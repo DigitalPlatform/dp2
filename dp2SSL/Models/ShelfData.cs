@@ -202,7 +202,7 @@ namespace dp2SSL
             XmlNodeList doors = ShelfCfgDom.DocumentElement.SelectNodes("shelf/door");
             foreach (XmlElement door in doors)
             {
-                DoorItem.ParseLockString(door.GetAttribute("antenna"),
+                DoorItem.ParseReaderString(door.GetAttribute("antenna"),
                     out string readerName,
                     out int antenna);
                 antenna_list.Add(antenna.ToString());
@@ -273,9 +273,10 @@ namespace dp2SSL
             }
         }
 
-        static List<Entity> _all = new List<Entity>();
-        static List<Entity> _adds = new List<Entity>();
-        static List<Entity> _removes = new List<Entity>();
+        static List<Entity> _all = new List<Entity>();  // 累积的全部图书
+        static List<Entity> _adds = new List<Entity>(); // 临时区 放入的图书
+        static List<Entity> _removes = new List<Entity>();  // 临时区 取走的图书
+        static List<Entity> _changes = new List<Entity>();  // 临时区 天线编号、门位置发生过变化的图书
 
         public static List<Entity> All
         {
@@ -298,6 +299,14 @@ namespace dp2SSL
             get
             {
                 return _removes;
+            }
+        }
+
+        public static List<Entity> Changes
+        {
+            get
+            {
+                return _changes;
             }
         }
 
@@ -514,7 +523,7 @@ namespace dp2SSL
             return errors;
         }
 
-        public static List<LockCommand> GetLockCommands()
+        public static List<string> GetLockCommands()
         {
             /*
             string cfg_filename = App.ShelfFilePath;
@@ -525,9 +534,9 @@ namespace dp2SSL
         }
 
         // 构造锁命令字符串数组
-        public static List<LockCommand> GetLockCommands(XmlDocument cfg_dom)
+        public static List<string> GetLockCommands(XmlDocument cfg_dom)
         {
-            // lockName --> List<int>
+            // lockName --> bool
             Hashtable table = new Hashtable();
             XmlNodeList doors = cfg_dom.DocumentElement.SelectNodes("//door");
             foreach (XmlElement door in doors)
@@ -535,22 +544,21 @@ namespace dp2SSL
                 string lockDef = door.GetAttribute("lock");
                 if (string.IsNullOrEmpty(lockDef))
                     continue;
-                DoorItem.ParseLockString(lockDef, out string lockName, out int lockIndex);
+
+                string lockName = DoorItem.NormalizeLockName(lockDef);
+                // DoorItem.ParseReaderString(lockDef, out string lockName, out int lockIndex);
                 if (string.IsNullOrEmpty(lockName))
                     continue;
 
-                List<int> array = null;
                 if (table.ContainsKey(lockName) == false)
                 {
-                    array = new List<int>();
-                    table[lockName] = array;
+                    table[lockName] = true;
                 }
                 else
-                    array = (List<int>)table[lockName];
-
-                array.Add(lockIndex);
+                    continue;
             }
 
+            /*
             List<LockCommand> results = new List<LockCommand>();
             foreach (string key in table.Keys)
             {
@@ -569,7 +577,25 @@ namespace dp2SSL
                     Indices = text.ToString()
                 });
             }
+            */
+            List<string> lock_names = new List<string>();
+            foreach (string s in table.Keys)
+            {
+                lock_names.Add(s);
+            }
+            lock_names.Sort();
 
+            return lock_names;
+        }
+
+        public static List<Entity> Find(List<Entity> entities, string uid)
+        {
+            List<Entity> results = new List<Entity>();
+            entities.ForEach((o) =>
+            {
+                if (o.UID == uid)
+                    results.Add(o);
+            });
             return results;
         }
 
@@ -659,16 +685,26 @@ namespace dp2SSL
         }
 
         // 更新 Entity 信息
-        static void Update(List<Entity> entities, TagAndData tag)
+        static bool Update(List<Entity> entities, TagAndData tag)
         {
+            bool changed = false;
             foreach (var entity in entities)
             {
                 if (entity.UID == tag.OneTag.UID)
                 {
-                    entity.ReaderName = tag.OneTag.ReaderName;
-                    entity.Antenna = tag.OneTag.AntennaID.ToString();
+                    if (entity.ReaderName != tag.OneTag.ReaderName)
+                    {
+                        entity.ReaderName = tag.OneTag.ReaderName;
+                        changed = true;
+                    }
+                    if (entity.Antenna != tag.OneTag.AntennaID.ToString())
+                    {
+                        entity.Antenna = tag.OneTag.AntennaID.ToString();
+                        changed = true;
+                    }
                 }
             }
+            return changed;
         }
 
         static SpeakList _speakList = new SpeakList();
@@ -720,7 +756,8 @@ namespace dp2SSL
                 else
                 {
                     // 更新 _all 里面的信息
-                    Update(_all, tag);
+                    if (Update(_all, tag) == true)
+                        Add(_changes, tag);
 
                     // 要把 _adds 和 _removes 里面都去掉
                     if (Remove(_adds, tag) == true)
@@ -746,6 +783,8 @@ namespace dp2SSL
                 {
                     if (Remove(_adds, tag) == true)
                         changed = true;
+                    if (Remove(_changes, tag) == true)
+                        changed = true;
                     if (Add(_removes, tag) == true)
                     {
                         changed = true;
@@ -758,6 +797,8 @@ namespace dp2SSL
                     if (Remove(_adds, tag) == true)
                         changed = true;
                     if (Remove(_removes, tag) == true)
+                        changed = true;
+                    if (Remove(_changes, tag) == true)
                         changed = true;
                 }
 
@@ -894,7 +935,11 @@ namespace dp2SSL
             }
         }
 
-
+        static string GetRandomString()
+        {
+            Random rnd = new Random();
+            return rnd.Next(1, 999999).ToString();
+        }
 
         // public delegate void Delegate_showDialog();
 
@@ -994,6 +1039,7 @@ namespace dp2SSL
                     string[] item_records = null;
                     string[] biblio_records = null;
                     BorrowInfo borrow_info = null;
+                    string currentLocation = "";
 
                     if (action == "borrow" || action == "renew")
                     {
@@ -1060,8 +1106,10 @@ namespace dp2SSL
                     {
                         // currentLocation 元素内容。格式为 馆藏地:架号
                         // 注意馆藏地和架号字符串里面不应包含逗号和冒号
-                        string currentLocation = info.CurrentShelfNo;
+                        currentLocation = info.CurrentShelfNo;
+                        // string currentLocation = GetRandomString(); // testing
                         entity.Waiting = true;
+                        // TODO: 如果先前 entity.Title 已经有了内容，就不要在本次 Return() API 中要求返 biblio summary
                         lRet = channel.Return(null,
                             "transfer",
                             "", // _patron.Barcode,
@@ -1073,7 +1121,7 @@ namespace dp2SSL
                             out item_records,
                             "xml",
                             out string[] reader_records,
-                            "",
+                            "summary",
                             out biblio_records,
                             out string[] dup_path,
                             out string output_reader_barcode,
@@ -1099,7 +1147,9 @@ namespace dp2SSL
                     */
                     func_setProgress?.Invoke(-1, -1, ++index);
 
-                    if (biblio_records != null && biblio_records.Length > 0)
+                    if (biblio_records != null
+                        && biblio_records.Length > 0
+                        && string.IsNullOrEmpty(biblio_records[0]) == false)
                         entity.Title = biblio_records[0];
 
                     string title = entity.PII;
@@ -1119,6 +1169,9 @@ namespace dp2SSL
                         ShelfData.Remove(ShelfData.Removes, entity);
                     }
 
+                    if (action == "transfer")
+                        ShelfData.Remove(ShelfData.Changes, entity);
+
                     string resultType = "succeed";
                     if (lRet == -1)
                         resultType = "error";
@@ -1131,6 +1184,7 @@ namespace dp2SSL
                         ErrorCode = channel.ErrorCode.ToString(),
                         ErrorInfo = strError,
                         Entity = entity,
+                        Direction = $"-->({currentLocation})",
                     };
                     doc.Add(messageItem);
 

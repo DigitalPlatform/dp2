@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace RfidCenter
 {
+    // TODO: 需要改造
     /// <summary>
     /// 用于模拟门锁的类，以方便没有硬件的情况下进行开发调试
     /// </summary>
@@ -51,7 +52,7 @@ namespace RfidCenter
             {
                 new LockState
                 {
-                    Name = "",
+                    Lock = "",
                     Index = index,
                     State = LockStates[index] == true ? "open" : "close"
                 }

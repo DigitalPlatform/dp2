@@ -63,10 +63,9 @@ uint new_password);
 
         NormalResult EnableSendKey(bool enable);
 
-        GetLockStateResult GetShelfLockState(string lockName,
-    string indices);
+        GetLockStateResult GetShelfLockState(string lockNameList);
 
-        NormalResult OpenShelfLock(string lockName, int index);
+        NormalResult OpenShelfLock(string lockName);
     }
 
     [Serializable()]

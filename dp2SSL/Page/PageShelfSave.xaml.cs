@@ -74,7 +74,7 @@ namespace dp2SSL
         private void DoorControl_OpenDoor(object sender, OpenDoorEventArgs e)
         {
             // MessageBox.Show(e.Name);
-            var result = RfidManager.OpenShelfLock(e.Door.LockName, e.Door.LockIndex);
+            var result = RfidManager.OpenShelfLock(e.Door.LockPath);
             if (result.Value == -1)
                 MessageBox.Show(result.ErrorInfo);
         }

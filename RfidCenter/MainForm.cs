@@ -1895,12 +1895,12 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
 
         private void MenuItem_openLock_Click(object sender, EventArgs e)
         {
-            string strIndex = InputDlg.GetInput(this, "请指定锁编号", "锁编号(从0开始)", "0");
+            string strIndex = InputDlg.GetInput(this, "请指定锁路径", "锁路径", "*.1.1");
             if (string.IsNullOrEmpty(strIndex) == false)
             {
                 if (_inSimuLock == false)
                 {
-                    var result = _driver.OpenShelfLock("*", Convert.ToInt32(strIndex));
+                    var result = _driver.OpenShelfLock(strIndex);
                     MessageDlg.Show(this, result.ToString(), "开锁");
                 }
                 else
@@ -1917,12 +1917,12 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
 
         private void MenuItem_getLockState_Click(object sender, EventArgs e)
         {
-            string strIndex = InputDlg.GetInput(this, "请指定锁编号", "锁编号(从0开始)", "0");
+            string strIndex = InputDlg.GetInput(this, "请指定锁路径", "锁路径", "*.1.1");
             if (string.IsNullOrEmpty(strIndex) == false)
             {
                 if (_inSimuLock == false)
                 {
-                    var result = _driver.GetShelfLockState("*", Convert.ToInt32(strIndex));
+                    var result = _driver.GetShelfLockState(strIndex);
                     MessageDlg.Show(this, result.ToString(), "锁状态");
                 }
                 else
