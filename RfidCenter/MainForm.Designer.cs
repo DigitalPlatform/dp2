@@ -41,6 +41,8 @@
             this.tabPage_operHistory = new System.Windows.Forms.TabPage();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
             this.tabPage_cfg = new System.Windows.Forms.TabPage();
+            this.comboBox_lamp = new System.Windows.Forms.ComboBox();
+            this.label1 = new System.Windows.Forms.Label();
             this.comboBox_lock = new System.Windows.Forms.ComboBox();
             this.label8 = new System.Windows.Forms.Label();
             this.comboBox_deviceList = new System.Windows.Forms.ComboBox();
@@ -62,6 +64,7 @@
             this.MenuItem_openSendKey = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_closeSendKey = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.MenuItem_simuLock = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_openLock = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_getLockState = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_getComPortInfo = new System.Windows.Forms.ToolStripMenuItem();
@@ -94,7 +97,9 @@
             this.MenuItem_manual = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_about = new System.Windows.Forms.ToolStripMenuItem();
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
-            this.MenuItem_simuLock = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_turnOffLamp = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_turnOnLamp = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator7 = new System.Windows.Forms.ToolStripSeparator();
             this.tabControl_main.SuspendLayout();
             this.tabPage_start.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_start)).BeginInit();
@@ -119,7 +124,7 @@
             this.tabControl_main.Name = "tabControl_main";
             this.tabControl_main.SelectedIndex = 0;
             this.tabControl_main.Size = new System.Drawing.Size(960, 443);
-            this.tabControl_main.TabIndex = 7;
+            this.tabControl_main.TabIndex = 2;
             // 
             // tabPage_start
             // 
@@ -230,6 +235,8 @@
             // tabPage_cfg
             // 
             this.tabPage_cfg.AutoScroll = true;
+            this.tabPage_cfg.Controls.Add(this.comboBox_lamp);
+            this.tabPage_cfg.Controls.Add(this.label1);
             this.tabPage_cfg.Controls.Add(this.comboBox_lock);
             this.tabPage_cfg.Controls.Add(this.label8);
             this.tabPage_cfg.Controls.Add(this.comboBox_deviceList);
@@ -245,6 +252,29 @@
             this.tabPage_cfg.Text = "配置参数";
             this.tabPage_cfg.UseVisualStyleBackColor = true;
             // 
+            // comboBox_lamp
+            // 
+            this.comboBox_lamp.FormattingEnabled = true;
+            this.comboBox_lamp.Items.AddRange(new object[] {
+            "COM1",
+            "COM2",
+            "COM3",
+            "COM4",
+            "<不使用>"});
+            this.comboBox_lamp.Location = new System.Drawing.Point(191, 77);
+            this.comboBox_lamp.Name = "comboBox_lamp";
+            this.comboBox_lamp.Size = new System.Drawing.Size(283, 32);
+            this.comboBox_lamp.TabIndex = 3;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(11, 80);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(57, 24);
+            this.label1.TabIndex = 2;
+            this.label1.Text = "灯(&A):";
+            // 
             // comboBox_lock
             // 
             this.comboBox_lock.FormattingEnabled = true;
@@ -258,7 +288,7 @@
             this.comboBox_lock.Location = new System.Drawing.Point(191, 39);
             this.comboBox_lock.Name = "comboBox_lock";
             this.comboBox_lock.Size = new System.Drawing.Size(283, 32);
-            this.comboBox_lock.TabIndex = 20;
+            this.comboBox_lock.TabIndex = 1;
             // 
             // label8
             // 
@@ -266,7 +296,7 @@
             this.label8.Location = new System.Drawing.Point(11, 42);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(71, 24);
-            this.label8.TabIndex = 19;
+            this.label8.TabIndex = 0;
             this.label8.Text = "门锁(&L):";
             // 
             // comboBox_deviceList
@@ -293,22 +323,22 @@
             this.checkBox_speak.AutoSize = true;
             this.checkBox_speak.Checked = true;
             this.checkBox_speak.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBox_speak.Location = new System.Drawing.Point(135, 88);
+            this.checkBox_speak.Location = new System.Drawing.Point(140, 162);
             this.checkBox_speak.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
             this.checkBox_speak.Name = "checkBox_speak";
             this.checkBox_speak.Size = new System.Drawing.Size(130, 28);
-            this.checkBox_speak.TabIndex = 16;
+            this.checkBox_speak.TabIndex = 5;
             this.checkBox_speak.Text = "语音提示(&S)";
             this.checkBox_speak.UseVisualStyleBackColor = true;
             // 
             // checkBox_beep
             // 
             this.checkBox_beep.AutoSize = true;
-            this.checkBox_beep.Location = new System.Drawing.Point(15, 88);
+            this.checkBox_beep.Location = new System.Drawing.Point(15, 162);
             this.checkBox_beep.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
             this.checkBox_beep.Name = "checkBox_beep";
             this.checkBox_beep.Size = new System.Drawing.Size(95, 28);
-            this.checkBox_beep.TabIndex = 15;
+            this.checkBox_beep.TabIndex = 4;
             this.checkBox_beep.Text = "蜂鸣(&B)";
             this.checkBox_beep.UseVisualStyleBackColor = true;
             // 
@@ -346,7 +376,7 @@
             this.toolStrip1.Location = new System.Drawing.Point(0, 34);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(960, 31);
-            this.toolStrip1.TabIndex = 5;
+            this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
             // toolButton_stop
@@ -403,7 +433,7 @@
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Padding = new System.Windows.Forms.Padding(7, 3, 0, 3);
             this.menuStrip1.Size = new System.Drawing.Size(960, 34);
-            this.menuStrip1.TabIndex = 4;
+            this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
             // MenuItem_file
@@ -417,6 +447,9 @@
             this.MenuItem_openLock,
             this.MenuItem_getLockState,
             this.MenuItem_getComPortInfo,
+            this.toolStripSeparator7,
+            this.MenuItem_turnOnLamp,
+            this.MenuItem_turnOffLamp,
             this.toolStripSeparator3,
             this.ToolStripMenuItem_exit});
             this.MenuItem_file.Name = "MenuItem_file";
@@ -448,6 +481,13 @@
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
             this.toolStripSeparator1.Size = new System.Drawing.Size(249, 6);
+            // 
+            // MenuItem_simuLock
+            // 
+            this.MenuItem_simuLock.Name = "MenuItem_simuLock";
+            this.MenuItem_simuLock.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_simuLock.Text = "模拟锁";
+            this.MenuItem_simuLock.Click += new System.EventHandler(this.MenuItem_simuLock_Click);
             // 
             // MenuItem_openLock
             // 
@@ -689,12 +729,24 @@
             this.notifyIcon1.Visible = true;
             this.notifyIcon1.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon1_MouseDoubleClick);
             // 
-            // MenuItem_simuLock
+            // MenuItem_turnOffLamp
             // 
-            this.MenuItem_simuLock.Name = "MenuItem_simuLock";
-            this.MenuItem_simuLock.Size = new System.Drawing.Size(252, 30);
-            this.MenuItem_simuLock.Text = "模拟锁";
-            this.MenuItem_simuLock.Click += new System.EventHandler(this.MenuItem_simuLock_Click);
+            this.MenuItem_turnOffLamp.Name = "MenuItem_turnOffLamp";
+            this.MenuItem_turnOffLamp.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_turnOffLamp.Text = "关灯";
+            this.MenuItem_turnOffLamp.Click += new System.EventHandler(this.MenuItem_turnOffLamp_Click);
+            // 
+            // MenuItem_turnOnLamp
+            // 
+            this.MenuItem_turnOnLamp.Name = "MenuItem_turnOnLamp";
+            this.MenuItem_turnOnLamp.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_turnOnLamp.Text = "开灯";
+            this.MenuItem_turnOnLamp.Click += new System.EventHandler(this.MenuItem_turnOnLamp_Click);
+            // 
+            // toolStripSeparator7
+            // 
+            this.toolStripSeparator7.Name = "toolStripSeparator7";
+            this.toolStripSeparator7.Size = new System.Drawing.Size(249, 6);
             // 
             // MainForm
             // 
@@ -801,6 +853,11 @@
         private System.Windows.Forms.ToolStripMenuItem MenuItem_getLockState;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_getComPortInfo;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_simuLock;
+        private System.Windows.Forms.ComboBox comboBox_lamp;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator7;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_turnOnLamp;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_turnOffLamp;
     }
 }
 

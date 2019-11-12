@@ -41,6 +41,8 @@ uint new_password);
         GetLockStateResult GetShelfLockState(string lockName);
 
         NormalResult OpenShelfLock(string lockName);
+
+        NormalResult TurnShelfLamp(string lampName, string action);
     }
 
     // 一段连续的 block
@@ -356,6 +358,15 @@ uint new_password);
         }
     }
 
+    // 书柜灯
+    public class ShelfLamp
+    {
+        public string Name { get; set; }
+        public string SerialNumber { get; set; }    // 序列号(USB)，或者 COM 端口号
+        public UIntPtr LampHandle { get; set; }
+    }
+
+    // 书柜门锁
     public class ShelfLock
     {
         public string Name { get; set; }
@@ -366,7 +377,6 @@ uint new_password);
         public string SerialNumber { get; set; }    // 序列号(USB)，或者 COM 端口号
         public string DriverPath { get; set; }
         public UIntPtr LockHandle { get; set; }
-
     }
 
     [Serializable()]

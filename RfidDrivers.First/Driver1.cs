@@ -101,6 +101,16 @@ namespace RfidDrivers.First
             }
         }
 
+        ShelfLamp _shelfLamp = null;
+
+        public ShelfLamp ShelfLamp
+        {
+            get
+            {
+                return _shelfLamp;
+            }
+        }
+
         // parameters:
         //      style   风格列表。xxx,xxx,xxx 形态
         //              其中，lock:COM1|COM2 指定锁控 COM 口
@@ -136,6 +146,19 @@ namespace RfidDrivers.First
                         };
                 }
 
+                // 2019/11/12
+                string lamp_param = StringUtil.GetParameterByPrefix(style, "lamp");
+                if (lamp_param != null)
+                {
+                    var lamp_result = InitialLamp(lamp_param);
+                    if (lamp_result.Value == -1)
+                        return new InitializeDriverResult
+                        {
+                            Value = -1,
+                            ErrorInfo = lamp_result.ErrorInfo
+                        };
+                }
+
                 return new InitializeDriverResult
                 {
                     Readers = _readers,
@@ -157,7 +180,7 @@ namespace RfidDrivers.First
             Lock();
             try
             {
-
+                FreeLamp();
                 CloseAllLocks();
 
                 return CloseAllReaders();
@@ -3945,6 +3968,68 @@ out Reader reader);
             return new NormalResult();
         }
 
+        // parameters:
+        //      port  COM口名称。形如 COM1
+        NormalResult InitialLamp(string port)
+        {
+            // 尝试打开
+            var result = ConnectLamp(port);
+            if (result.Value == -1)
+            {
+                Driver1Manager.Log?.Debug($"ConnectLamp() comName=[{port}] failed, errorinfo={result.ErrorInfo}, errorcode={result.ErrorCode}");
+                return result;
+            }
+            this._shelfLamp = result.ShelfLamp;
+            return new NormalResult();
+        }
+
+        void FreeLamp()
+        {
+            if (this._shelfLamp != null)
+            {
+                DisconnectLamp(this._shelfLamp.LampHandle);
+                this._shelfLamp = null;
+            }
+        }
+
+        class ConnectLampResult : NormalResult
+        {
+            public ShelfLamp ShelfLamp { get; set; }
+        }
+
+        void DisconnectLamp(UIntPtr hLamp)
+        {
+            if (hLamp == UIntPtr.Zero)
+                return;
+
+            RFIDLIB.miniLib_Lock.Mini_Disconnect(hLamp);
+        }
+
+        ConnectLampResult ConnectLamp(string port)
+        {
+            UIntPtr hLamp = UIntPtr.Zero; //Electronic lock handle
+
+            int ret = RFIDLIB.miniLib_Lock.Mini_Connect(port, 9600, "8N1", ref hLamp);
+            if (ret != 0)
+                return new ConnectLampResult
+                {
+                    Value = -1,
+                    ErrorInfo = "Connect Lamp fail",
+                    ErrorCode = ret.ToString()
+                };
+
+            return new ConnectLampResult
+            {
+                Value = 0,
+                ShelfLamp = new ShelfLamp
+                {
+                    Name = port,
+                    SerialNumber = port,
+                    LampHandle = hLamp
+                }
+            };
+        }
+
         class ConnectLockResult : NormalResult
         {
             public ShelfLock ShelfLock { get; set; }
@@ -4086,6 +4171,55 @@ out string number);
             return lockName + "." + number;
         }
         */
+
+        // 开/关书柜灯
+        // parameters:
+        //      lampName    暂未使用
+        //      action      turnOn/turnOff
+        public NormalResult TurnShelfLamp(string lampName, string action)
+        {
+            if (this._shelfLamp == null)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = "当前没有书柜灯",
+                    ErrorCode = "notFound"
+                };
+
+            if (action == "turnOn")
+            {
+                int iret = RFIDLIB.miniLib_Lock.Mini_OpenLight(this._shelfLamp.LampHandle);
+                if (iret == 0)
+                    return new NormalResult();
+                else
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"开灯失败 iret={iret}",
+                        ErrorCode = iret.ToString()
+                    };
+            }
+            else if (action == "turnOff")
+            {
+                int iret = RFIDLIB.miniLib_Lock.Mini_CloseLight(this._shelfLamp.LampHandle);
+                if (iret == 0)
+                    return new NormalResult();
+                else
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"关灯失败 iret={iret}",
+                        ErrorCode = iret.ToString()
+                    };
+            }
+            else
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"未知的 action={action}",
+                    ErrorCode = "unknownAction"
+                };
+        }
 
         // 开门
         public NormalResult OpenShelfLock(string lockNameParam)

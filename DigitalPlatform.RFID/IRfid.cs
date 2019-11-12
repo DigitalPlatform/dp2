@@ -66,6 +66,8 @@ uint new_password);
         GetLockStateResult GetShelfLockState(string lockNameList);
 
         NormalResult OpenShelfLock(string lockName);
+
+        NormalResult TurnShelfLamp(string lampName, string action);
     }
 
     [Serializable()]

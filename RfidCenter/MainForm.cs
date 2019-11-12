@@ -385,6 +385,13 @@ namespace RfidCenter
                         lock_param = $"lock:{lock_param}";
                     }
 
+                    string lamp_param = GetLampParam().Replace(",", "|").ToUpper();
+                    if (string.IsNullOrEmpty(lamp_param) == false
+                        && lamp_param != "<不使用>")
+                    {
+                        lock_param += $",lamp:{lamp_param}";
+                    }
+
                     string cfgFileName = Path.Combine(ClientInfo.UserDir, "readers.xml");
 
                     InitializeDriverResult result = _driver.InitializeDriver(cfgFileName, lock_param, set_hint_table ? null : existing_hint_table);
@@ -478,6 +485,14 @@ namespace RfidCenter
             return (string)this.Invoke((Func<string>)(() =>
             {
                 return this.comboBox_lock.Text;
+            }));
+        }
+
+        string GetLampParam()
+        {
+            return (string)this.Invoke((Func<string>)(() =>
+            {
+                return this.comboBox_lamp.Text;
             }));
         }
 
@@ -962,7 +977,7 @@ bool bClickClose = false)
                 }
             }
             return;
-            ERROR1:
+        ERROR1:
             this.ShowMessage(strError, "red", true);
             _chipDialog.ShowMessage(strError, "red", true);
         }
@@ -1007,7 +1022,7 @@ bool bClickClose = false)
             }
 
             return;
-            ERROR1:
+        ERROR1:
             this.ShowMessage(strError, "red", true);
             _chipDialog.ShowMessage(strError, "red", true);
         }
@@ -1104,7 +1119,8 @@ bool bClickClose = false)
                     new ControlWrapper(this.checkBox_speak, true),
                     new ControlWrapper(this.checkBox_beep, true),
                     this.comboBox_deviceList,
-                    new ComboBoxText(this.comboBox_lock)
+                    new ComboBoxText(this.comboBox_lock),
+                    new ComboBoxText(this.comboBox_lamp),
                 };
                 return GuiState.GetUiState(controls);
             }
@@ -1116,13 +1132,14 @@ bool bClickClose = false)
                     new ControlWrapper(this.checkBox_speak, true),
                     new ControlWrapper(this.checkBox_beep, true),
                     this.comboBox_deviceList,
-                    new ComboBoxText(this.comboBox_lock)
+                    new ComboBoxText(this.comboBox_lock),
+                    new ComboBoxText(this.comboBox_lamp),
                 };
                 GuiState.SetUiState(controls, value);
             }
         }
 
-#region remoting server
+        #region remoting server
 
 #if HTTP_CHANNEL
         HttpChannel m_serverChannel = null;
@@ -1170,9 +1187,9 @@ bool bClickClose = false)
             }
         }
 
-#endregion
+        #endregion
 
-#region ipc channel
+        #region ipc channel
 
         public static bool CallActivate(string strUrl)
         {
@@ -1246,7 +1263,7 @@ bool bClickClose = false)
             }
         }
 
-#endregion
+        #endregion
 
         private void ToolStripMenuItem_testRfidChannel_Click(object sender, EventArgs e)
         {
@@ -1254,7 +1271,7 @@ bool bClickClose = false)
             MessageBox.Show(this, result.ToString());
         }
 
-#region 浏览器控件
+        #region 浏览器控件
 
         public void ClearHtml()
         {
@@ -1322,7 +1339,7 @@ string strHtml)
         internal static void Navigate(WebBrowser webBrowser, string urlString)
         {
             int nRedoCount = 0;
-            REDO:
+        REDO:
             try
             {
                 webBrowser.Navigate(urlString);
@@ -1407,7 +1424,7 @@ string strHtml)
             AppendHtml("<div class='debug " + strClass + "'>" + HttpUtility.HtmlEncode(strText).Replace("\r\n", "<br/>") + "</div>");
         }
 
-#endregion
+        #endregion
 
         private void MenuItem_openSendKey_Click(object sender, EventArgs e)
         {
@@ -1496,7 +1513,7 @@ string strHtml)
                 }
                 catch
                 {
-                    
+
                 }
             });
         }
@@ -1677,7 +1694,7 @@ string strHtml)
 
             MessageBox.Show(this, "OK");
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1695,7 +1712,7 @@ string strHtml)
             ReadConfigResult result = _driver.ReadConfig("*", cfg_no);
             MessageDlg.Show(this, $"cfg_no:{result.CfgNo}\r\nbytes:\r\n{Element.GetHexString(result.Bytes, "4")}", "config info");
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1810,7 +1827,7 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
                 new_password);
             MessageDlg.Show(this, $"result:{result.ToString()}", "result");
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1955,6 +1972,18 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
                 _inSimuLock = false;
                 MenuItem_simuLock.Checked = false;
             }
+        }
+
+        private void MenuItem_turnOnLamp_Click(object sender, EventArgs e)
+        {
+            var result = _driver.TurnShelfLamp("*", "turnOn");
+            MessageDlg.Show(this, result.ToString(), "开灯");
+        }
+
+        private void MenuItem_turnOffLamp_Click(object sender, EventArgs e)
+        {
+            var result = _driver.TurnShelfLamp("*", "turnOff");
+            MessageDlg.Show(this, result.ToString(), "关灯");
         }
     }
 }

@@ -118,6 +118,27 @@ namespace dp2SSL
             }
         }
 
+
+
+        // 保存一个已经打开的灯的门名字表。只要有一个以上事项，就表示要开灯；如果一个事项也没有，就表示要关灯
+        // 门名字 --> bool
+        static Hashtable _lampTable = new Hashtable();
+
+        public static void TurnLamp(string doorName, bool on)
+        {
+            int oldCount = _lampTable.Count;
+
+            if (on)
+                _lampTable[doorName] = true;
+            else
+                _lampTable.Remove(doorName);
+
+            if (oldCount == 0 && _lampTable.Count > 0)
+                RfidManager.TurnShelfLamp("*", "turnOn");   // TODO: 遇到出错如何报错?
+            else if (oldCount > 0 && _lampTable.Count == 0)
+                RfidManager.TurnShelfLamp("*", "turnOff");
+        }
+
         public static void RefreshReaderNameList()
         {
             if (_openingDoorCount == 0)
