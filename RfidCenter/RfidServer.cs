@@ -256,7 +256,7 @@ namespace RfidCenter
                         return result;
                     }
                     */
-                    Thread.Sleep(200);  // 10?
+                    Thread.Sleep(10);  // 10? 200?
                 }
 
                 SetLastUids(session_id, current_uids);
