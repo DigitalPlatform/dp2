@@ -318,7 +318,7 @@ namespace dp2SSL
                 DisplayError(ref progress, message, color);
         }
 
-        private void DoorControl_OpenDoor(object sender, OpenDoorEventArgs e)
+        private async void DoorControl_OpenDoor(object sender, OpenDoorEventArgs e)
         {
             // 观察图书详情
             if (string.IsNullOrEmpty(e.ButtonName) == false)
@@ -387,9 +387,54 @@ namespace dp2SSL
             }
 
             // MessageBox.Show(e.Name);
-            var result = RfidManager.OpenShelfLock(e.Door.LockPath);
-            if (result.Value == -1)
-                MessageBox.Show(result.ErrorInfo);
+            bool cancelled = false;
+
+            // TODO: 显示一个模式对话框挡住界面，直到收到门状态变化的信号再自动关闭对话框。这样可以防止开门瞬间、还没有收到开门信号的时候用户突然点 home 按钮回到主菜单(因为这样会突破“主菜单界面不允许处在开门状态”的规则)
+            ProgressWindow progress = null;
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                progress = new ProgressWindow();
+                // progress.TitleText = "初始化智能书柜";
+                progress.MessageText = "正在开门，请稍候 ...";
+                progress.Owner = Application.Current.MainWindow;
+                progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                progress.Closed += (s1, e1) => {
+                    RemoveLayer();
+                    cancelled = true;
+                };
+                //progress.Width = Math.Min(700, this.ActualWidth);
+                //progress.Height = Math.Min(500, this.ActualHeight);
+                // progress.okButton.Content = "取消";
+                progress.okButton.Visibility = Visibility.Collapsed;
+                progress.Show();
+                AddLayer();
+            }));
+            try
+            {
+                var result = RfidManager.OpenShelfLock(e.Door.LockPath);
+                if (result.Value == -1)
+                    MessageBox.Show(result.ErrorInfo);
+
+                // 等待确认收到开门信号
+                await Task.Run(() =>
+                {
+                    while (e.Door.State != "open" && cancelled == false)
+                    {
+                        Thread.Sleep(500);
+                    }
+                });
+            }
+            finally
+            {
+                if (progress != null)
+                {
+                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    {
+                        if (progress != null)
+                            progress.Close();
+                    }));
+                }
+            }
         }
 
         private void CurrentApp_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -996,6 +1041,10 @@ namespace dp2SSL
                     // RFID 来源
                     if (patrons.Count == 1)
                     {
+                        // 2019/11/13
+                        // 把前面临时动作提交一次
+                        Submit();
+
                         if (_patron.Fill(patrons[0].OneTag) == false)
                             return;
 
@@ -1122,6 +1171,7 @@ namespace dp2SSL
                 || ShelfData.Changes.Count > 0)
                 SubmitCheckInOut(false, silently);
         }
+
         // parameters:
         //      submitBefore    是否自动提交前面残留的 _adds 和 _removes ?
         public void PatronClear(bool submitBefore)
