@@ -485,6 +485,9 @@ namespace DigitalPlatform.LibraryClient.localhost {
         NotChanged = 36,
         
         [System.Runtime.Serialization.EnumMemberAttribute()]
+        ServerTimeout = 37,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
         AlreadyExist = 100,
         
         [System.Runtime.Serialization.EnumMemberAttribute()]

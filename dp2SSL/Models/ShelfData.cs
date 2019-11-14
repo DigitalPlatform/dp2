@@ -59,7 +59,7 @@ namespace dp2SSL
             if (e.Result.Value == -1)
                 return;
 
-            bool triggerAllClosed = false;
+            // bool triggerAllClosed = false;
             {
                 int count = 0;
                 foreach (var state in e.Result.States)
@@ -81,8 +81,8 @@ namespace dp2SSL
                     }
                 }
 
-                if (_openingDoorCount > 0 && count == 0)
-                    triggerAllClosed = true;
+                //if (_openingDoorCount > 0 && count == 0)
+                //    triggerAllClosed = true;
 
                 SetOpenCount(count);
             }
@@ -294,10 +294,27 @@ namespace dp2SSL
             }
         }
 
+        // 累积的全部 action
+        static List<ActionInfo> _actions = new List<ActionInfo>();
+        public static List<ActionInfo> Actions
+        {
+            get
+            {
+                return _actions;
+            }
+        }
+
+        // 将 actions 保存起来
+        public static void PushActions(List<ActionInfo> actions)
+        {
+            _actions.AddRange(actions);
+        }
+
         static List<Entity> _all = new List<Entity>();  // 累积的全部图书
         static List<Entity> _adds = new List<Entity>(); // 临时区 放入的图书
         static List<Entity> _removes = new List<Entity>();  // 临时区 取走的图书
         static List<Entity> _changes = new List<Entity>();  // 临时区 天线编号、门位置发生过变化的图书
+        static Operator _operator = null;   // 当前控制临时区的读者身份
 
         public static List<Entity> All
         {
@@ -328,6 +345,14 @@ namespace dp2SSL
             get
             {
                 return _changes;
+            }
+        }
+
+        public static Operator Operator
+        {
+            get
+            {
+                return _operator;
             }
         }
 
@@ -730,6 +755,7 @@ namespace dp2SSL
 
         static SpeakList _speakList = new SpeakList();
 
+        public delegate void Delagate_booksChanged();
 
         // 跟随事件动态更新列表
         // Add: 检查列表中是否存在这个 PII，如果存在，则修改状态为 在架，并设置 UID 成员
@@ -739,7 +765,8 @@ namespace dp2SSL
         // Update: 检查列表中是否存在这个 PII，如果存在，则修改状态为 在架，并设置 UID 成员
         //      如果不存在，则为列表添加一个新元素，修改状态为在架，并设置 UID 和 PII 成员
         public static async Task ChangeEntities(BaseChannel<IRfid> channel,
-            TagChangedEventArgs e)
+            TagChangedEventArgs e,
+            Delagate_booksChanged func_booksChanged)
         {
             if (ShelfData.FirstInitialized == false)
                 return;
@@ -859,6 +886,7 @@ namespace dp2SSL
             {
                 // DoorItem.DisplayCount(_all, _adds, _removes, ShelfData.Doors);
                 ShelfData.RefreshCount();
+                func_booksChanged?.Invoke();
             }
 
             var task = Task.Run(async () =>
@@ -973,13 +1001,10 @@ namespace dp2SSL
         //      0   没有必要处理
         //      1   已经完成处理(要用对话框显示结果)
         public static SubmitResult SubmitCheckInOut(
-            // Delegate_showDialog func_showDialog,
             Delegate_setProgress func_setProgress,
-            // ProgressWindow progress,
-            string patronBarcode,
-            string patron_name,
-            List<ActionInfo> actions,
-            bool patron_filled)
+            //string patronBarcode,
+            //string patron_name,
+            List<ActionInfo> actions)
         {
             // TODO: 如果当前没有读者身份，则当作初始化处理，将书柜内的全部图书做还书尝试；被拿走的图书记入本地日志(所谓无主操作)
             // TODO: 注意还书，也就是往书柜里面放入图书，是不需要具体读者身份就可以提交的
@@ -1019,7 +1044,7 @@ namespace dp2SSL
                 List<string> errors = new List<string>();
                 List<string> borrows = new List<string>();
                 List<string> returns = new List<string>();
-                //List<string> warnings = new List<string>();
+                List<ActionInfo> processed = new List<ActionInfo>();
                 foreach (ActionInfo info in actions)
                 {
                     string action = info.Action;
@@ -1036,22 +1061,13 @@ namespace dp2SSL
                     // 借书操作必须要有读者卡
                     if (action == "borrow")
                     {
-                        if (patron_filled == false)
+                        if (string.IsNullOrEmpty(info.Operator.PatronBarcode))
                         {
                             // 界面警告
                             errors.Add($"册 '{entity.PII}' 无法进行借书请求");
                             // 写入错误日志
                             WpfClientInfo.WriteInfoLog($"册 '{entity.PII}' 无法进行借书请求");
                             continue;
-                        }
-
-                        if (string.IsNullOrEmpty(patronBarcode))
-                        {
-                            return new SubmitResult
-                            {
-                                Value = -1,
-                                ErrorInfo = $"请先在读卡器上放好读者卡，再进行{action_name}"
-                            };
                         }
                     }
 
@@ -1069,7 +1085,7 @@ namespace dp2SSL
                         entity.Waiting = true;
                         lRet = channel.Borrow(null,
                             action == "renew",
-                            patronBarcode,
+                            info.Operator.PatronBarcode,
                             entity.PII,
                             entity.ItemRecPath,
                             false,
@@ -1149,6 +1165,8 @@ namespace dp2SSL
                             out ReturnInfo return_info,
                             out strError);
                     }
+
+                    processed.Add(info);
 
                     /*
                     // testing
@@ -1235,7 +1253,7 @@ namespace dp2SSL
                                 // 界面警告
                                 //warnings.Add($"册 '{title}' (尝试还书时发现未曾被借出过): {strError}");
                                 // 写入错误日志
-                                WpfClientInfo.WriteInfoLog($"读者 {patron_name} {patronBarcode} 尝试还回册 '{title}' 时: {strError}");
+                                WpfClientInfo.WriteInfoLog($"读者 {info.Operator.PatronName} {info.Operator.PatronBarcode} 尝试还回册 '{title}' 时: {strError}");
                                 continue;
                             }
                         }
@@ -1278,7 +1296,7 @@ namespace dp2SSL
                             messageItem.ResultType = "warning";
                             messageItem.ErrorCode = "overflow";
                             // 写入错误日志
-                            WpfClientInfo.WriteInfoLog($"读者 {patron_name} {patronBarcode} 借阅 '{title}' 时发生超越许可: {strError}");
+                            WpfClientInfo.WriteInfoLog($"读者 {info.Operator.PatronName} {info.Operator.PatronBarcode} 借阅 '{title}' 时发生超越许可: {strError}");
                         }
                     }
 
@@ -1330,7 +1348,7 @@ namespace dp2SSL
                 }*/
                 func_setProgress?.Invoke(-1, -1, -1);   // hide progress bar
 
-                string speak = "";
+//                string speak = "";
                 {
                     /*
                     if (progress != null)
@@ -1349,6 +1367,12 @@ namespace dp2SSL
                     ShelfData.RefreshCount();
 
                     // App.CurrentApp.Speak(speak);
+                }
+
+                // 把处理过的移走
+                foreach(var info in processed)
+                {
+                    _actions.Remove(info);
                 }
 
                 return new SubmitResult
@@ -1373,8 +1397,16 @@ namespace dp2SSL
 
     }
 
+    // 操作者
+    public class Operator
+    {
+        public string PatronName { get; set; }
+        public string PatronBarcode { get; set; }
+    }
+
     public class ActionInfo
     {
+        public Operator Operator { get; set; }  // 提起请求的读者
         public Entity Entity { get; set; }
         public string Action { get; set; }  // borrow/return/transfer
         public string CurrentShelfNo { get; set; }  // 当前架号。transfer 动作会用到

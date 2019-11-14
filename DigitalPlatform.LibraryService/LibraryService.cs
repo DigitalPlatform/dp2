@@ -10197,6 +10197,16 @@ Stack:
                 result.Value = nRet;
                 return result;
             }
+            catch(ApplicationException ex)
+            {
+                string strErrorText = "dp2Library GetSystemParameter() API出现异常: " + ExceptionUtil.GetDebugText(ex);
+                app.WriteErrorLog(strErrorText);
+
+                result.Value = -1;
+                result.ErrorCode = ErrorCode.ServerTimeout;
+                result.ErrorInfo = strErrorText;
+                return result;
+            }
             catch (Exception ex)
             {
                 string strErrorText = "dp2Library GetSystemParameter() API出现异常: " + ExceptionUtil.GetDebugText(ex);

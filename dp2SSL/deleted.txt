@@ -840,3 +840,192 @@
                 column.Width = new GridLength(column_width);
             }
         }
+
+
+		~~~~~~~~~~~
+
+		        // 关门，或者更换读者的时候，向服务器提交出纳请求
+        // parameters:
+        //      clearPatron 操作完成后是否自动清除右侧的读者信息
+        async Task SubmitCheckInOut(
+            string strStyle = "clearPatron")
+        {
+            bool clearPatron = false;
+            bool silence = false;
+
+            if (StringUtil.IsInList("clearPatron", strStyle))
+                clearPatron = true;
+            if (StringUtil.IsInList("silence", strStyle))
+                silence = true;
+            bool verifyDoorClosing = StringUtil.IsInList("verifyDoorClosing", strStyle);
+
+        REDO:
+            List<ActionInfo> actions = new List<ActionInfo>();
+            foreach (var entity in ShelfData.Adds)
+            {
+                if (ShelfData.BelongToNormal(entity) == false)
+                    continue;
+                actions.Add(new ActionInfo
+                {
+                    Entity = entity,
+                    Action = "return",
+                    Operator = GetOperator()
+                });
+                // 没有更新的，才进行一次 transfer
+                if (ShelfData.Find(ShelfData.Changes, entity.UID).Count == 0)
+                {
+                    actions.Add(new ActionInfo
+                    {
+                        Entity = entity,
+                        Action = "transfer",
+                        CurrentShelfNo = ShelfData.GetShelfNo(entity),
+                        Operator = GetOperator()
+                    });
+                }
+            }
+            foreach (var entity in ShelfData.Changes)
+            {
+                if (ShelfData.BelongToNormal(entity) == false)
+                    continue;
+                // 更新
+                actions.Add(new ActionInfo
+                {
+                    Entity = entity,
+                    Action = "transfer",
+                    CurrentShelfNo = ShelfData.GetShelfNo(entity),
+                    Operator = GetOperator()
+                });
+            }
+            foreach (var entity in ShelfData.Removes)
+            {
+                if (ShelfData.BelongToNormal(entity) == false)
+                    continue;
+                actions.Add(new ActionInfo
+                {
+                    Entity = entity,
+                    Action = "borrow",
+                    Operator = GetOperator()
+                });
+            }
+
+            if (actions.Count == 0)
+                return;  // 没有必要处理
+
+            // 关闭以前残留的对话框
+            CloseDialogs();
+
+            ProgressWindow progress = null;
+            string patron_name = "";
+            patron_name = _patron.PatronName;
+
+            if (silence == false)
+            {
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    progress = new ProgressWindow();
+                    progress.MessageText = "正在处理，请稍候 ...";
+                    progress.Owner = Application.Current.MainWindow;
+                    progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                    progress.Closed += Progress_Closed;
+                    progress.Width = Math.Min(700, this.ActualWidth);
+                    progress.Height = Math.Min(500, this.ActualHeight);
+                    progress.Show();
+                    AddLayer();
+                }));
+            }
+
+            // 检查门是否全关闭
+            if (verifyDoorClosing && silence == false)
+            {
+                if (ShelfData.OpeningDoorCount > 0)
+                {
+                    // 检查门是否为关闭状态？
+                    await Task.Run(() =>
+                    {
+                        while (ShelfData.OpeningDoorCount > 0)
+                        {
+                            // TODO: 如何中断？
+                            //if (_initialCancelled)
+                            //    break;
+                            DisplayMessage(progress, "请关闭全部柜门，以完成请求", "yellow");
+                            Thread.Sleep(1000);
+                        }
+                    });
+                    // 确保全关闭后，回到开头重做
+                    if (progress != null)
+                        progress.Close();
+                    goto REDO;
+                }
+            }
+
+            bool patron_filled = false;
+
+            // 检查读者卡状态是否 OK
+            if (IsPatronOK("open", out string check_message) == false)
+            {
+                /*
+                if (string.IsNullOrEmpty(check_message))
+                    check_message = $"读卡器上的当前读者卡状态不正确。无法进行 checkin/out 操作";
+
+                DisplayError(ref progress, check_message);
+                return;
+                */
+            }
+            else
+                patron_filled = true;
+
+            try
+            {
+                var result = ShelfData.SubmitCheckInOut(
+                    (min, max, value) =>
+                    {
+                        if (progress != null)
+                        {
+                            Application.Current.Dispatcher.Invoke(new Action(() =>
+                            {
+                                if (min == -1 && max == -1 && value == -1)
+                                    progress.ProgressBar.Visibility = Visibility.Collapsed;
+                                if (min != -1)
+                                    progress.ProgressBar.Minimum = min;
+                                if (max != -1)
+                                    progress.ProgressBar.Maximum = max;
+                                if (value != -1)
+                                    progress.ProgressBar.Value = value;
+                            }));
+                        }
+                    },
+                    //_patron.Barcode,
+                    //_patron.PatronName,
+                    actions,
+                    patron_filled);
+                if (result.Value == -1)
+                {
+                    DisplayError(ref progress, result.ErrorInfo);
+                    return;
+                }
+
+                string speak = "";
+                if (progress != null && result.Value == 1 && result.MessageDocument != null)
+                {
+                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    {
+                        progress.MessageDocument = result.MessageDocument.BuildDocument(patron_name, 18, out speak);
+                        MemoryDialog(progress); // 记住对话框，以便后面可以补充关闭
+                        progress = null;
+                    }));
+                }
+
+                if (string.IsNullOrEmpty(speak) == false)
+                    App.CurrentApp.Speak(speak);
+            }
+            finally
+            {
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    if (progress != null)
+                        progress.Close();
+                }));
+                if (clearPatron)
+                    PatronClear(false);
+            }
+        }
