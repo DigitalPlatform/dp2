@@ -398,7 +398,8 @@ namespace dp2SSL
                 progress.MessageText = "正在开门，请稍候 ...";
                 progress.Owner = Application.Current.MainWindow;
                 progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-                progress.Closed += (s1, e1) => {
+                progress.Closed += (s1, e1) =>
+                {
                     RemoveLayer();
                     cancelled = true;
                 };
@@ -462,13 +463,16 @@ namespace dp2SSL
         }
 
 
-        private void CurrentApp_OpenCountChanged(object sender, OpenCountChangedEventArgs e)
+        private async void CurrentApp_OpenCountChanged(object sender, OpenCountChangedEventArgs e)
         {
             // 如果从有门打开的状态变为全部门都关闭的状态，要尝试提交一次出纳请求
             if (e.OldCount > 0 && e.NewCount == 0)
             {
-                SubmitCheckInOut();
+                // await SubmitCheckInOut("clearPatron,verifyDoorClosing");  // 要求检查门是否全关闭
+                SaveActions();
                 PatronClear(false);  // 确保在没有可提交内容的情况下也自动清除读者信息
+
+                await SubmitCheckInOut("verifyDoorClosing");
             }
         }
 
@@ -809,7 +813,13 @@ namespace dp2SSL
             // 读者。不再精细的进行增删改跟踪操作，而是笼统地看 TagList.Patrons 集合即可
             var task = RefreshPatrons();
 
-            await ShelfData.ChangeEntities((BaseChannel<IRfid>)sender, e);
+            await ShelfData.ChangeEntities((BaseChannel<IRfid>)sender,
+                e,
+                () =>
+                {
+                    // 如果图书数量有变动，要自动清除挡在前面的残留的对话框
+                    CloseDialogs();
+                });
 
             // "initial" 模式下，立即合并到 _all。等关门时候一并提交请求
             // TODO: 不过似乎此时有语音提示放入、取出，似乎更显得实用一些？
@@ -1035,6 +1045,7 @@ namespace dp2SSL
                 if (_patron.IsFingerprintSource)
                 {
                     // 指纹仪来源
+                    CloseDialogs();
                 }
                 else
                 {
@@ -1043,7 +1054,8 @@ namespace dp2SSL
                     {
                         // 2019/11/13
                         // 把前面临时动作提交一次
-                        Submit();
+                        await Submit();
+                        CloseDialogs();
 
                         if (_patron.Fill(patrons[0].OneTag) == false)
                             return;
@@ -1164,12 +1176,16 @@ namespace dp2SSL
             return new NormalResult();
         }
 
-        public void Submit(bool silently = false)
+        public async Task Submit(bool silently = false)
         {
             if (ShelfData.Adds.Count > 0
                 || ShelfData.Removes.Count > 0
                 || ShelfData.Changes.Count > 0)
-                SubmitCheckInOut(false, silently);
+            {
+                SaveActions();
+                await SubmitCheckInOut("silence");
+                // await SubmitCheckInOut("silence");
+            }
         }
 
         // parameters:
@@ -1182,7 +1198,10 @@ namespace dp2SSL
                 if (ShelfData.Adds.Count > 0
                     || ShelfData.Removes.Count > 0
                     || ShelfData.Changes.Count > 0)
-                    SubmitCheckInOut(false);
+                {
+                    // await SubmitCheckInOut("");    // 不清除 patron
+                    SaveActions();
+                }
             }
 
             _patron.Clear();
@@ -1335,6 +1354,15 @@ namespace dp2SSL
             // OpenDoor();
         }
 
+        Operator GetOperator()
+        {
+            return new Operator
+            {
+                PatronBarcode = _patron.Barcode,
+                PatronName = _patron.PatronName
+            };
+        }
+
         // TODO: 报错信息尝试用 FlowDocument 改造
         // 尝试进行一次还书操作
         // result.Value
@@ -1350,13 +1378,15 @@ namespace dp2SSL
                 actions.Add(new ActionInfo
                 {
                     Entity = entity,
-                    Action = "return"
+                    Action = "return",
+                    Operator = GetOperator()
                 });
                 actions.Add(new ActionInfo
                 {
                     Entity = entity,
                     Action = "transfer",
                     CurrentShelfNo = ShelfData.GetShelfNo(entity),
+                    Operator = GetOperator()
                 });
             }
 
@@ -1381,18 +1411,16 @@ namespace dp2SSL
                         }));
                     }
                 },
-                "", // _patron.Barcode,
-                "", // _patron.PatronName,
-                actions,
-                false);
+                //"", // _patron.Barcode,
+                //"", // _patron.PatronName,
+                actions);
         }
 
-        // 关门，或者更换读者的时候，向服务器提交出纳请求
-        // parameters:
-        //      clearPatron 操作完成后是否自动清除右侧的读者信息
-        void SubmitCheckInOut(bool clearPatron = true, bool silence = false)
+        // 将暂存的信息保存为 Action。但并不立即提交
+        void SaveActions()
         {
             List<ActionInfo> actions = new List<ActionInfo>();
+            List<Entity> processed = new List<Entity>();
             foreach (var entity in ShelfData.Adds)
             {
                 if (ShelfData.BelongToNormal(entity) == false)
@@ -1400,7 +1428,8 @@ namespace dp2SSL
                 actions.Add(new ActionInfo
                 {
                     Entity = entity,
-                    Action = "return"
+                    Action = "return",
+                    Operator = GetOperator()
                 });
                 // 没有更新的，才进行一次 transfer
                 if (ShelfData.Find(ShelfData.Changes, entity.UID).Count == 0)
@@ -1410,9 +1439,13 @@ namespace dp2SSL
                         Entity = entity,
                         Action = "transfer",
                         CurrentShelfNo = ShelfData.GetShelfNo(entity),
+                        Operator = GetOperator()
                     });
                 }
+
+                processed.Add(entity);
             }
+
             foreach (var entity in ShelfData.Changes)
             {
                 if (ShelfData.BelongToNormal(entity) == false)
@@ -1423,8 +1456,11 @@ namespace dp2SSL
                     Entity = entity,
                     Action = "transfer",
                     CurrentShelfNo = ShelfData.GetShelfNo(entity),
+                    Operator = GetOperator()
                 });
+                processed.Add(entity);
             }
+
             foreach (var entity in ShelfData.Removes)
             {
                 if (ShelfData.BelongToNormal(entity) == false)
@@ -1432,12 +1468,46 @@ namespace dp2SSL
                 actions.Add(new ActionInfo
                 {
                     Entity = entity,
-                    Action = "borrow"
+                    Action = "borrow",
+                    Operator = GetOperator()
                 });
+
+                processed.Add(entity);
+            }
+
+            foreach(var entity in processed)
+            {
+                ShelfData.Remove(ShelfData.All, entity);
+                ShelfData.Remove(ShelfData.Adds, entity);
+                ShelfData.Remove(ShelfData.Removes, entity);
+                ShelfData.Remove(ShelfData.Changes, entity);
             }
 
             if (actions.Count == 0)
                 return;  // 没有必要处理
+
+            ShelfData.PushActions(actions);
+        }
+
+        // 向服务器提交 actions 中存储的全部出纳请求
+        // parameters:
+        //      clearPatron 操作完成后是否自动清除右侧的读者信息
+        async Task SubmitCheckInOut(
+            string strStyle = "")
+        {
+            bool silence = false;
+
+            if (StringUtil.IsInList("silence", strStyle))
+                silence = true;
+            bool verifyDoorClosing = StringUtil.IsInList("verifyDoorClosing", strStyle);
+
+        REDO:
+
+            if (ShelfData.Actions.Count == 0)
+                return;  // 没有必要处理
+
+            // 关闭以前残留的对话框
+            CloseDialogs();
 
             ProgressWindow progress = null;
             string patron_name = "";
@@ -1459,6 +1529,31 @@ namespace dp2SSL
                 }));
             }
 
+            // 检查门是否全关闭
+            if (verifyDoorClosing && silence == false)
+            {
+                if (ShelfData.OpeningDoorCount > 0)
+                {
+                    // 检查门是否为关闭状态？
+                    await Task.Run(() =>
+                    {
+                        while (ShelfData.OpeningDoorCount > 0)
+                        {
+                            // TODO: 如何中断？
+                            //if (_initialCancelled)
+                            //    break;
+                            DisplayMessage(progress, "请关闭全部柜门，以完成请求", "yellow");
+                            Thread.Sleep(1000);
+                        }
+                    });
+                    // 确保全关闭后，回到开头重做
+                    if (progress != null)
+                        progress.Close();
+                    goto REDO;
+                }
+            }
+
+#if NO
             bool patron_filled = false;
 
             // 检查读者卡状态是否 OK
@@ -1474,7 +1569,7 @@ namespace dp2SSL
             }
             else
                 patron_filled = true;
-
+#endif
             try
             {
                 var result = ShelfData.SubmitCheckInOut(
@@ -1495,10 +1590,9 @@ namespace dp2SSL
                             }));
                         }
                     },
-                    _patron.Barcode,
-                    _patron.PatronName,
-                    actions,
-                    patron_filled);
+                    //_patron.Barcode,
+                    //_patron.PatronName,
+                    ShelfData.Actions);
                 if (result.Value == -1)
                 {
                     DisplayError(ref progress, result.ErrorInfo);
@@ -1511,6 +1605,7 @@ namespace dp2SSL
                     Application.Current.Dispatcher.Invoke(new Action(() =>
                     {
                         progress.MessageDocument = result.MessageDocument.BuildDocument(patron_name, 18, out speak);
+                        MemoryDialog(progress); // 记住对话框，以便后面可以补充关闭
                         progress = null;
                     }));
                 }
@@ -1525,8 +1620,8 @@ namespace dp2SSL
                     if (progress != null)
                         progress.Close();
                 }));
-                if (clearPatron)
-                    PatronClear(false);
+                //if (clearPatron)
+                //    PatronClear(false);
             }
         }
 
@@ -1550,7 +1645,7 @@ namespace dp2SSL
             PatronClear(true);
         }
 
-        #region 人脸识别功能
+#region 人脸识别功能
 
         bool _stopVideo = false;
 
@@ -1702,6 +1797,6 @@ namespace dp2SSL
             }
         }
 
-        #endregion
+#endregion
     }
 }

@@ -186,6 +186,7 @@ namespace RfidCenter
             string lastUids = "";
             lock (_lastUidTable.SyncRoot)
             {
+                // TODO: 是否可以改为一次动作？
                 if (_lastUidTable.ContainsKey(session_id))
                 {
                     lastUids = (string)_lastUidTable[session_id];
