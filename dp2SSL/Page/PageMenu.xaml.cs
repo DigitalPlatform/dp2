@@ -280,10 +280,10 @@ namespace dp2SSL
             {
                 // 测试功能
                 MessageDocument doc = new MessageDocument();
-                doc.Add("borrow", "succeed", "", "", new Entity { Title = "书名1" });
-                doc.Add("borrow", "succeed", "", "", new Entity { Title = "书名2" });
-                doc.Add("return", "warning", "这是警告信息", "", new Entity { Title = "书名3" });
-                doc.Add("return", "error", "还书出错", "errorCode", new Entity { Title = "书名4" });
+                doc.Add(new Operator { PatronName = "姓名" }, "borrow", "succeed", "", "", new Entity { Title = "书名1" });
+                doc.Add(new Operator { PatronName = "姓名" }, "borrow", "succeed", "", "", new Entity { Title = "书名2" });
+                doc.Add(new Operator { PatronName = "姓名" }, "return", "warning", "这是警告信息", "", new Entity { Title = "书名3" });
+                doc.Add(new Operator { PatronName = "姓名" }, "return", "error", "还书出错", "errorCode", new Entity { Title = "书名4" });
 
                 ProgressWindow progress = null;
 
@@ -292,7 +292,7 @@ namespace dp2SSL
 
                     progress = new ProgressWindow();
                     // progress.MessageText = "正在处理，请稍候 ...";
-                    progress.MessageDocument = doc.BuildDocument("王利文", 14, out string speak);
+                    progress.MessageDocument = doc.BuildDocument(14, out string speak);
                     progress.Owner = Application.Current.MainWindow;
                     progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
                     //progress.Closed += Progress_Closed;

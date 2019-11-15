@@ -1,5 +1,4 @@
-﻿using DigitalPlatform.Text;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,6 +6,8 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Media;
+
+using DigitalPlatform.Text;
 
 namespace dp2SSL
 {
@@ -31,7 +32,9 @@ namespace dp2SSL
             _items.Remove(item);
         }
 
-        public void Add(string operation,
+        public void Add(
+            Operator patron,
+            string operation,
             string resultType,
             string errorInfo,
             string errorCode,
@@ -39,6 +42,7 @@ namespace dp2SSL
         {
             Items.Add(new MessageItem
             {
+                Operator = patron,
                 Operation = operation,
                 ResultType = resultType,
                 ErrorInfo = errorInfo,
@@ -61,7 +65,7 @@ namespace dp2SSL
             }
         }
 
-        public FlowDocument BuildDocument(string patron_name,
+        public FlowDocument BuildDocument(// string patron_name,
             double baseFontSize,
             out string speak)
         {
@@ -80,6 +84,16 @@ namespace dp2SSL
             FlowDocument doc = new FlowDocument();
 
             // 第一部分，总结信息
+            List<string> names = new List<string>();
+            {
+                items.ForEach((o) =>
+                {
+                    if (o.Operator != null)
+                        names.Add(o.Operator.PatronName);
+                });
+                StringUtil.RemoveDupNoSort(ref names);
+            }
+
             int return_count = items.FindAll((o) => { return o.Operation == "return"; }).Count;
             int borrow_count = items.FindAll((o) => { return o.Operation == "borrow"; }).Count;
             int transfer_count = items.FindAll((o) => { return o.Operation == "transfer"; }).Count;
@@ -111,7 +125,7 @@ namespace dp2SSL
 
                     p.Inlines.Add(new Run
                     {
-                        Text = $"{patron_name} ",
+                        Text = $"{StringUtil.MakePathList(names)} ",
                         //Background = Brushes.DarkRed,
                         //Foreground = Brushes.White
                         FontFamily = new FontFamily("楷体"),
@@ -213,6 +227,7 @@ namespace dp2SSL
 
     public class MessageItem
     {
+        public Operator Operator { get; set; }
         public string Operation { get; set; }   // borrow 或 return 或 transfer
         public string ResultType { get; set; }  // 结果类型。succeed/error/warning/information
         public string ErrorInfo { get; set; }

@@ -1218,6 +1218,7 @@ namespace dp2SSL
                         resultType = "information";
                     MessageItem messageItem = new MessageItem
                     {
+                        Operator = info.Operator,
                         Operation = action,
                         ResultType = resultType,
                         ErrorCode = channel.ErrorCode.ToString(),

@@ -952,7 +952,7 @@ namespace dp2SSL
                         Application.Current.Dispatcher.Invoke(new Action(() =>
                         {
                             progress.BackColor = "yellow";
-                            progress.MessageDocument = result.MessageDocument.BuildDocument("初始化", 18, out speak);
+                            progress.MessageDocument = result.MessageDocument.BuildDocument(18, out speak);
                             if (result.MessageDocument.ErrorCount > 0)
                                 progress = null;
                         }));
@@ -1045,7 +1045,7 @@ namespace dp2SSL
                 if (_patron.IsFingerprintSource)
                 {
                     // 指纹仪来源
-                    CloseDialogs();
+                    // CloseDialogs();
                 }
                 else
                 {
@@ -1055,7 +1055,7 @@ namespace dp2SSL
                         // 2019/11/13
                         // 把前面临时动作提交一次
                         await Submit();
-                        CloseDialogs();
+                        // CloseDialogs();
 
                         if (_patron.Fill(patrons[0].OneTag) == false)
                             return;
@@ -1064,6 +1064,7 @@ namespace dp2SSL
 
                         // 2019/5/29
                         await FillPatronDetail();
+                        App.CurrentApp.Speak($"欢迎您，{_patron.PatronName}");
                     }
                     else
                     {
@@ -1183,7 +1184,7 @@ namespace dp2SSL
                 || ShelfData.Changes.Count > 0)
             {
                 SaveActions();
-                await SubmitCheckInOut("silence");
+                await SubmitCheckInOut(silently ? "silence" : "");
                 // await SubmitCheckInOut("silence");
             }
         }
@@ -1315,7 +1316,14 @@ namespace dp2SSL
 
         void AddLayer()
         {
-            _layer.Add(_adorner);
+            try
+            {
+                _layer.Add(_adorner);
+            }
+            catch
+            {
+
+            }
         }
 
         void RemoveLayer()
@@ -1510,8 +1518,8 @@ namespace dp2SSL
             CloseDialogs();
 
             ProgressWindow progress = null;
-            string patron_name = "";
-            patron_name = _patron.PatronName;
+            //string patron_name = "";
+            //patron_name = _patron.PatronName;
 
             if (silence == false)
             {
@@ -1604,7 +1612,7 @@ namespace dp2SSL
                 {
                     Application.Current.Dispatcher.Invoke(new Action(() =>
                     {
-                        progress.MessageDocument = result.MessageDocument.BuildDocument(patron_name, 18, out speak);
+                        progress.MessageDocument = result.MessageDocument.BuildDocument(18, out speak);
                         MemoryDialog(progress); // 记住对话框，以便后面可以补充关闭
                         progress = null;
                     }));
