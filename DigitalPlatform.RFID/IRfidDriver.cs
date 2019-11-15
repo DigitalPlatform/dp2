@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DigitalPlatform.Text;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,6 +20,8 @@ namespace DigitalPlatform.RFID
         // NormalResult CloseReader(object reader_handle);
 
         InventoryResult Inventory(string reader_name, string style);
+
+        InventoryResult Inventory(string reader_name, string antenna_list, string style);
 
         GetTagInfoResult GetTagInfo(string reader_name, InventoryInfo info);
 
@@ -344,16 +347,47 @@ uint new_password);
             return $"Name={Name},SerialNumber={SerialNumber},DriverPath={DriverPath},Result={Result?.ToString()}";
         }
 
-        // 匹配读卡器名字
-        public static bool MatchReaderName(string list, string one)
+        /*
+        // 获得 readername:1|2|3|4 里面冒号左边的读卡器名部分
+        public static string GetNamePart(string text)
         {
-            if (list == "*" || list == one)
+            if (string.IsNullOrEmpty(text))
+                return text;
+            var parts = StringUtil.ParseTwoPart(text, ":");
+            return parts[0];
+        }
+        */
+
+        // 匹配读卡器名字
+        // parameters:
+        //      list    要匹配的读卡器名字列表。形态为 "name1,name2" 或者 "name1:1|2|3|4,name2"
+        //              list 有还可能为 "*" 或 "*:1|2|3|4"
+        //      one     要匹配的单个读卡器名字。形态为 "name1"。注意它不能包含 *
+        public static bool MatchReaderName(string list,
+            string one,
+            out string antenna_list)
+        {
+            antenna_list = "";
+
+            if (one.IndexOf(":") != -1)
+                throw new Exception($"参数 one 内容 ({one}) 不应该包含冒号");
+
+            if (list == "*")
                 return true;
-            if (list.IndexOf(",") == -1)
-                return false;
+
             string[] names = list.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-            if (Array.IndexOf(names, one) != -1)
-                return true;
+            //if (Array.IndexOf(names, one) != -1)
+            //    return true;
+            foreach(string name in names)
+            {
+                var parts = StringUtil.ParseTwoPart(name, ":");
+
+                if (parts[0] == one || parts[0] == "*")
+                {
+                    antenna_list = parts[1];
+                    return true;
+                }
+            }
             return false;
         }
     }

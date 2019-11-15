@@ -41,6 +41,7 @@ namespace DigitalPlatform.RFID
             }
         }
 
+        /*
         static string _antennaList = null;
 
         public static string AntennaList
@@ -54,6 +55,7 @@ namespace DigitalPlatform.RFID
                 _antennaList = value;
             }
         }
+        */
 
         public static event ListLocksEventHandler ListLocks = null;
 
@@ -175,8 +177,10 @@ new SetErrorEventArgs
             (channel) =>
             {
                 string style = $"session:{Base.GetHashCode()}";
+                /*
                 if (string.IsNullOrEmpty(_antennaList) == false)
                     style += ",antenna:" + _antennaList;
+                    */
 
                 var readerNameList = _readerNameList;
                 var result = channel?.Object?.ListTags(readerNameList, style);

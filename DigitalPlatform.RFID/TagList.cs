@@ -115,7 +115,7 @@ namespace DigitalPlatform.RFID
         static bool InRange(TagAndData data, string readerNameList)
         {
             // 匹配读卡器名字
-            return Reader.MatchReaderName(readerNameList, data.OneTag.ReaderName);
+            return Reader.MatchReaderName(readerNameList, data.OneTag.ReaderName, out string antenna_list);
         }
 
         // parameters:

@@ -1029,3 +1029,58 @@
                     PatronClear(false);
             }
         }
+
+
+		~~~~~~~~~
+
+		        // 从 shelf.xml 配置文件中归纳出所有的天线编号
+        public static string GetAntennaList()
+        {
+            if (ShelfCfgDom == null)
+                return "";
+
+            List<string> antenna_list = new List<string>();
+
+            XmlNodeList doors = ShelfCfgDom.DocumentElement.SelectNodes("shelf/door");
+            foreach (XmlElement door in doors)
+            {
+                DoorItem.ParseReaderString(door.GetAttribute("antenna"),
+                    out string readerName,
+                    out int antenna);
+                antenna_list.Add(antenna.ToString());
+            }
+
+            StringUtil.RemoveDup(ref antenna_list, false);
+            return StringUtil.MakePathList(antenna_list, "|");
+
+            /*
+            List<string> antenna_list = new List<string>();
+            string cfg_filename = ShelfData.ShelfFilePath;
+            XmlDocument cfg_dom = new XmlDocument();
+            try
+            {
+                cfg_dom.Load(cfg_filename);
+
+                XmlNodeList doors = cfg_dom.DocumentElement.SelectNodes("shelf/door");
+                foreach (XmlElement door in doors)
+                {
+                    DoorItem.ParseLockString(door.GetAttribute("antenna"),
+                        out string readerName,
+                        out int antenna);
+                    antenna_list.Add(antenna.ToString());
+                }
+
+                StringUtil.RemoveDup(ref antenna_list, false);
+                return StringUtil.MakePathList(antenna_list, "|");
+            }
+            catch (FileNotFoundException)
+            {
+                return "";
+            }
+            catch (Exception ex)
+            {
+                this.SetError("cfg", $"装载配置文件 shelf.xml 时出现异常: {ex.Message}");
+                return "";
+            }
+            */
+        }

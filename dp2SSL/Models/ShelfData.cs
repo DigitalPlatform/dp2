@@ -38,6 +38,8 @@ namespace dp2SSL
 
         // 读者证读卡器名字。在 shelf.xml 中配置
         static string _patronReaderName = "";
+        // 全部读卡器名字列表
+        static string _allReaderName = "";
 
         // 当前处于打开状态的门的个数
         public static int OpeningDoorCount
@@ -154,9 +156,10 @@ namespace dp2SSL
             else
             {
                 // 打开图书读卡器(同时也使用读者证读卡器)
-                if (RfidManager.ReaderNameList != "*")
+                if (RfidManager.ReaderNameList != _allReaderName)
                 {
-                    RfidManager.ReaderNameList = "*";
+                    // RfidManager.ReaderNameList = "*";
+                    RfidManager.ReaderNameList = _allReaderName;
                     RfidManager.ClearCache();
                 }
             }
@@ -169,9 +172,12 @@ namespace dp2SSL
             ShelfData.InitialDoors();
 
             // 要在初始化以前设定好
-            RfidManager.AntennaList = GetAntennaList();
+            _patronReaderName = GetReaderNameList("patron");
+            _allReaderName = GetReaderNameList("doors,patron");
+            RfidManager.ReaderNameList = _allReaderName;
+            // RfidManager.AntennaList = GetAntennaList();
             RfidManager.LockCommands = ShelfData.GetLockCommands();
-            _patronReaderName = GetPatronReaderName();
+            // _patronReaderName = GetPatronReaderName();
         }
 
         // 从 shelf.xml 配置文件中获得读者证读卡器名
@@ -212,56 +218,93 @@ namespace dp2SSL
             */
         }
 
-        // 从 shelf.xml 配置文件中归纳出所有的天线编号
-        public static string GetAntennaList()
+        // 从 shelf.xml 配置文件中归纳出所有的读卡器名，包括天线编号部分
+        // parameters:
+        //      style   patron/doors
+        public static string GetReaderNameList(string style)
         {
             if (ShelfCfgDom == null)
-                return "";
+                return "*";
 
-            List<string> antenna_list = new List<string>();
+            // 读卡器名字 --> List<int> (天线列表)
+            Hashtable name_table = new Hashtable();
 
-            XmlNodeList doors = ShelfCfgDom.DocumentElement.SelectNodes("shelf/door");
-            foreach (XmlElement door in doors)
+            if (StringUtil.IsInList("doors", style))
             {
-                DoorItem.ParseReaderString(door.GetAttribute("antenna"),
-                    out string readerName,
-                    out int antenna);
-                antenna_list.Add(antenna.ToString());
-            }
-
-            StringUtil.RemoveDup(ref antenna_list, false);
-            return StringUtil.MakePathList(antenna_list, "|");
-
-            /*
-            List<string> antenna_list = new List<string>();
-            string cfg_filename = ShelfData.ShelfFilePath;
-            XmlDocument cfg_dom = new XmlDocument();
-            try
-            {
-                cfg_dom.Load(cfg_filename);
-
-                XmlNodeList doors = cfg_dom.DocumentElement.SelectNodes("shelf/door");
+                XmlNodeList doors = ShelfCfgDom.DocumentElement.SelectNodes("shelf/door");
                 foreach (XmlElement door in doors)
                 {
-                    DoorItem.ParseLockString(door.GetAttribute("antenna"),
+                    DoorItem.ParseReaderString(door.GetAttribute("antenna"),
                         out string readerName,
                         out int antenna);
-                    antenna_list.Add(antenna.ToString());
-                }
 
-                StringUtil.RemoveDup(ref antenna_list, false);
-                return StringUtil.MakePathList(antenna_list, "|");
+                    // 禁止使用 * 作为读卡器名字
+                    if (readerName == "*")
+                        throw new Exception($"antenna属性值中读卡器名字部分不应使用 * ({door.OuterXml})");
+
+                    AddToTable(name_table, readerName, antenna);
+
+                }
             }
-            catch (FileNotFoundException)
+
+            if (StringUtil.IsInList("patron", style))
             {
-                return "";
+                XmlElement patron = ShelfCfgDom.DocumentElement.SelectSingleNode("patron") as XmlElement;
+                if (patron != null)
+                {
+                    string readerName = patron.GetAttribute("readerName");
+                    AddToTable(name_table, readerName, -1);
+                }
             }
-            catch (Exception ex)
+
+            StringBuilder result = new StringBuilder();
+            int i = 0;
+            foreach (string key in name_table.Keys)
             {
-                this.SetError("cfg", $"装载配置文件 shelf.xml 时出现异常: {ex.Message}");
-                return "";
+                List<int> list = name_table[key] as List<int>;
+                list.Sort();
+
+                if (i > 0)
+                    result.Append(",");
+                if (list.Count == 0)
+                    result.Append(key);
+                else
+                    result.Append($"{key}:{Join(list, "|")}");
+                i++;
             }
-            */
+
+            return result.ToString();
+        }
+
+        static void AddToTable(Hashtable name_table, string readerName, int antenna)
+        {
+            List<int> list = new List<int>();
+            if (name_table.ContainsKey(readerName) == false)
+            {
+                name_table[readerName] = list;
+            }
+            else
+                list = name_table[readerName] as List<int>;
+
+            if (antenna != -1)
+            {
+                if (list.IndexOf(antenna) == -1)
+                    list.Add(antenna);
+            }
+        }
+
+        static string Join(List<int> list, string sep)
+        {
+            StringBuilder text = new StringBuilder();
+            int i = 0;
+            foreach (var v in list)
+            {
+                if (i > 0)
+                    text.Append(sep);
+                text.Append(v.ToString());
+                i++;
+            }
+            return text.ToString();
         }
 
         #endregion
@@ -436,8 +479,9 @@ namespace dp2SSL
                 {
                     // 使用全部读卡器，全部天线
                     RfidManager.Pause = true;
-                    RfidManager.ReaderNameList = "*";
-                    RfidManager.AntennaList = GetAntennaList();
+                    // RfidManager.ReaderNameList = "*";
+                    RfidManager.ReaderNameList = _allReaderName;
+                    // RfidManager.AntennaList = GetAntennaList();
                     TagList.DataReady = false;
                     RfidManager.Pause = false;
                     RfidManager.ClearCache();   // 迫使立即重新请求 Inventory
@@ -1349,7 +1393,7 @@ namespace dp2SSL
                 }*/
                 func_setProgress?.Invoke(-1, -1, -1);   // hide progress bar
 
-//                string speak = "";
+                //                string speak = "";
                 {
                     /*
                     if (progress != null)
@@ -1371,7 +1415,7 @@ namespace dp2SSL
                 }
 
                 // 把处理过的移走
-                foreach(var info in processed)
+                foreach (var info in processed)
                 {
                     _actions.Remove(info);
                 }
