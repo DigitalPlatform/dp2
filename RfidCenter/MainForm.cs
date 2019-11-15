@@ -508,7 +508,7 @@ namespace RfidCenter
 
         private void MenuItem_inventory_Click(object sender, EventArgs e)
         {
-            InventoryResult result = _driver.Inventory(GetCurrentReaderName(), "only_new");
+            InventoryResult result = _driver.Inventory(GetCurrentReaderName(), "", "only_new");
             MessageBox.Show(this, result.ToString());
             if (result.Results != null && result.Results.Count > 0)
                 _inventory_info = result.Results[0];

@@ -277,12 +277,13 @@ namespace RfidCenter
             }
         }
 
-        static uint _currenAntenna = 1;
-        DateTime _lastTime;
+        //static uint _currenAntenna = 1;
+        //DateTime _lastTime;
 
         // parameters:
+        //      reader_name_list    读卡器名字列表。形态为 "*" 或 "name1,name2" 或 "name1:1|2|3|4,name2"
         //      style   如果为 "getTagInfo"，表示要在结果中返回 TagInfo
-        ListTagsResult _listTags(string reader_name, string style)
+        ListTagsResult _listTags(string reader_name_list, string style)
         {
             InventoryResult result = new InventoryResult();
 
@@ -310,10 +311,12 @@ namespace RfidCenter
                     continue;
 #endif
 
-                if (Reader.MatchReaderName(reader_name, reader.Name) == false)
+                // 顺便要从 reader_name_list 中解析出天线部分
+                if (Reader.MatchReaderName(reader_name_list, reader.Name, out string antenna_list) == false)
                     continue;
 
                 InventoryResult inventory_result = Program.Rfid.Inventory(reader.Name,
+                    antenna_list,
                     style   // ""
                     );
                 if (inventory_result.Value == -1)
@@ -450,7 +453,7 @@ namespace RfidCenter
             List<GetTagInfoResult> errors = new List<GetTagInfoResult>();
             foreach (Reader reader in Program.Rfid.Readers)
             {
-                if (Reader.MatchReaderName(reader_name, reader.Name) == false)
+                if (Reader.MatchReaderName(reader_name, reader.Name, out string antenna_list) == false)
                     continue;
 
                 // result.Value
@@ -480,6 +483,7 @@ namespace RfidCenter
             return new GetTagInfoResult { ErrorCode = "notFoundReader" };
         }
 
+        // TODO: 要改造一下。天线编号要放在 reader_name 中？
         // 2019/9/27 增加的 antenna_id
         // result.Value
         //      -1
@@ -507,7 +511,7 @@ namespace RfidCenter
                 else
                     continue;
 #endif
-                if (Reader.MatchReaderName(reader_name, reader.Name) == false)
+                if (Reader.MatchReaderName(reader_name, reader.Name, out string antenna_list) == false)
                     continue;
 
                 InventoryInfo info = new InventoryInfo
@@ -562,7 +566,7 @@ namespace RfidCenter
                     continue;
 #endif
 
-                if (Reader.MatchReaderName(reader_name, reader.Name) == false)
+                if (Reader.MatchReaderName(reader_name, reader.Name, out string antenna_list) == false)
                     continue;
 
 

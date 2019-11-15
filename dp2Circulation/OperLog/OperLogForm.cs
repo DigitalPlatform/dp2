@@ -7100,6 +7100,7 @@ Keys keyData)
             {
                 OperLogFindDialog dlg = new OperLogFindDialog();
                 MainForm.SetControlFont(dlg, this.Font, false);
+                dlg.RecPathListVisible = false; // 暂未启用这个界面元素 2019/11/15
                 dlg.Operations = m_strFindOperations;
 
                 Program.MainForm.AppInfo.LinkFormState(dlg, "operlogform_finddialog_formstate");

@@ -263,5 +263,16 @@ namespace dp2Circulation
             this.textBox_recPathList.Text = "";
         }
 
+        public bool RecPathListVisible
+        {
+            get
+            {
+                return textBox_recPathList.Visible;
+            }
+            set
+            {
+                textBox_recPathList.Visible = value;
+            }
+        }
     }
 }

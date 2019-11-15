@@ -1065,6 +1065,8 @@ namespace dp2SSL
                         // 2019/5/29
                         await FillPatronDetail();
                         App.CurrentApp.Speak($"欢迎您，{_patron.PatronName}");
+
+                        // TODO: 开始启动延时自动清除读者信息的过程。如果中途门被打开，则延时过程被取消(也就是说读者信息不再会被自动清除)
                     }
                     else
                     {

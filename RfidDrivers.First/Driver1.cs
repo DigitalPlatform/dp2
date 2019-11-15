@@ -639,7 +639,7 @@ namespace RfidDrivers.First
                 if (reader.ReaderHandle == UIntPtr.Zero)
                     continue;
                 // if (reader_name == "*" || reader_name == reader.Name)
-                if (Reader.MatchReaderName(reader_name, reader.Name))
+                if (Reader.MatchReaderName(reader_name, reader.Name, out string antenna_list))
                     results.Add(reader);
             }
 
@@ -662,16 +662,18 @@ namespace RfidDrivers.First
                 if (reader.ReaderHandle == UIntPtr.Zero)
                     continue;
                 // if (reader_name == "*" || reader_name == reader.Name)
-                if (Reader.MatchReaderName(reader_name, reader.Name))
+                if (Reader.MatchReaderName(reader_name, reader.Name, out string antenna_list))
                     results.Add(reader.ReaderHandle);
             }
 
             return results;
         }
 
+#if NOUSE
         // 根据 reader 名字找到 reader_handle
-        UIntPtr GetReaderHandle(string reader_name, out string protocols)
+        UIntPtr GetReaderHandle(string reader_name_param, out string protocols)
         {
+            string reader_name = Reader.GetNamePart(reader_name_param);
             protocols = "";
             foreach (Reader reader in _readers)
             {
@@ -690,6 +692,8 @@ namespace RfidDrivers.First
 
             return UIntPtr.Zero;
         }
+
+#endif
 
         public List<CReaderDriverInf> readerDriverInfoList = new List<CReaderDriverInf>();
 
@@ -2219,13 +2223,24 @@ namespace RfidDrivers.First
             return new NormalResult();
         }
 
+        // 兼容以前的用法
+        public InventoryResult Inventory(string reader_name,
+    string style)
+        {
+            return Inventory(reader_name,
+    "",
+    style);
+        }
+
         // parameters:
+        //      antenna_list    内容为形态 "1|2|3|4"。如果为空，相当于 1。
         //      style   可由下列值组成
         //              only_new    每次只列出最新发现的那些标签(否则全部列出)
-        //              antenna:1|2|3|4 天线列表。缺省相当于 antenna:1 效果
         // exception:
         //      可能会抛出 System.AccessViolationException 异常
-        public InventoryResult Inventory(string reader_name, string style)
+        public InventoryResult Inventory(string reader_name,
+            string antenna_list,
+            string style)
         {
             Lock();
             try
@@ -2249,7 +2264,7 @@ out Reader reader);
                 // 2019/9/24
                 // 天线列表
                 // 1|2|3|4 这样的形态
-                string antenna_list = StringUtil.GetParameterByPrefix(style, "antenna", ":");
+                // string antenna_list = StringUtil.GetParameterByPrefix(style, "antenna", ":");
                 byte[] antennas = GetAntennaList(antenna_list);
 
                 UInt32 nTagCount = 0;
@@ -3567,125 +3582,136 @@ out Reader reader);
             ref UInt32 nTagCount,
             out List<InventoryInfo> results)
         {
-            results = new List<InventoryInfo>();
-
-            Byte enableAFI = 0;
-            int iret;
-            UIntPtr InvenParamSpecList = RFIDLIB.rfidlib_reader.RDR_CreateInvenParamSpecList();
-            if (InvenParamSpecList.ToUInt64() != 0)
+            try
             {
-                RFIDLIB.rfidlib_aip_iso15693.ISO15693_CreateInvenParam(
-                    InvenParamSpecList,
-                    0,
-                    enableAFI,
-                    0x00,   // AFI, 打算要匹配的 AFI byte 值
-                    0);
+                results = new List<InventoryInfo>();
 
-                if (StringUtil.IsInList("ISO14443A", protocols))
-                    RFIDLIB.rfidlib_aip_iso14443A.ISO14443A_CreateInvenParam(InvenParamSpecList, 0);
-            }
-            nTagCount = 0;
-        LABEL_TAG_INVENTORY:
-            // 可能会抛出 System.AccessViolationException 异常
-            iret = RFIDLIB.rfidlib_reader.RDR_TagInventory(hreader, AIType, AntennaSelCount, AntennaSel, InvenParamSpecList);
-            RFIDLIB.rfidlib_reader.RDR_CloseRFTransmitter(hreader);
-            if (iret == 0 || iret == -21)
-            {
-                nTagCount += RFIDLIB.rfidlib_reader.RDR_GetTagDataReportCount(hreader);
-                UIntPtr TagDataReport;
-                TagDataReport = (UIntPtr)0;
-                TagDataReport = RFIDLIB.rfidlib_reader.RDR_GetTagDataReport(hreader, RFIDLIB.rfidlib_def.RFID_SEEK_FIRST); //first
-                while (TagDataReport.ToUInt64() > 0)
+                Byte enableAFI = 0;
+                int iret;
+                UIntPtr InvenParamSpecList = RFIDLIB.rfidlib_reader.RDR_CreateInvenParamSpecList();
+                if (InvenParamSpecList.ToUInt64() != 0)
                 {
-                    UInt32 aip_id = 0;
-                    UInt32 tag_id = 0;
-                    UInt32 ant_id = 0;
-                    Byte dsfid = 0;
-                    // Byte uidlen = 0;
-                    Byte[] uid = new Byte[8];  // 16
+                    RFIDLIB.rfidlib_aip_iso15693.ISO15693_CreateInvenParam(
+                        InvenParamSpecList,
+                        0,
+                        enableAFI,
+                        0x00,   // AFI, 打算要匹配的 AFI byte 值
+                        0);
 
-                    /* Parse iso15693 tag report */
-                    {
-                        iret = RFIDLIB.rfidlib_aip_iso15693.ISO15693_ParseTagDataReport(TagDataReport,
-                            ref aip_id,
-                            ref tag_id,
-                            ref ant_id,
-                            ref dsfid,
-                            uid);
-                        if (iret == 0)
-                        {
-                            // uidlen = 8;
-                            // object[] pList = { aip_id, tag_id, ant_id, uid, (int)uidlen };
-                            //// Invoke(tagReportHandler, pList);
-                            //tagReportHandler(hreader, aip_id, tag_id, ant_id, uid ,8);
-                            InventoryInfo result = new InventoryInfo
-                            {
-                                Protocol = InventoryInfo.ISO15693,
-                                AipID = aip_id,
-                                TagType = tag_id,
-                                AntennaID = ant_id,
-                                DsfID = dsfid,
-                                UID = Element.GetHexString(uid),
-                            };
-                            // Array.Copy(uid, result.UID, result.UID.Length);
-                            results.Add(result);
-                        }
-                    }
-
-                    /* Parse Iso14443A tag report */
                     if (StringUtil.IsInList("ISO14443A", protocols))
-                    {
-                        uid = new Byte[8];
-
-                        Byte uidlen = 0;
-
-                        iret = RFIDLIB.rfidlib_aip_iso14443A.ISO14443A_ParseTagDataReport(TagDataReport,
-                            ref aip_id,
-                            ref tag_id,
-                            ref ant_id,
-                            uid,
-                            ref uidlen);
-                        if (iret == 0)
-                        {
-                            // object[] pList = { aip_id, tag_id, ant_id, uid, (int)uidlen };
-                            // Invoke(tagReportHandler, pList);
-                            //tagReportHandler(hreader, aip_id, tag_id, ant_id, uid, uidlen);
-
-                            {
-                                Debug.Assert(uidlen >= 4);
-                                byte[] temp = new byte[uidlen];
-                                Array.Copy(uid, temp, uidlen);
-                                uid = temp;
-                            }
-
-                            InventoryInfo result = new InventoryInfo
-                            {
-                                Protocol = InventoryInfo.ISO14443A,
-                                AipID = aip_id,
-                                TagType = tag_id,
-                                AntennaID = ant_id,
-                                DsfID = dsfid,
-                                UID = Element.GetHexString(uid),
-                            };
-                            results.Add(result);
-                        }
-                    }
-
-                    /* Get Next report from buffer */
-                    TagDataReport = RFIDLIB.rfidlib_reader.RDR_GetTagDataReport(hreader, RFIDLIB.rfidlib_def.RFID_SEEK_NEXT); //next
+                        RFIDLIB.rfidlib_aip_iso14443A.ISO14443A_CreateInvenParam(InvenParamSpecList, 0);
                 }
-                if (iret == -21) // stop trigger occur,need to inventory left tags
+                nTagCount = 0;
+            LABEL_TAG_INVENTORY:
+                // 可能会抛出 System.AccessViolationException 异常
+                iret = RFIDLIB.rfidlib_reader.RDR_TagInventory(hreader,
+                    AIType,
+                    AntennaSelCount,
+                    AntennaSel,
+                    InvenParamSpecList);
+                // RFIDLIB.rfidlib_reader.RDR_CloseRFTransmitter(hreader);
+                if (iret == 0 || iret == -21)
                 {
-                    AIType = RFIDLIB.rfidlib_def.AI_TYPE_CONTINUE;//use only-new-tag inventory 
-                    goto LABEL_TAG_INVENTORY;
-                }
-                iret = 0;
-            }
-            if (InvenParamSpecList.ToUInt64() != 0)
-                RFIDLIB.rfidlib_reader.DNODE_Destroy(InvenParamSpecList);
+                    nTagCount += RFIDLIB.rfidlib_reader.RDR_GetTagDataReportCount(hreader);
+                    UIntPtr TagDataReport;
+                    TagDataReport = (UIntPtr)0;
+                    TagDataReport = RFIDLIB.rfidlib_reader.RDR_GetTagDataReport(hreader, RFIDLIB.rfidlib_def.RFID_SEEK_FIRST); //first
+                    while (TagDataReport.ToUInt64() > 0)
+                    {
+                        UInt32 aip_id = 0;
+                        UInt32 tag_id = 0;
+                        UInt32 ant_id = 0;
+                        Byte dsfid = 0;
+                        // Byte uidlen = 0;
+                        Byte[] uid = new Byte[8];  // 16
 
-            RFIDLIB.rfidlib_reader.RDR_ResetCommuImmeTimeout(hreader);
-            return iret;
+                        /* Parse iso15693 tag report */
+                        {
+                            iret = RFIDLIB.rfidlib_aip_iso15693.ISO15693_ParseTagDataReport(TagDataReport,
+                                ref aip_id,
+                                ref tag_id,
+                                ref ant_id,
+                                ref dsfid,
+                                uid);
+                            if (iret == 0)
+                            {
+                                // uidlen = 8;
+                                // object[] pList = { aip_id, tag_id, ant_id, uid, (int)uidlen };
+                                //// Invoke(tagReportHandler, pList);
+                                //tagReportHandler(hreader, aip_id, tag_id, ant_id, uid ,8);
+                                InventoryInfo result = new InventoryInfo
+                                {
+                                    Protocol = InventoryInfo.ISO15693,
+                                    AipID = aip_id,
+                                    TagType = tag_id,
+                                    AntennaID = ant_id,
+                                    DsfID = dsfid,
+                                    UID = Element.GetHexString(uid),
+                                };
+                                // Array.Copy(uid, result.UID, result.UID.Length);
+                                results.Add(result);
+                            }
+                        }
+
+                        /* Parse Iso14443A tag report */
+                        if (StringUtil.IsInList("ISO14443A", protocols))
+                        {
+                            uid = new Byte[8];
+
+                            Byte uidlen = 0;
+
+                            iret = RFIDLIB.rfidlib_aip_iso14443A.ISO14443A_ParseTagDataReport(TagDataReport,
+                                ref aip_id,
+                                ref tag_id,
+                                ref ant_id,
+                                uid,
+                                ref uidlen);
+                            if (iret == 0)
+                            {
+                                // object[] pList = { aip_id, tag_id, ant_id, uid, (int)uidlen };
+                                // Invoke(tagReportHandler, pList);
+                                //tagReportHandler(hreader, aip_id, tag_id, ant_id, uid, uidlen);
+
+                                {
+                                    Debug.Assert(uidlen >= 4);
+                                    byte[] temp = new byte[uidlen];
+                                    Array.Copy(uid, temp, uidlen);
+                                    uid = temp;
+                                }
+
+                                InventoryInfo result = new InventoryInfo
+                                {
+                                    Protocol = InventoryInfo.ISO14443A,
+                                    AipID = aip_id,
+                                    TagType = tag_id,
+                                    AntennaID = ant_id,
+                                    DsfID = dsfid,
+                                    UID = Element.GetHexString(uid),
+                                };
+                                results.Add(result);
+                            }
+                        }
+
+                        /* Get Next report from buffer */
+                        TagDataReport = RFIDLIB.rfidlib_reader.RDR_GetTagDataReport(hreader, RFIDLIB.rfidlib_def.RFID_SEEK_NEXT); //next
+                    }
+                    if (iret == -21) // stop trigger occur,need to inventory left tags
+                    {
+                        AIType = RFIDLIB.rfidlib_def.AI_TYPE_CONTINUE;//use only-new-tag inventory 
+                        goto LABEL_TAG_INVENTORY;
+                    }
+                    iret = 0;
+                }
+                if (InvenParamSpecList.ToUInt64() != 0)
+                    RFIDLIB.rfidlib_reader.DNODE_Destroy(InvenParamSpecList);
+
+                RFIDLIB.rfidlib_reader.RDR_ResetCommuImmeTimeout(hreader);
+                return iret;
+            }
+            finally
+            {
+                RFIDLIB.rfidlib_reader.RDR_CloseRFTransmitter(hreader);
+            }
         }
 
         /*
@@ -4076,7 +4102,7 @@ out Reader reader);
             {
                 if (current_lock.LockHandle == UIntPtr.Zero)
                     continue;
-                if (Reader.MatchReaderName(lock_name, current_lock.Name))
+                if (Reader.MatchReaderName(lock_name, current_lock.Name, out string antenna_list))
                     results.Add(current_lock);
             }
 
@@ -4103,7 +4129,6 @@ out Reader reader);
         // 探测锁状态
         // parameters:
         //      lockName    锁名字。如果为 * 表示所有的锁
-        //      index       锁编号。从 0 开始计数
         public GetLockStateResult GetShelfLockState(string lockNameParam)
         {
             ParseLockName(lockNameParam,
