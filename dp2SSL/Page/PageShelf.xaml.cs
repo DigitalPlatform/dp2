@@ -416,6 +416,9 @@ namespace dp2SSL
                 if (result.Value == -1)
                     MessageBox.Show(result.ErrorInfo);
 
+                // 开门动作会中断延迟任务
+                StopDelayTask();
+
                 // 等待确认收到开门信号
                 await Task.Run(() =>
                 {
@@ -754,7 +757,7 @@ namespace dp2SSL
                     entity.FillFinished = true;
                 }
 
-                booksControl.SetBorrowable();
+                // booksControl.SetBorrowable();
             }
             catch (Exception ex)
             {
@@ -1067,6 +1070,7 @@ namespace dp2SSL
                         App.CurrentApp.Speak($"欢迎您，{_patron.PatronName}");
 
                         // TODO: 开始启动延时自动清除读者信息的过程。如果中途门被打开，则延时过程被取消(也就是说读者信息不再会被自动清除)
+                        BeginDelayTask();
                     }
                     else
                     {
@@ -1485,7 +1489,7 @@ namespace dp2SSL
                 processed.Add(entity);
             }
 
-            foreach(var entity in processed)
+            foreach (var entity in processed)
             {
                 ShelfData.Remove(ShelfData.All, entity);
                 ShelfData.Remove(ShelfData.Adds, entity);
@@ -1647,15 +1651,86 @@ namespace dp2SSL
             return text.ToString();
         }
 
-        // 延时自动清除读者信息
-        // 当在规定的时间内没有打开柜门，则自动清除读者信息。若打开了则不会清除
-        async Task DelayClearPatron(CancellationToken token)
+        DelayClear _delayTask = null;
+
+        void StopDelayTask()
         {
-            await Task.Delay(TimeSpan.FromSeconds(10), token);
-            PatronClear(true);
+            if (_delayTask != null)
+            {
+                _delayTask.Cancel.Cancel();
+                _delayTask = null;
+            }
+
+            /*
+            // 恢复按钮原有文字
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                this.clearPatron.Content = $"清除读者信息";
+            }));
+            */
         }
 
-#region 人脸识别功能
+        void BeginDelayTask()
+        {
+            StopDelayTask();
+            // TODO: 开始启动延时自动清除读者信息的过程。如果中途门被打开，则延时过程被取消(也就是说读者信息不再会被自动清除)
+            _delayTask = DelayClear.Start(
+                () =>
+                {
+                    PatronClear(true);
+                },
+                (seconds) =>
+                {
+                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    {
+                        if (seconds > 0)
+                            this.clearPatron.Content = $"({seconds.ToString()} 秒后自动) 清除读者信息";
+                        else
+                            this.clearPatron.Content = $"清除读者信息";
+                    }));
+                });
+        }
+
+        class DelayClear
+        {
+            public Task Task { get; set; }
+            public CancellationTokenSource Cancel { get; set; }
+
+            public delegate void Delegate_clear();
+            public delegate void Delegate_heartBeat(int leftSeconds);
+
+            public static DelayClear Start(Delegate_clear func_clear,
+                Delegate_heartBeat func_heartBeat)
+            {
+                DelayClear result = new DelayClear();
+                result.Cancel = new CancellationTokenSource();
+                result.Task = Task.Run(() =>
+                {
+                    try
+                    {
+                        int leftSeconds = 10;
+                        var token = result.Cancel.Token;
+                        while (token.IsCancellationRequested == false
+                        && leftSeconds > 0)
+                        {
+                            Task.Delay(TimeSpan.FromSeconds(1), token).Wait();
+                            func_heartBeat?.Invoke(leftSeconds--);
+                        }
+                        token.ThrowIfCancellationRequested();
+                        // Task.Delay(TimeSpan.FromSeconds(10), token).Wait();
+                        func_clear?.Invoke();
+                    }
+                    finally
+                    {
+                        func_heartBeat?.Invoke(-1); // 让按钮文字中的倒计时数字消失
+                    }
+                });
+                return result;
+            }
+        }
+
+
+        #region 人脸识别功能
 
         bool _stopVideo = false;
 
@@ -1807,6 +1882,20 @@ namespace dp2SSL
             }
         }
 
-#endregion
+        #endregion
+
+        private void ClearPatron_Click(object sender, RoutedEventArgs e)
+        {
+            StopDelayTask();
+
+            // 如果柜门没有全部关闭，要提醒先关闭柜门
+            if (ShelfData.OpeningDoorCount > 0)
+            {
+                ErrorBox("请先关闭全部柜门，才能清除读者信息", "yellow", "button_ok");
+                return;
+            }
+
+            PatronClear(true);
+        }
     }
 }
