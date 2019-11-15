@@ -51,6 +51,8 @@ https://dotnet.microsoft.com/download/visual-studio-sdks
 ```
 git submodule init
 git submodule update
+cd dp-library
+git pull
 ```
 
 以确保获得最新的 dp-library 代码。
