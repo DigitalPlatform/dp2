@@ -417,7 +417,7 @@ namespace dp2SSL
                     MessageBox.Show(result.ErrorInfo);
 
                 // 开门动作会中断延迟任务
-                StopDelayTask();
+                CancelDelayTask();
 
                 // 等待确认收到开门信号
                 await Task.Run(() =>
@@ -567,6 +567,8 @@ namespace dp2SSL
 
         private void PageShelf_Unloaded(object sender, RoutedEventArgs e)
         {
+            CancelDelayTask();
+
             // 提交尚未提交的取出和放入
             PatronClear(true);
 
@@ -1067,10 +1069,17 @@ namespace dp2SSL
 
                         // 2019/5/29
                         await FillPatronDetail();
-                        App.CurrentApp.Speak($"欢迎您，{_patron.PatronName}");
 
                         // TODO: 开始启动延时自动清除读者信息的过程。如果中途门被打开，则延时过程被取消(也就是说读者信息不再会被自动清除)
-                        BeginDelayTask();
+                        if (ShelfData.OpeningDoorCount == 0)
+                        {
+                            App.CurrentApp.Speak($"欢迎您，{_patron.PatronName}");
+                            BeginDelayTask();
+                        }
+                        else
+                        {
+                            App.CurrentApp.Speak($"欢迎您，{_patron.PatronName}。不要忘了关柜门优");
+                        }
                     }
                     else
                     {
@@ -1653,7 +1662,7 @@ namespace dp2SSL
 
         DelayClear _delayTask = null;
 
-        void StopDelayTask()
+        void CancelDelayTask()
         {
             if (_delayTask != null)
             {
@@ -1672,7 +1681,7 @@ namespace dp2SSL
 
         void BeginDelayTask()
         {
-            StopDelayTask();
+            CancelDelayTask();
             // TODO: 开始启动延时自动清除读者信息的过程。如果中途门被打开，则延时过程被取消(也就是说读者信息不再会被自动清除)
             _delayTask = DelayClear.Start(
                 () =>
@@ -1886,7 +1895,7 @@ namespace dp2SSL
 
         private void ClearPatron_Click(object sender, RoutedEventArgs e)
         {
-            StopDelayTask();
+            CancelDelayTask();
 
             // 如果柜门没有全部关闭，要提醒先关闭柜门
             if (ShelfData.OpeningDoorCount > 0)
