@@ -27,6 +27,8 @@ namespace dp2SSL
     {
         public static event OpenCountChangedEventHandler OpenCountChanged;
 
+        public static event DoorStateChangedEventHandler DoorStateChanged;
+
         /*
         public static event BookChangedEventHandler BookChanged;
 
@@ -69,12 +71,21 @@ namespace dp2SSL
                     if (state.State == "open")
                         count++;
 
-                    var result = DoorItem.SetLockState(ShelfData.Doors, state);
-                    if (result.LockName != null && result.OldState != null && result.NewState != null)
+                    var results = DoorItem.SetLockState(ShelfData.Doors, state);
+                    // 注：有可能一个锁和多个门关联
+                    foreach (LockChanged result in results)
                     {
                         if (result.NewState != result.OldState
                             && string.IsNullOrEmpty(result.OldState) == false)
                         {
+                            // 触发单独一个门被关闭的事件
+                            DoorStateChanged?.Invoke(null, new DoorStateChangedEventArgs
+                            {
+                                Door = result.Door,
+                                OldState = result.OldState,
+                                NewState = result.NewState
+                            });
+
                             if (result.NewState == "open")
                                 App.CurrentApp.Speak($"{result.LockName} 打开");
                             else

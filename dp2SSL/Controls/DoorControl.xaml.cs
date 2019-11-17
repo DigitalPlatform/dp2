@@ -393,6 +393,7 @@ this.ActualHeight - (this.Padding.Top + this.Padding.Bottom)));
             */
         }
 
+        /*
         private void All_Click(object sender, RoutedEventArgs e)
         {
             Button button = (Button)sender;
@@ -406,6 +407,7 @@ this.ActualHeight - (this.Padding.Top + this.Padding.Bottom)));
 
             e.Handled = true;
         }
+        */
 
         void SetBackgroundImage()
         {
@@ -432,6 +434,20 @@ this.ActualHeight - (this.Padding.Top + this.Padding.Bottom)));
             {
                 // TODO: 用一个报错文字图片设定为背景?
             }
+        }
+
+        private void All_Click(object sender, MouseButtonEventArgs e)
+        {
+            TextBlock button = (TextBlock)sender;
+            DoorItem door = button.DataContext as DoorItem;
+
+            OpenDoor?.Invoke(sender, new OpenDoorEventArgs
+            {
+                ButtonName = "count",
+                Door = button.DataContext as DoorItem
+            });
+
+            e.Handled = true;
         }
     }
 
@@ -546,6 +562,7 @@ OpenDoorEventArgs e);
 #endif
     public class LockChanged
     {
+        public DoorItem Door { get; set; }
         public string LockName { get; set; }
         public string OldState { get; set; }
         public string NewState { get; set; }

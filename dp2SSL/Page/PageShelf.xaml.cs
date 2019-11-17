@@ -94,6 +94,7 @@ namespace dp2SSL
 
             // RfidManager.ListLocks += RfidManager_ListLocks;
             ShelfData.OpenCountChanged += CurrentApp_OpenCountChanged;
+            ShelfData.DoorStateChanged += ShelfData_DoorStateChanged;
             //ShelfData.BookChanged += ShelfData_BookChanged;
 
             RfidManager.ClearCache();
@@ -146,6 +147,17 @@ namespace dp2SSL
                     this.SetGlobalError("initial", $"InitialShelfEntities() 出现异常: {ex.Message}");
                     WpfClientInfo.WriteErrorLog($"InitialShelfEntities() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 }
+            }
+        }
+
+        // 门状态变化。从这里触发提交
+        private async void ShelfData_DoorStateChanged(object sender, DoorStateChangedEventArgs e)
+        {
+            if (e.NewState == "close")
+            {
+                SaveActions();
+                e.Door.Operator = null; // 清掉门上的操作者名字
+                await SubmitCheckInOut("");
             }
         }
 
@@ -318,6 +330,7 @@ namespace dp2SSL
                 DisplayError(ref progress, message, color);
         }
 
+        // 点门控件触发开门
         private async void DoorControl_OpenDoor(object sender, OpenDoorEventArgs e)
         {
             // 观察图书详情
@@ -395,7 +408,7 @@ namespace dp2SSL
             {
                 progress = new ProgressWindow();
                 // progress.TitleText = "初始化智能书柜";
-                progress.MessageText = "正在开门，请稍候 ...";
+                progress.MessageText = $"{_patron.PatronName} 正在开门，请稍候 ...";
                 progress.Owner = Application.Current.MainWindow;
                 progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
                 progress.Closed += (s1, e1) =>
@@ -412,9 +425,19 @@ namespace dp2SSL
             }));
             try
             {
+                // 给门赋予操作者身份
+                e.Door.Operator = new Operator
+                {
+                    PatronBarcode = _patron.Barcode,
+                    PatronName = _patron.PatronName
+                };
                 var result = RfidManager.OpenShelfLock(e.Door.LockPath);
                 if (result.Value == -1)
                     MessageBox.Show(result.ErrorInfo);
+
+                // 如果读者信息区没有被固定，则门开后会自动清除读者信息区
+                if (PatronFixed == false)
+                    PatronClear();
 
                 // 开门动作会中断延迟任务
                 CancelDelayTask();
@@ -438,6 +461,18 @@ namespace dp2SSL
                             progress.Close();
                     }));
                 }
+            }
+        }
+
+        bool PatronFixed
+        {
+            get
+            {
+                return (bool)fixPatron.IsChecked;
+            }
+            set
+            {
+                fixPatron.IsChecked = value;
             }
         }
 
@@ -466,8 +501,9 @@ namespace dp2SSL
         }
 
 
-        private async void CurrentApp_OpenCountChanged(object sender, OpenCountChangedEventArgs e)
+        private void CurrentApp_OpenCountChanged(object sender, OpenCountChangedEventArgs e)
         {
+#if NO
             // 如果从有门打开的状态变为全部门都关闭的状态，要尝试提交一次出纳请求
             if (e.OldCount > 0 && e.NewCount == 0)
             {
@@ -477,6 +513,7 @@ namespace dp2SSL
 
                 await SubmitCheckInOut("verifyDoorClosing");
             }
+#endif
         }
 
 #if NO
@@ -565,12 +602,14 @@ namespace dp2SSL
         }
         */
 
-        private void PageShelf_Unloaded(object sender, RoutedEventArgs e)
+        private async void PageShelf_Unloaded(object sender, RoutedEventArgs e)
         {
             CancelDelayTask();
 
             // 提交尚未提交的取出和放入
-            PatronClear(true);
+            // PatronClear(true);
+            SaveActions();
+            await Submit(true);
 
             RfidManager.SetError -= RfidManager_SetError;
 
@@ -582,10 +621,11 @@ namespace dp2SSL
 
             // RfidManager.ListLocks -= RfidManager_ListLocks;
             ShelfData.OpenCountChanged -= CurrentApp_OpenCountChanged;
+            ShelfData.DoorStateChanged -= ShelfData_DoorStateChanged;
 
             // 确保 page 关闭时对话框能自动关闭
             CloseDialogs();
-            PatronClear(true);
+            PatronClear();
         }
 
         // 从指纹阅读器获取消息(第一阶段)
@@ -611,7 +651,7 @@ namespace dp2SSL
             {
                 SetPatronError("fingerprint", $"指纹中心出错: {result.ErrorInfo}, 错误码: {result.ErrorCode}");
                 if (_patron.IsFingerprintSource)
-                    PatronClear(true);    // 只有当面板上的读者信息来源是指纹仪时，才清除面板上的读者信息
+                    PatronClear();    // 只有当面板上的读者信息来源是指纹仪时，才清除面板上的读者信息
                 return;
             }
             else
@@ -623,7 +663,7 @@ namespace dp2SSL
             if (result.Message == null)
                 return;
 
-            PatronClear(true);
+            PatronClear();
             _patron.IsFingerprintSource = true;
             _patron.PII = result.Message;
         }
@@ -1057,14 +1097,14 @@ namespace dp2SSL
                     // RFID 来源
                     if (patrons.Count == 1)
                     {
-                        // 2019/11/13
-                        // 把前面临时动作提交一次
-                        await Submit();
-                        // CloseDialogs();
 
                         if (_patron.Fill(patrons[0].OneTag) == false)
                             return;
 
+                        Application.Current.Dispatcher.Invoke(new Action(() =>
+                        {
+                            fixPatron.IsEnabled = true;
+                        }));
                         SetPatronError("rfid_multi", "");   // 2019/5/22
 
                         // 2019/5/29
@@ -1098,6 +1138,11 @@ namespace dp2SSL
                             SetPatronError("rfid_multi", "");   // 2019/5/20
                     }
                 }
+                SetGlobalError("patron", "");
+            }
+            catch (Exception ex)
+            {
+                SetGlobalError("patron", $"RefreshPatrons() 出现异常: {ex.Message}");
             }
             finally
             {
@@ -1206,8 +1251,9 @@ namespace dp2SSL
 
         // parameters:
         //      submitBefore    是否自动提交前面残留的 _adds 和 _removes ?
-        public void PatronClear(bool submitBefore)
+        public void PatronClear(/*bool submitBefore*/)
         {
+            /*
             // 预先提交一次
             if (submitBefore)
             {
@@ -1219,8 +1265,14 @@ namespace dp2SSL
                     SaveActions();
                 }
             }
+            */
 
             _patron.Clear();
+            PatronFixed = false;
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                fixPatron.IsEnabled = false;
+            }));
 
             if (this.patronControl.BorrowedEntities.Count == 0)
             {
@@ -1377,6 +1429,7 @@ namespace dp2SSL
             // OpenDoor();
         }
 
+        /*
         Operator GetOperator()
         {
             return new Operator
@@ -1384,6 +1437,17 @@ namespace dp2SSL
                 PatronBarcode = _patron.Barcode,
                 PatronName = _patron.PatronName
             };
+        }
+        */
+
+            // 获得特定门的 Operator
+        static Operator GetOperator(Entity entity)
+        {
+            var doors = DoorItem.FindDoors(ShelfData.Doors, entity.ReaderName, entity.Antenna);
+            var person = doors[0].Operator;
+            if (person == null)
+                return new Operator();
+            return person;
         }
 
         // TODO: 报错信息尝试用 FlowDocument 改造
@@ -1402,14 +1466,14 @@ namespace dp2SSL
                 {
                     Entity = entity,
                     Action = "return",
-                    Operator = GetOperator()
+                    Operator = GetOperator(entity)
                 });
                 actions.Add(new ActionInfo
                 {
                     Entity = entity,
                     Action = "transfer",
                     CurrentShelfNo = ShelfData.GetShelfNo(entity),
-                    Operator = GetOperator()
+                    Operator = GetOperator(entity)
                 });
             }
 
@@ -1452,7 +1516,7 @@ namespace dp2SSL
                 {
                     Entity = entity,
                     Action = "return",
-                    Operator = GetOperator()
+                    Operator = GetOperator(entity)
                 });
                 // 没有更新的，才进行一次 transfer
                 if (ShelfData.Find(ShelfData.Changes, entity.UID).Count == 0)
@@ -1462,7 +1526,7 @@ namespace dp2SSL
                         Entity = entity,
                         Action = "transfer",
                         CurrentShelfNo = ShelfData.GetShelfNo(entity),
-                        Operator = GetOperator()
+                        Operator = GetOperator(entity)
                     });
                 }
 
@@ -1479,7 +1543,7 @@ namespace dp2SSL
                     Entity = entity,
                     Action = "transfer",
                     CurrentShelfNo = ShelfData.GetShelfNo(entity),
-                    Operator = GetOperator()
+                    Operator = GetOperator(entity)
                 });
                 processed.Add(entity);
             }
@@ -1492,7 +1556,7 @@ namespace dp2SSL
                 {
                     Entity = entity,
                     Action = "borrow",
-                    Operator = GetOperator()
+                    Operator = GetOperator(entity)
                 });
 
                 processed.Add(entity);
@@ -1686,7 +1750,7 @@ namespace dp2SSL
             _delayTask = DelayClear.Start(
                 () =>
                 {
-                    PatronClear(true);
+                    PatronClear();
                 },
                 (seconds) =>
                 {
@@ -1897,14 +1961,26 @@ namespace dp2SSL
         {
             CancelDelayTask();
 
+            /*
             // 如果柜门没有全部关闭，要提醒先关闭柜门
             if (ShelfData.OpeningDoorCount > 0)
             {
                 ErrorBox("请先关闭全部柜门，才能清除读者信息", "yellow", "button_ok");
                 return;
             }
+            */
 
-            PatronClear(true);
+            PatronClear();
+        }
+
+        private void FixPatron_Checked(object sender, RoutedEventArgs e)
+        {
+            CancelDelayTask();
+        }
+
+        private void FixPatron_Unchecked(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

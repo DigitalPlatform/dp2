@@ -13,6 +13,7 @@
         <local:IntToAddConverter x:Key="IntToError" Direction=" e:"/>
         <local:StateToBackConverter x:Key="StateToBack" OpenColor="DarkCyan" CloseColor="DarkGreen"/>
         <local:PercentageConverter x:Key="PercentageConverter" />
+        <local:OperatorConverter x:Key="OperatorToName" />
 
         <ControlTemplate x:Key = "ButtonTemplate" TargetType = "Button">
             <Border Background="{Binding State,Converter={StaticResource StateToBack}}" 
@@ -39,28 +40,37 @@
                     </Ellipse.Fill>
                 </Ellipse>
                 -->
+                    <TextBlock Text="{Binding Operator,Converter={StaticResource OperatorToName}}"
+                               FontSize="{Binding 
+                       Converter={StaticResource PercentageConverter}, 
+                       RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type Grid}},
+                       Path=ActualHeight, 
+                       ConverterParameter=0.2}"
+                               FontFamily="楷体"
+                        Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4"  Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+
                     <TextBlock Text="{Binding Name}"
                                FontSize="{Binding 
                        Converter={StaticResource PercentageConverter}, 
                        RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type Grid}},
                        Path=ActualHeight, 
                        ConverterParameter=0.18}"
-                        Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4"  Foreground="White" HorizontalAlignment="Right" />
+                        Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="3"  Foreground="White" HorizontalAlignment="Right" />
                     <TextBlock Name="count" Text="{Binding Count}"
                         FontSize="{Binding 
                        Converter={StaticResource PercentageConverter}, 
                        RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type Grid}},
                        Path=ActualHeight, 
-                       ConverterParameter=0.4}"
-                               Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4"  Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" 
-                               />
+                       ConverterParameter=0.18}"
+                               Grid.Row="2" Grid.Column="3" Grid.ColumnSpan="1"  Foreground="White" HorizontalAlignment="right" VerticalAlignment="Center" 
+                               MouseLeftButtonDown="All_Click"/>
 
                     <TextBlock Name="add"  Text="{Binding Add,Converter={StaticResource IntToAdd}}"
                         FontSize="{Binding 
                        Converter={StaticResource PercentageConverter}, 
                        RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type Grid}},
                        Path=ActualHeight, 
-                       ConverterParameter=0.2}"
+                       ConverterParameter=0.18}"
                                Grid.Row="2" Grid.Column="0"  Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Center"
                                MouseLeftButtonDown="TextBlock_MouseLeftButtonDown" />
                     <TextBlock Name="remove" Text="{Binding Remove,Converter={StaticResource IntToRemove}}"
@@ -68,7 +78,7 @@
                        Converter={StaticResource PercentageConverter}, 
                        RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type Grid}},
                        Path=ActualHeight, 
-                       ConverterParameter=0.2}" 
+                       ConverterParameter=0.18}" 
                                Grid.Row="2" Grid.Column="1"  Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Center"
                                MouseLeftButtonDown="TextBlock_MouseLeftButtonDown"/>
                     <TextBlock Name="errorCount" Text="{Binding ErrorCount,Converter={StaticResource IntToError}}"
@@ -76,9 +86,10 @@
                        Converter={StaticResource PercentageConverter}, 
                        RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type Grid}},
                        Path=ActualHeight, 
-                       ConverterParameter=0.2}"
+                       ConverterParameter=0.18}"
                                Grid.Row="2" Grid.Column="2"  Foreground="Red" HorizontalAlignment="Left" VerticalAlignment="Center"
                                MouseLeftButtonDown="TextBlock_MouseLeftButtonDown"/>
+                    <!--
                     <Button Name="all" Grid.Row="2" Grid.Column="3" HorizontalAlignment="Right" VerticalAlignment="Center"
                             Background="Transparent" BorderThickness="0" Foreground="DarkGray" Margin="4"
                             Click="All_Click">
@@ -90,6 +101,7 @@
                        ConverterParameter=0.2}" 
                                          Foreground="DarkGray" Margin="4"/>
                     </Button>
+                    -->
                     <!--
                 <ContentPresenter Content = "{TemplateBinding Content}" 
                HorizontalAlignment = "Center" VerticalAlignment = "Center" />
