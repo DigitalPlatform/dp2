@@ -881,11 +881,9 @@ namespace dp2SSL
             PatronClear();
         }
 
-        //ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
-        //object _sync_refresh = new object();
-        int _inRefresh = 0;
+        //int _inRefresh = 0;
 
-        string _rfidState = "ok";   // ok/error
+        //string _rfidState = "ok";   // ok/error
 
 #if OLD_RFID
         async Task Refresh(BaseChannel<IRfid> channel, ListTagsResult result)

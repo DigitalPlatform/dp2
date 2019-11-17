@@ -155,6 +155,22 @@ namespace dp2SSL
             }
         }
 
+        private Operator _operator = null;
+
+        // 操作者
+        public Operator Operator
+        {
+            get => _operator;
+            set
+            {
+                if (_operator != value)
+                {
+                    _operator = value;
+                    OnPropertyChanged("Operator");
+                }
+            }
+        }
+
         // 全部图书对象
         EntityCollection _allEntities = new EntityCollection();
         public EntityCollection AllEntities
@@ -359,9 +375,8 @@ namespace dp2SSL
             return true;
         }
 
-        // 注：不用刷新。可以把背景色绑定到状态文字上
         // 刷新门锁(开/关)状态
-        public static LockChanged SetLockState(
+        public static List<LockChanged> SetLockState(
             List<DoorItem> _doors,
             LockState state)
         {
@@ -374,6 +389,7 @@ namespace dp2SSL
                 {
                     results.Add(new LockChanged
                     {
+                        Door = door,
                         LockName = door.Name,
                         OldState = door.State,
                         NewState = state.State
@@ -402,9 +418,7 @@ namespace dp2SSL
                 i++;
             }
 
-            if (results.Count == 0)
-                return new LockChanged();
-            return results[0];
+            return results;
         }
 
         class Three
@@ -565,6 +579,19 @@ OpenCountChangedEventArgs e);
     {
         public int OldCount { get; set; }
         public int NewCount { get; set; }
+    }
+
+    public delegate void DoorStateChangedEventHandler(object sender,
+DoorStateChangedEventArgs e);
+
+    /// <summary>
+    /// 门状态变化(也就是开门、关门)事件的参数
+    /// </summary>
+    public class DoorStateChangedEventArgs : EventArgs
+    {
+        public DoorItem Door { get; set; }
+        public string OldState { get; set; }
+        public string NewState { get; set; }
     }
 
     public delegate void BookChangedEventHandler(object sender,
