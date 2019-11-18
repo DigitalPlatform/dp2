@@ -649,7 +649,7 @@ namespace dp2SSL
         {
             _patron.Clear();
 
-            if (this.patronControl.BorrowedEntities.Count == 0)
+            if (this.patronControl.BorrowedEntities.Count > 0)
             {
                 if (!Application.Current.Dispatcher.CheckAccess())
                     Application.Current.Dispatcher.Invoke(new Action(() =>

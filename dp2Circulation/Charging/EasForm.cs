@@ -307,6 +307,8 @@ out string strError);
                 {
                     try
                     {
+                        // TODO: 需要处理 WaitOne() 返回 false 的情况
+                        // true if the current instance receives a signal; otherwise, false.
                         _limit.WaitOne(TimeSpan.FromSeconds(10));
 
                         LibraryChannel channel = Program.MainForm.GetChannel();

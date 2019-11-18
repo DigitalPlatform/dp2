@@ -156,7 +156,17 @@ namespace dp2SSL
             if (e.NewState == "close")
             {
                 SaveActions();
+
+                // testing
+                // 先保存一套 actions
+                List<ActionInfo> temp = new List<ActionInfo>();
+                temp.AddRange(ShelfData.Actions);
+
                 e.Door.Operator = null; // 清掉门上的操作者名字
+                var task = SubmitCheckInOut("");
+
+                // testing
+                ShelfData.Actions.AddRange(temp);
                 await SubmitCheckInOut("");
             }
         }
@@ -395,7 +405,7 @@ namespace dp2SSL
                 out string strError);
             if (nRet != 1)
             {
-                ErrorBox(check_message);
+                ErrorBox(strError);
                 return;
             }
 
@@ -433,7 +443,12 @@ namespace dp2SSL
                 };
                 var result = RfidManager.OpenShelfLock(e.Door.LockPath);
                 if (result.Value == -1)
-                    MessageBox.Show(result.ErrorInfo);
+                {
+                    //MessageBox.Show(result.ErrorInfo);
+                    DisplayError(ref progress, result.ErrorInfo);
+                    e.Door.Operator = null;
+                    return;
+                }
 
                 // 如果读者信息区没有被固定，则门开后会自动清除读者信息区
                 if (PatronFixed == false)
@@ -503,6 +518,9 @@ namespace dp2SSL
 
         private void CurrentApp_OpenCountChanged(object sender, OpenCountChangedEventArgs e)
         {
+            // 当所有门都关闭后，即便是固定了的读者信息也要自动被清除。此举是避免读者忘了清除固定的读者信息
+            if (e.OldCount > 0 && e.NewCount == 0)
+                PatronClear();
 #if NO
             // 如果从有门打开的状态变为全部门都关闭的状态，要尝试提交一次出纳请求
             if (e.OldCount > 0 && e.NewCount == 0)
@@ -1101,25 +1119,13 @@ namespace dp2SSL
                         if (_patron.Fill(patrons[0].OneTag) == false)
                             return;
 
-                        Application.Current.Dispatcher.Invoke(new Action(() =>
-                        {
-                            fixPatron.IsEnabled = true;
-                        }));
+
                         SetPatronError("rfid_multi", "");   // 2019/5/22
 
                         // 2019/5/29
                         await FillPatronDetail();
 
-                        // TODO: 开始启动延时自动清除读者信息的过程。如果中途门被打开，则延时过程被取消(也就是说读者信息不再会被自动清除)
-                        if (ShelfData.OpeningDoorCount == 0)
-                        {
-                            App.CurrentApp.Speak($"欢迎您，{_patron.PatronName}");
-                            BeginDelayTask();
-                        }
-                        else
-                        {
-                            App.CurrentApp.Speak($"欢迎您，{_patron.PatronName}。不要忘了关柜门优");
-                        }
+                        Welcome();
                     }
                     else
                     {
@@ -1268,13 +1274,21 @@ namespace dp2SSL
             */
 
             _patron.Clear();
-            PatronFixed = false;
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            if (!Application.Current.Dispatcher.CheckAccess())
+                Application.Current.Dispatcher.Invoke(new Action(() =>
             {
+                PatronFixed = false;
                 fixPatron.IsEnabled = false;
+                clearPatron.IsEnabled = false;
             }));
+            else
+            {
+                PatronFixed = false;
+                fixPatron.IsEnabled = false;
+                clearPatron.IsEnabled = false;
+            }
 
-            if (this.patronControl.BorrowedEntities.Count == 0)
+            if (this.patronControl.BorrowedEntities.Count > 0)
             {
                 if (!Application.Current.Dispatcher.CheckAccess())
                     Application.Current.Dispatcher.Invoke(new Action(() =>
@@ -1440,7 +1454,7 @@ namespace dp2SSL
         }
         */
 
-            // 获得特定门的 Operator
+        // 获得特定门的 Operator
         static Operator GetOperator(Entity entity)
         {
             var doors = DoorItem.FindDoors(ShelfData.Doors, entity.ReaderName, entity.Antenna);
@@ -1506,6 +1520,7 @@ namespace dp2SSL
         // 将暂存的信息保存为 Action。但并不立即提交
         void SaveActions()
         {
+            /*
             List<ActionInfo> actions = new List<ActionInfo>();
             List<Entity> processed = new List<Entity>();
             foreach (var entity in ShelfData.Adds)
@@ -1574,6 +1589,38 @@ namespace dp2SSL
                 return;  // 没有必要处理
 
             ShelfData.PushActions(actions);
+            */
+            ShelfData.SaveActions((entity) => { return GetOperator(entity); });
+        }
+
+        SubmitWindow _progressWindow = null;
+
+        void OpenProgressWindow()
+        {
+            if (_progressWindow != null)
+                return;
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                _progressWindow = new SubmitWindow();
+                _progressWindow.MessageText = "正在处理，请稍候 ...";
+                _progressWindow.Owner = Application.Current.MainWindow;
+                _progressWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                _progressWindow.Closed += _progressWindow_Closed;
+                // _progressWindow.Next += _progressWindow_Next;
+                _progressWindow.Width = Math.Min(700, this.ActualWidth);
+                _progressWindow.Height = Math.Min(500, this.ActualHeight);
+                _progressWindow.Show();
+                AddLayer();
+            }));
+        }
+
+
+
+        private void _progressWindow_Closed(object sender, EventArgs e)
+        {
+            RemoveLayer();
+            _progressWindow = null;
+            // _showCount = 0;
         }
 
         // 向服务器提交 actions 中存储的全部出纳请求
@@ -1596,93 +1643,43 @@ namespace dp2SSL
             // 关闭以前残留的对话框
             CloseDialogs();
 
-            ProgressWindow progress = null;
-            //string patron_name = "";
-            //patron_name = _patron.PatronName;
+            SubmitWindow progress = null;
 
             if (silence == false)
             {
-                Application.Current.Dispatcher.Invoke(new Action(() =>
-                {
-                    progress = new ProgressWindow();
-                    progress.MessageText = "正在处理，请稍候 ...";
-                    progress.Owner = Application.Current.MainWindow;
-                    progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-                    progress.Closed += Progress_Closed;
-                    progress.Width = Math.Min(700, this.ActualWidth);
-                    progress.Height = Math.Min(500, this.ActualHeight);
-                    progress.Show();
-                    AddLayer();
-                }));
+                OpenProgressWindow();
+                progress = _progressWindow;
             }
 
-            // 检查门是否全关闭
-            if (verifyDoorClosing && silence == false)
-            {
-                if (ShelfData.OpeningDoorCount > 0)
-                {
-                    // 检查门是否为关闭状态？
-                    await Task.Run(() =>
-                    {
-                        while (ShelfData.OpeningDoorCount > 0)
-                        {
-                            // TODO: 如何中断？
-                            //if (_initialCancelled)
-                            //    break;
-                            DisplayMessage(progress, "请关闭全部柜门，以完成请求", "yellow");
-                            Thread.Sleep(1000);
-                        }
-                    });
-                    // 确保全关闭后，回到开头重做
-                    if (progress != null)
-                        progress.Close();
-                    goto REDO;
-                }
-            }
-
-#if NO
-            bool patron_filled = false;
-
-            // 检查读者卡状态是否 OK
-            if (IsPatronOK("open", out string check_message) == false)
-            {
-                /*
-                if (string.IsNullOrEmpty(check_message))
-                    check_message = $"读卡器上的当前读者卡状态不正确。无法进行 checkin/out 操作";
-
-                DisplayError(ref progress, check_message);
-                return;
-                */
-            }
-            else
-                patron_filled = true;
-#endif
             try
             {
+
                 var result = ShelfData.SubmitCheckInOut(
-                    (min, max, value) =>
-                    {
-                        if (progress != null)
-                        {
-                            Application.Current.Dispatcher.Invoke(new Action(() =>
-                            {
-                                if (min == -1 && max == -1 && value == -1)
-                                    progress.ProgressBar.Visibility = Visibility.Collapsed;
-                                if (min != -1)
-                                    progress.ProgressBar.Minimum = min;
-                                if (max != -1)
-                                    progress.ProgressBar.Maximum = max;
-                                if (value != -1)
-                                    progress.ProgressBar.Value = value;
-                            }));
-                        }
-                    },
-                    //_patron.Barcode,
-                    //_patron.PatronName,
-                    ShelfData.Actions);
+(min, max, value) =>
+{
+    if (progress != null)
+    {
+        Application.Current.Dispatcher.Invoke(new Action(() =>
+        {
+            if (min == -1 && max == -1 && value == -1)
+                progress.ProgressBar.Visibility = Visibility.Collapsed;
+            if (min != -1)
+                progress.ProgressBar.Minimum = min;
+            if (max != -1)
+                progress.ProgressBar.Maximum = max;
+            if (value != -1)
+                progress.ProgressBar.Value = value;
+        }));
+    }
+},
+//_patron.Barcode,
+//_patron.PatronName,
+ShelfData.Actions);
+
                 if (result.Value == -1)
                 {
-                    DisplayError(ref progress, result.ErrorInfo);
+                    // DisplayError(ref progress, result.ErrorInfo);
+                    _progressWindow?.PushContent(result.ErrorInfo, "red");
                     return;
                 }
 
@@ -1691,24 +1688,25 @@ namespace dp2SSL
                 {
                     Application.Current.Dispatcher.Invoke(new Action(() =>
                     {
+                        /*
                         progress.MessageDocument = result.MessageDocument.BuildDocument(18, out speak);
                         MemoryDialog(progress); // 记住对话框，以便后面可以补充关闭
                         progress = null;
+                        */
+                        _progressWindow?.PushContent(result.MessageDocument);
                     }));
                 }
-
-                if (string.IsNullOrEmpty(speak) == false)
-                    App.CurrentApp.Speak(speak);
             }
             finally
             {
                 Application.Current.Dispatcher.Invoke(new Action(() =>
                 {
+                    /*
                     if (progress != null)
                         progress.Close();
+                        */
+                    _progressWindow?.ShowContent();
                 }));
-                //if (clearPatron)
-                //    PatronClear(false);
             }
         }
 
@@ -1793,6 +1791,10 @@ namespace dp2SSL
                         // Task.Delay(TimeSpan.FromSeconds(10), token).Wait();
                         func_clear?.Invoke();
                     }
+                    catch
+                    {
+                        return;
+                    }
                     finally
                     {
                         func_heartBeat?.Invoke(-1); // 让按钮文字中的倒计时数字消失
@@ -1858,6 +1860,21 @@ namespace dp2SSL
             SetPatronInfo(message);
             SetQuality("");
             await FillPatronDetail();
+
+            Welcome();
+        }
+
+        // 开始启动延时自动清除读者信息的过程。如果中途门被打开，则延时过程被取消(也就是说读者信息不再会被自动清除)
+        void Welcome()
+        {
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                fixPatron.IsEnabled = true;
+                clearPatron.IsEnabled = true;
+            }));
+
+            App.CurrentApp.Speak($"欢迎您，{_patron.PatronName}");
+            BeginDelayTask();
         }
 
         void DisplayError(ref VideoWindow videoRegister,

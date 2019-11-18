@@ -16,6 +16,9 @@ using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
 using RFIDLIB;
 
+
+// 锁定全部读卡器靠一个全局锁来实现。锁定一个读卡器靠 RecordLock 来实现。锁定一个读卡器之前，先尝试用 read 方式获得全局锁
+
 namespace RfidDrivers.First
 {
     public class Driver1 : IRfidDriver
@@ -70,6 +73,10 @@ namespace RfidDrivers.First
             }
         }
 
+        // 读卡器锁
+        public RecordLockCollection reader_locks = new RecordLockCollection();
+
+        // 全局锁
         internal ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
 
         void Lock()
@@ -81,6 +88,18 @@ namespace RfidDrivers.First
         void Unlock()
         {
             _lock.ExitWriteLock();
+        }
+
+        void LockReader(Reader reader)
+        {
+            _lock.EnterReadLock();
+            reader_locks.LockForWrite(reader.GetHashCode().ToString());
+        }
+
+        void UnlockReader(Reader reader)
+        {
+            reader_locks.UnlockForWrite(reader.GetHashCode().ToString());
+            _lock.ExitReadLock();
         }
 
         List<Reader> _readers = new List<Reader>();
@@ -123,6 +142,7 @@ namespace RfidDrivers.First
 
             // 等待所有 API 调用安静下来
             WaitApiSilence();
+            // TODO: 锁定所有读卡器
             Lock();
             try
             {
@@ -177,6 +197,7 @@ namespace RfidDrivers.First
             this.State = "initializing";
             // 等待所有 API 调用安静下来
             WaitApiSilence();
+            // 锁定所有读卡器
             Lock();
             try
             {
@@ -2242,7 +2263,13 @@ namespace RfidDrivers.First
             string antenna_list,
             string style)
         {
-            Lock();
+            NormalResult result = GetReader(reader_name,
+out Reader reader);
+            if (result.Value == -1)
+                return new InventoryResult(result);
+
+            // TODO: 这里要按照一个读卡器粒度来锁定就好了。因为带有天线的读卡器 inventory 操作速度较慢
+            LockReader(reader);
             try
             {
                 /*
@@ -2252,10 +2279,7 @@ namespace RfidDrivers.First
                 if (result.Value == -1)
                     return new InventoryResult(result);
                     */
-                NormalResult result = GetReader(reader_name,
-out Reader reader);
-                if (result.Value == -1)
-                    return new InventoryResult(result);
+
 
                 byte ai_type = RFIDLIB.rfidlib_def.AI_TYPE_NEW;
                 if (StringUtil.IsInList("only_new", style))
@@ -2298,7 +2322,7 @@ out Reader reader);
             }
             finally
             {
-                Unlock();
+                UnlockReader(reader);
             }
         }
 
@@ -2508,6 +2532,7 @@ out Reader reader);
 
             byte[] antennas = GetAntennaList(antenna_list);
 
+            // 锁定所有读卡器?
             Lock();
             try
             {
@@ -2666,6 +2691,7 @@ out Reader reader);
             if (handles.Count == 0)
                 return new NormalResult { Value = -1, ErrorInfo = $"没有找到名为 {reader_name} 的读卡器" };
 
+            // 锁定很多读卡器
             Lock();
             try
             {
@@ -2698,6 +2724,7 @@ out Reader reader);
             if (readers.Count == 0)
                 return new NormalResult { Value = -1, ErrorInfo = $"没有找到名为 {reader_name} 的读卡器" };
 
+            // 锁定所有读卡器
             Lock();
             try
             {
@@ -2867,6 +2894,7 @@ out Reader reader);
             if (readers.Count == 0)
                 return new ReadConfigResult { Value = -1, ErrorInfo = $"没有找到名为 {reader_name} 的读卡器" };
 
+            // 锁定所有读卡器
             Lock();
             try
             {
@@ -2927,6 +2955,7 @@ out Reader reader);
             if (readers.Count == 0)
                 return new NormalResult { Value = -1, ErrorInfo = $"没有找到名为 {reader_name} 的读卡器" };
 
+            // 锁定所有读卡器
             Lock();
             try
             {
@@ -3036,7 +3065,13 @@ out Reader reader);
             EnsureBytes(new_tag_info);
             EnsureBytes(old_tag_info);
 
-            Lock();
+            NormalResult result = GetReader(one_reader_name,
+    out Reader reader);
+            if (result.Value == -1)
+                return result;
+
+            // 锁定一个读卡器
+            LockReader(reader);
             try
             {
                 /*
@@ -3044,10 +3079,7 @@ out Reader reader);
                 if (result.Value == -1)
                     return result;
                     */
-                NormalResult result = GetReader(one_reader_name,
-                    out Reader reader);
-                if (result.Value == -1)
-                    return result;
+
 
                 // TODO: 选择天线
                 // 2019/9/27
@@ -3185,7 +3217,7 @@ out Reader reader);
             }
             finally
             {
-                Unlock();
+                UnlockReader(reader);
             }
         }
 
@@ -3368,8 +3400,13 @@ out Reader reader);
             string one_reader_name,
             InventoryInfo info)
         {
+            NormalResult result = GetReader(one_reader_name,
+    out Reader reader);
+            if (result.Value == -1)
+                return new GetTagInfoResult(result);
 
-            Lock();
+            // 锁定一个读卡器
+            LockReader(reader);
             try
             {
                 /*
@@ -3377,10 +3414,7 @@ out Reader reader);
                 if (result.Value == -1)
                     return new GetTagInfoResult(result);
                     */
-                NormalResult result = GetReader(one_reader_name,
-                    out Reader reader);
-                if (result.Value == -1)
-                    return new GetTagInfoResult(result);
+
 
 #if DEBUG
                 if (info != null)
@@ -3498,11 +3532,13 @@ out Reader reader);
                 finally
                 {
                     _disconnectTag(reader.ReaderHandle, ref hTag);
+                    // 2019/11/18 尝试关闭射频
+                    RFIDLIB.rfidlib_reader.RDR_CloseRFTransmitter(reader.ReaderHandle);
                 }
             }
             finally
             {
-                Unlock();
+                UnlockReader(reader);
             }
         }
 
@@ -3609,7 +3645,7 @@ out Reader reader);
                     AntennaSelCount,
                     AntennaSel,
                     InvenParamSpecList);
-                // RFIDLIB.rfidlib_reader.RDR_CloseRFTransmitter(hreader);
+                RFIDLIB.rfidlib_reader.RDR_CloseRFTransmitter(hreader);
                 if (iret == 0 || iret == -21)
                 {
                     nTagCount += RFIDLIB.rfidlib_reader.RDR_GetTagDataReportCount(hreader);
@@ -3710,7 +3746,7 @@ out Reader reader);
             }
             finally
             {
-                RFIDLIB.rfidlib_reader.RDR_CloseRFTransmitter(hreader);
+                // RFIDLIB.rfidlib_reader.RDR_CloseRFTransmitter(hreader);
             }
         }
 
@@ -3861,6 +3897,7 @@ out Reader reader);
             if (handles.Count == 0)
                 return new NormalResult { Value = -1, ErrorInfo = $"没有找到名为 {reader_name} 的读卡器" };
 
+            // 锁定所有读卡器
             Lock();
             try
             {

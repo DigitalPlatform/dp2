@@ -191,6 +191,7 @@ namespace dp2SSL
             }
 
             RfidManager.Base.Name = "RFID 中心";
+            RfidManager.EnableBase2();
             RfidManager.Url = App.RfidUrl;
             // RfidManager.AntennaList = "1|2|3|4";    // TODO: 从 shelf.xml 中归纳出天线号范围
             RfidManager.SetError += RfidManager_SetError;
@@ -199,11 +200,9 @@ namespace dp2SSL
             RfidManager.ListLocks += ShelfData.RfidManager_ListLocks;
 
             RfidManager.Start(_cancelRefresh.Token);
-
+            if (App.Function == "智能书柜")
+                RfidManager.StartBase2(_cancelRefresh.Token);
         }
-
-
-
 
         // 单独的线程，监控 server UID 关系
         public void BeginCheckServerUID(CancellationToken token)
