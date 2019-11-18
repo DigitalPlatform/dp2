@@ -106,7 +106,7 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="20"/>
                     <RowDefinition Height="*"/>
-                    <RowDefinition Height="20"/>
+                    <RowDefinition Height="auto"/>
                 </Grid.RowDefinitions>
                 <TextBlock Background="Transparent" Foreground="Gray" FontSize="14" TextAlignment="Center"
                     Text="读者"/>
@@ -117,13 +117,45 @@
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <CheckBox Name="fixPatron" Grid.Column="0" Margin="10,0,10,0"
-                              Foreground="LightGray" HorizontalAlignment="Left" VerticalAlignment="Center"
-                              IsEnabled="False"
-                              Checked="FixPatron_Checked" Unchecked="FixPatron_Unchecked">固定</CheckBox>
-                    <Button Name="clearPatron" Grid.Column="1" HorizontalContentAlignment="Center"
+                    <ToggleButton Name="fixPatron" Grid.Column="0" Margin="10,0,10,0"
+                                  HorizontalAlignment="Left" VerticalAlignment="Stretch"
+                                  IsEnabled="False"
+                                  Content="固定"
+                              Checked="FixPatron_Checked" Unchecked="FixPatron_Unchecked">
+                        <ToggleButton.Resources>
+
+                            <ResourceDictionary>
+                                <ResourceDictionary.MergedDictionaries>
+                                    <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml" />
+                                    <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
+                                    <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Button.xaml" />
+                                    <ResourceDictionary Source="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.Blue.xaml" />
+                                    <ResourceDictionary Source="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Purple.xaml" />
+                                </ResourceDictionary.MergedDictionaries>
+                                <Style TargetType="ToggleButton" BasedOn="{StaticResource MaterialDesignRaisedButton}">
+                                    <Style.Triggers>
+                                        <Trigger Property="IsChecked" Value="True">
+                                            <Setter Property="Background" Value="{DynamicResource SecondaryAccentBrush}" />
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ResourceDictionary>
+                        </ToggleButton.Resources>
+                    </ToggleButton>
+                    <Button Name="clearPatron" Grid.Column="1" 
+                            HorizontalContentAlignment="Center" VerticalAlignment="Stretch"
                             Background="Transparent" Foreground="LightGray"
-                        Click="ClearPatron_Click">清除读者信息</Button>
+                            Content="清除读者信息" IsEnabled="False"
+                        Click="ClearPatron_Click">
+                        <Button.Resources>
+                            <ResourceDictionary>
+                                <ResourceDictionary.MergedDictionaries>
+                                    <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml"/>
+                                    <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml"/>
+                                </ResourceDictionary.MergedDictionaries>
+                            </ResourceDictionary>
+                        </Button.Resources>
+                    </Button>
                 </Grid>
             </Grid>
             <StackPanel Grid.Column="0" Grid.Row="1" 

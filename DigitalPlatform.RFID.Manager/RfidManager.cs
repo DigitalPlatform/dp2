@@ -41,6 +41,20 @@ namespace DigitalPlatform.RFID
             }
         }
 
+        // 附加的读卡器名字列表
+        static string _base2ReaderNameList = "*";
+        public static string Base2ReaderNameList
+        {
+            get
+            {
+                return _base2ReaderNameList;
+            }
+            set
+            {
+                _base2ReaderNameList = value;
+            }
+        }
+
         /*
         static string _antennaList = null;
 
@@ -63,21 +77,26 @@ namespace DigitalPlatform.RFID
 
         public static ManagerBase<IRfid> Base = new ManagerBase<IRfid>();
 
+        public static ManagerBase<IRfid> Base2 = null;
+
         public static event SetErrorEventHandler SetError
         {
             add
             {
                 Base.AddSetErrorEvent(value);
+                Base2?.AddSetErrorEvent(value);
             }
             remove
             {
                 Base.RemoveSetErrorEvent(value);
+                Base2?.RemoveSetErrorEvent(value);
             }
         }
 
         public static void Clear()
         {
             Base.Clear();
+            Base2?.Clear();
         }
 
         public static string Url
@@ -89,12 +108,15 @@ namespace DigitalPlatform.RFID
             set
             {
                 Base.Url = value;
+                if (Base2 != null)
+                    Base2.Url = value;
             }
         }
 
         public static void TriggerSetError(object sender, SetErrorEventArgs e)
         {
             Base.TriggerSetError(sender, e);
+            Base2?.TriggerSetError(sender, e);
         }
 
         static bool _pause = false;
@@ -128,6 +150,103 @@ namespace DigitalPlatform.RFID
             {
                 return _lockReady;
             }
+        }
+
+        public static void EnableBase2()
+        {
+            if (Base2 == null)
+                Base2 = new ManagerBase<IRfid>();
+
+            Base2.Name = Base.Name;
+        }
+
+        static object _syncRoot = new object();
+
+        // 启动附加的监控线程
+        public static void StartBase2(
+    CancellationToken token)
+        {
+            Base2.ShortWaitTime = TimeSpan.FromMilliseconds(10);
+            Base2.LongWaitTime = TimeSpan.FromMilliseconds(2000);
+            Base2.Start((channel) =>
+            {
+                // TODO: 看调用栈，如果是上层 GetState() 调用，就要免去检查 State 这一步
+                if (_checkState)
+                {
+                    var result = channel.Object.GetState("");
+                    if (result.Value == -1)
+                        throw new Exception($"RFID 中心当前处于 {result.ErrorCode} 状态({result.ErrorInfo})");
+                }
+                channel.Started = true;
+
+                channel.Object.EnableSendKey(false);
+            },
+            () =>
+            {
+                if (_pause == true)
+                {
+                    Base2.TriggerSetError(null,
+new SetErrorEventArgs
+{
+    Error = "RFID 功能已暂停"
+});
+                    return true;
+                }
+
+                if (string.IsNullOrEmpty(Base2.Url))
+                {
+                    Base2.TriggerSetError(null,
+                        new SetErrorEventArgs
+                        {
+                            Error = "RFID 中心 URL 尚未配置(因此无法从 RFID 读卡器读取信息)"
+                        });
+                    return true;
+                }
+
+                return false;
+            },
+            (channel) =>
+            {
+                string style = $"session:{Base2.GetHashCode()}";
+                /*
+                if (string.IsNullOrEmpty(_antennaList) == false)
+                    style += ",antenna:" + _antennaList;
+                    */
+
+                // 从 readerNameList 中只取出属于 base2 的部分，用来发出请求
+
+                var readerNameList = _base2ReaderNameList;
+                if (string.IsNullOrEmpty(readerNameList))
+                    return; // TODO: 是否需要特意延迟一下?
+                var result = channel?.Object?.ListTags(readerNameList, style);
+                if (result.Value == -1)
+                    Base2.TriggerSetError(result,
+                        new SetErrorEventArgs { Error = result.ErrorInfo });
+                else
+                    Base2.TriggerSetError(result,
+                        new SetErrorEventArgs { Error = null }); // 清除以前的报错
+
+                // TODO: 触发 ListTags 事件时要加锁
+                lock (_syncRoot)
+                {
+                    if (ListTags != null)
+                    {
+                        // 先记忆
+                        _lastTags = result.Results;
+
+                        // 注意 result.Value == -1 时也会触发这个事件
+                        ListTags(channel, new ListTagsEventArgs
+                        {
+                            ReaderNameList = readerNameList,
+                            Result = result
+                        });
+                    }
+                    else
+                        _lastTags = null;
+                }
+                // base2 这里就不再具有门锁功能
+            },
+            token);
         }
 
         // 启动后台任务。
@@ -183,28 +302,36 @@ new SetErrorEventArgs
                     */
 
                 var readerNameList = _readerNameList;
-                var result = channel?.Object?.ListTags(readerNameList, style);
-                if (result.Value == -1)
-                    Base.TriggerSetError(result,
-                        new SetErrorEventArgs { Error = result.ErrorInfo });
-                else
-                    Base.TriggerSetError(result,
-                        new SetErrorEventArgs { Error = null }); // 清除以前的报错
-
-                if (ListTags != null)
+                if (string.IsNullOrEmpty(readerNameList) == false)
                 {
-                    // 先记忆
-                    _lastTags = result.Results;
 
-                    // 注意 result.Value == -1 时也会触发这个事件
-                    ListTags(channel, new ListTagsEventArgs
+                    var result = channel?.Object?.ListTags(readerNameList, style);
+                    if (result.Value == -1)
+                        Base.TriggerSetError(result,
+                            new SetErrorEventArgs { Error = result.ErrorInfo });
+                    else
+                        Base.TriggerSetError(result,
+                            new SetErrorEventArgs { Error = null }); // 清除以前的报错
+
+                    lock (_syncRoot)
                     {
-                        ReaderNameList = readerNameList,
-                        Result = result
-                    });
+                        if (ListTags != null)
+                        {
+                            // 先记忆
+                            _lastTags = result.Results;
+
+                            // 注意 result.Value == -1 时也会触发这个事件
+                            ListTags(channel, new ListTagsEventArgs
+                            {
+                                ReaderNameList = readerNameList,
+                                Result = result
+                            });
+                        }
+                        else
+                            _lastTags = null;
+                    }
+
                 }
-                else
-                    _lastTags = null;
 
                 // 检查门状态
                 if (LockCommands != null)

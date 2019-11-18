@@ -15,18 +15,69 @@ using System.Windows.Shapes;
 namespace dp2SSL
 {
     /// <summary>
-    /// ProgressWindow.xaml 的交互逻辑
+    /// SubmitWindow.xaml 的交互逻辑
     /// </summary>
-    public partial class ProgressWindow : Window
+    public partial class SubmitWindow : Window
     {
-        public ProgressWindow()
+        // public event EventHandler Next;
+
+        List<DisplayContent> _contents = new List<DisplayContent>();
+
+        int _showCount = 0;
+
+        public SubmitWindow()
         {
             InitializeComponent();
         }
 
-        private void OkButton_Click(object sender, RoutedEventArgs e)
+        class DisplayContent
         {
-            this.Close();
+            public string Color { get; set; }
+            public string Text { get; set; }
+            public MessageDocument Document { get; set; }
+        }
+
+        public void PushContent(string text, string color)
+        {
+            _contents.Add(new DisplayContent
+            {
+                Text = text,
+                Color = color
+            });
+        }
+
+        public void PushContent(MessageDocument doc)
+        {
+            _contents.Add(new DisplayContent
+            {
+                Document = doc
+            });
+        }
+
+        public void ShowContent()
+        {
+            if (_contents.Count == 0)
+                return;
+            if (_showCount > 0)
+                return;
+            var first = _contents[0];
+            if (first.Document != null)
+            {
+                string speak = "";
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    this.MessageDocument = first.Document.BuildDocument(18, out speak);
+                }));
+                if (string.IsNullOrEmpty(speak) == false)
+                    App.CurrentApp.Speak(speak);
+            }
+            else
+            {
+                this.MessageText = first.Text;
+                this.BackColor = first.Color;
+            }
+            _contents.RemoveAt(0);
+            _showCount++;
         }
 
         public string MessageText
@@ -77,31 +128,6 @@ namespace dp2SSL
             }
         }
 
-#if NO
-        bool _errorMode = false;
-
-        public bool ErrorMode
-        {
-            get
-            {
-                return _errorMode;
-            }
-            set
-            {
-                _errorMode = value;
-                if (_errorMode)
-                {
-                    this.Background = Brushes.DarkRed;
-                    this.Foreground = Brushes.White;
-                }
-                else
-                {
-                    this.Background = Brushes.Black;
-                    this.Foreground = Brushes.White;
-                }
-            }
-        }
-#endif
         string _backColor = "black";
         public string BackColor
         {
@@ -150,6 +176,26 @@ namespace dp2SSL
             {
                 title.Text = value;
             }
+        }
+
+        private void OkButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Next?.Invoke(sender, new EventArgs());
+
+            if (_contents.Count == 0)
+            {
+                // TODO: 如果窗口正在处理中，要避免被关闭
+                this.Close();
+                return;
+            }
+
+            _showCount = 0;
+            ShowContent();
+        }
+
+        private void _progressWindow_Next(object sender, EventArgs e)
+        {
+
         }
     }
 }

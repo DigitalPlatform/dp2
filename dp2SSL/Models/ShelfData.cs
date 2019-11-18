@@ -40,8 +40,8 @@ namespace dp2SSL
 
         // 读者证读卡器名字。在 shelf.xml 中配置
         static string _patronReaderName = "";
-        // 全部读卡器名字列表
-        static string _allReaderName = "";
+        // 图书读卡器名字列表(也就是柜门里面的那些读卡器)
+        static string _doorReaderName = "";
 
         // 当前处于打开状态的门的个数
         public static int OpeningDoorCount
@@ -160,18 +160,20 @@ namespace dp2SSL
                 if (string.IsNullOrEmpty(_patronReaderName) == false
                     && RfidManager.ReaderNameList != _patronReaderName)
                 {
-                    RfidManager.ReaderNameList = _patronReaderName;
+                    // RfidManager.ReaderNameList = _patronReaderName;
+                    RfidManager.ReaderNameList = "";
                     RfidManager.ClearCache();
+                    //App.CurrentApp.SpeakSequence("静止");
                 }
             }
             else
             {
                 // 打开图书读卡器(同时也使用读者证读卡器)
-                if (RfidManager.ReaderNameList != _allReaderName)
+                if (RfidManager.ReaderNameList != _doorReaderName)
                 {
-                    // RfidManager.ReaderNameList = "*";
-                    RfidManager.ReaderNameList = _allReaderName;
+                    RfidManager.ReaderNameList = _doorReaderName;
                     RfidManager.ClearCache();
+                    //App.CurrentApp.SpeakSequence("活动");
                 }
             }
         }
@@ -184,8 +186,10 @@ namespace dp2SSL
 
             // 要在初始化以前设定好
             _patronReaderName = GetReaderNameList("patron");
-            _allReaderName = GetReaderNameList("doors,patron");
-            RfidManager.ReaderNameList = _allReaderName;
+            RfidManager.Base2ReaderNameList = _patronReaderName;    // 2019/11/18
+
+            _doorReaderName = GetReaderNameList("doors");
+            RfidManager.ReaderNameList = _doorReaderName;
             // RfidManager.AntennaList = GetAntennaList();
             RfidManager.LockCommands = ShelfData.GetLockCommands();
             // _patronReaderName = GetPatronReaderName();
@@ -358,6 +362,85 @@ namespace dp2SSL
             }
         }
 
+        static object _syncRoot = new object();
+
+        public delegate Operator Delegate_getOperator(Entity entity);
+
+        // 将暂存的信息保存为 Action。但并不立即提交
+        public static void SaveActions(Delegate_getOperator func_getOperator)
+        {
+            lock (_syncRoot)
+            {
+                List<ActionInfo> actions = new List<ActionInfo>();
+                List<Entity> processed = new List<Entity>();
+                foreach (var entity in ShelfData.Adds)
+                {
+                    if (ShelfData.BelongToNormal(entity) == false)
+                        continue;
+                    actions.Add(new ActionInfo
+                    {
+                        Entity = entity,
+                        Action = "return",
+                        Operator = func_getOperator?.Invoke(entity)
+                    });
+                    // 没有更新的，才进行一次 transfer
+                    if (ShelfData.Find(ShelfData.Changes, entity.UID).Count == 0)
+                    {
+                        actions.Add(new ActionInfo
+                        {
+                            Entity = entity,
+                            Action = "transfer",
+                            CurrentShelfNo = ShelfData.GetShelfNo(entity),
+                            Operator = func_getOperator?.Invoke(entity)
+                        });
+                    }
+
+                    processed.Add(entity);
+                }
+
+                foreach (var entity in ShelfData.Changes)
+                {
+                    if (ShelfData.BelongToNormal(entity) == false)
+                        continue;
+                    // 更新
+                    actions.Add(new ActionInfo
+                    {
+                        Entity = entity,
+                        Action = "transfer",
+                        CurrentShelfNo = ShelfData.GetShelfNo(entity),
+                        Operator = func_getOperator?.Invoke(entity)
+                    });
+                    processed.Add(entity);
+                }
+
+                foreach (var entity in ShelfData.Removes)
+                {
+                    if (ShelfData.BelongToNormal(entity) == false)
+                        continue;
+                    actions.Add(new ActionInfo
+                    {
+                        Entity = entity,
+                        Action = "borrow",
+                        Operator = func_getOperator?.Invoke(entity)
+                    });
+
+                    processed.Add(entity);
+                }
+
+                foreach (var entity in processed)
+                {
+                    ShelfData.Remove(ShelfData.All, entity);
+                    ShelfData.Remove(ShelfData.Adds, entity);
+                    ShelfData.Remove(ShelfData.Removes, entity);
+                    ShelfData.Remove(ShelfData.Changes, entity);
+                }
+
+                if (actions.Count == 0)
+                    return;  // 没有必要处理
+                ShelfData.PushActions(actions);
+            }
+        }
+
         // 将 actions 保存起来
         public static void PushActions(List<ActionInfo> actions)
         {
@@ -491,7 +574,7 @@ namespace dp2SSL
                     // 使用全部读卡器，全部天线
                     RfidManager.Pause = true;
                     // RfidManager.ReaderNameList = "*";
-                    RfidManager.ReaderNameList = _allReaderName;
+                    RfidManager.ReaderNameList = _doorReaderName;
                     // RfidManager.AntennaList = GetAntennaList();
                     TagList.DataReady = false;
                     RfidManager.Pause = false;
@@ -1045,6 +1128,9 @@ namespace dp2SSL
             return rnd.Next(1, 999999).ToString();
         }
 
+        // 限制获取摘要时候可以并发使用的 LibraryChannel 通道数
+        static Semaphore _limit = new Semaphore(1, 1);
+
         // public delegate void Delegate_showDialog();
 
         // -1 -1 n only change progress value
@@ -1072,6 +1158,15 @@ namespace dp2SSL
 
             // 先尽量执行还书请求，再报错说无法进行借书操作(记入错误日志)
             MessageDocument doc = new MessageDocument();
+
+            // true if the current instance receives a signal; otherwise, false.
+            if (_limit.WaitOne(TimeSpan.FromSeconds(10)) == false)
+                return new SubmitResult
+                {
+                    Value = -1,
+                    ErrorInfo = "获得资源过程中超时",
+                    ErrorCode = "timeout"
+                };
 
             LibraryChannel channel = App.CurrentApp.GetChannel();
             try
@@ -1102,6 +1197,10 @@ namespace dp2SSL
                 List<ActionInfo> processed = new List<ActionInfo>();
                 foreach (ActionInfo info in actions)
                 {
+                    // testing 
+                    Thread.Sleep(1000);
+
+
                     string action = info.Action;
                     Entity entity = info.Entity;
 
@@ -1441,6 +1540,7 @@ namespace dp2SSL
             finally
             {
                 App.CurrentApp.ReturnChannel(channel);
+                _limit.Release();
                 /*
                 Application.Current.Dispatcher.Invoke(new Action(() =>
                 {
