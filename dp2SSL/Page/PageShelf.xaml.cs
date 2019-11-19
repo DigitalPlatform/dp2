@@ -157,17 +157,21 @@ namespace dp2SSL
             {
                 SaveActions();
 
+                /*
                 // testing
                 // 先保存一套 actions
                 List<ActionInfo> temp = new List<ActionInfo>();
                 temp.AddRange(ShelfData.Actions);
+                */
 
                 e.Door.Operator = null; // 清掉门上的操作者名字
                 var task = SubmitCheckInOut("");
 
+                /*
                 // testing
                 ShelfData.Actions.AddRange(temp);
                 await SubmitCheckInOut("");
+                */
             }
         }
 
@@ -641,6 +645,8 @@ namespace dp2SSL
             ShelfData.OpenCountChanged -= CurrentApp_OpenCountChanged;
             ShelfData.DoorStateChanged -= ShelfData_DoorStateChanged;
 
+            if (_progressWindow != null)
+                _progressWindow.Close();
             // 确保 page 关闭时对话框能自动关闭
             CloseDialogs();
             PatronClear();
@@ -652,7 +658,7 @@ namespace dp2SSL
             SetPatronInfo(e.Result);
 
             await FillPatronDetail();
-
+            Welcome();
 #if NO
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
@@ -1124,7 +1130,6 @@ namespace dp2SSL
 
                         // 2019/5/29
                         await FillPatronDetail();
-
                         Welcome();
                     }
                     else
@@ -1495,7 +1500,7 @@ namespace dp2SSL
                 return new SubmitResult();  // 没有必要处理
 
             return ShelfData.SubmitCheckInOut(
-                (min, max, value) =>
+                (min, max, value, text) =>
                 {
                     if (progress != null)
                     {
@@ -1503,6 +1508,12 @@ namespace dp2SSL
                         {
                             if (min == -1 && max == -1 && value == -1)
                                 progress.ProgressBar.Visibility = Visibility.Collapsed;
+                            else
+                                progress.ProgressBar.Visibility = Visibility.Visible;
+
+                            //if (text != null)
+                            //    progress.MessageText = text;
+
                             if (min != -1)
                                 progress.ProgressBar.Minimum = min;
                             if (max != -1)
@@ -1597,24 +1608,38 @@ namespace dp2SSL
 
         void OpenProgressWindow()
         {
-            if (_progressWindow != null)
-                return;
+
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
-                _progressWindow = new SubmitWindow();
-                _progressWindow.MessageText = "正在处理，请稍候 ...";
-                _progressWindow.Owner = Application.Current.MainWindow;
-                _progressWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-                _progressWindow.Closed += _progressWindow_Closed;
-                // _progressWindow.Next += _progressWindow_Next;
-                _progressWindow.Width = Math.Min(700, this.ActualWidth);
-                _progressWindow.Height = Math.Min(500, this.ActualHeight);
-                _progressWindow.Show();
-                AddLayer();
+                if (_progressWindow != null)
+                {
+                    if (_progressWindow.IsVisible == false)
+                        _progressWindow.Show();
+                    return;
+                }
+                else
+                {
+                    _progressWindow = new SubmitWindow();
+                    _progressWindow.MessageText = "正在处理，请稍候 ...";
+                    _progressWindow.Owner = Application.Current.MainWindow;
+                    _progressWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                    _progressWindow.Closed += _progressWindow_Closed;
+                    _progressWindow.IsVisibleChanged += _progressWindow_IsVisibleChanged;
+                    // _progressWindow.Next += _progressWindow_Next;
+                    _progressWindow.Width = Math.Min(700, this.ActualWidth);
+                    _progressWindow.Height = Math.Min(500, this.ActualHeight);
+                    _progressWindow.Show();
+                }
             }));
         }
 
-
+        private void _progressWindow_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (_progressWindow.IsVisible == false)
+                RemoveLayer();
+            else
+                AddLayer();
+        }
 
         private void _progressWindow_Closed(object sender, EventArgs e)
         {
@@ -1655,7 +1680,7 @@ namespace dp2SSL
             {
 
                 var result = ShelfData.SubmitCheckInOut(
-(min, max, value) =>
+(min, max, value, text) =>
 {
     if (progress != null)
     {
@@ -1663,6 +1688,12 @@ namespace dp2SSL
         {
             if (min == -1 && max == -1 && value == -1)
                 progress.ProgressBar.Visibility = Visibility.Collapsed;
+            else
+                progress.ProgressBar.Visibility = Visibility.Visible;
+
+            if (text != null)
+                progress.TitleText = text;
+
             if (min != -1)
                 progress.ProgressBar.Minimum = min;
             if (max != -1)
@@ -1859,8 +1890,8 @@ ShelfData.Actions);
             };
             SetPatronInfo(message);
             SetQuality("");
-            await FillPatronDetail();
 
+            await FillPatronDetail();
             Welcome();
         }
 
