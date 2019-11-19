@@ -3419,7 +3419,7 @@ out Reader reader);
 #if DEBUG
                 if (info != null)
                 {
-                    Debug.Assert(info.UID.Length >= 8);
+                    Debug.Assert(info.UID.Length >= 8 || info.UID.Length == 0);
                 }
 #endif
                 // 2019/9/27
@@ -3440,6 +3440,10 @@ out Reader reader);
                         };
                     }
                 }
+
+                // 2019/11/20
+                if (info != null && info.UID == "00000000")
+                    return new GetTagInfoResult();
 
                 UIntPtr hTag = _connectTag(
                     reader.ReaderHandle,
@@ -3524,7 +3528,9 @@ out Reader reader);
                             LockStatus = result0.LockStatus,    // TagInfo.GetLockString(block_status),
                             Bytes = result0.Bytes,
                             EAS = eas_result.Value == 1,
-                            AntennaID = info == null ? 0 : info.AntennaID
+                            // AntennaID = info == null ? 0 : info.AntennaID
+                            // 2019/11/20
+                            AntennaID = (uint)(antenna_id == -1 ? 0 : antenna_id),
                         }
                     };
                     return result1;
@@ -3540,6 +3546,28 @@ out Reader reader);
             {
                 UnlockReader(reader);
             }
+        }
+
+        public NormalResult ManageReader(string reader_name, string command)
+        {
+            var readers = GetReadersByName(reader_name);
+            if (readers.Count == 0)
+                return new NormalResult { Value = -1, ErrorInfo = $"没有找到名为 {reader_name} 的读卡器" };
+
+            if (command == "CloseRFTransmitter")
+            {
+                foreach (var reader in readers)
+                {
+                    RFIDLIB.rfidlib_reader.RDR_CloseRFTransmitter(reader.ReaderHandle);
+                }
+                return new NormalResult();
+            }
+
+            return new NormalResult
+            {
+                Value = -1,
+                ErrorInfo = $"未知的 command '{command}'"
+            };
         }
 
         // 获得指定范围块的锁定状态

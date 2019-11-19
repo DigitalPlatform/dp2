@@ -844,6 +844,12 @@ new_password);
             return new NormalResult();
         }
 
+        // 管理读卡器
+        public NormalResult ManageReader(string reader_name_list, string command)
+        {
+            return Program.Rfid.ManageReader(reader_name_list, command);
+        }
+
 #if SENDKEY
         // 启动或者停止自动盘点
         void StartInventory(bool start)
