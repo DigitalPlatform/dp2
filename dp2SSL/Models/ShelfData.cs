@@ -43,6 +43,14 @@ namespace dp2SSL
         // 图书读卡器名字列表(也就是柜门里面的那些读卡器)
         static string _doorReaderName = "";
 
+        public static string DoorReaderName
+        {
+            get
+            {
+                return _doorReaderName;
+            }
+        }
+
         // 当前处于打开状态的门的个数
         public static int OpeningDoorCount
         {
@@ -186,12 +194,22 @@ namespace dp2SSL
 
             // 要在初始化以前设定好
             _patronReaderName = GetReaderNameList("patron");
+            WpfClientInfo.WriteErrorLog($"patron ReaderNameList '{_patronReaderName}'");
+
             RfidManager.Base2ReaderNameList = _patronReaderName;    // 2019/11/18
 
             _doorReaderName = GetReaderNameList("doors");
+            WpfClientInfo.WriteErrorLog($"doors ReaderNameList '{_doorReaderName}'");
+
             RfidManager.ReaderNameList = _doorReaderName;
             // RfidManager.AntennaList = GetAntennaList();
             RfidManager.LockCommands = ShelfData.GetLockCommands();
+
+            {
+                string temp = StringUtil.MakePathList(RfidManager.LockCommands);
+                WpfClientInfo.WriteErrorLog($"LockCommands '{temp}'");
+            }
+
             // _patronReaderName = GetPatronReaderName();
         }
 
@@ -233,6 +251,53 @@ namespace dp2SSL
             */
         }
 
+
+        // 从 shelf.xml 中归纳出每个 door 读卡器的天线编号列表
+        public static List<AntennaList> GetAntennaTable()
+        {
+            if (ShelfCfgDom == null)
+                return new List<AntennaList>();
+
+            // 读卡器名字 --> List<int> (天线列表)
+            Hashtable name_table = new Hashtable();
+
+            {
+                XmlNodeList doors = ShelfCfgDom.DocumentElement.SelectNodes("shelf/door");
+                foreach (XmlElement door in doors)
+                {
+                    DoorItem.ParseReaderString(door.GetAttribute("antenna"),
+                        out string readerName,
+                        out int antenna);
+
+                    // 禁止使用 * 作为读卡器名字
+                    if (readerName == "*")
+                        throw new Exception($"antenna属性值中读卡器名字部分不应使用 * ({door.OuterXml})");
+
+                    // 跳过空读卡器名
+                    if (string.IsNullOrEmpty(readerName))
+                        continue;
+
+                    AddToTable(name_table, readerName, antenna);
+                }
+            }
+
+            List<AntennaList> results = new List<AntennaList>();
+            foreach (string key in name_table.Keys)
+            {
+                List<int> list = name_table[key] as List<int>;
+                list.Sort();
+
+                results.Add(new AntennaList
+                {
+                    ReaderName = key,
+                    Antennas = list
+                });
+            }
+
+            return results;
+        }
+
+
         // 从 shelf.xml 配置文件中归纳出所有的读卡器名，包括天线编号部分
         // parameters:
         //      style   patron/doors
@@ -257,8 +322,11 @@ namespace dp2SSL
                     if (readerName == "*")
                         throw new Exception($"antenna属性值中读卡器名字部分不应使用 * ({door.OuterXml})");
 
-                    AddToTable(name_table, readerName, antenna);
+                    // 跳过空读卡器名
+                    if (string.IsNullOrEmpty(readerName))
+                        continue;
 
+                    AddToTable(name_table, readerName, antenna);
                 }
             }
 
@@ -367,7 +435,11 @@ namespace dp2SSL
         public delegate Operator Delegate_getOperator(Entity entity);
 
         // 将暂存的信息保存为 Action。但并不立即提交
-        public static void SaveActions(Delegate_getOperator func_getOperator)
+        // parameters:
+        //      patronBarcode   读者证条码号。如果为 "*"，表示希望针对全部读者的都提交
+        public static void SaveActions(
+            // string patronBarcode,
+            Delegate_getOperator func_getOperator)
         {
             lock (_syncRoot)
             {
@@ -377,11 +449,14 @@ namespace dp2SSL
                 {
                     if (ShelfData.BelongToNormal(entity) == false)
                         continue;
+                    var person = func_getOperator?.Invoke(entity);
+                    if (person == null)
+                        continue;
                     actions.Add(new ActionInfo
                     {
                         Entity = entity,
                         Action = "return",
-                        Operator = func_getOperator?.Invoke(entity)
+                        Operator = person,
                     });
                     // 没有更新的，才进行一次 transfer
                     if (ShelfData.Find(ShelfData.Changes, entity.UID).Count == 0)
@@ -391,7 +466,7 @@ namespace dp2SSL
                             Entity = entity,
                             Action = "transfer",
                             CurrentShelfNo = ShelfData.GetShelfNo(entity),
-                            Operator = func_getOperator?.Invoke(entity)
+                            Operator = person
                         });
                     }
 
@@ -402,13 +477,16 @@ namespace dp2SSL
                 {
                     if (ShelfData.BelongToNormal(entity) == false)
                         continue;
+                    var person = func_getOperator?.Invoke(entity);
+                    if (person == null)
+                        continue;
                     // 更新
                     actions.Add(new ActionInfo
                     {
                         Entity = entity,
                         Action = "transfer",
                         CurrentShelfNo = ShelfData.GetShelfNo(entity),
-                        Operator = func_getOperator?.Invoke(entity)
+                        Operator = person
                     });
                     processed.Add(entity);
                 }
@@ -417,11 +495,14 @@ namespace dp2SSL
                 {
                     if (ShelfData.BelongToNormal(entity) == false)
                         continue;
+                    var person = func_getOperator?.Invoke(entity);
+                    if (person == null)
+                        continue;
                     actions.Add(new ActionInfo
                     {
                         Entity = entity,
                         Action = "borrow",
-                        Operator = func_getOperator?.Invoke(entity)
+                        Operator = person
                     });
 
                     processed.Add(entity);
@@ -592,7 +673,6 @@ namespace dp2SSL
                 if (ret == false)
                     return;
 
-                // TODO: 显示“等待锁控就绪 ...”
                 func_display("等待锁控就绪 ...");
                 ret = await Task.Run(() =>
                 {
@@ -1572,4 +1652,11 @@ namespace dp2SSL
         public MessageDocument MessageDocument { get; set; }
         // public string SpeakContent { get; set; }
     }
+
+    public class AntennaList
+    {
+        public string ReaderName { get; set; }
+        public List<int> Antennas { get; set; }
+    }
+
 }

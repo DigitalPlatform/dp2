@@ -251,7 +251,9 @@ namespace dp2SSL
                     if (string.IsNullOrEmpty(lockName) == false)
                         lockName = NormalizeLockName(lockName);
                     // ParseReaderString(, out string lockName, out int lockIndex);
-                    ParseReaderString(door.GetAttribute("antenna"), out string readerName, out int antenna);
+                    ParseReaderString(door.GetAttribute("antenna"), 
+                        out string readerName, 
+                        out int antenna);
 
                     string lampName = door.GetAttribute("lamp");
 

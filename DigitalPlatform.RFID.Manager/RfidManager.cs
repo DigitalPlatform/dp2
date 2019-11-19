@@ -696,6 +696,41 @@ new SetErrorEventArgs
             }
         }
 
+        public static NormalResult ManageReader(string reader_name_list, string command)
+        {
+            try
+            {
+                BaseChannel<IRfid> channel = Base.GetChannel();
+                try
+                {
+                    var result = channel.Object.ManageReader(reader_name_list, command);
+                    if (result.Value == -1)
+                        Base.TriggerSetError(result,
+                            new SetErrorEventArgs { Error = result.ErrorInfo });
+                    else
+                        Base.TriggerSetError(result,
+                            new SetErrorEventArgs { Error = null }); // 清除以前的报错
+
+                    return result;
+                }
+                finally
+                {
+                    Base.ReturnChannel(channel);
+                }
+            }
+            catch (Exception ex)
+            {
+                Base.Clear();
+                Base.TriggerSetError(ex,
+                    new SetErrorEventArgs
+                    {
+                        Error = $"RFID 中心出现异常: {ExceptionUtil.GetAutoText(ex)}"
+                    });
+                return new NormalResult { Value = -1, ErrorInfo = ex.Message };
+            }
+        }
+
+
         // 打开门锁
         public static NormalResult OpenShelfLock(string lockName)
         {
@@ -764,6 +799,12 @@ new SetErrorEventArgs
                     });
                 return new NormalResult { Value = -1, ErrorInfo = ex.Message };
             }
+        }
+
+        public static NormalResult SelectAntenna(string reader_name,
+            uint antenna_id)
+        {
+            return GetTagInfo(reader_name, "00000000", antenna_id);
         }
 
     }

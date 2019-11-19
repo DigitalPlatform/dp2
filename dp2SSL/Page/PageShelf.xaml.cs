@@ -155,7 +155,7 @@ namespace dp2SSL
         {
             if (e.NewState == "close")
             {
-                SaveActions();
+                SaveDoorActions(e.Door);
 
                 /*
                 // testing
@@ -630,7 +630,7 @@ namespace dp2SSL
 
             // 提交尚未提交的取出和放入
             // PatronClear(true);
-            SaveActions();
+            SaveAllActions();
             await Submit(true);
 
             RfidManager.SetError -= RfidManager_SetError;
@@ -1039,6 +1039,13 @@ namespace dp2SSL
                     this.doorControl.Visibility = Visibility.Visible;
                 }
                 */
+
+                /*
+                var manage_result = RfidManager.ManageReader(ShelfData.DoorReaderName, "CloseRFTransmitter");
+                if (manage_result.Value == -1)
+                    this.SetGlobalError("InitialShelfEntities", $"ManageReader() 出错: {manage_result.ErrorInfo}");
+                    */
+                SelectAntenna();
             }
             finally
             {
@@ -1087,6 +1094,23 @@ namespace dp2SSL
             }
 
             // TODO: 初始化中断后，是否允许切换到菜单和设置画面？(只是不让进入书架画面)
+        }
+
+        // 故意选择用到的天线编号加一的天线
+        void SelectAntenna()
+        {
+            List<string> errors = new List<string>();
+            List<AntennaList> table = ShelfData.GetAntennaTable();
+            foreach (var list in table)
+            {
+                if (list.Antennas == null || list.Antennas.Count == 0)
+                    continue;
+                var manage_result = RfidManager.SelectAntenna(list.ReaderName, (uint)(list.Antennas[list.Antennas.Count - 1] + 1));
+                if (manage_result.Value == -1)
+                    errors.Add($"SelectAntenna() 出错: {manage_result.ErrorInfo}");
+            }
+            if (errors.Count > 0)
+                this.SetGlobalError("InitialShelfEntities", $"ManageReader() 出错: {StringUtil.MakePathList(errors, ";")}");
         }
 
         private void Error_Closed(object sender, EventArgs e)
@@ -1254,7 +1278,7 @@ namespace dp2SSL
                 || ShelfData.Removes.Count > 0
                 || ShelfData.Changes.Count > 0)
             {
-                SaveActions();
+                SaveAllActions();
                 await SubmitCheckInOut(silently ? "silence" : "");
                 // await SubmitCheckInOut("silence");
             }
@@ -1528,8 +1552,8 @@ namespace dp2SSL
                 actions);
         }
 
-        // 将暂存的信息保存为 Action。但并不立即提交
-        void SaveActions()
+        // 将指定门的暂存的信息保存为 Action。但并不立即提交
+        void SaveDoorActions(DoorItem door)
         {
             /*
             List<ActionInfo> actions = new List<ActionInfo>();
@@ -1601,8 +1625,24 @@ namespace dp2SSL
 
             ShelfData.PushActions(actions);
             */
-            ShelfData.SaveActions((entity) => { return GetOperator(entity); });
+            ShelfData.SaveActions((entity) =>
+            {
+                var results = DoorItem.FindDoors(ShelfData.Doors, entity.ReaderName, entity.Antenna);
+                if (results.IndexOf(door) != -1)
+                    return GetOperator(entity);
+                return null;
+            });
         }
+
+        // 将所有暂存信息保存为 Action，但并不立即提交
+        void SaveAllActions()
+        {
+            ShelfData.SaveActions((entity) =>
+            {
+                return GetOperator(entity);
+            });
+        }
+
 
         SubmitWindow _progressWindow = null;
 
@@ -1680,50 +1720,41 @@ namespace dp2SSL
             {
 
                 var result = ShelfData.SubmitCheckInOut(
-(min, max, value, text) =>
-{
-    if (progress != null)
-    {
-        Application.Current.Dispatcher.Invoke(new Action(() =>
-        {
-            if (min == -1 && max == -1 && value == -1)
-                progress.ProgressBar.Visibility = Visibility.Collapsed;
-            else
-                progress.ProgressBar.Visibility = Visibility.Visible;
+                (min, max, value, text) =>
+                {
+                    if (progress != null)
+                    {
+                        Application.Current.Dispatcher.Invoke(new Action(() =>
+                        {
+                            if (min == -1 && max == -1 && value == -1)
+                                progress.ProgressBar.Visibility = Visibility.Collapsed;
+                            else
+                                progress.ProgressBar.Visibility = Visibility.Visible;
 
-            if (text != null)
-                progress.TitleText = text;
+                            if (text != null)
+                                progress.TitleText = text;
 
-            if (min != -1)
-                progress.ProgressBar.Minimum = min;
-            if (max != -1)
-                progress.ProgressBar.Maximum = max;
-            if (value != -1)
-                progress.ProgressBar.Value = value;
-        }));
-    }
-},
-//_patron.Barcode,
-//_patron.PatronName,
+                            if (min != -1)
+                                progress.ProgressBar.Minimum = min;
+                            if (max != -1)
+                                progress.ProgressBar.Maximum = max;
+                            if (value != -1)
+                                progress.ProgressBar.Value = value;
+                        }));
+                    }
+                },
 ShelfData.Actions);
 
                 if (result.Value == -1)
                 {
-                    // DisplayError(ref progress, result.ErrorInfo);
                     _progressWindow?.PushContent(result.ErrorInfo, "red");
                     return;
                 }
 
-                string speak = "";
                 if (progress != null && result.Value == 1 && result.MessageDocument != null)
                 {
                     Application.Current.Dispatcher.Invoke(new Action(() =>
                     {
-                        /*
-                        progress.MessageDocument = result.MessageDocument.BuildDocument(18, out speak);
-                        MemoryDialog(progress); // 记住对话框，以便后面可以补充关闭
-                        progress = null;
-                        */
                         _progressWindow?.PushContent(result.MessageDocument);
                     }));
                 }
@@ -1732,10 +1763,6 @@ ShelfData.Actions);
             {
                 Application.Current.Dispatcher.Invoke(new Action(() =>
                 {
-                    /*
-                    if (progress != null)
-                        progress.Close();
-                        */
                     _progressWindow?.ShowContent();
                 }));
             }

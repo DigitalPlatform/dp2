@@ -68,6 +68,8 @@ uint new_password);
         NormalResult OpenShelfLock(string lockName);
 
         NormalResult TurnShelfLamp(string lampName, string action);
+
+        NormalResult ManageReader(string reader_name, string command);
     }
 
     [Serializable()]
