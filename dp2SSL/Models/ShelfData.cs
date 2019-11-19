@@ -1135,7 +1135,7 @@ namespace dp2SSL
 
         // -1 -1 n only change progress value
         // -1 -1 -1 hide progress bar
-        public delegate void Delegate_setProgress(double min, double max, double value);
+        public delegate void Delegate_setProgress(double min, double max, double value, string text);
 
         // result.Value
         //      -1  出错(要用对话框显示结果)
@@ -1185,7 +1185,7 @@ namespace dp2SSL
                 }
                 */
                 int index = 0;
-                func_setProgress?.Invoke(0, actions.Count, index);
+                func_setProgress?.Invoke(0, actions.Count, index, "正在处理，请稍候 ...");
 
                 // TODO: 准备工作：把涉及到的 Entity 对象的字段填充完整
                 // 检查 PII 是否都具备了
@@ -1198,8 +1198,7 @@ namespace dp2SSL
                 foreach (ActionInfo info in actions)
                 {
                     // testing 
-                    Thread.Sleep(1000);
-
+                    // Thread.Sleep(1000);
 
                     string action = info.Action;
                     Entity entity = info.Entity;
@@ -1338,7 +1337,7 @@ namespace dp2SSL
                         }));
                     }
                     */
-                    func_setProgress?.Invoke(-1, -1, ++index);
+                    func_setProgress?.Invoke(-1, -1, ++index, null);
 
                     if (biblio_records != null
                         && biblio_records.Length > 0
@@ -1501,7 +1500,7 @@ namespace dp2SSL
                         // progress.ProgressBar.Value = progress.ProgressBar.Maximum;
                     }));
                 }*/
-                func_setProgress?.Invoke(-1, -1, -1);   // hide progress bar
+                func_setProgress?.Invoke(-1, -1, -1, "处理完成");   // hide progress bar
 
                 //                string speak = "";
                 {

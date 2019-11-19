@@ -19,6 +19,7 @@
                 <RowDefinition Height="60"/>
             </Grid.RowDefinitions>
             <TextBox Name="title" Grid.Row="0"
+                     Foreground="LightGray"
                      Background="Transparent" BorderThickness="0"
                      FontSize="14" HorizontalContentAlignment="Center"/>
             <Grid Grid.Row="1">

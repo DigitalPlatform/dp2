@@ -52,15 +52,50 @@ namespace dp2SSL
             {
                 Document = doc
             });
+            // 变化按钮文字
+            RefreshButtonText();
+        }
+
+        DisplayContent PullContent()
+        {
+            if (_contents.Count > 0)
+            {
+                var content = _contents[0];
+                _contents.RemoveAt(0);
+                // 变化按钮文字
+                RefreshButtonText();
+                return content;
+            }
+
+            return null;
+        }
+
+        void RefreshButtonText()
+        {
+            if (_contents.Count > 0)
+            {
+                this.okButton.Content = $"继续 ({_contents.Count})";
+            }
+            else
+            {
+                this.okButton.Content = $"关闭";
+            }
         }
 
         public void ShowContent()
         {
-            if (_contents.Count == 0)
-                return;
+            //if (_contents.Count == 0)
+            //    return;
             if (_showCount > 0)
                 return;
-            var first = _contents[0];
+            var first = PullContent();
+            if (first == null)
+            {
+                this.MessageText = "(blank)";
+                this.BackColor = "yellow";
+                return;
+            }
+
             if (first.Document != null)
             {
                 string speak = "";
@@ -76,7 +111,7 @@ namespace dp2SSL
                 this.MessageText = first.Text;
                 this.BackColor = first.Color;
             }
-            _contents.RemoveAt(0);
+
             _showCount++;
         }
 
@@ -185,7 +220,11 @@ namespace dp2SSL
             if (_contents.Count == 0)
             {
                 // TODO: 如果窗口正在处理中，要避免被关闭
-                this.Close();
+                // this.Close();
+                this.MessageDocument = null;
+                this.MessageText = "";
+                this.Hide();
+                _showCount = 0;
                 return;
             }
 
