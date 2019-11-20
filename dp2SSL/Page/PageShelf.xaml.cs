@@ -306,6 +306,39 @@ namespace dp2SSL
             _dialogs.Add(dialog);
         }
 
+        delegate string Delegate_process(ProgressWindow progress);
+
+        void ProcessBox(string start_message,
+            Delegate_process func)
+        {
+            ProgressWindow progress = null;
+
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                progress = new ProgressWindow();
+                progress.MessageText = start_message;
+                progress.Owner = Application.Current.MainWindow;
+                progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                progress.Closed += Progress_Closed;
+                //if (StringUtil.IsInList("button_ok", style))
+                //    progress.okButton.Content = "确定";
+                progress.Show();
+                AddLayer();
+            }));
+
+            string result_message = func?.Invoke(progress);
+
+            if (string.IsNullOrEmpty(result_message) == false)
+                DisplayError(ref progress, result_message, "red");
+            else
+            {
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    progress.Close();
+                }));
+            }
+        }
+
         void ErrorBox(string message,
             string color = "red",
             string style = "")
@@ -657,8 +690,9 @@ namespace dp2SSL
         {
             SetPatronInfo(e.Result);
 
-            await FillPatronDetail();
-            Welcome();
+            var result = await FillPatronDetail();
+            if (result.Value != -1)
+                Welcome();
 #if NO
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
@@ -691,7 +725,6 @@ namespace dp2SSL
             _patron.IsFingerprintSource = true;
             _patron.PII = result.Message;
         }
-
 
         private void FingerprintManager_SetError(object sender, SetErrorEventArgs e)
         {
@@ -1096,21 +1129,50 @@ namespace dp2SSL
             // TODO: 初始化中断后，是否允许切换到菜单和设置画面？(只是不让进入书架画面)
         }
 
-        // 故意选择用到的天线编号加一的天线
-        void SelectAntenna()
+#if NO
+        // 故意选择用到的天线编号加一的天线(用 GetTagInfo() 实现)
+        string SelectAntenna()
         {
+            StringBuilder text = new StringBuilder();
             List<string> errors = new List<string>();
             List<AntennaList> table = ShelfData.GetAntennaTable();
             foreach (var list in table)
             {
                 if (list.Antennas == null || list.Antennas.Count == 0)
                     continue;
-                var manage_result = RfidManager.SelectAntenna(list.ReaderName, (uint)(list.Antennas[list.Antennas.Count - 1] + 1));
+                uint antenna = (uint)(list.Antennas[list.Antennas.Count - 1] + 1);
+                text.Append($"readerName[{list.ReaderName}], antenna[{antenna}]\r\n");
+                var manage_result = RfidManager.SelectAntenna(list.ReaderName, antenna);
                 if (manage_result.Value == -1)
                     errors.Add($"SelectAntenna() 出错: {manage_result.ErrorInfo}");
             }
             if (errors.Count > 0)
                 this.SetGlobalError("InitialShelfEntities", $"ManageReader() 出错: {StringUtil.MakePathList(errors, ";")}");
+
+            return text.ToString();
+        }
+#endif
+
+        // 故意选择用到的天线编号加一的天线(用 ListTags() 实现)
+        string SelectAntenna()
+        {
+            StringBuilder text = new StringBuilder();
+            List<string> errors = new List<string>();
+            List<AntennaList> table = ShelfData.GetAntennaTable();
+            foreach (var list in table)
+            {
+                if (list.Antennas == null || list.Antennas.Count == 0)
+                    continue;
+                // uint antenna = (uint)(list.Antennas[list.Antennas.Count - 1] + 1);
+                int first_antenna = list.Antennas[0];
+                text.Append($"readerName[{list.ReaderName}], antenna[{first_antenna}]\r\n");
+                var result = RfidManager.CallListTags($"{list.ReaderName}:{first_antenna}", "");
+                if (result.Value == -1)
+                    errors.Add($"CallListTags() 出错: {result.ErrorInfo}");
+            }
+            if (errors.Count > 0)
+                this.SetGlobalError("InitialShelfEntities", $"SelectAntenna() 出错: {StringUtil.MakePathList(errors, ";")}");
+            return text.ToString();
         }
 
         private void Error_Closed(object sender, EventArgs e)
@@ -1153,8 +1215,9 @@ namespace dp2SSL
                         SetPatronError("rfid_multi", "");   // 2019/5/22
 
                         // 2019/5/29
-                        await FillPatronDetail();
-                        Welcome();
+                        var result = await FillPatronDetail();
+                        if (result.Value != -1)
+                            Welcome();
                     }
                     else
                     {
@@ -1194,11 +1257,29 @@ namespace dp2SSL
                 return new NormalResult();
 
             string pii = _patron.PII;
+
+            // TODO: 判断 PII 是否为工作人员账户名
+            if (string.IsNullOrEmpty(pii) == false
+                && pii.StartsWith("~"))
+            {
+                // 出现登录对话框，要求输入密码登录验证
+                var login_result = WorkerLogin(pii);
+                if (login_result.Value == -1)
+                {
+                    PatronClear();
+                    return login_result;
+                }
+                return new NormalResult();
+            }
+
             if (string.IsNullOrEmpty(pii))
                 pii = _patron.UID;
 
             if (string.IsNullOrEmpty(pii))
                 return new NormalResult();
+
+
+            // TODO: 先显示等待动画
 
             // return.Value:
             //      -1  出错
@@ -1269,6 +1350,50 @@ namespace dp2SSL
                 });
             }
 #endif
+            return new NormalResult();
+        }
+
+        NormalResult WorkerLogin(string pii)
+        {
+            string userName = pii.Substring(1);
+            bool bRet = false;
+            string password = "";
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                InputPasswordWindows dialog = new InputPasswordWindows();
+                dialog.TitleText = $"请输入工作人员账户 {userName} 的密码并登录";
+                dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                bRet = (bool)dialog.ShowDialog();
+                password = dialog.password.Password;
+            }));
+            if (bRet == false)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorCode = "cancelled"
+                };
+            _patron.Barcode = pii;
+
+            // 登录
+            LoginResult result = null;
+            // 显示一个处理对话框
+            ProcessBox("正在登录 ...",
+                (progress) =>
+                {
+                    result = LibraryChannelUtil.WorkerLogin(userName, password);
+                    if (result.Value != 1)
+                        return result.ErrorInfo;
+                    return null;
+                });
+
+            if (result.Value != 1)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorCode = "loginFail",
+                    ErrorInfo = result.ErrorInfo,
+                };
+
             return new NormalResult();
         }
 
@@ -1918,8 +2043,9 @@ ShelfData.Actions);
             SetPatronInfo(message);
             SetQuality("");
 
-            await FillPatronDetail();
-            Welcome();
+            var fill_result = await FillPatronDetail();
+            if (fill_result.Value != -1)
+                Welcome();
         }
 
         // 开始启动延时自动清除读者信息的过程。如果中途门被打开，则延时过程被取消(也就是说读者信息不再会被自动清除)
@@ -2056,6 +2182,12 @@ ShelfData.Actions);
         private void FixPatron_Unchecked(object sender, RoutedEventArgs e)
         {
 
+        }
+
+        private void CloseRF_Click(object sender, RoutedEventArgs e)
+        {
+            string result = SelectAntenna();
+            MessageBox.Show(result);
         }
     }
 }

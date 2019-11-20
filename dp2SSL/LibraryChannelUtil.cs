@@ -201,5 +201,58 @@ namespace dp2SSL
             }
         }
 
+        public class LoginResult : NormalResult
+        {
+            public string OutputUserName { get; set; }
+            public string Rights { get; set; }
+            public string LibraryCode { get; set; }
+        }
+
+        // result.Value
+        //      -1:   出错
+        //      0:    登录未成功
+        //      1:    登录成功
+        public static LoginResult WorkerLogin(string userName, string password)
+        {
+            if (string.IsNullOrEmpty(App.dp2ServerUrl) == true)
+                return new LoginResult
+                {
+                    Value = -1,
+                    ErrorInfo = "dp2library 服务器 URL 尚未配置，无法进行工作人员登录"
+                };
+            LibraryChannel channel = App.CurrentApp.GetChannel(userName);
+            try
+            {
+                // -1:   出错
+                // 0:    登录未成功
+                // 1:    登录成功
+                long lRet = channel.Login(userName,
+                    password,
+                    "type=worker,client=dp2ssl|" + WpfClientInfo.ClientVersion,
+                    out string strOutputUserName,
+                    out string strRights,
+                    out string strLibraryCode,
+                    out string strError);
+                if (lRet == -1 || lRet == 0)
+                    return new LoginResult
+                    {
+                        Value = (int)lRet,
+                        ErrorInfo = strError,
+                    };
+
+                return new LoginResult
+                {
+                    Value = 1,
+                    OutputUserName = strOutputUserName,
+                    Rights = strRights,
+                    LibraryCode = strLibraryCode,
+                };
+            }
+            finally
+            {
+                App.CurrentApp.ReturnChannel(channel);
+            }
+        }
+
     }
 }
