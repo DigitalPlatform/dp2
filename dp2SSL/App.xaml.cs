@@ -184,7 +184,7 @@ namespace dp2SSL
                 {
                     ShelfData.InitialShelf();
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     this.SetError("cfg", $"InitialShelf() 出现异常:{ex.Message}");
                 }
@@ -513,6 +513,8 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
         {
             if (e.FirstTry == true)
             {
+                // TODO: 从工作人员用户名密码记载里面检查，如果是工作人员账户，则 ...
+
                 {
                     e.UserName = dp2UserName;
 
@@ -575,11 +577,12 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
 
         // parameters:
         //      style    风格。如果为 GUI，表示会自动添加 Idle 事件，并在其中执行 Application.DoEvents
-        public LibraryChannel GetChannel()
+        public LibraryChannel GetChannel(string strUserName = "")
         {
             string strServerUrl = dp2ServerUrl;
 
-            string strUserName = dp2UserName;
+            if (string.IsNullOrEmpty(strUserName))
+                strUserName = dp2UserName;
 
             LibraryChannel channel = this._channelPool.GetChannel(strServerUrl, strUserName);
             _channelList.Add(channel);

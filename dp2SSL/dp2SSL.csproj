@@ -33,7 +33,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>146</ApplicationRevision>
+    <ApplicationRevision>148</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -168,6 +168,9 @@
     <Compile Include="Dialog\InOutWindow.xaml.cs">
       <DependentUpon>InOutWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Dialog\InputPasswordWindows.xaml.cs">
+      <DependentUpon>InputPasswordWindows.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Dialog\OpenDoorWindow.xaml.cs">
       <DependentUpon>OpenDoorWindow.xaml</DependentUpon>
     </Compile>
@@ -239,6 +242,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Dialog\InOutWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Dialog\InputPasswordWindows.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
