@@ -458,13 +458,18 @@ namespace dp2SSL
                         Action = "return",
                         Operator = person,
                     });
-                    // 没有更新的，才进行一次 transfer
+                    // 没有更新的，才进行一次 transfer。更新的留在后面专门做
                     if (ShelfData.Find(ShelfData.Changes, entity.UID).Count == 0)
                     {
+                        string location = "";
+                        // 工作人员身份，还可能要进行馆藏位置向内转移
+                        if (person.IsWorker == true)
+                            location = "%checkin_location%";
                         actions.Add(new ActionInfo
                         {
                             Entity = entity,
                             Action = "transfer",
+                            Location = location,
                             CurrentShelfNo = ShelfData.GetShelfNo(entity),
                             Operator = person
                         });
@@ -480,11 +485,18 @@ namespace dp2SSL
                     var person = func_getOperator?.Invoke(entity);
                     if (person == null)
                         continue;
+
+                    string location = "";
+                    // 工作人员身份，还可能要进行馆藏位置转移
+                    if (person.IsWorker == true)
+                        location = "%checkin_location%";
+
                     // 更新
                     actions.Add(new ActionInfo
                     {
                         Entity = entity,
                         Action = "transfer",
+                        Location = location,
                         CurrentShelfNo = ShelfData.GetShelfNo(entity),
                         Operator = person
                     });
@@ -498,12 +510,31 @@ namespace dp2SSL
                     var person = func_getOperator?.Invoke(entity);
                     if (person == null)
                         continue;
-                    actions.Add(new ActionInfo
+                    if (person.IsWorker == false)
                     {
-                        Entity = entity,
-                        Action = "borrow",
-                        Operator = person
-                    });
+                        // 只有读者身份才进行借阅操作
+                        actions.Add(new ActionInfo
+                        {
+                            Entity = entity,
+                            Action = "borrow",
+                            Operator = person
+                        });
+                    }
+
+                    //
+                    if (person.IsWorker == true)
+                    {
+                        // 工作人员身份，还可能要进行馆藏位置向外转移
+                        string location = "%checkout_location%";
+                        actions.Add(new ActionInfo
+                        {
+                            Entity = entity,
+                            Action = "transfer",
+                            Location = location,
+                            CurrentShelfNo = ShelfData.GetShelfNo(entity),
+                            Operator = person
+                        });
+                    }
 
                     processed.Add(entity);
                 }
@@ -526,6 +557,27 @@ namespace dp2SSL
         public static void PushActions(List<ActionInfo> actions)
         {
             _actions.AddRange(actions);
+        }
+
+        // 询问典藏移交的一些条件参数
+        public static void AskLocationTransfer(List<ActionInfo> actions)
+        {
+            // 1) 搜集信息。观察是否有需要询问和兑现的参数
+            List<ActionInfo> checkins = new List<ActionInfo>();
+            foreach(var action in actions)
+            {
+                if (action.Action == "transfer"
+                    && action.Location == "%checkin_location%")
+                {
+                    checkins.Add(action);
+                }
+            }
+
+            // 询问放入的图书是否需要移交到当前书柜馆藏地
+            if (checkins.Count > 0)
+            {
+
+            }
         }
 
         static List<Entity> _all = new List<Entity>();  // 累积的全部图书
@@ -1311,11 +1363,7 @@ namespace dp2SSL
                     BorrowInfo borrow_info = null;
                     string currentLocation = "";
 
-                    string strUserName = "";
-                    string strOperatorBarcode = info.Operator?.PatronBarcode;
-                    if (strOperatorBarcode != null
-                        && strOperatorBarcode.StartsWith("~"))
-                        strUserName = strOperatorBarcode.Substring(1);
+                    string strUserName = info.Operator?.GetWorkerAccountName();
 
                     LibraryChannel channel = App.CurrentApp.GetChannel(strUserName);
                     try
@@ -1651,6 +1699,33 @@ namespace dp2SSL
     {
         public string PatronName { get; set; }
         public string PatronBarcode { get; set; }
+
+        public static bool IsPatronBarcodeWorker(string patronBarcode)
+        {
+            if (string.IsNullOrEmpty(patronBarcode))
+                return false;
+            return patronBarcode.StartsWith("~");
+        }
+
+        public static string BuildWorkerAccountName(string text)
+        {
+            return text.Substring(1);
+        }
+
+        public bool IsWorker
+        {
+            get
+            {
+                return IsPatronBarcodeWorker(this.PatronBarcode);
+            }
+        }
+
+        public string GetWorkerAccountName()
+        {
+            if (this.IsWorker == true)
+                return BuildWorkerAccountName(this.PatronBarcode);
+            return "";
+        }
     }
 
     public class ActionInfo
@@ -1658,6 +1733,7 @@ namespace dp2SSL
         public Operator Operator { get; set; }  // 提起请求的读者
         public Entity Entity { get; set; }
         public string Action { get; set; }  // borrow/return/transfer
+        public string Location { get; set; }    // 所有者馆藏地。transfer 动作会用到
         public string CurrentShelfNo { get; set; }  // 当前架号。transfer 动作会用到
     }
 

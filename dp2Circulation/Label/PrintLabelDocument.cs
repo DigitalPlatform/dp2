@@ -192,7 +192,7 @@ namespace dp2Circulation
             if (cache._copyCache.Count == 0
                 || cache._current_offset >= cache._copyCache.Count)
             {
-                REDO:
+            REDO:
                 // 重新获得 cache
                 // return:
                 //      -1  error
@@ -667,7 +667,7 @@ namespace dp2Circulation
                                 }
                             }
                         }
-                        NEXT_PAGE_0:
+                    NEXT_PAGE_0:
                         nTempPageNo++;
                     }
 #if NO
@@ -1054,7 +1054,7 @@ namespace dp2Circulation
                     y += (float)label_param.LabelHeight;
                 }
 
-                NEXT_PAGE:
+            NEXT_PAGE:
 
                 // If more lines exist, print another page.
                 if (bEOF == false)
@@ -1087,7 +1087,7 @@ namespace dp2Circulation
             this.m_nPageNo++;
             e.HasMorePages = true;
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(owner, strError);
         }
 
@@ -1310,6 +1310,13 @@ namespace dp2Circulation
                         if (debug_info != null)
                             debug_info.Append("barcode_text_style=" + ToString(barcode_text_style) + "\r\n");
 
+                        // 线条的风格
+                        string line_style = StringUtil.GetParameterByPrefix(strLineStyle,
+        "line_style",
+        ":");
+                        if (debug_info != null)
+                            debug_info.Append("line_style=" + ToString(line_style) + "\r\n");
+
                         // return:
                         //      null    没有找到前缀
                         //      ""      找到了前缀，并且值部分为空
@@ -1477,17 +1484,26 @@ namespace dp2Circulation
                                 if (bIsBarcodeFont == true && string.IsNullOrEmpty(strText) == false)
                                     strText = "*" + strText + "*";
 
+                                if (line_style != null)
+                                {
+                                    DrawLine(g,
+    rect,
+    (brushText as SolidBrush).Color,
+    line_style);
+
+                                }
+
                                 if (StringUtil.IsInList("auto_fit", text_style) == true)
                                 {
                                     float old_height = this_font.GetHeight(g);
                                     // 自动填充风格
                                     float auto_rect_height = 0;
                                     float auto_font_height = GetAutoFitTextHeight(
-                g,
-                this_font,
-                rect,
-                strText,
-                out auto_rect_height);
+                            g,
+                            this_font,
+                            rect,
+                            strText,
+                            out auto_rect_height);
                                     if (auto_font_height == 0)
                                     {
                                         // 普通风格
@@ -1506,15 +1522,15 @@ namespace dp2Circulation
                                         temp_rect.Offset(0, delta / 2);
 
                                         using (Font font = new Font(this_font.FontFamily,
-            auto_font_height,   // auto_height,
-            this_font.Style,
-            GraphicsUnit.Pixel))
+                    auto_font_height,   // auto_height,
+                    this_font.Style,
+                    GraphicsUnit.Pixel))
                                         {
                                             g.DrawString(strText,
-            font,
-            brushText,
-            temp_rect,
-            s_format);
+                    font,
+                    brushText,
+                    temp_rect,
+                    s_format);
                                         }
                                     }
                                 }
@@ -1578,6 +1594,45 @@ namespace dp2Circulation
                 g.Clip = old_clip;
             } // end of using clip
 
+        }
+
+        static void DrawLine(Graphics g,
+            RectangleF rect,
+            Color color,
+            string line_style)
+        {
+            if (StringUtil.IsInList("top", line_style) == true)
+            {
+                using (Pen pen = new Pen(color))
+                {
+                    g.DrawLine(pen,
+        new PointF(rect.Left, rect.Top + 1),
+        new PointF(rect.Right, rect.Top + 1)
+        );
+                }
+            }
+
+            else if (StringUtil.IsInList("bottom", line_style) == true)
+            {
+                using (Pen pen = new Pen(color))
+                {
+                    g.DrawLine(pen,
+        new PointF(rect.Left, rect.Bottom - 1),
+        new PointF(rect.Right, rect.Bottom - 1)
+        );
+                }
+            }
+            else // if (StringUtil.IsInList("center", line_style) == true)
+            {
+                // 默认 center
+                using (Pen pen = new Pen(color))
+                {
+                    g.DrawLine(pen,
+        new PointF(rect.Left, rect.Top + (rect.Height / 2)),
+        new PointF(rect.Right, rect.Top + (rect.Height / 2))
+        );
+                }
+            }
         }
 
         static string ToString(string text)
@@ -1730,7 +1785,7 @@ namespace dp2Circulation
         {
             // GraphicsUnit unit = g.PageUnit;
             float height = ref_font.GetHeight(g);    //  GetFontSizeInPixels(g, ref_font); // 初始的文字高度
-            // float ratio = 1F;
+                                                     // float ratio = 1F;
             float start_height = height;
             for (; ; )
             {
@@ -1772,7 +1827,7 @@ namespace dp2Circulation
             float start_height)
         {
             if (size.Width <= rect.Width
-    && Convert.ToDecimal(size.Height) <= Convert.ToDecimal(start_height))
+        && Convert.ToDecimal(size.Height) <= Convert.ToDecimal(start_height))
                 return 0;
 
             if (size.Width > rect.Width)
@@ -1833,9 +1888,9 @@ namespace dp2Circulation
         }
 #endif
         static float MeasureOcrTextHeight(
-Graphics g,
-RectangleF rect,
-string strText,
+        Graphics g,
+        RectangleF rect,
+        string strText,
             out float textRectHeight)
         {
             rect.Height = rect.Height / 3; // 预计的文字高度
