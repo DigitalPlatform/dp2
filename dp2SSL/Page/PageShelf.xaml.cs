@@ -432,18 +432,21 @@ namespace dp2SSL
             }
 
             // 检查读者记录状态
-            XmlDocument readerdom = new XmlDocument();
-            readerdom.LoadXml(_patron.Xml);
-            // return:
-            //      -1  检查过程出错
-            //      0   状态不正常
-            //      1   状态正常
-            int nRet = LibraryServerUtil.CheckPatronState(readerdom,
-                out string strError);
-            if (nRet != 1)
+            if (_patron.Barcode.StartsWith("~") == false)
             {
-                ErrorBox(strError);
-                return;
+                XmlDocument readerdom = new XmlDocument();
+                readerdom.LoadXml(_patron.Xml);
+                // return:
+                //      -1  检查过程出错
+                //      0   状态不正常
+                //      1   状态正常
+                int nRet = LibraryServerUtil.CheckPatronState(readerdom,
+                    out string strError);
+                if (nRet != 1)
+                {
+                    ErrorBox(strError);
+                    return;
+                }
             }
 
             // MessageBox.Show(e.Name);
@@ -1394,6 +1397,7 @@ namespace dp2SSL
                     ErrorInfo = result.ErrorInfo,
                 };
 
+            App.CurrentApp.SetAccount(userName, password);
             return new NormalResult();
         }
 
@@ -1426,6 +1430,8 @@ namespace dp2SSL
                 }
             }
             */
+            if (_patron.Barcode != null && _patron.Barcode.StartsWith("~"))
+                App.CurrentApp.RemoveAccount(_patron.Barcode.Substring(1));
 
             _patron.Clear();
             if (!Application.Current.Dispatcher.CheckAccess())

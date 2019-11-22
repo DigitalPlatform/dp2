@@ -1239,6 +1239,7 @@ namespace dp2SSL
             // 先尽量执行还书请求，再报错说无法进行借书操作(记入错误日志)
             MessageDocument doc = new MessageDocument();
 
+            // 限制同时能进入临界区的线程个数
             // true if the current instance receives a signal; otherwise, false.
             if (_limit.WaitOne(TimeSpan.FromSeconds(10)) == false)
                 return new SubmitResult
@@ -1248,7 +1249,6 @@ namespace dp2SSL
                     ErrorCode = "timeout"
                 };
 
-            LibraryChannel channel = App.CurrentApp.GetChannel();
             try
             {
                 // ClearEntitiesError();
@@ -1311,92 +1311,107 @@ namespace dp2SSL
                     BorrowInfo borrow_info = null;
                     string currentLocation = "";
 
-                    if (action == "borrow" || action == "renew")
-                    {
-                        // TODO: 智能书柜要求强制借书。如果册操作前处在被其他读者借阅状态，要自动先还书再进行借书
+                    string strUserName = "";
+                    string strOperatorBarcode = info.Operator?.PatronBarcode;
+                    if (strOperatorBarcode != null
+                        && strOperatorBarcode.StartsWith("~"))
+                        strUserName = strOperatorBarcode.Substring(1);
 
-                        entity.Waiting = true;
-                        lRet = channel.Borrow(null,
-                            action == "renew",
-                            info.Operator.PatronBarcode,
-                            entity.PII,
-                            entity.ItemRecPath,
-                            false,
-                            null,
-                            "item,reader,biblio,overflowable", // style,
-                            "xml", // item_format_list
-                            out item_records,
-                            "xml",
-                            out string[] reader_records,
-                            "summary",
-                            out biblio_records,
-                            out string[] dup_path,
-                            out string output_reader_barcode,
-                            out borrow_info,
-                            out strError);
-                    }
-                    else if (action == "return")
+                    LibraryChannel channel = App.CurrentApp.GetChannel(strUserName);
+                    try
                     {
-                        /*
-                        // TODO: 增加检查 EAS 现有状态功能，如果已经是 true 则不用修改，后面 API 遇到出错后也不要回滚 EAS
-                        // return 操作，提前修改 EAS
-                        // 注: 提前修改 EAS 的好处是比较安全。相比 API 执行完以后再修改 EAS，提前修改 EAS 成功后，无论后面发生什么，读者都无法拿着这本书走出门禁
+
+                        if (action == "borrow" || action == "renew")
                         {
-                            var result = SetEAS(entity.UID, entity.Antenna, action == "return");
-                            if (result.Value == -1)
-                            {
-                                entity.SetError($"{action_name}时修改 EAS 动作失败: {result.ErrorInfo}", "red");
-                                errors.Add($"册 '{entity.PII}' {action_name}时修改 EAS 动作失败: {result.ErrorInfo}");
-                                continue;
-                            }
-                        }
-                        */
-                        // 智能书柜不使用 EAS 状态。可以考虑统一修改为 EAS Off 状态？
+                            // TODO: 智能书柜要求强制借书。如果册操作前处在被其他读者借阅状态，要自动先还书再进行借书
 
-                        entity.Waiting = true;
-                        lRet = channel.Return(null,
-                            "return",
-                            "", // _patron.Barcode,
-                            entity.PII,
-                            entity.ItemRecPath,
-                            false,
-                            "item,reader,biblio", // style,
-                            "xml", // item_format_list
-                            out item_records,
-                            "xml",
-                            out string[] reader_records,
-                            "summary",
-                            out biblio_records,
-                            out string[] dup_path,
-                            out string output_reader_barcode,
-                            out ReturnInfo return_info,
-                            out strError);
+                            entity.Waiting = true;
+                            lRet = channel.Borrow(null,
+                                action == "renew",
+                                info.Operator.PatronBarcode,
+                                entity.PII,
+                                entity.ItemRecPath,
+                                false,
+                                null,
+                                "item,reader,biblio,overflowable", // style,
+                                "xml", // item_format_list
+                                out item_records,
+                                "xml",
+                                out string[] reader_records,
+                                "summary",
+                                out biblio_records,
+                                out string[] dup_path,
+                                out string output_reader_barcode,
+                                out borrow_info,
+                                out strError);
+                        }
+                        else if (action == "return")
+                        {
+                            /*
+                            // TODO: 增加检查 EAS 现有状态功能，如果已经是 true 则不用修改，后面 API 遇到出错后也不要回滚 EAS
+                            // return 操作，提前修改 EAS
+                            // 注: 提前修改 EAS 的好处是比较安全。相比 API 执行完以后再修改 EAS，提前修改 EAS 成功后，无论后面发生什么，读者都无法拿着这本书走出门禁
+                            {
+                                var result = SetEAS(entity.UID, entity.Antenna, action == "return");
+                                if (result.Value == -1)
+                                {
+                                    entity.SetError($"{action_name}时修改 EAS 动作失败: {result.ErrorInfo}", "red");
+                                    errors.Add($"册 '{entity.PII}' {action_name}时修改 EAS 动作失败: {result.ErrorInfo}");
+                                    continue;
+                                }
+                            }
+                            */
+                            // 智能书柜不使用 EAS 状态。可以考虑统一修改为 EAS Off 状态？
+
+                            entity.Waiting = true;
+                            lRet = channel.Return(null,
+                                "return",
+                                "", // _patron.Barcode,
+                                entity.PII,
+                                entity.ItemRecPath,
+                                false,
+                                "item,reader,biblio", // style,
+                                "xml", // item_format_list
+                                out item_records,
+                                "xml",
+                                out string[] reader_records,
+                                "summary",
+                                out biblio_records,
+                                out string[] dup_path,
+                                out string output_reader_barcode,
+                                out ReturnInfo return_info,
+                                out strError);
+                        }
+                        else if (action == "transfer")
+                        {
+                            // currentLocation 元素内容。格式为 馆藏地:架号
+                            // 注意馆藏地和架号字符串里面不应包含逗号和冒号
+                            currentLocation = info.CurrentShelfNo;
+                            // string currentLocation = GetRandomString(); // testing
+                            entity.Waiting = true;
+                            // TODO: 如果先前 entity.Title 已经有了内容，就不要在本次 Return() API 中要求返 biblio summary
+                            lRet = channel.Return(null,
+                                "transfer",
+                                "", // _patron.Barcode,
+                                entity.PII,
+                                entity.ItemRecPath,
+                                false,
+                                $"item,biblio,currentLocation:{StringUtil.EscapeString(currentLocation, ":,")}", // style,
+                                "xml", // item_format_list
+                                out item_records,
+                                "xml",
+                                out string[] reader_records,
+                                "summary",
+                                out biblio_records,
+                                out string[] dup_path,
+                                out string output_reader_barcode,
+                                out ReturnInfo return_info,
+                                out strError);
+                        }
                     }
-                    else if (action == "transfer")
+                    finally
                     {
-                        // currentLocation 元素内容。格式为 馆藏地:架号
-                        // 注意馆藏地和架号字符串里面不应包含逗号和冒号
-                        currentLocation = info.CurrentShelfNo;
-                        // string currentLocation = GetRandomString(); // testing
-                        entity.Waiting = true;
-                        // TODO: 如果先前 entity.Title 已经有了内容，就不要在本次 Return() API 中要求返 biblio summary
-                        lRet = channel.Return(null,
-                            "transfer",
-                            "", // _patron.Barcode,
-                            entity.PII,
-                            entity.ItemRecPath,
-                            false,
-                            $"item,biblio,currentLocation:{StringUtil.EscapeString(currentLocation, ":,")}", // style,
-                            "xml", // item_format_list
-                            out item_records,
-                            "xml",
-                            out string[] reader_records,
-                            "summary",
-                            out biblio_records,
-                            out string[] dup_path,
-                            out string output_reader_barcode,
-                            out ReturnInfo return_info,
-                            out strError);
+                        App.CurrentApp.ReturnChannel(channel);
                     }
 
                     processed.Add(info);
@@ -1618,7 +1633,6 @@ namespace dp2SSL
             }
             finally
             {
-                App.CurrentApp.ReturnChannel(channel);
                 _limit.Release();
                 /*
                 Application.Current.Dispatcher.Invoke(new Action(() =>

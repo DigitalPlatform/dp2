@@ -38,6 +38,22 @@
   </table>
   
   <key>
+    <xpath>*/distribute</xpath>
+    <from>itemlocation</from>
+    <table ref="itemlocation" />
+  </key>
+  <table name="itemlocation" id="11">
+    <convert>
+      <string style="distribute_locations,upper" />
+    </convert>
+    <convertquery>
+      <string style="upper" />
+    </convertquery>
+    <caption lang="zh-CN">册去向</caption>
+    <caption lang="en">Item Location</caption>
+  </table>
+
+  <key>
     <xpath>*/orderTime</xpath>
     <from>orderTime</from>
     <table ref="orderTime" />
@@ -94,7 +110,7 @@
     <from>state</from>
     <table ref="state" />
   </key>
-  <table name="state" id="10">
+  <table name="state" id="20">
     <convert>
       <string style="split,upper"/>
     </convert>

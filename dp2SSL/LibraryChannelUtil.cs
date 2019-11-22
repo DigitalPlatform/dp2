@@ -240,6 +240,9 @@ namespace dp2SSL
                         ErrorInfo = strError,
                     };
 
+                // testing
+                // channel.Logout(out strError);
+
                 return new LoginResult
                 {
                     Value = 1,
