@@ -162,6 +162,9 @@
     <Compile Include="Converter\StateToBackConverter.cs" />
     <Compile Include="Converter\StringToBrushConverter.cs" />
     <Compile Include="Converter\StringToOpacityConverter.cs" />
+    <Compile Include="Dialog\AskTransferInWindow.xaml.cs">
+      <DependentUpon>AskTransferInWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Dialog\BookInfoWindow.xaml.cs">
       <DependentUpon>BookInfoWindow.xaml</DependentUpon>
     </Compile>
@@ -234,6 +237,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\EntityListControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Dialog\AskTransferInWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

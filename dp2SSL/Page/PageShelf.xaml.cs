@@ -432,7 +432,7 @@ namespace dp2SSL
             }
 
             // 检查读者记录状态
-            if (_patron.Barcode.StartsWith("~") == false)
+            if (Operator.IsPatronBarcodeWorker(_patron.Barcode) == false)
             {
                 XmlDocument readerdom = new XmlDocument();
                 readerdom.LoadXml(_patron.Xml);
@@ -1263,7 +1263,7 @@ namespace dp2SSL
 
             // TODO: 判断 PII 是否为工作人员账户名
             if (string.IsNullOrEmpty(pii) == false
-                && pii.StartsWith("~"))
+                && Operator.IsPatronBarcodeWorker(pii))
             {
                 // 出现登录对话框，要求输入密码登录验证
                 var login_result = WorkerLogin(pii);
@@ -1430,8 +1430,8 @@ namespace dp2SSL
                 }
             }
             */
-            if (_patron.Barcode != null && _patron.Barcode.StartsWith("~"))
-                App.CurrentApp.RemoveAccount(_patron.Barcode.Substring(1));
+            if (_patron.Barcode != null && Operator.IsPatronBarcodeWorker(_patron.Barcode))
+                App.CurrentApp.RemoveAccount(Operator.BuildWorkerAccountName(_patron.Barcode));
 
             _patron.Clear();
             if (!Application.Current.Dispatcher.CheckAccess())
