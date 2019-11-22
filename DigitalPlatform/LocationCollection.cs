@@ -36,11 +36,9 @@ namespace DigitalPlatform.Text
             List<string> librarycodes = new List<string>();
             foreach (Location item in this)
             {
-                string strLibraryCode = "";
-                string strPureName = "";
                 ParseLocationName(item.Name,
-                    out strLibraryCode,
-                    out strPureName);
+                    out string strLibraryCode,
+                    out string strPureName);
                 librarycodes.Add(strLibraryCode);
             }
 
@@ -148,6 +146,7 @@ namespace DigitalPlatform.Text
 
             return nValue;
         }
+
 
         // 2012/12/22
         // 返回全部 RefID

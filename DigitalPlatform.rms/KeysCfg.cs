@@ -700,7 +700,7 @@ namespace DigitalPlatform.rms
                     nRet = this.DoScriptFunction(domData,
                         strFunctionName,
                         "", //strInputString
-                        // out strOutputString,
+                            // out strOutputString,
                         out OutputStrings,
                         out strError);
                     if (nRet == -1)
@@ -1677,13 +1677,25 @@ namespace DigitalPlatform.rms
                 else if (strOneStyleLower == "distribute_refids")
                 {
                     // 2008/10/22
-
                     List<string> results = new List<string>();
-
 
                     for (int i = 0; i < keys.Count; i++)
                     {
-                        List<string> temp_ids = GetLocationRefIDs(keys[i]);
+                        List<string> temp_ids = GetDistributeRefIDs(keys[i]);
+                        if (temp_ids.Count > 0)
+                            results.AddRange(temp_ids);
+                    }
+
+                    keys = results;
+                }
+                else if (strOneStyleLower == "distribute_locations")
+                {
+                    // 2019/11/22
+                    List<string> results = new List<string>();
+
+                    for (int i = 0; i < keys.Count; i++)
+                    {
+                        List<string> temp_ids = GetDistributeLocations(keys[i]);
                         if (temp_ids.Count > 0)
                             results.AddRange(temp_ids);
                     }
@@ -1714,7 +1726,6 @@ namespace DigitalPlatform.rms
                             out strError);
                         if (nRet == -1)
                             return -1;
-
                     }
                     else
                     {
@@ -1768,9 +1779,65 @@ namespace DigitalPlatform.rms
             return results;
         }
 
+        public static List<string> GetDistributeLocations(string strText)
+        {
+            List<string> results = new List<string>();
+            if (string.IsNullOrEmpty(strText))
+                return results;
+
+            string[] sections = strText.Split(new char[] { ';' });
+            foreach (string s in sections)
+            {
+                string strSection = s.Trim();
+                if (String.IsNullOrEmpty(strSection) == true)
+                    continue;
+
+                // string strIDs = ""; // 已验收id列表
+
+                string strLocationString = "";
+                int nRet = strSection.IndexOf(":");
+                if (nRet == -1)
+                {
+                    strLocationString = strSection;
+                    // nCount = 1;
+                }
+                else
+                {
+                    strLocationString = strSection.Substring(0, nRet).Trim();
+
+
+                    /*
+                    string strCount = strSection.Substring(nRet + 1);
+
+                    nRet = strCount.IndexOf("{");
+                    if (nRet != -1)
+                    {
+                        strIDs = strCount.Substring(nRet + 1).Trim();
+
+                        if (strIDs.Length > 0 && strIDs[strIDs.Length - 1] == '}')
+                            strIDs = strIDs.Substring(0, strIDs.Length - 1);
+
+                        strCount = strCount.Substring(0, nRet).Trim();
+                    }
+
+                    nCount = 0;
+                    Int32.TryParse(strCount, out nCount);
+                    */
+                }
+
+                if (string.IsNullOrEmpty(strLocationString) == false)
+                    results.Add(strLocationString);
+            }
+
+            StringUtil.RemoveDup(ref results, false);
+            return results;
+        }
+
+
+        // 保存本库:1{b898966a-13bb-43c9-b56a-28e25f5074af};流通库:2
         // 将采购馆藏字符串中的refid解析出来
-        // 花括号中,逗号是原来的分割refid字符粗汉之间的符号，'|'是套内分割refid的符号
-        public static List<string> GetLocationRefIDs(string strText)
+        // 花括号中,逗号是原来的分割refid字符串之间的符号，'|'是套内分割refid的符号
+        public static List<string> GetDistributeRefIDs(string strText)
         {
             List<string> results = new List<string>();
 

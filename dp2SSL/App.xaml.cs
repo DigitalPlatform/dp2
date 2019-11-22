@@ -508,13 +508,60 @@ namespace dp2SSL
 
         #region LibraryChannel
 
+        class Account
+        {
+            public string UserName { get; set; }
+            public string Password { get; set; }
+        }
+
+        Dictionary<string, Account> _accounts = new Dictionary<string, Account>();
+        
+        Account FindAcount(string userName)
+        {
+            if (_accounts.ContainsKey(userName) == false)
+                return null;
+            return _accounts[userName];
+        }
+
+        public void SetAccount(string userName, string password)
+        {
+            Account account = null;
+            if (_accounts.ContainsKey(userName) == false)
+            {
+                account = new Account
+                {
+                    UserName = userName,
+                    Password = password
+                };
+                _accounts[userName] = account;
+            }
+            else
+            {
+                account = _accounts[userName];
+                account.Password = password;
+            }
+        }
+
+        public void RemoveAccount(string userName)
+        {
+            if (_accounts.ContainsKey(userName))
+                _accounts.Remove(userName);
+        }
+
         internal void Channel_BeforeLogin(object sender,
 DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
         {
+            LibraryChannel channel = sender as LibraryChannel;
             if (e.FirstTry == true)
             {
                 // TODO: 从工作人员用户名密码记载里面检查，如果是工作人员账户，则 ...
-
+                Account account = FindAcount(channel.UserName);
+                if (account != null)
+                {
+                    e.UserName = account.UserName;
+                    e.Password = account.Password;
+                }
+                else
                 {
                     e.UserName = dp2UserName;
 
