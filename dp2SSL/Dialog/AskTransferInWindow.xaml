@@ -33,13 +33,13 @@
                     Width="200" Height="60" 
                     FontSize="30" FontWeight="ExtraBold" 
                     Foreground="White" 
-                    Click="OkButton_Click">典藏移交</Button>
+                    Click="TransferButton_Click">典藏移交</Button>
             <Button Name="notButton" 
                     Style="{DynamicResource RoundedButtonStyle}" 
                     Width="160" Height="60" 
                     FontSize="30" FontWeight="ExtraBold" 
                     Foreground="White" 
-                    Click="OkButton_Click">不移交</Button>
+                    Click="NotButton_Click">不移交</Button>
 
         </StackPanel>
 

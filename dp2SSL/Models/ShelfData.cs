@@ -464,11 +464,14 @@ namespace dp2SSL
                         string location = "";
                         // 工作人员身份，还可能要进行馆藏位置向内转移
                         if (person.IsWorker == true)
-                            location = "%checkin_location%";
+                        {
+                            location = GetLocationPart(ShelfData.GetShelfNo(entity));
+                        }
                         actions.Add(new ActionInfo
                         {
                             Entity = entity,
                             Action = "transfer",
+                            TransferDirection = "in",
                             Location = location,
                             CurrentShelfNo = ShelfData.GetShelfNo(entity),
                             Operator = person
@@ -489,13 +492,15 @@ namespace dp2SSL
                     string location = "";
                     // 工作人员身份，还可能要进行馆藏位置转移
                     if (person.IsWorker == true)
-                        location = "%checkin_location%";
-
+                    {
+                        location = GetLocationPart(ShelfData.GetShelfNo(entity));
+                    }
                     // 更新
                     actions.Add(new ActionInfo
                     {
                         Entity = entity,
                         Action = "transfer",
+                        TransferDirection = "in",
                         Location = location,
                         CurrentShelfNo = ShelfData.GetShelfNo(entity),
                         Operator = person
@@ -530,8 +535,9 @@ namespace dp2SSL
                         {
                             Entity = entity,
                             Action = "transfer",
+                            TransferDirection = "out",
                             Location = location,
-                            CurrentShelfNo = ShelfData.GetShelfNo(entity),
+                            // 注: ShelfNo 成员不使用。意在保持册记录中 currentLocation 元素不变
                             Operator = person
                         });
                     }
@@ -553,6 +559,12 @@ namespace dp2SSL
             }
         }
 
+        // 从 "阅览室:1-1" 中析出 "阅览室" 部分
+        static string GetLocationPart(string shelfNo)
+        {
+            return StringUtil.ParseTwoPart(shelfNo, ":")[0];
+        }
+
         // 将 actions 保存起来
         public static void PushActions(List<ActionInfo> actions)
         {
@@ -563,20 +575,46 @@ namespace dp2SSL
         public static void AskLocationTransfer(List<ActionInfo> actions)
         {
             // 1) 搜集信息。观察是否有需要询问和兑现的参数
-            List<ActionInfo> checkins = new List<ActionInfo>();
-            foreach(var action in actions)
+            List<ActionInfo> transferins = new List<ActionInfo>();
+            foreach (var action in actions)
             {
                 if (action.Action == "transfer"
-                    && action.Location == "%checkin_location%")
+                    && action.TransferDirection == "in"
+                    && string.IsNullOrEmpty(action.Location) == false)
                 {
-                    checkins.Add(action);
+                    transferins.Add(action);
                 }
             }
 
             // 询问放入的图书是否需要移交到当前书柜馆藏地
-            if (checkins.Count > 0)
+            if (transferins.Count > 0)
             {
+                EntityCollection collection = new EntityCollection();
+                foreach (var action in transferins)
+                {
+                    Entity dup = action.Entity.Clone();
+                    dup.Container = collection;
+                    collection.Add(dup);
+                }
+                string selection = "";
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    AskTransferInWindow dialog = new AskTransferInWindow();
+                    dialog.SetBooks(collection);
+                    dialog.Text = $"是否要针对以上放入书柜的图书进行典藏移交？";
+                    dialog.Owner = App.CurrentApp.MainWindow;
+                    dialog.ShowDialog();
+                    selection = dialog.Selection;
+                }));
 
+                // 把 transfer 动作里的 Location 成员清除
+                if (selection == "not")
+                {
+                    foreach (var action in transferins)
+                    {
+                        action.Location = "";
+                    }
+                }
             }
         }
 
@@ -1279,6 +1317,7 @@ namespace dp2SSL
             //string patron_name,
             List<ActionInfo> actions)
         {
+
             // TODO: 如果当前没有读者身份，则当作初始化处理，将书柜内的全部图书做还书尝试；被拿走的图书记入本地日志(所谓无主操作)
             // TODO: 注意还书，也就是往书柜里面放入图书，是不需要具体读者身份就可以提交的
 
@@ -1512,6 +1551,11 @@ namespace dp2SSL
                         resultType = "error";
                     else if (lRet == 1)
                         resultType = "information";
+                    string direction = "";
+                    if (string.IsNullOrEmpty(info.Location) == false)
+                        direction = $"家({info.Location})";
+                    if (string.IsNullOrEmpty(info.CurrentShelfNo) == false)
+                        direction += $" 当前位置({info.CurrentShelfNo})";
                     MessageItem messageItem = new MessageItem
                     {
                         Operator = info.Operator,
@@ -1520,7 +1564,7 @@ namespace dp2SSL
                         ErrorCode = channel.ErrorCode.ToString(),
                         ErrorInfo = strError,
                         Entity = entity,
-                        Direction = $"-->({currentLocation})",
+                        Direction = $"-->{direction}",
                     };
                     doc.Add(messageItem);
 
@@ -1561,7 +1605,7 @@ namespace dp2SSL
                             if (channel.ErrorCode == ErrorCode.NotChanged)
                             {
                                 // 不出现在结果中
-                                doc.Remove(messageItem);
+                                // doc.Remove(messageItem);
 
                                 // 改为警告
                                 messageItem.ResultType = "warning";
@@ -1733,6 +1777,7 @@ namespace dp2SSL
         public Operator Operator { get; set; }  // 提起请求的读者
         public Entity Entity { get; set; }
         public string Action { get; set; }  // borrow/return/transfer
+        public string TransferDirection { get; set; } // in/out 典藏移交的方向
         public string Location { get; set; }    // 所有者馆藏地。transfer 动作会用到
         public string CurrentShelfNo { get; set; }  // 当前架号。transfer 动作会用到
     }

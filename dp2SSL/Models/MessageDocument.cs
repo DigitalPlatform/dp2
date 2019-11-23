@@ -89,7 +89,7 @@ namespace dp2SSL
                 items.ForEach((o) =>
                 {
                     if (o.Operator != null)
-                        names.Add(o.Operator.PatronName);
+                        names.Add(string.IsNullOrEmpty(o.Operator.PatronName) ? o.Operator.PatronBarcode : o.Operator.PatronName);
                 });
                 StringUtil.RemoveDupNoSort(ref names);
             }
