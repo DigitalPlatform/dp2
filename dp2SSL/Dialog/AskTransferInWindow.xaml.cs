@@ -23,5 +23,48 @@ namespace dp2SSL
         {
             InitializeComponent();
         }
+
+        public void SetBooks(EntityCollection collection)
+        {
+            books.SetSource(collection);
+        }
+
+        public string TitleText
+        {
+            get
+            {
+                return this.title.Text;
+            }
+            set
+            {
+                this.title.Text = value;
+            }
+        }
+
+        public string Text
+        {
+            get
+            {
+                return this.text.Text;
+            }
+            set
+            {
+                this.text.Text = value;
+            }
+        }
+
+        public string Selection { get; set; }
+
+        private void TransferButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.Selection = "transfer";
+            this.Close();
+        }
+
+        private void NotButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.Selection = "not";
+            this.Close();
+        }
     }
 }

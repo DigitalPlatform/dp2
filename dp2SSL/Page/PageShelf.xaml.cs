@@ -1849,6 +1849,7 @@ namespace dp2SSL
 
             try
             {
+                ShelfData.AskLocationTransfer(ShelfData.Actions);
 
                 var result = ShelfData.SubmitCheckInOut(
                 (min, max, value, text) =>
