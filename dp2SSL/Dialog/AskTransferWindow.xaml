@@ -13,7 +13,7 @@
     <Border BorderThickness="1" BorderBrush="Gray">
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="60"/>
+                <RowDefinition Height="auto"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
@@ -22,7 +22,7 @@
             </Grid.RowDefinitions>
 
             <TextBox Name="title" Grid.Row="0"
-                     Background="Transparent" BorderThickness="0"
+                     Background="Transparent" Foreground="LightGray" BorderThickness="0"
                      FontSize="14" HorizontalContentAlignment="Center"/>
             <Border Grid.Row="1" BorderThickness="1" BorderBrush="Gray" Background="#FF272727">
                 <local:EntityListControl x:Name="books"/>

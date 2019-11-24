@@ -594,6 +594,7 @@ namespace dp2SSL
                 // 询问放入的图书是否需要移交到当前书柜馆藏地
                 if (transferins.Count > 0)
                 {
+                    App.CurrentApp.Speak("典藏移交");
                     string batchNo = transferins[0].Operator.GetWorkerAccountName() + "_" + DateTime.Now.ToShortDateString();
                     EntityCollection collection = new EntityCollection();
                     foreach (var action in transferins)
@@ -606,6 +607,7 @@ namespace dp2SSL
                     Application.Current.Dispatcher.Invoke(new Action(() =>
                     {
                         AskTransferWindow dialog = new AskTransferWindow();
+                        dialog.TitleText = "向内移交";
                         dialog.SetBooks(collection);
                         dialog.Text = $"是否要针对以上放入书柜的图书进行典藏移交？";
                         dialog.Owner = App.CurrentApp.MainWindow;
@@ -660,6 +662,8 @@ namespace dp2SSL
                 // 询问放入的图书是否需要移交到当前书柜馆藏地
                 if (transferouts.Count > 0)
                 {
+                    App.CurrentApp.Speak("典藏移交");
+
                     string batchNo = transferouts[0].Operator.GetWorkerAccountName() + "_" + DateTime.Now.ToShortDateString();
 
                     // TODO: 这个列表是否在程序初始化的时候得到?
@@ -677,6 +681,7 @@ namespace dp2SSL
                     Application.Current.Dispatcher.Invoke(new Action(() =>
                     {
                         AskTransferWindow dialog = new AskTransferWindow();
+                        dialog.TitleText = "向外移交";
                         dialog.Mode = "out";
                         dialog.SetBooks(collection);
                         dialog.Text = $"是否要针对以上拿出书柜的图书进行典藏移交？";
