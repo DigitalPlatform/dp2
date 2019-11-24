@@ -1391,7 +1391,7 @@ namespace DigitalPlatform.OPAC.Server
                         "chargingOperDatabase",
                         out string strValue,
                         out strError);
-                    this.WriteErrorLog("GetSystemParameters() circulation chargingOperDatabase return " + lRet + " , strValue '" + strValue + "', strError '" + strError + "'。(这是一条提示信息，不一定等于出错)");
+                    this.WriteErrorLog("GetSystemParameter() circulation chargingOperDatabase return " + lRet + " , strValue '" + strValue + "', strError '" + strError + "'。(这是一条提示信息，不一定等于出错)");
                     if (strValue == "enabled")
                         this.ChargingHistoryType = strValue;
                     else

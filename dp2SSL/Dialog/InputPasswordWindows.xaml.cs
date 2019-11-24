@@ -23,7 +23,13 @@ namespace dp2SSL
         {
             InitializeComponent();
 
+            this.Loaded += InputPasswordWindows_Loaded;
             this.keyborad.KeyPressed += Keyborad_KeyPressed;
+        }
+
+        private void InputPasswordWindows_Loaded(object sender, RoutedEventArgs e)
+        {
+            this.password.Focus();
         }
 
         private void Keyborad_KeyPressed(object sender, KeyPressedEventArgs e)

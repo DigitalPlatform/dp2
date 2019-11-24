@@ -41,6 +41,9 @@
                         <RowDefinition/>
                         <RowDefinition/>
                         <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+
                     </Grid.RowDefinitions>
                     <fa:ImageAwesome Grid.Row="0" Grid.RowSpan="3" Height="30" Foreground="DarkGray"
                             Icon="Spinner" Spin="true" SpinDuration="5" 
@@ -68,8 +71,16 @@
                                        Visibility="{Binding Path=BorrowInfo, Converter={StaticResource StringToVis}}"
                                        Foreground="LightGray"
                                        TextWrapping="Wrap"/>
+                    <TextBlock Grid.Row="4" Grid.Column="0" Text="{Binding Location}" 
+                                       Visibility="{Binding Path=Location, Converter={StaticResource StringToVis}}"
+                                       Foreground="LightGray"
+                                       TextWrapping="Wrap"/>
+                    <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding CurrentLocation}" 
+                                       Visibility="{Binding Path=CurrentLocation, Converter={StaticResource StringToVis}}"
+                                       Foreground="LightGray"
+                                       TextWrapping="Wrap" HorizontalAlignment="Right"/>
 
-                    <TextBlock Grid.Row="4" Grid.ColumnSpan="2" Text="{Binding Error}"
+                    <TextBlock Grid.Row="5" Grid.ColumnSpan="2" Text="{Binding Error}"
                                        FontSize="12" FontWeight="Bold" Foreground="White" Padding="10"
                                        Background="{Binding Path=ErrorColor, Converter={StaticResource StringToBrush}}"
                                        Visibility="{Binding Path=Error, Converter={StaticResource StringToVis}}"

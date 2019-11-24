@@ -22,6 +22,12 @@ namespace dp2SSL
         public AskTransferInWindow()
         {
             InitializeComponent();
+
+            Loaded += AskTransferInWindow_Loaded;
+        }
+
+        private void AskTransferInWindow_Loaded(object sender, RoutedEventArgs e)
+        {
         }
 
         public void SetBooks(EntityCollection collection)
@@ -55,8 +61,50 @@ namespace dp2SSL
 
         public string Selection { get; set; }
 
+        private string _mode = "in";
+
+        // 模式。in/out
+        public string Mode
+        {
+            get
+            {
+                return _mode;
+            }
+            set
+            {
+                _mode = value;
+                if (_mode == "in")
+                {
+                    targetFrame.Visibility = Visibility.Collapsed;
+                }
+                else
+                {
+                    targetFrame.Visibility = Visibility.Visible;
+                }
+            }
+        }
+
+        public string Target
+        {
+            get
+            {
+                return this.target.Text;
+            }
+            set
+            {
+                this.target.Text = value;
+            }
+        }
+
         private void TransferButton_Click(object sender, RoutedEventArgs e)
         {
+            // 检查 target 是否有值
+            if (string.IsNullOrEmpty(this.target.Text))
+            {
+                MessageBox.Show("尚未选择移交目标");
+                return;
+            }
+
             this.Selection = "transfer";
             this.Close();
         }

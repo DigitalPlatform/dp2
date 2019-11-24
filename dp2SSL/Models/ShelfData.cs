@@ -459,6 +459,7 @@ namespace dp2SSL
                         Operator = person,
                     });
                     // 没有更新的，才进行一次 transfer。更新的留在后面专门做
+                    // “更新”的意思是从这个门移动到了另外一个门
                     if (ShelfData.Find(ShelfData.Changes, entity.UID).Count == 0)
                     {
                         string location = "";
@@ -575,47 +576,105 @@ namespace dp2SSL
         public static void AskLocationTransfer(List<ActionInfo> actions)
         {
             // 1) 搜集信息。观察是否有需要询问和兑现的参数
-            List<ActionInfo> transferins = new List<ActionInfo>();
-            foreach (var action in actions)
             {
-                if (action.Action == "transfer"
-                    && action.TransferDirection == "in"
-                    && string.IsNullOrEmpty(action.Location) == false)
+                List<ActionInfo> transferins = new List<ActionInfo>();
+                foreach (var action in actions)
                 {
-                    transferins.Add(action);
+                    if (action.Action == "transfer"
+                        && action.TransferDirection == "in"
+                        && string.IsNullOrEmpty(action.Location) == false)
+                    {
+                        transferins.Add(action);
+                    }
                 }
-            }
 
-            // 询问放入的图书是否需要移交到当前书柜馆藏地
-            if (transferins.Count > 0)
-            {
-                EntityCollection collection = new EntityCollection();
-                foreach (var action in transferins)
+                // 询问放入的图书是否需要移交到当前书柜馆藏地
+                if (transferins.Count > 0)
                 {
-                    Entity dup = action.Entity.Clone();
-                    dup.Container = collection;
-                    collection.Add(dup);
-                }
-                string selection = "";
-                Application.Current.Dispatcher.Invoke(new Action(() =>
-                {
-                    AskTransferInWindow dialog = new AskTransferInWindow();
-                    dialog.SetBooks(collection);
-                    dialog.Text = $"是否要针对以上放入书柜的图书进行典藏移交？";
-                    dialog.Owner = App.CurrentApp.MainWindow;
-                    dialog.ShowDialog();
-                    selection = dialog.Selection;
-                }));
-
-                // 把 transfer 动作里的 Location 成员清除
-                if (selection == "not")
-                {
+                    EntityCollection collection = new EntityCollection();
                     foreach (var action in transferins)
                     {
-                        action.Location = "";
+                        Entity dup = action.Entity.Clone();
+                        dup.Container = collection;
+                        collection.Add(dup);
+                    }
+                    string selection = "";
+                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    {
+                        AskTransferInWindow dialog = new AskTransferInWindow();
+                        dialog.SetBooks(collection);
+                        dialog.Text = $"是否要针对以上放入书柜的图书进行典藏移交？";
+                        dialog.Owner = App.CurrentApp.MainWindow;
+                        dialog.ShowDialog();
+                        selection = dialog.Selection;
+                    }));
+
+                    // 把 transfer 动作里的 Location 成员清除
+                    if (selection == "not")
+                    {
+                        foreach (var action in transferins)
+                        {
+                            action.Location = "";
+                        }
                     }
                 }
             }
+
+            // 2) 搜集信息。观察是否有移交出
+            {
+                List<ActionInfo> transferouts = new List<ActionInfo>();
+                foreach (var action in actions)
+                {
+                    if (action.Action == "transfer"
+                        && action.TransferDirection == "out"
+                        && string.IsNullOrEmpty(action.Location) == false)
+                    {
+                        transferouts.Add(action);
+                    }
+                }
+
+                // 询问放入的图书是否需要移交到当前书柜馆藏地
+                if (transferouts.Count > 0)
+                {
+                    EntityCollection collection = new EntityCollection();
+                    foreach (var action in transferouts)
+                    {
+                        Entity dup = action.Entity.Clone();
+                        dup.Container = collection;
+                        collection.Add(dup);
+                    }
+                    string selection = "";
+                    string target = "";
+                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    {
+                        AskTransferInWindow dialog = new AskTransferInWindow();
+                        dialog.Mode = "out";
+                        dialog.SetBooks(collection);
+                        dialog.Text = $"是否要针对以上拿出书柜的图书进行典藏移交？";
+                        dialog.Owner = App.CurrentApp.MainWindow;
+                        dialog.ShowDialog();
+                        selection = dialog.Selection;
+                        target = dialog.Target;
+                    }));
+
+                    // 把 transfer 动作里的 Location 成员清除
+                    if (selection == "not")
+                    {
+                        foreach (var action in transferouts)
+                        {
+                            action.Location = "";
+                        }
+                    }
+                    else
+                    {
+                        foreach (var action in transferouts)
+                        {
+                            action.Location = target;
+                        }
+                    }
+                }
+            }
+
         }
 
         static List<Entity> _all = new List<Entity>();  // 累积的全部图书
