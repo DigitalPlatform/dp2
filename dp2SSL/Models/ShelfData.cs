@@ -636,6 +636,9 @@ namespace dp2SSL
                 // 询问放入的图书是否需要移交到当前书柜馆藏地
                 if (transferouts.Count > 0)
                 {
+                    // TODO: 这个列表是否在程序初始化的时候得到?
+                    var result = LibraryChannelUtil.GetLocationList();
+
                     EntityCollection collection = new EntityCollection();
                     foreach (var action in transferouts)
                     {
@@ -651,6 +654,7 @@ namespace dp2SSL
                         dialog.Mode = "out";
                         dialog.SetBooks(collection);
                         dialog.Text = $"是否要针对以上拿出书柜的图书进行典藏移交？";
+                        dialog.target.ItemsSource = result.List;
                         dialog.Owner = App.CurrentApp.MainWindow;
                         dialog.ShowDialog();
                         selection = dialog.Selection;
@@ -1420,6 +1424,9 @@ namespace dp2SSL
                 // TODO: 准备工作：把涉及到的 Entity 对象的字段填充完整
                 // 检查 PII 是否都具备了
 
+                // xml 发生改变了的那些实体记录
+                List<Entity> updates = new List<Entity>();
+
                 int success_count = 0;
                 List<string> errors = new List<string>();
                 List<string> borrows = new List<string>();
@@ -1532,7 +1539,12 @@ namespace dp2SSL
                         {
                             // currentLocation 元素内容。格式为 馆藏地:架号
                             // 注意馆藏地和架号字符串里面不应包含逗号和冒号
-                            currentLocation = info.CurrentShelfNo;
+                            List<string> commands = new List<string>();
+                            if (string.IsNullOrEmpty(info.CurrentShelfNo) == false)
+                                commands.Add($"currentLocation:{StringUtil.EscapeString(info.CurrentShelfNo, ":,")}");
+                            if (string.IsNullOrEmpty(info.Location) == false)
+                                commands.Add($"location:{StringUtil.EscapeString(info.Location, ":,")}");
+
                             // string currentLocation = GetRandomString(); // testing
                             entity.Waiting = true;
                             // TODO: 如果先前 entity.Title 已经有了内容，就不要在本次 Return() API 中要求返 biblio summary
@@ -1542,7 +1554,7 @@ namespace dp2SSL
                                 entity.PII,
                                 entity.ItemRecPath,
                                 false,
-                                $"item,biblio,currentLocation:{StringUtil.EscapeString(currentLocation, ":,")}", // style,
+                                $"item,biblio,{StringUtil.MakePathList(commands, ",")}", // style,
                                 "xml", // item_format_list
                                 out item_records,
                                 "xml",
@@ -1722,7 +1734,10 @@ namespace dp2SSL
                     // 刷新显示
                     {
                         if (item_records?.Length > 0)
+                        {
                             entity.SetData(entity.ItemRecPath, item_records[0]);
+                            updates.Add(entity);
+                        }
 
                         if (entity.Error != null)
                             continue;
@@ -1766,6 +1781,7 @@ namespace dp2SSL
                     // DoorItem.DisplayCount(_all, _adds, _removes, App.CurrentApp.Doors);
                     ShelfData.RefreshCount();
 
+                    DoorItem.RefreshEntity(updates, ShelfData.Doors);
                     // App.CurrentApp.Speak(speak);
                 }
 

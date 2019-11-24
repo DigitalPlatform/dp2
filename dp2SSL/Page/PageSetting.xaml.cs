@@ -184,6 +184,7 @@ namespace dp2SSL
             try
             {
                 Window cfg_window = new ConfigWindow();
+                cfg_window.Owner = App.CurrentApp.MainWindow;
                 cfg_window.ShowDialog();
             }
             finally

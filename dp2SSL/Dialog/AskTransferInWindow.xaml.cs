@@ -98,11 +98,14 @@ namespace dp2SSL
 
         private void TransferButton_Click(object sender, RoutedEventArgs e)
         {
-            // 检查 target 是否有值
-            if (string.IsNullOrEmpty(this.target.Text))
+            if (this.Mode == "out")
             {
-                MessageBox.Show("尚未选择移交目标");
-                return;
+                // 检查 target 是否有值
+                if (string.IsNullOrEmpty(this.target.Text))
+                {
+                    MessageBox.Show("尚未选择移交目标");
+                    return;
+                }
             }
 
             this.Selection = "transfer";

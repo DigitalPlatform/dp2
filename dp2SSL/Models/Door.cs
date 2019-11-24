@@ -251,8 +251,8 @@ namespace dp2SSL
                     if (string.IsNullOrEmpty(lockName) == false)
                         lockName = NormalizeLockName(lockName);
                     // ParseReaderString(, out string lockName, out int lockIndex);
-                    ParseReaderString(door.GetAttribute("antenna"), 
-                        out string readerName, 
+                    ParseReaderString(door.GetAttribute("antenna"),
+                        out string readerName,
                         out int antenna);
 
                     string lampName = door.GetAttribute("lamp");
@@ -455,6 +455,21 @@ namespace dp2SSL
             return table;
         }
 
+        public static void RefreshEntity(List<Entity> entities,
+            List<DoorItem> _doors)
+        {
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                foreach (var door in _doors)
+                {
+                    Refresh(door._allEntities, entities);
+                    Refresh(door._removeEntities, entities);
+                    Refresh(door._addEntities, entities);
+                    Refresh(door._errorEntities, entities);
+                }
+            }));
+        }
+
         // 统计各种计数，然后刷新到 DoorItem 中
         public static void DisplayCount(List<Entity> entities,
             List<Entity> adds,
@@ -502,10 +517,10 @@ namespace dp2SSL
                 {
                     // 更新 entities
                     // TODO: 异步填充
-                    if (Refresh(door._allEntities, count) == true
-                    || Refresh(door._removeEntities, remove) == true
-                    || Refresh(door._addEntities, add) == true
-                    || Refresh(door._errorEntities, error) == true)
+                    if (Update(door._allEntities, count) == true
+                    || Update(door._removeEntities, remove) == true
+                    || Update(door._addEntities, add) == true
+                    || Update(door._errorEntities, error) == true)
                     {
                         var task = Task.Run(async () =>
                         {
@@ -531,8 +546,8 @@ namespace dp2SSL
             }
         }
 
-        // 根据 items 集合更新 collection 集合内容
-        static bool Refresh(EntityCollection collection, List<Entity> items)
+        // 根据 items 集合完整替换更新 collection 集合内容
+        static bool Update(EntityCollection collection, List<Entity> items)
         {
             bool changed = false;
             int oldCount = items.Count;
@@ -568,6 +583,27 @@ namespace dp2SSL
             Debug.Assert(oldCount == items.Count, "");
             return changed;
         }
+
+        // 根据 items 集合更新据部 collection 集合内容
+        static void Refresh(EntityCollection collection, List<Entity> items)
+        {
+            // 添加 items 中多出来的对象
+            foreach (var item in items)
+            {
+                // 用 UID 来搜索
+                var found = collection.FindEntityByUID(item.UID);
+                if (found != null)
+                {
+                    // 尽量保持原来 index 位置不变
+                    int index = collection.IndexOf(found);
+                    collection.RemoveAt(index);
+                    Entity dup = item.Clone();
+                    dup.Container = collection;
+                    collection.Insert(index, dup);
+                }
+            }
+        }
+
     }
 
 
