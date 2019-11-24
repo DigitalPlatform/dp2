@@ -2611,6 +2611,8 @@ out strError);
                 bool bSimulate = StringUtil.IsInList("simulate", info.Style);     // 是否为模拟操作? 2015/6/9
                 bool bAutoPostfix = StringUtil.IsInList("autopostfix", info.Style); // 是否为自动加入后缀模式。指为发生重复的册条码号，登录号，自动添加后缀字符串
 
+                string batchNo = StringUtil.GetParameterByPrefix(info.Style, "batchNo");
+
                 string strStyle = info.Style;
 
                 // 加工 style 字符串，便于写入日志
@@ -3548,6 +3550,11 @@ out strError);
                     if (domOperLog != null
                         && bNoEventLog == false)    // 2008/10/6 
                     {
+                        // 2019/11/25
+                        // 在日志记录中写入批次号
+                        if (batchNo != null)
+                            DomUtil.SetElementText(domOperLog.DocumentElement, "batchNo", batchNo);
+
                         string strOperTime = this.Clock.GetClock();
                         DomUtil.SetElementText(domOperLog.DocumentElement, "operator",
                             sessioninfo.UserID);   // 操作者

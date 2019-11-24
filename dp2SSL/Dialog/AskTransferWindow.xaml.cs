@@ -17,9 +17,9 @@ namespace dp2SSL
     /// <summary>
     /// 询问是否要典藏移交进智能书柜所在馆藏地，的对话框
     /// </summary>
-    public partial class AskTransferInWindow : Window
+    public partial class AskTransferWindow : Window
     {
-        public AskTransferInWindow()
+        public AskTransferWindow()
         {
             InitializeComponent();
 
@@ -56,6 +56,18 @@ namespace dp2SSL
             set
             {
                 this.text.Text = value;
+            }
+        }
+
+        public string BatchNo
+        {
+            get
+            {
+                return this.batchNo.Text;
+            }
+            set
+            {
+                this.batchNo.Text = value;
             }
         }
 
