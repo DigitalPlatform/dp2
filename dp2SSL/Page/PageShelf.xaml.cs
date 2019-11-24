@@ -1839,7 +1839,26 @@ namespace dp2SSL
             CloseDialogs();
 
             // 对涉及到工作人员身份进行典藏移交的 action 进行补充修正
-            ShelfData.AskLocationTransfer(ShelfData.Actions);
+            bool changed = false;
+            ShelfData.AskLocationTransfer(ShelfData.Actions,
+                (action) =>
+                {
+                    var entity = action.Entity;
+                    if (action.Action == "transfer")
+                    {
+                        ShelfData.Remove(ShelfData.All, entity);
+                        ShelfData.Remove(ShelfData.Adds, entity);
+                        ShelfData.Remove(ShelfData.Removes, entity);
+                        ShelfData.Remove(ShelfData.Changes, entity);
+                        changed = true;
+                    }
+                });
+
+            if (changed)
+                ShelfData.RefreshCount();
+
+            if (ShelfData.Actions.Count == 0)
+                return;  // 没有必要处理
 
             SubmitWindow progress = null;
 

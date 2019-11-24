@@ -24,7 +24,9 @@
             <TextBox Name="title" Grid.Row="0"
                      Background="Transparent" BorderThickness="0"
                      FontSize="14" HorizontalContentAlignment="Center"/>
-            <local:EntityListControl x:Name="books" Grid.Row="1"/>
+            <Border Grid.Row="1" BorderThickness="1" BorderBrush="Gray" Background="#FF272727">
+                <local:EntityListControl x:Name="books"/>
+            </Border>
             <TextBox Name="text"  Grid.Row="2" Margin="10"
                    VerticalAlignment="Center" HorizontalAlignment="Center"
                    FontSize="20" TextWrapping="Wrap"
