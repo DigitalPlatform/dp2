@@ -1811,6 +1811,7 @@ namespace dp2Circulation
             string strOperation = DomUtil.GetElementText(dom.DocumentElement, "operation");
             string strAction = DomUtil.GetElementText(dom.DocumentElement, "action");
             string strStyle = DomUtil.GetElementText(dom.DocumentElement, "style");
+            string strBatchNo = DomUtil.GetElementText(dom.DocumentElement, "batchNo");
 
             string strRecord = DomUtil.GetElementText(dom.DocumentElement, "record", out node);
             string strRecPath = "";
@@ -1900,6 +1901,9 @@ namespace dp2Circulation
                 BuildHtmlLine("操作类型", strOperation + " -- " + strOperationCaption) +
 
                 BuildHtmlLine("动作", strAction + " -- " + GetActionName(strOperation, strAction)) +
+
+                (string.IsNullOrEmpty(strBatchNo) == false ?
+                BuildHtmlLine("批次号", strBatchNo) : "") +
 
                 BuildHtmlEncodedLine("操作前的记录", strOldRecPath, strOldRecordHtml) +
                 BuildHtmlEncodedLine("操作后的记录", strRecPath, strRecordHtml) +

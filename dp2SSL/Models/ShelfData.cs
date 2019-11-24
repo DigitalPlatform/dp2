@@ -591,6 +591,7 @@ namespace dp2SSL
                 // 询问放入的图书是否需要移交到当前书柜馆藏地
                 if (transferins.Count > 0)
                 {
+                    string batchNo = transferins[0].Operator.GetWorkerAccountName() + "_" + DateTime.Now.ToShortDateString();
                     EntityCollection collection = new EntityCollection();
                     foreach (var action in transferins)
                     {
@@ -601,12 +602,14 @@ namespace dp2SSL
                     string selection = "";
                     Application.Current.Dispatcher.Invoke(new Action(() =>
                     {
-                        AskTransferInWindow dialog = new AskTransferInWindow();
+                        AskTransferWindow dialog = new AskTransferWindow();
                         dialog.SetBooks(collection);
                         dialog.Text = $"是否要针对以上放入书柜的图书进行典藏移交？";
                         dialog.Owner = App.CurrentApp.MainWindow;
+                        dialog.BatchNo = batchNo;
                         dialog.ShowDialog();
                         selection = dialog.Selection;
+                        batchNo = dialog.BatchNo;
                     }));
 
                     // 把 transfer 动作里的 Location 成员清除
@@ -615,6 +618,13 @@ namespace dp2SSL
                         foreach (var action in transferins)
                         {
                             action.Location = "";
+                        }
+                    }
+                    else
+                    {
+                        foreach (var action in transferins)
+                        {
+                            action.BatchNo = batchNo;
                         }
                     }
                 }
@@ -636,6 +646,8 @@ namespace dp2SSL
                 // 询问放入的图书是否需要移交到当前书柜馆藏地
                 if (transferouts.Count > 0)
                 {
+                    string batchNo = transferouts[0].Operator.GetWorkerAccountName() + "_" + DateTime.Now.ToShortDateString();
+
                     // TODO: 这个列表是否在程序初始化的时候得到?
                     var result = LibraryChannelUtil.GetLocationList();
 
@@ -650,15 +662,17 @@ namespace dp2SSL
                     string target = "";
                     Application.Current.Dispatcher.Invoke(new Action(() =>
                     {
-                        AskTransferInWindow dialog = new AskTransferInWindow();
+                        AskTransferWindow dialog = new AskTransferWindow();
                         dialog.Mode = "out";
                         dialog.SetBooks(collection);
                         dialog.Text = $"是否要针对以上拿出书柜的图书进行典藏移交？";
                         dialog.target.ItemsSource = result.List;
+                        dialog.BatchNo = batchNo;
                         dialog.Owner = App.CurrentApp.MainWindow;
                         dialog.ShowDialog();
                         selection = dialog.Selection;
                         target = dialog.Target;
+                        batchNo = dialog.BatchNo;
                     }));
 
                     // 把 transfer 动作里的 Location 成员清除
@@ -674,6 +688,7 @@ namespace dp2SSL
                         foreach (var action in transferouts)
                         {
                             action.Location = target;
+                            action.BatchNo = batchNo;
                         }
                     }
                 }
@@ -1544,6 +1559,8 @@ namespace dp2SSL
                                 commands.Add($"currentLocation:{StringUtil.EscapeString(info.CurrentShelfNo, ":,")}");
                             if (string.IsNullOrEmpty(info.Location) == false)
                                 commands.Add($"location:{StringUtil.EscapeString(info.Location, ":,")}");
+                            if (string.IsNullOrEmpty(info.BatchNo) == false)
+                                commands.Add($"batchNo:{StringUtil.EscapeString(info.BatchNo, ":,")}");
 
                             // string currentLocation = GetRandomString(); // testing
                             entity.Waiting = true;
@@ -1855,6 +1872,7 @@ namespace dp2SSL
         public string TransferDirection { get; set; } // in/out 典藏移交的方向
         public string Location { get; set; }    // 所有者馆藏地。transfer 动作会用到
         public string CurrentShelfNo { get; set; }  // 当前架号。transfer 动作会用到
+        public string BatchNo { get; set; } // 批次号。transfer 动作会用到。建议可以用当前用户名加上日期构成
     }
 
     public class SubmitResult : NormalResult

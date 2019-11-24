@@ -162,8 +162,8 @@
     <Compile Include="Converter\StateToBackConverter.cs" />
     <Compile Include="Converter\StringToBrushConverter.cs" />
     <Compile Include="Converter\StringToOpacityConverter.cs" />
-    <Compile Include="Dialog\AskTransferInWindow.xaml.cs">
-      <DependentUpon>AskTransferInWindow.xaml</DependentUpon>
+    <Compile Include="Dialog\AskTransferWindow.xaml.cs">
+      <DependentUpon>AskTransferWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Dialog\BookInfoWindow.xaml.cs">
       <DependentUpon>BookInfoWindow.xaml</DependentUpon>
@@ -240,7 +240,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Dialog\AskTransferInWindow.xaml">
+    <Page Include="Dialog\AskTransferWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

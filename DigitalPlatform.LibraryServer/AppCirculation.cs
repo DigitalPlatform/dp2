@@ -6275,6 +6275,7 @@ start_time_1,
 
                     if (strAction == "transfer")
                     {
+                        strBatchNo = StringUtil.GetParameterByPrefix(strStyle, "batchNo");
                         string strNewLocation = StringUtil.GetParameterByPrefix(strStyle, "location");
                         // 注意参数值里面的逗号和冒号在请求时候要处理为转义字符
                         if (strNewLocation != null)
@@ -7794,6 +7795,7 @@ start_time_1,
                 }
             }
 
+            /*
             if (strBatchNo != null)
             {
                 string old_batchno = DomUtil.GetElementText(new_itemdom.DocumentElement,
@@ -7805,6 +7807,7 @@ start_time_1,
                     changed = true;
                 }
             }
+            */
 
             if (changed == false)
                 return 0;
@@ -7820,6 +7823,9 @@ start_time_1,
             info.NewRecPath = strItemRecPath;
             info.NewRecord = new_itemdom.OuterXml;
             info.Style = "dont_lock";
+
+            if (string.IsNullOrEmpty(strBatchNo) == false)
+                info.Style += ",batchNo:" + strBatchNo;
 
             var result = this.SetEntities(sessioninfo,
                 "", // strBiblioRecPath,
