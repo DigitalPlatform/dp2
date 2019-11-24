@@ -399,6 +399,7 @@ namespace dp2SSL
         private string _location;
 
         // 原始馆藏地
+        // 从册记录 location 元素中取出来的，并去除了 #reserve 部分的字符串
         public string Location
         {
             get => _location;
@@ -412,6 +413,37 @@ namespace dp2SSL
             }
         }
 
+        private string _currentLocation = "";
+
+        // 当前位置
+        // 从册记录 currentLocation 元素中取出来的字符串
+        public string CurrentLocation
+        {
+            get => _currentLocation;
+            set
+            {
+                if (_currentLocation != value)
+                {
+                    _currentLocation = value;
+                    OnPropertyChanged("CurrentLocation");
+                }
+            }
+        }
+
+        private string _shelfNo = "";
+
+        public string ShelfNo
+        {
+            get => _shelfNo;
+            set
+            {
+                if (_shelfNo != value)
+                {
+                    _shelfNo = value;
+                    OnPropertyChanged("ShelfNo");
+                }
+            }
+        }
         private string _borrowInfo;
 
         public string BorrowInfo
@@ -445,7 +477,6 @@ namespace dp2SSL
                 }
             }
         }
-
 
         // 是否在智能书架架上
         public bool OnShelf
@@ -481,48 +512,6 @@ namespace dp2SSL
         }
 
         public bool FillFinished { get; set; }
-#if NO
-        public string Error
-        {
-            get => _error;
-            set
-            {
-                _error = value;
-                OnPropertyChanged("Error");
-            }
-        }
-
-        bool _waiting = true;
-
-        public bool Waiting
-        {
-            get
-            {
-                return _waiting;
-            }
-            set
-            {
-                _waiting = value;
-                OnPropertyChanged("Waiting");
-            }
-        }
-
-#endif
-
-
-#if NO
-        void OnPropertyChanged(string name)
-        {
-            if (this.PropertyChanged != null)
-                PropertyChanged(this, new PropertyChangedEventArgs(name));
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-#endif
-
-        // internal string ItemXml { get; set; }
-
 
         public void SetData(string item_recpath, string xml)
         {
@@ -544,10 +533,17 @@ namespace dp2SSL
             else
                 this.State = "borrowed";
 
-            // TODO: 设置借书日期、期限、应还日期等
+            // 设置借书日期、期限、应还日期等
             string location = DomUtil.GetElementText(dom.DocumentElement, "location");
             location = StringUtil.GetPureLocation(location);
             this.Location = location;
+
+            // 2019/11/24
+            string currentLocation = DomUtil.GetElementText(dom.DocumentElement, "currentLocation");
+            this.CurrentLocation = currentLocation;
+
+            string shelfNo = DomUtil.GetElementText(dom.DocumentElement, "shelfNo");
+            this.ShelfNo = shelfNo;
 
             string borrowDate = DomUtil.GetElementText(dom.DocumentElement, "borrowDate");
             string returningDate = DomUtil.GetElementText(dom.DocumentElement, "returningDate");

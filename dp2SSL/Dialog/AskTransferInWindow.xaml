@@ -16,6 +16,7 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
 
         <TextBox Name="title" Grid.Row="0"
@@ -27,7 +28,12 @@
                    FontSize="20" TextWrapping="Wrap"
                  Background="Transparent" Foreground="White" 
                  VerticalScrollBarVisibility="Auto" BorderThickness="0">Text</TextBox>
-        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center">
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center"
+                    Name="targetFrame" Visibility="Collapsed">
+            <TextBlock>移交到: </TextBlock>
+            <ComboBox Name="target" Width="400"></ComboBox>
+        </StackPanel>
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Center">
             <Button Name="transferButton" 
                     Style="{DynamicResource RoundedButtonStyle}" 
                     Width="200" Height="60" 
