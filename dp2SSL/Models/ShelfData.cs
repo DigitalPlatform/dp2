@@ -572,8 +572,11 @@ namespace dp2SSL
             _actions.AddRange(actions);
         }
 
+        public delegate void Delegate_removeAction(ActionInfo action);
+
         // 询问典藏移交的一些条件参数
-        public static void AskLocationTransfer(List<ActionInfo> actions)
+        public static void AskLocationTransfer(List<ActionInfo> actions,
+            Delegate_removeAction func_removeAction)
         {
             // 1) 搜集信息。观察是否有需要询问和兑现的参数
             {
@@ -607,6 +610,9 @@ namespace dp2SSL
                         dialog.Text = $"是否要针对以上放入书柜的图书进行典藏移交？";
                         dialog.Owner = App.CurrentApp.MainWindow;
                         dialog.BatchNo = batchNo;
+                        dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                        dialog.Width = Math.Min(700, App.CurrentApp.MainWindow.ActualWidth);
+                        dialog.Height = Math.Min(500, App.CurrentApp.MainWindow.ActualHeight);
                         dialog.ShowDialog();
                         selection = dialog.Selection;
                         batchNo = dialog.BatchNo;
@@ -618,6 +624,14 @@ namespace dp2SSL
                         foreach (var action in transferins)
                         {
                             action.Location = "";
+
+                            // 把不需要操作的 ActionInfo 删除
+                            if (string.IsNullOrEmpty(action.Location)
+                                && string.IsNullOrEmpty(action.CurrentShelfNo))
+                            {
+                                actions.Remove(action);
+                                func_removeAction?.Invoke(action);
+                            }
                         }
                     }
                     else
@@ -669,6 +683,9 @@ namespace dp2SSL
                         dialog.target.ItemsSource = result.List;
                         dialog.BatchNo = batchNo;
                         dialog.Owner = App.CurrentApp.MainWindow;
+                        dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                        dialog.Width = Math.Min(700, App.CurrentApp.MainWindow.ActualWidth);
+                        dialog.Height = Math.Min(500, App.CurrentApp.MainWindow.ActualHeight);
                         dialog.ShowDialog();
                         selection = dialog.Selection;
                         target = dialog.Target;
@@ -681,6 +698,14 @@ namespace dp2SSL
                         foreach (var action in transferouts)
                         {
                             action.Location = "";
+
+                            // 把不需要操作的 ActionInfo 删除
+                            if (string.IsNullOrEmpty(action.Location)
+                                && string.IsNullOrEmpty(action.CurrentShelfNo))
+                            {
+                                actions.Remove(action);
+                                func_removeAction?.Invoke(action);
+                            }
                         }
                     }
                     else
@@ -1481,7 +1506,7 @@ namespace dp2SSL
                     string[] item_records = null;
                     string[] biblio_records = null;
                     BorrowInfo borrow_info = null;
-                    string currentLocation = "";
+                    // string currentLocation = "";
 
                     string strUserName = info.Operator?.GetWorkerAccountName();
 
