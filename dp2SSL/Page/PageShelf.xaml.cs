@@ -1358,6 +1358,7 @@ namespace dp2SSL
 
         NormalResult WorkerLogin(string pii)
         {
+            App.CurrentApp.SpeakSequence("请登录");
             string userName = pii.Substring(1);
             bool bRet = false;
             string password = "";
