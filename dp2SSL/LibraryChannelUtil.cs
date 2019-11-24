@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using System.Xml;
 using DigitalPlatform;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
@@ -140,7 +140,6 @@ namespace dp2SSL
             });
         }
 
-
         public class GetReaderInfoResult : NormalResult
         {
             public string RecPath { get; set; }
@@ -255,6 +254,88 @@ namespace dp2SSL
             {
                 App.CurrentApp.ReturnChannel(channel);
             }
+        }
+
+        public class GetLocationListResult : NormalResult
+        {
+            public List<string> List { get; set; }
+        }
+
+        // 获得馆藏地列表
+        public static GetLocationListResult GetLocationList()
+        {
+            string strOutputInfo = "";
+            LibraryChannel channel = App.CurrentApp.GetChannel();
+            try
+            {
+                long lRet = channel.GetSystemParameter(
+null,
+"circulation",
+"locationTypes",
+out strOutputInfo,
+out string strError);
+                if (lRet == -1)
+                    return new GetLocationListResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError,
+                        ErrorCode = channel.ErrorCode.ToString()
+                    };
+            }
+            finally
+            {
+                App.CurrentApp.ReturnChannel(channel);
+            }
+
+            // 
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml("<root />");
+
+            XmlDocumentFragment fragment = dom.CreateDocumentFragment();
+            try
+            {
+                fragment.InnerXml = strOutputInfo;
+            }
+            catch (Exception ex)
+            {
+                return new GetLocationListResult
+                {
+                    Value = -1,
+                    ErrorInfo = "fragment XML装入XmlDocumentFragment时出错: " + ex.Message
+                };
+            }
+
+            dom.DocumentElement.AppendChild(fragment);
+
+            /*
+<locationTypes>
+    <item canborrow="yes" itembarcodeNullable="yes">流通库</item>
+    <item>阅览室</item>
+    <library code="分馆1">
+        <item canborrow="yes">流通库</item>
+        <item>阅览室</item>
+    </library>
+</locationTypes>
+*/
+
+            List<string> results = new List<string>();
+            XmlNodeList nodes = dom.DocumentElement.SelectNodes("//item");
+            foreach (XmlElement node in nodes)
+            {
+                string strText = node.InnerText;
+
+                // 
+                string strLibraryCode = "";
+                XmlElement parent = node.ParentNode as XmlElement;
+                if (parent.Name == "library")
+                {
+                    strLibraryCode = parent.GetAttribute("code");
+                }
+
+                results.Add(string.IsNullOrEmpty(strLibraryCode) ? strText : strLibraryCode + "/" + strText);
+            }
+
+            return new GetLocationListResult { List = results };
         }
 
     }

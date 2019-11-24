@@ -335,6 +335,8 @@ namespace dp2SSL
             dup.BelongToCurrentShelf = this.BelongToCurrentShelf;
             dup.FillFinished = this.FillFinished;
             dup.State = this.State;
+            dup.CurrentLocation = this.CurrentLocation;
+            dup.ShelfNo = this.ShelfNo;
 
             dup.PII = this.PII;
             dup.UID = this.UID;

@@ -1365,6 +1365,7 @@ namespace dp2SSL
             {
                 InputPasswordWindows dialog = new InputPasswordWindows();
                 dialog.TitleText = $"请输入工作人员账户 {userName} 的密码并登录";
+                dialog.Owner = App.CurrentApp.MainWindow;
                 dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
                 bRet = (bool)dialog.ShowDialog();
                 password = dialog.password.Password;
@@ -1829,15 +1830,16 @@ namespace dp2SSL
 
             if (StringUtil.IsInList("silence", strStyle))
                 silence = true;
-            bool verifyDoorClosing = StringUtil.IsInList("verifyDoorClosing", strStyle);
-
-        REDO:
+            // bool verifyDoorClosing = StringUtil.IsInList("verifyDoorClosing", strStyle);
 
             if (ShelfData.Actions.Count == 0)
                 return;  // 没有必要处理
 
             // 关闭以前残留的对话框
             CloseDialogs();
+
+            // 对涉及到工作人员身份进行典藏移交的 action 进行补充修正
+            ShelfData.AskLocationTransfer(ShelfData.Actions);
 
             SubmitWindow progress = null;
 
@@ -1849,8 +1851,6 @@ namespace dp2SSL
 
             try
             {
-                ShelfData.AskLocationTransfer(ShelfData.Actions);
-
                 var result = ShelfData.SubmitCheckInOut(
                 (min, max, value, text) =>
                 {
@@ -2064,7 +2064,7 @@ ShelfData.Actions);
                 clearPatron.IsEnabled = true;
             }));
 
-            App.CurrentApp.Speak($"欢迎您，{_patron.PatronName}");
+            App.CurrentApp.Speak($"欢迎您，{(string.IsNullOrEmpty(_patron.PatronName) ? _patron.Barcode : _patron.PatronName)}");
             BeginDelayTask();
         }
 

@@ -253,6 +253,7 @@ namespace dp2SSL
             message_dlg.Closed += new EventHandler(delegate (object o1, EventArgs e1)
             {
             });
+            message_dlg.Owner = App.CurrentApp.MainWindow;
             message_dlg.ShowDialog();
             // 发送异常报告
             if ((bool)message_dlg.sendReport.IsChecked)
