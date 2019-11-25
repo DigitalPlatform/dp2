@@ -614,7 +614,7 @@ namespace dp2SSL
                         dialog.BatchNo = batchNo;
                         dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
                         dialog.Width = Math.Min(700, App.CurrentApp.MainWindow.ActualWidth);
-                        dialog.Height = Math.Min(500, App.CurrentApp.MainWindow.ActualHeight);
+                        dialog.Height = Math.Min(900, App.CurrentApp.MainWindow.ActualHeight);
                         dialog.ShowDialog();
                         selection = dialog.Selection;
                         batchNo = dialog.BatchNo;
@@ -690,7 +690,7 @@ namespace dp2SSL
                         dialog.Owner = App.CurrentApp.MainWindow;
                         dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
                         dialog.Width = Math.Min(700, App.CurrentApp.MainWindow.ActualWidth);
-                        dialog.Height = Math.Min(500, App.CurrentApp.MainWindow.ActualHeight);
+                        dialog.Height = Math.Min(900, App.CurrentApp.MainWindow.ActualHeight);
                         dialog.ShowDialog();
                         selection = dialog.Selection;
                         target = dialog.Target;
@@ -1163,6 +1163,13 @@ namespace dp2SSL
                     {
                         entity.Antenna = tag.OneTag.AntennaID.ToString();
                         changed = true;
+                    }
+                    // 2019/11/26
+                    if (entity.TagInfo != null && tag.OneTag.TagInfo != null
+                        && entity.TagInfo.EAS != tag.OneTag.TagInfo.EAS)
+                    {
+                        entity.TagInfo.EAS = tag.OneTag.TagInfo.EAS;
+                        // changed = true;
                     }
                 }
             }
@@ -1708,11 +1715,8 @@ namespace dp2SSL
                             {
                                 // TODO: 这里不知是普通状态还是 warning 合适。warning 是否比较强烈了
                                 messageItem.ResultType = "warning";
-                                // messageItem.ErrorCode = channel.ErrorCode.ToString();
-                                // 界面警告
-                                //warnings.Add($"册 '{title}' (尝试还书时发现未曾被借出过): {strError}");
-                                // 写入错误日志
                                 WpfClientInfo.WriteInfoLog($"读者 {info.Operator.PatronName} {info.Operator.PatronBarcode} 尝试还回册 '{title}' 时: {strError}");
+                                // TODO: 这里也要修改 EAS
                                 continue;
                             }
                         }
@@ -1777,6 +1781,24 @@ namespace dp2SSL
                         }
                     }
                     */
+
+                    // 2019/11/25
+                    if (action == "return")
+                    {
+                        var result = SetEAS(entity.UID, entity.Antenna, false);
+                        if (result.Value == -1)
+                        {
+                            string text = $"修改 EAS 动作失败: {result.ErrorInfo}";
+                            entity.SetError(text, "yellow");
+                            errors.Add($"册 '{entity.PII}' {action_name}操作成功，但修改 EAS 动作失败: {result.ErrorInfo}");
+
+                            messageItem.ErrorInfo = text;
+                            messageItem.ResultType = "warning";
+                            messageItem.ErrorCode = "changeEasFail";
+                            // 写入错误日志
+                            WpfClientInfo.WriteInfoLog($"修改册 '{title}' 的 EAS 失败: {result.ErrorInfo}");
+                        }
+                    }
 
                     // 刷新显示
                     {
@@ -1855,6 +1877,27 @@ namespace dp2SSL
                         progress.Close();
                 }));
                 */
+            }
+        }
+
+        static NormalResult SetEAS(string uid, string antenna, bool enable)
+        {
+            try
+            {
+                if (uint.TryParse(antenna, out uint antenna_id) == false)
+                    antenna_id = 0;
+                // TagList.ClearTagTable(uid);
+                var result = RfidManager.SetEAS($"{uid}", antenna_id, enable);
+                if (result.Value != -1)
+                {
+                    TagList.SetEasData(uid, enable);
+                    // All.SetEasData(uid, enable);
+                }
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new NormalResult { Value = -1, ErrorInfo = ex.Message };
             }
         }
 

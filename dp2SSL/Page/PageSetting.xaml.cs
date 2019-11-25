@@ -236,6 +236,8 @@ namespace dp2SSL
                     MessageBox.Show(StringUtil.MakePathList(errors, "\r\n"));
             }
 
+            PageMenu.MenuPage?.UpdateMenu();
+
             // 重新启动 Proccess 监控
             App.CurrentApp.StartProcessManager();
         }

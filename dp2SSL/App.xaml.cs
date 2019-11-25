@@ -611,14 +611,18 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             //_currentLibraryCodeList = channel.LibraryCodeList;
         }
 
+        object _syncRoot_channelList = new object();
         List<LibraryChannel> _channelList = new List<LibraryChannel>();
 
         public void AbortAllChannel()
         {
-            foreach (LibraryChannel channel in _channelList)
+            lock (_syncRoot_channelList)
             {
-                if (channel != null)
-                    channel.Abort();
+                foreach (LibraryChannel channel in _channelList)
+                {
+                    if (channel != null)
+                        channel.Abort();
+                }
             }
         }
 
@@ -632,7 +636,10 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                 strUserName = dp2UserName;
 
             LibraryChannel channel = this._channelPool.GetChannel(strServerUrl, strUserName);
-            _channelList.Add(channel);
+            lock (_syncRoot_channelList)
+            {
+                _channelList.Add(channel);
+            }
             // TODO: 检查数组是否溢出
             return channel;
         }
@@ -640,7 +647,10 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
         public void ReturnChannel(LibraryChannel channel)
         {
             this._channelPool.ReturnChannel(channel);
-            _channelList.Remove(channel);
+            lock (_syncRoot_channelList)
+            {
+                _channelList.Remove(channel);
+            }
         }
 
         SpeechSynthesizer m_speech = new SpeechSynthesizer();
