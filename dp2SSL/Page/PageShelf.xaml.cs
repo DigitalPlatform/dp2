@@ -974,7 +974,7 @@ namespace dp2SSL
                 progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
                 progress.Closed += Progress_Cancelled;
                 progress.Width = Math.Min(700, this.ActualWidth);
-                progress.Height = Math.Min(500, this.ActualHeight);
+                progress.Height = Math.Min(900, this.ActualHeight);
                 progress.okButton.Content = "取消";
                 progress.Show();
                 AddLayer();
@@ -1214,7 +1214,6 @@ namespace dp2SSL
                         if (_patron.Fill(patrons[0].OneTag) == false)
                             return;
 
-
                         SetPatronError("rfid_multi", "");   // 2019/5/22
 
                         // 2019/5/29
@@ -1265,6 +1264,8 @@ namespace dp2SSL
             if (string.IsNullOrEmpty(pii) == false
                 && Operator.IsPatronBarcodeWorker(pii))
             {
+                ClearBorrowedEntities();
+
                 // 出现登录对话框，要求输入密码登录验证
                 var login_result = WorkerLogin(pii);
                 if (login_result.Value == -1)
@@ -1279,8 +1280,10 @@ namespace dp2SSL
                 pii = _patron.UID;
 
             if (string.IsNullOrEmpty(pii))
+            {
+                ClearBorrowedEntities();
                 return new NormalResult();
-
+            }
 
             // TODO: 先显示等待动画
 
@@ -1296,6 +1299,8 @@ namespace dp2SSL
 
             if (result.Value != 1)
             {
+                ClearBorrowedEntities();
+
                 string error = $"读者 '{pii}': {result.ErrorInfo}";
                 SetPatronError("getreaderinfo", error);
                 return new NormalResult { Value = -1, ErrorInfo = error };
@@ -1450,6 +1455,11 @@ namespace dp2SSL
                 clearPatron.IsEnabled = false;
             }
 
+            ClearBorrowedEntities();
+        }
+
+        void ClearBorrowedEntities()
+        {
             if (this.patronControl.BorrowedEntities.Count > 0)
             {
                 if (!Application.Current.Dispatcher.CheckAccess())
@@ -1800,7 +1810,7 @@ namespace dp2SSL
                     _progressWindow.IsVisibleChanged += _progressWindow_IsVisibleChanged;
                     // _progressWindow.Next += _progressWindow_Next;
                     _progressWindow.Width = Math.Min(700, this.ActualWidth);
-                    _progressWindow.Height = Math.Min(500, this.ActualHeight);
+                    _progressWindow.Height = Math.Min(900, this.ActualHeight);
                     _progressWindow.Show();
                 }
             }));

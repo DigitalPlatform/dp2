@@ -73,6 +73,30 @@ namespace dp2SSL
         {
         }
 
+        public void UpdateMenu()
+        {
+            if (string.IsNullOrEmpty(App.FaceUrl))
+                this.registerFace.Visibility = Visibility.Hidden;
+            else
+                this.registerFace.Visibility = Visibility.Visible;
+
+            if (App.Function == "智能书柜")
+            {
+                this.shelf.Visibility = Visibility.Visible;
+                this.borrowButton.Visibility = Visibility.Collapsed;
+                this.returnButton.Visibility = Visibility.Collapsed;
+                this.renewButton.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                this.shelf.Visibility = Visibility.Collapsed;
+
+                this.borrowButton.Visibility = Visibility.Visible;
+                this.returnButton.Visibility = Visibility.Visible;
+                this.renewButton.Visibility = Visibility.Visible;
+            }
+        }
+
         void Initial()
         {
             Window window = Application.Current.MainWindow;
@@ -92,8 +116,6 @@ namespace dp2SSL
 
             this.message.Text = $"dp2SSL 版本号:\r\n{WpfClientInfo.ClientVersion}";
 
-            if (string.IsNullOrEmpty(App.FaceUrl))
-                this.registerFace.Visibility = Visibility.Hidden;
             /*
             if (string.IsNullOrEmpty(App.CurrentApp.Error))
             {
@@ -122,18 +144,7 @@ namespace dp2SSL
 
             // var task = SetWallPaper();
 
-            if (App.Function == "智能书柜")
-            {
-                this.shelf.Visibility = Visibility.Visible;
-                this.borrowButton.Visibility = Visibility.Collapsed;
-                this.returnButton.Visibility = Visibility.Collapsed;
-                this.renewBotton.Visibility = Visibility.Collapsed;
-            }
-            else
-            {
-                this.shelf.Visibility = Visibility.Collapsed;
-            }
-
+            UpdateMenu();
         }
 
         #region Wallpaper & tempo files

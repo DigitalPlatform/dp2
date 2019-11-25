@@ -74,18 +74,22 @@ namespace dp2SSL
             }
         }
 
+        // SetBorrowed("") 可以清除列表
         public void SetBorrowed(string patron_xml)
         {
             _borrowedEntities.Clear();
 
-            XmlDocument dom = new XmlDocument();
-            dom.LoadXml(patron_xml);
-
-            XmlNodeList borrows = dom.DocumentElement.SelectNodes("borrows/borrow");
-            foreach(XmlElement borrow in borrows)
+            if (string.IsNullOrEmpty(patron_xml) == false)
             {
-                string barcode = borrow.GetAttribute("barcode");
-                _borrowedEntities.Add(new Entity { PII = barcode, Container = _borrowedEntities });
+                XmlDocument dom = new XmlDocument();
+                dom.LoadXml(patron_xml);
+
+                XmlNodeList borrows = dom.DocumentElement.SelectNodes("borrows/borrow");
+                foreach (XmlElement borrow in borrows)
+                {
+                    string barcode = borrow.GetAttribute("barcode");
+                    _borrowedEntities.Add(new Entity { PII = barcode, Container = _borrowedEntities });
+                }
             }
         }
 
