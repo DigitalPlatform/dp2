@@ -31,6 +31,8 @@ using DigitalPlatform.Text;
 using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryServer;
+using DigitalPlatform.Xml;
+using static dp2SSL.App;
 
 namespace dp2SSL
 {
@@ -173,6 +175,14 @@ namespace dp2SSL
                 await SubmitCheckInOut("");
                 */
             }
+
+            if (e.NewState == "open")
+            {
+                // 切换所有者
+                var command = ShelfData.PopCommand(e.Door);
+                if (command != null)
+                    e.Door.Operator = command.Parameter as Operator;
+            }
         }
 
         static string GetPartialName(string buttonName)
@@ -211,8 +221,9 @@ namespace dp2SSL
                     bookInfoWindow.TitleText = $"{e.Door.Name} {GetPartialName(e.ButtonName)}";
                     bookInfoWindow.Owner = Application.Current.MainWindow;
                     bookInfoWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-                    bookInfoWindow.Width = Math.Min(1000, this.ActualWidth);
-                    bookInfoWindow.Height = Math.Min(700, this.ActualHeight);
+                    App.SetSize(bookInfoWindow, "wide");
+                    //bookInfoWindow.Width = Math.Min(1000, this.ActualWidth);
+                    //bookInfoWindow.Height = Math.Min(700, this.ActualHeight);
                     bookInfoWindow.Closed += BookInfoWindow_Closed;
                     bookInfoWindow.SetBooks(collection);
                     bookInfoWindow.Show();
@@ -351,6 +362,9 @@ namespace dp2SSL
                 progress.MessageText = "正在处理，请稍候 ...";
                 progress.Owner = Application.Current.MainWindow;
                 progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                App.SetSize(progress, "tall");
+                //progress.Width = Math.Min(700, this.ActualWidth);
+                //progress.Height = Math.Min(900, this.ActualHeight);
                 progress.Closed += Progress_Closed;
                 if (StringUtil.IsInList("button_ok", style))
                     progress.okButton.Content = "确定";
@@ -431,8 +445,15 @@ namespace dp2SSL
                 return;
             }
 
+            var person = new Operator
+            {
+                PatronBarcode = _patron.Barcode,
+                PatronName = _patron.PatronName
+            };
+            string libraryCodeOfDoor = ShelfData.GetLibraryCode(e.Door.ShelfNo);
+
             // 检查读者记录状态
-            if (Operator.IsPatronBarcodeWorker(_patron.Barcode) == false)
+            if (person.IsWorker == false)
             {
                 XmlDocument readerdom = new XmlDocument();
                 readerdom.LoadXml(_patron.Xml);
@@ -445,6 +466,32 @@ namespace dp2SSL
                 if (nRet != 1)
                 {
                     ErrorBox(strError);
+                    return;
+                }
+
+                // 检查读者所在分馆是否和打算打开的门的 shelfNo 参数矛盾
+                string libraryCodeOfPatron = DomUtil.GetElementText(readerdom.DocumentElement, "libraryCode");
+                if (libraryCodeOfDoor != libraryCodeOfPatron)
+                {
+                    ErrorBox($"权限不足，无法开门。\r\n\r\n详情: 读者 {_patron.PatronName} 所属馆代码 '{libraryCodeOfPatron}' 和门所属馆代码 '{libraryCodeOfDoor}' 不同");
+                    return;
+                }
+            }
+            else
+            {
+                // 对于工作人员也要检查其分馆是否和门的分馆矛盾
+
+                var account = App.CurrentApp.FindAccount(person.GetWorkerAccountName());
+                if (account == null)
+                {
+                    ErrorBox($"FindAccount('{person.GetWorkerAccountName()}') return null");
+                    return;
+                }
+
+                if (Account.IsGlobalUser(account.LibraryCodeList) == false
+                    && StringUtil.IsInList(libraryCodeOfDoor, account.LibraryCodeList) == false)
+                {
+                    ErrorBox($"权限不足，无法开门。\r\n\r\n详情: 工作人员 {person.GetWorkerAccountName()} 所属馆代码 '{account.LibraryCodeList}' 无法管辖门所属馆代码 '{libraryCodeOfDoor}'");
                     return;
                 }
             }
@@ -466,6 +513,8 @@ namespace dp2SSL
                     RemoveLayer();
                     cancelled = true;
                 };
+                App.SetSize(progress, "middle");
+
                 //progress.Width = Math.Min(700, this.ActualWidth);
                 //progress.Height = Math.Min(500, this.ActualHeight);
                 // progress.okButton.Content = "取消";
@@ -475,18 +524,18 @@ namespace dp2SSL
             }));
             try
             {
+                // TODO: 是否这里要等待开门信号到来时候再给门赋予操作者身份？因为过早赋予身份，可能会破坏一个姗姗来迟的早先一个关门动作信号的提交动作
                 // 给门赋予操作者身份
-                e.Door.Operator = new Operator
-                {
-                    PatronBarcode = _patron.Barcode,
-                    PatronName = _patron.PatronName
-                };
+                // e.Door.Operator = person;
+                ShelfData.PushCommand(e.Door, person);
+
                 var result = RfidManager.OpenShelfLock(e.Door.LockPath);
                 if (result.Value == -1)
                 {
                     //MessageBox.Show(result.ErrorInfo);
                     DisplayError(ref progress, result.ErrorInfo);
-                    e.Door.Operator = null;
+                    // e.Door.Operator = null;
+                    ShelfData.PopCommand(e.Door);
                     return;
                 }
 
@@ -708,6 +757,12 @@ namespace dp2SSL
         // 从指纹阅读器获取消息(第一阶段)
         void SetPatronInfo(GetMessageResult result)
         {
+            if (ClosePasswordDialog() == true)
+            {
+                // 这次刷卡的作用是取消了上次登录
+                return;
+            }
+
             if (result.Value == -1)
             {
                 SetPatronError("fingerprint", $"指纹中心出错: {result.ErrorInfo}, 错误码: {result.ErrorCode}");
@@ -973,8 +1028,9 @@ namespace dp2SSL
                 progress.Owner = Application.Current.MainWindow;
                 progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
                 progress.Closed += Progress_Cancelled;
-                progress.Width = Math.Min(700, this.ActualWidth);
-                progress.Height = Math.Min(900, this.ActualHeight);
+                App.SetSize(progress, "tall");
+                // progress.Width = Math.Min(700, this.ActualWidth);
+                // progress.Height = Math.Min(900, this.ActualHeight);
                 progress.okButton.Content = "取消";
                 progress.Show();
                 AddLayer();
@@ -1207,6 +1263,13 @@ namespace dp2SSL
                 }
                 else
                 {
+
+                    if (patrons.Count >= 1 && ClosePasswordDialog() == true)
+                    {
+                        // 这次刷卡的作用是取消了上次登录
+                        return;
+                    }
+
                     // RFID 来源
                     if (patrons.Count == 1)
                     {
@@ -1267,7 +1330,7 @@ namespace dp2SSL
                 ClearBorrowedEntities();
 
                 // 出现登录对话框，要求输入密码登录验证
-                var login_result = WorkerLogin(pii);
+                var login_result = await WorkerLogin(pii);
                 if (login_result.Value == -1)
                 {
                     PatronClear();
@@ -1361,22 +1424,61 @@ namespace dp2SSL
             return new NormalResult();
         }
 
-        NormalResult WorkerLogin(string pii)
+        InputPasswordWindows _passwordDialog = null;
+
+        bool ClosePasswordDialog()
+        {
+            if (_passwordDialog != null)
+            {
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    _passwordDialog.Close();
+                }));
+                return true;
+            }
+
+            return false;
+        }
+
+        async Task<NormalResult> WorkerLogin(string pii)
         {
             App.CurrentApp.SpeakSequence("请登录");
             string userName = pii.Substring(1);
-            bool bRet = false;
             string password = "";
+
+            bool closed = false;
+            string dialog_result = "";
+
+            ClosePasswordDialog();
+
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
-                InputPasswordWindows dialog = new InputPasswordWindows();
-                dialog.TitleText = $"请输入工作人员账户 {userName} 的密码并登录";
-                dialog.Owner = App.CurrentApp.MainWindow;
-                dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-                bRet = (bool)dialog.ShowDialog();
-                password = dialog.password.Password;
+                _passwordDialog = new InputPasswordWindows();
+                _passwordDialog.TitleText = $"请输入工作人员账户 {userName} 的密码并登录";
+                _passwordDialog.Owner = App.CurrentApp.MainWindow;
+                _passwordDialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                _passwordDialog.Closed += (s, e) =>
+                {
+                    RemoveLayer();
+                    password = _passwordDialog.password.Password;
+                    dialog_result = _passwordDialog.Result;
+                    _passwordDialog = null;
+                    closed = true;
+                };
+                _passwordDialog.Show();
+                AddLayer();
             }));
-            if (bRet == false)
+
+            // 等待对话框关闭
+            await Task.Run(() =>
+            {
+                while (closed == false)
+                {
+                    Thread.Sleep(500);
+                }
+            });
+
+            if (dialog_result != "OK")
                 return new NormalResult
                 {
                     Value = -1,
@@ -1385,27 +1487,29 @@ namespace dp2SSL
             _patron.Barcode = pii;
 
             // 登录
-            LoginResult result = null;
-            // 显示一个处理对话框
-            ProcessBox("正在登录 ...",
-                (progress) =>
-                {
-                    result = LibraryChannelUtil.WorkerLogin(userName, password);
-                    if (result.Value != 1)
-                        return result.ErrorInfo;
-                    return null;
-                });
+            {
+                LoginResult result = null;
+                // 显示一个处理对话框
+                ProcessBox("正在登录 ...",
+                    (progress) =>
+                    {
+                        result = LibraryChannelUtil.WorkerLogin(userName, password);
+                        if (result.Value != 1)
+                            return result.ErrorInfo;
+                        return null;
+                    });
 
-            if (result.Value != 1)
-                return new NormalResult
-                {
-                    Value = -1,
-                    ErrorCode = "loginFail",
-                    ErrorInfo = result.ErrorInfo,
-                };
+                if (result.Value != 1)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorCode = "loginFail",
+                        ErrorInfo = result.ErrorInfo,
+                    };
 
-            App.CurrentApp.SetAccount(userName, password);
-            return new NormalResult();
+                App.CurrentApp.SetAccount(userName, password, result.LibraryCode);
+                return new NormalResult();
+            }
         }
 
         public async Task Submit(bool silently = false)
@@ -1437,8 +1541,9 @@ namespace dp2SSL
                 }
             }
             */
-            if (_patron.Barcode != null && Operator.IsPatronBarcodeWorker(_patron.Barcode))
-                App.CurrentApp.RemoveAccount(Operator.BuildWorkerAccountName(_patron.Barcode));
+            // 暂时没有想好在什么时机清除 Account 信息
+            //if (_patron.Barcode != null && Operator.IsPatronBarcodeWorker(_patron.Barcode))
+            //    App.CurrentApp.RemoveAccount(Operator.BuildWorkerAccountName(_patron.Barcode));
 
             _patron.Clear();
             if (!Application.Current.Dispatcher.CheckAccess())
@@ -1809,8 +1914,9 @@ namespace dp2SSL
                     _progressWindow.Closed += _progressWindow_Closed;
                     _progressWindow.IsVisibleChanged += _progressWindow_IsVisibleChanged;
                     // _progressWindow.Next += _progressWindow_Next;
-                    _progressWindow.Width = Math.Min(700, this.ActualWidth);
-                    _progressWindow.Height = Math.Min(900, this.ActualHeight);
+                    App.SetSize(_progressWindow, "tall");
+                    //_progressWindow.Width = Math.Min(700, this.ActualWidth);
+                    //_progressWindow.Height = Math.Min(900, this.ActualHeight);
                     _progressWindow.Show();
                 }
             }));

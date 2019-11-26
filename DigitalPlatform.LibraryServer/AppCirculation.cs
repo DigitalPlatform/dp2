@@ -3734,11 +3734,16 @@ start_time_1,
             ParseCalendarName(strLocation,
         out string strItemLibraryCode,
         out string strRoom);
+
+            // 2019/11/26
+            // 暂时不进行这项检查。因为 overflow 方式借书的操作，确实可能会形成一个读者借另外一个分馆的图书的既成事实的情况
+            /*
             if (strItemLibraryCode != strReaderLibraryCode)
             {
                 strError = "还书操作被拒绝。因册记录的馆藏地 '" + strLocation + "' 不属于读者所在馆代码 '" + strReaderLibraryCode + "' ";
                 return 0;
             }
+            */
 
             // 去除 strRoom 内容中横杠或者冒号以后的部分
             {

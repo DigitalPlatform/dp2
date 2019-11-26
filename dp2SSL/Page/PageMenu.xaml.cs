@@ -307,8 +307,10 @@ namespace dp2SSL
                     progress.Owner = Application.Current.MainWindow;
                     progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
                     //progress.Closed += Progress_Closed;
-                    progress.Width = Math.Min(700, this.ActualWidth);
-                    progress.Height = Math.Min(500, this.ActualHeight);
+                    App.SetSize(progress, "wide");
+
+                    //progress.Width = Math.Min(700, this.ActualWidth);
+                    //progress.Height = Math.Min(500, this.ActualHeight);
                     progress.Show();
                     //AddLayer();
                 }));

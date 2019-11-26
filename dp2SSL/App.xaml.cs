@@ -508,22 +508,39 @@ namespace dp2SSL
 
         #region LibraryChannel
 
-        class Account
+        public class Account
         {
             public string UserName { get; set; }
             public string Password { get; set; }
+            public string LibraryCodeList { get; set; } // 馆代码列表
+
+            public static bool IsGlobalUser(string strLibraryCodeList)
+            {
+                if (strLibraryCodeList == "*" || string.IsNullOrEmpty(strLibraryCodeList) == true)
+                    return true;
+                return false;
+            }
+
+            public static bool MatchLibraryCode(string strLibraryCode, string strLocationLibraryCode)
+            {
+                if (IsGlobalUser(strLibraryCode) == true)
+                    return true;
+                if (strLibraryCode == strLocationLibraryCode)
+                    return true;
+                return false;
+            }
         }
 
         Dictionary<string, Account> _accounts = new Dictionary<string, Account>();
         
-        Account FindAcount(string userName)
+        public Account FindAccount(string userName)
         {
             if (_accounts.ContainsKey(userName) == false)
                 return null;
             return _accounts[userName];
         }
 
-        public void SetAccount(string userName, string password)
+        public void SetAccount(string userName, string password, string libraryCode)
         {
             Account account = null;
             if (_accounts.ContainsKey(userName) == false)
@@ -531,7 +548,8 @@ namespace dp2SSL
                 account = new Account
                 {
                     UserName = userName,
-                    Password = password
+                    Password = password,
+                    LibraryCodeList = libraryCode,
                 };
                 _accounts[userName] = account;
             }
@@ -555,7 +573,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             if (e.FirstTry == true)
             {
                 // TODO: 从工作人员用户名密码记载里面检查，如果是工作人员账户，则 ...
-                Account account = FindAcount(channel.UserName);
+                Account account = FindAccount(channel.UserName);
                 if (account != null)
                 {
                     e.UserName = account.UserName;
@@ -775,6 +793,31 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
 
                 // 标签总数显示 图书+读者卡
                 this.Number = $"{TagList.Books.Count}:{TagList.Patrons.Count}";
+            }
+        }
+
+        public static void SetSize(Window window, string style)
+        {
+            var mainWindows = App.CurrentApp.MainWindow;
+            if (style == "tall")
+            {
+                window.Width = Math.Min(700, mainWindows.ActualWidth * 0.95);
+                window.Height = Math.Min(900, mainWindows.ActualHeight * .95);
+            }
+            else if (style == "middle")
+            {
+                window.Width = Math.Min(700, mainWindows.ActualWidth * 0.95);
+                window.Height = Math.Min(500, mainWindows.ActualHeight * .95);
+            }
+            else if (style == "wide")
+            {
+                window.Width = Math.Min(1000, mainWindows.ActualWidth * 0.95);
+                window.Height = Math.Min(700, mainWindows.ActualHeight * .95);
+            }
+            else
+            {
+                window.Width = Math.Min(700, mainWindows.ActualWidth * 0.95);
+                window.Height = Math.Min(500, mainWindows.ActualHeight * .95);
             }
         }
     }

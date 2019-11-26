@@ -1065,13 +1065,11 @@ namespace dp2Circulation
         /// <returns>返回馆代码</returns>
         public static string GetLibraryCode(string strLocationString)
         {
-            string strLibraryCode = "";
-            string strPureName = "";
 
             // 解析
             ParseCalendarName(strLocationString,
-        out strLibraryCode,
-        out strPureName);
+        out string strLibraryCode,
+        out string strPureName);
 
             return strLibraryCode;
         }
