@@ -19,6 +19,8 @@ namespace dp2SSL
     /// </summary>
     public partial class InputPasswordWindows : Window
     {
+        public string Result { get; set; }
+
         public InputPasswordWindows()
         {
             InitializeComponent();
@@ -44,12 +46,14 @@ namespace dp2SSL
         }
         private void LoginButton_Click(object sender, RoutedEventArgs e)
         {
-            this.DialogResult = true;
+            this.Result = "OK";
+            this.Close();
         }
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
-            this.DialogResult = false;
+            this.Result = "Cancel";
+            this.Close();
         }
 
         public string TitleText
@@ -61,6 +65,15 @@ namespace dp2SSL
             set
             {
                 titleText.Text = value;
+            }
+        }
+
+        private void Password_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                LoginButton_Click(this.loginButton, new RoutedEventArgs());
+                return;
             }
         }
     }

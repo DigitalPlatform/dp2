@@ -566,6 +566,29 @@ namespace dp2SSL
             return StringUtil.ParseTwoPart(shelfNo, ":")[0];
         }
 
+        public static string GetLibraryCode(string shelfNo)
+        {
+            string location = GetLocationPart(shelfNo);
+            ParseLocation(location, out string libraryCode, out string room);
+            return libraryCode;
+        }
+
+        static void ParseLocation(string strName,
+    out string strLibraryCode,
+    out string strPureName)
+        {
+            strLibraryCode = "";
+            strPureName = "";
+            int nRet = strName.IndexOf("/");
+            if (nRet == -1)
+            {
+                strPureName = strName;
+                return;
+            }
+            strLibraryCode = strName.Substring(0, nRet).Trim();
+            strPureName = strName.Substring(nRet + 1).Trim();
+        }
+
         // 将 actions 保存起来
         public static void PushActions(List<ActionInfo> actions)
         {
@@ -613,8 +636,10 @@ namespace dp2SSL
                         dialog.Owner = App.CurrentApp.MainWindow;
                         dialog.BatchNo = batchNo;
                         dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-                        dialog.Width = Math.Min(700, App.CurrentApp.MainWindow.ActualWidth);
-                        dialog.Height = Math.Min(900, App.CurrentApp.MainWindow.ActualHeight);
+                        App.SetSize(dialog, "tall");
+
+                        //dialog.Width = Math.Min(700, App.CurrentApp.MainWindow.ActualWidth);
+                        //dialog.Height = Math.Min(900, App.CurrentApp.MainWindow.ActualHeight);
                         dialog.ShowDialog();
                         selection = dialog.Selection;
                         batchNo = dialog.BatchNo;
@@ -689,8 +714,10 @@ namespace dp2SSL
                         dialog.BatchNo = batchNo;
                         dialog.Owner = App.CurrentApp.MainWindow;
                         dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-                        dialog.Width = Math.Min(700, App.CurrentApp.MainWindow.ActualWidth);
-                        dialog.Height = Math.Min(900, App.CurrentApp.MainWindow.ActualHeight);
+                        App.SetSize(dialog, "tall");
+
+                        //dialog.Width = Math.Min(700, App.CurrentApp.MainWindow.ActualWidth);
+                        //.Height = Math.Min(900, App.CurrentApp.MainWindow.ActualHeight);
                         dialog.ShowDialog();
                         selection = dialog.Selection;
                         target = dialog.Target;
@@ -1479,10 +1506,10 @@ namespace dp2SSL
                 // xml 发生改变了的那些实体记录
                 List<Entity> updates = new List<Entity>();
 
-                int success_count = 0;
-                List<string> errors = new List<string>();
-                List<string> borrows = new List<string>();
-                List<string> returns = new List<string>();
+                //int success_count = 0;
+                //List<string> errors = new List<string>();
+                //List<string> borrows = new List<string>();
+                //List<string> returns = new List<string>();
                 List<ActionInfo> processed = new List<ActionInfo>();
                 foreach (ActionInfo info in actions)
                 {
@@ -1500,16 +1527,51 @@ namespace dp2SSL
                     else if (action == "transfer")
                         action_name = "转移";
 
-                    // 借书操作必须要有读者卡
+                    // 借书操作必须要有读者身份的请求者
                     if (action == "borrow")
                     {
-                        if (string.IsNullOrEmpty(info.Operator.PatronBarcode))
+                        if (string.IsNullOrEmpty(info.Operator.PatronBarcode)
+                            || info.Operator.IsWorker == true)
                         {
-                            // 界面警告
-                            errors.Add($"册 '{entity.PII}' 无法进行借书请求");
+                            MessageItem error = new MessageItem
+                            {
+                                Operator = info.Operator,
+                                Operation = action,
+                                ResultType = "error",
+                                ErrorCode = "InvalidOperator",
+                                ErrorInfo = "缺乏请求者",
+                                Entity = entity,
+                            };
+                            doc.Add(error);
                             // 写入错误日志
-                            WpfClientInfo.WriteInfoLog($"册 '{entity.PII}' 无法进行借书请求");
+                            WpfClientInfo.WriteInfoLog($"册 '{entity.PII}' 因缺乏请求者无法进行借书请求");
                             continue;
+                        }
+                    }
+
+                    // 2019/11/25
+                    // 还书操作前先尝试修改 EAS
+                    if (action == "return")
+                    {
+                        var result = SetEAS(entity.UID, entity.Antenna, false);
+                        if (result.Value == -1)
+                        {
+                            string text = $"修改 EAS 动作失败: {result.ErrorInfo}";
+                            entity.SetError(text, "yellow");
+
+                            MessageItem error = new MessageItem
+                            {
+                                Operator = info.Operator,
+                                Operation = "changeEAS",
+                                ResultType = "error",
+                                ErrorCode = "ChangeEasFail",
+                                ErrorInfo = text,
+                                Entity = entity,
+                            };
+                            doc.Add(error);
+
+                            // 写入错误日志
+                            WpfClientInfo.WriteInfoLog($"修改册 '{entity.PII}' 的 EAS 失败: {result.ErrorInfo}");
                         }
                     }
 
@@ -1713,8 +1775,7 @@ namespace dp2SSL
                         {
                             if (channel.ErrorCode == ErrorCode.NotBorrowed)
                             {
-                                // TODO: 这里不知是普通状态还是 warning 合适。warning 是否比较强烈了
-                                messageItem.ResultType = "warning";
+                                messageItem.ResultType = "information";
                                 WpfClientInfo.WriteInfoLog($"读者 {info.Operator.PatronName} {info.Operator.PatronBarcode} 尝试还回册 '{title}' 时: {strError}");
                                 // TODO: 这里也要修改 EAS
                                 continue;
@@ -1730,7 +1791,7 @@ namespace dp2SSL
                                 // doc.Remove(messageItem);
 
                                 // 改为警告
-                                messageItem.ResultType = "warning";
+                                messageItem.ResultType = "information";
                                 // messageItem.ErrorCode = channel.ErrorCode.ToString();
                                 // 界面警告
                                 //warnings.Add($"册 '{title}' (尝试转移时发现没有发生修改): {strError}");
@@ -1742,7 +1803,7 @@ namespace dp2SSL
 
                         entity.SetError($"{action_name}操作失败: {strError}", "red");
                         // TODO: 这里最好用 title
-                        errors.Add($"册 '{title}': {strError}");
+                        //errors.Add($"册 '{title}': {strError}");
                         continue;
                     }
 
@@ -1763,10 +1824,10 @@ namespace dp2SSL
                         }
                     }
 
-                    if (action == "borrow")
-                        borrows.Add(title);
-                    if (action == "return")
-                        returns.Add(title);
+                    //if (action == "borrow")
+                    //    borrows.Add(title);
+                    //if (action == "return")
+                    //    returns.Add(title);
 
                     /*
                     // borrow 操作，API 之后才修改 EAS
@@ -1781,24 +1842,6 @@ namespace dp2SSL
                         }
                     }
                     */
-
-                    // 2019/11/25
-                    if (action == "return")
-                    {
-                        var result = SetEAS(entity.UID, entity.Antenna, false);
-                        if (result.Value == -1)
-                        {
-                            string text = $"修改 EAS 动作失败: {result.ErrorInfo}";
-                            entity.SetError(text, "yellow");
-                            errors.Add($"册 '{entity.PII}' {action_name}操作成功，但修改 EAS 动作失败: {result.ErrorInfo}");
-
-                            messageItem.ErrorInfo = text;
-                            messageItem.ResultType = "warning";
-                            messageItem.ErrorCode = "changeEasFail";
-                            // 写入错误日志
-                            WpfClientInfo.WriteInfoLog($"修改册 '{title}' 的 EAS 失败: {result.ErrorInfo}");
-                        }
-                    }
 
                     // 刷新显示
                     {
@@ -1816,7 +1859,7 @@ namespace dp2SSL
                             message = strError;
                         entity.SetError(message,
                             lRet == 1 ? "yellow" : "green");
-                        success_count++;
+                        //success_count++;
                         // 刷新显示。特别是一些关于借阅日期，借期，应还日期的内容
                     }
                 }
@@ -1901,6 +1944,52 @@ namespace dp2SSL
             }
         }
 
+        // 门命令(延迟执行)队列。开门时放一个命令进入队列。等得到门开信号的时候再取出这个命令
+        static List<CommandItem> _commandQueue = new List<CommandItem>();
+        static object _syncRoot_commandQueue = new object();
+
+
+        public static void PushCommand(DoorItem door, Operator person)
+        {
+            CommandItem command = new CommandItem
+            {
+                Command = "setOwner",
+                Door = door,
+                Parameter = person,
+            };
+
+            lock (_syncRoot_commandQueue)
+            {
+                if (_commandQueue.Count > 1000)
+                {
+                    _commandQueue.Clear();
+                    WpfClientInfo.WriteErrorLog("_commandQueue 元素个数超过 1000。为保证安全自动清除了全部元素");
+                }
+                _commandQueue.Add(command);
+            }
+        }
+
+        public static CommandItem PopCommand(DoorItem door)
+        {
+            lock (_syncRoot_commandQueue)
+            {
+                CommandItem result = null;
+                foreach (var command in _commandQueue)
+                {
+                    if (command.Door == door)
+                    {
+                        result = command;
+                        break;
+                    }
+                }
+
+                if (result == null)
+                    return null;
+                _commandQueue.Remove(result);
+                return result;
+            }
+        }
+
     }
 
     // 操作者
@@ -1960,4 +2049,12 @@ namespace dp2SSL
         public List<int> Antennas { get; set; }
     }
 
+    public class CommandItem
+    {
+        public DoorItem Door { get; set; }
+        public string Command { get; set; }
+        public object Parameter { get; set; }
+
+        // TODO: 是否增加一个时间成员，用以测算 item 在 queue 中的留存时间？时间太长了说明不正常，需要排除故障
+    }
 }

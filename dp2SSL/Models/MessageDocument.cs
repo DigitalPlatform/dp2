@@ -246,6 +246,8 @@ namespace dp2SSL
                 return "还";
             if (operation == "transfer")
                 return "转移";
+            if (operation == "changeEAS")
+                return "修改EAS";
 
             return operation;
         }
