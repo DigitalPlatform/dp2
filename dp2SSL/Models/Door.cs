@@ -11,6 +11,7 @@ using System.Diagnostics;
 
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
+using System.Threading;
 
 namespace dp2SSL
 {
@@ -524,10 +525,11 @@ namespace dp2SSL
                     {
                         var task = Task.Run(async () =>
                         {
-                            await ShelfData.FillBookFields(door._allEntities);
-                            await ShelfData.FillBookFields(door._removeEntities);
-                            await ShelfData.FillBookFields(door._addEntities);
-                            await ShelfData.FillBookFields(door._errorEntities);
+                            CancellationToken token = ShelfData.CancelToken;
+                            await ShelfData.FillBookFields(door._allEntities, token);
+                            await ShelfData.FillBookFields(door._removeEntities, token);
+                            await ShelfData.FillBookFields(door._addEntities, token);
+                            await ShelfData.FillBookFields(door._errorEntities, token);
                         });
                     }
 
@@ -560,6 +562,7 @@ namespace dp2SSL
                 {
                     Entity dup = item.Clone();
                     dup.Container = collection;
+                    dup.Waiting = false;
                     collection.Add(dup);
                     changed = true;
                 }
@@ -599,6 +602,7 @@ namespace dp2SSL
                     collection.RemoveAt(index);
                     Entity dup = item.Clone();
                     dup.Container = collection;
+                    dup.Waiting = false;
                     collection.Insert(index, dup);
                 }
             }

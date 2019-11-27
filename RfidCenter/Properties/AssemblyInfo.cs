@@ -32,9 +32,10 @@ using System.Runtime.InteropServices;
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 // 方法是按如下所示使用“*”: :
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.3.*")]
-[assembly: AssemblyFileVersion("1.3.0.0")]
+[assembly: AssemblyVersion("1.4.*")]
+[assembly: AssemblyFileVersion("1.4.0.0")]
 
 // V1.1 2019/2/21 支持 32-bit Windows 环境
 // V1.2 2019/4/12 采用了最新 dp-library submodule 的版本
 // V1.3 2019/9/12 取消了 SendKey 功能
+// V1.4 2019/11/27 增加对具有多天线的读写器的支持。RfidCenter API 有若干改动

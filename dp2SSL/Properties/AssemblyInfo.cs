@@ -51,10 +51,11 @@ using System.Windows;
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 // 方法是按如下所示使用“*”: :
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.2.*")]
-[assembly: AssemblyFileVersion("1.2.0.0")]
+[assembly: AssemblyVersion("1.3.*")]
+[assembly: AssemblyFileVersion("1.3.0.0")]
 
 // 1.0 2019/2/21 第一个版本
 // 1.1 2019/2/26 可以显示版本号了
 // 1.2 2019/6/14 代码重构以后的版本，并具备人脸识别功能
+// 1.3 2019/11/27 这个版本的 dp2ssl 要和 RfidCenter 1.4 版配套使用才行。基本实现了智能书柜功能
 

@@ -970,6 +970,8 @@ namespace dp2SSL
 
         private async void CurrentApp_TagChanged(object sender, TagChangedEventArgs e)
         {
+            // TODO: 对已经拿走的读者卡，用 TagList.ClearTagTable() 清除它的缓存内容
+
             // 读者。不再精细的进行增删改跟踪操作，而是笼统地看 TagList.Patrons 集合即可
             var task = RefreshPatrons();
 

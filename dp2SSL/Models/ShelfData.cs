@@ -25,6 +25,16 @@ namespace dp2SSL
     /// </summary>
     public static class ShelfData
     {
+        public static CancellationToken CancelToken
+        {
+            get
+            {
+                return _cancel.Token;
+            }
+        }
+
+        static CancellationTokenSource _cancel = new CancellationTokenSource();
+
         public static event OpenCountChangedEventHandler OpenCountChanged;
 
         public static event DoorStateChangedEventHandler DoorStateChanged;
@@ -619,13 +629,17 @@ namespace dp2SSL
                 {
                     App.CurrentApp.Speak("典藏移交");
                     string batchNo = transferins[0].Operator.GetWorkerAccountName() + "_" + DateTime.Now.ToShortDateString();
+                    /*
                     EntityCollection collection = new EntityCollection();
                     foreach (var action in transferins)
                     {
                         Entity dup = action.Entity.Clone();
                         dup.Container = collection;
+                        dup.Waiting = false;
                         collection.Add(dup);
                     }
+                    */
+                    EntityCollection collection = BuildEntityCollection(transferins);
                     string selection = "";
                     Application.Current.Dispatcher.Invoke(new Action(() =>
                     {
@@ -693,14 +707,17 @@ namespace dp2SSL
 
                     // TODO: 这个列表是否在程序初始化的时候得到?
                     var result = LibraryChannelUtil.GetLocationList();
-
+                    /*
                     EntityCollection collection = new EntityCollection();
                     foreach (var action in transferouts)
                     {
                         Entity dup = action.Entity.Clone();
                         dup.Container = collection;
+                        dup.Waiting = false;
                         collection.Add(dup);
                     }
+                    */
+                    EntityCollection collection = BuildEntityCollection(transferouts);
                     string selection = "";
                     string target = "";
                     Application.Current.Dispatcher.Invoke(new Action(() =>
@@ -751,6 +768,23 @@ namespace dp2SSL
                 }
             }
 
+        }
+
+        static EntityCollection BuildEntityCollection(List<ActionInfo> actions)
+        {
+            EntityCollection collection = new EntityCollection();
+            foreach (var action in actions)
+            {
+                Entity dup = action.Entity.Clone();
+                dup.Container = collection;
+                dup.Waiting = false;
+                // testing
+                // dup.Title = null;
+                dup.FillFinished = false;
+                collection.Add(dup);
+            }
+
+            return collection;
         }
 
         static List<Entity> _all = new List<Entity>();  // 累积的全部图书
@@ -929,9 +963,10 @@ namespace dp2SSL
 
                 var task = Task.Run(async () =>
                 {
-                    await FillBookFields(_all);
-                    await FillBookFields(_adds);
-                    await FillBookFields(_removes);
+                    CancellationToken token = CancelToken;
+                    await FillBookFields(_all, token);
+                    await FillBookFields(_adds, token);
+                    await FillBookFields(_removes, token);
                 });
             }
             finally
@@ -1341,20 +1376,25 @@ namespace dp2SSL
 
             var task = Task.Run(async () =>
             {
-                await FillBookFields(_all);
-                await FillBookFields(_adds);
-                await FillBookFields(_removes);
+                CancellationToken token = CancelToken;
+                await FillBookFields(_all, token);
+                await FillBookFields(_adds, token);
+                await FillBookFields(_removes, token);
             });
         }
 
         public static async Task FillBookFields(// BaseChannel<IRfid> channel,
-    IList<Entity> entities)
+    IList<Entity> entities,
+    CancellationToken token,
+    bool refreshCount = true)
         {
             try
             {
                 int error_count = 0;
                 foreach (Entity entity in entities)
                 {
+                    if (token.IsCancellationRequested)
+                        return;
                     /*
                     if (_cancel == null
                         || _cancel.IsCancellationRequested)
@@ -1425,7 +1465,11 @@ namespace dp2SSL
                     entity.FillFinished = true;
                 }
 
-                ShelfData.RefreshCount();
+                if (token.IsCancellationRequested)
+                    return;
+
+                if (refreshCount)
+                    ShelfData.RefreshCount();
             }
             catch (Exception ex)
             {
@@ -1584,6 +1628,7 @@ namespace dp2SSL
 
                     string strUserName = info.Operator?.GetWorkerAccountName();
 
+                    entity.Waiting = true;
                     LibraryChannel channel = App.CurrentApp.GetChannel(strUserName);
                     try
                     {
@@ -1592,7 +1637,6 @@ namespace dp2SSL
                         {
                             // TODO: 智能书柜要求强制借书。如果册操作前处在被其他读者借阅状态，要自动先还书再进行借书
 
-                            entity.Waiting = true;
                             lRet = channel.Borrow(null,
                                 action == "renew",
                                 info.Operator.PatronBarcode,
@@ -1630,7 +1674,6 @@ namespace dp2SSL
                             */
                             // 智能书柜不使用 EAS 状态。可以考虑统一修改为 EAS Off 状态？
 
-                            entity.Waiting = true;
                             lRet = channel.Return(null,
                                 "return",
                                 "", // _patron.Barcode,
@@ -1662,7 +1705,6 @@ namespace dp2SSL
                                 commands.Add($"batchNo:{StringUtil.EscapeString(info.BatchNo, ":,")}");
 
                             // string currentLocation = GetRandomString(); // testing
-                            entity.Waiting = true;
                             // TODO: 如果先前 entity.Title 已经有了内容，就不要在本次 Return() API 中要求返 biblio summary
                             lRet = channel.Return(null,
                                 "transfer",
@@ -1686,6 +1728,7 @@ namespace dp2SSL
                     finally
                     {
                         App.CurrentApp.ReturnChannel(channel);
+                        entity.Waiting = false;
                     }
 
                     processed.Add(info);

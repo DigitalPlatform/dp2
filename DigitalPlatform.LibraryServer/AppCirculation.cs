@@ -3758,8 +3758,6 @@ start_time_1,
 
             ///
             // 检查册是否能够被还回
-            bool bResultValue = false;
-            string strMessageText = "";
 
             // 执行脚本函数ItemCanReturn
             // parameters:
@@ -3771,8 +3769,8 @@ start_time_1,
                 account,
                 readerdom,
                 itemdom,
-                out bResultValue,
-                out strMessageText,
+                out bool bResultValue,
+                out string strMessageText,
                 out strError);
             if (nRet == -1)
             {
