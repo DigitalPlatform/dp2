@@ -86,6 +86,9 @@
             this.toolStripStatusLabel_main = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripProgressBar_main = new System.Windows.Forms.ToolStripProgressBar();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
+            this.MenuItem_viewTodayDp2libraryErrorLogFile = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_viewTodayDp2kernelErrorLogFile = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator11 = new System.Windows.Forms.ToolStripSeparator();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.statusStrip_main.SuspendLayout();
@@ -359,6 +362,9 @@
             this.MenuItem_openUserFolder,
             this.MenuItem_openDataFolder,
             this.MenuItem_openProgramFolder,
+            this.toolStripSeparator11,
+            this.MenuItem_viewTodayDp2libraryErrorLogFile,
+            this.MenuItem_viewTodayDp2kernelErrorLogFile,
             this.toolStripSeparator3,
             this.MenuItem_autoStartDp2Circulation,
             this.toolStripSeparator4,
@@ -373,35 +379,35 @@
             // MenuItem_openUserFolder
             // 
             this.MenuItem_openUserFolder.Name = "MenuItem_openUserFolder";
-            this.MenuItem_openUserFolder.Size = new System.Drawing.Size(297, 30);
+            this.MenuItem_openUserFolder.Size = new System.Drawing.Size(408, 30);
             this.MenuItem_openUserFolder.Text = "打开用户文件夹(&U)";
             this.MenuItem_openUserFolder.Click += new System.EventHandler(this.MenuItem_openUserFolder_Click);
             // 
             // MenuItem_openDataFolder
             // 
             this.MenuItem_openDataFolder.Name = "MenuItem_openDataFolder";
-            this.MenuItem_openDataFolder.Size = new System.Drawing.Size(297, 30);
+            this.MenuItem_openDataFolder.Size = new System.Drawing.Size(408, 30);
             this.MenuItem_openDataFolder.Text = "打开数据文件夹(&D)";
             this.MenuItem_openDataFolder.Click += new System.EventHandler(this.MenuItem_openDataFolder_Click);
             // 
             // MenuItem_openProgramFolder
             // 
             this.MenuItem_openProgramFolder.Name = "MenuItem_openProgramFolder";
-            this.MenuItem_openProgramFolder.Size = new System.Drawing.Size(297, 30);
+            this.MenuItem_openProgramFolder.Size = new System.Drawing.Size(408, 30);
             this.MenuItem_openProgramFolder.Text = "打开程序文件夹(&P)";
             this.MenuItem_openProgramFolder.Click += new System.EventHandler(this.MenuItem_openProgramFolder_Click);
             // 
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(294, 6);
+            this.toolStripSeparator3.Size = new System.Drawing.Size(405, 6);
             // 
             // MenuItem_autoStartDp2Circulation
             // 
             this.MenuItem_autoStartDp2Circulation.Checked = true;
             this.MenuItem_autoStartDp2Circulation.CheckState = System.Windows.Forms.CheckState.Checked;
             this.MenuItem_autoStartDp2Circulation.Name = "MenuItem_autoStartDp2Circulation";
-            this.MenuItem_autoStartDp2Circulation.Size = new System.Drawing.Size(297, 30);
+            this.MenuItem_autoStartDp2Circulation.Size = new System.Drawing.Size(408, 30);
             this.MenuItem_autoStartDp2Circulation.Text = "自动启动 dp2Circulation";
             this.MenuItem_autoStartDp2Circulation.Visible = false;
             this.MenuItem_autoStartDp2Circulation.Click += new System.EventHandler(this.MenuItem_autoStartDp2Circulation_Click);
@@ -409,33 +415,33 @@
             // toolStripSeparator4
             // 
             this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(294, 6);
+            this.toolStripSeparator4.Size = new System.Drawing.Size(405, 6);
             this.toolStripSeparator4.Visible = false;
             // 
             // MenuItem_resetSerialCode
             // 
             this.MenuItem_resetSerialCode.Name = "MenuItem_resetSerialCode";
-            this.MenuItem_resetSerialCode.Size = new System.Drawing.Size(297, 30);
+            this.MenuItem_resetSerialCode.Size = new System.Drawing.Size(408, 30);
             this.MenuItem_resetSerialCode.Text = "设置序列号(&R) ...";
             this.MenuItem_resetSerialCode.Click += new System.EventHandler(this.MenuItem_resetSerialCode_Click);
             // 
             // MenuItem_setListeningUrl
             // 
             this.MenuItem_setListeningUrl.Name = "MenuItem_setListeningUrl";
-            this.MenuItem_setListeningUrl.Size = new System.Drawing.Size(297, 30);
+            this.MenuItem_setListeningUrl.Size = new System.Drawing.Size(408, 30);
             this.MenuItem_setListeningUrl.Text = "设置监听 URL(&L) ...";
             this.MenuItem_setListeningUrl.Click += new System.EventHandler(this.MenuItem_setListeningUrl_Click);
             // 
             // toolStripSeparator20
             // 
             this.toolStripSeparator20.Name = "toolStripSeparator20";
-            this.toolStripSeparator20.Size = new System.Drawing.Size(294, 6);
+            this.toolStripSeparator20.Size = new System.Drawing.Size(405, 6);
             this.toolStripSeparator20.Visible = false;
             // 
             // MenuItem_copyright
             // 
             this.MenuItem_copyright.Name = "MenuItem_copyright";
-            this.MenuItem_copyright.Size = new System.Drawing.Size(297, 30);
+            this.MenuItem_copyright.Size = new System.Drawing.Size(408, 30);
             this.MenuItem_copyright.Text = "版权(&C)...";
             this.MenuItem_copyright.Visible = false;
             this.MenuItem_copyright.Click += new System.EventHandler(this.MenuItem_copyright_Click);
@@ -520,6 +526,25 @@
             this.webBrowser1.Name = "webBrowser1";
             this.webBrowser1.Size = new System.Drawing.Size(558, 357);
             this.webBrowser1.TabIndex = 7;
+            // 
+            // MenuItem_viewTodayDp2libraryErrorLogFile
+            // 
+            this.MenuItem_viewTodayDp2libraryErrorLogFile.Name = "MenuItem_viewTodayDp2libraryErrorLogFile";
+            this.MenuItem_viewTodayDp2libraryErrorLogFile.Size = new System.Drawing.Size(408, 30);
+            this.MenuItem_viewTodayDp2libraryErrorLogFile.Text = "查看今日之 dp2library 错误日志文件 ...";
+            this.MenuItem_viewTodayDp2libraryErrorLogFile.Click += new System.EventHandler(this.MenuItem_viewTodayDp2libraryErrorLogFile_Click);
+            // 
+            // MenuItem_viewTodayDp2kernelErrorLogFile
+            // 
+            this.MenuItem_viewTodayDp2kernelErrorLogFile.Name = "MenuItem_viewTodayDp2kernelErrorLogFile";
+            this.MenuItem_viewTodayDp2kernelErrorLogFile.Size = new System.Drawing.Size(408, 30);
+            this.MenuItem_viewTodayDp2kernelErrorLogFile.Text = "查看今日之 dp2kernel 错误日志文件 ...";
+            this.MenuItem_viewTodayDp2kernelErrorLogFile.Click += new System.EventHandler(this.MenuItem_viewTodayDp2kernelErrorLogFile_Click);
+            // 
+            // toolStripSeparator11
+            // 
+            this.toolStripSeparator11.Name = "toolStripSeparator11";
+            this.toolStripSeparator11.Size = new System.Drawing.Size(405, 6);
             // 
             // MainForm
             // 
@@ -606,6 +631,9 @@
         private System.Windows.Forms.ToolStripMenuItem MenuItem_configLibraryXmlMongoDB;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_dp2library_setupMongoDB;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_restoreDp2library;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_viewTodayDp2libraryErrorLogFile;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_viewTodayDp2kernelErrorLogFile;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator11;
     }
 }
 

@@ -5427,6 +5427,20 @@ MessageBoxDefaultButton.Button2);
 #endif
             return new NormalResult { Value = -1, ErrorInfo = strError };
         }
+
+        private void MenuItem_viewTodayDp2libraryErrorLogFile_Click(object sender, EventArgs e)
+        {
+            string fileName = Path.Combine(this.UserDir, $"library_data\\log\\log_{DateTimeUtil.DateTimeToString8(DateTime.Now)}.txt");
+            //Process.Start("notepad", fileName);
+            Process.Start(fileName);
+        }
+
+        private void MenuItem_viewTodayDp2kernelErrorLogFile_Click(object sender, EventArgs e)
+        {
+            string fileName = Path.Combine(this.UserDir, $"kernel_data\\log\\log_{DateTimeUtil.DateTimeToString8(DateTime.Now)}.txt");
+            // Process.Start("notepad", fileName);
+            Process.Start(fileName);
+        }
     }
 
     /*

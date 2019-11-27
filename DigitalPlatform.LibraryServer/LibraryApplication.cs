@@ -2653,7 +2653,6 @@ namespace DigitalPlatform.LibraryServer
             }
 
             // 检查工作人员账号
-            Account account = null;
 
             /*
             if (e.Name == "public")
@@ -2666,7 +2665,7 @@ namespace DigitalPlatform.LibraryServer
             //      0   not found
             //      1   found
             nRet = this.GetAccount(e.Name,
-                out account,
+                out Account account,
                 out strError);
             if (nRet == -1)
             {
@@ -3106,6 +3105,10 @@ namespace DigitalPlatform.LibraryServer
             string libraryName = DomUtil.GetElementText(this.LibraryCfgDom.DocumentElement, "libraryInfo/libraryName");
             if (string.IsNullOrEmpty(libraryName) == false && libraryName.IndexOfAny(new char[] { '/', '\\' }) != -1)
                 errors.Add($"libraryInfo/libraryName 元素中的图书馆名 '{libraryName}' 不合法");
+
+            // 2019/11/27
+            if (DetectVirus.DetectXXX() || DetectVirus.DetectGuanjia())
+                errors.Add("dp2library 被木马软件干扰，无法启动");
 
             if (errors.Count > 0)
             {

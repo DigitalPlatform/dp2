@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -19,9 +20,23 @@ namespace dp2SSL
     /// </summary>
     public partial class BookInfoWindow : Window
     {
+        CancellationTokenSource _cancel = new CancellationTokenSource();
+
         public BookInfoWindow()
         {
             InitializeComponent();
+
+            Unloaded += BookInfoWindow_Unloaded;
+        }
+
+        ~BookInfoWindow()
+        {
+            _cancel.Dispose();
+        }
+
+        private void BookInfoWindow_Unloaded(object sender, RoutedEventArgs e)
+        {
+            _cancel.Cancel();
         }
 
         /*
@@ -41,6 +56,9 @@ namespace dp2SSL
         public void SetBooks(EntityCollection collection)
         {
             books.SetSource(collection);
+
+            // 后台处理刷新
+            var task = ShelfData.FillBookFields(collection, _cancel.Token, false);
         }
 
         public string TitleText
