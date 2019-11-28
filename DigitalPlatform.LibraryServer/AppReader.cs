@@ -2880,8 +2880,6 @@ root, strLibraryCode);
             nodeInfo.AppendChild(nodeInfoItem);
             DomUtil.SetAttr(nodeInfoItem, "name", "可借总册数");
 
-            string strParamValue = "";
-            MatchResult matchresult;
             // return:
             //      reader和book类型均匹配 算4分
             //      只有reader类型匹配，算3分
@@ -2893,8 +2891,8 @@ root, strLibraryCode);
                 strReaderType,
                 "",
                 "可借总册数",
-                out strParamValue,
-                out matchresult,
+                out string strParamValue,
+                out MatchResult matchresult,
                 out strError);
             if (nRet == -1 || nRet < 3)
                 DomUtil.SetAttr(nodeInfoItem, "error", strError);
@@ -2917,15 +2915,13 @@ root, strLibraryCode);
             nodeInfo.AppendChild(nodeInfoItem);
             DomUtil.SetAttr(nodeInfoItem, "name", "日历名");
 
-
-            Calendar calendar = null;
             // return:
             //      -1  出错
             //      0   没有找到日历
             //      1   找到日历
             nRet = this.GetReaderCalendar(strReaderType,
                 strLibraryCode,
-                out calendar,
+                out Calendar calendar,
                 out strError);
             if (nRet == -1 || nRet == 0)
             {

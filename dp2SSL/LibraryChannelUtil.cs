@@ -169,7 +169,7 @@ namespace dp2SSL
             {
                 long lRet = channel.GetReaderInfo(null,
                     pii,
-                    "xml",
+                    "advancexml", // "xml",
                     out string[] results,
                     out string recpath,
                     out byte[] timestamp,

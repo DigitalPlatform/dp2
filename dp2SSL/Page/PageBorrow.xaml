@@ -128,7 +128,8 @@
                     Foreground="White" 
                      Click="ReturnButton_Click">
                     <Button.Content>
-                        <TextBlock><Run Text="还"/><Run FontSize="20" Text=" ("/><Run FontSize="20" Text="{Binding ElementName=booksControl, Path=Returnable, UpdateSourceTrigger=PropertyChanged}" /><Run FontSize="20" Text=")"/>
+                        <TextBlock>
+                            <Run Text="还"/><Run FontSize="20" Text=" ("/><Run FontSize="20" Text="{Binding ElementName=booksControl, Path=Returnable, UpdateSourceTrigger=PropertyChanged}" /><Run FontSize="20" Text=")"/>
                         </TextBlock>
                     </Button.Content>
                 </Button>
