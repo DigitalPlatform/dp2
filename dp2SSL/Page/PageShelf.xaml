@@ -44,7 +44,7 @@
             <Grid Height="40" />
             <TextBlock Name="Quality" ToolTip="指纹质量"
                        Foreground="White" FontSize="16" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"></TextBlock>
-            <Button Name="closeRF" Click="CloseRF_Click">关闭射频</Button>
+            <Button Name="closeRF" Click="CloseRF_Click" Visibility="Collapsed">关闭射频</Button>
         </StackPanel>
         <Button Grid.Row="1" Grid.Column="2">Right</Button>
         <!--

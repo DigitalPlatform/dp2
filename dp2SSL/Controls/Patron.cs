@@ -409,6 +409,25 @@ namespace dp2SSL
             }
         }
 
+        int _borrowingCount;
+
+        // 在借册数
+        public int BorrowingCount
+        {
+            get
+            {
+                return _borrowingCount;
+            }
+            set
+            {
+                if (_borrowingCount != value)
+                {
+                    _borrowingCount = value;
+                    OnPropertyChanged("BorrowingCount");
+                }
+            }
+        }
+
         #endregion
 
         string _photoPath;
@@ -503,8 +522,10 @@ namespace dp2SSL
             }
 
             // 违约/交费信息
-            XmlNodeList nodes = dom.DocumentElement.SelectNodes("overdues/overdue");
-            this.OverdueCount = nodes.Count;
+            {
+                XmlNodeList nodes = dom.DocumentElement.SelectNodes("overdues/overdue");
+                this.OverdueCount = nodes.Count;
+            }
 
             // 在借图书中的已经超期的册数
             {
@@ -521,6 +542,12 @@ namespace dp2SSL
                     this.OverdueBorrowCount = 0;
                 else
                     this.OverdueBorrowCount = overdue_infos.Count;
+            }
+
+            // 在借册数
+            {
+                XmlNodeList nodes = dom.DocumentElement.SelectNodes("borrows/borrow");
+                this.BorrowingCount = nodes.Count;
             }
         }
 
@@ -595,6 +622,7 @@ namespace dp2SSL
             this.OverdueCount = 0;
             this.OverdueBorrowCount = 0;
             this.ArrivedCount = 0;
+            this.BorrowingCount = 0;
             this.Source = null;
             this.Xml = "";
             this.Timestamp = null;
