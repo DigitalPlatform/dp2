@@ -223,6 +223,24 @@ namespace dp2SSL
             */
             return doc;
         }
+
+#if NO
+        public delegate bool Deletage_shouldVisible(MessageItem item);
+
+        public static void HideSomething(FlowDocument doc, 
+            Deletage_shouldVisible func_shouldVisible)
+        {
+            foreach(var paragraph in doc.Blocks)
+            {
+                MessageItem item = paragraph.Tag as MessageItem;
+                if (item == null)
+                    continue;
+                bool visible = (bool)func_shouldVisible?.Invoke(item);
+                paragraph.
+            }
+        }
+
+#endif
     }
 
     public class MessageItem
@@ -263,6 +281,7 @@ namespace dp2SSL
             // p.LineHeight = 18;
             p.TextIndent = -20;
             p.Margin = new Thickness(10, 0, 0, 8);
+            p.Tag = this;   // 记忆下来后面隐藏事项的时候可以用到
 
             // 序号
             p.Inlines.Add(new Run($"{(index + 1).ToString()}) "));

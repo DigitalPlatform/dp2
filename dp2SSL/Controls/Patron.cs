@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
-
+using DigitalPlatform.LibraryServer;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Xml;
 
@@ -311,6 +311,106 @@ namespace dp2SSL
             }
         }
 
+        #region 和借阅权限、借阅情况有关的统计数字
+
+        int _maxBorrowItems;
+
+        // 最大可借册数
+        public int MaxBorrowItems
+        {
+            get
+            {
+                return _maxBorrowItems;
+            }
+            set
+            {
+                if (_maxBorrowItems != value)
+                {
+                    _maxBorrowItems = value;
+                    OnPropertyChanged("MaxBorrowItems");
+                }
+            }
+        }
+
+        int _canBorrowItems;
+
+        // 当前还可借册数
+        public int CanBorrowItems
+        {
+            get
+            {
+                return _canBorrowItems;
+            }
+            set
+            {
+                if (_canBorrowItems != value)
+                {
+                    _canBorrowItems = value;
+                    OnPropertyChanged("CanBorrowItems");
+                }
+            }
+        }
+
+
+        int _overdueCount;
+
+        // (待处理的)违约数量
+        public int OverdueCount
+        {
+            get
+            {
+                return _overdueCount;
+            }
+            set
+            {
+                if (_overdueCount != value)
+                {
+                    _overdueCount = value;
+                    OnPropertyChanged("OverdueCount");
+                }
+            }
+        }
+
+        int _overdueBorrowCount;
+
+        // 在借册中的已超期册数
+        public int OverdueBorrowCount
+        {
+            get
+            {
+                return _overdueBorrowCount;
+            }
+            set
+            {
+                if (_overdueBorrowCount != value)
+                {
+                    _overdueBorrowCount = value;
+                    OnPropertyChanged("OverdueBorrowCount");
+                }
+            }
+        }
+
+        int _arrivedCount;
+
+        // 已经到书的预约请求数
+        public int ArrivedCount
+        {
+            get
+            {
+                return _arrivedCount;
+            }
+            set
+            {
+                if (_arrivedCount != value)
+                {
+                    _arrivedCount = value;
+                    OnPropertyChanged("ArrivedCount");
+                }
+            }
+        }
+
+        #endregion
+
         string _photoPath;
 
         public string PhotoPath
@@ -346,7 +446,7 @@ namespace dp2SSL
 
         public string RecPath { get; set; }
 
-        public void SetPatronXml(string recpath, string xml, byte [] timestamp)
+        public void SetPatronXml(string recpath, string xml, byte[] timestamp)
         {
             if (string.IsNullOrEmpty(xml))
             {
@@ -370,6 +470,58 @@ namespace dp2SSL
             this.PhotoPath = GetCardPhotoPath(dom,
                 new List<string> { "face", "cardphoto" },
                 recpath);
+
+            // 2019/11/28
+            /*
+<info>
+<item name="可借总册数" value="15" />
+<item name="日历名">
+    <value>基本日历</value>
+</item>
+<item name="当前还可借" value="15"/>
+</info>
+             * */
+            {
+
+                if (dom.DocumentElement.SelectSingleNode("info/item[@name='可借总册数']") is XmlElement item)
+                {
+                    DomUtil.GetIntegerParam(item, "value", 0, out int value, out string strError);
+                    this.MaxBorrowItems = value;
+                }
+                else
+                    this.MaxBorrowItems = 0;
+            }
+
+            {
+                if (dom.DocumentElement.SelectSingleNode("info/item[@name='当前还可借']") is XmlElement item)
+                {
+                    DomUtil.GetIntegerParam(item, "value", 0, out int value, out string strError);
+                    this.CanBorrowItems = value;
+                }
+                else
+                    this.CanBorrowItems = 0;
+            }
+
+            // 违约/交费信息
+            XmlNodeList nodes = dom.DocumentElement.SelectNodes("overdues/overdue");
+            this.OverdueCount = nodes.Count;
+
+            // 在借图书中的已经超期的册数
+            {
+                // 检查当前是否有潜在的超期册
+                // return:
+                //      -1  error
+                //      0   没有超期册
+                //      1   有超期册
+                int nRet = LibraryServerUtil.CheckOverdue(
+                    dom,
+                    out List<string> overdue_infos,
+                    out string strError);
+                if (nRet == -1)
+                    this.OverdueBorrowCount = 0;
+                else
+                    this.OverdueBorrowCount = overdue_infos.Count;
+            }
         }
 
         // 从读者记录 XML 中获得读者卡片头像的路径。例如 "读者/1/object/0"
@@ -437,6 +589,15 @@ namespace dp2SSL
             this.UID = null;
             this.PII = null;
             this.PhotoPath = "";
+
+            this.MaxBorrowItems = 0;
+            this.CanBorrowItems = 0;
+            this.OverdueCount = 0;
+            this.OverdueBorrowCount = 0;
+            this.ArrivedCount = 0;
+            this.Source = null;
+            this.Xml = "";
+            this.Timestamp = null;
 
             this.RecPath = "";
 
