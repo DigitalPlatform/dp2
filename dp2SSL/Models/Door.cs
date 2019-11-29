@@ -404,7 +404,7 @@ namespace dp2SSL
                         door.State = state.State;
                         // 开关灯
                         if (string.IsNullOrEmpty(door.LampPath) == false)
-                            ShelfData.TurnLamp(door.Name, door.State == "open");
+                            ShelfData.TurnLamp(door.Name, door.State == "open" ? "on" : "off,delay");
                     }
 
                     /*

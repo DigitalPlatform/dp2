@@ -2650,6 +2650,8 @@ out Reader reader);
                             }
 
                             // 解析出 PII
+                            // Exception:
+                            //      可能会抛出异常 ArgumentException TagDataException
                             LogicChip chip = LogicChip.From(result0.Bytes,
                                 (int)blkSize);
                             string current_pii = chip.FindElement(ElementOID.PII)?.Text;

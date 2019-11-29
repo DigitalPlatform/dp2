@@ -155,8 +155,13 @@ namespace dp2SSL
         // 门名字 --> bool
         static Hashtable _lampTable = new Hashtable();
 
-        public static void TurnLamp(string doorName, bool on)
+        // parameters:
+        //      style   on 或者 off
+        //              delay   表示延迟关灯
+        //              skip 表示不真正开关物理灯，只是改变 hashtable 里面计数
+        public static void TurnLamp(string doorName, string style)
         {
+            bool on = StringUtil.IsInList("on", style);
             int oldCount = _lampTable.Count;
 
             if (on)
@@ -164,11 +169,72 @@ namespace dp2SSL
             else
                 _lampTable.Remove(doorName);
 
-            if (oldCount == 0 && _lampTable.Count > 0)
-                RfidManager.TurnShelfLamp("*", "turnOn");   // TODO: 遇到出错如何报错?
-            else if (oldCount > 0 && _lampTable.Count == 0)
-                RfidManager.TurnShelfLamp("*", "turnOff");
+            int newCount = _lampTable.Count;
+
+            if (oldCount == 0 && newCount > 0)
+            {
+                if (StringUtil.IsInList("skip", style) == false)
+                {
+                    // 用控件模拟灯亮灭，便于调试
+                    PageMenu.PageShelf.SimulateLamp(true);
+                    RfidManager.TurnShelfLamp("*", "turnOn");   // TODO: 遇到出错如何报错?
+                }
+            }
+            else if (oldCount > 0 && newCount == 0)
+            {
+                if (StringUtil.IsInList("delay", style))
+                    BeginDelayTurnOffTask();
+                else
+                {
+                    // 用控件模拟灯亮灭，便于调试
+                    PageMenu.PageShelf.SimulateLamp(false);
+                    RfidManager.TurnShelfLamp("*", "turnOff");
+                }
+            }
         }
+
+        #region 延迟关灯
+
+        static DelayAction _delayTurnOffTask = null;
+
+        public static void CancelDelayTurnOffTask()
+        {
+            if (_delayTurnOffTask != null)
+            {
+                _delayTurnOffTask.Cancel.Cancel();
+                _delayTurnOffTask = null;
+            }
+        }
+
+        public static void BeginDelayTurnOffTask()
+        {
+            CancelDelayTurnOffTask();
+
+            // 让灯继续亮着
+            ShelfData.TurnLamp("~", "on,skip");
+
+            // TODO: 开始启动延时自动清除读者信息的过程。如果中途门被打开，则延时过程被取消(也就是说读者信息不再会被自动清除)
+            _delayTurnOffTask = DelayAction.Start(
+                () =>
+                {
+                    ShelfData.TurnLamp("~", "off");
+                },
+                (seconds) =>
+                {
+                    /*
+                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    {
+                        if (seconds > 0)
+                            this.clearPatron.Content = $"({seconds.ToString()} 秒后自动) 清除读者信息";
+                        else
+                            this.clearPatron.Content = $"清除读者信息";
+                    }));
+                    */
+                });
+        }
+
+        #endregion
+
 
         public static void RefreshReaderNameList()
         {
@@ -863,11 +929,15 @@ namespace dp2SSL
         public delegate void Delegate_displayText(string text);
         public delegate bool Delegate_cancelled();
 
+        public class InitialShelfResult : NormalResult
+        {
+            public List<string> Warnings { get; set; }
+        }
 
         // 首次初始化智能书柜所需的标签相关数据结构
         // 初始化开始前，要先把 RfidManager.ReaderNameList 设置为 "*"
         // 初始化完成前，先不要允许(开关门变化导致)修改 RfidManager.ReaderNameList
-        public static async Task InitialShelfEntities(
+        public static async Task<InitialShelfResult> InitialShelfEntities(
             Delegate_displayText func_display,
             Delegate_cancelled func_cancelled)
         {
@@ -905,7 +975,7 @@ namespace dp2SSL
                 });
 
                 if (ret == false)
-                    return;
+                    return new InitialShelfResult();
 
                 // 使用全部读卡器、全部天线进行初始化。即便门是全部关闭的(注：一般情况下，当门关闭的时候图书读卡器是暂停盘点的)
                 func_display("启用全部读卡器 ...");
@@ -930,7 +1000,7 @@ namespace dp2SSL
                 });
 
                 if (ret == false)
-                    return;
+                    return new InitialShelfResult();
 
                 func_display("等待锁控就绪 ...");
                 ret = await Task.Run(() =>
@@ -946,13 +1016,25 @@ namespace dp2SSL
                 });
 
                 if (ret == false)
-                    return;
+                    return new InitialShelfResult();
+
+                List<string> warnings = new List<string>();
 
                 _all.Clear();
                 var books = TagList.Books;
                 foreach (var tag in books)
                 {
-                    _all.Add(NewEntity(tag));
+                    try
+                    {
+                        // Exception:
+                        //      可能会抛出异常 ArgumentException TagDataException
+                        _all.Add(NewEntity(tag));
+                    }
+                    catch(TagDataException ex)
+                    {
+                        warnings.Add($"UID 为 '{tag.OneTag?.UID}' 的标签出现数据格式错误: {ex.Message}");
+                        WpfClientInfo.WriteErrorLog($"InitialShelfEntities() 遇到 tag (UID={tag.OneTag?.UID}) 数据格式出错：{ex.Message}\r\ntag 详情：{tag.ToString()}");
+                    }
                 }
 
                 // DoorItem.DisplayCount(_all, _adds, _removes, App.CurrentApp.Doors);
@@ -968,6 +1050,8 @@ namespace dp2SSL
                     await FillBookFields(_adds, token);
                     await FillBookFields(_removes, token);
                 });
+
+                return new InitialShelfResult { Warnings = warnings };
             }
             finally
             {
@@ -984,6 +1068,8 @@ namespace dp2SSL
             }
         }
 
+        // Exception:
+        //      可能会抛出异常 ArgumentException TagDataException
         static Entity NewEntity(TagAndData tag)
         {
             var result = new Entity
@@ -994,6 +1080,8 @@ namespace dp2SSL
                 TagInfo = tag.OneTag.TagInfo,
             };
 
+            // Exception:
+            //      可能会抛出异常 ArgumentException TagDataException
             EntityCollection.SetPII(result);
             return result;
         }
@@ -1415,6 +1503,8 @@ namespace dp2SSL
 
                         Debug.Assert(entity.TagInfo != null);
 
+                        // Exception:
+                        //      可能会抛出异常 ArgumentException TagDataException
                         LogicChip chip = LogicChip.From(entity.TagInfo.Bytes,
 (int)entity.TagInfo.BlockSize,
 "" // tag.TagInfo.LockStatus

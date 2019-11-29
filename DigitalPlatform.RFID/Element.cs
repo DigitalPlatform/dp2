@@ -569,6 +569,8 @@ namespace DigitalPlatform.RFID
         }
 
         // 根据 byte [] 建立一个 Element 对象
+        // Exception:
+        //      可能会抛出异常 ArgumentException TagDataException
         // parameter:
         //      bytes   [out] 返回本次用掉的 byte 数
         public static Element Parse(byte[] data,
@@ -586,11 +588,11 @@ namespace DigitalPlatform.RFID
 
             /*
             // testing
-            throw new Exception("Element.Parse test throw exception");
+            throw new TagDataException("Element.Parse test throw exception");
             */
 
             if (data.Length - offset < 1)
-                throw new Exception($"data 长度不足，从 {offset} 开始应至少为 1 bytes");
+                throw new TagDataException($"data 长度不足，从 {offset} 开始应至少为 1 bytes");
 
             element._precursor = new Precursor(data[offset]);
 
@@ -605,14 +607,14 @@ namespace DigitalPlatform.RFID
             {
                 // OID 为 15-127。元素存储结构为 Precursor + Relative-OID 15 to 127 + Length of data + Compacted data
                 if (data.Length - offset < 3)
-                    throw new Exception($"data 长度不足，从 {offset} 开始应至少为 3 bytes");
+                    throw new TagDataException($"data 长度不足，从 {offset} 开始应至少为 3 bytes");
 
                 element.OID = (ElementOID)(15 + data[offset]);
                 offset++;
             }
 
             if (data.Length - offset < 2)
-                throw new Exception($"data 长度不足，从 {offset} 开始应至少为 2 bytes");
+                throw new TagDataException($"data 长度不足，从 {offset} 开始应至少为 2 bytes");
 
             if (element._precursor.Offset == true)
             {
@@ -625,7 +627,7 @@ namespace DigitalPlatform.RFID
             offset++;
 
             if (data.Length - offset < element._lengthOfData)
-                throw new Exception($"data 长度不足，从 {offset} 开始应至少为 {element._lengthOfData} bytes");
+                throw new TagDataException($"data 长度不足，从 {offset} 开始应至少为 {element._lengthOfData} bytes");
 
             element._compactedData = new byte[element._lengthOfData];
             Array.Copy(data, offset, element._compactedData, 0, element._lengthOfData);
@@ -636,7 +638,7 @@ namespace DigitalPlatform.RFID
 
             // 2019/7/7
             if (start + bytes > data.Length)
-                throw new Exception($"data 长度不足。从 {start} 开始不足 {bytes}(data 总长度 {data.Length})");
+                throw new TagDataException($"data 长度不足。从 {start} 开始不足 {bytes}(data 总长度 {data.Length})");
             Debug.Assert(start + bytes <= data.Length, "");
             Array.Copy(data, start, element.OriginData, 0, bytes);
 
@@ -682,7 +684,7 @@ namespace DigitalPlatform.RFID
                 else if (element._precursor.CompactionCode == (int)CompactionScheme.Utf8String)
                     element.Text = Encoding.UTF8.GetString(element._compactedData);
                 else
-                    throw new Exception($"出现意料之外的 CompactScheme {element._precursor.CompactionCode}");
+                    throw new TagDataException($"出现意料之外的 CompactScheme {element._precursor.CompactionCode}");
             }
 
             return element;
@@ -1071,4 +1073,16 @@ namespace DigitalPlatform.RFID
             this.MaxDelta = max_delta;
         }
     }
+
+    // RFID 标签数据异常
+    public class TagDataException : Exception
+    {
+
+        public TagDataException(string s)
+            : base(s)
+        {
+        }
+
+    }
+
 }

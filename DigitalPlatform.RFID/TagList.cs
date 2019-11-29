@@ -359,6 +359,8 @@ namespace DigitalPlatform.RFID
                             }
 
                             // 观察 typeOfUsage 元素
+                            // Exception:
+                            //      可能会抛出异常 ArgumentException TagDataException
                             var chip = LogicChip.From(info.Bytes,
         (int)info.BlockSize,
         "");
@@ -563,6 +565,11 @@ namespace DigitalPlatform.RFID
         // public LogicChip LogicChip { get; set; }
 
         public string Error { get; set; }   // 错误信息
+
+        public override string ToString()
+        {
+            return $"Type={Type},OneTag=[{OneTag.GetDescription()}],Error={Error}";
+        }
     }
 
 }

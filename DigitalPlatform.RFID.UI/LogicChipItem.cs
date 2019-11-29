@@ -694,6 +694,8 @@ namespace DigitalPlatform.RFID.UI
         #endregion
 
         // 根据物理数据构造 (拆包)
+        // Exception:
+        //      可能会抛出异常 ArgumentException TagDataException
         // parameters:
         //      block_map   每个 char 表示一个 block 的锁定状态。'l' 表示锁定, '.' 表示没有锁定
         public static new LogicChipItem From(byte[] data,
@@ -701,6 +703,8 @@ namespace DigitalPlatform.RFID.UI
             string block_map = "")
         {
             LogicChipItem chip = new LogicChipItem();
+            // Exception:
+            //      可能会抛出异常 ArgumentException TagDataException
             chip.Parse(data, block_size, block_map);
             // chip.InitialAllReadonly();
             return chip;

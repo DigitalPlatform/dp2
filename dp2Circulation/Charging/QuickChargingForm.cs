@@ -336,6 +336,8 @@ namespace dp2Circulation
 
         public static string GetPII(TagInfo tagInfo)
         {
+            // Exception:
+            //      可能会抛出异常 ArgumentException TagDataException
             LogicChip chip = LogicChip.From(tagInfo.Bytes,
 (int)tagInfo.BlockSize,
 "" // tagInfo.LockStatus
@@ -345,6 +347,8 @@ namespace dp2Circulation
 
         public static string GetTOU(TagInfo tagInfo)
         {
+            // Exception:
+            //      可能会抛出异常 ArgumentException TagDataException
             LogicChip chip = LogicChip.From(tagInfo.Bytes,
 (int)tagInfo.BlockSize,
 "" // tagInfo.LockStatus
