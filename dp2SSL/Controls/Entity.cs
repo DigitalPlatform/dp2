@@ -164,6 +164,8 @@ namespace dp2SSL
             };
             this.Add(entity);
 
+            // Exception:
+            //      可能会抛出异常 ArgumentException TagDataException
             SetPII(entity);
 
             entity.SetError(data.Error);
@@ -208,6 +210,8 @@ namespace dp2SSL
                     entity.ReaderName = readerName;
             }
 
+            // Exception:
+            //      可能会抛出异常 ArgumentException TagDataException
             SetPII(entity);
             // 如何触发下一步的获取和显示?
 
@@ -217,6 +221,8 @@ namespace dp2SSL
 
         public static string GetPII(TagInfo tagInfo)
         {
+            // Exception:
+            //      可能会抛出异常 ArgumentException TagDataException
             LogicChip chip = LogicChip.From(tagInfo.Bytes,
 (int)tagInfo.BlockSize,
 "" // tagInfo.LockStatus
@@ -225,6 +231,8 @@ namespace dp2SSL
         }
 
         // 根据 entity 中的 RFID 信息设置 PII
+        // Exception:
+        //      可能会抛出异常 ArgumentException TagDataException
         public static void SetPII(Entity entity)
         {
             // 刷新 PII
@@ -233,6 +241,8 @@ namespace dp2SSL
             {
                 string pii = "";
 
+                // Exception:
+                //      可能会抛出异常 ArgumentException TagDataException
                 LogicChip chip = LogicChip.From(entity.TagInfo.Bytes,
     (int)entity.TagInfo.BlockSize,
     "" // tag.TagInfo.LockStatus
@@ -290,6 +300,8 @@ namespace dp2SSL
                 string pii = "";
                 if (tag.TagInfo != null)
                 {
+                    // Exception:
+                    //      可能会抛出异常 ArgumentException TagDataException
                     LogicChip chip = LogicChip.From(tag.TagInfo.Bytes,
         (int)tag.TagInfo.BlockSize,
         "" // tag.TagInfo.LockStatus
@@ -321,11 +333,37 @@ namespace dp2SSL
 
     public class Entity : RfidItem
     {
+        /*
+ERROR dp2SSL 2019-11-28 14:35:59,100 - InitialShelfEntities() 出现异常: Type: System.NullReferenceException
+Message: 未将对象引用设置到对象的实例。
+Stack:
+   在 dp2SSL.Entity.Clone()
+   在 dp2SSL.DoorItem.Update(EntityCollection collection, List`1 items)
+   在 dp2SSL.DoorItem.<>c__DisplayClass79_1.<DisplayCount>b__0()
+   在 System.Windows.Threading.Dispatcher.Invoke(Action callback, DispatcherPriority priority, CancellationToken cancellationToken, TimeSpan timeout)
+   在 System.Windows.Threading.Dispatcher.Invoke(Action callback)
+   在 dp2SSL.DoorItem.DisplayCount(List`1 entities, List`1 adds, List`1 removes, List`1 errors, List`1 _doors)
+   在 dp2SSL.ShelfData.RefreshCount()
+   在 dp2SSL.ShelfData.<InitialShelfEntities>d__70.MoveNext()
+--- 引发异常的上一位置中堆栈跟踪的末尾 ---
+   在 System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   在 System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   在 System.Runtime.CompilerServices.TaskAwaiter.GetResult()
+   在 dp2SSL.PageShelf.<InitialShelfEntities>d__45.MoveNext()
+--- 引发异常的上一位置中堆栈跟踪的末尾 ---
+   在 System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   在 System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   在 System.Runtime.CompilerServices.TaskAwaiter.GetResult()
+   在 dp2SSL.PageShelf.<PageShelf_Loaded>d__9.MoveNext()
+   * */
         public Entity Clone()
         {
             Entity dup = new Entity();
             dup.Container = this.Container;
-            dup.TagInfo = this.TagInfo.Clone();
+            if (this.TagInfo != null)
+                dup.TagInfo = this.TagInfo.Clone();
+            else
+                dup.TagInfo = null;
             dup.ItemRecPath = this.ItemRecPath;
             dup.Title = this.Title;
             dup.Location = this.Location;
@@ -569,13 +607,13 @@ namespace dp2SSL
                     // TODO: 如果没有册条码号则用 refID 代替
                     if (delta.Hours > 0)
                         isOverdue = true;
-                        // overdue_infos.Add($"册 {strItemBarcode} 已超期 {delta.Hours} 小时");
+                    // overdue_infos.Add($"册 {strItemBarcode} 已超期 {delta.Hours} 小时");
                 }
                 else
                 {
                     if (delta.Days > 0)
                         isOverdue = true;
-                        // overdue_infos.Add($"册 {strItemBarcode} 已超期 {delta.Days} 天");
+                    // overdue_infos.Add($"册 {strItemBarcode} 已超期 {delta.Days} 天");
                 }
             }
 

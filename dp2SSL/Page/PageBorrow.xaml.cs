@@ -1336,6 +1336,8 @@ out string strError);
 
                         Debug.Assert(entity.TagInfo != null);
 
+                        // Exception:
+                        //      可能会抛出异常 ArgumentException TagDataException
                         LogicChip chip = LogicChip.From(entity.TagInfo.Bytes,
 (int)entity.TagInfo.BlockSize,
 "" // tag.TagInfo.LockStatus

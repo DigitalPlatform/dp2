@@ -591,6 +591,8 @@ namespace dp2SSL
 
             if (tag.TagInfo != null && tag.Protocol == InventoryInfo.ISO15693)
             {
+                // Exception:
+                //      可能会抛出异常 ArgumentException TagDataException
                 LogicChip chip = LogicChip.From(tag.TagInfo.Bytes,
     (int)tag.TagInfo.BlockSize,
     "" // tag.TagInfo.LockStatus

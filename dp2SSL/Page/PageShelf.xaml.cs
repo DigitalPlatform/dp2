@@ -882,6 +882,8 @@ namespace dp2SSL
 
                         Debug.Assert(entity.TagInfo != null);
 
+                        // Exception:
+                        //      可能会抛出异常 ArgumentException TagDataException
                         LogicChip chip = LogicChip.From(entity.TagInfo.Bytes,
 (int)entity.TagInfo.BlockSize,
 "" // tag.TagInfo.LockStatus
@@ -1041,7 +1043,7 @@ namespace dp2SSL
 
             try
             {
-                await ShelfData.InitialShelfEntities(
+                var initial_result = await ShelfData.InitialShelfEntities(
                     (s) =>
                     {
                         DisplayMessage(progress, s, "green");
@@ -1053,6 +1055,13 @@ namespace dp2SSL
 
                 if (_initialCancelled)
                     return;
+
+                // 2019/11/29
+                // 先报告一次标签数据错误
+                if (initial_result.Warnings?.Count > 0)
+                {
+                    ErrorBox(StringUtil.MakePathList(initial_result.Warnings, "\r\n"));
+                }
 
 #if NO
                 // TODO: 出现“正在初始化”的对话框。另外需要注意如果 DataReady 信号永远来不了怎么办
@@ -1323,6 +1332,9 @@ namespace dp2SSL
                 && force == false)
                 return new NormalResult();
 
+            // 开灯
+            ShelfData.TurnLamp("~", "on");
+
             string pii = _patron.PII;
 
             // TODO: 判断 PII 是否为工作人员账户名
@@ -1563,6 +1575,9 @@ namespace dp2SSL
             }
 
             ClearBorrowedEntities();
+
+            // 延迟关灯
+            ShelfData.TurnLamp("~", "off,delay");
         }
 
         void ClearBorrowedEntities()
@@ -2050,14 +2065,16 @@ ShelfData.Actions);
             return text.ToString();
         }
 
-        DelayClear _delayTask = null;
+        #region 延迟清除读者信息
+
+        DelayAction _delayClearPatronTask = null;
 
         void CancelDelayTask()
         {
-            if (_delayTask != null)
+            if (_delayClearPatronTask != null)
             {
-                _delayTask.Cancel.Cancel();
-                _delayTask = null;
+                _delayClearPatronTask.Cancel.Cancel();
+                _delayClearPatronTask = null;
             }
 
             /*
@@ -2073,7 +2090,7 @@ ShelfData.Actions);
         {
             CancelDelayTask();
             // TODO: 开始启动延时自动清除读者信息的过程。如果中途门被打开，则延时过程被取消(也就是说读者信息不再会被自动清除)
-            _delayTask = DelayClear.Start(
+            _delayClearPatronTask = DelayAction.Start(
                 () =>
                 {
                     PatronClear();
@@ -2090,48 +2107,22 @@ ShelfData.Actions);
                 });
         }
 
-        class DelayClear
+        #endregion
+
+        #region 模拟柜门灯亮灭
+
+        public void SimulateLamp(bool on)
         {
-            public Task Task { get; set; }
-            public CancellationTokenSource Cancel { get; set; }
-
-            public delegate void Delegate_clear();
-            public delegate void Delegate_heartBeat(int leftSeconds);
-
-            public static DelayClear Start(Delegate_clear func_clear,
-                Delegate_heartBeat func_heartBeat)
+            Application.Current.Dispatcher.Invoke(new Action(() =>
             {
-                DelayClear result = new DelayClear();
-                result.Cancel = new CancellationTokenSource();
-                result.Task = Task.Run(() =>
-                {
-                    try
-                    {
-                        int leftSeconds = 10;
-                        var token = result.Cancel.Token;
-                        while (token.IsCancellationRequested == false
-                        && leftSeconds > 0)
-                        {
-                            Task.Delay(TimeSpan.FromSeconds(1), token).Wait();
-                            func_heartBeat?.Invoke(leftSeconds--);
-                        }
-                        token.ThrowIfCancellationRequested();
-                        // Task.Delay(TimeSpan.FromSeconds(10), token).Wait();
-                        func_clear?.Invoke();
-                    }
-                    catch
-                    {
-                        return;
-                    }
-                    finally
-                    {
-                        func_heartBeat?.Invoke(-1); // 让按钮文字中的倒计时数字消失
-                    }
-                });
-                return result;
-            }
+                if (on)
+                    this.lamp.Background = new SolidColorBrush(Colors.White);
+                else
+                    this.lamp.Background = new SolidColorBrush(Colors.Black);
+            }));
         }
 
+        #endregion
 
         #region 人脸识别功能
 

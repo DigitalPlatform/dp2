@@ -418,6 +418,8 @@ L output:01100");
                 0x91, 0x00, 0x05, 0x1c,
                 0xbe, 0x99, 0x1a, 0x14,
             };
+            // Exception:
+            //      可能会抛出异常 ArgumentException TagDataException
             var element = Element.Parse(data, 0, out int bytes);
             Assert.AreEqual(1, (int)element.OID);
             Assert.AreEqual("123456789012", element.Text);

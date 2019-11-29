@@ -946,6 +946,8 @@ this.toolStripButton_autoFixEas.Checked);
                     var tag_info = item_info.OneTag.TagInfo;
                     if (tag_info == null)
                         continue;
+                    // Exception:
+                    //      可能会抛出异常 ArgumentException TagDataException
                     LogicChip chip = LogicChip.From(tag_info.Bytes,
                         (int)tag_info.BlockSize);
                     string pii = chip.FindElement(ElementOID.PII)?.Text;
@@ -1009,6 +1011,8 @@ this.toolStripButton_autoFixEas.Checked);
                     var tag_info = item_info.OneTag.TagInfo;
                     if (tag_info == null)
                         goto CONTINUE;
+                    // Exception:
+                    //      可能会抛出异常 ArgumentException TagDataException
                     LogicChip chip = LogicChip.From(tag_info.Bytes,
                         (int)tag_info.BlockSize);
                     string pii = chip.FindElement(ElementOID.PII)?.Text;

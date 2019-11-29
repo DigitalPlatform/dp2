@@ -166,6 +166,8 @@ namespace DigitalPlatform.RFID
         }
 
         // 根据物理数据构造 (拆包)
+        // Exception:
+        //      可能会抛出异常 ArgumentException TagDataException
         // parameters:
         //      block_map   每个 char 表示一个 block 的锁定状态。'l' 表示锁定, '.' 表示没有锁定
         public static LogicChip From(byte[] data,
@@ -173,11 +175,15 @@ namespace DigitalPlatform.RFID
             string block_map = "")
         {
             LogicChip chip = new LogicChip();
+            // Exception:
+            //      可能会抛出异常 ArgumentException TagDataException
             chip.Parse(data, block_size, block_map);
             return chip;
         }
 
         // 解析 data 内容，初始化本对象
+        // Exception:
+        //      可能会抛出异常 ArgumentException TagDataException
         public void Parse(byte[] data,
             int block_size,
             string block_map)
@@ -194,6 +200,8 @@ namespace DigitalPlatform.RFID
                     start++;
                     continue;  // 有时候用 0 填充了余下的部分 bytes
                 }
+                // Exception:
+                //      可能会抛出异常 ArgumentException TagDataException
                 Element element = Element.Parse(data, start, out int bytes);
                 Debug.Assert(element.StartOffs == start);
                 this._elements.Add(element);

@@ -185,7 +185,6 @@ uint new_password);
             */
             return text.ToString();
         }
-
     }
 
     [Serializable()]
