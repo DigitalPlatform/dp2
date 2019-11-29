@@ -134,6 +134,8 @@ namespace dp2SSL
 
             // _patronReaderName = GetPatronReaderName();
 
+            App.LineFeed += App_LineFeed;
+
             if (Mode == "initial" || ShelfData.FirstInitialized == false)
             {
                 try
@@ -150,6 +152,21 @@ namespace dp2SSL
                     WpfClientInfo.WriteErrorLog($"InitialShelfEntities() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 }
             }
+        }
+
+        private async void App_LineFeed(object sender, LineFeedEventArgs e)
+        {
+            // 扫入一个条码
+            string barcode = e.Text.ToUpper();
+            // 检查防范空字符串，和使用工作人员方式(~开头)的字符串
+            if (string.IsNullOrEmpty(barcode) || barcode.StartsWith("~"))
+                return;
+
+            SetPatronInfo(new GetMessageResult { Message = barcode });
+
+            var result = await FillPatronDetail();
+            if (result.Value != -1)
+                Welcome();
         }
 
         // 门状态变化。从这里触发提交
@@ -711,6 +728,8 @@ namespace dp2SSL
 
         private async void PageShelf_Unloaded(object sender, RoutedEventArgs e)
         {
+            App.LineFeed -= App_LineFeed;
+
             CancelDelayTask();
 
             // 提交尚未提交的取出和放入
@@ -1467,6 +1486,7 @@ namespace dp2SSL
 
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
+                App.PauseBarcodeScan();
                 _passwordDialog = new InputPasswordWindows();
                 _passwordDialog.TitleText = $"请输入工作人员账户 {userName} 的密码并登录";
                 _passwordDialog.Owner = App.CurrentApp.MainWindow;
@@ -1478,6 +1498,7 @@ namespace dp2SSL
                     dialog_result = _passwordDialog.Result;
                     _passwordDialog = null;
                     closed = true;
+                    App.ContinueBarcodeScan();
                 };
                 _passwordDialog.Show();
                 AddLayer();
@@ -2097,7 +2118,7 @@ ShelfData.Actions);
                 },
                 (seconds) =>
                 {
-                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    Application.Current?.Dispatcher?.Invoke(new Action(() =>
                     {
                         if (seconds > 0)
                             this.clearPatron.Content = $"({seconds.ToString()} 秒后自动) 清除读者信息";

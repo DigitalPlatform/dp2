@@ -21,6 +21,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
+using System.Text;
 
 namespace dp2SSL
 {
@@ -29,6 +30,7 @@ namespace dp2SSL
     /// </summary>
     public partial class App : Application, INotifyPropertyChanged
     {
+        public static event LineFeedEventHandler LineFeed = null;
 
         // 主要的通道池，用于当前服务器
         public LibraryChannelPool _channelPool = new LibraryChannelPool();
@@ -145,7 +147,6 @@ namespace dp2SSL
             FingerprintManager.SetError += FingerprintManager_SetError;
             FingerprintManager.Start(_cancelRefresh.Token);
 
-
             FaceManager.Base.Name = "人脸中心";
             FaceManager.Url = App.FaceUrl;
             FaceManager.SetError += FaceManager_SetError;
@@ -202,7 +203,53 @@ namespace dp2SSL
             RfidManager.Start(_cancelRefresh.Token);
             if (App.Function == "智能书柜")
                 RfidManager.StartBase2(_cancelRefresh.Token);
+
+            _barcodeCapture.InputEvent += _barcodeCapture_BarCodeEvent;
+            _barcodeCapture.Start();
         }
+
+        private void _barcodeCapture_BarCodeEvent(BarcodeCapture.KeyInput input)
+        {
+            if (_pauseBarcodeScan > 0)
+                return;
+
+            if (input.Chr == '\0')
+                return;
+
+            // this.AddErrors("input", new List<string> { $"your input:{barCode.Ascll}" });
+            if (input.Chr == '\n' || input.Chr == '\r')
+            {
+                string line = _line.ToString();
+                if (string.IsNullOrEmpty(line) == false)
+                {
+                    // 触发一次输入
+                    LineFeed?.Invoke(this, new LineFeedEventArgs { Text = line });
+                }
+                _line.Clear();
+                return;
+            }
+
+            // Debug.WriteLine($"chr={barCode.Chr}");
+            // 防止内容太多
+            if (_line.Length > 1000)
+                _line.Clear();
+            _line.Append(input.Chr);
+        }
+
+        public static void PauseBarcodeScan()
+        {
+            _pauseBarcodeScan++;
+        }
+
+        public static void ContinueBarcodeScan()
+        {
+            _pauseBarcodeScan--;
+        }
+
+        StringBuilder _line = new StringBuilder();
+        static BarcodeCapture _barcodeCapture = new BarcodeCapture();
+        // 是否暂停接收输入
+        static int _pauseBarcodeScan = 0;
 
         // 单独的线程，监控 server UID 关系
         public void BeginCheckServerUID(CancellationToken token)
@@ -331,6 +378,9 @@ namespace dp2SSL
         // 注：Windows 关机或者重启的时候，会触发 OnSessionEnding 事件，但不会触发 OnExit 事件
         protected async override void OnExit(ExitEventArgs e)
         {
+            _barcodeCapture.Stop();
+            _barcodeCapture.InputEvent -= _barcodeCapture_BarCodeEvent;
+
             await PageMenu.PageShelf.Submit(true);
 
             LibraryChannelManager.Log?.Debug("OnExit() called");
@@ -532,7 +582,7 @@ namespace dp2SSL
         }
 
         Dictionary<string, Account> _accounts = new Dictionary<string, Account>();
-        
+
         public Account FindAccount(string userName)
         {
             if (_accounts.ContainsKey(userName) == false)
@@ -714,6 +764,8 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
 
         protected override void OnActivated(EventArgs e)
         {
+            ContinueBarcodeScan();
+
             // 单独线程执行，避免阻塞 OnActivated() 返回
             Task.Run(() =>
             {
@@ -725,6 +777,8 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
 
         protected override void OnDeactivated(EventArgs e)
         {
+            PauseBarcodeScan();
+
             // Speak("DeActivated");
             base.OnDeactivated(e);
         }
@@ -837,5 +891,16 @@ TagChangedEventArgs e);
         public List<TagAndData> AddPatrons { get; set; }
         public List<TagAndData> UpdatePatrons { get; set; }
         public List<TagAndData> RemovePatrons { get; set; }
+    }
+
+    public delegate void LineFeedEventHandler(object sender,
+LineFeedEventArgs e);
+
+    /// <summary>
+    /// 条码枪输入一行文字的事件的参数
+    /// </summary>
+    public class LineFeedEventArgs : EventArgs
+    {
+        public string Text { get; set; }
     }
 }
