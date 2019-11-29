@@ -163,6 +163,7 @@
     <Compile Include="Backup.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="BarcodeCapture.cs" />
     <Compile Include="DateTimeUtil.cs" />
     <Compile Include="DigitalPlatform.IO.cs">
       <SubType>Code</SubType>
