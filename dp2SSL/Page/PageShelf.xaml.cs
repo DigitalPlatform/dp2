@@ -2216,6 +2216,8 @@ ShelfData.Actions);
 
             App.CurrentApp.Speak($"欢迎您，{(string.IsNullOrEmpty(_patron.PatronName) ? _patron.Barcode : _patron.PatronName)}");
             BeginDelayTask();
+
+            this.doorControl.AnimateDoors();
         }
 
         void DisplayError(ref VideoWindow videoRegister,

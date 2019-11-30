@@ -12,6 +12,7 @@ using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
@@ -98,6 +99,69 @@ namespace dp2SSL
             }
 
             return new Point(x, y);
+        }
+
+        public void AnimateDoors()
+        {
+            double start = 0;
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                // 遍历 Grid 对象
+                foreach (Grid grid in this.canvas.Children)
+                {
+                    if (grid == null)
+                        continue;
+
+                    foreach (Button button in grid.Children)
+                    {
+                        if (button == null)
+                            continue;
+                        var door = button.DataContext as DoorItem;
+                        if (door.State == "open")
+                            continue;
+
+                        var border = GetChildOfType<Border>(button);
+
+                        // https://docs.microsoft.com/en-us/dotnet/framework/wpf/graphics-multimedia/how-to-animate-color-by-using-key-frames
+                        ColorAnimationUsingKeyFrames colorAnimation
+        = new ColorAnimationUsingKeyFrames();
+                        colorAnimation.Duration = TimeSpan.FromSeconds(start + 1.0);
+
+                        // TODO: 应该从 <local:StateToBackConverter x:Key="StateToBack" OpenColor="DarkCyan" CloseColor="DarkGreen"/> 中去取
+                        Color oldColor = Colors.DarkGreen;
+
+                        colorAnimation.KeyFrames.Add(
+               new LinearColorKeyFrame(
+                   Colors.DarkOrange, // Target value (KeyValue)
+                   KeyTime.FromTimeSpan(TimeSpan.FromSeconds(start + 0.5))) // KeyTime
+               );
+
+                        colorAnimation.KeyFrames.Add(
+new LinearColorKeyFrame(
+oldColor, // Target value (KeyValue)
+KeyTime.FromTimeSpan(TimeSpan.FromSeconds(start + 1.0))) // KeyTime
+);
+
+                        border.Background.BeginAnimation(SolidColorBrush.ColorProperty, colorAnimation);
+                        start += 0.1;
+                    }
+                }
+            }));
+        }
+
+        public static T GetChildOfType<T>(DependencyObject depObj)
+    where T : DependencyObject
+        {
+            if (depObj == null) return null;
+
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
+            {
+                var child = VisualTreeHelper.GetChild(depObj, i);
+
+                var result = (child as T) ?? GetChildOfType<T>(child);
+                if (result != null) return result;
+            }
+            return null;
         }
 
         void SetSize(Size size)
@@ -195,7 +259,7 @@ namespace dp2SSL
         static string[] all_attrs = new string[] { "left", "top", "width", "height" };
         static string[] two_attrs = new string[] { "width", "height" };
 
-        static void CheckAttributes(XmlElement element, string [] attrs)
+        static void CheckAttributes(XmlElement element, string[] attrs)
         {
             int count = 0;
             foreach (string attr in attrs)
@@ -430,7 +494,7 @@ this.ActualHeight - (this.Padding.Top + this.Padding.Bottom)));
                 brush.Stretch = Stretch.Uniform;
                 this.Background = brush;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 // TODO: 用一个报错文字图片设定为背景?
             }
