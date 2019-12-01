@@ -149,6 +149,7 @@ namespace dp2Circulation
         // 根据 type 在 Table XML 中获得一个内容值
         static string FindBiblioTableContent(XmlDocument dom, string type)
         {
+            // TODO: 可以用 XPath 直接找到特定的 line 元素
             XmlNodeList nodes = dom.DocumentElement.SelectNodes("line");
             int i = 0;
             foreach (XmlElement line in nodes)
