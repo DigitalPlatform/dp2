@@ -1333,7 +1333,7 @@ namespace DigitalPlatform.LibraryServer
                         strFufen = strHitFufen;
                         if (bOutputDebugInfo == true)
                         {
-                            strDebugInfo += "当前条目范围已偏向比测试值左方。但先前条目命中过。所以返回value='" + strValue + "' fufen='" + strFufen + "'\r\n";
+                            strDebugInfo += "当前条目范围已偏向测试值左方。但先前条目命中过。所以返回value='" + strValue + "' fufen='" + strFufen + "'\r\n";
                         }
                         return 1;
                     }

@@ -139,7 +139,7 @@ namespace dp2Circulation
             ColumnPropertyCollection temp = Program.MainForm.GetBrowseColumnProperties(e.DbName);
             if (temp != null)
             {
-                if (m_bBiblioSummaryColumn == true)
+                if (m_nBiblioSummaryColumn > 0)
                     e.ColumnTitles.Insert(0, "书目摘要");
                 e.ColumnTitles.AddRange(temp);  // 要复制，不要直接使用，因为后面可能会修改。怕影响到原件
             }

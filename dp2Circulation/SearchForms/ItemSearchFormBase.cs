@@ -27,7 +27,8 @@ namespace dp2Circulation
         // 实体数据库名 --> 册条码号 列号
         // internal Hashtable m_tableBarcodeColIndex = new Hashtable();
 
-        internal bool m_bBiblioSummaryColumn = true; // 是否在浏览列表中 加入书目摘要列
+        // internal bool m_bBiblioSummaryColumn = true; // 是否在浏览列表中 加入书目摘要列
+        internal int m_nBiblioSummaryColumn = 1; // 在浏览列表中要加入的书目信息列数
 
         internal bool m_bFirstColumnIsKey = false; // 当前listview浏览列的第一列是否应为key
 
@@ -103,10 +104,10 @@ namespace dp2Circulation
 
                 nCol = 0;   // 这个大部分情况能奏效
 
-                if (m_bBiblioSummaryColumn == false)
+                if (m_nBiblioSummaryColumn == 0)
                     nCol += 1;
                 else
-                    nCol += 2;
+                    nCol += m_nBiblioSummaryColumn + 1;
 
                 if (this.m_bFirstColumnIsKey == true)
                     nCol++; // 2013/11/12
@@ -209,10 +210,10 @@ namespace dp2Circulation
                 if (nCol == -1)
                     return -1;
 
-                if (m_bBiblioSummaryColumn == false)
+                if (m_nBiblioSummaryColumn == 0)
                     nCol += 1;
                 else
-                    nCol += 2;
+                    nCol += m_nBiblioSummaryColumn + 1;
 
                 if (this.m_bFirstColumnIsKey == true)
                     nCol++; // 2013/11/12
@@ -535,23 +536,23 @@ namespace dp2Circulation
                 int c = 0;
                 for (; c < cols.Length; c++)
                 {
-                    if (this.m_bBiblioSummaryColumn == false)
+                    if (this.m_nBiblioSummaryColumn == 0)
                         ListViewUtil.ChangeItemText(item,
                         c + 1,
                         cols[c]);
                     else
                         ListViewUtil.ChangeItemText(item,
-                        c + 2,
+                        c + (m_nBiblioSummaryColumn + 1),
                         cols[c]);
                 }
 
                 if (bClearRestColumns)
                 {
                     // 清除余下的列内容
-                    if (this.m_bBiblioSummaryColumn == false)
+                    if (this.m_nBiblioSummaryColumn == 0)
                         c += 1;
                     else
-                        c += 2;
+                        c += m_nBiblioSummaryColumn + 1;
 
                     for (; c < item.SubItems.Count; c++)
                     {
@@ -579,7 +580,7 @@ namespace dp2Circulation
             strError = "";
             int nRet = 0;
 
-            if (m_bBiblioSummaryColumn == false)
+            if (m_nBiblioSummaryColumn == 0)
                 return 0;
 
             Debug.Assert(this.DbType == "item"
@@ -673,6 +674,42 @@ namespace dp2Circulation
             }
         }
 
+        public virtual List<Order.ColumnProperty> GetBiblioColumns()
+        {
+            return null;
+        }
+
+        public static List<string> GetCaptionList(List<Order.ColumnProperty> defs)
+        {
+            List<string> results = new List<string>();
+            foreach (var def in defs)
+            {
+                string type = def.Type;
+                if (type.StartsWith("biblio_") == false)
+                    continue;
+
+                results.Add(def.Caption);
+            }
+
+            return results;
+        }
+
+        static List<string> GetTypeList(List<Order.ColumnProperty> defs)
+        {
+            List<string> results = new List<string>();
+            foreach(var def in defs)
+            {
+                string type = def.Type;
+                if (type.StartsWith("biblio_") == false)
+                    continue;
+
+                type = type.Substring("biblio_".Length);
+                results.Add(type);
+            }
+
+            return results;
+        }
+
         // parameters:
         //      lStartIndex 调用前已经做过的事项数。为了准确显示 Progress
         // return:
@@ -681,17 +718,17 @@ namespace dp2Circulation
         //      0   用户中断
         //      1   完成
         internal int _fillBiblioSummaryColumn(
-            LibraryChannel channel,
-            List<ListViewItem> items,
-            long lStartIndex,
-            bool bDisplayMessage,
-            bool bAutoSearch,
-            out string strError)
+        LibraryChannel channel,
+        List<ListViewItem> items,
+        long lStartIndex,
+        bool bDisplayMessage,
+        bool bAutoSearch,
+        out string strError)
         {
             strError = "";
             int nRet = 0;
 
-            if (m_bBiblioSummaryColumn == false)
+            if (m_nBiblioSummaryColumn == 0)
                 return 0;
 
             Debug.Assert(this.DbType == "item"
@@ -759,7 +796,6 @@ namespace dp2Circulation
                     strBiblioRecPath = strText;
 #endif
                 int nCol = -1;
-                string strBiblioRecPath = "";
                 // 获得事项所从属的书目记录的路径
                 // return:
                 //      -1  出错
@@ -770,7 +806,7 @@ namespace dp2Circulation
                     item,
                     bAutoSearch,   // true 如果遇到没有 parent id 列的时候速度较慢
                     out nCol,
-                    out strBiblioRecPath,
+                    out string strBiblioRecPath,
                     out strError);
                 if (nRet == -1)
                 {
@@ -810,12 +846,19 @@ namespace dp2Circulation
                 }
             }
 
-            CacheableBiblioLoader loader = new CacheableBiblioLoader();
-            loader.Channel = channel;
-            loader.Stop = this.stop;
-            loader.Format = "summary";
-            loader.GetBiblioInfoStyle = GetBiblioInfoStyle.None;
-            loader.RecPaths = biblio_recpaths;
+            var column_def = GetBiblioColumns();
+            string format = "summary";
+            if (column_def != null)
+                format = "table:" + StringUtil.MakePathList(GetTypeList(column_def), "|");
+
+            CacheableBiblioLoader loader = new CacheableBiblioLoader
+            {
+                Channel = channel,
+                Stop = this.stop,
+                Format = format,    // "summary", "table",
+                GetBiblioInfoStyle = GetBiblioInfoStyle.None,
+                RecPaths = biblio_recpaths
+            };
 
             loader.Prompt += loader_Prompt;
 
@@ -873,15 +916,76 @@ namespace dp2Circulation
                 BiblioItem biblio = (BiblioItem)enumerator.Current;
                 // Debug.Assert(biblio.RecPath == strRecPath, "m_loader 和 items 的元素之间 记录路径存在严格的锁定对应关系");
 
-                ListViewUtil.ChangeItemText(item,
-                    this.m_bFirstColumnIsKey == false ? 1 : 2,
-                    biblio.Content);
+
+                if (column_def == null)
+                    ListViewUtil.ChangeItemText(item,
+                        this.m_bFirstColumnIsKey == false ? 1 : 2,
+                        biblio.Content);
+                else
+                {
+                    var columns = GetBiblioColumnText(column_def,
+biblio.Content, biblio.RecPath);
+                    int start = this.m_bFirstColumnIsKey == false ? 1 : 2;
+                    foreach (string text in columns)
+                    {
+                        ListViewUtil.ChangeItemText(item,
+        start++,
+        text);
+                    }
+                }
 
                 ClearOneChange(item, true); // 清除内存中的修改
                 i++;
             }
 
             return 1;
+        }
+
+        static List<string> GetBiblioColumnText(List<Order.ColumnProperty> columns,
+            string xml,
+            string biblio_recpath)
+        {
+            List<string> results = new List<string>();
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.LoadXml(xml);
+            }
+            catch (Exception ex)
+            {
+                results.Add($"!error:书目表格数据出错:{ex.Message}");
+                return results;
+            }
+
+            foreach (var column in columns)
+            {
+                string type = column.Type;
+
+                if (type.StartsWith("biblio_") == false)
+                {
+                    results.Add("");
+                    continue;
+                }
+
+                type = type.Substring("biblio_".Length);
+
+                if (type == "recpath")
+                {
+                    results.Add(biblio_recpath);
+                    continue;
+                }
+
+                XmlElement line = dom.DocumentElement.SelectSingleNode($"line[@type='{type}']") as XmlElement;
+                if (line == null)
+                {
+                    results.Add("");
+                    continue;
+                }
+
+                results.Add(line.GetAttribute("value")?.Replace("\n", " "));
+            }
+
+            return results;
         }
 
         void loader_Prompt(object sender, MessagePromptEventArgs e)
@@ -1086,7 +1190,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6347.382, Culture=neutral, P
                     return 1;
                 }
 
-                nCol += 2;
+                nCol += (m_nBiblioSummaryColumn + 1);
                 if (this.m_bFirstColumnIsKey == true)
                     nCol++; // 2013/11/12
                 m_tableSummaryColIndex[strItemDbName] = nCol;   // 储存起来
@@ -1346,7 +1450,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6347.382, Culture=neutral, P
                 lRet = channel.GetCommentInfo(
                      stop,
                      "@path:" + strItemRecPath,
-                    // "",
+                     // "",
                      null,
                      out strItemText,
                      out strItemRecPath,
@@ -1359,7 +1463,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6347.382, Culture=neutral, P
                 lRet = channel.GetOrderInfo(
                      stop,
                      "@path:" + strItemRecPath,
-                    // "",
+                     // "",
                      null,
                      out strItemText,
                      out strItemRecPath,
@@ -1372,7 +1476,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6347.382, Culture=neutral, P
                 lRet = channel.GetIssueInfo(
                      stop,
                      "@path:" + strItemRecPath,
-                    // "",
+                     // "",
                      null,
                      out strItemText,
                      out strItemRecPath,
