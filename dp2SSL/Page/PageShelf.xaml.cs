@@ -561,7 +561,7 @@ namespace dp2SSL
                     PatronClear();
 
                 // 开门动作会中断延迟任务
-                CancelDelayTask();
+                CancelDelayClearTask();
 
                 // 等待确认收到开门信号
                 await Task.Run(() =>
@@ -730,7 +730,7 @@ namespace dp2SSL
         {
             App.LineFeed -= App_LineFeed;
 
-            CancelDelayTask();
+            CancelDelayClearTask();
 
             // 提交尚未提交的取出和放入
             // PatronClear(true);
@@ -2090,7 +2090,7 @@ ShelfData.Actions);
 
         DelayAction _delayClearPatronTask = null;
 
-        void CancelDelayTask()
+        void CancelDelayClearTask()
         {
             if (_delayClearPatronTask != null)
             {
@@ -2107,11 +2107,17 @@ ShelfData.Actions);
             */
         }
 
-        void BeginDelayTask()
+        void BeginDelayClearTask()
         {
-            CancelDelayTask();
+            CancelDelayClearTask();
             // TODO: 开始启动延时自动清除读者信息的过程。如果中途门被打开，则延时过程被取消(也就是说读者信息不再会被自动清除)
+
+            Application.Current?.Dispatcher?.Invoke(new Action(() =>
+            {
+                PatronFixed = false;
+            }));
             _delayClearPatronTask = DelayAction.Start(
+                20,
                 () =>
                 {
                     PatronClear();
@@ -2215,7 +2221,7 @@ ShelfData.Actions);
             }));
 
             App.CurrentApp.Speak($"欢迎您，{(string.IsNullOrEmpty(_patron.PatronName) ? _patron.Barcode : _patron.PatronName)}");
-            BeginDelayTask();
+            BeginDelayClearTask();
 
             this.doorControl.AnimateDoors();
         }
@@ -2319,7 +2325,7 @@ ShelfData.Actions);
 
         private void ClearPatron_Click(object sender, RoutedEventArgs e)
         {
-            CancelDelayTask();
+            CancelDelayClearTask();
 
             /*
             // 如果柜门没有全部关闭，要提醒先关闭柜门
@@ -2335,7 +2341,7 @@ ShelfData.Actions);
 
         private void FixPatron_Checked(object sender, RoutedEventArgs e)
         {
-            CancelDelayTask();
+            CancelDelayClearTask();
         }
 
         private void FixPatron_Unchecked(object sender, RoutedEventArgs e)

@@ -139,7 +139,7 @@ namespace DigitalPlatform.RFID
         public static string LockName = null;   // "*";
         public static string LockIndices = null; // "0,1,2,3";
         */
-        public static List<string> LockCommands = null;
+        public static string LockCommands = null;
 
         static bool _lockReady = false;
 
@@ -338,9 +338,13 @@ new SetErrorEventArgs
                 {
                     List<GetLockStateResult> errors = new List<GetLockStateResult>();
                     List<LockState> states = new List<LockState>();
-                    foreach (var command in LockCommands)
                     {
-                        var lock_result = channel?.Object?.GetShelfLockState(command);
+                        // parameters:
+                        //      lockNameParam   为 "锁控板名字.卡编号.锁编号"。
+                        //                      其中卡编号部分可以是 "1" 也可以是 "1|2" 这样的形态
+                        //                      其中锁编号部分可以是 "1" 也可以是 "1|2|3|4" 这样的形态
+                        //                      如果缺乏卡编号和锁编号部分，缺乏的部分默认为 "1"
+                        var lock_result = channel?.Object?.GetShelfLockState(LockCommands);
                         if (lock_result.Value == -1)
                             Base.TriggerSetError(lock_result,
                                 new SetErrorEventArgs { Error = lock_result.ErrorInfo });

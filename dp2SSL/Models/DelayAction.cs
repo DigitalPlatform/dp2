@@ -15,7 +15,9 @@ namespace dp2SSL
         public delegate void Delegate_clear();
         public delegate void Delegate_heartBeat(int leftSeconds);
 
-        public static DelayAction Start(Delegate_clear func_clear,
+        public static DelayAction Start(
+            int leftSeconds,
+            Delegate_clear func_clear,
             Delegate_heartBeat func_heartBeat)
         {
             DelayAction result = new DelayAction();
@@ -24,7 +26,6 @@ namespace dp2SSL
             {
                 try
                 {
-                    int leftSeconds = 10;
                     var token = result.Cancel.Token;
                     while (token.IsCancellationRequested == false
                     && leftSeconds > 0)

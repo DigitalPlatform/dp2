@@ -215,6 +215,7 @@ namespace dp2SSL
 
             // TODO: 开始启动延时自动清除读者信息的过程。如果中途门被打开，则延时过程被取消(也就是说读者信息不再会被自动清除)
             _delayTurnOffTask = DelayAction.Start(
+                20,
                 () =>
                 {
                     ShelfData.TurnLamp("~", "off");
@@ -270,21 +271,18 @@ namespace dp2SSL
 
             // 要在初始化以前设定好
             _patronReaderName = GetReaderNameList("patron");
-            WpfClientInfo.WriteErrorLog($"patron ReaderNameList '{_patronReaderName}'");
+            WpfClientInfo.WriteInfoLog($"patron ReaderNameList '{_patronReaderName}'");
 
             RfidManager.Base2ReaderNameList = _patronReaderName;    // 2019/11/18
 
             _doorReaderName = GetReaderNameList("doors");
-            WpfClientInfo.WriteErrorLog($"doors ReaderNameList '{_doorReaderName}'");
+            WpfClientInfo.WriteInfoLog($"doors ReaderNameList '{_doorReaderName}'");
 
             RfidManager.ReaderNameList = _doorReaderName;
             // RfidManager.AntennaList = GetAntennaList();
-            RfidManager.LockCommands = ShelfData.GetLockCommands();
+            RfidManager.LockCommands = StringUtil.MakePathList(ShelfData.GetLockCommands());
 
-            {
-                string temp = StringUtil.MakePathList(RfidManager.LockCommands);
-                WpfClientInfo.WriteErrorLog($"LockCommands '{temp}'");
-            }
+            WpfClientInfo.WriteInfoLog($"LockCommands '{RfidManager.LockCommands}'");
 
             // _patronReaderName = GetPatronReaderName();
         }
@@ -1030,7 +1028,7 @@ namespace dp2SSL
                         //      可能会抛出异常 ArgumentException TagDataException
                         _all.Add(NewEntity(tag));
                     }
-                    catch(TagDataException ex)
+                    catch (TagDataException ex)
                     {
                         warnings.Add($"UID 为 '{tag.OneTag?.UID}' 的标签出现数据格式错误: {ex.Message}");
                         WpfClientInfo.WriteErrorLog($"InitialShelfEntities() 遇到 tag (UID={tag.OneTag?.UID}) 数据格式出错：{ex.Message}\r\ntag 详情：{tag.ToString()}");

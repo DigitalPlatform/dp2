@@ -4176,7 +4176,37 @@ out Reader reader);
             return results;
         }
 
-        public static void ParseLockName(string text, out string lockName,
+        // 解析锁名称字符串以后得到的细部结构
+        public class LockPath
+        {
+            public string LockName { get; set; }
+            public List<string> CardNameList { get; set; }
+            public List<string> NumberList { get; set; }
+
+            public static LockPath Parse(string text)
+            {
+                LockPath result = new LockPath();
+
+                result.LockName = "*";
+                result.CardNameList = new List<string> { "1" };
+                result.NumberList = new List<string> { "1" };
+
+                string[] parts = text.Split(new char[] { '.' });
+
+                if (parts.Length > 0)
+                    result.LockName = parts[0];
+                if (parts.Length > 1 && string.IsNullOrEmpty(parts[1]) == false)
+                    result.CardNameList = StringUtil.SplitList(parts[1], '|');
+                if (parts.Length > 2 && string.IsNullOrEmpty(parts[2]) == false)
+                    result.NumberList = StringUtil.SplitList(parts[2], '|');
+
+                return result;
+            }
+        }
+
+        /*
+        public static void ParseLockName(string text, 
+            out string lockName,
     out string card,
     out string number)
         {
@@ -4192,7 +4222,85 @@ out Reader reader);
             if (parts.Length > 2)
                 number = parts[2];
         }
+        */
 
+        // 探测锁状态
+        // parameters:
+        // parameters:
+        //      lockNameParam   为 "锁控板名字.卡编号.锁编号"。
+        //                      其中卡编号部分可以是 "1" 也可以是 "1|2" 这样的形态
+        //                      其中锁编号部分可以是 "1" 也可以是 "1|2|3|4" 这样的形态
+        //                      如果缺乏卡编号和锁编号部分，缺乏的部分默认为 "1"
+        public GetLockStateResult GetShelfLockState(string lockNameParam)
+        {
+            var path = LockPath.Parse(lockNameParam);
+
+            /*
+            ParseLockName(lockNameParam,
+                out string lockName,
+out string card,
+out string number);
+*/
+
+            List<ShelfLock> locks = GetLocksByName(path.LockName);
+            if (locks.Count == 0)
+                return new GetLockStateResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"当前不存在名为 '{path.LockName}' 的门锁对象",
+                    ErrorCode = "lockNotFound"
+                };
+
+            List<LockState> states = new List<LockState>();
+
+            foreach (var current_lock in locks)
+            {
+                foreach (var card in path.CardNameList)
+                {
+                    foreach (var number in path.NumberList)
+                    {
+                        int addr = 1;
+                        int index = 1;
+                        if (string.IsNullOrEmpty(card) == false)
+                            Int32.TryParse(card, out addr);
+                        if (string.IsNullOrEmpty(number) == false)
+                            Int32.TryParse(number, out index);
+
+                        Byte sta = 0x00;
+                        int iret = RFIDLIB.miniLib_Lock.Mini_GetDoorStatus(current_lock.LockHandle,
+                            (Byte)addr, // 1,
+                            (Byte)index,
+                            ref sta);
+                        if (iret != 0)
+                            return new GetLockStateResult
+                            {
+                                Value = -1,
+                                ErrorInfo = $"getDoorStatus error (lock name='{current_lock.Name}' index={index})"
+                            };
+
+                        states.Add(new LockState
+                        {
+                            // Path
+                            Path = $"{current_lock.Name}.{addr}.{index}",
+                            // 锁名字
+                            Lock = current_lock.Name,
+                            Board = addr,
+                            Index = index,
+                            State = (sta == 0x00 ? "open" : "close")
+                        });
+                    }
+                }
+            }
+
+            return new GetLockStateResult
+            {
+                Value = 0,
+                States = states
+            };
+        }
+
+
+#if REMOVED
         // 探测锁状态
         // parameters:
         //      lockName    锁名字。如果为 * 表示所有的锁
@@ -4254,6 +4362,8 @@ out string number);
             };
         }
 
+#endif
+
         /*
         // 还原锁名字
         static string RestoreLockName(string lockName, string number)
@@ -4314,6 +4424,70 @@ out string number);
         }
 
         // 开门
+        // parameters:
+        //      lockNameParam   为 "锁控板名字.卡编号.锁编号"。
+        //                      其中卡编号部分可以是 "1" 也可以是 "1|2" 这样的形态
+        //                      其中锁编号部分可以是 "1" 也可以是 "1|2|3|4" 这样的形态
+        //                      如果缺乏卡编号和锁编号部分，缺乏的部分默认为 "1"
+        public NormalResult OpenShelfLock(string lockNameParam)
+        {
+            var path = LockPath.Parse(lockNameParam);
+
+            /*
+            ParseLockName(lockNameParam,
+                out string lockName,
+out string card,
+out string number);
+*/
+
+            List<ShelfLock> locks = GetLocksByName(path.LockName);
+            if (locks.Count == 0)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"当前不存在名为 '{path.LockName}' 的门锁对象",
+                    ErrorCode = "lockNotFound"
+                };
+
+            List<LockState> states = new List<LockState>();
+
+            int count = 0;
+            foreach (var current_lock in locks)
+            {
+                foreach (var card in path.CardNameList)
+                {
+                    foreach (var number in path.NumberList)
+                    {
+                        int addr = 1;
+                        int index = 1;
+                        if (string.IsNullOrEmpty(card) == false)
+                            Int32.TryParse(card, out addr);
+                        if (string.IsNullOrEmpty(number) == false)
+                            Int32.TryParse(number, out index);
+
+                        int iret = RFIDLIB.miniLib_Lock.Mini_OpenDoor(current_lock.LockHandle,
+                            (Byte)addr,   // 1,
+                            (Byte)index);
+                        if (iret != 0)
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = $"openDoor error (lock name='{current_lock.Name}' index={index})"
+                            };
+                        count++;
+                    }
+                }
+            }
+
+            return new NormalResult
+            {
+                Value = count
+            };
+        }
+
+
+#if REMOVED
+        // 开门
         public NormalResult OpenShelfLock(string lockNameParam)
         {
             ParseLockName(lockNameParam,
@@ -4359,6 +4533,8 @@ out string number);
                 Value = count
             };
         }
+
+#endif
     }
 
     public class CReaderDriverInf
