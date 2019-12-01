@@ -1917,6 +1917,11 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
             {
                 if (_inSimuLock == false)
                 {
+                    // parameters:
+                    //      lockNameParam   为 "锁控板名字.卡编号.锁编号"。
+                    //                      其中卡编号部分可以是 "1" 也可以是 "1|2" 这样的形态
+                    //                      其中锁编号部分可以是 "1" 也可以是 "1|2|3|4" 这样的形态
+                    //                      如果缺乏卡编号和锁编号部分，缺乏的部分默认为 "1"
                     var result = _driver.OpenShelfLock(strIndex);
                     MessageDlg.Show(this, result.ToString(), "开锁");
                 }
@@ -1939,6 +1944,11 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
             {
                 if (_inSimuLock == false)
                 {
+                    // parameters:
+                    //      lockNameParam   为 "锁控板名字.卡编号.锁编号"。
+                    //                      其中卡编号部分可以是 "1" 也可以是 "1|2" 这样的形态
+                    //                      其中锁编号部分可以是 "1" 也可以是 "1|2|3|4" 这样的形态
+                    //                      如果缺乏卡编号和锁编号部分，缺乏的部分默认为 "1"
                     var result = _driver.GetShelfLockState(strIndex);
                     MessageDlg.Show(this, result.ToString(), "锁状态");
                 }

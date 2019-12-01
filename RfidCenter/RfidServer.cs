@@ -37,8 +37,11 @@ namespace RfidCenter
             {
                 // 探测锁状态
                 // parameters:
-                //      lockName    锁名字。如果为 * 表示所有的锁
-                //      index       锁编号。从 0 开始计数
+                // parameters:
+                //      lockNameParam   为 "锁控板名字.卡编号.锁编号"。
+                //                      其中卡编号部分可以是 "1" 也可以是 "1|2" 这样的形态
+                //                      其中锁编号部分可以是 "1" 也可以是 "1|2|3|4" 这样的形态
+                //                      如果缺乏卡编号和锁编号部分，缺乏的部分默认为 "1"
                 var result = Program.Rfid.GetShelfLockState(one);
                 if (result.Value == -1)
                     return result;
@@ -51,6 +54,11 @@ namespace RfidCenter
         // 开锁
         public NormalResult OpenShelfLock(string lockName)
         {
+            // parameters:
+            //      lockNameParam   为 "锁控板名字.卡编号.锁编号"。
+            //                      其中卡编号部分可以是 "1" 也可以是 "1|2" 这样的形态
+            //                      其中锁编号部分可以是 "1" 也可以是 "1|2|3|4" 这样的形态
+            //                      如果缺乏卡编号和锁编号部分，缺乏的部分默认为 "1"
             return Program.Rfid.OpenShelfLock(lockName);
         }
 
