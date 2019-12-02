@@ -15279,7 +15279,7 @@ strLibraryCode);    // 读者所在的馆代码
         // 为了兼容旧的脚本文件 table_unimarc.fltx。时间长了以后可以考虑删除本函数
         public static string BuildTableXml(List<NameValueLine> lines)
         {
-            return NameValueLine.BuildTableXml(lines);
+            return NameValueLine.BuildTableXml(lines, "");
         }
     }
 

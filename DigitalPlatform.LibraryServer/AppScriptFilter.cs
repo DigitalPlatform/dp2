@@ -693,7 +693,7 @@ ISBD Structure
         // parameters:
         //      strBiblioXml    XML记录，或者 MARC 记录
         //      strSyntax   MARC格式 usmarc/unimarc。如果strBiblioXml 第一字符为 '<' 则本参数可以为空
-        //      strStyle    创建风格。
+        //      strStyle    创建风格。例如 "title,author"
         public int ConvertBiblioXmlToTable(
             string strBiblioXml,
             string strSyntax,
@@ -779,7 +779,7 @@ ISBD Structure
                         return -1;
                     }
 
-                    strBiblio = NameValueLine.BuildTableXml(results);
+                    strBiblio = NameValueLine.BuildTableXml(results, strStyle);
                     return 0;
                 }
             }
