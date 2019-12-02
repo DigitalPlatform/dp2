@@ -697,13 +697,23 @@ namespace dp2Circulation
         static List<string> GetTypeList(List<Order.ColumnProperty> defs)
         {
             List<string> results = new List<string>();
-            foreach(var def in defs)
+            foreach (var def in defs)
             {
                 string type = def.Type;
                 if (type.StartsWith("biblio_") == false)
                     continue;
 
                 type = type.Substring("biblio_".Length);
+
+                if (type == "recpath")
+                    continue;
+
+                if (type == "isbd")
+                {
+                    // 要求所有带有 "_area" 的 type
+                    type = "areas";
+                }
+
                 results.Add(type);
             }
 
@@ -849,7 +859,7 @@ namespace dp2Circulation
             var column_def = GetBiblioColumns();
             string format = "summary";
             if (column_def != null)
-                format = "table:" + StringUtil.MakePathList(GetTypeList(column_def), "|");
+                format = "table:slim|" + StringUtil.MakePathList(GetTypeList(column_def), "|");
 
             CacheableBiblioLoader loader = new CacheableBiblioLoader
             {
@@ -945,6 +955,8 @@ biblio.Content, biblio.RecPath);
             string xml,
             string biblio_recpath)
         {
+            if (xml == "{null}")
+                return new List<string> { xml };
             List<string> results = new List<string>();
             XmlDocument dom = new XmlDocument();
             try
@@ -975,6 +987,13 @@ biblio.Content, biblio.RecPath);
                     continue;
                 }
 
+                if (type == "isbd")
+                {
+                    results.Add(BuildIsbd(dom));
+                    continue;
+                }
+
+                /*
                 XmlElement line = dom.DocumentElement.SelectSingleNode($"line[@type='{type}']") as XmlElement;
                 if (line == null)
                 {
@@ -983,9 +1002,73 @@ biblio.Content, biblio.RecPath);
                 }
 
                 results.Add(line.GetAttribute("value")?.Replace("\n", " "));
+                */
+                results.Add(GetValue(dom, type));
             }
 
             return results;
+        }
+
+        static string[] area_types = new string[] {
+"title_area",
+"edition_area",
+"material_specific_area",
+"publication_area",
+"material_description_area",
+"series_area",
+"notes_area",
+"resource_identifier_area",
+        };
+
+        static string BuildIsbd(XmlDocument table_dom)
+        {
+            /*
+* content_form_area
+* title_area
+* edition_area
+* material_specific_area
+* publication_area
+* material_description_area
+* series_area
+* notes_area
+* resource_identifier_area
+* * */
+            StringBuilder text = new StringBuilder();
+            foreach (var type in area_types)
+            {
+                string value = GetValue(table_dom, type);
+                if (string.IsNullOrEmpty(value) == false)
+                {
+                    if (text.Length > 0)
+                        text.Append(". -- ");
+                    text.Append(value);
+                }
+            }
+
+            return text.ToString();
+        }
+
+        static string GetValue(XmlDocument dom, string type)
+        {
+            // 先尝试用 XPath 直接获得
+            {
+                XmlElement line = dom.DocumentElement.SelectSingleNode($"line[@type='{type}']") as XmlElement;
+                if (line != null)
+                    return line.GetAttribute("value")?.Replace("\n", " ");
+            }
+
+            // 然后尝试从所有 line 元素中遍历 type 属性中局部包含所需值的
+            {
+                XmlNodeList lines = dom.DocumentElement.SelectNodes("line");
+                foreach (XmlElement line in lines)
+                {
+                    string current_type = line.GetAttribute("type");
+                    if (StringUtil.IsInList(type, current_type))
+                        return line.GetAttribute("value")?.Replace("\n", " ");
+                }
+
+                return "";  // 没有找到
+            }
         }
 
         void loader_Prompt(object sender, MessagePromptEventArgs e)

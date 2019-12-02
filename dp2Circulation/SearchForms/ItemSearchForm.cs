@@ -2369,13 +2369,12 @@ out strError);
                 string strBarcode = "";
                 if (bSelected == true)
                 {
-                    string strError = "";
                     // strBarcode = ListViewUtil.GetItemText(this.listView_records.SelectedItems[0], 1);
                     int nRet = GetItemBarcodeOrRefID(
     this.listView_records.SelectedItems[0],
     false,
     out strBarcode,
-    out strError);
+    out string strError);
                 }
 
                 bool bExistEntityForm = (Program.MainForm.GetTopChildWindow<EntityForm>() != null);
@@ -2567,7 +2566,7 @@ out strError);
                 contextMenu.MenuItems.Add(menuItem);
             }
 
-            menuItem = new MenuItem("定义书目格式(&B)");
+            menuItem = new MenuItem("设置书目栏目(&B) ...");
             menuItem.Click += new System.EventHandler(this.menu_defBiblioColumns_Click);
             contextMenu.MenuItems.Add(menuItem);
 
@@ -2976,8 +2975,13 @@ dlg.UiState);
             option.SaveData(Program.MainForm.AppInfo,
                 GetBiblioColumnPath());
 
+            m_tableSummaryColIndex.Clear();
+            ClearColumnIndexCache();
             _biblioColumns = null;
             GetBiblioColumns();
+
+            // 清除浏览列表中的所有行
+            ClearListViewItems();
         }
 
         string GetBiblioColumnPath()
@@ -13036,7 +13040,25 @@ out strError);
 
                 return results;
             }
-            return base.GetAllColumns(false);
+
+            {
+                var results = base.GetAllColumns(false);
+
+                string[] lines = new string[] {
+                    "biblio_isbd -- 书目摘要",
+                };
+
+                foreach (string line in lines)
+                {
+                    Column column = new Column();
+                    column.Name = line;
+                    column.Caption = GetRightPart(line);
+                    column.MaxChars = -1;
+                    results.Add(column);
+                }
+
+                return results;
+            }
         }
 
     }

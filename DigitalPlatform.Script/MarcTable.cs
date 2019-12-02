@@ -427,9 +427,9 @@ namespace DigitalPlatform.Marc
             // 数字资源
             if (StringUtil.IsInList("object", strStyle))
             {
-                
+
                 string objectTable = ScriptUtil.BuildObjectXmlTable(strMARC,
-                    StringUtil.IsInList("object_template", strStyle) ? BuildObjectHtmlTableStyle.Template | BuildObjectHtmlTableStyle.TemplateMultiHit: BuildObjectHtmlTableStyle.None,
+                    StringUtil.IsInList("object_template", strStyle) ? BuildObjectHtmlTableStyle.Template | BuildObjectHtmlTableStyle.TemplateMultiHit : BuildObjectHtmlTableStyle.None,
                     "unimarc",
                     strRecPath,
                     maps_container);
@@ -510,7 +510,7 @@ namespace DigitalPlatform.Marc
         {
             bool bRange = false;
             // 把 $d$e$f 聚集在一起
-            foreach(MarcSubfield subfield in field.ChildNodes)
+            foreach (MarcSubfield subfield in field.ChildNodes)
             {
                 if (subfield.Name == "d" || subfield.Name == "e" || subfield.Name == "f")
                 {
@@ -776,7 +776,7 @@ namespace DigitalPlatform.Marc
                     case "c":
                         return new PrePostfix(" ; ");
 
-                        // 注: $d$e$f 已经预处理过了，包含了标点符号在内容中
+                    // 注: $d$e$f 已经预处理过了，包含了标点符号在内容中
                     case "d":
                     case "e":
                     case "f":
@@ -1148,7 +1148,7 @@ namespace DigitalPlatform.Marc
         }
 
 
-#endregion
+        #endregion
 
         public static int ScriptMarc21(
             string strRecPath,
@@ -1168,7 +1168,7 @@ namespace DigitalPlatform.Marc
 
             string strImageUrl = ScriptUtil.GetCoverImageUrl(strMARC, "LargeImage");    // LargeImage
             if (string.IsNullOrEmpty(strImageUrl) == false)
-                results.Add(new NameValueLine("_coverImage", strImageUrl, 
+                results.Add(new NameValueLine("_coverImage", strImageUrl,
                     "coverimageurl" // 2019/7/19 添加
                     ));
 
@@ -1537,7 +1537,7 @@ namespace DigitalPlatform.Marc
             if (fields.count > 0)
             {
                 string strXml = ScriptUtil.BuildObjectXmlTable(strMARC,
-                    StringUtil.IsInList("object_template", strStyle) ? BuildObjectHtmlTableStyle.Template | BuildObjectHtmlTableStyle.TemplateMultiHit: BuildObjectHtmlTableStyle.None,
+                    StringUtil.IsInList("object_template", strStyle) ? BuildObjectHtmlTableStyle.Template | BuildObjectHtmlTableStyle.TemplateMultiHit : BuildObjectHtmlTableStyle.None,
                     "usmarc",
                     strRecPath,
                     maps_container);
@@ -1787,15 +1787,19 @@ namespace DigitalPlatform.Marc
         }
 
         // 创建 Table Xml
-        public static string BuildTableXml(List<NameValueLine> lines)
+        // parameters:
+        //      style   "slim" 表示希望返回一种简单格式，line 元素中去掉了 name 元素
+        public static string BuildTableXml(List<NameValueLine> lines, string style)
         {
+            bool slim = StringUtil.IsInList("slim", style);
             XmlDocument dom = new XmlDocument();
             dom.LoadXml("<root />");
             foreach (NameValueLine line in lines)
             {
                 XmlElement new_line = dom.CreateElement("line");
                 dom.DocumentElement.AppendChild(new_line);
-                new_line.SetAttribute("name", line.Name);
+                if (slim == false)
+                    new_line.SetAttribute("name", line.Name);
 
                 if (string.IsNullOrEmpty(line.Value) == false)
                     new_line.SetAttribute("value", line.Value);
