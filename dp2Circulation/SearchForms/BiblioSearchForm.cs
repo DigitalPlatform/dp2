@@ -3824,7 +3824,7 @@ out strError);
                     }
                 }
 
-                Order.ExportDistributeContext context = new Order.ExportDistributeContext
+                Order.DistributeExcelFile context = new Order.DistributeExcelFile
                 {
                     Sheet = sheet,
                     LocationList = location_list,
@@ -3836,8 +3836,8 @@ out strError);
                 };
 
                 // 输出标题行
-                Order.DistributeExcelFile.OutputDistributeInfoTitleLine(
-                    context,
+                context.OutputDistributeInfoTitleLine(
+                    // context,
 ""
 );
 
@@ -3864,8 +3864,8 @@ out strError);
                             Order.DistributeExcelFile.WarningRecPath("===", null);
                             Order.DistributeExcelFile.WarningRecPath("书目记录 " + strBiblioRecPath, null);
 
-                            nOrderCount += Order.DistributeExcelFile.OutputDistributeInfos(
-                                context,
+                            nOrderCount += context.OutputDistributeInfos(
+                                // context,
                                 this,
                                 strSellerFilter,
                                 dlg.LibraryCode,
@@ -4025,7 +4025,9 @@ out strError);
 
                 context.ContentEndRow = context.RowIndex - 1;
 
-                Order.DistributeExcelFile.OutputSumLine(context);
+                context.OutputSumLine(
+                    // context
+                    );
 
                 Order.DistributeExcelFile.AdjectColumnWidth(sheet, column_max_chars, 20);
 

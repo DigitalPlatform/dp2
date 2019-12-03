@@ -121,8 +121,18 @@ namespace dp2Circulation
     List<string> col_list,
     int nRowIndex)  // 从 0 开始计数。
         {
+            string strError = "";
             XmlDocument dom = new XmlDocument();
-            dom.LoadXml(strXml);
+            try
+            {
+                dom.LoadXml(strXml);
+            }
+            catch (Exception ex)
+            {
+                // 2019/12/3
+                strError = $"!error: 装载书目记录 XML 到 DOM 时出错: {ex.Message}";
+                dom.LoadXml("<root />");
+            }
 
             List<IXLCell> cells = new List<IXLCell>();
 
@@ -133,7 +143,12 @@ namespace dp2Circulation
                 if (col == "recpath" || col.EndsWith("_recpath"))
                     strValue = strBiblioRecPath;
                 else
-                    strValue = FindBiblioTableContent(dom, col);
+                {
+                    if (string.IsNullOrEmpty(strError) == false)
+                        strValue = strError;
+                    else
+                        strValue = FindBiblioTableContent(dom, col);
+                }
 
                 {
                     IXLCell cell = sheet.Cell(nRowIndex + 1, nStartColIndex + (i++) + 1).SetValue(strValue);
@@ -142,7 +157,6 @@ namespace dp2Circulation
                     if (col == "recpath" || col.EndsWith("_recpath"))
                         cell.Style.Font.FontColor = XLColor.LightGray;
                 }
-
             }
         }
 

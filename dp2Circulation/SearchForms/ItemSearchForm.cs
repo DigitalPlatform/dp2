@@ -2819,6 +2819,15 @@ out strError);
                     menuItemExport.MenuItems.Add(subMenuItem);
                 }
 
+                if (this.DbType == "item")
+                {
+                    subMenuItem = new MenuItem("册详细信息到 Excel 文件 [" + (nPathItemCount == -1 ? "?" : nPathItemCount.ToString()) + "] (&E)...");
+                    subMenuItem.Click += new System.EventHandler(this.menu_exportEntityExcelFile_Click);
+                    if (nPathItemCount == 0 || bLooping == true)
+                        subMenuItem.Enabled = false;
+                    menuItemExport.MenuItems.Add(subMenuItem);
+                }
+
                 // ---
                 subMenuItem = new MenuItem("-");
                 menuItemExport.MenuItems.Add(subMenuItem);
@@ -3008,6 +3017,52 @@ dlg.UiState);
             }
 
             nRet = VerifyItems(
+                (dlg) =>
+                {
+                    if (this.DbType != "item")
+                        return new NormalResult();
+
+                    MainForm.SetControlFont(dlg, this.Font);
+
+                    dlg.UiState = Program.MainForm.AppInfo.GetString(
+                        "ItemSearchForm",
+                        "VerifyEntityDialog_uiState",
+                        "");
+
+                    Program.MainForm.AppInfo.LinkFormState(dlg, "ItemSearchForm_VerifyEntityDialog_state");
+                    dlg.ShowDialog(this);
+
+                    Program.MainForm.AppInfo.SetString(
+                        "ItemSearchForm",
+                        "VerifyEntityDialog_uiState",
+                        dlg.UiState);
+
+                    if (dlg.ServerVerify == true)
+                    {
+                        if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.112") < 0)
+                        {
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = "服务器端校验功能只能和 dp2library 2.112 或以上版本配套使用"
+                            };
+                        }
+                    }
+
+                    if (dlg.AddPrice == true)
+                    {
+                        if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.113") < 0)
+                        {
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = "添加价格功能只能和 dp2library 2.113 或以上版本配套使用"
+                            };
+                        }
+                    }
+
+                    return new NormalResult();
+                },
                 func,
                 out strError);
             if (nRet == -1)
@@ -3070,7 +3125,11 @@ dlg.UiState);
             bool bAutoModify,
             ref bool bChanged);
 
-        int VerifyItems(delegate_verifyItemDom func,
+        delegate NormalResult delegate_openDialog(VerifyEntityDialog dlg);
+
+        int VerifyItems(
+            delegate_openDialog func_openDialog,
+            delegate_verifyItemDom func,
             out string strError)
         {
             strError = "";
@@ -3099,6 +3158,17 @@ dlg.UiState);
             if (bControl == true)
                 dlg.AutoModify = true;
 
+            if (func_openDialog != null)
+            {
+                var result = func_openDialog(dlg);
+                if (result.Value == -1)
+                {
+                    strError = result.ErrorInfo;
+                    return -1;
+                }
+            }
+
+            /*
             if (this.DbType == "item")
             {
                 MainForm.SetControlFont(dlg, this.Font);
@@ -3134,6 +3204,7 @@ dlg.UiState);
                     }
                 }
             }
+            */
 
             // 切换到“操作历史”属性页
             Program.MainForm.ActivateFixPage("history");
@@ -6584,7 +6655,7 @@ out strError);
                     }
                 }
 
-                Order.ExportDistributeContext context = new Order.ExportDistributeContext
+                Order.DistributeExcelFile context = new Order.DistributeExcelFile
                 {
                     Sheet = sheet,
                     LocationList = location_list,
@@ -6596,8 +6667,8 @@ out strError);
                 };
 
                 // 输出标题行
-                Order.DistributeExcelFile.OutputDistributeInfoTitleLine(
-                    context,
+                context.OutputDistributeInfoTitleLine(
+                    // context,
 // location_list,
 //sheet,
 ""
@@ -6621,6 +6692,7 @@ out strError);
                 string strSellerFilter = dlg.SellerFilter;  // "*";
 
                 nRet = VerifyItems(
+                    null,
                     (
             object param,
             LibraryChannel channel,
@@ -6723,8 +6795,8 @@ out strError);
                         order.OldRecPath = strOrderRecPath;
                         order.OldRecord = order_dom.DocumentElement.OuterXml;
 
-                        Order.DistributeExcelFile.OutputDistributeInfo(
-                            context,
+                        context.OutputDistributeInfo(
+                            // context,
                             this,
         // location_list,
         //sheet,
@@ -6758,7 +6830,7 @@ out strError);
 
                 context.ContentEndRow = context.RowIndex - 1;
 
-                Order.DistributeExcelFile.OutputSumLine(context);
+                context.OutputSumLine();
 
                 Order.DistributeExcelFile.AdjectColumnWidth(sheet, column_max_chars, 20);
 
@@ -6804,8 +6876,262 @@ out strError);
             MessageBox.Show(this, strError);
         }
 
+        // 导出册信息 Excel 文件
+        void menu_exportEntityExcelFile_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            if (this.listView_records.SelectedItems.Count == 0)
+            {
+                strError = "尚未选定要导出的事项";
+                goto ERROR1;
+            }
+
+            SaveEntityExcelFileDialog dlg = new SaveEntityExcelFileDialog();
+            MainForm.SetControlFont(dlg, this.Font);
+            dlg.LibraryCodeList = Program.MainForm.GetAllLibraryCode();
+            dlg.LibraryCode = Program.MainForm.FocusLibraryCode;
+
+            dlg.UiState = Program.MainForm.AppInfo.GetString(
+"ItemSearchForm",
+"SaveEntityExcelFileDialog_uiState",
+"");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "itemsearchform_SaveEntityExcelFileDialog");
+            dlg.ShowDialog(this);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.SetString(
+"ItemSearchForm",
+"SaveEntityExcelFileDialog_uiState",
+dlg.UiState);
+            if (dlg.DialogResult != System.Windows.Forms.DialogResult.OK)
+                return;
+            /*
+            int nRet = GetLocationList(
+out List<string> location_list_param,
+out strError);
+            if (nRet == -1)
+            {
+                strError = "获得馆藏地配置参数时出错: " + strError;
+                goto ERROR1;
+            }
+            */
+
+            /*
+            var location_list = Order.DistributeExcelFile.FilterLocationList(location_list_param, dlg.LibraryCode);
+            if (location_list.Count == 0)
+            {
+                strError = "当前用户能管辖的馆藏地 '"
+                    + StringUtil.MakePathList(location_list_param)
+                    + "' 和您选择的馆藏地过滤 '" + dlg.LibraryCode + "' 没有任何共同部分";
+                goto ERROR1;
+            }
+            */
+
+            bool bLaunchExcel = true;
+
+            XLWorkbook doc = null;
+            try
+            {
+                doc = new XLWorkbook(XLEventTracking.Disabled);
+                File.Delete(dlg.OutputFileName);
+            }
+            catch (Exception ex)
+            {
+                strError = "ItemSearchForm new XLWorkbook() exception(2): " + ExceptionUtil.GetAutoText(ex);
+                goto ERROR1;
+            }
+
+            List<int> column_max_chars = new List<int>();   // 每个列的最大字符数            
+            int nLineNumber = 0;    // 序号            
+            int nEntityCount = 0;    // 导出订购记录计数
+
+            try
+            {
+                IXLWorksheet sheet = null;
+                sheet = doc.Worksheets.Add("册信息表");
+
+                // 准备书目列标题
+                Order.ExportBiblioColumnOption biblio_column_option = new Order.ExportBiblioColumnOption(Program.MainForm.UserDir);
+                biblio_column_option.LoadData(Program.MainForm.AppInfo,
+                SaveEntityExcelFileDialog.BiblioDefPath);
+
+                List<Order.ColumnProperty> biblio_title_list = Order.DistributeExcelFile.BuildList(biblio_column_option);
+
+                // 准备册信息列标题
+                Order.EntityColumnOption entity_column_option = new Order.EntityColumnOption(Program.MainForm.UserDir,
+    "");
+                entity_column_option.LoadData(Program.MainForm.AppInfo,
+                SaveEntityExcelFileDialog.EntityDefPath);
+
+                List<Order.ColumnProperty> entity_title_list = Order.DistributeExcelFile.BuildList(entity_column_option);
+                // 附加某些列的值列表
+                {
+                    LibraryChannel channel = this.GetChannel();
+                    try
+                    {
+                        // TODO: 注意填充 location 元素的 ValueList
+                        if (Order.ColumnProperty.FillValueList(channel,
+                            dlg.LibraryCode,
+                            entity_title_list,
+                            out strError) == -1)
+                            goto ERROR1;
+                    }
+                    finally
+                    {
+                        this.ReturnChannel(channel);
+                    }
+                }
+
+                ExportItemExcelFile context = new ExportItemExcelFile
+                {
+                    Sheet = sheet,
+                    // LocationList = location_list,
+                    BiblioColList = biblio_title_list,
+                    OrderColList = entity_title_list,
+                    ColumnMaxChars = column_max_chars,
+                    RowIndex = 2,
+                    // OnlyOutputBlankStateOrderRecord = dlg.OnlyOutputBlankStateOrderRecord,
+                };
+
+                // 输出标题行
+                context.OutputDistributeInfoTitleLine(
+                    // context,
+""
+);
 
 
+                int nRet = VerifyItems(
+                    null,
+                    (
+            object param,
+            LibraryChannel channel,
+            string strEntityRecPath,
+            XmlDocument entity_dom,
+            List<string> errors,
+            bool bAutoModify,
+            ref bool bChanged) =>
+                    {
+                        // 过滤册记录
+                        // return:
+                        //      true    保留
+                        //      false   被过滤掉
+                        if (ExportItemExcelFile.FilterItemRecord(entity_dom,
+                            dlg.LibraryCode,
+                            strEntityRecPath) == false)
+                            return;
+
+                        // 处理一条册记录(输出到册信息 Excel 文件)
+                        string strParentID = DomUtil.GetElementText(entity_dom.DocumentElement, "parent");
+                        if (string.IsNullOrEmpty(strParentID))
+                        {
+                            errors.Add("缺乏 parent 元素");
+                            throw new Exception(StringUtil.MakePathList(errors));
+                        }
+
+                        string strBiblioRecPath = Program.MainForm.BuildBiblioRecPath(
+                            this.DbType,
+                            strEntityRecPath,
+                            strParentID);
+                        if (string.IsNullOrEmpty(strBiblioRecPath))
+                        {
+                            errors.Add("获取对应的书目记录路径时出错");
+                            throw new Exception(StringUtil.MakePathList(errors));
+                        }
+
+                        string strTableXml = "";
+
+                        {
+                            // return:
+                            //      -1  出错
+                            //      0   没有找到
+                            //      1   找到
+                            nRet = this.GetTable(
+                                strBiblioRecPath,
+                                StringUtil.MakePathList(Order.ColumnProperty.GetTypeList(biblio_title_list)),
+                                out strTableXml,
+                                out string strError1);
+                            if (nRet == -1)
+                                throw new Exception(strError1);
+                        }
+
+                        {
+                            EntityInfo entity = new EntityInfo();
+                            entity.OldRecPath = strEntityRecPath;
+                            entity.OldRecord = entity_dom.DocumentElement.OuterXml;
+
+                            context.OutputDistributeInfo(
+                                // context,
+                                this,
+                                strBiblioRecPath,
+                                ref nLineNumber,
+                                strTableXml,
+                                "", // strStyle,
+                                strEntityRecPath,
+                                (biblio_recpath, order_recpath) =>
+                                {
+                                    if (string.IsNullOrEmpty(order_recpath))
+                                    {
+                                        throw new Exception("尚未处理订购记录模板");
+                                    }
+                                    return entity;
+                                }
+                            );
+                            context.RowIndex++;
+                        }
+
+                        nEntityCount++;
+                    },
+    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+
+                context.ContentEndRow = context.RowIndex - 1;
+
+                context.OutputSumLine();
+
+                Order.DistributeExcelFile.AdjectColumnWidth(sheet, column_max_chars, 20);
+
+                // bDone = true;
+
+                if (doc != null)
+                {
+                    doc.SaveAs(dlg.OutputFileName);
+                    doc.Dispose();
+                }
+            }
+            catch (Exception ex)
+            {
+                strError = "导出册信息表 Excel 出现异常: " + ExceptionUtil.GetExceptionText(ex);
+                goto ERROR1;
+            }
+            finally
+            {
+                if (stop != null)
+                    stop.SetMessage("");
+
+                this.ClearMessage();
+            }
+
+            if (bLaunchExcel)
+            {
+                try
+                {
+                    System.Diagnostics.Process.Start(dlg.OutputFileName);
+                }
+                catch
+                {
+
+                }
+            }
+
+            // 提示完成和统计信息
+            MessageDialog.Show(this,
+                string.Format("导出完成。\r\n\r\n共导出册记录 {0} 条。", nEntityCount));
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
 
         // 统计馆藏分配去向
         void menu_distributeStatis_Click(object sender, EventArgs e)
@@ -13003,6 +13329,7 @@ out strError);
         public List<ListViewItem> Items = new List<ListViewItem>();
     }
 
+    // 适合实体查询窗(浏览列表)显示用途的书目列定义
     internal class ItemBiblioColumnOption : Order.BiblioColumnOption
     {
         public ItemBiblioColumnOption(string strDataDir) : base(strDataDir, "")
@@ -13060,6 +13387,5 @@ out strError);
                 return results;
             }
         }
-
     }
 }
