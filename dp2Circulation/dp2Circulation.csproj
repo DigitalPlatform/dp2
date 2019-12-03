@@ -52,7 +52,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>2</ApplicationRevision>
+    <ApplicationRevision>5</ApplicationRevision>
     <ApplicationVersion>3.6.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -483,6 +483,7 @@
     <Compile Include="EntityRegister\ScanRegisterBarcodeForm.designer.cs">
       <DependentUpon>ScanRegisterBarcodeForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Entity\ExportItemExcelFile.cs" />
     <Compile Include="Entity\GenerateData.cs" />
     <Compile Include="Entity\InventoryBatchNoControl.cs">
       <SubType>UserControl</SubType>
@@ -502,6 +503,12 @@
     </Compile>
     <Compile Include="Entity\ItemEditFormBase.cs">
       <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Entity\SaveEntityExcelFileDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Entity\SaveEntityExcelFileDialog.Designer.cs">
+      <DependentUpon>SaveEntityExcelFileDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="Entity\SelectBatchNoDialog.cs">
       <SubType>Form</SubType>
@@ -745,6 +752,7 @@
     </Compile>
     <Compile Include="Order\BatchOrder\OrderList.cs" />
     <Compile Include="Order\DistributeExcelFile.cs" />
+    <Compile Include="Order\ExportExcelFile.cs" />
     <Compile Include="Order\OrderReport.cs" />
     <Compile Include="Order\SaveDistributeExcelFileDialog.cs">
       <SubType>Form</SubType>
@@ -1822,6 +1830,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Entity\ItemEditFormBase.resx">
       <DependentUpon>ItemEditFormBase.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Entity\SaveEntityExcelFileDialog.resx">
+      <DependentUpon>SaveEntityExcelFileDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Entity\SelectBatchNoDialog.resx">
       <DependentUpon>SelectBatchNoDialog.cs</DependentUpon>
