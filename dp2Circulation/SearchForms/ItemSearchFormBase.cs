@@ -495,20 +495,24 @@ namespace dp2Circulation
 
         internal void ClearListViewItems()
         {
-            this._listviewRecords.Items.Clear();
-
-            /*
-            // 2008/11/22 
-            this.SortColumns.Clear();
-            SortColumns.ClearColumnSortDisplay(this.listView_records.Columns);
-             * */
-            ListViewUtil.ClearSortColumns(this._listviewRecords);
-
-            // 清除所有需要确定的栏标题
-            for (int i = 1; i < this._listviewRecords.Columns.Count; i++)
+            this.Invoke((Action)(() =>
             {
-                this._listviewRecords.Columns[i].Text = i.ToString();
-            }
+
+                this._listviewRecords.Items.Clear();
+
+                /*
+                // 2008/11/22 
+                this.SortColumns.Clear();
+                SortColumns.ClearColumnSortDisplay(this.listView_records.Columns);
+                 * */
+                ListViewUtil.ClearSortColumns(this._listviewRecords);
+
+                // 清除所有需要确定的栏标题
+                for (int i = 1; i < this._listviewRecords.Columns.Count; i++)
+                {
+                    this._listviewRecords.Columns[i].Text = i.ToString();
+                }
+            }));
 
             ClearBiblioTable();
             ClearCommentViewer();
