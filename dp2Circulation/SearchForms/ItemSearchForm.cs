@@ -27,6 +27,7 @@ using DigitalPlatform.LibraryServer;
 
 using ClosedXML.Excel;
 using DigitalPlatform.Core;
+using System.Threading.Tasks;
 
 // 2013/3/16 添加 XML 注释
 // 2017/4/16 将 this.Channel 改造为 this.GetChannel() 用法
@@ -221,7 +222,7 @@ namespace dp2Circulation
                     if (this.DbType == "item")
                         strName = "实体";
 
-                    this.label_message.Text = "当前检索所采用的匹配方式为 '精确一致'，针对全部" + strName + "库";
+                    this.LabelMessageText = "当前检索所采用的匹配方式为 '精确一致'，针对全部" + strName + "库";
                 }
             }
 
@@ -571,9 +572,85 @@ namespace dp2Circulation
             }
         }
 
+
+        string From
+        {
+            get
+            {
+                return (string)this.Invoke((Func<string>)(() =>
+                {
+                    return this.comboBox_from.Text;
+                }));
+            }
+            set
+            {
+                this.Invoke((Action)(() =>
+                {
+                    this.comboBox_from.Text = value;
+                }));
+            }
+        }
+
+        string EntityDbName
+        {
+            get
+            {
+                return (string)this.Invoke((Func<string>)(() =>
+                {
+                    return this.comboBox_entityDbName.Text;
+                }));
+            }
+            set
+            {
+                this.Invoke((Action)(() =>
+                {
+                    this.comboBox_entityDbName.Text = value;
+                }));
+            }
+        }
+
+        string QueryWord
+        {
+            get
+            {
+                return (string)this.Invoke((Func<string>)(() =>
+                {
+                    return this.tabComboBox_queryWord.Text;
+                }));
+            }
+            set
+            {
+                this.Invoke((Action)(() =>
+                {
+                    this.tabComboBox_queryWord.Text = value;
+                }));
+            }
+        }
+
+        string LabelMessageText
+        {
+            get
+            {
+                return (string)this.Invoke((Func<string>)(() =>
+                {
+                    return this.label_message.Text;
+                }));
+            }
+            set
+            {
+                this.Invoke((Action)(() =>
+                {
+                    this.label_message.Text = value;
+                }));
+            }
+        }
+
         string GetCurrentMatchStyle()
         {
-            string strText = this.comboBox_matchStyle.Text;
+            string strText = (string)this.Invoke((Func<string>)(() =>
+            {
+                return this.comboBox_matchStyle.Text;
+            }));
 
             // 2009/8/6 
             if (strText == "空值")
@@ -596,19 +673,22 @@ namespace dp2Circulation
 
         private void button_search_Click(object sender, EventArgs e)
         {
-            DoSearch(false, false, null);
+            BeginSearch(false, false, null);
         }
 
         ItemQueryParam PanelToQuery()
         {
-            ItemQueryParam query = new ItemQueryParam();
+            return (ItemQueryParam)this.Invoke((Func<ItemQueryParam>)(() =>
+            {
+                ItemQueryParam query = new ItemQueryParam();
 
-            query.QueryWord = this.tabComboBox_queryWord.Text;
-            query.DbNames = this.comboBox_entityDbName.Text;
-            query.From = this.comboBox_from.Text;
-            query.MatchStyle = this.comboBox_matchStyle.Text;
-            query.FirstColumnIsKey = this.m_bFirstColumnIsKey;
-            return query;
+                query.QueryWord = this.tabComboBox_queryWord.Text;
+                query.DbNames = this.comboBox_entityDbName.Text;
+                query.From = this.comboBox_from.Text;
+                query.MatchStyle = this.comboBox_matchStyle.Text;
+                query.FirstColumnIsKey = this.m_bFirstColumnIsKey;
+                return query;
+            }));
         }
 
         void PushQuery(ItemQueryParam query)
@@ -794,6 +874,20 @@ namespace dp2Circulation
             return 0;
         }
 
+        public Task<int> BeginSearch(bool bOutputKeyCount,
+    bool bOutputKeyID,
+    ItemQueryParam input_query,
+    bool bClearList = true)
+        {
+            return Task.Run(() =>
+            {
+                return DoSearch(bOutputKeyCount,
+bOutputKeyID,
+input_query,
+bClearList);
+            });
+        }
+
         /// <summary>
         /// 执行一次检索
         /// </summary>
@@ -846,7 +940,7 @@ namespace dp2Circulation
                 m_tableSummaryColIndex.Clear();
             }
 
-            this.label_message.Text = "";
+            this.LabelMessageText = "";
 
             if (stop.IsInLoop == true)
             {
@@ -875,11 +969,11 @@ namespace dp2Circulation
 
                 strMatchStyle = GetCurrentMatchStyle();
 
-                if (this.tabComboBox_queryWord.Text == "")
+                if (string.IsNullOrEmpty(this.QueryWord) == true)
                 {
                     if (strMatchStyle == "null")
                     {
-                        this.tabComboBox_queryWord.Text = "";
+                        this.QueryWord = "";
 
                         // 专门检索空值
                         strMatchStyle = "exact";
@@ -909,10 +1003,10 @@ namespace dp2Circulation
                 if (this.DbType == "item")
                 {
                     lRet = channel.SearchItem(stop,
-                        this.comboBox_entityDbName.Text, // "<all>",
-                        this.tabComboBox_queryWord.Text,
+                        this.EntityDbName,  // this.comboBox_entityDbName.Text, // "<all>",
+                        this.QueryWord, // this.tabComboBox_queryWord.Text,
                         this.MaxSearchResultCount,
-                        this.comboBox_from.Text,
+                        this.From,  // this.comboBox_from.Text,
                         strMatchStyle, // this.textBox_queryWord.Text == "" ? "left" : "exact",    // 原来为left 2007/10/18 changed
                         this.Lang,
                         strResultSetName,   // strResultSetName
@@ -923,10 +1017,10 @@ namespace dp2Circulation
                 else if (this.DbType == "comment")
                 {
                     lRet = channel.SearchComment(stop,
-                        this.comboBox_entityDbName.Text,
-                        this.tabComboBox_queryWord.Text,
+                        this.EntityDbName,  // this.comboBox_entityDbName.Text,
+                        this.QueryWord, // this.tabComboBox_queryWord.Text,
                         this.MaxSearchResultCount,
-                        this.comboBox_from.Text,
+                        this.From,  // this.comboBox_from.Text,
                         strMatchStyle,
                         this.Lang,
                         strResultSetName,
@@ -937,10 +1031,10 @@ namespace dp2Circulation
                 else if (this.DbType == "order")
                 {
                     lRet = channel.SearchOrder(stop,
-                        this.comboBox_entityDbName.Text,
-                        this.tabComboBox_queryWord.Text,
+                        this.EntityDbName,  // this.comboBox_entityDbName.Text,
+                        this.QueryWord, // this.tabComboBox_queryWord.Text,
                         this.MaxSearchResultCount,
-                        this.comboBox_from.Text,
+                        this.From,  // this.comboBox_from.Text,
                         strMatchStyle,
                         this.Lang,
                         strResultSetName,
@@ -951,10 +1045,10 @@ namespace dp2Circulation
                 else if (this.DbType == "issue")
                 {
                     lRet = channel.SearchIssue(stop,
-                        this.comboBox_entityDbName.Text,
-                        this.tabComboBox_queryWord.Text,
+                        this.EntityDbName,  // this.comboBox_entityDbName.Text,
+                        this.QueryWord, // this.tabComboBox_queryWord.Text,
                         this.MaxSearchResultCount,
-                        this.comboBox_from.Text,
+                        this.From,  // this.comboBox_from.Text,
                         strMatchStyle,
                         this.Lang,
                         strResultSetName,
@@ -980,8 +1074,9 @@ namespace dp2Circulation
                         goto ERROR1;
                     }
 
-                    string strQueryXml = "<target list='" + Program.MainForm.ArrivedDbName + ":" + this.comboBox_from.Text + "'><item><word>"
-        + StringUtil.GetXmlStringSimple(this.tabComboBox_queryWord.Text)
+                    string strQueryXml = "<target list='" + Program.MainForm.ArrivedDbName + ":"
+                        + this.From /*this.comboBox_from.Text*/ + "'><item><word>"
+        + StringUtil.GetXmlStringSimple(this.QueryWord/*this.tabComboBox_queryWord.Text*/)
         + "</word><match>" + strMatchStyle + "</match><relation>=</relation><dataType>string</dataType><maxCount>"
                     + this.MaxSearchResultCount + "</maxCount></item><lang>" + this.Lang + "</lang></target>";
                     // strOutputStyle ?
@@ -1023,8 +1118,8 @@ namespace dp2Circulation
                 if (nRet == -1)
                     this.ShowMessage("填充浏览列时出错: " + strError, "red", true);
 
-                // MessageBox.Show(this, Convert.ToString(lRet) + " : " + strError);
-                this.label_message.Text = "检索共命中 " + lHitCount.ToString() + " 条，已全部装入";
+                // this.label_message.Text = "检索共命中 " + lHitCount.ToString() + " 条，已全部装入";
+                this.LabelMessageText = "检索共命中 " + lHitCount.ToString() + " 条，已全部装入";
             }
             finally
             {
@@ -1045,7 +1140,7 @@ namespace dp2Circulation
 
             return 1;
         ERROR1:
-            MessageBox.Show(this, strError);
+            ShowMessageBox(strError);
             return -1;
         }
 
@@ -1175,7 +1270,7 @@ namespace dp2Circulation
             Program.MainForm.OperHistory.AppendHtml("<div class='debug green'>" + HttpUtility.HtmlEncode("检索共命中 " + lHitCount.ToString() + " 条") + "</div>");
 
             //
-            this.label_message.Text = "检索共命中 " + lHitCount.ToString() + " 条";
+            this.LabelMessageText = "检索共命中 " + lHitCount.ToString() + " 条";
 
             if (lHitCount == 0)
                 return 0;
@@ -1201,12 +1296,12 @@ namespace dp2Circulation
                 // 装入浏览格式
                 for (; ; )
                 {
-                    Application.DoEvents();	// 出让界面控制权
+                    // Application.DoEvents();	// 出让界面控制权
 
                     if (stop != null && stop.State != 0)
                     {
                         // MessageBox.Show(this, "用户中断");
-                        this.label_message.Text = "检索共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条，用户中断...";
+                        this.LabelMessageText = "检索共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条，用户中断...";
                         return 0;
                     }
 
@@ -1246,7 +1341,7 @@ namespace dp2Circulation
                         loader_Prompt(this, e);
                         if (e.ResultAction == "cancel")
                         {
-                            this.label_message.Text = "检索共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条，" + strError;
+                            this.LabelMessageText = "检索共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条，" + strError;
                             Program.MainForm.OperHistory.AppendHtml("<div class='debug green'>" + HttpUtility.HtmlEncode("放弃检索") + "</div>");
                             goto ERROR1;
                         }
@@ -1273,7 +1368,7 @@ namespace dp2Circulation
 
                     if (lRet == 0)
                     {
-                        MessageBox.Show(this, "未命中");
+                        ShowMessageBox("未命中");
                         return 0;
                     }
 
@@ -1314,7 +1409,7 @@ namespace dp2Circulation
                         goto ERROR1;
                     if (nRet == 0)
                     {
-                        this.label_message.Text = "检索共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条，用户中断...";
+                        this.LabelMessageText = "检索共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条，用户中断...";
                     }
 
                     bAccessBiblioSummaryDenied = param.bAccessBiblioSummaryDenied;
@@ -1500,9 +1595,12 @@ namespace dp2Circulation
 
                     if (bSelectFirstLine == false && this.listView_records.Items.Count > 0)
                     {
-                        if (this.listView_records.SelectedItems.Count == 0)
-                            this.listView_records.Items[0].Selected = true;
-                        bSelectFirstLine = true;
+                        this.Invoke((Action)(() =>
+                        {
+                            if (this.listView_records.SelectedItems.Count == 0)
+                                this.listView_records.Items[0].Selected = true;
+                            bSelectFirstLine = true;
+                        }));
                     }
 
                     lStart += searchresults.Length;
@@ -1521,7 +1619,7 @@ namespace dp2Circulation
             }
 
             if (bAccessBiblioSummaryDenied == true)
-                MessageBox.Show(this, "当前用户不具备获取书目摘要的权限");
+                ShowMessageBox("当前用户不具备获取书目摘要的权限");
 
             return 1;
         ERROR1:
@@ -1554,20 +1652,27 @@ namespace dp2Circulation
             strError = "";
 
             // 处理浏览结果
-            this.listView_records.BeginUpdate();
+            this.Invoke((Action)(() =>
+            {
+                this.listView_records.BeginUpdate();
+            }));
             try
             {
                 List<ListViewItem> items = new List<ListViewItem>();
                 int i = 0;
-                foreach (var searchresult in records)
+                // TODO: 如何让击键或者鼠标动作能得到立即反馈？
+                this.Invoke((Action)(() =>
                 {
-                    ListViewItem item = FillOneLine(searchresult, param);
+                    foreach (var searchresult in records)
+                    {
+                        ListViewItem item = FillOneLine(searchresult, param);
 
-                    param.query.Items.Add(item);
-                    items.Add(item);
-                    // stop.SetProgressValue(lStart + i);
-                    func_setProgress?.Invoke(i++);
-                }
+                        param.query.Items.Add(item);
+                        items.Add(item);
+                        // stop.SetProgressValue(lStart + i);
+                        func_setProgress?.Invoke(i++);
+                    }
+                }));
 
                 if (param.bOutputKeyCount == false
                     && param.bAccessBiblioSummaryDenied == false
@@ -1609,7 +1714,10 @@ namespace dp2Circulation
             }
             finally
             {
-                this.listView_records.EndUpdate();
+                this.Invoke((Action)(() =>
+                {
+                    this.listView_records.EndUpdate();
+                }));
             }
         }
 
@@ -1778,25 +1886,28 @@ namespace dp2Circulation
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
         public override void EnableControls(bool bEnable)
         {
-            this.button_search.Enabled = bEnable;
-            this.comboBox_from.Enabled = bEnable;
-
-            // 2008/11/21 
-            this.comboBox_entityDbName.Enabled = bEnable;
-            this.comboBox_matchStyle.Enabled = bEnable;
-
-            this.toolStrip_search.Enabled = bEnable;
-
-            if (this.comboBox_matchStyle.Text == "空值")
+            this.Invoke((Action)(() =>
             {
-                this.tabComboBox_queryWord.Enabled = false;
-            }
-            else
-            {
-                this.tabComboBox_queryWord.Enabled = bEnable;
-            }
+                this.button_search.Enabled = bEnable;
+                this.comboBox_from.Enabled = bEnable;
 
-            this.dp2QueryControl1.Enabled = bEnable;
+                // 2008/11/21 
+                this.comboBox_entityDbName.Enabled = bEnable;
+                this.comboBox_matchStyle.Enabled = bEnable;
+
+                this.toolStrip_search.Enabled = bEnable;
+
+                if (this.comboBox_matchStyle.Text == "空值")
+                {
+                    this.tabComboBox_queryWord.Enabled = false;
+                }
+                else
+                {
+                    this.tabComboBox_queryWord.Enabled = bEnable;
+                }
+
+                this.dp2QueryControl1.Enabled = bEnable;
+            }));
         }
 
         /*
@@ -2002,7 +2113,7 @@ namespace dp2Circulation
         {
             if (this.listView_records.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "尚未在列表中选定要操作的事项");
+                ShowMessageBox("尚未在列表中选定要操作的事项");
                 return;
             }
 
@@ -2050,7 +2161,7 @@ namespace dp2Circulation
                 else
                     this.comboBox_matchStyle.Text = "精确一致";
 
-                DoSearch(false, false, null);
+                BeginSearch(false, false, null);
             }
         }
 
@@ -2082,7 +2193,7 @@ namespace dp2Circulation
 
             if (this.listView_records.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "尚未在列表中选定要装入" + strTargetFormName + "的行");
+                ShowMessageBox("尚未在列表中选定要装入" + strTargetFormName + "的行");
                 return;
             }
 
@@ -2101,7 +2212,7 @@ namespace dp2Circulation
                     out strError);
                 if (nRet == -1)
                 {
-                    MessageBox.Show(this, strError);
+                    ShowMessageBox(strError);
                     return;
                 }
             }
@@ -2116,7 +2227,7 @@ namespace dp2Circulation
             {
                 if (this.DbType == "arrive")
                 {
-                    MessageBox.Show(this, "预约到书库记录无法装入 实体窗");
+                    ShowMessageBox("预约到书库记录无法装入 实体窗");
                     return;
                 }
 
@@ -3067,10 +3178,10 @@ dlg.UiState);
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
-            MessageBox.Show(this, "共处理 " + nRet.ToString() + " 个" + this.DbType + "记录");
+            ShowMessageBox("共处理 " + nRet.ToString() + " 个" + this.DbType + "记录");
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            ShowMessageBox(strError);
         }
 
         void menu_borrow_Click(object sender, EventArgs e)
@@ -3081,10 +3192,10 @@ dlg.UiState);
             nRet = DoCirculation("borrow", out strError);
             if (nRet == -1)
                 goto ERROR1;
-            MessageBox.Show(this, "共处理 " + nRet.ToString() + " 个册记录");
+            ShowMessageBox("共处理 " + nRet.ToString() + " 个册记录");
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            ShowMessageBox(strError);
         }
 
         // TODO: 显示处理耗费的时间
@@ -3096,10 +3207,10 @@ dlg.UiState);
             nRet = DoCirculation("return", out strError);
             if (nRet == -1)
                 goto ERROR1;
-            MessageBox.Show(this, "共处理 " + nRet.ToString() + " 个册记录");
+            ShowMessageBox("共处理 " + nRet.ToString() + " 个册记录");
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            ShowMessageBox(strError);
         }
 
         void menu_inventory_Click(object sender, EventArgs e)
@@ -3110,10 +3221,10 @@ dlg.UiState);
             nRet = DoCirculation("inventory", out strError);
             if (nRet == -1)
                 goto ERROR1;
-            MessageBox.Show(this, "共处理 " + nRet.ToString() + " 个册记录");
+            ShowMessageBox("共处理 " + nRet.ToString() + " 个册记录");
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            ShowMessageBox(strError);
         }
 
         delegate void delegate_verifyItemDom(
@@ -5616,14 +5727,14 @@ Program.MainForm.DefaultFont);
             }
 
             if (string.IsNullOrEmpty(strText) == false)
-                MessageBox.Show(this, strText);
+                ShowMessageBox(strText);
 
             return;
         ERROR1:
             if (string.IsNullOrEmpty(strText) == false)
-                MessageBox.Show(this, strText);
+                ShowMessageBox(strText);
 
-            MessageBox.Show(this, strError);
+            ShowMessageBox(strError);
         }
 
         // 装入读者查询窗口
@@ -5699,14 +5810,14 @@ Program.MainForm.DefaultFont);
             }
 
             if (string.IsNullOrEmpty(strText) == false)
-                MessageBox.Show(this, strText);
+                ShowMessageBox(strText);
 
             return;
         ERROR1:
             if (string.IsNullOrEmpty(strText) == false)
-                MessageBox.Show(this, strText);
+                ShowMessageBox(strText);
 
-            MessageBox.Show(this, strError);
+            ShowMessageBox(strError);
         }
 
 
@@ -5831,11 +5942,11 @@ Program.MainForm.DefaultFont);
             }
 
             if (string.IsNullOrEmpty(strText) == false)
-                MessageBox.Show(this, strText);
+                ShowMessageBox(strText);
 
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            ShowMessageBox(strError);
         }
 
         // 删除所选择的记录
@@ -6003,10 +6114,10 @@ Program.MainForm.DefaultFont);
                 stop.Style = StopStyle.None;
             }
 
-            MessageBox.Show(this, "成功删除" + this.DbTypeCaption + "记录 " + items.Count + " 条");
+            ShowMessageBox("成功删除" + this.DbTypeCaption + "记录 " + items.Count + " 条");
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            ShowMessageBox(strError);
         }
 
         // 快速修改记录
@@ -6020,10 +6131,10 @@ Program.MainForm.DefaultFont);
                 goto ERROR1;
 
             if (nRet != 0)
-                MessageBox.Show(this, strError);
+                ShowMessageBox(strError);
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            ShowMessageBox(strError);
         }
 
 #if NO
@@ -6497,7 +6608,7 @@ Program.MainForm.DefaultFont);
 
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            ShowMessageBox(strError);
         }
 
 
@@ -6546,7 +6657,7 @@ Program.MainForm.DefaultFont);
 
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            ShowMessageBox(strError);
         }
 
         // 导出订购去向分配表 Excel 文件
@@ -6668,7 +6779,7 @@ out strError);
 
                 // 输出标题行
                 context.OutputDistributeInfoTitleLine(
-                    // context,
+// context,
 // location_list,
 //sheet,
 ""
@@ -6873,7 +6984,7 @@ out strError);
                 string.Format("导出完成。\r\n\r\n共导出订购记录 {0} 条。", nOrderCount));
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            ShowMessageBox(strError);
         }
 
         // 导出册信息 Excel 文件
@@ -6995,7 +7106,7 @@ out strError);
 
                 // 输出标题行
                 context.OutputDistributeInfoTitleLine(
-                    // context,
+// context,
 ""
 );
 
@@ -7130,7 +7241,7 @@ out strError);
                 string.Format("导出完成。\r\n\r\n共导出册记录 {0} 条。", nEntityCount));
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            ShowMessageBox(strError);
         }
 
         // 统计馆藏分配去向
@@ -7247,7 +7358,7 @@ out strError);
 
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            ShowMessageBox(strError);
         }
 
         // 调用打印催询单窗口
@@ -7307,7 +7418,7 @@ out strError);
 
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            ShowMessageBox(strError);
         }
 
 
@@ -7354,7 +7465,7 @@ out strError);
 
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            ShowMessageBox(strError);
         }
 
         // 导出到(已验收的)册记录路径文件
@@ -7400,7 +7511,7 @@ out strError);
             Program.MainForm.StatusBarMessage = "册记录路径 " + nRet.ToString() + "个 已成功" + strExportStyle + "到文件 " + this.ExportItemRecPathFilename;
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            ShowMessageBox(strError);
         }
 
         // 导出到(已验收的)册记录路径文件
@@ -7831,13 +7942,10 @@ out strError);
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (stop != null)
+                    if (stop != null && stop.State != 0)
                     {
-                        if (stop.State != 0)
-                        {
-                            MessageBox.Show(this, "用户中断");
-                            return;
-                        }
+                        ShowMessageBox("用户中断");
+                        return;
                     }
 
                     string strRecPath = ListViewUtil.GetItemText(item, 0);
@@ -7947,10 +8055,10 @@ out strError);
                 stop.Style = StopStyle.None;
             }
 
-            MessageBox.Show(this, "共处理 " + nCount.ToString() + " 个册记录");
+            ShowMessageBox("共处理 " + nCount.ToString() + " 个册记录");
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            ShowMessageBox(strError);
         }
 
         public string QueryWordString
@@ -8240,7 +8348,7 @@ MessageBoxDefaultButton.Button1);
             DoViewComment(false);
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            ShowMessageBox(strError);
         }
 
         // 刷新所选择的行。也就是重新从数据库中装载浏览列
@@ -8337,11 +8445,11 @@ MessageBoxDefaultButton.Button1);
         }
 
         // 在一个新开的实体查询窗内检索key
-        void listView_searchKeysAtNewWindow_Click(object sender, EventArgs e)
+        async void listView_searchKeysAtNewWindow_Click(object sender, EventArgs e)
         {
             if (this.listView_records.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "尚未在列表中选定要操作的事项");
+                ShowMessageBox("尚未在列表中选定要操作的事项");
                 return;
             }
 
@@ -8372,7 +8480,7 @@ MessageBoxDefaultButton.Button1);
 
 
                 // 检索命中记录(而不是key)
-                int nRet = form.DoSearch(false, false, input_query, i == 0 ? true : false);
+                int nRet = await form.BeginSearch(false, false, input_query, i == 0 ? true : false);
                 if (nRet != 1)
                     break;
 
@@ -8473,7 +8581,7 @@ MessageBoxDefaultButton.Button1);
                 listView_records_SelectedIndexChanged(null, null);
             }
         ERROR1:
-            MessageBox.Show(this, strError);
+            ShowMessageBox(strError);
         }
 
         public int PasteBarcodeLinesFromClipboard(
@@ -8799,7 +8907,7 @@ MessageBoxDefaultButton.Button1);
 
                     if (stop != null && stop.State != 0)
                     {
-                        MessageBox.Show(this, "用户中断");
+                        ShowMessageBox("用户中断");
                         return;
                     }
 
@@ -8858,7 +8966,7 @@ MessageBoxDefaultButton.Button1);
             }
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            ShowMessageBox(strError);
         }
 
         // 从记录路径文件中导入
@@ -8873,7 +8981,7 @@ MessageBoxDefaultButton.Button1);
                 goto ERROR1;
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            ShowMessageBox(strError);
         }
 
         // TODO: 不具有 channel 参数的版本是否被脚本调用？可能需要改造脚本
@@ -9057,9 +9165,8 @@ MessageBoxDefaultButton.Button1);
             Program.MainForm.StatusBarMessage = "册条码号 " + this.listView_records.SelectedItems.Count.ToString() + "个 已成功" + strExportStyle + "到文件 " + this.ExportBarcodeFilename;
             return;
         ERROR1:
-            MessageBox.Show(strError);
+            ShowMessageBox(strError);
         }
-
 
         // 当前缺省的编码方式
         Encoding CurrentEncoding = Encoding.UTF8;
@@ -9763,9 +9870,8 @@ dlg.UiState);
             Program.MainForm.StatusBarMessage = "书目记录 " + groupTable.Count.ToString() + "个 已成功导出到文件 " + this.ExportBiblioDumpFilename;
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            ShowMessageBox(strError);
         }
-
 
         void SumCell(object sender, SumCellEventArgs e)
         {
@@ -10008,7 +10114,7 @@ dlg.UiState);
             Program.MainForm.StatusBarMessage = "书目记录 " + groupTable.Count.ToString() + "个 已成功导出到文件 " + this.ExportBiblioDumpFilename;
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            ShowMessageBox(strError);
         }
 
         // 将从属的书目记录保存到MARC文件
@@ -10437,7 +10543,7 @@ dlg.UiState);
 
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            ShowMessageBox(strError);
         }
 
         static void Create905(
@@ -11206,7 +11312,7 @@ out strError);
             Program.MainForm.StatusBarMessage = "书目记录路径 " + biblio_recpaths.Count.ToString() + "个 已成功" + strExportStyle + "到文件 " + this.ExportBiblioRecPathFilename;
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            ShowMessageBox(strError);
         }
 
         // 导出到记录路径文件。和当前窗口的类型有关
@@ -11337,7 +11443,7 @@ out strError);
             Program.MainForm.StatusBarMessage = "册记录路径 " + nRet.ToString() + "个 已成功" + strExportStyle + "到文件 " + this.ExportRecPathFilename;
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            ShowMessageBox(strError);
         }
 
 #if NOOOOOOOOOOO
@@ -11489,7 +11595,7 @@ out strError);
             }
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            ShowMessageBox(strError);
         }
 
         private void listView_records_ColumnClick(object sender, ColumnClickEventArgs e)
@@ -11570,7 +11676,7 @@ out strError);
         private void toolStripButton_search_Click(object sender, EventArgs e)
         {
             if (CheckProperties() == true)
-                DoSearch(false, false, null);
+                BeginSearch(false, false, null);
         }
 
         bool CheckProperties()
@@ -11584,13 +11690,13 @@ out strError);
 
             return true;
         ERROR1:
-            MessageBox.Show(this, strError);
+            ShowMessageBox(strError);
             return false;
         }
 
         private void ToolStripMenuItem_searchKeys_Click(object sender, EventArgs e)
         {
-            DoSearch(true, false, null);
+            BeginSearch(true, false, null);
         }
 
         // 将 ItemQueryParam 中的信息恢复到面板中
@@ -11644,27 +11750,29 @@ out strError);
 
         void SetQueryPrevNextState()
         {
-            if (this.m_nQueryIndex < 0)
+            this.Invoke((Action)(() =>
             {
-                toolStripButton_nextQuery.Enabled = false;
-                toolStripButton_prevQuery.Enabled = false;
-                return;
-            }
+                if (this.m_nQueryIndex < 0)
+                {
+                    toolStripButton_nextQuery.Enabled = false;
+                    toolStripButton_prevQuery.Enabled = false;
+                    return;
+                }
 
-            if (this.m_nQueryIndex >= this.m_queries.Count - 1)
-            {
-                toolStripButton_nextQuery.Enabled = false;
-            }
-            else
-                toolStripButton_nextQuery.Enabled = true;
+                if (this.m_nQueryIndex >= this.m_queries.Count - 1)
+                {
+                    toolStripButton_nextQuery.Enabled = false;
+                }
+                else
+                    toolStripButton_nextQuery.Enabled = true;
 
-            if (this.m_nQueryIndex <= 0)
-            {
-                toolStripButton_prevQuery.Enabled = false;
-            }
-            else
-                toolStripButton_prevQuery.Enabled = true;
-
+                if (this.m_nQueryIndex <= 0)
+                {
+                    toolStripButton_prevQuery.Enabled = false;
+                }
+                else
+                    toolStripButton_prevQuery.Enabled = true;
+            }));
         }
 
         private void textBox_queryWord_TextChanged(object sender, EventArgs e)
@@ -11753,7 +11861,7 @@ out strError);
 
         private void ToolStripMenuItem_searchKeyID_Click(object sender, EventArgs e)
         {
-            DoSearch(false, true, null);
+            BeginSearch(false, true, null);
         }
 
         private void textBox_queryWord_KeyPress(object sender, KeyPressEventArgs e)
@@ -12167,7 +12275,7 @@ out strError);
         // 在状态行显示文字信息
         internal override void SetStatusMessage(string strMessage)
         {
-            this.label_message.Text = strMessage;
+            this.LabelMessageText = strMessage;
         }
 
         // 丢弃选定的修改
@@ -12237,7 +12345,7 @@ out strError);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
+                ShowMessageBox(ExceptionUtil.GetAutoText(ex));
                 return;
             }
 
@@ -12573,7 +12681,7 @@ out strError);
             DoViewComment(false);
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            ShowMessageBox(strError);
         }
 
         // 准备脚本环境
@@ -12757,7 +12865,7 @@ Keys keyData)
             //this.m_lLoaded = 0;
             stop.HideProgress();
 
-            this.label_message.Text = "";
+            this.LabelMessageText = "";
 
             if (stop.IsInLoop == true)
             {
@@ -12834,7 +12942,7 @@ Keys keyData)
                     return;
 
                 // MessageBox.Show(this, Convert.ToString(lRet) + " : " + strError);
-                this.label_message.Text = "检索共命中 " + lHitCount.ToString() + " 条，已全部装入";
+                this.LabelMessageText = "检索共命中 " + lHitCount.ToString() + " 条，已全部装入";
             }
             finally
             {
@@ -12853,7 +12961,7 @@ Keys keyData)
             return;
 
         ERROR1:
-            MessageBox.Show(this, strError);
+            ShowMessageBox(strError);
         }
 
         private void dp2QueryControl1_GetList(object sender, GetListEventArgs e)
@@ -12935,8 +13043,7 @@ out strError);
 
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
-
+            ShowMessageBox(strError);
         }
 
         private void dp2QueryControl1_AppendMenu(object sender, AppendMenuEventArgs e)
@@ -13010,7 +13117,7 @@ out strError);
 
             this.tabComboBox_queryWord.Items.Clear();
 
-            this.label_message.Text = "";
+            this.LabelMessageText = "";
 
             if (stop.IsInLoop == true)
             {

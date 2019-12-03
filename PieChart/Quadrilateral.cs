@@ -1,4 +1,4 @@
-using System;
+锘縰sing System;
 using System.Diagnostics;
 using System.Drawing.Drawing2D;
 
@@ -38,7 +38,7 @@ namespace System.Drawing {
             m_path = new GraphicsPath(new PointF[] { point1, point2, point3, point4 }, pointTypes);
         }
 
-        // TODO: 容易造成 mem leak。建议用 Dispose() 改写
+        // TODO: 瀹规槗閫犳垚 mem leak銆傚缓璁敤 Dispose() 鏀瑰啓
         /// <summary>
         ///   <c>Finalize</c> method.
         /// </summary>
