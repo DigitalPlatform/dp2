@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using DigitalPlatform;
+using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Core;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
@@ -78,6 +79,15 @@ namespace RfidCenter
                 else
                     SetLastUids(session_id, "");
                 return new NormalResult();
+            }
+
+            if (style == "getVersion")
+            {
+                return new NormalResult
+                {
+                    Value = 0,
+                    ErrorCode = $"{ClientInfo.ClientVersion}"
+                };
             }
 
 
@@ -151,6 +161,21 @@ namespace RfidCenter
             return current.ToString();
         }
 
+        // 2019/12/4
+        // 构造用于比较的锁状态字符串
+        static string BuildStateString(List<LockState> states)
+        {
+            if (states == null || states.Count == 0)
+                return "";
+
+            StringBuilder current = new StringBuilder();
+            foreach (var state in states)
+            {
+                current.Append($"{state.Path}|{state.State},");
+            }
+            return current.ToString();
+        }
+
         // 清除 Hashtable
         static void ClearLastUidTable()
         {
@@ -179,6 +204,9 @@ namespace RfidCenter
             }
         }
 
+        // return:
+        //      true    不一致
+        //      false   一致
         static bool CompareLastUids(string session_id, string value)
         {
             /*
@@ -217,6 +245,10 @@ namespace RfidCenter
                     ErrorCode = "paused"
                 };
 
+            string lockNameList = StringUtil.GetParameterByPrefix(style, "getLockState");
+            if (lockNameList != null)
+                lockNameList = StringUtil.UnescapeString(lockNameList);
+
             Program.Rfid.IncApiCount();
             try
             {
@@ -231,31 +263,57 @@ namespace RfidCenter
                 string session_id = StringUtil.GetParameterByPrefix(style, "session");
 
                 TimeSpan length = TimeSpan.FromSeconds(2);
+
                 ListTagsResult result = null;
+                GetLockStateResult lock_result = null;
+
                 string current_uids = "";
                 DateTime start = DateTime.Now;
                 while (DateTime.Now - start < length
                     || result == null)
                 {
-                    result = _listTags(reader_name, style);
+                    if (string.IsNullOrEmpty(reader_name) == false)
+                    {
+                        result = _listTags(reader_name, style);
 
-                    if (result != null && result.Results != null)
-                        current_uids = BuildUids(result.Results);
+                        if (result != null && result.Results != null)
+                            current_uids = BuildUids(result.Results);
+                        else
+                            current_uids = "";
+
+                        // TODO: 这里的比较应该按照 Session 来进行
+                        // 只要本次和上次 tag 数不同，立刻就返回
+                        if (CompareLastUids(session_id, current_uids))
+                        {
+                            SetLastUids(session_id, current_uids);
+                            return result;
+                        }
+
+                        if (result.Value == -1)
+                        {
+                            return result;
+                        }
+                    }
                     else
-                        current_uids = "";
+                        result = new ListTagsResult();
 
-                    // TODO: 这里的比较应该按照 Session 来进行
-                    // 只要本次和上次 tag 数不同，立刻就返回
-                    if (CompareLastUids(session_id, current_uids))
+                    // 检测一下门锁状态是否有变化
+                    // 目前是 1:1 次数分配
+                    if (lockNameList != null)
                     {
-                        SetLastUids(session_id, current_uids);
-                        return result;
+                        lock_result = GetShelfLockState(lockNameList);
+                        // 这里的疑问是，如果 _listTags 没有出错，是否应该坚持返回正确结果？
+                        if (lock_result.Value != -1)
+                        {
+                            string current_states = BuildStateString(lock_result.States);
+                            if (CompareLastUids(session_id + "_lock", current_states))
+                            {
+                                SetLastUids(session_id + "_lock", current_states);
+                                return new ListTagsResult { GetLockStateResult = lock_result };
+                            }
+                        }
                     }
 
-                    if (result.Value == -1)
-                    {
-                        return result;
-                    }
                     /*
                     // TODO: 如果本次和上次都是 2，是否立即返回？可否先对比一下 uid，有差别再返回?
                     if (result.Results != null
@@ -269,6 +327,8 @@ namespace RfidCenter
                 }
 
                 SetLastUids(session_id, current_uids);
+                if (lockNameList != null && lock_result != null)
+                    result.GetLockStateResult = lock_result;
                 return result;
             }
             catch (Exception ex)

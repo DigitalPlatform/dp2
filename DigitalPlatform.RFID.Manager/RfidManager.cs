@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using DigitalPlatform;
 using DigitalPlatform.IO;
 using DigitalPlatform.RFID;
+using DigitalPlatform.Text;
 
 namespace DigitalPlatform.RFID
 {
@@ -296,15 +297,19 @@ new SetErrorEventArgs
             (channel) =>
             {
                 string style = $"session:{Base.GetHashCode()}";
+                // 2019/12/4
+                if (string.IsNullOrEmpty(LockCommands) == false)
+                    style += ",getLockState:" + StringUtil.EscapeString(LockCommands, ":,");
                 /*
                 if (string.IsNullOrEmpty(_antennaList) == false)
                     style += ",antenna:" + _antennaList;
                     */
 
+                GetLockStateResult lock_result = null;
                 var readerNameList = _readerNameList;
-                if (string.IsNullOrEmpty(readerNameList) == false)
+                if (string.IsNullOrEmpty(readerNameList) == false 
+                || string.IsNullOrEmpty(LockCommands) == false)
                 {
-
                     var result = channel?.Object?.ListTags(readerNameList, style);
                     if (result.Value == -1)
                         Base.TriggerSetError(result,
@@ -313,30 +318,33 @@ new SetErrorEventArgs
                         Base.TriggerSetError(result,
                             new SetErrorEventArgs { Error = null }); // 清除以前的报错
 
-                    lock (_syncRoot)
+                    lock_result = result.GetLockStateResult;
+
+                    if (string.IsNullOrEmpty(readerNameList) == false)
                     {
-                        if (ListTags != null)
+                        lock (_syncRoot)
                         {
-                            // 先记忆
-                            _lastTags = result.Results;
-
-                            // 注意 result.Value == -1 时也会触发这个事件
-                            ListTags(channel, new ListTagsEventArgs
+                            if (ListTags != null)
                             {
-                                ReaderNameList = readerNameList,
-                                Result = result
-                            });
-                        }
-                        else
-                            _lastTags = null;
-                    }
+                                // 先记忆
+                                _lastTags = result.Results;
 
+                                // 注意 result.Value == -1 时也会触发这个事件
+                                ListTags(channel, new ListTagsEventArgs
+                                {
+                                    ReaderNameList = readerNameList,
+                                    Result = result
+                                });
+                            }
+                            else
+                                _lastTags = null;
+                        }
+                    }
                 }
 
                 // 检查门状态
-                if (LockCommands != null)
+                if (lock_result != null)
                 {
-                    List<GetLockStateResult> errors = new List<GetLockStateResult>();
                     List<LockState> states = new List<LockState>();
                     {
                         // parameters:
@@ -344,7 +352,6 @@ new SetErrorEventArgs
                         //                      其中卡编号部分可以是 "1" 也可以是 "1|2" 这样的形态
                         //                      其中锁编号部分可以是 "1" 也可以是 "1|2|3|4" 这样的形态
                         //                      如果缺乏卡编号和锁编号部分，缺乏的部分默认为 "1"
-                        var lock_result = channel?.Object?.GetShelfLockState(LockCommands);
                         if (lock_result.Value == -1)
                             Base.TriggerSetError(lock_result,
                                 new SetErrorEventArgs { Error = lock_result.ErrorInfo });

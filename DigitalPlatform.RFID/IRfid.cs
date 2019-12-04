@@ -192,6 +192,10 @@ uint new_password);
     {
         public List<OneTag> Results { get; set; }
 
+        // 2019/12/4 增加
+        // public List<LockState> States { get; set; }
+        public GetLockStateResult GetLockStateResult { get; set; }
+
         public ListTagsResult()
         {
 
