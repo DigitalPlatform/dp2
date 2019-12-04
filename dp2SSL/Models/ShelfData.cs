@@ -1433,15 +1433,20 @@ namespace dp2SSL
             if (remove_count > 0)
             {
                 // App.CurrentApp.SpeakSequence($"取出 {remove_count} 本");
+                Sound(1, remove_count, "取出");
+                /*
                 _speakList.Speak("取出 {0} 本",
                     remove_count,
                     (s) =>
                     {
                         App.CurrentApp.SpeakSequence(s);
                     });
+                    */
             }
             if (add_count > 0)
             {
+                Sound(2, add_count, "放入");
+                /*
                 // App.CurrentApp.SpeakSequence($"放入 {add_count} 本");
                 _speakList.Speak("放入 {0} 本",
     add_count,
@@ -1449,6 +1454,7 @@ namespace dp2SSL
     {
         App.CurrentApp.SpeakSequence(s);
     });
+    */
             }
 
             // TODO: 把 add remove error 动作分散到每个门，然后再触发 ShelfData.BookChanged 事件
@@ -1466,6 +1472,22 @@ namespace dp2SSL
                 await FillBookFields(_all, token);
                 await FillBookFields(_adds, token);
                 await FillBookFields(_removes, token);
+            });
+        }
+
+        static int[] tones = new int[] { 523, 659, 783 };
+        /*
+         *  C4: 261 330 392
+            C5: 523 659 783
+         * */
+        public static void Sound(int tone, int count, string text)
+        {
+            Task.Run(() =>
+            {
+                for (int i = 0; i < count; i++)
+                    System.Console.Beep(tones[tone], 500);
+                if (string.IsNullOrEmpty(text) == false)
+                    App.CurrentApp.Speak(text);
             });
         }
 

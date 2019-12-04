@@ -1226,3 +1226,135 @@
                 //    PatronClear(false);
             }
         }
+
+
+		~~~~~~~~~~~~~~
+
+		        // 启动后台任务。
+        // 后台任务负责监视 RFID 中心的标签
+        public static void Start(
+            CancellationToken token)
+        {
+            Base.ShortWaitTime = TimeSpan.FromMilliseconds(10);
+            Base.LongWaitTime = TimeSpan.FromMilliseconds(2000);
+            Base.Start((channel) =>
+            {
+                // TODO: 看调用栈，如果是上层 GetState() 调用，就要免去检查 State 这一步
+                if (_checkState)
+                {
+                    var result = channel.Object.GetState("");
+                    if (result.Value == -1)
+                        throw new Exception($"RFID 中心当前处于 {result.ErrorCode} 状态({result.ErrorInfo})");
+                }
+                channel.Started = true;
+
+                channel.Object.EnableSendKey(false);
+            },
+            () =>
+            {
+                if (_pause == true)
+                {
+                    Base.TriggerSetError(null,
+new SetErrorEventArgs
+{
+    Error = "RFID 功能已暂停"
+});
+                    return true;
+                }
+
+                if (string.IsNullOrEmpty(Base.Url))
+                {
+                    Base.TriggerSetError(null,
+                        new SetErrorEventArgs
+                        {
+                            Error = "RFID 中心 URL 尚未配置(因此无法从 RFID 读卡器读取信息)"
+                        });
+                    return true;
+                }
+
+                return false;
+            },
+            (channel) =>
+            {
+                string style = $"session:{Base.GetHashCode()}";
+                /*
+                if (string.IsNullOrEmpty(_antennaList) == false)
+                    style += ",antenna:" + _antennaList;
+                    */
+
+                var readerNameList = _readerNameList;
+                if (string.IsNullOrEmpty(readerNameList) == false)
+                {
+
+                    var result = channel?.Object?.ListTags(readerNameList, style);
+                    if (result.Value == -1)
+                        Base.TriggerSetError(result,
+                            new SetErrorEventArgs { Error = result.ErrorInfo });
+                    else
+                        Base.TriggerSetError(result,
+                            new SetErrorEventArgs { Error = null }); // 清除以前的报错
+
+                    lock (_syncRoot)
+                    {
+                        if (ListTags != null)
+                        {
+                            // 先记忆
+                            _lastTags = result.Results;
+
+                            // 注意 result.Value == -1 时也会触发这个事件
+                            ListTags(channel, new ListTagsEventArgs
+                            {
+                                ReaderNameList = readerNameList,
+                                Result = result
+                            });
+                        }
+                        else
+                            _lastTags = null;
+                    }
+
+                }
+
+                // 检查门状态
+                if (LockCommands != null)
+                {
+                    List<GetLockStateResult> errors = new List<GetLockStateResult>();
+                    List<LockState> states = new List<LockState>();
+                    {
+                        // parameters:
+                        //      lockNameParam   为 "锁控板名字.卡编号.锁编号"。
+                        //                      其中卡编号部分可以是 "1" 也可以是 "1|2" 这样的形态
+                        //                      其中锁编号部分可以是 "1" 也可以是 "1|2|3|4" 这样的形态
+                        //                      如果缺乏卡编号和锁编号部分，缺乏的部分默认为 "1"
+                        var lock_result = channel?.Object?.GetShelfLockState(LockCommands);
+                        if (lock_result.Value == -1)
+                            Base.TriggerSetError(lock_result,
+                                new SetErrorEventArgs { Error = lock_result.ErrorInfo });
+                        else
+                            Base.TriggerSetError(lock_result,
+                                new SetErrorEventArgs { Error = null }); // 清除以前的报错
+                        if (lock_result.Value == -1)
+                        {
+                            // 注意 lock_result.Value == -1 时也会触发这个事件
+                            ListLocks?.Invoke(channel, new ListLocksEventArgs
+                            {
+                                Result = lock_result
+                            });
+                        }
+                        if (lock_result.States != null)
+                            states.AddRange(lock_result.States);
+                    }
+
+                    if (states.Count > 0)
+                    {
+                        // 注意 lock_result.Value == -1 时也会触发这个事件
+                        ListLocks?.Invoke(channel, new ListLocksEventArgs
+                        {
+                            Result = new GetLockStateResult { States = states }
+                        });
+                    }
+                    // 门锁状态就绪
+                    _lockReady = true;
+                }
+            },
+            token);
+        }

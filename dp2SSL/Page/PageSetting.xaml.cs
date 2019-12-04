@@ -344,7 +344,26 @@ namespace dp2SSL
                 }
             }
 
-            SKIP2:
+            // 如果没有配置 RFID 中心 URL 则不检查
+            if (string.IsNullOrEmpty(App.RfidUrl) == false)
+            {
+                var result = RfidManager.GetState("getVersion");
+                if (result.Value == -1)
+                    errors.Add("所连接的 RFID 中心版本太低。请升级到最新版本");
+                else
+                {
+                    try
+                    {
+                        if (StringUtil.CompareVersion(result.ErrorCode, "1.5") < 0)
+                            errors.Add($"所连接的 RFID 中心版本太低(为 {result.ErrorCode} 版)。请升级到 1.5 以上版本");
+                    }
+                    catch(Exception ex)
+                    {
+                        errors.Add($"所连接的 RFID 中心版本太低。请升级到最新版本。({ex.Message})");
+                    }
+                }
+            }
+
             if (errors.Count > 0)
                 return new NormalResult { Value = -1, ErrorInfo = StringUtil.MakePathList(errors, ";\r\n") };
 
