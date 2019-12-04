@@ -64,8 +64,7 @@ namespace DigitalPlatform.CommonControl
 
         static void SetSavePasswordState(SavePassword container, string strText)
         {
-            string strState = "";
-            if (IsType(strText, container, out strState) == false)
+            if (IsType(strText, container, out string strState) == false)
                 return;
 
             TextBox textbox = container.PasswordTextBox;
@@ -148,9 +147,9 @@ namespace DigitalPlatform.CommonControl
                 return;
             }
 
-            string strState = "";
-            if (IsType(strText, textbox, out strState) == false)
+            if (IsType(strText, textbox, out string strState) == false)
                 return;
+
             textbox.Text = StringUtil.UnescapeString(strState);
         }
 
