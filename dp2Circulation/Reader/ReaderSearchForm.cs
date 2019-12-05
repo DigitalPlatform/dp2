@@ -7733,7 +7733,7 @@ ref List<int> column_max_chars)
             }
 
             // 最大字符数
-            SetMaxChars(ref column_max_chars, 1, (nReaderIndex + 1).ToString().Length * 2);
+            ClosedXmlUtil.SetMaxChars(ref column_max_chars, 1, (nReaderIndex + 1).ToString().Length * 2);
 
             // 序号的右边竖线
             {
@@ -7791,7 +7791,7 @@ ref List<int> column_max_chars)
                         string strText = subcols[line];
 
                         // 最大字符数
-                        SetMaxChars(ref column_max_chars, nColIndex - 1, strText.Length);
+                        ClosedXmlUtil.SetMaxChars(ref column_max_chars, nColIndex - 1, strText.Length);
 
                         IXLCell cell = sheet.Cell(nRowIndex, nColIndex).SetValue(strText);
                         cell.Style.Alignment.WrapText = true;
@@ -7852,7 +7852,7 @@ ref List<int> column_max_chars)
                     {
                         string strText = subcols[line];
                         // 最大字符数
-                        SetMaxChars(ref column_max_chars, nColIndex - 1, strText.Length);
+                        ClosedXmlUtil.SetMaxChars(ref column_max_chars, nColIndex - 1, strText.Length);
 
                         IXLCell cell = sheet.Cell(nRowIndex, nColIndex).SetValue(strText);
                         cell.Style.Alignment.WrapText = true;
@@ -7977,7 +7977,7 @@ XLColor.DarkGreen,
                 foreach (string s in cols)
                 {
                     // 统计最大字符数
-                    SetMaxChars(ref column_max_chars, nColIndex - 1, GetCharWidth(s));
+                    ClosedXmlUtil.SetMaxChars(ref column_max_chars, nColIndex - 1, GetCharWidth(s));
 
                     IXLCell cell = null;
                     if (nColIndex == 2)
@@ -8016,7 +8016,7 @@ XLColor.DarkGreen,
                 Point point = points[i];
                 int nColIndex = point.X;
                 // 统计最大字符数
-                SetMaxChars(ref column_max_chars, nColIndex - 1, GetCharWidth(biblio.Content));
+                ClosedXmlUtil.SetMaxChars(ref column_max_chars, nColIndex - 1, GetCharWidth(biblio.Content));
 
                 IXLCell cell = null;
                 cell = sheet.Cell(point.Y, nColIndex).SetValue(biblio.Content);
@@ -8161,7 +8161,7 @@ XLColor.DarkGreen,
                 foreach (string s in cols)
                 {
                     // 统计最大字符数
-                    SetMaxChars(ref column_max_chars, nColIndex - 1, GetCharWidth(s));
+                    ClosedXmlUtil.SetMaxChars(ref column_max_chars, nColIndex - 1, GetCharWidth(s));
 
                     IXLCell cell = null;
                     if (nColIndex == 2)
@@ -8298,7 +8298,7 @@ XLColor.DarkGreen,
                 foreach (string s in cols)
                 {
                     // 统计最大字符数
-                    SetMaxChars(ref column_max_chars, nColIndex - 1, GetCharWidth(s));
+                    ClosedXmlUtil.SetMaxChars(ref column_max_chars, nColIndex - 1, GetCharWidth(s));
 
                     IXLCell cell = null;
                     if (nColIndex == 2)
@@ -8342,22 +8342,6 @@ XLColor.DarkGreen,
             }
 
             return result;
-        }
-
-        public static void SetMaxChars(ref List<int> column_max_chars, int index, int chars)
-        {
-            // 确保空间足够
-            while (column_max_chars.Count < index + 1)
-            {
-                column_max_chars.Add(0);
-            }
-
-            // 统计最大字符数
-            int nOldChars = column_max_chars[index];
-            if (chars > nOldChars)
-            {
-                column_max_chars[index] = chars;
-            }
         }
 
         static string ToLocalTime(string strRfc1123, string strFormat)

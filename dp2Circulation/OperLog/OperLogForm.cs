@@ -32,6 +32,7 @@ using DigitalPlatform.Core;
 using DigitalPlatform.LibraryServer;
 using dp2Circulation.OperLog;
 using static dp2Circulation.OperLog.OperLogReport;
+using DigitalPlatform.dp2.Statis;
 
 namespace dp2Circulation
 {
@@ -6586,7 +6587,7 @@ MessageBoxDefaultButton.Button1);
             foreach (string s in cols)
             {
                 // 统计最大字符数
-                ReaderSearchForm.SetMaxChars(ref column_max_chars, nColIndex - 1, ReaderSearchForm.GetCharWidth(s));
+                ClosedXmlUtil.SetMaxChars(ref column_max_chars, nColIndex - 1, ReaderSearchForm.GetCharWidth(s));
 
                 IXLCell cell = null;
                 cell = sheet.Cell(nRowIndex, nColIndex).SetValue(s);

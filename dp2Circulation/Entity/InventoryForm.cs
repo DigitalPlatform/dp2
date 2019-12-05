@@ -2504,8 +2504,7 @@ null);
             {
                 foreach (string s in output_columns)
                 {
-                    int v = 0;
-                    if (Int32.TryParse(s, out v) == false)
+                    if (Int32.TryParse(s, out int v) == false)
                     {
                         strError = "output_columns 数组中有非数字的字符串 '" + s + "'，格式错误";
                         return -1;

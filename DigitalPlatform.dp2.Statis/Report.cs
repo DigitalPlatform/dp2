@@ -1071,7 +1071,6 @@ The default behavior of an XmlWriter created using Create is to throw an Argumen
                 column_max_chars.Add(0);
             }
 
-
             // string strFontName = list.Font.FontFamily.Name;
 
             int nRowIndex = 0;
