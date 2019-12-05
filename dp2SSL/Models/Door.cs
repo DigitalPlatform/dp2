@@ -8,10 +8,10 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Xml;
 using System.Diagnostics;
+using System.Threading;
 
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
-using System.Threading;
 
 namespace dp2SSL
 {
@@ -120,6 +120,22 @@ namespace dp2SSL
                 {
                     _errorCount = value;
                     OnPropertyChanged("ErrorCount");
+                }
+            }
+        }
+
+        private bool _waiting = false;
+
+        // 是否处于等待状态
+        public bool Waiting
+        {
+            get => _waiting;
+            set
+            {
+                if (_waiting != value)
+                {
+                    _waiting = value;
+                    OnPropertyChanged("Waiting");
                 }
             }
         }

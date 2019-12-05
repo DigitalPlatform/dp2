@@ -198,7 +198,10 @@ namespace dp2SSL
                 // 切换所有者
                 var command = ShelfData.PopCommand(e.Door);
                 if (command != null)
+                {
+                    e.Door.Waiting = false;
                     e.Door.Operator = command.Parameter as Operator;
+                }
             }
         }
 
@@ -433,6 +436,13 @@ namespace dp2SSL
                 return;
             }
 
+            if (e.Door.Waiting)
+            {
+                // 正在开门中，要放弃重复开门的动作
+                App.CurrentApp.Speak("正在打开，请稍等");
+                return;
+            }
+
             // 以前积累的 _adds 和 _removes 要先处理，处理完再开门
 
             // 先检查当前是否具备读者身份？
@@ -518,6 +528,7 @@ namespace dp2SSL
 
             // TODO: 显示一个模式对话框挡住界面，直到收到门状态变化的信号再自动关闭对话框。这样可以防止开门瞬间、还没有收到开门信号的时候用户突然点 home 按钮回到主菜单(因为这样会突破“主菜单界面不允许处在开门状态”的规则)
             ProgressWindow progress = null;
+#if REMOVED
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
                 progress = new ProgressWindow();
@@ -539,6 +550,10 @@ namespace dp2SSL
                 progress.Show();
                 AddLayer();
             }));
+#endif
+            bool succeed = false;
+            e.Door.Waiting = true;
+
             try
             {
                 // TODO: 是否这里要等待开门信号到来时候再给门赋予操作者身份？因为过早赋予身份，可能会破坏一个姗姗来迟的早先一个关门动作信号的提交动作
@@ -563,6 +578,9 @@ namespace dp2SSL
                 // 开门动作会中断延迟任务
                 CancelDelayClearTask();
 
+                // 一旦成功，门的 waiting 状态会在 PopCommand 的同时被改回 false
+                succeed = true;
+
                 // 等待确认收到开门信号
                 await Task.Run(() =>
                 {
@@ -582,6 +600,9 @@ namespace dp2SSL
                             progress.Close();
                     }));
                 }
+
+                if (succeed == false)
+                    e.Door.Waiting = false;
             }
         }
 
