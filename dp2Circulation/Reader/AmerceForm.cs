@@ -318,13 +318,13 @@ this.splitContainer_lists,
                     "splitContainer_lists_ratio");
 
                 string strWidths = ListViewUtil.GetColumnWidthListString(this.listView_amerced);
-                Program.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo?.SetString(
                     "amerce_form",
                     "amerced_list_column_width",
                     strWidths);
 
                 strWidths = ListViewUtil.GetColumnWidthListString(this.listView_overdues);
-                Program.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo?.SetString(
                     "amerce_form",
                     "overdues_list_column_width",
                     strWidths);

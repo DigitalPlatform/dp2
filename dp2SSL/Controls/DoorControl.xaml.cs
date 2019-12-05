@@ -101,6 +101,10 @@ namespace dp2SSL
             return new Point(x, y);
         }
 
+        static double _length = 0.8;    // 动画持续时间(秒)
+        static double _top = 0.1;   // 达到最亮的时间(秒)
+        static double _delay = 0.02; // 下一个门启动动画的延迟时间(秒)
+
         public void AnimateDoors()
         {
             double start = 0;
@@ -125,7 +129,7 @@ namespace dp2SSL
                         // https://docs.microsoft.com/en-us/dotnet/framework/wpf/graphics-multimedia/how-to-animate-color-by-using-key-frames
                         ColorAnimationUsingKeyFrames colorAnimation
         = new ColorAnimationUsingKeyFrames();
-                        colorAnimation.Duration = TimeSpan.FromSeconds(start + 1.0);
+                        colorAnimation.Duration = TimeSpan.FromSeconds(start + _length);
 
                         // TODO: 应该从 <local:StateToBackConverter x:Key="StateToBack" OpenColor="DarkCyan" CloseColor="DarkGreen"/> 中去取
                         Color oldColor = Colors.DarkGreen;
@@ -133,17 +137,17 @@ namespace dp2SSL
                         colorAnimation.KeyFrames.Add(
                new LinearColorKeyFrame(
                    Colors.DarkOrange, // Target value (KeyValue)
-                   KeyTime.FromTimeSpan(TimeSpan.FromSeconds(start + 0.5))) // KeyTime
+                   KeyTime.FromTimeSpan(TimeSpan.FromSeconds(start + _top))) // KeyTime
                );
 
                         colorAnimation.KeyFrames.Add(
 new LinearColorKeyFrame(
 oldColor, // Target value (KeyValue)
-KeyTime.FromTimeSpan(TimeSpan.FromSeconds(start + 1.0))) // KeyTime
+KeyTime.FromTimeSpan(TimeSpan.FromSeconds(start + _length))) // KeyTime
 );
 
                         border.Background.BeginAnimation(SolidColorBrush.ColorProperty, colorAnimation);
-                        start += 0.1;
+                        start += _delay;
                     }
                 }
             }));

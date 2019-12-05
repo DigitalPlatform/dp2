@@ -2018,6 +2018,38 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
             return bookitem;
         }
 
+        /*
+操作类型 crashReport -- 异常报告 
+主题 dp2circulation 
+发送者 xxx 
+媒体类型 text 
+内容 发生未捕获的界面线程异常: 
+Type: System.ObjectDisposedException
+Message: 无法访问已释放的对象。
+对象名:“EntityControl”。
+Stack:
+在 System.Windows.Forms.Control.CreateHandle()
+在 System.Windows.Forms.Control.get_Handle()
+在 System.Windows.Forms.Control.GetSafeHandle(IWin32Window window)
+在 System.Windows.Forms.MessageBox.ShowCore(IWin32Window owner, String text, String caption, MessageBoxButtons buttons, MessageBoxIcon icon, MessageBoxDefaultButton defaultButton, MessageBoxOptions options, Boolean showHelp)
+在 System.Windows.Forms.MessageBox.Show(IWin32Window owner, String text)
+在 dp2Circulation.ItemControlBase`2.DoSearchItem(String strSearchPrefix, String strSearchText, T& result_item, Boolean bDisplayWarning)
+在 dp2Circulation.EntityControl.DoSearchEntity(String strBarcode)
+在 dp2Circulation.EntityForm.LoadItemByBarcode(String strItemBarcode, Boolean bAutoSavePrev)
+在 dp2Circulation.ItemHandoverForm.LoadToEntityForm(ListView list)
+在 dp2Circulation.ItemHandoverForm.listView_in_DoubleClick(Object sender, EventArgs e)
+在 System.Windows.Forms.Control.OnDoubleClick(EventArgs e)
+在 System.Windows.Forms.ListView.WndProc(Message& m)
+在 DigitalPlatform.GUI.ListViewNF.WndProc(Message& m)
+在 System.Windows.Forms.NativeWindow.Callback(IntPtr hWnd, Int32 msg, IntPtr wparam, IntPtr lparam)
+
+
+dp2Circulation 版本: dp2Circulation, Version=3.6.7270.28358, Culture=neutral, PublicKeyToken=null
+操作系统：Microsoft Windows NT 6.2.9200.0
+本机 MAC 地址: E0DB55BBC87D,162387CAD77B,262387CAD77B,342387CAD77B 
+操作时间 2019/12/1 14:53:48 (Sun, 01 Dec 2019 14:53:48 +0800) 
+前端地址 xxx 经由 http://dp2003.com/dp2library 
+         * */
         /// <summary>
         /// 根据事项记录的某个检索途径 检索出 书目记录 和全部下属事项记录，装入窗口
         /// </summary>
@@ -2036,91 +2068,100 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
             string strError = "";
             result_item = null;
 
-            // 先检查是否已在本窗口中?
-            // 对当前窗口内进行册记录路径查重
-            if (this.Items != null)
-            {
-                T dupitem = this.Items.GetItemByRecPath(strSearchText) as T;
-                if (dupitem != null)
-                {
-                    string strText = "";
-                    if (dupitem.ItemDisplayState == ItemDisplayState.Deleted)
-                        strText = this.ItemTypeName + "记录 '" + strSearchText + "' 正好为本种中未提交之一删除" + this.ItemTypeName + "请求。";
-                    else
-                        strText = this.ItemTypeName + "记录 '" + strSearchText + "' 在本种中找到。";
-
-                    dupitem.HilightListViewItem(true);
-
-                    if (bDisplayWarning == true)
-                        MessageBox.Show(this/*ForegroundWindow.Instance*/, strText);
-                    return 1;
-                }
-            }
-
-            // 向服务器提交检索请求
-            string strBiblioRecPath = "";
-            string strOutputItemRecPath = "";
-            string strIndex = strSearchPrefix + strSearchText;
-
-            string strFromCaption = "记录路径";
-            if (this.ItemType == "item" && string.IsNullOrEmpty(strSearchPrefix) == true)
-                strFromCaption = "册条码号";
-
-
-            // 根据事项记录路径检索，检索出其从属的书目记录路径。
-            LibraryChannel channel = Program.MainForm.GetChannel();
             try
             {
-                nRet = SearchBiblioRecPath(
-                    channel,
-                    strIndex,
-                    out strOutputItemRecPath,
-                    out strBiblioRecPath,
-                    out strError);
-            }
-            finally
-            {
-                Program.MainForm.ReturnChannel(channel);
-            }
-            if (nRet == -1)
-            {
-                MessageBox.Show(this/*ForegroundWindow.Instance*/, "对" + this.ItemTypeName + "-" + strFromCaption + " '" + strSearchText + "' 进行检索的过程中发生错误: " + strError);
-                return -1;
-            }
-            else if (nRet == 0)
-            {
 
-                MessageBox.Show(this/*ForegroundWindow.Instance*/, "没有找到" + strFromCaption + "为 '" + strSearchText + "' 的" + this.ItemTypeName + "记录。");
-                return 0;
-            }
-            else if (nRet == 1)
-            {
-                Debug.Assert(strBiblioRecPath != "", "");
-                // return:
-                //      -1  出错。已经用MessageBox报错
-                //      0   没有装载(例如发现窗口内的记录没有保存，出现警告对话框后，操作者选择了Cancel)
-                //      1   成功装载
-                //      2   通道被占用
-                nRet = this.TriggerLoadRecord(strBiblioRecPath);
-                if (nRet != 1)
+                // 先检查是否已在本窗口中?
+                // 对当前窗口内进行册记录路径查重
+                if (this.Items != null)
                 {
-                    MessageBox.Show(this, "TriggerLoadRecord 出错。错误码 " + nRet.ToString());
+                    T dupitem = this.Items.GetItemByRecPath(strSearchText) as T;
+                    if (dupitem != null)
+                    {
+                        string strText = "";
+                        if (dupitem.ItemDisplayState == ItemDisplayState.Deleted)
+                            strText = this.ItemTypeName + "记录 '" + strSearchText + "' 正好为本种中未提交之一删除" + this.ItemTypeName + "请求。";
+                        else
+                            strText = this.ItemTypeName + "记录 '" + strSearchText + "' 在本种中找到。";
+
+                        dupitem.HilightListViewItem(true);
+
+                        if (bDisplayWarning == true)
+                            MessageBox.Show(this/*ForegroundWindow.Instance*/, strText);
+                        return 1;
+                    }
+                }
+
+                // 向服务器提交检索请求
+                string strBiblioRecPath = "";
+                string strOutputItemRecPath = "";
+                string strIndex = strSearchPrefix + strSearchText;
+
+                string strFromCaption = "记录路径";
+                if (this.ItemType == "item" && string.IsNullOrEmpty(strSearchPrefix) == true)
+                    strFromCaption = "册条码号";
+
+                // 根据事项记录路径检索，检索出其从属的书目记录路径。
+                LibraryChannel channel = Program.MainForm.GetChannel();
+                try
+                {
+                    nRet = SearchBiblioRecPath(
+                        channel,
+                        strIndex,
+                        out strOutputItemRecPath,
+                        out strBiblioRecPath,
+                        out strError);
+                    // testing
+                    // nRet = -1;
+                    // strError = "test error";
+                }
+                finally
+                {
+                    Program.MainForm.ReturnChannel(channel);
+                }
+                if (nRet == -1)
+                {
+                    MessageBox.Show(this/*ForegroundWindow.Instance*/, "对" + this.ItemTypeName + "-" + strFromCaption + " '" + strSearchText + "' 进行检索的过程中发生错误: " + strError);
+                    return -1;
+                }
+                else if (nRet == 0)
+                {
+                    MessageBox.Show(this/*ForegroundWindow.Instance*/, "没有找到" + strFromCaption + "为 '" + strSearchText + "' 的" + this.ItemTypeName + "记录。");
+                    return 0;
+                }
+                else if (nRet == 1)
+                {
+                    Debug.Assert(strBiblioRecPath != "", "");
+                    // return:
+                    //      -1  出错。已经用MessageBox报错
+                    //      0   没有装载(例如发现窗口内的记录没有保存，出现警告对话框后，操作者选择了Cancel)
+                    //      1   成功装载
+                    //      2   通道被占用
+                    nRet = this.TriggerLoadRecord(strBiblioRecPath);
+                    if (nRet != 1)
+                    {
+                        MessageBox.Show(this, "TriggerLoadRecord 出错。错误码 " + nRet.ToString());
+                        return -1;
+                    }
+
+                    // 选上事项
+                    result_item = HilightLineByItemRecPath(strOutputItemRecPath, true); // BUG strSearchText 2013/10/22 修改
+                    return 1;
+                }
+                else if (nRet > 1) // 命中发生重复
+                {
+                    // Debug.Assert(false, "用" + this.ItemTypeName + "记录路径检索绝对不会发生重复现象");
+                    Debug.Assert(false, "用" + this.ItemTypeName + "记录 " + strSearchPrefix + " 检索应当不会发生重复现象");
+                    MessageBox.Show(this/*ForegroundWindow.Instance*/, "用 '" + strIndex + "' 检索" + this.ItemTypeName + "记录命中多于一条，为 " + nRet.ToString() + " 条");
                     return -1;
                 }
 
-                // 选上事项
-                result_item = HilightLineByItemRecPath(strOutputItemRecPath, true); // BUG strSearchText 2013/10/22 修改
-                return 1;
+                return 0;
             }
-            else if (nRet > 1) // 命中发生重复
+            catch(ObjectDisposedException)
             {
-                // Debug.Assert(false, "用" + this.ItemTypeName + "记录路径检索绝对不会发生重复现象");
-                Debug.Assert(false, "用" + this.ItemTypeName + "记录 " + strSearchPrefix + " 检索应当不会发生重复现象");
-                MessageBox.Show(this/*ForegroundWindow.Instance*/, "用 '" + strIndex + "' 检索" + this.ItemTypeName + "记录命中多于一条，为 " + nRet.ToString() + " 条");
                 return -1;
             }
-
-            return 0;
         }
 
         // 
@@ -2574,7 +2615,6 @@ size.Height);
                     Application.DoEvents();
             }
         }
-
     }
 
     /// <summary>
