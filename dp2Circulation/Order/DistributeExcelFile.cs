@@ -9,6 +9,7 @@ using ClosedXML.Excel;
 
 using DigitalPlatform;
 using DigitalPlatform.CommonControl;
+using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Text;
@@ -142,7 +143,7 @@ namespace dp2Circulation.Order
                         cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
 
                         // 最大字符数
-                        SetMaxChars(context.ColumnMaxChars,
+                        ClosedXmlUtil.SetMaxChars(context.ColumnMaxChars,
                         nStartColIndex + i,
                         ReaderSearchForm.GetCharWidth(cell.GetValue<string>()));
                     }
@@ -499,7 +500,7 @@ out copyNumberCell);
                 last_cell = cell;   // 2019/12/3
 
                 // 最大字符数
-                SetMaxChars(context.ColumnMaxChars,
+                ClosedXmlUtil.SetMaxChars(context.ColumnMaxChars,
                 nOldStartColIndex + j,
                 ReaderSearchForm.GetCharWidth(cell.GetValue<string>()));
             }

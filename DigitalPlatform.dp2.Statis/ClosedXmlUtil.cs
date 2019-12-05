@@ -149,7 +149,7 @@ namespace DigitalPlatform.dp2.Statis
                     // int nChars = column_max_chars[nColIndex - 1];
                     if (subitem.Text != null)
                     {
-                        SetMaxChars(ref column_max_chars, nColIndex - 1, subitem.Text.Length);
+                        SetMaxChars(/*ref*/ column_max_chars, nColIndex - 1, subitem.Text.Length);
                     }
                     IXLCell cell = sheet.Cell(nRowIndex, nColIndex).SetValue(DomUtil.ReplaceControlCharsButCrLf(subitem.Text, '*'));
                     cell.Style.Alignment.WrapText = true;
@@ -204,6 +204,7 @@ namespace DigitalPlatform.dp2.Statis
             return 1;
         }
 
+
         public static int GetMaxChars(List<int> column_max_chars, int index)
         {
             if (index < 0)
@@ -214,7 +215,7 @@ namespace DigitalPlatform.dp2.Statis
             return column_max_chars[index];
         }
 
-        public static void SetMaxChars(ref List<int> column_max_chars, int index, int chars)
+        public static void SetMaxChars(/*ref*/ List<int> column_max_chars, int index, int chars)
         {
             // 确保空间足够
             while (column_max_chars.Count < index + 1)

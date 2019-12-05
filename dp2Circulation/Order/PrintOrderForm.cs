@@ -28,6 +28,7 @@ using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
 using static DigitalPlatform.CommonControl.OrderDesignControl;
 using DigitalPlatform.Core;
+using DigitalPlatform.dp2.Statis;
 
 // 2017/4/9 从 this.Channel 用法改造为 ChannelPool 用法
 
@@ -3605,7 +3606,7 @@ out strError);
                     int nColIndex = 0;
 
                     // 记载第一列最大字符数
-                    SetMaxChars(ref column_max_chars,
+                    ClosedXmlUtil.SetMaxChars(/*ref*/ column_max_chars,
     TABLE_LEFT_BLANK_COLUMS + nColIndex,
     line.Class.Length);
 
@@ -3646,7 +3647,7 @@ TABLE_LEFT_BLANK_COLUMS + nColIndex++,
 strCurrentPrices);
 
                     // 记载最后一列最大字符数
-                    SetMaxChars(ref column_max_chars,
+                    ClosedXmlUtil.SetMaxChars(/*ref*/ column_max_chars,
     TABLE_LEFT_BLANK_COLUMS + nColIndex,
     strCurrentFixedPrices.Length);
                     IXLCell right = WriteExcelCell(
@@ -3680,7 +3681,7 @@ TABLE_LEFT_BLANK_COLUMS + nColIndex++,
 strAcceptCurrentPrices);
 
                         // 记载最后一列最大字符数
-                        SetMaxChars(ref column_max_chars,
+                        ClosedXmlUtil.SetMaxChars(/*ref*/ column_max_chars,
         TABLE_LEFT_BLANK_COLUMS + nColIndex,
         strAcceptCurrentFixedPrices.Length);
 
@@ -4138,7 +4139,7 @@ XLColor.LightGray);
                 if (sheet != null)
                 {
                     // 记载第一列最大字符数
-                    SetMaxChars(ref column_max_chars,
+                    ClosedXmlUtil.SetMaxChars(/*ref*/ column_max_chars,
     TABLE_LEFT_BLANK_COLUMS + nColIndex,
     inner_line.Key.Length);
 
@@ -5622,7 +5623,7 @@ strContent);
                     }
 
                     // 最大字符数
-                    SetMaxChars(ref column_max_chars,
+                    ClosedXmlUtil.SetMaxChars(/*ref*/ column_max_chars,
                         TABLE_LEFT_BLANK_COLUMS + col_index,
                         strContent.Length);
                     sheet.Row(TABLE_TOP_BLANK_LINES + nLineIndex + nTopBlankLines + 1).Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
@@ -5658,6 +5659,7 @@ strContent);
             return 0;
         }
 
+        /*
         public static void SetMaxChars(ref List<int> column_max_chars, int index, int chars)
         {
             // 确保空间足够
@@ -5673,6 +5675,7 @@ strContent);
                 column_max_chars[index] = chars;
             }
         }
+        */
 
         // 获得栏目内容(合并后)
         string GetMergedColumnContent(ListViewItem item,

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Xml;
 using ClosedXML.Excel;
-
+using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
@@ -92,7 +92,7 @@ namespace dp2Circulation.Order
                         IXLCell cell = context.Sheet.Cell((context.RowIndex + 1) + 1, nStartColIndex + i + 1).SetValue(col.Caption);
 
                         // 最大字符数
-                        SetMaxChars(context.ColumnMaxChars,
+                        ClosedXmlUtil.SetMaxChars(context.ColumnMaxChars,
                         nStartColIndex + i,
                         ReaderSearchForm.GetCharWidth(cell.GetValue<string>()));
                     }
@@ -220,7 +220,7 @@ out copyNumberCell);
                 last_cell = cell;   // 2019/12/3
 
                 // 最大字符数
-                SetMaxChars(context.ColumnMaxChars,
+                ClosedXmlUtil.SetMaxChars(context.ColumnMaxChars,
                 nOldStartColIndex + j,
                 ReaderSearchForm.GetCharWidth(cell.GetValue<string>()));
             }
@@ -241,6 +241,7 @@ out copyNumberCell);
 
         }
 
+        /*
         public static void SetMaxChars(List<int> column_max_chars, int index, int chars)
         {
             // 确保空间足够
@@ -256,6 +257,7 @@ out copyNumberCell);
                 column_max_chars[index] = chars;
             }
         }
+        */
 
         public static void Warning(string strText)
         {

@@ -309,7 +309,7 @@ namespace dp2Circulation
         protected override bool ProcessDialogKey(
     Keys keyData)
         {
-            if (keyData == Keys.Enter 
+            if (keyData == Keys.Enter
                 || keyData == Keys.LineFeed)  // 2019/6/12
             {
                 // MessageBox.Show(this, "test");
@@ -2582,11 +2582,18 @@ null);
                     }
 
                     // 统计最大字符数
+                    /*
                     int nChars = column_max_chars[nColIndex - 1];
                     if (string.IsNullOrEmpty(strText) == false && strText.Length > nChars)
                     {
                         column_max_chars[nColIndex - 1] = strText.Length;
                     }
+                    */
+                    if (string.IsNullOrEmpty(strText) == false)
+                    {
+                        ClosedXmlUtil.SetMaxChars(/*ref*/ column_max_chars, nColIndex - 1, strText.Length);
+                    }
+
                     IXLCell cell = sheet.Cell(nRowIndex, nColIndex).SetValue(strText);
                     cell.Style.Alignment.WrapText = true;
                     cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
@@ -2613,7 +2620,8 @@ null);
                 int i = 0;
                 foreach (IXLColumn column in sheet.Columns())
                 {
-                    int nChars = column_max_chars[i];
+                    // int nChars = column_max_chars[i];
+                    int nChars = ClosedXmlUtil.GetMaxChars(column_max_chars, i);
                     if (nChars < MAX_CHARS)
                         column.AdjustToContents();
                     else
