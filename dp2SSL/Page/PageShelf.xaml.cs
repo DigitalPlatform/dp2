@@ -524,11 +524,11 @@ namespace dp2SSL
             }
 
             // MessageBox.Show(e.Name);
-            bool cancelled = false;
 
             // TODO: 显示一个模式对话框挡住界面，直到收到门状态变化的信号再自动关闭对话框。这样可以防止开门瞬间、还没有收到开门信号的时候用户突然点 home 按钮回到主菜单(因为这样会突破“主菜单界面不允许处在开门状态”的规则)
             ProgressWindow progress = null;
 #if REMOVED
+            bool cancelled = false;
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
                 progress = new ProgressWindow();
@@ -581,6 +581,7 @@ namespace dp2SSL
                 // 一旦成功，门的 waiting 状态会在 PopCommand 的同时被改回 false
                 succeed = true;
 
+                /*
                 // 等待确认收到开门信号
                 await Task.Run(() =>
                 {
@@ -589,6 +590,7 @@ namespace dp2SSL
                         Thread.Sleep(500);
                     }
                 });
+                */
             }
             finally
             {
