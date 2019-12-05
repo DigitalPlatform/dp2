@@ -7,6 +7,7 @@ using System.Windows.Forms;
 using System.Xml;
 
 using ClosedXML.Excel;
+using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
 
@@ -39,7 +40,7 @@ namespace dp2Circulation.OperLog
             foreach (string s in cols)
             {
                 // 统计最大字符数
-                ReaderSearchForm.SetMaxChars(ref column_max_chars, nColIndex - 1, ReaderSearchForm.GetCharWidth(s));
+                ClosedXmlUtil.SetMaxChars(ref column_max_chars, nColIndex - 1, ReaderSearchForm.GetCharWidth(s));
 
                 IXLCell cell = null;
                 cell = sheet.Cell(nRowIndex, nColIndex).SetValue(s);

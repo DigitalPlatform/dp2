@@ -4129,7 +4129,6 @@ out strError);
             int nRowIndex = 2;
             try
             {
-
                 int nRet = ProcessBiblio(
                         (strRecPath, dom, timestamp, item) =>
                         {

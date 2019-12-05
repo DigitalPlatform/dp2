@@ -57,19 +57,21 @@ namespace DigitalPlatform.dp2.Statis
                 strError = "items == null || items.Count == 0";
                 return -1;
             }
+
             ListView list = items[0].ListView;
 
             // 询问文件名
-            SaveFileDialog dlg = new SaveFileDialog();
+            SaveFileDialog dlg = new SaveFileDialog
+            {
+                Title = "请指定要输出的 Excel 文件名",
+                CreatePrompt = false,
+                OverwritePrompt = true,
+                // dlg.FileName = this.ExportExcelFilename;
+                // dlg.InitialDirectory = Environment.CurrentDirectory;
+                Filter = "Excel 文件 (*.xlsx)|*.xlsx|All files (*.*)|*.*",
 
-            dlg.Title = "请指定要输出的 Excel 文件名";
-            dlg.CreatePrompt = false;
-            dlg.OverwritePrompt = true;
-            // dlg.FileName = this.ExportExcelFilename;
-            // dlg.InitialDirectory = Environment.CurrentDirectory;
-            dlg.Filter = "Excel 文件 (*.xlsx)|*.xlsx|All files (*.*)|*.*";
-
-            dlg.RestoreDirectory = true;
+                RestoreDirectory = true
+            };
 
             if (dlg.ShowDialog() != DialogResult.OK)
                 return 0;
@@ -110,7 +112,6 @@ namespace DigitalPlatform.dp2.Statis
                 column_max_chars.Add(0);
             }
 
-
             string strFontName = list.Font.FontFamily.Name;
 
             int nRowIndex = 1;
@@ -133,8 +134,7 @@ namespace DigitalPlatform.dp2.Statis
             {
                 Application.DoEvents();
 
-                if (stop != null
-    && stop.State != 0)
+                if (stop != null && stop.State != 0)
                 {
                     strError = "用户中断";
                     return 0;
@@ -146,10 +146,10 @@ namespace DigitalPlatform.dp2.Statis
                 foreach (ListViewItem.ListViewSubItem subitem in item.SubItems)
                 {
                     // 统计最大字符数
-                    int nChars = column_max_chars[nColIndex - 1];
-                    if (subitem.Text != null && subitem.Text.Length > nChars)
+                    // int nChars = column_max_chars[nColIndex - 1];
+                    if (subitem.Text != null)
                     {
-                        column_max_chars[nColIndex - 1] = subitem.Text.Length;
+                        SetMaxChars(ref column_max_chars, nColIndex - 1, subitem.Text.Length);
                     }
                     IXLCell cell = sheet.Cell(nRowIndex, nColIndex).SetValue(DomUtil.ReplaceControlCharsButCrLf(subitem.Text, '*'));
                     cell.Style.Alignment.WrapText = true;
@@ -160,7 +160,7 @@ namespace DigitalPlatform.dp2.Statis
                 }
 
                 if (stop != null)
-                    stop.SetProgressValue(nRowIndex-1);
+                    stop.SetProgressValue(nRowIndex - 1);
 
                 nRowIndex++;
             }
@@ -176,7 +176,9 @@ namespace DigitalPlatform.dp2.Statis
             int i = 0;
             foreach (IXLColumn column in sheet.Columns())
             {
-                int nChars = column_max_chars[i];
+                // int nChars = column_max_chars[i];
+                int nChars = GetMaxChars(column_max_chars, i);
+
                 if (nChars < MAX_CHARS)
                     column.AdjustToContents();
                 else
@@ -200,6 +202,32 @@ namespace DigitalPlatform.dp2.Statis
 
             }
             return 1;
+        }
+
+        public static int GetMaxChars(List<int> column_max_chars, int index)
+        {
+            if (index < 0)
+                throw new ArgumentException($"index 参数必须大于等于零 (而现在是 {index})");
+
+            if (index >= column_max_chars.Count)
+                return 0;
+            return column_max_chars[index];
+        }
+
+        public static void SetMaxChars(ref List<int> column_max_chars, int index, int chars)
+        {
+            // 确保空间足够
+            while (column_max_chars.Count < index + 1)
+            {
+                column_max_chars.Add(0);
+            }
+
+            // 统计最大字符数
+            int nOldChars = column_max_chars[index];
+            if (chars > nOldChars)
+            {
+                column_max_chars[index] = chars;
+            }
         }
     }
 }

@@ -255,7 +255,7 @@ namespace dp2Circulation
                 controls.Add(this.splitContainer_main);
                 controls.Add(this.tabControl_query);
                 controls.Add(this.listView_records);
-
+                // TODO: 如何过滤掉多余的列宽度
                 return GuiState.GetUiState(controls);
             }
             set
@@ -11568,6 +11568,7 @@ out strError);
                 strError = "无法重复进入循环";
                 goto ERROR1;
             }
+
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在导出选定的事项到 Excel 文件 ...");
