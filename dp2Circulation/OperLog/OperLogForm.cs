@@ -6587,7 +6587,7 @@ MessageBoxDefaultButton.Button1);
             foreach (string s in cols)
             {
                 // 统计最大字符数
-                ClosedXmlUtil.SetMaxChars(ref column_max_chars, nColIndex - 1, ReaderSearchForm.GetCharWidth(s));
+                ClosedXmlUtil.SetMaxChars(/*ref*/ column_max_chars, nColIndex - 1, ReaderSearchForm.GetCharWidth(s));
 
                 IXLCell cell = null;
                 cell = sheet.Cell(nRowIndex, nColIndex).SetValue(s);

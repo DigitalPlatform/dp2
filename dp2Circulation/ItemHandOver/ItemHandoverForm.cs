@@ -25,6 +25,7 @@ using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
 using ClosedXML.Excel;
 using DigitalPlatform.Core;
+using DigitalPlatform.dp2.Statis;
 
 // 2017/4/8 从 this.Channel 用法改造为 ChannelPool 用法
 
@@ -3170,7 +3171,7 @@ strContent);
                     }
 
                     // 最大字符数
-                    PrintOrderForm.SetMaxChars(ref column_max_chars,
+                    ClosedXmlUtil.SetMaxChars(/*ref*/ column_max_chars,
                         PrintOrderForm.TABLE_LEFT_BLANK_COLUMS + col_index,
                         strContent.Length);
                     sheet.Row(PrintOrderForm.TABLE_TOP_BLANK_LINES + nLineIndex + nTopBlankLines + 1).Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;

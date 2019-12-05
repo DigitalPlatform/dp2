@@ -8,6 +8,7 @@ using ClosedXML.Excel;
 
 using static dp2Circulation.PrintOrderForm;
 using DigitalPlatform.Text;
+using DigitalPlatform.dp2.Statis;
 
 namespace dp2Circulation
 {
@@ -354,7 +355,7 @@ text);
             public IXLCell SetCellText(string text)
             {
                 List<int> column_max_chars = this.ColumnMaxChars;
-                SetMaxChars(ref column_max_chars,
+                ClosedXmlUtil.SetMaxChars(/*ref*/ column_max_chars,
     TABLE_LEFT_BLANK_COLUMS + this.Column,
     text.Length);
                 this.ColumnMaxChars = column_max_chars;
@@ -370,7 +371,7 @@ text);
             public void SetCellText(long value)
             {
                 List<int> column_max_chars = this.ColumnMaxChars;
-                SetMaxChars(ref column_max_chars,
+                ClosedXmlUtil.SetMaxChars(/*ref*/ column_max_chars,
     TABLE_LEFT_BLANK_COLUMS + this.Column,
     value.ToString().Length);
                 this.ColumnMaxChars = column_max_chars;
@@ -390,7 +391,7 @@ text);
             string text,
             ref List<int> column_max_chars)
         {
-            SetMaxChars(ref column_max_chars,
+            ClosedXmlUtil.SetMaxChars(/*ref*/ column_max_chars,
 column,
 text.Length);
             WriteExcelCell(
