@@ -1358,3 +1358,241 @@ new SetErrorEventArgs
             },
             token);
         }
+
+
+		~~~
+		        // 增加了无标签时延迟等待功能。敏捷响应
+        public ListTagsResult ListTags(string reader_name, string style)
+        {
+            if (Program.Rfid.Pause)
+                return new ListTagsResult
+                {
+                    Value = -1,
+                    ErrorInfo = "RFID 功能处于暂停状态",
+                    ErrorCode = "paused"
+                };
+
+            string lockNameList = StringUtil.GetParameterByPrefix(style, "getLockState");
+            if (lockNameList != null)
+                lockNameList = StringUtil.UnescapeString(lockNameList);
+
+            Program.Rfid.IncApiCount();
+            try
+            {
+                if (Program.Rfid.Pause)
+                    return new ListTagsResult
+                    {
+                        Value = -1,
+                        ErrorInfo = "RFID 功能处于暂停状态",
+                        ErrorCode = "paused"
+                    };
+
+                string session_id = StringUtil.GetParameterByPrefix(style, "session");
+
+                TimeSpan length = TimeSpan.FromSeconds(2);
+
+                ListTagsResult result = null;
+                GetLockStateResult lock_result = null;
+
+                string current_uids = "";
+                DateTime start = DateTime.Now;
+                while (DateTime.Now - start < length
+                    || result == null)
+                {
+                    if (string.IsNullOrEmpty(reader_name) == false)
+                    {
+                        result = _listTags(reader_name, style);
+
+                        if (result != null && result.Results != null)
+                            current_uids = BuildUids(result.Results);
+                        else
+                            current_uids = "";
+
+                        // TODO: 这里的比较应该按照 Session 来进行
+                        // 只要本次和上次 tag 数不同，立刻就返回
+                        if (CompareLastUids(session_id, current_uids))
+                        {
+                            SetLastUids(session_id, current_uids);
+                            return result;
+                        }
+
+                        if (result.Value == -1)
+                        {
+                            return result;
+                        }
+                    }
+                    else
+                        result = new ListTagsResult();
+
+                    // 检测一下门锁状态是否有变化
+                    // 目前是 1:1 次数分配
+                    if (lockNameList != null)
+                    {
+                        lock_result = GetShelfLockState(lockNameList);
+                        // 这里的疑问是，如果 _listTags 没有出错，是否应该坚持返回正确结果？
+                        if (lock_result.Value != -1)
+                        {
+                            string current_states = BuildStateString(lock_result.States);
+                            if (CompareLastUids(session_id + "_lock", current_states))
+                            {
+                                SetLastUids(session_id + "_lock", current_states);
+                                return new ListTagsResult { GetLockStateResult = lock_result };
+                            }
+                        }
+                    }
+
+                    /*
+                    // TODO: 如果本次和上次都是 2，是否立即返回？可否先对比一下 uid，有差别再返回?
+                    if (result.Results != null
+                        && result.Results.Count > 0)
+                    {
+                        SetLastUids(current_uids);
+                        return result;
+                    }
+                    */
+                    Thread.Sleep(10);  // 10? 200?
+                }
+
+                SetLastUids(session_id, current_uids);
+                if (lockNameList != null && lock_result != null)
+                    result.GetLockStateResult = lock_result;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ListTagsResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"ListTags() 出现异常:{ex.Message}"
+                };
+            }
+            finally
+            {
+                Program.Rfid.DecApiCount();
+            }
+        }
+
+
+		~~~
+		第二个版本。先判断 inventory
+
+		        // 增加了无标签时延迟等待功能。敏捷响应
+        public ListTagsResult ListTags(string reader_name, string style)
+        {
+            if (Program.Rfid.Pause)
+                return new ListTagsResult
+                {
+                    Value = -1,
+                    ErrorInfo = "RFID 功能处于暂停状态",
+                    ErrorCode = "paused"
+                };
+
+            string lockNameList = StringUtil.GetParameterByPrefix(style, "getLockState");
+            if (lockNameList != null)
+                lockNameList = StringUtil.UnescapeString(lockNameList);
+
+            Program.Rfid.IncApiCount();
+            try
+            {
+                if (Program.Rfid.Pause)
+                    return new ListTagsResult
+                    {
+                        Value = -1,
+                        ErrorInfo = "RFID 功能处于暂停状态",
+                        ErrorCode = "paused"
+                    };
+
+                string session_id = StringUtil.GetParameterByPrefix(style, "session");
+
+                TimeSpan length = TimeSpan.FromSeconds(2);
+
+                ListTagsResult result = null;
+                GetLockStateResult lock_result = null;
+
+                string current_uids = "";
+                DateTime start = DateTime.Now;
+                while (DateTime.Now - start < length
+                    || result == null)
+                {
+                    // 执行 inventory
+                    if (string.IsNullOrEmpty(reader_name) == false)
+                    {
+                        result = _listTags(reader_name, style);
+                    }
+                    else
+                        result = new ListTagsResult();
+
+                    // 判断 inventory 结果
+                    if (string.IsNullOrEmpty(reader_name) == false)
+                    {
+                        if (result != null && result.Results != null)
+                            current_uids = BuildUids(result.Results);
+                        else
+                            current_uids = "";
+
+                        // TODO: 这里的比较应该按照 Session 来进行
+                        // 只要本次和上次 tag 数不同，立刻就返回
+                        if (CompareLastUids(session_id, current_uids))
+                        {
+                            SetLastUids(session_id, current_uids);
+                            return result;
+                        }
+
+                        if (result.Value == -1)
+                        {
+                            return result;
+                        }
+                    }
+
+                    // 执行门锁状态获取
+                    // 目前是 1:1 次数分配
+                    if (lockNameList != null)
+                    {
+                        lock_result = GetShelfLockState(lockNameList);
+                        // 从此开始 result.GetLockStateResult 就有值了
+                        result.GetLockStateResult = lock_result;
+                    }
+
+                    // 判断门锁状态
+                    if (lockNameList != null)
+                    {
+                        // 这里的疑问是，如果 _listTags 没有出错，是否应该坚持返回正确结果？
+                        if (lock_result.Value != -1)
+                        {
+                            string current_states = BuildStateString(lock_result.States);
+                            if (CompareLastUids(session_id + "_lock", current_states))
+                            {
+                                SetLastUids(session_id + "_lock", current_states);
+                                return result;
+                            }
+                        }
+                    }
+
+                    /*
+                    // TODO: 如果本次和上次都是 2，是否立即返回？可否先对比一下 uid，有差别再返回?
+                    if (result.Results != null
+                        && result.Results.Count > 0)
+                    {
+                        SetLastUids(current_uids);
+                        return result;
+                    }
+                    */
+                    Thread.Sleep(10);  // 10? 200?
+                }
+
+                SetLastUids(session_id, current_uids);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ListTagsResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"ListTags() 出现异常:{ex.Message}"
+                };
+            }
+            finally
+            {
+                Program.Rfid.DecApiCount();
+            }
+        }

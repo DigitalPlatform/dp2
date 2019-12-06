@@ -17,7 +17,7 @@
         <local:OperatorConverter x:Key="OperatorToName" />
 
         <ControlTemplate x:Key = "ButtonTemplate" TargetType = "Button">
-            <Border Background="{Binding State,Converter={StaticResource StateToBack}}" 
+            <Border  Background="{Binding State,Converter={StaticResource StateToBack}}" 
                     BorderBrush="DarkGray" BorderThickness="1,1,1,1" Padding="8">
                 <Grid >
                     <Grid.ColumnDefinitions>
@@ -73,7 +73,7 @@
                        ConverterParameter=0.18}"
                         Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="3"
                                Foreground="White" HorizontalAlignment="Right" />
-                   
+
                     <!-- 图书总数 -->
                     <TextBlock Name="count" Text="{Binding Count}"
                         FontSize="{Binding 
@@ -93,7 +93,7 @@
                        ConverterParameter=0.18}"
                                Grid.Row="2" Grid.Column="0"  Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Center"
                                MouseLeftButtonDown="TextBlock_MouseLeftButtonDown" />
-                    
+
                     <!-- 新取出的图书册数 -->
                     <TextBlock Name="remove" Text="{Binding Remove,Converter={StaticResource IntToRemove}}"
                         FontSize="{Binding 
@@ -103,7 +103,7 @@
                        ConverterParameter=0.18}" 
                                Grid.Row="2" Grid.Column="1"  Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Center"
                                MouseLeftButtonDown="TextBlock_MouseLeftButtonDown"/>
-                    
+
                     <!-- 发生错误的图书册数 -->
                     <TextBlock Name="errorCount" Text="{Binding ErrorCount,Converter={StaticResource IntToError}}"
                         FontSize="{Binding 

@@ -3,6 +3,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -249,6 +250,7 @@ namespace RfidCenter
             if (lockNameList != null)
                 lockNameList = StringUtil.UnescapeString(lockNameList);
 
+            bool output_time = false;
             Program.Rfid.IncApiCount();
             try
             {
@@ -262,6 +264,9 @@ namespace RfidCenter
 
                 string session_id = StringUtil.GetParameterByPrefix(style, "session");
 
+                if (output_time)
+                    Program.MainForm.OutputHistory($"session start: {session_id}, reader_name={reader_name}, style={style}");
+
                 TimeSpan length = TimeSpan.FromSeconds(2);
 
                 ListTagsResult result = null;
@@ -272,10 +277,53 @@ namespace RfidCenter
                 while (DateTime.Now - start < length
                     || result == null)
                 {
+                    Stopwatch watch = null;
+
+                    // 执行 inventory
                     if (string.IsNullOrEmpty(reader_name) == false)
                     {
+                        if (output_time)
+                            watch = new Stopwatch();
+                        else
+                            watch = null;
+                        watch?.Start();
                         result = _listTags(reader_name, style);
+                        watch?.Stop();
+                        if (output_time)
+                            Program.MainForm.OutputHistory($"{session_id} inventory time:{watch.Elapsed.TotalSeconds}, count:{result.Results?.Count}");
+                    }
+                    else
+                    {
+                        if (output_time)
+                            Program.MainForm.OutputHistory($"{session_id} inventory skipped");
+                        result = new ListTagsResult();
+                    }
 
+                    // 执行门锁状态获取
+                    // 目前是 1:1 次数分配
+                    if (lockNameList != null)
+                    {
+                        if (output_time)
+                            watch = new Stopwatch();
+                        else
+                            watch = null;
+                        watch?.Start();
+                        lock_result = GetShelfLockState(lockNameList);
+                        watch?.Stop();
+                        if (output_time)
+                            Program.MainForm.OutputHistory($"{session_id} getLockState time:{watch.Elapsed.TotalSeconds}, count:{lock_result.States?.Count}");
+                        // 从此开始 result.GetLockStateResult 就有值了
+                        result.GetLockStateResult = lock_result;
+                    }
+                    else
+                    {
+                        if (output_time)
+                            Program.MainForm.OutputHistory($"{session_id} getLockState skipped");
+                    }
+
+                    // 判断 inventory 结果
+                    if (string.IsNullOrEmpty(reader_name) == false)
+                    {
                         if (result != null && result.Results != null)
                             current_uids = BuildUids(result.Results);
                         else
@@ -294,14 +342,11 @@ namespace RfidCenter
                             return result;
                         }
                     }
-                    else
-                        result = new ListTagsResult();
 
-                    // 检测一下门锁状态是否有变化
-                    // 目前是 1:1 次数分配
+
+                    // 判断门锁状态
                     if (lockNameList != null)
                     {
-                        lock_result = GetShelfLockState(lockNameList);
                         // 这里的疑问是，如果 _listTags 没有出错，是否应该坚持返回正确结果？
                         if (lock_result.Value != -1)
                         {
@@ -309,7 +354,7 @@ namespace RfidCenter
                             if (CompareLastUids(session_id + "_lock", current_states))
                             {
                                 SetLastUids(session_id + "_lock", current_states);
-                                return new ListTagsResult { GetLockStateResult = lock_result };
+                                return result;
                             }
                         }
                     }
@@ -327,8 +372,6 @@ namespace RfidCenter
                 }
 
                 SetLastUids(session_id, current_uids);
-                if (lockNameList != null && lock_result != null)
-                    result.GetLockStateResult = lock_result;
                 return result;
             }
             catch (Exception ex)
