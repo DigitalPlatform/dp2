@@ -112,11 +112,32 @@ namespace DigitalPlatform.RFID
         // UID --> typeOfUsage string
         static Hashtable _typeTable = new Hashtable();
 
+        // TODO: 可以把 readerNameList 先 Parse 到一个结构来加快 match 速度
         static bool InRange(TagAndData data, string readerNameList)
         {
             // 匹配读卡器名字
-            return Reader.MatchReaderName(readerNameList, data.OneTag.ReaderName, out string antenna_list);
+            var ret = Reader.MatchReaderName(readerNameList, data.OneTag.ReaderName, out string antenna_list);
+            if (ret == false)
+                return false;
+            if (GetAntennaList(antenna_list).IndexOf(data.OneTag.AntennaID) != -1)
+                return true;
+            return ret;
         }
+
+        static List<uint> GetAntennaList(string list)
+        {
+            if (string.IsNullOrEmpty(list) == true)
+                return new List<uint> { 1 };    // 默认是一号天线
+            string[] numbers = list.Split(new char[] { '|', ',' });
+            List<uint> bytes = new List<uint>();
+            foreach (string number in numbers)
+            {
+                bytes.Add(Convert.ToUInt32(number));
+            }
+
+            return bytes;
+        }
+
 
         // parameters:
         //      readerNameList  list中包含的内容的读卡器名(列表)。注意 list 中包含的标签，可能并不是全部读卡器的标签。对没有包含在其中的标签，本函数需要注意跳过(维持现状)，不要当作被删除处理

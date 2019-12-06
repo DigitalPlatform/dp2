@@ -51,13 +51,13 @@ namespace dp2SSL
         // 读者证读卡器名字。在 shelf.xml 中配置
         static string _patronReaderName = "";
         // 图书读卡器名字列表(也就是柜门里面的那些读卡器)
-        static string _doorReaderName = "";
+        static string _allDoorReaderName = "";
 
         public static string DoorReaderName
         {
             get
             {
-                return _doorReaderName;
+                return _allDoorReaderName;
             }
         }
 
@@ -253,10 +253,12 @@ namespace dp2SSL
             }
             else
             {
+                var list = GetOpeningReaderNameList(Doors);
+
                 // 打开图书读卡器(同时也使用读者证读卡器)
-                if (RfidManager.ReaderNameList != _doorReaderName)
+                if (RfidManager.ReaderNameList != list)
                 {
-                    RfidManager.ReaderNameList = _doorReaderName;
+                    RfidManager.ReaderNameList = list;
                     RfidManager.ClearCache();
                     //App.CurrentApp.SpeakSequence("活动");
                 }
@@ -270,15 +272,16 @@ namespace dp2SSL
             ShelfData.InitialDoors();
 
             // 要在初始化以前设定好
-            _patronReaderName = GetReaderNameList("patron");
+            _patronReaderName = GetAllReaderNameList("patron");
             WpfClientInfo.WriteInfoLog($"patron ReaderNameList '{_patronReaderName}'");
 
             RfidManager.Base2ReaderNameList = _patronReaderName;    // 2019/11/18
+            RfidManager.LockThread = "base2";
 
-            _doorReaderName = GetReaderNameList("doors");
-            WpfClientInfo.WriteInfoLog($"doors ReaderNameList '{_doorReaderName}'");
+            _allDoorReaderName = GetAllReaderNameList("doors");
+            WpfClientInfo.WriteInfoLog($"doors ReaderNameList '{_allDoorReaderName}'");
 
-            RfidManager.ReaderNameList = _doorReaderName;
+            RfidManager.ReaderNameList = _allDoorReaderName;
             // RfidManager.AntennaList = GetAntennaList();
             RfidManager.LockCommands = StringUtil.MakePathList(ShelfData.GetLockCommands());
 
@@ -375,7 +378,7 @@ namespace dp2SSL
         // 从 shelf.xml 配置文件中归纳出所有的读卡器名，包括天线编号部分
         // parameters:
         //      style   patron/doors
-        public static string GetReaderNameList(string style)
+        public static string GetAllReaderNameList(string style)
         {
             if (ShelfCfgDom == null)
                 return "*";
@@ -412,6 +415,50 @@ namespace dp2SSL
                     string readerName = patron.GetAttribute("readerName");
                     AddToTable(name_table, readerName, -1);
                 }
+            }
+
+            StringBuilder result = new StringBuilder();
+            int i = 0;
+            foreach (string key in name_table.Keys)
+            {
+                List<int> list = name_table[key] as List<int>;
+                list.Sort();
+
+                if (i > 0)
+                    result.Append(",");
+                if (list.Count == 0)
+                    result.Append(key);
+                else
+                    result.Append($"{key}:{Join(list, "|")}");
+                i++;
+            }
+
+            return result.ToString();
+        }
+
+        // 获得处于打开状态的门的读卡器名字符串
+        // parameters:
+        public static string GetOpeningReaderNameList(List<DoorItem> _doors)
+        {
+            // 读卡器名字 --> List<int> (天线列表)
+            Hashtable name_table = new Hashtable();
+            foreach (var door in _doors)
+            {
+                var readerName = door.ReaderName;
+                var antenna = door.Antenna;
+
+                // 跳过空读卡器名
+                if (string.IsNullOrEmpty(readerName))
+                    continue;
+
+                // 禁止使用 * 作为读卡器名字
+                if (readerName == "*")
+                    throw new Exception($"antenna属性值中读卡器名字部分不应使用 *");
+
+                if (door.State != "open")
+                    continue;
+
+                AddToTable(name_table, readerName, antenna);
             }
 
             StringBuilder result = new StringBuilder();
@@ -982,7 +1029,7 @@ namespace dp2SSL
                     // 使用全部读卡器，全部天线
                     RfidManager.Pause = true;
                     // RfidManager.ReaderNameList = "*";
-                    RfidManager.ReaderNameList = _doorReaderName;
+                    RfidManager.ReaderNameList = _allDoorReaderName;
                     // RfidManager.AntennaList = GetAntennaList();
                     TagList.DataReady = false;
                     RfidManager.Pause = false;

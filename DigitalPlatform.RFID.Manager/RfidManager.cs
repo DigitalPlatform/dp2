@@ -56,6 +56,20 @@ namespace DigitalPlatform.RFID
             }
         }
 
+        // 探测门锁状态使用哪个线程？
+        // 空表示使用主要线程，"base2" 表示使用 Base2 线程
+        static string _lockThread = "";
+        public static string LockThread
+        {
+            get
+            {
+                return _lockThread;
+            }
+            set
+            {
+                _lockThread = value;
+            }
+        }
         /*
         static string _antennaList = null;
 
@@ -208,7 +222,6 @@ new SetErrorEventArgs
             },
             (channel) =>
             {
-                string style = $"session:{Base2.GetHashCode()}";
                 /*
                 if (string.IsNullOrEmpty(_antennaList) == false)
                     style += ",antenna:" + _antennaList;
@@ -216,36 +229,88 @@ new SetErrorEventArgs
 
                 // 从 readerNameList 中只取出属于 base2 的部分，用来发出请求
 
+                GetLockStateResult lock_result = null;
                 var readerNameList = _base2ReaderNameList;
-                if (string.IsNullOrEmpty(readerNameList))
-                    return; // TODO: 是否需要特意延迟一下?
-                var result = channel?.Object?.ListTags(readerNameList, style);
-                if (result.Value == -1)
-                    Base2.TriggerSetError(result,
-                        new SetErrorEventArgs { Error = result.ErrorInfo });
-                else
-                    Base2.TriggerSetError(result,
-                        new SetErrorEventArgs { Error = null }); // 清除以前的报错
-
-                // TODO: 触发 ListTags 事件时要加锁
-                lock (_syncRoot)
+                if (string.IsNullOrEmpty(readerNameList) == false)
                 {
-                    if (ListTags != null)
-                    {
-                        // 先记忆
-                        _lastTags = result.Results;
+                    string style = $"session:{Base2.GetHashCode()}";
+                    // 2019/12/6
+                    if (_lockThread == "base2"
+                        && string.IsNullOrEmpty(LockCommands) == false)
+                        style += ",getLockState:" + StringUtil.EscapeString(LockCommands, ":,");
 
-                        // 注意 result.Value == -1 时也会触发这个事件
-                        ListTags(channel, new ListTagsEventArgs
+                    var result = channel?.Object?.ListTags(readerNameList, style);
+                    if (result.Value == -1)
+                        Base2.TriggerSetError(result,
+                            new SetErrorEventArgs { Error = result.ErrorInfo });
+                    else
+                        Base2.TriggerSetError(result,
+                            new SetErrorEventArgs { Error = null }); // 清除以前的报错
+
+                    lock_result = result.GetLockStateResult;
+
+                    // TODO: 触发 ListTags 事件时要加锁
+                    lock (_syncRoot)
+                    {
+                        if (ListTags != null)
                         {
-                            ReaderNameList = readerNameList,
-                            Result = result
+                            // 先记忆
+                            _lastTags = result.Results;
+
+                            // 注意 result.Value == -1 时也会触发这个事件
+                            ListTags(channel, new ListTagsEventArgs
+                            {
+                                ReaderNameList = readerNameList,
+                                Result = result
+                            });
+                        }
+                        else
+                            _lastTags = null;
+                    }
+                }
+
+                // base2 这里负责探索门锁状态
+                // 检查门状态
+                if (_lockThread == "base2"
+                && LockCommands != null)
+                {
+                    List<LockState> states = new List<LockState>();
+                    {
+                        // parameters:
+                        //      lockNameParam   为 "锁控板名字.卡编号.锁编号"。
+                        //                      其中卡编号部分可以是 "1" 也可以是 "1|2" 这样的形态
+                        //                      其中锁编号部分可以是 "1" 也可以是 "1|2|3|4" 这样的形态
+                        //                      如果缺乏卡编号和锁编号部分，缺乏的部分默认为 "1"
+                        if (lock_result.Value == -1)
+                            Base.TriggerSetError(lock_result,
+                                new SetErrorEventArgs { Error = lock_result.ErrorInfo });
+                        else
+                            Base.TriggerSetError(lock_result,
+                                new SetErrorEventArgs { Error = null }); // 清除以前的报错
+                        if (lock_result.Value == -1)
+                        {
+                            // 注意 lock_result.Value == -1 时也会触发这个事件
+                            ListLocks?.Invoke(channel, new ListLocksEventArgs
+                            {
+                                Result = lock_result
+                            });
+                        }
+                        if (lock_result.States != null)
+                            states.AddRange(lock_result.States);
+                    }
+
+                    if (states.Count > 0)
+                    {
+                        // 注意 lock_result.Value == -1 时也会触发这个事件
+                        ListLocks?.Invoke(channel, new ListLocksEventArgs
+                        {
+                            Result = new GetLockStateResult { States = states }
                         });
                     }
-                    else
-                        _lastTags = null;
+                    // 门锁状态就绪
+                    _lockReady = true;
                 }
-                // base2 这里就不再具有门锁功能
+
             },
             token);
         }
@@ -296,10 +361,6 @@ new SetErrorEventArgs
             },
             (channel) =>
             {
-                string style = $"session:{Base.GetHashCode()}";
-                // 2019/12/4
-                if (string.IsNullOrEmpty(LockCommands) == false)
-                    style += ",getLockState:" + StringUtil.EscapeString(LockCommands, ":,");
                 /*
                 if (string.IsNullOrEmpty(_antennaList) == false)
                     style += ",antenna:" + _antennaList;
@@ -307,9 +368,15 @@ new SetErrorEventArgs
 
                 GetLockStateResult lock_result = null;
                 var readerNameList = _readerNameList;
-                if (string.IsNullOrEmpty(readerNameList) == false 
+                if (string.IsNullOrEmpty(readerNameList) == false
                 || string.IsNullOrEmpty(LockCommands) == false)
                 {
+                    string style = $"session:{Base.GetHashCode()}";
+                    // 2019/12/4
+                    if (_lockThread != "base2"
+                        && string.IsNullOrEmpty(LockCommands) == false)
+                        style += ",getLockState:" + StringUtil.EscapeString(LockCommands, ":,");
+
                     var result = channel?.Object?.ListTags(readerNameList, style);
                     if (result.Value == -1)
                         Base.TriggerSetError(result,
@@ -343,7 +410,8 @@ new SetErrorEventArgs
                 }
 
                 // 检查门状态
-                if (lock_result != null)
+                if (_lockThread != "base2"
+                && lock_result != null)
                 {
                     List<LockState> states = new List<LockState>();
                     {
