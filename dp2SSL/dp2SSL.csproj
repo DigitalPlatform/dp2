@@ -188,6 +188,7 @@
     </Compile>
     <Compile Include="FingerPrint.cs" />
     <Compile Include="Centers\FingerprintManager.cs" />
+    <Compile Include="InterceptKeys.cs" />
     <Compile Include="LayoutAdorner.cs" />
     <Compile Include="Dialog\MessageWindow.xaml.cs">
       <DependentUpon>MessageWindow.xaml</DependentUpon>
