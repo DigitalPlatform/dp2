@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace DigitalPlatform.IO
 {
@@ -29,12 +30,12 @@ namespace DigitalPlatform.IO
             public char Chr;//字符
             */
 
-                /*
-            public string OriginalChrs; //原始 字符
-            public string OriginalAsciis;//原始 ASCII
+            /*
+        public string OriginalChrs; //原始 字符
+        public string OriginalAsciis;//原始 ASCII
 
-            public string OriginalBarCode; //原始数据条码
-            */
+        public string OriginalBarCode; //原始数据条码
+        */
 
             public string Barcode;//条码信息 保存最终的条码
             public bool IsValid;//条码是否有效
@@ -92,7 +93,7 @@ namespace DigitalPlatform.IO
 
 
         delegate int HookProc(int nCode, Int32 wParam, IntPtr lParam);
-        CharInput _char = new CharInput();
+        // CharInput _char = new CharInput();
         int hKeyboardHook = 0;
 
         StringBuilder _barcode = new StringBuilder();
@@ -101,6 +102,150 @@ namespace DigitalPlatform.IO
 
         static int TIME_SHTRESHOLD = 50;
 
+        private const int WM_KEYDOWN = 0x0100;
+
+        static bool _shift = false;
+
+        private int KeyboardHookProc(int nCode, Int32 wParam, IntPtr lParam)
+        {
+            if (nCode == 0)
+            {
+                EventMsg msg = (EventMsg)Marshal.PtrToStructure(lParam, typeof(EventMsg));
+                if (wParam == 0x100)//WM_KEYDOWN=0x100 
+                {
+                    int vkCode = Marshal.ReadInt32(lParam);
+
+                    Keys key = (Keys)vkCode;
+
+                    if (key == Keys.LShiftKey)
+                    {
+                        _shift = true;
+                        // Console.WriteLine($"modi {(System.Windows.Forms.Keys)vkCode}");
+                        goto END1;
+                    }
+
+                    TimeSpan ts = DateTime.Now.Subtract(_string.Time);
+                    if (ts.TotalMilliseconds > TIME_SHTRESHOLD)
+                        _barcode.Clear();
+
+                    _string.Time = DateTime.Now;
+
+                    //KeysConverter kc = new KeysConverter();
+                    //string keyChar = kc.ConvertToString(key);
+
+                    string keyChar = GetKeyString(key, _shift);
+                    Debug.WriteLine($"keyChar='{keyChar}', key='{key.ToString()}'");
+
+                    _shift = false;
+                    _barcode.Append(keyChar);
+
+                    // 保护缓冲区
+                    if (_barcode.Length > 1000)
+                        _barcode.Clear();
+
+                    Debug.WriteLine($"msg.message={(msg.message & 0xff)} _barcode:'{_barcode.ToString()}'");
+
+                    if ((msg.message & 0xff) == 13 && _barcode.Length > 3)
+                    {
+                        // 回车
+                        _string.Barcode = _barcode.ToString();// barCode.OriginalBarCode;
+                        _string.IsValid = true;
+                        _barcode.Remove(0, _barcode.Length);
+
+                        Debug.WriteLine($"isValid = true");
+                    }
+                    else
+                        goto END1;
+
+                    try
+                    {
+                        if (InputLine != null
+                            // && _string.IsValid
+                            )
+                        {
+                            Debug.WriteLine($"trigger callback");
+
+                            AsyncCallback callback = new AsyncCallback(AsyncBack);
+                            Delegate[] delArray = InputLine.GetInvocationList();
+                            foreach (Delegate_lineFeed del in delArray)
+                            {
+                                try
+                                {
+                                    del.BeginInvoke(_string, callback, del); // 异步调用防止界面卡死
+                                }
+                                catch (Exception ex)
+                                {
+                                    throw ex;
+                                }
+                            }
+                            //BarCodeEvent(barCode);//触发事件
+                            _string.Barcode = "";
+                            //_char.OriginalChrs = "";
+                            //_char.OriginalAsciis = "";
+                            //_char.OriginalBarCode = "";
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        throw;
+                    }
+                    finally
+                    {
+                        _string.IsValid = false;
+                        _string.Time = DateTime.Now;
+                    }
+                }
+            }
+        END1:
+            return CallNextHookEx(hKeyboardHook, nCode, wParam, lParam);
+        }
+
+        static char[] upper_number = new char[] { ')','!','@',
+'#','$','%','^','&','*','(',
+        };
+
+        public static string GetKeyString(Keys key, bool shift)
+        {
+            if (key == Keys.None)
+                return "";
+
+            string keyStr = "?";    //  key.ToString();
+            int keyInt = (int)key;
+            // Numeric keys
+            if (key >= Keys.D0 && key <= Keys.D9)
+            {
+                if (shift == false)
+                    return char.ToString((char)(key - Keys.D0 + '0'));
+
+                return char.ToString(upper_number[key - Keys.D0]);
+            }
+            // Char keys are returned directly
+            else if (key >= Keys.A && key <= Keys.Z)
+            {
+                if (shift == false)
+                    return char.ToString((char)(key - Keys.A + 'a'));
+                return char.ToString((char)(key - Keys.A + 'A'));
+            }
+            else if (key == Keys.Oem1)
+            {
+                if (shift == false)
+                    return ";";
+                return ":";
+            }
+            else if (key == Keys.Return)
+            {
+                return "\r";
+            }
+            // If the key is a keypad operation (Add, Multiply, ...) or an 'Oem' key, P/Invoke
+            else if ((keyInt >= 84 && keyInt <= 89) || keyInt >= 140)
+            {
+                // keyStr = KeyCodeToUnicode(key);
+                return "?";
+            }
+            return keyStr;
+        }
+
+#if OLD
         private int KeyboardHookProc(int nCode, Int32 wParam, IntPtr lParam)
         {
             if (nCode == 0)
@@ -110,6 +255,10 @@ namespace DigitalPlatform.IO
                 {
                     _char.VirtKey = msg.message & 0xff;//虚拟吗
                     _char.ScanCode = msg.paramL & 0xff;//扫描码
+
+                    if (_char.VirtKey == (int)Keys.LShiftKey)
+                        goto END1;
+
                     StringBuilder strKeyName = new StringBuilder(225);
                     if (GetKeyNameText(_char.ScanCode * 65536, strKeyName, 255) > 0)
                     {
@@ -123,7 +272,6 @@ namespace DigitalPlatform.IO
                     uint uKey = 0;
                     GetKeyboardState(kbArray);
 
-
                     if (ToAscii(_char.VirtKey, _char.ScanCode, kbArray, ref uKey, 0))
                     {
                         _char.Ascii = uKey;
@@ -132,7 +280,11 @@ namespace DigitalPlatform.IO
 
                     TimeSpan ts = DateTime.Now.Subtract(_string.Time);
 
-                    Debug.WriteLine($"ts={ts.TotalMilliseconds} char:'{_char.Chr.ToString()}' code:{(int)(_char.Chr)}");
+                    // Debug.WriteLine($"ts={ts.TotalMilliseconds} char:'{_char.Chr.ToString()}' code:{(int)(_char.Chr)}");
+                    Debug.WriteLine($"ts={ts.TotalMilliseconds} code:{(int)(_char.Chr)}");
+
+                    if (_char.Chr == 0)
+                        goto END1;
 
                     if (ts.TotalMilliseconds > TIME_SHTRESHOLD)
                     {
@@ -200,8 +352,11 @@ namespace DigitalPlatform.IO
                     }
                 }
             }
+            END1:
             return CallNextHookEx(hKeyboardHook, nCode, wParam, lParam);
         }
+
+#endif
 
         //异步返回方法
         public void AsyncBack(IAsyncResult ar)

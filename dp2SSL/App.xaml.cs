@@ -14,6 +14,7 @@ using System.Xml;
 using System.IO;
 
 using dp2SSL.Models;
+using System.Text;
 
 using DigitalPlatform;
 using DigitalPlatform.Core;
@@ -21,7 +22,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
-using System.Text;
+using System.Windows.Input;
 
 namespace dp2SSL
 {

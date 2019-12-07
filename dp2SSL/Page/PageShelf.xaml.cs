@@ -152,6 +152,8 @@ namespace dp2SSL
                     WpfClientInfo.WriteErrorLog($"InitialShelfEntities() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 }
             }
+
+            InputMethod.Current.ImeState = InputMethodState.Off;
         }
 
         private async void App_LineFeed(object sender, LineFeedEventArgs e)
