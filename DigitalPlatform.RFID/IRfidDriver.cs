@@ -326,6 +326,35 @@ uint new_password);
         public string BaudRate { get; set; }
     }
 
+    // 解析读卡器名称字符串以后得到的细部结构
+    public class ReaderPath
+    {
+        // 读卡器名字
+        public string ReaderName { get; set; }
+        // 天线编号列表
+        public List<string> AntennaList { get; set; }
+
+        // 解析一段读卡器名字。例如 "readerName:1|2|3|4"
+        public static ReaderPath Parse(string text)
+        {
+            ReaderPath result = new ReaderPath();
+
+            var parts = StringUtil.ParseTwoPart(text, ":");
+            result.ReaderName = parts[0];
+            string list = parts[1];
+            if (string.IsNullOrEmpty(list))
+                result.AntennaList = new List<string> { "1" };
+            else
+            {
+                string[] antenna_list = list.Split(new char[] { '|' });
+                result.AntennaList = new List<string>(antenna_list);
+            }
+
+            return result;
+        }
+    }
+
+
     // [Serializable()]
     public class Reader
     {

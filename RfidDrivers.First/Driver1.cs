@@ -10,12 +10,11 @@ using System.Threading.Tasks;
 using System.Xml;
 
 using log4net;
+using RFIDLIB;
 
 using DigitalPlatform;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
-using RFIDLIB;
-
 
 // 锁定全部读卡器靠一个全局锁来实现。锁定一个读卡器靠 RecordLock 来实现。锁定一个读卡器之前，先尝试用 read 方式获得全局锁
 
@@ -2253,7 +2252,9 @@ namespace RfidDrivers.First
     style);
         }
 
+        // 对一个读卡器进行盘点
         // parameters:
+        //      reader_name     一个读卡器名字。注意，不应包含多个读卡器名字
         //      antenna_list    内容为形态 "1|2|3|4"。如果为空，相当于 1。
         //      style   可由下列值组成
         //              only_new    每次只列出最新发现的那些标签(否则全部列出)
