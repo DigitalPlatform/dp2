@@ -204,36 +204,29 @@ namespace dp2SSL
             if (App.Function == "智能书柜")
                 RfidManager.StartBase2(_cancelRefresh.Token);
 
-            _barcodeCapture.InputEvent += _barcodeCapture_BarCodeEvent;
+            _barcodeCapture.InputLine += _barcodeCapture_inputLine;
             _barcodeCapture.Start();
         }
 
-        private void _barcodeCapture_BarCodeEvent(BarcodeCapture.KeyInput input)
+        private void _barcodeCapture_inputLine(BarcodeCapture.StringInput input)
         {
             if (_pauseBarcodeScan > 0)
-                return;
-
-            if (input.Chr == '\0')
-                return;
-
-            // this.AddErrors("input", new List<string> { $"your input:{barCode.Ascll}" });
-            if (input.Chr == '\n' || input.Chr == '\r')
             {
-                string line = _line.ToString();
+                Debug.WriteLine("pauseBarcodeScan");
+                return;
+            }
+
+            Debug.WriteLine($"input.Barcode='{input.Barcode}'");
+
+            {
+                string line = input.Barcode.TrimEnd(new char[] { '\r', '\n' });
+                Debug.WriteLine($"line feed. line='{line}'");
                 if (string.IsNullOrEmpty(line) == false)
                 {
                     // 触发一次输入
                     LineFeed?.Invoke(this, new LineFeedEventArgs { Text = line });
                 }
-                _line.Clear();
-                return;
             }
-
-            // Debug.WriteLine($"chr={barCode.Chr}");
-            // 防止内容太多
-            if (_line.Length > 1000)
-                _line.Clear();
-            _line.Append(input.Chr);
         }
 
         public static void PauseBarcodeScan()
@@ -379,7 +372,7 @@ namespace dp2SSL
         protected async override void OnExit(ExitEventArgs e)
         {
             _barcodeCapture.Stop();
-            _barcodeCapture.InputEvent -= _barcodeCapture_BarCodeEvent;
+            _barcodeCapture.InputLine -= _barcodeCapture_inputLine;
 
             await PageMenu.PageShelf.Submit(true);
 

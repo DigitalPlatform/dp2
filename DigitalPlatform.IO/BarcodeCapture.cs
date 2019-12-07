@@ -13,19 +13,42 @@ namespace DigitalPlatform.IO
     /// </summary>
     public class BarcodeCapture
     {
-        public delegate void BardCodeDeletegate(KeyInput input);
-        public event BardCodeDeletegate InputEvent;
+        public delegate void Delegate_lineFeed(StringInput input);
+        public event Delegate_lineFeed InputLine;
 
         //定义成静态，这样不会抛出回收异常
         private static HookProc hookproc;
 
-        public struct KeyInput
+        public struct StringInput
+        {
+            /*
+            public int VirtKey;//虚拟码
+            public int ScanCode;//扫描码
+            public string KeyName;//键名
+            public uint Ascii;//Ascll
+            public char Chr;//字符
+            */
+
+                /*
+            public string OriginalChrs; //原始 字符
+            public string OriginalAsciis;//原始 ASCII
+
+            public string OriginalBarCode; //原始数据条码
+            */
+
+            public string Barcode;//条码信息 保存最终的条码
+            public bool IsValid;//条码是否有效
+            public DateTime Time;//扫描时间,
+        }
+
+        struct CharInput
         {
             public int VirtKey;//虚拟码
             public int ScanCode;//扫描码
             public string KeyName;//键名
             public uint Ascii;//Ascll
             public char Chr;//字符
+            /*
             public string OriginalChrs; //原始 字符
             public string OriginalAsciis;//原始 ASCII
 
@@ -34,6 +57,7 @@ namespace DigitalPlatform.IO
             public string Barcode;//条码信息 保存最终的条码
             public bool IsValid;//条码是否有效
             public DateTime Time;//扫描时间,
+            */
         }
 
         private struct EventMsg
@@ -68,10 +92,14 @@ namespace DigitalPlatform.IO
 
 
         delegate int HookProc(int nCode, Int32 wParam, IntPtr lParam);
-        KeyInput input = new KeyInput();
+        CharInput _char = new CharInput();
         int hKeyboardHook = 0;
 
-        StringBuilder sbBarCode = new StringBuilder();
+        StringBuilder _barcode = new StringBuilder();
+
+        StringInput _string = new StringInput();
+
+        static int TIME_SHTRESHOLD = 50;
 
         private int KeyboardHookProc(int nCode, Int32 wParam, IntPtr lParam)
         {
@@ -80,71 +108,74 @@ namespace DigitalPlatform.IO
                 EventMsg msg = (EventMsg)Marshal.PtrToStructure(lParam, typeof(EventMsg));
                 if (wParam == 0x100)//WM_KEYDOWN=0x100 
                 {
-                    input.VirtKey = msg.message & 0xff;//虚拟吗
-                    input.ScanCode = msg.paramL & 0xff;//扫描码
+                    _char.VirtKey = msg.message & 0xff;//虚拟吗
+                    _char.ScanCode = msg.paramL & 0xff;//扫描码
                     StringBuilder strKeyName = new StringBuilder(225);
-                    if (GetKeyNameText(input.ScanCode * 65536, strKeyName, 255) > 0)
+                    if (GetKeyNameText(_char.ScanCode * 65536, strKeyName, 255) > 0)
                     {
-                        input.KeyName = strKeyName.ToString().Trim(new char[] { ' ', '\0' });
+                        _char.KeyName = strKeyName.ToString().Trim(new char[] { ' ', '\0' });
                     }
                     else
                     {
-                        input.KeyName = "";
+                        _char.KeyName = "";
                     }
                     byte[] kbArray = new byte[256];
                     uint uKey = 0;
                     GetKeyboardState(kbArray);
 
 
-                    if (ToAscii(input.VirtKey, input.ScanCode, kbArray, ref uKey, 0))
+                    if (ToAscii(_char.VirtKey, _char.ScanCode, kbArray, ref uKey, 0))
                     {
-                        input.Ascii = uKey;
-                        input.Chr = Convert.ToChar(uKey);
+                        _char.Ascii = uKey;
+                        _char.Chr = Convert.ToChar(uKey);
                     }
 
-                    TimeSpan ts = DateTime.Now.Subtract(input.Time);
+                    TimeSpan ts = DateTime.Now.Subtract(_string.Time);
 
-                    if (ts.TotalMilliseconds > 50)
+                    Debug.WriteLine($"ts={ts.TotalMilliseconds} char:'{_char.Chr.ToString()}' code:{(int)(_char.Chr)}");
+
+                    if (ts.TotalMilliseconds > TIME_SHTRESHOLD)
                     {
                         //时间戳，大于50 毫秒表示手动输入
                         //strBarCode = barCode.Chr.ToString();
-                        sbBarCode.Remove(0, sbBarCode.Length);
-                        sbBarCode.Append(input.Chr.ToString());
-                        input.OriginalChrs = " " + Convert.ToString(input.Chr);
-                        input.OriginalAsciis = " " + Convert.ToString(input.Ascii);
-                        input.OriginalBarCode = Convert.ToString(input.Chr);
+                        _barcode.Remove(0, _barcode.Length);
+                        _barcode.Append(_char.Chr.ToString());
+                        //_char.OriginalChrs = " " + Convert.ToString(_char.Chr);
+                        //_char.OriginalAsciis = " " + Convert.ToString(_char.Ascii);
+                        //_char.OriginalBarCode = Convert.ToString(_char.Chr);
                     }
                     else
                     {
-                        sbBarCode.Append(input.Chr.ToString());
-                        if ((msg.message & 0xff) == 13 && sbBarCode.Length > 3)
-                        {//回车
-                         //barCode.BarCode = strBarCode;
-                            input.Barcode = sbBarCode.ToString();// barCode.OriginalBarCode;
-                            input.IsValid = true;
-                            sbBarCode.Remove(0, sbBarCode.Length);
+                        _barcode.Append(_char.Chr.ToString());
+
+                        Debug.WriteLine($"msg.message={(msg.message & 0xff)} _barcode:'{_barcode.ToString()}'");
+
+                        if ((msg.message & 0xff) == 13 && _barcode.Length > 3)
+                        {
+                            // 回车
+                            _string.Barcode = _barcode.ToString();// barCode.OriginalBarCode;
+                            _string.IsValid = true;
+                            _barcode.Remove(0, _barcode.Length);
+
+                            Debug.WriteLine($"isValid = true");
                         }
-                        //strBarCode += barCode.Chr.ToString();
                     }
-                    input.Time = DateTime.Now;
+                    _string.Time = DateTime.Now;
                     try
                     {
-                        if (InputEvent != null 
-                            && input.IsValid
+                        if (InputLine != null
+                            && _string.IsValid
                             )
                         {
+                            Debug.WriteLine($"trigger callback");
+
                             AsyncCallback callback = new AsyncCallback(AsyncBack);
-                            //object obj;
-                            Delegate[] delArray = InputEvent.GetInvocationList();
-                            //foreach (Delegate del in delArray)
-                            foreach (BardCodeDeletegate del in delArray)
+                            Delegate[] delArray = InputLine.GetInvocationList();
+                            foreach (Delegate_lineFeed del in delArray)
                             {
                                 try
                                 {
-                                    //方法1
-                                    //obj = del.DynamicInvoke(barCode);
-                                    //方法2
-                                    del.BeginInvoke(input, callback, del);//异步调用防止界面卡死
+                                    del.BeginInvoke(_string, callback, del); // 异步调用防止界面卡死
                                 }
                                 catch (Exception ex)
                                 {
@@ -152,10 +183,10 @@ namespace DigitalPlatform.IO
                                 }
                             }
                             //BarCodeEvent(barCode);//触发事件
-                            input.Barcode = "";
-                            input.OriginalChrs = "";
-                            input.OriginalAsciis = "";
-                            input.OriginalBarCode = "";
+                            _string.Barcode = "";
+                            //_char.OriginalChrs = "";
+                            //_char.OriginalAsciis = "";
+                            //_char.OriginalBarCode = "";
                         }
                     }
                     catch (Exception)
@@ -164,8 +195,8 @@ namespace DigitalPlatform.IO
                     }
                     finally
                     {
-                        input.IsValid = false; //最后一定要 设置barCode无效
-                        input.Time = DateTime.Now;
+                        _string.IsValid = false;
+                        _string.Time = DateTime.Now;
                     }
                 }
             }
@@ -175,7 +206,7 @@ namespace DigitalPlatform.IO
         //异步返回方法
         public void AsyncBack(IAsyncResult ar)
         {
-            BardCodeDeletegate del = ar.AsyncState as BardCodeDeletegate;
+            Delegate_lineFeed del = ar.AsyncState as Delegate_lineFeed;
             del.EndInvoke(ar);
         }
 

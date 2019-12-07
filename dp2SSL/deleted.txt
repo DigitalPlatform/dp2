@@ -1596,3 +1596,46 @@ new SetErrorEventArgs
                 Program.Rfid.DecApiCount();
             }
         }
+
+
+		~~~
+
+		        private void _barcodeCapture_BarCodeEvent(BarcodeCapture.KeyInput input)
+        {
+            if (_pauseBarcodeScan > 0)
+            {
+                Debug.WriteLine("pauseBarcodeScan");
+                return;
+            }
+
+            Debug.WriteLine($"input.Barcode='{input.Barcode}'");
+
+            if (input.Chr == '\0')
+            {
+                Debug.WriteLine("zero");
+                return;
+            }
+
+            // this.AddErrors("input", new List<string> { $"your input:{barCode.Ascll}" });
+            if (input.Chr == '\n' || input.Chr == '\r')
+            {
+                string line = _line.ToString();
+                Debug.WriteLine($"line feed. line='{line}'");
+                if (string.IsNullOrEmpty(line) == false)
+                {
+                    // 触发一次输入
+                    LineFeed?.Invoke(this, new LineFeedEventArgs { Text = line });
+                }
+                _line.Clear();
+                return;
+            }
+
+            // Debug.WriteLine($"chr={barCode.Chr}");
+            // 防止内容太多
+            if (_line.Length > 1000)
+                _line.Clear();
+            _line.Append(input.Chr);
+
+
+            Debug.WriteLine($"append char '{(int)input.Chr}'");
+        }
