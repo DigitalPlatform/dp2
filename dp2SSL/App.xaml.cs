@@ -23,6 +23,7 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
 using System.Windows.Input;
+using static DigitalPlatform.IO.BarcodeCapture;
 
 namespace dp2SSL
 {
@@ -32,6 +33,7 @@ namespace dp2SSL
     public partial class App : Application, INotifyPropertyChanged
     {
         public static event LineFeedEventHandler LineFeed = null;
+        public static event CharFeedEventHandler CharFeed = null;
 
         // 主要的通道池，用于当前服务器
         public LibraryChannelPool _channelPool = new LibraryChannelPool();
@@ -206,7 +208,19 @@ namespace dp2SSL
                 RfidManager.StartBase2(_cancelRefresh.Token);
 
             _barcodeCapture.InputLine += _barcodeCapture_inputLine;
+            //_barcodeCapture.InputChar += _barcodeCapture_InputChar;
             _barcodeCapture.Start();
+        }
+
+        private void _barcodeCapture_InputChar(CharInput input)
+        {
+            if (_pauseBarcodeScan > 0)
+            {
+                Debug.WriteLine("pauseBarcodeScan");
+                return;
+            }
+
+            CharFeed?.Invoke(this, new CharFeedEventArgs { CharInput = input });
         }
 
         private void _barcodeCapture_inputLine(BarcodeCapture.StringInput input)
@@ -374,8 +388,9 @@ namespace dp2SSL
         {
             _barcodeCapture.Stop();
             _barcodeCapture.InputLine -= _barcodeCapture_inputLine;
+            //_barcodeCapture.InputChar -= _barcodeCapture_InputChar;
 
-            await PageMenu.PageShelf.Submit(true);
+            await PageMenu.PageShelf?.Submit(true);
 
             LibraryChannelManager.Log?.Debug("OnExit() called");
             WpfClientInfo.Finish();
@@ -458,7 +473,15 @@ namespace dp2SSL
         {
             get
             {
-                return (bool)WpfClientInfo.Config?.GetBoolean("operation", "auto_trigger", false);
+                return (bool)WpfClientInfo.Config?.GetBoolean("ssl_operation", "auto_trigger", false);
+            }
+        }
+
+        public static bool PatronInfoLasting
+        {
+            get
+            {
+                return (bool)WpfClientInfo.Config?.GetBoolean("ssl_operation", "patron_info_lasting", false);
             }
         }
 
@@ -896,5 +919,17 @@ LineFeedEventArgs e);
     public class LineFeedEventArgs : EventArgs
     {
         public string Text { get; set; }
+    }
+
+
+    public delegate void CharFeedEventHandler(object sender,
+CharFeedEventArgs e);
+
+    /// <summary>
+    /// 条码枪输入一行文字的事件的参数
+    /// </summary>
+    public class CharFeedEventArgs : EventArgs
+    {
+        public CharInput CharInput { get; set; }
     }
 }

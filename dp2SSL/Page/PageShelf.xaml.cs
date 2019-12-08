@@ -135,6 +135,7 @@ namespace dp2SSL
             // _patronReaderName = GetPatronReaderName();
 
             App.LineFeed += App_LineFeed;
+            App.CharFeed += App_CharFeed;
 
             if (Mode == "initial" || ShelfData.FirstInitialized == false)
             {
@@ -154,6 +155,17 @@ namespace dp2SSL
             }
 
             InputMethod.Current.ImeState = InputMethodState.Off;
+        }
+
+        static string ToString(BarcodeCapture.CharInput input)
+        {
+            return $"{input.Key} string='{input.KeyChar}'";
+        }
+
+        private void App_CharFeed(object sender, CharFeedEventArgs e)
+        {
+            // 用来观察单个击键
+            SetGlobalError("charinput", ToString(e.CharInput));
         }
 
         private async void App_LineFeed(object sender, LineFeedEventArgs e)
@@ -754,6 +766,7 @@ namespace dp2SSL
         private async void PageShelf_Unloaded(object sender, RoutedEventArgs e)
         {
             App.LineFeed -= App_LineFeed;
+            App.CharFeed -= App_CharFeed;
 
             CancelDelayClearTask();
 
@@ -1353,7 +1366,9 @@ namespace dp2SSL
                             SetPatronError("rfid_multi", $"读卡器上放了多张读者卡({patrons.Count})。请拿走多余的");
                         }
                         else
+                        {
                             SetPatronError("rfid_multi", "");   // 2019/5/20
+                        }
                     }
                 }
                 SetGlobalError("patron", "");

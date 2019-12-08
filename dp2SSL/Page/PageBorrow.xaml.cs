@@ -69,8 +69,6 @@ namespace dp2SSL
             // _patron.IsFingerprintSource = true;
 
             App.CurrentApp.PropertyChanged += CurrentApp_PropertyChanged;
-
-
         }
 
         private void CurrentApp_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -225,6 +223,7 @@ namespace dp2SSL
             _adorner = new LayoutAdorner(this);
 
             {
+                /*
                 List<string> style = new List<string>();
                 if (string.IsNullOrEmpty(App.RfidUrl) == false)
                     style.Add("rfid");
@@ -233,7 +232,8 @@ namespace dp2SSL
                 if (string.IsNullOrEmpty(App.FaceUrl) == false
                     && StringUtil.IsInList("registerFace", this.ActionButtons) == false)
                     style.Add("face");
-                this.patronControl.SetStartMessage(StringUtil.MakePathList(style));
+                    */
+                this.patronControl.SetStartMessage(GetPageStyleList());
             }
 
 
@@ -249,6 +249,19 @@ namespace dp2SSL
                     break;  // 只有当初始化过程中没有被 TagChanged 事件打扰过，才算初始化成功了。否则就要重新初始化
             }
 
+        }
+
+        string GetPageStyleList()
+        {
+            List<string> style = new List<string>();
+            if (string.IsNullOrEmpty(App.RfidUrl) == false)
+                style.Add("rfid");
+            if (string.IsNullOrEmpty(App.FingerprintUrl) == false)
+                style.Add("fingerprint");
+            if (string.IsNullOrEmpty(App.FaceUrl) == false
+                && StringUtil.IsInList("registerFace", this.ActionButtons) == false)
+                style.Add("face");
+            return StringUtil.MakePathList(style);
         }
 
         /*
@@ -325,7 +338,7 @@ namespace dp2SSL
             {
                 if (_entities.Count == 0
         && changed == true  // 限定为，当数量减少到 0 这一次，才进行清除
-        && _patron.IsFingerprintSource)
+        && (_patron.IsFingerprintSource || App.PatronInfoLasting == true))
                     PatronClear();
 
                 // 2019/7/1
@@ -445,15 +458,21 @@ namespace dp2SSL
                     }
                     else
                     {
-                        PatronClear();
                         SetPatronError("getreaderinfo", "");
                         if (patrons.Count > 1)
                         {
+                            PatronClear();
                             // 读卡器上放了多张读者卡
                             SetPatronError("rfid_multi", $"读卡器上放了多张读者卡({patrons.Count})。请拿走多余的");
                         }
                         else
+                        {
+                            // 2019/12/8
+                            if (App.PatronInfoLasting == false)
+                                PatronClear();
+
                             SetPatronError("rfid_multi", "");   // 2019/5/20
+                        }
                     }
                 }
             }
@@ -725,12 +744,14 @@ namespace dp2SSL
                         _visiblityChanged = true;
                     }));
                 // 如果读者卡又被拿走了，则要恢复 patronControl 的隐藏状态
+                // 注意，这里要看当前是借书还是还书画面。借书画面还是要显示 patronControl
                 else if (string.IsNullOrEmpty(_patron.UID) == true && string.IsNullOrEmpty(_patron.Barcode) == true
     && this.patronControl.Visibility == Visibility.Visible
     && _visiblityChanged)
                     Application.Current.Dispatcher.Invoke(new Action(() =>
                     {
-                        patronControl.Visibility = Visibility.Collapsed;
+                        SetPatronControlVisibility();
+                        // patronControl.Visibility = Visibility.Collapsed;
                     }));
             }
         }
@@ -808,13 +829,25 @@ namespace dp2SSL
                 {
                     this.booksControl.Visibility = Visibility.Visible;
 
+                    SetPatronControlVisibility();
+                    /*
                     // (普通)还书和续借操作并不需要读者卡
                     if (borrowButton.Visibility != Visibility.Visible)
                         this.patronControl.Visibility = Visibility.Collapsed;
                     else
                         this.patronControl.Visibility = Visibility.Visible; // 2019/9/3
+                        */
                 }
             }
+        }
+
+        void SetPatronControlVisibility()
+        {
+            // (普通)还书和续借操作并不需要读者卡
+            if (borrowButton.Visibility != Visibility.Visible)
+                this.patronControl.Visibility = Visibility.Collapsed;
+            else
+                this.patronControl.Visibility = Visibility.Visible; // 2019/9/3
         }
 
 #if OLD_RFID
@@ -1076,8 +1109,8 @@ namespace dp2SSL
             if (result.Value == -1)
             {
                 SetPatronError("fingerprint", $"指纹中心出错: {result.ErrorInfo}, 错误码: {result.ErrorCode}");
-                if (_patron.IsFingerprintSource)
-                    PatronClear();    // 只有当面板上的读者信息来源是指纹仪时，才清除面板上的读者信息
+                if (_patron.IsFingerprintSource || App.PatronInfoLasting == true)
+                    PatronClear();    // 只有当面板上的读者信息来源是指纹仪时(或者 RFID 读者卡配置了不持久特性)，才清除面板上的读者信息
                 return;
             }
             else

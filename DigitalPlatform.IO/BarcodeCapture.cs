@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -16,6 +17,10 @@ namespace DigitalPlatform.IO
     {
         public delegate void Delegate_lineFeed(StringInput input);
         public event Delegate_lineFeed InputLine;
+
+        public delegate void Delegate_charFeed(CharInput input);
+
+        public event Delegate_charFeed InputChar;
 
         //定义成静态，这样不会抛出回收异常
         private static HookProc hookproc;
@@ -42,13 +47,19 @@ namespace DigitalPlatform.IO
             public DateTime Time;//扫描时间,
         }
 
-        struct CharInput
+        public struct CharInput
         {
+            public Keys Key;
+            public string KeyChar;
+
+            /*
             public int VirtKey;//虚拟码
             public int ScanCode;//扫描码
             public string KeyName;//键名
             public uint Ascii;//Ascll
             public char Chr;//字符
+            */
+
             /*
             public string OriginalChrs; //原始 字符
             public string OriginalAsciis;//原始 ASCII
@@ -103,6 +114,7 @@ namespace DigitalPlatform.IO
         static int TIME_SHTRESHOLD = 50;
 
         private const int WM_KEYDOWN = 0x0100;
+        private const int WM_KEYUP = 0x0101;
 
         static bool _shift = false;
 
@@ -111,7 +123,20 @@ namespace DigitalPlatform.IO
             if (nCode == 0)
             {
                 EventMsg msg = (EventMsg)Marshal.PtrToStructure(lParam, typeof(EventMsg));
-                if (wParam == 0x100)//WM_KEYDOWN=0x100 
+                if (wParam == WM_KEYUP)
+                {
+                    int vkCode = Marshal.ReadInt32(lParam);
+
+                    Keys key = (Keys)vkCode;
+
+                    if (key == Keys.LShiftKey)
+                    {
+                        _shift = false;
+                        goto END1;
+                    }
+                }
+
+                if (wParam == WM_KEYDOWN)//WM_KEYDOWN=0x100 
                 {
                     int vkCode = Marshal.ReadInt32(lParam);
 
@@ -136,7 +161,6 @@ namespace DigitalPlatform.IO
                     string keyChar = GetKeyString(key, _shift);
                     Debug.WriteLine($"keyChar='{keyChar}', key='{key.ToString()}'");
 
-                    _shift = false;
                     _barcode.Append(keyChar);
 
                     // 保护缓冲区
@@ -144,6 +168,28 @@ namespace DigitalPlatform.IO
                         _barcode.Clear();
 
                     Debug.WriteLine($"msg.message={(msg.message & 0xff)} _barcode:'{_barcode.ToString()}'");
+
+
+                    if (InputChar != null)
+                    {
+                        CharInput input = new CharInput {
+                            Key = key,
+                            KeyChar = keyChar,
+                        };
+                        AsyncCallback callback = new AsyncCallback(AsyncBackCharFeed);
+                        Delegate[] delArray = InputChar.GetInvocationList();
+                        foreach (Delegate_charFeed del in delArray)
+                        {
+                            try
+                            {
+                                del.BeginInvoke(input, callback, del);
+                            }
+                            catch (Exception ex)
+                            {
+                                throw ex;
+                            }
+                        }
+                    }
 
                     if ((msg.message & 0xff) == 13 && _barcode.Length > 3)
                     {
@@ -165,7 +211,7 @@ namespace DigitalPlatform.IO
                         {
                             Debug.WriteLine($"trigger callback");
 
-                            AsyncCallback callback = new AsyncCallback(AsyncBack);
+                            AsyncCallback callback = new AsyncCallback(AsyncBackLineFeed);
                             Delegate[] delArray = InputLine.GetInvocationList();
                             foreach (Delegate_lineFeed del in delArray)
                             {
@@ -200,24 +246,80 @@ namespace DigitalPlatform.IO
             return CallNextHookEx(hKeyboardHook, nCode, wParam, lParam);
         }
 
+        /*
         static char[] upper_number = new char[] { ')','!','@',
 '#','$','%','^','&','*','(',
         };
+        */
+
+        static string[] char_def = new string[] {
+            "Oemtilde:`~",
+            "D1:1!",
+            "D2:2@",
+            "D3:3#",
+            "D4:4$",
+            "D5:5%",
+            "D6:6^",
+            "D7:7&",
+            "D8:8*",
+            "D9:9(",
+            "D0:0)",
+            "OemMinus:-_",
+            "Oemplus:=+",
+            "OemOpenBrackets:[{",
+            "Oem6:]}",
+            "Oem5:\\|",
+            "Oem1:;:",
+            "Oem7:'\"",
+            "Oemcomma:,<",
+            "OemPeriod:.>",
+            "OemQuestion:/?",
+        };
+
+        static Hashtable _char_table = null;
+
+        static void BuildCharTable()
+        {
+            if (_char_table != null)
+                return;
+            _char_table = new Hashtable();
+            foreach(string def in char_def)
+            {
+                int pos = def.IndexOf(':');
+                string name = def.Substring(0, pos);
+                string chars = def.Substring(pos + 1);
+                _char_table[name] = chars;
+            }
+        }
+
+        static string GetCharDef(string name)
+        {
+            if (_char_table.ContainsKey(name) == false)
+                return null;
+            return (string)_char_table[name];
+        }
 
         public static string GetKeyString(Keys key, bool shift)
         {
             if (key == Keys.None)
                 return "";
 
+            BuildCharTable();
+
+            string name = key.ToString();
             string keyStr = "?";    //  key.ToString();
             int keyInt = (int)key;
             // Numeric keys
             if (key >= Keys.D0 && key <= Keys.D9)
             {
-                if (shift == false)
-                    return char.ToString((char)(key - Keys.D0 + '0'));
+                //if (shift == false)
+                //    return char.ToString((char)(key - Keys.D0 + '0'));
 
-                return char.ToString(upper_number[key - Keys.D0]);
+                var def = GetCharDef(name);
+                if (def == null)
+                    return "?";
+                return char.ToString(def[shift?1:0]);
+                // return char.ToString(upper_number[key - Keys.D0]);
             }
             // Char keys are returned directly
             else if (key >= Keys.A && key <= Keys.Z)
@@ -226,11 +328,13 @@ namespace DigitalPlatform.IO
                     return char.ToString((char)(key - Keys.A + 'a'));
                 return char.ToString((char)(key - Keys.A + 'A'));
             }
-            else if (key == Keys.Oem1)
+            else if (name.StartsWith("Oem"))
             {
-                if (shift == false)
-                    return ";";
-                return ":";
+                var def = GetCharDef(name);
+                if (def == null)
+                    return "?";
+                return char.ToString(def[shift?1:0]);
+
             }
             else if (key == Keys.Return)
             {
@@ -359,9 +463,16 @@ namespace DigitalPlatform.IO
 #endif
 
         //异步返回方法
-        public void AsyncBack(IAsyncResult ar)
+        public void AsyncBackLineFeed(IAsyncResult ar)
         {
             Delegate_lineFeed del = ar.AsyncState as Delegate_lineFeed;
+            del.EndInvoke(ar);
+        }
+
+        //异步返回方法
+        public void AsyncBackCharFeed(IAsyncResult ar)
+        {
+            Delegate_charFeed del = ar.AsyncState as Delegate_charFeed;
             del.EndInvoke(ar);
         }
 

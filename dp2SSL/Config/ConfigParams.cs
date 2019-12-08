@@ -162,16 +162,35 @@ Order = 7,
 Name = "借还按钮自动触发",
 Description = "借书和还书操作是否自动触发操作按钮"
 )]
-        [Category("操作风格")]
+        [Category("自助借还操作风格")]
         public bool AutoTrigger
         {
             get
             {
-                return _config.GetBoolean("operation", "auto_trigger", false);
+                return _config.GetBoolean("ssl_operation", "auto_trigger", false);
             }
             set
             {
-                _config.SetBoolean("operation", "auto_trigger", value);
+                _config.SetBoolean("ssl_operation", "auto_trigger", value);
+            }
+        }
+
+        // 默认值 false
+        [Display(
+Order = 7,
+Name = "读者信息显示持久",
+Description = "读者卡拿走后是否保持读者信息不清除"
+)]
+        [Category("自助借还操作风格")]
+        public bool PatronInfoLasting
+        {
+            get
+            {
+                return _config.GetBoolean("ssl_operation", "patron_info_lasting", false);
+            }
+            set
+            {
+                _config.SetBoolean("ssl_operation", "patron_info_lasting", value);
             }
         }
 
