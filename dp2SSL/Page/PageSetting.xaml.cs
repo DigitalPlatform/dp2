@@ -45,6 +45,7 @@ namespace dp2SSL
                     window.Close();
                 }
             }));
+            App.ContinueBarcodeScan();
         }
 
         private void PageSetting_Loaded(object sender, RoutedEventArgs e)
@@ -53,20 +54,15 @@ namespace dp2SSL
             InitialPage();
             if (this.password.Visibility == Visibility.Visible)
                 this.password.Focus();
+
+            App.PauseBarcodeScan();
         }
 
         private void Keyborad_KeyPressed(object sender, KeyPressedEventArgs e)
         {
             if (e.Key == '\r')
             {
-                if (this.setPassword.Visibility == Visibility.Visible)
-                {
-                    SetPassword_Click(this.setPassword, new RoutedEventArgs());
-                }
-                else if (this.login.Visibility == Visibility.Visible)
-                {
-                    Login_Click(this.login, new RoutedEventArgs());
-                }
+                OnEnter();
                 return;
             }
 
@@ -238,6 +234,9 @@ namespace dp2SSL
 
             PageMenu.MenuPage?.UpdateMenu();
 
+            // 2019/12/9
+            App.CurrentApp.InitialShelfCfg();
+
             // 重新启动 Proccess 监控
             App.CurrentApp.StartProcessManager();
         }
@@ -320,7 +319,7 @@ namespace dp2SSL
                 }
             }
 
-            SKIP1:
+        SKIP1:
 
             // 如果没有配置 人脸中心 URL 则不检查
             if (string.IsNullOrEmpty(App.FaceUrl) == false)
@@ -357,7 +356,7 @@ namespace dp2SSL
                         if (StringUtil.CompareVersion(result.ErrorCode, "1.5") < 0)
                             errors.Add($"所连接的 RFID 中心版本太低(为 {result.ErrorCode} 版)。请升级到 1.5 以上版本");
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         errors.Add($"所连接的 RFID 中心版本太低。请升级到最新版本。({ex.Message})");
                     }
@@ -552,6 +551,27 @@ namespace dp2SSL
         private void RestartFaceCenter_Click(object sender, RoutedEventArgs e)
         {
             FaceManager.GetState("restart");
+        }
+
+        private void Password_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == System.Windows.Input.Key.Enter)
+            {
+                OnEnter();
+                return;
+            }
+        }
+
+        void OnEnter()
+        {
+            if (this.setPassword.Visibility == Visibility.Visible)
+            {
+                SetPassword_Click(this.setPassword, new RoutedEventArgs());
+            }
+            else if (this.login.Visibility == Visibility.Visible)
+            {
+                Login_Click(this.login, new RoutedEventArgs());
+            }
         }
     }
 }

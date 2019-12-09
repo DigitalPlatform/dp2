@@ -74,7 +74,8 @@
                         <RowDefinition Height="160"/>
                     </Grid.RowDefinitions>
                     <PasswordBox Name="password" Grid.Row="0"
-                             Width="300" FontSize="20" Margin="4"/>
+                             Width="300" FontSize="20" Margin="4"
+                                 KeyDown="Password_KeyDown"/>
                     <local:NumberKeyboardControl x:Name="keyborad" Grid.Row="1"
                                                  Width="160" Height="160"/>
                 </Grid>

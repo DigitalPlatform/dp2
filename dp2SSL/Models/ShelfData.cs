@@ -276,7 +276,7 @@ namespace dp2SSL
             WpfClientInfo.WriteInfoLog($"patron ReaderNameList '{_patronReaderName}'");
 
             RfidManager.Base2ReaderNameList = _patronReaderName;    // 2019/11/18
-            RfidManager.LockThread = "base2";
+            // RfidManager.LockThread = "base2";
 
             _allDoorReaderName = GetAllReaderNameList("doors");
             WpfClientInfo.WriteInfoLog($"doors ReaderNameList '{_allDoorReaderName}'");
@@ -944,6 +944,7 @@ namespace dp2SSL
             }
         }
 
+        // 初始化门控件定义。包括初始化 ShelfCfgDom
         public static void InitialDoors()
         {
             {
@@ -1011,7 +1012,7 @@ namespace dp2SSL
                 {
                     while (true)
                     {
-                        if (TagList.DataReady == true)
+                        if (RfidManager.TagsReady == true)
                             return true;
                         if (func_cancelled() == true)
                             return false;
@@ -1028,15 +1029,20 @@ namespace dp2SSL
                 {
                     // 使用全部读卡器，全部天线
                     RfidManager.Pause = true;
-                    // RfidManager.ReaderNameList = "*";
+
+                    // TODO: 这里并不是马上能停下来呀？是否要等待停下来
+                    // 否则探测到 TagsReady == true 可能是上一轮延迟到来的结果
+                    // 可以考虑给 TagsReady 变成一个字符串值，内容是每一轮请求的 session_id，这样就可以确认是哪一次的返回了
+
+                    //RfidManager.Pause2 = true;  // 暂停 Base2 线程
                     RfidManager.ReaderNameList = _allDoorReaderName;
-                    // RfidManager.AntennaList = GetAntennaList();
-                    TagList.DataReady = false;
+                    RfidManager.TagsReady = false;
                     RfidManager.Pause = false;
+                    // 注意此时 Base 线程依然是暂停状态
                     RfidManager.ClearCache();   // 迫使立即重新请求 Inventory
                     while (true)
                     {
-                        if (TagList.DataReady == true)
+                        if (RfidManager.TagsReady == true)
                             return true;
                         if (func_cancelled() == true)
                             return false;
@@ -1045,30 +1051,20 @@ namespace dp2SSL
                 });
 
                 if (ret == false)
-                    return new InitialShelfResult();
-
-                func_display("等待锁控就绪 ...");
-                ret = await Task.Run(() =>
                 {
-                    while (true)
-                    {
-                        if (OpeningDoorCount != -1)
-                            return true;
-                        if (func_cancelled() == true)
-                            return false;
-                        Thread.Sleep(100);
-                    }
-                });
-
-                if (ret == false)
+                    WpfClientInfo.WriteErrorLog($"waiting DataReady cancelled");
                     return new InitialShelfResult();
+                }
 
                 List<string> warnings = new List<string>();
 
                 _all.Clear();
                 var books = TagList.Books;
+                WpfClientInfo.WriteErrorLog($"books count={books.Count}, ReaderNameList={RfidManager.ReaderNameList}");
                 foreach (var tag in books)
                 {
+                    WpfClientInfo.WriteErrorLog($" tag={tag.ToString()}");
+
                     try
                     {
                         // Exception:
@@ -1081,6 +1077,28 @@ namespace dp2SSL
                         WpfClientInfo.WriteErrorLog($"InitialShelfEntities() 遇到 tag (UID={tag.OneTag?.UID}) 数据格式出错：{ex.Message}\r\ntag 详情：{tag.ToString()}");
                     }
                 }
+
+
+                {
+                    func_display("等待锁控就绪 ...");
+                    // 恢复 Base2 线程运行
+                    // RfidManager.Pause2 = false;
+                    ret = await Task.Run(() =>
+                    {
+                        while (true)
+                        {
+                            if (OpeningDoorCount != -1)
+                                return true;
+                            if (func_cancelled() == true)
+                                return false;
+                            Thread.Sleep(100);
+                        }
+                    });
+
+                    if (ret == false)
+                        return new InitialShelfResult();
+                }
+
 
                 // DoorItem.DisplayCount(_all, _adds, _removes, App.CurrentApp.Doors);
                 RefreshCount();

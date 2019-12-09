@@ -288,6 +288,9 @@ namespace RfidCenter
                             watch = null;
                         watch?.Start();
                         result = _listTags(reader_name, style);
+                        // testing
+                        //if (reader_name.StartsWith("M201"))
+                        //    Thread.Sleep(5000);
                         watch?.Stop();
                         if (output_time)
                             Program.MainForm.OutputHistory($"{session_id} inventory time:{watch.Elapsed.TotalSeconds}, count:{result.Results?.Count}");

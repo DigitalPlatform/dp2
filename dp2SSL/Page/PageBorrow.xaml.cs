@@ -207,9 +207,12 @@ namespace dp2SSL
         private async void PageBorrow_Loaded(object sender, RoutedEventArgs e)
         {
             SetGlobalError("current", null); // 清除以前残留的报错信息
+            SetGlobalError("scan_barcode", null);
 
             FingerprintManager.SetError += FingerprintManager_SetError;
             FingerprintManager.Touched += FingerprintManager_Touched;
+
+            App.LineFeed += App_LineFeed;
 
             RfidManager.ClearCache();
             // 处理以前积累的 tags
@@ -248,7 +251,27 @@ namespace dp2SSL
                 if (_tagChangedCount == 0)
                     break;  // 只有当初始化过程中没有被 TagChanged 事件打扰过，才算初始化成功了。否则就要重新初始化
             }
+        }
 
+        private async void App_LineFeed(object sender, LineFeedEventArgs e)
+        {
+            if (App.EnablePatronBarcode == false)
+            {
+                SetGlobalError("scan_barcode", "当前设置参数不接受扫入条码");
+                return;
+            }
+
+            // 扫入一个条码
+            string barcode = e.Text.ToUpper();
+            // 检查防范空字符串，和使用工作人员方式(~开头)的字符串
+            if (string.IsNullOrEmpty(barcode) || barcode.StartsWith("~"))
+                return;
+
+            SetPatronInfo(new GetMessageResult { Message = barcode });
+
+            var result = await FillPatronDetail();
+            //if (result.Value != -1)
+            //    Welcome();
         }
 
         string GetPageStyleList()
@@ -697,6 +720,8 @@ namespace dp2SSL
 
             FingerprintManager.Touched -= FingerprintManager_Touched;
             FingerprintManager.SetError -= FingerprintManager_SetError;
+
+            App.LineFeed -= App_LineFeed;
 
             /*
             // 释放构造函数里面分配的资源

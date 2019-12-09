@@ -194,6 +194,25 @@ Description = "读者卡拿走后是否保持读者信息不清除"
             }
         }
 
+        // 默认值 false
+        [Display(
+Order = 7,
+Name = "启用读者证条码扫入",
+Description = "是否允许自助借还时扫入读者证条码"
+)]
+        [Category("自助借还操作风格")]
+        public bool EanblePatronBarcode
+        {
+            get
+            {
+                return _config.GetBoolean("ssl_operation", "enable_patron_barcode", false);
+            }
+            set
+            {
+                _config.SetBoolean("ssl_operation", "enable_patron_barcode", value);
+            }
+        }
+
         // 默认值 true
         [Display(
 Order = 8,
