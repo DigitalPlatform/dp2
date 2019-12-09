@@ -25,6 +25,8 @@ namespace DigitalPlatform.IO
         //定义成静态，这样不会抛出回收异常
         private static HookProc hookproc;
 
+        public bool Handled = false;
+
         public struct StringInput
         {
             /*
@@ -169,7 +171,6 @@ namespace DigitalPlatform.IO
 
                     Debug.WriteLine($"msg.message={(msg.message & 0xff)} _barcode:'{_barcode.ToString()}'");
 
-
                     if (InputChar != null)
                     {
                         CharInput input = new CharInput {
@@ -243,6 +244,8 @@ namespace DigitalPlatform.IO
                 }
             }
         END1:
+            if (Handled == true)
+                return 1;
             return CallNextHookEx(hKeyboardHook, nCode, wParam, lParam);
         }
 

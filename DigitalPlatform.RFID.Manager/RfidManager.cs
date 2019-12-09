@@ -134,6 +134,7 @@ namespace DigitalPlatform.RFID
             Base2?.TriggerSetError(sender, e);
         }
 
+        // 注意，Pause 不负责 Base2。Pause2 才是负责 Base2 的暂停的
         static bool _pause = false;
 
         public static bool Pause
@@ -145,6 +146,21 @@ namespace DigitalPlatform.RFID
             set
             {
                 _pause = value;
+            }
+        }
+
+        // Pause2 才是负责 Base2 的暂停的
+        static bool _pause2 = false;
+
+        public static bool Pause2
+        {
+            get
+            {
+                return _pause2;
+            }
+            set
+            {
+                _pause2 = value;
             }
         }
 
@@ -164,6 +180,36 @@ namespace DigitalPlatform.RFID
             get
             {
                 return _lockReady;
+            }
+        }
+
+        static bool _tagsReady = false;
+
+        // 线程1的标签准备就绪
+        public static bool TagsReady
+        {
+            get
+            {
+                return _tagsReady;
+            }
+            set
+            {
+                _tagsReady = value;
+            }
+        }
+
+        static bool _base2TagsReady = false;
+
+        // 线程1的标签准备就绪
+        public static bool Base2TagsReady
+        {
+            get
+            {
+                return _base2TagsReady;
+            }
+            set
+            {
+                _base2TagsReady = value;
             }
         }
 
@@ -198,7 +244,7 @@ namespace DigitalPlatform.RFID
             },
             () =>
             {
-                if (_pause == true)
+                if (_pause2 == true)
                 {
                     Base2.TriggerSetError(null,
 new SetErrorEventArgs
@@ -249,7 +295,7 @@ new SetErrorEventArgs
 
                     lock_result = result.GetLockStateResult;
 
-                    // TODO: 触发 ListTags 事件时要加锁
+                    // 触发 ListTags 事件时要加锁
                     lock (_syncRoot)
                     {
                         if (ListTags != null)
@@ -266,6 +312,8 @@ new SetErrorEventArgs
                         }
                         else
                             _lastTags = null;
+
+                        _base2TagsReady = true;
                     }
                 }
 
@@ -369,7 +417,7 @@ new SetErrorEventArgs
                 GetLockStateResult lock_result = null;
                 var readerNameList = _readerNameList;
                 if (string.IsNullOrEmpty(readerNameList) == false
-                || string.IsNullOrEmpty(LockCommands) == false)
+                || (_lockThread != "base2" && string.IsNullOrEmpty(LockCommands) == false))
                 {
                     string style = $"session:{Base.GetHashCode()}";
                     // 2019/12/4
@@ -405,6 +453,8 @@ new SetErrorEventArgs
                             }
                             else
                                 _lastTags = null;
+
+                            _tagsReady = true;
                         }
                     }
                 }

@@ -154,7 +154,7 @@ namespace dp2SSL
                 }
             }
 
-            InputMethod.Current.ImeState = InputMethodState.Off;
+            // InputMethod.Current.ImeState = InputMethodState.Off;
         }
 
         static string ToString(BarcodeCapture.CharInput input)

@@ -166,33 +166,8 @@ namespace dp2SSL
 
             BeginCheckServerUID(_cancelRefresh.Token);
 
-
-            if (App.Function == "智能书柜")
-            {
-                /*
-                ShelfData.InitialDoors();
-
-                // 要在初始化以前设定好
-                RfidManager.AntennaList = GetAntennaList();
-                try
-                {
-                    RfidManager.LockCommands = ShelfData.GetLockCommands();
-                }
-                catch (Exception ex)
-                {
-                    this.SetError("cfg", $"获得门锁命令时出错:{ex.Message}");
-                }
-                _patronReaderName = GetPatronReaderName();
-                */
-                try
-                {
-                    ShelfData.InitialShelf();
-                }
-                catch (Exception ex)
-                {
-                    this.SetError("cfg", $"InitialShelf() 出现异常:{ex.Message}");
-                }
-            }
+            // 
+            InitialShelfCfg();
 
             RfidManager.Base.Name = "RFID 中心";
             RfidManager.EnableBase2();
@@ -209,7 +184,25 @@ namespace dp2SSL
 
             _barcodeCapture.InputLine += _barcodeCapture_inputLine;
             //_barcodeCapture.InputChar += _barcodeCapture_InputChar;
+            _barcodeCapture.Handled = _pauseBarcodeScan == 0;   // 是否把处理过的字符吞掉
             _barcodeCapture.Start();
+
+            InputMethod.SetPreferredImeState(App.Current.MainWindow, InputMethodState.Off);
+        }
+
+        public void InitialShelfCfg()
+        {
+            if (App.Function == "智能书柜")
+            {
+                try
+                {
+                    ShelfData.InitialShelf();
+                }
+                catch (Exception ex)
+                {
+                    this.SetError("cfg", $"InitialShelf() 出现异常:{ex.Message}");
+                }
+            }
         }
 
         private void _barcodeCapture_InputChar(CharInput input)
@@ -222,6 +215,15 @@ namespace dp2SSL
 
             CharFeed?.Invoke(this, new CharFeedEventArgs { CharInput = input });
         }
+
+        class LastBarcode
+        {
+            public string Barcode { get; set; }
+            public DateTime Time { get; set; }
+        }
+
+        LastBarcode _lastBarcode = null;
+        static TimeSpan _repeatLimit = TimeSpan.FromSeconds(3);
 
         private void _barcodeCapture_inputLine(BarcodeCapture.StringInput input)
         {
@@ -238,6 +240,18 @@ namespace dp2SSL
                 Debug.WriteLine($"line feed. line='{line}'");
                 if (string.IsNullOrEmpty(line) == false)
                 {
+                    // 检查和上次输入是否重复
+                    if (_lastBarcode != null
+                        && _lastBarcode.Barcode == line
+                        && DateTime.Now - _lastBarcode.Time <= _repeatLimit)
+                    {
+                        Debug.WriteLine("密集重复输入被忽略");
+                        // App.CurrentApp.Speak("重复扫入被忽略");
+                        _lastBarcode = new LastBarcode { Barcode = line, Time = DateTime.Now };
+                        return;
+                    }
+
+                    _lastBarcode = new LastBarcode { Barcode = line, Time = DateTime.Now };
                     // 触发一次输入
                     LineFeed?.Invoke(this, new LineFeedEventArgs { Text = line });
                 }
@@ -247,11 +261,13 @@ namespace dp2SSL
         public static void PauseBarcodeScan()
         {
             _pauseBarcodeScan++;
+            _barcodeCapture.Handled = _pauseBarcodeScan == 0;
         }
 
         public static void ContinueBarcodeScan()
         {
             _pauseBarcodeScan--;
+            _barcodeCapture.Handled = _pauseBarcodeScan == 0;
         }
 
         StringBuilder _line = new StringBuilder();
@@ -482,6 +498,14 @@ namespace dp2SSL
             get
             {
                 return (bool)WpfClientInfo.Config?.GetBoolean("ssl_operation", "patron_info_lasting", false);
+            }
+        }
+
+        public static bool EnablePatronBarcode
+        {
+            get
+            {
+                return (bool)WpfClientInfo.Config?.GetBoolean("ssl_operation", "enable_patron_barcode", false);
             }
         }
 

@@ -46,6 +46,7 @@ namespace DigitalPlatform.RFID
 
         static bool _dataReady = false;
 
+        /*
         public static bool DataReady
         {
             get
@@ -57,6 +58,7 @@ namespace DigitalPlatform.RFID
                 _dataReady = value;
             }
         }
+        */
 
         static void ClearTagInfo(string uid)
         {
@@ -121,7 +123,7 @@ namespace DigitalPlatform.RFID
                 return false;
             if (GetAntennaList(antenna_list).IndexOf(data.OneTag.AntennaID) != -1)
                 return true;
-            return ret;
+            return false;   // ret is bug!!!
         }
 
         static List<uint> GetAntennaList(string list)
