@@ -177,6 +177,7 @@ namespace dp2SSL
         private void Config_Click(object sender, RoutedEventArgs e)
         {
             //FingerprintManager.Base.State = "pause";
+            App.PauseBarcodeScan();
             try
             {
                 Window cfg_window = new ConfigWindow();
@@ -186,6 +187,7 @@ namespace dp2SSL
             finally
             {
                 //FingerprintManager.Base.State = "";
+                App.ContinueBarcodeScan();
             }
 
             // 迫使 URL 生效

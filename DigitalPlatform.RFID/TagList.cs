@@ -121,15 +121,23 @@ namespace DigitalPlatform.RFID
             var ret = Reader.MatchReaderName(readerNameList, data.OneTag.ReaderName, out string antenna_list);
             if (ret == false)
                 return false;
-            if (GetAntennaList(antenna_list).IndexOf(data.OneTag.AntennaID) != -1)
+            var list = GetAntennaList(antenna_list);
+            // 2019/12/19
+            // 如果列表为空，表示不指定天线编号，所以任何 data 都是匹配命中的
+            // RL8600 默认天线编号为 0；M201 默认天线编号为 1。列表为空的情况表示不指定天线编号有助于处理好这两种不同做法的读写器
+            if (list.Count == 0)
+                return true;
+            if (list.IndexOf(data.OneTag.AntennaID) != -1)
                 return true;
             return false;   // ret is bug!!!
         }
 
+        // 把天线列表字符串变换为 List<uint> 类型
+        // 注意 list 为空时候返回一个空集合
         static List<uint> GetAntennaList(string list)
         {
             if (string.IsNullOrEmpty(list) == true)
-                return new List<uint> { 1 };    // 默认是一号天线
+                return new List<uint>();    // 字符串是空，返回的列表就是空
             string[] numbers = list.Split(new char[] { '|', ',' });
             List<uint> bytes = new List<uint>();
             foreach (string number in numbers)

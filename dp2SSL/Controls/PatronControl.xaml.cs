@@ -136,7 +136,7 @@ namespace dp2SSL
                 {
                     // SetGlobalError("patron", $"获取读者照片时出错: {strError}");
                     // return;
-                    throw new Exception($"获取读者照片时出错: {strError}");
+                    throw new Exception($"获取读者照片(path='{photo_path}')时出错: {strError}");
                 }
 
                 stream.Seek(0, SeekOrigin.Begin);

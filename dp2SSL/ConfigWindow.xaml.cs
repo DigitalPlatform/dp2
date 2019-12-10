@@ -46,5 +46,12 @@ namespace dp2SSL
             else
                 throw new Exception($"未知的属性名{item.PropertyName}");
         }
+
+        private void UrlClear_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = (Button)sender;
+            PropertyItem item = (PropertyItem)button.DataContext;
+            item.Value = "";
+        }
     }
 }

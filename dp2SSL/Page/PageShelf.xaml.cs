@@ -1359,7 +1359,8 @@ namespace dp2SSL
                         // PatronClear(false); // 不需要 submit
 
 
-                        SetPatronError("getreaderinfo", "");
+                        // SetPatronError("getreaderinfo", "");
+
                         if (patrons.Count > 1)
                         {
                             // 读卡器上放了多张读者卡
@@ -1665,6 +1666,14 @@ namespace dp2SSL
         void SetPatronError(string type, string error)
         {
             _patronErrorTable.SetError(type, error);
+            // 如果有错误信息，则主动把“清除读者信息”按钮设为可用，以便读者可以随时清除错误信息
+            if (_patron.Error != null)
+            {
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    clearPatron.IsEnabled = true;
+                }));
+            }
         }
 
         #endregion

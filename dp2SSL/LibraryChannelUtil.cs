@@ -183,6 +183,17 @@ namespace dp2SSL
                         Timestamp = timestamp
                     };
 
+                // 2019/12/19
+                // 命中读者记录多于一条
+                if (lRet > 1)
+                {
+                    return new GetReaderInfoResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"装载读者记录失败：'{pii}' 检索命中读者记录 {lRet} 条"
+                    };
+                }
+
                 string reader_xml = "";
                 if (results != null && results.Length > 0)
                     reader_xml = results[0];

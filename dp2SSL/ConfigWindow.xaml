@@ -22,8 +22,12 @@
                     <xctk:EditorTemplateDefinition.EditingTemplate>
                         <DataTemplate>
                             <DockPanel HorizontalAlignment="Stretch">
-                                <Button Name="urlDefault" Click="UrlDefault_Click" DockPanel.Dock="Right">设为常用值</Button>
-                                <TextBox Text="{Binding Value}" HorizontalAlignment="Stretch"/>
+                                <Button Name="urlClear" Click="UrlClear_Click"
+                                        Padding="6,4,6,4" DockPanel.Dock="Right">清除</Button>
+                                <Button Name="urlDefault" Click="UrlDefault_Click" 
+                                        Padding="6,4,6,4"  DockPanel.Dock="Right">设为常用值</Button>
+                                <TextBox Text="{Binding Value}" 
+                                         Padding="6,4,6,4" HorizontalAlignment="Stretch"/>
                             </DockPanel>
                         </DataTemplate>
                     </xctk:EditorTemplateDefinition.EditingTemplate>

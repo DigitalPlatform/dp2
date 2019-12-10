@@ -632,6 +632,9 @@ namespace dp2SSL
 
             this.RecPath = "";
 
+            // 2019/12/10
+            this.Error = null;
+
             this.SetNotEmpty();
         }
 

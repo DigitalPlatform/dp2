@@ -481,7 +481,10 @@ namespace dp2SSL
                     }
                     else
                     {
-                        SetPatronError("getreaderinfo", "");
+                        // 会顺便清掉读者信息区的错误信息
+                        if (App.PatronInfoLasting == false)
+                            SetPatronError("getreaderinfo", "");
+
                         if (patrons.Count > 1)
                         {
                             PatronClear();
