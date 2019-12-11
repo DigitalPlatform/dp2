@@ -516,6 +516,9 @@ namespace dp2SSL
                         }
                     }
                 }
+
+                if (patrons.Count == 0)
+                    CancelWarning();
             }
             catch (Exception ex)
             {
@@ -2935,7 +2938,17 @@ string usage)
                 20,
                 () =>
                 {
-                    PatronClear();
+                    // TODO: 这里要看读者卡是否还留在了读卡器上。
+                    // 如果读者卡还在读卡器上，如果决定要清除屏幕信息，则最好语音提示不要忘了拿走读者卡；
+                    //          如果决定不清除读者信息也可以，意在让路过屏幕的人看到屏幕信息从而意识到读卡器上还遗留了读者卡。此时语音提示不要忘了拿走读者卡也是可以的，和保留屏幕信息不矛盾
+                    // TODO: 语音提示是否要一直持续下去呢？直到有其他操作才中断语音提示
+                    if (TagList.Patrons.Count >= 1)
+                    {
+                        BeginWarningCard();
+                        // App.CurrentApp.Speak("注意，不要忘了拿走读者卡；注意，不要忘了拿走读者卡");
+                    }
+                    else
+                        PatronClear();
                 },
                 (seconds) =>
                 {
@@ -2947,6 +2960,35 @@ string usage)
                             this.clearPatron.Content = $"清除读者信息";
                     }));
                 });
+        }
+
+        CancellationTokenSource _cancelSpeaking = new CancellationTokenSource();
+
+        void CancelWarning()
+        {
+            if (_cancelSpeaking != null)
+            {
+                _cancelSpeaking.Cancel();
+                _cancelSpeaking = null;
+            }
+        }
+
+        void BeginWarningCard()
+        {
+            CancelWarning();
+
+            _cancelSpeaking = new CancellationTokenSource();
+            CancellationToken token = _cancelSpeaking.Token;
+            Task.Run(() =>
+            {
+                while (token.IsCancellationRequested == false)
+                {
+                    if (TagList.Patrons.Count == 0 || TagList.Books.Count > 0)
+                        break;
+                    App.CurrentApp.Speak("注意，不要忘了拿走读者卡");
+                    Task.Delay(TimeSpan.FromSeconds(10), token).Wait();
+                }
+            });
         }
 
         bool PatronFixed

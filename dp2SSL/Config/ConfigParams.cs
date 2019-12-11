@@ -178,8 +178,8 @@ Description = "借书和还书操作是否自动触发操作按钮"
         // 默认值 false
         [Display(
 Order = 7,
-Name = "读者信息显示持久",
-Description = "读者卡拿走后是否保持读者信息不清除"
+Name = "RFID读者卡拿走不敏感",    // 读者信息显示持久
+Description = "RFID读者卡拿走后是否保持读者信息不清除"
 )]
         [Category("自助借还操作风格")]
         public bool PatronInfoLasting
