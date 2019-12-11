@@ -131,7 +131,9 @@ namespace dp2SSL
             };
             SetPatronInfo(message);
             SetQuality("");
-            await FillPatronDetail();
+            var fill_result = await FillPatronDetail();
+            if (fill_result.Value != -1)
+                Welcome();
         }
 
         void DisplayVideo(VideoWindow window)
@@ -239,6 +241,13 @@ namespace dp2SSL
                 this.patronControl.SetStartMessage(GetPageStyleList());
             }
 
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                if (App.PatronInfoDelayClear)
+                    fixPatron.Visibility = Visibility.Visible;
+                else
+                    fixPatron.Visibility = Visibility.Collapsed;
+            }));
 
             // SetGlobalError("test", "test error");
 
@@ -270,8 +279,8 @@ namespace dp2SSL
             SetPatronInfo(new GetMessageResult { Message = barcode });
 
             var result = await FillPatronDetail();
-            //if (result.Value != -1)
-            //    Welcome();
+            if (result.Value != -1)
+                Welcome();
         }
 
         string GetPageStyleList()
@@ -357,6 +366,10 @@ namespace dp2SSL
 
             if (update_entities.Count > 0)
                 changed = true;
+
+            // 新放上图书会中断延迟任务
+            if (e.AddBooks != null && e.AddBooks.Count > 0)
+                CancelDelayClearTask();
 
             {
                 if (_entities.Count == 0
@@ -477,7 +490,9 @@ namespace dp2SSL
                         SetPatronError("rfid_multi", "");   // 2019/5/22
 
                         // 2019/5/29
-                        await FillPatronDetail();
+                        var fill_result = await FillPatronDetail();
+                        if (fill_result.Value != -1)
+                            Welcome();
                     }
                     else
                     {
@@ -574,8 +589,9 @@ namespace dp2SSL
 
             SetQuality(e.Quality == 0 ? "" : e.Quality.ToString());
 
-            await FillPatronDetail();
-
+            var fill_result = await FillPatronDetail();
+            if (fill_result.Value != -1)
+                Welcome();
 #if NO
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
@@ -716,6 +732,7 @@ namespace dp2SSL
         private void PageBorrow_Unloaded(object sender, RoutedEventArgs e)
         {
             // _cancel.Cancel();
+            CancelDelayClearTask();
 
             // 释放 Loaded 里面分配的资源
             // RfidManager.SetError -= RfidManager_SetError;
@@ -2030,6 +2047,14 @@ out string strError);
         void SetPatronError(string type, string error)
         {
             _patronErrorTable.SetError(type, error);
+            // 如果有错误信息，则主动把“清除读者信息”按钮设为可用，以便读者可以随时清除错误信息
+            if (_patron.Error != null)
+            {
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    clearPatron.IsEnabled = true;
+                }));
+            }
         }
 
 #if NO
@@ -2851,7 +2876,107 @@ string usage)
                 else
                     this.patronControl.BorrowedEntities.Clear();
             }
+
+            CancelDelayClearTask();
+            if (!Application.Current.Dispatcher.CheckAccess())
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    PatronFixed = false;
+                    fixPatron.IsEnabled = false;
+                    clearPatron.IsEnabled = false;
+                }));
+            else
+            {
+                PatronFixed = false;
+                fixPatron.IsEnabled = false;
+                clearPatron.IsEnabled = false;
+            }
         }
+
+
+        private void FixPatron_Checked(object sender, RoutedEventArgs e)
+        {
+            CancelDelayClearTask();
+        }
+
+        private void ClearPatron_Click(object sender, RoutedEventArgs e)
+        {
+            CancelDelayClearTask();
+
+            PatronClear();
+        }
+
+        #region 延迟清除读者信息
+
+        DelayAction _delayClearPatronTask = null;
+
+        void CancelDelayClearTask()
+        {
+            if (_delayClearPatronTask != null)
+            {
+                _delayClearPatronTask.Cancel.Cancel();
+                _delayClearPatronTask = null;
+            }
+        }
+
+        void BeginDelayClearTask()
+        {
+            if (App.PatronInfoDelayClear == false)
+                return;
+
+            CancelDelayClearTask();
+            // TODO: 开始启动延时自动清除读者信息的过程。如果中途门被打开，则延时过程被取消(也就是说读者信息不再会被自动清除)
+
+            Application.Current?.Dispatcher?.Invoke(new Action(() =>
+            {
+                PatronFixed = false;
+            }));
+            _delayClearPatronTask = DelayAction.Start(
+                20,
+                () =>
+                {
+                    PatronClear();
+                },
+                (seconds) =>
+                {
+                    Application.Current?.Dispatcher?.Invoke(new Action(() =>
+                    {
+                        if (seconds > 0)
+                            this.clearPatron.Content = $"({seconds.ToString()} 秒后自动) 清除读者信息";
+                        else
+                            this.clearPatron.Content = $"清除读者信息";
+                    }));
+                });
+        }
+
+        bool PatronFixed
+        {
+            get
+            {
+                return (bool)fixPatron.IsChecked;
+            }
+            set
+            {
+                fixPatron.IsChecked = value;
+            }
+        }
+
+        // 开始启动延时自动清除读者信息的过程。如果中途放上去图书，则延时过程被取消(也就是说读者信息不再会被自动清除)
+        void Welcome()
+        {
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                fixPatron.IsEnabled = true;
+                clearPatron.IsEnabled = true;
+            }));
+
+            App.CurrentApp.Speak($"欢迎您，{(string.IsNullOrEmpty(_patron.PatronName) ? _patron.Barcode : _patron.PatronName)}");
+            // 读写器上没有图书的时候，才启动延时清除
+            if (TagList.Books.Count == 0)
+                BeginDelayClearTask();
+        }
+
+        #endregion
 
     }
 }

@@ -622,17 +622,6 @@ namespace dp2SSL
             }
         }
 
-        bool PatronFixed
-        {
-            get
-            {
-                return (bool)fixPatron.IsChecked;
-            }
-            set
-            {
-                fixPatron.IsChecked = value;
-            }
-        }
 
         private void CurrentApp_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
@@ -2181,6 +2170,19 @@ ShelfData.Actions);
                             this.clearPatron.Content = $"清除读者信息";
                     }));
                 });
+        }
+
+
+        bool PatronFixed
+        {
+            get
+            {
+                return (bool)fixPatron.IsChecked;
+            }
+            set
+            {
+                fixPatron.IsChecked = value;
+            }
         }
 
         #endregion
