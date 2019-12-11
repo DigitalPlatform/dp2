@@ -501,6 +501,14 @@ namespace dp2SSL
             }
         }
 
+        public static bool PatronInfoDelayClear
+        {
+            get
+            {
+                return (bool)WpfClientInfo.Config?.GetBoolean("ssl_operation", "patron_info_delay_clear", false);
+            }
+        }
+
         public static bool EnablePatronBarcode
         {
             get

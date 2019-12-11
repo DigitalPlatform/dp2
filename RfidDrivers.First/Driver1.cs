@@ -2302,12 +2302,15 @@ out Reader reader);
                     ref nTagCount,
                     out List<InventoryInfo> results);
                 if (ret != 0)
+                {
+                    string error_code = GetErrorCode(ret, reader.ReaderHandle);
                     return new InventoryResult
                     {
                         Value = -1,
-                        ErrorInfo = "Inventory() error",
-                        ErrorCode = GetErrorCode(ret, reader.ReaderHandle)
+                        ErrorInfo = $"Inventory() error, errorCode={error_code}",
+                        ErrorCode = error_code
                     };
+                }
 
                 Debug.Assert(nTagCount == results.Count);
                 return new InventoryResult { Results = results };

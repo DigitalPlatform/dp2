@@ -197,6 +197,25 @@ Description = "读者卡拿走后是否保持读者信息不清除"
         // 默认值 false
         [Display(
 Order = 7,
+Name = "读者信息延时清除",
+Description = "是否自动延时清除读者信息"
+)]
+        [Category("自助借还操作风格")]
+        public bool PatronInfoDelayClear
+        {
+            get
+            {
+                return _config.GetBoolean("ssl_operation", "patron_info_delay_clear", false);
+            }
+            set
+            {
+                _config.SetBoolean("ssl_operation", "patron_info_delay_clear", value);
+            }
+        }
+
+        // 默认值 false
+        [Display(
+Order = 7,
 Name = "启用读者证条码扫入",
 Description = "是否允许自助借还时扫入读者证条码"
 )]
