@@ -132,8 +132,7 @@ namespace dp2SSL
             SetPatronInfo(message);
             SetQuality("");
             var fill_result = await FillPatronDetail();
-            if (fill_result.Value != -1)
-                Welcome();
+            Welcome(fill_result.Value == -1);
         }
 
         void DisplayVideo(VideoWindow window)
@@ -243,10 +242,11 @@ namespace dp2SSL
 
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
-                if (App.PatronInfoDelayClear)
-                    fixPatron.Visibility = Visibility.Visible;
+                // 身份读卡器竖向放置，才有固定读者信息的必要
+                if (App.PatronReaderVertical)
+                    fixAndClear.Visibility = Visibility.Visible;
                 else
-                    fixPatron.Visibility = Visibility.Collapsed;
+                    fixAndClear.Visibility = Visibility.Collapsed;
             }));
 
             // SetGlobalError("test", "test error");
@@ -279,8 +279,7 @@ namespace dp2SSL
             SetPatronInfo(new GetMessageResult { Message = barcode });
 
             var result = await FillPatronDetail();
-            if (result.Value != -1)
-                Welcome();
+            Welcome(result.Value == -1);
         }
 
         string GetPageStyleList()
@@ -317,12 +316,27 @@ namespace dp2SSL
             await ChangeEntities((BaseChannel<IRfid>)sender, e);
         }
 
+        public static bool isPatronChanged(TagChangedEventArgs e)
+        {
+            if (e.AddPatrons?.Count > 0)
+                return true;
+            if (e.RemovePatrons?.Count > 0)
+                return true;
+            if (e.UpdatePatrons?.Count > 0)
+                return true;
+
+            return false;
+        }
+
         // 跟随事件动态更新列表
         async Task ChangeEntities(BaseChannel<IRfid> channel,
             TagChangedEventArgs e)
         {
             // 读者。不再精细的进行增删改跟踪操作，而是笼统地看 TagList.Patrons 集合即可
-            var task = RefreshPatrons();
+            if (isPatronChanged(e))
+            {
+                var task = RefreshPatrons();
+            }
 
             bool changed = false;
             List<Entity> update_entities = new List<Entity>();
@@ -374,7 +388,7 @@ namespace dp2SSL
             {
                 if (_entities.Count == 0
         && changed == true  // 限定为，当数量减少到 0 这一次，才进行清除
-        && (_patron.IsFingerprintSource || App.PatronInfoLasting == true))
+        && (_patron.IsFingerprintSource || App.PatronReaderVertical == true))
                     PatronClear();
 
                 // 2019/7/1
@@ -383,6 +397,11 @@ namespace dp2SSL
     && changed == true  // 限定为，当数量减少到 0 这一次，才进行清除
     )
                     CloseDialogs();
+
+                // 当图书全部被移走时，如果身份读卡器横向放置，需要延时提醒不要忘记拿走读者卡
+                if (_entities.Count == 0 && changed == true
+                    && App.PatronReaderVertical == false)
+                    BeginNotifyTask();
 
                 // 当列表为空的时候，主动清空一次 tag 缓存。这样读者可以用拿走全部标签一次的方法来迫使清除缓存(比如中途利用内务修改过 RFID 标签的 EAS)
                 // TODO: 不过此举对反复拿放图书的响应速度有一定影响。后面也可以考虑继续改进(比如设立一个专门的清除缓存按钮，这里就不要清除缓存了)
@@ -465,6 +484,7 @@ namespace dp2SSL
 
         // ReaderWriterLockSlim _lock_refreshPatrons = new ReaderWriterLockSlim();
 
+        // TODO: 要和以前比对，读者信息是否发生了变化。如果没有变化就不要刷新界面了
         async Task RefreshPatrons()
         {
             //_lock_refreshPatrons.EnterWriteLock();
@@ -491,13 +511,12 @@ namespace dp2SSL
 
                         // 2019/5/29
                         var fill_result = await FillPatronDetail();
-                        if (fill_result.Value != -1)
-                            Welcome();
+                        Welcome(fill_result.Value == -1);
                     }
                     else
                     {
                         // 会顺便清掉读者信息区的错误信息
-                        if (App.PatronInfoLasting == false)
+                        if (App.PatronReaderVertical == false)
                             SetPatronError("getreaderinfo", "");
 
                         if (patrons.Count > 1)
@@ -509,7 +528,7 @@ namespace dp2SSL
                         else
                         {
                             // 2019/12/8
-                            if (App.PatronInfoLasting == false)
+                            if (App.PatronReaderVertical == false)
                                 PatronClear();
 
                             SetPatronError("rfid_multi", "");   // 2019/5/20
@@ -593,8 +612,7 @@ namespace dp2SSL
             SetQuality(e.Quality == 0 ? "" : e.Quality.ToString());
 
             var fill_result = await FillPatronDetail();
-            if (fill_result.Value != -1)
-                Welcome();
+            Welcome(fill_result.Value == -1);
 #if NO
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
@@ -1157,7 +1175,7 @@ namespace dp2SSL
             if (result.Value == -1)
             {
                 SetPatronError("fingerprint", $"指纹中心出错: {result.ErrorInfo}, 错误码: {result.ErrorCode}");
-                if (_patron.IsFingerprintSource || App.PatronInfoLasting == true)
+                if (_patron.IsFingerprintSource || App.PatronReaderVertical == true)
                     PatronClear();    // 只有当面板上的读者信息来源是指纹仪时(或者 RFID 读者卡配置了不持久特性)，才清除面板上的读者信息
                 return;
             }
@@ -2909,6 +2927,52 @@ string usage)
             PatronClear();
         }
 
+        #region 提醒拿走读者卡
+
+        static DelayAction _delayNotifyCard = null;
+
+        public static void CancelNotifyTask()
+        {
+            if (_delayNotifyCard != null)
+            {
+                _delayNotifyCard.Cancel.Cancel();
+                _delayNotifyCard = null;
+            }
+        }
+
+        public static void BeginNotifyTask()
+        {
+            CancelNotifyTask();
+
+            /*
+            Application.Current?.Dispatcher?.Invoke(new Action(() =>
+            {
+                PatronFixed = false;
+            }));
+            */
+            _delayNotifyCard = DelayAction.Start(
+                5,
+                () =>
+                {
+                    // 延时到点后，如果读者卡确实还在，则提醒不要忘了拿走
+                    if (TagList.Patrons.Count >= 1)
+                    {
+                        BeginWarningCard();
+                    }
+                },
+                (seconds) =>
+                {
+                    // 可显示倒计时
+                    /*
+                    Application.Current?.Dispatcher?.Invoke(new Action(() =>
+                    {
+                    }));
+                    */
+                });
+        }
+
+        #endregion
+
         #region 延迟清除读者信息
 
         DelayAction _delayClearPatronTask = null;
@@ -2924,7 +2988,8 @@ string usage)
 
         void BeginDelayClearTask()
         {
-            if (App.PatronInfoDelayClear == false)
+            // 横向放置身份证读卡器时，没有必要延迟清除。意思就是说横向情况是需要人主动拿走卡，屏幕上信息才能清除
+            if (App.PatronReaderVertical == false)
                 return;
 
             CancelDelayClearTask();
@@ -2962,9 +3027,9 @@ string usage)
                 });
         }
 
-        CancellationTokenSource _cancelSpeaking = new CancellationTokenSource();
+        static CancellationTokenSource _cancelSpeaking = new CancellationTokenSource();
 
-        void CancelWarning()
+        static void CancelWarning()
         {
             if (_cancelSpeaking != null)
             {
@@ -2973,7 +3038,7 @@ string usage)
             }
         }
 
-        void BeginWarningCard()
+        static void BeginWarningCard()
         {
             CancelWarning();
 
@@ -2986,7 +3051,14 @@ string usage)
                     if (TagList.Patrons.Count == 0 || TagList.Books.Count > 0)
                         break;
                     App.CurrentApp.Speak("注意，不要忘了拿走读者卡");
-                    Task.Delay(TimeSpan.FromSeconds(10), token).Wait();
+                    try
+                    {
+                        Task.Delay(TimeSpan.FromSeconds(10), token).Wait();
+                    }
+                    catch
+                    {
+                        break;
+                    }
                 }
             });
         }
@@ -3004,8 +3076,15 @@ string usage)
         }
 
         // 开始启动延时自动清除读者信息的过程。如果中途放上去图书，则延时过程被取消(也就是说读者信息不再会被自动清除)
-        void Welcome()
+        void Welcome(bool errorOccur)
         {
+            if (errorOccur)
+            {
+                // 身份读写器平放
+                if (App.PatronReaderVertical == false)
+                    BeginNotifyTask();
+                return;
+            }
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
                 fixPatron.IsEnabled = true;
@@ -3013,8 +3092,15 @@ string usage)
             }));
 
             App.CurrentApp.Speak($"欢迎您，{(string.IsNullOrEmpty(_patron.PatronName) ? _patron.Barcode : _patron.PatronName)}");
+
+            // 身份读写器平放
+            if (App.PatronReaderVertical == false)
+                BeginNotifyTask();
+
+            // 身份读写器竖放
             // 读写器上没有图书的时候，才启动延时清除
-            if (TagList.Books.Count == 0)
+            if (App.PatronReaderVertical == true
+                && TagList.Books.Count == 0)
                 BeginDelayClearTask();
         }
 

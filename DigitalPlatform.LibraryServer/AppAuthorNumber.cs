@@ -1272,10 +1272,14 @@ namespace DigitalPlatform.LibraryServer
                     if (index < 0)
                     {
                         range.Start = "A";    // 最小的一个字符
+                        range.IncludeStart = true;  // 2019/12/12 应该包含 'A'。比如 胡阿祥
+                        /*
+                         * 2019/12/12 以前是下面几句：
                         if (range.Start == range.End)
                             range.IncludeStart = range.IncludeEnd;
                         else
                             range.IncludeStart = false;
+                            */
                     }
                     else
                     {

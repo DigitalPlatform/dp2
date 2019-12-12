@@ -7,9 +7,10 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 
-using DigitalPlatform.Core;
 using Xceed.Wpf.Toolkit.PropertyGrid.Attributes;
 using Xceed.Wpf.Toolkit.PropertyGrid.Editors;
+
+using DigitalPlatform.Core;
 
 namespace dp2SSL
 {
@@ -178,8 +179,8 @@ Description = "借书和还书操作是否自动触发操作按钮"
         // 默认值 false
         [Display(
 Order = 7,
-Name = "RFID读者卡拿走不敏感",    // 读者信息显示持久
-Description = "RFID读者卡拿走后是否保持读者信息不清除"
+Name = "身份读卡器竖放",    // 拿走不敏感。读者信息显示持久
+Description = "RFID读者卡读卡器是否竖向放置"
 )]
         [Category("自助借还操作风格")]
         public bool PatronInfoLasting
@@ -194,6 +195,7 @@ Description = "RFID读者卡拿走后是否保持读者信息不清除"
             }
         }
 
+        /*
         // 默认值 false
         [Display(
 Order = 7,
@@ -212,6 +214,7 @@ Description = "是否自动延时清除读者信息"
                 _config.SetBoolean("ssl_operation", "patron_info_delay_clear", value);
             }
         }
+        */
 
         // 默认值 false
         [Display(
