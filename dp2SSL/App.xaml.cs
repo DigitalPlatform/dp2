@@ -406,7 +406,14 @@ namespace dp2SSL
             _barcodeCapture.InputLine -= _barcodeCapture_inputLine;
             //_barcodeCapture.InputChar -= _barcodeCapture_InputChar;
 
-            await PageMenu.PageShelf?.Submit(true);
+            try
+            {
+                await PageMenu.PageShelf?.Submit(true);
+            }
+            catch(NullReferenceException)
+            {
+
+            }
 
             LibraryChannelManager.Log?.Debug("OnExit() called");
             WpfClientInfo.Finish();
@@ -493,7 +500,8 @@ namespace dp2SSL
             }
         }
 
-        public static bool PatronInfoLasting
+        // 身份读卡器是否竖向放置
+        public static bool PatronReaderVertical
         {
             get
             {
@@ -501,6 +509,7 @@ namespace dp2SSL
             }
         }
 
+        /*
         public static bool PatronInfoDelayClear
         {
             get
@@ -508,6 +517,7 @@ namespace dp2SSL
                 return (bool)WpfClientInfo.Config?.GetBoolean("ssl_operation", "patron_info_delay_clear", false);
             }
         }
+        */
 
         public static bool EnablePatronBarcode
         {

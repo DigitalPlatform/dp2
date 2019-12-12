@@ -19,7 +19,7 @@ using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-
+using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
 
 namespace dp2SSL
@@ -67,10 +67,28 @@ namespace dp2SSL
                 if (App.Function == "智能书柜")
                     NavigatePageShelf("initial");
             }
+
+            // 如果有读者卡，要延时提醒不要忘了拿走读者卡
+            if (TagList.Patrons?.Count > 0)
+            {
+                PageBorrow.BeginNotifyTask();
+            }
+
+            App.CurrentApp.TagChanged += CurrentApp_TagChanged;
+        }
+
+        private void CurrentApp_TagChanged(object sender, TagChangedEventArgs e)
+        {
+            // 如果有读者卡，要延时提醒不要忘了拿走读者卡
+            if (/*PageBorrow.isPatronChanged(e) &&*/ TagList.Patrons?.Count > 0)
+            {
+                PageBorrow.BeginNotifyTask();
+            }
         }
 
         private void PageMenu_Unloaded(object sender, RoutedEventArgs e)
         {
+            App.CurrentApp.TagChanged -= CurrentApp_TagChanged;
         }
 
         public void UpdateMenu()
