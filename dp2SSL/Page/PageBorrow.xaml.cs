@@ -389,7 +389,7 @@ namespace dp2SSL
                 if (_entities.Count == 0
         && changed == true  // 限定为，当数量减少到 0 这一次，才进行清除
         && (_patron.IsFingerprintSource || App.PatronReaderVertical == true))
-                    PatronClear();
+                    PatronClear(true);
 
                 // 2019/7/1
                 // 当读卡器上的图书全部拿走时候，自动关闭残留的模式对话框
@@ -2883,8 +2883,19 @@ string usage)
             await RegisterFace("deleteFace");
         }
 
-        void PatronClear()
+        void PatronClear(bool check_card_existance = false)
         {
+            // 清除以前检查一下身份读卡器上是否有读者卡
+            if (check_card_existance && TagList.Patrons.Count >= 1)
+            {
+                BeginWarningCard((s)=> {
+                    // 延迟清除
+                    if (s == "cancelled" && App.PatronReaderVertical)
+                        PatronClear(false);
+                });
+                return;
+            }
+
             _patron.Clear();
 
             if (this.patronControl.BorrowedEntities.Count > 0)
@@ -2957,7 +2968,7 @@ string usage)
                     // 延时到点后，如果读者卡确实还在，则提醒不要忘了拿走
                     if (TagList.Patrons.Count >= 1)
                     {
-                        BeginWarningCard();
+                        BeginWarningCard(null);
                     }
                 },
                 (seconds) =>
@@ -3009,7 +3020,7 @@ string usage)
                     // TODO: 语音提示是否要一直持续下去呢？直到有其他操作才中断语音提示
                     if (TagList.Patrons.Count >= 1)
                     {
-                        BeginWarningCard();
+                        BeginWarningCard(null);
                         // App.CurrentApp.Speak("注意，不要忘了拿走读者卡；注意，不要忘了拿走读者卡");
                     }
                     else
@@ -3038,7 +3049,9 @@ string usage)
             }
         }
 
-        static void BeginWarningCard()
+        delegate void Delegate_cancelled(string condition);
+
+        static void BeginWarningCard(Delegate_cancelled func_cancelled)
         {
             CancelWarning();
 
@@ -3048,8 +3061,16 @@ string usage)
             {
                 while (token.IsCancellationRequested == false)
                 {
-                    if (TagList.Patrons.Count == 0 || TagList.Books.Count > 0)
+                    if (TagList.Patrons.Count == 0)
+                    {
+                        func_cancelled?.Invoke("patron_removed");
                         break;
+                    }
+                    if (TagList.Books.Count > 0)
+                    {
+                        func_cancelled?.Invoke("book_added");
+                        break;
+                    }
                     App.CurrentApp.Speak("注意，不要忘了拿走读者卡");
                     try
                     {
@@ -3057,6 +3078,7 @@ string usage)
                     }
                     catch
                     {
+                        func_cancelled?.Invoke("cancelled");
                         break;
                     }
                 }

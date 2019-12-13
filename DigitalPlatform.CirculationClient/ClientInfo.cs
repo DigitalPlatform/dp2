@@ -663,6 +663,7 @@ namespace DigitalPlatform.CirculationClient
                     return -1;
                 }
                 strSerialCode = ClientInfo.Config.Get("sn", "sn", "");
+                bReset = false;
                 goto REDO_VERIFY;
             }
             return 0;
