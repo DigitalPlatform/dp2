@@ -2888,7 +2888,8 @@ string usage)
             // 清除以前检查一下身份读卡器上是否有读者卡
             if (check_card_existance && TagList.Patrons.Count >= 1)
             {
-                BeginWarningCard((s)=> {
+                BeginWarningCard((s) =>
+                {
                     // 延迟清除
                     if (s == "cancelled" && App.PatronReaderVertical)
                         PatronClear(false);
@@ -3020,7 +3021,13 @@ string usage)
                     // TODO: 语音提示是否要一直持续下去呢？直到有其他操作才中断语音提示
                     if (TagList.Patrons.Count >= 1)
                     {
-                        BeginWarningCard(null);
+                        BeginWarningCard((s) =>
+                        {
+                            // 延迟清除
+                            // if (s == "cancelled" && App.PatronReaderVertical)
+                            if (TagList.Patrons.Count == 0) // 2019/12/13
+                                PatronClear(false);
+                        });
                         // App.CurrentApp.Speak("注意，不要忘了拿走读者卡；注意，不要忘了拿走读者卡");
                     }
                     else
@@ -3105,6 +3112,10 @@ string usage)
                 // 身份读写器平放
                 if (App.PatronReaderVertical == false)
                     BeginNotifyTask();
+
+                if (App.PatronReaderVertical == true
+    && TagList.Books.Count == 0)
+                    BeginDelayClearTask();
                 return;
             }
             Application.Current.Dispatcher.Invoke(new Action(() =>
