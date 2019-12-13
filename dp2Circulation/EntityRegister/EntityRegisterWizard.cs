@@ -2942,10 +2942,7 @@ MessageBoxDefaultButton.Button1);
                 // TODO: 可以通过服务器名，得到 url username 等配置参数
 
                 // 下载配置文件
-                string strContent = "";
-                string strError = "";
 
-                byte[] baCfgOutputTimestamp = null;
                 // return:
                 //      -1  error
                 //      0   not found
@@ -2954,9 +2951,9 @@ MessageBoxDefaultButton.Button1);
                     account.ServerUrl,
                     account.UserName,
                     strCfgFilePath,
-                    out strContent,
-                    out baCfgOutputTimestamp,
-                    out strError);
+                    out string strContent,
+                    out byte[] baCfgOutputTimestamp,
+                    out string strError);
                 if (nRet == -1 || nRet == 0)
                 {
                     e.ErrorInfo = "获得配置文件 '" + strCfgFilePath + "' 时出错：" + strError;
