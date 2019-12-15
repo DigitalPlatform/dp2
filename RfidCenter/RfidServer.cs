@@ -236,6 +236,10 @@ namespace RfidCenter
         }
 
         // 增加了无标签时延迟等待功能。敏捷响应
+        // parameters:
+        //      style   风格。逗号间隔的字符串内容
+        //              session:会话ID
+        //              dont_delay  不根据 session 来进行探测、延迟。也就是说确保要做一次 invetnory 并且立即返回
         public ListTagsResult ListTags(string reader_name, string style)
         {
             if (Program.Rfid.Pause)
@@ -261,6 +265,9 @@ namespace RfidCenter
                         ErrorInfo = "RFID 功能处于暂停状态",
                         ErrorCode = "paused"
                     };
+
+                // 2019/12/15
+                bool dont_delay = StringUtil.IsInList("dont_delay", style);
 
                 string session_id = StringUtil.GetParameterByPrefix(style, "session");
 
@@ -327,6 +334,10 @@ namespace RfidCenter
                     // 判断 inventory 结果
                     if (string.IsNullOrEmpty(reader_name) == false)
                     {
+                        // 立即返回
+                        if (dont_delay)
+                            return result;
+
                         if (result != null && result.Results != null)
                             current_uids = BuildUids(result.Results);
                         else
@@ -382,7 +393,8 @@ namespace RfidCenter
                 return new ListTagsResult
                 {
                     Value = -1,
-                    ErrorInfo = $"ListTags() 出现异常:{ex.Message}"
+                    // TODO: 如何返回异常信息?
+                    ErrorInfo = $"ListTags() 出现异常:{ExceptionUtil.GetDebugText(ex)}"
                 };
             }
             finally

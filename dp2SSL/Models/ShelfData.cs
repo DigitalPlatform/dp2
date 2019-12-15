@@ -73,13 +73,14 @@ namespace dp2SSL
         static int _openingDoorCount = -1; // 当前处于打开状态的门的个数。-1 表示个数尚未初始化
 
 
-        #region
-
-
         public static void RfidManager_ListLocks(object sender, ListLocksEventArgs e)
         {
             if (e.Result.Value == -1)
+            {
+                // TODO: 注意这里的信息量很大，需要防止错误日志空间被耗尽
+                WpfClientInfo.WriteErrorLog($"RfidManager ListLocks error: {e.Result.ErrorInfo}");
                 return;
+            }
 
             // bool triggerAllClosed = false;
             {
@@ -253,7 +254,11 @@ namespace dp2SSL
             }
             else
             {
-                var list = GetOpeningReaderNameList(Doors);
+                var list = GetReaderNameList(Doors,
+                    (d) =>
+                    {
+                        return (d.State == "open");
+                    });
 
                 // 打开图书读卡器(同时也使用读者证读卡器)
                 if (RfidManager.ReaderNameList != list)
@@ -276,7 +281,7 @@ namespace dp2SSL
             WpfClientInfo.WriteInfoLog($"patron ReaderNameList '{_patronReaderName}'");
 
             RfidManager.Base2ReaderNameList = _patronReaderName;    // 2019/11/18
-            // RfidManager.LockThread = "base2";
+            RfidManager.LockThread = "base2";   // 使用第二个线程来监控门锁
 
             _allDoorReaderName = GetAllReaderNameList("doors");
             WpfClientInfo.WriteInfoLog($"doors ReaderNameList '{_allDoorReaderName}'");
@@ -436,9 +441,15 @@ namespace dp2SSL
             return result.ToString();
         }
 
+        // return:
+        //      true 选中
+        //      false 希望跳过
+        public delegate bool Delegate_selectDoor(DoorItem door);
+
         // 获得处于打开状态的门的读卡器名字符串
         // parameters:
-        public static string GetOpeningReaderNameList(List<DoorItem> _doors)
+        public static string GetReaderNameList(List<DoorItem> _doors,
+            Delegate_selectDoor func_select)
         {
             // 读卡器名字 --> List<int> (天线列表)
             Hashtable name_table = new Hashtable();
@@ -455,7 +466,11 @@ namespace dp2SSL
                 if (readerName == "*")
                     throw new Exception($"antenna属性值中读卡器名字部分不应使用 *");
 
+                /*
                 if (door.State != "open")
+                    continue;
+                    */
+                if (func_select?.Invoke(door) == false)
                     continue;
 
                 AddToTable(name_table, readerName, antenna);
@@ -511,7 +526,25 @@ namespace dp2SSL
             return text.ToString();
         }
 
-        #endregion
+        // 单独对一个门关联的 RFID 标签进行一次 inventory，确保此前的标签变化情况没有被遗漏
+        public static void RefreshInventory(DoorItem door)
+        {
+            // 获得和一个门相关的 readernamelist
+            var list = GetReaderNameList(new List<DoorItem> { door }, null);
+            string style = $"dont_delay";   // 确保 inventory 并立即返回
+
+            StringBuilder debugInfo = new StringBuilder();
+            var result = RfidManager.CallListTags(list, style);
+            // WpfClientInfo.WriteErrorLog($"RefreshInventory() list={list}, style={style}, result={result.ToString()}");
+            try
+            {
+                RfidManager.TriggerListTagsEvent(list, result, true);
+            }
+            catch (Exception ex)
+            {
+                WpfClientInfo.WriteErrorLog($"RefreshInventory() TriggerListTagsEvent() 异常:{ExceptionUtil.GetDebugText(ex)}\r\ndebugInfo={debugInfo.ToString()}");
+            }
+        }
 
         static XmlDocument _shelfCfgDom = null;
 
@@ -1007,6 +1040,8 @@ namespace dp2SSL
             try
             {
                 // TODO: 出现“正在初始化”的对话框。另外需要注意如果 DataReady 信号永远来不了怎么办
+                WpfClientInfo.WriteInfoLog("开始初始化图书信息");
+
                 func_display("等待读卡器就绪 ...");
                 bool ret = await Task.Run(() =>
                 {
@@ -1024,7 +1059,9 @@ namespace dp2SSL
                     return new InitialShelfResult();
 
                 // 使用全部读卡器、全部天线进行初始化。即便门是全部关闭的(注：一般情况下，当门关闭的时候图书读卡器是暂停盘点的)
-                func_display("启用全部读卡器 ...");
+                WpfClientInfo.WriteInfoLog("开始启用全部读卡器和天线");
+
+                func_display("启用全部读卡器和天线 ...");
                 ret = await Task.Run(() =>
                 {
                     // 使用全部读卡器，全部天线
@@ -1056,6 +1093,9 @@ namespace dp2SSL
                     return new InitialShelfResult();
                 }
 
+                WpfClientInfo.WriteInfoLog("开始填充图书队列");
+                func_display("正在填充图书队列 ...");
+
                 List<string> warnings = new List<string>();
 
                 _all.Clear();
@@ -1080,6 +1120,7 @@ namespace dp2SSL
 
 
                 {
+                    WpfClientInfo.WriteInfoLog("等待锁控就绪");
                     func_display("等待锁控就绪 ...");
                     // 恢复 Base2 线程运行
                     // RfidManager.Pause2 = false;

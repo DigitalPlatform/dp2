@@ -134,6 +134,8 @@ namespace dp2SSL
 
             // _patronReaderName = GetPatronReaderName();
 
+            App.Updated += App_Updated;
+
             App.LineFeed += App_LineFeed;
             App.CharFeed += App_CharFeed;
 
@@ -155,6 +157,18 @@ namespace dp2SSL
             }
 
             // InputMethod.Current.ImeState = InputMethodState.Off;
+        }
+
+        private void App_Updated(object sender, UpdatedEventArgs e)
+        {
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                this.updateInfo.Text = e.Message;
+                if (string.IsNullOrEmpty(this.updateInfo.Text) == false)
+                    this.updateInfo.Visibility = Visibility.Visible;
+                else
+                    this.updateInfo.Visibility = Visibility.Collapsed;
+            }));
         }
 
         static string ToString(BarcodeCapture.CharInput input)
@@ -188,6 +202,21 @@ namespace dp2SSL
         {
             if (e.NewState == "close")
             {
+                // 2019/12/15
+                // 补做一次 inventory，确保不会漏掉 RFID 变动信息
+                e.Door.Waiting = true;  // inventory 期间显示等待动画
+                try
+                {
+                    await Task.Run(() =>
+                    {
+                        ShelfData.RefreshInventory(e.Door);
+                    });
+                }
+                finally
+                {
+                    e.Door.Waiting = false;
+                }
+
                 SaveDoorActions(e.Door);
 
                 /*
@@ -756,6 +785,8 @@ namespace dp2SSL
         {
             App.LineFeed -= App_LineFeed;
             App.CharFeed -= App_CharFeed;
+
+            App.Updated -= App_Updated;
 
             CancelDelayClearTask();
 
