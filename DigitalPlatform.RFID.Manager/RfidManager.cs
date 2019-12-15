@@ -277,7 +277,9 @@ new SetErrorEventArgs
 
                 GetLockStateResult lock_result = null;
                 var readerNameList = _base2ReaderNameList;
-                if (string.IsNullOrEmpty(readerNameList) == false)
+                if (string.IsNullOrEmpty(readerNameList) == false
+                || (_lockThread == "base2"
+                        && string.IsNullOrEmpty(LockCommands) == false))
                 {
                     string style = $"session:{Base2.GetHashCode()}";
                     // 2019/12/6
@@ -296,24 +298,27 @@ new SetErrorEventArgs
                     lock_result = result.GetLockStateResult;
 
                     // 触发 ListTags 事件时要加锁
-                    lock (_syncRoot)
+                    if (string.IsNullOrEmpty(readerNameList) == false)
                     {
-                        if (ListTags != null)
+                        lock (_syncRoot)
                         {
-                            // 先记忆
-                            _lastTags = result.Results;
-
-                            // 注意 result.Value == -1 时也会触发这个事件
-                            ListTags(channel, new ListTagsEventArgs
+                            if (ListTags != null)
                             {
-                                ReaderNameList = readerNameList,
-                                Result = result
-                            });
-                        }
-                        else
-                            _lastTags = null;
+                                // 先记忆
+                                _lastTags = result.Results;
 
-                        _base2TagsReady = true;
+                                // 注意 result.Value == -1 时也会触发这个事件
+                                ListTags(channel, new ListTagsEventArgs
+                                {
+                                    ReaderNameList = readerNameList,
+                                    Result = result
+                                });
+                            }
+                            else
+                                _lastTags = null;
+
+                            _base2TagsReady = true;
+                        }
                     }
                 }
 
@@ -513,6 +518,62 @@ new SetErrorEventArgs
             Base.ReturnChannel(channel);
         }
 
+        public static void TriggerListTagsEvent(
+            string reader_name_list,
+            ListTagsResult result/*,
+            StringBuilder debugInfo*/,
+            bool throwException)
+        {
+            if (ListTags == null)
+                return;
+
+            try
+            {
+                //debugInfo.AppendLine("1");
+
+                BaseChannel<IRfid> channel = Base.GetChannel();
+                //debugInfo.AppendLine("2");
+                try
+                {
+                    //debugInfo.AppendLine("3");
+
+                    lock (_syncRoot)
+                    {
+                        //debugInfo.AppendLine("4");
+
+                        ListTags?.Invoke(channel, new ListTagsEventArgs
+                        {
+                            ReaderNameList = reader_name_list,
+                            // Result = new ListTagsResult { Results = _lastTags }
+                            Result = result
+                        });
+
+                        //debugInfo.AppendLine("5");
+                    }
+                }
+                finally
+                {
+                    //debugInfo.AppendLine("6");
+
+                    Base.ReturnChannel(channel);
+                }
+            }
+            catch (Exception ex)
+            {
+                Base.Clear();
+                Base.TriggerSetError(ex,
+                    new SetErrorEventArgs
+                    {
+                        Error = $"RFID 中心出现异常: {ExceptionUtil.GetAutoText(ex)}"
+                    });
+
+                if (throwException)
+                    throw ex;
+            }
+        }
+
+
+#if NO
         public static void TriggerLastListTags()
         {
             if (ListTags == null)
@@ -546,6 +607,8 @@ new SetErrorEventArgs
                     });
             }
         }
+
+#endif
 
         public static GetTagInfoResult GetTagInfo(string reader_name,
             string uid,
@@ -969,7 +1032,6 @@ new SetErrorEventArgs
                 return new ListTagsResult { Value = -1, ErrorInfo = ex.Message };
             }
         }
-
     }
 
     public delegate void ListTagsEventHandler(object sender,

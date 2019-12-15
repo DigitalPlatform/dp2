@@ -15,6 +15,7 @@ using System.IO;
 
 using dp2SSL.Models;
 using System.Text;
+using System.Windows.Input;
 
 using DigitalPlatform;
 using DigitalPlatform.Core;
@@ -22,7 +23,6 @@ using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
-using System.Windows.Input;
 using static DigitalPlatform.IO.BarcodeCapture;
 
 namespace dp2SSL
@@ -32,6 +32,8 @@ namespace dp2SSL
     /// </summary>
     public partial class App : Application, INotifyPropertyChanged
     {
+        public static event UpdatedEventHandler Updated = null;
+
         public static event LineFeedEventHandler LineFeed = null;
         public static event CharFeedEventHandler CharFeed = null;
 
@@ -131,7 +133,11 @@ namespace dp2SSL
                 if (result.Value == -1)
                     OutputHistory("自动更新出错: " + result.ErrorInfo, 2);
                 else if (result.Value == 1)
+                {
                     OutputHistory(result.ErrorInfo, 1);
+                    Updated?.Invoke(this, new UpdatedEventArgs { Message = result.ErrorInfo });
+                    // MessageBox.Show(result.ErrorInfo);
+                }
                 else if (string.IsNullOrEmpty(result.ErrorInfo) == false)
                     OutputHistory(result.ErrorInfo, 0);
             });
@@ -148,6 +154,7 @@ namespace dp2SSL
             FingerprintManager.Base.Name = "指纹中心";
             FingerprintManager.Url = App.FingerprintUrl;
             FingerprintManager.SetError += FingerprintManager_SetError;
+            WpfClientInfo.WriteInfoLog("RfidManager.Start()");
             FingerprintManager.Start(_cancelRefresh.Token);
 
             FaceManager.Base.Name = "人脸中心";
@@ -180,7 +187,10 @@ namespace dp2SSL
 
             RfidManager.Start(_cancelRefresh.Token);
             if (App.Function == "智能书柜")
+            {
+                WpfClientInfo.WriteInfoLog("RfidManager.StartBase2()");
                 RfidManager.StartBase2(_cancelRefresh.Token);
+            }
 
             _barcodeCapture.InputLine += _barcodeCapture_inputLine;
             //_barcodeCapture.InputChar += _barcodeCapture_InputChar;
@@ -373,6 +383,10 @@ namespace dp2SSL
         private void RfidManager_SetError(object sender, SetErrorEventArgs e)
         {
             SetError("rfid", e.Error);
+            // 2019/12/15
+            // 注意这里的错误信息可能会洪水般冲来，可能会把磁盘空间占满
+            if (e.Error != null)
+                WpfClientInfo.WriteErrorLog($"RfidManager 出错: {e.Error}");
         }
 
         private void FingerprintManager_SetError(object sender, SetErrorEventArgs e)
@@ -410,7 +424,7 @@ namespace dp2SSL
             {
                 await PageMenu.PageShelf?.Submit(true);
             }
-            catch(NullReferenceException)
+            catch (NullReferenceException)
             {
 
             }
@@ -419,7 +433,7 @@ namespace dp2SSL
             WpfClientInfo.Finish();
             LibraryChannelManager.Log?.Debug("End WpfClientInfo.Finish()");
 
-            _cancelRefresh.Cancel();
+            _cancelRefresh?.Cancel();
             _cancelProcessMonitor?.Cancel();
 
             // EndFingerprint();
@@ -973,5 +987,16 @@ CharFeedEventArgs e);
     public class CharFeedEventArgs : EventArgs
     {
         public CharInput CharInput { get; set; }
+    }
+
+    public delegate void UpdatedEventHandler(object sender,
+UpdatedEventArgs e);
+
+    /// <summary>
+    /// 升级完成的事件的参数
+    /// </summary>
+    public class UpdatedEventArgs : EventArgs
+    {
+        public string Message { get; set; }
     }
 }
