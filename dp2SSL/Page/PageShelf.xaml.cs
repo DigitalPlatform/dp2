@@ -204,7 +204,8 @@ namespace dp2SSL
             {
                 // 2019/12/15
                 // 补做一次 inventory，确保不会漏掉 RFID 变动信息
-                e.Door.Waiting = true;  // inventory 期间显示等待动画
+                //WpfClientInfo.WriteInfoLog($"++incWaiting() door '{e.Door.Name}' state changed");
+                e.Door.IncWaiting();  // inventory 期间显示等待动画
                 try
                 {
                     await Task.Run(() =>
@@ -214,7 +215,8 @@ namespace dp2SSL
                 }
                 finally
                 {
-                    e.Door.Waiting = false;
+                    e.Door.DecWaiting();
+                    //WpfClientInfo.WriteInfoLog($"--decWaiting() door '{e.Door.Name}' state changed");
                 }
 
                 SaveDoorActions(e.Door);
@@ -238,13 +240,21 @@ namespace dp2SSL
 
             if (e.NewState == "open")
             {
+                /*
                 // 切换所有者
                 var command = ShelfData.PopCommand(e.Door);
                 if (command != null)
                 {
-                    e.Door.Waiting = false;
+                    e.Door.DecWaiting();
+                    WpfClientInfo.WriteInfoLog($"--decWaiting() door '{e.Door.Name}' pop command");
                     e.Door.Operator = command.Parameter as Operator;
                 }
+                else
+                {
+                    WpfClientInfo.WriteErrorLog($"!!! 门 {e.Door.Name} PopCommand() 时候没有找到命令对象");
+                }
+                */
+                ShelfData.ProcessOpenCommand(e.Door);
             }
         }
 
@@ -479,10 +489,10 @@ namespace dp2SSL
                 return;
             }
 
-            if (e.Door.Waiting)
+            if (e.Door.Waiting > 0)
             {
                 // 正在开门中，要放弃重复开门的动作
-                App.CurrentApp.Speak("正在打开，请稍等");
+                App.CurrentApp.Speak("正在打开，请稍等");   // 打开或者关闭都会造成这个状态
                 return;
             }
 
@@ -595,14 +605,23 @@ namespace dp2SSL
             }));
 #endif
             bool succeed = false;
-            e.Door.Waiting = true;
+            //WpfClientInfo.WriteInfoLog($"++incWaiting() door '{e.Door.Name}' open door");
+            e.Door.IncWaiting();
 
             try
             {
+                // 2019/12/16
+                // 开门点击动作重入
+                if (e.Door.Waiting > 1)
+                {
+                    App.CurrentApp.Speak("正在开门中，请稍等");
+                    return;
+                }
+
                 // TODO: 是否这里要等待开门信号到来时候再给门赋予操作者身份？因为过早赋予身份，可能会破坏一个姗姗来迟的早先一个关门动作信号的提交动作
                 // 给门赋予操作者身份
                 // e.Door.Operator = person;
-                ShelfData.PushCommand(e.Door, person);
+                ShelfData.PushCommand(e.Door, person, RfidManager.LockHeartbeat);
 
                 var result = RfidManager.OpenShelfLock(e.Door.LockPath);
                 if (result.Value == -1)
@@ -647,10 +666,12 @@ namespace dp2SSL
                 }
 
                 if (succeed == false)
-                    e.Door.Waiting = false;
+                {
+                    e.Door.DecWaiting();
+                    //WpfClientInfo.WriteInfoLog($"--decWaiting() door '{e.Door.Name}' on cancel");
+                }
             }
         }
-
 
         private void CurrentApp_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {

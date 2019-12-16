@@ -124,6 +124,42 @@ namespace dp2SSL
             }
         }
 
+        // 为了让 waiting 能叠加，用 int 类型
+        private int _waiting = 0;
+
+        // 是否处于等待状态
+        public int Waiting
+        {
+            get => _waiting;
+            set
+            {
+                if (_waiting != value)
+                {
+                    _waiting = value;
+                    OnPropertyChanged("Waiting");
+                }
+            }
+        }
+
+        object _syncRoot_waiting = new object();
+
+        public void IncWaiting()
+        {
+            lock (_syncRoot_waiting)
+            {
+                Waiting++;
+            }
+        }
+
+        public void DecWaiting()
+        {
+            lock (_syncRoot_waiting)
+            {
+                Waiting--;
+            }
+        }
+
+#if NO
         private bool _waiting = false;
 
         // 是否处于等待状态
@@ -139,6 +175,8 @@ namespace dp2SSL
                 }
             }
         }
+
+#endif
 
         private string _shelfNo;
 

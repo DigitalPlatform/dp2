@@ -327,6 +327,8 @@ new SetErrorEventArgs
                 if (_lockThread == "base2"
                 && LockCommands != null)
                 {
+                    IncLockHeartbeat();
+
                     List<LockState> states = new List<LockState>();
                     {
                         // parameters:
@@ -468,6 +470,7 @@ new SetErrorEventArgs
                 if (_lockThread != "base2"
                 && lock_result != null)
                 {
+                    IncLockHeartbeat();
                     List<LockState> states = new List<LockState>();
                     {
                         // parameters:
@@ -506,6 +509,22 @@ new SetErrorEventArgs
                 }
             },
             token);
+        }
+
+        static long _lockHeartbeat = 0;
+
+        // 增量心跳计数
+        static void IncLockHeartbeat()
+        {
+            Interlocked.Increment(ref _lockHeartbeat);
+        }
+
+        public static long LockHeartbeat
+        {
+            get
+            {
+                return Interlocked.Read(ref _lockHeartbeat);
+            }
         }
 
         public static BaseChannel<IRfid> GetChannel()
