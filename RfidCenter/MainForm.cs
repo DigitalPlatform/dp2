@@ -1914,28 +1914,30 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
         }
 
         bool _inSimuLock = false;   // 是否处于模拟门锁状态
-        SimuLock _simuLock = new SimuLock(4);
+
+        public bool InSimuLock
+        {
+            get
+            {
+                return _inSimuLock;
+            }
+        }
+
+        // SimuLock _simuLock = new SimuLock(1, 8);
 
         private void MenuItem_openLock_Click(object sender, EventArgs e)
         {
-            string strIndex = InputDlg.GetInput(this, "请指定锁路径", "锁路径", "*.1.1");
-            if (string.IsNullOrEmpty(strIndex) == false)
+            string path = InputDlg.GetInput(this, "开锁", "锁路径", "*.1.1");
+            if (string.IsNullOrEmpty(path) == false)
             {
-                if (_inSimuLock == false)
-                {
-                    // parameters:
-                    //      lockNameParam   为 "锁控板名字.卡编号.锁编号"。
-                    //                      其中卡编号部分可以是 "1" 也可以是 "1|2" 这样的形态
-                    //                      其中锁编号部分可以是 "1" 也可以是 "1|2|3|4" 这样的形态
-                    //                      如果缺乏卡编号和锁编号部分，缺乏的部分默认为 "1"
-                    var result = _driver.OpenShelfLock(strIndex);
-                    MessageDlg.Show(this, result.ToString(), "开锁");
-                }
-                else
-                {
-                    var result = _simuLock.OpenShelfLock("*", Convert.ToInt32(strIndex));
-                    MessageDlg.Show(this, result.ToString(), "开锁");
-                }
+                // parameters:
+                //      lockNameParam   为 "锁控板名字.卡编号.锁编号"。
+                //                      其中卡编号部分可以是 "1" 也可以是 "1|2" 这样的形态
+                //                      其中锁编号部分可以是 "1" 也可以是 "1|2|3|4" 这样的形态
+                //                      如果缺乏卡编号和锁编号部分，缺乏的部分默认为 "1"
+                // var result = _driver.OpenShelfLock(path);
+                var result = m_rfidObj?.OpenShelfLock(path);
+                MessageDlg.Show(this, result.ToString(), "开锁");
             }
             else
             {
@@ -1945,24 +1947,17 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
 
         private void MenuItem_getLockState_Click(object sender, EventArgs e)
         {
-            string strIndex = InputDlg.GetInput(this, "请指定锁路径", "锁路径", "*.1.1");
-            if (string.IsNullOrEmpty(strIndex) == false)
+            string path = InputDlg.GetInput(this, "请指定锁路径", "锁路径", "*.1.1");
+            if (string.IsNullOrEmpty(path) == false)
             {
-                if (_inSimuLock == false)
-                {
-                    // parameters:
-                    //      lockNameParam   为 "锁控板名字.卡编号.锁编号"。
-                    //                      其中卡编号部分可以是 "1" 也可以是 "1|2" 这样的形态
-                    //                      其中锁编号部分可以是 "1" 也可以是 "1|2|3|4" 这样的形态
-                    //                      如果缺乏卡编号和锁编号部分，缺乏的部分默认为 "1"
-                    var result = _driver.GetShelfLockState(strIndex);
-                    MessageDlg.Show(this, result.ToString(), "锁状态");
-                }
-                else
-                {
-                    var result = _simuLock.GetShelfLockState("*", Convert.ToInt32(strIndex));
-                    MessageDlg.Show(this, result.ToString(), "锁状态");
-                }
+                // parameters:
+                //      lockNameParam   为 "锁控板名字.卡编号.锁编号"。
+                //                      其中卡编号部分可以是 "1" 也可以是 "1|2" 这样的形态
+                //                      其中锁编号部分可以是 "1" 也可以是 "1|2|3|4" 这样的形态
+                //                      如果缺乏卡编号和锁编号部分，缺乏的部分默认为 "1"
+                // var result = _driver.GetShelfLockState(path);
+                var result = m_rfidObj?.GetShelfLockState(path);
+                MessageDlg.Show(this, result.ToString(), "锁状态");
             }
             else
             {
@@ -1978,16 +1973,22 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
 
         private void MenuItem_simuLock_Click(object sender, EventArgs e)
         {
+            string text = "";
             if (_inSimuLock == false)
             {
                 _inSimuLock = true;
                 MenuItem_simuLock.Checked = true;
+                text = "进入模拟门锁状态";
             }
             else
             {
                 _inSimuLock = false;
                 MenuItem_simuLock.Checked = false;
+                text = "退出模拟门锁状态";
             }
+
+            OutputHistory(text);
+            Speak(text);
         }
 
         private void MenuItem_turnOnLamp_Click(object sender, EventArgs e)
@@ -2000,6 +2001,27 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
         {
             var result = _driver.TurnShelfLamp("*", "turnOff");
             MessageDlg.Show(this, result.ToString(), "关灯");
+        }
+
+        // 模拟关门
+        private void MenuItem_closeLock_Click(object sender, EventArgs e)
+        {
+            string path = InputDlg.GetInput(this, "关门", "锁路径", "*.1.1");
+            if (string.IsNullOrEmpty(path) == false)
+            {
+                // parameters:
+                //      lockNameParam   为 "锁控板名字.卡编号.锁编号"。
+                //                      其中卡编号部分可以是 "1" 也可以是 "1|2" 这样的形态
+                //                      其中锁编号部分可以是 "1" 也可以是 "1|2|3|4" 这样的形态
+                //                      如果缺乏卡编号和锁编号部分，缺乏的部分默认为 "1"
+                var result = m_rfidObj?.CloseShelfLock(path);
+                MessageDlg.Show(this, result.ToString(), "模拟关门");
+            }
+            else
+            {
+                MessageBox.Show(this, "放弃");
+            }
+
         }
     }
 }

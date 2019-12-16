@@ -282,15 +282,26 @@ namespace dp2SSL
         {
             if (_openingDoorCount == 0)
             {
+                /*
                 // 关闭图书读卡器(只使用读者证读卡器)
                 if (string.IsNullOrEmpty(_patronReaderName) == false
                     && RfidManager.ReaderNameList != _patronReaderName)
                 {
                     // RfidManager.ReaderNameList = _patronReaderName;
-                    RfidManager.ReaderNameList = "";
+                    RfidManager.ReaderNameList = "";    // 图书读卡器全部停止盘点。此处假定读者证读卡器在第二线程遍历
                     RfidManager.ClearCache();
                     //App.CurrentApp.SpeakSequence("静止");
                 }
+                */
+                // 关闭图书读卡器(只使用读者证读卡器)
+                if (RfidManager.ReaderNameList != "")
+                {
+                    // RfidManager.ReaderNameList = _patronReaderName;
+                    RfidManager.ReaderNameList = "";    // 图书读卡器全部停止盘点。此处假定读者证读卡器在第二线程遍历
+                    RfidManager.ClearCache();
+                    //App.CurrentApp.SpeakSequence("静止");
+                }
+
             }
             else
             {
@@ -326,8 +337,12 @@ namespace dp2SSL
             _allDoorReaderName = GetAllReaderNameList("doors");
             WpfClientInfo.WriteInfoLog($"doors ReaderNameList '{_allDoorReaderName}'");
 
+#if OLD_VERSION
             RfidManager.ReaderNameList = _allDoorReaderName;
-            // RfidManager.AntennaList = GetAntennaList();
+#else
+            RfidManager.ReaderNameList = "";    // 假定一开始门是关闭的
+#endif
+
             RfidManager.LockCommands = StringUtil.MakePathList(ShelfData.GetLockCommands());
 
             WpfClientInfo.WriteInfoLog($"LockCommands '{RfidManager.LockCommands}'");
@@ -573,7 +588,7 @@ namespace dp2SSL
             var list = GetReaderNameList(new List<DoorItem> { door }, null);
             string style = $"dont_delay";   // 确保 inventory 并立即返回
 
-            StringBuilder debugInfo = new StringBuilder();
+            // StringBuilder debugInfo = new StringBuilder();
             var result = RfidManager.CallListTags(list, style);
             // WpfClientInfo.WriteErrorLog($"RefreshInventory() list={list}, style={style}, result={result.ToString()}");
             try
@@ -582,7 +597,8 @@ namespace dp2SSL
             }
             catch (Exception ex)
             {
-                WpfClientInfo.WriteErrorLog($"RefreshInventory() TriggerListTagsEvent() 异常:{ExceptionUtil.GetDebugText(ex)}\r\ndebugInfo={debugInfo.ToString()}");
+                // WpfClientInfo.WriteErrorLog($"RefreshInventory() TriggerListTagsEvent() 异常:{ExceptionUtil.GetDebugText(ex)}\r\ndebugInfo={debugInfo.ToString()}");
+                WpfClientInfo.WriteErrorLog($"RefreshInventory() TriggerListTagsEvent() list='{list}' 异常:{ExceptionUtil.GetDebugText(ex)}");
             }
         }
 
@@ -1056,38 +1072,65 @@ namespace dp2SSL
         // 首次初始化智能书柜所需的标签相关数据结构
         // 初始化开始前，要先把 RfidManager.ReaderNameList 设置为 "*"
         // 初始化完成前，先不要允许(开关门变化导致)修改 RfidManager.ReaderNameList
-        public static async Task<InitialShelfResult> InitialShelfEntities(
+        public static async Task<InitialShelfResult> newVersion_InitialShelfEntities(
             Delegate_displayText func_display,
             Delegate_cancelled func_cancelled)
         {
-            /*
-            ProgressWindow progress = null;
-            Application.Current.Dispatcher.Invoke(new Action(() =>
-            {
-                progress = new ProgressWindow();
-                progress.MessageText = "正在初始化图书信息，请稍候 ...";
-                progress.Owner = Application.Current.MainWindow;
-                progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-                progress.Closed += Progress_Closed;
-                //progress.Width = 700;
-                //progress.Height = 500;
-                progress.Show();
-                AddLayer();
-            }));
-            this.doorControl.Visibility = Visibility.Hidden;
-            */
+            // TODO: 出现“正在初始化”的对话框。另外需要注意如果 DataReady 信号永远来不了怎么办
+            WpfClientInfo.WriteInfoLog("开始初始化图书信息");
 
-            try
+            // 一个一个门地填充图书信息
+            int i = 0;
+            foreach (var door in Doors)
             {
-                // TODO: 出现“正在初始化”的对话框。另外需要注意如果 DataReady 信号永远来不了怎么办
-                WpfClientInfo.WriteInfoLog("开始初始化图书信息");
+                // 获得和一个门相关的 readernamelist
+                var list = GetReaderNameList(new List<DoorItem> { door }, null);
+                string style = $"dont_delay";   // 确保 inventory 并立即返回
 
-                func_display("等待读卡器就绪 ...");
+                func_display($"{i + 1}/{Doors.Count} 门 {door.Name} ({list}) ...");
+
+                var result = RfidManager.CallListTags(list, style);
+                RfidManager.TriggerListTagsEvent(list, result, true);
+
+                i++;
+            }
+
+            WpfClientInfo.WriteInfoLog("开始填充图书队列");
+            func_display("正在填充图书队列 ...");
+
+            List<string> warnings = new List<string>();
+
+            _all.Clear();
+            var books = TagList.Books;
+            WpfClientInfo.WriteErrorLog($"books count={books.Count}, ReaderNameList={RfidManager.ReaderNameList}(注：此时门应该都是关闭的，图书读卡器应该是停止盘点状态)");
+            foreach (var tag in books)
+            {
+                WpfClientInfo.WriteErrorLog($" tag={tag.ToString()}");
+
+                try
+                {
+                    // Exception:
+                    //      可能会抛出异常 ArgumentException TagDataException
+                    _all.Add(NewEntity(tag));
+                }
+                catch (TagDataException ex)
+                {
+                    warnings.Add($"UID 为 '{tag.OneTag?.UID}' 的标签出现数据格式错误: {ex.Message}");
+                    WpfClientInfo.WriteErrorLog($"InitialShelfEntities() 遇到 tag (UID={tag.OneTag?.UID}) 数据格式出错：{ex.Message}\r\ntag 详情：{tag.ToString()}");
+                }
+            }
+
+
+            {
+                WpfClientInfo.WriteInfoLog("等待锁控就绪");
+                func_display("等待锁控就绪 ...");
+                // 恢复 Base2 线程运行
+                // RfidManager.Pause2 = false;
                 bool ret = await Task.Run(() =>
                 {
                     while (true)
                     {
-                        if (RfidManager.TagsReady == true)
+                        if (OpeningDoorCount != -1)
                             return true;
                         if (func_cancelled() == true)
                             return false;
@@ -1097,29 +1140,124 @@ namespace dp2SSL
 
                 if (ret == false)
                     return new InitialShelfResult();
+            }
 
-                // 使用全部读卡器、全部天线进行初始化。即便门是全部关闭的(注：一般情况下，当门关闭的时候图书读卡器是暂停盘点的)
-                WpfClientInfo.WriteInfoLog("开始启用全部读卡器和天线");
+            // DoorItem.DisplayCount(_all, _adds, _removes, App.CurrentApp.Doors);
+            RefreshCount();
 
-                func_display("启用全部读卡器和天线 ...");
+            // TryReturn(progress, _all);
+            _firstInitial = true;   // 第一次初始化已经完成
+
+            func_display("获取图书册记录信息 ...");
+
+            var task = Task.Run(async () =>
+            {
+                CancellationToken token = CancelToken;
+                await FillBookFields(_all, token);
+                await FillBookFields(_adds, token);
+                await FillBookFields(_removes, token);
+            });
+
+            return new InitialShelfResult { Warnings = warnings };
+        }
+
+        // 首次初始化智能书柜所需的标签相关数据结构
+        // 初始化开始前，要先把 RfidManager.ReaderNameList 设置为 "*"
+        // 初始化完成前，先不要允许(开关门变化导致)修改 RfidManager.ReaderNameList
+        public static async Task<InitialShelfResult> InitialShelfEntities(
+            Delegate_displayText func_display,
+            Delegate_cancelled func_cancelled)
+        {
+            // TODO: 出现“正在初始化”的对话框。另外需要注意如果 DataReady 信号永远来不了怎么办
+            WpfClientInfo.WriteInfoLog("开始初始化图书信息");
+
+            func_display("等待读卡器就绪 ...");
+            bool ret = await Task.Run(() =>
+            {
+                while (true)
+                {
+                    if (RfidManager.TagsReady == true)
+                        return true;
+                    if (func_cancelled() == true)
+                        return false;
+                    Thread.Sleep(100);
+                }
+            });
+
+            if (ret == false)
+                return new InitialShelfResult();
+
+            // 使用全部读卡器、全部天线进行初始化。即便门是全部关闭的(注：一般情况下，当门关闭的时候图书读卡器是暂停盘点的)
+            WpfClientInfo.WriteInfoLog("开始启用全部读卡器和天线");
+
+            func_display("启用全部读卡器和天线 ...");
+            ret = await Task.Run(() =>
+            {
+                // 使用全部读卡器，全部天线
+                RfidManager.Pause = true;
+
+                // TODO: 这里并不是马上能停下来呀？是否要等待停下来
+                // 否则探测到 TagsReady == true 可能是上一轮延迟到来的结果
+                // 可以考虑给 TagsReady 变成一个字符串值，内容是每一轮请求的 session_id，这样就可以确认是哪一次的返回了
+
+                //RfidManager.Pause2 = true;  // 暂停 Base2 线程
+                RfidManager.ReaderNameList = _allDoorReaderName;
+                RfidManager.TagsReady = false;
+                RfidManager.Pause = false;
+                // 注意此时 Base 线程依然是暂停状态
+                RfidManager.ClearCache();   // 迫使立即重新请求 Inventory
+                while (true)
+                {
+                    if (RfidManager.TagsReady == true)
+                        return true;
+                    if (func_cancelled() == true)
+                        return false;
+                    Thread.Sleep(100);
+                }
+            });
+
+            if (ret == false)
+            {
+                WpfClientInfo.WriteErrorLog($"waiting DataReady cancelled");
+                return new InitialShelfResult();
+            }
+
+            WpfClientInfo.WriteInfoLog("开始填充图书队列");
+            func_display("正在填充图书队列 ...");
+
+            List<string> warnings = new List<string>();
+
+            _all.Clear();
+            var books = TagList.Books;
+            WpfClientInfo.WriteErrorLog($"books count={books.Count}, ReaderNameList={RfidManager.ReaderNameList}");
+            foreach (var tag in books)
+            {
+                WpfClientInfo.WriteErrorLog($" tag={tag.ToString()}");
+
+                try
+                {
+                    // Exception:
+                    //      可能会抛出异常 ArgumentException TagDataException
+                    _all.Add(NewEntity(tag));
+                }
+                catch (TagDataException ex)
+                {
+                    warnings.Add($"UID 为 '{tag.OneTag?.UID}' 的标签出现数据格式错误: {ex.Message}");
+                    WpfClientInfo.WriteErrorLog($"InitialShelfEntities() 遇到 tag (UID={tag.OneTag?.UID}) 数据格式出错：{ex.Message}\r\ntag 详情：{tag.ToString()}");
+                }
+            }
+
+
+            {
+                WpfClientInfo.WriteInfoLog("等待锁控就绪");
+                func_display("等待锁控就绪 ...");
+                // 恢复 Base2 线程运行
+                // RfidManager.Pause2 = false;
                 ret = await Task.Run(() =>
                 {
-                    // 使用全部读卡器，全部天线
-                    RfidManager.Pause = true;
-
-                    // TODO: 这里并不是马上能停下来呀？是否要等待停下来
-                    // 否则探测到 TagsReady == true 可能是上一轮延迟到来的结果
-                    // 可以考虑给 TagsReady 变成一个字符串值，内容是每一轮请求的 session_id，这样就可以确认是哪一次的返回了
-
-                    //RfidManager.Pause2 = true;  // 暂停 Base2 线程
-                    RfidManager.ReaderNameList = _allDoorReaderName;
-                    RfidManager.TagsReady = false;
-                    RfidManager.Pause = false;
-                    // 注意此时 Base 线程依然是暂停状态
-                    RfidManager.ClearCache();   // 迫使立即重新请求 Inventory
                     while (true)
                     {
-                        if (RfidManager.TagsReady == true)
+                        if (OpeningDoorCount != -1)
                             return true;
                         if (func_cancelled() == true)
                             return false;
@@ -1128,88 +1266,25 @@ namespace dp2SSL
                 });
 
                 if (ret == false)
-                {
-                    WpfClientInfo.WriteErrorLog($"waiting DataReady cancelled");
                     return new InitialShelfResult();
-                }
-
-                WpfClientInfo.WriteInfoLog("开始填充图书队列");
-                func_display("正在填充图书队列 ...");
-
-                List<string> warnings = new List<string>();
-
-                _all.Clear();
-                var books = TagList.Books;
-                WpfClientInfo.WriteErrorLog($"books count={books.Count}, ReaderNameList={RfidManager.ReaderNameList}");
-                foreach (var tag in books)
-                {
-                    WpfClientInfo.WriteErrorLog($" tag={tag.ToString()}");
-
-                    try
-                    {
-                        // Exception:
-                        //      可能会抛出异常 ArgumentException TagDataException
-                        _all.Add(NewEntity(tag));
-                    }
-                    catch (TagDataException ex)
-                    {
-                        warnings.Add($"UID 为 '{tag.OneTag?.UID}' 的标签出现数据格式错误: {ex.Message}");
-                        WpfClientInfo.WriteErrorLog($"InitialShelfEntities() 遇到 tag (UID={tag.OneTag?.UID}) 数据格式出错：{ex.Message}\r\ntag 详情：{tag.ToString()}");
-                    }
-                }
-
-
-                {
-                    WpfClientInfo.WriteInfoLog("等待锁控就绪");
-                    func_display("等待锁控就绪 ...");
-                    // 恢复 Base2 线程运行
-                    // RfidManager.Pause2 = false;
-                    ret = await Task.Run(() =>
-                    {
-                        while (true)
-                        {
-                            if (OpeningDoorCount != -1)
-                                return true;
-                            if (func_cancelled() == true)
-                                return false;
-                            Thread.Sleep(100);
-                        }
-                    });
-
-                    if (ret == false)
-                        return new InitialShelfResult();
-                }
-
-
-                // DoorItem.DisplayCount(_all, _adds, _removes, App.CurrentApp.Doors);
-                RefreshCount();
-
-                // TryReturn(progress, _all);
-                _firstInitial = true;   // 第一次初始化已经完成
-
-                var task = Task.Run(async () =>
-                {
-                    CancellationToken token = CancelToken;
-                    await FillBookFields(_all, token);
-                    await FillBookFields(_adds, token);
-                    await FillBookFields(_removes, token);
-                });
-
-                return new InitialShelfResult { Warnings = warnings };
             }
-            finally
+
+
+            // DoorItem.DisplayCount(_all, _adds, _removes, App.CurrentApp.Doors);
+            RefreshCount();
+
+            // TryReturn(progress, _all);
+            _firstInitial = true;   // 第一次初始化已经完成
+
+            var task = Task.Run(async () =>
             {
+                CancellationToken token = CancelToken;
+                await FillBookFields(_all, token);
+                await FillBookFields(_adds, token);
+                await FillBookFields(_removes, token);
+            });
 
-                /*
-                Application.Current.Dispatcher.Invoke(new Action(() =>
-                {
-                    if (progress != null)
-                        progress.Close();
-                }));
-
-                this.doorControl.Visibility = Visibility.Visible;
-                */
-            }
+            return new InitialShelfResult { Warnings = warnings };
         }
 
         // Exception:

@@ -22,6 +22,8 @@ namespace RfidCenter
     {
         static CompactLog _compactLog = new CompactLog();
 
+        static SimuLock _simuLock = new SimuLock(1, 8);
+
         public void Dispose()
         {
 #if SENDKEY
@@ -44,7 +46,13 @@ namespace RfidCenter
                 //                      其中卡编号部分可以是 "1" 也可以是 "1|2" 这样的形态
                 //                      其中锁编号部分可以是 "1" 也可以是 "1|2|3|4" 这样的形态
                 //                      如果缺乏卡编号和锁编号部分，缺乏的部分默认为 "1"
-                var result = Program.Rfid.GetShelfLockState(one);
+                GetLockStateResult result = null;
+
+                if (Program.MainForm.InSimuLock)
+                    result = _simuLock.GetShelfLockState(one);
+                else
+                    result = Program.Rfid.GetShelfLockState(one);
+
                 if (result.Value == -1)
                     return result;
                 states.AddRange(result.States);
@@ -56,12 +64,34 @@ namespace RfidCenter
         // 开锁
         public NormalResult OpenShelfLock(string lockName)
         {
+            if (Program.MainForm.InSimuLock)
+                return _simuLock.OpenShelfLock(lockName);
+
             // parameters:
             //      lockNameParam   为 "锁控板名字.卡编号.锁编号"。
             //                      其中卡编号部分可以是 "1" 也可以是 "1|2" 这样的形态
             //                      其中锁编号部分可以是 "1" 也可以是 "1|2|3|4" 这样的形态
             //                      如果缺乏卡编号和锁编号部分，缺乏的部分默认为 "1"
             return Program.Rfid.OpenShelfLock(lockName);
+        }
+
+        // 模拟关门
+        public NormalResult CloseShelfLock(string lockName)
+        {
+            if (Program.MainForm.InSimuLock)
+                return _simuLock.OpenShelfLock(lockName, false);
+
+            return new NormalResult
+            {
+                Value = -1,
+                ErrorInfo = "CloseShelfLock() 只能在 _simuLock == true 状态时调用"
+            };
+
+            // parameters:
+            //      lockNameParam   为 "锁控板名字.卡编号.锁编号"。
+            //                      其中卡编号部分可以是 "1" 也可以是 "1|2" 这样的形态
+            //                      其中锁编号部分可以是 "1" 也可以是 "1|2|3|4" 这样的形态
+            //                      如果缺乏卡编号和锁编号部分，缺乏的部分默认为 "1"
         }
 
         // 开关灯

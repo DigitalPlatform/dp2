@@ -65,7 +65,11 @@ uint new_password);
 
         GetLockStateResult GetShelfLockState(string lockNameList);
 
+        // 开锁
         NormalResult OpenShelfLock(string lockName);
+
+        // 模拟关门
+        NormalResult CloseShelfLock(string lockName);
 
         NormalResult TurnShelfLamp(string lampName, string action);
 
