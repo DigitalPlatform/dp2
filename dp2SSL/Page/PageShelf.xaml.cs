@@ -1111,6 +1111,7 @@ namespace dp2SSL
 
         bool _initialCancelled = false;
 
+#if OLD_VERSION
         // 初始化开始前，要先把 RfidManager.ReaderNameList 设置为 "*"
         // 初始化完成前，先不要允许(开关门变化导致)修改 RfidManager.ReaderNameList
         async Task InitialShelfEntities()
@@ -1296,6 +1297,161 @@ namespace dp2SSL
 
             // TODO: 初始化中断后，是否允许切换到菜单和设置画面？(只是不让进入书架画面)
         }
+
+#else
+
+        // 新版本的首次填充图书信息的函数
+        async Task InitialShelfEntities()
+        {
+            if (ShelfData.FirstInitialized)
+                return;
+
+            this.doorControl.Visibility = Visibility.Collapsed;
+            _initialCancelled = false;
+
+            ProgressWindow progress = null;
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                progress = new ProgressWindow();
+                progress.TitleText = "初始化智能书柜";
+                progress.MessageText = "正在初始化图书信息，请稍候 ...";
+                progress.Owner = Application.Current.MainWindow;
+                progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                progress.Closed += Progress_Cancelled;
+                App.SetSize(progress, "tall");
+                // progress.Width = Math.Min(700, this.ActualWidth);
+                // progress.Height = Math.Min(900, this.ActualHeight);
+                progress.okButton.Content = "取消";
+                progress.Show();
+                AddLayer();
+            }));
+            this.doorControl.Visibility = Visibility.Hidden;
+
+            try
+            {
+                // 把门显示出来。因为此时需要看到是否关门的状态
+                this.doorControl.Visibility = Visibility.Visible;
+                this.doorControl.InitializeButtons(ShelfData.ShelfCfgDom, ShelfData.Doors);
+
+                // 检查门是否为关闭状态？
+                // 注意 RfidManager 中门锁启动需要一定时间。状态可能是：尚未初始化/有门开着/门都关了
+                await Task.Run(() =>
+                {
+                    while (ShelfData.OpeningDoorCount > 0)
+                    {
+                        if (_initialCancelled)
+                            break;
+                        DisplayMessage(progress, "请关闭全部柜门，以完成初始化", "yellow");
+                        Thread.Sleep(1000);
+                    }
+                });
+
+                if (_initialCancelled)
+                    return;
+
+                // 此时门是关闭状态。让读卡器切换到节省盘点状态
+                ShelfData.RefreshReaderNameList();
+
+                // TODO: 填充 RFID 图书标签信息
+                var initial_result = await ShelfData.newVersion_InitialShelfEntities(
+    (s) =>
+    {
+        DisplayMessage(progress, s, "green");
+    },
+    () =>
+    {
+        return _initialCancelled;
+    });
+
+                if (_initialCancelled)
+                    return;
+
+                // 2019/11/29
+                // 先报告一次标签数据错误
+                if (initial_result.Warnings?.Count > 0)
+                {
+                    ErrorBox(StringUtil.MakePathList(initial_result.Warnings, "\r\n"));
+                }
+
+                // TODO: 如何显示还书操作中的报错信息? 看了报错以后点继续?
+                // result.Value
+                //      -1  出错
+                //      0   没有必要处理
+                //      1   已经处理
+                var result = TryReturn(progress, ShelfData.All);
+                if (result.MessageDocument != null
+                    && result.MessageDocument.ErrorCount > 0)
+                {
+                    string speak = "";
+                    {
+                        Application.Current.Dispatcher.Invoke(new Action(() =>
+                        {
+                            progress.BackColor = "yellow";
+                            progress.MessageDocument = result.MessageDocument.BuildDocument(18, out speak);
+                            if (result.MessageDocument.ErrorCount > 0)
+                                progress = null;
+                        }));
+                    }
+                    if (string.IsNullOrEmpty(speak) == false)
+                        App.CurrentApp.Speak(speak);
+                }
+
+                if (_initialCancelled)
+                    return;
+
+                SelectAntenna();
+            }
+            finally
+            {
+                // _firstInitial = true;   // 第一次初始化已经完成
+                RemoveLayer();
+
+                if (_initialCancelled == false)
+                {
+                    // PageMenu.MenuPage.shelf.Visibility = Visibility.Visible;
+
+                    if (progress != null)
+                    {
+                        progress.Closed -= Progress_Cancelled;
+                        Application.Current.Dispatcher.Invoke(new Action(() =>
+                        {
+                            if (progress != null)
+                                progress.Close();
+                        }));
+                    }
+
+                    SetGlobalError("initial", null);
+                    this.Mode = ""; // 从初始化模式转为普通模式
+                }
+                else
+                {
+                    ShelfData.FirstInitialized = false;
+
+                    // PageMenu.MenuPage.shelf.Visibility = Visibility.Collapsed;
+
+                    // TODO: 页面中央大字显示“书柜初始化失败”。重新进入页面时候应该自动重试初始化
+                    SetGlobalError("initial", "智能书柜初始化失败。请检查读卡器和门锁参数配置，重新进行初始化 ...");
+                    /*
+                    ProgressWindow error = null;
+                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    {
+                        error = new ProgressWindow();
+                        error.Owner = Application.Current.MainWindow;
+                        error.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                        error.Closed += Error_Closed;
+                        error.Show();
+                        AddLayer();
+                    }));
+                    DisplayError(ref error, "智能书柜初始化失败。请检查读卡器和门锁参数配置，重新进行初始化 ...");
+                    */
+                }
+            }
+
+            // TODO: 初始化中断后，是否允许切换到菜单和设置画面？(只是不让进入书架画面)
+        }
+
+
+#endif
 
 #if NO
         // 故意选择用到的天线编号加一的天线(用 GetTagInfo() 实现)

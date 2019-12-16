@@ -68,6 +68,9 @@
             this.MenuItem_openLock = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_getLockState = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_getComPortInfo = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator7 = new System.Windows.Forms.ToolStripSeparator();
+            this.MenuItem_turnOnLamp = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_turnOffLamp = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.ToolStripMenuItem_exit = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_testing = new System.Windows.Forms.ToolStripMenuItem();
@@ -97,9 +100,7 @@
             this.MenuItem_manual = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_about = new System.Windows.Forms.ToolStripMenuItem();
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
-            this.MenuItem_turnOffLamp = new System.Windows.Forms.ToolStripMenuItem();
-            this.MenuItem_turnOnLamp = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator7 = new System.Windows.Forms.ToolStripSeparator();
+            this.MenuItem_closeLock = new System.Windows.Forms.ToolStripMenuItem();
             this.tabControl_main.SuspendLayout();
             this.tabPage_start.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_start)).BeginInit();
@@ -445,6 +446,7 @@
             this.toolStripSeparator1,
             this.MenuItem_simuLock,
             this.MenuItem_openLock,
+            this.MenuItem_closeLock,
             this.MenuItem_getLockState,
             this.MenuItem_getComPortInfo,
             this.toolStripSeparator7,
@@ -509,6 +511,25 @@
             this.MenuItem_getComPortInfo.Size = new System.Drawing.Size(252, 30);
             this.MenuItem_getComPortInfo.Text = "探测 COM 口信息";
             this.MenuItem_getComPortInfo.Click += new System.EventHandler(this.MenuItem_getComPortInfo_Click);
+            // 
+            // toolStripSeparator7
+            // 
+            this.toolStripSeparator7.Name = "toolStripSeparator7";
+            this.toolStripSeparator7.Size = new System.Drawing.Size(249, 6);
+            // 
+            // MenuItem_turnOnLamp
+            // 
+            this.MenuItem_turnOnLamp.Name = "MenuItem_turnOnLamp";
+            this.MenuItem_turnOnLamp.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_turnOnLamp.Text = "开灯";
+            this.MenuItem_turnOnLamp.Click += new System.EventHandler(this.MenuItem_turnOnLamp_Click);
+            // 
+            // MenuItem_turnOffLamp
+            // 
+            this.MenuItem_turnOffLamp.Name = "MenuItem_turnOffLamp";
+            this.MenuItem_turnOffLamp.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_turnOffLamp.Text = "关灯";
+            this.MenuItem_turnOffLamp.Click += new System.EventHandler(this.MenuItem_turnOffLamp_Click);
             // 
             // toolStripSeparator3
             // 
@@ -729,24 +750,12 @@
             this.notifyIcon1.Visible = true;
             this.notifyIcon1.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon1_MouseDoubleClick);
             // 
-            // MenuItem_turnOffLamp
+            // MenuItem_closeLock
             // 
-            this.MenuItem_turnOffLamp.Name = "MenuItem_turnOffLamp";
-            this.MenuItem_turnOffLamp.Size = new System.Drawing.Size(252, 30);
-            this.MenuItem_turnOffLamp.Text = "关灯";
-            this.MenuItem_turnOffLamp.Click += new System.EventHandler(this.MenuItem_turnOffLamp_Click);
-            // 
-            // MenuItem_turnOnLamp
-            // 
-            this.MenuItem_turnOnLamp.Name = "MenuItem_turnOnLamp";
-            this.MenuItem_turnOnLamp.Size = new System.Drawing.Size(252, 30);
-            this.MenuItem_turnOnLamp.Text = "开灯";
-            this.MenuItem_turnOnLamp.Click += new System.EventHandler(this.MenuItem_turnOnLamp_Click);
-            // 
-            // toolStripSeparator7
-            // 
-            this.toolStripSeparator7.Name = "toolStripSeparator7";
-            this.toolStripSeparator7.Size = new System.Drawing.Size(249, 6);
+            this.MenuItem_closeLock.Name = "MenuItem_closeLock";
+            this.MenuItem_closeLock.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_closeLock.Text = "关门";
+            this.MenuItem_closeLock.Click += new System.EventHandler(this.MenuItem_closeLock_Click);
             // 
             // MainForm
             // 
@@ -858,6 +867,7 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator7;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_turnOnLamp;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_turnOffLamp;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_closeLock;
     }
 }
 
