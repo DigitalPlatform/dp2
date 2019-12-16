@@ -70,6 +70,22 @@ namespace dp2SSL
             }
         }
 
+        public static void ProcessOpenCommand(DoorItem door)
+        {
+            // 切换所有者
+            var command = ShelfData.PopCommand(door);
+            if (command != null)
+            {
+                door.DecWaiting();
+                //WpfClientInfo.WriteInfoLog($"--decWaiting() door '{door.Name}' pop command");
+                door.Operator = command.Parameter as Operator;
+            }
+            else
+            {
+                WpfClientInfo.WriteErrorLog($"!!! 门 {door.Name} PopCommand() 时候没有找到命令对象");
+            }
+        }
+
         static int _openingDoorCount = -1; // 当前处于打开状态的门的个数。-1 表示个数尚未初始化
 
 
@@ -78,7 +94,7 @@ namespace dp2SSL
             if (e.Result.Value == -1)
             {
                 // TODO: 注意这里的信息量很大，需要防止错误日志空间被耗尽
-                WpfClientInfo.WriteErrorLog($"RfidManager ListLocks error: {e.Result.ErrorInfo}");
+                //WpfClientInfo.WriteErrorLog($"RfidManager ListLocks error: {e.Result.ErrorInfo}");
                 return;
             }
 
@@ -119,14 +135,38 @@ namespace dp2SSL
                 SetOpenCount(count);
             }
 
-            /*
-            // TODO: 如果从有门打开的状态变为全部门都关闭的状态，要尝试提交一次出纳请求
-            if (triggerAllClosed)
+            // 2019/12/16
+            // 对可能遗漏 Pop 的 命令进行检查
             {
-                SubmitCheckInOut();
-                PatronClear(false);  // 确保在没有可提交内容的情况下也自动清除读者信息
+                // 检查命令队列中可能被 getLockState 轮询状态所遗漏的命令
+                var missing_commands = CheckCommands(RfidManager.LockHeartbeat);
+                if (missing_commands.Count > 0)
+                {
+                    foreach (var command in missing_commands)
+                    {
+                        // 如果此门状态不是关闭状态，则不需要进行修补处理
+                        if (command.Door.State != "close")
+                            continue;
+                        // ProcessOpenCommand(command.Door);
+                        // 补一次门状态变化? --> open --> close
+                        // 触发单独一个门被关闭的事件
+                        DoorStateChanged?.Invoke(null, new DoorStateChangedEventArgs
+                        {
+                            Door = command.Door,
+                            OldState = "close",
+                            NewState = "open"
+                        });
+                        DoorStateChanged?.Invoke(null, new DoorStateChangedEventArgs
+                        {
+                            Door = command.Door,
+                            OldState = "open",
+                            NewState = "close"
+                        });
+                        App.CurrentApp.Speak("补做检查");   // 测试完成后可以取消这个语音
+                        WpfClientInfo.WriteInfoLog($"提醒：检查过程为门 '{command.Door.Name}' 补做了一次 open 和 一次 close");
+                    }
+                }
             }
-            */
         }
 
         // 设置打开门数量
@@ -281,7 +321,7 @@ namespace dp2SSL
             WpfClientInfo.WriteInfoLog($"patron ReaderNameList '{_patronReaderName}'");
 
             RfidManager.Base2ReaderNameList = _patronReaderName;    // 2019/11/18
-            RfidManager.LockThread = "base2";   // 使用第二个线程来监控门锁
+            // RfidManager.LockThread = "base2";   // 使用第二个线程来监控门锁
 
             _allDoorReaderName = GetAllReaderNameList("doors");
             WpfClientInfo.WriteInfoLog($"doors ReaderNameList '{_allDoorReaderName}'");
@@ -2208,13 +2248,16 @@ namespace dp2SSL
         static object _syncRoot_commandQueue = new object();
 
 
-        public static void PushCommand(DoorItem door, Operator person)
+        public static void PushCommand(DoorItem door,
+            Operator person,
+            long heartbeat)
         {
             CommandItem command = new CommandItem
             {
                 Command = "setOwner",
                 Door = door,
                 Parameter = person,
+                Heartbeat = heartbeat,
             };
 
             lock (_syncRoot_commandQueue)
@@ -2246,6 +2289,40 @@ namespace dp2SSL
                     return null;
                 _commandQueue.Remove(result);
                 return result;
+            }
+        }
+
+        // 检查命令队列。观察是否有超过合理时间的命令滞留，如果有就返回它们
+        public static List<CommandItem> CheckCommands(long currentHeartbeat)
+        {
+            List<CommandItem> results = new List<CommandItem>();
+            lock (_syncRoot_commandQueue)
+            {
+                foreach (var command in _commandQueue)
+                {
+                    // 和当初 push 时候间隔了多个心跳
+                    if (currentHeartbeat >= command.Heartbeat + 1)
+                    {
+                        results.Add(command);
+                    }
+                }
+            }
+
+            return results;
+        }
+
+        public static string CommandToString()
+        {
+            lock (_syncRoot_commandQueue)
+            {
+                StringBuilder text = new StringBuilder();
+                int i = 0;
+                foreach (var command in _commandQueue)
+                {
+                    text.AppendLine($"{i + 1}) {command.ToString()}");
+                    i++;
+                }
+                return text.ToString();
             }
         }
 
@@ -2313,7 +2390,13 @@ namespace dp2SSL
         public DoorItem Door { get; set; }
         public string Command { get; set; }
         public object Parameter { get; set; }
+        public long Heartbeat { get; set; }
 
         // TODO: 是否增加一个时间成员，用以测算 item 在 queue 中的留存时间？时间太长了说明不正常，需要排除故障
+
+        public override string ToString()
+        {
+            return $"DoorName:{Door.Name}, Command:{Command}";
+        }
     }
 }

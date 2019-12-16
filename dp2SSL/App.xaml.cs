@@ -385,8 +385,8 @@ namespace dp2SSL
             SetError("rfid", e.Error);
             // 2019/12/15
             // 注意这里的错误信息可能会洪水般冲来，可能会把磁盘空间占满
-            if (e.Error != null)
-                WpfClientInfo.WriteErrorLog($"RfidManager 出错: {e.Error}");
+            //if (e.Error != null)
+            //    WpfClientInfo.WriteErrorLog($"RfidManager 出错: {e.Error}");
         }
 
         private void FingerprintManager_SetError(object sender, SetErrorEventArgs e)
@@ -409,6 +409,9 @@ namespace dp2SSL
 
             _cancelRefresh?.Cancel();
             _cancelProcessMonitor?.Cancel();
+
+            // 最后关灯
+            RfidManager.TurnShelfLamp("*", "turnOff");
 
             base.OnSessionEnding(e);
         }
@@ -441,6 +444,9 @@ namespace dp2SSL
             this._channelPool.BeforeLogin -= new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
             this._channelPool.AfterLogin -= new AfterLoginEventHandle(Channel_AfterLogin);
             this._channelPool.Close();
+
+            // 最后关灯
+            RfidManager.TurnShelfLamp("*", "turnOff");
 
             base.OnExit(e);
         }

@@ -8,7 +8,10 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
+        <!--
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        -->
+        <local:CountToVisibilityConverter x:Key="CountToVis" />
         <local:IntToAddConverter x:Key="IntToAdd" Direction="+"/>
         <local:IntToAddConverter x:Key="IntToRemove" Direction="-"/>
         <local:IntToAddConverter x:Key="IntToError" Direction=" e:"/>
@@ -61,7 +64,7 @@
                        ConverterParameter=0.4}"
                                      Foreground="#FFF3F4F6"
                             Icon="Spinner" Spin="true" SpinDuration="2" 
-                                         Visibility="{Binding Path=Waiting, Converter={StaticResource BoolToVis}}"
+                                         Visibility="{Binding Path=Waiting, Converter={StaticResource CountToVis}}"
                                          HorizontalAlignment="Center" VerticalAlignment="Center"/>
 
                     <!-- 门名字 -->
