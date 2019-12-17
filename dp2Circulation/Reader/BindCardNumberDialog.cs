@@ -132,5 +132,47 @@ namespace dp2Circulation
                     MessageBox.Show(this, $"号码 {result} 已经存在了");
             }
         }
+
+        private void button_add14443_decimal_Click(object sender, EventArgs e)
+        {
+            using (RfidToolForm dialog = new RfidToolForm())
+            {
+                dialog.Text = "选择 ISO14443A 读者卡";
+                dialog.OkCancelVisible = true;
+                dialog.LayoutVertical = false;
+                dialog.AutoCloseDialog = false;
+                dialog.ProtocolFilter = InventoryInfo.ISO14443A;
+
+                // dialog.SelectedPII = auto_select_pii;
+                // dialog.AutoSelectCondition = "auto_or_blankPII";
+                Program.MainForm.AppInfo.LinkFormState(dialog, "select14443TagDialog_formstate");
+                dialog.ShowDialog(this);
+
+                if (dialog.DialogResult == DialogResult.Cancel)
+                    return;
+
+                string result = dialog.SelectedID;
+                if (result.StartsWith("uid:"))
+                    result = result.Substring("uid:".Length);
+
+                // 转换为十进制
+                result = HexToDecimal(result);
+
+                // 查重
+                if (this.listBox1.Items.IndexOf(result) == -1)
+                {
+                    this.listBox1.Items.Add(result);
+                    this.listBox1.SelectedItem = result;
+                }
+                else
+                    MessageBox.Show(this, $"号码 {result} 已经存在了");
+            }
+        }
+
+        public static string HexToDecimal(string hex_string)
+        {
+            var bytes = Element.FromHexString(hex_string);
+            return BitConverter.ToUInt32(bytes, 0).ToString();
+        }
     }
 }

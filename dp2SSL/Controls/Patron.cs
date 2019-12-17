@@ -161,6 +161,24 @@ namespace dp2SSL
             this.ErrorColor = color;
             this.Waiting = false;
         }
+
+        public RfidItem Clone()
+        {
+            Patron dup = new Patron();
+            CopyTo(dup);
+            return dup;
+        }
+
+        public void CopyTo(RfidItem dup)
+        {
+            dup.PII = this.PII;
+            dup.UID = this.UID;
+            dup.Error = this.Error;
+            dup.ErrorColor = this.ErrorColor;
+            dup.Waiting = this.Waiting;
+            dup.ReaderName = this.ReaderName;
+            dup.Antenna = this.Antenna;
+        }
     }
 
     // 读者信息
@@ -465,6 +483,37 @@ namespace dp2SSL
         public byte[] Timestamp { get; set; }
 
         public string RecPath { get; set; }
+
+        public new Patron Clone()
+        {
+            Patron dup = new Patron();
+            this.CopyTo(dup);
+            return dup;
+        }
+
+        public void CopyTo(Patron dup)
+        {
+            if (this == dup)
+                throw new ArgumentException("dup 不应该和 this 相同");
+
+            base.CopyTo(dup);
+            dup.Source = this.Source;
+            dup.NotEmpty = this.NotEmpty;
+            dup.PatronName = this.PatronName;
+            dup.Barcode = this.Barcode;
+            dup.Department = this.Department;
+            dup.MaxBorrowItems = this.MaxBorrowItems;
+            dup.CanBorrowItems = this.CanBorrowItems;
+            dup.OverdueCount = this.OverdueCount;
+            dup.OverdueBorrowCount = this.OverdueBorrowCount;
+            dup.ArrivedCount = this.ArrivedCount;
+            dup.BorrowingCount = this.BorrowingCount;
+            dup.PhotoPath = this.PhotoPath;
+
+            dup.Xml = this.Xml;
+            dup.Timestamp = this.Timestamp;
+            dup.RecPath = this.RecPath;
+        }
 
         public void SetPatronXml(string recpath, string xml, byte[] timestamp)
         {

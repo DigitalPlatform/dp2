@@ -1078,11 +1078,15 @@ namespace dp2SSL
         {
             // TODO: 出现“正在初始化”的对话框。另外需要注意如果 DataReady 信号永远来不了怎么办
             WpfClientInfo.WriteInfoLog("开始初始化图书信息");
+            func_display("开始初始化图书信息 ...");
 
             // 一个一个门地填充图书信息
             int i = 0;
             foreach (var door in Doors)
             {
+                if (func_cancelled() == true)
+                    return new InitialShelfResult();
+
                 // 获得和一个门相关的 readernamelist
                 var list = GetReaderNameList(new List<DoorItem> { door }, null);
                 string style = $"dont_delay";   // 确保 inventory 并立即返回
@@ -1095,6 +1099,9 @@ namespace dp2SSL
                 i++;
             }
 
+            if (func_cancelled() == true)
+                return new InitialShelfResult();
+
             WpfClientInfo.WriteInfoLog("开始填充图书队列");
             func_display("正在填充图书队列 ...");
 
@@ -1105,13 +1112,29 @@ namespace dp2SSL
             WpfClientInfo.WriteErrorLog($"books count={books.Count}, ReaderNameList={RfidManager.ReaderNameList}(注：此时门应该都是关闭的，图书读卡器应该是停止盘点状态)");
             foreach (var tag in books)
             {
+                if (func_cancelled() == true)
+                    return new InitialShelfResult();
+
                 WpfClientInfo.WriteErrorLog($" tag={tag.ToString()}");
+
+                // 2019/12/17
+                // 判断一下 tag 是否属于已经定义的门范围
+                var doors = DoorItem.FindDoors(ShelfData.Doors, tag.OneTag.ReaderName, tag.OneTag.AntennaID.ToString());
+                if (doors.Count == 0)
+                {
+                    WpfClientInfo.WriteInfoLog($"tag (UID={tag.OneTag?.UID}) 不属于任何已经定义的门，没有被加入 _all 集合。\r\ntag 详情：{tag.ToString()}");
+                    continue;
+                }
 
                 try
                 {
                     // Exception:
                     //      可能会抛出异常 ArgumentException TagDataException
-                    _all.Add(NewEntity(tag));
+                    var entity = NewEntity(tag);
+
+                    func_display($"正在填充图书队列 ({entity.PII})...");
+
+                    _all.Add(entity);
                 }
                 catch (TagDataException ex)
                 {

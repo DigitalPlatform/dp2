@@ -295,6 +295,26 @@ Description = "dp2SSL 的功能类型"
                 _config.Set("global", "function", value);
             }
         }
+
+        // 默认值 空
+        [Display(
+Order = 10,
+Name = "14443A卡号预处理",
+Description = "14443A卡号预处理"
+)]
+        [ItemsSource(typeof(CardNumberConvertItemsSource))]
+        [Category("全局")]
+        public string CardNumberConvert
+        {
+            get
+            {
+                return _config.Get("global", "card_number_convert_method", "十六进制");
+            }
+            set
+            {
+                _config.Set("global", "card_number_convert_method", value);
+            }
+        }
     }
 
 

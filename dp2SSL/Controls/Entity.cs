@@ -356,7 +356,7 @@ Stack:
    在 System.Runtime.CompilerServices.TaskAwaiter.GetResult()
    在 dp2SSL.PageShelf.<PageShelf_Loaded>d__9.MoveNext()
    * */
-        public Entity Clone()
+        public new Entity Clone()
         {
             Entity dup = new Entity();
             dup.Container = this.Container;

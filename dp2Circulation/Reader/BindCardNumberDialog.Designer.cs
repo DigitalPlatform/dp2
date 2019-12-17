@@ -35,6 +35,7 @@
             this.button_add = new System.Windows.Forms.Button();
             this.button_delete = new System.Windows.Forms.Button();
             this.button_add14443 = new System.Windows.Forms.Button();
+            this.button_add14443_decimal = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // button_Cancel
@@ -97,7 +98,7 @@
             // 
             this.button_delete.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_delete.Enabled = false;
-            this.button_delete.Location = new System.Drawing.Point(380, 191);
+            this.button_delete.Location = new System.Drawing.Point(380, 250);
             this.button_delete.Name = "button_delete";
             this.button_delete.Size = new System.Drawing.Size(133, 36);
             this.button_delete.TabIndex = 4;
@@ -116,6 +117,17 @@
             this.button_add14443.UseVisualStyleBackColor = true;
             this.button_add14443.Click += new System.EventHandler(this.button_add14443_Click);
             // 
+            // button_add14443_decimal
+            // 
+            this.button_add14443_decimal.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_add14443_decimal.Location = new System.Drawing.Point(380, 144);
+            this.button_add14443_decimal.Name = "button_add14443_decimal";
+            this.button_add14443_decimal.Size = new System.Drawing.Size(133, 62);
+            this.button_add14443_decimal.TabIndex = 7;
+            this.button_add14443_decimal.Text = "添加 14443A 卡号(十进制) ...";
+            this.button_add14443_decimal.UseVisualStyleBackColor = true;
+            this.button_add14443_decimal.Click += new System.EventHandler(this.button_add14443_decimal_Click);
+            // 
             // BindCardNumberDialog
             // 
             this.AcceptButton = this.button_OK;
@@ -123,6 +135,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.button_Cancel;
             this.ClientSize = new System.Drawing.Size(525, 373);
+            this.Controls.Add(this.button_add14443_decimal);
             this.Controls.Add(this.button_add14443);
             this.Controls.Add(this.button_delete);
             this.Controls.Add(this.button_add);
@@ -148,5 +161,6 @@
         private System.Windows.Forms.Button button_add;
         private System.Windows.Forms.Button button_delete;
         private System.Windows.Forms.Button button_add14443;
+        private System.Windows.Forms.Button button_add14443_decimal;
     }
 }
