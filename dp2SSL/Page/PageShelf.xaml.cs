@@ -46,6 +46,7 @@ namespace dp2SSL
 
         // EntityCollection _entities = new EntityCollection();
         Patron _patron = new Patron();
+        object _syncRoot_patron = new object();
 
         public string Mode { get; set; }    // 运行模式。空/initial
 
@@ -144,10 +145,18 @@ namespace dp2SSL
                 try
                 {
                     // TODO: 可否放到 App 的初始化阶段? 这样好处是菜单画面就可以看到有关数量显示了
-                    await InitialShelfEntities();
+                    // await InitialShelfEntities();
 
-                    // 迫使图书盘点暂停(如果门是全部关闭的话)
-                    // SetOpenCount(_openCount);
+                    await Task.Run(async () =>
+                    {
+                        // 初始化之前开灯，让使用者感觉舒服一些(感觉机器在活动状态)
+                        RfidManager.TurnShelfLamp("*", "turnOn");
+
+                        await InitialShelfEntities();
+
+                        // 初始化完成之后，应该是全部门关闭状态，还没有人开始使用，则先关灯，进入等待使用的状态
+                        RfidManager.TurnShelfLamp("*", "turnOff");
+                    });
                 }
                 catch (Exception ex)
                 {
@@ -311,21 +320,21 @@ namespace dp2SSL
         }
 
         // 当前读者卡状态是否 OK?
-        bool IsPatronOK(string action, out string message)
+        static bool IsPatronOK(Patron patron, string action, out string message)
         {
             message = "";
 
             // 如果 UID 为空，而 Barcode 有内容，也是 OK 的。这是指纹的场景
-            if (string.IsNullOrEmpty(_patron.UID) == true
-                && string.IsNullOrEmpty(_patron.Barcode) == false)
+            if (string.IsNullOrEmpty(patron.UID) == true
+                && string.IsNullOrEmpty(patron.Barcode) == false)
                 return true;
 
             // UID 和 Barcode 都不为空。这是 15693 和 14443 读者卡的场景
-            if (string.IsNullOrEmpty(_patron.UID) == false
-    && string.IsNullOrEmpty(_patron.Barcode) == false)
+            if (string.IsNullOrEmpty(patron.UID) == false
+    && string.IsNullOrEmpty(patron.Barcode) == false)
                 return true;
 
-            string debug_info = $"uid:[{_patron.UID}],barcode:[{_patron.Barcode}]";
+            string debug_info = $"uid:[{patron.UID}],barcode:[{patron.Barcode}]";
             if (action == "open")
             {
                 // 提示信息要考虑到应用了指纹的情况
@@ -496,39 +505,34 @@ namespace dp2SSL
                 return;
             }
 
+            // TODO: 这里最好锁定
+            Patron current_patron = null;
+
+            lock (_syncRoot_patron)
+            {
+                current_patron = _patron.Clone();
+            }
+
+
+            // TODO: 提前到这里这里清除读者信息?
+
             // 以前积累的 _adds 和 _removes 要先处理，处理完再开门
 
             // 先检查当前是否具备读者身份？
             // 检查读者卡状态是否 OK
-            if (IsPatronOK("open", out string check_message) == false)
+            if (IsPatronOK(current_patron, "open", out string check_message) == false)
             {
                 if (string.IsNullOrEmpty(check_message))
                     check_message = $"(读卡器上的)当前读者卡状态不正确。无法进行开门操作";
 
-                /*
-                ProgressWindow progress = null;
-
-                Application.Current.Dispatcher.Invoke(new Action(() =>
-                {
-                    progress = new ProgressWindow();
-                    progress.MessageText = "正在处理，请稍候 ...";
-                    progress.Owner = Application.Current.MainWindow;
-                    progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-                    progress.Closed += Progress_Closed;
-                    progress.Show();
-                    AddLayer();
-                }));
-
-                DisplayError(ref progress, check_message);
-                */
                 ErrorBox(check_message);
                 return;
             }
 
             var person = new Operator
             {
-                PatronBarcode = _patron.Barcode,
-                PatronName = _patron.PatronName
+                PatronBarcode = current_patron.Barcode,
+                PatronName = current_patron.PatronName
             };
             string libraryCodeOfDoor = ShelfData.GetLibraryCode(e.Door.ShelfNo);
 
@@ -536,7 +540,7 @@ namespace dp2SSL
             if (person.IsWorker == false)
             {
                 XmlDocument readerdom = new XmlDocument();
-                readerdom.LoadXml(_patron.Xml);
+                readerdom.LoadXml(current_patron.Xml);
                 // return:
                 //      -1  检查过程出错
                 //      0   状态不正常
@@ -633,6 +637,7 @@ namespace dp2SSL
                     return;
                 }
 
+                // TODO: 加锁。避免和 Clone() 互相干扰
                 // 如果读者信息区没有被固定，则门开后会自动清除读者信息区
                 if (PatronFixed == false)
                     PatronClear();
@@ -1306,7 +1311,15 @@ namespace dp2SSL
             if (ShelfData.FirstInitialized)
                 return;
 
-            this.doorControl.Visibility = Visibility.Collapsed;
+            // 尚未配置 shelf.xml
+            if (ShelfData.ShelfCfgDom == null)
+                return;
+
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                this.doorControl.Visibility = Visibility.Collapsed;
+            }));
+
             _initialCancelled = false;
 
             ProgressWindow progress = null;
@@ -1325,13 +1338,16 @@ namespace dp2SSL
                 progress.Show();
                 AddLayer();
             }));
-            this.doorControl.Visibility = Visibility.Hidden;
 
-            try
+            Application.Current.Dispatcher.Invoke(new Action(() =>
             {
                 // 把门显示出来。因为此时需要看到是否关门的状态
                 this.doorControl.Visibility = Visibility.Visible;
                 this.doorControl.InitializeButtons(ShelfData.ShelfCfgDom, ShelfData.Doors);
+            }));
+
+            try
+            {
 
                 // 检查门是否为关闭状态？
                 // 注意 RfidManager 中门锁启动需要一定时间。状态可能是：尚未初始化/有门开着/门都关了
@@ -1357,11 +1373,12 @@ namespace dp2SSL
     (s) =>
     {
         DisplayMessage(progress, s, "green");
+        // Thread.Sleep(1000);
     },
     () =>
     {
         return _initialCancelled;
-    });
+    }).ConfigureAwait(false);
 
                 if (_initialCancelled)
                     return;
@@ -1372,6 +1389,8 @@ namespace dp2SSL
                 {
                     ErrorBox(StringUtil.MakePathList(initial_result.Warnings, "\r\n"));
                 }
+
+                DisplayMessage(progress, "尝试还书和上架 ...", "green");
 
                 // TODO: 如何显示还书操作中的报错信息? 看了报错以后点继续?
                 // result.Value
@@ -1404,7 +1423,10 @@ namespace dp2SSL
             finally
             {
                 // _firstInitial = true;   // 第一次初始化已经完成
-                RemoveLayer();
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    RemoveLayer();
+                }));
 
                 if (_initialCancelled == false)
                 {
@@ -1581,6 +1603,12 @@ namespace dp2SSL
             }
         }
 
+        public static string HexToDecimal(string hex_string)
+        {
+            var bytes = Element.FromHexString(hex_string);
+            return BitConverter.ToUInt32(bytes, 0).ToString();
+        }
+
         // 填充读者信息的其他字段(第二阶段)
         async Task<NormalResult> FillPatronDetail(bool force = false)
         {
@@ -1611,7 +1639,12 @@ namespace dp2SSL
             }
 
             if (string.IsNullOrEmpty(pii))
-                pii = _patron.UID;
+            {
+                if (App.CardNumberConvertMethod == "十进制")
+                    pii = HexToDecimal(_patron.UID);  // 14443A 卡的 UID
+                else
+                    pii = _patron.UID;  // 14443A 卡的 UID
+            }
 
             if (string.IsNullOrEmpty(pii))
             {
@@ -1818,7 +1851,12 @@ namespace dp2SSL
             //if (_patron.Barcode != null && Operator.IsPatronBarcodeWorker(_patron.Barcode))
             //    App.CurrentApp.RemoveAccount(Operator.BuildWorkerAccountName(_patron.Barcode));
 
-            _patron.Clear();
+            lock (_syncRoot_patron)
+            {
+                _patron.Clear();
+            }
+
+
             if (!Application.Current.Dispatcher.CheckAccess())
                 Application.Current.Dispatcher.Invoke(new Action(() =>
             {
@@ -2019,6 +2057,8 @@ namespace dp2SSL
         static Operator GetOperator(Entity entity)
         {
             var doors = DoorItem.FindDoors(ShelfData.Doors, entity.ReaderName, entity.Antenna);
+            if (doors.Count == 0)
+                return null;
             var person = doors[0].Operator;
             if (person == null)
                 return new Operator();

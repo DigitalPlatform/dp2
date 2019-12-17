@@ -482,7 +482,7 @@ this.ActualHeight - (this.Padding.Top + this.Padding.Bottom)));
             // TODO: ShelfCfgDom 在从自助借还模式切换为智能书柜模式时会成为 null
 
             // shelf.xml 中 root 元素的 backImageFile 属性
-            string backImageFile = ShelfData.ShelfCfgDom.DocumentElement.GetAttribute("backImageFile");
+            string backImageFile = ShelfData.ShelfCfgDom?.DocumentElement?.GetAttribute("backImageFile");
             if (string.IsNullOrEmpty(backImageFile))
                 return;
 

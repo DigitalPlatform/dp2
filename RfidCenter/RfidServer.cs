@@ -22,7 +22,7 @@ namespace RfidCenter
     {
         static CompactLog _compactLog = new CompactLog();
 
-        static SimuLock _simuLock = new SimuLock(1, 8);
+        static SimuLock _simuLock = new SimuLock(2, 24); // 2 块锁控版，每块上面控制 24 个门
 
         public void Dispose()
         {

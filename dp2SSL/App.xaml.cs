@@ -154,7 +154,7 @@ namespace dp2SSL
             FingerprintManager.Base.Name = "指纹中心";
             FingerprintManager.Url = App.FingerprintUrl;
             FingerprintManager.SetError += FingerprintManager_SetError;
-            WpfClientInfo.WriteInfoLog("RfidManager.Start()");
+            WpfClientInfo.WriteInfoLog("FingerprintManager.Start()");
             FingerprintManager.Start(_cancelRefresh.Token);
 
             FaceManager.Base.Name = "人脸中心";
@@ -185,6 +185,12 @@ namespace dp2SSL
 
             RfidManager.ListLocks += ShelfData.RfidManager_ListLocks;
 
+            // 2019/12/17
+            // 智能书柜一开始假定全部门关闭，所以不需要对任何图书读卡器进行盘点
+            if (App.Function == "智能书柜")
+                RfidManager.ReaderNameList = "";
+
+            WpfClientInfo.WriteInfoLog("FingerprintManager.Start()");
             RfidManager.Start(_cancelRefresh.Token);
             if (App.Function == "智能书柜")
             {
@@ -207,6 +213,10 @@ namespace dp2SSL
                 try
                 {
                     ShelfData.InitialShelf();
+                }
+                catch(FileNotFoundException)
+                {
+                    this.SetError("cfg", $"尚未配置 shelf.xml 文件");
                 }
                 catch (Exception ex)
                 {
@@ -576,6 +586,16 @@ namespace dp2SSL
                 return WpfClientInfo.Config?.Get("global",
     "function",
     "自助借还");
+            }
+        }
+
+        public static string CardNumberConvertMethod
+        {
+            get
+            {
+                return WpfClientInfo.Config?.Get("global",
+    "card_number_convert_method",
+    "十六进制");
             }
         }
 

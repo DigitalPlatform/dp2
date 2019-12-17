@@ -17,4 +17,16 @@ namespace dp2SSL
             return sizes;
         }
     }
+
+    public class CardNumberConvertItemsSource : IItemsSource
+    {
+        public ItemCollection GetValues()
+        {
+            ItemCollection sizes = new ItemCollection();
+            sizes.Add("十进制");
+            sizes.Add("十六进制");
+            return sizes;
+        }
+    }
+    
 }
