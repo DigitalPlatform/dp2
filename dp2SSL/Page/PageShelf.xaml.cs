@@ -199,10 +199,17 @@ namespace dp2SSL
             if (string.IsNullOrEmpty(barcode) || barcode.StartsWith("~"))
                 return;
 
+            // return:
+            //      false   没有成功
+            //      true    成功
             SetPatronInfo(new GetMessageResult { Message = barcode });
 
+            // resut.Value
+            //      -1  出错
+            //      0   没有填充
+            //      1   成功填充
             var result = await FillPatronDetail();
-            if (result.Value != -1)
+            if (result.Value == 1)
                 Welcome();
         }
 
@@ -843,10 +850,17 @@ namespace dp2SSL
         // 从指纹阅读器获取消息(第一阶段)
         private async void FingerprintManager_Touched(object sender, TouchedEventArgs e)
         {
+            // return:
+            //      false   没有成功
+            //      true    成功
             SetPatronInfo(e.Result);
 
+            // resut.Value
+            //      -1  出错
+            //      0   没有填充
+            //      1   成功填充
             var result = await FillPatronDetail();
-            if (result.Value != -1)
+            if (result.Value == 1)
                 Welcome();
 #if NO
             Application.Current.Dispatcher.Invoke(new Action(() =>
@@ -857,13 +871,16 @@ namespace dp2SSL
 #endif
         }
 
-        // 从指纹阅读器获取消息(第一阶段)
-        void SetPatronInfo(GetMessageResult result)
+        // 从指纹阅读器(或人脸)获取消息(第一阶段)
+        // return:
+        //      false   没有成功
+        //      true    成功
+        bool SetPatronInfo(GetMessageResult result)
         {
             if (ClosePasswordDialog() == true)
             {
                 // 这次刷卡的作用是取消了上次登录
-                return;
+                return false;
             }
 
             if (result.Value == -1)
@@ -871,7 +888,7 @@ namespace dp2SSL
                 SetPatronError("fingerprint", $"指纹中心出错: {result.ErrorInfo}, 错误码: {result.ErrorCode}");
                 if (_patron.IsFingerprintSource)
                     PatronClear();    // 只有当面板上的读者信息来源是指纹仪时，才清除面板上的读者信息
-                return;
+                return false;
             }
             else
             {
@@ -880,11 +897,12 @@ namespace dp2SSL
             }
 
             if (result.Message == null)
-                return;
+                return false;
 
             PatronClear();
             _patron.IsFingerprintSource = true;
             _patron.PII = result.Message;
+            return true;
         }
 
         private void FingerprintManager_SetError(object sender, SetErrorEventArgs e)
@@ -1567,8 +1585,12 @@ namespace dp2SSL
                         SetPatronError("rfid_multi", "");   // 2019/5/22
 
                         // 2019/5/29
+                        // resut.Value
+                        //      -1  出错
+                        //      0   没有填充
+                        //      1   成功填充
                         var result = await FillPatronDetail();
-                        if (result.Value != -1)
+                        if (result.Value == 1)
                             Welcome();
                     }
                     else
@@ -1610,6 +1632,10 @@ namespace dp2SSL
         }
 
         // 填充读者信息的其他字段(第二阶段)
+        // resut.Value
+        //      -1  出错
+        //      0   没有填充
+        //      1   成功填充
         async Task<NormalResult> FillPatronDetail(bool force = false)
         {
             // 已经填充过了
@@ -1635,7 +1661,7 @@ namespace dp2SSL
                     PatronClear();
                     return login_result;
                 }
-                return new NormalResult();
+                return new NormalResult { Value = 1 };
             }
 
             if (string.IsNullOrEmpty(pii))
@@ -1670,7 +1696,11 @@ namespace dp2SSL
 
                 string error = $"读者 '{pii}': {result.ErrorInfo}";
                 SetPatronError("getreaderinfo", error);
-                return new NormalResult { Value = -1, ErrorInfo = error };
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = error
+                };
             }
 
             SetPatronError("getreaderinfo", "");
@@ -1725,23 +1755,32 @@ namespace dp2SSL
                 });
             }
 #endif
-            return new NormalResult();
+            return new NormalResult { Value = 1 };
         }
 
         InputPasswordWindows _passwordDialog = null;
 
+        // return:
+        //      true    关闭了密码输入窗口
+        //      false   其他情况
         bool ClosePasswordDialog()
         {
+            bool found = false;
             if (_passwordDialog != null)
             {
                 Application.Current.Dispatcher.Invoke(new Action(() =>
                 {
                     _passwordDialog.Close();
+                    found = true;
                 }));
-                return true;
             }
 
-            return false;
+            // 2019/12/18
+            // 关闭已经打开的人脸识别视频窗口
+            if (CloseRecognitionWindow() == true)
+                found = true;
+
+            return found;
         }
 
         async Task<NormalResult> WorkerLogin(string pii)
@@ -2454,26 +2493,27 @@ ShelfData.Actions);
 
         bool _stopVideo = false;
 
+        VideoWindow _videoRecognition = null;
+
         private async void PatronControl_InputFace(object sender, EventArgs e)
         {
             RecognitionFaceResult result = null;
 
-            VideoWindow videoRecognition = null;
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
-                videoRecognition = new VideoWindow
+                _videoRecognition = new VideoWindow
                 {
                     TitleText = "识别人脸 ...",
                     Owner = Application.Current.MainWindow,
                     WindowStartupLocation = WindowStartupLocation.CenterOwner
                 };
-                videoRecognition.Closed += VideoRecognition_Closed;
-                videoRecognition.Show();
+                _videoRecognition.Closed += VideoRecognition_Closed;
+                _videoRecognition.Show();
             }));
             _stopVideo = false;
             var task = Task.Run(() =>
             {
-                DisplayVideo(videoRecognition);
+                DisplayVideo(_videoRecognition);
             });
             try
             {
@@ -2482,7 +2522,7 @@ ShelfData.Actions);
                 {
                     if (result.ErrorCode != "cancelled")
                         SetGlobalError("face", result.ErrorInfo);
-                    DisplayError(ref videoRecognition, result.ErrorInfo);
+                    DisplayError(ref _videoRecognition, result.ErrorInfo);
                     return;
                 }
 
@@ -2490,10 +2530,10 @@ ShelfData.Actions);
             }
             finally
             {
-                if (videoRecognition != null)
+                if (_videoRecognition != null)
                     Application.Current.Dispatcher.Invoke(new Action(() =>
                     {
-                        videoRecognition.Close();
+                        _videoRecognition.Close();
                     }));
             }
 
@@ -2502,11 +2542,18 @@ ShelfData.Actions);
                 Value = 1,
                 Message = result.Patron,
             };
+            // return:
+            //      false   没有成功
+            //      true    成功
             SetPatronInfo(message);
             SetQuality("");
 
+            // resut.Value
+            //      -1  出错
+            //      0   没有填充
+            //      1   成功填充
             var fill_result = await FillPatronDetail();
-            if (fill_result.Value != -1)
+            if (fill_result.Value == 1)
                 Welcome();
         }
 
@@ -2529,6 +2576,8 @@ ShelfData.Actions);
         string message,
         string color = "red")
         {
+            if (videoRegister == null)
+                return;
             MemoryDialog(videoRegister);
             var temp = videoRegister;
             Application.Current.Dispatcher.Invoke(new Action(() =>
@@ -2582,6 +2631,22 @@ ShelfData.Actions);
             FaceManager.CancelRecognitionFace();
             _stopVideo = true;
             RemoveLayer();
+            _videoRecognition = null;
+        }
+
+        bool CloseRecognitionWindow()
+        {
+            bool closed = false;
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                if (_videoRecognition != null)
+                {
+                    _videoRecognition.Close();
+                    closed = true;
+                }
+            }));
+
+            return closed;
         }
 
         void EnableControls(bool enable)

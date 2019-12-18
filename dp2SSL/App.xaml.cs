@@ -561,6 +561,9 @@ namespace dp2SSL
         {
             get
             {
+                if (WpfClientInfo.Config == null)
+                    return true;
+
                 return (bool)WpfClientInfo.Config?.GetBoolean("global",
                     "process_monitor",
                     true);
@@ -596,6 +599,18 @@ namespace dp2SSL
                 return WpfClientInfo.Config?.Get("global",
     "card_number_convert_method",
     "十六进制");
+            }
+        }
+
+        public static bool DetectBookChange
+        {
+            get
+            {
+                if (WpfClientInfo.Config == null)
+                    return true;
+                return (bool)WpfClientInfo.Config?.GetBoolean("shelf_operation",
+    "detect_book_change",
+    true);
             }
         }
 
