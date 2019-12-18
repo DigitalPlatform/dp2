@@ -315,6 +315,25 @@ Description = "14443A卡号预处理"
                 _config.Set("global", "card_number_convert_method", value);
             }
         }
+
+        // 默认值 true
+        [Display(
+Order = 1,
+Name = "动态反馈图书变动数",
+Description = "是否动态反馈图书变动数"
+)]
+        [Category("智能书柜操作风格")]
+        public bool DetectBookChange
+        {
+            get
+            {
+                return _config.GetBoolean("shelf_operation", "detect_book_change", true);
+            }
+            set
+            {
+                _config.SetBoolean("shelf_operation", "detect_book_change", value);
+            }
+        }
     }
 
 
