@@ -688,6 +688,7 @@ DoorStateChangedEventArgs e);
         public DoorItem Door { get; set; }
         public string OldState { get; set; }
         public string NewState { get; set; }
+        public string Comment { get; set; } // 对事件消息来源做一个注释
     }
 
     public delegate void BookChangedEventHandler(object sender,
