@@ -213,6 +213,8 @@ namespace dp2SSL
                 Welcome();
         }
 
+        object _syncRoot_save = new object();
+
         // 门状态变化。从这里触发提交
         private async void ShelfData_DoorStateChanged(object sender, DoorStateChangedEventArgs e)
         {
@@ -224,6 +226,7 @@ namespace dp2SSL
                 e.Door.IncWaiting();  // inventory 期间显示等待动画
                 try
                 {
+                    // TODO: 这里用 await 是否不太合适？
                     await Task.Run(() =>
                     {
                         ShelfData.RefreshInventory(e.Door);
@@ -235,16 +238,20 @@ namespace dp2SSL
                     //WpfClientInfo.WriteInfoLog($"--decWaiting() door '{e.Door.Name}' state changed");
                 }
 
-                SaveDoorActions(e.Door);
+                lock (_syncRoot_save)
+                {
+                    SaveDoorActions(e.Door);
 
-                /*
-                // testing
-                // 先保存一套 actions
-                List<ActionInfo> temp = new List<ActionInfo>();
-                temp.AddRange(ShelfData.Actions);
-                */
+                    /*
+                    // testing
+                    // 先保存一套 actions
+                    List<ActionInfo> temp = new List<ActionInfo>();
+                    temp.AddRange(ShelfData.Actions);
+                    */
 
-                e.Door.Operator = null; // 清掉门上的操作者名字
+                    e.Door.Operator = null; // 清掉门上的操作者名字
+                }
+
                 var task = SubmitCheckInOut("");
 
                 /*
@@ -270,7 +277,7 @@ namespace dp2SSL
                     WpfClientInfo.WriteErrorLog($"!!! 门 {e.Door.Name} PopCommand() 时候没有找到命令对象");
                 }
                 */
-                ShelfData.ProcessOpenCommand(e.Door);
+                ShelfData.ProcessOpenCommand(e.Door, e.Comment);
             }
         }
 
@@ -640,7 +647,7 @@ namespace dp2SSL
                     //MessageBox.Show(result.ErrorInfo);
                     DisplayError(ref progress, result.ErrorInfo);
                     // e.Door.Operator = null;
-                    ShelfData.PopCommand(e.Door);
+                    ShelfData.PopCommand(e.Door, "cancelled");
                     return;
                 }
 
@@ -1410,12 +1417,15 @@ namespace dp2SSL
 
                 DisplayMessage(progress, "尝试还书和上架 ...", "green");
 
+                WpfClientInfo.WriteInfoLog("首次初始化尝试还书和上架开始");
                 // TODO: 如何显示还书操作中的报错信息? 看了报错以后点继续?
                 // result.Value
                 //      -1  出错
                 //      0   没有必要处理
                 //      1   已经处理
                 var result = TryReturn(progress, ShelfData.All);
+                WpfClientInfo.WriteInfoLog("首次初始化尝试还书和上架结束");
+
                 if (result.MessageDocument != null
                     && result.MessageDocument.ErrorCount > 0)
                 {
@@ -2093,14 +2103,26 @@ namespace dp2SSL
         */
 
         // 获得特定门的 Operator
-        static Operator GetOperator(Entity entity)
+        // parameters:
+        //      logNullOperator 是否在错误日志里面记载未找到门的 Operator 的情况？(读者借书时候需要 log，其他时候不需要)
+        static Operator GetOperator(Entity entity, bool logNullOperator)
         {
             var doors = DoorItem.FindDoors(ShelfData.Doors, entity.ReaderName, entity.Antenna);
             if (doors.Count == 0)
                 return null;
+            if (doors.Count > 1)
+            {
+                WpfClientInfo.WriteErrorLog($"读卡器名 '{entity.ReaderName}' 天线编号 {entity.Antenna} 匹配上 {doors.Count} 个门");
+                throw new Exception($"读卡器名 '{entity.ReaderName}' 天线编号 {entity.Antenna} 匹配上 {doors.Count} 个门。请检查 shelf.xml 并修正配置此错误，确保只匹配一个门");
+            }
+
             var person = doors[0].Operator;
             if (person == null)
+            {
+                if (logNullOperator)
+                    WpfClientInfo.WriteErrorLog($"标签 '{entity.UID}' 经查找属于门 '{doors[0].Name}'，但此时门 '{doors[0].Name}' 并没有关联的 Operator 信息");
                 return new Operator();
+            }
             return person;
         }
 
@@ -2120,14 +2142,14 @@ namespace dp2SSL
                 {
                     Entity = entity,
                     Action = "return",
-                    Operator = GetOperator(entity)
+                    Operator = GetOperator(entity, false)
                 });
                 actions.Add(new ActionInfo
                 {
                     Entity = entity,
                     Action = "transfer",
                     CurrentShelfNo = ShelfData.GetShelfNo(entity),
-                    Operator = GetOperator(entity)
+                    Operator = GetOperator(entity, false)
                 });
             }
 
@@ -2239,8 +2261,18 @@ namespace dp2SSL
             ShelfData.SaveActions((entity) =>
             {
                 var results = DoorItem.FindDoors(ShelfData.Doors, entity.ReaderName, entity.Antenna);
+                // TODO: 如果遇到 results.Count > 1 是否抛出异常?
+                if (results.Count > 1)
+                {
+                    WpfClientInfo.WriteErrorLog($"读卡器名 '{entity.ReaderName}' 天线编号 {entity.Antenna} 匹配上 {results.Count} 个门");
+                    throw new Exception($"读卡器名 '{entity.ReaderName}' 天线编号 {entity.Antenna} 匹配上 {results.Count} 个门。请检查 shelf.xml 并修正配置此错误，确保只匹配一个门");
+                }
+
                 if (results.IndexOf(door) != -1)
-                    return GetOperator(entity);
+                {
+                    return door.Operator;
+                    // return GetOperator(entity);
+                }
                 return null;
             });
         }
@@ -2250,7 +2282,7 @@ namespace dp2SSL
         {
             ShelfData.SaveActions((entity) =>
             {
-                return GetOperator(entity);
+                return GetOperator(entity, true);
             });
         }
 

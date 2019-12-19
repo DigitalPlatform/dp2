@@ -70,10 +70,10 @@ namespace dp2SSL
             }
         }
 
-        public static void ProcessOpenCommand(DoorItem door)
+        public static void ProcessOpenCommand(DoorItem door, string comment)
         {
             // 切换所有者
-            var command = ShelfData.PopCommand(door);
+            var command = ShelfData.PopCommand(door, comment);
             if (command != null)
             {
                 door.DecWaiting();
@@ -98,6 +98,7 @@ namespace dp2SSL
                 return;
             }
 
+            List<DoorItem> processed = new List<DoorItem>();
             // bool triggerAllClosed = false;
             {
                 int count = 0;
@@ -121,6 +122,8 @@ namespace dp2SSL
                                 NewState = result.NewState
                             });
 
+                            processed.Add(result.Door);
+
                             if (result.NewState == "open")
                                 App.CurrentApp.Speak($"{result.LockName} 打开");
                             else
@@ -135,6 +138,8 @@ namespace dp2SSL
                 SetOpenCount(count);
             }
 
+            // TODO: 如果刚才已经获得了一个门锁的关门信号，则后面不要重复触发 DoorStateChanged 
+
             // 2019/12/16
             // 对可能遗漏 Pop 的 命令进行检查
             {
@@ -147,6 +152,12 @@ namespace dp2SSL
                         // 如果此门状态不是关闭状态，则不需要进行修补处理
                         if (command.Door.State != "close")
                             continue;
+
+                        // 2019/12/18
+                        // 前面正常处理流程已经触发过这个门的状态变化事件了
+                        if (processed.IndexOf(command.Door) != -1)
+                            continue;
+
                         // ProcessOpenCommand(command.Door);
                         // 补一次门状态变化? --> open --> close
                         // 触发单独一个门被关闭的事件
@@ -154,16 +165,18 @@ namespace dp2SSL
                         {
                             Door = command.Door,
                             OldState = "close",
-                            NewState = "open"
+                            NewState = "open",
+                            Comment = $"补做。Heartbeat={RfidManager.LockHeartbeat}",
                         });
                         DoorStateChanged?.Invoke(null, new DoorStateChangedEventArgs
                         {
                             Door = command.Door,
                             OldState = "open",
-                            NewState = "close"
+                            NewState = "close",
+                            Comment = $"补做。Heartbeat={RfidManager.LockHeartbeat}",
                         });
                         App.CurrentApp.Speak("补做检查");   // 测试完成后可以取消这个语音
-                        WpfClientInfo.WriteInfoLog($"提醒：检查过程为门 '{command.Door.Name}' 补做了一次 open 和 一次 close");
+                        WpfClientInfo.WriteInfoLog($"提醒：检查过程为门 '{command.Door.Name}' 补做了一次 open 和 一次 close。Heartbeat:{RfidManager.LockHeartbeat}");
                     }
                 }
             }
@@ -2368,10 +2381,11 @@ namespace dp2SSL
                     WpfClientInfo.WriteErrorLog("_commandQueue 元素个数超过 1000。为保证安全自动清除了全部元素");
                 }
                 _commandQueue.Add(command);
+                WpfClientInfo.WriteInfoLog($"PushCommand {command.ToString()}");
             }
         }
 
-        public static CommandItem PopCommand(DoorItem door)
+        public static CommandItem PopCommand(DoorItem door, string comment = "")
         {
             lock (_syncRoot_commandQueue)
             {
@@ -2386,8 +2400,12 @@ namespace dp2SSL
                 }
 
                 if (result == null)
+                {
+                    WpfClientInfo.WriteInfoLog($"PopCommand (door={door.Name} 时间={RfidManager.LockHeartbeat}) ({comment}) not found command");
                     return null;
+                }
                 _commandQueue.Remove(result);
+                WpfClientInfo.WriteInfoLog($"PopCommand (door={door.Name} 时间={RfidManager.LockHeartbeat}) ({comment}) {result.ToString()}");
                 return result;
             }
         }
@@ -2401,7 +2419,7 @@ namespace dp2SSL
                 foreach (var command in _commandQueue)
                 {
                     // 和当初 push 时候间隔了多个心跳
-                    if (currentHeartbeat >= command.Heartbeat + 1)
+                    if (currentHeartbeat >= command.Heartbeat + 1)  // +1
                     {
                         results.Add(command);
                     }
@@ -2433,6 +2451,11 @@ namespace dp2SSL
     {
         public string PatronName { get; set; }
         public string PatronBarcode { get; set; }
+
+        public override string ToString()
+        {
+            return $"PatronName:{PatronName}, PatronBarcode:{PatronBarcode}";
+        }
 
         public static bool IsPatronBarcodeWorker(string patronBarcode)
         {
@@ -2496,7 +2519,7 @@ namespace dp2SSL
 
         public override string ToString()
         {
-            return $"DoorName:{Door.Name}, Command:{Command}";
+            return $"DoorName:{Door.Name}, Command:{Command}, Parameter:{Parameter}, Heartbeat:{Heartbeat}";
         }
     }
 }
