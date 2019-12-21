@@ -166,6 +166,27 @@ namespace dp2SSL
             }
 
             // InputMethod.Current.ImeState = InputMethodState.Off;
+            if (ShelfData.DoorMonitor == null)
+            {
+                ShelfData.DoorMonitor = new DoorMonitor();
+                /*
+                ShelfData.DoorMonitor.Start(async (door) =>
+                    {
+                        ShelfData.RefreshInventory(door);
+                        SaveDoorActions(door);
+                        await SubmitCheckInOut();   // "silence"
+                    },
+                    new CancellationToken());
+                    */
+                // 不使用独立线程。而是借用 getLockState 的线程来处理
+                ShelfData.DoorMonitor.Initialize(async (door) =>
+                {
+                    ShelfData.RefreshInventory(door);
+                    SaveDoorActions(door);
+                    // door.Operator = null;
+                    await SubmitCheckInOut();   // "silence"
+                });
+            }
         }
 
         private void App_Updated(object sender, UpdatedEventArgs e)
@@ -249,7 +270,7 @@ namespace dp2SSL
                     temp.AddRange(ShelfData.Actions);
                     */
 
-                    e.Door.Operator = null; // 清掉门上的操作者名字
+                    // e.Door.Operator = null; // 清掉门上的操作者名字
                 }
 
                 var task = SubmitCheckInOut("");
@@ -261,24 +282,15 @@ namespace dp2SSL
                 */
             }
 
+            /*
             if (e.NewState == "open")
             {
-                /*
-                // 切换所有者
-                var command = ShelfData.PopCommand(e.Door);
-                if (command != null)
-                {
-                    e.Door.DecWaiting();
-                    WpfClientInfo.WriteInfoLog($"--decWaiting() door '{e.Door.Name}' pop command");
-                    e.Door.Operator = command.Parameter as Operator;
-                }
-                else
-                {
-                    WpfClientInfo.WriteErrorLog($"!!! 门 {e.Door.Name} PopCommand() 时候没有找到命令对象");
-                }
-                */
                 ShelfData.ProcessOpenCommand(e.Door, e.Comment);
             }
+            */
+
+            // 取消状态变化监控
+            ShelfData.DoorMonitor.RemoveMessages(e.Door);
         }
 
         static string GetPartialName(string buttonName)
@@ -636,18 +648,46 @@ namespace dp2SSL
                     return;
                 }
 
+                // 2019/12/21
+                if (e.Door.Operator != null)
+                {
+                    WpfClientInfo.WriteInfoLog($"开门前发现门 {e.Door.Name} 的 Operator 不为空(为 '{e.Door.Operator.ToString()}')，所以补做一次 Inventory");
+                    // 补做一次 inventory，确保不会漏掉 RFID 变动信息
+                    try
+                    {
+                        await Task.Run(() =>
+                        {
+                            ShelfData.RefreshInventory(e.Door);
+                            SaveDoorActions(e.Door);
+                            // TODO: 是否 Submit? Submit 窗口可能会干扰原本的开门流程
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        WpfClientInfo.WriteErrorLog($"对门 {e.Door.Name} 补做 Inventory 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                    }
+                }
+
+                e.Door.Operator = person;
+
+                // 开始监控这个门的状态变化。如果超过一定时间没有得到开门状态，则主动补一次 submit 动作
+                ShelfData.DoorMonitor?.BeginMonitor(e.Door);
+
+                /*
                 // TODO: 是否这里要等待开门信号到来时候再给门赋予操作者身份？因为过早赋予身份，可能会破坏一个姗姗来迟的早先一个关门动作信号的提交动作
                 // 给门赋予操作者身份
-                // e.Door.Operator = person;
                 ShelfData.PushCommand(e.Door, person, RfidManager.LockHeartbeat);
+                */
 
                 var result = RfidManager.OpenShelfLock(e.Door.LockPath);
                 if (result.Value == -1)
                 {
                     //MessageBox.Show(result.ErrorInfo);
                     DisplayError(ref progress, result.ErrorInfo);
-                    // e.Door.Operator = null;
+                    e.Door.Operator = null;
+                    /*
                     ShelfData.PopCommand(e.Door, "cancelled");
+                    */
                     return;
                 }
 
@@ -660,7 +700,7 @@ namespace dp2SSL
                 CancelDelayClearTask();
 
                 // 一旦成功，门的 waiting 状态会在 PopCommand 的同时被改回 false
-                succeed = true;
+                //succeed = true;
 
                 /*
                 // 等待确认收到开门信号
@@ -2188,76 +2228,6 @@ namespace dp2SSL
         // 将指定门的暂存的信息保存为 Action。但并不立即提交
         void SaveDoorActions(DoorItem door)
         {
-            /*
-            List<ActionInfo> actions = new List<ActionInfo>();
-            List<Entity> processed = new List<Entity>();
-            foreach (var entity in ShelfData.Adds)
-            {
-                if (ShelfData.BelongToNormal(entity) == false)
-                    continue;
-                actions.Add(new ActionInfo
-                {
-                    Entity = entity,
-                    Action = "return",
-                    Operator = GetOperator(entity)
-                });
-                // 没有更新的，才进行一次 transfer
-                if (ShelfData.Find(ShelfData.Changes, entity.UID).Count == 0)
-                {
-                    actions.Add(new ActionInfo
-                    {
-                        Entity = entity,
-                        Action = "transfer",
-                        CurrentShelfNo = ShelfData.GetShelfNo(entity),
-                        Operator = GetOperator(entity)
-                    });
-                }
-
-                processed.Add(entity);
-            }
-
-            foreach (var entity in ShelfData.Changes)
-            {
-                if (ShelfData.BelongToNormal(entity) == false)
-                    continue;
-                // 更新
-                actions.Add(new ActionInfo
-                {
-                    Entity = entity,
-                    Action = "transfer",
-                    CurrentShelfNo = ShelfData.GetShelfNo(entity),
-                    Operator = GetOperator(entity)
-                });
-                processed.Add(entity);
-            }
-
-            foreach (var entity in ShelfData.Removes)
-            {
-                if (ShelfData.BelongToNormal(entity) == false)
-                    continue;
-                actions.Add(new ActionInfo
-                {
-                    Entity = entity,
-                    Action = "borrow",
-                    Operator = GetOperator(entity)
-                });
-
-                processed.Add(entity);
-            }
-
-            foreach (var entity in processed)
-            {
-                ShelfData.Remove(ShelfData.All, entity);
-                ShelfData.Remove(ShelfData.Adds, entity);
-                ShelfData.Remove(ShelfData.Removes, entity);
-                ShelfData.Remove(ShelfData.Changes, entity);
-            }
-
-            if (actions.Count == 0)
-                return;  // 没有必要处理
-
-            ShelfData.PushActions(actions);
-            */
             ShelfData.SaveActions((entity) =>
             {
                 var results = DoorItem.FindDoors(ShelfData.Doors, entity.ReaderName, entity.Antenna);
@@ -2275,6 +2245,10 @@ namespace dp2SSL
                 }
                 return null;
             });
+
+            // 2019/12/21
+            if (door.State == "close")
+                door.Operator = null; // 清掉门上的操作者名字
         }
 
         // 将所有暂存信息保存为 Action，但并不立即提交

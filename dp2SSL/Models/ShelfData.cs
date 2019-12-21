@@ -25,6 +25,8 @@ namespace dp2SSL
     /// </summary>
     public static class ShelfData
     {
+        public static DoorMonitor DoorMonitor = null;
+
         public static CancellationToken CancelToken
         {
             get
@@ -70,6 +72,7 @@ namespace dp2SSL
             }
         }
 
+        /*
         public static void ProcessOpenCommand(DoorItem door, string comment)
         {
             // 切换所有者
@@ -85,6 +88,7 @@ namespace dp2SSL
                 WpfClientInfo.WriteErrorLog($"!!! 门 {door.Name} PopCommand() 时候没有找到命令对象");
             }
         }
+        */
 
         static int _openingDoorCount = -1; // 当前处于打开状态的门的个数。-1 表示个数尚未初始化
 
@@ -107,6 +111,7 @@ namespace dp2SSL
                     if (state.State == "open")
                         count++;
 
+                    // 刷新门锁对象的 State 状态
                     var results = DoorItem.SetLockState(ShelfData.Doors, state);
                     // 注：有可能一个锁和多个门关联
                     foreach (LockChanged result in results)
@@ -115,6 +120,7 @@ namespace dp2SSL
                             && string.IsNullOrEmpty(result.OldState) == false)
                         {
                             // 触发单独一个门被关闭的事件
+                            // 注意此时 door 对象的 State 状态已经变化为新状态了
                             DoorStateChanged?.Invoke(null, new DoorStateChangedEventArgs
                             {
                                 Door = result.Door,
@@ -138,6 +144,10 @@ namespace dp2SSL
                 SetOpenCount(count);
             }
 
+
+            ShelfData.DoorMonitor?.ProcessTimeout();
+
+#if REMOVED
             // TODO: 如果刚才已经获得了一个门锁的关门信号，则后面不要重复触发 DoorStateChanged 
 
             // 2019/12/16
@@ -180,6 +190,7 @@ namespace dp2SSL
                     }
                 }
             }
+#endif
         }
 
         // 设置打开门数量
@@ -247,7 +258,7 @@ namespace dp2SSL
             }
         }
 
-        #region 延迟关灯
+#region 延迟关灯
 
         static DelayAction _delayTurnOffTask = null;
 
@@ -288,7 +299,7 @@ namespace dp2SSL
                 });
         }
 
-        #endregion
+#endregion
 
 
         public static void RefreshReaderNameList()
@@ -2356,10 +2367,12 @@ namespace dp2SSL
             }
         }
 
+#if REMOVED
+#region 门命令延迟执行
+
         // 门命令(延迟执行)队列。开门时放一个命令进入队列。等得到门开信号的时候再取出这个命令
         static List<CommandItem> _commandQueue = new List<CommandItem>();
         static object _syncRoot_commandQueue = new object();
-
 
         public static void PushCommand(DoorItem door,
             Operator person,
@@ -2444,6 +2457,9 @@ namespace dp2SSL
             }
         }
 
+
+#endregion
+#endif
     }
 
     // 操作者

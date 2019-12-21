@@ -33,7 +33,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>67</ApplicationRevision>
+    <ApplicationRevision>77</ApplicationRevision>
     <ApplicationVersion>1.3.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -197,6 +197,7 @@
     <Compile Include="ManagerBase.cs" />
     <Compile Include="Models\DelayAction.cs" />
     <Compile Include="Models\Door.cs" />
+    <Compile Include="Models\DoorMonitor.cs" />
     <Compile Include="Models\MessageDocument.cs" />
     <Compile Include="Models\ShelfData.cs" />
     <Compile Include="Models\SpeakList.cs" />
