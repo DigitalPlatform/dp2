@@ -197,6 +197,8 @@ namespace dp2SSL
             FingerprintManager.Clear();
             FaceManager.Url = App.FaceUrl;
             FaceManager.Clear();
+            // 迫使 RfidManager.ReaderNameList 反应最新变化
+            ShelfData.RefreshReaderNameList();
 
             // 2019/6/19
             // 主动保存一次参数配置
@@ -238,6 +240,9 @@ namespace dp2SSL
 
             // 2019/12/9
             App.CurrentApp.InitialShelfCfg();
+            // 因为 Doors 发生了变化，所以要重新初始化门控件
+            PageMenu.PageShelf?.InitialDoorControl();
+            ShelfData.RefreshCount();
 
             // 重新启动 Proccess 监控
             App.CurrentApp.StartProcessManager();

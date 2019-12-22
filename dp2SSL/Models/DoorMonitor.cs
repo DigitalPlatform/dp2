@@ -17,7 +17,7 @@ namespace dp2SSL
 
         public TimeSpan TimeoutLength = TimeSpan.FromSeconds(5);
 
-        public delegate void Delegate_tiggerSubmit(DoorItem door);
+        public delegate void Delegate_tiggerSubmit(DoorItem door, bool clearOperator);
 
         object _syncRoot = new object();
 
@@ -63,7 +63,7 @@ namespace dp2SSL
                     App.CurrentApp.Speak("补做遗留提交");
                     WpfClientInfo.WriteInfoLog($"对门 {message.Door.Name} 补做一次 submit (1)");
 
-                    _func_submit?.Invoke(message.Door);
+                    _func_submit?.Invoke(message.Door, false);
                     message.StartTime = DateTime.Now;   // 重新开始
                     message.HeartbeatTicks = RfidManager.LockHeartbeat;
                 }
@@ -115,8 +115,10 @@ namespace dp2SSL
                         App.CurrentApp.Speak("超时补做提交");
                         WpfClientInfo.WriteInfoLog($"超时情况下，对门 {message.Door.Name} 补做一次 submit");
 
-                        _func_submit?.Invoke(message.Door);
+                        _func_submit?.Invoke(message.Door, true);
                         delete_messages.Add(message);
+
+                        message.Door.Waiting--;
                     }
                 }
 
