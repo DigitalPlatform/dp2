@@ -283,6 +283,9 @@ KeyTime.FromTimeSpan(TimeSpan.FromSeconds(start + _length))) // KeyTime
         public void InitializeButtons(XmlDocument cfg_dom,
             List<DoorItem> items)
         {
+            // 2019/12/22
+            this.canvas.Children.Clear();
+
             XmlElement root = cfg_dom.DocumentElement;
             CheckAttributes(root, two_attrs);
 

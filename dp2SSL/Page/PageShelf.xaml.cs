@@ -179,10 +179,10 @@ namespace dp2SSL
                     new CancellationToken());
                     */
                 // 不使用独立线程。而是借用 getLockState 的线程来处理
-                ShelfData.DoorMonitor.Initialize(async (door) =>
+                ShelfData.DoorMonitor.Initialize(async (door, clearOperator) =>
                 {
                     ShelfData.RefreshInventory(door);
-                    SaveDoorActions(door);
+                    SaveDoorActions(door, clearOperator);
                     // door.Operator = null;
                     await SubmitCheckInOut();   // "silence"
                 });
@@ -261,7 +261,7 @@ namespace dp2SSL
 
                 lock (_syncRoot_save)
                 {
-                    SaveDoorActions(e.Door);
+                    SaveDoorActions(e.Door, true);
 
                     /*
                     // testing
@@ -282,12 +282,11 @@ namespace dp2SSL
                 */
             }
 
-            /*
             if (e.NewState == "open")
             {
-                ShelfData.ProcessOpenCommand(e.Door, e.Comment);
+                // ShelfData.ProcessOpenCommand(e.Door, e.Comment);
+                e.Door.Waiting--;
             }
-            */
 
             // 取消状态变化监控
             ShelfData.DoorMonitor.RemoveMessages(e.Door);
@@ -658,7 +657,7 @@ namespace dp2SSL
                         await Task.Run(() =>
                         {
                             ShelfData.RefreshInventory(e.Door);
-                            SaveDoorActions(e.Door);
+                            SaveDoorActions(e.Door, false);
                             // TODO: 是否 Submit? Submit 窗口可能会干扰原本的开门流程
                         });
                     }
@@ -688,6 +687,8 @@ namespace dp2SSL
                     /*
                     ShelfData.PopCommand(e.Door, "cancelled");
                     */
+                    // 取消监控
+                    ShelfData.DoorMonitor?.RemoveMessages(e.Door);
                     return;
                 }
 
@@ -700,7 +701,7 @@ namespace dp2SSL
                 CancelDelayClearTask();
 
                 // 一旦成功，门的 waiting 状态会在 PopCommand 的同时被改回 false
-                //succeed = true;
+                succeed = true;
 
                 /*
                 // 等待确认收到开门信号
@@ -1369,6 +1370,15 @@ namespace dp2SSL
         }
 
 #else
+        public void InitialDoorControl()
+        {
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                // 把门显示出来
+                this.doorControl.Visibility = Visibility.Visible;
+                this.doorControl.InitializeButtons(ShelfData.ShelfCfgDom, ShelfData.Doors);
+            }));
+        }
 
         // 新版本的首次填充图书信息的函数
         async Task InitialShelfEntities()
@@ -2226,7 +2236,7 @@ namespace dp2SSL
         }
 
         // 将指定门的暂存的信息保存为 Action。但并不立即提交
-        void SaveDoorActions(DoorItem door)
+        void SaveDoorActions(DoorItem door, bool clearOperator)
         {
             ShelfData.SaveActions((entity) =>
             {
@@ -2247,7 +2257,7 @@ namespace dp2SSL
             });
 
             // 2019/12/21
-            if (door.State == "close")
+            if (clearOperator == true && door.State == "close")
                 door.Operator = null; // 清掉门上的操作者名字
         }
 

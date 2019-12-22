@@ -1070,6 +1070,9 @@ namespace dp2SSL
                 _shelfCfgDom = cfg_dom;
             }
 
+            // 2019/12/22
+            if (_doors != null)
+                _doors.Clear();
             _doors = DoorItem.BuildItems(_shelfCfgDom);
         }
 
