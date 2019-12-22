@@ -285,7 +285,8 @@ namespace dp2SSL
             if (e.NewState == "open")
             {
                 // ShelfData.ProcessOpenCommand(e.Door, e.Comment);
-                e.Door.Waiting--;
+
+                // e.Door.Waiting--;
             }
 
             // 取消状态变化监控
@@ -669,14 +670,19 @@ namespace dp2SSL
 
                 e.Door.Operator = person;
 
+                // 把发出命令的瞬间安排在 getLockState 之前的间隙。就是说不和 getLockState 重叠
+                //lock (RfidManager.SyncRoot)
+                //{
                 // 开始监控这个门的状态变化。如果超过一定时间没有得到开门状态，则主动补一次 submit 动作
-                ShelfData.DoorMonitor?.BeginMonitor(e.Door);
+                // ShelfData.DoorMonitor?.BeginMonitor(e.Door);
 
                 /*
                 // TODO: 是否这里要等待开门信号到来时候再给门赋予操作者身份？因为过早赋予身份，可能会破坏一个姗姗来迟的早先一个关门动作信号的提交动作
                 // 给门赋予操作者身份
                 ShelfData.PushCommand(e.Door, person, RfidManager.LockHeartbeat);
                 */
+
+                long startTicks = RfidManager.LockHeartbeat;
 
                 var result = RfidManager.OpenShelfLock(e.Door.LockPath);
                 if (result.Value == -1)
@@ -691,6 +697,7 @@ namespace dp2SSL
                     ShelfData.DoorMonitor?.RemoveMessages(e.Door);
                     return;
                 }
+                //}
 
                 // TODO: 加锁。避免和 Clone() 互相干扰
                 // 如果读者信息区没有被固定，则门开后会自动清除读者信息区
@@ -701,18 +708,32 @@ namespace dp2SSL
                 CancelDelayClearTask();
 
                 // 一旦成功，门的 waiting 状态会在 PopCommand 的同时被改回 false
-                succeed = true;
+                // succeed = true;
 
-                /*
                 // 等待确认收到开门信号
-                await Task.Run(() =>
+                await Task.Run(async () =>
                 {
-                    while (e.Door.State != "open" && cancelled == false)
+                    DateTime start = DateTime.Now;
+                    while (e.Door.State != "open"
+                    // && cancelled == false
+                    )
                     {
+                        // 超时。补一次开门和关门提交动作
+                        // if (DateTime.Now - start >= TimeSpan.FromSeconds(5))
+                        if (RfidManager.LockHeartbeat - startTicks >= 3)
+                        {
+                            App.CurrentApp.Speak("超时补做提交");
+                            WpfClientInfo.WriteInfoLog($"超时情况下，对门 {e.Door.Name} 补做一次 submit");
+
+                            ShelfData.RefreshInventory(e.Door);
+                            SaveDoorActions(e.Door, true);
+                            await SubmitCheckInOut();   // "silence"
+                            break;
+                        }
+
                         Thread.Sleep(500);
                     }
                 });
-                */
             }
             finally
             {
@@ -2275,13 +2296,15 @@ namespace dp2SSL
 
         void OpenProgressWindow()
         {
-
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
                 if (_progressWindow != null)
                 {
                     if (_progressWindow.IsVisible == false)
                         _progressWindow.Show();
+                    // 2019/12/22 
+                    // 每次刚开始的时候都把颜色恢复初始值，避免受到上次最后颜色的影响
+                    _progressWindow.BackColor = "black";
                     return;
                 }
                 else

@@ -223,6 +223,14 @@ namespace DigitalPlatform.RFID
 
         static object _syncRoot = new object();
 
+        public static object SyncRoot
+        {
+            get
+            {
+                return _syncRoot;
+            }
+        }
+
         // 启动附加的监控线程
         public static void StartBase2(
     CancellationToken token)
@@ -297,6 +305,8 @@ new SetErrorEventArgs
 
                     lock_result = result.GetLockStateResult;
 
+                    IncLockHeartbeat();
+
                     // 触发 ListTags 事件时要加锁
                     if (string.IsNullOrEmpty(readerNameList) == false)
                     {
@@ -327,7 +337,6 @@ new SetErrorEventArgs
                 if (_lockThread == "base2"
                 && LockCommands != null)
                 {
-                    IncLockHeartbeat();
 
                     List<LockState> states = new List<LockState>();
                     {
@@ -442,6 +451,8 @@ new SetErrorEventArgs
 
                     lock_result = result.GetLockStateResult;
 
+                    IncLockHeartbeat();
+
                     if (string.IsNullOrEmpty(readerNameList) == false)
                     {
                         lock (_syncRoot)
@@ -470,7 +481,6 @@ new SetErrorEventArgs
                 if (_lockThread != "base2"
                 && lock_result != null)
                 {
-                    IncLockHeartbeat();
                     List<LockState> states = new List<LockState>();
                     {
                         // parameters:

@@ -109,8 +109,8 @@ namespace dp2SSL
                 List<MonitorMessage> delete_messages = new List<MonitorMessage>();
                 foreach (var message in _messages)
                 {
-                    if (DateTime.Now - message.StartTime > TimeoutLength)
-                    // if (RfidManager.LockHeartbeat - message.HeartbeatTicks >= 2)
+                    // if (DateTime.Now - message.StartTime > TimeoutLength)
+                    if (RfidManager.LockHeartbeat - message.HeartbeatTicks >= 2)
                     {
                         App.CurrentApp.Speak("超时补做提交");
                         WpfClientInfo.WriteInfoLog($"超时情况下，对门 {message.Door.Name} 补做一次 submit");
