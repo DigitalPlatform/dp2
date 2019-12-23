@@ -5520,10 +5520,13 @@ Program.MainForm.DefaultFont);
             int nRet = 0;
 
             int nDelta = 0;
+            /*
             if (m_nBiblioSummaryColumn == 0)
                 nDelta += 1;
             else
                 nDelta += 2;
+                */
+            nDelta = m_nBiblioSummaryColumn + 1;
 
             stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
 
@@ -5546,9 +5549,6 @@ Program.MainForm.DefaultFont);
                 if (string.IsNullOrEmpty(item.Text) == true)
                     continue;
 
-                string strReaderBarcode = "";
-
-
                 // 获得指定类型的的列的值
                 // 通过 browse 配置文件中的类型来指定
                 // return:
@@ -5559,7 +5559,7 @@ Program.MainForm.DefaultFont);
                     item,
                     "borrower",
                     nDelta,
-                    out strReaderBarcode,
+                    out string strReaderBarcode,
                     out strError);
                 if (nRet == -1)
                     return -1;

@@ -575,7 +575,7 @@ namespace dp2Circulation
 
             DoViewComment(false);
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -631,7 +631,7 @@ namespace dp2Circulation
 
             DoViewComment(false);
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -995,7 +995,7 @@ namespace dp2Circulation
             strError = "处理完成。\r\n\r\n" + strError;
             MessageBox.Show(this, strError);
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1037,7 +1037,7 @@ namespace dp2Circulation
             strError = "处理完成。\r\n\r\n" + strError;
             MessageBox.Show(this, strError);
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1121,7 +1121,7 @@ namespace dp2Circulation
 
                         byte[] baNewTimestamp = null;
 
-                        REDO_SAVE:
+                    REDO_SAVE:
                         // return:
                         //      -2  时间戳不匹配
                         //      -1  出错
@@ -1252,7 +1252,7 @@ namespace dp2Circulation
                         this.m_nChangedCount--;
                         Debug.Assert(this.m_nChangedCount >= 0, "");
 
-                        CONTINUE:
+                    CONTINUE:
                         if (dont_enablecontrol == false)
                             stop.SetProgressValue(i);
                     }
@@ -1580,7 +1580,7 @@ namespace dp2Circulation
                 Value = 1,
                 ErrorInfo = strError
             };
-            ERROR1:
+        ERROR1:
             return new NormalResult
             {
                 Value = -1,
@@ -2083,7 +2083,6 @@ ref bChanged);
                 }
 
                 nCol += nDelta;
-
 
                 _tableColIndex[strItemDbName + "|" + strType] = nCol;   // 储存起来
             }
