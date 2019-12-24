@@ -174,5 +174,12 @@ namespace dp2Circulation
             var bytes = Element.FromHexString(hex_string);
             return BitConverter.ToUInt32(bytes, 0).ToString();
         }
+
+        public static string DecimalToHex(string decimal_string)
+        {
+            uint value = Convert.ToUInt32(decimal_string);
+            var bytes = BitConverter.GetBytes(value);
+            return Element.GetHexString(bytes);
+        }
     }
 }
