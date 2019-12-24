@@ -1594,5 +1594,124 @@ MessageBoxDefaultButton.Button2);
             ERROR1:
             MessageBox.Show(this, strError);
         }
+
+        // UID 从十六进制转换为十进制
+        private void toolStripButton_uidToDecimal_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            this.textBox_textLines_target.Text = "";
+            this.textBox_textLines_source2.Text = "";
+
+            StringBuilder error = new StringBuilder();
+            StringBuilder result2 = new StringBuilder();
+
+            this.EnableControls(false);
+
+            this.stop.OnStop += new StopEventHandler(this.DoStop);
+            this.stop.Initial("正在转换 UID ...");
+            this.stop.BeginLoop();
+            try
+            {
+                foreach (string line in this.textBox_textLines_source1.Lines)
+                {
+                    if (string.IsNullOrEmpty(line))
+                    {
+                        result2.AppendLine();
+                        continue;
+                    }
+                    string strLine = line.Trim();
+                    if (string.IsNullOrEmpty(strLine))
+                    {
+                        result2.AppendLine();
+                        continue;
+                    }
+
+                    // 十六进制 6DB28CAF；十进制 2945233517 
+                    try
+                    {
+                        string result = BindCardNumberDialog.HexToDecimal(strLine);
+                        result2.AppendLine(result);
+                    }
+                    catch (Exception ex)
+                    {
+                        result2.AppendLine($"!!! 字符串 '{strLine}' 格式不正确: {ex.Message}");
+                    }
+                }
+
+                this.textBox_textLines_source2.Text = error.ToString();
+                this.textBox_textLines_target.Text = result2.ToString();
+                return;
+            }
+            finally
+            {
+                this.stop.EndLoop();
+                this.stop.OnStop -= new StopEventHandler(this.DoStop);
+                this.stop.Initial("");
+
+                this.EnableControls(true);
+            }
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        private void toolStripButton_uidToHex_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            this.textBox_textLines_target.Text = "";
+            this.textBox_textLines_source2.Text = "";
+
+            StringBuilder error = new StringBuilder();
+            StringBuilder result2 = new StringBuilder();
+
+            this.EnableControls(false);
+
+            this.stop.OnStop += new StopEventHandler(this.DoStop);
+            this.stop.Initial("正在转换 UID ...");
+            this.stop.BeginLoop();
+            try
+            {
+                foreach (string line in this.textBox_textLines_source1.Lines)
+                {
+                    if (string.IsNullOrEmpty(line))
+                    {
+                        result2.AppendLine();
+                        continue;
+                    }
+                    string strLine = line.Trim();
+                    if (string.IsNullOrEmpty(strLine))
+                    {
+                        result2.AppendLine();
+                        continue;
+                    }
+
+                    // 十进制 2945233517；十六进制 6DB28CAF
+                    try
+                    {
+                        string result = BindCardNumberDialog.DecimalToHex(strLine);
+                        result2.AppendLine(result);
+                    }
+                    catch(Exception ex)
+                    {
+                        result2.AppendLine($"!!! 字符串 '{strLine}' 格式不正确: {ex.Message}");
+                    }
+                }
+
+                this.textBox_textLines_source2.Text = error.ToString();
+                this.textBox_textLines_target.Text = result2.ToString();
+                return;
+            }
+            finally
+            {
+                this.stop.EndLoop();
+                this.stop.OnStop -= new StopEventHandler(this.DoStop);
+                this.stop.Initial("");
+
+                this.EnableControls(true);
+            }
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
     }
 }
