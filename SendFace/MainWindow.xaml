@@ -5,8 +5,59 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SendFace"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="100" Width="100"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        ShowInTaskbar="False" 
+        Topmost="True" Focusable="False" ShowActivated="False"
+        >
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Button.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.Blue.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Purple.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <BooleanToVisibilityConverter x:Key="VisibleIfTrueConverter" />
+            <Image x:Key="MyImage" Source="/SendFace;component/face_recognition_219.png"/>
+        </ResourceDictionary>
+
+
+    </Window.Resources>
     <Grid>
-        
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+        <Image Grid.Row="0" Name="photo" 
+               Visibility="Collapsed"
+               Margin="0" HorizontalAlignment="Center" VerticalAlignment="Center"
+                   />
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+            </Grid.RowDefinitions>
+
+            <Button Grid.Row="0" Name="inputFace" Visibility="Visible"
+                        Content="{StaticResource MyImage}"
+                        Style="{StaticResource MaterialDesignFloatingActionLightButton}"
+                        Height="90" Width="90"
+                        Click="InputFace_Click">
+            </Button>
+            <Button Name="cancelButton" Grid.Row="0" Visibility="Collapsed"
+                    Style="{DynamicResource RoundedButtonStyle}" 
+                    Height="60" 
+                    FontSize="30" FontWeight="ExtraBold" 
+                    Foreground="White" 
+                     Click="CancelButton_Click">取消</Button>
+            <TextBlock Grid.Row="1" Name="error" 
+                   Foreground="White" Background="DarkRed"
+                   Visibility="Collapsed"
+                   Focusable="False" />
+        </Grid>
+
     </Grid>
 </Window>

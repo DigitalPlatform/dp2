@@ -15,6 +15,7 @@ using Newtonsoft.Json;
 using DigitalPlatform;
 using DigitalPlatform.Text;
 using DigitalPlatform.RFID;
+using DigitalPlatform.Face;
 
 namespace dp2SSL
 {

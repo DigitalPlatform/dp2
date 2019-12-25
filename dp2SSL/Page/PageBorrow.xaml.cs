@@ -25,6 +25,7 @@ using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Core;
+using DigitalPlatform.Face;
 
 namespace dp2SSL
 {

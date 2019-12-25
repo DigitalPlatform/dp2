@@ -24,6 +24,7 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
 using static DigitalPlatform.IO.BarcodeCapture;
+using DigitalPlatform.Face;
 
 namespace dp2SSL
 {
