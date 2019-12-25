@@ -5,14 +5,11 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-using DigitalPlatform;
 using DigitalPlatform.Interfaces;
 using DigitalPlatform.IO;
-using DigitalPlatform.RFID;
 
-namespace dp2SSL
+namespace DigitalPlatform.Face
 {
-#if REMOVED
     /// <summary>
     /// 人脸通道集中管理
     /// </summary>
@@ -405,5 +402,4 @@ namespace dp2SSL
 
     }
 
-#endif
 }

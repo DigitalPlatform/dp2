@@ -33,6 +33,7 @@ using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.Xml;
 using static dp2SSL.App;
+using DigitalPlatform.Face;
 
 namespace dp2SSL
 {

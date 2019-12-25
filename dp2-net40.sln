@@ -231,6 +231,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CallFaceCenterSample", "Cal
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SendFace", "SendFace\SendFace.csproj", "{0DF4A3BC-76FC-40E1-AC7A-2C8F065FB881}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.Face", "DigitalPlatform.Face\DigitalPlatform.Face.csproj", "{3EC4344F-A653-47F8-A25D-A58DE64C3FFC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1874,6 +1876,24 @@ Global
 		{0DF4A3BC-76FC-40E1-AC7A-2C8F065FB881}.Test|Mixed Platforms.Build.0 = Release|Any CPU
 		{0DF4A3BC-76FC-40E1-AC7A-2C8F065FB881}.Test|x86.ActiveCfg = Release|Any CPU
 		{0DF4A3BC-76FC-40E1-AC7A-2C8F065FB881}.Test|x86.Build.0 = Release|Any CPU
+		{3EC4344F-A653-47F8-A25D-A58DE64C3FFC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3EC4344F-A653-47F8-A25D-A58DE64C3FFC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3EC4344F-A653-47F8-A25D-A58DE64C3FFC}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{3EC4344F-A653-47F8-A25D-A58DE64C3FFC}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{3EC4344F-A653-47F8-A25D-A58DE64C3FFC}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3EC4344F-A653-47F8-A25D-A58DE64C3FFC}.Debug|x86.Build.0 = Debug|Any CPU
+		{3EC4344F-A653-47F8-A25D-A58DE64C3FFC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3EC4344F-A653-47F8-A25D-A58DE64C3FFC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3EC4344F-A653-47F8-A25D-A58DE64C3FFC}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{3EC4344F-A653-47F8-A25D-A58DE64C3FFC}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{3EC4344F-A653-47F8-A25D-A58DE64C3FFC}.Release|x86.ActiveCfg = Release|Any CPU
+		{3EC4344F-A653-47F8-A25D-A58DE64C3FFC}.Release|x86.Build.0 = Release|Any CPU
+		{3EC4344F-A653-47F8-A25D-A58DE64C3FFC}.Test|Any CPU.ActiveCfg = Release|Any CPU
+		{3EC4344F-A653-47F8-A25D-A58DE64C3FFC}.Test|Any CPU.Build.0 = Release|Any CPU
+		{3EC4344F-A653-47F8-A25D-A58DE64C3FFC}.Test|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{3EC4344F-A653-47F8-A25D-A58DE64C3FFC}.Test|Mixed Platforms.Build.0 = Release|Any CPU
+		{3EC4344F-A653-47F8-A25D-A58DE64C3FFC}.Test|x86.ActiveCfg = Release|Any CPU
+		{3EC4344F-A653-47F8-A25D-A58DE64C3FFC}.Test|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
