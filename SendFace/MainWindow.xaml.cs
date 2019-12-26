@@ -51,6 +51,8 @@ namespace SendFace
 
         private void MainWindow_Unloaded(object sender, RoutedEventArgs e)
         {
+            InterceptMouse.MouseClick -= InterceptMouse_MouseClick;
+
             _cancelRefresh.Cancel();
         }
 
@@ -60,6 +62,57 @@ namespace SendFace
             FaceManager.Url = "ipc://FaceChannel/FaceServer";
             FaceManager.SetError += FaceManager_SetError; ;
             FaceManager.Start(_cancelRefresh.Token);
+
+            InterceptMouse.MouseClick += InterceptMouse_MouseClick;
+
+            {
+                var desktopWorkingArea = System.Windows.SystemParameters.WorkArea;
+                this.Left = desktopWorkingArea.Right - this.Width;
+                this.Top = desktopWorkingArea.Bottom - this.Height;
+            }
+        }
+
+        private void InterceptMouse_MouseClick(object sender, MouseClickEventArgs e)
+        {
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                Rect rect = new Rect(this.Left, this.Top, this.Width, this.Height);
+                Point pt = RealPixelsToWpf(this, e.Location);
+                // message.Content = $"x={e.Location.X},y={e.Location.Y}";
+                if (rect.Contains(pt))
+                {
+                    // System.Windows.Forms.SendKeys.SendWait($"x={e.Location.X},y={e.Location.Y}\r\n");
+                    OnClicked();
+                    e.Handled = true;
+                }
+            }));
+        }
+
+        static Point RealPixelsToWpf(Window w, Point p)
+        {
+            var t = PresentationSource.FromVisual(w).CompositionTarget.TransformFromDevice;
+            return t.Transform(p);
+        }
+
+        void OnClicked()
+        {
+            if (this.cancelButton.Visibility == Visibility.Visible)
+            {
+                // 停止识别
+                Task.Run(() =>
+                {
+                    CancelButton_Click(this, new RoutedEventArgs());
+                });
+
+            }
+            else
+            {
+                // 开始识别
+                Task.Run(() =>
+                {
+                    recognitionFace();
+                });
+            }
         }
 
         private void FaceManager_SetError(object sender, DigitalPlatform.IO.SetErrorEventArgs e)
@@ -86,8 +139,7 @@ namespace SendFace
             _errorTable.SetError(type, "");
         }
 
-
-        private async void InputFace_Click(object sender, RoutedEventArgs e)
+        async void recognitionFace()
         {
             EnterMode("video");
 
@@ -118,7 +170,7 @@ namespace SendFace
                 EnterMode("standby");
             }
 
-            // SendKeys.SendWait(result.Patron);
+            System.Windows.Forms.SendKeys.SendWait(result.Patron + "\n");
         }
 
         async Task<RecognitionFaceResult> RecognitionFace(string style)
@@ -150,24 +202,42 @@ namespace SendFace
         //      mode    "standby" "video"
         public void EnterMode(string mode)
         {
-            if (mode == "standby")
+            Application.Current.Dispatcher.Invoke(new Action(() =>
             {
-                this.photo.Visibility = Visibility.Collapsed;
-                this.inputFace.Visibility = Visibility.Visible;
-                this.cancelButton.Visibility = Visibility.Collapsed;
-                this.Width = 100;
-                this.Height = 100;
-            }
-            if (mode == "video")
-            {
-                this.photo.Width = 300;
-                this.photo.Height = 300;
-                this.photo.Visibility = Visibility.Visible;
-                this.inputFace.Visibility = Visibility.Collapsed;
-                this.cancelButton.Visibility = Visibility.Visible;
-                this.Width = 400;
-                this.Height = 400;
-            }
+
+                if (mode == "standby")
+                {
+                    this.photo.Visibility = Visibility.Collapsed;
+                    this.inputFace.Visibility = Visibility.Visible;
+                    this.cancelButton.Visibility = Visibility.Collapsed;
+                    this.Width = 100;
+                    this.Height = 100;
+                    this.Background = new SolidColorBrush(Colors.Transparent);
+
+                    {
+                        var desktopWorkingArea = System.Windows.SystemParameters.WorkArea;
+                        this.Left = desktopWorkingArea.Right - this.Width;
+                        this.Top = desktopWorkingArea.Bottom - this.Height;
+                    }
+                }
+                if (mode == "video")
+                {
+                    this.photo.Width = 300;
+                    this.photo.Height = 300;
+                    this.photo.Visibility = Visibility.Visible;
+                    this.inputFace.Visibility = Visibility.Collapsed;
+                    this.cancelButton.Visibility = Visibility.Visible;
+                    this.Width = 400;
+                    this.Height = 400;
+                    this.Background = new SolidColorBrush(Colors.DarkGray);
+
+                    {
+                        var desktopWorkingArea = System.Windows.SystemParameters.WorkArea;
+                        this.Left = desktopWorkingArea.Right - this.Width;
+                        this.Top = desktopWorkingArea.Bottom - this.Height;
+                    }
+                }
+            }));
         }
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)
@@ -220,5 +290,18 @@ namespace SendFace
             imageSource.EndInit();
             this.photo.Source = imageSource;
         }
+
+        private void InputFace_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            ContextMenu cm = this.FindResource("menu") as ContextMenu;
+            cm.PlacementTarget = sender as Button;
+            cm.IsOpen = true;
+        }
+
+        private void Exit_Click(object sender, RoutedEventArgs e)
+        {
+            App.Current.Shutdown();
+        }
+
     }
 }

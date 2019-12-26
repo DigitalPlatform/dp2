@@ -14,20 +14,21 @@ namespace SendFace
     /// </summary>
     public partial class App : Application
     {
-
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
+            InterceptMouse.Start();
+        }
+
+        protected override void OnExit(ExitEventArgs e)
+        {
+            InterceptMouse.End();
+            base.OnExit(e);
         }
 
         protected override void OnSessionEnding(SessionEndingCancelEventArgs e)
         {
             base.OnSessionEnding(e);
-        }
-
-        protected override void OnExit(ExitEventArgs e)
-        {
-            base.OnExit(e);
         }
     }
 }
