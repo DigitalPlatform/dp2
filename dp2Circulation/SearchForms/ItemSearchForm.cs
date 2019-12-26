@@ -8849,6 +8849,8 @@ MessageBoxDefaultButton.Button1);
             if (dlg.ShowDialog() != DialogResult.OK)
                 return;
 
+            bool bControl = Control.ModifierKeys == Keys.Control;
+
             this.m_strUsedBarcodeFilename = dlg.FileName;
 
             StreamReader sr = null;
@@ -8870,6 +8872,23 @@ MessageBoxDefaultButton.Button1);
                 strError = "无法重复进入循环";
                 goto ERROR1;
             }
+
+            bool needTransform = false;
+            // 变换条码号
+            // return:
+            //      -1  出错
+            //      0   不需要进行变换
+            //      1   需要进行变换
+            int nRet = Program.MainForm.NeedTransformBarcode(
+                Program.MainForm.FocusLibraryCode,
+                out strError);
+            if (nRet == -1)
+            {
+                goto ERROR1;
+            }
+            if (nRet == 1)
+                needTransform = true;
+
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在导入条码号 ...");
             stop.BeginLoop();
@@ -8918,6 +8937,25 @@ MessageBoxDefaultButton.Button1);
                     if (strBarcode == null)
                         break;
 
+                    // 2019/12/26
+                    // Transform
+                    if (bControl == false)
+                    {
+                        if (needTransform)
+                        {
+                            nRet = Program.MainForm.TransformBarcode(
+                                Program.MainForm.FocusLibraryCode,
+                                ref strBarcode,
+                                out strError);
+                            if (nRet == -1)
+                            {
+                                goto ERROR1;
+                            }
+
+                            // TODO: 如何让操作者能看到变换后的字符串?
+                        }
+                    }
+
                     ListViewItem item = new ListViewItem();
                     item.Text = "";
                     // ListViewUtil.ChangeItemText(item, 1, strBarcode);
@@ -8932,7 +8970,7 @@ MessageBoxDefaultButton.Button1);
                 }
 
                 // 刷新浏览行
-                int nRet = RefreshListViewLines(
+                nRet = RefreshListViewLines(
                     channel,
                     items,
                     "",
