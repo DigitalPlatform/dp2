@@ -18,7 +18,7 @@ using System.Windows.Shapes;
 using DigitalPlatform.Core;
 using DigitalPlatform.Face;
 using DigitalPlatform.Interfaces;
-
+using SendFace.Properties;
 
 namespace SendFace
 {
@@ -49,11 +49,23 @@ namespace SendFace
             });
         }
 
+        protected override void OnSourceInitialized(EventArgs e)
+        {
+            base.OnSourceInitialized(e);
+
+            string value = Settings.Default.windowPosition;
+            if (string.IsNullOrEmpty(value) == false)
+                _position = value;
+        }
+
         private void MainWindow_Unloaded(object sender, RoutedEventArgs e)
         {
             InterceptMouse.MouseClick -= InterceptMouse_MouseClick;
 
             _cancelRefresh.Cancel();
+
+            Settings.Default.windowPosition = _position;
+            Settings.Default.Save();
         }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -65,11 +77,7 @@ namespace SendFace
 
             InterceptMouse.MouseClick += InterceptMouse_MouseClick;
 
-            {
-                var desktopWorkingArea = System.Windows.SystemParameters.WorkArea;
-                this.Left = desktopWorkingArea.Right - this.Width;
-                this.Top = desktopWorkingArea.Bottom - this.Height;
-            }
+            SetWindowPos(_position);
         }
 
         private void InterceptMouse_MouseClick(object sender, MouseClickEventArgs e)
@@ -211,14 +219,10 @@ namespace SendFace
                     this.inputFace.Visibility = Visibility.Visible;
                     this.cancelButton.Visibility = Visibility.Collapsed;
                     this.Width = 100;
-                    this.Height = 100;
+                    // this.Height = 100;
                     this.Background = new SolidColorBrush(Colors.Transparent);
 
-                    {
-                        var desktopWorkingArea = System.Windows.SystemParameters.WorkArea;
-                        this.Left = desktopWorkingArea.Right - this.Width;
-                        this.Top = desktopWorkingArea.Bottom - this.Height;
-                    }
+                    SetWindowPos(_position);
                 }
                 if (mode == "video")
                 {
@@ -228,16 +232,43 @@ namespace SendFace
                     this.inputFace.Visibility = Visibility.Collapsed;
                     this.cancelButton.Visibility = Visibility.Visible;
                     this.Width = 400;
-                    this.Height = 400;
+                    // this.Height = 400;
                     this.Background = new SolidColorBrush(Colors.DarkGray);
 
-                    {
-                        var desktopWorkingArea = System.Windows.SystemParameters.WorkArea;
-                        this.Left = desktopWorkingArea.Right - this.Width;
-                        this.Top = desktopWorkingArea.Bottom - this.Height;
-                    }
+                    SetWindowPos(_position);
+
                 }
             }));
+        }
+
+        string _position = "right_bottom";
+
+        void SetWindowPos(string position)
+        {
+            var desktopWorkingArea = System.Windows.SystemParameters.WorkArea;
+
+            if (position == "right_bottom")
+            {
+                this.Left = desktopWorkingArea.Right - this.Width;
+                this.Top = desktopWorkingArea.Bottom - this.Height;
+            }
+            else if (position == "left_bottom")
+            {
+                this.Left = 0;
+                this.Top = desktopWorkingArea.Bottom - this.Height;
+            }
+            else if (position == "right_top")
+            {
+                this.Left = desktopWorkingArea.Right - this.Width;
+                this.Top = 0;
+            }
+            else if (position == "left_top")
+            {
+                this.Left = 0;
+                this.Top = 0;
+            }
+            else
+                throw new ArgumentException($"未知的 position '{position}'");
         }
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)
@@ -303,5 +334,28 @@ namespace SendFace
             App.Current.Shutdown();
         }
 
+        private void Menu_leftTop_Click(object sender, RoutedEventArgs e)
+        {
+            _position = "left_top";
+            SetWindowPos(_position);
+        }
+
+        private void Menu_rightTop_Click(object sender, RoutedEventArgs e)
+        {
+            _position = "right_top";
+            SetWindowPos(_position);
+        }
+
+        private void Menu_leftBottom_Click(object sender, RoutedEventArgs e)
+        {
+            _position = "left_bottom";
+            SetWindowPos(_position);
+        }
+
+        private void Menu_rightBottom_Click(object sender, RoutedEventArgs e)
+        {
+            _position = "right_bottom";
+            SetWindowPos(_position);
+        }
     }
 }

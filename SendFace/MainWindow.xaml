@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SendFace"
         mc:Ignorable="d"
-        Title="MainWindow" Height="100" Width="100"
+        Title="MainWindow" Height="Auto" Width="100" SizeToContent="Height"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         ShowInTaskbar="False" 
         Topmost="True" Focusable="False" ShowActivated="False"
@@ -24,6 +24,12 @@
             <Image x:Key="MyImage" Source="/SendFace;component/face_recognition_219.png"/>
 
             <ContextMenu x:Key="menu">
+                <MenuItem Name="menu_windowPosition" Header="窗口位置">
+                    <MenuItem Name="menu_leftTop" Header="左上角" Click="Menu_leftTop_Click"/>
+                    <MenuItem Name="menu_rightTop" Header="右上角" Click="Menu_rightTop_Click"/>
+                    <MenuItem Name="menu_leftBottom" Header="左下角" Click="Menu_leftBottom_Click"/>
+                    <MenuItem Name="menu_rightBottom" Header="右下角" Click="Menu_rightBottom_Click"/>
+                </MenuItem>
                 <Separator />
                 <MenuItem Name="exit" Header="退出" Click="Exit_Click"/>
             </ContextMenu>
@@ -43,7 +49,7 @@
         <Grid Grid.Row="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
+                <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
             <Button Grid.Row="0" Name="inputFace" Visibility="Visible"
                         Content="{StaticResource MyImage}"
@@ -53,13 +59,14 @@
             </Button>
             <Button Name="cancelButton" Grid.Row="0" Visibility="Collapsed"
                     Style="{DynamicResource RoundedButtonStyle}" 
-                    Height="60" 
+                    Height="60" Width="200"
                     FontSize="30" FontWeight="ExtraBold" 
                     Foreground="White" 
                      Click="CancelButton_Click">取消</Button>
             <TextBlock Grid.Row="1" Name="error" 
                    Foreground="White" Background="DarkRed"
                    Visibility="Collapsed"
+                       TextWrapping="Wrap"
                    Focusable="False" />
         </Grid>
 
