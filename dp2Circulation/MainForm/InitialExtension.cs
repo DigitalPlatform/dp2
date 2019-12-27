@@ -15,6 +15,7 @@ using System.ComponentModel;
 using System.Web;
 using System.Threading.Tasks;
 using System.Net;
+using System.Threading;
 
 using log4net;
 
@@ -34,7 +35,6 @@ using DigitalPlatform.Drawing;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Core;
 using DigitalPlatform.RFID;
-using System.Threading;
 
 namespace dp2Circulation
 {
