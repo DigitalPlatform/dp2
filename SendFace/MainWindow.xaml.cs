@@ -14,10 +14,11 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-
+using DigitalPlatform;
 using DigitalPlatform.Core;
 using DigitalPlatform.Face;
 using DigitalPlatform.Interfaces;
+using DigitalPlatform.WPF;
 using SendFace.Properties;
 
 namespace SendFace
@@ -78,6 +79,21 @@ namespace SendFace
             InterceptMouse.MouseClick += InterceptMouse_MouseClick;
 
             SetWindowPos(_position);
+
+            // 后台自动检查更新
+            var task = Task.Run(() =>
+            {
+                NormalResult result = WpfClientInfo.InstallUpdateSync();
+                if (result.Value == -1)
+                    SetError("update", "自动更新出错: " + result.ErrorInfo);
+                else if (result.Value == 1)
+                {
+                    SetError("update", result.ErrorInfo);
+                    // Updated?.Invoke(this, new UpdatedEventArgs { Message = result.ErrorInfo });
+                }
+                else if (string.IsNullOrEmpty(result.ErrorInfo) == false)
+                    SetError("update", result.ErrorInfo);
+            });
         }
 
         private void InterceptMouse_MouseClick(object sender, MouseClickEventArgs e)
@@ -178,7 +194,7 @@ namespace SendFace
                 EnterMode("standby");
             }
 
-            System.Windows.Forms.SendKeys.SendWait(result.Patron + "\n");
+            System.Windows.Forms.SendKeys.SendWait(result.Patron + "\r");
         }
 
         async Task<RecognitionFaceResult> RecognitionFace(string style)

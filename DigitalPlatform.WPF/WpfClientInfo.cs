@@ -8,19 +8,16 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Threading;
+using DigitalPlatform;
 
 using log4net;
 
-using DigitalPlatform;
 using DigitalPlatform.Core;
 using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient;
 
-namespace dp2SSL
+namespace DigitalPlatform.WPF
 {
-
-#if REMOVED
     /// <summary>
     /// WPF 前端的通用功能
     /// </summary>
@@ -255,7 +252,7 @@ namespace dp2SSL
             message_dlg.Closed += new EventHandler(delegate (object o1, EventArgs e1)
             {
             });
-            message_dlg.Owner = App.CurrentApp.MainWindow;
+            // message_dlg.Owner = App.CurrentApp.MainWindow;
             message_dlg.ShowDialog();
             // 发送异常报告
             if ((bool)message_dlg.sendReport.IsChecked)
@@ -265,7 +262,7 @@ namespace dp2SSL
             // TODO: 显示为红色窗口，表示警告的意思
 
             // 自动重启应用
-            System.Windows.Forms.Application.Restart();
+            // System.Windows.Forms.Application.Restart();
             System.Windows.Application.Current.Shutdown();
             // Application.Current.MainWindow.Close();
         }
@@ -284,37 +281,6 @@ namespace dp2SSL
             // MainForm.WriteErrorLog(strError);
             return strError;
         }
-
-#if NO
-        static void Application_ThreadException(object sender,
-    ThreadExceptionEventArgs e)
-        {
-            if (_bExiting == true)
-                return;
-
-            Exception ex = (Exception)e.Exception;
-            string strError = GetExceptionText(ex, "界面线程");
-
-            bool bSendReport = true;
-            DialogResult result = MessageDlg.Show(MainForm,
-    $"{ProgramName} 发生未知的异常:\r\n\r\n" + strError + "\r\n---\r\n\r\n是否关闭程序?",
-    $"{ProgramName} 发生未知的异常",
-    MessageBoxButtons.YesNo,
-    MessageBoxDefaultButton.Button2,
-    ref bSendReport,
-    new string[] { "关闭", "继续" },
-    "将信息发送给开发者");
-            {
-                if (bSendReport)
-                    CrashReport(strError);
-            }
-            if (result == DialogResult.Yes)
-            {
-                _bExiting = true;
-                Application.Exit();
-            }
-        }
-#endif
 
         static void CrashReport(string strText)
         {
@@ -489,42 +455,6 @@ namespace dp2SSL
             }
         }
 
-#if REMOVED
-        public static bool HasModuleStarted(string mutex_name)
-        {
-            bool createdNew = true;
-            // mutex name need contains windows account name. or us programes file path, hashed
-            using (Mutex mutex = new Mutex(true,
-                mutex_name, // "dp2libraryXE V3", 
-                out createdNew))
-            {
-                if (createdNew)
-                    return false;
-                else
-                    return true;
-            }
-        }
-
-        public static bool StartModule(
-            string shortcut_path,
-            string arguments)
-        {
-            string strShortcutFilePath = PathUtil.GetShortcutFilePath(
-                    shortcut_path
-                    // "DigitalPlatform/dp2 V3/dp2Library XE V3"
-                    );
-
-            if (File.Exists(strShortcutFilePath) == false)
-                return false;
-
-            // https://stackoverflow.com/questions/558344/clickonce-appref-ms-argument
-            Process.Start(strShortcutFilePath, arguments);
-            return true;
-        }
-
-#endif
     }
 
-
-#endif
 }
