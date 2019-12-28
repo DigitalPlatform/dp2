@@ -40,6 +40,8 @@ namespace CallRfidCenterSample
 
         private void Form1_TagChanged(object sender, TagChangedEventArgs e)
         {
+            /*
+            // 方法1：用 e 中的增删改集合动态修改 ListView
             this.Invoke((Action)(() =>
             {
                 if (e.AddBooks != null)
@@ -77,6 +79,35 @@ namespace CallRfidCenterSample
                     {
                         RemoveItem(tag);
                     }
+            }));
+            */
+
+            // 方法2：每次都遍历 TagList.Books Patrons 集合
+            this.Invoke((Action)(() =>
+            {
+                List<TagAndData> tags = new List<TagAndData>();
+                tags.AddRange(TagList.Books);
+                tags.AddRange(TagList.Patrons);
+
+                List<ListViewItem> items = new List<ListViewItem>();
+                foreach (var tag in tags)
+                {
+                    var item = UpdateItem(tag);
+                    items.Add(item);
+                }
+
+                // 删除掉 tags 中没有包含的 ListViewItem
+                List<ListViewItem> delete_items = new List<ListViewItem>();
+                foreach (ListViewItem item in this.listView_tags.Items)
+                {
+                    if (items.IndexOf(item) == -1)
+                        delete_items.Add(item);
+                }
+
+                foreach(ListViewItem item in delete_items)
+                {
+                    this.listView_tags.Items.Remove(item);
+                }
             }));
         }
 
@@ -130,15 +161,15 @@ namespace CallRfidCenterSample
         }
 
         // 更新一行内容
-        void UpdateItem(TagAndData tag)
+        ListViewItem UpdateItem(TagAndData tag)
         {
             var item = ListViewUtil.FindItem(this.listView_tags, tag.OneTag.UID, COLUMN_UID);
             if (item == null)
             {
-                AddItem(tag);
-                return;
+                return AddItem(tag);
             }
             RefreshItem(item, tag);
+            return item;
         }
     }
 }
