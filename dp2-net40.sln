@@ -235,6 +235,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.Face", "Dig
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.WPF", "DigitalPlatform.WPF\DigitalPlatform.WPF.csproj", "{7C195988-B4B3-4AB4-A1C9-B5A2158A5267}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CallRfidCenterSample", "CallRfidCenterSample\CallRfidCenterSample.csproj", "{B514ACFB-CAEB-4606-89C6-F2D5BED1A256}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1914,6 +1916,24 @@ Global
 		{7C195988-B4B3-4AB4-A1C9-B5A2158A5267}.Test|Mixed Platforms.Build.0 = Release|Any CPU
 		{7C195988-B4B3-4AB4-A1C9-B5A2158A5267}.Test|x86.ActiveCfg = Release|Any CPU
 		{7C195988-B4B3-4AB4-A1C9-B5A2158A5267}.Test|x86.Build.0 = Release|Any CPU
+		{B514ACFB-CAEB-4606-89C6-F2D5BED1A256}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B514ACFB-CAEB-4606-89C6-F2D5BED1A256}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B514ACFB-CAEB-4606-89C6-F2D5BED1A256}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{B514ACFB-CAEB-4606-89C6-F2D5BED1A256}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{B514ACFB-CAEB-4606-89C6-F2D5BED1A256}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B514ACFB-CAEB-4606-89C6-F2D5BED1A256}.Debug|x86.Build.0 = Debug|Any CPU
+		{B514ACFB-CAEB-4606-89C6-F2D5BED1A256}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B514ACFB-CAEB-4606-89C6-F2D5BED1A256}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B514ACFB-CAEB-4606-89C6-F2D5BED1A256}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{B514ACFB-CAEB-4606-89C6-F2D5BED1A256}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{B514ACFB-CAEB-4606-89C6-F2D5BED1A256}.Release|x86.ActiveCfg = Release|Any CPU
+		{B514ACFB-CAEB-4606-89C6-F2D5BED1A256}.Release|x86.Build.0 = Release|Any CPU
+		{B514ACFB-CAEB-4606-89C6-F2D5BED1A256}.Test|Any CPU.ActiveCfg = Release|Any CPU
+		{B514ACFB-CAEB-4606-89C6-F2D5BED1A256}.Test|Any CPU.Build.0 = Release|Any CPU
+		{B514ACFB-CAEB-4606-89C6-F2D5BED1A256}.Test|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{B514ACFB-CAEB-4606-89C6-F2D5BED1A256}.Test|Mixed Platforms.Build.0 = Release|Any CPU
+		{B514ACFB-CAEB-4606-89C6-F2D5BED1A256}.Test|x86.ActiveCfg = Release|Any CPU
+		{B514ACFB-CAEB-4606-89C6-F2D5BED1A256}.Test|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
