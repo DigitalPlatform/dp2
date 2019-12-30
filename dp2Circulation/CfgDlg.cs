@@ -545,13 +545,19 @@ false);
     "rfidCenterUrl",
     "");  // 常用值 "ipc://RfidChannel/RfidServer"
 
+            if (StringUtil.IsInList("client_disablerfid", Program.MainForm._currentUserRights))
+            {
+                this.textBox_cardReader_rfidCenterUrl.Enabled = false;
+                this.button_cardReader_setRfidUrlDefaultValue.Enabled = false;
+            }
+
             // *** 指纹
 
             // 指纹阅读器接口URL
             this.textBox_fingerprint_readerUrl.Text =
-                ap.GetString("fingerprint",
-                "fingerPrintReaderUrl",
-                "");    // 常用值 "ipc://FingerprintChannel/FingerprintServer"
+            ap.GetString("fingerprint",
+            "fingerPrintReaderUrl",
+            "");    // 常用值 "ipc://FingerprintChannel/FingerprintServer"
 
             // 人脸识别接口URL
             this.textBox_face_readerUrl.Text =
@@ -1598,7 +1604,7 @@ false);
 
             MessageBox.Show(this, "日志文件本地缓存目录 " + strCacheDir + " 已经被清空");
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1647,7 +1653,7 @@ MessageBoxDefaultButton.Button2);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 

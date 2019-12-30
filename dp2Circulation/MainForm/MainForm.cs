@@ -2966,6 +2966,14 @@ false);
             LibraryChannel channel = sender as LibraryChannel;
             _currentUserName = channel.UserName;
             _currentUserRights = channel.Rights;
+
+            if (StringUtil.IsInList("client_disablerfid", this._currentUserRights)
+                && string.IsNullOrEmpty(this.RfidCenterUrl) == false)
+            {
+                this.RfidCenterUrl = "";
+                StartOrStopRfidManager();
+            }
+
             _currentLibraryCodeList = channel.LibraryCodeList;
 
             if (_verified == false && StringUtil.IsInList("serverlicensed", channel.Rights) == false)
@@ -7626,6 +7634,13 @@ out strError);
                 return this.AppInfo?.GetString("cardreader",
     "rfidCenterUrl",
     "");  // 常用值 "ipc://RfidChannel/RfidServer"
+            }
+            set
+            {
+                this.AppInfo?.SetString("cardreader",
+"rfidCenterUrl",
+value);  // 常用值 "ipc://RfidChannel/RfidServer"
+
             }
         }
 
