@@ -206,7 +206,7 @@ namespace DigitalPlatform.LibraryServer
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -235,7 +235,7 @@ namespace DigitalPlatform.LibraryServer
         // 获得一个目前尚未被使用过的instancename值
         string GetNewInstanceName(int nStart)
         {
-            REDO:
+        REDO:
             string strResult = "instance" + nStart.ToString();
             for (int i = 0; i < this.listView_instance.Items.Count; i++)
             {
@@ -307,7 +307,7 @@ namespace DigitalPlatform.LibraryServer
             {
                 this.Enabled = true;
             }
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -315,14 +315,13 @@ namespace DigitalPlatform.LibraryServer
         {
             Debug.Assert(String.IsNullOrEmpty(e.DataDir) == false, "");
 
-            string strError = "";
             LineInfo info = new LineInfo();
             // return:
             //      -1  error
             //      0   file not found
             //      1   succeed
             int nRet = info.Build(e.DataDir,
-                out strError);
+                out string strError);
             if (nRet == -1)
             {
                 e.ErrorInfo = strError;
@@ -468,7 +467,7 @@ namespace DigitalPlatform.LibraryServer
     "start");
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
             return;
         }
@@ -794,7 +793,7 @@ namespace DigitalPlatform.LibraryServer
                 this.Enabled = true;
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
             return;
         }
@@ -1188,7 +1187,7 @@ namespace DigitalPlatform.LibraryServer
 
                             strSourceDir = PathUtil.MergePath(strTempDataDir, "cfgs");
                             strTargetDir = PathUtil.MergePath(strDataDir, "cfgs");
-                            REDO:
+                        REDO:
                             try
                             {
                                 nRet = PathUtil.CopyDirectory(strSourceDir,
@@ -1266,7 +1265,7 @@ namespace DigitalPlatform.LibraryServer
 
                         string strSourceDir = PathUtil.MergePath(strTempDataDir, "cfgs");
                         string strTargetDir = PathUtil.MergePath(strDataDir, "cfgs");
-                        REDO:
+                    REDO:
                         try
                         {
                             nRet = PathUtil.CopyDirectory(strSourceDir,
@@ -1312,7 +1311,7 @@ namespace DigitalPlatform.LibraryServer
                     }
                 }
 
-                CONTINUE:
+            CONTINUE:
                 // 在注册表中写入instance信息
                 // 因为可能插入或者删除任意实例，那么注册表事项需要全部重写
                 InstallHelper.SetInstanceInfo(
@@ -1797,7 +1796,7 @@ namespace DigitalPlatform.LibraryServer
 
                 if (string.IsNullOrEmpty(strDataDir) == false)
                 {
-                    REDO_DELETE_DATADIR:
+                REDO_DELETE_DATADIR:
                     // 删除数据目录
                     try
                     {
@@ -2120,7 +2119,7 @@ MessageBoxDefaultButton.Button2);
                     }
                 });
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -2198,7 +2197,7 @@ MessageBoxDefaultButton.Button2);
                 }));
             }
 
-            ERROR1:
+        ERROR1:
             owner.Invoke((Action)(() =>
             {
                 MessageBox.Show(owner, strError);
@@ -2712,7 +2711,6 @@ MessageBoxDefaultButton.Button2);
 #endif
                 // 新的做法
                 this.SupervisorPassword = null; // 表示得不到以前的密码，同时也不打算修改
-
                 this.SupervisorRights = DomUtil.GetAttr(nodeSupervisor, "rights");
             }
 
@@ -2786,17 +2784,22 @@ MessageBoxDefaultButton.Button2);
             {
                 // 查重
                 nodeSupervisor = nodeAccounts.SelectSingleNode($"account[@name='{this.SupervisorUserName}']") as XmlElement;
+                /* BUG!!! 这样会造成 supervisor 账户被删除，然后后面又拉上一个其他账户来顶替 supervisor 的故障
                 // 如果发现以前有这个 @name，则先删除这个 account 元素，以避免出现重复
                 if (nodeSupervisor != null)
                     nodeSupervisor.ParentNode.RemoveChild(nodeSupervisor);
+                    */
             }
-
-            nodeSupervisor = nodeAccounts.SelectSingleNode("account[@type='']") as XmlElement;
 
             if (nodeSupervisor == null)
             {
-                nodeSupervisor = dom.CreateElement("account");
-                nodeAccounts.AppendChild(nodeSupervisor);
+                // 2020/1/3 把 name 属性为 'supervisor' 的拉过来用
+                nodeSupervisor = nodeAccounts.SelectSingleNode("account[@type='' and @name='supervisor']") as XmlElement;
+                if (nodeSupervisor == null)
+                {
+                    nodeSupervisor = dom.CreateElement("account");
+                    nodeAccounts.AppendChild(nodeSupervisor);
+                }
             }
 
             if (this.SupervisorUserName != null)
@@ -2815,8 +2818,7 @@ MessageBoxDefaultButton.Button2);
                 else
                 {
                     // 新的密码存储策略
-                    string strHashed = "";
-                    nRet = LibraryServerUtil.SetUserPassword(this.SupervisorPassword, out strHashed, out strError);
+                    nRet = LibraryServerUtil.SetUserPassword(this.SupervisorPassword, out string strHashed, out strError);
                     if (nRet == -1)
                     {
                         strError = "SetUserPassword() error: " + strError;
