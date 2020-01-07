@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.7.*")]
-[assembly: AssemblyFileVersion("3.7.0.0")]
+[assembly: AssemblyVersion("3.8.*")]
+[assembly: AssemblyFileVersion("3.8.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -67,3 +67,4 @@ using System.Runtime.InteropServices;
 // 3.5 2019/9/3 消除了 rest.http 存在的通道泄露 bug
 // 3.6 2019/11/27 这个版本要和 RfidCenter 1.4 版配套使用才行
 // 3.7 2019/12/2 实体查询窗增加定义浏览列中的书目列功能
+// 3.8 2020/1/6 实体查询窗定义浏览列中书目列功能确认正常
