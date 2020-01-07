@@ -417,7 +417,7 @@ namespace DigitalPlatform.LibraryServer
                     bRightVerified = true;
                 }
 
-                VERIFY_NORMAL_RIGHTS:
+            VERIFY_NORMAL_RIGHTS:
                 if (bRightVerified == false)
                 {
                     if (strDbType == "biblio")
@@ -646,7 +646,7 @@ namespace DigitalPlatform.LibraryServer
 
             result.Value = 1;
             return result;
-            ERROR1:
+        ERROR1:
             result.Value = -1;
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
@@ -1387,7 +1387,7 @@ namespace DigitalPlatform.LibraryServer
                     return -1;
                 }
 
-                CONTINUE:
+            CONTINUE:
                 result_strings.Add(strBiblio);
             } // end of for
 
@@ -2026,7 +2026,7 @@ namespace DigitalPlatform.LibraryServer
             string strBiblioXml = "";
             strBiblioRecPath = strBiblioDbName + "/" + strBiblioRecID;
 
-            LOADBIBLIO:
+        LOADBIBLIO:
 
             // 看看是否在排除列表中
             if (String.IsNullOrEmpty(strBiblioRecPathExclude) == false
@@ -2235,7 +2235,7 @@ return result;
 
             result.Value = 1;
             return result;
-            ERROR1:
+        ERROR1:
             result.Value = -1;
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
@@ -2728,7 +2728,7 @@ out strError);
                         goto FOUND;
                 }
                 return false;
-                FOUND:
+            FOUND:
                 continue;
             }
 
@@ -4096,7 +4096,7 @@ nsmgr);
 
             result.Value = 0;
             return result;
-            ERROR1:
+        ERROR1:
             result.Value = -1;
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
@@ -4816,7 +4816,7 @@ nsmgr);
                 }
             }
 
-            CHECK_RIGHTS_2:
+        CHECK_RIGHTS_2:
             if (bRightVerified == false)
             {
                 if (strDbType == "biblio")
@@ -5050,7 +5050,7 @@ out strError);
                 // 防止贸然覆盖了文档根下的有用信息。
             }
 
-            SKIP_MEMO_OLDRECORD:
+        SKIP_MEMO_OLDRECORD:
 
             bool bBiblioNotFound = false;
 
@@ -5701,7 +5701,7 @@ out strError);
                 goto ERROR1;
             }
 
-            END1:
+        END1:
             if (bSimulate == false && bNoEventLog == false)
             {
                 if (string.IsNullOrEmpty(strOutputBiblioRecPath) == false)
@@ -5742,7 +5742,7 @@ out strError);
                 }
             }
             return result;
-            ERROR1:
+        ERROR1:
             result.Value = -1;
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
@@ -6175,7 +6175,7 @@ out strError);
                 this.BiblioLocks.UnlockForWrite(strBiblioRecPath);
             }
             return 0;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -6321,9 +6321,15 @@ out strError);
 
             string strUnionCatalogStyle = "";
             string strAccessParameters = "";
-            bool bRightVerified = false;
+            // 针对源的读权限是否已经校验过
+            bool bReadRightVerified = false;
+            // 针对目标的写权限是否已经校验过
+            bool bWriteRightVerified = false;
             ItemDbCfg cfg_source = null;
             ItemDbCfg cfg_target = null;
+
+            // 目标书目库名
+            string strTargetBiblioDbName = "";
 
             // 2016/7/4
             // 检查 strNewBiblioRecPath
@@ -6344,6 +6350,8 @@ out strError);
                     goto ERROR1;
                 }
                 Debug.Assert(cfg_target != null, "");
+
+                strTargetBiblioDbName = strBiblioDbName;
             }
 
             // 检查数据库路径，看看是不是已经正规定义的编目库？
@@ -6392,69 +6400,134 @@ out strError);
                 // 检查存取权限
                 if (String.IsNullOrEmpty(sessioninfo.Access) == false)
                 {
-                    // return:
-                    //      null    指定的操作类型的权限没有定义
-                    //      ""      定义了指定类型的操作权限，但是否定的定义
-                    //      其它      权限列表。* 表示通配的权限列表
-                    string strActionList = GetDbOperRights(sessioninfo.Access,
-                        strBiblioDbName,
-                        "setbiblioinfo");
-                    if (strActionList == null)
+                    // *** 第一步，检查源数据库相关权限
                     {
-                        // 看看是不是关于 setbiblioinfo 的任何权限都没有定义?
-                        strActionList = GetDbOperRights(sessioninfo.Access,
-                            "",
-                            "setbiblioinfo");
+                        string strReadAction = "copy";
+
+                        // return:
+                        //      null    指定的操作类型的权限没有定义
+                        //      ""      定义了指定类型的操作权限，但是否定的定义
+                        //      其它      权限列表。* 表示通配的权限列表
+                        string strActionList = GetDbOperRights(sessioninfo.Access,
+                            strBiblioDbName,
+                            "getbiblioinfo");
                         if (strActionList == null)
                         {
-                            // 2014/3/12
-                            // TODO: 可以提示"既没有... 也没有 ..."
-                            goto CHECK_RIGHTS_2;
+                            // 看看是不是关于 getbiblioinfo 的任何权限都没有定义?
+                            strActionList = GetDbOperRights(sessioninfo.Access,
+                                "",
+                                "getbiblioinfo");
+                            if (strActionList == null)
+                            {
+                                // 继续检查写权限
+                                goto SKIP_1;
+                            }
+                            else
+                            {
+                                strError = "用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + strBiblioDbName + "' 执行 getbiblioinfo " + strReadAction + " 操作的存取权限(注:复制操作由一个读和一个写操作构成)";
+                                result.Value = -1;
+                                result.ErrorInfo = strError;
+                                result.ErrorCode = ErrorCode.AccessDenied;
+                                return result;
+                            }
+                        }
+
+                        if (strActionList == "*")
+                        {
+                            // 通配
                         }
                         else
                         {
-                            strError = "用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + strBiblioDbName + "' 执行 setbiblioinfo " + strAction + " 操作的存取权限";
-                            result.Value = -1;
-                            result.ErrorInfo = strError;
-                            result.ErrorCode = ErrorCode.AccessDenied;
-                            return result;
+                            if (IsInAccessList(strReadAction, strActionList, out strAccessParameters) == false)
+                            {
+                                strError = "用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + strBiblioDbName + "' 执行 getbiblioinfo " + strReadAction + " 操作的存取权限(注:复制操作由一个读和一个写操作构成)";
+                                result.Value = -1;
+                                result.ErrorInfo = strError;
+                                result.ErrorCode = ErrorCode.AccessDenied;
+                                return result;
+                            }
                         }
-#if NO
-                        strError = "用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + strBiblioDbName + "' 执行 setbiblioinfo " + strAction + " 操作的存取权限";
-                        result.Value = -1;
-                        result.ErrorInfo = strError;
-                        result.ErrorCode = ErrorCode.AccessDenied;
-                        return result;
-#endif
-                    }
-                    if (strActionList == "*")
-                    {
-                        // 通配
-                    }
-                    else
-                    {
-                        if (IsInAccessList(strAction, strActionList, out strAccessParameters) == false)
-                        {
-                            strError = "用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + strBiblioDbName + "' 执行 setbiblioinfo " + strAction + " 操作的存取权限";
-                            result.Value = -1;
-                            result.ErrorInfo = strError;
-                            result.ErrorCode = ErrorCode.AccessDenied;
-                            return result;
-                        }
+
+                        bReadRightVerified = true;
                     }
 
-                    bRightVerified = true;
+                    SKIP_1:
+
+                    // *** 第二步，检查目标数据库相关权限
+                    {
+                        string strWriteAction = "new";
+                        if (ResPath.IsAppendRecPath(strNewBiblioRecPath) == false)
+                            strWriteAction = "change";
+
+                        // return:
+                        //      null    指定的操作类型的权限没有定义
+                        //      ""      定义了指定类型的操作权限，但是否定的定义
+                        //      其它      权限列表。* 表示通配的权限列表
+                        string strActionList = GetDbOperRights(sessioninfo.Access,
+                            strTargetBiblioDbName,
+                            "setbiblioinfo");
+                        if (strActionList == null)
+                        {
+                            // 看看是不是关于 setbiblioinfo 的任何权限都没有定义?
+                            strActionList = GetDbOperRights(sessioninfo.Access,
+                                "",
+                                "setbiblioinfo");
+                            if (strActionList == null)
+                            {
+                                // 2014/3/12
+                                // TODO: 可以提示"既没有... 也没有 ..."
+                                goto CHECK_RIGHTS_2;
+                            }
+                            else
+                            {
+                                strError = $"用户 '{sessioninfo.UserID}' 不具备 针对数据库 '{strTargetBiblioDbName}' 执行 setbiblioinfo {strWriteAction} 操作的存取权限";
+                                result.Value = -1;
+                                result.ErrorInfo = strError;
+                                result.ErrorCode = ErrorCode.AccessDenied;
+                                return result;
+                            }
+                        }
+
+                        if (strActionList == "*")
+                        {
+                            // 通配
+                        }
+                        else
+                        {
+                            if (IsInAccessList(strWriteAction, strActionList, out strAccessParameters) == false)
+                            {
+                                strError = "用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + strBiblioDbName + "' 执行 setbiblioinfo " + strWriteAction + " 操作的存取权限";
+                                result.Value = -1;
+                                result.ErrorInfo = strError;
+                                result.ErrorCode = ErrorCode.AccessDenied;
+                                return result;
+                            }
+                        }
+
+                        bWriteRightVerified = true;
+                    }
                 }
             }
 
-            CHECK_RIGHTS_2:
-            if (bRightVerified == false)
+        CHECK_RIGHTS_2:
+            if (bReadRightVerified == false)
+            {
+                // 权限字符串
+                if (StringUtil.IsInList("getbiblioinfo,order", sessioninfo.RightsOrigin) == false)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = "设置书目信息被拒绝。不具备针对源数据库的 order 或 getbiblioinfo 权限。";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+            }
+            if (bWriteRightVerified == false)
             {
                 // 权限字符串
                 if (StringUtil.IsInList("setbiblioinfo,order", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "设置书目信息被拒绝。不具备order或setbiblioinfo权限。";
+                    result.ErrorInfo = "设置书目信息被拒绝。不具备 order 或 setbiblioinfo 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -6537,7 +6610,7 @@ out strError);
                 // 防止贸然覆盖了文档根下的有用信息。
             }
 
-            SKIP_MEMO_OLDRECORD:
+        SKIP_MEMO_OLDRECORD:
 
             // bool bBiblioNotFound = false;
 
@@ -6784,7 +6857,7 @@ out strError);
                                     // 删除刚刚复制的目标记录
                                     string strError_1 = "";
                                     int nRedoCount = 0;
-                                    REDO_DELETE:
+                                REDO_DELETE:
                                     lRet = channel.DoDeleteRes(strOutputBiblioRecPath,
                                         baTimestamp,
                                         out baOutputTimestamp,
@@ -6882,7 +6955,7 @@ out strError);
             }
 
             return result;
-            ERROR1:
+        ERROR1:
             result.Value = -1;
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
@@ -7340,7 +7413,7 @@ out strError);
             }
 
             return nCopyCount;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -7584,7 +7657,7 @@ out strError);
             }
 
             return 0;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 

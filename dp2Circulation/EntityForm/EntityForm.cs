@@ -5226,7 +5226,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
                                     ListViewItem item = new ListViewItem();
                                     item.Tag = c;
                                     _zchannelTable[c] = item;
-                                    this.browseWindow.RecordsList.Items.Add(item);
+                                    this.browseWindow?.RecordsList?.Items?.Add(item);
                                     BiblioSearchForm.UpdateCommandLine(item, c, r);
                                 }));
                             },

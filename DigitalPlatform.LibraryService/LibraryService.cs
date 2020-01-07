@@ -940,7 +940,7 @@ namespace dp2Library
 
                 // 检查前端版本
                 if (nRet == 1
-                    // && StringUtil.IsInList("checkclientversion", strRights) == true
+                    && StringUtil.IsInList("checkclientversion", strRights) == true
                     )
                 {
                     string strClientVersion = (string)parameters["client"];
@@ -1218,11 +1218,11 @@ namespace dp2Library
             return rest_list;
         }
 
+        static string base_version = "2.14";
+
         static string CheckClientVersion(string strText)
         {
-            string strName = "";
-            string strVersion = "";
-            StringUtil.ParseTwoPart(strText, "|", out strName, out strVersion);
+            StringUtil.ParseTwoPart(strText, "|", out string strName, out string strVersion);
             if (string.IsNullOrEmpty(strName) == true
                 || string.IsNullOrEmpty(strVersion) == true)
                 return "前端版本太旧，未达到 dp2library 服务器对前端版本的最低要求，登录失败。请立即升级前端程序到最新版本";
@@ -1230,8 +1230,8 @@ namespace dp2Library
             strName = strName.ToLower();
             if (strName == "dp2circulation")
             {
-                if (version.CompareTo(new Version("2.14")) < 0) // 2.14
-                    return "前端 dp2circulation (内务)版本太旧，登录失败。请立即升级到最新版本";
+                if (version.CompareTo(new Version(base_version)) < 0) // 2.14
+                    return $"前端 dp2circulation (内务)版本太旧(低于{base_version})，登录失败。请立即升级到最新版本";
             }
 
             return null;    // 表示版本满足要求
@@ -3804,6 +3804,7 @@ namespace dp2Library
 
             try
             {
+                /*
                 // 权限字符串
                 if (StringUtil.IsInList("setbiblioinfo,order", sessioninfo.RightsOrigin) == false)
                 {
@@ -3812,6 +3813,7 @@ namespace dp2Library
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
+                */
 
                 return app.CopyBiblioInfo(
                     sessioninfo,

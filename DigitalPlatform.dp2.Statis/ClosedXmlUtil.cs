@@ -11,6 +11,7 @@ using ClosedXML.Excel;
 
 using DigitalPlatform.Xml;
 using DigitalPlatform.Core;
+using System.Diagnostics;
 
 namespace DigitalPlatform.dp2.Statis
 {
@@ -42,6 +43,37 @@ namespace DigitalPlatform.dp2.Statis
             return stringSize.Width / (double)printableChars.Length;
         }
 
+
+        /*
+操作类型 crashReport -- 异常报告 
+主题 dp2circulation 
+发送者 xxx 
+媒体类型 text 
+内容 发生未捕获的界面线程异常: 
+Type: System.ArgumentOutOfRangeException
+Message: 索引超出范围。必须为非负值并小于集合大小。
+参数名: index
+Stack:
+在 System.ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument argument, ExceptionResource resource)
+在 System.Collections.Generic.List`1.get_Item(Int32 index)
+在 DigitalPlatform.dp2.Statis.ClosedXmlUtil.ExportToExcel(Stop stop, List`1 items, String& strError)
+在 dp2Circulation.ItemSearchForm.menu_exportExcelFile_Click(Object sender, EventArgs e)
+在 System.Windows.Forms.MenuItem.OnClick(EventArgs e)
+在 System.Windows.Forms.MenuItem.MenuItemData.Execute()
+在 System.Windows.Forms.Command.Invoke()
+在 System.Windows.Forms.Control.WmCommand(Message& m)
+在 System.Windows.Forms.Control.WndProc(Message& m)
+在 System.Windows.Forms.ListView.WndProc(Message& m)
+在 DigitalPlatform.GUI.ListViewNF.WndProc(Message& m)
+在 System.Windows.Forms.NativeWindow.Callback(IntPtr hWnd, Int32 msg, IntPtr wparam, IntPtr lparam)
+
+
+dp2Circulation 版本: dp2Circulation, Version=3.7.7278.20124, Culture=neutral, PublicKeyToken=null
+操作系统：Microsoft Windows NT 6.2.9200.0
+本机 MAC 地址: 94C691840CE9 
+操作时间 2020/1/2 14:44:36 (Thu, 02 Jan 2020 14:44:36 +0800) 
+前端地址 xxx 经由 http://dp2003.com/dp2library 
+         * */
         // return:
         //      -1  出错
         //      0   放弃或中断
@@ -112,6 +144,8 @@ namespace DigitalPlatform.dp2.Statis
                 column_max_chars.Add(0);
             }
 
+            Debug.Assert(alignments.Count == list.Columns.Count, "");
+
             string strFontName = list.Font.FontFamily.Name;
 
             int nRowIndex = 1;
@@ -155,7 +189,11 @@ namespace DigitalPlatform.dp2.Statis
                     cell.Style.Alignment.WrapText = true;
                     cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
                     cell.Style.Font.FontName = strFontName;
-                    cell.Style.Alignment.Horizontal = alignments[nColIndex - 1];
+                    // 2020/1/6 增加保护代码
+                    if (nColIndex - 1 < alignments.Count)
+                        cell.Style.Alignment.Horizontal = alignments[nColIndex - 1];
+                    else
+                        cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Left;
                     nColIndex++;
                 }
 
@@ -182,7 +220,13 @@ namespace DigitalPlatform.dp2.Statis
                 if (nChars < MAX_CHARS)
                     column.AdjustToContents();
                 else
-                    column.Width = (double)list.Columns[i].Width / char_width;  // Math.Min(MAX_CHARS, nChars);
+                {
+                    int nColumnWidth = 100;
+                    // 2020/1/6 增加保护判断
+                    if (i >= 0 && i < list.Columns.Count)
+                        nColumnWidth = list.Columns[i].Width;
+                    column.Width = (double)nColumnWidth / char_width;  // Math.Min(MAX_CHARS, nChars);
+                }
                 i++;
             }
 
