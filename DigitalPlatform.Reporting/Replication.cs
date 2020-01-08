@@ -9,6 +9,7 @@ using System.Xml;
 
 namespace DigitalPlatform.Reporting
 {
+#if REMOVED
     /// <summary>
     /// 同步和复制功能
     /// </summary>
@@ -470,4 +471,6 @@ namespace DigitalPlatform.Reporting
         }
 
     }
+
+#endif
 }

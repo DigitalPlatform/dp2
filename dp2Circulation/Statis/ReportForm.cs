@@ -691,11 +691,9 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
                                 line.ReturningTime = "";
 
                             string strPrice = searchresult.Cols[10];
-                            long value = 0;
-                            string strUnit = "";
                             nRet = AmerceOperLogLine.ParsePriceString(strPrice,
-                    out value,
-                    out strUnit,
+                    out long value,
+                    out string strUnit,
                     out strError);
                             if (nRet == -1)
                             {
