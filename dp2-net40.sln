@@ -237,6 +237,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.WPF", "Digi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CallRfidCenterSample", "CallRfidCenterSample\CallRfidCenterSample.csproj", "{B514ACFB-CAEB-4606-89C6-F2D5BED1A256}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.LibraryServer.Reporting", "DigitalPlatform.LibraryServer.Reporting\DigitalPlatform.LibraryServer.Reporting.csproj", "{42059AF3-46EC-476A-A0FF-7932DF49A7DB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestReporting", "TestReporting\TestReporting.csproj", "{54F3063D-5601-40F0-9431-419AEFF6FA90}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1934,6 +1938,42 @@ Global
 		{B514ACFB-CAEB-4606-89C6-F2D5BED1A256}.Test|Mixed Platforms.Build.0 = Release|Any CPU
 		{B514ACFB-CAEB-4606-89C6-F2D5BED1A256}.Test|x86.ActiveCfg = Release|Any CPU
 		{B514ACFB-CAEB-4606-89C6-F2D5BED1A256}.Test|x86.Build.0 = Release|Any CPU
+		{42059AF3-46EC-476A-A0FF-7932DF49A7DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{42059AF3-46EC-476A-A0FF-7932DF49A7DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{42059AF3-46EC-476A-A0FF-7932DF49A7DB}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{42059AF3-46EC-476A-A0FF-7932DF49A7DB}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{42059AF3-46EC-476A-A0FF-7932DF49A7DB}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{42059AF3-46EC-476A-A0FF-7932DF49A7DB}.Debug|x86.Build.0 = Debug|Any CPU
+		{42059AF3-46EC-476A-A0FF-7932DF49A7DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{42059AF3-46EC-476A-A0FF-7932DF49A7DB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{42059AF3-46EC-476A-A0FF-7932DF49A7DB}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{42059AF3-46EC-476A-A0FF-7932DF49A7DB}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{42059AF3-46EC-476A-A0FF-7932DF49A7DB}.Release|x86.ActiveCfg = Release|Any CPU
+		{42059AF3-46EC-476A-A0FF-7932DF49A7DB}.Release|x86.Build.0 = Release|Any CPU
+		{42059AF3-46EC-476A-A0FF-7932DF49A7DB}.Test|Any CPU.ActiveCfg = Debug|Any CPU
+		{42059AF3-46EC-476A-A0FF-7932DF49A7DB}.Test|Any CPU.Build.0 = Debug|Any CPU
+		{42059AF3-46EC-476A-A0FF-7932DF49A7DB}.Test|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{42059AF3-46EC-476A-A0FF-7932DF49A7DB}.Test|Mixed Platforms.Build.0 = Debug|Any CPU
+		{42059AF3-46EC-476A-A0FF-7932DF49A7DB}.Test|x86.ActiveCfg = Debug|Any CPU
+		{42059AF3-46EC-476A-A0FF-7932DF49A7DB}.Test|x86.Build.0 = Debug|Any CPU
+		{54F3063D-5601-40F0-9431-419AEFF6FA90}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{54F3063D-5601-40F0-9431-419AEFF6FA90}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{54F3063D-5601-40F0-9431-419AEFF6FA90}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{54F3063D-5601-40F0-9431-419AEFF6FA90}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{54F3063D-5601-40F0-9431-419AEFF6FA90}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{54F3063D-5601-40F0-9431-419AEFF6FA90}.Debug|x86.Build.0 = Debug|Any CPU
+		{54F3063D-5601-40F0-9431-419AEFF6FA90}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{54F3063D-5601-40F0-9431-419AEFF6FA90}.Release|Any CPU.Build.0 = Release|Any CPU
+		{54F3063D-5601-40F0-9431-419AEFF6FA90}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{54F3063D-5601-40F0-9431-419AEFF6FA90}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{54F3063D-5601-40F0-9431-419AEFF6FA90}.Release|x86.ActiveCfg = Release|Any CPU
+		{54F3063D-5601-40F0-9431-419AEFF6FA90}.Release|x86.Build.0 = Release|Any CPU
+		{54F3063D-5601-40F0-9431-419AEFF6FA90}.Test|Any CPU.ActiveCfg = Release|Any CPU
+		{54F3063D-5601-40F0-9431-419AEFF6FA90}.Test|Any CPU.Build.0 = Release|Any CPU
+		{54F3063D-5601-40F0-9431-419AEFF6FA90}.Test|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{54F3063D-5601-40F0-9431-419AEFF6FA90}.Test|Mixed Platforms.Build.0 = Release|Any CPU
+		{54F3063D-5601-40F0-9431-419AEFF6FA90}.Test|x86.ActiveCfg = Release|Any CPU
+		{54F3063D-5601-40F0-9431-419AEFF6FA90}.Test|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
