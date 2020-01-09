@@ -1181,6 +1181,7 @@ out strError);
                                     channel,
             strDbName,
             lCurrentCount,
+            func_showMessage,
             ref lProgress,
             ref lIndex,
             out strError);
@@ -1207,6 +1208,7 @@ out strError);
                                     channel,
             strDbName,
             lCurrentCount,
+            func_showMessage,
             ref lProgress,
             ref lIndex,
             out strError);
@@ -1235,6 +1237,7 @@ out strError);
                                     channel,
                 strDbName,
                 lCurrentCount,
+            func_showMessage,
             ref lProgress,
             ref lIndex,
                 out strError);
@@ -1489,6 +1492,7 @@ out strError);
     LibraryChannel channel,
     string strItemDbNameParam,
     long lOldCount,
+    Delegate_showMessage func_showMessage,
     ref long lProgress,
     ref long lIndex,
     out string strError)
@@ -1590,6 +1594,7 @@ out strError);
                     return line;
                 },
                 null,
+                func_showMessage,
                 "id,cols,format:@coldef:*/barcode|*/location|*/accessNo|*/parent|*/state|*/operations/operation[@name='create']/@time|*/borrower|*/borrowDate|*/borrowPeriod|*/returningDate|*/price|*/refID",
             lOldCount,
                 ref lProgress,
@@ -1611,6 +1616,7 @@ out strError);
             Delegate_search func_search,
             Delegate_buildItem func_buildItem,
             Delegate_beforeSave func_beforeSave,
+            Delegate_showMessage func_showMessage,
             // string strItemDbNameParam,
             string strStyle,
             long lOldCount,
@@ -1761,7 +1767,7 @@ strStyle,
 
                     line.BiblioRecPath = strBiblioRecPath;
 #endif
-                    object line = func_buildItem(searchresult) as Item;
+                    object line = func_buildItem(searchresult);
                     if (line == null)
                         continue;
 
@@ -1772,7 +1778,10 @@ strStyle,
                     {
                         func_beforeSave?.Invoke(lines);
                         context.SaveChanges();
+
                         lines.Clear();
+
+                        func_showMessage?.Invoke($"正在创建 {searchresult.Path} ...");
                     }
 
                 CONTINUE:
@@ -1799,6 +1808,7 @@ strStyle,
     LibraryChannel channel,
             string strReaderDbNameParam,
             long lOldCount,
+    Delegate_showMessage func_showMessage,
             ref long lProgress,
             ref long lIndex,
             out string strError)
@@ -1850,6 +1860,7 @@ strStyle,
                     return line;
                 },
                 null,
+                func_showMessage,
                 "id,cols,format:@coldef:*/barcode|*/department|*/readerType|*/name|*/state",
             lOldCount,
                 ref lProgress,
@@ -1862,6 +1873,7 @@ LibraryContext context,
 LibraryChannel channel,
     string strBiblioDbNameParam,
     long lOldCount,
+    Delegate_showMessage func_showMessage,
     ref long lProgress,
     ref long lIndex,
     out string strError)
@@ -1939,6 +1951,7 @@ LibraryChannel channel,
                     }
 
                 },
+                func_showMessage,
                 "id",
                 lOldCount,
                 ref lProgress,
