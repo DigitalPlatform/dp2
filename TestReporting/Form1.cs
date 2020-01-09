@@ -446,7 +446,8 @@ string strHtml)
                             ErrorInfo = strError
                         };
 
-                    DatabaseConfig config = new DatabaseConfig {
+                    DatabaseConfig config = new DatabaseConfig
+                    {
                         ServerName = "localhost",
                         DatabaseName = "testrep",
                         UserName = "root",
@@ -454,9 +455,13 @@ string strHtml)
                     };
                     nRet = replication.DoPlan(
                         config,
-channel,
-ref task_dom,
-out strError);
+                        channel,
+                        ref task_dom,
+                        (message) =>
+                        {
+                            OutputHistory(message);
+                        },
+                        out strError);
                     if (nRet == -1)
                         return new NormalResult
                         {

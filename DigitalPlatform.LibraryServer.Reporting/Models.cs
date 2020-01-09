@@ -438,10 +438,10 @@ namespace DigitalPlatform.LibraryServer.Reporting
                     Debug.Assert(string.IsNullOrEmpty(strParentID) == false, "");
 
                     Debug.Assert(this.Operation.IndexOf("set") == 0, "");
-                    string strDbType = this.Operation.Substring("set".Length);
+                    string strDbType = this.Operation.Substring("set".Length).ToLower();
 
                     // 根据实体库名得到书目库名
-                    this.BiblioRecPath = Program.MainForm.BuildBiblioRecPath(strDbType, // "item",
+                    this.BiblioRecPath = Replication.BuildBiblioRecPath(strDbType, // "item",
                         this.ItemRecPath,
                         strParentID);
                 }
