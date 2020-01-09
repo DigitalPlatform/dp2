@@ -26,7 +26,12 @@ namespace DigitalPlatform.LibraryServer.Reporting
         {
             strError = "";
 
-            int nRet = GetDbFromInfos(channel,
+            int nRet = CheckVersion(channel,
+out strError);
+            if (nRet == -1)
+                return -1;
+
+            nRet = GetDbFromInfos(channel,
     out strError);
             if (nRet == -1)
                 return -1;
@@ -44,6 +49,33 @@ namespace DigitalPlatform.LibraryServer.Reporting
         }
 
         #region 初始化各种数据结构
+
+        public string ServerVersion { get; set; }
+        public string ServerUID { get; set; }
+
+        public int CheckVersion(LibraryChannel channel,
+    out string strError)
+        {
+            strError = "";
+
+            long lRet = channel.GetVersion(null,
+out string strVersion,
+out string strUID,
+out strError);
+            if (lRet == -1)
+            {
+                strError = "针对服务器 " + channel.Url + " 获得版本号的过程发生错误：" + strError;
+                return -1;
+            }
+
+            this.ServerUID = strUID;
+
+            if (string.IsNullOrEmpty(strVersion) == true)
+                strVersion = "2.0";
+
+            this.ServerVersion = strVersion;
+            return 1;
+        }
 
         /// <summary>
         /// 书目库检索路径信息集合
@@ -236,7 +268,7 @@ out strError);
         /// <summary>
         /// 书目库属性集合
         /// </summary>
-        public List<BiblioDbProperty> BiblioDbProperties = null;
+        public static List<BiblioDbProperty> BiblioDbProperties = null;
 
         public int InitialBiblioDbProperties(LibraryChannel channel,
             out string strError)
@@ -244,7 +276,7 @@ out strError);
             strError = "";
             int nRet = 0;
 
-            this.BiblioDbProperties = new List<BiblioDbProperty>();
+            BiblioDbProperties = new List<BiblioDbProperty>();
             // this.AuthorityDbProperties = new List<BiblioDbProperty>();
 
             if (this.AllDatabaseDom == null)
@@ -260,7 +292,7 @@ out strError);
                     // string strLibraryCode = DomUtil.GetAttr(node, "libraryCode");
 
                     BiblioDbProperty property = new BiblioDbProperty();
-                    this.BiblioDbProperties.Add(property);
+                    BiblioDbProperties.Add(property);
                     property.DbName = DomUtil.GetAttr(node, "name");
                     property.ItemDbName = DomUtil.GetAttr(node, "entityDbName");
                     property.Syntax = DomUtil.GetAttr(node, "syntax");
@@ -1017,6 +1049,7 @@ out strError);
             DatabaseConfig config,
             LibraryChannel channel,
             ref XmlDocument task_dom,
+            Delegate_showMessage func_showMessage,
             out string strError)
         {
             strError = "";
@@ -1294,6 +1327,8 @@ out strError);
                         }
                     }
 
+#endif
+
                     if (node.Name == "operlog")
                     {
                         string strTableInitilized = DomUtil.GetAttr(node,
@@ -1319,11 +1354,11 @@ out strError);
                         if (strTableInitilized != "finish")
                         {
                             // stop.SetMessage("正在初始化本地数据库的日志表 ...");
-
+                            /*
                             nRet = CreateOperLogTables(out strError);
                             if (nRet == -1)
                                 return -1;
-
+                                */
                             DomUtil.SetAttr(node,
                                 "initial_tables", "finish");
                         }
@@ -1335,10 +1370,13 @@ out strError);
                             // TODO: 中断时断点记载
                             // TODO: 进度条应该是重新设置的
                             nRet = DoCreateOperLogTable(
+                                context,
+                                channel,
                                 -1,
                                 strStartDate,
                                 strEndDate,
                                 LogType.OperLog,
+                                func_showMessage,
                                 out strLastDate,
                                 out lLastIndex,
                                 out strError);
@@ -1386,10 +1424,13 @@ out strError);
                             // TODO: 中断时断点记载
                             // TODO: 进度条应该是重新设置的
                             nRet = DoCreateOperLogTable(
+                                context,
+                                channel,
                                 -1,
                                 strStartDate,
                                 strEndDate,
                                 LogType.AccessLog,
+                                func_showMessage,
                                 out strLastDate,
                                 out lLastIndex,
                                 out strError);
@@ -1402,8 +1443,6 @@ out strError);
                             DomUtil.SetAttr(node, "state", "finish");
                         }
                     }
-
-#endif
                 }
 
                 // TODO: 全部完成后，需要在 task_dom 中清除不必要的信息
@@ -1931,12 +1970,12 @@ LibraryChannel channel,
             if (String.IsNullOrEmpty(strItemDbName) == true)
                 return null;
 
-            if (this.BiblioDbProperties != null)
+            if (BiblioDbProperties != null)
             {
-                for (int i = 0; i < this.BiblioDbProperties.Count; i++)
+                for (int i = 0; i < BiblioDbProperties.Count; i++)
                 {
-                    if (this.BiblioDbProperties[i].ItemDbName == strItemDbName)
-                        return this.BiblioDbProperties[i].DbName;
+                    if (BiblioDbProperties[i].ItemDbName == strItemDbName)
+                        return BiblioDbProperties[i].DbName;
                 }
             }
 
@@ -2145,7 +2184,7 @@ LibraryChannel channel,
         }
 
         // 根据 册/订购/期/评注 记录路径和 parentid 构造所从属的书目记录路径
-        public string BuildBiblioRecPath(string strDbType,
+        public static string BuildBiblioRecPath(string strDbType,
             string strItemRecPath,
             string strParentID)
         {
@@ -2163,17 +2202,17 @@ LibraryChannel channel,
             return strBiblioDbName + "/" + strParentID;
         }
 
-        public string GetBiblioDbNameFromItemDbName(string strDbType,
+        public static string GetBiblioDbNameFromItemDbName(string strDbType,
     string strItemDbName)
         {
             if (String.IsNullOrEmpty(strItemDbName) == true)
                 return null;
 
-            if (this.BiblioDbProperties != null)
+            if (BiblioDbProperties != null)
             {
-                if (strDbType == "item")
+                if (strDbType == "item" || strDbType == "entity")
                 {
-                    foreach (BiblioDbProperty prop in this.BiblioDbProperties)
+                    foreach (BiblioDbProperty prop in BiblioDbProperties)
                     {
                         if (prop.ItemDbName == strItemDbName)
                             return prop.DbName;
@@ -2181,7 +2220,7 @@ LibraryChannel channel,
                 }
                 else if (strDbType == "order")
                 {
-                    foreach (BiblioDbProperty prop in this.BiblioDbProperties)
+                    foreach (BiblioDbProperty prop in BiblioDbProperties)
                     {
                         if (prop.OrderDbName == strItemDbName)
                             return prop.DbName;
@@ -2189,7 +2228,7 @@ LibraryChannel channel,
                 }
                 else if (strDbType == "issue")
                 {
-                    foreach (BiblioDbProperty prop in this.BiblioDbProperties)
+                    foreach (BiblioDbProperty prop in BiblioDbProperties)
                     {
                         if (prop.IssueDbName == strItemDbName)
                             return prop.DbName;
@@ -2197,7 +2236,7 @@ LibraryChannel channel,
                 }
                 else if (strDbType == "comment")
                 {
-                    foreach (BiblioDbProperty prop in this.BiblioDbProperties)
+                    foreach (BiblioDbProperty prop in BiblioDbProperties)
                     {
                         if (prop.CommentDbName == strItemDbName)
                             return prop.DbName;
@@ -2213,11 +2252,13 @@ LibraryChannel channel,
 
         // 根据日志文件创建本地 operlogxxx 表
         int DoCreateOperLogTable(
+            LibraryContext context,
             LibraryChannel channel,
             long lProgressStart,
             string strStartDate,
             string strEndDate,
             LogType logType,
+            Delegate_showMessage func_showMessage,
             out string strLastDate,
             out long lLastIndex,
             out string strError)
@@ -2291,9 +2332,8 @@ LibraryChannel channel,
             ProgressEstimate estimate = new ProgressEstimate();
 
             OperLogLoader loader = new OperLogLoader();
-            loader.Channel = this.Channel;
-            loader.Stop = this.Progress;
-            // loader.owner = this;
+            loader.Channel = channel;
+            loader.Stop = null;
             loader.Estimate = estimate;
             loader.Dates = filenames;
             loader.Level = 2;  //  Program.MainForm.OperLogLevel;
@@ -2304,19 +2344,25 @@ LibraryChannel channel,
 
             loader.ProgressStart = lProgressStart;
 
-            loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
-            loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
+            //loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
+            //loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
 
-            // List<OperLogLine> circu_lines = new List<OperLogLine>();
-            MultiBuffer buffer = new MultiBuffer();
-            buffer.Initial();
-            // OperLogLineBase.MainForm = Program.MainForm;
+            List<OperBase> opers = new List<OperBase>();
+            //MultiBuffer buffer = new MultiBuffer();
+            //buffer.Initial();
 
             try
             {
+                string prev_date = "";
                 int nRecCount = 0;
                 foreach (OperLogItem item in loader)
                 {
+                    if (prev_date != item.Date)
+                    {
+                        func_showMessage?.Invoke($"正在处理日志文件 {item.Date}");
+                        prev_date = item.Date;
+                    }
+
                     string strXml = item.Xml;
 
                     if (string.IsNullOrEmpty(strXml) == true)
@@ -2333,7 +2379,10 @@ LibraryChannel channel,
                         }
                         catch (Exception ex)
                         {
+                            // TODO: 记入错误日志，然后继续处理
+
                             strError = item.Date + " 中偏移为 " + item.Index.ToString() + " 的日志记录 XML 装载到 DOM 时出错: " + ex.Message;
+                            /*
                             DialogResult result = DialogResult.No;
 
                             string strText = strError;
@@ -2348,19 +2397,14 @@ LibraryChannel channel,
                             }));
                             if (result == DialogResult.No)
                                 return -1;
+                                */
                             continue;
                         }
 
                         string strOperation = DomUtil.GetElementText(dom.DocumentElement, "operation");
                         string strAction = DomUtil.GetElementText(dom.DocumentElement, "action");
-#if NO
-                                if (strOperation != "borrow" && strOperation != "return")
-                                {
-                                    nRecCount++;
-                                    continue;
-                                }
-#endif
-                        if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.74") < 0
+
+                        if (StringUtil.CompareVersion(this.ServerVersion, "2.74") < 0
                             && strOperation == "amerce" && (strAction == "amerce" || strAction == "modifyprice"))
                         {
                             // 重新获得当前日志记录，用最详细级别
@@ -2371,27 +2415,49 @@ LibraryChannel channel,
                                 return -1;
                             }
                             dom.LoadXml(new_item.Xml);
-                            nRet = buffer.AddLine(
-strOperation,
-dom,
-new_item.Date,
-new_item.Index,
-out strError);
+                            nRet = BuildOpers(
+    strOperation,
+    dom,
+    new_item.Date,
+    new_item.Index,
+    out List<OperBase> lines,
+    out strError);
+                            if (lines != null)
+                                opers.AddRange(lines);
                         }
                         else
                         {
-                            nRet = buffer.AddLine(
+                            // return:
+                            //      -2  不能识别的 strOperation 类型
+                            //      -1  出错
+                            //      0   成功
+                            nRet = BuildOpers(
                                 strOperation,
                                 dom,
                                 item.Date,
                                 item.Index,
+                                out List<OperBase> lines,
                                 out strError);
+                            if (lines != null)
+                                opers.AddRange(lines);
                         }
                         if (nRet == -1)
                             return -1;
                         // -2 不要报错
                     }
 
+                    if (opers.Count > 4000)
+                    {
+                        context.AddRange(opers);
+                        context.SaveChanges();
+                        opers.Clear();
+
+                        strLastDate = item.Date;
+                        lLastIndex = item.Index + 1;
+                        nRecCount = 0;
+                    }
+
+                    /*
                     bool bForce = false;
                     if (nRecCount >= 4000)
                         bForce = true;
@@ -2408,6 +2474,7 @@ out strError);
                     // 2016/5/22
                     if (nRet == -1)
                         return -1;
+                        */
 
                     nRecCount++;
                 }
@@ -2418,20 +2485,99 @@ out strError);
                 return -1;
             }
 
-            nRet = buffer.WriteToDb(connection,
+            if (opers.Count > 0)
+            {
+                context.AddRange(opers);
+                context.SaveChanges();
+                opers.Clear();
+            }
+            /*
+                nRet = buffer.WriteToDb(connection,
                 true,
                 true,   // false,
                 out strError);
             if (nRet == -1)
                 return -1;
-
+                */
             // 表示处理完成
             strLastDate = "";
             lLastIndex = 0;
-
             return 0;
         }
 
+        // 在内存中增加一行
+        // return:
+        //      -2  不能识别的 strOperation 类型
+        //      -1  出错
+        //      0   成功
+        public int BuildOpers(
+            string strOperation,
+            XmlDocument dom,
+            string strDate,
+            long lIndex,
+            out List<OperBase> lines,
+            out string strError)
+        {
+            lines = new List<OperBase>();
+
+            OperBase line = null;
+            if (strOperation == "borrow" || strOperation == "return")
+            {
+                line = new CircuOper();
+            }
+            else if (strOperation == "setReaderInfo")
+            {
+                line = new PatronOper();
+            }
+            else if (strOperation == "setBiblioInfo")
+            {
+                line = new BiblioOper();
+            }
+            else if (strOperation == "setEntity")
+            {
+                line = new ItemOper();
+            }
+            else if (strOperation == "setOrder")
+            {
+                line = new ItemOper();
+            }
+            else if (strOperation == "setIssue")
+            {
+                line = new ItemOper();
+            }
+            else if (strOperation == "setComment")
+            {
+                line = new ItemOper();
+            }
+            else if (strOperation == "amerce")
+            {
+                line = new AmerceOper();
+            }
+            else if (strOperation == "passgate")
+            {
+                line = new PassGateOper();
+            }
+            else if (strOperation == "getRes")
+            {
+                line = new GetResOper();
+            }
+            else
+            {
+                strError = "不能识别的 strOperation '" + strOperation + "'";
+                return -2;
+            }
+            int nRet = line.SetData(dom,
+    strDate,
+    lIndex,
+    out List<OperBase> temp_lines,
+    out strError);
+            if (nRet == -1)
+                return -1;
+            lines.Add(line);
+            if (temp_lines != null && temp_lines.Count > 0)
+                lines.AddRange(temp_lines);
+            return 0;
+        }
     }
 
 
