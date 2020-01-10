@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using System.Xml;
 
@@ -10,6 +11,8 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace DigitalPlatform.LibraryServer.Reporting
 {
@@ -1046,7 +1049,7 @@ out strError);
         // parameters:
         //      task_dom    存储了计划信息的 XMlDocument 对象。执行后，里面的信息会记载了断点信息等。如果完全完成，则保存前可以仅仅留下结束点信息
         public int DoPlan(
-            DatabaseConfig config,
+            // DatabaseConfig config,
             LibraryChannel channel,
             ref XmlDocument task_dom,
             Delegate_showMessage func_showMessage,
@@ -1055,7 +1058,8 @@ out strError);
             strError = "";
             int nRet = 0;
 
-            using (var context = new LibraryContext(config))
+            var context = new LibraryContext();
+            try
             {
                 context.Database.EnsureDeleted();
                 context.Database.EnsureCreated();
@@ -1177,7 +1181,7 @@ out strError);
                             try
                             {
                                 nRet = BuildItemRecords(
-                                    context,
+                                    ref context,
                                     channel,
             strDbName,
             lCurrentCount,
@@ -1204,7 +1208,7 @@ out strError);
                             try
                             {
                                 nRet = BuildReaderRecords(
-                                    context,
+                                    ref context,
                                     channel,
             strDbName,
             lCurrentCount,
@@ -1233,7 +1237,7 @@ out strError);
                                 try
                                 {
                                     nRet = BuildBiblioRecords(
-                                    context,
+                                    ref context,
                                     channel,
                 strDbName,
                 lCurrentCount,
@@ -1373,7 +1377,7 @@ out strError);
                             // TODO: 中断时断点记载
                             // TODO: 进度条应该是重新设置的
                             nRet = DoCreateOperLogTable(
-                                context,
+                                ref context,
                                 channel,
                                 -1,
                                 strStartDate,
@@ -1427,7 +1431,7 @@ out strError);
                             // TODO: 中断时断点记载
                             // TODO: 进度条应该是重新设置的
                             nRet = DoCreateOperLogTable(
-                                context,
+                                ref context,
                                 channel,
                                 -1,
                                 strStartDate,
@@ -1452,6 +1456,11 @@ out strError);
                 DomUtil.SetAttr(task_dom.DocumentElement,
                     "state", "daily");  // 表示首次创建已经完成，进入每日同步阶段
                 return 0;
+            }
+            finally
+            {
+                if (context != null)
+                    context.Dispose();
             }
         }
 
@@ -1488,7 +1497,7 @@ out strError);
 
 
         int BuildItemRecords(
-    LibraryContext context,
+    ref LibraryContext context,
     LibraryChannel channel,
     string strItemDbNameParam,
     long lOldCount,
@@ -1500,7 +1509,7 @@ out strError);
             // 实体库名 --> 书目库名
             Hashtable dbname_table = new Hashtable();
 
-            return BuildRecords(context,
+            return BuildRecords(ref context,
                 channel,
                 (c, r) =>
                 {
@@ -1611,7 +1620,7 @@ out strError);
         //      lIndex  [in] 起点 index
         //              [out] 返回中断位置的 index
         int BuildRecords(
-            LibraryContext context,
+            ref LibraryContext context,
             LibraryChannel channel,
             Delegate_search func_search,
             Delegate_buildItem func_buildItem,
@@ -1777,7 +1786,7 @@ strStyle,
                     if (lines.Count >= 1000)
                     {
                         func_beforeSave?.Invoke(lines);
-                        context.SaveChanges();
+                        SaveChanges(ref context);
 
                         lines.Clear();
 
@@ -1791,7 +1800,7 @@ strStyle,
                 if (lines.Count > 0)
                 {
                     func_beforeSave?.Invoke(lines);
-                    context.SaveChanges();
+                    SaveChanges(ref context);
                 }
             }
             finally
@@ -1802,9 +1811,28 @@ strStyle,
             return 0;
         }
 
+        public void SaveChanges(ref LibraryContext context)
+        {
+            context.SaveChanges();
+            //context.Dispose();
+            //context = new LibraryContext();
+            DetachAll(context);
+        }
+
+        public void DetachAll(LibraryContext context)
+        {
+            foreach (EntityEntry entityEntry in context.ChangeTracker.Entries().ToArray())
+            {
+                if (entityEntry.Entity != null)
+                {
+                    entityEntry.State = EntityState.Detached;
+                }
+            }
+        }
+
         // 复制读者记录
         int BuildReaderRecords(
-    LibraryContext context,
+    ref LibraryContext context,
     LibraryChannel channel,
             string strReaderDbNameParam,
             long lOldCount,
@@ -1815,7 +1843,7 @@ strStyle,
         {
             Hashtable librarycode_table = new Hashtable();
 
-            return BuildRecords(context,
+            return BuildRecords(ref context,
                 channel,
                 (c, r) =>
                 {
@@ -1869,7 +1897,7 @@ strStyle,
         }
 
         int BuildBiblioRecords(
-LibraryContext context,
+ref LibraryContext context,
 LibraryChannel channel,
     string strBiblioDbNameParam,
     long lOldCount,
@@ -1880,7 +1908,7 @@ LibraryChannel channel,
         {
             List<string> biblio_recpaths = new List<string>();
 
-            return BuildRecords(context,
+            return BuildRecords(ref context,
                 channel,
                 (c, r) =>
                 {
@@ -2265,7 +2293,7 @@ LibraryChannel channel,
 
         // 根据日志文件创建本地 operlogxxx 表
         int DoCreateOperLogTable(
-            LibraryContext context,
+            ref LibraryContext context,
             LibraryChannel channel,
             long lProgressStart,
             string strStartDate,
@@ -2462,7 +2490,7 @@ LibraryChannel channel,
                     if (opers.Count > 4000)
                     {
                         context.AddRange(opers);
-                        context.SaveChanges();
+                        SaveChanges(ref context);
                         opers.Clear();
 
                         strLastDate = item.Date;
@@ -2501,7 +2529,7 @@ LibraryChannel channel,
             if (opers.Count > 0)
             {
                 context.AddRange(opers);
-                context.SaveChanges();
+                SaveChanges(ref context);
                 opers.Clear();
             }
             /*

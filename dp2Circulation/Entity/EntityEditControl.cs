@@ -2299,6 +2299,29 @@ namespace dp2Circulation
             }
         }
 
+        private void textBox_barcode_TextChanged(object sender, EventArgs e)
+        {
+            // 2020/1/10
+            // 自动把小写字母转换为大写字母
+            ToUpper(this.textBox_barcode);
+        }
+
+        // 2020/1/10
+        // 自动把小写字母转换为大写字母
+        public static void ToUpper(TextBox textBox)
+        {
+            string uppered = textBox.Text.ToUpper();
+            if (textBox.Text != uppered)
+            {
+                int save_start = textBox.SelectionStart;
+                int save_length = textBox.SelectionLength;
+
+                textBox.Text = uppered;
+
+                textBox.SelectionStart = save_start;
+                textBox.SelectionLength = save_length;
+            }
+        }
 
 #if NO
         class MyTextBox : TextBox

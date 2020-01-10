@@ -14496,6 +14496,12 @@ Program.MainForm.DefaultFont);
             return results;
         }
 
+        private void textBox_itemBarcode_TextChanged(object sender, EventArgs e)
+        {
+            // 2020/1/10
+            EntityEditControl.ToUpper(this.textBox_itemBarcode);
+        }
+
 #if NO
         void TryStartDrag(Point start)
         {

@@ -9,9 +9,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.RFID.UI;
 using DigitalPlatform.RFID;
-using static dp2Circulation.MyForm;
 using DigitalPlatform.Xml;
-using DigitalPlatform.Core;
 
 namespace dp2Circulation
 {

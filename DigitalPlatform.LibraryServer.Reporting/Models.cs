@@ -23,17 +23,19 @@ namespace DigitalPlatform.LibraryServer.Reporting
         public DbSet<ItemOper> ItemOpers { get; set; }
         public DbSet<AmerceOper> AmerceOpers { get; set; }
 
+        /*
         DatabaseConfig _config = null;
 
         public LibraryContext(DatabaseConfig config)
         {
             _config = config;
         }
+        */
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             // optionsBuilder.UseMySQL("server=localhost;database=library;user=user;password=password");
-            optionsBuilder.UseMySql(_config.BuildConnectionString());
+            optionsBuilder.UseMySql(DatabaseConfig.BuildConnectionString());
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -61,7 +63,38 @@ namespace DigitalPlatform.LibraryServer.Reporting
                 entity.HasKey(e => e.RecPath);
             });
 
+            /*
             modelBuilder.Entity<OperBase>(entity =>
+            {
+                entity.HasKey(e => new { e.Date, e.No, e.SubNo });
+            });
+            */
+
+            modelBuilder.Entity<PassGateOper>(entity =>
+            {
+                entity.HasKey(e => new { e.Date, e.No, e.SubNo });
+            });
+            modelBuilder.Entity<GetResOper>(entity =>
+            {
+                entity.HasKey(e => new { e.Date, e.No, e.SubNo });
+            });
+            modelBuilder.Entity<CircuOper>(entity =>
+            {
+                entity.HasKey(e => new { e.Date, e.No, e.SubNo });
+            });
+            modelBuilder.Entity<PatronOper>(entity =>
+            {
+                entity.HasKey(e => new { e.Date, e.No, e.SubNo });
+            });
+            modelBuilder.Entity<BiblioOper>(entity =>
+            {
+                entity.HasKey(e => new { e.Date, e.No, e.SubNo });
+            });
+            modelBuilder.Entity<ItemOper>(entity =>
+            {
+                entity.HasKey(e => new { e.Date, e.No, e.SubNo });
+            });
+            modelBuilder.Entity<AmerceOper>(entity =>
             {
                 entity.HasKey(e => new { e.Date, e.No, e.SubNo });
             });
@@ -913,14 +946,14 @@ out DateTime borrowdate) == false)
 
     }
 
-    public class DatabaseConfig
+    public static class DatabaseConfig
     {
-        public string ServerName { get; set; }
-        public string UserName { get; set; }
-        public string Password { get; set; }
-        public string DatabaseName { get; set; }
+        public static string ServerName { get; set; }
+        public static string UserName { get; set; }
+        public static string Password { get; set; }
+        public static string DatabaseName { get; set; }
 
-        public string BuildConnectionString()
+        public static string BuildConnectionString()
         {
             return $"server={ServerName};database={DatabaseName};user={UserName};password={Password}";
         }

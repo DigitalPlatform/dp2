@@ -378,6 +378,7 @@
             this.textBox_barcode.Size = new System.Drawing.Size(216, 21);
             this.textBox_barcode.TabIndex = 2;
             this.textBox_barcode.ReadOnlyChanged += new System.EventHandler(this.textBox_barcode_ReadOnlyChanged);
+            this.textBox_barcode.TextChanged += new System.EventHandler(this.textBox_barcode_TextChanged);
             this.textBox_barcode.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
             this.textBox_barcode.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
             // 
@@ -977,6 +978,7 @@
             this.checkedComboBox_state.MinimumSize = new System.Drawing.Size(135, 0);
             this.checkedComboBox_state.Name = "checkedComboBox_state";
             this.checkedComboBox_state.Padding = new System.Windows.Forms.Padding(6);
+            this.checkedComboBox_state.ReadOnly = false;
             this.checkedComboBox_state.Size = new System.Drawing.Size(404, 33);
             this.checkedComboBox_state.TabIndex = 5;
             this.checkedComboBox_state.DropDown += new System.EventHandler(this.comboBox_state_DropDown);

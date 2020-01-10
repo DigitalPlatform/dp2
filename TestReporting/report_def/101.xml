@@ -1,0 +1,17 @@
+﻿<root>
+  <title>借阅排行, 按部门\r%library%\r%daterange%</title>
+  <titleComment>
+  </titleComment>
+  <columns>
+    <column name="部门" align="left" sum="no" class="Department" eval="" />
+    <column name="借书册数" align="right" sum="yes" class="BorrowCount" eval="" />
+    <column name="还书册数" align="right" sum="yes" class="ReturnCount" eval="" />
+  </columns>
+  <css>
+  </css>
+  <typeName>101 部门的借阅排行</typeName>
+  <columnSortStyle>
+  </columnSortStyle>
+  <createFrequency>year,month,day</createFrequency>
+  <property fresh="false" />
+</root>

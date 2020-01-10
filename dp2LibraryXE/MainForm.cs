@@ -789,7 +789,7 @@ http://github.com/digitalplatform/dp2"
             // 修改前的模式
             string strOldMode = this.AppInfo.GetString("main_form", "last_mode", "test");   // "standard"
 
-            REDO_VERIFY:
+        REDO_VERIFY:
             strSerialCode = this.AppInfo.GetString("sn", "sn", "");
             if (strSerialCode == "test")
             {
@@ -927,7 +927,7 @@ http://github.com/digitalplatform/dp2"
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.OriginCode = strOriginCode;
 
-            REDO:
+        REDO:
             dlg.ShowDialog(this);
             if (dlg.DialogResult != DialogResult.OK)
                 return 0;
@@ -1149,7 +1149,7 @@ http://github.com/digitalplatform/dp2"
 
             MessageBox.Show(this, "dp2Kernel 数据目录安装成功");
             return;
-            ERROR1:
+        ERROR1:
             // TODO: Invoke
             MessageBox.Show(this, result.ErrorInfo);
         }
@@ -2164,12 +2164,27 @@ TaskScheduler.Default);
             return 1;
         }
 
+        // 从若干 URL 中获得第一个 URL
         static string GetFirstUrl(string strUrlList)
         {
             List<string> urls = StringUtil.SplitList(strUrlList, ';');
             if (urls.Count == 0)
                 return "";
 
+            // 2020/1/10
+            // 注意尽量优先选择 rest.http: 或者 net.pipe: URL，避开 http: URL
+            // 因为某些剪裁后的 Windows 版本无法使用 WCF http: (加密的 WebService) 协议
+            var results = urls.FindAll((s) =>
+            {
+                if (s.StartsWith("http:") == false)
+                    return true;
+                return false;
+            });
+
+            if (results.Count > 0)
+                return results[0];
+
+            // 实在找不到可用的 URL 那就只好用原先的第一个 URL
             return urls[0];
         }
 
@@ -2810,7 +2825,7 @@ TaskScheduler.Default);
 
             MessageBox.Show(this, "dp2Library 数据目录安装成功");
             return;
-            ERROR1:
+        ERROR1:
             // TODO: Invoke
             MessageBox.Show(this, result.ErrorInfo);
         }
@@ -2832,7 +2847,7 @@ TaskScheduler.Default);
 
             MessageBox.Show(this, "dp2Kernel 数据目录安装成功");
             return;
-            ERROR1:
+        ERROR1:
             // TODO: Invoke
             MessageBox.Show(this, result.ErrorInfo);
         }
@@ -2849,7 +2864,7 @@ TaskScheduler.Default);
 
             MessageBox.Show(this, "dp2Library 数据目录安装成功");
             return;
-            ERROR1:
+        ERROR1:
             // TODO: Invoke
             MessageBox.Show(this, result.ErrorInfo);
         }
@@ -3023,7 +3038,7 @@ miniServer	-- enterprise mini
             string strOldMode = this.AppInfo.GetString("main_form", "last_mode", "test");   // "standard"
 
             string strSerialCode = "";
-            REDO_VERIFY:
+        REDO_VERIFY:
 
             //string strLocalString = GetEnvironmentString(this.IsServer);
 
@@ -3139,7 +3154,7 @@ miniServer	-- enterprise mini
             }
 
 
-            RESTART:
+        RESTART:
             // 修改后的模式
             //string strNewMode = this.AppInfo.GetString("main_form", "last_mode", "standard");
             //if (strOldMode != strNewMode)
@@ -3152,7 +3167,7 @@ miniServer	-- enterprise mini
             }
 
             return;
-            ERROR1:
+        ERROR1:
             // TODO: Invoke
             MessageBox.Show(this, strError);
 #endif
@@ -3348,7 +3363,7 @@ this.Font);
                 goto ERROR1;
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3374,7 +3389,7 @@ this.Font);
                 _versionManager.AutoSave();
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3527,7 +3542,7 @@ this.Font);
             if (time1 > time2)
                 return 1;
             return -1;
-            BAD_TIMESTRING:
+        BAD_TIMESTRING:
             return string.Compare(strTimestamp1, strTimestamp2);
         }
 
@@ -3987,7 +4002,7 @@ MessageBoxDefaultButton.Button2);
 
             MessageBox.Show(this, "dp2OPAC 数据目录和应用程序目录安装成功");
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -4120,7 +4135,7 @@ Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
 
             MessageBox.Show(this, "注册成功");
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -4273,7 +4288,7 @@ Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
                 goto ERROR1;
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -4456,7 +4471,7 @@ Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
 
             AppendSectionTitle("结束安装 dp2OPAC");
             return;
-            ERROR1:
+        ERROR1:
             AppendString(strError + "\r\n");
 
             this.AppInfo.SetBoolean("OPAC", "installed", false);
@@ -4470,7 +4485,7 @@ Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
         // http://www.microsoft.com/en-us/download/details.aspx?id=34679
 
 
-#region console
+        #region console
 
         /// <summary>
         /// 将浏览器控件中已有的内容清除，并为后面输出的纯文本显示做好准备
@@ -4584,7 +4599,7 @@ Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
         }
 
 
-#endregion
+        #endregion
 
         // 检查当前超级用户帐户是否为空密码
         // return:
@@ -4607,7 +4622,7 @@ Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
                 try
                 {
                     int nRedoCount = 0;
-                    REDO:
+                REDO:
                     // return:
                     //      -1  error
                     //      0   登录未成功
@@ -4814,7 +4829,7 @@ Stack:
 
             AppendSectionTitle("结束升级 dp2OPAC");
             return;
-            ERROR1:
+        ERROR1:
             AppendString(strError + "\r\n");
             MessageBox.Show(this, strError);
         }
@@ -4905,7 +4920,7 @@ C:\WINDOWS\SysNative\dism.exe /NoRestart /Online /Enable-Feature /FeatureName:MS
              * */
 
             return;
-            ERROR1:
+        ERROR1:
             AppendString("出错: " + strError + "\r\n");
             MessageBox.Show(this, strError);
         }
@@ -5015,7 +5030,7 @@ C:\WINDOWS\SysNative\dism.exe /NoRestart /Online /Enable-Feature /FeatureName:MS
             else
                 MessageBox.Show(this, "配置文件本次操作后没有发生变化 (先前已经" + (bAdd ? "配置" : "清除") + "过 MQ 参数了)");
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5046,7 +5061,7 @@ C:\WINDOWS\SysNative\dism.exe /NoRestart /Online /Enable-Feature /FeatureName:MS
             else
                 MessageBox.Show(this, "配置文件本次操作后没有发生变化 (先前已经配置过 MongoDB 参数了)");
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5108,7 +5123,7 @@ C:\WINDOWS\SysNative\dism.exe /NoRestart /Online /Enable-Feature /FeatureName:MS
 
             AppendString("MongoDB 移走成功\r\n");
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5218,7 +5233,7 @@ C:\WINDOWS\SysNative\dism.exe /NoRestart /Online /Enable-Feature /FeatureName:MS
                 }
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5281,7 +5296,7 @@ MessageBoxDefaultButton.Button2);
                 if (nRet == -1)
                 {
                     strError = strError + "\r\n\r\n已放弃恢复操作";
-                    return new NormalResult { Value = -1, ErrorInfo = strError};
+                    return new NormalResult { Value = -1, ErrorInfo = strError };
                 }
                 if (nRet == 0)
                     return new NormalResult();
@@ -5403,7 +5418,7 @@ MessageBoxDefaultButton.Button2);
                 strError = "恢复实例 '" + param_base.DataDir + "' 完成";
                 return new NormalResult { Value = 1, ErrorInfo = strError };
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 strError = $"大备份恢复过程出现异常: {ExceptionUtil.GetExceptionText(ex)}";
                 goto ERROR1;
@@ -5418,7 +5433,7 @@ MessageBoxDefaultButton.Button2);
                 }));
             }
 
-            ERROR1:
+        ERROR1:
 #if NO
             owner.Invoke((Action)(() =>
             {
