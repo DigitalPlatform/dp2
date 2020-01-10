@@ -29,15 +29,19 @@
         private void InitializeComponent()
         {
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.MenuItem_file = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_buildPlan = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_doPlan = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_exit = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_test = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
-            this.MenuItem_file = new System.Windows.Forms.ToolStripMenuItem();
-            this.MenuItem_test = new System.Windows.Forms.ToolStripMenuItem();
-            this.MenuItem_buildPlan = new System.Windows.Forms.ToolStripMenuItem();
-            this.MenuItem_exit = new System.Windows.Forms.ToolStripMenuItem();
             this.tabControl_main = new System.Windows.Forms.TabControl();
             this.tabPage_history = new System.Windows.Forms.TabPage();
+            this.webBrowser1 = new System.Windows.Forms.WebBrowser();
             this.tabPage_config = new System.Windows.Forms.TabPage();
+            this.textBox_replicationStart = new System.Windows.Forms.TextBox();
+            this.label5 = new System.Windows.Forms.Label();
             this.checkBox_cfg_savePasswordLong = new System.Windows.Forms.CheckBox();
             this.textBox_cfg_location = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
@@ -51,10 +55,9 @@
             this.toolStripButton_cfg_setXeServer = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButton_cfg_setHongnibaServer = new System.Windows.Forms.ToolStripButton();
-            this.webBrowser1 = new System.Windows.Forms.WebBrowser();
-            this.textBox_replicationStart = new System.Windows.Forms.TextBox();
-            this.label5 = new System.Windows.Forms.Label();
-            this.MenuItem_doPlan = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_report = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_createReport = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_testCreateReport = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.tabControl_main.SuspendLayout();
             this.tabPage_history.SuspendLayout();
@@ -67,12 +70,51 @@
             this.menuStrip1.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.MenuItem_file,
-            this.MenuItem_test});
+            this.MenuItem_test,
+            this.MenuItem_report});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(800, 32);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
+            // 
+            // MenuItem_file
+            // 
+            this.MenuItem_file.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.MenuItem_buildPlan,
+            this.MenuItem_doPlan,
+            this.MenuItem_exit});
+            this.MenuItem_file.Name = "MenuItem_file";
+            this.MenuItem_file.Size = new System.Drawing.Size(58, 28);
+            this.MenuItem_file.Text = "文件";
+            // 
+            // MenuItem_buildPlan
+            // 
+            this.MenuItem_buildPlan.Name = "MenuItem_buildPlan";
+            this.MenuItem_buildPlan.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_buildPlan.Text = "创建同步计划";
+            this.MenuItem_buildPlan.Click += new System.EventHandler(this.MenuItem_buildPlan_Click);
+            // 
+            // MenuItem_doPlan
+            // 
+            this.MenuItem_doPlan.Name = "MenuItem_doPlan";
+            this.MenuItem_doPlan.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_doPlan.Text = "执行同步计划";
+            this.MenuItem_doPlan.Click += new System.EventHandler(this.MenuItem_doPlan_Click);
+            // 
+            // MenuItem_exit
+            // 
+            this.MenuItem_exit.Name = "MenuItem_exit";
+            this.MenuItem_exit.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_exit.Text = "退出";
+            // 
+            // MenuItem_test
+            // 
+            this.MenuItem_test.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.MenuItem_testCreateReport});
+            this.MenuItem_test.Name = "MenuItem_test";
+            this.MenuItem_test.Size = new System.Drawing.Size(58, 28);
+            this.MenuItem_test.Text = "测试";
             // 
             // toolStrip1
             // 
@@ -92,35 +134,6 @@
             this.statusStrip1.TabIndex = 2;
             this.statusStrip1.Text = "statusStrip1";
             // 
-            // MenuItem_file
-            // 
-            this.MenuItem_file.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.MenuItem_buildPlan,
-            this.MenuItem_doPlan,
-            this.MenuItem_exit});
-            this.MenuItem_file.Name = "MenuItem_file";
-            this.MenuItem_file.Size = new System.Drawing.Size(58, 28);
-            this.MenuItem_file.Text = "文件";
-            // 
-            // MenuItem_test
-            // 
-            this.MenuItem_test.Name = "MenuItem_test";
-            this.MenuItem_test.Size = new System.Drawing.Size(58, 28);
-            this.MenuItem_test.Text = "测试";
-            // 
-            // MenuItem_buildPlan
-            // 
-            this.MenuItem_buildPlan.Name = "MenuItem_buildPlan";
-            this.MenuItem_buildPlan.Size = new System.Drawing.Size(252, 30);
-            this.MenuItem_buildPlan.Text = "创建同步计划";
-            this.MenuItem_buildPlan.Click += new System.EventHandler(this.MenuItem_buildPlan_Click);
-            // 
-            // MenuItem_exit
-            // 
-            this.MenuItem_exit.Name = "MenuItem_exit";
-            this.MenuItem_exit.Size = new System.Drawing.Size(252, 30);
-            this.MenuItem_exit.Text = "退出";
-            // 
             // tabControl_main
             // 
             this.tabControl_main.Controls.Add(this.tabPage_history);
@@ -138,10 +151,20 @@
             this.tabPage_history.Location = new System.Drawing.Point(4, 28);
             this.tabPage_history.Name = "tabPage_history";
             this.tabPage_history.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage_history.Size = new System.Drawing.Size(792, 339);
+            this.tabPage_history.Size = new System.Drawing.Size(792, 404);
             this.tabPage_history.TabIndex = 0;
             this.tabPage_history.Text = "操作历史";
             this.tabPage_history.UseVisualStyleBackColor = true;
+            // 
+            // webBrowser1
+            // 
+            this.webBrowser1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.webBrowser1.Location = new System.Drawing.Point(3, 3);
+            this.webBrowser1.Margin = new System.Windows.Forms.Padding(4);
+            this.webBrowser1.MinimumSize = new System.Drawing.Size(24, 27);
+            this.webBrowser1.Name = "webBrowser1";
+            this.webBrowser1.Size = new System.Drawing.Size(786, 398);
+            this.webBrowser1.TabIndex = 2;
             // 
             // tabPage_config
             // 
@@ -164,6 +187,25 @@
             this.tabPage_config.TabIndex = 1;
             this.tabPage_config.Text = "配置参数";
             this.tabPage_config.UseVisualStyleBackColor = true;
+            // 
+            // textBox_replicationStart
+            // 
+            this.textBox_replicationStart.ImeMode = System.Windows.Forms.ImeMode.Off;
+            this.textBox_replicationStart.Location = new System.Drawing.Point(190, 353);
+            this.textBox_replicationStart.Margin = new System.Windows.Forms.Padding(5);
+            this.textBox_replicationStart.Name = "textBox_replicationStart";
+            this.textBox_replicationStart.Size = new System.Drawing.Size(283, 28);
+            this.textBox_replicationStart.TabIndex = 21;
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(10, 356);
+            this.label5.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(152, 18);
+            this.label5.TabIndex = 20;
+            this.label5.Text = "日志同步起点(&R):";
             // 
             // checkBox_cfg_savePasswordLong
             // 
@@ -300,41 +342,26 @@
             this.toolStripButton_cfg_setHongnibaServer.ToolTipText = "设为红泥巴.数字平台服务器";
             this.toolStripButton_cfg_setHongnibaServer.Click += new System.EventHandler(this.toolStripButton_cfg_setHongnibaServer_Click);
             // 
-            // webBrowser1
+            // MenuItem_report
             // 
-            this.webBrowser1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.webBrowser1.Location = new System.Drawing.Point(3, 3);
-            this.webBrowser1.Margin = new System.Windows.Forms.Padding(4);
-            this.webBrowser1.MinimumSize = new System.Drawing.Size(24, 27);
-            this.webBrowser1.Name = "webBrowser1";
-            this.webBrowser1.Size = new System.Drawing.Size(786, 333);
-            this.webBrowser1.TabIndex = 2;
+            this.MenuItem_report.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.MenuItem_createReport});
+            this.MenuItem_report.Name = "MenuItem_report";
+            this.MenuItem_report.Size = new System.Drawing.Size(58, 28);
+            this.MenuItem_report.Text = "报表";
             // 
-            // textBox_replicationStart
+            // MenuItem_createReport
             // 
-            this.textBox_replicationStart.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.textBox_replicationStart.Location = new System.Drawing.Point(190, 353);
-            this.textBox_replicationStart.Margin = new System.Windows.Forms.Padding(5);
-            this.textBox_replicationStart.Name = "textBox_replicationStart";
-            this.textBox_replicationStart.Size = new System.Drawing.Size(283, 28);
-            this.textBox_replicationStart.TabIndex = 21;
+            this.MenuItem_createReport.Name = "MenuItem_createReport";
+            this.MenuItem_createReport.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_createReport.Text = "创建报表 ...";
             // 
-            // label5
+            // MenuItem_testCreateReport
             // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(10, 356);
-            this.label5.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(152, 18);
-            this.label5.TabIndex = 20;
-            this.label5.Text = "日志同步起点(&R):";
-            // 
-            // MenuItem_doPlan
-            // 
-            this.MenuItem_doPlan.Name = "MenuItem_doPlan";
-            this.MenuItem_doPlan.Size = new System.Drawing.Size(252, 30);
-            this.MenuItem_doPlan.Text = "执行同步计划";
-            this.MenuItem_doPlan.Click += new System.EventHandler(this.MenuItem_doPlan_Click);
+            this.MenuItem_testCreateReport.Name = "MenuItem_testCreateReport";
+            this.MenuItem_testCreateReport.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_testCreateReport.Text = "测试创建报表";
+            this.MenuItem_testCreateReport.Click += new System.EventHandler(this.MenuItem_testCreateReport_Click);
             // 
             // Form1
             // 
@@ -393,6 +420,9 @@
         public System.Windows.Forms.TextBox textBox_replicationStart;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_doPlan;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_testCreateReport;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_report;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_createReport;
     }
 }
 

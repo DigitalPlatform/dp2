@@ -1,8 +1,10 @@
 ﻿
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -446,15 +448,12 @@ string strHtml)
                             ErrorInfo = strError
                         };
 
-                    DatabaseConfig config = new DatabaseConfig
-                    {
-                        ServerName = "localhost",
-                        DatabaseName = "testrep",
-                        UserName = "root",
-                        Password = "test",
-                    };
+                    DatabaseConfig.ServerName = "localhost";
+                    DatabaseConfig.DatabaseName = "testrep";
+                    DatabaseConfig.UserName = "root";
+                    DatabaseConfig.Password = "test";
+
                     nRet = replication.DoPlan(
-                        config,
                         channel,
                         ref task_dom,
                         (message) =>
@@ -481,6 +480,39 @@ string strHtml)
         private void MenuItem_doPlan_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void MenuItem_testCreateReport_Click(object sender, EventArgs e)
+        {
+            string defFileName = Path.Combine(ClientInfo.DataDir, "report_def\\101.xml");
+
+            ReportWriter writer = new ReportWriter();
+            int nRet = writer.Initial(defFileName, out string strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            string strOutputFileName = Path.Combine(ClientInfo.UserDir, "test.rml");
+
+            Hashtable macro_table = new Hashtable();
+
+            DatabaseConfig.ServerName = "localhost";
+            DatabaseConfig.DatabaseName = "testrep";
+            DatabaseConfig.UserName = "root";
+            DatabaseConfig.Password = "test";
+
+            using (var context = new LibraryContext())
+            {
+                Report.TestBuildReport(context,
+                    "20190101-20191231",
+                    writer,
+                    macro_table,
+                    strOutputFileName);
+            }
+
+            Process.Start("notepad", strOutputFileName);
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
         }
     }
 }
