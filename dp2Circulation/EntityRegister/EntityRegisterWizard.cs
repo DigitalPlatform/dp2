@@ -783,6 +783,9 @@ MessageBoxDefaultButton.Button1);
             this.ClearList();
             this.ClearMessage();
 
+            // zchannel --> ListViewItem
+            Hashtable zchannelTable = new Hashtable();
+
             if (bAutoSetFocus == false)
                 _inWizardControl++;
 
@@ -925,7 +928,9 @@ MessageBoxDefaultButton.Button1);
                         {
                             this.Invoke((Action)(() =>
                             {
-                                DpRow row = CreateCommandLine(TYPE_INFO, c);
+                                DpRow row = CreateCommandLine(
+                                    zchannelTable,
+                                    TYPE_INFO, c);
                                 UpdateCommandLine(row, c, r);
                             }));
                         },
@@ -933,7 +938,7 @@ MessageBoxDefaultButton.Button1);
                         {
                             this.Invoke((Action)(() =>
                             {
-                                var item = (DpRow)_zchannelTable[c];
+                                var item = (DpRow)zchannelTable[c];
                                 if (r.Records != null)
                                     FillList(c._fetched,
                                         c.ZClient.ForcedRecordsEncoding == null ? c.TargetInfo.DefaultRecordsEncoding : c.ZClient.ForcedRecordsEncoding,
@@ -1182,8 +1187,6 @@ MessageBoxDefaultButton.Button1);
 
         #region 针对 Z39.50 服务器的检索
 
-        // zchannel --> ListViewItem
-        Hashtable _zchannelTable = new Hashtable();
         Z3950Searcher _zsearcher = new Z3950Searcher();
 
         // (Z39.50)填入浏览记录
@@ -1967,12 +1970,12 @@ false);
         }
 
         DpRow CreateCommandLine(
+            Hashtable zchannelTable,
             int nType,
             ZClientChannel c)
         {
-
             DpRow row = new DpRow();
-            _zchannelTable[c] = row;
+            zchannelTable[c] = row;
 
             // 序号
             DpCell cell = new DpCell();

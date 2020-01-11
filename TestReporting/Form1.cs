@@ -492,8 +492,10 @@ string strHtml)
                 goto ERROR1;
 
             string strOutputFileName = Path.Combine(ClientInfo.UserDir, "test.rml");
+            string strOutputHtmlFileName = Path.Combine(ClientInfo.UserDir, "test.html");
 
             Hashtable macro_table = new Hashtable();
+            // macro_table["%library%"] = strLibraryCode;
 
             DatabaseConfig.ServerName = "localhost";
             DatabaseConfig.DatabaseName = "testrep";
@@ -503,13 +505,30 @@ string strHtml)
             using (var context = new LibraryContext())
             {
                 Report.TestBuildReport(context,
+                    "海淀分馆",
                     "20190101-20191231",
                     writer,
                     macro_table,
                     strOutputFileName);
             }
 
-            Process.Start("notepad", strOutputFileName);
+
+            // RML 格式转换为 HTML 文件
+            // parameters:
+            //      strCssTemplate  CSS 模板。里面 %columns% 代表各列的样式
+            nRet = DigitalPlatform.dp2.Statis.Report.RmlToHtml(strOutputFileName,
+                strOutputHtmlFileName,
+                "",
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            // Process.Start("notepad", strOutputFileName);
+            ReportViewerForm viewer = new ReportViewerForm();
+            viewer.DataDir = ClientInfo.UserTempDir;
+            viewer.SetXmlFile(strOutputFileName);
+            viewer.SetHtmlFile(strOutputHtmlFileName);
+            viewer.ShowDialog(this);
             return;
         ERROR1:
             MessageBox.Show(this, strError);

@@ -1272,6 +1272,8 @@ Keys keyData)
                 GetChannelStyle.GUI,
                 "");  // ? "test:127.0.0.1"
 #endif
+            // zchannel --> ListViewItem
+            Hashtable zchannelTable = new Hashtable();
 
             LibraryChannel channel = this.GetChannel();
 
@@ -1632,9 +1634,7 @@ Keys keyData)
                             {
                                 ListViewItem item = new ListViewItem();
                                 item.Tag = c;
-                                _zchannelTable[c] = item;
-                                //ListViewUtil.ChangeItemText(item, 0, $"Z39.50:{c.TargetInfo.HostName}");
-                                //ListViewUtil.ChangeItemText(item, 1, $"search result={r.Value} resultCount={r.ResultCount}");
+                                zchannelTable[c] = item;
                                 this.listView_records.Items.Add(item);
                                 UpdateCommandLine(item, c, r);
                             }));
@@ -1643,7 +1643,7 @@ Keys keyData)
                         {
                             this.Invoke((Action)(() =>
                             {
-                                ListViewItem item = (ListViewItem)_zchannelTable[c];
+                                ListViewItem item = (ListViewItem)zchannelTable[c];
                                 if (r.Records != null)
                                     FillList(c._fetched,
                                         c.ZClient.ForcedRecordsEncoding == null ? c.TargetInfo.DefaultRecordsEncoding : c.ZClient.ForcedRecordsEncoding,
@@ -1759,8 +1759,6 @@ Keys keyData)
         }
 #endif
 
-        // zchannel --> ListViewItem
-        Hashtable _zchannelTable = new Hashtable();
         Z3950Searcher _zsearcher = new Z3950Searcher();
 
         // (Z39.50)填入浏览记录

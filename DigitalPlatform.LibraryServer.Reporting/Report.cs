@@ -11,6 +11,7 @@ namespace DigitalPlatform.LibraryServer.Reporting
     {
         // 测试创建按部门的图书借阅排行榜
         public static void TestBuildReport(LibraryContext context,
+            string strLibraryCode,
             string strDateRange,
             ReportWriter writer,
             Hashtable macro_table,
@@ -31,6 +32,9 @@ namespace DigitalPlatform.LibraryServer.Reporting
     .ToList();
     */
             var opers = context.CircuOpers
+            .Where(b => (strLibraryCode == "*" || b.LibraryCode == strLibraryCode)
+            && string.Compare(b.Date, strStartDate) >= 0 
+            && string.Compare(b.Date, strEndDate) <= 0)
             .Join(
                 context.Patrons,
                 oper => oper.ReaderBarcode,
@@ -50,7 +54,11 @@ namespace DigitalPlatform.LibraryServer.Reporting
                 BorrowCount = g.Sum(t => t.BorrowCount),
                 ReturnCount = g.Sum(t => t.ReturnCount)
             })
+            .OrderByDescending(t => t.BorrowCount).ThenBy(t => t.Department)
             .ToList();
+
+            macro_table["%daterange%"] = strDateRange;
+            macro_table["%library%"] = strLibraryCode;
 
             int nRet = writer.OutputRmlReport(
             opers,
@@ -61,5 +69,11 @@ namespace DigitalPlatform.LibraryServer.Reporting
                 throw new Exception(strError);
         }
 
+        public static bool MatchLibraryCode(string libraryCode, string pattern)
+        {
+            if (pattern == "*")
+                return true;
+            return string.Compare(libraryCode, pattern) == 0;
+        }
     }
 }

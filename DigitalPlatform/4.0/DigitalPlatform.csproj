@@ -271,6 +271,7 @@
     </Compile>
     <Compile Include="ProgramUtil.cs" />
     <Compile Include="Result.cs" />
+    <Compile Include="WebBrowserExtension.cs" />
     <EmbeddedResource Include="..\AutoCloseMessageBox.resx">
       <DependentUpon>AutoCloseMessageBox.cs</DependentUpon>
       <SubType>Designer</SubType>

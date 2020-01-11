@@ -4968,6 +4968,8 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
         private async void button_search_Click(object sender, EventArgs e)
         {
             string strError = "";
+            // zchannel --> ListViewItem
+            Hashtable zchannelTable = new Hashtable();
 
             this._processing++;
             try
@@ -5225,7 +5227,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
                                 {
                                     ListViewItem item = new ListViewItem();
                                     item.Tag = c;
-                                    _zchannelTable[c] = item;
+                                    zchannelTable[c] = item;
                                     this.browseWindow?.RecordsList?.Items?.Add(item);
                                     BiblioSearchForm.UpdateCommandLine(item, c, r);
                                 }));
@@ -5234,7 +5236,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
                             {
                                 this.Invoke((Action)(() =>
                                 {
-                                    ListViewItem item = (ListViewItem)_zchannelTable[c];
+                                    ListViewItem item = (ListViewItem)zchannelTable[c];
                                     if (r.Records != null)
                                         FillList(c._fetched,
                                             c.ZClient.ForcedRecordsEncoding == null ? c.TargetInfo.DefaultRecordsEncoding : c.ZClient.ForcedRecordsEncoding,
@@ -5326,7 +5328,6 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
 
                     // this.button_search.Enabled = true;
                     this.EnableControls(true);
-
                     //// m_nInSearching--;
                 }
 
@@ -5393,8 +5394,6 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
             this.DoStop(sender, e);
         }
 
-        // zchannel --> ListViewItem
-        Hashtable _zchannelTable = new Hashtable();
         Z3950Searcher _zsearcher = new Z3950Searcher();
 
         async Task LoadNextBatch(bool all)

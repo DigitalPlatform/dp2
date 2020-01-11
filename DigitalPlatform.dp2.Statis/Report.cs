@@ -4,17 +4,17 @@ using System.Collections;
 using System.Text;
 using System.Diagnostics;
 using System.Globalization;
-
-using DigitalPlatform.Text;
 using System.Xml;
 using System.Web.UI;
 using System.IO;
 using System.Windows.Forms;
+
 using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml;
 using ClosedXML.Excel;
+
+using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
-using DigitalPlatform.Core;
 
 namespace DigitalPlatform.dp2.Statis
 {
