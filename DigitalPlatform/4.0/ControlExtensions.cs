@@ -109,17 +109,4 @@ namespace DigitalPlatform
         }
     }
 
-    public static class WebBrowserExtension
-    {
-        public static void ScrollToEnd(this WebBrowser webBrowser1)
-        {
-            if (webBrowser1.Document != null
-                && webBrowser1.Document.Window != null
-                && webBrowser1.Document.Body != null)
-                webBrowser1.Document.Window.ScrollTo(
-                    0,
-                    webBrowser1.Document.Body.ScrollRectangle.Height);
-        }
-    }
-
 }
