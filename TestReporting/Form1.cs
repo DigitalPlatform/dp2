@@ -484,7 +484,7 @@ string strHtml)
 
         private void MenuItem_testCreateReport_Click(object sender, EventArgs e)
         {
-            string defFileName = Path.Combine(ClientInfo.DataDir, "report_def\\101.xml");
+            string defFileName = Path.Combine(ClientInfo.DataDir, "report_def\\121.xml");
 
             ReportWriter writer = new ReportWriter();
             int nRet = writer.Initial(defFileName, out string strError);
@@ -504,8 +504,8 @@ string strHtml)
 
             using (var context = new LibraryContext())
             {
-                Report.TestBuildReport(context,
-                    "海淀分馆",
+                Report.BuildReport121(context,
+                    "*",
                     "20190101-20191231",
                     writer,
                     macro_table,
