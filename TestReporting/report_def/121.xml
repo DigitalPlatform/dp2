@@ -1,0 +1,19 @@
+﻿<root>
+  <title>借阅排行, 按读者姓名\r%library%\r%daterange%</title>
+  <titleComment>
+  </titleComment>
+  <columns>
+    <column name="证条码号" type="String" align="left" sum="no" class="PatronBarcode" eval="" />
+    <column name="姓名" type="" align="left" sum="no" class="Name" eval="" />
+    <column name="单位" type="" align="left" sum="no" class="Department" eval="" />
+    <column name="借书册数" type="" align="right" sum="yes" class="BorrowCount" eval="" />
+    <column name="还书册数" type="" align="right" sum="yes" class="ReturnCount" eval="" />
+  </columns>
+  <css>
+  </css>
+  <typeName>121 读者姓名的借阅排行</typeName>
+  <columnSortStyle>
+  </columnSortStyle>
+  <createFrequency>year,month,day</createFrequency>
+  <property fresh="false" />
+</root>
