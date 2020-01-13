@@ -484,31 +484,49 @@ string strHtml)
 
         private void MenuItem_testCreateReport_Click(object sender, EventArgs e)
         {
-            string defFileName = Path.Combine(ClientInfo.DataDir, "report_def\\121.xml");
+            BuildReportDialog dlg = new BuildReportDialog();
+            dlg.DataDir = Path.Combine(ClientInfo.DataDir, "report_def");
+            dlg.UiState = ClientInfo.Config.Get(
+"BuildReportDialog",
+"uiState",
+"");
+
+            dlg.ShowDialog(this);
+
+            ClientInfo.Config.Set(
+"BuildReportDialog",
+"uiState",
+dlg.UiState);
+
+            if (dlg.DialogResult == DialogResult.Cancel)
+                return;
+
+            string defFileName = Path.Combine(ClientInfo.DataDir, $"report_def\\{dlg.ReportType}.xml");
 
             ReportWriter writer = new ReportWriter();
             int nRet = writer.Initial(defFileName, out string strError);
             if (nRet == -1)
                 goto ERROR1;
 
+            writer.Algorithm = dlg.ReportType;
+
             string strOutputFileName = Path.Combine(ClientInfo.UserDir, "test.rml");
             string strOutputHtmlFileName = Path.Combine(ClientInfo.UserDir, "test.html");
-
-            Hashtable macro_table = new Hashtable();
-            // macro_table["%library%"] = strLibraryCode;
 
             DatabaseConfig.ServerName = "localhost";
             DatabaseConfig.DatabaseName = "testrep";
             DatabaseConfig.UserName = "root";
             DatabaseConfig.Password = "test";
 
+            Hashtable param_table = new Hashtable();
+
             using (var context = new LibraryContext())
             {
-                Report.BuildReport121(context,
-                    "*",
-                    "20190101-20191231",
+                Report.BuildReport(context,
+                    param_table,
+                    dlg.DateRange,
+                    // dlg.Parameters,
                     writer,
-                    macro_table,
                     strOutputFileName);
             }
 
