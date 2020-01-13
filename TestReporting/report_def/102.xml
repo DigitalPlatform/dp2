@@ -1,10 +1,10 @@
 ﻿<root>
-  <title>借阅排行, 按部门\r%library%\r%daterange%</title>
-  <titleComment>
-  </titleComment>
+  <title>借阅排行, 按选定的部门\r%library%\r%daterange%</title>
+  <titleComment>按册数排序</titleComment>
   <parameters>
     <parameter name="libraryCode" type="libraryCode" comment="馆代码"/>
     <parameter name="dateRange" type="dateRange" comment="时间范围"/>
+    <parameter name="departmentRange" type="departmentRange" comment="选定的部门范围(逗号分隔列举)"/>
   </parameters>
   <columns>
     <column name="部门" align="left" sum="no" class="Department" eval="" />
@@ -13,9 +13,8 @@
   </columns>
   <css>
   </css>
-  <typeName>101 部门的借阅排行</typeName>
-  <columnSortStyle>
-  </columnSortStyle>
+  <columnSortStyle>1:d,0:a</columnSortStyle>
+  <typeName>102 选定部门的借阅排行</typeName>
   <createFrequency>year,month,day</createFrequency>
   <property fresh="false" />
 </root>

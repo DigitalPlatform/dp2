@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 using System.Xml;
+
+using Microsoft.EntityFrameworkCore;
+
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
-using Microsoft.EntityFrameworkCore;
 
 namespace DigitalPlatform.LibraryServer.Reporting
 {
@@ -309,6 +311,8 @@ namespace DigitalPlatform.LibraryServer.Reporting
         // 读者证条码号
         public string ReaderBarcode { get; set; }
 
+        public DateTime ReturningTime { get; set; }
+
         // 根据日志 XML 记录填充数据
         public override int SetData(XmlDocument dom,
             string strDate,
@@ -326,6 +330,27 @@ namespace DigitalPlatform.LibraryServer.Reporting
                 "itemBarcode");
             string strReaderBarcode = DomUtil.GetElementText(dom.DocumentElement,
                 "readerBarcode");
+
+            string strBorrowPeriod = DomUtil.GetElementText(dom.DocumentElement,
+                "borrowPeriod");
+            if (string.IsNullOrEmpty(strBorrowPeriod) == false)
+            {
+                // parameters:
+                //      strBorrowTime   借阅起点时间。u 格式
+                //      strReturningTime    返回应还时间。 u 格式
+                nRet = Replication.BuildReturingTimeString(this.OperTime,
+    strBorrowPeriod,
+    out DateTime returningTime,
+    out string error);
+                if (nRet == -1)
+                {
+                    this.ReturningTime = DateTime.MinValue;
+                }
+                else
+                    this.ReturningTime = returningTime;
+            }
+            else
+                this.ReturningTime = DateTime.MinValue;
 
             this.ItemBarcode = strItemBarcode;
             this.ReaderBarcode = strReaderBarcode;

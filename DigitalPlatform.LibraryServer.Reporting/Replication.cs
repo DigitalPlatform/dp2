@@ -1541,7 +1541,7 @@ out strError);
                     if (string.IsNullOrEmpty(line.ItemBarcode))
                         line.ItemBarcode = "@refID:" + searchresult.Cols[11];
 
-                    line.Location = searchresult.Cols[1];
+                    line.Location = GetLocationString(searchresult.Cols[1]);
                     line.AccessNo = searchresult.Cols[2];
 
                     line.State = searchresult.Cols[4];
@@ -1554,7 +1554,7 @@ out strError);
                     // line.ReturningTime = ItemLine.GetLocalTime(searchresult.Cols[9]);
 
                     int nRet = 0;
-                    if (line.BorrowTime == DateTime.MinValue)
+                    if (line.BorrowTime != DateTime.MinValue)
                     {
                         // parameters:
                         //      strBorrowTime   借阅起点时间。u 格式
@@ -1609,6 +1609,40 @@ out strError);
                 ref lProgress,
                 ref lIndex,
                 out strError);
+        }
+        
+        // 把 location 字符串变换为便于处理的形态
+        // 阅览室 --> /阅览室
+        // 海淀分馆/阅览室 --> 海淀分馆/阅览室
+        // #reservation,阅览室 --> /阅览室
+        static string GetLocationString(string text)
+        {
+            text = StringUtil.GetPureLocation(text);
+            // 分析 strLocation 是否属于总馆形态，比如“阅览室”
+            // 如果是总馆形态，则要在前部增加一个 / 字符，以保证可以正确匹配 map 值
+            // ‘/’字符可以理解为在馆代码和阅览室名字之间插入的一个必要的符号。这是为了弥补早期做法的兼容性问题
+            ParseCalendarName(text,
+        out string strLibraryCode,
+        out string strRoom);
+            if (string.IsNullOrEmpty(strLibraryCode))
+                text = "/" + strRoom;
+            return text;
+        }
+
+        public static void ParseCalendarName(string strName,
+    out string strLibraryCode,
+    out string strPureName)
+        {
+            strLibraryCode = "";
+            strPureName = "";
+            int nRet = strName.IndexOf("/");
+            if (nRet == -1)
+            {
+                strPureName = strName;
+                return;
+            }
+            strLibraryCode = strName.Substring(0, nRet).Trim();
+            strPureName = strName.Substring(nRet + 1).Trim();
         }
 
         delegate NormalResult Delegate_search(LibraryChannel channel, string resultsetName);

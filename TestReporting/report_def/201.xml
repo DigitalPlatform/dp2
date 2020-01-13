@@ -1,19 +1,20 @@
 ﻿<root>
-  <title>借阅排行, 按部门\r%library%\r%daterange%</title>
+  <title>借阅排行, 按图书种，馆藏地\r%location%\r%daterange%</title>
   <titleComment>
   </titleComment>
   <parameters>
-    <parameter name="libraryCode" type="libraryCode" comment="馆代码"/>
+    <parameter name="location" type="location" comment="图书馆藏地"/>
     <parameter name="dateRange" type="dateRange" comment="时间范围"/>
   </parameters>
   <columns>
-    <column name="部门" align="left" sum="no" class="Department" eval="" />
+    <column name="书目记录路径" align="left" sum="no" class="RecPath" eval="" />
+    <column name="书目摘要" align="left" sum="no" class="Summary" eval="" />
     <column name="借书册数" align="right" sum="yes" class="BorrowCount" eval="" />
     <column name="还书册数" align="right" sum="yes" class="ReturnCount" eval="" />
   </columns>
   <css>
   </css>
-  <typeName>101 部门的借阅排行</typeName>
+  <typeName>201 馆藏地点和图书种的借阅排行</typeName>
   <columnSortStyle>
   </columnSortStyle>
   <createFrequency>year,month,day</createFrequency>

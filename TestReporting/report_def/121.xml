@@ -2,6 +2,10 @@
   <title>借阅排行, 按读者姓名\r%library%\r%daterange%</title>
   <titleComment>
   </titleComment>
+  <parameters>
+    <parameter name="libraryCode" type="libraryCode" comment="馆代码"/>
+    <parameter name="dateRange" type="dateRange" comment="时间范围"/>
+  </parameters>
   <columns>
     <column name="证条码号" type="String" align="left" sum="no" class="PatronBarcode" eval="" />
     <column name="姓名" type="" align="left" sum="no" class="Name" eval="" />

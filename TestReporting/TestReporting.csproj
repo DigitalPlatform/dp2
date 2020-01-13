@@ -170,6 +170,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BuildReportDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BuildReportDialog.Designer.cs">
+      <DependentUpon>BuildReportDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="ReportViewerForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -184,6 +190,9 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="BuildReportDialog.resx">
+      <DependentUpon>BuildReportDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="ReportViewerForm.resx">
       <DependentUpon>ReportViewerForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -234,6 +243,10 @@
       <Project>{42059af3-46ec-476a-a0ff-7932df49a7db}</Project>
       <Name>DigitalPlatform.LibraryServer.Reporting</Name>
     </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.Xml\DigitalPlatform.Xml.csproj">
+      <Project>{E6489E89-1349-4EE7-A00B-AC96B9912587}</Project>
+      <Name>DigitalPlatform.Xml</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform\4.0\DigitalPlatform.csproj">
       <Project>{BDD43275-EAA0-4670-8BA3-0DB5CD7598DD}</Project>
       <Name>DigitalPlatform</Name>
@@ -250,7 +263,22 @@
     <Content Include="report_def\101.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="report_def\102.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="report_def\111.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="report_def\121.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="report_def\131.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="report_def\141.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="report_def\201.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

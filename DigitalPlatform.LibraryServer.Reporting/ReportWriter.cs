@@ -15,6 +15,9 @@ namespace DigitalPlatform.LibraryServer.Reporting
 {
     public class ReportWriter
     {
+        // 报表算法。101/111/121 ...
+        public string Algorithm { get; set; }
+
         public string CfgFile = "";
 
         // 报表配置文件 XMLDOM
@@ -483,13 +486,12 @@ namespace DigitalPlatform.LibraryServer.Reporting
                         {
                             // if (column.DataType != DataType.Currency)
                             {
-                                object v = null;
 
                                 // if (column.ColumnNumber < data_reader.FieldCount)
                                 // v = data_reader.GetValue(column.ColumnNumber);
-                                TryGetFieldValue(handle.Current, 
+                                TryGetFieldValue(handle.Current,
                                     column.CssClass,
-                                    out v);
+                                    out object v);
 
 
                                 if (sums[j] == null)
@@ -519,9 +521,9 @@ namespace DigitalPlatform.LibraryServer.Reporting
 
             writer.WriteEndElement();   // </tbody>
 
-#if NO
             if (this.SumLine == true)
             {
+                /*
                 SumLineReader sum_line = null;
                 if (engine != null)
                 {
@@ -532,6 +534,7 @@ namespace DigitalPlatform.LibraryServer.Reporting
                     engine.SetGlobalValue("line", sum_line);
                     engine.SetGlobalValue("rowNumber", "");
                 }
+                */
 
                 // strResult.Append("<tr class='sum'>\r\n");
                 writer.WriteStartElement("tfoot");
@@ -561,23 +564,21 @@ namespace DigitalPlatform.LibraryServer.Reporting
                                 strText = ((decimal)sums[j]).ToString("N", nfi);
                             else if (column.DataType == ColumnDataType.Price)
                             {
-                                strText = StatisUtil.Int64ToPrice((Int64)sums[j]);
+                                strText = Int64ToPrice((Int64)sums[j]);
                             }
                             else
                                 strText = Convert.ToString(sums[j]);
 
                             if (column.DataType == ColumnDataType.Currency)
                             {
-                                string strSomPrice = "";
-                                string strError = "";
                                 // 汇总价格
                                 int nRet = PriceUtil.SumPrices(strText,
-                out strSomPrice,
-                out strError);
+                out string strSumPrice,
+                out string strError);
                                 if (nRet == -1)
                                     strText = strError;
                                 else
-                                    strText = strSomPrice;
+                                    strText = strSumPrice;
                             }
                         }
                         else
@@ -597,9 +598,13 @@ namespace DigitalPlatform.LibraryServer.Reporting
                 writer.WriteEndElement();   // </tfoot>
             }
 
-#endif
-
             writer.WriteEndElement();   // </table>
+        }
+
+        public static string Int64ToPrice(Int64 v)
+        {
+            Decimal d = Convert.ToDecimal(v / (double)100);
+            return d.ToString();
         }
 
         static string GetDebugInfo(ColumnDataType datatype,

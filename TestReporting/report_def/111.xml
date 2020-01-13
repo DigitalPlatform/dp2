@@ -1,5 +1,5 @@
 ﻿<root>
-  <title>借阅排行, 按部门\r%library%\r%daterange%</title>
+  <title>借阅排行, 按读者类型\r%library%\r%daterange%</title>
   <titleComment>
   </titleComment>
   <parameters>
@@ -7,13 +7,13 @@
     <parameter name="dateRange" type="dateRange" comment="时间范围"/>
   </parameters>
   <columns>
-    <column name="部门" align="left" sum="no" class="Department" eval="" />
+    <column name="读者类型" align="left" sum="no" class="PatronType" eval="" />
     <column name="借书册数" align="right" sum="yes" class="BorrowCount" eval="" />
     <column name="还书册数" align="right" sum="yes" class="ReturnCount" eval="" />
   </columns>
   <css>
   </css>
-  <typeName>101 部门的借阅排行</typeName>
+  <typeName>111 读者类型的借阅排行</typeName>
   <columnSortStyle>
   </columnSortStyle>
   <createFrequency>year,month,day</createFrequency>
