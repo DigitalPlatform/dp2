@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Windows.Forms;
 using System.Xml;
+
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.CommonControl;
@@ -119,12 +120,13 @@ bool bClickClose = false)
             this._channelPool.BeforeLogin += new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
             this._channelPool.AfterLogin += new AfterLoginEventHandle(Channel_AfterLogin);
 
+            this.LoadTaskDom();
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             SaveSettings();
-
+            SaveTaskDom();
         }
 
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
@@ -407,16 +409,54 @@ string strHtml)
             }
         }
 
+        void Begin()
+        {
+            if (_cancel != null)
+                _cancel.Dispose();
+            _cancel = new CancellationTokenSource();
+            this.toolStripButton_stop.Enabled = true;
+        }
+
+        void End()
+        {
+            this.toolStripButton_stop.Enabled = false;
+        }
+
         private async void MenuItem_buildPlan_Click(object sender, EventArgs e)
         {
-            var result = await Replication();
+            Begin();
+            var result = await Replication(_cancel.Token);
+            End();
             if (result.Value == -1)
                 MessageBox.Show(this, result.ErrorInfo);
             else
                 MessageBox.Show(this, "OK");
         }
 
-        Task<NormalResult> Replication()
+        XmlDocument _taskDom = null;
+
+        void SaveTaskDom()
+        {
+            string filename = Path.Combine(ClientInfo.UserDir, "task.xml");
+            if (_taskDom == null)
+                File.Delete(filename);
+            else
+                _taskDom.Save(filename);
+        }
+
+        void LoadTaskDom()
+        {
+            string filename = Path.Combine(ClientInfo.UserDir, "task.xml");
+            if (File.Exists(filename))
+            {
+                _taskDom = new XmlDocument();
+                _taskDom.Load(filename);
+            }
+            else
+                _taskDom = null;
+        }
+
+        Task<NormalResult> Replication(CancellationToken token)
         {
             return Task<NormalResult>.Run(() =>
             {
@@ -441,6 +481,7 @@ string strHtml)
                         },
                         out XmlDocument task_dom,
                         out strError);
+                    _taskDom = task_dom;
                     if (nRet == -1)
                         return new NormalResult
                         {
@@ -460,6 +501,7 @@ string strHtml)
                         {
                             OutputHistory(message);
                         },
+                        token,
                         out strError);
                     if (nRet == -1)
                         return new NormalResult
@@ -477,21 +519,87 @@ string strHtml)
             });
         }
 
-        private void MenuItem_doPlan_Click(object sender, EventArgs e)
+        private async void MenuItem_continueExcutePlan_Click(object sender, EventArgs e)
         {
+            string strError = "";
+            if (_taskDom == null)
+            {
+                strError = "尚未首次执行";
+                goto ERROR1;
+            }
 
+            Begin();
+            var result = await ContinueExcutePlan(_taskDom, _cancel.Token);
+            End();
+            if (result.Value == -1)
+            {
+                strError = result.ErrorInfo;
+                goto ERROR1;
+            }
+            MessageBox.Show(this, "OK");
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        Task<NormalResult> ContinueExcutePlan(XmlDocument task_dom,
+            CancellationToken token)
+        {
+            return Task<NormalResult>.Run(() =>
+            {
+                Replication replication = new Replication();
+                LibraryChannel channel = this.GetChannel();
+                try
+                {
+                    int nRet = replication.Initialize(channel,
+                        out string strError);
+                    if (nRet == -1)
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError
+                        };
+
+                    DatabaseConfig.ServerName = "localhost";
+                    DatabaseConfig.DatabaseName = "testrep";
+                    DatabaseConfig.UserName = "root";
+                    DatabaseConfig.Password = "test";
+
+                    nRet = replication.DoPlan(
+                        channel,
+                        ref task_dom,
+                        (message) =>
+                        {
+                            OutputHistory(message);
+                        },
+                        token,
+                        out strError);
+                    if (nRet == -1)
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError
+                        };
+
+                    return new NormalResult();
+                }
+                finally
+                {
+                    this.ReturnChannel(channel);
+                }
+            });
         }
 
         private void MenuItem_testCreateReport_Click(object sender, EventArgs e)
         {
-            BuildReportDialog dlg = new BuildReportDialog();
+            BuildReportDialog1 dlg = new BuildReportDialog1();
             dlg.DataDir = Path.Combine(ClientInfo.DataDir, "report_def");
             dlg.UiState = ClientInfo.Config.Get(
 "BuildReportDialog",
 "uiState",
 "");
-
             dlg.ShowDialog(this);
+
 
             ClientInfo.Config.Set(
 "BuildReportDialog",
@@ -518,13 +626,12 @@ dlg.UiState);
             DatabaseConfig.UserName = "root";
             DatabaseConfig.Password = "test";
 
-            Hashtable param_table = new Hashtable();
+            Hashtable param_table = dlg.SelectedParamTable;
 
             using (var context = new LibraryContext())
             {
                 Report.BuildReport(context,
                     param_table,
-                    dlg.DateRange,
                     // dlg.Parameters,
                     writer,
                     strOutputFileName);
@@ -550,6 +657,12 @@ dlg.UiState);
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+        private void toolStripButton_stop_Click(object sender, EventArgs e)
+        {
+            _cancel.Cancel();
+            this.toolStripButton_stop.Enabled = false;
         }
     }
 }

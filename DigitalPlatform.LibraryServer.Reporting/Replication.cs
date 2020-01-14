@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Xml;
 
 using DigitalPlatform.IO;
@@ -1053,6 +1054,7 @@ out strError);
             LibraryChannel channel,
             ref XmlDocument task_dom,
             Delegate_showMessage func_showMessage,
+            CancellationToken token,
             out string strError)
         {
             strError = "";
@@ -1061,16 +1063,13 @@ out strError);
             var context = new LibraryContext();
             try
             {
-                context.Database.EnsureDeleted();
-                context.Database.EnsureCreated();
-
-                /*
                 // 初始化各种表，除了 operlogXXX 表以外
                 string strInitilized = DomUtil.GetAttr(task_dom.DocumentElement,
                     "initial_tables");
                 if (strInitilized != "finish")
                 {
-                    stop.SetMessage("正在删除残余的数据库文件 ...");
+                    // stop.SetMessage("正在删除残余的数据库文件 ...");
+                    /*
                     // 删除以前遗留的数据库文件
                     string strDatabaseFile = Path.Combine(GetBaseDirectory(), "operlog.bin");
                     if (File.Exists(strDatabaseFile) == true)
@@ -1118,11 +1117,16 @@ out strError);
                                 return -1;
                         }
                     }
+                    */
+
+                    {
+                        context.Database.EnsureDeleted();
+                        context.Database.EnsureCreated();
+                    }
 
                     DomUtil.SetAttr(task_dom.DocumentElement,
                         "initial_tables", "finish");
                 }
-                */
 
                 // 先累计总记录数，以便设置进度条
                 long lTotalCount = 0;
@@ -1186,6 +1190,7 @@ out strError);
             strDbName,
             lCurrentCount,
             func_showMessage,
+            token,
             ref lProgress,
             ref lIndex,
             out strError);
@@ -1213,6 +1218,7 @@ out strError);
             strDbName,
             lCurrentCount,
             func_showMessage,
+            token,
             ref lProgress,
             ref lIndex,
             out strError);
@@ -1242,6 +1248,7 @@ out strError);
                 strDbName,
                 lCurrentCount,
             func_showMessage,
+            token,
             ref lProgress,
             ref lIndex,
                 out strError);
@@ -1457,6 +1464,11 @@ out strError);
                     "state", "daily");  // 表示首次创建已经完成，进入每日同步阶段
                 return 0;
             }
+            catch (Exception ex)
+            {
+                strError = ExceptionUtil.GetDebugText(ex);
+                return -1;
+            }
             finally
             {
                 if (context != null)
@@ -1502,6 +1514,7 @@ out strError);
     string strItemDbNameParam,
     long lOldCount,
     Delegate_showMessage func_showMessage,
+    CancellationToken token,
     ref long lProgress,
     ref long lIndex,
     out string strError)
@@ -1606,11 +1619,12 @@ out strError);
                 func_showMessage,
                 "id,cols,format:@coldef:*/barcode|*/location|*/accessNo|*/parent|*/state|*/operations/operation[@name='create']/@time|*/borrower|*/borrowDate|*/borrowPeriod|*/returningDate|*/price|*/refID",
             lOldCount,
+            token,
                 ref lProgress,
                 ref lIndex,
                 out strError);
         }
-        
+
         // 把 location 字符串变换为便于处理的形态
         // 阅览室 --> /阅览室
         // 海淀分馆/阅览室 --> 海淀分馆/阅览室
@@ -1663,6 +1677,7 @@ out strError);
             // string strItemDbNameParam,
             string strStyle,
             long lOldCount,
+            CancellationToken token,
             ref long lProgress,
             ref long lIndex,
             out string strError)
@@ -1719,16 +1734,24 @@ null,
 strResultSetName,
 strStyle,
 "zh");
+                loader.Start = lIndex;
+
                 // loader.Prompt += this.Loader_Prompt;
 
                 // 处理浏览结果
-                int i = 0;
+                long i = lIndex;
                 List<object> lines = new List<object>();
                 foreach (DigitalPlatform.LibraryClient.localhost.Record searchresult in loader)
                 {
                     // DigitalPlatform.LibraryClient.localhost.Record searchresult = searchresults[i];
+                    if (token.IsCancellationRequested)
+                    {
+                        strError = "用户中断";
+                        return -1;
+                    }
 
-
+                    if (i < lIndex)
+                        goto CONTINUE;
 #if NO
                     // 2016/4/12
                     // 检查事项状态。主动抛出异常，避免后面出现 index 异常
@@ -1812,15 +1835,17 @@ strStyle,
 #endif
                     object line = func_buildItem(searchresult);
                     if (line == null)
-                        continue;
+                        goto CONTINUE;
 
                     lines.Add(line);
-                    context.Add(line);
+                    // context.Add(line);
 
-                    if (lines.Count >= 1000)
+                    if (lines.Count >= 100)
                     {
                         func_beforeSave?.Invoke(lines);
-                        SaveChanges(ref context);
+                        SaveChanges(ref context, lines);
+
+                        lIndex = i + 1;
 
                         lines.Clear();
 
@@ -1834,7 +1859,7 @@ strStyle,
                 if (lines.Count > 0)
                 {
                     func_beforeSave?.Invoke(lines);
-                    SaveChanges(ref context);
+                    SaveChanges(ref context, lines);
                 }
             }
             finally
@@ -1845,12 +1870,71 @@ strStyle,
             return 0;
         }
 
-        public void SaveChanges(ref LibraryContext context)
+        public int SaveChangesOneByOne(ref LibraryContext context,
+    List<object> lines)
         {
-            context.SaveChanges();
-            //context.Dispose();
-            //context = new LibraryContext();
-            DetachAll(context);
+            int count = 0;
+            foreach (var line in lines)
+            {
+                using (var dbContextTransaction = context.Database.BeginTransaction())
+                {
+                    try
+                    {
+                        context.AddRange(line);
+                        context.SaveChanges();
+                        dbContextTransaction.Commit();
+                        count++;
+                    }
+                    catch(Exception ex)
+                    {
+                        throw ex;
+                    }
+                }
+            }
+
+
+            context.Dispose();
+            context = new LibraryContext();
+            // DetachAll(context);
+
+            return count;
+        }
+
+        public void SaveChanges(ref LibraryContext context,
+            List<object> lines)
+        {
+            Exception exception = null;
+            // 自动重试两次
+            for (int i = 0; i < 2; i++)
+            {
+                using (var dbContextTransaction = context.Database.BeginTransaction())
+                {
+                    try
+                    {
+                        context.AddRange(lines);
+                        context.SaveChanges();
+                        dbContextTransaction.Commit();
+                        break;
+                    }
+                    catch (Exception ex)
+                    {
+                        // Rollback() 本身也可能再次抛异常
+                        dbContextTransaction.Rollback(); //Required according to MSDN article 
+                        // TODO: 写入错误日志
+                        exception = ex;
+                    }
+                }
+            }
+
+            if (exception != null)
+            {
+                SaveChangesOneByOne(ref context, lines);
+                // throw exception;
+            }
+
+            context.Dispose();
+            context = new LibraryContext();
+            // DetachAll(context);
         }
 
         public void DetachAll(LibraryContext context)
@@ -1871,6 +1955,7 @@ strStyle,
             string strReaderDbNameParam,
             long lOldCount,
     Delegate_showMessage func_showMessage,
+    CancellationToken token,
             ref long lProgress,
             ref long lIndex,
             out string strError)
@@ -1925,6 +2010,7 @@ strStyle,
                 func_showMessage,
                 "id,cols,format:@coldef:*/barcode|*/department|*/readerType|*/name|*/state",
             lOldCount,
+            token,
                 ref lProgress,
                 ref lIndex,
                 out strError);
@@ -1936,6 +2022,7 @@ LibraryChannel channel,
     string strBiblioDbNameParam,
     long lOldCount,
     Delegate_showMessage func_showMessage,
+    CancellationToken token,
     ref long lProgress,
     ref long lIndex,
     out string strError)
@@ -1965,6 +2052,9 @@ LibraryChannel channel,
                 {
                     Biblio line = new Biblio();
                     line.RecPath = searchresult.Path;
+                    line.Xml = searchresult.RecordBody.Xml;
+                    // TODO: 创建检索点
+                    line.CreateKeys(line.Xml, line.RecPath);
                     biblio_recpaths.Add(searchresult.Path);
                     return line;
                 },
@@ -2014,8 +2104,9 @@ LibraryChannel channel,
 
                 },
                 func_showMessage,
-                "id",
+                "id,xml",
                 lOldCount,
+                token,
                 ref lProgress,
                 ref lIndex,
                 out strError);
@@ -2422,7 +2513,7 @@ LibraryChannel channel,
             //loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
             //loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
 
-            List<OperBase> opers = new List<OperBase>();
+            List<object> opers = new List<object>();
             //MultiBuffer buffer = new MultiBuffer();
             //buffer.Initial();
 
@@ -2523,8 +2614,8 @@ LibraryChannel channel,
 
                     if (opers.Count > 4000)
                     {
-                        context.AddRange(opers);
-                        SaveChanges(ref context);
+                        // context.AddRange(opers);
+                        SaveChanges(ref context, opers);
                         opers.Clear();
 
                         strLastDate = item.Date;
@@ -2562,8 +2653,8 @@ LibraryChannel channel,
 
             if (opers.Count > 0)
             {
-                context.AddRange(opers);
-                SaveChanges(ref context);
+                // context.AddRange(opers);
+                SaveChanges(ref context, opers);
                 opers.Clear();
             }
             /*

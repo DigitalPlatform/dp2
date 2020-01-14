@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
+using DigitalPlatform.Marc;
+using System.ComponentModel.DataAnnotations;
 
 namespace DigitalPlatform.LibraryServer.Reporting
 {
@@ -16,6 +18,7 @@ namespace DigitalPlatform.LibraryServer.Reporting
         public DbSet<Item> Items { get; set; }
         public DbSet<Biblio> Biblios { get; set; }
         public DbSet<Patron> Patrons { get; set; }
+        public DbSet<Key> Keys { get; set; }
 
         public DbSet<PassGateOper> PassGateOpers { get; set; }
         public DbSet<GetResOper> GetResOpers { get; set; }
@@ -53,6 +56,20 @@ namespace DigitalPlatform.LibraryServer.Reporting
             modelBuilder.Entity<Biblio>(entity =>
             {
                 entity.HasKey(e => e.RecPath);
+                entity.HasMany(e => e.Keys);
+                /*
+                entity.Property(e => e.Title).IsRequired();
+                entity.HasOne(d => d.Publisher)
+                  .WithMany(p => p.Books);
+                  */
+            });
+
+            // 检索点
+            modelBuilder.Entity<Key>(entity =>
+            {
+                entity.HasKey(e => new { e.Text, e.Type, e.BiblioRecPath });
+                entity.HasOne(e => e.Biblio);
+                entity.Property(e => e.BiblioRecPath).IsRequired();
                 /*
                 entity.Property(e => e.Title).IsRequired();
                 entity.HasOne(d => d.Publisher)
@@ -140,7 +157,120 @@ namespace DigitalPlatform.LibraryServer.Reporting
         public string Title { get; set; }
         public string Author { get; set; }
         public string Publisher { get; set; }
+        [MaxLength(4096)]
         public string Summary { get; set; }
+
+        // 书目记录 XML 内容
+        [MaxLength(4096)]
+        public string Xml { get; set; }
+
+        // 书目记录的检索点
+        public List<Key> Keys { get; set; }
+
+        // 首次创建检索点对象
+        public void CreateKeys(string strXml,
+            string strBiblioRecPath)
+        {
+            if (this.Keys == null)
+                this.Keys = new List<Key>();
+
+            int nRet = MarcUtil.Xml2Marc(strXml,
+    false,
+    null,
+    out string strOutMarcSyntax,
+    out string strMARC,
+    out string strError);
+            if (nRet == -1)
+                throw new Exception(strError);
+            MarcRecord record = new MarcRecord(strMARC);
+            if (strOutMarcSyntax == "unimarc")
+            {
+                this.Keys.AddRange(BuildKeys(record,
+strBiblioRecPath,
+"field[@name='200']/subfield[@name='a']",
+"title"));
+
+                this.Keys.AddRange(BuildKeys(record,
+strBiblioRecPath,
+"field[@name='690']/subfield[@name='a']",
+"class_clc"));
+            }
+            else
+            {
+                this.Keys.AddRange(BuildKeys(record,
+strBiblioRecPath,
+"field[@name='245']/subfield[@name='a']",
+"title"));
+            }
+        }
+
+        public static List<Key> BuildKeys(MarcRecord record,
+            string strBiblioRecPath,
+            string xpath,
+            string type)
+        {
+            List<string> values = new List<string>();
+            foreach (MarcSubfield subfield in record.select(xpath))
+            {
+                values.Add(subfield.Content);
+            }
+
+            // TODO: SQL Server 无法区分大小写 key 字符串，会认为重复
+            values.Sort((a, b) => string.Compare(a, b, true));
+            _removeDup(ref values);
+            StringUtil.RemoveBlank(ref values);
+
+            List<Key> results = new List<Key>();
+            foreach (string class_string in values)
+            {
+                Key key = new Key
+                {
+                    Text = class_string,
+                    Type = type,
+                    BiblioRecPath = strBiblioRecPath
+                };
+                results.Add(key);
+            }
+
+            return results;
+        }
+
+        public static void _removeDup(ref List<string> list)
+        {
+            for (int i = 0; i < list.Count; i++)
+            {
+                string strItem = list[i].ToUpper();
+                for (int j = i + 1; j < list.Count; j++)
+                {
+                    if (strItem == list[j].ToUpper())
+                    {
+                        list.RemoveAt(j);
+                        j--;
+                    }
+                    else
+                    {
+                        i = j - 1;
+                        break;
+                    }
+                }
+            }
+        }
+
+    }
+
+    // 检索点
+    public class Key
+    {
+        [MaxLength(256)]
+        public string Text { get; set; }
+        // 检索点类型。例如 title author class class_clc
+        [MaxLength(128)]
+        public string Type { get; set; }
+
+        // 该检索点所从属的书目记录
+        public Biblio Biblio { get; set; }
+        [MaxLength(128)]
+        public string BiblioRecPath { get; set; }
     }
 
     // 日志行 基础类
@@ -980,7 +1110,7 @@ out DateTime borrowdate) == false)
 
         public static string BuildConnectionString()
         {
-            return $"server={ServerName};database={DatabaseName};user={UserName};password={Password}";
+            return $"server={ServerName};database={DatabaseName};user={UserName};password={Password};Connection Timeout=300;Keepalive=10;";
         }
     }
 }

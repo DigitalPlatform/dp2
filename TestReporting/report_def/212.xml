@@ -1,0 +1,17 @@
+<root>
+  <title>借阅排行, 按分类，馆藏地\r%location%\r%class%\r%daterange%</title>
+  <titleComment>
+  </titleComment>
+  <columns>
+    <column name="类号" type="String" align="left" sum="no" class="class" eval="" />
+    <column name="借书册数" type="" align="right" sum="yes" class="borrowitems" eval="" />
+    <column name="还书册数" type="" align="right" sum="yes" class="returnitems" eval="" />
+  </columns>
+  <css>
+  </css>
+  <typeName>212 馆藏地点和分类的借阅排行</typeName>
+  <columnSortStyle>
+  </columnSortStyle>
+  <createFrequency>year,month,day</createFrequency>
+  <property fresh="false" />
+</root>
