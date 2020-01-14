@@ -1,0 +1,21 @@
+﻿<root>
+  <title>没有被借出过的图书, 按图书种，馆藏地\r%location%\r%daterange%</title>
+  <titleComment>
+  </titleComment>
+  <parameters>
+    <parameter name="location" type="location" comment="图书馆藏地"/>
+    <parameter name="dateRange" type="dateRange" comment="时间范围"/>
+  </parameters>
+    <columns>
+    <column name="书目记录路径" align="left" sum="no" class="BiblioRecPath" eval="" />
+    <column name="书目摘要" align="left" sum="no" class="Summary" eval="" />
+    <column name="册数" align="right" sum="yes" class="ItemCount" eval="" />
+    </columns>
+  <css>
+  </css>
+  <typeName>202 馆藏地点的没有被借出的图书种</typeName>
+  <columnSortStyle>
+  </columnSortStyle>
+  <createFrequency>month</createFrequency>
+  <property fresh="false" />
+</root>

@@ -12,8 +12,10 @@
   <ItemGroup>
     <ProjectReference Include="..\DigitalPlatform.IO\DigitalPlatform.IO.csproj" />
     <ProjectReference Include="..\DigitalPlatform.LibraryClient\DigitalPlatform.LibraryClient.csproj" />
+    <ProjectReference Include="..\DigitalPlatform.MarcKernel\DigitalPlatform.MarcKernel.csproj" />
     <ProjectReference Include="..\DigitalPlatform.Xml\DigitalPlatform.Xml.csproj" />
     <ProjectReference Include="..\dp-library\DigitalPlatform.Core\DigitalPlatform.Core.csproj" />
+    <ProjectReference Include="..\dp-library\DigitalPlatform.MarcQuery\DigitalPlatform.MarcQuery.csproj" />
   </ItemGroup>
 
 </Project>

@@ -36,6 +36,9 @@ namespace DigitalPlatform.LibraryClient
         // 每批获取最多多少个记录
         public long BatchSize { get; set; }
 
+        // 从什么偏移位置开始取
+        public long Start { get; set; }
+
         public ResultSetLoader(LibraryChannel channel,
             DigitalPlatform.Stop stop,
             string resultsetName,
@@ -54,7 +57,7 @@ namespace DigitalPlatform.LibraryClient
             string strError = "";
 
             long lHitCount = -1;
-            long lStart = 0;
+            long lStart = this.Start;
             long nPerCount = this.BatchSize == 0 ? -1 : this.BatchSize;
             // nPerCount = 1;  // test
             for (; ; )

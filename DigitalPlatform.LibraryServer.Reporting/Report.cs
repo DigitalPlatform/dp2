@@ -15,22 +15,23 @@ namespace DigitalPlatform.LibraryServer.Reporting
     {
         public static void BuildReport(LibraryContext context,
     Hashtable param_table,
-    string strDateRange,
     ReportWriter writer,
     string strOutputFileName)
         {
-            // 将日期字符串解析为起止范围日期
-            // throw:
-            //      Exception
-            DateTimeUtil.ParseDateRange(strDateRange,
-                out string strStartDate,
-                out string strEndDate);
-            if (string.IsNullOrEmpty(strEndDate) == true)
-                strEndDate = strStartDate;
+            string strDateRange = param_table["dateRange"] as string;
 
-            if (writer.Algorithm == "101")
+            string strStartDate = "";
+            string strEndDate = "";
+            if (string.IsNullOrEmpty(strDateRange) == false)
             {
-
+                // 将日期字符串解析为起止范围日期
+                // throw:
+                //      Exception
+                DateTimeUtil.ParseDateRange(strDateRange,
+                    out strStartDate,
+                    out strEndDate);
+                if (string.IsNullOrEmpty(strEndDate) == true)
+                    strEndDate = strStartDate;
             }
 
             Hashtable macro_table = new Hashtable();
@@ -94,6 +95,15 @@ writer,
 macro_table,
 strOutputFileName);
                     return;
+                case "202":
+                    BuildReport_202(context,
+param_table,
+strStartDate,
+strEndDate,
+writer,
+macro_table,
+strOutputFileName);
+                    return;
             }
 
             throw new Exception($"算法 {writer.Algorithm} 没有找到");
@@ -104,9 +114,102 @@ strOutputFileName);
             return StringUtil.ParseTwoPart(location, "/")[0];
         }
 
+        // 某段时间内没有被借出过的图书。这里有个疑问，就是这一段时间以前借了但在这一段时间内来不及还的算不算借过？
+        // parameters:
+        //      param_table 要求 location 参数。表示一个馆藏地，例如 "/阅览室"。注意使用新版的正规形态，其中必须包含一个斜杠
+        public static void BuildReport_202(LibraryContext context,
+            Hashtable param_table,
+            string strStartDate,
+            string strEndDate,
+            ReportWriter writer,
+            Hashtable macro_table,
+            string strOutputFileName)
+        {
+            string location = param_table["location"] as string;
+            // string librarycode = GetLibraryCode(location);
+
+            macro_table["%location%"] = location;
+
+            var items = context.CircuOpers
+            .Where(b => // (b.LibraryCode == librarycode) &&
+            b.Action == "borrow"
+            && string.Compare(b.Date, strStartDate) >= 0
+            && string.Compare(b.Date, strEndDate) <= 0)
+            .Join(
+                context.Items,
+                oper => oper.ItemBarcode,
+                item => item.ItemBarcode,
+                (oper, item) => new
+                {
+                    item.ItemBarcode,
+                    Location = item.Location,
+                }
+            )
+            .DefaultIfEmpty()
+            .Where(x => x.Location == location)
+            .Select(x => x.ItemBarcode).ToList();
+
+            /*
+            var results = context.Items
+                .ToList()
+                .Where(x => x.Location == location && !items.Contains(x.ItemBarcode))
+                .GroupBy(x => x.BiblioRecPath)
+                .Select(g => new
+                {
+                    BiblioRecPath = g.Key,
+                    ItemCount = g.Count(),
+                    BarcodeList = g.Select(x => x.ItemBarcode).ToArray()
+                })
+                .Join(context.Biblios,
+            item => item.BiblioRecPath,
+            biblio => biblio.RecPath,
+            (item, biblio) => new
+            {
+                BiblioRecPath = item.BiblioRecPath,
+                Summary = biblio.Summary,
+                ItemCount = item.ItemCount,
+                Barcodes = string.Join(",", item.BarcodeList),
+            })
+            .OrderBy(t => t.BiblioRecPath)
+            .ToList();
+
+                  <column name="册条码号列表" align="left" sum="no" class="Barcodes" eval="" />
+
+            */
+
+            var results = context.Items
+    .Where(x => x.Location == location && !items.Contains(x.ItemBarcode))
+    .GroupBy(x => x.BiblioRecPath)
+    .Select(g => new
+    {
+        BiblioRecPath = g.Key,
+        ItemCount = g.Count(),
+    })
+    .Join(context.Biblios,
+item => item.BiblioRecPath,
+biblio => biblio.RecPath,
+(item, biblio) => new
+{
+    BiblioRecPath = item.BiblioRecPath,
+    Summary = biblio.Summary,
+    ItemCount = item.ItemCount,
+})
+.OrderBy(t => t.BiblioRecPath)
+.ToList();
+
+
+            int nRet = writer.OutputRmlReport(
+            results,
+            macro_table,
+            strOutputFileName,
+            out string strError);
+            if (nRet == -1)
+                throw new Exception(strError);
+        }
+
         // 按图书种的借阅排行榜
         // parameters:
-        //      param_table 要求 location 参数
+        //      param_table 要求 location 参数。表示一个馆藏地，例如 "/阅览室"。注意使用新版的正规形态，其中必须包含一个斜杠
         public static void BuildReport_201(LibraryContext context,
             Hashtable param_table,
             string strStartDate,
@@ -116,11 +219,11 @@ strOutputFileName);
             string strOutputFileName)
         {
             string location = param_table["location"] as string;
-            string librarycode = GetLibraryCode(location);
+            // string librarycode = GetLibraryCode(location);
 
             var opers = context.CircuOpers
-            .Where(b => (b.LibraryCode == librarycode)
-            && (b.Action == "borrow" || b.Action == "return")
+            .Where(b => // (b.LibraryCode == librarycode) &&
+            (b.Action == "borrow" || b.Action == "return")
             && string.Compare(b.Date, strStartDate) >= 0
             && string.Compare(b.Date, strEndDate) <= 0)
             .Join(
@@ -148,7 +251,8 @@ strOutputFileName);
             .Join(context.Biblios,
             item => item.BiblioRecPath,
             biblio => biblio.RecPath,
-            (item, biblio) => new {
+            (item, biblio) => new
+            {
                 RecPath = item.BiblioRecPath,
                 Summary = biblio.Summary,
                 BorrowCount = item.BorrowCount,
@@ -182,17 +286,17 @@ string strOutputFileName)
 
             string date = "";
             date = param_table["endDate"] as string;
-            if (string.IsNullOrEmpty(date))
+            if (string.IsNullOrEmpty(date) == false)
             {
-                date = strEndDate;
                 end = DateTimeUtil.Long8ToDateTime(date);
-                DateTime today = DateTime.Now;
-                if (end > today)
-                    end = today;
             }
             else
             {
+                date = strEndDate;
                 end = DateTimeUtil.Long8ToDateTime(strEndDate);
+                DateTime today = DateTime.Now;
+                if (end > today)
+                    end = today;
             }
 
             string strLibraryCode = param_table["libraryCode"] as string;
