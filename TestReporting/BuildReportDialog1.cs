@@ -147,7 +147,7 @@ namespace TestReporting
         // 装载当前控件状态。根据报表类型
         void LoadCurrentControlState(string reportType)
         {
-           Hashtable table = null;
+            Hashtable table = null;
 
             if (_uiStateTable.ContainsKey(reportType) == true)
                 table = _uiStateTable[reportType];
@@ -178,7 +178,11 @@ namespace TestReporting
                 dom.Load(filename);
 
                 XmlElement parameters = dom.DocumentElement.SelectSingleNode("parameters") as XmlElement;
-
+                if (parameters == null)
+                {
+                    MessageBox.Show(this, $"文件 {filename} 内尚未定义 parameters 元素");
+                    return;
+                }
                 this._buildReportControl.CreateChildren(parameters);
 
                 _currentReportType = GetReportType();

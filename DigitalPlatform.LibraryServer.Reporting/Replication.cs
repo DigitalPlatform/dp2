@@ -1323,7 +1323,6 @@ out strError);
 
                     }
 
-#if NO
 
                     if (node.Name == "user")
                     {
@@ -1332,16 +1331,15 @@ out strError);
                         if (strState != "finish")
                         {
                             nRet = DoCreateUserTable(
+                                ref context,
+                                channel,
+                                func_showMessage,
                                 out strError);
                             if (nRet == -1)
-                            {
                                 return -1;
-                            }
                             DomUtil.SetAttr(node, "state", "finish");
                         }
                     }
-
-#endif
 
                     if (node.Name == "operlog")
                     {
@@ -1507,6 +1505,57 @@ out strError);
             */
         }
 
+        // 创建 user 表
+        int DoCreateUserTable(
+            ref LibraryContext context,
+            LibraryChannel channel,
+            Delegate_showMessage func_showMessage,
+            out string strError)
+        {
+            strError = "";
+
+            func_showMessage?.Invoke("创建用户表 ...");
+
+            int nStart = 0;
+            for (; ; )
+            {
+                long lRet = channel.GetUser(
+                    null,
+                    "list",
+                    "",
+                    nStart,
+                    -1,
+                    out UserInfo[] users,
+                    out strError);
+                if (lRet == -1)
+                    return -1;
+                if (lRet == 0)
+                {
+                    strError = "不存在用户信息。";
+                    return 0;   // not found
+                }
+
+                Debug.Assert(users != null, "");
+
+                List<object> lines = new List<object>();
+                foreach (var info in users)
+                {
+                    User line = new User { ID = info.UserName,
+                    Rights = info.Rights,
+                    LibraryCodeList = "," + info.LibraryCode + ","};
+                    lines.Add(line);
+                }
+
+                // 插入一批用户记录
+                SaveChanges(ref context, lines);
+
+                nStart += users.Length;
+                if (nStart >= lRet)
+                    break;
+            }
+
+            return 0;
+        }
 
         int BuildItemRecords(
     ref LibraryContext context,
@@ -1663,6 +1712,9 @@ out strError);
         delegate object Delegate_buildItem(
             DigitalPlatform.LibraryClient.localhost.Record record);
         delegate void Delegate_beforeSave(List<object> items);
+
+        // BuildRecords() 每批记录个数
+        const int BATCH_SIZE = 500;
 
         // parameters:
         //      lIndex  [in] 起点 index
@@ -1840,7 +1892,7 @@ strStyle,
                     lines.Add(line);
                     // context.Add(line);
 
-                    if (lines.Count >= 100)
+                    if (lines.Count >= BATCH_SIZE)
                     {
                         func_beforeSave?.Invoke(lines);
                         SaveChanges(ref context, lines);
@@ -1885,7 +1937,7 @@ strStyle,
                         dbContextTransaction.Commit();
                         count++;
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         throw ex;
                     }

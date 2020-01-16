@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 using System.Xml;
+using System.ComponentModel.DataAnnotations;
 
 using Microsoft.EntityFrameworkCore;
 
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Marc;
-using System.ComponentModel.DataAnnotations;
 
 namespace DigitalPlatform.LibraryServer.Reporting
 {
@@ -19,6 +19,7 @@ namespace DigitalPlatform.LibraryServer.Reporting
         public DbSet<Biblio> Biblios { get; set; }
         public DbSet<Patron> Patrons { get; set; }
         public DbSet<Key> Keys { get; set; }
+        public DbSet<User> Users { get; set; }
 
         public DbSet<PassGateOper> PassGateOpers { get; set; }
         public DbSet<GetResOper> GetResOpers { get; set; }
@@ -271,6 +272,14 @@ strBiblioRecPath,
         public Biblio Biblio { get; set; }
         [MaxLength(128)]
         public string BiblioRecPath { get; set; }
+    }
+
+    public class User
+    {
+        public string ID { get; set; }
+        // 馆代码列表。已变换为特殊形态 ,cod1,code2, 即，确保头尾都有逗号，这样方便 IndexOf() 进行匹配
+        public string LibraryCodeList { get; set; }
+        public string Rights { get; set; }
     }
 
     // 日志行 基础类
@@ -570,7 +579,7 @@ strBiblioRecPath,
 
     }
 
-    // order isue comment 每行的基类
+    // item order issue comment 每行的基类
     public class ItemOper : OperBase
     {
         // 特有的字段
