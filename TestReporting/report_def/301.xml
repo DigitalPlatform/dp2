@@ -1,0 +1,23 @@
+﻿<root>
+  <title>图书种册, 按分类，馆藏地\r%location%\r%class%\r%daterange%</title>
+  <titleComment>\r</titleComment>
+  <parameters>
+    <parameter name="location" type="location" comment="图书馆藏地"/>
+    <parameter name="dateRange" type="dateRange" comment="时间范围"/>
+    <parameter name="classType" type="dateRange" comment="分类法"/>
+  </parameters>
+  <columns>
+    <column name="类号" type="String" align="left" sum="no" class="Class" eval="" />
+    <column name="存量种数" type="" align="right" sum="yes" class="StartBiblioCount" eval="" />
+    <column name="增量种数" type="" align="right" sum="yes" class="DeltaBiblioCount" eval="" />
+    <column name="存量册数" type="" align="right" sum="yes" class="StartItemCount" eval="" />
+    <column name="增量册数" type="" align="right" sum="yes" class="DeltaItemCount" eval="" />
+  </columns>
+  <css>
+  </css>
+  <typeName>301 馆藏地点和分类的图书种册</typeName>
+  <columnSortStyle>
+  </columnSortStyle>
+  <createFrequency>month,year</createFrequency>
+  <property fresh="false" />
+</root>

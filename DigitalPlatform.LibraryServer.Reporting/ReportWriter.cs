@@ -149,6 +149,7 @@ namespace DigitalPlatform.LibraryServer.Reporting
 
         public int OutputRmlReport<T>(
             IEnumerable<T> data_reader,
+            object sum,
             Hashtable macro_table,
             string strOutputFileName,
             out string strError)
@@ -224,6 +225,7 @@ namespace DigitalPlatform.LibraryServer.Reporting
 
                 OutputRmlTable(
                     data_reader,
+                    sum,
                     writer);
 
                 writer.WriteEndElement();   // </report>
@@ -275,6 +277,7 @@ namespace DigitalPlatform.LibraryServer.Reporting
         //      nTopLines   顶部预留多少行
         void OutputRmlTable<T>(
             IEnumerable<T> data_reader,
+            object sum,
             XmlTextWriter writer,
             int nMaxLines = -1)
         {
@@ -521,7 +524,50 @@ namespace DigitalPlatform.LibraryServer.Reporting
 
             writer.WriteEndElement();   // </tbody>
 
-            if (this.SumLine == true)
+            if (sum != null)
+            {
+                writer.WriteStartElement("tfoot");
+                writer.WriteStartElement("tr");
+                WriteAttributeString(writer, "class", "sum");
+
+                for (j = 0; j < this.Columns.Count; j++)
+                {
+                    PrintColumn000 column = this.Columns[j];
+                    string strText = "";
+
+                    if (j == 0)
+                        strText = "合计(" + nLineCount.ToString() + "行)";
+                    else if (column.Sum == true)
+                    {
+                        if (string.IsNullOrEmpty(column.Eval) == false)
+                        {
+                            engine.SetGlobalValue("currency", new PriceUtil());
+                            strText = engine.Evaluate(column.Eval).ToString();
+                        }
+                        else if (column.Sum == true)
+                        {
+                            TryGetFieldValue(sum,
+column.CssClass,
+out object o);
+                            // (column.ColumnNumber);
+                            if (o != null)
+                                strText = o.ToString();
+                            else
+                                strText = "";
+                        }
+                    }
+
+                    writer.WriteStartElement(j == 0 ? "th" : "td");
+                    if (string.IsNullOrEmpty(column.CssClass) == false)
+                        WriteAttributeString(writer, "class", column.CssClass);
+                    WriteString(writer, strText);
+                    writer.WriteEndElement();   // </td>
+                }
+
+                writer.WriteEndElement();   // </tr>
+                writer.WriteEndElement();   // </tfoot>
+            }
+            else if (this.SumLine == true)
             {
                 /*
                 SumLineReader sum_line = null;

@@ -1,0 +1,24 @@
+﻿<root>
+  <title>订购工作量\r%library%\r%daterange%</title>
+  <titleComment>
+  </titleComment>
+  <parameters>
+    <parameter name="libraryCode" type="libraryCode" comment="馆代码"/>
+    <parameter name="dateRange" type="dateRange" comment="时间范围"/>
+  </parameters>
+  <columns>
+    <column name="操作者" type="String" align="left" sum="no" class="Operator" eval="" />
+    <column name="创建" type="" align="right" sum="yes" class="NewCount" eval="" />
+    <column name="修改" type="" align="right" sum="yes" class="ChangeCount" eval="" />
+    <column name="删除" type="" align="right" sum="yes" class="DeleteCount" eval="" />
+    <column name="复制" type="" align="right" sum="yes" class="CopyCount" eval="" />
+    <column name="移动" type="" align="right" sum="yes" class="MoveCount" eval="" />
+    <column name="操作总量" type="" align="right" sum="yes" class="TotalCount" eval="" />
+  </columns>
+  <css>
+  </css>
+  <typeName>412 订购工作量，按工作人员</typeName>
+  <columnSortStyle>0:a</columnSortStyle>
+  <createFrequency>day,month,year</createFrequency>
+  <property fresh="false" />
+</root>

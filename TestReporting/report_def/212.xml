@@ -1,11 +1,16 @@
-<root>
+﻿<root>
   <title>借阅排行, 按分类，馆藏地\r%location%\r%class%\r%daterange%</title>
   <titleComment>
   </titleComment>
+  <parameters>
+    <parameter name="location" type="location" comment="图书馆藏地"/>
+    <parameter name="dateRange" type="dateRange" comment="时间范围"/>
+    <parameter name="classType" type="dateRange" comment="分类法"/>
+  </parameters>
   <columns>
-    <column name="类号" type="String" align="left" sum="no" class="class" eval="" />
-    <column name="借书册数" type="" align="right" sum="yes" class="borrowitems" eval="" />
-    <column name="还书册数" type="" align="right" sum="yes" class="returnitems" eval="" />
+    <column name="类号" type="String" align="left" sum="no" class="Class" eval="" />
+    <column name="借书册数" type="" align="right" sum="yes" class="BorrowCount" eval="" />
+    <column name="还书册数" type="" align="right" sum="yes" class="ReturnCount" eval="" />
   </columns>
   <css>
   </css>
