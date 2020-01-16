@@ -3,12 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Diagnostics;
 
 using Microsoft.EntityFrameworkCore;
 
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
-using System.Diagnostics;
 
 namespace DigitalPlatform.LibraryServer.Reporting
 {
@@ -152,6 +152,42 @@ writer,
 macro_table,
 strOutputFileName);
                     return;
+                case "421":
+                    BuildReport_421(context,
+param_table,
+strStartDate,
+strEndDate,
+writer,
+macro_table,
+strOutputFileName);
+                    return;
+                case "422":
+                    BuildReport_422(context,
+param_table,
+strStartDate,
+strEndDate,
+writer,
+macro_table,
+strOutputFileName);
+                    return;
+                case "431":
+                    BuildReport_431(context,
+param_table,
+strStartDate,
+strEndDate,
+writer,
+macro_table,
+strOutputFileName);
+                    return;
+                case "432":
+                    BuildReport_432(context,
+param_table,
+strStartDate,
+strEndDate,
+writer,
+macro_table,
+strOutputFileName);
+                    return;
             }
 
             throw new Exception($"算法 {writer.Algorithm} 没有找到");
@@ -162,10 +198,76 @@ strOutputFileName);
             return StringUtil.ParseTwoPart(location, "/")[0];
         }
 
-        // 编目流水
+        // 册登记工作量
+        // 和 BuildReport_412() 的差异是多输出了一个 transfer(转移) 列
         // parameters:
-        //      operation   为 setEntity 或 setOrder 等
-        public static void BuildReport_411(LibraryContext context,
+        public static void BuildReport_432(LibraryContext context,
+Hashtable param_table,
+string strStartDate,
+string strEndDate,
+ReportWriter writer,
+Hashtable macro_table,
+string strOutputFileName)
+        {
+            // 注: libraryCode 要求是一个馆代码，或者 *
+            string libraryCode = param_table["libraryCode"] as string;
+            if (libraryCode != "*")
+                libraryCode = "," + libraryCode + ",";
+
+            macro_table["%library%"] = libraryCode;
+
+            var items = context.ItemOpers
+                .Where(b => b.Operation == "setEntity"
+            && string.Compare(b.Date, strStartDate) >= 0
+            && string.Compare(b.Date, strEndDate) <= 0)
+                .LeftJoin(
+                context.Users,
+                oper => oper.Operator,
+                user => user.ID,
+                (oper, user) => new
+                {
+                    UserLibraryCode = user == null ? "" : user.LibraryCodeList,
+                    oper.Action,
+                    oper.Operator,
+                    NewCount = oper.Action == "new" ? 1 : 0,
+                    ChangeCount = oper.Action == "change" ? 1 : 0,
+                    DeleteCount = oper.Action == "delete" ? 1 : 0,
+                    CopyCount = oper.Action == "copy" ? 1 : 0,
+                    MoveCount = oper.Action == "move" ? 1 : 0,
+                    TransferCount = oper.Action == "transfer" ? 1: 0,
+                    TotalCount = 1,
+                }
+                )
+                .Where(x => libraryCode == "*" || x.UserLibraryCode.IndexOf(libraryCode) != -1)
+            .GroupBy(x => x.Operator)
+            .Select(g => new
+            {
+                Operator = g.Key,
+                NewCount = g.Sum(x => x.NewCount),
+                ChangeCount = g.Sum(x => x.ChangeCount),
+                DeleteCount = g.Sum(x => x.DeleteCount),
+                CopyCount = g.Sum(x => x.CopyCount),
+                MoveCount = g.Sum(x => x.MoveCount),
+                TransferCount = g.Sum(x => x.TransferCount),
+                TotalCount = g.Sum(x => x.TotalCount),
+            })
+            .OrderBy(x => x.Operator)
+            .ToList();
+
+            int nRet = writer.OutputRmlReport(
+            items,
+            null,
+            macro_table,
+            strOutputFileName,
+            out string strError);
+            if (nRet == -1)
+                throw new Exception(strError);
+        }
+
+        // 册登记流水
+        // 和 BuildReport_411() 的区别是多输出一列 ItemBarcode
+        // parameters:
+        public static void BuildReport_431(LibraryContext context,
 Hashtable param_table,
 string strStartDate,
 string strEndDate,
@@ -185,25 +287,9 @@ string strOutputFileName)
             // TODO: 12 点
             DateTime end_time = DateTimeUtil.Long8ToDateTime(strEndDate);
 
-            /*
-            var items = from oper in context.ItemOpers
-                        join biblio in context.Biblios on oper.BiblioRecPath equals biblio.RecPath
-                        into joined
-                        from result in joined.DefaultIfEmpty()
-                        select new
-                        {
-                            Operation = oper.Operation + "." + oper.Action,
-                            oper.ItemRecPath,
-                            BiblioRecPath = oper.BiblioRecPath,
-                            Summary = result == null ? "" : result.Summary,
-                            OperTime = oper.OperTime,
-                            Operator = oper.Operator
-                        };
-                        */
-
-            // TODO: 订购记录怎么看出是哪个分馆的? 1) 从操作者的权限可以看出 2) 从日志记录的 libraryCode 可以看出 3) 从订购记录的 distribute 元素可以看出
+            // 权且用操作者的所属馆代码来匹配 libraryCode
             var items = context.ItemOpers
-                .Where(b => b.Operation == operation
+                .Where(b => b.Operation == "setEntity"
             && string.Compare(b.Date, strStartDate) >= 0
             && string.Compare(b.Date, strEndDate) <= 0)
                 .LeftJoin(
@@ -236,26 +322,150 @@ string strOutputFileName)
                     Operator = oper.Operator
                 }
             )
+            .LeftJoin(
+                context.Items,
+                oper => oper.ItemRecPath,
+                item => item.ItemRecPath,
+                (oper, item) => new
+                {
+                    oper.Operation,
+                    oper.ItemRecPath,
+                    oper.BiblioRecPath,
+                    oper.Summary,
+                    oper.OperTime,
+                    oper.Operator,
+                    item.ItemBarcode,
+                }
+            ).OrderBy(x => x.OperTime)
             .ToList();
 
-            /*
-            var items = context.ItemOpers
-                .SelectMany(a => context.Biblios
-.Where(b => b.RecPath == a.BiblioRecPath
-&& a.Operation == "setEntity"
-&& string.Compare(a.Date, strStartDate) >= 0
-&& string.Compare(a.Date, strEndDate) <= 0)
-.DefaultIfEmpty()
-.Select(b => new {
-    Operation = a.Action,
-    ItemRecPath = a.ItemRecPath,
-    BiblioRecPath = a.BiblioRecPath,
-    Summary = b == null ? "" : b.Summary,
-    a.OperTime,
-    a.Operator
-})
-                ).ToList();
-                */
+            int nRet = writer.OutputRmlReport(
+            items,
+            null,
+            macro_table,
+            strOutputFileName,
+            out string strError);
+            if (nRet == -1)
+                throw new Exception(strError);
+        }
+
+        // 编目工作量
+        // parameters:
+        public static void BuildReport_422(LibraryContext context,
+Hashtable param_table,
+string strStartDate,
+string strEndDate,
+ReportWriter writer,
+Hashtable macro_table,
+string strOutputFileName)
+        {
+            // 注: libraryCode 要求是一个馆代码，或者 *
+            string libraryCode = param_table["libraryCode"] as string;
+            if (libraryCode != "*")
+                libraryCode = "," + libraryCode + ",";
+
+            macro_table["%library%"] = libraryCode;
+
+            // TODO: 订购记录怎么看出是哪个分馆的? 1) 从操作者的权限可以看出 2) 从日志记录的 libraryCode 可以看出 3) 从订购记录的 distribute 元素可以看出
+            var items = context.BiblioOpers
+                .Where(b => b.Operation == "setBiblioInfo"
+            && string.Compare(b.Date, strStartDate) >= 0
+            && string.Compare(b.Date, strEndDate) <= 0)
+                .LeftJoin(
+                context.Users,
+                oper => oper.Operator,
+                user => user.ID,
+                (oper, user) => new
+                {
+                    UserLibraryCode = user == null ? "" : user.LibraryCodeList,
+                    oper.Action,
+                    oper.Operator,
+                    NewCount = oper.Action == "new" ? 1 : 0,
+                    ChangeCount = oper.Action == "change" ? 1 : 0,
+                    DeleteCount = oper.Action == "delete" ? 1 : 0,
+                    CopyCount = oper.Action == "copy" ? 1 : 0,
+                    MoveCount = oper.Action == "move" ? 1 : 0,
+                    TotalCount = 1,
+                }
+                )
+                .Where(x => libraryCode == "*" || x.UserLibraryCode.IndexOf(libraryCode) != -1)
+            .GroupBy(x => x.Operator)
+            .Select(g => new
+            {
+                Operator = g.Key,
+                NewCount = g.Sum(x => x.NewCount),
+                ChangeCount = g.Sum(x => x.ChangeCount),
+                DeleteCount = g.Sum(x => x.DeleteCount),
+                CopyCount = g.Sum(x => x.CopyCount),
+                MoveCount = g.Sum(x => x.MoveCount),
+                TotalCount = g.Sum(x => x.TotalCount),
+            })
+            .OrderBy(x => x.Operator)
+            .ToList();
+
+            int nRet = writer.OutputRmlReport(
+            items,
+            null,
+            macro_table,
+            strOutputFileName,
+            out string strError);
+            if (nRet == -1)
+                throw new Exception(strError);
+        }
+
+        // 编目流水
+        // parameters:
+        public static void BuildReport_421(LibraryContext context,
+Hashtable param_table,
+string strStartDate,
+string strEndDate,
+ReportWriter writer,
+Hashtable macro_table,
+string strOutputFileName)
+        {
+            // 注: libraryCode 要求是一个馆代码，或者 *
+            string libraryCode = param_table["libraryCode"] as string;
+            if (libraryCode != "*")
+                libraryCode = "," + libraryCode + ",";
+
+            macro_table["%library%"] = libraryCode;
+
+
+            // 编目操作都是全局的，不属于某个分馆。这里权且按照工作人员所属的分馆来进行统计
+            var items = context.BiblioOpers
+                .Where(b => b.Operation == "setBiblioInfo"
+            && string.Compare(b.Date, strStartDate) >= 0
+            && string.Compare(b.Date, strEndDate) <= 0)
+                .LeftJoin(
+                context.Users,
+                oper => oper.Operator,
+                user => user.ID,
+                (oper, user) => new
+                {
+                    UserLibraryCode = user.LibraryCodeList,
+                    oper.BiblioRecPath,
+                    oper.Operation,
+                    oper.Action,
+                    oper.OperTime,
+                    oper.Operator,
+                }
+                )
+                .Where(x => libraryCode == "*" || x.UserLibraryCode.IndexOf(libraryCode) != -1)
+            .LeftJoin(
+                context.Biblios,
+                oper => oper.BiblioRecPath,
+                biblio => biblio.RecPath,
+                (oper, biblio) => new
+                {
+                    Operation = oper.Operation + "." + oper.Action,
+                    BiblioRecPath = oper.BiblioRecPath,
+                    Summary = biblio.Summary,
+                    OperTime = oper.OperTime,
+                    Operator = oper.Operator
+                }
+            )
+            .OrderBy(x => x.OperTime)
+            .ToList();
 
             int nRet = writer.OutputRmlReport(
             items,
@@ -299,6 +509,7 @@ string strOutputFileName)
                 {
                     UserLibraryCode = user == null ? "" : user.LibraryCodeList,
                     oper.Action,
+                    oper.Operator,
                     NewCount = oper.Action == "new" ? 1 : 0,
                     ChangeCount = oper.Action == "change" ? 1 : 0,
                     DeleteCount = oper.Action == "delete" ? 1 : 0,
@@ -308,7 +519,7 @@ string strOutputFileName)
                 }
                 )
                 .Where(x => libraryCode == "*" || x.UserLibraryCode.IndexOf(libraryCode) != -1)
-            .GroupBy(x => x.Action)
+            .GroupBy(x => x.Operator)
             .Select(g => new
             {
                 Operator = g.Key,
@@ -319,6 +530,7 @@ string strOutputFileName)
                 MoveCount = g.Sum(x => x.MoveCount),
                 TotalCount = g.Sum(x => x.TotalCount),
             })
+            .OrderBy(x => x.Operator)
             .ToList();
 
             int nRet = writer.OutputRmlReport(
@@ -406,6 +618,7 @@ string strOutputFileName)
                     Operator = oper.Operator
                 }
             )
+            .OrderBy(x => x.OperTime)
             .ToList();
 
             /*
@@ -487,7 +700,6 @@ string strOutputFileName)
                 InnerCount = g.Sum(x => x.InnerCount),
                 OuterCount = g.Sum(x => x.OuterCount),
             })
-            .OrderBy(x => x.Class)
             .Select(x => new
             {
                 x.Class,
@@ -496,6 +708,7 @@ string strOutputFileName)
                 x.OuterCount,
                 Percent = String.Format("{0,3:N}%", ((double)x.OuterCount / (double)x.ItemCount) * (double)100)
             })
+            .OrderBy(x => x.Class)
             .ToList();
 
             // https://damieng.com/blog/2014/09/04/optimizing-sum-count-min-max-and-average-with-linq

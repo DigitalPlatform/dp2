@@ -59,16 +59,12 @@ namespace TestReporting
 
         private void button_OK_Click(object sender, EventArgs e)
         {
-            SaveCurrentControlState(_currentReportType);
-
             this.DialogResult = DialogResult.OK;
             this.Close();
         }
 
         private void button_Cancel_Click(object sender, EventArgs e)
         {
-            SaveCurrentControlState(_currentReportType);
-
             this.DialogResult = DialogResult.Cancel;
             this.Close();
         }
@@ -193,6 +189,11 @@ namespace TestReporting
                 // TODO: 如何报错?
                 MessageBox.Show(this, ex.Message);
             }
+        }
+
+        private void BuildReportDialog1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            SaveCurrentControlState(_currentReportType);
         }
     }
 }
