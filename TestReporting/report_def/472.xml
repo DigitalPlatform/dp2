@@ -1,0 +1,29 @@
+﻿<root>
+  <title>违约金工作量\r%library%\r%daterange%</title>
+  <titleComment>
+  </titleComment>
+  <parameters>
+    <parameter name="libraryCode" type="libraryCode" comment="馆代码"/>
+    <parameter name="dateRange" type="dateRange" comment="时间范围"/>
+  </parameters>
+  <columns>
+    <column name="操作者" type="String" align="left" sum="no" class="Operator" eval="" />
+    <column name="收取次" type="" align="right" sum="yes" class="AmerceCount" eval="" />
+    <column name="收取金额" type="Currency" align="right" sum="yes" class="AmerceMoney" eval="" />
+    <column name="修改次" type="" align="right" sum="yes" class="ModifyCount" eval="" />
+    <column name="修改金额" type="Currency" align="right" sum="yes" class="ModifyMoney" eval="" />
+    <column name="撤销次" type="" align="right" sum="yes" class="UndoCount" eval="" />
+    <column name="撤销金额" type="Currency" align="right" sum="yes" class="UndoMoney" eval="" />
+    <column name="失效次" type="" align="right" sum="yes" class="ExpireCount" eval="" />
+    <column name="操作总量" type="" align="right" sum="yes" class="TotalCount" eval="" />
+
+    <column name="实收金额" type="Currency" align="right" sum="yes" class="FinalAmerceMoney" eval1="currency.Set(line.GetString(2)).Substract(line.GetString(6)).ToString()" />
+  </columns>
+  <css>
+  </css>
+  <typeName>472 违约金工作量，按工作人员</typeName>
+  <columnSortStyle>
+  </columnSortStyle>
+  <createFrequency>day,month,year</createFrequency>
+  <property fresh="false" />
+</root>
