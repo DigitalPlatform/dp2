@@ -370,8 +370,6 @@ strBiblioRecPath,
             if (nRet == -1)
                 return -1;
 
-            string strLibraryCode = DomUtil.GetElementText(dom.DocumentElement,
-    "libraryCode");
 
             string strReaderBarcode = DomUtil.GetElementText(dom.DocumentElement,
                 "readerBarcode");
@@ -379,7 +377,13 @@ strBiblioRecPath,
             string strGateName = DomUtil.GetElementText(dom.DocumentElement,
     "gateName");
 
+            /*
+            string strLibraryCode = DomUtil.GetElementText(dom.DocumentElement,
+"libraryCode");
+
             this.LibraryCode = strLibraryCode;  // 这里和基础类的 LibraryCode 什么关系?
+            */
+
             this.ReaderBarcode = strReaderBarcode;
             this.GateName = strGateName;
             return 0;
@@ -657,7 +661,7 @@ strBiblioRecPath,
         public string ItemBarcode { get; set; }
         public string ReaderBarcode { get; set; }
         public string Unit { get; set; }
-        public long Price { get; set; }  // 分
+        public decimal Price { get; set; }  // 元值
         public string Reason { get; set; }
         public string ID { get; set; }
 
@@ -845,11 +849,9 @@ strBiblioRecPath,
                     return;
                 }
 
-                long value = 0;
-                string strUnit = "";
                 nRet = ParsePriceString(strResult,
-        out value,
-        out strUnit,
+        out decimal value,
+        out string strUnit,
         out strError);
                 if (nRet == -1)
                 {
@@ -904,11 +906,9 @@ strBiblioRecPath,
 
                 string strPrice = DomUtil.GetElementText(amerce_dom.DocumentElement,
                     "price");
-                long value = 0;
-                string strUnit = "";
                 int nRet = ParsePriceString(strPrice,
-        out value,
-        out strUnit,
+        out decimal value,
+        out string strUnit,
         out strError);
                 if (nRet == -1)
                 {
@@ -1048,6 +1048,31 @@ out DateTime borrowdate) == false)
         }
 
         internal static int ParsePriceString(string strPrice,
+    out decimal value,
+    out string strUnit,
+    out string strError)
+        {
+            value = 0;
+            strUnit = "";
+            strError = "";
+
+            if (string.IsNullOrEmpty(strPrice) == true)
+                return 0;
+
+            // 解析单个金额字符串。例如 CNY10.00 或 -CNY100.00/7
+            int nRet = PriceUtil.ParseSinglePrice(strPrice,
+                out CurrencyItem item,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            strUnit = item.Prefix + item.Postfix;
+            value = item.Value;
+            return 0;
+        }
+
+#if NO
+        internal static int ParsePriceString(string strPrice,
             out long value,
             out string strUnit,
             out string strError)
@@ -1107,7 +1132,7 @@ out DateTime borrowdate) == false)
             return 0;
         }
 
-
+#endif
     }
 
     public static class DatabaseConfig

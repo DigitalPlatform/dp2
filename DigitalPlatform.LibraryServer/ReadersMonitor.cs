@@ -546,14 +546,15 @@ namespace DigitalPlatform.LibraryServer
                     // 2016/4/10
                     if (strBodyType == "mq" && this._queue != null)
                     {
+                        string strRecipient = (string.IsNullOrEmpty(strRefID) ? strReaderBarcode : "!refID:" + strRefID)
+                            + "@LUID:" + this.App.UID;
                         // 向 MSMQ 消息队列发送消息
                         // return:
                         //      -2  MSMQ 错误
                         //      -1  出错
                         //      0   成功
                         nRet = SendToQueue(this._queue,
-                            (string.IsNullOrEmpty(strRefID) ? strReaderBarcode : "!refID:" + strRefID)
-                            + "@LUID:" + this.App.UID,
+                            strRecipient,
                             strMime,
                             strBody,
                             out strError);
@@ -574,6 +575,10 @@ namespace DigitalPlatform.LibraryServer
                         }
                         else
                         {
+                            // 2020/1/17
+                            // 发送成功则记入错误日志，便于排查错误
+                            this.App.WriteErrorLog($"成功发出 MQ 消息: recipient={strRecipient}, mime={strMime}, body={strBody}");
+
                             if (this.App.Statis != null)
                                 this.App.Statis.IncreaseEntryValue(
                                 strLibraryCode,

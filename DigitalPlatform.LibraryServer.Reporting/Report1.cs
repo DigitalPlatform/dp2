@@ -188,6 +188,116 @@ writer,
 macro_table,
 strOutputFileName);
                     return;
+                case "441":
+                    BuildReport_441(context,
+param_table,
+strStartDate,
+strEndDate,
+writer,
+macro_table,
+strOutputFileName);
+                    return;
+                case "442":
+                    BuildReport_442(context,
+param_table,
+strStartDate,
+strEndDate,
+writer,
+macro_table,
+strOutputFileName);
+                    return;
+                case "443":
+                    BuildReport_443(context,
+param_table,
+strStartDate,
+strEndDate,
+writer,
+macro_table,
+strOutputFileName);
+                    return;
+                case "451":
+                    BuildReport_411(context,
+param_table,
+strStartDate,
+strEndDate,
+"setIssue",
+writer,
+macro_table,
+strOutputFileName);
+                    return;
+                case "452":
+                    BuildReport_412(context,
+param_table,
+strStartDate,
+strEndDate,
+"setIssue",
+writer,
+macro_table,
+strOutputFileName);
+                    return;
+                case "471":
+                    BuildReport_471(context,
+param_table,
+strStartDate,
+strEndDate,
+writer,
+macro_table,
+strOutputFileName);
+                    return;
+                case "472":
+                    BuildReport_472(context,
+param_table,
+strStartDate,
+strEndDate,
+writer,
+macro_table,
+strOutputFileName);
+                    return;
+                case "481":
+                    BuildReport_481(context,
+param_table,
+strStartDate,
+strEndDate,
+writer,
+macro_table,
+strOutputFileName);
+                    return;
+                case "482":
+                    BuildReport_482(context,
+param_table,
+strStartDate,
+strEndDate,
+writer,
+macro_table,
+strOutputFileName);
+                    return;
+                case "491":
+                    BuildReport_491(context,
+param_table,
+strStartDate,
+strEndDate,
+writer,
+macro_table,
+strOutputFileName);
+                    return;
+                case "492":
+                    BuildReport_492(context,
+param_table,
+strStartDate,
+strEndDate,
+writer,
+macro_table,
+strOutputFileName);
+                    return;
+                case "493":
+                    BuildReport_493(context,
+param_table,
+strStartDate,
+strEndDate,
+writer,
+macro_table,
+strOutputFileName);
+                    return;
             }
 
             throw new Exception($"算法 {writer.Algorithm} 没有找到");
@@ -196,6 +306,863 @@ strOutputFileName);
         static string GetLibraryCode(string location)
         {
             return StringUtil.ParseTwoPart(location, "/")[0];
+        }
+
+        // 获取对象操作量。按分类。注意操作者既可能是工作人员，也可能是读者
+        // parameters:
+        public static void BuildReport_493(LibraryContext context,
+Hashtable param_table,
+string strStartDate,
+string strEndDate,
+ReportWriter writer,
+Hashtable macro_table,
+string strOutputFileName)
+        {
+            string classType = param_table["classType"] as string;
+            // 注: libraryCode 要求是一个馆代码，或者 *
+            string libraryCode = param_table["libraryCode"] as string;
+            string libraryCode0 = libraryCode;
+            if (libraryCode != "*")
+                libraryCode = "," + libraryCode + ",";
+
+            macro_table["%library%"] = libraryCode;
+            macro_table["%class%"] = classType;
+
+#if NO
+            var items = context.GetResOpers
+                .Where(b => b.Operation == "getRes"
+                && (libraryCode == "*" || b.LibraryCode.IndexOf(libraryCode) != -1)
+                && string.Compare(b.Date, strStartDate) >= 0
+                && string.Compare(b.Date, strEndDate) <= 0)
+                .LeftJoin(
+                context.Patrons,
+                oper => oper.Operator,
+                patron => patron.Barcode,
+                (oper, patron) => new
+                {
+                    PatronLibraryCode = patron == null ? null : patron.LibraryCode,
+                    oper.Operator,
+                    oper.Size,
+                    oper.XmlRecPath
+                }
+                )
+                .LeftJoin(
+                context.Users,
+                oper => oper.Operator,
+                user => user.ID,
+                (oper, user) => new
+                {
+                    oper.PatronLibraryCode,
+                    UserLibraryCode = user == null ? null : user.LibraryCodeList,
+                    oper.Operator,
+                    oper.XmlRecPath,
+                    GetCount = 1,
+                    GetSize = Convert.ToInt64(oper.Size),
+                    TotalCount = 1,
+                }
+                )
+                .Where(x => (x.UserLibraryCode != null && (libraryCode == "*" || x.UserLibraryCode.IndexOf(libraryCode) != -1))
+                || (x.PatronLibraryCode != null && (libraryCode0 == "*" || x.PatronLibraryCode == libraryCode0)))
+                .LeftJoin(
+                context.Keys,
+                item => item.XmlRecPath,
+                key => key.BiblioRecPath,
+                (item, key) => new
+                {
+                    key.Type,
+                    Class = string.IsNullOrEmpty(key.Text) ? "" : key.Text.Substring(0, 1),
+                    item.GetCount,
+                    item.GetSize,
+                }
+            )
+            .Where(x => x.Type == classType)
+            .GroupBy(x => x.Class)
+            .Select(g => new
+            {
+                Class = g.Key,
+                GetCount = g.Sum(x => x.GetCount),
+                GetSize = g.Sum(x => x.GetSize),
+            })
+                .OrderBy(x => x.Class)
+            .ToList();
+#endif
+
+            var items = context.GetResOpers
+                .Where(b => b.Operation == "getRes"
+                    && (libraryCode == "*" || b.LibraryCode.IndexOf(libraryCode) != -1)
+                    && string.Compare(b.Date, strStartDate) >= 0
+                    && string.Compare(b.Date, strEndDate) <= 0)
+                .LeftJoin(
+                    context.Patrons,
+                    oper => oper.Operator,
+                    patron => patron.Barcode,
+                    (oper, patron) => new
+                    {
+                        // 多次 join 时的典型写法，传递对象而不是属性：
+                        oper,
+                        patron, // 注意可能为空
+                    })
+                .LeftJoin(
+                    context.Users,
+                    j1 => j1.oper.Operator,
+                    user => user.ID,
+                    (j1, user) => new
+                    {
+                        // 因为后面 where 马上要用到，所以给一个具体的名字
+                        PatronLibraryCode = j1.patron == null ? null : j1.patron.LibraryCode,
+                        UserLibraryCode = user == null ? null : user.LibraryCodeList,
+
+                        // 向后传递对象
+                        j1.oper,
+                        // user,
+                    })
+                .Where(x => (x.UserLibraryCode != null && (libraryCode == "*" || x.UserLibraryCode.IndexOf(libraryCode) != -1))
+                    || (x.PatronLibraryCode != null && (libraryCode0 == "*" || x.PatronLibraryCode == libraryCode0)))
+                .LeftJoin(
+                    context.Keys,
+                    j2 => new { key1 = j2.oper.XmlRecPath, key2 = classType },
+                    key => new { key1 = key.BiblioRecPath, key2 = key.Type },
+                    (j2, key) => new
+                    {
+                        Class = string.IsNullOrEmpty(key.Text) ? "" : key.Text.Substring(0, 1),
+                        GetCount = 1,
+                        GetSize = Convert.ToInt64(j2.oper.Size),
+                    }
+                )
+                .GroupBy(x => x.Class)
+                .Select(g => new
+                {
+                    Class = g.Key,
+                    GetCount = g.Sum(x => x.GetCount),
+                    GetSize = g.Sum(x => x.GetSize),
+                })
+                .OrderBy(x => x.Class)
+                .ToList();
+
+            int nRet = writer.OutputRmlReport(
+            items,
+            null,
+            macro_table,
+            strOutputFileName,
+            out string strError);
+            if (nRet == -1)
+                throw new Exception(strError);
+        }
+
+        // 获取对象操作量。按操作者。注意操作者既可能是工作人员，也可能是读者
+        // parameters:
+        public static void BuildReport_492(LibraryContext context,
+Hashtable param_table,
+string strStartDate,
+string strEndDate,
+ReportWriter writer,
+Hashtable macro_table,
+string strOutputFileName)
+        {
+            // 注: libraryCode 要求是一个馆代码，或者 *
+            string libraryCode = param_table["libraryCode"] as string;
+            string libraryCode0 = libraryCode;
+            if (libraryCode != "*")
+                libraryCode = "," + libraryCode + ",";
+
+            macro_table["%library%"] = libraryCode;
+
+            var items = context.GetResOpers
+                .Where(b => b.Operation == "getRes"
+                && (libraryCode == "*" || b.LibraryCode.IndexOf(libraryCode) != -1)
+                && string.Compare(b.Date, strStartDate) >= 0
+                && string.Compare(b.Date, strEndDate) <= 0)
+                .LeftJoin(
+                context.Patrons,
+                oper => oper.Operator,
+                patron => patron.Barcode,
+                (oper, patron) => new
+                {
+                    PatronLibraryCode = patron == null ? null : patron.LibraryCode,
+                    // Operation = oper.Action,
+                    oper.Operator,
+                    // oper.Action,
+                    // oper.XmlRecPath,
+                    oper.Size,
+                }
+                )
+                .LeftJoin(
+                context.Users,
+                oper => oper.Operator,
+                user => user.ID,
+                (oper, user) => new
+                {
+                    oper.PatronLibraryCode,
+                    UserLibraryCode = user == null ? null : user.LibraryCodeList,
+                    // oper.Action,
+                    oper.Operator,
+                    // oper.Size,
+                    // oper.XmlRecPath,
+                    GetCount = 1,
+                    GetSize = Convert.ToInt64(oper.Size),
+                    TotalCount = 1,
+                }
+                )
+                .Where(x => (x.UserLibraryCode != null && (libraryCode == "*" || x.UserLibraryCode.IndexOf(libraryCode) != -1))
+                || (x.PatronLibraryCode != null && (libraryCode0 == "*" || x.PatronLibraryCode == libraryCode0)))
+            .GroupBy(x => x.Operator)
+            .Select(g => new
+            {
+                Operator = g.Key,
+                GetCount = g.Sum(x => x.GetCount),
+                GetSize = g.Sum(x => x.GetSize),
+                TotalCount = g.Sum(x => x.TotalCount),
+            })
+                .LeftJoin(
+                context.Patrons,
+                oper => oper.Operator,
+                patron => patron.Barcode,
+                (oper, patron) => new
+                {
+                    oper.Operator,
+                    oper.GetCount,
+                    oper.GetSize,
+                    oper.TotalCount,
+                    Name = patron == null ? null : patron.Name,
+                    Department = patron == null ? null : patron.Department,
+                }
+                ).OrderBy(x => x.Operator)
+            .ToList();
+
+            int nRet = writer.OutputRmlReport(
+            items,
+            null,
+            macro_table,
+            strOutputFileName,
+            out string strError);
+            if (nRet == -1)
+                throw new Exception(strError);
+        }
+
+        // 获取对象流水
+        // parameters:
+        public static void BuildReport_491(LibraryContext context,
+Hashtable param_table,
+string strStartDate,
+string strEndDate,
+ReportWriter writer,
+Hashtable macro_table,
+string strOutputFileName)
+        {
+            // 注: libraryCode 要求是一个馆代码，或者 *
+            string libraryCode = param_table["libraryCode"] as string;
+            string libraryCode0 = libraryCode;
+            if (libraryCode != "*")
+                libraryCode = "," + libraryCode + ",";
+
+            macro_table["%library%"] = libraryCode;
+
+            var items = context.GetResOpers
+                .Where(b => b.Operation == "getRes"
+                && (libraryCode == "*" || b.LibraryCode.IndexOf(libraryCode) != -1)
+                && string.Compare(b.Date, strStartDate) >= 0
+                && string.Compare(b.Date, strEndDate) <= 0)
+                .LeftJoin(
+                context.Patrons,
+                oper => oper.Operator,
+                patron => patron.Barcode,
+                (oper, patron) => new
+                {
+                    PatronLibraryCode = patron == null ? null : patron.LibraryCode,
+                    Operation = oper.Action,
+                    oper.OperTime,
+                    oper.Operator,
+                    oper.Action,
+                    oper.XmlRecPath,
+                    oper.Size,
+                    oper.ObjectID,
+                }
+                )
+                .LeftJoin(
+                context.Users,
+                oper => oper.Operator,
+                user => user.ID,
+                (oper, user) => new
+                {
+                    oper.PatronLibraryCode,
+                    UserLibraryCode = user == null ? null : user.LibraryCodeList,
+                    oper.Action,
+                    oper.Operator,
+                    oper.OperTime,
+                    oper.XmlRecPath,
+                    oper.Size,
+                    oper.ObjectID,
+                }
+                )
+                .Where(x => (x.UserLibraryCode != null && (libraryCode == "*" || x.UserLibraryCode.IndexOf(libraryCode) != -1))
+                || (x.PatronLibraryCode != null && (libraryCode0 == "*" || x.PatronLibraryCode == libraryCode0)))
+            .LeftJoin(
+                context.Biblios,
+                oper => oper.XmlRecPath,
+                biblio => biblio.RecPath,
+                (oper, biblio) => new
+                {
+                    Operation = oper.Action,
+                    BiblioRecPath = biblio == null ? null : biblio.RecPath,
+                    Summary = biblio.Summary,
+                    ObjectSize = oper.Size,
+                    oper.ObjectID,
+                    OperTime = oper.OperTime,
+                    Operator = oper.Operator
+                }
+            )
+            .OrderBy(x => x.OperTime)
+            .ToList();
+
+            int nRet = writer.OutputRmlReport(
+            items,
+            null,
+            macro_table,
+            strOutputFileName,
+            out string strError);
+            if (nRet == -1)
+                throw new Exception(strError);
+        }
+
+        // 入馆登记工作量，按门名称
+        // parameters:
+        public static void BuildReport_482(LibraryContext context,
+Hashtable param_table,
+string strStartDate,
+string strEndDate,
+ReportWriter writer,
+Hashtable macro_table,
+string strOutputFileName)
+        {
+            // 注: libraryCode 要求是一个馆代码，或者 *
+            string libraryCode = param_table["libraryCode"] as string;
+            if (libraryCode != "*")
+                libraryCode = "," + libraryCode + ",";
+
+            macro_table["%library%"] = libraryCode;
+
+            var items = context.PassGateOpers
+                .Where(b => b.Operation == "passgate"
+                && (libraryCode == "*" || b.LibraryCode.IndexOf(libraryCode) != -1)
+            && string.Compare(b.Date, strStartDate) >= 0
+            && string.Compare(b.Date, strEndDate) <= 0)
+                .Select(oper => new
+                {
+                    oper.GateName,
+                    PassCount = oper.Action == "" ? 1 : 0,
+                    TotalCount = 1,
+                })
+            .GroupBy(x => x.GateName)
+            .Select(g => new
+            {
+                GateName = g.Key,
+                PassCount = g.Sum(x => x.PassCount),
+                TotalCount = g.Sum(x => x.TotalCount),
+            })
+            .OrderBy(x => x.GateName)
+            .ToList();
+
+            /*
+            var items = context.PassGateOpers
+                .Where(b => b.Operation == "passgate"
+    && (libraryCode == "*" || b.LibraryCode.IndexOf(libraryCode) != -1)
+&& string.Compare(b.Date, strStartDate) >= 0
+&& string.Compare(b.Date, strEndDate) <= 0)
+                .GroupBy(x => x.GateName)
+                .Select(g => new
+                {
+                    GateName = g.Key,
+                    PassCount = g.Count(x => x.Action == "passgate"),
+                    TotalCount = g.Count(),
+                })
+                .OrderBy(x => x.GateName)
+                .ToList();
+                */
+
+            int nRet = writer.OutputRmlReport(
+            items,
+            null,
+            macro_table,
+            strOutputFileName,
+            out string strError);
+            if (nRet == -1)
+                throw new Exception(strError);
+        }
+
+
+        // 入馆登记流水
+        // 用读者记录的馆代码来进行分馆筛选; 或者用日志记录的馆代码来筛选?
+        // parameters:
+        public static void BuildReport_481(LibraryContext context,
+Hashtable param_table,
+string strStartDate,
+string strEndDate,
+ReportWriter writer,
+Hashtable macro_table,
+string strOutputFileName)
+        {
+            // 注: libraryCode 要求是一个馆代码，或者 *
+            string libraryCode = param_table["libraryCode"] as string;
+            if (libraryCode != "*")
+                libraryCode = "," + libraryCode + ",";
+
+            macro_table["%library%"] = libraryCode;
+
+            var items = context.PassGateOpers
+                .Where(b => b.Operation == "passgate"
+                && (libraryCode == "*" || b.LibraryCode.IndexOf(libraryCode) != -1)
+                && string.Compare(b.Date, strStartDate) >= 0
+                && string.Compare(b.Date, strEndDate) <= 0)
+                .LeftJoin(
+                context.Patrons,
+                oper => oper.ReaderBarcode,
+                patron => patron.Barcode,
+                (oper, patron) => new
+                {
+                    GateName = oper.GateName,
+                    PatronBarcode = oper.ReaderBarcode,
+                    PatronName = patron.Name,
+                    patron.Department,
+                    Operation = oper.Action,
+                    oper.OperTime,
+                    oper.Operator,
+                }
+                )
+            .OrderBy(x => x.OperTime)
+            .ToList();
+
+            int nRet = writer.OutputRmlReport(
+            items,
+            null,
+            macro_table,
+            strOutputFileName,
+            out string strError);
+            if (nRet == -1)
+                throw new Exception(strError);
+        }
+
+
+        // 违约金工作量，按操作者
+        // parameters:
+        public static void BuildReport_472(LibraryContext context,
+Hashtable param_table,
+string strStartDate,
+string strEndDate,
+ReportWriter writer,
+Hashtable macro_table,
+string strOutputFileName)
+        {
+            // 注: libraryCode 要求是一个馆代码，或者 *
+            string libraryCode = param_table["libraryCode"] as string;
+            if (libraryCode != "*")
+                libraryCode = "," + libraryCode + ",";
+
+            macro_table["%library%"] = libraryCode;
+
+            var items = context.AmerceOpers
+                .Where(b => b.Operation == "amerce"
+                && (libraryCode == "*" || b.LibraryCode.IndexOf(libraryCode) != -1)
+                && string.Compare(b.Date, strStartDate) >= 0
+                && string.Compare(b.Date, strEndDate) <= 0)
+                .Select(oper => new
+                {
+                    oper.Operator,
+                    AmerceCount = oper.Action == "amerce" ? 1 : 0,
+                    AmerceMoney = oper.Action == "amerce" ? oper.Unit + oper.Price.ToString() : "",
+
+                    ModifyCount = oper.Action == "modifyprice" ? 1 : 0,
+                    ModifyMoney = oper.Action == "modifyprice" ? oper.Unit + oper.Price.ToString() : "",
+
+                    UndoCount = oper.Action == "undo" ? 1 : 0,
+                    UndoMoney = oper.Action == "undo" ? oper.Unit + oper.Price.ToString() : "",
+
+                    ExpireCount = oper.Action == "expire" ? 1 : 0,
+
+                    TotalCount = 1,
+                }
+                )
+                .AsEnumerable()
+            .GroupBy(x => x.Operator)
+            .Select(g => new
+            {
+                Operator = g.Key,
+                AmerceCount = g.Sum(x => x.AmerceCount),
+                AmerceMoney = g.SumPrice(x => x.AmerceMoney),
+                ModifyCount = g.Sum(x => x.ModifyCount),
+                ModifyMoney = g.SumPrice(x => x.ModifyMoney),
+                UndoCount = g.Sum(x => x.UndoCount),
+                UndoMoney = g.SumPrice(x => x.UndoMoney),
+                ExpireCount = g.Sum(x => x.ExpireCount),
+                TotalCount = g.Sum(x => x.TotalCount),
+            })
+            .Select(x => new
+            {
+                x.Operator,
+                x.AmerceCount,
+                x.AmerceMoney,
+                x.ModifyCount,
+                x.ModifyMoney,
+                x.UndoCount,
+                x.UndoMoney,
+                x.ExpireCount,
+                x.TotalCount,
+                FinalAmerceMoney = Substract(x.AmerceMoney, x.UndoMoney),
+            })
+            .OrderBy(x => x.Operator)
+            .ToList();
+
+            int nRet = writer.OutputRmlReport(
+            items,
+            null,
+            macro_table,
+            strOutputFileName,
+            out string strError);
+            if (nRet == -1)
+                throw new Exception(strError);
+        }
+
+        public static string Substract(string p1, string p2)
+        {
+            var price = new PriceUtil();
+            price.Set(p1).Substract(p2);
+            return price.ToString();
+        }
+
+        public static string Divide(string p1, string p2)
+        {
+            var price = new PriceUtil();
+            price.Set(p1).Divide(p2);
+            return price.ToString();
+        }
+
+        /*
+        public static string SumPrice(this IEnumerable<string> collection)
+        {
+            return collection.Aggregate((a, b) => PriceUtil.Add(a, b));
+        }
+        */
+
+        // 违约金流水
+        // 用读者记录的馆代码来进行分馆筛选; 或者用日志记录的馆代码来筛选?
+        // parameters:
+        public static void BuildReport_471(LibraryContext context,
+Hashtable param_table,
+string strStartDate,
+string strEndDate,
+ReportWriter writer,
+Hashtable macro_table,
+string strOutputFileName)
+        {
+            // 注: libraryCode 要求是一个馆代码，或者 *
+            string libraryCode = param_table["libraryCode"] as string;
+            if (libraryCode != "*")
+                libraryCode = "," + libraryCode + ",";
+
+            macro_table["%library%"] = libraryCode;
+
+            /*
+            DateTime start_time = DateTimeUtil.Long8ToDateTime(strStartDate);
+
+            // TODO: 12 点
+            DateTime end_time = DateTimeUtil.Long8ToDateTime(strEndDate);
+            */
+
+            var items = context.AmerceOpers
+                .Where(b => b.Operation == "amerce"
+                && (libraryCode == "*" || b.LibraryCode.IndexOf(libraryCode) != -1)
+                && string.Compare(b.Date, strStartDate) >= 0
+                && string.Compare(b.Date, strEndDate) <= 0)
+                .LeftJoin(
+                context.Patrons,
+                oper => oper.ReaderBarcode,
+                patron => patron.Barcode,
+                (oper, patron) => new
+                {
+                    oper.AmerceRecPath,
+                    oper.Reason,
+                    oper.Price,
+                    oper.Unit,
+                    oper.ReaderBarcode,
+                    PatronName = patron.Name,
+                    patron.Department,
+                    oper.ItemBarcode,
+                    Operation = oper.Action,
+                    oper.OperTime,
+                    oper.Operator,
+                }
+                )
+                .LeftJoin(context.Items,
+                oper => oper.ItemBarcode,
+                item => item.ItemBarcode,
+                (oper, item) => new
+                {
+                    oper.AmerceRecPath,
+                    oper.Reason,
+                    oper.Price,
+                    oper.Unit,
+                    oper.ReaderBarcode,
+                    oper.PatronName,
+                    oper.Department,
+                    oper.ItemBarcode,
+                    item.BiblioRecPath,
+                    oper.Operation,
+                    oper.OperTime,
+                    oper.Operator
+                })
+            .LeftJoin(
+                context.Biblios,
+                oper => oper.BiblioRecPath,
+                biblio => biblio.RecPath,
+                (oper, biblio) => new
+                {
+                    oper.AmerceRecPath,
+                    oper.Reason,
+                    Price = oper.Price,
+                    oper.Unit,
+                    PatronBarcode = oper.ReaderBarcode,
+                    oper.PatronName,
+                    oper.Department,
+                    oper.ItemBarcode,
+                    biblio.Summary,
+                    oper.Operation,
+                    oper.OperTime,
+                    oper.Operator
+                }
+            )
+            .OrderBy(x => x.OperTime)
+            /*
+            .AsEnumerable()
+            .Select(item => new
+            {
+                item.AmerceRecPath,
+                item.Reason,
+                Price = item.Price,
+                item.Unit,
+                item.PatronBarcode,
+                item.PatronName,
+                item.Department,
+                item.ItemBarcode,
+                item.Summary,
+                item.Operation,
+                item.OperTime,
+                item.Operator
+            }) */
+            .ToList();
+
+            // TODO: 进行 sum?
+
+            int nRet = writer.OutputRmlReport(
+            items,
+            null,
+            macro_table,
+            strOutputFileName,
+            out string strError);
+            if (nRet == -1)
+                throw new Exception(strError);
+        }
+
+        // 出纳工作量，按馆藏地点
+        // parameters:
+        public static void BuildReport_443(LibraryContext context,
+Hashtable param_table,
+string strStartDate,
+string strEndDate,
+ReportWriter writer,
+Hashtable macro_table,
+string strOutputFileName)
+        {
+            // 注: libraryCode 要求是一个馆代码，或者 *
+            string libraryCode = param_table["libraryCode"] as string;
+            if (libraryCode != "*")
+                libraryCode = "," + libraryCode + ",";
+
+            macro_table["%library%"] = libraryCode;
+
+            var items = context.CircuOpers
+                .Where(b => (b.Operation == "borrow" || b.Operation == "return")
+                && (libraryCode == "*" || b.LibraryCode.IndexOf(libraryCode) != -1)
+                && string.Compare(b.Date, strStartDate) >= 0
+                && string.Compare(b.Date, strEndDate) <= 0)
+                .LeftJoin(context.Items,
+                oper => oper.ItemBarcode,
+                item => item.ItemBarcode,
+                (oper, item) => new
+                {
+                    item.Location,
+                    BorrowCount = oper.Action == "borrow" ? 1 : 0,
+                    RenewCount = oper.Action == "renew" ? 1 : 0,
+                    ReturnCount = oper.Action == "return" ? 1 : 0,
+                    LostCount = oper.Action == "lost" ? 1 : 0,
+                    ReadCount = oper.Action == "read" ? 1 : 0,
+                    TotalCount = 1,
+                })
+            .GroupBy(x => x.Location)
+            .Select(g => new
+            {
+                Location = g.Key,
+                BorrowCount = g.Sum(x => x.BorrowCount),
+                RenewCount = g.Sum(x => x.RenewCount),
+                ReturnCount = g.Sum(x => x.ReturnCount),
+                LostCount = g.Sum(x => x.LostCount),
+                ReadCount = g.Sum(x => x.ReadCount),
+                TotalCount = g.Sum(x => x.TotalCount),
+            })
+            .OrderBy(x => x.Location)
+            .ToList();
+
+            int nRet = writer.OutputRmlReport(
+            items,
+            null,
+            macro_table,
+            strOutputFileName,
+            out string strError);
+            if (nRet == -1)
+                throw new Exception(strError);
+        }
+
+
+        // 出纳工作量，按操作者
+        // parameters:
+        public static void BuildReport_442(LibraryContext context,
+Hashtable param_table,
+string strStartDate,
+string strEndDate,
+ReportWriter writer,
+Hashtable macro_table,
+string strOutputFileName)
+        {
+            // 注: libraryCode 要求是一个馆代码，或者 *
+            string libraryCode = param_table["libraryCode"] as string;
+            if (libraryCode != "*")
+                libraryCode = "," + libraryCode + ",";
+
+            macro_table["%library%"] = libraryCode;
+
+            var items = context.CircuOpers
+                .Where(b => (b.Operation == "borrow" || b.Operation == "return")
+                && (libraryCode == "*" || b.LibraryCode.IndexOf(libraryCode) != -1)
+                && string.Compare(b.Date, strStartDate) >= 0
+                && string.Compare(b.Date, strEndDate) <= 0)
+                .Select(oper => new
+                {
+                    oper.Operator,
+                    BorrowCount = oper.Action == "borrow" ? 1 : 0,
+                    RenewCount = oper.Action == "renew" ? 1 : 0,
+                    ReturnCount = oper.Action == "return" ? 1 : 0,
+                    LostCount = oper.Action == "lost" ? 1 : 0,
+                    ReadCount = oper.Action == "read" ? 1 : 0,
+                    TotalCount = 1,
+                }
+                )
+            .GroupBy(x => x.Operator)
+            .Select(g => new
+            {
+                Operator = g.Key,
+                BorrowCount = g.Sum(x => x.BorrowCount),
+                RenewCount = g.Sum(x => x.RenewCount),
+                ReturnCount = g.Sum(x => x.ReturnCount),
+                LostCount = g.Sum(x => x.LostCount),
+                ReadCount = g.Sum(x => x.ReadCount),
+                TotalCount = g.Sum(x => x.TotalCount),
+            })
+            .OrderBy(x => x.Operator)
+            .ToList();
+
+            int nRet = writer.OutputRmlReport(
+            items,
+            null,
+            macro_table,
+            strOutputFileName,
+            out string strError);
+            if (nRet == -1)
+                throw new Exception(strError);
+        }
+
+
+        // 出纳流水
+        // 用读者记录的馆代码来进行分馆筛选; 或者用日志记录的馆代码来筛选?
+        // parameters:
+        public static void BuildReport_441(LibraryContext context,
+Hashtable param_table,
+string strStartDate,
+string strEndDate,
+ReportWriter writer,
+Hashtable macro_table,
+string strOutputFileName)
+        {
+            // 注: libraryCode 要求是一个馆代码，或者 *
+            string libraryCode = param_table["libraryCode"] as string;
+            if (libraryCode != "*")
+                libraryCode = "," + libraryCode + ",";
+
+            macro_table["%library%"] = libraryCode;
+
+            DateTime start_time = DateTimeUtil.Long8ToDateTime(strStartDate);
+
+            // TODO: 12 点
+            DateTime end_time = DateTimeUtil.Long8ToDateTime(strEndDate);
+
+            var items = context.CircuOpers
+                .Where(b => (b.Operation == "borrow" || b.Operation == "return")
+                && (libraryCode == "*" || b.LibraryCode.IndexOf(libraryCode) != -1)
+                && string.Compare(b.Date, strStartDate) >= 0
+                && string.Compare(b.Date, strEndDate) <= 0)
+                .LeftJoin(
+                context.Patrons,
+                oper => oper.ReaderBarcode,
+                patron => patron.Barcode,
+                (oper, patron) => new
+                {
+                    oper.ReaderBarcode,
+                    PatronName = patron.Name,
+                    patron.Department,
+                    oper.ItemBarcode,
+                    Operation = oper.Action,
+                    oper.OperTime,
+                    oper.Operator,
+                }
+                )
+                .LeftJoin(context.Items,
+                oper => oper.ItemBarcode,
+                item => item.ItemBarcode,
+                (oper, item) => new
+                {
+                    oper.ReaderBarcode,
+                    oper.PatronName,
+                    oper.Department,
+                    oper.ItemBarcode,
+                    item.BiblioRecPath,
+                    oper.Operation,
+                    oper.OperTime,
+                    oper.Operator
+                })
+            .LeftJoin(
+                context.Biblios,
+                oper => oper.BiblioRecPath,
+                biblio => biblio.RecPath,
+                (oper, biblio) => new
+                {
+                    PatronBarcode = oper.ReaderBarcode,
+                    oper.PatronName,
+                    oper.Department,
+                    oper.ItemBarcode,
+                    biblio.Summary,
+                    oper.Operation,
+                    oper.OperTime,
+                    oper.Operator
+                }
+            )
+            .OrderBy(x => x.OperTime)
+            .ToList();
+
+            int nRet = writer.OutputRmlReport(
+            items,
+            null,
+            macro_table,
+            strOutputFileName,
+            out string strError);
+            if (nRet == -1)
+                throw new Exception(strError);
         }
 
         // 册登记工作量
@@ -234,7 +1201,7 @@ string strOutputFileName)
                     DeleteCount = oper.Action == "delete" ? 1 : 0,
                     CopyCount = oper.Action == "copy" ? 1 : 0,
                     MoveCount = oper.Action == "move" ? 1 : 0,
-                    TransferCount = oper.Action == "transfer" ? 1: 0,
+                    TransferCount = oper.Action == "transfer" ? 1 : 0,
                     TotalCount = 1,
                 }
                 )
@@ -562,10 +1529,12 @@ string strOutputFileName)
 
             macro_table["%library%"] = libraryCode;
 
+            /*
             DateTime start_time = DateTimeUtil.Long8ToDateTime(strStartDate);
 
             // TODO: 12 点
             DateTime end_time = DateTimeUtil.Long8ToDateTime(strEndDate);
+            */
 
             /*
             var items = from oper in context.ItemOpers

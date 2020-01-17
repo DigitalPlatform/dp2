@@ -1714,7 +1714,7 @@ out strError);
         delegate void Delegate_beforeSave(List<object> items);
 
         // BuildRecords() 每批记录个数
-        const int BATCH_SIZE = 500;
+        const int BATCH_SIZE = 100;
 
         // parameters:
         //      lIndex  [in] 起点 index

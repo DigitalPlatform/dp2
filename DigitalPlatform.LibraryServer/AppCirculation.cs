@@ -10517,7 +10517,6 @@ start_time_1,
             indices = new List<int>();
 
             // long lOver = 0;
-            string strPeriodUnit = "";
 
             DateTime borrowdate;
 
@@ -10540,11 +10539,10 @@ start_time_1,
 
             // 解析期限值
             // string strPeriodUnit = "";
-            long lPeriodValue = 0;
 
             int nRet = ParsePeriodUnit(strPeriod,
-                out lPeriodValue,
-                out strPeriodUnit,
+                out long lPeriodValue,
+                out string strPeriodUnit,
                 out strError);
             if (nRet == -1)
             {
@@ -10690,8 +10688,7 @@ start_time_1,
                 }
 
                 // 数值
-                float v = 0;
-                if (float.TryParse(strValue, out v) == false)
+                if (float.TryParse(strValue, out float v) == false)
                 {
                     strError = "检查点定义 '" + strCheckPoint + "' 格式错误，其中 '" + strValue + "' 部分应该为数值形态";
                     return -1;
@@ -10715,12 +10712,10 @@ start_time_1,
             }
 
             // 解析期限值
-            string strPeriodUnit = "";
-            long lPeriodValue = 0;
 
             int nRet = ParsePeriodUnit(strValue,
-                out lPeriodValue,
-                out strPeriodUnit,
+                out long lPeriodValue,
+                out string strPeriodUnit,
                 out strError);
             if (nRet == -1)
                 return -1;

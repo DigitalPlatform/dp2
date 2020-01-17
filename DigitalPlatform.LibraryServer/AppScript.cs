@@ -3168,7 +3168,6 @@ namespace DigitalPlatform.LibraryServer
             int nNormalCount = 0;   // 一般提醒的事项数
 
             XmlNodeList nodes = readerdom.DocumentElement.SelectNodes("borrows/borrow");
-
             if (nodes.Count == 0)
                 return 0;
 
@@ -3217,9 +3216,8 @@ namespace DigitalPlatform.LibraryServer
                     {
                         timeReturning = DateTime.Now;
                         timeNextWorkingDay = DateTime.Now;
-                        long lValue = 0;
                         LibraryApplication.ParsePeriodUnit(strPeriod,
-                            out lValue,
+                            out long lValue,
                             out strPeriodUnit,
                             out strError);
                         lOver = lValue;
@@ -3290,7 +3288,6 @@ namespace DigitalPlatform.LibraryServer
                 {
                     // 检查超期前的通知点
 
-                    List<int> indices = null;
                     // 检查每个通知点，返回当前时间已经达到或者超过了通知点的那些检查点的下标
                     // return:
                     //      -1  数据格式错误
@@ -3300,7 +3297,7 @@ namespace DigitalPlatform.LibraryServer
                         strBorrowDate,
                         strPeriod,
                         App.NotifyDef,
-                        out indices,
+                        out List<int> indices,
                         out strError);
                     if (nRet == -1)
                         return -1;

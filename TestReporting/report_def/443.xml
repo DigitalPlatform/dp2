@@ -1,0 +1,24 @@
+﻿<root>
+  <title>出纳工作量\r%library%\r%daterange%</title>
+  <titleComment>
+  </titleComment>
+  <parameters>
+    <parameter name="libraryCode" type="libraryCode" comment="馆代码"/>
+    <parameter name="dateRange" type="dateRange" comment="时间范围"/>
+  </parameters>
+  <columns>
+    <column name="馆藏地点" type="String" align="left" sum="no" class="Location" eval="" />
+    <column name="借书" type="" align="right" sum="yes" class="BorrowCount" eval="" />
+    <column name="续借" type="" align="right" sum="yes" class="RenewCount" eval="" />
+    <column name="还书" type="" align="right" sum="yes" class="ReturnCount" eval="" />
+    <column name="丢失" type="" align="right" sum="yes" class="LostCount" eval="" />
+    <column name="读过" type="" align="right" sum="yes" class="ReadCount" eval="" />
+    <column name="操作总量" type="" align="right" sum="yes" class="TotalCount" eval="" />
+  </columns>
+  <css>
+  </css>
+  <typeName>443 出纳工作量，按馆藏地点</typeName>
+  <columnSortStyle>0:a</columnSortStyle>
+  <createFrequency>day,month,year</createFrequency>
+  <property fresh="false" />
+</root>
