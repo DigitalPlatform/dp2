@@ -420,8 +420,8 @@ string strOutputFileName)
                     || (x.PatronLibraryCode != null && (libraryCode0 == "*" || x.PatronLibraryCode == libraryCode0)))
                 .LeftJoin(
                     context.Keys,
-                    j2 => new { key1 = j2.oper.XmlRecPath, key2 = classType },
-                    key => new { key1 = key.BiblioRecPath, key2 = key.Type },
+                    j2 => new { recpath = j2.oper.XmlRecPath, type = classType, index = 0 },
+                    key => new { recpath = key.BiblioRecPath, type = key.Type, index = key.Index },
                     (j2, key) => new
                     {
                         Class = string.IsNullOrEmpty(key.Text) ? "" : key.Text.Substring(0, 1),
@@ -1642,15 +1642,15 @@ string strOutputFileName)
             .Where(b => b.Location == location
             // && b.CreateTime >= start_time
             && b.CreateTime <= end_time)
-            .Join(
+            .LeftJoin(
                 context.Keys,
-                item => item.BiblioRecPath,
-                key => key.BiblioRecPath,
+                item => new { recpath = item.BiblioRecPath, type = classType, index = 0 },
+                key => new { recpath = key.BiblioRecPath, type = key.Type, index = key.Index },
                 (item, key) => new
                 {
                     // item.ItemBarcode,
                     item.Location,
-                    ClassType = key.Type,
+                    // ClassType = key.Type,
                     BiblioRecPath = item.BiblioRecPath,
                     ItemCount = 1,
                     InnerCount = string.IsNullOrEmpty(item.Borrower) ? 1 : 0,
@@ -1659,7 +1659,9 @@ string strOutputFileName)
                 }
             )
             .DefaultIfEmpty()
-            .Where(x => x.Location == location && x.ClassType == classType)
+            .Where(x => x.Location == location
+            // && x.ClassType == classType
+            )
             .AsEnumerable()
             .GroupBy(x => x.Class)
             .Select(g => new
@@ -1736,15 +1738,15 @@ string strOutputFileName)
             .Where(b => b.Location == location
             // && b.CreateTime >= start_time
             && b.CreateTime <= end_time)
-            .Join(
+            .LeftJoin(
                 context.Keys,
-                item => item.BiblioRecPath,
-                key => key.BiblioRecPath,
+                item => new { recpath = item.BiblioRecPath, type = classType, index = 0 },
+                key => new { recpath = key.BiblioRecPath, type = key.Type, index = key.Index },
                 (item, key) => new
                 {
                     // item.ItemBarcode,
                     item.Location,
-                    ClassType = key.Type,
+                    // ClassType = key.Type,
                     BiblioRecPath = item.BiblioRecPath,
                     ItemCount = 1,
                     NewItemCount = item.CreateTime >= start_time ? 1 : 0,
@@ -1753,7 +1755,9 @@ string strOutputFileName)
                 }
             )
             .DefaultIfEmpty()
-            .Where(x => x.Location == location && x.ClassType == classType)
+            .Where(x => x.Location == location
+            // && x.ClassType == classType
+            )
             .AsEnumerable()
             .GroupBy(x => x.Class)
             .Select(g => new
@@ -1802,7 +1806,7 @@ string strOutputFileName)
             b.Action == "borrow" || b.Action == "return"
             && string.Compare(b.Date, strStartDate) >= 0
             && string.Compare(b.Date, strEndDate) <= 0)
-            .Join(
+            .LeftJoin(
                 context.Items,
                 oper => oper.ItemBarcode,
                 item => item.ItemBarcode,
@@ -1814,7 +1818,7 @@ string strOutputFileName)
                     BorrowCount = oper.Action == "borrow" ? 1 : 0,
                     ReturnCount = oper.Action == "return" ? 1 : 0,
                     Class = context.Keys
-                .Where(x => x.BiblioRecPath == item.BiblioRecPath && x.Type == classType)
+                .Where(x => x.BiblioRecPath == item.BiblioRecPath && x.Type == classType && x.Index == 0)
                 .Select(x => x.Text).FirstOrDefault()
                 }
             )
@@ -1862,7 +1866,7 @@ string strOutputFileName)
             b.Action == "borrow"
             && string.Compare(b.Date, strStartDate) >= 0
             && string.Compare(b.Date, strEndDate) <= 0)
-            .Join(
+            .LeftJoin(
                 context.Items,
                 oper => oper.ItemBarcode,
                 item => item.ItemBarcode,
@@ -1912,7 +1916,7 @@ string strOutputFileName)
         BiblioRecPath = g.Key,
         ItemCount = g.Count(),
     })
-    .Join(context.Biblios,
+    .LeftJoin(context.Biblios,
 item => item.BiblioRecPath,
 biblio => biblio.RecPath,
 (item, biblio) => new
@@ -1954,7 +1958,7 @@ biblio => biblio.RecPath,
             (b.Action == "borrow" || b.Action == "return")
             && string.Compare(b.Date, strStartDate) >= 0
             && string.Compare(b.Date, strEndDate) <= 0)
-            .Join(
+            .LeftJoin(
                 context.Items,
                 oper => oper.ItemBarcode,
                 item => item.ItemBarcode,
@@ -1976,7 +1980,7 @@ biblio => biblio.RecPath,
                 ReturnCount = g.Sum(t => t.ReturnCount)
             })
             .DefaultIfEmpty()
-            .Join(context.Biblios,
+            .LeftJoin(context.Biblios,
             item => item.BiblioRecPath,
             biblio => biblio.RecPath,
             (item, biblio) => new
@@ -2039,7 +2043,7 @@ string strOutputFileName)
                 .Where(x => (strLibraryCode == "*" || x.Location.StartsWith(strLibraryCode))
                 && string.IsNullOrEmpty(x.Borrower) == false
                 && x.ReturningTime < end)
-                .Join(context.Patrons,
+                .LeftJoin(context.Patrons,
                 item => item.Borrower,
                 patron => patron.Barcode,
                 (item, patron) => new
@@ -2047,7 +2051,7 @@ string strOutputFileName)
                     ItemBarcode = item.ItemBarcode,
                     PatronBarcode = item.Borrower,
                     Period = item.BorrowPeriod,
-                    Name = patron.Name,
+                    Name = patron == null ? "" : patron.Name,
                     Department = patron.Department,
                     BorrowTime = item.BorrowTime,
                     ReturningTime = item.ReturningTime,
@@ -2168,13 +2172,13 @@ string strOutputFileName)
             && b.Action == "borrow"
             && string.Compare(b.Date, strStartDate) >= 0
             && string.Compare(b.Date, strEndDate) <= 0)
-            .Join(
+            .LeftJoin(
                 context.Items,
                 oper => oper.ItemBarcode,
                 item => item.ItemBarcode,
                 (oper, item) => new
                 {
-                    ItemBarcode = item.ItemBarcode,
+                    ItemBarcode = item == null ? "" : item.ItemBarcode,
                     BorrowTime = oper.OperTime,
                     ReturnTime = context
                     .CircuOpers.Where(x => x.ReaderBarcode == patronBarcode && x.Action == "return" && x.OperTime >= oper.OperTime)
@@ -2182,7 +2186,7 @@ string strOutputFileName)
                     .OrderBy(a => a.OperTime)
                     .FirstOrDefault().OperTime,
                     Summary = context
-                    .Biblios.Where(x => x.RecPath == item.BiblioRecPath)
+                    .Biblios.Where(x => item != null && x.RecPath == item.BiblioRecPath)
                     .Select(a => a.Summary)
                     .FirstOrDefault()
                 }
@@ -2227,15 +2231,15 @@ string strOutputFileName)
             .Where(b => (strLibraryCode == "*" || b.LibraryCode == strLibraryCode)
             && string.Compare(b.Date, strStartDate) >= 0
             && string.Compare(b.Date, strEndDate) <= 0)
-            .Join(
+            .LeftJoin(
                 context.Patrons,
                 oper => oper.ReaderBarcode,
                 patron => patron.Barcode,
                 (oper, patron) => new
                 {
-                    PatronBarcode = patron.Barcode,
-                    Name = patron.Name,
-                    Department = patron.Department,
+                    PatronBarcode = patron == null ? "" : patron.Barcode,
+                    Name = patron == null ? "" : patron.Name,
+                    Department = patron == null ? "" : patron.Department,
                     BorrowCount = oper.Action == "borrow" ? 1 : 0,
                     ReturnCount = oper.Action == "return" ? 1 : 0
                 }
@@ -2281,13 +2285,13 @@ string strOutputFileName)
             .Where(b => (strLibraryCode == "*" || b.LibraryCode == strLibraryCode)
             && string.Compare(b.Date, strStartDate) >= 0
             && string.Compare(b.Date, strEndDate) <= 0)
-            .Join(
+            .LeftJoin(
                 context.Patrons,
                 oper => oper.ReaderBarcode,
                 patron => patron.Barcode,
                 (oper, patron) => new
                 {
-                    ReaderType = patron.ReaderType,
+                    ReaderType = patron == null ? "" : patron.ReaderType,
                     BorrowCount = oper.Action == "borrow" ? 1 : 0,
                     ReturnCount = oper.Action == "return" ? 1 : 0
                 }
@@ -2332,15 +2336,16 @@ string strOutputFileName)
             .Where(b => (strLibraryCode == "*" || b.LibraryCode == strLibraryCode)
             && string.Compare(b.Date, strStartDate) >= 0
             && string.Compare(b.Date, strEndDate) <= 0)
-            .Join(
+            .LeftJoin(
                 context.Patrons,
                 oper => oper.ReaderBarcode,
                 patron => patron.Barcode,
                 (oper, patron) => new
                 {
-                    Department = patron.Department,
+                    Department = patron == null ? "" : patron.Department,
                     BorrowCount = oper.Action == "borrow" ? 1 : 0,
-                    ReturnCount = oper.Action == "return" ? 1 : 0
+                    ReturnCount = oper.Action == "return" ? 1 : 0,
+                    ReadCount = oper.Action == "read" ? 1 : 0,
                 }
             )
             .DefaultIfEmpty()
@@ -2349,9 +2354,9 @@ string strOutputFileName)
             {
                 Department = g.Key,
                 BorrowCount = g.Sum(t => t.BorrowCount),
-                ReturnCount = g.Sum(t => t.ReturnCount)
+                ReturnCount = g.Sum(t => t.ReturnCount),
+                ReadCount = g.Sum(t => t.ReadCount),
             })
-            .DefaultIfEmpty()
             .OrderByDescending(t => t.BorrowCount).ThenBy(t => t.Department)
             .ToList();
 
@@ -2391,13 +2396,13 @@ string strOutputFileName)
             .Where(b => (strLibraryCode == "*" || b.LibraryCode == strLibraryCode)
             && string.Compare(b.Date, strStartDate) >= 0
             && string.Compare(b.Date, strEndDate) <= 0)
-            .Join(
+            .LeftJoin(
                 context.Patrons,
                 oper => oper.ReaderBarcode,
                 patron => patron.Barcode,
                 (oper, patron) => new
                 {
-                    Department = patron.Department,
+                    Department = patron == null ? "" : patron.Department,
                     BorrowCount = oper.Action == "borrow" ? 1 : 0,
                     ReturnCount = oper.Action == "return" ? 1 : 0
                 }
