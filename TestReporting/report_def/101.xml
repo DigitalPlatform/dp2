@@ -5,11 +5,13 @@
   <parameters>
     <parameter name="libraryCode" type="libraryCode" comment="馆代码"/>
     <parameter name="dateRange" type="dateRange" comment="时间范围"/>
+    <parameter name="sortColumn" type="column" comment="排序列"/>
   </parameters>
   <columns>
     <column name="部门" align="left" sum="no" class="Department" eval="" />
     <column name="借书册数" align="right" sum="yes" class="BorrowCount" eval="" />
     <column name="还书册数" align="right" sum="yes" class="ReturnCount" eval="" />
+    <column name="读过册数" align="right" sum="yes" class="ReadCount" eval="" />
   </columns>
   <css>
   </css>

@@ -39,6 +39,7 @@
             this.MenuItem_report = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_createReport = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+            this.toolStripButton_stop = new System.Windows.Forms.ToolStripButton();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.tabControl_main = new System.Windows.Forms.TabControl();
             this.tabPage_history = new System.Windows.Forms.TabPage();
@@ -59,7 +60,8 @@
             this.toolStripButton_cfg_setXeServer = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButton_cfg_setHongnibaServer = new System.Windows.Forms.ToolStripButton();
-            this.toolStripButton_stop = new System.Windows.Forms.ToolStripButton();
+            this.MenuItem_trunAllTest = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_testDeleteBiblioRecord = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.tabControl_main.SuspendLayout();
@@ -114,7 +116,9 @@
             // MenuItem_test
             // 
             this.MenuItem_test.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.MenuItem_testCreateReport});
+            this.MenuItem_testCreateReport,
+            this.MenuItem_trunAllTest,
+            this.MenuItem_testDeleteBiblioRecord});
             this.MenuItem_test.Name = "MenuItem_test";
             this.MenuItem_test.Size = new System.Drawing.Size(58, 28);
             this.MenuItem_test.Text = "测试";
@@ -122,7 +126,7 @@
             // MenuItem_testCreateReport
             // 
             this.MenuItem_testCreateReport.Name = "MenuItem_testCreateReport";
-            this.MenuItem_testCreateReport.Size = new System.Drawing.Size(200, 30);
+            this.MenuItem_testCreateReport.Size = new System.Drawing.Size(252, 30);
             this.MenuItem_testCreateReport.Text = "测试创建报表";
             this.MenuItem_testCreateReport.Click += new System.EventHandler(this.MenuItem_testCreateReport_Click);
             // 
@@ -150,6 +154,17 @@
             this.toolStrip1.Size = new System.Drawing.Size(800, 31);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
+            // 
+            // toolStripButton_stop
+            // 
+            this.toolStripButton_stop.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_stop.Enabled = false;
+            this.toolStripButton_stop.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_stop.Image")));
+            this.toolStripButton_stop.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_stop.Name = "toolStripButton_stop";
+            this.toolStripButton_stop.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_stop.Text = "停止";
+            this.toolStripButton_stop.Click += new System.EventHandler(this.toolStripButton_stop_Click);
             // 
             // statusStrip1
             // 
@@ -209,7 +224,7 @@
             this.tabPage_config.Location = new System.Drawing.Point(4, 28);
             this.tabPage_config.Name = "tabPage_config";
             this.tabPage_config.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage_config.Size = new System.Drawing.Size(792, 404);
+            this.tabPage_config.Size = new System.Drawing.Size(792, 398);
             this.tabPage_config.TabIndex = 1;
             this.tabPage_config.Text = "配置参数";
             this.tabPage_config.UseVisualStyleBackColor = true;
@@ -368,16 +383,19 @@
             this.toolStripButton_cfg_setHongnibaServer.ToolTipText = "设为红泥巴.数字平台服务器";
             this.toolStripButton_cfg_setHongnibaServer.Click += new System.EventHandler(this.toolStripButton_cfg_setHongnibaServer_Click);
             // 
-            // toolStripButton_stop
+            // MenuItem_trunAllTest
             // 
-            this.toolStripButton_stop.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.toolStripButton_stop.Enabled = false;
-            this.toolStripButton_stop.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_stop.Image")));
-            this.toolStripButton_stop.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton_stop.Name = "toolStripButton_stop";
-            this.toolStripButton_stop.Size = new System.Drawing.Size(50, 28);
-            this.toolStripButton_stop.Text = "停止";
-            this.toolStripButton_stop.Click += new System.EventHandler(this.toolStripButton_stop_Click);
+            this.MenuItem_trunAllTest.Name = "MenuItem_trunAllTest";
+            this.MenuItem_trunAllTest.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_trunAllTest.Text = "运行全部测试项目";
+            this.MenuItem_trunAllTest.Click += new System.EventHandler(this.MenuItem_runAllTest_Click);
+            // 
+            // MenuItem_testDeleteBiblioRecord
+            // 
+            this.MenuItem_testDeleteBiblioRecord.Name = "MenuItem_testDeleteBiblioRecord";
+            this.MenuItem_testDeleteBiblioRecord.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_testDeleteBiblioRecord.Text = "测试删除书目记录";
+            this.MenuItem_testDeleteBiblioRecord.Click += new System.EventHandler(this.MenuItem_testDeleteBiblioRecord_Click);
             // 
             // Form1
             // 
@@ -442,6 +460,8 @@
         private System.Windows.Forms.ToolStripMenuItem MenuItem_report;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_createReport;
         private System.Windows.Forms.ToolStripButton toolStripButton_stop;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_trunAllTest;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_testDeleteBiblioRecord;
     }
 }
 

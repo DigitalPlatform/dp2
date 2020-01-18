@@ -203,6 +203,36 @@ strBiblioRecPath,
 "field[@name='245']/subfield[@name='a']",
 "title"));
             }
+
+            // 对所有检索点排序，赋予 Index
+            SetIndex(this.Keys);
+        }
+
+        public static void SetIndex(List<Key> keys)
+        {
+            keys.Sort((a, b) =>
+            {
+                int nRet = string.Compare(a.Type, b.Type);
+                if (nRet != 0)
+                    return nRet;
+                // 继续比较 index
+                return a.Index - b.Index;
+            });
+
+            // 重新分配 Index
+            string prev_type = "";
+            int prev_index = 0;
+            foreach (var key in keys)
+            {
+                if (key.Type != prev_type)
+                {
+                    prev_type = key.Type;
+                    prev_index = 0;
+                }
+
+                key.Index = prev_index;
+                prev_index++;
+            }
         }
 
         public static List<Key> BuildKeys(MarcRecord record,
@@ -222,13 +252,15 @@ strBiblioRecPath,
             StringUtil.RemoveBlank(ref values);
 
             List<Key> results = new List<Key>();
+            int index = 0;
             foreach (string class_string in values)
             {
                 Key key = new Key
                 {
                     Text = class_string,
                     Type = type,
-                    BiblioRecPath = strBiblioRecPath
+                    BiblioRecPath = strBiblioRecPath,
+                    Index = index++,
                 };
                 results.Add(key);
             }
@@ -272,6 +304,9 @@ strBiblioRecPath,
         public Biblio Biblio { get; set; }
         [MaxLength(128)]
         public string BiblioRecPath { get; set; }
+
+        // 检索点在同 Type 检索点中的序号，从 0 开始
+        public int Index { get; set; }
     }
 
     public class User
@@ -379,7 +414,7 @@ strBiblioRecPath,
 
             /*
             string strLibraryCode = DomUtil.GetElementText(dom.DocumentElement,
-"libraryCode");
+    "libraryCode");
 
             this.LibraryCode = strLibraryCode;  // 这里和基础类的 LibraryCode 什么关系?
             */
@@ -1008,7 +1043,7 @@ strBiblioRecPath,
             }
 #endif
             if (DateTime.TryParse(strBorrowTime,
-out DateTime borrowdate) == false)
+    out DateTime borrowdate) == false)
             {
                 strError = "借阅日期字符串 '" + strBorrowTime + "' 无法解析";
                 return -1;

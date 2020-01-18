@@ -664,5 +664,33 @@ dlg.UiState);
             _cancel.Cancel();
             this.toolStripButton_stop.Enabled = false;
         }
+
+        private void MenuItem_runAllTest_Click(object sender, EventArgs e)
+        {
+            DatabaseConfig.ServerName = "localhost";
+            DatabaseConfig.DatabaseName = "testrep";
+            DatabaseConfig.UserName = "root";
+            DatabaseConfig.Password = "test";
+
+            using (var context = new LibraryContext())
+            {
+                test.TestAll(context);
+            }
+
+            MessageBox.Show(this, "OK");
+        }
+
+        private void MenuItem_testDeleteBiblioRecord_Click(object sender, EventArgs e)
+        {
+            DatabaseConfig.ServerName = "localhost";
+            DatabaseConfig.DatabaseName = "testrep";
+            DatabaseConfig.UserName = "root";
+            DatabaseConfig.Password = "test";
+
+            using (var context = new LibraryContext())
+            {
+                // test.TestLeftJoinKeys(context);
+            }
+        }
     }
 }
