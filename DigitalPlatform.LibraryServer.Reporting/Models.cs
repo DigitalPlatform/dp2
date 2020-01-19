@@ -41,7 +41,9 @@ namespace DigitalPlatform.LibraryServer.Reporting
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             // optionsBuilder.UseMySQL("server=localhost;database=library;user=user;password=password");
-            optionsBuilder.UseMySql(DatabaseConfig.BuildConnectionString());
+            optionsBuilder
+                .UseLazyLoadingProxies()
+                .UseMySql(DatabaseConfig.BuildConnectionString());
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -166,7 +168,7 @@ namespace DigitalPlatform.LibraryServer.Reporting
         public string Xml { get; set; }
 
         // 书目记录的检索点
-        public List<Key> Keys { get; set; }
+        public virtual List<Key> Keys { get; set; }
 
         // 首次创建检索点对象
         public void CreateKeys(string strXml,
@@ -301,7 +303,7 @@ strBiblioRecPath,
         public string Type { get; set; }
 
         // 该检索点所从属的书目记录
-        public Biblio Biblio { get; set; }
+        public virtual Biblio Biblio { get; set; }
         [MaxLength(128)]
         public string BiblioRecPath { get; set; }
 

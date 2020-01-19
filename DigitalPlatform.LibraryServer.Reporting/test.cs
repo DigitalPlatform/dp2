@@ -12,9 +12,57 @@ namespace DigitalPlatform.LibraryServer.Reporting
         // 运行全部测试项目
         public static void TestAll(LibraryContext context)
         {
+            TestQueryBiblios(context);
             TestLeftJoin(context);
             TestDeleteBiblioKeys(context);
             TestLeftJoinMissingKeys(context);
+        }
+
+        // 测试查询书目记录
+        public static void TestQueryBiblios(LibraryContext context)
+        {
+            // 删除可能存在的记录
+            {
+                var records = context.Biblios
+                    .Where(x => x.RecPath.StartsWith("test/")).ToList();
+                if (records.Count > 0)
+                {
+                    context.Biblios.RemoveRange(records);
+                    context.SaveChanges();
+                }
+            }
+
+            // 创建两条书目记录
+            {
+                MarcRecord marc = new MarcRecord();
+                marc.add(new MarcField('$', "200  $atitle1$fauthor"));
+                marc.add(new MarcField('$', "690  $aclass_string1_1"));
+                marc.add(new MarcField('$', "690  $aclass_string1_2"));
+
+                CreateTestRecord(context,
+        "test/1",
+        marc.Text);
+            }
+
+            {
+                MarcRecord marc = new MarcRecord();
+                marc.add(new MarcField('$', "200  $atitle2$fauthor"));
+                marc.add(new MarcField('$', "690  $aclass_string2_1"));
+                marc.add(new MarcField('$', "690  $aclass_string2_2"));
+
+                CreateTestRecord(context,
+        "test/2",
+        marc.Text);
+            }
+
+            context.SaveChanges();
+
+            // 查询
+            var biblios = context.Biblios
+                .Where(x => x.RecPath == "test/1")
+                .ToList();
+
+
         }
 
         // 测试删除书目记录的时候是否也正确删除了 keys
