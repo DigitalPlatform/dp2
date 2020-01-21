@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
@@ -12,11 +13,96 @@ namespace DigitalPlatform.LibraryServer.Reporting
         // 运行全部测试项目
         public static void TestAll(LibraryContext context)
         {
+            TestAddOrUpdateBiblio(ref context);
             TestQueryBiblios(context);
             TestLeftJoin(context);
             TestDeleteBiblioKeys(context);
             TestLeftJoinMissingKeys(context);
         }
+
+        #region
+
+        public static void TestAddOrUpdateBiblio(ref LibraryContext context)
+        {
+            string recpath = "test/1";
+            // 删除可能存在的记录
+            var record = context.Biblios
+                .Where(x => x.RecPath == recpath).FirstOrDefault();
+            if (record != null)
+            {
+                context.Biblios.Remove(record);
+                context.SaveChanges();
+            }
+
+            // 创建一条新的记录
+            {
+                MarcRecord marc = new MarcRecord();
+                marc.add(new MarcField('$', "200  $atitle1$fauthor1"));
+                marc.add(new MarcField('$', "690  $aclass_string1"));
+                Biblio biblio = new Biblio { RecPath = recpath };
+                if (MarcUtil.Marc2Xml(marc.Text,
+        "unimarc",
+        out string xml,
+        out string error) == -1)
+                    throw new Exception(error);
+                biblio.RecPath = recpath;
+                biblio.Xml = xml;
+                biblio.CreateKeys(biblio.Xml, biblio.RecPath);
+                context.Add(biblio);
+                context.SaveChanges();
+            }
+
+            context.Dispose();
+            context = new LibraryContext();
+
+            // 用于最后阶段比对检索点
+            List<Key> save_keys = new List<Key>();
+
+            // 更新上述书目记录
+            {
+                MarcRecord marc = new MarcRecord();
+                marc.add(new MarcField('$', "200  $atitle2$fauthor2"));
+                marc.add(new MarcField('$', "690  $aclass_string2"));
+                if (MarcUtil.Marc2Xml(marc.Text,
+        "unimarc",
+        out string xml,
+        out string error) == -1)
+                    throw new Exception(error);
+
+                var biblio = context.Biblios.SingleOrDefault(c => c.RecPath == recpath)
+    ?? new Biblio { RecPath = recpath};
+
+                Debug.Assert(biblio.RecPath == recpath);
+
+                biblio.RecPath = recpath;
+                biblio.Xml = xml;
+                biblio.CreateKeys(biblio.Xml, biblio.RecPath);
+
+                save_keys.AddRange(biblio.Keys);
+
+                context.AddOrUpdate(biblio);
+                context.SaveChanges();
+            }
+
+            context.Dispose();
+            context = new LibraryContext();
+
+            // 检查检索点是否正确
+            var keys = context.Keys
+                .Where(x => x.BiblioRecPath == recpath)
+                .ToList();
+
+            if (keys.Count != save_keys.Count)
+                throw new Exception($"keys.Count ({keys.Count}) 和 save_keys.Count ({save_keys.Count})应该相等");
+
+            foreach (var current in save_keys)
+            {
+                if (Key.IndexOf(keys, current) == -1)
+                    throw new Exception($"key '{current.ToString()}' 在检索结果中没有找到");
+            }
+        }
+
+        #endregion
 
         // 测试查询书目记录
         public static void TestQueryBiblios(LibraryContext context)
@@ -62,7 +148,7 @@ namespace DigitalPlatform.LibraryServer.Reporting
                 .Where(x => x.RecPath == "test/1")
                 .ToList();
 
-
+            // 验证
         }
 
         // 测试删除书目记录的时候是否也正确删除了 keys
@@ -191,6 +277,7 @@ namespace DigitalPlatform.LibraryServer.Reporting
             }
         }
 
+#if NO
         public static void UpdateBiblio(
             LibraryContext context,
             Biblio biblio)
@@ -208,6 +295,7 @@ namespace DigitalPlatform.LibraryServer.Reporting
             context.AddOrUpdate(biblio);
             context.SaveChanges();
         }
+#endif
 
         public static void CreateTestRecord(LibraryContext context,
             string recpath,

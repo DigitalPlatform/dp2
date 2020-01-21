@@ -8,6 +8,7 @@ namespace DigitalPlatform.LibraryServer.Reporting
 {
     public static class ContextExtensions
     {
+        // https://www.michaelgmccarthy.com/2016/08/24/entity-framework-addorupdate-is-a-destructive-operation/
         public static void AddOrUpdate(this DbContext ctx, object entity)
         {
             var entry = ctx.Entry(entity);

@@ -473,7 +473,7 @@ string strHtml)
                             ErrorInfo = strError
                         };
 
-                    nRet = replication.BuildPlan("*",
+                    nRet = replication.BuildFirstPlan("*",
                         channel,
                         (message) =>
                         {
@@ -494,7 +494,7 @@ string strHtml)
                     DatabaseConfig.UserName = "root";
                     DatabaseConfig.Password = "test";
 
-                    nRet = replication.DoPlan(
+                    nRet = replication.RunFirstPlan(
                         channel,
                         ref task_dom,
                         (message) =>
@@ -565,7 +565,7 @@ string strHtml)
                     DatabaseConfig.UserName = "root";
                     DatabaseConfig.Password = "test";
 
-                    nRet = replication.DoPlan(
+                    nRet = replication.RunFirstPlan(
                         channel,
                         ref task_dom,
                         (message) =>
@@ -691,6 +691,101 @@ dlg.UiState);
             {
                 // test.TestLeftJoinKeys(context);
             }
+        }
+
+        private async void MenuItem_testReplication_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            Begin();
+            var result = await TestLogReplication(_cancel.Token);
+            End();
+            if (result.Value == -1)
+            {
+                strError = result.ErrorInfo;
+                goto ERROR1;
+            }
+            MessageBox.Show(this, "OK");
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        Task<NormalResult> TestLogReplication(CancellationToken token)
+        {
+            return Task<NormalResult>.Run(() =>
+            {
+                Replication replication = new Replication();
+                LibraryChannel channel = this.GetChannel();
+                try
+                {
+                    int nRet = replication.Initialize(channel,
+                        out string strError);
+                    if (nRet == -1)
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError
+                        };
+
+                    DatabaseConfig.ServerName = "localhost";
+                    DatabaseConfig.DatabaseName = "testrep";
+                    DatabaseConfig.UserName = "root";
+                    DatabaseConfig.Password = "test";
+
+                    var context = new LibraryContext();
+                    try
+                    {
+                        nRet = replication.DoReplication(
+                            ref context,
+                            channel,
+                            "19990101",
+                            "20201231",
+                            LogType.OperLog,
+                            (message) =>
+                            {
+                                OutputHistory(message);
+                            },
+                            token,
+                            out string strLastDate,
+                            out long last_index,
+                            out strError);
+                        if (nRet == -1)
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = strError
+                            };
+
+                        return new NormalResult();
+                    }
+                    finally
+                    {
+                        if (context != null)
+                            context.Dispose();
+                    }
+                }
+                finally
+                {
+                    this.ReturnChannel(channel);
+                }
+            });
+        }
+
+        private void MenuItem_recreateBlankDatabase_Click(object sender, EventArgs e)
+        {
+            DatabaseConfig.ServerName = "localhost";
+            DatabaseConfig.DatabaseName = "testrep";
+            DatabaseConfig.UserName = "root";
+            DatabaseConfig.Password = "test";
+
+            using (var context = new LibraryContext())
+            {
+                context.Database.EnsureDeleted();
+                context.Database.EnsureCreated();
+            }
+
+            MessageBox.Show(this, "OK");
         }
     }
 }
