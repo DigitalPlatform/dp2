@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Marc;
+using System.Linq;
 
 namespace DigitalPlatform.LibraryServer.Reporting
 {
@@ -66,6 +67,12 @@ namespace DigitalPlatform.LibraryServer.Reporting
                   .WithMany(p => p.Books);
                   */
             });
+
+            /*
+            modelBuilder.Entity<Biblio>().Property(p => p.RecPath)
+    .HasDatabaseGeneratedOption(System.ComponentModel
+    .DataAnnotations.Schema.DatabaseGeneratedOption.None);
+    */
 
             // 检索点
             modelBuilder.Entity<Key>(entity =>
@@ -154,162 +161,6 @@ namespace DigitalPlatform.LibraryServer.Reporting
         public DateTime ReturningTime { get; set; }   // 预计还回时间
     }
 
-    public class Biblio
-    {
-        public string RecPath { get; set; }
-        public string Title { get; set; }
-        public string Author { get; set; }
-        public string Publisher { get; set; }
-        [MaxLength(4096)]
-        public string Summary { get; set; }
-
-        // 书目记录 XML 内容
-        [MaxLength(4096)]
-        public string Xml { get; set; }
-
-        // 书目记录的检索点
-        public virtual List<Key> Keys { get; set; }
-
-        // 首次创建检索点对象
-        public void CreateKeys(string strXml,
-            string strBiblioRecPath)
-        {
-            if (this.Keys == null)
-                this.Keys = new List<Key>();
-
-            int nRet = MarcUtil.Xml2Marc(strXml,
-    false,
-    null,
-    out string strOutMarcSyntax,
-    out string strMARC,
-    out string strError);
-            if (nRet == -1)
-                throw new Exception(strError);
-            MarcRecord record = new MarcRecord(strMARC);
-            if (strOutMarcSyntax == "unimarc")
-            {
-                this.Keys.AddRange(BuildKeys(record,
-strBiblioRecPath,
-"field[@name='200']/subfield[@name='a']",
-"title"));
-
-                this.Keys.AddRange(BuildKeys(record,
-strBiblioRecPath,
-"field[@name='690']/subfield[@name='a']",
-"class_clc"));
-            }
-            else
-            {
-                this.Keys.AddRange(BuildKeys(record,
-strBiblioRecPath,
-"field[@name='245']/subfield[@name='a']",
-"title"));
-            }
-
-            // 对所有检索点排序，赋予 Index
-            SetIndex(this.Keys);
-        }
-
-        public static void SetIndex(List<Key> keys)
-        {
-            keys.Sort((a, b) =>
-            {
-                int nRet = string.Compare(a.Type, b.Type);
-                if (nRet != 0)
-                    return nRet;
-                // 继续比较 index
-                return a.Index - b.Index;
-            });
-
-            // 重新分配 Index
-            string prev_type = "";
-            int prev_index = 0;
-            foreach (var key in keys)
-            {
-                if (key.Type != prev_type)
-                {
-                    prev_type = key.Type;
-                    prev_index = 0;
-                }
-
-                key.Index = prev_index;
-                prev_index++;
-            }
-        }
-
-        public static List<Key> BuildKeys(MarcRecord record,
-            string strBiblioRecPath,
-            string xpath,
-            string type)
-        {
-            List<string> values = new List<string>();
-            foreach (MarcSubfield subfield in record.select(xpath))
-            {
-                values.Add(subfield.Content);
-            }
-
-            // TODO: SQL Server 无法区分大小写 key 字符串，会认为重复
-            values.Sort((a, b) => string.Compare(a, b, true));
-            _removeDup(ref values);
-            StringUtil.RemoveBlank(ref values);
-
-            List<Key> results = new List<Key>();
-            int index = 0;
-            foreach (string class_string in values)
-            {
-                Key key = new Key
-                {
-                    Text = class_string,
-                    Type = type,
-                    BiblioRecPath = strBiblioRecPath,
-                    Index = index++,
-                };
-                results.Add(key);
-            }
-
-            return results;
-        }
-
-        public static void _removeDup(ref List<string> list)
-        {
-            for (int i = 0; i < list.Count; i++)
-            {
-                string strItem = list[i].ToUpper();
-                for (int j = i + 1; j < list.Count; j++)
-                {
-                    if (strItem == list[j].ToUpper())
-                    {
-                        list.RemoveAt(j);
-                        j--;
-                    }
-                    else
-                    {
-                        i = j - 1;
-                        break;
-                    }
-                }
-            }
-        }
-
-    }
-
-    // 检索点
-    public class Key
-    {
-        [MaxLength(256)]
-        public string Text { get; set; }
-        // 检索点类型。例如 title author class class_clc
-        [MaxLength(128)]
-        public string Type { get; set; }
-
-        // 该检索点所从属的书目记录
-        public virtual Biblio Biblio { get; set; }
-        [MaxLength(128)]
-        public string BiblioRecPath { get; set; }
-
-        // 检索点在同 Type 检索点中的序号，从 0 开始
-        public int Index { get; set; }
-    }
 
     public class User
     {

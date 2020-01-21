@@ -36,6 +36,9 @@
             this.MenuItem_exit = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_test = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_testCreateReport = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_trunAllTest = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_testDeleteBiblioRecord = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_testReplication = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_report = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_createReport = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
@@ -60,8 +63,7 @@
             this.toolStripButton_cfg_setXeServer = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButton_cfg_setHongnibaServer = new System.Windows.Forms.ToolStripButton();
-            this.MenuItem_trunAllTest = new System.Windows.Forms.ToolStripMenuItem();
-            this.MenuItem_testDeleteBiblioRecord = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_recreateBlankDatabase = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.tabControl_main.SuspendLayout();
@@ -118,7 +120,9 @@
             this.MenuItem_test.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.MenuItem_testCreateReport,
             this.MenuItem_trunAllTest,
-            this.MenuItem_testDeleteBiblioRecord});
+            this.MenuItem_testDeleteBiblioRecord,
+            this.MenuItem_testReplication,
+            this.MenuItem_recreateBlankDatabase});
             this.MenuItem_test.Name = "MenuItem_test";
             this.MenuItem_test.Size = new System.Drawing.Size(58, 28);
             this.MenuItem_test.Text = "测试";
@@ -126,9 +130,30 @@
             // MenuItem_testCreateReport
             // 
             this.MenuItem_testCreateReport.Name = "MenuItem_testCreateReport";
-            this.MenuItem_testCreateReport.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_testCreateReport.Size = new System.Drawing.Size(254, 30);
             this.MenuItem_testCreateReport.Text = "测试创建报表";
             this.MenuItem_testCreateReport.Click += new System.EventHandler(this.MenuItem_testCreateReport_Click);
+            // 
+            // MenuItem_trunAllTest
+            // 
+            this.MenuItem_trunAllTest.Name = "MenuItem_trunAllTest";
+            this.MenuItem_trunAllTest.Size = new System.Drawing.Size(254, 30);
+            this.MenuItem_trunAllTest.Text = "运行全部测试项目";
+            this.MenuItem_trunAllTest.Click += new System.EventHandler(this.MenuItem_runAllTest_Click);
+            // 
+            // MenuItem_testDeleteBiblioRecord
+            // 
+            this.MenuItem_testDeleteBiblioRecord.Name = "MenuItem_testDeleteBiblioRecord";
+            this.MenuItem_testDeleteBiblioRecord.Size = new System.Drawing.Size(254, 30);
+            this.MenuItem_testDeleteBiblioRecord.Text = "测试删除书目记录";
+            this.MenuItem_testDeleteBiblioRecord.Click += new System.EventHandler(this.MenuItem_testDeleteBiblioRecord_Click);
+            // 
+            // MenuItem_testReplication
+            // 
+            this.MenuItem_testReplication.Name = "MenuItem_testReplication";
+            this.MenuItem_testReplication.Size = new System.Drawing.Size(254, 30);
+            this.MenuItem_testReplication.Text = "测试同步";
+            this.MenuItem_testReplication.Click += new System.EventHandler(this.MenuItem_testReplication_Click);
             // 
             // MenuItem_report
             // 
@@ -383,19 +408,12 @@
             this.toolStripButton_cfg_setHongnibaServer.ToolTipText = "设为红泥巴.数字平台服务器";
             this.toolStripButton_cfg_setHongnibaServer.Click += new System.EventHandler(this.toolStripButton_cfg_setHongnibaServer_Click);
             // 
-            // MenuItem_trunAllTest
+            // MenuItem_recreateBlankDatabase
             // 
-            this.MenuItem_trunAllTest.Name = "MenuItem_trunAllTest";
-            this.MenuItem_trunAllTest.Size = new System.Drawing.Size(252, 30);
-            this.MenuItem_trunAllTest.Text = "运行全部测试项目";
-            this.MenuItem_trunAllTest.Click += new System.EventHandler(this.MenuItem_runAllTest_Click);
-            // 
-            // MenuItem_testDeleteBiblioRecord
-            // 
-            this.MenuItem_testDeleteBiblioRecord.Name = "MenuItem_testDeleteBiblioRecord";
-            this.MenuItem_testDeleteBiblioRecord.Size = new System.Drawing.Size(252, 30);
-            this.MenuItem_testDeleteBiblioRecord.Text = "测试删除书目记录";
-            this.MenuItem_testDeleteBiblioRecord.Click += new System.EventHandler(this.MenuItem_testDeleteBiblioRecord_Click);
+            this.MenuItem_recreateBlankDatabase.Name = "MenuItem_recreateBlankDatabase";
+            this.MenuItem_recreateBlankDatabase.Size = new System.Drawing.Size(254, 30);
+            this.MenuItem_recreateBlankDatabase.Text = "重新创建空白数据库";
+            this.MenuItem_recreateBlankDatabase.Click += new System.EventHandler(this.MenuItem_recreateBlankDatabase_Click);
             // 
             // Form1
             // 
@@ -462,6 +480,8 @@
         private System.Windows.Forms.ToolStripButton toolStripButton_stop;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_trunAllTest;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_testDeleteBiblioRecord;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_testReplication;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_recreateBlankDatabase;
     }
 }
 

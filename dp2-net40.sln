@@ -211,8 +211,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestMarcEditor", "TestMarcE
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DigitalPlatform.MarcQuery", "dp-library\DigitalPlatform.MarcQuery\DigitalPlatform.MarcQuery.csproj", "{623EA980-BE0A-46BB-9E3E-DD8D0FE54F6F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DigitalPlatform.Reporting", "DigitalPlatform.Reporting\DigitalPlatform.Reporting.csproj", "{744FFDC6-8AC9-45F6-B054-2751DDA9EA78}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.KernelClient", "DigitalPlatform.KernelClient\DigitalPlatform.KernelClient.csproj", "{58E33A45-D8AC-451F-971D-E1F5216198A2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FaceDrivers.ArcSoft", "FaceDrivers.ArcSoft\FaceDrivers.ArcSoft.csproj", "{5ADA90F1-11A0-4BFF-A1EA-5FCE066D3051}"
@@ -237,7 +235,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.WPF", "Digi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CallRfidCenterSample", "CallRfidCenterSample\CallRfidCenterSample.csproj", "{B514ACFB-CAEB-4606-89C6-F2D5BED1A256}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.LibraryServer.Reporting", "DigitalPlatform.LibraryServer.Reporting\DigitalPlatform.LibraryServer.Reporting.csproj", "{42059AF3-46EC-476A-A0FF-7932DF49A7DB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DigitalPlatform.LibraryServer.Reporting", "DigitalPlatform.LibraryServer.Reporting\DigitalPlatform.LibraryServer.Reporting.csproj", "{42059AF3-46EC-476A-A0FF-7932DF49A7DB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestReporting", "TestReporting\TestReporting.csproj", "{54F3063D-5601-40F0-9431-419AEFF6FA90}"
 EndProject
@@ -1704,24 +1702,6 @@ Global
 		{623EA980-BE0A-46BB-9E3E-DD8D0FE54F6F}.Test|Mixed Platforms.Build.0 = Debug|Any CPU
 		{623EA980-BE0A-46BB-9E3E-DD8D0FE54F6F}.Test|x86.ActiveCfg = Debug|Any CPU
 		{623EA980-BE0A-46BB-9E3E-DD8D0FE54F6F}.Test|x86.Build.0 = Debug|Any CPU
-		{744FFDC6-8AC9-45F6-B054-2751DDA9EA78}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{744FFDC6-8AC9-45F6-B054-2751DDA9EA78}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{744FFDC6-8AC9-45F6-B054-2751DDA9EA78}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{744FFDC6-8AC9-45F6-B054-2751DDA9EA78}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{744FFDC6-8AC9-45F6-B054-2751DDA9EA78}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{744FFDC6-8AC9-45F6-B054-2751DDA9EA78}.Debug|x86.Build.0 = Debug|Any CPU
-		{744FFDC6-8AC9-45F6-B054-2751DDA9EA78}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{744FFDC6-8AC9-45F6-B054-2751DDA9EA78}.Release|Any CPU.Build.0 = Release|Any CPU
-		{744FFDC6-8AC9-45F6-B054-2751DDA9EA78}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{744FFDC6-8AC9-45F6-B054-2751DDA9EA78}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{744FFDC6-8AC9-45F6-B054-2751DDA9EA78}.Release|x86.ActiveCfg = Release|Any CPU
-		{744FFDC6-8AC9-45F6-B054-2751DDA9EA78}.Release|x86.Build.0 = Release|Any CPU
-		{744FFDC6-8AC9-45F6-B054-2751DDA9EA78}.Test|Any CPU.ActiveCfg = Debug|Any CPU
-		{744FFDC6-8AC9-45F6-B054-2751DDA9EA78}.Test|Any CPU.Build.0 = Debug|Any CPU
-		{744FFDC6-8AC9-45F6-B054-2751DDA9EA78}.Test|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{744FFDC6-8AC9-45F6-B054-2751DDA9EA78}.Test|Mixed Platforms.Build.0 = Debug|Any CPU
-		{744FFDC6-8AC9-45F6-B054-2751DDA9EA78}.Test|x86.ActiveCfg = Debug|Any CPU
-		{744FFDC6-8AC9-45F6-B054-2751DDA9EA78}.Test|x86.Build.0 = Debug|Any CPU
 		{58E33A45-D8AC-451F-971D-E1F5216198A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{58E33A45-D8AC-451F-971D-E1F5216198A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{58E33A45-D8AC-451F-971D-E1F5216198A2}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
