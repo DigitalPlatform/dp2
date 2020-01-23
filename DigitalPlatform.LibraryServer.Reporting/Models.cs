@@ -130,38 +130,6 @@ namespace DigitalPlatform.LibraryServer.Reporting
         }
     }
 
-    public class Patron
-    {
-        public string RecPath { get; set; }
-        public string Barcode { get; set; }
-        public string LibraryCode { get; set; }
-        public string Department { get; set; }
-        public string ReaderType { get; set; }
-        public string Name { get; set; }
-        public string State { get; set; }
-    }
-
-    public class Item
-    {
-        public string ItemRecPath { get; set; }
-        public string ItemBarcode { get; set; }
-        public string Location { get; set; }
-        public string AccessNo { get; set; }
-        public string BiblioRecPath { get; set; }
-
-        public DateTime CreateTime { get; set; }
-        public string State { get; set; }
-
-        public long Price { get; set; }
-        public string Unit { get; set; }
-
-        public string Borrower { get; set; }
-        public DateTime BorrowTime { get; set; }
-        public string BorrowPeriod { get; set; }
-        public DateTime ReturningTime { get; set; }   // 预计还回时间
-    }
-
-
     public class User
     {
         public string ID { get; set; }

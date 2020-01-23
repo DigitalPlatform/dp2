@@ -736,6 +736,23 @@ dlg.UiState);
                     var context = new LibraryContext();
                     try
                     {
+                        nRet = replication.DoCreateOperLogTable(
+    ref context,
+    channel,
+    -1,
+                            "19990101",
+                            "20201231",
+    LogType.OperLog,
+    true,
+                            (message) =>
+                            {
+                                OutputHistory(message);
+                            },
+                            token,
+    out string strLastDate,
+    out long last_index,
+    out strError);
+                        /*
                         nRet = replication.DoReplication(
                             ref context,
                             channel,
@@ -750,6 +767,7 @@ dlg.UiState);
                             out string strLastDate,
                             out long last_index,
                             out strError);
+                            */
                         if (nRet == -1)
                             return new NormalResult
                             {

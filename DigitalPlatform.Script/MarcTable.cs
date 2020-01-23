@@ -32,7 +32,7 @@ namespace DigitalPlatform.Marc
 8: Resource identifier and terms of availability area (e.g., ISBN, ISSN)
          * */
         // parameters:
-        //     strStyle    创建结果的风格。如果为 "" 表示创建所有大项和提名拼音、数字资源。
+        //     strStyle    创建结果的风格。如果为 "" 表示创建所有大项和题名拼音、数字资源。
         public static int ScriptUnimarc(
             string strRecPath,
             string strMARC,
