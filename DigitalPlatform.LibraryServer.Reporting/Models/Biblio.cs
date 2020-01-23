@@ -1,11 +1,12 @@
-﻿using DigitalPlatform.Marc;
-using DigitalPlatform.Text;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+
+using DigitalPlatform.Marc;
+using DigitalPlatform.Text;
 
 namespace DigitalPlatform.LibraryServer.Reporting
 {
@@ -25,11 +26,88 @@ namespace DigitalPlatform.LibraryServer.Reporting
         // 书目记录的检索点
         public virtual List<Key> Keys { get; set; }
 
+        public void CreateSummary(string strXml, string recpath)
+        {
+            int nRet = MarcUtil.Xml2Marc(strXml,
+false,
+null,
+out string strOutMarcSyntax,
+out string strMARC,
+out string strError);
+            if (nRet == -1)
+            {
+                this.Summary = "error:" + strError;
+                return;
+            }
 
-        // TODO: 创建 Summary
+            this.Summary = CreateSummary(
+                recpath,
+                strMARC,
+                strOutMarcSyntax);
+        }
+
+        // 创建书目摘要
+        public static string CreateSummary(
+            string strRecPath,
+            string strMARC,
+            string syntax)
+        {
+            string strError = "";
+            int nRet = 0;
+            List<NameValueLine> results = null;
+
+            if (syntax == "usmarc")
+                nRet = MarcTable.ScriptMarc21(
+strRecPath,
+strMARC,
+"areas",
+null,
+out results,
+out strError);
+            else
+                nRet = MarcTable.ScriptUnimarc(
+    strRecPath,
+    strMARC,
+    "areas",
+    null,
+    out results,
+    out strError);
+            if (nRet == -1)
+                return "error:" + strError;
+
+            StringBuilder text = new StringBuilder();
+            foreach (var line in results)
+            {
+                if (text.Length > 0)
+                    text.Append(". -- ");
+                text.Append(line.Value);
+            }
+
+            return text.ToString();
+        }
+
+        public void Create(string strXml,
+            string strBiblioRecPath)
+        {
+            var result = CreateKeys(strXml, strBiblioRecPath);
+            if (result.Value == -1)
+            {
+                this.Summary = "error:" + result.ErrorInfo;
+                return;
+            }
+
+            this.Summary = CreateSummary(strBiblioRecPath, result.MARC, result.Syntax);
+        }
+
+        // 返回创建检索点过程中的中间结果
+        public class CreateKeysResult : NormalResult
+        {
+            public string MARC { get; set; }
+            public string Syntax { get; set; }
+        }
 
         // 创建检索点对象
-        public void CreateKeys(string strXml,
+        public CreateKeysResult CreateKeys(string strXml,
             string strBiblioRecPath)
         {
             if (this.Keys == null)
@@ -42,7 +120,11 @@ namespace DigitalPlatform.LibraryServer.Reporting
     out string strMARC,
     out string strError);
             if (nRet == -1)
-                throw new Exception(strError);
+                return new CreateKeysResult
+                {
+                    Value = -1,
+                    ErrorInfo = strError
+                };
 
             // TODO: 新创建的 keys 先进入一个临时区。然后排序，和当前已有的 keys 合并
             List<Key> keys = new List<Key>();
@@ -72,6 +154,12 @@ strBiblioRecPath,
             SetIndex(keys);
 
             MergeKeys(keys, this.Keys);
+
+            return new CreateKeysResult
+            {
+                MARC = strMARC,
+                Syntax = strOutMarcSyntax
+            };
         }
 
         // 把 source 里面的元素合并到 target 中。
@@ -210,7 +298,7 @@ strBiblioRecPath,
             LibraryContext context,
             string strBiblioRecPath,
             string strBiblioXml,
-            bool saveChanges = true)
+            bool saveChanges = false)
         {
             /*
             strError = "";
@@ -226,7 +314,7 @@ strBiblioRecPath,
 
             biblio.RecPath = strBiblioRecPath;
             biblio.Xml = strBiblioXml;
-            biblio.CreateKeys(biblio.Xml, biblio.RecPath);
+            biblio.Create(biblio.Xml, biblio.RecPath);
             context.AddOrUpdate(biblio);
             if (saveChanges)
                 context.SaveChanges();

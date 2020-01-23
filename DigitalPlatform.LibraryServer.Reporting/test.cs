@@ -47,7 +47,7 @@ namespace DigitalPlatform.LibraryServer.Reporting
                     throw new Exception(error);
                 biblio.RecPath = recpath;
                 biblio.Xml = xml;
-                biblio.CreateKeys(biblio.Xml, biblio.RecPath);
+                biblio.Create(biblio.Xml, biblio.RecPath);
                 context.Add(biblio);
                 context.SaveChanges();
             }
@@ -76,7 +76,7 @@ namespace DigitalPlatform.LibraryServer.Reporting
 
                 biblio.RecPath = recpath;
                 biblio.Xml = xml;
-                biblio.CreateKeys(biblio.Xml, biblio.RecPath);
+                biblio.Create(biblio.Xml, biblio.RecPath);
 
                 save_keys.AddRange(biblio.Keys);
 
@@ -327,7 +327,7 @@ namespace DigitalPlatform.LibraryServer.Reporting
                 throw new Exception(error);
             biblio.RecPath = recpath;
             biblio.Xml = xml;
-            biblio.CreateKeys(biblio.Xml, biblio.RecPath);
+            biblio.Create(biblio.Xml, biblio.RecPath);
             context.Biblios.Add(biblio);
         }
 
@@ -361,7 +361,7 @@ namespace DigitalPlatform.LibraryServer.Reporting
                 throw new Exception(error);
             biblio.RecPath = recpath;
             biblio.Xml = xml;
-            biblio.CreateKeys(biblio.Xml, biblio.RecPath);
+            biblio.Create(biblio.Xml, biblio.RecPath);
             context.Biblios.Add(biblio);
             context.SaveChanges();
         }
@@ -396,7 +396,7 @@ namespace DigitalPlatform.LibraryServer.Reporting
                     throw new Exception(error);
                 biblio.RecPath = recpath;
                 biblio.Xml = xml;
-                biblio.CreateKeys(biblio.Xml, biblio.RecPath);
+                biblio.Create(biblio.Xml, biblio.RecPath);
                 context.Biblios.Add(biblio);
                 context.SaveChanges();
 

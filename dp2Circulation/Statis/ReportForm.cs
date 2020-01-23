@@ -9088,7 +9088,7 @@ out strError);
 
                         if (strAction == "copy")
                         {
-                            string strNewBarcode = DomUtil.GetAttr(node, "newBarocde");
+                            string strNewBarcode = DomUtil.GetAttr(node, "newBarcode"); // 2020/1/22 修改 newBarocde
                             // TODO: 目标位置实体记录已经存在怎么办 ?
                             // 目标册记录的 barcode 字段要修改为空
                             text.Append("insert or replace into item (itemrecpath, itembarcode, location, accessno, bibliorecpath) ");

@@ -7,13 +7,14 @@ using System.Text;
 using System.Threading;
 using System.Xml;
 
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+
 using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace DigitalPlatform.LibraryServer.Reporting
 {
@@ -387,7 +388,7 @@ out strError);
             return 0;
         }
 
-
+#if NO
 
         // 记忆书目库的分类号 style 列表
         int MemoryClassFromStyles(XmlElement root,
@@ -485,6 +486,7 @@ out strError);
             return StringUtil.MakePathList(results);
         }
 
+#endif
 
         #endregion
 
@@ -637,7 +639,6 @@ out strError);
         public int BuildFirstPlan(string strTypeList,
             LibraryChannel channel,
             Delegate_showMessage func_showMessage,
-            // XmlDocument database_dom,
             out XmlDocument task_dom,
             out string strError)
         {
@@ -754,6 +755,8 @@ out strError);
                     if (nRet == -1)
                         return -1;
 #endif
+
+#if NO
                 // 记忆书目库的分类号 style 列表
                 nRet = MemoryClassFromStyles(task_dom.DocumentElement,
         out strError);
@@ -788,6 +791,8 @@ out strError);
                 if (nRet == -1)
                     return -1;
 
+#endif
+
                 //
                 foreach (string strBiblioDbName in biblio_dbnames)
                 {
@@ -817,6 +822,7 @@ out strError);
                     node.SetAttribute("type", "biblio");
                     node.SetAttribute("count", lRet.ToString());
 
+#if NO
                     foreach (string strStyle in styles)
                     {
                         func_showMessage?.Invoke("正在计划任务 检索 " + strBiblioDbName + " " + strStyle + " ...");
@@ -849,12 +855,16 @@ out strError);
                         class_node.SetAttribute("class_table_name", strClassTableName);
                         class_node.SetAttribute("count", lRet.ToString());
                     }
+
+#endif
                 }
             }
 
+
+
             // *** 创建日志表
             if (strTypeList == "*"
-                || StringUtil.IsInList("operlog", strTypeList) == true)
+            || StringUtil.IsInList("operlog", strTypeList) == true)
             {
                 // return:
                 //      -1  出错
@@ -1377,8 +1387,6 @@ out strError);
 
                         if (strState != "finish")
                         {
-                            string strLastDate = "";
-                            long lLastIndex = 0;
                             // TODO: 中断时断点记载
                             // TODO: 进度条应该是重新设置的
                             nRet = DoCreateOperLogTable(
@@ -1388,10 +1396,11 @@ out strError);
                                 strStartDate,
                                 strEndDate,
                                 LogType.OperLog,
+                                false,
                                 func_showMessage,
                                 token,
-                                out strLastDate,
-                                out lLastIndex,
+                                out string strLastDate,
+                                out long lLastIndex,
                                 out strError);
                             if (nRet == -1)
                             {
@@ -1443,6 +1452,7 @@ out strError);
                                 strStartDate,
                                 strEndDate,
                                 LogType.AccessLog,
+                                false,
                                 func_showMessage,
                                 token,
                                 out strLastDate,
@@ -1608,7 +1618,7 @@ out strError);
                     if (string.IsNullOrEmpty(line.ItemBarcode))
                         line.ItemBarcode = "@refID:" + searchresult.Cols[11];
 
-                    line.Location = GetLocationString(searchresult.Cols[1]);
+                    line.Location = Item.CanonicalizeLocationString(searchresult.Cols[1]);
                     line.AccessNo = searchresult.Cols[2];
 
                     line.State = searchresult.Cols[4];
@@ -1642,7 +1652,7 @@ out strError);
 
                     string strPrice = searchresult.Cols[10];
                     nRet = ParsePriceString(strPrice,
-            out long value,
+            out decimal value,
             out string strUnit,
             out string error1);
                     if (nRet == -1)
@@ -1679,23 +1689,7 @@ out strError);
                 out strError);
         }
 
-        // 把 location 字符串变换为便于处理的形态
-        // 阅览室 --> /阅览室
-        // 海淀分馆/阅览室 --> 海淀分馆/阅览室
-        // #reservation,阅览室 --> /阅览室
-        static string GetLocationString(string text)
-        {
-            text = StringUtil.GetPureLocation(text);
-            // 分析 strLocation 是否属于总馆形态，比如“阅览室”
-            // 如果是总馆形态，则要在前部增加一个 / 字符，以保证可以正确匹配 map 值
-            // ‘/’字符可以理解为在馆代码和阅览室名字之间插入的一个必要的符号。这是为了弥补早期做法的兼容性问题
-            ParseCalendarName(text,
-        out string strLibraryCode,
-        out string strRoom);
-            if (string.IsNullOrEmpty(strLibraryCode))
-                text = "/" + strRoom;
-            return text;
-        }
+
 
         public static void ParseCalendarName(string strName,
     out string strLibraryCode,
@@ -1809,87 +1803,7 @@ strStyle,
 
                     if (i < lIndex)
                         goto CONTINUE;
-#if NO
-                    // 2016/4/12
-                    // 检查事项状态。主动抛出异常，避免后面出现 index 异常
-                    if (searchresult.Cols == null)
-                    {
-                        // throw new Exception("浏览事项 Cols 为空: (lStart=0 index=" + i + ")  " + DumpResultItem(searchresult));
-                        // TODO: 写入错误日志
-                        continue;
-                    }
-                    if (searchresult.Cols.Length < 12)
-                    {
-                        // throw new Exception("浏览事项异常: (lStart=" + lStart + " index=" + i + ")  " + DumpResultItem(searchresult));
-                        goto CONTINUE;   // 中途遇到服务器有人删除册记录，很常见的现象
-                    }
 
-                    Item line = new Item();
-                    line.ItemRecPath = searchresult.Path;
-                    line.ItemBarcode = searchresult.Cols[0];
-                    // 2016/9/26
-                    if (string.IsNullOrEmpty(line.ItemBarcode))
-                        line.ItemBarcode = "@refID:" + searchresult.Cols[11];
-
-                    line.Location = searchresult.Cols[1];
-                    line.AccessNo = searchresult.Cols[2];
-
-                    line.State = searchresult.Cols[4];
-
-                    line.CreateTime = GetLocalTime(searchresult.Cols[5]);
-
-                    line.Borrower = searchresult.Cols[6];
-                    line.BorrowTime = GetLocalTime(searchresult.Cols[7]);
-                    line.BorrowPeriod = searchresult.Cols[8];
-                    // line.ReturningTime = ItemLine.GetLocalTime(searchresult.Cols[9]);
-
-                    if (line.BorrowTime == DateTime.MinValue)
-                    {
-                        // parameters:
-                        //      strBorrowTime   借阅起点时间。u 格式
-                        //      strReturningTime    返回应还时间。 u 格式
-                        nRet = BuildReturingTimeString(line.BorrowTime,
-            line.BorrowPeriod,
-            out DateTime returningTime,
-            out strError);
-                        if (nRet == -1)
-                        {
-                            line.ReturningTime = DateTime.MinValue;
-                        }
-                        else
-                            line.ReturningTime = returningTime;
-                    }
-                    else
-                        line.ReturningTime = DateTime.MinValue;
-
-                    string strPrice = searchresult.Cols[10];
-                    nRet = ParsePriceString(strPrice,
-            out long value,
-            out string strUnit,
-            out strError);
-                    if (nRet == -1)
-                    {
-                        line.Price = 0;
-                        line.Unit = "";
-                    }
-                    else
-                    {
-                        line.Price = value;
-                        line.Unit = strUnit;
-                    }
-
-                    string strItemDbName = GetDbName(searchresult.Path);
-                    string strBiblioDbName = (string)dbname_table[strItemDbName];
-                    if (string.IsNullOrEmpty(strBiblioDbName) == true)
-                    {
-                        strBiblioDbName = GetBiblioDbNameFromItemDbName(strItemDbName);
-                        dbname_table[strItemDbName] = strBiblioDbName;
-                    }
-
-                    string strBiblioRecPath = strBiblioDbName + "/" + searchresult.Cols[3];
-
-                    line.BiblioRecPath = strBiblioRecPath;
-#endif
                     object line = func_buildItem(searchresult);
                     if (line == null)
                         goto CONTINUE;
@@ -1937,13 +1851,16 @@ strStyle,
                 {
                     try
                     {
-                        context.AddRange(line);
+                        context.Find()
+                        context.Add(line);
                         context.SaveChanges();
                         dbContextTransaction.Commit();
                         count++;
                     }
                     catch (Exception ex)
                     {
+                        // Number = 1062 重复的 PrimaryKey
+
                         throw ex;
                     }
                 }
@@ -2110,13 +2027,14 @@ LibraryChannel channel,
                     Biblio line = new Biblio();
                     line.RecPath = searchresult.Path;
                     line.Xml = searchresult.RecordBody.Xml;
-                    // TODO: 创建检索点
-                    line.CreateKeys(line.Xml, line.RecPath);
+                    // 创建检索点和 Summary
+                    line.Create(line.Xml, line.RecPath);
                     biblio_recpaths.Add(searchresult.Path);
                     return line;
                 },
                 (lines) =>
                 {
+#if NO
                     {
                         Debug.Assert(biblio_recpaths.Count == lines.Count, "");
 
@@ -2158,7 +2076,7 @@ LibraryChannel channel,
                             channel.Timeout = old_timeout;
                         }
                     }
-
+#endif
                 },
                 func_showMessage,
                 "id,xml",
@@ -2347,7 +2265,7 @@ LibraryChannel channel,
 
 
         internal static int ParsePriceString(string strPrice,
-            out long value,
+            out decimal value,
             out string strUnit,
             out string strError)
         {
@@ -2393,6 +2311,7 @@ LibraryChannel channel,
                 return -1;
 
             strUnit = item.Prefix + item.Postfix;
+            /*
             try
             {
                 value = (long)(item.Value * 100);
@@ -2403,6 +2322,8 @@ LibraryChannel channel,
                 strError = "元值 '" + item.Value.ToString() + "' 折算为分值的时候出现异常：" + ex.Message;
                 return -1;
             }
+            */
+            value = item.Value;
             return 0;
         }
 
@@ -2490,13 +2411,14 @@ LibraryChannel channel,
 
 
         // 根据日志文件创建本地 operlogxxx 表
-        int DoCreateOperLogTable(
+        public int DoCreateOperLogTable(
             ref LibraryContext context,
             LibraryChannel channel,
             long lProgressStart,
             string strStartDate,
             string strEndDate,
             LogType logType,
+            bool bTraceLogRecord, // 是否跟踪日志记录。第一阶段只创建 operlogxxx 表的时候，本参数应当为 false
             Delegate_showMessage func_showMessage,
             CancellationToken token,
             out string strLastDate,
@@ -2593,6 +2515,7 @@ LibraryChannel channel,
 
             try
             {
+                int nProcessCount = 0;
                 string prev_date = "";
                 int nRecCount = 0;
                 foreach (OperLogItem item in loader)
@@ -2650,6 +2573,7 @@ LibraryChannel channel,
                         string strOperation = DomUtil.GetElementText(dom.DocumentElement, "operation");
                         string strAction = DomUtil.GetElementText(dom.DocumentElement, "action");
 
+                        OperLogItem current_item = item;
                         if (StringUtil.CompareVersion(this.ServerVersion, "2.74") < 0
                             && strOperation == "amerce" && (strAction == "amerce" || strAction == "modifyprice"))
                         {
@@ -2661,6 +2585,8 @@ LibraryChannel channel,
                                 return -1;
                             }
                             dom.LoadXml(new_item.Xml);
+                            current_item = new_item;
+                            /*
                             nRet = BuildOpers(
     strOperation,
     dom,
@@ -2670,8 +2596,9 @@ LibraryChannel channel,
     out strError);
                             if (lines != null)
                                 opers.AddRange(lines);
+                                */
                         }
-                        else
+
                         {
                             // return:
                             //      -2  不能识别的 strOperation 类型
@@ -2680,8 +2607,8 @@ LibraryChannel channel,
                             nRet = BuildOpers(
                                 strOperation,
                                 dom,
-                                item.Date,
-                                item.Index,
+                                current_item.Date,
+                                current_item.Index,
                                 out List<OperBase> lines,
                                 out strError);
                             if (lines != null)
@@ -2690,9 +2617,40 @@ LibraryChannel channel,
                         if (nRet == -1)
                             return -1;
                         // -2 不要报错
+
+                        if (bTraceLogRecord)
+                        {
+                            // 将一条日志记录中的动作兑现到 item reader biblio class_ 表
+                            // return:
+                            //      -1  出错
+                            //      0   没有必要处理
+                            //      1   完成
+                            nRet = ProcessLogRecord(
+                                context,
+                                item,
+                                dom,
+                                out strError);
+                            if (nRet == -1)
+                            {
+                                strError = "同步 " + item.Date + " " + item.Index.ToString() + " 时出错: " + strError;
+                                // TODO: 写入错误日志
+                            }
+                            if (nRet == 1)
+                                nProcessCount++;
+
+                            /*
+                            if (nProcessCount >= 1000)
+                            {
+                                context.SaveChanges();
+                                context.Dispose();
+                                context = new LibraryContext();
+                                nProcessCount = 0;
+                            }
+                            */
+                        }
                     }
 
-                    if (opers.Count > 4000)
+                    if (opers.Count > 100) // 4000
                     {
                         // context.AddRange(opers);
                         SaveChanges(ref context, opers);
@@ -2703,52 +2661,31 @@ LibraryChannel channel,
                         nRecCount = 0;
                     }
 
-                    /*
-                    bool bForce = false;
-                    if (nRecCount >= 4000)
-                        bForce = true;
-                    nRet = buffer.WriteToDb(connection,
-                        true,
-                        bForce,
-                        out strError);
-                    if (bForce == true)
-                    {
-                        strLastDate = item.Date;
-                        lLastIndex = item.Index + 1;
-                        nRecCount = 0;
-                    }
-                    // 2016/5/22
-                    if (nRet == -1)
-                        return -1;
-                        */
-
                     nRecCount++;
+                } // end of foreach
+
+                if (opers.Count > 0)
+                {
+                    // context.AddRange(opers);
+                    SaveChanges(ref context, opers);
+                    opers.Clear();
                 }
+
+                /*
+                if (bTraceLogRecord)
+                    context.SaveChanges();
+                    */
+
+                // 表示处理完成
+                strLastDate = "";
+                lLastIndex = 0;
+                return 0;
             }
             catch (Exception ex)
             {
                 strError = ExceptionUtil.GetDebugText(ex);
                 return -1;
             }
-
-            if (opers.Count > 0)
-            {
-                // context.AddRange(opers);
-                SaveChanges(ref context, opers);
-                opers.Clear();
-            }
-            /*
-                nRet = buffer.WriteToDb(connection,
-                true,
-                true,   // false,
-                out strError);
-            if (nRet == -1)
-                return -1;
-                */
-            // 表示处理完成
-            strLastDate = "";
-            lLastIndex = 0;
-            return 0;
         }
 
         // 在内存中增加一行
@@ -2825,281 +2762,13 @@ LibraryChannel channel,
             return 0;
         }
 
-        // 同步
-        // 注：中途遇到异常(例如 Loader 抛出异常)，可能会丢失 INSERT_BATCH 条以内的日志记录写入 operlog 表
-        // parameters:
-        //      strLastDate   处理中断或者结束时返回最后处理过的日期
-        //      last_index  处理或中断返回时最后处理过的位置。以后继续处理的时候可以从这个偏移开始
-        // return:
-        //      -1  出错
-        //      0   中断
-        //      1   完成
-        public int DoReplication(
-            ref LibraryContext context,
-            LibraryChannel channel,
-            string strStartDate,
-            string strEndDate,
-            LogType logType,
-            Delegate_showMessage func_showMessage,
-            CancellationToken token,
-            out string strLastDate,
-            out long last_index,
-            out string strError)
-        {
-            strError = "";
-            strLastDate = "";
-            last_index = -1;    // -1 表示尚未处理
-
-            int nRet = 0;
-
-            bool bUserChanged = false;
-
-            // strStartDate 里面可能会包含 ":1-100" 这样的附加成分
-            StringUtil.ParseTwoPart(strStartDate,
-                ":",
-                out string strLeft,
-                out string strRight);
-            strStartDate = strLeft;
-
-            if (string.IsNullOrEmpty(strStartDate) == true)
-            {
-                strError = "DoReplication() 出错: strStartDate 参数值不应为空";
-                return -1;
-            }
-
-            // stop.Initial("正在进行同步 ...");
-
-            try
-            {
-                /*
-                List<BiblioDbFromInfo> styles = null;
-                // 获得所有分类号检索途径 style
-                int nRet = GetClassFromStylesFromFile(out styles,
-                    out strError);
-                if (nRet == -1)
-                    return -1;
-
-                _classFromStyles = styles;
-
-                _updateBiblios.Clear();
-                _updateItems.Clear();
-                _updateReaders.Clear();
-                */
-
-                nRet = OperLogLoader.MakeLogFileNames(strStartDate,
-                    strEndDate,
-                    true,  // 是否包含扩展名 ".log"
-                    out List<string> dates,
-                    out string strWarning,
-                    out strError);
-                if (nRet == -1)
-                    return -1;
-
-                if (dates.Count > 0 && string.IsNullOrEmpty(strRight) == false)
-                {
-                    dates[0] = dates[0] + ":" + strRight;
-                }
-
-                // this.Channel.Timeout = new TimeSpan(0, 1, 0);   // 一分钟
-
-                ProgressEstimate estimate = new ProgressEstimate();
-
-                OperLogLoader loader = new OperLogLoader();
-                loader.Channel = channel;
-                loader.Stop = null;
-                loader.Estimate = estimate;
-                loader.Dates = dates;
-                loader.Level = 2;  // Program.MainForm.OperLogLevel;
-                loader.AutoCache = false;
-                loader.CacheDir = "";
-                loader.LogType = logType;
-
-                //loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
-                //loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
-
-                /*
-                // List<OperLogLine> lines = new List<OperLogLine>();
-                MultiBuffer buffer = new MultiBuffer();
-                buffer.Initial();
-                */
-
-                int nRecCount = 0;
-
-                string prev_date = "";
-                string strLastItemDate = "";
-                long lLastItemIndex = -1;
-                foreach (OperLogItem item in loader)
-                {
-                    if (token != null && token.IsCancellationRequested)
-                    {
-                        strError = "用户中断";
-                        return 0;
-                    }
-
-                    if (prev_date != item.Date)
-                    {
-                        func_showMessage?.Invoke($"正在处理日志文件 {item.Date}");
-                        prev_date = item.Date;
-                    }
-
-                    // stop.SetMessage("正在同步 " + item.Date + " " + item.Index.ToString() + " " + estimate.Text + "...");
-
-                    if (string.IsNullOrEmpty(item.Xml) == true)
-                        goto CONTINUE;
-
-                    XmlDocument dom = new XmlDocument();
-                    try
-                    {
-                        dom.LoadXml(item.Xml);
-                    }
-                    catch (Exception ex)
-                    {
-                        strError = logType.ToString() + "日志记录 " + item.Date + " " + item.Index.ToString() + " XML 装入 DOM 的时候发生错误: " + ex.Message;
-                        // TODO: 写入错误日志
-
-                        continue;
-                    }
-
-                    string strOperation = DomUtil.GetElementText(dom.DocumentElement, "operation");
-                    if (strOperation == "setUser")
-                    {
-                        bUserChanged = true;
-                        goto CONTINUE;
-                    }
-                    else
-                    {
-                        string strAction = DomUtil.GetElementText(dom.DocumentElement, "action");
-
-                        OperLogItem current_item = item;
-                        if (StringUtil.CompareVersion(this.ServerVersion, "2.74") < 0
-&& strOperation == "amerce" && (strAction == "amerce" || strAction == "modifyprice"))
-                        {
-                            // 重新获得当前日志记录，用最详细级别
-                            OperLogItem new_item = loader.LoadOperLogItem(item, 0);
-                            if (new_item == null)
-                            {
-                                strError = "重新获取 OperLogItem 时出错";
-                                return -1;
-                            }
-                            dom.LoadXml(new_item.Xml);
-                            current_item = new_item;
-                        }
-
-#if NO
-                        // 在内存中增加一行，关于 operlogXXX 表的信息
-                        nRet = buffer.AddLine(
-    strOperation,
-    dom,
-    current_item.Date,
-    current_item.Index,
-    out strError);
-                        if (nRet == -1)
-                            return -1;
-                        bool bForce = false;
-                        if (nRecCount >= 4000)
-                            bForce = true;
-                        nRet = buffer.WriteToDb(connection,
-                            true,
-                            bForce,
-                            out strError);
-                        if (bForce == true)
-                        {
-                            // 记忆
-                            strLastDate = item.Date;
-                            last_index = item.Index + 1;
-                            nRecCount = 0;
-                        }
-                        // 2016/5/22
-                        if (nRet == -1)
-                            return -1;
-#endif
-
-                        nRecCount++;
-                    }
-
-                    // 将一条日志记录中的动作兑现到 item reader biblio class_ 表
-                    // return:
-                    //      -1  出错
-                    //      0   中断
-                    //      1   完成
-                    nRet = ProcessLogRecord(
-                        context,
-                        item,
-                        dom,
-                        out strError);
-                    if (nRet == -1)
-                    {
-                        strError = "同步 " + item.Date + " " + item.Index.ToString() + " 时出错: " + strError;
-                        // TODO: 写入错误日志
-#if NO
-                        // TODO: 最好有个冻结按钮
-                        DialogResult result = System.Windows.Forms.DialogResult.Cancel;
-                        string strText = strError;
-                        this.Invoke((Action)(() =>
-                        {
-                            result = AutoCloseMessageBox.Show(this, strText + "\r\n\r\n(点右上角关闭按钮可以中断批处理)", 5000);
-                        }));
-
-                        if (result != System.Windows.Forms.DialogResult.OK)
-                            return -1;  // TODO: 缓存中没有兑现的怎么办?
-
-                        // 记入日志，继续处理
-                        this.GetErrorInfoForm().WriteHtml(strError + "\r\n");
-#endif
-                    }
-
-                // lProcessCount++;
-                CONTINUE:
-                    // 便于循环外获得这些值
-                    strLastItemDate = item.Date;
-                    lLastItemIndex = item.Index + 1;
-
-                    // index = 0;  // 第一个日志文件后面的，都从头开始了
-                }
-
-#if NO
-                // 缓存中尚未最后兑现的部分
-                nRet = FlushUpdate(
-                    connection,
-                    out strError);
-                if (nRet == -1)
-                    return -1;
-
-                // 最后一批
-                nRet = buffer.WriteToDb(connection,
-true,
-true,   // false,
-out strError);
-                if (nRet == -1)
-                    return -1;
-
-                // 记忆
-                strLastDate = strLastItemDate;
-                last_index = lLastItemIndex;
-
-                if (bUserChanged == true)
-                {
-                    nRet = DoCreateUserTable(out strError);
-                    if (nRet == -1)
-                        return -1;
-                }
-#endif
-
-                return 1;
-            }
-            catch (Exception ex)
-            {
-                strError = "DoReplication() exception: " + ExceptionUtil.GetDebugText(ex);
-                return -1;
-            }
-        }
 
         #region
 
         // 将一条日志记录中的动作兑现到 item reader biblio class_ 表
         // return:
         //      -1  出错
-        //      0   中断
+        //      0   没有必要处理
         //      1   完成
         int ProcessLogRecord(
             LibraryContext context,
@@ -3114,41 +2783,43 @@ out strError);
     "operation");
             if (strOperation == "setBiblioInfo")
             {
+                // return:
+                //     -1  出错
+                //     0   没有必要处理
+                //     1   已经处理
                 nRet = this.TraceSetBiblioInfo(
                     context,
                     dom,
                     out strError);
             }
-#if NO
             else if (strOperation == "setEntity")
             {
                 nRet = this.TraceSetEntity(
-                    connection,
+                    context,
                     dom,
                     out strError);
             }
             else if (strOperation == "setReaderInfo")
             {
                 nRet = this.TraceSetReaderInfo(
-                    connection,
+                    context,
                     dom,
                     out strError);
             }
             else if (strOperation == "borrow")
             {
                 nRet = this.TraceBorrow(
-                    connection,
+                    context,
                     dom,
                     out strError);
             }
             else if (strOperation == "return")
             {
                 nRet = this.TraceReturn(
-                    connection,
+                    context,
                     dom,
                     out strError);
             }
-#endif
 
             if (nRet == -1)
             {
@@ -3158,7 +2829,7 @@ out strError);
                 return -1;
             }
 
-            return 1;
+            return nRet;
         }
 
         // SetBiblioInfo() API 或 CopyBiblioInfo() API 的恢复动作
@@ -3191,6 +2862,10 @@ out strError);
 逻辑恢复delete操作的时候，检索出全部下属的实体记录删除。
 快照恢复的时候，可以根据operlogdom直接删除记录了path的那些实体记录
          * */
+        // return:
+        //     -1  出错
+        //     0   没有必要处理
+        //     1   已经处理
         public int TraceSetBiblioInfo(
             LibraryContext context,
             XmlDocument domLog,
@@ -3198,173 +2873,925 @@ out strError);
         {
             strError = "";
 
-            //long lRet = 0;
-            int nRet = 0;
-
-            string strAction = DomUtil.GetElementText(domLog.DocumentElement,
-                "action");
-
-            if (strAction == "new" || strAction == "change")
+            using (var dbContextTransaction = context.Database.BeginTransaction())
             {
-                string strRecord = DomUtil.GetElementText(domLog.DocumentElement,
-                    "record",
-                    out XmlNode node);
-                if (node == null)
+
+                //long lRet = 0;
+                int nRet = 0;
+
+                string strAction = DomUtil.GetElementText(domLog.DocumentElement,
+                    "action");
+
+                if (strAction == "new" || strAction == "change")
                 {
-                    strError = "日志记录中缺<record>元素";
-                    return -1;
-                }
-                string strRecPath = DomUtil.GetAttr(node, "recPath");
-
-                if (string.IsNullOrEmpty(strRecPath) == true)
-                    return 0;   // 轮空
-
-                string strTimestamp = DomUtil.GetAttr(node, "timestamp");
-
-                // 把书目摘要写入 biblio 表
-
-                // 把分类号写入若干分类号表
-                try
-                {
-                    Biblio.UpdateBiblioRecord(
-            context,
-            strRecPath,
-            strRecord);
-                }
-                catch (Exception ex)
-                {
-                    if (nRet == -1)
+                    string strRecord = DomUtil.GetElementText(domLog.DocumentElement,
+                        "record",
+                        out XmlNode node);
+                    if (node == null)
                     {
-                        strError = ex.Message;
+                        strError = "日志记录中缺<record>元素";
                         return -1;
                     }
-                }
+                    string strRecPath = DomUtil.GetAttr(node, "recPath");
 
-                // 在 biblio 表中写入 summary 为空或者特殊标志的记录，最后按照标记全部重新获得?
-            }
-#if NO
-            else if (strAction == "onlymovebiblio"
-                || strAction == "onlycopybiblio"
-                || strAction == "move"
-                || strAction == "copy")
-            {
-                string strTargetRecord = DomUtil.GetElementText(domLog.DocumentElement,
-                    "record",
-                    out XmlNode node);
-                if (node == null)
-                {
-                    strError = "日志记录中缺<record>元素";
-                    return -1;
-                }
-                string strTargetRecPath = DomUtil.GetAttr(node, "recPath");
+                    if (string.IsNullOrEmpty(strRecPath) == true)
+                        return 0;   // 轮空
 
-                if (string.IsNullOrEmpty(strTargetRecPath) == true)
-                    return 0;
+                    string strTimestamp = DomUtil.GetAttr(node, "timestamp");
 
-                string strOldRecord = DomUtil.GetElementText(domLog.DocumentElement,
-                    "oldRecord",
-                    out node);
-                if (node == null)
-                {
-                    strError = "日志记录中缺<oldRecord>元素";
-                    return -1;
-                }
-                string strOldRecPath = DomUtil.GetAttr(node, "recPath");
-                bool bOldExist = DomUtil.GetBooleanParam(node, "exist", true);
+                    // 把书目摘要写入 biblio 表
 
-                string strMergeStyle = DomUtil.GetElementText(domLog.DocumentElement,
-    "mergeStyle");
-
-                // 如果目标记录没有记载，就尽量用源记录
-                if (String.IsNullOrEmpty(strTargetRecord) == true)
-                {
-                    if (String.IsNullOrEmpty(strOldRecord) == true)
+                    // 把分类号写入若干分类号表
+                    try
                     {
-                        if (bOldExist == true)
+                        Biblio.UpdateBiblioRecord(
+                context,
+                strRecPath,
+                strRecord);
+                    }
+                    catch (Exception ex)
+                    {
+                        if (nRet == -1)
                         {
-                            strError = "源记录 '" + strOldRecPath + "' 不存在，并且<record>元素无文本内容，这时<oldRecord>元素也无文本内容，无法获得要写入的记录内容";
+                            strError = ex.Message;
                             return -1;
                         }
                     }
-                    else
-                        strTargetRecord = strOldRecord;
+                }
+                else if (strAction == "onlymovebiblio"
+                    || strAction == "onlycopybiblio"
+                    || strAction == "move"
+                    || strAction == "copy")
+                {
+                    string strTargetRecord = DomUtil.GetElementText(domLog.DocumentElement,
+                        "record",
+                        out XmlNode node);
+                    if (node == null)
+                    {
+                        strError = "日志记录中缺<record>元素";
+                        return -1;
+                    }
+                    string strTargetRecPath = DomUtil.GetAttr(node, "recPath");
+
+                    if (string.IsNullOrEmpty(strTargetRecPath) == true)
+                        return 0;
+
+                    string strOldRecord = DomUtil.GetElementText(domLog.DocumentElement,
+                        "oldRecord",
+                        out node);
+                    if (node == null)
+                    {
+                        strError = "日志记录中缺<oldRecord>元素";
+                        return -1;
+                    }
+                    string strOldRecPath = DomUtil.GetAttr(node, "recPath");
+                    bool bOldExist = DomUtil.GetBooleanParam(node, "exist", true);
+
+                    string strMergeStyle = DomUtil.GetElementText(domLog.DocumentElement,
+        "mergeStyle");
+
+                    // 如果目标记录没有记载，就尽量用源记录
+                    if (String.IsNullOrEmpty(strTargetRecord) == true)
+                    {
+                        if (String.IsNullOrEmpty(strOldRecord) == true)
+                        {
+                            if (bOldExist == true)
+                            {
+                                strError = "源记录 '" + strOldRecPath + "' 不存在，并且<record>元素无文本内容，这时<oldRecord>元素也无文本内容，无法获得要写入的记录内容";
+                                return -1;
+                            }
+                        }
+                        else
+                            strTargetRecord = strOldRecord;
+                    }
+
+                    // 如果有“新记录”内容
+                    if (string.IsNullOrEmpty(strTargetRecPath) == false
+                        && String.IsNullOrEmpty(strTargetRecord) == false)
+                    {
+                        // 写入新的书目记录
+                        try
+                        {
+                            Biblio.UpdateBiblioRecord(
+                    context,
+                    strTargetRecPath,
+                    strTargetRecord);
+                        }
+                        catch (Exception ex)
+                        {
+                            if (nRet == -1)
+                            {
+                                strError = ex.Message;
+                                return -1;
+                            }
+                        }
+                    }
+
+                    // 复制或者移动下级子记录
+                    if (strAction == "move"
+                    || strAction == "copy")
+                    {
+                        nRet = CopySubRecords(
+                            context,
+                            domLog,
+                            strAction,
+                            // string strSourceBiblioRecPath,
+                            strTargetRecPath,
+                            out strError);
+                        if (nRet == -1)
+                            return -1;
+                    }
+
+                    if (strAction == "move" || strAction == "onlymovebiblio")
+                    {
+                        // 删除旧的书目记录
+                        nRet = DeleteBiblioRecord(
+                            context,
+                            strOldRecPath,
+                            true,
+                            true,
+                            out strError);
+                        if (nRet == -1)
+                            return -1;
+                    }
+                }
+                else if (strAction == "delete"
+                    || strAction == "onlydeletebiblio"
+                    || strAction == "onlydeletesubrecord")
+                {
+                    string strOldRecord = DomUtil.GetElementText(domLog.DocumentElement,
+                        "oldRecord",
+                        out XmlNode node);
+                    if (node == null)
+                    {
+                        strError = "日志记录中缺<oldRecord>元素";
+                        return -1;
+                    }
+                    string strRecPath = DomUtil.GetAttr(node, "recPath");
+
+                    if (string.IsNullOrEmpty(strRecPath) == false)
+                    {
+                        // 删除书目记录
+                        nRet = DeleteBiblioRecord(
+                            context,
+                            strRecPath,
+                            strAction == "delete" || strAction == "onlydeletebiblio" ? true : false,
+                            strAction == "delete" || strAction == "onlydeletesubrecord" ? true : false,
+                            out strError);
+                        if (nRet == -1)
+                            return -1;
+                    }
                 }
 
-                // 如果有“新记录”内容
-                if (string.IsNullOrEmpty(strTargetRecPath) == false
-                    && String.IsNullOrEmpty(strTargetRecord) == false)
-                {
-                    // 写入新的书目记录
-                    nRet = UpdateBiblioRecord(
-context,
-strTargetRecPath,
-strTargetRecord,
-out strError);
-                    if (nRet == -1)
-                        return -1;
-                }
-
-                // 复制或者移动下级子记录
-                if (strAction == "move"
-                || strAction == "copy")
-                {
-                    nRet = CopySubRecords(
-                        connection,
-                        domLog,
-                        strAction,
-                        // string strSourceBiblioRecPath,
-                        strTargetRecPath,
-                        out strError);
-                    if (nRet == -1)
-                        return -1;
-                }
-
-                if (strAction == "move" || strAction == "onlymovebiblio")
-                {
-                    // 删除旧的书目记录
-                    nRet = DeleteBiblioRecord(
-                        connection,
-                        strOldRecPath,
-                        true,
-                        true,
-                        out strError);
-                    if (nRet == -1)
-                        return -1;
-                }
+                context.SaveChanges();
+                dbContextTransaction.Commit();
             }
-            else if (strAction == "delete"
-                || strAction == "onlydeletebiblio"
-                || strAction == "onlydeletesubrecord")
+            return 1;
+        }
+
+        // TODO: 需要扩展为也能复制 order issue comment 记录
+        int CopySubRecords(
+            LibraryContext context,
+            XmlDocument dom,
+            string strAction,
+            string strTargetBiblioRecPath,
+            out string strError)
+        {
+            strError = "";
+
+            if (dom == null || dom.DocumentElement == null)
+                return 0;
+
+            string strElement = "";
+            if (strAction == "move")
+                strElement = "moveEntityRecords";
+            else if (strAction == "copy")
+                strElement = "copyEntityRecords";
+
+            XmlNodeList nodes = dom.DocumentElement.SelectNodes(strElement + "/record");
+            if (nodes.Count == 0)
+                return 0;
+
+            StringBuilder text = new StringBuilder(4096);
+
+            // Debug.WriteLine("CopySubRecords() nodes.Count=" + nodes.Count);
+            /*
+<copyEntityRecords> 被复制的实体记录(容器)。只有当<action>为*copy*时才有这个元素。
+<record recPath='中文图书实体/100' targetRecPath='中文图书实体/110'>...</record> 这个元素可以重复。注意元素内文本内容目前为空。recPath属性为源记录路径，targetRecPath为目标记录路径
+...
+</copyEntityRecords>
+<moveEntityRecords> 被移动的实体记录(容器)。只有当<action>为*move*时才有这个元素。
+<record recPath='中文图书实体/100' targetRecPath='中文图书实体/110'>...</record> 这个元素可以重复。注意元素内文本内容目前为空。recPath属性为源记录路径，targetRecPath为目标记录路径
+...
+</moveEntityRecords>
+* */
+            foreach (XmlNode node in nodes)
             {
-                XmlNode node = null;
-                string strOldRecord = DomUtil.GetElementText(domLog.DocumentElement,
-                    "oldRecord",
-                    out node);
-                if (node == null)
-                {
-                    strError = "日志记录中缺<oldRecord>元素";
-                    return -1;
-                }
-                string strRecPath = DomUtil.GetAttr(node, "recPath");
+                string strSourceRecPath = DomUtil.GetAttr(node, "recPath");
+                string strTargetRecPath = DomUtil.GetAttr(node, "targetRecPath");
 
-                if (string.IsNullOrEmpty(strRecPath) == false)
+                if (strAction == "copy")
                 {
-                    // 删除书目记录
-                    nRet = DeleteBiblioRecord(
-                        connection,
-                        strRecPath,
-                        strAction == "delete" || strAction == "onlydeletebiblio" ? true : false,
-                        strAction == "delete" || strAction == "onlydeletesubrecord" ? true : false,
-                        out strError);
-                    if (nRet == -1)
-                        return -1;
+                    string strNewBarcode = DomUtil.GetAttr(node, "newBarcode");
+
+                    var source_item = context.Items.SingleOrDefault(x => x.ItemRecPath == strSourceRecPath);
+                    var target_item = context.Items.SingleOrDefault(x => x.ItemRecPath == strTargetRecPath);
+                    if (target_item == null)
+                    {
+                        if (source_item != null)
+                        {
+                            target_item = source_item.Clone();
+                            target_item.ClearBorrowInfo();
+                            target_item.ItemRecPath = strTargetRecPath;
+                        }
+                        else
+                        {
+                            // 注意这时候新 new 的对象很多字段都是空，信息不全了
+                            target_item = new Item
+                            {
+                                ItemRecPath = strTargetRecPath,
+                                BiblioRecPath = strTargetBiblioRecPath,
+                                CreateTime = DateTime.Now
+                            };
+                        }
+                    }
+                    target_item.BiblioRecPath = strTargetBiblioRecPath;
+                    if (string.IsNullOrEmpty(strNewBarcode) == false)
+                        target_item.ItemBarcode = strNewBarcode;
+                    context.AddOrUpdate(target_item);
+                }
+                else
+                {
+                    // move
+                    // 注意检查源和目标记录路径应该不同
+                    // 删除源。修改目标
+
+
+                    string strNewBarcode = DomUtil.GetAttr(node, "newBarcode");
+
+                    var source_item = context.Items.SingleOrDefault(x => x.ItemRecPath == strSourceRecPath);
+                    var target_item = context.Items.SingleOrDefault(x => x.ItemRecPath == strTargetRecPath);
+                    if (target_item != null && source_item != null)
+                    {
+                        // 源和目标都已经存在。
+                        context.Remove(source_item);
+                        source_item.CopyTo(target_item);
+                        Debug.Assert(string.IsNullOrEmpty(strTargetRecPath) == false, "");
+                        target_item.ItemRecPath = strTargetRecPath;
+                    }
+                    else if (target_item == null && source_item != null)
+                    {
+                        // 源存在，目标不存在。
+                        // 要把源修改为目标
+                        target_item = source_item.Clone();
+                        context.Remove(source_item);
+
+                        Debug.Assert(string.IsNullOrEmpty(strTargetRecPath) == false, "");
+                        target_item.ItemRecPath = strTargetRecPath;
+                    }
+                    else if (target_item != null && source_item == null)
+                    {
+                        // 源不存在，目标存在。
+                        // 注：这种情况有潜在问题
+                    }
+                    else if (target_item == null)
+                    {
+                        // 源和目标都不存在
+                        // 注：这种情况有潜在问题
+                        target_item = new Item
+                        {
+                            ItemRecPath = strTargetRecPath,
+                            CreateTime = DateTime.Now
+                        };
+                    }
+
+                    target_item.ItemRecPath = strTargetRecPath;
+                    target_item.BiblioRecPath = strTargetBiblioRecPath;
+                    if (string.IsNullOrEmpty(strNewBarcode) == false)
+                        target_item.ItemBarcode = strNewBarcode;
+                    context.AddOrUpdate(target_item);
                 }
             }
-#endif
 
             return 0;
         }
 
+        int DeleteBiblioRecord(
+    LibraryContext context,
+    string strBiblioRecPath,
+    bool bDeleteBiblio,
+    bool bDeleteSubrecord,
+    out string strError)
+        {
+            strError = "";
+
+            if (bDeleteBiblio == false
+    && bDeleteSubrecord == false)
+            {
+                return 0;
+            }
+
+            if (bDeleteBiblio)
+            {
+                var biblio = context.Biblios.SingleOrDefault(x => x.RecPath == strBiblioRecPath);
+                if (biblio != null)
+                    context.Biblios.Remove(biblio);
+            }
+
+            if (bDeleteSubrecord)
+            {
+                var items = context.Items.Where(x => x.BiblioRecPath == strBiblioRecPath).ToList();
+                if (items.Count > 0)
+                    context.Items.RemoveRange(items);
+            }
+
+            return 1;
+        }
+
+        // SetEntities() API 恢复动作
+        /* 日志记录格式
+<root>
+  <operation>setEntity</operation> 操作类型
+  <action>new</action> 具体动作。有new change delete 3种
+  <style>...</style> 风格。有force nocheckdup noeventlog 3种
+  <record recPath='中文图书实体/3'><root><parent>2</parent><barcode>0000003</barcode><state>状态2</state><location>阅览室</location><price></price><bookType>教学参考</bookType><registerNo></registerNo><comment>test</comment><mergeComment></mergeComment><batchNo>111</batchNo><borrower></borrower><borrowDate></borrowDate><borrowPeriod></borrowPeriod></root></record> 记录体
+  <oldRecord recPath='中文图书实体/3'>...</oldRecord> 被覆盖或者删除的记录 动作为change和delete时具备此元素
+  <operator>test</operator> 操作者
+  <operTime>Fri, 08 Dec 2006 08:41:46 GMT</operTime> 操作时间
+</root>
+
+注：1) 当<action>为delete时，没有<record>元素。为new时，没有<oldRecord>元素。
+	2) <record>中的内容, 涉及到流通的<borrower><borrowDate><borrowPeriod>等, 在日志恢复阶段, 都应当无效, 这几个内容应当从当前位置库中记录获取, 和<record>中其他内容合并后, 再写入数据库
+	3) 一次SetEntities()API调用, 可能创建多条日志记录。
+         
+         * */
+        public int TraceSetEntity(
+    LibraryContext context,
+    XmlDocument domLog,
+    out string strError)
+        {
+            strError = "";
+
+            using (var dbContextTransaction = context.Database.BeginTransaction())
+            {
+                int nRet = 0;
+
+                string strAction = DomUtil.GetElementText(domLog.DocumentElement,
+                    "action");
+
+                if (strAction == "new"
+        || strAction == "change"
+        || strAction == "move")
+                {
+                    string strRecord = DomUtil.GetElementText(domLog.DocumentElement,
+                        "record",
+                        out XmlNode node);
+                    if (node == null)
+                    {
+                        // 改为进行删除操作
+                        strAction = "delete";
+                        goto TRY_DELETE;
+                    }
+
+                    string strNewRecPath = DomUtil.GetAttr(node, "recPath");
+
+                    // 
+                    string strOldRecord = "";
+                    string strOldRecPath = "";
+                    if (strAction == "move")
+                    {
+                        strOldRecord = DomUtil.GetElementText(domLog.DocumentElement,
+                            "oldRecord",
+                            out node);
+                        if (node == null)
+                        {
+                            strError = "日志记录中缺<oldRecord>元素";
+                            return -1;
+                        }
+
+                        strOldRecPath = DomUtil.GetAttr(node, "recPath");
+                    }
+
+                    string strCreateOperTime = "";
+
+                    if (strAction == "new")
+                        strCreateOperTime = DomUtil.GetElementText(domLog.DocumentElement, "operTime");
+
+                    // 在 SQL item 库中写入一条册记录
+                    nRet = WriteItemRecord(context,
+                        strNewRecPath,
+                        strRecord,
+                        strCreateOperTime,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "写入册记录 '" + strNewRecPath + "' 时发生错误: " + strError;
+                        return -1;
+                    }
+
+                    if (strAction == "move")
+                    {
+                        // 删除册记录
+                        var item = context.Items.FirstOrDefault(x => x.ItemRecPath == strOldRecPath);
+                        if (item != null)
+                            context.Items.Remove(item);
+                    }
+
+                    context.SaveChanges();
+                    dbContextTransaction.Commit();
+                    return 1;
+                }
+            TRY_DELETE:
+                if (strAction == "delete")
+                {
+                    XmlNode node = null;
+                    string strOldRecord = DomUtil.GetElementText(domLog.DocumentElement,
+                        "oldRecord",
+                        out node);
+                    if (node == null)
+                    {
+                        strError = "日志记录中缺<oldRecord>元素";
+                        return -1;
+                    }
+                    string strRecPath = DomUtil.GetAttr(node, "recPath");
+
+                    // 删除册记录
+                    var item = context.Items.FirstOrDefault(x => x.ItemRecPath == strRecPath);
+                    if (item != null)
+                        context.Items.Remove(item);
+
+                    context.SaveChanges();
+                    dbContextTransaction.Commit();
+                    return 1;
+                }
+
+                strError = "无法识别的<action>内容 '" + strAction + "'";
+                return -1;
+            }
+        }
+
+        // 在 SQL item 库中写入一条册记录
+        // parameters:
+        //      strLogCreateTime    日志操作记载的创建时间。不是创建动作的其他时间，不要放在这里
+        int WriteItemRecord(LibraryContext context,
+            string strItemRecPath,
+            string strItemXml,
+            string strLogCreateTime,
+            out string strError)
+        {
+            strError = "";
+
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.LoadXml(strItemXml);
+            }
+            catch (Exception ex)
+            {
+                strError = "XML 装入 DOM 出错: " + ex.Message;
+                return -1;
+            }
+
+            string strParentID = DomUtil.GetElementText(dom.DocumentElement,
+                "parent");
+            // 根据 册/订购/期/评注 记录路径和 parentid 构造所从属的书目记录路径
+            string strBiblioRecPath = BuildBiblioRecPath("item",
+                strItemRecPath,
+                strParentID);
+            if (string.IsNullOrEmpty(strBiblioRecPath) == true)
+            {
+                strError = "根据册记录路径 '" + strItemRecPath + "' 和 parentid '" + strParentID + "' 构造书目记录路径出错";
+                return 0;
+            }
+
+            var line = context.Items.FirstOrDefault(x => x.ItemRecPath == strItemRecPath);
+
+            // 
+            int nRet = Item.FromXml(dom,
+            strItemRecPath,
+            strBiblioRecPath,
+            strLogCreateTime,
+            ref line,
+            out strError);
+            if (nRet == -1)
+                return -1;
+
+            context.AddOrUpdate(line);
+            return 0;
+        }
+
+        // SetReaderInfo() API 恢复动作
+        /*
+<root>
+	<operation>setReaderInfo</operation> 操作类型
+	<action>...</action> 具体动作。有new change delete move 4种
+	<record recPath='...'>...</record> 新记录
+    <oldRecord recPath='...'>...</oldRecord> 被覆盖或者删除的记录 动作为change和delete时具备此元素
+    <changedEntityRecord itemBarcode='...' recPath='...' oldBorrower='...' newBorrower='...' /> 若干个元素。表示连带发生修改的册记录
+	<operator>test</operator> 操作者
+	<operTime>Fri, 08 Dec 2006 09:01:38 GMT</operTime> 操作时间
+</root>
+
+注: new 的时候只有<record>元素，delete的时候只有<oldRecord>元素，change的时候两者都有
+
+         * */
+        public int TraceSetReaderInfo(
+LibraryContext context,
+XmlDocument domLog,
+out string strError)
+        {
+            strError = "";
+
+            using (var dbContextTransaction = context.Database.BeginTransaction())
+            {
+                int nRet = 0;
+
+                string strAction = DomUtil.GetElementText(domLog.DocumentElement,
+                    "action");
+
+                if (strAction == "new"
+                    || strAction == "change"
+                    || strAction == "move")
+                {
+                    string strRecord = DomUtil.GetElementText(domLog.DocumentElement,
+                        "record",
+                        out XmlNode node);
+                    if (node == null)
+                    {
+                        strError = "日志记录中缺<record>元素";
+                        return -1;
+                    }
+                    string strNewRecPath = DomUtil.GetAttr(node, "recPath");
+
+                    string strOldRecord = "";
+                    string strOldRecPath = "";
+                    if (strAction == "move")
+                    {
+                        strOldRecord = DomUtil.GetElementText(domLog.DocumentElement,
+                            "oldRecord",
+                            out node);
+                        if (node == null)
+                        {
+                            strError = "日志记录中缺<oldRecord>元素";
+                            return -1;
+                        }
+
+                        strOldRecPath = DomUtil.GetAttr(node, "recPath");
+                        if (string.IsNullOrEmpty(strOldRecPath) == true)
+                        {
+                            strError = "日志记录中<oldRecord>元素内缺recPath属性值";
+                            return -1;
+                        }
+
+                        // 如果移动过程中没有修改，则要用旧的记录内容写入目标
+                        if (string.IsNullOrEmpty(strRecord) == true)
+                            strRecord = strOldRecord;
+                    }
+
+                    // 在 Patrons 表中写入一条读者记录
+                    nRet = WriteReaderRecord(context,
+                        strNewRecPath,
+                        strRecord,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "写入读者记录 '" + strNewRecPath + "' 时发生错误: " + strError;
+                        return -1;
+                    }
+
+                    XmlNodeList nodes = domLog.DocumentElement.SelectNodes("changedEntityRecord");
+                    foreach (XmlElement item in nodes)
+                    {
+                        string strItemBarcode = item.GetAttribute("itemBarcode");
+                        string strItemRecPath = item.GetAttribute("recPath");
+                        string strOldReaderBarcode = item.GetAttribute("oldBorrower");
+                        string strNewReaderBarcode = item.GetAttribute("newBorrower");
+
+                        nRet = TraceChangeBorrower(
+                            context,
+                            strItemBarcode,
+                            strItemRecPath,
+                            strNewReaderBarcode,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            strError = "修改册记录 '" + strItemRecPath + "' 的 borrower 字段时发生错误: " + strError;
+                            return -1;
+                        }
+                    }
+
+                    if (strAction == "move")
+                    {
+                        // 删除读者记录
+                        var patron = context.Patrons.FirstOrDefault(x => x.RecPath == strOldRecPath);
+                        if (patron != null)
+                            context.Patrons.Remove(patron);
+                    }
+
+                    context.SaveChanges();
+                    dbContextTransaction.Commit();
+                    return 1;
+                }
+                else if (strAction == "delete")
+                {
+                    string strOldRecord = DomUtil.GetElementText(domLog.DocumentElement,
+                        "oldRecord",
+                        out XmlNode node);
+                    if (node == null)
+                    {
+                        strError = "日志记录中缺<oldRecord>元素";
+                        return -1;
+                    }
+                    string strRecPath = DomUtil.GetAttr(node, "recPath");
+
+                    // 删除读者记录
+                    var patron = context.Patrons.FirstOrDefault(x => x.RecPath == strRecPath);
+                    if (patron != null)
+                        context.Patrons.Remove(patron);
+
+                    context.SaveChanges();
+                    dbContextTransaction.Commit();
+                    return 1;
+                }
+                else
+                {
+                    strError = "无法识别的<action>内容 '" + strAction + "'";
+                    return -1;
+                }
+            }
+        }
+
+        // 在 SQL reader 库中写入一条读者记录
+        int WriteReaderRecord(LibraryContext context,
+            string strReaderRecPath,
+            string strReaderXml,
+            out string strError)
+        {
+            strError = "";
+
+            if (string.IsNullOrEmpty(strReaderRecPath) == true)
+                return 0;
+
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.LoadXml(strReaderXml);
+            }
+            catch (Exception ex)
+            {
+                strError = "WriteReaderRecord XML 装入 DOM 出错: " + ex.Message;
+                return -1;
+            }
+
+            // 根据读者库名，得到馆代码
+            string strReaderDbName = GetDbName(strReaderRecPath);
+
+            string strLibraryCode = GetReaderDbLibraryCode(strReaderDbName);
+
+            var line = context.Patrons.FirstOrDefault(x => x.RecPath == strReaderRecPath);
+            // 根据 XML 记录建立
+            int nRet = Patron.FromXml(dom,
+                strReaderRecPath,
+                strLibraryCode,
+                ref line,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            context.AddOrUpdate(line);
+            return 0;
+        }
+
+        public int TraceChangeBorrower(
+    LibraryContext context,
+    string strItemBarcode,
+    string strItemRecPath,
+    string strNewBorrower,
+    out string strError)
+        {
+            strError = "";
+
+            if (String.IsNullOrEmpty(strItemBarcode) == true)
+            {
+                strError = "strItemBarcode 参数不应为空";
+                return -1;
+            }
+
+            var item = context.Items.FirstOrDefault(x => x.ItemRecPath == strItemRecPath);
+            if (item != null)
+            {
+                item.ItemBarcode = strItemBarcode;
+                item.Borrower = strNewBorrower;
+                context.Items.Update(item);
+            }
+            else
+            {
+                // TODO 写入错误日志，表明没有找到这个路径的实体记录
+            }
+
+#if NO
+            ItemLine line = new ItemLine();
+
+            // line.Full = false;
+            line.Level = 2;
+            line.ItemBarcode = strItemBarcode;
+            line.Borrower = strNewBorrower;
+            line.ItemRecPath = strItemRecPath;
+
+            this._updateItems.Add(line);
+            if (this._updateItems.Count >= UPDATE_ITEMS_BATCHSIZE)
+            {
+                nRet = CommitUpdateItems(
+                    connection,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+            }
+#endif
+            return 0;
+        }
+
+        // Borrow() API 恢复动作
+        /*
+<root>
+  <operation>borrow</operation> 操作类型
+  <readerBarcode>R0000002</readerBarcode> 读者证条码号
+  <itemBarcode>0000001</itemBarcode>  册条码号
+  <borrowDate>Fri, 08 Dec 2006 04:17:31 GMT</borrowDate> 借阅日期
+  <borrowPeriod>30day</borrowPeriod> 借阅期限
+  <no>0</no> 续借次数。0为首次普通借阅，1开始为续借
+  <operator>test</operator> 操作者
+  <operTime>Fri, 08 Dec 2006 04:17:31 GMT</operTime> 操作时间
+  <confirmItemRecPath>...</confirmItemRecPath> 辅助判断用的册记录路径
+  
+  <readerRecord recPath='...'>...</readerRecord>	最新读者记录
+  <itemRecord recPath='...'>...</itemRecord>	最新册记录
+</root>
+         * */
+        public int TraceBorrow(
+LibraryContext context,
+XmlDocument domLog,
+out string strError)
+        {
+            strError = "";
+
+            using (var dbContextTransaction = context.Database.BeginTransaction())
+            {
+                int nRet = 0;
+
+                string strReaderBarcode = DomUtil.GetElementText(domLog.DocumentElement,
+        "readerBarcode");
+                if (String.IsNullOrEmpty(strReaderBarcode) == true)
+                {
+                    strError = "<readerBarcode>元素值为空";
+                    return -1;
+                }
+
+                // 读入册记录
+                string strConfirmItemRecPath = DomUtil.GetElementText(domLog.DocumentElement,
+                    "confirmItemRecPath");
+                string strItemBarcode = DomUtil.GetElementText(domLog.DocumentElement,
+                    "itemBarcode");
+                if (String.IsNullOrEmpty(strItemBarcode) == true)
+                {
+                    strError = "<strItemBarcode>元素值为空";
+                    return -1;
+                }
+
+                var borrowDate = GetLocalTime(DomUtil.GetElementText(domLog.DocumentElement,
+                    "borrowDate"));
+                string strBorrowPeriod = DomUtil.GetElementText(domLog.DocumentElement,
+                    "borrowPeriod");
+                //string strReturningDate = ItemLine.GetLocalTime(DomUtil.GetElementText(domLog.DocumentElement,
+                //    "returningDate"));
+
+                DateTime returningTime = DateTime.MinValue;
+
+                if (borrowDate != DateTime.MinValue)
+                {
+                    // parameters:
+                    //      strBorrowTime   借阅起点时间。u 格式
+                    //      strReturningTime    返回应还时间。 u 格式
+                    nRet = BuildReturingTimeString(borrowDate,
+        strBorrowPeriod,
+        out returningTime,
+        out strError);
+                    if (nRet == -1)
+                    {
+                        returningTime = DateTime.MinValue;
+                    }
+                }
+                else
+                    returningTime = DateTime.MinValue;
+
+
+                Item item = null;
+
+                if (string.IsNullOrEmpty(strConfirmItemRecPath) == false)
+                    item = context.Items.FirstOrDefault(x => x.ItemRecPath == strConfirmItemRecPath);
+                else
+                    item = context.Items.FirstOrDefault(x => x.ItemBarcode == strItemBarcode);
+
+                if (item != null)
+                {
+                    if (string.IsNullOrEmpty(item.ItemBarcode))
+                        item.ItemBarcode = strItemBarcode;
+                    if (string.IsNullOrEmpty(item.ItemRecPath))
+                        item.ItemRecPath = strConfirmItemRecPath;
+                    item.Borrower = strReaderBarcode;
+                    item.BorrowTime = borrowDate;
+                    item.BorrowPeriod = strBorrowPeriod;
+                    item.ReturningTime = returningTime;
+
+                    context.Items.Update(item);
+                    context.SaveChanges();
+                    dbContextTransaction.Commit();
+                    return 1;
+                }
+                return 0;
+            }
+        }
+
+        // Return() API 恢复动作
+        /*
+<root>
+  <operation>return</operation> 操作类型
+  <action>return</action> 动作。有 return/lost/inventory/read/boxing 几种。恢复动作目前仅恢复 return 和 lost 两种，其余会忽略
+  <itemBarcode>0000001</itemBarcode> 册条码号
+  <readerBarcode>R0000002</readerBarcode> 读者证条码号
+  <operator>test</operator> 操作者
+  <operTime>Fri, 08 Dec 2006 04:17:45 GMT</operTime> 操作时间
+  <overdues>...</overdues> 超期信息 通常内容为一个字符串，为一个<overdue>元素XML文本片断
+  
+  <confirmItemRecPath>...</confirmItemRecPath> 辅助判断用的册记录路径
+  
+  <readerRecord recPath='...'>...</readerRecord>	最新读者记录
+  <itemRecord recPath='...'>...</itemRecord>	最新册记录
+  
+</root>
+
+         * */
+        public int TraceReturn(
+LibraryContext context,
+XmlDocument domLog,
+out string strError)
+        {
+            strError = "";
+
+            using (var dbContextTransaction = context.Database.BeginTransaction())
+            {
+
+                string strAction = DomUtil.GetElementText(domLog.DocumentElement,
+    "action");
+                if (strAction != "return" && strAction != "lost")
+                    return 0;   // 其余 inventory/read/boxing 动作并不会改变任何册记录，所以这里返回了
+
+                string strReaderBarcode = DomUtil.GetElementText(domLog.DocumentElement,
+        "readerBarcode");
+                if (String.IsNullOrEmpty(strReaderBarcode) == true)
+                {
+                    strError = "<readerBarcode>元素值为空";
+                    return -1;
+                }
+
+                // 读入册记录
+                string strConfirmItemRecPath = DomUtil.GetElementText(domLog.DocumentElement,
+                    "confirmItemRecPath");
+                string strItemBarcode = DomUtil.GetElementText(domLog.DocumentElement,
+                    "itemBarcode");
+                if (String.IsNullOrEmpty(strItemBarcode) == true)
+                {
+                    strError = "<strItemBarcode>元素值为空";
+                    return -1;
+                }
+
+                Item item = null;
+
+                if (string.IsNullOrEmpty(strConfirmItemRecPath) == false)
+                    item = context.Items.FirstOrDefault(x => x.ItemRecPath == strConfirmItemRecPath);
+                else
+                    item = context.Items.FirstOrDefault(x => x.ItemBarcode == strItemBarcode);
+
+                if (item != null)
+                {
+                    if (string.IsNullOrEmpty(item.ItemBarcode))
+                        item.ItemBarcode = strItemBarcode;
+                    if (string.IsNullOrEmpty(item.ItemRecPath))
+                        item.ItemRecPath = strConfirmItemRecPath;
+                    item.Borrower = null;
+                    item.BorrowTime = DateTime.MinValue;
+                    item.BorrowPeriod = null;
+                    item.ReturningTime = DateTime.MinValue;
+
+                    context.Items.Update(item);
+                    context.SaveChanges();
+                    dbContextTransaction.Commit();
+                    return 1;
+                }
+
+                return 0;
+            }
+        }
 
 
         #endregion
@@ -3373,58 +3800,6 @@ out strError);
         #region 日志同步
 
 
-        int DeleteBiblioRecord(
-            SQLiteConnection connection,
-            string strBiblioRecPath,
-            bool bDeleteBiblio,
-            bool bDeleteSubrecord,
-            out string strError)
-        {
-            strError = "";
-            int nRet = 0;
-
-            // 把前面积累的关于修改书目记录的请求全部兑现了
-            if (this._updateBiblios.Count > 0)
-            {
-                nRet = CommitUpdateBiblios(
-                    connection,
-                    out strError);
-                if (nRet == -1)
-                {
-                    strError = "DeleteBiblioRecord() 中 CommitUpdateBiblios() 出错: " + strError;
-                    return -1;
-                }
-            }
-
-            if (bDeleteBiblio == false
-    && bDeleteSubrecord == false)
-            {
-                return 0;
-            }
-
-            // 把请求放入队列
-            UpdateBiblio update = new UpdateBiblio();
-            update.BiblioRecPath = strBiblioRecPath;
-            update.DeleteBiblio = bDeleteBiblio;
-            update.DeleteSubrecord = bDeleteSubrecord;
-            // update.BiblioXml = strBiblioXml;
-            _deleteBiblios.Add(update);
-
-            // if (this._updateBiblios.Count >= UPDATE_BIBLIOS_BATCHSIZE)   // BUG
-            if (this._deleteBiblios.Count >= DELETE_BIBLIOS_BATCHSIZE)
-            {
-                nRet = CommitDeleteBiblios(
-        connection,
-        out strError);
-                if (nRet == -1)
-                {
-                    strError = "UpdateBiblioRecord() 中 CommitUpdateBiblios() 出错: " + strError;
-                    return -1;
-                }
-            }
-
-            return 1;
-        }
 
         int CommitDeleteBiblios(
     SQLiteConnection connection,
@@ -3533,680 +3908,20 @@ out strError);
 
 
 
-        // Return() API 恢复动作
-        /*
-<root>
-  <operation>return</operation> 操作类型
-  <action>return</action> 动作。有 return/lost/inventory/read/boxing 几种。恢复动作目前仅恢复 return 和 lost 两种，其余会忽略
-  <itemBarcode>0000001</itemBarcode> 册条码号
-  <readerBarcode>R0000002</readerBarcode> 读者证条码号
-  <operator>test</operator> 操作者
-  <operTime>Fri, 08 Dec 2006 04:17:45 GMT</operTime> 操作时间
-  <overdues>...</overdues> 超期信息 通常内容为一个字符串，为一个<overdue>元素XML文本片断
-  
-  <confirmItemRecPath>...</confirmItemRecPath> 辅助判断用的册记录路径
-  
-  <readerRecord recPath='...'>...</readerRecord>	最新读者记录
-  <itemRecord recPath='...'>...</itemRecord>	最新册记录
-  
-</root>
 
-         * */
-        public int TraceReturn(
-SQLiteConnection connection,
-XmlDocument domLog,
-out string strError)
-        {
-            strError = "";
 
-            string strAction = DomUtil.GetElementText(domLog.DocumentElement,
-    "action");
-            if (strAction != "return" && strAction != "lost")
-                return 0;   // 其余 inventory/read/boxing 动作并不会改变任何册记录，所以这里返回了
 
-            //long lRet = 0;
-            int nRet = 0;
 
-            string strReaderBarcode = DomUtil.GetElementText(domLog.DocumentElement,
-    "readerBarcode");
-            if (String.IsNullOrEmpty(strReaderBarcode) == true)
-            {
-                strError = "<readerBarcode>元素值为空";
-                return -1;
-            }
 
-            // 读入册记录
-            string strConfirmItemRecPath = DomUtil.GetElementText(domLog.DocumentElement,
-                "confirmItemRecPath");
-            string strItemBarcode = DomUtil.GetElementText(domLog.DocumentElement,
-                "itemBarcode");
-            if (String.IsNullOrEmpty(strItemBarcode) == true)
-            {
-                strError = "<strItemBarcode>元素值为空";
-                return -1;
-            }
 
-            ItemLine line = new ItemLine();
 
-            // line.Full = false;
-            line.Level = 1;
-            line.ItemBarcode = strItemBarcode;
-            line.Borrower = "";
-            line.BorrowTime = "";
-            line.BorrowPeriod = "";
-            line.ReturningTime = "";
-            line.ItemRecPath = strConfirmItemRecPath;
 
-            this._updateItems.Add(line);
-            if (this._updateItems.Count >= UPDATE_ITEMS_BATCHSIZE)
-            {
-                nRet = CommitUpdateItems(
-                    connection,
-                    out strError);
-                if (nRet == -1)
-                    return -1;
-            }
-            return 0;
-        }
-
-        // Borrow() API 恢复动作
-        /*
-<root>
-  <operation>borrow</operation> 操作类型
-  <readerBarcode>R0000002</readerBarcode> 读者证条码号
-  <itemBarcode>0000001</itemBarcode>  册条码号
-  <borrowDate>Fri, 08 Dec 2006 04:17:31 GMT</borrowDate> 借阅日期
-  <borrowPeriod>30day</borrowPeriod> 借阅期限
-  <no>0</no> 续借次数。0为首次普通借阅，1开始为续借
-  <operator>test</operator> 操作者
-  <operTime>Fri, 08 Dec 2006 04:17:31 GMT</operTime> 操作时间
-  <confirmItemRecPath>...</confirmItemRecPath> 辅助判断用的册记录路径
-  
-  <readerRecord recPath='...'>...</readerRecord>	最新读者记录
-  <itemRecord recPath='...'>...</itemRecord>	最新册记录
-</root>
-         * */
-        public int TraceBorrow(
-SQLiteConnection connection,
-XmlDocument domLog,
-out string strError)
-        {
-            strError = "";
-
-            //long lRet = 0;
-            int nRet = 0;
-
-            string strReaderBarcode = DomUtil.GetElementText(domLog.DocumentElement,
-    "readerBarcode");
-            if (String.IsNullOrEmpty(strReaderBarcode) == true)
-            {
-                strError = "<readerBarcode>元素值为空";
-                return -1;
-            }
-
-            // 读入册记录
-            string strConfirmItemRecPath = DomUtil.GetElementText(domLog.DocumentElement,
-                "confirmItemRecPath");
-            string strItemBarcode = DomUtil.GetElementText(domLog.DocumentElement,
-                "itemBarcode");
-            if (String.IsNullOrEmpty(strItemBarcode) == true)
-            {
-                strError = "<strItemBarcode>元素值为空";
-                return -1;
-            }
-
-            string strBorrowDate = SQLiteUtil.GetLocalTime(DomUtil.GetElementText(domLog.DocumentElement,
-                "borrowDate"));
-            string strBorrowPeriod = DomUtil.GetElementText(domLog.DocumentElement,
-                "borrowPeriod");
-            //string strReturningDate = ItemLine.GetLocalTime(DomUtil.GetElementText(domLog.DocumentElement,
-            //    "returningDate"));
-
-            string strReturningTime = "";
-
-            if (string.IsNullOrEmpty(strBorrowDate) == false)
-            {
-                // parameters:
-                //      strBorrowTime   借阅起点时间。u 格式
-                //      strReturningTime    返回应还时间。 u 格式
-                nRet = AmerceOperLogLine.BuildReturingTimeString(strBorrowDate,
-    strBorrowPeriod,
-    out strReturningTime,
-    out strError);
-                if (nRet == -1)
-                {
-                    strReturningTime = "";
-                }
-            }
-            else
-                strReturningTime = "";
-
-
-            ItemLine line = new ItemLine();
-
-            // line.Full = false;
-            line.Level = 1;
-            line.ItemBarcode = strItemBarcode;
-            line.Borrower = strReaderBarcode;
-            line.BorrowTime = strBorrowDate;
-            line.BorrowPeriod = strBorrowPeriod;
-            line.ReturningTime = strReturningTime;
-            line.ItemRecPath = strConfirmItemRecPath;
-
-            this._updateItems.Add(line);
-            if (this._updateItems.Count >= UPDATE_ITEMS_BATCHSIZE)
-            {
-                nRet = CommitUpdateItems(
-                    connection,
-                    out strError);
-                if (nRet == -1)
-                    return -1;
-            }
-            return 0;
-        }
-
-        // SetReaderInfo() API 恢复动作
-        /*
-<root>
-	<operation>setReaderInfo</operation> 操作类型
-	<action>...</action> 具体动作。有new change delete move 4种
-	<record recPath='...'>...</record> 新记录
-    <oldRecord recPath='...'>...</oldRecord> 被覆盖或者删除的记录 动作为change和delete时具备此元素
-    <changedEntityRecord itemBarcode='...' recPath='...' oldBorrower='...' newBorrower='...' /> 若干个元素。表示连带发生修改的册记录
-	<operator>test</operator> 操作者
-	<operTime>Fri, 08 Dec 2006 09:01:38 GMT</operTime> 操作时间
-</root>
-
-注: new 的时候只有<record>元素，delete的时候只有<oldRecord>元素，change的时候两者都有
-
-         * */
-        public int TraceSetReaderInfo(
-SQLiteConnection connection,
-XmlDocument domLog,
-out string strError)
-        {
-            strError = "";
-
-            //long lRet = 0;
-            int nRet = 0;
-
-            string strAction = DomUtil.GetElementText(domLog.DocumentElement,
-                "action");
-
-            if (strAction == "new"
-                || strAction == "change"
-                || strAction == "move")
-            {
-                XmlNode node = null;
-                string strRecord = DomUtil.GetElementText(domLog.DocumentElement,
-                    "record",
-                    out node);
-                if (node == null)
-                {
-                    strError = "日志记录中缺<record>元素";
-                    return -1;
-                }
-                string strNewRecPath = DomUtil.GetAttr(node, "recPath");
-
-                string strOldRecord = "";
-                string strOldRecPath = "";
-                if (strAction == "move")
-                {
-                    strOldRecord = DomUtil.GetElementText(domLog.DocumentElement,
-                        "oldRecord",
-                        out node);
-                    if (node == null)
-                    {
-                        strError = "日志记录中缺<oldRecord>元素";
-                        return -1;
-                    }
-
-                    strOldRecPath = DomUtil.GetAttr(node, "recPath");
-                    if (string.IsNullOrEmpty(strOldRecPath) == true)
-                    {
-                        strError = "日志记录中<oldRecord>元素内缺recPath属性值";
-                        return -1;
-                    }
-
-                    // 如果移动过程中没有修改，则要用旧的记录内容写入目标
-                    if (string.IsNullOrEmpty(strRecord) == true)
-                        strRecord = strOldRecord;
-                }
-
-                // 在 SQL reader 库中写入一条读者记录
-                nRet = WriteReaderRecord(connection,
-                    strNewRecPath,
-                    strRecord,
-                    out strError);
-                if (nRet == -1)
-                {
-                    strError = "写入读者记录 '" + strNewRecPath + "' 时发生错误: " + strError;
-                    return -1;
-                }
-
-                // 2015/9/11
-                XmlNodeList nodes = domLog.DocumentElement.SelectNodes("changedEntityRecord");
-                foreach (XmlElement item in nodes)
-                {
-                    string strItemBarcode = item.GetAttribute("itemBarcode");
-                    string strItemRecPath = item.GetAttribute("recPath");
-                    string strOldReaderBarcode = item.GetAttribute("oldBorrower");
-                    string strNewReaderBarcode = item.GetAttribute("newBorrower");
-
-                    nRet = TraceChangeBorrower(
-                        connection,
-                        strItemBarcode,
-                        strItemRecPath,
-                        strNewReaderBarcode,
-                        out strError);
-                    if (nRet == -1)
-                    {
-                        strError = "修改册记录 '" + strItemRecPath + "' 的 borrower 字段时发生错误: " + strError;
-                        return -1;
-                    }
-                }
-
-                if (strAction == "move")
-                {
-                    // 兑现缓存
-                    nRet = CommitUpdateReaders(
-    connection,
-    out strError);
-                    if (nRet == -1)
-                        return -1;
-
-                    // 删除读者记录
-                    nRet = ReaderLine.DeleteReaderLine(
-                        connection,
-                        strOldRecPath,
-                        out strError);
-                    if (nRet == -1)
-                        return -1;
-                }
-            }
-            else if (strAction == "delete")
-            {
-                XmlNode node = null;
-                string strOldRecord = DomUtil.GetElementText(domLog.DocumentElement,
-                    "oldRecord",
-                    out node);
-                if (node == null)
-                {
-                    strError = "日志记录中缺<oldRecord>元素";
-                    return -1;
-                }
-                string strRecPath = DomUtil.GetAttr(node, "recPath");
-
-                // 兑现缓存
-                nRet = CommitUpdateReaders(
-connection,
-out strError);
-                if (nRet == -1)
-                    return -1;
-
-                // 删除读者记录
-                nRet = ReaderLine.DeleteReaderLine(
-                    connection,
-                    strRecPath,
-                    out strError);
-                if (nRet == -1)
-                    return -1;
-            }
-            else
-            {
-                strError = "无法识别的<action>内容 '" + strAction + "'";
-                return -1;
-            }
-
-            return 0;
-        }
-
-        public int TraceChangeBorrower(
-            SQLiteConnection connection,
-            string strItemBarcode,
-            string strItemRecPath,
-            string strNewBorrower,
-            out string strError)
-        {
-            strError = "";
-
-            //long lRet = 0;
-            int nRet = 0;
-
-            if (String.IsNullOrEmpty(strItemBarcode) == true)
-            {
-                strError = "strItemBarcode 参数不应为空";
-                return -1;
-            }
-
-            ItemLine line = new ItemLine();
-
-            // line.Full = false;
-            line.Level = 2;
-            line.ItemBarcode = strItemBarcode;
-            line.Borrower = strNewBorrower;
-            line.ItemRecPath = strItemRecPath;
-
-            this._updateItems.Add(line);
-            if (this._updateItems.Count >= UPDATE_ITEMS_BATCHSIZE)
-            {
-                nRet = CommitUpdateItems(
-                    connection,
-                    out strError);
-                if (nRet == -1)
-                    return -1;
-            }
-            return 0;
-        }
-
-        // SetEntities() API 恢复动作
-        /* 日志记录格式
-<root>
-  <operation>setEntity</operation> 操作类型
-  <action>new</action> 具体动作。有new change delete 3种
-  <style>...</style> 风格。有force nocheckdup noeventlog 3种
-  <record recPath='中文图书实体/3'><root><parent>2</parent><barcode>0000003</barcode><state>状态2</state><location>阅览室</location><price></price><bookType>教学参考</bookType><registerNo></registerNo><comment>test</comment><mergeComment></mergeComment><batchNo>111</batchNo><borrower></borrower><borrowDate></borrowDate><borrowPeriod></borrowPeriod></root></record> 记录体
-  <oldRecord recPath='中文图书实体/3'>...</oldRecord> 被覆盖或者删除的记录 动作为change和delete时具备此元素
-  <operator>test</operator> 操作者
-  <operTime>Fri, 08 Dec 2006 08:41:46 GMT</operTime> 操作时间
-</root>
-
-注：1) 当<action>为delete时，没有<record>元素。为new时，没有<oldRecord>元素。
-	2) <record>中的内容, 涉及到流通的<borrower><borrowDate><borrowPeriod>等, 在日志恢复阶段, 都应当无效, 这几个内容应当从当前位置库中记录获取, 和<record>中其他内容合并后, 再写入数据库
-	3) 一次SetEntities()API调用, 可能创建多条日志记录。
-         
-         * */
-        public int TraceSetEntity(
-    SQLiteConnection connection,
-    XmlDocument domLog,
-    out string strError)
-        {
-            strError = "";
-
-            //long lRet = 0;
-            int nRet = 0;
-
-            string strAction = DomUtil.GetElementText(domLog.DocumentElement,
-                "action");
-
-            if (strAction == "new"
-    || strAction == "change"
-    || strAction == "move")
-            {
-                XmlNode node = null;
-                string strRecord = DomUtil.GetElementText(domLog.DocumentElement,
-                    "record",
-                    out node);
-                if (node == null)
-                {
-#if NO
-                    strError = "日志记录中缺<record>元素";
-                    return -1;
-#endif
-                    // 改为进行删除操作
-                    strAction = "delete";
-                    goto TRY_DELETE;
-                }
-
-                string strNewRecPath = DomUtil.GetAttr(node, "recPath");
-
-                // 
-                string strOldRecord = "";
-                string strOldRecPath = "";
-                if (strAction == "move")
-                {
-                    strOldRecord = DomUtil.GetElementText(domLog.DocumentElement,
-                        "oldRecord",
-                        out node);
-                    if (node == null)
-                    {
-                        strError = "日志记录中缺<oldRecord>元素";
-                        return -1;
-                    }
-
-                    strOldRecPath = DomUtil.GetAttr(node, "recPath");
-                }
-
-                string strCreateOperTime = "";
-
-                if (strAction == "new")
-                    strCreateOperTime = DomUtil.GetElementText(domLog.DocumentElement, "operTime");
-
-                // 在 SQL item 库中写入一条册记录
-                nRet = WriteItemRecord(connection,
-                    strNewRecPath,
-                    strRecord,
-                    strCreateOperTime,
-                    out strError);
-                if (nRet == -1)
-                {
-                    strError = "写入册记录 '" + strNewRecPath + "' 时发生错误: " + strError;
-                    return -1;
-                }
-
-                if (strAction == "move")
-                {
-                    // 兑现前面的缓存
-                    nRet = CommitUpdateItems(
-            connection,
-            out strError);
-                    if (nRet == -1)
-                        return -1;
-
-                    // 删除册记录
-                    nRet = ItemLine.DeleteItemLine(
-                        connection,
-                        strOldRecPath,
-                        out strError);
-                    if (nRet == -1)
-                        return -1;
-                }
-
-                return 0;
-            }
-        TRY_DELETE:
-            if (strAction == "delete")
-            {
-                XmlNode node = null;
-                string strOldRecord = DomUtil.GetElementText(domLog.DocumentElement,
-                    "oldRecord",
-                    out node);
-                if (node == null)
-                {
-                    strError = "日志记录中缺<oldRecord>元素";
-                    return -1;
-                }
-                string strRecPath = DomUtil.GetAttr(node, "recPath");
-
-                // 兑现前面的缓存
-                nRet = CommitUpdateItems(
-        connection,
-        out strError);
-                if (nRet == -1)
-                    return -1;
-
-                // 删除册记录
-                nRet = ItemLine.DeleteItemLine(
-                    connection,
-                    strRecPath,
-                    out strError);
-                if (nRet == -1)
-                    return -1;
-                return 0;
-            }
-
-            strError = "无法识别的<action>内容 '" + strAction + "'";
-            return -1;
-        }
-
-
-        // TODO: 需要扩展为也能复制 order issue comment 记录
-        int CopySubRecords(
-            SQLiteConnection connection,
-            XmlDocument dom,
-            string strAction,
-            // string strSourceBiblioRecPath,
-            string strTargetBiblioRecPath,
-            out string strError)
-        {
-            strError = "";
-            int nRet = 0;
-
-            if (dom == null || dom.DocumentElement == null)
-                return 0;
-
-            string strElement = "";
-            if (strAction == "move")
-                strElement = "moveEntityRecords";
-            else if (strAction == "copy")
-                strElement = "copyEntityRecords";
-
-            XmlNodeList nodes = dom.DocumentElement.SelectNodes(strElement + "/record");
-            if (nodes.Count == 0)
-                return 0;
-
-            nRet = CommitUpdateBiblios(
-    connection,
-    out strError);
-            if (nRet == -1)
-            {
-                strError = "CopySubRecords() 中 CommitUpdateBiblios() 出错: " + strError;
-                return -1;
-            }
-
-            nRet = CommitDeleteBiblios(
-connection,
-out strError);
-            if (nRet == -1)
-            {
-                strError = "CopySubRecords() 中 CommitDeleteBiblios() 出错: " + strError;
-                return -1;
-            }
-
-            StringBuilder text = new StringBuilder(4096);
-
-            using (SQLiteTransaction mytransaction = connection.BeginTransaction())
-            {
-                int i = 0;
-                using (SQLiteCommand command = new SQLiteCommand("",
-    connection))
-                {
-                    SQLiteUtil.SetParameter(command,
-    "@t_bibliorecpath",
-    strTargetBiblioRecPath);
-
-                    Debug.WriteLine("CopySubRecords() nodes.Count=" + nodes.Count);
-                    foreach (XmlNode node in nodes)
-                    {
-                        string strSourceRecPath = DomUtil.GetAttr(node, "recPath");
-                        string strTargetRecPath = DomUtil.GetAttr(node, "targetRecPath");
-
-                        if (strAction == "copy")
-                        {
-                            string strNewBarcode = DomUtil.GetAttr(node, "newBarocde");
-                            // TODO: 目标位置实体记录已经存在怎么办 ?
-                            // 目标册记录的 barcode 字段要修改为空
-                            text.Append("insert or replace into item (itemrecpath, itembarcode, location, accessno, bibliorecpath) ");
-                            text.Append("select @t_itemrecpath" + i + " as itemrecpath, @newbarcode" + i + " as itembarcode, location, accessno, @t_bibliorecpath as bibliorecpath from item where itemrecpath = @s_itemrecpath" + i + " ; ");
-
-                            SQLiteUtil.SetParameter(command,
-    "@newbarcode" + i,
-    strNewBarcode);
-                        }
-                        else
-                        {
-                            // *** 如果目标位置有记录，而源位置没有记录，应该是直接在目标记录上修改
-
-                            // 确保源位置有记录
-                            text.Append("insert or ignore into item (itemrecpath, itembarcode, location, accessno, bibliorecpath) ");
-                            text.Append("select @s_itemrecpath" + i + " as itemrecpath, itembarcode, location, accessno, @t_bibliorecpath as bibliorecpath from item where itemrecpath = @t_itemrecpath" + i + " ; ");
-
-                            // 如果目标位置已经有记录，先删除
-                            text.Append("delete from item where itemrecpath = @t_itemrecpath" + i + " ;");
-
-                            // 等于是修改 item 表的 itemrecpath 字段内容
-                            text.Append("update item SET itemrecpath = @t_itemrecpath" + i + " , bibliorecpath = @t_bibliorecpath where itemrecpath=@s_itemrecpath" + i + " ;");
-                        }
-
-                        SQLiteUtil.SetParameter(command,
-    "@t_itemrecpath" + i,
-    strTargetRecPath);
-                        SQLiteUtil.SetParameter(command,
-    "@s_itemrecpath" + i,
-    strSourceRecPath);
-                        i++;
-                    }
-
-                    command.CommandText = text.ToString();
-                    int nCount = command.ExecuteNonQuery();
-                }
-                mytransaction.Commit();
-            }
-            return 0;
-        }
 
         const int UPDATE_ITEMS_BATCHSIZE = 10;
 
         List<ItemLine> _updateItems = new List<ItemLine>();
 
-        // 在 SQL item 库中写入一条册记录
-        // parameters:
-        //      strLogCreateTime    日志操作记载的创建时间。不是创建动作的其他时间，不要放在这里
-        int WriteItemRecord(SQLiteConnection connection,
-            string strItemRecPath,
-            string strItemXml,
-            string strLogCreateTime,
-            out string strError)
-        {
-            strError = "";
 
-            XmlDocument dom = new XmlDocument();
-            try
-            {
-                dom.LoadXml(strItemXml);
-            }
-            catch (Exception ex)
-            {
-                strError = "XML 装入 DOM 出错: " + ex.Message;
-                return -1;
-            }
-
-            string strParentID = DomUtil.GetElementText(dom.DocumentElement,
-                "parent");
-            // 根据 册/订购/期/评注 记录路径和 parentid 构造所从属的书目记录路径
-            string strBiblioRecPath = Program.MainForm.BuildBiblioRecPath("item",
-                strItemRecPath,
-                strParentID);
-            if (string.IsNullOrEmpty(strBiblioRecPath) == true)
-            {
-                strError = "根据册记录路径 '" + strItemRecPath + "' 和 parentid '" + strParentID + "' 构造书目记录路径出错";
-                return 0;
-            }
-
-            ItemLine line = null;
-            //  XML 记录变换为 SQL 记录
-            int nRet = ItemLine.Xml2Line(dom,
-            strItemRecPath,
-            strBiblioRecPath,
-            strLogCreateTime,
-            out line,
-            out strError);
-            if (nRet == -1)
-                return -1;
-
-            this._updateItems.Add(line);
-
-            if (this._updateItems.Count >= UPDATE_ITEMS_BATCHSIZE)
-            {
-                nRet = CommitUpdateItems(
-                    connection,
-                    out strError);
-                if (nRet == -1)
-                    return -1;
-            }
-
-            return 0;
-        }
 
         int CommitUpdateItems(
             SQLiteConnection connection,
@@ -4237,55 +3952,6 @@ out strError);
 
         List<ReaderLine> _updateReaders = new List<ReaderLine>();
 
-        // 在 SQL reader 库中写入一条读者记录
-        int WriteReaderRecord(SQLiteConnection connection,
-            string strReaderRecPath,
-            string strReaderXml,
-            out string strError)
-        {
-            strError = "";
-
-            if (string.IsNullOrEmpty(strReaderRecPath) == true)
-                return 0;
-
-            XmlDocument dom = new XmlDocument();
-            try
-            {
-                dom.LoadXml(strReaderXml);
-            }
-            catch (Exception ex)
-            {
-                strError = "WriteReaderRecord XML 装入 DOM 出错: " + ex.Message;
-                return -1;
-            }
-
-            // 根据读者库名，得到馆代码
-            string strReaderDbName = Global.GetDbName(strReaderRecPath);
-
-            string strLibraryCode = Program.MainForm.GetReaderDbLibraryCode(strReaderDbName);
-
-            ReaderLine line = null;
-            //  XML 记录变换为 SQL 记录
-            int nRet = ReaderLine.Xml2Line(dom,
-                strReaderRecPath,
-                strLibraryCode,
-                out line,
-                out strError);
-            if (nRet == -1)
-                return -1;
-
-            _updateReaders.Add(line);
-
-            if (this._updateReaders.Count >= UPDATE_READERS_BATCHSIZE)
-            {
-                nRet = CommitUpdateReaders(
-                    connection,
-                    out strError);
-                if (nRet == -1)
-                    return -1;
-            }
-            return 0;
-        }
 
         int CommitUpdateReaders(
     SQLiteConnection connection,
@@ -4327,9 +3993,9 @@ out strError);
         /// 书目库名
         /// </summary>
         public string DbName = "";  // 书目库名
-        /// <summary>
-        /// 格式语法
-        /// </summary>
+                                    /// <summary>
+                                    /// 格式语法
+                                    /// </summary>
         public string Syntax = "";  // 格式语法
 
         /// <summary>
