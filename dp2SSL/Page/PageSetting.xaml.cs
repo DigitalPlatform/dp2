@@ -16,6 +16,7 @@ using DigitalPlatform;
 using DigitalPlatform.Text;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Face;
+using DigitalPlatform.WPF;
 
 namespace dp2SSL
 {

@@ -26,6 +26,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Core;
 using DigitalPlatform.Face;
+using DigitalPlatform.WPF;
 
 namespace dp2SSL
 {

@@ -395,6 +395,10 @@
       <Project>{26F96CC3-A4A9-4BC4-A10A-BC7E25581FF6}</Project>
       <Name>DigitalPlatform.Text</Name>
     </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.WPF\DigitalPlatform.WPF.csproj">
+      <Project>{7c195988-b4b3-4ab4-a1c9-b5a2158a5267}</Project>
+      <Name>DigitalPlatform.WPF</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.Xml\DigitalPlatform.Xml.csproj">
       <Project>{E6489E89-1349-4EE7-A00B-AC96B9912587}</Project>
       <Name>DigitalPlatform.Xml</Name>
