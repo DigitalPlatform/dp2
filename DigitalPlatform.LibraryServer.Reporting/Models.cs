@@ -150,6 +150,11 @@ namespace DigitalPlatform.LibraryServer.Reporting
         public DateTime OperTime { get; set; }
         public string Operator { get; set; }
 
+        public object[] GetKeys()
+        {
+            return new object[] { Date, No, SubNo };
+        }
+
         // 根据日志 XML 记录填充数据
         // 本函数负责填充基类的数据成员
         public virtual int SetData(XmlDocument dom,

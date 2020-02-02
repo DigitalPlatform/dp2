@@ -16,6 +16,7 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
+using DigitalPlatform.WPF;
 using static dp2SSL.LibraryChannelUtil;
 
 namespace dp2SSL
@@ -258,7 +259,7 @@ namespace dp2SSL
             }
         }
 
-#region 延迟关灯
+        #region 延迟关灯
 
         static DelayAction _delayTurnOffTask = null;
 
@@ -299,7 +300,7 @@ namespace dp2SSL
                 });
         }
 
-#endregion
+        #endregion
 
 
         public static void RefreshReaderNameList()
@@ -782,12 +783,20 @@ namespace dp2SSL
                     processed.Add(entity);
                 }
 
+                /*
                 foreach (var entity in processed)
                 {
-                    ShelfData.Remove(ShelfData.All, entity);
-                    ShelfData.Remove(ShelfData.Adds, entity);
-                    ShelfData.Remove(ShelfData.Removes, entity);
-                    ShelfData.Remove(ShelfData.Changes, entity);
+                    ShelfData.Remove("all", entity);
+                    ShelfData.Remove("adds", entity);
+                    ShelfData.Remove("removes", entity);
+                    ShelfData.Remove("changes", entity);
+                }
+                */
+                {
+                    ShelfData.Remove("all", processed);
+                    ShelfData.Remove("adds", processed);
+                    ShelfData.Remove("removes", processed);
+                    ShelfData.Remove("changes", processed);
                 }
 
                 if (actions.Count == 0)
@@ -1013,43 +1022,50 @@ namespace dp2SSL
             return collection;
         }
 
+        // 用于保护 _all _adds _removes _changes 的锁对象
+        static object _syncRoot_all = new object();
+
         static List<Entity> _all = new List<Entity>();  // 累积的全部图书
         static List<Entity> _adds = new List<Entity>(); // 临时区 放入的图书
         static List<Entity> _removes = new List<Entity>();  // 临时区 取走的图书
         static List<Entity> _changes = new List<Entity>();  // 临时区 天线编号、门位置发生过变化的图书
+
+        public static IReadOnlyCollection<Entity> All
+        {
+            get
+            {
+                List<Entity> results = new List<Entity>(_all);
+                return results;
+                // return _all.AsReadOnly();
+            }
+        }
+
+        public static IReadOnlyCollection<Entity> Adds
+        {
+            get
+            {
+                return new List<Entity>(_adds);
+            }
+        }
+
+        public static IReadOnlyCollection<Entity> Removes
+        {
+            get
+            {
+                return new List<Entity>(_removes);
+            }
+        }
+
+        public static IReadOnlyCollection<Entity> Changes
+        {
+            get
+            {
+                return new List<Entity>(_changes);
+            }
+        }
+
+        /*
         static Operator _operator = null;   // 当前控制临时区的读者身份
-
-        public static List<Entity> All
-        {
-            get
-            {
-                return _all;
-            }
-        }
-
-        public static List<Entity> Adds
-        {
-            get
-            {
-                return _adds;
-            }
-        }
-
-        public static List<Entity> Removes
-        {
-            get
-            {
-                return _removes;
-            }
-        }
-
-        public static List<Entity> Changes
-        {
-            get
-            {
-                return _changes;
-            }
-        }
 
         public static Operator Operator
         {
@@ -1058,6 +1074,7 @@ namespace dp2SSL
                 return _operator;
             }
         }
+        */
 
         // 初始化门控件定义。包括初始化 ShelfCfgDom
         public static void InitialDoors()
@@ -1136,40 +1153,45 @@ namespace dp2SSL
 
             List<string> warnings = new List<string>();
 
-            _all.Clear();
-            var books = TagList.Books;
-            WpfClientInfo.WriteErrorLog($"books count={books.Count}, ReaderNameList={RfidManager.ReaderNameList}(注：此时门应该都是关闭的，图书读卡器应该是停止盘点状态)");
-            foreach (var tag in books)
+            lock (_syncRoot_all)
             {
-                if (func_cancelled() == true)
-                    return new InitialShelfResult();
+                _all.Clear();
 
-                WpfClientInfo.WriteErrorLog($" tag={tag.ToString()}");
-
-                // 2019/12/17
-                // 判断一下 tag 是否属于已经定义的门范围
-                var doors = DoorItem.FindDoors(ShelfData.Doors, tag.OneTag.ReaderName, tag.OneTag.AntennaID.ToString());
-                if (doors.Count == 0)
+                var books = TagList.Books;
+                WpfClientInfo.WriteErrorLog($"books count={books.Count}, ReaderNameList={RfidManager.ReaderNameList}(注：此时门应该都是关闭的，图书读卡器应该是停止盘点状态)");
+                foreach (var tag in books)
                 {
-                    WpfClientInfo.WriteInfoLog($"tag (UID={tag.OneTag?.UID}) 不属于任何已经定义的门，没有被加入 _all 集合。\r\ntag 详情：{tag.ToString()}");
-                    continue;
+                    if (func_cancelled() == true)
+                        return new InitialShelfResult();
+
+                    WpfClientInfo.WriteErrorLog($" tag={tag.ToString()}");
+
+                    // 2019/12/17
+                    // 判断一下 tag 是否属于已经定义的门范围
+                    var doors = DoorItem.FindDoors(ShelfData.Doors, tag.OneTag.ReaderName, tag.OneTag.AntennaID.ToString());
+                    if (doors.Count == 0)
+                    {
+                        WpfClientInfo.WriteInfoLog($"tag (UID={tag.OneTag?.UID}) 不属于任何已经定义的门，没有被加入 _all 集合。\r\ntag 详情：{tag.ToString()}");
+                        continue;
+                    }
+
+                    try
+                    {
+                        // Exception:
+                        //      可能会抛出异常 ArgumentException TagDataException
+                        var entity = NewEntity(tag);
+
+                        func_display($"正在填充图书队列 ({entity.PII})...");
+
+                        _all.Add(entity);
+                    }
+                    catch (TagDataException ex)
+                    {
+                        warnings.Add($"UID 为 '{tag.OneTag?.UID}' 的标签出现数据格式错误: {ex.Message}");
+                        WpfClientInfo.WriteErrorLog($"InitialShelfEntities() 遇到 tag (UID={tag.OneTag?.UID}) 数据格式出错：{ex.Message}\r\ntag 详情：{tag.ToString()}");
+                    }
                 }
 
-                try
-                {
-                    // Exception:
-                    //      可能会抛出异常 ArgumentException TagDataException
-                    var entity = NewEntity(tag);
-
-                    func_display($"正在填充图书队列 ({entity.PII})...");
-
-                    _all.Add(entity);
-                }
-                catch (TagDataException ex)
-                {
-                    warnings.Add($"UID 为 '{tag.OneTag?.UID}' 的标签出现数据格式错误: {ex.Message}");
-                    WpfClientInfo.WriteErrorLog($"InitialShelfEntities() 遇到 tag (UID={tag.OneTag?.UID}) 数据格式出错：{ex.Message}\r\ntag 详情：{tag.ToString()}");
-                }
             }
 
 
@@ -1205,13 +1227,15 @@ namespace dp2SSL
             var task = Task.Run(async () =>
             {
                 CancellationToken token = CancelToken;
-                await FillBookFields(_all, token);
-                await FillBookFields(_adds, token);
-                await FillBookFields(_removes, token);
+                await FillBookFields(All, token);
+                await FillBookFields(Adds, token);
+                await FillBookFields(Removes, token);
             });
 
             return new InitialShelfResult { Warnings = warnings };
         }
+
+#if NO
 
         // 首次初始化智能书柜所需的标签相关数据结构
         // 初始化开始前，要先把 RfidManager.ReaderNameList 设置为 "*"
@@ -1279,23 +1303,26 @@ namespace dp2SSL
 
             List<string> warnings = new List<string>();
 
-            _all.Clear();
-            var books = TagList.Books;
-            WpfClientInfo.WriteErrorLog($"books count={books.Count}, ReaderNameList={RfidManager.ReaderNameList}");
-            foreach (var tag in books)
+            lock (_syncRoot_all)
             {
-                WpfClientInfo.WriteErrorLog($" tag={tag.ToString()}");
+                _all.Clear();
+                var books = TagList.Books;
+                WpfClientInfo.WriteErrorLog($"books count={books.Count}, ReaderNameList={RfidManager.ReaderNameList}");
+                foreach (var tag in books)
+                {
+                    WpfClientInfo.WriteErrorLog($" tag={tag.ToString()}");
 
-                try
-                {
-                    // Exception:
-                    //      可能会抛出异常 ArgumentException TagDataException
-                    _all.Add(NewEntity(tag));
-                }
-                catch (TagDataException ex)
-                {
-                    warnings.Add($"UID 为 '{tag.OneTag?.UID}' 的标签出现数据格式错误: {ex.Message}");
-                    WpfClientInfo.WriteErrorLog($"InitialShelfEntities() 遇到 tag (UID={tag.OneTag?.UID}) 数据格式出错：{ex.Message}\r\ntag 详情：{tag.ToString()}");
+                    try
+                    {
+                        // Exception:
+                        //      可能会抛出异常 ArgumentException TagDataException
+                        _all.Add(NewEntity(tag));
+                    }
+                    catch (TagDataException ex)
+                    {
+                        warnings.Add($"UID 为 '{tag.OneTag?.UID}' 的标签出现数据格式错误: {ex.Message}");
+                        WpfClientInfo.WriteErrorLog($"InitialShelfEntities() 遇到 tag (UID={tag.OneTag?.UID}) 数据格式出错：{ex.Message}\r\ntag 详情：{tag.ToString()}");
+                    }
                 }
             }
 
@@ -1331,13 +1358,16 @@ namespace dp2SSL
             var task = Task.Run(async () =>
             {
                 CancellationToken token = CancelToken;
-                await FillBookFields(_all, token);
-                await FillBookFields(_adds, token);
-                await FillBookFields(_removes, token);
+                await FillBookFields(All, token);
+                await FillBookFields(Adds, token);
+                await FillBookFields(Removes, token);
             });
 
             return new InitialShelfResult { Warnings = warnings };
         }
+
+
+#endif
 
         // Exception:
         //      可能会抛出异常 ArgumentException TagDataException
@@ -1382,10 +1412,14 @@ namespace dp2SSL
         // 刷新门内图书数字显示
         public static void RefreshCount()
         {
-            List<Entity> errors = GetErrors(_all, _adds, _removes);
-            DoorItem.DisplayCount(_all, _adds, _removes, errors, Doors);
+            lock (_syncRoot_all)
+            {
+                List<Entity> errors = GetErrors(_all, _adds, _removes);
+                DoorItem.DisplayCount(_all, _adds, _removes, errors, Doors);
+            }
         }
 
+        // 注意，没有加锁
         public static List<Entity> GetErrors(List<Entity> all,
             List<Entity> adds,
             List<Entity> removes)
@@ -1399,7 +1433,7 @@ namespace dp2SSL
                 if (entity.Error != null && entity.ErrorColor == "red")
                 {
                     if (errors.IndexOf(entity) == -1)
-                        Add(errors, entity);
+                        internalAdd(errors, entity);
                 }
             }
 
@@ -1471,17 +1505,42 @@ namespace dp2SSL
             return lock_names;
         }
 
-        public static List<Entity> Find(List<Entity> entities, string uid)
+        public static List<Entity> Find(IReadOnlyCollection<Entity> entities,
+            string uid)
         {
             List<Entity> results = new List<Entity>();
+            /*
             entities.ForEach((o) =>
             {
                 if (o.UID == uid)
                     results.Add(o);
             });
+            */
+            foreach (var o in entities)
+            {
+                if (o.UID == uid)
+                    results.Add(o);
+            }
             return results;
         }
 
+        static List<Entity> Find(string name, TagAndData tag)
+        {
+            lock (_syncRoot_all)
+            {
+                List<Entity> entities = LinkByName(name);
+
+                List<Entity> results = new List<Entity>();
+                entities.ForEach((o) =>
+                {
+                    if (o.UID == tag.OneTag.UID)
+                        results.Add(o);
+                });
+                return results;
+            }
+        }
+
+        // 注意：这是不加锁的版本
         static List<Entity> Find(List<Entity> entities, TagAndData tag)
         {
             List<Entity> results = new List<Entity>();
@@ -1493,7 +1552,67 @@ namespace dp2SSL
             return results;
         }
 
-        internal static bool Add(List<Entity> entities, Entity entity)
+        internal static void Add(string name, Entity entity)
+        {
+            var list = new List<Entity>();
+            list.Add(entity);
+            Add(name, list);
+        }
+
+        internal static void Add(string name, 
+            IReadOnlyCollection<Entity> adds)
+        {
+            lock (_syncRoot_all)
+            {
+                List<Entity> entities = LinkByName(name);
+
+                int count = 0;
+                foreach (var entity in adds)
+                {
+                    Debug.Assert(entity != null, "");
+                    Debug.Assert(string.IsNullOrEmpty(entity.UID) == false, "");
+
+                    List<Entity> results = new List<Entity>();
+                    entities.ForEach((o) =>
+                    {
+                        if (o.UID == entity.UID)
+                            results.Add(o);
+                    });
+                    if (results.Count > 0)
+                        continue;
+                    entities.Add(entity);
+                    count ++;
+                }
+            }
+        }
+
+
+        /*
+        internal static bool Add(string name, Entity entity)
+        {
+            lock (_syncRoot_all)
+            {
+                List<Entity> entities = LinkByName(name);
+
+                Debug.Assert(entity != null, "");
+                Debug.Assert(string.IsNullOrEmpty(entity.UID) == false, "");
+
+                List<Entity> results = new List<Entity>();
+                entities.ForEach((o) =>
+                {
+                    if (o.UID == entity.UID)
+                        results.Add(o);
+                });
+                if (results.Count > 0)
+                    return false;
+                entities.Add(entity);
+                return true;
+            }
+        }
+        */
+
+        // 注意，没有加锁
+        internal static bool internalAdd(List<Entity> entities, Entity entity)
         {
             Debug.Assert(entity != null, "");
             Debug.Assert(string.IsNullOrEmpty(entity.UID) == false, "");
@@ -1510,27 +1629,100 @@ namespace dp2SSL
             return true;
         }
 
+        internal static void Remove(string name, Entity entity)
+        {
+            var list = new List<Entity>();
+            list.Add(entity);
+            Remove(name, list);
+        }
+
+        internal static void Remove(string name, 
+            IReadOnlyCollection<Entity> removes)
+        {
+            lock (_syncRoot_all)
+            {
+                List<Entity> entities = LinkByName(name);
+
+                int count = 0;
+                foreach(var entity in removes)
+                {
+                    Debug.Assert(entity != null, "");
+                    Debug.Assert(string.IsNullOrEmpty(entity.UID) == false, "");
+
+                    List<Entity> results = new List<Entity>();
+                    entities.ForEach((o) =>
+                    {
+                        if (o.UID == entity.UID)
+                            results.Add(o);
+                    });
+                    if (results.Count > 0)
+                    {
+                        foreach (var o in results)
+                        {
+                            entities.Remove(o);
+                            count++;
+                        }
+                    }
+                }
+            }
+        }
+
+        /*
+        internal static bool Remove(string name, Entity entity)
+        {
+            lock (_syncRoot_all)
+            {
+                List<Entity> entities = LinkByName(name);
+
+                Debug.Assert(entity != null, "");
+                Debug.Assert(string.IsNullOrEmpty(entity.UID) == false, "");
+
+                List<Entity> results = new List<Entity>();
+                entities.ForEach((o) =>
+                {
+                    if (o.UID == entity.UID)
+                        results.Add(o);
+                });
+                if (results.Count > 0)
+                {
+                    foreach (var o in results)
+                    {
+                        entities.Remove(o);
+                    }
+                    return true;
+                }
+                return false;
+            }
+        }
+
+        */
+
+        /*
         internal static bool Remove(List<Entity> entities, Entity entity)
         {
-            Debug.Assert(entity != null, "");
-            Debug.Assert(string.IsNullOrEmpty(entity.UID) == false, "");
+            lock (_syncRoot_all)
+            {
+                Debug.Assert(entity != null, "");
+                Debug.Assert(string.IsNullOrEmpty(entity.UID) == false, "");
 
-            List<Entity> results = new List<Entity>();
-            entities.ForEach((o) =>
-            {
-                if (o.UID == entity.UID)
-                    results.Add(o);
-            });
-            if (results.Count > 0)
-            {
-                foreach (var o in results)
+                List<Entity> results = new List<Entity>();
+                entities.ForEach((o) =>
                 {
-                    entities.Remove(o);
+                    if (o.UID == entity.UID)
+                        results.Add(o);
+                });
+                if (results.Count > 0)
+                {
+                    foreach (var o in results)
+                    {
+                        entities.Remove(o);
+                    }
+                    return true;
                 }
-                return true;
+                return false;
             }
-            return false;
         }
+        */
 
         static bool Add(List<Entity> entities, TagAndData tag)
         {
@@ -1567,7 +1759,66 @@ namespace dp2SSL
             return false;
         }
 
+        static List<Entity> LinkByName(string name)
+        {
+            List<Entity> entities = null;
+            switch (name)
+            {
+                case "all":
+                    entities = _all;
+                    break;
+                case "adds":
+                    entities = _adds;
+                    break;
+                case "removes":
+                    entities = _removes;
+                    break;
+                case "changes":
+                    entities = _changes;
+                    break;
+                default:
+                    throw new ArgumentException($"无法识别的 name 参数值 '{name}'");
+            }
+
+            return entities;
+        }
+
         // 更新 Entity 信息
+        static bool Update(string name, TagAndData tag)
+        {
+            lock (_syncRoot_all)
+            {
+                List<Entity> entities = LinkByName(name);
+
+                bool changed = false;
+                foreach (var entity in entities)
+                {
+                    if (entity.UID == tag.OneTag.UID)
+                    {
+                        if (entity.ReaderName != tag.OneTag.ReaderName)
+                        {
+                            entity.ReaderName = tag.OneTag.ReaderName;
+                            changed = true;
+                        }
+                        if (entity.Antenna != tag.OneTag.AntennaID.ToString())
+                        {
+                            entity.Antenna = tag.OneTag.AntennaID.ToString();
+                            changed = true;
+                        }
+                        // 2019/11/26
+                        if (entity.TagInfo != null && tag.OneTag.TagInfo != null
+                            && entity.TagInfo.EAS != tag.OneTag.TagInfo.EAS)
+                        {
+                            entity.TagInfo.EAS = tag.OneTag.TagInfo.EAS;
+                            // changed = true;
+                        }
+                    }
+                }
+                return changed;
+            }
+        }
+
+        // 注意：这是不加锁的版本
         static bool Update(List<Entity> entities, TagAndData tag)
         {
             bool changed = false;
@@ -1625,76 +1876,81 @@ namespace dp2SSL
                 tags.AddRange(e.UpdateBooks);
 
             List<string> add_uids = new List<string>();
-            // 新添加标签(或者更新标签信息)
-            foreach (var tag in tags)
-            {
-                // 没有 TagInfo 信息的先跳过
-                if (tag.OneTag.TagInfo == null)
-                    continue;
-
-                add_uids.Add(tag.OneTag.UID);
-
-                // 看看 _all 里面有没有
-                var results = Find(_all, tag);
-                if (results.Count == 0)
-                {
-                    if (Add(_adds, tag) == true)
-                    {
-                        changed = true;
-                    }
-                    if (Remove(_removes, tag) == true)
-                        changed = true;
-                }
-                else
-                {
-                    // 更新 _all 里面的信息
-                    if (Update(_all, tag) == true)
-                        Add(_changes, tag);
-
-                    // 要把 _adds 和 _removes 里面都去掉
-                    if (Remove(_adds, tag) == true)
-                        changed = true;
-                    if (Remove(_removes, tag) == true)
-                        changed = true;
-                }
-            }
-
-            // 拿走标签
             int removeBooksCount = 0;
-            foreach (var tag in e.RemoveBooks)
+            lock (_syncRoot_all)
             {
-                if (tag.OneTag.TagInfo == null)
-                    continue;
 
-                if (tag.Type == "patron")
-                    continue;
-
-                // 看看 _all 里面有没有
-                var results = Find(_all, tag);
-                if (results.Count > 0)
+                // 新添加标签(或者更新标签信息)
+                foreach (var tag in tags)
                 {
-                    if (Remove(_adds, tag) == true)
-                        changed = true;
-                    if (Remove(_changes, tag) == true)
-                        changed = true;
-                    if (Add(_removes, tag) == true)
+                    // 没有 TagInfo 信息的先跳过
+                    if (tag.OneTag.TagInfo == null)
+                        continue;
+
+                    add_uids.Add(tag.OneTag.UID);
+
+                    // 看看 _all 里面有没有
+                    var results = Find(_all, tag);
+                    if (results.Count == 0)
                     {
-                        changed = true;
+                        if (Add(_adds, tag) == true)
+                        {
+                            changed = true;
+                        }
+                        if (Remove(_removes, tag) == true)
+                            changed = true;
+                    }
+                    else
+                    {
+                        // 更新 _all 里面的信息
+                        if (Update(_all, tag) == true)
+                            Add(_changes, tag);
+
+                        // 要把 _adds 和 _removes 里面都去掉
+                        if (Remove(_adds, tag) == true)
+                            changed = true;
+                        if (Remove(_removes, tag) == true)
+                            changed = true;
                     }
                 }
-                else
+
+                // 拿走标签
+                foreach (var tag in e.RemoveBooks)
                 {
-                    // _all 里面没有，很奇怪。但，
-                    // 要把 _adds 和 _removes 里面都去掉
-                    if (Remove(_adds, tag) == true)
-                        changed = true;
-                    if (Remove(_removes, tag) == true)
-                        changed = true;
-                    if (Remove(_changes, tag) == true)
-                        changed = true;
+                    if (tag.OneTag.TagInfo == null)
+                        continue;
+
+                    if (tag.Type == "patron")
+                        continue;
+
+                    // 看看 _all 里面有没有
+                    var results = Find("all", tag);
+                    if (results.Count > 0)
+                    {
+                        if (Remove(_adds, tag) == true)
+                            changed = true;
+                        if (Remove(_changes, tag) == true)
+                            changed = true;
+                        if (Add(_removes, tag) == true)
+                        {
+                            changed = true;
+                        }
+                    }
+                    else
+                    {
+                        // _all 里面没有，很奇怪。但，
+                        // 要把 _adds 和 _removes 里面都去掉
+                        if (Remove(_adds, tag) == true)
+                            changed = true;
+                        if (Remove(_removes, tag) == true)
+                            changed = true;
+                        if (Remove(_changes, tag) == true)
+                            changed = true;
+                    }
+
+                    removeBooksCount++;
                 }
 
-                removeBooksCount++;
             }
 
             StringUtil.RemoveDup(ref add_uids, false);
@@ -1742,9 +1998,9 @@ namespace dp2SSL
             var task = Task.Run(async () =>
             {
                 CancellationToken token = CancelToken;
-                await FillBookFields(_all, token);
-                await FillBookFields(_adds, token);
-                await FillBookFields(_removes, token);
+                await FillBookFields(All, token);
+                await FillBookFields(Adds, token);
+                await FillBookFields(Removes, token);
             });
         }
 
@@ -1765,7 +2021,7 @@ namespace dp2SSL
         }
 
         public static async Task FillBookFields(// BaseChannel<IRfid> channel,
-    IList<Entity> entities,
+    IReadOnlyCollection<Entity> entities,
     CancellationToken token,
     bool refreshCount = true)
         {
@@ -2148,16 +2404,16 @@ namespace dp2SSL
                         // 把 _adds 和 _removes 归入 _all
                         // 一边处理一边动态修改 _all?
                         if (action == "return")
-                            ShelfData.Add(ShelfData.All, entity);
+                            ShelfData.Add("all", entity);
                         else
-                            ShelfData.Remove(ShelfData.All, entity);
+                            ShelfData.Remove("all", entity);
 
-                        ShelfData.Remove(ShelfData.Adds, entity);
-                        ShelfData.Remove(ShelfData.Removes, entity);
+                        ShelfData.Remove("adds", entity);
+                        ShelfData.Remove("removes", entity);
                     }
 
                     if (action == "transfer")
-                        ShelfData.Remove(ShelfData.Changes, entity);
+                        ShelfData.Remove("changes", entity);
 
                     string resultType = "succeed";
                     if (lRet == -1)
@@ -2371,7 +2627,7 @@ namespace dp2SSL
         }
 
 #if REMOVED
-#region 门命令延迟执行
+        #region 门命令延迟执行
 
         // 门命令(延迟执行)队列。开门时放一个命令进入队列。等得到门开信号的时候再取出这个命令
         static List<CommandItem> _commandQueue = new List<CommandItem>();
@@ -2461,7 +2717,7 @@ namespace dp2SSL
         }
 
 
-#endregion
+        #endregion
 #endif
     }
 

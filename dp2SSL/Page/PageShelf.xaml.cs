@@ -34,6 +34,7 @@ using DigitalPlatform.LibraryServer;
 using DigitalPlatform.Xml;
 using static dp2SSL.App;
 using DigitalPlatform.Face;
+using DigitalPlatform.WPF;
 
 namespace dp2SSL
 {
@@ -274,6 +275,7 @@ namespace dp2SSL
                     // e.Door.Operator = null; // 清掉门上的操作者名字
                 }
 
+                // 注: 调用完成后门控件上的 +- 数字才会消失
                 var task = SubmitCheckInOut("");
 
                 /*
@@ -1180,22 +1182,39 @@ namespace dp2SSL
             // TODO: 不过似乎此时有语音提示放入、取出，似乎更显得实用一些？
             if (this.Mode == "initial")
             {
-                List<Entity> adds = new List<Entity>(ShelfData.Adds);
+                var adds = ShelfData.Adds; // new List<Entity>(ShelfData.Adds);
+                /*
                 foreach (var entity in adds)
                 {
-                    ShelfData.Add(ShelfData.All, entity);
+                    ShelfData.Add("all", entity);
 
-                    ShelfData.Remove(ShelfData.Adds, entity);
-                    ShelfData.Remove(ShelfData.Removes, entity);
+                    ShelfData.Remove("adds", entity);
+                    ShelfData.Remove("removes", entity);
+                }
+                */
+                {
+                    ShelfData.Add("all", adds);
+
+                    ShelfData.Remove("adds", adds);
+                    ShelfData.Remove("removes", adds);
                 }
 
-                List<Entity> removes = new List<Entity>(ShelfData.Removes);
+                // List<Entity> removes = new List<Entity>(ShelfData.Removes);
+                var removes = ShelfData.Removes;
+                /*
                 foreach (var entity in removes)
                 {
-                    ShelfData.Remove(ShelfData.All, entity);
+                    ShelfData.Remove("all", entity);
 
-                    ShelfData.Remove(ShelfData.Adds, entity);
-                    ShelfData.Remove(ShelfData.Removes, entity);
+                    ShelfData.Remove("adds", entity);
+                    ShelfData.Remove("removes", entity);
+                }
+                */
+                {
+                    ShelfData.Remove("all", removes);
+
+                    ShelfData.Remove("adds", removes);
+                    ShelfData.Remove("removes", removes);
                 }
 
                 ShelfData.RefreshCount();
@@ -2205,7 +2224,7 @@ namespace dp2SSL
         //      0   没有必要处理
         //      1   已经处理
         SubmitResult TryReturn(ProgressWindow progress,
-            List<Entity> entities)
+            IReadOnlyCollection<Entity> entities)
         {
             List<ActionInfo> actions = new List<ActionInfo>();
             foreach (var entity in entities)
@@ -2366,10 +2385,10 @@ namespace dp2SSL
                     var entity = action.Entity;
                     if (action.Action == "transfer")
                     {
-                        ShelfData.Remove(ShelfData.All, entity);
-                        ShelfData.Remove(ShelfData.Adds, entity);
-                        ShelfData.Remove(ShelfData.Removes, entity);
-                        ShelfData.Remove(ShelfData.Changes, entity);
+                        ShelfData.Remove("all", entity);
+                        ShelfData.Remove("adds", entity);
+                        ShelfData.Remove("removes", entity);
+                        ShelfData.Remove("changes", entity);
                         changed = true;
                     }
                 });

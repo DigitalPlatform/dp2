@@ -7,6 +7,7 @@ using System.Xml;
 using DigitalPlatform;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.WPF;
 
 namespace dp2SSL
 {

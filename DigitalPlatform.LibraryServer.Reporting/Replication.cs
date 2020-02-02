@@ -15,6 +15,7 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
+using System.Reflection;
 
 namespace DigitalPlatform.LibraryServer.Reporting
 {
@@ -1851,7 +1852,6 @@ strStyle,
                 {
                     try
                     {
-                        context.Find()
                         context.Add(line);
                         context.SaveChanges();
                         dbContextTransaction.Commit();
@@ -2509,12 +2509,11 @@ LibraryChannel channel,
             //loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
             //loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
 
-            List<object> opers = new List<object>();
-            //MultiBuffer buffer = new MultiBuffer();
-            //buffer.Initial();
-
+            List<OperBase> opers = new List<OperBase>();
             try
             {
+                string maxDate = GetMaxDate(context);
+
                 int nProcessCount = 0;
                 string prev_date = "";
                 int nRecCount = 0;
@@ -2605,6 +2604,7 @@ LibraryChannel channel,
                             //      -1  出错
                             //      0   成功
                             nRet = BuildOpers(
+                                context,
                                 strOperation,
                                 dom,
                                 current_item.Date,
@@ -2653,7 +2653,7 @@ LibraryChannel channel,
                     if (opers.Count > 100) // 4000
                     {
                         // context.AddRange(opers);
-                        SaveChanges(ref context, opers);
+                        SaveOpers(ref context, opers);
                         opers.Clear();
 
                         strLastDate = item.Date;
@@ -2667,7 +2667,7 @@ LibraryChannel channel,
                 if (opers.Count > 0)
                 {
                     // context.AddRange(opers);
-                    SaveChanges(ref context, opers);
+                    SaveOpers(ref context, opers);
                     opers.Clear();
                 }
 
@@ -2688,12 +2688,53 @@ LibraryChannel channel,
             }
         }
 
+        // 获得已经存在的事项的最大 Date 值。如果不存在任何事项，则返回 null
+        public string GetMaxDate(LibraryContext context)
+        {
+            var item = context.AmerceOpers
+                .Select(oper => new { oper.Date })
+                .OrderByDescending(x => x.Date)
+                .Take(1)
+                .FirstOrDefault();
+            if (item == null)
+                return null;
+            return item.Date;
+        }
+
+        public void SaveOpers(ref LibraryContext context,
+            List<OperBase> lines)
+        {
+            using (var dbContextTransaction = context.Database.BeginTransaction())
+            {
+                try
+                {
+                    foreach (var line in lines)
+                    {
+                        context.AddOrUpdate(line);
+                    }
+                    context.SaveChanges();
+                    dbContextTransaction.Commit();
+                }
+                catch (Exception ex)
+                {
+                    // Rollback() 本身也可能再次抛异常
+                    dbContextTransaction.Rollback(); //Required according to MSDN article 
+                                                     // TODO: 写入错误日志
+                   throw ex;
+                }
+            }
+
+            context.Dispose();
+            context = new LibraryContext();
+        }
+
         // 在内存中增加一行
         // return:
         //      -2  不能识别的 strOperation 类型
         //      -1  出错
         //      0   成功
         public int BuildOpers(
+            LibraryContext context,
             string strOperation,
             XmlDocument dom,
             string strDate,
@@ -2702,47 +2743,50 @@ LibraryChannel channel,
             out string strError)
         {
             lines = new List<OperBase>();
+            DbSet<OperBase> set = null;
 
             OperBase line = null;
             if (strOperation == "borrow" || strOperation == "return")
             {
+                // line = context.CircuOpers.Find(line.GetKeys()) ?? new CircuOper();
                 line = new CircuOper();
+                set = context.Set<CircuOper>();
             }
             else if (strOperation == "setReaderInfo")
             {
-                line = new PatronOper();
+                line = context.PatronOpers.Find(line.GetKeys()) ?? new PatronOper();
             }
             else if (strOperation == "setBiblioInfo")
             {
-                line = new BiblioOper();
+                line = context.BiblioOpers.Find(line.GetKeys()) ?? new BiblioOper();
             }
             else if (strOperation == "setEntity")
             {
-                line = new ItemOper();
+                line = context.ItemOpers.Find(line.GetKeys()) ?? new ItemOper();
             }
             else if (strOperation == "setOrder")
             {
-                line = new ItemOper();
+                line = context.ItemOpers.Find(line.GetKeys()) ?? new ItemOper();
             }
             else if (strOperation == "setIssue")
             {
-                line = new ItemOper();
+                line = context.ItemOpers.Find(line.GetKeys()) ?? new ItemOper();
             }
             else if (strOperation == "setComment")
             {
-                line = new ItemOper();
+                line = context.ItemOpers.Find(line.GetKeys()) ?? new ItemOper();
             }
             else if (strOperation == "amerce")
             {
-                line = new AmerceOper();
+                line = context.AmerceOpers.Find(line.GetKeys()) ?? new AmerceOper();
             }
             else if (strOperation == "passgate")
             {
-                line = new PassGateOper();
+                line = context.PassGateOpers.Find(line.GetKeys()) ?? new PassGateOper();
             }
             else if (strOperation == "getRes")
             {
-                line = new GetResOper();
+                line = context.GetResOpers.Find(line.GetKeys()) ?? new GetResOper();
             }
             else
             {
@@ -2759,6 +2803,10 @@ LibraryChannel channel,
             lines.Add(line);
             if (temp_lines != null && temp_lines.Count > 0)
                 lines.AddRange(temp_lines);
+
+            var type = Assembly.GetExecutingAssembly().GetTypes().FirstOrDefault(t => t.Name == "test");
+
+            var set = context.Set(type);
             return 0;
         }
 
