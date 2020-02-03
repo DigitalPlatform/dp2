@@ -662,15 +662,20 @@ namespace dp2SSL
 
         // 累积的全部 action
         static List<ActionInfo> _actions = new List<ActionInfo>();
-        public static List<ActionInfo> Actions
+        public static IReadOnlyCollection<ActionInfo> Actions
         {
             get
             {
-                return _actions;
+                lock (_syncRoot_actions)
+                {
+                    return new List<ActionInfo>(_actions);
+                    // return _actions;
+                }
             }
         }
 
-        static object _syncRoot = new object();
+        // 用于保护 Actions 数据结构的锁对象
+        static object _syncRoot_actions = new object();
 
         public delegate Operator Delegate_getOperator(Entity entity);
 
@@ -681,7 +686,7 @@ namespace dp2SSL
             // string patronBarcode,
             Delegate_getOperator func_getOperator)
         {
-            lock (_syncRoot)
+            lock (_syncRoot_actions)
             {
                 List<ActionInfo> actions = new List<ActionInfo>();
                 List<Entity> processed = new List<Entity>();
@@ -840,12 +845,17 @@ namespace dp2SSL
         // 将 actions 保存起来
         public static void PushActions(List<ActionInfo> actions)
         {
-            _actions.AddRange(actions);
+            lock (_syncRoot_actions)
+            {
+                _actions.AddRange(actions);
+            }
         }
 
         public delegate void Delegate_removeAction(ActionInfo action);
 
         // 询问典藏移交的一些条件参数
+        // parameters:
+        //      actions     在本函数处理过程中此集合内的对象可能被修改，集合元素可能被移除
         public static void AskLocationTransfer(List<ActionInfo> actions,
             Delegate_removeAction func_removeAction)
         {
@@ -1005,7 +1015,6 @@ namespace dp2SSL
                     }
                 }
             }
-
         }
 
         static EntityCollection BuildEntityCollection(List<ActionInfo> actions)
@@ -1037,9 +1046,12 @@ namespace dp2SSL
         {
             get
             {
-                List<Entity> results = new List<Entity>(_all);
-                return results;
-                // return _all.AsReadOnly();
+                lock (_syncRoot_all)
+                {
+                    List<Entity> results = new List<Entity>(_all);
+                    return results;
+                    // return _all.AsReadOnly();
+                }
             }
         }
 
@@ -1047,7 +1059,10 @@ namespace dp2SSL
         {
             get
             {
-                return new List<Entity>(_adds);
+                lock (_syncRoot_all)
+                {
+                    return new List<Entity>(_adds);
+                }
             }
         }
 
@@ -1055,7 +1070,10 @@ namespace dp2SSL
         {
             get
             {
-                return new List<Entity>(_removes);
+                lock (_syncRoot_all)
+                {
+                    return new List<Entity>(_removes);
+                }
             }
         }
 
@@ -1063,7 +1081,10 @@ namespace dp2SSL
         {
             get
             {
-                return new List<Entity>(_changes);
+                lock (_syncRoot_all)
+                {
+                    return new List<Entity>(_changes);
+                }
             }
         }
 
@@ -2165,6 +2186,8 @@ namespace dp2SSL
         // -1 -1 -1 hide progress bar
         public delegate void Delegate_setProgress(double min, double max, double value, string text);
 
+        // parameters:
+        //      actions 要处理的 Action 集合。每个 Action 对象处理完以后，会自动从 _actions 中移除
         // result.Value
         //      -1  出错(要用对话框显示结果)
         //      0   没有必要处理
@@ -2173,7 +2196,7 @@ namespace dp2SSL
             Delegate_setProgress func_setProgress,
             //string patronBarcode,
             //string patron_name,
-            List<ActionInfo> actions)
+            IReadOnlyCollection<ActionInfo> actions)
         {
 
             // TODO: 如果当前没有读者身份，则当作初始化处理，将书柜内的全部图书做还书尝试；被拿走的图书记入本地日志(所谓无主操作)
@@ -2613,9 +2636,12 @@ namespace dp2SSL
                 }
 
                 // 把处理过的移走
-                foreach (var info in processed)
+                lock (_syncRoot_actions)
                 {
-                    _actions.Remove(info);
+                    foreach (var info in processed)
+                    {
+                        _actions.Remove(info);
+                    }
                 }
 
                 return new SubmitResult
