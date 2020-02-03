@@ -2394,7 +2394,9 @@ namespace dp2SSL
                 silence = true;
             // bool verifyDoorClosing = StringUtil.IsInList("verifyDoorClosing", strStyle);
 
-            if (ShelfData.Actions.Count == 0)
+            // 在本函数内使用。中途可能被修改
+            List<ActionInfo> actions = new List<ActionInfo>(ShelfData.Actions);
+            if (actions.Count == 0)
                 return;  // 没有必要处理
 
             // 关闭以前残留的对话框
@@ -2403,7 +2405,7 @@ namespace dp2SSL
             {
                 // 对涉及到工作人员身份进行典藏移交的 action 进行补充修正
                 bool changed = false;
-                ShelfData.AskLocationTransfer(ShelfData.Actions,
+                ShelfData.AskLocationTransfer(actions,
                     (action) =>
                     {
                         var entity = action.Entity;
@@ -2420,7 +2422,7 @@ namespace dp2SSL
                 if (changed)
                     ShelfData.RefreshCount();
 
-                if (ShelfData.Actions.Count == 0)
+                if (actions.Count == 0)
                     return;  // 没有必要处理
             }
 
@@ -2458,7 +2460,7 @@ namespace dp2SSL
                         }));
                     }
                 },
-ShelfData.Actions);
+                actions);
 
                 if (result.Value == -1)
                 {
