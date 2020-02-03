@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 
 namespace dp2SSL
 {
+#if DOOR_MONITOR
+
     /// <summary>
     /// 监控门的状态变化。如果超时以后还没有到来期待的开门状态变化，则补做一个开门和关闭状态变化序列
     /// </summary>
@@ -138,4 +140,7 @@ namespace dp2SSL
         public DateTime StartTime { get; set; }
         public long HeartbeatTicks { get; set; }
     }
+
+#endif
+
 }

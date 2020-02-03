@@ -168,6 +168,8 @@ namespace dp2SSL
             }
 
             // InputMethod.Current.ImeState = InputMethodState.Off;
+#if DOOR_MONITOR
+
             if (ShelfData.DoorMonitor == null)
             {
                 ShelfData.DoorMonitor = new DoorMonitor();
@@ -189,6 +191,7 @@ namespace dp2SSL
                     await SubmitCheckInOut();   // "silence"
                 });
             }
+#endif
         }
 
         private void App_Updated(object sender, UpdatedEventArgs e)
@@ -292,8 +295,11 @@ namespace dp2SSL
                 // e.Door.Waiting--;
             }
 
+#if DOOR_MONITOR
+
             // 取消状态变化监控
             ShelfData.DoorMonitor.RemoveMessages(e.Door);
+#endif
         }
 
         static string GetPartialName(string buttonName)
@@ -696,8 +702,11 @@ namespace dp2SSL
                     /*
                     ShelfData.PopCommand(e.Door, "cancelled");
                     */
+#if DOOR_MONITOR
+
                     // 取消监控
                     ShelfData.DoorMonitor?.RemoveMessages(e.Door);
+#endif
                     return;
                 }
                 //}
@@ -1461,6 +1470,20 @@ namespace dp2SSL
                 this.doorControl.Visibility = Visibility.Visible;
                 this.doorControl.InitializeButtons(ShelfData.ShelfCfgDom, ShelfData.Doors);
             }));
+
+            // 等待锁控就绪
+            var lock_result = await ShelfData.WaitLockReady(
+                (s) =>
+                {
+                    DisplayMessage(progress, s, "green");
+                },
+                () =>
+                {
+                    return _initialCancelled;
+                })
+                .ConfigureAwait(false);
+            if (lock_result.Value == -1)
+                return;
 
             try
             {
@@ -2377,27 +2400,29 @@ namespace dp2SSL
             // 关闭以前残留的对话框
             CloseDialogs();
 
-            // 对涉及到工作人员身份进行典藏移交的 action 进行补充修正
-            bool changed = false;
-            ShelfData.AskLocationTransfer(ShelfData.Actions,
-                (action) =>
-                {
-                    var entity = action.Entity;
-                    if (action.Action == "transfer")
+            {
+                // 对涉及到工作人员身份进行典藏移交的 action 进行补充修正
+                bool changed = false;
+                ShelfData.AskLocationTransfer(ShelfData.Actions,
+                    (action) =>
                     {
-                        ShelfData.Remove("all", entity);
-                        ShelfData.Remove("adds", entity);
-                        ShelfData.Remove("removes", entity);
-                        ShelfData.Remove("changes", entity);
-                        changed = true;
-                    }
-                });
+                        var entity = action.Entity;
+                        if (action.Action == "transfer")
+                        {
+                            ShelfData.Remove("all", entity);
+                            ShelfData.Remove("adds", entity);
+                            ShelfData.Remove("removes", entity);
+                            ShelfData.Remove("changes", entity);
+                            changed = true;
+                        }
+                    });
 
-            if (changed)
-                ShelfData.RefreshCount();
+                if (changed)
+                    ShelfData.RefreshCount();
 
-            if (ShelfData.Actions.Count == 0)
-                return;  // 没有必要处理
+                if (ShelfData.Actions.Count == 0)
+                    return;  // 没有必要处理
+            }
 
             SubmitWindow progress = null;
 
