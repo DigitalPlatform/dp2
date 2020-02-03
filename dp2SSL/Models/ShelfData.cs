@@ -26,7 +26,9 @@ namespace dp2SSL
     /// </summary>
     public static class ShelfData
     {
+#if DOOR_MONITOR
         public static DoorMonitor DoorMonitor = null;
+#endif
 
         public static CancellationToken CancelToken
         {
@@ -145,8 +147,9 @@ namespace dp2SSL
                 SetOpenCount(count);
             }
 
-
+#if DOOR_MONITOR
             ShelfData.DoorMonitor?.ProcessTimeout();
+#endif
 
 #if REMOVED
             // TODO: 如果刚才已经获得了一个门锁的关门信号，则后面不要重复触发 DoorStateChanged 
@@ -1107,6 +1110,35 @@ namespace dp2SSL
             }
         }
 
+        public static async Task<NormalResult> WaitLockReady(
+            Delegate_displayText func_display,
+            Delegate_cancelled func_cancelled)
+        {
+            WpfClientInfo.WriteInfoLog("等待锁控就绪");
+            func_display("等待锁控就绪 ...");
+            bool ret = await Task.Run(() =>
+            {
+                while (true)
+                {
+                    if (OpeningDoorCount != -1)
+                        return true;
+                    if (func_cancelled() == true)
+                        return false;
+                    Thread.Sleep(100);
+                }
+            });
+
+            if (ret == false)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = "用户中断",
+                    ErrorCode = "cancelled"
+                };
+
+            return new NormalResult();
+        }
+
         public delegate void Delegate_displayText(string text);
         public delegate bool Delegate_cancelled();
 
@@ -1194,7 +1226,7 @@ namespace dp2SSL
 
             }
 
-
+            /*
             {
                 WpfClientInfo.WriteInfoLog("等待锁控就绪");
                 func_display("等待锁控就绪 ...");
@@ -1215,6 +1247,7 @@ namespace dp2SSL
                 if (ret == false)
                     return new InitialShelfResult();
             }
+            */
 
             // DoorItem.DisplayCount(_all, _adds, _removes, App.CurrentApp.Doors);
             RefreshCount();
@@ -1559,7 +1592,7 @@ namespace dp2SSL
             Add(name, list);
         }
 
-        internal static void Add(string name, 
+        internal static void Add(string name,
             IReadOnlyCollection<Entity> adds)
         {
             lock (_syncRoot_all)
@@ -1581,7 +1614,7 @@ namespace dp2SSL
                     if (results.Count > 0)
                         continue;
                     entities.Add(entity);
-                    count ++;
+                    count++;
                 }
             }
         }
@@ -1636,7 +1669,7 @@ namespace dp2SSL
             Remove(name, list);
         }
 
-        internal static void Remove(string name, 
+        internal static void Remove(string name,
             IReadOnlyCollection<Entity> removes)
         {
             lock (_syncRoot_all)
@@ -1644,7 +1677,7 @@ namespace dp2SSL
                 List<Entity> entities = LinkByName(name);
 
                 int count = 0;
-                foreach(var entity in removes)
+                foreach (var entity in removes)
                 {
                     Debug.Assert(entity != null, "");
                     Debug.Assert(string.IsNullOrEmpty(entity.UID) == false, "");
