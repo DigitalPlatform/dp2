@@ -2194,8 +2194,6 @@ namespace dp2SSL
         //      1   已经完成处理(要用对话框显示结果)
         public static SubmitResult SubmitCheckInOut(
             Delegate_setProgress func_setProgress,
-            //string patronBarcode,
-            //string patron_name,
             IReadOnlyCollection<ActionInfo> actions)
         {
 
@@ -2315,6 +2313,8 @@ namespace dp2SSL
                     }
 
                     long lRet = 0;
+                    ErrorCode error_code = ErrorCode.NoError;
+
                     string strError = "";
                     string[] item_records = null;
                     string[] biblio_records = null;
@@ -2419,6 +2419,8 @@ namespace dp2SSL
                                 out ReturnInfo return_info,
                                 out strError);
                         }
+
+                        error_code = channel.ErrorCode; // 保存下来，避免被 ReturnChannel 以后破坏
                     }
                     finally
                     {
@@ -2486,7 +2488,7 @@ namespace dp2SSL
                         Operator = info.Operator,
                         Operation = action,
                         ResultType = resultType,
-                        ErrorCode = channel.ErrorCode.ToString(),
+                        ErrorCode = error_code.ToString(),
                         ErrorInfo = strError,
                         Entity = entity,
                         Direction = $"-->{direction}",
@@ -2511,7 +2513,7 @@ namespace dp2SSL
 
                         if (action == "return")
                         {
-                            if (channel.ErrorCode == ErrorCode.NotBorrowed)
+                            if (error_code == ErrorCode.NotBorrowed)
                             {
                                 messageItem.ResultType = "information";
                                 WpfClientInfo.WriteInfoLog($"读者 {info.Operator.PatronName} {info.Operator.PatronBarcode} 尝试还回册 '{title}' 时: {strError}");
@@ -2520,10 +2522,9 @@ namespace dp2SSL
                             }
                         }
 
-
                         if (action == "transfer")
                         {
-                            if (channel.ErrorCode == ErrorCode.NotChanged)
+                            if (error_code == ErrorCode.NotChanged)
                             {
                                 // 不出现在结果中
                                 // doc.Remove(messageItem);
@@ -2635,6 +2636,7 @@ namespace dp2SSL
                     // App.CurrentApp.Speak(speak);
                 }
 
+                // TODO: 遇到通讯出错的请求，是否放入一个永久保存的数据结构里面，自动在稍后进行重试请求？
                 // 把处理过的移走
                 lock (_syncRoot_actions)
                 {
