@@ -17,6 +17,7 @@ using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
 using DigitalPlatform.WPF;
+using Newtonsoft.Json;
 using static dp2SSL.LibraryChannelUtil;
 
 namespace dp2SSL
@@ -2687,6 +2688,80 @@ namespace dp2SSL
             }
         }
 
+        /*
+        static Operator OperatorFromRequest(RequestItem request)
+        {
+            if (request.PatronName == null
+                && request.PatronBarcode == null)
+                return null;
+            return new Operator
+            {
+                PatronName = request.PatronName,
+                PatronBarcode = request.PatronBarcode,
+            };
+        }
+
+        static Entity EntityFromRequest(RequestItem request)
+        {
+            return new Entity
+            {
+                UID = request.UID,
+                ReaderName = request.ReaderName,
+                Antenna = request.Antenna,
+                PII = request.PII,
+                ItemRecPath = request.ItemRecPath,
+                Title = request.Title,
+                Location = request.ItemLocation,
+                CurrentLocation = request.ItemCurrentLocation,
+                ShelfNo = request.ShelfNo,
+                State = request.State
+            };
+        }
+        */
+
+        static List<ActionInfo> FromRequests(List<RequestItem> requests)
+        {
+            List<ActionInfo> actions = new List<ActionInfo>();
+            foreach (var request in requests)
+            {
+                ActionInfo action = new ActionInfo();
+                action.Operator = request.OperatorString == null ? null :
+                    JsonConvert.DeserializeObject<Operator>(request.OperatorString);
+                action.Entity = JsonConvert.DeserializeObject<Entity>(request.EntityString);
+                action.Action = request.Action;
+                action.TransferDirection = request.TransferDirection;
+                action.Location = request.Location;
+                action.CurrentShelfNo = request.CurrentShelfNo;
+                action.BatchNo = request.BatchNo;
+
+                actions.Add(action);
+            }
+
+            return actions;
+        }
+
+        static List<RequestItem> FromActions(List<ActionInfo> actions)
+        {
+            List<RequestItem> requests = new List<RequestItem>();
+            foreach (var action in actions)
+            {
+                RequestItem request = new RequestItem();
+
+                request.OperatorString = action.Operator == null ? null : JsonConvert.SerializeObject(action.Operator);
+                request.EntityString = JsonConvert.SerializeObject(action.Entity);
+
+                request.Action = action.Action;
+                request.TransferDirection = action.TransferDirection;
+                request.Location = action.Location;
+                request.CurrentShelfNo = action.CurrentShelfNo;
+                request.BatchNo = action.BatchNo;
+
+                requests.Add(request);
+            }
+
+            return requests;
+        }
+
 #if REMOVED
         #region 门命令延迟执行
 
@@ -2831,6 +2906,8 @@ namespace dp2SSL
         public string CurrentShelfNo { get; set; }  // 当前架号。transfer 动作会用到
         public string BatchNo { get; set; } // 批次号。transfer 动作会用到。建议可以用当前用户名加上日期构成
     }
+
+
 
     public class SubmitResult : NormalResult
     {
