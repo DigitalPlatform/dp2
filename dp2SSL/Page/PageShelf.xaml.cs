@@ -88,6 +88,7 @@ namespace dp2SSL
             this.Mode = mode;
         }
 
+
         private async void PageShelf_Loaded(object sender, RoutedEventArgs e)
         {
             // _firstInitial = false;
@@ -159,6 +160,8 @@ namespace dp2SSL
                         // 初始化完成之后，应该是全部门关闭状态，还没有人开始使用，则先关灯，进入等待使用的状态
                         RfidManager.TurnShelfLamp("*", "turnOff");
                     });
+
+
                 }
                 catch (Exception ex)
                 {
@@ -1555,6 +1558,8 @@ namespace dp2SSL
                     }
                     if (string.IsNullOrEmpty(speak) == false)
                         App.CurrentApp.Speak(speak);
+
+                    _initialCancelled = true;   // 表示初始化失败
                 }
 
                 if (_initialCancelled)
@@ -2270,7 +2275,7 @@ namespace dp2SSL
             if (actions.Count == 0)
                 return new SubmitResult();  // 没有必要处理
 
-            return ShelfData.SubmitCheckInOut(
+            var result = ShelfData.SubmitCheckInOut(
                 (min, max, value, text) =>
                 {
                     if (progress != null)
@@ -2297,6 +2302,8 @@ namespace dp2SSL
                 //"", // _patron.Barcode,
                 //"", // _patron.PatronName,
                 actions);
+
+            return result;
         }
 
         // 将指定门的暂存的信息保存为 Action。但并不立即提交
@@ -2465,6 +2472,15 @@ namespace dp2SSL
                 if (result.Value == -1)
                 {
                     _progressWindow?.PushContent(result.ErrorInfo, "red");
+
+                    if (result.ErrorCode == "limitTimeout")
+                    {
+                        WpfClientInfo.WriteErrorLog("发生一次 limitTimeout 出错");
+                    }
+
+                    // 启动自动重试
+                    if (result.RetryActions != null)
+                        ShelfData.AddRetryActions(result.RetryActions);
                     return;
                 }
 
@@ -2475,6 +2491,10 @@ namespace dp2SSL
                         _progressWindow?.PushContent(result.MessageDocument);
                     }));
                 }
+
+                // 启动自动重试
+                if (result.RetryActions != null)
+                    ShelfData.AddRetryActions(result.RetryActions);
             }
             finally
             {

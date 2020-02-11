@@ -49,7 +49,7 @@ namespace dp2Circulation
             this.textBox_dbNameList.Text = strDbNameList.Replace(",", "\r\n");
 #endif
 
-                this.textBox_dbNameList.Text = param.DbNameList;
+                this.textBox_dbNameList.Text = param.DbNameList?.Replace(",", "\r\n");
                 this.comboBox_backupFileName.Text = param.BackupFileName;
 
 #if NO
@@ -159,7 +159,7 @@ namespace dp2Circulation
 
                 BackupTaskStart param = new BackupTaskStart();
                 param.BackupFileName = this.comboBox_backupFileName.Text;
-                param.DbNameList = this.textBox_dbNameList.Text;
+                param.DbNameList = this.textBox_dbNameList.Text.Replace("\r\n", ",");
 
                 this.StartInfo.Start = param.ToString();
             }

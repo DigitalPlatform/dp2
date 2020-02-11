@@ -290,8 +290,14 @@ namespace DigitalPlatform.LibraryServer
 
                 // Debug.Assert(breakpoints != null, "");
 
+                string names = "全部数据库";
+                if (string.IsNullOrEmpty(strDbNameList) || strDbNameList == "*")
+                    names = "全部数据库";
+                else
+                    names = strDbNameList;
+
                 this.AppendResultText("计划进行的处理：\r\n---\r\n"
-                    + (breakpoint == null ? "备份全部数据库" : breakpoint.GetSummary())
+                    + (breakpoint == null ? $"备份{names}" : breakpoint.GetSummary())
                     + "\r\n---\r\n\r\n");
 
                 m_nRecordCount = 0;
@@ -376,7 +382,7 @@ out strError);
 
                 DoPendingCommands(strBackupFileName);
                 return;
-                ERROR1:
+            ERROR1:
                 this.ErrorInfo = strError;
                 this.AppendResultText(strError + "\r\n");
                 this.SetProgressText(strError);
@@ -1071,7 +1077,7 @@ out strError);
                 this.AppendResultText("结束准备数据库定义\r\n");
             }
 
-            ERROR1:
+        ERROR1:
             WriteStateFile(strOutputFileNameParam, "error");
             return -1;
         }
@@ -1142,6 +1148,12 @@ out strError);
             strError = "";
 
             int nRecordCount = 0;
+
+            if (strDbNameList != null && strDbNameList.IndexOfAny(new char[] { '\r', '\n' }) != -1)
+            {
+                strError = $"strDbNameList 参数值('{strDbNameList}')格式错误。不允许包含回车或者换行符号。此参数若要列举多个数据库名，请在数据库名之间使用逗号间隔";
+                return -1;
+            }
 
             List<string> dbnames = StringUtil.SplitList(strDbNameList);
 

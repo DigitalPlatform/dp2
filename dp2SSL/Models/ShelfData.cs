@@ -2187,6 +2187,8 @@ namespace dp2SSL
         // -1 -1 -1 hide progress bar
         public delegate void Delegate_setProgress(double min, double max, double value, string text);
 
+        // TODO: 无法进行重试的错误，应该尝试在本地 SQLite 数据库中建立借还信息，以便日后追查
+        // 提交请求到 dp2library 服务器
         // parameters:
         //      actions 要处理的 Action 集合。每个 Action 对象处理完以后，会自动从 _actions 中移除
         // result.Value
@@ -2211,13 +2213,15 @@ namespace dp2SSL
             MessageDocument doc = new MessageDocument();
 
             // 限制同时能进入临界区的线程个数
+            // TODO: 如果另一个并发的 submit 过程时间较长，导致这里超时了，应该需要自动重试
             // true if the current instance receives a signal; otherwise, false.
             if (_limit.WaitOne(TimeSpan.FromSeconds(10)) == false)
                 return new SubmitResult
                 {
                     Value = -1,
                     ErrorInfo = "获得资源过程中超时",
-                    ErrorCode = "timeout"
+                    ErrorCode = "limitTimeout",
+                    RetryActions = new List<ActionInfo>(actions),
                 };
 
             try
@@ -2244,11 +2248,14 @@ namespace dp2SSL
                 // xml 发生改变了的那些实体记录
                 List<Entity> updates = new List<Entity>();
 
-                //int success_count = 0;
-                //List<string> errors = new List<string>();
-                //List<string> borrows = new List<string>();
-                //List<string> returns = new List<string>();
-                List<ActionInfo> processed = new List<ActionInfo>();
+                // List<ActionInfo> processed = new List<ActionInfo>();
+
+                // 出错了的，需要重做请求 dp2library 的那些 Action
+                List<ActionInfo> retry_actions = new List<ActionInfo>();
+
+                // 出错了的，但无法进行重试的那些 Action
+                List<ActionInfo> error_actions = new List<ActionInfo>();
+
                 foreach (ActionInfo info in actions)
                 {
                     // testing 
@@ -2320,7 +2327,6 @@ namespace dp2SSL
                     string[] item_records = null;
                     string[] biblio_records = null;
                     BorrowInfo borrow_info = null;
-                    // string currentLocation = "";
 
                     string strUserName = info.Operator?.GetWorkerAccountName();
 
@@ -2328,7 +2334,6 @@ namespace dp2SSL
                     LibraryChannel channel = App.CurrentApp.GetChannel(strUserName);
                     try
                     {
-
                         if (action == "borrow" || action == "renew")
                         {
                             // TODO: 智能书柜要求强制借书。如果册操作前处在被其他读者借阅状态，要自动先还书再进行借书
@@ -2429,7 +2434,7 @@ namespace dp2SSL
                         entity.Waiting = false;
                     }
 
-                    processed.Add(info);
+                    // processed.Add(info);
 
                     /*
                     // testing
@@ -2438,15 +2443,6 @@ namespace dp2SSL
                     channel.ErrorCode = ErrorCode.AccessDenied;
                     */
 
-                    /*
-                    if (progress != null)
-                    {
-                        Application.Current.Dispatcher.Invoke(new Action(() =>
-                        {
-                            progress.ProgressBar.Value++;
-                        }));
-                    }
-                    */
                     func_setProgress?.Invoke(-1, -1, ++index, null);
 
                     if (biblio_records != null
@@ -2458,6 +2454,7 @@ namespace dp2SSL
                     if (string.IsNullOrEmpty(entity.Title) == false)
                         title += " (" + entity.Title + ")";
 
+                    // TODO: 其实 SaveActions 里面已经处理了 all adds removes changed 数组，这里似乎不需要再处理了
                     if (action == "borrow" || action == "return")
                     {
                         // 把 _adds 和 _removes 归入 _all
@@ -2512,6 +2509,14 @@ namespace dp2SSL
                         }
                         */
 
+
+                        // 如果是通讯出错，要加入 retry_actions
+                        if (error_code == ErrorCode.RequestError
+                            || error_code == ErrorCode.RequestTimeOut
+                            || error_code == ErrorCode.RequestCanceled
+                            )
+                            retry_actions.Add(info);
+
                         if (action == "return")
                         {
                             if (error_code == ErrorCode.NotBorrowed)
@@ -2544,6 +2549,9 @@ namespace dp2SSL
                         entity.SetError($"{action_name}操作失败: {strError}", "red");
                         // TODO: 这里最好用 title
                         //errors.Add($"册 '{title}': {strError}");
+
+                        if (retry_actions.IndexOf(info) == -1)
+                            error_actions.Add(info);
                         continue;
                     }
 
@@ -2602,33 +2610,12 @@ namespace dp2SSL
                         //success_count++;
                         // 刷新显示。特别是一些关于借阅日期，借期，应还日期的内容
                     }
+
                 }
 
-                /*
-                if (progress != null)
-                {
-                    Application.Current.Dispatcher.Invoke(new Action(() =>
-                    {
-                        progress.ProgressBar.Visibility = Visibility.Collapsed;
-                        // progress.ProgressBar.Value = progress.ProgressBar.Maximum;
-                    }));
-                }*/
                 func_setProgress?.Invoke(-1, -1, -1, "处理完成");   // hide progress bar
 
-                //                string speak = "";
                 {
-                    /*
-                    if (progress != null)
-                    {
-                        Application.Current.Dispatcher.Invoke(new Action(() =>
-                        {
-                            // DisplayError(ref progress, message, backColor);
-                            progress.MessageDocument = doc.BuildDocument(patron_name, 18, out speak);
-                            progress = null;
-                        }));
-                    }
-                    */
-
                     // 重新装载读者信息和显示
                     // DoorItem.DisplayCount(_all, _adds, _removes, App.CurrentApp.Doors);
                     ShelfData.RefreshCount();
@@ -2641,7 +2628,7 @@ namespace dp2SSL
                 // 把处理过的移走
                 lock (_syncRoot_actions)
                 {
-                    foreach (var info in processed)
+                    foreach (var info in actions)
                     {
                         _actions.Remove(info);
                     }
@@ -2651,8 +2638,9 @@ namespace dp2SSL
                 {
                     Value = 1,
                     MessageDocument = doc,
-                    // SpeakContent = speak
-                }; // new NormalResult { Value = success_count };
+                    RetryActions = retry_actions,
+                    ErrorActions = error_actions,
+                };
             }
             finally
             {
@@ -2760,6 +2748,70 @@ namespace dp2SSL
             }
 
             return requests;
+        }
+
+        static Task _retryTask = null;
+        static List<ActionInfo> _retryActions = new List<ActionInfo>();
+        static object _syncRoot_retryActions = new object();
+
+        // 启动重试任务。此任务长期在后台运行
+        public static void StartRetryTask(CancellationToken token)
+        {
+            if (_retryTask != null)
+                return;
+
+            // 启动重试专用线程
+            _retryTask = Task.Factory.StartNew(() => {
+
+                while(token.IsCancellationRequested == false)
+                {
+                    Task.Delay(TimeSpan.FromSeconds(10)).Wait(token);
+
+                    List<ActionInfo> actions = null;
+                    lock (_syncRoot_retryActions)
+                    {
+                        actions = new List<ActionInfo>(_retryActions);
+                    }
+
+                    if (actions.Count == 0)
+                        continue;
+                    var result = SubmitCheckInOut(
+    null,
+    actions);
+                    List<ActionInfo> processed = new List<ActionInfo>();
+                    if (result.RetryActions != null)
+                    {
+                        foreach (var action in actions)
+                        {
+                            if (result.RetryActions.IndexOf(action) == -1)
+                                processed.Add(action);
+                        }
+                    }
+
+                    // TODO: 把重试成功的情况写入错误日志，以便检查和改进程序
+
+                    // 把处理掉的 ActionInfo 对象移走
+                    lock (_syncRoot_retryActions)
+                    {
+                        foreach(var action in processed)
+                        {
+                            _retryActions.Remove(action);
+                        }
+                    }
+                }
+                _retryTask = null;
+            },
+token,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+        }
+
+        public static void AddRetryActions(List<ActionInfo> actions)
+        {
+            lock (_syncRoot_retryActions)
+            {
+                _retryActions.AddRange(actions);
+            }
         }
 
 #if REMOVED
@@ -2911,8 +2963,16 @@ namespace dp2SSL
 
     public class SubmitResult : NormalResult
     {
+        // [out]
         public MessageDocument MessageDocument { get; set; }
-        // public string SpeakContent { get; set; }
+
+        // [out]
+        // 发生了错误，但不需要后面重试提交的 ActionInfo 对象集合
+        public List<ActionInfo> ErrorActions { get; set; }
+
+        // [out]
+        // 发生了错误，需要后面重试提交的 ActionInfo 对象集合
+        public List<ActionInfo> RetryActions { get; set; }
     }
 
     public class AntennaList
