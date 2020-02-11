@@ -67,3 +67,4 @@ namespace dp2SSL
             modelBuilder.Entity<RequestItem>().ToTable("requests");
         }
     }
+}
