@@ -557,7 +557,6 @@ namespace DigitalPlatform.CirculationClient
             // 否则是倒序
             strPath = strFullPath.Substring(0, nRet).Trim();
             strServerName = strFullPath.Substring(nRet + 1).Trim();
-
         }
 
         // 根据全路径逐步展开
