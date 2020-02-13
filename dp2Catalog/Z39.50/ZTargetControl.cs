@@ -165,7 +165,7 @@ namespace dp2Catalog
             }
             catch (Exception ex)
             {
-                strError = "装载文件 '"+strFileName+"' 到XMLDOM时出错: " + ex.Message;
+                strError = "装载文件 '" + strFileName + "' 到XMLDOM时出错: " + ex.Message;
                 return -1;
             }
 
@@ -173,14 +173,17 @@ namespace dp2Catalog
                 null,
                 out strError);
             if (nRet == -1)
+            {
+                strError = $"文件 '{strFileName}' NewOneNodeAndChildren() 时出错: {strError}";
                 return -1;
+            }
 
             return 0;
         }
 
         public void Save()
         {
-            if (this.Changed == true 
+            if (this.Changed == true
                 && this.m_strFileName != ""
                 && this.dom != null)
             {
@@ -216,11 +219,11 @@ namespace dp2Catalog
                 {
                     curTreeNode = new TreeNode(strName, TYPE_DIR, TYPE_DIR);
                 }
-                if (node.Name == "server")
+                else if (node.Name == "server")
                 {
                     curTreeNode = new TreeNode(strName, TYPE_SERVER_OFFLINE, TYPE_SERVER_OFFLINE);
                 }
-                if (node.Name == "database")
+                else if (node.Name == "database")
                 {
                     if (DomUtil.GetBooleanParam(node,
                         "notInAll",
@@ -228,6 +231,12 @@ namespace dp2Catalog
                         curTreeNode = new TreeNode(strName, TYPE_DATABASE_NOTINALL, TYPE_DATABASE_NOTINALL);
                     else
                         curTreeNode = new TreeNode(strName, TYPE_DATABASE, TYPE_DATABASE);
+                }
+                else
+                {
+                    // 2020/2/12
+                    strError = $"未知的 node.Name 值 '{node.Name}'";
+                    return -1;
                 }
 
                 treeNodes.Add(curTreeNode);
@@ -253,7 +262,6 @@ namespace dp2Catalog
 
             return 0;
         }
-
 
         // 2007/7/28
         // 将服务器节点的图标变成online/offline状态
@@ -533,7 +541,7 @@ namespace dp2Catalog
                 strError = "暂不支持目标目录检索";
                 return -1;
             }
-            
+
             targetinfo = new TargetInfo();
 
             string[] dbnames = null;
@@ -646,7 +654,7 @@ namespace dp2Catalog
 
             targetinfo.ConvertEACC = ZServerPropertyForm.GetBool(
                 DomUtil.GetAttr(xmlServerNode,
-                "converteacc"),false);
+                "converteacc"), false);
             targetinfo.FirstFull = ZServerPropertyForm.GetBool(
                 DomUtil.GetAttr(xmlServerNode,
                 "firstfull"), false);
@@ -704,7 +712,7 @@ DomUtil.GetAttr(xmlServerNode,
                         }
                         targetinfo.DefaultRecordsEncoding = this.Marc8Encoding;
                     }
-                    else 
+                    else
                         targetinfo.DefaultRecordsEncoding = Encoding.GetEncoding(strDefaultEncodingName);
                 }
                 catch
@@ -797,7 +805,7 @@ DomUtil.GetAttr(xmlServerNode,
             // 属性
             menuItem = new ToolStripMenuItem("属性(&P)");
             if (node == null
-                || (node != null && IsDatabaseType(node) == true ))
+                || (node != null && IsDatabaseType(node) == true))
                 menuItem.Enabled = false;
             menuItem.Click += new EventHandler(menuItem_property_Click);
             contextMenu.Items.Add(menuItem);
@@ -892,7 +900,7 @@ DomUtil.GetAttr(xmlServerNode,
                 OnSetMenu(this, newargs);
                 if (newargs.ContextMenuStrip != contextMenu)
                     contextMenu = newargs.ContextMenuStrip;
-            }		
+            }
 
             contextMenu.Show(this, e.Location);
         }
@@ -904,7 +912,7 @@ DomUtil.GetAttr(xmlServerNode,
             else
                 this.CheckBoxes = true;
         }
-        
+
 
         private void ZTargetControl_MouseDown(object sender, MouseEventArgs e)
         {
@@ -925,7 +933,7 @@ DomUtil.GetAttr(xmlServerNode,
             }
 
             DialogResult result = MessageBox.Show(this,
-"确实要删除节点 '"+node.Text+"'? ",
+"确实要删除节点 '" + node.Text + "'? ",
 "dp2Catalog",
 MessageBoxButtons.YesNo,
 MessageBoxIcon.Question,
@@ -1104,7 +1112,7 @@ MessageBoxDefaultButton.Button2);
             }
         }
 
-        private void Dlg_FindDp2Server(object sender, 
+        private void Dlg_FindDp2Server(object sender,
             DigitalPlatform.Z3950.UI.FindDp2ServerEventArgs e)
         {
             dp2SearchForm dp2_searchform = this.MainForm.GetDp2SearchForm();
@@ -1192,7 +1200,7 @@ MessageBoxDefaultButton.Button2);
                 else
                     xmlnode = this.dom.DocumentElement;
 
-                TreeNode newnode = new TreeNode("", 
+                TreeNode newnode = new TreeNode("",
                     TYPE_SERVER_OFFLINE, TYPE_SERVER_OFFLINE);
                 //
                 nodes.Add(newnode);
@@ -1343,7 +1351,7 @@ MessageBoxDefaultButton.Button2);
                     info.Name = dlg.DirName;
 
                 }
-                
+
             }
         }
 
@@ -1538,9 +1546,9 @@ MessageBoxDefaultButton.Button2);
 
 
         public string UserName = "";
-		public string Password = "";
-		public string GroupID = "";
-		public int AuthenticationMethod = 0;
+        public string Password = "";
+        public string GroupID = "";
+        public int AuthenticationMethod = 0;
 
         public string PreferredRecordSyntax = BerTree.MARC_SYNTAX;  // 可以有--部分。使用时候小心，用GetLeftValue()获得干净的值
         public string DefaultResultSetName = "default";
@@ -1676,7 +1684,7 @@ MessageBoxDefaultButton.Button2);
                 {
                     strDbNameList = string.Join(",", this.DbNames);
                 }
- 
+
                 string strTreePath = "";
 
                 if (this.StartNode != null)

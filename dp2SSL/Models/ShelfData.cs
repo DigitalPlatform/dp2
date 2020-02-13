@@ -2760,6 +2760,9 @@ namespace dp2SSL
             if (_retryTask != null)
                 return;
 
+            string a = "";
+            a.ToList();
+
             // 启动重试专用线程
             _retryTask = Task.Factory.StartNew(() => {
 

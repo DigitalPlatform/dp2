@@ -239,6 +239,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DigitalPlatform.LibraryServ
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestReporting", "TestReporting\TestReporting.csproj", "{54F3063D-5601-40F0-9431-419AEFF6FA90}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dp2ManageCenter", "dp2ManageCenter\dp2ManageCenter.csproj", "{4DD7602B-FBA3-4172-9542-DD59B9C7677D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1954,6 +1956,24 @@ Global
 		{54F3063D-5601-40F0-9431-419AEFF6FA90}.Test|Mixed Platforms.Build.0 = Release|Any CPU
 		{54F3063D-5601-40F0-9431-419AEFF6FA90}.Test|x86.ActiveCfg = Release|Any CPU
 		{54F3063D-5601-40F0-9431-419AEFF6FA90}.Test|x86.Build.0 = Release|Any CPU
+		{4DD7602B-FBA3-4172-9542-DD59B9C7677D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4DD7602B-FBA3-4172-9542-DD59B9C7677D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4DD7602B-FBA3-4172-9542-DD59B9C7677D}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{4DD7602B-FBA3-4172-9542-DD59B9C7677D}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{4DD7602B-FBA3-4172-9542-DD59B9C7677D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{4DD7602B-FBA3-4172-9542-DD59B9C7677D}.Debug|x86.Build.0 = Debug|Any CPU
+		{4DD7602B-FBA3-4172-9542-DD59B9C7677D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4DD7602B-FBA3-4172-9542-DD59B9C7677D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4DD7602B-FBA3-4172-9542-DD59B9C7677D}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{4DD7602B-FBA3-4172-9542-DD59B9C7677D}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{4DD7602B-FBA3-4172-9542-DD59B9C7677D}.Release|x86.ActiveCfg = Release|Any CPU
+		{4DD7602B-FBA3-4172-9542-DD59B9C7677D}.Release|x86.Build.0 = Release|Any CPU
+		{4DD7602B-FBA3-4172-9542-DD59B9C7677D}.Test|Any CPU.ActiveCfg = Release|Any CPU
+		{4DD7602B-FBA3-4172-9542-DD59B9C7677D}.Test|Any CPU.Build.0 = Release|Any CPU
+		{4DD7602B-FBA3-4172-9542-DD59B9C7677D}.Test|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{4DD7602B-FBA3-4172-9542-DD59B9C7677D}.Test|Mixed Platforms.Build.0 = Release|Any CPU
+		{4DD7602B-FBA3-4172-9542-DD59B9C7677D}.Test|x86.ActiveCfg = Release|Any CPU
+		{4DD7602B-FBA3-4172-9542-DD59B9C7677D}.Test|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

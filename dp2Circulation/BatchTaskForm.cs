@@ -11,12 +11,7 @@ using System.Diagnostics;
 using System.IO;
 
 using DigitalPlatform;
-using DigitalPlatform.CirculationClient;
-using DigitalPlatform.Xml;
-using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient.localhost;
-using DigitalPlatform.CommonControl;
-using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Text;
 
 namespace dp2Circulation
