@@ -377,7 +377,9 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
-            task._pendingCommands.Add("abort");
+            // TODO: 如果任务已经是停止状态，那么添加 "abort" 会不会影响下一个新开始的启动？
+            if (task._pendingCommands.IndexOf("abort") == -1)
+                task._pendingCommands.Add("abort");
             task.Stop();
 
             info = task.GetCurrentInfo(param.ResultOffset,
