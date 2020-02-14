@@ -790,8 +790,8 @@ string strHtml)
                     });
 
                     // 设置开始时间
-                    DateTime start_time = DateTime.Now;
-                    SetItemText(item, COLUMN_STARTTIME, start_time.ToString());
+                    //DateTime start_time = DateTime.Now;
+                    //SetItemText(item, COLUMN_STARTTIME, start_time.ToString());
                     SetItemText(item, COLUMN_STATE, "正在下载");
                     SetItemText(item, COLUMN_SERVERFILES, StringUtil.MakePathList(paths));
 
@@ -799,10 +799,11 @@ string strHtml)
 
                     info.InitialPathList(paths);
                     info.ServerName = server.Name;
-                    info.StartTime = start_time;
+                    // info.StartTime = start_time;
                     info.State = "downloading";
                     SetItemColor(item);
 
+#if NO
                     foreach (string path in paths)
                     {
                         if (string.IsNullOrEmpty(path) == false)
@@ -857,13 +858,18 @@ string strHtml)
                         }
                     }
 
+#endif
                 }
-                return new NormalResult();
+                // return new NormalResult();
             }
             finally
             {
                 this.ReturnChannel(channel);
             }
+
+            return await DownloadBackupFiles(
+                item,
+                strOutputFolder);
         }
 
         async Task<NormalResult> DownloadBackupFiles(
@@ -934,9 +940,10 @@ string strHtml)
                 });
 
                 // 设置开始时间
-                //DateTime start_time = DateTime.Now;
-                //SetItemText(item, COLUMN_STARTTIME, start_time.ToString());
+                DateTime start_time = DateTime.Now;
+                SetItemText(item, COLUMN_STARTTIME, start_time.ToString());
                 SetItemText(item, COLUMN_STATE, "正在下载");
+                info.StartTime = start_time;
                 info.ClearAllPathState();
                 info.State = "downloading";
                 SetItemColor(item);
@@ -960,7 +967,8 @@ string strHtml)
                             strOutputFolder,
                                 (p, t) =>
                                 {
-                                    SetItemText(item, COLUMN_PROGRESS, t);
+                                    int index = info.IndexOfPath(p);
+                                    SetItemText(item, COLUMN_PROGRESS, $"({(index+1)}){t}");
                                 },
                                 (p, error) =>
                                 {
@@ -1021,6 +1029,20 @@ string strHtml)
             public DateTime StartTime { get; set; }
 
             public string State { get; set; }   // (null)/dowloading/finish/error
+
+            public int IndexOfPath(string path)
+            {
+                if (this.PathList == null)
+                    return -1;
+                int i = 0;
+                foreach(var item in this.PathList)
+                {
+                    if (item.Path == path)
+                        return i;
+                    i++;
+                }
+                return -1;
+            }
 
             public void SetPathState(string path, string state)
             {
@@ -2137,6 +2159,10 @@ string strHtml)
                     try
                     {
                         Task.Delay(delta, token).Wait();
+                    }
+                    catch(AggregateException)
+                    {
+                        return;
                     }
                     catch(TaskCanceledException)
                     {

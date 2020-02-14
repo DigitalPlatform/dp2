@@ -174,6 +174,9 @@ namespace DigitalPlatform.LibraryServer
                     strDbNameList = "continue";
                 }
 
+                this._pendingCommands.Clear();
+
+
                 string strRecPathFileName = Path.Combine(this.App.BackupDir, "recpath.txt");
                 string strBackupFileName = "";
 
@@ -226,13 +229,12 @@ namespace DigitalPlatform.LibraryServer
                 else
                 {
                     {
-                        BreakPointInfo temp_breakpoint = null;
                         // 删除上次的大备份文件
                         // return:
                         //      -1  出错
                         //      0   没有发现断点信息
                         //      1   成功
-                        nRet = ReadBreakPoint(out temp_breakpoint,
+                        nRet = ReadBreakPoint(out BreakPointInfo temp_breakpoint,
                 out strError);
                         if (nRet == -1)
                             goto ERROR1;
