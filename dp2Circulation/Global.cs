@@ -2904,7 +2904,6 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
         public static void WriteHtml(WebBrowser webBrowser,
     string strHtml)
         {
-
             HtmlDocument doc = webBrowser.Document;
 
             if (doc == null)

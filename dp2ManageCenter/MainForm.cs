@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -21,6 +22,7 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryServer.Common;
 using DigitalPlatform.Text;
+using Newtonsoft.Json;
 
 namespace dp2ManageCenter
 {
@@ -55,7 +57,10 @@ namespace dp2ManageCenter
 
             this.UiState = ClientInfo.Config.Get("global", "ui_state", ""); // Properties.Settings.Default.ui_state;
 
+            LoadBackupTasks();
+
             ClearHtml();
+            ClearTaskConsole();
 
             // 显示版本号
             this.OutputHistory($"版本号: {ClientInfo.ClientVersion}");
@@ -71,13 +76,15 @@ namespace dp2ManageCenter
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             SaveSettings();
-            // SaveTaskDom();
         }
 
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             _cancel?.Cancel();
             _cancel?.Dispose();
+
+            _cancelRefresh?.Cancel();
+            _cancelRefresh?.Dispose();
 
             this.Servers.ServerChanged -= new dp2ServerChangedEventHandle(Servers_ServerChanged);
             SaveServers();
@@ -172,6 +179,8 @@ namespace dp2ManageCenter
                 List<object> controls = new List<object>
                 {
                     this.tabControl_main,
+                    this.splitContainer_backupTasks,
+                    this.listView_backupTasks,
                 };
                 return GuiState.GetUiState(controls);
             }
@@ -180,6 +189,8 @@ namespace dp2ManageCenter
                 List<object> controls = new List<object>
                 {
                     this.tabControl_main,
+                    this.splitContainer_backupTasks,
+                    this.listView_backupTasks,
                 };
                 GuiState.SetUiState(controls, value);
             }
@@ -214,6 +225,9 @@ bool bClickClose = false)
         void SaveSettings()
         {
             ClientInfo.Config?.Set("global", "ui_state", this.UiState);
+
+            SaveBackupTasks();
+
             ClientInfo.Finish();
         }
 
@@ -621,7 +635,7 @@ string strHtml)
             this.Close();
         }
 
-        private async void MenuItem_startBackupTask_Click(object sender, EventArgs e)
+        private async void MenuItem_newBackupTasks_Click(object sender, EventArgs e)
         {
             string strError = "";
 
@@ -650,7 +664,7 @@ string strHtml)
                     goto ERROR1;
                 }
 
-                var result = await StartBackupTask(server);
+                var result = await NewBackupTask(server);
                 if (result.Value == -1)
                 {
                     strError = result.ErrorInfo;
@@ -670,11 +684,11 @@ string strHtml)
         const int COLUMN_STATE = 1;
         const int COLUMN_STARTTIME = 2;
         const int COLUMN_PROGRESS = 3;
+        const int COLUMN_SERVERFILES = 4;
 
-        async Task<NormalResult> StartBackupTask(dp2Server server)
+        async Task<NormalResult> NewBackupTask(dp2Server server)
         {
-            string strOutputFolder = Path.Combine(ClientInfo.UserDir, $"backup\\{server.Name}");
-            PathUtil.CreateDirIfNeed(strOutputFolder);
+            string strOutputFolder = GetOutputFolder(server.Name);
 
             ListViewItem item = new ListViewItem();
             this.listView_backupTasks.Items.Add(item);
@@ -700,6 +714,9 @@ string strHtml)
 
         void SetItemText(ListViewItem item, int column, string text)
         {
+            if (this.IsDisposed)
+                return;
+
             this.Invoke((Action)(() =>
             {
                 ListViewUtil.ChangeItemText(item, column, text);
@@ -767,17 +784,29 @@ string strHtml)
                             ErrorInfo = "放弃处理"
                         };
 
-                    paths = GetFileNames(infos, (info) =>
+                    paths = GetFileNames(infos, (i) =>
                     {
-                        return info.ServerPath;
+                        return i.ServerPath;
                     });
+
+                    // 设置开始时间
+                    DateTime start_time = DateTime.Now;
+                    SetItemText(item, COLUMN_STARTTIME, start_time.ToString());
+                    SetItemText(item, COLUMN_STATE, "正在下载");
+                    SetItemText(item, COLUMN_SERVERFILES, StringUtil.MakePathList(paths));
+
+                    var info = GetInfo(item);
+
+                    info.InitialPathList(paths);
+                    info.ServerName = server.Name;
+                    info.StartTime = start_time;
+                    info.State = "downloading";
+                    SetItemColor(item);
+
                     foreach (string path in paths)
                     {
                         if (string.IsNullOrEmpty(path) == false)
                         {
-                            // 设置开始时间
-                            SetItemText(item, COLUMN_STARTTIME, DateTime.Now.ToString());
-
                             // parameters:
                             //      strOutputFolder 输出目录。
                             //                      [in] 如果为 null，表示要弹出对话框询问目录。如果不为 null，则直接使用这个目录路径
@@ -791,9 +820,30 @@ string strHtml)
                                 path,
                                 "append",
                                 strOutputFolder,
-                                (text) =>
+                                (p, t) =>
                                 {
-                                    SetItemText(item, COLUMN_PROGRESS, text);
+                                    // TODO: 一个完成，一个还没有完成，如何表示？
+                                    SetItemText(item, COLUMN_PROGRESS, t);
+                                },
+                                (p, error) =>
+                                {
+                                    // 修改 ListViewItem 状态列为“完成”
+                                    if (error == null)
+                                    {
+                                        info.SetPathState(p, "finish");
+                                        if (info.IsAllPathFinish())
+                                        {
+                                            info.State = "finish";
+                                            SetItemText(item, COLUMN_STATE, "下载完成");
+                                        }
+                                    }
+                                    else
+                                    {
+                                        info.SetPathState(p, $"error:{error}");
+                                        info.State = "error";
+                                        SetItemText(item, COLUMN_STATE, info.GetStateListString());
+                                    }
+                                    SetItemColor(item);
                                 },
                                 out strError);
                             if (nRet == -1)
@@ -806,6 +856,7 @@ string strHtml)
                                 break;
                         }
                     }
+
                 }
                 return new NormalResult();
             }
@@ -813,6 +864,245 @@ string strHtml)
             {
                 this.ReturnChannel(channel);
             }
+        }
+
+        async Task<NormalResult> DownloadBackupFiles(
+    ListViewItem item,
+    string strOutputFolder)
+        {
+            var info = GetInfo(item);
+            if (string.IsNullOrEmpty(info.ServerName))
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = "item 中缺乏 info.ServerName"
+                };
+            dp2Server server = this.Servers.GetServerByName(info.ServerName);
+            if (server == null)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"没有找到名为 '{info.ServerName}' 的服务器定义"
+                };
+
+            LibraryChannel channel = this.GetChannel(server.Url);
+            try
+            {
+                // TODO: 一组两个文件，对已经下载完的一个文件不要重复下载
+                // TODO: 如果两个文件都已经成功下载，也要提示一下
+
+                // 开始下载文件
+                List<string> paths = new List<string>();
+                if (info.PathList != null)
+                    foreach (var path_item in info.PathList)
+                    {
+                        paths.Add(path_item.Path);
+                    }
+
+                if (paths.Count == 0)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"任务事项 '{info.ServerName}' 中没有任何下载文件事项"
+                    };
+
+                StringUtil.RemoveBlank(ref paths);
+
+                var infos = MainForm.BuildDownloadInfoList(paths);
+
+                // 询问是否覆盖已有的目标下载文件。整体询问
+                // return:
+                //      -1  出错
+                //      0   放弃下载
+                //      1   同意启动下载
+                var result = await AskOverwriteFiles(
+                    channel,
+                    infos,
+                    strOutputFolder);
+                if (result.Value == -1)
+                    return result;
+                if (result.Value != 1)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = "放弃处理"
+                    };
+
+                paths = GetFileNames(infos, (i) =>
+                {
+                    return i.ServerPath;
+                });
+
+                // 设置开始时间
+                //DateTime start_time = DateTime.Now;
+                //SetItemText(item, COLUMN_STARTTIME, start_time.ToString());
+                SetItemText(item, COLUMN_STATE, "正在下载");
+                info.ClearAllPathState();
+                info.State = "downloading";
+                SetItemColor(item);
+
+                foreach (string path in paths)
+                {
+                    if (string.IsNullOrEmpty(path) == false)
+                    {
+                        // parameters:
+                        //      strOutputFolder 输出目录。
+                        //                      [in] 如果为 null，表示要弹出对话框询问目录。如果不为 null，则直接使用这个目录路径
+                        //                      [out] 实际使用的目录
+                        // return:
+                        //      -1  出错
+                        //      0   放弃下载
+                        //      1   成功启动了下载
+                        int nRet = BeginDownloadFile(
+                            channel.Url,
+                            path,
+                            "append",
+                            strOutputFolder,
+                                (p, t) =>
+                                {
+                                    SetItemText(item, COLUMN_PROGRESS, t);
+                                },
+                                (p, error) =>
+                                {
+                                    // 修改 ListViewItem 状态列为“完成”
+                                    if (error == null)
+                                    {
+                                        info.SetPathState(p, "finish");
+                                        if (info.IsAllPathFinish())
+                                        {
+                                            info.State = "finish";
+                                            SetItemText(item, COLUMN_STATE, "下载完成");
+                                        }
+                                    }
+                                    else
+                                    {
+                                        info.SetPathState(p, $"error:{error}");
+                                        info.State = "error";
+                                        SetItemText(item, COLUMN_STATE, info.GetStateListString());
+                                    }
+                                    SetItemColor(item);
+                                },
+                            out string strError);
+                        if (nRet == -1)
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = strError
+                            };
+                        if (nRet == 0)
+                            break;
+                    }
+                }
+
+                return new NormalResult();
+            }
+            finally
+            {
+                this.ReturnChannel(channel);
+            }
+        }
+
+
+        public class PathItem
+        {
+            public string Path { get; set; }
+            public string State { get; set; }
+        }
+
+        public class BackupItemInfo
+        {
+            // 服务器名
+            public string ServerName { get; set; }
+
+            // 要下载的文件名集合。服务器端路径形态
+            public List<PathItem> PathList { get; set; }
+
+            // 首次启动任务的时间
+            public DateTime StartTime { get; set; }
+
+            public string State { get; set; }   // (null)/dowloading/finish/error
+
+            public void SetPathState(string path, string state)
+            {
+                if (this.PathList == null)
+                {
+                    this.PathList = new List<PathItem>();
+                    this.PathList.Add(new PathItem { Path = path, State = state });
+                    return;
+                }
+                var item = this.PathList.Find((o) => { return o.Path == path; });
+                if (item != null)
+                    item.State = state;
+            }
+
+            // 是否所有文件都完成了?
+            public bool IsAllPathFinish()
+            {
+                if (this.PathList == null)
+                    return false;
+                foreach (var item in this.PathList)
+                {
+                    if (item.State == null
+                        || item.State.StartsWith("finish") == false)
+                        return false;
+                }
+                return true;
+            }
+
+            public void ClearAllPathState()
+            {
+                if (this.PathList == null)
+                    return;
+                foreach (var item in this.PathList)
+                {
+                    item.State = null;
+                }
+            }
+
+            public void InitialPathList(List<string> paths)
+            {
+                if (this.PathList == null)
+                    this.PathList = new List<PathItem>();
+                foreach (var path in paths)
+                {
+                    this.PathList.Add(new PathItem { Path = path });
+                }
+            }
+
+            public string GetPathListString()
+            {
+                if (this.PathList == null)
+                    return "";
+                List<string> results = new List<string>();
+                foreach (var item in this.PathList)
+                {
+                    results.Add(item.Path);
+                }
+                return StringUtil.MakePathList(results);
+            }
+
+            public string GetStateListString()
+            {
+                if (this.PathList == null)
+                    return "";
+                List<string> results = new List<string>();
+                foreach (var item in this.PathList)
+                {
+                    results.Add(item.State);
+                }
+                return StringUtil.MakePathList(results);
+            }
+        }
+
+        static BackupItemInfo GetInfo(ListViewItem item)
+        {
+            BackupItemInfo info = item.Tag as BackupItemInfo;
+            if (info == null)
+            {
+                info = new BackupItemInfo();
+                item.Tag = info;
+            }
+            return info;
         }
 
         #region 下载文件
@@ -1299,8 +1589,12 @@ string strHtml)
             }
         }
 
-
-        public delegate void Delegate_showProgress(string text);
+        // 一个文件显示下载进度
+        // parameters:
+        //      path    服务器端文件名。如果为 null，表示希望直接设置进度文本
+        public delegate void Delegate_showProgress(string path, string text);
+        // 一个文件下载结束
+        public delegate void Delegate_finish(string path, string error);
 
         // parameters:
         //      strPath 服务器端的文件路径
@@ -1314,6 +1608,7 @@ string strHtml)
             string strAppendStyle,
             string strOutputFolder,
             Delegate_showProgress func_showProgress,
+            Delegate_finish func_finish,
             out string strError)
         {
             strError = "";
@@ -1436,19 +1731,46 @@ string strHtml)
                     this.ReturnChannel(channel);
                     channel = null;
                 }
+
+                {
+                    // TODO: "finish:error" 表示下载完成，但服务器端的 .~state 文件内容为 "error"，表示服务器创建文件时出错而停止。比如磁盘空间满等原因
+                    if (downloader.State.StartsWith("finish"))
+                    {
+                        var parts = StringUtil.ParseTwoPart(downloader.State, ":");
+                        // 成功完成
+                        if (string.IsNullOrEmpty(parts[1]))
+                        {
+                            func_finish.Invoke(strPath, null);
+                            func_showProgress?.Invoke(strPath, "下载完成");
+                        }
+                        else
+                        {
+                            func_finish.Invoke(strPath, downloader.ErrorInfo);
+                            func_showProgress?.Invoke(strPath, "下载完成但文件有错");
+                        }
+                    }
+                    else
+                    {
+                        // 因出错中断
+                        func_finish.Invoke(strPath, downloader.ErrorInfo);
+                        func_showProgress?.Invoke(strPath, "error:" + downloader.ErrorInfo);
+                    }
+                }
                 /*
                 DisplayDownloaderErrorInfo(downloader);
                 */
                 RemoveDownloader(downloader);
             });
             string prev_text = "";
+            DateTime prev_time = DateTime.MinValue;
             downloader.ProgressChanged += new DownloadProgressChangedEventHandler(delegate (object o1, DownloadProgressChangedEventArgs e1)
             {
                 string text = GetProgressText(e1.Text, e1.BytesReceived, e1.TotalBytesToReceive);
-                if (text != prev_text)
+                if (text != prev_text && DateTime.Now - prev_time > TimeSpan.FromSeconds(1))
                 {
-                    func_showProgress?.Invoke(text);
+                    func_showProgress?.Invoke(strPath, text);
                     prev_text = text;
+                    prev_time = DateTime.Now;
                 }
                 //if (dlg.IsDisposed == false)
                 //    dlg.SetProgress(e1.Text, e1.BytesReceived, e1.TotalBytesToReceive);
@@ -1490,6 +1812,7 @@ string strHtml)
             return 1;
         }
 
+        // TODO: 最好还能显示这是文件中的第一个还是第二个文件
         // 设置进度条信息
         // parameters:
         //      strText 文字。当 strText 为空的时候，函数用 bytesReceived 和 totalBytesToReceive 刷新设置进度条比例显示。否则只刷新显示 strText 文字
@@ -1620,5 +1943,445 @@ string strHtml)
         }
 
         #endregion
+
+        #region 大备份任务列表的保存和恢复
+
+        void SaveBackupTasks()
+        {
+            List<BackupItemInfo> infos = new List<BackupItemInfo>();
+            foreach (ListViewItem item in this.listView_backupTasks.Items)
+            {
+                infos.Add(GetInfo(item));
+            }
+
+            string value = JsonConvert.SerializeObject(infos);
+            ClientInfo.Config.Set("global", "backupTasks", value);
+        }
+
+        void LoadBackupTasks()
+        {
+            this.listView_backupTasks.Items.Clear();
+
+            string value = ClientInfo.Config.Get("global", "backupTasks");
+            if (string.IsNullOrEmpty(value))
+                return;
+
+            try
+            {
+                List<BackupItemInfo> infos = JsonConvert.DeserializeObject<List<BackupItemInfo>>(value);
+                if (infos == null)
+                    return;
+
+                foreach (var info in infos)
+                {
+                    ListViewItem item = new ListViewItem();
+                    item.Tag = info;
+                    ListViewUtil.ChangeItemText(item, COLUMN_SERVERNAME, info.ServerName);
+                    ListViewUtil.ChangeItemText(item, COLUMN_SERVERFILES, info.GetPathListString());
+                    this.listView_backupTasks.Items.Add(item);
+                }
+            }
+            catch (Newtonsoft.Json.JsonSerializationException)
+            {
+
+            }
+
+            RefreshMenuItems();
+        }
+
+        #endregion
+
+        static string GetOutputFolder(string server_name)
+        {
+            if (string.IsNullOrEmpty(server_name))
+                throw new ArgumentException("server_name 参数值不应为空");
+
+            string strOutputFolder = Path.Combine(ClientInfo.UserDir, $"backup\\{server_name}");
+            PathUtil.CreateDirIfNeed(strOutputFolder);
+            return strOutputFolder;
+        }
+
+        private async void MenuItem_continueBackupTasks_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            this.ShowMessage("正在启动任务");
+            try
+            {
+                foreach (ListViewItem item in this.listView_backupTasks.Items)
+                {
+                    string server_name = ListViewUtil.GetItemText(item, COLUMN_SERVERNAME);
+                    string strOutputFolder = GetOutputFolder(server_name);
+
+                    var result = await DownloadBackupFiles(item, strOutputFolder);
+                    if (result.Value == -1)
+                    {
+                        strError = result.ErrorInfo;
+                        goto ERROR1;
+                    }
+                }
+            }
+            finally
+            {
+                this.ClearMessage();
+            }
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        private void listView_backupTasks_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            RefreshMenuItems();
+
+            RefreshTaskConsole();
+        }
+
+        #region 任务控制台信息
+
+        ListViewItem _activeItem = null;
+
+        CancellationTokenSource _cancelRefresh = new CancellationTokenSource();
+
+        void RefreshTaskConsole()
+        {
+            if (this.listView_backupTasks.SelectedItems.Count == 1)
+            {
+                if (_activeItem != this.listView_backupTasks.SelectedItems[0])
+                {
+                    // 切换显示 Task Console
+                    ClearTaskConsole();
+                    _activeItem = this.listView_backupTasks.SelectedItems[0];
+
+                    Task.Run(() =>
+                    {
+                        string server_url = this.Servers.GetServerByName(GetInfo(_activeItem)?.ServerName)?.Url;
+                        RefreshTaskConsole(server_url, true, _cancelRefresh.Token);
+                    });
+                }
+            }
+            else
+            {
+                ClearTaskConsole();
+            }
+        }
+
+        void ClearTaskConsole()
+        {
+            _activeItem = null;
+            ClearWebBrowser(webBrowser_backupTask, true);
+
+            ResultTextDecoder = Encoding.UTF8.GetDecoder();
+            CurResultOffs = 0;
+            CurResultVersion = 0;
+
+            _cancelRefresh?.Cancel();
+            _cancelRefresh.Dispose();
+            _cancelRefresh = new CancellationTokenSource();
+
+            this.toolStripStatusLabel_message.Text = "";
+        }
+
+        Decoder ResultTextDecoder = Encoding.UTF8.GetDecoder();
+        long CurResultOffs = 0;
+        long CurResultVersion = 0;
+
+        // parameters:
+        //      bRewind 是否顺便把指针拨向从头开始获取
+        void ClearWebBrowser(WebBrowser webBrowser,
+            bool bRewind)
+        {
+            HtmlDocument doc = webBrowser.Document;
+
+            if (doc == null)
+            {
+                webBrowser.Navigate("about:blank");
+                doc = webBrowser.Document;
+            }
+
+            doc = doc.OpenNew(true);
+            doc.Write("<pre>");
+            if (bRewind == true)
+                this.CurResultOffs = 0; // 从头开始获取?
+        }
+
+        void RefreshTaskConsole(string server_url,
+            bool get_message,
+            CancellationToken token)
+        {
+            string strError = "";
+            LibraryChannel channel = this.GetChannel(server_url);
+            try
+            {
+                TimeSpan delta = TimeSpan.FromSeconds(0);
+                BatchTaskInfo param = new BatchTaskInfo();
+                if (get_message == false)
+                {
+                    param.MaxResultBytes = 0;
+                }
+                else
+                {
+                    param.MaxResultBytes = 4096;
+                    /*
+                    if (i >= 5)  // 如果发现尚未来得及获取的内容太多，就及时扩大“窗口”尺寸
+                        param.MaxResultBytes = 100 * 1024;
+                        */
+                }
+
+                for (int i = 0; ; i++)
+                {
+                    if (token.IsCancellationRequested)
+                        return;
+
+                    // TODO: 可以考虑用一个延时来调节获取信息的速度。如果很快追上了，就降低速度；否则就加快速度
+                    try
+                    {
+                        Task.Delay(delta, token).Wait();
+                    }
+                    catch(TaskCanceledException)
+                    {
+                        return;
+                    }
+
+                    param.ResultOffset = this.CurResultOffs;
+
+                    long lRet = channel.BatchTask(
+                        null,
+                        "大备份",
+                        "getinfo",
+                        param,
+                        out BatchTaskInfo resultInfo,
+                        out strError);
+                    if (lRet == -1)
+                    {
+                        this.Invoke((Action)(() =>
+                        {
+                            this.toolStripStatusLabel_message.Text = "BatchTask() 请求出错: " + strError;
+                        }));
+                        // 降低速度
+                        delta = TimeSpan.FromSeconds(10);
+                        continue;
+                    }
+
+                    string text = GetResultText(resultInfo.ResultText);
+                    if (this.IsDisposed)
+                        return;
+                    if (string.IsNullOrEmpty(text) == false)
+                    {
+                        this.Invoke((Action)(() =>
+                        {
+                            WriteHtml(this.webBrowser_backupTask, text);
+                            ScrollToEnd();
+                        }));
+                    }
+
+                    // 显示 Progress 文字行
+                    {
+                        this.Invoke((Action)(() =>
+                        {
+                            this.toolStripStatusLabel_message.Text = resultInfo.ProgressText;
+                        }));
+                    }
+
+                    if (get_message == false)
+                    {
+                        // 没有必要显示累积
+                        break;
+                    }
+
+                    if (this.CurResultOffs == 0)
+                        this.CurResultVersion = resultInfo.ResultVersion;
+                    else if (this.CurResultVersion != resultInfo.ResultVersion)
+                    {
+                        // 说明服务器端result文件其实已经更换
+                        this.CurResultOffs = 0; // rewind
+                        this.Invoke((Action)(() =>
+                        {
+                            WriteHtml(this.webBrowser_backupTask,
+                            "***新内容 version=" + resultInfo.ResultVersion.ToString() + " ***\r\n");
+                            ScrollToEnd();
+                        }));
+                        goto COINTINU1;
+                    }
+
+                    if (resultInfo.ResultTotalLength < param.ResultOffset)
+                    {
+                        // 说明服务器端result文件其实已经更换
+                        this.CurResultOffs = 0; // rewind
+                        this.Invoke((Action)(() =>
+                        {
+                            WriteHtml(this.webBrowser_backupTask,
+                            "***新内容***\r\n");
+                            ScrollToEnd();
+                        }));
+                        goto COINTINU1;
+                    }
+                    else
+                    {
+                        // 存储用以下次
+                        this.CurResultOffs = resultInfo.ResultOffset;
+                    }
+
+                COINTINU1:
+                    // 如果本次并没有“触底”，需要立即循环获取新的信息。但是循环有一个最大次数，以应对服务器疯狂发生信息的情形。
+                    if (resultInfo.ResultOffset >= resultInfo.ResultTotalLength)
+                    {
+                        // 降低速度
+                        delta = TimeSpan.FromSeconds(1);
+                        // 减小包
+                        param.MaxResultBytes = 4096;
+                    }
+                    else
+                    {
+                        // 提高速度
+                        delta = TimeSpan.FromSeconds(0);
+                        // 加大包
+                        param.MaxResultBytes = 100 * 1024;
+                    }
+                }
+                return;
+            }
+            finally
+            {
+                this.ReturnChannel(channel);
+            }
+        }
+
+        void ScrollToEnd()
+        {
+            this.webBrowser_backupTask.ScrollToEnd();
+        }
+
+        string GetResultText(byte[] baResult)
+        {
+            if (baResult == null)
+                return "";
+            if (baResult.Length == 0)
+                return "";
+
+            // Decoder ResultTextDecoder = Encoding.UTF8.GetDecoder;
+            char[] chars = new char[baResult.Length];
+
+            int nCharCount = this.ResultTextDecoder.GetChars(
+                baResult,
+                    0,
+                    baResult.Length,
+                    chars,
+                    0);
+            Debug.Assert(nCharCount <= baResult.Length, "");
+            return new string(chars, 0, nCharCount);
+        }
+
+        #endregion
+
+        void RefreshMenuItems()
+        {
+            // 统计出处于尚未启动状态的事项数
+            int nStopCount = 0;
+            foreach (ListViewItem item in this.listView_backupTasks.SelectedItems)
+            {
+                var state = ListViewUtil.GetItemText(item, COLUMN_STATE);
+                if (string.IsNullOrEmpty(state))
+                    nStopCount++;
+            }
+
+            MenuItem_continueBackupTasks.Enabled = nStopCount > 0;
+        }
+
+        private void listView_backupTasks_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Right)
+                return;
+
+            ContextMenu contextMenu = new ContextMenu();
+            MenuItem menuItem = null;
+
+            menuItem = new MenuItem("全选(&A)");
+            menuItem.Tag = this.listView_backupTasks;
+            menuItem.Click += new System.EventHandler(this.menu_selectAll_Click);
+            contextMenu.MenuItems.Add(menuItem);
+
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
+            menuItem = new MenuItem("重启下载 [" + this.listView_backupTasks.SelectedItems.Count.ToString() + "] (&S)");
+            menuItem.Click += new System.EventHandler(this.MenuItem_continueBackupTasks_Click);
+            if (this.listView_backupTasks.SelectedItems.Count == 0)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
+
+            menuItem = new MenuItem("移除 [" + this.listView_backupTasks.SelectedItems.Count.ToString() + "] (&D)");
+            menuItem.Click += new System.EventHandler(this.menu_removeSelected_Click);
+            if (this.listView_backupTasks.SelectedItems.Count == 0)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
+
+            contextMenu.Show(this.listView_backupTasks, new Point(e.X, e.Y));
+        }
+
+        void menu_selectAll_Click(object sender, EventArgs e)
+        {
+            ListView list = (ListView)((MenuItem)sender).Tag;
+
+            ListViewUtil.SelectAllLines(list);
+        }
+
+        void menu_removeSelected_Click(object sender, EventArgs e)
+        {
+            if (this.listView_backupTasks.SelectedItems.Count == 0)
+            {
+                MessageBox.Show(this, "尚未选定要移除的事项。");
+                return;
+            }
+
+            DialogResult result = MessageBox.Show(this,
+"确实要移除选定的 " + this.listView_backupTasks.SelectedItems.Count.ToString() + " 个事项?",
+"MainForm",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+            if (result != DialogResult.Yes)
+                return;
+
+            ListViewUtil.DeleteSelectedItems(this.listView_backupTasks);
+        }
+
+        // 根据行状态设置行背景色
+        void SetItemColor(ListViewItem item)
+        {
+            this.Invoke((Action)(() =>
+            {
+                var info = GetInfo(item);
+                if (info == null)
+                {
+                    item.BackColor = SystemColors.Control;
+                    item.ForeColor = SystemColors.ControlText;
+                    return;
+                }
+                string state = info.State;
+                if (state == "finish")
+                {
+                    item.BackColor = Color.DarkGreen;
+                    item.ForeColor = Color.White;
+                }
+                else if (state == "error")
+                {
+                    item.BackColor = Color.DarkRed;
+                    item.ForeColor = Color.White;
+                }
+                else
+                {
+                    item.BackColor = SystemColors.Window;
+                    item.ForeColor = SystemColors.WindowText;
+                }
+            }));
+        }
     }
 }

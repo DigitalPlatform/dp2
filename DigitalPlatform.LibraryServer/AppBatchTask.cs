@@ -382,7 +382,6 @@ namespace DigitalPlatform.LibraryServer
 
             info = task.GetCurrentInfo(param.ResultOffset,
                 param.MaxResultBytes);
-
             return 1;
         }
 

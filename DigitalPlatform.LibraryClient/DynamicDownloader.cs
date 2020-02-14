@@ -354,14 +354,13 @@ namespace DigitalPlatform.LibraryClient
                     if (lStart >= lRet || bNotFound == true)
                     {
                         // 探测文件状态。
-                        string strState = "";
                         // 探测下载状态
                         // return:
                         //      -1  出错
                         //      0   文件没有找到
                         //      1   文件找到
                         int nRet = DetectDownloadState(this.ServerFilePath,
-                out strState,
+                out string strState,
                 out strError);
                         if (nRet == -1)
                         {
@@ -392,7 +391,7 @@ namespace DigitalPlatform.LibraryClient
                                 continue;
 
                             if (strState != "finish" && nRet != 0)
-                                this.ErrorInfo = "下载文件 '" + this.ServerFilePath + "' 时遭遇状态出错: " + strState;
+                                this.ErrorInfo = "下载文件 '" + this.ServerFilePath + "' 时遭遇(服务器端)状态出错: " + strState;
                             else if (this.ServerFilePath.StartsWith("!"))
                             {
                                 DisplayMessage("正在获得服务器文件 " + this.ServerFilePath + " 的 MD5 ...");
