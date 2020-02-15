@@ -1057,27 +1057,13 @@ string strHtml)
                         }
                     }
                 }
+
+                return new NormalResult();
             }
             finally
             {
                 this.ReturnChannel(channel);
             }
-
-            // 自动删除服务器端大备份文件
-            if (deleteServerFile)
-            {
-                var delete_result = DeleteServerFiles(item);
-                if (delete_result.Value == -1)
-                {
-                    return new NormalResult
-                    {
-                        Value = -1,
-                        ErrorInfo = $"下载文件成功，但删除服务器端大备份文件时出错: {delete_result.ErrorInfo}"
-                    };
-                }
-            }
-
-            return new NormalResult();
         }
 
         NormalResult DeleteServerFiles(ListViewItem item)
@@ -2504,12 +2490,15 @@ string strHtml)
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
+            menuItem = new MenuItem("新建大备份任务 (&B)");
+            menuItem.Click += new System.EventHandler(this.MenuItem_newBackupTasks_Click);
+            contextMenu.MenuItems.Add(menuItem);
+
             menuItem = new MenuItem("重启下载 [" + this.listView_backupTasks.SelectedItems.Count.ToString() + "] (&S)");
             menuItem.Click += new System.EventHandler(this.MenuItem_continueBackupTasks_Click);
             if (this.listView_backupTasks.SelectedItems.Count == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
-
 
             menuItem = new MenuItem("删除服务器端备份文件 [" + this.listView_backupTasks.SelectedItems.Count.ToString() + "] (&D)");
             menuItem.Click += new System.EventHandler(this.menu_deleteServerFile_Click);
@@ -2559,6 +2548,7 @@ string strHtml)
             ListViewUtil.DeleteSelectedItems(this.listView_backupTasks);
         }
 
+        // 删除服务器端大备份文件。这个功能一般用于诊断和维护。因为正常下载结束时会自动删除服务器端的大备份文件
         async void menu_deleteServerFile_Click(object sender, EventArgs e)
         {
             if (this.listView_backupTasks.SelectedItems.Count == 0)
@@ -2568,7 +2558,7 @@ string strHtml)
             }
 
             DialogResult result = MessageBox.Show(this,
-        "确实要删除选定的 " + this.listView_backupTasks.SelectedItems.Count.ToString() + " 个事项对应的服务器端备份文件?",
+        "确实要删除选定的 " + this.listView_backupTasks.SelectedItems.Count.ToString() + " 个事项对应的服务器端备份文件?\r\n\r\n注：删除服务器端备份文件后，就再也无法进行下载操作",
         "MainForm",
         MessageBoxButtons.YesNo,
         MessageBoxIcon.Question,
@@ -2634,5 +2624,562 @@ string strHtml)
                 }
             }));
         }
+
+        #region 日志备份
+
+        const int OPERLOG_COLUMN_SERVERNAME = 0;
+        const int OPERLOG_COLUMN_STATE = 1;
+        const int OPERLOG_COLUMN_STARTTIME = 2;
+        const int OPERLOG_COLUMN_PROGRESS = 3;
+        const int OPERLOG_COLUMN_SERVERFILES = 4;
+
+        // 备份日志文件。即，把日志文件从服务器拷贝到本地目录。要处理好增量复制的问题。
+        // return:
+        //      -1  出错
+        //      0   放弃下载，或者没有必要下载。提示信息在 strError 中
+        //      1   成功启动了下载
+        NormalResult BackupOperLogFiles(
+            ListViewItem item,
+            string strOutputFolder)
+        {
+            if (string.IsNullOrEmpty(strOutputFolder))
+            {
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = "strOutputFolder 参数值不应为空"
+                };
+            }
+
+            try
+            {
+                DateTime now = DateTime.Now;
+
+                string strLastDate = ReadOperLogMemoryFile(strOutputFolder);
+                if (string.IsNullOrEmpty(strLastDate) == false
+                    && strLastDate.Length != 8)
+                    strLastDate = "";
+
+                // 列出已经下载的文件列表
+                // 当天下载当天日期的日志文件，要创建一个同名的状态文件，表示它可能没有完成。以后再处理的时候，如果不再是当天，确保下载完成了，可以删除状态文件
+                List<OperLogFileInfo> local_files = GetLocalOperLogFileNames(strOutputFolder, strLastDate);
+                List<OperLogFileInfo> server_files = GetServerOperLogFileNames(item, strLastDate);
+
+                // 计算出尚未下载的文件
+                List<DownloadFileInfo> fileinfos = GetDownloadFileList(local_files, server_files);
+                if (fileinfos.Count == 0)
+                {
+                    WriteOperLogMemoryFile(strOutputFolder, now);
+                    return new NormalResult
+                    {
+                        Value = 0,
+                        ErrorInfo = "服务器端没有发现新增的日志文件"
+                    };
+                }
+
+                string strFolder = strOutputFolder;
+                // 关注以前曾经下载的，可能服务器端发生了变化的文件。从文件尺寸可以看出来。
+                // return:
+                //      -1  出错
+                //      0   放弃下载
+                //      1   成功启动了下载
+                var result = BeginDownloadFiles(
+                    item,
+                    fileinfos,
+                    "append",
+                    (bError) =>
+                    {
+                        // 写入记忆文件，然后提示结束
+                        if (bError == false)
+                            WriteOperLogMemoryFile(strFolder, now);
+                    },
+                    strOutputFolder);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = "BackupOperLogFiles() 出现异常: " + ex.Message
+                };
+            }
+        }
+
+        string GetServerUrl(string server_name)
+        {
+            var server = this.Servers.GetServerByName(server_name);
+            if (server == null)
+                throw new Exception($"没有找到名为 '{server_name}' 的服务器");
+            return server.Url;
+        }
+
+        // return:
+        //      -1  出错
+        //      0   放弃下载
+        //      1   成功启动了下载
+        NormalResult BeginDownloadFiles(
+            ListViewItem item,
+            List<DownloadFileInfo> fileinfos,
+            string strAppendStyleParam,
+            Delegate_end func_end,
+            string strOutputFolder)
+        {
+            if (string.IsNullOrEmpty(strOutputFolder))
+            {
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = "strOutputFolder 参数值不应为空"
+                };
+            }
+
+            List<DynamicDownloader> current_downloaders = new List<DynamicDownloader>();
+
+            string server_name = ListViewUtil.GetItemText(item, OPERLOG_COLUMN_SERVERNAME);
+            if (string.IsNullOrEmpty(server_name))
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = "item 中服务器名列不应为空"
+                };
+            /*
+            var server = this.Servers.GetServerByName(server_name);
+            if (server == null)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"没有找到名为 '{server_name}' 的服务器"
+                };
+                */
+
+            LibraryChannel channel = this.GetChannel(GetServerUrl(server_name));
+
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = new TimeSpan(0, 5, 0);
+
+            /*
+            FileDownloadDialog dlg = new FileDownloadDialog();
+            dlg.FormClosed += new FormClosedEventHandler(delegate (object o1, FormClosedEventArgs e1)
+            {
+                foreach (DynamicDownloader current in current_downloaders)
+                {
+                    current.Cancel();
+                }
+            });
+            dlg.Font = this.Font;
+            //dlg.Text = //"正在下载 " + strPath;
+            //dlg.SourceFilePath = //strPath;
+            //dlg.TargetFilePath = //strTargetPath;
+            dlg.Show(this);
+            */
+
+            bool bDone = false;
+            try
+            {
+                bool bAppend = false;   // 是否继续下载?
+
+                foreach (DownloadFileInfo info in fileinfos)
+                {
+                    string strPath = info.ServerPath;
+
+                    string strExt = Path.GetExtension(strPath);
+                    if (strExt == ".~state")
+                    {
+                        // strError = "状态文件是一种临时文件，不支持直接下载";
+                        // return -1;
+                        continue;
+                    }
+
+                    string strTargetPath = Path.Combine(strOutputFolder, Path.GetFileName(strPath));
+
+                    string strTargetTempPath = DynamicDownloader.GetTempFileName(strTargetPath);
+
+                    string strAppendStyle = info.OverwriteStyle;
+                    if (string.IsNullOrEmpty(strAppendStyle))
+                        strAppendStyle = strAppendStyleParam;
+
+                    if (strAppendStyle == "append")
+                    {
+                        bAppend = true;
+                        // TODO: 要检查 MD5 是否一致。如果不一致依然要重新下载
+                        // 在 append 风格下，如果遇到正式目标文件已经存在，不再重新下载。
+                        // 注: 如果想要重新下载，需要用 overwrite 风格来调用
+                        if (File.Exists(strTargetPath))
+                        {
+                            if (File.Exists(strTargetTempPath))
+                                File.Delete(strTargetTempPath); // 防范性地删除
+                            continue;
+                        }
+                    }
+                    else if (strAppendStyle == "overwrite")
+                    {
+                        bAppend = false;
+                        if (File.Exists(strTargetPath))
+                            File.Delete(strTargetPath);
+                        if (File.Exists(strTargetTempPath))
+                            File.Delete(strTargetTempPath);
+                    }
+                    else if (strAppendStyle == "ask")
+                    {
+                        // 观察目标文件是否已经存在
+                        if (File.Exists(strTargetPath))
+                        {
+                            DialogResult result = MessageBox.Show(this,
+                "目标文件 '" + strTargetPath + "' 已经存在。\r\n\r\n是否重新下载并覆盖它?\r\n[是：下载并覆盖; 取消：放弃下载]",
+                "MainForm",
+                MessageBoxButtons.OKCancel,
+                MessageBoxIcon.Question,
+                MessageBoxDefaultButton.Button1);
+                            if (result == DialogResult.Cancel)
+                                return new NormalResult
+                                {
+                                    Value = 0,
+                                    ErrorInfo = "放弃下载"
+                                };
+                            bAppend = false;
+                            File.Delete(strTargetPath);
+                            if (File.Exists(strTargetTempPath))
+                                File.Delete(strTargetTempPath); // 防范性地删除
+                        }
+
+                        // 观察临时文件是否已经存在
+                        if (File.Exists(strTargetTempPath))
+                        {
+                            DialogResult result = MessageBox.Show(this,
+                "目标文件 '" + strTargetPath + "' 先前曾经被下载过，但未能完成。\r\n\r\n是否继续下载未完成部分?\r\n[是：从断点继续下载; 否: 重新从头下载; 取消：放弃下载]",
+                "MainForm",
+                MessageBoxButtons.YesNoCancel,
+                MessageBoxIcon.Question,
+                MessageBoxDefaultButton.Button1);
+                            if (result == DialogResult.Cancel)
+                                return new NormalResult
+                                {
+                                    Value = 0,
+                                    ErrorInfo = "放弃下载"
+                                };
+
+                            if (result == DialogResult.Yes)
+                                bAppend = true;
+                            else
+                            {
+                                File.Delete(strTargetTempPath);
+                                if (File.Exists(strTargetPath))
+                                    File.Delete(strTargetPath); // 防范性地删除
+                            }
+                        }
+                    }
+                    else
+                    {
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = "未知的 strAppendStyle 值 '" + strAppendStyle + "'"
+                        };
+                    }
+
+                    DynamicDownloader downloader = new DynamicDownloader(channel,
+                        strPath,
+                        strTargetPath);
+                    // downloader.Tag = dlg;
+
+                    _downloaders.Add(downloader);
+
+                    downloader.Closed += new EventHandler(delegate (object o1, EventArgs e1)
+                    {
+                        // TODO: 如何在 item 中显示多行报错？
+                        string error = "下载 " + downloader.ServerFilePath + "-->" + downloader.LocalFilePath + " 过程中出错: " + downloader.ErrorInfo;
+                        SetItemText(item, OPERLOG_COLUMN_STATE, error);
+                        // DisplayDownloaderErrorInfo(downloader);
+
+                        RemoveDownloader(downloader);
+                    });
+                    downloader.ProgressChanged += new DownloadProgressChangedEventHandler(delegate (object o1, DownloadProgressChangedEventArgs e1)
+                    {
+                        /*
+                        if (dlg.IsDisposed == false)
+                            dlg.SetProgress(e1.Text, e1.BytesReceived, e1.TotalBytesToReceive);
+                            */
+                        // TODO: 如何在 item 中显示多个进度?
+                        SetItemText(item, OPERLOG_COLUMN_PROGRESS, GetProgressText(e1.Text, e1.BytesReceived, e1.TotalBytesToReceive));
+                    });
+                    // 2017/10/7
+                    downloader.Prompt += new MessagePromptEventHandler(delegate (object o1, MessagePromptEventArgs e1)
+                    {
+                        if (this.IsDisposed == true)
+                        {
+                            e1.ResultAction = "cancel";
+                            return;
+                        }
+
+                        this.Invoke((Action)(() =>
+                        {
+                            if (e1.Actions == "yes,no,cancel")
+                            {
+                                bool bHideMessageBox = true;
+                                DialogResult result = MessageDialog.Show(this,
+                                    e1.MessageText + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)",
+                    MessageBoxButtons.YesNoCancel,
+                    MessageBoxDefaultButton.Button1,
+                    null,
+                    ref bHideMessageBox,
+                    new string[] { "重试", "跳过", "放弃" },
+                    20);
+                                if (result == DialogResult.Cancel)
+                                    e1.ResultAction = "cancel";
+                                else if (result == System.Windows.Forms.DialogResult.No)
+                                    e1.ResultAction = "no";
+                                else
+                                    e1.ResultAction = "yes";
+                            }
+                        }));
+                    });
+
+                    current_downloaders.Add(downloader);
+                }
+
+                Task.Factory.StartNew(() => SequenceDownloadFiles(current_downloaders,
+                    bAppend,
+                    (bError) =>
+                    {
+                        if (channel != null)
+                        {
+                            channel.Timeout = old_timeout;
+                            this.ReturnChannel(channel);
+                            channel = null;
+                        }
+                        /*
+                        this.Invoke((Action)(() =>
+                        {
+                            dlg.Close();
+                        }));
+                        */
+                        foreach (DynamicDownloader current in current_downloaders)
+                        {
+                            current.Close();
+                        }
+
+                        if (func_end != null)
+                            func_end(bError);
+                    }),
+    CancellationToken.None,
+    TaskCreationOptions.LongRunning,
+    TaskScheduler.Default);
+
+                bDone = true;
+                return new NormalResult { Value = 1 };
+            }
+            finally
+            {
+                if (bDone == false)
+                {
+                    if (channel != null)
+                    {
+                        channel.Timeout = old_timeout;
+                        this.ReturnChannel(channel);
+                        channel = null;
+                    }
+                    /*
+                    this.Invoke((Action)(() =>
+                    {
+                        dlg.Close();
+                    }));
+                    */
+                    foreach (DynamicDownloader current in current_downloaders)
+                    {
+                        current.Close();
+                    }
+                }
+            }
+        }
+
+        /*
+        void DisplayDownloaderErrorInfo(DynamicDownloader downloader)
+        {
+            if (string.IsNullOrEmpty(downloader.ErrorInfo) == false
+                && downloader.ErrorInfo.StartsWith("~") == false)
+            {
+                this.Invoke((Action)(() =>
+                {
+                    MessageBox.Show(this, "下载 " + downloader.ServerFilePath + "-->" + downloader.LocalFilePath + " 过程中出错: " + downloader.ErrorInfo);
+                }));
+                downloader.ErrorInfo = "~" + downloader.ErrorInfo;  // 只显示一次
+            }
+        }
+        */
+
+        public delegate void Delegate_end(bool bError);
+
+        // 顺序执行每个 DynamicDownloader
+        void SequenceDownloadFiles(List<DynamicDownloader> downloaders,
+            bool bAppend,
+            Delegate_end func_end)
+        {
+            int i = 0;
+            bool bError = false;
+            foreach (DynamicDownloader downloader in downloaders)
+            {
+                string strNo = "";
+                if (downloaders.Count > 0)
+                    strNo = " " + (i + 1).ToString() + "/" + downloaders.Count + " ";
+
+                this.Invoke((Action)(() =>
+                {
+                    FileDownloadDialog dlg = downloader.Tag as FileDownloadDialog;
+                    dlg.SourceFilePath = downloader.ServerFilePath;
+                    dlg.TargetFilePath = downloader.LocalFilePath;
+                    dlg.Text = "正在下载 " + strNo + dlg.SourceFilePath;
+                }));
+                Task task = downloader.StartDownload(bAppend);
+                task.Wait();    // TODO: 这里要允许中断
+                if (downloader.IsCancellationRequested)
+                {
+                    bError = true;
+                    break;
+                }
+                if (downloader.State == "error")
+                {
+                    bError = true;
+                    break;
+                }
+                i++;
+            }
+
+            func_end(bError);
+        }
+
+        // 写入记忆当前日期的文件
+        static void WriteOperLogMemoryFile(string strDirectory,
+            DateTime now)
+        {
+            string filename = Path.Combine(strDirectory, "operlog_backup.txt");
+            File.WriteAllText(filename, DateTimeUtil.DateTimeToString8(now));
+        }
+
+        static string ReadOperLogMemoryFile(string strDirectory)
+        {
+            string filename = Path.Combine(strDirectory, "operlog_backup.txt");
+            if (File.Exists(filename) == false)
+                return null;
+            return File.ReadAllText(filename);
+        }
+
+        List<DownloadFileInfo> GetDownloadFileList(List<OperLogFileInfo> local_files,
+    List<OperLogFileInfo> server_files)
+        {
+            List<DownloadFileInfo> results = new List<DownloadFileInfo>();
+
+            foreach (OperLogFileInfo server_info in server_files)
+            {
+                OperLogFileInfo local_info = Find(local_files, server_info.FileName);
+                if (local_info != null
+                    && local_info.Length == server_info.Length)
+                    continue;
+
+                DownloadFileInfo result = new DownloadFileInfo();
+                result.ServerPath = "!operlog/" + server_info.FileName;
+                if (local_info != null && local_info.Length != server_info.Length)
+                    result.OverwriteStyle = "overwrite";
+                else
+                    result.OverwriteStyle = "append";
+                results.Add(result);
+            }
+
+            return results;
+        }
+
+        static OperLogFileInfo Find(List<OperLogFileInfo> infos, string strFileName)
+        {
+            foreach (OperLogFileInfo info in infos)
+            {
+                if (info.FileName == strFileName)
+                    return info;
+            }
+
+            return null;
+        }
+
+        class OperLogFileInfo
+        {
+            // 纯文件名
+            public string FileName { get; set; }
+
+            // 文件内容尺寸
+            public long Length { get; set; }
+        }
+
+        List<OperLogFileInfo> GetServerOperLogFileNames(ListViewItem item,
+            string strLastDate)
+        {
+            if (string.IsNullOrEmpty(strLastDate) == false
+    && strLastDate.Length != 8)
+                throw new ArgumentException("strLastDate 参数值如果不为空，应该是 8 字符", "strLastDate");
+
+            List<OperLogFileInfo> results = new List<OperLogFileInfo>();
+
+            string server_name = ListViewUtil.GetItemText(item, OPERLOG_COLUMN_SERVERNAME);
+            if (string.IsNullOrEmpty(server_name))
+                throw new Exception("item 中服务器名列不应为空");
+
+            LibraryChannel channel = this.GetChannel(GetServerUrl(server_name));
+            try
+            {
+                FileItemLoader loader = new FileItemLoader(channel,
+                    null,
+                    "!operlog",
+                    "*.log");
+                foreach (FileItemInfo info in loader)
+                {
+                    string strName = Path.GetFileName(info.Name);
+                    if (string.IsNullOrEmpty(strLastDate) == false
+    && string.Compare(strName, strLastDate) < 0)
+                        continue;
+
+                    OperLogFileInfo result = new OperLogFileInfo();
+                    result.FileName = strName;
+                    result.Length = info.Size;
+                    results.Add(result);
+                }
+
+                return results;
+            }
+            finally
+            {
+                this.ReturnChannel(channel);
+            }
+        }
+
+        // parameters:
+        //      strLastDate 上次备份的最后日期，8 字符。如果为空，表示当前是首次备份
+        static List<OperLogFileInfo> GetLocalOperLogFileNames(string strDirectory,
+            string strLastDate)
+        {
+            if (string.IsNullOrEmpty(strLastDate) == false
+                && strLastDate.Length != 8)
+                throw new ArgumentException("strLastDate 参数值如果不为空，应该是 8 字符", "strLastDate");
+
+            DirectoryInfo di = new DirectoryInfo(strDirectory);
+
+            FileInfo[] fis = di.GetFiles("*.log");
+
+            List<OperLogFileInfo> results = new List<OperLogFileInfo>();
+            foreach (FileInfo fi in fis)
+            {
+                if (string.IsNullOrEmpty(strLastDate) == false
+                    && string.Compare(fi.Name, strLastDate) < 0)
+                    continue;
+
+                OperLogFileInfo result = new OperLogFileInfo
+                {
+                    FileName = fi.Name,
+                    Length = fi.Length
+                };
+                results.Add(result);
+            }
+            return results;
+        }
+
+        #endregion
+
     }
 }
