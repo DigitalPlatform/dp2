@@ -764,6 +764,7 @@ string strHtml)
 
                     StringUtil.RemoveBlank(ref paths);
 
+                    /*
                     var infos = MainForm.BuildDownloadInfoList(paths);
 
                     // 询问是否覆盖已有的目标下载文件。整体询问
@@ -788,6 +789,7 @@ string strHtml)
                     {
                         return i.ServerPath;
                     });
+                    */
 
                     // 设置开始时间
                     //DateTime start_time = DateTime.Now;
@@ -872,9 +874,12 @@ string strHtml)
                 strOutputFolder);
         }
 
+        // parameters:
+        //      deleteServerFile    下载成功后是否自动删除服务器端文件?
         async Task<NormalResult> DownloadBackupFiles(
     ListViewItem item,
-    string strOutputFolder)
+    string strOutputFolder,
+    bool deleteServerFile = true)
         {
             var info = GetInfo(item);
             if (string.IsNullOrEmpty(info.ServerName))
@@ -934,6 +939,18 @@ string strHtml)
                         ErrorInfo = "放弃处理"
                     };
 
+                // 把要跳过的文件的状态修改
+                // 这样才能让 ListViewItem 的 state 列最后正确显示全部完成
+                info.ClearAllPathState();
+                if (result.DeletedFiles != null)
+                {
+                    foreach (var skiped in result.DeletedFiles)
+                    {
+                        string path = skiped.ServerPath;
+                        info.SetPathState(path, "finish");
+                    }
+                }
+
                 paths = GetFileNames(infos, (i) =>
                 {
                     return i.ServerPath;
@@ -944,72 +961,192 @@ string strHtml)
                 SetItemText(item, COLUMN_STARTTIME, start_time.ToString());
                 SetItemText(item, COLUMN_STATE, "正在下载");
                 info.StartTime = start_time;
-                info.ClearAllPathState();
                 info.State = "downloading";
                 SetItemColor(item);
 
-                foreach (string path in paths)
+                if (paths.Count == 0)
                 {
-                    if (string.IsNullOrEmpty(path) == false)
+                    if (info.IsAllPathFinish())
                     {
-                        // parameters:
-                        //      strOutputFolder 输出目录。
-                        //                      [in] 如果为 null，表示要弹出对话框询问目录。如果不为 null，则直接使用这个目录路径
-                        //                      [out] 实际使用的目录
-                        // return:
-                        //      -1  出错
-                        //      0   放弃下载
-                        //      1   成功启动了下载
-                        int nRet = BeginDownloadFile(
-                            channel.Url,
-                            path,
-                            "append",
-                            strOutputFolder,
-                                (p, t) =>
-                                {
-                                    int index = info.IndexOfPath(p);
-                                    SetItemText(item, COLUMN_PROGRESS, $"({(index+1)}){t}");
-                                },
-                                (p, error) =>
-                                {
-                                    // 修改 ListViewItem 状态列为“完成”
-                                    if (error == null)
+                        info.State = "finish";
+                        SetItemText(item, COLUMN_STATE, "下载完成");
+                    }
+                    else
+                    {
+                        info.State = "finish";
+                        SetItemText(item, COLUMN_STATE, "没有发生下载");
+                    }
+
+                    // 去删除服务器端的文件
+                    if (deleteServerFile)
+                    {
+                        var delete_result = DeleteServerFiles(item);
+                        if (delete_result.Value == -1)
+                        {
+                            SetItemText(item, COLUMN_STATE, $"删除服务器端大备份文件时出错: {delete_result.ErrorInfo}");
+                            // TODO: 是否返回出错？
+                        }
+                    }
+
+                    info.State = "finish";
+                    SetItemColor(item);
+                }
+                else
+                {
+                    foreach (string path in paths)
+                    {
+                        if (string.IsNullOrEmpty(path) == false)
+                        {
+                            // parameters:
+                            //      strOutputFolder 输出目录。
+                            //                      [in] 如果为 null，表示要弹出对话框询问目录。如果不为 null，则直接使用这个目录路径
+                            //                      [out] 实际使用的目录
+                            // return:
+                            //      -1  出错
+                            //      0   放弃下载
+                            //      1   成功启动了下载
+                            int nRet = BeginDownloadFile(
+                                channel.Url,
+                                path,
+                                "append",
+                                strOutputFolder,
+                                    (p, t) =>
                                     {
-                                        info.SetPathState(p, "finish");
-                                        if (info.IsAllPathFinish())
+                                        int index = info.IndexOfPath(p);
+                                        SetItemText(item, COLUMN_PROGRESS, $"({(index + 1)}){t}");
+                                    },
+                                    (p, error) =>
+                                    {
+                                        // 修改 ListViewItem 状态列为“完成”
+                                        if (error == null)
                                         {
-                                            info.State = "finish";
-                                            SetItemText(item, COLUMN_STATE, "下载完成");
+                                            info.SetPathState(p, "finish");
+                                            if (info.IsAllPathFinish())
+                                            {
+                                                info.State = "finish";
+                                                SetItemText(item, COLUMN_STATE, "下载完成");
+
+                                                // 删除所有服务器端备份文件
+                                                if (deleteServerFile)
+                                                {
+                                                    var delete_result = DeleteServerFiles(item);
+                                                    if (delete_result.Value == -1)
+                                                    {
+                                                        SetItemText(item, COLUMN_STATE, $"下载文件完成，但删除服务器端大备份文件时出错: {delete_result.ErrorInfo}");
+                                                    }
+                                                }
+                                            }
                                         }
-                                    }
-                                    else
-                                    {
-                                        info.SetPathState(p, $"error:{error}");
-                                        info.State = "error";
-                                        SetItemText(item, COLUMN_STATE, info.GetStateListString());
-                                    }
-                                    SetItemColor(item);
-                                },
-                            out string strError);
-                        if (nRet == -1)
-                            return new NormalResult
-                            {
-                                Value = -1,
-                                ErrorInfo = strError
-                            };
-                        if (nRet == 0)
-                            break;
+                                        else
+                                        {
+                                            info.SetPathState(p, $"error:{error}");
+                                            info.State = "error";
+                                            SetItemText(item, COLUMN_STATE, info.GetStateListString());
+                                        }
+                                        SetItemColor(item);
+                                    },
+                                out string strError);
+                            if (nRet == -1)
+                                return new NormalResult
+                                {
+                                    Value = -1,
+                                    ErrorInfo = strError
+                                };
+                            if (nRet == 0)
+                                break;
+                        }
                     }
                 }
-
-                return new NormalResult();
             }
             finally
             {
                 this.ReturnChannel(channel);
             }
+
+            // 自动删除服务器端大备份文件
+            if (deleteServerFile)
+            {
+                var delete_result = DeleteServerFiles(item);
+                if (delete_result.Value == -1)
+                {
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"下载文件成功，但删除服务器端大备份文件时出错: {delete_result.ErrorInfo}"
+                    };
+                }
+            }
+
+            return new NormalResult();
         }
 
+        NormalResult DeleteServerFiles(ListViewItem item)
+        {
+            var info = GetInfo(item);
+
+            if (info.PathList == null || info.PathList.Count == 0)
+                return new NormalResult();
+
+            if (string.IsNullOrEmpty(info.ServerName))
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = "item 中缺乏 info.ServerName"
+                };
+            dp2Server server = this.Servers.GetServerByName(info.ServerName);
+            if (server == null)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"没有找到名为 '{info.ServerName}' 的服务器定义"
+                };
+
+            LibraryChannel channel = this.GetChannel(server.Url);
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = new TimeSpan(0, 5, 0);
+            try
+            {
+                List<string> errors = new List<string>();
+                foreach (var path_item in info.PathList)
+                {
+                    string strPath = path_item.Path;
+
+                    string strCurrentDirectory = Path.GetDirectoryName(strPath);
+                    string strFileName = Path.GetFileName(strPath);
+
+                    long nRet = channel.ListFile(
+                        null,
+                        "delete",
+                        strCurrentDirectory,
+                        strFileName,
+                        0,
+                        -1,
+                        out FileItemInfo[] infos,
+                        out string strError);
+                    if (nRet == -1)
+                        errors.Add($"删除服务器 {server.Name} 上的备份文件 {strPath} 时出错: {strError}");
+                    // 如果文件不存在(nRet == 0)，不算错误
+                }
+
+                if (errors.Count > 0)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = StringUtil.MakePathList(errors, "\r\n")
+                    };
+
+                return new NormalResult();
+            }
+            finally
+            {
+                channel.Timeout = old_timeout;
+
+                this.ReturnChannel(channel);
+            }
+
+            // 刷新显示。把 item 中的文件名列清空
+
+        }
 
         public class PathItem
         {
@@ -1035,7 +1172,7 @@ string strHtml)
                 if (this.PathList == null)
                     return -1;
                 int i = 0;
-                foreach(var item in this.PathList)
+                foreach (var item in this.PathList)
                 {
                     if (item.Path == path)
                         return i;
@@ -1131,7 +1268,11 @@ string strHtml)
 
         public class AskResult : NormalResult
         {
+            // [out]
             public bool Append { get; set; }
+
+            // [out] 询问后，操作者决定从处理文件列表中删除(也就是不下载这些文件)的事项
+            public List<DownloadFileInfo> DeletedFiles { get; set; }
         }
 
         // TODO: 将中途打算删除的文件留到函数返回前一刹那再删除
@@ -1154,6 +1295,9 @@ string strHtml)
             {
                 throw new ArgumentException("strOutputFolder 参数值不允许为空");
             }
+
+
+            List<DownloadFileInfo> deleted = new List<DownloadFileInfo>();
 
             DialogResult md5_result = System.Windows.Forms.DialogResult.Yes;
             bool bDontAskMd5Verify = false; // 是否要询问 MD5 校验
@@ -1197,7 +1341,11 @@ string strHtml)
                                 new string[] { "是(验证)", "否(不验证)", "取消本次文件下载任务" },
                                 20);
                             if (md5_result == System.Windows.Forms.DialogResult.Cancel)
-                                return new AskResult { Value = 0 };
+                                return new AskResult
+                                {
+                                    Value = 0,
+                                    DeletedFiles = deleted
+                                };
                         }
 
                         if (md5_result == System.Windows.Forms.DialogResult.Yes)
@@ -1211,7 +1359,8 @@ string strHtml)
                                 return new AskResult
                                 {
                                     Value = -1,
-                                    ErrorInfo = result.ErrorInfo
+                                    ErrorInfo = result.ErrorInfo,
+                                    DeletedFiles = deleted
                                 };
                             }
                             if (result.Value == 0)
@@ -1250,7 +1399,8 @@ string strHtml)
                     return new AskResult
                     {
                         Value = 1,
-                        Append = false
+                        Append = false,
+                        DeletedFiles = deleted
                     };
                 }
             }
@@ -1272,18 +1422,19 @@ string strHtml)
                 if (md5_mismatch_filenames.Count > 0)
                 {
                     DialogResult result = MessageBox.Show(this,
-    "下列文件中 '" + GetFileNameList(md5_mismatch_filenames, "\r\n") + "' 先前曾经被下载过，但 MD5 验证发现和服务器侧文件不一致。\r\n\r\n是否删除它们然后重新下载?\r\n[是：重新下载; 否: 不下载这些文件; 取消：放弃全部下载]",
-    "MainForm",
-    MessageBoxButtons.YesNoCancel,
-    MessageBoxIcon.Question,
-    MessageBoxDefaultButton.Button1);
+        "下列文件中 '" + GetFileNameList(md5_mismatch_filenames, "\r\n") + "' 先前曾经被下载过，但 MD5 验证发现和服务器侧文件不一致。\r\n\r\n是否删除它们然后重新下载?\r\n[是：重新下载; 否: 不下载这些文件; 取消：放弃全部下载]",
+        "MainForm",
+        MessageBoxButtons.YesNoCancel,
+        MessageBoxIcon.Question,
+        MessageBoxDefaultButton.Button1);
                     if (result == DialogResult.Cancel)
                     {
                         delete_filenames.Clear();
                         return new AskResult
                         {
                             Value = 0,
-                            Append = bAppend
+                            Append = bAppend,
+                            DeletedFiles = deleted
                         };
                     }
                     if (result == DialogResult.Yes)
@@ -1306,10 +1457,11 @@ string strHtml)
                     else
                     {
                         // 从文件列表中清除，这样就不会下载这些文件了
-                        DeleteItems(fileinfos, (info) =>
-                        {
-                            return info.MD5Matched == "no";
-                        });
+                        deleted.AddRange(DeleteItems(fileinfos,
+                            (info) =>
+                            {
+                                return info.MD5Matched == "no";
+                            }));
                     }
                 }
 
@@ -1323,18 +1475,19 @@ string strHtml)
                 if (temp_filenames.Count > 0)
                 {
                     DialogResult result = MessageBox.Show(this,
-    "下列文件 '" + GetFileNameList(temp_filenames, "\r\n") + "' 先前曾经被下载过，但未能完成。\r\n\r\n是否继续下载未完成部分?\r\n[是：从断点继续下载; 否: 重新从头下载; 取消：放弃全部下载]",
-    "MainForm",
-    MessageBoxButtons.YesNoCancel,
-    MessageBoxIcon.Question,
-    MessageBoxDefaultButton.Button1);
+        "下列文件 '" + GetFileNameList(temp_filenames, "\r\n") + "' 先前曾经被下载过，但未能完成。\r\n\r\n是否继续下载未完成部分?\r\n[是：从断点继续下载; 否: 重新从头下载; 取消：放弃全部下载]",
+        "MainForm",
+        MessageBoxButtons.YesNoCancel,
+        MessageBoxIcon.Question,
+        MessageBoxDefaultButton.Button1);
                     if (result == DialogResult.Cancel)
                     {
                         delete_filenames.Clear();
                         return new AskResult
                         {
                             Value = 0,
-                            Append = bAppend
+                            Append = bAppend,
+                            DeletedFiles = deleted
                         };
                     }
                     if (result == DialogResult.Yes)
@@ -1384,18 +1537,19 @@ string strHtml)
                 if (md5_matched_filenames.Count > 0)
                 {
                     DialogResult result = MessageBox.Show(this,
-    "下列文件中 '" + GetFileNameList(md5_matched_filenames, "\r\n") + "' 先前曾经被下载过，并且 MD5 验证发现和服务器侧文件完全一致。\r\n\r\n是否删除它们然后重新下载?\r\n[是：重新下载; 否: 不下载这些文件; 取消：放弃全部下载]",
-    "MainForm",
-    MessageBoxButtons.YesNoCancel,
-    MessageBoxIcon.Question,
-    MessageBoxDefaultButton.Button2);
+        "下列文件中 '" + GetFileNameList(md5_matched_filenames, "\r\n") + "' 先前曾经被下载过，并且 MD5 验证发现和服务器侧文件完全一致。\r\n\r\n是否删除它们然后重新下载?\r\n[是：重新下载; 否: 不下载这些文件; 取消：放弃全部下载]",
+        "MainForm",
+        MessageBoxButtons.YesNoCancel,
+        MessageBoxIcon.Question,
+        MessageBoxDefaultButton.Button2);
                     if (result == DialogResult.Cancel)
                     {
                         delete_filenames.Clear();
                         return new AskResult
                         {
                             Value = 0,
-                            Append = bAppend
+                            Append = bAppend,
+                            DeletedFiles = deleted
                         };
                     }
                     if (result == DialogResult.Yes)
@@ -1420,10 +1574,11 @@ string strHtml)
                     else
                     {
                         // 从文件列表中清除，这样就不会下载这些文件了
-                        DeleteItems(fileinfos, (info) =>
-                        {
-                            return info.MD5Matched == "yes";
-                        });
+                        deleted.AddRange(DeleteItems(fileinfos,
+                            (info) =>
+                            {
+                                return info.MD5Matched == "yes";
+                            }));
                     }
                 }
 
@@ -1437,18 +1592,19 @@ string strHtml)
                 if (filenames.Count > 0)
                 {
                     DialogResult result = MessageBox.Show(this,
-    "下列文件中 '" + GetFileNameList(filenames, "\r\n") + "' 先前曾经被下载过。\r\n\r\n是否删除它们然后重新下载?\r\n[是：重新下载; 否: 不下载这些文件; 取消：放弃全部下载]",
-    "MainForm",
-    MessageBoxButtons.YesNoCancel,
-    MessageBoxIcon.Question,
-    MessageBoxDefaultButton.Button2);
+        "下列文件中 '" + GetFileNameList(filenames, "\r\n") + "' 先前曾经被下载过。\r\n\r\n是否删除它们然后重新下载?\r\n[是：重新下载; 否: 不下载这些文件; 取消：放弃全部下载]",
+        "MainForm",
+        MessageBoxButtons.YesNoCancel,
+        MessageBoxIcon.Question,
+        MessageBoxDefaultButton.Button2);
                     if (result == DialogResult.Cancel)
                     {
                         delete_filenames.Clear();
                         return new AskResult
                         {
                             Value = 0,
-                            Append = bAppend
+                            Append = bAppend,
+                            DeletedFiles = deleted
                         };
                     }
                     if (result == DialogResult.Yes)
@@ -1474,16 +1630,18 @@ string strHtml)
                     else
                     {
                         // 从文件列表中清除，这样就不会下载这些文件了
-                        DeleteItems(fileinfos, (info) =>
-                        {
-                            return info.LocalFileExists;
-                        });
+                        deleted.AddRange(DeleteItems(fileinfos,
+                            (info) =>
+                            {
+                                return info.LocalFileExists;
+                            }));
                     }
                 }
                 return new AskResult
                 {
                     Value = 1,
-                    Append = bAppend
+                    Append = bAppend,
+                    DeletedFiles = deleted
                 };
             }
             finally
@@ -1510,8 +1668,12 @@ string strHtml)
             }
         }
 
-        // func 返回 true 表示要删除
-        void DeleteItems(List<DownloadFileInfo> fileinfos, Delegate_processItem2 func)
+        // parameters:
+        //      func    若 func 返回 true 表示要删除
+        // return:
+        //      返回实际删除的事项
+        List<DownloadFileInfo> DeleteItems(List<DownloadFileInfo> fileinfos,
+            Delegate_processItem2 func)
         {
             List<DownloadFileInfo> delete_infos = new List<DownloadFileInfo>();
             foreach (DownloadFileInfo info in fileinfos)
@@ -1524,6 +1686,8 @@ string strHtml)
             {
                 fileinfos.Remove(info);
             }
+
+            return delete_infos;
         }
 
 
@@ -1539,13 +1703,13 @@ string strHtml)
 
         /*
         Task<NormalResult> BeginCheckMD5(string strServerFilePath,
-    string strLocalFilePath)
+        string strLocalFilePath)
         {
             return Task.Factory.StartNew<NormalResult>(
-    () =>
-    {
+        () =>
+        {
         return _checkMD5(strServerFilePath, strLocalFilePath);
-    });
+        });
         }
         */
 
@@ -1799,21 +1963,26 @@ string strHtml)
             });
             downloader.Prompt += new MessagePromptEventHandler(delegate (object o1, MessagePromptEventArgs e1)
             {
-                e1.ResultAction = "yes";
-#if NO
-                if (dlg.IsDisposed == true)
+                if (this.IsDisposed == true)
                 {
                     e1.ResultAction = "cancel";
                     return;
                 }
+
+                func_showProgress?.Invoke(strPath, $"中途出错:{e1.MessageText}");
 
                 this.Invoke((Action)(() =>
                 {
                     if (e1.Actions == "yes,no,cancel")
                     {
                         bool bHideMessageBox = true;
+
+                        string server_name = this.Servers.GetServer(strServerUrl)?.Name;
+                        if (string.IsNullOrEmpty(server_name))
+                            server_name = strServerUrl;
+
                         DialogResult result = MessageDialog.Show(this,
-                            e1.MessageText + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)",
+                            $"服务器 '{server_name}': { e1.MessageText}\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)",
             MessageBoxButtons.YesNoCancel,
             MessageBoxDefaultButton.Button1,
             null,
@@ -1827,8 +1996,12 @@ string strHtml)
                         else
                             e1.ResultAction = "yes";
                     }
+                    else
+                    {
+                        e1.ResultAction = "yes";
+                        // TODO: 是否延时一段？
+                    }
                 }));
-#endif
             });
             downloader.StartDownload(bAppend);
             return 1;
@@ -1939,7 +2112,7 @@ string strHtml)
             public bool LocalFileExists { get; set; }
             // 本地和服务器端文件的 MD5 是否匹配
             public string MD5Matched { get; set; }   // 空/yes/no 
-            // 本地临时文件是否存在
+                                                     // 本地临时文件是否存在
             public bool TempFileExists { get; set; }
 
             public string OverwriteStyle { get; set; }  // append/overwrite
@@ -2160,11 +2333,11 @@ string strHtml)
                     {
                         Task.Delay(delta, token).Wait();
                     }
-                    catch(AggregateException)
+                    catch (AggregateException)
                     {
                         return;
                     }
-                    catch(TaskCanceledException)
+                    catch (TaskCanceledException)
                     {
                         return;
                     }
@@ -2337,6 +2510,13 @@ string strHtml)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
+
+            menuItem = new MenuItem("删除服务器端备份文件 [" + this.listView_backupTasks.SelectedItems.Count.ToString() + "] (&D)");
+            menuItem.Click += new System.EventHandler(this.menu_deleteServerFile_Click);
+            if (this.listView_backupTasks.SelectedItems.Count == 0)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
             // ---
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
@@ -2368,15 +2548,60 @@ string strHtml)
             }
 
             DialogResult result = MessageBox.Show(this,
-"确实要移除选定的 " + this.listView_backupTasks.SelectedItems.Count.ToString() + " 个事项?",
-"MainForm",
-MessageBoxButtons.YesNo,
-MessageBoxIcon.Question,
-MessageBoxDefaultButton.Button2);
+        "确实要移除选定的 " + this.listView_backupTasks.SelectedItems.Count.ToString() + " 个事项?",
+        "MainForm",
+        MessageBoxButtons.YesNo,
+        MessageBoxIcon.Question,
+        MessageBoxDefaultButton.Button2);
             if (result != DialogResult.Yes)
                 return;
 
             ListViewUtil.DeleteSelectedItems(this.listView_backupTasks);
+        }
+
+        async void menu_deleteServerFile_Click(object sender, EventArgs e)
+        {
+            if (this.listView_backupTasks.SelectedItems.Count == 0)
+            {
+                MessageBox.Show(this, "尚未选定要删除服务器端备份文件的事项");
+                return;
+            }
+
+            DialogResult result = MessageBox.Show(this,
+        "确实要删除选定的 " + this.listView_backupTasks.SelectedItems.Count.ToString() + " 个事项对应的服务器端备份文件?",
+        "MainForm",
+        MessageBoxButtons.YesNo,
+        MessageBoxIcon.Question,
+        MessageBoxDefaultButton.Button2);
+            if (result != DialogResult.Yes)
+                return;
+
+            List<ListViewItem> items = new List<ListViewItem>();
+            items.AddRange(this.listView_backupTasks.SelectedItems.Cast<ListViewItem>());
+
+            StringBuilder error = new StringBuilder();
+            this.ShowMessage("正在删除服务器端备份文件 ...");
+            try
+            {
+                await Task.Run(() =>
+                {
+                    foreach (ListViewItem item in items)
+                    {
+                        var delete_result = DeleteServerFiles(item);
+                        if (delete_result.Value == -1)
+                            error.AppendLine(delete_result.ErrorInfo);
+                    }
+                });
+            }
+            finally
+            {
+                this.ClearMessage();
+            }
+
+            if (error.Length > 0)
+                MessageDlg.Show(this, error.ToString(), "MainForm");
+            else
+                MessageBox.Show(this, "删除成功");
         }
 
         // 根据行状态设置行背景色
