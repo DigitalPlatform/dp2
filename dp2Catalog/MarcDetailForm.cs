@@ -6806,6 +6806,11 @@ Stack:
 
                 DisplayHtml(strRecord, GetSyntaxOID(strOutMarcSyntax));
 
+                // 2020/2/17
+                // 设置 MarcSyntax OID，以便让保存到文件功能可以感知到 MARC 格式类型
+                this.m_currentRecord = new DigitalPlatform.OldZ3950.Record();
+                this.m_currentRecord.m_strSyntaxOID = GetSyntaxOID(strOutMarcSyntax);
+
                 this.LinkedSearchForm = null;  // 切断和原来关联的检索窗的联系。这样就没法前后翻页了
                 return 0;
                 ERROR1:

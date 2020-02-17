@@ -136,7 +136,6 @@ namespace DigitalPlatform.CirculationClient
 
             if (strFrom != "")
                 this.textBox_path.Text += "/" + strFrom;
-
             return;
         ERROR1:
             MessageBox.Show(this, strError);
