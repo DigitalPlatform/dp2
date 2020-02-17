@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Windows.Forms;
 
 using DigitalPlatform.GUI;
+using System.Collections.Generic;
 
 namespace DigitalPlatform.CirculationClient
 {
@@ -211,10 +212,7 @@ namespace DigitalPlatform.CirculationClient
                 item.SubItems.Add(server.Url);
                 item.SubItems.Add(server.DefaultUserName);
                 item.SubItems.Add(server.SavePassword == true ? "是" : "否");
-
             }
-
-
         }
 
         private void listView1_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
@@ -235,7 +233,6 @@ namespace DigitalPlatform.CirculationClient
                 menuItem.Enabled = false;
             }
             contextMenu.MenuItems.Add(menuItem);
-
 
             // ---
             menuItem = new MenuItem("-");
@@ -303,7 +300,6 @@ namespace DigitalPlatform.CirculationClient
                 return;
             }
 
-
             int nActiveLine = listView1.SelectedIndices[0];
             // ListViewItem item = listView1.Items[nActiveLine];
 
@@ -343,7 +339,6 @@ namespace DigitalPlatform.CirculationClient
                 true);
 
             m_bChanged = true;
-
         }
 
 
@@ -407,9 +402,7 @@ namespace DigitalPlatform.CirculationClient
                 true);
 
             m_bChanged = true;
-
         }
-
 
         private void listView1_DoubleClick(object sender, System.EventArgs e)
         {
@@ -435,7 +428,6 @@ namespace DigitalPlatform.CirculationClient
                     }
                 }
             }
-
         }
 
         private void button_newServer_Click(object sender, EventArgs e)
@@ -466,6 +458,36 @@ namespace DigitalPlatform.CirculationClient
 
             m_firstUseBalloon.Dispose();
             m_firstUseBalloon = null;
+        }
+
+        List<string> GetSelectedPathList()
+        {
+            List<string> results = new List<string>();
+            foreach(ListViewItem item in this.listView1.SelectedItems)
+            {
+                results.Add(ListViewUtil.GetItemText(item, 0));
+            }
+
+            return results;
+        }
+
+        public List<string> SelectedServerNames
+        {
+            get
+            {
+                return GetSelectedPathList();
+            }
+            set
+            {
+                foreach(ListViewItem item in this.listView1.Items)
+                {
+                    string name = ListViewUtil.GetItemText(item, 0);
+                    if (value == null || value.IndexOf(name) == -1)
+                        item.Selected = false;
+                    else
+                        item.Selected = true;
+                }
+            }
         }
     }
 }
