@@ -14813,7 +14813,7 @@ strLibraryCode);    // 读者所在的馆代码
 
                 // 注意： strPath 中的斜杠应该是 '/'
                 string strFirstLevel = StringUtil.GetFirstPartPath(ref strPath);
-                if (StringUtil.IsInList("managedatabase", strRights) == false)
+                if (StringUtil.IsInList("managedatabase,backup", strRights) == false)
                 {
                     if (string.Compare(strFirstLevel, "upload", true) != 0)
                     {
@@ -14822,9 +14822,9 @@ strLibraryCode);    // 读者所在的馆代码
                     }
                 }
 
-                if (StringUtil.IsInList("download", strRights) == false)
+                if (StringUtil.IsInList("download,backup", strRights) == false)
                 {
-                    strError = "读取文件 " + strResPath + " 被拒绝。不具备 download 权限";
+                    strError = "读取文件 " + strResPath + " 被拒绝。不具备 download 或 backup 权限";
                     return 0;
                 }
                 // 用于限定的根目录

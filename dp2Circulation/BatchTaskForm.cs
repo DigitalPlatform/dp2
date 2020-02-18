@@ -415,9 +415,9 @@ namespace dp2Circulation
                 // 2017/9/30
                 if (dlg.DownloadFiles)
                 {
-                    if (StringUtil.IsInList("download", MainForm._currentUserRights) == false)
+                    if (StringUtil.IsInList("download,backup", MainForm._currentUserRights) == false)
                     {
-                        strError = "启动“大备份”任务被拒绝。当前用户并不具备 download 权限，所以无法在大备份同时下载文件。请先为当前用户添加这个权限，再重新启动大备份任务";
+                        strError = "启动“大备份”任务被拒绝。当前用户并不具备 download 或 backup 权限，所以无法在大备份同时下载文件。请先为当前用户添加这个权限，再重新启动大备份任务";
                         return -1;
                     }
                 }

@@ -8913,7 +8913,11 @@ Stack:
                     return result;
                 }
 
-                if (StringUtil.IsInList("batchtask", sessioninfo.RightsOrigin) == false)
+                if (strName == "大备份" && StringUtil.IsInList("backup", sessioninfo.RightsOrigin) == true)
+                {
+                    // 大备份任务可以由 backup 权限的账户启动
+                }
+                else if (StringUtil.IsInList("batchtask", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
                     result.ErrorInfo = "操作批处理任务 被拒绝。不具备batchtask权限。";
@@ -9820,7 +9824,7 @@ Stack:
                 {
                     // TODO: 根据不同的权限限定不同的 root 起点
                     string strRoot = Path.Combine(app.DataDir, "upload");
-                    if (StringUtil.IsInList("managedatabase", sessioninfo.RightsOrigin) == true)
+                    if (StringUtil.IsInList("managedatabase,backup", sessioninfo.RightsOrigin) == true)
                     {
                         strRoot = app.DataDir.Replace("/", "\\");  // 权力很大，能看到数据目录下的全部文件和目录了
                         if (strRoot.EndsWith("\\") == false)
