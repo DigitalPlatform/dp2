@@ -5,14 +5,17 @@ using System.Windows.Forms;
 
 using DigitalPlatform.GUI;
 using System.Collections.Generic;
+using DigitalPlatform.Text;
 
 namespace DigitalPlatform.CirculationClient
 {
     /// <summary>
-    /// Summary description for ServersDlg.
+    /// 管理 dp2library 服务器的对话框
     /// </summary>
     public class ServersDlg : System.Windows.Forms.Form
     {
+        public string Mode = "config";  // config/select 两者之一
+
         public bool FirstRun = false;
 
         public dp2ServerCollection Servers = null;  // 引用
@@ -66,21 +69,52 @@ namespace DigitalPlatform.CirculationClient
         /// </summary>
         private void InitializeComponent()
         {
+            this.button_OK = new System.Windows.Forms.Button();
+            this.button_Cancel = new System.Windows.Forms.Button();
+            this.button_newServer = new System.Windows.Forms.Button();
             this.listView1 = new DigitalPlatform.GUI.ListViewNF();
             this.columnHeader_name = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_url = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_userName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_savePassword = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.button_OK = new System.Windows.Forms.Button();
-            this.button_Cancel = new System.Windows.Forms.Button();
-            this.button_newServer = new System.Windows.Forms.Button();
             this.SuspendLayout();
+            // 
+            // button_OK
+            // 
+            this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_OK.Location = new System.Drawing.Point(574, 265);
+            this.button_OK.Name = "button_OK";
+            this.button_OK.Size = new System.Drawing.Size(125, 33);
+            this.button_OK.TabIndex = 1;
+            this.button_OK.Text = "确定";
+            this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
+            // 
+            // button_Cancel
+            // 
+            this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_Cancel.Location = new System.Drawing.Point(574, 306);
+            this.button_Cancel.Name = "button_Cancel";
+            this.button_Cancel.Size = new System.Drawing.Size(125, 31);
+            this.button_Cancel.TabIndex = 2;
+            this.button_Cancel.Text = "取消";
+            this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
+            // 
+            // button_newServer
+            // 
+            this.button_newServer.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.button_newServer.Location = new System.Drawing.Point(15, 265);
+            this.button_newServer.Name = "button_newServer";
+            this.button_newServer.Size = new System.Drawing.Size(188, 33);
+            this.button_newServer.TabIndex = 3;
+            this.button_newServer.Text = "新增服务器(&N)";
+            this.button_newServer.UseVisualStyleBackColor = true;
+            this.button_newServer.Click += new System.EventHandler(this.button_newServer_Click);
             // 
             // listView1
             // 
-            this.listView1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.listView1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.listView1.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader_name,
             this.columnHeader_url,
@@ -88,12 +122,13 @@ namespace DigitalPlatform.CirculationClient
             this.columnHeader_savePassword});
             this.listView1.FullRowSelect = true;
             this.listView1.HideSelection = false;
-            this.listView1.Location = new System.Drawing.Point(9, 9);
+            this.listView1.Location = new System.Drawing.Point(15, 14);
             this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(446, 276);
+            this.listView1.Size = new System.Drawing.Size(684, 244);
             this.listView1.TabIndex = 0;
             this.listView1.UseCompatibleStateImageBehavior = false;
             this.listView1.View = System.Windows.Forms.View.Details;
+            this.listView1.SelectedIndexChanged += new System.EventHandler(this.listView1_SelectedIndexChanged);
             this.listView1.DoubleClick += new System.EventHandler(this.listView1_DoubleClick);
             this.listView1.MouseUp += new System.Windows.Forms.MouseEventHandler(this.listView1_MouseUp);
             // 
@@ -117,42 +152,11 @@ namespace DigitalPlatform.CirculationClient
             this.columnHeader_savePassword.Text = "是否保存密码";
             this.columnHeader_savePassword.Width = 150;
             // 
-            // button_OK
-            // 
-            this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_OK.Location = new System.Drawing.Point(380, 290);
-            this.button_OK.Name = "button_OK";
-            this.button_OK.Size = new System.Drawing.Size(75, 22);
-            this.button_OK.TabIndex = 1;
-            this.button_OK.Text = "确定";
-            this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
-            // 
-            // button_Cancel
-            // 
-            this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_Cancel.Location = new System.Drawing.Point(380, 317);
-            this.button_Cancel.Name = "button_Cancel";
-            this.button_Cancel.Size = new System.Drawing.Size(75, 21);
-            this.button_Cancel.TabIndex = 2;
-            this.button_Cancel.Text = "取消";
-            this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
-            // 
-            // button_newServer
-            // 
-            this.button_newServer.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.button_newServer.Location = new System.Drawing.Point(9, 290);
-            this.button_newServer.Name = "button_newServer";
-            this.button_newServer.Size = new System.Drawing.Size(113, 22);
-            this.button_newServer.TabIndex = 3;
-            this.button_newServer.Text = "新增服务器(&N)";
-            this.button_newServer.UseVisualStyleBackColor = true;
-            this.button_newServer.Click += new System.EventHandler(this.button_newServer_Click);
-            // 
             // ServersDlg
             // 
             this.AcceptButton = this.button_OK;
-            this.AutoScaleBaseSize = new System.Drawing.Size(6, 14);
-            this.ClientSize = new System.Drawing.Size(464, 348);
+            this.AutoScaleBaseSize = new System.Drawing.Size(10, 21);
+            this.ClientSize = new System.Drawing.Size(714, 352);
             this.Controls.Add(this.button_newServer);
             this.Controls.Add(this.button_Cancel);
             this.Controls.Add(this.button_OK);
@@ -164,12 +168,19 @@ namespace DigitalPlatform.CirculationClient
             this.Closing += new System.ComponentModel.CancelEventHandler(this.ServersDlg_Closing);
             this.Load += new System.EventHandler(this.ServersDlg_Load);
             this.ResumeLayout(false);
+
         }
         #endregion
 
         private void ServersDlg_Load(object sender, System.EventArgs e)
         {
             FillList();
+
+            if (this.Mode == "select")
+            {
+                this.button_newServer.Visible = false;
+                RefreshButtons();
+            }
 
             if (this.FirstRun == true)
             {
@@ -370,11 +381,12 @@ namespace DigitalPlatform.CirculationClient
             }
             else
             {
-                dlg.ServerName = ((dp2Server)Servers[nActiveLine]).Name;
-                dlg.Password = ((dp2Server)Servers[nActiveLine]).DefaultPassword;
-                dlg.ServerUrl = ((dp2Server)Servers[nActiveLine]).Url;
-                dlg.UserName = ((dp2Server)Servers[nActiveLine]).DefaultUserName;
-                dlg.SavePassword = ((dp2Server)Servers[nActiveLine]).SavePassword;
+                dp2Server server = (dp2Server)Servers[nActiveLine];
+                dlg.ServerName = server.Name;
+                dlg.Password = server.DefaultPassword;
+                dlg.ServerUrl = server.Url;
+                dlg.UserName = server.DefaultUserName;
+                dlg.SavePassword = server.SavePassword;
             }
 
             dlg.ShowDialog(this);
@@ -382,12 +394,32 @@ namespace DigitalPlatform.CirculationClient
             if (dlg.DialogResult != DialogResult.OK)
                 return;
 
-            dp2Server server = Servers.NewServer(nActiveLine);
-            server.Name = dlg.ServerName;
-            server.DefaultPassword = dlg.Password;
-            server.Url = dlg.ServerUrl;
-            server.DefaultUserName = dlg.UserName;
-            server.SavePassword = dlg.SavePassword;
+            List<string> urls = new List<string>();
+            if (dlg.ServerUrl.IndexOf("\r\n") == -1)
+                urls.Add(dlg.ServerUrl);
+            else
+            {
+                urls = StringUtil.SplitList(dlg.ServerUrl.Replace("\r\n", "\r"), '\r');
+                StringUtil.RemoveBlank(ref urls);
+                StringUtil.RemoveDupNoSort(ref urls);
+            }
+
+            // 允许一次创建多个服务器节点
+            int i = 0;
+            foreach(string url in urls)
+            {
+                dp2Server server = Servers.NewServer(nActiveLine);
+                // TODO: 建议用 public 账户尝试从 dp2library 服务器获得服务器名字符串
+                string name = dlg.ServerName;
+                if (i > 0)
+                    name = dlg.ServerName + (i + 1).ToString();
+                server.Name = name;
+                server.DefaultPassword = dlg.Password;
+                server.Url = url;
+                server.DefaultUserName = dlg.UserName;
+                server.SavePassword = dlg.SavePassword;
+                i++;
+            }
 
             Servers.Changed = true;
 
@@ -487,6 +519,22 @@ namespace DigitalPlatform.CirculationClient
                     else
                         item.Selected = true;
                 }
+            }
+        }
+
+        private void listView1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            RefreshButtons();
+        }
+
+        void RefreshButtons()
+        {
+            if (this.Mode == "select")
+            {
+                if (this.listView1.SelectedItems.Count > 0)
+                    this.button_OK.Enabled = true;
+                else
+                    this.button_OK.Enabled = false;
             }
         }
     }

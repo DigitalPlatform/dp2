@@ -66,6 +66,7 @@ namespace DigitalPlatform.CirculationClient
             }
         }
 
+        // 注：允许输入多行文本。即字符串中包含 \r\n
         public string ServerUrl
         {
             get
@@ -206,6 +207,11 @@ a => a.AddressFamily == AddressFamily.InterNetwork);
                 this.textBox_userName.Text = "supervisor";
                 this.textBox_password.Text = "";
             }
+        }
+
+        private void toolStripButton_enableMultiLine_CheckedChanged(object sender, EventArgs e)
+        {
+            this.textBox_serverAddr.Multiline = this.toolStripButton_enableMultiLine.Checked;
         }
     }
 }

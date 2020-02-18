@@ -57,6 +57,14 @@ namespace dp2ManageCenter
             ClientInfo.Initial("dp2managecenter");
 
             this.UiState = ClientInfo.Config.Get("global", "ui_state", ""); // Properties.Settings.Default.ui_state;
+                                                                            // 恢复 MainForm 的显示状态
+            {
+                var state = ClientInfo.Config.Get("mainForm", "state", "");
+                if (string.IsNullOrEmpty(state) == false)
+                {
+                    FormProperty.SetProperty(state, this, ClientInfo.IsMinimizeMode());
+                }
+            }
 
             LoadBackupTasks();
             LoadOperLogTasks();
@@ -231,6 +239,12 @@ bool bClickClose = false)
         void SaveSettings()
         {
             ClientInfo.Config?.Set("global", "ui_state", this.UiState);
+
+            // 保存 MainForm 的显示状态
+            {
+                var state = FormProperty.GetProperty(this);
+                ClientInfo.Config.Set("mainForm", "state", state);
+            }
 
             SaveBackupTasks();
             SaveOperLogTasks();
@@ -657,7 +671,8 @@ string strHtml)
             }
         }
 
-        AsyncSemaphore _backupLimit = new AsyncSemaphore(1);
+        AsyncSemaphore _backupLimit = new AsyncSemaphore(5);
+        AsyncSemaphore _operLogLimit = new AsyncSemaphore(5);
 
         // 先新建全部任务，这时已经用 BatchTask() "start" 请求启动了所有服务器端的备份任务。然后再做一个循环启动下载任务。
         private async void MenuItem_newBackupTasks_Click(object sender, EventArgs e)
@@ -858,6 +873,15 @@ string strHtml)
 
                 SetItemText(item, COLUMN_STATE, "正在启动服务器端任务");
 
+                // 检查 dp2library 版本号
+                var check_result = CheckLibraryServerVersion(channel);
+                if (check_result.Value == -1)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = SetBackupItemError(item, check_result.ErrorInfo)
+                    };
+
                 // return:
                 //      -1  出错
                 //      0   启动成功
@@ -919,6 +943,19 @@ string strHtml)
                 return new NormalResult();
         }
 
+        static char[] movingChars = new char[] { '/', '-', '\\', '|' };
+
+        static string GetMovingChar(ref int index)
+        {
+            if (index < 0 || index > 3)
+                index = 0;
+            string result = new string(movingChars[index], 1);
+            index++;
+            if (index > 3)
+                index = 0;
+            return result;
+        }
+
         // parameters:
         //      deleteServerFile    下载成功后是否自动删除服务器端文件?
         async Task<NormalResult> DownloadBackupFiles(
@@ -976,9 +1013,14 @@ string strHtml)
                 var result = await AskOverwriteFiles(
                     channel,
                     infos,
+                    "dontAskMd5Verify,auto",
                     strOutputFolder);
                 if (result.Value == -1)
+                {
+                    SetBackupItemError(item, result.ErrorInfo);
                     return result;
+                }
+
                 if (result.Value != 1)
                     return new NormalResult
                     {
@@ -1063,7 +1105,7 @@ string strHtml)
                                     (p, t) =>
                                     {
                                         int index = info.IndexOfPath(p);
-                                        SetItemText(item, COLUMN_PROGRESS, $"({(index + 1)}){t}");
+                                        SetItemText(item, COLUMN_PROGRESS, $"({(index + 1)}){t} {GetMovingChar(ref info.MovingIndex)}");
                                     },
                                     (p, error) =>
                                     {
@@ -1105,6 +1147,51 @@ string strHtml)
                     }
                 }
 
+                return new NormalResult();
+            }
+            finally
+            {
+                this.ReturnChannel(channel);
+            }
+        }
+
+
+        NormalResult CancelServerBackupTask(ListViewItem item)
+        {
+            var info = GetBackupInfo(item);
+
+            var server_url = GetServerUrl(info.ServerName);
+
+            BatchTaskInfo resultInfo = null;
+
+            LibraryChannel channel = this.GetChannel(server_url);
+            try
+            {
+                SetItemText(item, COLUMN_STATE, "正在撤销服务器端任务");
+
+                // return:
+                //      -1  出错
+                //      0   启动成功
+                //      1   调用前任务已经处于执行状态，本次调用激活了这个任务
+                long lRet = channel.BatchTask(
+                    null,
+                    "大备份",
+                    "abort",
+                    new BatchTaskInfo(),
+                    out resultInfo,
+                    out string strError);
+                if (lRet == -1)
+                {
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = SetBackupItemError(item, strError)
+                    };
+                }
+
+                info.State = "finish";
+                SetItemText(item, COLUMN_STATE, "服务器端任务已经撤销");
+                SetBackupItemColor(item);
                 return new NormalResult();
             }
             finally
@@ -1243,6 +1330,8 @@ string strHtml)
         {
             // 不参与序列化
             public Task<NormalResult> BackupTask { get; set; }
+
+            public int MovingIndex = 0;
 
             // 服务器名
             [JsonProperty]
@@ -1401,6 +1490,7 @@ string strHtml)
         public async Task<AskResult> AskOverwriteFiles(// List<string> filenames,
             LibraryChannel channel,
             List<DownloadFileInfo> fileinfos,
+            string style,
             string strOutputFolder
             //out bool bAppend,
             //out string strError
@@ -1413,11 +1503,11 @@ string strHtml)
                 throw new ArgumentException("strOutputFolder 参数值不允许为空");
             }
 
-
             List<DownloadFileInfo> deleted = new List<DownloadFileInfo>();
 
             DialogResult md5_result = System.Windows.Forms.DialogResult.Yes;
-            bool bDontAskMd5Verify = false; // 是否要询问 MD5 校验
+            // bool bDontAskMd5Verify = false; // 是否要询问 MD5 校验
+            bool bDontAskMd5Verify = StringUtil.IsInList("auto", style);    // // 是否要询问 MD5 校验
 
             // 检查目标文件的存在情况
             foreach (DownloadFileInfo info in fileinfos)
@@ -1523,7 +1613,6 @@ string strHtml)
             }
 
             List<string> delete_filenames = new List<string>();
-
             try
             {
 
@@ -1591,12 +1680,16 @@ string strHtml)
                 });
                 if (temp_filenames.Count > 0)
                 {
-                    DialogResult result = MessageBox.Show(this,
-        "下列文件 '" + GetFileNameList(temp_filenames, "\r\n") + "' 先前曾经被下载过，但未能完成。\r\n\r\n是否继续下载未完成部分?\r\n[是：从断点继续下载; 否: 重新从头下载; 取消：放弃全部下载]",
-        "MainForm",
-        MessageBoxButtons.YesNoCancel,
-        MessageBoxIcon.Question,
-        MessageBoxDefaultButton.Button1);
+                    DialogResult result = DialogResult.Yes;
+                    if (StringUtil.IsInList("auto", style) == false)
+                    {
+                        result = MessageBox.Show(this,
+            "下列文件 '" + GetFileNameList(temp_filenames, "\r\n") + "' 先前曾经被下载过，但未能完成。\r\n\r\n是否继续下载未完成部分?\r\n[是：从断点继续下载; 否: 重新从头下载; 取消：放弃全部下载]",
+            "MainForm",
+            MessageBoxButtons.YesNoCancel,
+            MessageBoxIcon.Question,
+            MessageBoxDefaultButton.Button1);
+                    }
                     if (result == DialogResult.Cancel)
                     {
                         delete_filenames.Clear();
@@ -1641,7 +1734,6 @@ string strHtml)
                             }
                         });
                     }
-
                 }
 
                 // 询问 MD5 验证过的文件是否重新下载？(建议不必重新下载)
@@ -1653,12 +1745,17 @@ string strHtml)
                 });
                 if (md5_matched_filenames.Count > 0)
                 {
-                    DialogResult result = MessageBox.Show(this,
-        "下列文件中 '" + GetFileNameList(md5_matched_filenames, "\r\n") + "' 先前曾经被下载过，并且 MD5 验证发现和服务器侧文件完全一致。\r\n\r\n是否删除它们然后重新下载?\r\n[是：重新下载; 否: 不下载这些文件; 取消：放弃全部下载]",
-        "MainForm",
-        MessageBoxButtons.YesNoCancel,
-        MessageBoxIcon.Question,
-        MessageBoxDefaultButton.Button2);
+                    DialogResult result = DialogResult.No;
+                    // 如果 style 中包含 "auto" 则不要询问
+                    if (StringUtil.IsInList("auto", style) == false)
+                    {
+                        result = MessageBox.Show(this,
+            "下列文件中 '" + GetFileNameList(md5_matched_filenames, "\r\n") + "' 先前曾经被下载过，并且 MD5 验证发现和服务器侧文件完全一致。\r\n\r\n是否删除它们然后重新下载?\r\n[是：重新下载; 否: 不下载这些文件; 取消：放弃全部下载]",
+            "MainForm",
+            MessageBoxButtons.YesNoCancel,
+            MessageBoxIcon.Question,
+            MessageBoxDefaultButton.Button2);
+                    }
                     if (result == DialogResult.Cancel)
                     {
                         delete_filenames.Clear();
@@ -1905,6 +2002,7 @@ string strHtml)
             // public DynamicDownloader Downloader { get; set; }
         }
 
+        // 下载单个大备份文件
         // parameters:
         //      strPath 服务器端的文件路径
         // return:
@@ -2068,7 +2166,7 @@ string strHtml)
             downloader.ProgressChanged += new DownloadProgressChangedEventHandler(delegate (object o1, DownloadProgressChangedEventArgs e1)
             {
                 string text = GetProgressText(e1.Text, e1.BytesReceived, e1.TotalBytesToReceive);
-                if (text != prev_text && DateTime.Now - prev_time > TimeSpan.FromSeconds(1))
+                if (text != prev_text || DateTime.Now - prev_time > TimeSpan.FromSeconds(1))
                 {
                     func_showProgress?.Invoke(strPath, text);
                     prev_text = text;
@@ -2322,7 +2420,7 @@ string strHtml)
 
         private void MenuItem_continueBackupTasks_Click(object sender, EventArgs e)
         {
-            // string strError = "";
+            string strError = "";
 
             this.ShowMessage("正在启动任务");
             try
@@ -2335,6 +2433,13 @@ string strHtml)
                     string strOutputFolder = GetOutputFolder(server_name);
 
                     var info = GetBackupInfo(item);
+                    // 如果下载正在运行，则不允许重复启动
+                    if (info.IsRunning == true)
+                    {
+                        strError = $"任务 '{server_name}' 已经在运行中，无法重复启动";
+                        goto ERROR1;
+                    }
+
                     info.BackupTask = DownloadBackupFiles(item,
                         strOutputFolder,
                         info.CancellationToken);
@@ -2353,10 +2458,8 @@ string strHtml)
                 this.ClearMessage();
             }
             return;
-            /*
         ERROR1:
             MessageBox.Show(this, strError);
-            */
         }
 
         private void listView_backupTasks_SelectedIndexChanged(object sender, EventArgs e)
@@ -2654,6 +2757,16 @@ string strHtml)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
+            menuItem = new MenuItem("撤销服务器端大备份任务 [" + this.listView_backupTasks.SelectedItems.Count.ToString() + "] (&C)");
+            menuItem.Click += new System.EventHandler(this.menu_cancelServerBackupTask_Click);
+            if (this.listView_backupTasks.SelectedItems.Count == 0)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
             menuItem = new MenuItem("删除服务器端备份文件 [" + this.listView_backupTasks.SelectedItems.Count.ToString() + "] (&D)");
             menuItem.Click += new System.EventHandler(this.menu_deleteServerFile_Click);
             if (this.listView_backupTasks.SelectedItems.Count == 0)
@@ -2664,6 +2777,15 @@ string strHtml)
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
+            menuItem = new MenuItem("打开本地文件夹 [" + this.listView_backupTasks.SelectedItems.Count.ToString() + "] (&F)");
+            menuItem.Click += new System.EventHandler(this.menu_openBackupLocalFolder_Click);
+            if (this.listView_backupTasks.SelectedItems.Count == 0)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
 
             menuItem = new MenuItem("移除 [" + this.listView_backupTasks.SelectedItems.Count.ToString() + "] (&D)");
             menuItem.Click += new System.EventHandler(this.menu_removeSelected_Click);
@@ -2673,6 +2795,29 @@ string strHtml)
 
 
             contextMenu.Show(this.listView_backupTasks, new Point(e.X, e.Y));
+        }
+
+        void menu_openBackupLocalFolder_Click(object sender, EventArgs e)
+        {
+            List<string> errors = new List<string>();
+            foreach (ListViewItem item in this.listView_backupTasks.SelectedItems)
+            {
+                var info = GetBackupInfo(item);
+                string path = GetOutputFolder(info.ServerName);
+                try
+                {
+                    System.Diagnostics.Process.Start(path);
+                }
+                catch (Exception ex)
+                {
+                    errors.Add($"打开文件夹 '{path}' 时出现异常: {ExceptionUtil.GetAutoText(ex)}");
+                }
+            }
+
+            if (errors.Count > 0)
+                MessageDlg.Show(this,
+                    StringUtil.MakePathList(errors, "\r\n"),
+                    "打开文件夹时出错");
         }
 
         void MenuItem_stopBackupTasks_Click(object sender, EventArgs e)
@@ -2710,6 +2855,52 @@ string strHtml)
                 return;
 
             ListViewUtil.DeleteSelectedItems(this.listView_backupTasks);
+        }
+
+        // 撤销服务器端大备份任务
+        async void menu_cancelServerBackupTask_Click(object sender, EventArgs e)
+        {
+            if (this.listView_backupTasks.SelectedItems.Count == 0)
+            {
+                MessageBox.Show(this, "尚未选定要撤销服务器端任务的事项");
+                return;
+            }
+
+            DialogResult result = MessageBox.Show(this,
+        "确实要撤销选定的 " + this.listView_backupTasks.SelectedItems.Count.ToString() + " 个事项对应的服务器端大备份任务?\r\n\r\n注：撤销服务器端大备份任务后，就再也无法进行下载操作",
+        "MainForm",
+        MessageBoxButtons.YesNo,
+        MessageBoxIcon.Question,
+        MessageBoxDefaultButton.Button2);
+            if (result != DialogResult.Yes)
+                return;
+
+            List<ListViewItem> items = new List<ListViewItem>();
+            items.AddRange(this.listView_backupTasks.SelectedItems.Cast<ListViewItem>());
+
+            StringBuilder error = new StringBuilder();
+            this.ShowMessage("正在撤销服务器端大备份任务 ...");
+            try
+            {
+                await Task.Run(() =>
+                {
+                    foreach (ListViewItem item in items)
+                    {
+                        var delete_result = CancelServerBackupTask(item);
+                        if (delete_result.Value == -1)
+                            error.AppendLine(delete_result.ErrorInfo);
+                    }
+                });
+            }
+            finally
+            {
+                this.ClearMessage();
+            }
+
+            if (error.Length > 0)
+                MessageDlg.Show(this, error.ToString(), "MainForm");
+            else
+                MessageBox.Show(this, "删除成功");
         }
 
         // 删除服务器端大备份文件。这个功能一般用于诊断和维护。因为正常下载结束时会自动删除服务器端的大备份文件
@@ -2893,6 +3084,8 @@ string strHtml)
                 // 列出已经下载的文件列表
                 // 当天下载当天日期的日志文件，要创建一个同名的状态文件，表示它可能没有完成。以后再处理的时候，如果不再是当天，确保下载完成了，可以删除状态文件
                 List<OperLogFileInfo> local_files = GetLocalOperLogFileNames(strOutputFolder, strLastDate);
+
+                // 可能会抛出异常
                 List<OperLogFileInfo> server_files = GetServerOperLogFileNames(item, strLastDate);
 
                 // 计算出尚未下载的文件
@@ -2956,7 +3149,7 @@ string strHtml)
             return server.Url;
         }
 
-        // 下载一系列文件
+        // 下载一系列操作日志文件
         // return:
         //      -1  出错
         //      0   放弃下载
@@ -2996,7 +3189,7 @@ string strHtml)
                     ErrorInfo = $"没有找到名为 '{server_name}' 的服务器"
                 };
                 */
-            var releaser = await _backupLimit.EnterAsync(token);
+            var releaser = await _operLogLimit.EnterAsync(token);
 
             LibraryChannel channel = this.GetChannel(GetServerUrl(server_name));
 
@@ -3386,6 +3579,43 @@ string strHtml)
             public long Length { get; set; }
         }
 
+        static NormalResult CheckLibraryServerVersion(LibraryChannel channel)
+        {
+            long lRet = channel.GetVersion(null,
+out string strVersion,
+out string strUID,
+out string strError);
+            if (lRet == -1)
+            {
+                strError = "针对服务器 " + channel.Url + " 获得版本号的过程发生错误：" + strError;
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = strError
+                };
+            }
+
+            // this.ServerUID = strUID;
+
+            if (string.IsNullOrEmpty(strVersion) == true)
+                strVersion = "2.0";
+
+            // this.ServerVersion = strVersion;
+
+            string base_version = "2.60"; // 2.33
+            if (StringUtil.CompareVersion(strVersion, base_version) < 0)
+            {
+                strError = $"dp2library 服务器 '{channel.Url}' 版本必须升级为 " + base_version + " 以上时才能使用大备份和日志备份功能 (当前 dp2library 版本实际为 " + strVersion + ")";
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = strError
+                };
+            }
+
+            return new NormalResult();
+        }
+
         List<OperLogFileInfo> GetServerOperLogFileNames(ListViewItem item,
             string strLastDate)
         {
@@ -3402,6 +3632,11 @@ string strHtml)
             LibraryChannel channel = this.GetChannel(GetServerUrl(server_name));
             try
             {
+                // 检查 dp2library 服务器版本号
+                var check_result = CheckLibraryServerVersion(channel);
+                if (check_result.Value == -1)
+                    throw new Exception(check_result.ErrorInfo);
+
                 FileItemLoader loader = new FileItemLoader(channel,
                     null,
                     "!operlog",
@@ -3639,6 +3874,16 @@ string strHtml)
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
+            menuItem = new MenuItem("打开本地文件夹 [" + this.listView_operLogTasks.SelectedItems.Count.ToString() + "] (&F)");
+            menuItem.Click += new System.EventHandler(this.menu_openOperLogLocalFolder_Click);
+            if (this.listView_operLogTasks.SelectedItems.Count == 0)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
 
             menuItem = new MenuItem("移除 [" + this.listView_operLogTasks.SelectedItems.Count.ToString() + "] (&D)");
             menuItem.Click += new System.EventHandler(this.menu_removeOperLogTasks_Click);
@@ -3649,6 +3894,31 @@ string strHtml)
 
             contextMenu.Show(this.listView_operLogTasks, new Point(e.X, e.Y));
         }
+
+        void menu_openOperLogLocalFolder_Click(object sender, EventArgs e)
+        {
+            List<string> errors = new List<string>();
+            foreach (ListViewItem item in this.listView_operLogTasks.SelectedItems)
+            {
+                var info = GetOperLogInfo(item);
+                string strOutputFolder = Path.Combine(GetOutputFolder(info.ServerName), "operlog");
+                PathUtil.CreateDirIfNeed(strOutputFolder);
+                try
+                {
+                    System.Diagnostics.Process.Start(strOutputFolder);
+                }
+                catch (Exception ex)
+                {
+                    errors.Add($"打开文件夹 '{strOutputFolder}' 时出现异常: {ExceptionUtil.GetAutoText(ex)}");
+                }
+            }
+
+            if (errors.Count > 0)
+                MessageDlg.Show(this,
+                    StringUtil.MakePathList(errors, "\r\n"),
+                    "打开文件夹时出错");
+        }
+
 
         void MenuItem_stopOperLogTasks_Click(object sender, EventArgs e)
         {
@@ -3763,6 +4033,14 @@ string strHtml)
                     PathUtil.CreateDirIfNeed(strOutputFolder);
 
                     var info = GetOperLogInfo(item);
+
+                    // 如果下载正在运行，则不允许重复启动
+                    if (info.IsRunning == true)
+                    {
+                        strError = $"任务 '{server_name}' 已经在运行中，无法重复启动";
+                        goto ERROR1;
+                    }
+
                     info.CancelTask();
                     info.OperLogTask = GetOperLogFiles(
                             item,
@@ -3846,6 +4124,8 @@ MessageBoxDefaultButton.Button2);
         {
             ServersDlg dlg = new ServersDlg();
             GuiUtil.SetControlFont(dlg, this.Font);
+            dlg.Text = "请选择 dp2library 服务器";
+            dlg.Mode = "select";
             dlg.Servers = Servers.Dup();
             dlg.ShowDialog(this);
 
@@ -3853,6 +4133,224 @@ MessageBoxDefaultButton.Button2);
                 return null;
 
             return dlg.SelectedServerNames;
+        }
+
+        // 批量修改密码
+        private async void MenuItem_changePassword_Click(object sender, EventArgs e)
+        {
+            var server_names = SelectServerNames();
+            if (server_names == null)
+                return;
+
+            string new_password = InputDlg.GetInput(this, "修改密码",
+                "新密码:",
+                null,
+                this.Font);
+            if (new_password == null)
+                return;
+            List<string> errors = new List<string>();
+            int changed_count = 0;
+
+            this.ShowMessage("正在修改密码");
+            try
+            {
+                await Task.Run(() =>
+                {
+
+                    foreach (var server_name in server_names)
+                    {
+                        var server = this.Servers.GetServerByName(server_name);
+                        string old_password = server.DefaultPassword;
+
+                        var result = ChangePassword(
+                            server,
+                            server.DefaultUserName,
+                            server.DefaultPassword,
+                            new_password);
+                        if (result.Value == -1)
+                        {
+                            errors.Add(result.ErrorInfo);
+                        }
+                        else
+                        {
+                            server.DefaultPassword = new_password;
+                            changed_count++;
+                        }
+                    }
+                });
+            }
+            finally
+            {
+                this.ClearMessage();
+            }
+
+            // 及时保存一次
+            if (changed_count > 0)
+            {
+                this.Servers.Changed = true;
+                // this.Servers.Save(null);
+            }
+
+            string changed_text = $"修改成功 {changed_count} 个";
+
+            if (errors.Count > 0)
+                MessageDlg.Show(this,
+                    changed_text + "\r\n\r\n出错：" + StringUtil.MakePathList(errors, "\r\n"),
+                    "修改密码过程出错");
+            else
+                MessageBox.Show(this, changed_text);
+        }
+
+        NormalResult ChangePassword(
+            dp2Server server,
+            string userName,
+            string old_password,
+            string new_password)
+        {
+
+            LibraryChannel channel = this.GetChannel(server.Url, userName);
+            try
+            {
+                // return:
+                //      -1  error
+                //      0   登录未成功
+                //      1   登录成功
+                long lRet = channel.Login(userName,
+                    old_password,
+                    "type=worker,client=dp2managecenter|" + ClientInfo.ClientVersion,
+                    out string strError);
+                if (lRet == -1)
+                {
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"针对服务器 {server.Name} 用户 '{userName}' 进行登录失败，无法进行密码修改: {strError}",
+                        ErrorCode = "loginFail"
+                    };
+                }
+
+                if (lRet == 0)
+                {
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"服务器 {server.Name} 用户 '{userName}' 的旧密码不正确，无法进行密码修改",
+                        ErrorCode = "oldPasswordError"
+                    };
+                }
+
+                // 修改为新密码
+                lRet = channel.ChangeUserPassword(
+        null,
+        userName,
+        old_password,
+        new_password,
+        out strError);
+                if (lRet == -1)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"针对服务器 {server.Name} 用户 '{userName}' 进行密码修改时出错: {strError}",
+                        ErrorCode = "changePasswordFail"
+                    };
+
+                return new NormalResult();
+            }
+            finally
+            {
+                this.ReturnChannel(channel);
+            }
+        }
+
+        // 批量刷新服务器名
+        private async void MenuItem_refreshServerName_Click(object sender, EventArgs e)
+        {
+            var server_names = SelectServerNames();
+            if (server_names == null)
+                return;
+
+            List<string> errors = new List<string>();
+            int changed_count = 0;
+
+            this.ShowMessage("正在从服务器获取服务器名");
+            try
+            {
+                await Task.Run(() =>
+                {
+                    foreach (var server_name in server_names)
+                    {
+                        var server = this.Servers.GetServerByName(server_name);
+
+                        var result = GetLibraryName(
+                            server);
+                        if (result.Value == -1)
+                        {
+                            errors.Add(result.ErrorInfo);
+                        }
+                        else
+                        {
+                            // TODO: 要对现有的 ServerName 查重。也可以放到最后去做，如果发现重复的，在字符串后面加一个随机的后缀
+                            if (string.IsNullOrEmpty(result.LibraryName) == false)
+                            {
+                                server.Name = result.LibraryName;
+                                changed_count++;
+                            }
+                        }
+                    }
+                });
+            }
+            finally
+            {
+                this.ClearMessage();
+            }
+
+            // 及时保存一次
+            if (changed_count > 0)
+            {
+                this.Servers.Changed = true;
+            }
+
+            string changed_text = $"修改成功 {changed_count} 个";
+
+            if (errors.Count > 0)
+                MessageDlg.Show(this,
+                    changed_text + "\r\n\r\n出错：" + StringUtil.MakePathList(errors, "\r\n"),
+                    "刷新服务器名过程出错");
+            else
+                MessageBox.Show(this, changed_text);
+        }
+
+        public class GetLibraryNameResult : NormalResult
+        {
+            public string LibraryName { get; set; }
+        }
+
+        GetLibraryNameResult GetLibraryName(dp2Server server)
+        {
+            LibraryChannel channel = this.GetChannel(server.Url);
+            try
+            {
+                long lRet = channel.GetSystemParameter(null,
+    "library",
+    "name",
+    out string strValue,
+    out string strError);
+                if (lRet == -1)
+                {
+                    strError = "针对服务器 " + channel.Url + " 获得图书馆一般信息library/name过程发生错误：" + strError;
+                    return new GetLibraryNameResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError,
+                    };
+                }
+
+                return new GetLibraryNameResult { LibraryName = strValue };
+            }
+            finally
+            {
+                this.ReturnChannel(channel);
+            }
         }
     }
 }
