@@ -164,7 +164,7 @@ namespace DigitalPlatform.CirculationClient
             this.Name = "ServersDlg";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
-            this.Text = "dp2library 服务器和缺省帐户管理";
+            this.Text = "dp2library 服务器和默认帐户管理";
             this.Closing += new System.ComponentModel.CancelEventHandler(this.ServersDlg_Closing);
             this.Load += new System.EventHandler(this.ServersDlg_Load);
             this.ResumeLayout(false);
@@ -365,7 +365,7 @@ namespace DigitalPlatform.CirculationClient
             // GuiUtil.AutoSetDefaultFont(dlg); 
             GuiUtil.SetControlFont(dlg, this.Font);
 
-            dlg.Text = "新增服务器地址和缺省帐户";
+            dlg.Text = "新增服务器地址和默认帐户";
 
             if (nActiveLine == -1)
             {

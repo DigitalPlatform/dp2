@@ -114,7 +114,7 @@ namespace dp2ManageCenter
             this._channelPool.AfterLogin -= new AfterLoginEventHandle(Channels_AfterLogin);
         }
 
-        // 服务器名和缺省帐户管理
+        // 服务器名和默认帐户管理
         public void ManageServers(bool bFirstRun)
         {
             using (ServersDlg dlg = new ServersDlg())
@@ -3046,7 +3046,7 @@ string strHtml)
         const int OPERLOG_COLUMN_STATE = 1;
         const int OPERLOG_COLUMN_STARTTIME = 2;
         const int OPERLOG_COLUMN_PROGRESS = 3;
-        const int OPERLOG_COLUMN_SERVERFILES = 4;
+        // const int OPERLOG_COLUMN_SERVERFILES = 4;
 
         NormalResult NewOperLogTask(dp2Server server, CancellationToken token)
         {

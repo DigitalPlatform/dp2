@@ -264,7 +264,7 @@ namespace dp2Catalog
             this.button_dp2library_serverManage.Name = "button_dp2library_serverManage";
             this.button_dp2library_serverManage.Size = new System.Drawing.Size(206, 22);
             this.button_dp2library_serverManage.TabIndex = 0;
-            this.button_dp2library_serverManage.Text = "服务器和缺省帐户管理...";
+            this.button_dp2library_serverManage.Text = "服务器和默认帐户管理...";
             this.button_dp2library_serverManage.UseVisualStyleBackColor = true;
             this.button_dp2library_serverManage.Click += new System.EventHandler(this.button_dp2library_serverManage_Click);
             // 

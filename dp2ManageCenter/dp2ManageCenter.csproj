@@ -12,6 +12,29 @@
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
+    <IsWebBootstrapper>true</IsWebBootstrapper>
+    <PublishUrl>c:\publish\dp2ManageCenter\v1\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Web</InstallFrom>
+    <UpdateEnabled>true</UpdateEnabled>
+    <UpdateMode>Background</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <InstallUrl>http://dp2003.com/dp2ManageCenter/v1/</InstallUrl>
+    <UpdateUrl>http://dp2003.com/dp2ManageCenter/v1/</UpdateUrl>
+    <ProductName>dp2管理中心</ProductName>
+    <PublisherName>DigitalPlatform</PublisherName>
+    <SuiteName>dp2 V3</SuiteName>
+    <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
+    <WebPage>publish.htm</WebPage>
+    <ApplicationRevision>2</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <PublishWizardCompleted>true</PublishWizardCompleted>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -31,6 +54,27 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignManifests>true</SignManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestCertificateThumbprint>80AE8886E9220471869958BEFAF13962C3FA0319</ManifestCertificateThumbprint>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestKeyFile>代码签名证书-2019.pfx</ManifestKeyFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestTimestampUrl>http://timestamp.comodoca.com/rfc3161</ManifestTimestampUrl>
+  </PropertyGroup>
+  <PropertyGroup>
+    <GenerateManifests>false</GenerateManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <TargetZone>LocalIntranet</TargetZone>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.VisualStudio.Threading, Version=16.5.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
@@ -102,6 +146,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <None Include="packages.config" />
+    <None Include="Properties\app.manifest" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -111,6 +156,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <None Include="代码签名证书-2019.pfx" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -144,6 +190,18 @@
       <Project>{C5B517C1-7344-45A5-89DC-06A9B130AE36}</Project>
       <Name>DigitalPlatform.Core</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.7.2 %28x86 和 x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
