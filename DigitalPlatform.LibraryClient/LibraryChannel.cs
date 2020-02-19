@@ -5364,15 +5364,16 @@ out strError);
                 LibraryServerResult result = this.ws.EndGetSystemParameter(
                     out strValue,
                     soapresult);
+                // 2020/2/19 调整到这里
+                strError = result.ErrorInfo;
+                this.ErrorCode = result.ErrorCode;
+                this.ClearRedoCount();
                 if (result.Value == -1 && result.ErrorCode == ErrorCode.NotLogin)
                 {
                     if (DoNotLogin(ref strError) == 1)
                         goto REDO;
                     return -1;
                 }
-                strError = result.ErrorInfo;
-                this.ErrorCode = result.ErrorCode;
-                this.ClearRedoCount();
                 return result.Value;
             }
             catch (Exception ex)
