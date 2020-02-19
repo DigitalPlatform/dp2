@@ -117,7 +117,7 @@ namespace dp2Library
                 strDataDir = DomUtil.GetAttr(dom.DocumentElement, "datadir");
             }
 
-            START:
+        START:
             lock (info.LockObject)
             {
                 // 2019/4/27 避免重复 new LibraryApplication
@@ -987,7 +987,7 @@ namespace dp2Library
                     result.ErrorCode = ErrorCode.SystemError;
 
                 return result;
-                ERROR1:
+            ERROR1:
                 result.Value = -1;
                 result.ErrorInfo = strError;
                 result.ErrorCode = ErrorCode.SystemError;
@@ -1181,7 +1181,7 @@ namespace dp2Library
             }
 
             return false;
-            ERROR1:
+        ERROR1:
             sessioninfo.Account = null; // 2017/5/5 堵住漏洞
             result.Value = -1;
             result.ErrorInfo = strError;
@@ -1593,7 +1593,7 @@ namespace dp2Library
                 }
 
                 return result;
-                ERROR1:
+            ERROR1:
                 result.Value = -1;
                 result.ErrorInfo = strError;
                 result.ErrorCode = ErrorCode.SystemError;
@@ -2305,7 +2305,7 @@ namespace dp2Library
                 }
 
                 return result;
-                ERROR1:
+            ERROR1:
                 result.Value = -1;
                 result.ErrorInfo = strError;
                 result.ErrorCode = ErrorCode.SystemError;
@@ -2576,7 +2576,7 @@ namespace dp2Library
 
                 result.Value = 0;
                 return result;
-                ERROR1:
+            ERROR1:
                 result.Value = -1;
                 result.ErrorInfo = strError;
                 result.ErrorCode = ErrorCode.SystemError;
@@ -2885,7 +2885,7 @@ namespace dp2Library
                     EndSearch();
                 }
                 return result;
-                ERROR1:
+            ERROR1:
                 result.Value = -1;
                 result.ErrorInfo = strError;
                 result.ErrorCode = ErrorCode.SystemError;
@@ -3110,7 +3110,7 @@ namespace dp2Library
                 return result;
             }
 
-            ERROR1:
+        ERROR1:
             result.Value = -1;
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
@@ -3676,7 +3676,7 @@ namespace dp2Library
                 }
 
                 return result;
-                ERROR1:
+            ERROR1:
                 result.Value = -1;
                 result.ErrorInfo = strError;
                 result.ErrorCode = ErrorCode.SystemError;
@@ -4537,7 +4537,7 @@ namespace dp2Library
 
                 return result;
 
-                ERROR1:
+            ERROR1:
                 result.Value = -1;
                 result.ErrorInfo = strError;
                 result.ErrorCode = ErrorCode.SystemError;
@@ -5184,9 +5184,9 @@ namespace dp2Library
                         strBiblio = "";
                 }
 
-                END1:
+            END1:
                 return result;
-                ERROR1:
+            ERROR1:
                 result.Value = -1;
                 result.ErrorInfo = strError;
                 result.ErrorCode = ErrorCode.SystemError;
@@ -5288,7 +5288,7 @@ namespace dp2Library
 
                 result.Value = paths.Length;
                 return result;
-                ERROR1:
+            ERROR1:
                 result.Value = -1;
                 result.ErrorInfo = strError;
                 result.ErrorCode = ErrorCode.SystemError;
@@ -5370,7 +5370,7 @@ namespace dp2Library
                 channel.Idle -= new IdleEventHandler(channel_IdleEvent);
                 EndSearch();
             }
-            ERROR1:
+        ERROR1:
             result.Value = -1;
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
@@ -6114,7 +6114,7 @@ namespace dp2Library
                 result.Value = nRet;    // 可能会多于1条
             }
 
-            GET_DOM_AND_BIBLIORECPATH:
+        GET_DOM_AND_BIBLIORECPATH:
 
             if (string.IsNullOrEmpty(strXml) == false)   // 是否有节省运算的办法?
             {
@@ -6171,7 +6171,7 @@ namespace dp2Library
             }
 
             return 1;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -6655,7 +6655,7 @@ namespace dp2Library
                         strBiblio = "";
                 }
 
-                DOISSUE:
+            DOISSUE:
                 // 取得期信息
                 if (String.IsNullOrEmpty(strResultType) == true
                     || String.Compare(strResultType, "recpath", true) == 0)
@@ -6710,7 +6710,7 @@ namespace dp2Library
                 }
 
                 return result;
-                ERROR1:
+            ERROR1:
                 result.Value = -1;
                 result.ErrorInfo = strError;
                 result.ErrorCode = ErrorCode.SystemError;
@@ -6793,7 +6793,7 @@ namespace dp2Library
                     channel.Idle -= new IdleEventHandler(channel_IdleEvent);
                     EndSearch();
                 }
-                ERROR1:
+            ERROR1:
                 result.Value = -1;
                 result.ErrorInfo = strError;
                 result.ErrorCode = ErrorCode.SystemError;
@@ -6988,7 +6988,7 @@ namespace dp2Library
 
                 return result;
 
-                ERROR1:
+            ERROR1:
                 result.Value = -1;
                 result.ErrorInfo = strError;
                 result.ErrorCode = ErrorCode.SystemError;
@@ -7663,7 +7663,7 @@ namespace dp2Library
                         strBiblio = "";
                 }
 
-                DOORDER:
+            DOORDER:
                 // 取得订购信息
                 if (String.IsNullOrEmpty(strResultType) == true
                     || String.Compare(strResultType, "recpath", true) == 0)
@@ -7718,7 +7718,7 @@ namespace dp2Library
                 }
 
                 return result;
-                ERROR1:
+            ERROR1:
                 result.Value = -1;
                 result.ErrorInfo = strError;
                 result.ErrorCode = ErrorCode.SystemError;
@@ -7799,7 +7799,7 @@ namespace dp2Library
                     channel.Idle -= new IdleEventHandler(channel_IdleEvent);
                     EndSearch();
                 }
-                ERROR1:
+            ERROR1:
                 result.Value = -1;
                 result.ErrorInfo = strError;
                 result.ErrorCode = ErrorCode.SystemError;
@@ -8060,7 +8060,7 @@ namespace dp2Library
 
                 return result;
 
-                ERROR1:
+            ERROR1:
                 result.Value = -1;
                 result.ErrorInfo = strError;
                 result.ErrorCode = ErrorCode.SystemError;
@@ -8444,7 +8444,7 @@ namespace dp2Library
 
                     DateTime start_time = DateTime.Now;
 
-                    REDO:
+                REDO:
                     // return:
                     //      -1  error
                     //      0   file not found
@@ -8475,7 +8475,7 @@ namespace dp2Library
                 result.Value = nRet;
                 result.ErrorInfo = strError;
                 return result;
-                ERROR1:
+            ERROR1:
                 result.Value = -1;
                 result.ErrorCode = ErrorCode.SystemError;
                 result.ErrorInfo = strError;
@@ -8680,7 +8680,7 @@ namespace dp2Library
                 }
 
                 return result;
-                ERROR1:
+            ERROR1:
                 result.Value = -1;
                 result.ErrorCode = ErrorCode.SystemError;
                 result.ErrorInfo = strError;
@@ -8748,7 +8748,7 @@ namespace dp2Library
 
                 result.Value = nRet;
                 return result;
-                ERROR1:
+            ERROR1:
                 result.Value = -1;
                 result.ErrorCode = ErrorCode.SystemError;
                 result.ErrorInfo = strError;
@@ -8853,7 +8853,7 @@ namespace dp2Library
 
                 result.Value = nRet;
                 return result;
-                ERROR1:
+            ERROR1:
                 result.Value = -1;
                 result.ErrorCode = ErrorCode.SystemError;
                 result.ErrorInfo = strError;
@@ -8982,7 +8982,7 @@ Stack:
                 result.Value = nRet;
                 result.ErrorInfo = strError;    // 2014/11/26
                 return result;
-                ERROR1:
+            ERROR1:
                 result.Value = -1;
                 result.ErrorCode = ErrorCode.SystemError;
                 result.ErrorInfo = strError;
@@ -9043,7 +9043,7 @@ Stack:
 
                 result.Value = nRet;
                 return result;
-                ERROR1:
+            ERROR1:
                 result.Value = -1;
                 result.ErrorCode = ErrorCode.SystemError;
                 result.ErrorInfo = strError;
@@ -9140,7 +9140,7 @@ Stack:
 
                 result.Value = nRet;    // 原来这里返回 0
                 return result;
-                ERROR1:
+            ERROR1:
                 result.Value = -1;
                 result.ErrorInfo = strError;
                 return result;
@@ -9210,7 +9210,7 @@ Stack:
 
                 result.Value = nRet;
                 return result;
-                ERROR1:
+            ERROR1:
                 result.Value = -1;
                 result.ErrorCode = ErrorCode.SystemError;
                 result.ErrorInfo = strError;
@@ -9350,7 +9350,7 @@ Stack:
 
                 result.Value = nRet;
                 return result;
-                ERROR1:
+            ERROR1:
                 result.Value = -1;
                 result.ErrorCode = ErrorCode.SystemError;
                 result.ErrorInfo = strError;
@@ -9418,7 +9418,7 @@ Stack:
 
                 result.Value = nRet;
                 return result;
-                ERROR1:
+            ERROR1:
                 result.Value = -1;
                 result.ErrorCode = ErrorCode.SystemError;
                 result.ErrorInfo = strError;
@@ -9484,7 +9484,7 @@ Stack:
 
                 result.Value = nRet;
                 return result;
-                ERROR1:
+            ERROR1:
                 result.Value = -1;
                 result.ErrorCode = ErrorCode.SystemError;
                 result.ErrorInfo = strError;
@@ -9608,7 +9608,7 @@ Stack:
 
                 result.Value = nRet;
                 return result;
-                ERROR1:
+            ERROR1:
                 result.Value = -1;
                 result.ErrorCode = ErrorCode.SystemError;
                 result.ErrorInfo = strError;
@@ -9735,7 +9735,7 @@ Stack:
                 result.ErrorInfo = strError;
                 result.Value = nResultValue;
                 return result;
-                ERROR1:
+            ERROR1:
                 result.Value = -1;
                 result.ErrorCode = ErrorCode.SystemError;
                 result.ErrorInfo = strError;
@@ -9976,7 +9976,7 @@ Stack:
                 result.ErrorInfo = strErrorText;
                 return result;
             }
-            ERROR1:
+        ERROR1:
             result.ErrorInfo = strError;
             result.Value = -1;
             result.ErrorCode = ErrorCode.SystemError;
@@ -10117,7 +10117,7 @@ Stack:
                 }
 
                 return result;
-                ERROR1:
+            ERROR1:
                 result.Value = -1;
                 result.ErrorCode = ErrorCode.SystemError;
                 result.ErrorInfo = strError;
@@ -10152,7 +10152,19 @@ Stack:
             string strError = "";
             strValue = "";
 
-            LibraryServerResult result = this.PrepareEnvironment("GetSystemParameter", true, true, true);
+            bool isPublic = false;  // 是否不需要登录
+            if (strCategory == "library" && strName == "name")
+                isPublic = true;
+
+            LibraryServerResult result = null;
+            if (isPublic)
+            {
+                result = this.PrepareEnvironment("GetSystemParameter", false);  // 不准备 sessioninfo
+                sessioninfo = null;
+            }
+            else
+                result = this.PrepareEnvironment("GetSystemParameter", true, true, true);
+
             if (result.Value == -1)
                 return result;
 
@@ -10165,7 +10177,7 @@ Stack:
             try
             {
                 // 权限判断
-                if (StringUtil.IsInList("getsystemparameter,order", sessioninfo.RightsOrigin) == false)
+                if (isPublic == false && StringUtil.IsInList("getsystemparameter,order", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
                     result.ErrorInfo = "获得系统参数的操作被拒绝。不具备 order 或 getsystemparameter 权限。";
@@ -10181,7 +10193,6 @@ Stack:
                     strName,
                     out strValue,
                     out strError);
-
                 if (nRet == -1)
                 {
                     result.Value = -1;
@@ -10203,7 +10214,7 @@ Stack:
                 result.Value = nRet;
                 return result;
             }
-            catch(ApplicationException ex)
+            catch (ApplicationException ex)
             {
                 string strErrorText = "dp2Library GetSystemParameter() API出现异常: " + ExceptionUtil.GetDebugText(ex);
                 app.WriteErrorLog(strErrorText);
@@ -10774,10 +10785,10 @@ Stack:
                     goto ERROR1;
                 }
 
-                END1:
+            END1:
                 result.Value = nRet;
                 return result;
-                ERROR1:
+            ERROR1:
                 result.Value = -1;
                 result.ErrorCode = ErrorCode.SystemError;
                 result.ErrorInfo = strError;
@@ -10889,7 +10900,7 @@ Stack:
                 result.Value = nRet;
                 result.ErrorInfo = strError;
                 return result;
-                ERROR1:
+            ERROR1:
                 result.Value = -1;
                 result.ErrorCode = ErrorCode.SystemError;
                 result.ErrorInfo = strError;
@@ -11659,7 +11670,7 @@ Stack:
                     channel.Idle -= new IdleEventHandler(channel_IdleEvent);
                     EndSearch();
                 }
-                ERROR1:
+            ERROR1:
                 result.Value = -1;
                 result.ErrorInfo = strError;
                 result.ErrorCode = ErrorCode.SystemError;
@@ -12355,7 +12366,7 @@ Stack:
                     strMetadata = "";
 
                 return result;
-                ERROR1:
+            ERROR1:
                 result.Value = -1;
                 result.ErrorInfo = strError;
                 result.ErrorCode = ErrorCode.SystemError;
@@ -13409,7 +13420,7 @@ out strError);
                         strBiblio = "";
                 }
 
-                DO_COMMENT:
+            DO_COMMENT:
                 // 取得评注信息
                 if (String.IsNullOrEmpty(strResultType) == true
                     || String.Compare(strResultType, "recpath", true) == 0)
@@ -13464,7 +13475,7 @@ out strError);
                 }
 
                 return result;
-                ERROR1:
+            ERROR1:
                 result.Value = -1;
                 result.ErrorInfo = strError;
                 result.ErrorCode = ErrorCode.SystemError;
@@ -13546,7 +13557,7 @@ out strError);
                     channel.Idle -= new IdleEventHandler(channel_IdleEvent);
                     EndSearch();
                 }
-                ERROR1:
+            ERROR1:
                 result.Value = -1;
                 result.ErrorInfo = strError;
                 result.ErrorCode = ErrorCode.SystemError;
@@ -13809,7 +13820,7 @@ out strError);
 
                 return result;
 
-                ERROR1:
+            ERROR1:
                 result.Value = -1;
                 result.ErrorInfo = strError;
                 result.ErrorCode = ErrorCode.SystemError;
@@ -13902,7 +13913,7 @@ out strError);
                 result.Value = nRet;
                 result.ErrorInfo = strError;
                 return result;
-                ERROR1:
+            ERROR1:
                 result.Value = -1;
                 result.ErrorInfo = strError;
                 result.ErrorCode = ErrorCode.SystemError;
@@ -13963,7 +13974,7 @@ out strError);
                 result.ErrorInfo = strError;
                 return result;
 
-                ERROR1:
+            ERROR1:
                 result.Value = -1;
                 result.ErrorInfo = strError;
                 result.ErrorCode = ErrorCode.SystemError;
@@ -14253,7 +14264,7 @@ out strError);
                 result.Value = nRet;
                 result.ErrorInfo = strError;
                 return result;
-                ERROR1:
+            ERROR1:
                 result.Value = -1;
                 result.ErrorInfo = strError;
                 result.ErrorCode = ErrorCode.SystemError;
@@ -14305,7 +14316,7 @@ out strError);
                 result.Value = nRet;
                 result.ErrorInfo = strError;
                 return result;
-                ERROR1:
+            ERROR1:
                 result.Value = -1;
                 result.ErrorInfo = strError;
                 result.ErrorCode = ErrorCode.SystemError;
@@ -14381,7 +14392,7 @@ out strError);
                 result.Value = nRet;
                 result.ErrorInfo = strError;
                 return result;
-                ERROR1:
+            ERROR1:
                 result.Value = -1;
                 result.ErrorInfo = strError;
                 result.ErrorCode = ErrorCode.SystemError;
@@ -14509,7 +14520,7 @@ out strError);
                     goto ERROR1;
                 }
                 return result;
-                ERROR1:
+            ERROR1:
                 result.Value = -1;
                 result.ErrorInfo = strError;
                 result.ErrorCode = ErrorCode.SystemError;

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DigitalPlatform.LibraryClient;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -6,6 +7,7 @@ using System.Drawing;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DigitalPlatform.CirculationClient
@@ -91,7 +93,7 @@ namespace DigitalPlatform.CirculationClient
             }
         }
 
-        public string　ServerName
+        public string ServerName
         {
             get
             {
@@ -120,7 +122,7 @@ namespace DigitalPlatform.CirculationClient
             Uri uri1 = new Uri(strUrl1);
             Uri uri2 = new Uri(strUrl2);
 
-            bool bRet =  uri1.Equals(uri2);
+            bool bRet = uri1.Equals(uri2);
             if (bRet == true)
                 return true;
 
@@ -150,16 +152,16 @@ namespace DigitalPlatform.CirculationClient
 Dns.GetHostEntry(strHost2).AddressList,
 a => a.AddressFamily == AddressFamily.InterNetwork);
 #endif
-            IPAddress[] address_list1 = null; 
+            IPAddress[] address_list1 = null;
             IPAddress[] address_list2 = null;
 
             try
             {
                 address_list1 = Dns.GetHostAddresses(strHost1);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                throw new Exception("解析主机名 '"+strHost1+"' 时出错: " + ex.Message + "\r\n请检查网络状态是否正常");
+                throw new Exception("解析主机名 '" + strHost1 + "' 时出错: " + ex.Message + "\r\n请检查网络状态是否正常");
             }
 
             try
@@ -171,9 +173,9 @@ a => a.AddressFamily == AddressFamily.InterNetwork);
                 throw new Exception("解析主机名 '" + strHost2 + "' 时出错: " + ex.Message + "\r\n检查网络状态是否正常");
             }
 
-            foreach(IPAddress address1 in address_list1)
+            foreach (IPAddress address1 in address_list1)
             {
-                foreach(IPAddress address2 in address_list2)
+                foreach (IPAddress address2 in address_list2)
                 {
                     if (IPAddress.Equals(address1, address2) == true)
                         return true;
@@ -212,6 +214,46 @@ a => a.AddressFamily == AddressFamily.InterNetwork);
         private void toolStripButton_enableMultiLine_CheckedChanged(object sender, EventArgs e)
         {
             this.textBox_serverAddr.Multiline = this.toolStripButton_enableMultiLine.Checked;
+        }
+
+        private async void button_getLibraryName_Click(object sender, EventArgs e)
+        {
+            this.button_getLibraryName.Enabled = false;
+            try
+            {
+                var result = await Task.Run<NormalResult>(() =>
+                {
+                    using (LibraryChannel channel = new LibraryChannel())
+                    {
+                        channel.Timeout = TimeSpan.FromSeconds(5);
+                        channel.Url = this.textBox_serverAddr.Text;
+                        long lRet = channel.GetSystemParameter(null, "library", "name",
+                            out string libraryName,
+                            out string strError);
+                        if (lRet == -1)
+                        {
+                            if (channel.ErrorCode == LibraryClient.localhost.ErrorCode.NotLogin)
+                                strError = "dp2library 服务器需要升级到 3.22 版以上，才支持不登录即可获得图书馆名";
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = strError
+                            };
+                        }
+                        else
+                            return new NormalResult { ErrorInfo = libraryName };
+                    }
+                });
+
+                if (result.Value == -1)
+                    MessageBox.Show(this, result.ErrorInfo);
+                else
+                    this.textBox_serverName.Text = result.ErrorInfo;
+            }
+            finally
+            {
+                this.button_getLibraryName.Enabled = true;
+            }
         }
     }
 }

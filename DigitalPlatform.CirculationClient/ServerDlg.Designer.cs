@@ -47,6 +47,7 @@
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButton_server_setHongnibaServer = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_enableMultiLine = new System.Windows.Forms.ToolStripButton();
+            this.button_getLibraryName = new System.Windows.Forms.Button();
             this.toolStrip_server.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -166,7 +167,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_serverName.Location = new System.Drawing.Point(14, 129);
             this.textBox_serverName.Name = "textBox_serverName";
-            this.textBox_serverName.Size = new System.Drawing.Size(574, 28);
+            this.textBox_serverName.Size = new System.Drawing.Size(524, 28);
             this.textBox_serverName.TabIndex = 23;
             // 
             // textBox_comment
@@ -242,11 +243,22 @@
             this.toolStripButton_enableMultiLine.ToolTipText = "允许在“服务器地址”中输入多行文本";
             this.toolStripButton_enableMultiLine.CheckedChanged += new System.EventHandler(this.toolStripButton_enableMultiLine_CheckedChanged);
             // 
+            // button_getLibraryName
+            // 
+            this.button_getLibraryName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_getLibraryName.Location = new System.Drawing.Point(544, 129);
+            this.button_getLibraryName.Name = "button_getLibraryName";
+            this.button_getLibraryName.Size = new System.Drawing.Size(44, 28);
+            this.button_getLibraryName.TabIndex = 26;
+            this.button_getLibraryName.Text = "...";
+            this.button_getLibraryName.Click += new System.EventHandler(this.button_getLibraryName_Click);
+            // 
             // ServerDlg
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(600, 444);
+            this.Controls.Add(this.button_getLibraryName);
             this.Controls.Add(this.textBox_comment);
             this.Controls.Add(this.textBox_serverName);
             this.Controls.Add(this.label4);
@@ -292,5 +304,6 @@
         private System.Windows.Forms.ToolStripButton toolStripButton_server_setHongnibaServer;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripButton toolStripButton_enableMultiLine;
+        private System.Windows.Forms.Button button_getLibraryName;
     }
 }

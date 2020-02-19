@@ -65,6 +65,7 @@
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_changePassword = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_refreshServerName = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_config = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.tabControl_main.SuspendLayout();
@@ -95,6 +96,7 @@
             this.MenuItem_file.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.MenuItem_serversSetting,
             this.MenuItem_outputFolder,
+            this.MenuItem_config,
             this.toolStripSeparator1,
             this.MenuItem_exit});
             this.MenuItem_file.Name = "MenuItem_file";
@@ -121,21 +123,21 @@
             // MenuItem_configOutputFolder
             // 
             this.MenuItem_configOutputFolder.Name = "MenuItem_configOutputFolder";
-            this.MenuItem_configOutputFolder.Size = new System.Drawing.Size(236, 30);
+            this.MenuItem_configOutputFolder.Size = new System.Drawing.Size(252, 30);
             this.MenuItem_configOutputFolder.Text = "设置输出目录 ...";
             this.MenuItem_configOutputFolder.Click += new System.EventHandler(this.MenuItem_configOutputFolder_Click);
             // 
             // MenuItem_resetOutputFolder
             // 
             this.MenuItem_resetOutputFolder.Name = "MenuItem_resetOutputFolder";
-            this.MenuItem_resetOutputFolder.Size = new System.Drawing.Size(236, 30);
+            this.MenuItem_resetOutputFolder.Size = new System.Drawing.Size(252, 30);
             this.MenuItem_resetOutputFolder.Text = "恢复默认输出目录";
             this.MenuItem_resetOutputFolder.Click += new System.EventHandler(this.MenuItem_resetOutputFolder_Click);
             // 
             // MenuItem_openOutputFolder
             // 
             this.MenuItem_openOutputFolder.Name = "MenuItem_openOutputFolder";
-            this.MenuItem_openOutputFolder.Size = new System.Drawing.Size(236, 30);
+            this.MenuItem_openOutputFolder.Size = new System.Drawing.Size(252, 30);
             this.MenuItem_openOutputFolder.Text = "打开文件夹";
             this.MenuItem_openOutputFolder.Click += new System.EventHandler(this.MenuItem_openOutputFolder_Click);
             // 
@@ -403,6 +405,13 @@
             this.MenuItem_refreshServerName.ToolTipText = "从 dp2library 服务器获取图书馆名，作为服务器名";
             this.MenuItem_refreshServerName.Click += new System.EventHandler(this.MenuItem_refreshServerName_Click);
             // 
+            // MenuItem_config
+            // 
+            this.MenuItem_config.Name = "MenuItem_config";
+            this.MenuItem_config.Size = new System.Drawing.Size(300, 30);
+            this.MenuItem_config.Text = "参数设置 ...";
+            this.MenuItem_config.Click += new System.EventHandler(this.MenuItem_config_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
@@ -477,6 +486,7 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_changePassword;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_refreshServerName;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_config;
     }
 }
 

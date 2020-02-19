@@ -66,6 +66,14 @@ namespace dp2ManageCenter
                 }
             }
 
+            if (_backupLimit != null)
+                _backupLimit.Dispose();
+            _backupLimit = new AsyncSemaphore(BackupChannelMax);
+
+            if (_operLogLimit != null)
+                _operLogLimit.Dispose();
+            _operLogLimit = new AsyncSemaphore(OperLogChannelMax);
+
             LoadBackupTasks();
             LoadOperLogTasks();
 
@@ -109,24 +117,26 @@ namespace dp2ManageCenter
         // 服务器名和缺省帐户管理
         public void ManageServers(bool bFirstRun)
         {
-            ServersDlg dlg = new ServersDlg();
-            // GuiUtil.SetControlFont(dlg, this.DefaultFont);
-
-            dp2ServerCollection newServers = Servers.Dup();
-
-            if (bFirstRun == true)
+            using (ServersDlg dlg = new ServersDlg())
             {
-                dlg.Text = "首次运行: 创建 dp2library 服务器目标";
-                dlg.FirstRun = true;
+                GuiUtil.SetControlFont(dlg, this.Font);
+
+                dp2ServerCollection newServers = Servers.Dup();
+
+                if (bFirstRun == true)
+                {
+                    dlg.Text = "首次运行: 创建 dp2library 服务器目标";
+                    dlg.FirstRun = true;
+                }
+                dlg.Servers = newServers;
+                dlg.ShowDialog(this);
+
+                if (dlg.DialogResult != DialogResult.OK)
+                    return;
+
+                // this.Servers = newServers;
+                this.Servers.Import(newServers);
             }
-            dlg.Servers = newServers;
-            dlg.ShowDialog(this);
-
-            if (dlg.DialogResult != DialogResult.OK)
-                return;
-
-            // this.Servers = newServers;
-            this.Servers.Import(newServers);
         }
 
         void SaveServers()
@@ -560,73 +570,75 @@ string strHtml)
         {
             dp2Server server = this.Servers[strServerUrl];
 
-            ServerDlg dlg = new ServerDlg();
-            GuiUtil.SetControlFont(dlg, this.Font);
-
-            if (String.IsNullOrEmpty(strServerUrl) == true)
+            using (ServerDlg dlg = new ServerDlg())
             {
+                GuiUtil.SetControlFont(dlg, this.Font);
+
+                if (String.IsNullOrEmpty(strServerUrl) == true)
+                {
+                }
+                else
+                {
+                    dlg.ServerUrl = strServerUrl;
+                }
+
+                if (owner == null)
+                    owner = this;
+
+                if (String.IsNullOrEmpty(strTitle) == false)
+                    dlg.Text = strTitle;
+
+                dlg.Comment = strComment;
+                dlg.UserName = server.DefaultUserName;
+
+                /*
+                this.App.AppInfo.LinkFormState(dlg,
+                    "dp2_logindlg_state");
+                this.Activate();    // 让 MDI 子窗口翻出来到前面
+                */
+                dlg.ShowDialog(owner);
+
+                // this.AppInfo.UnlinkFormState(dlg);
+
+
+                if (dlg.DialogResult == DialogResult.Cancel)
+                {
+                    return null;
+                }
+
+                bool bChanged = false;
+
+                if (server.DefaultUserName != dlg.UserName)
+                {
+                    server.DefaultUserName = dlg.UserName;
+                    bChanged = true;
+                }
+
+                string strNewPassword = (dlg.SavePassword == true) ?
+                dlg.Password : "";
+                if (server.DefaultPassword != strNewPassword)
+                {
+                    server.DefaultPassword = strNewPassword;
+                    bChanged = true;
+                }
+
+                if (server.SavePassword != dlg.SavePassword)
+                {
+                    server.SavePassword = dlg.SavePassword;
+                    bChanged = true;
+                }
+
+                if (server.Url != dlg.ServerUrl)
+                {
+                    server.Url = dlg.ServerUrl;
+                    bChanged = true;
+                }
+
+                if (bChanged == true)
+                    this.Servers.Changed = true;
+
+                return dlg;
             }
-            else
-            {
-                dlg.ServerUrl = strServerUrl;
-            }
-
-            if (owner == null)
-                owner = this;
-
-            if (String.IsNullOrEmpty(strTitle) == false)
-                dlg.Text = strTitle;
-
-            dlg.Comment = strComment;
-            dlg.UserName = server.DefaultUserName;
-
-            /*
-            this.App.AppInfo.LinkFormState(dlg,
-                "dp2_logindlg_state");
-            this.Activate();    // 让 MDI 子窗口翻出来到前面
-            */
-            dlg.ShowDialog(owner);
-
-            // this.AppInfo.UnlinkFormState(dlg);
-
-
-            if (dlg.DialogResult == DialogResult.Cancel)
-            {
-                return null;
-            }
-
-            bool bChanged = false;
-
-            if (server.DefaultUserName != dlg.UserName)
-            {
-                server.DefaultUserName = dlg.UserName;
-                bChanged = true;
-            }
-
-            string strNewPassword = (dlg.SavePassword == true) ?
-            dlg.Password : "";
-            if (server.DefaultPassword != strNewPassword)
-            {
-                server.DefaultPassword = strNewPassword;
-                bChanged = true;
-            }
-
-            if (server.SavePassword != dlg.SavePassword)
-            {
-                server.SavePassword = dlg.SavePassword;
-                bChanged = true;
-            }
-
-            if (server.Url != dlg.ServerUrl)
-            {
-                server.Url = dlg.ServerUrl;
-                bChanged = true;
-            }
-
-            if (bChanged == true)
-                this.Servers.Changed = true;
-
-            return dlg;
         }
 
         public string CurrentUserName { get; set; }
@@ -671,8 +683,30 @@ string strHtml)
             }
         }
 
-        AsyncSemaphore _backupLimit = new AsyncSemaphore(5);
-        AsyncSemaphore _operLogLimit = new AsyncSemaphore(5);
+        public int BackupChannelMax
+        {
+            get
+            {
+                return ClientInfo.Config.GetInt(
+                "config",
+                "backupChannelMax",
+                5);
+            }
+        }
+
+        public int OperLogChannelMax
+        {
+            get
+            {
+                return ClientInfo.Config.GetInt(
+                "config",
+                "operlogChannelMax",
+                5);
+            }
+        }
+
+        AsyncSemaphore _backupLimit = new AsyncSemaphore(1);
+        AsyncSemaphore _operLogLimit = new AsyncSemaphore(1);
 
         // 先新建全部任务，这时已经用 BatchTask() "start" 请求启动了所有服务器端的备份任务。然后再做一个循环启动下载任务。
         private async void MenuItem_newBackupTasks_Click(object sender, EventArgs e)
@@ -835,6 +869,14 @@ string strHtml)
             SetBackupItemColor(item);
             // TODO: 修改背景颜色为红色
             return error;
+        }
+
+        string GetItemText(ListViewItem item, int column)
+        {
+            return (string)this.Invoke((Func<string>)(() =>
+            {
+                return ListViewUtil.GetItemText(item, column);
+            }));
         }
 
         void SetItemText(ListViewItem item, int column, string text)
@@ -2106,6 +2148,8 @@ string strHtml)
                 };
             }
 
+            func_showProgress?.Invoke(strPath, "等待通道 ...");
+
             var releaser = await _backupLimit.EnterAsync(token);
 
             LibraryChannel channel = this.GetChannel(strServerUrl);
@@ -2418,45 +2462,59 @@ string strHtml)
             return strOutputFolder;
         }
 
-        private void MenuItem_continueBackupTasks_Click(object sender, EventArgs e)
+        private async void MenuItem_continueBackupTasks_Click(object sender, EventArgs e)
         {
             string strError = "";
 
+            List<ListViewItem> items = new List<ListViewItem>();
+            items.AddRange(this.listView_backupTasks.SelectedItems.Cast<ListViewItem>());
+
             this.ShowMessage("正在启动任务");
-            try
+            var result = await Task.Run<NormalResult>(() =>
             {
-                CancellationToken token = _cancel.Token;
-
-                foreach (ListViewItem item in this.listView_backupTasks.Items)
+                try
                 {
-                    string server_name = ListViewUtil.GetItemText(item, COLUMN_SERVERNAME);
-                    string strOutputFolder = GetOutputFolder(server_name);
+                    // CancellationToken token = _cancel.Token;
 
-                    var info = GetBackupInfo(item);
-                    // 如果下载正在运行，则不允许重复启动
-                    if (info.IsRunning == true)
+                    foreach (ListViewItem item in items)
                     {
-                        strError = $"任务 '{server_name}' 已经在运行中，无法重复启动";
-                        goto ERROR1;
+                        string server_name = GetItemText(item, COLUMN_SERVERNAME);
+                        string strOutputFolder = GetOutputFolder(server_name);
+
+                        var info = GetBackupInfo(item);
+                        // 如果下载正在运行，则不允许重复启动
+                        if (info.IsRunning == true)
+                        {
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = $"任务 '{server_name}' 已经在运行中，无法重复启动"
+                            };
+                        }
+
+                        info.BackupTask = DownloadBackupFiles(item,
+                            strOutputFolder,
+                            info.CancellationToken);
+                        /*
+                        var result = await DownloadBackupFiles(item, strOutputFolder, token);
+                        if (result.Value == -1)
+                        {
+                            strError = result.ErrorInfo;
+                            goto ERROR1;
+                        }
+                        */
                     }
 
-                    info.BackupTask = DownloadBackupFiles(item,
-                        strOutputFolder,
-                        info.CancellationToken);
-                    /*
-                    var result = await DownloadBackupFiles(item, strOutputFolder, token);
-                    if (result.Value == -1)
-                    {
-                        strError = result.ErrorInfo;
-                        goto ERROR1;
-                    }
-                    */
+                    return new NormalResult();
                 }
-            }
-            finally
-            {
-                this.ClearMessage();
-            }
+                finally
+                {
+                    this.ClearMessage();
+                }
+            });
+            if (result.Value == -1)
+                goto ERROR1;
+
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -3189,6 +3247,9 @@ string strHtml)
                     ErrorInfo = $"没有找到名为 '{server_name}' 的服务器"
                 };
                 */
+
+            SetItemText(item, OPERLOG_COLUMN_PROGRESS, "等待通道 ...");
+
             var releaser = await _operLogLimit.EnterAsync(token);
 
             LibraryChannel channel = this.GetChannel(GetServerUrl(server_name));
@@ -4011,53 +4072,68 @@ out string strError);
                 MessageBox.Show(this, strError);
         }
 
-        void MenuItem_continueOperLogTasks_Click(object sender, EventArgs e)
+        async void MenuItem_continueOperLogTasks_Click(object sender, EventArgs e)
         {
             string strError = "";
 
+            List<ListViewItem> items = new List<ListViewItem>();
+            items.AddRange(this.listView_operLogTasks.SelectedItems.Cast<ListViewItem>());
+
             this.ShowMessage("正在启动任务");
-
-            try
+            var result = await Task.Run<NormalResult>(() =>
             {
-                foreach (ListViewItem item in this.listView_operLogTasks.SelectedItems)
+                try
                 {
-                    string server_name = ListViewUtil.GetItemText(item, OPERLOG_COLUMN_SERVERNAME);
-                    var server = this.Servers.GetServerByName(server_name);
-                    if (server == null)
+                    foreach (ListViewItem item in items)
                     {
-                        strError = $"名为 '{server_name}' 的服务器不存在...";
-                        goto ERROR1;
+                        string server_name = GetItemText(item, OPERLOG_COLUMN_SERVERNAME);
+                        var server = this.Servers.GetServerByName(server_name);
+                        if (server == null)
+                        {
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = $"名为 '{server_name}' 的服务器不存在..."
+                            };
+                        }
+
+                        string strOutputFolder = Path.Combine(GetOutputFolder(server.Name), "operlog");
+                        PathUtil.CreateDirIfNeed(strOutputFolder);
+
+                        var info = GetOperLogInfo(item);
+
+                        // 如果下载正在运行，则不允许重复启动
+                        if (info.IsRunning == true)
+                        {
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = $"任务 '{server_name}' 已经在运行中，无法重复启动"
+                            };
+                        }
+
+                        info.CancelTask();
+                        info.OperLogTask = GetOperLogFiles(
+                                item,
+                                strOutputFolder,
+                                info.CancellationToken);
+                        /*
+                        if (result.Value == -1)
+                        {
+                            SetOperLogItemError(item, result.ErrorInfo);
+                        }
+                        */
                     }
 
-                    string strOutputFolder = Path.Combine(GetOutputFolder(server.Name), "operlog");
-                    PathUtil.CreateDirIfNeed(strOutputFolder);
-
-                    var info = GetOperLogInfo(item);
-
-                    // 如果下载正在运行，则不允许重复启动
-                    if (info.IsRunning == true)
-                    {
-                        strError = $"任务 '{server_name}' 已经在运行中，无法重复启动";
-                        goto ERROR1;
-                    }
-
-                    info.CancelTask();
-                    info.OperLogTask = GetOperLogFiles(
-                            item,
-                            strOutputFolder,
-                            info.CancellationToken);
-                    /*
-                    if (result.Value == -1)
-                    {
-                        SetOperLogItemError(item, result.ErrorInfo);
-                    }
-                    */
+                    return new NormalResult();
                 }
-            }
-            finally
-            {
-                this.ClearMessage();
-            }
+                finally
+                {
+                    this.ClearMessage();
+                }
+            });
+            if (result.Value == -1)
+                goto ERROR1;
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -4077,18 +4153,19 @@ out string strError);
 
         private void MenuItem_configOutputFolder_Click(object sender, EventArgs e)
         {
-            FolderBrowserDialog dir_dlg = new FolderBrowserDialog();
+            using (FolderBrowserDialog dir_dlg = new FolderBrowserDialog())
+            {
+                dir_dlg.Description = "请指定下载目标文件夹";
+                dir_dlg.RootFolder = Environment.SpecialFolder.MyComputer;
+                dir_dlg.ShowNewFolderButton = true;
+                dir_dlg.SelectedPath = OutputFolderRoot;
+                dir_dlg.ShowNewFolderButton = true;
 
-            dir_dlg.Description = "请指定下载目标文件夹";
-            dir_dlg.RootFolder = Environment.SpecialFolder.MyComputer;
-            dir_dlg.ShowNewFolderButton = true;
-            dir_dlg.SelectedPath = OutputFolderRoot;
-            dir_dlg.ShowNewFolderButton = true;
+                if (dir_dlg.ShowDialog() != DialogResult.OK)
+                    return;
 
-            if (dir_dlg.ShowDialog() != DialogResult.OK)
-                return;
-
-            OutputFolderRoot = dir_dlg.SelectedPath;
+                OutputFolderRoot = dir_dlg.SelectedPath;
+            }
         }
 
         private void MenuItem_resetOutputFolder_Click(object sender, EventArgs e)
@@ -4122,17 +4199,19 @@ MessageBoxDefaultButton.Button2);
 
         List<string> SelectServerNames()
         {
-            ServersDlg dlg = new ServersDlg();
-            GuiUtil.SetControlFont(dlg, this.Font);
-            dlg.Text = "请选择 dp2library 服务器";
-            dlg.Mode = "select";
-            dlg.Servers = Servers.Dup();
-            dlg.ShowDialog(this);
+            using (ServersDlg dlg = new ServersDlg())
+            {
+                GuiUtil.SetControlFont(dlg, this.Font);
+                dlg.Text = "请选择 dp2library 服务器";
+                dlg.Mode = "select";
+                dlg.Servers = Servers.Dup();
+                dlg.ShowDialog(this);
 
-            if (dlg.DialogResult != DialogResult.OK)
-                return null;
+                if (dlg.DialogResult != DialogResult.OK)
+                    return null;
 
-            return dlg.SelectedServerNames;
+                return dlg.SelectedServerNames;
+            }
         }
 
         // 批量修改密码
@@ -4350,6 +4429,15 @@ MessageBoxDefaultButton.Button2);
             finally
             {
                 this.ReturnChannel(channel);
+            }
+        }
+
+        private void MenuItem_config_Click(object sender, EventArgs e)
+        {
+            using (ConfigForm dlg = new ConfigForm())
+            {
+                GuiUtil.SetControlFont(dlg, this.Font);
+                dlg.ShowDialog(this);
             }
         }
     }
