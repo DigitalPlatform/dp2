@@ -75,7 +75,8 @@ namespace dp2ManageCenter
             _operLogLimit = new AsyncSemaphore(OperLogChannelMax);
 
             LoadBackupTasks();
-            LoadOperLogTasks();
+            LoadOperLogTasks(this.listView_operLogTasks);
+            LoadOperLogTasks(this.listView_errorLogTasks);
 
             ClearHtml();
             ClearTaskConsole();
@@ -257,7 +258,8 @@ bool bClickClose = false)
             }
 
             SaveBackupTasks();
-            SaveOperLogTasks();
+            SaveOperLogTasks(this.listView_operLogTasks);
+            SaveOperLogTasks(this.listView_errorLogTasks);
 
             ClientInfo.Finish();
         }
@@ -780,6 +782,52 @@ string strHtml)
         ERROR1:
             if (token.IsCancellationRequested == false)
                 MessageBox.Show(this, strError);
+        }
+
+        void MenuItem_newStoppedBackupTasks_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            var server_names = SelectServerNames();
+            if (server_names == null)
+                return;
+
+            List<string> warnings = new List<string>();
+            this.ShowMessage("正在创建和启动任务");
+            try
+            {
+                foreach (var server_name in server_names)
+                {
+                    dp2Server server = this.Servers.GetServerByName(server_name);
+                    if (server == null)
+                    {
+                        strError = $"名为 '{server_name}' 的服务器不存在...";
+                        goto ERROR1;
+                    }
+
+                    // 对列表中的事项进行查重
+                    var dup = ListViewUtil.FindItem(this.listView_backupTasks, server.Name, OPERLOG_COLUMN_SERVERNAME);
+                    if (dup != null)
+                    {
+                        strError = $"名为 '{server.Name}' 的大备份任务已经存在，无法再次创建";
+                        goto ERROR1;
+                    }
+
+                    ListViewItem item = new ListViewItem();
+                    this.listView_backupTasks.Items.Add(item);
+                    ListViewUtil.ChangeItemText(item, COLUMN_SERVERNAME, server.Name);
+
+                    var info = GetBackupInfo(item);
+                    info.ServerName = server.Name;
+                }
+            }
+            finally
+            {
+                this.ClearMessage();
+            }
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
         }
 
         const int COLUMN_SERVERNAME = 0;
@@ -2803,6 +2851,10 @@ string strHtml)
             menuItem.Click += new System.EventHandler(this.MenuItem_newBackupTasks_Click);
             contextMenu.MenuItems.Add(menuItem);
 
+            menuItem = new MenuItem("新建静止状态的大备份任务 (&P)");
+            menuItem.Click += new System.EventHandler(this.MenuItem_newStoppedBackupTasks_Click);
+            contextMenu.MenuItems.Add(menuItem);
+
             menuItem = new MenuItem("停止下载 [" + this.listView_backupTasks.SelectedItems.Count.ToString() + "] (&T)");
             menuItem.Click += new System.EventHandler(this.MenuItem_stopBackupTasks_Click);
             if (this.listView_backupTasks.SelectedItems.Count == 0)
@@ -2835,6 +2887,12 @@ string strHtml)
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
+            menuItem = new MenuItem("打开服务器文件夹 [" + this.listView_backupTasks.SelectedItems.Count.ToString() + "] (&S)");
+            menuItem.Click += new System.EventHandler(this.menu_openBackupServerFolder_Click);
+            if (this.listView_backupTasks.SelectedItems.Count == 0)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
             menuItem = new MenuItem("打开本地文件夹 [" + this.listView_backupTasks.SelectedItems.Count.ToString() + "] (&F)");
             menuItem.Click += new System.EventHandler(this.menu_openBackupLocalFolder_Click);
             if (this.listView_backupTasks.SelectedItems.Count == 0)
@@ -2854,6 +2912,33 @@ string strHtml)
 
             contextMenu.Show(this.listView_backupTasks, new Point(e.X, e.Y));
         }
+
+        void menu_openBackupServerFolder_Click(object sender, EventArgs e)
+        {
+            List<string> errors = new List<string>();
+            foreach (ListViewItem item in this.listView_backupTasks.SelectedItems)
+            {
+                var info = GetBackupInfo(item);
+                var server = this.Servers.GetServerByName(info.ServerName);
+                if (server == null)
+                {
+                    errors.Add($"没有找到名为 '{info.ServerName}' 的服务器");
+                    continue;
+                }
+
+                ServerFileSystemForm dlg = new ServerFileSystemForm();
+                dlg.ServerName = server.Name;
+                dlg.ServerUrl = server.Url;
+                dlg.SelectedPath = "!backup";
+                dlg.Show(this);
+            }
+
+            if (errors.Count > 0)
+                MessageDlg.Show(this,
+                    StringUtil.MakePathList(errors, "\r\n"),
+                    "打开服务器文件夹时出错");
+        }
+
 
         void menu_openBackupLocalFolder_Click(object sender, EventArgs e)
         {
@@ -2875,7 +2960,7 @@ string strHtml)
             if (errors.Count > 0)
                 MessageDlg.Show(this,
                     StringUtil.MakePathList(errors, "\r\n"),
-                    "打开文件夹时出错");
+                    "打开本地文件夹时出错");
         }
 
         void MenuItem_stopBackupTasks_Click(object sender, EventArgs e)
@@ -3048,17 +3133,23 @@ string strHtml)
         const int OPERLOG_COLUMN_PROGRESS = 3;
         // const int OPERLOG_COLUMN_SERVERFILES = 4;
 
-        NormalResult NewOperLogTask(dp2Server server, CancellationToken token)
+        NormalResult NewOperLogTask(ListView listView,
+            dp2Server server,
+            CancellationToken token)
         {
+            string taskTypeName = "日备份任务";
+            if (listView == this.listView_errorLogTasks)
+                taskTypeName = "错误日志下载任务";
+
             var dup_result = (NormalResult)this.Invoke((Func<NormalResult>)(() =>
             {
                 // 对列表中的事项进行查重
-                var dup = ListViewUtil.FindItem(this.listView_operLogTasks, server.Name, OPERLOG_COLUMN_SERVERNAME);
+                var dup = ListViewUtil.FindItem(listView, server.Name, OPERLOG_COLUMN_SERVERNAME);
                 if (dup != null)
                     return new NormalResult
                     {
                         Value = -1,
-                        ErrorInfo = $"名为 '{server.Name}' 的日备份任务已经存在，无法再次创建",
+                        ErrorInfo = $"名为 '{server.Name}' 的{taskTypeName}已经存在，无法再次创建",
                         ErrorCode = "taskAlreadyExist"
                     };
                 else
@@ -3068,14 +3159,13 @@ string strHtml)
             if (dup_result.Value == -1)
                 return dup_result;
 
-            string strOutputFolder = Path.Combine(GetOutputFolder(server.Name), "operlog");
-            PathUtil.CreateDirIfNeed(strOutputFolder);
+            string strOutputFolder = GetOutputLogFolder(listView, server.Name);
 
             ListViewItem item = null;
             this.Invoke((Action)(() =>
             {
                 item = new ListViewItem();
-                this.listView_operLogTasks.Items.Add(item);
+                listView.Items.Add(item);
                 ListViewUtil.ChangeItemText(item, OPERLOG_COLUMN_SERVERNAME, server.Name);
             }));
 
@@ -3134,23 +3224,35 @@ string strHtml)
 
                 DateTime now = DateTime.Now;
 
-                string strLastDate = ReadOperLogMemoryFile(strOutputFolder);
+                string strLastDate = ReadOperLogMemoryFile(item.ListView, strOutputFolder);
                 if (string.IsNullOrEmpty(strLastDate) == false
                     && strLastDate.Length != 8)
                     strLastDate = "";
 
                 // 列出已经下载的文件列表
                 // 当天下载当天日期的日志文件，要创建一个同名的状态文件，表示它可能没有完成。以后再处理的时候，如果不再是当天，确保下载完成了，可以删除状态文件
-                List<OperLogFileInfo> local_files = GetLocalOperLogFileNames(strOutputFolder, strLastDate);
+                string pattern = "*.log";
+                if (item.ListView == this.listView_errorLogTasks)
+                    pattern = "log_*.txt";
+                List<OperLogFileInfo> local_files = GetLocalOperLogFileNames(
+                    strOutputFolder,
+                    pattern,
+                    strLastDate);
 
                 // 可能会抛出异常
                 List<OperLogFileInfo> server_files = GetServerOperLogFileNames(item, strLastDate);
 
                 // 计算出尚未下载的文件
-                List<DownloadFileInfo> fileinfos = GetDownloadFileList(local_files, server_files);
+                string server_folder = "!operlog/";
+                if (item.ListView == this.listView_errorLogTasks)
+                    server_folder = "!log/";
+                List<DownloadFileInfo> fileinfos = GetDownloadFileList(
+                    server_folder,
+                    local_files,
+                    server_files);
                 if (fileinfos.Count == 0)
                 {
-                    WriteOperLogMemoryFile(strOutputFolder, now);
+                    WriteOperLogMemoryFile(item.ListView, strOutputFolder, now);
 
                     SetItemText(item, OPERLOG_COLUMN_STATE, "没有新文件需要下载");
                     // TODO: 设置背景色为绿色
@@ -3178,7 +3280,7 @@ string strHtml)
                     {
                         // 写入记忆文件，然后提示结束
                         if (bError == false)
-                            WriteOperLogMemoryFile(strFolder, now);
+                            WriteOperLogMemoryFile(item.ListView, strFolder, now);
                     },
                     strOutputFolder,
                     token);
@@ -3580,24 +3682,33 @@ string strHtml)
             func_end(bError);
         }
 
+        string GetMemoryFileName(ListView listView, string strDirectory)
+        {
+            return Path.Combine(strDirectory,
+    listView == this.listView_operLogTasks ?
+    "operlog_backup.txt" : "memory_backup.txt");
+        }
+
         // 写入记忆当前日期的文件
-        static void WriteOperLogMemoryFile(string strDirectory,
+        void WriteOperLogMemoryFile(ListView listView, string strDirectory,
             DateTime now)
         {
-            string filename = Path.Combine(strDirectory, "operlog_backup.txt");
+            string filename = GetMemoryFileName(listView, strDirectory);
             File.WriteAllText(filename, DateTimeUtil.DateTimeToString8(now));
         }
 
-        static string ReadOperLogMemoryFile(string strDirectory)
+        string ReadOperLogMemoryFile(ListView listView, string strDirectory)
         {
-            string filename = Path.Combine(strDirectory, "operlog_backup.txt");
+            string filename = GetMemoryFileName(listView, strDirectory);
             if (File.Exists(filename) == false)
                 return null;
             return File.ReadAllText(filename);
         }
 
-        List<DownloadFileInfo> GetDownloadFileList(List<OperLogFileInfo> local_files,
-    List<OperLogFileInfo> server_files)
+        List<DownloadFileInfo> GetDownloadFileList(
+            string server_folder,
+            List<OperLogFileInfo> local_files,
+            List<OperLogFileInfo> server_files)
         {
             List<DownloadFileInfo> results = new List<DownloadFileInfo>();
 
@@ -3609,7 +3720,8 @@ string strHtml)
                     continue;
 
                 DownloadFileInfo result = new DownloadFileInfo();
-                result.ServerPath = "!operlog/" + server_info.FileName;
+                // result.ServerPath = "!operlog/" + server_info.FileName;
+                result.ServerPath = server_folder + server_info.FileName;
                 if (local_info != null && local_info.Length != server_info.Length)
                     result.OverwriteStyle = "overwrite";
                 else
@@ -3698,10 +3810,18 @@ out string strError);
                 if (check_result.Value == -1)
                     throw new Exception(check_result.ErrorInfo);
 
+                string category = "!operlog";
+                string pattern = "*.log";
+                if (item.ListView == this.listView_errorLogTasks)
+                {
+                    category = "!log";
+                    pattern = "log_*.txt";
+                }
+
                 FileItemLoader loader = new FileItemLoader(channel,
                     null,
-                    "!operlog",
-                    "*.log");
+                    category, // "!operlog",
+                    pattern);
                 foreach (FileItemInfo info in loader)
                 {
                     string strName = Path.GetFileName(info.Name);
@@ -3725,7 +3845,9 @@ out string strError);
 
         // parameters:
         //      strLastDate 上次备份的最后日期，8 字符。如果为空，表示当前是首次备份
-        static List<OperLogFileInfo> GetLocalOperLogFileNames(string strDirectory,
+        static List<OperLogFileInfo> GetLocalOperLogFileNames(
+            string strDirectory,
+            string pattern,
             string strLastDate)
         {
             if (string.IsNullOrEmpty(strLastDate) == false
@@ -3734,7 +3856,7 @@ out string strError);
 
             DirectoryInfo di = new DirectoryInfo(strDirectory);
 
-            FileInfo[] fis = di.GetFiles("*.log");
+            FileInfo[] fis = di.GetFiles(pattern);
 
             List<OperLogFileInfo> results = new List<OperLogFileInfo>();
             foreach (FileInfo fi in fis)
@@ -3797,7 +3919,9 @@ out string strError);
         // 根据行状态设置行背景色
         void SetOperLogItemColor(ListViewItem item)
         {
-            Debug.Assert(item.ListView == this.listView_operLogTasks, "");
+            Debug.Assert(item.ListView == this.listView_operLogTasks
+                || item.ListView == this.listView_errorLogTasks,
+                "");
 
             this.Invoke((Action)(() =>
             {
@@ -3831,23 +3955,23 @@ out string strError);
 
         #region 日备份任务列表的保存和恢复
 
-        void SaveOperLogTasks()
+        void SaveOperLogTasks(ListView listView)
         {
             List<OperLogItemInfo> infos = new List<OperLogItemInfo>();
-            foreach (ListViewItem item in this.listView_operLogTasks.Items)
+            foreach (ListViewItem item in listView.Items)
             {
                 infos.Add(GetOperLogInfo(item));
             }
 
             string value = JsonConvert.SerializeObject(infos);
-            ClientInfo.Config.Set("global", "operLogTasks", value);
+            ClientInfo.Config.Set("global", listView.Name, value);
         }
 
-        void LoadOperLogTasks()
+        void LoadOperLogTasks(ListView listView)
         {
-            this.listView_operLogTasks.Items.Clear();
+            listView.Items.Clear();
 
-            string value = ClientInfo.Config.Get("global", "operLogTasks");
+            string value = ClientInfo.Config.Get("global", listView.Name);
             if (string.IsNullOrEmpty(value))
                 return;
 
@@ -3859,10 +3983,12 @@ out string strError);
 
                 foreach (var info in infos)
                 {
-                    ListViewItem item = new ListViewItem();
-                    item.Tag = info;
+                    ListViewItem item = new ListViewItem
+                    {
+                        Tag = info
+                    };
                     ListViewUtil.ChangeItemText(item, OPERLOG_COLUMN_SERVERNAME, info.ServerName);
-                    this.listView_operLogTasks.Items.Add(item);
+                    listView.Items.Add(item);
                 }
             }
             catch (Newtonsoft.Json.JsonSerializationException)
@@ -3916,16 +4042,19 @@ out string strError);
             contextMenu.MenuItems.Add(menuItem);
 
             menuItem = new MenuItem("新建下载日备份任务 (&B)");
+            menuItem.Tag = this.listView_operLogTasks;
             menuItem.Click += new System.EventHandler(this.MenuItem_newOperLogTasks_Click);
             contextMenu.MenuItems.Add(menuItem);
 
             menuItem = new MenuItem("停止下载 [" + this.listView_operLogTasks.SelectedItems.Count.ToString() + "] (&T)");
+            menuItem.Tag = this.listView_operLogTasks;
             menuItem.Click += new System.EventHandler(this.MenuItem_stopOperLogTasks_Click);
             if (this.listView_operLogTasks.SelectedItems.Count == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
             menuItem = new MenuItem("重启下载 [" + this.listView_operLogTasks.SelectedItems.Count.ToString() + "] (&S)");
+            menuItem.Tag = this.listView_operLogTasks;
             menuItem.Click += new System.EventHandler(this.MenuItem_continueOperLogTasks_Click);
             if (this.listView_operLogTasks.SelectedItems.Count == 0)
                 menuItem.Enabled = false;
@@ -3936,6 +4065,7 @@ out string strError);
             contextMenu.MenuItems.Add(menuItem);
 
             menuItem = new MenuItem("打开本地文件夹 [" + this.listView_operLogTasks.SelectedItems.Count.ToString() + "] (&F)");
+            menuItem.Tag = this.listView_operLogTasks;
             menuItem.Click += new System.EventHandler(this.menu_openOperLogLocalFolder_Click);
             if (this.listView_operLogTasks.SelectedItems.Count == 0)
                 menuItem.Enabled = false;
@@ -3947,6 +4077,7 @@ out string strError);
 
 
             menuItem = new MenuItem("移除 [" + this.listView_operLogTasks.SelectedItems.Count.ToString() + "] (&D)");
+            menuItem.Tag = this.listView_operLogTasks;
             menuItem.Click += new System.EventHandler(this.menu_removeOperLogTasks_Click);
             if (this.listView_operLogTasks.SelectedItems.Count == 0)
                 menuItem.Enabled = false;
@@ -3956,14 +4087,18 @@ out string strError);
             contextMenu.Show(this.listView_operLogTasks, new Point(e.X, e.Y));
         }
 
+        // 打开操作日志/错误日志本地文件夹
         void menu_openOperLogLocalFolder_Click(object sender, EventArgs e)
         {
+            ListView listView = GetMenuItemTag(sender);
+            Debug.Assert(listView != null, "");
+
             List<string> errors = new List<string>();
-            foreach (ListViewItem item in this.listView_operLogTasks.SelectedItems)
+            foreach (ListViewItem item in listView.SelectedItems)
             {
                 var info = GetOperLogInfo(item);
-                string strOutputFolder = Path.Combine(GetOutputFolder(info.ServerName), "operlog");
-                PathUtil.CreateDirIfNeed(strOutputFolder);
+                string strOutputFolder = GetOutputLogFolder(listView, info.ServerName);
+
                 try
                 {
                     System.Diagnostics.Process.Start(strOutputFolder);
@@ -3977,13 +4112,16 @@ out string strError);
             if (errors.Count > 0)
                 MessageDlg.Show(this,
                     StringUtil.MakePathList(errors, "\r\n"),
-                    "打开文件夹时出错");
+                    "打开本地文件夹时出错");
         }
 
-
+        // 停止(操作日志/错误日志)下载任务
         void MenuItem_stopOperLogTasks_Click(object sender, EventArgs e)
         {
-            foreach (ListViewItem item in this.listView_operLogTasks.SelectedItems)
+            ListView listView = GetMenuItemTag(sender);
+            Debug.Assert(listView != null, "");
+
+            foreach (ListViewItem item in listView.SelectedItems)
             {
                 var info = GetOperLogInfo(item);
                 if (info.IsRunning)
@@ -3991,17 +4129,21 @@ out string strError);
             }
         }
 
-
+        // TODO: 移除前先停止任务?
+        // 移除(操作日志/错误日志)下载任务
         void menu_removeOperLogTasks_Click(object sender, EventArgs e)
         {
-            if (this.listView_operLogTasks.SelectedItems.Count == 0)
+            ListView listView = GetMenuItemTag(sender);
+            Debug.Assert(listView != null, "");
+
+            if (listView.SelectedItems.Count == 0)
             {
                 MessageBox.Show(this, "尚未选定要移除的事项。");
                 return;
             }
 
             DialogResult result = MessageBox.Show(this,
-        "确实要移除选定的 " + this.listView_operLogTasks.SelectedItems.Count.ToString() + " 个事项?",
+        "确实要移除选定的 " + listView.SelectedItems.Count.ToString() + " 个事项?",
         "MainForm",
         MessageBoxButtons.YesNo,
         MessageBoxIcon.Question,
@@ -4009,12 +4151,23 @@ out string strError);
             if (result != DialogResult.Yes)
                 return;
 
-            ListViewUtil.DeleteSelectedItems(this.listView_operLogTasks);
+            ListViewUtil.DeleteSelectedItems(listView);
         }
 
+        static ListView GetMenuItemTag(object sender)
+        {
+            MenuItem menuItem = sender as MenuItem;
+            Debug.Assert(menuItem != null, "");
+            return menuItem.Tag as ListView;
+        }
+
+        // 新建下载操作日志/错误日志任务
         async void MenuItem_newOperLogTasks_Click(object sender, EventArgs e)
         {
             string strError = "";
+
+            ListView listView = GetMenuItemTag(sender);
+            Debug.Assert(listView != null, "");
 
             var server_names = SelectServerNames();
             if (server_names == null)
@@ -4024,7 +4177,6 @@ out string strError);
 
             List<string> warnings = new List<string>();
             this.ShowMessage("正在创建和启动任务");
-
             try
             {
                 var result = await Task.Run<NormalResult>(() =>
@@ -4043,7 +4195,7 @@ out string strError);
                             };
                         }
 
-                        var new_result = NewOperLogTask(server, token);
+                        var new_result = NewOperLogTask(listView, server, token);
                         if (new_result.Value == -1)
                         {
                             if (new_result.ErrorCode == "taskAlreadyExist")
@@ -4076,8 +4228,11 @@ out string strError);
         {
             string strError = "";
 
+            ListView listView = GetMenuItemTag(sender);
+            Debug.Assert(listView != null, "");
+
             List<ListViewItem> items = new List<ListViewItem>();
-            items.AddRange(this.listView_operLogTasks.SelectedItems.Cast<ListViewItem>());
+            items.AddRange(listView.SelectedItems.Cast<ListViewItem>());
 
             this.ShowMessage("正在启动任务");
             var result = await Task.Run<NormalResult>(() =>
@@ -4097,8 +4252,7 @@ out string strError);
                             };
                         }
 
-                        string strOutputFolder = Path.Combine(GetOutputFolder(server.Name), "operlog");
-                        PathUtil.CreateDirIfNeed(strOutputFolder);
+                        string strOutputFolder = GetOutputLogFolder(listView, server.Name);
 
                         var info = GetOperLogInfo(item);
 
@@ -4137,6 +4291,21 @@ out string strError);
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+        string GetOutputLogFolder(ListView listView,
+            string serverName)
+        {
+            string strOutputFolder = "";
+            if (listView == this.listView_operLogTasks)
+                strOutputFolder = Path.Combine(GetOutputFolder(serverName), "operlog");
+            else if (listView == this.listView_errorLogTasks)
+                strOutputFolder = Path.Combine(GetOutputFolder(serverName), "log");
+            else
+                throw new ArgumentException("未知的 listView");
+
+            PathUtil.CreateDirIfNeed(strOutputFolder);
+            return strOutputFolder;
         }
 
         static string OutputFolderRoot
@@ -4439,6 +4608,105 @@ MessageBoxDefaultButton.Button2);
                 GuiUtil.SetControlFont(dlg, this.Font);
                 dlg.ShowDialog(this);
             }
+        }
+
+        private void MenuItem_openUserFolder_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(ClientInfo.UserDir);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
+            }
+        }
+
+        private void MenuItem_openDataFolder_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(ClientInfo.DataDir);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
+            }
+        }
+
+        private void MenuItem_openProgramFolder_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(Environment.CurrentDirectory);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
+            }
+        }
+
+        private void listView_errorLogTasks_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Right)
+                return;
+
+            ContextMenu contextMenu = new ContextMenu();
+            MenuItem menuItem = null;
+
+            menuItem = new MenuItem("全选(&A)");
+            menuItem.Tag = this.listView_errorLogTasks;
+            menuItem.Click += new System.EventHandler(this.menu_selectAll_Click);
+            contextMenu.MenuItems.Add(menuItem);
+
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
+            menuItem = new MenuItem("新建下载错误日志任务 (&B)");
+            menuItem.Tag = this.listView_errorLogTasks;
+            menuItem.Click += new System.EventHandler(this.MenuItem_newOperLogTasks_Click);
+            contextMenu.MenuItems.Add(menuItem);
+
+            menuItem = new MenuItem("停止下载 [" + this.listView_operLogTasks.SelectedItems.Count.ToString() + "] (&T)");
+            menuItem.Tag = this.listView_errorLogTasks;
+            menuItem.Click += new System.EventHandler(this.MenuItem_stopOperLogTasks_Click);
+            if (this.listView_errorLogTasks.SelectedItems.Count == 0)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
+            menuItem = new MenuItem("重启下载 [" + this.listView_operLogTasks.SelectedItems.Count.ToString() + "] (&S)");
+            menuItem.Tag = this.listView_errorLogTasks;
+            menuItem.Click += new System.EventHandler(this.MenuItem_continueOperLogTasks_Click);
+            if (this.listView_errorLogTasks.SelectedItems.Count == 0)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
+            menuItem = new MenuItem("打开本地文件夹 [" + this.listView_operLogTasks.SelectedItems.Count.ToString() + "] (&F)");
+            menuItem.Tag = this.listView_errorLogTasks;
+            menuItem.Click += new System.EventHandler(this.menu_openOperLogLocalFolder_Click);
+            if (this.listView_errorLogTasks.SelectedItems.Count == 0)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
+
+            menuItem = new MenuItem("移除 [" + this.listView_operLogTasks.SelectedItems.Count.ToString() + "] (&D)");
+            menuItem.Tag = this.listView_errorLogTasks;
+            menuItem.Click += new System.EventHandler(this.menu_removeOperLogTasks_Click);
+            if (this.listView_errorLogTasks.SelectedItems.Count == 0)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
+
+            contextMenu.Show(this.listView_errorLogTasks, new Point(e.X, e.Y));
         }
     }
 }
