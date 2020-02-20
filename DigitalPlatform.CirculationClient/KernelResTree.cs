@@ -109,10 +109,100 @@ namespace DigitalPlatform.CirculationClient
             return result;
         }
 
+        // 把 API 中用到的服务器文件路径转换为分级形态的字符串集合
+        // 例如 !backup 要转为两级。
+        static List<string> BuildPathList(string path)
+        {
+            List<string> aName = new List<string>(path.Split(new Char[] { '/' }));
+
+            if (aName.Count > 0 && aName[0].StartsWith("!"))
+            {
+                aName.Insert(0, "!");
+                aName[1] = aName[1].Substring(1);
+            }
+
+            return aName;
+        }
+
+        // 根据路径逐步展开
+        // return:
+        //      -1  出错
+        //      0   没有出错
+        public int ExpandPath(string path, out string strError)
+        {
+            strError = "";
+
+            List<string> errors = new List<string>();
+
+            List<string> aName = BuildPathList(path);
+
+            TreeNode node = null;
+            TreeNode nodeThis = null;
+
+            /*
+            string[] temp = new string[aName.Length + 1];
+            Array.Copy(aName, 0, temp, 1, aName.Length);
+            temp[0] = respath.Url;
+
+            aName = temp;
+            */
+
+            foreach (string name in aName)
+            {
+                TreeNodeCollection nodes = null;
+
+                if (node == null)
+                    nodes = this.Nodes;
+                else
+                    nodes = node.Nodes;
+
+                bool bFound = false;
+                for (int j = 0; j < nodes.Count; j++)
+                {
+                    TreeNode currrent_node = nodes[j];
+
+                    // 如果是其他节点，取节点正文即可
+                    string strName = currrent_node.Text;
+                    if (name == strName)
+                    {
+                        bFound = true;
+                        nodeThis = nodes[j];
+                        break;
+                    }
+                }
+                if (bFound == false)
+                    break;
+
+                node = nodeThis;
+
+                // 需要展开
+                if (IsLoading(node) == true)
+                {
+                    int nRet = Fill(null, node, out strError);
+                    if (nRet == -1)
+                    {
+                        errors.Add(strError);
+                        break;
+                    }
+                }
+                node.Expand();  // 即便最终层次没有找到，也要展开中间层次
+            }
+
+            if (nodeThis != null && nodeThis.Parent != null)
+                nodeThis.Parent.Expand();
+
+            this.SelectedNode = nodeThis;
+            if (errors.Count > 0)
+            {
+                strError = StringUtil.MakePathList(errors, "\r\n");
+                return -1;
+            }
+            return 0;
+        }
+
         public bool Fill(TreeNode node = null)
         {
-            string strError = "";
-            if (this.Fill(null, node, out strError) == -1)
+            if (this.Fill(null, node, out string strError) == -1)
             {
                 MessageBox.Show(this, strError);
                 return false;
@@ -624,10 +714,13 @@ namespace DigitalPlatform.CirculationClient
             MessageBox.Show(this, strError);
         }
 
-        void Refresh(TreeNode node)
+        public void Refresh(TreeNode node)
         {
             if (node == null)
+            {
+                this.Fill(null);
                 return;
+            }
 
             string strName = node.Text;
             if (node.ImageIndex == RESTYPE_FILE)
@@ -978,7 +1071,7 @@ namespace DigitalPlatform.CirculationClient
             if (string.IsNullOrEmpty(e1.ErrorInfo) == false)
                 goto ERROR1;
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -986,11 +1079,13 @@ namespace DigitalPlatform.CirculationClient
         {
             string strError = "";
 
+            /*
             if (this.SelectedNode == null)
             {
                 strError = "尚未选择要刷新的节点";
                 goto ERROR1;
             }
+            */
 
 #if NO
             TreeNode node = this.SelectedNode;

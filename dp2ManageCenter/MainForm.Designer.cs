@@ -44,6 +44,10 @@
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_changePassword = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_refreshServerName = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_help = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_openUserFolder = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_openDataFolder = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_openProgramFolder = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel_message = new System.Windows.Forms.ToolStripStatusLabel();
@@ -65,6 +69,12 @@
             this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.tabPage_history = new System.Windows.Forms.TabPage();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
+            this.tabPage_errorLogTasks = new System.Windows.Forms.TabPage();
+            this.listView_errorLogTasks = new System.Windows.Forms.ListView();
+            this.columnHeader5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader7 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader8 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.tabControl_main.SuspendLayout();
@@ -75,6 +85,7 @@
             this.splitContainer_backupTasks.SuspendLayout();
             this.tabPage_operLogTasks.SuspendLayout();
             this.tabPage_history.SuspendLayout();
+            this.tabPage_errorLogTasks.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -83,7 +94,8 @@
             this.menuStrip1.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.MenuItem_file,
-            this.MenuItem_management});
+            this.MenuItem_management,
+            this.MenuItem_help});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Padding = new System.Windows.Forms.Padding(7, 3, 0, 3);
@@ -206,6 +218,37 @@
             this.MenuItem_refreshServerName.ToolTipText = "从 dp2library 服务器获取图书馆名，作为服务器名";
             this.MenuItem_refreshServerName.Click += new System.EventHandler(this.MenuItem_refreshServerName_Click);
             // 
+            // MenuItem_help
+            // 
+            this.MenuItem_help.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.MenuItem_openUserFolder,
+            this.MenuItem_openDataFolder,
+            this.MenuItem_openProgramFolder});
+            this.MenuItem_help.Name = "MenuItem_help";
+            this.MenuItem_help.Size = new System.Drawing.Size(102, 32);
+            this.MenuItem_help.Text = "帮助(&H)";
+            // 
+            // MenuItem_openUserFolder
+            // 
+            this.MenuItem_openUserFolder.Name = "MenuItem_openUserFolder";
+            this.MenuItem_openUserFolder.Size = new System.Drawing.Size(306, 40);
+            this.MenuItem_openUserFolder.Text = "打开用户文件夹(&U)";
+            this.MenuItem_openUserFolder.Click += new System.EventHandler(this.MenuItem_openUserFolder_Click);
+            // 
+            // MenuItem_openDataFolder
+            // 
+            this.MenuItem_openDataFolder.Name = "MenuItem_openDataFolder";
+            this.MenuItem_openDataFolder.Size = new System.Drawing.Size(306, 40);
+            this.MenuItem_openDataFolder.Text = "打开数据文件夹(&D)";
+            this.MenuItem_openDataFolder.Click += new System.EventHandler(this.MenuItem_openDataFolder_Click);
+            // 
+            // MenuItem_openProgramFolder
+            // 
+            this.MenuItem_openProgramFolder.Name = "MenuItem_openProgramFolder";
+            this.MenuItem_openProgramFolder.Size = new System.Drawing.Size(306, 40);
+            this.MenuItem_openProgramFolder.Text = "打开程序文件夹(&P)";
+            this.MenuItem_openProgramFolder.Click += new System.EventHandler(this.MenuItem_openProgramFolder_Click);
+            // 
             // toolStrip1
             // 
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(24, 24);
@@ -237,6 +280,7 @@
             // 
             this.tabControl_main.Controls.Add(this.tabPage_backupTasks);
             this.tabControl_main.Controls.Add(this.tabPage_operLogTasks);
+            this.tabControl_main.Controls.Add(this.tabPage_errorLogTasks);
             this.tabControl_main.Controls.Add(this.tabPage_history);
             this.tabControl_main.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl_main.Location = new System.Drawing.Point(0, 63);
@@ -391,7 +435,7 @@
             this.tabPage_history.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_history.Name = "tabPage_history";
             this.tabPage_history.Padding = new System.Windows.Forms.Padding(4);
-            this.tabPage_history.Size = new System.Drawing.Size(970, 471);
+            this.tabPage_history.Size = new System.Drawing.Size(970, 459);
             this.tabPage_history.TabIndex = 1;
             this.tabPage_history.Text = "操作历史";
             this.tabPage_history.UseVisualStyleBackColor = true;
@@ -403,8 +447,57 @@
             this.webBrowser1.Margin = new System.Windows.Forms.Padding(5);
             this.webBrowser1.MinimumSize = new System.Drawing.Size(29, 36);
             this.webBrowser1.Name = "webBrowser1";
-            this.webBrowser1.Size = new System.Drawing.Size(962, 463);
+            this.webBrowser1.Size = new System.Drawing.Size(962, 451);
             this.webBrowser1.TabIndex = 3;
+            // 
+            // tabPage_errorLogTasks
+            // 
+            this.tabPage_errorLogTasks.Controls.Add(this.listView_errorLogTasks);
+            this.tabPage_errorLogTasks.Location = new System.Drawing.Point(4, 37);
+            this.tabPage_errorLogTasks.Name = "tabPage_errorLogTasks";
+            this.tabPage_errorLogTasks.Size = new System.Drawing.Size(970, 459);
+            this.tabPage_errorLogTasks.TabIndex = 3;
+            this.tabPage_errorLogTasks.Text = "错误日志";
+            this.tabPage_errorLogTasks.UseVisualStyleBackColor = true;
+            // 
+            // listView_errorLogTasks
+            // 
+            this.listView_errorLogTasks.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnHeader5,
+            this.columnHeader6,
+            this.columnHeader7,
+            this.columnHeader8});
+            this.listView_errorLogTasks.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.listView_errorLogTasks.FullRowSelect = true;
+            this.listView_errorLogTasks.HideSelection = false;
+            this.listView_errorLogTasks.Location = new System.Drawing.Point(0, 0);
+            this.listView_errorLogTasks.Margin = new System.Windows.Forms.Padding(4);
+            this.listView_errorLogTasks.Name = "listView_errorLogTasks";
+            this.listView_errorLogTasks.Size = new System.Drawing.Size(970, 459);
+            this.listView_errorLogTasks.TabIndex = 2;
+            this.listView_errorLogTasks.UseCompatibleStateImageBehavior = false;
+            this.listView_errorLogTasks.View = System.Windows.Forms.View.Details;
+            this.listView_errorLogTasks.MouseUp += new System.Windows.Forms.MouseEventHandler(this.listView_errorLogTasks_MouseUp);
+            // 
+            // columnHeader5
+            // 
+            this.columnHeader5.Text = "服务器名";
+            this.columnHeader5.Width = 205;
+            // 
+            // columnHeader6
+            // 
+            this.columnHeader6.Text = "任务状态";
+            this.columnHeader6.Width = 171;
+            // 
+            // columnHeader7
+            // 
+            this.columnHeader7.Text = "启动时间";
+            this.columnHeader7.Width = 184;
+            // 
+            // columnHeader8
+            // 
+            this.columnHeader8.Text = "进度";
+            this.columnHeader8.Width = 196;
             // 
             // MainForm
             // 
@@ -436,6 +529,7 @@
             this.splitContainer_backupTasks.ResumeLayout(false);
             this.tabPage_operLogTasks.ResumeLayout(false);
             this.tabPage_history.ResumeLayout(false);
+            this.tabPage_errorLogTasks.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -480,6 +574,16 @@
         private System.Windows.Forms.ToolStripMenuItem MenuItem_changePassword;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_refreshServerName;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_config;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_help;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_openUserFolder;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_openDataFolder;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_openProgramFolder;
+        private System.Windows.Forms.TabPage tabPage_errorLogTasks;
+        private System.Windows.Forms.ListView listView_errorLogTasks;
+        private System.Windows.Forms.ColumnHeader columnHeader5;
+        private System.Windows.Forms.ColumnHeader columnHeader6;
+        private System.Windows.Forms.ColumnHeader columnHeader7;
+        private System.Windows.Forms.ColumnHeader columnHeader8;
     }
 }
 
