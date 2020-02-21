@@ -55,6 +55,8 @@ cd dp-library
 git pull
 ```
 
+注：如果 git pull 命令报错说 `You are not currently on a branch.`，可以用 `git pull origin master`
+
 以确保获得最新的 dp-library 代码。
 
 Git 命令执行以后，需要重新打开 dp2 Solution 变动才能生效
