@@ -79,7 +79,7 @@ namespace DigitalPlatform.MessageClient
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = "ListAllUsers() 出现异常: " + ex.Message;
             }
             finally
             {
@@ -134,7 +134,7 @@ namespace DigitalPlatform.MessageClient
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = "NewUser() 出现异常: " + ex.Message;
                 goto ERROR1;
             }
             finally
@@ -269,7 +269,7 @@ namespace DigitalPlatform.MessageClient
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = "ModifyUser() 出现异常: " + ex.Message;
                 goto ERROR1;
             }
             finally
@@ -339,7 +339,7 @@ namespace DigitalPlatform.MessageClient
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = "DeleteUser() 出现异常: " + ex.Message;
                 goto ERROR1;
             }
             finally

@@ -418,7 +418,7 @@ namespace DigitalPlatform.OPAC.Server
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = "PrepareMarcFilter() 出现异常: " + ex.Message;
                 return -1;
             }
 

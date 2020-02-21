@@ -546,7 +546,7 @@ out strError);
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = "GetResultset() 出现异常: " + ex.Message;
                 return -1;
             }
 

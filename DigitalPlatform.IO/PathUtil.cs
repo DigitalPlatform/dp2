@@ -926,7 +926,7 @@ namespace DigitalPlatform.IO
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = "CopyDirectory() 出现异常: " + ex.Message;
                 return -1;
             }
 

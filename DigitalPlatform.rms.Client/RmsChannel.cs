@@ -3934,7 +3934,7 @@ namespace DigitalPlatform.rms.Client
                     }
                     else
                     {
-                        Debug.Assert(keys != null, "WebService GetRecords() API record参数返回值不应为null");
+                        // Debug.Assert(keys != null, "WebService GetRecords() API record参数返回值不应为null");
 
                         lTotalCount = result.Value;
                     }
@@ -3944,6 +3944,8 @@ namespace DigitalPlatform.rms.Client
                         nStart += keys.Length;
                         nCount += keys.Length;
                     }
+                    else
+                        break;  // 2020/2/21
 
                     // 做事
                     for (int i = 0; i < keys.Length; i++)
@@ -3965,13 +3967,15 @@ namespace DigitalPlatform.rms.Client
                         */
                         KeyInfo keyInfo = keys[i];
 
-                        AccessKeyInfo info = new AccessKeyInfo();
-                        info.FromValue = keyInfo.FromValue;
-                        info.ID = keyInfo.ID;
-                        info.Key = keyInfo.Key;
-                        info.KeyNoProcess = keyInfo.KeyNoProcess;
-                        info.Num = keyInfo.Num;
-                        info.FromName = keyInfo.FromName;
+                        AccessKeyInfo info = new AccessKeyInfo
+                        {
+                            FromValue = keyInfo.FromValue,
+                            ID = keyInfo.ID,
+                            Key = keyInfo.Key,
+                            KeyNoProcess = keyInfo.KeyNoProcess,
+                            Num = keyInfo.Num,
+                            FromName = keyInfo.FromName
+                        };
 
                         aLine.Add(info);
                     }

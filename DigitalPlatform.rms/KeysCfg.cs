@@ -718,7 +718,6 @@ namespace DigitalPlatform.rms
                             }
                         }
                     }
-
                 }
                 else
                 {
@@ -879,7 +878,6 @@ namespace DigitalPlatform.rms
                     }
                 }
             }
-
 
             return 0;
         }

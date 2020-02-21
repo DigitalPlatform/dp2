@@ -370,7 +370,7 @@ namespace DigitalPlatform.CirculationClient
                     catch (Exception ex)
                     {
                         // TODO: 出现异常后，是否改为用原来的方法一个一个对象地获取 metadata?
-                        strError = ex.Message;
+                        strError = "LoadObject() 异常: " + ex.Message;
                         return -1;
                     }
                     finally

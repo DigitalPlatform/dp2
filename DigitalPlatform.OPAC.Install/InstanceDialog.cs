@@ -742,7 +742,7 @@ namespace DigitalPlatform.OPAC
             catch (Exception ex)
             {
                 // 2018/1/27
-                strError = ex.Message;
+                strError = "CreateNewDataDir() 出现异常: " + ex.Message;
                 return -1;
             }
 
