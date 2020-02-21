@@ -319,8 +319,8 @@ this.checkBox_returnSearchDetail.Checked);
                 if (nRet == -1)
                     return -1;
 
-                if (string.IsNullOrEmpty("") == false)
-                    this.ProjectName = "";
+                if (String.IsNullOrEmpty(strUsedProjectName) == false)
+                    this.ProjectName = strUsedProjectName;
             }
             finally
             {
