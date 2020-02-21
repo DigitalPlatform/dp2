@@ -125,7 +125,7 @@ namespace dp2Kernel
                     strDataDir = DomUtil.GetAttr(dom.DocumentElement, "datadir");
                 }
 
-                START:
+            START:
                 info.App = new KernelApplication();
                 // parameter:
                 //		strDataDir	data目录
@@ -417,7 +417,7 @@ namespace dp2Kernel
                 this.sessioninfo.UserName = user.Name;
                 result.Value = 1;
                 return result;
-                ERROR1:
+            ERROR1:
                 result.Value = -1;
                 result.ErrorString = strError;
                 result.ErrorCode = ErrorCodeValue.CommonError;
@@ -519,7 +519,7 @@ namespace dp2Kernel
             if (sessioninfo.InSearching > 0)
             {
                 // if (sessioninfo.ChannelHandle != null)
-                    sessioninfo?.ChannelHandle?.DoStop();
+                sessioninfo?.ChannelHandle?.DoStop();
 
                 app.MyWriteDebugInfo("因后一个stop的到来，前一个search不得不中断 ");
             }
@@ -557,7 +557,7 @@ namespace dp2Kernel
             if (sessioninfo.InSearching > 0)
             {
                 // if (sessioninfo.ChannelHandle != null)
-                    sessioninfo?.ChannelHandle?.DoStop();
+                sessioninfo?.ChannelHandle?.DoStop();
 
                 app.MyWriteDebugInfo("因后一个search(ex)的到来，前一个search(ex)不得不中断 ");
             }
@@ -729,7 +729,7 @@ namespace dp2Kernel
             if (sessioninfo.InSearching > 0)
             {
                 // if (sessioninfo.ChannelHandle != null)
-                    sessioninfo?.ChannelHandle?.DoStop();
+                sessioninfo?.ChannelHandle?.DoStop();
 
                 app.MyWriteDebugInfo("因后一个search的到来，前一个search不得不中断 ");
             }
@@ -1383,7 +1383,7 @@ namespace dp2Kernel
                 return result;
             }
 
-            ERROR1:
+        ERROR1:
             result.Value = -1;
             result.ErrorCode = ErrorCodeValue.CommonError;
             result.ErrorString = strError;
@@ -1571,7 +1571,7 @@ namespace dp2Kernel
                 result.ErrorString = strErrorText;
                 return result;
             }
-            ERROR1:
+        ERROR1:
             result.Value = -1;
             result.ErrorCode = ErrorCodeValue.CommonError;
             result.ErrorString = strError;
@@ -2746,9 +2746,8 @@ namespace dp2Kernel
 
             try
             {
-
                 //是否登录的判断
-                if (this.sessioninfo.UserName == "")
+                if (string.IsNullOrEmpty(this.sessioninfo.UserName))
                 {
                     result.Value = -1;
                     result.ErrorCode = ErrorCodeValue.NotLogin;
@@ -2757,7 +2756,6 @@ namespace dp2Kernel
                 }
 
                 //
-
                 return API_CreateKeys(
                     strXml,
                     strRecPath,
@@ -2779,16 +2777,15 @@ namespace dp2Kernel
             }
         }
 
-
         // 以下建议单独写成一个中层函数
         Result API_CreateKeys(
-            string strXml,
-            string strRecPath,
-            int lStart,
-            int lLength,
-            string strLang,
-            // string strStyle,
-            out KeyInfo[] keys)
+        string strXml,
+        string strRecPath,
+        int lStart,
+        int lLength,
+        string strLang,
+        // string strStyle,
+        out KeyInfo[] keys)
         {
             keys = null;
             Result result = new Result();
@@ -2804,17 +2801,15 @@ namespace dp2Kernel
                 return result;
             }
 
-            string strError = "";
-            KeyCollection allKeys = null;
             // return:
-            //		-1	出错
-            //		0	成功
+            // -1 出错
+            // 0 成功
             int nRet = db.API_PretendWrite(strXml,
-                dbPath.ID,
-                strLang,
-                // strStyle,
-                out allKeys,
-                out strError);
+            dbPath.ID,
+            strLang,
+            // strStyle,
+            out KeyCollection allKeys,
+            out string strError);
             if (nRet <= -1)
             {
                 result.Value = -1;
@@ -2824,18 +2819,20 @@ namespace dp2Kernel
             }
             result.Value = allKeys.Count;
 
+            // 2020/2/21
+            if (allKeys.Count == 0)
+                return result;
 
             int nMaxLength = 500;
-            long lOutputLength = 0;
             // return:
-            //		-1  出错
-            //		0   成功
+            // -1 出错
+            // 0 成功
             nRet = ConvertUtil.GetRealLength((int)lStart,
-                (int)lLength,
-                allKeys.Count,
-                nMaxLength,
-                out lOutputLength,
-                out strError);
+            (int)lLength,
+            allKeys.Count,
+            nMaxLength,
+            out long lOutputLength,
+            out strError);
             if (nRet == -1)
             {
                 result.Value = -1;
@@ -2848,17 +2845,18 @@ namespace dp2Kernel
             for (int i = 0; i < lOutputLength; i++)
             {
                 KeyItem dpKey = (KeyItem)allKeys[i + lStart];
-                KeyInfo keyInfo = new KeyInfo();
-                keyInfo.ID = dpKey.RecordID;
-                keyInfo.Key = dpKey.Key;
-                keyInfo.KeyNoProcess = dpKey.KeyNoProcess;
-                keyInfo.FromValue = dpKey.FromValue;
-                keyInfo.Num = dpKey.Num;
-                keyInfo.FromName = dpKey.FromName;
+                KeyInfo keyInfo = new KeyInfo
+                {
+                    ID = dpKey.RecordID,
+                    Key = dpKey.Key,
+                    KeyNoProcess = dpKey.KeyNoProcess,
+                    FromValue = dpKey.FromValue,
+                    Num = dpKey.Num,
+                    FromName = dpKey.FromName
+                };
                 keys[i] = keyInfo;
             }
 
-            //this.GetSessionInfo().Keys = allKeys;
             return result;
         }
 
@@ -3032,7 +3030,7 @@ namespace dp2Kernel
 
                 result.Value = nRet;
                 return result;
-                ERROR1:
+            ERROR1:
                 result.Value = -1;
                 result.ErrorCode = ErrorCodeValue.CommonError;
                 result.ErrorString = strError;

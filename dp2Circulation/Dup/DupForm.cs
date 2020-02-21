@@ -306,22 +306,21 @@ this.checkBox_returnSearchDetail.Checked);
         public int DoSearch(out string strError)
         {
             strError = "";
-            string strUsedProjectName = "";
+            // string strUsedProjectName = "";
 
             this.EventFinish.Reset();
             try
             {
-
                 int nRet = DoSearch(this.comboBox_projectName.Text,
                     this.textBox_recordPath.Text,
                     this.XmlRecord,
-                    out strUsedProjectName,
+                    out string strUsedProjectName,
                     out strError);
                 if (nRet == -1)
                     return -1;
 
-                if (String.IsNullOrEmpty(strUsedProjectName) == false)
-                    this.ProjectName = strUsedProjectName;
+                if (string.IsNullOrEmpty("") == false)
+                    this.ProjectName = "";
             }
             finally
             {
@@ -393,9 +392,6 @@ this.checkBox_returnSearchDetail.Checked);
             stop.Initial("正在进行查重 ...");
             stop.BeginLoop();
 
-            //this.Update();
-            //Program.MainForm.Update();
-
             try
             {
                 this.ClearDupState();
@@ -420,7 +416,10 @@ this.checkBox_returnSearchDetail.Checked);
                     out strUsedProjectName,
                     out strError);
                 if (lRet == -1)
+                {
+                    strError = "channel.SearchDup() error: " + strError;
                     goto ERROR1;
+                }
 
                 long lHitCount = lRet;
 
@@ -445,17 +444,18 @@ this.checkBox_returnSearchDetail.Checked);
 
                     stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
 
-                    DupSearchResult[] searchresults = null;
-
                     lRet = channel.GetDupSearchResult(
                         stop,
                         lStart,
                         lPerCount,
                         strBrowseStyle, // "cols,excludecolsoflowthreshold",
-                        out searchresults,
+                        out DupSearchResult[] searchresults,
                         out strError);
                     if (lRet == -1)
+                    {
+                        strError = "channel.GetDupSearchResult() error: " + strError;
                         goto ERROR1;
+                    }
 
                     if (lRet == 0)
                         break;
@@ -478,9 +478,11 @@ this.checkBox_returnSearchDetail.Checked);
                                 goto END1;
                         }
 
-                        ListViewItem item = new ListViewItem();
-                        item.Text = result.Path;
-                        item.Tag = result;
+                        ListViewItem item = new ListViewItem
+                        {
+                            Text = result.Path,
+                            Tag = result
+                        };
                         item.SubItems.Add(result.Weight.ToString());
                         if (result.Cols != null)
                         {
@@ -515,10 +517,9 @@ this.checkBox_returnSearchDetail.Checked);
                     lStart += searchresults.Length;
                     if (lStart >= lHitCount || lPerCount <= 0)
                         break;
-
                 }
 
-                END1:
+            END1:
                 this.SetDupState();
 
                 return (int)lHitCount;
@@ -539,7 +540,7 @@ this.checkBox_returnSearchDetail.Checked);
             }
 
 
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -548,14 +549,10 @@ this.checkBox_returnSearchDetail.Checked);
             if (this.comboBox_projectName.Items.Count > 0)
                 return;
 
-            string strError = "";
-            int nRet = 0;
-
-            string[] projectnames = null;
             // 列出可用的查重方案名
-            nRet = ListProjectNames(this.RecordPath,
-                out projectnames,
-                out strError);
+            int nRet = ListProjectNames(this.RecordPath,
+                out string[] projectnames,
+                out string strError);
             if (nRet == -1)
                 goto ERROR1;
 
@@ -563,11 +560,9 @@ this.checkBox_returnSearchDetail.Checked);
             {
                 this.comboBox_projectName.Items.Add(projectnames[i]);
             }
-
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
-
         }
 
         // 
@@ -627,7 +622,7 @@ this.checkBox_returnSearchDetail.Checked);
             }
 
 
-            ERROR1:
+        ERROR1:
             return -1;
         }
 

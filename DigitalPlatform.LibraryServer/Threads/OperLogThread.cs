@@ -248,7 +248,7 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = "SendToQueue() 出现异常: " + ex.Message;
                 return -1;
             }
 

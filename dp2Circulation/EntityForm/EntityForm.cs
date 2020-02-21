@@ -9963,14 +9963,16 @@ MessageBoxDefaultButton.Button1);
             string strError = "";
 
             // 获得书目记录XML格式
-            string strXmlBody = "";
             int nRet = this.GetBiblioXml(
                 "", // 迫使从记录路径中看marc格式
                 true,   // 包含资源ID
-                out strXmlBody,
+                out string strXmlBody,
                 out strError);
             if (nRet == -1)
+            {
+                strError = "GetBiblioXml() error: " + strError;
                 goto ERROR1;
+            }
 
             bool bExistDupForm = Program.MainForm.GetTopChildWindow<DupForm>() != null;
 
@@ -9995,7 +9997,7 @@ MessageBoxDefaultButton.Button1);
             nRet = form.DoSearch(out strError);
             if (nRet == -1)
             {
-                MessageBox.Show(form, strError);
+                MessageBox.Show(form, "DoSearch() error: " + strError);
                 return -1;
             }
 

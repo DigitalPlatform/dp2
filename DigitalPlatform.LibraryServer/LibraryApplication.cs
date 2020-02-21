@@ -9194,7 +9194,7 @@ out strError);
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = "GetReaderRecForLogin() 出现异常: " + ex.Message;
                 return -1;
             }
         }

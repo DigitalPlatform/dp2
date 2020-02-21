@@ -3029,7 +3029,7 @@ LibraryChannel channel,
                         {
                             if (nRet == -1)
                             {
-                                strError = ex.Message;
+                                strError = "TraceSetBiblioInfo() 出现异常: " + ex.Message;
                                 return -1;
                             }
                         }

@@ -438,7 +438,7 @@ namespace DigitalPlatform
             if (lStart == lTotalLength)
             {
                 lOutputLength = 0;
-                strError = "范围错误: 起始值 " + lStart.ToString() + " 大于总长度 " + lTotalLength.ToString() + "\r\n";
+                strError = "GetRealLength() 范围错误: 起始值 " + lStart.ToString() + " 大于或等于总长度 " + lTotalLength.ToString() + "\r\n";
                 return -1;
             }
 

@@ -267,7 +267,7 @@ namespace dp2Library
                 {
                     // TimeoutException
                 }
-                strError = ex.Message;
+                strError = "InitialSession() 出现异常: " + ex.Message;
                 return -2;
             }
             catch (Exception ex)

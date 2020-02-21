@@ -5336,7 +5336,7 @@ namespace DigitalPlatform.rms
             }
             catch (PathErrorException ex)
             {
-                strError = ex.Message;
+                strError = "GetFileCfgItem() 出现异常: " + ex.Message;
                 return -1;
             }
             finally

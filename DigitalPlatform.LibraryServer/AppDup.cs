@@ -262,14 +262,13 @@ namespace DigitalPlatform.LibraryServer
 
             strUsedProjectName = strProjectName;
 
-            XmlNode nodeProject = null;
             // 获得查重方案定义节点
             // return:
             //      -1  出错
             //      0   not found
             //      1   found
             nRet = GetDupProjectNode(strProjectName,
-                out nodeProject,
+                out XmlNode nodeProject,
                 out strError);
             if (nRet == 0 || nRet == -1)
                 goto ERROR1;
@@ -681,17 +680,6 @@ namespace DigitalPlatform.LibraryServer
             out List<AccessKeyInfo> aLine,
             out string strError)
         {
-            strError = "";
-            aLine = null;
-
-            /*
-            RmsChannel channel = Channels.GetChannel(this.WsUrl);
-            if (channel == null)
-            {
-                strError = "get channel error";
-                return -1;
-            }
-             * */
             Debug.Assert(channel != null, "");
 
             long lRet = channel.DoGetKeys(
@@ -703,9 +691,7 @@ namespace DigitalPlatform.LibraryServer
                 out aLine,
                 out strError);
             if (lRet == -1)
-            {
                 return -1;
-            }
 
             return 0;
         }
