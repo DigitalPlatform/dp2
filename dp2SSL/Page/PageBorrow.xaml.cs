@@ -1796,8 +1796,8 @@ out string strError);
                         if (item_records?.Length > 0)
                             entity.SetData(entity.ItemRecPath, item_records[0]);
 
-                        if (entity.Error != null)
-                            continue;
+                        //if (entity.Error != null)
+                        //    continue;
 
                         string message = $"{action_name}成功";
                         if (lRet == 1 && string.IsNullOrEmpty(strError) == false)

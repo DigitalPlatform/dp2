@@ -8,6 +8,8 @@ using System.Threading;
 using System.Windows.Forms;
 using System.Collections.Generic;
 using System.Collections;
+using System.Drawing;
+using System.Xml;
 
 using log4net;
 
@@ -16,8 +18,6 @@ using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Text;
 using DigitalPlatform.Core;
-using System.Drawing;
-using System.Xml;
 using DigitalPlatform.Xml;
 
 namespace DigitalPlatform.CirculationClient

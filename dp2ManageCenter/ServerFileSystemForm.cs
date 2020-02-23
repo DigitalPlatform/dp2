@@ -1,5 +1,4 @@
-﻿using DigitalPlatform.CirculationClient;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -8,6 +7,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.CommonControl;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.Text;
 
 namespace dp2ManageCenter
 {
@@ -63,7 +67,7 @@ namespace dp2ManageCenter
 
         private void kernelResTree1_GetChannel(object sender, DigitalPlatform.LibraryClient.GetChannelEventArgs e)
         {
-            e.Channel = ((ClientInfo.MainForm) as MainForm).GetChannel(this.ServerUrl);
+            e.Channel = Program.MainForm.GetChannel(this.ServerUrl);
         }
 
         private void kernelResTree1_ReturnChannel(object sender, DigitalPlatform.LibraryClient.ReturnChannelEventArgs e)
@@ -84,5 +88,134 @@ namespace dp2ManageCenter
         {
             this.kernelResTree1.Refresh(this.kernelResTree1.SelectedNode);
         }
+
+        private void kernelResTree1_DownloadFiles(object sender, DownloadFilesEventArgs e)
+        {
+            string strError = "";
+            string strOutputFolder = "";
+
+            if (e.Action == "getmd5")
+            {
+                Task.Run(() =>
+                {
+                    GetMd5(e);
+                });
+                return;
+            }
+
+#if NO
+            List<dp2Circulation.MainForm.DownloadFileInfo> infos = MainForm.BuildDownloadInfoList(e.FileNames);
+
+            // 询问是否覆盖已有的目标下载文件。整体询问
+            // return:
+            //      -1  出错
+            //      0   放弃下载
+            //      1   同意启动下载
+            int nRet = Program.MainForm.AskOverwriteFiles(infos,    // e.FileNames,
+ref strOutputFolder,
+out bool bAppend,
+out strError);
+            if (nRet == -1)
+            {
+                e.ErrorInfo = strError;
+                return;
+            }
+
+            // return:
+            //      -1  出错
+            //      0   放弃下载
+            //      1   成功启动了下载
+            nRet = Program.MainForm.BeginDownloadFiles(infos,   // e.FileNames,
+                bAppend ? "append" : "overwrite",
+                null,
+                ref strOutputFolder,
+                out strError);
+            if (nRet == -1)
+                e.ErrorInfo = strError;
+#endif
+        }
+
+        private void kernelResTree1_UploadFiles(object sender, UploadFilesEventArgs e)
+        {
+            // Program.MainForm.BeginUploadFiles(e);
+        }
+
+        void ShowMessage(string text)
+        {
+            this.BeginInvoke((Action)(() =>
+            {
+                this.toolStripStatusLabel_message.Text = text;
+            }));
+        }
+
+        void ClearMessage()
+        {
+            this.BeginInvoke((Action)(() =>
+            {
+                this.toolStripStatusLabel_message.Text = "";
+            }));
+        }
+
+        void ShowMessageBox(string text)
+        {
+            this.BeginInvoke((Action)(() =>
+            {
+                MessageBox.Show(this, text);
+            }));
+        }
+
+        void GetMd5(DownloadFilesEventArgs e)
+        {
+            string strError = "";
+
+            List<string> lines = new List<string>();
+
+            var channel = Program.MainForm.GetChannel(this.ServerUrl);
+
+            // var old_timeout = channel.Timeout;
+            channel.Timeout = new TimeSpan(0, 25, 0);
+            this.ShowMessage("正在获取 MD5 ...");
+            try
+            {
+                foreach (string filepath in e.FileNames)
+                {
+                    this.ShowMessage($"正在获取服务器文件 {filepath} 的 MD5 ...");
+
+                    // 检查 MD5
+                    // return:
+                    //      -1  出错
+                    //      0   文件没有找到
+                    //      1   文件找到
+                    int nRet = DynamicDownloader.GetServerFileMD5(
+                        channel,
+                        null,   // this.Stop,
+                        filepath,
+                        out byte[] server_md5,
+                        out strError);
+                    if (nRet != 1)
+                    {
+                        strError = "探测服务器端文件 '" + filepath + "' MD5 时出错: " + strError;
+                        goto ERROR1;
+                    }
+
+                    lines.Add($"文件 {filepath} 的 MD5 为 {Convert.ToBase64String(server_md5)}");
+                }
+            }
+            finally
+            {
+                //channel.Timeout = old_timeout;
+                Program.MainForm.ReturnChannel(channel);
+                this.ClearMessage();
+            }
+
+            this.Invoke((Action)(() =>
+            {
+                MessageDialog.Show(this, StringUtil.MakePathList(lines, "\r\n"));
+            }));
+            return;
+        ERROR1:
+            ShowMessageBox(strError);
+        }
+
     }
 }

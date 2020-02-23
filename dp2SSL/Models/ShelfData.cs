@@ -11,13 +11,14 @@ using System.Windows;
 using System.Windows.Documents;
 using System.Xml;
 
+using Newtonsoft.Json;
+
 using DigitalPlatform;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
 using DigitalPlatform.WPF;
-using Newtonsoft.Json;
 using static dp2SSL.LibraryChannelUtil;
 
 namespace dp2SSL
@@ -2599,8 +2600,8 @@ namespace dp2SSL
                             updates.Add(entity);
                         }
 
-                        if (entity.Error != null)
-                            continue;
+                        //if (entity.Error != null)
+                        //    continue;
 
                         string message = $"{action_name}成功";
                         if (lRet == 1 && string.IsNullOrEmpty(strError) == false)
@@ -2645,13 +2646,6 @@ namespace dp2SSL
             finally
             {
                 _limit.Release();
-                /*
-                Application.Current.Dispatcher.Invoke(new Action(() =>
-                {
-                    if (progress != null)
-                        progress.Close();
-                }));
-                */
             }
         }
 
@@ -2707,6 +2701,31 @@ namespace dp2SSL
         }
         */
 
+        // 从外部存储中装载以前遗留的 Actions
+        public static void LoadRetryActions()
+        {
+            using (var context = new MyContext())
+            {
+                context.Database.EnsureCreated();
+                var items = context.Requests.ToList();
+                AddRetryActions(FromRequests(items));
+            }
+        }
+
+        public static void SaveRetrysActions()
+        {
+            using (var context = new MyContext())
+            {
+                context.Database.EnsureDeleted();
+                lock (_syncRoot_retryActions)
+                {
+                    context.Requests.AddRange(FromActions(_retryActions));
+                    _retryActions.Clear();
+                }
+                context.SaveChanges();
+            }
+        }
+
         static List<ActionInfo> FromRequests(List<RequestItem> requests)
         {
             List<ActionInfo> actions = new List<ActionInfo>();
@@ -2753,6 +2772,38 @@ namespace dp2SSL
         static Task _retryTask = null;
         static List<ActionInfo> _retryActions = new List<ActionInfo>();
         static object _syncRoot_retryActions = new object();
+        static AutoResetEvent _eventRetry = new AutoResetEvent(false);
+
+        public static void ActivateRetry()
+        {
+            _eventRetry.Set();
+        }
+
+        // 从 _retryActions 中找到匹配的元素加以删除
+        public static void RemoveFromRetryActions(List<Entity> entities)
+        {
+            lock (_syncRoot_actions)
+            {
+                List<ActionInfo> matched = new List<ActionInfo>();
+                foreach (var action in _retryActions)
+                {
+                    string pii = action.Entity.PII;
+                    var found = entities.Find((a) =>
+                    {
+                        if (a.PII == pii)
+                            return true;
+                        return false;
+                    });
+                    if (found != null)
+                        matched.Add(action);
+                }
+
+                foreach(var action in matched)
+                {
+                    _retryActions.Remove(action);
+                }
+            }
+        }
 
         // 启动重试任务。此任务长期在后台运行
         public static void StartRetryTask(CancellationToken token)
@@ -2760,15 +2811,21 @@ namespace dp2SSL
             if (_retryTask != null)
                 return;
 
-            string a = "";
-            a.ToList();
+            token.Register(() =>
+            {
+                _eventRetry.Set();
+            });
 
             // 启动重试专用线程
-            _retryTask = Task.Factory.StartNew(() => {
+            _retryTask = Task.Factory.StartNew(() =>
+            {
 
-                while(token.IsCancellationRequested == false)
+                while (token.IsCancellationRequested == false)
                 {
-                    Task.Delay(TimeSpan.FromSeconds(10)).Wait(token);
+                    // TODO: 无论是整体退出，还是需要激活，都需要能中断 Delay
+                    // Task.Delay(TimeSpan.FromSeconds(10)).Wait(token);
+                    _eventRetry.WaitOne(TimeSpan.FromSeconds(10));
+                    token.ThrowIfCancellationRequested();
 
                     List<ActionInfo> actions = null;
                     lock (_syncRoot_retryActions)
@@ -2778,9 +2835,14 @@ namespace dp2SSL
 
                     if (actions.Count == 0)
                         continue;
+
                     var result = SubmitCheckInOut(
     null,
     actions);
+
+                    // 将 submit 情况写入日志备查
+                    WpfClientInfo.WriteInfoLog($"重试提交请求:\r\n{ActionInfo.ToString(actions)}\r\n返回结果:{result.ToString()}");
+
                     List<ActionInfo> processed = new List<ActionInfo>();
                     if (result.RetryActions != null)
                     {
@@ -2796,10 +2858,12 @@ namespace dp2SSL
                     // 把处理掉的 ActionInfo 对象移走
                     lock (_syncRoot_retryActions)
                     {
-                        foreach(var action in processed)
+                        foreach (var action in processed)
                         {
                             _retryActions.Remove(action);
                         }
+
+                        PageMenu.PageShelf?.SetRetryInfo(_retryActions.Count == 0 ? "" : _retryActions.Count.ToString());
                     }
                 }
                 _retryTask = null;
@@ -2814,6 +2878,18 @@ TaskScheduler.Default);
             lock (_syncRoot_retryActions)
             {
                 _retryActions.AddRange(actions);
+                PageMenu.PageShelf?.SetRetryInfo(_retryActions.Count == 0 ? "" : _retryActions.Count.ToString());
+            }
+        }
+
+        public static int RetryActionsCount
+        {
+            get
+            {
+                lock (_syncRoot_retryActions)
+                {
+                    return _retryActions.Count;
+                }
             }
         }
 
@@ -2960,6 +3036,32 @@ TaskScheduler.Default);
         public string Location { get; set; }    // 所有者馆藏地。transfer 动作会用到
         public string CurrentShelfNo { get; set; }  // 当前架号。transfer 动作会用到
         public string BatchNo { get; set; } // 批次号。transfer 动作会用到。建议可以用当前用户名加上日期构成
+
+        public override string ToString()
+        {
+            return $"Action={Action},TransferDirection={TransferDirection},Location={Location},CurrentShelfNo={CurrentShelfNo},Operator=[{Operator}],Entity=[{ToString(this.Entity)}],BatchNo={BatchNo}";
+        }
+
+        static string ToString(Entity entity)
+        {
+            return $"PII:{entity.PII},UID:{entity.UID},Title:{entity.Title},ItemRecPath:{entity.ItemRecPath},ReaderName:{entity.ReaderName},Antenna:{entity.Antenna}";
+        }
+
+        public static string ToString(List<ActionInfo> actions)
+        {
+            if (actions == null)
+                return "(null)";
+            StringBuilder text = new StringBuilder();
+            text.AppendLine($"ActionInfo 对象共 {actions.Count} 个:");
+            int i = 0;
+            foreach (var action in actions)
+            {
+                text.AppendLine($"{(i + 1)}) {action.ToString()}");
+                i++;
+            }
+
+            return text.ToString();
+        }
     }
 
 
@@ -2976,6 +3078,23 @@ TaskScheduler.Default);
         // [out]
         // 发生了错误，需要后面重试提交的 ActionInfo 对象集合
         public List<ActionInfo> RetryActions { get; set; }
+
+        public override string ToString()
+        {
+            StringBuilder text = new StringBuilder();
+            text.AppendLine(base.ToString());
+            if (ErrorActions != null && ErrorActions.Count > 0)
+            {
+                text.AppendLine("发生了错误(但不需要重试)的 ActionInfo:");
+                text.AppendLine(ActionInfo.ToString(ErrorActions));
+            }
+            if (RetryActions != null && RetryActions.Count > 0)
+            {
+                text.AppendLine("需要重试的 ActionInfo:");
+                text.AppendLine(ActionInfo.ToString(RetryActions));
+            }
+            return text.ToString();
+        }
     }
 
     public class AntennaList

@@ -209,6 +209,19 @@ namespace dp2SSL
             }));
         }
 
+        // 显示重试信息
+        public void SetRetryInfo(string text)
+        {
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                this.updateInfo.Text = text;
+                if (string.IsNullOrEmpty(this.updateInfo.Text) == false)
+                    this.updateInfo.Visibility = Visibility.Visible;
+                else
+                    this.updateInfo.Visibility = Visibility.Collapsed;
+            }));
+        }
+
         static string ToString(BarcodeCapture.CharInput input)
         {
             return $"{input.Key} string='{input.KeyChar}'";
@@ -1535,6 +1548,7 @@ namespace dp2SSL
                 DisplayMessage(progress, "尝试还书和上架 ...", "green");
 
                 WpfClientInfo.WriteInfoLog("首次初始化尝试还书和上架开始");
+
                 // TODO: 如何显示还书操作中的报错信息? 看了报错以后点继续?
                 // result.Value
                 //      -1  出错
@@ -1566,6 +1580,13 @@ namespace dp2SSL
                     return;
 
                 SelectAntenna();
+
+                // 将 RetryActions 里面的 PII 和 ShelfData.All 里面 PII 相同的事项删除。因为刚才 TryReturn() 已经成功提交了它们
+                ShelfData.LoadRetryActions();
+                ShelfData.RemoveFromRetryActions(new List<Entity>(ShelfData.All));
+
+                // 启动重试任务。此任务长期在后台运行
+                ShelfData.StartRetryTask(new CancellationToken());
             }
             finally
             {
@@ -2433,6 +2454,8 @@ namespace dp2SSL
                     return;  // 没有必要处理
             }
 
+            // TODO: 如果 RetryActions 有内容，则本次的 actions 要立刻追加进入 RetryActions，并立即触发重试 Task 过程。这是为了保证优先提交滞留的请求
+
             SubmitWindow progress = null;
 
             if (silence == false)
@@ -2443,6 +2466,19 @@ namespace dp2SSL
 
             try
             {
+                // 2020/2/23
+                if (ShelfData.RetryActionsCount > 0)
+                {
+                    ShelfData.AddRetryActions(actions);
+                    {
+                        string text = $"由于此前有待重试的请求，所以本次 {actions.Count} 个请求被加入重试队列，稍后会自动进行重试";
+                        _progressWindow?.PushContent(text, "red");
+                        WpfClientInfo.WriteErrorLog(text);
+                    }
+                    ShelfData.ActivateRetry();
+                    return;
+                }
+
                 var result = ShelfData.SubmitCheckInOut(
                 (min, max, value, text) =>
                 {
@@ -2469,6 +2505,9 @@ namespace dp2SSL
                 },
                 actions);
 
+                // 将 submit 情况写入日志备查
+                WpfClientInfo.WriteInfoLog($"首次提交请求:\r\n{ActionInfo.ToString(actions)}\r\n返回结果:{result.ToString()}");
+
                 if (result.Value == -1)
                 {
                     _progressWindow?.PushContent(result.ErrorInfo, "red");
@@ -2494,7 +2533,9 @@ namespace dp2SSL
 
                 // 启动自动重试
                 if (result.RetryActions != null)
+                {
                     ShelfData.AddRetryActions(result.RetryActions);
+                }
             }
             finally
             {

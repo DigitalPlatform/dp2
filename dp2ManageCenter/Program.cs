@@ -10,6 +10,14 @@ namespace dp2ManageCenter
 {
     static class Program
     {
+        public static MainForm MainForm
+        {
+            get
+            {
+                return (MainForm)ClientInfo.MainForm;
+            }
+        }
+
         /// <summary>
         /// 应用程序的主入口点。
         /// </summary>

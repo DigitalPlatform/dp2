@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using DigitalPlatform.WPF;
 using Microsoft.EntityFrameworkCore;
 
 namespace dp2SSL
@@ -58,8 +59,9 @@ namespace dp2SSL
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+            string filePath = Path.Combine(WpfClientInfo.UserDir, "actions.db");
             optionsBuilder
-                .UseSqlite(@"Data Source=actions.db;");
+                .UseSqlite($"Data Source={filePath};");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
