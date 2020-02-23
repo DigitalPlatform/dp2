@@ -50,6 +50,10 @@
                        Background="DarkOrange" Foreground="White"
                        TextWrapping="Wrap" Padding="6,6,6,6"
                        ></TextBlock>
+            <TextBlock Name="retryInfo" ToolTip="重试" Visibility="Collapsed"
+                       Background="DarkOrange" Foreground="White"
+                       TextWrapping="Wrap" Padding="6,6,6,6"
+                       ></TextBlock>
         </StackPanel>
         <Button Grid.Row="1" Grid.Column="2">Right</Button>
         <!--

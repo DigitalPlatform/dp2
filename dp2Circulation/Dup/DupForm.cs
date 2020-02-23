@@ -332,8 +332,7 @@ this.checkBox_returnSearchDetail.Checked);
 
         private void button_search_Click(object sender, EventArgs e)
         {
-            string strError = "";
-            int nRet = this.DoSearch(out strError);
+            int nRet = this.DoSearch(out string strError);
             if (nRet == -1)
             {
                 MessageBox.Show(this, strError);
