@@ -2712,7 +2712,7 @@ namespace dp2SSL
             }
         }
 
-        public static void SaveRetrysActions()
+        public static void SaveRetryActions()
         {
             using (var context = new MyContext())
             {
@@ -2720,7 +2720,6 @@ namespace dp2SSL
                 lock (_syncRoot_retryActions)
                 {
                     context.Requests.AddRange(FromActions(_retryActions));
-                    _retryActions.Clear();
                 }
                 context.SaveChanges();
             }
@@ -2806,10 +2805,12 @@ namespace dp2SSL
         }
 
         // 启动重试任务。此任务长期在后台运行
-        public static void StartRetryTask(CancellationToken token)
+        public static void StartRetryTask()
         {
             if (_retryTask != null)
                 return;
+
+            CancellationToken token = _cancel.Token;
 
             token.Register(() =>
             {
