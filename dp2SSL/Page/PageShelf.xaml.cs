@@ -1586,7 +1586,7 @@ namespace dp2SSL
                 ShelfData.RemoveFromRetryActions(new List<Entity>(ShelfData.All));
 
                 // 启动重试任务。此任务长期在后台运行
-                ShelfData.StartRetryTask(new CancellationToken());
+                ShelfData.StartRetryTask();
             }
             finally
             {

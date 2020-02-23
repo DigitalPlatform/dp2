@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -11,6 +12,9 @@ namespace dp2SSL
 {
     public class RequestItem
     {
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
+        public int ID { get; set; }
+
         // public Operator Operator { get; set; }  // 提起请求的读者
         // Operator 对象 JSON 化以后的字符串
         public string OperatorString { get; set; }
@@ -67,6 +71,15 @@ namespace dp2SSL
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<RequestItem>().ToTable("requests");
+            modelBuilder.Entity<RequestItem>(entity =>
+            {
+                entity.HasKey(e => e.ID);
+                // entity.Property(e => e.Name).IsRequired();
+            });
+            /*
+            modelBuilder.Entity<RequestItem>().Property(p => p.ID)
+.HasDatabaseGeneratedOption(DatabaseGeneratedOption.None);
+*/
         }
     }
 }
