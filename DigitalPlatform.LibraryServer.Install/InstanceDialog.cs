@@ -16,6 +16,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.Interfaces;
+using System.Linq;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -2692,7 +2693,11 @@ MessageBoxDefaultButton.Button2);
 
             // supervisor
             // 算法是获得 type 属性为空的第一个 account 元素
-            XmlElement nodeSupervisor = dom.DocumentElement.SelectSingleNode("accounts/account[@type='']") as XmlElement;
+            // XmlElement nodeSupervisor = dom.DocumentElement.SelectSingleNode("accounts/account[@type='']") as XmlElement;
+            // 2020/2/24
+            var nodes = dom.DocumentElement.SelectNodes("accounts/account");
+            XmlElement nodeSupervisor = nodes.Cast<XmlElement>().First(node => string.IsNullOrEmpty(node.GetAttribute("type")));
+            
             if (nodeSupervisor != null)
             {
                 this.SupervisorUserName = DomUtil.GetAttr(nodeSupervisor, "name");

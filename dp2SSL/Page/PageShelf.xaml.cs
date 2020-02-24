@@ -541,6 +541,14 @@ namespace dp2SSL
                 return;
             }
 
+            // 当前有滞留的请求
+            if (ShelfData.RetryActionsCount > 0)
+            {
+                ShelfData.ActivateRetry();
+                ErrorBox($"当前有 {ShelfData.RetryActionsCount} 个滞留请求尚未提交，请联系管理员排除此故障");
+                return;
+            }
+
             // 检查门锁是否已经是打开状态?
             if (e.Door.State == "open")
             {

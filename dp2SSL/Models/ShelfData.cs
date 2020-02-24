@@ -2200,7 +2200,6 @@ namespace dp2SSL
             Delegate_setProgress func_setProgress,
             IReadOnlyCollection<ActionInfo> actions)
         {
-
             // TODO: 如果当前没有读者身份，则当作初始化处理，将书柜内的全部图书做还书尝试；被拿走的图书记入本地日志(所谓无主操作)
             // TODO: 注意还书，也就是往书柜里面放入图书，是不需要具体读者身份就可以提交的
 
@@ -2525,6 +2524,7 @@ namespace dp2SSL
                                 messageItem.ResultType = "information";
                                 WpfClientInfo.WriteInfoLog($"读者 {info.Operator.PatronName} {info.Operator.PatronBarcode} 尝试还回册 '{title}' 时: {strError}");
                                 // TODO: 这里也要修改 EAS
+                                entity.SetError(null);
                                 continue;
                             }
                         }
@@ -2543,6 +2543,7 @@ namespace dp2SSL
                                 //warnings.Add($"册 '{title}' (尝试转移时发现没有发生修改): {strError}");
                                 // 写入错误日志
                                 WpfClientInfo.WriteInfoLog($"转移册 '{title}' 时: {strError}");
+                                entity.SetError(null);
                                 continue;
                             }
                         }
@@ -2570,6 +2571,7 @@ namespace dp2SSL
                             messageItem.ErrorCode = "overflow";
                             // 写入错误日志
                             WpfClientInfo.WriteInfoLog($"读者 {info.Operator.PatronName} {info.Operator.PatronBarcode} 借阅 '{title}' 时发生超越许可: {strError}");
+                            entity.SetError(null);
                         }
                     }
 
@@ -2714,14 +2716,25 @@ namespace dp2SSL
 
         public static void SaveRetryActions()
         {
-            using (var context = new MyContext())
+            try
             {
-                context.Database.EnsureDeleted();
-                lock (_syncRoot_retryActions)
+                using (var context = new MyContext())
                 {
-                    context.Requests.AddRange(FromActions(_retryActions));
+                    context.Database.EnsureDeleted();
+                    context.Database.EnsureCreated();
+
+                    lock (_syncRoot_retryActions)
+                    {
+                        context.Requests.AddRange(FromActions(_retryActions));
+                    }
+                    context.SaveChanges();
+
+                    WpfClientInfo.WriteInfoLog($"RetryActions 保存成功。内容如下：\r\n{ActionInfo.ToString(_retryActions)}");
                 }
-                context.SaveChanges();
+            }
+            catch(Exception ex)
+            {
+                WpfClientInfo.WriteErrorLog($"SaveRetryActions() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
             }
         }
 
@@ -2801,7 +2814,13 @@ namespace dp2SSL
                 {
                     _retryActions.Remove(action);
                 }
+                RefreshRetryInfo();
             }
+        }
+
+        public static void RefreshRetryInfo()
+        {
+            PageMenu.PageShelf?.SetRetryInfo(_retryActions.Count == 0 ? "" : $"滞留:{_retryActions.Count}");
         }
 
         // 启动重试任务。此任务长期在后台运行
@@ -2864,7 +2883,7 @@ namespace dp2SSL
                             _retryActions.Remove(action);
                         }
 
-                        PageMenu.PageShelf?.SetRetryInfo(_retryActions.Count == 0 ? "" : _retryActions.Count.ToString());
+                        RefreshRetryInfo();
                     }
                 }
                 _retryTask = null;
@@ -2879,7 +2898,7 @@ TaskScheduler.Default);
             lock (_syncRoot_retryActions)
             {
                 _retryActions.AddRange(actions);
-                PageMenu.PageShelf?.SetRetryInfo(_retryActions.Count == 0 ? "" : _retryActions.Count.ToString());
+                RefreshRetryInfo();
             }
         }
 

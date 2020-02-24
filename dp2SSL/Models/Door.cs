@@ -641,7 +641,7 @@ namespace dp2SSL
             return changed;
         }
 
-        // 根据 items 集合更新据部 collection 集合内容
+        // 根据 items 集合更新局部 collection 集合内容
         static void Refresh(EntityCollection collection, List<Entity> items)
         {
             // 添加 items 中多出来的对象
@@ -661,7 +661,6 @@ namespace dp2SSL
                 }
             }
         }
-
     }
 
 

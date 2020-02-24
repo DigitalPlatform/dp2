@@ -59,9 +59,11 @@ namespace DigitalPlatform.LibraryServer
         // TODO: 似乎 eventClose 用 ManualResetEvent 更好
         internal ManualResetEvent eventClose = new ManualResetEvent(false);	// true : initial state is signaled 
         internal AutoResetEvent eventActive = new AutoResetEvent(false);	// 激活信号
-        internal AutoResetEvent eventFinished = new AutoResetEvent(false);	// true : initial state is signaled 
+        // 2020/2/24: 似乎 eventFinished 用 ManualResetEvent 更好
+        internal ManualResetEvent eventFinished = new ManualResetEvent(false);	// true : initial state is signaled 
 
-        internal AutoResetEvent eventStarted = new AutoResetEvent(false);	// 首次启动起来
+        // 2020/2/24 从 AutoResetEvent 修改为 ManualResetEvent
+        internal ManualResetEvent eventStarted = new ManualResetEvent(false);	// 首次启动起来
 
         public int PerTime = 60 * 60 * 1000;	// 1小时
 

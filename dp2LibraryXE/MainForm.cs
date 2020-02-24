@@ -2691,7 +2691,11 @@ TaskScheduler.Default);
                 nodeAccounts = dom.CreateElement("accounts");
                 dom.DocumentElement.AppendChild(nodeAccounts);
             }
-            XmlElement nodeSupervisor = nodeAccounts.SelectSingleNode("account[@type='']") as XmlElement;
+            // XmlElement nodeSupervisor = nodeAccounts.SelectSingleNode("account[@type='']") as XmlElement;
+            // 2020/2/24
+            var nodes = nodeAccounts.SelectNodes("account");
+            XmlElement nodeSupervisor = nodes.Cast<XmlElement>().First(node => string.IsNullOrEmpty(node.GetAttribute("type")));
+
             if (nodeSupervisor == null)
             {
                 nodeSupervisor = dom.CreateElement("account");

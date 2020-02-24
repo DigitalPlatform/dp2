@@ -247,7 +247,6 @@ namespace DigitalPlatform.LibraryServer
 
                         task.AppendResultText("新任务已加入等待队列：\r\n---\r\n" + RebuildKeys.GetSummary(param.StartInfo) + "\r\n---\r\n\r\n");
                     }
-
                     else
                     {
                         // 尽量采用前端发来的参数进行运行
@@ -258,7 +257,19 @@ namespace DigitalPlatform.LibraryServer
                     task.eventActive.Set();
                     task.ManualStart = true;    // 表示为命令启动
 
-                    strError = "任务 " + task.Name + " 已经在运行中，不能重复启动。本次操作激活了这个任务。";
+                    int nRet = WaitForBegin(
+    task,
+    strName,
+    param,
+    ref info,
+    out string strError1);
+                    if (nRet == 0)
+                    {
+                        strError = "任务 " + task.Name + " 已经在运行中，不能重复启动。本次操作激活了这个任务。";
+                        return 1;
+                    }
+
+                    strError += "; " + strError1;
                     return 1;
                 }
             }
@@ -280,6 +291,58 @@ namespace DigitalPlatform.LibraryServer
             // 激活 2007/10/10
             task.eventActive.Set();
              * */
+
+            return WaitForBegin(
+task,
+strName,
+param,
+ref info,
+out strError);
+
+#if NO
+            // 等待工作线程运行到启动点
+            if (task.StartInfo.WaitForBegin)
+            {
+                if (task.eventStarted.WaitOne(TimeSpan.FromSeconds(10)) == false)
+                {
+                    strError = "任务 " + task.Name + " 未能在 10 秒内启动成功";
+                    return 1;
+                }
+
+                // 2017/8/23
+                if (string.IsNullOrEmpty(task.ErrorInfo) == false)
+                {
+                    strError = "任务 " + task.Name + " 启动阶段出错: " + task.ErrorInfo;
+                    return 1;
+                }
+            }
+
+            info = task.GetCurrentInfo(param.ResultOffset,
+                param.MaxResultBytes);
+
+            if (task.StartInfo.WaitForBegin)
+            {
+                if (info.StartInfo == null)
+                    info.StartInfo = new BatchTaskStartInfo();
+                if (strName == "大备份")
+                {
+                    BackupTask temp = task as BackupTask;
+                    info.StartInfo.OutputParam = temp.OutputFileNames;
+                }
+            }
+
+            return 0;
+#endif
+        }
+
+        int WaitForBegin(
+            BatchTask task,
+            string strName,
+            BatchTaskInfo param,
+            ref BatchTaskInfo info,
+            out string strError)
+        {
+            strError = "";
 
             // 等待工作线程运行到启动点
             if (task.StartInfo.WaitForBegin)
@@ -414,6 +477,19 @@ namespace DigitalPlatform.LibraryServer
             info = task.GetCurrentInfo(param.ResultOffset,
                 param.MaxResultBytes);
 
+            // 特殊地，大备份 任务可以要求返回输出文件名列表
+            // param.StartInfo.Param 包含一定的 style
+            if (strName == "大备份"
+                && param.StartInfo != null
+                && StringUtil.IsInList("getOutputFileNames", param.StartInfo.Param))
+            {
+                if (info.StartInfo == null)
+                    info.StartInfo = new BatchTaskStartInfo();
+                {
+                    BackupTask temp = task as BackupTask;
+                    info.StartInfo.OutputParam = temp.OutputFileNames;
+                }
+            }
             return 1;
         }
     }

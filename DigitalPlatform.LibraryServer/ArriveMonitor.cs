@@ -201,9 +201,8 @@ namespace DigitalPlatform.LibraryServer
                 startinfo = new BatchTaskStartInfo();   // 按照缺省值来
 
             // 通用启动参数
-            bool bLoop = true;
             nRet = ParseArriveMonitorParam(startinfo.Param,
-                out bLoop,
+                out bool bLoop,
                 out strError);
             if (nRet == -1)
             {

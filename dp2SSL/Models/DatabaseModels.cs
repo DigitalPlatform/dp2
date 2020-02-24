@@ -12,7 +12,7 @@ namespace dp2SSL
 {
     public class RequestItem
     {
-        [DatabaseGenerated(DatabaseGeneratedOption.None)]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ID { get; set; }
 
         // public Operator Operator { get; set; }  // 提起请求的读者
