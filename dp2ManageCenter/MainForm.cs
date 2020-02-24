@@ -874,9 +874,11 @@ string strHtml)
                 item = new ListViewItem();
                 this.listView_backupTasks.Items.Add(item);
                 ListViewUtil.ChangeItemText(item, COLUMN_SERVERNAME, server.Name);
+
             }));
 
             var info = GetBackupInfo(item);
+            info.ServerName = server.Name;
             info.CancelTask();
             // TODO: 出错时要把错误状态显示和背景颜色都兑现
             info.BackupTask = Backup(server,
@@ -983,8 +985,22 @@ string strHtml)
                     new BatchTaskInfo { StartInfo = startinfo },
                     out resultInfo,
                     out string strError);
+
+                if (resultInfo != null && resultInfo.StartInfo != null)
+                {
+                    // 把服务器端文件保存起来
+                    List<string> paths = StringUtil.SplitList(resultInfo.StartInfo.OutputParam);
+                    StringUtil.RemoveBlank(ref paths);
+                    SetItemText(item, COLUMN_SERVERFILES, StringUtil.MakePathList(paths));
+
+                    var info = GetBackupInfo(item);
+                    info.ServerName = server.Name;
+                    info.InitialPathList(paths);
+                }
+
                 if (lRet == -1 || lRet == 1)
                 {
+                    // TODO: 本次激活的情况，需要想办法获得服务器一端的两个文件名
                     return new NormalResult
                     {
                         Value = -1,
@@ -1006,16 +1022,11 @@ string strHtml)
                 // 开始下载文件
                 // TODO: 检查这部分代码是否和 DownloadBackupFiles() 里面的代码有重复
                 {
-                    List<string> paths = StringUtil.SplitList(resultInfo.StartInfo.OutputParam);
-
-                    StringUtil.RemoveBlank(ref paths);
 
                     SetItemText(item, COLUMN_STATE, "正在下载");
-                    SetItemText(item, COLUMN_SERVERFILES, StringUtil.MakePathList(paths));
 
                     var info = GetBackupInfo(item);
 
-                    info.InitialPathList(paths);
                     info.ServerName = server.Name;
                     info.State = "downloading";
                     SetBackupItemColor(item);
@@ -1044,6 +1055,46 @@ string strHtml)
             if (index > 3)
                 index = 0;
             return result;
+        }
+
+        int GetOutputFileNames(LibraryChannel channel,
+            ListViewItem item,
+            out List<string> paths,
+            out string strError)
+        {
+            strError = "";
+            paths = new List<string>();
+
+            BatchTaskStartInfo startinfo = new BatchTaskStartInfo
+            {
+                Param = "getOutputFileNames",
+            };
+            // return:
+            //      -1  出错
+            //      0   启动成功
+            //      1   调用前任务已经处于执行状态，本次调用激活了这个任务
+            long lRet = channel.BatchTask(
+                null,
+                "大备份",
+                "getinfo",
+                new BatchTaskInfo { StartInfo = startinfo },
+                out BatchTaskInfo resultInfo,
+                out strError);
+            if (lRet == -1)
+                return -1;
+
+            if (resultInfo != null && resultInfo.StartInfo != null)
+            {
+                // 把服务器端文件保存起来
+                paths = StringUtil.SplitList(resultInfo.StartInfo.OutputParam);
+                StringUtil.RemoveBlank(ref paths);
+                SetItemText(item, COLUMN_SERVERFILES, StringUtil.MakePathList(paths));
+
+                var info = GetBackupInfo(item);
+                info.InitialPathList(paths);
+            }
+
+            return 0;
         }
 
         // parameters:
@@ -1085,11 +1136,19 @@ string strHtml)
                     }
 
                 if (paths.Count == 0)
-                    return new NormalResult
-                    {
-                        Value = -1,
-                        ErrorInfo = SetBackupItemError(item, $"任务事项 '{info.ServerName}' 中没有任何下载文件事项")
-                    };
+                {
+                    // 尝试重新从服务器获取这个信息
+                    int nRet = GetOutputFileNames(channel,
+    item,
+    out paths,
+    out string strError);
+                    if (nRet == -1 || paths.Count == 0)
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = SetBackupItemError(item, $"任务事项 '{info.ServerName}' 中没有任何下载文件事项")
+                        };
+                }
 
                 StringUtil.RemoveBlank(ref paths);
 
@@ -2997,6 +3056,12 @@ string strHtml)
             if (result != DialogResult.Yes)
                 return;
 
+            foreach (ListViewItem item in this.listView_backupTasks.SelectedItems)
+            {
+                var info = GetBackupInfo(item);
+                info.CancelTask();
+            }
+
             ListViewUtil.DeleteSelectedItems(this.listView_backupTasks);
         }
 
@@ -3095,7 +3160,8 @@ string strHtml)
         // 根据行状态设置行背景色
         void SetBackupItemColor(ListViewItem item)
         {
-            Debug.Assert(item.ListView == this.listView_backupTasks, "");
+            Debug.Assert(item.ListView == null ||
+                item.ListView == this.listView_backupTasks, "");
 
             this.Invoke((Action)(() =>
             {
@@ -3919,7 +3985,8 @@ out string strError);
         // 根据行状态设置行背景色
         void SetOperLogItemColor(ListViewItem item)
         {
-            Debug.Assert(item.ListView == this.listView_operLogTasks
+            Debug.Assert(item.ListView == null
+                || item.ListView == this.listView_operLogTasks
                 || item.ListView == this.listView_errorLogTasks,
                 "");
 
@@ -4150,6 +4217,12 @@ out string strError);
         MessageBoxDefaultButton.Button2);
             if (result != DialogResult.Yes)
                 return;
+
+            foreach(ListViewItem item in this.listView_errorLogTasks.SelectedItems)
+            {
+                var info = GetOperLogInfo(item);
+                info.CancelTask();
+            }
 
             ListViewUtil.DeleteSelectedItems(listView);
         }

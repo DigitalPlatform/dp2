@@ -418,8 +418,6 @@ namespace DigitalPlatform.LibraryServer
         {
             strError = "";
 
-            LibraryInstanceInfo info = null;
-
             // 从注册表和 library.xml 文件中获得实例信息
             // return:
             //      -1  出错
@@ -427,7 +425,7 @@ namespace DigitalPlatform.LibraryServer
             //      1   成功
             int nRet = GetLibraryInstanceInfo(
                 strInstanceName,
-                out info,
+                out LibraryInstanceInfo info,
                 out strError);
             if (nRet == -1)
             {
@@ -710,13 +708,18 @@ namespace DigitalPlatform.LibraryServer
 
             XmlElement nodeSupervisor = null;
 
+            // https://stackoverflow.com/questions/362945/xpath-query-to-select-node-when-attribute-does-not-exist
             // TODO: 找到所有具备 managedatabase 权限的用户信息返回
             // 找到第一个具备 managedatabase 权限用户
-            XmlNodeList nodes = dom.DocumentElement.SelectNodes("accounts/account[@type='']");
+            // XmlNodeList nodes = dom.DocumentElement.SelectNodes("accounts/account[@type='']");
+            XmlNodeList nodes = dom.DocumentElement.SelectNodes("accounts/account");
             if (nodes.Count > 0)
             {
                 foreach (XmlElement account in nodes)
                 {
+                    if (string.IsNullOrEmpty(account.GetAttribute("type")))
+                        continue;
+
                     string strRights = account.GetAttribute("rights");
                     if (StringUtil.IsInList("managedatabase", strRights) == true)
                     {

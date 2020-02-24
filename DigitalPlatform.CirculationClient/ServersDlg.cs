@@ -235,11 +235,12 @@ namespace DigitalPlatform.CirculationClient
             MenuItem menuItem = null;
 
             bool bSelected = listView1.SelectedItems.Count > 0;
+            bool bReadOnly = (this.Mode == "select");
 
-            //
-            menuItem = new MenuItem("修改(&M)");
+                //
+                menuItem = new MenuItem("修改(&M)");
             menuItem.Click += new System.EventHandler(this.menu_modifyServer);
-            if (bSelected == false)
+            if (bSelected == false || bReadOnly)
             {
                 menuItem.Enabled = false;
             }
@@ -252,7 +253,7 @@ namespace DigitalPlatform.CirculationClient
 
             menuItem = new MenuItem("删除(&D)");
             menuItem.Click += new System.EventHandler(this.menu_deleteServer);
-            if (bSelected == false)
+            if (bSelected == false || bReadOnly)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
@@ -264,8 +265,9 @@ namespace DigitalPlatform.CirculationClient
             //
             menuItem = new MenuItem("新增(&N)");
             menuItem.Click += new System.EventHandler(this.menu_newServer);
+            if (bReadOnly)
+                menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
-
 
             contextMenu.Show(listView1, new Point(e.X, e.Y));
         }
