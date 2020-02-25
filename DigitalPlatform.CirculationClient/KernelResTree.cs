@@ -485,6 +485,11 @@ namespace DigitalPlatform.CirculationClient
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
+            menuItem = new MenuItem("复制文件名 [" + selected_file_nodes.Count + "] (&C)");
+            menuItem.Click += new System.EventHandler(this.menu_copyFileName);
+            if (selected_file_nodes.Count == 0)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
 
             // ---
             menuItem = new MenuItem("-");
@@ -1027,6 +1032,32 @@ namespace DigitalPlatform.CirculationClient
 
             downloader.StartDownload(bAppend);
 #endif
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        // 复制文件名到 Windows 剪贴板
+        void menu_copyFileName(object sender, System.EventArgs e)
+        {
+            string strError = "";
+
+            List<TreeNode> nodes = this.GetCheckedFileNodes();
+
+            if (nodes.Count == 0)
+            {
+                strError = "尚未选择要复制名字的文件节点";
+                goto ERROR1;
+            }
+
+            List<string> paths = new List<string>();
+            foreach (TreeNode node in nodes)
+            {
+                string strPath = GetNodePath(node);
+                paths.Add(strPath);
+            }
+
+            Clipboard.SetText(StringUtil.MakePathList(paths, "\r\n"));
             return;
         ERROR1:
             MessageBox.Show(this, strError);

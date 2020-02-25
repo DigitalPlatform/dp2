@@ -5,9 +5,11 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.LibraryClient;
@@ -103,6 +105,7 @@ namespace dp2ManageCenter
                 return;
             }
 
+
 #if NO
             List<dp2Circulation.MainForm.DownloadFileInfo> infos = MainForm.BuildDownloadInfoList(e.FileNames);
 
@@ -170,26 +173,51 @@ out strError);
 
             List<string> lines = new List<string>();
 
+            CancellationTokenSource cancel = new CancellationTokenSource();
+            // 出现一个对话框，允许中断获取 MD5 的过程
+            FileDownloadDialog dlg = null;
+            this.Invoke((Action)(() =>
+            {
+                dlg = new FileDownloadDialog();
+                dlg.Font = this.Font;
+                dlg.Text = $"正在获取 MD5";
+                // dlg.SourceFilePath = strTargetPath;
+                dlg.TargetFilePath = null;
+                // 让 Progress 变为走马灯状态
+                dlg.StartMarquee();
+            }));
+            dlg.FormClosed += new FormClosedEventHandler(delegate (object o1, FormClosedEventArgs e1)
+            {
+                cancel.Cancel();
+            });
+            this.Invoke((Action)(() =>
+            {
+                dlg.Show(this);
+            }));
+
             var channel = Program.MainForm.GetChannel(this.ServerUrl);
 
             // var old_timeout = channel.Timeout;
             channel.Timeout = new TimeSpan(0, 25, 0);
-            this.ShowMessage("正在获取 MD5 ...");
+            // this.ShowMessage("正在获取 MD5 ...");
             try
             {
                 foreach (string filepath in e.FileNames)
                 {
-                    this.ShowMessage($"正在获取服务器文件 {filepath} 的 MD5 ...");
+                    // this.ShowMessage($"正在获取服务器文件 {filepath} 的 MD5 ...");
+
+                    dlg.SetProgress($"正在获取服务器文件 {filepath} 的 MD5 ...", 0, 0);
 
                     // 检查 MD5
                     // return:
                     //      -1  出错
                     //      0   文件没有找到
                     //      1   文件找到
-                    int nRet = DynamicDownloader.GetServerFileMD5(
+                    int nRet = DynamicDownloader.GetServerFileMD5ByTask(
                         channel,
                         null,   // this.Stop,
                         filepath,
+                        cancel.Token,
                         out byte[] server_md5,
                         out strError);
                     if (nRet != 1)
@@ -201,11 +229,22 @@ out strError);
                     lines.Add($"文件 {filepath} 的 MD5 为 {Convert.ToBase64String(server_md5)}");
                 }
             }
+            catch (Exception ex)
+            {
+                strError = ex.Message;
+                goto ERROR1;
+            }
             finally
             {
                 //channel.Timeout = old_timeout;
                 Program.MainForm.ReturnChannel(channel);
-                this.ClearMessage();
+                // this.ClearMessage();
+
+                this.Invoke((Action)(() =>
+                {
+                    dlg.Close();
+                }));
+                cancel.Dispose();
             }
 
             this.Invoke((Action)(() =>

@@ -161,6 +161,7 @@
     <Compile Include="DupResultSet.cs" />
     <Compile Include="Garden.cs" />
     <Compile Include="MarcTable.cs" />
+    <Compile Include="Md5Task.cs" />
     <Compile Include="MongoDb\AccessLogDatabase.cs" />
     <Compile Include="MongoDb\BuildMongoOperDatabase.cs" />
     <Compile Include="MongoDb\ChargingOperDatabase.cs" />

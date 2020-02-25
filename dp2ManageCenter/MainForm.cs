@@ -788,6 +788,8 @@ string strHtml)
         {
             string strError = "";
 
+            bool bControl = (Control.ModifierKeys & Keys.Control) == Keys.Control;
+
             var server_names = SelectServerNames();
             if (server_names == null)
                 return;
@@ -813,11 +815,27 @@ string strHtml)
                         goto ERROR1;
                     }
 
+                    // 询问服务器端文件名。只需要输入一个文件名例如 "!backup/中国建筑科学研究院_2020-02-13_12_41_57.dp2bak" 即可，程序会自动计算出一对文件名
+                    List<string> paths = null;
+                    if (bControl)
+                    {
+                        var filename = InputDlg.GetInput(this, "指定大备份文件名", "服务器端大备份文件路径", null, this.Font);
+                        if (filename != null)
+                        {
+                            paths = ComputePaths(filename);
+                        }
+                    }
+
                     ListViewItem item = new ListViewItem();
                     this.listView_backupTasks.Items.Add(item);
                     ListViewUtil.ChangeItemText(item, COLUMN_SERVERNAME, server.Name);
 
                     var info = GetBackupInfo(item);
+                    if (paths != null)
+                    {
+                        info.InitialPathList(paths);
+                        SetItemText(item, COLUMN_SERVERFILES, StringUtil.MakePathList(paths));
+                    }
                     info.ServerName = server.Name;
                 }
             }
@@ -828,6 +846,20 @@ string strHtml)
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+        // 根据一个文件路径计算出一对文件路径
+        static List<string> ComputePaths(string path)
+        {
+            if (path.StartsWith("!") == false)
+                throw new ArgumentException($"路径 '{path}' 不合法。应为感叹号开头的服务器路径形态");
+
+            string directory = Path.GetDirectoryName(path);
+            string pure_filename = Path.GetFileNameWithoutExtension(path);
+            List<string> results = new List<string>();
+            results.Add(Path.Combine(directory, pure_filename + ".dbdef.zip"));
+            results.Add(Path.Combine(directory, pure_filename + ".dp2bak"));
+            return results;
         }
 
         const int COLUMN_SERVERNAME = 0;
@@ -1708,8 +1740,42 @@ string strHtml)
                         {
                             var result = await Task.Run<NormalResult>(() =>
                             {
-                                return _checkMD5(channel, filename, strTargetPath);
+                                CancellationTokenSource cancel = new CancellationTokenSource();
+
+                                // 出现一个对话框，允许中断获取 MD5 的过程
+                                FileDownloadDialog dlg = null;
+                                this.Invoke((Action)(() =>
+                                {
+                                    dlg = new FileDownloadDialog();
+                                    dlg.Font = this.Font;
+                                    dlg.Text = $"正在获取 MD5: {strTargetPath}";
+                                    dlg.SourceFilePath = strTargetPath;
+                                    dlg.TargetFilePath = null;
+                                    // 让 Progress 变为走马灯状态
+                                    dlg.StartMarquee();
+                                }));
+                                dlg.FormClosed += new FormClosedEventHandler(delegate (object o1, FormClosedEventArgs e1)
+                                {
+                                    cancel.Cancel();
+                                });
+                                this.Invoke((Action)(() =>
+                                {
+                                    dlg.Show(this);
+                                }));
+                                try
+                                {
+                                    return _checkMD5(channel, filename, strTargetPath, cancel.Token);
+                                }
+                                finally
+                                {
+                                    this.Invoke((Action)(() =>
+                                    {
+                                        dlg.Close();
+                                    }));
+                                    cancel.Dispose();
+                                }
                             });
+
                             if (result.Value == -1)
                             {
                                 return new AskResult
@@ -2076,6 +2142,8 @@ string strHtml)
         }
         */
 
+
+
         // result.Value:
         //      -1  出错
         //      0   不匹配
@@ -2083,9 +2151,10 @@ string strHtml)
         NormalResult _checkMD5(
             LibraryChannel channel,
             string strServerFilePath,
-            string strLocalFilePath)
+            string strLocalFilePath,
+            CancellationToken token)
         {
-            string strError = "";
+            // string strError = "";
 
             /*
             LibraryChannel channel = this.GetChannel();
@@ -2106,12 +2175,13 @@ string strHtml)
                 //      -1  出错
                 //      0   文件没有找到
                 //      1   文件找到
-                int nRet = DynamicDownloader.GetServerFileMD5(
+                int nRet = DynamicDownloader.GetServerFileMD5ByTask(
                     channel,
                     null,   // this.Stop,
                     strServerFilePath,
+                    token,
                     out byte[] server_md5,
-                    out strError);
+                    out string strError);
                 // TODO: 遇到出错要可以 UI 交互重试
                 if (nRet != 1)
                 {
@@ -2369,7 +2439,7 @@ string strHtml)
                 }));
             });
             // 注：启动下载但并不等待
-            await downloader.StartDownload(bAppend);
+            await downloader.StartDownload(bAppend, true);
             return new BeginDownloadResult { Value = 1 };
         }
 
@@ -2841,6 +2911,15 @@ string strHtml)
                     }
                 }
                 return;
+            }
+            catch(Exception ex)
+            {
+                this.Invoke((Action)(() =>
+                {
+                    WriteHtml(this.webBrowser_backupTask,
+                    $"*** RefreshTaskConsole() 出现异常 ***\r\n{ExceptionUtil.GetDebugText(ex)}\r\n");
+                    ScrollToEnd();
+                }));
             }
             finally
             {
@@ -3730,7 +3809,7 @@ string strHtml)
                     Debug.Assert(item != null, "");
                     SetItemText(item, OPERLOG_COLUMN_STATE, $"正在下载 {strNo} {downloader.ServerFilePath}");
                 }));
-                Task task = downloader.StartDownload(bAppend);
+                Task task = downloader.StartDownload(bAppend, true);
                 task.Wait();    // TODO: 这里要允许中断
                 if (downloader.IsCancellationRequested)
                 {
@@ -3841,7 +3920,7 @@ out string strError);
 
             // this.ServerVersion = strVersion;
 
-            string base_version = "2.60"; // 2.33
+            string base_version = "3.23"; // 3.23
             if (StringUtil.CompareVersion(strVersion, base_version) < 0)
             {
                 strError = $"dp2library 服务器 '{channel.Url}' 版本必须升级为 " + base_version + " 以上时才能使用大备份和日志备份功能 (当前 dp2library 版本实际为 " + strVersion + ")";
@@ -4218,7 +4297,7 @@ out string strError);
             if (result != DialogResult.Yes)
                 return;
 
-            foreach(ListViewItem item in this.listView_errorLogTasks.SelectedItems)
+            foreach (ListViewItem item in this.listView_errorLogTasks.SelectedItems)
             {
                 var info = GetOperLogInfo(item);
                 info.CancelTask();
