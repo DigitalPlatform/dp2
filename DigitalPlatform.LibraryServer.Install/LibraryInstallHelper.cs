@@ -717,7 +717,7 @@ namespace DigitalPlatform.LibraryServer
             {
                 foreach (XmlElement account in nodes)
                 {
-                    if (string.IsNullOrEmpty(account.GetAttribute("type")))
+                    if (string.IsNullOrEmpty(account.GetAttribute("type")) == false)
                         continue;
 
                     string strRights = account.GetAttribute("rights");

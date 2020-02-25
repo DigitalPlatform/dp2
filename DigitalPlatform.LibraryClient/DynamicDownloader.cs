@@ -137,7 +137,10 @@ namespace DigitalPlatform.LibraryClient
             }
         }
 
-        public Task StartDownload(bool bContinue)
+        // parameters:
+        //      getMd5NewStyle  获得服务器文件 MD5 的时候是否使用新轮询风格? (注：只能对 dp2library 本地文件用新轮询风格)
+        public Task StartDownload(bool bContinue, 
+            bool getMd5NewStyle = false)
         {
             // 创建输出文件
             this.Close();
@@ -152,14 +155,16 @@ namespace DigitalPlatform.LibraryClient
                 _stream.Seek(0, SeekOrigin.End);
             }
 
-            return Task.Factory.StartNew(() => Download(),
+            return Task.Factory.StartNew(() => Download(getMd5NewStyle),
     CancellationToken.None,
     TaskCreationOptions.LongRunning,
     TaskScheduler.Default);
         }
 
         // TODO: 遇到出错，要删除已经下载的临时文件; 如果是中断，临时文件要保留
-        void Download()
+        // parameters:
+        //      getMd5NewStyle  获得服务器文件 MD5 的时候是否使用新轮询风格? (注：只能对 dp2library 本地文件用新轮询风格)
+        void Download(bool getMd5NewStyle)
         {
             string strError = "";
 
@@ -395,6 +400,7 @@ namespace DigitalPlatform.LibraryClient
                             else if (this.ServerFilePath.StartsWith("!"))
                             {
                                 DisplayMessage("正在获得服务器文件 " + this.ServerFilePath + " 的 MD5 ...");
+
                                 // 检查 MD5
                                 byte[] server_md5 = null;
                             REDO_MD5:
@@ -402,12 +408,21 @@ namespace DigitalPlatform.LibraryClient
                                 //      -1  出错
                                 //      0   文件没有找到
                                 //      1   文件找到
-                                nRet = GetServerFileMD5(
-                                    this.Channel,
-                                    this.Stop,
-                                    this.ServerFilePath,
-            out server_md5,
-            out strError);
+                                if (getMd5NewStyle)
+                                    nRet = GetServerFileMD5ByTask(
+                                        this.Channel,
+                                        this.Stop,
+                                        this.ServerFilePath,
+                                        new CancellationToken(),
+                out server_md5,
+                out strError);
+                                else
+                                    nRet = GetServerFileMD5(
+            this.Channel,
+            this.Stop,
+            this.ServerFilePath,
+    out server_md5,
+    out strError);
                                 if (nRet != 1)
                                 {
                                     if (nRet == -1)
@@ -623,6 +638,124 @@ namespace DigitalPlatform.LibraryClient
                 {
 
                 }
+            }
+        }
+
+        static CancellationToken _token;
+
+        // 探测 MD5 (用轮询任务法)
+        // return:
+        //      -1  出错
+        //      0   文件没有找到
+        //      1   文件找到
+        public static int GetServerFileMD5ByTask(
+            LibraryChannel channel,
+            Stop stop,
+            string strServerPath,
+            CancellationToken token,
+            out byte[] md5,
+            out string strError)
+        {
+            strError = "";
+            md5 = null;
+
+            /*
+            string strStyle = "md5";
+            string strMetadata = "";
+            byte[] baContent = null;
+            string strOutputPath = "";
+            */
+
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromSeconds(10);
+            try
+            {
+                //检查 dp2library 版本号
+                long lRet = channel.GetVersion(stop,
+                    out string version,
+                    out string uid,
+                    out strError);
+                if (lRet == -1)
+                {
+                    strError = "检查 dp2library 服务器版本号时出错: " + strError;
+                    return -1;
+                }
+
+                string base_version = "3.23";
+                if (StringUtil.CompareVersion(version, base_version) < 0)
+                {
+                    strError = "获得服务器文件 MD5 的功能需要 dp2library 服务器版本为 {base_version} 以上";
+                    return -1;
+                }
+
+                // 启动任务
+                // return:
+                //		strStyle	一般设置为"content,data,metadata,timestamp,outputpath";
+                //		-1	出错。具体出错原因在this.ErrorCode中。this.ErrorInfo中有出错信息。
+                //		0	成功
+                lRet = channel.GetRes(
+                    stop,
+                    strServerPath,
+                    0,
+                    0,
+                    "md5,beginTask",
+                    out byte[] baContent,
+                    out string strMetadata,
+                    out string strOutputPath,
+                    out md5,
+                    out strError);
+                if (lRet == -1)
+                {
+                    if (channel.ErrorCode == localhost.ErrorCode.NotFound)
+                        return 0;
+
+                    return -1;
+                }
+
+                string taskID = Encoding.UTF8.GetString(md5);
+
+                // 轮询，获得任务结果
+                while (true)
+                {
+                    if (token.IsCancellationRequested)
+                    {
+                        strError = "前端请求中断";
+                        return -1;
+                    }
+
+                    if (stop != null && stop.IsStopped)
+                    {
+                        strError = "前端请求中断";
+                        return -1;
+                    }
+
+                    lRet = channel.GetRes(
+    stop,
+    strServerPath,
+    0,
+    0,
+    $"md5,getTaskResult,taskID:{taskID}",
+    out baContent,
+    out strMetadata,
+    out strOutputPath,
+    out md5,
+    out strError);
+                    if (lRet == -1)
+                        return -1;
+                    if (lRet == 1)
+                        return 1;
+
+                    Task.Delay(TimeSpan.FromSeconds(1), token).Wait();
+                }
+            }
+            catch (Exception ex)
+            {
+                strError = "GetServerFileMD5ByTask() 出现异常: " + ex.Message;
+                return -1;
+            }
+            finally
+            {
+                channel.Timeout = old_timeout;
             }
         }
 

@@ -10,6 +10,8 @@ using Ionic.Zip;
 using DigitalPlatform.Text;
 using DigitalPlatform.IO;
 using DigitalPlatform.Core;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -525,7 +527,7 @@ namespace DigitalPlatform.LibraryServer
                 }
             }
 
-            END1:
+        END1:
             if (bIsComplete == true)
             {
                 // 多轮上传的内容完成后，最后需要单独设置文件最后修改时间
@@ -576,10 +578,20 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
+        #region MD5 Task
+
+        Md5TaskCollection _md5Tasks = new Md5TaskCollection();
+
+        #endregion
+
         // 下载本地文件
         // TODO: 限制 nMaxLength 最大值
         // parameters:
         //      strStyle    "uploadedPartial" 表示操作都是针对已上载临时部分的。比如希望获得这个局部的长度，时间戳，等等
+        //                  "taskID" 在进行 taskResult 和 taskStop 操作时用 taskID 来指定任务 ID
+        //                  "beginTask" 表示本次启动了任务但并不等待任务完成。outputTimestamp 参数会返回 taskID(byte [] 用 UTF-8 Encoding 解释)
+        //                  "getTaskResult" 获取任务是否结束的信息和两个返回参数值
+        //                  "stopTask" 停止一个任务
         // return:
         //      -2      文件不存在
         //		-1      出错
@@ -744,18 +756,43 @@ namespace DigitalPlatform.LibraryServer
             // 取 MD5
             if (StringUtil.IsInList("md5", strStyle) == true)
             {
-#if NO
-                string strNewFileName = GetNewFileName(strFilePath);
-                if (File.Exists(strNewFileName) == true)
+                if (StringUtil.IsInList("beginTask", strStyle))
                 {
-                    outputTimestamp = FileUtil.GetFileMd5(strNewFileName);
+                    var taskID = _md5Tasks.StartMd5Task(strFilePath);
+                    outputTimestamp = Encoding.UTF8.GetBytes(taskID);
+                }
+                else if (StringUtil.IsInList("getTaskResult", strStyle)
+                    || StringUtil.IsInList("stopTask", strStyle))
+                {
+                    var taskID = StringUtil.GetParameterByPrefix(strStyle, "taskID");
+                    if (string.IsNullOrEmpty(taskID))
+                    {
+                        strError = "没有提供 taskID";
+                        return -1;
+                    }
+                    var task = _md5Tasks.FindMd5Task(taskID);
+                    if (task == null)
+                    {
+                        strError = $"没有找到 taskID 为 '{taskID}' 的 MD5 任务";
+                        return -1;
+                    }
+                    if (StringUtil.IsInList("getTaskResult", strStyle))
+                    {
+                        if (task.Result == null)
+                        {
+                            outputTimestamp = null;
+                            return 0;   // 表示任务尚未完成
+                        }
+                        outputTimestamp = ByteArray.GetTimeStampByteArray(task.Result.ErrorCode);
+                        _md5Tasks.RemoveMd5Task(taskID);
+                        return 1;   // 表示任务已经完成
+                    }
+
+                    _md5Tasks.StopMd5Task(taskID);
+                    return 0;
                 }
                 else
-                {
                     outputTimestamp = FileUtil.GetFileMd5(strFilePath);
-                }
-#endif
-                outputTimestamp = FileUtil.GetFileMd5(strFilePath);
             }
 
             return lTotalLength;
@@ -876,7 +913,7 @@ namespace DigitalPlatform.LibraryServer
 
                     count++;
 
-                    CONTINUE:
+                CONTINUE:
                     i++;
                 }
 
