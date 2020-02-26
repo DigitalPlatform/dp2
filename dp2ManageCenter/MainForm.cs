@@ -13,6 +13,8 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Windows.Forms;
 
+using Newtonsoft.Json;
+
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.CommonControl;
@@ -23,7 +25,6 @@ using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryServer.Common;
 using DigitalPlatform.Text;
 using Microsoft.VisualStudio.Threading;
-using Newtonsoft.Json;
 
 namespace dp2ManageCenter
 {
@@ -121,6 +122,7 @@ namespace dp2ManageCenter
             using (ServersDlg dlg = new ServersDlg())
             {
                 GuiUtil.SetControlFont(dlg, this.Font);
+                ClientInfo.MemoryState(dlg, "manageServers", "state");
 
                 dp2ServerCollection newServers = Servers.Dup();
 
@@ -1764,7 +1766,10 @@ string strHtml)
                                 }));
                                 try
                                 {
-                                    return _checkMD5(channel, filename, strTargetPath, cancel.Token);
+                                    return _checkMD5(channel,
+                                        filename,
+                                        strTargetPath,
+                                        cancel.Token);
                                 }
                                 finally
                                 {
@@ -2179,10 +2184,53 @@ string strHtml)
                     channel,
                     null,   // this.Stop,
                     strServerFilePath,
+                    new MessagePromptEventHandler(delegate (object o1, MessagePromptEventArgs e1)
+                    {
+                        // 遇到出错要可以 UI 交互重试
+
+                        if (this.IsDisposed == true)
+                        {
+                            e1.ResultAction = "cancel";
+                            return;
+                        }
+
+                        // func_showProgress?.Invoke(strPath, $"中途出错:{e1.MessageText}");
+
+                        this.Invoke((Action)(() =>
+                        {
+                            if (e1.Actions == "yes,no,cancel")
+                            {
+                                bool bHideMessageBox = true;
+
+                                string server_name = this.Servers.GetServer(channel.Url)?.Name;
+                                if (string.IsNullOrEmpty(server_name))
+                                    server_name = channel.Url;
+
+                                DialogResult result = MessageDialog.Show(this,
+                                    $"服务器 '{server_name}': { e1.MessageText}\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)",
+                    MessageBoxButtons.YesNoCancel,
+                    MessageBoxDefaultButton.Button1,
+                    null,
+                    ref bHideMessageBox,
+                    new string[] { "重试", "跳过", "放弃" },
+                    20);
+                                if (result == DialogResult.Cancel)
+                                    e1.ResultAction = "cancel";
+                                else if (result == System.Windows.Forms.DialogResult.No)
+                                    e1.ResultAction = "no";
+                                else
+                                    e1.ResultAction = "yes";
+                            }
+                            else
+                            {
+                                e1.ResultAction = "yes";
+                                // TODO: 是否延时一段？
+                            }
+                        }));
+                    }),
                     token,
                     out byte[] server_md5,
                     out string strError);
-                // TODO: 遇到出错要可以 UI 交互重试
                 if (nRet != 1)
                 {
                     strError = "探测服务器端文件 '" + strServerFilePath + "' MD5 时出错: " + strError;
@@ -4492,7 +4540,7 @@ out string strError);
         private void MenuItem_resetOutputFolder_Click(object sender, EventArgs e)
         {
             DialogResult result = MessageBox.Show(this,
-"确实要讲输出目录恢复为默认设置值?",
+"确实要将输出目录恢复为默认设置值?",
 "MainForm",
 MessageBoxButtons.YesNo,
 MessageBoxIcon.Question,
@@ -4522,6 +4570,9 @@ MessageBoxDefaultButton.Button2);
         {
             using (ServersDlg dlg = new ServersDlg())
             {
+                GuiUtil.SetControlFont(dlg, this.Font);
+                ClientInfo.MemoryState(dlg, "selectServerNames", "state");
+
                 GuiUtil.SetControlFont(dlg, this.Font);
                 dlg.Text = "请选择 dp2library 服务器";
                 dlg.Mode = "select";

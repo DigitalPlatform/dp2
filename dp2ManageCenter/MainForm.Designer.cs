@@ -67,14 +67,14 @@
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.tabPage_history = new System.Windows.Forms.TabPage();
-            this.webBrowser1 = new System.Windows.Forms.WebBrowser();
             this.tabPage_errorLogTasks = new System.Windows.Forms.TabPage();
             this.listView_errorLogTasks = new System.Windows.Forms.ListView();
             this.columnHeader5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader7 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader8 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.tabPage_history = new System.Windows.Forms.TabPage();
+            this.webBrowser1 = new System.Windows.Forms.WebBrowser();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.tabControl_main.SuspendLayout();
@@ -84,8 +84,8 @@
             this.splitContainer_backupTasks.Panel2.SuspendLayout();
             this.splitContainer_backupTasks.SuspendLayout();
             this.tabPage_operLogTasks.SuspendLayout();
-            this.tabPage_history.SuspendLayout();
             this.tabPage_errorLogTasks.SuspendLayout();
+            this.tabPage_history.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -99,7 +99,7 @@
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Padding = new System.Windows.Forms.Padding(7, 3, 0, 3);
-            this.menuStrip1.Size = new System.Drawing.Size(978, 38);
+            this.menuStrip1.Size = new System.Drawing.Size(978, 39);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -112,7 +112,7 @@
             this.toolStripSeparator1,
             this.MenuItem_exit});
             this.MenuItem_file.Name = "MenuItem_file";
-            this.MenuItem_file.Size = new System.Drawing.Size(97, 32);
+            this.MenuItem_file.Size = new System.Drawing.Size(97, 33);
             this.MenuItem_file.Text = "文件(&F)";
             // 
             // MenuItem_serversSetting
@@ -181,7 +181,7 @@
             this.MenuItem_changePassword,
             this.MenuItem_refreshServerName});
             this.MenuItem_management.Name = "MenuItem_management";
-            this.MenuItem_management.Size = new System.Drawing.Size(107, 32);
+            this.MenuItem_management.Size = new System.Drawing.Size(107, 33);
             this.MenuItem_management.Text = "管理(&M)";
             // 
             // MenuItem_newBackupTasks
@@ -195,7 +195,7 @@
             // 
             this.MenuItem_continueBackupTasks.Name = "MenuItem_continueBackupTasks";
             this.MenuItem_continueBackupTasks.Size = new System.Drawing.Size(318, 40);
-            this.MenuItem_continueBackupTasks.Text = "重启大备份任务(&C)";
+            this.MenuItem_continueBackupTasks.Text = "重启大备份下载(&C)";
             this.MenuItem_continueBackupTasks.Click += new System.EventHandler(this.MenuItem_continueBackupTasks_Click);
             // 
             // toolStripSeparator2
@@ -225,7 +225,7 @@
             this.MenuItem_openDataFolder,
             this.MenuItem_openProgramFolder});
             this.MenuItem_help.Name = "MenuItem_help";
-            this.MenuItem_help.Size = new System.Drawing.Size(102, 32);
+            this.MenuItem_help.Size = new System.Drawing.Size(102, 33);
             this.MenuItem_help.Text = "帮助(&H)";
             // 
             // MenuItem_openUserFolder
@@ -252,7 +252,7 @@
             // toolStrip1
             // 
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(24, 24);
-            this.toolStrip1.Location = new System.Drawing.Point(0, 38);
+            this.toolStrip1.Location = new System.Drawing.Point(0, 39);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(978, 25);
             this.toolStrip1.TabIndex = 1;
@@ -283,11 +283,11 @@
             this.tabControl_main.Controls.Add(this.tabPage_errorLogTasks);
             this.tabControl_main.Controls.Add(this.tabPage_history);
             this.tabControl_main.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tabControl_main.Location = new System.Drawing.Point(0, 63);
+            this.tabControl_main.Location = new System.Drawing.Point(0, 64);
             this.tabControl_main.Margin = new System.Windows.Forms.Padding(4);
             this.tabControl_main.Name = "tabControl_main";
             this.tabControl_main.SelectedIndex = 0;
-            this.tabControl_main.Size = new System.Drawing.Size(978, 500);
+            this.tabControl_main.Size = new System.Drawing.Size(978, 499);
             this.tabControl_main.TabIndex = 3;
             // 
             // tabPage_backupTasks
@@ -297,7 +297,7 @@
             this.tabPage_backupTasks.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_backupTasks.Name = "tabPage_backupTasks";
             this.tabPage_backupTasks.Padding = new System.Windows.Forms.Padding(4);
-            this.tabPage_backupTasks.Size = new System.Drawing.Size(970, 459);
+            this.tabPage_backupTasks.Size = new System.Drawing.Size(970, 458);
             this.tabPage_backupTasks.TabIndex = 0;
             this.tabPage_backupTasks.Text = "大备份任务";
             this.tabPage_backupTasks.UseVisualStyleBackColor = true;
@@ -316,7 +316,7 @@
             // splitContainer_backupTasks.Panel2
             // 
             this.splitContainer_backupTasks.Panel2.Controls.Add(this.webBrowser_backupTask);
-            this.splitContainer_backupTasks.Size = new System.Drawing.Size(962, 451);
+            this.splitContainer_backupTasks.Size = new System.Drawing.Size(962, 450);
             this.splitContainer_backupTasks.SplitterDistance = 514;
             this.splitContainer_backupTasks.SplitterWidth = 10;
             this.splitContainer_backupTasks.TabIndex = 1;
@@ -335,7 +335,7 @@
             this.listView_backupTasks.Location = new System.Drawing.Point(0, 0);
             this.listView_backupTasks.Margin = new System.Windows.Forms.Padding(4);
             this.listView_backupTasks.Name = "listView_backupTasks";
-            this.listView_backupTasks.Size = new System.Drawing.Size(514, 451);
+            this.listView_backupTasks.Size = new System.Drawing.Size(514, 450);
             this.listView_backupTasks.TabIndex = 0;
             this.listView_backupTasks.UseCompatibleStateImageBehavior = false;
             this.listView_backupTasks.View = System.Windows.Forms.View.Details;
@@ -374,7 +374,7 @@
             this.webBrowser_backupTask.Margin = new System.Windows.Forms.Padding(5);
             this.webBrowser_backupTask.MinimumSize = new System.Drawing.Size(29, 36);
             this.webBrowser_backupTask.Name = "webBrowser_backupTask";
-            this.webBrowser_backupTask.Size = new System.Drawing.Size(438, 451);
+            this.webBrowser_backupTask.Size = new System.Drawing.Size(438, 450);
             this.webBrowser_backupTask.TabIndex = 4;
             // 
             // tabPage_operLogTasks
@@ -428,28 +428,6 @@
             this.columnHeader4.Text = "进度";
             this.columnHeader4.Width = 196;
             // 
-            // tabPage_history
-            // 
-            this.tabPage_history.Controls.Add(this.webBrowser1);
-            this.tabPage_history.Location = new System.Drawing.Point(4, 37);
-            this.tabPage_history.Margin = new System.Windows.Forms.Padding(4);
-            this.tabPage_history.Name = "tabPage_history";
-            this.tabPage_history.Padding = new System.Windows.Forms.Padding(4);
-            this.tabPage_history.Size = new System.Drawing.Size(970, 459);
-            this.tabPage_history.TabIndex = 1;
-            this.tabPage_history.Text = "操作历史";
-            this.tabPage_history.UseVisualStyleBackColor = true;
-            // 
-            // webBrowser1
-            // 
-            this.webBrowser1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.webBrowser1.Location = new System.Drawing.Point(4, 4);
-            this.webBrowser1.Margin = new System.Windows.Forms.Padding(5);
-            this.webBrowser1.MinimumSize = new System.Drawing.Size(29, 36);
-            this.webBrowser1.Name = "webBrowser1";
-            this.webBrowser1.Size = new System.Drawing.Size(962, 451);
-            this.webBrowser1.TabIndex = 3;
-            // 
             // tabPage_errorLogTasks
             // 
             this.tabPage_errorLogTasks.Controls.Add(this.listView_errorLogTasks);
@@ -499,6 +477,28 @@
             this.columnHeader8.Text = "进度";
             this.columnHeader8.Width = 196;
             // 
+            // tabPage_history
+            // 
+            this.tabPage_history.Controls.Add(this.webBrowser1);
+            this.tabPage_history.Location = new System.Drawing.Point(4, 37);
+            this.tabPage_history.Margin = new System.Windows.Forms.Padding(4);
+            this.tabPage_history.Name = "tabPage_history";
+            this.tabPage_history.Padding = new System.Windows.Forms.Padding(4);
+            this.tabPage_history.Size = new System.Drawing.Size(970, 459);
+            this.tabPage_history.TabIndex = 1;
+            this.tabPage_history.Text = "操作历史";
+            this.tabPage_history.UseVisualStyleBackColor = true;
+            // 
+            // webBrowser1
+            // 
+            this.webBrowser1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.webBrowser1.Location = new System.Drawing.Point(4, 4);
+            this.webBrowser1.Margin = new System.Windows.Forms.Padding(5);
+            this.webBrowser1.MinimumSize = new System.Drawing.Size(29, 36);
+            this.webBrowser1.Name = "webBrowser1";
+            this.webBrowser1.Size = new System.Drawing.Size(962, 451);
+            this.webBrowser1.TabIndex = 3;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(13F, 28F);
@@ -528,8 +528,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_backupTasks)).EndInit();
             this.splitContainer_backupTasks.ResumeLayout(false);
             this.tabPage_operLogTasks.ResumeLayout(false);
-            this.tabPage_history.ResumeLayout(false);
             this.tabPage_errorLogTasks.ResumeLayout(false);
+            this.tabPage_history.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 

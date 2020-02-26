@@ -99,15 +99,47 @@ namespace dp2Circulation
 
             try
             {
+                // 2020/2/26 改用 ...ByTask()
                 // 检查 MD5
                 // return:
                 //      -1  出错
                 //      0   文件没有找到
                 //      1   文件找到
-                int nRet = DynamicDownloader.GetServerFileMD5(
+                int nRet = DynamicDownloader.GetServerFileMD5ByTask(
                     channel,
                     Stop,   // this.Stop,
                     strServerFilePath,
+                    new MessagePromptEventHandler(delegate (object o1, MessagePromptEventArgs e1)
+                    {
+                        if (this.IsDisposed == true)
+                        {
+                            e1.ResultAction = "cancel";
+                            return;
+                        }
+
+                        this.Invoke((Action)(() =>
+                        {
+                            if (e1.Actions == "yes,no,cancel")
+                            {
+                                bool bHideMessageBox = true;
+                                DialogResult result = MessageDialog.Show(this,
+                                    e1.MessageText + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)",
+                    MessageBoxButtons.YesNoCancel,
+                    MessageBoxDefaultButton.Button1,
+                    null,
+                    ref bHideMessageBox,
+                    new string[] { "重试", "跳过", "放弃" },
+                    20);
+                                if (result == DialogResult.Cancel)
+                                    e1.ResultAction = "cancel";
+                                else if (result == System.Windows.Forms.DialogResult.No)
+                                    e1.ResultAction = "no";
+                                else
+                                    e1.ResultAction = "yes";
+                            }
+                        }));
+                    }),
+                    new CancellationToken(),
                     out byte[] server_md5,
                     out strError);
                 // TODO: 遇到出错要可以 UI 交互重试

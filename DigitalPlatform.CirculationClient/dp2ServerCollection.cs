@@ -9,6 +9,7 @@ using System.IO;
 
 using DigitalPlatform;
 using DigitalPlatform.Text;
+using Newtonsoft.Json;
 
 namespace DigitalPlatform.CirculationClient
 {
@@ -26,6 +27,9 @@ namespace DigitalPlatform.CirculationClient
 
         public bool SavePassword = false;
 
+        // 2020/2/26
+        public string UID { get; set; }
+
         [NonSerialized]
         public bool Verified = false;   // 是验证过序列号?
 
@@ -42,8 +46,10 @@ namespace DigitalPlatform.CirculationClient
             this.StorageDefaultPassword = refServer.StorageDefaultPassword;
             this.SavePassword = refServer.SavePassword;
             this.Verified = refServer.Verified;
+            this.UID = refServer.UID;
         }
 
+        // [JsonIgnore]
         public string DefaultPassword
         {
             get
@@ -153,6 +159,19 @@ namespace DigitalPlatform.CirculationClient
             }
 
             return null;
+        }
+
+        // 根据 UID 查找
+        public List<dp2Server> FindServerByUID(string uid)
+        {
+            List<dp2Server> results = new List<dp2Server>();
+            foreach(dp2Server server in this)
+            {
+                if (server.UID == uid)
+                    results.Add(server);
+            }
+
+            return results;
         }
 
         // 克隆。

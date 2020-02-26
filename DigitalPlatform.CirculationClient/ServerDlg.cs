@@ -255,5 +255,32 @@ a => a.AddressFamily == AddressFamily.InterNetwork);
                 this.button_getLibraryName.Enabled = true;
             }
         }
+
+        public static async Task<NormalResult> GetServerUID(string url)
+        {
+            return await Task.Run<NormalResult>(() =>
+            {
+                using (LibraryChannel channel = new LibraryChannel())
+                {
+                    channel.Timeout = TimeSpan.FromSeconds(5);
+                    channel.Url = url;
+                    long lRet = channel.GetVersion(null, 
+                        out string version,
+                        out string uid,
+                        out string strError);
+                    if (lRet == -1)
+                    {
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError
+                        };
+                    }
+                    else
+                        return new NormalResult { ErrorCode = uid };
+                }
+            });
+        }
+
     }
 }

@@ -11442,7 +11442,7 @@ MessageBoxDefaultButton.Button1);
 
 
         // 创建一个特定时间段(一个分馆)的若干报表
-        // 要讲创建好的报表写入相应目录的 index.xml 中
+        // 要将创建好的报表写入相应目录的 index.xml 中
         // parameters:
         //      strTimeType 时间单位类型。 year month week day 之一
         //      times   本轮的全部时间字符串。strTime 一定在其中。通过 times 和 strTime，能看出 strTime 时间是不是数组最后一个元素

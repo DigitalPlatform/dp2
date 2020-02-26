@@ -138,11 +138,16 @@ namespace dp2Circulation
             Program.MainForm.BeginUploadFiles(e);
         }
 
-        void GetMd5(DownloadFilesEventArgs e)
+        void GetMd5(DownloadFilesEventArgs e,
+            MessagePromptEventHandler prompt)
         {
             string strError = "";
 
             List<string> lines = new List<string>();
+
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在获取 MD5 ...");
+            stop.BeginLoop();
 
             var channel = this.GetChannel();
 
@@ -160,10 +165,12 @@ namespace dp2Circulation
                     //      -1  出错
                     //      0   文件没有找到
                     //      1   文件找到
-                    int nRet = DynamicDownloader.GetServerFileMD5(
+                    int nRet = DynamicDownloader.GetServerFileMD5ByTask(
                         channel,
                         stop,   // this.Stop,
                         filepath,
+                        prompt,
+                        new System.Threading.CancellationToken(),
                         out byte[] server_md5,
                         out strError);
                     if (nRet != 1)
@@ -180,6 +187,10 @@ namespace dp2Circulation
                 //channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
                 this.ClearMessage();
+
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
             }
 
             this.Invoke((Action)(() =>
@@ -187,7 +198,7 @@ namespace dp2Circulation
                 MessageDialog.Show(this, StringUtil.MakePathList(lines, "\r\n"));
             }));
             return;
-            ERROR1:
+        ERROR1:
             ShowMessageBox(strError);
         }
 
@@ -201,7 +212,46 @@ namespace dp2Circulation
             {
                 Task.Run(() =>
                 {
-                    GetMd5(e);
+                    GetMd5(e,
+                        (o1, e1) =>
+                        {
+                            // 遇到出错要可以 UI 交互重试
+
+                            if (this.IsDisposed == true)
+                            {
+                                e1.ResultAction = "cancel";
+                                return;
+                            }
+
+                            this.Invoke((Action)(() =>
+                            {
+                                if (e1.Actions == "yes,no,cancel")
+                                {
+                                    bool bHideMessageBox = true;
+
+                                    DialogResult result = MessageDialog.Show(this,
+                                            $"{ e1.MessageText}\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断处理)",
+                            MessageBoxButtons.YesNoCancel,
+                            MessageBoxDefaultButton.Button1,
+                            null,
+                            ref bHideMessageBox,
+                            new string[] { "重试", "跳过", "放弃" },
+                            20);
+                                    if (result == DialogResult.Cancel)
+                                        e1.ResultAction = "cancel";
+                                    else if (result == System.Windows.Forms.DialogResult.No)
+                                        e1.ResultAction = "no";
+                                    else
+                                        e1.ResultAction = "yes";
+                                }
+                                else
+                                {
+                                    e1.ResultAction = "yes";
+                                    // TODO: 是否延时一段？
+                                }
+
+                            }));
+                        });
                 });
                 return;
             }
@@ -214,9 +264,9 @@ namespace dp2Circulation
             //      0   放弃下载
             //      1   同意启动下载
             int nRet = Program.MainForm.AskOverwriteFiles(infos,    // e.FileNames,
-ref strOutputFolder,
-out bool bAppend,
-out strError);
+    ref strOutputFolder,
+    out bool bAppend,
+    out strError);
             if (nRet == -1)
             {
                 e.ErrorInfo = strError;
@@ -229,9 +279,9 @@ out strError);
             //      1   成功启动了下载
             nRet = Program.MainForm.BeginDownloadFiles(infos,   // e.FileNames,
                 bAppend ? "append" : "overwrite",
-                null,
-                ref strOutputFolder,
-                out strError);
+                        null,
+                        ref strOutputFolder,
+                        out strError);
             if (nRet == -1)
                 e.ErrorInfo = strError;
         }
@@ -737,7 +787,7 @@ out strError);
             }
 
             return 1;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -908,7 +958,7 @@ out strError);
                 EnableControls(true);
             }
 
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -1065,7 +1115,7 @@ out strError);
                 EnableControls(true);
             }
 
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -1117,7 +1167,7 @@ out strError);
                 EnableControls(true);
             }
 
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -1173,7 +1223,7 @@ out strError);
                 EnableControls(true);
             }
 
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -1225,7 +1275,7 @@ out strError);
                 EnableControls(true);
             }
 
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -1279,7 +1329,7 @@ out strError);
                 EnableControls(true);
             }
 
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -1390,7 +1440,7 @@ out strError);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1666,7 +1716,7 @@ out strError);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1863,7 +1913,7 @@ out strError);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1906,7 +1956,7 @@ out strError);
 
             /*
             ListViewItem item = null;
-            
+
             if (this.listView_databases.SelectedItems.Count > 0)
                 this.listView_databases.SelectedItems[0];
              * */
@@ -2328,7 +2378,7 @@ out strError);
 
             login_dlg.StartPosition = FormStartPosition.CenterScreen;
 
-            REDO_LOGIN:
+        REDO_LOGIN:
             login_dlg.ShowDialog(this);
 
             if (login_dlg.DialogResult != DialogResult.OK)
@@ -2623,7 +2673,7 @@ out strError);
             // 重新获得各种库名、列表
             Program.MainForm.StartPrepareNames(false, false);
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -2703,7 +2753,7 @@ out strError);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -2919,7 +2969,7 @@ out strError);
                 EnableControls(true);
             }
 
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -2959,7 +3009,7 @@ out strError);
                 EnableControls(true);
             }
 
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -3009,7 +3059,7 @@ out strError);
                 EnableControls(true);
             }
 
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -3108,11 +3158,11 @@ out strError);
             if (newly_biblio_dbnames.Count > 0)
             {
                 DialogResult result = MessageBox.Show(this,
-    "刚新增的虚拟库 " + strName + " 其成员库中，库 " + StringUtil.MakePathList(newly_biblio_dbnames) + " 还没有OPAC记录显示格式定义。\r\n\r\n要自动给它(们)创建常规的OPAC记录显示格式定义么? ",
-    "ManagerForm",
-    MessageBoxButtons.YesNo,
-    MessageBoxIcon.Question,
-    MessageBoxDefaultButton.Button1);
+        "刚新增的虚拟库 " + strName + " 其成员库中，库 " + StringUtil.MakePathList(newly_biblio_dbnames) + " 还没有OPAC记录显示格式定义。\r\n\r\n要自动给它(们)创建常规的OPAC记录显示格式定义么? ",
+        "ManagerForm",
+        MessageBoxButtons.YesNo,
+        MessageBoxIcon.Question,
+        MessageBoxDefaultButton.Button1);
                 if (result == DialogResult.Yes)
                 {
                     for (int i = 0; i < newly_biblio_dbnames.Count; i++)
@@ -3127,7 +3177,7 @@ out strError);
                 }
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3391,7 +3441,7 @@ out strError);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3609,7 +3659,7 @@ out strError);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3731,7 +3781,7 @@ out strError);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3844,7 +3894,7 @@ out strError);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
 
         }
@@ -3920,7 +3970,7 @@ out strError);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3956,17 +4006,17 @@ out strError);
             dom.DocumentElement.AppendChild(fragment);
 
             /*
-    <browseformats>
+        <browseformats>
         <database name="中文图书">
             <format name="详细" type="biblio" />
         </database>
-    	<database name="特色资源">
-	    	<format name="详细" scriptfile="./cfgs/opac_detail.fltx" />
-	    </database>
+        <database name="特色资源">
+            <format name="详细" scriptfile="./cfgs/opac_detail.fltx" />
+        </database>
         <database name="读者">
             <format name="详细" scriptfile="./cfgs/opac_detail.cs" />
         </database>
-    </browseformats>
+        </browseformats>
              * */
 
 
@@ -3994,7 +4044,7 @@ out strError);
                     string strStyle = DomUtil.GetAttr(format_node, "style");
 
                     string strDisplayText = strFormatName;
-                    
+
                     if (String.IsNullOrEmpty(strType) == false)
                         strDisplayText += " type=" + strType;
 
@@ -4071,7 +4121,7 @@ out strError);
                 EnableControls(true);
             }
 
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -4111,7 +4161,7 @@ out strError);
                 EnableControls(true);
             }
 
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -4175,7 +4225,7 @@ out strError);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
 
         }
@@ -4300,7 +4350,7 @@ out strError);
                 goto ERROR1;
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -4450,7 +4500,7 @@ out strError);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -4629,7 +4679,7 @@ out strError);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -4688,7 +4738,7 @@ out strError);
                 goto ERROR1;
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -4720,7 +4770,7 @@ out strError);
                     treeView_opacBrowseFormats.SelectedNode = curSelectedNode;
 
                     if (treeView_opacBrowseFormats.SelectedNode == null)
-                        treeView_opacBrowseFormats_AfterSelect(null, null);	// 补丁
+                        treeView_opacBrowseFormats_AfterSelect(null, null); // 补丁
                 }
 
             }
@@ -5271,7 +5321,7 @@ out strError);
 
         // <locationtypes>
         int GetAllLocationInfo(out string strOutputInfo,
-    out string strError)
+        out string strError)
         {
             strError = "";
 
@@ -5304,7 +5354,7 @@ out strError);
 
                 EnableControls(true);
             }
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -5344,7 +5394,7 @@ out strError);
                 EnableControls(true);
             }
 
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -5567,7 +5617,7 @@ out strError);
             dlg.ItemBarcodeNullable = true;
             dlg.StartPosition = FormStartPosition.CenterScreen;
 
-            REDO:
+        REDO:
             dlg.ShowDialog(this);
 
             if (dlg.DialogResult != DialogResult.OK)
@@ -5629,7 +5679,7 @@ out strError);
             dlg.ItemBarcodeNullable = (ListViewUtil.GetItemText(item, LOCATION_COLUMN_ITEMBARCODENULLABLE) == "是") ? true : false;
             dlg.StartPosition = FormStartPosition.CenterScreen;
 
-            REDO:
+        REDO:
             dlg.ShowDialog(this);
 
             if (dlg.DialogResult != DialogResult.OK)
@@ -5657,7 +5707,7 @@ out strError);
             ListViewUtil.SelectLine(item, true);
             this.LocationTypesDefChanged = true;
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5685,7 +5735,7 @@ out strError);
 
         // 2014/9/6
         static string GetLocationItemNameList(ListView.SelectedListViewItemCollection items,
-    string strSep = ",")
+        string strSep = ",")
         {
             StringBuilder strItemNameList = new StringBuilder(4096);
             foreach (ListViewItem item in items)
@@ -5736,7 +5786,7 @@ out strError);
 
             this.LocationTypesDefChanged = true;
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5974,7 +6024,7 @@ out strError);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6080,7 +6130,7 @@ out strError);
                 EnableControls(true);
             }
 
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -6127,7 +6177,7 @@ out strError);
             }
 
 
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -6193,7 +6243,7 @@ out strError);
 
             this.ValueTableChanged = false;
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
 
         }
@@ -6251,9 +6301,9 @@ out strError);
                 return -1;
 
             nRet = AddRoot(strScriptXml,
-    "barcodeValidation",
-    out string strXml,
-    out strError);
+        "barcodeValidation",
+        out string strXml,
+        out strError);
             if (nRet == -1)
                 return -1;
 
@@ -6344,7 +6394,7 @@ out strError);
                 EnableControls(true);
             }
 
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -6394,7 +6444,7 @@ out strError);
                 EnableControls(true);
             }
 
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -6451,9 +6501,9 @@ out strError);
                 return -1;
 
             nRet = AddRoot(strScriptXml,
-"script",
-out string strXml,
-out strError);
+        "script",
+        out string strXml,
+        out strError);
             if (nRet == -1)
                 return -1;
 #if NO
@@ -6513,7 +6563,7 @@ out strError);
                 EnableControls(true);
             }
 
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -6556,7 +6606,7 @@ out strError);
                 EnableControls(true);
             }
 
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -6628,7 +6678,7 @@ out strError);
             this.ScriptChanged = false;
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6701,7 +6751,7 @@ out strError);
             this.textBox_script.DisableEmSetSelMsg = true;
             OnScriptTextCaretChanged();
             return;
-            ERROR1:
+        ERROR1:
             // 发出警告性的响声
             Console.Beep();
         }
@@ -7004,7 +7054,7 @@ out strError);
 
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -7203,7 +7253,7 @@ out strError);
             this.ZhongcihaoChanged = true;
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -7269,7 +7319,7 @@ out strError);
             this.ZhongcihaoChanged = true;
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -7584,7 +7634,7 @@ out strError);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -7650,7 +7700,7 @@ out strError);
             treeView_zhongcihao_AfterSelect(this, null);
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -7665,7 +7715,7 @@ out strError);
                     treeView_zhongcihao.SelectedNode = curSelectedNode;
 
                     if (treeView_zhongcihao.SelectedNode == null)
-                        treeView_zhongcihao_AfterSelect(null, null);	// 补丁
+                        treeView_zhongcihao_AfterSelect(null, null);    // 补丁
                 }
 
             }
@@ -7821,7 +7871,7 @@ out strError);
             dlg.AllZhongcihaoDatabaseInfoXml = GetAllZhongcihaoDbInfoXml();
             dlg.ExcludingDbNames = used_dbnames;
             dlg.StartPosition = FormStartPosition.CenterScreen;
-            REDO_INPUT:
+        REDO_INPUT:
             dlg.ShowDialog(this);
 
             if (dlg.DialogResult != DialogResult.OK)
@@ -7895,7 +7945,7 @@ out strError);
 
             this.ArrangementChanged = true;
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -7997,7 +8047,7 @@ out strError);
             treeView_arrangement_AfterSelect(this, null);
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -8085,7 +8135,7 @@ out strError);
             this.ArrangementChanged = true;
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -8146,7 +8196,7 @@ out strError);
                 string strZhongcihaoDbName = DomUtil.GetAttr(dom.DocumentElement,
                     "zhongcihaodb");
                 string strCallNumberStyle = DomUtil.GetAttr(dom.DocumentElement,
-    "callNumberStyle");
+        "callNumberStyle");
 
                 List<string> used_dbnames = GetArrangementAllUsedZhongcihaoDbName(current_treenode);
 
@@ -8162,7 +8212,7 @@ out strError);
                 dlg.AllZhongcihaoDatabaseInfoXml = GetAllZhongcihaoDbInfoXml();
                 dlg.ExcludingDbNames = used_dbnames;
                 dlg.StartPosition = FormStartPosition.CenterScreen;
-                REDO_INPUT:
+            REDO_INPUT:
                 dlg.ShowDialog(this);
 
                 if (dlg.DialogResult != DialogResult.OK)
@@ -8266,7 +8316,7 @@ out strError);
                 this.ArrangementChanged = true;
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -8282,7 +8332,7 @@ out strError);
                     treeView_arrangement.SelectedNode = curSelectedNode;
 
                     if (treeView_arrangement.SelectedNode == null)
-                        treeView_arrangement_AfterSelect(null, null);	// 补丁
+                        treeView_arrangement_AfterSelect(null, null);   // 补丁
                 }
             }
         }
@@ -8547,7 +8597,7 @@ out strError);
             FillDefaultList(this.m_dup_dom); // 库名的集合可能发生改变
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -8606,7 +8656,7 @@ out strError);
 
             this.DupChanged = true;
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -8951,7 +9001,7 @@ out strError);
             this.LoanPolicyDefChanged = false;
             Program.MainForm.ClearValueTableCache();   // 因为 <rightsTable> 里面的 <readerTypes> 和 <bookTypes> 元素可能发生变化，影响着值列表缓存
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -9071,11 +9121,11 @@ out strError);
             if (item.ImageIndex == ITEMTYPE_DELETED)
             {
                 DialogResult result = MessageBox.Show(this,
-    "此日历事项当前为已删除状态。\r\n\r\n需要恢复它么？\r\n\r\n(Yes: 恢复并编辑; No: 不恢复，以只读状态观察; Cancel: 放弃本次编辑操作)",
-    "ManagerForm",
-    MessageBoxButtons.YesNoCancel,
-    MessageBoxIcon.Question,
-    MessageBoxDefaultButton.Button2);
+        "此日历事项当前为已删除状态。\r\n\r\n需要恢复它么？\r\n\r\n(Yes: 恢复并编辑; No: 不恢复，以只读状态观察; Cancel: 放弃本次编辑操作)",
+        "ManagerForm",
+        MessageBoxButtons.YesNoCancel,
+        MessageBoxIcon.Question,
+        MessageBoxDefaultButton.Button2);
                 if (result == System.Windows.Forms.DialogResult.Cancel)
                     return;
                 if (result == System.Windows.Forms.DialogResult.Yes)
@@ -9136,7 +9186,7 @@ out strError);
             // 一般编辑的时候，不可能修改日历名，所以 m_nCalendarVersion++; 就不用了
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -9158,7 +9208,7 @@ out strError);
             dlg.Comment = "";
             dlg.Content = "";
 
-            REDO:
+        REDO:
             Program.MainForm.AppInfo.LinkFormState(dlg, "CalendarDialog_state");
             dlg.ShowDialog(this);
             Program.MainForm.AppInfo.UnlinkFormState(dlg);
@@ -9245,7 +9295,7 @@ out strError);
 
             m_nCalendarVersion++;
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -9257,7 +9307,7 @@ out strError);
                 goto ERROR1;
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -9272,7 +9322,7 @@ out strError);
                     goto ERROR1;
 
                 return;
-                ERROR1:
+            ERROR1:
                 MessageBox.Show(this, strError);
             }
             finally
@@ -9477,7 +9527,7 @@ out strError);
                 Program.MainForm.GetBarcodeValidationInfo();
             });
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 

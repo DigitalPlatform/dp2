@@ -194,7 +194,7 @@ out strError);
             long skip_offset = 0;
 
             {
-                REDO_DETECT:
+            REDO_DETECT:
                 // 先检查以前是否有已经上传的局部
                 long lRet = channel.GetRes(stop,
                     strServerFilePath,
@@ -358,7 +358,7 @@ out strError);
 
                         int nRedoCount = 0;
                         long save_pos = stream.Position;
-                        REDO:
+                    REDO:
                         // 2019/6/21
                         // 如果是重做，文件指针要回到合适位置
                         if (stream.Position != save_pos)
@@ -432,8 +432,8 @@ out strError);
                         channel,
                         stop,
                         strServerFilePath,
-                        strClientFilePath);
-
+                        strClientFilePath,
+                        prompt_func);
                     stop?.SetMessage("MD5 校验完成");
 
                     if (result.Value == -1)
@@ -473,19 +473,43 @@ out strError);
             this LibraryChannel channel,
             Stop stop,
             string strServerFilePath,
-            string strLocalFilePath)
+            string strLocalFilePath,
+            delegate_prompt prompt_func)
         {
+            // stop 对中断 MD5 会起作用
+            Debug.Assert(stop != null, "");
+
+            // 2020/2/26 改为 ...ByTask()
             // 检查 MD5
             // return:
             //      -1  出错
             //      0   文件没有找到
             //      1   文件找到
-            int nRet = DynamicDownloader.GetServerFileMD5(
+            int nRet = DynamicDownloader.GetServerFileMD5ByTask(
                 channel,
                 stop,   // this.Stop,
                 strServerFilePath,
+                /*
+                new MessagePromptEventHandler(delegate (object o1, MessagePromptEventArgs e1)
+                {
+                    //转换为 prompt_func 发生作用
+                }),
+                */
+                (o1, e1) =>
+                {
+                    if (prompt_func == null)
+                    {
+                        e1.ResultAction = "cancel";
+                        return;
+                    }
+
+                    string[] buttons = e1.Actions.Split(new char[] { ',' });
+                    //转换为 prompt_func 发生作用
+                    e1.ResultAction = prompt_func(channel, e1.MessageText, buttons, 20);
+                },
+                new System.Threading.CancellationToken(),
                 out byte[] server_md5,
-                out string strError);
+                out string strError); ;
             if (nRet != 1)
             {
                 strError = "探测服务器端文件 '" + strServerFilePath + "' MD5 时出错: " + strError;
@@ -629,7 +653,7 @@ out strError);
                 }
             }
 
-            GETDATA:
+        GETDATA:
 
             // 重新正式获取内容
             lRet = channel.GetRes(
@@ -764,7 +788,7 @@ out strError);
                 return 0;   // 以无错误姿态返回
             }
 
-            GETDATA:
+        GETDATA:
             // 重新正式获取内容
             lRet = channel.GetRes(
                 stop,
