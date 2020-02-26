@@ -217,6 +217,7 @@ out strError);
                         channel,
                         null,   // this.Stop,
                         filepath,
+                        (MessagePromptEventHandler)null,
                         cancel.Token,
                         out byte[] server_md5,
                         out strError);

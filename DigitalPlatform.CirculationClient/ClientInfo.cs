@@ -619,7 +619,7 @@ namespace DigitalPlatform.CirculationClient
             {
             }
 
-            REDO_VERIFY:
+        REDO_VERIFY:
             if (bReset == false
                 && SerialNumberMode != "must"
                 && strSerialCode == "community")
@@ -725,7 +725,7 @@ namespace DigitalPlatform.CirculationClient
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.OriginCode = strOriginCode;
 
-            REDO:
+        REDO:
             dlg.ShowDialog(MainForm);
             if (dlg.DialogResult != DialogResult.OK)
                 return 0;
@@ -1057,7 +1057,7 @@ delegate_action action)
             {
                 dom.Load(strXmlFilename);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 strError = $"打开 XML 文件失败: {ex.Message}";
                 return -1;
@@ -1106,6 +1106,23 @@ delegate_action action)
             }
 
             return "";
+        }
+
+        public static void MemoryState(Form form, string section, string entry)
+        {
+            form.Load += (s1, e1) =>
+            {
+                var state = ClientInfo.Config.Get(section, entry, "");
+                if (string.IsNullOrEmpty(state) == false)
+                {
+                    FormProperty.SetProperty(state, form, ClientInfo.IsMinimizeMode());
+                }
+            };
+            form.FormClosed += (s1, e1) =>
+            {
+                var state = FormProperty.GetProperty(form);
+                ClientInfo.Config.Set(section, entry, state);
+            };
         }
     }
 }
