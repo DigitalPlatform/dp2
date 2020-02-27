@@ -11,6 +11,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Globalization;
 using System.ServiceModel.Channels;
+using System.Threading.Tasks;
 
 using DigitalPlatform;
 using DigitalPlatform.LibraryServer;
@@ -23,7 +24,6 @@ using DigitalPlatform.LibraryServer.Common;
 using DigitalPlatform.rms;
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.rms.Client.rmsws_localhost;
-using System.Threading.Tasks;
 
 namespace dp2Library
 {

@@ -7,6 +7,7 @@ using System.Windows.Forms;
 using System.Drawing;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Linq;
 
 namespace DigitalPlatform.GUI
 {
@@ -828,6 +829,20 @@ namespace DigitalPlatform.GUI
             }
         }
 
+        public static List<int> GetSelectedIndices(ListView list)
+        {
+            return new List<int>(list.SelectedIndices.Cast<int>());
+        }
+
+        public static void SelectItems(ListView list, List<int> indices)
+        {
+            ClearSelection(list);
+            foreach(int i in indices)
+            {
+                var item = list.Items[i];
+                item.Selected = true;
+            }
+        }
     }
 
     public static class ListBoxUtil

@@ -2695,9 +2695,15 @@ MessageBoxDefaultButton.Button2);
             // 算法是获得 type 属性为空的第一个 account 元素
             // XmlElement nodeSupervisor = dom.DocumentElement.SelectSingleNode("accounts/account[@type='']") as XmlElement;
             // 2020/2/24
-            var nodes = dom.DocumentElement.SelectNodes("accounts/account");
-            XmlElement nodeSupervisor = nodes.Cast<XmlElement>().First(node => string.IsNullOrEmpty(node.GetAttribute("type")));
-            
+            // TODO：最好还需要限定一下 rights 里面包含 managedatabase
+            var nodes = dom.DocumentElement.SelectNodes("accounts/account").Cast<XmlElement>()
+                .Where(node => string.IsNullOrEmpty(node.GetAttribute("type")));
+            // 2020/2/27
+            // 先尝试一次有没有名为 supervisor 的元素
+            XmlElement nodeSupervisor = nodes.FirstOrDefault(node => node.GetAttribute("name") == "supervisor");
+            if (nodeSupervisor == null)
+                nodeSupervisor = nodes.FirstOrDefault();
+
             if (nodeSupervisor != null)
             {
                 this.SupervisorUserName = DomUtil.GetAttr(nodeSupervisor, "name");
@@ -2799,11 +2805,17 @@ MessageBoxDefaultButton.Button2);
             if (nodeSupervisor == null)
             {
                 // 2020/1/3 把 name 属性为 'supervisor' 的拉过来用
-                nodeSupervisor = nodeAccounts.SelectSingleNode("account[@type='' and @name='supervisor']") as XmlElement;
+                // nodeSupervisor = nodeAccounts.SelectSingleNode("account[@type='' and @name='supervisor']") as XmlElement;
+                // 2020/2/27 注意 type 属性不存在或者存在但值为空的判断 
+                nodeSupervisor = nodeAccounts.SelectNodes("account[@name='supervisor']").Cast<XmlElement>()
+                    .FirstOrDefault(o => string.IsNullOrEmpty(o.GetAttribute("type")));
                 if (nodeSupervisor == null)
                 {
                     nodeSupervisor = dom.CreateElement("account");
-                    nodeAccounts.AppendChild(nodeSupervisor);
+                    // nodeAccounts.AppendChild(nodeSupervisor);
+                    // 2020/2/27
+                    // 前插
+                    nodeAccounts.PrependChild(nodeSupervisor);
                 }
             }
 

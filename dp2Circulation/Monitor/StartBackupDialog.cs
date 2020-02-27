@@ -68,7 +68,7 @@ namespace dp2Circulation
 
                 return;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 strError = ex.Message;
                 goto ERROR1;
