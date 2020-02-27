@@ -282,5 +282,36 @@ a => a.AddressFamily == AddressFamily.InterNetwork);
             });
         }
 
+        public static async Task<NormalResult> GetServerName(string url)
+        {
+            return await Task.Run<NormalResult>(() =>
+            {
+                using (LibraryChannel channel = new LibraryChannel())
+                {
+                    channel.Timeout = TimeSpan.FromSeconds(5);
+                    channel.Url = url;
+                    long lRet = channel.GetSystemParameter(null,
+"library",
+"name",
+out string strLibraryName,
+out string strError);
+                    if (lRet == -1)
+                    {
+                        if (channel.ErrorCode == LibraryClient.localhost.ErrorCode.NotLogin)
+                        {
+                            strError = $"服务器 {channel.Url} 版本太旧，无法免登录获得图书馆名。请将它升级到最新版本";
+                        }
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError
+                        };
+                    }
+                    else
+                        return new NormalResult { ErrorCode = strLibraryName };
+                }
+            });
+        }
+
     }
 }

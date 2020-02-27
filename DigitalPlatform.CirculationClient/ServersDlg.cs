@@ -3,12 +3,12 @@ using System.Drawing;
 using System.ComponentModel;
 using System.Windows.Forms;
 using System.Collections.Generic;
+using System.Management;
 
 using Newtonsoft.Json;
 
 using DigitalPlatform.GUI;
 using DigitalPlatform.Text;
-using System.Management;
 
 namespace DigitalPlatform.CirculationClient
 {
@@ -35,6 +35,7 @@ namespace DigitalPlatform.CirculationClient
         private ColumnHeader columnHeader_name;
         private IContainer components;
         private ColumnHeader columnHeader_uid;
+        private ColumnHeader columnHeader_lineNo;
         private MessageBalloon m_firstUseBalloon = null;
 
 
@@ -81,6 +82,7 @@ namespace DigitalPlatform.CirculationClient
             this.columnHeader_userName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_savePassword = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_uid = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_lineNo = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.SuspendLayout();
             // 
             // button_OK
@@ -116,15 +118,16 @@ namespace DigitalPlatform.CirculationClient
             // 
             // listView1
             // 
-            this.listView1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.listView1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.listView1.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader_name,
             this.columnHeader_url,
             this.columnHeader_userName,
             this.columnHeader_savePassword,
-            this.columnHeader_uid});
+            this.columnHeader_uid,
+            this.columnHeader_lineNo});
             this.listView1.FullRowSelect = true;
             this.listView1.HideSelection = false;
             this.listView1.Location = new System.Drawing.Point(17, 16);
@@ -161,6 +164,12 @@ namespace DigitalPlatform.CirculationClient
             // 
             this.columnHeader_uid.Text = "UID";
             this.columnHeader_uid.Width = 200;
+            // 
+            // columnHeader_lineNo
+            // 
+            this.columnHeader_lineNo.Text = "行号";
+            this.columnHeader_lineNo.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.columnHeader_lineNo.Width = 70;
             // 
             // ServersDlg
             // 
@@ -205,6 +214,18 @@ namespace DigitalPlatform.CirculationClient
             // 为了让Cancel退出有放弃整体修改的效果，请调主在初始化Servers
             // 属性的时候用一个克隆的ServerCollection对象。
 
+            bool control = (Control.ModifierKeys & Keys.Control) == Keys.Control;
+
+            if (control == false)
+            {
+                var warnings = VerifyDup();
+                if (warnings.Count > 0)
+                {
+                    MessageDlg.Show(this, $"经检查发现如下错误，请修复:\r\n{StringUtil.MakePathList(warnings, "\r\n")}", "发现错误");
+                    return;
+                }
+            }
+
             this.DialogResult = DialogResult.OK;
             this.Close();
         }
@@ -215,11 +236,38 @@ namespace DigitalPlatform.CirculationClient
             this.Close();
         }
 
+        // 检查服务器名和 UID 是否重复
+        List<string> VerifyDup()
+        {
+            List<string> warnings = new List<string>();
+            for (int i = 0; i < this.Servers.Count; i++)
+            {
+                var server1 = this.Servers[i] as dp2Server;
+                if (string.IsNullOrEmpty(server1.Name))
+                    warnings.Add($"事项 {(i + 1)} 的服务器名为空");
+                if (string.IsNullOrEmpty(server1.UID))
+                    warnings.Add($"事项 {(i + 1)} 的 UID 为空");
+                for (int j = i + 1; j < this.Servers.Count; j++)
+                {
+                    var server2 = this.Servers[j] as dp2Server;
+                    if (string.IsNullOrEmpty(server2.Name) == false
+                        && server1.Name == server2.Name)
+                        warnings.Add($"事项 {(i + 1)} 和 {(j + 1)} 的服务器名重复了(都是 '{server1.Name}')");
+                    if (string.IsNullOrEmpty(server2.UID) == false
+                        && server1.UID == server2.UID)
+                        warnings.Add($"事项 {(i + 1)}({server1.Name}) 和 {(j + 1)}({server1.Name}) 的 UID 重复了(都是 '{server1.UID}')");
+                }
+            }
+
+            return warnings;
+        }
+
         const int COLUMN_NAME = 0;
         const int COLUMN_URL = 1;
         const int COLUMN_USERNAME = 2;
         const int COLUMN_SAVEPASSWORD = 3;
         const int COLUMN_UID = 4;
+        const int COLUMN_LINENO = 5;
 
         void FillList()
         {
@@ -235,11 +283,14 @@ namespace DigitalPlatform.CirculationClient
                 ListViewItem item = new ListViewItem(server.Name, 0);
 
                 listView1.Items.Add(item);
+                // item.Tag = server;
 
                 ListViewUtil.ChangeItemText(item, COLUMN_URL, server.Url);
                 ListViewUtil.ChangeItemText(item, COLUMN_USERNAME, server.DefaultUserName);
                 ListViewUtil.ChangeItemText(item, COLUMN_SAVEPASSWORD, server.SavePassword == true ? "是" : "否");
                 ListViewUtil.ChangeItemText(item, COLUMN_UID, server.UID);
+                ListViewUtil.ChangeItemText(item, COLUMN_LINENO, (i+1).ToString());
+
                 //item.SubItems.Add(server.Url);
                 //item.SubItems.Add(server.DefaultUserName);
                 //item.SubItems.Add(server.SavePassword == true ? "是" : "否");
@@ -315,8 +366,11 @@ namespace DigitalPlatform.CirculationClient
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
-
-
+            menuItem = new MenuItem("刷新服务器名(&R)");
+            menuItem.Click += new System.EventHandler(this.menu_refreshServerName);
+            if (bSelected == false || bReadOnly)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
 
             contextMenu.Show(listView1, new Point(e.X, e.Y));
         }
@@ -422,6 +476,59 @@ namespace DigitalPlatform.CirculationClient
 
             string value = JsonConvert.SerializeObject(servers, Formatting.Indented);
             Clipboard.SetText(value);
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        async void menu_refreshServerName(object sender, System.EventArgs e)
+        {
+            string strError = "";
+            if (listView1.SelectedIndices.Count == 0)
+            {
+                strError = "尚未选择要刷新服务器名的事项 ...";
+                goto ERROR1;
+            }
+
+            int change_count = 0;
+            List<string> errors = new List<string>();
+
+            using (MessageBar bar = MessageBar.Create(this, "正在刷新服务器名"))
+            {
+                foreach (int index in this.listView1.SelectedIndices)
+                {
+                    dp2Server server = Servers[index] as dp2Server;
+
+                    // 获得服务器 UID
+                    string server_name = "";
+                    bar.SetMessageText($"正在获取服务器 {server.Url} 的图书馆名 ...");
+                    var result = await ServerDlg.GetServerName(server.Url);
+                    if (result.Value == -1)
+                        errors.Add($"针对服务器 {server.Url} 获取图书馆名时出错: {result.ErrorInfo}");
+                    else
+                        server_name = result.ErrorCode;
+
+                    if (server.Name != server_name)
+                    {
+                        server.Name = server_name;
+                        change_count++;
+                    }
+                }
+
+                // TODO: 刷新后如果发现发生了服务器名重复，怎么处理?
+
+                if (change_count > 0)
+                {
+                    Servers.Changed = true;
+                    // 刷新前保存选择位置
+                    var indices = ListViewUtil.GetSelectedIndices(this.listView1);
+                    this.listView1.BeginUpdate();
+                    FillList();
+                    // 刷新后恢复选择位置
+                    ListViewUtil.SelectItems(this.listView1, indices);
+                    this.listView1.EndUpdate();
+                }
+            }
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -774,7 +881,7 @@ namespace DigitalPlatform.CirculationClient
 
         static string _key = null;
 
-        // key 字符串根据 CPU ID 确定，增强安全性
+        // 获得加密 key。key 字符串根据 CPU ID 确定，增强安全性
         public static string GetKey()
         {
             if (_key == null)

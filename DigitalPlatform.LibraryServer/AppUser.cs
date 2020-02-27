@@ -431,8 +431,7 @@ namespace DigitalPlatform.LibraryServer
                         EncryptKey);
                     DomUtil.SetAttr(nodeAccount, "password", strPassword);
 #endif
-                    string strHashed = "";
-                    nRet = LibraryServerUtil.SetUserPassword(userinfo.Password, out strHashed, out strError);
+                    nRet = LibraryServerUtil.SetUserPassword(userinfo.Password, out string strHashed, out strError);
                     if (nRet == -1)
                         return -1;
                     DomUtil.SetAttr(nodeAccount, "password", strHashed);

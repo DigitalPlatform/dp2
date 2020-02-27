@@ -773,6 +773,11 @@ string strHtml)
                     goto ERROR1;
                 }
             }
+            catch (Exception ex)
+            {
+                strError = "程序出现异常: " + ExceptionUtil.GetDebugText(ex);
+                goto ERROR1;
+            }
             finally
             {
                 this.ClearMessage();
@@ -971,7 +976,26 @@ string strHtml)
             this.Invoke((Action)(() =>
             {
                 ListViewUtil.ChangeItemText(item, column, text);
+                // https://stackoverflow.com/questions/2730931/how-to-set-tooltip-for-a-listviewitem
             }));
+        }
+
+        /*
+        // 时间精确到日即可
+        public static string GetCurrentBackupFileName(string server_name)
+        {
+            DateTime now = DateTime.Now;
+            return "MC_" + now.ToString("yyyy_MM_dd") + "_" + server_name + "_" + now.ToString("HHmmssffff") +".dp2bak";
+        }
+        */
+
+        // 时间精确到日即可
+        public static string GetCurrentBackupFileName(string server_name)
+        {
+            DateTime now = DateTime.Now;
+            return "MC_" + now.ToString("yyyy_MM_dd") + "_" + server_name
+                // + "_" + now.ToString("HHmmssffff") 
+                + ".dp2bak";
         }
 
         async Task<NormalResult> Backup(dp2Server server,
@@ -987,7 +1011,7 @@ string strHtml)
             {
                 BackupTaskStart param = new BackupTaskStart
                 {
-                    BackupFileName = "",
+                    BackupFileName = GetCurrentBackupFileName(server.Name),
                     DbNameList = "*"
                 };
 
@@ -1069,7 +1093,9 @@ string strHtml)
                 var result = await DownloadBackupFiles(
                     item,
                     strOutputFolder,
-                    token);
+                    token,
+                    true,
+                    true);
                 if (result.Value == -1)
                     SetBackupItemError(item, result.ErrorInfo);
                 return result;
@@ -1137,7 +1163,8 @@ string strHtml)
     ListViewItem item,
     string strOutputFolder,
     CancellationToken token,
-    bool deleteServerFile = true)
+    bool clearLocalFileBefore = false,
+    bool deleteServerFileAtEnd = true)
         {
             var info = GetBackupInfo(item);
             if (string.IsNullOrEmpty(info.ServerName))
@@ -1196,7 +1223,7 @@ string strHtml)
                 var result = await AskOverwriteFiles(
                     channel,
                     infos,
-                    "dontAskMd5Verify,auto",
+                    "dontAskMd5Verify,auto" + (clearLocalFileBefore ? ",clearBefore" : ""),
                     strOutputFolder);
                 if (result.Value == -1)
                 {
@@ -1250,7 +1277,7 @@ string strHtml)
                     }
 
                     // 去删除服务器端的文件
-                    if (deleteServerFile)
+                    if (deleteServerFileAtEnd)
                     {
                         var delete_result = DeleteServerFiles(item);
                         if (delete_result.Value == -1)
@@ -1302,7 +1329,7 @@ string strHtml)
                                                 SetItemText(item, COLUMN_STATE, "下载完成");
 
                                                 // 删除所有服务器端备份文件
-                                                if (deleteServerFile)
+                                                if (deleteServerFileAtEnd)
                                                 {
                                                     var delete_result = DeleteServerFiles(item);
                                                     if (delete_result.Value == -1)
@@ -1666,6 +1693,10 @@ string strHtml)
 
         // TODO: 将中途打算删除的文件留到函数返回前一刹那再删除
         // 询问是否覆盖已有的目标下载文件。整体询问
+        // parameters:
+        //      style   风格。
+        //              如果包含 auto，表示尽量自动按照追加下载处理而减少弹出对话框询问
+        //              如果包含 clearBefore，表示直接删除本地已有同名文件，不再询问
         // return:
         //      -1  出错
         //      0   放弃下载
@@ -1685,6 +1716,8 @@ string strHtml)
             {
                 throw new ArgumentException("strOutputFolder 参数值不允许为空");
             }
+
+            bool clearBefore = StringUtil.IsInList("clearBefore", style);
 
             List<DownloadFileInfo> deleted = new List<DownloadFileInfo>();
 
@@ -1717,6 +1750,12 @@ string strHtml)
                 {
                     info.LocalFileExists = true;
 
+                    if (clearBefore)
+                    {
+                        // 把这种情况当作 MD5 不匹配一样处理
+                        info.MD5Matched = "no";
+                    }
+                    else
                     if (filename.StartsWith("!"))
                     {
                         if (bDontAskMd5Verify == false)
@@ -1835,7 +1874,6 @@ string strHtml)
             List<string> delete_filenames = new List<string>();
             try
             {
-
                 // MD5 不匹配的文件
                 List<string> md5_mismatch_filenames = new List<string>();   // 正式文件存在的，并且 MD5 经过探测发现不匹配的
                 md5_mismatch_filenames = GetFileNames(fileinfos, (info) =>
@@ -1847,12 +1885,16 @@ string strHtml)
 
                 if (md5_mismatch_filenames.Count > 0)
                 {
-                    DialogResult result = MessageBox.Show(this,
-        "下列文件中 '" + GetFileNameList(md5_mismatch_filenames, "\r\n") + "' 先前曾经被下载过，但 MD5 验证发现和服务器侧文件不一致。\r\n\r\n是否删除它们然后重新下载?\r\n[是：重新下载; 否: 不下载这些文件; 取消：放弃全部下载]",
-        "MainForm",
-        MessageBoxButtons.YesNoCancel,
-        MessageBoxIcon.Question,
-        MessageBoxDefaultButton.Button1);
+                    DialogResult result = DialogResult.Yes;
+                    if (clearBefore == false)
+                    {
+                        result = MessageBox.Show(this,
+    "下列文件中 '" + GetFileNameList(md5_mismatch_filenames, "\r\n") + "' 先前曾经被下载过，但 MD5 验证发现和服务器侧文件不一致。\r\n\r\n是否删除它们然后重新下载?\r\n[是：重新下载; 否: 不下载这些文件; 取消：放弃全部下载]",
+    "MainForm",
+    MessageBoxButtons.YesNoCancel,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button1);
+                    }
                     if (result == DialogResult.Cancel)
                     {
                         delete_filenames.Clear();
@@ -2719,7 +2761,9 @@ string strHtml)
 
                         info.BackupTask = DownloadBackupFiles(item,
                             strOutputFolder,
-                            info.CancellationToken);
+                            info.CancellationToken,
+                            false,
+                            true);
                         /*
                         var result = await DownloadBackupFiles(item, strOutputFolder, token);
                         if (result.Value == -1)
@@ -2731,6 +2775,15 @@ string strHtml)
                     }
 
                     return new NormalResult();
+                }
+                catch (Exception ex)
+                {
+                    strError = "程序出现异常: " + ExceptionUtil.GetDebugText(ex);
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError
+                    };
                 }
                 finally
                 {
@@ -2960,7 +3013,7 @@ string strHtml)
                 }
                 return;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 this.Invoke((Action)(() =>
                 {
@@ -3129,18 +3182,25 @@ string strHtml)
         void menu_openBackupLocalFolder_Click(object sender, EventArgs e)
         {
             List<string> errors = new List<string>();
-            foreach (ListViewItem item in this.listView_backupTasks.SelectedItems)
+            try
             {
-                var info = GetBackupInfo(item);
-                string path = GetOutputFolder(info.ServerName);
-                try
+                foreach (ListViewItem item in this.listView_backupTasks.SelectedItems)
                 {
-                    System.Diagnostics.Process.Start(path);
+                    var info = GetBackupInfo(item);
+                    string path = GetOutputFolder(info.ServerName);
+                    try
+                    {
+                        System.Diagnostics.Process.Start(path);
+                    }
+                    catch (Exception ex)
+                    {
+                        errors.Add($"打开文件夹 '{path}' 时出现异常: {ExceptionUtil.GetAutoText(ex)}");
+                    }
                 }
-                catch (Exception ex)
-                {
-                    errors.Add($"打开文件夹 '{path}' 时出现异常: {ExceptionUtil.GetAutoText(ex)}");
-                }
+            }
+            catch (Exception ex)
+            {
+                errors.Add("程序出现异常: " + ExceptionUtil.GetDebugText(ex));
             }
 
             if (errors.Count > 0)
@@ -4288,19 +4348,26 @@ out string strError);
             Debug.Assert(listView != null, "");
 
             List<string> errors = new List<string>();
-            foreach (ListViewItem item in listView.SelectedItems)
+            try
             {
-                var info = GetOperLogInfo(item);
-                string strOutputFolder = GetOutputLogFolder(listView, info.ServerName);
+                foreach (ListViewItem item in listView.SelectedItems)
+                {
+                    var info = GetOperLogInfo(item);
+                    string strOutputFolder = GetOutputLogFolder(listView, info.ServerName);
 
-                try
-                {
-                    System.Diagnostics.Process.Start(strOutputFolder);
+                    try
+                    {
+                        System.Diagnostics.Process.Start(strOutputFolder);
+                    }
+                    catch (Exception ex)
+                    {
+                        errors.Add($"打开文件夹 '{strOutputFolder}' 时出现异常: {ExceptionUtil.GetAutoText(ex)}");
+                    }
                 }
-                catch (Exception ex)
-                {
-                    errors.Add($"打开文件夹 '{strOutputFolder}' 时出现异常: {ExceptionUtil.GetAutoText(ex)}");
-                }
+            }
+            catch (Exception ex)
+            {
+                errors.Add("程序出现异常: " + ExceptionUtil.GetDebugText(ex));
             }
 
             if (errors.Count > 0)
@@ -4411,6 +4478,11 @@ out string strError);
                     goto ERROR1;
                 }
             }
+            catch (Exception ex)
+            {
+                strError = "程序出现异常: " + ExceptionUtil.GetDebugText(ex);
+                goto ERROR1;
+            }
             finally
             {
                 this.ClearMessage();
@@ -4480,6 +4552,15 @@ out string strError);
                     }
 
                     return new NormalResult();
+                }
+                catch (Exception ex)
+                {
+                    strError = "程序出现异常: " + ExceptionUtil.GetDebugText(ex);
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError
+                    };
                 }
                 finally
                 {
