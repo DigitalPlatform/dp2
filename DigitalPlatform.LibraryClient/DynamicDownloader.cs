@@ -142,11 +142,11 @@ namespace DigitalPlatform.LibraryClient
         public Task StartDownload(bool bContinue,
             bool getMd5NewStyle = false)
         {
-            // 创建输出文件
             this.Close();
 
             string strTempFileName = this.GetTempFileName();
 
+            // 创建输出文件
             if (bContinue == false)
                 _stream = File.Create(strTempFileName);
             else
@@ -230,7 +230,6 @@ namespace DigitalPlatform.LibraryClient
 
                 REDO:
                     string strMetadata = "";
-                    string strOutputPath = "";
                     long lRet = this.Channel.GetRes(
                         this.Stop,
                         this.ServerFilePath,
@@ -239,7 +238,7 @@ namespace DigitalPlatform.LibraryClient
                         strStyle,
                         out baContent,
                         out strMetadata,
-                        out strOutputPath,
+                        out string strOutputPath,
                         out timestamp,
                         out strError);
                     if (lRet == -1)
@@ -399,6 +398,7 @@ namespace DigitalPlatform.LibraryClient
                                 this.ErrorInfo = "下载文件 '" + this.ServerFilePath + "' 时遭遇(服务器端)状态出错: " + strState;
                             else if (this.ServerFilePath.StartsWith("!"))
                             {
+#if NO
                                 DisplayMessage("正在获得服务器文件 " + this.ServerFilePath + " 的 MD5 ...");
 
                                 // 检查 MD5
@@ -458,6 +458,35 @@ namespace DigitalPlatform.LibraryClient
                                     strError = "服务器端文件 '" + this.ServerFilePath + "' 和刚下载的本地文件 MD5 不匹配";
                                     goto ERROR1;
                                 }
+#endif
+                                // 让两个任务并行执行
+                                var task1 = GetRemoteMd5(this._cancel.Token);
+                                var task2 = GetLocalMd5(this._cancel.Token);
+
+                                DisplayMessage($"正在对比 MD5 {this.ServerFilePath} <--> {this.LocalFilePath} ...");
+
+                                Task.WaitAll(new Task[] { task1, task2 },
+                                    this._cancel.Token);
+
+                                if (task1.Result.Value != 0)
+                                {
+                                    strError = "探测服务器端文件 '" + this.ServerFilePath + "' MD5 时出错: " + task1.Result.ErrorInfo;
+                                    goto ERROR1;
+                                }
+                                var server_md5 = task1.Result.MD5;
+
+                                if (task2.Result.Value != 0)
+                                {
+                                    strError = "探测本地文件 '" + this.LocalFilePath + "' MD5 时出错: " + task2.Result.ErrorInfo;
+                                    goto ERROR1;
+                                }
+                                var local_md5 = task2.Result.MD5;
+
+                                if (ByteArray.Compare(server_md5, local_md5) != 0)
+                                {
+                                    strError = "服务器端文件 '" + this.ServerFilePath + "' 和刚下载的本地文件 MD5 不匹配";
+                                    goto ERROR1;
+                                }
                             }
                             this.State = "finish:" + strState;
                             TriggerClosedEvent();
@@ -512,6 +541,89 @@ namespace DigitalPlatform.LibraryClient
             fileInfo.LastWriteTimeUtc = new DateTime(lTicks);
         }
 
+        public class GetMd5Result : NormalResult
+        {
+            public byte[] MD5 { get; set; }
+        }
+
+        Task<GetMd5Result> GetLocalMd5(CancellationToken token)
+        {
+            return Task.Run<GetMd5Result>(() =>
+            {
+                // DisplayMessage("正在获得本地文件 " + this.LocalFilePath + " 的 MD5 ...");
+
+                _stream.Seek(0, SeekOrigin.Begin);
+                byte[] local_md5 = GetFileMd5(_stream);
+                return new GetMd5Result { Value = 0, MD5 = local_md5 };
+            });
+        }
+
+        Task<GetMd5Result> GetRemoteMd5(CancellationToken token)
+        {
+            return Task.Run<GetMd5Result>(() =>
+            {
+            REDO_MD5:
+                int nRet = GetServerFileMD5ByTask(
+        this.Channel,
+        this.Stop,
+        this.ServerFilePath,
+        this.Prompt,
+        token,
+    out byte[] server_md5,
+    out string strError);
+                if (nRet != 1)
+                {
+                    if (nRet == -1)
+                    {
+                        if (token.IsCancellationRequested)
+                            goto ERROR1;
+                        if (this.Prompt != null
+                            && !(this.Stop != null && this.Stop.IsStopped == true))
+                        {
+                            MessagePromptEventArgs e = new MessagePromptEventArgs();
+                            e.MessageText = "获得服务器文件 '" + this.ServerFilePath + "' 的 MD5 时发生错误： " + strError;
+                            e.Actions = "yes,no,cancel";
+                            this.Prompt(this, e);
+                            if (e.ResultAction == "cancel")
+                                goto ERROR1;
+                            else if (e.ResultAction == "yes")
+                                goto REDO_MD5;
+                            else
+                                goto ERROR1;
+                        }
+                        else
+                            goto ERROR1;
+                    }
+                    strError = "探测服务器端文件 '" + this.ServerFilePath + "' MD5 时出错: " + strError;
+                    goto ERROR1;
+                }
+                return new GetMd5Result { Value = 0, MD5 = server_md5 };
+            ERROR1:
+                return new GetMd5Result { Value = -1, ErrorInfo = strError };
+            });
+        }
+
+        public static byte[] GetFileMd5(string filename,
+    CancellationToken token)
+        {
+            using (var md5 = MD5.Create())
+            {
+                using (var stream = File.Open(
+                        filename,
+                        FileMode.Open,
+                        FileAccess.ReadWrite, // Read会造成无法打开
+                        FileShare.ReadWrite))
+                {
+                    using (CancellationTokenRegistration ctr = token.Register(() =>
+                    {
+                        stream.Close();
+                    }))
+                    {
+                        return md5.ComputeHash(stream);
+                    }
+                }
+            }
+        }
 
         public static byte[] GetFileMd5(Stream stream)
         {

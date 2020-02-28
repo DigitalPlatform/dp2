@@ -14,6 +14,7 @@ using System.Web;
 using System.Windows.Forms;
 
 using Newtonsoft.Json;
+using Microsoft.VisualStudio.Threading;
 
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
@@ -24,7 +25,6 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryServer.Common;
 using DigitalPlatform.Text;
-using Microsoft.VisualStudio.Threading;
 
 namespace dp2ManageCenter
 {
@@ -426,15 +426,18 @@ string strHtml)
         #region dp2library 通道
 
         public LibraryChannelPool _channelPool = new LibraryChannelPool();
+        private readonly Object _syncRoot_channelPool = new Object();
 
         List<LibraryChannel> _channelList = new List<LibraryChannel>();
         public void DoStop(object sender, StopEventArgs e)
         {
-            // TODO: 加锁
-            foreach (LibraryChannel channel in _channelList)
+            lock (_syncRoot_channelPool)
             {
-                if (channel != null)
-                    channel.Abort();
+                foreach (LibraryChannel channel in _channelList)
+                {
+                    if (channel != null)
+                        channel.Abort();
+                }
             }
         }
 
@@ -459,8 +462,10 @@ string strHtml)
             //if ((style & GetChannelStyle.GUI) != 0)
             //    channel.Idle += channel_Idle;
 
-            // TODO: 加锁
-            _channelList.Add(channel);
+            lock (_syncRoot_channelPool)
+            {
+                _channelList.Add(channel);
+            }
             // TODO: 检查数组是否溢出
             return channel;
         }
@@ -477,7 +482,10 @@ string strHtml)
             // channel.Idle -= channel_Idle;
 
             this._channelPool.ReturnChannel(channel);
-            _channelList.Remove(channel);
+            lock (_syncRoot_channelPool)
+            {
+                _channelList.Remove(channel);
+            }
         }
 
         void Channels_BeforeLogin(object sender, DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
@@ -919,6 +927,7 @@ string strHtml)
             var info = GetBackupInfo(item);
             info.ServerName = server.Name;
             info.CancelTask();
+            info.BeginTask();
             // TODO: 出错时要把错误状态显示和背景颜色都兑现
             info.BackupTask = Backup(server,
                 item, strOutputFolder,
@@ -1183,6 +1192,8 @@ string strHtml)
                 };
 
             LibraryChannel channel = this.GetChannel(server.Url);
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = new TimeSpan(0, 5, 0);
             try
             {
                 // TODO: 一组两个文件，对已经下载完的一个文件不要重复下载
@@ -1308,7 +1319,7 @@ string strHtml)
                             //      1   成功启动了下载
                             var download_result = await BeginDownloadFile(
                                 info,
-                                channel.Url,
+                                channel,
                                 path,
                                 "append",
                                 strOutputFolder,
@@ -1361,6 +1372,7 @@ string strHtml)
             }
             finally
             {
+                channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
             }
         }
@@ -1485,7 +1497,7 @@ string strHtml)
         }
 
         [JsonObject(MemberSerialization.OptIn)]
-        public class ItemInfoBase
+        public class ItemInfoBase : IDisposable
         {
             // 不参与序列化
             internal List<DynamicDownloader> _downloaders = new List<DynamicDownloader>();
@@ -1512,6 +1524,14 @@ string strHtml)
                 }
             }
 
+            public void BeginTask()
+            {
+                /*
+                CancelTask();
+                this._cancel = new CancellationTokenSource();
+                */
+            }
+
             public void CancelTask()
             {
                 if (this._cancel != null)
@@ -1522,6 +1542,15 @@ string strHtml)
                 }
 
                 CancelDownloaders();
+            }
+
+            public void Dispose()
+            {
+                if (_cancel != null)
+                {
+                    _cancel.Dispose();
+                    _cancel = null;
+                }
             }
 
             public CancellationToken CancellationToken
@@ -2320,7 +2349,8 @@ string strHtml)
         //      1   成功启动了下载
         public async Task<BeginDownloadResult> BeginDownloadFile(
             BackupItemInfo info,
-            string strServerUrl,
+            // string strServerUrl,
+            LibraryChannel channel,
             string strPath,
             string strAppendStyle,
             string strOutputFolder,
@@ -2419,10 +2449,12 @@ string strHtml)
 
             var releaser = await _backupLimit.EnterAsync(token);
 
+            /*
             LibraryChannel channel = this.GetChannel(strServerUrl);
 
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = new TimeSpan(0, 5, 0);
+            */
 
             DynamicDownloader downloader = new DynamicDownloader(channel,
                 strPath,
@@ -2433,6 +2465,7 @@ string strHtml)
 
             downloader.Closed += new EventHandler(delegate (object o1, EventArgs e1)
             {
+                /*
                 if (channel != null)
                 {
                     channel.Timeout = old_timeout;
@@ -2441,6 +2474,8 @@ string strHtml)
 
                     releaser.Dispose();
                 }
+                */
+                releaser.Dispose();
 
                 {
                     // TODO: "finish:error" 表示下载完成，但服务器端的 .~state 文件内容为 "error"，表示服务器创建文件时出错而停止。比如磁盘空间满等原因
@@ -2502,9 +2537,9 @@ string strHtml)
                     {
                         bool bHideMessageBox = true;
 
-                        string server_name = this.Servers.GetServer(strServerUrl)?.Name;
+                        string server_name = this.Servers.GetServer(channel.Url)?.Name;
                         if (string.IsNullOrEmpty(server_name))
-                            server_name = strServerUrl;
+                            server_name = channel.Url;
 
                         DialogResult result = MessageDialog.Show(this,
                             $"服务器 '{server_name}': { e1.MessageText}\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)",
@@ -2759,6 +2794,8 @@ string strHtml)
                             };
                         }
 
+                        info.CancelTask();
+                        info.BeginTask();
                         info.BackupTask = DownloadBackupFiles(item,
                             strOutputFolder,
                             info.CancellationToken,
@@ -3143,7 +3180,7 @@ string strHtml)
             contextMenu.MenuItems.Add(menuItem);
 
             menuItem = new MenuItem("移除 [" + this.listView_backupTasks.SelectedItems.Count.ToString() + "] (&D)");
-            menuItem.Click += new System.EventHandler(this.menu_removeSelected_Click);
+            menuItem.Click += new System.EventHandler(this.menu_removeBackupTasks_Click);
             if (this.listView_backupTasks.SelectedItems.Count == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
@@ -3226,7 +3263,7 @@ string strHtml)
             ListViewUtil.SelectAllLines(list);
         }
 
-        void menu_removeSelected_Click(object sender, EventArgs e)
+        void menu_removeBackupTasks_Click(object sender, EventArgs e)
         {
             if (this.listView_backupTasks.SelectedItems.Count == 0)
             {
@@ -3387,8 +3424,7 @@ string strHtml)
         // const int OPERLOG_COLUMN_SERVERFILES = 4;
 
         NormalResult NewOperLogTask(ListView listView,
-            dp2Server server,
-            CancellationToken token)
+            dp2Server server)
         {
             string taskTypeName = "日备份任务";
             if (listView == this.listView_errorLogTasks)
@@ -3424,10 +3460,11 @@ string strHtml)
 
             var info = GetOperLogInfo(item);
             info.CancelTask();
+            info.BeginTask();
             info.OperLogTask = GetOperLogFiles(
                     item,
                     strOutputFolder,
-                    token);
+                    info.CancellationToken);
             /*
             var result = await Task.Run(() =>
             {
@@ -3540,6 +3577,8 @@ string strHtml)
                 if (result.Value == -1)
                 {
                     info.State = "error";
+                    // 2020/2/28
+                    SetItemText(item, OPERLOG_COLUMN_STATE, "出错: " + result.ErrorInfo);
                     SetOperLogItemColor(item);
                 }
                 return result;
@@ -3635,6 +3674,17 @@ string strHtml)
                 List<string> errors = new List<string>();
                 foreach (DownloadFileInfo fileinfo in fileinfos)
                 {
+                    // 2020/2/28
+                    if (token.IsCancellationRequested)
+                    {
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = "中断",
+                            ErrorCode = "cancelled"
+                        };
+                    }
+
                     string strPath = fileinfo.ServerPath;
 
                     string strExt = Path.GetExtension(strPath);
@@ -3805,8 +3855,55 @@ string strHtml)
                 }
                 else
                 {
+                    var result = await SequenceDownloadFiles(current_downloaders,
+                        bAppend,
+                        token,
+                        (bError) =>
+                        {
+                            if (channel != null)
+                            {
+                                channel.Timeout = old_timeout;
+                                this.ReturnChannel(channel);
+                                channel = null;
+
+                                releaser.Dispose();
+                            }
+                            /*
+                            this.Invoke((Action)(() =>
+                            {
+                                dlg.Close();
+                            }));
+                            */
+                            foreach (DynamicDownloader current in current_downloaders)
+                            {
+                                current.Close();
+                            }
+
+                            // 在 state 列中显示 errors 报错
+                            if (errors.Count > 0)
+                            {
+                                SetItemText(item, OPERLOG_COLUMN_STATE, $"错误({errors.Count}): " + StringUtil.MakePathList(errors, ";"));
+                                item_info.State = "error";
+                            }
+                            else
+                            {
+                                SetItemText(item, OPERLOG_COLUMN_STATE, $"下载完成({current_downloaders.Count})");
+                                item_info.State = "finish";
+                                SetItemText(item, OPERLOG_COLUMN_PROGRESS, $"完成");
+                            }
+
+                            // 改变 item 背景色
+                            SetOperLogItemColor(item);
+
+                            if (func_end != null)
+                                func_end(bError);
+                        });
+                    if (result.Value == -1)
+                        return result;
+#if NO
                     await Task.Factory.StartNew(() => SequenceDownloadFiles(current_downloaders,
                         bAppend,
+                        token,
                         (bError) =>
                         {
                             if (channel != null)
@@ -3847,9 +3944,10 @@ string strHtml)
                             if (func_end != null)
                                 func_end(bError);
                         }),
-        CancellationToken.None,
+        token,
         TaskCreationOptions.LongRunning,
         TaskScheduler.Default);
+#endif
                 }
 
                 bDone = true;
@@ -3899,40 +3997,58 @@ string strHtml)
         public delegate void Delegate_end(bool bError);
 
         // 顺序执行每个 DynamicDownloader
-        void SequenceDownloadFiles(List<DynamicDownloader> downloaders,
+        async Task<NormalResult> SequenceDownloadFiles(List<DynamicDownloader> downloaders,
             bool bAppend,
+            CancellationToken token,
             Delegate_end func_end)
         {
             int i = 0;
             bool bError = false;
-            foreach (DynamicDownloader downloader in downloaders)
+            try
             {
-                string strNo = "";
-                if (downloaders.Count > 0)
-                    strNo = " " + (i + 1).ToString() + "/" + downloaders.Count + " ";
+                foreach (DynamicDownloader downloader in downloaders)
+                {
+                    string strNo = "";
+                    if (downloaders.Count > 0)
+                        strNo = " " + (i + 1).ToString() + "/" + downloaders.Count + " ";
 
-                this.Invoke((Action)(() =>
-                {
-                    ListViewItem item = downloader.Tag as ListViewItem;
-                    Debug.Assert(item != null, "");
-                    SetItemText(item, OPERLOG_COLUMN_STATE, $"正在下载 {strNo} {downloader.ServerFilePath}");
-                }));
-                Task task = downloader.StartDownload(bAppend, true);
-                task.Wait();    // TODO: 这里要允许中断
-                if (downloader.IsCancellationRequested)
-                {
-                    bError = true;
-                    break;
+                    this.Invoke((Action)(() =>
+                    {
+                        ListViewItem item = downloader.Tag as ListViewItem;
+                        Debug.Assert(item != null, "");
+                        SetItemText(item, OPERLOG_COLUMN_STATE, $"正在下载 {strNo} {downloader.ServerFilePath}");
+                    }));
+                    await downloader.StartDownload(bAppend, true);
+                    if (downloader.IsCancellationRequested
+                        || token.IsCancellationRequested)
+                    {
+                        bError = true;
+                        break;
+                    }
+                    if (downloader.State == "error")
+                    {
+                        bError = true;
+                        break;
+                    }
+                    i++;
                 }
-                if (downloader.State == "error")
-                {
-                    bError = true;
-                    break;
-                }
-                i++;
+
+                return new NormalResult();
             }
-
-            func_end(bError);
+            catch (Exception ex)
+            {
+                bError = true;
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = ex.Message,
+                    ErrorCode = "exception:" + ex.GetType().ToString()
+                };
+            }
+            finally
+            {
+                func_end(bError);
+            }
         }
 
         string GetMemoryFileName(ListView listView, string strDirectory)
@@ -4412,10 +4528,11 @@ out string strError);
             if (result != DialogResult.Yes)
                 return;
 
-            foreach (ListViewItem item in this.listView_errorLogTasks.SelectedItems)
+            foreach (ListViewItem item in listView.SelectedItems)
             {
                 var info = GetOperLogInfo(item);
-                info.CancelTask();
+                if (info.IsRunning)
+                    info.CancelTask();
             }
 
             ListViewUtil.DeleteSelectedItems(listView);
@@ -4462,7 +4579,7 @@ out string strError);
                             };
                         }
 
-                        var new_result = NewOperLogTask(listView, server, token);
+                        var new_result = NewOperLogTask(listView, server);
                         if (new_result.Value == -1)
                         {
                             if (new_result.ErrorCode == "taskAlreadyExist")
@@ -4539,6 +4656,7 @@ out string strError);
                         }
 
                         info.CancelTask();
+                        info.BeginTask();
                         info.OperLogTask = GetOperLogFiles(
                                 item,
                                 strOutputFolder,

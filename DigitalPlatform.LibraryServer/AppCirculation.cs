@@ -8606,18 +8606,17 @@ start_time_1,
         public int SetCalendar(string strAction,
             string strLibraryCodeList,
             CalenderInfo info,
+            out ErrorCode error_code,
             out string strError)
         {
             strError = "";
+            error_code = ErrorCode.NoError;
 
             {
-                string strLibraryCode = "";
-                string strPureName = "";
-
                 // 解析日历名
                 ParseCalendarName(info.Name,
-            out strLibraryCode,
-            out strPureName);
+            out string strLibraryCode,
+            out string strPureName);
 
                 // 检查日历名中馆代码。必须使用单个馆代码
                 if (strLibraryCode.IndexOf(",") != -1)
@@ -8634,18 +8633,16 @@ start_time_1,
 
                 if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                 {
-
                     if (StringUtil.IsInList(strLibraryCode, strLibraryCodeList) == false)
                     {
+                        error_code = ErrorCode.AccessDenied;
                         strError = "当前用户管辖的馆代码为 '" + strLibraryCodeList + "'，不包含日历名中的馆代码 '" + strLibraryCode + "'，修改操作被拒绝";
                         return -1;
                     }
                 }
             }
 
-            string strXPath = "";
-
-            strXPath = "calendars/calendar[@name='" + info.Name + "']";
+            string strXPath = "calendars/calendar[@name='" + info.Name + "']";
 
             XmlNodeList nodes = this.LibraryCfgDom.DocumentElement.SelectNodes(strXPath);
 
@@ -8680,7 +8677,6 @@ start_time_1,
                         nodes[i].ParentNode.RemoveChild(nodes[i]);
                     }
                     node = nodes[0];
-
                 }
                 else
                 {
@@ -8696,11 +8692,11 @@ start_time_1,
                 return 0;
             }
 
-
             if (strAction == "change")
             {
                 if (nodes.Count == 0)
                 {
+                    error_code = ErrorCode.NotFound;
                     strError = "日历名 '" + info.Name + "' 不存在";
                     return -1;
                 }
@@ -8727,6 +8723,7 @@ start_time_1,
 
                 if (nodes.Count > 0)
                 {
+                    error_code = ErrorCode.AlreadyExist;
                     strError = "日历名 '" + info.Name + "' 已经存在";
                     return -1;
                 }
@@ -8753,6 +8750,7 @@ start_time_1,
             {
                 if (nodes.Count == 0)
                 {
+                    error_code = ErrorCode.NotFound;
                     strError = "日历名 '" + info.Name + "' 不存在";
                     return -1;
                 }
