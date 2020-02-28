@@ -262,22 +262,30 @@ a => a.AddressFamily == AddressFamily.InterNetwork);
             {
                 using (LibraryChannel channel = new LibraryChannel())
                 {
-                    channel.Timeout = TimeSpan.FromSeconds(5);
+                    channel.Timeout = TimeSpan.FromSeconds(10);
                     channel.Url = url;
-                    long lRet = channel.GetVersion(null, 
-                        out string version,
-                        out string uid,
-                        out string strError);
-                    if (lRet == -1)
+                    for (int i = 0;; i++)
                     {
-                        return new NormalResult
+                        long lRet = channel.GetVersion(null,
+                            out string version,
+                            out string uid,
+                            out string strError);
+                        if (lRet == -1)
                         {
-                            Value = -1,
-                            ErrorInfo = strError
-                        };
+                            if (channel.ErrorCode == LibraryClient.localhost.ErrorCode.RequestTimeOut)
+                            {
+                                if (i < 2)
+                                    continue;
+                            }
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = strError
+                            };
+                        }
+                        else
+                            return new NormalResult { ErrorCode = uid };
                     }
-                    else
-                        return new NormalResult { ErrorCode = uid };
                 }
             });
         }
@@ -288,27 +296,36 @@ a => a.AddressFamily == AddressFamily.InterNetwork);
             {
                 using (LibraryChannel channel = new LibraryChannel())
                 {
-                    channel.Timeout = TimeSpan.FromSeconds(5);
+                    channel.Timeout = TimeSpan.FromSeconds(10);
                     channel.Url = url;
-                    long lRet = channel.GetSystemParameter(null,
-"library",
-"name",
-out string strLibraryName,
-out string strError);
-                    if (lRet == -1)
+                    for (int i = 0; ; i++)
                     {
-                        if (channel.ErrorCode == LibraryClient.localhost.ErrorCode.NotLogin)
+                        long lRet = channel.GetSystemParameter(null,
+    "library",
+    "name",
+    out string strLibraryName,
+    out string strError);
+                        if (lRet == -1)
                         {
-                            strError = $"服务器 {channel.Url} 版本太旧，无法免登录获得图书馆名。请将它升级到最新版本";
+                            if (channel.ErrorCode == LibraryClient.localhost.ErrorCode.RequestTimeOut)
+                            {
+                                if (i < 2)
+                                    continue;
+                            }
+                            if (channel.ErrorCode == LibraryClient.localhost.ErrorCode.NotLogin)
+                            {
+                                strError = $"服务器 {channel.Url} 版本太旧，无法免登录获得图书馆名。请将它升级到最新版本";
+                            }
+
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = strError
+                            };
                         }
-                        return new NormalResult
-                        {
-                            Value = -1,
-                            ErrorInfo = strError
-                        };
+                        else
+                            return new NormalResult { ErrorCode = strLibraryName };
                     }
-                    else
-                        return new NormalResult { ErrorCode = strLibraryName };
                 }
             });
         }

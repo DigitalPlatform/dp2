@@ -504,7 +504,10 @@ namespace DigitalPlatform.CirculationClient
                     bar.SetMessageText($"正在获取服务器 {server.Url} 的图书馆名 ...");
                     var result = await ServerDlg.GetServerName(server.Url);
                     if (result.Value == -1)
+                    {
                         errors.Add($"针对服务器 {server.Url} 获取图书馆名时出错: {result.ErrorInfo}");
+                        continue;
+                    }
                     else
                         server_name = result.ErrorCode;
 
@@ -529,9 +532,16 @@ namespace DigitalPlatform.CirculationClient
                     this.listView1.EndUpdate();
                 }
             }
+
+            if (errors.Count > 0)
+            {
+                strError = $"刷新服务器名时出错:\r\n{StringUtil.MakePathList(errors, "\r\n")}";
+                goto ERROR1;
+            }
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            // TODO: MessageDlg 应可以指定左上角图标
+            MessageDlg.Show(this, strError, "ServersDlg");
         }
 
         async void menu_refreshUID(object sender, System.EventArgs e)
@@ -557,7 +567,10 @@ namespace DigitalPlatform.CirculationClient
                     bar.SetMessageText($"正在获取服务器 {server.Url} 的 UID ...");
                     var result = await ServerDlg.GetServerUID(server.Url);
                     if (result.Value == -1)
+                    {
                         errors.Add($"针对服务器 {server.Url} 获取服务器 UID 时出错: {result.ErrorInfo}");
+                        continue;
+                    }
                     else
                         uid = result.ErrorCode;
 
@@ -576,9 +589,14 @@ namespace DigitalPlatform.CirculationClient
                     FillList();
                 }
             }
+            if (errors.Count > 0)
+            {
+                strError = $"刷新 UID 时出错:\r\n{StringUtil.MakePathList(errors, "\r\n")}";
+                goto ERROR1;
+            }
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            MessageDlg.Show(this, strError, "ServersDlg");
         }
 
         async void menu_modifyServer(object sender, System.EventArgs e)

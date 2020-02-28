@@ -9239,7 +9239,6 @@ namespace dp2Circulation
 
             this.CalendarDefChanged = true;
             m_nCalendarVersion++;
-
             return;
 #if NO
         ERROR1:

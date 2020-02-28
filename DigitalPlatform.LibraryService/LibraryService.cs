@@ -8842,6 +8842,7 @@ namespace dp2Library
                 int nRet = app.SetCalendar(strAction,
                     sessioninfo.LibraryCodeList,
                     info,
+                    out ErrorCode error_code,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -8855,7 +8856,10 @@ namespace dp2Library
                 return result;
             ERROR1:
                 result.Value = -1;
-                result.ErrorCode = ErrorCode.SystemError;
+                if (error_code == ErrorCode.NoError)
+                    result.ErrorCode = ErrorCode.SystemError;
+                else
+                    result.ErrorCode = error_code;
                 result.ErrorInfo = strError;
                 return result;
             }

@@ -156,12 +156,11 @@ namespace DigitalPlatform.LibraryClient
         /// <param name="channel">通道对象</param>
         public void ReturnChannel(LibraryChannel channel)
         {
-            LibraryChannelWrapper wrapper = null;
             if (this.m_lock.TryEnterReadLock(m_nLockTimeout) == false)
                 throw new LockException("锁定尝试中超时");
             try
             {
-                wrapper = _findChannel(channel);
+                LibraryChannelWrapper wrapper = _findChannel(channel);
                 if (wrapper != null)
                     wrapper.InUsing = false;
             }

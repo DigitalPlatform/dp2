@@ -301,7 +301,6 @@ namespace dp2Circulation
                     out strError);
                 if (lRet == -1)
                     goto ERROR1;
-
             }
             finally
             {
@@ -553,7 +552,10 @@ namespace dp2Circulation
                 this.textBox_comment.Text,
                 out strError);
             if (nRet == -1)
+            {
+                // TODO: 如果报错日历不存在，需要增加一个提示，建议操作者使用“创建”按钮
                 goto ERROR1;
+            }
 
             this.calenderControl1.Changed = false;
             this.button_save.Enabled = false;

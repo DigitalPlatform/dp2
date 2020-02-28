@@ -34,8 +34,8 @@ using System.Runtime.InteropServices;
 // [assembly: AssemblyVersion("1.0.*")]
 
 // https://stackoverflow.com/questions/53782085/visual-studio-assemblyversion-with-dont-work
-[assembly: AssemblyVersion("1.2.*")]
-[assembly: AssemblyFileVersion("1.2.0.0")]
+[assembly: AssemblyVersion("1.3.*")]
+[assembly: AssemblyFileVersion("1.3.0.0")]
 
 // v1.1 (2020/2/25) 获取 MD5 采用了新的任务方式。会检查 dp2library 的版本号是否为 3.23 以上
 // v1.2 (2020/2/26) 服务器管理对话框里面增加了 UID 列，新增服务器节点时会检查 UID 是否重复，重复的不允许加入
@@ -44,3 +44,6 @@ using System.Runtime.InteropServices;
 //                  新功能：ListView 对于内容显示不全的列，鼠标停留在上方会出现 tooltips 小窗口
 //                  dp2ManageCenter 创建大备份文件时，文件名采用 MC_2020_02_02_图书馆名.dp2bak 这样的格式，在内务批处理任务窗等处查看大备份文件名的时候，便于操作者把内务启动的大备份任务产生的文件和 dp2ManageCenter 产生的区别开
 //                  服务器管理对话框，在确定关闭前会对服务器名和 UID 非空，服务器名之间不能重复，UID 之间不能重复进行检查。按住 Ctrl 键点确定按钮可以跳过这种检查
+//                  下载文件的最后阶段，进行服务器文件和本地文件 MD5 比对的时候，采用并行的方式进行
+// V1.3 (2020/2/28) 优化了大备份下载算法，节省了通道，只为每一个服务器使用一根下载通道。(此前可能要用到三根)
+//                  修正了下载日备份文件时“移除”列表事项时任务没有停止的 bug
