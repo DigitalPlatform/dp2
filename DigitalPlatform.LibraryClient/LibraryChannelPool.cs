@@ -45,48 +45,58 @@ namespace DigitalPlatform.LibraryClient
         {
             LibraryChannelWrapper wrapper = null;
 
-            if (this.m_lock.TryEnterWriteLock(m_nLockTimeout) == false)
+            if (this.m_lock.TryEnterReadLock(m_nLockTimeout) == false)
                 throw new LockException("锁定尝试中超时");
             try
             {
                 wrapper = this._findChannel(strUrl, strUserName, strLang, true);
-
                 if (wrapper != null)
                     return wrapper.Channel;
+            }
+            finally
+            {
+                this.m_lock.ExitReadLock();
+            }
 
+            // 如果没有找到
+            LibraryChannel inner_channel = new LibraryChannel();
+            inner_channel.Url = strUrl;
+            inner_channel.UserName = strUserName;
+            if (strLang != null)
+                inner_channel.Lang = strLang;
+            if (strClientIP != null)
+                inner_channel.ClientIP = strClientIP;
+
+            // test
+            // inner_channel.ClientIP = "test:127.0.0.1";
+
+            inner_channel.BeforeLogin -= new BeforeLoginEventHandle(channel_BeforeLogin);
+            inner_channel.BeforeLogin += new BeforeLoginEventHandle(channel_BeforeLogin);
+
+            inner_channel.AfterLogin -= inner_channel_AfterLogin;
+            inner_channel.AfterLogin += inner_channel_AfterLogin;
+
+            wrapper = new LibraryChannelWrapper();
+            wrapper.Channel = inner_channel;
+            wrapper.InUsing = true;
+
+            if (this.m_lock.TryEnterWriteLock(m_nLockTimeout) == false)
+                throw new LockException("锁定尝试中超时");
+            try
+            {
                 if (this.Count >= MaxCount)
                 {
                     // 清理不用的通道
-                    int nDeleteCount = _cleanChannel(false);
+                    int nDeleteCount = _cleanChannel(false,
+                        (channel) => { return true; });
                     if (nDeleteCount == 0)
                     {
+                        inner_channel?.Dispose();
                         // 全部都在使用
                         throw new Exception("通道池已满，请稍后重试获取通道");
                     }
                 }
 
-                // 如果没有找到
-                LibraryChannel inner_channel = new LibraryChannel();
-                inner_channel.Url = strUrl;
-                inner_channel.UserName = strUserName;
-                if (strLang != null)
-                    inner_channel.Lang = strLang;
-                if (strClientIP != null)
-                    inner_channel.ClientIP = strClientIP;
-
-                // test
-                // inner_channel.ClientIP = "test:127.0.0.1";
-
-
-                inner_channel.BeforeLogin -= new BeforeLoginEventHandle(channel_BeforeLogin);
-                inner_channel.BeforeLogin += new BeforeLoginEventHandle(channel_BeforeLogin);
-
-                inner_channel.AfterLogin -= inner_channel_AfterLogin;
-                inner_channel.AfterLogin += inner_channel_AfterLogin;
-
-                wrapper = new LibraryChannelWrapper();
-                wrapper.Channel = inner_channel;
-                wrapper.InUsing = true;
 
                 this.Add(wrapper);
                 return inner_channel;
@@ -172,9 +182,18 @@ namespace DigitalPlatform.LibraryClient
 
         public int CleanChannel(string strUserName = "")
         {
-            return _cleanChannel(true, strUserName);
+            // return _cleanChannel(true, strUserName);
+            return _cleanChannel(true, (channel) => string.IsNullOrEmpty(strUserName) == true || channel.UserName == strUserName);
         }
 
+        public delegate bool Delegate_needClean(LibraryChannel channel);
+
+        public int CleanChannel(Delegate_needClean func_needClean)
+        {
+            return _cleanChannel(true, func_needClean);
+        }
+
+#if NO
         // 清理处在未使用状态的通道
         // parameters:
         //      strUserName 希望清除用户名为此值的全部通道。如果本参数值为空，则表示清除全部通道
@@ -197,6 +216,49 @@ namespace DigitalPlatform.LibraryClient
                     if (wrapper.InUsing == false
                         && (string.IsNullOrEmpty(strUserName) == true || wrapper.Channel.UserName == strUserName)
                         )
+                    {
+                        this.RemoveAt(i);
+                        i--;
+                        deletes.Add(wrapper);
+                    }
+                }
+            }
+            finally
+            {
+                if (bLock == true)
+                    this.m_lock.ExitWriteLock();
+            }
+
+            foreach (LibraryChannelWrapper wrapper in deletes)
+            {
+                wrapper.Channel.BeforeLogin -= new BeforeLoginEventHandle(channel_BeforeLogin);
+                wrapper.Channel.AfterLogin -= inner_channel_AfterLogin;
+                wrapper.Channel.Close();
+            }
+
+            return deletes.Count;
+        }
+#endif
+
+
+        // return:
+        //      清理掉的通道数目
+        int _cleanChannel(bool bLock, Delegate_needClean func_needClean)
+        {
+            List<LibraryChannelWrapper> deletes = new List<LibraryChannelWrapper>();
+
+            if (bLock == true)
+            {
+                if (this.m_lock.TryEnterWriteLock(m_nLockTimeout) == false)
+                    throw new LockException("锁定尝试中超时");
+            }
+            try
+            {
+                for (int i = 0; i < this.Count; i++)
+                {
+                    LibraryChannelWrapper wrapper = this[i];
+                    if (wrapper.InUsing == false
+                        && (func_needClean == null || func_needClean(wrapper.Channel) == true))
                     {
                         this.RemoveAt(i);
                         i--;

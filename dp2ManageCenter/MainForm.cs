@@ -602,12 +602,14 @@ string strHtml)
 
                 dlg.Comment = strComment;
                 dlg.UserName = server.DefaultUserName;
+                dlg.ServerName = server.Name;
 
                 /*
                 this.App.AppInfo.LinkFormState(dlg,
                     "dp2_logindlg_state");
                 this.Activate();    // 让 MDI 子窗口翻出来到前面
                 */
+                ClientInfo.MemoryState(dlg, "askNotLogin", "formState");
                 dlg.ShowDialog(owner);
 
                 // this.AppInfo.UnlinkFormState(dlg);
@@ -1374,9 +1376,12 @@ string strHtml)
             {
                 channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
+
+                // 及时清理关于本服务器的闲置通道
+                if (string.IsNullOrEmpty(server.Url) == false)
+                    this._channelPool.CleanChannel((c) => c.Url == server.Url);
             }
         }
-
 
         NormalResult CancelServerBackupTask(ListViewItem item)
         {
@@ -3164,7 +3169,8 @@ string strHtml)
             contextMenu.MenuItems.Add(menuItem);
 
             menuItem = new MenuItem("打开服务器文件夹 [" + this.listView_backupTasks.SelectedItems.Count.ToString() + "] (&S)");
-            menuItem.Click += new System.EventHandler(this.menu_openBackupServerFolder_Click);
+            menuItem.Tag = this.listView_backupTasks;
+            menuItem.Click += new System.EventHandler(this.menu_openServerFolder_Click);
             if (this.listView_backupTasks.SelectedItems.Count == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
@@ -3189,23 +3195,43 @@ string strHtml)
             contextMenu.Show(this.listView_backupTasks, new Point(e.X, e.Y));
         }
 
-        void menu_openBackupServerFolder_Click(object sender, EventArgs e)
+        void menu_openServerFolder_Click(object sender, EventArgs e)
         {
+            ListView listView = GetMenuItemTag(sender);
+            Debug.Assert(listView != null, "");
+
             List<string> errors = new List<string>();
-            foreach (ListViewItem item in this.listView_backupTasks.SelectedItems)
+            foreach (ListViewItem item in listView.SelectedItems)
             {
-                var info = GetBackupInfo(item);
-                var server = this.Servers.GetServerByName(info.ServerName);
+                string server_name = "";
+
+                if (listView == this.listView_backupTasks)
+                    server_name = GetBackupInfo(item).ServerName;
+                else if (listView == this.listView_operLogTasks)
+                    server_name = GetOperLogInfo(item).ServerName;
+                else if (listView == this.listView_errorLogTasks)
+                    server_name = GetOperLogInfo(item).ServerName;
+                else
+                    throw new ArgumentException("未知的 listView");
+
+                var server = this.Servers.GetServerByName(server_name);
                 if (server == null)
                 {
-                    errors.Add($"没有找到名为 '{info.ServerName}' 的服务器");
+                    errors.Add($"没有找到名为 '{server_name}' 的服务器");
                     continue;
                 }
 
                 ServerFileSystemForm dlg = new ServerFileSystemForm();
                 dlg.ServerName = server.Name;
                 dlg.ServerUrl = server.Url;
-                dlg.SelectedPath = "!backup";
+                if (listView == this.listView_backupTasks)
+                    dlg.SelectedPath = "!backup";
+                else if (listView == this.listView_operLogTasks)
+                    dlg.SelectedPath = "!operlog";
+                else if (listView == this.listView_errorLogTasks)
+                    dlg.SelectedPath = "!log";
+                else
+                    throw new ArgumentException("未知的 listView");
                 dlg.Show(this);
             }
 
@@ -3501,6 +3527,7 @@ string strHtml)
                 };
             }
 
+            string url = "";
             try
             {
                 var info = GetOperLogInfo(item);
@@ -3508,6 +3535,8 @@ string strHtml)
                 info.State = "";
                 info.StartTime = DateTime.Now;
                 SetOperLogItemColor(item);
+
+                url = this.Servers.GetServerByName(info.ServerName)?.Url;
 
                 SetItemText(item, OPERLOG_COLUMN_STATE, "正在下载");
                 SetItemText(item, OPERLOG_COLUMN_STARTTIME, info.StartTime.ToString());
@@ -3590,6 +3619,12 @@ string strHtml)
                     Value = -1,
                     ErrorInfo = SetOperLogItemError(item, "BackupOperLogFiles() 出现异常: " + ex.Message)
                 };
+            }
+            finally
+            {
+                // 及时清理关于本服务器的闲置通道
+                if (string.IsNullOrEmpty(url) == false)
+                    this._channelPool.CleanChannel((channel) => channel.Url == url);
             }
         }
 
@@ -4434,6 +4469,13 @@ out string strError);
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
+            menuItem = new MenuItem("打开服务器文件夹 [" + this.listView_operLogTasks.SelectedItems.Count.ToString() + "] (&S)");
+            menuItem.Tag = this.listView_operLogTasks;
+            menuItem.Click += new System.EventHandler(this.menu_openServerFolder_Click);
+            if (this.listView_operLogTasks.SelectedItems.Count == 0)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
             menuItem = new MenuItem("打开本地文件夹 [" + this.listView_operLogTasks.SelectedItems.Count.ToString() + "] (&F)");
             menuItem.Tag = this.listView_operLogTasks;
             menuItem.Click += new System.EventHandler(this.menu_openOperLogLocalFolder_Click);
@@ -5086,6 +5128,13 @@ MessageBoxDefaultButton.Button2);
 
             // ---
             menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
+            menuItem = new MenuItem("打开服务器文件夹 [" + this.listView_errorLogTasks.SelectedItems.Count.ToString() + "] (&S)");
+            menuItem.Tag = this.listView_errorLogTasks;
+            menuItem.Click += new System.EventHandler(this.menu_openServerFolder_Click);
+            if (this.listView_errorLogTasks.SelectedItems.Count == 0)
+                menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
             menuItem = new MenuItem("打开本地文件夹 [" + this.listView_operLogTasks.SelectedItems.Count.ToString() + "] (&F)");
