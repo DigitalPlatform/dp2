@@ -677,6 +677,8 @@ namespace DigitalPlatform.LibraryServer
 
             // 4.长度
             lTotalLength = file.Length;
+            // 这个长度有时候会有迟滞
+            // https://stackoverflow.com/questions/7828132/getting-current-file-length-fileinfo-length-caching-and-stale-information
 
             // 5.有data风格时,才会取数据
             if (StringUtil.IsInList("data", strStyle) == true)
