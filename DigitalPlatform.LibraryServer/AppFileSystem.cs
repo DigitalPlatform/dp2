@@ -680,6 +680,18 @@ namespace DigitalPlatform.LibraryServer
             // 这个长度有时候会有迟滞
             // https://stackoverflow.com/questions/7828132/getting-current-file-length-fileinfo-length-caching-and-stale-information
 
+            // 2020/2/29
+            // 如果是正在获取当日的操作日志文件
+            if (PathUtil.IsEqual(strFilePath, this.OperLog.CurrentFileName))
+            {
+                // 如果刚才通过 FileInfo.Length 获得的文件长度不准确
+                if (lTotalLength < this.OperLog.GetCurrentStreamLength())
+                {
+                    // this.OperLog.ReOpen();
+                    lTotalLength = this.OperLog.GetCurrentStreamLength();
+                }
+            }
+
             // 5.有data风格时,才会取数据
             if (StringUtil.IsInList("data", strStyle) == true)
             {
@@ -729,7 +741,9 @@ namespace DigitalPlatform.LibraryServer
                     }
 #endif
                     StreamItem s = this._physicalFileCache.GetStream(strFilePath,
-    FileMode.Open, FileAccess.Read, lStart > 10 * 1024);
+    FileMode.Open,
+    FileAccess.Read,
+    lStart > 10 * 1024);
                     try
                     {
                         destBuffer = new byte[lOutputLength];
@@ -751,6 +765,15 @@ namespace DigitalPlatform.LibraryServer
                     {
                         _physicalFileCache.ReturnStream(s);
                     }
+
+                    /*
+                    // 2020/2/29
+                    // 顺序获取到最后一次，则清除缓存事项。这样可以确保后面再次获取 FileInfo 的时候能准确一些
+                    if (lStart + lOutputLength >= lTotalLength)
+                    {
+                        _physicalFileCache.ClearItems(strFilePath);
+                    }
+                    */
                 }
             }
 
@@ -860,7 +883,7 @@ namespace DigitalPlatform.LibraryServer
         // return:
         //      -1  出错
         //      其他  列出的事项总数。注意，不是 lLength 所指出的本次返回数
-        public static int ListFile(
+        public int ListFile(
             string strRootPath,
             string strCurrentDirectory,
             string strPattern,
@@ -911,6 +934,14 @@ namespace DigitalPlatform.LibraryServer
                     {
                         FileInfo fi = si as FileInfo;
                         info.Size = fi.Length;
+
+                        // 2020/2/29
+                        // 如果是正在获取当日的操作日志文件
+                        if (PathUtil.IsEqual(si.FullName, this.OperLog.CurrentFileName))
+                        {
+                            // 这个尺寸更准确
+                            info.Size = this.OperLog.GetCurrentStreamLength();
+                        }
                     }
 
                     count++;

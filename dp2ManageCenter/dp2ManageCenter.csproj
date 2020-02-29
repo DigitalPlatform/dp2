@@ -68,7 +68,7 @@
     <ManifestTimestampUrl>http://timestamp.comodoca.com/rfc3161</ManifestTimestampUrl>
   </PropertyGroup>
   <PropertyGroup>
-    <GenerateManifests>true</GenerateManifests>
+    <GenerateManifests>false</GenerateManifests>
   </PropertyGroup>
   <PropertyGroup>
     <TargetZone>LocalIntranet</TargetZone>
@@ -136,6 +136,7 @@
     <Compile Include="ServerFileSystemForm.Designer.cs">
       <DependentUpon>ServerFileSystemForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="ServerTaskLimit.cs" />
     <EmbeddedResource Include="ConfigForm.resx">
       <DependentUpon>ConfigForm.cs</DependentUpon>
     </EmbeddedResource>

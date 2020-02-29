@@ -697,11 +697,28 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
-        string GetCurrentLogFileName()
+        // 构建当日日志文件名
+        string BuildCurrentLogFileName()
         {
             DateTime now = DateTime.Now;    // 采用本地时区，主要是方便在半夜12点的时候切换日志文件名。一般图书馆在半夜都是不开馆。
             // DateTime.UtcNow;
             return Path.Combine(this.m_strDirectory, now.ToString("yyyyMMdd") + ".log");
+        }
+
+        public string CurrentFileName
+        {
+            get
+            {
+                return this.m_strFileName;
+            }
+        }
+
+        // 获得当日文件流的尺寸
+        public long GetCurrentStreamLength()
+        {
+            if (m_stream == null)
+                return -1;
+            return m_stream.Length;
         }
 
         // 打开当天日志文件流，并将文件指针放在文件尾部
@@ -709,7 +726,7 @@ namespace DigitalPlatform.LibraryServer
         {
             strError = "";
 
-            string strFileName = GetCurrentLogFileName();
+            string strFileName = BuildCurrentLogFileName();
 
             if (strFileName == this.m_strFileName)
             {
@@ -907,7 +924,7 @@ namespace DigitalPlatform.LibraryServer
                 ////Debug.WriteLine("end write lock");
             }
 
-            SMALL_MODE:
+        SMALL_MODE:
             // 小日志文件模式
             // 可以并发，因为文件名已经严格区分了
             {
@@ -1094,7 +1111,8 @@ namespace DigitalPlatform.LibraryServer
             stream.Flush();
         }
 
-        void ReOpen()
+        // TODO: 可以被文件系统查询当日日志文件时调用?
+        public void ReOpen()
         {
             if (this.m_stream != null)
             {
@@ -1107,7 +1125,6 @@ namespace DigitalPlatform.LibraryServer
                     FileAccess.ReadWrite,
                     FileShare.ReadWrite);
                 this.m_stream.Seek(0, SeekOrigin.End);
-
             }
         }
 

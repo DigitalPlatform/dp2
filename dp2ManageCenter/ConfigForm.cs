@@ -1,5 +1,4 @@
-﻿using DigitalPlatform.CirculationClient;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -8,6 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+
+using DigitalPlatform.CirculationClient;
 
 namespace dp2ManageCenter
 {
@@ -28,6 +29,11 @@ namespace dp2ManageCenter
                 "config",
                 "operlogChannelMax",
                 5);
+
+            this.numericUpDown_oneServerBackupTaskMax.Value = ClientInfo.Config.GetInt(
+                "config",
+                "oneServerBackupTaskMax",
+                2);
         }
 
         private void ConfigForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -48,6 +54,10 @@ namespace dp2ManageCenter
             ClientInfo.Config.SetInt("config",
                 "operlogChannelMax",
                 (int)this.numericUpDown_operlogChannelMax.Value);
+            ClientInfo.Config.SetInt(
+                "config",
+                "oneServerBackupTaskMax",
+                (int)this.numericUpDown_oneServerBackupTaskMax.Value);
 
             this.DialogResult = DialogResult.OK;
             this.Close();
