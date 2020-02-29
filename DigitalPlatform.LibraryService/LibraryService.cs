@@ -9938,7 +9938,7 @@ Stack:
                         // return:
                         //      -1  出错
                         //      其他  列出的事项总数。注意，不是 lLength 所指出的本次返回数
-                        nRet = LibraryApplication.ListFile(
+                        nRet = app.ListFile(
                             strRoot,
                             strCurrentDirectory,
                             strFileName,

@@ -75,6 +75,10 @@ namespace dp2ManageCenter
                 _operLogLimit.Dispose();
             _operLogLimit = new AsyncSemaphore(OperLogChannelMax);
 
+            if (_serverTaskManager != null)
+                _serverTaskManager.Dispose();
+            _serverTaskManager = new ServerTaskManager(OneServerBackupTaskMax);
+
             LoadBackupTasks();
             LoadOperLogTasks(this.listView_operLogTasks);
             LoadOperLogTasks(this.listView_errorLogTasks);
@@ -719,6 +723,19 @@ string strHtml)
             }
         }
 
+        public int OneServerBackupTaskMax
+        {
+            get
+            {
+                return ClientInfo.Config.GetInt(
+                    "config",
+                    "oneServerBackupTaskMax",
+                    2);
+            }
+        }
+
+        ServerTaskManager _serverTaskManager = new ServerTaskManager(1);
+
         AsyncSemaphore _backupLimit = new AsyncSemaphore(1);
         AsyncSemaphore _operLogLimit = new AsyncSemaphore(1);
 
@@ -1004,9 +1021,18 @@ string strHtml)
         public static string GetCurrentBackupFileName(string server_name)
         {
             DateTime now = DateTime.Now;
-            return "MC_" + now.ToString("yyyy_MM_dd") + "_" + server_name
+            return // "MC_" 
+                "test_"
+                + now.ToString("yyyy_MM_dd") + "_" + server_name
                 // + "_" + now.ToString("HHmmssffff") 
                 + ".dp2bak";
+        }
+
+        // TODO: 需要把 Domain Name 归一化为 IP
+        static string GetServerIP(string url)
+        {
+            Uri uri = new Uri(url);
+            return uri.Host;
         }
 
         async Task<NormalResult> Backup(dp2Server server,
@@ -1017,102 +1043,114 @@ string strHtml)
         {
             BatchTaskInfo resultInfo = null;
 
-            LibraryChannel channel = this.GetChannel(server.Url);
+            SetItemText(item, COLUMN_STATE, "等待大备份数量许可");
+
+            var releaser = await _serverTaskManager.EnterAsync(GetServerIP(server.Url), token);
             try
             {
-                BackupTaskStart param = new BackupTaskStart
+                SetItemText(item, COLUMN_STATE, "正在启动大备份任务");
+
+                LibraryChannel channel = this.GetChannel(server.Url);
+                try
                 {
-                    BackupFileName = GetCurrentBackupFileName(server.Name),
-                    DbNameList = "*"
-                };
-
-                BatchTaskStartInfo startinfo = new BatchTaskStartInfo
-                {
-                    Start = param.ToString(),
-                    WaitForBegin = true
-                };
-
-                SetItemText(item, COLUMN_STATE, "正在启动服务器端任务");
-
-                // 检查 dp2library 版本号
-                var check_result = CheckLibraryServerVersion(channel);
-                if (check_result.Value == -1)
-                    return new NormalResult
+                    BackupTaskStart param = new BackupTaskStart
                     {
-                        Value = -1,
-                        ErrorInfo = SetBackupItemError(item, check_result.ErrorInfo)
+                        BackupFileName = GetCurrentBackupFileName(server.Name),
+                        DbNameList = "*"
                     };
 
-                // return:
-                //      -1  出错
-                //      0   启动成功
-                //      1   调用前任务已经处于执行状态，本次调用激活了这个任务
-                long lRet = channel.BatchTask(
-                    null,
-                    "大备份",
-                    "start",
-                    new BatchTaskInfo { StartInfo = startinfo },
-                    out resultInfo,
-                    out string strError);
-
-                if (resultInfo != null && resultInfo.StartInfo != null)
-                {
-                    // 把服务器端文件保存起来
-                    List<string> paths = StringUtil.SplitList(resultInfo.StartInfo.OutputParam);
-                    StringUtil.RemoveBlank(ref paths);
-                    SetItemText(item, COLUMN_SERVERFILES, StringUtil.MakePathList(paths));
-
-                    var info = GetBackupInfo(item);
-                    info.ServerName = server.Name;
-                    info.InitialPathList(paths);
-                }
-
-                if (lRet == -1 || lRet == 1)
-                {
-                    // TODO: 本次激活的情况，需要想办法获得服务器一端的两个文件名
-                    return new NormalResult
+                    BatchTaskStartInfo startinfo = new BatchTaskStartInfo
                     {
-                        Value = -1,
-                        ErrorInfo = SetBackupItemError(item, strError)
+                        Start = param.ToString(),
+                        WaitForBegin = true
                     };
+
+                    SetItemText(item, COLUMN_STATE, "正在启动服务器端任务");
+
+                    // 检查 dp2library 版本号
+                    var check_result = CheckLibraryServerVersion(channel);
+                    if (check_result.Value == -1)
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = SetBackupItemError(item, check_result.ErrorInfo)
+                        };
+
+                    // return:
+                    //      -1  出错
+                    //      0   启动成功
+                    //      1   调用前任务已经处于执行状态，本次调用激活了这个任务
+                    long lRet = channel.BatchTask(
+                        null,
+                        "大备份",
+                        "start",
+                        new BatchTaskInfo { StartInfo = startinfo },
+                        out resultInfo,
+                        out string strError);
+
+                    if (resultInfo != null && resultInfo.StartInfo != null)
+                    {
+                        // 把服务器端文件保存起来
+                        List<string> paths = StringUtil.SplitList(resultInfo.StartInfo.OutputParam);
+                        StringUtil.RemoveBlank(ref paths);
+                        SetItemText(item, COLUMN_SERVERFILES, StringUtil.MakePathList(paths));
+
+                        var info = GetBackupInfo(item);
+                        info.ServerName = server.Name;
+                        info.InitialPathList(paths);
+                    }
+
+                    if (lRet == -1 || lRet == 1)
+                    {
+                        // TODO: 本次激活的情况，需要想办法获得服务器一端的两个文件名
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = SetBackupItemError(item, strError)
+                        };
+                    }
+
+                    SetItemText(item, COLUMN_STATE, "服务器端任务已经启动");
+
+                    // return new NormalResult();
+                }
+                finally
+                {
+                    this.ReturnChannel(channel);
                 }
 
-                SetItemText(item, COLUMN_STATE, "服务器端任务已经启动");
+                if (startDownload)
+                {
+                    // 开始下载文件
+                    // TODO: 检查这部分代码是否和 DownloadBackupFiles() 里面的代码有重复
+                    {
 
-                // return new NormalResult();
+                        SetItemText(item, COLUMN_STATE, "正在下载");
+
+                        var info = GetBackupInfo(item);
+
+                        info.ServerName = server.Name;
+                        info.State = "downloading";
+                        SetBackupItemColor(item);
+                    }
+
+                    var result = await DownloadBackupFiles(
+                        item,
+                        strOutputFolder,
+                        token,
+                        true,
+                        true);
+                    if (result.Value == -1)
+                        SetBackupItemError(item, result.ErrorInfo);
+                    return result;
+                }
+                else
+                    return new NormalResult();
             }
             finally
             {
-                this.ReturnChannel(channel);
+                releaser.Dispose();
             }
-
-            if (startDownload)
-            {
-                // 开始下载文件
-                // TODO: 检查这部分代码是否和 DownloadBackupFiles() 里面的代码有重复
-                {
-
-                    SetItemText(item, COLUMN_STATE, "正在下载");
-
-                    var info = GetBackupInfo(item);
-
-                    info.ServerName = server.Name;
-                    info.State = "downloading";
-                    SetBackupItemColor(item);
-                }
-
-                var result = await DownloadBackupFiles(
-                    item,
-                    strOutputFolder,
-                    token,
-                    true,
-                    true);
-                if (result.Value == -1)
-                    SetBackupItemError(item, result.ErrorInfo);
-                return result;
-            }
-            else
-                return new NormalResult();
         }
 
         static char[] movingChars = new char[] { '/', '-', '\\', '|' };
@@ -3527,7 +3565,7 @@ string strHtml)
                 };
             }
 
-            string url = "";
+            string server_url = "";
             try
             {
                 var info = GetOperLogInfo(item);
@@ -3536,13 +3574,14 @@ string strHtml)
                 info.StartTime = DateTime.Now;
                 SetOperLogItemColor(item);
 
-                url = this.Servers.GetServerByName(info.ServerName)?.Url;
+                server_url = this.Servers.GetServerByName(info.ServerName)?.Url;
 
                 SetItemText(item, OPERLOG_COLUMN_STATE, "正在下载");
                 SetItemText(item, OPERLOG_COLUMN_STARTTIME, info.StartTime.ToString());
 
                 DateTime now = DateTime.Now;
 
+                // 上次下载过的最后一个文件日期
                 string strLastDate = ReadOperLogMemoryFile(item.ListView, strOutputFolder);
                 if (string.IsNullOrEmpty(strLastDate) == false
                     && strLastDate.Length != 8)
@@ -3623,8 +3662,8 @@ string strHtml)
             finally
             {
                 // 及时清理关于本服务器的闲置通道
-                if (string.IsNullOrEmpty(url) == false)
-                    this._channelPool.CleanChannel((channel) => channel.Url == url);
+                if (string.IsNullOrEmpty(server_url) == false)
+                    this._channelPool.CleanChannel((channel) => channel.Url == server_url);
             }
         }
 
@@ -4053,6 +4092,7 @@ string strHtml)
                         Debug.Assert(item != null, "");
                         SetItemText(item, OPERLOG_COLUMN_STATE, $"正在下载 {strNo} {downloader.ServerFilePath}");
                     }));
+                    // 下载。包含 MD5 校验过程
                     await downloader.StartDownload(bAppend, true);
                     if (downloader.IsCancellationRequested
                         || token.IsCancellationRequested)
@@ -4119,6 +4159,7 @@ string strHtml)
             foreach (OperLogFileInfo server_info in server_files)
             {
                 OperLogFileInfo local_info = Find(local_files, server_info.FileName);
+                // 若本地文件和服务器文件长度一样，则不返回它
                 if (local_info != null
                     && local_info.Length == server_info.Length)
                     continue;
@@ -4193,6 +4234,10 @@ out string strError);
             return new NormalResult();
         }
 
+        // 获得服务器一端的文件名信息列表
+        // 算法是把上次备份最后日期之前的本地文件名排除，只返回这个日期当天和之后的
+        // parameters:
+        //      strLastDate 上次备份的最后日期，8 字符。如果为空，表示当前是首次备份
         List<OperLogFileInfo> GetServerOperLogFileNames(ListViewItem item,
             string strLastDate)
         {
@@ -4247,6 +4292,8 @@ out string strError);
             }
         }
 
+        // 获得本地文件名信息列表
+        // 算法是把上次备份最后日期之前的本地文件名排除，只返回这个日期当天和之后的
         // parameters:
         //      strLastDate 上次备份的最后日期，8 字符。如果为空，表示当前是首次备份
         static List<OperLogFileInfo> GetLocalOperLogFileNames(
