@@ -3488,7 +3488,8 @@ string strHtml)
         // const int OPERLOG_COLUMN_SERVERFILES = 4;
 
         NormalResult NewOperLogTask(ListView listView,
-            dp2Server server)
+            dp2Server server,
+            bool detect_all)
         {
             string taskTypeName = "日备份任务";
             if (listView == this.listView_errorLogTasks)
@@ -3528,6 +3529,7 @@ string strHtml)
             info.OperLogTask = GetOperLogFiles(
                     item,
                     strOutputFolder,
+                    detect_all,
                     info.CancellationToken);
             /*
             var result = await Task.Run(() =>
@@ -3546,14 +3548,168 @@ string strHtml)
             return new NormalResult();
         }
 
+#if NO
+        // 验证全部本地和服务器文件
+        async Task<NormalResult> VerifyOperLogFiles(
+            ListView listView,
+            string server_name,
+    string strOutputFolder,
+    CancellationToken token)
+        {
+            if (string.IsNullOrEmpty(strOutputFolder))
+            {
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = "strOutputFolder 参数值不应为空"
+                };
+            }
+
+            FileDownloadDialog dlg = new FileDownloadDialog();
+
+            string server_url = "";
+            try
+            {
+                server_url = this.Servers.GetServerByName(server_name)?.Url;
+
+                DateTime now = DateTime.Now;
+
+                /*
+                // 上次下载过的最后一个文件日期
+                string strLastDate = ReadOperLogMemoryFile(listView, strOutputFolder);
+                if (string.IsNullOrEmpty(strLastDate) == false
+                    && strLastDate.Length != 8)
+                    strLastDate = "";
+                    */
+                string strLastDate = "";
+
+                // 列出已经下载的文件列表
+                // 当天下载当天日期的日志文件，要创建一个同名的状态文件，表示它可能没有完成。以后再处理的时候，如果不再是当天，确保下载完成了，可以删除状态文件
+                string pattern = "*.log";
+                if (listView == this.listView_errorLogTasks)
+                    pattern = "log_*.txt";
+                List<OperLogFileInfo> local_files = GetLocalOperLogFileNames(
+                    strOutputFolder,
+                    pattern,
+                    strLastDate);
+
+                // 可能会抛出异常
+                List<OperLogFileInfo> server_files = GetServerOperLogFileNames(item, strLastDate);
+
+                // 计算出尚未下载的文件
+                string server_folder = "!operlog/";
+                if (listView == this.listView_errorLogTasks)
+                    server_folder = "!log/";
+
+                List<DownloadFileInfo> fileinfos = new List<DownloadFileInfo>();
+                foreach (var server_info in server_files)
+                {
+                    OperLogFileInfo local_info = Find(local_files, server_info.FileName);
+                    if (local_info != null)
+                    {
+                        fileinfos.Add(new DownloadFileInfo
+                        {
+                            LocalPath = local_info.FileName,
+                            ServerPath = server_info.FileName
+                        });
+                        local_files.Remove(local_info);
+                    }
+                    else
+                        fileinfos.Add(new DownloadFileInfo
+                        {
+                            ServerPath = server_info.FileName
+                        });
+                }
+                foreach (var info in local_files)
+                {
+                    fileinfos.Add(new DownloadFileInfo
+                    {
+                        LocalPath = info.FileName
+                    });
+                }
+
+                fileinfos.Sort((a,b)=> {
+                    string filename1 = a.LocalPath;
+                    if (string.IsNullOrEmpty(filename1))
+                        filename1 = a.ServerPath;
+                    string filename2 = b.LocalPath;
+                    if (string.IsNullOrEmpty(filename2))
+                        filename2 = b.ServerPath;
+
+                    return string.Compare(filename1, filename2);
+                });
+
+                foreach(var info in fileinfos)
+                {
+                    if (string.IsNullOrEmpty(info.LocalPath) == false)
+                    {
+                        // 获得本地文件 MD5
+                    }
+                    if (string.IsNullOrEmpty(info.ServerPath))
+                    {
+                        // 获得服务器文件 MD5
+                    }
+
+
+                }
+
+                string strFolder = strOutputFolder;
+                // 关注以前曾经下载的，可能服务器端发生了变化的文件。从文件尺寸可以看出来。
+                // return:
+                //      -1  出错
+                //      0   放弃下载
+                //      1   成功启动了下载
+                var result = await BeginDownloadFiles(
+                    item,
+                    fileinfos,
+                    "append",
+                    (bError) =>
+                    {
+                        // 写入记忆文件，然后提示结束
+                        if (bError == false)
+                            WriteOperLogMemoryFile(item.ListView, strFolder, now);
+                    },
+                    strOutputFolder,
+                    token);
+                if (result.Value == -1)
+                {
+                    info.State = "error";
+                    // 2020/2/28
+                    SetItemText(item, OPERLOG_COLUMN_STATE, "出错: " + result.ErrorInfo);
+                    SetOperLogItemColor(item);
+                }
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = SetOperLogItemError(item, "BackupOperLogFiles() 出现异常: " + ex.Message)
+                };
+            }
+            finally
+            {
+                // 及时清理关于本服务器的闲置通道
+                if (string.IsNullOrEmpty(server_url) == false)
+                    this._channelPool.CleanChannel((channel) => channel.Url == server_url);
+            }
+        }
+
+#endif
+
+        // TODO: 要返回一个本地和服务器文件 文件名 尺寸 MD5 对照的列表
         // 备份日志文件。即，把日志文件从服务器拷贝到本地目录。要处理好增量复制的问题。
-        // return:
+        // parameters:
+        //      detect_all  是否强制探测所有文件？false 表示只探测上次运行记忆的最后日期以及之后的文件
+            // return:
         //      -1  出错
         //      0   放弃下载，或者没有必要下载。提示信息在 strError 中
         //      1   成功启动了下载
         async Task<NormalResult> GetOperLogFiles(
             ListViewItem item,
             string strOutputFolder,
+            bool detect_all,
             CancellationToken token)
         {
             if (string.IsNullOrEmpty(strOutputFolder))
@@ -3585,6 +3741,9 @@ string strHtml)
                 string strLastDate = ReadOperLogMemoryFile(item.ListView, strOutputFolder);
                 if (string.IsNullOrEmpty(strLastDate) == false
                     && strLastDate.Length != 8)
+                    strLastDate = "";
+
+                if (detect_all)
                     strLastDate = "";
 
                 // 列出已经下载的文件列表
@@ -4220,7 +4379,7 @@ out string strError);
 
             // this.ServerVersion = strVersion;
 
-            string base_version = "3.23"; // 3.23
+            string base_version = "3.24"; // 3.23
             if (StringUtil.CompareVersion(strVersion, base_version) < 0)
             {
                 strError = $"dp2library 服务器 '{channel.Url}' 版本必须升级为 " + base_version + " 以上时才能使用大备份和日志备份功能 (当前 dp2library 版本实际为 " + strVersion + ")";
@@ -4530,6 +4689,11 @@ out string strError);
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
+            menuItem = new MenuItem("验证本地和服务器文件 (&V)");
+            menuItem.Tag = this.listView_operLogTasks;
+            menuItem.Click += new System.EventHandler(this.MenuItem_verifyLocalAndServerFile_Click);
+            contextMenu.MenuItems.Add(menuItem);
+
             // ---
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
@@ -4544,6 +4708,12 @@ out string strError);
 
 
             contextMenu.Show(this.listView_operLogTasks, new Point(e.X, e.Y));
+        }
+
+        // 验证全部本地和服务器文件
+        void MenuItem_verifyLocalAndServerFile_Click(object sender, EventArgs e)
+        {
+
         }
 
         // 打开操作日志/错误日志本地文件夹
@@ -4668,7 +4838,7 @@ out string strError);
                             };
                         }
 
-                        var new_result = NewOperLogTask(listView, server);
+                        var new_result = NewOperLogTask(listView, server, false);
                         if (new_result.Value == -1)
                         {
                             if (new_result.ErrorCode == "taskAlreadyExist")
@@ -4749,6 +4919,7 @@ out string strError);
                         info.OperLogTask = GetOperLogFiles(
                                 item,
                                 strOutputFolder,
+                                false,
                                 info.CancellationToken);
                         /*
                         if (result.Value == -1)

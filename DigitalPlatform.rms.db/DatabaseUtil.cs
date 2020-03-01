@@ -75,12 +75,13 @@ namespace DigitalPlatform.rms
             return strDir;
         }
 
-
         // 为配置文件创建时间戳
         public static byte[] CreateTimestampForCfg(string strFilePath)
         {
             byte[] baTimestamp = null;
             FileInfo fileInfo = new FileInfo(strFilePath);
+            // 2020/3/1
+            fileInfo.Refresh();
             if (fileInfo.Exists == false)
                 return baTimestamp;
 

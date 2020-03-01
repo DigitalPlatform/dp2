@@ -236,6 +236,8 @@ namespace DigitalPlatform.rms
             foreach (string filename in files)
             {
                 FileInfo fileInfo = new FileInfo(filename);
+                // 2020/3/1
+                fileInfo.Refresh();
                 string strFileName = fileInfo.Name;
                 if (this.IsRecord(strFileName) == false)
                     continue;
@@ -699,6 +701,8 @@ namespace DigitalPlatform.rms
 
             int nTotalLength = 0;
             FileInfo file = new FileInfo(strFilePath);
+            // 2020/3/1
+            file.Refresh();
             if (file.Exists == false)
             {
                 strError = "文件'" + strFilePath + "'不存在";
@@ -2256,6 +2260,8 @@ namespace DigitalPlatform.rms
             foreach (string fileName in files)
             {
                 FileInfo fileInfo = new FileInfo(fileName);
+                // 2020/3/1
+                fileInfo.Refresh();
                 string strFileName = fileInfo.Name;
                 if (this.IsRecord(strFileName) == false)
                     continue;
