@@ -7933,6 +7933,8 @@ handle.CancelTokenSource.Token).Result;
                 }
 
                 FileInfo fi = new FileInfo(strPageImageFileName);
+                // 2020/3/1
+                fi.Refresh();
                 lTotalLength = fi.Length;
 
                 // 得到实际读的长度
@@ -8469,6 +8471,8 @@ handle.CancelTokenSource.Token).Result;
                     }
 
                     FileInfo fi = new FileInfo(strObjectFilename);
+                    // 2020/3/1
+                    fi.Refresh();
                     if (fi.Exists == false)
                     {
                         // TODO: 不要直接汇报物理文件名
@@ -8928,6 +8932,8 @@ handle.CancelTokenSource.Token).Result;
                     int nRedoCount = 0;
                     REDO:
                     FileInfo fi = new FileInfo(strObjectFilename);
+                    // 2020/3/1
+                    fi.Refresh();
                     if (fi.Exists == false)
                     {
                         // 尝试补救一下
@@ -9287,6 +9293,8 @@ handle.CancelTokenSource.Token).Result;
                     }
 
                     FileInfo fi = new FileInfo(strObjectFilename);
+                    // 2020/3/1
+                    fi.Refresh();
                     if (fi.Exists == false)
                     {
                         // TODO: 不要直接汇报物理文件名
@@ -9633,6 +9641,8 @@ handle.CancelTokenSource.Token).Result;
                     }
 
                     FileInfo fi = new FileInfo(strObjectFilename);
+                    // 2020/3/1
+                    fi.Refresh();
                     if (fi.Exists == false)
                     {
                         // TODO: 不要直接汇报物理文件名
@@ -17792,6 +17802,8 @@ handle.CancelTokenSource.Token).Result;
             string strFileName = BuildObjectFileName(strID, bTempObject);
 
             FileInfo fi = new FileInfo(strFileName);
+            // 2020/3/1
+            fi.Refresh();
             if (fi.Exists == false)
                 return 0;
 

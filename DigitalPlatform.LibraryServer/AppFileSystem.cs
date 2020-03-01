@@ -275,7 +275,7 @@ namespace DigitalPlatform.LibraryServer
                     }
                     // 把写到 metadata 里的尺寸设好
                     FileInfo fi = new FileInfo(strFilePath);
-                    lCurrentLength = fi.Length;
+                    lCurrentLength = fi.Length; // TODO:?
                     fi = null;
                 }
             }
@@ -635,6 +635,7 @@ namespace DigitalPlatform.LibraryServer
                     return -2;
                 }
             }
+            file.Refresh();
 
             // 1.取时间戳
             if (StringUtil.IsInList("timestamp", strStyle) == true)
@@ -680,6 +681,9 @@ namespace DigitalPlatform.LibraryServer
             // 这个长度有时候会有迟滞
             // https://stackoverflow.com/questions/7828132/getting-current-file-length-fileinfo-length-caching-and-stale-information
 
+            // 2020/3/1
+            // lTotalLength = GetFileLength(strFilePath);
+            /*
             // 2020/2/29
             // 如果是正在获取当日的操作日志文件
             if (PathUtil.IsEqual(strFilePath, this.OperLog.CurrentFileName))
@@ -691,6 +695,7 @@ namespace DigitalPlatform.LibraryServer
                     lTotalLength = this.OperLog.GetCurrentStreamLength();
                 }
             }
+            */
 
             // 5.有data风格时,才会取数据
             if (StringUtil.IsInList("data", strStyle) == true)
@@ -823,6 +828,17 @@ namespace DigitalPlatform.LibraryServer
             return lTotalLength;
         }
 
+        // 获得文件尺寸。这个版本可以避免使用 FileInfo 可能遇到的信息陈旧的问题
+        public static long GetFileLength(string strFilePath)
+        {
+            // TODO: 如果出现异常，则改用 FileInfo.Length
+            using (FileStream s = new FileStream(strFilePath,
+    FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
+            {
+                return s.Length;
+            }
+        }
+
         // 转入新的目录
         // parameters:
         //      strRoot 根目录，物理路径
@@ -905,6 +921,9 @@ namespace DigitalPlatform.LibraryServer
                 int count = 0;
                 foreach (FileSystemInfo si in loader)
                 {
+                    // 2020/3/1
+                    si.Refresh();
+
                     // 检查文件或目录必须在根以下。防止漏洞
                     if (PathUtil.IsChildOrEqual(si.FullName, strRootPath) == false)
                         continue;
@@ -935,6 +954,9 @@ namespace DigitalPlatform.LibraryServer
                         FileInfo fi = si as FileInfo;
                         info.Size = fi.Length;
 
+                        // 2020/3/1
+                        // info.Size = GetFileLength(si.FullName);
+                        /*
                         // 2020/2/29
                         // 如果是正在获取当日的操作日志文件
                         if (PathUtil.IsEqual(si.FullName, this.OperLog.CurrentFileName))
@@ -942,6 +964,7 @@ namespace DigitalPlatform.LibraryServer
                             // 这个尺寸更准确
                             info.Size = this.OperLog.GetCurrentStreamLength();
                         }
+                        */
                     }
 
                     count++;

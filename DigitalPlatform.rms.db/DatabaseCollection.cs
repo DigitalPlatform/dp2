@@ -4458,6 +4458,8 @@ namespace DigitalPlatform.rms
                     }
                     //把写到metadata里的尺寸设好
                     FileInfo fi = new FileInfo(strFilePath);
+                    // 2020/3/1
+                    fi.Refresh();
                     lCurrentLength = fi.Length;
                     fi = null;
 
@@ -5373,6 +5375,8 @@ namespace DigitalPlatform.rms
 
             long lTotalLength = 0;
             FileInfo file = new FileInfo(strFilePath);
+            // 2020/3/1
+            file.Refresh();
             if (file.Exists == false)
             {
                 strError = "服务器不存在物理路径为'" + strFilePath + "'的文件。";
@@ -6340,6 +6344,8 @@ namespace DigitalPlatform.rms
 
             long lTotalLength = 0;
             FileInfo file = new FileInfo(strFilePath);
+            // 2020/3/1
+            file.Refresh();
             if (file.Exists == false)
             {
                 strError = " dp2Library 服务器不存在物理路径为 '" + strFilePath + "' 的文件";

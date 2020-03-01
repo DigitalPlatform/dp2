@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.23.*")]
-[assembly: AssemblyFileVersion("3.23.0.0")]
+[assembly: AssemblyVersion("3.24.*")]
+[assembly: AssemblyFileVersion("3.24.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -204,3 +204,4 @@ ItemCanReturn()
 //      3.21 (2020/2/18) BatchTask() API 启动 “大备份”任务时可以用 backup 权限就够了。backup 权限也能用 ListFile() API 下载和删除 upload 子目录以外的其他子目录，权限比较高
 //      3.22 (2020/2/19) GetSystemParameter() API 当 strCategory 为 "library" strName 为 "name" 时不需要登录就可以获取到信息
 //		3.23 (2020/2/25) GetRes() API 用于获得 dp2library 文件 MD5 信息的时候，可以使用 beginTask getTaskResult 等子功能，用轮询方式查看任务状态和获得结果。这可适应非常大的物理文件
+//		3.24 (2020/3/1) ListFile() API 以前版本有时会出现获取当日操作日志文件尺寸陈旧的问题。现已消除

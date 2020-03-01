@@ -5687,7 +5687,10 @@ MessageBoxDefaultButton.Button2);
                     foreach (var filename in dlg.FileNames)
                     {
                         this._floatingMessage.Text = $"正在运算 {i+1}) {filename} 的 MD5, 请等待 ...";
-                        using (FileStream stream = File.OpenRead(filename))
+                        // using (FileStream stream = File.OpenRead(filename))
+                        // 注意要用共享方式打开。因为操作日志文件有可能此时被其他进程打开使用
+                        using (FileStream stream = new FileStream(filename,
+    FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
                         {
                             stream.Seek(0, SeekOrigin.Begin);
                             var bytes = DynamicDownloader.GetFileMd5(stream);
