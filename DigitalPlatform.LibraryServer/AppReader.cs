@@ -122,10 +122,9 @@ namespace DigitalPlatform.LibraryServer
         public bool IsCurrentChangeableReaderPath(string strReaderRecPath,
             string strAccountLibraryCodeList)
         {
-            string strLibraryCode = "";
             return IsCurrentChangeableReaderPath(strReaderRecPath,
                 strAccountLibraryCodeList,
-                out strLibraryCode);
+                out string strLibraryCode);
         }
 
         // 观察一个读者记录路径，看看是不是在当前用户管辖的读者库范围内? 戍边获得读者库(strReaderRecPath)的馆代码
@@ -682,6 +681,7 @@ namespace DigitalPlatform.LibraryServer
                 result.ErrorCode = ErrorCode.AccessDenied;
                 return result;
             }
+
             string strError = "";
             int nRet = 0;
             long lRet = 0;
@@ -1281,14 +1281,23 @@ namespace DigitalPlatform.LibraryServer
                         strSavedXml = domNewRec.OuterXml;
                     }
 
-                    string strLibraryCode = "";
                     // 观察一个读者记录路径，看看是不是在当前用户管辖的读者库范围内?
                     if (app.IsCurrentChangeableReaderPath(strRecPath,
                         sessioninfo.LibraryCodeList,
-                        out strLibraryCode) == false)
+                        out string strLibraryCode) == false)
                     {
                         strError = "读者记录路径 '" + strRecPath + "' 的读者库不在当前用户管辖范围内";
                         goto ERROR1;
+                    }
+
+                    // 2020/3/2
+                    // 给 strSaveXml 中添加 libraryCode 元素
+                    {
+                        XmlDocument domTemp = new XmlDocument();
+                        domTemp.LoadXml(strSavedXml);
+
+                        DomUtil.SetElementText(domTemp.DocumentElement, "libraryCode", strLibraryCode);
+                        strSavedXml = domTemp.OuterXml;
                     }
 
                     // 2014/7/4
@@ -1314,6 +1323,7 @@ namespace DigitalPlatform.LibraryServer
                         }
                     }
 
+                    // TODO: 添加 libraryCode 元素
 
                     lRet = channel.DoSaveTextRes(strRecPath,
                         strSavedXml,
@@ -1430,7 +1440,7 @@ strLibraryCode);    // 读者所在的馆代码
                        strOldXml,
                        baOldTimestamp,
                        strOldBarcode,
-                        // strNewBarcode,
+                       // strNewBarcode,
                        domOldRec,
                        ref strExistingXml,
                        ref baNewTimestamp,
@@ -1962,11 +1972,10 @@ root, strLibraryCode);
                 baNewTimestamp = exist_timestamp;   // 让前端知道库中记录实际上发生过变化
             }
 
-            string strLibraryCode = "";
             // 观察一个读者记录路径，看看是不是在当前用户管辖的读者库范围内?
             if (this.IsCurrentChangeableReaderPath(strRecPath,
                 strCurrentLibraryCode,
-                out strLibraryCode) == false)
+                out string strLibraryCode) == false)
             {
                 strError = "读者记录路径 '" + strRecPath + "' 的读者库不在当前用户管辖范围内";
                 goto ERROR1;
@@ -2329,6 +2338,10 @@ root, strLibraryCode);
                 goto ERROR1;
             }
 
+            // 2020/3/2
+            // 给 domNewRec 中添加 libraryCode 元素
+            DomUtil.SetElementText(domNewRec.DocumentElement, "libraryCode", strLibraryCode);
+
             // 2014/7/4
             if (this.VerifyReaderType == true)
             {
@@ -2372,7 +2385,7 @@ root, strLibraryCode);
                 DomUtil.SetElementText(domNewRec.DocumentElement, "comment", strExistComment);
             }
 
-            REDO_SAVE:
+        REDO_SAVE:
             // 保存新记录
             byte[] output_timestamp = null;
             lRet = channel.DoSaveTextRes(strRecPath,
@@ -2827,10 +2840,10 @@ root, strLibraryCode);
                 }
             }
 
-            // TODO: 是否还要看看 //reservations/request ?
+        // TODO: 是否还要看看 //reservations/request ?
 
 
-            END1:
+        END1:
             if (String.IsNullOrEmpty(strDetail) == false)
                 return true;
 
@@ -3660,7 +3673,7 @@ out strError);
                         }
                     }
 
-                    NOT_FOUND:
+                NOT_FOUND:
                     strError = "没有找到";
                     error_code = ErrorCode.NotFound;
                     return 0;
@@ -3681,7 +3694,7 @@ out strError);
                 return nRet;
             }
 
-            SKIP0:
+        SKIP0:
             // 2013/5/21
             if (recpaths != null)
                 strOutputPath = StringUtil.MakePathList(recpaths);
@@ -4140,7 +4153,7 @@ out strError);
                             out strError);
                          * */
                         nRet = this.GetReaderRecXmlByFrom(
-                            // sessioninfo.Channels,
+    // sessioninfo.Channels,
     channel,
     null,
     strIdcardNumber,
@@ -4149,7 +4162,7 @@ out strError);
     sessioninfo.LibraryCodeList,
     out recpaths,
     out strXml,
-                            // out strOutputPath,
+    // out strOutputPath,
     out baTimestamp,
     out strError);
                         if (nRet == -1)
@@ -4291,7 +4304,7 @@ out strError);
             else
                 strRecPath = strOutputPath;
 
-        SKIP1:
+            SKIP1:
             if (String.IsNullOrEmpty(strResultTypeList) == true)
             {
                 results = null; // 不返回任何结果
@@ -5150,6 +5163,8 @@ out strError);
                 }
 
                 strTargetRecPath = strOutputRecPath;
+
+                // TODO: 如果新位置的 libraryCode 变了，还要专门改写一次新位置的 XML 记录
 
                 /*
                 if (String.IsNullOrEmpty(strNewBiblio) == false)
