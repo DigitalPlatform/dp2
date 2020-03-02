@@ -306,21 +306,58 @@ namespace DigitalPlatform.LibraryServer
                     // 把id解析出来
                     strID = ResPath.GetRecordId(strOutputPath);
 
+                    int nRedoCount = 0;
+                    REDO:
                     // 处理
+                    // parameters:
+                    //      bChanged    [out] strReaderXml 是否发生过改变
+                    // return:
+                    //      -1  出错
+                    //      0   正常
                     nRet = DoOneRecord(
                         bodytypes,
                         strOutputPath,
                         strLibraryCode,
-                        strXmlBody,
+                        ref strXmlBody,
+                        nRedoCount,
                         baOutputTimeStamp,
+                        out bool bChanged,
                         out strError);
                     if (nRet == -1)
                     {
                         AppendResultText("DoOneRecord() error : " + strError + "。\r\n");
                         // 循环并不停止
                     }
+                    if (bChanged == true)
+                    {
+                        // return:
+                        //      -2  保存时遇到时间戳冲突，已经重新装载读者记录返回于 strReaderXml 中，时间戳于 output_timestamp 中
+                        //      -1  出错
+                        //      0   保存成功
+                        nRet = SavePatronRecord(channel,
+    strOutputPath,
+    ref strXmlBody,
+    baOutputTimeStamp,
+    out byte[] output_timestamp,
+    out strError);
+                        if (nRet == -1)
+                        {
+                            AppendResultText("SavePatronRecord() error : " + strError + "。\r\n");
+                            // 循环并不停止
+                        }
+                        else if (nRet == -2)
+                        {
+                            if (nRedoCount > 10)
+                            {
+                                AppendResultText("SavePatronRecord() (遇到时间戳不匹配)重试十次以后依然出错，放弃重试。error : " + strError + "。\r\n");
+                                // 循环并不停止
+                            }
+                            baOutputTimeStamp = output_timestamp;
+                            goto REDO;
+                        }
+                    }
 
-                    CONTINUE:
+                CONTINUE:
                     continue;
                 } // end of for
 
@@ -349,7 +386,7 @@ namespace DigitalPlatform.LibraryServer
             }
 
             return;
-            ERROR1:
+        ERROR1:
             AppendResultText("ReadersMonitor thread error : " + strError + "\r\n");
             this.App.WriteErrorLog("ReadersMonitor thread error : " + strError + "\r\n");
             return;
@@ -368,23 +405,31 @@ namespace DigitalPlatform.LibraryServer
         }
 
         // 处理一条读者记录
+        // parameters:
+        //      bChanged    [out] strReaderXml 是否发生过改变
+        // return:
+        //      -1  出错
+        //      0   正常
         int DoOneRecord(
             List<string> bodytypes,
             string strPath,
             string strLibraryCode,
-            string strReaderXml,
+            ref string strReaderXml,
+            int nRedoCount,
             byte[] baTimeStamp,
+            out bool bChanged,
             out string strError)
         {
             strError = "";
-            long lRet = 0;
+            bChanged = false;
+            // long lRet = 0;
             int nRet = 0;
 
             RmsChannel channel = this.RmsChannels.GetChannel(this.App.WsUrl);
-            int nRedoCount = 0;
+            // int nRedoCount = 0;
 
-            REDO:
-            byte[] output_timestamp = null;
+        //REDO:
+            //byte[] output_timestamp = null;
 
             XmlDocument readerdom = new XmlDocument();
             try
@@ -397,8 +442,14 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
-            // 2016/4/26
-            DomUtil.SetElementText(readerdom.DocumentElement, "libraryCode", strLibraryCode);
+            // 2020/3/2
+            string oldLibraryCode = DomUtil.GetElementText(readerdom.DocumentElement, "libraryCode");
+            if (oldLibraryCode != strLibraryCode)
+            {
+                DomUtil.SetElementText(readerdom.DocumentElement, "libraryCode", strLibraryCode);
+                strReaderXml = readerdom.OuterXml;
+                bChanged = true;
+            }
 
             string strReaderBarcode = DomUtil.GetElementText(readerdom.DocumentElement,
                 "barcode");
@@ -408,14 +459,13 @@ namespace DigitalPlatform.LibraryServer
             string strReaderType = DomUtil.GetElementText(readerdom.DocumentElement,
                 "readerType");
 
-            Calendar calendar = null;
             // return:
             //      -1  出错
             //      0   没有找到日历
             //      1   找到日历
             nRet = this.App.GetReaderCalendar(strReaderType,
                 strLibraryCode,
-                out calendar,
+                out Calendar calendar,
                 out strError);
             if (nRet == -1 || nRet == 0)
             {
@@ -425,7 +475,6 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
-            bool bChanged = false;
 
             // 每种 bodytype 做一次
             for (int i = 0; i < bodytypes.Count; i++)
@@ -484,10 +533,7 @@ namespace DigitalPlatform.LibraryServer
                     return -1;
 #endif
 
-                int nResultValue = 0;
-                string strBody = "";
                 // List<string> wantNotifyBarcodes = null;
-                string strMime = "";
 
                 // 保存调用脚本前的读者记录 
                 string strOldReaderXml = readerdom.DocumentElement.OuterXml;
@@ -507,9 +553,9 @@ namespace DigitalPlatform.LibraryServer
                         calendar,
                         // notifiedBarcodes,
                         strBodyType,
-                        out nResultValue,
-                        out strBody,
-                        out strMime,
+                        out int nResultValue,
+                        out string strBody,
+                        out string strMime,
                         // out wantNotifyBarcodes,
                         out strError);
                 if (nRet == -1)
@@ -747,6 +793,7 @@ namespace DigitalPlatform.LibraryServer
                         bChanged = true;
 #endif
 
+                    strReaderXml = readerdom.OuterXml;
                     bChanged = true;
                 }
             } // end of for
@@ -776,7 +823,10 @@ namespace DigitalPlatform.LibraryServer
                 }
 
                 if (nRet == 1)
+                {
+                    strReaderXml = readerdom.OuterXml;
                     bChanged = true;
+                }
             }
 
             // 给借阅信息和借阅历史中增加 biblioRecPath 属性
@@ -792,7 +842,10 @@ namespace DigitalPlatform.LibraryServer
                 this.AppendResultText(strError + "\r\n");
             }
             if (nRet == 1)
+            {
+                strReaderXml = readerdom.OuterXml;
                 bChanged = true;
+            }
 
             // 删除超过极限数量的 BorrowHistory 下级元素
             // return:
@@ -807,7 +860,10 @@ namespace DigitalPlatform.LibraryServer
                 this.AppendResultText(strError + "\r\n");
             }
             if (nRet == 1)
+            {
+                strReaderXml = readerdom.OuterXml;
                 bChanged = true;
+            }
 
             // 2016/12/27
             // return:
@@ -822,7 +878,10 @@ namespace DigitalPlatform.LibraryServer
                 this.AppendResultText(strError + "\r\n");
             }
             if (nRet == 1)
+            {
+                strReaderXml = readerdom.OuterXml;
                 bChanged = true;
+            }
 
             // 2016/4/10
             // 如果读者记录中没有 refID 元素，自动创建它
@@ -838,19 +897,22 @@ namespace DigitalPlatform.LibraryServer
                 this.AppendResultText(strError + "\r\n");
             }
             if (nRet == 1)
+            {
+                strReaderXml = readerdom.OuterXml;
                 bChanged = true;
+            }
 
+#if NO
             // 修改读者记录后存回
             if (bChanged == true)
             {
-                string strOutputPath = "";
                 lRet = channel.DoSaveTextRes(strPath,
                     readerdom.OuterXml,
                     false,
                     "content",  // ,ignorechecktimestamp
                     baTimeStamp,
                     out output_timestamp,
-                    out strOutputPath,
+                    out string strOutputPath,
                     out strError);
                 if (lRet == -1)
                 {
@@ -865,12 +927,11 @@ namespace DigitalPlatform.LibraryServer
 
                         string strStyle = "data,content,timestamp,outputpath";
 
-                        string strMetaData = "";
                         // string strOutputPath = "";
                         lRet = channel.GetRes(strPath,
                             strStyle,
                             out strReaderXml,
-                            out strMetaData,
+                            out string strMetaData,
                             out baTimeStamp,
                             out strOutputPath,
                             out strError);
@@ -887,6 +948,60 @@ namespace DigitalPlatform.LibraryServer
                     strError = "写回读者库记录 '" + strPath + "' 时发生错误: " + strError;
                     return -1;
                 }
+            }
+
+#endif
+            return 0;
+        }
+
+        // 修改读者记录后存回
+        // return:
+        //      -2  保存时遇到时间戳冲突，已经重新装载读者记录返回于 strReaderXml 中，时间戳于 output_timestamp 中
+        //      -1  出错
+        //      0   保存成功
+        int SavePatronRecord(RmsChannel channel,
+            string strPath,
+            ref string strReaderXml,
+            byte [] baTimeStamp,
+            out byte [] output_timestamp,
+            out string strError)
+        {
+            long lRet = channel.DoSaveTextRes(strPath,
+                strReaderXml,
+                false,
+                "content",  // ,ignorechecktimestamp
+                baTimeStamp,
+                out output_timestamp,
+                out string strOutputPath,
+                out strError);
+            if (lRet == -1)
+            {
+                // 时间戳冲突
+                if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch)
+                {
+                    string strStyle = "data,content,timestamp,outputpath";
+
+                    lRet = channel.GetRes(strPath,
+                        strStyle,
+                        out strReaderXml,
+                        out string strMetaData,
+                        out baTimeStamp,
+                        out strOutputPath,
+                        out strError);
+                    output_timestamp = baTimeStamp;
+                    if (lRet == -1)
+                    {
+                        strError = "写回读者库记录 '" + strPath + "' 时发生时间戳冲突，重装记录时又发生错误: " + strError;
+                        return -1;
+                    }
+
+                    //nRedoCount++;
+                    //goto REDO;
+                    return -2;
+                }
+
+                strError = "写回读者库记录 '" + strPath + "' 时发生错误: " + strError;
+                return -1;
             }
 
             return 0;
@@ -930,7 +1045,7 @@ namespace DigitalPlatform.LibraryServer
                 myQueue.Send(myMessage);
                 return 0;
             }
-            catch(System.Messaging.MessageQueueException ex)
+            catch (System.Messaging.MessageQueueException ex)
             {
                 strError = "发送消息到 MQ 出现异常: " + ExceptionUtil.GetDebugText(ex);
                 return -2;
