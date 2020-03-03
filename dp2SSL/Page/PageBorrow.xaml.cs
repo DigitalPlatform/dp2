@@ -294,6 +294,7 @@ namespace dp2SSL
             if (string.IsNullOrEmpty(App.FaceUrl) == false
                 && StringUtil.IsInList("registerFace", this.ActionButtons) == false)
                 style.Add("face");
+
             return StringUtil.MakePathList(style);
         }
 
@@ -855,6 +856,8 @@ namespace dp2SSL
                     buttons.Add("renew");
                 if (registerFace.Visibility == Visibility.Visible)
                     buttons.Add("registerFace");
+                if (bindPatronCard.Visibility == Visibility.Visible)
+                    buttons.Add("bindPatronCard");
 
                 return StringUtil.MakePathList(buttons);
             }
@@ -887,8 +890,20 @@ namespace dp2SSL
                 else
                     deleteFace.Visibility = Visibility.Collapsed;
 
+                if (buttons.IndexOf("bindPatronCard") != -1)
+                    bindPatronCard.Visibility = Visibility.Visible;
+                else
+                    bindPatronCard.Visibility = Visibility.Collapsed;
+
+                if (buttons.IndexOf("releasePatronCard") != -1)
+                    releasPatronCard.Visibility = Visibility.Visible;
+                else
+                    releasPatronCard.Visibility = Visibility.Collapsed;
+
                 if (registerFace.Visibility == Visibility.Visible
-                    || deleteFace.Visibility == Visibility.Visible)
+                    || deleteFace.Visibility == Visibility.Visible
+                    || bindPatronCard.Visibility == Visibility.Visible
+                    || releasPatronCard.Visibility == Visibility.Visible)
                 {
                     this.booksControl.Visibility = Visibility.Collapsed;
                     // this.patronControl.HideInputFaceButton();
@@ -3140,6 +3155,254 @@ string usage)
         }
 
         #endregion
+
+        private void bindPatronCard_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void releasPatronCard_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        // 绑定或者解绑(ISO14443A)读者卡
+        private async Task BindPatronCard(string action)
+        {
+            GetFeatureStringResult result = null;
+
+            string action_name = "绑定读者卡";
+            if (action == "releasePatronCard")
+                action_name = "解绑读者卡";
+
+            // TODO: 弹出一个对话框，检测 ISO14443A 读者卡
+            // 注意探测读者卡的时候，不是要刷新右侧的读者信息，而是把探测到的信息拦截到对话框里面，右侧的读者信息不要有任何变化
+
+            VideoWindow videoRegister = null;
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                videoRegister = new VideoWindow
+                {
+                    TitleText = $"{action_name} ...",
+                    Owner = Application.Current.MainWindow,
+                    WindowStartupLocation = WindowStartupLocation.CenterOwner
+                };
+                videoRegister.Closed += VideoRegister_Closed;
+                videoRegister.Show();
+                AddLayer();
+            }));
+            try
+            {
+                if (IsPatronOK(action, out string check_message) == false)
+                {
+                    if (string.IsNullOrEmpty(check_message))
+                        check_message = $"读卡器上的当前读者卡状态不正确。无法进行{action_name}操作";
+
+                    DisplayError(ref videoRegister, check_message, "yellow");
+                    return;
+                }
+
+                if (action == "registerFace")
+                {
+                    _stopVideo = false;
+                    try
+                    {
+                        var task = Task.Run(() =>
+                        {
+                            DisplayVideo(videoRegister);
+                        });
+
+                        // 2019/9/6 增加
+                        {
+                            var state_result = FaceManager.GetState("camera");
+                            if (state_result.Value == -1)
+                            {
+                                DisplayError(ref videoRegister, state_result.ErrorInfo);
+                                return;
+                            }
+                        }
+
+                        // 启动一个单独的显示倒计时数字的任务
+                        var task1 = Task.Run(() =>
+                        {
+                            for (int i = 5; i > 0; i--)
+                            {
+                                if (_stopVideo == true)
+                                    break;
+
+                                if (videoRegister == null)
+                                    break;
+
+                                if (videoRegister != null)
+                                {
+                                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                                    {
+                                        if (videoRegister != null)
+                                            videoRegister.TitleText = $"倒计时 {i}";
+                                    }));
+                                }
+                                Thread.Sleep(1000);
+                            }
+                            if (videoRegister != null)
+                            {
+                                Application.Current.Dispatcher.Invoke(new Action(() =>
+                                {
+                                    videoRegister.TitleText = "拍摄";
+                                }));
+                            }
+                        });
+
+
+
+                        result = await GetFeatureString("returnImage,countDown,format:jpeg");
+                        if (result.Value == -1)
+                        {
+                            DisplayError(ref videoRegister, result.ErrorInfo);
+                            return;
+                        }
+
+                        if (result.Value == 0)
+                        {
+                            DisplayError(ref videoRegister, result.ErrorInfo);
+                            return;
+                        }
+
+                        // SetGlobalError("face", null);
+                    }
+                    finally
+                    {
+                        _stopVideo = true;
+                    }
+                    // TODO: 背景变为绿色
+                }
+
+                videoRegister.Background = new SolidColorBrush(Colors.DarkGreen);
+                videoRegister.MessageText = "正在写入读者记录 ...";
+                // Thread.Sleep(1000);
+
+                bool changed = false;
+                XmlDocument dom = new XmlDocument();
+                dom.LoadXml(_patron.Xml);
+
+                if (action == "registerFace")
+                {
+                    // TODO: 对话框提示以前已经登记过人脸，是否要覆盖？
+
+                    // 在读者 XML 记录中加入 face 元素
+                    if (!(dom.DocumentElement.SelectSingleNode("face") is XmlElement face))
+                    {
+                        face = dom.CreateElement("face");
+                        dom.DocumentElement.AppendChild(face);
+                    }
+                    face.SetAttribute("version", result.Version);
+                    face.InnerText = result.FeatureString;
+                    changed = true;
+                }
+                else if (action == "deleteFace")
+                {
+                    // 删除 face 元素
+                    if (!(dom.DocumentElement.SelectSingleNode("face") is XmlElement face))
+                    {
+                        // 报错说本来就没有人脸信息，所以也没有必要删除
+                        DisplayError(ref videoRegister, "读者记录中原本不存在人脸信息 ...");
+                        return;
+                    }
+                    else
+                    {
+                        face.ParentNode.RemoveChild(face);
+                        changed = true;
+                    }
+                }
+
+                // 删除 dprms:file 元素
+                string object_path = "";
+
+                if (action == "registerFace")
+                {
+                    if (GetCardPhotoObjectPath(dom,
+        "face",
+        _patron.RecPath,
+        out object_path) == true)
+                        changed = true;
+                }
+                else
+                {
+                    // return:
+                    //      false   没有发生修改
+                    //      true    发生了修改
+                    if (RemoveCardPhotoObject(dom, "face") == true)
+                        changed = true;
+                }
+
+                // TODO: 用 WPF 对话框
+                if (action == "deleteFace")
+                {
+                    MessageBoxResult dialog_result = MessageBox.Show(
+                        "确实要删除人脸信息?\r\n\r\n(人脸信息删除以后，您将无法使用人脸识别功能)",
+                        "dp2SSL",
+                        MessageBoxButton.YesNo,
+                        MessageBoxImage.Question);
+                    if (dialog_result == MessageBoxResult.No)
+                        return;
+                }
+
+
+                if (changed == true)
+                {
+                    // 保存读者记录
+                    var save_result = await SetReaderInfo(_patron.RecPath,
+                        dom.OuterXml,
+                        _patron.Xml,
+                        _patron.Timestamp);
+                    if (save_result.Value == -1)
+                    {
+                        DisplayError(ref videoRegister, save_result.ErrorInfo);
+                        return;
+                    }
+
+                    _patron.Timestamp = save_result.NewTimestamp;
+                    _patron.Xml = dom.OuterXml;
+                }
+
+                if (action == "registerFace")
+                {
+                    videoRegister.MessageText = "正在上传读者照片 ...";
+                    // Thread.Sleep(1000);
+
+                    // 上传头像
+                    var upload_result = await UploadObject(
+            object_path,
+            result.ImageData);
+                    if (upload_result.Value == -1)
+                    {
+                        DisplayError(ref videoRegister,
+                            $"上传头像文件失败: {upload_result.ErrorInfo}");
+                        return;
+                    }
+                }
+
+                // 上传完对象后通知 facecenter DoReplication 一次
+                var notify_result = FaceManager.Notify("faceChanged");
+                if (notify_result.Value == -1)
+                    SetGlobalError("face", $"FaceManager.Notify() error: {notify_result.ErrorInfo}");   // 2019/9/11 增加 error:
+
+                string message = $"{action_name}成功";
+                if (action == "deleteFace")
+                    App.CurrentApp.Speak(message);
+                DisplayError(ref videoRegister, message, "green");
+            }
+            finally
+            {
+                if (videoRegister != null)
+                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    {
+                        videoRegister.Close();
+                    }));
+            }
+
+            // 刷新读者信息区显示
+            var temp_task = FillPatronDetail(true);
+        }
 
     }
 }

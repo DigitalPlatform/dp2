@@ -349,6 +349,11 @@ namespace dp2SSL
             NavigatePageShelf("");  // 普通使用
         }
 
+        private void bindPatronCard_Click(object sender, RoutedEventArgs e)
+        {
+            NavigatePageBorrow("bindPatronCard,releasePatronCard");
+        }
+
 
 
 #if NO

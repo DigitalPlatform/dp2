@@ -211,6 +211,27 @@
                         <TextBlock>删除人脸</TextBlock>
                     </Button.Content>
                 </Button>
+
+                <Button Name="bindPatronCard"
+                    Style="{DynamicResource RoundedButtonStyle}" 
+                    Width="200" Height="60" 
+                    FontSize="30" FontWeight="ExtraBold" 
+                    Foreground="White" 
+                     Click="bindPatronCard_Click">
+                    <Button.Content>
+                        <TextBlock>绑定读者卡</TextBlock>
+                    </Button.Content>
+                </Button>
+                <Button Name="releasPatronCard"
+                    Style="{DynamicResource RoundedButtonStyle}" 
+                    Width="200" Height="60" 
+                    FontSize="30" FontWeight="ExtraBold" 
+                    Foreground="White" 
+                     Click="releasPatronCard_Click">
+                    <Button.Content>
+                        <TextBlock>解绑读者卡</TextBlock>
+                    </Button.Content>
+                </Button>
             </StackPanel>
         </Grid>
     </Grid>
