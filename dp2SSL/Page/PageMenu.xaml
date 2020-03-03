@@ -59,6 +59,12 @@
                    VerticalAlignment="Center" HorizontalAlignment="Center"
                    Background="Transparent" Foreground="White"/>
         </Grid>
+        
+        <Button 
+                Name="bindPatronCard" Content="绑定读者卡" Click="bindPatronCard_Click"
+                Background="#FF7FC1AB" Foreground="Black" FontSize="24" BorderThickness="0"/>
+
+
         <Button Name="error" Content="错误信息"  Click="Error_Click"
                 Visibility="{Binding Path=Error, Mode=OneWay, Converter={StaticResource StringToVis}}"
                 Background="DarkRed" Foreground="White" FontSize="36" BorderThickness="0"/>
