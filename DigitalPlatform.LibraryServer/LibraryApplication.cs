@@ -8971,6 +8971,7 @@ out strError);
             prefixes.Add("TP:");
             prefixes.Add("ID:");    // 2009/9/22 
             prefixes.Add("CN:");    // 2012/11/7
+            prefixes.Add("RI:");    // 2020/3/4
 
             for (int i = 0; i < prefixes.Count; i++)
             {
@@ -10690,6 +10691,7 @@ out strError);
                 return -1;
             account.AccountLibraryCode = strLibraryCode;
 
+            /*
             // 2009/9/26 
             if (String.IsNullOrEmpty(account.Barcode) == true)
             {
@@ -10698,6 +10700,7 @@ out strError);
                     strError);
                 return -1;
             }
+            */
 
             account.Name = DomUtil.GetElementText(readerdom.DocumentElement,
                 "name");
