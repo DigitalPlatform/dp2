@@ -3166,31 +3166,100 @@ string usage)
 
         }
 
+        // return.Value
+        //      -1  出错
+        //      0   放弃
+        //      1   成功获得读者卡 UID，返回在 NormalResult.ErrorCode 中
+        async Task<NormalResult> Get14443ACardUID(ProgressWindow progress,
+            CancellationToken token)
+        {
+            // TODO: 是否一开始要探测读卡器上是否有没有拿走的读者卡，提醒读者先拿走？
+
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                progress.MessageText = "请扫要绑定的读者卡 ...";
+            }));
+
+            // 暂时断开原来的标签处理事件
+            App.CurrentApp.TagChanged -= CurrentApp_TagChanged;
+            // 使用当前的处理事件
+            App.CurrentApp.TagChanged += tagChanged;
+            try
+            {
+                while (token.IsCancellationRequested == false)
+                {
+                    if (TagList.Patrons.Count == 0)
+                    {
+                        Application.Current.Dispatcher.Invoke(new Action(() =>
+                        {
+                            progress.MessageText = "请扫要绑定的读者卡 ...";
+                        }));
+                    }
+                    if (TagList.Patrons.Count > 1)
+                    {
+                        Application.Current.Dispatcher.Invoke(new Action(() =>
+                        {
+                            progress.MessageText = "请拿走多余的读者卡";
+                        }));
+                    }
+
+                    if (TagList.Patrons.Count == 1)
+                    {
+                        var tag = TagList.Patrons[0].OneTag;
+                        if (tag.Protocol == InventoryInfo.ISO14443A)
+                        {
+                            return new NormalResult
+                            {
+                                Value = 1,
+                                ErrorCode = tag.UID
+                            };
+                        }
+                    }
+
+                    await Task.Delay(1000, token);
+                }
+                return new NormalResult { Value = 0 };
+            }
+            finally
+            {
+                App.CurrentApp.TagChanged -= tagChanged;
+                App.CurrentApp.TagChanged += CurrentApp_TagChanged;
+            }
+
+            void tagChanged(object sender, TagChangedEventArgs e)
+            {
+
+            }
+        }
+
+
+
         // 绑定或者解绑(ISO14443A)读者卡
         private async Task BindPatronCard(string action)
         {
-            GetFeatureStringResult result = null;
+            // GetFeatureStringResult result = null;
 
             string action_name = "绑定读者卡";
             if (action == "releasePatronCard")
                 action_name = "解绑读者卡";
 
-            // TODO: 弹出一个对话框，检测 ISO14443A 读者卡
-            // 注意探测读者卡的时候，不是要刷新右侧的读者信息，而是把探测到的信息拦截到对话框里面，右侧的读者信息不要有任何变化
+            // 提前打开对话框
+            ProgressWindow progress = null;
 
-            VideoWindow videoRegister = null;
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
-                videoRegister = new VideoWindow
+                progress = new ProgressWindow();
+                progress.MessageText = "请扫要绑定的读者卡 ...";
+                progress.Owner = Application.Current.MainWindow;
+                progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                progress.Closed += (o, e) =>
                 {
-                    TitleText = $"{action_name} ...",
-                    Owner = Application.Current.MainWindow,
-                    WindowStartupLocation = WindowStartupLocation.CenterOwner
+                    RemoveLayer();
                 };
-                videoRegister.Closed += VideoRegister_Closed;
-                videoRegister.Show();
+                progress.Show();
                 AddLayer();
             }));
+
             try
             {
                 if (IsPatronOK(action, out string check_message) == false)
@@ -3198,97 +3267,38 @@ string usage)
                     if (string.IsNullOrEmpty(check_message))
                         check_message = $"读卡器上的当前读者卡状态不正确。无法进行{action_name}操作";
 
-                    DisplayError(ref videoRegister, check_message, "yellow");
+                    DisplayError(ref progress, check_message, "yellow");
                     return;
                 }
 
-                if (action == "registerFace")
+                // TODO: 弹出一个对话框，检测 ISO14443A 读者卡
+                // 注意探测读者卡的时候，不是要刷新右侧的读者信息，而是把探测到的信息拦截到对话框里面，右侧的读者信息不要有任何变化
+                var result = await Get14443ACardUID(progress,
+                new CancellationToken());
+                if (result.Value == -1)
                 {
-                    _stopVideo = false;
-                    try
-                    {
-                        var task = Task.Run(() =>
-                        {
-                            DisplayVideo(videoRegister);
-                        });
-
-                        // 2019/9/6 增加
-                        {
-                            var state_result = FaceManager.GetState("camera");
-                            if (state_result.Value == -1)
-                            {
-                                DisplayError(ref videoRegister, state_result.ErrorInfo);
-                                return;
-                            }
-                        }
-
-                        // 启动一个单独的显示倒计时数字的任务
-                        var task1 = Task.Run(() =>
-                        {
-                            for (int i = 5; i > 0; i--)
-                            {
-                                if (_stopVideo == true)
-                                    break;
-
-                                if (videoRegister == null)
-                                    break;
-
-                                if (videoRegister != null)
-                                {
-                                    Application.Current.Dispatcher.Invoke(new Action(() =>
-                                    {
-                                        if (videoRegister != null)
-                                            videoRegister.TitleText = $"倒计时 {i}";
-                                    }));
-                                }
-                                Thread.Sleep(1000);
-                            }
-                            if (videoRegister != null)
-                            {
-                                Application.Current.Dispatcher.Invoke(new Action(() =>
-                                {
-                                    videoRegister.TitleText = "拍摄";
-                                }));
-                            }
-                        });
-
-
-
-                        result = await GetFeatureString("returnImage,countDown,format:jpeg");
-                        if (result.Value == -1)
-                        {
-                            DisplayError(ref videoRegister, result.ErrorInfo);
-                            return;
-                        }
-
-                        if (result.Value == 0)
-                        {
-                            DisplayError(ref videoRegister, result.ErrorInfo);
-                            return;
-                        }
-
-                        // SetGlobalError("face", null);
-                    }
-                    finally
-                    {
-                        _stopVideo = true;
-                    }
-                    // TODO: 背景变为绿色
+                    SetGlobalError("bind", result.ErrorInfo);
+                    return;
                 }
 
-                videoRegister.Background = new SolidColorBrush(Colors.DarkGreen);
-                videoRegister.MessageText = "正在写入读者记录 ...";
-                // Thread.Sleep(1000);
+                if (result.Value == 0)
+                    return;
+
+                string uid = result.ErrorCode;
+
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    progress.MessageText = "正在修改读者记录 ...";
+                }));
 
                 bool changed = false;
                 XmlDocument dom = new XmlDocument();
                 dom.LoadXml(_patron.Xml);
 
-                if (action == "registerFace")
+                if (action == "bindPatronCard")
                 {
-                    // TODO: 对话框提示以前已经登记过人脸，是否要覆盖？
+                    // 修改读者 XML 记录中的 cardNumber 元素
 
-                    // 在读者 XML 记录中加入 face 元素
                     if (!(dom.DocumentElement.SelectSingleNode("face") is XmlElement face))
                     {
                         face = dom.CreateElement("face");
@@ -3298,9 +3308,9 @@ string usage)
                     face.InnerText = result.FeatureString;
                     changed = true;
                 }
-                else if (action == "deleteFace")
+                else if (action == "releasePatronCard")
                 {
-                    // 删除 face 元素
+                    // 从读者记录的 cardNumber 元素中移走指定的 UID
                     if (!(dom.DocumentElement.SelectSingleNode("face") is XmlElement face))
                     {
                         // 报错说本来就没有人脸信息，所以也没有必要删除
@@ -3314,31 +3324,11 @@ string usage)
                     }
                 }
 
-                // 删除 dprms:file 元素
-                string object_path = "";
-
-                if (action == "registerFace")
-                {
-                    if (GetCardPhotoObjectPath(dom,
-        "face",
-        _patron.RecPath,
-        out object_path) == true)
-                        changed = true;
-                }
-                else
-                {
-                    // return:
-                    //      false   没有发生修改
-                    //      true    发生了修改
-                    if (RemoveCardPhotoObject(dom, "face") == true)
-                        changed = true;
-                }
-
                 // TODO: 用 WPF 对话框
-                if (action == "deleteFace")
+                if (action == "releasePatronCard")
                 {
                     MessageBoxResult dialog_result = MessageBox.Show(
-                        "确实要删除人脸信息?\r\n\r\n(人脸信息删除以后，您将无法使用人脸识别功能)",
+                        $"确实要解除对读者卡 {uid} 的绑定?\r\n\r\n(解除绑定以后，您将无法使用这一张读者卡进行借书还书操作)",
                         "dp2SSL",
                         MessageBoxButton.YesNo,
                         MessageBoxImage.Question);
@@ -3356,7 +3346,7 @@ string usage)
                         _patron.Timestamp);
                     if (save_result.Value == -1)
                     {
-                        DisplayError(ref videoRegister, save_result.ErrorInfo);
+                        DisplayError(ref progress, save_result.ErrorInfo);
                         return;
                     }
 
@@ -3364,39 +3354,17 @@ string usage)
                     _patron.Xml = dom.OuterXml;
                 }
 
-                if (action == "registerFace")
-                {
-                    videoRegister.MessageText = "正在上传读者照片 ...";
-                    // Thread.Sleep(1000);
-
-                    // 上传头像
-                    var upload_result = await UploadObject(
-            object_path,
-            result.ImageData);
-                    if (upload_result.Value == -1)
-                    {
-                        DisplayError(ref videoRegister,
-                            $"上传头像文件失败: {upload_result.ErrorInfo}");
-                        return;
-                    }
-                }
-
-                // 上传完对象后通知 facecenter DoReplication 一次
-                var notify_result = FaceManager.Notify("faceChanged");
-                if (notify_result.Value == -1)
-                    SetGlobalError("face", $"FaceManager.Notify() error: {notify_result.ErrorInfo}");   // 2019/9/11 增加 error:
-
                 string message = $"{action_name}成功";
-                if (action == "deleteFace")
+                if (action == "releasePatronCard")
                     App.CurrentApp.Speak(message);
-                DisplayError(ref videoRegister, message, "green");
+                DisplayError(ref progress, message, "green");
             }
             finally
             {
-                if (videoRegister != null)
+                if (progress != null)
                     Application.Current.Dispatcher.Invoke(new Action(() =>
                     {
-                        videoRegister.Close();
+                        progress.Close();
                     }));
             }
 
