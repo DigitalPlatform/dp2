@@ -227,7 +227,7 @@
                     Width="200" Height="60" 
                     FontSize="30" FontWeight="ExtraBold" 
                     Foreground="White" 
-                     Click="releasPatronCard_Click">
+                     Click="releasePatronCard_Click">
                     <Button.Content>
                         <TextBlock>解绑读者卡</TextBlock>
                     </Button.Content>

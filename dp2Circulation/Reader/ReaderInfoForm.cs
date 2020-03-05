@@ -1826,7 +1826,10 @@ strNewDefault);
             string strError = "";
             int nRet = 0;
 
-            if (string.IsNullOrEmpty(this.readerEditControl1.Barcode) == true)
+            bool bControlPressed = (Control.ModifierKeys & Keys.Control) == Keys.Control;
+            
+            if (bControlPressed == false 
+                && string.IsNullOrEmpty(this.readerEditControl1.Barcode) == true)
             {
                 strError = "尚未输入证条码号";
                 goto ERROR1;

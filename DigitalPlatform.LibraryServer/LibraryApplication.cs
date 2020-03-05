@@ -1906,8 +1906,8 @@ namespace DigitalPlatform.LibraryServer
                 // this.m_lock.ReleaseWriterLock();
                 this.UnlockForWrite();
             }
-            // 2008/10/13 
-            ERROR1:
+        // 2008/10/13 
+        ERROR1:
             if (bReload == false)
             {
                 if (this.watcher == null)
@@ -4578,7 +4578,7 @@ namespace DigitalPlatform.LibraryServer
             strError = "没有找到名为 '" + strChildDbName + "' 的种下属库";
             return 0;
 
-            FOUND:
+        FOUND:
             strBiblioDbName = DomUtil.GetAttr(node, "biblioDbName");
             return 1;
         }
@@ -4621,7 +4621,7 @@ namespace DigitalPlatform.LibraryServer
                 return 0;
             }
 
-            FOUND:
+        FOUND:
             strBiblioDbName = DomUtil.GetAttr(node, "biblioDbName");
             return 1;
 
@@ -4691,7 +4691,7 @@ namespace DigitalPlatform.LibraryServer
                 return 0;
             }
 
-            FOUND:
+        FOUND:
             strBiblioDbName = DomUtil.GetAttr(node, "biblioDbName");
             return 1;
         }
@@ -4734,7 +4734,7 @@ namespace DigitalPlatform.LibraryServer
                 return 0;
             }
 
-            FOUND:
+        FOUND:
             strBiblioDbName = DomUtil.GetAttr(node, "biblioDbName");
             return 1;
         }
@@ -4777,7 +4777,7 @@ namespace DigitalPlatform.LibraryServer
                 return 0;
             }
 
-            FOUND:
+        FOUND:
             strBiblioDbName = DomUtil.GetAttr(node, "biblioDbName");
             return 1;
         }
@@ -5537,7 +5537,7 @@ namespace DigitalPlatform.LibraryServer
                 goto ERROR1;
 
             return (int)lHitCount;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -5623,7 +5623,7 @@ namespace DigitalPlatform.LibraryServer
                 goto ERROR1;
 
             return (int)lHitCount;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -5758,7 +5758,7 @@ namespace DigitalPlatform.LibraryServer
                 goto ERROR1;
 
             return (int)lHitCount;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -6173,7 +6173,7 @@ out strError);
             }
 
             return (int)lHitCount;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -6673,7 +6673,7 @@ out strError);
             }
 
             return (int)lHitCount;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -6808,7 +6808,7 @@ out strError);
             }
 
             return (int)lHitCount;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -6913,7 +6913,7 @@ out strError);
             }
 
             return (int)lHitCount;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -7045,7 +7045,7 @@ out strError);
             }
 
             return (int)lHitCount;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -7374,7 +7374,7 @@ out strError);
             }
 
             return (int)lHitCount;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -7937,7 +7937,7 @@ out strError);
             }
 
             return (int)lHitCount;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -8382,7 +8382,7 @@ out strError);
             info_list.CopyTo(infos);
 
             return infos.Length;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -8592,7 +8592,7 @@ out strError);
             }
 
             return (int)lHitCount;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -8729,7 +8729,7 @@ out strError);
                 goto ERROR1;
 
             return (int)lHitCount;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -8852,7 +8852,7 @@ out strError);
             }
 
             return (int)lHitCount;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -8952,7 +8952,7 @@ out strError);
             }
 
             return (int)lHitCount;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -9578,7 +9578,7 @@ out strError);
                 output_timestamp = aTimestamp[nIndex];
             }
             return aPathNew.Count;
-            ERROR1:
+        ERROR1:
             return -1;
             /*
         LOADONE:
@@ -10469,7 +10469,7 @@ out strError);
                 }
             }
 
-            DO_LOGIN:
+        DO_LOGIN:
 
             bool bTempPassword = false;
             string strToken = "";
@@ -10691,16 +10691,26 @@ out strError);
                 return -1;
             account.AccountLibraryCode = strLibraryCode;
 
-            /*
             // 2009/9/26 
             if (String.IsNullOrEmpty(account.Barcode) == true)
             {
+                /*
+                // 2020/3/4
+                var refID = DomUtil.GetElementText(readerdom.DocumentElement,
+"refID");
+                if (string.IsNullOrEmpty(refID))
+                {
+                    strError = "读者记录中证条码号内容为空，并且参考 ID 内容也为空，登录失败";
+                    return -1;
+                }
+                account.Barcode = "@refID:" + refID;
+                account.UserID = account.Barcode;
+                */
                 // text-level: 用户提示
                 strError = string.Format(this.GetString("读者记录中证条码号内容为空，登录失败"),    // "读者记录中证条码号内容为空，登录失败"
                     strError);
                 return -1;
             }
-            */
 
             account.Name = DomUtil.GetElementText(readerdom.DocumentElement,
                 "name");
@@ -11228,7 +11238,7 @@ out strError);
             }
 
             return 1;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -11334,7 +11344,7 @@ out strError);
             }
 
             return 1;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -11845,7 +11855,7 @@ out strError);
                 }
             }
 
-            GET_BIBLIO:
+        GET_BIBLIO:
 
             string strItemDbName = "";  // 实体库名
             string strBiblioRecID = ""; // 种记录id
@@ -12473,7 +12483,7 @@ out strError);
             }
 
             return result;
-            ERROR1:
+        ERROR1:
             result.Value = -1;
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
@@ -12535,7 +12545,7 @@ strLibraryCode);    // 读者所在的馆代码
             }
 
             int nRedoCount = 0;
-            REDO:
+        REDO:
 
             // 修改读者密码
             // return:
@@ -12643,7 +12653,7 @@ strLibraryCode);    // 读者所在的馆代码
             }
 
             return 0;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -12696,7 +12706,7 @@ strLibraryCode);    // 读者所在的馆代码
             }
 
             int nRedoCount = 0;
-            REDO:
+        REDO:
 
             // 修改读者临时密码
             // return:
@@ -12795,7 +12805,7 @@ strLibraryCode);    // 读者所在的馆代码
             // this.LoginCache.Remove(strReaderBarcode);   // 及时失效登录缓存
             this.ClearLoginCache(strReaderBarcode);   // 及时失效登录缓存
             return 0;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -13865,7 +13875,7 @@ strLibraryCode);    // 读者所在的馆代码
                 return 1;   // 为.fltx文件
 
             return 0;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -14914,7 +14924,7 @@ strLibraryCode);    // 读者所在的馆代码
 
                         strError = "读取资源 " + strResPath + " 被拒绝。不具备相应的权限";
                         return 0;
-                        ALLOW_ACCESS:
+                    ALLOW_ACCESS:
                         // 2018/8/12
                         // 判断 dp2library 序列号是否许可进行下载
                         if (string.IsNullOrEmpty(strPartCmd) == false)
@@ -15458,7 +15468,7 @@ strLibraryCode);    // 读者所在的馆代码
         private string binding = ""; // 2016/10/26
         public string Binding { get => binding; set => binding = value; }
 
-        private string barcode = ""; // 证条码号。对于读者型的帐户有意义
+        private string barcode = ""; // 证条码号。对于读者型的帐户有意义。特殊情况下，内容可能是"@refID:xxxxx"
         public string Barcode { get => barcode; set => barcode = value; }
 
         private string name = "";    // 姓名。对于读者型的帐户有意义
@@ -15740,7 +15750,7 @@ strLibraryCode);    // 读者所在的馆代码
                 return false;
             }
 
-            END1:
+        END1:
             if (alter_type_list != null)
                 alter_type_list.Add("router_ip"); // 表示已经验证了 router_ip: 绑定
             return true;
@@ -15939,7 +15949,7 @@ strLibraryCode);    // 读者所在的馆代码
 
                 results.Add(type);  // 没有替代
                 continue;
-                FOUND:
+            FOUND:
                 // 发现了可以替代的
                 continue;
             }
@@ -16103,7 +16113,7 @@ strLibraryCode);    // 读者所在的馆代码
                 nDayCount++;
 
 
-                CONTINUE:
+            CONTINUE:
                 TimeSpan delta = new TimeSpan(24, 0, 0);    // 24小时
                 curDay = curDay + delta;
             }
