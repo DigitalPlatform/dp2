@@ -45,47 +45,39 @@ namespace DigitalPlatform.LibraryClient
         {
             LibraryChannelWrapper wrapper = null;
 
-            if (this.m_lock.TryEnterReadLock(m_nLockTimeout) == false)
+            if (this.m_lock.TryEnterWriteLock(m_nLockTimeout) == false)
                 throw new LockException("锁定尝试中超时");
             try
             {
                 wrapper = this._findChannel(strUrl, strUserName, strLang, true);
                 if (wrapper != null)
                     return wrapper.Channel;
-            }
-            finally
-            {
-                this.m_lock.ExitReadLock();
-            }
 
-            // 如果没有找到
-            LibraryChannel inner_channel = new LibraryChannel();
-            inner_channel.Url = strUrl;
-            inner_channel.UserName = strUserName;
-            if (strLang != null)
-                inner_channel.Lang = strLang;
-            if (strClientIP != null)
-                inner_channel.ClientIP = strClientIP;
+                // 如果没有找到
+                LibraryChannel inner_channel = new LibraryChannel();
+                inner_channel.Url = strUrl;
+                inner_channel.UserName = strUserName;
+                if (strLang != null)
+                    inner_channel.Lang = strLang;
+                if (strClientIP != null)
+                    inner_channel.ClientIP = strClientIP;
 
-            // test
-            // inner_channel.ClientIP = "test:127.0.0.1";
+                // test
+                // inner_channel.ClientIP = "test:127.0.0.1";
 
-            inner_channel.BeforeLogin -= new BeforeLoginEventHandle(channel_BeforeLogin);
-            inner_channel.BeforeLogin += new BeforeLoginEventHandle(channel_BeforeLogin);
+                inner_channel.BeforeLogin -= new BeforeLoginEventHandle(channel_BeforeLogin);
+                inner_channel.BeforeLogin += new BeforeLoginEventHandle(channel_BeforeLogin);
 
-            inner_channel.AfterLogin -= inner_channel_AfterLogin;
-            inner_channel.AfterLogin += inner_channel_AfterLogin;
+                inner_channel.AfterLogin -= inner_channel_AfterLogin;
+                inner_channel.AfterLogin += inner_channel_AfterLogin;
 
-            wrapper = new LibraryChannelWrapper();
-            wrapper.Channel = inner_channel;
-            wrapper.InUsing = true;
+                wrapper = new LibraryChannelWrapper();
+                wrapper.Channel = inner_channel;
+                wrapper.InUsing = true;
 
-            if (this.m_lock.TryEnterWriteLock(m_nLockTimeout) == false)
-                throw new LockException("锁定尝试中超时");
-            try
-            {
                 if (this.Count >= MaxCount)
                 {
+                    // TODO: 这一个部分放在写锁定范围内，是否会导致其他请求排队超时？
                     // 清理不用的通道
                     int nDeleteCount = _cleanChannel(false,
                         (channel) => { return true; });
@@ -96,7 +88,6 @@ namespace DigitalPlatform.LibraryClient
                         throw new Exception("通道池已满，请稍后重试获取通道");
                     }
                 }
-
 
                 this.Add(wrapper);
                 return inner_channel;
