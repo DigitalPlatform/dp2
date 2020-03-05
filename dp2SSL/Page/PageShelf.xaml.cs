@@ -1553,6 +1553,10 @@ namespace dp2SSL
                     ErrorBox(StringUtil.MakePathList(initial_result.Warnings, "\r\n"));
                 }
 
+                // 从本地数据库装载 RetryActions
+                ShelfData.ClearRetryActions();
+                ShelfData.LoadRetryActions();
+
                 DisplayMessage(progress, "尝试还书和上架 ...", "green");
 
                 WpfClientInfo.WriteInfoLog("首次初始化尝试还书和上架开始");
@@ -1590,7 +1594,6 @@ namespace dp2SSL
                 SelectAntenna();
 
                 // 将 RetryActions 里面的 PII 和 ShelfData.All 里面 PII 相同的事项删除。因为刚才 TryReturn() 已经成功提交了它们
-                ShelfData.LoadRetryActions();
                 ShelfData.RemoveFromRetryActions(new List<Entity>(ShelfData.All));
 
                 // 启动重试任务。此任务长期在后台运行
@@ -2483,6 +2486,8 @@ namespace dp2SSL
                         _progressWindow?.PushContent(text, "red");
                         WpfClientInfo.WriteErrorLog(text);
                     }
+                    // TODO: 保存到数据库。这样不怕中途断电或者异常退出
+
                     ShelfData.ActivateRetry();
                     return;
                 }
@@ -2527,7 +2532,11 @@ namespace dp2SSL
 
                     // 启动自动重试
                     if (result.RetryActions != null)
+                    {
                         ShelfData.AddRetryActions(result.RetryActions);
+                        // TODO: 保存到数据库。这样不怕中途断电或者异常退出
+
+                    }
                     return;
                 }
 
@@ -2543,6 +2552,8 @@ namespace dp2SSL
                 if (result.RetryActions != null)
                 {
                     ShelfData.AddRetryActions(result.RetryActions);
+                    // TODO: 保存到数据库。这样不怕中途断电或者异常退出
+
                 }
             }
             finally

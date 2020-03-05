@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+
 using DigitalPlatform;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
@@ -69,7 +70,7 @@ namespace dp2SSL
                         ErrorInfo = strError
                     };
 
-                strSummary = strSummary.Replace(". -- ", "\r\n");   // .Replace("/", "\r\n");
+                strSummary = strSummary?.Replace(". -- ", "\r\n");   // .Replace("/", "\r\n");
 
                 return new GetEntityDataResult
                 {

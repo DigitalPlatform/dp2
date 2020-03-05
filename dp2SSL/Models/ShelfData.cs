@@ -2146,6 +2146,9 @@ namespace dp2SSL
                             if (result.ErrorCode == "NotFound")
                                 error = $"警告：PII 为 {entity.PII} 的图书没有找到记录";
 
+                            // 2020/3/5
+                            WpfClientInfo.WriteErrorLog($"GetEntityData() error: {error}");
+
                             App.CurrentApp.SpeakSequence(error);
                             entity.SetError(result.ErrorInfo);
                             entity.FillFinished = true;
@@ -2509,7 +2512,6 @@ namespace dp2SSL
                         }
                         */
 
-
                         // 如果是通讯出错，要加入 retry_actions
                         if (error_code == ErrorCode.RequestError
                             || error_code == ErrorCode.RequestTimeOut
@@ -2547,6 +2549,8 @@ namespace dp2SSL
                                 continue;
                             }
                         }
+
+                        WpfClientInfo.WriteErrorLog($"请求失败。action:{action},PII:{entity.PII}, 错误信息:{strError}, 错误码:{error_code.ToString()}");
 
                         entity.SetError($"{action_name}操作失败: {strError}", "red");
                         // TODO: 这里最好用 title
@@ -2619,12 +2623,33 @@ namespace dp2SSL
                 func_setProgress?.Invoke(-1, -1, -1, "处理完成");   // hide progress bar
 
                 {
+                    /*
+                     * 
+ERROR dp2SSL 2020-03-05 16:49:47,472 - 重试专用线程出现异常: Type: System.Threading.Tasks.TaskCanceledException
+Message: 已取消一个任务。
+Stack:
+   在 System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   在 System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   在 System.Windows.Threading.DispatcherOperation.Wait(TimeSpan timeout)
+   在 System.Windows.Threading.Dispatcher.InvokeImpl(DispatcherOperation operation, CancellationToken cancellationToken, TimeSpan timeout)
+   在 System.Windows.Threading.Dispatcher.Invoke(Action callback, DispatcherPriority priority, CancellationToken cancellationToken, TimeSpan timeout)
+   在 System.Windows.Threading.Dispatcher.Invoke(Action callback)
+   在 dp2SSL.DoorItem.DisplayCount(List`1 entities, List`1 adds, List`1 removes, List`1 errors, List`1 _doors)
+   在 dp2SSL.ShelfData.RefreshCount()
+   在 dp2SSL.ShelfData.SubmitCheckInOut(Delegate_setProgress func_setProgress, IReadOnlyCollection`1 actions)
+   在 dp2SSL.ShelfData.<>c__DisplayClass119_0.<StartRetryTask>b__1()                     * 
+                     * */
                     // 重新装载读者信息和显示
-                    // DoorItem.DisplayCount(_all, _adds, _removes, App.CurrentApp.Doors);
-                    ShelfData.RefreshCount();
-
-                    DoorItem.RefreshEntity(updates, ShelfData.Doors);
-                    // App.CurrentApp.Speak(speak);
+                    try
+                    {
+                        ShelfData.RefreshCount();
+                        DoorItem.RefreshEntity(updates, ShelfData.Doors);
+                        // App.CurrentApp.Speak(speak);
+                    }
+                    catch (Exception ex)
+                    {
+                        WpfClientInfo.WriteErrorLog($"SubmitChechInOut() 中的 RefreshCount() 出现异常: {ExceptionUtil.GetDebugText(ex)}。为了避免破坏流程，这里截获了异常，让后续处理正常进行");
+                    }
                 }
 
                 // TODO: 遇到通讯出错的请求，是否放入一个永久保存的数据结构里面，自动在稍后进行重试请求？
@@ -2711,6 +2736,8 @@ namespace dp2SSL
                 context.Database.EnsureCreated();
                 var items = context.Requests.ToList();
                 AddRetryActions(FromRequests(items));
+
+                WpfClientInfo.WriteInfoLog($"从本地数据库装载 RetryActions 成功。内容如下：\r\n{ActionInfo.ToString(_retryActions)}");
             }
         }
 
@@ -2729,10 +2756,10 @@ namespace dp2SSL
                     }
                     context.SaveChanges();
 
-                    WpfClientInfo.WriteInfoLog($"RetryActions 保存成功。内容如下：\r\n{ActionInfo.ToString(_retryActions)}");
+                    WpfClientInfo.WriteInfoLog($"RetryActions 保存到本地数据库成功。内容如下：\r\n{ActionInfo.ToString(_retryActions)}");
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 WpfClientInfo.WriteErrorLog($"SaveRetryActions() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
             }
@@ -2810,7 +2837,7 @@ namespace dp2SSL
                         matched.Add(action);
                 }
 
-                foreach(var action in matched)
+                foreach (var action in matched)
                 {
                     _retryActions.Remove(action);
                 }
@@ -2839,54 +2866,66 @@ namespace dp2SSL
             // 启动重试专用线程
             _retryTask = Task.Factory.StartNew(() =>
             {
-
-                while (token.IsCancellationRequested == false)
+                WpfClientInfo.WriteInfoLog("重试专用线程开始");
+                try
                 {
-                    // TODO: 无论是整体退出，还是需要激活，都需要能中断 Delay
-                    // Task.Delay(TimeSpan.FromSeconds(10)).Wait(token);
-                    _eventRetry.WaitOne(TimeSpan.FromSeconds(10));
-                    token.ThrowIfCancellationRequested();
-
-                    List<ActionInfo> actions = null;
-                    lock (_syncRoot_retryActions)
+                    while (token.IsCancellationRequested == false)
                     {
-                        actions = new List<ActionInfo>(_retryActions);
-                    }
+                        // TODO: 无论是整体退出，还是需要激活，都需要能中断 Delay
+                        // Task.Delay(TimeSpan.FromSeconds(10)).Wait(token);
+                        _eventRetry.WaitOne(TimeSpan.FromSeconds(10));
+                        token.ThrowIfCancellationRequested();
 
-                    if (actions.Count == 0)
-                        continue;
-
-                    var result = SubmitCheckInOut(
-    null,
-    actions);
-
-                    // 将 submit 情况写入日志备查
-                    WpfClientInfo.WriteInfoLog($"重试提交请求:\r\n{ActionInfo.ToString(actions)}\r\n返回结果:{result.ToString()}");
-
-                    List<ActionInfo> processed = new List<ActionInfo>();
-                    if (result.RetryActions != null)
-                    {
-                        foreach (var action in actions)
+                        List<ActionInfo> actions = null;
+                        lock (_syncRoot_retryActions)
                         {
-                            if (result.RetryActions.IndexOf(action) == -1)
-                                processed.Add(action);
-                        }
-                    }
-
-                    // TODO: 把重试成功的情况写入错误日志，以便检查和改进程序
-
-                    // 把处理掉的 ActionInfo 对象移走
-                    lock (_syncRoot_retryActions)
-                    {
-                        foreach (var action in processed)
-                        {
-                            _retryActions.Remove(action);
+                            actions = new List<ActionInfo>(_retryActions);
                         }
 
-                        RefreshRetryInfo();
+                        if (actions.Count == 0)
+                            continue;
+
+                        var result = SubmitCheckInOut(
+        null,
+        actions);
+
+                        // 将 submit 情况写入日志备查
+                        WpfClientInfo.WriteInfoLog($"重试提交请求:\r\n{ActionInfo.ToString(actions)}\r\n返回结果:{result.ToString()}");
+
+                        List<ActionInfo> processed = new List<ActionInfo>();
+                        if (result.RetryActions != null)
+                        {
+                            foreach (var action in actions)
+                            {
+                                if (result.RetryActions.IndexOf(action) == -1)
+                                    processed.Add(action);
+                            }
+                        }
+
+                        // TODO: 保存到数据库。这样不怕中途断电或者异常退出
+
+                        // 把处理掉的 ActionInfo 对象移走
+                        lock (_syncRoot_retryActions)
+                        {
+                            foreach (var action in processed)
+                            {
+                                _retryActions.Remove(action);
+                            }
+
+                            RefreshRetryInfo();
+                        }
                     }
+                    _retryTask = null;
+
                 }
-                _retryTask = null;
+                catch (Exception ex)
+                {
+                    WpfClientInfo.WriteErrorLog($"重试专用线程出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                }
+                finally
+                {
+                    WpfClientInfo.WriteInfoLog("重试专用线程结束");
+                }
             },
 token,
 TaskCreationOptions.LongRunning,
@@ -2898,6 +2937,15 @@ TaskScheduler.Default);
             lock (_syncRoot_retryActions)
             {
                 _retryActions.AddRange(actions);
+                RefreshRetryInfo();
+            }
+        }
+
+        public static void ClearRetryActions()
+        {
+            lock (_syncRoot_retryActions)
+            {
+                _retryActions.Clear();
                 RefreshRetryInfo();
             }
         }
