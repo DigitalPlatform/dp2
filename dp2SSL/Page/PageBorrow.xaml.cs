@@ -3156,14 +3156,14 @@ string usage)
 
         #endregion
 
-        private void bindPatronCard_Click(object sender, RoutedEventArgs e)
+        private async void bindPatronCard_Click(object sender, RoutedEventArgs e)
         {
-
+            await BindPatronCard("bindPatronCard");
         }
 
-        private void releasPatronCard_Click(object sender, RoutedEventArgs e)
+        private async void releasePatronCard_Click(object sender, RoutedEventArgs e)
         {
-
+            await BindPatronCard("releasePatronCard");
         }
 
         // return.Value
@@ -3171,19 +3171,18 @@ string usage)
         //      0   放弃
         //      1   成功获得读者卡 UID，返回在 NormalResult.ErrorCode 中
         async Task<NormalResult> Get14443ACardUID(ProgressWindow progress,
+            string action_caption,
             CancellationToken token)
         {
             // TODO: 是否一开始要探测读卡器上是否有没有拿走的读者卡，提醒读者先拿走？
 
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
-                progress.MessageText = "请扫要绑定的读者卡 ...";
+                progress.MessageText = $"请扫要{action_caption}的读者卡 ...";
             }));
 
-            // 暂时断开原来的标签处理事件
-            App.CurrentApp.TagChanged -= CurrentApp_TagChanged;
             // 使用当前的处理事件
-            App.CurrentApp.TagChanged += tagChanged;
+            // App.CurrentApp.TagChanged += tagChanged;
             try
             {
                 while (token.IsCancellationRequested == false)
@@ -3192,7 +3191,7 @@ string usage)
                     {
                         Application.Current.Dispatcher.Invoke(new Action(() =>
                         {
-                            progress.MessageText = "请扫要绑定的读者卡 ...";
+                            progress.MessageText = $"请扫要{action_caption}的读者卡 ...";
                         }));
                     }
                     if (TagList.Patrons.Count > 1)
@@ -3216,23 +3215,22 @@ string usage)
                         }
                     }
 
-                    await Task.Delay(1000, token);
+                    await Task.Delay(TimeSpan.FromMilliseconds(500), token);
                 }
                 return new NormalResult { Value = 0 };
             }
             finally
             {
-                App.CurrentApp.TagChanged -= tagChanged;
-                App.CurrentApp.TagChanged += CurrentApp_TagChanged;
+                // App.CurrentApp.TagChanged -= tagChanged;
             }
 
+            /*
             void tagChanged(object sender, TagChangedEventArgs e)
             {
 
             }
+            */
         }
-
-
 
         // 绑定或者解绑(ISO14443A)读者卡
         private async Task BindPatronCard(string action)
@@ -3260,6 +3258,9 @@ string usage)
                 AddLayer();
             }));
 
+            // 暂时断开原来的标签处理事件
+            App.CurrentApp.TagChanged -= CurrentApp_TagChanged;
+
             try
             {
                 if (IsPatronOK(action, out string check_message) == false)
@@ -3274,10 +3275,11 @@ string usage)
                 // TODO: 弹出一个对话框，检测 ISO14443A 读者卡
                 // 注意探测读者卡的时候，不是要刷新右侧的读者信息，而是把探测到的信息拦截到对话框里面，右侧的读者信息不要有任何变化
                 var result = await Get14443ACardUID(progress,
-                new CancellationToken());
+                    action_name,
+                    new CancellationToken());
                 if (result.Value == -1)
                 {
-                    SetGlobalError("bind", result.ErrorInfo);
+                    DisplayError(ref progress, result.ErrorInfo);
                     return;
                 }
 
@@ -3298,44 +3300,39 @@ string usage)
                 if (action == "bindPatronCard")
                 {
                     // 修改读者 XML 记录中的 cardNumber 元素
-
-                    if (!(dom.DocumentElement.SelectSingleNode("face") is XmlElement face))
+                    var modify_result = ModifyBinding(dom,
+    "bind",
+    uid);
+                    if (modify_result.Value == -1)
                     {
-                        face = dom.CreateElement("face");
-                        dom.DocumentElement.AppendChild(face);
+                        DisplayError(ref progress, $"绑定失败: {modify_result.ErrorInfo}");
+                        return;
                     }
-                    face.SetAttribute("version", result.Version);
-                    face.InnerText = result.FeatureString;
                     changed = true;
                 }
                 else if (action == "releasePatronCard")
                 {
                     // 从读者记录的 cardNumber 元素中移走指定的 UID
-                    if (!(dom.DocumentElement.SelectSingleNode("face") is XmlElement face))
+                    var modify_result = ModifyBinding(dom,
+"release",
+uid);
+                    if (modify_result.Value == -1)
                     {
-                        // 报错说本来就没有人脸信息，所以也没有必要删除
-                        DisplayError(ref videoRegister, "读者记录中原本不存在人脸信息 ...");
+                        DisplayError(ref progress, $"解除绑定失败: {modify_result.ErrorInfo}");
                         return;
                     }
-                    else
-                    {
-                        face.ParentNode.RemoveChild(face);
-                        changed = true;
-                    }
-                }
 
-                // TODO: 用 WPF 对话框
-                if (action == "releasePatronCard")
-                {
+                    // TODO: 用 WPF 对话框
                     MessageBoxResult dialog_result = MessageBox.Show(
-                        $"确实要解除对读者卡 {uid} 的绑定?\r\n\r\n(解除绑定以后，您将无法使用这一张读者卡进行借书还书操作)",
-                        "dp2SSL",
-                        MessageBoxButton.YesNo,
-                        MessageBoxImage.Question);
+    $"确实要解除对读者卡 {uid} 的绑定?\r\n\r\n(解除绑定以后，您将无法使用这一张读者卡进行借书还书操作)",
+    "dp2SSL",
+    MessageBoxButton.YesNo,
+    MessageBoxImage.Question);
                     if (dialog_result == MessageBoxResult.No)
                         return;
-                }
 
+                    changed = true;
+                }
 
                 if (changed == true)
                 {
@@ -3354,6 +3351,7 @@ string usage)
                     _patron.Xml = dom.OuterXml;
                 }
 
+                // TODO: “别忘了拿走读者卡”应该在读者读卡器竖放时候才有必要提示
                 string message = $"{action_name}成功";
                 if (action == "releasePatronCard")
                     App.CurrentApp.Speak(message);
@@ -3361,6 +3359,8 @@ string usage)
             }
             finally
             {
+                App.CurrentApp.TagChanged += CurrentApp_TagChanged;
+
                 if (progress != null)
                     Application.Current.Dispatcher.Invoke(new Action(() =>
                     {
@@ -3372,5 +3372,37 @@ string usage)
             var temp_task = FillPatronDetail(true);
         }
 
+        static NormalResult ModifyBinding(XmlDocument dom,
+            string action,
+            string uid)
+        {
+            uid = uid.ToUpper();
+
+            string value = DomUtil.GetElementText(dom.DocumentElement, "cardNumber");
+            if (value != null)
+                value = value.ToUpper();
+            if (action == "release")
+            {
+                if (StringUtil.IsInList(uid, value) == false)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"并不存在 UID 为 {uid} 的绑定信息"
+                    };
+            }
+            if (action == "bind")
+            {
+                if (StringUtil.IsInList(uid, value) == true)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"已经存在 UID 为 {uid} 的绑定信息"
+                    };
+            }
+
+            StringUtil.SetInList(ref value, uid, action == "bind");
+            DomUtil.SetElementText(dom.DocumentElement, "cardNumber", value);
+            return new NormalResult();
+        }
     }
 }
