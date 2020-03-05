@@ -1093,7 +1093,7 @@ namespace DigitalPlatform.ResultSet
             {
                 m_streamSmall.Close();
                 m_streamSmall = null;
-                if (m_strSmallFileName != "")
+                if (string.IsNullOrEmpty(m_strSmallFileName) == false)
                 {
                     File.Delete(m_strSmallFileName);
                     m_strSmallFileName = "";
@@ -1101,7 +1101,7 @@ namespace DigitalPlatform.ResultSet
             }
             if (m_streamSmall == null)
             {
-                if (m_strSmallFileName == "")
+                if (string.IsNullOrEmpty(m_strSmallFileName))
                     m_strSmallFileName = DoGetTempFilename();
 
                 m_streamSmall = File.Open(m_strSmallFileName,

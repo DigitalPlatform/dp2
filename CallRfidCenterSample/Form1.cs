@@ -49,7 +49,7 @@ namespace CallRfidCenterSample
             RfidManager.Url = url;
             // RfidManager.AntennaList = "1|2|3|4";    // testing
             // RfidManager.SetError += RfidManager_SetError;
-            RfidManager.ListTags += RfidManager_ListTags; ;
+            RfidManager.ListTags += RfidManager_ListTags;
             RfidManager.Start(_cancelRfidManager.Token);
         }
 
