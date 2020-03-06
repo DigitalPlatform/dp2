@@ -1963,14 +1963,18 @@ out string strError);
     && string.IsNullOrEmpty(_patron.Barcode) == false)
                 return true;
 
+            string fang = "放好";
+            if (App.PatronReaderVertical)
+                fang = "扫";
+
             string debug_info = $"uid:[{_patron.UID}],barcode:[{_patron.Barcode}]";
             if (action == "borrow")
             {
                 // 提示信息要考虑到应用了指纹的情况
                 if (string.IsNullOrEmpty(App.FingerprintUrl) == false)
-                    message = $"请先放好读者卡，或扫入一次指纹，然后再进行借书操作({debug_info})";
+                    message = $"请先{fang}读者卡，或扫入一次指纹，然后再进行借书操作({debug_info})";
                 else
-                    message = $"请先放好读者卡，然后再进行借书操作({debug_info})";
+                    message = $"请先{fang}读者卡，然后再进行借书操作({debug_info})";
             }
             else if (action == "registerFace"
                 || action == "deleteFace")
@@ -1981,9 +1985,26 @@ out string strError);
 
                 // 提示信息要考虑到应用了指纹的情况
                 if (string.IsNullOrEmpty(App.FingerprintUrl) == false)
-                    message = $"请先放好读者卡，或扫入一次指纹，然后再进行{action_name}操作({debug_info})";
+                    message = $"请先{fang}读者卡，或扫入一次指纹，然后再进行{action_name}操作({debug_info})";
                 else
-                    message = $"请先放好读者卡，然后再进行{action_name}操作({debug_info})";
+                    message = $"请先{fang}读者卡，然后再进行{action_name}操作({debug_info})";
+            }
+            else if (action == "bindPatronCard"
+                || action == "releasePatronCard")
+            {
+                string action_name = "绑定新读者卡";
+                if (action == "releasePatronCard")
+                    action_name = "解绑指定读者卡";
+
+                // 提示信息要考虑到应用了指纹和人脸的情况
+                List<string> styles = new List<string>();
+                styles.Add($"请先{fang}可用的读者卡鉴别身份");
+                if (string.IsNullOrEmpty(App.FingerprintUrl) == false)
+                    styles.Add("或扫入一次指纹");
+                if (string.IsNullOrEmpty(App.FaceUrl) == false)
+                    styles.Add("或人脸识别");
+
+                message = $"{StringUtil.MakePathList(styles, "，")}，然后再进行{action_name}操作({debug_info})";
             }
             else
             {
@@ -3237,9 +3258,9 @@ string usage)
         {
             // GetFeatureStringResult result = null;
 
-            string action_name = "绑定读者卡";
+            string action_name = "绑定";
             if (action == "releasePatronCard")
-                action_name = "解绑读者卡";
+                action_name = "解绑";
 
             // 提前打开对话框
             ProgressWindow progress = null;
@@ -3266,7 +3287,7 @@ string usage)
                 if (IsPatronOK(action, out string check_message) == false)
                 {
                     if (string.IsNullOrEmpty(check_message))
-                        check_message = $"读卡器上的当前读者卡状态不正确。无法进行{action_name}操作";
+                        check_message = $"读卡器上的当前读者卡状态不正确。无法进行{action_name}读者卡的操作";
 
                     DisplayError(ref progress, check_message, "yellow");
                     return;
@@ -3352,7 +3373,7 @@ uid);
                 }
 
                 // TODO: “别忘了拿走读者卡”应该在读者读卡器竖放时候才有必要提示
-                string message = $"{action_name}成功";
+                string message = $"{action_name}读者卡成功";
                 if (action == "releasePatronCard")
                     App.CurrentApp.Speak(message);
                 DisplayError(ref progress, message, "green");

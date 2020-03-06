@@ -1021,8 +1021,8 @@ string strHtml)
         public static string GetCurrentBackupFileName(string server_name)
         {
             DateTime now = DateTime.Now;
-            return // "MC_" 
-                "test_"
+            return "MC_" 
+                // "test_"
                 + now.ToString("yyyy_MM_dd") + "_" + server_name
                 // + "_" + now.ToString("HHmmssffff") 
                 + ".dp2bak";
