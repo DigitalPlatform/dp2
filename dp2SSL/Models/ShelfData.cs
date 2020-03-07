@@ -3164,12 +3164,12 @@ TaskScheduler.Default);
             text.AppendLine(base.ToString());
             if (ErrorActions != null && ErrorActions.Count > 0)
             {
-                text.AppendLine("发生了错误(但不需要重试)的 ActionInfo:");
+                text.AppendLine($"发生了错误(但不需要重试)的 ActionInfo:({ErrorActions.Count})");
                 text.AppendLine(ActionInfo.ToString(ErrorActions));
             }
             if (RetryActions != null && RetryActions.Count > 0)
             {
-                text.AppendLine("需要重试的 ActionInfo:");
+                text.AppendLine($"需要重试的 ActionInfo:({RetryActions.Count})");
                 text.AppendLine(ActionInfo.ToString(RetryActions));
             }
             return text.ToString();
