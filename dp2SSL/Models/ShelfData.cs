@@ -2333,8 +2333,12 @@ namespace dp2SSL
 
                     string strUserName = info.Operator?.GetWorkerAccountName();
 
+                    int nRedoCount = 0;
+                REDO:
                     entity.Waiting = true;
                     LibraryChannel channel = App.CurrentApp.GetChannel(strUserName);
+                    TimeSpan old_timeout = channel.Timeout;
+                    channel.Timeout = TimeSpan.FromSeconds(10);
                     try
                     {
                         if (action == "borrow" || action == "renew")
@@ -2433,9 +2437,16 @@ namespace dp2SSL
                     }
                     finally
                     {
+                        channel.Timeout = old_timeout;
                         App.CurrentApp.ReturnChannel(channel);
                         entity.Waiting = false;
                     }
+
+                    // 2020/3/7
+                    if ((error_code == ErrorCode.RequestError
+    || error_code == ErrorCode.RequestTimeOut)
+    && nRedoCount < 2)
+                        goto REDO;
 
                     // processed.Add(info);
 

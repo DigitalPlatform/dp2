@@ -27,15 +27,14 @@ namespace dp2SSL
         //      1   找到
         public static GetEntityDataResult GetEntityData(string pii)
         {
-            /*
-            title = "";
-            item_xml = "";
-            item_recpath = "";
-            */
-
             LibraryChannel channel = App.CurrentApp.GetChannel();
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromSeconds(10);
             try
             {
+                // TODO: ItemXml 和 BiblioSummary 可以考虑在本地缓存一段时间
+                int nRedoCount = 0;
+            REDO_GETITEMINFO:
                 long lRet = channel.GetItemInfo(null,
                     "item",
                     pii,
@@ -43,32 +42,52 @@ namespace dp2SSL
                     "xml",
                     out string item_xml,
                     out string item_recpath,
-                    out byte[] item_timestamp,
+                    out _,
                     "",
-                    out string biblio_xml,
-                    out string biblio_recpath,
+                    out _,
+                    out _,
                     out string strError);
                 if (lRet == -1)
+                {
+                    if ((channel.ErrorCode == ErrorCode.RequestError ||
+                        channel.ErrorCode == ErrorCode.RequestTimeOut)
+                        && nRedoCount < 2)
+                    {
+                        nRedoCount++;
+                        goto REDO_GETITEMINFO;
+                    }
                     return new GetEntityDataResult
                     {
                         Value = -1,
                         ErrorInfo = strError
                     };
+                }
 
+                nRedoCount = 0;
+            REDO_GETBIBLIOSUMMARY:
                 lRet = channel.GetBiblioSummary(
     null,
     pii,
     "", // strConfirmItemRecPath,
     null,
-    out string strBiblioRecPath,
+    out _,
     out string strSummary,
     out strError);
                 if (lRet == -1)
+                {
+                    if ((channel.ErrorCode == ErrorCode.RequestError ||
+    channel.ErrorCode == ErrorCode.RequestTimeOut)
+    && nRedoCount < 2)
+                    {
+                        nRedoCount++;
+                        goto REDO_GETBIBLIOSUMMARY;
+                    }
                     return new GetEntityDataResult
                     {
                         Value = -1,
                         ErrorInfo = strError
                     };
+                }
 
                 strSummary = strSummary?.Replace(". -- ", "\r\n");   // .Replace("/", "\r\n");
 
@@ -84,6 +103,7 @@ namespace dp2SSL
             }
             finally
             {
+                channel.Timeout = old_timeout;
                 App.CurrentApp.ReturnChannel(channel);
             }
         }
