@@ -2478,12 +2478,14 @@ namespace dp2SSL
             try
             {
                 // 2020/2/23
-                if (ShelfData.RetryActionsCount > 0)
+                // if (ShelfData.RetryActionsCount > 0)
                 {
+                    // TODO: 加入的时候应带有归并功能。但注意 Retry 线程里面正在处理的集合应该暂时从 RetryActions 里面移走，避免和归并过程掺和
                     ShelfData.AddRetryActions(actions);
                     {
-                        string text = $"由于此前有待重试的请求，所以本次 {actions.Count} 个请求被加入重试队列，稍后会自动进行重试";
-                        _progressWindow?.PushContent(text, "red");
+                        string text = $"本次 {actions.Count} 个请求被加入队列，稍后会自动进行提交";
+                        // _progressWindow?.PushContent(text, "green");
+                        // 用 Balloon 提示
                         WpfClientInfo.WriteErrorLog(text);
                     }
                     // TODO: 保存到数据库。这样不怕中途断电或者异常退出
@@ -2491,6 +2493,8 @@ namespace dp2SSL
                     ShelfData.ActivateRetry();
                     return;
                 }
+
+#if OLD
 
                 var result = ShelfData.SubmitCheckInOut(
                 (min, max, value, text) =>
@@ -2555,6 +2559,8 @@ namespace dp2SSL
                     // TODO: 保存到数据库。这样不怕中途断电或者异常退出
 
                 }
+
+#endif
             }
             finally
             {
@@ -2577,7 +2583,7 @@ namespace dp2SSL
             return text.ToString();
         }
 
-        #region 延迟清除读者信息
+#region 延迟清除读者信息
 
         DelayAction _delayClearPatronTask = null;
 
@@ -2638,9 +2644,9 @@ namespace dp2SSL
             }
         }
 
-        #endregion
+#endregion
 
-        #region 模拟柜门灯亮灭
+#region 模拟柜门灯亮灭
 
         public void SimulateLamp(bool on)
         {
@@ -2653,9 +2659,9 @@ namespace dp2SSL
             }));
         }
 
-        #endregion
+#endregion
 
-        #region 人脸识别功能
+#region 人脸识别功能
 
         bool _stopVideo = false;
 
@@ -2851,7 +2857,7 @@ namespace dp2SSL
             }
         }
 
-        #endregion
+#endregion
 
         private void ClearPatron_Click(object sender, RoutedEventArgs e)
         {
