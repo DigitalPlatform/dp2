@@ -2507,6 +2507,12 @@ namespace dp2SSL
                     };
                     doc.Add(messageItem);
 
+                    {
+                        info.LastErrorInfo = strError;
+                        info.RetryCount++;
+                    }
+
+
                     // 微调
                     if (lRet == 0 && action == "return")
                         messageItem.ErrorInfo = "";
@@ -2528,7 +2534,17 @@ namespace dp2SSL
                             || error_code == ErrorCode.RequestTimeOut
                             || error_code == ErrorCode.RequestCanceled
                             )
+                        {
                             retry_actions.Add(info);
+                            info.RetryType = "communication";
+                        }
+                        else
+                        {
+                            // 一般错误也需要重试 10 次
+                            if (info.RetryCount < 10)
+                                retry_actions.Add(info);
+                            info.RetryType = "normal";
+                        }
 
                         if (action == "return")
                         {
@@ -2758,8 +2774,15 @@ Stack:
             {
                 using (var context = new MyContext())
                 {
-                    context.Database.EnsureDeleted();
+                    // context.Database.EnsureDeleted();
+                    // context.Database.EnsureCreated();
+
                     context.Database.EnsureCreated();
+                    {
+                        var allRec = context.Requests;
+                        context.Requests.RemoveRange(allRec);
+                        context.SaveChanges();
+                    }
 
                     lock (_syncRoot_retryActions)
                     {
@@ -2876,68 +2899,114 @@ Stack:
 
             // 启动重试专用线程
             _retryTask = Task.Factory.StartNew(() =>
-            {
-                WpfClientInfo.WriteInfoLog("重试专用线程开始");
-                try
                 {
-                    while (token.IsCancellationRequested == false)
+                    WpfClientInfo.WriteInfoLog("重试专用线程开始");
+                    try
                     {
-                        // TODO: 无论是整体退出，还是需要激活，都需要能中断 Delay
-                        // Task.Delay(TimeSpan.FromSeconds(10)).Wait(token);
-                        _eventRetry.WaitOne(TimeSpan.FromSeconds(10));
-                        token.ThrowIfCancellationRequested();
-
-                        List<ActionInfo> actions = null;
-                        lock (_syncRoot_retryActions)
+                        while (token.IsCancellationRequested == false)
                         {
-                            actions = new List<ActionInfo>(_retryActions);
-                        }
+                            // TODO: 无论是整体退出，还是需要激活，都需要能中断 Delay
+                            // Task.Delay(TimeSpan.FromSeconds(10)).Wait(token);
+                            _eventRetry.WaitOne(TimeSpan.FromSeconds(10));
+                            token.ThrowIfCancellationRequested();
 
-                        if (actions.Count == 0)
-                            continue;
-
-                        var result = SubmitCheckInOut(
-        null,
-        actions);
-
-                        // 将 submit 情况写入日志备查
-                        WpfClientInfo.WriteInfoLog($"重试提交请求:\r\n{ActionInfo.ToString(actions)}\r\n返回结果:{result.ToString()}");
-
-                        List<ActionInfo> processed = new List<ActionInfo>();
-                        if (result.RetryActions != null)
-                        {
-                            foreach (var action in actions)
+                            List<ActionInfo> actions = null;
+                            lock (_syncRoot_retryActions)
                             {
-                                if (result.RetryActions.IndexOf(action) == -1)
-                                    processed.Add(action);
-                            }
-                        }
-
-                        // TODO: 保存到数据库。这样不怕中途断电或者异常退出
-
-                        // 把处理掉的 ActionInfo 对象移走
-                        lock (_syncRoot_retryActions)
-                        {
-                            foreach (var action in processed)
-                            {
-                                _retryActions.Remove(action);
+                                actions = new List<ActionInfo>(_retryActions);
                             }
 
-                            RefreshRetryInfo();
+                            if (actions.Count == 0)
+                                continue;
+
+                            // 准备对话框
+                            SubmitWindow progress = PageMenu.PageShelf?.OpenProgressWindow();
+
+                            var result = SubmitCheckInOut(
+                            (min, max, value, text) =>
+                            {
+                                if (progress != null)
+                                {
+                                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                                    {
+                                        if (min == -1 && max == -1 && value == -1)
+                                            progress.ProgressBar.Visibility = Visibility.Collapsed;
+                                        else
+                                            progress.ProgressBar.Visibility = Visibility.Visible;
+
+                                        if (text != null)
+                                            progress.TitleText = text;
+
+                                        if (min != -1)
+                                            progress.ProgressBar.Minimum = min;
+                                        if (max != -1)
+                                            progress.ProgressBar.Maximum = max;
+                                        if (value != -1)
+                                            progress.ProgressBar.Value = value;
+                                    }));
+                                }
+                            },
+                            actions);
+
+                            // 将 submit 情况写入日志备查
+                            WpfClientInfo.WriteInfoLog($"重试提交请求:\r\n{ActionInfo.ToString(actions)}\r\n返回结果:{result.ToString()}");
+
+                            List<ActionInfo> processed = new List<ActionInfo>();
+                            if (result.RetryActions != null)
+                            {
+                                foreach (var action in actions)
+                                {
+                                    if (result.RetryActions.IndexOf(action) == -1)
+                                        processed.Add(action);
+                                }
+                            }
+
+                            // TODO: 保存到数据库。这样不怕中途断电或者异常退出
+
+                            // 把处理掉的 ActionInfo 对象移走
+                            lock (_syncRoot_retryActions)
+                            {
+                                foreach (var action in processed)
+                                {
+                                    _retryActions.Remove(action);
+                                }
+
+                                RefreshRetryInfo();
+                            }
+
+                            // 把执行结果显示到对话框内
+                            // 全部事项都重试失败的时候不需要显示
+                            if (processed.Count > 0 && progress != null)
+                            {
+                                if (result.Value == -1)
+                                    progress?.PushContent(result.ErrorInfo, "red");
+                                else if (result.Value == 1 && result.MessageDocument != null)
+                                {
+                                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                                    {
+                                        progress?.PushContent(result.MessageDocument);
+                                    }));
+                                }
+
+                                // 显示出来
+                                Application.Current.Dispatcher.Invoke(new Action(() =>
+                                {
+                                    progress?.ShowContent();
+                                }));
+                            }
                         }
+                        _retryTask = null;
+
                     }
-                    _retryTask = null;
-
-                }
-                catch (Exception ex)
-                {
-                    WpfClientInfo.WriteErrorLog($"重试专用线程出现异常: {ExceptionUtil.GetDebugText(ex)}");
-                }
-                finally
-                {
-                    WpfClientInfo.WriteInfoLog("重试专用线程结束");
-                }
-            },
+                    catch (Exception ex)
+                    {
+                        WpfClientInfo.WriteErrorLog($"重试专用线程出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                    }
+                    finally
+                    {
+                        WpfClientInfo.WriteInfoLog("重试专用线程结束");
+                    }
+                },
 token,
 TaskCreationOptions.LongRunning,
 TaskScheduler.Default);
@@ -3115,6 +3184,11 @@ TaskScheduler.Default);
         public string Location { get; set; }    // 所有者馆藏地。transfer 动作会用到
         public string CurrentShelfNo { get; set; }  // 当前架号。transfer 动作会用到
         public string BatchNo { get; set; } // 批次号。transfer 动作会用到。建议可以用当前用户名加上日期构成
+
+        // 2020/3/8
+        public string LastErrorInfo { get; set; }   // 最近一次出错的信息
+        public string RetryType { get; set; }   // 重试类型 communication/other
+        public int RetryCount { get; set; } // 已经进行过的重试次数
 
         public override string ToString()
         {

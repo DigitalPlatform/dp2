@@ -2376,7 +2376,7 @@ namespace dp2SSL
 
         SubmitWindow _progressWindow = null;
 
-        void OpenProgressWindow()
+        public SubmitWindow OpenProgressWindow()
         {
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
@@ -2404,6 +2404,7 @@ namespace dp2SSL
                     _progressWindow.Show();
                 }
             }));
+            return _progressWindow;
         }
 
         private void _progressWindow_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -2467,6 +2468,7 @@ namespace dp2SSL
 
             // TODO: 如果 RetryActions 有内容，则本次的 actions 要立刻追加进入 RetryActions，并立即触发重试 Task 过程。这是为了保证优先提交滞留的请求
 
+            /*
             SubmitWindow progress = null;
 
             if (silence == false)
@@ -2474,6 +2476,7 @@ namespace dp2SSL
                 OpenProgressWindow();
                 progress = _progressWindow;
             }
+            */
 
             try
             {
@@ -2564,10 +2567,12 @@ namespace dp2SSL
             }
             finally
             {
+                /*
                 Application.Current.Dispatcher.Invoke(new Action(() =>
                 {
                     _progressWindow?.ShowContent();
                 }));
+                */
             }
         }
 

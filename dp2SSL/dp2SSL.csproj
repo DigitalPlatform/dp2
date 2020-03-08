@@ -304,6 +304,7 @@
     <Compile Include="Models\Door.cs" />
     <Compile Include="Models\DoorMonitor.cs" />
     <Compile Include="Models\MessageDocument.cs" />
+    <Compile Include="Models\Operation.cs" />
     <Compile Include="Models\ShelfData.cs" />
     <Compile Include="Models\SpeakList.cs" />
     <Compile Include="Models\TagList.cs" />

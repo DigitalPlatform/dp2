@@ -5,8 +5,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DigitalPlatform.WPF;
 using Microsoft.EntityFrameworkCore;
+
+using DigitalPlatform.WPF;
 
 namespace dp2SSL
 {
@@ -59,7 +60,11 @@ namespace dp2SSL
 
     public class MyContext : DbContext
     {
+        // 滞留的请求
         public DbSet<RequestItem> Requests { get; set; }
+
+        // 操作日志
+        public DbSet<Operation> Operations { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -80,6 +85,15 @@ namespace dp2SSL
             modelBuilder.Entity<RequestItem>().Property(p => p.ID)
 .HasDatabaseGeneratedOption(DatabaseGeneratedOption.None);
 */
+
+            modelBuilder.Entity<Operation>().ToTable("operations");
+            modelBuilder.Entity<Operation>(entity =>
+            {
+                entity.HasKey(e => e.ID);
+                entity.HasKey(e => e.OperTime);
+                entity.HasKey(e => e.PII);
+                // entity.Property(e => e.Name).IsRequired();
+            });
         }
     }
 }
