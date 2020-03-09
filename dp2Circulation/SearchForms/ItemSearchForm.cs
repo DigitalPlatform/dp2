@@ -10202,7 +10202,8 @@ dlg.UiState);
                 dlg.Rule = this.LastCatalogingRule;
             }
             dlg.FileName = this.LastIso2709FileName;
-            dlg.CrLf = this.LastCrLfIso2709;
+            // dlg.CrLf = this.LastCrLfIso2709;
+            dlg.CrLfVisible = false;   // 2020/3/9
             dlg.EncodingListItems = Global.GetEncodingList(false);
             dlg.EncodingName =
                 (String.IsNullOrEmpty(this.LastEncodingName) == true ? Global.GetEncodingName(preferredEncoding) : this.LastEncodingName);

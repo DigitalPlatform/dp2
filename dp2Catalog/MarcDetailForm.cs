@@ -2102,7 +2102,8 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
             dlg.GetEncoding -= new GetEncodingEventHandler(dlg_GetEncoding);
             dlg.GetEncoding += new GetEncodingEventHandler(dlg_GetEncoding);
             dlg.FileName = MainForm.LastIso2709FileName;
-            dlg.CrLf = MainForm.LastCrLfIso2709;
+            // dlg.CrLf = MainForm.LastCrLfIso2709;
+            dlg.CrLfVisible = false;   // 2020/3/9
             dlg.RemoveField998 = MainForm.LastRemoveField998;
             dlg.EncodingListItems = Global.GetEncodingList(true);
             dlg.EncodingName =

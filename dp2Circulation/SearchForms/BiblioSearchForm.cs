@@ -9736,7 +9736,8 @@ MessageBoxDefaultButton.Button1);
             dlg.RuleVisible = true;
             dlg.Rule = this.LastCatalogingRule;
             dlg.FileName = this.LastIso2709FileName;
-            dlg.CrLf = this.LastCrLfIso2709;
+            // dlg.CrLf = this.LastCrLfIso2709;
+            dlg.CrLfVisible = false;   // 2020/3/9
             dlg.RemoveField998 = this.LastRemoveField998;
             dlg.EncodingListItems = Global.GetEncodingList(false);
             dlg.EncodingName =

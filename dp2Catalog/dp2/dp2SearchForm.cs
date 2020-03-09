@@ -5350,7 +5350,8 @@ namespace dp2Catalog
             GuiUtil.SetControlFont(dlg, this.Font);
             dlg.IsOutput = true;
             dlg.FileName = MainForm.LastIso2709FileName;
-            dlg.CrLf = MainForm.LastCrLfIso2709;
+            // dlg.CrLf = MainForm.LastCrLfIso2709;
+            dlg.CrLfVisible = false;   // 2020/3/9
             dlg.RemoveField998 = MainForm.LastRemoveField998;
             dlg.EncodingListItems = Global.GetEncodingList(true);
             dlg.EncodingName =

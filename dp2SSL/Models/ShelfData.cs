@@ -3041,6 +3041,78 @@ TaskScheduler.Default);
             }
         }
 
+        // 把动作写入本地操作日志
+        // parameters:
+        //      initial 是否为书柜启动时候的初始化操作
+        public static async Task SaveOperations(List<ActionInfo> actions,
+            bool initial)
+        {
+            try
+            {
+                using (var context = new MyContext())
+                {
+                    foreach (var action in actions)
+                    {
+                        var operation = FromAction(action, initial);
+                        context.Operations.Add(operation);
+                    }
+                    int count = await context.SaveChangesAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                // TODO: 出现此错误，要把应用挂起，显示警告请管理员介入处理
+                WpfClientInfo.WriteErrorLog($"SaveOperations() 出现异常：{ExceptionUtil.GetDebugText(ex)}");
+                throw ex;
+            }
+        }
+
+        static Operation FromAction(ActionInfo action, bool initial)
+        {
+            Operation result = new Operation();
+            if (action.Action == "borrow")
+                result.Action = "checkout";
+            else if (action.Action == "return")
+                result.Action = "checkin";
+            else if (action.Action == "transfer")
+                result.Action = "transfer";
+            else
+                result.Action = "~" + action.Action;
+
+            if (initial)
+                result.Condition = "initial";   // 表示这是书柜启动时候的初始化操作
+
+            result.UID = action.Entity?.UID;
+            result.PII = action.Entity?.PII;
+            result.Antenna = action.Entity?.Antenna;
+            result.Title = action.Entity?.Title;
+            result.Operator = GetOperatorString(action.Operator);
+            result.OperTime = DateTime.Now;
+
+            if (action.Action == "transfer")
+            {
+                result.Parameter = JsonConvert.SerializeObject(new
+                {
+                    batchNo = action.BatchNo,
+                    location = action.Location,
+                    currentShelfNo = action.CurrentShelfNo,
+                    direction = action.TransferDirection,
+                });
+            }
+            return result;
+
+            string GetOperatorString(Operator person)
+            {
+                if (person == null)
+                    return null;
+                return JsonConvert.SerializeObject(new
+                {
+                    name = person.PatronName,
+                    barcode = person.PatronBarcode,
+                });
+            }
+        }
+
 #if REMOVED
         #region 门命令延迟执行
 
