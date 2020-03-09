@@ -13,8 +13,10 @@ namespace dp2SSL
         public int ID { get; set; }
 
         public string Action { get; set; }  // inventory/checkout/checkin/patron/opendoor/closedoor
+        public string Condition { get; set; }   // initial
         public string UID { get; set; } // RFID 标签的 UID
         public string PII { get; set; } // RFID 标签的 PII
+        public string Antenna { get; set; } // 天线编号
         public string Title { get; set; }   // 书名，或者读者姓名
         public string Parameter { get; set; }   // 操作的附加参数
 

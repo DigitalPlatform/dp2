@@ -3775,7 +3775,8 @@ this.checkBox_import_fastMode.Checked);
                         marcdlg.MarcSyntax = strMarcSyntax;
                         marcdlg.EnableMarcSyntax = false;   // 不允许用户选择marc syntax，因为这是数据库配置好了的属性 2007/8/18
 
-                        marcdlg.CrLf = this.OutputCrLf;
+                        // marcdlg.CrLf = this.OutputCrLf;
+                        marcdlg.CrLfVisible = false;   // 2020/3/9
                         marcdlg.AddG01 = this.AddG01;
                         marcdlg.RemoveField998 = this.Remove998;
                         marcdlg.UnimarcModify100 = this.UnimarcModify100;

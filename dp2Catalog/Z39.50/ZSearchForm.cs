@@ -4828,7 +4828,8 @@ MessageBoxDefaultButton.Button1);
             dlg.GetEncoding -= new GetEncodingEventHandler(dlg_GetEncoding);
             dlg.GetEncoding += new GetEncodingEventHandler(dlg_GetEncoding);
             dlg.FileName = this.MainForm.LastIso2709FileName;
-            dlg.CrLf = this.MainForm.LastCrLfIso2709;
+            // dlg.CrLf = this.MainForm.LastCrLfIso2709;
+            dlg.CrLfVisible = false;   // 2020/3/9
             dlg.RemoveField998Visible = false;
             dlg.Mode880Visible = false; // 暂时不支持 880 模式转换
             dlg.EncodingListItems = Global.GetEncodingList(true);

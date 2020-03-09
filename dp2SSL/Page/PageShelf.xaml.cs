@@ -545,8 +545,8 @@ namespace dp2SSL
             if (ShelfData.RetryActionsCount > 0)
             {
                 ShelfData.ActivateRetry();
-                ErrorBox($"当前有 {ShelfData.RetryActionsCount} 个滞留请求尚未提交，请联系管理员排除此故障");
-                return;
+                //ErrorBox($"当前有 {ShelfData.RetryActionsCount} 个滞留请求尚未提交，请联系管理员排除此故障");
+                //return;
             }
 
             // 检查门锁是否已经是打开状态?
@@ -1566,7 +1566,7 @@ namespace dp2SSL
                 //      -1  出错
                 //      0   没有必要处理
                 //      1   已经处理
-                var result = TryReturn(progress, ShelfData.All);
+                var result = await TryReturn(progress, ShelfData.All);
                 WpfClientInfo.WriteInfoLog("首次初始化尝试还书和上架结束");
 
                 if (result.MessageDocument != null
@@ -2283,7 +2283,7 @@ namespace dp2SSL
         //      -1  出错
         //      0   没有必要处理
         //      1   已经处理
-        SubmitResult TryReturn(ProgressWindow progress,
+        async Task<SubmitResult> TryReturn(ProgressWindow progress,
             IReadOnlyCollection<Entity> entities)
         {
             List<ActionInfo> actions = new List<ActionInfo>();
@@ -2306,6 +2306,9 @@ namespace dp2SSL
 
             if (actions.Count == 0)
                 return new SubmitResult();  // 没有必要处理
+
+            // 初始化的操作也要写入本地操作日志
+            await ShelfData.SaveOperations(actions, true);
 
             var result = ShelfData.SubmitCheckInOut(
                 (min, max, value, text) =>
@@ -2483,6 +2486,8 @@ namespace dp2SSL
                 // 2020/2/23
                 // if (ShelfData.RetryActionsCount > 0)
                 {
+                    await ShelfData.SaveOperations(actions, false);
+
                     // TODO: 加入的时候应带有归并功能。但注意 Retry 线程里面正在处理的集合应该暂时从 RetryActions 里面移走，避免和归并过程掺和
                     ShelfData.AddRetryActions(actions);
                     {

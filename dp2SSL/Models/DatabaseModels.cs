@@ -90,8 +90,8 @@ namespace dp2SSL
             modelBuilder.Entity<Operation>(entity =>
             {
                 entity.HasKey(e => e.ID);
-                entity.HasKey(e => e.OperTime);
-                entity.HasKey(e => e.PII);
+                entity.HasIndex(e => e.OperTime);
+                entity.HasIndex(e => e.PII);
                 // entity.Property(e => e.Name).IsRequired();
             });
         }

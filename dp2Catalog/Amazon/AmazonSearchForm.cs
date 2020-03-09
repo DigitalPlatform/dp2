@@ -3072,7 +3072,8 @@ MessageBoxDefaultButton.Button1);
             dlg.GetEncoding -= new GetEncodingEventHandler(dlg_GetEncoding);
             dlg.GetEncoding += new GetEncodingEventHandler(dlg_GetEncoding);
             dlg.FileName = m_mainForm.LastIso2709FileName;
-            dlg.CrLf = m_mainForm.LastCrLfIso2709;
+            // dlg.CrLf = m_mainForm.LastCrLfIso2709;
+            dlg.CrLfVisible = false;   // 2020/3/9
             dlg.RemoveField998Visible = false;
             //dlg.RemoveField998 = m_mainForm.LastRemoveField998;
             dlg.EncodingListItems = Global.GetEncodingList(true);

@@ -1152,7 +1152,8 @@ MessageBoxDefaultButton.Button2);
             dlg.Text = "请指定目标 ISO2709 文件名";
             dlg.IsOutput = true;
             dlg.FileName = "";
-            dlg.CrLf = false;
+            // dlg.CrLf = false;
+            dlg.CrLfVisible = false;   // 2020/3/9
             dlg.AddG01Visible = false;
             dlg.RemoveField998Visible = false;
             //dlg.RemoveField998 = m_mainForm.LastRemoveField998;
