@@ -419,7 +419,7 @@ namespace dp2SSL
             WpfClientInfo.Finish();
             LibraryChannelManager.Log?.Debug("End WpfClientInfo.Finish()");
 
-            ShelfData.SaveRetryActions();
+            // ShelfData.SaveRetryActions();
 
             _cancelRefresh?.Cancel();
             _cancelProcessMonitor?.Cancel();
@@ -450,7 +450,7 @@ namespace dp2SSL
             WpfClientInfo.Finish();
             LibraryChannelManager.Log?.Debug("End WpfClientInfo.Finish()");
 
-            ShelfData.SaveRetryActions();
+            // ShelfData.SaveRetryActions();
 
             _cancelRefresh?.Cancel();
             _cancelProcessMonitor?.Cancel();
