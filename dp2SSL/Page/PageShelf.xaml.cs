@@ -295,7 +295,7 @@ namespace dp2SSL
                 }
 
                 // 注: 调用完成后门控件上的 +- 数字才会消失
-                var task = SubmitCheckInOut("");
+                var task = DoRequest(ShelfData.PullActions(), "");
 
                 /*
                 // testing
@@ -763,7 +763,7 @@ namespace dp2SSL
 
                             ShelfData.RefreshInventory(e.Door);
                             SaveDoorActions(e.Door, true);
-                            await SubmitCheckInOut();   // "silence"
+                            await DoRequest(ShelfData.PullActions());   // "silence"
                             break;
                         }
 
@@ -1553,10 +1553,6 @@ namespace dp2SSL
                     ErrorBox(StringUtil.MakePathList(initial_result.Warnings, "\r\n"));
                 }
 
-                // 从本地数据库装载 RetryActions
-                ShelfData.ClearRetryActions();
-                ShelfData.LoadRetryActions();
-
                 DisplayMessage(progress, "尝试还书和上架 ...", "green");
 
                 WpfClientInfo.WriteInfoLog("首次初始化尝试还书和上架开始");
@@ -1597,7 +1593,7 @@ namespace dp2SSL
                 ShelfData.RemoveFromRetryActions(new List<Entity>(ShelfData.All));
 
                 // 启动重试任务。此任务长期在后台运行
-                ShelfData.StartRetryTask();
+                ShelfData.StartRequestTask();
             }
             finally
             {
@@ -2025,7 +2021,7 @@ namespace dp2SSL
                 || ShelfData.Changes.Count > 0)
             {
                 SaveAllActions();
-                await SubmitCheckInOut(silently ? "silence" : "");
+                await DoRequest(ShelfData.PullActions(), silently ? "silence" : "");
                 // await SubmitCheckInOut("silence");
             }
         }
@@ -2308,7 +2304,7 @@ namespace dp2SSL
                 return new SubmitResult();  // 没有必要处理
 
             // 初始化的操作也要写入本地操作日志
-            await ShelfData.SaveOperations(actions, true);
+            await ShelfData.SaveActionsToDatabase(actions);
 
             var result = ShelfData.SubmitCheckInOut(
                 (min, max, value, text) =>
@@ -2428,19 +2424,24 @@ namespace dp2SSL
         // 向服务器提交 actions 中存储的全部出纳请求
         // parameters:
         //      clearPatron 操作完成后是否自动清除右侧的读者信息
-        async Task SubmitCheckInOut(
+        async Task DoRequest(List<ActionInfo> actions,
             string strStyle = "")
         {
+            if (actions.Count == 0)
+                return;  // 没有必要处理
+
             bool silence = false;
 
             if (StringUtil.IsInList("silence", strStyle))
                 silence = true;
             // bool verifyDoorClosing = StringUtil.IsInList("verifyDoorClosing", strStyle);
 
+            /*
             // 在本函数内使用。中途可能被修改
             List<ActionInfo> actions = new List<ActionInfo>(ShelfData.Actions);
             if (actions.Count == 0)
                 return;  // 没有必要处理
+                */
 
             // 关闭以前残留的对话框
             CloseDialogs();
@@ -2486,7 +2487,7 @@ namespace dp2SSL
                 // 2020/2/23
                 // if (ShelfData.RetryActionsCount > 0)
                 {
-                    await ShelfData.SaveOperations(actions, false);
+                    await ShelfData.SaveActionsToDatabase(actions);
 
                     // TODO: 加入的时候应带有归并功能。但注意 Retry 线程里面正在处理的集合应该暂时从 RetryActions 里面移走，避免和归并过程掺和
                     ShelfData.AddRetryActions(actions);

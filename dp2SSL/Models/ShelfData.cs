@@ -676,6 +676,17 @@ namespace dp2SSL
             }
         }
 
+        // 获得 Actions，并同时从 _actions 中移走
+        public static List<ActionInfo> PullActions()
+        {
+            lock (_syncRoot_actions)
+            {
+                var results = new List<ActionInfo>(_actions);
+                _actions.Clear();
+                return results;
+            }
+        }
+
         // 用于保护 Actions 数据结构的锁对象
         static object _syncRoot_actions = new object();
 
@@ -2529,23 +2540,6 @@ namespace dp2SSL
                         }
                         */
 
-                        // 如果是通讯出错，要加入 retry_actions
-                        if (error_code == ErrorCode.RequestError
-                            || error_code == ErrorCode.RequestTimeOut
-                            || error_code == ErrorCode.RequestCanceled
-                            )
-                        {
-                            retry_actions.Add(info);
-                            info.RetryType = "communication";
-                        }
-                        else
-                        {
-                            // 一般错误也需要重试 10 次
-                            if (info.RetryCount < 10)
-                                retry_actions.Add(info);
-                            info.RetryType = "normal";
-                        }
-
                         if (action == "return")
                         {
                             if (error_code == ErrorCode.NotBorrowed)
@@ -2575,6 +2569,23 @@ namespace dp2SSL
                                 entity.SetError(null);
                                 continue;
                             }
+                        }
+
+                        // 如果是通讯出错，要加入 retry_actions
+                        if (error_code == ErrorCode.RequestError
+                            || error_code == ErrorCode.RequestTimeOut
+                            || error_code == ErrorCode.RequestCanceled
+                            )
+                        {
+                            retry_actions.Add(info);
+                            info.RetryType = "communication";
+                        }
+                        else
+                        {
+                            // 一般错误也需要重试 10 次
+                            if (info.RetryCount < 10)
+                                retry_actions.Add(info);
+                            info.RetryType = "normal";
                         }
 
                         WpfClientInfo.WriteErrorLog($"请求失败。action:{action},PII:{entity.PII}, 错误信息:{strError}, 错误码:{error_code.ToString()}");
@@ -2755,6 +2766,7 @@ Stack:
         }
         */
 
+#if NO
         // 从外部存储中装载以前遗留的 Actions
         public static void LoadRetryActions()
         {
@@ -2796,6 +2808,43 @@ Stack:
             catch (Exception ex)
             {
                 WpfClientInfo.WriteErrorLog($"SaveRetryActions() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+            }
+        }
+
+#endif
+
+        // 从外部存储中装载尚未同步的 Actions
+        // 注意：这些 Actions 应该先按照 PII 排序分组以后，一组一组进行处理
+        public static List<ActionInfo> LoadActionsFromDatabase()
+        {
+            using (var context = new MyContext())
+            {
+                context.Database.EnsureCreated();
+                var items = context.Requests.Where(o => string.IsNullOrEmpty(o.State)).ToList();
+                var actions = FromRequests(items);
+                WpfClientInfo.WriteInfoLog($"从本地数据库装载 Actions 成功。内容如下：\r\n{ActionInfo.ToString(actions)}");
+                return actions;
+            }
+        }
+
+        // 把 Actions 追加保存到本地数据库
+        public static async Task SaveActionsToDatabase(List<ActionInfo> actions)
+        {
+            try
+            {
+                using (var context = new MyContext())
+                {
+                    context.Database.EnsureCreated();
+
+                    context.Requests.AddRange(FromActions(actions));
+                    int nCount = await context.SaveChangesAsync();
+
+                    WpfClientInfo.WriteInfoLog($"Actions 保存到本地数据库成功。内容如下：\r\n{ActionInfo.ToString(_retryActions)}");
+                }
+            }
+            catch (Exception ex)
+            {
+                WpfClientInfo.WriteErrorLog($"SaveActionsToDatabase() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
             }
         }
 
@@ -2884,6 +2933,138 @@ Stack:
             PageMenu.PageShelf?.SetRetryInfo(_retryActions.Count == 0 ? "" : $"滞留:{_retryActions.Count}");
         }
 
+        // 启动同步任务。此任务长期在后台运行
+        public static void StartRequestTask()
+        {
+            if (_retryTask != null)
+                return;
+
+            CancellationToken token = _cancel.Token;
+
+            token.Register(() =>
+            {
+                _eventRetry.Set();
+            });
+
+            // 启动重试专用线程
+            _retryTask = Task.Factory.StartNew(() =>
+            {
+                WpfClientInfo.WriteInfoLog("重试专用线程开始");
+                try
+                {
+                    while (token.IsCancellationRequested == false)
+                    {
+                        // TODO: 无论是整体退出，还是需要激活，都需要能中断 Delay
+                        // Task.Delay(TimeSpan.FromSeconds(10)).Wait(token);
+                        _eventRetry.WaitOne(TimeSpan.FromSeconds(10));
+                        token.ThrowIfCancellationRequested();
+
+                        // TODO: 从本地数据库中装载需要同步的那些 Actions
+                        List<ActionInfo> actions = LoadActionsFromDatabase();
+                        // 排序和分组。按照分组提交给 dp2library 服务器
+
+                        lock (_syncRoot_retryActions)
+                        {
+                            actions = new List<ActionInfo>(_retryActions);
+                        }
+
+                        if (actions.Count == 0)
+                            continue;
+
+                        // 准备对话框
+                        SubmitWindow progress = PageMenu.PageShelf?.OpenProgressWindow();
+
+                        var result = SubmitCheckInOut(
+                        (min, max, value, text) =>
+                        {
+                            if (progress != null)
+                            {
+                                Application.Current.Dispatcher.Invoke(new Action(() =>
+                                {
+                                    if (min == -1 && max == -1 && value == -1)
+                                        progress.ProgressBar.Visibility = Visibility.Collapsed;
+                                    else
+                                        progress.ProgressBar.Visibility = Visibility.Visible;
+
+                                    if (text != null)
+                                        progress.TitleText = text;
+
+                                    if (min != -1)
+                                        progress.ProgressBar.Minimum = min;
+                                    if (max != -1)
+                                        progress.ProgressBar.Maximum = max;
+                                    if (value != -1)
+                                        progress.ProgressBar.Value = value;
+                                }));
+                            }
+                        },
+                        actions);
+
+                        // 将 submit 情况写入日志备查
+                        WpfClientInfo.WriteInfoLog($"重试提交请求:\r\n{ActionInfo.ToString(actions)}\r\n返回结果:{result.ToString()}");
+
+                        List<ActionInfo> processed = new List<ActionInfo>();
+                        if (result.RetryActions != null)
+                        {
+                            foreach (var action in actions)
+                            {
+                                if (result.RetryActions.IndexOf(action) == -1)
+                                    processed.Add(action);
+                            }
+                        }
+
+                        // TODO: 保存到数据库。这样不怕中途断电或者异常退出
+
+                        // 把处理掉的 ActionInfo 对象移走
+                        lock (_syncRoot_retryActions)
+                        {
+                            foreach (var action in processed)
+                            {
+                                _retryActions.Remove(action);
+                            }
+
+                            RefreshRetryInfo();
+                        }
+
+                        // 把执行结果显示到对话框内
+                        // 全部事项都重试失败的时候不需要显示
+                        if (processed.Count > 0 && progress != null)
+                        {
+                            if (result.Value == -1)
+                                progress?.PushContent(result.ErrorInfo, "red");
+                            else if (result.Value == 1 && result.MessageDocument != null)
+                            {
+                                Application.Current.Dispatcher.Invoke(new Action(() =>
+                                {
+                                    progress?.PushContent(result.MessageDocument);
+                                }));
+                            }
+
+                            // 显示出来
+                            Application.Current.Dispatcher.Invoke(new Action(() =>
+                            {
+                                progress?.ShowContent();
+                            }));
+                        }
+                    }
+                    _retryTask = null;
+
+                }
+                catch (Exception ex)
+                {
+                    WpfClientInfo.WriteErrorLog($"重试专用线程出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                }
+                finally
+                {
+                    WpfClientInfo.WriteInfoLog("重试专用线程结束");
+                }
+            },
+token,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+        }
+
+#if NO
         // 启动重试任务。此任务长期在后台运行
         public static void StartRetryTask()
         {
@@ -3012,6 +3193,7 @@ TaskCreationOptions.LongRunning,
 TaskScheduler.Default);
         }
 
+#endif
         public static void AddRetryActions(List<ActionInfo> actions)
         {
             lock (_syncRoot_retryActions)
@@ -3021,6 +3203,7 @@ TaskScheduler.Default);
             }
         }
 
+#if NO
         public static void ClearRetryActions()
         {
             lock (_syncRoot_retryActions)
@@ -3029,6 +3212,7 @@ TaskScheduler.Default);
                 RefreshRetryInfo();
             }
         }
+#endif
 
         public static int RetryActionsCount
         {
@@ -3041,6 +3225,8 @@ TaskScheduler.Default);
             }
         }
 
+
+#if NO
         // 把动作写入本地操作日志
         // parameters:
         //      initial 是否为书柜启动时候的初始化操作
@@ -3067,13 +3253,19 @@ TaskScheduler.Default);
             }
         }
 
+        // TODO: 省略记载 transfer 操作？但记载工作人员典藏移交的操作
         static Operation FromAction(ActionInfo action, bool initial)
         {
             Operation result = new Operation();
             if (action.Action == "borrow")
                 result.Action = "checkout";
             else if (action.Action == "return")
-                result.Action = "checkin";
+            {
+                if (initial)
+                    result.Action = "inventory";
+                else
+                    result.Action = "checkin";
+            }
             else if (action.Action == "transfer")
                 result.Action = "transfer";
             else
@@ -3113,8 +3305,10 @@ TaskScheduler.Default);
             }
         }
 
+#endif
+
 #if REMOVED
-        #region 门命令延迟执行
+#region 门命令延迟执行
 
         // 门命令(延迟执行)队列。开门时放一个命令进入队列。等得到门开信号的时候再取出这个命令
         static List<CommandItem> _commandQueue = new List<CommandItem>();
@@ -3204,7 +3398,7 @@ TaskScheduler.Default);
         }
 
 
-        #endregion
+#endregion
 #endif
     }
 

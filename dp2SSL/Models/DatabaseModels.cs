@@ -24,11 +24,16 @@ namespace dp2SSL
         // Entity 对象 JSON 化以后的字符串
         public string EntityString { get; set; }
 
+
         public string Action { get; set; }  // borrow/return/transfer
         public string TransferDirection { get; set; } // in/out 典藏移交的方向
         public string Location { get; set; }    // 所有者馆藏地。transfer 动作会用到
         public string CurrentShelfNo { get; set; }  // 当前架号。transfer 动作会用到
         public string BatchNo { get; set; } // 批次号。transfer 动作会用到。建议可以用当前用户名加上日期构成
+
+        public string PII { get; set; } // PII 单独从 EntityString 中抽取出来，便于进行搜索
+        public DateTime OperTime { get; set; }  // 操作时间
+        public string State { get; set; }   // 状态。表示是否完成同步，还是正在重试同步阶段，还是已经因为重试出错次数太多而放弃重试(需要人工介入处理)
     }
 
 #if NO
@@ -63,8 +68,10 @@ namespace dp2SSL
         // 滞留的请求
         public DbSet<RequestItem> Requests { get; set; }
 
+#if NO
         // 操作日志
         public DbSet<Operation> Operations { get; set; }
+#endif
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -79,6 +86,9 @@ namespace dp2SSL
             modelBuilder.Entity<RequestItem>(entity =>
             {
                 entity.HasKey(e => e.ID);
+                entity.HasIndex(e => e.OperTime);
+                entity.HasIndex(e => e.PII);
+
                 // entity.Property(e => e.Name).IsRequired();
             });
             /*
@@ -86,6 +96,7 @@ namespace dp2SSL
 .HasDatabaseGeneratedOption(DatabaseGeneratedOption.None);
 */
 
+#if NO
             modelBuilder.Entity<Operation>().ToTable("operations");
             modelBuilder.Entity<Operation>(entity =>
             {
@@ -94,6 +105,7 @@ namespace dp2SSL
                 entity.HasIndex(e => e.PII);
                 // entity.Property(e => e.Name).IsRequired();
             });
+#endif
         }
     }
 }
