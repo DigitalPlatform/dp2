@@ -491,9 +491,21 @@ namespace DigitalPlatform.LibraryServer.Common
                     if (StringUtil.IsValidCMIS(barcode))
                         return true;
                 }
+
+                if (range.Name.ToLower() == "guid")
+                {
+                    if (IsValidGUID(barcode))
+                        return true;
+                }
             }
 
             return false;
+        }
+
+        // 2020/3/13
+        static bool IsValidGUID(string text)
+        {
+            return Guid.TryParse(text, out _);
         }
 
         // 获得 transform 属性
@@ -523,6 +535,12 @@ namespace DigitalPlatform.LibraryServer.Common
                 if (range.Name.ToLower() == "cmis")
                 {
                     if (StringUtil.IsValidCMIS(barcode))
+                        return true;
+                }
+
+                if (range.Name.ToLower() == "guid")
+                {
+                    if (IsValidGUID(barcode))
                         return true;
                 }
             }
@@ -584,6 +602,7 @@ namespace DigitalPlatform.LibraryServer.Common
      * <collection>
      *      <validator location="海淀分馆" >
      *          <patron>
+     *              <GUID />
      *              <CMIS />
      *              <range value="P000001-P999999" transform="..." >
      *              <range>"P000001", "P999999"</range>
