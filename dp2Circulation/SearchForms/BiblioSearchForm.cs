@@ -920,7 +920,7 @@ Keys keyData)
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1580,7 +1580,7 @@ Keys keyData)
                                                 cols);
                                     }
 
-                                    CONTINUE:
+                                CONTINUE:
                                     query.Items.Add(item);
                                 }
                             }
@@ -1727,7 +1727,7 @@ Keys keyData)
             }
 
             return;
-            ERROR1:
+        ERROR1:
             try
             {
                 MessageBox.Show(this, strError);
@@ -1877,7 +1877,7 @@ index);  // index + i
                 }
                 ));
 
-                CONTINUE:
+            CONTINUE:
                 i++;
             }
 
@@ -2088,7 +2088,7 @@ out strError);
             // 单独给一个线程来执行
             Task.Factory.StartNew(() => FillList(e.Start, strLibraryName, e.Records));
             return;
-            ERROR1:
+        ERROR1:
             AddErrorLine(strError);
         }
 
@@ -2462,7 +2462,7 @@ out strError);
                 goto ERROR1;
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3333,7 +3333,7 @@ out strError);
                 goto ERROR1;
             MessageBox.Show(this, "共处理 " + nRet.ToString() + " 个书目记录");
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3835,7 +3835,7 @@ out strError);
 
                 // 输出标题行
                 context.OutputDistributeInfoTitleLine(
-                    // context,
+// context,
 ""
 );
 
@@ -3873,10 +3873,10 @@ out strError);
                                 "",
                                 (biblio_recpath, order_recpath) =>
                                 {
-                                    REDO_0:
+                                REDO_0:
                                     if (string.IsNullOrEmpty(strDefaultOrderXml))
                                     {
-                                        REDO:
+                                    REDO:
                                         // 看看即将插入的位置是图书还是期刊?
                                         string strPubType = OrderEditForm.GetPublicationType(biblio_recpath);
 
@@ -4075,7 +4075,7 @@ out strError);
                 string.Format("导出完成。\r\n\r\n共处理书目记录 {0} 条, 导出订购记录 {1} 条。\r\n所导出的订购记录中，{2} 条是新订购记录， 其中 {3} 条已经写入订购库",
                 nBiblioCount, nOrderCount, nNewOrderCount, nWriteNewOrderCount));
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -4177,7 +4177,7 @@ out strError);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -4259,7 +4259,7 @@ out strError);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -4305,7 +4305,7 @@ out strError);
             form.EnableControls(true);
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -4428,7 +4428,7 @@ out strError);
             strError = "处理完成。\r\n\r\n" + strError;
             MessageBox.Show(this, strError);
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -4459,7 +4459,7 @@ out strError);
             strError = "处理完成。\r\n\r\n" + strError;
             MessageBox.Show(this, strError);
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -4469,7 +4469,11 @@ out strError);
             strError = "";
 
             int nReloadCount = 0;
-            int nSavedCount = 0;
+            // int nSavedCount = 0;
+
+            bool bDontPrompt = false;
+            DialogResult dialog_result = DialogResult.Yes;  // yes no cancel
+            List<ListViewItem> saved_items = new List<ListViewItem>();
 
             LibraryChannel channel = this.GetChannel();
 
@@ -4517,7 +4521,8 @@ out strError);
 
                     stop.SetMessage("正在保存书目记录 " + strRecPath);
 
-
+                    int nRedoCount = 0;
+                REDO_SAVE:
                     long lRet = channel.SetBiblioInfo(
                         stop,
                         "change",
@@ -4572,6 +4577,32 @@ out strError);
                             goto CONTINUE;
                         }
 
+                        // 
+                        if (bDontPrompt == false || nRedoCount >= 10)
+                        {
+                            bool temp = bDontPrompt;
+                            string message = $"保存书目记录 {strRecPath} 时出错:\r\n{strError}\r\n---\r\n\r\n是否重试?\r\n\r\n注：\r\n[重试] 重试保存\r\n[跳过] 放弃保存当前记录，但继续后面的处理\r\n[中断] 中断整批操作";
+                            dialog_result = (DialogResult)Application.OpenForms[0].Invoke(new Func<DialogResult>(() =>
+                            {
+                                return MessageDlg.Show(this,
+                                message,
+                                "BiblioSearchForm",
+                                MessageBoxButtons.YesNoCancel,
+                                MessageBoxDefaultButton.Button1,
+                                ref temp,
+                                new string[] { "重试", "跳过", "中断" },
+                                "下次不再询问");
+                            }));
+                            bDontPrompt = temp;
+                        }
+                        if (dialog_result == DialogResult.Yes)
+                        {
+                            nRedoCount++;
+                            goto REDO_SAVE;
+                        }
+                        if (dialog_result == DialogResult.No)
+                            continue;
+
                         return -1;
                     }
 
@@ -4623,12 +4654,13 @@ MessageBoxDefaultButton.Button1);
                     item.BackColor = SystemColors.Window;
                     item.ForeColor = SystemColors.WindowText;
 
-                    nSavedCount++;
+                    // nSavedCount++;
+                    saved_items.Add(item);
 
                     this.m_nChangedCount--;
                     Debug.Assert(this.m_nChangedCount >= 0, "");
 
-                    CONTINUE:
+                CONTINUE:
                     stop.SetProgressValue(i);
                 }
             }
@@ -4648,7 +4680,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             // 2013/10/22
-            int nRet = RefreshListViewLines(items,
+            int nRet = RefreshListViewLines(saved_items,
     out strError);
             if (nRet == -1)
                 return -1;
@@ -4656,8 +4688,8 @@ MessageBoxDefaultButton.Button1);
             RefreshPropertyView(false);
 
             strError = "";
-            if (nSavedCount > 0)
-                strError += "共保存书目记录 " + nSavedCount + " 条";
+            if (saved_items.Count > 0)
+                strError += "共保存书目记录 " + saved_items.Count + " 条";
             if (nReloadCount > 0)
             {
                 if (string.IsNullOrEmpty(strError) == false)
@@ -4855,7 +4887,7 @@ MessageBoxDefaultButton.Button1);
 
             RefreshPropertyView(false);
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -4903,7 +4935,7 @@ MessageBoxDefaultButton.Button1);
 
             RefreshPropertyView(false);
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5397,7 +5429,7 @@ MessageBoxDefaultButton.Button1);
 
             RefreshPropertyView(false);
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5801,7 +5833,7 @@ MessageBoxDefaultButton.Button1);
                 null);
 
             return 0;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -6003,7 +6035,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6103,7 +6135,7 @@ MessageBoxDefaultButton.Button1);
 
             filter.Assembly = assemblyFilter;
             return 0;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -6240,7 +6272,7 @@ MessageBoxDefaultButton.Button1);
             // 如果正好修改了处于选择状态的一行
             RefreshPropertyView(false);
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6369,7 +6401,7 @@ MessageBoxDefaultButton.Button1);
                     // 2016/3/23
                     channel.Timeout = new TimeSpan(0, 40, 0);   // 复制的时候可能需要复制对象，所需时间一般很长
 
-                    REDO:
+                REDO:
                     long lRet = 0;
                     if (strRecPath.IndexOf("@") != -1)
                     {
@@ -6511,7 +6543,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             return 1;
-            ERROR1:
+        ERROR1:
             // MessageBox.Show(this, strError);
             return -1;
         }
@@ -6536,7 +6568,7 @@ MessageBoxDefaultButton.Button1);
                 goto ERROR1;
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6560,7 +6592,7 @@ MessageBoxDefaultButton.Button1);
                 goto ERROR1;
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6582,7 +6614,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6604,7 +6636,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6626,7 +6658,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6648,7 +6680,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6689,7 +6721,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6716,7 +6748,7 @@ MessageBoxDefaultButton.Button1);
             form.EnableControls(true);
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6730,7 +6762,7 @@ MessageBoxDefaultButton.Button1);
                 goto ERROR1;
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6746,7 +6778,7 @@ MessageBoxDefaultButton.Button1);
                 goto ERROR1;
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6760,7 +6792,7 @@ MessageBoxDefaultButton.Button1);
                 goto ERROR1;
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6774,7 +6806,7 @@ MessageBoxDefaultButton.Button1);
                 goto ERROR1;
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6787,7 +6819,7 @@ MessageBoxDefaultButton.Button1);
                 goto ERROR1;
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6803,7 +6835,7 @@ MessageBoxDefaultButton.Button1);
                 goto ERROR1;
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6818,7 +6850,7 @@ MessageBoxDefaultButton.Button1);
                 goto ERROR1;
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6833,7 +6865,7 @@ MessageBoxDefaultButton.Button1);
                 goto ERROR1;
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6848,7 +6880,7 @@ MessageBoxDefaultButton.Button1);
                 goto ERROR1;
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6981,7 +7013,7 @@ MessageBoxDefaultButton.Button1);
                         index++;
                     }
 
-                    CONTINUE:
+                CONTINUE:
                     stop.SetProgressValue(++i);
                 }
 
@@ -7216,7 +7248,7 @@ MessageBoxDefaultButton.Button1);
 
             Program.MainForm.StatusBarMessage = strDbTypeName + "记录记录路径 " + nCount.ToString() + "个 已成功" + strExportStyle + "到文件 " + this.ExportEntityRecPathFilename;
             return 1;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -7363,7 +7395,7 @@ MessageBoxDefaultButton.Button1);
 
             Program.MainForm.StatusBarMessage = "统计出下级" + strDbTypeName + "记录为空的书目记录 " + nCount.ToString() + "个";
             return 1;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -7543,7 +7575,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -8043,7 +8075,7 @@ MessageBoxDefaultButton.Button2);
 
             MessageBox.Show(this, "成功删除书目记录 " + nDeleteCount + " 条");
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -8379,7 +8411,7 @@ MessageBoxDefaultButton.Button1);
 
                     if (dlg.IncludeObjectFile && bRemote == false)
                     {
-                        REDO_WRITEOBJECTS:
+                    REDO_WRITEOBJECTS:
                         // 将书目记录中的对象资源写入外部文件
                         nRet = WriteObjectFiles(stop,
                 channel,
@@ -8508,7 +8540,7 @@ MessageBoxDefaultButton.Button1);
 
                     // 收尾 dprms:record 元素
                     writer.WriteEndElement();
-                    CONTINUE:
+                CONTINUE:
                     stop.SetProgressValue(++i);
                 }
 
@@ -8538,7 +8570,7 @@ MessageBoxDefaultButton.Button1);
             MainForm.StatusBarMessage = this.listView_records.SelectedItems.Count.ToString()
                 + "条记录成功保存到文件 " + dlg.FileName;
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -8680,7 +8712,7 @@ MessageBoxDefaultButton.Button1);
                     ListViewUtil.ChangeItemText(item, COLUMN_TIMESTAMP, strTimestamp);
 #endif
 
-                    CONTINUE:
+                CONTINUE:
                     i++;
                 }
 
@@ -8788,7 +8820,7 @@ MessageBoxDefaultButton.Button1);
 
                 if (dlg.IncludeObjectFile)
                 {
-                    REDO_WRITEOBJECTS:
+                REDO_WRITEOBJECTS:
                     // 将记录中的对象资源写入外部文件
                     int nRet = WriteObjectFiles(stop,
             channel,
@@ -9121,7 +9153,7 @@ MessageBoxDefaultButton.Button1);
     dlg.FileName);
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -9130,7 +9162,7 @@ MessageBoxDefaultButton.Button1);
             string recpath,
             string strOpacServerUrl)
         {
-            if (string.IsNullOrEmpty(strOpacServerUrl) == false 
+            if (string.IsNullOrEmpty(strOpacServerUrl) == false
                 && strOpacServerUrl[strOpacServerUrl.Length - 1] != '/')
                 strOpacServerUrl += "/";
 
@@ -9397,7 +9429,7 @@ MessageBoxDefaultButton.Button1);
                 + "条记录成功保存到文件 " + dlg.FileName;
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -10055,7 +10087,7 @@ MessageBoxDefaultButton.Button1);
                 MainForm.StatusBarMessage = nCount.ToString()
                     + "条记录成功保存到新文件 " + this.LastIso2709FileName;
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -10847,7 +10879,7 @@ MessageBoxDefaultButton.Button1);
 
             return;
 
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -10916,7 +10948,7 @@ MessageBoxDefaultButton.Button1);
             Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
