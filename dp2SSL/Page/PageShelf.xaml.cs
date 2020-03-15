@@ -2304,8 +2304,9 @@ namespace dp2SSL
                 return new SubmitResult();  // 没有必要处理
 
             // 初始化的操作也要写入本地操作日志
-            await ShelfData.SaveActionsToDatabase(actions);
+            // await ShelfData.SaveActionsToDatabase(actions);
 
+            // 立即处理，然后在界面报错
             var result = ShelfData.SubmitCheckInOut(
                 (min, max, value, text) =>
                 {
@@ -2594,7 +2595,7 @@ namespace dp2SSL
             return text.ToString();
         }
 
-#region 延迟清除读者信息
+        #region 延迟清除读者信息
 
         DelayAction _delayClearPatronTask = null;
 
@@ -2655,9 +2656,9 @@ namespace dp2SSL
             }
         }
 
-#endregion
+        #endregion
 
-#region 模拟柜门灯亮灭
+        #region 模拟柜门灯亮灭
 
         public void SimulateLamp(bool on)
         {
@@ -2670,9 +2671,9 @@ namespace dp2SSL
             }));
         }
 
-#endregion
+        #endregion
 
-#region 人脸识别功能
+        #region 人脸识别功能
 
         bool _stopVideo = false;
 
@@ -2868,7 +2869,7 @@ namespace dp2SSL
             }
         }
 
-#endregion
+        #endregion
 
         private void ClearPatron_Click(object sender, RoutedEventArgs e)
         {

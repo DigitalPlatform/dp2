@@ -36,11 +36,11 @@ namespace DigitalPlatform.LibraryServer.Common
             XmlNodeList nodes = _dom.DocumentElement.SelectNodes("validator");
             if (nodes.Count == 0)
                 return new List<XmlElement>();
-            foreach(XmlElement validator in nodes)
+            foreach (XmlElement validator in nodes)
             {
                 string current = validator.GetAttribute("location");
                 if (Match(location, current))
-                    return new List<XmlElement>{ validator };
+                    return new List<XmlElement> { validator };
             }
             return new List<XmlElement>();
         }
@@ -57,7 +57,7 @@ namespace DigitalPlatform.LibraryServer.Common
             if (one == pattern)
                 return true;
             string[] list = pattern.Split(new char[] { ',' });
-            foreach(string p in list)
+            foreach (string p in list)
             {
                 if (one == p)
                     return true;
@@ -497,15 +497,30 @@ namespace DigitalPlatform.LibraryServer.Common
                     if (IsValidGUID(barcode))
                         return true;
                 }
+
+                if (range.Name.ToLower() == "mpn")
+                {
+                    if (IsMobilePhone(barcode))
+                        return true;
+                }
             }
 
             return false;
         }
 
         // 2020/3/13
+        // https://stackoverflow.com/questions/11040707/c-sharp-regex-for-guid
         static bool IsValidGUID(string text)
         {
             return Guid.TryParse(text, out _);
+        }
+
+        // 判断是否手机号
+        // https://www.jianshu.com/p/37cb110604fb
+        public static bool IsMobilePhone(string input)
+        {
+            Regex regex = new Regex("^1[34578]\\d{9}$");
+            return regex.IsMatch(input);
         }
 
         // 获得 transform 属性
@@ -541,6 +556,12 @@ namespace DigitalPlatform.LibraryServer.Common
                 if (range.Name.ToLower() == "guid")
                 {
                     if (IsValidGUID(barcode))
+                        return true;
+                }
+
+                if (range.Name.ToLower() == "mpn")
+                {
+                    if (IsMobilePhone(barcode))
                         return true;
                 }
             }
