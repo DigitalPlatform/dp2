@@ -2827,6 +2827,16 @@ Stack:
             }
         }
 
+        static void ChangeDatabaseActionState(int id, string state)
+        {
+            using (var context = new MyContext())
+            {
+                var item = context.Requests.FirstOrDefault(o => o.ID == id);
+                item.State = state;
+                context.SaveChanges();
+            }
+        }
+
         // 把 Actions 追加保存到本地数据库
         public static async Task SaveActionsToDatabase(List<ActionInfo> actions)
         {
@@ -2845,6 +2855,7 @@ Stack:
             catch (Exception ex)
             {
                 WpfClientInfo.WriteErrorLog($"SaveActionsToDatabase() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                throw ex;
             }
         }
 
@@ -2862,6 +2873,7 @@ Stack:
                 action.Location = request.Location;
                 action.CurrentShelfNo = request.CurrentShelfNo;
                 action.BatchNo = request.BatchNo;
+                action.ID = request.ID;
 
                 actions.Add(action);
             }
@@ -2961,57 +2973,86 @@ Stack:
 
                         // TODO: 从本地数据库中装载需要同步的那些 Actions
                         List<ActionInfo> actions = LoadActionsFromDatabase();
-                        // 排序和分组。按照分组提交给 dp2library 服务器
-
-                        lock (_syncRoot_retryActions)
-                        {
-                            actions = new List<ActionInfo>(_retryActions);
-                        }
-
                         if (actions.Count == 0)
                             continue;
+
+                        // 排序和分组。按照分组提交给 dp2library 服务器
+                        var groups = GroupActions(actions);
+
+                        List<MessageItem> messages = new List<MessageItem>();
 
                         // 准备对话框
                         SubmitWindow progress = PageMenu.PageShelf?.OpenProgressWindow();
 
-                        var result = SubmitCheckInOut(
-                        (min, max, value, text) =>
+                        foreach (var group in groups)
                         {
-                            if (progress != null)
+                            var result = SubmitCheckInOut(
+                            (min, max, value, text) =>
                             {
-                                Application.Current.Dispatcher.Invoke(new Action(() =>
+                                if (progress != null)
                                 {
-                                    if (min == -1 && max == -1 && value == -1)
-                                        progress.ProgressBar.Visibility = Visibility.Collapsed;
-                                    else
-                                        progress.ProgressBar.Visibility = Visibility.Visible;
+                                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                                    {
+                                        if (min == -1 && max == -1 && value == -1)
+                                            progress.ProgressBar.Visibility = Visibility.Collapsed;
+                                        else
+                                            progress.ProgressBar.Visibility = Visibility.Visible;
 
-                                    if (text != null)
-                                        progress.TitleText = text;
+                                        if (text != null)
+                                            progress.TitleText = text;
 
-                                    if (min != -1)
-                                        progress.ProgressBar.Minimum = min;
-                                    if (max != -1)
-                                        progress.ProgressBar.Maximum = max;
-                                    if (value != -1)
-                                        progress.ProgressBar.Value = value;
-                                }));
+                                        if (min != -1)
+                                            progress.ProgressBar.Minimum = min;
+                                        if (max != -1)
+                                            progress.ProgressBar.Maximum = max;
+                                        if (value != -1)
+                                            progress.ProgressBar.Value = value;
+                                    }));
+                                }
+                            },
+                            group);
+
+                            // TODO: 把 group 中报错的信息写入本地数据库的对应事项中
+
+                            // 把已经处理成功的 Action 对应在本地数据库中的事项的状态修改
+                            List<ActionInfo> processed = new List<ActionInfo>();
+                            if (result.RetryActions != null)
+                            {
+                                foreach (var action in group)
+                                {
+                                    if (result.RetryActions.IndexOf(action) == -1)
+                                    {
+                                        ChangeDatabaseActionState(action.ID, "sync");
+                                        processed.Add(action);
+                                    }
+                                }
                             }
-                        },
-                        actions);
+
+                            if (result.MessageDocument != null)
+                                messages.AddRange(result.MessageDocument.Items);
+                        }
 
                         // 将 submit 情况写入日志备查
-                        WpfClientInfo.WriteInfoLog($"重试提交请求:\r\n{ActionInfo.ToString(actions)}\r\n返回结果:{result.ToString()}");
+                        // WpfClientInfo.WriteInfoLog($"重试提交请求:\r\n{ActionInfo.ToString(actions)}\r\n返回结果:{result.ToString()}");
 
-                        List<ActionInfo> processed = new List<ActionInfo>();
-                        if (result.RetryActions != null)
+                        // 把执行结果显示到对话框内
+                        // 全部事项都重试失败的时候不需要显示
+                        if (progress != null)
                         {
-                            foreach (var action in actions)
+                            Application.Current.Dispatcher.Invoke(new Action(() =>
                             {
-                                if (result.RetryActions.IndexOf(action) == -1)
-                                    processed.Add(action);
-                            }
+                                MessageDocument doc = new MessageDocument();
+                                doc.AddRange(messages);
+                                progress?.PushContent(doc);
+                            }));
+
+                            // 显示出来
+                            Application.Current.Dispatcher.Invoke(new Action(() =>
+                            {
+                                progress?.ShowContent();
+                            }));
                         }
+#if NO
 
                         // TODO: 保存到数据库。这样不怕中途断电或者异常退出
 
@@ -3046,6 +3087,8 @@ Stack:
                                 progress?.ShowContent();
                             }));
                         }
+
+#endif
                     }
                     _retryTask = null;
 
@@ -3062,6 +3105,36 @@ Stack:
 token,
 TaskCreationOptions.LongRunning,
 TaskScheduler.Default);
+        }
+
+        // 对 Actions 按照 PII 进行分组
+        static List<List<ActionInfo>> GroupActions(List<ActionInfo> actions)
+        {
+            // 按照 PII 分装
+            // PII --> List<ActionInfo>
+            Hashtable table = new Hashtable();
+            foreach (var action in actions)
+            {
+                List<ActionInfo> list = table[action.Entity.PII] as List<ActionInfo>;
+                if (list == null)
+                {
+                    list = new List<ActionInfo>();
+                    table[action.Entity.PII] = list;
+                }
+                list.Add(action);
+            }
+
+            return new List<List<ActionInfo>>(table.Values.Cast<List<ActionInfo>>());
+
+            /*
+            List<List<ActionInfo>> results = new List<List<ActionInfo>>();
+            foreach(var key in table.Keys)
+            {
+                results.Add(table[key] as List<ActionInfo>);
+            }
+
+            return results;
+            */
         }
 
 #if NO
@@ -3308,7 +3381,7 @@ TaskScheduler.Default);
 #endif
 
 #if REMOVED
-#region 门命令延迟执行
+        #region 门命令延迟执行
 
         // 门命令(延迟执行)队列。开门时放一个命令进入队列。等得到门开信号的时候再取出这个命令
         static List<CommandItem> _commandQueue = new List<CommandItem>();
@@ -3398,7 +3471,7 @@ TaskScheduler.Default);
         }
 
 
-#endregion
+        #endregion
 #endif
     }
 
@@ -3455,6 +3528,7 @@ TaskScheduler.Default);
         public string LastErrorInfo { get; set; }   // 最近一次出错的信息
         public string RetryType { get; set; }   // 重试类型 communication/other
         public int RetryCount { get; set; } // 已经进行过的重试次数
+        public int ID { get; set; } // 日志数据库中对应的记录 ID
 
         public override string ToString()
         {

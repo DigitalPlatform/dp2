@@ -27,6 +27,11 @@ namespace dp2SSL
             _items.Add(item);
         }
 
+        public void AddRange(List<MessageItem> items)
+        {
+            _items.AddRange(items);
+        }
+
         public void Remove(MessageItem item)
         {
             _items.Remove(item);
