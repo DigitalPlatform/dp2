@@ -2467,8 +2467,9 @@ namespace DigitalPlatform.LibraryServer
                 try
                 {
                     this._mongoClient = new MongoClient(this.MongoDbConnStr);
-                    var server = this._mongoClient.GetServer();
-                    server.Connect();
+                    // TODO: 如何检测连接是否出错?
+                    //var server = this._mongoClient.GetServer();
+                    //server.Connect();
                 }
                 catch (Exception ex)
                 {

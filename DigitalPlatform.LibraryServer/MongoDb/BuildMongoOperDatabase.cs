@@ -343,7 +343,6 @@ namespace DigitalPlatform.LibraryServer
 
                 SetProgressText(strFileName + " 记录" + (lIndex + 1).ToString());
 
-                long lAttachmentLength = 0;
                 // 获得一个日志记录
                 // parameters:
                 //      strFileName 纯文件名,不含路径部分
@@ -363,7 +362,7 @@ namespace DigitalPlatform.LibraryServer
                     "", // strFilter
                     out lHintNext,
                     out strXml,
-                    out lAttachmentLength, // attachment,
+                    out long lAttachmentLength, // attachment,
                     out strError);
                 if (nRet == -1)
                 {

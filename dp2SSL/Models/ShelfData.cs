@@ -1179,12 +1179,14 @@ namespace dp2SSL
         public class InitialShelfResult : NormalResult
         {
             public List<string> Warnings { get; set; }
+            public List<Entity> All { get; set; }
         }
 
         // 首次初始化智能书柜所需的标签相关数据结构
         // 初始化开始前，要先把 RfidManager.ReaderNameList 设置为 "*"
         // 初始化完成前，先不要允许(开关门变化导致)修改 RfidManager.ReaderNameList
         public static async Task<InitialShelfResult> newVersion_InitialShelfEntities(
+            List<DoorItem> doors_param,
             Delegate_displayText func_display,
             Delegate_cancelled func_cancelled)
         {
@@ -1194,7 +1196,7 @@ namespace dp2SSL
 
             // 一个一个门地填充图书信息
             int i = 0;
-            foreach (var door in Doors)
+            foreach (var door in doors_param)
             {
                 if (func_cancelled() == true)
                     return new InitialShelfResult();
@@ -1221,7 +1223,8 @@ namespace dp2SSL
 
             lock (_syncRoot_all)
             {
-                _all.Clear();
+                // _all.Clear();
+                List<Entity> all = new List<Entity>();
 
                 var books = TagList.Books;
                 WpfClientInfo.WriteErrorLog($"books count={books.Count}, ReaderNameList={RfidManager.ReaderNameList}(注：此时门应该都是关闭的，图书读卡器应该是停止盘点状态)");
@@ -1249,7 +1252,7 @@ namespace dp2SSL
 
                         func_display($"正在填充图书队列 ({entity.PII})...");
 
-                        _all.Add(entity);
+                        all.Add(entity);
                     }
                     catch (TagDataException ex)
                     {
@@ -1257,38 +1260,16 @@ namespace dp2SSL
                         WpfClientInfo.WriteErrorLog($"InitialShelfEntities() 遇到 tag (UID={tag.OneTag?.UID}) 数据格式出错：{ex.Message}\r\ntag 详情：{tag.ToString()}");
                     }
                 }
-
             }
-
-            /*
-            {
-                WpfClientInfo.WriteInfoLog("等待锁控就绪");
-                func_display("等待锁控就绪 ...");
-                // 恢复 Base2 线程运行
-                // RfidManager.Pause2 = false;
-                bool ret = await Task.Run(() =>
-                {
-                    while (true)
-                    {
-                        if (OpeningDoorCount != -1)
-                            return true;
-                        if (func_cancelled() == true)
-                            return false;
-                        Thread.Sleep(100);
-                    }
-                });
-
-                if (ret == false)
-                    return new InitialShelfResult();
-            }
-            */
 
             // DoorItem.DisplayCount(_all, _adds, _removes, App.CurrentApp.Doors);
+            // TODO: 只刷新指定门的数字即可
             RefreshCount();
 
             // TryReturn(progress, _all);
             _firstInitial = true;   // 第一次初始化已经完成
 
+            /* 这一段可以在函数返回后做
             func_display("获取图书册记录信息 ...");
 
             var task = Task.Run(async () =>
@@ -1298,6 +1279,7 @@ namespace dp2SSL
                 await FillBookFields(Adds, token);
                 await FillBookFields(Removes, token);
             });
+            */
 
             return new InitialShelfResult { Warnings = warnings };
         }
