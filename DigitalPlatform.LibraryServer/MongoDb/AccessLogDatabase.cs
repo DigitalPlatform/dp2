@@ -3,16 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml;
+using System.Threading;
 
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
-using MongoDB.Driver.Builders;
+// using MongoDB.Driver.Builders;
 
 using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
-using System.Threading;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -22,7 +22,7 @@ namespace DigitalPlatform.LibraryServer
 
         string _logDatabaseName = "";
 
-        MongoCollection<AccessLogItem> _logCollection = null;
+        IMongoCollection<AccessLogItem> _logCollection = null;
 
         DailyItemCount _itemCount = null;
 
@@ -61,14 +61,17 @@ namespace DigitalPlatform.LibraryServer
             }
 #endif
 
-            var server = client.GetServer();
+            // var server = client.GetServer();
 
             {
-                var db = server.GetDatabase(this._logDatabaseName);
+                // var db = server.GetDatabase(this._logDatabaseName);
+                var db = client.GetDatabase(this._logDatabaseName);
 
                 _logCollection = db.GetCollection<AccessLogItem>("accessLog");
                 // _logCollection.DropAllIndexes();
-                if (_logCollection.GetIndexes().Count == 0)
+
+                // if (_logCollection.GetIndexes().Count == 0)
+                if (_logCollection.Indexes.List().ToList().Count == 0)
                 {
 #if NO
                     _logCollection.CreateIndex(new IndexKeysBuilder().Ascending("OperTime"),
@@ -86,9 +89,22 @@ namespace DigitalPlatform.LibraryServer
 
         public void CreateIndex()
         {
+
+            {
+                var indexModel = new CreateIndexModel<AccessLogItem>(
+        Builders<AccessLogItem>.IndexKeys.Ascending(_ => _.OperTime),
+        new CreateIndexOptions() { Unique = false });
+                _logCollection.Indexes.CreateOne(indexModel);
+            }
+        }
+
+#if OLD
+        public void CreateIndex()
+        {
             _logCollection.CreateIndex(new IndexKeysBuilder().Ascending("OperTime"),
     IndexOptions.SetUnique(false));
         }
+#endif
 
         // 清除集合内的全部内容
         public int Clear(out string strError)
@@ -101,7 +117,8 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
-            WriteConcernResult result = _logCollection.RemoveAll();
+            // WriteConcernResult result = _logCollection.RemoveAll();
+            var result = _logCollection.DeleteMany(Builders<AccessLogItem>.Filter.Empty);    //  RemoveAll();
             CreateIndex();
             return 0;
         }
@@ -112,7 +129,7 @@ namespace DigitalPlatform.LibraryServer
             return DateTimeUtil.DateTimeToString8(DateTime.Now);
         }
 
-        public MongoCollection<AccessLogItem> LogCollection
+        public IMongoCollection<AccessLogItem> LogCollection
         {
             get
             {
@@ -160,6 +177,7 @@ namespace DigitalPlatform.LibraryServer
             return true;
         }
 #endif
+
         public bool Add(string operation,
     string path,
     long size,
@@ -188,7 +206,7 @@ namespace DigitalPlatform.LibraryServer
         public bool Add(AccessLogItem item,
             long maxItemCount)
         {
-            MongoCollection<AccessLogItem> collection = this.LogCollection;
+            IMongoCollection<AccessLogItem> collection = this.LogCollection;
             if (collection == null)
                 return false;
 
@@ -203,7 +221,7 @@ namespace DigitalPlatform.LibraryServer
                 }
             }
 
-            collection.Insert(item);
+            collection.InsertOne(item);
             return true;
         }
 
@@ -244,6 +262,22 @@ namespace DigitalPlatform.LibraryServer
 
         public IEnumerable<AccessLogItem> Find(string date, int start)
         {
+            IMongoCollection<AccessLogItem> collection = this.LogCollection;
+            if (collection == null)
+                return null;
+
+            DateTime start_time = DateTimeUtil.Long8ToDateTime(date);
+            DateTime end_time = start_time.AddDays(1);
+
+            var query = Builders<AccessLogItem>.Filter.And(
+                Builders<AccessLogItem>.Filter.Gte("OperTime", start_time),
+                Builders<AccessLogItem>.Filter.Lt("OperTime", end_time));
+            return collection.Find(query).Skip(start).ToEnumerable();
+        }
+
+#if OLD
+        public IEnumerable<AccessLogItem> Find(string date, int start)
+        {
             MongoCollection<AccessLogItem> collection = this.LogCollection;
             if (collection == null)
                 return null;
@@ -256,6 +290,51 @@ namespace DigitalPlatform.LibraryServer
             return collection.Find(query).Skip(start);
         }
 
+#endif
+        // 获得一个日期的事项个数
+        // return:
+        //      -1  集合不存在
+        //      >=0 数量
+        public long GetItemCount(string date)
+        {
+            IMongoCollection<AccessLogItem> collection = this.LogCollection;
+            if (collection == null)
+                return -1;
+
+            DateTime start_time = DateTimeUtil.Long8ToDateTime(date);
+            DateTime end_time = start_time.AddDays(1);
+
+            var query = Builders<AccessLogItem>.Filter.And(
+                Builders<AccessLogItem>.Filter.Gte("OperTime", start_time),
+                Builders<AccessLogItem>.Filter.Lt("OperTime", end_time));
+
+            return collection.CountDocuments(query);
+
+            /*
+            // var keyFunction = (BsonJavaScript)@"{}";
+            var keyFunction = (BsonJavaScript)@"function(doc) {
+return { None : '' };
+}"; // mongodb v3.4
+
+            var document = new BsonDocument("count", 0);
+            var result = collection.Group(
+                query,
+                keyFunction,
+                document,
+                new BsonJavaScript("function(doc, out){ out.count++; }"),
+                null
+            ).ToArray();
+
+            foreach (BsonDocument doc in result)
+            {
+                return doc.GetValue("count", 0).ToInt32();
+            }
+
+            return 0;
+            */
+        }
+
+#if OLD
         // 获得一个日期的事项个数
         // return:
         //      -1  集合不存在
@@ -293,6 +372,7 @@ return { None : '' };
 
             return 0;
         }
+#endif
 
         public class ValueCount
         {
@@ -300,13 +380,88 @@ return { None : '' };
             public int Count = 0;
         }
 
+        
+
         // parameters:
         //      max 返回最多多少个元素。如果为 -1，表示不限制
         //      hit_count   返回命中总数。是命中的整个集合的数量，除去 start 以后的值
-        public List<ValueCount> ListDates(int start, int max, out int hit_count)
+        public List<ValueCount> ListDates(int start,
+            int max,
+            out int hit_count)
         {
             hit_count = 0;
-            MongoCollection<AccessLogItem> collection = this.LogCollection;
+            IMongoCollection<AccessLogItem> collection = this.LogCollection;
+            if (collection == null)
+                return null;
+
+            // https://stackoverflow.com/questions/55124152/aggregate-substr-in-mongodb-c-sharp-driver
+            // TODO: 注意测试一下
+            var myresults = collection.Aggregate()
+    .Group(central => DateTimeUtil.DateTimeToString8(central.OperTime), 
+    g => new { Id = g.Key, Count = g.Count() })
+    .Skip(start)
+    .ToList();
+
+            hit_count = myresults.Count;
+            List<ValueCount> values = new List<ValueCount>();
+            int nCount = 0;
+            foreach (var doc in myresults)
+            {
+                ValueCount item = new ValueCount();
+                item.Value = doc.Id.ToString().Replace("-", "");
+                item.Count = doc.Count;
+                values.Add(item);
+                nCount++;
+                if (max != -1 && nCount >= max)
+                    break;
+            }
+
+            return values;
+
+            /*
+            var document = new BsonDocument("count", 0);
+            var keyFunction = (BsonJavaScript)@"function(doc) {
+        var date = new Date(doc.OperTime);
+        var dateKey = date.toISOString().slice(0, 10);
+        return {'day':dateKey};
+    }";
+            //         var dateKey = date.getFullYear()+'|'+(date.getMonth()+1)+'|'+date.getDate();
+            var result = collection.Group(
+                Query.Null,
+                keyFunction,
+                document,
+                new BsonJavaScript("function(doc, out){ out.count++; }"),
+                null
+            ).Skip<BsonDocument>(start);
+
+            List<ValueCount> values = new List<ValueCount>();
+            int nCount = 0;
+            foreach (BsonDocument doc in result)
+            {
+                ValueCount item = new ValueCount();
+                item.Value = doc.GetValue("day", "").ToString().Replace("-", "");
+                item.Count = doc.GetValue("count", 0).ToInt32();
+                values.Add(item);
+                nCount++;
+                if (max != -1 && nCount >= max)
+                    break;
+            }
+
+            hit_count = result.Count<BsonDocument>();
+            return values;
+            */
+        }
+
+#if OLD
+        // parameters:
+        //      max 返回最多多少个元素。如果为 -1，表示不限制
+        //      hit_count   返回命中总数。是命中的整个集合的数量，除去 start 以后的值
+        public List<ValueCount> ListDates(int start, 
+            int max,
+            out int hit_count)
+        {
+            hit_count = 0;
+            IMongoCollection<AccessLogItem> collection = this.LogCollection;
             if (collection == null)
                 return null;
 
@@ -352,6 +507,7 @@ return { None : '' };
             hit_count = result.Count<BsonDocument>();
             return values;
         }
+#endif
 
         static string GetXml(AccessLogItem item)
         {
@@ -643,7 +799,7 @@ return { None : '' };
         }
 
         public void SetValue(string name,
-            string strDate, 
+            string strDate,
             long lValue)
         {
             DailyItemCount item = GetItem(name);

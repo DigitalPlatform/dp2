@@ -14,7 +14,7 @@ namespace DigitalPlatform.LibraryServer
     public class MongoDatabase<T>
     {
         internal string _databaseName = ""; // 数据库名。实际上要加上 prefix 部分才构成真正使用的数据库名
-        internal MongoCollection<T> _collection = null;
+        internal IMongoCollection<T> _collection = null;    // 旧版本这里是 MongoCollection
         internal string _collectionName = "collection";
 
         // 数据库是否已经启用
@@ -58,13 +58,15 @@ namespace DigitalPlatform.LibraryServer
 
             string databaseName = strInstancePrefix + this._databaseName;
 
-            var server = client.GetServer();
+            // var server = client.GetServer();
 
             {
-                var db = server.GetDatabase(databaseName);
+                // var db = server.GetDatabase(databaseName);
+                var db = client.GetDatabase(databaseName);
 
                 this._collection = db.GetCollection<T>(_collectionName);
-                if (this._collection.GetIndexes().Count == 0)
+                // if (this._collection.GetIndexes().Count == 0)
+                if (this._collection.Indexes.List().ToList().Count == 0)
                     CreateIndex();
             }
 
@@ -87,7 +89,8 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
-            WriteConcernResult result = _collection.RemoveAll();
+            // WriteConcernResult result = _collection.RemoveAll();
+            var result = _collection.DeleteMany(FilterDefinition<T>.Empty);
             CreateIndex();
             return 0;
         }

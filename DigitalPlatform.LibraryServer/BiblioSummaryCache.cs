@@ -3,7 +3,7 @@
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
-using MongoDB.Driver.Builders;
+// using MongoDB.Driver.Builders;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -78,13 +78,15 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
-            var server = this._mongoClient.GetServer();
+            // var server = this._mongoClient.GetServer();
 
             {
-                var db = server.GetDatabase(this._summaryDbName);
+                // var db = server.GetDatabase(this._summaryDbName);
+                var db = this._mongoClient.GetDatabase(this._summaryDbName);
 
                 this._summaryCollection = db.GetCollection<SummaryItem>("summary");
-                if (_summaryCollection.GetIndexes().Count == 0)
+                // if (_summaryCollection.GetIndexes().Count == 0)
+                if (_summaryCollection.Indexes.List().ToList().Count == 0)
                 {
                     //_summaryCollection.CreateIndex(new IndexKeysBuilder().Ascending("BiblioRecPath"),
                     //    IndexOptions.SetUnique(true));
@@ -94,9 +96,9 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
-        MongoCollection<SummaryItem> _summaryCollection = null;
+        IMongoCollection<SummaryItem> _summaryCollection = null;
 
-        public MongoCollection<SummaryItem> SummaryCollection
+        public IMongoCollection<SummaryItem> SummaryCollection
         {
             get
             {
@@ -107,70 +109,106 @@ namespace DigitalPlatform.LibraryServer
         // 设置书目摘要
         public void SetBiblioSummary(string strBiblioRecPath, string strSummary, string strImageFragment)
         {
-            MongoCollection<SummaryItem> collection = this.SummaryCollection;
+            IMongoCollection<SummaryItem> collection = this.SummaryCollection;
             if (collection == null)
                 return;
 
+            /*
             var query = new QueryDocument("BiblioRecPath", strBiblioRecPath);
-            var update = Update.SetOnInsert("BiblioRecPath", strBiblioRecPath).Set("Summary", strSummary).Set("ImageFragment", strImageFragment);
+            var update = Update.SetOnInsert("BiblioRecPath", strBiblioRecPath)
+            .Set("Summary", strSummary)
+            .Set("ImageFragment", strImageFragment);
             collection.Update(
     query,
     update,
     UpdateFlags.Upsert);
+    */
+            var updateDef = Builders<SummaryItem>.Update
+                .SetOnInsert(_ => _.BiblioRecPath, strBiblioRecPath)
+                .Set(_ => _.Summary, strSummary)
+                .Set(_ => _.ImageFragment, strImageFragment);
+
+            collection.UpdateOne(
+                o => o.BiblioRecPath == strBiblioRecPath,
+                updateDef,
+                new UpdateOptions { IsUpsert = true });
+
         }
 
         // 删除书目摘要
         public void DeleteBiblioSummary(string strBiblioRecPath)
         {
-            MongoCollection<SummaryItem> collection = this.SummaryCollection;
+            IMongoCollection<SummaryItem> collection = this.SummaryCollection;
             if (collection == null)
                 return;
 
+            collection.FindOneAndDelete(_ => _.BiblioRecPath == strBiblioRecPath);
+            /*
             var query = new QueryDocument("BiblioRecPath", strBiblioRecPath);
-            collection.Remove(
-    query);
+            collection.Remove(query);
+            */
         }
 
         // 删除书目摘要
         public void DeleteBiblioSummaryByDbName(string strBiblioDbName)
         {
-            MongoCollection<SummaryItem> collection = this.SummaryCollection;
+            IMongoCollection<SummaryItem> collection = this.SummaryCollection;
             if (collection == null)
                 return;
 
+            collection.FindOneAndDelete(_ => _.BiblioRecPath.StartsWith(strBiblioDbName + "/"));
+
+            /*
             var query = Query.Matches("BiblioRecPath", new BsonRegularExpression("^" + strBiblioDbName + "/\\d+"));
             collection.Remove(query);
+            */
         }
 
         // 获得书目摘要
         public SummaryItem GetBiblioSummary(string strBiblioRecPath)
         {
-            MongoCollection<SummaryItem> collection = this.SummaryCollection;
+            IMongoCollection<SummaryItem> collection = this.SummaryCollection;
             if (collection == null)
                 return null;
 
+            return collection.Find(_ => _.BiblioRecPath == strBiblioRecPath).FirstOrDefault();
+
+            /*
             var query = new QueryDocument("BiblioRecPath", strBiblioRecPath);
 
             return collection.FindOne(query);
+            */
         }
 
         // 清除集合内的全部内容
         public void ClearBiblioSummaryDb()
         {
-            MongoCollection<SummaryItem> collection = this.SummaryCollection;
+            IMongoCollection<SummaryItem> collection = this.SummaryCollection;
             if (collection == null)
                 return;
 
-            WriteConcernResult result = collection.RemoveAll();
-
+            // WriteConcernResult result = collection.RemoveAll();
+            var result = collection.DeleteMany(FilterDefinition<SummaryItem>.Empty);
             CreateBiblioSummaryIndex();
         }
 
         public void CreateBiblioSummaryIndex()
         {
+            {
+                var indexModel = new CreateIndexModel<SummaryItem>(
+        Builders<SummaryItem>.IndexKeys.Ascending(_ => _.BiblioRecPath),
+        new CreateIndexOptions() { Unique = true });
+                _summaryCollection.Indexes.CreateOne(indexModel);
+            }
+        }
+
+#if OLD
+        public void CreateBiblioSummaryIndex()
+        {
             _summaryCollection.CreateIndex(new IndexKeysBuilder().Ascending("BiblioRecPath"),
     IndexOptions.SetUnique(true));
         }
+#endif
     }
 
     // 书目摘要对象

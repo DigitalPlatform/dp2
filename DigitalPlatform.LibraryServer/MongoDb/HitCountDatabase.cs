@@ -6,7 +6,7 @@ using System.Text;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
-using MongoDB.Driver.Builders;
+// using MongoDB.Driver.Builders;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -18,7 +18,7 @@ namespace DigitalPlatform.LibraryServer
         // MongoClient m_mongoClient = null;
 
         string m_strHitCountDatabaseName = "";
-        MongoCollection<HitCountItem> _hitCountCollection = null;
+        IMongoCollection<HitCountItem> _hitCountCollection = null;
 
         // 初始化
         // parameters:
@@ -55,13 +55,15 @@ namespace DigitalPlatform.LibraryServer
             }
 #endif
 
-            var server = client.GetServer();
+            // var server = client.GetServer();
 
             {
-                var db = server.GetDatabase(this.m_strHitCountDatabaseName);
+                // var db = server.GetDatabase(this.m_strHitCountDatabaseName);
+                var db = client.GetDatabase(this.m_strHitCountDatabaseName);
 
                 _hitCountCollection = db.GetCollection<HitCountItem>("hitcount");
-                if (_hitCountCollection.GetIndexes().Count == 0)
+                // if (_hitCountCollection.GetIndexes().Count == 0)
+                if (_hitCountCollection.Indexes.List().ToList().Count == 0)
                     CreateIndex();
             }
 
@@ -70,10 +72,22 @@ namespace DigitalPlatform.LibraryServer
 
         public void CreateIndex()
         {
+
+            {
+                var indexModel = new CreateIndexModel<HitCountItem>(
+        Builders<HitCountItem>.IndexKeys.Ascending(_ => _.URL),
+        new CreateIndexOptions() { Unique = false });
+                _hitCountCollection.Indexes.CreateOne(indexModel);
+            }
+        }
+
+#if OLD
+        public void CreateIndex()
+        {
             _hitCountCollection.CreateIndex(new IndexKeysBuilder().Ascending("URL"),
                 IndexOptions.SetUnique(true));
         }
-
+#endif
         // 清除集合内的全部内容
         public int Clear(out string strError)
         {
@@ -85,12 +99,13 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
-            WriteConcernResult result = _hitCountCollection.RemoveAll();
+            // WriteConcernResult result = _hitCountCollection.RemoveAll();
+            var result = _hitCountCollection.DeleteMany(Builders<HitCountItem>.Filter.Empty);    //  RemoveAll();
             CreateIndex();
             return 0;
         }
 
-        public MongoCollection<HitCountItem> HitCountCollection
+        public IMongoCollection<HitCountItem> HitCountCollection
         {
             get
             {
@@ -104,7 +119,27 @@ namespace DigitalPlatform.LibraryServer
         //      true    成功
         public bool IncHitCount(string strURL)
         {
-            MongoCollection<HitCountItem> collection = this.HitCountCollection;
+            IMongoCollection<HitCountItem> collection = this.HitCountCollection;
+            if (collection == null)
+                return false;
+
+            var updateDef = Builders<HitCountItem>.Update.Inc(o => o.HitCount, 1);
+
+            collection.UpdateOne(
+                o => o.URL == strURL,
+                updateDef, 
+                new UpdateOptions { IsUpsert = true });
+            return true;
+        }
+
+#if OLD
+        // 增加一次访问计数
+        // return:
+        //      false   没有成功。通常因为 mongodb 无法打开等原因
+        //      true    成功
+        public bool IncHitCount(string strURL)
+        {
+            IMongoCollection<HitCountItem> collection = this.HitCountCollection;
             if (collection == null)
                 return false;
 
@@ -116,19 +151,28 @@ namespace DigitalPlatform.LibraryServer
     UpdateFlags.Upsert);
             return true;
         }
+#endif
 
         public long GetHitCount(string strURL)
         {
-            MongoCollection<HitCountItem> collection = this.HitCountCollection;
+            IMongoCollection<HitCountItem> collection = this.HitCountCollection;
             if (collection == null)
                 return -1;
 
+            var item = collection.Find(Builders<HitCountItem>.Filter.Eq("URL", strURL))
+                .FirstOrDefault();
+            if (item == null)
+                return 0;
+            return item.HitCount;
+
+            /*
             var query = new QueryDocument("URL", strURL);
 
             var item = collection.FindOne(query);
             if (item == null)
                 return 0;
             return item.HitCount;
+            */
         }
 
     }
