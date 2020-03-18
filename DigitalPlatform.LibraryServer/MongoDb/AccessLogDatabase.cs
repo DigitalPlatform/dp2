@@ -674,14 +674,22 @@ return { None : '' };
             if (collection == null)
                 return 0;
             List<OperLogInfo> infos = new List<OperLogInfo>();
-            foreach (AccessLogItem item in collection)
             {
-                OperLogInfo info = new OperLogInfo();
-                info.AttachmentLength = 0;
-                info.HintNext = 0;
-                info.Index = lIndex++;
-                info.Xml = GetXml(item);
-                infos.Add(info);
+                int i = 0;
+                foreach (AccessLogItem item in collection)
+                {
+                    // 2020/3/19
+                    // 限制每次返回的最大数量
+                    if ((nCount != -1 && i >= nCount) || i > 100)
+                        break;
+                    OperLogInfo info = new OperLogInfo();
+                    info.AttachmentLength = 0;
+                    info.HintNext = 0;
+                    info.Index = lIndex++;
+                    info.Xml = GetXml(item);
+                    infos.Add(info);
+                    i++;
+                }
             }
             if (infos.Count == 0)
                 return 2;
