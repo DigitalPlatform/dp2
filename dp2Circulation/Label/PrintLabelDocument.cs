@@ -594,12 +594,20 @@ namespace dp2Circulation
                 (double)(nPageHeight - PageMargins.Top - PageMargins.Bottom)
                 / (double)label_param.LabelHeight
                 );
+            // 2020/3/19
+            // 调整一下，确保至少可以显示一行标签
+            // TODO: 这里发生调整后，是否可以显示特殊的颜色表示标签实际上放不下、溢出了？
+            if (nYCount == 0)
+                nYCount = 1;
+
             // 水平方向的个数
             nXCount = (int)
                 (
                 (double)(nPageWidth - PageMargins.Left - PageMargins.Right)
                 / (double)label_param.LabelWidth
                 );
+            if (nXCount == 0)
+                nXCount = 1;
 
             // int current_offset = 0;
             // _copyCache.Clear();
