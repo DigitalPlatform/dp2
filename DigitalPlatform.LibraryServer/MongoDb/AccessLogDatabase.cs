@@ -380,7 +380,7 @@ return { None : '' };
             public int Count = 0;
         }
 
-        
+
 
         // parameters:
         //      max 返回最多多少个元素。如果为 -1，表示不限制
@@ -396,11 +396,19 @@ return { None : '' };
 
             // https://stackoverflow.com/questions/55124152/aggregate-substr-in-mongodb-c-sharp-driver
             // TODO: 注意测试一下
+            /*
             var myresults = collection.Aggregate()
     .Group(central => DateTimeUtil.DateTimeToString8(central.OperTime), 
     g => new { Id = g.Key, Count = g.Count() })
     .Skip(start)
     .ToList();
+    */
+            var myresults = collection.Aggregate()
+.Group(central => central.OperTime.ToString().Substring(0, 10),  // "yyyyMMdd"
+g => new { Id = g.Key, Count = g.Count() })
+.SortBy(o => o.Id)
+.Skip(start)
+.ToList();
 
             hit_count = myresults.Count;
             List<ValueCount> values = new List<ValueCount>();

@@ -807,6 +807,17 @@ Environment.GetFolderPath(Environment.SpecialFolder.System),
             // 使用这个 AppPool
             lines.Add("set app \"" + strSiteName + strVirtualDirPath + "\" /applicationPool:dp2OPAC");
 
+            // 设置默认起始页面
+            // lines.Add($"set config \"{strSiteName + strVirtualDirPath}\" / section:defaultDocument / +files.[value='searchbiblio.aspx']");
+            
+            // 2020/3/19
+            // https://docs.microsoft.com/en-us/iis/configuration/system.webserver/defaultdocument/
+            lines.Add($"set config \"{strSiteName + strVirtualDirPath}\" /section:defaultDocument /enabled:true /+files.[value='searchbiblio.aspx']");
+
+            // 2020/3/19
+            // 解除对 web.config 中 handlers 的锁定
+            // lines.Add("unlock config -section:system.webServer/handlers");
+
             // parameters:
             //      lines   若干行参数。每行执行一次
             // return:

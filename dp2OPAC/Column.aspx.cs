@@ -81,7 +81,6 @@ ref sessioninfo) == false)
 
         string strTitle = (string)this.GetLocalResourceObject("最新书评");
         this.ColumnControl1.Title = strTitle;
-
     }
 
     protected void Button_createColumnStorage_Click(object sender, EventArgs e)
