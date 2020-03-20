@@ -3,15 +3,16 @@
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
-// using MongoDB.Driver.Builders;
 
 namespace DigitalPlatform.LibraryServer
 {
     /// <summary>
-    /// 本部分是书目缓存相关的代码
+    /// 本部分是书目摘要缓存相关的代码
+    /// 书目摘要被缓存在一个 mongodb 数据库里
     /// </summary>
     public partial class LibraryApplication
     {
+#if NO
         public MemoryCache BiblioSummaryCache = null;
 
         internal void InitialBiblioSummaryCache()
@@ -35,6 +36,7 @@ namespace DigitalPlatform.LibraryServer
                 this.BiblioSummaryCache.Remove(strItemRecPath);
             }
         }
+#endif
 
         public string MongoDbConnStr = "";
         public string MongoDbInstancePrefix = ""; // MongoDB 的实例字符串。用于区分不同的 dp2OPAC 实例在同一 MongoDB 实例中创建的数据库名，这个实例名被用作数据库名的前缀字符串
