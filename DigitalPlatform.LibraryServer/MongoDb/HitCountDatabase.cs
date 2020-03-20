@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Linq;
 
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
-// using MongoDB.Driver.Builders;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -15,8 +11,6 @@ namespace DigitalPlatform.LibraryServer
     /// </summary>
     public class HitCountDatabase
     {
-        // MongoClient m_mongoClient = null;
-
         string m_strHitCountDatabaseName = "";
         IMongoCollection<HitCountItem> _hitCountCollection = null;
 
@@ -76,7 +70,7 @@ namespace DigitalPlatform.LibraryServer
             {
                 var indexModel = new CreateIndexModel<HitCountItem>(
         Builders<HitCountItem>.IndexKeys.Ascending(_ => _.URL),
-        new CreateIndexOptions() { Unique = false });
+        new CreateIndexOptions() { Unique = true });
                 _hitCountCollection.Indexes.CreateOne(indexModel);
             }
         }

@@ -14434,9 +14434,7 @@ out strError);
             {
                 // TODO: 检查权限。至少 set 要求权限。读者身份不应该能进行此项操作。如果功能需要，可以用代理账户身份进行
 
-                string strBiblioRecPath = "";
-                string strUrl = "";
-                StringUtil.ParseTwoPart(strName, "|", out strBiblioRecPath, out strUrl);
+                StringUtil.ParseTwoPart(strName, "|", out string strBiblioRecPath, out string strUrl);
 
                 if (strAction == "get")
                     Value = app.HitCountDatabase.GetHitCount(strUrl);   // 如果 mongodb 没有打开，则这里会返回 Value = -1，但 ErrorCode 没有错误码

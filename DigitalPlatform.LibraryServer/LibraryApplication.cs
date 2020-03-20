@@ -674,7 +674,7 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     this.InitialLoginCache();
-                    this.InitialBiblioSummaryCache();
+                    // this.InitialBiblioSummaryCache();
 
                     if (bReload == false)
                     {
