@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.25.*")]
-[assembly: AssemblyFileVersion("3.25.0.0")]
+[assembly: AssemblyVersion("3.26.*")]
+[assembly: AssemblyFileVersion("3.26.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -206,3 +206,4 @@ ItemCanReturn()
 //		3.23 (2020/2/25) GetRes() API 用于获得 dp2library 文件 MD5 信息的时候，可以使用 beginTask getTaskResult 等子功能，用轮询方式查看任务状态和获得结果。这可适应非常大的物理文件
 //		3.24 (2020/3/1) ListFile() API 以前版本有时会出现获取当日操作日志文件尺寸陈旧的问题。现已消除
 //		3.25 (2020/3/2) 超期通知批处理任务会自动给所有的读者记录加上 libraryCode 元素。SetReaderInfo() API 无论是 new 还是 change 动作都会自动给读者记录加上 libraryCode 元素
+//		3.26 (2020/3/20) 重构代码，使用 MongoDB.Driver 2.10.2。修正了 dp2OPAC 安装包中 opac_app.zip 缺大量子目录和文件的问题。

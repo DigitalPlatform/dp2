@@ -8,6 +8,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace DigitalPlatform.LibraryServer
 {
+#if REMOVED
     /// <summary>
     /// 存储“读过”动作信息的数据库
     /// </summary>
@@ -38,5 +39,5 @@ namespace DigitalPlatform.LibraryServer
         [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
         public DateTime OperTime { get; set; } // 操作时间
     }
-
+#endif
 }
