@@ -180,7 +180,10 @@ namespace dp2Circulation.Order
                     out string[] values,
                     out string strError);
                 if (nRet == -1)
+                {
                     MessageBox.Show(this, strError);
+                    return;
+                }
 
                 var list = new List<string>(values);
 
