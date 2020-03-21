@@ -31,6 +31,7 @@ namespace dp2OPAC
 
         protected void Application_Start(Object sender, EventArgs e)
         {
+            // 注册路由
             RegisterRoutes(RouteTable.Routes);
 
             OpacApplication app = null;
@@ -317,16 +318,17 @@ namespace dp2OPAC
 
         void RegisterRoutes(RouteCollection routes)
         {
+            // routes.MapPageRoute("default", "", "~/searchbiblio.aspx");
             routes.MapPageRoute("globalRoute3",
                 "stylenew/{style}/{filename}",
-                "~/css.aspx");
+                "~/css.aspx",true);
             // 2014/12/2
             routes.MapPageRoute("globalRoute2",
     "stylenew/{filename}",
-    "~/css.aspx");
+    "~/css.aspx",true);
             routes.MapPageRoute("libraryRoute4",
                 "stylenew/{librarycode}/{style}/{filename}",
-                "~/css.aspx");
+                "~/css.aspx",true);
         }
 
         #region Web Form Designer generated code

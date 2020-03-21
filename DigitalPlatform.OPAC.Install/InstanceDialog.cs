@@ -198,7 +198,7 @@ namespace DigitalPlatform.OPAC
 
         private void button_OK_Click(object sender, EventArgs e)
         {
-            string strError = "";
+            // string strError = "";
             // int nRet = 0;
 
 #if NO
@@ -284,15 +284,15 @@ namespace DigitalPlatform.OPAC
             strError = "";
             int nRet = 0;
 
-            List<OpacAppInfo> all_infos = null; // IIS 中的全部虚拟目录
+            // IIS 中的全部虚拟目录
             // 获得全部的虚拟目录信息，不光是 dp2OPAC 有关的
-            nRet = OpacAppInfo.GetAllVirtualInfoByAppCmd(out all_infos, out strError);
+            nRet = OpacAppInfo.GetAllVirtualInfoByAppCmd(out List<OpacAppInfo> all_infos, out strError);
             if (nRet == -1)
                 return -1;
 
-            List<OpacAppInfo> infos = null; // dp2OPAC 类型的全部虚拟目录
+            // dp2OPAC 类型的全部虚拟目录
             // 获得全部 dp2OPAC 有关的
-            nRet = OpacAppInfo.GetOpacInfoByAppCmd(out infos, out strError);
+            nRet = OpacAppInfo.GetOpacInfoByAppCmd(out List<OpacAppInfo> infos, out strError);
             if (nRet == -1)
                 return -1;
 
@@ -968,14 +968,13 @@ namespace DigitalPlatform.OPAC
         {
             Debug.Assert(String.IsNullOrEmpty(e.DataDir) == false, "");
 
-            string strError = "";
             LineInfo info = new LineInfo();
             // return:
             //      -1  error
             //      0   file not found
             //      1   succeed
             int nRet = info.Build(e.DataDir,
-                out strError);
+                out string strError);
             if (nRet == -1)
             {
                 e.ErrorInfo = strError;
@@ -1390,9 +1389,6 @@ namespace DigitalPlatform.OPAC
             dom.Save(strFilename);
             return 0;
         }
-
-
     }
-
 }
 

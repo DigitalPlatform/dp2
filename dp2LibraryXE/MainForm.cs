@@ -3777,10 +3777,14 @@ MessageBoxDefaultButton.Button2);
         {
             strError = "";
 
+            // 2020/3/21
+            // 是否要跳过 web.config 复制？
+            string strTargetWebConfigFileName = Path.Combine(this.UserDir, "opac_app\\web.config");
+            bool skip_webconfig = File.Exists(strTargetWebConfigFileName);
+
             string strZipFileName = Path.Combine(this.DataDir, "opac_app.zip");
 
-            string strOldTimestamp = "";
-            int nRet = _versionManager.GetFileVersion(Path.GetFileName(strZipFileName), out strOldTimestamp);
+            int nRet = _versionManager.GetFileVersion(Path.GetFileName(strZipFileName), out string strOldTimestamp);
             string strNewTimestamp = File.GetLastWriteTime(strZipFileName).ToString();
 
             if (bForce == true || CompareTimestamp(strOldTimestamp, strNewTimestamp) != 0)  // 2016/9/28 原来是 <
@@ -3807,7 +3811,8 @@ MessageBoxDefaultButton.Button2);
                     {
                         foreach (ZipEntry e in zip)
                         {
-                            if (e.FileName.ToLower() == "opac_app/web.config")
+                            if (skip_webconfig
+                                && e.FileName.ToLower() == "opac_app/web.config")
                                 continue;
 
                             AppendString(e.FileName + "\r\n");

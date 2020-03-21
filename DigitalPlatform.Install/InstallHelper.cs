@@ -738,7 +738,7 @@ out string strError)
             out string strError)
         {
             strError = "";
-            REDO_DELETE_DATADIR:
+        REDO_DELETE_DATADIR:
             try
             {
                 Directory.Delete(strDataDir, true);

@@ -1,6 +1,8 @@
 md opac_app
 cd opac_app
 
+xcopy ..\web.config /Y
+
 xcopy ..\..\dp2opac\craftmap craftmap /y /e /i /q
 xcopy ..\..\dp2opac\jqtree jqtree /y /e /i /q
 xcopy ..\..\dp2opac\jquerytreeview jquerytreeview /y /e /i /q
