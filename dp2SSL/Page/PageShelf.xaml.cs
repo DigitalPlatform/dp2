@@ -1293,8 +1293,6 @@ namespace dp2SSL
                 progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
                 progress.Closed += Progress_Cancelled;
                 App.SetSize(progress, "tall");
-                // progress.Width = Math.Min(700, this.ActualWidth);
-                // progress.Height = Math.Min(900, this.ActualHeight);
                 progress.okButton.Content = "取消";
                 progress.Show();
                 AddLayer();
@@ -1343,57 +1341,126 @@ namespace dp2SSL
                 // 此时门是关闭状态。让读卡器切换到节省盘点状态
                 ShelfData.RefreshReaderNameList();
 
-                // TODO: 填充 RFID 图书标签信息
-                var initial_result = await ShelfData.newVersion_InitialShelfEntities(
-    (s) =>
-    {
-        DisplayMessage(progress, s, "green");
-        // Thread.Sleep(1000);
-    },
-    () =>
-    {
-        return _initialCancelled;
-    }).ConfigureAwait(false);
-
-                if (_initialCancelled)
-                    return;
-
-                // 2019/11/29
-                // 先报告一次标签数据错误
-                if (initial_result.Warnings?.Count > 0)
+                // 对每一个门执行初始化操作
+                foreach (var door in ShelfData.Doors)
                 {
-                    ErrorBox(StringUtil.MakePathList(initial_result.Warnings, "\r\n"));
-                }
-
-                DisplayMessage(progress, "自动盘点图书 ...", "green");
-
-                WpfClientInfo.WriteInfoLog("自动盘点全部图书开始");
-
-                // TODO: 如何显示还书操作中的报错信息? 看了报错以后点继续?
-                // result.Value
-                //      -1  出错
-                //      0   没有必要处理
-                //      1   已经处理
-                var result = await InventoryBooks(progress, ShelfData.All);
-                WpfClientInfo.WriteInfoLog("自动盘点全部图书结束");
-
-                if (result.MessageDocument != null
-                    && result.MessageDocument.ErrorCount > 0)
-                {
-                    string speak = "";
+                    while (true)
                     {
-                        Application.Current.Dispatcher.Invoke(new Action(() =>
-                        {
-                            progress.BackColor = "yellow";
-                            progress.MessageDocument = result.MessageDocument.BuildDocument(18, out speak);
-                            if (result.MessageDocument.ErrorCount > 0)
-                                progress = null;
-                        }));
-                    }
-                    if (string.IsNullOrEmpty(speak) == false)
-                        App.CurrentApp.Speak(speak);
+                        // TODO: 填充 RFID 图书标签信息
+                        var initial_result = await ShelfData.newVersion_InitialShelfEntities(
+                            new List<DoorItem> { door },
+                            (s) =>
+                            {
+                                DisplayMessage(progress, s, "green");
+                                // Thread.Sleep(1000);
+                            },
+                            () =>
+                            {
+                                return _initialCancelled;
+                            }).ConfigureAwait(false);
 
-                    _initialCancelled = true;   // 表示初始化失败
+                        if (_initialCancelled)
+                            return;
+
+                        var all = initial_result.All;
+
+                        if (initial_result.Value != -1
+                            && all != null
+                            && all.Count > 0)
+                        {
+                            DisplayMessage(progress, $"获取门 {door.Name} 内的图书册记录信息 ...", "green");
+
+                            var task = Task.Run(async () =>
+                            {
+                                CancellationToken token = ShelfData.CancelToken;
+                                await ShelfData.FillBookFields(all, token);
+                                //await FillBookFields(Adds, token);
+                                //await FillBookFields(Removes, token);
+                            });
+                        }
+
+                        // 2019/11/29
+                        // 先报告一次标签数据错误
+                        // TODO: 这里是否要报错暂停?
+                        if (initial_result.Warnings?.Count > 0)
+                        {
+                            ErrorBox(StringUtil.MakePathList(initial_result.Warnings, "\r\n"));
+                        }
+
+                        DisplayMessage(progress, "自动盘点图书 ...", "green");
+
+                        WpfClientInfo.WriteInfoLog("自动盘点全部图书开始");
+
+                        // TODO: 如何显示还书操作中的报错信息? 看了报错以后点继续?
+                        // result.Value
+                        //      -1  出错
+                        //      0   没有必要处理
+                        //      1   已经处理
+                        var result = await InventoryBooks(progress, all);
+                        WpfClientInfo.WriteInfoLog("自动盘点全部图书结束");
+
+                        if (result.MessageDocument != null
+                            && result.MessageDocument.ErrorCount > 0)
+                        {
+                            InventoryWindow errorWindow = null;
+                            string speak = "";
+                            bool? ret = false;
+                            Application.Current.Dispatcher.Invoke(new Action(() =>
+                            {
+                                errorWindow = new InventoryWindow();
+                                errorWindow.TitleText = "初始化智能书柜";
+                                // errorWindow.MessageText = "正在初始化图书信息，请稍候 ...";
+                                // errorWindow.Owner = Application.Current.MainWindow;
+                                errorWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                                App.SetSize(errorWindow, "tall");
+                                errorWindow.BackColor = "yellow";
+                                errorWindow.MessageDocument = result.MessageDocument.BuildDocument(18, out string speak);
+                                ret = errorWindow.ShowDialog();
+                            }));
+                            /*
+                            {
+                                Application.Current.Dispatcher.Invoke(new Action(() =>
+                                {
+                                    progress.BackColor = "yellow";
+                                    progress.MessageDocument = result.MessageDocument.BuildDocument(18, out speak);
+                                    if (result.MessageDocument.ErrorCount > 0)
+                                        progress = null;
+                                }));
+                            }
+                            */
+                            if (string.IsNullOrEmpty(speak) == false)
+                                App.CurrentApp.Speak(speak);
+
+                            if (ret == false)
+                            {
+                                _initialCancelled = true;   // 表示初始化失败
+                                break;
+                            }
+                            else
+                            {
+                                // 开门，并等待关门
+                                var open_result = RfidManager.OpenShelfLock(door.LockPath);
+                                if (open_result.Value == -1)
+                                {
+                                    DisplayError(ref progress, result.ErrorInfo);
+                                    return;
+                                }
+                                // 出现对话框提示调整后关门自动开始重试
+                                ErrorBox("请调整图书后关闭全部柜门，以重试初始化", "yellow");
+
+                                await Task.Run(() =>
+                                {
+                                    while (door.State == "open")
+                                    {
+                                        if (_initialCancelled)
+                                            break;
+                                        DisplayMessage(progress, "请调整图书后关闭全部柜门，以重试初始化", "yellow");
+                                        Thread.Sleep(1000);
+                                    }
+                                });
+                            }
+                        }
+                    }
                 }
 
                 if (_initialCancelled)
@@ -1457,6 +1524,20 @@ namespace dp2SSL
             }
 
             // TODO: 初始化中断后，是否允许切换到菜单和设置画面？(只是不让进入书架画面)
+
+            /*
+            void DisplayMessage(InventoryWindow window,
+    string message,
+    string color = "")
+            {
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    window.MessageText = message;
+                    if (string.IsNullOrEmpty(color) == false)
+                        window.BackColor = color;
+                }));
+            }
+            */
         }
 
 #if NO
@@ -2090,7 +2171,7 @@ namespace dp2SSL
         //      -1  出错
         //      0   没有必要处理
         //      1   已经处理
-        async Task<SubmitResult> InventoryBooks(ProgressWindow progress,
+        async Task<SubmitResult> InventoryBooks(InventoryWindow progress,
             IReadOnlyCollection<Entity> entities)
         {
             List<ActionInfo> actions = new List<ActionInfo>();

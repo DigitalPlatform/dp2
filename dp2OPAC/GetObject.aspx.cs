@@ -85,10 +85,9 @@ ref sessioninfo) == false)
                     }
                     // TODO: 这里可以优化一下，当 lValue == -1 的时候，可以为 App 设置一个标志，以后就不再为外部 URL 请求 dp2library 的 HitCounver() API 了
                     string strText = "";
-                    long lValue = 0;
                     long lRet = app.GetHitCount(channel,
                         strBiblioRecPath + "|" + strURI,
-                        out lValue,
+                        out long lValue,
                         out strError);
                     if (lRet == -1)
                         strText = strError;
