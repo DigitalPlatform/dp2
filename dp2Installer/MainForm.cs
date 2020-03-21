@@ -3947,8 +3947,7 @@ MessageBoxDefaultButton.Button2);
             try
             {
                 // 检查 IIS 是否已经启用
-                List<OpacAppInfo> infos = null;
-                nRet = OpacAppInfo.GetOpacInfo(out infos, out strError);
+                nRet = OpacAppInfo.GetOpacInfo(out List<OpacAppInfo> infos, out strError);
                 if (nRet == -1)
                     goto ERROR1;
 
