@@ -1221,10 +1221,10 @@ namespace dp2SSL
 
             List<string> warnings = new List<string>();
 
-            lock (_syncRoot_all)
+            List<Entity> all = new List<Entity>();
+            // lock (_syncRoot_all)
             {
                 // _all.Clear();
-                List<Entity> all = new List<Entity>();
 
                 var books = TagList.Books;
                 WpfClientInfo.WriteErrorLog($"books count={books.Count}, ReaderNameList={RfidManager.ReaderNameList}(注：此时门应该都是关闭的，图书读卡器应该是停止盘点状态)");
@@ -1281,7 +1281,11 @@ namespace dp2SSL
             });
             */
 
-            return new InitialShelfResult { Warnings = warnings };
+            return new InitialShelfResult
+            {
+                Warnings = warnings,
+                All = all
+            };
         }
 
 #if NO

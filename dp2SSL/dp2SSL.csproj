@@ -284,6 +284,9 @@
     <Compile Include="Dialog\PatronWindow.xaml.cs">
       <DependentUpon>PatronWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Dialog\InventoryWindow.xaml.cs">
+      <DependentUpon>InventoryWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Dialog\SubmitWindow.xaml.cs">
       <DependentUpon>SubmitWindow.xaml</DependentUpon>
     </Compile>
@@ -372,6 +375,10 @@
     <Page Include="Dialog\PatronWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Dialog\InventoryWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Dialog\SubmitWindow.xaml">
       <SubType>Designer</SubType>
