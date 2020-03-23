@@ -2112,104 +2112,133 @@ namespace dp2SSL
             });
         }
 
-        public static async Task FillBookFields(// BaseChannel<IRfid> channel,
+        public class FillBookFieldsResult : NormalResult
+        {
+            public List<string> Errors { get; set; }
+        }
+
+        public static async Task<FillBookFieldsResult> FillBookFields(// BaseChannel<IRfid> channel,
     IReadOnlyCollection<Entity> entities,
     CancellationToken token,
     bool refreshCount = true)
         {
-            try
+            // int error_count = 0;
+            List<string> errors = new List<string>();
+            foreach (Entity entity in entities)
             {
-                int error_count = 0;
-                foreach (Entity entity in entities)
+                if (token.IsCancellationRequested)
+                    return new FillBookFieldsResult
+                    {
+                        Value = -1,
+                        ErrorInfo = "中断",
+                        ErrorCode = "cancelled"
+                    };
+                /*
+                if (_cancel == null
+                    || _cancel.IsCancellationRequested)
+                    return;
+                    */
+                if (entity.FillFinished == true)
+                    continue;
+
+                //if (string.IsNullOrEmpty(entity.Error) == false)
+                //    continue;
+
+                // 获得 PII
+                // 注：如果 PII 为空，文字中要填入 "(空)"
+                if (string.IsNullOrEmpty(entity.PII))
                 {
-                    if (token.IsCancellationRequested)
-                        return;
-                    /*
-                    if (_cancel == null
-                        || _cancel.IsCancellationRequested)
-                        return;
-                        */
-                    if (entity.FillFinished == true)
+                    if (entity.TagInfo == null)
                         continue;
 
-                    //if (string.IsNullOrEmpty(entity.Error) == false)
-                    //    continue;
-
-                    // 获得 PII
-                    // 注：如果 PII 为空，文字中要填入 "(空)"
-                    if (string.IsNullOrEmpty(entity.PII))
+                    Debug.Assert(entity.TagInfo != null);
+                    LogicChip chip = null;
+                    try
                     {
-                        if (entity.TagInfo == null)
-                            continue;
-
-                        Debug.Assert(entity.TagInfo != null);
-
                         // Exception:
                         //      可能会抛出异常 ArgumentException TagDataException
-                        LogicChip chip = LogicChip.From(entity.TagInfo.Bytes,
+                        chip = LogicChip.From(entity.TagInfo.Bytes,
 (int)entity.TagInfo.BlockSize,
 "" // tag.TagInfo.LockStatus
 );
-                        string pii = chip.FindElement(ElementOID.PII)?.Text;
-                        if (string.IsNullOrEmpty(pii))
-                        {
-                            // 报错
-                            App.CurrentApp.SpeakSequence($"警告：发现 PII 字段为空的标签");
-                            entity.SetError($"PII 字段为空");
-                            entity.FillFinished = true;
-                            error_count++;
-                            continue;
-                        }
-
-                        entity.PII = PageBorrow.GetCaption(pii);
                     }
-
-                    // 获得 Title
-                    // 注：如果 Title 为空，文字中要填入 "(空)"
-                    if (string.IsNullOrEmpty(entity.Title)
-                        && string.IsNullOrEmpty(entity.PII) == false && entity.PII != "(空)")
+                    catch (Exception ex)
                     {
-                        GetEntityDataResult result = await
-                            Task<GetEntityDataResult>.Run(() =>
-                            {
-                                return GetEntityData(entity.PII);
-                            });
-                        if (result.Value == -1 || result.Value == 0)
-                        {
-                            // TODO: 条码号没有找到的错误码要单独记下来
-                            // 报错
-                            string error = $"警告：PII 为 {entity.PII} 的标签出错: {result.ErrorInfo}";
-                            if (result.ErrorCode == "NotFound")
-                                error = $"警告：PII 为 {entity.PII} 的图书没有找到记录";
-
-                            // 2020/3/5
-                            WpfClientInfo.WriteErrorLog($"GetEntityData() error: {error}");
-
-                            App.CurrentApp.SpeakSequence(error);
-                            entity.SetError(result.ErrorInfo);
-                            entity.FillFinished = true;
-                            error_count++;
-                            continue;
-                        }
-                        entity.Title = PageBorrow.GetCaption(result.Title);
-                        entity.SetData(result.ItemRecPath, result.ItemXml);
+                        errors.Add($"解析 RFID 标签时出现异常 {ex.Message}");
+                        continue;
                     }
 
-                    entity.SetError(null);
-                    entity.FillFinished = true;
+                    string pii = chip.FindElement(ElementOID.PII)?.Text;
+                    if (string.IsNullOrEmpty(pii))
+                    {
+                        // 报错
+                        App.CurrentApp.SpeakSequence($"警告：发现 PII 字段为空的标签");
+                        entity.SetError($"PII 字段为空");
+                        entity.FillFinished = true;
+                        // error_count++;
+                        errors.Add($"标签 PII 字段为空(UID={entity.TagInfo.UID})");
+                        continue;
+                    }
+
+                    entity.PII = PageBorrow.GetCaption(pii);
                 }
 
-                if (token.IsCancellationRequested)
-                    return;
+                // 获得 Title
+                // 注：如果 Title 为空，文字中要填入 "(空)"
+                if (string.IsNullOrEmpty(entity.Title)
+                    && string.IsNullOrEmpty(entity.PII) == false && entity.PII != "(空)")
+                {
+                    GetEntityDataResult result = await
+                        Task<GetEntityDataResult>.Run(() =>
+                        {
+                            return GetEntityData(entity.PII);
+                        });
+                    if (result.Value == -1 || result.Value == 0)
+                    {
+                        // TODO: 条码号没有找到的错误码要单独记下来
+                        // 报错
+                        string error = $"警告：PII 为 {entity.PII} 的标签出错: {result.ErrorInfo}";
+                        if (result.ErrorCode == "NotFound")
+                            error = $"警告：PII 为 {entity.PII} 的图书没有找到记录";
 
-                if (refreshCount)
-                    ShelfData.RefreshCount();
+                        // 2020/3/5
+                        WpfClientInfo.WriteErrorLog($"GetEntityData() error: {error}");
+
+                        App.CurrentApp.SpeakSequence(error);
+                        entity.SetError(result.ErrorInfo);
+                        entity.FillFinished = true;
+                        // error_count++;
+                        errors.Add(error);
+                        continue;
+                    }
+                    entity.Title = PageBorrow.GetCaption(result.Title);
+                    entity.SetData(result.ItemRecPath, result.ItemXml);
+                }
+
+                entity.SetError(null);
+                entity.FillFinished = true;
+            }
+
+            if (token.IsCancellationRequested)
+                return new FillBookFieldsResult
+                {
+                    Value = -1,
+                    ErrorInfo = "中断",
+                    ErrorCode = "cancelled"
+                };
+
+            if (refreshCount)
+                ShelfData.RefreshCount();
+
+            return new FillBookFieldsResult { Errors = errors };
+            /*
             }
             catch (Exception ex)
             {
                 //LibraryChannelManager.Log?.Error($"FillBookFields() 发生异常: {ExceptionUtil.GetExceptionText(ex)}");   // 2019/9/19
                 //SetGlobalError("current", $"FillBookFields() 发生异常(已写入错误日志): {ex.Message}"); // 2019/9/11 增加 FillBookFields() exception:
             }
+            */
         }
 
         static string GetRandomString()
@@ -2550,7 +2579,7 @@ namespace dp2SSL
 
                     {
                         info.LastErrorInfo = strError;
-                        info.RetryCount++;
+                        info.SyncCount++;
                     }
 
                     // 微调
@@ -2559,7 +2588,7 @@ namespace dp2SSL
 
                     // sync/commerror/normalerror/空
                     // 同步成功/通讯出错/一般出错/从未同步过
-                    info.RetryType = "sync";
+                    info.State = "sync";
 
                     if (lRet == -1)
                     {
@@ -2613,14 +2642,14 @@ namespace dp2SSL
                             )
                         {
                             // retry_actions.Add(info);
-                            info.RetryType = "commerror";
+                            info.State = "commerror";
                         }
                         else
                         {
                             // 一般错误也需要重试 10 次
                             //if (info.RetryCount < 10)
                             //    retry_actions.Add(info);
-                            info.RetryType = "normalerror";
+                            info.State = "normalerror";
                             if (StringUtil.IsInList("auto_stop", style))
                                 break;
                         }
@@ -2915,7 +2944,8 @@ Stack:
                 action.CurrentShelfNo = request.CurrentShelfNo;
                 action.BatchNo = request.BatchNo;
                 action.ID = request.ID;
-                action.RetryCount = request.RetryCount;
+                action.SyncCount = request.SyncCount;
+                action.State = request.State;
 
                 actions.Add(action);
             }
@@ -2938,7 +2968,8 @@ Stack:
                 request.Location = action.Location;
                 request.CurrentShelfNo = action.CurrentShelfNo;
                 request.BatchNo = action.BatchNo;
-                request.RetryCount = action.RetryCount;
+                request.SyncCount = action.SyncCount;
+                request.State = action.State;
 
                 requests.Add(request);
             }
@@ -3087,7 +3118,7 @@ Stack:
                                 {
                                     // sync/commerror/normalerror/空
                                     // 同步成功/通讯出错/一般出错/从未同步过
-                                    ChangeDatabaseActionState(action.ID, action.RetryType);
+                                    ChangeDatabaseActionState(action.ID, action.State);
                                 }
                             }
 
@@ -3161,6 +3192,7 @@ Stack:
                 catch (Exception ex)
                 {
                     WpfClientInfo.WriteErrorLog($"重试专用线程出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                    App.CurrentApp?.SetError("sync", $"重试专用线程出现异常: {ex.Message}");
                 }
                 finally
                 {
@@ -3596,8 +3628,9 @@ TaskScheduler.Default);
 
         // 2020/3/8
         public string LastErrorInfo { get; set; }   // 最近一次出错的信息
-        public string RetryType { get; set; }   // 重试类型 communication/other
-        public int RetryCount { get; set; } // 已经进行过的重试次数
+
+        public string State { get; set; }   // 状态 sync/commerror/normalerror/空 = 同步成功/通讯出错/一般出错/从未同步过
+        public int SyncCount { get; set; } // 已经进行过的同步重试次数
         public int ID { get; set; } // 日志数据库中对应的记录 ID
 
         public override string ToString()
