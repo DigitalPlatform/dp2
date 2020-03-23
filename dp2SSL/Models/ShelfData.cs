@@ -718,7 +718,7 @@ namespace dp2SSL
                     });
                     // 没有更新的，才进行一次 transfer。更新的留在后面专门做
                     // “更新”的意思是从这个门移动到了另外一个门
-                    if (ShelfData.Find(ShelfData.Changes, entity.UID).Count == 0)
+                    if (ShelfData.Find(ShelfData.Changes, (o) => o.UID == entity.UID).Count == 0)
                     {
                         string location = "";
                         // 工作人员身份，还可能要进行馆藏位置向内转移
@@ -1244,6 +1244,10 @@ namespace dp2SSL
                         continue;
                     }
 
+                    // 不属于本函数当前关注的门范围
+                    if (Cross(doors_param, doors) == false)
+                        continue;
+
                     try
                     {
                         // Exception:
@@ -1267,7 +1271,7 @@ namespace dp2SSL
             RefreshCount();
 
             // TryReturn(progress, _all);
-            _firstInitial = true;   // 第一次初始化已经完成
+            // _firstInitial = true;   // 第一次初始化已经完成
 
             /* 这一段可以在函数返回后做
             func_display("获取图书册记录信息 ...");
@@ -1286,6 +1290,18 @@ namespace dp2SSL
                 Warnings = warnings,
                 All = all
             };
+
+            // 观察两个集合是否有交集
+            bool Cross(List<DoorItem> doors1, List<DoorItem> doors2)
+            {
+                foreach (var door1 in doors1)
+                {
+                    if (doors2.IndexOf(door1) != -1)
+                        return true;
+                }
+
+                return false;
+            }
         }
 
 #if NO
@@ -1558,6 +1574,28 @@ namespace dp2SSL
             return lock_names;
         }
 
+        public delegate bool Delegate_match(Entity entity);
+
+        public static List<Entity> Find(IReadOnlyCollection<Entity> entities,
+            Delegate_match func_match)
+        {
+            List<Entity> results = new List<Entity>();
+            /*
+            entities.ForEach((o) =>
+            {
+                if (o.UID == uid)
+                    results.Add(o);
+            });
+            */
+            foreach (var o in entities)
+            {
+                if (func_match(o) == true)
+                    results.Add(o);
+            }
+            return results;
+        }
+
+#if NO
         public static List<Entity> Find(IReadOnlyCollection<Entity> entities,
             string uid)
         {
@@ -1576,6 +1614,7 @@ namespace dp2SSL
             }
             return results;
         }
+#endif
 
         static List<Entity> Find(string name, TagAndData tag)
         {
@@ -2180,7 +2219,7 @@ namespace dp2SSL
         }
 
         // 限制获取摘要时候可以并发使用的 LibraryChannel 通道数
-        static Semaphore _limit = new Semaphore(1, 1);
+        // static Semaphore _limit = new Semaphore(1, 1);
 
         // public delegate void Delegate_showDialog();
 
@@ -2188,17 +2227,20 @@ namespace dp2SSL
         // -1 -1 -1 hide progress bar
         public delegate void Delegate_setProgress(double min, double max, double value, string text);
 
+        // TODO: 结果似乎可以考虑直接设置 ActionInfo 的 State 成员？这样返回后直接写入数据库即可
         // TODO: 无法进行重试的错误，应该尝试在本地 SQLite 数据库中建立借还信息，以便日后追查
         // 提交请求到 dp2library 服务器
         // parameters:
         //      actions 要处理的 Action 集合。每个 Action 对象处理完以后，会自动从 _actions 中移除
+        //      style   "auto_stop" 遇到报错就停止处理后面部分
         // result.Value
         //      -1  出错(要用对话框显示结果)
         //      0   没有必要处理
         //      1   已经完成处理(要用对话框显示结果)
         public static SubmitResult SubmitCheckInOut(
             Delegate_setProgress func_setProgress,
-            IReadOnlyCollection<ActionInfo> actions)
+            IReadOnlyCollection<ActionInfo> actions,
+            string style)
         {
             // TODO: 如果当前没有读者身份，则当作初始化处理，将书柜内的全部图书做还书尝试；被拿走的图书记入本地日志(所谓无主操作)
             // TODO: 注意还书，也就是往书柜里面放入图书，是不需要具体读者身份就可以提交的
@@ -2212,6 +2254,7 @@ namespace dp2SSL
             // 先尽量执行还书请求，再报错说无法进行借书操作(记入错误日志)
             MessageDocument doc = new MessageDocument();
 
+            /*
             // 限制同时能进入临界区的线程个数
             // TODO: 如果另一个并发的 submit 过程时间较长，导致这里超时了，应该需要自动重试
             // true if the current instance receives a signal; otherwise, false.
@@ -2223,6 +2266,7 @@ namespace dp2SSL
                     ErrorCode = "limitTimeout",
                     RetryActions = new List<ActionInfo>(actions),
                 };
+                */
 
             try
             {
@@ -2248,10 +2292,10 @@ namespace dp2SSL
                 // xml 发生改变了的那些实体记录
                 List<Entity> updates = new List<Entity>();
 
-                // List<ActionInfo> processed = new List<ActionInfo>();
+                List<ActionInfo> processed = new List<ActionInfo>();
 
                 // 出错了的，需要重做请求 dp2library 的那些 Action
-                List<ActionInfo> retry_actions = new List<ActionInfo>();
+                // List<ActionInfo> retry_actions = new List<ActionInfo>();
 
                 // 出错了的，但无法进行重试的那些 Action
                 List<ActionInfo> error_actions = new List<ActionInfo>();
@@ -2445,7 +2489,7 @@ namespace dp2SSL
     && nRedoCount < 2)
                         goto REDO;
 
-                    // processed.Add(info);
+                    processed.Add(info);
 
                     /*
                     // testing
@@ -2509,10 +2553,13 @@ namespace dp2SSL
                         info.RetryCount++;
                     }
 
-
                     // 微调
                     if (lRet == 0 && action == "return")
                         messageItem.ErrorInfo = "";
+
+                    // sync/commerror/normalerror/空
+                    // 同步成功/通讯出错/一般出错/从未同步过
+                    info.RetryType = "sync";
 
                     if (lRet == -1)
                     {
@@ -2557,21 +2604,25 @@ namespace dp2SSL
                             }
                         }
 
+                        error_actions.Add(info);
+
                         // 如果是通讯出错，要加入 retry_actions
                         if (error_code == ErrorCode.RequestError
                             || error_code == ErrorCode.RequestTimeOut
                             || error_code == ErrorCode.RequestCanceled
                             )
                         {
-                            retry_actions.Add(info);
-                            info.RetryType = "communication";
+                            // retry_actions.Add(info);
+                            info.RetryType = "commerror";
                         }
                         else
                         {
                             // 一般错误也需要重试 10 次
-                            if (info.RetryCount < 10)
-                                retry_actions.Add(info);
-                            info.RetryType = "normal";
+                            //if (info.RetryCount < 10)
+                            //    retry_actions.Add(info);
+                            info.RetryType = "normalerror";
+                            if (StringUtil.IsInList("auto_stop", style))
+                                break;
                         }
 
                         WpfClientInfo.WriteErrorLog($"请求失败。action:{action},PII:{entity.PII}, 错误信息:{strError}, 错误码:{error_code.ToString()}");
@@ -2580,8 +2631,8 @@ namespace dp2SSL
                         // TODO: 这里最好用 title
                         //errors.Add($"册 '{title}': {strError}");
 
-                        if (retry_actions.IndexOf(info) == -1)
-                            error_actions.Add(info);
+                        // if (retry_actions.IndexOf(info) == -1)
+                        //      error_actions.Add(info);
                         continue;
                     }
 
@@ -2690,13 +2741,14 @@ Stack:
                 {
                     Value = 1,
                     MessageDocument = doc,
-                    RetryActions = retry_actions,
+                    // RetryActions = retry_actions,
+                    ProcessedActions = processed,
                     ErrorActions = error_actions,
                 };
             }
             finally
             {
-                _limit.Release();
+                // _limit.Release();
             }
         }
 
@@ -2799,6 +2851,9 @@ Stack:
 
 #endif
 
+        // sync/commerror/normalerror/空
+        // 同步成功/通讯出错/一般出错/从未同步过
+
         // 从外部存储中装载尚未同步的 Actions
         // 注意：这些 Actions 应该先按照 PII 排序分组以后，一组一组进行处理
         public static List<ActionInfo> LoadActionsFromDatabase()
@@ -2806,7 +2861,7 @@ Stack:
             using (var context = new MyContext())
             {
                 context.Database.EnsureCreated();
-                var items = context.Requests.Where(o => string.IsNullOrEmpty(o.State)).ToList();
+                var items = context.Requests.Where(o => o.State != "sync").ToList();
                 var actions = FromRequests(items);
                 WpfClientInfo.WriteInfoLog($"从本地数据库装载 Actions 成功。内容如下：\r\n{ActionInfo.ToString(actions)}");
                 return actions;
@@ -2835,7 +2890,7 @@ Stack:
                     context.Requests.AddRange(FromActions(actions));
                     int nCount = await context.SaveChangesAsync();
 
-                    WpfClientInfo.WriteInfoLog($"Actions 保存到本地数据库成功。内容如下：\r\n{ActionInfo.ToString(_retryActions)}");
+                    WpfClientInfo.WriteInfoLog($"Actions 保存到本地数据库成功。内容如下：\r\n{ActionInfo.ToString(actions)}");
                 }
             }
             catch (Exception ex)
@@ -2860,6 +2915,7 @@ Stack:
                 action.CurrentShelfNo = request.CurrentShelfNo;
                 action.BatchNo = request.BatchNo;
                 action.ID = request.ID;
+                action.RetryCount = request.RetryCount;
 
                 actions.Add(action);
             }
@@ -2882,6 +2938,7 @@ Stack:
                 request.Location = action.Location;
                 request.CurrentShelfNo = action.CurrentShelfNo;
                 request.BatchNo = action.BatchNo;
+                request.RetryCount = action.RetryCount;
 
                 requests.Add(request);
             }
@@ -2890,8 +2947,12 @@ Stack:
         }
 
         static Task _retryTask = null;
+
+        /*
         static List<ActionInfo> _retryActions = new List<ActionInfo>();
         static object _syncRoot_retryActions = new object();
+        */
+
         static AutoResetEvent _eventRetry = new AutoResetEvent(false);
 
         public static void ActivateRetry()
@@ -2899,6 +2960,7 @@ Stack:
             _eventRetry.Set();
         }
 
+        /*
         // 从 _retryActions 中找到匹配的元素加以删除
         public static void RemoveFromRetryActions(List<Entity> entities)
         {
@@ -2925,10 +2987,11 @@ Stack:
                 RefreshRetryInfo();
             }
         }
+        */
 
-        public static void RefreshRetryInfo()
+        public static void RefreshRetryInfo(List<ActionInfo> actions)
         {
-            PageMenu.PageShelf?.SetRetryInfo(_retryActions.Count == 0 ? "" : $"滞留:{_retryActions.Count}");
+            PageMenu.PageShelf?.SetRetryInfo(actions.Count == 0 ? "" : $"滞留:{actions.Count}");
         }
 
         // 启动同步任务。此任务长期在后台运行
@@ -2961,6 +3024,8 @@ Stack:
                         List<ActionInfo> actions = LoadActionsFromDatabase();
                         if (actions.Count == 0)
                             continue;
+
+                        // RefreshRetryInfo() ???
 
                         // 排序和分组。按照分组提交给 dp2library 服务器
                         var groups = GroupActions(actions);
@@ -2996,10 +3061,12 @@ Stack:
                                     }));
                                 }
                             },
-                            group);
+                            group,
+                            "auto_stop");
 
                             // TODO: 把 group 中报错的信息写入本地数据库的对应事项中
 
+                            /*
                             // 把已经处理成功的 Action 对应在本地数据库中的事项的状态修改
                             List<ActionInfo> processed = new List<ActionInfo>();
                             if (result.RetryActions != null)
@@ -3013,10 +3080,22 @@ Stack:
                                     }
                                 }
                             }
+                            */
+                            if (result.ProcessedActions != null)
+                            {
+                                foreach (var action in result.ProcessedActions)
+                                {
+                                    // sync/commerror/normalerror/空
+                                    // 同步成功/通讯出错/一般出错/从未同步过
+                                    ChangeDatabaseActionState(action.ID, action.RetryType);
+                                }
+                            }
 
                             if (result.MessageDocument != null)
                                 messages.AddRange(result.MessageDocument.Items);
                         }
+
+                        // TODO: 更新每个事项的 RetryCount。如果超过 10 次，要把 State 更新为 fail
 
                         // 将 submit 情况写入日志备查
                         // WpfClientInfo.WriteInfoLog($"重试提交请求:\r\n{ActionInfo.ToString(actions)}\r\n返回结果:{result.ToString()}");
@@ -3253,6 +3332,8 @@ TaskScheduler.Default);
         }
 
 #endif
+
+        /*
         public static void AddRetryActions(List<ActionInfo> actions)
         {
             lock (_syncRoot_retryActions)
@@ -3261,6 +3342,7 @@ TaskScheduler.Default);
                 RefreshRetryInfo();
             }
         }
+        */
 
 #if NO
         public static void ClearRetryActions()
@@ -3273,16 +3355,18 @@ TaskScheduler.Default);
         }
 #endif
 
-        public static int RetryActionsCount
+        /*
+    public static int RetryActionsCount
+    {
+        get
         {
-            get
+            lock (_syncRoot_retryActions)
             {
-                lock (_syncRoot_retryActions)
-                {
-                    return _retryActions.Count;
-                }
+                return _retryActions.Count;
             }
         }
+    }
+    */
 
 
 #if NO
@@ -3555,8 +3639,13 @@ TaskScheduler.Default);
         public List<ActionInfo> ErrorActions { get; set; }
 
         // [out]
+        // 处理过的 ActionInfo 对象集合。这里面包含成功的，和失败的
+        public List<ActionInfo> ProcessedActions { get; set; }
+
+
+        // [out]
         // 发生了错误，需要后面重试提交的 ActionInfo 对象集合
-        public List<ActionInfo> RetryActions { get; set; }
+        // public List<ActionInfo> RetryActions { get; set; }
 
         public override string ToString()
         {
@@ -3567,10 +3656,17 @@ TaskScheduler.Default);
                 text.AppendLine($"发生了错误(但不需要重试)的 ActionInfo:({ErrorActions.Count})");
                 text.AppendLine(ActionInfo.ToString(ErrorActions));
             }
+            /*
             if (RetryActions != null && RetryActions.Count > 0)
             {
                 text.AppendLine($"需要重试的 ActionInfo:({RetryActions.Count})");
                 text.AppendLine(ActionInfo.ToString(RetryActions));
+            }
+            */
+            if (ProcessedActions != null && ProcessedActions.Count > 0)
+            {
+                text.AppendLine($"处理过的 ActionInfo:({ProcessedActions.Count})");
+                text.AppendLine(ActionInfo.ToString(ProcessedActions));
             }
             return text.ToString();
         }

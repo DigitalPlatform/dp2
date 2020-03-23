@@ -3999,17 +3999,19 @@ MessageBoxDefaultButton.Button2);
 
         private void MenuItem_setupOpacDataAppDir_Click(object sender, EventArgs e)
         {
-            string strError = "";
             // 安装 dp2OPAC 的数据目录
             // parameters:
             //      bAutoSetup  是否自动安装。自动安装时，如果已经存在数据文件，则不会再次安装。否则会强行重新安装，但安装前会出现对话框警告
             int nRet = SetupOpacDataAndAppDir(
                 false,
-                out strError);
+                out string strError);
             if (nRet == -1 || nRet == 0)
                 goto ERROR1;
 
-            MessageBox.Show(this, "dp2OPAC 数据目录和应用程序目录安装成功");
+            string strInformation = "dp2OPAC 数据目录和应用程序目录安装成功";
+            AppendString(strInformation + "\r\n");
+
+            MessageBox.Show(this, strInformation);
             return;
         ERROR1:
             MessageBox.Show(this, strError);

@@ -35,6 +35,7 @@ namespace dp2SSL
         public DateTime OperTime { get; set; }  // 操作时间
         public string State { get; set; }   // 状态。sync/retry/fail/空
                                             // 表示是否完成同步，还是正在重试同步阶段，还是已经因为重试出错次数太多而放弃重试(需要人工介入处理)
+        public int RetryCount { get; set; }
     }
 
 #if NO

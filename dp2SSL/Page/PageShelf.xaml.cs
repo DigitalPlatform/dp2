@@ -541,6 +541,7 @@ namespace dp2SSL
                 return;
             }
 
+            /*
             // 当前有滞留的请求
             if (ShelfData.RetryActionsCount > 0)
             {
@@ -548,6 +549,7 @@ namespace dp2SSL
                 //ErrorBox($"当前有 {ShelfData.RetryActionsCount} 个滞留请求尚未提交，请联系管理员排除此故障");
                 //return;
             }
+            */
 
             // 检查门锁是否已经是打开状态?
             if (e.Door.State == "open")
@@ -1283,17 +1285,39 @@ namespace dp2SSL
 
             _initialCancelled = false;
 
-            ProgressWindow progress = null;
+            AutoResetEvent eventRetry = new AutoResetEvent(false);
+            ManualResetEvent eventCancel = new ManualResetEvent(false);
+
+            InventoryWindow progress = null;
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
-                progress = new ProgressWindow();
+                progress = new InventoryWindow();
                 progress.TitleText = "初始化智能书柜";
                 progress.MessageText = "正在初始化图书信息，请稍候 ...";
                 progress.Owner = Application.Current.MainWindow;
                 progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-                progress.Closed += Progress_Cancelled;
+                progress.Closed += (s, e) =>
+                {
+                    _initialCancelled = true;
+                    eventCancel.Set();
+                };
+                progress.openDoorButton.Click += (s, e) =>
+                {
+                    var open_result = RfidManager.OpenShelfLock(progress.Door.LockPath);
+                    if (open_result.Value == -1)
+                        ErrorBox(open_result.ErrorInfo);
+                };
+                progress.retryButton.Click += (s, e) =>
+                {
+                    eventRetry.Set();
+                };
+                progress.cancelButton.Click += (s, e) =>
+                {
+                    eventCancel.Set();
+                };
                 App.SetSize(progress, "tall");
-                progress.okButton.Content = "取消";
+                progress.EnableRetryOpenButtons(false);
+                // progress.okButton.Content = "取消";
                 progress.Show();
                 AddLayer();
             }));
@@ -1344,8 +1368,22 @@ namespace dp2SSL
                 // 对每一个门执行初始化操作
                 foreach (var door in ShelfData.Doors)
                 {
+                    progress.Door = door;
+
+                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    {
+                        progress.EnableRetryOpenButtons(false);
+                    }));
+
                     while (true)
                     {
+                        // 处理前先从 All 中移走当前门的所有标签
+                        {
+                            var remove_entities = ShelfData.Find(ShelfData.All, (o) => o.Antenna == door.Antenna.ToString());
+                            if (remove_entities.Count > 0)
+                                ShelfData.Remove("all", remove_entities);
+                        }
+
                         // TODO: 填充 RFID 图书标签信息
                         var initial_result = await ShelfData.newVersion_InitialShelfEntities(
                             new List<DoorItem> { door },
@@ -1362,102 +1400,112 @@ namespace dp2SSL
                         if (_initialCancelled)
                             return;
 
-                        var all = initial_result.All;
+                        var part = initial_result.All;
+
+                        if (part.Count == 0)
+                            break;
 
                         if (initial_result.Value != -1
-                            && all != null
-                            && all.Count > 0)
+                            && part != null
+                            && part.Count > 0)
                         {
                             DisplayMessage(progress, $"获取门 {door.Name} 内的图书册记录信息 ...", "green");
 
+                            // TODO: 填充图书信息过程中遇到的报错也应该在对话框里面显示报错？
                             var task = Task.Run(async () =>
                             {
                                 CancellationToken token = ShelfData.CancelToken;
-                                await ShelfData.FillBookFields(all, token);
+                                await ShelfData.FillBookFields(part, token);
                                 //await FillBookFields(Adds, token);
                                 //await FillBookFields(Removes, token);
                             });
                         }
 
-                        // 2019/11/29
                         // 先报告一次标签数据错误
-                        // TODO: 这里是否要报错暂停?
                         if (initial_result.Warnings?.Count > 0)
                         {
-                            ErrorBox(StringUtil.MakePathList(initial_result.Warnings, "\r\n"));
+                            string error = StringUtil.MakePathList(initial_result.Warnings, "\r\n");
+                            // ErrorBox(StringUtil.MakePathList(initial_result.Warnings, "\r\n"));
+                            Application.Current.Dispatcher.Invoke(new Action(() =>
+                            {
+                                progress.BackColor = "yellow";
+                                progress.MessageText = error;
+                            }));
+                            goto WAIT_RETRY;
                         }
 
                         DisplayMessage(progress, "自动盘点图书 ...", "green");
 
                         WpfClientInfo.WriteInfoLog("自动盘点全部图书开始");
 
-                        // TODO: 如何显示还书操作中的报错信息? 看了报错以后点继续?
                         // result.Value
                         //      -1  出错
                         //      0   没有必要处理
                         //      1   已经处理
-                        var result = await InventoryBooks(progress, all);
+                        var result = await InventoryBooks(progress, part);
                         WpfClientInfo.WriteInfoLog("自动盘点全部图书结束");
 
                         if (result.MessageDocument != null
                             && result.MessageDocument.ErrorCount > 0)
                         {
-                            InventoryWindow errorWindow = null;
                             string speak = "";
-                            bool? ret = false;
-                            Application.Current.Dispatcher.Invoke(new Action(() =>
-                            {
-                                errorWindow = new InventoryWindow();
-                                errorWindow.TitleText = "初始化智能书柜";
-                                // errorWindow.MessageText = "正在初始化图书信息，请稍候 ...";
-                                // errorWindow.Owner = Application.Current.MainWindow;
-                                errorWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-                                App.SetSize(errorWindow, "tall");
-                                errorWindow.BackColor = "yellow";
-                                errorWindow.MessageDocument = result.MessageDocument.BuildDocument(18, out string speak);
-                                ret = errorWindow.ShowDialog();
-                            }));
-                            /*
                             {
                                 Application.Current.Dispatcher.Invoke(new Action(() =>
                                 {
                                     progress.BackColor = "yellow";
                                     progress.MessageDocument = result.MessageDocument.BuildDocument(18, out speak);
-                                    if (result.MessageDocument.ErrorCount > 0)
-                                        progress = null;
+                                    //if (result.MessageDocument.ErrorCount > 0)
+                                    //    progress = null;
                                 }));
                             }
-                            */
                             if (string.IsNullOrEmpty(speak) == false)
                                 App.CurrentApp.Speak(speak);
+                        }
+                        else
+                        {
+                            var test = ShelfData.All;
+                            break;
+                        }
 
-                            if (ret == false)
+                    WAIT_RETRY:
+                        {
+                            Application.Current.Dispatcher.Invoke(new Action(() =>
+                            {
+                                progress.EnableRetryOpenButtons(true);
+                            }));
+
+                            // 等待按钮按下
+                            var index = WaitHandle.WaitAny(new WaitHandle[]
+                            {
+                                eventRetry,
+                                eventCancel,
+                                ShelfData.CancelToken.WaitHandle
+                            });
+                            if (index == 1)
                             {
                                 _initialCancelled = true;   // 表示初始化失败
                                 break;
                             }
-                            else
+                            else if (index == 0)
                             {
-                                // 开门，并等待关门
-                                var open_result = RfidManager.OpenShelfLock(door.LockPath);
-                                if (open_result.Value == -1)
-                                {
-                                    DisplayError(ref progress, result.ErrorInfo);
-                                    return;
-                                }
-                                // 出现对话框提示调整后关门自动开始重试
-                                ErrorBox("请调整图书后关闭全部柜门，以重试初始化", "yellow");
-
+                                // 等待关门
                                 await Task.Run(() =>
                                 {
                                     while (door.State == "open")
                                     {
                                         if (_initialCancelled)
                                             break;
-                                        DisplayMessage(progress, "请调整图书后关闭全部柜门，以重试初始化", "yellow");
+                                        DisplayMessage(progress, "请关闭全部柜门，以重试初始化", "yellow");
                                         Thread.Sleep(1000);
                                     }
                                 });
+                                continue;
+                            }
+                            else
+                            {
+                                // 中断
+                                Debug.Assert(index == 3);
+                                return;
                             }
                         }
                     }
@@ -1469,7 +1517,7 @@ namespace dp2SSL
                 SelectAntenna();
 
                 // 将 RetryActions 里面的 PII 和 ShelfData.All 里面 PII 相同的事项删除。因为刚才 TryReturn() 已经成功提交了它们
-                ShelfData.RemoveFromRetryActions(new List<Entity>(ShelfData.All));
+                // ShelfData.RemoveFromRetryActions(new List<Entity>(ShelfData.All));
 
                 // 启动重试任务。此任务长期在后台运行
                 ShelfData.StartRequestTask();
@@ -1498,6 +1546,7 @@ namespace dp2SSL
 
                     SetGlobalError("initial", null);
                     this.Mode = ""; // 从初始化模式转为普通模式
+                    ShelfData.FirstInitialized = true;   // 第一次初始化已经完成
                 }
                 else
                 {
@@ -1525,7 +1574,6 @@ namespace dp2SSL
 
             // TODO: 初始化中断后，是否允许切换到菜单和设置画面？(只是不让进入书架画面)
 
-            /*
             void DisplayMessage(InventoryWindow window,
     string message,
     string color = "")
@@ -1537,7 +1585,6 @@ namespace dp2SSL
                         window.BackColor = color;
                 }));
             }
-            */
         }
 
 #if NO
@@ -2225,7 +2272,8 @@ namespace dp2SSL
                 },
                 //"", // _patron.Barcode,
                 //"", // _patron.PatronName,
-                actions);
+                actions,
+                "");
 
             // TODO: 如果不是全部 actions 都成功，则要显示出有问题的图书(特别是所在的门名字)，
             // 等工作人员解决问题，重新盘点。直到全部成功。
@@ -2387,7 +2435,7 @@ namespace dp2SSL
                     await ShelfData.SaveActionsToDatabase(actions);
 
                     // TODO: 加入的时候应带有归并功能。但注意 Retry 线程里面正在处理的集合应该暂时从 RetryActions 里面移走，避免和归并过程掺和
-                    ShelfData.AddRetryActions(actions);
+                    // ShelfData.AddRetryActions(actions);
                     {
                         string text = $"本次 {actions.Count} 个请求被加入队列，稍后会自动进行提交";
                         // _progressWindow?.PushContent(text, "green");
