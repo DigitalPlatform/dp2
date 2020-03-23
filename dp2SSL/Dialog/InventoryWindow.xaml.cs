@@ -20,15 +20,19 @@ namespace dp2SSL
     /// </summary>
     public partial class InventoryWindow : Window
     {
+        public DoorItem Door { get; set; }
+
         public InventoryWindow()
         {
             InitializeComponent();
         }
 
+        /*
         private void OkButton_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
         }
+        */
 
         public string MessageText
         {
@@ -78,31 +82,6 @@ namespace dp2SSL
             }
         }
 
-#if NO
-        bool _errorMode = false;
-
-        public bool ErrorMode
-        {
-            get
-            {
-                return _errorMode;
-            }
-            set
-            {
-                _errorMode = value;
-                if (_errorMode)
-                {
-                    this.Background = Brushes.DarkRed;
-                    this.Foreground = Brushes.White;
-                }
-                else
-                {
-                    this.Background = Brushes.Black;
-                    this.Foreground = Brushes.White;
-                }
-            }
-        }
-#endif
         string _backColor = "black";
         public string BackColor
         {
@@ -155,16 +134,28 @@ namespace dp2SSL
 
         private void cancelButton_Click(object sender, RoutedEventArgs e)
         {
-            this.DialogResult = false;
-            this.Close();
+            //this.DialogResult = false;
+            //this.Close();
         }
 
         private void openDoorButton_Click(object sender, RoutedEventArgs e)
         {
             // TODO: 开门以后，监控门的状态。如果关门了，则自动开始重试
 
-            this.DialogResult = true;
-            this.Close();
+            //this.DialogResult = true;
+            //this.Close();
         }
+
+        private void retryButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        public void EnableRetryOpenButtons(bool enable)
+        {
+            this.retryButton.Visibility = enable ? Visibility.Visible : Visibility.Collapsed;
+            this.openDoorButton.Visibility = enable ? Visibility.Visible : Visibility.Collapsed;
+        }
+
     }
 }

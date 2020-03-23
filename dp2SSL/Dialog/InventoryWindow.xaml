@@ -34,18 +34,25 @@
             <ProgressBar Name="progressBar" Grid.Row="2"
                      Height="5" Background="Transparent" BorderThickness="0"/>
             <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center">
-                <Button Name="cancelButton" 
-                    Style="{DynamicResource RoundedButtonStyle}" 
-                    Width="120" Height="60" 
-                    FontSize="30" FontWeight="ExtraBold" 
-                    Foreground="White" 
-                    Click="cancelButton_Click">取消</Button>
+
                 <Button Name="openDoorButton" 
                     Style="{DynamicResource RoundedButtonStyle}" 
                     Width="120" Height="60" 
                     FontSize="30" FontWeight="ExtraBold" 
                     Foreground="White" 
                     Click="openDoorButton_Click">开门</Button>
+                <Button Name="retryButton" 
+                    Style="{DynamicResource RoundedButtonStyle}" 
+                    Width="120" Height="60" 
+                    FontSize="30" FontWeight="ExtraBold" 
+                    Foreground="White" 
+                    Click="retryButton_Click">重试</Button>
+                <Button Name="cancelButton" 
+                    Style="{DynamicResource RoundedButtonStyle}" 
+                    Width="120" Height="60" 
+                    FontSize="30" FontWeight="ExtraBold" 
+                    Foreground="White" 
+                    Click="cancelButton_Click">取消</Button>
             </StackPanel>
 
         </Grid>
