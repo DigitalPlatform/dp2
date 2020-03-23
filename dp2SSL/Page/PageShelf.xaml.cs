@@ -541,6 +541,12 @@ namespace dp2SSL
                 return;
             }
 
+            if (ShelfData.FirstInitialized == false)
+            {
+                ErrorBox("书柜尚未完成初始化，不允许开门");
+                return;
+            }
+
             /*
             // 当前有滞留的请求
             if (ShelfData.RetryActionsCount > 0)
@@ -1314,6 +1320,7 @@ namespace dp2SSL
                 progress.cancelButton.Click += (s, e) =>
                 {
                     eventCancel.Set();
+                    progress.Close();
                 };
                 App.SetSize(progress, "tall");
                 progress.EnableRetryOpenButtons(false);
@@ -1372,6 +1379,7 @@ namespace dp2SSL
 
                     Application.Current.Dispatcher.Invoke(new Action(() =>
                     {
+                        progress.TitleText = $"正在初始化门 {door.Name}";
                         progress.EnableRetryOpenButtons(false);
                     }));
 
@@ -1400,27 +1408,6 @@ namespace dp2SSL
                         if (_initialCancelled)
                             return;
 
-                        var part = initial_result.All;
-
-                        if (part.Count == 0)
-                            break;
-
-                        if (initial_result.Value != -1
-                            && part != null
-                            && part.Count > 0)
-                        {
-                            DisplayMessage(progress, $"获取门 {door.Name} 内的图书册记录信息 ...", "green");
-
-                            // TODO: 填充图书信息过程中遇到的报错也应该在对话框里面显示报错？
-                            var task = Task.Run(async () =>
-                            {
-                                CancellationToken token = ShelfData.CancelToken;
-                                await ShelfData.FillBookFields(part, token);
-                                //await FillBookFields(Adds, token);
-                                //await FillBookFields(Removes, token);
-                            });
-                        }
-
                         // 先报告一次标签数据错误
                         if (initial_result.Warnings?.Count > 0)
                         {
@@ -1432,6 +1419,40 @@ namespace dp2SSL
                                 progress.MessageText = error;
                             }));
                             goto WAIT_RETRY;
+                        }
+
+                        var part = initial_result.All;
+
+                        if (part.Count == 0)
+                            break;
+
+                        if (initial_result.Value != -1
+                            && part != null
+                            && part.Count > 0)
+                        {
+                            DisplayMessage(progress, $"获取门 {door.Name} 内的图书册记录信息 ...", "green");
+
+                            /*
+                            // TODO: 填充图书信息过程中遇到的报错也应该在对话框里面显示报错？
+                            var task = Task.Run(async () =>
+                            {
+                                CancellationToken token = ShelfData.CancelToken;
+                                await ShelfData.FillBookFields(part, token);
+                                //await FillBookFields(Adds, token);
+                                //await FillBookFields(Removes, token);
+                            });
+                            */
+                            var fill_result = await ShelfData.FillBookFields(part, ShelfData.CancelToken);
+                            if (fill_result.Errors?.Count > 0)
+                            {
+                                string error = StringUtil.MakePathList(fill_result.Errors, "\r\n");
+                                Application.Current.Dispatcher.Invoke(new Action(() =>
+                                {
+                                    progress.BackColor = "yellow";
+                                    progress.MessageText = error;
+                                }));
+                                goto WAIT_RETRY;
+                            }
                         }
 
                         DisplayMessage(progress, "自动盘点图书 ...", "green");
@@ -1484,7 +1505,7 @@ namespace dp2SSL
                             if (index == 1)
                             {
                                 _initialCancelled = true;   // 表示初始化失败
-                                break;
+                                return;
                             }
                             else if (index == 0)
                             {
