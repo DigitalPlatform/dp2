@@ -2578,7 +2578,9 @@ namespace dp2SSL
                     doc.Add(messageItem);
 
                     {
-                        info.LastErrorInfo = strError;
+                        info.SyncErrorInfo = strError;
+                        if (error_code != ErrorCode.NoError)
+                            info.SyncErrorInfo += $"[{error_code}]";
                         info.SyncCount++;
                     }
 
@@ -2885,12 +2887,12 @@ Stack:
 
         // 从外部存储中装载尚未同步的 Actions
         // 注意：这些 Actions 应该先按照 PII 排序分组以后，一组一组进行处理
-        public static List<ActionInfo> LoadActionsFromDatabase()
+        public static List<ActionInfo> LoadRetryActionsFromDatabase()
         {
             using (var context = new MyContext())
             {
                 context.Database.EnsureCreated();
-                var items = context.Requests.Where(o => o.State != "sync").ToList();
+                var items = context.Requests.Where(o => o.State != "sync" && o.State != "cancelsync").ToList();
                 var actions = FromRequests(items);
                 WpfClientInfo.WriteInfoLog($"从本地数据库装载 Actions 成功。内容如下：\r\n{ActionInfo.ToString(actions)}");
                 return actions;
@@ -2929,6 +2931,24 @@ Stack:
             }
         }
 
+        // 从操作日志数据库中把一些需要重试的事项移走
+        // 原理：当首次初始化以后，已经初始化确认在书架内的图书，已经进行了还书操作，那么此前累积的需要重试借书或者还书的同步请求，都可以不执行了。这样不会造成图书丢失。但可能会丢掉一些中间操作信息
+        // 改进：可以不删除，但把这些事项的状态标记为 “放弃重试”
+        public static void RemoveRetryActionsFromDatabase(IEnumerable<string> piis)
+        {
+            using (var context = new MyContext())
+            {
+                context.Database.EnsureCreated();
+                foreach(var pii in piis)
+                {
+                    var items = context.Requests.Where(o => o.PII == pii && o.State != "sync").ToList();
+                    // context.Requests.RemoveRange(items);
+                    items.ForEach(o => o.State = "cancelsync");
+                    context.SaveChanges();
+                }
+            }
+        }
+
         static List<ActionInfo> FromRequests(List<RequestItem> requests)
         {
             List<ActionInfo> actions = new List<ActionInfo>();
@@ -2946,7 +2966,7 @@ Stack:
                 action.ID = request.ID;
                 action.SyncCount = request.SyncCount;
                 action.State = request.State;
-
+                action.SyncErrorInfo = request.SyncErrorInfo;
                 actions.Add(action);
             }
 
@@ -2970,7 +2990,7 @@ Stack:
                 request.BatchNo = action.BatchNo;
                 request.SyncCount = action.SyncCount;
                 request.State = action.State;
-
+                request.SyncErrorInfo = action.SyncErrorInfo;
                 requests.Add(request);
             }
 
@@ -3052,7 +3072,7 @@ Stack:
                         token.ThrowIfCancellationRequested();
 
                         // TODO: 从本地数据库中装载需要同步的那些 Actions
-                        List<ActionInfo> actions = LoadActionsFromDatabase();
+                        List<ActionInfo> actions = LoadRetryActionsFromDatabase();
                         if (actions.Count == 0)
                             continue;
 
@@ -3626,10 +3646,8 @@ TaskScheduler.Default);
         public string CurrentShelfNo { get; set; }  // 当前架号。transfer 动作会用到
         public string BatchNo { get; set; } // 批次号。transfer 动作会用到。建议可以用当前用户名加上日期构成
 
-        // 2020/3/8
-        public string LastErrorInfo { get; set; }   // 最近一次出错的信息
-
         public string State { get; set; }   // 状态 sync/commerror/normalerror/空 = 同步成功/通讯出错/一般出错/从未同步过
+        public string SyncErrorInfo { get; set; }   // 最近一次同步操作的报错信息
         public int SyncCount { get; set; } // 已经进行过的同步重试次数
         public int ID { get; set; } // 日志数据库中对应的记录 ID
 
