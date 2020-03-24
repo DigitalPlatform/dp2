@@ -34,7 +34,8 @@ namespace dp2SSL
         public string PII { get; set; } // PII 单独从 EntityString 中抽取出来，便于进行搜索
         public DateTime OperTime { get; set; }  // 操作时间
         public string State { get; set; }   // 状态。sync/commerror/normalerror/空
-                                            // 表示是否完成同步，还是正在出错重试同步阶段，还是从未同步过
+                                                    // 表示是否完成同步，还是正在出错重试同步阶段，还是从未同步过
+        public string SyncErrorInfo { get; set; }   // 最近一次同步操作的报错信息
         public int SyncCount { get; set; }
     }
 

@@ -1537,9 +1537,12 @@ namespace dp2SSL
 
                 SelectAntenna();
 
-                // 将 RetryActions 里面的 PII 和 ShelfData.All 里面 PII 相同的事项删除。因为刚才 TryReturn() 已经成功提交了它们
+                // 将 操作历史库 里面的 PII 和 ShelfData.All 里面 PII 相同的事项的状态标记为“放弃同步”。因为刚才已经成功同步了它们
                 // ShelfData.RemoveFromRetryActions(new List<Entity>(ShelfData.All));
-
+                {
+                    var piis = ShelfData.All.Select(x => x.UID);
+                    ShelfData.RemoveRetryActionsFromDatabase(piis);
+                }
                 // 启动重试任务。此任务长期在后台运行
                 ShelfData.StartRequestTask();
             }
