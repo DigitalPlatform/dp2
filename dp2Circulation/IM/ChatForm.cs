@@ -18,6 +18,8 @@ using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Text;
 using DigitalPlatform.MessageClient;
+using DigitalPlatform.CommonControl;
+using Newtonsoft.Json;
 
 namespace dp2Circulation
 {
@@ -31,7 +33,7 @@ namespace dp2Circulation
             this.panel_input.Width = 300;
         }
 
-        private void IMForm_Load(object sender, EventArgs e)
+        private async void IMForm_Load(object sender, EventArgs e)
         {
             if (Program.MainForm != null)
             {
@@ -39,6 +41,7 @@ namespace dp2Circulation
             }
 
             this.ClearHtml();
+            this.LoadRows();
 
             if (Program.MainForm != null && Program.MainForm.MessageHub != null)
             {
@@ -47,16 +50,37 @@ namespace dp2Circulation
             }
             SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
 
-            Task.Factory.StartNew(() => DoLoadMessage(_currentGroupName, "", true));
+            // Task.Factory.StartNew(() => DoLoadMessage(_currentGroupName, "", true));
+            await DoLoadMessage(_currentGroupName, "", true);
         }
 
-        void SystemEvents_PowerModeChanged(object sender, PowerModeChangedEventArgs e)
+        string[] default_groups = new string[] {
+        "<default>",
+        };
+
+        void FillGroupList(List<string> names)
+        {
+            this.dpTable_groups.Rows.Clear();
+            foreach (string name in names)
+            {
+                DpRow row = new DpRow();
+                row.Add(new DpCell());
+                row.Add(new DpCell { Text = name });
+                this.dpTable_groups.Rows.Add(row);
+            }
+
+            if (this.dpTable_groups.Rows.Count > 0)
+                this.dpTable_groups.SelectRange(this.dpTable_groups.Rows[0],
+                    this.dpTable_groups.Rows[0]);
+        }
+
+        async void SystemEvents_PowerModeChanged(object sender, PowerModeChangedEventArgs e)
         {
             if (e.Mode == PowerModes.Resume)
-                FillDeltaMessage();
+                await FillDeltaMessage();
         }
 
-        void MessageHub_ConnectionStateChange(object sender, ConnectionEventArgs e)
+        async void MessageHub_ConnectionStateChange(object sender, ConnectionEventArgs e)
         {
             if (_inGetMessage > 0)
                 return;
@@ -64,12 +88,12 @@ namespace dp2Circulation
             if (e.Action == "Reconnected"
                 || e.Action == "Connected")
             {
-                FillDeltaMessage();
+                await FillDeltaMessage();
             }
         }
 
 
-        void FillDeltaMessage()
+        async Task FillDeltaMessage()
         {
             // 补充获取先前在没有连接时间段的消息
             bool bUrlChanged = Program.MainForm.MessageHub.dp2MServerUrl != _currentUrl;
@@ -84,7 +108,8 @@ namespace dp2Circulation
 
             _edgeRecord = _lastMessage;
 
-            Task.Factory.StartNew(() => DoLoadMessage(_currentGroupName, strLastTime + "~", bUrlChanged));
+            // Task.Factory.StartNew(() => DoLoadMessage(_currentGroupName, strLastTime + "~", bUrlChanged));
+            await DoLoadMessage(_currentGroupName, strLastTime + "~", bUrlChanged);
             // TODO: 填充消息的时候，如果和上次最末一条同样时间，则要从返回结果集合中和上次最末一条 ID 匹配的后一条开始填充
         }
 
@@ -149,9 +174,9 @@ namespace dp2Circulation
                 string strLibraryUID = (string)table["libraryUID"];
                 string strLibraryUserName = (string)table["libraryUserName"];
 
-                string strText = strLibraryUserName + "@" + strLibraryName + "|" +strLibraryUID;
+                string strText = strLibraryUserName + "@" + strLibraryName + "|" + strLibraryUID;
 
-                if (CompareUserName(record.creator,"~" + strText) == true)
+                if (CompareUserName(record.creator, "~" + strText) == true)
                     return true;
             }
 
@@ -232,6 +257,8 @@ namespace dp2Circulation
                 Program.MainForm.MessageHub.AddMessage -= MessageHub_AddMessage;
                 Program.MainForm.MessageHub.ConnectionStateChange -= MessageHub_ConnectionStateChange;
             }
+
+            SaveRows();
 
             //CloseConnection();
 
@@ -388,7 +415,8 @@ namespace dp2Circulation
                 MessageBox.Show(this, "尚未输入文字");
                 return;
             }
-            Task.Factory.StartNew(() => SendMessage("<default>", this.textBox_input.Text));
+            Task.Factory.StartNew(() => SendMessage(_currentGroupName,
+                this.textBox_input.Text));
         }
 
         void SendMessage(string strGroupName, string strText)
@@ -397,7 +425,7 @@ namespace dp2Circulation
 
             List<MessageRecord> messages = new List<MessageRecord>();
             MessageRecord record = new MessageRecord();
-            record.groups = new string [1] {strGroupName};
+            record.groups = new string[1] { strGroupName };
             record.data = strText;
             messages.Add(record);
 
@@ -425,7 +453,7 @@ namespace dp2Circulation
         int _inGetMessage = 0;  // 防止因为 ConnectionStateChange 事件导致重入
 
         // 装载已经存在的消息记录
-        async void DoLoadMessage(string strGroupName,
+        async Task DoLoadMessage(string strGroupName,
             string strTimeRange,
             bool bClearAll)
         {
@@ -449,7 +477,8 @@ namespace dp2Circulation
                         Program.MainForm.MessageHub.Connect();
                         Thread.Sleep(5000);
                         _redoLoadMesssageCount++;
-                        Task.Factory.StartNew(() => DoLoadMessage(strGroupName, strTimeRange, bClearAll));
+                        // await Task.Factory.StartNew(() => DoLoadMessage(strGroupName, strTimeRange, bClearAll));
+                        await DoLoadMessage(strGroupName, strTimeRange, bClearAll);
                         return;
                     }
                     else
@@ -530,7 +559,7 @@ namespace dp2Circulation
         List<MessageRecord> _edgeRecords = new List<MessageRecord>();
 
         string _currentUrl = "";
-        string _currentGroupName = "<default>";
+        string _currentGroupName = "";  // "<default>";
         MessageRecord _lastMessage = null;   // 当前消息显示界面中最后一条消息
 
         // return:
@@ -665,6 +694,108 @@ namespace dp2Circulation
 
             // DoSearchBiblio();
 #endif
+        }
+
+        private void dpTable_groups_SelectionChanged(object sender, EventArgs e)
+        {
+            string oldGroupName = _currentGroupName;
+            string newGroupName = "";
+            if (this.dpTable_groups.SelectedRows.Count == 1)
+            {
+                newGroupName = this.dpTable_groups.SelectedRows[0][1].Text;
+            }
+
+            if (newGroupName != _currentGroupName)
+            {
+                _currentGroupName = newGroupName;
+                if (string.IsNullOrEmpty(_currentGroupName))
+                {
+                    ClearHtml();
+                    _lastMessage = null;
+                }
+                else
+                {
+                    Task.Factory.StartNew(() => DoLoadMessage(_currentGroupName, "", true));
+                }
+            }
+        }
+
+        private void dpTable_groups_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Right)
+                return;
+
+            ContextMenu contextMenu = new ContextMenu();
+            MenuItem menuItem = null;
+
+            menuItem = new MenuItem("添加群名");
+            menuItem.Click += new System.EventHandler(this.menu_newGroupName_Click);
+            contextMenu.MenuItems.Add(menuItem);
+
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
+
+            menuItem = new MenuItem("删除群名(&D)");
+            menuItem.Click += new System.EventHandler(this.menu_deleteGroupName_Click);
+            if (this.dpTable_groups.SelectedRows.Count == 0)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
+
+            contextMenu.Show(this.dpTable_groups, new Point(e.X, e.Y));
+        }
+
+        void menu_newGroupName_Click(object sender, EventArgs e)
+        {
+            var name = InputDlg.GetInput(this,
+                "添加群名",
+                "群名",
+                "",
+                this.Font);
+            if (name == null)
+                return;
+
+            DpRow row = new DpRow();
+            row.Add(new DpCell());
+            row.Add(new DpCell { Text = name });
+            this.dpTable_groups.Rows.Add(row);
+        }
+
+        void menu_deleteGroupName_Click(object sender, EventArgs e)
+        {
+            List<DpRow> rows = new List<DpRow>(this.dpTable_groups.SelectedRows);
+            foreach (var row in rows)
+            {
+                this.dpTable_groups.Rows.Remove(row);
+            }
+        }
+
+        void LoadRows()
+        {
+            string value = Program.MainForm.AppInfo.GetString("chatForm", "groups", "");
+            List<string> names = null;
+            if (string.IsNullOrEmpty(value) == false)
+                names = JsonConvert.DeserializeObject<List<string>>(value);
+
+            if (names == null || names.Count == 0)
+                names = new List<string>(default_groups);
+
+            FillGroupList(names);
+        }
+
+        void SaveRows()
+        {
+            List<string> names = new List<string>();
+            foreach (var row in this.dpTable_groups.Rows)
+            {
+                string name = row[1].Text;
+                names.Add(name);
+            }
+
+            string value = JsonConvert.SerializeObject(names);
+            Program.MainForm.AppInfo.SetString("chatForm", "groups", value);
         }
 
 #if NO

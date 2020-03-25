@@ -15,6 +15,10 @@ using System.Security.Principal;
 using System.Reflection;
 
 using MongoDB.Driver;
+using MongoDB.Bson;
+using MongoDB.Bson.IO;
+
+using Newtonsoft.Json.Linq;
 
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.Xml;
@@ -26,6 +30,7 @@ using DigitalPlatform.rms.Client.rmsws_localhost;
 using DigitalPlatform.LibraryServer.Common;
 using DigitalPlatform.Core;
 using DigitalPlatform.Marc;
+
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -2470,11 +2475,41 @@ namespace DigitalPlatform.LibraryServer
                     // TODO: 如何检测连接是否出错?
                     //var server = this._mongoClient.GetServer();
                     //server.Connect();
+
+
                 }
                 catch (Exception ex)
                 {
                     this._mongoClient = null;
                     strError = "初始化 MongoClient 时出错: " + ex.Message;
+                    return -1;
+                }
+
+                // 检查版本
+                try
+                {
+                    // https://docs.mongodb.com/manual/reference/command/serverStatus/#dbcmd.serverStatus
+                    var db = this._mongoClient.GetDatabase("test");
+                    var command = new BsonDocument { { "serverStatus", 1 } };
+                    var result = db.RunCommand<BsonDocument>(command);
+                    // https://grokbase.com/t/gg/mongodb-csharp/12bkre3b6e/deserializing-dynamic-data-numberlong-issue
+                    string jsonText = result.ToJson(new JsonWriterSettings
+                    {
+                        OutputMode = JsonOutputMode.Strict
+                    });
+                    JObject json = JObject.Parse(jsonText);
+                    var version = (string)json["version"];
+                    if (StringUtil.CompareVersion(version, "4.2.0") < 0)
+                    {
+                        this._mongoClient = null;
+                        strError = $"当前 MongoDB 版本太旧({version})。请升级到 4.2 以上版本";
+                        return -1;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    this._mongoClient = null;
+                    strError = "检查 MongoDB 版本号时出错: " + ex.Message;
                     return -1;
                 }
 
