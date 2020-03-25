@@ -56,9 +56,10 @@
             // 
             this.webBrowser1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.webBrowser1.Location = new System.Drawing.Point(0, 0);
-            this.webBrowser1.MinimumSize = new System.Drawing.Size(20, 20);
+            this.webBrowser1.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
+            this.webBrowser1.MinimumSize = new System.Drawing.Size(37, 35);
             this.webBrowser1.Name = "webBrowser1";
-            this.webBrowser1.Size = new System.Drawing.Size(435, 246);
+            this.webBrowser1.Size = new System.Drawing.Size(798, 434);
             this.webBrowser1.TabIndex = 0;
             // 
             // panel_input
@@ -67,16 +68,18 @@
             this.panel_input.Controls.Add(this.textBox_input);
             this.panel_input.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel_input.Location = new System.Drawing.Point(0, 0);
+            this.panel_input.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.panel_input.Name = "panel_input";
-            this.panel_input.Size = new System.Drawing.Size(435, 65);
+            this.panel_input.Size = new System.Drawing.Size(798, 116);
             this.panel_input.TabIndex = 1;
             // 
             // button_send
             // 
             this.button_send.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_send.Location = new System.Drawing.Point(357, 4);
+            this.button_send.Location = new System.Drawing.Point(655, 7);
+            this.button_send.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.button_send.Name = "button_send";
-            this.button_send.Size = new System.Drawing.Size(78, 23);
+            this.button_send.Size = new System.Drawing.Size(143, 40);
             this.button_send.TabIndex = 1;
             this.button_send.Text = "发送";
             this.button_send.UseVisualStyleBackColor = true;
@@ -88,22 +91,25 @@
             this.textBox_input.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_input.Location = new System.Drawing.Point(4, 4);
-            this.textBox_input.MinimumSize = new System.Drawing.Size(50, 4);
+            this.textBox_input.Location = new System.Drawing.Point(7, 7);
+            this.textBox_input.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
+            this.textBox_input.MinimumSize = new System.Drawing.Size(88, 4);
             this.textBox_input.Multiline = true;
             this.textBox_input.Name = "textBox_input";
             this.textBox_input.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_input.Size = new System.Drawing.Size(347, 61);
+            this.textBox_input.Size = new System.Drawing.Size(633, 106);
             this.textBox_input.TabIndex = 0;
             // 
             // toolStrip1
             // 
             this.toolStrip1.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.toolStrip1.ImageScalingSize = new System.Drawing.Size(28, 28);
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButton_searchBiblio});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 319);
+            this.toolStrip1.Location = new System.Drawing.Point(0, 564);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(552, 25);
+            this.toolStrip1.Padding = new System.Windows.Forms.Padding(0, 0, 4, 0);
+            this.toolStrip1.Size = new System.Drawing.Size(1012, 38);
             this.toolStrip1.TabIndex = 2;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -113,7 +119,7 @@
             this.toolStripButton_searchBiblio.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_searchBiblio.Image")));
             this.toolStripButton_searchBiblio.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_searchBiblio.Name = "toolStripButton_searchBiblio";
-            this.toolStripButton_searchBiblio.Size = new System.Drawing.Size(60, 22);
+            this.toolStripButton_searchBiblio.Size = new System.Drawing.Size(100, 32);
             this.toolStripButton_searchBiblio.Text = "书目检索";
             this.toolStripButton_searchBiblio.Click += new System.EventHandler(this.toolStripButton_searchBiblio_Click);
             // 
@@ -121,6 +127,7 @@
             // 
             this.splitContainer_message.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer_message.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer_message.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.splitContainer_message.Name = "splitContainer_message";
             this.splitContainer_message.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
@@ -131,15 +138,16 @@
             // splitContainer_message.Panel2
             // 
             this.splitContainer_message.Panel2.Controls.Add(this.panel_input);
-            this.splitContainer_message.Size = new System.Drawing.Size(435, 319);
-            this.splitContainer_message.SplitterDistance = 246;
-            this.splitContainer_message.SplitterWidth = 8;
+            this.splitContainer_message.Size = new System.Drawing.Size(798, 564);
+            this.splitContainer_message.SplitterDistance = 434;
+            this.splitContainer_message.SplitterWidth = 14;
             this.splitContainer_message.TabIndex = 3;
             // 
             // splitContainer_main
             // 
             this.splitContainer_main.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer_main.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer_main.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.splitContainer_main.Name = "splitContainer_main";
             // 
             // splitContainer_main.Panel1
@@ -149,9 +157,9 @@
             // splitContainer_main.Panel2
             // 
             this.splitContainer_main.Panel2.Controls.Add(this.splitContainer_message);
-            this.splitContainer_main.Size = new System.Drawing.Size(552, 319);
-            this.splitContainer_main.SplitterDistance = 109;
-            this.splitContainer_main.SplitterWidth = 8;
+            this.splitContainer_main.Size = new System.Drawing.Size(1012, 564);
+            this.splitContainer_main.SplitterDistance = 199;
+            this.splitContainer_main.SplitterWidth = 15;
             this.splitContainer_main.TabIndex = 4;
             // 
             // dpTable_groups
@@ -167,16 +175,21 @@
             this.dpTable_groups.DocumentOrgY = ((long)(0));
             this.dpTable_groups.DocumentShadowColor = System.Drawing.SystemColors.ControlDarkDark;
             this.dpTable_groups.FocusedItem = null;
+            this.dpTable_groups.FullRowSelect = true;
             this.dpTable_groups.HighlightBackColor = System.Drawing.SystemColors.Highlight;
             this.dpTable_groups.HightlightForeColor = System.Drawing.SystemColors.HighlightText;
             this.dpTable_groups.HoverBackColor = System.Drawing.SystemColors.HotTrack;
             this.dpTable_groups.InactiveHighlightBackColor = System.Drawing.SystemColors.InactiveCaption;
             this.dpTable_groups.InactiveHightlightForeColor = System.Drawing.SystemColors.InactiveCaptionText;
             this.dpTable_groups.Location = new System.Drawing.Point(0, 0);
+            this.dpTable_groups.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
+            this.dpTable_groups.MaxTextHeight = 57;
             this.dpTable_groups.Name = "dpTable_groups";
-            this.dpTable_groups.Size = new System.Drawing.Size(109, 319);
+            this.dpTable_groups.Size = new System.Drawing.Size(199, 564);
             this.dpTable_groups.TabIndex = 0;
             this.dpTable_groups.Text = "dpTable1";
+            this.dpTable_groups.SelectionChanged += new System.EventHandler(this.dpTable_groups_SelectionChanged);
+            this.dpTable_groups.MouseUp += new System.Windows.Forms.MouseEventHandler(this.dpTable_groups_MouseUp);
             // 
             // dpColumn_icon
             // 
@@ -198,11 +211,12 @@
             // 
             // ChatForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(552, 344);
+            this.ClientSize = new System.Drawing.Size(1012, 602);
             this.Controls.Add(this.splitContainer_main);
             this.Controls.Add(this.toolStrip1);
+            this.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.Name = "ChatForm";
             this.Text = "聊天";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.IMForm_FormClosing);

@@ -93,14 +93,14 @@ namespace DigitalPlatform.MessageClient
 ));
         }
 
-        private void toolStripButton_refresh_Click(object sender, EventArgs e)
+        private async void toolStripButton_refresh_Click(object sender, EventArgs e)
         {
-            ListAllUsers();
+            await ListAllUsers();
         }
 
-        private void toolStripButton_new_Click(object sender, EventArgs e)
+        private async void toolStripButton_new_Click(object sender, EventArgs e)
         {
-            NewUser();
+            await NewUser();
         }
 
         async Task NewUser()
