@@ -1613,9 +1613,19 @@ namespace DigitalPlatform.LibraryServer
                         strOutputReaderRecPath,
                         ref domOperLog,
                         out borrow_info,
+                        out ErrorCode errorCode,
                         out strError);
                     if (nRet == -1)
+                    {
+                        if (errorCode != ErrorCode.NoError)
+                        {
+                            result.Value = -1;
+                            result.ErrorInfo = strError;
+                            result.ErrorCode = errorCode;
+                            return result;
+                        }
                         goto ERROR1;
+                    }
 
                     WriteTimeUsed(
                         time_lines,
@@ -16493,8 +16503,10 @@ start_time_1,
             string strReaderRecPath,
             ref XmlDocument domOperLog,
             out BorrowInfo borrow_info,
+            out ErrorCode error_code,
             out string strError)
         {
+            error_code = ErrorCode.NoError;
             strError = "";
             int nRet = 0;
             borrow_info = new BorrowInfo();
@@ -17018,11 +17030,13 @@ start_time_1,
                     {
                         // text-level: 用户提示
                         strError = "借阅操作被拒绝。因册 '" + strItemBarcode + "' 在本次操作前已经被当前读者 '" + strReaderBarcode + "' 借阅了。";
+                        error_code = ErrorCode.AlreadyBorrowed;    // 已经被当前读者借阅
                         return -1;
                     }
 
                     // text-level: 用户提示
                     strError = "借阅操作被拒绝。因册 '" + strItemBarcode + "' 在本次操作前已经处于被读者 '" + strOldReaderBarcode + "' 借阅(持有)状态(尚未归还)。\r\n如果属于拿错情况，请工作人员立即扣留此书，设法交还给持有人；\r\n如果确系(经持有人同意)其他读者要转借此册，需先履行还书手续；\r\n如果持有人要续借此册，请履行续借手续。";
+                    error_code = ErrorCode.AlreadyBorrowedByOther;   // 已经被其他读者借阅
                     return -1;
                 }
             }

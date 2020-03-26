@@ -2604,6 +2604,18 @@ namespace dp2SSL
                         }
                         */
 
+                        if (action == "borrow")
+                        {
+                            // TODO: ErrorCode.AlreadyBorrowedByOther 应该补一个还书动作然后重试借书?
+                            if (error_code == ErrorCode.AlreadyBorrowed)
+                            {
+                                messageItem.ResultType = "information";
+                                WpfClientInfo.WriteInfoLog($"读者 {info.Operator.PatronName} {info.Operator.PatronBarcode} 尝试借阅册 '{title}' 时: {strError}");
+                                entity.SetError(null);
+                                continue;
+                            }
+                        }
+
                         if (action == "return")
                         {
                             if (error_code == ErrorCode.NotBorrowed)
@@ -2899,12 +2911,14 @@ Stack:
             }
         }
 
-        static void ChangeDatabaseActionState(int id, string state)
+        static void ChangeDatabaseActionState(int id, ActionInfo action)
         {
             using (var context = new MyContext())
             {
                 var item = context.Requests.FirstOrDefault(o => o.ID == id);
-                item.State = state;
+                item.State = action.State;
+                item.SyncErrorInfo = action.SyncErrorInfo;
+                item.SyncCount = action.SyncCount;
                 context.SaveChanges();
             }
         }
@@ -2957,7 +2971,9 @@ Stack:
                 ActionInfo action = new ActionInfo();
                 action.Operator = request.OperatorString == null ? null :
                     JsonConvert.DeserializeObject<Operator>(request.OperatorString);
+                // action.Operator = request.Operator;
                 action.Entity = JsonConvert.DeserializeObject<Entity>(request.EntityString);
+                // action.Entity = request.Entity;
                 action.Action = request.Action;
                 action.TransferDirection = request.TransferDirection;
                 action.Location = request.Location;
@@ -2979,10 +2995,13 @@ Stack:
             foreach (var action in actions)
             {
                 RequestItem request = new RequestItem();
-
+                request.PII = action.Entity?.PII;
                 request.OperatorString = action.Operator == null ? null : JsonConvert.SerializeObject(action.Operator);
                 request.EntityString = JsonConvert.SerializeObject(action.Entity);
-
+                /*
+                request.Operator = action.Operator.Clone();
+                request.Entity = action.Entity.Clone();
+                */
                 request.Action = action.Action;
                 request.TransferDirection = action.TransferDirection;
                 request.Location = action.Location;
@@ -2991,6 +3010,7 @@ Stack:
                 request.SyncCount = action.SyncCount;
                 request.State = action.State;
                 request.SyncErrorInfo = action.SyncErrorInfo;
+                request.OperTime = DateTime.Now;
                 requests.Add(request);
             }
 
@@ -3138,7 +3158,7 @@ Stack:
                                 {
                                     // sync/commerror/normalerror/空
                                     // 同步成功/通讯出错/一般出错/从未同步过
-                                    ChangeDatabaseActionState(action.ID, action.State);
+                                    ChangeDatabaseActionState(action.ID, action);
                                 }
                             }
 
@@ -3602,6 +3622,14 @@ TaskScheduler.Default);
     {
         public string PatronName { get; set; }
         public string PatronBarcode { get; set; }
+
+        public Operator Clone()
+        {
+            Operator dup = new Operator();
+            dup.PatronName = this.PatronName;
+            dup.PatronBarcode = this.PatronBarcode;
+            return dup;
+        }
 
         public override string ToString()
         {

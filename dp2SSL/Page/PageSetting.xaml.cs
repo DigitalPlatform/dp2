@@ -248,6 +248,8 @@ namespace dp2SSL
 
             // 重新启动 Proccess 监控
             App.CurrentApp.StartProcessManager();
+
+            App.CurrentApp.ConnectMessageServer();
         }
 
         public static NormalResult CheckServerUID()

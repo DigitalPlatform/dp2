@@ -26,6 +26,7 @@ using DigitalPlatform.Text;
 using static DigitalPlatform.IO.BarcodeCapture;
 using DigitalPlatform.Face;
 using DigitalPlatform.WPF;
+using DigitalPlatform.MessageClient;
 
 namespace dp2SSL
 {
@@ -206,6 +207,23 @@ namespace dp2SSL
             _barcodeCapture.Start();
 
             InputMethod.SetPreferredImeState(App.Current.MainWindow, InputMethodState.Off);
+
+            var task2 = ConnectMessageServer();
+        }
+
+        public async Task ConnectMessageServer()
+        {
+            if (string.IsNullOrEmpty(messageServerUrl) == false)
+            {
+                TinyServer.CloseConnection();
+                var result = await TinyServer.ConnectAsync(messageServerUrl, messageUserName, messagePassword, "");
+                if (result.Value == -1)
+                    WpfClientInfo.WriteErrorLog($"连接消息服务器失败: {result.ErrorInfo}。url={messageServerUrl},userName={messageUserName},errorCode={result.ErrorCode}");
+                // 发出一条消息表示自己启动成功
+                var message_result = await TinyServer.SetMessageAsync("我这台智能书柜启动了！");
+                if (message_result.Value == -1)
+                    WpfClientInfo.WriteErrorLog($"第一条消息发送失败: {message_result.ErrorInfo}");
+            }
         }
 
         public void InitialShelfCfg()
@@ -216,7 +234,7 @@ namespace dp2SSL
                 {
                     ShelfData.InitialShelf();
                 }
-                catch(FileNotFoundException)
+                catch (FileNotFoundException)
                 {
                     this.SetError("cfg", $"尚未配置 shelf.xml 文件");
                 }
@@ -496,6 +514,50 @@ namespace dp2SSL
             }
         }
 
+        public static string dp2Password
+        {
+            get
+            {
+                return DecryptPasssword(WpfClientInfo.Config.Get("global", "dp2Password", ""));
+            }
+        }
+
+        #region 消息服务器相关参数
+
+        public static string messageServerUrl
+        {
+            get
+            {
+                return WpfClientInfo.Config.Get("global", "messageServerUrl", "");
+            }
+        }
+
+        public static string messageUserName
+        {
+            get
+            {
+                return WpfClientInfo.Config.Get("global", "messageUserName", "");
+            }
+        }
+
+        public static string messagePassword
+        {
+            get
+            {
+                return DecryptPasssword(WpfClientInfo.Config.Get("global", "messagePassword", ""));
+            }
+        }
+
+        public static string messageGroupName
+        {
+            get
+            {
+                return WpfClientInfo.Config.Get("global", "messageGroupName", "");
+            }
+        }
+
+        #endregion
+
         public static string RfidUrl
         {
             get
@@ -620,13 +682,7 @@ namespace dp2SSL
             }
         }
 
-        public static string dp2Password
-        {
-            get
-            {
-                return DecryptPasssword(WpfClientInfo.Config.Get("global", "dp2Password", ""));
-            }
-        }
+
 
         public static void SetLockingPassword(string password)
         {

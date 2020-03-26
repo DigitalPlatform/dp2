@@ -2456,6 +2456,14 @@ namespace dp2SSL
                 // 2020/2/23
                 // if (ShelfData.RetryActionsCount > 0)
                 {
+                    /*
+                    // 给所有 ActionInfo 对象加上操作时间
+                    foreach(var action in actions)
+                    {
+
+                    }
+                    */
+
                     await ShelfData.SaveActionsToDatabase(actions);
 
                     // TODO: 加入的时候应带有归并功能。但注意 Retry 线程里面正在处理的集合应该暂时从 RetryActions 里面移走，避免和归并过程掺和
