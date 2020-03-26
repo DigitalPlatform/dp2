@@ -334,6 +334,87 @@ Description = "是否动态反馈图书变动数"
                 _config.SetBoolean("shelf_operation", "detect_book_change", value);
             }
         }
+
+        #region 消息服务器相关参数
+
+        [Display(
+    Order = 21,
+    Name = "URL 地址",
+    Description = "消息服务器的 URL 地址"
+    )]
+        [Category("消息服务器")]
+        public string MessageServerUrl
+        {
+            get
+            {
+                return _config.Get("global", "messageServerUrl", "");
+            }
+            set
+            {
+                _config.Set("global", "messageServerUrl", value);
+                App.CurrentApp.ClearChannelPool();
+            }
+        }
+
+        [Display(
+    Order = 22,
+    Name = "用户名",
+    Description = "消息服务器的用户名"
+    )]
+        [Category("消息服务器")]
+        public string MessageUserName
+        {
+            get
+            {
+                return _config.Get("global", "messageUserName", "");
+            }
+            set
+            {
+                _config.Set("global", "messageUserName", value);
+                App.CurrentApp.ClearChannelPool();
+            }
+        }
+
+        [Display(
+    Order = 23,
+    Name = "密码",
+    Description = "消息服务器的密码"
+    )]
+        [Editor(typeof(PasswordEditor), typeof(PasswordEditor))]
+        [Category("消息服务器")]
+        public string MessagePassword
+        {
+            get
+            {
+                return App.DecryptPasssword(_config.Get("global", "messagePassword", ""));
+            }
+            set
+            {
+                _config.Set("global", "messagePassword", App.EncryptPassword(value));
+                App.CurrentApp.ClearChannelPool();
+            }
+        }
+
+        [Display(
+Order = 24,
+Name = "组名",
+Description = "用于交换消息的组的名字"
+)]
+        [Category("消息服务器")]
+        public string MessageGroupName
+        {
+            get
+            {
+                return _config.Get("global", "messageGroupName", "");
+            }
+            set
+            {
+                _config.Set("global", "messageGroupName", value);
+                App.CurrentApp.ClearChannelPool();
+            }
+        }
+
+        #endregion
     }
 
 

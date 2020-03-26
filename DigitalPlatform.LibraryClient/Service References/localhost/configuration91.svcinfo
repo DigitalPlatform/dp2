@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<SavedWcfConfigurationInformation xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Version="9.1" CheckSum="AsgBm7sWXsxu+psWsORRG1nfZtc=">
+<SavedWcfConfigurationInformation xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Version="9.1" CheckSum="yaz1f/evlBxE89hy3UeoyEdJRfe7y6rX2kahHWyCunQ=">
   <bindingConfigurations>
     <bindingConfiguration bindingType="netNamedPipeBinding" name="NetNamedPipeBinding_dp2library">
       <properties>

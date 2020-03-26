@@ -9,6 +9,7 @@ using Microsoft.AspNet.SignalR.Client;
 
 using DigitalPlatform;
 using DigitalPlatform.MessageClient;
+using Newtonsoft.Json;
 
 namespace dp2SSL
 {
@@ -26,7 +27,7 @@ namespace dp2SSL
             set;
         }
 
-        static void CloseConnection()
+        public static void CloseConnection()
         {
             if (Connection == null)
                 return;
@@ -35,6 +36,8 @@ namespace dp2SSL
 
             Connection.Stop();
             Connection.Dispose();
+
+            _userName = "";
         }
 
         static List<IDisposable> _handlers = new List<IDisposable>();
@@ -51,6 +54,8 @@ namespace dp2SSL
         }
 
         private static readonly Object _syncRoot = new Object();
+
+        static string _userName = "";
 
         public static async Task<NormalResult> ConnectAsync(string url,
             string userName,
@@ -118,6 +123,8 @@ namespace dp2SSL
             {
                 await Connection.Start().ConfigureAwait(false);
 
+                _userName = userName;
+
                 {
                     /*
                     _exiting = false;
@@ -183,7 +190,15 @@ namespace dp2SSL
         static void OnAddMessageRecieved(string action,
 IList<MessageRecord> messages)
         {
-            
+            foreach (var message in messages)
+            {
+                // TODO: 忽略自己发出的消息?
+                if (message.data.StartsWith($"@{_userName}"))
+                {
+                    string command = message.data.Substring($"@{_userName}".Length).Trim();
+                    ProcessCommand(command);
+                }
+            }
         }
 
         // 当 server 发来检索请求的时候被调用。重载的时候要进行检索，并调用 Response 把检索结果发送给 server
@@ -191,7 +206,98 @@ IList<MessageRecord> messages)
         {
         }
 
+        static string GroupName
+        {
+            get
+            {
+                return App.messageGroupName;
+            }
+        }
+
+        static void ProcessCommand(string command)
+        {
+            if (command.StartsWith("hello"))
+            {
+                SetMessageAsync("hello!");
+            }
+
+            if (command.StartsWith("list history"))
+            {
+                ListHistory(command);
+            }
+        }
+
+        static void ListHistory(string command)
+        {
+            using (var context = new MyContext())
+            {
+                var items = context.Requests.Where(o => true).ToList();
+                SetMessageAsync($"> {command}\r\n当前共有 {items.Count} 个历史事项");
+                int i = 1;
+                foreach (var item in items)
+                {
+                    SetMessageAsync($"{i++}\r\n{GetDisplayString(item)}");
+                }
+            }
+        }
+
+        public class DisplayRequestItem
+        {
+            public int ID { get; set; }
+
+            public string PII { get; set; } // PII 单独从 EntityString 中抽取出来，便于进行搜索
+
+            public string Action { get; set; }  // borrow/return/transfer
+
+            public DateTime OperTime { get; set; }  // 操作时间
+            public string State { get; set; }   // 状态。sync/commerror/normalerror/空
+                                                // 表示是否完成同步，还是正在出错重试同步阶段，还是从未同步过
+            public string SyncErrorInfo { get; set; }   // 最近一次同步操作的报错信息
+            public int SyncCount { get; set; }
+
+            public Operator Operator { get; set; }  // 提起请求的读者
+
+            public Entity Entity { get; set; }
+
+            public string TransferDirection { get; set; } // in/out 典藏移交的方向
+            public string Location { get; set; }    // 所有者馆藏地。transfer 动作会用到
+            public string CurrentShelfNo { get; set; }  // 当前架号。transfer 动作会用到
+            public string BatchNo { get; set; } // 批次号。transfer 动作会用到。建议可以用当前用户名加上日期构成
+        }
+
+        static string GetDisplayString(RequestItem item)
+        {
+            DisplayRequestItem result = new DisplayRequestItem
+            {
+                ID = item.ID,
+                PII = item.PII,
+                Action = item.Action,
+                OperTime = item.OperTime,
+                State = item.State,
+                SyncErrorInfo = item.SyncErrorInfo,
+                SyncCount = item.SyncCount,
+                Operator = JsonConvert.DeserializeObject<Operator>(item.OperatorString),
+                Entity = JsonConvert.DeserializeObject<Entity>(item.EntityString),
+                TransferDirection = item.TransferDirection,
+                Location = item.Location,
+                CurrentShelfNo = item.CurrentShelfNo,
+                BatchNo = item.BatchNo,
+            };
+            return JsonConvert.SerializeObject(result, Formatting.Indented);
+        }
+
         #region SetMessage() API
+
+        public static Task<SetMessageResult> SetMessageAsync(string content)
+        {
+            SetMessageRequest request = new SetMessageRequest("create", "",
+                new List<MessageRecord> {
+                        new MessageRecord {
+                            groups= new string[] { GroupName},
+                            data = content}
+                });
+            return SetMessageAsync(request);
+        }
 
         public static Task<SetMessageResult> SetMessageAsync(
             SetMessageRequest param)

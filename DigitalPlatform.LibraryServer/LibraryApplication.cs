@@ -15388,6 +15388,8 @@ strLibraryCode);    // 读者所在的馆代码
         NotBorrowed = 35,   // 册记录处于未被借出状态 2017/6/20
         NotChanged = 36,    // 没有发生修改 2019/11/10
         ServerTimeout = 37, // 服务器发生 ApplicationException 超时
+        AlreadyBorrowed = 38,   // 已经被当前读者借阅 2020/3/26
+        AlreadyBorrowedByOther = 39,    // 已经被其他读者借阅 2020/3/26
 
         // 以下为兼容内核错误码而设立的同名错误码
         AlreadyExist = 100, // 兼容

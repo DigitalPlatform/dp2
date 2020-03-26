@@ -488,6 +488,12 @@ namespace DigitalPlatform.LibraryClient.localhost {
         ServerTimeout = 37,
         
         [System.Runtime.Serialization.EnumMemberAttribute()]
+        AlreadyBorrowed = 38,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        AlreadyBorrowedByOther = 39,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
         AlreadyExist = 100,
         
         [System.Runtime.Serialization.EnumMemberAttribute()]

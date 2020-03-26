@@ -16,27 +16,30 @@ namespace dp2SSL
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ID { get; set; }
 
+        public string PII { get; set; } // PII 单独从 EntityString 中抽取出来，便于进行搜索
+
+        public string Action { get; set; }  // borrow/return/transfer
+
+        public DateTime OperTime { get; set; }  // 操作时间
+        public string State { get; set; }   // 状态。sync/commerror/normalerror/空
+                                            // 表示是否完成同步，还是正在出错重试同步阶段，还是从未同步过
+        public string SyncErrorInfo { get; set; }   // 最近一次同步操作的报错信息
+        public int SyncCount { get; set; }
+
         // public Operator Operator { get; set; }  // 提起请求的读者
+
         // Operator 对象 JSON 化以后的字符串
         public string OperatorString { get; set; }
 
-        // public Entity Entity { get; set; }
+        //public Entity Entity { get; set; }
         // Entity 对象 JSON 化以后的字符串
         public string EntityString { get; set; }
 
-
-        public string Action { get; set; }  // borrow/return/transfer
         public string TransferDirection { get; set; } // in/out 典藏移交的方向
         public string Location { get; set; }    // 所有者馆藏地。transfer 动作会用到
         public string CurrentShelfNo { get; set; }  // 当前架号。transfer 动作会用到
         public string BatchNo { get; set; } // 批次号。transfer 动作会用到。建议可以用当前用户名加上日期构成
 
-        public string PII { get; set; } // PII 单独从 EntityString 中抽取出来，便于进行搜索
-        public DateTime OperTime { get; set; }  // 操作时间
-        public string State { get; set; }   // 状态。sync/commerror/normalerror/空
-                                                    // 表示是否完成同步，还是正在出错重试同步阶段，还是从未同步过
-        public string SyncErrorInfo { get; set; }   // 最近一次同步操作的报错信息
-        public int SyncCount { get; set; }
     }
 
 #if NO
