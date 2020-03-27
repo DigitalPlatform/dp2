@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.26.*")]
-[assembly: AssemblyFileVersion("3.26.0.0")]
+[assembly: AssemblyVersion("3.27.*")]
+[assembly: AssemblyFileVersion("3.27.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -207,3 +207,4 @@ ItemCanReturn()
 //		3.24 (2020/3/1) ListFile() API 以前版本有时会出现获取当日操作日志文件尺寸陈旧的问题。现已消除
 //		3.25 (2020/3/2) 超期通知批处理任务会自动给所有的读者记录加上 libraryCode 元素。SetReaderInfo() API 无论是 new 还是 change 动作都会自动给读者记录加上 libraryCode 元素
 //		3.26 (2020/3/20) 重构代码，使用 MongoDB.Driver 2.10.2。修正了 dp2OPAC 安装包中 opac_app.zip 缺大量子目录和文件的问题。
+//		3.27 (2020/3/27) Borrow() 和 Return() API 的 strStyle 参数可以包含 operTime:xxx 子参数，表示本次操作为同步操作，xxx 部分是实际操作时间。程序会对实际操作时间和册记录中遗留的 checkInOutDate 元素里面的时间进行比较，有可能会拒绝同步(返回错误码 ErrorCode.SyncDenied)

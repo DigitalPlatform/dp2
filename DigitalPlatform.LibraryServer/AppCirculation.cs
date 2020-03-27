@@ -628,6 +628,8 @@ namespace DigitalPlatform.LibraryServer
         //                  "item"表示将返回册记录；"reader"表示将返回读者记录
         //                  "auto_renew"  表示如果当前处在已经借出状态，并且发起借书的又是同一人，自动当作续借请求进行操作
         //                  "overflowable" 表示允许超过借书限额进行借书。但超出限额的册的借期只有一天(必须在当天之内还回)
+        //                  "operTime:xxxx" 表示本次借阅操作是同步操作，实际动作时刻其实早于本次提交请求的时刻。xxxx 部分是实际动作时刻，为 RFC1123 格式。
+        //                          本函数会检查册记录里面的 checkInOutDate 元素内的时间，如果实际操作时刻早于这个时间，则同步请求会被拒绝
         //      strItemFormat   规定strItemRecord参数所返回的数据格式
         //      strItemRecord   返回册记录
         //      strReaderFormat 规定strReaderRecord参数所返回的数据格式
@@ -1597,6 +1599,27 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     // 移动到这里
+
+                    if (strAction == "borrow" || strAction == "renew")
+                    {
+                        // 2020/3/27
+                        // return:
+                        //      -1  出错
+                        //      0   符合要求
+                        //      1   不符合要求，同步请求应当被拒绝
+                        nRet = CheckSyncTime(itemdom,
+                            strStyle,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        if (nRet == 1)
+                        {
+                            result.Value = -1;
+                            result.ErrorInfo = strError;
+                            result.ErrorCode = ErrorCode.SyncDenied;
+                            return result;
+                        }
+                    }
 
                     // 在读者记录和册记录中添加借阅信息
                     // string strNewReaderXml = "";
@@ -6502,6 +6525,27 @@ start_time_1,
                             out strError);
                         if (nRet == -1 || nRet == 0)
                             goto ERROR1;
+
+                        if (strAction == "return" || strAction == "lost")
+                        {
+                            // 2020/3/27
+                            // return:
+                            //      -1  出错
+                            //      0   符合要求
+                            //      1   不符合要求，同步请求应当被拒绝
+                            nRet = CheckSyncTime(itemdom,
+                                strStyle,
+                                out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+                            if (nRet == 1)
+                            {
+                                result.Value = -1;
+                                result.ErrorInfo = strError;
+                                result.ErrorCode = ErrorCode.SyncDenied;
+                                return result;
+                            }
+                        }
 
                         // return:
                         //      -1  出错
@@ -15377,6 +15421,12 @@ start_time_1,
             DomUtil.DeleteElements(itemdom.DocumentElement,
     "borrowDate");
 
+            // 2020/3/27
+            // 最近一次借还本册操作的时间。用于同步借还请求判断先后关系
+            DomUtil.SetElementText(itemdom.DocumentElement,
+    "checkInOutDate",
+    strOperTime);
+
             if (nodeOldBorrower != null)
                 DomUtil.SetAttr(nodeOldBorrower,
                "borrowPeriod",
@@ -17056,6 +17106,12 @@ start_time_1,
                 "borrowDate",
                 strBorrowDate);
 
+            // 2020/3/27
+            // 最近一次借还本册操作的时间。用于同步借还请求判断先后关系
+            DomUtil.SetElementText(itemdom.DocumentElement,
+    "checkInOutDate",
+    strBorrowDate);
+
             // 2019/11/9
             // 记载溢出原因
             if (overflowReasons.Count > 0)
@@ -17175,6 +17231,45 @@ start_time_1,
             borrow_info.Location = strLocation;
              * */
             borrow_info.ItemBarcode = strItemBarcode;
+
+            return 0;
+        }
+
+        // 检查同步请求的操作时间和册记录内记载的最近一次借还操作时间之间的关系
+        // return:
+        //      -1  出错
+        //      0   符合要求
+        //      1   不符合要求，同步请求应当被拒绝
+        int CheckSyncTime(XmlDocument itemdom,
+            string strStyle,
+            out string strError)
+        {
+            strError = "";
+            string operTime = StringUtil.GetParameterByPrefix(strStyle, "operTime", ":");
+            if (operTime == null)
+                return 0;   // 没有 operTime 子参数
+            if (DateTimeUtil.TryParseRfc1123DateTimeString(operTime,
+                out DateTime currentTime) == false)
+            {
+                strError = $"operTime子参数包含的时间字符串 '{operTime}' 不合法。应为 RFC1123 格式";
+                return -1;
+            }
+
+            string lastDate = DomUtil.GetElementText(itemdom.DocumentElement, "checkInOutDate");
+            if (string.IsNullOrEmpty(lastDate))
+                return 0;
+            if (DateTimeUtil.TryParseRfc1123DateTimeString(lastDate,
+    out DateTime lastTime) == false)
+            {
+                strError = $"册记录内 checkInOutDate 元素包含的时间字符串 '{lastDate}' 不合法。应为 RFC1123 格式";
+                return -1;
+            }
+
+            if (currentTime < lastTime)
+            {
+                strError = $"实际操作时间 {currentTime.ToString()} 之后又发生了借还操作({lastTime.ToString()})，同步被拒绝";
+                return 1;
+            }
 
             return 0;
         }

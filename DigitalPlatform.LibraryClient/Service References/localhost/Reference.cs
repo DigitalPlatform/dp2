@@ -494,6 +494,9 @@ namespace DigitalPlatform.LibraryClient.localhost {
         AlreadyBorrowedByOther = 39,
         
         [System.Runtime.Serialization.EnumMemberAttribute()]
+        SyncDenied = 40,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
         AlreadyExist = 100,
         
         [System.Runtime.Serialization.EnumMemberAttribute()]
