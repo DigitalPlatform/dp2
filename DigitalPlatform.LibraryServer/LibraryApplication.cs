@@ -15390,6 +15390,7 @@ strLibraryCode);    // 读者所在的馆代码
         ServerTimeout = 37, // 服务器发生 ApplicationException 超时
         AlreadyBorrowed = 38,   // 已经被当前读者借阅 2020/3/26
         AlreadyBorrowedByOther = 39,    // 已经被其他读者借阅 2020/3/26
+        SyncDenied = 40,    // 同步操作被拒绝(因为实际操作时间之后又发生过借还操作) 2020/3/27
 
         // 以下为兼容内核错误码而设立的同名错误码
         AlreadyExist = 100, // 兼容
