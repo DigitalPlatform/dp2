@@ -3084,6 +3084,9 @@ Stack:
 
         public static bool PauseSubmit { get; set; }
 
+        // 同步重试间隔时间
+        static TimeSpan _idleLength = TimeSpan.FromSeconds(10);
+
         // 启动同步任务。此任务长期在后台运行
         public static void StartSyncTask()
         {
@@ -3107,8 +3110,11 @@ Stack:
                     {
                         // TODO: 无论是整体退出，还是需要激活，都需要能中断 Delay
                         // Task.Delay(TimeSpan.FromSeconds(10)).Wait(token);
-                        _eventRetry.WaitOne(TimeSpan.FromSeconds(10));
+                        _eventRetry.WaitOne(_idleLength);
                         token.ThrowIfCancellationRequested();
+
+                        // 顺便检查和确保连接到消息服务器
+                        App.CurrentApp.EnsureConnectMessageServer().Wait(token);
 
                         if (PauseSubmit)
                             continue;
@@ -3123,7 +3129,8 @@ Stack:
                         // 一般来说，只要 SubmitWindow 开着，就要显示请求情况结果。
                         // 特殊地，如果 SubmitWindow 没有开着，但本次至少有一个成功的请求结果了，那就专门打开 SubmitWindow 显示信息
 
-                        int succeedCount = 0;
+                        int succeedCount = 0;   // 同步成功的事项数量
+                        int newCount = 0;   // 首次进行同步的事项数量
 
                         // 排序和分组。按照分组提交给 dp2library 服务器
                         var groups = GroupActions(actions);
@@ -3187,6 +3194,8 @@ Stack:
                                 {
                                     if (action.State == "sync")
                                         succeedCount++;
+                                    if (action.SyncCount == 1)
+                                        newCount++;
                                     // sync/commerror/normalerror/空
                                     // 同步成功/通讯出错/一般出错/从未同步过
                                     ChangeDatabaseActionState(action.ID, action);
@@ -3209,7 +3218,8 @@ Stack:
 
                         // 把执行结果显示到对话框内
                         // 全部事项都重试失败的时候不需要显示
-                        if (progress != null && progress.IsVisible)
+                        if (progress != null && progress.IsVisible
+                        && (succeedCount > 0 || newCount > 0))
                         {
                             Application.Current.Dispatcher.Invoke(new Action(() =>
                             {
