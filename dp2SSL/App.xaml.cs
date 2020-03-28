@@ -226,6 +226,18 @@ namespace dp2SSL
             }
         }
 
+        // 确保连接到消息服务器
+        public async Task EnsureConnectMessageServer()
+        {
+            if (string.IsNullOrEmpty(messageServerUrl) == false
+                && TinyServer.IsDisconnected)
+            {
+                var result = await TinyServer.ConnectAsync(messageServerUrl, messageUserName, messagePassword, "");
+                if (result.Value == -1)
+                    WpfClientInfo.WriteErrorLog($"连接消息服务器失败: {result.ErrorInfo}。url={messageServerUrl},userName={messageUserName},errorCode={result.ErrorCode}");
+            }
+        }
+
         public void InitialShelfCfg()
         {
             if (App.Function == "智能书柜")

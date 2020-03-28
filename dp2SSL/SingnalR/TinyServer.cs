@@ -5,11 +5,11 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
+using Newtonsoft.Json;
 using Microsoft.AspNet.SignalR.Client;
 
 using DigitalPlatform;
 using DigitalPlatform.MessageClient;
-using Newtonsoft.Json;
 
 namespace dp2SSL
 {
@@ -36,6 +36,7 @@ namespace dp2SSL
 
             Connection.Stop();
             Connection.Dispose();
+            Connection = null;
 
             _userName = "";
         }
@@ -51,6 +52,16 @@ namespace dp2SSL
             }
 
             _handlers.Clear();
+        }
+
+        public static bool IsDisconnected
+        {
+            get
+            {
+                if (Connection == null)
+                    return true;
+                return Connection.State == ConnectionState.Disconnected;
+            }
         }
 
         private static readonly Object _syncRoot = new Object();
