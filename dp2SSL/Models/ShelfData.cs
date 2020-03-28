@@ -2087,6 +2087,7 @@ namespace dp2SSL
                 func_booksChanged?.Invoke();
             }
 
+            // TODO: 平时可以建立一个 cache，以后先从 cache 里面取书目摘要字符串
             var task = Task.Run(async () =>
             {
                 CancellationToken token = CancelToken;
@@ -2353,6 +2354,7 @@ namespace dp2SSL
                         {
                             MessageItem error = new MessageItem
                             {
+                                SyncCount = info.SyncCount,
                                 Operator = info.Operator,
                                 Operation = action,
                                 ResultType = "error",
@@ -2379,6 +2381,7 @@ namespace dp2SSL
 
                             MessageItem error = new MessageItem
                             {
+                                SyncCount = info.SyncCount,
                                 Operator = info.Operator,
                                 Operation = "changeEAS",
                                 ResultType = "error",
@@ -2516,7 +2519,10 @@ namespace dp2SSL
                     if ((error_code == ErrorCode.RequestError
     || error_code == ErrorCode.RequestTimeOut)
     && nRedoCount < 2)
+                    {
+                        nRedoCount++;
                         goto REDO;
+                    }
 
                     processed.Add(info);
 
@@ -2567,6 +2573,7 @@ namespace dp2SSL
                         direction += $" 当前位置({info.CurrentShelfNo})";
                     MessageItem messageItem = new MessageItem
                     {
+                        SyncCount = info.SyncCount,
                         Operator = info.Operator,
                         Operation = action,
                         ResultType = resultType,
@@ -2664,9 +2671,10 @@ namespace dp2SSL
                             //if (info.RetryCount < 10)
                             //    retry_actions.Add(info);
                             info.State = "normalerror";
-                            if (StringUtil.IsInList("auto_stop", style))
-                                break;
                         }
+
+                        if (StringUtil.IsInList("auto_stop", style))
+                            break;
 
                         WpfClientInfo.WriteErrorLog($"请求失败。action:{action},PII:{entity.PII}, 错误信息:{strError}, 错误码:{error_code.ToString()}");
 
@@ -2924,6 +2932,7 @@ Stack:
         }
 
         // 把 Actions 追加保存到本地数据库
+        // 当本函数执行完以后，ActionInfo 对象的 ID 有了值，和数据库记录的 ID 对应
         public static async Task SaveActionsToDatabase(List<ActionInfo> actions)
         {
             try
@@ -2932,8 +2941,16 @@ Stack:
                 {
                     context.Database.EnsureCreated();
 
-                    context.Requests.AddRange(FromActions(actions));
+                    var requests = FromActions(actions);
+                    context.Requests.AddRange(requests);
                     int nCount = await context.SaveChangesAsync();
+
+                    Debug.Assert(requests.Count == actions.Count, "");
+                    // 刷新 ActionInfo 对象的 ID
+                    for (int i = 0; i < requests.Count; i++)
+                    {
+                        actions[i].ID = requests[i].ID;
+                    }
 
                     WpfClientInfo.WriteInfoLog($"Actions 保存到本地数据库成功。内容如下：\r\n{ActionInfo.ToString(actions)}");
                 }
@@ -2953,7 +2970,7 @@ Stack:
             using (var context = new MyContext())
             {
                 context.Database.EnsureCreated();
-                foreach(var pii in piis)
+                foreach (var pii in piis)
                 {
                     var items = context.Requests.Where(o => o.PII == pii && o.State != "sync").ToList();
                     // context.Requests.RemoveRange(items);
@@ -3065,8 +3082,10 @@ Stack:
             PageMenu.PageShelf?.SetRetryInfo(actions.Count == 0 ? "" : $"滞留:{actions.Count}");
         }
 
+        public static bool PauseSubmit { get; set; }
+
         // 启动同步任务。此任务长期在后台运行
-        public static void StartRequestTask()
+        public static void StartSyncTask()
         {
             if (_retryTask != null)
                 return;
@@ -3091,6 +3110,9 @@ Stack:
                         _eventRetry.WaitOne(TimeSpan.FromSeconds(10));
                         token.ThrowIfCancellationRequested();
 
+                        if (PauseSubmit)
+                            continue;
+
                         // TODO: 从本地数据库中装载需要同步的那些 Actions
                         List<ActionInfo> actions = LoadRetryActionsFromDatabase();
                         if (actions.Count == 0)
@@ -3098,13 +3120,18 @@ Stack:
 
                         // RefreshRetryInfo() ???
 
+                        // 一般来说，只要 SubmitWindow 开着，就要显示请求情况结果。
+                        // 特殊地，如果 SubmitWindow 没有开着，但本次至少有一个成功的请求结果了，那就专门打开 SubmitWindow 显示信息
+
+                        int succeedCount = 0;
+
                         // 排序和分组。按照分组提交给 dp2library 服务器
                         var groups = GroupActions(actions);
 
                         List<MessageItem> messages = new List<MessageItem>();
-
                         // 准备对话框
-                        SubmitWindow progress = PageMenu.PageShelf?.OpenProgressWindow();
+                        // SubmitWindow progress = PageMenu.PageShelf?.OpenProgressWindow();
+                        SubmitWindow progress = PageMenu.PageShelf?.ProgressWindow;
 
                         foreach (var group in groups)
                         {
@@ -3154,8 +3181,12 @@ Stack:
                             */
                             if (result.ProcessedActions != null)
                             {
+                                // result.ProcessedActions.ForEach(o => { if (o.SyncCount == 0) newCount++; });
+
                                 foreach (var action in result.ProcessedActions)
                                 {
+                                    if (action.State == "sync")
+                                        succeedCount++;
                                     // sync/commerror/normalerror/空
                                     // 同步成功/通讯出错/一般出错/从未同步过
                                     ChangeDatabaseActionState(action.ID, action);
@@ -3171,9 +3202,14 @@ Stack:
                         // 将 submit 情况写入日志备查
                         // WpfClientInfo.WriteInfoLog($"重试提交请求:\r\n{ActionInfo.ToString(actions)}\r\n返回结果:{result.ToString()}");
 
+                        // 如果本轮有成功的请求，并且进度窗口没有打开，则补充打开进度窗口
+                        if ((progress == null || progress.IsVisible == false)
+                        && succeedCount > 0)
+                            progress = PageMenu.PageShelf?.OpenProgressWindow();
+
                         // 把执行结果显示到对话框内
                         // 全部事项都重试失败的时候不需要显示
-                        if (progress != null)
+                        if (progress != null && progress.IsVisible)
                         {
                             Application.Current.Dispatcher.Invoke(new Action(() =>
                             {
