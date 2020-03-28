@@ -54,6 +54,9 @@
                        Background="DarkOrange" Foreground="White"
                        TextWrapping="Wrap" Padding="6,6,6,6"
                        ></TextBlock>
+            <CheckBox Name="pauseSubmit" Foreground="White"
+                      Checked="pauseSubmit_Checked"
+                      Unchecked="pauseSubmit_Unchecked">暂停提交</CheckBox>
         </StackPanel>
         <Button Grid.Row="1" Grid.Column="2">Right</Button>
         <!--

@@ -1544,7 +1544,7 @@ namespace dp2SSL
                     ShelfData.RemoveRetryActionsFromDatabase(piis);
                 }
                 // 启动重试任务。此任务长期在后台运行
-                ShelfData.StartRequestTask();
+                ShelfData.StartSyncTask();
             }
             finally
             {
@@ -2344,6 +2344,14 @@ namespace dp2SSL
 
         SubmitWindow _progressWindow = null;
 
+        public SubmitWindow ProgressWindow
+        {
+            get
+            {
+                return _progressWindow;
+            }
+        }
+
         public SubmitWindow OpenProgressWindow()
         {
             Application.Current.Dispatcher.Invoke(new Action(() =>
@@ -2441,7 +2449,6 @@ namespace dp2SSL
 
             // TODO: 如果 RetryActions 有内容，则本次的 actions 要立刻追加进入 RetryActions，并立即触发重试 Task 过程。这是为了保证优先提交滞留的请求
 
-            /*
             SubmitWindow progress = null;
 
             if (silence == false)
@@ -2449,7 +2456,6 @@ namespace dp2SSL
                 OpenProgressWindow();
                 progress = _progressWindow;
             }
-            */
 
             try
             {
@@ -2472,11 +2478,17 @@ namespace dp2SSL
                         string text = $"本次 {actions.Count} 个请求被加入队列，稍后会自动进行提交";
                         // _progressWindow?.PushContent(text, "green");
                         // 用 Balloon 提示
-                        WpfClientInfo.WriteErrorLog(text);
+                        WpfClientInfo.WriteInfoLog(text);
                     }
                     // TODO: 保存到数据库。这样不怕中途断电或者异常退出
 
                     ShelfData.ActivateRetry();
+
+                    // TODO: 等待请求提交以后显示信息
+                    // 用一个 actions 数组来捕捉请求提交完成时刻
+                    // 一个批次结构里面有若干 ID。匹配上其中一个 ID 就算显示过这个批次了，把批次信息移走
+                    // 特别需要注意语音和文字提醒这批里面的溢出借书警告
+                    // 其实如果简化处理的话，只要一批请求有一个成功的就可以显示。意思是只要减少了等待事项的一批请求就显示其结果
                     return;
                 }
 
@@ -2877,6 +2889,16 @@ namespace dp2SSL
         {
             string result = SelectAntenna();
             MessageBox.Show(result);
+        }
+
+        private void pauseSubmit_Checked(object sender, RoutedEventArgs e)
+        {
+            ShelfData.PauseSubmit = true;
+        }
+
+        private void pauseSubmit_Unchecked(object sender, RoutedEventArgs e)
+        {
+            ShelfData.PauseSubmit = false;
         }
     }
 }

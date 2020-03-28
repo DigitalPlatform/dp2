@@ -258,6 +258,8 @@ namespace dp2SSL
 
         public string Direction { get; set; }   // 转移操作的方向。只有转移操作才用到这个字段
 
+        public int SyncCount { get; set; }  // 操作时达到的重试次数
+
         // 消息所涉及到的实体
         public Entity Entity { get; set; }
 
