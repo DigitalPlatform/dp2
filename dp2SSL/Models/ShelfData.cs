@@ -2912,7 +2912,8 @@ Stack:
             using (var context = new MyContext())
             {
                 context.Database.EnsureCreated();
-                var items = context.Requests.Where(o => o.State != "sync" && o.State != "cancelsync").ToList();
+                var items = context.Requests.Where(o => o.State != "sync" && o.State != "cancelsync")
+                    .OrderBy(o => o.ID).ToList();
                 var actions = FromRequests(items);
                 WpfClientInfo.WriteInfoLog($"从本地数据库装载 Actions 成功。内容如下：\r\n{ActionInfo.ToString(actions)}");
                 return actions;

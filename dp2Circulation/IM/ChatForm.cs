@@ -319,7 +319,7 @@ namespace dp2Circulation
             string strText = "<div class='item'>"
 + "<div class='item_line_" + left + "'>"
 + " <div class='item_prefix_text_" + left + "'>" + HttpUtility.HtmlEncode(strName).Replace("\r\n", "<br/>") + "</div>"
-+ " <div class='item_summary_" + left + "'>" + HttpUtility.HtmlEncode(strContent).Replace("\r\n", "<br/>") + "</div>"
++ " <div class='item_summary_" + left + "'>" + HttpUtility.HtmlEncode(strContent).Replace("\r\n", "<br/>").Replace(" ","&nbsp;") + "</div>"
 + "</div>"
 + " <div class='clear'></div>"
 + "</div>";
