@@ -1543,6 +1543,26 @@ namespace dp2SSL
                     var piis = ShelfData.All.Select(x => x.UID);
                     ShelfData.RemoveRetryActionsFromDatabase(piis);
                 }
+
+                // 将刚才初始化涉及到的 action 操作写入本地数据库
+                {
+                    List<ActionInfo> actions = new List<ActionInfo>();
+                    foreach (var entity in ShelfData.All)
+                    {
+                        actions.Add(new ActionInfo
+                        {
+                            Entity = entity,
+                            Action = "inventory",
+                            State = "sync",
+                            SyncCount = 1,
+                            CurrentShelfNo = ShelfData.GetShelfNo(entity),
+                            Operator = GetOperator(entity, false)
+                        });
+                    }
+                    DisplayMessage(progress, "正在将盘点动作写入本地数据库", "green");
+                    await ShelfData.SaveActionsToDatabase(actions);
+                }
+
                 // 启动重试任务。此任务长期在后台运行
                 ShelfData.StartSyncTask();
             }
