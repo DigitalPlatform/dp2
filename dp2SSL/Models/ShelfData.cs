@@ -247,7 +247,7 @@ namespace dp2SSL
                 if (StringUtil.IsInList("skip", style) == false)
                 {
                     // 用控件模拟灯亮灭，便于调试
-                    PageMenu.PageShelf.SimulateLamp(true);
+                    PageMenu.PageShelf?.SimulateLamp(true);
                     RfidManager.TurnShelfLamp("*", "turnOn");   // TODO: 遇到出错如何报错?
                 }
             }

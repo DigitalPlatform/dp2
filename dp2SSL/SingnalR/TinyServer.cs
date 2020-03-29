@@ -4,13 +4,18 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using System.Diagnostics;
+using System.Linq.Expressions;
 
 using Newtonsoft.Json;
 using Microsoft.AspNet.SignalR.Client;
+using Z.Expressions;
 
 using DigitalPlatform;
 using DigitalPlatform.MessageClient;
 using DigitalPlatform.Xml;
+using DigitalPlatform.Text;
+using System.Threading;
 
 namespace dp2SSL
 {
@@ -102,7 +107,6 @@ namespace dp2SSL
                     _handlers.Add(handler);
                 }
 
-                /*
                 // *** search
                 {
                     var handler = HubProxy.On<SearchRequest>("search",
@@ -110,7 +114,6 @@ namespace dp2SSL
                     );
                     _handlers.Add(handler);
                 }
-                */
 
                 /*
                 // *** webCall
@@ -446,5 +449,377 @@ IList<MessageRecord> messages)
 
         #endregion
 
+        #region Search() API
+
+        // 当 server 发来检索请求的时候被调用。重载的时候要进行检索，并调用 Response 把检索结果发送给 server
+        static void OnSearchRecieved(SearchRequest param)
+        {
+            // 单独给一个线程来执行
+            // Task.Factory.StartNew(() => SearchAndResponse(param));
+            Task.Run(() => SearchAndResponse(param));
+        }
+
+        static void SearchAndResponse(SearchRequest searchParam)
+        {
+            /*
+            if (searchParam.Operation == "getPatronInfo")
+            {
+                GetPatronInfo(searchParam);
+                return;
+            }
+
+            if (searchParam.Operation == "getSystemParameter")
+            {
+                GetSystemParameter(searchParam);
+                return;
+            }
+
+            if (searchParam.Operation == "getUserInfo")
+            {
+                GetUserInfo(searchParam);
+                return;
+            }
+
+            if (searchParam.Operation == "getBiblioInfo")
+            {
+                GetBiblioInfo(searchParam);
+                return;
+            }
+
+            if (searchParam.Operation == "getBiblioSummary")
+            {
+                GetBiblioSummary(searchParam);
+                return;
+            }
+
+            if (searchParam.Operation == "getItemInfo")
+            {
+                GetItemInfo(searchParam);
+                return;
+            }
+
+            if (searchParam.Operation == "getBrowseRecords")
+            {
+                GetBrowseRecords(searchParam);
+                return;
+            }
+            */
+
+            SearchHistory(searchParam);
+            return;
+        }
+
+        // https://eval-expression.net/linq-dynamic
+        static string BuildQuery(SearchRequest request)
+        {
+            if (string.IsNullOrEmpty(request.QueryWord))
+                return "true";
+
+            StringBuilder text = new StringBuilder();
+            List<string> uses = StringUtil.SplitList(request.UseList);
+            List<string> where_list = new List<string>();
+            foreach (var use in uses)
+            {
+                //string s = "";
+                //s.EndsWith()
+                if (request.MatchStyle == "left")
+                    where_list.Add($" x.{use}.StartsWith(\"{request.QueryWord}\") ");
+                else if (request.MatchStyle == "right")
+                    where_list.Add($" x.{use}.EndsWith(\"{request.QueryWord}\") ");
+                else if (request.MatchStyle == "exact")
+                    where_list.Add($" x.{use} == \"{request.QueryWord}\" ");
+                else // if (request.MatchStyle == "middle")
+                    where_list.Add($" x.{use}.IndexOf(\"{request.QueryWord}\") != -1 ");
+            }
+
+            text.Append(StringUtil.MakePathList(where_list, "||"));
+            return text.ToString();
+        }
+
+        // TODO: 结果集用 ID 数组表示? 早期可只支持 default 这一个结果集
+        static async Task SearchHistory(SearchRequest searchParam)
+        {
+            string strError = "";
+            string strErrorCode = "";
+            IList<DigitalPlatform.MessageClient.Record> records = new List<DigitalPlatform.MessageClient.Record>();
+
+            string strResultSetName = searchParam.ResultSetName;
+            if (string.IsNullOrEmpty(strResultSetName) == true)
+                strResultSetName = "default";  // "#" + searchParam.TaskID;    // "default";
+            else
+                strResultSetName = "#" + strResultSetName;  // 如果请求方指定了结果集名，则在 dp2library 中处理为全局结果集名
+
+            try
+            {
+                int count = (int)searchParam.Count;
+                if (count == -1)
+                    count = Int32.MaxValue;
+
+                if (searchParam.QueryWord == "!getResult")
+                {
+                    // lRet = -1;
+                }
+                else
+                {
+                    // TODO: .Operation == "searchBiblio"
+                    using (var context = new MyContext())
+                    {
+                        // https://stackoverflow.com/questions/37078256/entity-framework-building-where-clause-on-the-fly-using-expression
+                        string query = BuildQuery(searchParam);
+
+                        var query_result = context.Requests.WhereDynamic(x => query)
+    .OrderBy(o => o.ID);
+                        int result_count = query_result.Count();
+
+                        if (result_count == 0)
+                        {
+                            // 没有命中
+                            TryResponseSearch(
+                                new SearchResponse(
+    searchParam.TaskID,
+    0,
+    0,
+    "", // this.dp2library.LibraryUID,
+    records,
+    "没有命中",  // 出错信息大概为 not found。
+    "NotFound"));
+                            return;
+                        }
+
+                        if (searchParam.Count == 0)
+                        {
+                            // 返回命中数
+                            TryResponseSearch(
+                                new SearchResponse(
+                                searchParam.TaskID,
+                                result_count,
+    0,
+    "", // this.dp2library.LibraryUID,
+    records,
+    "本次没有返回任何记录",
+    strErrorCode));
+                            return;
+                        }
+
+                        var items = query_result.Skip((int)searchParam.Start)
+    .Take(count)
+    .ToList();
+                        /*
+                        var items = context.Requests.WhereDynamic(x => query)
+                            .OrderBy(o => o.ID)
+                            .Skip((int)searchParam.Start)
+                            .Take(count)
+                            .ToList();
+                            */
+
+                        foreach (var item in items)
+                        {
+                            records.Add(new Record
+                            {
+                                RecPath = item.ID.ToString(),
+                                Format = "JSON",
+                                Data = DisplayRequestItem.GetDisplayString(item),
+                                Timestamp = null
+                            });
+                        }
+                        var result = await TryResponseSearch(
+    searchParam.TaskID,
+    result_count,
+    searchParam.Start,
+    "", // libraryUID,
+    records,
+    "", // errorInfo,
+    "", // errorCode,
+    100);
+                    }
+                }
+                return;
+            }
+            catch (Exception ex)
+            {
+                strError = ExceptionUtil.GetDebugText(ex);
+                goto ERROR1;
+            }
+
+        ERROR1:
+            // 报错
+            TryResponseSearch(
+                new SearchResponse(
+searchParam.TaskID,
+-1,
+0,
+"", // this.dp2library.LibraryUID,
+records,
+strError,
+strErrorCode));
+        }
+
+        // 调用 server 端 ResponseSearchBiblio
+        static async void TryResponseSearch(
+SearchResponse responseParam)
+        {
+            // TODO: 等待执行完成。如果有异常要当时处理。比如减小尺寸重发。
+            int nRedoCount = 0;
+        REDO:
+            try
+            {
+                MessageResult result = await HubProxy.Invoke<MessageResult>("ResponseSearch",
+ responseParam).ConfigureAwait(false);
+                if (result.Value == -1)
+                {
+                    //AddErrorLine(result.ErrorInfo);
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                //AddErrorLine(ex.Message);
+                if (ex.InnerException is InvalidOperationException
+                    && nRedoCount < 2)
+                {
+                    nRedoCount++;
+                    Thread.Sleep(1000);
+                    goto REDO;
+                }
+            }
+        }
+
+        class ResponseSearchResult : NormalResult
+        {
+            // [out]
+            public long BatchSize { get; set; }
+        }
+
+        // TODO: 注意测试，一次只能发送一个元素，或者连一个元素都发送不成功的情况
+        // 具有重试机制的 ReponseSearch
+        // 运行策略是，当遇到 InvalidOperationException 异常时，减少一半数量重试发送，用多次小批发送解决问题
+        // 如果最终无法完成发送，则尝试发送一条报错信息，然后返回 false
+        // parameters:
+        //      batch_size  建议的最佳一次发送数目。-1 表示不限制
+        // return Value:
+        //      1    成功
+        //      0   失败
+        static async Task<ResponseSearchResult> TryResponseSearch(
+            string taskID,
+            long resultCount,
+            long start,
+            string libraryUID,
+            IList<Record> records,
+            string errorInfo,
+            string errorCode,
+            long batch_size)
+        {
+            string strError = "";
+
+            List<Record> rest = new List<Record>(); // 等待发送的
+            List<Record> current = new List<Record>();  // 当前正在发送的
+            if (batch_size == -1)
+                current.AddRange(records);
+            else
+            {
+                rest.AddRange(records);
+
+                // 将最多 batch_size 个元素从 rest 中移动到 current 中
+                for (int i = 0; i < batch_size && rest.Count > 0; i++)
+                {
+                    current.Add(rest[0]);
+                    rest.RemoveAt(0);
+                }
+            }
+
+            long send = 0;  // 已经发送过的元素数
+            while (current.Count > 0)
+            {
+                try
+                {
+                    // Wait(new TimeSpan(0, 0, 0, 0, 50)); // 50
+
+                    var result = await HubProxy.Invoke<MessageResult>("ResponseSearch",
+new SearchResponse(
+                        taskID,
+                        resultCount,
+                        start + send,
+                        libraryUID,
+                        current,
+                        errorInfo,
+                        errorCode));
+
+                    // _lastTime = DateTime.Now;
+                    if (result.Value == -1)
+                        return new ResponseSearchResult
+                        {
+                            Value = 0,
+                            BatchSize = batch_size
+                        };   // 可能因为服务器端已经中断此 taskID，或者执行 ReponseSearch() 时出错
+                }
+                catch (Exception ex)
+                {
+                    if (ex.InnerException is InvalidOperationException)
+                    {
+                        if (current.Count == 1)
+                        {
+                            strError = "向中心发送 ResponseSearch 消息时出现异常(连一个元素也发送不出去): " + ex.InnerException.Message;
+                            goto ERROR1;
+                        }
+                        // 减少一半元素发送
+                        int half = Math.Max(1, current.Count / 2);
+                        int offs = current.Count - half;
+                        for (int i = 0; current.Count > offs; i++)
+                        {
+                            Record record = current[offs];
+                            rest.Insert(i, record);
+                            current.RemoveAt(offs);
+                        }
+                        batch_size = half;
+                        continue;
+                    }
+
+                    strError = "向中心发送 ResponseSearch 消息时出现异常: " + ExceptionUtil.GetExceptionText(ex);
+                    goto ERROR1;
+                }
+
+                // Console.WriteLine("成功发送 offset=" + (start + send) + " " + current.Count.ToString());
+
+                send += current.Count;
+                current.Clear();
+                if (batch_size == -1)
+                    current.AddRange(rest);
+                else
+                {
+                    // 将最多 batch_size 个元素从 rest 中移动到 current 中
+                    for (int i = 0; i < batch_size && rest.Count > 0; i++)
+                    {
+                        current.Add(rest[0]);
+                        rest.RemoveAt(0);
+                    }
+                }
+            }
+
+            Debug.Assert(rest.Count == 0, "");
+            Debug.Assert(current.Count == 0, "");
+            return new ResponseSearchResult
+            {
+                Value = 1,
+                BatchSize = batch_size
+            };
+        ERROR1:
+            // 报错
+            TryResponseSearch(
+                new SearchResponse(
+taskID,
+-1,
+0,
+libraryUID,
+new List<Record>(),
+strError,
+"_sendResponseSearchError"));    // 消息层面发生的错误(表示不是 dp2library 层面的错误)，错误码为 _ 开头
+            return new ResponseSearchResult
+            {
+                Value = 0,
+                BatchSize = batch_size
+            };
+        }
+
+        #endregion
     }
 }
