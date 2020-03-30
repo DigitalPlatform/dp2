@@ -17,6 +17,7 @@ using DigitalPlatform.Script;
 using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
 using DigitalPlatform.LibraryClient;
+using DigitalPlatform.Text;
 
 namespace dp2Circulation
 {
@@ -138,6 +139,8 @@ namespace dp2Circulation
                 false);
              * */
 
+            // 2020/3/30
+            this.Channel = null;    // testing
         }
 
         private void OperLogStatisForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -397,7 +400,7 @@ namespace dp2Circulation
                 if (nRet == 1)
                     goto END1;  // TODO: SkipAll如何执行? 是否连OnEnd也不执行了？
 
-            END1:
+                END1:
                 // 触发Script的OnEnd()代码
                 if (objStatis != null)
                 {
@@ -405,11 +408,12 @@ namespace dp2Circulation
                     objStatis.OnEnd(this, args);
                 }
 
+                // 2020/3/30
+                if (nRet == 1)
+                    return -1;
                 return 0;
-
             ERROR1:
                 return -1;
-
             }
             catch (Exception ex)
             {
@@ -488,10 +492,39 @@ namespace dp2Circulation
             return 0;
         }
 
-
+        void loader_Prompt(object sender, MessagePromptEventArgs e)
+        {
+            // TODO: 不再出现此对话框。不过重试有个次数限制，同一位置失败多次后总要出现对话框才好
+            if (e.Actions == "yes,no,cancel")
+            {
+#if NO
+                DialogResult result = MessageBox.Show(this,
+    e.MessageText + "\r\n\r\n是否重试操作?\r\n\r\n(是: 重试;  否: 跳过本次操作，继续后面的操作; 取消: 停止全部操作)",
+    "ReportForm",
+    MessageBoxButtons.YesNoCancel,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button1);
+                if (result == DialogResult.Yes)
+                    e.ResultAction = "yes";
+                else if (result == DialogResult.Cancel)
+                    e.ResultAction = "cancel";
+                else
+                    e.ResultAction = "no";
+#endif
+                DialogResult result = AutoCloseMessageBox.Show(this,
+    e.MessageText + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)",
+    20 * 1000,
+    "OperLogStatisForm");
+                if (result == DialogResult.Cancel)
+                    e.ResultAction = "no";
+                else
+                    e.ResultAction = "yes";
+            }
+        }
 
         // 对每个日志文件，每个日志记录进行循环
         // return:
+        //      -1  出错
         //      0   普通返回
         //      1   要全部中断
         int DoLoop(
@@ -509,7 +542,6 @@ namespace dp2Circulation
             string strStartDate = DateTimeUtil.DateTimeToString8(this.dateControl_start.Value);
             string strEndDate = DateTimeUtil.DateTimeToString8(this.dateControl_end.Value);
 
-            string strWarning = "";
 
             // 根据日期范围，发生日志文件名
             // parameters:
@@ -522,7 +554,7 @@ namespace dp2Circulation
                 strEndDate,
                 true,
                 out LogFileNames,
-                out strWarning,
+                out string strWarning,
                 out strError);
             if (nRet == -1)
                 return -1;
@@ -536,22 +568,83 @@ namespace dp2Circulation
 
             ProgressEstimate estimate = new ProgressEstimate();
 
-            nRet = OperLogForm.ProcessFiles(this,
-stop,
-estimate,
-Channel,
-LogFileNames,
-Program.MainForm.OperLogLevel,
-strStyle,
-"", // strFilter
-Program.MainForm.OperLogCacheDir,
-null,   // param,
-procDoRecord,   // DoRecord,
-out strError);
-            if (nRet == -1)
-                return -1;
+            LibraryChannel channel = this.GetChannel();
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromSeconds(10);
+            try
+            {
+#if NO
+                nRet = OperLogForm.ProcessFiles(this,
+    stop,
+    estimate,
+    channel,
+    LogFileNames,
+    Program.MainForm.OperLogLevel,
+    strStyle,
+    "", // strFilter
+    Program.MainForm.OperLogCacheDir,
+    null,   // param,
+    procDoRecord,   // DoRecord,
+    out strError);
+                if (nRet == -1)
+                    return -1;
 
-            return nRet;
+                return nRet;
+#endif
+                bool bAccessLog = StringUtil.IsInList("accessLog", strStyle);
+
+                OperLogLoader loader = new OperLogLoader();
+                loader.Channel = channel;
+                loader.Stop = this.Progress;
+                loader.Estimate = estimate;
+                loader.Dates = LogFileNames;
+                loader.Level = Program.MainForm.OperLogLevel;
+                loader.AutoCache = StringUtil.IsInList("autocache", strStyle);    // false;
+                loader.CacheDir = Program.MainForm.OperLogCacheDir;
+                loader.LogType = bAccessLog ? LogType.AccessLog : LogType.OperLog; 
+                // loader.Filter = "borrow,return";
+
+                loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
+                loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
+
+                foreach (OperLogItem item in loader)
+                {
+                    if (stop != null && stop.State != 0)
+                    {
+                        strError = "用户中断";
+                        return 1;
+                    }
+
+                    if (stop != null)
+                        stop.SetMessage("正在获取 " + item.Date + " " + item.Index.ToString() + " " + estimate.Text + "...");
+
+                    if (string.IsNullOrEmpty(item.Xml) == true)
+                        continue;
+
+                    nRet = procDoRecord(item.Date + ".log", 
+                        item.Xml,
+                        false,  // bInCacheFile,
+                        0,
+                        item.Index,
+                        item.AttachmentLength,
+                        null,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+                }
+
+                return 0;
+            }
+            catch(InterruptException ex)
+            {
+                strError = ex.Message;
+                return 1;
+            }
+            finally
+            {
+                channel.Timeout = old_timeout;
+                this.ReturnChannel(channel);
+            }
         }
 
         // 准备脚本环境
@@ -582,11 +675,11 @@ out strError);
 
                                     Environment.CurrentDirectory + "\\digitalplatform.core.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
-   									Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
+                                       Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",
 
                                     Environment.CurrentDirectory + "\\digitalplatform.Script.dll",  // 2011/8/25 新增
 									// Environment.CurrentDirectory + "\\digitalplatform.dp2.statis.dll",
@@ -703,11 +796,11 @@ out strError);
 
                                     Environment.CurrentDirectory + "\\digitalplatform.core.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
-   									Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
+                                       Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",
 
                                     Environment.CurrentDirectory + "\\digitalplatform.Script.dll",  // 2011/8/25 新增
 									// Environment.CurrentDirectory + "\\digitalplatform.dp2.statis.dll",
@@ -937,7 +1030,6 @@ out strError);
             }
 
             this.button_next.Enabled = true;
-
         }
 
         // 
@@ -958,22 +1050,34 @@ out strError);
             out byte[] baTimestamp,
             out string strError)
         {
-            long lRet = Channel.GetReaderInfo(
-                stop,
-                strReaderBarcode,
-                strResultTypeList,
-                out results,
-                out strRecPath,
-                out baTimestamp,
-                out strError);
-            return (int)lRet;
-        }
+            LibraryChannel channel = this.GetChannel();
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromSeconds(10);
 
+            try
+            {
+                long lRet = channel.GetReaderInfo(
+                    stop,
+                    strReaderBarcode,
+                    strResultTypeList,
+                    out results,
+                    out strRecPath,
+                    out baTimestamp,
+                    out strError);
+                return (int)lRet;
+            }
+            finally
+            {
+                channel.Timeout = old_timeout;
+                this.ReturnChannel(channel);
+            }
+        }
 
         //
         /// <summary>
         /// 获取书目摘要
         /// </summary>
+        /// <param name="channel"></param>
         /// <param name="strItemBarcode">册条码号</param>
         /// <param name="strConfirmItemRecPath">(册条码号发生重复时)用于确认的册记录路径</param>
         /// <param name="strBiblioRecPathExclude">要排除的书目记录路径列表，用逗号间隔。除开列表中的这些书目记录路径, 才返回摘要内容, 否则仅仅返回书目记录路径</param>
@@ -981,14 +1085,16 @@ out strError);
         /// <param name="strSummary">返回书目摘要</param>
         /// <param name="strError">返回出错信息</param>
         /// <returns>-1: 出错; 0: 没有找到; 1: 找到</returns>
-        public int GetBiblioSummary(string strItemBarcode,
+        public int GetBiblioSummary(
+            LibraryChannel channel,
+            string strItemBarcode,
             string strConfirmItemRecPath,
             string strBiblioRecPathExclude,
             out string strBiblioRecPath,
             out string strSummary,
             out string strError)
         {
-            long lRet = Channel.GetBiblioSummary(
+            long lRet = channel.GetBiblioSummary(
                 stop,
                 strItemBarcode,
                 strConfirmItemRecPath,
@@ -1010,22 +1116,36 @@ out strError);
         public string GetItemSummary(string strItemBarcode,
             int nMaxLength = -1)
         {
-            string strSummary = "";
-            string strBiblioRecPath = "";
-            string strError = "";
-            int nRet = GetBiblioSummary(strItemBarcode,
-                "",
-                "",
-                out strBiblioRecPath,
-                out strSummary,
-                out strError);
-            if (nRet == -1)
-                return strError;
+            LibraryChannel channel = this.GetChannel();
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromSeconds(10);
 
-            if (nMaxLength == -1 || strSummary.Length <= nMaxLength)
-                return strSummary;
+            try
+            {
+                string strSummary = "";
+                string strBiblioRecPath = "";
+                string strError = "";
+                int nRet = GetBiblioSummary(
+                    channel,
+                    strItemBarcode,
+                    "",
+                    "",
+                    out strBiblioRecPath,
+                    out strSummary,
+                    out strError);
+                if (nRet == -1)
+                    return strError;
 
-            return strSummary.Substring(0, nMaxLength) + "...";
+                if (nMaxLength == -1 || strSummary.Length <= nMaxLength)
+                    return strSummary;
+
+                return strSummary.Substring(0, nMaxLength) + "...";
+            }
+            finally
+            {
+                channel.Timeout = old_timeout;
+                this.ReturnChannel(channel);
+            }
         }
 
         // 2012/10/6
@@ -1056,13 +1176,26 @@ out strError);
                 return strSummary;
             }
 
+            LibraryChannel channel = this.GetChannel();
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromSeconds(10);
+
             string strXml = "";
             string[] results = null;
-            long lRet = Channel.GetReaderInfo(stop,
-                strPatronBarcode,
-                "xml",
-                out results,
-                out strError);
+            long lRet = 0;
+            try
+            {
+                lRet = channel.GetReaderInfo(stop,
+                    strPatronBarcode,
+                    "xml",
+                    out results,
+                    out strError);
+            }
+            finally
+            {
+                channel.Timeout = old_timeout;
+                this.ReturnChannel(channel);
+            }
             if (lRet == -1)
             {
                 strSummary = strError;
@@ -1108,19 +1241,22 @@ out strError);
         /// <summary>
         /// 获取书目记录的局部
         /// </summary>
+        /// <param name="channel">通讯通道</param>
         /// <param name="strBiblioRecPath">书目记录路径</param>
         /// <param name="strBiblioXml">书目记录 XML</param>
         /// <param name="strPartName">局部名</param>
         /// <param name="strResultValue">返回结果字符串</param>
         /// <param name="strError">返回出错信息</param>
         /// <returns>-1: 出错; 0: 没有找到; 1: 找到</returns>
-        public int GetBiblioPart(string strBiblioRecPath,
+        public int GetBiblioPart(
+            LibraryChannel channel,
+            string strBiblioRecPath,
             string strBiblioXml,
             string strPartName,
             out string strResultValue,
             out string strError)
         {
-            long lRet = Channel.GetBiblioInfo(
+            long lRet = channel.GetBiblioInfo(
                 stop,
                 strBiblioRecPath,
                 strBiblioXml,
@@ -1145,21 +1281,36 @@ out strError);
             string strError = "";
             string strResultValue = "";
             int nRet = 0;
-            // 获取书目记录的局部
-            nRet = GetBiblioPart(strBiblioRecPath,
-                "", // strBiblioXml
-                strMacroName,
-                out strResultValue,
-                out strError);
-            if (nRet == -1)
+
+            LibraryChannel channel = this.GetChannel();
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromSeconds(10);
+
+            try
             {
-                if (String.IsNullOrEmpty(strResultValue) == true)
-                    return strError;
+                // 获取书目记录的局部
+                nRet = GetBiblioPart(
+                    channel,
+                    strBiblioRecPath,
+                    "", // strBiblioXml
+                    strMacroName,
+                    out strResultValue,
+                    out strError);
+                if (nRet == -1)
+                {
+                    if (String.IsNullOrEmpty(strResultValue) == true)
+                        return strError;
+
+                    return strResultValue;
+                }
 
                 return strResultValue;
             }
-
-            return strResultValue;
+            finally
+            {
+                channel.Timeout = old_timeout;
+                this.ReturnChannel(channel);
+            }
         }
 
         private void OperLogStatisForm_Activated(object sender, EventArgs e)

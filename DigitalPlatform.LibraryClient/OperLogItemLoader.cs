@@ -783,6 +783,10 @@ FileShare.ReadWrite);
                                         continue;
                                     }
 #endif
+                                    bool isStopped = (this.Stop != null && this.Stop.State != 0);
+                                    if (isStopped)
+                                        throw new InterruptException(strError);
+
                                     if (this.Prompt != null)
                                     {
                                         MessagePromptEventArgs e = new MessagePromptEventArgs();
