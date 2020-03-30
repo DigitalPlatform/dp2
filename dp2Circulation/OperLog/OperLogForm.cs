@@ -114,6 +114,9 @@ namespace dp2Circulation
 "operlog_form",
 "ui_state",
 "");
+
+            // 2020/3/30
+            this.Channel = null;    // testing
         }
 
         /// <summary>
@@ -327,6 +330,9 @@ namespace dp2Circulation
 #if DELAY_UPDATE
             this.listView_records.BeginUpdate();
 #endif
+            LibraryChannel channel = this.GetChannel();
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromSeconds(10);
             try
             {
                 List<string> lines = new List<string>();
@@ -341,7 +347,7 @@ namespace dp2Circulation
                 int nRet = ProcessFiles(this,
     stop,
     this.estimate,
-    Channel,
+    channel,
     lines,
     nLevel, // Program.MainForm.OperLogLevel,
     strStyle,
@@ -355,6 +361,9 @@ namespace dp2Circulation
             }
             finally
             {
+                channel.Timeout = old_timeout;
+                this.ReturnChannel(channel);
+
 #if DELAY_UPDATE
                 this.listView_records.EndUpdate();
 #endif
@@ -4169,6 +4178,9 @@ FileShare.ReadWrite))
             Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
 + "开始装入日志文件中的记录" + "</div>");
 
+            LibraryChannel channel = this.GetChannel();
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromSeconds(10);
 
             try
             {
@@ -4197,7 +4209,7 @@ FileShare.ReadWrite))
                 nRet = ProcessFiles(this,
                     stop,
                     this.estimate,
-                    Channel,
+                    channel,
                     lines,
                     nLevel, // Program.MainForm.OperLogLevel,
                     strStyle,
@@ -4211,6 +4223,8 @@ FileShare.ReadWrite))
             }
             finally
             {
+                channel.Timeout = old_timeout;
+                this.ReturnChannel(channel);
 
 #if DELAY_UPDATE
                 this.listView_records.EndUpdate();
@@ -4552,6 +4566,10 @@ FileShare.ReadWrite))
             Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
 + "开始装入日志文件中的记录" + "</div>");
 
+            LibraryChannel channel = this.GetChannel();
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromSeconds(10);
+
             try
             {
                 stop.SetMessage("正在准备日志文件名 ...");
@@ -4582,7 +4600,7 @@ FileShare.ReadWrite))
                 nRet = ProcessFiles(this,
     stop,
     this.estimate,
-    Channel,
+    channel,
     lines,
     nLevel,     // Program.MainForm.OperLogLevel,
     strStyle,
@@ -4598,6 +4616,8 @@ FileShare.ReadWrite))
             }
             finally
             {
+                channel.Timeout = old_timeout;
+                this.ReturnChannel(channel);
                 /*
                 if (sr != null)
                     sr.Close();
@@ -8414,11 +8434,10 @@ MessageBoxDefaultButton.Button1);
 
                 if (bRemoveCacheFile == true)
                 {
-                    string strError1 = "";
                     nRet = DeleteCacheFile(
                         strCacheDir,
                         bAccessLog ? strLogFileName + ".a" : strLogFileName,
-                        out strError1);
+                        out string strError1);
                     if (nRet == -1)
                         MessageBox.Show(owner, strError1);
                 }

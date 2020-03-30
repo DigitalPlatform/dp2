@@ -734,7 +734,8 @@ namespace DigitalPlatform.LibraryClient
                         lSize = lTotalSize,
                         Filter = this.Filter,
                         LogType = this.LogType,
-                        ServerVersion = this.ServerVersion
+                        ServerVersion = this.ServerVersion,
+                        CacheDir = this.CacheDir,   // 2020/3/30
                     };
 
                     if (this.Prompt != null)
