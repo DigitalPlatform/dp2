@@ -1474,7 +1474,7 @@ namespace dp2SSL
                                 Application.Current.Dispatcher.Invoke(new Action(() =>
                                 {
                                     progress.BackColor = "yellow";
-                                    progress.MessageDocument = result.MessageDocument.BuildDocument(18, out speak);
+                                    progress.MessageDocument = result.MessageDocument.BuildDocument(14/*18*/, out speak);
                                     //if (result.MessageDocument.ErrorCount > 0)
                                     //    progress = null;
                                 }));

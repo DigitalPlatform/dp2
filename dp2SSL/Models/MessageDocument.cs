@@ -108,6 +108,13 @@ namespace dp2SSL
             int warning_count = items.FindAll((o) => { return o.ResultType == "warning"; }).Count;
             int information_count = items.FindAll((o) => { return o.ResultType == "information"; }).Count;
 
+            // 检查超额图书
+            List<string> overflow_titles = new List<string>();
+            items.ForEach(item => {
+                if (item.Operation == "borrow" && item.ErrorCode == "overflow")
+                    overflow_titles.Add($"{item.Entity.PII} {item.Entity.Title}");
+            });
+
             {
                 var p = new Paragraph();
                 p.FontFamily = new FontFamily("微软雅黑");
@@ -187,7 +194,14 @@ namespace dp2SSL
                 }
             }
 
-            // 第二部分，列出每一笔操作
+            // 第二部分，列出超额的信息
+            if (overflow_titles.Count > 0)
+            {
+                var p = BuildOverflowParagraph(overflow_titles);
+                doc.Blocks.Add(p);
+            }
+
+            // 第三部分，列出每一笔操作
             int index = 0;
             foreach (var item in items)
             {
@@ -197,20 +211,21 @@ namespace dp2SSL
 
             // 构造提示语音
             List<string> speaks = new List<string>();
+            /*
             int overflow_count = 0;
             foreach (var item in items)
             {
                 if (item.Operation == "borrow" && item.ErrorCode == "overflow")
                     overflow_count++;
             }
-
-            if (overflow_count > 0)
+            */
+            if (overflow_titles.Count > 0)
             {
-                speaks.Add($"警告：有 {overflow_count} 册图书超越许可册数，请放回书柜，谢谢");
+                speaks.Add($"警告：有 {overflow_titles.Count} 册图书超越许可册数，请放回书柜，谢谢");
             }
 
             if (speaks.Count == 0)
-                speaks.Add("操作完成");
+                speaks.Add("操作完成"); // TODO：可否增加姓名和借还册数？例如 王立文借书 5 册成功
 
             speak = StringUtil.MakePathList(speaks, "; ");
 
@@ -227,6 +242,28 @@ namespace dp2SSL
             doc.Blocks.Add(p);
             */
             return doc;
+
+            // 构造超额图书列表
+            Paragraph BuildOverflowParagraph(List<string> titles)
+            {
+                var p = new Paragraph();
+                p.FontFamily = new FontFamily("微软雅黑");
+                p.FontSize = baseFontSize * 1.2;
+                // p.FontStyle = FontStyles.Italic;
+                p.TextAlignment = TextAlignment.Left;
+                p.Foreground = Brushes.White;
+                p.Background = Brushes.DarkRed;
+                // p.LineHeight = 18;
+                p.TextIndent = 0;   // -20;
+                p.Margin = new Thickness(10, 0, 0, 8);
+                p.Padding = new Thickness(8);
+                p.Tag = this;   // 记忆下来后面隐藏事项的时候可以用到
+
+                p.Inlines.Add(new Run($"警告：您取书已经超额了。请将下列 {titles.Count} 册图书放回书柜: \r\n{StringUtil.MakePathList(titles, "\r\n")}"));
+
+                return p;
+            }
+
         }
 
 #if NO

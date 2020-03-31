@@ -101,7 +101,7 @@ namespace dp2SSL
                 string speak = "";
                 Application.Current.Dispatcher.Invoke(new Action(() =>
                 {
-                    this.MessageDocument = first.Document.BuildDocument(18, out speak);
+                    this.MessageDocument = first.Document.BuildDocument(14/*18*/, out speak);
                 }));
                 if (string.IsNullOrEmpty(speak) == false)
                     App.CurrentApp.Speak(speak);
