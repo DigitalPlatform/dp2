@@ -13,6 +13,7 @@ using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Web;
+using System.Text;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
@@ -29,7 +30,7 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Drawing;
-using System.Text;
+
 
 namespace dp2Circulation
 {
@@ -4345,50 +4346,6 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
             bool bValue = (this.m_bDeletedMode == true) ? false : bEnable;  // 2012/3/19
             if (this.m_marcEditor.Enabled != bValue)
                 this.m_marcEditor.Enabled = bValue;
-        }
-
-        // 获取书目记录的局部
-        int GetBiblioPart(string strBiblioRecPath,
-            string strBiblioXml,
-            string strPartName,
-            out string strResultValue,
-            out string strError)
-        {
-            LibraryChannel channel = this.GetChannel();
-            TimeSpan old_timeout = channel.Timeout;
-            channel.Timeout = new TimeSpan(0, 0, 10);
-
-#if NO
-            Progress.OnStop += new StopEventHandler(this.DoStop);
-            Progress.Initial("正在获取书目记录的局部 -- '" + strPartName + "'...");
-            Progress.BeginLoop();
-#endif
-
-            string strOldMessage = Progress.Message;
-            Progress.SetMessage("正在装入书目记录 " + strBiblioRecPath + " 的局部 ...");
-            try
-            {
-                long lRet = channel.GetBiblioInfo(
-                    null,   // Progress.State == 0 ? Progress : null,
-                    strBiblioRecPath,
-                    strBiblioXml,
-                    strPartName,    // 包含'@'符号
-                    out strResultValue,
-                    out strError);
-                return (int)lRet;
-            }
-            finally
-            {
-#if NO
-                Progress.EndLoop();
-                Progress.OnStop -= new StopEventHandler(this.DoStop);
-                Progress.Initial("");
-#endif
-                Progress.SetMessage(strOldMessage);
-
-                channel.Timeout = old_timeout;
-                this.ReturnChannel(channel);
-            }
         }
 
         string GetMacroValue(string strMacroName)
