@@ -1091,17 +1091,14 @@ namespace dp2Circulation
 
             try
             {
-                string strSummary = "";
-                string strBiblioRecPath = "";
-                string strError = "";
                 int nRet = GetBiblioSummary(
                     channel,
                     strItemBarcode,
                     "",
                     "",
-                    out strBiblioRecPath,
-                    out strSummary,
-                    out strError);
+                    out string strBiblioRecPath,
+                    out string strSummary,
+                    out string strError);
                 if (nRet == -1)
                     return strError;
 

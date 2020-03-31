@@ -2109,7 +2109,7 @@ namespace dp2SSL
                 for (int i = 0; i < count; i++)
                     System.Console.Beep(tones[tone], 500);
                 if (string.IsNullOrEmpty(text) == false)
-                    App.CurrentApp.Speak(text);
+                    App.CurrentApp.SpeakSequence(text); // 不打断前面的说话
             });
         }
 

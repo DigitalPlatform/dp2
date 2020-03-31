@@ -14,12 +14,13 @@ using System.Windows.Forms;
 using System.Collections;
 using Microsoft.Win32;
 
+using Newtonsoft.Json;
+
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Text;
 using DigitalPlatform.MessageClient;
 using DigitalPlatform.CommonControl;
-using Newtonsoft.Json;
 
 namespace dp2Circulation
 {
@@ -144,10 +145,39 @@ namespace dp2Circulation
             }
         }
 
+        static bool GroupNameEqual(string string1, string string2)
+        {
+            string name1 = string1;
+            if (string1.IndexOf(":") != -1)
+                name1 = StringUtil.ParseTwoPart(string1, ":")[1];
+
+            string name2 = string2;
+            if (string2.IndexOf(":") != -1)
+                name2 = StringUtil.ParseTwoPart(string2, ":")[1];
+
+            return name1 == name2;
+        }
+
+        static bool GroupNameContains(string[] names, string name)
+        {
+            foreach (var current in names)
+            {
+                if (GroupNameEqual(current, name))
+                    return true;
+            }
+
+            return false;
+        }
+
+        // TODO: 对不是当前群组的消息，要更新左侧群名列表右侧的新消息数显示
         void AddMessage(AddMessageEventArgs e)
         {
             foreach (MessageRecord record in e.Records)
             {
+                // 忽略不是当前群组的消息
+                if (GroupNameContains(record.groups, _currentGroupName) == false)
+                    continue;
+
                 AddTimeLine(record);
 
                 // creator 要替换为用户名
@@ -319,7 +349,7 @@ namespace dp2Circulation
             string strText = "<div class='item'>"
 + "<div class='item_line_" + left + "'>"
 + " <div class='item_prefix_text_" + left + "'>" + HttpUtility.HtmlEncode(strName).Replace("\r\n", "<br/>") + "</div>"
-+ " <div class='item_summary_" + left + "'>" + HttpUtility.HtmlEncode(strContent).Replace("\r\n", "<br/>").Replace(" ","&nbsp;") + "</div>"
++ " <div class='item_summary_" + left + "'>" + HttpUtility.HtmlEncode(strContent).Replace("\r\n", "<br/>").Replace(" ", "&nbsp;") + "</div>"
 + "</div>"
 + " <div class='clear'></div>"
 + "</div>";
