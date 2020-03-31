@@ -322,7 +322,10 @@ namespace dp2SSL
 
                     progress = new ProgressWindow();
                     // progress.MessageText = "正在处理，请稍候 ...";
-                    progress.MessageDocument = doc.BuildDocument(14, out string speak);
+                    progress.MessageDocument = doc.BuildDocument(
+                        MessageDocument.BaseFontSize,
+                        "",
+                        out string speak);
                     progress.Owner = Application.Current.MainWindow;
                     progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
                     //progress.Closed += Progress_Closed;

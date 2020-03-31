@@ -70,13 +70,20 @@ namespace dp2SSL
             }
         }
 
+        public static double BaseFontSize = 12;
+
+        // parameters:
+        //      style   display_transfer 表示要显示转移操作信息。如果缺乏则不显示
         public FlowDocument BuildDocument(// string patron_name,
             double baseFontSize,
+            string style,
             out string speak)
         {
             speak = "";
             List<MessageItem> items = new List<MessageItem>();
             items.AddRange(this._items);
+
+            bool display_transfer = StringUtil.IsInList("transfer", style);
 
             /*
             // 按照 Operation 排序
@@ -106,13 +113,18 @@ namespace dp2SSL
             int succeed_count = items.FindAll((o) => { return o.ResultType == "succeed" || string.IsNullOrEmpty(o.ResultType); }).Count;
             int error_count = items.FindAll((o) => { return o.ResultType == "error"; }).Count;
             int warning_count = items.FindAll((o) => { return o.ResultType == "warning"; }).Count;
-            int information_count = items.FindAll((o) => { return o.ResultType == "information"; }).Count;
+            int information_count = 0;
+            if (display_transfer == false)
+                information_count = items.FindAll((o) => { return o.ResultType == "information" && o.Operation != "transfer"; }).Count;
+            else
+                information_count = items.FindAll((o) => { return o.ResultType == "information"; }).Count;
 
             // 检查超额图书
             List<string> overflow_titles = new List<string>();
-            items.ForEach(item => {
+            items.ForEach(item =>
+            {
                 if (item.Operation == "borrow" && item.ErrorCode == "overflow")
-                    overflow_titles.Add($"{item.Entity.PII} {item.Entity.Title}");
+                    overflow_titles.Add($"{ShortTitle(item.Entity.Title)} [{item.Entity.PII}]");
             });
 
             {
@@ -132,7 +144,8 @@ namespace dp2SSL
                         lines.Add($"还书请求 {return_count}");
                     if (borrow_count > 0)
                         lines.Add($"借书请求 {borrow_count}");
-                    if (transfer_count > 0)
+
+                    if (display_transfer && transfer_count > 0)
                         lines.Add($"转移请求 {transfer_count}");
 
                     p.Inlines.Add(new Run
@@ -205,8 +218,9 @@ namespace dp2SSL
             int index = 0;
             foreach (var item in items)
             {
-                var p = item.BuildParagraph(index++, baseFontSize);
-                doc.Blocks.Add(p);
+                var p = item.BuildParagraph(index++, baseFontSize, style);
+                if (p != null)
+                    doc.Blocks.Add(p);
             }
 
             // 构造提示语音
@@ -248,22 +262,40 @@ namespace dp2SSL
             {
                 var p = new Paragraph();
                 p.FontFamily = new FontFamily("微软雅黑");
-                p.FontSize = baseFontSize * 1.2;
+                p.FontSize = baseFontSize * 1.8;
                 // p.FontStyle = FontStyles.Italic;
                 p.TextAlignment = TextAlignment.Left;
                 p.Foreground = Brushes.White;
-                p.Background = Brushes.DarkRed;
+                p.Background = Brushes.DarkGoldenrod;
                 // p.LineHeight = 18;
                 p.TextIndent = 0;   // -20;
-                p.Margin = new Thickness(10, 0, 0, 8);
-                p.Padding = new Thickness(8);
+                p.Margin = new Thickness(10, 40, 0, 40);
+                p.Padding = new Thickness(20);
                 p.Tag = this;   // 记忆下来后面隐藏事项的时候可以用到
 
-                p.Inlines.Add(new Run($"警告：您取书已经超额了。请将下列 {titles.Count} 册图书放回书柜: \r\n{StringUtil.MakePathList(titles, "\r\n")}"));
+                StringBuilder text = new StringBuilder();
+                text.Append($"警告：您取书已经超额了。请将下列 {titles.Count} 册图书放回书柜:");
+                int i = 1;
+                foreach(string title in titles)
+                {
+                    text.Append($"\r\n{i}) {title}");
+                    i++;
+                }
+                p.Inlines.Add(new Run(text.ToString()));
 
                 return p;
             }
 
+        }
+
+        internal static string ShortTitle(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+                return "";
+            int pos = text.IndexOf(". --");
+            if (pos == -1)
+                return text;
+            return text.Substring(0, pos).Trim();
         }
 
 #if NO
@@ -314,8 +346,14 @@ namespace dp2SSL
             return operation;
         }
 
-        public Paragraph BuildParagraph(int index, double baseFontSize)
+        public Paragraph BuildParagraph(int index,
+            double baseFontSize,
+            string style)
         {
+            bool display_transfer = StringUtil.IsInList("transfer", style);
+            if (Operation == "transfer" && display_transfer == false)
+                return null;
+
             var p = new Paragraph();
             p.FontFamily = new FontFamily("微软雅黑");
             p.FontSize = baseFontSize;
@@ -324,7 +362,7 @@ namespace dp2SSL
             p.Foreground = Brushes.Gray;
             // p.LineHeight = 18;
             p.TextIndent = -20;
-            p.Margin = new Thickness(10, 0, 0, 8);
+            p.Margin = new Thickness(10, 0, 0, 8);  // 10,0,0,8
             p.Tag = this;   // 记忆下来后面隐藏事项的时候可以用到
 
             // 序号
@@ -393,7 +431,7 @@ namespace dp2SSL
             // 书目摘要
             if (Entity != null && string.IsNullOrEmpty(Entity.Title) == false)
             {
-                Run run = new Run(Entity.Title);
+                Run run = new Run(MessageDocument.ShortTitle(Entity.Title));
                 /*
                 run.FontSize = 14;
                 run.FontStyle = FontStyles.Normal;
