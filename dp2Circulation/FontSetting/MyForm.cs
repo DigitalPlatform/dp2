@@ -1304,6 +1304,152 @@ out string strError)
             }
         }
 
+        // 获取书目记录的局部
+        public int GetBiblioPart(string strBiblioRecPath,
+            string strBiblioXml,
+            string strPartName,
+            out string strResultValue,
+            out string strError)
+        {
+            LibraryChannel channel = this.GetChannel();
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = new TimeSpan(0, 0, 10);
+
+#if NO
+            Progress.OnStop += new StopEventHandler(this.DoStop);
+            Progress.Initial("正在获取书目记录的局部 -- '" + strPartName + "'...");
+            Progress.BeginLoop();
+#endif
+
+            string strOldMessage = Progress.Message;
+            Progress.SetMessage("正在装入书目记录 " + strBiblioRecPath + " 的局部 ...");
+            try
+            {
+                long lRet = channel.GetBiblioInfo(
+                    null,   // Progress.State == 0 ? Progress : null,
+                    strBiblioRecPath,
+                    strBiblioXml,
+                    strPartName,    // 包含'@'符号
+                    out strResultValue,
+                    out strError);
+                return (int)lRet;
+            }
+            finally
+            {
+#if NO
+                Progress.EndLoop();
+                Progress.OnStop -= new StopEventHandler(this.DoStop);
+                Progress.Initial("");
+#endif
+                Progress.SetMessage(strOldMessage);
+
+                channel.Timeout = old_timeout;
+                this.ReturnChannel(channel);
+            }
+        }
+
+        // 
+        /// <summary>
+        /// 获取书目记录的局部
+        /// </summary>
+        /// <param name="channel">通讯通道</param>
+        /// <param name="strBiblioRecPath">书目记录路径</param>
+        /// <param name="strBiblioXml">书目记录 XML</param>
+        /// <param name="strPartName">局部名</param>
+        /// <param name="strResultValue">返回结果字符串</param>
+        /// <param name="strError">返回出错信息</param>
+        /// <returns>-1: 出错; 0: 没有找到; 1: 找到</returns>
+        public int GetBiblioPart(
+            LibraryChannel channel,
+            string strBiblioRecPath,
+            string strBiblioXml,
+            string strPartName,
+            out string strResultValue,
+            out string strError)
+        {
+            long lRet = channel.GetBiblioInfo(
+                stop,
+                strBiblioRecPath,
+                strBiblioXml,
+                strPartName,    // 包含'@'符号
+                out strResultValue,
+                out strError);
+            return (int)lRet;
+        }
+
+        //
+        /// <summary>
+        /// 获取书目摘要
+        /// </summary>
+        /// <param name="channel"></param>
+        /// <param name="strItemBarcode">册条码号</param>
+        /// <param name="strConfirmItemRecPath">(册条码号发生重复时)用于确认的册记录路径</param>
+        /// <param name="strBiblioRecPathExclude">要排除的书目记录路径列表，用逗号间隔。除开列表中的这些书目记录路径, 才返回摘要内容, 否则仅仅返回书目记录路径</param>
+        /// <param name="strBiblioRecPath">返回书目记录路径</param>
+        /// <param name="strSummary">返回书目摘要</param>
+        /// <param name="strError">返回出错信息</param>
+        /// <returns>-1: 出错; 0: 没有找到; 1: 找到</returns>
+        public int GetBiblioSummary(
+            LibraryChannel channel,
+            string strItemBarcode,
+            string strConfirmItemRecPath,
+            string strBiblioRecPathExclude,
+            out string strBiblioRecPath,
+            out string strSummary,
+            out string strError)
+        {
+            long lRet = channel.GetBiblioSummary(
+                stop,
+                strItemBarcode,
+                strConfirmItemRecPath,
+                strBiblioRecPathExclude,
+                out strBiblioRecPath,
+                out strSummary,
+                out strError);
+            return (int)lRet;
+        }
+
+        //
+        /// <summary>
+        /// 获取书目摘要
+        /// </summary>
+        /// <param name="strItemBarcode">册条码号</param>
+        /// <param name="strConfirmItemRecPath">(册条码号发生重复时)用于确认的册记录路径</param>
+        /// <param name="strBiblioRecPathExclude">要排除的书目记录路径列表，用逗号间隔。除开列表中的这些书目记录路径, 才返回摘要内容, 否则仅仅返回书目记录路径</param>
+        /// <param name="strBiblioRecPath">返回书目记录路径</param>
+        /// <param name="strSummary">返回书目摘要</param>
+        /// <param name="strError">返回出错信息</param>
+        /// <returns>-1: 出错; 0: 没有找到; 1: 找到</returns>
+        public int GetBiblioSummary(
+            string strItemBarcode,
+            string strConfirmItemRecPath,
+            string strBiblioRecPathExclude,
+            out string strBiblioRecPath,
+            out string strSummary,
+            out string strError)
+        {
+            LibraryChannel channel = this.GetChannel();
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = new TimeSpan(0, 0, 10);
+            try
+            {
+                long lRet = channel.GetBiblioSummary(
+                    stop,
+                    strItemBarcode,
+                    strConfirmItemRecPath,
+                    strBiblioRecPathExclude,
+                    out strBiblioRecPath,
+                    out strSummary,
+                    out strError);
+                return (int)lRet;
+            }
+            finally
+            {
+                channel.Timeout = old_timeout;
+                this.ReturnChannel(channel);
+            }
+        }
+
         #endregion
 
         #region 创建书目记录的浏览格式

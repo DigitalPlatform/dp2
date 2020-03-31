@@ -406,6 +406,7 @@ namespace dp2Circulation
             return strResultValue;
         }
 
+#if REMOVED // 已经被移动到 MyForm 中
         // 获取书目记录的局部
         int GetBiblioPart(string strBiblioRecPath,
             string strBiblioXml,
@@ -433,6 +434,7 @@ namespace dp2Circulation
                 this.ReturnChannel(channel);
             }
         }
+#endif
 
         // return:
         //      返回 HTML tr 元素片段
