@@ -16,6 +16,7 @@ using DigitalPlatform.MessageClient;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using System.Threading;
+using DigitalPlatform.WPF;
 
 namespace dp2SSL
 {
@@ -237,6 +238,18 @@ IList<MessageRecord> messages)
                 return;
             }
 
+            if (command.StartsWith("version"))
+            {
+                SetMessageAsync($"dp2SSL 前端版本: {WpfClientInfo.ClientVersion}");
+                return;
+            }
+
+            if (command.StartsWith("error"))
+            {
+                SetMessageAsync($"dp2SSL 当前界面报错: [{App.CurrentApp.Error}]; 书柜初始化是否完成: {ShelfData.FirstInitialized}");
+                return;
+            }
+
             // 列出操作历史
             if (command.StartsWith("list history"))
             {
@@ -262,32 +275,41 @@ IList<MessageRecord> messages)
         //      空 所有事项
         static void ListHistory(string command)
         {
-            // 子参数
-            string param = command.Substring("list history".Length).Trim();
-            // "not sync" 表示只列出那些没有成功同步的操作
-
-            using (var context = new MyContext())
+            try
             {
-                List<RequestItem> items = null;
-                if (param == "not sync" || param == "!sync" || param == "new")
-                    items = context.Requests.Where(o => o.State != "sync")
-                        .OrderBy(o => o.ID).ToList();
-                else if (param == "sync")
-                    items = context.Requests.Where(o => o.State == "sync")
-                        .OrderBy(o => o.ID).ToList();
-                else if (param == "error")
-                    items = context.Requests.Where(o => o.State == "commerror" || o.State == "normalerror")
-                        .OrderBy(o => o.ID).ToList();
-                else
-                    items = context.Requests.Where(o => true)
-                        .OrderBy(o => o.ID).ToList();
+                // 子参数
+                string param = command.Substring("list history".Length).Trim();
+                // "not sync" 表示只列出那些没有成功同步的操作
 
-                SetMessageAsync($"> {command}\r\n当前共有 {items.Count} 个历史事项");
-                int i = 1;
-                foreach (var item in items)
+                using (var context = new MyContext())
                 {
-                    SetMessageAsync($"{i++}\r\n{DisplayRequestItem.GetDisplayString(item)}");
+                    context.Database.EnsureCreated();   // 2020/4/1
+
+                    List<RequestItem> items = null;
+                    if (param == "not sync" || param == "!sync" || param == "new")
+                        items = context.Requests.Where(o => o.State != "sync")
+                            .OrderBy(o => o.ID).ToList();
+                    else if (param == "sync")
+                        items = context.Requests.Where(o => o.State == "sync")
+                            .OrderBy(o => o.ID).ToList();
+                    else if (param == "error")
+                        items = context.Requests.Where(o => o.State == "commerror" || o.State == "normalerror")
+                            .OrderBy(o => o.ID).ToList();
+                    else
+                        items = context.Requests.Where(o => true)
+                            .OrderBy(o => o.ID).ToList();
+
+                    SetMessageAsync($"> {command}\r\n当前共有 {items.Count} 个历史事项");
+                    int i = 1;
+                    foreach (var item in items)
+                    {
+                        SetMessageAsync($"{i++}\r\n{DisplayRequestItem.GetDisplayString(item)}");
+                    }
                 }
+            }
+            catch(Exception ex)
+            {
+                SetMessageAsync($"命令 {command} 执行过程出现异常:\r\n{ExceptionUtil.GetDebugText(ex)}");
             }
         }
 

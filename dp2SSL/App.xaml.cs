@@ -208,22 +208,49 @@ namespace dp2SSL
 
             InputMethod.SetPreferredImeState(App.Current.MainWindow, InputMethodState.Off);
 
-            var task2 = ConnectMessageServer();
+            // 这里要等待连接完成，因为后面初始化时候需要发出点对点消息。TODO: 是否要显示一个对话框请用户等待？
+            await ConnectMessageServer();
         }
+
+        static ManualResetEvent _messageServerConnected = new ManualResetEvent(false);
 
         public async Task ConnectMessageServer()
         {
-            if (string.IsNullOrEmpty(messageServerUrl) == false)
+            try
             {
-                TinyServer.CloseConnection();
-                var result = await TinyServer.ConnectAsync(messageServerUrl, messageUserName, messagePassword, "");
-                if (result.Value == -1)
-                    WpfClientInfo.WriteErrorLog($"连接消息服务器失败: {result.ErrorInfo}。url={messageServerUrl},userName={messageUserName},errorCode={result.ErrorCode}");
-                // 发出一条消息表示自己启动成功
-                var message_result = await TinyServer.SetMessageAsync("我这台智能书柜启动了！");
-                if (message_result.Value == -1)
-                    WpfClientInfo.WriteErrorLog($"第一条消息发送失败: {message_result.ErrorInfo}");
+                if (string.IsNullOrEmpty(messageServerUrl) == false)
+                {
+                    _messageServerConnected.Reset();
+
+                    TinyServer.CloseConnection();
+                    var result = await TinyServer.ConnectAsync(messageServerUrl, messageUserName, messagePassword, "");
+                    if (result.Value == -1)
+                        WpfClientInfo.WriteErrorLog($"连接消息服务器失败: {result.ErrorInfo}。url={messageServerUrl},userName={messageUserName},errorCode={result.ErrorCode}");
+                    else
+                    {
+                        PageShelf.TrySetMessage("我这台智能书柜启动了！");
+                        /*
+                        // 发出一条消息表示自己启动成功
+                        var message_result = await TinyServer.SetMessageAsync("我这台智能书柜启动了！");
+                        if (message_result.Value == -1)
+                            WpfClientInfo.WriteErrorLog($"第一条消息发送失败: {message_result.ErrorInfo}");
+                    */
+                    }
+                    _messageServerConnected.Set();
+                }
+                else
+                    _messageServerConnected.Set();
             }
+            catch (Exception ex)
+            {
+                WpfClientInfo.WriteErrorLog($"ConnectMessageServer() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                _messageServerConnected.Set();
+            }
+        }
+
+        public static void WaitMessageServerConnected()
+        {
+            _messageServerConnected.WaitOne();
         }
 
         // 确保连接到消息服务器
@@ -456,6 +483,8 @@ namespace dp2SSL
 
             // 最后关灯
             RfidManager.TurnShelfLamp("*", "turnOff");
+            
+            PageShelf.TrySetMessage($"我这台智能书柜停止了哟！({e.ReasonSessionEnding})");
 
             base.OnSessionEnding(e);
         }
@@ -493,6 +522,8 @@ namespace dp2SSL
 
             // 最后关灯
             RfidManager.TurnShelfLamp("*", "turnOff");
+
+            PageShelf.TrySetMessage($"我这台智能书柜退出了哟！");
 
             base.OnExit(e);
         }

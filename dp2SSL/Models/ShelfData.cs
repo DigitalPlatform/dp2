@@ -692,13 +692,30 @@ namespace dp2SSL
 
         public delegate Operator Delegate_getOperator(Entity entity);
 
+        public class OperationInfo
+        {
+            // 操作名称
+            public string Operation { get; set; }
+            public Entity Entity { get; set; }
+            public string ShelfNo { get; set; }
+            public Operator Operator { get; set; }
+        }
+
+        public class SaveActionResult : NormalResult
+        {
+            public List<OperationInfo> Operations { get; set; }
+            public List<ActionInfo> Actions { get; set; }
+        }
+
         // 将暂存的信息保存为 Action。但并不立即提交
         // parameters:
         //      patronBarcode   读者证条码号。如果为 "*"，表示希望针对全部读者的都提交
-        public static void SaveActions(
+        public static SaveActionResult SaveActions(
             // string patronBarcode,
             Delegate_getOperator func_getOperator)
         {
+            List<OperationInfo> infos = new List<OperationInfo>();
+
             lock (_syncRoot_actions)
             {
                 List<ActionInfo> actions = new List<ActionInfo>();
@@ -737,6 +754,22 @@ namespace dp2SSL
                         });
                     }
 
+                    // 用于显示的操作信息
+                    {
+                        var operation = new OperationInfo
+                        {
+                            Operation = "还书",
+                            Entity = entity,
+                            Operator = person,
+                            ShelfNo = ShelfData.GetShelfNo(entity),
+                        };
+                        if (person.IsWorker == true)
+                        {
+                            operation.Operation = "调入";
+                        }
+                        infos.Add(operation);
+                    }
+
                     processed.Add(entity);
                 }
 
@@ -764,6 +797,20 @@ namespace dp2SSL
                         CurrentShelfNo = ShelfData.GetShelfNo(entity),
                         Operator = person
                     });
+
+                    // 用于显示的操作信息
+                    {
+                        var operation = new OperationInfo
+                        {
+                            Operation = "调整位置",
+                            Entity = entity,
+                            Operator = person,
+                            ShelfNo = ShelfData.GetShelfNo(entity),
+                        };
+
+                        infos.Add(operation);
+                    }
+
                     processed.Add(entity);
                 }
 
@@ -801,6 +848,22 @@ namespace dp2SSL
                         });
                     }
 
+                    // 用于显示的操作信息
+                    {
+                        var operation = new OperationInfo
+                        {
+                            Operation = "借书",
+                            Entity = entity,
+                            Operator = person,
+                            ShelfNo = ShelfData.GetShelfNo(entity),
+                        };
+                        if (person.IsWorker == true)
+                        {
+                            operation.Operation = "调出";
+                        }
+                        infos.Add(operation);
+                    }
+
                     processed.Add(entity);
                 }
 
@@ -821,8 +884,17 @@ namespace dp2SSL
                 }
 
                 if (actions.Count == 0)
-                    return;  // 没有必要处理
+                    return new SaveActionResult
+                    {
+                        Actions = actions,
+                        Operations = infos
+                    };  // 没有必要处理
                 ShelfData.PushActions(actions);
+                return new SaveActionResult
+                {
+                    Actions = actions,
+                    Operations = infos
+                };
             }
         }
 
@@ -2338,6 +2410,7 @@ namespace dp2SSL
                     string action = info.Action;
                     Entity entity = info.Entity;
 
+#if REMOVED
                     string action_name = "借书";
                     if (action == "return")
                         action_name = "还书";
@@ -2345,6 +2418,7 @@ namespace dp2SSL
                         action_name = "续借";
                     else if (action == "transfer")
                         action_name = "转移";
+#endif
 
                     // 借书操作必须要有读者身份的请求者
                     if (action == "borrow")
@@ -2377,7 +2451,9 @@ namespace dp2SSL
                         if (result.Value == -1)
                         {
                             string text = $"修改 EAS 动作失败: {result.ErrorInfo}";
+#if REMOVED
                             entity.SetError(text, "yellow");
+#endif
 
                             MessageItem error = new MessageItem
                             {
@@ -2618,7 +2694,9 @@ namespace dp2SSL
                             {
                                 messageItem.ResultType = "information";
                                 WpfClientInfo.WriteInfoLog($"读者 {info.Operator.PatronName} {info.Operator.PatronBarcode} 尝试借阅册 '{title}' 时: {strError}");
+#if REMOVED
                                 entity.SetError(null);
+#endif
                                 continue;
                             }
                         }
@@ -2630,7 +2708,9 @@ namespace dp2SSL
                                 messageItem.ResultType = "information";
                                 WpfClientInfo.WriteInfoLog($"读者 {info.Operator.PatronName} {info.Operator.PatronBarcode} 尝试还回册 '{title}' 时: {strError}");
                                 // TODO: 这里也要修改 EAS
+#if REMOVED
                                 entity.SetError(null);
+#endif
                                 continue;
                             }
                         }
@@ -2649,7 +2729,9 @@ namespace dp2SSL
                                 //warnings.Add($"册 '{title}' (尝试转移时发现没有发生修改): {strError}");
                                 // 写入错误日志
                                 WpfClientInfo.WriteInfoLog($"转移册 '{title}' 时: {strError}");
+#if REMOVED
                                 entity.SetError(null);
+#endif
                                 continue;
                             }
                         }
@@ -2678,12 +2760,9 @@ namespace dp2SSL
 
                         WpfClientInfo.WriteErrorLog($"请求失败。action:{action},PII:{entity.PII}, 错误信息:{strError}, 错误码:{error_code.ToString()}");
 
+#if REMOVED
                         entity.SetError($"{action_name}操作失败: {strError}", "red");
-                        // TODO: 这里最好用 title
-                        //errors.Add($"册 '{title}': {strError}");
-
-                        // if (retry_actions.IndexOf(info) == -1)
-                        //      error_actions.Add(info);
+#endif
                         continue;
                     }
 
@@ -2701,7 +2780,9 @@ namespace dp2SSL
                             messageItem.ErrorCode = "overflow";
                             // 写入错误日志
                             WpfClientInfo.WriteInfoLog($"读者 {info.Operator.PatronName} {info.Operator.PatronBarcode} 借阅 '{title}' 时发生超越许可: {strError}");
+#if REMOVED
                             entity.SetError(null);
+#endif
                         }
                     }
 
@@ -2735,13 +2816,15 @@ namespace dp2SSL
                         //if (entity.Error != null)
                         //    continue;
 
+#if REMOVED
                         string message = $"{action_name}成功";
                         if (lRet == 1 && string.IsNullOrEmpty(strError) == false)
                             message = strError;
                         entity.SetError(message,
                             lRet == 1 ? "yellow" : "green");
-                        //success_count++;
-                        // 刷新显示。特别是一些关于借阅日期，借期，应还日期的内容
+#endif
+
+                        // TODO: 刷新读者信息显示。特别是一些关于借阅日期，借期，应还日期的内容
                     }
 
                 }
@@ -3214,13 +3297,13 @@ Stack:
 
                         // 如果本轮有成功的请求，并且进度窗口没有打开，则补充打开进度窗口
                         if ((progress == null || progress.IsVisible == false)
-                        && succeedCount > 0)
+                            && succeedCount > 0)
                             progress = PageMenu.PageShelf?.OpenProgressWindow();
 
                         // 把执行结果显示到对话框内
                         // 全部事项都重试失败的时候不需要显示
                         if (progress != null && progress.IsVisible
-                        && (succeedCount > 0 || newCount > 0))
+                            && (succeedCount > 0 || newCount > 0))
                         {
                             Application.Current.Dispatcher.Invoke(new Action(() =>
                             {
@@ -3231,9 +3314,9 @@ Stack:
 
                             // 显示出来
                             Application.Current.Dispatcher.Invoke(new Action(() =>
-                            {
-                                progress?.ShowContent();
-                            }));
+                                {
+                                    progress?.ShowContent();
+                                }));
                         }
 #if NO
 
@@ -3570,7 +3653,7 @@ TaskScheduler.Default);
 #endif
 
 #if REMOVED
-        #region 门命令延迟执行
+#region 门命令延迟执行
 
         // 门命令(延迟执行)队列。开门时放一个命令进入队列。等得到门开信号的时候再取出这个命令
         static List<CommandItem> _commandQueue = new List<CommandItem>();
@@ -3660,7 +3743,7 @@ TaskScheduler.Default);
         }
 
 
-        #endregion
+#endregion
 #endif
     }
 
@@ -3681,6 +3764,13 @@ TaskScheduler.Default);
         public override string ToString()
         {
             return $"PatronName:{PatronName}, PatronBarcode:{PatronBarcode}";
+        }
+
+        public string GetDisplayString()
+        {
+            if (string.IsNullOrEmpty(PatronName) == false)
+                return PatronName;
+            return PatronBarcode;
         }
 
         public static bool IsPatronBarcodeWorker(string patronBarcode)
