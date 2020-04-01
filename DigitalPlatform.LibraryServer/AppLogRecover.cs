@@ -49,6 +49,7 @@ namespace DigitalPlatform.LibraryServer
 </root>
          * */
         // parameters:
+        //      level   恢复级别。注意 Snapshot 级别非常危险，弄不好会破坏以前的读者记录，要慎用
         //      bForce  是否为容错状态。在容错状态下，如果遇到重复的册条码号，就算做第一条。
         public int RecoverBorrow(
             RmsChannelCollection Channels,
@@ -76,13 +77,12 @@ namespace DigitalPlatform.LibraryServer
             // 快照恢复
             if (level == RecoverLevel.Snapshot)
             {
-                XmlNode node = null;
                 string strReaderXml = DomUtil.GetElementText(domLog.DocumentElement,
                     "readerRecord",
-                    out node);
+                    out XmlNode node);
                 if (node == null)
                 {
-                    strError = "日志记录中缺<readerRecord>元素";
+                    strError = "日志记录中缺 <readerRecord> 元素";
                     return -1;
                 }
 
@@ -90,7 +90,7 @@ namespace DigitalPlatform.LibraryServer
                 bool bClipping = DomUtil.GetBooleanParam(node, "clipping", false);
                 if (bClipping == true)
                 {
-                    strError = "日志记录中<readerRecord>元素为 clipping 状态，无法进行快照恢复";
+                    strError = "日志记录中 <readerRecord> 元素为 clipping 状态，无法进行快照恢复";
                     return -1;
                 }
 
@@ -101,7 +101,7 @@ namespace DigitalPlatform.LibraryServer
     out node);
                 if (node == null)
                 {
-                    strError = "日志记录中缺<itemRecord>元素";
+                    strError = "日志记录中缺 <itemRecord> 元素";
                     return -1;
                 }
                 string strItemRecPath = DomUtil.GetAttr(node, "recPath");
@@ -156,7 +156,6 @@ out strError);
                 }
 
                 // 读入读者记录
-
                 nRet = this.GetReaderRecXml(
                     // Channels,
                     channel,
@@ -281,7 +280,6 @@ out strError);
                     }
                     else
                     {
-
                         Debug.Assert(nRet == 1, "");
                         Debug.Assert(aPath.Count == 1, "");
 
@@ -290,7 +288,6 @@ out strError);
                             strOutputItemRecPath = aPath[0];
                         }
                     }
-
                 }
 
                 nRet = LibraryApplication.LoadToDom(strItemXml,
@@ -345,7 +342,6 @@ out strError);
                     out strError);
                 if (lRet == -1)
                     goto ERROR1;
-
             }
 
             // 容错恢复

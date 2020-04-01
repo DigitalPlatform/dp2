@@ -260,6 +260,15 @@ namespace dp2SSL
         // 门状态变化。从这里触发提交
         private async void ShelfData_DoorStateChanged(object sender, DoorStateChangedEventArgs e)
         {
+            {
+                string text = "";
+                if (e.NewState == "open")
+                    text = $"门 '{e.Door.Name}' 被 {e.Door.Operator?.GetDisplayString()} 打开";
+                else
+                    text = $"门 '{e.Door.Name}' 被 {e.Door.Operator?.GetDisplayString()} 关上";
+                TrySetMessage(text);
+            }
+
             if (e.NewState == "close")
             {
                 // 2019/12/15
@@ -316,6 +325,29 @@ namespace dp2SSL
             // 取消状态变化监控
             ShelfData.DoorMonitor.RemoveMessages(e.Door);
 #endif
+        }
+
+        public static void TrySetMessage(string text)
+        {
+            try
+            {
+                Task.Run(async () =>
+                {
+                    var result = await TinyServer.SetMessageAsync(text);
+                    if (result.Value == -1)
+                    {
+                        App.CurrentApp.SetError("setMessage", $"发送消息失败: {result.ErrorInfo}。消息内容:{StringUtil.CutString(text, 100)}");
+                        WpfClientInfo.WriteErrorLog($"发送消息失败: {result.ErrorInfo}。消息内容:{text}");
+                    }
+                    else
+                        App.CurrentApp.SetError("setMessage", null);
+                });
+            }
+            catch (Exception ex)
+            {
+                App.CurrentApp.SetError("setMessage", $"发送消息出现异常: {ex.Message}。消息内容:{StringUtil.CutString(text, 100)}");
+                WpfClientInfo.WriteErrorLog($"发送消息出现异常: {ex.Message}。消息内容:{text}");
+            }
         }
 
         static string GetPartialName(string buttonName)
@@ -1284,6 +1316,16 @@ namespace dp2SSL
             if (ShelfData.ShelfCfgDom == null)
                 return;
 
+            {
+                // 等待一下和 dp2mserver 连接完成
+                // TODO: 要显示一个对话框，让用户知道这里在等待
+                App.CurrentApp.SetError("setMessage", "正在连接到消息服务器，请稍等 ...");
+                App.WaitMessageServerConnected();
+                App.CurrentApp.SetError("setMessage", null);
+
+                TrySetMessage("我正在执行初始化 ...");
+            }
+
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
                 this.doorControl.Visibility = Visibility.Collapsed;
@@ -1594,6 +1636,10 @@ namespace dp2SSL
                     SetGlobalError("initial", null);
                     this.Mode = ""; // 从初始化模式转为普通模式
                     ShelfData.FirstInitialized = true;   // 第一次初始化已经完成
+
+                    {
+                        TrySetMessage("我已经成功完成初始化。读者可以开始用我借书啦");
+                    }
                 }
                 else
                 {
@@ -1603,7 +1649,9 @@ namespace dp2SSL
 
                     // TODO: 页面中央大字显示“书柜初始化失败”。重新进入页面时候应该自动重试初始化
                     SetGlobalError("initial", "智能书柜初始化失败。请检查读卡器和门锁参数配置，重新进行初始化 ...");
-                    /*
+                    {
+                        TrySetMessage("*** 抱歉，我初始化失败了。请管理员帮我解决一下吧！");
+                    }                    /*
                     ProgressWindow error = null;
                     Application.Current.Dispatcher.Invoke(new Action(() =>
                     {
@@ -2332,7 +2380,7 @@ namespace dp2SSL
         // 将指定门的暂存的信息保存为 Action。但并不立即提交
         void SaveDoorActions(DoorItem door, bool clearOperator)
         {
-            ShelfData.SaveActions((entity) =>
+            var result = ShelfData.SaveActions((entity) =>
             {
                 var results = DoorItem.FindDoors(ShelfData.Doors, entity.ReaderName, entity.Antenna);
                 // TODO: 如果遇到 results.Count > 1 是否抛出异常?
@@ -2353,6 +2401,19 @@ namespace dp2SSL
             // 2019/12/21
             if (clearOperator == true && door.State == "close")
                 door.Operator = null; // 清掉门上的操作者名字
+
+            // 发出点对点消息
+            if (result.Operations != null && result.Operations.Count > 0)
+            {
+                StringBuilder text = new StringBuilder();
+                text.AppendLine($"{result.Operations[0].Operator.GetDisplayString()}");
+                foreach (var info in result.Operations)
+                {
+                    // TODO: 为啥 Entity.Title 为空
+                    text.AppendLine($"{info.Operation} {info.Entity.Title} [{info.Entity.PII}] 架位:{info.ShelfNo}");
+                }
+                TrySetMessage(text.ToString());
+            }
         }
 
         // 将所有暂存信息保存为 Action，但并不立即提交

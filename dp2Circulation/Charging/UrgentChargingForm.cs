@@ -116,7 +116,6 @@ namespace dp2Circulation
             EnableControls(false);
 
             API.PostMessage(this.Handle, WM_PREPARE, 0, 0);
-
         }
 
         private void UrgentChargingForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -145,7 +144,9 @@ namespace dp2Circulation
         {
             get
             {
-                return Program.MainForm.DataDir + "\\urgent_charging.txt";
+                // return Program.MainForm.DataDir + "\\urgent_charging.txt";
+                // 2020/4/1 修改为在用户文件夹内
+                return Path.Combine(Program.MainForm.UserDir, "urgent_charging.txt");
             }
         }
 
@@ -232,7 +233,6 @@ namespace dp2Circulation
                     }
                 }
 
-
                 BarcodeAndTime barcodetime = new BarcodeAndTime();
                 barcodetime.Barcode = this.textBox_itemBarcode.Text;
                 barcodetime.Time = DateTime.Now;
@@ -287,7 +287,6 @@ InfoColor.Green,
 this.InfoDlgOpacity,
                         Program.MainForm.DefaultFont);
                 this.SwitchFocus(ITEM_BARCODE, strFastInputText);
-
             }
 
             if (this.FuncState == FuncState.VerifyReturn)
@@ -314,14 +313,11 @@ InfoColor.Green,
 this.InfoDlgOpacity,
                         Program.MainForm.DefaultFont);
                 this.SwitchFocus(ITEM_BARCODE, strFastInputText);
-
             }
 
             return;
         ERROR1:
             MessageBox.Show(this, strError);
-
-
         }
 
         // 带有焦点切换功能的
@@ -370,7 +366,6 @@ this.InfoDlgOpacity,
                     {
                         this.textBox_itemBarcode.Focus();
                     }
-
                 }
             }
         }
@@ -389,7 +384,6 @@ this.InfoDlgOpacity,
                 if (this.m_funcstate != value
                     && value == FuncState.Return)
                     MessageBox.Show(this, "警告：使用不带验证读者证条码号的还回功能，会影响日后数据库恢复到数据库时的容错能力。请慎用此功能。");
-
 
                 this.m_funcstate = value;
 
@@ -416,7 +410,6 @@ this.InfoDlgOpacity,
                     this.toolStripMenuItem_verifyReturn.Checked = true;
                     this.textBox_readerBarcode.Enabled = true;
                 }
-
             }
         }
 
@@ -435,7 +428,6 @@ this.InfoDlgOpacity,
             this.FuncState = FuncState.VerifyReturn;
         }
 
-
         private void textBox_readerBarcode_Enter(object sender, EventArgs e)
         {
             this.AcceptButton = this.button_loadReader;
@@ -450,7 +442,6 @@ this.InfoDlgOpacity,
         {
             this.AcceptButton = this.button_itemAction;
         }
-
 
         // 从文件中装入内容到浏览器
         int LoadLogFileContentToBrowser(out string strError)
@@ -592,7 +583,7 @@ this.InfoDlgOpacity,
 
                         return;
                     }
-                // break;
+                    // break;
 
             }
             base.DefWndProc(ref m);
@@ -653,6 +644,23 @@ this.InfoDlgOpacity,
             int nRet = 0;
 
             string strLogFileName = this.LogFileName;
+
+            bool control = (Control.ModifierKeys & Keys.Control) == Keys.Control;
+            if (control)
+            {
+                OpenFileDialog dlg = new OpenFileDialog();
+
+                dlg.Title = "请指定要恢复信息文件";
+                dlg.FileName = "";
+                dlg.Filter = "恢复信息文件 (*.txt)|*.txt|All files (*.*)|*.*";
+                dlg.RestoreDirectory = true;
+
+                if (dlg.ShowDialog() != DialogResult.OK)
+                    return;
+
+                strLogFileName = dlg.FileName;
+            }
+
             int nLineCount = 0;
 
             stop.OnStop += new StopEventHandler(this.DoStop);
@@ -667,7 +675,6 @@ this.InfoDlgOpacity,
             Global.WriteHtml(this.webBrowser_operationInfo,
     "开始恢复。\r\n");
 
-
             try
             {
                 using (StreamReader sr = new StreamReader(strLogFileName, true))
@@ -681,10 +688,9 @@ this.InfoDlgOpacity,
                         if (String.IsNullOrEmpty(strLine) == true)
                             continue;
 
-                        string strXml = "";
                         nRet = BuildRecoverXml(
                             strLine,
-                            out strXml,
+                            out string strXml,
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
@@ -738,8 +744,9 @@ this.InfoDlgOpacity,
 
             Global.WriteHtml(this.webBrowser_operationInfo,
                 "恢复完成。共处理记录 " + nLineCount + " 个。 \r\n");
-            Global.WriteHtml(this.webBrowser_operationInfo,
-    "注意打开数据目录，改名保存 " + this.LogFileName + " 文件，避免将来不小心重复恢复。\r\n");
+            if (control == false)
+                Global.WriteHtml(this.webBrowser_operationInfo,
+        "注意打开用户文件夹，改名保存 " + this.LogFileName + " 文件，避免将来不小心重复恢复。\r\n");
 
             API.PostMessage(this.Handle, WM_SCROLLTOEND, 0, 0);
             return;
@@ -790,7 +797,6 @@ this.InfoDlgOpacity,
             strError = "";
 
             string[] cols = strLine.Split(new char[] { '\t' });
-
 
             if (cols.Length < 4)
             {
@@ -843,19 +849,15 @@ strOperTime);
                 // 注：不能鲁莽写入<borrowPeriod>，而是写入<defaulBorrowPeriod>
                 // 因为先要给服务器机会，让它探测读者类型针对册类型的借期参数，实在不行才采用这里给出的缺省参数。
 
-
                 // operTime
                 DomUtil.SetElementText(dom.DocumentElement,
 "operTime",
 strOperTime);
 
-
-
                 // operator
                 DomUtil.SetElementText(dom.DocumentElement,
 "operator",
 strUserName);
-
             }
             else if (strFunction == "return")
             {

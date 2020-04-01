@@ -10848,7 +10848,7 @@ Stack:
                 if (StringUtil.IsInList("urgentrecover", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "紧急恢复的操作被拒绝。不具备urgentrecover权限。";
+                    result.ErrorInfo = "紧急恢复的操作被拒绝。不具备 urgentrecover 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -10871,7 +10871,7 @@ Stack:
                 }
                 catch (Exception ex)
                 {
-                    strError = "装载日志记录XML进入DOM发生错误: " + ex.Message;
+                    strError = "装载日志记录 XML 进入 DOM 发生错误: " + ex.Message;
                     goto ERROR1;
                 }
 
