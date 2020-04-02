@@ -203,7 +203,7 @@ namespace dp2SSL
         }
 
         // 收到消息。被当作命令解释。执行后发回命令执行结果
-        static void OnAddMessageRecieved(string action,
+        static async void OnAddMessageRecieved(string action,
 IList<MessageRecord> messages)
         {
             foreach (var message in messages)
@@ -212,7 +212,7 @@ IList<MessageRecord> messages)
                 if (message.data.StartsWith($"@{_userName}"))
                 {
                     string command = message.data.Substring($"@{_userName}".Length).Trim();
-                    ProcessCommand(command);
+                    await ProcessCommand(command);
                 }
             }
         }
@@ -230,30 +230,30 @@ IList<MessageRecord> messages)
             }
         }
 
-        static void ProcessCommand(string command)
+        static async Task ProcessCommand(string command)
         {
             if (command.StartsWith("hello"))
             {
-                SetMessageAsync("hello!");
+                await SetMessageAsync("hello!");
                 return;
             }
 
             if (command.StartsWith("version"))
             {
-                SetMessageAsync($"dp2SSL 前端版本: {WpfClientInfo.ClientVersion}");
+                await SetMessageAsync($"dp2SSL 前端版本: {WpfClientInfo.ClientVersion}");
                 return;
             }
 
             if (command.StartsWith("error"))
             {
-                SetMessageAsync($"dp2SSL 当前界面报错: [{App.CurrentApp.Error}]; 书柜初始化是否完成: {ShelfData.FirstInitialized}");
+                await SetMessageAsync($"dp2SSL 当前界面报错: [{App.CurrentApp.Error}]; 书柜初始化是否完成: {ShelfData.FirstInitialized}");
                 return;
             }
 
             // 列出操作历史
             if (command.StartsWith("list history"))
             {
-                ListHistory(command);
+                await ListHistory(command);
                 return;
             }
 
@@ -264,7 +264,7 @@ IList<MessageRecord> messages)
                 return;
             }
 
-            SetMessageAsync($"我无法理解这个命令 '{command}'");
+            await SetMessageAsync($"我无法理解这个命令 '{command}'");
         }
 
         // 列出操作历史
@@ -273,7 +273,7 @@ IList<MessageRecord> messages)
         //      sync 已经同步的那些shixiang
         //      error 同步出错的事项
         //      空 所有事项
-        static void ListHistory(string command)
+        static async Task ListHistory(string command)
         {
             try
             {
@@ -299,17 +299,17 @@ IList<MessageRecord> messages)
                         items = context.Requests.Where(o => true)
                             .OrderBy(o => o.ID).ToList();
 
-                    SetMessageAsync($"> {command}\r\n当前共有 {items.Count} 个历史事项");
+                    await SetMessageAsync($"> {command}\r\n当前共有 {items.Count} 个历史事项");
                     int i = 1;
                     foreach (var item in items)
                     {
-                        SetMessageAsync($"{i++}\r\n{DisplayRequestItem.GetDisplayString(item)}");
+                        await SetMessageAsync($"{i++}\r\n{DisplayRequestItem.GetDisplayString(item)}");
                     }
                 }
             }
             catch(Exception ex)
             {
-                SetMessageAsync($"命令 {command} 执行过程出现异常:\r\n{ExceptionUtil.GetDebugText(ex)}");
+                await SetMessageAsync($"命令 {command} 执行过程出现异常:\r\n{ExceptionUtil.GetDebugText(ex)}");
             }
         }
 
@@ -338,7 +338,7 @@ IList<MessageRecord> messages)
                     text.AppendLine($"{i++}\r\n{SimpleRequestItem.GetDisplayString(item)}");
                 }
                 // 获得 dp2library 中的册记录
-                var result = LibraryChannelUtil.GetEntityData(param);
+                var result = LibraryChannelUtil.GetEntityData(param).Result;
                 if (result.Value == -1 || result.Value == 0)
                     text.AppendLine($"尝试获得册记录时出错: {result.ErrorInfo}");
                 else

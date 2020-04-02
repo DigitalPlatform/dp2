@@ -26,6 +26,10 @@ namespace dp2Circulation
 {
     public partial class ChatForm : MyForm
     {
+        const int COLUMN_ICON = 0;
+        const int COLUMN_GROUPNAME = 1;
+        const int COLUMN_NEWMESSAGECOUNT = 2;
+
         public ChatForm()
         {
             InitializeComponent();
@@ -64,10 +68,13 @@ namespace dp2Circulation
             this.dpTable_groups.Rows.Clear();
             foreach (string name in names)
             {
+                /*
                 DpRow row = new DpRow();
                 row.Add(new DpCell());
                 row.Add(new DpCell { Text = name });
                 this.dpTable_groups.Rows.Add(row);
+                */
+                AddNewRow(name, "");
             }
 
             if (this.dpTable_groups.Rows.Count > 0)
@@ -114,9 +121,10 @@ namespace dp2Circulation
             // TODO: 填充消息的时候，如果和上次最末一条同样时间，则要从返回结果集合中和上次最末一条 ID 匹配的后一条开始填充
         }
 
-        void MessageHub_AddMessage(object sender, AddMessageEventArgs e)
+        async void MessageHub_AddMessage(object sender, AddMessageEventArgs e)
         {
-            this.BeginInvoke(new Action<AddMessageEventArgs>(AddMessage), e);
+            // this.BeginInvoke(new Action<AddMessageEventArgs>(AddMessage), e);
+            await AddMessage(e);
         }
 
         // 如果必要，加入时间提示行
@@ -158,8 +166,17 @@ namespace dp2Circulation
             return name1 == name2;
         }
 
+        static string GetPureName(string text)
+        {
+            if (text.IndexOf(":") == -1)
+                return text;
+
+            return StringUtil.ParseTwoPart(text, ":")[1];
+        }
+
         static bool GroupNameContains(string[] names, string name)
         {
+            /*
             foreach (var current in names)
             {
                 if (GroupNameEqual(current, name))
@@ -167,13 +184,94 @@ namespace dp2Circulation
             }
 
             return false;
+            */
+            return GroupNameIndexOf(names, name) != -1;
+        }
+
+        static int GroupNameIndexOf(string[] names, string name)
+        {
+            int i = 0;
+            foreach (var current in names)
+            {
+                if (GroupNameEqual(current, name))
+                    return i;
+                i++;
+            }
+
+            return -1;
+        }
+
+        // 更新左侧群名列表。
+        // 增补群名，和更新名字右侧的新消息数字
+        void UpdateGroupNameList(string[] groups)
+        {
+            if (groups == null)
+                return;
+
+            // 存储发现以后剩下的名字
+            List<string> names = new List<string>(groups);
+            foreach (var row in this.dpTable_groups.Rows)
+            {
+                string name = row[COLUMN_GROUPNAME].Text;
+
+                int index = GroupNameIndexOf(names.ToArray(), name);
+                if (index != -1)
+                {
+                    if (name != _currentGroupName)
+                    {
+                        string old_value = row[COLUMN_NEWMESSAGECOUNT].Text;
+                        this.Invoke((Action)(() =>
+                        {
+                            // 注意所在线程应该为界面线程
+                            row[COLUMN_NEWMESSAGECOUNT].Text = IncValue(old_value, 1);
+                        }));
+                    }
+                    names.RemoveAt(index);    // 去掉一个发现的名字
+                }
+            }
+
+            // 剩下部分群名在列表中没有找到，需要添加到群名列表中
+            this.Invoke((Action)(() =>
+            {
+                foreach (var name in names)
+                {
+                    AddNewRow(GetPureName(name), "1");
+                }
+            }));
+            return;
+
+            string IncValue(string old_value, int delta)
+            {
+                if (Int32.TryParse(old_value, out int count) == false)
+                    count = 0;
+                return (count + delta).ToString();
+            }
+        }
+
+        // 清除群名列表中右侧的新消息数字
+        void ClearNewCount(string group_name)
+        {
+            foreach (var row in this.dpTable_groups.Rows)
+            {
+                string name = row[COLUMN_GROUPNAME].Text;
+                if (name == group_name)
+                {
+                    this.Invoke((Action)(() =>
+                    {
+                        row[COLUMN_NEWMESSAGECOUNT].Text = "";
+                    }));
+                    return;
+                }
+            }
         }
 
         // TODO: 对不是当前群组的消息，要更新左侧群名列表右侧的新消息数显示
-        void AddMessage(AddMessageEventArgs e)
+        async Task AddMessage(AddMessageEventArgs e)
         {
             foreach (MessageRecord record in e.Records)
             {
+                UpdateGroupNameList(record.groups);
+
                 // 忽略不是当前群组的消息
                 if (GroupNameContains(record.groups, _currentGroupName) == false)
                     continue;
@@ -557,6 +655,9 @@ namespace dp2Circulation
                             //goto ERROR1;
                             this.AddErrorLine(result.ErrorInfo);
                         }
+
+                        // 把左侧列表中当前群名行的新消息数字清除
+                        ClearNewCount(strGroupName);
                     }
                     catch (AggregateException ex)
                     {
@@ -787,10 +888,17 @@ namespace dp2Circulation
             if (name == null)
                 return;
 
+            AddNewRow(name, "");
+        }
+
+        DpRow AddNewRow(string name, string new_message_count)
+        {
             DpRow row = new DpRow();
             row.Add(new DpCell());
             row.Add(new DpCell { Text = name });
+            row.Add(new DpCell { Text = new_message_count });
             this.dpTable_groups.Rows.Add(row);
+            return row;
         }
 
         void menu_deleteGroupName_Click(object sender, EventArgs e)

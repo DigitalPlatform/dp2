@@ -40,6 +40,7 @@
             this.dpTable_groups = new DigitalPlatform.CommonControl.DpTable();
             this.dpColumn_icon = new DigitalPlatform.CommonControl.DpColumn();
             this.dpColumn_name = new DigitalPlatform.CommonControl.DpColumn();
+            this.dpColumn_newCount = new DigitalPlatform.CommonControl.DpColumn();
             this.panel_input.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_message)).BeginInit();
@@ -167,6 +168,7 @@
             this.dpTable_groups.AutoDocCenter = true;
             this.dpTable_groups.Columns.Add(this.dpColumn_icon);
             this.dpTable_groups.Columns.Add(this.dpColumn_name);
+            this.dpTable_groups.Columns.Add(this.dpColumn_newCount);
             this.dpTable_groups.ColumnsBackColor = System.Drawing.SystemColors.Control;
             this.dpTable_groups.ColumnsForeColor = System.Drawing.SystemColors.ControlText;
             this.dpTable_groups.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -207,7 +209,18 @@
             this.dpColumn_name.Font = null;
             this.dpColumn_name.ForeColor = System.Drawing.Color.Transparent;
             this.dpColumn_name.LineAlignment = System.Drawing.StringAlignment.Near;
+            this.dpColumn_name.Text = "群名";
             this.dpColumn_name.Width = 200;
+            // 
+            // dpColumn_newCount
+            // 
+            this.dpColumn_newCount.Alignment = System.Drawing.StringAlignment.Near;
+            this.dpColumn_newCount.BackColor = System.Drawing.Color.Transparent;
+            this.dpColumn_newCount.Font = null;
+            this.dpColumn_newCount.ForeColor = System.Drawing.Color.Transparent;
+            this.dpColumn_newCount.LineAlignment = System.Drawing.StringAlignment.Near;
+            this.dpColumn_newCount.Text = "未读数";
+            this.dpColumn_newCount.Width = 120;
             // 
             // ChatForm
             // 
@@ -252,5 +265,6 @@
         private DigitalPlatform.CommonControl.DpTable dpTable_groups;
         private DigitalPlatform.CommonControl.DpColumn dpColumn_icon;
         private DigitalPlatform.CommonControl.DpColumn dpColumn_name;
+        private DigitalPlatform.CommonControl.DpColumn dpColumn_newCount;
     }
 }

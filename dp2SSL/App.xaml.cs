@@ -480,6 +480,7 @@ namespace dp2SSL
 
             _cancelRefresh?.Cancel();
             _cancelProcessMonitor?.Cancel();
+            ShelfData.CancelAll();
 
             // 最后关灯
             RfidManager.TurnShelfLamp("*", "turnOff");
@@ -513,6 +514,7 @@ namespace dp2SSL
 
             _cancelRefresh?.Cancel();
             _cancelProcessMonitor?.Cancel();
+            ShelfData.CancelAll();
 
             // EndFingerprint();
 

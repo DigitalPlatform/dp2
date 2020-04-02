@@ -24,6 +24,7 @@ namespace dp2SSL
         public string State { get; set; }   // 状态。sync/commerror/normalerror/空
                                             // 表示是否完成同步，还是正在出错重试同步阶段，还是从未同步过
         public string SyncErrorInfo { get; set; }   // 最近一次同步操作的报错信息
+        public string SyncErrorCode { get; set; }   // 最近一次同步操作的错误码
         public int SyncCount { get; set; }
 
         // public Operator Operator { get; set; }  // 提起请求的读者

@@ -771,6 +771,24 @@ namespace dp2SSL
                     }
 
                     processed.Add(entity);
+
+                    // 2020/4/2
+                    ShelfData.Add("all", entity);
+
+                    // 2020/4/2
+                    // 还书操作前先尝试修改 EAS
+                    {
+                        var result = SetEAS(entity.UID, entity.Antenna, false);
+                        if (result.Value == -1)
+                        {
+                            string text = $"修改 EAS 动作失败: {result.ErrorInfo}";
+                            entity.SetError(text, "yellow");
+
+                            // 写入错误日志
+                            WpfClientInfo.WriteInfoLog($"修改册 '{entity.PII}' 的 EAS 失败: {result.ErrorInfo}");
+                        }
+                    }
+
                 }
 
                 foreach (var entity in ShelfData.Changes)
@@ -865,6 +883,9 @@ namespace dp2SSL
                     }
 
                     processed.Add(entity);
+
+                    // 2020/4/2
+                    ShelfData.Remove("all", entity);
                 }
 
                 /*
@@ -877,11 +898,14 @@ namespace dp2SSL
                 }
                 */
                 {
-                    ShelfData.Remove("all", processed);
+                    // ShelfData.Remove("all", processed);
                     ShelfData.Remove("adds", processed);
                     ShelfData.Remove("removes", processed);
                     ShelfData.Remove("changes", processed);
                 }
+
+                // 2020/4/2
+                ShelfData.RefreshCount();
 
                 if (actions.Count == 0)
                     return new SaveActionResult
@@ -2261,11 +2285,7 @@ namespace dp2SSL
                 if (string.IsNullOrEmpty(entity.Title)
                     && string.IsNullOrEmpty(entity.PII) == false && entity.PII != "(空)")
                 {
-                    GetEntityDataResult result = await
-                        Task<GetEntityDataResult>.Run(() =>
-                        {
-                            return GetEntityData(entity.PII);
-                        });
+                    GetEntityDataResult result = await GetEntityData(entity.PII);
                     if (result.Value == -1 || result.Value == 0)
                     {
                         // TODO: 条码号没有找到的错误码要单独记下来
@@ -2443,6 +2463,7 @@ namespace dp2SSL
                         }
                     }
 
+#if REMOVED
                     // 2019/11/25
                     // 还书操作前先尝试修改 EAS
                     if (action == "return")
@@ -2471,6 +2492,7 @@ namespace dp2SSL
                             WpfClientInfo.WriteInfoLog($"修改册 '{entity.PII}' 的 EAS 失败: {result.ErrorInfo}");
                         }
                     }
+#endif
 
                     long lRet = 0;
                     ErrorCode error_code = ErrorCode.NoError;
@@ -2620,6 +2642,7 @@ namespace dp2SSL
                     if (string.IsNullOrEmpty(entity.Title) == false)
                         title += " (" + entity.Title + ")";
 
+#if REMOVED
                     // TODO: 其实 SaveActions 里面已经处理了 all adds removes changed 数组，这里似乎不需要再处理了
                     if (action == "borrow" || action == "return")
                     {
@@ -2636,6 +2659,7 @@ namespace dp2SSL
 
                     if (action == "transfer")
                         ShelfData.Remove("changes", entity);
+#endif
 
                     string resultType = "succeed";
                     if (lRet == -1)
@@ -2664,6 +2688,7 @@ namespace dp2SSL
                         info.SyncErrorInfo = strError;
                         if (error_code != ErrorCode.NoError)
                             info.SyncErrorInfo += $"[{error_code}]";
+                        info.SyncErrorCode = error_code.ToString();
                         info.SyncCount++;
                     }
 
@@ -2713,6 +2738,7 @@ namespace dp2SSL
 #endif
                                 continue;
                             }
+
                         }
 
                         if (action == "transfer")
@@ -2749,10 +2775,10 @@ namespace dp2SSL
                         }
                         else
                         {
-                            // 一般错误也需要重试 10 次
-                            //if (info.RetryCount < 10)
-                            //    retry_actions.Add(info);
-                            info.State = "normalerror";
+                            if (error_code == ErrorCode.ItemBarcodeNotFound)
+                                info.State = "dontsync";
+                            else
+                                info.State = "normalerror";
                         }
 
                         if (StringUtil.IsInList("auto_stop", style))
@@ -2851,7 +2877,7 @@ Stack:
                     // 重新装载读者信息和显示
                     try
                     {
-                        ShelfData.RefreshCount();
+                        // ShelfData.RefreshCount();
                         DoorItem.RefreshEntity(updates, ShelfData.Doors);
                         // App.CurrentApp.Speak(speak);
                     }
@@ -2886,7 +2912,7 @@ Stack:
             }
         }
 
-        static NormalResult SetEAS(string uid, string antenna, bool enable)
+        public static NormalResult SetEAS(string uid, string antenna, bool enable)
         {
             try
             {
@@ -2995,7 +3021,7 @@ Stack:
             using (var context = new MyContext())
             {
                 context.Database.EnsureCreated();
-                var items = context.Requests.Where(o => o.State != "sync" && o.State != "cancelsync")
+                var items = context.Requests.Where(o => o.State != "sync" && o.State != "dontsync")
                     .OrderBy(o => o.ID).ToList();
                 var actions = FromRequests(items);
                 WpfClientInfo.WriteInfoLog($"从本地数据库装载 Actions 成功。内容如下：\r\n{ActionInfo.ToString(actions)}");
@@ -3010,6 +3036,7 @@ Stack:
                 var item = context.Requests.FirstOrDefault(o => o.ID == id);
                 item.State = action.State;
                 item.SyncErrorInfo = action.SyncErrorInfo;
+                item.SyncErrorCode = action.SyncErrorCode;
                 item.SyncCount = action.SyncCount;
                 context.SaveChanges();
             }
@@ -3084,6 +3111,7 @@ Stack:
                 action.SyncCount = request.SyncCount;
                 action.State = request.State;
                 action.SyncErrorInfo = request.SyncErrorInfo;
+                action.SyncErrorCode = request.SyncErrorCode;
                 actions.Add(action);
             }
 
@@ -3111,6 +3139,7 @@ Stack:
                 request.SyncCount = action.SyncCount;
                 request.State = action.State;
                 request.SyncErrorInfo = action.SyncErrorInfo;
+                request.SyncErrorCode = action.SyncErrorCode;
                 request.OperTime = DateTime.Now;
                 requests.Add(request);
             }
@@ -3217,6 +3246,7 @@ Stack:
                         int newCount = 0;   // 首次进行同步的事项数量
 
                         // 排序和分组。按照分组提交给 dp2library 服务器
+                        // TODO: 但进度显示不应该太细碎？应该按照总的进度来显示
                         var groups = GroupActions(actions);
 
                         List<MessageItem> messages = new List<MessageItem>();
@@ -3224,16 +3254,30 @@ Stack:
                         // SubmitWindow progress = PageMenu.PageShelf?.OpenProgressWindow();
                         SubmitWindow progress = PageMenu.PageShelf?.ProgressWindow;
 
+                        int start = 0;  // 当前 group 开始的偏移
+                        int total = actions.Count;
                         foreach (var group in groups)
                         {
+                            int current_count = group.Count;    // 当前 group 包含的动作数量
+
                             var result = SubmitCheckInOut(
                             (min, max, value, text) =>
                             {
+                                // 2020/4/2
+                                // 修正三个值
+                                if (max != -1)
+                                    max = total;
+                                //if (min != -1)
+                                //    min += start;
+                                if (value != -1)
+                                    value += start;
+
                                 if (progress != null)
                                 {
                                     Application.Current.Dispatcher.Invoke(new Action(() =>
                                     {
-                                        if (min == -1 && max == -1 && value == -1)
+                                        if (min == -1 && max == -1 && value == -1
+                                        && groups.IndexOf(group) == groups.Count - 1)   // 只有最后一次才隐藏进度条
                                             progress.ProgressBar.Visibility = Visibility.Collapsed;
                                         else
                                             progress.ProgressBar.Visibility = Visibility.Visible;
@@ -3288,6 +3332,8 @@ Stack:
 
                             if (result.MessageDocument != null)
                                 messages.AddRange(result.MessageDocument.Items);
+
+                            start += current_count;
                         }
 
                         // TODO: 更新每个事项的 RetryCount。如果超过 10 次，要把 State 更新为 fail
@@ -3372,6 +3418,11 @@ Stack:
 token,
 TaskCreationOptions.LongRunning,
 TaskScheduler.Default);
+        }
+
+        public static void CancelAll()
+        {
+            _cancel.Cancel();
         }
 
         // 对 Actions 按照 PII 进行分组
@@ -3653,7 +3704,7 @@ TaskScheduler.Default);
 #endif
 
 #if REMOVED
-#region 门命令延迟执行
+        #region 门命令延迟执行
 
         // 门命令(延迟执行)队列。开门时放一个命令进入队列。等得到门开信号的时候再取出这个命令
         static List<CommandItem> _commandQueue = new List<CommandItem>();
@@ -3743,7 +3794,7 @@ TaskScheduler.Default);
         }
 
 
-#endregion
+        #endregion
 #endif
     }
 
@@ -3811,8 +3862,12 @@ TaskScheduler.Default);
         public string CurrentShelfNo { get; set; }  // 当前架号。transfer 动作会用到
         public string BatchNo { get; set; } // 批次号。transfer 动作会用到。建议可以用当前用户名加上日期构成
 
-        public string State { get; set; }   // 状态 sync/commerror/normalerror/空 = 同步成功/通讯出错/一般出错/从未同步过
+        // 状态 
+        // sync/dontsync/commerror/normalerror/空
+        // 对应于: 同步成功/不再同步/通讯出错/一般出错/从未同步过
+        public string State { get; set; }
         public string SyncErrorInfo { get; set; }   // 最近一次同步操作的报错信息
+        public string SyncErrorCode { get; set; }   // 最近一次同步操作的错误码
         public int SyncCount { get; set; } // 已经进行过的同步重试次数
         public int ID { get; set; } // 日志数据库中对应的记录 ID
 
