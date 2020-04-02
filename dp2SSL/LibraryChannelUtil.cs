@@ -9,6 +9,7 @@ using DigitalPlatform;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.WPF;
+using Microsoft.VisualStudio.Threading;
 
 namespace dp2SSL
 {
@@ -21,90 +22,95 @@ namespace dp2SSL
             public string ItemRecPath { get; set; }
         }
 
+        static AsyncSemaphore _channelLimit = new AsyncSemaphore(1);
+
         // 获得一个册的题名字符串
         // .Value
         //      0   没有找到
         //      1   找到
-        public static GetEntityDataResult GetEntityData(string pii)
+        public static async Task<GetEntityDataResult> GetEntityData(string pii)
         {
-            LibraryChannel channel = App.CurrentApp.GetChannel();
-            TimeSpan old_timeout = channel.Timeout;
-            channel.Timeout = TimeSpan.FromSeconds(10);
-            try
+            using (var releaser = await _channelLimit.EnterAsync())
             {
-                // TODO: ItemXml 和 BiblioSummary 可以考虑在本地缓存一段时间
-                int nRedoCount = 0;
-            REDO_GETITEMINFO:
-                long lRet = channel.GetItemInfo(null,
-                    "item",
-                    pii,
-                    "",
-                    "xml",
-                    out string item_xml,
-                    out string item_recpath,
-                    out _,
-                    "",
-                    out _,
-                    out _,
-                    out string strError);
-                if (lRet == -1)
+                LibraryChannel channel = App.CurrentApp.GetChannel();
+                TimeSpan old_timeout = channel.Timeout;
+                channel.Timeout = TimeSpan.FromSeconds(10);
+                try
                 {
-                    if ((channel.ErrorCode == ErrorCode.RequestError ||
-                        channel.ErrorCode == ErrorCode.RequestTimeOut)
-                        && nRedoCount < 2)
+                    // TODO: ItemXml 和 BiblioSummary 可以考虑在本地缓存一段时间
+                    int nRedoCount = 0;
+                REDO_GETITEMINFO:
+                    long lRet = channel.GetItemInfo(null,
+                        "item",
+                        pii,
+                        "",
+                        "xml",
+                        out string item_xml,
+                        out string item_recpath,
+                        out _,
+                        "",
+                        out _,
+                        out _,
+                        out string strError);
+                    if (lRet == -1)
                     {
-                        nRedoCount++;
-                        goto REDO_GETITEMINFO;
+                        if ((channel.ErrorCode == ErrorCode.RequestError ||
+                            channel.ErrorCode == ErrorCode.RequestTimeOut)
+                            && nRedoCount < 2)
+                        {
+                            nRedoCount++;
+                            goto REDO_GETITEMINFO;
+                        }
+                        return new GetEntityDataResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError
+                        };
                     }
+
+                    nRedoCount = 0;
+                REDO_GETBIBLIOSUMMARY:
+                    lRet = channel.GetBiblioSummary(
+        null,
+        pii,
+        "", // strConfirmItemRecPath,
+        null,
+        out _,
+        out string strSummary,
+        out strError);
+                    if (lRet == -1)
+                    {
+                        if ((channel.ErrorCode == ErrorCode.RequestError ||
+        channel.ErrorCode == ErrorCode.RequestTimeOut)
+        && nRedoCount < 2)
+                        {
+                            nRedoCount++;
+                            goto REDO_GETBIBLIOSUMMARY;
+                        }
+                        return new GetEntityDataResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError
+                        };
+                    }
+
+                    strSummary = strSummary?.Replace(". -- ", "\r\n");   // .Replace("/", "\r\n");
+
                     return new GetEntityDataResult
                     {
-                        Value = -1,
-                        ErrorInfo = strError
+                        Value = (int)lRet,
+                        ItemXml = item_xml,
+                        ItemRecPath = item_recpath,
+                        Title = strSummary,
+                        ErrorInfo = strError,
+                        ErrorCode = channel.ErrorCode.ToString()
                     };
                 }
-
-                nRedoCount = 0;
-            REDO_GETBIBLIOSUMMARY:
-                lRet = channel.GetBiblioSummary(
-    null,
-    pii,
-    "", // strConfirmItemRecPath,
-    null,
-    out _,
-    out string strSummary,
-    out strError);
-                if (lRet == -1)
+                finally
                 {
-                    if ((channel.ErrorCode == ErrorCode.RequestError ||
-    channel.ErrorCode == ErrorCode.RequestTimeOut)
-    && nRedoCount < 2)
-                    {
-                        nRedoCount++;
-                        goto REDO_GETBIBLIOSUMMARY;
-                    }
-                    return new GetEntityDataResult
-                    {
-                        Value = -1,
-                        ErrorInfo = strError
-                    };
+                    channel.Timeout = old_timeout;
+                    App.CurrentApp.ReturnChannel(channel);
                 }
-
-                strSummary = strSummary?.Replace(". -- ", "\r\n");   // .Replace("/", "\r\n");
-
-                return new GetEntityDataResult
-                {
-                    Value = (int)lRet,
-                    ItemXml = item_xml,
-                    ItemRecPath = item_recpath,
-                    Title = strSummary,
-                    ErrorInfo = strError,
-                    ErrorCode = channel.ErrorCode.ToString()
-                };
-            }
-            finally
-            {
-                channel.Timeout = old_timeout;
-                App.CurrentApp.ReturnChannel(channel);
             }
         }
 
@@ -370,6 +376,5 @@ out string strError);
 
             return new GetLocationListResult { List = results };
         }
-
     }
 }

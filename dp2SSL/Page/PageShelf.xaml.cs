@@ -1163,12 +1163,7 @@ namespace dp2SSL
                     if (string.IsNullOrEmpty(entity.Title)
                         && string.IsNullOrEmpty(entity.PII) == false && entity.PII != "(空)")
                     {
-                        GetEntityDataResult result = await
-                            Task<GetEntityDataResult>.Run(() =>
-                            {
-                                return GetEntityData(entity.PII);
-                            });
-
+                        GetEntityDataResult result = await GetEntityData(entity.PII);
                         if (result.Value == -1)
                         {
                             entity.SetError(result.ErrorInfo);
@@ -1467,6 +1462,9 @@ namespace dp2SSL
 
                         if (part.Count == 0)
                             break;
+
+                        // 2020/4/2
+                        ShelfData.Add("all", part);
 
                         if (initial_result.Value != -1
                             && part != null
@@ -2332,6 +2330,21 @@ namespace dp2SSL
                     CurrentShelfNo = ShelfData.GetShelfNo(entity),
                     Operator = GetOperator(entity, false)
                 });
+
+                // 2020/4/2
+                // 还书操作前先尝试修改 EAS
+                {
+                    var eas_result = ShelfData.SetEAS(entity.UID, entity.Antenna, false);
+                    if (eas_result.Value == -1)
+                    {
+                        return new SubmitResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"修改册 '{entity.PII}' 的 EAS 失败: {eas_result.ErrorInfo}",
+                            ErrorCode = "setEasError"
+                        };
+                    }
+                }
             }
 
             if (actions.Count == 0)
@@ -2514,6 +2527,7 @@ namespace dp2SSL
                     (action) =>
                     {
                         var entity = action.Entity;
+                        /*
                         if (action.Action == "transfer")
                         {
                             ShelfData.Remove("all", entity);
@@ -2522,6 +2536,7 @@ namespace dp2SSL
                             ShelfData.Remove("changes", entity);
                             changed = true;
                         }
+                        */
                     });
 
                 if (changed)

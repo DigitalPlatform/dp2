@@ -1467,11 +1467,7 @@ out string strError);
                     if (string.IsNullOrEmpty(entity.Title)
                         && string.IsNullOrEmpty(entity.PII) == false && entity.PII != "(空)")
                     {
-                        GetEntityDataResult result = await
-                            Task<GetEntityDataResult>.Run(() =>
-                            {
-                                return GetEntityData(entity.PII);
-                            });
+                        GetEntityDataResult result = await GetEntityData(entity.PII);
                         /*
                         out string title,
                         out string item_xml,
