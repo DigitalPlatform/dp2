@@ -336,16 +336,16 @@ namespace dp2SSL
                     var result = await TinyServer.SetMessageAsync(text);
                     if (result.Value == -1)
                     {
-                        App.CurrentApp.SetError("setMessage", $"发送消息失败: {result.ErrorInfo}。消息内容:{StringUtil.CutString(text, 100)}");
+                        App.CurrentApp?.SetError("setMessage", $"发送消息失败: {result.ErrorInfo}。消息内容:{StringUtil.CutString(text, 100)}");
                         WpfClientInfo.WriteErrorLog($"发送消息失败: {result.ErrorInfo}。消息内容:{text}");
                     }
                     else
-                        App.CurrentApp.SetError("setMessage", null);
+                        App.CurrentApp?.SetError("setMessage", null);
                 });
             }
             catch (Exception ex)
             {
-                App.CurrentApp.SetError("setMessage", $"发送消息出现异常: {ex.Message}。消息内容:{StringUtil.CutString(text, 100)}");
+                App.CurrentApp?.SetError("setMessage", $"发送消息出现异常: {ex.Message}。消息内容:{StringUtil.CutString(text, 100)}");
                 WpfClientInfo.WriteErrorLog($"发送消息出现异常: {ex.Message}。消息内容:{text}");
             }
         }

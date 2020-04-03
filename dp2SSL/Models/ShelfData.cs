@@ -2450,6 +2450,7 @@ namespace dp2SSL
                             {
                                 SyncCount = info.SyncCount,
                                 Operator = info.Operator,
+                                OperTime = info.OperTime,
                                 Operation = action,
                                 ResultType = "error",
                                 ErrorCode = "InvalidOperator",
@@ -2675,6 +2676,7 @@ namespace dp2SSL
                     {
                         SyncCount = info.SyncCount,
                         Operator = info.Operator,
+                        OperTime = info.OperTime,
                         Operation = action,
                         ResultType = resultType,
                         ErrorCode = error_code.ToString(),
@@ -3112,6 +3114,7 @@ Stack:
                 action.State = request.State;
                 action.SyncErrorInfo = request.SyncErrorInfo;
                 action.SyncErrorCode = request.SyncErrorCode;
+                action.OperTime = request.OperTime;
                 actions.Add(action);
             }
 
@@ -3140,7 +3143,10 @@ Stack:
                 request.State = action.State;
                 request.SyncErrorInfo = action.SyncErrorInfo;
                 request.SyncErrorCode = action.SyncErrorCode;
-                request.OperTime = DateTime.Now;
+                if (action.OperTime == DateTime.MinValue)
+                    request.OperTime = DateTime.Now;
+                else
+                    request.OperTime = action.OperTime;
                 requests.Add(request);
             }
 
@@ -3855,6 +3861,7 @@ TaskScheduler.Default);
     public class ActionInfo
     {
         public Operator Operator { get; set; }  // 提起请求的读者
+        public DateTime OperTime { get; set; }  // 首次操作的时间
         public Entity Entity { get; set; }
         public string Action { get; set; }  // borrow/return/transfer
         public string TransferDirection { get; set; } // in/out 典藏移交的方向

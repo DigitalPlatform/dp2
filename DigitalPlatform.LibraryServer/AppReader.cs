@@ -1314,7 +1314,7 @@ namespace DigitalPlatform.LibraryServer
                         //      1   不符合要求
                         nRet = CheckReaderType(domTemp,
                             strLibraryCode,
-                            //strReaderDbName,
+                            strReaderDbName,
                             out strError);
                         if (nRet == -1 || nRet == 1)
                         {
@@ -1534,40 +1534,24 @@ strLibraryCode);    // 读者所在的馆代码
         //      1   不符合要求
         internal int CheckReaderType(XmlDocument dom,
             string strLibraryCode,
-            // string strReaderDbName,
+            string strReaderDbName,
             out string strError)
         {
             strError = "";
-            int nRet = 0;
+            // int nRet = 0;
 
             List<string> values = null;
-            /*
 
-            // 试探 读者库名
-
-            // 获得一个图书馆代码下的值列表
-            // parameters:
-            //      strLibraryCode  馆代码
-            //      strTableName    表名。如果为空，表示任意name参数值均匹配
-            //      strDbName   数据库名。如果为空，表示任意dbname参数值均匹配。
-            values = GetOneLibraryValueTable(
-                strLibraryCode,
-                "readerType",
-                strReaderDbName);
-            if (values != null && values.Count > 0)
-                goto FOUND;
-
-            // 试探不使用数据库名
-            values = GetOneLibraryValueTable(
-    strLibraryCode,
-    "readerType",
-    "");
-            if (values != null && values.Count > 0)
-                goto FOUND;
-
-            return 0;   // 因为没有值列表，什么值都可以
-            */
-
+            var result = GetValueTable(
+strLibraryCode,
+"readerType",
+strReaderDbName,
+false);
+            if (result == null || result.Length == 0)
+                return 0;
+            values = new List<string>(result);
+            GetPureValue(ref values);
+#if REMOVED
             // return:
             //      -1  出错
             //      0   library.xml 中尚未定义 rightsTable 元素
@@ -1582,6 +1566,9 @@ strLibraryCode);    // 读者所在的馆代码
                 return 0;   // 因为没有值列表，什么值都可以
 
             FOUND:
+            GetPureValue(ref values);
+
+#endif
             string strReaderType = DomUtil.GetElementText(dom.DocumentElement,
     "readerType");
 
@@ -1597,11 +1584,11 @@ strLibraryCode);    // 读者所在的馆代码
                     return 0;
             }
 
-            GetPureValue(ref values);
             strError = "读者类型 '" + strReaderType + "' 不是合法的值。应为 '" + StringUtil.MakePathList(values) + "' 之一";
             return 1;
         }
 
+#if REMOVED
         // return:
         //      -1  出错
         //      0   library.xml 中尚未定义 rightsTable 元素
@@ -1626,6 +1613,8 @@ root, strLibraryCode);
 
             return 1;
         }
+
+#endif
 
         // 对新旧读者记录(或者册记录)中包含的条码号进行比较, 看看是否发生了变化(进而就需要查重)
         // 条码号包含在<barcode>元素中
@@ -2363,7 +2352,7 @@ root, strLibraryCode);
                 //      1   不符合要求
                 nRet = CheckReaderType(domNewRec,   // domTemp,
                     strLibraryCode,
-                    //strReaderDbName,
+                    strReaderDbName,
                     out strError);
                 if (nRet == -1 || nRet == 1)
                 {

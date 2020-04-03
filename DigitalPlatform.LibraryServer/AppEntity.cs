@@ -3942,7 +3942,7 @@ out strError);
             out string strError)
         {
             strError = "";
-            int nRet = 0;
+            // int nRet = 0;
             string strLibraryCode = "";
 
             string strLocation = DomUtil.GetElementText(dom.DocumentElement,
@@ -3957,6 +3957,17 @@ out strError);
 
             List<string> values = null;
 
+            var result = GetValueTable(
+    strLibraryCode,
+    "bookType",
+    strItemDbName,
+    false);
+            if (result == null || result.Length == 0)
+                return 0;
+            values = new List<string>(result);
+            GetPureValue(ref values);
+
+#if NO
             // 试探 书目库名
 
             string strBiblioDbName = "";
@@ -4004,9 +4015,13 @@ out strError);
             if (values.Count > 0)
                 goto FOUND;
 
+
             return 0;   // 因为没有值列表，什么值都可以
 
             FOUND:
+            GetPureValue(ref values);
+
+#endif
             string strBookType = DomUtil.GetElementText(dom.DocumentElement,
     "bookType");
 
@@ -4022,7 +4037,6 @@ out strError);
                     return 0;
             }
 
-            GetPureValue(ref values);
             strError = "图书类型 '" + strBookType + "' 不是合法的值。应为 '" + StringUtil.MakePathList(values) + "' 之一";
             return 1;
         }
@@ -5778,7 +5792,7 @@ out strError);
             return true;
         }
 
-        #endregion
+#endregion
 
 #if NO
         // 根据册条码号列表，得到记录路径列表
