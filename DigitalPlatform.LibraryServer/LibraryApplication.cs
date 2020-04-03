@@ -13465,7 +13465,8 @@ strLibraryCode);    // 读者所在的馆代码
         public string[] GetValueTable(
             string strLibraryCodeList,
             string strTableNameParam,
-            string strDbNameParam)
+            string strDbNameParam,
+            bool addBraces = true)
         {
             List<string> librarycodes = new List<string>();
             if (SessionInfo.IsGlobalUser(strLibraryCodeList) == true)
@@ -13523,7 +13524,8 @@ strLibraryCode);    // 读者所在的馆代码
                 }
 
                 // 加上 {} 部分
-                if (strTableNameParam != "location"
+                if (addBraces
+                    && strTableNameParam != "location"
                     && temp != null)
                 {
                     temp = ConvertValueList(strLibraryCode, temp);

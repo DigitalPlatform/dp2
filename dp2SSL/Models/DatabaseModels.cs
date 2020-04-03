@@ -20,7 +20,7 @@ namespace dp2SSL
 
         public string Action { get; set; }  // borrow/return/transfer
 
-        public DateTime OperTime { get; set; }  // 操作时间
+        public DateTime OperTime { get; set; }  // 操作时间。这是首次操作时间，然后重试同步的时候并不改变这个时间
         public string State { get; set; }   // 状态。sync/commerror/normalerror/空
                                             // 表示是否完成同步，还是正在出错重试同步阶段，还是从未同步过
         public string SyncErrorInfo { get; set; }   // 最近一次同步操作的报错信息

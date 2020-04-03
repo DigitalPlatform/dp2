@@ -39,6 +39,7 @@ namespace dp2SSL
 
         public void Add(
             Operator patron,
+            DateTime operTime,
             string operation,
             string resultType,
             string errorInfo,
@@ -48,6 +49,7 @@ namespace dp2SSL
             Items.Add(new MessageItem
             {
                 Operator = patron,
+                OperTime = operTime,
                 Operation = operation,
                 ResultType = resultType,
                 ErrorInfo = errorInfo,
@@ -320,6 +322,7 @@ namespace dp2SSL
     public class MessageItem
     {
         public Operator Operator { get; set; }
+        public DateTime OperTime { get; set; }
         public string Operation { get; set; }   // borrow 或 return 或 transfer
         public string ResultType { get; set; }  // 结果类型。succeed/error/warning/information
         public string ErrorInfo { get; set; }
