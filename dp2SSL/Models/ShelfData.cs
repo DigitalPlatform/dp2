@@ -3087,7 +3087,7 @@ Stack:
                 {
                     var items = context.Requests.Where(o => o.PII == pii && o.State != "sync").ToList();
                     // context.Requests.RemoveRange(items);
-                    items.ForEach(o => o.State = "cancelsync");
+                    items.ForEach(o => o.State = "dontsync");
                     context.SaveChanges();
                 }
             }

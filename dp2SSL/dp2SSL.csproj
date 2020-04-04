@@ -371,6 +371,7 @@
     <Compile Include="Models\Operation.cs" />
     <Compile Include="Models\ShelfData.cs" />
     <Compile Include="Models\SpeakList.cs" />
+    <Compile Include="Models\SubmitDocument.cs" />
     <Compile Include="Models\TagList.cs" />
     <Compile Include="Page\PageError.xaml.cs">
       <DependentUpon>PageError.xaml</DependentUpon>
