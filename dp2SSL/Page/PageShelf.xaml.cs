@@ -1584,6 +1584,7 @@ namespace dp2SSL
                 // ShelfData.RemoveFromRetryActions(new List<Entity>(ShelfData.All));
                 {
                     var piis = ShelfData.All.Select(x => x.UID);
+                    // TODO: 虽然状态被修改为 dontsync，但依然需要在 SyncErrorInfo 里面注解一下为何 dontsync(因为初始化盘点时候已经同步成功了)
                     ShelfData.RemoveRetryActionsFromDatabase(piis);
                 }
 
