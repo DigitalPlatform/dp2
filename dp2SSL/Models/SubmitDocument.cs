@@ -1,12 +1,14 @@
-﻿using DigitalPlatform.Text;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Media;
+
+using DigitalPlatform.Text;
 
 namespace dp2SSL
 {
@@ -16,11 +18,62 @@ namespace dp2SSL
         public double BaseFontSize { get; set; }
         public string BuildStyle { get; set; }
 
+        internal List<ActionInfo> _actions = new List<ActionInfo>();
+
         // 刷新显示
         // 把 actions 中的对象的状态变化更新到当前文档中
         // TODO: 一个办法是整个 Paragraph 替换。一个办法只替换里面的部分 InLine 对象
         public void Refresh(List<ActionInfo> actions)
         {
+            // 更新 _actions 中的对象
+            int count = 0;
+            foreach (var action in actions)
+            {
+                var old_action = _actions.Where(o => o.ID == action.ID).FirstOrDefault();
+                if (old_action != null)
+                {
+                    int index = _actions.IndexOf(old_action);
+                    Debug.Assert(index != -1, "");
+                    if (index != -1)
+                    {
+                        _actions.RemoveAt(index);
+                        _actions.Insert(index, action);
+                        count++;
+                    }
+                }
+            }
+
+            if (count == 0)
+                return;
+
+            {
+                // 检查超额图书
+                List<string> overflow_titles = new List<string>();
+                _actions.ForEach(item =>
+                {
+                    if (item.Action == "borrow" && item.SyncErrorCode == "overflow")
+                        overflow_titles.Add($"{ShortTitle(item.Entity.Title)} [{item.Entity.PII}]");
+                });
+
+                // 显示超额的信息
+                if (overflow_titles.Count > 0)
+                {
+                    // 定位 Paragraph
+                    var block = this.Blocks.Where(o =>
+                    {
+                        if (!(o.Tag is string id))
+                            return false;
+                        return id == "#overflow";
+                    }).FirstOrDefault();
+                    var p = BuildOverflowParagraph(overflow_titles);
+                    this.Blocks.InsertBefore(block, p);
+                    this.Blocks.Remove(block);
+
+                    // 语音提醒
+                    App.CurrentApp.Speak("警告：借书超额");
+                }
+            }
+
             foreach (var action in actions)
             {
                 // 定位 Paragraph
@@ -34,7 +87,7 @@ namespace dp2SSL
                 if (block == null)
                     continue;
 
-                    // 替换 Paragraph
+                // 替换 Paragraph
                 {
                     if (!(block.Tag is ParagraphInfo old_info))
                         continue;
@@ -44,7 +97,44 @@ namespace dp2SSL
                     this.Blocks.Remove(block);
                 }
             }
+        }
 
+        // 构造超额图书列表
+        Paragraph BuildOverflowParagraph(List<string> titles)
+        {
+            var p = new Paragraph();
+            p.FontFamily = new FontFamily("微软雅黑");
+            p.FontSize = this.BaseFontSize * 1.8;
+            // p.FontStyle = FontStyles.Italic;
+            p.TextAlignment = TextAlignment.Left;
+            p.Foreground = Brushes.White;
+            p.Background = Brushes.DarkGoldenrod;
+            // p.LineHeight = 18;
+            p.TextIndent = 0;   // -20;
+            p.Margin = new Thickness(10, this.BaseFontSize * 2.0, 0, this.BaseFontSize * 2.0);
+            p.Padding = new Thickness(this.BaseFontSize * 1.4);
+            p.Tag = "#reserve";
+
+            StringBuilder text = new StringBuilder();
+            text.Append($"警告：您取书已经超额了。请将下列 {titles.Count} 册图书放回书柜:");
+            int i = 1;
+            foreach (string title in titles)
+            {
+                text.Append($"\r\n{i}) {title}");
+                i++;
+            }
+            p.Inlines.Add(new Run(text.ToString()));
+            return p;
+        }
+
+        internal static string ShortTitle(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+                return "";
+            int pos = text.IndexOf(". --");
+            if (pos == -1)
+                return text;
+            return text.Substring(0, pos).Trim();
         }
 
         public static SubmitDocument Build(List<ActionInfo> actions,
@@ -54,6 +144,10 @@ namespace dp2SSL
             SubmitDocument doc = new SubmitDocument();
             doc.BaseFontSize = baseFontSize;
             doc.BuildStyle = style;
+
+            // 保存起来
+            doc._actions.Clear();
+            doc._actions.AddRange(actions);
 
             bool display_transfer = StringUtil.IsInList("transfer", style);
 
@@ -98,7 +192,7 @@ namespace dp2SSL
                 p.TextAlignment = TextAlignment.Left;
                 p.Foreground = Brushes.Gray;
                 // p.TextIndent = -20;
-                p.Margin = new Thickness(0, 0, 0, 18);
+                p.Margin = new Thickness(0, 0, 0, baseFontSize/*18*/);
                 doc.Blocks.Add(p);
 
                 if (borrow_count + return_count > 0)
@@ -182,6 +276,16 @@ namespace dp2SSL
             }
 #endif
 
+            // 超额信息的占位符
+            {
+                var p = new Paragraph();
+                p.FontSize = 0.1;
+                p.Margin = new Thickness();
+                p.Padding = new Thickness();
+                p.Tag = "#overflow";
+                doc.Blocks.Add(p);
+            }
+
             // 第三部分，列出每一笔操作
             int index = 0;
             foreach (var action in actions)
@@ -242,7 +346,7 @@ namespace dp2SSL
             // 状态
             {
                 // 等待动画
-                if (action.State == "")
+                if (string.IsNullOrEmpty(action.State))
                 {
                     var image = new FontAwesome.WPF.ImageAwesome();
                     image.Icon = FontAwesome.WPF.FontAwesomeIcon.Spinner;
@@ -253,6 +357,16 @@ namespace dp2SSL
                     var container = new InlineUIContainer(image);
                     container.Name = "image_id";
                     p.Inlines.Add(container);
+                }
+                else if (action.SyncErrorCode == "overflow")
+                {
+                    back = Brushes.DarkRed;
+                    p.Inlines.Add(new Run
+                    {
+                        Text = " 超额 ",
+                        Background = back,
+                        Foreground = Brushes.White
+                    });
                 }
                 else if (action.State == "sync")
                 {
