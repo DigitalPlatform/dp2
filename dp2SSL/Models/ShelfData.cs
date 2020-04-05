@@ -1740,14 +1740,21 @@ namespace dp2SSL
             return results;
         }
 
-        internal static void Add(string name, Entity entity)
+        // return:
+        //      false   实际上没有添加(对象以前已经在集合中存在)
+        //      true    发生了添加
+        internal static bool Add(string name, Entity entity)
         {
             var list = new List<Entity>();
             list.Add(entity);
-            Add(name, list);
+            if (Add(name, list) > 0)
+                return true;
+            return false;
         }
 
-        internal static void Add(string name,
+        // return:
+        //      返回实际添加的个数
+        internal static int Add(string name,
             IReadOnlyCollection<Entity> adds)
         {
             lock (_syncRoot_all)
@@ -1771,6 +1778,8 @@ namespace dp2SSL
                     entities.Add(entity);
                     count++;
                 }
+
+                return count;
             }
         }
 
@@ -2119,14 +2128,20 @@ namespace dp2SSL
                             changed = true;
                         if (Remove(_changes, tag) == true)
                             changed = true;
+                        /*
                         if (Add(_removes, tag) == true)
                         {
                             changed = true;
                         }
+                        */
+                        // 2020/4/5
+                        // 这样可以利用 All 里面的 Entity 对象，通常其 Title 属性已经有值
+                        if (Add("removes", results[0]) == true)
+                            changed = true;
                     }
                     else
                     {
-                        // _all 里面没有，很奇怪。但，
+                        // _all 里面没有，很奇怪(是否写入错误日志？)。但，
                         // 要把 _adds 和 _removes 里面都去掉
                         if (Remove(_adds, tag) == true)
                             changed = true;
@@ -2147,6 +2162,7 @@ namespace dp2SSL
             if (e.RemoveBooks != null)
                 remove_count = removeBooksCount; // 注： e.RemoveBooks.Count 是不准确的，有时候会把 ISO15693 的读者卡判断时作为 remove 信号
 
+#if REMOVED
             if (remove_count > 0)
             {
                 // App.CurrentApp.SpeakSequence($"取出 {remove_count} 本");
@@ -2173,6 +2189,7 @@ namespace dp2SSL
     });
     */
             }
+#endif
 
             // TODO: 把 add remove error 动作分散到每个门，然后再触发 ShelfData.BookChanged 事件
 
@@ -2811,6 +2828,12 @@ namespace dp2SSL
 #if REMOVED
                             entity.SetError(null);
 #endif
+                            info.SyncErrorCode = "overflow";
+                            {
+                                if (string.IsNullOrEmpty(info.SyncErrorInfo) == false)
+                                    info.SyncErrorInfo += "; ";
+                                info.SyncErrorInfo += $"借书超额，请将本册放回书柜。详细原因： {string.Join("; ", borrow_info.Overflows)}";
+                            }
                         }
                     }
 
@@ -3255,7 +3278,8 @@ Stack:
                         // TODO: 但进度显示不应该太细碎？应该按照总的进度来显示
                         var groups = GroupActions(actions);
 
-                        List<MessageItem> messages = new List<MessageItem>();
+                        // List<MessageItem> messages = new List<MessageItem>();
+                        
                         // 准备对话框
                         // SubmitWindow progress = PageMenu.PageShelf?.OpenProgressWindow();
                         SubmitWindow progress = PageMenu.PageShelf?.ProgressWindow;
@@ -3336,9 +3360,20 @@ Stack:
                                 }
                             }
 
+                            if (progress != null && progress.IsVisible)
+                            {
+                                // Thread.Sleep(3000);
+                                // 刷新显示
+                                Application.Current.Dispatcher.Invoke(new Action(() =>
+                                {
+                                    progress?.Refresh(result.ProcessedActions);
+                                }));
+                            }
+
+                            /*
                             if (result.MessageDocument != null)
                                 messages.AddRange(result.MessageDocument.Items);
-
+                                */
                             start += current_count;
                         }
 
@@ -3346,6 +3381,10 @@ Stack:
 
                         // 将 submit 情况写入日志备查
                         // WpfClientInfo.WriteInfoLog($"重试提交请求:\r\n{ActionInfo.ToString(actions)}\r\n返回结果:{result.ToString()}");
+
+
+
+#if REMOVED
 
                         // 如果本轮有成功的请求，并且进度窗口没有打开，则补充打开进度窗口
                         if ((progress == null || progress.IsVisible == false)
@@ -3370,42 +3409,6 @@ Stack:
                                     progress?.ShowContent();
                                 }));
                         }
-#if NO
-
-                        // TODO: 保存到数据库。这样不怕中途断电或者异常退出
-
-                        // 把处理掉的 ActionInfo 对象移走
-                        lock (_syncRoot_retryActions)
-                        {
-                            foreach (var action in processed)
-                            {
-                                _retryActions.Remove(action);
-                            }
-
-                            RefreshRetryInfo();
-                        }
-
-                        // 把执行结果显示到对话框内
-                        // 全部事项都重试失败的时候不需要显示
-                        if (processed.Count > 0 && progress != null)
-                        {
-                            if (result.Value == -1)
-                                progress?.PushContent(result.ErrorInfo, "red");
-                            else if (result.Value == 1 && result.MessageDocument != null)
-                            {
-                                Application.Current.Dispatcher.Invoke(new Action(() =>
-                                {
-                                    progress?.PushContent(result.MessageDocument);
-                                }));
-                            }
-
-                            // 显示出来
-                            Application.Current.Dispatcher.Invoke(new Action(() =>
-                            {
-                                progress?.ShowContent();
-                            }));
-                        }
-
 #endif
                     }
                     _retryTask = null;
@@ -3710,7 +3713,7 @@ TaskScheduler.Default);
 #endif
 
 #if REMOVED
-        #region 门命令延迟执行
+#region 门命令延迟执行
 
         // 门命令(延迟执行)队列。开门时放一个命令进入队列。等得到门开信号的时候再取出这个命令
         static List<CommandItem> _commandQueue = new List<CommandItem>();
@@ -3800,7 +3803,7 @@ TaskScheduler.Default);
         }
 
 
-        #endregion
+#endregion
 #endif
     }
 

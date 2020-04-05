@@ -34,7 +34,8 @@ namespace dp2SSL
         {
             public string Color { get; set; }
             public string Text { get; set; }
-            public MessageDocument Document { get; set; }
+            // public MessageDocument Document { get; set; }
+            public SubmitDocument Document { get; set; }
         }
 
         public void PushContent(string text, string color)
@@ -46,7 +47,19 @@ namespace dp2SSL
             });
         }
 
+#if NO
         public void PushContent(MessageDocument doc)
+        {
+            _contents.Add(new DisplayContent
+            {
+                Document = doc
+            });
+            // 变化按钮文字
+            RefreshButtonText();
+        }
+#endif
+
+        public void PushContent(SubmitDocument doc)
         {
             _contents.Add(new DisplayContent
             {
@@ -98,6 +111,7 @@ namespace dp2SSL
 
             if (first.Document != null)
             {
+#if NO
                 string speak = "";
                 Application.Current.Dispatcher.Invoke(new Action(() =>
                 {
@@ -108,6 +122,11 @@ namespace dp2SSL
                 }));
                 if (string.IsNullOrEmpty(speak) == false)
                     App.CurrentApp.Speak(speak);
+#endif
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    this.MessageDocument = first.Document;
+                }));
             }
             else
             {
@@ -116,6 +135,20 @@ namespace dp2SSL
             }
 
             _showCount++;
+        }
+
+        public void Refresh(List<ActionInfo> actions)
+        {
+            // 先刷新当前文档
+            SubmitDocument current = this.MessageDocument as SubmitDocument;
+            if (current != null)
+                current.Refresh(actions);
+
+            // 然后刷新正在排队的文档
+            foreach(var content in _contents)
+            {
+                content.Document?.Refresh(actions);
+            }
         }
 
         public string MessageText

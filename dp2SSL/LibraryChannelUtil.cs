@@ -22,6 +22,8 @@ namespace dp2SSL
             public string ItemRecPath { get; set; }
         }
 
+        static bool _cacheDbCreated = false;
+
         static AsyncSemaphore _channelLimit = new AsyncSemaphore(1);
 
         // 获得一个册的题名字符串
@@ -68,6 +70,25 @@ namespace dp2SSL
                         };
                     }
 
+                    // 先尝试从书目库中获取书目摘要
+                    using (BiblioCacheContext context = new BiblioCacheContext())
+                    {
+                        if (_cacheDbCreated == false)
+                        {
+                            context.Database.EnsureCreated();
+                            _cacheDbCreated = true;
+                        }
+                        var item = context.BiblioSummaries.Where(o => o.PII == pii).FirstOrDefault();
+                        if (item != null)
+                            return new GetEntityDataResult
+                            {
+                                Value = 1,
+                                ItemXml = item_xml,
+                                ItemRecPath = item_recpath,
+                                Title = item.BiblioSummary,
+                            };
+                    }
+
                     nRedoCount = 0;
                 REDO_GETBIBLIOSUMMARY:
                     lRet = channel.GetBiblioSummary(
@@ -95,6 +116,27 @@ namespace dp2SSL
                     }
 
                     strSummary = strSummary?.Replace(". -- ", "\r\n");   // .Replace("/", "\r\n");
+
+                    // 存入数据库备用
+                    if (lRet == 1)
+                    {
+                        try
+                        {
+                            using (BiblioCacheContext context = new BiblioCacheContext())
+                            {
+                                context.BiblioSummaries.Add(new BiblioSummaryItem
+                                {
+                                    PII = pii,
+                                    BiblioSummary = strSummary
+                                });
+                                await context.SaveChangesAsync();
+                            }
+                        }
+                        catch
+                        {
+
+                        }
+                    }
 
                     return new GetEntityDataResult
                     {

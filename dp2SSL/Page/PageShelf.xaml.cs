@@ -2570,6 +2570,7 @@ namespace dp2SSL
                     }
                     */
 
+                    // 保存到数据库。这样不怕中途断电或者异常退出
                     await ShelfData.SaveActionsToDatabase(actions);
 
                     // TODO: 加入的时候应带有归并功能。但注意 Retry 线程里面正在处理的集合应该暂时从 RetryActions 里面移走，避免和归并过程掺和
@@ -2580,7 +2581,18 @@ namespace dp2SSL
                         // 用 Balloon 提示
                         WpfClientInfo.WriteInfoLog(text);
                     }
-                    // TODO: 保存到数据库。这样不怕中途断电或者异常退出
+
+                    // 先在对话框里面把信息显示出来。然后同步线程会去提交请求，显示里面的相关事项会被刷新显示
+                    {
+                        Application.Current.Dispatcher.Invoke(new Action(() =>
+                        {
+                            SubmitDocument doc = SubmitDocument.Build(actions,
+                                14, "");
+                            progress?.PushContent(doc);
+                            // 显示出来
+                            progress?.ShowContent();
+                        }));
+                    }
 
                     ShelfData.ActivateRetry();
 
@@ -2589,6 +2601,8 @@ namespace dp2SSL
                     // 一个批次结构里面有若干 ID。匹配上其中一个 ID 就算显示过这个批次了，把批次信息移走
                     // 特别需要注意语音和文字提醒这批里面的溢出借书警告
                     // 其实如果简化处理的话，只要一批请求有一个成功的就可以显示。意思是只要减少了等待事项的一批请求就显示其结果
+
+
                     return;
                 }
 
