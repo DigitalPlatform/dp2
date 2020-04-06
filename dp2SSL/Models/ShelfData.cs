@@ -3078,8 +3078,12 @@ Stack:
                     context.Database.EnsureCreated();
 
                     var requests = FromActions(actions);
-                    context.Requests.AddRange(requests);
-                    int nCount = await context.SaveChangesAsync();
+                    foreach (var request in requests)
+                    {
+                        // 注：这样一个一个保存可以保持 ID 的严格从小到大。因为这些事项之间是有严格顺序关系的(借和还顺序不能颠倒)
+                        context.Requests.AddRange(request);
+                        int nCount = await context.SaveChangesAsync();
+                    }
 
                     Debug.Assert(requests.Count == actions.Count, "");
                     // 刷新 ActionInfo 对象的 ID
