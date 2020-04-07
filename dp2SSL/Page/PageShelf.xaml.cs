@@ -333,7 +333,8 @@ namespace dp2SSL
             {
                 Task.Run(async () =>
                 {
-                    var result = await TinyServer.SetMessageAsync(text);
+                    /*
+                    var result = await TinyServer.SafeSetMessageAsync(text);
                     if (result.Value == -1)
                     {
                         App.CurrentApp?.SetError("setMessage", $"发送消息失败: {result.ErrorInfo}。消息内容:{StringUtil.CutString(text, 100)}");
@@ -341,6 +342,8 @@ namespace dp2SSL
                     }
                     else
                         App.CurrentApp?.SetError("setMessage", null);
+                        */
+                    await TinyServer.SafeSetMessageAsync(text);
                 });
             }
             catch (Exception ex)
@@ -1312,11 +1315,13 @@ namespace dp2SSL
                 return;
 
             {
+                /*
                 // 等待一下和 dp2mserver 连接完成
                 // TODO: 要显示一个对话框，让用户知道这里在等待
                 App.CurrentApp.SetError("setMessage", "正在连接到消息服务器，请稍等 ...");
                 App.WaitMessageServerConnected();
                 App.CurrentApp.SetError("setMessage", null);
+                */
 
                 TrySetMessage("我正在执行初始化 ...");
             }
@@ -2421,10 +2426,12 @@ namespace dp2SSL
             {
                 StringBuilder text = new StringBuilder();
                 text.AppendLine($"{result.Operations[0].Operator.GetDisplayString()}");
+                int i = 0;
                 foreach (var info in result.Operations)
                 {
                     // TODO: 为啥 Entity.Title 为空
-                    text.AppendLine($"{info.Operation} {info.Entity.Title} [{info.Entity.PII}] 架位:{info.ShelfNo}");
+                    text.AppendLine($"{i + 1}) {info.Operation} {SubmitDocument.ShortTitle(info.Entity.Title)} [{info.Entity.PII}] 架位:{info.ShelfNo}");
+                    i++;
                 }
                 TrySetMessage(text.ToString());
             }

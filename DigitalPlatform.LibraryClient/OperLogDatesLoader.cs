@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+
 using DigitalPlatform.Core;
 using DigitalPlatform.LibraryClient.localhost;
 
@@ -100,7 +101,7 @@ namespace DigitalPlatform.LibraryClient
                     -1,
                     nPerCount,
                     "getfilenames",
-                    "",
+                    (this.LogType & LogType.AccessLog) != 0 ? "accessLog" : "", // 2020/4/7
                     out records,
                     out strError);
                 /*

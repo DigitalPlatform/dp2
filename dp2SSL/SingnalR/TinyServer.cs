@@ -17,11 +17,116 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using System.Threading;
 using DigitalPlatform.WPF;
+using DigitalPlatform.SimpleMessageQueue;
 
 namespace dp2SSL
 {
     public static class TinyServer
     {
+        #region 消息队列
+
+        static MessageQueue _queue = null;
+
+        public static void InitialMessageQueue(string databaseFileName,
+            CancellationToken token)
+        {
+            _queue = new MessageQueue(databaseFileName);
+        }
+
+        static Task _sendTask = null;
+
+        // 同步重试间隔时间
+        static TimeSpan _idleLength = TimeSpan.FromMinutes(5);   // TimeSpan.FromSeconds(10);
+
+        static AutoResetEvent _eventSend = new AutoResetEvent(false);
+
+        public static void ActivateSend()
+        {
+            _eventSend.Set();
+        }
+
+        // 启动发送消息任务。此任务长期在后台运行
+        public static void StartSendTask(CancellationToken token = default)
+        {
+            if (_sendTask != null)
+                return;
+
+            token.Register(() =>
+            {
+                _eventSend.Set();
+            });
+
+            _sendTask = Task.Factory.StartNew(() =>
+            {
+                WpfClientInfo.WriteInfoLog("消息发送专用线程开始");
+                try
+                {
+                    while (token.IsCancellationRequested == false)
+                    {
+                        _eventSend.WaitOne(_idleLength);
+                        token.ThrowIfCancellationRequested();
+
+                        // 检查和确保连接到消息服务器
+                        App.CurrentApp.EnsureConnectMessageServer().Wait(token);
+
+                        while (token.IsCancellationRequested == false)
+                        {
+                            try
+                            {
+                                var message = _queue.PeekAsync(token).Result;
+                                if (message == null)
+                                    break;
+                                var request = JsonConvert.DeserializeObject<SetMessageRequest>(message.GetString());
+
+                                var result = SetMessageAsync(request).Result;
+                                if (result.Value == -1)
+                                {
+                                    // TODO: 要避免错误日志太多把错误日志文件塞满
+                                    WpfClientInfo.WriteErrorLog($"SetMessageAsync() 出错: {result.ErrorInfo}");
+                                }
+                                else
+                                    _queue.PullAsync(token).Wait();
+                            }
+                            catch (Exception ex)
+                            {
+                                // TODO: 要避免错误日志太多把错误日志文件塞满
+                                WpfClientInfo.WriteErrorLog($"发送消息过程中出现异常(不会终止循环): {ExceptionUtil.GetDebugText(ex)}");
+                                break;
+                            }
+                        }
+                    }
+                    _sendTask = null;
+                }
+                catch (Exception ex)
+                {
+                    WpfClientInfo.WriteErrorLog($"消息发送专用线程出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                    App.CurrentApp?.SetError("send", $"消息发送专用线程出现异常: {ex.Message}");
+                }
+                finally
+                {
+                    WpfClientInfo.WriteInfoLog("消息发送专用线程结束");
+                }
+            },
+token,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+        }
+
+        public static async Task SafeSetMessageAsync(string content)
+        {
+            SetMessageRequest request = new SetMessageRequest("create", "",
+                new List<MessageRecord> {
+                        new MessageRecord {
+                            groups= new string[] { GroupName},
+                            data = content}
+                });
+            await _queue.PushAsync(new List<string> { JsonConvert.SerializeObject(request) });
+            ActivateSend();
+            // return SetMessageAsync(request);
+        }
+
+        #endregion
+
         static IHubProxy HubProxy
         {
             get;
@@ -234,19 +339,19 @@ IList<MessageRecord> messages)
         {
             if (command.StartsWith("hello"))
             {
-                await SetMessageAsync("hello!");
+                await SafeSetMessageAsync("hello!");
                 return;
             }
 
             if (command.StartsWith("version"))
             {
-                await SetMessageAsync($"dp2SSL 前端版本: {WpfClientInfo.ClientVersion}");
+                await SafeSetMessageAsync($"dp2SSL 前端版本: {WpfClientInfo.ClientVersion}");
                 return;
             }
 
             if (command.StartsWith("error"))
             {
-                await SetMessageAsync($"dp2SSL 当前界面报错: [{App.CurrentApp.Error}]; 书柜初始化是否完成: {ShelfData.FirstInitialized}");
+                await SafeSetMessageAsync($"dp2SSL 当前界面报错: [{App.CurrentApp.Error}]; 书柜初始化是否完成: {ShelfData.FirstInitialized}");
                 return;
             }
 
@@ -260,11 +365,11 @@ IList<MessageRecord> messages)
             // 检查册状态
             if (command.StartsWith("check"))
             {
-                CheckBook(command);
+                await CheckBook(command);
                 return;
             }
 
-            await SetMessageAsync($"我无法理解这个命令 '{command}'");
+            await SafeSetMessageAsync($"我无法理解这个命令 '{command}'");
         }
 
         // 列出操作历史
@@ -299,22 +404,22 @@ IList<MessageRecord> messages)
                         items = context.Requests.Where(o => true)
                             .OrderBy(o => o.ID).ToList();
 
-                    await SetMessageAsync($"> {command}\r\n当前共有 {items.Count} 个历史事项");
+                    await SafeSetMessageAsync($"> {command}\r\n当前共有 {items.Count} 个历史事项");
                     int i = 1;
                     foreach (var item in items)
                     {
-                        await SetMessageAsync($"{i++}\r\n{DisplayRequestItem.GetDisplayString(item)}");
+                        await SafeSetMessageAsync($"{i++}\r\n{DisplayRequestItem.GetDisplayString(item)}");
                     }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                await SetMessageAsync($"命令 {command} 执行过程出现异常:\r\n{ExceptionUtil.GetDebugText(ex)}");
+                await SafeSetMessageAsync($"命令 {command} 执行过程出现异常:\r\n{ExceptionUtil.GetDebugText(ex)}");
             }
         }
 
         // 检查册状态
-        static void CheckBook(string command)
+        static async Task CheckBook(string command)
         {
             // 子参数
             string param = command.Substring("check".Length).Trim();
@@ -344,7 +449,7 @@ IList<MessageRecord> messages)
                 else
                     text.AppendLine($"册记录:\r\n{DomUtil.GetIndentXml(result.ItemXml)}");
 
-                SetMessageAsync(text.ToString());
+                await SafeSetMessageAsync(text.ToString());
             }
         }
 
@@ -450,6 +555,7 @@ IList<MessageRecord> messages)
 
         #region SetMessage() API
 
+        // 不可靠的直接发送消息
         public static Task<SetMessageResult> SetMessageAsync(string content)
         {
             SetMessageRequest request = new SetMessageRequest("create", "",
@@ -461,6 +567,7 @@ IList<MessageRecord> messages)
             return SetMessageAsync(request);
         }
 
+        // 不可靠的直接发送消息
         public static Task<SetMessageResult> SetMessageAsync(
             SetMessageRequest param)
         {

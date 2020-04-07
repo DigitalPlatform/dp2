@@ -396,17 +396,33 @@ return { None : '' };
             // TODO: 注意测试一下
             /*
             var myresults = collection.Aggregate()
-    .Group(central => DateTimeUtil.DateTimeToString8(central.OperTime), 
-    g => new { Id = g.Key, Count = g.Count() })
-    .Skip(start)
-    .ToList();
-    */
+            .Group(central => DateTimeUtil.DateTimeToString8(central.OperTime), 
+            g => new { Id = g.Key, Count = g.Count() })
+            .Skip(start)
+            .ToList();
+            */
+#if NO
+            // mongodb 4.0 以上可用。3.x 版本不能用这个方法
             var myresults = collection.Aggregate()
 .Group(central => central.OperTime.ToString().Substring(0, 10),  // "yyyyMMdd"
 g => new { Id = g.Key, Count = g.Count() })
 .SortBy(o => o.Id)
 .Skip(start)
 .ToList();
+#endif
+
+
+            var myresults = collection.Aggregate()
+                .Group(central => new
+                {
+                    Year = central.OperTime.Year,
+                    Month = central.OperTime.Month,
+                    Day = central.OperTime.Day
+                },
+                g => new { Id = g.Key, Count = g.Count() })
+                .SortBy(o => o.Id)
+                .Skip(start)
+                .ToList();
 
             hit_count = myresults.Count;
             List<ValueCount> values = new List<ValueCount>();
@@ -414,7 +430,10 @@ g => new { Id = g.Key, Count = g.Count() })
             foreach (var doc in myresults)
             {
                 ValueCount item = new ValueCount();
-                item.Value = doc.Id.ToString().Replace("-", "");
+                // item.Value = doc.Id.ToString().Replace("-", "");
+                item.Value = doc.Id.Year.ToString().PadLeft(4, '0')
+                    + doc.Id.Month.ToString().PadLeft(2, '0')
+                    + doc.Id.Day.ToString().PadLeft(2, '0');
                 item.Count = doc.Count;
                 values.Add(item);
                 nCount++;

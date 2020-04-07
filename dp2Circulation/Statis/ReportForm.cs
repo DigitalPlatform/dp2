@@ -6265,6 +6265,7 @@ MessageBoxDefaultButton.Button2);
                     //      0   没有找到
                     //      1   找到
                     nRet = GetFirstOperLogDate(
+                        this.Channel,
                         LogType.OperLog | LogType.AccessLog,
                         out string strFirstDate,
                         out strError);
@@ -6323,6 +6324,7 @@ MessageBoxDefaultButton.Button2);
                     //      0   没有找到
                     //      1   找到
                     nRet = GetFirstOperLogDate(
+                        this.Channel,
                         LogType.AccessLog,
                         out strFirstDate,
                         out strError);
@@ -6377,82 +6379,7 @@ MessageBoxDefaultButton.Button2);
             }
         }
 
-        // 获得第一个(实有的)日志文件日期
-        // return:
-        //      -1  出错
-        //      0   没有找到
-        //      1   找到
-        int GetFirstOperLogDate(
-            LogType logType,
-            out string strFirstDate,
-            out string strError)
-        {
-            strFirstDate = "";
-            strError = "";
 
-            DigitalPlatform.LibraryClient.localhost.OperLogInfo[] records = null;
-
-            List<string> dates = new List<string>();
-            List<string> styles = new List<string>();
-            if ((logType & LogType.OperLog) != 0)
-                styles.Add("getfilenames");
-            if ((logType & LogType.AccessLog) != 0)
-                styles.Add("getfilenames,accessLog");
-            if (styles.Count == 0)
-            {
-                strError = "logStyle 参数值中至少要包含一种类型";
-                return -1;
-            }
-
-            foreach (string style in styles)
-            {
-                // 获得日志
-                // return:
-                //      -1  error
-                //      0   file not found
-                //      1   succeed
-                //      2   超过范围，本次调用无效
-                long lRet = this.Channel.GetOperLogs(
-                    null,
-                    "",
-                    0,
-                    -1,
-                    1,
-                    style,  // "getfilenames",
-                    "", // strFilter
-                    out records,
-                    out strError);
-                if (lRet == -1)
-                    return -1;
-
-                if (lRet == 0)
-                    continue;
-
-                if (records == null || records.Length < 1)
-                {
-                    strError = "records error";
-                    return -1;
-                }
-
-                if (string.IsNullOrEmpty(records[0].Xml) == true
-                    || records[0].Xml.Length < 8)
-                {
-                    strError = "records[0].Xml error";
-                    return -1;
-                }
-
-                dates.Add(records[0].Xml.Substring(0, 8));
-            }
-
-            if (dates.Count == 0)
-                return 0;
-
-            // 取较小的一个
-            if (dates.Count > 1)
-                dates.Sort();
-            strFirstDate = dates[0];
-            return 1;
-        }
 
         ProgressEstimate _estimate = new ProgressEstimate();
 
