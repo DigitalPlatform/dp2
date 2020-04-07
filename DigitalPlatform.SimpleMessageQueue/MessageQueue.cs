@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace DigitalPlatform.SimpleMessageQueue
 {
@@ -32,7 +34,8 @@ namespace DigitalPlatform.SimpleMessageQueue
             }
         }
 
-        public void Push(List<string> texts)
+        public async Task PushAsync(List<string> texts, 
+            CancellationToken token = default)
         {
             using (var context = new QueueContext(_databaseFileName))
             {
@@ -40,7 +43,7 @@ namespace DigitalPlatform.SimpleMessageQueue
                 {
                     context.Items.AddRange(BuildItem(text));
                 }
-                context.SaveChanges();
+                await context.SaveChangesAsync(token).ConfigureAwait(false);
             }
         }
 
@@ -77,7 +80,8 @@ namespace DigitalPlatform.SimpleMessageQueue
             return results;
         }
 
-        public void Push(List<byte[]> contents)
+        public async Task PushAsync(List<byte[]> contents,
+            CancellationToken token = default)
         {
             using (var context = new QueueContext(_databaseFileName))
             {
@@ -88,18 +92,19 @@ namespace DigitalPlatform.SimpleMessageQueue
                     foreach (var item in items)
                     {
                         context.Items.Add(item);
-                        context.SaveChanges();
+                        await context.SaveChangesAsync(token);
                     }
                 }
             }
         }
 
-        public Message Pull()
+        public async Task<Message> PullAsync(CancellationToken token = default)
         {
-            return Get(true);
+            return await GetAsync(true, token);
         }
 
-        public Message Get(bool remove_items)
+        public async Task<Message> GetAsync(bool remove_items,
+            CancellationToken token = default)
         {
             using (var context = new QueueContext(_databaseFileName))
             {
@@ -134,16 +139,16 @@ namespace DigitalPlatform.SimpleMessageQueue
                 if (remove_items)
                 {
                     context.Items.RemoveRange(items);
-                    context.SaveChanges();
+                    await context.SaveChangesAsync(token);
                 }
 
                 return new Message { Content = bytes.ToArray() };
             }
         }
 
-        public Message Peek()
+        public async Task<Message> PeekAsync(CancellationToken token = default)
         {
-            return Get(false);
+            return await GetAsync(false,token);
         }
     }
 

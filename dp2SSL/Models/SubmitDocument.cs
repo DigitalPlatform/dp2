@@ -63,8 +63,16 @@ namespace dp2SSL
                     {
                         if (!(o.Tag is string id))
                             return false;
-                        return id == "#overflow";
+                        return id == OVERFLOW_ID;
                     }).FirstOrDefault();
+
+                    // block 不应为 null。替代方法：
+                    if (block == null)
+                    {
+                        // TODO: 在适当位置插入标志段落
+                        throw new Exception("#overflow 标志段落没有找到");
+                    }
+
                     var p = BuildOverflowParagraph(overflow_titles);
                     this.Blocks.InsertBefore(block, p);
                     this.Blocks.Remove(block);
@@ -99,6 +107,8 @@ namespace dp2SSL
             }
         }
 
+        const string OVERFLOW_ID = "#overflow";
+
         // 构造超额图书列表
         Paragraph BuildOverflowParagraph(List<string> titles)
         {
@@ -113,7 +123,7 @@ namespace dp2SSL
             p.TextIndent = 0;   // -20;
             p.Margin = new Thickness(10, this.BaseFontSize * 2.0, 0, this.BaseFontSize * 2.0);
             p.Padding = new Thickness(this.BaseFontSize * 1.4);
-            p.Tag = "#reserve";
+            p.Tag = OVERFLOW_ID;
 
             StringBuilder text = new StringBuilder();
             text.Append($"警告：您取书已经超额了。请将下列 {titles.Count} 册图书放回书柜:");
@@ -127,7 +137,7 @@ namespace dp2SSL
             return p;
         }
 
-        internal static string ShortTitle(string text)
+        public static string ShortTitle(string text)
         {
             if (string.IsNullOrEmpty(text))
                 return "";
@@ -290,9 +300,12 @@ namespace dp2SSL
             int index = 0;
             foreach (var action in actions)
             {
-                var p = BuildParagraph(action, index++, baseFontSize, style);
+                var p = BuildParagraph(action, index, baseFontSize, style);
                 if (p != null)
+                {
                     doc.Blocks.Add(p);
+                    index++;
+                }
             }
 
 #if NO
@@ -443,7 +456,8 @@ namespace dp2SSL
             }
 
             // 错误码和错误信息
-            if (string.IsNullOrEmpty(action.SyncErrorInfo) == false)
+            if (string.IsNullOrEmpty(action.SyncErrorInfo) == false
+                && (action.State != "sync" || action.SyncErrorCode == "overflow"))
             {
                 p.Inlines.Add(new Run
                 {

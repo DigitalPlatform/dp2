@@ -20,6 +20,7 @@ using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
 using DigitalPlatform.WPF;
 using static dp2SSL.LibraryChannelUtil;
+using Microsoft.VisualStudio.Threading;
 
 namespace dp2SSL
 {
@@ -3036,6 +3037,11 @@ Stack:
 
 #endif
 
+        // static object _syncRoot_database = new object();
+
+        // 限制数据库操作，同一时刻只能一个函数进入
+        static AsyncSemaphore _databaseLimit = new AsyncSemaphore(1);
+
         // sync/commerror/normalerror/空
         // 同步成功/通讯出错/一般出错/从未同步过
 
@@ -3043,27 +3049,33 @@ Stack:
         // 注意：这些 Actions 应该先按照 PII 排序分组以后，一组一组进行处理
         public static List<ActionInfo> LoadRetryActionsFromDatabase()
         {
-            using (var context = new MyContext())
+            using (var releaser = _databaseLimit.EnterAsync().Result)
             {
-                context.Database.EnsureCreated();
-                var items = context.Requests.Where(o => o.State != "sync" && o.State != "dontsync")
-                    .OrderBy(o => o.ID).ToList();
-                var actions = FromRequests(items);
-                WpfClientInfo.WriteInfoLog($"从本地数据库装载 Actions 成功。内容如下：\r\n{ActionInfo.ToString(actions)}");
-                return actions;
+                using (var context = new MyContext())
+                {
+                    context.Database.EnsureCreated();
+                    var items = context.Requests.Where(o => o.State != "sync" && o.State != "dontsync")
+                        .OrderBy(o => o.ID).ToList();
+                    var actions = FromRequests(items);
+                    WpfClientInfo.WriteInfoLog($"从本地数据库装载 Actions 成功。内容如下：\r\n{ActionInfo.ToString(actions)}");
+                    return actions;
+                }
             }
         }
 
         static void ChangeDatabaseActionState(int id, ActionInfo action)
         {
-            using (var context = new MyContext())
+            using (var releaser = _databaseLimit.EnterAsync().Result)
             {
-                var item = context.Requests.FirstOrDefault(o => o.ID == id);
-                item.State = action.State;
-                item.SyncErrorInfo = action.SyncErrorInfo;
-                item.SyncErrorCode = action.SyncErrorCode;
-                item.SyncCount = action.SyncCount;
-                context.SaveChanges();
+                using (var context = new MyContext())
+                {
+                    var item = context.Requests.FirstOrDefault(o => o.ID == id);
+                    item.State = action.State;
+                    item.SyncErrorInfo = action.SyncErrorInfo;
+                    item.SyncErrorCode = action.SyncErrorCode;
+                    item.SyncCount = action.SyncCount;
+                    context.SaveChanges();
+                }
             }
         }
 
@@ -3073,26 +3085,29 @@ Stack:
         {
             try
             {
-                using (var context = new MyContext())
+                using (var releaser = await _databaseLimit.EnterAsync())
                 {
-                    context.Database.EnsureCreated();
-
-                    var requests = FromActions(actions);
-                    foreach (var request in requests)
+                    using (var context = new MyContext())
                     {
-                        // 注：这样一个一个保存可以保持 ID 的严格从小到大。因为这些事项之间是有严格顺序关系的(借和还顺序不能颠倒)
-                        context.Requests.AddRange(request);
-                        int nCount = await context.SaveChangesAsync();
-                    }
+                        context.Database.EnsureCreated();
 
-                    Debug.Assert(requests.Count == actions.Count, "");
-                    // 刷新 ActionInfo 对象的 ID
-                    for (int i = 0; i < requests.Count; i++)
-                    {
-                        actions[i].ID = requests[i].ID;
-                    }
+                        var requests = FromActions(actions);
+                        foreach (var request in requests)
+                        {
+                            // 注：这样一个一个保存可以保持 ID 的严格从小到大。因为这些事项之间是有严格顺序关系的(借和还顺序不能颠倒)
+                            context.Requests.AddRange(request);
+                            int nCount = await context.SaveChangesAsync();
+                        }
 
-                    WpfClientInfo.WriteInfoLog($"Actions 保存到本地数据库成功。内容如下：\r\n{ActionInfo.ToString(actions)}");
+                        Debug.Assert(requests.Count == actions.Count, "");
+                        // 刷新 ActionInfo 对象的 ID
+                        for (int i = 0; i < requests.Count; i++)
+                        {
+                            actions[i].ID = requests[i].ID;
+                        }
+
+                        WpfClientInfo.WriteInfoLog($"Actions 保存到本地数据库成功。内容如下：\r\n{ActionInfo.ToString(actions)}");
+                    }
                 }
             }
             catch (Exception ex)
@@ -3107,15 +3122,18 @@ Stack:
         // 改进：可以不删除，但把这些事项的状态标记为 “放弃重试”
         public static void RemoveRetryActionsFromDatabase(IEnumerable<string> piis)
         {
-            using (var context = new MyContext())
+            using (var releaser = _databaseLimit.EnterAsync().Result)
             {
-                context.Database.EnsureCreated();
-                foreach (var pii in piis)
+                using (var context = new MyContext())
                 {
-                    var items = context.Requests.Where(o => o.PII == pii && o.State != "sync").ToList();
-                    // context.Requests.RemoveRange(items);
-                    items.ForEach(o => o.State = "dontsync");
-                    context.SaveChanges();
+                    context.Database.EnsureCreated();
+                    foreach (var pii in piis)
+                    {
+                        var items = context.Requests.Where(o => o.PII == pii && o.State != "sync").ToList();
+                        // context.Requests.RemoveRange(items);
+                        items.ForEach(o => o.State = "dontsync");
+                        context.SaveChanges();
+                    }
                 }
             }
         }
@@ -3259,8 +3277,10 @@ Stack:
                         _eventRetry.WaitOne(_idleLength);
                         token.ThrowIfCancellationRequested();
 
+#if REMOVED
                         // 顺便检查和确保连接到消息服务器
                         App.CurrentApp.EnsureConnectMessageServer().Wait(token);
+#endif
 
                         if (PauseSubmit)
                             continue;
@@ -3283,7 +3303,7 @@ Stack:
                         var groups = GroupActions(actions);
 
                         // List<MessageItem> messages = new List<MessageItem>();
-                        
+
                         // 准备对话框
                         // SubmitWindow progress = PageMenu.PageShelf?.OpenProgressWindow();
                         SubmitWindow progress = PageMenu.PageShelf?.ProgressWindow;
@@ -3362,6 +3382,8 @@ Stack:
                                     // 同步成功/通讯出错/一般出错/从未同步过
                                     ChangeDatabaseActionState(action.ID, action);
                                 }
+
+                                MessageNotifyOverflow(result.ProcessedActions);
                             }
 
                             if (progress != null && progress.IsVisible)
@@ -3431,6 +3453,22 @@ Stack:
 token,
 TaskCreationOptions.LongRunning,
 TaskScheduler.Default);
+        }
+
+        static void MessageNotifyOverflow(List<ActionInfo> actions)
+        {
+            // 检查超额图书
+            List<string> overflow_titles = new List<string>();
+            int i = 1;
+            actions.ForEach(item =>
+            {
+                if (item.Action == "borrow" && item.SyncErrorCode == "overflow")
+                    overflow_titles.Add($"{i++}) {SubmitDocument.ShortTitle(item.Entity.Title)} [{item.Entity.PII}]");
+            });
+            if (overflow_titles.Count > 0)
+            {
+                PageShelf.TrySetMessage($"下列图书发生超额借阅：\r\n{StringUtil.MakePathList(overflow_titles, "\r\n")}");
+            }
         }
 
         public static void CancelAll()

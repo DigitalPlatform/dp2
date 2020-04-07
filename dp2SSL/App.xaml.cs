@@ -208,11 +208,19 @@ namespace dp2SSL
 
             InputMethod.SetPreferredImeState(App.Current.MainWindow, InputMethodState.Off);
 
+            TinyServer.InitialMessageQueue(
+    System.IO.Path.Combine(WpfClientInfo.UserDir, "mq.db"),
+    _cancelRefresh.Token);
+
             // 这里要等待连接完成，因为后面初始化时候需要发出点对点消息。TODO: 是否要显示一个对话框请用户等待？
             await ConnectMessageServer();
+
+            TinyServer.StartSendTask(_cancelRefresh.Token);
         }
 
+        /*
         static ManualResetEvent _messageServerConnected = new ManualResetEvent(false);
+        */
 
         public async Task ConnectMessageServer()
         {
@@ -220,7 +228,7 @@ namespace dp2SSL
             {
                 if (string.IsNullOrEmpty(messageServerUrl) == false)
                 {
-                    _messageServerConnected.Reset();
+                    //_messageServerConnected.Reset();
 
                     TinyServer.CloseConnection();
                     var result = await TinyServer.ConnectAsync(messageServerUrl, messageUserName, messagePassword, "");
@@ -236,22 +244,26 @@ namespace dp2SSL
                             WpfClientInfo.WriteErrorLog($"第一条消息发送失败: {message_result.ErrorInfo}");
                     */
                     }
-                    _messageServerConnected.Set();
+                    //_messageServerConnected.Set();
                 }
                 else
-                    _messageServerConnected.Set();
+                {
+                    // _messageServerConnected.Set();
+                }
             }
             catch (Exception ex)
             {
                 WpfClientInfo.WriteErrorLog($"ConnectMessageServer() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
-                _messageServerConnected.Set();
+                // _messageServerConnected.Set();
             }
         }
 
+        /*
         public static void WaitMessageServerConnected()
         {
             _messageServerConnected.WaitOne();
         }
+        */
 
         // 确保连接到消息服务器
         public async Task EnsureConnectMessageServer()
@@ -512,6 +524,17 @@ namespace dp2SSL
 
             // ShelfData.SaveRetryActions();
 
+            try
+            {
+                // 尝试抢先直接发送
+                _ = TinyServer.SetMessageAsync($"我这台智能书柜退出了哟！");
+            }
+            catch
+            {
+                // 如果直接发送不成功，则送入 MessageQueue 中
+                PageShelf.TrySetMessage($"我这台智能书柜退出了哟！");
+            }
+
             _cancelRefresh?.Cancel();
             _cancelProcessMonitor?.Cancel();
             ShelfData.CancelAll();
@@ -524,8 +547,6 @@ namespace dp2SSL
 
             // 最后关灯
             RfidManager.TurnShelfLamp("*", "turnOff");
-
-            PageShelf.TrySetMessage($"我这台智能书柜退出了哟！");
 
             base.OnExit(e);
         }

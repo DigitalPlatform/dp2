@@ -2458,6 +2458,8 @@ namespace DigitalPlatform.LibraryServer
             this.m_lock.ReleaseReaderLock();
         }
 
+        const string mongodb_base_version = "3.0";  // "4.2.0"
+
         // 初始化和 mongodb 有关的数据库
         public int InitialMongoDatabases(out string strError)
         {
@@ -2499,10 +2501,10 @@ namespace DigitalPlatform.LibraryServer
                     });
                     JObject json = JObject.Parse(jsonText);
                     var version = (string)json["version"];
-                    if (StringUtil.CompareVersion(version, "4.2.0") < 0)
+                    if (StringUtil.CompareVersion(version, mongodb_base_version) < 0)
                     {
                         this._mongoClient = null;
-                        strError = $"当前 MongoDB 版本太旧({version})。请升级到 4.2 以上版本";
+                        strError = $"当前 MongoDB 版本太旧({version})。请升级到 {mongodb_base_version} 以上版本";
                         return -1;
                     }
                 }
