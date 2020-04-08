@@ -44,7 +44,7 @@
             <Grid Height="40" />
             <TextBlock Name="Quality" ToolTip="指纹质量"
                        Foreground="White" FontSize="16" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"></TextBlock>
-            <Button Name="closeRF" Click="CloseRF_Click" Visibility="Collapsed">关闭射频</Button>
+            <Button Name="closeRF" Click="CloseRF_Click" Visibility="Visible">关闭射频</Button>
             <Border Name="lamp" Width="30" Height="30" Background="Black"/>
             <TextBlock Name="updateInfo" ToolTip="升级信息" Visibility="Collapsed"
                        Background="DarkOrange" Foreground="White"

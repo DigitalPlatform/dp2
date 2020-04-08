@@ -35,6 +35,7 @@ using DigitalPlatform.Xml;
 using static dp2SSL.App;
 using DigitalPlatform.Face;
 using DigitalPlatform.WPF;
+// using Microsoft.VisualStudio.Shell;
 
 namespace dp2SSL
 {
@@ -89,7 +90,9 @@ namespace dp2SSL
         }
 
 
+#pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
         private async void PageShelf_Loaded(object sender, RoutedEventArgs e)
+#pragma warning restore VSTHRD100 // 避免使用 Async Void 方法
         {
             // _firstInitial = false;
 
@@ -155,7 +158,7 @@ namespace dp2SSL
                         // 初始化之前开灯，让使用者感觉舒服一些(感觉机器在活动状态)
                         RfidManager.TurnShelfLamp("*", "turnOn");
 
-                        await InitialShelfEntities();
+                        await InitialShelfEntitiesAsync();
 
                         // 初始化完成之后，应该是全部门关闭状态，还没有人开始使用，则先关灯，进入等待使用的状态
                         RfidManager.TurnShelfLamp("*", "turnOff");
@@ -199,7 +202,7 @@ namespace dp2SSL
 
         private void App_Updated(object sender, UpdatedEventArgs e)
         {
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            App.Invoke(new Action(() =>
             {
                 this.updateInfo.Text = e.Message;
                 if (string.IsNullOrEmpty(this.updateInfo.Text) == false)
@@ -212,7 +215,7 @@ namespace dp2SSL
         // 显示重试信息
         public void SetRetryInfo(string text)
         {
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            App.Invoke(new Action(() =>
             {
                 this.updateInfo.Text = text;
                 if (string.IsNullOrEmpty(this.updateInfo.Text) == false)
@@ -233,7 +236,9 @@ namespace dp2SSL
             SetGlobalError("charinput", ToString(e.CharInput));
         }
 
+#pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
         private async void App_LineFeed(object sender, LineFeedEventArgs e)
+#pragma warning restore VSTHRD100 // 避免使用 Async Void 方法
         {
             // 扫入一个条码
             string barcode = e.Text.ToUpper();
@@ -250,7 +255,7 @@ namespace dp2SSL
             //      -1  出错
             //      0   没有填充
             //      1   成功填充
-            var result = await FillPatronDetail();
+            var result = await FillPatronDetailAsync();
             if (result.Value == 1)
                 Welcome();
         }
@@ -258,7 +263,9 @@ namespace dp2SSL
         object _syncRoot_save = new object();
 
         // 门状态变化。从这里触发提交
+#pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
         private async void ShelfData_DoorStateChanged(object sender, DoorStateChangedEventArgs e)
+#pragma warning restore VSTHRD100 // 避免使用 Async Void 方法
         {
             {
                 string text = "";
@@ -304,7 +311,7 @@ namespace dp2SSL
                 }
 
                 // 注: 调用完成后门控件上的 +- 数字才会消失
-                var task = DoRequest(ShelfData.PullActions(), "");
+                var task = DoRequestAsync(ShelfData.PullActions(), "");
 
                 /*
                 // testing
@@ -331,7 +338,7 @@ namespace dp2SSL
         {
             try
             {
-                Task.Run(async () =>
+                _ = Task.Run(async () =>
                 {
                     /*
                     var result = await TinyServer.SafeSetMessageAsync(text);
@@ -343,7 +350,7 @@ namespace dp2SSL
                     else
                         App.CurrentApp?.SetError("setMessage", null);
                         */
-                    await TinyServer.SafeSetMessageAsync(text);
+                    await TinyServer.SendMessageAsync(text);
                 });
             }
             catch (Exception ex)
@@ -383,7 +390,7 @@ namespace dp2SSL
                 else if (e.ButtonName == "errorCount")
                     collection = e.Door.ErrorEntities;
 
-                Application.Current.Dispatcher.Invoke(new Action(() =>
+                App.Invoke(new Action(() =>
                 {
                     bookInfoWindow = new BookInfoWindow();
                     bookInfoWindow.TitleText = $"{e.Door.Name} {GetPartialName(e.ButtonName)}";
@@ -445,7 +452,7 @@ namespace dp2SSL
                 return;
             MemoryDialog(progress);
             var temp = progress;
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            App.Invoke(new Action(() =>
             {
                 temp.MessageText = message;
                 temp.BackColor = color;
@@ -458,7 +465,7 @@ namespace dp2SSL
             string message,
             string color = "")
         {
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            App.Invoke(new Action(() =>
             {
                 progress.MessageText = message;
                 if (string.IsNullOrEmpty(color) == false)
@@ -471,7 +478,7 @@ namespace dp2SSL
         void CloseDialogs()
         {
             // 确保 page 关闭时对话框能自动关闭
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            App.Invoke(new Action(() =>
             {
                 foreach (var window in _dialogs)
                 {
@@ -492,7 +499,7 @@ namespace dp2SSL
         {
             ProgressWindow progress = null;
 
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            App.Invoke(new Action(() =>
             {
                 progress = new ProgressWindow();
                 progress.MessageText = start_message;
@@ -511,7 +518,7 @@ namespace dp2SSL
                 DisplayError(ref progress, result_message, "red");
             else
             {
-                Application.Current.Dispatcher.Invoke(new Action(() =>
+                App.Invoke(new Action(() =>
                 {
                     progress.Close();
                 }));
@@ -524,7 +531,7 @@ namespace dp2SSL
         {
             ProgressWindow progress = null;
 
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            App.Invoke(new Action(() =>
             {
                 progress = new ProgressWindow();
                 progress.MessageText = "正在处理，请稍候 ...";
@@ -545,11 +552,11 @@ namespace dp2SSL
             {
                 DisplayMessage(progress, message, color);
 
-                Task.Run(() =>
+                _ = Task.Run(async () =>
                 {
                     // TODO: 显示倒计时计数？
-                    Task.Delay(TimeSpan.FromSeconds(1)).Wait();
-                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    await Task.Delay(TimeSpan.FromSeconds(1));
+                    App.Invoke(new Action(() =>
                     {
                         progress.Close();
                     }));
@@ -560,7 +567,9 @@ namespace dp2SSL
         }
 
         // 点门控件触发开门
+#pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
         private async void DoorControl_OpenDoor(object sender, OpenDoorEventArgs e)
+#pragma warning restore VSTHRD100 // 避免使用 Async Void 方法
         {
             // 观察图书详情
             if (string.IsNullOrEmpty(e.ButtonName) == false)
@@ -806,7 +815,7 @@ namespace dp2SSL
 
                             ShelfData.RefreshInventory(e.Door);
                             SaveDoorActions(e.Door, true);
-                            await DoRequest(ShelfData.PullActions());   // "silence"
+                            await DoRequestAsync(ShelfData.PullActions());   // "silence"
                             break;
                         }
 
@@ -818,7 +827,7 @@ namespace dp2SSL
             {
                 if (progress != null)
                 {
-                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    App.Invoke(new Action(() =>
                     {
                         if (progress != null)
                             progress.Close();
@@ -962,7 +971,9 @@ namespace dp2SSL
         }
         */
 
+#pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
         private async void PageShelf_Unloaded(object sender, RoutedEventArgs e)
+#pragma warning restore VSTHRD100 // 避免使用 Async Void 方法
         {
             App.LineFeed -= App_LineFeed;
             App.CharFeed -= App_CharFeed;
@@ -974,7 +985,7 @@ namespace dp2SSL
             // 提交尚未提交的取出和放入
             // PatronClear(true);
             SaveAllActions();
-            await Submit(true);
+            await SubmitAsync(true);
 
             RfidManager.SetError -= RfidManager_SetError;
 
@@ -996,7 +1007,9 @@ namespace dp2SSL
         }
 
         // 从指纹阅读器获取消息(第一阶段)
+#pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
         private async void FingerprintManager_Touched(object sender, TouchedEventArgs e)
+#pragma warning restore VSTHRD100 // 避免使用 Async Void 方法
         {
             // return:
             //      false   没有成功
@@ -1007,7 +1020,7 @@ namespace dp2SSL
             //      -1  出错
             //      0   没有填充
             //      1   成功填充
-            var result = await FillPatronDetail();
+            var result = await FillPatronDetailAsync();
             if (result.Value == 1)
                 Welcome();
 #if NO
@@ -1128,7 +1141,7 @@ namespace dp2SSL
         }
 
         // 第二阶段：填充图书信息的 PII 和 Title 字段
-        async Task FillBookFields(BaseChannel<IRfid> channel,
+        async Task FillBookFieldsAsync(BaseChannel<IRfid> channel,
             List<Entity> entities,
             CancellationToken token)
         {
@@ -1166,7 +1179,7 @@ namespace dp2SSL
                     if (string.IsNullOrEmpty(entity.Title)
                         && string.IsNullOrEmpty(entity.PII) == false && entity.PII != "(空)")
                     {
-                        GetEntityDataResult result = await GetEntityData(entity.PII);
+                        GetEntityDataResult result = await GetEntityDataAsync(entity.PII);
                         if (result.Value == -1)
                         {
                             entity.SetError(result.ErrorInfo);
@@ -1222,7 +1235,7 @@ namespace dp2SSL
                 {
                     token.ThrowIfCancellationRequested();
                     string pii = record.Cols[0];
-                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    App.Invoke(new Action(() =>
                     {
                         entities.Add(pii);
                     }));
@@ -1234,14 +1247,16 @@ namespace dp2SSL
             }
         }
 
+#pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
         private async void CurrentApp_TagChanged(object sender, TagChangedEventArgs e)
+#pragma warning restore VSTHRD100 // 避免使用 Async Void 方法
         {
             // TODO: 对已经拿走的读者卡，用 TagList.ClearTagTable() 清除它的缓存内容
 
             // 读者。不再精细的进行增删改跟踪操作，而是笼统地看 TagList.Patrons 集合即可
-            var task = RefreshPatrons();
+            var task = RefreshPatronsAsync();
 
-            await ShelfData.ChangeEntities((BaseChannel<IRfid>)sender,
+            await ShelfData.ChangeEntitiesAsync((BaseChannel<IRfid>)sender,
                 e,
                 () =>
                 {
@@ -1296,7 +1311,7 @@ namespace dp2SSL
 
         public void InitialDoorControl()
         {
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            App.Invoke(new Action(() =>
             {
                 // 把门显示出来
                 this.doorControl.Visibility = Visibility.Visible;
@@ -1305,7 +1320,7 @@ namespace dp2SSL
         }
 
         // 新版本的首次填充图书信息的函数
-        async Task InitialShelfEntities()
+        async Task InitialShelfEntitiesAsync()
         {
             if (ShelfData.FirstInitialized)
                 return;
@@ -1326,7 +1341,7 @@ namespace dp2SSL
                 TrySetMessage("我正在执行初始化 ...");
             }
 
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            App.Invoke(new Action(() =>
             {
                 this.doorControl.Visibility = Visibility.Collapsed;
             }));
@@ -1337,7 +1352,7 @@ namespace dp2SSL
             ManualResetEvent eventCancel = new ManualResetEvent(false);
 
             InventoryWindow progress = null;
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            App.Invoke(new Action(() =>
             {
                 progress = new InventoryWindow();
                 progress.TitleText = "初始化智能书柜";
@@ -1371,7 +1386,7 @@ namespace dp2SSL
                 AddLayer();
             }));
 
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            App.Invoke(new Action(() =>
             {
                 // 把门显示出来。因为此时需要看到是否关门的状态
                 this.doorControl.Visibility = Visibility.Visible;
@@ -1379,7 +1394,7 @@ namespace dp2SSL
             }));
 
             // 等待锁控就绪
-            var lock_result = await ShelfData.WaitLockReady(
+            var lock_result = await ShelfData.WaitLockReadyAsync(
                 (s) =>
                 {
                     DisplayMessage(progress, s, "green");
@@ -1419,7 +1434,7 @@ namespace dp2SSL
                 {
                     progress.Door = door;
 
-                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    App.Invoke(new Action(() =>
                     {
                         progress.TitleText = $"正在初始化门 {door.Name}";
                         progress.EnableRetryOpenButtons(false);
@@ -1435,7 +1450,7 @@ namespace dp2SSL
                         }
 
                         // TODO: 填充 RFID 图书标签信息
-                        var initial_result = await ShelfData.newVersion_InitialShelfEntities(
+                        var initial_result = await ShelfData.newVersion_InitialShelfEntitiesAsync(
                             new List<DoorItem> { door },
                             (s) =>
                             {
@@ -1455,7 +1470,7 @@ namespace dp2SSL
                         {
                             string error = StringUtil.MakePathList(initial_result.Warnings, "\r\n");
                             // ErrorBox(StringUtil.MakePathList(initial_result.Warnings, "\r\n"));
-                            Application.Current.Dispatcher.Invoke(new Action(() =>
+                            App.Invoke(new Action(() =>
                             {
                                 progress.BackColor = "yellow";
                                 progress.MessageText = error;
@@ -1487,11 +1502,11 @@ namespace dp2SSL
                                 //await FillBookFields(Removes, token);
                             });
                             */
-                            var fill_result = await ShelfData.FillBookFields(part, ShelfData.CancelToken);
+                            var fill_result = await ShelfData.FillBookFieldsAsync(part, ShelfData.CancelToken);
                             if (fill_result.Errors?.Count > 0)
                             {
                                 string error = StringUtil.MakePathList(fill_result.Errors, "\r\n");
-                                Application.Current.Dispatcher.Invoke(new Action(() =>
+                                App.Invoke(new Action(() =>
                                 {
                                     progress.BackColor = "yellow";
                                     progress.MessageText = error;
@@ -1508,7 +1523,7 @@ namespace dp2SSL
                         //      -1  出错
                         //      0   没有必要处理
                         //      1   已经处理
-                        var result = await InventoryBooks(progress, part);
+                        var result = await InventoryBooksAsync(progress, part);
                         WpfClientInfo.WriteInfoLog("自动盘点全部图书结束");
 
                         if (result.MessageDocument != null
@@ -1516,7 +1531,7 @@ namespace dp2SSL
                         {
                             string speak = "";
                             {
-                                Application.Current.Dispatcher.Invoke(new Action(() =>
+                                App.Invoke(new Action(() =>
                                 {
                                     progress.BackColor = "yellow";
                                     progress.MessageDocument = result.MessageDocument.BuildDocument(
@@ -1538,7 +1553,7 @@ namespace dp2SSL
 
                     WAIT_RETRY:
                         {
-                            Application.Current.Dispatcher.Invoke(new Action(() =>
+                            App.Invoke(new Action(() =>
                             {
                                 progress.EnableRetryOpenButtons(true);
                             }));
@@ -1583,14 +1598,14 @@ namespace dp2SSL
                 if (_initialCancelled)
                     return;
 
-                SelectAntenna();
+                ShelfData.SelectAntenna();
 
                 // 将 操作历史库 里面的 PII 和 ShelfData.All 里面 PII 相同的事项的状态标记为“放弃同步”。因为刚才已经成功同步了它们
                 // ShelfData.RemoveFromRetryActions(new List<Entity>(ShelfData.All));
                 {
                     var piis = ShelfData.All.Select(x => x.UID);
                     // TODO: 虽然状态被修改为 dontsync，但依然需要在 SyncErrorInfo 里面注解一下为何 dontsync(因为初始化盘点时候已经同步成功了)
-                    ShelfData.RemoveRetryActionsFromDatabase(piis);
+                    await ShelfData.RemoveRetryActionsFromDatabaseAsync(piis);
                 }
 
                 // 将刚才初始化涉及到的 action 操作写入本地数据库
@@ -1609,7 +1624,7 @@ namespace dp2SSL
                         });
                     }
                     DisplayMessage(progress, "正在将盘点动作写入本地数据库", "green");
-                    await ShelfData.SaveActionsToDatabase(actions);
+                    await ShelfData.SaveActionsToDatabaseAsync(actions);
                 }
 
                 // 启动重试任务。此任务长期在后台运行
@@ -1618,7 +1633,7 @@ namespace dp2SSL
             finally
             {
                 // _firstInitial = true;   // 第一次初始化已经完成
-                Application.Current.Dispatcher.Invoke(new Action(() =>
+                App.Invoke(new Action(() =>
                 {
                     RemoveLayer();
                 }));
@@ -1630,7 +1645,7 @@ namespace dp2SSL
                     if (progress != null)
                     {
                         progress.Closed -= Progress_Cancelled;
-                        Application.Current.Dispatcher.Invoke(new Action(() =>
+                        App.Invoke(new Action(() =>
                         {
                             if (progress != null)
                                 progress.Close();
@@ -1677,7 +1692,7 @@ namespace dp2SSL
     string message,
     string color = "")
             {
-                Application.Current.Dispatcher.Invoke(new Action(() =>
+                App.Invoke(new Action(() =>
                 {
                     window.MessageText = message;
                     if (string.IsNullOrEmpty(color) == false)
@@ -1710,8 +1725,9 @@ namespace dp2SSL
         }
 #endif
 
+#if NO
         // 故意选择用到的天线编号加一的天线(用 ListTags() 实现)
-        string SelectAntenna()
+        static string SelectAntenna()
         {
             StringBuilder text = new StringBuilder();
             List<string> errors = new List<string>();
@@ -1731,6 +1747,7 @@ namespace dp2SSL
                 this.SetGlobalError("InitialShelfEntities", $"SelectAntenna() 出错: {StringUtil.MakePathList(errors, ";")}");
             return text.ToString();
         }
+#endif
 
         private void Error_Closed(object sender, EventArgs e)
         {
@@ -1745,7 +1762,7 @@ namespace dp2SSL
 
         // 刷新读者信息
         // TODO: 当读者信息更替时，要检查前一个读者是否有 _adds 和 _removes 队列需要提交，先提交，再刷成后一个读者信息
-        async Task RefreshPatrons()
+        async Task RefreshPatronsAsync()
         {
             //_lock_refreshPatrons.EnterWriteLock();
             try
@@ -1782,7 +1799,7 @@ namespace dp2SSL
                         //      -1  出错
                         //      0   没有填充
                         //      1   成功填充
-                        var result = await FillPatronDetail();
+                        var result = await FillPatronDetailAsync();
                         if (result.Value == 1)
                             Welcome();
                     }
@@ -1829,7 +1846,7 @@ namespace dp2SSL
         //      -1  出错
         //      0   没有填充
         //      1   成功填充
-        async Task<NormalResult> FillPatronDetail(bool force = false)
+        async Task<NormalResult> FillPatronDetailAsync(bool force = false)
         {
             // 已经填充过了
             if (_patron.PatronName != null
@@ -1848,7 +1865,7 @@ namespace dp2SSL
                 ClearBorrowedEntities();
 
                 // 出现登录对话框，要求输入密码登录验证
-                var login_result = await WorkerLogin(pii);
+                var login_result = await WorkerLoginAsync(pii);
                 if (login_result.Value == -1)
                 {
                     PatronClear();
@@ -1906,7 +1923,7 @@ namespace dp2SSL
             if (force)
                 _patron.PhotoPath = "";
             // string old_photopath = _patron.PhotoPath;
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            App.Invoke(new Action(() =>
             {
                 _patron.SetPatronXml(result.RecPath, result.ReaderXml, result.Timestamp);
                 this.patronControl.SetBorrowed(result.ReaderXml);
@@ -1925,7 +1942,7 @@ namespace dp2SSL
                     BaseChannel<IRfid> channel = RfidManager.GetChannel();
                     try
                     {
-                        await FillBookFields(channel, entities, new CancellationToken());
+                        await FillBookFieldsAsync(channel, entities, new CancellationToken());
                     }
                     finally
                     {
@@ -1961,7 +1978,7 @@ namespace dp2SSL
             bool found = false;
             if (_passwordDialog != null)
             {
-                Application.Current.Dispatcher.Invoke(new Action(() =>
+                App.Invoke(new Action(() =>
                 {
                     _passwordDialog.Close();
                     found = true;
@@ -1976,7 +1993,7 @@ namespace dp2SSL
             return found;
         }
 
-        async Task<NormalResult> WorkerLogin(string pii)
+        async Task<NormalResult> WorkerLoginAsync(string pii)
         {
             App.CurrentApp.SpeakSequence("请登录");
             string userName = pii.Substring(1);
@@ -1987,7 +2004,7 @@ namespace dp2SSL
 
             ClosePasswordDialog();
 
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            App.Invoke(new Action(() =>
             {
                 App.PauseBarcodeScan();
                 _passwordDialog = new InputPasswordWindows();
@@ -2050,14 +2067,14 @@ namespace dp2SSL
             }
         }
 
-        public async Task Submit(bool silently = false)
+        public async Task SubmitAsync(bool silently = false)
         {
             if (ShelfData.Adds.Count > 0
                 || ShelfData.Removes.Count > 0
                 || ShelfData.Changes.Count > 0)
             {
                 SaveAllActions();
-                await DoRequest(ShelfData.PullActions(), silently ? "silence" : "");
+                await DoRequestAsync(ShelfData.PullActions(), silently ? "silence" : "");
                 // await SubmitCheckInOut("silence");
             }
         }
@@ -2090,7 +2107,7 @@ namespace dp2SSL
 
 
             if (!Application.Current.Dispatcher.CheckAccess())
-                Application.Current.Dispatcher.Invoke(new Action(() =>
+                App.Invoke(new Action(() =>
             {
                 PatronFixed = false;
                 fixPatron.IsEnabled = false;
@@ -2114,7 +2131,7 @@ namespace dp2SSL
             if (this.patronControl.BorrowedEntities.Count > 0)
             {
                 if (!Application.Current.Dispatcher.CheckAccess())
-                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    App.Invoke(new Action(() =>
                     {
                         this.patronControl.BorrowedEntities.Clear();
                     }));
@@ -2136,7 +2153,7 @@ namespace dp2SSL
             // 如果有错误信息，则主动把“清除读者信息”按钮设为可用，以便读者可以随时清除错误信息
             if (_patron.Error != null)
             {
-                Application.Current.Dispatcher.Invoke(new Action(() =>
+                App.Invoke(new Action(() =>
                 {
                     clearPatron.IsEnabled = true;
                 }));
@@ -2151,7 +2168,7 @@ namespace dp2SSL
         {
             if (e.PropertyName == "PhotoPath")
             {
-                Task.Run(() =>
+                _ = Task.Run(() =>
                 {
                     try
                     {
@@ -2170,7 +2187,7 @@ namespace dp2SSL
                 // 如果 patronControl 本来是隐藏状态，但读卡器上放上了读者卡，这时候要把 patronControl 恢复显示
                 if ((string.IsNullOrEmpty(_patron.UID) == false || string.IsNullOrEmpty(_patron.Barcode) == false)
                     && this.patronControl.Visibility != Visibility.Visible)
-                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    App.Invoke(new Action(() =>
                     {
                         patronControl.Visibility = Visibility.Visible;
                         _visiblityChanged = true;
@@ -2179,7 +2196,7 @@ namespace dp2SSL
                 else if (string.IsNullOrEmpty(_patron.UID) == true && string.IsNullOrEmpty(_patron.Barcode) == true
     && this.patronControl.Visibility == Visibility.Visible
     && _visiblityChanged)
-                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    App.Invoke(new Action(() =>
                     {
                         patronControl.Visibility = Visibility.Collapsed;
                     }));
@@ -2317,7 +2334,7 @@ namespace dp2SSL
         //      -1  出错
         //      0   没有必要处理
         //      1   已经处理
-        async Task<SubmitResult> InventoryBooks(InventoryWindow progress,
+        async Task<SubmitResult> InventoryBooksAsync(InventoryWindow progress,
             IReadOnlyCollection<Entity> entities)
         {
             List<ActionInfo> actions = new List<ActionInfo>();
@@ -2365,7 +2382,7 @@ namespace dp2SSL
                 {
                     if (progress != null)
                     {
-                        Application.Current.Dispatcher.Invoke(new Action(() =>
+                        App.Invoke(new Action(() =>
                         {
                             if (min == -1 && max == -1 && value == -1)
                                 progress.ProgressBar.Visibility = Visibility.Collapsed;
@@ -2459,7 +2476,7 @@ namespace dp2SSL
 
         public SubmitWindow OpenProgressWindow()
         {
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            App.Invoke(new Action(() =>
             {
                 if (_progressWindow != null)
                 {
@@ -2506,7 +2523,7 @@ namespace dp2SSL
         // 向服务器提交 actions 中存储的全部出纳请求
         // parameters:
         //      clearPatron 操作完成后是否自动清除右侧的读者信息
-        async Task DoRequest(List<ActionInfo> actions,
+        async Task DoRequestAsync(List<ActionInfo> actions,
             string strStyle = "")
         {
             if (actions.Count == 0)
@@ -2578,7 +2595,7 @@ namespace dp2SSL
                     */
 
                     // 保存到数据库。这样不怕中途断电或者异常退出
-                    await ShelfData.SaveActionsToDatabase(actions);
+                    await ShelfData.SaveActionsToDatabaseAsync(actions);
 
                     // TODO: 加入的时候应带有归并功能。但注意 Retry 线程里面正在处理的集合应该暂时从 RetryActions 里面移走，避免和归并过程掺和
                     // ShelfData.AddRetryActions(actions);
@@ -2591,14 +2608,15 @@ namespace dp2SSL
 
                     // 先在对话框里面把信息显示出来。然后同步线程会去提交请求，显示里面的相关事项会被刷新显示
                     {
-                        Application.Current.Dispatcher.Invoke(new Action(() =>
-                        {
-                            SubmitDocument doc = SubmitDocument.Build(actions,
+                        Invoke(() =>
+                            {
+                                SubmitDocument doc = SubmitDocument.Build(actions,
                                 14, "");
-                            progress?.PushContent(doc);
-                            // 显示出来
-                            progress?.ShowContent();
-                        }));
+                                progress?.PushContent(doc);
+                                // 显示出来
+                                progress?.ShowContent();
+                            }
+                        );
                     }
 
                     ShelfData.ActivateRetry();
@@ -2730,7 +2748,7 @@ namespace dp2SSL
             CancelDelayClearTask();
             // TODO: 开始启动延时自动清除读者信息的过程。如果中途门被打开，则延时过程被取消(也就是说读者信息不再会被自动清除)
 
-            Application.Current?.Dispatcher?.Invoke(new Action(() =>
+            App.Invoke(new Action(() =>
             {
                 PatronFixed = false;
             }));
@@ -2742,7 +2760,7 @@ namespace dp2SSL
                 },
                 (seconds) =>
                 {
-                    Application.Current?.Dispatcher?.Invoke(new Action(() =>
+                    App.Invoke(new Action(() =>
                     {
                         if (seconds > 0)
                             this.clearPatron.Content = $"({seconds.ToString()} 秒后自动) 清除读者信息";
@@ -2771,7 +2789,7 @@ namespace dp2SSL
 
         public void SimulateLamp(bool on)
         {
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            App.Invoke(new Action(() =>
             {
                 if (on)
                     this.lamp.Background = new SolidColorBrush(Colors.White);
@@ -2788,11 +2806,13 @@ namespace dp2SSL
 
         VideoWindow _videoRecognition = null;
 
+#pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
         private async void PatronControl_InputFace(object sender, EventArgs e)
+#pragma warning restore VSTHRD100 // 避免使用 Async Void 方法
         {
             RecognitionFaceResult result = null;
 
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            App.Invoke(new Action(() =>
             {
                 _videoRecognition = new VideoWindow
                 {
@@ -2810,7 +2830,7 @@ namespace dp2SSL
             });
             try
             {
-                result = await RecognitionFace("");
+                result = await RecognitionFaceAsync("");
                 if (result.Value == -1)
                 {
                     if (result.ErrorCode != "cancelled")
@@ -2824,7 +2844,7 @@ namespace dp2SSL
             finally
             {
                 if (_videoRecognition != null)
-                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    App.Invoke(new Action(() =>
                     {
                         _videoRecognition.Close();
                     }));
@@ -2845,7 +2865,7 @@ namespace dp2SSL
             //      -1  出错
             //      0   没有填充
             //      1   成功填充
-            var fill_result = await FillPatronDetail();
+            var fill_result = await FillPatronDetailAsync();
             if (fill_result.Value == 1)
                 Welcome();
         }
@@ -2853,7 +2873,7 @@ namespace dp2SSL
         // 开始启动延时自动清除读者信息的过程。如果中途门被打开，则延时过程被取消(也就是说读者信息不再会被自动清除)
         void Welcome()
         {
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            App.Invoke(new Action(() =>
             {
                 fixPatron.IsEnabled = true;
                 clearPatron.IsEnabled = true;
@@ -2873,7 +2893,7 @@ namespace dp2SSL
                 return;
             MemoryDialog(videoRegister);
             var temp = videoRegister;
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            App.Invoke(new Action(() =>
             {
                 temp.MessageText = message;
                 temp.BackColor = color;
@@ -2886,7 +2906,7 @@ namespace dp2SSL
 
         void SetQuality(string text)
         {
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            App.Invoke(new Action(() =>
             {
                 this.Quality.Text = text;
             }));
@@ -2905,7 +2925,7 @@ namespace dp2SSL
                 MemoryStream stream = new MemoryStream(result.ImageData);
                 try
                 {
-                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    App.Invoke(new Action(() =>
                     {
                         window.SetPhoto(stream);
                     }));
@@ -2930,7 +2950,7 @@ namespace dp2SSL
         bool CloseRecognitionWindow()
         {
             bool closed = false;
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            App.Invoke(new Action(() =>
             {
                 if (_videoRecognition != null)
                 {
@@ -2944,7 +2964,7 @@ namespace dp2SSL
 
         void EnableControls(bool enable)
         {
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            App.Invoke(new Action(() =>
             {
                 //this.borrowButton.IsEnabled = enable;
                 //this.returnButton.IsEnabled = enable;
@@ -2953,7 +2973,7 @@ namespace dp2SSL
             }));
         }
 
-        async Task<RecognitionFaceResult> RecognitionFace(string style)
+        async Task<RecognitionFaceResult> RecognitionFaceAsync(string style)
         {
             EnableControls(false);
             try
@@ -3008,8 +3028,8 @@ namespace dp2SSL
 
         private void CloseRF_Click(object sender, RoutedEventArgs e)
         {
-            string result = SelectAntenna();
-            MessageBox.Show(result);
+            var result = ShelfData.SelectAntenna();
+            MessageBox.Show(result.ErrorInfo);
         }
 
         private void pauseSubmit_Checked(object sender, RoutedEventArgs e)

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.VisualStudio.Threading;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,6 +11,8 @@ namespace DigitalPlatform.SimpleMessageQueue
     public class MessageQueue
     {
         string _databaseFileName = null;
+
+        AsyncSemaphore _databaseLimit = new AsyncSemaphore(1);
 
         int _chunkSize = 4096;
         public int ChunkSize
@@ -27,23 +30,28 @@ namespace DigitalPlatform.SimpleMessageQueue
         public MessageQueue(string databaseFileName)
         {
             _databaseFileName = databaseFileName;
-
-            using (var context = new QueueContext(_databaseFileName))
+            using (var releaser = _databaseLimit.EnterAsync().Result)
             {
-                context.Database.EnsureCreated();
+                using (var context = new QueueContext(_databaseFileName))
+                {
+                    context.Database.EnsureCreated();
+                }
             }
         }
 
-        public async Task PushAsync(List<string> texts, 
+        public async Task PushAsync(List<string> texts,
             CancellationToken token = default)
         {
-            using (var context = new QueueContext(_databaseFileName))
+            using (var releaser = await _databaseLimit.EnterAsync())
             {
-                foreach (string text in texts)
+                using (var context = new QueueContext(_databaseFileName))
                 {
-                    context.Items.AddRange(BuildItem(text));
+                    foreach (string text in texts)
+                    {
+                        context.Items.AddRange(BuildItem(text));
+                    }
+                    await context.SaveChangesAsync(token).ConfigureAwait(false);
                 }
-                await context.SaveChangesAsync(token).ConfigureAwait(false);
             }
         }
 
@@ -55,6 +63,7 @@ namespace DigitalPlatform.SimpleMessageQueue
 
         List<QueueItem> BuildItem(byte[] buffer)
         {
+            DateTime now = DateTime.Now;
             List<QueueItem> results = new List<QueueItem>();
             int start = 0;
             while (start < buffer.Length)
@@ -62,7 +71,11 @@ namespace DigitalPlatform.SimpleMessageQueue
                 int length = Math.Min(buffer.Length - start, this.ChunkSize);
                 byte[] fragment = new byte[length];
                 Array.Copy(buffer, start, fragment, 0, length);
-                QueueItem item = new QueueItem { Content = fragment };
+                QueueItem item = new QueueItem
+                {
+                    Content = fragment,
+                    CreateTime = now
+                };
                 results.Add(item);
 
                 start += length;
@@ -83,16 +96,19 @@ namespace DigitalPlatform.SimpleMessageQueue
         public async Task PushAsync(List<byte[]> contents,
             CancellationToken token = default)
         {
-            using (var context = new QueueContext(_databaseFileName))
+            using (var releaser = await _databaseLimit.EnterAsync())
             {
-                foreach (var content in contents)
+                using (var context = new QueueContext(_databaseFileName))
                 {
-                    // 注意，这里每次 Add() 以后都要及时 SaveChanges()。否则 ID 的顺序会发生混乱
-                    var items = BuildItem(content);
-                    foreach (var item in items)
+                    foreach (var content in contents)
                     {
-                        context.Items.Add(item);
-                        await context.SaveChangesAsync(token);
+                        // 注意，这里每次 Add() 以后都要及时 SaveChanges()。否则 ID 的顺序会发生混乱
+                        var items = BuildItem(content);
+                        foreach (var item in items)
+                        {
+                            context.Items.Add(item);
+                            await context.SaveChangesAsync(token);
+                        }
                     }
                 }
             }
@@ -106,49 +122,52 @@ namespace DigitalPlatform.SimpleMessageQueue
         public async Task<Message> GetAsync(bool remove_items,
             CancellationToken token = default)
         {
-            using (var context = new QueueContext(_databaseFileName))
+            using (var releaser = await _databaseLimit.EnterAsync())
             {
-                List<QueueItem> items = new List<QueueItem>();
-
-                var first = context.Items.OrderBy(o => o.ID).FirstOrDefault();
-                if (first == null)
-                    return null;
-
-                items.Add(first);
-                if (string.IsNullOrEmpty(first.GroupID))
-                    return new Message { Content = first.Content };
-                // 取出所有 GroupID 相同的事项，然后拼接起来
-                var group_id = first.GroupID;
-                List<byte> bytes = new List<byte>(first.Content);
-
-                int id = first.ID;
-                while (true)
+                using (var context = new QueueContext(_databaseFileName))
                 {
-                    var current = context.Items.Where(o => o.ID > id).OrderBy(o => o.ID).FirstOrDefault();
-                    if (current == null)
-                        break;
-                    if (current.GroupID != group_id)
-                        break;
-                    bytes.AddRange(current.Content);
-                    id = current.ID;
+                    List<QueueItem> items = new List<QueueItem>();
 
-                    items.Add(current);
+                    var first = context.Items.OrderBy(o => o.ID).FirstOrDefault();
+                    if (first == null)
+                        return null;
+
+                    items.Add(first);
+                    if (string.IsNullOrEmpty(first.GroupID))
+                        return new Message { Content = first.Content };
+                    // 取出所有 GroupID 相同的事项，然后拼接起来
+                    var group_id = first.GroupID;
+                    List<byte> bytes = new List<byte>(first.Content);
+
+                    int id = first.ID;
+                    while (true)
+                    {
+                        var current = context.Items.Where(o => o.ID > id).OrderBy(o => o.ID).FirstOrDefault();
+                        if (current == null)
+                            break;
+                        if (current.GroupID != group_id)
+                            break;
+                        bytes.AddRange(current.Content);
+                        id = current.ID;
+
+                        items.Add(current);
+                    }
+
+                    // 删除涉及到的事项
+                    if (remove_items)
+                    {
+                        context.Items.RemoveRange(items);
+                        await context.SaveChangesAsync(token);
+                    }
+
+                    return new Message { Content = bytes.ToArray() };
                 }
-
-                // 删除涉及到的事项
-                if (remove_items)
-                {
-                    context.Items.RemoveRange(items);
-                    await context.SaveChangesAsync(token);
-                }
-
-                return new Message { Content = bytes.ToArray() };
             }
         }
 
         public async Task<Message> PeekAsync(CancellationToken token = default)
         {
-            return await GetAsync(false,token);
+            return await GetAsync(false, token);
         }
     }
 

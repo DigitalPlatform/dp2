@@ -83,12 +83,14 @@ namespace dp2SSL
 
         bool _stopVideo = false;
 
+#pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
         private async void PatronControl_InputFace(object sender, EventArgs e)
+#pragma warning restore VSTHRD100 // 避免使用 Async Void 方法
         {
             RecognitionFaceResult result = null;
 
             VideoWindow videoRecognition = null;
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            App.Invoke(new Action(() =>
             {
                 videoRecognition = new VideoWindow
                 {
@@ -106,7 +108,7 @@ namespace dp2SSL
             });
             try
             {
-                result = await RecognitionFace("");
+                result = await RecognitionFaceAsync("");
                 if (result.Value == -1)
                 {
                     if (result.ErrorCode != "cancelled")
@@ -120,7 +122,7 @@ namespace dp2SSL
             finally
             {
                 if (videoRecognition != null)
-                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    App.Invoke(new Action(() =>
                     {
                         videoRecognition.Close();
                     }));
@@ -133,7 +135,7 @@ namespace dp2SSL
             };
             SetPatronInfo(message);
             SetQuality("");
-            var fill_result = await FillPatronDetail();
+            var fill_result = await FillPatronDetailAsync();
             Welcome(fill_result.Value == -1);
         }
 
@@ -150,7 +152,7 @@ namespace dp2SSL
                 MemoryStream stream = new MemoryStream(result.ImageData);
                 try
                 {
-                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    App.Invoke(new Action(() =>
                     {
                         window.SetPhoto(stream);
                     }));
@@ -173,7 +175,7 @@ namespace dp2SSL
 
         void EnableControls(bool enable)
         {
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            App.Invoke(new Action(() =>
             {
                 this.borrowButton.IsEnabled = enable;
                 this.returnButton.IsEnabled = enable;
@@ -182,7 +184,7 @@ namespace dp2SSL
             }));
         }
 
-        async Task<RecognitionFaceResult> RecognitionFace(string style)
+        async Task<RecognitionFaceResult> RecognitionFaceAsync(string style)
         {
             EnableControls(false);
             try
@@ -207,7 +209,9 @@ namespace dp2SSL
             }
         }
 
+#pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
         private async void PageBorrow_Loaded(object sender, RoutedEventArgs e)
+#pragma warning restore VSTHRD100 // 避免使用 Async Void 方法
         {
             SetGlobalError("current", null); // 清除以前残留的报错信息
             SetGlobalError("scan_barcode", null);
@@ -242,7 +246,7 @@ namespace dp2SSL
                 this.patronControl.SetStartMessage(GetPageStyleList());
             }
 
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            App.Invoke(new Action(() =>
             {
                 // 身份读卡器竖向放置，才有固定读者信息的必要
                 if (App.PatronReaderVertical)
@@ -258,13 +262,15 @@ namespace dp2SSL
             while (true)
             {
                 _tagChangedCount = 0;
-                await InitialEntities();
+                await InitialEntitiesAsync();
                 if (_tagChangedCount == 0)
                     break;  // 只有当初始化过程中没有被 TagChanged 事件打扰过，才算初始化成功了。否则就要重新初始化
             }
         }
 
+#pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
         private async void App_LineFeed(object sender, LineFeedEventArgs e)
+#pragma warning restore VSTHRD100 // 避免使用 Async Void 方法
         {
             if (App.EnablePatronBarcode == false)
             {
@@ -280,7 +286,7 @@ namespace dp2SSL
 
             SetPatronInfo(new GetMessageResult { Message = barcode });
 
-            var result = await FillPatronDetail();
+            var result = await FillPatronDetailAsync();
             Welcome(result.Value == -1);
         }
 
@@ -313,10 +319,12 @@ namespace dp2SSL
 
         int _tagChangedCount = 0;
 
+#pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
         private async void CurrentApp_TagChanged(object sender, TagChangedEventArgs e)
+#pragma warning restore VSTHRD100 // 避免使用 Async Void 方法
         {
             _tagChangedCount++;
-            await ChangeEntities((BaseChannel<IRfid>)sender, e);
+            await ChangeEntitiesAsync((BaseChannel<IRfid>)sender, e);
         }
 
         public static bool isPatronChanged(TagChangedEventArgs e)
@@ -332,18 +340,22 @@ namespace dp2SSL
         }
 
         // 跟随事件动态更新列表
-        async Task ChangeEntities(BaseChannel<IRfid> channel,
+        async Task ChangeEntitiesAsync(BaseChannel<IRfid> channel,
             TagChangedEventArgs e)
         {
             // 读者。不再精细的进行增删改跟踪操作，而是笼统地看 TagList.Patrons 集合即可
             if (isPatronChanged(e))
             {
-                var task = RefreshPatrons();
+                var task = RefreshPatronsAsync();
             }
+
+            // 2020/4/8
+            if (booksControl.Visibility != Visibility.Visible)
+                return;
 
             bool changed = false;
             List<Entity> update_entities = new List<Entity>();
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            App.Invoke(new Action(() =>
             {
                 if (e.AddBooks != null)
                     foreach (var tag in e.AddBooks)
@@ -368,7 +380,7 @@ namespace dp2SSL
 
             if (update_entities.Count > 0)
             {
-                await FillBookFields(channel, update_entities);
+                await FillBookFieldsAsync(channel, update_entities);
 
                 Trigger(update_entities);
 
@@ -414,55 +426,57 @@ namespace dp2SSL
         }
 
         // 首次初始化 Entity 列表
-        async Task<NormalResult> InitialEntities()
+        async Task<NormalResult> InitialEntitiesAsync()
         {
             _entities.Clear();  // 2019/9/4
 
-            var books = TagList.Books;
-            if (books.Count > 0)
+            if (booksControl.Visibility == Visibility.Visible)  // 2020/4/8
             {
-                List<Entity> update_entities = new List<Entity>();
-
-                foreach (var tag in books)
+                var books = TagList.Books;
+                if (books.Count > 0)
                 {
-                    var entity = _entities.Add(tag);
-                    update_entities.Add(entity);
-                }
+                    List<Entity> update_entities = new List<Entity>();
 
-                if (update_entities.Count > 0)
-                {
-                    try
+                    foreach (var tag in books)
                     {
-                        BaseChannel<IRfid> channel = RfidManager.GetChannel();
+                        var entity = _entities.Add(tag);
+                        update_entities.Add(entity);
+                    }
+
+                    if (update_entities.Count > 0)
+                    {
                         try
                         {
-                            await FillBookFields(channel, update_entities);
+                            BaseChannel<IRfid> channel = RfidManager.GetChannel();
+                            try
+                            {
+                                await FillBookFieldsAsync(channel, update_entities);
 
-                            Trigger(update_entities);
+                                Trigger(update_entities);
+                            }
+                            finally
+                            {
+                                RfidManager.ReturnChannel(channel);
+                            }
                         }
-                        finally
+                        catch (Exception ex)
                         {
-                            RfidManager.ReturnChannel(channel);
+                            string error = $"填充图书信息时出现异常: {ex.Message}";
+                            SetGlobalError("rfid", error);
+                            return new NormalResult { Value = -1, ErrorInfo = error };
                         }
-                    }
-                    catch (Exception ex)
-                    {
-                        string error = $"填充图书信息时出现异常: {ex.Message}";
-                        SetGlobalError("rfid", error);
-                        return new NormalResult { Value = -1, ErrorInfo = error };
-                    }
 
-                    // 自动检查 EAS 状态
-                    CheckEAS(update_entities);
+                        // 自动检查 EAS 状态
+                        CheckEAS(update_entities);
+                    }
+                }
+                else
+                {
+                    booksControl.SetBorrowable();
                 }
             }
-            else
-            {
-                booksControl.SetBorrowable();
-            }
 
-            var task = RefreshPatrons();
-
+            var task = RefreshPatronsAsync();
             return new NormalResult();
         }
 
@@ -479,7 +493,7 @@ namespace dp2SSL
             if (results.Count == 0)
                 return;
 
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            App.Invoke(new Action(() =>
             {
                 MessageBox.Show($"开始。数量 [{results.Count}]");
             }));
@@ -488,7 +502,7 @@ namespace dp2SSL
         // ReaderWriterLockSlim _lock_refreshPatrons = new ReaderWriterLockSlim();
 
         // TODO: 要和以前比对，读者信息是否发生了变化。如果没有变化就不要刷新界面了
-        async Task RefreshPatrons()
+        async Task RefreshPatronsAsync()
         {
             //_lock_refreshPatrons.EnterWriteLock();
             try
@@ -513,7 +527,7 @@ namespace dp2SSL
                         SetPatronError("rfid_multi", "");   // 2019/5/22
 
                         // 2019/5/29
-                        var fill_result = await FillPatronDetail();
+                        var fill_result = await FillPatronDetailAsync();
                         Welcome(fill_result.Value == -1);
                     }
                     else
@@ -597,14 +611,16 @@ namespace dp2SSL
 
         void SetQuality(string text)
         {
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            App.Invoke(new Action(() =>
             {
                 this.Quality.Text = text;
             }));
         }
 
         // 从指纹阅读器获取消息(第一阶段)
+#pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
         private async void FingerprintManager_Touched(object sender, TouchedEventArgs e)
+#pragma warning restore VSTHRD100 // 避免使用 Async Void 方法
         {
             // 注如果 FingerprintManager 已经挂接 SetError 事件，Touched 事件这里就可以忽略 result.Value == -1 情况
             if (e.Result.Value == -1)
@@ -614,7 +630,7 @@ namespace dp2SSL
 
             SetQuality(e.Quality == 0 ? "" : e.Quality.ToString());
 
-            var fill_result = await FillPatronDetail();
+            var fill_result = await FillPatronDetailAsync();
             Welcome(fill_result.Value == -1);
 #if NO
             Application.Current.Dispatcher.Invoke(new Action(() =>
@@ -739,7 +755,7 @@ namespace dp2SSL
         void CloseDialogs()
         {
             // 确保 page 关闭时对话框能自动关闭
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            App.Invoke(new Action(() =>
             {
                 foreach (var window in _dialogs)
                 {
@@ -788,7 +804,7 @@ namespace dp2SSL
         {
             if (e.PropertyName == "PhotoPath")
             {
-                Task.Run(() =>
+                _ = Task.Run(() =>
                 {
                     try
                     {
@@ -807,7 +823,7 @@ namespace dp2SSL
                 // 如果 patronControl 本来是隐藏状态，但读卡器上放上了读者卡，这时候要把 patronControl 恢复显示
                 if ((string.IsNullOrEmpty(_patron.UID) == false || string.IsNullOrEmpty(_patron.Barcode) == false)
                     && this.patronControl.Visibility != Visibility.Visible)
-                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    App.Invoke(new Action(() =>
                     {
                         patronControl.Visibility = Visibility.Visible;
                         _visiblityChanged = true;
@@ -817,7 +833,7 @@ namespace dp2SSL
                 else if (string.IsNullOrEmpty(_patron.UID) == true && string.IsNullOrEmpty(_patron.Barcode) == true
     && this.patronControl.Visibility == Visibility.Visible
     && _visiblityChanged)
-                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    App.Invoke(new Action(() =>
                     {
                         SetPatronControlVisibility();
                         // patronControl.Visibility = Visibility.Collapsed;
@@ -976,19 +992,19 @@ namespace dp2SSL
         // 清除图书列表
         void ClearBookList()
         {
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            App.Invoke(new Action(() =>
             {
                 List<Entity> new_entities = null;
                 _entities.Refresh(new List<OneTag>(), ref new_entities);
             }));
         }
 
-        async Task ClearBooksAndPatron(BaseChannel<IRfid> channel)
+        async Task ClearBooksAndPatronAsync(BaseChannel<IRfid> channel)
         {
             try
             {
                 ClearBookList();
-                await FillBookFields(channel, new List<Entity>());
+                await FillBookFieldsAsync(channel, new List<Entity>());
             }
             catch (Exception ex)
             {
@@ -1257,7 +1273,7 @@ namespace dp2SSL
         }
 #endif
         // 填充读者信息的其他字段(第二阶段)
-        async Task<NormalResult> FillPatronDetail(bool force = false)
+        async Task<NormalResult> FillPatronDetailAsync(bool force = false)
         {
 #if NO
             if (_cancelRefresh == null
@@ -1310,7 +1326,7 @@ namespace dp2SSL
             if (force)
                 _patron.PhotoPath = "";
             // string old_photopath = _patron.PhotoPath;
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            App.Invoke(new Action(() =>
             {
                 _patron.SetPatronXml(result.RecPath, result.ReaderXml, result.Timestamp);
                 this.patronControl.SetBorrowed(result.ReaderXml);
@@ -1329,7 +1345,7 @@ namespace dp2SSL
                     BaseChannel<IRfid> channel = RfidManager.GetChannel();
                     try
                     {
-                        await FillBookFields(channel, entities);
+                        await FillBookFieldsAsync(channel, entities);
                     }
                     finally
                     {
@@ -1403,7 +1419,7 @@ namespace dp2SSL
         }
 #endif
         // 第二阶段：填充图书信息的 PII 和 Title 字段
-        async Task FillBookFields(BaseChannel<IRfid> channel,
+        async Task FillBookFieldsAsync(BaseChannel<IRfid> channel,
             List<Entity> entities)
         {
 #if NO
@@ -1467,7 +1483,7 @@ out string strError);
                     if (string.IsNullOrEmpty(entity.Title)
                         && string.IsNullOrEmpty(entity.PII) == false && entity.PII != "(空)")
                     {
-                        GetEntityDataResult result = await GetEntityData(entity.PII);
+                        GetEntityDataResult result = await GetEntityDataAsync(entity.PII);
                         /*
                         out string title,
                         out string item_xml,
@@ -1592,7 +1608,7 @@ out string strError);
         // 借书
         private void BorrowButton_Click(object sender, RoutedEventArgs e)
         {
-            Task.Run(() =>
+            _ = Task.Run(() =>
             {
                 Loan("borrow");
             });
@@ -1623,7 +1639,7 @@ out string strError);
             else if (action == "renew")
                 action_name = "续借";
 
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            App.Invoke(new Action(() =>
             {
                 progress = new ProgressWindow();
                 progress.MessageText = "正在处理，请稍候 ...";
@@ -1677,7 +1693,7 @@ out string strError);
             {
                 ClearEntitiesError();
 
-                Application.Current.Dispatcher.Invoke(new Action(() =>
+                App.Invoke(new Action(() =>
                 {
                     progress.ProgressBar.Value = 0;
                     progress.ProgressBar.Minimum = 0;
@@ -1769,7 +1785,7 @@ out string strError);
                             out strError);
                     }
 
-                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    App.Invoke(new Action(() =>
                     {
                         progress.ProgressBar.Value++;
                     }));
@@ -1820,7 +1836,7 @@ out string strError);
                     }
                 }
 
-                Application.Current.Dispatcher.Invoke(new Action(() =>
+                App.Invoke(new Action(() =>
                 {
                     progress.ProgressBar.Visibility = Visibility.Collapsed;
                     // progress.ProgressBar.Value = progress.ProgressBar.Maximum;
@@ -1889,7 +1905,7 @@ out string strError);
                     */
 
                     // 重新装载读者信息和显示
-                    var task = FillPatronDetail(true);
+                    var task = FillPatronDetailAsync(true);
 
                     App.CurrentApp.Speak(speak);
                 }
@@ -1899,7 +1915,7 @@ out string strError);
             finally
             {
                 App.CurrentApp.ReturnChannel(channel);
-                Application.Current.Dispatcher.Invoke(new Action(() =>
+                App.Invoke(new Action(() =>
                 {
                     if (progress != null)
                         progress.Close();
@@ -2072,7 +2088,7 @@ out string strError);
 #endif
         private void ReturnButton_Click(object sender, RoutedEventArgs e)
         {
-            Task.Run(() =>
+            _ = Task.Run(() =>
             {
                 Loan("return");
             });
@@ -2081,7 +2097,7 @@ out string strError);
         // 续借
         private void RenewButton_Click(object sender, RoutedEventArgs e)
         {
-            Task.Run(() =>
+            _ = Task.Run(() =>
             {
                 Loan("renew");
             });
@@ -2105,7 +2121,7 @@ out string strError);
             // 如果有错误信息，则主动把“清除读者信息”按钮设为可用，以便读者可以随时清除错误信息
             if (_patron.Error != null)
             {
-                Application.Current.Dispatcher.Invoke(new Action(() =>
+                App.Invoke(new Action(() =>
                 {
                     clearPatron.IsEnabled = true;
                 }));
@@ -2194,13 +2210,15 @@ out string strError);
 
         #endregion
 
+#pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
         private async void RegisterFace_Click(object sender, RoutedEventArgs e)
+#pragma warning restore VSTHRD100 // 避免使用 Async Void 方法
         {
-            await RegisterFace("registerFace");
+            await RegisterFaceAsync("registerFace");
         }
 
         // 注册或者删除人脸
-        private async Task RegisterFace(string action)
+        private async Task RegisterFaceAsync(string action)
         {
             GetFeatureStringResult result = null;
 
@@ -2209,7 +2227,7 @@ out string strError);
                 action_name = "删除人脸";
 
             VideoWindow videoRegister = null;
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            App.Invoke(new Action(() =>
             {
                 videoRegister = new VideoWindow
                 {
@@ -2265,7 +2283,7 @@ out string strError);
 
                                 if (videoRegister != null)
                                 {
-                                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                                    App.Invoke(new Action(() =>
                                     {
                                         if (videoRegister != null)
                                             videoRegister.TitleText = $"倒计时 {i}";
@@ -2275,7 +2293,7 @@ out string strError);
                             }
                             if (videoRegister != null)
                             {
-                                Application.Current.Dispatcher.Invoke(new Action(() =>
+                                App.Invoke(new Action(() =>
                                 {
                                     videoRegister.TitleText = "拍摄";
                                 }));
@@ -2284,7 +2302,7 @@ out string strError);
 
 
 
-                        result = await GetFeatureString("returnImage,countDown,format:jpeg");
+                        result = await GetFeatureStringAsync("returnImage,countDown,format:jpeg");
                         if (result.Value == -1)
                         {
                             DisplayError(ref videoRegister, result.ErrorInfo);
@@ -2380,7 +2398,7 @@ out string strError);
                 if (changed == true)
                 {
                     // 保存读者记录
-                    var save_result = await SetReaderInfo(_patron.RecPath,
+                    var save_result = await SetReaderInfoAsync(_patron.RecPath,
                         dom.OuterXml,
                         _patron.Xml,
                         _patron.Timestamp);
@@ -2400,7 +2418,7 @@ out string strError);
                     // Thread.Sleep(1000);
 
                     // 上传头像
-                    var upload_result = await UploadObject(
+                    var upload_result = await UploadObjectAsync(
             object_path,
             result.ImageData);
                     if (upload_result.Value == -1)
@@ -2424,14 +2442,14 @@ out string strError);
             finally
             {
                 if (videoRegister != null)
-                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    App.Invoke(new Action(() =>
                     {
                         videoRegister.Close();
                     }));
             }
 
             // 刷新读者信息区显示
-            var temp_task = FillPatronDetail(true);
+            var temp_task = FillPatronDetailAsync(true);
         }
 
         void DisplayError(ref ProgressWindow progress,
@@ -2440,7 +2458,7 @@ out string strError);
         {
             MemoryDialog(progress);
             var temp = progress;
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            App.Invoke(new Action(() =>
             {
                 temp.MessageText = message;
                 temp.BackColor = color;
@@ -2455,7 +2473,7 @@ out string strError);
         {
             MemoryDialog(videoRegister);
             var temp = videoRegister;
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            App.Invoke(new Action(() =>
             {
                 temp.MessageText = message;
                 temp.BackColor = color;
@@ -2465,7 +2483,7 @@ out string strError);
             videoRegister = null;
         }
 
-        Task<NormalResult> UploadObject(
+        Task<NormalResult> UploadObjectAsync(
             string object_path,
             byte[] imageData)
         {
@@ -2887,7 +2905,7 @@ string usage)
             RemoveLayer();
         }
 
-        async Task<GetFeatureStringResult> GetFeatureString(string style)
+        async Task<GetFeatureStringResult> GetFeatureStringAsync(string style)
         {
             EnableControls(false);
             try
@@ -2912,9 +2930,11 @@ string usage)
             }
         }
 
+#pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
         private async void DeleteFace_Click(object sender, RoutedEventArgs e)
+#pragma warning restore VSTHRD100 // 避免使用 Async Void 方法
         {
-            await RegisterFace("deleteFace");
+            await RegisterFaceAsync("deleteFace");
         }
 
         void PatronClear(bool check_card_existance = false)
@@ -2936,7 +2956,7 @@ string usage)
             if (this.patronControl.BorrowedEntities.Count > 0)
             {
                 if (!Application.Current.Dispatcher.CheckAccess())
-                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    App.Invoke(new Action(() =>
                     {
                         this.patronControl.BorrowedEntities.Clear();
                     }));
@@ -2945,8 +2965,9 @@ string usage)
             }
 
             CancelDelayClearTask();
+            // TODO: 这里要测试一下 CheckAccess()
             if (!Application.Current.Dispatcher.CheckAccess())
-                Application.Current.Dispatcher.Invoke(new Action(() =>
+                App.Invoke(new Action(() =>
                 {
                     PatronFixed = false;
                     fixPatron.IsEnabled = false;
@@ -3041,7 +3062,7 @@ string usage)
             CancelDelayClearTask();
             // TODO: 开始启动延时自动清除读者信息的过程。如果中途门被打开，则延时过程被取消(也就是说读者信息不再会被自动清除)
 
-            Application.Current?.Dispatcher?.Invoke(new Action(() =>
+            App.Invoke(new Action(() =>
             {
                 PatronFixed = false;
             }));
@@ -3069,7 +3090,7 @@ string usage)
                 },
                 (seconds) =>
                 {
-                    Application.Current?.Dispatcher?.Invoke(new Action(() =>
+                    App.Invoke(new Action(() =>
                     {
                         if (seconds > 0)
                             this.clearPatron.Content = $"({seconds.ToString()} 秒后自动) 清除读者信息";
@@ -3098,7 +3119,7 @@ string usage)
 
             _cancelSpeaking = new CancellationTokenSource();
             CancellationToken token = _cancelSpeaking.Token;
-            Task.Run(() =>
+            _ = Task.Run(async () =>
             {
                 while (token.IsCancellationRequested == false)
                 {
@@ -3115,7 +3136,7 @@ string usage)
                     App.CurrentApp.Speak("注意，不要忘了拿走读者卡");
                     try
                     {
-                        Task.Delay(TimeSpan.FromSeconds(10), token).Wait();
+                        await Task.Delay(TimeSpan.FromSeconds(10), token);
                     }
                     catch
                     {
@@ -3152,7 +3173,7 @@ string usage)
                     BeginDelayClearTask();
                 return;
             }
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            App.Invoke(new Action(() =>
             {
                 fixPatron.IsEnabled = true;
                 clearPatron.IsEnabled = true;
@@ -3173,27 +3194,31 @@ string usage)
 
         #endregion
 
+#pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
         private async void bindPatronCard_Click(object sender, RoutedEventArgs e)
+#pragma warning restore VSTHRD100 // 避免使用 Async Void 方法
         {
-            await BindPatronCard("bindPatronCard");
+            await BindPatronCardAsync("bindPatronCard");
         }
 
+#pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
         private async void releasePatronCard_Click(object sender, RoutedEventArgs e)
+#pragma warning restore VSTHRD100 // 避免使用 Async Void 方法
         {
-            await BindPatronCard("releasePatronCard");
+            await BindPatronCardAsync("releasePatronCard");
         }
 
         // return.Value
         //      -1  出错
         //      0   放弃
         //      1   成功获得读者卡 UID，返回在 NormalResult.ErrorCode 中
-        async Task<NormalResult> Get14443ACardUID(ProgressWindow progress,
+        async Task<NormalResult> Get14443ACardUIDAsync(ProgressWindow progress,
             string action_caption,
             CancellationToken token)
         {
             // TODO: 是否一开始要探测读卡器上是否有没有拿走的读者卡，提醒读者先拿走？
 
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            App.Invoke(new Action(() =>
             {
                 progress.MessageText = $"请扫要{action_caption}的读者卡 ...";
             }));
@@ -3206,14 +3231,14 @@ string usage)
                 {
                     if (TagList.Patrons.Count == 0)
                     {
-                        Application.Current.Dispatcher.Invoke(new Action(() =>
+                        App.Invoke(new Action(() =>
                         {
                             progress.MessageText = $"请扫要{action_caption}的读者卡 ...";
                         }));
                     }
                     if (TagList.Patrons.Count > 1)
                     {
-                        Application.Current.Dispatcher.Invoke(new Action(() =>
+                        App.Invoke(new Action(() =>
                         {
                             progress.MessageText = "请拿走多余的读者卡";
                         }));
@@ -3250,7 +3275,7 @@ string usage)
         }
 
         // 绑定或者解绑(ISO14443A)读者卡
-        private async Task BindPatronCard(string action)
+        private async Task BindPatronCardAsync(string action)
         {
             // GetFeatureStringResult result = null;
 
@@ -3261,7 +3286,7 @@ string usage)
             // 提前打开对话框
             ProgressWindow progress = null;
 
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            App.Invoke(new Action(() =>
             {
                 progress = new ProgressWindow();
                 progress.MessageText = "请扫要绑定的读者卡 ...";
@@ -3291,7 +3316,7 @@ string usage)
 
                 // TODO: 弹出一个对话框，检测 ISO14443A 读者卡
                 // 注意探测读者卡的时候，不是要刷新右侧的读者信息，而是把探测到的信息拦截到对话框里面，右侧的读者信息不要有任何变化
-                var result = await Get14443ACardUID(progress,
+                var result = await Get14443ACardUIDAsync(progress,
                     action_name,
                     new CancellationToken());
                 if (result.Value == -1)
@@ -3305,7 +3330,7 @@ string usage)
 
                 string uid = result.ErrorCode;
 
-                Application.Current.Dispatcher.Invoke(new Action(() =>
+                App.Invoke(new Action(() =>
                 {
                     progress.MessageText = "正在修改读者记录 ...";
                 }));
@@ -3354,7 +3379,7 @@ uid);
                 if (changed == true)
                 {
                     // 保存读者记录
-                    var save_result = await SetReaderInfo(_patron.RecPath,
+                    var save_result = await SetReaderInfoAsync(_patron.RecPath,
                         dom.OuterXml,
                         _patron.Xml,
                         _patron.Timestamp);
@@ -3379,14 +3404,14 @@ uid);
                 App.CurrentApp.TagChanged += CurrentApp_TagChanged;
 
                 if (progress != null)
-                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    App.Invoke(new Action(() =>
                     {
                         progress.Close();
                     }));
             }
 
             // 刷新读者信息区显示
-            var temp_task = FillPatronDetail(true);
+            var temp_task = FillPatronDetailAsync(true);
         }
 
         static NormalResult ModifyBinding(XmlDocument dom,

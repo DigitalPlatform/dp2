@@ -201,6 +201,16 @@
                         <TextBlock>重启人脸中心</TextBlock>
                     </Button.Content>
                 </Button>
+                <Button Name="sterilamp"
+                    Style="{DynamicResource RoundedButtonStyle}" 
+                    Width="260" Height="60" 
+                    FontSize="20" FontWeight="ExtraBold" 
+                    Foreground="White" 
+                     Click="sterilamp_Click">
+                    <Button.Content>
+                        <TextBlock>紫外线杀菌</TextBlock>
+                    </Button.Content>
+                </Button>
             </WrapPanel>
         </Grid>
     </Grid>

@@ -73,6 +73,9 @@ uint new_password);
 
         NormalResult TurnShelfLamp(string lampName, string action);
 
+        // 2020/4/8
+        NormalResult TurnSterilamp(string lampName, string action);
+
         NormalResult ManageReader(string reader_name, string command);
     }
 

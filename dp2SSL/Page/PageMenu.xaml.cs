@@ -318,7 +318,7 @@ namespace dp2SSL
 
                 ProgressWindow progress = null;
 
-                Application.Current.Dispatcher.Invoke(new Action(() =>
+                App.Invoke(new Action(() =>
                 {
 
                     progress = new ProgressWindow();

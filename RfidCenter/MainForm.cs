@@ -2023,5 +2023,17 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
             }
 
         }
+
+        private void ToolStripMenuItem_sterilamp_turnOn_Click(object sender, EventArgs e)
+        {
+            var result = _driver.TurnSterilamp("*", "turnOn");
+            MessageDlg.Show(this, result.ToString(), "开灯");
+        }
+
+        private void ToolStripMenuItem_sterilamp_turnOff_Click(object sender, EventArgs e)
+        {
+            var result = _driver.TurnSterilamp("*", "turnOff");
+            MessageDlg.Show(this, result.ToString(), "关灯");
+        }
     }
 }

@@ -10,6 +10,8 @@ using DigitalPlatform.LibraryServer;
 using DigitalPlatform.RFID.UI;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Xml;
+using static dp2Circulation.CallNumberForm;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {
@@ -195,9 +197,11 @@ namespace dp2Circulation
                 }
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
+
+        public List<MemoTailNumber> ProtectedNumbers = new List<MemoTailNumber>();
 
         // 获得索取号
         void button_getAccessNo_Click(object sender, EventArgs e)
@@ -211,6 +215,12 @@ namespace dp2Circulation
                     e1.ScriptEntry = "CreateCallNumber";
                 e1.FocusedControl = sender; // sender为最原始的子控件
                 this.GenerateData(this, e1);
+                var parameter = e1.Parameter as GetCallNumberParameter;
+                if (parameter != null)
+                {
+                    if (parameter.ProtectedNumbers != null)
+                        this.ProtectedNumbers.AddRange(parameter.ProtectedNumbers);
+                }
             }
         }
 
@@ -349,7 +359,7 @@ namespace dp2Circulation
             }
 
             return 0;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -982,7 +992,7 @@ namespace dp2Circulation
 #endif
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1023,7 +1033,7 @@ namespace dp2Circulation
                 goto ERROR1;
             _leftLoaded = true;
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1057,7 +1067,7 @@ namespace dp2Circulation
 
             try
             {
-                REDO:
+            REDO:
                 // 出现对话框让选择一个
                 // SelectTagDialog dialog = new SelectTagDialog();
                 using (RfidToolForm dialog = new RfidToolForm())
@@ -1263,7 +1273,7 @@ out strError);
 
         int LoadChipByUID(
             string reader_name,
-            string uid, 
+            string uid,
             uint antenna_id,
             out TagInfo tag_info,
             out string strError)
@@ -1313,6 +1323,72 @@ out strError);
 #if OLD_CODE
                 EndRfidChannel(channel);
 #endif
+            }
+        }
+
+        private void EntityEditForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            // var reason = e.CloseReason;
+            if (this.DialogResult == DialogResult.Cancel)
+            {
+                // 对保护过的号码放弃保护
+                if (ProtectedNumbers != null)
+                {
+                    foreach (var number in ProtectedNumbers)
+                    {
+                        int nRet = ProtectTailNumber(
+    "unmemo",
+    number.ArrangeGroupName,
+    number.Class,
+    number.Number,
+    out string strOutputNumber,
+    out string strError);
+                        if (nRet == -1)
+                            MessageBox.Show(this, strError);
+                    }
+                }
+            }
+        }
+
+
+        // parameters:
+        //      strAction   protect/unmemo 之一
+        int ProtectTailNumber(
+            string strAction,
+            string strArrangeGroupName,
+            string strClass,
+            string strTestNumber,
+            out string strOutputNumber,
+            out string strError)
+        {
+            strOutputNumber = "";
+
+            // EnableControls(false);
+
+            Debug.Assert(strAction == "protect" || strAction == "unmemo", "");
+
+            LibraryChannel channel = Program.MainForm.GetChannel();
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = new TimeSpan(0, 1, 0);
+            try
+            {
+                long lRet = channel.SetOneClassTailNumber(
+                    null,
+                    strAction,
+                    strArrangeGroupName,
+                    strClass,
+                    strTestNumber,
+                    out strOutputNumber,
+                    out strError);
+                if (lRet == -1)
+                    return -1;
+
+                return (int)lRet;
+            }
+            finally
+            {
+                channel.Timeout = old_timeout;
+                Program.MainForm.ReturnChannel(channel);
             }
         }
 

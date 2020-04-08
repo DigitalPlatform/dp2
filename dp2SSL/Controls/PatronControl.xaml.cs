@@ -111,7 +111,7 @@ namespace dp2SSL
         {
             if (string.IsNullOrEmpty(photo_path))
             {
-                Application.Current.Dispatcher.Invoke(new Action(() =>
+                App.Invoke(new Action(() =>
                 {
                     this.SetPhoto(null);
                 }));
@@ -140,7 +140,7 @@ namespace dp2SSL
                 }
 
                 stream.Seek(0, SeekOrigin.Begin);
-                Application.Current.Dispatcher.Invoke(new Action(() =>
+                App.Invoke(new Action(() =>
                 {
                     this.SetPhoto(stream);
                 }));

@@ -40,7 +40,7 @@ namespace dp2SSL
         private void PageSetting_Unloaded(object sender, RoutedEventArgs e)
         {
             // 确保 page 关闭时对话框能自动关闭
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            App.Invoke(new Action(() =>
             {
                 foreach (var window in _dialogs)
                 {
@@ -249,7 +249,7 @@ namespace dp2SSL
             // 重新启动 Proccess 监控
             App.CurrentApp.StartProcessManager();
 
-            App.CurrentApp.ConnectMessageServer();
+            _ = App.CurrentApp.ConnectMessageServerAsync();
         }
 
         public static NormalResult CheckServerUID()
@@ -455,13 +455,15 @@ namespace dp2SSL
             }
         }
 
+#pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
         private async void DownloadDailyWallpaper_Click(object sender, RoutedEventArgs e)
+#pragma warning restore VSTHRD100 // 避免使用 Async Void 方法
         {
             this.downloadDailyWallpaper.IsEnabled = false;
             try
             {
                 string filename = Path.Combine(WpfClientInfo.UserDir, "daily_wallpaper");
-                await DownloadBingWallPaper(filename);
+                await DownloadBingWallPaperAsync(filename);
             }
             finally
             {
@@ -472,7 +474,7 @@ namespace dp2SSL
         List<Window> _dialogs = new List<Window>();
 
         // https://blog.csdn.net/m0_37682004/article/details/82314055
-        Task DownloadBingWallPaper(string filename)
+        Task DownloadBingWallPaperAsync(string filename)
         {
             return Task.Run(() =>
             {
@@ -480,7 +482,7 @@ namespace dp2SSL
                 {
 
                     ProgressWindow progress = null;
-                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    App.Invoke(new Action(() =>
                     {
                         progress = new ProgressWindow();
                         progress.MessageText = "正在下载 bing 壁纸，请稍候 ...";
@@ -501,7 +503,7 @@ namespace dp2SSL
                         url = $"https://cn.bing.com{url}";
                         client.DownloadFile(url, filename);
                         _dialogs.Add(progress);
-                        Application.Current.Dispatcher.Invoke(new Action(() =>
+                        App.Invoke(new Action(() =>
                         {
                             progress.MessageText = "下载完成";
                             progress.BackColor = "green";
@@ -511,7 +513,7 @@ namespace dp2SSL
                     catch (Exception ex)
                     {
                         _dialogs.Add(progress);
-                        Application.Current.Dispatcher.Invoke(new Action(() =>
+                        App.Invoke(new Action(() =>
                         {
                             progress.MessageText = $"下载 bing 壁纸过程出现异常: {ExceptionUtil.GetExceptionText(ex)}";
                             progress.BackColor = "red";
@@ -520,7 +522,7 @@ namespace dp2SSL
                     }
                     finally
                     {
-                        Application.Current.Dispatcher.Invoke(new Action(() =>
+                        App.Invoke(new Action(() =>
                         {
                             if (progress != null)
                                 progress.Close();
@@ -583,6 +585,12 @@ namespace dp2SSL
             {
                 Login_Click(this.login, new RoutedEventArgs());
             }
+        }
+
+        // 紫外线杀菌
+        private void sterilamp_Click(object sender, RoutedEventArgs e)
+        {
+            _ = App.CurrentApp.SterilampAsync();
         }
     }
 }
