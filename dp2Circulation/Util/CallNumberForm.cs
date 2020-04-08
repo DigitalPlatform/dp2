@@ -1701,6 +1701,7 @@ COLUMN_CALLNUMBER);
         }
 
         int ProtectTailNumber(
+            string strAction,
             string strTestNumber,
             List<MemoTailNumber> numbers,
             out string strOutputNumber,
@@ -1708,6 +1709,8 @@ COLUMN_CALLNUMBER);
         {
             strOutputNumber = "";
             strError = "";
+
+            Debug.Assert(strAction == "protect" || strAction == "unmemo", "");
 
             EnableControls(false);
 
@@ -1721,7 +1724,7 @@ COLUMN_CALLNUMBER);
                 string strClass = this.ClassNumber;
 
                 int nRet = ProtectTailNumber(
-                    "protect",
+                    strAction,  // "protect",
                     strArrangeGroupName,
                     strClass,
                     strTestNumber,
@@ -1732,11 +1735,27 @@ COLUMN_CALLNUMBER);
 
                 if (numbers != null)
                 {
-                    MemoTailNumber number = new MemoTailNumber();
-                    number.ArrangeGroupName = strArrangeGroupName;
-                    number.Class = strClass;
-                    number.Number = strOutputNumber;
-                    numbers.Add(number);
+                    if (strAction == "protect")
+                    {
+                        MemoTailNumber number = new MemoTailNumber();
+                        number.ArrangeGroupName = strArrangeGroupName;
+                        number.Class = strClass;
+                        number.Number = strOutputNumber;
+                        numbers.Add(number);
+                    }
+                    if (strAction == "unmemo")
+                    {
+                        var found = numbers.FindAll((o) => {
+                            // TODO: 是否要判断 strOutputNumber?
+                            if (o.Class == strClass && o.Number == strTestNumber)
+                                return true;
+                            return false;
+                        });
+                        foreach(var number in found)
+                        {
+                            numbers.Remove(number);
+                        }
+                    }
                 }
 
                 return nRet;
@@ -2080,6 +2099,7 @@ COLUMN_CALLNUMBER);
         /// <param name="style">种次号取号的风格</param>
         /// <param name="strClass">类号</param>
         /// <param name="strLocationString">馆藏地点</param>
+        /// <param name="protectedNumbers"></param>
         /// <param name="strNumber">返回种次号</param>
         /// <param name="strError">返回出错信息</param>
         /// <returns>-1: 出错; 0: 放弃; 1: 成功</returns>
@@ -2087,12 +2107,14 @@ COLUMN_CALLNUMBER);
             ZhongcihaoStyle style,
             string strClass,
             string strLocationString,
+            out List<MemoTailNumber> protectedNumbers,
             out string strNumber,
             out string strError)
         {
             strNumber = "";
             strError = "";
             int nRet = 0;
+            protectedNumbers = new List<MemoTailNumber>();
 
             this.ClassNumber = strClass;
             this.LocationString = strLocationString;
@@ -2394,14 +2416,22 @@ COLUMN_CALLNUMBER);
                 if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.104") < 0)
                     return 1;
 
+                int start = this.MemoNumbers.Count;
                 string strTestNumber = strNumber;
                 nRet = ProtectTailNumber(
+                    "protect",
                     strTestNumber,
                     this.MemoNumbers,
                     out strNumber,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
+
+                // 返回本次保护过的号码
+                for(int i = start;i<this.MemoNumbers.Count;i++)
+                {
+                    protectedNumbers.Add(this.MemoNumbers[i]);
+                }
             }
             return 1;
             ERROR1:

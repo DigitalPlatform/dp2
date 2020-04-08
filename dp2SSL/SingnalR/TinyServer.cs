@@ -56,7 +56,7 @@ namespace dp2SSL
                 _eventSend.Set();
             });
 
-            _sendTask = Task.Factory.StartNew(() =>
+            _sendTask = Task.Factory.StartNew(async () =>
             {
                 WpfClientInfo.WriteInfoLog("消息发送专用线程开始");
                 try
@@ -67,25 +67,25 @@ namespace dp2SSL
                         token.ThrowIfCancellationRequested();
 
                         // 检查和确保连接到消息服务器
-                        App.CurrentApp.EnsureConnectMessageServer().Wait(token);
+                        await App.CurrentApp.EnsureConnectMessageServerAsync();
 
                         while (token.IsCancellationRequested == false)
                         {
                             try
                             {
-                                var message = _queue.PeekAsync(token).Result;
+                                var message = await _queue.PeekAsync(token);
                                 if (message == null)
                                     break;
                                 var request = JsonConvert.DeserializeObject<SetMessageRequest>(message.GetString());
 
-                                var result = SetMessageAsync(request).Result;
+                                var result = await SetMessageAsync(request);
                                 if (result.Value == -1)
                                 {
                                     // TODO: 要避免错误日志太多把错误日志文件塞满
                                     WpfClientInfo.WriteErrorLog($"SetMessageAsync() 出错: {result.ErrorInfo}");
                                 }
                                 else
-                                    _queue.PullAsync(token).Wait();
+                                    await _queue.PullAsync(token);
                             }
                             catch (Exception ex)
                             {
@@ -112,7 +112,7 @@ TaskCreationOptions.LongRunning,
 TaskScheduler.Default);
         }
 
-        public static async Task SafeSetMessageAsync(string content)
+        public static async Task SendMessageAsync(string content)
         {
             SetMessageRequest request = new SetMessageRequest("create", "",
                 new List<MessageRecord> {
@@ -308,18 +308,21 @@ TaskScheduler.Default);
         }
 
         // 收到消息。被当作命令解释。执行后发回命令执行结果
-        static async void OnAddMessageRecieved(string action,
+        static void OnAddMessageRecieved(string action,
 IList<MessageRecord> messages)
         {
-            foreach (var message in messages)
+            _ = Task.Run(async () =>
             {
-                // TODO: 忽略自己发出的消息?
-                if (message.data.StartsWith($"@{_userName}"))
+                foreach (var message in messages)
                 {
-                    string command = message.data.Substring($"@{_userName}".Length).Trim();
-                    await ProcessCommand(command);
+                    // TODO: 忽略自己发出的消息?
+                    if (message.data.StartsWith($"@{_userName}"))
+                    {
+                        string command = message.data.Substring($"@{_userName}".Length).Trim();
+                        await ProcessCommandAsync(command);
+                    }
                 }
-            }
+            });
         }
 
         // 当 server 发来检索请求的时候被调用。重载的时候要进行检索，并调用 Response 把检索结果发送给 server
@@ -335,41 +338,41 @@ IList<MessageRecord> messages)
             }
         }
 
-        static async Task ProcessCommand(string command)
+        static async Task ProcessCommandAsync(string command)
         {
             if (command.StartsWith("hello"))
             {
-                await SafeSetMessageAsync("hello!");
+                await SendMessageAsync("hello!");
                 return;
             }
 
             if (command.StartsWith("version"))
             {
-                await SafeSetMessageAsync($"dp2SSL 前端版本: {WpfClientInfo.ClientVersion}");
+                await SendMessageAsync($"dp2SSL 前端版本: {WpfClientInfo.ClientVersion}");
                 return;
             }
 
             if (command.StartsWith("error"))
             {
-                await SafeSetMessageAsync($"dp2SSL 当前界面报错: [{App.CurrentApp.Error}]; 书柜初始化是否完成: {ShelfData.FirstInitialized}");
+                await SendMessageAsync($"dp2SSL 当前界面报错: [{App.CurrentApp.Error}]; 书柜初始化是否完成: {ShelfData.FirstInitialized}");
                 return;
             }
 
             // 列出操作历史
             if (command.StartsWith("list history"))
             {
-                await ListHistory(command);
+                await ListHistoryAsync(command);
                 return;
             }
 
             // 检查册状态
             if (command.StartsWith("check"))
             {
-                await CheckBook(command);
+                await CheckBookAsync(command);
                 return;
             }
 
-            await SafeSetMessageAsync($"我无法理解这个命令 '{command}'");
+            await SendMessageAsync($"我无法理解这个命令 '{command}'");
         }
 
         // 列出操作历史
@@ -378,7 +381,7 @@ IList<MessageRecord> messages)
         //      sync 已经同步的那些shixiang
         //      error 同步出错的事项
         //      空 所有事项
-        static async Task ListHistory(string command)
+        static async Task ListHistoryAsync(string command)
         {
             try
             {
@@ -404,22 +407,22 @@ IList<MessageRecord> messages)
                         items = context.Requests.Where(o => true)
                             .OrderBy(o => o.ID).ToList();
 
-                    await SafeSetMessageAsync($"> {command}\r\n当前共有 {items.Count} 个历史事项");
+                    await SendMessageAsync($"> {command}\r\n当前共有 {items.Count} 个历史事项");
                     int i = 1;
                     foreach (var item in items)
                     {
-                        await SafeSetMessageAsync($"{i++}\r\n{DisplayRequestItem.GetDisplayString(item)}");
+                        await SendMessageAsync($"{i++}\r\n{DisplayRequestItem.GetDisplayString(item)}");
                     }
                 }
             }
             catch (Exception ex)
             {
-                await SafeSetMessageAsync($"命令 {command} 执行过程出现异常:\r\n{ExceptionUtil.GetDebugText(ex)}");
+                await SendMessageAsync($"命令 {command} 执行过程出现异常:\r\n{ExceptionUtil.GetDebugText(ex)}");
             }
         }
 
         // 检查册状态
-        static async Task CheckBook(string command)
+        static async Task CheckBookAsync(string command)
         {
             // 子参数
             string param = command.Substring("check".Length).Trim();
@@ -443,13 +446,13 @@ IList<MessageRecord> messages)
                     text.AppendLine($"{i++}\r\n{SimpleRequestItem.GetDisplayString(item)}");
                 }
                 // 获得 dp2library 中的册记录
-                var result = LibraryChannelUtil.GetEntityData(param).Result;
+                var result = await LibraryChannelUtil.GetEntityDataAsync(param);
                 if (result.Value == -1 || result.Value == 0)
                     text.AppendLine($"尝试获得册记录时出错: {result.ErrorInfo}");
                 else
                     text.AppendLine($"册记录:\r\n{DomUtil.GetIndentXml(result.ItemXml)}");
 
-                await SafeSetMessageAsync(text.ToString());
+                await SendMessageAsync(text.ToString());
             }
         }
 
@@ -585,7 +588,7 @@ IList<MessageRecord> messages)
         {
             // 单独给一个线程来执行
             // Task.Factory.StartNew(() => SearchAndResponse(param));
-            Task.Run(() => SearchAndResponse(param));
+            _ = Task.Run(() => SearchAndResponse(param));
         }
 
         static void SearchAndResponse(SearchRequest searchParam)
@@ -634,7 +637,7 @@ IList<MessageRecord> messages)
             }
             */
 
-            SearchHistory(searchParam);
+            _ = SearchHistoryAsync(searchParam);
             return;
         }
 
@@ -666,7 +669,7 @@ IList<MessageRecord> messages)
         }
 
         // TODO: 结果集用 ID 数组表示? 早期可只支持 default 这一个结果集
-        static async Task SearchHistory(SearchRequest searchParam)
+        static async Task SearchHistoryAsync(SearchRequest searchParam)
         {
             string strError = "";
             string strErrorCode = "";
@@ -703,7 +706,7 @@ IList<MessageRecord> messages)
                         if (result_count == 0)
                         {
                             // 没有命中
-                            TryResponseSearch(
+                            await TryResponseSearchAsync(
                                 new SearchResponse(
     searchParam.TaskID,
     0,
@@ -718,7 +721,7 @@ IList<MessageRecord> messages)
                         if (searchParam.Count == 0)
                         {
                             // 返回命中数
-                            TryResponseSearch(
+                            await TryResponseSearchAsync(
                                 new SearchResponse(
                                 searchParam.TaskID,
                                 result_count,
@@ -751,7 +754,7 @@ IList<MessageRecord> messages)
                                 Timestamp = null
                             });
                         }
-                        var result = await TryResponseSearch(
+                        var result = await TryResponseSearchAsync(
     searchParam.TaskID,
     result_count,
     searchParam.Start,
@@ -772,7 +775,7 @@ IList<MessageRecord> messages)
 
         ERROR1:
             // 报错
-            TryResponseSearch(
+            await TryResponseSearchAsync(
                 new SearchResponse(
 searchParam.TaskID,
 -1,
@@ -784,7 +787,7 @@ strErrorCode));
         }
 
         // 调用 server 端 ResponseSearchBiblio
-        static async void TryResponseSearch(
+        static async Task TryResponseSearchAsync(
 SearchResponse responseParam)
         {
             // TODO: 等待执行完成。如果有异常要当时处理。比如减小尺寸重发。
@@ -828,7 +831,7 @@ SearchResponse responseParam)
         // return Value:
         //      1    成功
         //      0   失败
-        static async Task<ResponseSearchResult> TryResponseSearch(
+        static async Task<ResponseSearchResult> TryResponseSearchAsync(
             string taskID,
             long resultCount,
             long start,
@@ -933,7 +936,7 @@ new SearchResponse(
             };
         ERROR1:
             // 报错
-            TryResponseSearch(
+            await TryResponseSearchAsync(
                 new SearchResponse(
 taskID,
 -1,

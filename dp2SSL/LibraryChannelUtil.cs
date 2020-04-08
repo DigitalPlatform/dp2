@@ -30,7 +30,7 @@ namespace dp2SSL
         // .Value
         //      0   没有找到
         //      1   找到
-        public static async Task<GetEntityDataResult> GetEntityData(string pii)
+        public static async Task<GetEntityDataResult> GetEntityDataAsync(string pii)
         {
             using (var releaser = await _channelLimit.EnterAsync())
             {
@@ -66,7 +66,8 @@ namespace dp2SSL
                         return new GetEntityDataResult
                         {
                             Value = -1,
-                            ErrorInfo = strError
+                            ErrorInfo = strError,
+                            ErrorCode = channel.ErrorCode.ToString()
                         };
                     }
 
@@ -111,7 +112,8 @@ namespace dp2SSL
                         return new GetEntityDataResult
                         {
                             Value = -1,
-                            ErrorInfo = strError
+                            ErrorInfo = strError,
+                            ErrorCode = channel.ErrorCode.ToString(),
                         };
                     }
 
@@ -161,7 +163,7 @@ namespace dp2SSL
             public byte[] NewTimestamp { get; set; }
         }
 
-        public static Task<SetReaderInfoResult> SetReaderInfo(string recpath,
+        public static Task<SetReaderInfoResult> SetReaderInfoAsync(string recpath,
             string xml,
             string old_xml,
             byte[] timestamp)

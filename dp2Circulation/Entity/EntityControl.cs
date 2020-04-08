@@ -1326,7 +1326,6 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
 
             using (EntityEditForm edit = new EntityEditForm())
             {
-
                 this.ParentShowMessage("正在准备数据 ...", "green", false);
                 try
                 {
@@ -1363,7 +1362,10 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
                 Program.MainForm.AppInfo.UnlinkFormState(edit);
 
                 if (edit.DialogResult != DialogResult.OK)
+                {
+                    // TODO: 取消中途记忆的所有种次号
                     return;
+                }
 
                 LibraryChannel channel = Program.MainForm.GetChannel();
 
@@ -1907,6 +1909,11 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
                 Program.MainForm.AppInfo.LinkFormState(edit, "EntityEditForm_state");
                 edit.ShowDialog(this);
                 Program.MainForm.AppInfo.UnlinkFormState(edit);
+
+                if (edit.DialogResult != DialogResult.OK)
+                {
+                    // TODO: 取消中途记忆的所有种次号
+                }
 
                 if (edit.DialogResult != DialogResult.OK
                     && edit.Item == bookitem    // 表明尚未前后移动，或者移动回到起点，然后Cancel

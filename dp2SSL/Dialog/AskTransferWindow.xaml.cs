@@ -49,7 +49,7 @@ namespace dp2SSL
             books.SetSource(collection);
 
             // 后台处理刷新
-            var task = ShelfData.FillBookFields(collection, _cancel.Token, false);
+            var task = ShelfData.FillBookFieldsAsync(collection, _cancel.Token, false);
         }
 
         public string TitleText

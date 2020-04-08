@@ -109,7 +109,7 @@ namespace dp2SSL
         public void AnimateDoors()
         {
             double start = 0;
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            App.Invoke(new Action(() =>
             {
                 // 遍历 Grid 对象
                 foreach (Grid grid in this.canvas.Children)

@@ -513,7 +513,7 @@ namespace dp2SSL
         public static void RefreshEntity(List<Entity> entities,
             List<DoorItem> _doors)
         {
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            App.Invoke(new Action(() =>
             {
                 foreach (var door in _doors)
                 {
@@ -568,7 +568,7 @@ namespace dp2SSL
                 */
 
 
-                Application.Current.Dispatcher.Invoke(new Action(() =>
+                App.Invoke(new Action(() =>
                 {
                     // 更新 entities
                     // TODO: 异步填充
@@ -580,10 +580,10 @@ namespace dp2SSL
                         var task = Task.Run(async () =>
                         {
                             CancellationToken token = ShelfData.CancelToken;
-                            await ShelfData.FillBookFields(door._allEntities, token);
-                            await ShelfData.FillBookFields(door._removeEntities, token);
-                            await ShelfData.FillBookFields(door._addEntities, token);
-                            await ShelfData.FillBookFields(door._errorEntities, token);
+                            await ShelfData.FillBookFieldsAsync(door._allEntities, token);
+                            await ShelfData.FillBookFieldsAsync(door._removeEntities, token);
+                            await ShelfData.FillBookFieldsAsync(door._addEntities, token);
+                            await ShelfData.FillBookFieldsAsync(door._errorEntities, token);
                         });
                     }
 

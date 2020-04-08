@@ -27,9 +27,9 @@ namespace dp2SSL
                 this.Add(item);
             }
 
-            Task.Run(() =>
+            _ = Task.Run(async () =>
             {
-                Task.Delay(TimeSpan.FromSeconds(1)).Wait();
+                await Task.Delay(TimeSpan.FromSeconds(1));
                 var results = Merge();
                 foreach (var result in results)
                 {

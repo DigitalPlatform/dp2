@@ -94,6 +94,12 @@ namespace RfidCenter
             //                      如果缺乏卡编号和锁编号部分，缺乏的部分默认为 "1"
         }
 
+        // 开关紫外灯
+        public NormalResult TurnSterilamp(string lampName, string action)
+        {
+            return Program.Rfid.TurnSterilamp(lampName, action);
+        }
+
         // 开关灯
         public NormalResult TurnShelfLamp(string lampName, string action)
         {

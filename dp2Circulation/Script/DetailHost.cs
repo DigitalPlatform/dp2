@@ -20,6 +20,7 @@ using DigitalPlatform.IO;
 
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
+using static dp2Circulation.CallNumberForm;
 
 namespace dp2Circulation
 {
@@ -4228,10 +4229,19 @@ chi	中文	如果是中文，则为空。
                             style,
                             strClass,
                             strLocation,
+                            out List<MemoTailNumber> protectedNumbers,
                             out strQufenhao,
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
+
+                        // 2020/4/8
+                        GetCallNumberParameter parameter = new GetCallNumberParameter();
+                        if (e.Parameter == null)
+                            e.Parameter = parameter;
+                        if (parameter.ProtectedNumbers == null)
+                            parameter.ProtectedNumbers = new List<MemoTailNumber>();
+                        parameter.ProtectedNumbers.AddRange(protectedNumbers);
                         if (nRet == 0)
                             return 0;
                     }

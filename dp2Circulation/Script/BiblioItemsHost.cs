@@ -19,6 +19,7 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.CommonDialog;
 using DigitalPlatform.CommonControl;
+using static dp2Circulation.CallNumberForm;
 
 namespace dp2Circulation
 {
@@ -260,12 +261,16 @@ namespace dp2Circulation
                     parameter.ExistingAccessNo,
                     parameter.Location,
                     parameter.RecPath,
+                    out List<MemoTailNumber> protectedNumbers,
                     out strResult,
                     out strError);
                 if (nRet == -1)
                     e.ErrorInfo = strError;
                 else
+                {
                     parameter.ResultAccessNo = strResult;
+                    parameter.ProtectedNumbers = protectedNumbers;
+                }
                 return;
             }
 
@@ -282,11 +287,13 @@ namespace dp2Circulation
                     edit.AccessNo,
                     edit.LocationString,
                     edit.RecPath,
+                    out List<MemoTailNumber> protectedNumbers,
                     out strResult,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
                 edit.AccessNo = strResult;
+                // edit.ProtectedNumbers = protectedNumbers;
 #if NO
                 nRet = CreateOneCallNumber(sender,
                     e,
@@ -332,12 +339,14 @@ namespace dp2Circulation
             string strLocation,
             string strItemRecPath,
             //int index,
+            out List<MemoTailNumber> protectedNumbers,
             out string strAccessNo,
-    out string strError)
+            out string strError)
         {
             strError = "";
             strAccessNo = "";
             int nRet = 0;
+            protectedNumbers = new List<MemoTailNumber>();
 
             string strClass = "";
 
@@ -459,6 +468,7 @@ namespace dp2Circulation
                         style,
                         strClass,
                         strLocation,
+                        out protectedNumbers,
                         out strQufenhao,
                         out strError);
                     if (nRet == -1)
@@ -2484,5 +2494,10 @@ namespace dp2Circulation
         public string RecPath = "";
 
         public string ResultAccessNo = "";  // [out]
+
+        // 2020/4/8
+        // 返回保护过的索取号
+        // [out]
+        public List<MemoTailNumber> ProtectedNumbers { get; set; }
     }
 }

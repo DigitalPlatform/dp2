@@ -27,6 +27,10 @@ using static DigitalPlatform.IO.BarcodeCapture;
 using DigitalPlatform.Face;
 using DigitalPlatform.WPF;
 using DigitalPlatform.MessageClient;
+using System.Windows.Media;
+
+//using Microsoft.VisualStudio.Shell;
+//using Task = System.Threading.Tasks.Task;
 
 namespace dp2SSL
 {
@@ -94,7 +98,9 @@ namespace dp2SSL
 
         #endregion
 
+#pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
         protected async override void OnStartup(StartupEventArgs e)
+#pragma warning restore VSTHRD100 // 避免使用 Async Void 方法
         {
             bool aIsNewInstance = false;
             myMutex = new Mutex(true, "{75BAF3F0-FF7F-46BB-9ACD-8FE7429BF291}", out aIsNewInstance);
@@ -213,7 +219,7 @@ namespace dp2SSL
     _cancelRefresh.Token);
 
             // 这里要等待连接完成，因为后面初始化时候需要发出点对点消息。TODO: 是否要显示一个对话框请用户等待？
-            await ConnectMessageServer();
+            await ConnectMessageServerAsync();
 
             TinyServer.StartSendTask(_cancelRefresh.Token);
         }
@@ -222,7 +228,7 @@ namespace dp2SSL
         static ManualResetEvent _messageServerConnected = new ManualResetEvent(false);
         */
 
-        public async Task ConnectMessageServer()
+        public async Task ConnectMessageServerAsync()
         {
             try
             {
@@ -266,7 +272,7 @@ namespace dp2SSL
         */
 
         // 确保连接到消息服务器
-        public async Task EnsureConnectMessageServer()
+        public async Task EnsureConnectMessageServerAsync()
         {
             if (string.IsNullOrEmpty(messageServerUrl) == false
                 && TinyServer.IsDisconnected)
@@ -372,7 +378,7 @@ namespace dp2SSL
             // 刚开始 5 分钟内频繁检查
             DateTime start = DateTime.Now;
 
-            var task1 = Task.Run(() =>
+            var task1 = Task.Run(async () =>
             {
                 try
                 {
@@ -385,9 +391,9 @@ namespace dp2SSL
                             SetError("uid", null);
 
                         if (DateTime.Now - start < TimeSpan.FromMinutes(5))
-                            Task.Delay(TimeSpan.FromSeconds(5)).Wait(token);
+                            await Task.Delay(TimeSpan.FromSeconds(5));
                         else
-                            Task.Delay(TimeSpan.FromMinutes(5)).Wait(token);
+                            await Task.Delay(TimeSpan.FromMinutes(5));
                     }
                 }
                 catch (OperationCanceledException)
@@ -496,14 +502,16 @@ namespace dp2SSL
 
             // 最后关灯
             RfidManager.TurnShelfLamp("*", "turnOff");
-            
+
             PageShelf.TrySetMessage($"我这台智能书柜停止了哟！({e.ReasonSessionEnding})");
 
             base.OnSessionEnding(e);
         }
 
         // 注：Windows 关机或者重启的时候，会触发 OnSessionEnding 事件，但不会触发 OnExit 事件
+#pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
         protected async override void OnExit(ExitEventArgs e)
+#pragma warning restore VSTHRD100 // 避免使用 Async Void 方法
         {
             _barcodeCapture.Stop();
             _barcodeCapture.InputLine -= _barcodeCapture_inputLine;
@@ -511,7 +519,7 @@ namespace dp2SSL
 
             try
             {
-                await PageMenu.PageShelf?.Submit(true);
+                await PageMenu.PageShelf?.SubmitAsync(true);
             }
             catch (NullReferenceException)
             {
@@ -1009,7 +1017,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             ContinueBarcodeScan();
 
             // 单独线程执行，避免阻塞 OnActivated() 返回
-            Task.Run(() =>
+            _ = Task.Run(() =>
             {
                 FingerprintManager.EnableSendkey(false);
                 RfidManager.EnableSendkey(false);
@@ -1115,6 +1123,77 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                 window.Width = Math.Min(700, mainWindows.ActualWidth * 0.95);
                 window.Height = Math.Min(500, mainWindows.ActualHeight * .95);
             }
+        }
+
+        // 紫外杀菌
+        public async Task SterilampAsync()
+        {
+            ProgressWindow progress = null;
+
+            using (var cancel = CancellationTokenSource.CreateLinkedTokenSource(_cancelRefresh.Token))
+            {
+                App.Invoke(new Action(() =>
+                {
+                    progress = new ProgressWindow();
+                    progress.TitleText = "紫外线消毒";
+                    progress.MessageText = "即将进行紫外线消毒\r\n警告：紫外线对眼睛和皮肤有害，请迅速远离书柜";
+                    progress.Owner = Application.Current.MainWindow;
+                    progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                    progress.Closed += (s, e) =>
+                    {
+                        cancel.Cancel();
+                    };
+                    progress.okButton.Content = "停止";
+                    progress.Background = new SolidColorBrush(Colors.DarkRed);
+                    App.SetSize(progress, "wide");
+                    progress.Show();
+                }));
+
+                try
+                {
+                    // 首先警告远离
+                    App.CurrentApp.Speak("即将开始紫外线消毒，紫外灯对眼睛和皮肤有害，请马上远离书柜");
+                    await Task.Delay(TimeSpan.FromSeconds(20), cancel.Token);
+
+                    App.Invoke(new Action(() =>
+                    {
+                        progress.MessageText = "正在进行紫外线消毒\r\n警告：紫外线对眼睛和皮肤有害，请不要靠近书柜";
+                    }));
+
+                    // TODO: 屏幕上可以显示剩余时间
+                    // TODO: 背景色动画，闪动
+                    RfidManager.TurnSterilamp("*", "turnOn");
+                    for (int i = 0; i < 3 * 10; i++)    // 10 分钟
+                    {
+                        App.CurrentApp.Speak("正在进行紫外线消毒，紫外灯对眼睛和皮肤有害，请不要靠近书柜");
+                        if (cancel.Token.IsCancellationRequested)
+                            break;
+                        await Task.Delay(TimeSpan.FromSeconds(20), cancel.Token);
+                    }
+                }
+                finally
+                {
+                    RfidManager.TurnSterilamp("*", "turnOff");
+                    App.CurrentApp.Speak("紫外灯已关闭");
+                    App.Invoke(new Action(() =>
+                    {
+                        progress.Close();
+                    }));
+                }
+            }
+        }
+
+        public static void Invoke(Action action)
+        {
+            /*
+            ThreadHelper.JoinableTaskFactory.Run(async delegate
+            {
+                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+                action.Invoke();
+            });
+            */
+
+            Current.Dispatcher.Invoke(action);
         }
     }
 

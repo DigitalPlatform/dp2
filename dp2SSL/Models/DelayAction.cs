@@ -22,7 +22,7 @@ namespace dp2SSL
         {
             DelayAction result = new DelayAction();
             result.Cancel = new CancellationTokenSource();
-            result.Task = Task.Run(() =>
+            result.Task = Task.Run(async () =>
             {
                 try
                 {
@@ -30,7 +30,7 @@ namespace dp2SSL
                     while (token.IsCancellationRequested == false
                     && leftSeconds > 0)
                     {
-                        Task.Delay(TimeSpan.FromSeconds(1), token).Wait();
+                        await Task.Delay(TimeSpan.FromSeconds(1), token);
                         func_heartBeat?.Invoke(leftSeconds--);
                     }
                     token.ThrowIfCancellationRequested();

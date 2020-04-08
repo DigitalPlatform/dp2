@@ -4378,6 +4378,57 @@ out string number);
         }
         */
 
+        // 开/关紫外灯
+        // parameters:
+        //      lampName    暂未使用
+        //      action      turnOn/turnOff
+        public NormalResult TurnSterilamp(string lampName, string action)
+        {
+            if (this._shelfLamp == null)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = "当前没有紫外灯",
+                    ErrorCode = "notFound"
+                };
+
+            if (action == "turnOn")
+            {
+                // 注意：SDK 函数本身就写反了
+                int iret = RFIDLIB.miniLib_Lock.Mini_CloseSterilamp(this._shelfLamp.LampHandle);
+                if (iret == 0)
+                    return new NormalResult();
+                else
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"开灯失败 iret={iret}",
+                        ErrorCode = iret.ToString()
+                    };
+            }
+            else if (action == "turnOff")
+            {
+                // 注意：SDK 函数本身就写反了
+                int iret = RFIDLIB.miniLib_Lock.Mini_OpenSterilamp(this._shelfLamp.LampHandle);
+                if (iret == 0)
+                    return new NormalResult();
+                else
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"关灯失败 iret={iret}",
+                        ErrorCode = iret.ToString()
+                    };
+            }
+            else
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"未知的 action={action}",
+                    ErrorCode = "unknownAction"
+                };
+        }
+
         // 开/关书柜灯
         // parameters:
         //      lampName    暂未使用

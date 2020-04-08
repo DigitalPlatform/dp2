@@ -64,7 +64,7 @@ namespace UnitTestSimpleMessageQueue
             File.Delete(fileName);
 
             MessageQueue queue = new MessageQueue(fileName);
-            queue.ChunkSize = 10;
+            queue.ChunkSize = 4096;
 
             List<byte> bytes = new List<byte>();
             for (int i = 0; i < queue.ChunkSize * 20; i++)

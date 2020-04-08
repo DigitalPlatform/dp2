@@ -46,6 +46,9 @@ uint new_password);
         NormalResult OpenShelfLock(string lockName);
 
         NormalResult TurnShelfLamp(string lampName, string action);
+
+        // 2020/4/8
+        NormalResult TurnSterilamp(string lampName, string action);
     }
 
     // 一段连续的 block

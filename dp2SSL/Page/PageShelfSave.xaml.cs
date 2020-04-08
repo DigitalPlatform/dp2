@@ -103,7 +103,9 @@ namespace dp2SSL
             }
         }
 
+#pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
         private async void PageShelf_Loaded(object sender, RoutedEventArgs e)
+#pragma warning restore VSTHRD100 // 避免使用 Async Void 方法
         {
             FingerprintManager.SetError += FingerprintManager_SetError;
             FingerprintManager.Touched += FingerprintManager_Touched;
@@ -133,7 +135,7 @@ namespace dp2SSL
 
             // RfidManager.LockCommands = DoorControl.GetLockCommands();
 
-            await Fill(new CancellationToken());
+            await FillAsync(new CancellationToken());
         }
 
         private void RfidManager_ListLocks(object sender, ListLocksEventArgs e)
@@ -167,11 +169,13 @@ namespace dp2SSL
         }
 
         // 从指纹阅读器获取消息(第一阶段)
+#pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
         private async void FingerprintManager_Touched(object sender, TouchedEventArgs e)
+#pragma warning restore VSTHRD100 // 避免使用 Async Void 方法
         {
             SetPatronInfo(e.Result);
 
-            await FillPatronDetail();
+            await FillPatronDetailAsync();
 
 #if NO
             Application.Current.Dispatcher.Invoke(new Action(() =>
@@ -236,7 +240,7 @@ namespace dp2SSL
 
 
         // 首次填充图书列表
-        async Task<NormalResult> Fill(CancellationToken token)
+        async Task<NormalResult> FillAsync(CancellationToken token)
         {
             await Task.Run(() =>
             {
@@ -251,12 +255,12 @@ namespace dp2SSL
             // TODO: 首次从累积的列表里面初始化
             update_entities.AddRange(InitialEntities());
 
-            var task = RefreshPatrons();
+            var task = RefreshPatronsAsync();
 
-            return await Update(null, update_entities, token);
+            return await UpdateAsync(null, update_entities, token);
         }
 
-        async Task<NormalResult> Update(
+        async Task<NormalResult> UpdateAsync(
             BaseChannel<IRfid> channel_param,
             List<Entity> update_entities,
             CancellationToken token)
@@ -270,7 +274,7 @@ namespace dp2SSL
                         channel = RfidManager.GetChannel();
                     try
                     {
-                        await FillBookFields(channel, update_entities, token);
+                        await FillBookFieldsAsync(channel, update_entities, token);
                     }
                     finally
                     {
@@ -298,7 +302,7 @@ namespace dp2SSL
         }
 
         // 第二阶段：填充图书信息的 PII 和 Title 字段
-        async Task FillBookFields(BaseChannel<IRfid> channel,
+        async Task FillBookFieldsAsync(BaseChannel<IRfid> channel,
             List<Entity> entities,
             CancellationToken token)
         {
@@ -334,7 +338,7 @@ namespace dp2SSL
                     if (string.IsNullOrEmpty(entity.Title)
                         && string.IsNullOrEmpty(entity.PII) == false && entity.PII != "(空)")
                     {
-                        GetEntityDataResult result = await GetEntityData(entity.PII);
+                        GetEntityDataResult result = await GetEntityDataAsync(entity.PII);
                         if (result.Value == -1)
                         {
                             entity.SetError(result.ErrorInfo);
@@ -390,7 +394,7 @@ namespace dp2SSL
                 {
                     token.ThrowIfCancellationRequested();
                     string pii = record.Cols[0];
-                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    App.Invoke(new Action(() =>
                     {
                         entities.Add(pii);
                     }));
@@ -402,9 +406,11 @@ namespace dp2SSL
             }
         }
 
+#pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
         private async void CurrentApp_TagChanged(object sender, TagChangedEventArgs e)
+#pragma warning restore VSTHRD100 // 避免使用 Async Void 方法
         {
-            await ChangeEntities((BaseChannel<IRfid>)sender, e);
+            await ChangeEntitiesAsync((BaseChannel<IRfid>)sender, e);
         }
 
         // 跟随事件动态更新列表
@@ -414,15 +420,15 @@ namespace dp2SSL
         //      如果不存在这个 PII，则不做任何动作
         // Update: 检查列表中是否存在这个 PII，如果存在，则修改状态为 在架，并设置 UID 成员
         //      如果不存在，则为列表添加一个新元素，修改状态为在架，并设置 UID 和 PII 成员
-        async Task ChangeEntities(BaseChannel<IRfid> channel,
+        async Task ChangeEntitiesAsync(BaseChannel<IRfid> channel,
             TagChangedEventArgs e)
         {
             // 读者。不再精细的进行增删改跟踪操作，而是笼统地看 TagList.Patrons 集合即可
-            var task = RefreshPatrons();
+            var task = RefreshPatronsAsync();
 
-            bool changed = false;
+            // bool changed = false;
             List<Entity> update_entities = new List<Entity>();
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            App.Invoke(new Action(() =>
             {
                 if (e.AddBooks != null)
                     foreach (var tag in e.AddBooks)
@@ -452,7 +458,7 @@ namespace dp2SSL
             {
                 // await FillBookFields(channel, update_entities);
 
-                await Update(channel, update_entities, new CancellationToken());
+                await UpdateAsync(channel, update_entities, new CancellationToken());
 
                 // Trigger(update_entities);
 
@@ -464,8 +470,10 @@ namespace dp2SSL
                 booksControl.SetBorrowable();
             }*/
 
+            /*
             if (update_entities.Count > 0)
                 changed = true;
+                */
 
             /*
             {
@@ -496,7 +504,7 @@ namespace dp2SSL
                 return new List<Entity>();
 
             List<Entity> update_entities = new List<Entity>();
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            App.Invoke(new Action(() =>
             {
                 foreach (var tag in books)
                 {
@@ -509,7 +517,7 @@ namespace dp2SSL
             return update_entities;
         }
 
-        async Task RefreshPatrons()
+        async Task RefreshPatronsAsync()
         {
             //_lock_refreshPatrons.EnterWriteLock();
             try
@@ -533,7 +541,7 @@ namespace dp2SSL
                         SetPatronError("rfid_multi", "");   // 2019/5/22
 
                         // 2019/5/29
-                        await FillPatronDetail();
+                        await FillPatronDetailAsync();
                     }
                     else
                     {
@@ -556,7 +564,7 @@ namespace dp2SSL
         }
 
         // 填充读者信息的其他字段(第二阶段)
-        async Task<NormalResult> FillPatronDetail(bool force = false)
+        async Task<NormalResult> FillPatronDetailAsync(bool force = false)
         {
             // 已经填充过了
             if (_patron.PatronName != null
@@ -595,7 +603,7 @@ namespace dp2SSL
             if (force)
                 _patron.PhotoPath = "";
             // string old_photopath = _patron.PhotoPath;
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            App.Invoke(new Action(() =>
             {
                 _patron.SetPatronXml(result.RecPath, result.ReaderXml, result.Timestamp);
                 this.patronControl.SetBorrowed(result.ReaderXml);
@@ -614,7 +622,7 @@ namespace dp2SSL
                     BaseChannel<IRfid> channel = RfidManager.GetChannel();
                     try
                     {
-                        await FillBookFields(channel, entities, new CancellationToken());
+                        await FillBookFieldsAsync(channel, entities, new CancellationToken());
                     }
                     finally
                     {
@@ -647,7 +655,7 @@ namespace dp2SSL
             if (this.patronControl.BorrowedEntities.Count > 0)
             {
                 if (!Application.Current.Dispatcher.CheckAccess())
-                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    App.Invoke(new Action(() =>
                     {
                         this.patronControl.BorrowedEntities.Clear();
                     }));
@@ -676,7 +684,7 @@ namespace dp2SSL
         {
             if (e.PropertyName == "PhotoPath")
             {
-                Task.Run(() =>
+                _ = Task.Run(() =>
                 {
                     try
                     {
@@ -695,7 +703,7 @@ namespace dp2SSL
                 // 如果 patronControl 本来是隐藏状态，但读卡器上放上了读者卡，这时候要把 patronControl 恢复显示
                 if ((string.IsNullOrEmpty(_patron.UID) == false || string.IsNullOrEmpty(_patron.Barcode) == false)
                     && this.patronControl.Visibility != Visibility.Visible)
-                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    App.Invoke(new Action(() =>
                     {
                         patronControl.Visibility = Visibility.Visible;
                         _visiblityChanged = true;
@@ -704,7 +712,7 @@ namespace dp2SSL
                 else if (string.IsNullOrEmpty(_patron.UID) == true && string.IsNullOrEmpty(_patron.Barcode) == true
     && this.patronControl.Visibility == Visibility.Visible
     && _visiblityChanged)
-                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    App.Invoke(new Action(() =>
                     {
                         patronControl.Visibility = Visibility.Collapsed;
                     }));
@@ -717,7 +725,7 @@ namespace dp2SSL
             // 打开对话框，询问门号
             OpenDoorWindow progress = null;
 
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            App.Invoke(new Action(() =>
             {
                 progress = new OpenDoorWindow();
                 // progress.MessageText = "正在处理，请稍候 ...";
@@ -736,7 +744,7 @@ namespace dp2SSL
             }
             finally
             {
-                Application.Current.Dispatcher.Invoke(new Action(() =>
+                App.Invoke(new Action(() =>
                 {
                     if (progress != null)
                         progress.Close();

@@ -86,9 +86,10 @@
             // 
             this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_OK.Enabled = false;
-            this.button_OK.Location = new System.Drawing.Point(683, 1);
+            this.button_OK.Location = new System.Drawing.Point(835, 1);
+            this.button_OK.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.button_OK.Name = "button_OK";
-            this.button_OK.Size = new System.Drawing.Size(84, 33);
+            this.button_OK.Size = new System.Drawing.Size(103, 38);
             this.button_OK.TabIndex = 2;
             this.button_OK.Text = "确定";
             this.button_OK.UseVisualStyleBackColor = true;
@@ -98,9 +99,10 @@
             // 
             this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.button_Cancel.Location = new System.Drawing.Point(773, 1);
+            this.button_Cancel.Location = new System.Drawing.Point(945, 1);
+            this.button_Cancel.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.button_Cancel.Name = "button_Cancel";
-            this.button_Cancel.Size = new System.Drawing.Size(84, 33);
+            this.button_Cancel.Size = new System.Drawing.Size(103, 38);
             this.button_Cancel.TabIndex = 3;
             this.button_Cancel.Text = "取消";
             this.button_Cancel.UseVisualStyleBackColor = true;
@@ -112,9 +114,10 @@
             this.checkBox_autoSearchDup.AutoSize = true;
             this.checkBox_autoSearchDup.Checked = true;
             this.checkBox_autoSearchDup.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBox_autoSearchDup.Location = new System.Drawing.Point(0, 7);
+            this.checkBox_autoSearchDup.Location = new System.Drawing.Point(0, 9);
+            this.checkBox_autoSearchDup.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.checkBox_autoSearchDup.Name = "checkBox_autoSearchDup";
-            this.checkBox_autoSearchDup.Size = new System.Drawing.Size(259, 22);
+            this.checkBox_autoSearchDup.Size = new System.Drawing.Size(300, 25);
             this.checkBox_autoSearchDup.TabIndex = 1;
             this.checkBox_autoSearchDup.Text = "实时对册条码号进行查重(&R)";
             this.checkBox_autoSearchDup.UseVisualStyleBackColor = true;
@@ -123,6 +126,7 @@
             // 
             this.splitContainer_itemArea.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer_itemArea.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer_itemArea.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.splitContainer_itemArea.Name = "splitContainer_itemArea";
             // 
             // splitContainer_itemArea.Panel1
@@ -132,8 +136,9 @@
             // splitContainer_itemArea.Panel2
             // 
             this.splitContainer_itemArea.Panel2.Controls.Add(this.tableLayoutPanel_editing);
-            this.splitContainer_itemArea.Size = new System.Drawing.Size(418, 407);
-            this.splitContainer_itemArea.SplitterDistance = 201;
+            this.splitContainer_itemArea.Size = new System.Drawing.Size(510, 477);
+            this.splitContainer_itemArea.SplitterDistance = 245;
+            this.splitContainer_itemArea.SplitterWidth = 5;
             this.splitContainer_itemArea.TabIndex = 5;
             // 
             // tableLayoutPanel_existing
@@ -145,20 +150,22 @@
             this.tableLayoutPanel_existing.Controls.Add(this.button_existing_undoMaskDelete, 0, 2);
             this.tableLayoutPanel_existing.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel_existing.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel_existing.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tableLayoutPanel_existing.Name = "tableLayoutPanel_existing";
             this.tableLayoutPanel_existing.RowCount = 3;
             this.tableLayoutPanel_existing.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_existing.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel_existing.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel_existing.Size = new System.Drawing.Size(201, 407);
+            this.tableLayoutPanel_existing.Size = new System.Drawing.Size(245, 477);
             this.tableLayoutPanel_existing.TabIndex = 0;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(3, 0);
+            this.label1.Location = new System.Drawing.Point(4, 0);
+            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(152, 18);
+            this.label1.Size = new System.Drawing.Size(178, 21);
             this.label1.TabIndex = 0;
             this.label1.Text = "当前数据库中记录";
             // 
@@ -184,12 +191,13 @@
             this.entityEditControl_existing.ForeColor = System.Drawing.SystemColors.ControlText;
             this.entityEditControl_existing.Initializing = true;
             this.entityEditControl_existing.Intact = "";
-            this.entityEditControl_existing.Location = new System.Drawing.Point(3, 21);
+            this.entityEditControl_existing.Location = new System.Drawing.Point(5, 24);
             this.entityEditControl_existing.LocationString = "";
+            this.entityEditControl_existing.Margin = new System.Windows.Forms.Padding(5, 3, 5, 3);
             this.entityEditControl_existing.MemberBackColor = System.Drawing.Color.WhiteSmoke;
             this.entityEditControl_existing.MemberForeColor = System.Drawing.SystemColors.ControlText;
             this.entityEditControl_existing.MergeComment = "";
-            this.entityEditControl_existing.MinimumSize = new System.Drawing.Size(84, 0);
+            this.entityEditControl_existing.MinimumSize = new System.Drawing.Size(103, 0);
             this.entityEditControl_existing.Name = "entityEditControl_existing";
             this.entityEditControl_existing.Operations = "";
             this.entityEditControl_existing.ParentId = "";
@@ -200,7 +208,7 @@
             this.entityEditControl_existing.RegisterNo = "";
             this.entityEditControl_existing.Seller = "";
             this.entityEditControl_existing.ShelfNo = "";
-            this.entityEditControl_existing.Size = new System.Drawing.Size(195, 344);
+            this.entityEditControl_existing.Size = new System.Drawing.Size(235, 406);
             this.entityEditControl_existing.Source = "";
             this.entityEditControl_existing.State = "";
             this.entityEditControl_existing.TabIndex = 1;
@@ -210,9 +218,10 @@
             // 
             // button_existing_undoMaskDelete
             // 
-            this.button_existing_undoMaskDelete.Location = new System.Drawing.Point(3, 371);
+            this.button_existing_undoMaskDelete.Location = new System.Drawing.Point(4, 436);
+            this.button_existing_undoMaskDelete.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.button_existing_undoMaskDelete.Name = "button_existing_undoMaskDelete";
-            this.button_existing_undoMaskDelete.Size = new System.Drawing.Size(183, 33);
+            this.button_existing_undoMaskDelete.Size = new System.Drawing.Size(224, 38);
             this.button_existing_undoMaskDelete.TabIndex = 2;
             this.button_existing_undoMaskDelete.Text = "撤销标记删除(&U)";
             this.button_existing_undoMaskDelete.UseVisualStyleBackColor = true;
@@ -227,19 +236,21 @@
             this.tableLayoutPanel_editing.Controls.Add(this.panel_editing, 0, 1);
             this.tableLayoutPanel_editing.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel_editing.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel_editing.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tableLayoutPanel_editing.Name = "tableLayoutPanel_editing";
             this.tableLayoutPanel_editing.RowCount = 3;
             this.tableLayoutPanel_editing.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_editing.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel_editing.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel_editing.Size = new System.Drawing.Size(213, 407);
+            this.tableLayoutPanel_editing.Size = new System.Drawing.Size(260, 477);
             this.tableLayoutPanel_editing.TabIndex = 0;
             // 
             // button_editing_undoMaskDelete
             // 
-            this.button_editing_undoMaskDelete.Location = new System.Drawing.Point(3, 371);
+            this.button_editing_undoMaskDelete.Location = new System.Drawing.Point(4, 436);
+            this.button_editing_undoMaskDelete.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.button_editing_undoMaskDelete.Name = "button_editing_undoMaskDelete";
-            this.button_editing_undoMaskDelete.Size = new System.Drawing.Size(183, 33);
+            this.button_editing_undoMaskDelete.Size = new System.Drawing.Size(224, 38);
             this.button_editing_undoMaskDelete.TabIndex = 1;
             this.button_editing_undoMaskDelete.Text = "撤销标记删除(&U)";
             this.button_editing_undoMaskDelete.UseVisualStyleBackColor = true;
@@ -248,9 +259,10 @@
             // label_editing
             // 
             this.label_editing.AutoSize = true;
-            this.label_editing.Location = new System.Drawing.Point(3, 0);
+            this.label_editing.Location = new System.Drawing.Point(4, 0);
+            this.label_editing.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label_editing.Name = "label_editing";
-            this.label_editing.Size = new System.Drawing.Size(134, 18);
+            this.label_editing.Size = new System.Drawing.Size(157, 21);
             this.label_editing.TabIndex = 0;
             this.label_editing.Text = "正在编辑的记录";
             // 
@@ -259,9 +271,10 @@
             this.panel_editing.Controls.Add(this.toolStrip_item);
             this.panel_editing.Controls.Add(this.entityEditControl_editing);
             this.panel_editing.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel_editing.Location = new System.Drawing.Point(3, 21);
+            this.panel_editing.Location = new System.Drawing.Point(4, 24);
+            this.panel_editing.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.panel_editing.Name = "panel_editing";
-            this.panel_editing.Size = new System.Drawing.Size(207, 344);
+            this.panel_editing.Size = new System.Drawing.Size(252, 406);
             this.panel_editing.TabIndex = 8;
             // 
             // toolStrip_item
@@ -274,11 +287,10 @@
             this.toolStripButton_prev,
             this.toolStripButton_new,
             this.toolStripButton_option});
-            this.toolStrip_item.Location = new System.Drawing.Point(177, 0);
+            this.toolStrip_item.Location = new System.Drawing.Point(210, 0);
             this.toolStrip_item.Name = "toolStrip_item";
-            this.toolStrip_item.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
             this.toolStrip_item.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
-            this.toolStrip_item.Size = new System.Drawing.Size(30, 344);
+            this.toolStrip_item.Size = new System.Drawing.Size(42, 406);
             this.toolStrip_item.TabIndex = 3;
             this.toolStrip_item.Text = "toolStrip1";
             // 
@@ -289,7 +301,7 @@
             this.toolStripButton_next.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_next.Image")));
             this.toolStripButton_next.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_next.Name = "toolStripButton_next";
-            this.toolStripButton_next.Size = new System.Drawing.Size(25, 28);
+            this.toolStripButton_next.Size = new System.Drawing.Size(37, 28);
             this.toolStripButton_next.Text = "下一记录";
             this.toolStripButton_next.Click += new System.EventHandler(this.toolStripButton_next_Click);
             // 
@@ -300,7 +312,7 @@
             this.toolStripButton_prev.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_prev.Image")));
             this.toolStripButton_prev.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_prev.Name = "toolStripButton_prev";
-            this.toolStripButton_prev.Size = new System.Drawing.Size(25, 28);
+            this.toolStripButton_prev.Size = new System.Drawing.Size(37, 28);
             this.toolStripButton_prev.Text = "上一记录";
             this.toolStripButton_prev.Click += new System.EventHandler(this.toolStripButton_prev_Click);
             // 
@@ -310,7 +322,7 @@
             this.toolStripButton_new.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_new.Image")));
             this.toolStripButton_new.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_new.Name = "toolStripButton_new";
-            this.toolStripButton_new.Size = new System.Drawing.Size(25, 28);
+            this.toolStripButton_new.Size = new System.Drawing.Size(37, 28);
             this.toolStripButton_new.Text = "新建册记录";
             this.toolStripButton_new.Click += new System.EventHandler(this.toolStripButton_new_Click);
             // 
@@ -320,7 +332,7 @@
             this.toolStripButton_option.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_option.Image")));
             this.toolStripButton_option.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_option.Name = "toolStripButton_option";
-            this.toolStripButton_option.Size = new System.Drawing.Size(25, 28);
+            this.toolStripButton_option.Size = new System.Drawing.Size(37, 28);
             this.toolStripButton_option.Text = "选项";
             this.toolStripButton_option.Click += new System.EventHandler(this.toolStripButton_option_Click);
             // 
@@ -350,10 +362,11 @@
             this.entityEditControl_editing.Intact = "";
             this.entityEditControl_editing.Location = new System.Drawing.Point(0, 0);
             this.entityEditControl_editing.LocationString = "";
+            this.entityEditControl_editing.Margin = new System.Windows.Forms.Padding(5, 3, 5, 3);
             this.entityEditControl_editing.MemberBackColor = System.Drawing.Color.WhiteSmoke;
             this.entityEditControl_editing.MemberForeColor = System.Drawing.SystemColors.ControlText;
             this.entityEditControl_editing.MergeComment = "";
-            this.entityEditControl_editing.MinimumSize = new System.Drawing.Size(84, 0);
+            this.entityEditControl_editing.MinimumSize = new System.Drawing.Size(103, 0);
             this.entityEditControl_editing.Name = "entityEditControl_editing";
             this.entityEditControl_editing.Operations = "";
             this.entityEditControl_editing.ParentId = "";
@@ -364,7 +377,7 @@
             this.entityEditControl_editing.RegisterNo = "";
             this.entityEditControl_editing.Seller = "";
             this.entityEditControl_editing.ShelfNo = "";
-            this.entityEditControl_editing.Size = new System.Drawing.Size(166, 344);
+            this.entityEditControl_editing.Size = new System.Drawing.Size(202, 406);
             this.entityEditControl_editing.Source = "";
             this.entityEditControl_editing.State = "";
             this.entityEditControl_editing.TabIndex = 0;
@@ -383,13 +396,14 @@
             this.tableLayoutPanel_main.Controls.Add(this.panel_back, 0, 1);
             this.tableLayoutPanel_main.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel_main.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel_main.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tableLayoutPanel_main.Name = "tableLayoutPanel_main";
             this.tableLayoutPanel_main.RowCount = 4;
             this.tableLayoutPanel_main.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_main.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel_main.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_main.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel_main.Size = new System.Drawing.Size(863, 537);
+            this.tableLayoutPanel_main.Size = new System.Drawing.Size(1055, 626);
             this.tableLayoutPanel_main.TabIndex = 0;
             // 
             // panel_okCancel
@@ -399,9 +413,10 @@
             this.panel_okCancel.Controls.Add(this.button_OK);
             this.panel_okCancel.Controls.Add(this.button_Cancel);
             this.panel_okCancel.Controls.Add(this.checkBox_autoSearchDup);
-            this.panel_okCancel.Location = new System.Drawing.Point(3, 500);
+            this.panel_okCancel.Location = new System.Drawing.Point(4, 583);
+            this.panel_okCancel.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.panel_okCancel.Name = "panel_okCancel";
-            this.panel_okCancel.Size = new System.Drawing.Size(857, 34);
+            this.panel_okCancel.Size = new System.Drawing.Size(1047, 40);
             this.panel_okCancel.TabIndex = 4;
             // 
             // textBox_message
@@ -411,27 +426,30 @@
             this.textBox_message.BackColor = System.Drawing.SystemColors.Info;
             this.textBox_message.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox_message.ForeColor = System.Drawing.SystemColors.InfoText;
-            this.textBox_message.Location = new System.Drawing.Point(3, 3);
+            this.textBox_message.Location = new System.Drawing.Point(4, 3);
+            this.textBox_message.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.textBox_message.Multiline = true;
             this.textBox_message.Name = "textBox_message";
             this.textBox_message.ReadOnly = true;
             this.textBox_message.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_message.Size = new System.Drawing.Size(857, 78);
+            this.textBox_message.Size = new System.Drawing.Size(1047, 91);
             this.textBox_message.TabIndex = 0;
             // 
             // panel_back
             // 
             this.panel_back.Controls.Add(this.splitContainer_back);
             this.panel_back.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel_back.Location = new System.Drawing.Point(3, 87);
+            this.panel_back.Location = new System.Drawing.Point(4, 100);
+            this.panel_back.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.panel_back.Name = "panel_back";
-            this.panel_back.Size = new System.Drawing.Size(857, 407);
+            this.panel_back.Size = new System.Drawing.Size(1047, 477);
             this.panel_back.TabIndex = 1;
             // 
             // splitContainer_back
             // 
             this.splitContainer_back.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer_back.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer_back.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.splitContainer_back.Name = "splitContainer_back";
             // 
             // splitContainer_back.Panel1
@@ -441,9 +459,9 @@
             // splitContainer_back.Panel2
             // 
             this.splitContainer_back.Panel2.Controls.Add(this.panel_rfid);
-            this.splitContainer_back.Size = new System.Drawing.Size(857, 407);
-            this.splitContainer_back.SplitterDistance = 418;
-            this.splitContainer_back.SplitterWidth = 8;
+            this.splitContainer_back.Size = new System.Drawing.Size(1047, 477);
+            this.splitContainer_back.SplitterDistance = 510;
+            this.splitContainer_back.SplitterWidth = 10;
             this.splitContainer_back.TabIndex = 0;
             // 
             // panel_rfid
@@ -452,14 +470,16 @@
             this.panel_rfid.Controls.Add(this.toolStrip_rfid);
             this.panel_rfid.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel_rfid.Location = new System.Drawing.Point(0, 0);
+            this.panel_rfid.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.panel_rfid.Name = "panel_rfid";
-            this.panel_rfid.Size = new System.Drawing.Size(431, 407);
+            this.panel_rfid.Size = new System.Drawing.Size(527, 477);
             this.panel_rfid.TabIndex = 0;
             // 
             // splitContainer_rfidArea
             // 
             this.splitContainer_rfidArea.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer_rfidArea.Location = new System.Drawing.Point(29, 0);
+            this.splitContainer_rfidArea.Location = new System.Drawing.Point(42, 0);
+            this.splitContainer_rfidArea.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.splitContainer_rfidArea.Name = "splitContainer_rfidArea";
             // 
             // splitContainer_rfidArea.Panel1
@@ -469,8 +489,9 @@
             // splitContainer_rfidArea.Panel2
             // 
             this.splitContainer_rfidArea.Panel2.Controls.Add(this.chipEditor_editing);
-            this.splitContainer_rfidArea.Size = new System.Drawing.Size(402, 407);
-            this.splitContainer_rfidArea.SplitterDistance = 192;
+            this.splitContainer_rfidArea.Size = new System.Drawing.Size(485, 477);
+            this.splitContainer_rfidArea.SplitterDistance = 231;
+            this.splitContainer_rfidArea.SplitterWidth = 5;
             this.splitContainer_rfidArea.TabIndex = 0;
             // 
             // chipEditor_existing
@@ -478,8 +499,9 @@
             this.chipEditor_existing.Dock = System.Windows.Forms.DockStyle.Fill;
             this.chipEditor_existing.Location = new System.Drawing.Point(0, 0);
             this.chipEditor_existing.LogicChipItem = null;
+            this.chipEditor_existing.Margin = new System.Windows.Forms.Padding(5, 3, 5, 3);
             this.chipEditor_existing.Name = "chipEditor_existing";
-            this.chipEditor_existing.Size = new System.Drawing.Size(192, 407);
+            this.chipEditor_existing.Size = new System.Drawing.Size(231, 477);
             this.chipEditor_existing.TabIndex = 0;
             this.chipEditor_existing.TitleVisible = true;
             // 
@@ -488,8 +510,9 @@
             this.chipEditor_editing.Dock = System.Windows.Forms.DockStyle.Fill;
             this.chipEditor_editing.Location = new System.Drawing.Point(0, 0);
             this.chipEditor_editing.LogicChipItem = null;
+            this.chipEditor_editing.Margin = new System.Windows.Forms.Padding(5, 3, 5, 3);
             this.chipEditor_editing.Name = "chipEditor_editing";
-            this.chipEditor_editing.Size = new System.Drawing.Size(206, 407);
+            this.chipEditor_editing.Size = new System.Drawing.Size(249, 477);
             this.chipEditor_editing.TabIndex = 1;
             this.chipEditor_editing.TitleVisible = true;
             // 
@@ -502,7 +525,7 @@
             this.toolStripButton_loadRfid});
             this.toolStrip_rfid.Location = new System.Drawing.Point(0, 0);
             this.toolStrip_rfid.Name = "toolStrip_rfid";
-            this.toolStrip_rfid.Size = new System.Drawing.Size(29, 407);
+            this.toolStrip_rfid.Size = new System.Drawing.Size(42, 477);
             this.toolStrip_rfid.TabIndex = 0;
             this.toolStrip_rfid.Text = "toolStrip2";
             // 
@@ -512,7 +535,7 @@
             this.toolStripButton_saveRfid.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_saveRfid.Image")));
             this.toolStripButton_saveRfid.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_saveRfid.Name = "toolStripButton_saveRfid";
-            this.toolStripButton_saveRfid.Size = new System.Drawing.Size(26, 28);
+            this.toolStripButton_saveRfid.Size = new System.Drawing.Size(37, 28);
             this.toolStripButton_saveRfid.Text = "写入标签";
             this.toolStripButton_saveRfid.Click += new System.EventHandler(this.toolStripButton_saveRfid_Click);
             // 
@@ -522,23 +545,25 @@
             this.toolStripButton_loadRfid.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_loadRfid.Image")));
             this.toolStripButton_loadRfid.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_loadRfid.Name = "toolStripButton_loadRfid";
-            this.toolStripButton_loadRfid.Size = new System.Drawing.Size(26, 28);
+            this.toolStripButton_loadRfid.Size = new System.Drawing.Size(37, 28);
             this.toolStripButton_loadRfid.Text = "装载标签";
             this.toolStripButton_loadRfid.Click += new System.EventHandler(this.toolStripButton_loadRfid_Click);
             // 
             // EntityEditForm
             // 
             this.AcceptButton = this.button_OK;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.button_Cancel;
-            this.ClientSize = new System.Drawing.Size(863, 537);
+            this.ClientSize = new System.Drawing.Size(1055, 626);
             this.Controls.Add(this.tableLayoutPanel_main);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.Name = "EntityEditForm";
             this.ShowInTaskbar = false;
             this.Text = "册信息";
             this.Activated += new System.EventHandler(this.EntityEditForm_Activated);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.EntityEditForm_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.EntityEditForm_FormClosed);
             this.Load += new System.EventHandler(this.EntityEditForm_Load);
             this.splitContainer_itemArea.Panel1.ResumeLayout(false);

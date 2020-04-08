@@ -999,7 +999,7 @@ namespace dp2SSL
                     */
                     EntityCollection collection = BuildEntityCollection(transferins);
                     string selection = "";
-                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    App.Invoke(new Action(() =>
                     {
                         AskTransferWindow dialog = new AskTransferWindow();
                         dialog.TitleText = "向内移交";
@@ -1078,7 +1078,7 @@ namespace dp2SSL
                     EntityCollection collection = BuildEntityCollection(transferouts);
                     string selection = "";
                     string target = "";
-                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    App.Invoke(new Action(() =>
                     {
                         AskTransferWindow dialog = new AskTransferWindow();
                         dialog.TitleText = "向外移交";
@@ -1241,7 +1241,7 @@ namespace dp2SSL
             }
         }
 
-        public static async Task<NormalResult> WaitLockReady(
+        public static async Task<NormalResult> WaitLockReadyAsync(
             Delegate_displayText func_display,
             Delegate_cancelled func_cancelled)
         {
@@ -1282,7 +1282,7 @@ namespace dp2SSL
         // 首次初始化智能书柜所需的标签相关数据结构
         // 初始化开始前，要先把 RfidManager.ReaderNameList 设置为 "*"
         // 初始化完成前，先不要允许(开关门变化导致)修改 RfidManager.ReaderNameList
-        public static async Task<InitialShelfResult> newVersion_InitialShelfEntities(
+        public static async Task<InitialShelfResult> newVersion_InitialShelfEntitiesAsync(
             List<DoorItem> doors_param,
             Delegate_displayText func_display,
             Delegate_cancelled func_cancelled)
@@ -2046,6 +2046,41 @@ namespace dp2SSL
             return changed;
         }
 
+        // 故意选择用到的天线编号加一的天线(用 ListTags() 实现)
+        public static NormalResult SelectAntenna()
+        {
+            StringBuilder text = new StringBuilder();
+            List<string> errors = new List<string>();
+            List<AntennaList> table = ShelfData.GetAntennaTable();
+            foreach (var list in table)
+            {
+                if (list.Antennas == null || list.Antennas.Count == 0)
+                    continue;
+                // uint antenna = (uint)(list.Antennas[list.Antennas.Count - 1] + 1);
+                int first_antenna = list.Antennas[0];
+                text.Append($"readerName[{list.ReaderName}], antenna[{first_antenna}]\r\n");
+                var result = RfidManager.CallListTags($"{list.ReaderName}:{first_antenna}", "");
+                if (result.Value == -1)
+                    errors.Add($"CallListTags() 出错: {result.ErrorInfo}");
+            }
+            if (errors.Count > 0)
+            {
+                // this.SetGlobalError("InitialShelfEntities", $"SelectAntenna() 出错: {StringUtil.MakePathList(errors, ";")}");
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"SelectAntenna() 出错: {StringUtil.MakePathList(errors, ";")}"
+                };
+            }
+            return new NormalResult
+            {
+                Value = 0,
+                ErrorInfo = text.ToString()
+            };
+        }
+
+        static bool _tagAdded = false;
+
         static SpeakList _speakList = new SpeakList();
 
         public delegate void Delagate_booksChanged();
@@ -2057,7 +2092,7 @@ namespace dp2SSL
         //      如果不存在这个 PII，则不做任何动作
         // Update: 检查列表中是否存在这个 PII，如果存在，则修改状态为 在架，并设置 UID 成员
         //      如果不存在，则为列表添加一个新元素，修改状态为在架，并设置 UID 和 PII 成员
-        public static async Task ChangeEntities(BaseChannel<IRfid> channel,
+        public static async Task ChangeEntitiesAsync(BaseChannel<IRfid> channel,
             TagChangedEventArgs e,
             Delagate_booksChanged func_booksChanged)
         {
@@ -2069,7 +2104,12 @@ namespace dp2SSL
 
             List<TagAndData> tags = new List<TagAndData>();
             if (e.AddBooks != null)
+            {
                 tags.AddRange(e.AddBooks);
+                // 延时触发 SelectAntenna()
+                _tagAdded = true;
+            }
+
             if (e.UpdateBooks != null)
                 tags.AddRange(e.UpdateBooks);
 
@@ -2077,7 +2117,6 @@ namespace dp2SSL
             int removeBooksCount = 0;
             lock (_syncRoot_all)
             {
-
                 // 新添加标签(或者更新标签信息)
                 foreach (var tag in tags)
                 {
@@ -2205,9 +2244,9 @@ namespace dp2SSL
             var task = Task.Run(async () =>
             {
                 CancellationToken token = CancelToken;
-                await FillBookFields(All, token);
-                await FillBookFields(Adds, token);
-                await FillBookFields(Removes, token);
+                await FillBookFieldsAsync(All, token);
+                await FillBookFieldsAsync(Adds, token);
+                await FillBookFieldsAsync(Removes, token);
             });
         }
 
@@ -2218,7 +2257,7 @@ namespace dp2SSL
          * */
         public static void Sound(int tone, int count, string text)
         {
-            Task.Run(() =>
+            _ = Task.Run(() =>
             {
                 for (int i = 0; i < count; i++)
                     System.Console.Beep(tones[tone], 500);
@@ -2232,7 +2271,7 @@ namespace dp2SSL
             public List<string> Errors { get; set; }
         }
 
-        public static async Task<FillBookFieldsResult> FillBookFields(// BaseChannel<IRfid> channel,
+        public static async Task<FillBookFieldsResult> FillBookFieldsAsync(// BaseChannel<IRfid> channel,
     IReadOnlyCollection<Entity> entities,
     CancellationToken token,
     bool refreshCount = true)
@@ -2303,7 +2342,7 @@ namespace dp2SSL
                 if (string.IsNullOrEmpty(entity.Title)
                     && string.IsNullOrEmpty(entity.PII) == false && entity.PII != "(空)")
                 {
-                    GetEntityDataResult result = await GetEntityData(entity.PII);
+                    GetEntityDataResult result = await GetEntityDataAsync(entity.PII);
                     if (result.Value == -1 || result.Value == 0)
                     {
                         // TODO: 条码号没有找到的错误码要单独记下来
@@ -2315,9 +2354,17 @@ namespace dp2SSL
                         // 2020/3/5
                         WpfClientInfo.WriteErrorLog($"GetEntityData() error: {error}");
 
+                        // TODO: 如果发现当前一直是通讯中断的情况，要避免语音念太多报错
                         App.CurrentApp.SpeakSequence(error);
                         entity.SetError(result.ErrorInfo);
-                        entity.FillFinished = true;
+                        // 2020/4/8
+                        if (result.ErrorCode == "RequestError" || result.ErrorCode == "RequestTimeOut")
+                        {
+                            // 如果是通讯失败导致的出错，应该有办法进行重试获取
+                            entity.FillFinished = false;
+                        }
+                        else
+                            entity.FillFinished = true;
                         // error_count++;
                         errors.Add(error);
                         continue;
@@ -3047,9 +3094,9 @@ Stack:
 
         // 从外部存储中装载尚未同步的 Actions
         // 注意：这些 Actions 应该先按照 PII 排序分组以后，一组一组进行处理
-        public static List<ActionInfo> LoadRetryActionsFromDatabase()
+        public static async Task<List<ActionInfo>> LoadRetryActionsFromDatabaseAsync()
         {
-            using (var releaser = _databaseLimit.EnterAsync().Result)
+            using (var releaser = await _databaseLimit.EnterAsync())
             {
                 using (var context = new MyContext())
                 {
@@ -3063,9 +3110,9 @@ Stack:
             }
         }
 
-        static void ChangeDatabaseActionState(int id, ActionInfo action)
+        static async Task ChangeDatabaseActionStateAsync(int id, ActionInfo action)
         {
-            using (var releaser = _databaseLimit.EnterAsync().Result)
+            using (var releaser = await _databaseLimit.EnterAsync())
             {
                 using (var context = new MyContext())
                 {
@@ -3081,7 +3128,7 @@ Stack:
 
         // 把 Actions 追加保存到本地数据库
         // 当本函数执行完以后，ActionInfo 对象的 ID 有了值，和数据库记录的 ID 对应
-        public static async Task SaveActionsToDatabase(List<ActionInfo> actions)
+        public static async Task SaveActionsToDatabaseAsync(List<ActionInfo> actions)
         {
             try
             {
@@ -3095,7 +3142,7 @@ Stack:
                         foreach (var request in requests)
                         {
                             // 注：这样一个一个保存可以保持 ID 的严格从小到大。因为这些事项之间是有严格顺序关系的(借和还顺序不能颠倒)
-                            context.Requests.AddRange(request);
+                            await context.Requests.AddRangeAsync(request);
                             int nCount = await context.SaveChangesAsync();
                         }
 
@@ -3120,9 +3167,9 @@ Stack:
         // 从操作日志数据库中把一些需要重试的事项移走
         // 原理：当首次初始化以后，已经初始化确认在书架内的图书，已经进行了还书操作，那么此前累积的需要重试借书或者还书的同步请求，都可以不执行了。这样不会造成图书丢失。但可能会丢掉一些中间操作信息
         // 改进：可以不删除，但把这些事项的状态标记为 “放弃重试”
-        public static void RemoveRetryActionsFromDatabase(IEnumerable<string> piis)
+        public static async Task RemoveRetryActionsFromDatabaseAsync(IEnumerable<string> piis)
         {
-            using (var releaser = _databaseLimit.EnterAsync().Result)
+            using (var releaser = await _databaseLimit.EnterAsync())
             {
                 using (var context = new MyContext())
                 {
@@ -3265,7 +3312,7 @@ Stack:
             });
 
             // 启动重试专用线程
-            _retryTask = Task.Factory.StartNew(() =>
+            _retryTask = Task.Factory.StartNew(async () =>
             {
                 WpfClientInfo.WriteInfoLog("重试专用线程开始");
                 try
@@ -3282,11 +3329,21 @@ Stack:
                         App.CurrentApp.EnsureConnectMessageServer().Wait(token);
 #endif
 
+                        // 顺便关闭天线射频
+                        if (_tagAdded)
+                        {
+                            _ = Task.Run(() =>
+                            {
+                                SelectAntenna();
+                            });
+                            _tagAdded = false;
+                        }
+
                         if (PauseSubmit)
                             continue;
 
                         // TODO: 从本地数据库中装载需要同步的那些 Actions
-                        List<ActionInfo> actions = LoadRetryActionsFromDatabase();
+                        List<ActionInfo> actions = await LoadRetryActionsFromDatabaseAsync();
                         if (actions.Count == 0)
                             continue;
 
@@ -3328,7 +3385,7 @@ Stack:
 
                                 if (progress != null)
                                 {
-                                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                                    App.Invoke(new Action(() =>
                                     {
                                         if (min == -1 && max == -1 && value == -1
                                         && groups.IndexOf(group) == groups.Count - 1)   // 只有最后一次才隐藏进度条
@@ -3380,7 +3437,7 @@ Stack:
                                         newCount++;
                                     // sync/commerror/normalerror/空
                                     // 同步成功/通讯出错/一般出错/从未同步过
-                                    ChangeDatabaseActionState(action.ID, action);
+                                    await ChangeDatabaseActionStateAsync(action.ID, action);
                                 }
 
                                 MessageNotifyOverflow(result.ProcessedActions);
@@ -3390,7 +3447,7 @@ Stack:
                             {
                                 // Thread.Sleep(3000);
                                 // 刷新显示
-                                Application.Current.Dispatcher.Invoke(new Action(() =>
+                                App.Invoke(new Action(() =>
                                 {
                                     progress?.Refresh(result.ProcessedActions);
                                 }));
@@ -3755,7 +3812,7 @@ TaskScheduler.Default);
 #endif
 
 #if REMOVED
-#region 门命令延迟执行
+        #region 门命令延迟执行
 
         // 门命令(延迟执行)队列。开门时放一个命令进入队列。等得到门开信号的时候再取出这个命令
         static List<CommandItem> _commandQueue = new List<CommandItem>();
@@ -3845,7 +3902,7 @@ TaskScheduler.Default);
         }
 
 
-#endregion
+        #endregion
 #endif
     }
 

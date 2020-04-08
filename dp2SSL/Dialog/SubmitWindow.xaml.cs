@@ -123,7 +123,7 @@ namespace dp2SSL
                 if (string.IsNullOrEmpty(speak) == false)
                     App.CurrentApp.Speak(speak);
 #endif
-                Application.Current.Dispatcher.Invoke(new Action(() =>
+                App.Invoke(new Action(() =>
                 {
                     this.MessageDocument = first.Document;
                 }));
