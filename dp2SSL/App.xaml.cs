@@ -214,7 +214,7 @@ namespace dp2SSL
 
             InputMethod.SetPreferredImeState(App.Current.MainWindow, InputMethodState.Off);
 
-            TinyServer.InitialMessageQueue(
+            await TinyServer.InitialMessageQueueAsync(
     System.IO.Path.Combine(WpfClientInfo.UserDir, "mq.db"),
     _cancelRefresh.Token);
 
@@ -222,6 +222,7 @@ namespace dp2SSL
             await ConnectMessageServerAsync();
 
             TinyServer.StartSendTask(_cancelRefresh.Token);
+            PageShelf.TrySetMessage("我这台智能书柜启动了！");
         }
 
         /*
@@ -242,7 +243,6 @@ namespace dp2SSL
                         WpfClientInfo.WriteErrorLog($"连接消息服务器失败: {result.ErrorInfo}。url={messageServerUrl},userName={messageUserName},errorCode={result.ErrorCode}");
                     else
                     {
-                        PageShelf.TrySetMessage("我这台智能书柜启动了！");
                         /*
                         // 发出一条消息表示自己启动成功
                         var message_result = await TinyServer.SetMessageAsync("我这台智能书柜启动了！");
@@ -628,6 +628,37 @@ namespace dp2SSL
             {
                 return WpfClientInfo.Config?.Get("global", "messageGroupName", "");
             }
+        }
+
+        // 检查消息服务器参数配置的有效性
+        public NormalResult CheckMessageServerParameters()
+        {
+            List<string> errors = new List<string>();
+            if (string.IsNullOrEmpty(messageServerUrl) == false)
+            {
+                /*
+                if (messageServerUrl != "http://dp2003.com:8083/dp2mserver")
+                {
+
+                }
+                */
+
+                if (string.IsNullOrEmpty(messageUserName))
+                    errors.Add("尚未配置消息服务器用户名");
+                if (string.IsNullOrEmpty(messageGroupName))
+                    errors.Add("尚未配置消息服务器的组名");
+            }
+
+            if (errors.Count > 0)
+            {
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = StringUtil.MakePathList(errors, "; ")
+                };
+            }
+
+            return new NormalResult();
         }
 
         #endregion

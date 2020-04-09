@@ -27,10 +27,11 @@ namespace dp2SSL
 
         static MessageQueue _queue = null;
 
-        public static void InitialMessageQueue(string databaseFileName,
+        public static async Task InitialMessageQueueAsync(string databaseFileName,
             CancellationToken token)
         {
-            _queue = new MessageQueue(databaseFileName);
+            _queue = new MessageQueue(databaseFileName, false);
+            await _queue.EnsureCreatedAsync();
         }
 
         static Task _sendTask = null;
@@ -66,6 +67,20 @@ namespace dp2SSL
                         _eventSend.WaitOne(_idleLength);
                         token.ThrowIfCancellationRequested();
 
+                        // 如果暂时没有配置消息服务器
+                        if (string.IsNullOrEmpty(App.messageServerUrl))
+                            continue;
+
+                        // 检查 dp2mserver 相关参数的合法性
+                        var check_result = App.CurrentApp.CheckMessageServerParameters();
+                        if (check_result.Value == -1)
+                        {
+                            App.CurrentApp.SetError("messageServer", $"消息服务器参数配置错误: {check_result.ErrorInfo}");
+                            continue;
+                        }
+                        else
+                            App.CurrentApp.SetError("messageServer", null);
+
                         // 检查和确保连接到消息服务器
                         await App.CurrentApp.EnsureConnectMessageServerAsync();
 
@@ -81,11 +96,16 @@ namespace dp2SSL
                                 var result = await SetMessageAsync(request);
                                 if (result.Value == -1)
                                 {
-                                    // TODO: 要避免错误日志太多把错误日志文件塞满
-                                    WpfClientInfo.WriteErrorLog($"SetMessageAsync() 出错: {result.ErrorInfo}");
+                                    // 为了让用户引起警觉，最好显示到界面报错
+                                    App.CurrentApp.SetError("sendMessage", $"同步发送消息出错: {result.ErrorInfo}");
+
+                                    // TODO: 错误日志中要写入消息内容
+                                    WpfClientInfo.WriteErrorLog($"SetMessageAsync() 出错(本条消息已被跳过，不会再重试发送): {result.ErrorInfo}");
                                 }
                                 else
-                                    await _queue.PullAsync(token);
+                                    App.CurrentApp.SetError("sendMessage", null);
+
+                                await _queue.PullAsync(token);
                             }
                             catch (Exception ex)
                             {

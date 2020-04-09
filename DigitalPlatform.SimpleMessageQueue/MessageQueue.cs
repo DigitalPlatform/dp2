@@ -27,10 +27,20 @@ namespace DigitalPlatform.SimpleMessageQueue
             }
         }
 
-        public MessageQueue(string databaseFileName)
+        public MessageQueue(string databaseFileName,
+            bool ensureCreated = true)
         {
             _databaseFileName = databaseFileName;
-            using (var releaser = _databaseLimit.EnterAsync().Result)
+            if (ensureCreated)
+                using (var context = new QueueContext(_databaseFileName))
+                {
+                    context.Database.EnsureCreated();
+                }
+        }
+
+        public async Task EnsureCreatedAsync()
+        {
+            using (var releaser = await _databaseLimit.EnterAsync())
             {
                 using (var context = new QueueContext(_databaseFileName))
                 {

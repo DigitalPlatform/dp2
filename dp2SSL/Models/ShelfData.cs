@@ -1614,6 +1614,13 @@ namespace dp2SSL
             // Exception:
             //      可能会抛出异常 ArgumentException 
             EntityCollection.SetPII(result);
+            // 2020/4/9
+            if (tag.Type == "patron")
+            {
+                // 避免被当作图书同步到 dp2library
+                result.PII = "(读者卡)" + result.PII;
+                result.AppendError("读者卡误放入书柜");
+            }
             return result;
         }
 
@@ -2182,6 +2189,22 @@ namespace dp2SSL
             if (e.UpdateBooks != null)
                 tags.AddRange(e.UpdateBooks);
 
+            // 2020/4/9
+            // 把书柜读卡器上的(ISO15693)读者卡也计算在内
+            var patrons = TagList.Patrons.FindAll(tag =>
+            {
+                // 判断一下 tag 是否属于已经定义的门范围
+                var doors = DoorItem.FindDoors(ShelfData.Doors, tag.OneTag.ReaderName, tag.OneTag.AntennaID.ToString());
+                if (doors.Count > 0)
+                    return true;
+                return false;
+            });
+            foreach (var patron in patrons)
+            {
+                var type = patron.Type;
+            }
+            tags.AddRange(patrons);
+
             List<string> add_uids = new List<string>();
             int removeBooksCount = 0;
             lock (_syncRoot_all)
@@ -2226,14 +2249,30 @@ namespace dp2SSL
                     }
                 }
 
+                var removes = e.RemoveBooks;
+                {
+                    // 2020/4/9
+                    // 把书柜读卡器上的(ISO15693)读者卡也计算在内
+                    var remove_patrons = e.RemovePatrons?.FindAll(tag =>
+                    {
+                        // 判断一下 tag 是否属于已经定义的门范围
+                        var doors = DoorItem.FindDoors(ShelfData.Doors, tag.OneTag.ReaderName, tag.OneTag.AntennaID.ToString());
+                        if (doors.Count > 0)
+                            return true;
+                        return false;
+                    });
+                    if (remove_patrons != null)
+                        removes.AddRange(remove_patrons);
+                }
+
                 // 拿走标签
-                foreach (var tag in e.RemoveBooks)
+                foreach (var tag in removes)
                 {
                     if (tag.OneTag.TagInfo == null)
                         continue;
 
-                    if (tag.Type == "patron")
-                        continue;
+                    //if (tag.Type == "patron")
+                    //    continue;
 
                     // 看看 _all 里面有没有
                     var results = Find("all", tag);
@@ -2430,7 +2469,7 @@ namespace dp2SSL
                         WpfClientInfo.WriteErrorLog($"GetEntityData() error: {error}");
 
                         // TODO: 如果发现当前一直是通讯中断的情况，要避免语音念太多报错
-                        App.CurrentApp.SpeakSequence(error);
+                        // App.CurrentApp.SpeakSequence(error);
                         entity.SetError(result.ErrorInfo);
                         // 2020/4/8
                         if (result.ErrorCode == "RequestError" || result.ErrorCode == "RequestTimeOut")
