@@ -17,6 +17,8 @@ xcopy ..\..\dp2opac\*.asax.cs /Y
 xcopy ..\..\dp2opac\*.js /Y
 xcopy ..\..\dp2opac\web.config /Y
 
+xcopy ..\..\dp2opac\*_sidebar.xml /Y
+
 del about.* /Q
 del search2.* /Q
 del sample.* /Q

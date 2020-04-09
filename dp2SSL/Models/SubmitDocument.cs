@@ -52,7 +52,7 @@ namespace dp2SSL
                 _actions.ForEach(item =>
                 {
                     if (item.Action == "borrow" && item.SyncErrorCode == "overflow")
-                        overflow_titles.Add($"{ShortTitle(item.Entity.Title)} [{item.Entity.PII}]");
+                        overflow_titles.Add($"{ShortTitle(item.Entity.Title)} [{ShelfData.GetPiiString(item.Entity)}]");
                 });
 
                 // 显示超额的信息
@@ -441,10 +441,23 @@ namespace dp2SSL
                 });
             }
 
-            // 书目摘要
-            if (action.Entity != null && string.IsNullOrEmpty(action.Entity.Title) == false)
+            string title = "";
+
+            if (action.Entity != null)
             {
-                Run run = new Run(MessageDocument.ShortTitle(action.Entity.Title));
+                title = MessageDocument.ShortTitle(action.Entity.Title);
+                if (string.IsNullOrEmpty(title))
+                {
+                    title = ShelfData.GetPiiString(action.Entity);
+                }
+            }
+            else
+                title = "(action.Entity 为空)";
+
+            // 书目摘要
+            if (string.IsNullOrEmpty(title) == false)
+            {
+                Run run = new Run(title);
                 /*
                 run.FontSize = 14;
                 run.FontStyle = FontStyles.Normal;

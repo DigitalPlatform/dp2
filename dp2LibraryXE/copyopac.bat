@@ -17,6 +17,7 @@ xcopy ..\..\dp2opac\*.aspx.cs /Y
 xcopy ..\..\dp2opac\*.aspx.designer.cs /Y
 xcopy ..\..\dp2opac\*.asax.cs /Y
 xcopy ..\..\dp2opac\*.js /Y
+xcopy ..\..\dp2opac\*_sidebar.xml /Y
 
 del about.* /Q
 del search2.* /Q

@@ -626,7 +626,7 @@ namespace dp2SSL
         {
             get
             {
-                return WpfClientInfo.Config.Get("global", "messageGroupName", "");
+                return WpfClientInfo.Config?.Get("global", "messageGroupName", "");
             }
         }
 

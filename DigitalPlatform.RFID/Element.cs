@@ -1077,12 +1077,10 @@ namespace DigitalPlatform.RFID
     // RFID 标签数据异常
     public class TagDataException : Exception
     {
-
         public TagDataException(string s)
             : base(s)
         {
         }
-
     }
 
 }
