@@ -1779,7 +1779,8 @@ namespace dp2SSL
 
                 // 2020/4/9
                 // 把书柜读卡器上的(ISO15693)读者卡排除在外
-                var patrons = TagList.Patrons.FindAll(tag => {
+                var patrons = TagList.Patrons.FindAll(tag =>
+                {
                     // 判断一下 tag 是否属于已经定义的门范围
                     var doors = DoorItem.FindDoors(ShelfData.Doors, tag.OneTag.ReaderName, tag.OneTag.AntennaID.ToString());
                     if (doors.Count > 0)
@@ -2564,10 +2565,11 @@ namespace dp2SSL
             // 关闭以前残留的对话框
             CloseDialogs();
 
+            bool bAsked = false;
             {
                 // 对涉及到工作人员身份进行典藏移交的 action 进行补充修正
                 bool changed = false;
-                ShelfData.AskLocationTransfer(actions,
+                bAsked = ShelfData.AskLocationTransfer(actions,
                     (action) =>
                     {
                         var entity = action.Entity;
@@ -2628,14 +2630,15 @@ namespace dp2SSL
                     // 先在对话框里面把信息显示出来。然后同步线程会去提交请求，显示里面的相关事项会被刷新显示
                     {
                         Invoke(() =>
-                            {
-                                SubmitDocument doc = SubmitDocument.Build(actions,
-                                14, "");
-                                progress?.PushContent(doc);
-                                // 显示出来
-                                progress?.ShowContent();
-                            }
-                        );
+                        {
+                            SubmitDocument doc = SubmitDocument.Build(actions,
+                            14,
+                            bAsked ? "transfer" : "");
+
+                            progress?.PushContent(doc);
+                            // 显示出来
+                            progress?.ShowContent();
+                        });
                     }
 
                     ShelfData.ActivateRetry();
