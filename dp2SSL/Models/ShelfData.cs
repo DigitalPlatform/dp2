@@ -982,9 +982,10 @@ namespace dp2SSL
         // 询问典藏移交的一些条件参数
         // parameters:
         //      actions     在本函数处理过程中此集合内的对象可能被修改，集合元素可能被移除
-        public static void AskLocationTransfer(List<ActionInfo> actions,
+        public static bool AskLocationTransfer(List<ActionInfo> actions,
             Delegate_removeAction func_removeAction)
         {
+            bool bAsked = false;
             // 1) 搜集信息。观察是否有需要询问和兑现的参数
             {
                 List<ActionInfo> transferins = new List<ActionInfo>();
@@ -1001,6 +1002,7 @@ namespace dp2SSL
                 // 询问放入的图书是否需要移交到当前书柜馆藏地
                 if (transferins.Count > 0)
                 {
+                    bAsked = true;
                     App.CurrentApp.Speak("典藏移交");
                     string batchNo = transferins[0].Operator.GetWorkerAccountName() + "_" + DateTime.Now.ToShortDateString();
                     /*
@@ -1075,6 +1077,7 @@ namespace dp2SSL
                 // 询问放入的图书是否需要移交到当前书柜馆藏地
                 if (transferouts.Count > 0)
                 {
+                    bAsked = true;
                     App.CurrentApp.Speak("典藏移交");
 
                     string batchNo = transferouts[0].Operator.GetWorkerAccountName() + "_" + DateTime.Now.ToShortDateString();
@@ -1141,6 +1144,8 @@ namespace dp2SSL
                     }
                 }
             }
+
+            return bAsked;
         }
 
         static EntityCollection BuildEntityCollection(List<ActionInfo> actions)

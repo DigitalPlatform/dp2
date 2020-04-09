@@ -205,7 +205,7 @@ namespace dp2SSL
                 p.Margin = new Thickness(0, 0, 0, baseFontSize/*18*/);
                 doc.Blocks.Add(p);
 
-                if (borrow_count + return_count > 0)
+                if (borrow_count + return_count + transfer_count > 0)
                 {
                     List<string> lines = new List<string>();
                     if (return_count > 0)
@@ -337,8 +337,10 @@ namespace dp2SSL
     double baseFontSize,
     string style)
         {
+            // 是否显示 transfer (in) 条目。注意，即便 false, 也要显示 transfer (out) 条目的
             bool display_transfer = StringUtil.IsInList("transfer", style);
-            if (action.Action == "transfer" && display_transfer == false)
+            if (action.Action == "transfer" && action.TransferDirection == "in"
+                && display_transfer == false)
                 return null;
 
             var p = new Paragraph();
