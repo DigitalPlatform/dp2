@@ -287,7 +287,8 @@ namespace dp2SSL
                     // TODO: 这里用 await 是否不太合适？
                     await Task.Run(() =>
                     {
-                        ShelfData.RefreshInventory(e.Door);
+                        var result = ShelfData.RefreshInventory(e.Door);
+                        // TODO: 是否可以越过无法解析的标签，继续解析其他标签？
                     });
                 }
                 finally
@@ -1466,9 +1467,16 @@ namespace dp2SSL
                             return;
 
                         // 先报告一次标签数据错误
-                        if (initial_result.Warnings?.Count > 0)
+                        if (initial_result.Warnings?.Count > 0
+                            || initial_result.Value == -1)
                         {
-                            string error = StringUtil.MakePathList(initial_result.Warnings, "\r\n");
+                            string error = initial_result.ErrorInfo;
+                            if (initial_result.Warnings != null)
+                            {
+                                if (string.IsNullOrEmpty(error) == false)
+                                    error += "\r\n";
+                                error += StringUtil.MakePathList(initial_result.Warnings, "\r\n");
+                            }
                             // ErrorBox(StringUtil.MakePathList(initial_result.Warnings, "\r\n"));
                             App.Invoke(new Action(() =>
                             {
@@ -1480,7 +1488,7 @@ namespace dp2SSL
 
                         var part = initial_result.All;
 
-                        if (part.Count == 0)
+                        if (part == null || part.Count == 0)
                             break;
 
                         // 2020/4/2
@@ -1767,7 +1775,18 @@ namespace dp2SSL
             //_lock_refreshPatrons.EnterWriteLock();
             try
             {
-                var patrons = TagList.Patrons;
+                // var patrons = TagList.Patrons;
+
+                // 2020/4/9
+                // 把书柜读卡器上的(ISO15693)读者卡排除在外
+                var patrons = TagList.Patrons.FindAll(tag => {
+                    // 判断一下 tag 是否属于已经定义的门范围
+                    var doors = DoorItem.FindDoors(ShelfData.Doors, tag.OneTag.ReaderName, tag.OneTag.AntennaID.ToString());
+                    if (doors.Count > 0)
+                        return false;
+                    return true;
+                });
+
                 if (patrons.Count == 1)
                     _patron.IsRfidSource = true;
 

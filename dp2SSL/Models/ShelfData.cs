@@ -615,7 +615,7 @@ namespace dp2SSL
         }
 
         // 单独对一个门关联的 RFID 标签进行一次 inventory，确保此前的标签变化情况没有被遗漏
-        public static void RefreshInventory(DoorItem door)
+        public static NormalResult RefreshInventory(DoorItem door)
         {
             // 获得和一个门相关的 readernamelist
             var list = GetReaderNameList(new List<DoorItem> { door }, null);
@@ -627,11 +627,27 @@ namespace dp2SSL
             try
             {
                 RfidManager.TriggerListTagsEvent(list, result, true);
+                return new NormalResult();
+            }
+            catch (TagInfoException ex)
+            {
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"对门 {door.Name} 内的全部标签进行盘点时，发现无法解析的标签(UID:{ex.TagInfo.UID})",
+                    ErrorCode = "tagParseError"
+                };
             }
             catch (Exception ex)
             {
                 // WpfClientInfo.WriteErrorLog($"RefreshInventory() TriggerListTagsEvent() 异常:{ExceptionUtil.GetDebugText(ex)}\r\ndebugInfo={debugInfo.ToString()}");
                 WpfClientInfo.WriteErrorLog($"RefreshInventory() TriggerListTagsEvent() list='{list}' 异常:{ExceptionUtil.GetDebugText(ex)}");
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"RefreshInventory() 出现异常(门:{door.Name}): {ex.Message}",
+                    ErrorCode = ex.GetType().ToString()
+                };
             }
         }
 
@@ -1305,7 +1321,21 @@ namespace dp2SSL
                 func_display($"{i + 1}/{Doors.Count} 门 {door.Name} ({list}) ...");
 
                 var result = RfidManager.CallListTags(list, style);
-                RfidManager.TriggerListTagsEvent(list, result, true);
+                try
+                {
+                    RfidManager.TriggerListTagsEvent(list, result, true);
+                }
+                catch (TagInfoException ex)
+                {
+                    // 2020/4/9
+                    string error = $"出现无法解析的标签 UID:{ex.TagInfo.UID}";
+                    WpfClientInfo.WriteErrorLog($"InitialShelfEntities() 异常: {error} 门:{door.Name}");
+                    return new InitialShelfResult
+                    {
+                        Value = -1,
+                        ErrorInfo = error
+                    };
+                }
 
                 i++;
             }
@@ -1337,7 +1367,7 @@ namespace dp2SSL
                     var doors = DoorItem.FindDoors(ShelfData.Doors, tag.OneTag.ReaderName, tag.OneTag.AntennaID.ToString());
                     if (doors.Count == 0)
                     {
-                        WpfClientInfo.WriteInfoLog($"tag (UID={tag.OneTag?.UID}) 不属于任何已经定义的门，没有被加入 _all 集合。\r\ntag 详情：{tag.ToString()}");
+                        WpfClientInfo.WriteInfoLog($"tag (UID={tag.OneTag?.UID},Antenna={tag.OneTag.AntennaID}) 不属于任何已经定义的门，没有被加入 _all 集合。\r\ntag 详情：{tag.ToString()}");
                         continue;
                     }
 
@@ -1347,18 +1377,51 @@ namespace dp2SSL
 
                     try
                     {
+                        // 注：所创建的 Entity 对象其 Error 成员可能有值，表示有出错信息
                         // Exception:
-                        //      可能会抛出异常 ArgumentException TagDataException
+                        //      可能会抛出异常 ArgumentException
                         var entity = NewEntity(tag);
 
-                        func_display($"正在填充图书队列 ({entity.PII})...");
+                        func_display($"正在填充图书队列 ({GetPiiString(entity)})...");
 
                         all.Add(entity);
+
+                        if (string.IsNullOrEmpty(entity.Error) == false)
+                        {
+                            warnings.Add($"UID 为 '{tag.OneTag?.UID}' 的标签解析出错: {entity.Error}");
+                            WpfClientInfo.WriteErrorLog($"InitialShelfEntities() 遇到 tag (UID={tag.OneTag?.UID}) 解析出错: {entity.Error}\r\ntag 详情：{tag.ToString()}");
+                        }
                     }
                     catch (TagDataException ex)
                     {
                         warnings.Add($"UID 为 '{tag.OneTag?.UID}' 的标签出现数据格式错误: {ex.Message}");
                         WpfClientInfo.WriteErrorLog($"InitialShelfEntities() 遇到 tag (UID={tag.OneTag?.UID}) 数据格式出错：{ex.Message}\r\ntag 详情：{tag.ToString()}");
+                    }
+                }
+
+                // 2020/4/9
+                // 检查放在柜门内的 ISO15693 读者卡
+                var patrons = TagList.Patrons;
+                foreach (var tag in patrons)
+                {
+                    if (func_cancelled() == true)
+                        return new InitialShelfResult();
+
+                    WpfClientInfo.WriteErrorLog($" (读者卡)tag={tag.ToString()}");
+
+                    // 判断一下 tag 是否属于已经定义的门范围
+                    var doors = DoorItem.FindDoors(ShelfData.Doors, tag.OneTag.ReaderName, tag.OneTag.AntennaID.ToString());
+                    if (doors.Count == 0)
+                    {
+                        // 这是正常情况：读者卡所放的读卡器不是柜门读卡器
+                        continue;
+                    }
+
+                    // 属于本函数当前关注的门范围
+                    if (Cross(doors_param, doors) == true)
+                    {
+                        warnings.Add($"出现读者证标签。UID={tag.OneTag?.UID} Protocol={tag.OneTag?.Protocol}");
+                        WpfClientInfo.WriteErrorLog($"InitialShelfEntities() 出现读者证标签。门={doors[0].Name},UID={tag.OneTag?.UID} Protocol={tag.OneTag?.Protocol}\r\ntag 详情：{tag.ToString()}");
                     }
                 }
             }
@@ -1535,8 +1598,9 @@ namespace dp2SSL
 
 #endif
 
+        // 注：所创建的 Entity 对象其 Error 成员可能有值，表示有出错信息
         // Exception:
-        //      可能会抛出异常 ArgumentException TagDataException
+        //      可能会抛出异常 ArgumentException
         static Entity NewEntity(TagAndData tag)
         {
             var result = new Entity
@@ -1548,7 +1612,7 @@ namespace dp2SSL
             };
 
             // Exception:
-            //      可能会抛出异常 ArgumentException TagDataException
+            //      可能会抛出异常 ArgumentException 
             EntityCollection.SetPII(result);
             return result;
         }
@@ -1922,6 +1986,8 @@ namespace dp2SSL
         }
         */
 
+        // Exception:
+        //      可能会抛出异常 ArgumentException TagDataException
         static bool Add(List<Entity> entities, TagAndData tag)
         {
             List<Entity> results = new List<Entity>();
@@ -1932,6 +1998,9 @@ namespace dp2SSL
             });
             if (results.Count == 0)
             {
+                // 注：所创建的 Entity 对象其 Error 成员可能有值，表示有出错信息
+                // Exception:
+                //      可能会抛出异常 ArgumentException
                 entities.Add(NewEntity(tag));
                 return true;
             }
@@ -2130,6 +2199,8 @@ namespace dp2SSL
                     var results = Find(_all, tag);
                     if (results.Count == 0)
                     {
+                        // Exception:
+                        //      可能会抛出异常 ArgumentException TagDataException
                         if (Add(_adds, tag) == true)
                         {
                             changed = true;
@@ -2141,7 +2212,11 @@ namespace dp2SSL
                     {
                         // 更新 _all 里面的信息
                         if (Update(_all, tag) == true)
+                        {
+                            // Exception:
+                            //      可能会抛出异常 ArgumentException TagDataException
                             Add(_changes, tag);
+                        }
 
                         // 要把 _adds 和 _removes 里面都去掉
                         if (Remove(_adds, tag) == true)
@@ -2318,7 +2393,7 @@ namespace dp2SSL
                     }
                     catch (Exception ex)
                     {
-                        errors.Add($"解析 RFID 标签时出现异常 {ex.Message}");
+                        errors.Add($"解析 RFID 标签(UID:{entity.TagInfo.UID})时出现异常 {ex.Message}");
                         continue;
                     }
 
@@ -2495,6 +2570,17 @@ namespace dp2SSL
                     string action = info.Action;
                     Entity entity = info.Entity;
 
+                    // 2020/4/8
+                    // 如果 PII 为空
+                    if (string.IsNullOrEmpty(entity.PII))
+                    {
+                        info.State = "dontsync";
+                        info.SyncErrorCode = "PiiEmpty";
+                        info.SyncErrorInfo = $"UID 为 {entity.UID} 的标签 PII 为空，不再进行同步(标签原出错信息 '{entity.Error}')";
+                        processed.Add(info);
+                        error_actions.Add(info);
+                        continue;
+                    }
 #if REMOVED
                     string action_name = "借书";
                     if (action == "return")
@@ -2524,7 +2610,7 @@ namespace dp2SSL
                             };
                             doc.Add(error);
                             // 写入错误日志
-                            WpfClientInfo.WriteInfoLog($"册 '{entity.PII}' 因缺乏请求者无法进行借书请求");
+                            WpfClientInfo.WriteInfoLog($"册 '{GetPiiString(entity)}' 因缺乏请求者无法进行借书请求");
                             continue;
                         }
                     }
@@ -2704,7 +2790,7 @@ namespace dp2SSL
                         && string.IsNullOrEmpty(biblio_records[0]) == false)
                         entity.Title = biblio_records[0];
 
-                    string title = entity.PII;
+                    string title = GetPiiString(entity);
                     if (string.IsNullOrEmpty(entity.Title) == false)
                         title += " (" + entity.Title + ")";
 
@@ -3220,6 +3306,7 @@ Stack:
             {
                 RequestItem request = new RequestItem();
                 request.PII = action.Entity?.PII;
+                // TODO: 若 PII 为空，写入 UID?
                 request.OperatorString = action.Operator == null ? null : JsonConvert.SerializeObject(action.Operator);
                 request.EntityString = JsonConvert.SerializeObject(action.Entity);
                 /*
@@ -3520,7 +3607,10 @@ TaskScheduler.Default);
             actions.ForEach(item =>
             {
                 if (item.Action == "borrow" && item.SyncErrorCode == "overflow")
-                    overflow_titles.Add($"{i++}) {SubmitDocument.ShortTitle(item.Entity.Title)} [{item.Entity.PII}]");
+                {
+                    var pii = GetPiiString(item.Entity);
+                    overflow_titles.Add($"{i++}) {SubmitDocument.ShortTitle(item.Entity.Title)} [{pii}]");
+                }
             });
             if (overflow_titles.Count > 0)
             {
@@ -3541,17 +3631,17 @@ TaskScheduler.Default);
             Hashtable table = new Hashtable();
             foreach (var action in actions)
             {
-                List<ActionInfo> list = table[action.Entity.PII] as List<ActionInfo>;
+                string pii = GetPiiString(action.Entity);
+                List<ActionInfo> list = table[pii] as List<ActionInfo>;
                 if (list == null)
                 {
                     list = new List<ActionInfo>();
-                    table[action.Entity.PII] = list;
+                    table[pii] = list;
                 }
                 list.Add(action);
             }
 
             return new List<List<ActionInfo>>(table.Values.Cast<List<ActionInfo>>());
-
             /*
             List<List<ActionInfo>> results = new List<List<ActionInfo>>();
             foreach(var key in table.Keys)
@@ -3561,6 +3651,14 @@ TaskScheduler.Default);
 
             return results;
             */
+        }
+
+        // 获得 PII 字符串。如果 PII 为空，会改取 UID 返回
+        public static string GetPiiString(Entity entity)
+        {
+            if (string.IsNullOrEmpty(entity.PII))
+                return $"UID:{entity.UID}";
+            return entity.PII;
         }
 
 #if NO

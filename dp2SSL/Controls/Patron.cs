@@ -162,6 +162,22 @@ namespace dp2SSL
             this.Waiting = false;
         }
 
+        // 2020/4/9
+        // 追加一个错误信息
+        public void AppendError(string error, string color = "red")
+        {
+            if (string.IsNullOrEmpty(error))
+            {
+                this.Waiting = false;
+                return;
+            }
+            if (string.IsNullOrEmpty(this.Error) == false)
+                this.Error += ";";
+            this.Error += error;
+            this.ErrorColor = color;
+            this.Waiting = false;
+        }
+
         public RfidItem Clone()
         {
             Patron dup = new Patron();

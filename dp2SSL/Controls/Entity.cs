@@ -165,10 +165,10 @@ namespace dp2SSL
             this.Add(entity);
 
             // Exception:
-            //      可能会抛出异常 ArgumentException TagDataException
+            //      可能会抛出异常 ArgumentException
             SetPII(entity);
 
-            entity.SetError(data.Error);
+            entity.AppendError(data.Error);
             return entity;
         }
 
@@ -211,11 +211,11 @@ namespace dp2SSL
             }
 
             // Exception:
-            //      可能会抛出异常 ArgumentException TagDataException
+            //      可能会抛出异常 ArgumentException
             SetPII(entity);
             // 如何触发下一步的获取和显示?
 
-            entity.SetError(data.Error);
+            entity.AppendError(data.Error);
             return entity;
         }
 
@@ -231,8 +231,9 @@ namespace dp2SSL
         }
 
         // 根据 entity 中的 RFID 信息设置 PII
+        // 注：如果标签内容解析错误，Entity.Error 中会返回有报错信息
         // Exception:
-        //      可能会抛出异常 ArgumentException TagDataException
+        //      可能会抛出异常 ArgumentException
         public static void SetPII(Entity entity)
         {
             // 刷新 PII
@@ -241,14 +242,27 @@ namespace dp2SSL
             {
                 string pii = "";
 
-                // Exception:
-                //      可能会抛出异常 ArgumentException TagDataException
-                LogicChip chip = LogicChip.From(entity.TagInfo.Bytes,
-    (int)entity.TagInfo.BlockSize,
-    "" // tag.TagInfo.LockStatus
-    );
-                pii = chip.FindElement(ElementOID.PII)?.Text;
-                entity.PII = pii;
+                try
+                {
+                    // Exception:
+                    //      可能会抛出异常 ArgumentException TagDataException
+                    LogicChip chip = LogicChip.From(entity.TagInfo.Bytes,
+        (int)entity.TagInfo.BlockSize,
+        "" // tag.TagInfo.LockStatus
+        );
+                    pii = chip.FindElement(ElementOID.PII)?.Text;
+                    entity.PII = pii;
+                }
+                catch(TagInfoException ex)
+                {
+                    // entity.UID 应该有值
+                    entity.SetError($"标签内容解析错误: {ex.Message}");
+                }
+                catch (Exception ex)
+                {
+                    // entity.UID 应该有值
+                    entity.SetError($"标签内容解析错误(1): {ex.Message}");
+                }
             }
             else if (string.IsNullOrEmpty(entity.PII) == false
                 && entity.TagInfo == null)

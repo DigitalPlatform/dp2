@@ -151,6 +151,8 @@ namespace DigitalPlatform.RFID
 
         // parameters:
         //      readerNameList  list中包含的内容的读卡器名(列表)。注意 list 中包含的标签，可能并不是全部读卡器的标签。对没有包含在其中的标签，本函数需要注意跳过(维持现状)，不要当作被删除处理
+        // 异常：
+        //      可能抛出 TagInfoException
         public static void Refresh(BaseChannel<IRfid> channel,
             string readerNameList,
             List<OneTag> list,
@@ -389,14 +391,25 @@ namespace DigitalPlatform.RFID
                                 }
                             }
 
-                            // 观察 typeOfUsage 元素
-                            // Exception:
-                            //      可能会抛出异常 ArgumentException TagDataException
-                            var chip = LogicChip.From(info.Bytes,
-        (int)info.BlockSize,
-        "");
+                            LogicChip chip = null;
+                            string typeOfUsage = "";
+                            try
+                            {
+                                // 观察 typeOfUsage 元素
+                                // Exception:
+                                //      可能会抛出异常 ArgumentException TagDataException
+                                chip = LogicChip.From(info.Bytes,
+            (int)info.BlockSize,
+            "");
+                                typeOfUsage = chip.FindElement(ElementOID.TypeOfUsage)?.Text;
+                            }
+                            catch (TagDataException ex)
+                            {
+                                // throw new TagInfoException(ex.Message, info);
 
-                            string typeOfUsage = chip.FindElement(ElementOID.TypeOfUsage)?.Text;
+                                // 解析错误的标签，当作图书标签处理
+                                typeOfUsage = "";
+                            }
 
                             // 分离 ISO15693 图书标签和读者卡标签
                             if (string.IsNullOrEmpty(data.Type))
@@ -425,6 +438,8 @@ namespace DigitalPlatform.RFID
                                     _typeTable[data.OneTag.UID] = typeOfUsage;
                                 }
                             }
+
+
                         }
                     } // end of foreach
 
@@ -603,4 +618,16 @@ namespace DigitalPlatform.RFID
         }
     }
 
+    // 2020/4/9
+    // RFID 标签信息异常
+    [Serializable]
+    public class TagInfoException : Exception
+    {
+        public TagInfo TagInfo { get; set; }
+        public TagInfoException(string s, TagInfo tagInfo)
+            : base(s)
+        {
+            TagInfo = tagInfo;
+        }
+    }
 }
