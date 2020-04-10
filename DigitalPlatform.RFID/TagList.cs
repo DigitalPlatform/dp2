@@ -110,6 +110,14 @@ namespace DigitalPlatform.RFID
             List<TagAndData> removed_patrons);
         public delegate void delegate_setError(string type, string error);
 
+        // 2020/4/10
+        // 判断标签是图书标签还是读者卡类型？
+        // return:
+        //      ""  不确定类型
+        //      "patron"    读者卡
+        //      "book"      图书标签
+        public delegate string delegate_detectType(OneTag tag);
+
         // TODO: 维持一个 UID --> typeOfUsage 的对照表，加快对图书和读者类型标签的分离判断过程
         // UID --> typeOfUsage string
         static Hashtable _typeTable = new Hashtable();
@@ -157,7 +165,8 @@ namespace DigitalPlatform.RFID
             string readerNameList,
             List<OneTag> list,
             delegate_notifyChanged notifyChanged,
-            delegate_setError setError)
+            delegate_setError setError,
+            delegate_detectType detectType = null)
         {
             try
             {
@@ -205,27 +214,59 @@ namespace DigitalPlatform.RFID
                         continue;
                     }
 
-                    // ISO14443A 的一律当作读者证卡
-                    if (tag.Protocol == InventoryInfo.ISO14443A)
+                    // 原来的行为
+                    if (detectType == null)
                     {
-                        patron = new TagAndData { OneTag = tag, Type = "patron" };
-                        new_patrons.Add(patron);
-                    }
-                    else
-                    {
-                        // 根据缓存的 typeOfUsage 来判断
-                        string typeOfUsage = (string)_typeTable[tag.UID];
-                        if (typeOfUsage != null && typeOfUsage.StartsWith("8"))
+                        // ISO14443A 的一律当作读者证卡
+                        if (tag.Protocol == InventoryInfo.ISO14443A)
                         {
                             patron = new TagAndData { OneTag = tag, Type = "patron" };
                             new_patrons.Add(patron);
-                            found_books.Remove(patron);
                         }
                         else
                         {
-                            // ISO15693 的则先添加到 _books 中。等类型判断完成，有可能还要调整到 _patrons 中
-                            book = new TagAndData { OneTag = tag };
-                            new_books.Add(book);
+                            // 根据缓存的 typeOfUsage 来判断
+                            string typeOfUsage = (string)_typeTable[tag.UID];
+                            if (typeOfUsage != null && typeOfUsage.StartsWith("8"))
+                            {
+                                patron = new TagAndData { OneTag = tag, Type = "patron" };
+                                new_patrons.Add(patron);
+                                found_books.Remove(patron);
+                            }
+                            else
+                            {
+                                // ISO15693 的则先添加到 _books 中。等类型判断完成，有可能还要调整到 _patrons 中
+                                book = new TagAndData { OneTag = tag };
+                                new_books.Add(book);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // *** 按照定制函数来进行类别分析
+                        string type = detectType(tag);
+                        if (type == "patron")
+                        {
+                            var new_data = new TagAndData
+                            {
+                                OneTag = tag,
+                                Type = "patron"
+                            };
+                            new_patrons.Add(new_data);
+                            // TODO: 按照 UID 移走
+                            found_books.Remove(new_data);
+                        }
+                        else
+                        {
+                            // "book" or ""
+                            var new_data = new TagAndData
+                            {
+                                OneTag = tag,
+                                Type = ""
+                            };
+                            new_books.Add(new_data);
+                            // TODO: 按照 UID 移走
+                            found_patrons.Remove(new_data);
                         }
                     }
                 }
@@ -391,54 +432,93 @@ namespace DigitalPlatform.RFID
                                 }
                             }
 
-                            LogicChip chip = null;
-                            string typeOfUsage = "";
-                            try
-                            {
-                                // 观察 typeOfUsage 元素
-                                // Exception:
-                                //      可能会抛出异常 ArgumentException TagDataException
-                                chip = LogicChip.From(info.Bytes,
-            (int)info.BlockSize,
-            "");
-                                typeOfUsage = chip.FindElement(ElementOID.TypeOfUsage)?.Text;
-                            }
-                            catch (TagDataException ex)
-                            {
-                                // throw new TagInfoException(ex.Message, info);
-
-                                // 解析错误的标签，当作图书标签处理
-                                typeOfUsage = "";
-                            }
-
-                            // 分离 ISO15693 图书标签和读者卡标签
+                            // 对于不确定类型的标签(data.Type 为空的)，再次确定类型以便分离 ISO15693 图书标签和读者卡标签
                             if (string.IsNullOrEmpty(data.Type))
                             {
-                                if (typeOfUsage != null && typeOfUsage.StartsWith("8"))
+                                // 原来的行为
+                                if (detectType == null)
                                 {
-                                    // 需要调整到 _patrons 中
-                                    data.Type = "patron";
-                                    // 删除列表? 同时添加列表
-                                    remove_books.Add(data);
-                                    update_books.Remove(data);  // 容错
-                                    new_patrons.Add(data);
+                                    LogicChip chip = null;
+                                    string typeOfUsage = "";
+                                    try
+                                    {
+                                        // 观察 typeOfUsage 元素
+                                        // Exception:
+                                        //      可能会抛出异常 ArgumentException TagDataException
+                                        chip = LogicChip.From(info.Bytes,
+                    (int)info.BlockSize,
+                    "");
+                                        typeOfUsage = chip.FindElement(ElementOID.TypeOfUsage)?.Text;
+                                    }
+                                    catch (TagDataException ex)
+                                    {
+                                        // throw new TagInfoException(ex.Message, info);
+
+                                        // 解析错误的标签，当作图书标签处理
+                                        typeOfUsage = "";
+                                    }
+
+
+                                    if (typeOfUsage != null && typeOfUsage.StartsWith("8"))
+                                    {
+                                        // 需要调整到 _patrons 中
+                                        data.Type = "patron";
+                                        // 删除列表? 同时添加列表
+                                        remove_books.Add(data);
+                                        update_books.Remove(data);  // 容错
+                                        new_patrons.Add(data);
+                                    }
+                                    else
+                                    {
+                                        data.Type = "book";
+                                        update_books.Add(data);
+                                        update_patrons.Remove(data);
+                                    }
+
+                                    // 保存到缓存
+                                    if (typeOfUsage != null)
+                                    {
+                                        if (_typeTable.Count > 1000)
+                                            _typeTable.Clear();
+                                        _typeTable[data.OneTag.UID] = typeOfUsage;
+                                    }
                                 }
                                 else
                                 {
-                                    data.Type = "book";
-                                    update_books.Add(data);
-                                    update_patrons.Remove(data);
-                                }
+                                    // *** 用定制的函数判断
+                                    string new_type = detectType(tag);
 
-                                // 保存到缓存
-                                if (typeOfUsage != null)
-                                {
-                                    if (_typeTable.Count > 1000)
-                                        _typeTable.Clear();
-                                    _typeTable[data.OneTag.UID] = typeOfUsage;
+                                    // 重新分离 ISO15693 图书标签和读者卡标签
+                                    if (data.Type != new_type)
+                                    {
+                                        if (new_type == "patron")
+                                        {
+                                            // book --> patron
+                                            // 需要调整到 _patrons 中
+                                            data.Type = "patron";
+                                            // 删除列表? 同时添加列表
+                                            remove_books.Add(data);
+                                            update_books.Remove(data);  // 容错
+                                            //new_patrons.Add(data);
+                                            update_patrons.Add(data);
+                                        }
+
+                                        if (new_type == "book")
+                                        {
+                                            // patron --> book
+                                            data.Type = "book";
+                                            /*
+                                            update_books.Add(data);
+                                            update_patrons.Remove(data);
+                                            */
+                                            remove_patrons.Add(data);
+                                            update_patrons.Remove(data);
+                                            update_books.Add(data);
+                                        }
+
+                                    }
                                 }
                             }
-
 
                         }
                     } // end of foreach
