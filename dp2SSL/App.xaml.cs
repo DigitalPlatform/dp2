@@ -1167,7 +1167,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                 {
                     progress = new ProgressWindow();
                     progress.TitleText = "紫外线消毒";
-                    progress.MessageText = "即将进行紫外线消毒\r\n警告：紫外线对眼睛和皮肤有害，请迅速远离书柜";
+                    progress.MessageText = "警告：紫外线对眼睛和皮肤有害";
                     progress.Owner = Application.Current.MainWindow;
                     progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
                     progress.Closed += (s, e) =>
@@ -1177,28 +1177,50 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                     progress.okButton.Content = "停止";
                     progress.Background = new SolidColorBrush(Colors.DarkRed);
                     App.SetSize(progress, "wide");
+                    progress.BackColor = "yellow";
                     progress.Show();
                 }));
 
                 try
                 {
-                    // 首先警告远离
-                    App.CurrentApp.Speak("即将开始紫外线消毒，紫外灯对眼睛和皮肤有害，请马上远离书柜");
-                    await Task.Delay(TimeSpan.FromSeconds(20), cancel.Token);
+                    // 首先倒计时警告远离
+                    App.CurrentApp.Speak("即将开始紫外线消毒，请马上远离书柜");
+                    for (int i = 20; i > 0; i--)
+                    {
+                        if (cancel.Token.IsCancellationRequested)
+                            return;
+                        string text = $"({i}) 即将进行紫外线消毒，请迅速远离书柜\r\n\r\n警告：紫外线对眼睛和皮肤有害";
+                        App.Invoke(new Action(() =>
+                        {
+                            progress.MessageText = text;
+                        }));
+                        await Task.Delay(TimeSpan.FromSeconds(1), cancel.Token);
+                    }
 
                     App.Invoke(new Action(() =>
                     {
-                        progress.MessageText = "正在进行紫外线消毒\r\n警告：紫外线对眼睛和皮肤有害，请不要靠近书柜";
+                        progress.BackColor = "red";
+                        progress.MessageText = "正在进行紫外线消毒，请不要靠近书柜\r\n\r\n警告：紫外线对眼睛和皮肤有害";
                     }));
 
                     // TODO: 屏幕上可以显示剩余时间
                     // TODO: 背景色动画，闪动
                     RfidManager.TurnSterilamp("*", "turnOn");
+                    DateTime end = DateTime.Now + TimeSpan.FromMinutes(10);
                     for (int i = 0; i < 3 * 10; i++)    // 10 分钟
                     {
-                        App.CurrentApp.Speak("正在进行紫外线消毒，紫外灯对眼睛和皮肤有害，请不要靠近书柜");
+                        App.CurrentApp.SpeakSequence("正在进行紫外线消毒，紫外灯对眼睛和皮肤有害，请不要靠近书柜");
                         if (cancel.Token.IsCancellationRequested)
                             break;
+                        string timeText = $"剩余 {Convert.ToInt32((end - DateTime.Now).TotalMinutes)} 分钟";
+
+                        if ((i % 3) == 0)
+                            App.CurrentApp.SpeakSequence(timeText);
+
+                        App.Invoke(new Action(() =>
+                        {
+                            progress.MessageText = $"({timeText}) 正在进行紫外线消毒，请不要靠近书柜\r\n\r\n警告：紫外线对眼睛和皮肤有害";
+                        }));
                         await Task.Delay(TimeSpan.FromSeconds(20), cancel.Token);
                     }
                 }

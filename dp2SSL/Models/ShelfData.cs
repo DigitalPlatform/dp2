@@ -2188,7 +2188,8 @@ namespace dp2SSL
             {
                 tags.AddRange(e.AddBooks);
                 // 延时触发 SelectAntenna()
-                _tagAdded = true;
+                if (e.AddBooks.Count > 0)
+                    _tagAdded = true;
             }
 
             if (e.UpdateBooks != null)
@@ -2196,19 +2197,35 @@ namespace dp2SSL
 
             // 2020/4/9
             // 把书柜读卡器上的(ISO15693)读者卡也计算在内
-            var patrons = TagList.Patrons.FindAll(tag =>
             {
-                // 判断一下 tag 是否属于已经定义的门范围
-                var doors = DoorItem.FindDoors(ShelfData.Doors, tag.OneTag.ReaderName, tag.OneTag.AntennaID.ToString());
-                if (doors.Count > 0)
-                    return true;
-                return false;
-            });
-            foreach (var patron in patrons)
-            {
-                var type = patron.Type;
+                List<TagAndData> temp = new List<TagAndData>();
+                if (e.AddPatrons != null)
+                    temp.AddRange(e.AddPatrons);
+                if (e.UpdatePatrons != null)    // 因为有两阶段通知的问题，所以 update 的也应该考虑在内
+                    temp.AddRange(e.UpdatePatrons);
+                var patrons = temp.FindAll(tag =>
+                {
+                    if (tag.OneTag.Protocol != InventoryInfo.ISO15693)
+                        return false;
+                    if (tag.OneTag.TagInfo == null)
+                        return false;   // 忽略还没有 TagInfo 的那些超前的通知
+
+                    // 判断一下 tag 是否属于已经定义的门范围
+                    var doors = DoorItem.FindDoors(ShelfData.Doors, tag.OneTag.ReaderName, tag.OneTag.AntennaID.ToString());
+                    if (doors.Count > 0)
+                        return true;
+                    return false;
+                });
+                /*
+                foreach (var patron in patrons)
+                {
+                    var type = patron.Type;
+                }
+                */
+                tags.AddRange(patrons);
             }
-            tags.AddRange(patrons);
+
+            // List<string> new_patron_uids = new List<string>();
 
             List<string> add_uids = new List<string>();
             int removeBooksCount = 0;
@@ -2232,6 +2249,10 @@ namespace dp2SSL
                         if (Add(_adds, tag) == true)
                         {
                             changed = true;
+
+                            // 刚刚增加的 patron 的 UID，记忆下来
+                            //if (tag.Type == "patron")
+                            //    new_patron_uids.Add(tag.OneTag.UID);
                         }
                         if (Remove(_removes, tag) == true)
                             changed = true;
@@ -2260,6 +2281,8 @@ namespace dp2SSL
                     // 把书柜读卡器上的(ISO15693)读者卡也计算在内
                     var remove_patrons = e.RemovePatrons?.FindAll(tag =>
                     {
+                        if (tag.OneTag.Protocol != InventoryInfo.ISO15693)
+                            return false;
                         // 判断一下 tag 是否属于已经定义的门范围
                         var doors = DoorItem.FindDoors(ShelfData.Doors, tag.OneTag.ReaderName, tag.OneTag.AntennaID.ToString());
                         if (doors.Count > 0)
@@ -2278,6 +2301,18 @@ namespace dp2SSL
 
                     //if (tag.Type == "patron")
                     //    continue;
+
+                    /*
+                    // 2020/4/10
+                    // 刚增加的 patron，这里就不要去移走了
+                    if (new_patron_uids.IndexOf(tag.OneTag.UID) != -1)
+                        continue;
+                        */
+
+                    // 2020/4/10
+                    // 刚添加过的标签，这里就不要去移走了。即，添加比移除要优先
+                    if (add_uids.IndexOf(tag.OneTag.UID) != -1)
+                        continue;
 
                     // 看看 _all 里面有没有
                     var results = Find("all", tag);
