@@ -49,6 +49,7 @@
     <Compile Include="Element.cs" />
     <Compile Include="IRfid.cs" />
     <Compile Include="IRfidDriver.cs" />
+    <Compile Include="NewTagList.cs" />
     <Compile Include="Permutation.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TagList.cs" />

@@ -1358,7 +1358,13 @@ namespace dp2SSL
             {
                 // _all.Clear();
 
+#if OLD_TAGCHANGED
                 var books = TagList.Books;
+#else
+                var books = NewTagList.Tags;
+                // TODO: 注意里面也包含了读者卡，需要过滤一下
+#endif
+
                 WpfClientInfo.WriteErrorLog($"books count={books.Count}, ReaderNameList={RfidManager.ReaderNameList}(注：此时门应该都是关闭的，图书读卡器应该是停止盘点状态)");
                 foreach (var tag in books)
                 {
@@ -1366,6 +1372,10 @@ namespace dp2SSL
                         return new InitialShelfResult();
 
                     WpfClientInfo.WriteErrorLog($" tag={tag.ToString()}");
+
+                    // 跳过读者读卡器上的标签
+                    if (tag.OneTag.ReaderName == _patronReaderName)
+                        continue;
 
                     // 2019/12/17
                     // 判断一下 tag 是否属于已经定义的门范围
@@ -1379,6 +1389,7 @@ namespace dp2SSL
                     // 不属于本函数当前关注的门范围
                     if (Cross(doors_param, doors) == false)
                         continue;
+
 
                     try
                     {
@@ -1402,7 +1413,19 @@ namespace dp2SSL
                         warnings.Add($"UID 为 '{tag.OneTag?.UID}' 的标签出现数据格式错误: {ex.Message}");
                         WpfClientInfo.WriteErrorLog($"InitialShelfEntities() 遇到 tag (UID={tag.OneTag?.UID}) 数据格式出错：{ex.Message}\r\ntag 详情：{tag.ToString()}");
                     }
+
+                    /*
+                    // 对读者卡进行判断(注：这些都是在书柜门以内的读卡器上的读者卡)
+                    // 属于本函数当前关注的门范围
+                    if (tag.Type == "patron")
+                    {
+                        warnings.Add($"出现读者证标签。UID={tag.OneTag?.UID} Protocol={tag.OneTag?.Protocol}");
+                        WpfClientInfo.WriteErrorLog($"InitialShelfEntities() 出现读者证标签。门={doors[0].Name},UID={tag.OneTag?.UID} Protocol={tag.OneTag?.Protocol}\r\ntag 详情：{tag.ToString()}");
+                    }
+                    */
                 }
+
+#if OLD_TAGCHANGED
 
                 // 2020/4/9
                 // 检查放在柜门内的 ISO15693 读者卡
@@ -1429,6 +1452,7 @@ namespace dp2SSL
                         WpfClientInfo.WriteErrorLog($"InitialShelfEntities() 出现读者证标签。门={doors[0].Name},UID={tag.OneTag?.UID} Protocol={tag.OneTag?.Protocol}\r\ntag 详情：{tag.ToString()}");
                     }
                 }
+#endif
             }
 
             // DoorItem.DisplayCount(_all, _adds, _removes, App.CurrentApp.Doors);
@@ -1466,6 +1490,42 @@ namespace dp2SSL
                 }
 
                 return false;
+            }
+        }
+
+        // Exception:
+        //      可能会抛出异常 ArgumentException TagDataException
+        static void SetTagType(TagAndData data, out string pii)
+        {
+            pii = null;
+
+            if (data.OneTag.Protocol == InventoryInfo.ISO14443A)
+            {
+                data.Type = "patron";
+                return;
+            }
+
+            if (data.OneTag.TagInfo == null)
+            {
+                data.Type = ""; // 表示类型不确定
+                return;
+            }
+
+            if (string.IsNullOrEmpty(data.Type))
+            {
+                // Exception:
+                //      可能会抛出异常 ArgumentException TagDataException
+                LogicChip chip = LogicChip.From(data.OneTag.TagInfo.Bytes,
+    (int)data.OneTag.TagInfo.BlockSize,
+    "" // tag.TagInfo.LockStatus
+    );
+                pii = chip.FindElement(ElementOID.PII)?.Text;
+
+                var typeOfUsage = chip.FindElement(ElementOID.TypeOfUsage)?.Text;
+                if (typeOfUsage != null && typeOfUsage.StartsWith("8"))
+                    data.Type = "patron";
+                else
+                    data.Type = "book";
             }
         }
 
@@ -1617,8 +1677,16 @@ namespace dp2SSL
             };
 
             // Exception:
+            //      可能会抛出异常 ArgumentException TagDataException
+            SetTagType(tag, out string pii);
+            result.PII = pii;
+
+#if NO
+            // Exception:
             //      可能会抛出异常 ArgumentException 
-            EntityCollection.SetPII(result);
+            EntityCollection.SetPII(result, pii);
+#endif
+
             // 2020/4/9
             if (tag.Type == "patron")
             {
@@ -2166,6 +2234,340 @@ namespace dp2SSL
 
         public delegate void Delagate_booksChanged();
 
+        // 新版本事件
+        // 跟随事件动态更新列表
+        // Add: 检查列表中是否存在这个 PII，如果存在，则修改状态为 在架，并设置 UID 成员
+        //      如果不存在，则为列表添加一个新元素，修改状态为在架，并设置 UID 和 PII 成员
+        // Remove: 检查列表中是否存在这个 PII，如果存在，则修改状态为 不在架
+        //      如果不存在这个 PII，则不做任何动作
+        // Update: 检查列表中是否存在这个 PII，如果存在，则修改状态为 在架，并设置 UID 成员
+        //      如果不存在，则为列表添加一个新元素，修改状态为在架，并设置 UID 和 PII 成员
+        public static async Task ChangeEntitiesAsync(BaseChannel<IRfid> channel,
+            NewTagChangedEventArgs e,
+            Delagate_booksChanged func_booksChanged)
+        {
+            if (ShelfData.FirstInitialized == false)
+                return;
+
+            // 开门状态下，动态信息暂时不要合并
+            bool changed = false;
+
+            List<TagAndData> tags = new List<TagAndData>();
+            if (e.AddTags != null)
+            {
+                tags.AddRange(e.AddTags);
+                // 延时触发 SelectAntenna()
+                if (e.AddTags.Count > 0)
+                    _tagAdded = true;
+            }
+
+            if (e.UpdateTags != null)
+                tags.AddRange(e.UpdateTags);
+
+            // 2020/4/11
+            // 忽略读者读卡器上的标签
+            {
+                var filtered = tags.FindAll(tag =>
+                {
+                    //if (tag.OneTag.Protocol != InventoryInfo.ISO15693)
+                    //    return false;
+                    // 加快判断速度，先排除读者读卡器上的标签
+                    if (tag.OneTag.ReaderName == _patronReaderName)
+                        return false;
+
+                    if (tag.OneTag.Protocol == InventoryInfo.ISO15693
+                        && tag.OneTag.TagInfo == null)
+                        return false;   // 忽略还没有 TagInfo 的那些超前的通知
+
+                    // 判断一下 tag 是否属于已经定义的门范围
+                    var doors = DoorItem.FindDoors(ShelfData.Doors, tag.OneTag.ReaderName, tag.OneTag.AntennaID.ToString());
+                    if (doors.Count > 0)
+                        return true;
+                    return false;
+                });
+
+                tags = filtered;
+            }
+
+            List<string> add_uids = new List<string>();
+            int removeBooksCount = 0;
+            lock (_syncRoot_all)
+            {
+                // 新添加标签(或者更新标签信息)
+                foreach (var tag in tags)
+                {
+                    // 没有 TagInfo 信息的先跳过
+                    if (tag.OneTag.TagInfo == null)
+                        continue;
+
+                    add_uids.Add(tag.OneTag.UID);
+
+                    // 看看 _all 里面有没有
+                    var results = Find(_all, tag);
+                    if (results.Count == 0)
+                    {
+                        // Exception:
+                        //      可能会抛出异常 ArgumentException TagDataException
+                        if (Add(_adds, tag) == true)
+                        {
+                            changed = true;
+
+                            // 刚刚增加的 patron 的 UID，记忆下来
+                            //if (tag.Type == "patron")
+                            //    new_patron_uids.Add(tag.OneTag.UID);
+                        }
+                        if (Remove(_removes, tag) == true)
+                            changed = true;
+                    }
+                    else
+                    {
+                        // 更新 _all 里面的信息
+                        if (Update(_all, tag) == true)
+                        {
+                            // Exception:
+                            //      可能会抛出异常 ArgumentException TagDataException
+                            Add(_changes, tag);
+                        }
+
+                        // 要把 _adds 和 _removes 里面都去掉
+                        if (Remove(_adds, tag) == true)
+                            changed = true;
+                        if (Remove(_removes, tag) == true)
+                            changed = true;
+                    }
+                }
+
+                List<TagAndData> removes = null;
+                {
+                    // 2020/4/9
+                    // 把书柜读卡器上的(ISO15693)读者卡也计算在内
+                    removes = e.RemoveTags?.FindAll(tag =>
+                    {
+                        //if (tag.OneTag.Protocol != InventoryInfo.ISO15693)
+                        //    return false;
+
+                        // 加快判断速度，先排除读者读卡器上的标签
+                        if (tag.OneTag.ReaderName == _patronReaderName)
+                            return false;
+
+                        // 判断一下 tag 是否属于已经定义的门范围
+                        var doors = DoorItem.FindDoors(ShelfData.Doors, tag.OneTag.ReaderName, tag.OneTag.AntennaID.ToString());
+                        if (doors.Count > 0)
+                            return true;
+                        return false;
+                    });
+                }
+
+                // 拿走标签
+                foreach (var tag in removes)
+                {
+                    if (tag.OneTag.TagInfo == null)
+                        continue;
+
+                    // 刚添加过的标签，这里就不要去移走了。即，添加比移除要优先
+                    if (add_uids.IndexOf(tag.OneTag.UID) != -1)
+                        continue;
+
+                    // 看看 _all 里面有没有
+                    var results = Find("all", tag);
+                    if (results.Count > 0)
+                    {
+                        if (Remove(_adds, tag) == true)
+                            changed = true;
+                        if (Remove(_changes, tag) == true)
+                            changed = true;
+                        /*
+                        if (Add(_removes, tag) == true)
+                        {
+                            changed = true;
+                        }
+                        */
+                        // 2020/4/5
+                        // 这样可以利用 All 里面的 Entity 对象，通常其 Title 属性已经有值
+                        if (Add("removes", results[0]) == true)
+                            changed = true;
+                    }
+                    else
+                    {
+                        // _all 里面没有，很奇怪(是否写入错误日志？)。但，
+                        // 要把 _adds 和 _removes 里面都去掉
+                        if (Remove(_adds, tag) == true)
+                            changed = true;
+                        if (Remove(_removes, tag) == true)
+                            changed = true;
+                        if (Remove(_changes, tag) == true)
+                            changed = true;
+                    }
+
+                    removeBooksCount++;
+                }
+            }
+
+            /*
+            StringUtil.RemoveDup(ref add_uids, false);
+            int add_count = add_uids.Count;
+            int remove_count = 0;
+            if (e.RemoveTags != null)
+                remove_count = removeBooksCount; // 注： e.RemoveBooks.Count 是不准确的，有时候会把 ISO15693 的读者卡判断时作为 remove 信号
+
+            */
+
+            // TODO: 把 add remove error 动作分散到每个门，然后再触发 ShelfData.BookChanged 事件
+
+            if (changed == true)
+            {
+                // DoorItem.DisplayCount(_all, _adds, _removes, ShelfData.Doors);
+                ShelfData.RefreshCount();
+                func_booksChanged?.Invoke();
+            }
+
+            // TODO: 平时可以建立一个 cache，以后先从 cache 里面取书目摘要字符串
+            var task = Task.Run(async () =>
+            {
+                CancellationToken token = CancelToken;
+                await FillBookFieldsAsync(All, token);
+                await FillBookFieldsAsync(Adds, token);
+                await FillBookFieldsAsync(Removes, token);
+            });
+        }
+
+        static object _syncRoot_patronTags = new object();
+        static List<TagAndData> _patronTags = null;
+
+        public static List<TagAndData> PatronTags
+        {
+            get
+            {
+                lock (_syncRoot_patronTags)
+                {
+                    return new List<TagAndData>(_patronTags);
+                }
+            }
+        }
+
+        // 更新 _patronTags 集合
+        // TODO: 要能处理 ISO15693 图书标签放到读者读卡器上的动作。可以弹出一个窗口显示这一本图书的信息
+        public static async Task<NormalResult> ChangePatronTagsAsync(BaseChannel<IRfid> channel,
+            NewTagChangedEventArgs e)
+        {
+            int count = 0;
+            // 初始化
+            if (_patronTags == null)
+            {
+                lock (_syncRoot_patronTags)
+                {
+                    _patronTags = NewTagList.Tags.FindAll((tag) =>
+                    {
+                        if (tag.OneTag.ReaderName != _patronReaderName)
+                            return false;
+                        // TODO: ISO15693 的 .TagInfo 是否可能为 null?
+                        // 排除 ISO15693 的图书标签
+                        SetTagType(tag, out string pii);
+                        if (tag.Type == "book")
+                            return false;
+                        return true;
+                    });
+                }
+                return new NormalResult { Value = 1 };
+            }
+
+            // ****
+            // 处理需要添加的对象
+            List<TagAndData> tags = new List<TagAndData>();
+            if (e.AddTags != null)
+            {
+                tags.AddRange(e.AddTags);
+                // 延时触发 SelectAntenna()
+                if (e.AddTags.Count > 0)
+                    _tagAdded = true;
+            }
+
+            if (e.UpdateTags != null)
+                tags.AddRange(e.UpdateTags);
+
+            {
+                var filtered = tags.FindAll(tag =>
+                {
+                    if (tag.OneTag.ReaderName != _patronReaderName)
+                        return false;
+                    // 暂时忽略 .TagInfo 为空的那些 ISO15693 的标签
+                    if (tag.OneTag.Protocol == InventoryInfo.ISO15693
+                    && tag.OneTag.TagInfo == null)
+                        return false;
+                    SetTagType(tag, out string pii);
+                    if (tag.Type == "book")
+                        return false;
+                    return true;
+                });
+
+                tags = filtered;
+            }
+
+            lock (_syncRoot_patronTags)
+            {
+                foreach (var tag in tags)
+                {
+                    var found = _patronTags.FindAll(o =>
+                    {
+                        return o.OneTag.UID == tag.OneTag.UID;
+                    });
+
+                    if (found.Count > 0)
+                    {
+                        // 替换
+                        int index = _patronTags.IndexOf(found[0]);
+                        _patronTags[index] = tag;
+                        count++;
+                    }
+                    else
+                    {
+                        _patronTags.Add(tag);
+                        count++;
+                    }
+                }
+            }
+
+            // ****
+            // 处理需要移走的对象
+            List<TagAndData> removes = null;
+            {
+                // 2020/4/9
+                // 把书柜读卡器上的(ISO15693)读者卡也计算在内
+                removes = e.RemoveTags?.FindAll(tag =>
+                {
+                    if (tag.OneTag.ReaderName != _patronReaderName)
+                        return false;
+                    return true;
+                });
+            }
+
+            if (removes.Count > 0)
+            {
+                lock (_syncRoot_patronTags)
+                {
+                    foreach (var tag in removes)
+                    {
+                        Remove(_patronTags, tag.OneTag.UID);
+                        count++;
+                    }
+                }
+            }
+            return new NormalResult { Value = count };
+
+            void Remove(List<TagAndData> collection, string uid)
+            {
+                var found = collection.FindAll(o =>
+                {
+                    return o.OneTag.UID == uid;
+                });
+                foreach (var tag in found)
+                {
+                    collection.Remove(tag);
+                }
+            }
+        }
+
+#if OLD_TAGCHANGED
         // 跟随事件动态更新列表
         // Add: 检查列表中是否存在这个 PII，如果存在，则修改状态为 在架，并设置 UID 成员
         //      如果不存在，则为列表添加一个新元素，修改状态为在架，并设置 UID 和 PII 成员
@@ -2403,6 +2805,8 @@ namespace dp2SSL
                 await FillBookFieldsAsync(Removes, token);
             });
         }
+
+#endif
 
         static int[] tones = new int[] { 523, 659, 783 };
         /*
@@ -3156,12 +3560,15 @@ Stack:
             {
                 if (uint.TryParse(antenna, out uint antenna_id) == false)
                     antenna_id = 0;
-                // TagList.ClearTagTable(uid);
                 var result = RfidManager.SetEAS($"{uid}", antenna_id, enable);
                 if (result.Value != -1)
                 {
+#if OLD_TAGCHANGED
+
                     TagList.SetEasData(uid, enable);
-                    // All.SetEasData(uid, enable);
+#else
+                    NewTagList.SetEasData(uid, enable);
+#endif
                 }
                 return result;
             }

@@ -230,6 +230,12 @@ namespace dp2SSL
             return chip.FindElement(ElementOID.PII)?.Text;
         }
 
+        // 2020/4/11
+        public static void SetPII(Entity entity, string pii)
+        {
+            entity.PII = pii;
+        }
+
         // 根据 entity 中的 RFID 信息设置 PII
         // 注：如果标签内容解析错误，Entity.Error 中会返回有报错信息
         // Exception:
@@ -253,7 +259,7 @@ namespace dp2SSL
                     pii = chip.FindElement(ElementOID.PII)?.Text;
                     entity.PII = pii;
                 }
-                catch(TagInfoException ex)
+                catch (TagInfoException ex)
                 {
                     // entity.UID 应该有值
                     entity.SetError($"标签内容解析错误: {ex.Message}");

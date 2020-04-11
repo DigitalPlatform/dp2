@@ -99,7 +99,11 @@ namespace dp2SSL
             FingerprintManager.SetError += FingerprintManager_SetError;
             FingerprintManager.Touched += FingerprintManager_Touched;
 
+#if OLD_TAGCHANGED
             App.CurrentApp.TagChanged += CurrentApp_TagChanged;
+#else
+            App.CurrentApp.NewTagChanged += CurrentApp_NewTagChanged;
+#endif
 
             // RfidManager.ListLocks += RfidManager_ListLocks;
             ShelfData.OpenCountChanged += CurrentApp_OpenCountChanged;
@@ -990,8 +994,11 @@ namespace dp2SSL
 
             RfidManager.SetError -= RfidManager_SetError;
 
+#if OLD_TAGCHANGED
             App.CurrentApp.TagChanged -= CurrentApp_TagChanged;
-            //ShelfData.BookChanged -= ShelfData_BookChanged;
+#else
+            App.CurrentApp.NewTagChanged += CurrentApp_NewTagChanged;
+#endif
 
             FingerprintManager.Touched -= FingerprintManager_Touched;
             FingerprintManager.SetError -= FingerprintManager_SetError;
@@ -1248,6 +1255,8 @@ namespace dp2SSL
             }
         }
 
+#if OLD_TAGCHANGED
+
 #pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
         private async void CurrentApp_TagChanged(object sender, TagChangedEventArgs e)
 #pragma warning restore VSTHRD100 // 避免使用 Async Void 方法
@@ -1307,6 +1316,57 @@ namespace dp2SSL
                 ShelfData.RefreshCount();
             }
         }
+
+#else
+        // 新版本的事件
+#pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
+        private async void CurrentApp_NewTagChanged(object sender, NewTagChangedEventArgs e)
+#pragma warning restore VSTHRD100 // 避免使用 Async Void 方法
+        {
+            // TODO: 对已经拿走的读者卡，用 TagList.ClearTagTable() 清除它的缓存内容
+
+            // 读者。不再精细的进行增删改跟踪操作，而是笼统地看 TagList.Patrons 集合即可
+            _ = Task.Run(async () =>
+            {
+                var result = await ShelfData.ChangePatronTagsAsync((BaseChannel<IRfid>)sender,
+                    e);
+                if (result.Value > 0)
+                    await RefreshPatronsAsync();
+            });
+
+
+            await ShelfData.ChangeEntitiesAsync((BaseChannel<IRfid>)sender,
+                e,
+                () =>
+                {
+                    // 如果图书数量有变动，要自动清除挡在前面的残留的对话框
+                    CloseDialogs();
+                });
+
+            // "initial" 模式下，立即合并到 _all。等关门时候一并提交请求
+            // TODO: 不过似乎此时有语音提示放入、取出，似乎更显得实用一些？
+            if (this.Mode == "initial")
+            {
+                var adds = ShelfData.Adds; // new List<Entity>(ShelfData.Adds);
+                {
+                    ShelfData.Add("all", adds);
+
+                    ShelfData.Remove("adds", adds);
+                    ShelfData.Remove("removes", adds);
+                }
+
+                var removes = ShelfData.Removes;
+                {
+                    ShelfData.Remove("all", removes);
+
+                    ShelfData.Remove("adds", removes);
+                    ShelfData.Remove("removes", removes);
+                }
+
+                ShelfData.RefreshCount();
+            }
+        }
+#endif
 
         bool _initialCancelled = false;
 
@@ -1768,6 +1828,81 @@ namespace dp2SSL
             _initialCancelled = true;
         }
 
+        // 新版本的，注意读者卡也在 NewTagList.Tags 里面
+        // 刷新读者信息
+        // TODO: 当读者信息更替时，要检查前一个读者是否有 _adds 和 _removes 队列需要提交，先提交，再刷成后一个读者信息
+        async Task RefreshPatronsAsync()
+        {
+            try
+            {
+                // 2020/4/11
+                // 只关注 shelf.xml 中定义的读者卡读卡器上的卡
+                var patrons = ShelfData.PatronTags;
+
+                if (patrons.Count == 1)
+                    _patron.IsRfidSource = true;
+
+                if (_patron.IsFingerprintSource)
+                {
+                    // 指纹仪来源
+                    // CloseDialogs();
+                }
+                else
+                {
+
+                    if (patrons.Count >= 1 && ClosePasswordDialog() == true)
+                    {
+                        // 这次刷卡的作用是取消了上次登录
+                        return;
+                    }
+
+                    // RFID 来源
+                    if (patrons.Count == 1)
+                    {
+                        if (_patron.Fill(patrons[0].OneTag) == false)
+                            return;
+
+                        SetPatronError("rfid_multi", "");   // 2019/5/22
+
+                        // 2019/5/29
+                        // resut.Value
+                        //      -1  出错
+                        //      0   没有填充
+                        //      1   成功填充
+                        var result = await FillPatronDetailAsync();
+                        if (result.Value == 1)
+                            Welcome();
+                    }
+                    else
+                    {
+                        // 拿走 RFID 读者卡时，不要清除读者信息。也就是说和指纹做法一样
+
+                        // PatronClear(false); // 不需要 submit
+
+
+                        // SetPatronError("getreaderinfo", "");
+
+                        if (patrons.Count > 1)
+                        {
+                            // 读卡器上放了多张读者卡
+                            SetPatronError("rfid_multi", $"读卡器上放了多张读者卡({patrons.Count})。请拿走多余的");
+                        }
+                        else
+                        {
+                            SetPatronError("rfid_multi", "");   // 2019/5/20
+                        }
+                    }
+                }
+                SetGlobalError("patron", "");
+            }
+            catch (Exception ex)
+            {
+                SetGlobalError("patron", $"RefreshPatrons() 出现异常: {ex.Message}");
+            }
+        }
+
+#if OLD_TAGCHANGED
+
         // 刷新读者信息
         // TODO: 当读者信息更替时，要检查前一个读者是否有 _adds 和 _removes 队列需要提交，先提交，再刷成后一个读者信息
         async Task RefreshPatronsAsync()
@@ -1775,8 +1910,6 @@ namespace dp2SSL
             //_lock_refreshPatrons.EnterWriteLock();
             try
             {
-                // var patrons = TagList.Patrons;
-
                 // 2020/4/9
                 // 把书柜读卡器上的(ISO15693)读者卡排除在外
                 var patrons = TagList.Patrons.FindAll(tag =>
@@ -1854,6 +1987,7 @@ namespace dp2SSL
                 //_lock_refreshPatrons.ExitWriteLock();
             }
         }
+#endif
 
         public static string HexToDecimal(string hex_string)
         {
