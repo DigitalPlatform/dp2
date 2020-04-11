@@ -283,12 +283,16 @@ namespace dp2SSL
             }
         }
 
+        // 比 App.Funcion == "智能书柜" 判断起来更快
+        static bool _isShelfMode = false;
+
         public void InitialShelfCfg()
         {
             if (App.Function == "智能书柜")
             {
                 try
                 {
+                    _isShelfMode = true;
                     ShelfData.InitialShelf();
                 }
                 catch (FileNotFoundException)
@@ -300,6 +304,8 @@ namespace dp2SSL
                     this.SetError("cfg", $"InitialShelf() 出现异常:{ex.Message}");
                 }
             }
+            else
+                _isShelfMode = false;
         }
 
         private void _barcodeCapture_InputChar(CharInput input)
@@ -1097,6 +1103,10 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
         }
 
         public event TagChangedEventHandler TagChanged = null;
+
+        // 新版本的事件
+        public event NewTagChangedEventHandler NewTagChanged = null;
+
         // public event SetErrorEventHandler TagSetError = null;
 
         private void RfidManager_ListTags(object sender, ListTagsEventArgs e)
@@ -1105,29 +1115,61 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             // this.Number = e.Result?.Results?.Count.ToString();
             if (e.Result.Results != null)
             {
-                TagList.Refresh(sender as BaseChannel<IRfid>,
-                    e.ReaderNameList,
-                    e.Result.Results,
-                        (add_books, update_books, remove_books, add_patrons, update_patrons, remove_patrons) =>
-                        {
-                            TagChanged?.Invoke(sender, new TagChangedEventArgs
+                if (_isShelfMode == false)
+                {
+                    TagList.Refresh(sender as BaseChannel<IRfid>,
+                        e.ReaderNameList,
+                        e.Result.Results,
+                            (add_books, update_books, remove_books, add_patrons, update_patrons, remove_patrons) =>
                             {
-                                AddBooks = add_books,
-                                UpdateBooks = update_books,
-                                RemoveBooks = remove_books,
-                                AddPatrons = add_patrons,
-                                UpdatePatrons = update_patrons,
-                                RemovePatrons = remove_patrons
+                                TagChanged?.Invoke(sender, new TagChangedEventArgs
+                                {
+                                    AddBooks = add_books,
+                                    UpdateBooks = update_books,
+                                    RemoveBooks = remove_books,
+                                    AddPatrons = add_patrons,
+                                    UpdatePatrons = update_patrons,
+                                    RemovePatrons = remove_patrons
+                                });
+                            },
+                            (type, text) =>
+                            {
+                                RfidManager.TriggerSetError(this, new SetErrorEventArgs { Error = text });
+                                // TagSetError?.Invoke(this, new SetErrorEventArgs { Error = text });
+                            });
+
+                    // 标签总数显示 图书+读者卡
+                    this.Number = $"{TagList.Books.Count}:{TagList.Patrons.Count}";
+                }
+                else
+                {
+                    NewTagList.Refresh(// sender as BaseChannel<IRfid>,
+                        e.ReaderNameList,
+                        e.Result.Results,
+                        (readerName, uid, antennaID) =>
+                        {
+                            var channel = sender as BaseChannel<IRfid>;
+                            if (channel.Started == false)
+                                return new GetTagInfoResult { Value = -1, ErrorInfo = "RFID 通道尚未启动" };
+                            return channel.Object.GetTagInfo(readerName, uid, antennaID);
+                        },
+                        (add_tags, update_tags, remove_tags) =>
+                        {
+                            NewTagChanged?.Invoke(sender, new NewTagChangedEventArgs
+                            {
+                                AddTags = add_tags,
+                                UpdateTags = update_tags,
+                                RemoveTags = remove_tags,
                             });
                         },
                         (type, text) =>
                         {
                             RfidManager.TriggerSetError(this, new SetErrorEventArgs { Error = text });
-                            // TagSetError?.Invoke(this, new SetErrorEventArgs { Error = text });
                         });
 
-                // 标签总数显示 图书+读者卡
-                this.Number = $"{TagList.Books.Count}:{TagList.Patrons.Count}";
+                    // 标签总数显示 只显示标签数，不再区分图书标签和读者卡
+                    this.Number = $"{NewTagList.Tags.Count}";
+                }
             }
         }
 
@@ -1249,6 +1291,20 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             Current.Dispatcher.Invoke(action);
         }
     }
+
+    public delegate void NewTagChangedEventHandler(object sender,
+NewTagChangedEventArgs e);
+
+    /// <summary>
+    /// 设置标签变化事件的参数
+    /// </summary>
+    public class NewTagChangedEventArgs : EventArgs
+    {
+        public List<TagAndData> AddTags { get; set; }
+        public List<TagAndData> UpdateTags { get; set; }
+        public List<TagAndData> RemoveTags { get; set; }
+    }
+
 
     public delegate void TagChangedEventHandler(object sender,
 TagChangedEventArgs e);
