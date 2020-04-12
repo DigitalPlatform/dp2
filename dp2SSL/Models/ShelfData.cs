@@ -1003,7 +1003,7 @@ namespace dp2SSL
                 if (transferins.Count > 0)
                 {
                     bAsked = true;
-                    App.CurrentApp.Speak("典藏移交");
+                    App.CurrentApp.Speak("上架");
                     string batchNo = transferins[0].Operator.GetWorkerAccountName() + "_" + DateTime.Now.ToShortDateString();
                     /*
                     EntityCollection collection = new EntityCollection();
@@ -1020,7 +1020,9 @@ namespace dp2SSL
                     App.Invoke(new Action(() =>
                     {
                         AskTransferWindow dialog = new AskTransferWindow();
-                        dialog.TitleText = "向内移交";
+                        dialog.TitleText = "上架";
+                        dialog.TransferButtonText = "上架+典藏移交";
+                        dialog.NotButtonText = "普通上架";
                         dialog.SetBooks(collection);
                         dialog.Text = $"是否要针对以上放入书柜的图书进行典藏移交？";
                         dialog.Owner = App.CurrentApp.MainWindow;
@@ -1078,7 +1080,7 @@ namespace dp2SSL
                 if (transferouts.Count > 0)
                 {
                     bAsked = true;
-                    App.CurrentApp.Speak("典藏移交");
+                    App.CurrentApp.Speak("下架");
 
                     string batchNo = transferouts[0].Operator.GetWorkerAccountName() + "_" + DateTime.Now.ToShortDateString();
 
@@ -1100,7 +1102,9 @@ namespace dp2SSL
                     App.Invoke(new Action(() =>
                     {
                         AskTransferWindow dialog = new AskTransferWindow();
-                        dialog.TitleText = "向外移交";
+                        dialog.TitleText = "下架";
+                        dialog.TransferButtonText = "下架+典藏移交";
+                        dialog.NotButtonText = "普通下架";
                         dialog.Mode = "out";
                         dialog.SetBooks(collection);
                         dialog.Text = $"是否要针对以上拿出书柜的图书进行典藏移交？";
@@ -1123,8 +1127,12 @@ namespace dp2SSL
                     {
                         foreach (var action in transferouts)
                         {
+                            // 修改 Action
                             action.Location = "";
+                            // 注: action.CurrentShelfNo 也为空
+                            // 注: action.TransferDirection 为 "out"
 
+                            /*
                             // 把不需要操作的 ActionInfo 删除
                             if (string.IsNullOrEmpty(action.Location)
                                 && string.IsNullOrEmpty(action.CurrentShelfNo))
@@ -1132,6 +1140,8 @@ namespace dp2SSL
                                 actions.Remove(action);
                                 func_removeAction?.Invoke(action);
                             }
+                            */
+
                         }
                     }
                     else
@@ -3060,6 +3070,19 @@ namespace dp2SSL
                         info.State = "dontsync";
                         info.SyncErrorCode = "PiiEmpty";
                         info.SyncErrorInfo = $"UID 为 {entity.UID} 的标签 PII 为空，不再进行同步(标签原出错信息 '{entity.Error}')";
+                        processed.Add(info);
+                        error_actions.Add(info);
+                        continue;
+                    }
+
+                    if (info.Action == "transfer"
+                        && info.TransferDirection == "out"
+                        && string.IsNullOrEmpty(info.Location) == true
+                        && string.IsNullOrEmpty(info.CurrentShelfNo) == true)
+                    {
+                        info.State = "dontsync";
+                        info.SyncErrorCode = "NotSupport";  // 目前暂不支持同步此请求
+                        info.SyncErrorInfo = $"(无目标式)下架请求暂不支持同步到 dp2library";
                         processed.Add(info);
                         error_actions.Add(info);
                         continue;

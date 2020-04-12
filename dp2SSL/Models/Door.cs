@@ -280,6 +280,11 @@ namespace dp2SSL
         // 根据 shelf.xml 配置文件定义，构建 DoorItem 集合
         public static List<DoorItem> BuildItems(XmlDocument cfg_dom)
         {
+            List<string> location_list = null;
+            var getlocation_result = LibraryChannelUtil.GetLocationList();
+            if (getlocation_result.Value != -1)
+                location_list = getlocation_result.List;
+
             List<DoorItem> results = new List<DoorItem>();
 
             XmlNodeList shelfs = cfg_dom.DocumentElement.SelectNodes("shelf");
@@ -300,6 +305,13 @@ namespace dp2SSL
                         throw new Exception($"非 free 类型的 door 元素未定义必备的 shelfNo (架号)属性({door.OuterXml})");
                     }
 
+                    // 2020/4/12
+                    // 检查 shelfNo 中冒号左边的馆藏地是否在 dp2library 一段存在
+                    {
+                        var location = StringUtil.ParseTwoPart(door_shelfNo, ":")[0];
+                        if (location_list != null && location_list.IndexOf(location) == -1)
+                            throw new Exception($"shelf.xml 中的 shelfNo 属性值 '{door_shelfNo}' 中的馆藏地 '{location}' 不在当前 dp2library 定义的合法馆藏地值范围内。(当前合法的馆藏地为 '{StringUtil.MakePathList(location_list, ",")}')");
+                    }
                     string lockName = door.GetAttribute("lock");
                     if (lockName != null && lockName.IndexOf(":") != -1)
                         throw new Exception($"lock 属性值中不应包含冒号({door.OuterXml})");

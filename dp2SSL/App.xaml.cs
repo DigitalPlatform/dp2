@@ -286,6 +286,7 @@ namespace dp2SSL
         // 比 App.Funcion == "智能书柜" 判断起来更快
         static bool _isShelfMode = false;
 
+        // 可能会在全局错误 "cfg" 中设置出错信息
         public void InitialShelfCfg()
         {
             if (App.Function == "智能书柜")
@@ -1100,6 +1101,11 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
         {
             // _errors.Clear();
             _errorTable.SetError(type, "");
+        }
+
+        public string GetError(string type)
+        {
+            return _errorTable.GetError(type);
         }
 
         public event TagChangedEventHandler TagChanged = null;

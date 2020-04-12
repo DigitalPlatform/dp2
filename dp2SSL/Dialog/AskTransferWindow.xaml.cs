@@ -3,15 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+
 
 namespace dp2SSL
 {
@@ -122,6 +115,30 @@ namespace dp2SSL
             set
             {
                 this.target.Text = value;
+            }
+        }
+
+        public string TransferButtonText
+        {
+            get
+            {
+                return this.transferButton.Content as string;
+            }
+            set
+            {
+                this.transferButton.Content = value;
+            }
+        }
+
+        public string NotButtonText
+        {
+            get
+            {
+                return this.notButton.Content as string;
+            }
+            set
+            {
+                this.notButton.Content = value;
             }
         }
 

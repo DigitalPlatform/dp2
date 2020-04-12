@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Linq.Expressions;
+using System.Threading;
 
 using Newtonsoft.Json;
 using Microsoft.AspNet.SignalR.Client;
@@ -15,7 +16,6 @@ using DigitalPlatform;
 using DigitalPlatform.MessageClient;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
-using System.Threading;
 using DigitalPlatform.WPF;
 using DigitalPlatform.SimpleMessageQueue;
 
@@ -385,6 +385,13 @@ IList<MessageRecord> messages)
                 return;
             }
 
+            // 修改操作历史
+            if (command.StartsWith("change history"))
+            {
+                await ChangeHistoryAsync(command);
+                return;
+            }
+
             // 检查册状态
             if (command.StartsWith("check"))
             {
@@ -408,6 +415,11 @@ IList<MessageRecord> messages)
                 // 子参数
                 string param = command.Substring("list history".Length).Trim();
                 // "not sync" 表示只列出那些没有成功同步的操作
+
+                // TODO: 实现 id=xxx~xxx 操作。可以根据 ID 查看记录
+                // id=xxx(n) 表示从指定 ID 位置开始向后看至多 n 条记录
+                // id=xxx(-n) 表示从指定 ID 位置开始向前(时间靠前)看至多 n 条记录
+                // TODO: 实现 state=xxx,xxx 操作。可以根据记录状态查看记录
 
                 using (var context = new MyContext())
                 {
@@ -475,6 +487,74 @@ IList<MessageRecord> messages)
                 await SendMessageAsync(text.ToString());
             }
         }
+
+        // 修改操作历史
+        // 子参数:
+        //      id=xxxx state=xxxx
+        static async Task ChangeHistoryAsync(string command)
+        {
+            try
+            {
+                // 子参数
+                string param = command.Substring("change history".Length).Trim();
+
+                var table = StringUtil.ParseParameters(param, ' ', '=', "");
+                string id_string = table["id"] as string;
+                if (string.IsNullOrEmpty(id_string))
+                {
+                    await SendMessageAsync($"> {command}\r\n命令中缺乏 id=xxxx 部分，无法定位要修改的记录");
+                    return;
+                }
+
+                int id = Convert.ToInt32(id_string);
+
+                using (var context = new MyContext())
+                {
+                    context.Database.EnsureCreated();
+
+                    var item = context.Requests.Where(o => o.ID == id).FirstOrDefault();
+                    if (item == null)
+                    {
+                        await SendMessageAsync($"> {command}\r\n没有找到 ID 为 '{id}' 的操作历史记录");
+                        return;
+                    }
+
+                    bool changed = false;
+                    if (table.ContainsKey("state"))
+                    {
+                        string new_value = table["state"] as string;
+                        if (isStateValid(new_value) == false)
+                        {
+                            await SendMessageAsync($"> {command}\r\n要修改为新的 State 值 '{new_value}' 不合法。修改操作被拒绝");
+                            return;
+                        }
+                        // TODO: 是否自动写入一个附注字段内容，记载修改前的内容，和修改的原因(comment=xxx)？
+                        item.State = new_value;
+                        changed = true;
+                    }
+
+                    if (changed == true)
+                    {
+                        await context.SaveChangesAsync();
+                        await SendMessageAsync($"> {command}\r\n记录被修改。修改后内容如下:\r\n{DisplayRequestItem.GetDisplayString(item)}");
+                    }
+                    else
+                        await SendMessageAsync($"> {command}\r\n记录没有发生修改。记录内容如下:\r\n{DisplayRequestItem.GetDisplayString(item)}");
+                }
+            }
+            catch (Exception ex)
+            {
+                await SendMessageAsync($"命令 {command} 执行过程出现异常:\r\n{ExceptionUtil.GetDebugText(ex)}");
+            }
+        }
+
+        static bool isStateValid(string value)
+        {
+            if (value != "dontsync")
+                return true;
+            return false;
+        }
+
 
         #region 显示格式
 

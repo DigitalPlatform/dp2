@@ -425,20 +425,23 @@ namespace dp2SSL
                 }
             }
 
-
-            // 操作名称
-            p.Inlines.Add(new Run
-            {
-                Text = GetOperationCaption(action.Action) + " ",
-                Foreground = Brushes.White
-            });
-
             // 转移方向
-            if (action.Action == "transfer" && string.IsNullOrEmpty(action.TransferDirection) == false)
+            if (action.Action == "transfer"
+                /*&& string.IsNullOrEmpty(action.TransferDirection) == false*/)
             {
                 p.Inlines.Add(new Run
                 {
-                    Text = GetOperationCaption(action.TransferDirection) + " ",
+                    Text = GetTransferDirCaption(action.TransferDirection) + " ",
+                    Foreground = Brushes.White
+                });
+            }
+            else
+            {
+
+                // 操作名称
+                p.Inlines.Add(new Run
+                {
+                    Text = GetOperationCaption(action.Action) + " ",
                     Foreground = Brushes.White
                 });
             }
@@ -470,6 +473,8 @@ namespace dp2SSL
                 p.Inlines.Add(run);
             }
 
+            // TODO: 对于上架/下架来说，最好还要补充显示一些细节信息：location 去向；和 currentLocation 去向
+
             // 错误码和错误信息
             if (string.IsNullOrEmpty(action.SyncErrorInfo) == false
                 && (action.State != "sync" || action.SyncErrorCode == "overflow"))
@@ -483,6 +488,19 @@ namespace dp2SSL
             }
 
             return p;
+        }
+
+        // TODO: 最好把 下架 和 典藏移交(出) 区别开。典藏移交是有明确 location 目的地的操作
+        // TODO: 也把上架 和典藏移交(入) 区别开。典藏移交是有明确 location 目的地的操作
+        static string GetTransferDirCaption(string transferDirection)
+        {
+            if (transferDirection == "in")
+                return "上架";
+            if (transferDirection == "out")
+                return "下架";
+            if (string.IsNullOrEmpty(transferDirection))
+                return "转移(方向不明)";
+            return transferDirection;
         }
 
         static string GetOperationCaption(string operation)

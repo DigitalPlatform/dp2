@@ -1447,6 +1447,14 @@ namespace dp2SSL
                 AddLayer();
             }));
 
+            string cfg_error = App.CurrentApp.GetError("cfg");
+            if (string.IsNullOrEmpty(cfg_error) == false)
+            {
+                DisplayMessage(progress, cfg_error, "red");
+                _initialCancelled = true;
+                return;
+            }
+
             App.Invoke(new Action(() =>
             {
                 // 把门显示出来。因为此时需要看到是否关门的状态
@@ -2134,7 +2142,7 @@ namespace dp2SSL
             {
                 App.Invoke(new Action(() =>
                 {
-                    _passwordDialog.Close();
+                    _passwordDialog?.Close();
                     found = true;
                 }));
             }
@@ -2167,12 +2175,15 @@ namespace dp2SSL
                 _passwordDialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
                 _passwordDialog.Closed += (s, e) =>
                 {
-                    RemoveLayer();
-                    password = _passwordDialog.password.Password;
-                    dialog_result = _passwordDialog.Result;
-                    _passwordDialog = null;
-                    closed = true;
-                    App.ContinueBarcodeScan();
+                    if (_passwordDialog != null)
+                    {
+                        RemoveLayer();
+                        password = _passwordDialog.password.Password;
+                        dialog_result = _passwordDialog.Result;
+                        _passwordDialog = null;
+                        closed = true;
+                        App.ContinueBarcodeScan();
+                    }
                 };
                 _passwordDialog.Show();
                 AddLayer();
