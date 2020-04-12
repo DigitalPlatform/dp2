@@ -25,6 +25,7 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryServer.Common;
 using DigitalPlatform.Text;
+using dp2ManageCenter.Message;
 
 namespace dp2ManageCenter
 {
@@ -5376,6 +5377,22 @@ MessageBoxDefaultButton.Button2);
 
 
             contextMenu.Show(this.listView_errorLogTasks, new Point(e.X, e.Y));
+        }
+
+        // 设置消息账户
+        private void ToolStripMenuItem_messageAccounts_Click(object sender, EventArgs e)
+        {
+            using (MessageAccountForm dlg = new MessageAccountForm())
+            {
+                dlg.CfgFileName = Path.Combine(ClientInfo.UserDir, "message_accounts.json");
+                dlg.ShowDialog(this);
+            }
+        }
+
+        // 书柜查询
+        private void ToolStripMenuItem_searchShelf_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

@@ -242,6 +242,8 @@ KeyTime.FromTimeSpan(TimeSpan.FromSeconds(start + _length))) // KeyTime
                 button.SetValue(Grid.ColumnProperty, 0);
                 button.Click += Button_Click;
 
+                if (items.Count - 1 < index)
+                    throw new Exception($"门 items 个数({items.Count})不足");
                 button.DataContext = items[index++];
 
                 grid.Children.Add(button);
