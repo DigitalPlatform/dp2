@@ -174,7 +174,13 @@ namespace dp2SSL
 
             int return_count = actions.FindAll((o) => { return o.Action == "return"; }).Count;
             int borrow_count = actions.FindAll((o) => { return o.Action == "borrow"; }).Count;
-            int transfer_count = actions.FindAll((o) => { return o.Action == "transfer"; }).Count;
+            int change_currentLocation_count = actions
+                .FindAll((o) => { return o.Action == "transfer" && string.IsNullOrEmpty(o.CurrentShelfNo) == false; })
+                .Count;
+
+            int change_location_count = actions
+                .FindAll(o => { return o.Action == "transfer" && string.IsNullOrEmpty(o.Location) == false; })
+                .Count;
 
             /*
             int succeed_count = actions.FindAll((o) => { return o.ResultType == "succeed" || string.IsNullOrEmpty(o.ResultType); }).Count;
@@ -205,16 +211,18 @@ namespace dp2SSL
                 p.Margin = new Thickness(0, 0, 0, baseFontSize/*18*/);
                 doc.Blocks.Add(p);
 
-                if (borrow_count + return_count + transfer_count > 0)
+                if (borrow_count + return_count + change_currentLocation_count + change_location_count > 0)
                 {
                     List<string> lines = new List<string>();
                     if (return_count > 0)
-                        lines.Add($"还书请求 {return_count}");
+                        lines.Add($"还书 {return_count}");
                     if (borrow_count > 0)
-                        lines.Add($"借书请求 {borrow_count}");
+                        lines.Add($"借书 {borrow_count}");
 
-                    if (display_transfer && transfer_count > 0)
-                        lines.Add($"转移请求 {transfer_count}");
+                    if (display_transfer && change_currentLocation_count > 0)
+                        lines.Add($"转架 {change_currentLocation_count}");
+                    if (display_transfer && change_location_count > 0)
+                        lines.Add($"调拨 {change_location_count}");
 
                     p.Inlines.Add(new Run
                     {
@@ -405,7 +413,7 @@ namespace dp2SSL
                 }
                 else if (action.State == "dontsync")
                 {
-                    back = Brushes.DarkRed;
+                    back = Brushes.DarkBlue;
                     p.Inlines.Add(new Run
                     {
                         Text = $" 不再同步 ",
@@ -431,13 +439,12 @@ namespace dp2SSL
             {
                 p.Inlines.Add(new Run
                 {
-                    Text = GetTransferDirCaption(action.TransferDirection) + " ",
+                    Text = GetTransferDirCaption(action.TransferDirection, action.Location) + " ",
                     Foreground = Brushes.White
                 });
             }
             else
             {
-
                 // 操作名称
                 p.Inlines.Add(new Run
                 {
@@ -473,7 +480,20 @@ namespace dp2SSL
                 p.Inlines.Add(run);
             }
 
-            // TODO: 对于上架/下架来说，最好还要补充显示一些细节信息：location 去向；和 currentLocation 去向
+            // 对于上架/下架来说，还要补充显示一些细节信息：location 去向；和 currentLocation 去向
+            if (action.Action == "transfer")
+            {
+                List<string> details = new List<string>();
+                if (string.IsNullOrEmpty(action.Location) == false)
+                    details.Add($"调拨到:{action.Location}");
+                if (string.IsNullOrEmpty(action.CurrentShelfNo) == false)
+                    details.Add($"新架位:{action.CurrentShelfNo}");
+                p.Inlines.Add(new Run
+                {
+                    Text = " " + StringUtil.MakePathList(details, " ") + " ",
+                    Foreground = Brushes.Green
+                });
+            }
 
             // 错误码和错误信息
             if (string.IsNullOrEmpty(action.SyncErrorInfo) == false
@@ -492,15 +512,32 @@ namespace dp2SSL
 
         // TODO: 最好把 下架 和 典藏移交(出) 区别开。典藏移交是有明确 location 目的地的操作
         // TODO: 也把上架 和典藏移交(入) 区别开。典藏移交是有明确 location 目的地的操作
-        static string GetTransferDirCaption(string transferDirection)
+        static string GetTransferDirCaption(string transferDirection, string location)
         {
+            string result = "";
+            string direction = "";
             if (transferDirection == "in")
-                return "上架";
-            if (transferDirection == "out")
-                return "下架";
-            if (string.IsNullOrEmpty(transferDirection))
-                return "转移(方向不明)";
-            return transferDirection;
+            {
+                result = "上架";
+                direction = "入";
+            }
+            else if (transferDirection == "out")
+            {
+                result = "下架";
+                direction = "出";
+            }
+            else if (string.IsNullOrEmpty(transferDirection))
+                result = "转移(方向不明)";
+            else
+                result = transferDirection;
+
+            if (string.IsNullOrEmpty(location) == false)
+            {
+                if (string.IsNullOrEmpty(direction) == false)
+                    return result + "+调" + direction;
+                return result + "+调拨";
+            }
+            return result;
         }
 
         static string GetOperationCaption(string operation)

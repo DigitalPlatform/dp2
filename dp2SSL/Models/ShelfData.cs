@@ -714,13 +714,94 @@ namespace dp2SSL
             // 操作名称
             public string Operation { get; set; }
             public Entity Entity { get; set; }
-            public string ShelfNo { get; set; }
+            public string Location { get; set; }    // 目标馆藏地(调拨)
+            public string ShelfNo { get; set; }     // 目标架位(上下架)
             public Operator Operator { get; set; }
+        }
+
+        // 根据 ActionInfo 对象构建 OperationInfo 对象
+        public static List<OperationInfo> BuildOperationInfos(List<ActionInfo> actions)
+        {
+            List<OperationInfo> results = new List<OperationInfo>();
+            foreach(var action in actions)
+            {
+                if (action.Action == "return")
+                {
+                    var operation = new OperationInfo
+                    {
+                        Operation = "还书",
+                        Entity = action.Entity,
+                        Operator = action.Operator,
+                        ShelfNo = ShelfData.GetShelfNo(action.Entity),
+                    };
+                    /*
+                    if (action.Operator.IsWorker == true)
+                    {
+                        operation.Operation = "转入";
+                    }
+                    */
+                    results.Add(operation);
+                }
+
+                if (action.Action == "borrow")
+                {
+                    var operation = new OperationInfo
+                    {
+                        Operation = "借书",
+                        Entity = action.Entity,
+                        Operator = action.Operator,
+                        ShelfNo = ShelfData.GetShelfNo(action.Entity),
+                    };
+                    /*
+                    if (action.Operator.IsWorker == true)
+                    {
+                        operation.Operation = "转出";
+                    }
+                    */
+                    results.Add(operation);
+                }
+
+                if (action.Action == "transfer" && action.TransferDirection=="in")
+                {
+                    string name = "上架";
+                    if (string.IsNullOrEmpty(action.Location) == false)
+                        name = "上架+调入";
+                    var operation = new OperationInfo
+                    {
+                        Operation = name,
+                        Entity = action.Entity,
+                        Operator = action.Operator,
+                        Location = action.Location,
+                        ShelfNo = action.CurrentShelfNo,
+                    };
+
+                    results.Add(operation);
+                }
+
+                if (action.Action == "transfer" && action.TransferDirection == "out")
+                {
+                    string name = "下架";
+                    if (string.IsNullOrEmpty(action.Location) == false)
+                        name = "下架+调出";
+
+                    var operation = new OperationInfo
+                    {
+                        Operation = name,
+                        Entity = action.Entity,
+                        Operator = action.Operator,
+                        Location = action.Location,
+                        ShelfNo = action.CurrentShelfNo,
+                    };
+
+                    results.Add(operation);
+                }
+            }
+            return results;
         }
 
         public class SaveActionResult : NormalResult
         {
-            public List<OperationInfo> Operations { get; set; }
+            // public List<OperationInfo> Operations { get; set; }
             public List<ActionInfo> Actions { get; set; }
         }
 
@@ -731,7 +812,7 @@ namespace dp2SSL
             // string patronBarcode,
             Delegate_getOperator func_getOperator)
         {
-            List<OperationInfo> infos = new List<OperationInfo>();
+            // List<OperationInfo> infos = new List<OperationInfo>();
 
             lock (_syncRoot_actions)
             {
@@ -771,6 +852,7 @@ namespace dp2SSL
                         });
                     }
 
+                    /*
                     // 用于显示的操作信息
                     {
                         var operation = new OperationInfo
@@ -782,10 +864,11 @@ namespace dp2SSL
                         };
                         if (person.IsWorker == true)
                         {
-                            operation.Operation = "调入";
+                            operation.Operation = "转入";
                         }
                         infos.Add(operation);
                     }
+                    */
 
                     processed.Add(entity);
 
@@ -833,6 +916,7 @@ namespace dp2SSL
                         Operator = person
                     });
 
+                    /*
                     // 用于显示的操作信息
                     {
                         var operation = new OperationInfo
@@ -845,6 +929,7 @@ namespace dp2SSL
 
                         infos.Add(operation);
                     }
+                    */
 
                     processed.Add(entity);
                 }
@@ -883,6 +968,7 @@ namespace dp2SSL
                         });
                     }
 
+                    /*
                     // 用于显示的操作信息
                     {
                         var operation = new OperationInfo
@@ -894,10 +980,11 @@ namespace dp2SSL
                         };
                         if (person.IsWorker == true)
                         {
-                            operation.Operation = "调出";
+                            operation.Operation = "转出";
                         }
                         infos.Add(operation);
                     }
+                    */
 
                     processed.Add(entity);
 
@@ -928,13 +1015,13 @@ namespace dp2SSL
                     return new SaveActionResult
                     {
                         Actions = actions,
-                        Operations = infos
+                        //Operations = infos
                     };  // 没有必要处理
                 ShelfData.PushActions(actions);
                 return new SaveActionResult
                 {
                     Actions = actions,
-                    Operations = infos
+                    //Operations = infos
                 };
             }
         }
@@ -1021,10 +1108,10 @@ namespace dp2SSL
                     {
                         AskTransferWindow dialog = new AskTransferWindow();
                         dialog.TitleText = "上架";
-                        dialog.TransferButtonText = "上架+典藏移交";
+                        dialog.TransferButtonText = "上架+调入";
                         dialog.NotButtonText = "普通上架";
                         dialog.SetBooks(collection);
-                        dialog.Text = $"是否要针对以上放入书柜的图书进行典藏移交？";
+                        dialog.Text = $"是否要针对以上放入书柜的图书进行调入？";
                         dialog.Owner = App.CurrentApp.MainWindow;
                         dialog.BatchNo = batchNo;
                         dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
@@ -1103,11 +1190,11 @@ namespace dp2SSL
                     {
                         AskTransferWindow dialog = new AskTransferWindow();
                         dialog.TitleText = "下架";
-                        dialog.TransferButtonText = "下架+典藏移交";
+                        dialog.TransferButtonText = "下架+调出";
                         dialog.NotButtonText = "普通下架";
                         dialog.Mode = "out";
                         dialog.SetBooks(collection);
-                        dialog.Text = $"是否要针对以上拿出书柜的图书进行典藏移交？";
+                        dialog.Text = $"是否要针对以上拿出书柜的图书进行调出？";
                         dialog.target.ItemsSource = result.List;
                         dialog.BatchNo = batchNo;
                         dialog.Owner = App.CurrentApp.MainWindow;
@@ -2435,9 +2522,9 @@ namespace dp2SSL
             var task = Task.Run(async () =>
             {
                 CancellationToken token = CancelToken;
-                await FillBookFieldsAsync(All, token);
-                await FillBookFieldsAsync(Adds, token);
-                await FillBookFieldsAsync(Removes, token);
+                await FillBookFieldsAsync(All, token, "refreshCount");
+                await FillBookFieldsAsync(Adds, token, "refreshCount");
+                await FillBookFieldsAsync(Removes, token, "refreshCount");
             });
         }
 
@@ -2839,11 +2926,19 @@ namespace dp2SSL
             public List<string> Errors { get; set; }
         }
 
+        // TODO: 刷新 data 以前，是否先把有关字段都设置为 ?，避免观看者误会
+        // TODO: 获取册记录，优先从缓存中获取。注意借书、还书、转移等同步操作后，要及时更新或者废止缓存内容
         public static async Task<FillBookFieldsResult> FillBookFieldsAsync(// BaseChannel<IRfid> channel,
     IReadOnlyCollection<Entity> entities,
     CancellationToken token,
-    bool refreshCount = true)
+    string style/*,
+    bool refreshCount = true*/)
         {
+            // 是否重新获得册记录?
+            bool refresh_data = StringUtil.IsInList("refreshData", style);
+            // 是否刷新门上的数字
+            bool refreshCount = StringUtil.IsInList("refreshCount", style);
+
             // int error_count = 0;
             List<string> errors = new List<string>();
             foreach (Entity entity in entities)
@@ -2907,7 +3002,7 @@ namespace dp2SSL
 
                 // 获得 Title
                 // 注：如果 Title 为空，文字中要填入 "(空)"
-                if (string.IsNullOrEmpty(entity.Title)
+                if ((string.IsNullOrEmpty(entity.Title) || refresh_data)
                     && string.IsNullOrEmpty(entity.PII) == false && entity.PII != "(空)")
                 {
                     GetEntityDataResult result = await GetEntityDataAsync(entity.PII);

@@ -1326,6 +1326,7 @@ namespace dp2SSL
             // TODO: 对已经拿走的读者卡，用 TagList.ClearTagTable() 清除它的缓存内容
 
             // 读者。不再精细的进行增删改跟踪操作，而是笼统地看 TagList.Patrons 集合即可
+            /*
             _ = Task.Run(async () =>
             {
                 var result = await ShelfData.ChangePatronTagsAsync((BaseChannel<IRfid>)sender,
@@ -1333,7 +1334,14 @@ namespace dp2SSL
                 if (result.Value > 0)
                     await RefreshPatronsAsync();
             });
+            */
 
+            {
+                var result = await ShelfData.ChangePatronTagsAsync((BaseChannel<IRfid>)sender,
+    e);
+                if (result.Value > 0)
+                    await RefreshPatronsAsync();
+            }
 
             await ShelfData.ChangeEntitiesAsync((BaseChannel<IRfid>)sender,
                 e,
@@ -1578,7 +1586,7 @@ namespace dp2SSL
                                 //await FillBookFields(Removes, token);
                             });
                             */
-                            var fill_result = await ShelfData.FillBookFieldsAsync(part, ShelfData.CancelToken);
+                            var fill_result = await ShelfData.FillBookFieldsAsync(part, ShelfData.CancelToken, "refreshCount");
                             if (fill_result.Errors?.Count > 0)
                             {
                                 string error = StringUtil.MakePathList(fill_result.Errors, "\r\n");
@@ -2603,6 +2611,7 @@ namespace dp2SSL
             if (clearOperator == true && door.State == "close")
                 door.Operator = null; // 清掉门上的操作者名字
 
+            /*
             // 发出点对点消息
             if (result.Operations != null && result.Operations.Count > 0)
             {
@@ -2617,6 +2626,7 @@ namespace dp2SSL
                 }
                 TrySetMessage(text.ToString());
             }
+            */
         }
 
         // 将所有暂存信息保存为 Action，但并不立即提交
@@ -2762,6 +2772,28 @@ namespace dp2SSL
 
                     // 保存到数据库。这样不怕中途断电或者异常退出
                     await ShelfData.SaveActionsToDatabaseAsync(actions);
+
+                    // 在这里发出点对点消息比较合适
+                    // 发出点对点消息
+                    {
+                        var infos = ShelfData.BuildOperationInfos(actions);
+
+                        StringBuilder text = new StringBuilder();
+                        text.AppendLine($"{actions[0].Operator.GetDisplayString()}");
+                        int i = 0;
+                        foreach (var info in infos)
+                        {
+                            // TODO: 为啥 Entity.Title 为空
+                            text.Append($"{i + 1}) {info.Operation} {SubmitDocument.ShortTitle(info.Entity.Title)} [{info.Entity.PII}]");
+                            if (string.IsNullOrEmpty(info.Location) == false)
+                                text.Append($" 调拨到:{info.Location}");
+                            if (string.IsNullOrEmpty(info.ShelfNo) == false)
+                                text.Append($" 新架位:{info.ShelfNo}");
+                            text.AppendLine();
+                            i++;
+                        }
+                        TrySetMessage(text.ToString());
+                    }
 
                     // TODO: 加入的时候应带有归并功能。但注意 Retry 线程里面正在处理的集合应该暂时从 RetryActions 里面移走，避免和归并过程掺和
                     // ShelfData.AddRetryActions(actions);
