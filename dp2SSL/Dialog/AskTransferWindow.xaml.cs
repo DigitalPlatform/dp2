@@ -42,7 +42,8 @@ namespace dp2SSL
             books.SetSource(collection);
 
             // 后台处理刷新
-            var task = ShelfData.FillBookFieldsAsync(collection, _cancel.Token, "refreshData"/*, false*/);
+            // var task = ShelfData.FillBookFieldsAsync(collection, _cancel.Token, "refreshData"/*, false*/);
+            _ = ShelfData.FillBookFieldsAsync(collection, _cancel.Token, "");
         }
 
         public string TitleText

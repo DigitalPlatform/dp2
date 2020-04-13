@@ -723,7 +723,7 @@ namespace dp2SSL
         public static List<OperationInfo> BuildOperationInfos(List<ActionInfo> actions)
         {
             List<OperationInfo> results = new List<OperationInfo>();
-            foreach(var action in actions)
+            foreach (var action in actions)
             {
                 if (action.Action == "return")
                 {
@@ -761,7 +761,7 @@ namespace dp2SSL
                     results.Add(operation);
                 }
 
-                if (action.Action == "transfer" && action.TransferDirection=="in")
+                if (action.Action == "transfer" && action.TransferDirection == "in")
                 {
                     string name = "上架";
                     if (string.IsNullOrEmpty(action.Location) == false)
@@ -1107,7 +1107,7 @@ namespace dp2SSL
                     App.Invoke(new Action(() =>
                     {
                         AskTransferWindow dialog = new AskTransferWindow();
-                        dialog.TitleText = "上架";
+                        dialog.TitleText = $"上架({StringUtil.MakePathList(GetDoorName(transferins), ",")})";
                         dialog.TransferButtonText = "上架+调入";
                         dialog.NotButtonText = "普通上架";
                         dialog.SetBooks(collection);
@@ -1189,7 +1189,7 @@ namespace dp2SSL
                     App.Invoke(new Action(() =>
                     {
                         AskTransferWindow dialog = new AskTransferWindow();
-                        dialog.TitleText = "下架";
+                        dialog.TitleText = $"下架({StringUtil.MakePathList(GetDoorName(transferouts), ",")})";
                         dialog.TransferButtonText = "下架+调出";
                         dialog.NotButtonText = "普通下架";
                         dialog.Mode = "out";
@@ -1243,6 +1243,34 @@ namespace dp2SSL
             }
 
             return bAsked;
+
+            // 概括门名字
+            List<string> GetDoorName(List<ActionInfo> actions_param)
+            {
+                List<DoorItem> results = new List<DoorItem>();
+                foreach (var action in actions_param)
+                {
+                    var doors = DoorItem.FindDoors(ShelfData.Doors, action.Entity.ReaderName, action.Entity.Antenna);
+                    Add(results, doors);
+                }
+
+                List<string> names = new List<string>();
+                foreach(var door in results)
+                {
+                    names.Add(door.Name);
+                }
+
+                return names;
+
+                void Add(List<DoorItem> target, List<DoorItem> doors)
+                {
+                    foreach(var door in doors)
+                    {
+                        if (target.IndexOf(door) == -1)
+                            target.Add(door);
+                    }
+                }
+            }
         }
 
         static EntityCollection BuildEntityCollection(List<ActionInfo> actions)
@@ -1493,7 +1521,7 @@ namespace dp2SSL
                         // 注：所创建的 Entity 对象其 Error 成员可能有值，表示有出错信息
                         // Exception:
                         //      可能会抛出异常 ArgumentException
-                        var entity = NewEntity(tag);
+                        var entity = NewEntity(tag, false);
 
                         func_display($"正在填充图书队列 ({GetPiiString(entity)})...");
 
@@ -1763,7 +1791,7 @@ namespace dp2SSL
         // 注：所创建的 Entity 对象其 Error 成员可能有值，表示有出错信息
         // Exception:
         //      可能会抛出异常 ArgumentException
-        static Entity NewEntity(TagAndData tag)
+        static Entity NewEntity(TagAndData tag, bool throw_exception = true)
         {
             var result = new Entity
             {
@@ -1775,8 +1803,20 @@ namespace dp2SSL
 
             // Exception:
             //      可能会抛出异常 ArgumentException TagDataException
-            SetTagType(tag, out string pii);
-            result.PII = pii;
+            try
+            {
+                SetTagType(tag, out string pii);
+                result.PII = pii;
+            }
+            catch (Exception ex)
+            {
+                if (throw_exception == false)
+                {
+                    result.AppendError($"RFID 标签格式错误: {ex.Message}");
+                }
+                else
+                    throw ex;
+            }
 
 #if NO
             // Exception:
@@ -2178,7 +2218,7 @@ namespace dp2SSL
                 // 注：所创建的 Entity 对象其 Error 成员可能有值，表示有出错信息
                 // Exception:
                 //      可能会抛出异常 ArgumentException
-                entities.Add(NewEntity(tag));
+                entities.Add(NewEntity(tag, false));
                 return true;
             }
             return false;
@@ -2225,6 +2265,28 @@ namespace dp2SSL
             }
 
             return entities;
+        }
+
+        // 2020/4/13
+        // 更新 entity 里面的读者记录相关数据
+        static bool UpdateEntityXml(string name,
+            string uid,
+            string entity_xml)
+        {
+            lock (_syncRoot_all)
+            {
+                List<Entity> entities = LinkByName(name);
+
+                bool changed = false;
+                foreach (var entity in entities)
+                {
+                    if (entity.UID == uid)
+                    {
+                        entity.SetData(entity.ItemRecPath, entity_xml);
+                    }
+                }
+                return changed;
+            }
         }
 
         // 更新 Entity 信息
@@ -2559,7 +2621,14 @@ namespace dp2SSL
                             return false;
                         // TODO: ISO15693 的 .TagInfo 是否可能为 null?
                         // 排除 ISO15693 的图书标签
-                        SetTagType(tag, out string pii);
+                        try
+                        {
+                            SetTagType(tag, out string pii);
+                        }
+                        catch (Exception ex)
+                        {
+                            tag.Error += ($"RFID 标签格式错误: {ex.Message}");
+                        }
                         if (tag.Type == "book")
                             return false;
                         return true;
@@ -2591,7 +2660,14 @@ namespace dp2SSL
                     if (tag.OneTag.Protocol == InventoryInfo.ISO15693
                     && tag.OneTag.TagInfo == null)
                         return false;
-                    SetTagType(tag, out string pii);
+                    try
+                    {
+                        SetTagType(tag, out string pii);
+                    }
+                    catch (Exception ex)
+                    {
+                        tag.Error += ($"RFID 标签格式错误: {ex.Message}");
+                    }
                     if (tag.Type == "book")
                         return false;
                     return true;
@@ -3595,7 +3671,11 @@ namespace dp2SSL
                     {
                         if (item_records?.Length > 0)
                         {
-                            entity.SetData(entity.ItemRecPath, item_records[0]);
+                            // TODO: 这里更新 entity 后，那些克隆的 entity 何时更新呢？可否现在存入缓存备用?
+                            string entity_xml = item_records[0];
+                            entity.SetData(entity.ItemRecPath, entity_xml);
+                            // 2020/4/13
+                            UpdateEntityXml("all", entity.UID, entity_xml);
                             updates.Add(entity);
                         }
 
@@ -3612,7 +3692,6 @@ namespace dp2SSL
 
                         // TODO: 刷新读者信息显示。特别是一些关于借阅日期，借期，应还日期的内容
                     }
-
                 }
 
                 func_setProgress?.Invoke(-1, -1, -1, "处理完成");   // hide progress bar

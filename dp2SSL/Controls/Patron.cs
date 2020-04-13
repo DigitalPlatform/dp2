@@ -645,6 +645,11 @@ namespace dp2SSL
         }
 
         // 刷新信息
+        // Exception:
+        //      可能会抛出异常 ArgumentException TagDataException
+        // return:
+        //      false   未进行刷新
+        //      true    成功进行了刷新
         public bool Fill(OneTag tag)
         {
             string pii = "";
