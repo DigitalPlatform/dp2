@@ -34,7 +34,7 @@
                  VerticalScrollBarVisibility="Auto" BorderThickness="0">Text</TextBox>
             <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center"
                     Name="targetFrame" Visibility="Collapsed">
-                <TextBlock>移交到:</TextBlock>
+                <TextBlock>调拨到:</TextBlock>
                 <ComboBox Name="target" Width="400"></ComboBox>
             </StackPanel>
             <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Center"
@@ -45,13 +45,13 @@
             <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Center">
                 <Button Name="transferButton" 
                     Style="{DynamicResource RoundedButtonStyle}" 
-                    Width="260" Height="60" 
+                    Width="220" Height="60" 
                     FontSize="30" FontWeight="ExtraBold" 
                     Foreground="Red" 
                     Click="TransferButton_Click">典藏移交</Button>
                 <Button Name="notButton" 
                     Style="{DynamicResource RoundedButtonStyle}" 
-                    Width="160" Height="60" 
+                    Width="180" Height="60" 
                     FontSize="30" FontWeight="ExtraBold" 
                     Foreground="White" 
                     Click="NotButton_Click">不移交</Button>
