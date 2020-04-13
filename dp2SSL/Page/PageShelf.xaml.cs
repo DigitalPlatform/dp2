@@ -1875,8 +1875,17 @@ namespace dp2SSL
                     // RFID 来源
                     if (patrons.Count == 1)
                     {
-                        if (_patron.Fill(patrons[0].OneTag) == false)
+                        try
+                        {
+                            if (_patron.Fill(patrons[0].OneTag) == false)
+                                return;
+                            SetPatronError("patron_tag", null);
+                        }
+                        catch (Exception ex)
+                        {
+                            SetPatronError("patron_tag", $"UID 为 {patrons[0].OneTag.UID} 的标签格式不正确: {ex.Message}");
                             return;
+                        }
 
                         SetPatronError("rfid_multi", "");   // 2019/5/22
 

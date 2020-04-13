@@ -190,6 +190,10 @@ namespace dp2Circulation
 
         static int GroupNameIndexOf(string[] names, string name)
         {
+            // 2020/4/13
+            if (names == null)
+                return -1;
+
             int i = 0;
             foreach (var current in names)
             {
@@ -268,6 +272,7 @@ namespace dp2Circulation
         // TODO: 对不是当前群组的消息，要更新左侧群名列表右侧的新消息数显示
         async Task AddMessage(AddMessageEventArgs e)
         {
+            // TODO: fragment 消息是否能处理?
             foreach (MessageRecord record in e.Records)
             {
                 UpdateGroupNameList(record.groups);

@@ -89,16 +89,36 @@ namespace RfidDrivers.First
             _lock.ExitWriteLock();
         }
 
+        // TODO: 测试时候可以缩小为 1~5 秒，便于暴露出超时异常导致的问题
+        static int _lockTimeout = 5000; // 1000 * 120;   // 2 分钟
+
         void LockReader(Reader reader)
         {
             _lock.EnterReadLock();
-            reader_locks.LockForWrite(reader.GetHashCode().ToString());
+            try
+            {
+                // TODO: 把超时极限时间变长。确保书柜的全部门 inventory 和 getTagInfo 足够
+                reader_locks.LockForWrite(reader.GetHashCode().ToString(), _lockTimeout);
+            }
+            catch
+            {
+                // 不要忘记 _lock.ExitReaderLock
+                _lock.ExitReadLock();
+                throw;
+            }
         }
 
         void UnlockReader(Reader reader)
         {
-            reader_locks.UnlockForWrite(reader.GetHashCode().ToString());
-            _lock.ExitReadLock();
+            try
+            {
+                reader_locks.UnlockForWrite(reader.GetHashCode().ToString());
+            }
+            finally
+            {
+                // 无论如何都会调用这一句
+                _lock.ExitReadLock();
+            }
         }
 
         List<Reader> _readers = new List<Reader>();

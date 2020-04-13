@@ -32,11 +32,12 @@ using System.Runtime.InteropServices;
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 // 方法是按如下所示使用“*”: :
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.5.*")]
-[assembly: AssemblyFileVersion("1.5.0.0")]
+[assembly: AssemblyVersion("1.6.*")]
+[assembly: AssemblyFileVersion("1.6.0.0")]
 
 // V1.1 2019/2/21 支持 32-bit Windows 环境
 // V1.2 2019/4/12 采用了最新 dp-library submodule 的版本
 // V1.3 2019/9/12 取消了 SendKey 功能
 // V1.4 2019/11/27 增加对具有多天线的读写器的支持。RfidCenter API 有若干改动
 // V1.5 2019/12/5 对 ListTags() API 做了增强，允许它同时执行 getLockState 动作
+// V1.6 2020/4/13 修正了 reader_locks.LockForWrite() 异常未处理的 bug
