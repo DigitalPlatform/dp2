@@ -54,6 +54,7 @@
     <Compile Include="TestChip.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestChip2.cs" />
+    <Compile Include="TestDriver.cs" />
     <Compile Include="TestNewTagList.cs" />
     <Compile Include="TestRfid2.cs" />
     <Compile Include="TestSetElementPos.cs" />
@@ -70,6 +71,10 @@
     <ProjectReference Include="..\dp-library\DigitalPlatform.Core\DigitalPlatform.Core.csproj">
       <Project>{c5b517c1-7344-45a5-89dc-06a9b130ae36}</Project>
       <Name>DigitalPlatform.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RfidDrivers.First\RfidDrivers.First.csproj">
+      <Project>{dfadb438-ebff-47fb-acf6-586224cef771}</Project>
+      <Name>RfidDrivers.First</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

@@ -288,12 +288,15 @@ namespace dp2SSL
                 e.Door.IncWaiting();  // inventory 期间显示等待动画
                 try
                 {
+                    /*
                     // TODO: 这里用 await 是否不太合适？
                     await Task.Run(() =>
                     {
                         var result = ShelfData.RefreshInventory(e.Door);
                         // TODO: 是否可以越过无法解析的标签，继续解析其他标签？
                     });
+                    */
+                    var result = await ShelfData.RefreshInventoryAsync(e.Door);
                 }
                 finally
                 {
@@ -745,12 +748,18 @@ namespace dp2SSL
                     // 补做一次 inventory，确保不会漏掉 RFID 变动信息
                     try
                     {
+                        /*
                         await Task.Run(() =>
                         {
                             ShelfData.RefreshInventory(e.Door);
                             SaveDoorActions(e.Door, false);
                             // TODO: 是否 Submit? Submit 窗口可能会干扰原本的开门流程
                         });
+                        */
+                        {
+                            await ShelfData.RefreshInventoryAsync(e.Door);
+                            SaveDoorActions(e.Door, false);
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -818,7 +827,7 @@ namespace dp2SSL
                             App.CurrentApp.Speak("超时补做提交");
                             WpfClientInfo.WriteInfoLog($"超时情况下，对门 {e.Door.Name} 补做一次 submit");
 
-                            ShelfData.RefreshInventory(e.Door);
+                            await ShelfData.RefreshInventoryAsync(e.Door);
                             SaveDoorActions(e.Door, true);
                             await DoRequestAsync(ShelfData.PullActions());   // "silence"
                             break;
@@ -2733,7 +2742,7 @@ namespace dp2SSL
             {
                 // 对涉及到工作人员身份进行典藏移交的 action 进行补充修正
                 bool changed = false;
-                bAsked = ShelfData.AskLocationTransfer(actions,
+                bAsked = await ShelfData.AskLocationTransferAsync(actions,
                     (action) =>
                     {
                         var entity = action.Entity;

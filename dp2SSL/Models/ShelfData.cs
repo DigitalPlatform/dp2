@@ -614,40 +614,47 @@ namespace dp2SSL
             return text.ToString();
         }
 
+        // 显示对书柜门的 Iventory 操作，同一时刻只能一个函数进入
+        static AsyncSemaphore _inventoryLimit = new AsyncSemaphore(1);
+
         // 单独对一个门关联的 RFID 标签进行一次 inventory，确保此前的标签变化情况没有被遗漏
-        public static NormalResult RefreshInventory(DoorItem door)
+        public static async Task<NormalResult> RefreshInventoryAsync(DoorItem door)
         {
             // 获得和一个门相关的 readernamelist
             var list = GetReaderNameList(new List<DoorItem> { door }, null);
             string style = $"dont_delay";   // 确保 inventory 并立即返回
 
-            // StringBuilder debugInfo = new StringBuilder();
-            var result = RfidManager.CallListTags(list, style);
-            // WpfClientInfo.WriteErrorLog($"RefreshInventory() list={list}, style={style}, result={result.ToString()}");
-            try
+            using (var releaser = await _inventoryLimit.EnterAsync())
             {
-                RfidManager.TriggerListTagsEvent(list, result, true);
-                return new NormalResult();
-            }
-            catch (TagInfoException ex)
-            {
-                return new NormalResult
+                // StringBuilder debugInfo = new StringBuilder();
+                var result = RfidManager.CallListTags(list, style);
+                // WpfClientInfo.WriteErrorLog($"RefreshInventory() list={list}, style={style}, result={result.ToString()}");
+
+                try
                 {
-                    Value = -1,
-                    ErrorInfo = $"对门 {door.Name} 内的全部标签进行盘点时，发现无法解析的标签(UID:{ex.TagInfo.UID})",
-                    ErrorCode = "tagParseError"
-                };
-            }
-            catch (Exception ex)
-            {
-                // WpfClientInfo.WriteErrorLog($"RefreshInventory() TriggerListTagsEvent() 异常:{ExceptionUtil.GetDebugText(ex)}\r\ndebugInfo={debugInfo.ToString()}");
-                WpfClientInfo.WriteErrorLog($"RefreshInventory() TriggerListTagsEvent() list='{list}' 异常:{ExceptionUtil.GetDebugText(ex)}");
-                return new NormalResult
+                    RfidManager.TriggerListTagsEvent(list, result, true);
+                    return new NormalResult();
+                }
+                catch (TagInfoException ex)
                 {
-                    Value = -1,
-                    ErrorInfo = $"RefreshInventory() 出现异常(门:{door.Name}): {ex.Message}",
-                    ErrorCode = ex.GetType().ToString()
-                };
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"对门 {door.Name} 内的全部标签进行盘点时，发现无法解析的标签(UID:{ex.TagInfo.UID})",
+                        ErrorCode = "tagParseError"
+                    };
+                }
+                catch (Exception ex)
+                {
+                    // WpfClientInfo.WriteErrorLog($"RefreshInventory() TriggerListTagsEvent() 异常:{ExceptionUtil.GetDebugText(ex)}\r\ndebugInfo={debugInfo.ToString()}");
+                    WpfClientInfo.WriteErrorLog($"RefreshInventory() TriggerListTagsEvent() list='{list}' 异常:{ExceptionUtil.GetDebugText(ex)}");
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"RefreshInventory() 出现异常(门:{door.Name}): {ex.Message}",
+                        ErrorCode = ex.GetType().ToString()
+                    };
+                }
             }
         }
 
@@ -1064,12 +1071,20 @@ namespace dp2SSL
             }
         }
 
+
+        // 限制询问对话框，同一时刻只能打开一个对话框
+        static AsyncSemaphore _askLimit = new AsyncSemaphore(1);
+
+
         public delegate void Delegate_removeAction(ActionInfo action);
 
         // 询问典藏移交的一些条件参数
         // parameters:
         //      actions     在本函数处理过程中此集合内的对象可能被修改，集合元素可能被移除
-        public static bool AskLocationTransfer(List<ActionInfo> actions,
+        // return:
+        //      false   没有发生询问
+        //      true    发生了询问
+        public static async Task<bool> AskLocationTransferAsync(List<ActionInfo> actions,
             Delegate_removeAction func_removeAction)
         {
             bool bAsked = false;
@@ -1089,62 +1104,73 @@ namespace dp2SSL
                 // 询问放入的图书是否需要移交到当前书柜馆藏地
                 if (transferins.Count > 0)
                 {
-                    bAsked = true;
-                    App.CurrentApp.Speak("上架");
-                    string batchNo = transferins[0].Operator.GetWorkerAccountName() + "_" + DateTime.Now.ToShortDateString();
-                    /*
-                    EntityCollection collection = new EntityCollection();
-                    foreach (var action in transferins)
+                    using (var releaser = await _askLimit.EnterAsync())
                     {
-                        Entity dup = action.Entity.Clone();
-                        dup.Container = collection;
-                        dup.Waiting = false;
-                        collection.Add(dup);
-                    }
-                    */
-                    EntityCollection collection = BuildEntityCollection(transferins);
-                    string selection = "";
-                    App.Invoke(new Action(() =>
-                    {
-                        AskTransferWindow dialog = new AskTransferWindow();
-                        dialog.TitleText = $"上架({StringUtil.MakePathList(GetDoorName(transferins), ",")})";
-                        dialog.TransferButtonText = "上架+调入";
-                        dialog.NotButtonText = "普通上架";
-                        dialog.SetBooks(collection);
-                        dialog.Text = $"是否要针对以上放入书柜的图书进行调入？";
-                        dialog.Owner = App.CurrentApp.MainWindow;
-                        dialog.BatchNo = batchNo;
-                        dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-                        App.SetSize(dialog, "tall");
-
-                        //dialog.Width = Math.Min(700, App.CurrentApp.MainWindow.ActualWidth);
-                        //dialog.Height = Math.Min(900, App.CurrentApp.MainWindow.ActualHeight);
-                        dialog.ShowDialog();
-                        selection = dialog.Selection;
-                        batchNo = dialog.BatchNo;
-                    }));
-
-                    // 把 transfer 动作里的 Location 成员清除
-                    if (selection == "not")
-                    {
+                        bAsked = true;
+                        App.CurrentApp.Speak("上架");
+                        string batchNo = transferins[0].Operator.GetWorkerAccountName() + "_" + DateTime.Now.ToShortDateString();
+                        /*
+                        EntityCollection collection = new EntityCollection();
                         foreach (var action in transferins)
                         {
-                            action.Location = "";
-
-                            // 把不需要操作的 ActionInfo 删除
-                            if (string.IsNullOrEmpty(action.Location)
-                                && string.IsNullOrEmpty(action.CurrentShelfNo))
+                            Entity dup = action.Entity.Clone();
+                            dup.Container = collection;
+                            dup.Waiting = false;
+                            collection.Add(dup);
+                        }
+                        */
+                        EntityCollection collection = BuildEntityCollection(transferins);
+                        string selection = "";
+                        App.Invoke(new Action(() =>
+                        {
+                            App.PauseBarcodeScan();
+                            try
                             {
-                                actions.Remove(action);
-                                func_removeAction?.Invoke(action);
+                                AskTransferWindow dialog = new AskTransferWindow();
+                                dialog.TitleText = $"上架({StringUtil.MakePathList(GetDoorName(transferins), ",")})";
+                                dialog.TransferButtonText = "上架+调入";
+                                dialog.NotButtonText = "普通上架";
+                                dialog.SetBooks(collection);
+                                dialog.Text = $"是否要针对以上放入书柜的图书进行调入？";
+                                dialog.Owner = App.CurrentApp.MainWindow;
+                                dialog.BatchNo = batchNo;
+                                dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                                App.SetSize(dialog, "tall");
+
+                                //dialog.Width = Math.Min(700, App.CurrentApp.MainWindow.ActualWidth);
+                                //dialog.Height = Math.Min(900, App.CurrentApp.MainWindow.ActualHeight);
+                                dialog.ShowDialog();
+                                selection = dialog.Selection;
+                                batchNo = dialog.BatchNo;
+                            }
+                            finally
+                            {
+                                App.ContinueBarcodeScan();
+                            }
+                        }));
+
+                        // 把 transfer 动作里的 Location 成员清除
+                        if (selection == "not")
+                        {
+                            foreach (var action in transferins)
+                            {
+                                action.Location = "";
+
+                                // 把不需要操作的 ActionInfo 删除
+                                if (string.IsNullOrEmpty(action.Location)
+                                    && string.IsNullOrEmpty(action.CurrentShelfNo))
+                                {
+                                    actions.Remove(action);
+                                    func_removeAction?.Invoke(action);
+                                }
                             }
                         }
-                    }
-                    else
-                    {
-                        foreach (var action in transferins)
+                        else
                         {
-                            action.BatchNo = batchNo;
+                            foreach (var action in transferins)
+                            {
+                                action.BatchNo = batchNo;
+                            }
                         }
                     }
                 }
@@ -1166,77 +1192,88 @@ namespace dp2SSL
                 // 询问放入的图书是否需要移交到当前书柜馆藏地
                 if (transferouts.Count > 0)
                 {
-                    bAsked = true;
-                    App.CurrentApp.Speak("下架");
-
-                    string batchNo = transferouts[0].Operator.GetWorkerAccountName() + "_" + DateTime.Now.ToShortDateString();
-
-                    // TODO: 这个列表是否在程序初始化的时候得到?
-                    var result = LibraryChannelUtil.GetLocationList();
-                    /*
-                    EntityCollection collection = new EntityCollection();
-                    foreach (var action in transferouts)
+                    using (var releaser = await _askLimit.EnterAsync())
                     {
-                        Entity dup = action.Entity.Clone();
-                        dup.Container = collection;
-                        dup.Waiting = false;
-                        collection.Add(dup);
-                    }
-                    */
-                    EntityCollection collection = BuildEntityCollection(transferouts);
-                    string selection = "";
-                    string target = "";
-                    App.Invoke(new Action(() =>
-                    {
-                        AskTransferWindow dialog = new AskTransferWindow();
-                        dialog.TitleText = $"下架({StringUtil.MakePathList(GetDoorName(transferouts), ",")})";
-                        dialog.TransferButtonText = "下架+调出";
-                        dialog.NotButtonText = "普通下架";
-                        dialog.Mode = "out";
-                        dialog.SetBooks(collection);
-                        dialog.Text = $"是否要针对以上拿出书柜的图书进行调出？";
-                        dialog.target.ItemsSource = result.List;
-                        dialog.BatchNo = batchNo;
-                        dialog.Owner = App.CurrentApp.MainWindow;
-                        dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-                        App.SetSize(dialog, "tall");
+                        bAsked = true;
+                        App.CurrentApp.Speak("下架");
 
-                        //dialog.Width = Math.Min(700, App.CurrentApp.MainWindow.ActualWidth);
-                        //.Height = Math.Min(900, App.CurrentApp.MainWindow.ActualHeight);
-                        dialog.ShowDialog();
-                        selection = dialog.Selection;
-                        target = dialog.Target;
-                        batchNo = dialog.BatchNo;
-                    }));
+                        string batchNo = transferouts[0].Operator.GetWorkerAccountName() + "_" + DateTime.Now.ToShortDateString();
 
-                    // 把 transfer 动作里的 Location 成员清除
-                    if (selection == "not")
-                    {
+                        // TODO: 这个列表是否在程序初始化的时候得到?
+                        var result = LibraryChannelUtil.GetLocationList();
+                        /*
+                        EntityCollection collection = new EntityCollection();
                         foreach (var action in transferouts)
                         {
-                            // 修改 Action
-                            action.Location = "";
-                            // 注: action.CurrentShelfNo 也为空
-                            // 注: action.TransferDirection 为 "out"
-
-                            /*
-                            // 把不需要操作的 ActionInfo 删除
-                            if (string.IsNullOrEmpty(action.Location)
-                                && string.IsNullOrEmpty(action.CurrentShelfNo))
-                            {
-                                actions.Remove(action);
-                                func_removeAction?.Invoke(action);
-                            }
-                            */
-
+                            Entity dup = action.Entity.Clone();
+                            dup.Container = collection;
+                            dup.Waiting = false;
+                            collection.Add(dup);
                         }
-                    }
-                    else
-                    {
-                        foreach (var action in transferouts)
+                        */
+                        EntityCollection collection = BuildEntityCollection(transferouts);
+                        string selection = "";
+                        string target = "";
+                        App.Invoke(new Action(() =>
                         {
-                            action.Location = target;
-                            action.BatchNo = batchNo;
+                            App.PauseBarcodeScan();
+                            try
+                            {
+                                AskTransferWindow dialog = new AskTransferWindow();
+                                dialog.TitleText = $"下架({StringUtil.MakePathList(GetDoorName(transferouts), ",")})";
+                                dialog.TransferButtonText = "下架+调出";
+                                dialog.NotButtonText = "普通下架";
+                                dialog.Mode = "out";
+                                dialog.SetBooks(collection);
+                                dialog.Text = $"是否要针对以上拿出书柜的图书进行调出？";
+                                dialog.target.ItemsSource = result.List;
+                                dialog.BatchNo = batchNo;
+                                dialog.Owner = App.CurrentApp.MainWindow;
+                                dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                                App.SetSize(dialog, "tall");
+
+                                //dialog.Width = Math.Min(700, App.CurrentApp.MainWindow.ActualWidth);
+                                //.Height = Math.Min(900, App.CurrentApp.MainWindow.ActualHeight);
+                                dialog.ShowDialog();
+                                selection = dialog.Selection;
+                                target = dialog.Target;
+                                batchNo = dialog.BatchNo;
+                            }
+                            finally
+                            {
+                                App.ContinueBarcodeScan();
+                            }
+                        }));
+
+                        // 把 transfer 动作里的 Location 成员清除
+                        if (selection == "not")
+                        {
+                            foreach (var action in transferouts)
+                            {
+                                // 修改 Action
+                                action.Location = "";
+                                // 注: action.CurrentShelfNo 也为空
+                                // 注: action.TransferDirection 为 "out"
+
+                                /*
+                                // 把不需要操作的 ActionInfo 删除
+                                if (string.IsNullOrEmpty(action.Location)
+                                    && string.IsNullOrEmpty(action.CurrentShelfNo))
+                                {
+                                    actions.Remove(action);
+                                    func_removeAction?.Invoke(action);
+                                }
+                                */
+
+                            }
+                        }
+                        else
+                        {
+                            foreach (var action in transferouts)
+                            {
+                                action.Location = target;
+                                action.BatchNo = batchNo;
+                            }
                         }
                     }
                 }
@@ -1255,7 +1292,7 @@ namespace dp2SSL
                 }
 
                 List<string> names = new List<string>();
-                foreach(var door in results)
+                foreach (var door in results)
                 {
                     names.Add(door.Name);
                 }
@@ -1264,7 +1301,7 @@ namespace dp2SSL
 
                 void Add(List<DoorItem> target, List<DoorItem> doors)
                 {
-                    foreach(var door in doors)
+                    foreach (var door in doors)
                     {
                         if (target.IndexOf(door) == -1)
                             target.Add(door);

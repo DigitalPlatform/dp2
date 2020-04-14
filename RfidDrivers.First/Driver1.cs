@@ -90,15 +90,15 @@ namespace RfidDrivers.First
         }
 
         // TODO: 测试时候可以缩小为 1~5 秒，便于暴露出超时异常导致的问题
-        static int _lockTimeout = 5000; // 1000 * 120;   // 2 分钟
+        // static int _lockTimeout = 5000; // 1000 * 120;   // 2 分钟
 
-        void LockReader(Reader reader)
+        void LockReader(Reader reader, int timeout = 5000)
         {
             _lock.EnterReadLock();
             try
             {
                 // TODO: 把超时极限时间变长。确保书柜的全部门 inventory 和 getTagInfo 足够
-                reader_locks.LockForWrite(reader.GetHashCode().ToString(), _lockTimeout);
+                reader_locks.LockForWrite(reader.GetHashCode().ToString(), timeout);
             }
             catch
             {
@@ -3414,6 +3414,43 @@ out Reader reader);
                     ErrorCode = GetErrorCode(iret, hreader)
                 };
             return new NormalResult();
+        }
+
+        public NormalResult TestInitialReader()
+        {
+            _readers.Clear();
+            _readers.Add(new Reader { Name = "test"});
+            return new NormalResult();
+        }
+
+        public NormalResult TestCall(string style)
+        {
+            /*
+            NormalResult result = GetReader(one_reader_name,
+    out Reader reader);
+            if (result.Value == -1)
+                return new GetTagInfoResult(result);
+                */
+            Reader reader = _readers[0];
+
+            string sleepString = StringUtil.GetParameterByPrefix(style, "sleep", ":");
+            Int32.TryParse(sleepString, out int sleepValue);
+            
+            string timeoutString = StringUtil.GetParameterByPrefix(style, "timeout", ":");
+            Int32.TryParse(timeoutString, out int timeoutValue);
+
+            // 锁定一个读卡器
+            LockReader(reader, timeoutValue);
+            try
+            {
+                Thread.Sleep(sleepValue);
+
+                return new NormalResult();
+            }
+            finally
+            {
+                UnlockReader(reader);
+            }
         }
 
         // parameters:
