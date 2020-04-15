@@ -294,7 +294,11 @@ namespace dp2SSL
                 try
                 {
                     _isShelfMode = true;
-                    ShelfData.InitialShelf();
+                    var result = ShelfData.InitialShelf();
+                    if (result.Value == -1)
+                        this.SetError("cfg", result.ErrorInfo);
+                    else
+                        this.SetError("cfg", null);
                 }
                 catch (FileNotFoundException)
                 {

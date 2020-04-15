@@ -1464,37 +1464,37 @@ namespace dp2SSL
                 AddLayer();
             }));
 
-            string cfg_error = App.CurrentApp.GetError("cfg");
-            if (string.IsNullOrEmpty(cfg_error) == false)
-            {
-                DisplayMessage(progress, cfg_error, "red");
-                _initialCancelled = true;
-                return;
-            }
-
-            App.Invoke(new Action(() =>
-            {
-                // 把门显示出来。因为此时需要看到是否关门的状态
-                this.doorControl.Visibility = Visibility.Visible;
-                this.doorControl.InitializeButtons(ShelfData.ShelfCfgDom, ShelfData.Doors);
-            }));
-
-            // 等待锁控就绪
-            var lock_result = await ShelfData.WaitLockReadyAsync(
-                (s) =>
-                {
-                    DisplayMessage(progress, s, "green");
-                },
-                () =>
-                {
-                    return _initialCancelled;
-                })
-                .ConfigureAwait(false);
-            if (lock_result.Value == -1)
-                return;
-
             try
             {
+                string cfg_error = App.CurrentApp.GetError("cfg");
+                if (string.IsNullOrEmpty(cfg_error) == false)
+                {
+                    DisplayMessage(progress, cfg_error, "red");
+                    _initialCancelled = true;
+                    App.CurrentApp.InitialShelfCfg();
+                    return;
+                }
+
+                App.Invoke(new Action(() =>
+                {
+                    // 把门显示出来。因为此时需要看到是否关门的状态
+                    this.doorControl.Visibility = Visibility.Visible;
+                    this.doorControl.InitializeButtons(ShelfData.ShelfCfgDom, ShelfData.Doors);
+                }));
+
+                // 等待锁控就绪
+                var lock_result = await ShelfData.WaitLockReadyAsync(
+                    (s) =>
+                    {
+                        DisplayMessage(progress, s, "green");
+                    },
+                    () =>
+                    {
+                        return _initialCancelled;
+                    })
+                    .ConfigureAwait(false);
+                if (lock_result.Value == -1)
+                    return;
 
                 // 检查门是否为关闭状态？
                 // 注意 RfidManager 中门锁启动需要一定时间。状态可能是：尚未初始化/有门开着/门都关了
@@ -2125,24 +2125,29 @@ namespace dp2SSL
             }
             if (entities.Count > 0)
             {
-                try
+                // 在一个独立的线程里面刷新在借册，这样本函数可以尽早返回，从而听到欢迎的语音
+                _ = Task.Run(async () =>
                 {
-                    BaseChannel<IRfid> channel = RfidManager.GetChannel();
                     try
                     {
-                        await FillBookFieldsAsync(channel, entities, new CancellationToken());
+                        BaseChannel<IRfid> channel = RfidManager.GetChannel();
+                        try
+                        {
+                            await FillBookFieldsAsync(channel, entities, new CancellationToken());
+                        }
+                        finally
+                        {
+                            RfidManager.ReturnChannel(channel);
+                        }
                     }
-                    finally
+                    catch (Exception ex)
                     {
-                        RfidManager.ReturnChannel(channel);
+                        string error = $"填充读者信息时出现异常: {ex.Message}";
+                        SetGlobalError("rfid", error);
+                        // return new NormalResult { Value = -1, ErrorInfo = error };
                     }
-                }
-                catch (Exception ex)
-                {
-                    string error = $"填充读者信息时出现异常: {ex.Message}";
-                    SetGlobalError("rfid", error);
-                    return new NormalResult { Value = -1, ErrorInfo = error };
-                }
+                });
+
             }
 #if NO
             // 装载图象
@@ -2833,6 +2838,12 @@ namespace dp2SSL
                             progress?.PushContent(doc);
                             // 显示出来
                             progress?.ShowContent();
+
+                            /*
+                            // 2020/4/15
+                            if (progress != null && doc.DoorNames != null && doc.DoorNames.Count > 0)
+                                progress.Tag = $"({StringUtil.MakePathList(doc.DoorNames, ",")})";
+                                */
                         });
                     }
 
