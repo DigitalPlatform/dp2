@@ -354,11 +354,24 @@ namespace dp2SSL
             }
         }
 
+        static List<string> _locationList = null;
+
         // exception:
         //      可能会抛出异常
-        public static void InitialShelf()
+        public static NormalResult InitialShelf()
         {
             ShelfData.InitialDoors();
+
+            // 获得馆藏地列表
+            var result = LibraryChannelUtil.GetLocationList();
+            if (result.Value == -1)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"获得馆藏地列表时出错: {result.ErrorInfo}"
+                };
+            else
+                _locationList = result.List;
 
             // 要在初始化以前设定好
             _patronReaderName = GetAllReaderNameList("patron");
@@ -381,6 +394,7 @@ namespace dp2SSL
             WpfClientInfo.WriteInfoLog($"LockCommands '{RfidManager.LockCommands}'");
 
             // _patronReaderName = GetPatronReaderName();
+            return new NormalResult();
         }
 
         // 从 shelf.xml 配置文件中获得读者证读卡器名
@@ -1200,7 +1214,7 @@ namespace dp2SSL
                         string batchNo = transferouts[0].Operator.GetWorkerAccountName() + "_" + DateTime.Now.ToShortDateString();
 
                         // TODO: 这个列表是否在程序初始化的时候得到?
-                        var result = LibraryChannelUtil.GetLocationList();
+                        // var result = LibraryChannelUtil.GetLocationList();
                         /*
                         EntityCollection collection = new EntityCollection();
                         foreach (var action in transferouts)
@@ -1226,7 +1240,7 @@ namespace dp2SSL
                                 dialog.Mode = "out";
                                 dialog.SetBooks(collection);
                                 dialog.Text = $"是否要针对以上拿出书柜的图书进行调出？";
-                                dialog.target.ItemsSource = result.List;
+                                dialog.target.ItemsSource = _locationList;  // result.List;
                                 dialog.BatchNo = batchNo;
                                 dialog.Owner = App.CurrentApp.MainWindow;
                                 dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
@@ -1280,32 +1294,32 @@ namespace dp2SSL
             }
 
             return bAsked;
+        }
 
-            // 概括门名字
-            List<string> GetDoorName(List<ActionInfo> actions_param)
+        // 概括门名字
+        public static List<string> GetDoorName(List<ActionInfo> actions_param)
+        {
+            List<DoorItem> results = new List<DoorItem>();
+            foreach (var action in actions_param)
             {
-                List<DoorItem> results = new List<DoorItem>();
-                foreach (var action in actions_param)
-                {
-                    var doors = DoorItem.FindDoors(ShelfData.Doors, action.Entity.ReaderName, action.Entity.Antenna);
-                    Add(results, doors);
-                }
+                var doors = DoorItem.FindDoors(ShelfData.Doors, action.Entity.ReaderName, action.Entity.Antenna);
+                Add(results, doors);
+            }
 
-                List<string> names = new List<string>();
-                foreach (var door in results)
-                {
-                    names.Add(door.Name);
-                }
+            List<string> names = new List<string>();
+            foreach (var door in results)
+            {
+                names.Add(door.Name);
+            }
 
-                return names;
+            return names;
 
-                void Add(List<DoorItem> target, List<DoorItem> doors)
+            void Add(List<DoorItem> target, List<DoorItem> doors)
+            {
+                foreach (var door in doors)
                 {
-                    foreach (var door in doors)
-                    {
-                        if (target.IndexOf(door) == -1)
-                            target.Add(door);
-                    }
+                    if (target.IndexOf(door) == -1)
+                        target.Add(door);
                 }
             }
         }
@@ -2458,7 +2472,12 @@ namespace dp2SSL
             }
 
             if (e.UpdateTags != null)
+            {
                 tags.AddRange(e.UpdateTags);
+                // 2020/4/15
+                if (e.UpdateTags.Count > 0)
+                    _tagAdded = true;
+            }
 
             // 2020/4/11
             // 忽略读者读卡器上的标签
@@ -2686,7 +2705,12 @@ namespace dp2SSL
             }
 
             if (e.UpdateTags != null)
+            {
                 tags.AddRange(e.UpdateTags);
+                // 2020/4/15
+                if (e.UpdateTags.Count > 0)
+                    _tagAdded = true;
+            }
 
             {
                 var filtered = tags.FindAll(tag =>
@@ -2758,7 +2782,7 @@ namespace dp2SSL
                     foreach (var tag in removes)
                     {
                         Remove(_patronTags, tag.OneTag.UID);
-                        count++;
+                        // count++;
                     }
                 }
             }
@@ -4201,7 +4225,7 @@ Stack:
                                             progress.ProgressBar.Visibility = Visibility.Visible;
 
                                         if (text != null)
-                                            progress.TitleText = text;
+                                            progress.TitleText = text;  // + " " + (progress.Tag as string);
 
                                         if (min != -1)
                                             progress.ProgressBar.Minimum = min;

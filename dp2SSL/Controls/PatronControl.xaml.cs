@@ -84,13 +84,48 @@ namespace dp2SSL
                 XmlDocument dom = new XmlDocument();
                 dom.LoadXml(patron_xml);
 
+                List<Entity> entities = new List<Entity>();
                 XmlNodeList borrows = dom.DocumentElement.SelectNodes("borrows/borrow");
                 foreach (XmlElement borrow in borrows)
                 {
                     string barcode = borrow.GetAttribute("barcode");
-                    _borrowedEntities.Add(new Entity { PII = barcode, Container = _borrowedEntities });
+                    entities.Add(new Entity { PII = barcode, Container = _borrowedEntities });
+                }
+
+                entities.Sort((a, b) => {
+                    return CompareEntities(a, b, entities);
+                });
+
+                foreach (var entity in entities)
+                {
+                    _borrowedEntities.Add(entity);
                 }
             }
+        }
+
+        static bool IsState(Entity entity, string sub)
+        {
+            return StringUtil.IsInList(sub, entity.State);
+        }
+
+        // 对 Entity 进行排序
+        // TODO: 余下的建议按照应还日期，日期靠前排序。这样便于读者观察到需要尽快还书的册
+        static int CompareEntities(Entity a, Entity b, List<Entity> entities)
+        {
+            int index_a = entities.IndexOf(a);
+            int index_b = entities.IndexOf(b);
+            bool a_overflow = IsState(a, "overflow");
+            bool b_overflow = IsState(b, "overflow");
+            if (a_overflow && b_overflow)
+                return index_a - index_b;
+
+            if (a_overflow)
+                return -1;
+            if (b_overflow)
+                return 1;
+
+            // 按原来的序
+            return index_a - index_b;
         }
 
         public void SetPhoto(Stream stream)

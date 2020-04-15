@@ -17,6 +17,7 @@ namespace dp2SSL
     {
         public double BaseFontSize { get; set; }
         public string BuildStyle { get; set; }
+        // public List<string> DoorNames { get; set; }
 
         internal List<ActionInfo> _actions = new List<ActionInfo>();
 
@@ -182,6 +183,9 @@ namespace dp2SSL
                 .FindAll(o => { return o.Action == "transfer" && string.IsNullOrEmpty(o.Location) == false; })
                 .Count;
 
+            // 总结一下涉及到的门
+            var door_names = ShelfData.GetDoorName(actions);
+
             /*
             int succeed_count = actions.FindAll((o) => { return o.ResultType == "succeed" || string.IsNullOrEmpty(o.ResultType); }).Count;
             int error_count = items.FindAll((o) => { return o.ResultType == "error"; }).Count;
@@ -205,7 +209,7 @@ namespace dp2SSL
                 var p = new Paragraph();
                 p.FontFamily = new FontFamily("微软雅黑");
                 p.FontSize = baseFontSize;
-                p.TextAlignment = TextAlignment.Left;
+                p.TextAlignment = TextAlignment.Center;
                 p.Foreground = Brushes.Gray;
                 // p.TextIndent = -20;
                 p.Margin = new Thickness(0, 0, 0, baseFontSize/*18*/);
@@ -226,18 +230,31 @@ namespace dp2SSL
 
                     p.Inlines.Add(new Run
                     {
-                        Text = $"{StringUtil.MakePathList(names)} ",
+                        Text = $"{StringUtil.MakePathList(names)}",
                         //Background = Brushes.DarkRed,
                         //Foreground = Brushes.White
                         FontFamily = new FontFamily("楷体"),
-                        FontSize = baseFontSize * 2.5,
+                        FontSize = baseFontSize * 3.5,  // 2.5,
                         // FontWeight = FontWeights.Bold,
                         Foreground = Brushes.White,
                     });
 
+                    if (door_names.Count > 0)
+                    {
+                        p.Inlines.Add(new Run
+                        {
+                            Text = $"\r\n({StringUtil.MakePathList(door_names)})",
+                            //Background = Brushes.DarkRed,
+                            Foreground = Brushes.Green,
+                            // FontFamily = new FontFamily("楷体"),
+                            FontSize = baseFontSize,
+                            // FontWeight = FontWeights.Bold,
+                        });
+                    }
+
                     p.Inlines.Add(new Run
                     {
-                        Text = $"{StringUtil.MakePathList(lines, ", ")}\r\n",
+                        Text = $"\r\n{StringUtil.MakePathList(lines, ", ")}\r\n",
                         //Background = Brushes.DarkRed,
                         //Foreground = Brushes.White
                         FontSize = baseFontSize * 1.2,
