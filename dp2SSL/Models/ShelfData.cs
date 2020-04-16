@@ -2512,7 +2512,14 @@ namespace dp2SSL
 
             // 延时触发 SelectAntenna()
             if (tags.Count > 0)
-                _tagAdded = true;
+            {
+                _ = Task.Run(async () =>
+                {
+                    // 延时设置
+                    await Task.Delay(TimeSpan.FromSeconds(10), App.CancelToken);
+                    _tagAdded = true;
+                });
+            }
 
             List<string> add_uids = new List<string>();
             int removeBooksCount = 0;
