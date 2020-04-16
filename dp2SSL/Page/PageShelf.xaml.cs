@@ -95,6 +95,7 @@ namespace dp2SSL
 #pragma warning restore VSTHRD100 // 避免使用 Async Void 方法
         {
             // _firstInitial = false;
+            App.IsPageShelfActive = true;
 
             FingerprintManager.SetError += FingerprintManager_SetError;
             FingerprintManager.Touched += FingerprintManager_Touched;
@@ -989,6 +990,8 @@ namespace dp2SSL
         private async void PageShelf_Unloaded(object sender, RoutedEventArgs e)
 #pragma warning restore VSTHRD100 // 避免使用 Async Void 方法
         {
+            App.IsPageShelfActive = false;
+
             App.LineFeed -= App_LineFeed;
             App.CharFeed -= App_CharFeed;
 
@@ -3269,5 +3272,222 @@ namespace dp2SSL
         {
             ShelfData.PauseSubmit = false;
         }
+
+#if REMOVED
+
+        #region 绑定和解绑读者功能
+
+#pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
+        private async void bindPatronCard_Click(object sender, RoutedEventArgs e)
+#pragma warning restore VSTHRD100 // 避免使用 Async Void 方法
+        {
+            await BindPatronCardAsync("bindPatronCard");
+        }
+
+#pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
+        private async void releasePatronCard_Click(object sender, RoutedEventArgs e)
+#pragma warning restore VSTHRD100 // 避免使用 Async Void 方法
+        {
+            await BindPatronCardAsync("releasePatronCard");
+        }
+
+        // 绑定或者解绑(ISO14443A)读者卡
+        private async Task BindPatronCardAsync(string action)
+        {
+            string action_name = "绑定";
+            if (action == "releasePatronCard")
+                action_name = "解绑";
+
+            // 提前打开对话框
+            ProgressWindow progress = null;
+
+            App.Invoke(new Action(() =>
+            {
+                progress = new ProgressWindow();
+                progress.MessageText = "请扫要绑定的读者卡 ...";
+                progress.Owner = Application.Current.MainWindow;
+                progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                progress.Closed += (o, e) =>
+                {
+                    RemoveLayer();
+                };
+                progress.Show();
+                AddLayer();
+            }));
+
+            // 暂时断开原来的标签处理事件
+            App.CurrentApp.NewTagChanged -= CurrentApp_NewTagChanged;
+
+            try
+            {
+                // TODO: 这里最好锁定
+                Patron current_patron = null;
+
+                lock (_syncRoot_patron)
+                {
+                    current_patron = _patron.Clone();
+                }
+                if (IsPatronOK(current_patron, action, out string check_message) == false)
+                {
+                    if (string.IsNullOrEmpty(check_message))
+                        check_message = $"读卡器上的当前读者卡状态不正确。无法进行{action_name}读者卡的操作";
+
+                    DisplayError(ref progress, check_message, "yellow");
+                    return;
+                }
+
+                // TODO: 弹出一个对话框，检测 ISO14443A 读者卡
+                // 注意探测读者卡的时候，不是要刷新右侧的读者信息，而是把探测到的信息拦截到对话框里面，右侧的读者信息不要有任何变化
+                var result = await Get14443ACardUIDAsync(progress,
+                    action_name,
+                    new CancellationToken());
+                if (result.Value == -1)
+                {
+                    DisplayError(ref progress, result.ErrorInfo);
+                    return;
+                }
+
+                if (result.Value == 0)
+                    return;
+
+                string uid = result.ErrorCode;
+
+                App.Invoke(new Action(() =>
+                {
+                    progress.MessageText = "正在修改读者记录 ...";
+                }));
+
+                bool changed = false;
+                XmlDocument dom = new XmlDocument();
+                dom.LoadXml(_patron.Xml);
+
+                if (action == "bindPatronCard")
+                {
+                    // 修改读者 XML 记录中的 cardNumber 元素
+                    var modify_result = PageBorrow.ModifyBinding(dom,
+    "bind",
+    uid);
+                    if (modify_result.Value == -1)
+                    {
+                        DisplayError(ref progress, $"绑定失败: {modify_result.ErrorInfo}");
+                        return;
+                    }
+                    changed = true;
+                }
+                else if (action == "releasePatronCard")
+                {
+                    // 从读者记录的 cardNumber 元素中移走指定的 UID
+                    var modify_result = PageBorrow.ModifyBinding(dom,
+"release",
+uid);
+                    if (modify_result.Value == -1)
+                    {
+                        DisplayError(ref progress, $"解除绑定失败: {modify_result.ErrorInfo}");
+                        return;
+                    }
+
+                    // TODO: 用 WPF 对话框
+                    MessageBoxResult dialog_result = MessageBox.Show(
+    $"确实要解除对读者卡 {uid} 的绑定?\r\n\r\n(解除绑定以后，您将无法使用这一张读者卡进行借书还书操作)",
+    "dp2SSL",
+    MessageBoxButton.YesNo,
+    MessageBoxImage.Question);
+                    if (dialog_result == MessageBoxResult.No)
+                        return;
+
+                    changed = true;
+                }
+
+                if (changed == true)
+                {
+                    // 保存读者记录
+                    var save_result = await SetReaderInfoAsync(_patron.RecPath,
+                        dom.OuterXml,
+                        _patron.Xml,
+                        _patron.Timestamp);
+                    if (save_result.Value == -1)
+                    {
+                        DisplayError(ref progress, save_result.ErrorInfo);
+                        return;
+                    }
+
+                    _patron.Timestamp = save_result.NewTimestamp;
+                    _patron.Xml = dom.OuterXml;
+                }
+
+                // TODO: “别忘了拿走读者卡”应该在读者读卡器竖放时候才有必要提示
+                string message = $"{action_name}读者卡成功";
+                if (action == "releasePatronCard")
+                    App.CurrentApp.Speak(message);
+                DisplayError(ref progress, message, "green");
+            }
+            finally
+            {
+                App.CurrentApp.NewTagChanged += CurrentApp_NewTagChanged;
+
+                if (progress != null)
+                    App.Invoke(new Action(() =>
+                    {
+                        progress.Close();
+                    }));
+            }
+
+            // 刷新读者信息区显示
+            var temp_task = FillPatronDetailAsync(true);
+        }
+
+        // return.Value
+        //      -1  出错
+        //      0   放弃
+        //      1   成功获得读者卡 UID，返回在 NormalResult.ErrorCode 中
+        static async Task<NormalResult> Get14443ACardUIDAsync(ProgressWindow progress,
+            string action_caption,
+            CancellationToken token)
+        {
+            // TODO: 是否一开始要探测读卡器上是否有没有拿走的读者卡，提醒读者先拿走？
+
+            App.Invoke(new Action(() =>
+            {
+                progress.MessageText = $"请扫要{action_caption}的读者卡 ...";
+            }));
+
+            while (token.IsCancellationRequested == false)
+            {
+                if (TagList.Patrons.Count == 0)
+                {
+                    App.Invoke(new Action(() =>
+                    {
+                        progress.MessageText = $"请扫要{action_caption}的读者卡 ...";
+                    }));
+                }
+                if (TagList.Patrons.Count > 1)
+                {
+                    App.Invoke(new Action(() =>
+                    {
+                        progress.MessageText = "请拿走多余的读者卡";
+                    }));
+                }
+
+                if (TagList.Patrons.Count == 1)
+                {
+                    var tag = TagList.Patrons[0].OneTag;
+                    if (tag.Protocol == InventoryInfo.ISO14443A)
+                    {
+                        return new NormalResult
+                        {
+                            Value = 1,
+                            ErrorCode = tag.UID
+                        };
+                    }
+                }
+
+                await Task.Delay(TimeSpan.FromMilliseconds(500), token);
+            }
+            return new NormalResult { Value = 0 };
+        }
+
+        #endregion
+
+#endif
     }
 }

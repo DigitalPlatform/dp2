@@ -24,7 +24,7 @@
             <TextBox Name="title" Grid.Row="0" Text="标题" Padding="6"
                      Background="Transparent" Foreground="LightGray" BorderThickness="0"
                      FontSize="24" HorizontalContentAlignment="Center"/>
-            <Border Grid.Row="1" BorderThickness="1" BorderBrush="Gray" Background="#FF272727">
+            <Border Grid.Row="1" BorderThickness="0" BorderBrush="Gray" Background="#FF272727">
                 <local:EntityListControl x:Name="books"/>
             </Border>
             <TextBox Name="text"  Grid.Row="2" Margin="10"
@@ -42,7 +42,7 @@
                 <TextBlock>批次号:</TextBlock>
                 <TextBox Name="batchNo" Width="400"></TextBox>
             </StackPanel>
-            <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Center">
+            <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
                 <Button Name="transferButton" 
                     Style="{DynamicResource RoundedButtonStyle}" 
                     Width="220" Height="60" 

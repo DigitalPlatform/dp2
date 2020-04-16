@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -23,7 +24,7 @@ namespace dp2SSL
     {
         public event EventHandler InputFace = null;
 
-        EntityCollection _borrowedEntities = new EntityCollection { Style = "template:SmallTemplate"};
+        EntityCollection _borrowedEntities = new EntityCollection { Style = "template:SmallTemplate" };
 
         public PatronControl()
         {
@@ -84,16 +85,23 @@ namespace dp2SSL
                 XmlDocument dom = new XmlDocument();
                 dom.LoadXml(patron_xml);
 
+                // 用 hashtable 保存一下每个 entity 的原始序
+                Hashtable originIndexTable = new Hashtable();
+                int i = 0;
+
                 List<Entity> entities = new List<Entity>();
                 XmlNodeList borrows = dom.DocumentElement.SelectNodes("borrows/borrow");
                 foreach (XmlElement borrow in borrows)
                 {
                     string barcode = borrow.GetAttribute("barcode");
-                    entities.Add(new Entity { PII = barcode, Container = _borrowedEntities });
+                    var new_entity = new Entity { PII = barcode, Container = _borrowedEntities };
+                    entities.Add(new_entity);
+                    originIndexTable[new_entity] = i++;
                 }
 
-                entities.Sort((a, b) => {
-                    return CompareEntities(a, b, entities);
+                entities.Sort((a, b) =>
+                {
+                    return CompareEntities(a, b, originIndexTable);
                 });
 
                 foreach (var entity in entities)
@@ -110,10 +118,12 @@ namespace dp2SSL
 
         // 对 Entity 进行排序
         // TODO: 余下的建议按照应还日期，日期靠前排序。这样便于读者观察到需要尽快还书的册
-        static int CompareEntities(Entity a, Entity b, List<Entity> entities)
+        static int CompareEntities(Entity a, 
+            Entity b,
+            Hashtable originIndexTable)
         {
-            int index_a = entities.IndexOf(a);
-            int index_b = entities.IndexOf(b);
+            int index_a = (int)originIndexTable[a];
+            int index_b = (int)originIndexTable[b];
             bool a_overflow = IsState(a, "overflow");
             bool b_overflow = IsState(b, "overflow");
             if (a_overflow && b_overflow)
