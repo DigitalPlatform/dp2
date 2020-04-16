@@ -7039,10 +7039,15 @@ strContent);
             form.MdiParent = Program.MainForm;
             form.Show();
 
+            // 2020/4/16
+            form.LoadOrderByRecPath(strRecPath, false);
+
+            /*
             if (this.comboBox_load_type.Text == "图书")
                 form.LoadOrderByRecPath(strRecPath, false);
             else
                 form.LoadIssueByRecPath(strRecPath, false);
+            */
         }
 
         // 重新进行合并

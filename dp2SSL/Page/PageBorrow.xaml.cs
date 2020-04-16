@@ -325,6 +325,9 @@ namespace dp2SSL
         private async void CurrentApp_TagChanged(object sender, TagChangedEventArgs e)
 #pragma warning restore VSTHRD100 // 避免使用 Async Void 方法
         {
+            if (_skipTagChanged > 0)
+                return;
+
             _tagChangedCount++;
             await ChangeEntitiesAsync((BaseChannel<IRfid>)sender, e);
         }
@@ -3291,6 +3294,8 @@ string usage)
             */
         }
 
+        int _skipTagChanged = 0;
+
         // 绑定或者解绑(ISO14443A)读者卡
         private async Task BindPatronCardAsync(string action)
         {
@@ -3318,8 +3323,8 @@ string usage)
             }));
 
             // 暂时断开原来的标签处理事件
-            App.CurrentApp.TagChanged -= CurrentApp_TagChanged;
-
+            // App.CurrentApp.TagChanged -= CurrentApp_TagChanged;
+            _skipTagChanged++;
             try
             {
                 if (IsPatronOK(action, out string check_message) == false)
@@ -3426,7 +3431,8 @@ uid);
             }
             finally
             {
-                App.CurrentApp.TagChanged += CurrentApp_TagChanged;
+                // App.CurrentApp.TagChanged += CurrentApp_TagChanged;
+                _skipTagChanged--;
 
                 if (progress != null)
                     App.Invoke(new Action(() =>

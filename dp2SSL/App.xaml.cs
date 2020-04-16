@@ -47,7 +47,17 @@ namespace dp2SSL
         // 主要的通道池，用于当前服务器
         public LibraryChannelPool _channelPool = new LibraryChannelPool();
 
-        CancellationTokenSource _cancelRefresh = new CancellationTokenSource();
+        static CancellationTokenSource _cancelRefresh = new CancellationTokenSource();
+
+        public static CancellationToken CancelToken
+        {
+            get
+            {
+                if (_cancelRefresh == null)
+                    return new CancellationToken();
+                return _cancelRefresh.Token;
+            }
+        }
 
         CancellationTokenSource _cancelProcessMonitor = new CancellationTokenSource();
 
