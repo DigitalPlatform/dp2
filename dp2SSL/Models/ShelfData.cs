@@ -1140,12 +1140,13 @@ namespace dp2SSL
                             App.PauseBarcodeScan();
                             try
                             {
+                                var door_names = StringUtil.MakePathList(GetDoorName(transferins), ",");
                                 AskTransferWindow dialog = new AskTransferWindow();
-                                dialog.TitleText = $"上架({StringUtil.MakePathList(GetDoorName(transferins), ",")})";
+                                dialog.TitleText = $"上架({door_names})";
                                 dialog.TransferButtonText = "上架+调入";
                                 dialog.NotButtonText = "普通上架";
                                 dialog.SetBooks(collection);
-                                dialog.Text = $"是否要针对以上放入书柜的图书进行调入？";
+                                dialog.Text = $"如何处理以上放入 {door_names} 的 {collection.Count} 册图书？";
                                 dialog.Owner = App.CurrentApp.MainWindow;
                                 dialog.BatchNo = batchNo;
                                 dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
@@ -1233,13 +1234,14 @@ namespace dp2SSL
                             App.PauseBarcodeScan();
                             try
                             {
+                                var door_names = StringUtil.MakePathList(GetDoorName(transferouts), ",");
                                 AskTransferWindow dialog = new AskTransferWindow();
-                                dialog.TitleText = $"下架({StringUtil.MakePathList(GetDoorName(transferouts), ",")})";
+                                dialog.TitleText = $"下架({door_names})";
                                 dialog.TransferButtonText = "下架+调出";
                                 dialog.NotButtonText = "普通下架";
                                 dialog.Mode = "out";
                                 dialog.SetBooks(collection);
-                                dialog.Text = $"是否要针对以上拿出书柜的图书进行调出？";
+                                dialog.Text = $"如何处理以上从 {door_names} 取走的 {collection.Count} 册图书？";
                                 dialog.target.ItemsSource = _locationList;  // result.List;
                                 dialog.BatchNo = batchNo;
                                 dialog.Owner = App.CurrentApp.MainWindow;
@@ -2466,17 +2468,21 @@ namespace dp2SSL
             if (e.AddTags != null)
             {
                 tags.AddRange(e.AddTags);
+                /*
                 // 延时触发 SelectAntenna()
                 if (e.AddTags.Count > 0)
                     _tagAdded = true;
+                    */
             }
 
             if (e.UpdateTags != null)
             {
                 tags.AddRange(e.UpdateTags);
+                /*
                 // 2020/4/15
                 if (e.UpdateTags.Count > 0)
                     _tagAdded = true;
+                    */
             }
 
             // 2020/4/11
@@ -2503,6 +2509,10 @@ namespace dp2SSL
 
                 tags = filtered;
             }
+
+            // 延时触发 SelectAntenna()
+            if (tags.Count > 0)
+                _tagAdded = true;
 
             List<string> add_uids = new List<string>();
             int removeBooksCount = 0;
@@ -2699,17 +2709,21 @@ namespace dp2SSL
             if (e.AddTags != null)
             {
                 tags.AddRange(e.AddTags);
+                /*
                 // 延时触发 SelectAntenna()
                 if (e.AddTags.Count > 0)
                     _tagAdded = true;
+                    */
             }
 
             if (e.UpdateTags != null)
             {
                 tags.AddRange(e.UpdateTags);
+                /*
                 // 2020/4/15
                 if (e.UpdateTags.Count > 0)
                     _tagAdded = true;
+                    */
             }
 
             {

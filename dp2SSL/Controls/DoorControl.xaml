@@ -138,7 +138,7 @@
         </ControlTemplate>
     </UserControl.Resources>
     <Border BorderBrush="Gray" BorderThickness="0,0,0,0">
-        <Canvas Name="canvas" >
+        <Canvas Name="canvas">
 
         </Canvas>
     </Border>

@@ -98,7 +98,7 @@
                 <!--
                 <local:EntityListControl x:Name="booksControl" Grid.Row="1" Visibility="Collapsed"/>
                 -->
-                <local:DoorControl x:Name="doorControl" Grid.Row="1"/>
+                <local:DoorControl x:Name="doorControl" Grid.Row="1" />
             </Grid>
             <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" Background="Blue">
                 <!-- 

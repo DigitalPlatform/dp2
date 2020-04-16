@@ -283,6 +283,9 @@ namespace dp2SSL
             }
         }
 
+        public static bool IsPageBorrowActive { get; set; }
+        public static bool IsPageShelfActive { get; set; }
+
         // 比 App.Funcion == "智能书柜" 判断起来更快
         static bool _isShelfMode = false;
 
@@ -1125,7 +1128,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             // this.Number = e.Result?.Results?.Count.ToString();
             if (e.Result.Results != null)
             {
-                if (_isShelfMode == false)
+                if (IsPageBorrowActive == true)
                 {
                     TagList.Refresh(sender as BaseChannel<IRfid>,
                         e.ReaderNameList,
@@ -1151,7 +1154,9 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                     // 标签总数显示 图书+读者卡
                     this.Number = $"{TagList.Books.Count}:{TagList.Patrons.Count}";
                 }
-                else
+
+
+                if (IsPageShelfActive)
                 {
                     NewTagList.Refresh(// sender as BaseChannel<IRfid>,
                         e.ReaderNameList,

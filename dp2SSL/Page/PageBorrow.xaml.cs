@@ -213,6 +213,8 @@ namespace dp2SSL
         private async void PageBorrow_Loaded(object sender, RoutedEventArgs e)
 #pragma warning restore VSTHRD100 // 避免使用 Async Void 方法
         {
+            App.IsPageBorrowActive = true;
+
             SetGlobalError("current", null); // 清除以前残留的报错信息
             SetGlobalError("scan_barcode", null);
 
@@ -771,6 +773,8 @@ namespace dp2SSL
 
         private void PageBorrow_Unloaded(object sender, RoutedEventArgs e)
         {
+            App.IsPageBorrowActive = false;
+
             // _cancel.Cancel();
             CancelDelayClearTask();
 
@@ -923,6 +927,9 @@ namespace dp2SSL
                 {
                     this.booksControl.Visibility = Visibility.Collapsed;
                     // this.patronControl.HideInputFaceButton();
+
+                    // 2020/4/16
+                    SetPatronControlVisibility();
                 }
                 else
                 {
@@ -940,13 +947,23 @@ namespace dp2SSL
             }
         }
 
+        // 决定是否隐藏读者信息控件
         void SetPatronControlVisibility()
         {
+            // 2020/4/16
+            if (returnButton.Visibility == Visibility.Visible
+                || renewButton.Visibility == Visibility.Visible)
+                this.patronControl.Visibility = Visibility.Collapsed;
+            else
+                this.patronControl.Visibility = Visibility.Visible;
+
+            /*
             // (普通)还书和续借操作并不需要读者卡
             if (borrowButton.Visibility != Visibility.Visible)
                 this.patronControl.Visibility = Visibility.Collapsed;
             else
                 this.patronControl.Visibility = Visibility.Visible; // 2019/9/3
+                */
         }
 
 #if OLD_RFID
@@ -3337,7 +3354,15 @@ string usage)
 
                 bool changed = false;
                 XmlDocument dom = new XmlDocument();
-                dom.LoadXml(_patron.Xml);
+                try
+                {
+                    dom.LoadXml(_patron.Xml);
+                }
+                catch (Exception ex)
+                {
+                    DisplayError(ref progress, $"BindPatronCardAsync() 异常，读者记录 (证条码号:{_patron.Barcode},读者记录路径:{_patron.RecPath}) XML 装载到 XmlDocument 失败: {ex.Message}");
+                    return;
+                }
 
                 if (action == "bindPatronCard")
                 {
@@ -3414,7 +3439,7 @@ uid);
             var temp_task = FillPatronDetailAsync(true);
         }
 
-        static NormalResult ModifyBinding(XmlDocument dom,
+        public static NormalResult ModifyBinding(XmlDocument dom,
             string action,
             string uid)
         {
