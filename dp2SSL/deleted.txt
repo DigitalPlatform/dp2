@@ -2147,3 +2147,284 @@ new SetErrorEventArgs
 
             // TODO: 初始化中断后，是否允许切换到菜单和设置画面？(只是不让进入书架画面)
         }
+
+
+        ~~~~~~~~~~~~~
+
+                // 新版本的事件
+#pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
+        private async void CurrentApp_NewTagChanged(object sender, NewTagChangedEventArgs e)
+#pragma warning restore VSTHRD100 // 避免使用 Async Void 方法
+        {
+            // TODO: 对已经拿走的读者卡，用 TagList.ClearTagTable() 清除它的缓存内容
+
+            // 读者。不再精细的进行增删改跟踪操作，而是笼统地看 TagList.Patrons 集合即可
+            /*
+            _ = Task.Run(async () =>
+            {
+                var result = await ShelfData.ChangePatronTagsAsync((BaseChannel<IRfid>)sender,
+                    e);
+                if (result.Value > 0)
+                    await RefreshPatronsAsync();
+            });
+            */
+
+            {
+                var result = await ShelfData.ChangePatronTagsAsync((BaseChannel<IRfid>)sender,
+    e);
+                if (result.Value > 0)
+                    await RefreshPatronsAsync();
+            }
+
+            await ShelfData.ChangeEntitiesAsync((BaseChannel<IRfid>)sender,
+                e,
+                () =>
+                {
+                    // 如果图书数量有变动，要自动清除挡在前面的残留的对话框
+                    CloseDialogs();
+                });
+
+            // "initial" 模式下，立即合并到 _all。等关门时候一并提交请求
+            // TODO: 不过似乎此时有语音提示放入、取出，似乎更显得实用一些？
+            if (this.Mode == "initial")
+            {
+                var adds = ShelfData.Adds; // new List<Entity>(ShelfData.Adds);
+                {
+                    ShelfData.Add("all", adds);
+
+                    ShelfData.Remove("adds", adds);
+                    ShelfData.Remove("removes", adds);
+                }
+
+                var removes = ShelfData.Removes;
+                {
+                    ShelfData.Remove("all", removes);
+
+                    ShelfData.Remove("adds", removes);
+                    ShelfData.Remove("removes", removes);
+                }
+
+                ShelfData.RefreshCount();
+            }
+        }
+
+
+        ~~~~~~~~~~
+
+
+                // 新版本事件
+        // 跟随事件动态更新列表
+        // Add: 检查列表中是否存在这个 PII，如果存在，则修改状态为 在架，并设置 UID 成员
+        //      如果不存在，则为列表添加一个新元素，修改状态为在架，并设置 UID 和 PII 成员
+        // Remove: 检查列表中是否存在这个 PII，如果存在，则修改状态为 不在架
+        //      如果不存在这个 PII，则不做任何动作
+        // Update: 检查列表中是否存在这个 PII，如果存在，则修改状态为 在架，并设置 UID 成员
+        //      如果不存在，则为列表添加一个新元素，修改状态为在架，并设置 UID 和 PII 成员
+        public static async Task ChangeEntitiesAsync(BaseChannel<IRfid> channel,
+            NewTagChangedEventArgs e,
+            Delagate_booksChanged func_booksChanged)
+        {
+            if (ShelfData.FirstInitialized == false)
+                return;
+
+            // 开门状态下，动态信息暂时不要合并
+            bool changed = false;
+
+            List<TagAndData> tags = new List<TagAndData>();
+            if (e.AddTags != null)
+            {
+                tags.AddRange(e.AddTags);
+                /*
+                // 延时触发 SelectAntenna()
+                if (e.AddTags.Count > 0)
+                    _tagAdded = true;
+                    */
+            }
+
+            if (e.UpdateTags != null)
+            {
+                tags.AddRange(e.UpdateTags);
+                /*
+                // 2020/4/15
+                if (e.UpdateTags.Count > 0)
+                    _tagAdded = true;
+                    */
+            }
+
+            // 2020/4/11
+            // 忽略读者读卡器上的标签
+            {
+                var filtered = tags.FindAll(tag =>
+                {
+                    //if (tag.OneTag.Protocol != InventoryInfo.ISO15693)
+                    //    return false;
+                    // 加快判断速度，先排除读者读卡器上的标签
+                    if (tag.OneTag.ReaderName == _patronReaderName)
+                        return false;
+
+                    if (tag.OneTag.Protocol == InventoryInfo.ISO15693
+                        && tag.OneTag.TagInfo == null)
+                        return false;   // 忽略还没有 TagInfo 的那些超前的通知
+
+                    // 判断一下 tag 是否属于已经定义的门范围
+                    var doors = DoorItem.FindDoors(ShelfData.Doors, tag.OneTag.ReaderName, tag.OneTag.AntennaID.ToString());
+                    if (doors.Count > 0)
+                        return true;
+                    return false;
+                });
+
+                tags = filtered;
+            }
+
+            // 延时触发 SelectAntenna()
+            if (tags.Count > 0)
+            {
+                _ = Task.Run(async () =>
+                {
+                    // 延时设置
+                    await Task.Delay(TimeSpan.FromSeconds(10), App.CancelToken);
+                    _tagAdded = true;
+                });
+            }
+
+            List<string> add_uids = new List<string>();
+            int removeBooksCount = 0;
+            lock (_syncRoot_all)
+            {
+                // 新添加标签(或者更新标签信息)
+                foreach (var tag in tags)
+                {
+                    // 没有 TagInfo 信息的先跳过
+                    if (tag.OneTag.TagInfo == null)
+                        continue;
+
+                    add_uids.Add(tag.OneTag.UID);
+
+                    // 看看 _all 里面有没有
+                    var results = Find(_all, tag);
+                    if (results.Count == 0)
+                    {
+                        // Exception:
+                        //      可能会抛出异常 ArgumentException TagDataException
+                        if (Add(_adds, tag) == true)
+                        {
+                            changed = true;
+
+                            // 刚刚增加的 patron 的 UID，记忆下来
+                            //if (tag.Type == "patron")
+                            //    new_patron_uids.Add(tag.OneTag.UID);
+                        }
+                        if (Remove(_removes, tag) == true)
+                            changed = true;
+                    }
+                    else
+                    {
+                        // 更新 _all 里面的信息
+                        if (Update(_all, tag) == true)
+                        {
+                            // Exception:
+                            //      可能会抛出异常 ArgumentException TagDataException
+                            Add(_changes, tag);
+                        }
+
+                        // 要把 _adds 和 _removes 里面都去掉
+                        if (Remove(_adds, tag) == true)
+                            changed = true;
+                        if (Remove(_removes, tag) == true)
+                            changed = true;
+                    }
+                }
+
+                List<TagAndData> removes = null;
+                {
+                    // 2020/4/9
+                    // 把书柜读卡器上的(ISO15693)读者卡也计算在内
+                    removes = e.RemoveTags?.FindAll(tag =>
+                    {
+                        //if (tag.OneTag.Protocol != InventoryInfo.ISO15693)
+                        //    return false;
+
+                        // 加快判断速度，先排除读者读卡器上的标签
+                        if (tag.OneTag.ReaderName == _patronReaderName)
+                            return false;
+
+                        // 判断一下 tag 是否属于已经定义的门范围
+                        var doors = DoorItem.FindDoors(ShelfData.Doors, tag.OneTag.ReaderName, tag.OneTag.AntennaID.ToString());
+                        if (doors.Count > 0)
+                            return true;
+                        return false;
+                    });
+                }
+
+                // 拿走标签
+                foreach (var tag in removes)
+                {
+                    if (tag.OneTag.TagInfo == null)
+                        continue;
+
+                    // 刚添加过的标签，这里就不要去移走了。即，添加比移除要优先
+                    if (add_uids.IndexOf(tag.OneTag.UID) != -1)
+                        continue;
+
+                    // 看看 _all 里面有没有
+                    var results = Find("all", tag);
+                    if (results.Count > 0)
+                    {
+                        if (Remove(_adds, tag) == true)
+                            changed = true;
+                        if (Remove(_changes, tag) == true)
+                            changed = true;
+                        /*
+                        if (Add(_removes, tag) == true)
+                        {
+                            changed = true;
+                        }
+                        */
+                        // 2020/4/5
+                        // 这样可以利用 All 里面的 Entity 对象，通常其 Title 属性已经有值
+                        if (Add("removes", results[0]) == true)
+                            changed = true;
+                    }
+                    else
+                    {
+                        // _all 里面没有，很奇怪(是否写入错误日志？)。但，
+                        // 要把 _adds 和 _removes 里面都去掉
+                        if (Remove(_adds, tag) == true)
+                            changed = true;
+                        if (Remove(_removes, tag) == true)
+                            changed = true;
+                        if (Remove(_changes, tag) == true)
+                            changed = true;
+                    }
+
+                    removeBooksCount++;
+                }
+            }
+
+            /*
+            StringUtil.RemoveDup(ref add_uids, false);
+            int add_count = add_uids.Count;
+            int remove_count = 0;
+            if (e.RemoveTags != null)
+                remove_count = removeBooksCount; // 注： e.RemoveBooks.Count 是不准确的，有时候会把 ISO15693 的读者卡判断时作为 remove 信号
+
+            */
+
+            // TODO: 把 add remove error 动作分散到每个门，然后再触发 ShelfData.BookChanged 事件
+
+            if (changed == true)
+            {
+                // DoorItem.DisplayCount(_all, _adds, _removes, ShelfData.Doors);
+                ShelfData.RefreshCount();
+                func_booksChanged?.Invoke();
+            }
+
+            // TODO: 平时可以建立一个 cache，以后先从 cache 里面取书目摘要字符串
+            var task = Task.Run(async () =>
+            {
+                CancellationToken token = CancelToken;
+                await FillBookFieldsAsync(All, token, "refreshCount");
+                await FillBookFieldsAsync(Adds, token, "refreshCount");
+                await FillBookFieldsAsync(Removes, token, "refreshCount");
+            });
+        }

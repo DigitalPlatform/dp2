@@ -260,9 +260,9 @@ namespace dp2SSL
             //      -1  出错
             //      0   没有填充
             //      1   成功填充
-            var result = await FillPatronDetailAsync();
-            if (result.Value == 1)
-                Welcome();
+            var result = await FillPatronDetailAsync(() => Welcome());
+            //if (result.Value == 1)
+            //    Welcome();
         }
 
         object _syncRoot_save = new object();
@@ -1040,9 +1040,9 @@ namespace dp2SSL
             //      -1  出错
             //      0   没有填充
             //      1   成功填充
-            var result = await FillPatronDetailAsync();
-            if (result.Value == 1)
-                Welcome();
+            var result = await FillPatronDetailAsync(() => Welcome());
+            //if (result.Value == 1)
+            //    Welcome();
 #if NO
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
@@ -1347,16 +1347,20 @@ namespace dp2SSL
                     await RefreshPatronsAsync();
             });
             */
+            var sep_result = await ShelfData.SeperateTagsAsync((BaseChannel<IRfid>)sender,
+                e,
+                (t) =>
+                {
+                    if (t.ReaderName == ShelfData.PatronReaderName)
+                        return "patron";
+                    return "book";
+                });
 
-            {
-                var result = await ShelfData.ChangePatronTagsAsync((BaseChannel<IRfid>)sender,
-    e);
-                if (result.Value > 0)
-                    await RefreshPatronsAsync();
-            }
+            if (sep_result.add_patrons.Count > 0 || sep_result.updated_patrons.Count > 0)
+                await RefreshPatronsAsync();
 
             await ShelfData.ChangeEntitiesAsync((BaseChannel<IRfid>)sender,
-                e,
+                sep_result,
                 () =>
                 {
                     // 如果图书数量有变动，要自动清除挡在前面的残留的对话框
@@ -1386,6 +1390,7 @@ namespace dp2SSL
                 ShelfData.RefreshCount();
             }
         }
+
 #endif
 
         bool _initialCancelled = false;
@@ -1694,7 +1699,7 @@ namespace dp2SSL
                 if (_initialCancelled)
                     return;
 
-                ShelfData.SelectAntenna();
+                await ShelfData.SelectAntennaAsync();
 
                 // 将 操作历史库 里面的 PII 和 ShelfData.All 里面 PII 相同的事项的状态标记为“放弃同步”。因为刚才已经成功同步了它们
                 // ShelfData.RemoveFromRetryActions(new List<Entity>(ShelfData.All));
@@ -1906,9 +1911,9 @@ namespace dp2SSL
                         //      -1  出错
                         //      0   没有填充
                         //      1   成功填充
-                        var result = await FillPatronDetailAsync();
-                        if (result.Value == 1)
-                            Welcome();
+                        var result = await FillPatronDetailAsync(() => Welcome());
+                        //if (result.Value == 1)
+                        //    Welcome();
                     }
                     else
                     {
@@ -2032,12 +2037,16 @@ namespace dp2SSL
             return BitConverter.ToUInt32(bytes, 0).ToString();
         }
 
+        public delegate void Delegate_welcome();
+
         // 填充读者信息的其他字段(第二阶段)
         // resut.Value
         //      -1  出错
         //      0   没有填充
         //      1   成功填充
-        async Task<NormalResult> FillPatronDetailAsync(bool force = false)
+        async Task<NormalResult> FillPatronDetailAsync(
+            Delegate_welcome func_welcome,
+            bool force = false)
         {
             // 已经填充过了
             if (_patron.PatronName != null
@@ -2062,6 +2071,8 @@ namespace dp2SSL
                     PatronClear();
                     return login_result;
                 }
+                // 成功时调用 Welcome
+                func_welcome?.Invoke();
                 return new NormalResult { Value = 1 };
             }
 
@@ -2120,6 +2131,9 @@ namespace dp2SSL
                 this.patronControl.SetBorrowed(result.ReaderXml);
             }));
 
+            // 成功时调用 Welcome
+            func_welcome?.Invoke();
+
             // 显示在借图书列表
             List<Entity> entities = new List<Entity>();
             foreach (Entity entity in this.patronControl.BorrowedEntities)
@@ -2128,6 +2142,25 @@ namespace dp2SSL
             }
             if (entities.Count > 0)
             {
+                try
+                {
+                    BaseChannel<IRfid> channel = RfidManager.GetChannel();
+                    try
+                    {
+                        await FillBookFieldsAsync(channel, entities, new CancellationToken());
+                    }
+                    finally
+                    {
+                        RfidManager.ReturnChannel(channel);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    string error = $"填充读者信息时出现异常: {ex.Message}";
+                    SetGlobalError("rfid", error);
+                    return new NormalResult { Value = -1, ErrorInfo = error };
+                }
+                /*
                 // 在一个独立的线程里面刷新在借册，这样本函数可以尽早返回，从而听到欢迎的语音
                 _ = Task.Run(async () =>
                 {
@@ -2150,7 +2183,7 @@ namespace dp2SSL
                         // return new NormalResult { Value = -1, ErrorInfo = error };
                     }
                 });
-
+                */
             }
 #if NO
             // 装载图象
@@ -3096,9 +3129,9 @@ namespace dp2SSL
             //      -1  出错
             //      0   没有填充
             //      1   成功填充
-            var fill_result = await FillPatronDetailAsync();
-            if (fill_result.Value == 1)
-                Welcome();
+            var fill_result = await FillPatronDetailAsync(() => Welcome());
+            //if (fill_result.Value == 1)
+            //    Welcome();
         }
 
         // 开始启动延时自动清除读者信息的过程。如果中途门被打开，则延时过程被取消(也就是说读者信息不再会被自动清除)
@@ -3257,9 +3290,9 @@ namespace dp2SSL
 
         }
 
-        private void CloseRF_Click(object sender, RoutedEventArgs e)
+        private async void CloseRF_Click(object sender, RoutedEventArgs e)
         {
-            var result = ShelfData.SelectAntenna();
+            var result = await ShelfData.SelectAntennaAsync();
             MessageBox.Show(result.ErrorInfo);
         }
 
