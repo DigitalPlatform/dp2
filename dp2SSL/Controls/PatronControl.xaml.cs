@@ -86,27 +86,20 @@ namespace dp2SSL
                 dom.LoadXml(patron_xml);
 
                 // 用 hashtable 保存一下每个 entity 的原始序
-                Hashtable originIndexTable = new Hashtable();
-                int i = 0;
+                // Hashtable originIndexTable = new Hashtable();
+                int i = 0;  // 插入位置
 
-                List<Entity> entities = new List<Entity>();
+                // List<Entity> entities = new List<Entity>();
                 XmlNodeList borrows = dom.DocumentElement.SelectNodes("borrows/borrow");
                 foreach (XmlElement borrow in borrows)
                 {
                     string barcode = borrow.GetAttribute("barcode");
                     var new_entity = new Entity { PII = barcode, Container = _borrowedEntities };
-                    entities.Add(new_entity);
-                    originIndexTable[new_entity] = i++;
-                }
-
-                entities.Sort((a, b) =>
-                {
-                    return CompareEntities(a, b, originIndexTable);
-                });
-
-                foreach (var entity in entities)
-                {
-                    _borrowedEntities.Add(entity);
+                    // 2020/4/17 不用排序，在添加时临时决定是插入到前部还是追加
+                    if (IsState(new_entity, "overflow") == true)
+                        _borrowedEntities.Insert(i++, new_entity);
+                    else
+                        _borrowedEntities.Add(new_entity);
                 }
             }
         }
@@ -116,9 +109,10 @@ namespace dp2SSL
             return StringUtil.IsInList(sub, entity.State);
         }
 
+        /*
         // 对 Entity 进行排序
         // TODO: 余下的建议按照应还日期，日期靠前排序。这样便于读者观察到需要尽快还书的册
-        static int CompareEntities(Entity a, 
+        static int CompareEntities(Entity a,
             Entity b,
             Hashtable originIndexTable)
         {
@@ -137,6 +131,7 @@ namespace dp2SSL
             // 按原来的序
             return index_a - index_b;
         }
+        */
 
         public void SetPhoto(Stream stream)
         {
