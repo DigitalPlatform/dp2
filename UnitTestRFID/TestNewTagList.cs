@@ -148,6 +148,109 @@ namespace UnitTestRFID
             Assert.AreEqual(1, NewTagList.Tags.Count);
         }
 
+        // TODO: 如果两个读卡器都发现了一个同样 UID 的标签，要做一下取舍
+
+        // 测试对列表中的标签进行更新。从一个读卡器变动到另一个读卡器
+        [TestMethod]
+        public void Test_update_1()
+        {
+            NewTagList.Clear();
+
+            List<OneTag> tag_list = new List<OneTag>();
+
+            // 准备内容
+            tag_list.Add(BuildOne15693Tag("M201", 1, "111111"));
+            NewTagList.Refresh(
+                "*",
+                tag_list,
+                (readerName, uid, antennaID) =>
+                {
+                    // 获得标签内容
+                    return new GetTagInfoResult
+                    {
+                        TagInfo = BuildOne15693TagInfo(tag_list[0])
+                    };
+                    // return null;
+                },
+                null,
+                null);
+
+            // 检查一下
+            Assert.AreEqual(1, NewTagList.Tags.Count);
+
+            List<TagAndData> new_results = new List<TagAndData>();
+            List<TagAndData> changed_results = new List<TagAndData>();
+            List<TagAndData> removed_results = new List<TagAndData>();
+
+            List<TypeAndError> errors = new List<TypeAndError>();
+
+
+            List<OneTag> update_list = new List<OneTag>();
+            update_list.Add(BuildOne15693Tag("RL8600", 2, "111111"));
+
+            // 用 update_list 集合来刷新
+            NewTagList.Refresh(
+                "*",
+                update_list,
+                (readerName, uid, antennaID) =>
+                {
+                    // 获得标签内容
+                    return new GetTagInfoResult
+                    {
+                        TagInfo = BuildOne15693TagInfo(update_list[0])
+                    };
+                },
+                (new_tags, changed_tags, removed_tags) =>
+                {
+                    if (new_tags != null && new_tags.Count > 0)
+                    {
+                        throw new Exception("new_tags 不应该发生添加");
+                    }
+                    if (changed_tags != null && changed_tags.Count > 0)
+                    {
+                        // 检查
+                        Assert.AreEqual(1, changed_tags.Count);
+
+                        var result = changed_tags[0];
+                        // 比较除了 TagInfo 以外的成员
+                        Assert.IsTrue(IsEqual(result.OneTag, update_list[0], false));
+
+                        if (result.OneTag.TagInfo == null)
+                        {
+
+                        }
+                        else
+                        {
+                            // 这个时候，TagInfo 应该不是 null 了
+                            Assert.AreNotEqual(null, result.OneTag.TagInfo);
+                            // 专门比较 TagInfo
+                            Assert.IsTrue(IsEqual(BuildOne15693TagInfo(update_list[0]), result.OneTag.TagInfo));
+                        }
+
+                        changed_results.AddRange(changed_tags);
+                    }
+                    if (removed_tags != null && removed_tags.Count > 0)
+                    {
+                        throw new Exception("removed_tags 不应该发生添加");
+                    }
+                },
+                (string type, string error) =>
+                {
+                    errors.Add(new TypeAndError
+                    {
+                        Type = type,
+                        Error = error
+                    });
+                });
+
+            Assert.AreEqual(0, new_results.Count);
+            Assert.AreEqual(1, changed_results.Count);  // 两阶段也是可能的
+            Assert.AreEqual(0, removed_results.Count);
+
+            Assert.AreEqual(1, NewTagList.Tags.Count);
+        }
+
+
         // 测试从列表中移走标签
         // 获得标签详细内容时，返回正常的结果
         [TestMethod]

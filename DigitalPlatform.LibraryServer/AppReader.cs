@@ -1048,6 +1048,7 @@ namespace DigitalPlatform.LibraryServer
                         strAction,
                         strRecPath,
                         domNewRec,
+                        bForce ? "dontVerifyBarcode" : "", // 2020/4/17 强制保存的时候不进行读者证条码号规则校验
                         out strError);
                     if (nRet != 0)
                     {

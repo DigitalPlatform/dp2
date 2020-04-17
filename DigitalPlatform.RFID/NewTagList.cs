@@ -115,7 +115,7 @@ namespace DigitalPlatform.RFID
         // parameters:
         //      readerNameList  list中包含的内容的读卡器名(列表)。注意 list 中包含的标签，可能并不是全部读卡器的标签。对没有包含在其中的标签，本函数需要注意跳过(维持现状)，不要当作被删除处理
         // 异常：
-        //      可能抛出 TagInfoException
+        //      
         public static void Refresh(// BaseChannel<IRfid> channel,
             string readerNameList,
             List<OneTag> list,
@@ -143,10 +143,26 @@ namespace DigitalPlatform.RFID
                 if (book != null)
                 {
                     found_books.Add(book);
-                    if (book.OneTag.AntennaID != tag.AntennaID)
+                    if (book.OneTag.AntennaID != tag.AntennaID
+                        || book.OneTag.ReaderName != tag.ReaderName)
                     {
+                        var onetag = book.OneTag;
                         // 修改 AntennaID
-                        book.OneTag.AntennaID = tag.AntennaID;
+                        onetag.AntennaID = tag.AntennaID;
+                        onetag.ReaderName = tag.ReaderName;
+                        if (onetag.TagInfo != null)
+                        {
+                            /*
+                            // TODO: 这里还有个做法，就是干脆把 .TagInfo 设置为 null。这会导致重新获取 TagInfo(所谓两阶段)
+                            onetag.TagInfo = null;
+                            ClearTagTable(onetag.UID);
+                            */
+                            onetag.TagInfo.AntennaID = tag.AntennaID;
+                            onetag.TagInfo.ReaderName = tag.ReaderName;
+
+                            // 只清理缓存
+                            _tagTable.Remove(onetag.UID);
+                        }
                         changed_books.Add(book);
                     }
 

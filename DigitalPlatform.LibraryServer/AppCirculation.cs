@@ -1520,6 +1520,15 @@ namespace DigitalPlatform.LibraryServer
                     DomUtil.SetElementText(domOperLog.DocumentElement,
                         "action",
                         bRenew == true ? "renew" : "borrow");
+
+                    string strOperTime = this.Clock.GetClock();
+                    // 如果有 operTime 子参数，直接用它作为操作时间
+                    {
+                        string paramOperTime = StringUtil.GetParameterByPrefix(strStyle, "operTime");
+                        if (string.IsNullOrEmpty(paramOperTime) == false)
+                            strOperTime = StringUtil.UnescapeString(paramOperTime);
+                    }
+
                     // 原来在这里
 
                     // TODO: overflowable 状态下，发现册已经被保留，如何处理？是否允许短暂借出?
@@ -1631,6 +1640,7 @@ namespace DigitalPlatform.LibraryServer
                         ref itemdom,
                         bForce,
                         sessioninfo.UserID,
+                        strOperTime,
                         sessioninfo.Account?.Location,
                         strOutputItemRecPath,
                         strOutputReaderRecPath,
@@ -6506,6 +6516,14 @@ start_time_1,
                         "state");
 
                     string strOperTime = this.Clock.GetClock();
+                    // 如果有 operTime 子参数，直接用它作为操作时间
+                    {
+                        string paramOperTime = StringUtil.GetParameterByPrefix(strStyle, "operTime");
+                        if (string.IsNullOrEmpty(paramOperTime) == false)
+                            strOperTime = StringUtil.UnescapeString(paramOperTime);
+                    }
+
+
                     string strWarning = "";
 
                     // 处理册记录
@@ -15423,6 +15441,7 @@ start_time_1,
 
             // 2020/3/27
             // 最近一次借还本册操作的时间。用于同步借还请求判断先后关系
+            // 注意这里应该写入实际操作时间。同步的时候，同步成功的时间有可能晚于实际操作时间。实际操作时间有 style 参数里面的 operTime 子参数给出
             DomUtil.SetElementText(itemdom.DocumentElement,
     "checkInOutDate",
     strOperTime);
@@ -16548,6 +16567,7 @@ start_time_1,
             ref XmlDocument itemdom,
             bool bForce,
             string strOperator,
+            string strOperTime,
             string strAccountLocation,  // sessioninfo.Account.Location
             string strItemRecPath,
             string strReaderRecPath,
@@ -16997,7 +17017,7 @@ start_time_1,
 
             string strRenewComment = "";
 
-            string strBorrowDate = app.Clock.GetClock();
+            // string strBorrowDate = app.Clock.GetClock();
 
             string strLastReturningDate = "";   // 上次的应还时间
 
@@ -17017,13 +17037,13 @@ start_time_1,
                 strRenewComment += "no=" + Convert.ToString(nNo - 1) + ", ";
                 strRenewComment += "borrowDate=" + DomUtil.GetAttr(nodeBorrow, "borrowDate") + ", ";
                 strRenewComment += "borrowPeriod=" + DomUtil.GetAttr(nodeBorrow, "borrowPeriod") + ", ";
-                strRenewComment += "returnDate=" + strBorrowDate + ", ";
+                strRenewComment += "returnDate=" + strOperTime + ", ";
                 strRenewComment += "operator=" + DomUtil.GetAttr(nodeBorrow, "operator");
             }
 
             // borrowDate
             DomUtil.SetAttr(nodeBorrow, "borrowDate",
-                strBorrowDate);
+                strOperTime);
 
             if (nNo > 0)    // 2013/12/23
                 DomUtil.SetAttr(nodeBorrow, "no", Convert.ToString(nNo));
@@ -17104,13 +17124,14 @@ start_time_1,
 
             DomUtil.SetElementText(itemdom.DocumentElement,
                 "borrowDate",
-                strBorrowDate);
+                strOperTime);
 
             // 2020/3/27
             // 最近一次借还本册操作的时间。用于同步借还请求判断先后关系
+            // 注意这里应该写入实际操作时间。同步的时候，同步成功的时间有可能晚于实际操作时间。实际操作时间有 style 参数里面的 operTime 子参数给出
             DomUtil.SetElementText(itemdom.DocumentElement,
     "checkInOutDate",
-    strBorrowDate);
+    strOperTime);
 
             // 2019/11/9
             // 记载溢出原因
@@ -17175,7 +17196,7 @@ start_time_1,
             DomUtil.SetElementText(domOperLog.DocumentElement, "itemBarcode",
                 strItemBarcode);    // 册条码号
             DomUtil.SetElementText(domOperLog.DocumentElement, "borrowDate",
-                strBorrowDate);     // 借阅日期
+                strOperTime);     // 借阅日期
             DomUtil.SetElementText(domOperLog.DocumentElement, "borrowPeriod",
                 strThisBorrowPeriod);   // 借阅期限
                                         // 2016/6/7
@@ -17212,7 +17233,7 @@ start_time_1,
                 operator_node?.SetAttribute("location", strAccountLocation);
 
             DomUtil.SetElementText(domOperLog.DocumentElement, "operTime",
-                strBorrowDate);   // 操作时间
+                strOperTime);   // 操作时间
 
             // 返回借阅成功的信息
 
@@ -17248,12 +17269,18 @@ start_time_1,
             string operTime = StringUtil.GetParameterByPrefix(strStyle, "operTime", ":");
             if (operTime == null)
                 return 0;   // 没有 operTime 子参数
+
+            operTime = StringUtil.UnescapeString(operTime);
+
             if (DateTimeUtil.TryParseRfc1123DateTimeString(operTime,
                 out DateTime currentTime) == false)
             {
                 strError = $"operTime子参数包含的时间字符串 '{operTime}' 不合法。应为 RFC1123 格式";
                 return -1;
             }
+
+            // 2020/4/17
+            currentTime = currentTime.ToLocalTime();
 
             string lastDate = DomUtil.GetElementText(itemdom.DocumentElement, "checkInOutDate");
             if (string.IsNullOrEmpty(lastDate))
@@ -17264,6 +17291,9 @@ start_time_1,
                 strError = $"册记录内 checkInOutDate 元素包含的时间字符串 '{lastDate}' 不合法。应为 RFC1123 格式";
                 return -1;
             }
+
+            // 2020/4/17
+            lastTime = lastTime.ToLocalTime();
 
             if (currentTime < lastTime)
             {

@@ -1859,7 +1859,8 @@ namespace DigitalPlatform.LibraryServer
             SessionInfo sessioninfo,
             string strAction,
             string strRecPath,
-            XmlDocument itemdom,
+            XmlDocument readerdom,
+            string style,
             out string strError)
         {
             strError = "";
@@ -1900,7 +1901,7 @@ namespace DigitalPlatform.LibraryServer
                 "DigitalPlatform.LibraryServer.LibraryHost");
             if (hostEntryClassType == null)
             {
-                strError = "<script>脚本中未找到DigitalPlatform.LibraryServer.LibraryHost类的派生类，无法校验条码号。";
+                strError = "<script>脚本中未找到DigitalPlatform.LibraryServer.LibraryHost类的派生类，无法校验读者记录";
                 return -2;
             }
 
@@ -1925,7 +1926,8 @@ namespace DigitalPlatform.LibraryServer
                     sessioninfo,
                     strAction,
                     strRecPath,
-                    itemdom,
+                    readerdom,
+                    style,
                     out strError);
             }
             catch (Exception ex)
@@ -1958,6 +1960,7 @@ namespace DigitalPlatform.LibraryServer
             //
         }
 
+        // 2020/4/17 增加了 style 参数
         // return:
         //      -3  条码号错误
         //      -1  调用出错
@@ -1968,17 +1971,21 @@ namespace DigitalPlatform.LibraryServer
             string strAction,
             string strRecPath,
             XmlDocument readerdom,
+            string style,
             out string strError)
         {
             strError = "";
             int nRet = 0;
 
+            bool dontVerifyBarcode = StringUtil.IsInList("dontVerifyBarcode", style);
+
             string strNewBarcode = DomUtil.GetElementText(readerdom.DocumentElement, "barcode");
 
-            if (strAction == "new"
+            if ((strAction == "new"
 || strAction == "change"
 || strAction == "changereaderbarcode"
 || strAction == "move")
+&& dontVerifyBarcode == false)
             {
                 if (string.IsNullOrEmpty(strNewBarcode) == false)
                 {
@@ -2085,8 +2092,6 @@ namespace DigitalPlatform.LibraryServer
 
             return 0;
         }
-
-
 
         // 2016/4/3
         // 按照缺省行为，验证读者记录中的证条码号
