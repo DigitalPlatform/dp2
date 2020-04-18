@@ -345,28 +345,18 @@ namespace dp2SSL
 
         public static void TrySetMessage(string text)
         {
-            try
+            _ = Task.Run(async () =>
             {
-                _ = Task.Run(async () =>
+                try
                 {
-                    /*
-                    var result = await TinyServer.SafeSetMessageAsync(text);
-                    if (result.Value == -1)
-                    {
-                        App.CurrentApp?.SetError("setMessage", $"发送消息失败: {result.ErrorInfo}。消息内容:{StringUtil.CutString(text, 100)}");
-                        WpfClientInfo.WriteErrorLog($"发送消息失败: {result.ErrorInfo}。消息内容:{text}");
-                    }
-                    else
-                        App.CurrentApp?.SetError("setMessage", null);
-                        */
                     await TinyServer.SendMessageAsync(text);
-                });
-            }
-            catch (Exception ex)
-            {
-                App.CurrentApp?.SetError("setMessage", $"发送消息出现异常: {ex.Message}。消息内容:{StringUtil.CutString(text, 100)}");
-                WpfClientInfo.WriteErrorLog($"发送消息出现异常: {ex.Message}。消息内容:{text}");
-            }
+                }
+                catch (Exception ex)
+                {
+                    App.CurrentApp?.SetError("setMessage", $"发送消息出现异常: {ex.Message}。消息内容:{StringUtil.CutString(text, 100)}");
+                    WpfClientInfo.WriteErrorLog($"发送消息出现异常: {ex.Message}。消息内容:{text}");
+                }
+            });
         }
 
         static string GetPartialName(string buttonName)
@@ -563,12 +553,19 @@ namespace dp2SSL
 
                 _ = Task.Run(async () =>
                 {
-                    // TODO: 显示倒计时计数？
-                    await Task.Delay(TimeSpan.FromSeconds(1));
-                    App.Invoke(new Action(() =>
+                    try
                     {
-                        progress.Close();
-                    }));
+                        // TODO: 显示倒计时计数？
+                        await Task.Delay(TimeSpan.FromSeconds(1));
+                        App.Invoke(new Action(() =>
+                        {
+                            progress.Close();
+                        }));
+                    }
+                    catch
+                    {
+                        // TODO: 写入错误日志
+                    }
                 });
             }
             else
@@ -1388,8 +1385,8 @@ namespace dp2SSL
                     sep_result,
                     () =>
                     {
-                    // 如果图书数量有变动，要自动清除挡在前面的残留的对话框
-                    CloseDialogs();
+                        // 如果图书数量有变动，要自动清除挡在前面的残留的对话框
+                        CloseDialogs();
                     });
             }
         }
@@ -3102,7 +3099,14 @@ namespace dp2SSL
             _stopVideo = false;
             var task = Task.Run(() =>
             {
-                DisplayVideo(_videoRecognition);
+                try
+                {
+                    DisplayVideo(_videoRecognition);
+                }
+                catch
+                {
+                    // TODO: 写入错误日志
+                }
             });
             try
             {

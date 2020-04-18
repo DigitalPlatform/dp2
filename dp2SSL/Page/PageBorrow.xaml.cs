@@ -104,7 +104,14 @@ namespace dp2SSL
             _stopVideo = false;
             var task = Task.Run(() =>
             {
-                DisplayVideo(videoRecognition);
+                try
+                {
+                    DisplayVideo(videoRecognition);
+                }
+                catch
+                {
+                    // TODO: 写入错误日志
+                }
             });
             try
             {
@@ -1630,7 +1637,14 @@ out string strError);
         {
             _ = Task.Run(() =>
             {
-                Loan("borrow");
+                try
+                {
+                    Loan("borrow");
+                }
+                catch
+                {
+                    // TODO: 写入错误日志
+                }
             });
         }
 
@@ -2110,7 +2124,14 @@ out string strError);
         {
             _ = Task.Run(() =>
             {
-                Loan("return");
+                try
+                {
+                    Loan("return");
+                }
+                catch
+                {
+                    // TODO: 写入错误日志
+                }
             });
         }
 
@@ -2119,7 +2140,14 @@ out string strError);
         {
             _ = Task.Run(() =>
             {
-                Loan("renew");
+                try
+                {
+                    Loan("renew");
+                }
+                catch
+                {
+                    // TODO: 写入错误日志
+                }
             });
         }
 
@@ -2277,7 +2305,14 @@ out string strError);
                     {
                         var task = Task.Run(() =>
                         {
-                            DisplayVideo(videoRegister);
+                            try
+                            {
+                                DisplayVideo(videoRegister);
+                            }
+                            catch
+                            {
+                                // TODO: 写入错误日志
+                            }
                         });
 
                         // 2019/9/6 增加
@@ -2293,30 +2328,37 @@ out string strError);
                         // 启动一个单独的显示倒计时数字的任务
                         var task1 = Task.Run(() =>
                         {
-                            for (int i = 5; i > 0; i--)
+                            try
                             {
-                                if (_stopVideo == true)
-                                    break;
+                                for (int i = 5; i > 0; i--)
+                                {
+                                    if (_stopVideo == true)
+                                        break;
 
-                                if (videoRegister == null)
-                                    break;
+                                    if (videoRegister == null)
+                                        break;
 
+                                    if (videoRegister != null)
+                                    {
+                                        App.Invoke(new Action(() =>
+                                        {
+                                            if (videoRegister != null)
+                                                videoRegister.TitleText = $"倒计时 {i}";
+                                        }));
+                                    }
+                                    Thread.Sleep(1000);
+                                }
                                 if (videoRegister != null)
                                 {
                                     App.Invoke(new Action(() =>
                                     {
-                                        if (videoRegister != null)
-                                            videoRegister.TitleText = $"倒计时 {i}";
+                                        videoRegister.TitleText = "拍摄";
                                     }));
                                 }
-                                Thread.Sleep(1000);
                             }
-                            if (videoRegister != null)
+                            catch
                             {
-                                App.Invoke(new Action(() =>
-                                {
-                                    videoRegister.TitleText = "拍摄";
-                                }));
+                                // TODO: 写入错误日志
                             }
                         });
 
@@ -3141,28 +3183,35 @@ string usage)
             CancellationToken token = _cancelSpeaking.Token;
             _ = Task.Run(async () =>
             {
-                while (token.IsCancellationRequested == false)
+                try
                 {
-                    if (TagList.Patrons.Count == 0)
+                    while (token.IsCancellationRequested == false)
                     {
-                        func_cancelled?.Invoke("patron_removed");
-                        break;
+                        if (TagList.Patrons.Count == 0)
+                        {
+                            func_cancelled?.Invoke("patron_removed");
+                            break;
+                        }
+                        if (TagList.Books.Count > 0)
+                        {
+                            func_cancelled?.Invoke("book_added");
+                            break;
+                        }
+                        App.CurrentApp.Speak("注意，不要忘了拿走读者卡");
+                        try
+                        {
+                            await Task.Delay(TimeSpan.FromSeconds(10), token);
+                        }
+                        catch
+                        {
+                            func_cancelled?.Invoke("cancelled");
+                            break;
+                        }
                     }
-                    if (TagList.Books.Count > 0)
-                    {
-                        func_cancelled?.Invoke("book_added");
-                        break;
-                    }
-                    App.CurrentApp.Speak("注意，不要忘了拿走读者卡");
-                    try
-                    {
-                        await Task.Delay(TimeSpan.FromSeconds(10), token);
-                    }
-                    catch
-                    {
-                        func_cancelled?.Invoke("cancelled");
-                        break;
-                    }
+                }
+                catch
+                {
+                    // TODO: 写入错误日志
                 }
             });
         }

@@ -478,63 +478,70 @@ namespace dp2SSL
         {
             return Task.Run(() =>
             {
-                using (WebClient client = new WebClient())
+                try
                 {
-
-                    ProgressWindow progress = null;
-                    App.Invoke(new Action(() =>
+                    using (WebClient client = new WebClient())
                     {
-                        progress = new ProgressWindow();
-                        progress.MessageText = "正在下载 bing 壁纸，请稍候 ...";
-                        progress.Owner = Application.Current.MainWindow;
-                        progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-                        progress.Closed += (sender, e) =>
-                        {
-                            client.CancelAsync();
-                        };
-                        progress.Show();
-                    }));
 
-                    try
-                    {
-                        byte[] bytes = client.DownloadData("https://cn.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=zh-CN");
-                        dynamic obj = JsonConvert.DeserializeObject(Encoding.UTF8.GetString(bytes));
-                        string url = obj.images[0].url;
-                        url = $"https://cn.bing.com{url}";
-                        client.DownloadFile(url, filename);
-                        _dialogs.Add(progress);
+                        ProgressWindow progress = null;
                         App.Invoke(new Action(() =>
                         {
-                            progress.MessageText = "下载完成";
-                            progress.BackColor = "green";
-                            progress = null;
+                            progress = new ProgressWindow();
+                            progress.MessageText = "正在下载 bing 壁纸，请稍候 ...";
+                            progress.Owner = Application.Current.MainWindow;
+                            progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                            progress.Closed += (sender, e) =>
+                            {
+                                client.CancelAsync();
+                            };
+                            progress.Show();
                         }));
-                    }
-                    catch (Exception ex)
-                    {
-                        _dialogs.Add(progress);
-                        App.Invoke(new Action(() =>
-                        {
-                            progress.MessageText = $"下载 bing 壁纸过程出现异常: {ExceptionUtil.GetExceptionText(ex)}";
-                            progress.BackColor = "red";
-                            progress = null;
-                        }));
-                    }
-                    finally
-                    {
-                        App.Invoke(new Action(() =>
-                        {
-                            if (progress != null)
-                                progress.Close();
-                        }));
-                    }
 
-                    /*
-                    Application.Current.Dispatcher.Invoke(new Action(() =>
-                    {
-                        MessageBox.Show(message);
-                    }));
-                    */
+                        try
+                        {
+                            byte[] bytes = client.DownloadData("https://cn.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=zh-CN");
+                            dynamic obj = JsonConvert.DeserializeObject(Encoding.UTF8.GetString(bytes));
+                            string url = obj.images[0].url;
+                            url = $"https://cn.bing.com{url}";
+                            client.DownloadFile(url, filename);
+                            _dialogs.Add(progress);
+                            App.Invoke(new Action(() =>
+                            {
+                                progress.MessageText = "下载完成";
+                                progress.BackColor = "green";
+                                progress = null;
+                            }));
+                        }
+                        catch (Exception ex)
+                        {
+                            _dialogs.Add(progress);
+                            App.Invoke(new Action(() =>
+                            {
+                                progress.MessageText = $"下载 bing 壁纸过程出现异常: {ExceptionUtil.GetExceptionText(ex)}";
+                                progress.BackColor = "red";
+                                progress = null;
+                            }));
+                        }
+                        finally
+                        {
+                            App.Invoke(new Action(() =>
+                            {
+                                if (progress != null)
+                                    progress.Close();
+                            }));
+                        }
+
+                        /*
+                        Application.Current.Dispatcher.Invoke(new Action(() =>
+                        {
+                            MessageBox.Show(message);
+                        }));
+                        */
+                    }
+                }
+                catch
+                {
+                    // TODO: 写入错误日志
                 }
             });
         }
