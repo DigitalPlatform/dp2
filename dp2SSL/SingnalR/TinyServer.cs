@@ -333,14 +333,21 @@ IList<MessageRecord> messages)
         {
             _ = Task.Run(async () =>
             {
-                foreach (var message in messages)
+                try
                 {
-                    // TODO: 忽略自己发出的消息?
-                    if (message.data.StartsWith($"@{_userName}"))
+                    foreach (var message in messages)
                     {
-                        string command = message.data.Substring($"@{_userName}".Length).Trim();
-                        await ProcessCommandAsync(command);
+                        // TODO: 忽略自己发出的消息?
+                        if (message.data.StartsWith($"@{_userName}"))
+                        {
+                            string command = message.data.Substring($"@{_userName}".Length).Trim();
+                            await ProcessCommandAsync(command);
+                        }
                     }
+                }
+                catch
+                {
+                    // TODO: 写入错误日志
                 }
             });
         }
@@ -688,7 +695,17 @@ IList<MessageRecord> messages)
         {
             // 单独给一个线程来执行
             // Task.Factory.StartNew(() => SearchAndResponse(param));
-            _ = Task.Run(() => SearchAndResponse(param));
+            _ = Task.Run(() =>
+            {
+                try
+                {
+                    SearchAndResponse(param);
+                }
+                catch
+                {
+                    // TODO: 写入错误日志
+                }
+            });
         }
 
         static void SearchAndResponse(SearchRequest searchParam)

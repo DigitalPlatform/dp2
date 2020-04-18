@@ -474,6 +474,7 @@ namespace dp2SSL
             }
         }
 
+        // 异常：捕获了全部异常
         void DeleteLastTempFiles()
         {
             try
@@ -1074,8 +1075,15 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             // 单独线程执行，避免阻塞 OnActivated() 返回
             _ = Task.Run(() =>
             {
-                FingerprintManager.EnableSendkey(false);
-                RfidManager.EnableSendkey(false);
+                try
+                {
+                    FingerprintManager.EnableSendkey(false);
+                    RfidManager.EnableSendkey(false);
+                }
+                catch
+                {
+
+                }
             });
             base.OnActivated(e);
         }

@@ -29,12 +29,19 @@ namespace dp2SSL
 
             _ = Task.Run(async () =>
             {
-                await Task.Delay(TimeSpan.FromSeconds(1));
-                var results = Merge();
-                foreach (var result in results)
+                try
                 {
-                    string text = string.Format(type, result.Count);
-                    func(text);
+                    await Task.Delay(TimeSpan.FromSeconds(1));
+                    var results = Merge();
+                    foreach (var result in results)
+                    {
+                        string text = string.Format(type, result.Count);
+                        func(text);
+                    }
+                }
+                catch
+                {
+
                 }
             });
         }

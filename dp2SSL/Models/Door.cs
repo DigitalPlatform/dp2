@@ -591,11 +591,18 @@ namespace dp2SSL
                     {
                         var task = Task.Run(async () =>
                         {
-                            CancellationToken token = ShelfData.CancelToken;
-                            await ShelfData.FillBookFieldsAsync(door._allEntities, token, "refreshCount");
-                            await ShelfData.FillBookFieldsAsync(door._removeEntities, token, "refreshCount");
-                            await ShelfData.FillBookFieldsAsync(door._addEntities, token, "refreshCount");
-                            await ShelfData.FillBookFieldsAsync(door._errorEntities, token, "refreshCount");
+                            try
+                            {
+                                CancellationToken token = ShelfData.CancelToken;
+                                await ShelfData.FillBookFieldsAsync(door._allEntities, token, "refreshCount");
+                                await ShelfData.FillBookFieldsAsync(door._removeEntities, token, "refreshCount");
+                                await ShelfData.FillBookFieldsAsync(door._addEntities, token, "refreshCount");
+                                await ShelfData.FillBookFieldsAsync(door._errorEntities, token, "refreshCount");
+                            }
+                            catch
+                            {
+                                // TODO: 写入错误日志
+                            }
                         });
                     }
 

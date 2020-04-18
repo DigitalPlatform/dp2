@@ -2525,9 +2525,16 @@ namespace dp2SSL
             {
                 _ = Task.Run(async () =>
                 {
-                    // 延时设置
-                    await Task.Delay(TimeSpan.FromSeconds(10), App.CancelToken);
-                    _tagAdded = true;
+                    try
+                    {
+                        // 延时设置
+                        await Task.Delay(TimeSpan.FromSeconds(10), App.CancelToken);
+                        _tagAdded = true;
+                    }
+                    catch
+                    {
+
+                    }
                 });
             }
 
@@ -2648,12 +2655,19 @@ namespace dp2SSL
             }
 
             // TODO: 平时可以建立一个 cache，以后先从 cache 里面取书目摘要字符串
-            var task = Task.Run(async () =>
+            _ = Task.Run(async () =>
             {
-                CancellationToken token = CancelToken;
-                await FillBookFieldsAsync(All, token, "refreshCount");
-                await FillBookFieldsAsync(Adds, token, "refreshCount");
-                await FillBookFieldsAsync(Removes, token, "refreshCount");
+                try
+                {
+                    CancellationToken token = CancelToken;
+                    await FillBookFieldsAsync(All, token, "refreshCount");
+                    await FillBookFieldsAsync(Adds, token, "refreshCount");
+                    await FillBookFieldsAsync(Removes, token, "refreshCount");
+                }
+                catch
+                {
+                    // TODO: 写入错误日志
+                }
             });
         }
 
@@ -3359,10 +3373,17 @@ namespace dp2SSL
         {
             _ = Task.Run(() =>
             {
-                for (int i = 0; i < count; i++)
-                    System.Console.Beep(tones[tone], 500);
-                if (string.IsNullOrEmpty(text) == false)
-                    App.CurrentApp.SpeakSequence(text); // 不打断前面的说话
+                try
+                {
+                    for (int i = 0; i < count; i++)
+                        System.Console.Beep(tones[tone], 500);
+                    if (string.IsNullOrEmpty(text) == false)
+                        App.CurrentApp.SpeakSequence(text); // 不打断前面的说话
+                }
+                catch
+                {
+
+                }
             });
         }
 
@@ -4478,7 +4499,14 @@ Stack:
                         {
                             _ = Task.Run(async () =>
                             {
-                                await SelectAntennaAsync();
+                                try
+                                {
+                                    await SelectAntennaAsync();
+                                }
+                                catch
+                                {
+                                    // TODO: 写入错误日志
+                                }
                             });
                             _tagAdded = false;
                         }
