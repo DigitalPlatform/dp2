@@ -2740,6 +2740,35 @@ namespace dp2SSL
         // 特殊地，.TagInfo 为 null 的 ISO15693 会暂时被当作 "book"
         public delegate string Delegate_detectType(OneTag tag);
 
+        // 初始化 _patronTags 和 bookTags 两个集合
+        public static void InitialPatronBookTags(Delegate_detectType func_detectType)
+        {
+            lock (_syncRoot_patronTags)
+            {
+                _patronTags = new List<TagAndData>();
+                _bookTags = new List<TagAndData>();
+                NewTagList.Tags.ForEach((tag) =>
+                {
+                    var type = func_detectType(tag.OneTag);
+                    if (type == "patron")
+                        _patronTags.Add(tag);
+                    else if (type == "book")
+                        _bookTags.Add(tag);
+
+                    /*
+                    try
+                    {
+                        SetTagType(tag, out string pii);
+                    }
+                    catch (Exception ex)
+                    {
+                        tag.Error += ($"RFID 标签格式错误: {ex.Message}");
+                    }
+                    */
+                });
+            }
+        }
+
         // 更新 _patronTags 和 _bookTags 集合
         // 要返回新增加的两类标签的数目
         // TODO: 要能处理 ISO15693 图书标签放到读者读卡器上的动作。可以弹出一个窗口显示这一本图书的信息
@@ -2749,6 +2778,7 @@ namespace dp2SSL
         {
             lock (_syncRoot_patronTags)
             {
+#if NO
                 // ***
                 // 初始化
                 if (_patronTags == null || _bookTags == null)
@@ -2776,6 +2806,8 @@ namespace dp2SSL
                     });
                 }
 
+#endif
+
                 List<TagAndData> add_books = new List<TagAndData>();
                 List<TagAndData> add_patrons = new List<TagAndData>();
                 List<TagAndData> updated_books = new List<TagAndData>();
@@ -2791,6 +2823,11 @@ namespace dp2SSL
                     // 分离新添加的标签
                     e.AddTags.ForEach((tag) =>
                     {
+                        // 对于 .TagInfo == null 的 ISO15693 标签不敏感
+                        if (tag.OneTag.TagInfo == null
+                        && tag.OneTag.Protocol == InventoryInfo.ISO15693)
+                            return;
+
                         var type = func_detectType(tag.OneTag);
                         if (type == "patron")
                         {
@@ -2814,18 +2851,23 @@ namespace dp2SSL
                     // 分离更新了的标签
                     e.UpdateTags.ForEach((tag) =>
                     {
+                        // 对于 .TagInfo == null 的 ISO15693 标签不敏感
+                        if (tag.OneTag.TagInfo == null
+                        && tag.OneTag.Protocol == InventoryInfo.ISO15693)
+                            return;
+
                         var type = func_detectType(tag.OneTag);
                         if (type == "patron")
                         {
-                        // TODO: 尝试从 _bookTags 里面移走
-                        removed_books.AddRange(Remove(_bookTags, tag.OneTag.UID));
+                            // TODO: 尝试从 _bookTags 里面移走
+                            removed_books.AddRange(Remove(_bookTags, tag.OneTag.UID));
                             Update(_patronTags, tag);
                             updated_patrons.Add(tag);
                         }
                         else if (type == "book")
                         {
-                        // TODO: 尝试从 _patronTags 里面移走
-                        removed_patrons.AddRange(Remove(_patronTags, tag.OneTag.UID));
+                            // TODO: 尝试从 _patronTags 里面移走
+                            removed_patrons.AddRange(Remove(_patronTags, tag.OneTag.UID));
                             Update(_bookTags, tag);
                             updated_books.Add(tag);
                         }
