@@ -1347,25 +1347,6 @@ namespace dp2SSL
                     await RefreshPatronsAsync();
             });
             */
-            var sep_result = await ShelfData.SeperateTagsAsync((BaseChannel<IRfid>)sender,
-                e,
-                (t) =>
-                {
-                    if (t.ReaderName == ShelfData.PatronReaderName)
-                        return "patron";
-                    return "book";
-                });
-
-            if (sep_result.add_patrons.Count > 0 || sep_result.updated_patrons.Count > 0)
-                await RefreshPatronsAsync();
-
-            await ShelfData.ChangeEntitiesAsync((BaseChannel<IRfid>)sender,
-                sep_result,
-                () =>
-                {
-                    // 如果图书数量有变动，要自动清除挡在前面的残留的对话框
-                    CloseDialogs();
-                });
 
             // "initial" 模式下，立即合并到 _all。等关门时候一并提交请求
             // TODO: 不过似乎此时有语音提示放入、取出，似乎更显得实用一些？
@@ -1388,6 +1369,28 @@ namespace dp2SSL
                 }
 
                 ShelfData.RefreshCount();
+            }
+            else
+            {
+                var sep_result = await ShelfData.SeperateTagsAsync((BaseChannel<IRfid>)sender,
+                    e,
+                    (t) =>
+                    {
+                        if (t.ReaderName == ShelfData.PatronReaderName)
+                            return "patron";
+                        return "book";
+                    });
+
+                if (sep_result.add_patrons.Count > 0 || sep_result.updated_patrons.Count > 0)
+                    await RefreshPatronsAsync();
+
+                await ShelfData.ChangeEntitiesAsync((BaseChannel<IRfid>)sender,
+                    sep_result,
+                    () =>
+                    {
+                    // 如果图书数量有变动，要自动清除挡在前面的残留的对话框
+                    CloseDialogs();
+                    });
             }
         }
 
@@ -1699,6 +1702,13 @@ namespace dp2SSL
                 if (_initialCancelled)
                     return;
 
+                ShelfData.InitialPatronBookTags((t) =>
+                {
+                    if (t.ReaderName == ShelfData.PatronReaderName)
+                        return "patron";
+                    return "book";
+                });
+
                 await ShelfData.SelectAntennaAsync();
 
                 // 将 操作历史库 里面的 PII 和 ShelfData.All 里面 PII 相同的事项的状态标记为“放弃同步”。因为刚才已经成功同步了它们
@@ -1882,7 +1892,6 @@ namespace dp2SSL
                 }
                 else
                 {
-
                     if (patrons.Count >= 1 && ClosePasswordDialog() == true)
                     {
                         // 这次刷卡的作用是取消了上次登录
@@ -1905,6 +1914,9 @@ namespace dp2SSL
                         }
 
                         SetPatronError("rfid_multi", "");   // 2019/5/22
+
+                        // 2020/4/18
+                        SetPatronError(null, null);
 
                         // 2019/5/29
                         // resut.Value
