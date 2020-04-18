@@ -175,13 +175,23 @@ namespace dp2SSL
 
             int return_count = actions.FindAll((o) => { return o.Action == "return"; }).Count;
             int borrow_count = actions.FindAll((o) => { return o.Action == "borrow"; }).Count;
+            
+            // 修改了 currentLocation 并且向内转移的数量
             int change_currentLocation_count = actions
-                .FindAll((o) => { return o.Action == "transfer" && string.IsNullOrEmpty(o.CurrentShelfNo) == false; })
+                .FindAll((o) => { return o.Action == "transfer" 
+                    && string.IsNullOrEmpty(o.CurrentShelfNo) == false
+                    && o.TransferDirection == "in"; })
                 .Count;
 
+            // 修改了 location 的数量。这个意味着发生了调拨
             int change_location_count = actions
                 .FindAll(o => { return o.Action == "transfer" && string.IsNullOrEmpty(o.Location) == false; })
                 .Count;
+
+            // (工作人员)普通下架。特点是去向不明，但至少知道这些图书是离开书柜了
+            int transferout_count = actions
+    .FindAll(o => { return o.Action == "transfer" && o.TransferDirection == "out"; })
+    .Count;
 
             // 总结一下涉及到的门
             var door_names = ShelfData.GetDoorName(actions);
@@ -215,7 +225,11 @@ namespace dp2SSL
                 p.Margin = new Thickness(0, 0, 0, baseFontSize/*18*/);
                 doc.Blocks.Add(p);
 
-                if (borrow_count + return_count + change_currentLocation_count + change_location_count > 0)
+                if (borrow_count
+                    + return_count
+                    + change_currentLocation_count
+                    + change_location_count 
+                    + transferout_count > 0)
                 {
                     List<string> lines = new List<string>();
                     if (return_count > 0)
@@ -224,9 +238,11 @@ namespace dp2SSL
                         lines.Add($"借书 {borrow_count}");
 
                     if (display_transfer && change_currentLocation_count > 0)
-                        lines.Add($"转架 {change_currentLocation_count}");
+                        lines.Add($"上架 {change_currentLocation_count}");
                     if (display_transfer && change_location_count > 0)
                         lines.Add($"调拨 {change_location_count}");
+                    if (display_transfer && transferout_count > 0)
+                        lines.Add($"下架 {transferout_count}");
 
                     p.Inlines.Add(new Run
                     {
