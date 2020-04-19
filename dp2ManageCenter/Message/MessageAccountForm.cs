@@ -15,17 +15,26 @@ using DigitalPlatform;
 using DigitalPlatform.IO;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Text;
+using DigitalPlatform.CirculationClient;
 
 namespace dp2ManageCenter.Message
 {
     public partial class MessageAccountForm : Form
     {
         // 配置文件名
-        public string CfgFileName { get; set; }
+        // public string CfgFileName { get; set; }
 
         public MessageAccountForm()
         {
             InitializeComponent();
+        }
+
+        public static string MessageAccountFileName
+        {
+            get
+            {
+                return Path.Combine(ClientInfo.UserDir, "message_accounts.json");
+            }
         }
 
         private void MessageAccountForm_Load(object sender, EventArgs e)
@@ -57,16 +66,28 @@ namespace dp2ManageCenter.Message
             this.Close();
         }
 
+        public static List<Account> GetAccounts()
+        {
+            string value = File.ReadAllText(MessageAccountFileName, Encoding.UTF8);
+            var accounts = JsonConvert.DeserializeObject<List<Account>>(value);
+            if (accounts == null)
+                accounts = new List<Account>();
+            return accounts;
+        }
+
         void FillList()
         {
             this.listView_accounts.Items.Clear();
 
             try
             {
+                /*
                 string value = File.ReadAllText(this.CfgFileName, Encoding.UTF8);
                 var accounts = JsonConvert.DeserializeObject<List<Account>>(value);
                 if (accounts == null)
                     accounts = new List<Account>();
+                    */
+                var accounts = GetAccounts();
 
                 foreach (var account in accounts)
                 {
@@ -104,8 +125,8 @@ namespace dp2ManageCenter.Message
             }
 
             string value = JsonConvert.SerializeObject(accounts, Formatting.Indented);
-            PathUtil.CreateDirIfNeed(Path.GetDirectoryName(this.CfgFileName));
-            File.WriteAllText(this.CfgFileName, value);
+            PathUtil.CreateDirIfNeed(Path.GetDirectoryName(MessageAccountFileName));
+            File.WriteAllText(MessageAccountFileName, value);
         }
 
         private void listView_accounts_MouseUp(object sender, MouseEventArgs e)

@@ -144,7 +144,10 @@ namespace DigitalPlatform.RFID
         {
             setError?.Invoke("rfid", null);
 
-            // TODO: 对 list 里面的元素要按照天线号进行过滤
+            // 对 list 里面的元素要按照天线号进行过滤
+            // 注：这样过滤主要是为了防范 shelf.xml 对 M201 这样的没有多天线的配置了多个天线用于多个门，引起这里算法故障(在 Tags 中填充很多重复 UID 的对象)
+            // 由于 RfidCenter 中 ListTags() 对于 M201 这样的读卡器没有严格过滤天线号，所以会有上述问题
+            // 若加固了 RfidCenter 以后，这一段过滤代码可以省略，以便提高执行速度
             List<OneTag> list = new List<OneTag>();
             foreach (OneTag tag in list_param)
             {
