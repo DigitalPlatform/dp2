@@ -44,6 +44,10 @@
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_changePassword = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_refreshServerName = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem_message = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_searchShelf = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.ToolStripMenuItem_messageAccounts = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_help = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_openUserFolder = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_openDataFolder = new System.Windows.Forms.ToolStripMenuItem();
@@ -75,10 +79,6 @@
             this.columnHeader8 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.tabPage_history = new System.Windows.Forms.TabPage();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
-            this.toolStripMenuItem_message = new System.Windows.Forms.ToolStripMenuItem();
-            this.ToolStripMenuItem_searchShelf = new System.Windows.Forms.ToolStripMenuItem();
-            this.ToolStripMenuItem_messageAccounts = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.tabControl_main.SuspendLayout();
@@ -223,6 +223,35 @@
             this.MenuItem_refreshServerName.ToolTipText = "从 dp2library 服务器获取图书馆名，作为服务器名";
             this.MenuItem_refreshServerName.Click += new System.EventHandler(this.MenuItem_refreshServerName_Click);
             // 
+            // toolStripMenuItem_message
+            // 
+            this.toolStripMenuItem_message.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.ToolStripMenuItem_searchShelf,
+            this.toolStripSeparator3,
+            this.ToolStripMenuItem_messageAccounts});
+            this.toolStripMenuItem_message.Name = "toolStripMenuItem_message";
+            this.toolStripMenuItem_message.Size = new System.Drawing.Size(72, 33);
+            this.toolStripMenuItem_message.Text = "消息";
+            // 
+            // ToolStripMenuItem_searchShelf
+            // 
+            this.ToolStripMenuItem_searchShelf.Name = "ToolStripMenuItem_searchShelf";
+            this.ToolStripMenuItem_searchShelf.Size = new System.Drawing.Size(315, 40);
+            this.ToolStripMenuItem_searchShelf.Text = "书柜查询(&S)";
+            this.ToolStripMenuItem_searchShelf.Click += new System.EventHandler(this.ToolStripMenuItem_searchShelf_Click);
+            // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(312, 6);
+            // 
+            // ToolStripMenuItem_messageAccounts
+            // 
+            this.ToolStripMenuItem_messageAccounts.Name = "ToolStripMenuItem_messageAccounts";
+            this.ToolStripMenuItem_messageAccounts.Size = new System.Drawing.Size(315, 40);
+            this.ToolStripMenuItem_messageAccounts.Text = "设置消息账户";
+            this.ToolStripMenuItem_messageAccounts.Click += new System.EventHandler(this.ToolStripMenuItem_messageAccounts_Click);
+            // 
             // MenuItem_help
             // 
             this.MenuItem_help.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -236,21 +265,21 @@
             // MenuItem_openUserFolder
             // 
             this.MenuItem_openUserFolder.Name = "MenuItem_openUserFolder";
-            this.MenuItem_openUserFolder.Size = new System.Drawing.Size(315, 40);
+            this.MenuItem_openUserFolder.Size = new System.Drawing.Size(306, 40);
             this.MenuItem_openUserFolder.Text = "打开用户文件夹(&U)";
             this.MenuItem_openUserFolder.Click += new System.EventHandler(this.MenuItem_openUserFolder_Click);
             // 
             // MenuItem_openDataFolder
             // 
             this.MenuItem_openDataFolder.Name = "MenuItem_openDataFolder";
-            this.MenuItem_openDataFolder.Size = new System.Drawing.Size(315, 40);
+            this.MenuItem_openDataFolder.Size = new System.Drawing.Size(306, 40);
             this.MenuItem_openDataFolder.Text = "打开数据文件夹(&D)";
             this.MenuItem_openDataFolder.Click += new System.EventHandler(this.MenuItem_openDataFolder_Click);
             // 
             // MenuItem_openProgramFolder
             // 
             this.MenuItem_openProgramFolder.Name = "MenuItem_openProgramFolder";
-            this.MenuItem_openProgramFolder.Size = new System.Drawing.Size(315, 40);
+            this.MenuItem_openProgramFolder.Size = new System.Drawing.Size(306, 40);
             this.MenuItem_openProgramFolder.Text = "打开程序文件夹(&P)";
             this.MenuItem_openProgramFolder.Click += new System.EventHandler(this.MenuItem_openProgramFolder_Click);
             // 
@@ -272,7 +301,7 @@
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Padding = new System.Windows.Forms.Padding(1, 0, 17, 0);
             this.statusStrip1.Size = new System.Drawing.Size(978, 37);
-            this.statusStrip1.TabIndex = 2;
+            this.statusStrip1.TabIndex = 3;
             this.statusStrip1.Text = "statusStrip1";
             // 
             // toolStripStatusLabel_message
@@ -293,7 +322,7 @@
             this.tabControl_main.Name = "tabControl_main";
             this.tabControl_main.SelectedIndex = 0;
             this.tabControl_main.Size = new System.Drawing.Size(978, 499);
-            this.tabControl_main.TabIndex = 3;
+            this.tabControl_main.TabIndex = 2;
             // 
             // tabPage_backupTasks
             // 
@@ -389,7 +418,7 @@
             this.tabPage_operLogTasks.Location = new System.Drawing.Point(4, 37);
             this.tabPage_operLogTasks.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_operLogTasks.Name = "tabPage_operLogTasks";
-            this.tabPage_operLogTasks.Size = new System.Drawing.Size(970, 459);
+            this.tabPage_operLogTasks.Size = new System.Drawing.Size(970, 458);
             this.tabPage_operLogTasks.TabIndex = 2;
             this.tabPage_operLogTasks.Text = "日备份任务";
             this.tabPage_operLogTasks.UseVisualStyleBackColor = true;
@@ -408,7 +437,7 @@
             this.listView_operLogTasks.Margin = new System.Windows.Forms.Padding(4);
             this.listView_operLogTasks.Name = "listView_operLogTasks";
             this.listView_operLogTasks.ShowItemToolTips = true;
-            this.listView_operLogTasks.Size = new System.Drawing.Size(970, 459);
+            this.listView_operLogTasks.Size = new System.Drawing.Size(970, 458);
             this.listView_operLogTasks.TabIndex = 1;
             this.listView_operLogTasks.UseCompatibleStateImageBehavior = false;
             this.listView_operLogTasks.View = System.Windows.Forms.View.Details;
@@ -440,7 +469,7 @@
             this.tabPage_errorLogTasks.Controls.Add(this.listView_errorLogTasks);
             this.tabPage_errorLogTasks.Location = new System.Drawing.Point(4, 37);
             this.tabPage_errorLogTasks.Name = "tabPage_errorLogTasks";
-            this.tabPage_errorLogTasks.Size = new System.Drawing.Size(970, 459);
+            this.tabPage_errorLogTasks.Size = new System.Drawing.Size(970, 458);
             this.tabPage_errorLogTasks.TabIndex = 3;
             this.tabPage_errorLogTasks.Text = "错误日志";
             this.tabPage_errorLogTasks.UseVisualStyleBackColor = true;
@@ -459,7 +488,7 @@
             this.listView_errorLogTasks.Margin = new System.Windows.Forms.Padding(4);
             this.listView_errorLogTasks.Name = "listView_errorLogTasks";
             this.listView_errorLogTasks.ShowItemToolTips = true;
-            this.listView_errorLogTasks.Size = new System.Drawing.Size(970, 459);
+            this.listView_errorLogTasks.Size = new System.Drawing.Size(970, 458);
             this.listView_errorLogTasks.TabIndex = 2;
             this.listView_errorLogTasks.UseCompatibleStateImageBehavior = false;
             this.listView_errorLogTasks.View = System.Windows.Forms.View.Details;
@@ -492,7 +521,7 @@
             this.tabPage_history.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_history.Name = "tabPage_history";
             this.tabPage_history.Padding = new System.Windows.Forms.Padding(4);
-            this.tabPage_history.Size = new System.Drawing.Size(970, 459);
+            this.tabPage_history.Size = new System.Drawing.Size(970, 458);
             this.tabPage_history.TabIndex = 1;
             this.tabPage_history.Text = "操作历史";
             this.tabPage_history.UseVisualStyleBackColor = true;
@@ -504,37 +533,8 @@
             this.webBrowser1.Margin = new System.Windows.Forms.Padding(5);
             this.webBrowser1.MinimumSize = new System.Drawing.Size(29, 36);
             this.webBrowser1.Name = "webBrowser1";
-            this.webBrowser1.Size = new System.Drawing.Size(962, 451);
+            this.webBrowser1.Size = new System.Drawing.Size(962, 450);
             this.webBrowser1.TabIndex = 3;
-            // 
-            // toolStripMenuItem_message
-            // 
-            this.toolStripMenuItem_message.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.ToolStripMenuItem_searchShelf,
-            this.toolStripSeparator3,
-            this.ToolStripMenuItem_messageAccounts});
-            this.toolStripMenuItem_message.Name = "toolStripMenuItem_message";
-            this.toolStripMenuItem_message.Size = new System.Drawing.Size(72, 33);
-            this.toolStripMenuItem_message.Text = "消息";
-            // 
-            // ToolStripMenuItem_searchShelf
-            // 
-            this.ToolStripMenuItem_searchShelf.Name = "ToolStripMenuItem_searchShelf";
-            this.ToolStripMenuItem_searchShelf.Size = new System.Drawing.Size(315, 40);
-            this.ToolStripMenuItem_searchShelf.Text = "书柜查询(&S)";
-            this.ToolStripMenuItem_searchShelf.Click += new System.EventHandler(this.ToolStripMenuItem_searchShelf_Click);
-            // 
-            // ToolStripMenuItem_messageAccounts
-            // 
-            this.ToolStripMenuItem_messageAccounts.Name = "ToolStripMenuItem_messageAccounts";
-            this.ToolStripMenuItem_messageAccounts.Size = new System.Drawing.Size(315, 40);
-            this.ToolStripMenuItem_messageAccounts.Text = "设置消息账户";
-            this.ToolStripMenuItem_messageAccounts.Click += new System.EventHandler(this.ToolStripMenuItem_messageAccounts_Click);
-            // 
-            // toolStripSeparator3
-            // 
-            this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(312, 6);
             // 
             // MainForm
             // 

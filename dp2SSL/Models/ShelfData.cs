@@ -852,7 +852,7 @@ namespace dp2SSL
                 List<Entity> processed = new List<Entity>();
                 foreach (var entity in ShelfData.Adds)
                 {
-                    Debug.Assert(string.IsNullOrEmpty(entity.PII) == false, "");
+                    // Debug.Assert(string.IsNullOrEmpty(entity.PII) == false, "");
                     
                     if (ShelfData.BelongToNormal(entity) == false)
                         continue;
@@ -929,7 +929,7 @@ namespace dp2SSL
 
                 foreach (var entity in ShelfData.Changes)
                 {
-                    Debug.Assert(string.IsNullOrEmpty(entity.PII) == false, "");
+                    // Debug.Assert(string.IsNullOrEmpty(entity.PII) == false, "");
 
                     if (ShelfData.BelongToNormal(entity) == false)
                         continue;
@@ -974,7 +974,7 @@ namespace dp2SSL
 
                 foreach (var entity in ShelfData.Removes)
                 {
-                    Debug.Assert(string.IsNullOrEmpty(entity.PII) == false, "");
+                    // Debug.Assert(string.IsNullOrEmpty(entity.PII) == false, "");
 
                     if (ShelfData.BelongToNormal(entity) == false)
                         continue;
@@ -2347,6 +2347,17 @@ namespace dp2SSL
             return false;
         }
 
+        static void CheckPII(List<Entity> entities)
+        {
+            foreach(var entity in entities)
+            {
+                if (entity.PII == null)
+                {
+                    Debug.Assert(false, "PII 不应为 null");
+                }
+            }
+        }
+
         // Exception:
         //      可能会抛出异常 ArgumentException TagDataException
         static bool Add(List<Entity> entities, TagAndData tag)
@@ -2723,6 +2734,7 @@ namespace dp2SSL
                             // 更新 _all 里面的信息
                             if (Update(_all, tag) == true)
                             {
+                                tag.Type = null;    // 令 NewEntity 重新解析标签
                                 // Exception:
                                 //      可能会抛出异常 ArgumentException TagDataException
                                 Add(_changes, tag);
@@ -2817,6 +2829,13 @@ namespace dp2SSL
                 ShelfData.RefreshCount();
                 func_booksChanged?.Invoke();
             }
+
+            /*
+            CheckPII(_all);
+            CheckPII(_adds);
+            CheckPII(_removes);
+            CheckPII(_changes);
+            */
 
             // TODO: 平时可以建立一个 cache，以后先从 cache 里面取书目摘要字符串
             _ = Task.Run(async () =>
@@ -3136,6 +3155,16 @@ namespace dp2SSL
                     }
                 }
                 */
+
+                // 2020/4/19
+                foreach(var tag in updated_books)
+                {
+                    tag.Type = null;    // 迫使 NewEntity 重新解析标签
+                }
+                foreach (var tag in updated_patrons)
+                {
+                    tag.Type = null;    // 迫使 NewEntity 重新解析标签
+                }
 
                 return new SeperateResult
                 {

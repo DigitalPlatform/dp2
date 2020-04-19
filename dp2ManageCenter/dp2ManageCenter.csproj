@@ -139,6 +139,12 @@
     <Compile Include="Message\MessageAccountForm.Designer.cs">
       <DependentUpon>MessageAccountForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Message\ShelfSearchForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Message\ShelfSearchForm.Designer.cs">
+      <DependentUpon>ShelfSearchForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ServerFileSystemForm.cs">
@@ -156,6 +162,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Message\MessageAccountForm.resx">
       <DependentUpon>MessageAccountForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Message\ShelfSearchForm.resx">
+      <DependentUpon>ShelfSearchForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

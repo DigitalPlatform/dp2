@@ -3695,6 +3695,8 @@ out Reader reader);
                 return iret.ToString();
         }
 
+        // 盘点
+        // TODO: 对于 M201 RL8600 RL1700 等只有一个天线的读卡器，要处理好不指定天线编号的和指定天线编号的两类盘点情况。目前无论如何都能返回盘点结果的做法是不好的，会对前端造成额外的过滤负担
         // parameters:
         //      AIType  RFIDLIB.rfidlib_def.AI_TYPE_NEW / RFIDLIB.rfidlib_def.AI_TYPE_CONTINUE
         //      AntinnaSel  从 1 开始？

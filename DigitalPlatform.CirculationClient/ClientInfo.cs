@@ -1020,6 +1020,8 @@ delegate_action action)
                 // https://stackoverflow.com/questions/558344/clickonce-appref-ms-argument
                 var args = AppDomain.CurrentDomain?.SetupInformation?.ActivationArguments?.ActivationData[0];
                 // List<string> args = StringUtil.GetCommandLineArgs();
+                if (args == null)
+                    return false;
                 return args?.IndexOf("minimize") != -1;
             }
             catch

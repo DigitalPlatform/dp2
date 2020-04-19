@@ -59,13 +59,26 @@ namespace dp2ManageCenter
             ClientInfo.Initial("dp2managecenter");
 
             this.UiState = ClientInfo.Config.Get("global", "ui_state", ""); // Properties.Settings.Default.ui_state;
-                                                                            // 恢复 MainForm 的显示状态
+
+            // 恢复 MainForm 的显示状态
             {
                 var state = ClientInfo.Config.Get("mainForm", "state", "");
                 if (string.IsNullOrEmpty(state) == false)
                 {
-                    FormProperty.SetProperty(state, this, ClientInfo.IsMinimizeMode());
+                    bool force_minimize = ClientInfo.IsMinimizeMode();
+                    FormProperty.SetProperty(state, this, force_minimize);
                 }
+
+                /*
+                _ = Task.Run(async () =>
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(2));
+                    this.Invoke((Action)(() =>
+                    {
+                        this.Activate();
+                    }));
+                });
+                */
             }
 
             if (_backupLimit != null)
@@ -1022,7 +1035,7 @@ string strHtml)
         public static string GetCurrentBackupFileName(string server_name)
         {
             DateTime now = DateTime.Now;
-            return "MC_" 
+            return "MC_"
                 // "test_"
                 + now.ToString("yyyy_MM_dd") + "_" + server_name
                 // + "_" + now.ToString("HHmmssffff") 
@@ -3703,7 +3716,7 @@ string strHtml)
         // 备份日志文件。即，把日志文件从服务器拷贝到本地目录。要处理好增量复制的问题。
         // parameters:
         //      detect_all  是否强制探测所有文件？false 表示只探测上次运行记忆的最后日期以及之后的文件
-            // return:
+        // return:
         //      -1  出错
         //      0   放弃下载，或者没有必要下载。提示信息在 strError 中
         //      1   成功启动了下载
@@ -5384,7 +5397,7 @@ MessageBoxDefaultButton.Button2);
         {
             using (MessageAccountForm dlg = new MessageAccountForm())
             {
-                dlg.CfgFileName = Path.Combine(ClientInfo.UserDir, "message_accounts.json");
+                // dlg.CfgFileName = MessageAccountFileName;   // Path.Combine(ClientInfo.UserDir, "message_accounts.json");
                 dlg.ShowDialog(this);
             }
         }
@@ -5392,7 +5405,9 @@ MessageBoxDefaultButton.Button2);
         // 书柜查询
         private void ToolStripMenuItem_searchShelf_Click(object sender, EventArgs e)
         {
-
+            ShelfSearchForm form = new ShelfSearchForm();
+            form.Font = this.Font;
+            form.Show(this);
         }
     }
 }

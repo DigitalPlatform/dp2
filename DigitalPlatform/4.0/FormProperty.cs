@@ -57,13 +57,20 @@ namespace DigitalPlatform
 
             if (force_minimize)
             {
-                Task.Run(() =>
+                _ = Task.Run(async () =>
                 {
-                    Task.Delay(2000).Wait();
-                    form.BeginInvoke((Action)(() =>
+                    try
                     {
-                        form.WindowState = FormWindowState.Minimized;
-                    }));
+                        await Task.Delay(2000);
+                        form.BeginInvoke((Action)(() =>
+                        {
+                            form.WindowState = FormWindowState.Minimized;
+                        }));
+                    }
+                    catch
+                    {
+
+                    }
                 });
             }
         }
