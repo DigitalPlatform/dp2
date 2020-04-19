@@ -237,12 +237,23 @@ namespace dp2SSL
                     if (borrow_count > 0)
                         lines.Add($"借书 {borrow_count}");
 
+                    REDO:
                     if (display_transfer && change_currentLocation_count > 0)
                         lines.Add($"上架 {change_currentLocation_count}");
                     if (display_transfer && change_location_count > 0)
                         lines.Add($"调拨 {change_location_count}");
                     if (display_transfer && transferout_count > 0)
                         lines.Add($"下架 {transferout_count}");
+
+                    if (lines.Count == 0 && display_transfer == false)
+                    {
+                        display_transfer = true;
+
+                        // 修正 style，便于 Refresh() 时候使用新的 style
+                        StringUtil.SetInList(ref style, "transfer", true);
+                        doc.BuildStyle = style;
+                        goto REDO;
+                    }
 
                     p.Inlines.Add(new Run
                     {
