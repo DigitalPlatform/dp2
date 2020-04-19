@@ -79,6 +79,24 @@ namespace DigitalPlatform.RFID
         // static Hashtable _typeTable = new Hashtable();
 
         // TODO: 可以把 readerNameList 先 Parse 到一个结构来加快 match 速度
+        static bool InRange(OneTag tag, string readerNameList)
+        {
+            // 匹配读卡器名字
+            var ret = Reader.MatchReaderName(readerNameList,tag.ReaderName, out string antenna_list);
+            if (ret == false)
+                return false;
+            var list = GetAntennaList(antenna_list);
+            // 2019/12/19
+            // 如果列表为空，表示不指定天线编号，所以任何 data 都是匹配命中的
+            // RL8600 默认天线编号为 0；M201 默认天线编号为 1。列表为空的情况表示不指定天线编号有助于处理好这两种不同做法的读写器
+            if (list.Count == 0)
+                return true;
+            if (list.IndexOf(tag.AntennaID) != -1)
+                return true;
+            return false;   // ret is bug!!!
+        }
+
+        /*
         static bool InRange(TagAndData data, string readerNameList)
         {
             // 匹配读卡器名字
@@ -95,6 +113,7 @@ namespace DigitalPlatform.RFID
                 return true;
             return false;   // ret is bug!!!
         }
+        */
 
         // 把天线列表字符串变换为 List<uint> 类型
         // 注意 list 为空时候返回一个空集合
@@ -118,12 +137,21 @@ namespace DigitalPlatform.RFID
         //      
         public static void Refresh(// BaseChannel<IRfid> channel,
             string readerNameList,
-            List<OneTag> list,
+            List<OneTag> list_param,
             delegate_getTagInfo getTagInfo,
             delegate_notifyChanged notifyChanged,
             delegate_setError setError)
         {
             setError?.Invoke("rfid", null);
+
+            // TODO: 对 list 里面的元素要按照天线号进行过滤
+            List<OneTag> list = new List<OneTag>();
+            foreach (OneTag tag in list_param)
+            {
+                if (InRange(tag, readerNameList) == false)
+                    continue;
+                list.Add(tag);
+            }
 
             List<TagAndData> new_books = new List<TagAndData>();
 
@@ -140,6 +168,11 @@ namespace DigitalPlatform.RFID
             {
                 // 检查以前的列表中是否已经有了
                 var book = FindBookTag(tag.UID);
+                // 2020/4/19 修正
+                // 如果找到的对象是属于当前读卡器以外的范围，则当作没有找到处理
+                if (book != null && InRange(book.OneTag, readerNameList) == false)
+                    book = null;
+
                 if (book != null)
                 {
                     found_books.Add(book);
@@ -173,6 +206,10 @@ namespace DigitalPlatform.RFID
                 // ISO15693 的则先添加到 _books 中。等类型判断完成，有可能还要调整到 _patrons 中
                 book = new TagAndData { OneTag = tag };
                 new_books.Add(book);
+
+                // 2020/4/19
+                // 对于新加入的标签，只清理缓存。防止以前残留的 cache 信息污染
+                _tagTable.Remove(tag.UID);
             }
 
             List<TagAndData> remove_books = new List<TagAndData>();
@@ -181,7 +218,7 @@ namespace DigitalPlatform.RFID
             // 注意对那些在 readerNameList 以外的标签不要当作 removed 处理
             foreach (TagAndData book in _tags)
             {
-                if (InRange(book, readerNameList) == false)
+                if (InRange(book.OneTag, readerNameList) == false)
                     continue;
                 if (found_books.IndexOf(book) == -1)
                     remove_books.Add(book);

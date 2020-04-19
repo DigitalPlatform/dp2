@@ -1723,7 +1723,7 @@ namespace dp2SSL
                     {
                         actions.Add(new ActionInfo
                         {
-                            Entity = entity,
+                            Entity = entity.Clone(),
                             Action = "inventory",
                             State = "sync",
                             SyncCount = 1,
@@ -2583,13 +2583,13 @@ namespace dp2SSL
             {
                 actions.Add(new ActionInfo
                 {
-                    Entity = entity,
+                    Entity = entity.Clone(),
                     Action = "return",
                     Operator = GetOperator(entity, false)
                 });
                 actions.Add(new ActionInfo
                 {
-                    Entity = entity,
+                    Entity = entity.Clone(),
                     Action = "transfer",
                     CurrentShelfNo = ShelfData.GetShelfNo(entity),
                     Operator = GetOperator(entity, false)

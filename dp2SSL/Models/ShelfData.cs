@@ -852,14 +852,18 @@ namespace dp2SSL
                 List<Entity> processed = new List<Entity>();
                 foreach (var entity in ShelfData.Adds)
                 {
+                    Debug.Assert(string.IsNullOrEmpty(entity.PII) == false, "");
+                    
                     if (ShelfData.BelongToNormal(entity) == false)
                         continue;
                     var person = func_getOperator?.Invoke(entity);
                     if (person == null)
                         continue;
+
+
                     actions.Add(new ActionInfo
                     {
-                        Entity = entity,
+                        Entity = entity.Clone(),
                         Action = "return",
                         Operator = person,
                     });
@@ -875,7 +879,7 @@ namespace dp2SSL
                         }
                         actions.Add(new ActionInfo
                         {
-                            Entity = entity,
+                            Entity = entity.Clone(),
                             Action = "transfer",
                             TransferDirection = "in",
                             Location = location,
@@ -925,6 +929,8 @@ namespace dp2SSL
 
                 foreach (var entity in ShelfData.Changes)
                 {
+                    Debug.Assert(string.IsNullOrEmpty(entity.PII) == false, "");
+
                     if (ShelfData.BelongToNormal(entity) == false)
                         continue;
                     var person = func_getOperator?.Invoke(entity);
@@ -940,7 +946,7 @@ namespace dp2SSL
                     // 更新
                     actions.Add(new ActionInfo
                     {
-                        Entity = entity,
+                        Entity = entity.Clone(),
                         Action = "transfer",
                         TransferDirection = "in",
                         Location = location,
@@ -968,17 +974,33 @@ namespace dp2SSL
 
                 foreach (var entity in ShelfData.Removes)
                 {
+                    Debug.Assert(string.IsNullOrEmpty(entity.PII) == false, "");
+
                     if (ShelfData.BelongToNormal(entity) == false)
                         continue;
                     var person = func_getOperator?.Invoke(entity);
                     if (person == null)
                         continue;
+
+                    // 2020/4/19
+                    // 检查一下 actions 里面是否已经有了针对同一个 PII 的 return 动作。
+                    // 如果已经有了，则删除 return 动作，并且也忽略新的 borrow 动作
+                    var returns = actions.FindAll(o => o.Action == "return" && o.Entity.PII == entity.PII);
+                    if (returns.Count > 0)
+                    {
+                        foreach(var r in returns)
+                        {
+                            actions.Remove(r);
+                        }
+                        continue;
+                    }
+
                     if (person.IsWorker == false)
                     {
                         // 只有读者身份才进行借阅操作
                         actions.Add(new ActionInfo
                         {
-                            Entity = entity,
+                            Entity = entity.Clone(),
                             Action = "borrow",
                             Operator = person
                         });
@@ -991,7 +1013,7 @@ namespace dp2SSL
                         string location = "%checkout_location%";
                         actions.Add(new ActionInfo
                         {
-                            Entity = entity,
+                            Entity = entity.Clone(),
                             Action = "transfer",
                             TransferDirection = "out",
                             Location = location,
@@ -2101,6 +2123,40 @@ namespace dp2SSL
             return false;
         }
 
+        static void ReplaceOrAdd(List<Entity> entities, TagAndData tag)
+        {
+            lock (_syncRoot_all)
+            {
+                var found = entities.FindAll((o) => o.UID == tag.OneTag.UID);
+                if (found.Count > 0)
+                {
+                    foreach (var o in found)
+                    {
+                        entities.Remove(o);
+                    }
+                }
+                entities.Add(NewEntity(tag, false));
+            }
+        }
+
+        // 2020/4/19
+        // 替换集合中 UID 相同的 Entity 对象。如果没有找到则添加 entity 进入集合
+        static void ReplaceOrAdd(List<Entity> entities, Entity entity)
+        {
+            lock (_syncRoot_all)
+            {
+                var found = entities.FindAll((o) => o.UID == entity.UID);
+                if (found.Count > 0)
+                {
+                    foreach (var o in found)
+                    {
+                        entities.Remove(o);
+                    }
+                }
+                entities.Add(entity);
+            }
+        }
+
         // return:
         //      返回实际添加的个数
         internal static int Add(string name,
@@ -2272,6 +2328,27 @@ namespace dp2SSL
 
         // Exception:
         //      可能会抛出异常 ArgumentException TagDataException
+        static bool Add(List<Entity> entities, Entity entity)
+        {
+            List<Entity> results = new List<Entity>();
+            entities.ForEach((o) =>
+            {
+                if (o.UID == entity.UID)
+                    results.Add(o);
+            });
+            if (results.Count == 0)
+            {
+                // 注：所创建的 Entity 对象其 Error 成员可能有值，表示有出错信息
+                // Exception:
+                //      可能会抛出异常 ArgumentException
+                entities.Add(entity);
+                return true;
+            }
+            return false;
+        }
+
+        // Exception:
+        //      可能会抛出异常 ArgumentException TagDataException
         static bool Add(List<Entity> entities, TagAndData tag)
         {
             List<Entity> results = new List<Entity>();
@@ -2391,6 +2468,7 @@ namespace dp2SSL
             }
         }
 
+
         // 注意：这是不加锁的版本
         static bool Update(List<Entity> entities, TagAndData tag)
         {
@@ -2420,6 +2498,55 @@ namespace dp2SSL
             }
             return changed;
         }
+
+#if NEW_VERSION
+
+        public class UpdateResult : NormalResult
+        {
+            // 变化前的 Entity 内容
+            public List<Entity> OldEntities { get; set; }
+            // 变化后的 Entity 内容
+            public List<Entity> NewEntities { get; set; }
+        }
+
+        // 注意：这是不加锁的版本
+        static UpdateResult new_Update(List<Entity> entities, TagAndData tag)
+        {
+            List<Entity> old_entities = new List<Entity>();
+            List<Entity> new_entities = new List<Entity>();
+
+            // bool changed = false;
+            foreach (var entity in entities)
+            {
+                if (entity.UID == tag.OneTag.UID)
+                {
+                    if (entity.ReaderName != tag.OneTag.ReaderName
+                        || entity.Antenna != tag.OneTag.AntennaID.ToString()
+                        || (entity.TagInfo != null && tag.OneTag.TagInfo != null
+                        && entity.TagInfo.EAS != tag.OneTag.TagInfo.EAS))
+                    {
+                        old_entities.Add(entity.Clone());
+
+                        entity.ReaderName = tag.OneTag.ReaderName;
+                        entity.Antenna = tag.OneTag.AntennaID.ToString();
+                        if (entity.TagInfo != null && tag.OneTag.TagInfo != null)
+                            entity.TagInfo.EAS = tag.OneTag.TagInfo.EAS;
+
+                        new_entities.Add(entity);
+                        // changed = true;
+                    }
+                }
+            }
+
+            // return changed;
+            return new UpdateResult
+            {
+                OldEntities = old_entities,
+                NewEntities = new_entities
+            };
+        }
+
+#endif
 
         // 故意选择用到的天线编号加一的天线(用 ListTags() 实现)
         public static async Task<NormalResult> SelectAntennaAsync()
@@ -2570,19 +2697,54 @@ namespace dp2SSL
                     }
                     else
                     {
-                        // 更新 _all 里面的信息
-                        if (Update(_all, tag) == true)
+                        bool processed = false;
+                        // var old_entities = Find(_all, o => o.UID == tag.OneTag.UID);
+                        // 找到以前的对象
+                        if (results.Count > 0)
                         {
-                            // Exception:
-                            //      可能会抛出异常 ArgumentException TagDataException
-                            Add(_changes, tag);
+                            var old_entity = results[0];
+                            var old_doors = DoorItem.FindDoors(ShelfData.Doors, old_entity.ReaderName, old_entity.Antenna);
+                            var new_doors = DoorItem.FindDoors(ShelfData.Doors, tag.OneTag.ReaderName, tag.OneTag.AntennaID.ToString());
+
+                            // 如果新旧对象所在的门发生了转移
+                            if (old_doors.Count > 0 && new_doors.Count > 0
+    && old_doors[0] != new_doors[0])
+                            {
+                                // 新门
+                                ReplaceOrAdd(_adds, tag);
+
+                                // 旧门
+                                ReplaceOrAdd(_removes, old_entity);
+                                changed = true;
+
+                                processed = true;
+                            }
+
+                            // 更新 _all 里面的信息
+                            if (Update(_all, tag) == true)
+                            {
+                                // Exception:
+                                //      可能会抛出异常 ArgumentException TagDataException
+                                Add(_changes, tag);
+                            }
                         }
 
-                        // 要把 _adds 和 _removes 里面都去掉
-                        if (Remove(_adds, tag) == true)
-                            changed = true;
-                        if (Remove(_removes, tag) == true)
-                            changed = true;
+                        if (processed == false)
+                        {
+                            // 更新 _all 里面的信息
+                            if (Update(_all, tag) == true)
+                            {
+                                // Exception:
+                                //      可能会抛出异常 ArgumentException TagDataException
+                                Add(_changes, tag);
+                            }
+
+                            // 要把 _adds 和 _removes 里面都去掉
+                            if (Remove(_adds, tag) == true)
+                                changed = true;
+                            if (Remove(_removes, tag) == true)
+                                changed = true;
+                        }
                     }
                 }
 
@@ -2609,6 +2771,8 @@ namespace dp2SSL
                     // 刚添加过的标签，这里就不要去移走了。即，添加比移除要优先
                     if (add_uids.IndexOf(tag.OneTag.UID) != -1)
                         continue;
+
+                    // TODO: 特别注意，对于书柜门内的标签，要所属门完全一致才允许 remove
 
                     // 看看 _all 里面有没有
                     var results = Find("all", tag);
@@ -2663,6 +2827,7 @@ namespace dp2SSL
                     await FillBookFieldsAsync(All, token, "refreshCount");
                     await FillBookFieldsAsync(Adds, token, "refreshCount");
                     await FillBookFieldsAsync(Removes, token, "refreshCount");
+                    await FillBookFieldsAsync(Changes, token, "refreshCount");
                 }
                 catch
                 {
@@ -2701,11 +2866,16 @@ namespace dp2SSL
         }
 
         // 用 UID 找到，并移走
-        static List<TagAndData> Remove(List<TagAndData> list, string uid)
+        static List<TagAndData> Remove(List<TagAndData> list,
+            string uid,
+            string reader_name,
+            uint antenna)
         {
             List<TagAndData> found = list.FindAll((tag) =>
             {
-                return (tag.OneTag.UID == uid);
+                return (tag.OneTag.UID == uid
+                && tag.OneTag.ReaderName == reader_name
+                && tag.OneTag.AntennaID == antenna);
             });
             foreach (var tag in found)
             {
@@ -2715,7 +2885,9 @@ namespace dp2SSL
         }
 
         // 更新同 UID 的事项。如果没有找到，则在末尾添加
-        static void Update(List<TagAndData> list, TagAndData tag)
+        // return:
+        //      返回被替换掉的，以前的对象
+        static List<TagAndData> Update(List<TagAndData> list, TagAndData tag)
         {
             List<TagAndData> found = list.FindAll((t) =>
             {
@@ -2726,6 +2898,8 @@ namespace dp2SSL
                 list.Remove(t);
             }
             list.Add(tag);
+
+            return found;
         }
 
         static bool Add(List<TagAndData> list, TagAndData tag)
@@ -2873,15 +3047,17 @@ namespace dp2SSL
                         var type = func_detectType(tag.OneTag);
                         if (type == "patron")
                         {
+                            var one_tag = tag.OneTag;
                             // TODO: 尝试从 _bookTags 里面移走
-                            removed_books.AddRange(Remove(_bookTags, tag.OneTag.UID));
+                            removed_books.AddRange(Remove(_bookTags, one_tag.UID, one_tag.ReaderName, one_tag.AntennaID));
                             Update(_patronTags, tag);
                             updated_patrons.Add(tag);
                         }
                         else if (type == "book")
                         {
+                            var one_tag = tag.OneTag;
                             // TODO: 尝试从 _patronTags 里面移走
-                            removed_patrons.AddRange(Remove(_patronTags, tag.OneTag.UID));
+                            removed_patrons.AddRange(Remove(_patronTags, one_tag.UID, one_tag.ReaderName, one_tag.AntennaID));
                             Update(_bookTags, tag);
                             updated_books.Add(tag);
                         }
@@ -2895,11 +3071,13 @@ namespace dp2SSL
                     // 分离移走了的标签
                     e.RemoveTags.ForEach((tag) =>
                     {
-                        var type = func_detectType(tag.OneTag);
+                        var one_tag = tag.OneTag;
+                        var type = func_detectType(one_tag);
                         if (type == "patron" || type == "book")
                         {
-                            removed_books.AddRange(Remove(_bookTags, tag.OneTag.UID));
-                            removed_patrons.AddRange(Remove(_patronTags, tag.OneTag.UID));
+                            // 注意，只有当 UID 和 读卡器名字 和 天线编号都相同才予以删除
+                            removed_books.AddRange(Remove(_bookTags, one_tag.UID, one_tag.ReaderName, one_tag.AntennaID));
+                            removed_patrons.AddRange(Remove(_patronTags, one_tag.UID, one_tag.ReaderName, one_tag.AntennaID));
                         }
                     });
                 }
