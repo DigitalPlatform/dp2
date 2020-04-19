@@ -171,10 +171,14 @@ namespace DigitalPlatform.RFID
             {
                 // 检查以前的列表中是否已经有了
                 var book = FindBookTag(tag.UID);
-                // 2020/4/19 修正
+
+                /*
+                // 2020/4/19 验证性做法：从一个读卡器变动到另一个读卡器，第一种顺序，瞬间集合里面可能会有相同 UID 的两个对象
+                // 用 Test_transfer_test_1() 单元测试
                 // 如果找到的对象是属于当前读卡器以外的范围，则当作没有找到处理
                 if (book != null && InRange(book.OneTag, readerNameList) == false)
                     book = null;
+                    */
 
                 if (book != null)
                 {

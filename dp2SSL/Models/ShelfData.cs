@@ -2709,6 +2709,7 @@ namespace dp2SSL
                     else
                     {
                         bool processed = false;
+                        /*
                         // var old_entities = Find(_all, o => o.UID == tag.OneTag.UID);
                         // 找到以前的对象
                         if (results.Count > 0)
@@ -2740,12 +2741,15 @@ namespace dp2SSL
                                 Add(_changes, tag);
                             }
                         }
+                        */
 
                         if (processed == false)
                         {
                             // 更新 _all 里面的信息
                             if (Update(_all, tag) == true)
                             {
+                                tag.Type = null;    // 令 NewEntity 重新解析标签
+
                                 // Exception:
                                 //      可能会抛出异常 ArgumentException TagDataException
                                 Add(_changes, tag);
