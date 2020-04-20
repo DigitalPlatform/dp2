@@ -1349,23 +1349,23 @@ namespace dp2SSL
             // TODO: 不过似乎此时有语音提示放入、取出，似乎更显得实用一些？
             if (this.Mode == "initial")
             {
-                var adds = ShelfData.Adds; // new List<Entity>(ShelfData.Adds);
+                var adds = ShelfData.l_Adds; // new List<Entity>(ShelfData.Adds);
                 {
-                    ShelfData.Add("all", adds);
+                    ShelfData.l_Add("all", adds);
 
-                    ShelfData.Remove("adds", adds);
-                    ShelfData.Remove("removes", adds);
+                    ShelfData.l_Remove("adds", adds);
+                    ShelfData.l_Remove("removes", adds);
                 }
 
-                var removes = ShelfData.Removes;
+                var removes = ShelfData.l_Removes;
                 {
-                    ShelfData.Remove("all", removes);
+                    ShelfData.l_Remove("all", removes);
 
-                    ShelfData.Remove("adds", removes);
-                    ShelfData.Remove("removes", removes);
+                    ShelfData.l_Remove("adds", removes);
+                    ShelfData.l_Remove("removes", removes);
                 }
 
-                ShelfData.RefreshCount();
+                ShelfData.l_RefreshCount();
             }
             else
             {
@@ -1538,9 +1538,9 @@ namespace dp2SSL
                     {
                         // 处理前先从 All 中移走当前门的所有标签
                         {
-                            var remove_entities = ShelfData.Find(ShelfData.All, (o) => o.Antenna == door.Antenna.ToString());
+                            var remove_entities = ShelfData.Find(ShelfData.l_All, (o) => o.Antenna == door.Antenna.ToString());
                             if (remove_entities.Count > 0)
-                                ShelfData.Remove("all", remove_entities);
+                                ShelfData.l_Remove("all", remove_entities);
                         }
 
                         // TODO: 填充 RFID 图书标签信息
@@ -1585,7 +1585,7 @@ namespace dp2SSL
                             break;
 
                         // 2020/4/2
-                        ShelfData.Add("all", part);
+                        ShelfData.l_Add("all", part);
 
                         if (initial_result.Value != -1
                             && part != null
@@ -1648,7 +1648,7 @@ namespace dp2SSL
                         }
                         else
                         {
-                            var test = ShelfData.All;
+                            var test = ShelfData.l_All;
                             break;
                         }
 
@@ -1711,7 +1711,7 @@ namespace dp2SSL
                 // 将 操作历史库 里面的 PII 和 ShelfData.All 里面 PII 相同的事项的状态标记为“放弃同步”。因为刚才已经成功同步了它们
                 // ShelfData.RemoveFromRetryActions(new List<Entity>(ShelfData.All));
                 {
-                    var piis = ShelfData.All.Select(x => x.UID);
+                    var piis = ShelfData.l_All.Select(x => x.UID);
                     // TODO: 虽然状态被修改为 dontsync，但依然需要在 SyncErrorInfo 里面注解一下为何 dontsync(因为初始化盘点时候已经同步成功了)
                     await ShelfData.RemoveRetryActionsFromDatabaseAsync(piis);
                 }
@@ -1719,7 +1719,7 @@ namespace dp2SSL
                 // 将刚才初始化涉及到的 action 操作写入本地数据库
                 {
                     List<ActionInfo> actions = new List<ActionInfo>();
-                    foreach (var entity in ShelfData.All)
+                    foreach (var entity in ShelfData.l_All)
                     {
                         actions.Add(new ActionInfo
                         {
@@ -2310,9 +2310,9 @@ namespace dp2SSL
 
         public async Task SubmitAsync(bool silently = false)
         {
-            if (ShelfData.Adds.Count > 0
-                || ShelfData.Removes.Count > 0
-                || ShelfData.Changes.Count > 0)
+            if (ShelfData.l_Adds.Count > 0
+                || ShelfData.l_Removes.Count > 0
+                || ShelfData.l_Changes.Count > 0)
             {
                 SaveAllActions();
                 await DoRequestAsync(ShelfData.PullActions(), silently ? "silence" : "");
@@ -2809,7 +2809,7 @@ namespace dp2SSL
                     });
 
                 if (changed)
-                    ShelfData.RefreshCount();
+                    ShelfData.l_RefreshCount();
 
                 if (actions.Count == 0)
                     return;  // 没有必要处理
@@ -3320,6 +3320,24 @@ namespace dp2SSL
         private void pauseSubmit_Unchecked(object sender, RoutedEventArgs e)
         {
             ShelfData.PauseSubmit = false;
+        }
+
+
+        // 强制对所有门盘点一次
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:命名样式", Justification = "<挂起>")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:避免使用 Async Void 方法", Justification = "<挂起>")]
+        private async void inventory_Click(object sender, RoutedEventArgs e)
+        {
+            List<string> errors = new List<string>();
+            foreach (var door in ShelfData.Doors)
+            {
+                var result = await ShelfData.RefreshInventoryAsync(door);
+                if (result.Value == -1)
+                    errors.Add(result.ErrorInfo);
+            }
+
+            if (errors.Count > 0)
+                MessageBox.Show(StringUtil.MakePathList(errors, "\r\n"));
         }
 
 #if REMOVED

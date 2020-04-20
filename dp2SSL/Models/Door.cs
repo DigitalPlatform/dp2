@@ -578,34 +578,38 @@ namespace dp2SSL
                     Errors = error
                 });
                 */
+                bool bChanged = false;
+                if (Update(door._allEntities, count) == true
+                || Update(door._removeEntities, remove) == true
+                || Update(door._addEntities, add) == true
+                || Update(door._errorEntities, error) == true)
+                {
+                    bChanged = true;
+                }
 
+                if (bChanged)
+                {
+                    _ = Task.Run(async () =>
+                    {
+                        try
+                        {
+                            CancellationToken token = ShelfData.CancelToken;
+                            await ShelfData.FillBookFieldsAsync(door._allEntities, token, "refreshCount");
+                            await ShelfData.FillBookFieldsAsync(door._removeEntities, token, "refreshCount");
+                            await ShelfData.FillBookFieldsAsync(door._addEntities, token, "refreshCount");
+                            await ShelfData.FillBookFieldsAsync(door._errorEntities, token, "refreshCount");
+                        }
+                        catch
+                        {
+                            // TODO: 写入错误日志
+                        }
+                    });
+                }
 
                 App.Invoke(new Action(() =>
                 {
                     // 更新 entities
                     // TODO: 异步填充
-                    if (Update(door._allEntities, count) == true
-                    || Update(door._removeEntities, remove) == true
-                    || Update(door._addEntities, add) == true
-                    || Update(door._errorEntities, error) == true)
-                    {
-                        var task = Task.Run(async () =>
-                        {
-                            try
-                            {
-                                CancellationToken token = ShelfData.CancelToken;
-                                await ShelfData.FillBookFieldsAsync(door._allEntities, token, "refreshCount");
-                                await ShelfData.FillBookFieldsAsync(door._removeEntities, token, "refreshCount");
-                                await ShelfData.FillBookFieldsAsync(door._addEntities, token, "refreshCount");
-                                await ShelfData.FillBookFieldsAsync(door._errorEntities, token, "refreshCount");
-                            }
-                            catch
-                            {
-                                // TODO: 写入错误日志
-                            }
-                        });
-                    }
-
                     door.Count = count.Count;
                     door.Add = add.Count;
                     door.Remove = remove.Count;

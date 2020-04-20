@@ -11,6 +11,7 @@ using DigitalPlatform;
 using DigitalPlatform.IO;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
+using Microsoft.VisualStudio.Threading;
 
 namespace DigitalPlatform.RFID
 {
@@ -221,6 +222,7 @@ namespace DigitalPlatform.RFID
             Base2.Name = Base.Name;
         }
 
+
         static object _syncRoot = new object();
 
         public static object SyncRoot
@@ -230,6 +232,8 @@ namespace DigitalPlatform.RFID
                 return _syncRoot;
             }
         }
+
+        // static AsyncSemaphore _limit = new AsyncSemaphore(1);
 
         // 启动附加的监控线程
         public static void StartBase2(
@@ -249,6 +253,8 @@ namespace DigitalPlatform.RFID
                 channel.Started = true;
 
                 channel.Object.EnableSendKey(false);
+
+                //return null;
             },
             () =>
             {
@@ -274,7 +280,7 @@ new SetErrorEventArgs
 
                 return false;
             },
-            (channel) =>
+            async (channel) =>
             {
                 /*
                 if (string.IsNullOrEmpty(_antennaList) == false)
@@ -311,6 +317,7 @@ new SetErrorEventArgs
                     if (string.IsNullOrEmpty(readerNameList) == false)
                     {
                         lock (_syncRoot)
+                        // using(var releaser = await _limit.EnterAsync().ConfigureAwait(false))
                         {
                             if (ListTags != null)
                             {
@@ -374,7 +381,6 @@ new SetErrorEventArgs
                     // 门锁状态就绪
                     _lockReady = true;
                 }
-
             },
             token);
         }
@@ -398,6 +404,8 @@ new SetErrorEventArgs
                 channel.Started = true;
 
                 channel.Object.EnableSendKey(false);
+
+                // return null;
             },
             () =>
             {
@@ -423,7 +431,7 @@ new SetErrorEventArgs
 
                 return false;
             },
-            (channel) =>
+            async (channel) =>
             {
                 /*
                 if (string.IsNullOrEmpty(_antennaList) == false)
@@ -456,6 +464,7 @@ new SetErrorEventArgs
                     if (string.IsNullOrEmpty(readerNameList) == false)
                     {
                         lock (_syncRoot)
+                        // using (var releaser = await _limit.EnterAsync().ConfigureAwait(false))
                         {
                             if (ListTags != null)
                             {
@@ -547,7 +556,7 @@ new SetErrorEventArgs
             Base.ReturnChannel(channel);
         }
 
-        public static void TriggerListTagsEvent(
+        public static async Task TriggerListTagsEvent(
             string reader_name_list,
             ListTagsResult result/*,
             StringBuilder debugInfo*/,
@@ -567,6 +576,7 @@ new SetErrorEventArgs
                     //debugInfo.AppendLine("3");
 
                     lock (_syncRoot)
+                    // using (var releaser = await _limit.EnterAsync().ConfigureAwait(false))
                     {
                         //debugInfo.AppendLine("4");
 

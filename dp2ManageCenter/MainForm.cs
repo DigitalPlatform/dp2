@@ -754,6 +754,7 @@ string strHtml)
         AsyncSemaphore _operLogLimit = new AsyncSemaphore(1);
 
         // 先新建全部任务，这时已经用 BatchTask() "start" 请求启动了所有服务器端的备份任务。然后再做一个循环启动下载任务。
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:避免使用 Async Void 方法", Justification = "<挂起>")]
         private async void MenuItem_newBackupTasks_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -2821,6 +2822,7 @@ string strHtml)
             return strOutputFolder;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:避免使用 Async Void 方法", Justification = "<挂起>")]
         private async void MenuItem_continueBackupTasks_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -3368,6 +3370,7 @@ string strHtml)
         }
 
         // 撤销服务器端大备份任务
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:避免使用 Async Void 方法", Justification = "<挂起>")]
         async void menu_cancelServerBackupTask_Click(object sender, EventArgs e)
         {
             if (this.listView_backupTasks.SelectedItems.Count == 0)
@@ -3414,6 +3417,7 @@ string strHtml)
         }
 
         // 删除服务器端大备份文件。这个功能一般用于诊断和维护。因为正常下载结束时会自动删除服务器端的大备份文件
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:避免使用 Async Void 方法", Justification = "<挂起>")]
         async void menu_deleteServerFile_Click(object sender, EventArgs e)
         {
             if (this.listView_backupTasks.SelectedItems.Count == 0)
@@ -4819,6 +4823,7 @@ out string strError);
         }
 
         // 新建下载操作日志/错误日志任务
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:避免使用 Async Void 方法", Justification = "<挂起>")]
         async void MenuItem_newOperLogTasks_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -4886,6 +4891,7 @@ out string strError);
                 MessageBox.Show(this, strError);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:避免使用 Async Void 方法", Justification = "<挂起>")]
         async void MenuItem_continueOperLogTasks_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -5060,6 +5066,7 @@ MessageBoxDefaultButton.Button2);
         }
 
         // 批量修改密码
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:避免使用 Async Void 方法", Justification = "<挂起>")]
         private async void MenuItem_changePassword_Click(object sender, EventArgs e)
         {
             var server_names = SelectServerNames();
@@ -5186,7 +5193,9 @@ MessageBoxDefaultButton.Button2);
             }
         }
 
+
         // 批量刷新服务器名
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:避免使用 Async Void 方法", Justification = "<挂起>")]
         private async void MenuItem_refreshServerName_Click(object sender, EventArgs e)
         {
             var server_names = SelectServerNames();

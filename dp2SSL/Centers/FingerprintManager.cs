@@ -69,6 +69,7 @@ namespace dp2SSL
                 channel.Started = true;
 
                 channel.Object.EnableSendKey(false);
+                //return null;
             },
             null,
             (channel) =>
@@ -115,7 +116,7 @@ namespace dp2SSL
                         Result = result
                     });
                 }
-
+                //return null;
             },
 token);
         }
