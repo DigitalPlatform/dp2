@@ -46,7 +46,7 @@
                 Name="registerFace" Content="注册人脸" Click="RegisterFace_Click"
                 Background="#FFB1D21C" Foreground="Black" FontSize="36" BorderThickness="0"/>
         <Button 
-            Name="shelf" Content="书架"  Click="Shelf_Click"
+            Name="shelf" Content="书柜"  Click="Shelf_Click"
                 Background="#FF0A7832" Foreground="White" FontSize="40" BorderThickness="0"/>
 
         <Button 
