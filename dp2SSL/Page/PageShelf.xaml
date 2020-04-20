@@ -7,7 +7,7 @@
       xmlns:fa="http://schemas.fontawesome.io/icons/"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
-      WindowTitle="书架" Title="书架"
+      WindowTitle="书柜" Title="书柜"
       x:Name="_this" >
     <Page.Resources>
         <local:StringToVisibilityConverter x:Key="StringToVis" />
@@ -32,12 +32,20 @@
         <!-- left bar -->
         <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Vertical">
             <Grid Height="20" />
-            <Button Name="goHome" Background="Transparent" BorderThickness="0" Click="GoHome_Click">
+            <Button Name="goHome" Background="Transparent" BorderThickness="0"
+                    Click="GoHome_Click" ToolTip="主菜单">
                 <fa:ImageAwesome Icon="Home"
                              Height="40" Foreground="DarkGray" Margin="4"/>
             </Button>
             <Grid Height="20" />
-            <Button Name="goHelp" Background="Transparent" BorderThickness="0">
+            <Button Name="register" Background="Transparent" BorderThickness="0"
+                    Click="register_Click" ToolTip="绑定读者证">
+                <fa:ImageAwesome Icon="UserPlus"
+                             Height="40" Foreground="DarkGray" Margin="4"/>
+            </Button>
+            <Grid Height="20" />
+            <Button Name="goHelp" Background="Transparent" BorderThickness="0"
+                    ToolTip="帮助">
                 <fa:ImageAwesome Icon="LightbulbOutline"
                              Height="40" Foreground="DarkGray" Margin="4"/>
             </Button>

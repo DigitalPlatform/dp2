@@ -226,6 +226,17 @@ namespace dp2SSL
             }));
         }
 #endif
+        public static PageBorrow PageBorrow
+        {
+            get
+            {
+                if (_pageBorrow == null)
+                    _pageBorrow = new PageBorrow();
+
+                return _pageBorrow;
+            }
+        }
+
         static PageBorrow _pageBorrow = null;
 
         void NavigatePageBorrow(string buttons)

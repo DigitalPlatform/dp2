@@ -3340,6 +3340,19 @@ namespace dp2SSL
                 MessageBox.Show(StringUtil.MakePathList(errors, "\r\n"));
         }
 
+        // 转到绑定读者证画面
+        private void register_Click(object sender, RoutedEventArgs e)
+        {
+            NavigatePageBorrow("bindPatronCard,releasePatronCard");
+        }
+
+        public void NavigatePageBorrow(string buttons)
+        {
+            var pageBorrow = PageMenu.PageBorrow;
+            pageBorrow.ActionButtons = buttons;
+            this.NavigationService.Navigate(pageBorrow);
+        }
+
 #if REMOVED
 
         #region 绑定和解绑读者功能
