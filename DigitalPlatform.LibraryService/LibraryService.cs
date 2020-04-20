@@ -14262,6 +14262,26 @@ out strError);
                             if (nRet == -1)
                                 goto ERROR1;
                         }
+
+                        // 2020/4/20
+                        if (data.strRecipient.StartsWith("!mq:"))
+                        {
+                            if (StringUtil.IsInList("sendmq", sessioninfo.RightsOrigin) == false)
+                            {
+                                result.Value = -1;
+                                result.ErrorInfo = "发送 MQ 消息被拒绝。不具备 sendmq 权限";
+                                result.ErrorCode = ErrorCode.AccessDenied;
+                                return result;
+                            }
+
+                            nRet = app.SendMessageQueue(
+    data.strRecipient.Substring("!mq:".Length),
+    data.strMime,
+    data.strBody,
+    out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+                        }
                     }
                 }
 

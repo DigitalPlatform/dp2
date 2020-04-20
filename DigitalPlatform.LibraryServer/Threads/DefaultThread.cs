@@ -132,7 +132,7 @@ namespace DigitalPlatform.LibraryServer
             string strError = "";
 
             if (this.App.kdbs == null
-                        && (DateTime.Now - this.m_lastRetryTime).TotalMinutes >= m_nRetryAfterMinutes)
+                && (DateTime.Now - this.m_lastRetryTime).TotalMinutes >= m_nRetryAfterMinutes)
             {
                 try
                 {
@@ -160,7 +160,7 @@ namespace DigitalPlatform.LibraryServer
 
             // 
             if (this.App.vdbs == null
-                        && (DateTime.Now - this.m_lastRetryTime).TotalMinutes >= m_nRetryAfterMinutes)
+                && (DateTime.Now - this.m_lastRetryTime).TotalMinutes >= m_nRetryAfterMinutes)
             {
                 try
                 {

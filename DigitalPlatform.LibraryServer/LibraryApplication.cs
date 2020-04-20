@@ -15269,6 +15269,39 @@ strLibraryCode);    // 读者所在的馆代码
             return ResPathType.None;
         }
 
+        // 发送 MQ 消息
+        public int SendMessageQueue(
+            string strRecipient,
+            string strMime,
+            string strBody,
+            out string strError)
+        {
+            try
+            {
+                using (MessageQueue queue = new MessageQueue(this.OutgoingQueue))
+                {
+                    // 向 MSMQ 消息队列发送消息
+                    // return:
+                    //      -2  MSMQ 错误
+                    //      -1  出错
+                    //      0   成功
+                    int nRet = ReadersMonitor.SendToQueue(queue,
+                        strRecipient,
+                        strMime,
+                        strBody,
+                        out strError);
+                    if (nRet == -1 || nRet == -2)
+                        return -1;
+                    return 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                strError = "创建路径为 '" + this.OutgoingQueue + "' 的 MessageQueue 对象失败: " + ExceptionUtil.GetDebugText(ex);
+                return -1;
+            }
+        }
+
         // 通过 MSMQ 发送手机短信
         // parameters:
         //      strUserName 账户名，或者读者证件条码号，或者 "@refID:xxxx"
