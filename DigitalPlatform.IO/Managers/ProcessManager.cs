@@ -24,7 +24,7 @@ namespace DigitalPlatform.IO
             // 首次等待
             TimeSpan wait_time = TimeSpan.FromSeconds(30);
 
-            Task.Run(() =>
+            Task.Run(async () =>
             {
                 while (token.IsCancellationRequested == false)
                 {
@@ -47,9 +47,9 @@ namespace DigitalPlatform.IO
                     // 延时
                     try
                     {
-                        Task.Delay(// TimeSpan.FromMilliseconds(1000), 
+                        await Task.Delay(// TimeSpan.FromMilliseconds(1000), 
                             wait_time,
-                            token).Wait();
+                            token);
                     }
                     catch
                     {

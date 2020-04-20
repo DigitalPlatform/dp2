@@ -105,7 +105,7 @@ namespace DigitalPlatform.IO
         {
             _new_action = new_action;
 
-            Task.Run(() =>
+            Task.Run(async () =>
             {
                 TimeSpan wait_time = this.ShortWaitTime;
                 while (token.IsCancellationRequested == false)
@@ -114,9 +114,9 @@ namespace DigitalPlatform.IO
                     // 延时
                     try
                     {
-                        Task.Delay(// TimeSpan.FromMilliseconds(1000), 
+                        await Task.Delay(// TimeSpan.FromMilliseconds(1000), 
                             wait_time,
-                            token).Wait();
+                            token);
                     }
                     catch
                     {
@@ -190,7 +190,7 @@ namespace DigitalPlatform.IO
             });
         }
 
-        public delegate void delegate_action(BaseChannel<T> channel);
+        public delegate /*Task*/void delegate_action(BaseChannel<T> channel);
         public delegate bool delegate_skip();
 
         // Exception: 

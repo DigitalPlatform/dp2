@@ -68,6 +68,7 @@ namespace DigitalPlatform.Face
                 channel.Started = true;
 
                 channel.Object.EnableSendKey(false);
+                //return null;
             },
             null,
             (channel) =>
@@ -79,6 +80,7 @@ namespace DigitalPlatform.Face
                 else
                     Base.TriggerSetError(result,
                         new SetErrorEventArgs { Error = null }); // 清除以前的报错
+                //return null;
             },
             token);
         }

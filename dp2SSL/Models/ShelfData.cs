@@ -649,7 +649,7 @@ namespace dp2SSL
             var list = GetReaderNameList(new List<DoorItem> { door }, null);
             string style = $"dont_delay";   // 确保 inventory 并立即返回
 
-            using (var releaser = await _inventoryLimit.EnterAsync())
+            using (var releaser = await _inventoryLimit.EnterAsync().ConfigureAwait(false))
             {
                 // StringBuilder debugInfo = new StringBuilder();
                 var result = RfidManager.CallListTags(list, style);
@@ -657,7 +657,7 @@ namespace dp2SSL
 
                 try
                 {
-                    RfidManager.TriggerListTagsEvent(list, result, true);
+                    await RfidManager.TriggerListTagsEvent(list, result, true);
                     return new NormalResult();
                 }
                 catch (TagInfoException ex)
@@ -850,10 +850,10 @@ namespace dp2SSL
             {
                 List<ActionInfo> actions = new List<ActionInfo>();
                 List<Entity> processed = new List<Entity>();
-                foreach (var entity in ShelfData.Adds)
+                foreach (var entity in ShelfData.l_Adds)
                 {
                     // Debug.Assert(string.IsNullOrEmpty(entity.PII) == false, "");
-                    
+
                     if (ShelfData.BelongToNormal(entity) == false)
                         continue;
                     var person = func_getOperator?.Invoke(entity);
@@ -869,7 +869,7 @@ namespace dp2SSL
                     });
                     // 没有更新的，才进行一次 transfer。更新的留在后面专门做
                     // “更新”的意思是从这个门移动到了另外一个门
-                    if (ShelfData.Find(ShelfData.Changes, (o) => o.UID == entity.UID).Count == 0)
+                    if (ShelfData.Find(ShelfData.l_Changes, (o) => o.UID == entity.UID).Count == 0)
                     {
                         string location = "";
                         // 工作人员身份，还可能要进行馆藏位置向内转移
@@ -927,7 +927,7 @@ namespace dp2SSL
 
                 }
 
-                foreach (var entity in ShelfData.Changes)
+                foreach (var entity in ShelfData.l_Changes)
                 {
                     // Debug.Assert(string.IsNullOrEmpty(entity.PII) == false, "");
 
@@ -972,7 +972,7 @@ namespace dp2SSL
                     processed.Add(entity);
                 }
 
-                foreach (var entity in ShelfData.Removes)
+                foreach (var entity in ShelfData.l_Removes)
                 {
                     // Debug.Assert(string.IsNullOrEmpty(entity.PII) == false, "");
 
@@ -988,7 +988,7 @@ namespace dp2SSL
                     var returns = actions.FindAll(o => o.Action == "return" && o.Entity.PII == entity.PII);
                     if (returns.Count > 0)
                     {
-                        foreach(var r in returns)
+                        foreach (var r in returns)
                         {
                             actions.Remove(r);
                         }
@@ -1057,13 +1057,13 @@ namespace dp2SSL
                 */
                 {
                     // ShelfData.Remove("all", processed);
-                    ShelfData.Remove("adds", processed);
-                    ShelfData.Remove("removes", processed);
-                    ShelfData.Remove("changes", processed);
+                    ShelfData.l_Remove("adds", processed);
+                    ShelfData.l_Remove("removes", processed);
+                    ShelfData.l_Remove("changes", processed);
                 }
 
                 // 2020/4/2
-                ShelfData.RefreshCount();
+                ShelfData.l_RefreshCount();
 
                 if (actions.Count == 0)
                     return new SaveActionResult
@@ -1384,7 +1384,7 @@ namespace dp2SSL
         static List<Entity> _removes = new List<Entity>();  // 临时区 取走的图书
         static List<Entity> _changes = new List<Entity>();  // 临时区 天线编号、门位置发生过变化的图书
 
-        public static IReadOnlyCollection<Entity> All
+        public static IReadOnlyCollection<Entity> l_All
         {
             get
             {
@@ -1397,7 +1397,7 @@ namespace dp2SSL
             }
         }
 
-        public static IReadOnlyCollection<Entity> Adds
+        public static IReadOnlyCollection<Entity> l_Adds
         {
             get
             {
@@ -1408,7 +1408,7 @@ namespace dp2SSL
             }
         }
 
-        public static IReadOnlyCollection<Entity> Removes
+        public static IReadOnlyCollection<Entity> l_Removes
         {
             get
             {
@@ -1419,7 +1419,7 @@ namespace dp2SSL
             }
         }
 
-        public static IReadOnlyCollection<Entity> Changes
+        public static IReadOnlyCollection<Entity> l_Changes
         {
             get
             {
@@ -1536,12 +1536,12 @@ namespace dp2SSL
 
                 func_display($"{i + 1}/{Doors.Count} 门 {door.Name} ({list}) ...");
 
-                using (var releaser = await _inventoryLimit.EnterAsync())
+                using (var releaser = await _inventoryLimit.EnterAsync().ConfigureAwait(false))
                 {
                     var result = RfidManager.CallListTags(list, style);
                     try
                     {
-                        RfidManager.TriggerListTagsEvent(list, result, true);
+                        await RfidManager.TriggerListTagsEvent(list, result, true);
                     }
                     catch (TagInfoException ex)
                     {
@@ -1568,7 +1568,7 @@ namespace dp2SSL
             List<string> warnings = new List<string>();
 
             List<Entity> all = new List<Entity>();
-            // lock (_syncRoot_all)
+            lock (_syncRoot_all)
             {
                 // _all.Clear();
 
@@ -1671,7 +1671,7 @@ namespace dp2SSL
 
             // DoorItem.DisplayCount(_all, _adds, _removes, App.CurrentApp.Doors);
             // TODO: 只刷新指定门的数字即可
-            RefreshCount();
+            l_RefreshCount();
 
             // TryReturn(progress, _all);
             // _firstInitial = true;   // 第一次初始化已经完成
@@ -1946,13 +1946,21 @@ namespace dp2SSL
         }
 
         // 刷新门内图书数字显示
-        public static void RefreshCount()
+        public static void l_RefreshCount()
         {
+            List<Entity> errors = null;
+            List<Entity> all = null;
+            List<Entity> adds = null;
+            List<Entity> removes = null;
+
             lock (_syncRoot_all)
             {
-                List<Entity> errors = GetErrors(_all, _adds, _removes);
-                DoorItem.DisplayCount(_all, _adds, _removes, errors, Doors);
+                all = new List<Entity>(_all);
+                adds = new List<Entity>(_adds);
+                removes = new List<Entity>(_removes);
+                errors = GetErrors(_all, _adds, _removes);
             }
+            DoorItem.DisplayCount(all, adds, removes, errors, Doors);
         }
 
         // 注意，没有加锁
@@ -2083,7 +2091,7 @@ namespace dp2SSL
         }
 #endif
 
-        static List<Entity> Find(string name, TagAndData tag)
+        static List<Entity> l_Find(string name, TagAndData tag)
         {
             lock (_syncRoot_all)
             {
@@ -2118,12 +2126,12 @@ namespace dp2SSL
         {
             var list = new List<Entity>();
             list.Add(entity);
-            if (Add(name, list) > 0)
+            if (l_Add(name, list) > 0)
                 return true;
             return false;
         }
 
-        static void ReplaceOrAdd(List<Entity> entities, TagAndData tag)
+        static void l_ReplaceOrAdd(List<Entity> entities, TagAndData tag)
         {
             lock (_syncRoot_all)
             {
@@ -2141,7 +2149,7 @@ namespace dp2SSL
 
         // 2020/4/19
         // 替换集合中 UID 相同的 Entity 对象。如果没有找到则添加 entity 进入集合
-        static void ReplaceOrAdd(List<Entity> entities, Entity entity)
+        static void l_ReplaceOrAdd(List<Entity> entities, Entity entity)
         {
             lock (_syncRoot_all)
             {
@@ -2159,7 +2167,7 @@ namespace dp2SSL
 
         // return:
         //      返回实际添加的个数
-        internal static int Add(string name,
+        internal static int l_Add(string name,
             IReadOnlyCollection<Entity> adds)
         {
             lock (_syncRoot_all)
@@ -2235,10 +2243,10 @@ namespace dp2SSL
         {
             var list = new List<Entity>();
             list.Add(entity);
-            Remove(name, list);
+            l_Remove(name, list);
         }
 
-        internal static void Remove(string name,
+        internal static void l_Remove(string name,
             IReadOnlyCollection<Entity> removes)
         {
             lock (_syncRoot_all)
@@ -2349,7 +2357,7 @@ namespace dp2SSL
 
         static void CheckPII(List<Entity> entities)
         {
-            foreach(var entity in entities)
+            foreach (var entity in entities)
             {
                 if (entity.PII == null)
                 {
@@ -2424,7 +2432,7 @@ namespace dp2SSL
 
         // 2020/4/13
         // 更新 entity 里面的读者记录相关数据
-        static bool UpdateEntityXml(string name,
+        static bool l_UpdateEntityXml(string name,
             string uid,
             string entity_xml)
         {
@@ -2445,7 +2453,7 @@ namespace dp2SSL
         }
 
         // 更新 Entity 信息
-        static bool Update(string name, TagAndData tag)
+        static bool l_Update(string name, TagAndData tag)
         {
             lock (_syncRoot_all)
             {
@@ -2572,7 +2580,7 @@ namespace dp2SSL
                 // uint antenna = (uint)(list.Antennas[list.Antennas.Count - 1] + 1);
                 int first_antenna = list.Antennas[0];
                 text.Append($"readerName[{list.ReaderName}], antenna[{first_antenna}]\r\n");
-                using (var releaser = await _inventoryLimit.EnterAsync())
+                using (var releaser = await _inventoryLimit.EnterAsync().ConfigureAwait(false))
                 {
                     try
                     {
@@ -2791,7 +2799,7 @@ namespace dp2SSL
                     // TODO: 特别注意，对于书柜门内的标签，要所属门完全一致才允许 remove
 
                     // 看看 _all 里面有没有
-                    var results = Find("all", tag);
+                    var results = l_Find("all", tag);
                     if (results.Count > 0)
                     {
                         if (Remove(_adds, tag) == true)
@@ -2830,7 +2838,7 @@ namespace dp2SSL
             if (changed == true)
             {
                 // DoorItem.DisplayCount(_all, _adds, _removes, ShelfData.Doors);
-                ShelfData.RefreshCount();
+                ShelfData.l_RefreshCount();
                 func_booksChanged?.Invoke();
             }
 
@@ -2847,10 +2855,10 @@ namespace dp2SSL
                 try
                 {
                     CancellationToken token = CancelToken;
-                    await FillBookFieldsAsync(All, token, "refreshCount");
-                    await FillBookFieldsAsync(Adds, token, "refreshCount");
-                    await FillBookFieldsAsync(Removes, token, "refreshCount");
-                    await FillBookFieldsAsync(Changes, token, "refreshCount");
+                    await FillBookFieldsAsync(l_All, token, "refreshCount");
+                    await FillBookFieldsAsync(l_Adds, token, "refreshCount");
+                    await FillBookFieldsAsync(l_Removes, token, "refreshCount");
+                    await FillBookFieldsAsync(l_Changes, token, "refreshCount");
                 }
                 catch
                 {
@@ -3161,7 +3169,7 @@ namespace dp2SSL
                 */
 
                 // 2020/4/19
-                foreach(var tag in updated_books)
+                foreach (var tag in updated_books)
                 {
                     tag.Type = null;    // 迫使 NewEntity 重新解析标签
                 }
@@ -3726,7 +3734,7 @@ namespace dp2SSL
                 };
 
             if (refreshCount)
-                ShelfData.RefreshCount();
+                ShelfData.l_RefreshCount();
 
             return new FillBookFieldsResult { Errors = errors };
             /*
@@ -4281,7 +4289,7 @@ namespace dp2SSL
                             string entity_xml = item_records[0];
                             entity.SetData(entity.ItemRecPath, entity_xml);
                             // 2020/4/13
-                            UpdateEntityXml("all", entity.UID, entity_xml);
+                            l_UpdateEntityXml("all", entity.UID, entity_xml);
                             updates.Add(entity);
                         }
 
