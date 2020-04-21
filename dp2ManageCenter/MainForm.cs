@@ -5418,5 +5418,12 @@ MessageBoxDefaultButton.Button2);
             form.Font = this.Font;
             form.Show(this);
         }
+
+        private void ToolStripMenuItem_chat_Click(object sender, EventArgs e)
+        {
+            ChatForm dlg = new ChatForm();
+            dlg.Font = this.Font;
+            dlg.Show(this);
+        }
     }
 }

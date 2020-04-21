@@ -137,6 +137,13 @@
     <Compile Include="MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Message\ChatForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Message\ChatForm.Designer.cs">
+      <DependentUpon>ChatForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Message\ConnectionPool.cs" />
     <Compile Include="Message\MessageAccountForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -164,6 +171,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Message\ChatForm.resx">
+      <DependentUpon>ChatForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Message\MessageAccountForm.resx">
       <DependentUpon>MessageAccountForm.cs</DependentUpon>

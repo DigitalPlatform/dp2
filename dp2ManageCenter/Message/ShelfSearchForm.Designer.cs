@@ -39,7 +39,7 @@
             this.label2 = new System.Windows.Forms.Label();
             this.comboBox_query_myAccount = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
-            this.listView_records = new System.Windows.Forms.ListView();
+            this.listView_records = new dp2ManageCenter.Message.DoubleBufferdListView();
             this.columnHeader_id = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_pii = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_action = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -180,6 +180,7 @@
             this.listView_records.HideSelection = false;
             this.listView_records.Location = new System.Drawing.Point(13, 221);
             this.listView_records.Name = "listView_records";
+            this.listView_records.ShowItemToolTips = true;
             this.listView_records.Size = new System.Drawing.Size(883, 326);
             this.listView_records.TabIndex = 1;
             this.listView_records.UseCompatibleStateImageBehavior = false;
@@ -264,7 +265,7 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.ComboBox comboBox_query_matchStyle;
         private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.ListView listView_records;
+        private DoubleBufferdListView listView_records;
         private System.Windows.Forms.ColumnHeader columnHeader_id;
         private System.Windows.Forms.ColumnHeader columnHeader_pii;
         private System.Windows.Forms.ColumnHeader columnHeader_action;

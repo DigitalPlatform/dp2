@@ -76,6 +76,7 @@
             this.listView_accounts.TabIndex = 4;
             this.listView_accounts.UseCompatibleStateImageBehavior = false;
             this.listView_accounts.View = System.Windows.Forms.View.Details;
+            this.listView_accounts.SelectedIndexChanged += new System.EventHandler(this.listView_accounts_SelectedIndexChanged);
             this.listView_accounts.DoubleClick += new System.EventHandler(this.listView_accounts_DoubleClick);
             this.listView_accounts.MouseUp += new System.Windows.Forms.MouseEventHandler(this.listView_accounts_MouseUp);
             // 

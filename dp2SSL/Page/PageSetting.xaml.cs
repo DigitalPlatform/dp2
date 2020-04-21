@@ -252,6 +252,9 @@ namespace dp2SSL
             _ = App.CurrentApp.ConnectMessageServerAsync();
         }
 
+        const string dp2library_base_version = "3.27";
+        const string fingerprintcenter_base_version = "2.1";
+
         public static NormalResult CheckServerUID()
         {
             // 如果没有配置 dp2library URL 则不检查
@@ -292,9 +295,9 @@ namespace dp2SSL
 
             // 检查 dp2library 版本号
             if (App.Function == "智能书柜"
-                && StringUtil.CompareVersion(version, "3.27") < 0)
+                && StringUtil.CompareVersion(version, dp2library_base_version) < 0)
             {
-                errors.Add($"智能书柜功能要求连接的 dp2library 服务器版本在 3.27 以上(但当前是 {version})");
+                errors.Add($"智能书柜功能要求连接的 dp2library 服务器版本在 {dp2library_base_version} 以上(但当前是 {version})");
             }
 
             // 如果没有配置 指纹中心 URL 则不检查
@@ -307,7 +310,7 @@ namespace dp2SSL
                     goto SKIP1;
                 }
 
-                if (StringUtil.CompareVersion(version_result.Version, "2.1") < 0)
+                if (StringUtil.CompareVersion(version_result.Version, fingerprintcenter_base_version) < 0)
                 {
                     // 版本太低，无法进行 UID 检查
                     goto SKIP1;

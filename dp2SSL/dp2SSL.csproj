@@ -36,7 +36,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>46</ApplicationRevision>
+    <ApplicationRevision>48</ApplicationRevision>
     <ApplicationVersion>1.4.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -494,12 +494,13 @@
     <Compile Include="LibraryChannelUtil.cs" />
     <Compile Include="ManagerBase.cs" />
     <Compile Include="Models\BiblioCacheContext.cs" />
-    <Compile Include="Models\DatabaseModels.cs" />
+    <Compile Include="Models\RequestContext.cs" />
     <Compile Include="Models\DelayAction.cs" />
     <Compile Include="Models\Door.cs" />
     <Compile Include="Models\DoorMonitor.cs" />
     <Compile Include="Models\MessageDocument.cs" />
     <Compile Include="Models\Operation.cs" />
+    <Compile Include="Models\ResultsetContext.cs" />
     <Compile Include="Models\ShelfData.cs" />
     <Compile Include="Models\SpeakList.cs" />
     <Compile Include="Models\SubmitDocument.cs" />

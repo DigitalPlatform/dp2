@@ -4481,7 +4481,7 @@ Stack:
         {
             using (var releaser = await _databaseLimit.EnterAsync())
             {
-                using (var context = new MyContext())
+                using (var context = new RequestContext())
                 {
                     context.Database.EnsureCreated();
                     var items = context.Requests.Where(o => o.State != "sync" && o.State != "dontsync")
@@ -4497,7 +4497,7 @@ Stack:
         {
             using (var releaser = await _databaseLimit.EnterAsync())
             {
-                using (var context = new MyContext())
+                using (var context = new RequestContext())
                 {
                     var item = context.Requests.FirstOrDefault(o => o.ID == id);
                     item.State = action.State;
@@ -4517,7 +4517,7 @@ Stack:
             {
                 using (var releaser = await _databaseLimit.EnterAsync())
                 {
-                    using (var context = new MyContext())
+                    using (var context = new RequestContext())
                     {
                         context.Database.EnsureCreated();
 
@@ -4554,7 +4554,7 @@ Stack:
         {
             using (var releaser = await _databaseLimit.EnterAsync())
             {
-                using (var context = new MyContext())
+                using (var context = new RequestContext())
                 {
                     context.Database.EnsureCreated();
                     foreach (var pii in piis)

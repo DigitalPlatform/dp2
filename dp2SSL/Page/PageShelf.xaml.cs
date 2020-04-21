@@ -265,7 +265,7 @@ namespace dp2SSL
             //    Welcome();
         }
 
-        object _syncRoot_save = new object();
+        // object _syncRoot_save = new object();
 
         // 门状态变化。从这里触发提交
 #pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
@@ -283,6 +283,7 @@ namespace dp2SSL
 
             if (e.NewState == "close")
             {
+                List<ActionInfo> actions = null;
                 // 2019/12/15
                 // 补做一次 inventory，确保不会漏掉 RFID 变动信息
                 //WpfClientInfo.WriteInfoLog($"++incWaiting() door '{e.Door.Name}' state changed");
@@ -298,6 +299,10 @@ namespace dp2SSL
                     });
                     */
                     var result = await ShelfData.RefreshInventoryAsync(e.Door);
+
+                    // 2020/4/21 把这两句移动到 try 范围内
+                    SaveDoorActions(e.Door, true);
+                    actions = ShelfData.PullActions();
                 }
                 finally
                 {
@@ -305,9 +310,10 @@ namespace dp2SSL
                     //WpfClientInfo.WriteInfoLog($"--decWaiting() door '{e.Door.Name}' state changed");
                 }
 
-                lock (_syncRoot_save)
-                {
-                    SaveDoorActions(e.Door, true);
+#if NO
+                //lock (_syncRoot_save)
+                //{
+                SaveDoorActions(e.Door, true);
 
                     /*
                     // testing
@@ -317,10 +323,11 @@ namespace dp2SSL
                     */
 
                     // e.Door.Operator = null; // 清掉门上的操作者名字
-                }
+                //}
+#endif
 
                 // 注: 调用完成后门控件上的 +- 数字才会消失
-                var task = DoRequestAsync(ShelfData.PullActions(), "");
+                var task = DoRequestAsync(actions, "");
 
                 /*
                 // testing
@@ -572,10 +579,10 @@ namespace dp2SSL
                 DisplayError(ref progress, message, color);
         }
 
+
         // 点门控件触发开门
-#pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:避免使用 Async Void 方法", Justification = "<挂起>")]
         private async void DoorControl_OpenDoor(object sender, OpenDoorEventArgs e)
-#pragma warning restore VSTHRD100 // 避免使用 Async Void 方法
         {
             // 观察图书详情
             if (string.IsNullOrEmpty(e.ButtonName) == false)
@@ -2381,7 +2388,7 @@ namespace dp2SSL
             }
         }
 
-        #region patron 分类报错机制
+#region patron 分类报错机制
 
         // 错误类别 --> 错误字符串
         // 错误类别有：rfid fingerprint getreaderinfo
@@ -2401,7 +2408,7 @@ namespace dp2SSL
             }
         }
 
-        #endregion
+#endregion
 
         bool _visiblityChanged = false;
 
@@ -2995,7 +3002,7 @@ namespace dp2SSL
             return text.ToString();
         }
 
-        #region 延迟清除读者信息
+#region 延迟清除读者信息
 
         DelayAction _delayClearPatronTask = null;
 
@@ -3056,9 +3063,9 @@ namespace dp2SSL
             }
         }
 
-        #endregion
+#endregion
 
-        #region 模拟柜门灯亮灭
+#region 模拟柜门灯亮灭
 
         public void SimulateLamp(bool on)
         {
@@ -3071,9 +3078,9 @@ namespace dp2SSL
             }));
         }
 
-        #endregion
+#endregion
 
-        #region 人脸识别功能
+#region 人脸识别功能
 
         bool _stopVideo = false;
 
@@ -3278,7 +3285,7 @@ namespace dp2SSL
             }
         }
 
-        #endregion
+#endregion
 
         private void ClearPatron_Click(object sender, RoutedEventArgs e)
         {
@@ -3306,6 +3313,7 @@ namespace dp2SSL
 
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:避免使用 Async Void 方法", Justification = "<挂起>")]
         private async void CloseRF_Click(object sender, RoutedEventArgs e)
         {
             var result = await ShelfData.SelectAntennaAsync();
@@ -3355,7 +3363,7 @@ namespace dp2SSL
 
 #if REMOVED
 
-        #region 绑定和解绑读者功能
+#region 绑定和解绑读者功能
 
 #pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
         private async void bindPatronCard_Click(object sender, RoutedEventArgs e)
@@ -3566,7 +3574,7 @@ uid);
             return new NormalResult { Value = 0 };
         }
 
-        #endregion
+#endregion
 
 #endif
     }
