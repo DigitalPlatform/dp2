@@ -537,6 +537,26 @@ namespace dp2SSL
             }));
         }
 
+        /*
+说明: 由于未经处理的异常，进程终止。
+异常信息: System.NotSupportedException
+   在 System.Windows.Data.CollectionView.OnCollectionChanged(System.Object, System.Collections.Specialized.NotifyCollectionChangedEventArgs)
+   在 System.Collections.ObjectModel.ObservableCollection`1[[System.__Canon, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]].OnCollectionChanged(System.Collections.Specialized.NotifyCollectionChangedEventArgs)
+   在 System.Collections.ObjectModel.ObservableCollection`1[[System.__Canon, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]].InsertItem(Int32, System.__Canon)
+   在 dp2SSL.DoorItem.Update(dp2SSL.EntityCollection, System.Collections.Generic.List`1<dp2SSL.Entity>)
+   在 dp2SSL.DoorItem.DisplayCount(System.Collections.Generic.List`1<dp2SSL.Entity>, System.Collections.Generic.List`1<dp2SSL.Entity>, System.Collections.Generic.List`1<dp2SSL.Entity>, System.Collections.Generic.List`1<dp2SSL.Entity>, System.Collections.Generic.List`1<dp2SSL.DoorItem>)
+   在 dp2SSL.ShelfData.l_RefreshCount()
+   在 dp2SSL.ShelfData+<ChangeEntitiesAsync>d__118.MoveNext()
+   在 System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   在 System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(System.Threading.Tasks.Task)
+   在 System.Runtime.CompilerServices.TaskAwaiter.GetResult()
+   在 dp2SSL.PageShelf+<CurrentApp_NewTagChanged>d__48.MoveNext()
+   在 System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   在 System.Threading.ExecutionContext.RunInternal(System.Threading.ExecutionContext, System.Threading.ContextCallback, System.Object, Boolean)
+   在 System.Threading.ExecutionContext.Run(System.Threading.ExecutionContext, System.Threading.ContextCallback, System.Object, Boolean)
+   在 System.Threading.QueueUserWorkItemCallback.System.Threading.IThreadPoolWorkItem.ExecuteWorkItem()
+   在 System.Threading.ThreadPoolWorkQueue.Dispatch()
+   * */
         // 统计各种计数，然后刷新到 DoorItem 中
         public static void DisplayCount(List<Entity> entities,
             List<Entity> adds,
@@ -579,13 +599,39 @@ namespace dp2SSL
                 });
                 */
                 bool bChanged = false;
-                if (Update(door._allEntities, count) == true
+
+                App.Invoke(new Action(() =>
+                {
+                    if (Update(door._allEntities, count) == true
                 || Update(door._removeEntities, remove) == true
                 || Update(door._addEntities, add) == true
                 || Update(door._errorEntities, error) == true)
+                    {
+                        bChanged = true;
+                    }
+                    /*
+                }));
+
+
+
+                App.Invoke(new Action(() =>
                 {
-                    bChanged = true;
-                }
+                */
+
+                    // 更新 entities
+                    // TODO: 异步填充
+                    door.Count = count.Count;
+                    door.Add = add.Count;
+                    door.Remove = remove.Count;
+                    door.ErrorCount = error.Count;
+                    /*
+                    TextBlock block = (TextBlock)door.Button.GetValue(Button.ContentProperty);
+                    SetBlockText(block, null,
+                        count.Count.ToString(),
+                        add.Count.ToString(),
+                        remove.Count.ToString());
+                        */
+                }));
 
                 if (bChanged)
                 {
@@ -605,27 +651,13 @@ namespace dp2SSL
                         }
                     });
                 }
-
-                App.Invoke(new Action(() =>
-                {
-                    // 更新 entities
-                    // TODO: 异步填充
-                    door.Count = count.Count;
-                    door.Add = add.Count;
-                    door.Remove = remove.Count;
-                    door.ErrorCount = error.Count;
-                    /*
-                    TextBlock block = (TextBlock)door.Button.GetValue(Button.ContentProperty);
-                    SetBlockText(block, null,
-                        count.Count.ToString(),
-                        add.Count.ToString(),
-                        remove.Count.ToString());
-                        */
-                }));
             }
         }
 
         // 根据 items 集合完整替换更新 collection 集合内容
+        // 注意，本函数因为要修改 ObservationCollection，所以应该在界面线程内执行
+        // ... You need to switch context back into the UI thread when you access the observable collection ...
+        // https://stackoverflow.com/questions/12110740/collectionview-notsupportedexception-after-checking-on-dispatcher-currentdispatc
         static bool Update(EntityCollection collection, List<Entity> items)
         {
             bool changed = false;
@@ -633,7 +665,7 @@ namespace dp2SSL
             // 添加 items 中多出来的对象
             foreach (var item in items)
             {
-                // TODO: 用 UID 来搜索
+                // 用 UID 来搜索
                 var found = collection.FindEntityByUID(item.UID);
                 if (found == null)
                 {

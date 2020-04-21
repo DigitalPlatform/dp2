@@ -79,6 +79,7 @@
             this.columnHeader8 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.tabPage_history = new System.Windows.Forms.TabPage();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
+            this.ToolStripMenuItem_chat = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.tabControl_main.SuspendLayout();
@@ -228,7 +229,8 @@
             this.toolStripMenuItem_message.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.ToolStripMenuItem_searchShelf,
             this.toolStripSeparator3,
-            this.ToolStripMenuItem_messageAccounts});
+            this.ToolStripMenuItem_messageAccounts,
+            this.ToolStripMenuItem_chat});
             this.toolStripMenuItem_message.Name = "toolStripMenuItem_message";
             this.toolStripMenuItem_message.Size = new System.Drawing.Size(72, 33);
             this.toolStripMenuItem_message.Text = "消息";
@@ -536,6 +538,13 @@
             this.webBrowser1.Size = new System.Drawing.Size(962, 450);
             this.webBrowser1.TabIndex = 3;
             // 
+            // ToolStripMenuItem_chat
+            // 
+            this.ToolStripMenuItem_chat.Name = "ToolStripMenuItem_chat";
+            this.ToolStripMenuItem_chat.Size = new System.Drawing.Size(315, 40);
+            this.ToolStripMenuItem_chat.Text = "聊天";
+            this.ToolStripMenuItem_chat.Click += new System.EventHandler(this.ToolStripMenuItem_chat_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(13F, 28F);
@@ -625,6 +634,7 @@
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_searchShelf;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_messageAccounts;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_chat;
     }
 }
 

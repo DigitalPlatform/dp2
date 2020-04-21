@@ -24,6 +24,10 @@ namespace dp2ManageCenter.Message
         // 配置文件名
         // public string CfgFileName { get; set; }
 
+        public string Mode { get; set; }    // select/空
+
+        public Account SelectedAccount { get; set; }
+
         public MessageAccountForm()
         {
             InitializeComponent();
@@ -40,6 +44,11 @@ namespace dp2ManageCenter.Message
         private void MessageAccountForm_Load(object sender, EventArgs e)
         {
             FillList();
+
+            if (this.Mode == "select")
+            {
+                listView_accounts_SelectedIndexChanged(sender, e);
+            }
         }
 
         private void MessageAccountForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -273,6 +282,22 @@ namespace dp2ManageCenter.Message
         private void listView_accounts_DoubleClick(object sender, EventArgs e)
         {
             MenuItem_modifyAccount_Click(sender, e);
+        }
+
+        private void listView_accounts_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (this.listView_accounts.SelectedItems.Count != 1)
+            {
+                this.SelectedAccount = null;
+                if (this.Mode == "select")
+                    this.button_OK.Enabled = false;
+            }
+            else
+            {
+                this.SelectedAccount = this.listView_accounts.SelectedItems[0].Tag as Account;
+                if (this.Mode == "select")
+                    this.button_OK.Enabled = true;
+            }
         }
     }
 

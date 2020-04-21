@@ -428,7 +428,7 @@ IList<MessageRecord> messages)
                 // id=xxx(-n) 表示从指定 ID 位置开始向前(时间靠前)看至多 n 条记录
                 // TODO: 实现 state=xxx,xxx 操作。可以根据记录状态查看记录
 
-                using (var context = new MyContext())
+                using (var context = new RequestContext())
                 {
                     context.Database.EnsureCreated();   // 2020/4/1
 
@@ -471,7 +471,7 @@ IList<MessageRecord> messages)
 
             // TODO: 用一段文字描述这一册的总体状态。特别是是否同步成功，本地库最新状态和 dp2library 一端是否吻合
 
-            using (var context = new MyContext())
+            using (var context = new RequestContext())
             {
                 // 关于这个 PII 的最新 10 操作
                 var items = context.Requests.Where(o => o.PII == param)
@@ -515,7 +515,7 @@ IList<MessageRecord> messages)
 
                 int id = Convert.ToInt32(id_string);
 
-                using (var context = new MyContext())
+                using (var context = new RequestContext())
                 {
                     context.Database.EnsureCreated();
 
@@ -616,7 +616,7 @@ IList<MessageRecord> messages)
         }
 
         // 详细的格式
-        class DisplayRequestItem
+        public class DisplayRequestItem
         {
             public int ID { get; set; }
 
@@ -627,6 +627,8 @@ IList<MessageRecord> messages)
             public DateTime OperTime { get; set; }  // 操作时间
             public string State { get; set; }   // 状态。sync/commerror/normalerror/空
                                                 // 表示是否完成同步，还是正在出错重试同步阶段，还是从未同步过
+
+            public string SyncErrorCode { get; set; }
             public string SyncErrorInfo { get; set; }   // 最近一次同步操作的报错信息
             public int SyncCount { get; set; }
 
@@ -648,6 +650,7 @@ IList<MessageRecord> messages)
                     Action = item.Action,
                     OperTime = item.OperTime,
                     State = item.State,
+                    SyncErrorCode = item.SyncErrorCode,
                     SyncErrorInfo = item.SyncErrorInfo,
                     SyncCount = item.SyncCount,
                     Operator = JsonConvert.DeserializeObject<Operator>(item.OperatorString),
@@ -759,10 +762,15 @@ IList<MessageRecord> messages)
         }
 
         // https://eval-expression.net/linq-dynamic
+        // parameters:
+        //      request.UseList 为一个逗号间隔的检索途径列表。检索途径可以用 State/...
+        //      request.MatchStyle 为 left/right/middle/exact 之一。缺省为 middle
         static string BuildQuery(SearchRequest request)
         {
             if (string.IsNullOrEmpty(request.QueryWord))
                 return "true";
+
+            string queryWordString = request.QueryWord.Replace("\"", "\\\"");
 
             StringBuilder text = new StringBuilder();
             List<string> uses = StringUtil.SplitList(request.UseList);
@@ -772,17 +780,102 @@ IList<MessageRecord> messages)
                 //string s = "";
                 //s.EndsWith()
                 if (request.MatchStyle == "left")
-                    where_list.Add($" x.{use}.StartsWith(\"{request.QueryWord}\") ");
+                    where_list.Add($" x.{use}.StartsWith(\"{queryWordString}\") ");
                 else if (request.MatchStyle == "right")
-                    where_list.Add($" x.{use}.EndsWith(\"{request.QueryWord}\") ");
+                    where_list.Add($" x.{use}.EndsWith(\"{queryWordString}\") ");
                 else if (request.MatchStyle == "exact")
-                    where_list.Add($" x.{use} == \"{request.QueryWord}\" ");
+                    where_list.Add($" x.{use} == \"{queryWordString}\" ");
                 else // if (request.MatchStyle == "middle")
-                    where_list.Add($" x.{use}.IndexOf(\"{request.QueryWord}\") != -1 ");
+                    where_list.Add($" x.{use}.IndexOf(\"{queryWordString}\") != -1 ");
             }
 
             text.Append(StringUtil.MakePathList(where_list, "||"));
             return text.ToString();
+        }
+
+        delegate void delegate_process(RequestItem item);
+
+        // 遍历结果集内指定范围的记录
+        // 按照 ID 从小到大遍历
+        // parameters:
+        //      length  本次要获得的最大记录数。-1 表示尽可能多
+        static void ForEach(string resultsetName,
+            int start,
+            int length,
+            delegate_process func_process)
+        {
+            using (var context = new ResultsetContext())
+            using (var mycontext = new RequestContext())
+            {
+                int count = 0;
+                foreach (var item in context.Items
+                    .Where(o => o.ResultsetName == resultsetName)
+                    .OrderBy(o => o.ID)
+                    .Skip(start))
+                {
+                    if (length != -1 && count >= length)
+                        break;
+                    var request = mycontext.Requests.Where(o => o.ID == item.ID).FirstOrDefault();
+                    func_process(request);
+                    count++;
+                }
+            }
+        }
+
+        // 创建一个结果集
+        static async Task CreateResultsetAsync(IOrderedQueryable<RequestItem> result,
+            string resultsetName)
+        {
+            using (var context = new ResultsetContext())
+            {
+                context.Database.EnsureCreated();
+                context.Items.RemoveRange(context.Items.Where(o => o.ResultsetName == resultsetName));
+
+                foreach (var item in result)
+                {
+                    context.Items.Add(new ResultsetItem
+                    {
+                        ResultsetName = resultsetName,
+                        ID = item.ID
+                    });
+                }
+                await context.SaveChangesAsync();
+            }
+        }
+
+        // 删除一个结果集
+        static async Task DeleteResultsetAsync(string resultsetName)
+        {
+            using (var context = new ResultsetContext())
+            {
+                context.Database.EnsureCreated();
+                context.Items.RemoveRange(context.Items.Where(o => o.ResultsetName == resultsetName));
+                await context.SaveChangesAsync();
+            }
+        }
+
+        public static async Task DeleteAllResultsetAsync()
+        {
+            try
+            {
+                using (var context = new ResultsetContext())
+                {
+                    context.Database.EnsureDeleted();
+                    await context.SaveChangesAsync();
+                }
+            }
+            catch(Exception ex)
+            {
+                WpfClientInfo.WriteErrorLog($"启动时删除全部结果集出现异常: {ExceptionUtil.GetDebugText(ex)}");
+            }
+        }
+
+        static int GetResultsetLength(string resultsetName)
+        {
+            using (var context = new ResultsetContext())
+            {
+                return context.Items.Where(o => o.ResultsetName == resultsetName).Count();
+            }
         }
 
         // TODO: 结果集用 ID 数组表示? 早期可只支持 default 这一个结果集
@@ -807,11 +900,33 @@ IList<MessageRecord> messages)
                 if (searchParam.QueryWord == "!getResult")
                 {
                     // lRet = -1;
+                    ForEach(strResultSetName,
+                        (int)searchParam.Start,
+                        count,
+                        item =>
+                        {
+                            records.Add(new Record
+                            {
+                                RecPath = item.ID.ToString(),
+                                Format = "JSON",
+                                Data = DisplayRequestItem.GetDisplayString(item),
+                                Timestamp = null
+                            });
+                        });
+                    var result = await TryResponseSearchAsync(
+searchParam.TaskID,
+GetResultsetLength(strResultSetName),
+searchParam.Start,
+"", // libraryUID,
+records,
+"", // errorInfo,
+"", // errorCode,
+100);
                 }
                 else
                 {
                     // TODO: .Operation == "searchBiblio"
-                    using (var context = new MyContext())
+                    using (var context = new RequestContext())
                     {
                         // https://stackoverflow.com/questions/37078256/entity-framework-building-where-clause-on-the-fly-using-expression
                         string query = BuildQuery(searchParam);
@@ -819,6 +934,12 @@ IList<MessageRecord> messages)
                         var query_result = context.Requests.WhereDynamic(x => query)
     .OrderBy(o => o.ID);
                         int result_count = query_result.Count();
+
+                        // 创建一个结果集
+                        if (result_count > 0)
+                        {
+                            await CreateResultsetAsync(query_result, strResultSetName);
+                        }
 
                         if (result_count == 0)
                         {
@@ -850,17 +971,10 @@ IList<MessageRecord> messages)
                             return;
                         }
 
+                        /*
                         var items = query_result.Skip((int)searchParam.Start)
     .Take(count)
     .ToList();
-                        /*
-                        var items = context.Requests.WhereDynamic(x => query)
-                            .OrderBy(o => o.ID)
-                            .Skip((int)searchParam.Start)
-                            .Take(count)
-                            .ToList();
-                            */
-
                         foreach (var item in items)
                         {
                             records.Add(new Record
@@ -871,6 +985,21 @@ IList<MessageRecord> messages)
                                 Timestamp = null
                             });
                         }
+                        */
+                        ForEach(strResultSetName,
+                            (int)searchParam.Start,
+                            count,
+                            item =>
+                            {
+                                records.Add(new Record
+                                {
+                                    RecPath = item.ID.ToString(),
+                                    Format = "JSON",
+                                    Data = DisplayRequestItem.GetDisplayString(item),
+                                    Timestamp = null
+                                });
+                            });
+
                         var result = await TryResponseSearchAsync(
     searchParam.TaskID,
     result_count,

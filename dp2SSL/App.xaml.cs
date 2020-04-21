@@ -108,9 +108,8 @@ namespace dp2SSL
 
         #endregion
 
-#pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:避免使用 Async Void 方法", Justification = "<挂起>")]
         protected async override void OnStartup(StartupEventArgs e)
-#pragma warning restore VSTHRD100 // 避免使用 Async Void 方法
         {
             bool aIsNewInstance = false;
             myMutex = new Mutex(true, "{75BAF3F0-FF7F-46BB-9ACD-8FE7429BF291}", out aIsNewInstance);
@@ -231,6 +230,7 @@ namespace dp2SSL
             // 这里要等待连接完成，因为后面初始化时候需要发出点对点消息。TODO: 是否要显示一个对话框请用户等待？
             await ConnectMessageServerAsync();
 
+            await TinyServer.DeleteAllResultsetAsync();
             TinyServer.StartSendTask(_cancelRefresh.Token);
             PageShelf.TrySetMessage("我这台智能书柜启动了！");
         }
@@ -530,13 +530,22 @@ namespace dp2SSL
 
             PageShelf.TrySetMessage($"我这台智能书柜停止了哟！({e.ReasonSessionEnding})");
 
+            try
+            {
+                TinyServer.CloseConnection();
+            }
+            catch
+            {
+
+            }
+
             base.OnSessionEnding(e);
         }
 
+
         // 注：Windows 关机或者重启的时候，会触发 OnSessionEnding 事件，但不会触发 OnExit 事件
-#pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:避免使用 Async Void 方法", Justification = "<挂起>")]
         protected async override void OnExit(ExitEventArgs e)
-#pragma warning restore VSTHRD100 // 避免使用 Async Void 方法
         {
             _barcodeCapture.Stop();
             _barcodeCapture.InputLine -= _barcodeCapture_inputLine;
@@ -566,6 +575,15 @@ namespace dp2SSL
             {
                 // 如果直接发送不成功，则送入 MessageQueue 中
                 PageShelf.TrySetMessage($"我这台智能书柜退出了哟！");
+            }
+
+            try
+            {
+                TinyServer.CloseConnection();
+            }
+            catch
+            {
+
             }
 
             _cancelRefresh?.Cancel();

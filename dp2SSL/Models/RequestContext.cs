@@ -70,7 +70,7 @@ namespace dp2SSL
     }
 #endif
 
-    public class MyContext : DbContext
+    public class RequestContext : DbContext
     {
         // 滞留的请求
         public DbSet<RequestItem> Requests { get; set; }

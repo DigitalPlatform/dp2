@@ -9,18 +9,20 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using Newtonsoft.Json;
+
 using DigitalPlatform;
-using DigitalPlatform.CirculationClient;
-using DigitalPlatform.CommonControl;
 using DigitalPlatform.GUI;
-using DigitalPlatform.MessageClient;
 using DigitalPlatform.Text;
+using DigitalPlatform.CommonControl;
+using DigitalPlatform.MessageClient;
+using DigitalPlatform.CirculationClient;
 
 namespace dp2ManageCenter.Message
 {
     public partial class ShelfSearchForm : Form
     {
-        P2PConnection _connection = new P2PConnection();
+        // P2PConnection _connection = new P2PConnection();
 
         CancellationTokenSource _cancel = new CancellationTokenSource();
 
@@ -65,16 +67,17 @@ namespace dp2ManageCenter.Message
             }
         }
 
-        private async void ShelfSearchForm_Load(object sender, EventArgs e)
+        private void ShelfSearchForm_Load(object sender, EventArgs e)
         {
             FillMyAccountList();
 
             this.UiState = ClientInfo.Config.Get("shelfSearchForm", "ui_state", "");
 
+            /*
             var result = await ConnectAsync();
             if (result.Value == -1)
                 MessageBox.Show(this, result.ErrorInfo);
-
+                */
         }
 
         private void ShelfSearchForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -83,7 +86,7 @@ namespace dp2ManageCenter.Message
 
             ClientInfo.Config?.Set("shelfSearchForm", "ui_state", this.UiState);
 
-            _connection.CloseConnection();
+            // _connection.CloseConnection();
         }
 
         private void ShelfSearchForm_FormClosed(object sender, FormClosedEventArgs e)
@@ -108,6 +111,7 @@ namespace dp2ManageCenter.Message
             }
         }
 
+        /*
         async Task<NormalResult> ConnectAsync()
         {
             string userNameAndUrl = this.comboBox_query_myAccount.Text;
@@ -126,27 +130,27 @@ namespace dp2ManageCenter.Message
                 account.Password,
                 "");
         }
+        */
 
-        static Account FindAccount(List<Account> accounts,
-            string userNameAndUrl)
-        {
-            var parts = StringUtil.ParseTwoPart(userNameAndUrl, "@");
-            string userName = parts[0];
-            string serverUrl = parts[1];
-            var found = accounts.FindAll(o=>o.UserName == userName && o.ServerUrl == serverUrl);
-            if (found.Count == 0)
-                return null;
-            return found[0];
-        }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:命名样式", Justification = "<挂起>")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:避免使用 Async Void 方法", Justification = "<挂起>")]
         private async void button_search_Click(object sender, EventArgs e)
         {
             string strError = "";
 
             try
             {
+                var get_result = await ConnectionPool.GetConnectiontAsync(this.comboBox_query_myAccount.Text);
+                if (get_result.Value == -1)
+                {
+                    strError = get_result.ErrorInfo;
+                    goto ERROR1;
+                }
 
+                var connection = get_result.Connection;
+
+                string resultsetName = "default";
                 string remoteUserName = this.comboBox_query_shelfAccount.Text;
 
                 SearchRequest request = new SearchRequest(Guid.NewGuid().ToString(),
@@ -156,12 +160,12 @@ namespace dp2ManageCenter.Message
                     this.textBox_query_word.Text,
                     this.comboBox_query_from.Text,
                     this.comboBox_query_matchStyle.Text,
-                    "resultsetName",
+                    resultsetName,
                     "json",
                     -1,
                     0,
                     10);
-                var result = await _connection.SearchAsyncLite(remoteUserName,
+                var result = await connection.SearchAsyncLite(remoteUserName,
                     request,
                     TimeSpan.FromSeconds(10),
                     _cancel.Token);
@@ -175,7 +179,15 @@ namespace dp2ManageCenter.Message
                     strError = "没有命中";
                     goto ERROR1;
                 }
-                FillRecords(result.Records);
+                FillRecords(result.Records, true);
+                if (result.Records.Count < result.ResultCount)
+                {
+                    var fill_result = await FillRestRecordsAsync(
+                        connection,
+                        remoteUserName,
+                        resultsetName,
+                        result.Records.Count);
+                }
                 return;
             }
             catch (AggregateException ex)
@@ -193,18 +205,140 @@ namespace dp2ManageCenter.Message
             MessageBox.Show(this, strError);
         }
 
-        void FillRecords(List<Record> records)
+        void FillRecords(List<Record> records, bool clear_before)
         {
-            this.listView_records.Items.Clear();
+            if (clear_before)
+                this.listView_records.Items.Clear();
 
-            foreach(var record in records)
+            // this.listView_records.BeginUpdate();
+            foreach (var record in records)
             {
+                var request = JsonConvert.DeserializeObject<RequestItem>(record.Data);
+
                 ListViewItem item = new ListViewItem();
                 ListViewUtil.ChangeItemText(item, COLUMN_ID, record.RecPath);
-                ListViewUtil.ChangeItemText(item, COLUMN_ACTION, "");
+                ListViewUtil.ChangeItemText(item, COLUMN_PII, request.PII);
+                ListViewUtil.ChangeItemText(item, COLUMN_ACTION, request.Action);
+                ListViewUtil.ChangeItemText(item, COLUMN_OPERTIME, request.OperTime.ToString());
+                ListViewUtil.ChangeItemText(item, COLUMN_STATE, request.State);
+                ListViewUtil.ChangeItemText(item, COLUMN_ERRORCODE, request.SyncErrorCode);
+                ListViewUtil.ChangeItemText(item, COLUMN_ERRORINFO, request.SyncErrorInfo);
 
                 this.listView_records.Items.Add(item);
             }
+            // this.listView_records.EndUpdate();
+        }
+
+        // 继续填充余下的命中记录
+        async Task<NormalResult> FillRestRecordsAsync(
+            P2PConnection connection,
+            string remoteUserName,
+            string resultsetName,
+            int start)
+        {
+            try
+            {
+                // string remoteUserName = this.comboBox_query_shelfAccount.Text;
+                while (true)
+                {
+                    SearchRequest request = new SearchRequest(Guid.NewGuid().ToString(),
+                        null,   // loginInfo,
+                        "searchBiblio",
+                        "", // "dbNameList",
+                        "!getResult",
+                        "", // this.comboBox_query_from.Text,
+                        "", // this.comboBox_query_matchStyle.Text,
+                        resultsetName,
+                        "json",
+                        -1,
+                        start,
+                        10);
+                    var result = await connection.SearchAsyncLite(remoteUserName,
+                        request,
+                        TimeSpan.FromSeconds(10),
+                        _cancel.Token);
+                    if (result.ResultCount == -1)
+                    {
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = result.ErrorInfo
+                        };
+                    }
+                    if (result.ResultCount == 0)
+                    {
+                        // strError = "没有命中";
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = "检索没有命中结果。无法获得结果"
+                        };
+                    }
+                    if (start >= result.ResultCount)
+                        break;
+
+                    FillRecords(result.Records, false);
+                    start += result.Records.Count;
+                }
+
+                return new NormalResult();
+            }
+            catch (AggregateException ex)
+            {
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = MessageConnection.GetExceptionText(ex)
+                };
+            }
+            catch (Exception ex)
+            {
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = ex.Message
+                };
+            }
+;
+        }
+    }
+
+    public class RequestItem
+    {
+        public int ID { get; set; }
+
+        public string PII { get; set; } // PII 单独从 EntityString 中抽取出来，便于进行搜索
+
+        public string Action { get; set; }  // borrow/return/transfer
+
+        public DateTime OperTime { get; set; }  // 操作时间。这是首次操作时间，然后重试同步的时候并不改变这个时间
+        public string State { get; set; }   // 状态。sync/commerror/normalerror/空
+                                            // 表示是否完成同步，还是正在出错重试同步阶段，还是从未同步过
+        public string SyncErrorInfo { get; set; }   // 最近一次同步操作的报错信息
+        public string SyncErrorCode { get; set; }   // 最近一次同步操作的错误码
+        public int SyncCount { get; set; }
+
+        // public Operator Operator { get; set; }  // 提起请求的读者
+
+        // Operator 对象 JSON 化以后的字符串
+        public string OperatorString { get; set; }
+
+        //public Entity Entity { get; set; }
+        // Entity 对象 JSON 化以后的字符串
+        public string EntityString { get; set; }
+
+        public string TransferDirection { get; set; } // in/out 典藏移交的方向
+        public string Location { get; set; }    // 所有者馆藏地。transfer 动作会用到
+        public string CurrentShelfNo { get; set; }  // 当前架号。transfer 动作会用到
+        public string BatchNo { get; set; } // 批次号。transfer 动作会用到。建议可以用当前用户名加上日期构成
+    }
+
+    public class DoubleBufferdListView : ListView
+    {
+        protected override bool DoubleBuffered
+        {
+            get => true;
+            set => base.DoubleBuffered = true;
         }
     }
 }
