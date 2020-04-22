@@ -24,7 +24,7 @@ namespace dp2SSL
 
         static bool _cacheDbCreated = false;
 
-        static AsyncSemaphore _channelLimit = new AsyncSemaphore(1);
+        static AsyncSemaphore _channelLimit = new AsyncSemaphore(2);
 
         // 获得一个册的题名字符串
         // .Value

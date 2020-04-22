@@ -1369,10 +1369,30 @@ request).Result;
         public string type { get; set; }    // 消息类型。类型是从用途角度来说的
         public string thread { get; set; }    // 消息所从属的话题线索
 
+        // 2020/4/22
+        public string[] subjects { get; set; }   // 主题词
+
         public DateTime publishTime { get; set; } // 消息发布时间
         public DateTime expireTime { get; set; } // 消息失效时间
+
+        // 2020/4/22
+        public void CopyFrom(MessageRecord record)
+        {
+            this.id = record.id;
+            this.groups = record.groups;
+            this.creator = record.creator;
+            this.userName = record.userName;
+            this.data = record.data;
+            this.format = record.format;
+            this.type = record.type;
+            this.thread = record.thread;
+            this.subjects = record.subjects;
+            this.publishTime = record.publishTime;
+            this.expireTime = record.expireTime;
+        }
     }
 
+    /*
     public class SetMessageRequest
     {
         public string Action { get; set; }
@@ -1388,6 +1408,45 @@ request).Result;
             this.Records = records;
         }
     }
+    */
+
+    public class SetMessageRequest
+    {
+        public string TaskID { get; set; }  // 2016/11/30 新增，如果为空，表示不使用多次分批发送功能
+
+        public string Action { get; set; }
+        public string Style { get; set; }
+        public List<MessageRecord> Records { get; set; }
+
+        public SetMessageRequest()
+        {
+
+        }
+
+        public SetMessageRequest(
+            string action,
+            string style,
+            List<MessageRecord> records)
+        {
+            this.TaskID = "";
+            this.Action = action;
+            this.Style = style;
+            this.Records = records;
+        }
+
+        public SetMessageRequest(
+            string taskID,
+            string action,
+            string style,
+            List<MessageRecord> records)
+        {
+            this.TaskID = taskID;
+            this.Action = action;
+            this.Style = style;
+            this.Records = records;
+        }
+    }
+
 
     public class SetMessageResult : MessageResult
     {

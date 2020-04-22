@@ -30,6 +30,7 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ChatForm));
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+            this.toolStripButton_selectAccount = new System.Windows.Forms.ToolStripButton();
             this.splitContainer_main = new System.Windows.Forms.SplitContainer();
             this.dpTable_groups = new DigitalPlatform.CommonControl.DpTable();
             this.dpColumn_icon = new DigitalPlatform.CommonControl.DpColumn();
@@ -43,7 +44,6 @@
             this.panel_input = new System.Windows.Forms.Panel();
             this.button_send = new System.Windows.Forms.Button();
             this.textBox_input = new System.Windows.Forms.TextBox();
-            this.toolStripButton_selectAccount = new System.Windows.Forms.ToolStripButton();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_main)).BeginInit();
             this.splitContainer_main.Panel1.SuspendLayout();
@@ -66,6 +66,16 @@
             this.toolStrip1.Size = new System.Drawing.Size(1111, 38);
             this.toolStrip1.TabIndex = 0;
             this.toolStrip1.Text = "toolStrip1";
+            // 
+            // toolStripButton_selectAccount
+            // 
+            this.toolStripButton_selectAccount.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_selectAccount.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_selectAccount.Image")));
+            this.toolStripButton_selectAccount.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_selectAccount.Name = "toolStripButton_selectAccount";
+            this.toolStripButton_selectAccount.Size = new System.Drawing.Size(100, 32);
+            this.toolStripButton_selectAccount.Text = "选择账户";
+            this.toolStripButton_selectAccount.Click += new System.EventHandler(this.toolStripButton_selectAccount_Click);
             // 
             // splitContainer_main
             // 
@@ -113,6 +123,8 @@
             this.dpTable_groups.Size = new System.Drawing.Size(218, 587);
             this.dpTable_groups.TabIndex = 0;
             this.dpTable_groups.Text = "dpTable1";
+            this.dpTable_groups.SelectionChanged += new System.EventHandler(this.dpTable_groups_SelectionChanged);
+            this.dpTable_groups.MouseUp += new System.Windows.Forms.MouseEventHandler(this.dpTable_groups_MouseUp);
             // 
             // dpColumn_icon
             // 
@@ -121,6 +133,7 @@
             this.dpColumn_icon.Font = null;
             this.dpColumn_icon.ForeColor = System.Drawing.Color.Transparent;
             this.dpColumn_icon.LineAlignment = System.Drawing.StringAlignment.Near;
+            this.dpColumn_icon.Width = 10;
             // 
             // dpColumn_name
             // 
@@ -130,6 +143,7 @@
             this.dpColumn_name.ForeColor = System.Drawing.Color.Transparent;
             this.dpColumn_name.LineAlignment = System.Drawing.StringAlignment.Near;
             this.dpColumn_name.Text = "群名";
+            this.dpColumn_name.Width = 140;
             // 
             // dpColumn_newCount
             // 
@@ -139,6 +153,7 @@
             this.dpColumn_newCount.ForeColor = System.Drawing.Color.Transparent;
             this.dpColumn_newCount.LineAlignment = System.Drawing.StringAlignment.Near;
             this.dpColumn_newCount.Text = "新消息数";
+            this.dpColumn_newCount.Width = 120;
             // 
             // splitContainer_message
             // 
@@ -174,17 +189,20 @@
             this.dpTable_messages.DocumentOrgY = ((long)(0));
             this.dpTable_messages.DocumentShadowColor = System.Drawing.SystemColors.ControlDarkDark;
             this.dpTable_messages.FocusedItem = null;
+            this.dpTable_messages.FullRowSelect = true;
             this.dpTable_messages.HighlightBackColor = System.Drawing.SystemColors.Highlight;
             this.dpTable_messages.HightlightForeColor = System.Drawing.SystemColors.HighlightText;
             this.dpTable_messages.HoverBackColor = System.Drawing.SystemColors.HotTrack;
             this.dpTable_messages.InactiveHighlightBackColor = System.Drawing.SystemColors.InactiveCaption;
             this.dpTable_messages.InactiveHightlightForeColor = System.Drawing.SystemColors.InactiveCaptionText;
             this.dpTable_messages.Location = new System.Drawing.Point(0, 0);
-            this.dpTable_messages.MaxTextHeight = 57;
+            this.dpTable_messages.MaxTextHeight = 1000;
             this.dpTable_messages.Name = "dpTable_messages";
             this.dpTable_messages.Size = new System.Drawing.Size(878, 451);
             this.dpTable_messages.TabIndex = 0;
             this.dpTable_messages.Text = "dpTable1";
+            this.dpTable_messages.DoubleClick += new System.EventHandler(this.dpTable_messages_DoubleClick);
+            this.dpTable_messages.MouseUp += new System.Windows.Forms.MouseEventHandler(this.dpTable_messages_MouseUp);
             // 
             // dpColumn_sender
             // 
@@ -194,7 +212,6 @@
             this.dpColumn_sender.ForeColor = System.Drawing.Color.Transparent;
             this.dpColumn_sender.LineAlignment = System.Drawing.StringAlignment.Near;
             this.dpColumn_sender.Text = "发送者";
-            this.dpColumn_sender.Width = 160;
             // 
             // dpColumn_time
             // 
@@ -204,7 +221,7 @@
             this.dpColumn_time.ForeColor = System.Drawing.Color.Transparent;
             this.dpColumn_time.LineAlignment = System.Drawing.StringAlignment.Near;
             this.dpColumn_time.Text = "时间";
-            this.dpColumn_time.Width = 120;
+            this.dpColumn_time.Width = 80;
             // 
             // dpColumn_content
             // 
@@ -214,7 +231,7 @@
             this.dpColumn_content.ForeColor = System.Drawing.Color.Transparent;
             this.dpColumn_content.LineAlignment = System.Drawing.StringAlignment.Near;
             this.dpColumn_content.Text = "正文";
-            this.dpColumn_content.Width = 400;
+            this.dpColumn_content.Width = 600;
             // 
             // panel_input
             // 
@@ -252,16 +269,6 @@
             this.textBox_input.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.textBox_input.Size = new System.Drawing.Size(713, 112);
             this.textBox_input.TabIndex = 0;
-            // 
-            // toolStripButton_selectAccount
-            // 
-            this.toolStripButton_selectAccount.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.toolStripButton_selectAccount.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_selectAccount.Image")));
-            this.toolStripButton_selectAccount.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton_selectAccount.Name = "toolStripButton_selectAccount";
-            this.toolStripButton_selectAccount.Size = new System.Drawing.Size(100, 32);
-            this.toolStripButton_selectAccount.Text = "选择账户";
-            this.toolStripButton_selectAccount.Click += new System.EventHandler(this.toolStripButton_selectAccount_Click);
             // 
             // ChatForm
             // 
