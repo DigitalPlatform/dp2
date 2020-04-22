@@ -1,4 +1,5 @@
 ﻿using DigitalPlatform.CirculationClient;
+using DigitalPlatform.Core;
 using DigitalPlatform.Text;
 using System;
 using System.Collections.Generic;
@@ -28,6 +29,8 @@ namespace dp2ManageCenter
 
             if (StringUtil.IsDevelopMode() == false)
                 ClientInfo.PrepareCatchException();
+
+            ProgramUtil.SetDpiAwareness();
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
