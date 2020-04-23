@@ -1234,6 +1234,9 @@ namespace dp2SSL
             CancellationToken token)
         {
             var channel = App.CurrentApp.GetChannel();
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromSeconds(30);
+
             try
             {
                 long lRet = channel.SearchItem(null,
@@ -1269,6 +1272,7 @@ namespace dp2SSL
             }
             finally
             {
+                channel.Timeout = old_timeout;
                 App.CurrentApp.ReturnChannel(channel);
             }
         }
@@ -2055,6 +2059,11 @@ namespace dp2SSL
             return BitConverter.ToUInt32(bytes, 0).ToString();
         }
 
+        static string GetNowString()
+        {
+            return DateTime.Now.ToString("HH.mm.ss.ffff");
+        }
+
         public delegate void Delegate_welcome();
 
         // 填充读者信息的其他字段(第二阶段)
@@ -2066,122 +2075,121 @@ namespace dp2SSL
             Delegate_welcome func_welcome,
             bool force = false)
         {
-            // 已经填充过了
-            if (_patron.PatronName != null
-                && force == false)
-                return new NormalResult();
-
-            // 开灯
-            ShelfData.TurnLamp("~", "on");
-
-            string pii = _patron.PII;
-
-            // TODO: 判断 PII 是否为工作人员账户名
-            if (string.IsNullOrEmpty(pii) == false
-                && Operator.IsPatronBarcodeWorker(pii))
+            List<string> debug_infos = new List<string>();
+            debug_infos.Add($"进入函数时刻: {GetNowString()}");
+            _patron.Waiting = true;
+            try
             {
-                ClearBorrowedEntities();
+                // 已经填充过了
+                if (_patron.PatronName != null
+                    && force == false)
+                    return new NormalResult();
 
-                // 出现登录对话框，要求输入密码登录验证
-                var login_result = await WorkerLoginAsync(pii);
-                if (login_result.Value == -1)
+                // 开灯
+                ShelfData.TurnLamp("~", "on");
+
+                string pii = _patron.PII;
+
+                // TODO: 判断 PII 是否为工作人员账户名
+                if (string.IsNullOrEmpty(pii) == false
+                    && Operator.IsPatronBarcodeWorker(pii))
                 {
-                    PatronClear();
-                    return login_result;
+                    ClearBorrowedEntities();
+
+                    // 出现登录对话框，要求输入密码登录验证
+                    var login_result = await WorkerLoginAsync(pii);
+                    if (login_result.Value == -1)
+                    {
+                        PatronClear();
+                        return login_result;
+                    }
+                    // 成功时调用 Welcome
+                    func_welcome?.Invoke();
+                    return new NormalResult { Value = 1 };
                 }
+
+                if (string.IsNullOrEmpty(pii))
+                {
+                    if (App.CardNumberConvertMethod == "十进制")
+                        pii = HexToDecimal(_patron.UID);  // 14443A 卡的 UID
+                    else
+                        pii = _patron.UID;  // 14443A 卡的 UID
+                }
+
+                if (string.IsNullOrEmpty(pii))
+                {
+                    ClearBorrowedEntities();
+                    return new NormalResult();
+                }
+
+                // TODO: 先显示等待动画
+
+                debug_infos.Add($"开始 GetReaderInfo(): {GetNowString()}");
+
+                // return.Value:
+                //      -1  出错
+                //      0   读者记录没有找到
+                //      1   成功
+                GetReaderInfoResult result = await
+                    Task<GetReaderInfoResult>.Run(() =>
+                    {
+                        // testing
+                        // Thread.Sleep(1000 * 20);
+
+                        return GetReaderInfo(pii);
+                    });
+
+                debug_infos.Add($"结束 GetReaderInfo(): {GetNowString()}");
+
+                if (result.Value != 1)
+                {
+                    ClearBorrowedEntities();
+
+                    string error = $"读者 '{pii}': {result.ErrorInfo}";
+                    SetPatronError("getreaderinfo", error);
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = error
+                    };
+                }
+
+                SetPatronError("getreaderinfo", "");
+
+                //if (string.IsNullOrEmpty(_patron.State) == true)
+                //    OpenDoor();
+
+                // TODO: 出现一个半透明(倒计时)提示对话框，提示可以开门了。如果书柜只有一个门，则直接打开这个门？
+
+                if (force)
+                    _patron.PhotoPath = "";
+
+                debug_infos.Add($"开始 SetPatronXml(): {GetNowString()}");
+
+
+                // string old_photopath = _patron.PhotoPath;
+                App.Invoke(new Action(() =>
+                {
+                    _patron.SetPatronXml(result.RecPath, result.ReaderXml, result.Timestamp);
+                    this.patronControl.SetBorrowed(result.ReaderXml);
+                }));
+
+                debug_infos.Add($"结束 SetPatronXml(): {GetNowString()}");
+
+
                 // 成功时调用 Welcome
                 func_welcome?.Invoke();
-                return new NormalResult { Value = 1 };
-            }
 
-            if (string.IsNullOrEmpty(pii))
-            {
-                if (App.CardNumberConvertMethod == "十进制")
-                    pii = HexToDecimal(_patron.UID);  // 14443A 卡的 UID
-                else
-                    pii = _patron.UID;  // 14443A 卡的 UID
-            }
-
-            if (string.IsNullOrEmpty(pii))
-            {
-                ClearBorrowedEntities();
-                return new NormalResult();
-            }
-
-            // TODO: 先显示等待动画
-
-            // return.Value:
-            //      -1  出错
-            //      0   读者记录没有找到
-            //      1   成功
-            GetReaderInfoResult result = await
-                Task<GetReaderInfoResult>.Run(() =>
+                // 显示在借图书列表
+                List<Entity> entities = new List<Entity>();
+                foreach (Entity entity in this.patronControl.BorrowedEntities)
                 {
-                    return GetReaderInfo(pii);
-                });
-
-            if (result.Value != 1)
-            {
-                ClearBorrowedEntities();
-
-                string error = $"读者 '{pii}': {result.ErrorInfo}";
-                SetPatronError("getreaderinfo", error);
-                return new NormalResult
-                {
-                    Value = -1,
-                    ErrorInfo = error
-                };
-            }
-
-            SetPatronError("getreaderinfo", "");
-
-            //if (string.IsNullOrEmpty(_patron.State) == true)
-            //    OpenDoor();
-
-            // TODO: 出现一个半透明(倒计时)提示对话框，提示可以开门了。如果书柜只有一个门，则直接打开这个门？
-
-            if (force)
-                _patron.PhotoPath = "";
-            // string old_photopath = _patron.PhotoPath;
-            App.Invoke(new Action(() =>
-            {
-                _patron.SetPatronXml(result.RecPath, result.ReaderXml, result.Timestamp);
-                this.patronControl.SetBorrowed(result.ReaderXml);
-            }));
-
-            // 成功时调用 Welcome
-            func_welcome?.Invoke();
-
-            // 显示在借图书列表
-            List<Entity> entities = new List<Entity>();
-            foreach (Entity entity in this.patronControl.BorrowedEntities)
-            {
-                entities.Add(entity);
-            }
-            if (entities.Count > 0)
-            {
-                try
-                {
-                    BaseChannel<IRfid> channel = RfidManager.GetChannel();
-                    try
-                    {
-                        await FillBookFieldsAsync(channel, entities, new CancellationToken());
-                    }
-                    finally
-                    {
-                        RfidManager.ReturnChannel(channel);
-                    }
+                    entities.Add(entity);
                 }
-                catch (Exception ex)
+                if (entities.Count > 0)
                 {
-                    string error = $"填充读者信息时出现异常: {ex.Message}";
-                    SetGlobalError("rfid", error);
-                    return new NormalResult { Value = -1, ErrorInfo = error };
-                }
-                /*
-                // 在一个独立的线程里面刷新在借册，这样本函数可以尽早返回，从而听到欢迎的语音
-                _ = Task.Run(async () =>
-                {
+                    debug_infos.Add($"开始 FillBookFieldsAsync(): {GetNowString()}");
+
                     try
                     {
                         BaseChannel<IRfid> channel = RfidManager.GetChannel();
@@ -2198,11 +2206,36 @@ namespace dp2SSL
                     {
                         string error = $"填充读者信息时出现异常: {ex.Message}";
                         SetGlobalError("rfid", error);
-                        // return new NormalResult { Value = -1, ErrorInfo = error };
+                        return new NormalResult { Value = -1, ErrorInfo = error };
                     }
-                });
-                */
-            }
+
+                    debug_infos.Add($"结束 FillBookFieldsAsync(): {GetNowString()}");
+
+                    /*
+                    // 在一个独立的线程里面刷新在借册，这样本函数可以尽早返回，从而听到欢迎的语音
+                    _ = Task.Run(async () =>
+                    {
+                        try
+                        {
+                            BaseChannel<IRfid> channel = RfidManager.GetChannel();
+                            try
+                            {
+                                await FillBookFieldsAsync(channel, entities, new CancellationToken());
+                            }
+                            finally
+                            {
+                                RfidManager.ReturnChannel(channel);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            string error = $"填充读者信息时出现异常: {ex.Message}";
+                            SetGlobalError("rfid", error);
+                            // return new NormalResult { Value = -1, ErrorInfo = error };
+                        }
+                    });
+                    */
+                }
 #if NO
             // 装载图象
             if (old_photopath != _patron.PhotoPath)
@@ -2212,7 +2245,15 @@ namespace dp2SSL
                 });
             }
 #endif
-            return new NormalResult { Value = 1 };
+                return new NormalResult { Value = 1 };
+            }
+            finally
+            {
+                _patron.Waiting = false;
+                debug_infos.Add($"退出函数时刻: {GetNowString()}");
+
+                WpfClientInfo.WriteInfoLog($"FillPatronDetailAsync() 时间耗费情况:\r\n{StringUtil.MakePathList(debug_infos, "\r\n")}");
+            }
         }
 
         InputPasswordWindows _passwordDialog = null;

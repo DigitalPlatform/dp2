@@ -160,6 +160,8 @@ namespace dp2SSL
 
             Stream stream = new MemoryStream();
             var channel = App.CurrentApp.GetChannel();
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromSeconds(30);
             try
             {
                 long lRet = channel.GetRes(
@@ -188,6 +190,7 @@ namespace dp2SSL
             }
             finally
             {
+                channel.Timeout = old_timeout;
                 App.CurrentApp.ReturnChannel(channel);
                 if (stream != null)
                     stream.Dispose();

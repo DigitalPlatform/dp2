@@ -241,6 +241,14 @@ TaskScheduler.Default);
                     _handlers.Add(handler);
                 }
 
+                // *** setInfo
+                {
+                    var handler = HubProxy.On<SetInfoRequest>("setInfo",
+                    (param) => OnSetInfoRecieved(param)
+                    );
+                    _handlers.Add(handler);
+                }
+
                 /*
                 // *** webCall
                 {
@@ -661,6 +669,11 @@ IList<MessageRecord> messages)
                     BatchNo = item.BatchNo,
                 };
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
+            }
+
+            public static DisplayRequestItem FromDisplayString(string value)
+            {
+                return JsonConvert.DeserializeObject<DisplayRequestItem>(value);
             }
         }
 
@@ -1199,5 +1212,187 @@ strError,
         }
 
         #endregion
+
+
+        #region SetInfo() API
+
+        static void OnSetInfoRecieved(SetInfoRequest param)
+        {
+            // 单独给一个线程来执行
+            _ = Task.Run(async () => {
+                try
+                {
+                    await SetInfoAndResponse(param);
+                }
+                catch
+                {
+                    // TODO: 写入错误日志
+                }
+            });
+        }
+
+        static async Task SetInfoAndResponse(SetInfoRequest param)
+        {
+            return;
+
+#if NO
+            string strError = "";
+
+            List<DisplayRequestItem> items = new List<DisplayRequestItem>();
+            foreach (var entity in param.Entities)
+            {
+                // entity.Action; 表示要进行的操作 "change" "delete"
+                // change:fieldname1|fieldname2 表示要修改哪些字段
+                items.Add(DisplayRequestItem.FromDisplayString(entity.NewRecord.Data));
+            }
+
+            IList<Entity> results = new List<Entity>();
+
+            List<DigitalPlatform.LibraryClient.localhost.EntityInfo> entities = new List<DigitalPlatform.LibraryClient.localhost.EntityInfo>();
+            foreach (Entity entity in param.Entities)
+            {
+                entities.Add(BuildEntityInfo(entity));
+            }
+
+            try
+            {
+                LibraryChannel channel = GetChannel(param.LoginInfo);
+                try
+                {
+                    DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos = null;
+                    long lRet = 0;
+
+                    if (param.Operation == "setItemInfo")
+                        lRet = channel.SetEntities(param.BiblioRecPath,
+                             entities.ToArray(),
+                             out errorinfos,
+                             out strError);
+                    else if (param.Operation == "setOrderInfo")
+                        lRet = channel.SetOrders(param.BiblioRecPath,
+                             entities.ToArray(),
+                             out errorinfos,
+                             out strError);
+                    else if (param.Operation == "setIssueInfo")
+                        lRet = channel.SetIssues(param.BiblioRecPath,
+                             entities.ToArray(),
+                             out errorinfos,
+                             out strError);
+                    else if (param.Operation == "setCommentInfo")
+                        lRet = channel.SetComments(param.BiblioRecPath,
+                             entities.ToArray(),
+                             out errorinfos,
+                             out strError);
+                    else if (param.Operation == "setReaderInfo")
+                    {
+                        List<EntityInfo> errors = new List<EntityInfo>();
+                        foreach (EntityInfo info in entities)
+                        {
+                            string strSavedRecPath = "";
+                            string strSavedXml = "";
+                            string strExistingXml = "";
+                            byte[] baNewTimestamp = null;
+                            ErrorCodeValue kernel_errorcode;
+                            lRet = channel.SetReaderInfo(info.Action,
+                                info.NewRecPath,
+                                info.NewRecord,
+                                info.OldRecord,
+                                info.OldTimestamp,
+                                out strExistingXml,
+                                out strSavedXml,
+                                out strSavedRecPath,
+                                out baNewTimestamp,
+                                out kernel_errorcode,
+                                out strError);
+                            EntityInfo error = new EntityInfo();
+                            error.NewTimestamp = baNewTimestamp;
+                            error.NewRecPath = strSavedRecPath;
+                            error.OldRecord = strExistingXml;
+                            error.NewRecord = strSavedXml;
+                            error.ErrorCode = kernel_errorcode;
+                            if (lRet == -1)
+                                error.ErrorInfo = strError;
+                            errors.Add(error);
+                        }
+                        errorinfos = errors.ToArray();
+                    }
+                    else
+                    {
+                        strError = "无法识别的 param.Operation 值 '" + param.Operation + "'";
+                        goto ERROR1;
+                    }
+
+                    if (errorinfos != null)
+                    {
+                        foreach (DigitalPlatform.LibraryClient.localhost.EntityInfo error in errorinfos)
+                        {
+                            results.Add(BuildEntity(error));
+                        }
+                    }
+                    await ResponseSetInfo(param.TaskID,
+        lRet,
+        results,
+        strError);
+                    return;
+                }
+                finally
+                {
+                    this.ReturnChannel(channel);
+                }
+            }
+            catch (Exception ex)
+            {
+                AddErrorLine("SetInfoAndResponse() 出现异常: " + ex.Message);
+                strError = ExceptionUtil.GetDebugText(ex);
+                goto ERROR1;
+            }
+
+        ERROR1:
+            // 报错
+            await TryResponseSetInfo(
+param.TaskID,
+-1,
+results,
+strError);
+
+#endif
+        }
+
+        // 调用 server 端 ResponseSetInfo
+        // TODO: 要考虑发送失败的问题
+        public static async Task<MessageResult> ResponseSetInfo(
+            string taskID,
+            long resultValue,
+            IList<Entity> results,
+            string errorInfo)
+        {
+            return await HubProxy.Invoke<MessageResult>("ResponseSetInfo",
+taskID,
+resultValue,
+results,
+errorInfo).ConfigureAwait(false);
+        }
+
+        public static async Task TryResponseSetInfo(
+    string taskID,
+    long resultValue,
+    IList<Entity> results,
+    string errorInfo)
+        {
+            try
+            {
+                await HubProxy.Invoke<MessageResult>("ResponseSetInfo",
+    taskID,
+    resultValue,
+    results,
+    errorInfo).ConfigureAwait(false);
+            }
+            catch
+            {
+
+            }
+        }
+
+#endregion
+
     }
 }

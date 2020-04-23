@@ -1723,6 +1723,9 @@ out string strError);
             }
 
             LibraryChannel channel = App.CurrentApp.GetChannel();
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromSeconds(10);
+
             try
             {
                 ClearEntitiesError();
@@ -1948,6 +1951,7 @@ out string strError);
             }
             finally
             {
+                channel.Timeout = old_timeout;
                 App.CurrentApp.ReturnChannel(channel);
                 App.Invoke(new Action(() =>
                 {
@@ -2552,6 +2556,9 @@ out string strError);
             return Task<NormalResult>.Run(() =>
             {
                 LibraryChannel channel = App.CurrentApp.GetChannel();
+                TimeSpan old_timeout = channel.Timeout;
+                channel.Timeout = TimeSpan.FromSeconds(60);
+
                 try
                 {
                     string strClientFilePath = Path.Combine(WpfClientInfo.UserTempDir, "~photo");
@@ -2581,6 +2588,7 @@ out string strError);
                 }
                 finally
                 {
+                    channel.Timeout = old_timeout;
                     App.CurrentApp.ReturnChannel(channel);
                 }
             });

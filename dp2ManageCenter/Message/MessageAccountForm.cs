@@ -77,11 +77,18 @@ namespace dp2ManageCenter.Message
 
         public static List<Account> GetAccounts()
         {
-            string value = File.ReadAllText(MessageAccountFileName, Encoding.UTF8);
-            var accounts = JsonConvert.DeserializeObject<List<Account>>(value);
-            if (accounts == null)
-                accounts = new List<Account>();
-            return accounts;
+            try
+            {
+                string value = File.ReadAllText(MessageAccountFileName, Encoding.UTF8);
+                var accounts = JsonConvert.DeserializeObject<List<Account>>(value);
+                if (accounts == null)
+                    accounts = new List<Account>();
+                return accounts;
+            }
+            catch(FileNotFoundException ex)
+            {
+                return new List<Account>();
+            }
         }
 
         void FillList()
