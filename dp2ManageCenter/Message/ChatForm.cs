@@ -16,6 +16,7 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.MessageClient;
 using DigitalPlatform.Text;
+using System.Collections;
 
 namespace dp2ManageCenter.Message
 {
@@ -40,8 +41,11 @@ namespace dp2ManageCenter.Message
             {
                 _userNameAndUrl = value;
                 this.Text = $"聊天 {_userNameAndUrl}";
+
+                _ = AddEventAsync();
             }
         }
+
 
         public ChatForm()
         {
@@ -69,6 +73,7 @@ namespace dp2ManageCenter.Message
             this.UiState = ClientInfo.Config.Get("chat", "uiState", "");
             this.UserNameAndUrl = ClientInfo.Config.Get("chat", "userNameAndUrl", "");
             this.LoadGroups(this.UserNameAndUrl);
+            //this.LoadStartTime(this.UserNameAndUrl);
         }
 
         void SaveSettings()
@@ -76,6 +81,7 @@ namespace dp2ManageCenter.Message
             ClientInfo.Config.Set("chat", "uiState", this.UiState);
             ClientInfo.Config.Set("chat", "userNameAndUrl", this.UserNameAndUrl);
             this.SaveGroups(this.UserNameAndUrl);
+            this.SaveStartTime(this.UserNameAndUrl, this._currentGroupName);
         }
 
         public string UiState
@@ -116,6 +122,7 @@ namespace dp2ManageCenter.Message
                 AddGroupNameNewRow(name, "");
             }
 
+            // 自动选择第一个 group
             if (this.dpTable_groups.Rows.Count > 0)
                 this.dpTable_groups.SelectRange(this.dpTable_groups.Rows[0],
                     this.dpTable_groups.Rows[0]);
@@ -152,6 +159,24 @@ namespace dp2ManageCenter.Message
             return "a" + text.ToString();
         }
 
+        // 消息显示时间范围的开始时间
+        string _startDate = "";
+
+        void LoadStartTime(string userNameAndUrl, string groupName)
+        {
+            this._startDate = ClientInfo.Config.Get("startDate",
+                GetSection(userNameAndUrl) + "_" + GetSection(groupName),
+                "");
+            if (string.IsNullOrEmpty(this._startDate))
+                this._startDate = DateTime.Now.ToString("yyyy-MM-dd");
+        }
+
+        void SaveStartTime(string userNameAndUrl, string groupName)
+        {
+            ClientInfo.Config.Set("startDate",
+                GetSection(userNameAndUrl) + "_" + GetSection(groupName)
+                , this._startDate);
+        }
 
         void LoadGroups(string userNameAndUrl)
         {
@@ -181,7 +206,8 @@ namespace dp2ManageCenter.Message
 
         #endregion
 
-        private void toolStripButton_selectAccount_Click(object sender, EventArgs e)
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:避免使用 Async Void 方法", Justification = "<挂起>")]
+        private async void toolStripButton_selectAccount_Click(object sender, EventArgs e)
         {
             using (MessageAccountForm dlg = new MessageAccountForm())
             {
@@ -190,7 +216,14 @@ namespace dp2ManageCenter.Message
                 if (dlg.DialogResult == DialogResult.Cancel)
                     return;
                 var account = dlg.SelectedAccount;
+
+                this.SaveSettings();
+
                 this.UserNameAndUrl = account.UserName + "@" + account.ServerUrl;
+
+                this.LoadGroups(this.UserNameAndUrl);
+                this.LoadStartTime(this.UserNameAndUrl, _currentGroupName);
+                await LoadMessageAsync(_currentGroupName, this._startDate, "", "clearAll");
             }
         }
 
@@ -255,7 +288,10 @@ namespace dp2ManageCenter.Message
 
             if (newGroupName != _currentGroupName)
             {
+                SaveStartTime(this.UserNameAndUrl, _currentGroupName);
                 _currentGroupName = newGroupName;
+                LoadStartTime(this.UserNameAndUrl, _currentGroupName);
+
                 if (string.IsNullOrEmpty(_currentGroupName))
                 {
                     ClearMessageList();
@@ -263,8 +299,8 @@ namespace dp2ManageCenter.Message
                 }
                 else
                 {
-                    string startDate = DateTime.Now.ToString("yyyy-MM-dd");
-                    await LoadMessageAsync(_currentGroupName, startDate, "", "clearAll");
+                    // string startDate = DateTime.Now.ToString("yyyy-MM-dd");
+                    await LoadMessageAsync(_currentGroupName, this._startDate, "", "clearAll");
                 }
             }
 
@@ -310,7 +346,9 @@ namespace dp2ManageCenter.Message
 
         int _inGetMessage = 0;  // 防止因为 ConnectionStateChange 事件导致重入
 
+        // FillMessage 用到的临时变量
         int _currentIndex = -1;
+        string _currentDate = "";
 
         // 装载已经存在的消息记录
         async Task LoadMessageAsync(string strGroupName,
@@ -382,6 +420,9 @@ namespace dp2ManageCenter.Message
                         _currentIndex = 0;
                     else
                         _currentIndex = -1;
+
+                    _currentDate = strStartDate;
+
                     AddMessageDateLine(_currentIndex == -1 ? -1 : _currentIndex++, strStartDate);
 
                     CancellationToken cancel_token = new CancellationToken();
@@ -436,6 +477,100 @@ namespace dp2ManageCenter.Message
             }
         }
 
+        #region 群名有关
+
+        static bool GroupNameContains(string[] names, string name)
+        {
+            return GroupNameIndexOf(names, name) != -1;
+        }
+
+        static int GroupNameIndexOf(string[] names, string name)
+        {
+            if (names == null)
+                return -1;
+
+            int i = 0;
+            foreach (var current in names)
+            {
+                if (GroupNameEqual(current, name))
+                    return i;
+                i++;
+            }
+
+            return -1;
+        }
+
+        // 更新左侧群名列表。
+        // 增补群名，和更新名字右侧的新消息数字
+        void UpdateGroupNameList(string[] groups)
+        {
+            if (groups == null)
+                return;
+
+            // 存储发现以后剩下的名字
+            List<string> names = new List<string>(groups);
+            foreach (var row in this.dpTable_groups.Rows)
+            {
+                string name = row[COLUMN_GROUPNAME].Text;
+
+                int index = GroupNameIndexOf(names.ToArray(), name);
+                if (index != -1)
+                {
+                    if (name != _currentGroupName)
+                    {
+                        string old_value = row[COLUMN_NEWMESSAGECOUNT].Text;
+                        this.Invoke((Action)(() =>
+                        {
+                            // 注意所在线程应该为界面线程
+                            row[COLUMN_NEWMESSAGECOUNT].Text = IncValue(old_value, 1);
+                        }));
+                    }
+                    names.RemoveAt(index);    // 去掉一个发现的名字
+                }
+            }
+
+            // 剩下部分群名在列表中没有找到，需要添加到群名列表中
+            this.Invoke((Action)(() =>
+            {
+                foreach (var name in names)
+                {
+                    AddGroupNameNewRow(GetPureName(name), "1");
+                }
+            }));
+            return;
+
+            string IncValue(string old_value, int delta)
+            {
+                if (Int32.TryParse(old_value, out int count) == false)
+                    count = 0;
+                return (count + delta).ToString();
+            }
+        }
+
+        static bool GroupNameEqual(string string1, string string2)
+        {
+            string name1 = string1;
+            if (string1.IndexOf(":") != -1)
+                name1 = StringUtil.ParseTwoPart(string1, ":")[1];
+
+            string name2 = string2;
+            if (string2.IndexOf(":") != -1)
+                name2 = StringUtil.ParseTwoPart(string2, ":")[1];
+
+            return name1 == name2;
+        }
+
+        static string GetPureName(string text)
+        {
+            if (text.IndexOf(":") == -1)
+                return text;
+
+            return StringUtil.ParseTwoPart(text, ":")[1];
+        }
+
+
+        #endregion
+
         void FillMessage(
     StringBuilder cache,
     long totalCount,
@@ -470,6 +605,13 @@ namespace dp2ManageCenter.Message
                             data = cache.ToString();
                             cache.Clear();
                         }
+                    }
+
+                    string current_date = record.publishTime.ToString("yyyy-MM-dd");
+                    if (current_date != _currentDate)
+                    {
+                        AddMessageDateLine(_currentIndex == -1 ? -1 : _currentIndex++, current_date);
+                        _currentDate = current_date;
                     }
 
                     AddMessageLine(_currentIndex == -1 ? -1 : _currentIndex++, record);
@@ -580,6 +722,8 @@ namespace dp2ManageCenter.Message
             ContextMenu contextMenu = new ContextMenu();
             MenuItem menuItem = null;
 
+            // TODO: 根据选中的行是否为命令行，决定菜单文字如何提示。当只选定了命令行时，作用是减少显示消息的时间范围
+
             menuItem = new MenuItem($"从服务器删除消息 [{selected_count}] (&D)");
             menuItem.Click += new System.EventHandler(this.menu_deleteMessageFromServer_Click);
             if (selected_count == 0)
@@ -598,19 +742,119 @@ namespace dp2ManageCenter.Message
             contextMenu.MenuItems.Add(menuItem);
             */
 
-            contextMenu.Show(this.dpTable_groups, new Point(e.X, e.Y));
+            contextMenu.Show(this.dpTable_messages, new Point(e.X, e.Y));
         }
 
+        // 是否有小于集合中任何一天的情况？
+        static bool IsLittleThanAny(string current_date, List<string> dates)
+        {
+            foreach (var date in dates)
+            {
+                if (string.Compare(current_date, date) < 0)
+                    return true;
+            }
+            return false;
+        }
+
+        // 从 _startDate 中排除若干天。算法是，如果一个日期大于或者等于 _startDate，就把这个日期的后一天作为新的 _startDate
+        bool DeleteFromStartDate(List<CommandLine> commands)
+        {
+            List<string> dates = new List<string>();
+
+            bool changed = false;
+            foreach (var command in commands)
+            {
+                if (string.Compare(command.Date, this._startDate) >= 0)
+                {
+                    this._startDate = NextDate(command.Date);
+                    changed = true;
+
+                    // 视觉上删除这一天(以及以前)的全部消息行
+                    dates.Add(command.Date);
+                }
+            }
+
+            List<DpRow> delete_rows = new List<DpRow>();
+            foreach (var row in this.dpTable_messages.Rows)
+            {
+                MessageRecord message = row.Tag as MessageRecord;
+                if (message != null)
+                {
+                    string current_date = message.publishTime.ToString("yyyy-MM-dd");
+                    if (dates.IndexOf(current_date) != -1)
+                        delete_rows.Add(row);
+                    else
+                    {
+                        // 小于 dates 中任何一天的 row 也要删除
+                        if (IsLittleThanAny(current_date, dates))
+                            delete_rows.Add(row);
+                    }
+                }
+
+                CommandLine command = row.Tag as CommandLine;
+                if (command != null)
+                {
+                    if (dates.IndexOf(command.Date) != -1)
+                        delete_rows.Add(row);
+                    else
+                    {
+                        // 小于 dates 中任何一天的 row 也要删除
+                        if (IsLittleThanAny(command.Date, dates))
+                            delete_rows.Add(row);
+                    }
+                }
+            }
+
+            foreach (var row in delete_rows)
+            {
+                this.dpTable_messages.Rows.Remove(row);
+            }
+
+            return changed;
+        }
 
         // 从 dp2mserver 服务器上删除消息
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:避免使用 Async Void 方法", Justification = "<挂起>")]
         async void menu_deleteMessageFromServer_Click(object sender, EventArgs e)
         {
             string strError = "";
+
+            // .Tag --> DpRow
+            Hashtable table = new Hashtable();
+
+            List<CommandLine> commands = new List<CommandLine>();
             List<MessageRecord> messages = new List<MessageRecord>();
             foreach (var row in this.dpTable_messages.SelectedRows)
             {
-                messages.Add(row.Tag as MessageRecord);
+                CommandLine command = row.Tag as CommandLine;
+                if (command != null)
+                    commands.Add(command);
+
+                MessageRecord record = row.Tag as MessageRecord;
+                if (record != null)
+                    messages.Add(record);
+
+                table[row.Tag] = row;
+            }
+
+            if (messages.Count > 0)
+            {
+                DialogResult dialog_result = MessageBox.Show(this,
+    "确实要从服务器删除选定的 " + this.dpTable_messages.SelectedRows.ToString() + " 条消息? \r\n\r\n(警告：删除后消息无法恢复。请谨慎操作)",
+    "ChatForm",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button2);
+                if (dialog_result != DialogResult.Yes)
+                    return;
+            }
+
+            var changed = DeleteFromStartDate(commands);
+            if (changed)
+            {
+                SaveStartTime(this.UserNameAndUrl, this._currentGroupName);
+                // 重新装载?
+                // await LoadMessageAsync(_currentGroupName, this._startDate, "", "clearAll");
             }
 
             var result = await DeleteMessageAsync(messages);
@@ -620,19 +864,31 @@ namespace dp2ManageCenter.Message
                 goto ERROR1;
             }
 
-            // TODO: 把删除的消息从视觉上删除
+            // 把服务端口已经删除的消息从 列表中视觉上删除
             if (result.SucceedRecords != null)
             {
                 foreach (var record in result.SucceedRecords)
                 {
-
+                    DpRow row = table[record] as DpRow;
+                    if (row != null)
+                        this.dpTable_messages.Rows.Remove(row);
                 }
             }
 
             // 报错
             if (result.Errors != null && result.Errors.Count > 0)
             {
-
+                List<string> errors = new List<string>();
+                int i = 0;
+                foreach (var error in result.Errors)
+                {
+                    errors.Add($"{i + 1}) {error.ErrorInfo}");
+                    i++;
+                }
+                MessageDlg.Show(this,
+                    $"删除过程出错({result.Errors.Count}):\r\n" +
+                    StringUtil.MakePathList(errors, "\r\n"),
+                    "删除过程出错");
             }
             return;
         ERROR1:
@@ -692,10 +948,16 @@ namespace dp2ManageCenter.Message
                     succeeds.Add(message);
             }
 
-            return new DeleteMessageResult { Errors = errors };
+            return new DeleteMessageResult
+            {
+                Errors = errors,
+                SucceedRecords = succeeds
+            };
         }
 
+
         // 在消息行上双击。如果是命令行，则执行命令
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:避免使用 Async Void 方法", Justification = "<挂起>")]
         private async void dpTable_messages_DoubleClick(object sender, EventArgs e)
         {
             if (this.dpTable_messages.SelectedRows.Count == 1)
@@ -713,7 +975,10 @@ namespace dp2ManageCenter.Message
             // 在第一个命令行上双击，可以向前扩展装载一天的消息
             if (this.dpTable_messages.Rows.IndexOf(row) == 0)
             {
-                await LoadMessageAsync(_currentGroupName, PrevDate(line.Date), line.Date, "insertBefore");
+                this._startDate = PrevDate(line.Date);
+                this.SaveStartTime(this.UserNameAndUrl, _currentGroupName);
+
+                await LoadMessageAsync(_currentGroupName, this._startDate, line.Date, "insertBefore");
             }
         }
 
@@ -728,6 +993,98 @@ namespace dp2ManageCenter.Message
             DateTime time = DateTime.Parse(strDate);
             return time.Add(TimeSpan.FromDays(1)).ToString("yyyy-MM-dd");
         }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:避免使用 Async Void 方法", Justification = "<挂起>")]
+        private async void button_send_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            if (string.IsNullOrEmpty(this.textBox_input.Text))
+            {
+                MessageBox.Show(this, "尚未输入文字");
+                return;
+            }
+            var result = await SendMessage(_currentGroupName, this.textBox_input.Text);
+            if (result.Value == -1)
+            {
+                strError = result.ErrorInfo;
+                goto ERROR1;
+            }
+
+            // 调用成功后才把输入的文字清除
+            this.Invoke((Action)(() => this.textBox_input.Text = ""
+                ));
+            return;
+        ERROR1:
+            this.Invoke((Action)(() => MessageBox.Show(this, strError)));
+        }
+
+        async Task<NormalResult> SendMessage(string strGroupName,
+            string strText)
+        {
+            var get_result = await ConnectionPool.GetConnectiontAsync(this.UserNameAndUrl);
+            if (get_result.Value == -1)
+            {
+                return get_result;
+            }
+            P2PConnection connection = get_result.Connection;
+
+            // this.EnableControls(false);
+
+            List<MessageRecord> messages = new List<MessageRecord>();
+            MessageRecord record = new MessageRecord();
+            record.groups = new string[1] { strGroupName };
+            record.data = strText;
+            messages.Add(record);
+
+            SetMessageRequest param = new SetMessageRequest("create",
+                "",
+               messages);
+
+            var result = await connection.SetMessageAsyncLite(param);
+            if (result.Value == -1)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = result.ErrorInfo
+                };
+            return new NormalResult();
+
+
+            // this.EnableControls(true);
+        }
+
+        async Task AddEventAsync()
+        {
+            // 挂接事件
+            var get_result = await ConnectionPool.GetConnectiontAsync(this.UserNameAndUrl);
+            if (get_result.Value == -1)
+                return;
+            P2PConnection connection = get_result.Connection;
+            connection.AddMessage -= Connection_AddMessage;
+            connection.AddMessage += Connection_AddMessage;
+        }
+
+        private void Connection_AddMessage(object sender, AddMessageEventArgs e)
+        {
+            P2PConnection connection = sender as P2PConnection;
+
+            if (e.Records != null && e.Action == "create")
+            {
+                // TODO: 要 if e.Action; 更新的 action 要更新已经显示的行的内容，删除的 action 要兑现删除效果
+                foreach (var record in e.Records)
+                {
+                    UpdateGroupNameList(record.groups);
+
+                    // 忽略不是当前群组的消息
+                    if (GroupNameContains(record.groups, _currentGroupName) == false)
+                        continue;
+
+                    AddMessageLine(_currentIndex == -1 ? -1 : _currentIndex++, record);
+                }
+            }
+        }
+
 
 #if OLD_VERSION
         async Task<SetMessageResult> DeleteMessageAsync(List<MessageRecord> messages)

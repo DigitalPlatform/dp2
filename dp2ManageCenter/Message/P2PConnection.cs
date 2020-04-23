@@ -98,7 +98,6 @@ namespace dp2ManageCenter.Message
 
                 HubProxy = Connection.CreateHubProxy("MyHub");
 
-                /*
                 {
                     var handler = HubProxy.On<string, IList<MessageRecord>>("addMessage",
                         (name, messages) =>
@@ -107,6 +106,7 @@ namespace dp2ManageCenter.Message
                     _handlers.Add(handler);
                 }
 
+                /*
                 // *** search
                 {
                     var handler = HubProxy.On<SearchRequest>("search",
@@ -692,6 +692,29 @@ cancellation_token);
             return HubProxy.Invoke<MessageResult>(
                 "CancelSearch",
                 taskID);
+        }
+
+        public virtual void OnAddMessageRecieved(string action,
+IList<MessageRecord> messages)
+        {
+            AddMessageEventArgs e = new AddMessageEventArgs();
+            e.Action = action;
+            e.Records = new List<MessageRecord>();
+            e.Records.AddRange(messages);
+            this.TriggerAddMessage(this, e);
+        }
+
+        public event AddMessageEventHandler AddMessage = null;
+
+        // 触发消息通知事件
+        public virtual void TriggerAddMessage(P2PConnection connection,
+            AddMessageEventArgs e)
+        {
+            AddMessageEventHandler handler = this.AddMessage;
+            if (handler != null)
+            {
+                handler(connection, e);
+            }
         }
     }
 
