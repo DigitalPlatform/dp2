@@ -34,8 +34,8 @@ using System.Runtime.InteropServices;
 // [assembly: AssemblyVersion("1.0.*")]
 
 // https://stackoverflow.com/questions/53782085/visual-studio-assemblyversion-with-dont-work
-[assembly: AssemblyVersion("1.3.*")]
-[assembly: AssemblyFileVersion("1.3.0.0")]
+[assembly: AssemblyVersion("1.4.*")]
+[assembly: AssemblyFileVersion("1.4.0.0")]
 
 // v1.1 (2020/2/25) 获取 MD5 采用了新的任务方式。会检查 dp2library 的版本号是否为 3.23 以上
 // v1.2 (2020/2/26) 服务器管理对话框里面增加了 UID 列，新增服务器节点时会检查 UID 是否重复，重复的不允许加入
@@ -49,3 +49,4 @@ using System.Runtime.InteropServices;
 //                  修正了下载日备份文件时“移除”列表事项时任务没有停止的 bug
 //      (2020/2/29) LibraryChannelPool 里面 GetChannel() 加锁算法进行了改进。分为两个阶段加锁，第一阶段加了读锁，如果必要在第二阶段再加写锁。这样当 pool 中有闲置通道的时候，只需要加读锁就可以了，尽量不影响其他 GetChannel() 和 ReturnChannel() 的并发性能
 //                  大备份和日备份过程中，每当完成针对一个服务器的任务时，会自动释放闲置的 LibraryChannel 通道。这样能减轻 ChannelPool 执行时加锁的压力
+// V1.4 (2020/4/23) 增加点对点消息窗，和书架查询窗

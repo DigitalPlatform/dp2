@@ -254,6 +254,7 @@
             this.button_send.TabIndex = 1;
             this.button_send.Text = "发送";
             this.button_send.UseVisualStyleBackColor = true;
+            this.button_send.Click += new System.EventHandler(this.button_send_Click);
             // 
             // textBox_input
             // 
