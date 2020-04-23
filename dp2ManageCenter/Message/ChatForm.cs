@@ -8,15 +8,15 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Collections;
 
 using Newtonsoft.Json;
 
 using DigitalPlatform;
-using DigitalPlatform.CirculationClient;
+using DigitalPlatform.Text;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.MessageClient;
-using DigitalPlatform.Text;
-using System.Collections;
+using DigitalPlatform.CirculationClient;
 
 namespace dp2ManageCenter.Message
 {
@@ -145,7 +145,7 @@ namespace dp2ManageCenter.Message
         public static string GetSection(string strText)
         {
             if (string.IsNullOrEmpty(strText) == true)
-                return "";
+                return "a";
 
             StringBuilder text = new StringBuilder();
             foreach (char ch in strText)
@@ -313,7 +313,7 @@ namespace dp2ManageCenter.Message
 
         void DislayProgress(string text)
         {
-
+            this.toolStripLabel_message.Text = text;
         }
 
         // 清除群名列表中右侧的新消息数字
@@ -469,7 +469,8 @@ namespace dp2ManageCenter.Message
                     this.Invoke((Action)(() => this.DislayProgress("")));
                 }
             ERROR1:
-                this.Invoke((Action)(() => MessageBox.Show(this, strError)));
+                //this.Invoke((Action)(() => MessageBox.Show(this, strError)));
+                AddMessageErrorLine(_currentIndex == -1 ? -1 : _currentIndex++, strError);
             }
             finally
             {
@@ -702,6 +703,8 @@ namespace dp2ManageCenter.Message
             row.Add(new DpCell { Text = "error" });
             row.Add(new DpCell { Text = "" });
             row.Add(new DpCell { Text = strContent });
+            row.BackColor = Color.DarkRed;
+            row.ForeColor = Color.White;
 
             this.Invoke((Action)(() =>
             {

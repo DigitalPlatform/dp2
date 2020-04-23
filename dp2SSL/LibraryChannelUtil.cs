@@ -171,6 +171,8 @@ namespace dp2SSL
             return Task<SetReaderInfoResult>.Run(() =>
             {
                 LibraryChannel channel = App.CurrentApp.GetChannel();
+                TimeSpan old_timeout = channel.Timeout;
+                channel.Timeout = TimeSpan.FromSeconds(10);
                 try
                 {
                     long lRet = channel.SetReaderInfo(null,
@@ -207,6 +209,7 @@ namespace dp2SSL
                 }
                 finally
                 {
+                    channel.Timeout = old_timeout;
                     App.CurrentApp.ReturnChannel(channel);
                 }
             });
@@ -237,6 +240,8 @@ namespace dp2SSL
                     ErrorInfo = "dp2library 服务器 URL 尚未配置，无法获得读者信息"
                 };
             LibraryChannel channel = App.CurrentApp.GetChannel();
+            var old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromSeconds(5);  // 设置 5 秒超时，避免等待太久
             try
             {
                 long lRet = channel.GetReaderInfo(null,
@@ -279,6 +284,7 @@ namespace dp2SSL
             }
             finally
             {
+                channel.Timeout = old_timeout;
                 App.CurrentApp.ReturnChannel(channel);
             }
         }
@@ -303,6 +309,9 @@ namespace dp2SSL
                     ErrorInfo = "dp2library 服务器 URL 尚未配置，无法进行工作人员登录"
                 };
             LibraryChannel channel = App.CurrentApp.GetChannel(userName);
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromSeconds(10);
+
             try
             {
                 // -1:   出错
@@ -335,6 +344,7 @@ namespace dp2SSL
             }
             finally
             {
+                channel.Timeout = old_timeout;
                 App.CurrentApp.ReturnChannel(channel);
             }
         }
@@ -349,6 +359,9 @@ namespace dp2SSL
         {
             string strOutputInfo = "";
             LibraryChannel channel = App.CurrentApp.GetChannel();
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromSeconds(10);
+
             try
             {
                 long lRet = channel.GetSystemParameter(
@@ -367,6 +380,7 @@ out string strError);
             }
             finally
             {
+                channel.Timeout = old_timeout;
                 App.CurrentApp.ReturnChannel(channel);
             }
 

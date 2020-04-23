@@ -39,15 +39,21 @@
             this.label2 = new System.Windows.Forms.Label();
             this.comboBox_query_myAccount = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
+            this.button_search = new System.Windows.Forms.Button();
             this.listView_records = new dp2ManageCenter.Message.DoubleBufferdListView();
             this.columnHeader_id = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader_pii = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_action = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_pii = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_operTime = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_state = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_errorCode = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_errorInfo = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.button_search = new System.Windows.Forms.Button();
+            this.columnHeader_syncCount = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_syncOperTime = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_batchNo = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_toShelfNo = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_toLocation = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_transferDirection = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.panel_query.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -163,6 +169,16 @@
             this.label1.TabIndex = 0;
             this.label1.Text = "账户名";
             // 
+            // button_search
+            // 
+            this.button_search.Location = new System.Drawing.Point(732, 163);
+            this.button_search.Name = "button_search";
+            this.button_search.Size = new System.Drawing.Size(164, 41);
+            this.button_search.TabIndex = 2;
+            this.button_search.Text = "检索";
+            this.button_search.UseVisualStyleBackColor = true;
+            this.button_search.Click += new System.EventHandler(this.button_search_Click);
+            // 
             // listView_records
             // 
             this.listView_records.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -170,12 +186,18 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.listView_records.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader_id,
-            this.columnHeader_pii,
             this.columnHeader_action,
+            this.columnHeader_pii,
             this.columnHeader_operTime,
             this.columnHeader_state,
             this.columnHeader_errorCode,
-            this.columnHeader_errorInfo});
+            this.columnHeader_errorInfo,
+            this.columnHeader_syncCount,
+            this.columnHeader_syncOperTime,
+            this.columnHeader_batchNo,
+            this.columnHeader_toShelfNo,
+            this.columnHeader_toLocation,
+            this.columnHeader_transferDirection});
             this.listView_records.FullRowSelect = true;
             this.listView_records.HideSelection = false;
             this.listView_records.Location = new System.Drawing.Point(13, 221);
@@ -185,21 +207,22 @@
             this.listView_records.TabIndex = 1;
             this.listView_records.UseCompatibleStateImageBehavior = false;
             this.listView_records.View = System.Windows.Forms.View.Details;
+            this.listView_records.MouseUp += new System.Windows.Forms.MouseEventHandler(this.listView_records_MouseUp);
             // 
             // columnHeader_id
             // 
             this.columnHeader_id.Text = "ID";
             this.columnHeader_id.Width = 105;
             // 
-            // columnHeader_pii
-            // 
-            this.columnHeader_pii.Text = "PII";
-            this.columnHeader_pii.Width = 186;
-            // 
             // columnHeader_action
             // 
             this.columnHeader_action.Text = "动作";
             this.columnHeader_action.Width = 130;
+            // 
+            // columnHeader_pii
+            // 
+            this.columnHeader_pii.Text = "PII";
+            this.columnHeader_pii.Width = 186;
             // 
             // columnHeader_operTime
             // 
@@ -221,15 +244,35 @@
             this.columnHeader_errorInfo.Text = "错误信息";
             this.columnHeader_errorInfo.Width = 293;
             // 
-            // button_search
+            // columnHeader_syncCount
             // 
-            this.button_search.Location = new System.Drawing.Point(732, 163);
-            this.button_search.Name = "button_search";
-            this.button_search.Size = new System.Drawing.Size(164, 41);
-            this.button_search.TabIndex = 2;
-            this.button_search.Text = "检索";
-            this.button_search.UseVisualStyleBackColor = true;
-            this.button_search.Click += new System.EventHandler(this.button_search_Click);
+            this.columnHeader_syncCount.Text = "同步次数";
+            this.columnHeader_syncCount.Width = 100;
+            // 
+            // columnHeader_syncOperTime
+            // 
+            this.columnHeader_syncOperTime.Text = "最后同步时间";
+            this.columnHeader_syncOperTime.Width = 180;
+            // 
+            // columnHeader_batchNo
+            // 
+            this.columnHeader_batchNo.Text = "批次号";
+            this.columnHeader_batchNo.Width = 180;
+            // 
+            // columnHeader_toShelfNo
+            // 
+            this.columnHeader_toShelfNo.Text = "去向最新架位";
+            this.columnHeader_toShelfNo.Width = 180;
+            // 
+            // columnHeader_toLocation
+            // 
+            this.columnHeader_toLocation.Text = "去向永久架位";
+            this.columnHeader_toLocation.Width = 180;
+            // 
+            // columnHeader_transferDirection
+            // 
+            this.columnHeader_transferDirection.Text = "典藏移交方向";
+            this.columnHeader_transferDirection.Width = 180;
             // 
             // ShelfSearchForm
             // 
@@ -274,5 +317,11 @@
         private System.Windows.Forms.ColumnHeader columnHeader_errorCode;
         private System.Windows.Forms.ColumnHeader columnHeader_errorInfo;
         private System.Windows.Forms.Button button_search;
+        private System.Windows.Forms.ColumnHeader columnHeader_syncCount;
+        private System.Windows.Forms.ColumnHeader columnHeader_syncOperTime;
+        private System.Windows.Forms.ColumnHeader columnHeader_batchNo;
+        private System.Windows.Forms.ColumnHeader columnHeader_toShelfNo;
+        private System.Windows.Forms.ColumnHeader columnHeader_toLocation;
+        private System.Windows.Forms.ColumnHeader columnHeader_transferDirection;
     }
 }

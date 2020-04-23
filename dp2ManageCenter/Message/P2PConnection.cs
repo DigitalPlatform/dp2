@@ -572,6 +572,9 @@ request).ConfigureAwait(false);
         {
             if (records == null)
                 return;
+            if (string.IsNullOrEmpty(libraryUID) || libraryUID == "|")
+                return;
+
             foreach (Record record in records)
             {
                 record.RecPath += "@" + libraryUID;

@@ -27,12 +27,18 @@ namespace dp2ManageCenter.Message
         CancellationTokenSource _cancel = new CancellationTokenSource();
 
         const int COLUMN_ID = 0;
-        const int COLUMN_PII = 1;
-        const int COLUMN_ACTION = 2;
+        const int COLUMN_ACTION = 1;
+        const int COLUMN_PII = 2;
         const int COLUMN_OPERTIME = 3;
         const int COLUMN_STATE = 4;
         const int COLUMN_ERRORCODE = 5;
         const int COLUMN_ERRORINFO = 6;
+        const int COLUMN_SYNCCOUNT = 7;
+        const int COLUMN_SYNCOPERTIME = 8;
+        const int COLUMN_BATCHNO = 9;
+        const int COLUMN_TOSHELFNO = 10;
+        const int COLUMN_TOLOCATION = 11;
+        const int COLUMN_TRANSFERDIRECTION = 12;
 
         public ShelfSearchForm()
         {
@@ -50,6 +56,7 @@ namespace dp2ManageCenter.Message
                     this.textBox_query_word,
                     new ComboBoxText(this.comboBox_query_from),
                     new ComboBoxText(this.comboBox_query_matchStyle),
+                    this.listView_records,
                 };
                 return GuiState.GetUiState(controls);
             }
@@ -62,6 +69,7 @@ namespace dp2ManageCenter.Message
                     this.textBox_query_word,
                     new ComboBoxText(this.comboBox_query_from),
                     new ComboBoxText(this.comboBox_query_matchStyle),
+                    this.listView_records,
                 };
                 GuiState.SetUiState(controls, value);
             }
@@ -223,6 +231,12 @@ namespace dp2ManageCenter.Message
                 ListViewUtil.ChangeItemText(item, COLUMN_STATE, request.State);
                 ListViewUtil.ChangeItemText(item, COLUMN_ERRORCODE, request.SyncErrorCode);
                 ListViewUtil.ChangeItemText(item, COLUMN_ERRORINFO, request.SyncErrorInfo);
+                ListViewUtil.ChangeItemText(item, COLUMN_SYNCCOUNT, request.SyncCount.ToString());
+                ListViewUtil.ChangeItemText(item, COLUMN_SYNCOPERTIME, "");
+                ListViewUtil.ChangeItemText(item, COLUMN_BATCHNO, request.BatchNo);
+                ListViewUtil.ChangeItemText(item, COLUMN_TOSHELFNO, request.CurrentShelfNo);
+                ListViewUtil.ChangeItemText(item, COLUMN_TOLOCATION, request.Location);
+                ListViewUtil.ChangeItemText(item, COLUMN_TRANSFERDIRECTION, request.TransferDirection);
 
                 this.listView_records.Items.Add(item);
             }
@@ -299,7 +313,58 @@ namespace dp2ManageCenter.Message
                     ErrorInfo = ex.Message
                 };
             }
-;
+        }
+
+        private void listView_records_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Right)
+                return;
+
+            ContextMenu contextMenu = new ContextMenu();
+            MenuItem menuItem = null;
+
+            /*
+            menuItem = new MenuItem("全选(&A)");
+            menuItem.Tag = this.listView_operLogTasks;
+            menuItem.Click += new System.EventHandler(this.menu_selectAll_Click);
+            contextMenu.MenuItems.Add(menuItem);
+
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+            */
+
+            menuItem = new MenuItem("修改状态 [" + this.listView_records.SelectedItems.Count.ToString() + "] (&M)");
+            menuItem.Click += new System.EventHandler(this.MenuItem_modifyState_Click);
+            if (this.listView_records.SelectedItems.Count != 1)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
+
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
+
+            menuItem = new MenuItem("删除记录 [" + this.listView_records.SelectedItems.Count.ToString() + "] (&D)");
+            menuItem.Click += new System.EventHandler(this.MenuItem_deleteRecords_Click);
+            if (this.listView_records.SelectedItems.Count == 0)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
+            contextMenu.Show(this.listView_records, new Point(e.X, e.Y));
+        }
+
+        // 修改状态
+        void MenuItem_modifyState_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        // 删除记录
+        void MenuItem_deleteRecords_Click(object sender, EventArgs e)
+        {
+
         }
     }
 

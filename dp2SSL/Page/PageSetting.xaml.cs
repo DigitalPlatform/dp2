@@ -266,6 +266,9 @@ namespace dp2SSL
 
             // 获得 dp2library 服务器的 UID
             var channel = App.CurrentApp.GetChannel();
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromSeconds(10);
+
             try
             {
                 long lRet = channel.GetVersion(null,
@@ -288,6 +291,7 @@ namespace dp2SSL
             }
             finally
             {
+                channel.Timeout = old_timeout;
                 App.CurrentApp.ReturnChannel(channel);
             }
 

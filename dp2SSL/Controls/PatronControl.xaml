@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:dp2SSL"
+             xmlns:fa="http://schemas.fontawesome.io/icons/"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="400">
     <UserControl.Resources>
@@ -62,6 +63,11 @@
                         <RowDefinition Height="Auto"/>
 
                     </Grid.RowDefinitions>
+                    
+                    <fa:ImageAwesome Grid.Row="0" Grid.Column="1" Height="30" Foreground="DarkGray"
+                            Icon="Spinner" Spin="true" SpinDuration="5" 
+                                         Visibility="{Binding Path=Waiting, Converter={StaticResource VisibleIfTrueConverter}}"
+                                         VerticalAlignment="Center"/>
 
                     <Image Name="photo"  Grid.Row="0" Grid.Column="3" 
                        MaxWidth="160" MinHeight="40"
