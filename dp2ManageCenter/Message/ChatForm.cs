@@ -17,6 +17,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.MessageClient;
 using DigitalPlatform.CirculationClient;
+using System.Runtime.InteropServices;
 
 namespace dp2ManageCenter.Message
 {
@@ -687,9 +688,16 @@ namespace dp2ManageCenter.Message
             this.Invoke((Action)(() =>
             {
                 if (index == -1)
+                {
                     this.dpTable_messages.Rows.Add(row);
+
+                    if (_bVertBottom)
+                        this.dpTable_messages.EnsureVisible(row);
+                }
                 else
+                {
                     this.dpTable_messages.Rows.Insert(index, row);
+                }
             }));
         }
 
@@ -1086,6 +1094,34 @@ namespace dp2ManageCenter.Message
                     AddMessageLine(_currentIndex == -1 ? -1 : _currentIndex++, record);
                 }
             }
+        }
+
+        bool _bVertBottom = false;
+
+        private void dpTable_messages_ScrollBarTouched(object sender, ScrollBarTouchedArgs e)
+        {
+            /*
+            if (e.Action == "VertBottom")
+                _bVertBottom = true;
+            else
+                _bVertBottom = false;
+                */
+
+            if (e.Action == "VertEndScroll")
+            {
+                API.ScrollInfoStruct si = new API.ScrollInfoStruct();
+
+                si.cbSize = Marshal.SizeOf(si);
+                si.fMask = API.SIF_RANGE | API.SIF_POS | API.SIF_PAGE;
+
+                API.GetScrollInfo(this.dpTable_messages.Handle, API.SB_VERT, ref si);
+                if (si.nPos + si.nPage >= si.nMax - 1)
+                    _bVertBottom = true;
+                else
+                    _bVertBottom = false;
+            }
+
+            // DislayProgress($"e.Position={e.Action},_bVertBottom:{_bVertBottom}");
         }
 
 

@@ -2158,15 +2158,22 @@ Color.FromArgb(100, this.m_hoverBackColor)
                     return;
                 case API.WM_VSCROLL:
                     {
+                        string position = $"{API.LoWord(m.WParam.ToInt32())}";
                         int CellWidth = 100;
                         switch (API.LoWord(m.WParam.ToInt32()))
                         {
+                            case API.SB_ENDSCROLL:
+                                position = "VertEndScroll";
+                                break;
                             case API.SB_BOTTOM:
+                                position = "VertBottom";
                                 break;
                             case API.SB_TOP:
+                                position = "VertTop";
                                 break;
                             case API.SB_THUMBPOSITION:
                             case API.SB_THUMBTRACK:
+                                position = "VertThumb";
                                 this.Update();
                                 int v = API.HiWord(m.WParam.ToInt32());
                                 if (this.m_v_ratio != 1.0F)
@@ -2175,15 +2182,19 @@ Color.FromArgb(100, this.m_hoverBackColor)
                                     DocumentOrgY = -v;
                                 break;
                             case API.SB_LINEDOWN:
+                                position = "VertLineDown";
                                 DocumentOrgY -= (int)CellWidth;
                                 break;
                             case API.SB_LINEUP:
+                                position = "VertLineUp";
                                 DocumentOrgY += (int)CellWidth;
                                 break;
                             case API.SB_PAGEDOWN:
+                                position = "VertPageDown";
                                 DocumentOrgY -= Math.Max(0, this.ClientSize.Height - this.ColumnHeight);
                                 break;
                             case API.SB_PAGEUP:
+                                position = "VertPageUp";
                                 DocumentOrgY += Math.Max(0, this.ClientSize.Height - this.ColumnHeight);
                                 break;
                         }
@@ -2192,6 +2203,7 @@ Color.FromArgb(100, this.m_hoverBackColor)
                         if (this.ScrollBarTouched != null)
                         {
                             ScrollBarTouchedArgs e1 = new ScrollBarTouchedArgs();
+                            e1.Action = position;
                             this.ScrollBarTouched(this, e1);
                         }
                     }
@@ -5817,7 +5829,9 @@ this.TextHeight + cell_padding.Vertical);
     /// </summary>
     public class ScrollBarTouchedArgs : EventArgs
     {
-        public string Position = "";    // 到达什么位置
+        public string Action = "";    // 动作
+        //public long Value = 0;          // 数值
+        //public string Position = "";    // 到达什么位置
     }
 
     /// <summary>

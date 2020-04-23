@@ -31,6 +31,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ChatForm));
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripButton_selectAccount = new System.Windows.Forms.ToolStripButton();
+            this.toolStripLabel_message = new System.Windows.Forms.ToolStripLabel();
             this.splitContainer_main = new System.Windows.Forms.SplitContainer();
             this.dpTable_groups = new DigitalPlatform.CommonControl.DpTable();
             this.dpColumn_icon = new DigitalPlatform.CommonControl.DpColumn();
@@ -42,9 +43,9 @@
             this.dpColumn_time = new DigitalPlatform.CommonControl.DpColumn();
             this.dpColumn_content = new DigitalPlatform.CommonControl.DpColumn();
             this.panel_input = new System.Windows.Forms.Panel();
+            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.button_send = new System.Windows.Forms.Button();
             this.textBox_input = new System.Windows.Forms.TextBox();
-            this.toolStripLabel_message = new System.Windows.Forms.ToolStripLabel();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_main)).BeginInit();
             this.splitContainer_main.Panel1.SuspendLayout();
@@ -55,6 +56,7 @@
             this.splitContainer_message.Panel2.SuspendLayout();
             this.splitContainer_message.SuspendLayout();
             this.panel_input.SuspendLayout();
+            this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // toolStrip1
@@ -65,7 +67,7 @@
             this.toolStripLabel_message});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(1111, 44);
+            this.toolStrip1.Size = new System.Drawing.Size(1111, 38);
             this.toolStrip1.TabIndex = 0;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -75,14 +77,21 @@
             this.toolStripButton_selectAccount.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_selectAccount.Image")));
             this.toolStripButton_selectAccount.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_selectAccount.Name = "toolStripButton_selectAccount";
-            this.toolStripButton_selectAccount.Size = new System.Drawing.Size(100, 38);
+            this.toolStripButton_selectAccount.Size = new System.Drawing.Size(100, 32);
             this.toolStripButton_selectAccount.Text = "选择账户";
             this.toolStripButton_selectAccount.Click += new System.EventHandler(this.toolStripButton_selectAccount_Click);
+            // 
+            // toolStripLabel_message
+            // 
+            this.toolStripLabel_message.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.toolStripLabel_message.Name = "toolStripLabel_message";
+            this.toolStripLabel_message.Size = new System.Drawing.Size(101, 32);
+            this.toolStripLabel_message.Text = "message";
             // 
             // splitContainer_main
             // 
             this.splitContainer_main.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer_main.Location = new System.Drawing.Point(0, 44);
+            this.splitContainer_main.Location = new System.Drawing.Point(0, 38);
             this.splitContainer_main.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.splitContainer_main.Name = "splitContainer_main";
             // 
@@ -93,7 +102,7 @@
             // splitContainer_main.Panel2
             // 
             this.splitContainer_main.Panel2.Controls.Add(this.splitContainer_message);
-            this.splitContainer_main.Size = new System.Drawing.Size(1111, 581);
+            this.splitContainer_main.Size = new System.Drawing.Size(1111, 587);
             this.splitContainer_main.SplitterDistance = 218;
             this.splitContainer_main.SplitterWidth = 15;
             this.splitContainer_main.TabIndex = 5;
@@ -122,7 +131,7 @@
             this.dpTable_groups.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.dpTable_groups.MaxTextHeight = 57;
             this.dpTable_groups.Name = "dpTable_groups";
-            this.dpTable_groups.Size = new System.Drawing.Size(218, 581);
+            this.dpTable_groups.Size = new System.Drawing.Size(218, 587);
             this.dpTable_groups.TabIndex = 0;
             this.dpTable_groups.Text = "dpTable1";
             this.dpTable_groups.SelectionChanged += new System.EventHandler(this.dpTable_groups_SelectionChanged);
@@ -172,8 +181,8 @@
             // splitContainer_message.Panel2
             // 
             this.splitContainer_message.Panel2.Controls.Add(this.panel_input);
-            this.splitContainer_message.Size = new System.Drawing.Size(878, 581);
-            this.splitContainer_message.SplitterDistance = 446;
+            this.splitContainer_message.Size = new System.Drawing.Size(878, 587);
+            this.splitContainer_message.SplitterDistance = 473;
             this.splitContainer_message.SplitterWidth = 14;
             this.splitContainer_message.TabIndex = 3;
             // 
@@ -200,9 +209,10 @@
             this.dpTable_messages.Location = new System.Drawing.Point(0, 0);
             this.dpTable_messages.MaxTextHeight = 1000;
             this.dpTable_messages.Name = "dpTable_messages";
-            this.dpTable_messages.Size = new System.Drawing.Size(878, 446);
+            this.dpTable_messages.Size = new System.Drawing.Size(878, 473);
             this.dpTable_messages.TabIndex = 0;
             this.dpTable_messages.Text = "dpTable1";
+            this.dpTable_messages.ScrollBarTouched += new DigitalPlatform.CommonControl.ScrollBarTouchedEventHandler(this.dpTable_messages_ScrollBarTouched);
             this.dpTable_messages.DoubleClick += new System.EventHandler(this.dpTable_messages_DoubleClick);
             this.dpTable_messages.MouseUp += new System.Windows.Forms.MouseEventHandler(this.dpTable_messages_MouseUp);
             // 
@@ -237,19 +247,33 @@
             // 
             // panel_input
             // 
-            this.panel_input.Controls.Add(this.button_send);
-            this.panel_input.Controls.Add(this.textBox_input);
+            this.panel_input.Controls.Add(this.tableLayoutPanel1);
             this.panel_input.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel_input.Location = new System.Drawing.Point(0, 0);
             this.panel_input.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.panel_input.Name = "panel_input";
-            this.panel_input.Size = new System.Drawing.Size(878, 121);
+            this.panel_input.Size = new System.Drawing.Size(878, 100);
             this.panel_input.TabIndex = 1;
+            // 
+            // tableLayoutPanel1
+            // 
+            this.tableLayoutPanel1.ColumnCount = 2;
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel1.Controls.Add(this.button_send, 1, 0);
+            this.tableLayoutPanel1.Controls.Add(this.textBox_input, 0, 0);
+            this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
+            this.tableLayoutPanel1.RowCount = 1;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(878, 100);
+            this.tableLayoutPanel1.TabIndex = 2;
             // 
             // button_send
             // 
             this.button_send.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_send.Location = new System.Drawing.Point(735, 7);
+            this.button_send.Location = new System.Drawing.Point(729, 5);
             this.button_send.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.button_send.Name = "button_send";
             this.button_send.Size = new System.Drawing.Size(143, 40);
@@ -261,24 +285,15 @@
             // textBox_input
             // 
             this.textBox_input.AcceptsReturn = true;
-            this.textBox_input.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_input.Location = new System.Drawing.Point(7, 7);
+            this.textBox_input.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBox_input.Location = new System.Drawing.Point(6, 5);
             this.textBox_input.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.textBox_input.MinimumSize = new System.Drawing.Size(88, 4);
             this.textBox_input.Multiline = true;
             this.textBox_input.Name = "textBox_input";
             this.textBox_input.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_input.Size = new System.Drawing.Size(713, 111);
+            this.textBox_input.Size = new System.Drawing.Size(711, 90);
             this.textBox_input.TabIndex = 0;
-            // 
-            // toolStripLabel_message
-            // 
-            this.toolStripLabel_message.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.toolStripLabel_message.Name = "toolStripLabel_message";
-            this.toolStripLabel_message.Size = new System.Drawing.Size(101, 38);
-            this.toolStripLabel_message.Text = "message";
             // 
             // ChatForm
             // 
@@ -305,7 +320,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_message)).EndInit();
             this.splitContainer_message.ResumeLayout(false);
             this.panel_input.ResumeLayout(false);
-            this.panel_input.PerformLayout();
+            this.tableLayoutPanel1.ResumeLayout(false);
+            this.tableLayoutPanel1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -329,5 +345,6 @@
         private DigitalPlatform.CommonControl.DpColumn dpColumn_content;
         private System.Windows.Forms.ToolStripButton toolStripButton_selectAccount;
         private System.Windows.Forms.ToolStripLabel toolStripLabel_message;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
     }
 }
