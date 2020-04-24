@@ -5829,7 +5829,7 @@ this.TextHeight + cell_padding.Vertical);
     /// </summary>
     public class ScrollBarTouchedArgs : EventArgs
     {
-        public string Action = "";    // 动作
+        public string Action = "";    // 动作 VertEndScroll/VertBottom/VertTop/VertThumb/VertLineDown/VertLineUp/VertPageDown/VertPageUp
         //public long Value = 0;          // 数值
         //public string Position = "";    // 到达什么位置
     }

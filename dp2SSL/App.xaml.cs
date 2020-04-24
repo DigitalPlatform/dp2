@@ -1339,7 +1339,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             });
             */
 
-            Current.Dispatcher.Invoke(action);
+            Current.Dispatcher?.Invoke(action);
         }
     }
 

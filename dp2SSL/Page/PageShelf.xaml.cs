@@ -2097,7 +2097,7 @@ namespace dp2SSL
                     ClearBorrowedEntities();
 
                     // 出现登录对话框，要求输入密码登录验证
-                    var login_result = await WorkerLoginAsync(pii);
+                    var login_result = await WorkerLoginAsync(pii).ConfigureAwait(false);
                     if (login_result.Value == -1)
                     {
                         PatronClear();
@@ -2137,7 +2137,7 @@ namespace dp2SSL
                         // Thread.Sleep(1000 * 20);
 
                         return GetReaderInfo(pii);
-                    });
+                    }).ConfigureAwait(false);
 
                 debug_infos.Add($"结束 GetReaderInfo(): {GetNowString()}");
 
@@ -2188,6 +2188,7 @@ namespace dp2SSL
                 }
                 if (entities.Count > 0)
                 {
+                    /*
                     debug_infos.Add($"开始 FillBookFieldsAsync(): {GetNowString()}");
 
                     try
@@ -2210,9 +2211,10 @@ namespace dp2SSL
                     }
 
                     debug_infos.Add($"结束 FillBookFieldsAsync(): {GetNowString()}");
+                    */
 
-                    /*
                     // 在一个独立的线程里面刷新在借册，这样本函数可以尽早返回，从而听到欢迎的语音
+                    debug_infos.Add($"开始 FillBookFieldsAsync(): {GetNowString()}");
                     _ = Task.Run(async () =>
                     {
                         try
@@ -2231,10 +2233,11 @@ namespace dp2SSL
                         {
                             string error = $"填充读者信息时出现异常: {ex.Message}";
                             SetGlobalError("rfid", error);
+                            WpfClientInfo.WriteErrorLog($"填充读者信息时出现异常: {ExceptionUtil.GetDebugText(ex)}");
                             // return new NormalResult { Value = -1, ErrorInfo = error };
                         }
                     });
-                    */
+                    debug_infos.Add($"结束 FillBookFieldsAsync(): {GetNowString()}");
                 }
 #if NO
             // 装载图象

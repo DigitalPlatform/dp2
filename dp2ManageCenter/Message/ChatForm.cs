@@ -366,7 +366,7 @@ namespace dp2ManageCenter.Message
             bool bClearAll = StringUtil.IsInList("clearAll", strStyle);
             bool bInsertBefore = StringUtil.IsInList("insertBefore", strStyle);
 
-            var get_result = await ConnectionPool.GetConnectiontAsync(this.UserNameAndUrl);
+            var get_result = await ConnectionPool.OpenConnectionAsync(this.UserNameAndUrl);
             if (get_result.Value == -1)
             {
                 // TODO: 显示报错信息
@@ -777,11 +777,15 @@ namespace dp2ManageCenter.Message
             {
                 if (string.Compare(command.Date, this._startDate) >= 0)
                 {
-                    this._startDate = NextDate(command.Date);
-                    changed = true;
+                    this._startDate = NextDate(command.Date, out bool geted);
 
-                    // 视觉上删除这一天(以及以前)的全部消息行
-                    dates.Add(command.Date);
+                    if (geted == true)
+                    {
+                        changed = true;
+
+                        // 视觉上删除这一天(以及以前)的全部消息行
+                        dates.Add(command.Date);
+                    }
                 }
             }
 
@@ -851,7 +855,7 @@ namespace dp2ManageCenter.Message
             if (messages.Count > 0)
             {
                 DialogResult dialog_result = MessageBox.Show(this,
-    "确实要从服务器删除选定的 " + this.dpTable_messages.SelectedRows.ToString() + " 条消息? \r\n\r\n(警告：删除后消息无法恢复。请谨慎操作)",
+    "确实要从服务器删除选定的 " + this.dpTable_messages.SelectedRows.Count.ToString() + " 条消息? \r\n\r\n(警告：删除后消息无法恢复。请谨慎操作)",
     "ChatForm",
     MessageBoxButtons.YesNo,
     MessageBoxIcon.Question,
@@ -921,7 +925,7 @@ namespace dp2ManageCenter.Message
 
         async Task<DeleteMessageResult> DeleteMessageAsync(List<MessageRecord> messages)
         {
-            var get_result = await ConnectionPool.GetConnectiontAsync(this.UserNameAndUrl);
+            var get_result = await ConnectionPool.OpenConnectionAsync(this.UserNameAndUrl);
             if (get_result.Value == -1)
                 return new DeleteMessageResult
                 {
@@ -990,6 +994,15 @@ namespace dp2ManageCenter.Message
                 this.SaveStartTime(this.UserNameAndUrl, _currentGroupName);
 
                 await LoadMessageAsync(_currentGroupName, this._startDate, line.Date, "insertBefore");
+
+                // 清除以前的选择
+                foreach(var c in this.dpTable_messages.SelectedRows)
+                {
+                    c.Selected = false;
+                }
+                // 选择更新后的第一行
+                this.dpTable_messages.Rows[0].Selected = true;
+                // this.dpTable_messages.ClearAllSelections();
             }
         }
 
@@ -999,10 +1012,18 @@ namespace dp2ManageCenter.Message
             return time.Subtract(TimeSpan.FromDays(1)).ToString("yyyy-MM-dd");
         }
 
-        static string NextDate(string strDate)
+        static string NextDate(string strDate, out bool changed)
         {
             DateTime time = DateTime.Parse(strDate);
-            return time.Add(TimeSpan.FromDays(1)).ToString("yyyy-MM-dd");
+            DateTime next = time.Add(TimeSpan.FromDays(1));
+            // 检查一下，不让超过当前时间
+            if (next > DateTime.Now)
+            {
+                changed = false;
+                return strDate;
+            }
+            changed = true;
+            return next.ToString("yyyy-MM-dd");
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:避免使用 Async Void 方法", Justification = "<挂起>")]
@@ -1033,42 +1054,67 @@ namespace dp2ManageCenter.Message
         async Task<NormalResult> SendMessage(string strGroupName,
             string strText)
         {
-            var get_result = await ConnectionPool.GetConnectiontAsync(this.UserNameAndUrl);
-            if (get_result.Value == -1)
+            this.EnableControls(false);
+
+            try
             {
-                return get_result;
+                /*
+                var get_result = await ConnectionPool.OpenConnectionAsync(this.UserNameAndUrl);
+                if (get_result.Value == -1)
+                {
+                    return get_result;
+                }
+                P2PConnection connection = get_result.Connection;
+                */
+                P2PConnection connection = await ConnectionPool.GetConnectionAsync(this.UserNameAndUrl);
+
+
+                List<MessageRecord> messages = new List<MessageRecord>();
+                MessageRecord record = new MessageRecord();
+                record.groups = new string[1] { strGroupName };
+                record.data = strText;
+                messages.Add(record);
+
+                SetMessageRequest param = new SetMessageRequest("create",
+                    "",
+                   messages);
+
+                var result = await connection.SetMessageAsyncLite(param);
+                if (result.Value == -1)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = result.ErrorInfo
+                    };
+                return new NormalResult();
             }
-            P2PConnection connection = get_result.Connection;
-
-            // this.EnableControls(false);
-
-            List<MessageRecord> messages = new List<MessageRecord>();
-            MessageRecord record = new MessageRecord();
-            record.groups = new string[1] { strGroupName };
-            record.data = strText;
-            messages.Add(record);
-
-            SetMessageRequest param = new SetMessageRequest("create",
-                "",
-               messages);
-
-            var result = await connection.SetMessageAsyncLite(param);
-            if (result.Value == -1)
+            catch (Exception ex)
+            {
                 return new NormalResult
                 {
                     Value = -1,
-                    ErrorInfo = result.ErrorInfo
+                    ErrorInfo = ex.Message
                 };
-            return new NormalResult();
+            }
+            finally
+            {
+                this.EnableControls(true);
+            }
+        }
 
-
-            // this.EnableControls(true);
+        void EnableControls(bool bEnable)
+        {
+            this.Invoke((Action)(() =>
+            {
+                this.button_send.Enabled = bEnable;
+                this.textBox_input.Enabled = bEnable;
+            }));
         }
 
         async Task AddEventAsync()
         {
             // 挂接事件
-            var get_result = await ConnectionPool.GetConnectiontAsync(this.UserNameAndUrl);
+            var get_result = await ConnectionPool.OpenConnectionAsync(this.UserNameAndUrl);
             if (get_result.Value == -1)
                 return;
             P2PConnection connection = get_result.Connection;

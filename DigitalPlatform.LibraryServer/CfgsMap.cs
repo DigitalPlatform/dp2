@@ -40,7 +40,16 @@ namespace DigitalPlatform.LibraryServer
             catch
             {
             }
-            PathUtil.TryCreateDir(this.RootDir);
+
+            try
+            {
+                PathUtil.TryCreateDir(this.RootDir);
+            }
+            catch(Exception ex)
+            {
+                // 2020/4/24
+                throw new Exception($"重新创建目录 '{this.RootDir}' 时出现异常：{ex.Message}", ex);
+            }
         }
 
         // 清除一个本地缓存的配置文件

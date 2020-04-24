@@ -158,6 +158,8 @@ namespace dp2SSL
                 return;
             }
 
+            // TODO: 照片可以缓存到本地。每次只需要获取 timestamp 即可。如果 timestamp 和缓存的不一致再重新获取一次
+
             Stream stream = new MemoryStream();
             var channel = App.CurrentApp.GetChannel();
             TimeSpan old_timeout = channel.Timeout;
