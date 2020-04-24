@@ -4219,7 +4219,8 @@ namespace dp2SSL
                         }
                         else
                         {
-                            if (error_code == ErrorCode.ItemBarcodeNotFound)
+                            if (error_code == ErrorCode.ItemBarcodeNotFound
+                                || error_code == ErrorCode.SyncDenied)  // 2020/4/24
                                 info.State = "dontsync";
                             else
                                 info.State = "normalerror";

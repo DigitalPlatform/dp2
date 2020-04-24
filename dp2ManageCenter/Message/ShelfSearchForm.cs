@@ -140,6 +140,23 @@ namespace dp2ManageCenter.Message
         }
         */
 
+        CancellationTokenSource _cancelSearch = new CancellationTokenSource();
+
+        void EnableSearchButtons(bool bEnable)
+        {
+            this.Invoke((Action)(() =>
+            {
+                this.comboBox_query_from.Enabled = bEnable;
+                this.comboBox_query_matchStyle.Enabled = bEnable;
+                this.comboBox_query_myAccount.Enabled = bEnable;
+                this.comboBox_query_shelfAccount.Enabled = bEnable;
+                this.textBox_query_word.Enabled = bEnable;
+
+                this.button_search.Enabled = bEnable;
+                this.button_stop.Enabled = !bEnable;
+            }));
+        }
+
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:命名样式", Justification = "<挂起>")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:避免使用 Async Void 方法", Justification = "<挂起>")]
@@ -147,6 +164,10 @@ namespace dp2ManageCenter.Message
         {
             string strError = "";
 
+            _cancelSearch = new CancellationTokenSource();
+            CancellationToken token = _cancelSearch.Token;
+
+            EnableSearchButtons(false);
             try
             {
                 this.listView_records.Items.Clear();
@@ -177,8 +198,8 @@ namespace dp2ManageCenter.Message
                     10);
                 var result = await connection.SearchAsyncLite(remoteUserName,
                     request,
-                    TimeSpan.FromSeconds(10),
-                    _cancel.Token);
+                    TimeSpan.FromSeconds(60),
+                    token);
                 if (result.ResultCount == -1)
                 {
                     strError = result.ErrorInfo;
@@ -189,14 +210,15 @@ namespace dp2ManageCenter.Message
                     strError = "没有命中";
                     goto ERROR1;
                 }
-                FillRecords(result.Records, true);
+                FillRecords(result.Records, true, token);
                 if (result.Records.Count < result.ResultCount)
                 {
                     var fill_result = await FillRestRecordsAsync(
                         connection,
                         remoteUserName,
                         resultsetName,
-                        result.Records.Count);
+                        result.Records.Count,
+                        token);
                 }
                 return;
             }
@@ -210,12 +232,17 @@ namespace dp2ManageCenter.Message
                 strError = ex.Message;
                 goto ERROR1;
             }
+            finally
+            {
+                EnableSearchButtons(true);
+            }
 
         ERROR1:
             MessageBox.Show(this, strError);
         }
 
-        void FillRecords(List<Record> records, bool clear_before)
+        void FillRecords(List<Record> records, bool clear_before,
+            CancellationToken token)
         {
             if (clear_before)
                 this.listView_records.Items.Clear();
@@ -223,6 +250,9 @@ namespace dp2ManageCenter.Message
             // this.listView_records.BeginUpdate();
             foreach (var record in records)
             {
+                if (token.IsCancellationRequested)
+                    return;
+
                 var request = JsonConvert.DeserializeObject<RequestItem>(record.Data);
 
                 ListViewItem item = new ListViewItem();
@@ -296,12 +326,13 @@ namespace dp2ManageCenter.Message
             P2PConnection connection,
             string remoteUserName,
             string resultsetName,
-            int start)
+            int start,
+            CancellationToken token)
         {
             try
             {
                 // string remoteUserName = this.comboBox_query_shelfAccount.Text;
-                while (true)
+                while (token.IsCancellationRequested == false)
                 {
                     SearchRequest request = new SearchRequest(Guid.NewGuid().ToString(),
                         null,   // loginInfo,
@@ -317,8 +348,8 @@ namespace dp2ManageCenter.Message
                         10);
                     var result = await connection.SearchAsyncLite(remoteUserName,
                         request,
-                        TimeSpan.FromSeconds(10),
-                        _cancel.Token);
+                        TimeSpan.FromSeconds(60),
+                        token);
                     if (result.ResultCount == -1)
                     {
                         return new NormalResult
@@ -339,7 +370,7 @@ namespace dp2ManageCenter.Message
                     if (start >= result.ResultCount)
                         break;
 
-                    FillRecords(result.Records, false);
+                    FillRecords(result.Records, false, token);
                     start += result.Records.Count;
                 }
 
@@ -457,7 +488,7 @@ namespace dp2ManageCenter.Message
                 }
 
                 // 刷新成功修改了的行
-                foreach(var record in succeed_records)
+                foreach (var record in succeed_records)
                 {
                     if (string.IsNullOrEmpty(record))
                         continue;
@@ -493,6 +524,11 @@ namespace dp2ManageCenter.Message
         void MenuItem_deleteRecords_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void button_stop_Click(object sender, EventArgs e)
+        {
+            _cancelSearch?.Cancel();
         }
     }
 

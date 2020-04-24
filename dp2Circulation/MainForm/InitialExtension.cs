@@ -2457,7 +2457,8 @@ AppInfo.GetString("config",
                         if (nRet == -1)
                             goto END1;
 
-                        // 2008/11/29 
+                        // 2020/4/24
+                        // TODO: 如果前面的语句跳过去了，则 this.NormalDbProperties 为 null，可能会引起后面 Assertion 报错
                         nRet = InitialNormalDbProperties(false);
                         if (nRet == -1)
                             goto END1;

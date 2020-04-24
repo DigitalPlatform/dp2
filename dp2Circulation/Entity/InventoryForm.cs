@@ -1593,6 +1593,12 @@ null);
 
                 // 获得 册记录路径 的列号
                 ColumnPropertyCollection temp = Program.MainForm.GetBrowseColumnProperties(strInventoryDbName);
+                // 2020/4/24
+                if (temp == null)
+                {
+                    strError = $"盘点库 '{strInventoryDbName}' 没有找到列定义";
+                    return -1;
+                }
                 int nCol = temp.FindColumnByType("item_recpath");
                 if (nCol == -1)
                 {
@@ -1931,6 +1937,12 @@ null);
             {
                 // 获得 册记录路径 的列号
                 ColumnPropertyCollection temp = Program.MainForm.GetBrowseColumnProperties(defs.InventoryDbName);
+                // 2020/4/24
+                if (temp == null)
+                {
+                    strError = $"盘点库 '{defs.InventoryDbName}' 没有找到列定义";
+                    return -1;
+                }
                 defs.InventoryItemRecPathColumnIndex = temp.FindColumnByType("item_recpath");
                 if (defs.InventoryItemRecPathColumnIndex == -1)
                 {
