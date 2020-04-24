@@ -2074,6 +2074,12 @@ ref bChanged);
             if (o == null)
             {
                 ColumnPropertyCollection temp = Program.MainForm.GetBrowseColumnProperties(strItemDbName);
+                // 2020/4/24
+                if (temp == null)
+                {
+                    strError = $"数据库 '{strItemDbName}' 没有找到列定义";
+                    return -1;
+                }
                 nCol = temp.FindColumnByType(strType);
                 if (nCol == -1)
                 {

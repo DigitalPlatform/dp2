@@ -54,6 +54,7 @@
             this.columnHeader_toShelfNo = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_toLocation = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_transferDirection = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.button_stop = new System.Windows.Forms.Button();
             this.panel_query.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -191,7 +192,7 @@
             // 
             // button_search
             // 
-            this.button_search.Location = new System.Drawing.Point(732, 163);
+            this.button_search.Location = new System.Drawing.Point(732, 20);
             this.button_search.Name = "button_search";
             this.button_search.Size = new System.Drawing.Size(164, 41);
             this.button_search.TabIndex = 2;
@@ -294,11 +295,23 @@
             this.columnHeader_transferDirection.Text = "典藏移交方向";
             this.columnHeader_transferDirection.Width = 180;
             // 
+            // button_stop
+            // 
+            this.button_stop.Enabled = false;
+            this.button_stop.Location = new System.Drawing.Point(732, 67);
+            this.button_stop.Name = "button_stop";
+            this.button_stop.Size = new System.Drawing.Size(164, 41);
+            this.button_stop.TabIndex = 3;
+            this.button_stop.Text = "停止";
+            this.button_stop.UseVisualStyleBackColor = true;
+            this.button_stop.Click += new System.EventHandler(this.button_stop_Click);
+            // 
             // ShelfSearchForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(908, 559);
+            this.Controls.Add(this.button_stop);
             this.Controls.Add(this.button_search);
             this.Controls.Add(this.listView_records);
             this.Controls.Add(this.panel_query);
@@ -343,5 +356,6 @@
         private System.Windows.Forms.ColumnHeader columnHeader_toShelfNo;
         private System.Windows.Forms.ColumnHeader columnHeader_toLocation;
         private System.Windows.Forms.ColumnHeader columnHeader_transferDirection;
+        private System.Windows.Forms.Button button_stop;
     }
 }
