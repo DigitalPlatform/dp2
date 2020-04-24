@@ -149,7 +149,9 @@ namespace dp2ManageCenter.Message
 
             try
             {
-                var get_result = await ConnectionPool.GetConnectiontAsync(this.comboBox_query_myAccount.Text);
+                this.listView_records.Items.Clear();
+
+                var get_result = await ConnectionPool.OpenConnectionAsync(this.comboBox_query_myAccount.Text);
                 if (get_result.Value == -1)
                 {
                     strError = get_result.ErrorInfo;
@@ -163,7 +165,7 @@ namespace dp2ManageCenter.Message
 
                 SearchRequest request = new SearchRequest(Guid.NewGuid().ToString(),
                     null,   // loginInfo,
-                    "searchBiblio",
+                    "searchHistory",    // "searchBiblio",
                     "dbNameList",
                     this.textBox_query_word.Text,
                     this.comboBox_query_from.Text,
@@ -224,6 +226,7 @@ namespace dp2ManageCenter.Message
                 var request = JsonConvert.DeserializeObject<RequestItem>(record.Data);
 
                 ListViewItem item = new ListViewItem();
+                /*
                 ListViewUtil.ChangeItemText(item, COLUMN_ID, record.RecPath);
                 ListViewUtil.ChangeItemText(item, COLUMN_PII, request.PII);
                 ListViewUtil.ChangeItemText(item, COLUMN_ACTION, request.Action);
@@ -237,10 +240,55 @@ namespace dp2ManageCenter.Message
                 ListViewUtil.ChangeItemText(item, COLUMN_TOSHELFNO, request.CurrentShelfNo);
                 ListViewUtil.ChangeItemText(item, COLUMN_TOLOCATION, request.Location);
                 ListViewUtil.ChangeItemText(item, COLUMN_TRANSFERDIRECTION, request.TransferDirection);
-
+                item.Tag = request;
+                */
+                SetLine(item, request);
                 this.listView_records.Items.Add(item);
             }
             // this.listView_records.EndUpdate();
+        }
+
+        static void SetLine(ListViewItem item, RequestItem request)
+        {
+            ListViewUtil.ChangeItemText(item, COLUMN_ID, request.ID.ToString());
+            ListViewUtil.ChangeItemText(item, COLUMN_PII, request.PII);
+            ListViewUtil.ChangeItemText(item, COLUMN_ACTION, request.Action);
+            ListViewUtil.ChangeItemText(item, COLUMN_OPERTIME, request.OperTime.ToString());
+            ListViewUtil.ChangeItemText(item, COLUMN_STATE, request.State);
+            ListViewUtil.ChangeItemText(item, COLUMN_ERRORCODE, request.SyncErrorCode);
+            ListViewUtil.ChangeItemText(item, COLUMN_ERRORINFO, request.SyncErrorInfo);
+            ListViewUtil.ChangeItemText(item, COLUMN_SYNCCOUNT, request.SyncCount.ToString());
+            ListViewUtil.ChangeItemText(item, COLUMN_SYNCOPERTIME, "");
+            ListViewUtil.ChangeItemText(item, COLUMN_BATCHNO, request.BatchNo);
+            ListViewUtil.ChangeItemText(item, COLUMN_TOSHELFNO, request.CurrentShelfNo);
+            ListViewUtil.ChangeItemText(item, COLUMN_TOLOCATION, request.Location);
+            ListViewUtil.ChangeItemText(item, COLUMN_TRANSFERDIRECTION, request.TransferDirection);
+            item.Tag = request;
+            SetLineColor(item, request);
+        }
+
+        static void SetLineColor(ListViewItem item, RequestItem request)
+        {
+            Color backColor = Color.White;
+            Color foreColor = Color.Black;
+            if (request.State == "sync")
+            {
+                backColor = Color.DarkGreen;
+                foreColor = Color.White;
+            }
+            else if (request.State == "dontsync")
+            {
+                backColor = Color.DarkBlue;
+                foreColor = Color.White;
+            }
+            else if (request.State.Contains("error"))
+            {
+                backColor = Color.DarkRed;
+                foreColor = Color.White;
+            }
+
+            item.BackColor = backColor;
+            item.ForeColor = foreColor;
         }
 
         // 继续填充余下的命中记录
@@ -257,7 +305,7 @@ namespace dp2ManageCenter.Message
                 {
                     SearchRequest request = new SearchRequest(Guid.NewGuid().ToString(),
                         null,   // loginInfo,
-                        "searchBiblio",
+                        "searchHistory", // "searchBiblio",
                         "", // "dbNameList",
                         "!getResult",
                         "", // this.comboBox_query_from.Text,
@@ -355,10 +403,90 @@ namespace dp2ManageCenter.Message
             contextMenu.Show(this.listView_records, new Point(e.X, e.Y));
         }
 
-        // 修改状态
-        void MenuItem_modifyState_Click(object sender, EventArgs e)
-        {
 
+        // 修改状态
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:避免使用 Async Void 方法", Justification = "<挂起>")]
+        async void MenuItem_modifyState_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            string new_state = InputDlg.GetInput(this, "修改状态", "新状态值", "dontsync", this.Font);
+            if (new_state == null)
+                return;
+            try
+            {
+                SetInfoRequest request = new SetInfoRequest();
+                request.Operation = "setHistory";
+                request.Entities = new List<Entity>();
+
+                foreach (ListViewItem item in this.listView_records.SelectedItems)
+                {
+                    RequestItem tag = item.Tag as RequestItem;
+                    tag.State = new_state;
+                    Record record = new Record { Data = JsonConvert.SerializeObject(tag) };
+                    request.Entities.Add(new Entity
+                    {
+                        Action = "change:state",
+                        NewRecord = record
+                    });
+                }
+
+                var connection = await ConnectionPool.GetConnectionAsync(this.comboBox_query_myAccount.Text);
+                var result = await connection.SetInfoAsyncLite(this.comboBox_query_shelfAccount.Text,
+                    request,
+                    TimeSpan.FromSeconds(10),
+                    default);
+                if (result.Value == -1)
+                {
+                    strError = result.ErrorInfo;
+                    goto ERROR1;
+                }
+
+                // 报错
+                List<string> errors = new List<string>();
+                List<string> succeed_records = new List<string>();
+                if (result.Entities != null)
+                {
+                    foreach (var entity in result.Entities)
+                    {
+                        if (string.IsNullOrEmpty(entity.ErrorInfo) == false)
+                            errors.Add(entity.ErrorInfo);
+                        else
+                            succeed_records.Add(entity.NewRecord?.Data);
+                    }
+                }
+
+                // 刷新成功修改了的行
+                foreach(var record in succeed_records)
+                {
+                    if (string.IsNullOrEmpty(record))
+                        continue;
+                    var item = JsonConvert.DeserializeObject<RequestItem>(record);
+                    RefreshLine(item.ID, item);
+                }
+
+                if (errors.Count > 0)
+                    MessageDialog.Show(this, $"出错:\r\n{StringUtil.MakePathList(errors, "\r\n")}");
+                return;
+            }
+            catch (Exception ex)
+            {
+                strError = ex.Message;
+                goto ERROR1;
+            }
+
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        // 刷新一行的显示
+        void RefreshLine(int id, RequestItem request_item)
+        {
+            // 先定位到这一行
+            ListViewItem item = ListViewUtil.FindItem(this.listView_records, id.ToString(), COLUMN_ID);
+            if (item == null)
+                return;
+            SetLine(item, request_item);
         }
 
         // 删除记录

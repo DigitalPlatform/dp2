@@ -20,29 +20,67 @@ namespace dp2ManageCenter.Message
 
         static AsyncSemaphore _limit = new AsyncSemaphore(1);
 
-        public class GetConnectionResult : NormalResult
+        public class OpenConnectionResult : NormalResult
         {
             public P2PConnection Connection { get; set; }
         }
 
         // 获得一个连接
-        public static async Task<GetConnectionResult> GetConnectiontAsync(string userNameAndUrl)
+        // 异常：可能会抛出 Exception 异常
+        public static async Task<P2PConnection> GetConnectionAsync(string userNameAndUrl)
+        {
+            var result = await OpenConnectionAsync(userNameAndUrl);
+            if (result.Value == -1)
+                throw new Exception(result.ErrorInfo);
+            return result.Connection;
+        }
+
+        // 确保连接到消息服务器
+        public static async Task EnsureConnectMessageServerAsync(
+            P2PConnection connection,
+            string userNameAndUrl)
+        {
+            if (connection.IsDisconnected)
+            {
+                var accounts = MessageAccountForm.GetAccounts();
+                var account = FindAccount(accounts, userNameAndUrl);
+                if (account == null)
+                    return;
+
+                var result = await connection.ConnectAsync(account.ServerUrl,
+    account.UserName,
+    account.Password,
+    "");
+            }
+        }
+
+        // 获得一个连接
+        public static async Task<OpenConnectionResult> OpenConnectionAsync(string userNameAndUrl)
         {
             using (var releaser = await _limit.EnterAsync())
             {
                 P2PConnection connection = _table[userNameAndUrl] as P2PConnection;
                 if (connection != null)
-                    return new GetConnectionResult
+                {
+                    // 尝试连接一次
+                    if (connection.IsDisconnected == true)
+                    {
+                        await EnsureConnectMessageServerAsync(
+    connection,
+    userNameAndUrl);
+                    }
+                    return new OpenConnectionResult
                     {
                         Value = 0,
                         Connection = connection
                     };
+                }
 
                 var accounts = MessageAccountForm.GetAccounts();
                 var account = FindAccount(accounts, userNameAndUrl);
                 if (account == null)
                 {
-                    return new GetConnectionResult
+                    return new OpenConnectionResult
                     {
                         Value = -1,
                         ErrorInfo = $"用户名 '{userNameAndUrl}' 没有找到"
@@ -57,13 +95,13 @@ namespace dp2ManageCenter.Message
                     account.Password,
                     "");
                 if (result.Value == -1)
-                    return new GetConnectionResult
+                    return new OpenConnectionResult
                     {
                         Value = -1,
                         ErrorInfo = result.ErrorInfo,
                         ErrorCode = result.ErrorCode
                     };
-                return new GetConnectionResult
+                return new OpenConnectionResult
                 {
                     Value = 0,
                     Connection = connection

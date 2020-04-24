@@ -79,6 +79,11 @@
             this.comboBox_query_matchStyle.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.comboBox_query_matchStyle.FormattingEnabled = true;
+            this.comboBox_query_matchStyle.Items.AddRange(new object[] {
+            "left",
+            "middle",
+            "right",
+            "exact"});
             this.comboBox_query_matchStyle.Location = new System.Drawing.Point(132, 158);
             this.comboBox_query_matchStyle.Name = "comboBox_query_matchStyle";
             this.comboBox_query_matchStyle.Size = new System.Drawing.Size(552, 29);
@@ -98,6 +103,21 @@
             this.comboBox_query_from.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.comboBox_query_from.FormattingEnabled = true;
+            this.comboBox_query_from.Items.AddRange(new object[] {
+            "ID",
+            "Action",
+            "State",
+            "Operator-",
+            "PII",
+            "ItemRecPath-",
+            "OperTime",
+            "BatchNo",
+            "CurrentShelfNo",
+            "Location",
+            "TransferDirection",
+            "SyncErrorCode",
+            "SyncErrorInfo",
+            "SyncCount"});
             this.comboBox_query_from.Location = new System.Drawing.Point(132, 123);
             this.comboBox_query_from.Name = "comboBox_query_from";
             this.comboBox_query_from.Size = new System.Drawing.Size(552, 29);

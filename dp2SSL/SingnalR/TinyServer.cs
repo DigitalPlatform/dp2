@@ -13,11 +13,12 @@ using Microsoft.AspNet.SignalR.Client;
 using Z.Expressions;
 
 using DigitalPlatform;
-using DigitalPlatform.MessageClient;
 using DigitalPlatform.Xml;
-using DigitalPlatform.Text;
 using DigitalPlatform.WPF;
+using DigitalPlatform.Text;
+using DigitalPlatform.MessageClient;
 using DigitalPlatform.SimpleMessageQueue;
+using DigitalPlatform.IO;
 
 namespace dp2SSL
 {
@@ -563,9 +564,10 @@ IList<MessageRecord> messages)
             }
         }
 
+        // 检查要修改成的 State 字段值是否合法。目前只支持修改为 "dontsync" 值
         static bool isStateValid(string value)
         {
-            if (value != "dontsync")
+            if (value == "dontsync")
                 return true;
             return false;
         }
@@ -774,6 +776,59 @@ IList<MessageRecord> messages)
             return;
         }
 
+        public static int ParseTimeRangeString(string strText,
+    bool bAdjustEnd,
+    out DateTime start,
+    out DateTime end,
+    out string strError)
+        {
+            strError = "";
+            start = new DateTime((long)0);
+            end = new DateTime((long)0);
+
+            int nRet = strText.IndexOf("-");
+            if (nRet == -1)
+            {
+                strError = "'" + strText + "' 中缺乏破折号 '-'";
+                return -1;
+            }
+
+            string strStart = strText.Substring(0, nRet).Trim();
+            string strEnd = strText.Substring(nRet + 1).Trim();
+
+            if (String.IsNullOrEmpty(strStart) == true)
+                start = new DateTime(0);
+            else
+            {
+                if (strStart.Length != 8)
+                {
+                    strError = "破折号左边的部分 '" + strStart + "' 不是8字符";
+                    return -1;
+                }
+                start = DateTimeUtil.Long8ToDateTime(strStart);
+            }
+
+            if (String.IsNullOrEmpty(strEnd) == true)
+                end = new DateTime(0);
+            else
+            {
+                if (strEnd.Length != 8)
+                {
+                    strError = "破折号右边的部分 '" + strEnd + "' 不是8字符";
+                    return -1;
+                }
+                end = DateTimeUtil.Long8ToDateTime(strEnd);
+
+                if (bAdjustEnd == true)
+                {
+                    // 修正一天
+                    end += new TimeSpan(24, 0, 0);
+                }
+            }
+
+            return 0;
+        }
+
         // https://eval-expression.net/linq-dynamic
         // parameters:
         //      request.UseList 为一个逗号间隔的检索途径列表。检索途径可以用 State/...
@@ -792,6 +847,35 @@ IList<MessageRecord> messages)
             {
                 //string s = "";
                 //s.EndsWith()
+
+                if (use == "ID" || use == "SyncCount")
+                {
+                    // TODO: 允许范围检索
+                    if (queryWordString.Contains("-"))
+                    {
+                        var parts = StringUtil.ParseTwoPart(queryWordString, "-");
+                        where_list.Add($" x.{use} >= Convert.ToInt32(\"{parts[0]}\") && x.{use} <= Convert.ToInt32(\"{parts[1]}\")");
+                    }
+                    else
+                    {
+                        where_list.Add($" x.{use} == Convert.ToInt32(\"{queryWordString}\") ");
+                    }
+                    continue;
+                }
+
+                if (use == "OperTime")
+                {
+                    int nRet = ParseTimeRangeString(queryWordString,
+true,
+out DateTime start,
+out DateTime end,
+out string strError);
+                    if (nRet == -1)
+                        throw new Exception(strError);
+                    where_list.Add($" x.{use} >= new DateTime({start.Ticks}) && x.{use} <= new DateTime({end.Ticks})");
+                    continue;
+                }
+
                 if (request.MatchStyle == "left")
                     where_list.Add($" x.{use}.StartsWith(\"{queryWordString}\") ");
                 else if (request.MatchStyle == "right")
@@ -877,7 +961,7 @@ IList<MessageRecord> messages)
                     await context.SaveChangesAsync();
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 WpfClientInfo.WriteErrorLog($"启动时删除全部结果集出现异常: {ExceptionUtil.GetDebugText(ex)}");
             }
@@ -909,6 +993,12 @@ IList<MessageRecord> messages)
                 int count = (int)searchParam.Count;
                 if (count == -1)
                     count = Int32.MaxValue;
+
+                if (searchParam.Operation != "searchHistory")
+                {
+                    strError = $"暂不支持操作 '{searchParam.Operation}'";
+                    goto ERROR1;
+                }
 
                 if (searchParam.QueryWord == "!getResult")
                 {
@@ -1219,7 +1309,8 @@ strError,
         static void OnSetInfoRecieved(SetInfoRequest param)
         {
             // 单独给一个线程来执行
-            _ = Task.Run(async () => {
+            _ = Task.Run(async () =>
+            {
                 try
                 {
                     await SetInfoAndResponse(param);
@@ -1231,117 +1322,169 @@ strError,
             });
         }
 
+        public class ChangeHistoryResult : NormalResult
+        {
+            // 返回的实体
+            public List<DigitalPlatform.MessageClient.Entity> ResultEntities { get; set; }
+        }
+
+        // 对操作历史记录进行修改
+        async static Task<ChangeHistoryResult> ChangeHistoryAsync(List<DigitalPlatform.MessageClient.Entity> actions)
+        {
+            List<DigitalPlatform.MessageClient.Entity> results = new List<DigitalPlatform.MessageClient.Entity>();
+
+            foreach (var action in actions)
+            {
+                string action_string = action.Action;
+                // 分离冒号左右部分
+                var parts = StringUtil.ParseTwoPart(action_string, ":");
+                string command = parts[0];
+                string parameters = parts[1];
+
+                if (command == "change")
+                {
+                    var result = await ChangeHistoryRecordAsync(action.NewRecord.Data, parameters);
+                    var result_entity = new DigitalPlatform.MessageClient.Entity();
+                    result_entity.Action = action.Action;
+                    result_entity.OldRecord = null;
+                    result_entity.ErrorCode = result.ErrorCode;
+                    result_entity.ErrorInfo = result.ErrorInfo;
+
+                    if (result.Value == 1)
+                    {
+                        result_entity.NewRecord = new Record();
+                        result_entity.NewRecord.Data = result.ChangedRecord;
+                    }
+
+                    results.Add(result_entity);
+                }
+            }
+
+            return new ChangeHistoryResult { ResultEntities = results };
+        }
+
+        public class ChangeResult : NormalResult
+        {
+            // 修改后的记录
+            public string ChangedRecord { get; set; }
+        }
+
+        // 修改一条操作历史记录
+        // parameters:
+        //      text    一条 JSON 记录。里面的 ID 字段用于定位要修改的记录；State 字段内容是要修改成的该字段内容
+        static async Task<ChangeResult> ChangeHistoryRecordAsync(string text,
+            string parameters)
+        {
+            // 解析 parameters
+            var fields = StringUtil.SplitList(parameters, '|');
+
+            if (fields.Count == 0)
+                return new ChangeResult
+                {
+                    Value = -1,
+                    ErrorInfo = "action 中缺乏冒号以后的参数"
+                };
+
+            // 从 record 中取出 ID 字符串
+            var record = DisplayRequestItem.FromDisplayString(text);
+            if (record.ID == 0)
+            {
+                return new ChangeResult
+                {
+                    Value = -1,
+                    ErrorInfo = "新记录内容中没有包含 ID 字段"
+                };
+            }
+            // 检索出以前的记录
+
+            // 修改以后保存
+
+            using (var context = new RequestContext())
+            {
+                context.Database.EnsureCreated();
+
+                var item = context.Requests.Where(o => o.ID == record.ID).FirstOrDefault();
+                if (item == null)
+                {
+                    return new ChangeResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"没有找到 ID 为 '{record.ID}' 的操作历史记录"
+                    };
+                }
+
+                int count = 0;
+                bool changed = false;
+                if (fields.IndexOf("state") != -1)
+                {
+                    count++;
+                    string new_value = record.State;
+                    if (isStateValid(new_value) == false)
+                    {
+                        return new ChangeResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"要修改为新的 State 值 '{new_value}' 不合法。修改操作被拒绝"
+                        };
+                    }
+                    // TODO: 是否自动写入一个附注字段内容，记载修改前的内容，和修改的原因(comment=xxx)？
+                    item.State = new_value;
+                    changed = true;
+                }
+
+                if (count == 0)
+                {
+                    return new ChangeResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"修改字段名列表 '{parameters}' 中没有可支持的部分"
+                    };
+                }
+
+                if (changed == true)
+                {
+                    await context.SaveChangesAsync();
+
+                    return new ChangeResult
+                    {
+                        Value = 1,  // 表示修改了
+                        ChangedRecord = DisplayRequestItem.GetDisplayString(item)
+                    };
+                }
+                else
+                    return new ChangeResult
+                    {
+                        Value = 0,  // 表示没有发生修改
+                        ChangedRecord = DisplayRequestItem.GetDisplayString(item)
+                    };
+            }
+
+        }
+
         static async Task SetInfoAndResponse(SetInfoRequest param)
         {
-            return;
-
-#if NO
             string strError = "";
-
-            List<DisplayRequestItem> items = new List<DisplayRequestItem>();
-            foreach (var entity in param.Entities)
-            {
-                // entity.Action; 表示要进行的操作 "change" "delete"
-                // change:fieldname1|fieldname2 表示要修改哪些字段
-                items.Add(DisplayRequestItem.FromDisplayString(entity.NewRecord.Data));
-            }
-
-            IList<Entity> results = new List<Entity>();
-
-            List<DigitalPlatform.LibraryClient.localhost.EntityInfo> entities = new List<DigitalPlatform.LibraryClient.localhost.EntityInfo>();
-            foreach (Entity entity in param.Entities)
-            {
-                entities.Add(BuildEntityInfo(entity));
-            }
 
             try
             {
-                LibraryChannel channel = GetChannel(param.LoginInfo);
-                try
+                ChangeHistoryResult result = null;
+                if (param.Operation == "setHistory")
+                    result = await ChangeHistoryAsync(param.Entities);
+                else
                 {
-                    DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos = null;
-                    long lRet = 0;
-
-                    if (param.Operation == "setItemInfo")
-                        lRet = channel.SetEntities(param.BiblioRecPath,
-                             entities.ToArray(),
-                             out errorinfos,
-                             out strError);
-                    else if (param.Operation == "setOrderInfo")
-                        lRet = channel.SetOrders(param.BiblioRecPath,
-                             entities.ToArray(),
-                             out errorinfos,
-                             out strError);
-                    else if (param.Operation == "setIssueInfo")
-                        lRet = channel.SetIssues(param.BiblioRecPath,
-                             entities.ToArray(),
-                             out errorinfos,
-                             out strError);
-                    else if (param.Operation == "setCommentInfo")
-                        lRet = channel.SetComments(param.BiblioRecPath,
-                             entities.ToArray(),
-                             out errorinfos,
-                             out strError);
-                    else if (param.Operation == "setReaderInfo")
-                    {
-                        List<EntityInfo> errors = new List<EntityInfo>();
-                        foreach (EntityInfo info in entities)
-                        {
-                            string strSavedRecPath = "";
-                            string strSavedXml = "";
-                            string strExistingXml = "";
-                            byte[] baNewTimestamp = null;
-                            ErrorCodeValue kernel_errorcode;
-                            lRet = channel.SetReaderInfo(info.Action,
-                                info.NewRecPath,
-                                info.NewRecord,
-                                info.OldRecord,
-                                info.OldTimestamp,
-                                out strExistingXml,
-                                out strSavedXml,
-                                out strSavedRecPath,
-                                out baNewTimestamp,
-                                out kernel_errorcode,
-                                out strError);
-                            EntityInfo error = new EntityInfo();
-                            error.NewTimestamp = baNewTimestamp;
-                            error.NewRecPath = strSavedRecPath;
-                            error.OldRecord = strExistingXml;
-                            error.NewRecord = strSavedXml;
-                            error.ErrorCode = kernel_errorcode;
-                            if (lRet == -1)
-                                error.ErrorInfo = strError;
-                            errors.Add(error);
-                        }
-                        errorinfos = errors.ToArray();
-                    }
-                    else
-                    {
-                        strError = "无法识别的 param.Operation 值 '" + param.Operation + "'";
-                        goto ERROR1;
-                    }
-
-                    if (errorinfos != null)
-                    {
-                        foreach (DigitalPlatform.LibraryClient.localhost.EntityInfo error in errorinfos)
-                        {
-                            results.Add(BuildEntity(error));
-                        }
-                    }
-                    await ResponseSetInfo(param.TaskID,
-        lRet,
-        results,
-        strError);
-                    return;
+                    strError = "无法识别的 param.Operation 值 '" + param.Operation + "'";
+                    goto ERROR1;
                 }
-                finally
-                {
-                    this.ReturnChannel(channel);
-                }
+
+                await ResponseSetInfo(param.TaskID,
+    result.ResultEntities.Count,
+    result.ResultEntities,
+    strError);
+                return;
             }
             catch (Exception ex)
             {
-                AddErrorLine("SetInfoAndResponse() 出现异常: " + ex.Message);
+                // AddErrorLine("SetInfoAndResponse() 出现异常: " + ex.Message);
                 strError = ExceptionUtil.GetDebugText(ex);
                 goto ERROR1;
             }
@@ -1351,10 +1494,9 @@ strError,
             await TryResponseSetInfo(
 param.TaskID,
 -1,
-results,
+new List<DigitalPlatform.MessageClient.Entity>(),   // results
 strError);
 
-#endif
         }
 
         // 调用 server 端 ResponseSetInfo
@@ -1362,29 +1504,29 @@ strError);
         public static async Task<MessageResult> ResponseSetInfo(
             string taskID,
             long resultValue,
-            IList<Entity> results,
+            IList<DigitalPlatform.MessageClient.Entity> results,
             string errorInfo)
         {
             return await HubProxy.Invoke<MessageResult>("ResponseSetInfo",
-taskID,
-resultValue,
-results,
-errorInfo).ConfigureAwait(false);
+        taskID,
+        resultValue,
+        results,
+        errorInfo).ConfigureAwait(false);
         }
 
         public static async Task TryResponseSetInfo(
-    string taskID,
-    long resultValue,
-    IList<Entity> results,
-    string errorInfo)
+        string taskID,
+        long resultValue,
+        IList<DigitalPlatform.MessageClient.Entity> results,
+        string errorInfo)
         {
             try
             {
                 await HubProxy.Invoke<MessageResult>("ResponseSetInfo",
-    taskID,
-    resultValue,
-    results,
-    errorInfo).ConfigureAwait(false);
+        taskID,
+        resultValue,
+        results,
+        errorInfo).ConfigureAwait(false);
             }
             catch
             {
@@ -1392,7 +1534,7 @@ errorInfo).ConfigureAwait(false);
             }
         }
 
-#endregion
+        #endregion
 
     }
 }

@@ -244,6 +244,8 @@ namespace dp2SSL
             channel.Timeout = TimeSpan.FromSeconds(5);  // 设置 5 秒超时，避免等待太久
             try
             {
+                int nRedoCount = 0;
+            REDO:
                 long lRet = channel.GetReaderInfo(null,
                     pii,
                     "advancexml", // "xml",
@@ -252,6 +254,15 @@ namespace dp2SSL
                     out byte[] timestamp,
                     out string strError);
                 if (lRet == -1 || lRet == 0)
+                {
+                    // 2020/4/24 增加一次重试机会
+                    if (lRet == -1
+                        && (channel.ErrorCode == ErrorCode.RequestCanceled || channel.ErrorCode == ErrorCode.RequestError)
+                        && nRedoCount < 2)
+                    {
+                        nRedoCount++;
+                        goto REDO;
+                    }
                     return new GetReaderInfoResult
                     {
                         Value = (int)lRet,
@@ -259,6 +270,7 @@ namespace dp2SSL
                         RecPath = recpath,
                         Timestamp = timestamp
                     };
+                }
 
                 // 2019/12/19
                 // 命中读者记录多于一条

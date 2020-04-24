@@ -719,6 +719,92 @@ IList<MessageRecord> messages)
                 handler(connection, e);
             }
         }
+
+        #region SetInfo() API
+
+        public class SetInfoResult : MessageResult
+        {
+            public List<Entity> Entities { get; set; }
+        }
+
+        public static Task<TResult> TaskRun<TResult>(
+    Func<TResult> function,
+    CancellationToken cancellationToken)
+        {
+            return Task.Factory.StartNew<TResult>(
+                function,
+                cancellationToken,
+                TaskCreationOptions.LongRunning, TaskScheduler.Default);
+        }
+
+        public Task<SetInfoResult> SetInfoTaskAsync(
+string strRemoteUserName,
+SetInfoRequest request,
+TimeSpan timeout,
+CancellationToken token)
+        {
+            return TaskRun<SetInfoResult>(() =>
+            {
+                return SetInfoAsyncLite(strRemoteUserName, request, timeout, token).Result;
+            }, token);
+        }
+
+        public async Task<SetInfoResult> SetInfoAsyncLite(
+    string strRemoteUserName,
+    SetInfoRequest request,
+    TimeSpan timeout,
+    CancellationToken token)
+        {
+            SetInfoResult result = new SetInfoResult();
+            if (result.Entities == null)
+                result.Entities = new List<Entity>();
+
+            if (string.IsNullOrEmpty(request.TaskID) == true)
+                request.TaskID = Guid.NewGuid().ToString();
+
+            using (WaitEvents wait_events = new WaitEvents())
+            {
+                using (var handler = HubProxy.On<
+                    string, long, IList<Entity>, string>(
+                    "responseSetInfo",
+                    (taskID, resultValue, entities, errorInfo) =>
+                    {
+                        if (taskID != request.TaskID)
+                            return;
+
+                        // 装载命中结果
+                        if (entities != null)
+                            result.Entities.AddRange(entities);
+                        result.Value = resultValue;
+                        result.ErrorInfo = errorInfo;
+                        wait_events.finish_event.Set();
+                    }))
+                {
+                    MessageResult message = await HubProxy.Invoke<MessageResult>(
+        "RequestSetInfo",
+        strRemoteUserName,
+        request).ConfigureAwait(false);
+                    if (message.Value == -1
+                        || message.Value == 0)
+                    {
+                        result.ErrorInfo = message.ErrorInfo;
+                        result.Value = -1;
+                        result.String = message.String;
+                        return result;
+                    }
+
+                    await WaitAsync(
+    request.TaskID,
+    wait_events,
+    timeout,
+    token).ConfigureAwait(false);
+                    return result;
+                }
+            }
+        }
+
+        #endregion
+
     }
 
     public class SearchResult
