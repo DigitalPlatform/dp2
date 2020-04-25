@@ -5885,7 +5885,13 @@ start_time_1,
                         strBiblioRecID = DomUtil.GetElementText(itemdom.DocumentElement, "parent"); //
                     }
 
-
+                    string strOperTime = this.Clock.GetClock();
+                    // 如果有 operTime 子参数，直接用它作为操作时间
+                    {
+                        string paramOperTime = StringUtil.GetParameterByPrefix(strStyle, "operTime");
+                        if (string.IsNullOrEmpty(paramOperTime) == false)
+                            strOperTime = StringUtil.UnescapeString(paramOperTime);
+                    }
 
                     WriteTimeUsed(
                     time_lines,
@@ -5977,6 +5983,56 @@ start_time_1,
                                     result.ErrorInfo = strError;
                                     result.ErrorCode = ErrorCode.NotBorrowed;
                                     strOutputItemXml = itemdom.OuterXml;    // TODO: 是否放在更靠前位置，提前设置好
+
+                                    // 2020/4/25
+                                    {
+                                        // 检查同步请求的操作时间和册记录内记载的最近一次借还操作时间之间的关系
+                                        // return:
+                                        //      -1  出错
+                                        //      0   符合要求
+                                        //      1   不符合要求，同步请求应当被拒绝
+                                        nRet = CheckSyncTime(itemdom,
+                                            strStyle,
+                                            out string strError1);
+                                        if (nRet == -1)
+                                        {
+
+                                        }
+                                        else if (nRet == 1)
+                                        {
+                                            result.ErrorCode = ErrorCode.SyncDenied;
+                                            result.ErrorInfo += "; " + strError1;
+                                        }
+                                        else
+                                        {
+                                            // nRet == 0
+
+                                            // 如果 style 里面有 operTime 子参数，则应该更改 checkInOutDate 时间，以便可以用来阻止后继的不合适的同步操作
+                                            string paramOperTime = StringUtil.GetParameterByPrefix(strStyle, "operTime");
+                                            if (string.IsNullOrEmpty(paramOperTime) == false)
+                                            {
+                                                DomUtil.SetElementText(itemdom.DocumentElement,
+    "checkInOutDate",
+    strOperTime);
+                                                result.ErrorInfo += "; (checkInOutDate 已经被修改)";
+
+                                                // 保存册记录
+                                                lRet = channel.DoSaveTextRes(strOutputItemRecPath,
+        itemdom.OuterXml,
+        false,
+        "content,ignorechecktimestamp",
+        item_timestamp,
+        out byte [] _,
+        out string _,
+        out strError);
+                                                if (lRet == -1)
+                                                {
+                                                    this.WriteErrorLog("Return() 写入册记录(1) '" + strOutputItemRecPath + "' 时出错: " + strError);
+                                                }
+                                            }
+                                        }
+                                    }
+
                                     goto END3;
                                 }
                                 goto ERROR1;
@@ -6515,6 +6571,7 @@ start_time_1,
                     string strReaderState = DomUtil.GetElementText(readerdom.DocumentElement,
                         "state");
 
+                    /*
                     string strOperTime = this.Clock.GetClock();
                     // 如果有 operTime 子参数，直接用它作为操作时间
                     {
@@ -6522,6 +6579,7 @@ start_time_1,
                         if (string.IsNullOrEmpty(paramOperTime) == false)
                             strOperTime = StringUtil.UnescapeString(paramOperTime);
                     }
+                    */
 
 
                     string strWarning = "";
