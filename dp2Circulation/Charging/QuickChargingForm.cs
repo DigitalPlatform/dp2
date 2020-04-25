@@ -477,7 +477,7 @@ namespace dp2Circulation
                 //      -1  出错
                 //      0   ListsView 中没有找到事项
                 //      1   发生了修改
-                var eas_result = _easForm.TryCorrectEas(data.OneTag.UID, 
+                var eas_result = _easForm.TryCorrectEas(data.OneTag.UID,
                     data.OneTag.AntennaID,
                     pii);
                 if (eas_result.Value == -1)
@@ -1556,7 +1556,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
             }
 #endif
             int nRedoCount = 0;
-            REDO:
+        REDO:
             try
             {
                 if (strHtml == "(空)")
@@ -1603,7 +1603,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
             }
 
             int nRedoCount = 0;
-            REDO:
+        REDO:
             try
             {
                 this.m_webExternalHost_readerInfo.SetTextString(strText, "reader_text");
@@ -3768,7 +3768,7 @@ MessageBoxDefaultButton.Button2);
                 form.LoadRecord(selected_task.ReaderBarcode);
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3799,7 +3799,7 @@ MessageBoxDefaultButton.Button2);
 
             form.LoadRecord(selected_task.ItemBarcode);
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3824,7 +3824,7 @@ MessageBoxDefaultButton.Button2);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             this.ShowMessage(strError, "error", true);
         }
 
@@ -3855,7 +3855,7 @@ MessageBoxDefaultButton.Button2);
 
             form.LoadItemByBarcode(selected_task.ItemBarcode, false);
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -4264,7 +4264,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
                 goto ERROR1;
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -4565,6 +4565,44 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
                 this.ShowMessage($"重启 RFID 中心时出错: {result.ErrorInfo}", "red", true);
             else
                 this.ShowMessageAutoClear("RFID 中心已经重启", "green", 5000, true);
+        }
+
+        // 是否处于“测试同步”状态。在此状态下，Borrow() 和 Return() 请求前，会弹出对话框要求操作者输入 operTime 子参数
+        public bool TestSync
+        {
+            get
+            {
+                return (bool)this.Invoke(new Func<bool>(() =>
+                {
+                    return this.ToolStripMenuItem_testSync.Checked;
+                }));
+            }
+        }
+
+        DateTime _lastInputTime = DateTime.Now;
+
+        public string GetOperTimeParamString()
+        {
+            if (this.TestSync == false)
+                return "";
+            REDO:
+            string value = (string)this.Invoke(new Func<string>(() =>
+            {
+                return InputDlg.GetInput(this,
+                "测试同步",
+                "请输入实际操作时间(格式：'2020-1-1 08:01:55')",
+                _lastInputTime.ToString("yyyy-MM-dd HH:mm:ss"),
+                this.Font);
+            }));
+            if (value == null)
+                return "";
+            if (DateTime.TryParse(value, out DateTime time) == false)
+            {
+                MessageBox.Show(this, $"时间字符串 '{value}' 不合法。请重新输入");
+                goto REDO;
+            }
+            _lastInputTime = time;
+            return DateTimeUtil.Rfc1123DateTimeStringEx(time);
         }
     }
 

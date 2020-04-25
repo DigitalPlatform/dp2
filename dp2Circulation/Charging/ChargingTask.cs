@@ -842,6 +842,9 @@ namespace dp2Circulation
                 goto ERROR1;
             }
 
+            string additional = this.Container.GetOperTimeParamString();
+            if (string.IsNullOrEmpty(additional) == false)
+                strStyle += ",operTime:" + StringUtil.EscapeString(additional, ",:");
 
             long lRet = 0;
             LibraryChannel channel = this.GetChannel();
@@ -1508,6 +1511,10 @@ end_time);
                         eas_changed = true;
                 }
             }
+
+            string additional = this.Container.GetOperTimeParamString();
+            if (string.IsNullOrEmpty(additional) == false)
+                strStyle += ",operTime:" + StringUtil.EscapeString(additional, ",:");
 
             long lRet = 0;
 
