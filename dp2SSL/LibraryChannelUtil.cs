@@ -26,135 +26,260 @@ namespace dp2SSL
 
         static AsyncSemaphore _channelLimit = new AsyncSemaphore(2);
 
-        // 获得一个册的题名字符串
+        // 获得册记录信息和书目摘要信息
         // .Value
         //      0   没有找到
         //      1   找到
         public static async Task<GetEntityDataResult> GetEntityDataAsync(string pii)
         {
-            using (var releaser = await _channelLimit.EnterAsync())
+            try
             {
-                LibraryChannel channel = App.CurrentApp.GetChannel();
-                TimeSpan old_timeout = channel.Timeout;
-                channel.Timeout = TimeSpan.FromSeconds(10);
-                try
+                using (var releaser = await _channelLimit.EnterAsync())
+                using (BiblioCacheContext context = new BiblioCacheContext())
                 {
-                    // TODO: ItemXml 和 BiblioSummary 可以考虑在本地缓存一段时间
-                    int nRedoCount = 0;
-                REDO_GETITEMINFO:
-                    long lRet = channel.GetItemInfo(null,
-                        "item",
-                        pii,
-                        "",
-                        "xml",
-                        out string item_xml,
-                        out string item_recpath,
-                        out _,
-                        "",
-                        out _,
-                        out _,
-                        out string strError);
-                    if (lRet == -1)
+                    if (_cacheDbCreated == false)
                     {
-                        if ((channel.ErrorCode == ErrorCode.RequestError ||
-                            channel.ErrorCode == ErrorCode.RequestTimeOut)
-                            && nRedoCount < 2)
-                        {
-                            nRedoCount++;
-                            goto REDO_GETITEMINFO;
-                        }
-                        return new GetEntityDataResult
-                        {
-                            Value = -1,
-                            ErrorInfo = strError,
-                            ErrorCode = channel.ErrorCode.ToString()
-                        };
+                        context.Database.EnsureCreated();
+                        _cacheDbCreated = true;
                     }
 
-                    // 先尝试从书目库中获取书目摘要
-                    using (BiblioCacheContext context = new BiblioCacheContext())
+                    LibraryChannel channel = App.CurrentApp.GetChannel();
+                    TimeSpan old_timeout = channel.Timeout;
+                    channel.Timeout = TimeSpan.FromSeconds(10);
+                    try
                     {
-                        if (_cacheDbCreated == false)
-                        {
-                            context.Database.EnsureCreated();
-                            _cacheDbCreated = true;
-                        }
-                        var item = context.BiblioSummaries.Where(o => o.PII == pii).FirstOrDefault();
-                        if (item != null)
-                            return new GetEntityDataResult
+                        GetEntityDataResult result = null;
+                        List<NormalResult> errors = new List<NormalResult>();
+
+                        // ***
+                        // 第一步：获取册记录
+
+                        // 先尝试从本地实体库中获得记录
+                        var entity_record = context.Entities.Where(o => o.PII == pii).FirstOrDefault();
+                        if (entity_record != null)
+                            result = new GetEntityDataResult
                             {
                                 Value = 1,
-                                ItemXml = item_xml,
-                                ItemRecPath = item_recpath,
-                                Title = item.BiblioSummary,
+                                ItemXml = entity_record.Xml,
+                                ItemRecPath = entity_record.RecPath,
+                                Title = "",
                             };
-                    }
-
-                    nRedoCount = 0;
-                REDO_GETBIBLIOSUMMARY:
-                    lRet = channel.GetBiblioSummary(
-        null,
-        pii,
-        "", // strConfirmItemRecPath,
-        null,
-        out _,
-        out string strSummary,
-        out strError);
-                    if (lRet == -1)
-                    {
-                        if ((channel.ErrorCode == ErrorCode.RequestError ||
-        channel.ErrorCode == ErrorCode.RequestTimeOut)
-        && nRedoCount < 2)
+                        else
                         {
-                            nRedoCount++;
-                            goto REDO_GETBIBLIOSUMMARY;
-                        }
-                        return new GetEntityDataResult
-                        {
-                            Value = -1,
-                            ErrorInfo = strError,
-                            ErrorCode = channel.ErrorCode.ToString(),
-                        };
-                    }
-
-                    strSummary = strSummary?.Replace(". -- ", "\r\n");   // .Replace("/", "\r\n");
-
-                    // 存入数据库备用
-                    if (lRet == 1)
-                    {
-                        try
-                        {
-                            using (BiblioCacheContext context = new BiblioCacheContext())
+                            // 再尝试从 dp2library 服务器获取
+                            // TODO: ItemXml 和 BiblioSummary 可以考虑在本地缓存一段时间
+                            int nRedoCount = 0;
+                        REDO_GETITEMINFO:
+                            long lRet = channel.GetItemInfo(null,
+                                "item",
+                                pii,
+                                "",
+                                "xml",
+                                out string item_xml,
+                                out string item_recpath,
+                                out byte[] timestamp,
+                                "",
+                                out _,
+                                out _,
+                                out string strError);
+                            if (lRet == -1)
                             {
-                                context.BiblioSummaries.Add(new BiblioSummaryItem
+                                if ((channel.ErrorCode == ErrorCode.RequestError ||
+                                    channel.ErrorCode == ErrorCode.RequestTimeOut)
+                                    && nRedoCount < 2)
+                                {
+                                    nRedoCount++;
+                                    goto REDO_GETITEMINFO;
+                                }
+                                // TODO: 这里不着急返回，还需要尝试获得书目摘要
+                                errors.Add(new NormalResult
+                                {
+                                    Value = -1,
+                                    ErrorInfo = strError,
+                                    ErrorCode = channel.ErrorCode.ToString()
+                                });
+                                /*
+                                return new GetEntityDataResult
+                                {
+                                    Value = -1,
+                                    ErrorInfo = strError,
+                                    ErrorCode = channel.ErrorCode.ToString()
+                                };
+                                */
+                            }
+                            else
+                            {
+                                result = new GetEntityDataResult
+                                {
+                                    Value = 1,
+                                    ItemXml = item_xml,
+                                    ItemRecPath = item_recpath,
+                                    Title = "",
+                                };
+
+                                // 保存到本地数据库
+                                context.Entities.Add(new EntityItem
                                 {
                                     PII = pii,
-                                    BiblioSummary = strSummary
+                                    Xml = item_xml,
+                                    RecPath = item_recpath,
+                                    Timestamp = timestamp,
                                 });
                                 await context.SaveChangesAsync();
                             }
                         }
-                        catch
+
+                        // ***
+                        /// 第二步：获取书目摘要
+
+                        // 先尝试从本地书目库中获取书目摘要
+
+                        var item = context.BiblioSummaries.Where(o => o.PII == pii).FirstOrDefault();
+                        if (item != null)
                         {
+                            if (result == null)
+                                result = new GetEntityDataResult();
 
+                            result.Title = item.BiblioSummary;
                         }
-                    }
+                        else
+                        {
+                            // 从 dp2library 服务器获取书目摘要
+                            int nRedoCount = 0;
+                        REDO_GETBIBLIOSUMMARY:
+                            long lRet = channel.GetBiblioSummary(
+                null,
+                pii,
+                "", // strConfirmItemRecPath,
+                null,
+                out _,
+                out string strSummary,
+                out string strError);
+                            if (lRet == -1)
+                            {
+                                if ((channel.ErrorCode == ErrorCode.RequestError ||
+                channel.ErrorCode == ErrorCode.RequestTimeOut)
+                && nRedoCount < 2)
+                                {
+                                    nRedoCount++;
+                                    goto REDO_GETBIBLIOSUMMARY;
+                                }
 
-                    return new GetEntityDataResult
+                                errors.Add(new NormalResult
+                                {
+                                    Value = -1,
+                                    ErrorInfo = strError,
+                                    ErrorCode = channel.ErrorCode.ToString()
+                                });
+                                /*
+                                return new GetEntityDataResult
+                                {
+                                    Value = -1,
+                                    ErrorInfo = strError,
+                                    ErrorCode = channel.ErrorCode.ToString(),
+                                };
+                                */
+                            }
+                            else
+                            {
+                                strSummary = strSummary?.Replace(". -- ", "\r\n");   // .Replace("/", "\r\n");
+
+                                if (result == null)
+                                    result = new GetEntityDataResult();
+
+                                result.Title = strSummary;
+
+                                // 存入数据库备用
+                                if (lRet == 1)
+                                {
+                                    try
+                                    {
+                                        context.BiblioSummaries.Add(new BiblioSummaryItem
+                                        {
+                                            PII = pii,
+                                            BiblioSummary = strSummary
+                                        });
+                                        await context.SaveChangesAsync();
+                                    }
+                                    catch
+                                    {
+
+                                    }
+                                }
+                            }
+
+                            /*
+                            return new GetEntityDataResult
+                            {
+                                Value = (int)lRet,
+                                ItemXml = item_xml,
+                                ItemRecPath = item_recpath,
+                                Title = strSummary,
+                                ErrorInfo = strError,
+                                ErrorCode = channel.ErrorCode.ToString()
+                            };
+                            */
+                        }
+
+                        // 完全成功
+                        if (result != null && errors.Count == 0)
+                            return result;
+                        if (result == null)
+                            return new GetEntityDataResult
+                            {
+                                Value = errors[0].Value,
+                                ErrorInfo = errors[0].ErrorInfo,
+                                ErrorCode = errors[0].ErrorCode
+                            };
+                        result.ErrorInfo = errors[0].ErrorInfo;
+                        result.ErrorCode = errors[0].ErrorCode;
+                        return result;
+                    }
+                    finally
                     {
-                        Value = (int)lRet,
-                        ItemXml = item_xml,
-                        ItemRecPath = item_recpath,
-                        Title = strSummary,
-                        ErrorInfo = strError,
-                        ErrorCode = channel.ErrorCode.ToString()
-                    };
+                        channel.Timeout = old_timeout;
+                        App.CurrentApp.ReturnChannel(channel);
+                    }
                 }
-                finally
+            }
+            catch (Exception ex)
+            {
+                return new GetEntityDataResult
                 {
-                    channel.Timeout = old_timeout;
-                    App.CurrentApp.ReturnChannel(channel);
+                    Value = -1,
+                    ErrorInfo = $"GetEntityDataAsync() 出现异常: {ex.Message}",
+                    ErrorCode = ex.GetType().ToString()
+                };
+            }
+        }
+
+        // result.Value
+        //      0   没有找到记录。没有发生更新
+        //      1   成功更新
+        public static async Task<NormalResult> UpdateEntityXmlAsync(string pii,
+            string item_xml,
+            byte[] timestamp)
+        {
+            using (BiblioCacheContext context = new BiblioCacheContext())
+            {
+                if (_cacheDbCreated == false)
+                {
+                    context.Database.EnsureCreated();
+                    _cacheDbCreated = true;
                 }
+
+                // 先尝试从本地实体库中获得原记录
+                var entity_record = context.Entities.Where(o => o.PII == pii).FirstOrDefault();
+                if (entity_record == null)
+                    return new NormalResult { Value = 0 };
+
+                entity_record.Xml = item_xml;
+                entity_record.Timestamp = timestamp;
+
+                // 保存到本地数据库
+                context.Entities.Update(entity_record);
+                await context.SaveChangesAsync();
+                return new NormalResult { Value = 1 };
             }
         }
 

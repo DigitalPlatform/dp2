@@ -1709,6 +1709,10 @@ namespace DigitalPlatform.LibraryServer
                     // 及时更新时间戳
                     reader_timestamp = output_timestamp;
 
+                    // 2020/4/26
+                    // 把 XML 中多余的元素删除
+                    DomUtil.RemoveEmptyElements(itemdom.DocumentElement);
+
                     // 写回册记录
                     lRet = channel.DoSaveTextRes(strOutputItemRecPath,
                         itemdom.OuterXml,
@@ -6920,6 +6924,10 @@ start_time_1,
                         "Return() 中写回读者记录 耗时 ");
 
                     DateTime start_time_write_item = DateTime.Now;
+
+                    // 2020/4/26
+                    // 把 XML 中多余的元素删除
+                    DomUtil.RemoveEmptyElements(itemdom.DocumentElement);
 
                     lRet = channel.DoSaveTextRes(strOutputItemRecPath,
                         itemdom.OuterXml,
@@ -19881,8 +19889,6 @@ start_time_1,
 
                     DomUtil.RemoveEmptyElements(itemdom.DocumentElement);
 
-                    byte[] output_timestamp = null;
-                    string strOutputPath = "";
 
                     // 写回册记录
                     lRet = channel.DoSaveTextRes(strOutputItemRecPath,
@@ -19890,8 +19896,8 @@ start_time_1,
                         false,
                         "content",  // ,ignorechecktimestamp
                         item_timestamp,
-                        out output_timestamp,
-                        out strOutputPath,
+                        out byte[] output_timestamp,
+                        out string strOutputPath,
                         out strError);
                     if (lRet == -1)
                     {

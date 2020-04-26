@@ -3773,7 +3773,7 @@ namespace dp2SSL
         //      -1  出错(要用对话框显示结果)
         //      0   没有必要处理
         //      1   已经完成处理(要用对话框显示结果)
-        public static SubmitResult SubmitCheckInOut(
+        public static async Task<SubmitResult> SubmitCheckInOutAsync(
             Delegate_setProgress func_setProgress,
             IReadOnlyCollection<ActionInfo> actions,
             string style)
@@ -3956,6 +3956,10 @@ namespace dp2SSL
                     channel.Timeout = TimeSpan.FromSeconds(10);
                     try
                     {
+                        string strStyle = "item";   //  "item,reader";
+                        if (entity.Title == null)
+                            strStyle += ",biblio";
+
                         if (action == "borrow" || action == "renew")
                         {
                             // TODO: 智能书柜要求强制借书。如果册操作前处在被其他读者借阅状态，要自动先还书再进行借书
@@ -3967,7 +3971,7 @@ namespace dp2SSL
                                 entity.ItemRecPath,
                                 false,
                                 null,
-                                "item,reader,biblio,overflowable" + operTimeStyle, // style,
+                                strStyle + ",overflowable" + operTimeStyle, // style,
                                 "xml", // item_format_list
                                 out item_records,
                                 "xml",
@@ -4003,7 +4007,7 @@ namespace dp2SSL
                                 entity.PII,
                                 entity.ItemRecPath,
                                 false,
-                                "item,reader,biblio" + operTimeStyle, // style,
+                                strStyle + operTimeStyle, // style,
                                 "xml", // item_format_list
                                 out item_records,
                                 "xml",
@@ -4035,7 +4039,7 @@ namespace dp2SSL
                                 entity.PII,
                                 entity.ItemRecPath,
                                 false,
-                                $"item,biblio,{StringUtil.MakePathList(commands, ",")}" + operTimeStyle, // style,
+                                $"{strStyle},{StringUtil.MakePathList(commands, ",")}" + operTimeStyle, // style,
                                 "xml", // item_format_list
                                 out item_records,
                                 "xml",
@@ -4077,7 +4081,8 @@ namespace dp2SSL
 
                     func_setProgress?.Invoke(-1, -1, ++index, null);
 
-                    if (biblio_records != null
+                    if (entity.Title == null
+                        && biblio_records != null
                         && biblio_records.Length > 0
                         && string.IsNullOrEmpty(biblio_records[0]) == false)
                         entity.Title = biblio_records[0];
@@ -4292,6 +4297,15 @@ namespace dp2SSL
                             entity.SetData(entity.ItemRecPath, entity_xml);
                             // 2020/4/13
                             l_UpdateEntityXml("all", entity.UID, entity_xml);
+
+                            // 2020/4/26
+                            // result.Value
+                            //      0   没有找到记录。没有发生更新
+                            //      1   成功更新
+                            var result = await LibraryChannelUtil.UpdateEntityXmlAsync(entity.PII,
+                                entity_xml,
+                                null);
+
                             updates.Add(entity);
                         }
 
@@ -4663,9 +4677,9 @@ Stack:
                                 {
                                     await SelectAntennaAsync();
                                 }
-                                catch
+                                catch (Exception ex)
                                 {
-                                    // TODO: 写入错误日志
+                                    WpfClientInfo.WriteErrorLog($"关闭天线射频 SelectAntennaAsync() 时出现异常: {ExceptionUtil.GetDebugText(ex)}");
                                 }
                             });
                             _tagAdded = false;
@@ -4856,7 +4870,7 @@ TaskScheduler.Default);
                         {
                             int current_count = group.Count;    // 当前 group 包含的动作数量
 
-                            var result = SubmitCheckInOut(
+                            var result = await SubmitCheckInOutAsync(
                             (min, max, value, text) =>
                             {
                                 // 2020/4/2

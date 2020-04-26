@@ -2494,3 +2494,138 @@ new SetErrorEventArgs
             // 按原来的序
             return index_a - index_b;
         }
+
+
+        ~~~~~~~~~~~
+
+                // 获得一个册的题名字符串
+        // .Value
+        //      0   没有找到
+        //      1   找到
+        public static async Task<GetEntityDataResult> GetEntityDataAsync(string pii)
+        {
+            using (var releaser = await _channelLimit.EnterAsync())
+            {
+                LibraryChannel channel = App.CurrentApp.GetChannel();
+                TimeSpan old_timeout = channel.Timeout;
+                channel.Timeout = TimeSpan.FromSeconds(10);
+                try
+                {
+                    // TODO: ItemXml 和 BiblioSummary 可以考虑在本地缓存一段时间
+                    int nRedoCount = 0;
+                REDO_GETITEMINFO:
+                    long lRet = channel.GetItemInfo(null,
+                        "item",
+                        pii,
+                        "",
+                        "xml",
+                        out string item_xml,
+                        out string item_recpath,
+                        out _,
+                        "",
+                        out _,
+                        out _,
+                        out string strError);
+                    if (lRet == -1)
+                    {
+                        if ((channel.ErrorCode == ErrorCode.RequestError ||
+                            channel.ErrorCode == ErrorCode.RequestTimeOut)
+                            && nRedoCount < 2)
+                        {
+                            nRedoCount++;
+                            goto REDO_GETITEMINFO;
+                        }
+                        return new GetEntityDataResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError,
+                            ErrorCode = channel.ErrorCode.ToString()
+                        };
+                    }
+
+                    // 先尝试从本地书目库中获取书目摘要
+                    using (BiblioCacheContext context = new BiblioCacheContext())
+                    {
+                        if (_cacheDbCreated == false)
+                        {
+                            context.Database.EnsureCreated();
+                            _cacheDbCreated = true;
+                        }
+                        var item = context.BiblioSummaries.Where(o => o.PII == pii).FirstOrDefault();
+                        if (item != null)
+                            return new GetEntityDataResult
+                            {
+                                Value = 1,
+                                ItemXml = item_xml,
+                                ItemRecPath = item_recpath,
+                                Title = item.BiblioSummary,
+                            };
+                    }
+
+                    nRedoCount = 0;
+                REDO_GETBIBLIOSUMMARY:
+                    lRet = channel.GetBiblioSummary(
+        null,
+        pii,
+        "", // strConfirmItemRecPath,
+        null,
+        out _,
+        out string strSummary,
+        out strError);
+                    if (lRet == -1)
+                    {
+                        if ((channel.ErrorCode == ErrorCode.RequestError ||
+        channel.ErrorCode == ErrorCode.RequestTimeOut)
+        && nRedoCount < 2)
+                        {
+                            nRedoCount++;
+                            goto REDO_GETBIBLIOSUMMARY;
+                        }
+                        return new GetEntityDataResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError,
+                            ErrorCode = channel.ErrorCode.ToString(),
+                        };
+                    }
+
+                    strSummary = strSummary?.Replace(". -- ", "\r\n");   // .Replace("/", "\r\n");
+
+                    // 存入数据库备用
+                    if (lRet == 1)
+                    {
+                        try
+                        {
+                            using (BiblioCacheContext context = new BiblioCacheContext())
+                            {
+                                context.BiblioSummaries.Add(new BiblioSummaryItem
+                                {
+                                    PII = pii,
+                                    BiblioSummary = strSummary
+                                });
+                                await context.SaveChangesAsync();
+                            }
+                        }
+                        catch
+                        {
+
+                        }
+                    }
+
+                    return new GetEntityDataResult
+                    {
+                        Value = (int)lRet,
+                        ItemXml = item_xml,
+                        ItemRecPath = item_recpath,
+                        Title = strSummary,
+                        ErrorInfo = strError,
+                        ErrorCode = channel.ErrorCode.ToString()
+                    };
+                }
+                finally
+                {
+                    channel.Timeout = old_timeout;
+                    App.CurrentApp.ReturnChannel(channel);
+                }
+            }
+        }

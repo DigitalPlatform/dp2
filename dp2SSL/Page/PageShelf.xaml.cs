@@ -2673,7 +2673,7 @@ namespace dp2SSL
             // await ShelfData.SaveActionsToDatabase(actions);
 
             // 立即处理，然后在界面报错
-            var result = ShelfData.SubmitCheckInOut(
+            var result = await ShelfData.SubmitCheckInOutAsync(
                 (min, max, value, text) =>
                 {
                     if (progress != null)
