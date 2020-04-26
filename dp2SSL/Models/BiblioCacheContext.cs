@@ -18,10 +18,33 @@ namespace dp2SSL
         public string BiblioSummary { get; set; }
     }
 
+    // 册记录
+    public class EntityItem
+    {
+        public string PII { get; set; }
+        public string RecPath { get; set; }
+        public string Xml { get; set; }
+        public byte[] Timestamp { get; set; }
+    }
+
+    public class PatronItem
+    {
+        public string PII { get; set; }
+        // 绑定的 UID
+        public string Bindings { get; set; }
+        public string RecPath { get; set; }
+        public string Xml { get; set; }
+        public byte[] Timestamp { get; set; }
+    }
+
     public class BiblioCacheContext : DbContext
     {
         // 书目摘要
         public DbSet<BiblioSummaryItem> BiblioSummaries { get; set; }
+        // 册记录
+        public DbSet<EntityItem> Entities { get; set; }
+        // 读者记录
+        public DbSet<PatronItem> Patrons { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -32,11 +55,28 @@ namespace dp2SSL
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            // ***
             modelBuilder.Entity<BiblioSummaryItem>().ToTable("summary");
             modelBuilder.Entity<BiblioSummaryItem>(entity =>
             {
                 entity.HasKey(e => e.PII);
                 // entity.HasIndex(e => e.PII);
+            });
+
+            // ***
+            modelBuilder.Entity<EntityItem>().ToTable("entity");
+            modelBuilder.Entity<EntityItem>(entity =>
+            {
+                entity.HasKey(e => e.PII);
+                // entity.HasIndex(e => e.PII);
+            });
+
+            // ***
+            modelBuilder.Entity<PatronItem>().ToTable("patron");
+            modelBuilder.Entity<PatronItem>(entity =>
+            {
+                entity.HasKey(e => e.PII);
+                // entity.HasIndex(e => e.Bindings);
             });
         }
     }
