@@ -42,6 +42,22 @@ namespace dp2SSL
             }
         }
 
+        private DateTime _openTime = DateTime.MinValue;
+
+
+        // 最近一次开门的时间
+        public DateTime OpenTime
+        {
+            get
+            {
+                return _openTime;
+            }
+            set
+            {
+                _openTime = value;
+            }
+        }
+
         private string _type;
 
         // 门的类型。值可能为 空/free。free 表示这是一个安装在书柜外面的读卡器，它实际上没有门 

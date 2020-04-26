@@ -338,6 +338,8 @@ namespace dp2SSL
 
             if (e.NewState == "open")
             {
+                e.Door.OpenTime = DateTime.Now;
+
                 // ShelfData.ProcessOpenCommand(e.Door, e.Comment);
 
                 // e.Door.Waiting--;
