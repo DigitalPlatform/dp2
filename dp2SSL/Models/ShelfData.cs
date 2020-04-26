@@ -13,15 +13,16 @@ using System.Xml;
 
 using Newtonsoft.Json;
 
+using Microsoft.VisualStudio.Threading;
+
 using DigitalPlatform;
-using DigitalPlatform.LibraryClient;
-using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.WPF;
+using DigitalPlatform.IO;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
-using DigitalPlatform.WPF;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.LibraryClient.localhost;
 using static dp2SSL.LibraryChannelUtil;
-using Microsoft.VisualStudio.Threading;
-using DigitalPlatform.IO;
 
 namespace dp2SSL
 {
@@ -4630,6 +4631,96 @@ Stack:
             return requests;
         }
 
+        #region MonitorTask
+
+        static Task _monitorTask = null;
+
+        // 启动一般监控任务
+        public static void StartMonitorTask()
+        {
+            if (_monitorTask != null)
+                return;
+
+            CancellationToken token = _cancel.Token;
+
+            _monitorTask = Task.Factory.StartNew(async () =>
+            {
+                WpfClientInfo.WriteInfoLog("监控专用线程开始");
+                try
+                {
+                    while (token.IsCancellationRequested == false)
+                    {
+                        await Task.Delay(TimeSpan.FromSeconds(10));
+                        token.ThrowIfCancellationRequested();
+
+                        // ***
+                        // 关闭天线射频
+                        if (_tagAdded)
+                        {
+                            _ = Task.Run(async () =>
+                            {
+                                try
+                                {
+                                    await SelectAntennaAsync();
+                                }
+                                catch
+                                {
+                                    // TODO: 写入错误日志
+                                }
+                            });
+                            _tagAdded = false;
+                        }
+
+                        // 提醒关门
+                        WarningCloseDoor();
+                    }
+                    _monitorTask = null;
+
+                }
+                catch (Exception ex)
+                {
+                    WpfClientInfo.WriteErrorLog($"监控专用线程出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                    App.CurrentApp?.SetError("monitor", $"监控专用线程出现异常: {ex.Message}");
+                }
+                finally
+                {
+                    WpfClientInfo.WriteInfoLog("监控专用线程结束");
+                }
+            },
+token,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+        }
+
+        // 从打开门开始多少时间开始警告关门
+        static TimeSpan _warningDoorLength = TimeSpan.FromSeconds(30);
+        static DateTime _lastWarningTime;
+
+        static void WarningCloseDoor()
+        {
+            var now = DateTime.Now;
+
+            // 控制进入本函数的频率
+            if (now - _lastWarningTime < TimeSpan.FromSeconds(20))
+                return;
+
+            _lastWarningTime = now;
+
+            List<string> doors = new List<string>();
+            foreach (var door in Doors)
+            {
+                if (door.State == "open" && now - door.OpenTime > _warningDoorLength)
+                {
+                    doors.Add(door.Name);
+                }
+            }
+
+            if (doors.Count > 0)
+                App.CurrentApp.SpeakSequence($"不要忘记关门 {StringUtil.MakePathList(doors, ",")}");
+        }
+
+        #endregion
+
         static Task _retryTask = null;
 
         /*
@@ -4714,6 +4805,7 @@ Stack:
                         App.CurrentApp.EnsureConnectMessageServer().Wait(token);
 #endif
 
+#if REMOVED
                         // 顺便关闭天线射频
                         if (_tagAdded)
                         {
@@ -4730,6 +4822,7 @@ Stack:
                             });
                             _tagAdded = false;
                         }
+#endif
 
                         if (PauseSubmit)
                             continue;

@@ -223,16 +223,22 @@ namespace dp2SSL
 
             InputMethod.SetPreferredImeState(App.Current.MainWindow, InputMethodState.Off);
 
-            await TinyServer.InitialMessageQueueAsync(
+            if (App.Function == "智能书柜")
+            {
+
+                await TinyServer.InitialMessageQueueAsync(
     System.IO.Path.Combine(WpfClientInfo.UserDir, "mq.db"),
     _cancelRefresh.Token);
 
-            // 这里要等待连接完成，因为后面初始化时候需要发出点对点消息。TODO: 是否要显示一个对话框请用户等待？
-            await ConnectMessageServerAsync();
+                // 这里要等待连接完成，因为后面初始化时候需要发出点对点消息。TODO: 是否要显示一个对话框请用户等待？
+                await ConnectMessageServerAsync();
 
-            await TinyServer.DeleteAllResultsetAsync();
-            TinyServer.StartSendTask(_cancelRefresh.Token);
-            PageShelf.TrySetMessage("我这台智能书柜启动了！");
+                await TinyServer.DeleteAllResultsetAsync();
+                TinyServer.StartSendTask(_cancelRefresh.Token);
+                PageShelf.TrySetMessage("我这台智能书柜启动了！");
+
+                ShelfData.StartMonitorTask();
+            }
         }
 
         /*
