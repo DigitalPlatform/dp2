@@ -1733,6 +1733,7 @@ namespace dp2SSL
 
                 // 将刚才初始化涉及到的 action 操作写入本地数据库
                 {
+                    DateTime now = DateTime.Now;
                     List<ActionInfo> actions = new List<ActionInfo>();
                     foreach (var entity in ShelfData.l_All)
                     {
@@ -1743,7 +1744,9 @@ namespace dp2SSL
                             State = "sync",
                             SyncCount = 1,
                             CurrentShelfNo = ShelfData.GetShelfNo(entity),
-                            Operator = GetOperator(entity, false)
+                            Operator = GetOperator(entity, false),
+                            OperTime = now,
+                            SyncOperTime = now
                         });
                     }
                     DisplayMessage(progress, "正在将盘点动作写入本地数据库", "green");

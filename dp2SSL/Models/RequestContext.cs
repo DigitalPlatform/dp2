@@ -16,6 +16,15 @@ namespace dp2SSL
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ID { get; set; }
 
+        // 操作者 ID。为读者证条码号，或者 ~工作人员账户名
+        public string OperatorID { get; set; }  // 从 Operator 而来
+
+        // 同步操作时间。最后一次同步操作的时间
+        public DateTime SyncOperTime { get; set; }
+
+        // 相关操作的 ID 信息。当 Action 为 "borrow" 时，这里用作对应的还书操作的 ID。也就是说凡是这个字段为空表示尚未还书
+        public string LinkID { get; set; }
+
         public string PII { get; set; } // PII 单独从 EntityString 中抽取出来，便于进行搜索
 
         public string Action { get; set; }  // borrow/return/transfer
@@ -41,6 +50,9 @@ namespace dp2SSL
         public string CurrentShelfNo { get; set; }  // 当前架号。transfer 动作会用到
         public string BatchNo { get; set; } // 批次号。transfer 动作会用到。建议可以用当前用户名加上日期构成
 
+        // 2020/4/27
+        // 借阅信息
+        public string ActionString { get; set; }
     }
 
 #if NO
@@ -95,7 +107,8 @@ namespace dp2SSL
                 entity.HasKey(e => e.ID);
                 entity.HasIndex(e => e.OperTime);
                 entity.HasIndex(e => e.PII);
-
+                // 2020/4/27
+                entity.HasIndex(e => e.OperatorID);
                 // entity.Property(e => e.Name).IsRequired();
             });
             /*
