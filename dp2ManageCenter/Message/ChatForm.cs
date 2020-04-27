@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Collections;
+using System.Runtime.InteropServices;
 
 using Newtonsoft.Json;
 
@@ -17,7 +18,6 @@ using DigitalPlatform.Text;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.MessageClient;
 using DigitalPlatform.CirculationClient;
-using System.Runtime.InteropServices;
 
 namespace dp2ManageCenter.Message
 {
@@ -598,7 +598,10 @@ namespace dp2ManageCenter.Message
                 {
                     string data = "";   // 拼接完成的 data
                     if (string.IsNullOrEmpty(record.id))
+                    {
                         cache.Append(record.data);
+                        continue;
+                    }
                     else
                     {
                         if (cache.Length > 0)
@@ -606,6 +609,8 @@ namespace dp2ManageCenter.Message
                             cache.Append(record.data);
                             data = cache.ToString();
                             cache.Clear();
+
+                            record.data = data;
                         }
                     }
 
@@ -745,15 +750,33 @@ namespace dp2ManageCenter.Message
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
-            /*
-            menuItem = new MenuItem("删除群名(&D)");
-            menuItem.Click += new System.EventHandler(this.menu_deleteGroupName_Click);
-            if (this.dpTable_groups.SelectedRows.Count == 0)
+            menuItem = new MenuItem("查看消息正文(&T)");
+            menuItem.Click += new System.EventHandler(this.menu_displayMessageText_Click);
+            if (this.dpTable_messages.SelectedRows.Count == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
-            */
 
             contextMenu.Show(this.dpTable_messages, new Point(e.X, e.Y));
+        }
+
+        // 查看消息正文
+        void menu_displayMessageText_Click(object sender, EventArgs e)
+        {
+            StringBuilder text = new StringBuilder();
+            int count = this.dpTable_messages.SelectedRows.Count;
+            int i = 0;
+            foreach (var row in this.dpTable_messages.SelectedRows)
+            {
+                var message = row.Tag as MessageRecord;
+                if (message == null)
+                    continue;
+                if (count == 0)
+                    text.Append(message.data);
+                else
+                    text.Append($"{(i++) + 1}) {message.data}");
+            }
+
+            MessageDlg.Show(this, text.ToString(), "消息正文");
         }
 
         // 是否有小于集合中任何一天的情况？
@@ -996,7 +1019,7 @@ namespace dp2ManageCenter.Message
                 await LoadMessageAsync(_currentGroupName, this._startDate, line.Date, "insertBefore");
 
                 // 清除以前的选择
-                foreach(var c in this.dpTable_messages.SelectedRows)
+                foreach (var c in this.dpTable_messages.SelectedRows)
                 {
                     c.Selected = false;
                 }
@@ -1122,6 +1145,8 @@ namespace dp2ManageCenter.Message
             connection.AddMessage += Connection_AddMessage;
         }
 
+        StringBuilder _messageData = new StringBuilder();
+
         private void Connection_AddMessage(object sender, AddMessageEventArgs e)
         {
             P2PConnection connection = sender as P2PConnection;
@@ -1133,9 +1158,22 @@ namespace dp2ManageCenter.Message
                 {
                     UpdateGroupNameList(record.groups);
 
+
                     // 忽略不是当前群组的消息
                     if (GroupNameContains(record.groups, _currentGroupName) == false)
                         continue;
+
+                    if (string.IsNullOrEmpty(record.id))
+                    {
+                        _messageData.Append(record.data);
+                        continue;
+                    }
+
+                    if (_messageData.Length > 0)
+                    {
+                        record.data = _messageData.ToString() + record.data;
+                        _messageData.Clear();
+                    }
 
                     AddMessageLine(_currentIndex == -1 ? -1 : _currentIndex++, record);
                 }

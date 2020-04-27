@@ -23,6 +23,9 @@ using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using static dp2SSL.LibraryChannelUtil;
+using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 
 namespace dp2SSL
 {
@@ -3844,6 +3847,9 @@ namespace dp2SSL
                     string action = info.Action;
                     Entity entity = info.Entity;
 
+                    // 2020/4/27
+                    info.SyncOperTime = DateTime.Now;
+
                     // 2020/4/8
                     // 如果 PII 为空
                     if (string.IsNullOrEmpty(entity.PII))
@@ -4060,6 +4066,8 @@ namespace dp2SSL
                         App.CurrentApp.ReturnChannel(channel);
                         entity.Waiting = false;
                     }
+
+                    // borrow_info.LatestReturnTime
 
                     // 2020/3/7
                     if ((error_code == ErrorCode.RequestError
@@ -4520,6 +4528,7 @@ Stack:
                     item.SyncErrorInfo = action.SyncErrorInfo;
                     item.SyncErrorCode = action.SyncErrorCode;
                     item.SyncCount = action.SyncCount;
+                    item.SyncOperTime = action.SyncOperTime;
                     context.SaveChanges();
                 }
             }
@@ -4543,6 +4552,21 @@ Stack:
                             // 注：这样一个一个保存可以保持 ID 的严格从小到大。因为这些事项之间是有严格顺序关系的(借和还顺序不能颠倒)
                             await context.Requests.AddRangeAsync(request);
                             int nCount = await context.SaveChangesAsync();
+
+                            // 2020/4/27
+                            // 如果是还书动作，需要更新它之前的全部同 PII 的借书动作的 LinkID 字段
+                            if (request.Action == "return" || request.Action == "inventory")
+                            {
+                                var borrowRequests = context.Requests.
+                                    Where(o => o.PII == request.PII && o.Action == "borrow" && o.LinkID == null)
+                                    .ToList();
+                                foreach (var item in borrowRequests)
+                                {
+                                    item.LinkID = request.ID.ToString();
+                                    context.Requests.Update(item);
+                                    await context.SaveChangesAsync();
+                                }
+                            }
                         }
 
                         Debug.Assert(requests.Count == actions.Count, "");
@@ -4572,6 +4596,7 @@ Stack:
             {
                 using (var context = new RequestContext())
                 {
+                    // context.Database.Migrate();
                     context.Database.EnsureCreated();
                     foreach (var pii in piis)
                     {
@@ -4606,6 +4631,7 @@ Stack:
                 action.SyncErrorInfo = request.SyncErrorInfo;
                 action.SyncErrorCode = request.SyncErrorCode;
                 action.OperTime = request.OperTime;
+                action.SyncOperTime = request.SyncOperTime;
                 actions.Add(action);
             }
 
@@ -4618,6 +4644,10 @@ Stack:
             foreach (var action in actions)
             {
                 RequestItem request = new RequestItem();
+
+                // 2020/4/27
+                request.OperatorID = action.Operator?.PatronBarcode;
+
                 request.PII = action.Entity?.PII;
                 // TODO: 若 PII 为空，写入 UID?
                 request.OperatorString = action.Operator == null ? null : JsonConvert.SerializeObject(action.Operator);
@@ -4639,6 +4669,8 @@ Stack:
                     request.OperTime = DateTime.Now;
                 else
                     request.OperTime = action.OperTime;
+
+                request.SyncOperTime = action.SyncOperTime;
                 requests.Add(request);
             }
 
@@ -5489,6 +5521,8 @@ TaskScheduler.Default);
         public string SyncErrorCode { get; set; }   // 最近一次同步操作的错误码
         public int SyncCount { get; set; } // 已经进行过的同步重试次数
         public int ID { get; set; } // 日志数据库中对应的记录 ID
+
+        public DateTime SyncOperTime { get; set; }  // 最后一次同步操作的时间
 
         public override string ToString()
         {

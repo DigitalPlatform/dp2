@@ -28,17 +28,19 @@ namespace dp2ManageCenter.Message
 
         const int COLUMN_ID = 0;
         const int COLUMN_ACTION = 1;
-        const int COLUMN_PII = 2;
-        const int COLUMN_OPERTIME = 3;
-        const int COLUMN_STATE = 4;
-        const int COLUMN_ERRORCODE = 5;
-        const int COLUMN_ERRORINFO = 6;
-        const int COLUMN_SYNCCOUNT = 7;
-        const int COLUMN_SYNCOPERTIME = 8;
-        const int COLUMN_BATCHNO = 9;
-        const int COLUMN_TOSHELFNO = 10;
-        const int COLUMN_TOLOCATION = 11;
-        const int COLUMN_TRANSFERDIRECTION = 12;
+        const int COLUMN_OPERATOR = 2;
+        const int COLUMN_PII = 3;
+        const int COLUMN_OPERTIME = 4;
+        const int COLUMN_STATE = 5;
+        const int COLUMN_ERRORCODE = 6;
+        const int COLUMN_ERRORINFO = 7;
+        const int COLUMN_SYNCCOUNT = 8;
+        const int COLUMN_SYNCOPERTIME = 9;
+        const int COLUMN_LINKID = 10;
+        const int COLUMN_BATCHNO = 11;
+        const int COLUMN_TOSHELFNO = 12;
+        const int COLUMN_TOLOCATION = 13;
+        const int COLUMN_TRANSFERDIRECTION = 14;
 
         public ShelfSearchForm()
         {
@@ -283,12 +285,15 @@ namespace dp2ManageCenter.Message
             ListViewUtil.ChangeItemText(item, COLUMN_ID, request.ID.ToString());
             ListViewUtil.ChangeItemText(item, COLUMN_PII, request.PII);
             ListViewUtil.ChangeItemText(item, COLUMN_ACTION, request.Action);
+            ListViewUtil.ChangeItemText(item, COLUMN_OPERATOR, request.OperatorID);
+
             ListViewUtil.ChangeItemText(item, COLUMN_OPERTIME, request.OperTime.ToString());
             ListViewUtil.ChangeItemText(item, COLUMN_STATE, request.State);
             ListViewUtil.ChangeItemText(item, COLUMN_ERRORCODE, request.SyncErrorCode);
             ListViewUtil.ChangeItemText(item, COLUMN_ERRORINFO, request.SyncErrorInfo);
             ListViewUtil.ChangeItemText(item, COLUMN_SYNCCOUNT, request.SyncCount.ToString());
-            ListViewUtil.ChangeItemText(item, COLUMN_SYNCOPERTIME, "");
+            ListViewUtil.ChangeItemText(item, COLUMN_SYNCOPERTIME, request.SyncOperTime.ToString());
+            ListViewUtil.ChangeItemText(item, COLUMN_LINKID, request.LinkID);
             ListViewUtil.ChangeItemText(item, COLUMN_BATCHNO, request.BatchNo);
             ListViewUtil.ChangeItemText(item, COLUMN_TOSHELFNO, request.CurrentShelfNo);
             ListViewUtil.ChangeItemText(item, COLUMN_TOLOCATION, request.Location);
@@ -560,6 +565,14 @@ namespace dp2ManageCenter.Message
         public string Location { get; set; }    // 所有者馆藏地。transfer 动作会用到
         public string CurrentShelfNo { get; set; }  // 当前架号。transfer 动作会用到
         public string BatchNo { get; set; } // 批次号。transfer 动作会用到。建议可以用当前用户名加上日期构成
+
+        // 操作者 ID。为读者证条码号，或者 ~工作人员账户名
+        public string OperatorID { get; set; }  // 从 Operator 而来
+
+        // 同步操作时间。最后一次同步操作的时间
+        public DateTime SyncOperTime { get; set; }
+
+        public string LinkID { get; set; }
     }
 
     public class DoubleBufferdListView : ListView

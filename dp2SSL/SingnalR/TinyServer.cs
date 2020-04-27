@@ -141,10 +141,74 @@ TaskScheduler.Default);
                             groups= new string[] { GroupName},
                             data = content}
                 });
-            await _queue.PushAsync(new List<string> { JsonConvert.SerializeObject(request) });
+
+            // 2020/4/27 增加 chunk 能力
+            {
+                int chunk_size = 4096;
+                int length = GetLength(request);
+                if (length < chunk_size)
+                {
+                    await _queue.PushAsync(new List<string> { JsonConvert.SerializeObject(request) }).ConfigureAwait(false);
+                    return;
+                }
+
+                // SetMessageResult result = null;
+                foreach (MessageRecord record in request.Records)
+                {
+                    string taskID = Guid.NewGuid().ToString();
+                    string data = record.data;
+                    int send = 0;
+                    for (; ; )
+                    {
+                        SetMessageRequest current_request = new SetMessageRequest();
+                        current_request.TaskID = taskID;
+                        current_request.Style = request.Style;
+                        current_request.Action = request.Action;
+                        current_request.Records = new List<MessageRecord>();
+                        MessageRecord current_record = new MessageRecord();
+                        // TODO: 除了第一次请求外，其它的都只要 .data 成员具备即可
+                        current_record.CopyFrom(record);
+                        current_record.data = data.Substring(send, Math.Min(chunk_size, data.Length - send));
+                        current_request.Records.Add(current_record);
+                        // 这一次就是最后一次
+                        if (send + current_record.data.Length >= data.Length)
+                        {
+                            MessageRecord tail_record = new MessageRecord();
+                            tail_record.data = null;    // 表示结束
+                            current_request.Records.Add(tail_record);
+                        }
+
+                        await _queue.PushAsync(new List<string> { JsonConvert.SerializeObject(current_request) }).ConfigureAwait(false);
+                        /*
+                        result = await TrySetMessageAsync(current_request).ConfigureAwait(false);
+                        if (result.Value == -1)
+                            return result;  // 中途出错了
+                            */
+
+                        send += current_record.data.Length;
+                        if (send >= data.Length)
+                            break;
+                    }
+                }
+            }
             ActivateSend();
             // return SetMessageAsync(request);
         }
+
+        static int GetLength(SetMessageRequest request)
+        {
+            if (request.Records == null)
+                return 0;
+            int length = 0;
+            foreach (MessageRecord record in request.Records)
+            {
+                if (record.data != null)
+                    length += record.data.Length;
+            }
+
+            return length;
+        }
+
 
         #endregion
 
@@ -409,9 +473,16 @@ IList<MessageRecord> messages)
             }
 
             // 检查册状态
-            if (command.StartsWith("check"))
+            if (command.StartsWith("check book"))
             {
                 await CheckBookAsync(command);
+                return;
+            }
+
+            // 检查读者状态
+            if (command.StartsWith("check patron"))
+            {
+                await CheckPatronAsync(command);
                 return;
             }
 
@@ -469,11 +540,96 @@ IList<MessageRecord> messages)
             }
         }
 
+        // 检查读者状态
+        static async Task CheckPatronAsync(string command)
+        {
+            // 子参数
+            string param = command.Substring("check patron".Length).Trim();
+
+            // 目前子参数为 PII
+            param = param.ToUpper();
+
+            // TODO: 用一段文字描述这一册的总体状态。特别是是否同步成功，本地库最新状态和 dp2library 一端是否吻合
+
+            using (var context = new RequestContext())
+            {
+                StringBuilder text = new StringBuilder();
+                text.AppendLine($"> {command}\r\n");
+
+                // 显示该读者的在借册情况
+                var borrows = context.Requests
+                    .Where(o => o.OperatorID == param && o.Action == "borrow" && o.LinkID == null)
+                    .OrderBy(o => o.ID).ToList();
+                if (borrows.Count == 0)
+                    text.AppendLine($"操作历史中，该读者目前没有在借册");
+                else
+                {
+                    text.AppendLine($"操作历史中，该读者目前有 {borrows.Count} 个在借册");
+                    int j = 0;
+                    foreach (var item in borrows)
+                    {
+                        var title = GetEntityTitle(item.EntityString);
+                        text.AppendLine($"{(j++) + 1}) [{item.PII}] {title} 借阅日期:{item.OperTime.ToString()}");
+                    }
+                }
+
+                text.AppendLine();
+
+                // dp2library 一端的读者记录
+                var result = LibraryChannelUtil.GetReaderInfo(param);
+                if (result.Value == -1)
+                    text.AppendLine($"获得读者记录时出错: {result.ErrorInfo}");
+                else
+                {
+                    string xml = DomUtil.GetIndentXml(result.ReaderXml);
+                    text.AppendLine($"读者记录\r\n{xml}");
+                }
+
+                text.AppendLine();
+
+                // 关于这个 PII 的最新 10 操作
+                var items = context.Requests.Where(o => o.OperatorID == param)
+                    .OrderByDescending(o => o.ID).Take(10).ToList();
+
+                text.AppendLine($"证条码号 为 {param} 的读者最新操作历史 {items.Count} 个");
+                int i = 1;
+                foreach (var item in items)
+                {
+                    text.AppendLine($"{i++}\r\n{SimpleRequestItem.GetDisplayString(item)}");
+                }
+
+
+                /*
+                // 获得 dp2library 中的册记录
+                var result = await LibraryChannelUtil.GetEntityDataAsync(param);
+                if (result.Value == -1 || result.Value == 0)
+                    text.AppendLine($"尝试获得册记录时出错: {result.ErrorInfo}");
+                else
+                    text.AppendLine($"册记录:\r\n{DomUtil.GetIndentXml(result.ItemXml)}");
+                    */
+
+                await SendMessageAsync(text.ToString());
+            }
+        }
+
+        class EntityTemplate
+        {
+            public string Title { get; set; }
+        }
+
+        static string GetEntityTitle(string entityString)
+        {
+            var template = JsonConvert.DeserializeObject<EntityTemplate>(entityString);
+            if (template == null)
+                return "";
+            return template.Title;
+        }
+
         // 检查册状态
         static async Task CheckBookAsync(string command)
         {
             // 子参数
-            string param = command.Substring("check".Length).Trim();
+            string param = command.Substring("check book".Length).Trim();
 
             // 目前子参数为 PII
             param = param.ToUpper();
@@ -638,9 +794,16 @@ IList<MessageRecord> messages)
             public string State { get; set; }   // 状态。sync/commerror/normalerror/空
                                                 // 表示是否完成同步，还是正在出错重试同步阶段，还是从未同步过
 
+            // 操作者 ID。为读者证条码号，或者 ~工作人员账户名
+            public string OperatorID { get; set; }  // 从 Operator 而来
+            public string LinkID { get; set; }
+
             public string SyncErrorCode { get; set; }
             public string SyncErrorInfo { get; set; }   // 最近一次同步操作的报错信息
             public int SyncCount { get; set; }
+
+            // 同步操作时间。最后一次同步操作的时间
+            public DateTime SyncOperTime { get; set; }
 
             public Operator Operator { get; set; }  // 提起请求的读者
 
@@ -651,11 +814,17 @@ IList<MessageRecord> messages)
             public string CurrentShelfNo { get; set; }  // 当前架号。transfer 动作会用到
             public string BatchNo { get; set; } // 批次号。transfer 动作会用到。建议可以用当前用户名加上日期构成
 
+            // 2020/4/27
+            public string ActionString { get; set; }
+
             public static string GetDisplayString(RequestItem item)
             {
                 DisplayRequestItem result = new DisplayRequestItem
                 {
                     ID = item.ID,
+                    OperatorID = item.OperatorID,
+                    LinkID = item.LinkID,
+                    SyncOperTime = item.SyncOperTime,
                     PII = item.PII,
                     Action = item.Action,
                     OperTime = item.OperTime,
@@ -669,6 +838,7 @@ IList<MessageRecord> messages)
                     Location = item.Location,
                     CurrentShelfNo = item.CurrentShelfNo,
                     BatchNo = item.BatchNo,
+                    ActionString = item.ActionString,
                 };
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }

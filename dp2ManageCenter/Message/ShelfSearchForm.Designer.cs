@@ -40,9 +40,11 @@
             this.comboBox_query_myAccount = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
             this.button_search = new System.Windows.Forms.Button();
+            this.button_stop = new System.Windows.Forms.Button();
             this.listView_records = new dp2ManageCenter.Message.DoubleBufferdListView();
             this.columnHeader_id = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_action = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_operator = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_pii = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_operTime = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_state = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -54,7 +56,7 @@
             this.columnHeader_toShelfNo = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_toLocation = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_transferDirection = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.button_stop = new System.Windows.Forms.Button();
+            this.columnHeader_linkID = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.panel_query.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -200,6 +202,17 @@
             this.button_search.UseVisualStyleBackColor = true;
             this.button_search.Click += new System.EventHandler(this.button_search_Click);
             // 
+            // button_stop
+            // 
+            this.button_stop.Enabled = false;
+            this.button_stop.Location = new System.Drawing.Point(732, 67);
+            this.button_stop.Name = "button_stop";
+            this.button_stop.Size = new System.Drawing.Size(164, 41);
+            this.button_stop.TabIndex = 3;
+            this.button_stop.Text = "停止";
+            this.button_stop.UseVisualStyleBackColor = true;
+            this.button_stop.Click += new System.EventHandler(this.button_stop_Click);
+            // 
             // listView_records
             // 
             this.listView_records.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -208,6 +221,7 @@
             this.listView_records.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader_id,
             this.columnHeader_action,
+            this.columnHeader_operator,
             this.columnHeader_pii,
             this.columnHeader_operTime,
             this.columnHeader_state,
@@ -215,6 +229,7 @@
             this.columnHeader_errorInfo,
             this.columnHeader_syncCount,
             this.columnHeader_syncOperTime,
+            this.columnHeader_linkID,
             this.columnHeader_batchNo,
             this.columnHeader_toShelfNo,
             this.columnHeader_toLocation,
@@ -239,6 +254,11 @@
             // 
             this.columnHeader_action.Text = "动作";
             this.columnHeader_action.Width = 130;
+            // 
+            // columnHeader_operator
+            // 
+            this.columnHeader_operator.Text = "操作者";
+            this.columnHeader_operator.Width = 151;
             // 
             // columnHeader_pii
             // 
@@ -295,16 +315,10 @@
             this.columnHeader_transferDirection.Text = "典藏移交方向";
             this.columnHeader_transferDirection.Width = 180;
             // 
-            // button_stop
+            // columnHeader_linkID
             // 
-            this.button_stop.Enabled = false;
-            this.button_stop.Location = new System.Drawing.Point(732, 67);
-            this.button_stop.Name = "button_stop";
-            this.button_stop.Size = new System.Drawing.Size(164, 41);
-            this.button_stop.TabIndex = 3;
-            this.button_stop.Text = "停止";
-            this.button_stop.UseVisualStyleBackColor = true;
-            this.button_stop.Click += new System.EventHandler(this.button_stop_Click);
+            this.columnHeader_linkID.Text = "关联 ID";
+            this.columnHeader_linkID.Width = 100;
             // 
             // ShelfSearchForm
             // 
@@ -357,5 +371,7 @@
         private System.Windows.Forms.ColumnHeader columnHeader_toLocation;
         private System.Windows.Forms.ColumnHeader columnHeader_transferDirection;
         private System.Windows.Forms.Button button_stop;
+        private System.Windows.Forms.ColumnHeader columnHeader_operator;
+        private System.Windows.Forms.ColumnHeader columnHeader_linkID;
     }
 }
