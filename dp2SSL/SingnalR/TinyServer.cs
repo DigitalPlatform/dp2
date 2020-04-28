@@ -13,12 +13,13 @@ using Microsoft.AspNet.SignalR.Client;
 using Z.Expressions;
 
 using DigitalPlatform;
+using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
 using DigitalPlatform.WPF;
 using DigitalPlatform.Text;
 using DigitalPlatform.MessageClient;
 using DigitalPlatform.SimpleMessageQueue;
-using DigitalPlatform.IO;
+using Microsoft.VisualStudio.Threading;
 
 namespace dp2SSL
 {
@@ -149,6 +150,7 @@ TaskScheduler.Default);
                 if (length < chunk_size)
                 {
                     await _queue.PushAsync(new List<string> { JsonConvert.SerializeObject(request) }).ConfigureAwait(false);
+                    ActivateSend();
                     return;
                 }
 
@@ -400,30 +402,432 @@ TaskScheduler.Default);
             return text.ToString();
         }
 
+        #region 接收和处理聊天消息
+
         // 收到消息。被当作命令解释。执行后发回命令执行结果
         static void OnAddMessageRecieved(string action,
 IList<MessageRecord> messages)
         {
             _ = Task.Run(async () =>
             {
-                try
-                {
-                    foreach (var message in messages)
-                    {
-                        // TODO: 忽略自己发出的消息?
-                        if (message.data.StartsWith($"@{_userName}"))
-                        {
-                            string command = message.data.Substring($"@{_userName}".Length).Trim();
-                            await ProcessCommandAsync(command);
-                        }
-                    }
-                }
-                catch
-                {
-                    // TODO: 写入错误日志
-                }
+                if (action == "create")
+                    await ProcessMessages(messages);
             });
         }
+
+        static async Task ProcessMessages(IList<MessageRecord> messages)
+        {
+            try
+            {
+                foreach (var message in messages)
+                {
+                    // TODO: 忽略自己发出的消息?
+                    if (message.data.StartsWith($"@{_userName}"))
+                    {
+                        string command = message.data.Substring($"@{_userName}".Length).Trim();
+                        await ProcessCommandAsync(command);
+                    }
+                }
+            }
+            catch
+            {
+                // TODO: 写入错误日志
+            }
+        }
+
+        public delegate void Delegate_outputMessage(
+StringBuilder cache,
+long totalCount,
+long start,
+IList<MessageRecord> records,
+string errorInfo,
+string errorCode);
+
+        public static async Task<MessageResult> GetMessageAsyncLite(
+GetMessageRequest request,
+Delegate_outputMessage proc,
+TimeSpan timeout,
+CancellationToken token)
+        {
+            MessageResult result = new MessageResult();
+
+            if (string.IsNullOrEmpty(request.TaskID) == true)
+                request.TaskID = Guid.NewGuid().ToString();
+
+            long recieved = 0;
+
+            StringBuilder cache = new StringBuilder();
+
+            using (WaitEvents wait_events = new WaitEvents())    // 表示中途数据到来
+            {
+                using (var handler = HubProxy.On<
+                    string, long, long, IList<MessageRecord>, string, string>(
+                    "responseGetMessage",
+                    (taskID, resultCount, start, records, errorInfo, errorCode) =>
+                    {
+                        if (taskID != request.TaskID)
+                            return;
+
+                        if (resultCount == -1 || start == -1)
+                        {
+                            if (start == -1)
+                            {
+                                // 表示发送响应过程已经结束。只是起到通知的作用，不携带任何信息
+                                // result.Finished = true;
+                            }
+                            else
+                            {
+                                result.Value = resultCount;
+                                result.ErrorInfo = errorInfo;
+                                result.String = errorCode;
+                            }
+                            wait_events.finish_event.Set();
+                            return;
+                        }
+
+                        proc(
+                            cache,
+                            resultCount,
+                            start,
+                            records,
+                            errorInfo,
+                            errorCode);
+
+                        if (records != null)
+                            recieved += GetCount(records);  // records.Count;
+
+                        if (errorCode == "_complete")
+                        {
+                            result.Value = resultCount;
+                            wait_events.finish_event.Set();
+                            return;
+                        }
+
+                        if (resultCount >= 0 &&
+                            IsComplete(request.Start, request.Count, resultCount, recieved) == true)
+                            wait_events.finish_event.Set();
+                        else
+                            wait_events.active_event.Set();
+                    }))
+                {
+                    MessageResult temp = await HubProxy.Invoke<MessageResult>(
+"RequestGetMessage",
+request).ConfigureAwait(false);
+                    if (temp.Value == -1 || temp.Value == 0 || temp.Value == 2)
+                        return temp;
+
+                    // result.String 里面是返回的 taskID
+
+                    await WaitAsync(
+    request.TaskID,
+    wait_events,
+    timeout,
+    token).ConfigureAwait(false);
+                    return result;
+                }
+            }
+        }
+
+        static bool IsComplete(long requestStart,
+long requestCount,
+long totalCount,
+long recordsCount)
+        {
+            long tail = 0;
+            if (requestCount != -1)
+                tail = Math.Min(requestStart + requestCount, totalCount);
+            else
+                tail = totalCount;
+
+            if (requestStart + recordsCount >= totalCount)
+                return true;
+            return false;
+        }
+
+        // 计算列表中完满元素的个数。所谓完满元素就是 id 不是空的元素
+        static int GetCount(IList<MessageRecord> records)
+        {
+            int count = 0;
+            foreach (MessageRecord record in records)
+            {
+                if (string.IsNullOrEmpty(record.id) == false)
+                    count++;
+            }
+
+            return count;
+        }
+
+        internal class WaitEvents : IDisposable
+        {
+            public ManualResetEvent finish_event = new ManualResetEvent(false);    // 表示数据全部到来
+            public AutoResetEvent active_event = new AutoResetEvent(false);    // 表示中途数据到来
+
+            public virtual void Dispose()
+            {
+                finish_event.Dispose();
+                active_event.Dispose();
+            }
+        }
+
+
+        static Task WaitAsync(string taskID,
+    WaitEvents wait_events,
+    TimeSpan timeout,
+    CancellationToken cancellation_token)
+        {
+            return TaskRunAction(
+    () =>
+    {
+        Wait(taskID, wait_events, timeout, cancellation_token);
+    },
+cancellation_token);
+        }
+
+        static void Wait(string taskID,
+            WaitEvents wait_events,
+            TimeSpan timeout,
+            CancellationToken cancellation_token)
+        {
+            DateTime start_time = DateTime.Now; // 其实可以不用
+
+            WaitHandle[] events = null;
+
+            if (cancellation_token != null)
+            {
+                events = new WaitHandle[3];
+                events[0] = wait_events.finish_event;
+                events[1] = wait_events.active_event;
+                events[2] = cancellation_token.WaitHandle;
+            }
+            else
+            {
+                events = new WaitHandle[2];
+                events[0] = wait_events.finish_event;
+                events[1] = wait_events.active_event;
+            }
+
+            while (true)
+            {
+                int index = WaitHandle.WaitAny(events,
+                    timeout,
+                    true); // false
+
+                if (index == 0) // 正常完成
+                    return; //  result;
+                else if (index == 1)
+                {
+                    start_time = DateTime.Now;  // 重新计算超时开始时刻
+                    Debug.WriteLine("重新计算超时开始时间 " + start_time.ToString());
+                }
+                else if (index == 2)
+                {
+                    if (cancellation_token != null)
+                    {
+                        // 向服务器发送 CancelSearch 请求
+                        CancelSearchAsync(taskID);
+                        cancellation_token.ThrowIfCancellationRequested();
+                    }
+                }
+                else if (index == WaitHandle.WaitTimeout)
+                {
+                    // if (DateTime.Now - start_time >= timeout)
+                    {
+                        Debug.WriteLine("超时。delta=" + (DateTime.Now - start_time).TotalSeconds.ToString());
+                        // 向服务器发送 CancelSearch 请求
+                        CancelSearchAsync(taskID);
+                        throw new TimeoutException("已超时 " + timeout.ToString());
+                    }
+                }
+            }
+        }
+
+        // 请求服务器中断一个 task
+        public static Task<MessageResult> CancelSearchAsync(string taskID)
+        {
+            return HubProxy.Invoke<MessageResult>(
+                "CancelSearch",
+                taskID);
+        }
+
+        public static Task TaskRunAction(Action function, CancellationToken cancellationToken)
+        {
+            return Task.Factory.StartNew(
+                function,
+                cancellationToken,
+                TaskCreationOptions.LongRunning, TaskScheduler.Default);
+        }
+
+
+        static int _inGetMessage = 0;  // 防止因为 ConnectionStateChange 事件导致重入
+
+        // 获得指定时间范围的消息
+        // 装载已经存在的消息记录
+        static async Task LoadMessageAsync(string strGroupName,
+            string strStartDate,
+            string strEndDate
+            // string strStyle
+            )
+        {
+            if (_inGetMessage > 0)
+                return;
+
+            _inGetMessage++;
+            try
+            {
+                string strError = "";
+
+#if NO
+                // TODO: 如果当前 Connection 尚未连接，则要促使它连接，然后重试 load
+                if (Program.MainForm.MessageHub.IsConnected == false)
+                {
+                    if (_redoLoadMesssageCount < 5)
+                    {
+                        AddErrorLine("当前点对点连接尚未建立。重试操作中 ...");
+                        Program.MainForm.MessageHub.Connect();
+                        Thread.Sleep(5000);
+                        _redoLoadMesssageCount++;
+                        // await Task.Factory.StartNew(() => DoLoadMessage(strGroupName, strTimeRange, bClearAll));
+                        await DoLoadMessage(strGroupName, strTimeRange, bClearAll);
+                        return;
+                    }
+                    else
+                    {
+                        AddErrorLine("当前点对点连接尚未建立。停止重试。消息装载失败。");
+                        _redoLoadMesssageCount = 0; // 以后再调用本函数，就重新计算重试次数
+                        return;
+                    }
+                }
+#endif
+
+                {
+                    CancellationToken cancel_token = new CancellationToken();
+
+                    string id = Guid.NewGuid().ToString();
+                    GetMessageRequest request = new GetMessageRequest(id,
+                        strGroupName, // "<default>" 表示默认群组
+                        "",
+                        strStartDate + "~" + strEndDate,
+                        0,
+                        -1);
+                    try
+                    {
+                        MessageResult result = await GetMessageAsyncLite(
+                            request,
+                            FillMessage,
+                            new TimeSpan(0, 1, 0),
+                            cancel_token);
+                        if (result.Value == -1)
+                        {
+                            //strError = result.ErrorInfo;
+                            //goto ERROR1;
+                            return;
+                        }
+
+                        // 成功
+                    }
+                    catch (AggregateException ex)
+                    {
+                        strError = MessageConnection.GetExceptionText(ex);
+                        goto ERROR1;
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = ex.Message;
+                        goto ERROR1;
+                    }
+                    return;
+                }
+
+            ERROR1:
+                //this.Invoke((Action)(() => MessageBox.Show(this, strError)));
+                return;
+            }
+            finally
+            {
+                _inGetMessage--;
+            }
+        }
+
+        // 拼接后 data 的最大长度
+        const int MAX_MESSAGE_DATA_LENGTH = 1024 * 1024;
+
+        static void FillMessage(
+    StringBuilder cache,
+    long totalCount,
+    long start,
+    IList<MessageRecord> records,
+    string errorInfo,
+    string errorCode)
+        {
+            if (totalCount == -1)
+            {
+                StringBuilder text = new StringBuilder();
+                text.Append("***\r\n");
+                text.Append("totalCount=" + totalCount + "\r\n");
+                text.Append("errorInfo=" + errorInfo + "\r\n");
+                text.Append("errorCode=" + errorCode + "\r\n");
+
+                return;
+            }
+
+            if (records != null)
+            {
+                foreach (MessageRecord record in records)
+                {
+                    string data = "";   // 拼接完成的 data
+                    if (string.IsNullOrEmpty(record.id)
+                        && cache.Length < MAX_MESSAGE_DATA_LENGTH)
+                    {
+                        cache.Append(record.data);
+                        continue;
+                    }
+                    else
+                    {
+                        if (cache.Length > 0)
+                        {
+                            cache.Append(record.data);
+                            data = cache.ToString();
+                            cache.Clear();
+
+                            record.data = data;
+                        }
+                    }
+
+                    _ = ProcessMessages(new List<MessageRecord> { record });
+
+                    /*
+                    StringBuilder text = new StringBuilder();
+                    text.Append("***\r\n");
+                    text.Append("id=" + HttpUtility.HtmlEncode(record.id) + "\r\n");
+                    text.Append("data=" + HttpUtility.HtmlEncode(record.data) + "\r\n");
+                    if (record.data != null)
+                        text.Append("data.Length=" + record.data.Length + "\r\n");
+
+                    if (string.IsNullOrEmpty(data) == false)
+                        text.Append("concated data=" + HttpUtility.HtmlEncode(data) + "\r\n");
+
+                    if (record.groups != null)
+                        text.Append("groups=" + HttpUtility.HtmlEncode(string.Join(",", record.groups)) + "\r\n");
+                    text.Append("creator=" + HttpUtility.HtmlEncode(record.creator) + "\r\n");
+                    text.Append("userName=" + HttpUtility.HtmlEncode(record.userName) + "\r\n");
+
+                    text.Append("format=" + HttpUtility.HtmlEncode(record.format) + "\r\n");
+                    text.Append("type=" + HttpUtility.HtmlEncode(record.type) + "\r\n");
+                    text.Append("thread=" + HttpUtility.HtmlEncode(record.thread) + "\r\n");
+
+                    if (record.subjects != null)
+                        text.Append("subjects=" + HttpUtility.HtmlEncode(string.Join(SUBJECT_DELIM, record.subjects)) + "\r\n");
+
+                    text.Append("publishTime=" + HttpUtility.HtmlEncode(record.publishTime.ToString("G")) + "\r\n");
+                    text.Append("expireTime=" + HttpUtility.HtmlEncode(record.expireTime) + "\r\n");
+                    AppendHtml(this.webBrowser_message, text.ToString());
+                    */
+                }
+            }
+        }
+
+
+        #endregion
 
         // 当 server 发来检索请求的时候被调用。重载的时候要进行检索，并调用 Response 把检索结果发送给 server
         static void OnSearchBiblioRecieved(SearchRequest param)
@@ -1145,6 +1549,8 @@ out string strError);
             }
         }
 
+        static string _libraryUID = Guid.NewGuid().ToString();
+
         // TODO: 结果集用 ID 数组表示? 早期可只支持 default 这一个结果集
         static async Task SearchHistoryAsync(SearchRequest searchParam)
         {
@@ -1190,7 +1596,7 @@ out string strError);
 searchParam.TaskID,
 GetResultsetLength(strResultSetName),
 searchParam.Start,
-"", // libraryUID,
+_libraryUID, // libraryUID,
 records,
 "", // errorInfo,
 "", // errorCode,
@@ -1222,7 +1628,7 @@ records,
     searchParam.TaskID,
     0,
     0,
-    "", // this.dp2library.LibraryUID,
+    _libraryUID, // this.dp2library.LibraryUID,
     records,
     "没有命中",  // 出错信息大概为 not found。
     "NotFound"));
@@ -1237,7 +1643,7 @@ records,
                                 searchParam.TaskID,
                                 result_count,
     0,
-    "", // this.dp2library.LibraryUID,
+    _libraryUID, // this.dp2library.LibraryUID,
     records,
     "本次没有返回任何记录",
     strErrorCode));
@@ -1277,7 +1683,7 @@ records,
     searchParam.TaskID,
     result_count,
     searchParam.Start,
-    "", // libraryUID,
+    _libraryUID, // libraryUID,
     records,
     "", // errorInfo,
     "", // errorCode,
@@ -1299,7 +1705,7 @@ records,
 searchParam.TaskID,
 -1,
 0,
-"", // this.dp2library.LibraryUID,
+_libraryUID, // this.dp2library.LibraryUID,
 records,
 strError,
 strErrorCode));

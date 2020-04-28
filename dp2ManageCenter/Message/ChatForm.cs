@@ -573,6 +573,9 @@ namespace dp2ManageCenter.Message
 
         #endregion
 
+        // 拼接后 data 的最大长度
+        const int MAX_MESSAGE_DATA_LENGTH = 1024 * 1024;
+
         void FillMessage(
     StringBuilder cache,
     long totalCount,
@@ -597,7 +600,8 @@ namespace dp2ManageCenter.Message
                 foreach (MessageRecord record in records)
                 {
                     string data = "";   // 拼接完成的 data
-                    if (string.IsNullOrEmpty(record.id))
+                    if (string.IsNullOrEmpty(record.id)
+                        && cache.Length < MAX_MESSAGE_DATA_LENGTH)
                     {
                         cache.Append(record.data);
                         continue;
@@ -1145,6 +1149,7 @@ namespace dp2ManageCenter.Message
             connection.AddMessage += Connection_AddMessage;
         }
 
+        // 用于拼接 data 的缓冲区
         StringBuilder _messageData = new StringBuilder();
 
         private void Connection_AddMessage(object sender, AddMessageEventArgs e)
@@ -1163,7 +1168,8 @@ namespace dp2ManageCenter.Message
                     if (GroupNameContains(record.groups, _currentGroupName) == false)
                         continue;
 
-                    if (string.IsNullOrEmpty(record.id))
+                    if (string.IsNullOrEmpty(record.id)
+                        && _messageData.Length < MAX_MESSAGE_DATA_LENGTH)
                     {
                         _messageData.Append(record.data);
                         continue;

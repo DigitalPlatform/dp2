@@ -52,11 +52,14 @@
             this.columnHeader_errorInfo = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_syncCount = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_syncOperTime = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_actionInfo = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_linkID = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_batchNo = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_toShelfNo = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_toLocation = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_transferDirection = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader_linkID = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_bookTitle = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_name = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.panel_query.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -222,13 +225,16 @@
             this.columnHeader_id,
             this.columnHeader_action,
             this.columnHeader_operator,
+            this.columnHeader_name,
             this.columnHeader_pii,
+            this.columnHeader_bookTitle,
             this.columnHeader_operTime,
             this.columnHeader_state,
             this.columnHeader_errorCode,
             this.columnHeader_errorInfo,
             this.columnHeader_syncCount,
             this.columnHeader_syncOperTime,
+            this.columnHeader_actionInfo,
             this.columnHeader_linkID,
             this.columnHeader_batchNo,
             this.columnHeader_toShelfNo,
@@ -295,6 +301,16 @@
             this.columnHeader_syncOperTime.Text = "最后同步时间";
             this.columnHeader_syncOperTime.Width = 180;
             // 
+            // columnHeader_actionInfo
+            // 
+            this.columnHeader_actionInfo.Text = "操作细节";
+            this.columnHeader_actionInfo.Width = 100;
+            // 
+            // columnHeader_linkID
+            // 
+            this.columnHeader_linkID.Text = "关联 ID";
+            this.columnHeader_linkID.Width = 100;
+            // 
             // columnHeader_batchNo
             // 
             this.columnHeader_batchNo.Text = "批次号";
@@ -315,10 +331,15 @@
             this.columnHeader_transferDirection.Text = "典藏移交方向";
             this.columnHeader_transferDirection.Width = 180;
             // 
-            // columnHeader_linkID
+            // columnHeader_bookTitle
             // 
-            this.columnHeader_linkID.Text = "关联 ID";
-            this.columnHeader_linkID.Width = 100;
+            this.columnHeader_bookTitle.Text = "书名";
+            this.columnHeader_bookTitle.Width = 100;
+            // 
+            // columnHeader_name
+            // 
+            this.columnHeader_name.Text = "姓名";
+            this.columnHeader_name.Width = 80;
             // 
             // ShelfSearchForm
             // 
@@ -373,5 +394,8 @@
         private System.Windows.Forms.Button button_stop;
         private System.Windows.Forms.ColumnHeader columnHeader_operator;
         private System.Windows.Forms.ColumnHeader columnHeader_linkID;
+        private System.Windows.Forms.ColumnHeader columnHeader_actionInfo;
+        private System.Windows.Forms.ColumnHeader columnHeader_name;
+        private System.Windows.Forms.ColumnHeader columnHeader_bookTitle;
     }
 }

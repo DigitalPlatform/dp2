@@ -296,6 +296,11 @@ namespace dp2SSL
                 var result = await TinyServer.ConnectAsync(messageServerUrl, messageUserName, messagePassword, "");
                 if (result.Value == -1)
                     WpfClientInfo.WriteErrorLog($"连接消息服务器失败: {result.ErrorInfo}。url={messageServerUrl},userName={messageUserName},errorCode={result.ErrorCode}");
+                else
+                {
+                    // 重新装载一次间歇期间新产生的消息
+
+                }
             }
         }
 
