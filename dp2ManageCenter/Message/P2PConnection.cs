@@ -543,6 +543,7 @@ request).ConfigureAwait(false);
 
                     try
                     {
+                        // TODO: 当检索一个目标的时候，不应该长时间等待其他目标
                         await WaitAsync(
         request.TaskID,
         wait_events,

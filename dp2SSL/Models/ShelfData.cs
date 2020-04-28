@@ -3951,6 +3951,7 @@ namespace dp2SSL
                     string[] item_records = null;
                     string[] biblio_records = null;
                     BorrowInfo borrow_info = null;
+                    ReturnInfo return_info = null;
 
                     string strUserName = info.Operator?.GetWorkerAccountName();
 
@@ -4022,7 +4023,7 @@ namespace dp2SSL
                                 out biblio_records,
                                 out string[] dup_path,
                                 out string output_reader_barcode,
-                                out ReturnInfo return_info,
+                                out return_info,
                                 out strError);
                         }
                         else if (action == "transfer")
@@ -4054,7 +4055,7 @@ namespace dp2SSL
                                 out biblio_records,
                                 out string[] dup_path,
                                 out string output_reader_barcode,
-                                out ReturnInfo return_info,
+                                out return_info,
                                 out strError);
                         }
 
@@ -4067,7 +4068,6 @@ namespace dp2SSL
                         entity.Waiting = false;
                     }
 
-                    // borrow_info.LatestReturnTime
 
                     // 2020/3/7
                     if ((error_code == ErrorCode.RequestError
@@ -4079,6 +4079,21 @@ namespace dp2SSL
                     }
 
                     processed.Add(info);
+
+                    if (info.Action == "borrow")
+                    {
+                        if (borrow_info == null)
+                            info.ActionString = null;
+                        else
+                            info.ActionString = JsonConvert.SerializeObject(borrow_info);
+                    }
+                    else
+                    {
+                        if (return_info == null)
+                            info.ActionString = null;
+                        else
+                            info.ActionString = JsonConvert.SerializeObject(return_info);
+                    }
 
                     /*
                     // testing
@@ -4529,6 +4544,7 @@ Stack:
                     item.SyncErrorCode = action.SyncErrorCode;
                     item.SyncCount = action.SyncCount;
                     item.SyncOperTime = action.SyncOperTime;
+                    item.ActionString = action.ActionString;
                     context.SaveChanges();
                 }
             }
@@ -5523,6 +5539,7 @@ TaskScheduler.Default);
         public int ID { get; set; } // 日志数据库中对应的记录 ID
 
         public DateTime SyncOperTime { get; set; }  // 最后一次同步操作的时间
+        public string ActionString { get; set; }    // 存储 BorrowInfo 或者 ReturnInfo 的 JSON 化字符串
 
         public override string ToString()
         {

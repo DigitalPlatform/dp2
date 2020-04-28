@@ -701,7 +701,7 @@ namespace dp2Circulation
                 return false;
 #endif
             return;
-            ERROR1:
+        ERROR1:
             task.State = "error";
             task.Color = "red";
             this.CurrentReaderBarcode = ""; // 及时清除上下文,避免后面错误借到先前的读者名下
@@ -1033,7 +1033,7 @@ end_time);
             times.Add(DateTime.Now);
             LogOperTime("borrow", times, strOperText);
             return;
-            ERROR1:
+        ERROR1:
             task.State = "error";
             task.Color = "red";
             // this.Container.SetReaderRenderString(strError);
@@ -1512,7 +1512,15 @@ end_time);
                 }
             }
 
-            string additional = this.Container.GetOperTimeParamString();
+            string additional = "";
+            if (this.Container.TestSync == true)
+                additional = this.Container.GetOperTimeParamString();
+            else
+            {
+                // 不是测试状态也带有 operTime 子参数
+                additional = DateTimeUtil.Rfc1123DateTimeStringEx(DateTime.Now);
+            }
+
             if (string.IsNullOrEmpty(additional) == false)
                 strStyle += ",operTime:" + StringUtil.EscapeString(additional, ",:");
 
@@ -1754,7 +1762,7 @@ end_time);
             LogOperTime("return", times, strOperText);
             return;
 
-            ERROR1:
+        ERROR1:
             task.State = "error";
             task.Color = "red";
             // this.Container.SetReaderRenderString(strError);

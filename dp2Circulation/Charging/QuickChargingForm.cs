@@ -4579,6 +4579,11 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
             }
         }
 
+        public string GetDefaultOperTimeParamString()
+        {
+            return DateTimeUtil.Rfc1123DateTimeStringEx(DateTime.Now);
+        }
+
         DateTime _lastInputTime = DateTime.Now;
 
         public string GetOperTimeParamString()

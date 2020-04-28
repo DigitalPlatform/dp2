@@ -17,6 +17,8 @@ using DigitalPlatform.Text;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.MessageClient;
 using DigitalPlatform.CirculationClient;
+// using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.IO;
 
 namespace dp2ManageCenter.Message
 {
@@ -29,18 +31,21 @@ namespace dp2ManageCenter.Message
         const int COLUMN_ID = 0;
         const int COLUMN_ACTION = 1;
         const int COLUMN_OPERATOR = 2;
-        const int COLUMN_PII = 3;
-        const int COLUMN_OPERTIME = 4;
-        const int COLUMN_STATE = 5;
-        const int COLUMN_ERRORCODE = 6;
-        const int COLUMN_ERRORINFO = 7;
-        const int COLUMN_SYNCCOUNT = 8;
-        const int COLUMN_SYNCOPERTIME = 9;
-        const int COLUMN_LINKID = 10;
-        const int COLUMN_BATCHNO = 11;
-        const int COLUMN_TOSHELFNO = 12;
-        const int COLUMN_TOLOCATION = 13;
-        const int COLUMN_TRANSFERDIRECTION = 14;
+        const int COLUMN_NAME = 3;
+        const int COLUMN_PII = 4;
+        const int COLUMN_BOOKTITLE = 5;
+        const int COLUMN_OPERTIME = 6;
+        const int COLUMN_STATE = 7;
+        const int COLUMN_ERRORCODE = 8;
+        const int COLUMN_ERRORINFO = 9;
+        const int COLUMN_SYNCCOUNT = 10;
+        const int COLUMN_SYNCOPERTIME = 11;
+        const int COLUMN_ACTIONINFO = 12;
+        const int COLUMN_LINKID = 13;
+        const int COLUMN_BATCHNO = 14;
+        const int COLUMN_TOSHELFNO = 15;
+        const int COLUMN_TOLOCATION = 16;
+        const int COLUMN_TRANSFERDIRECTION = 17;
 
         public ShelfSearchForm()
         {
@@ -282,10 +287,39 @@ namespace dp2ManageCenter.Message
 
         static void SetLine(ListViewItem item, RequestItem request)
         {
+            string action_info = "";
+            if (request.Action == "borrow")
+            {
+                var borrow_info = request.GetBorrowInfo();
+                if (borrow_info != null)
+                {
+                    string returning_date = "";
+                    if (string.IsNullOrEmpty(borrow_info.LatestReturnTime) == false)
+                    {
+                        if (DateTimeUtil.TryParseRfc1123DateTimeString(borrow_info.LatestReturnTime, out DateTime time) == true)
+                            returning_date = time.ToString();
+                        else
+                            returning_date = $"时间字符串 '{borrow_info.LatestReturnTime}' 格式错误";
+                    }
+                    action_info = $"应还时间: {returning_date}";
+                }
+            }
+            else
+            {
+                var return_info = request.GetReturnInfo();
+                if (return_info != null
+                    && string.IsNullOrEmpty(return_info.OverdueString) == false)
+                {
+                    action_info = $"超期情况: {return_info.OverdueString}";
+                }
+            }
+
             ListViewUtil.ChangeItemText(item, COLUMN_ID, request.ID.ToString());
             ListViewUtil.ChangeItemText(item, COLUMN_PII, request.PII);
+            ListViewUtil.ChangeItemText(item, COLUMN_BOOKTITLE, request.Entity?.Title);
             ListViewUtil.ChangeItemText(item, COLUMN_ACTION, request.Action);
             ListViewUtil.ChangeItemText(item, COLUMN_OPERATOR, request.OperatorID);
+            ListViewUtil.ChangeItemText(item, COLUMN_NAME, request.Operator?.PatronName);
 
             ListViewUtil.ChangeItemText(item, COLUMN_OPERTIME, request.OperTime.ToString());
             ListViewUtil.ChangeItemText(item, COLUMN_STATE, request.State);
@@ -293,6 +327,8 @@ namespace dp2ManageCenter.Message
             ListViewUtil.ChangeItemText(item, COLUMN_ERRORINFO, request.SyncErrorInfo);
             ListViewUtil.ChangeItemText(item, COLUMN_SYNCCOUNT, request.SyncCount.ToString());
             ListViewUtil.ChangeItemText(item, COLUMN_SYNCOPERTIME, request.SyncOperTime.ToString());
+            ListViewUtil.ChangeItemText(item, COLUMN_ACTIONINFO, action_info);
+
             ListViewUtil.ChangeItemText(item, COLUMN_LINKID, request.LinkID);
             ListViewUtil.ChangeItemText(item, COLUMN_BATCHNO, request.BatchNo);
             ListViewUtil.ChangeItemText(item, COLUMN_TOSHELFNO, request.CurrentShelfNo);
@@ -309,21 +345,30 @@ namespace dp2ManageCenter.Message
             if (request.State == "sync")
             {
                 backColor = Color.DarkGreen;
-                foreColor = Color.White;
+                foreColor = GetForeColor();
             }
             else if (request.State == "dontsync")
             {
                 backColor = Color.DarkBlue;
-                foreColor = Color.White;
+                foreColor = GetForeColor();
             }
             else if (request.State.Contains("error"))
             {
                 backColor = Color.DarkRed;
-                foreColor = Color.White;
+                foreColor = GetForeColor();
             }
+
+            // TODO: Action为 "borrow" 的，LinkID 为空的，显示为黄色？
 
             item.BackColor = backColor;
             item.ForeColor = foreColor;
+
+            Color GetForeColor()
+            {
+                if (request.Action == "borrow" && string.IsNullOrEmpty(request.LinkID) == true)
+                    return Color.Yellow;
+                return Color.White;
+            }
         }
 
         // 继续填充余下的命中记录
@@ -377,6 +422,8 @@ namespace dp2ManageCenter.Message
 
                     FillRecords(result.Records, false, token);
                     start += result.Records.Count;
+                    if (start >= result.ResultCount)
+                        break;
                 }
 
                 return new NormalResult();
@@ -552,14 +599,14 @@ namespace dp2ManageCenter.Message
         public string SyncErrorCode { get; set; }   // 最近一次同步操作的错误码
         public int SyncCount { get; set; }
 
-        // public Operator Operator { get; set; }  // 提起请求的读者
+        public RequestOperator Operator { get; set; }  // 提起请求的读者
 
         // Operator 对象 JSON 化以后的字符串
-        public string OperatorString { get; set; }
+        // public string OperatorString { get; set; }
 
-        //public Entity Entity { get; set; }
+        public RequestEntity Entity { get; set; }
         // Entity 对象 JSON 化以后的字符串
-        public string EntityString { get; set; }
+        // public string EntityString { get; set; }
 
         public string TransferDirection { get; set; } // in/out 典藏移交的方向
         public string Location { get; set; }    // 所有者馆藏地。transfer 动作会用到
@@ -573,6 +620,65 @@ namespace dp2ManageCenter.Message
         public DateTime SyncOperTime { get; set; }
 
         public string LinkID { get; set; }
+
+        public string ActionString { get; set; }
+
+        public DigitalPlatform.LibraryClient.localhost.ReturnInfo GetReturnInfo()
+        {
+            if (this.ActionString == null)
+                return null;
+            return JsonConvert.DeserializeObject<DigitalPlatform.LibraryClient.localhost.ReturnInfo>(this.ActionString);
+        }
+
+        public DigitalPlatform.LibraryClient.localhost.BorrowInfo GetBorrowInfo()
+        {
+            if (this.ActionString == null)
+                return null;
+            return JsonConvert.DeserializeObject<DigitalPlatform.LibraryClient.localhost.BorrowInfo>(this.ActionString);
+        }
+
+#if REMOVED
+        public string GetBookTitle()
+        {
+            /*
+            if (this.EntityString == null)
+                return null;
+            var entity = JsonConvert.DeserializeObject<RequestEntity>(this.EntityString);
+            return entity?.Title;
+            */
+            return this.Entity?.Title;
+        }
+#endif
+    }
+
+    public class RequestOperator
+    {
+        public string PatronName { get; set; }
+        public string PatronBarcode { get; set; }
+    }
+
+    public class RequestEntity
+    {
+        // TagInfo
+        public string ItemRecPath { get; set; }
+        public string Title { get; set; }
+        public string Location { get; set; }
+        //dup.BorrowInfo = this.BorrowInfo;
+        //dup.ShelfState = this.ShelfState;
+        //dup.OnShelf = this.OnShelf;
+        //dup.BelongToCurrentShelf = this.BelongToCurrentShelf;
+        //dup.FillFinished = this.FillFinished;
+        //dup.State = this.State;
+        public string CurrentLocation { get; set; }
+        public string ShelfNo { get; set; }
+
+        public string PII { get; set; }
+        public string UID { get; set; }
+        //dup.Error = this.Error;
+        //dup.ErrorColor = this.ErrorColor;
+        //dup.Waiting = this.Waiting;
+        public string ReaderName { get; set; }
+        public string Antenna { get; set; }
     }
 
     public class DoubleBufferdListView : ListView
