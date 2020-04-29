@@ -20,6 +20,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.MessageClient;
 using DigitalPlatform.SimpleMessageQueue;
 using Microsoft.VisualStudio.Threading;
+using System.Collections;
 
 namespace dp2SSL
 {
@@ -39,7 +40,7 @@ namespace dp2SSL
         static Task _sendTask = null;
 
         // 同步重试间隔时间
-        static TimeSpan _idleLength = TimeSpan.FromMinutes(5);   // TimeSpan.FromSeconds(10);
+        static TimeSpan _idleLength = TimeSpan.FromMinutes(5);   // 5 // TimeSpan.FromSeconds(10);
 
         static AutoResetEvent _eventSend = new AutoResetEvent(false);
 
@@ -95,6 +96,18 @@ namespace dp2SSL
                                     break;
                                 var request = JsonConvert.DeserializeObject<SetMessageRequest>(message.GetString());
 
+                                /*
+                                // 2020/4/29
+                                // 对 request 中的 groups 进行必要的变换
+                                foreach(var record in request.Records)
+                                {
+                                    if (record.groups == null)
+                                    {
+
+                                    }
+                                }
+                                */
+
                                 var result = await SetMessageAsync(request);
                                 if (result.Value == -1)
                                 {
@@ -134,12 +147,14 @@ TaskCreationOptions.LongRunning,
 TaskScheduler.Default);
         }
 
-        public static async Task SendMessageAsync(string content)
+        // 注意，groups 可能为空。表示当前 dp2mserver 用户所参与的所有群
+        public static async Task SendMessageAsync(string[] groups,
+            string content)
         {
             SetMessageRequest request = new SetMessageRequest("create", "",
                 new List<MessageRecord> {
                         new MessageRecord {
-                            groups= new string[] { GroupName},
+                            groups = groups,    // new string[] { groupName},
                             data = content}
                 });
 
@@ -233,6 +248,8 @@ TaskScheduler.Default);
 
             DisposeHandlers();
 
+            Connection.Reconnected -= Connection_Reconnected;
+
             Connection.Stop();
             Connection.Dispose();
             Connection = null;
@@ -277,6 +294,8 @@ TaskScheduler.Default);
                 CloseConnection();
 
                 Connection = new HubConnection(url);
+
+                Connection.Reconnected += Connection_Reconnected;
 
                 // 一直到真正连接前才触发登录事件
                 //if (this.Container != null)
@@ -387,6 +406,50 @@ TaskScheduler.Default);
             }
         }
 
+        private static void Connection_Reconnected()
+        {
+            _ = LoadGapMessageAsync();
+        }
+
+#if REMOVED
+        // 准备群名列表
+        public static async Task<NormalResult> PrepareGroupNames()
+        {
+            if (string.IsNullOrEmpty(_userName))
+                throw new ArgumentException("_userName 为空");
+
+            var result = await GetUsersAsync(_userName, 0, -1);
+            if (result.Value == -1)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = result.ErrorInfo
+                };
+            if (result.Users == null || result.Users.Count == 0)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"当前 dp2mserver 服务器中不存在名为 '{_userName}' 的用户"
+                };
+
+            _groups = new List<string>(result.Users[0].groups);
+
+            return new NormalResult();
+        }
+
+        static List<string> _groups = null;
+
+        public static string[] GroupNames
+        {
+            get
+            {
+                if (_groups == null)
+                    return null;
+                return _groups.ToArray();
+            }
+        }
+#endif
+
         public static string GetExceptionText(AggregateException exception)
         {
             StringBuilder text = new StringBuilder();
@@ -410,8 +473,15 @@ IList<MessageRecord> messages)
         {
             _ = Task.Run(async () =>
             {
-                if (action == "create")
-                    await ProcessMessages(messages);
+                try
+                {
+                    if (action == "create")
+                        await ProcessMessages(messages);
+                }
+                catch
+                {
+                    // TODO: 写入错误日志
+                }
             });
         }
 
@@ -422,11 +492,19 @@ IList<MessageRecord> messages)
                 foreach (var message in messages)
                 {
                     // TODO: 忽略自己发出的消息?
-                    if (message.data.StartsWith($"@{_userName}"))
+                    if (message.data.StartsWith($"@{_userName}")
+                        && _instantMessageIDs.ContainsKey(message.id) == false)
                     {
                         string command = message.data.Substring($"@{_userName}".Length).Trim();
-                        await ProcessCommandAsync(command);
+
+                        if (message.groups != null && message.groups.Length > 0)
+                            await ProcessCommandAsync(command, message.groups[0]);
+
+                        _instantMessageIDs[message.id] = message.publishTime;
+                        ClearOldIDs();
                     }
+
+                    _lastMessage = message;
                 }
             }
             catch
@@ -657,8 +735,46 @@ cancellation_token);
                 TaskCreationOptions.LongRunning, TaskScheduler.Default);
         }
 
+        // 当前获得的最后一条消息
+        static MessageRecord _lastMessage = null;
+
+        // 消息 ID --> 消息创建时间
+        static Hashtable _instantMessageIDs = new Hashtable();
 
         static int _inGetMessage = 0;  // 防止因为 ConnectionStateChange 事件导致重入
+
+        // 主动装载间隙期间的消息
+        public static async Task LoadGapMessageAsync()
+        {
+            if (_lastMessage != null)
+            {
+                var strStartDate = _lastMessage.publishTime.ToString("G");
+                await LoadMessageAsync(_lastMessage.groups[0],
+        strStartDate,
+        "");
+            }
+        }
+
+        // 清除 _instantMessageIDs 中较旧的条目。避免空间膨胀失控
+        static void ClearOldIDs()
+        {
+            DateTime now = DateTime.Now;
+            TimeSpan delta = TimeSpan.FromMinutes(5);
+
+            foreach (string key in _instantMessageIDs.Keys)
+            {
+                object value = _instantMessageIDs[key];
+                if (value == null)
+                    continue;
+                var time = (DateTime)value;
+                if (now - time > delta)
+                    _instantMessageIDs.Remove(key);
+            }
+
+            // 实在太多了干脆全部清除
+            if (_instantMessageIDs.Count > 1024 * 10)
+                _instantMessageIDs.Clear();
+        }
 
         // 获得指定时间范围的消息
         // 装载已经存在的消息记录
@@ -834,6 +950,7 @@ cancellation_token);
         {
         }
 
+        /*
         static string GroupName
         {
             get
@@ -841,56 +958,57 @@ cancellation_token);
                 return App.messageGroupName;
             }
         }
+        */
 
-        static async Task ProcessCommandAsync(string command)
+        static async Task ProcessCommandAsync(string command, string groupName)
         {
             if (command.StartsWith("hello"))
             {
-                await SendMessageAsync("hello!");
+                await SendMessageAsync(new string[] { groupName }, "hello!");
                 return;
             }
 
             if (command.StartsWith("version"))
             {
-                await SendMessageAsync($"dp2SSL 前端版本: {WpfClientInfo.ClientVersion}");
+                await SendMessageAsync(new string[] { groupName }, $"dp2SSL 前端版本: {WpfClientInfo.ClientVersion}");
                 return;
             }
 
             if (command.StartsWith("error"))
             {
-                await SendMessageAsync($"dp2SSL 当前界面报错: [{App.CurrentApp.Error}]; 书柜初始化是否完成: {ShelfData.FirstInitialized}");
+                await SendMessageAsync(new string[] { groupName }, $"dp2SSL 当前界面报错: [{App.CurrentApp.Error}]; 书柜初始化是否完成: {ShelfData.FirstInitialized}");
                 return;
             }
 
             // 列出操作历史
             if (command.StartsWith("list history"))
             {
-                await ListHistoryAsync(command);
+                await ListHistoryAsync(command, groupName);
                 return;
             }
 
             // 修改操作历史
             if (command.StartsWith("change history"))
             {
-                await ChangeHistoryAsync(command);
+                await ChangeHistoryAsync(command, groupName);
                 return;
             }
 
             // 检查册状态
             if (command.StartsWith("check book"))
             {
-                await CheckBookAsync(command);
+                await CheckBookAsync(command, groupName);
                 return;
             }
 
             // 检查读者状态
             if (command.StartsWith("check patron"))
             {
-                await CheckPatronAsync(command);
+                await CheckPatronAsync(command, groupName);
                 return;
             }
 
-            await SendMessageAsync($"我无法理解这个命令 '{command}'");
+            await SendMessageAsync(new string[] { groupName }, $"我无法理解这个命令 '{command}'");
         }
 
         // 列出操作历史
@@ -899,7 +1017,7 @@ cancellation_token);
         //      sync 已经同步的那些shixiang
         //      error 同步出错的事项
         //      空 所有事项
-        static async Task ListHistoryAsync(string command)
+        static async Task ListHistoryAsync(string command, string groupName)
         {
             try
             {
@@ -930,22 +1048,25 @@ cancellation_token);
                         items = context.Requests.Where(o => true)
                             .OrderBy(o => o.ID).ToList();
 
-                    await SendMessageAsync($"> {command}\r\n当前共有 {items.Count} 个历史事项");
+                    await SendMessageAsync(new string[] { groupName },
+                        $"> {command}\r\n当前共有 {items.Count} 个历史事项");
                     int i = 1;
                     foreach (var item in items)
                     {
-                        await SendMessageAsync($"{i++}\r\n{DisplayRequestItem.GetDisplayString(item)}");
+                        await SendMessageAsync(new string[] { groupName },
+                            $"{i++}\r\n{DisplayRequestItem.GetDisplayString(item)}");
                     }
                 }
             }
             catch (Exception ex)
             {
-                await SendMessageAsync($"命令 {command} 执行过程出现异常:\r\n{ExceptionUtil.GetDebugText(ex)}");
+                await SendMessageAsync(new string[] { groupName },
+                    $"命令 {command} 执行过程出现异常:\r\n{ExceptionUtil.GetDebugText(ex)}");
             }
         }
 
         // 检查读者状态
-        static async Task CheckPatronAsync(string command)
+        static async Task CheckPatronAsync(string command, string groupName)
         {
             // 子参数
             string param = command.Substring("check patron".Length).Trim();
@@ -1012,7 +1133,7 @@ cancellation_token);
                     text.AppendLine($"册记录:\r\n{DomUtil.GetIndentXml(result.ItemXml)}");
                     */
 
-                await SendMessageAsync(text.ToString());
+                await SendMessageAsync(new string[] { groupName }, text.ToString());
             }
         }
 
@@ -1030,7 +1151,7 @@ cancellation_token);
         }
 
         // 检查册状态
-        static async Task CheckBookAsync(string command)
+        static async Task CheckBookAsync(string command, string groupName)
         {
             // 子参数
             string param = command.Substring("check book".Length).Trim();
@@ -1060,14 +1181,14 @@ cancellation_token);
                 else
                     text.AppendLine($"册记录:\r\n{DomUtil.GetIndentXml(result.ItemXml)}");
 
-                await SendMessageAsync(text.ToString());
+                await SendMessageAsync(new string[] { groupName }, text.ToString());
             }
         }
 
         // 修改操作历史
         // 子参数:
         //      id=xxxx state=xxxx
-        static async Task ChangeHistoryAsync(string command)
+        static async Task ChangeHistoryAsync(string command, string groupName)
         {
             try
             {
@@ -1078,7 +1199,8 @@ cancellation_token);
                 string id_string = table["id"] as string;
                 if (string.IsNullOrEmpty(id_string))
                 {
-                    await SendMessageAsync($"> {command}\r\n命令中缺乏 id=xxxx 部分，无法定位要修改的记录");
+                    await SendMessageAsync(new string[] { groupName },
+                        $"> {command}\r\n命令中缺乏 id=xxxx 部分，无法定位要修改的记录");
                     return;
                 }
 
@@ -1091,7 +1213,8 @@ cancellation_token);
                     var item = context.Requests.Where(o => o.ID == id).FirstOrDefault();
                     if (item == null)
                     {
-                        await SendMessageAsync($"> {command}\r\n没有找到 ID 为 '{id}' 的操作历史记录");
+                        await SendMessageAsync(new string[] { groupName },
+                            $"> {command}\r\n没有找到 ID 为 '{id}' 的操作历史记录");
                         return;
                     }
 
@@ -1101,7 +1224,8 @@ cancellation_token);
                         string new_value = table["state"] as string;
                         if (isStateValid(new_value) == false)
                         {
-                            await SendMessageAsync($"> {command}\r\n要修改为新的 State 值 '{new_value}' 不合法。修改操作被拒绝");
+                            await SendMessageAsync(new string[] { groupName },
+                                $"> {command}\r\n要修改为新的 State 值 '{new_value}' 不合法。修改操作被拒绝");
                             return;
                         }
                         // TODO: 是否自动写入一个附注字段内容，记载修改前的内容，和修改的原因(comment=xxx)？
@@ -1112,15 +1236,18 @@ cancellation_token);
                     if (changed == true)
                     {
                         await context.SaveChangesAsync();
-                        await SendMessageAsync($"> {command}\r\n记录被修改。修改后内容如下:\r\n{DisplayRequestItem.GetDisplayString(item)}");
+                        await SendMessageAsync(new string[] { groupName },
+                            $"> {command}\r\n记录被修改。修改后内容如下:\r\n{DisplayRequestItem.GetDisplayString(item)}");
                     }
                     else
-                        await SendMessageAsync($"> {command}\r\n记录没有发生修改。记录内容如下:\r\n{DisplayRequestItem.GetDisplayString(item)}");
+                        await SendMessageAsync(new string[] { groupName },
+                            $"> {command}\r\n记录没有发生修改。记录内容如下:\r\n{DisplayRequestItem.GetDisplayString(item)}");
                 }
             }
             catch (Exception ex)
             {
-                await SendMessageAsync($"命令 {command} 执行过程出现异常:\r\n{ExceptionUtil.GetDebugText(ex)}");
+                await SendMessageAsync(new string[] { groupName },
+                    $"命令 {command} 执行过程出现异常:\r\n{ExceptionUtil.GetDebugText(ex)}");
             }
         }
 
@@ -1258,12 +1385,32 @@ cancellation_token);
         #region SetMessage() API
 
         // 不可靠的直接发送消息
-        public static Task<SetMessageResult> SetMessageAsync(string content)
+        public static Task<SetMessageResult> InnerSetMessageAsync(string[] groups, string content)
         {
+            // TODO: 如果 groups 为 null 代表所有加入的群名列表
+
+            /*
+            if (groups == null)
+            {
+                groups = GroupNames;
+                if (groups == null || groups.Length == 0)
+                {
+                    string error = $"InnerSetMessageAsync() 出错: GroupName 不正确";
+                    WpfClientInfo.WriteErrorLog(error);
+                    return Task.FromResult<SetMessageResult>(new SetMessageResult
+                    {
+                        Value = -1,
+                        ErrorInfo = error
+                    });
+                }
+            }
+            */
+
+
             SetMessageRequest request = new SetMessageRequest("create", "",
                 new List<MessageRecord> {
                         new MessageRecord {
-                            groups= new string[] { GroupName},
+                            groups= groups, // new string[] { groupName},
                             data = content}
                 });
             return SetMessageAsync(request);
@@ -2112,5 +2259,18 @@ strError);
 
         #endregion
 
+        #region GetUsers()
+
+        public static Task<GetUserResult> GetUsersAsync(string userName,
+            int start,
+            int count)
+        {
+            return HubProxy.Invoke<GetUserResult>("GetUsers",
+                userName,
+                start,
+                count);
+        }
+
+        #endregion
     }
 }

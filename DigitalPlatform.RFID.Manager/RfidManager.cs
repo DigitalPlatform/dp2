@@ -280,7 +280,7 @@ new SetErrorEventArgs
 
                 return false;
             },
-            async (channel) =>
+            (channel) =>
             {
                 /*
                 if (string.IsNullOrEmpty(_antennaList) == false)

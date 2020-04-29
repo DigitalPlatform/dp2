@@ -5,11 +5,12 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 
+using Microsoft.VisualStudio.Threading;
+
 using DigitalPlatform;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.WPF;
-using Microsoft.VisualStudio.Threading;
 
 namespace dp2SSL
 {
@@ -135,7 +136,8 @@ namespace dp2SSL
                         // 先尝试从本地书目库中获取书目摘要
 
                         var item = context.BiblioSummaries.Where(o => o.PII == pii).FirstOrDefault();
-                        if (item != null)
+                        if (item != null
+                            && string.IsNullOrEmpty(item.BiblioSummary) == false)
                         {
                             if (result == null)
                                 result = new GetEntityDataResult();
@@ -190,20 +192,31 @@ namespace dp2SSL
                                 result.Title = strSummary;
 
                                 // 存入数据库备用
-                                if (lRet == 1)
+                                if (lRet == 1 && string.IsNullOrEmpty(strSummary) == false)
                                 {
                                     try
                                     {
-                                        context.BiblioSummaries.Add(new BiblioSummaryItem
+                                        var exist_item = context.BiblioSummaries.Where(o => o.PII == pii).FirstOrDefault();
+
+                                        if (exist_item != null)
                                         {
-                                            PII = pii,
-                                            BiblioSummary = strSummary
-                                        });
+                                            if (exist_item.BiblioSummary != strSummary)
+                                            {
+                                                exist_item.BiblioSummary = strSummary;
+                                                context.BiblioSummaries.Update(exist_item);
+                                            }
+                                        }
+                                        else
+                                            context.BiblioSummaries.Add(new BiblioSummaryItem
+                                            {
+                                                PII = pii,
+                                                BiblioSummary = strSummary
+                                            });
                                         await context.SaveChangesAsync();
                                     }
-                                    catch
+                                    catch (Exception ex)
                                     {
-
+                                        WpfClientInfo.WriteErrorLog($"GetEntityDataAsync() 中保存 summary 时(PII 为 '{pii}')出现异常:{ExceptionUtil.GetDebugText(ex)}");
                                     }
                                 }
                             }

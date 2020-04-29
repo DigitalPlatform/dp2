@@ -2908,6 +2908,10 @@ namespace dp2SSL
         {
             List<TagAndData> found = list.FindAll((tag) =>
             {
+                // 2020/4/29
+                // TODO: 在添加到集合的地方进行检查，确保 .OneTag 不为 null
+                if (tag.OneTag == null)
+                    return false;
                 return (tag.OneTag.UID == uid
                 && tag.OneTag.ReaderName == reader_name
                 && tag.OneTag.AntennaID == antenna);
@@ -4212,6 +4216,12 @@ namespace dp2SSL
                                 continue;
                             }
 
+                            // 2020/4/29
+                            if (error_code == ErrorCode.SyncDenied)
+                            {
+                                messageItem.ResultType = "information";
+                            }
+
                         }
 
                         if (action == "transfer")
@@ -5074,7 +5084,7 @@ TaskScheduler.Default);
             });
             if (overflow_titles.Count > 0)
             {
-                PageShelf.TrySetMessage($"下列图书发生超额借阅：\r\n{StringUtil.MakePathList(overflow_titles, "\r\n")}");
+                PageShelf.TrySetMessage(null, $"下列图书发生超额借阅：\r\n{StringUtil.MakePathList(overflow_titles, "\r\n")}");
             }
         }
 
