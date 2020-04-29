@@ -395,6 +395,7 @@ Description = "是否动态反馈图书变动数"
             }
         }
 
+        /*
         [Display(
 Order = 24,
 Name = "组名",
@@ -413,6 +414,7 @@ Description = "用于交换消息的组的名字"
                 App.CurrentApp.ClearChannelPool();
             }
         }
+        */
 
         #endregion
     }

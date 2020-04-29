@@ -160,16 +160,22 @@ namespace dp2SSL
 
                     await Task.Run(async () =>
                     {
-                        // 初始化之前开灯，让使用者感觉舒服一些(感觉机器在活动状态)
-                        RfidManager.TurnShelfLamp("*", "turnOn");
+                        try
+                        {
+                            // 初始化之前开灯，让使用者感觉舒服一些(感觉机器在活动状态)
+                            RfidManager.TurnShelfLamp("*", "turnOn");
 
-                        await InitialShelfEntitiesAsync();
+                            await InitialShelfEntitiesAsync();
 
-                        // 初始化完成之后，应该是全部门关闭状态，还没有人开始使用，则先关灯，进入等待使用的状态
-                        RfidManager.TurnShelfLamp("*", "turnOff");
+                            // 初始化完成之后，应该是全部门关闭状态，还没有人开始使用，则先关灯，进入等待使用的状态
+                            RfidManager.TurnShelfLamp("*", "turnOff");
+                        }
+                        catch(Exception ex)
+                        {
+                            this.SetGlobalError("initial", $"InitialShelfEntitiesAsync() 出现异常: {ex.Message}");
+                            WpfClientInfo.WriteErrorLog($"InitialShelfEntitiesAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                        }
                     });
-
-
                 }
                 catch (Exception ex)
                 {
@@ -278,7 +284,7 @@ namespace dp2SSL
                     text = $"门 '{e.Door.Name}' 被 {e.Door.Operator?.GetDisplayString()} 打开";
                 else
                     text = $"门 '{e.Door.Name}' 被 {e.Door.Operator?.GetDisplayString()} 关上";
-                TrySetMessage(text);
+                TrySetMessage(null, text);
             }
 
             if (e.NewState == "close")
@@ -352,13 +358,27 @@ namespace dp2SSL
 #endif
         }
 
-        public static void TrySetMessage(string text)
+        public static void TrySetMessage(string[] groups, string text)
         {
+            // TODO: 当 groups 为 null 时，是代表当前书柜 dp2mserver 所加入的所有群名列表
+            /*
+            if (groups == null)
+            {
+                groups = TinyServer.GroupNames;
+                if (groups == null || groups.Length == 0)
+                {
+                    App.CurrentApp?.SetError("setMessage", $"发送消息出现异常: GroupName 不正确。消息内容:{StringUtil.CutString(text, 100)}");
+                    WpfClientInfo.WriteErrorLog($"发送消息出现异常: GroupName 不正确");
+                    return;
+                }
+            }
+            */
+
             _ = Task.Run(async () =>
             {
                 try
                 {
-                    await TinyServer.SendMessageAsync(text);
+                    await TinyServer.SendMessageAsync(groups, text);
                 }
                 catch (Exception ex)
                 {
@@ -824,25 +844,32 @@ namespace dp2SSL
                 // 等待确认收到开门信号
                 await Task.Run(async () =>
                 {
-                    DateTime start = DateTime.Now;
-                    while (e.Door.State != "open"
-                    // && cancelled == false
-                    )
+                    try
                     {
-                        // 超时。补一次开门和关门提交动作
-                        // if (DateTime.Now - start >= TimeSpan.FromSeconds(5))
-                        if (RfidManager.LockHeartbeat - startTicks >= 3)
+                        DateTime start = DateTime.Now;
+                        while (e.Door.State != "open"
+                        // && cancelled == false
+                        )
                         {
-                            App.CurrentApp.Speak("超时补做提交");
-                            WpfClientInfo.WriteInfoLog($"超时情况下，对门 {e.Door.Name} 补做一次 submit");
+                            // 超时。补一次开门和关门提交动作
+                            // if (DateTime.Now - start >= TimeSpan.FromSeconds(5))
+                            if (RfidManager.LockHeartbeat - startTicks >= 3)
+                            {
+                                App.CurrentApp.Speak("超时补做提交");
+                                WpfClientInfo.WriteInfoLog($"超时情况下，对门 {e.Door.Name} 补做一次 submit");
 
-                            await ShelfData.RefreshInventoryAsync(e.Door);
-                            SaveDoorActions(e.Door, true);
-                            await DoRequestAsync(ShelfData.PullActions());   // "silence"
-                            break;
+                                await ShelfData.RefreshInventoryAsync(e.Door);
+                                SaveDoorActions(e.Door, true);
+                                await DoRequestAsync(ShelfData.PullActions());   // "silence"
+                                break;
+                            }
+
+                            Thread.Sleep(500);
                         }
-
-                        Thread.Sleep(500);
+                    }
+                    catch(Exception ex)
+                    {
+                        WpfClientInfo.WriteErrorLog($"等待确认收到开门信号过程中出现异常:{ExceptionUtil.GetDebugText(ex)}");
                     }
                 });
             }
@@ -1362,8 +1389,11 @@ namespace dp2SSL
 
             // "initial" 模式下，立即合并到 _all。等关门时候一并提交请求
             // TODO: 不过似乎此时有语音提示放入、取出，似乎更显得实用一些？
-            if (this.Mode == "initial")
+            if (this.Mode == "initial" 
+                || ShelfData.FirstInitialized == false
+                )
             {
+                /*
                 var adds = ShelfData.l_Adds; // new List<Entity>(ShelfData.Adds);
                 {
                     ShelfData.l_Add("all", adds);
@@ -1381,6 +1411,7 @@ namespace dp2SSL
                 }
 
                 ShelfData.l_RefreshCount();
+                */
             }
             else
             {
@@ -1439,7 +1470,7 @@ namespace dp2SSL
                 App.CurrentApp.SetError("setMessage", null);
                 */
 
-                TrySetMessage("我正在执行初始化 ...");
+                TrySetMessage(null, "我正在执行初始化 ...");
             }
 
             App.Invoke(new Action(() =>
@@ -1756,6 +1787,12 @@ namespace dp2SSL
                 // 启动重试任务。此任务长期在后台运行
                 ShelfData.StartSyncTask();
             }
+            catch(Exception ex)
+            {
+                // 2020/4/29
+                WpfClientInfo.WriteErrorLog($"InitialShelfEntitiesAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                throw ex;
+            }
             finally
             {
                 // _firstInitial = true;   // 第一次初始化已经完成
@@ -1783,7 +1820,7 @@ namespace dp2SSL
                     ShelfData.FirstInitialized = true;   // 第一次初始化已经完成
 
                     {
-                        TrySetMessage("我已经成功完成初始化。读者可以开始用我借书啦");
+                        TrySetMessage(null, "我已经成功完成初始化。读者可以开始用我借书啦");
                     }
                 }
                 else
@@ -1795,7 +1832,7 @@ namespace dp2SSL
                     // TODO: 页面中央大字显示“书柜初始化失败”。重新进入页面时候应该自动重试初始化
                     SetGlobalError("initial", "智能书柜初始化失败。请检查读卡器和门锁参数配置，重新进行初始化 ...");
                     {
-                        TrySetMessage("*** 抱歉，我初始化失败了。请管理员帮我解决一下吧！");
+                        TrySetMessage(null, "*** 抱歉，我初始化失败了。请管理员帮我解决一下吧！");
                     }                    /*
                     ProgressWindow error = null;
                     Application.Current.Dispatcher.Invoke(new Action(() =>
@@ -2439,7 +2476,7 @@ namespace dp2SSL
             }
         }
 
-#region patron 分类报错机制
+        #region patron 分类报错机制
 
         // 错误类别 --> 错误字符串
         // 错误类别有：rfid fingerprint getreaderinfo
@@ -2459,7 +2496,7 @@ namespace dp2SSL
             }
         }
 
-#endregion
+        #endregion
 
         bool _visiblityChanged = false;
 
@@ -2636,6 +2673,8 @@ namespace dp2SSL
         async Task<SubmitResult> InventoryBooksAsync(InventoryWindow progress,
             IReadOnlyCollection<Entity> entities)
         {
+            DateTime now = DateTime.Now;
+
             List<ActionInfo> actions = new List<ActionInfo>();
             foreach (var entity in entities)
             {
@@ -2643,14 +2682,16 @@ namespace dp2SSL
                 {
                     Entity = entity.Clone(),
                     Action = "return",
-                    Operator = GetOperator(entity, false)
+                    Operator = GetOperator(entity, false),
+                    OperTime = now,
                 });
                 actions.Add(new ActionInfo
                 {
                     Entity = entity.Clone(),
                     Action = "transfer",
                     CurrentShelfNo = ShelfData.GetShelfNo(entity),
-                    Operator = GetOperator(entity, false)
+                    Operator = GetOperator(entity, false),
+                    OperTime = now,
                 });
 
                 // 2020/4/2
@@ -2918,7 +2959,7 @@ namespace dp2SSL
                             text.AppendLine();
                             i++;
                         }
-                        TrySetMessage(text.ToString());
+                        TrySetMessage(null, text.ToString());
                     }
 
                     // TODO: 加入的时候应带有归并功能。但注意 Retry 线程里面正在处理的集合应该暂时从 RetryActions 里面移走，避免和归并过程掺和
@@ -3053,7 +3094,7 @@ namespace dp2SSL
             return text.ToString();
         }
 
-#region 延迟清除读者信息
+        #region 延迟清除读者信息
 
         DelayAction _delayClearPatronTask = null;
 
@@ -3114,9 +3155,9 @@ namespace dp2SSL
             }
         }
 
-#endregion
+        #endregion
 
-#region 模拟柜门灯亮灭
+        #region 模拟柜门灯亮灭
 
         public void SimulateLamp(bool on)
         {
@@ -3129,9 +3170,9 @@ namespace dp2SSL
             }));
         }
 
-#endregion
+        #endregion
 
-#region 人脸识别功能
+        #region 人脸识别功能
 
         bool _stopVideo = false;
 
@@ -3336,7 +3377,7 @@ namespace dp2SSL
             }
         }
 
-#endregion
+        #endregion
 
         private void ClearPatron_Click(object sender, RoutedEventArgs e)
         {
@@ -3414,7 +3455,7 @@ namespace dp2SSL
 
 #if REMOVED
 
-#region 绑定和解绑读者功能
+        #region 绑定和解绑读者功能
 
 #pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
         private async void bindPatronCard_Click(object sender, RoutedEventArgs e)
@@ -3625,7 +3666,7 @@ uid);
             return new NormalResult { Value = 0 };
         }
 
-#endregion
+        #endregion
 
 #endif
     }

@@ -235,7 +235,7 @@ namespace dp2SSL
 
                 await TinyServer.DeleteAllResultsetAsync();
                 TinyServer.StartSendTask(_cancelRefresh.Token);
-                PageShelf.TrySetMessage("我这台智能书柜启动了！");
+                PageShelf.TrySetMessage(null, "我这台智能书柜启动了！");
 
                 ShelfData.StartMonitorTask();
             }
@@ -260,11 +260,10 @@ namespace dp2SSL
                     else
                     {
                         /*
-                        // 发出一条消息表示自己启动成功
-                        var message_result = await TinyServer.SetMessageAsync("我这台智能书柜启动了！");
-                        if (message_result.Value == -1)
-                            WpfClientInfo.WriteErrorLog($"第一条消息发送失败: {message_result.ErrorInfo}");
-                    */
+                        var prepare_result = await TinyServer.PrepareGroupNames();
+                        if (prepare_result.Value == -1)
+                            WpfClientInfo.WriteErrorLog($"准备群名失败: {prepare_result.ErrorInfo}。url={messageServerUrl},userName={messageUserName},errorCode={prepare_result.ErrorCode}");
+                            */
                     }
                     //_messageServerConnected.Set();
                 }
@@ -298,8 +297,11 @@ namespace dp2SSL
                     WpfClientInfo.WriteErrorLog($"连接消息服务器失败: {result.ErrorInfo}。url={messageServerUrl},userName={messageUserName},errorCode={result.ErrorCode}");
                 else
                 {
-                    // 重新装载一次间歇期间新产生的消息
-
+                    /*
+                    var prepare_result = await TinyServer.PrepareGroupNames();
+                    if (prepare_result.Value == -1)
+                        WpfClientInfo.WriteErrorLog($"准备群名失败: {prepare_result.ErrorInfo}。url={messageServerUrl},userName={messageUserName},errorCode={prepare_result.ErrorCode}");
+                        */
                 }
             }
         }
@@ -539,7 +541,7 @@ namespace dp2SSL
             // 最后关灯
             RfidManager.TurnShelfLamp("*", "turnOff");
 
-            PageShelf.TrySetMessage($"我这台智能书柜停止了哟！({e.ReasonSessionEnding})");
+            PageShelf.TrySetMessage(null, $"我这台智能书柜停止了哟！({e.ReasonSessionEnding})");
 
             try
             {
@@ -580,12 +582,12 @@ namespace dp2SSL
             try
             {
                 // 尝试抢先直接发送
-                _ = TinyServer.SetMessageAsync($"我这台智能书柜退出了哟！");
+                _ = TinyServer.InnerSetMessageAsync(null, $"我这台智能书柜退出了哟！");
             }
             catch
             {
                 // 如果直接发送不成功，则送入 MessageQueue 中
-                PageShelf.TrySetMessage($"我这台智能书柜退出了哟！");
+                PageShelf.TrySetMessage(null, $"我这台智能书柜退出了哟！");
             }
 
             try
@@ -676,6 +678,7 @@ namespace dp2SSL
             }
         }
 
+        /*
         public static string messageGroupName
         {
             get
@@ -683,6 +686,7 @@ namespace dp2SSL
                 return WpfClientInfo.Config?.Get("global", "messageGroupName", "");
             }
         }
+        */
 
         // 检查消息服务器参数配置的有效性
         public NormalResult CheckMessageServerParameters()
@@ -699,8 +703,10 @@ namespace dp2SSL
 
                 if (string.IsNullOrEmpty(messageUserName))
                     errors.Add("尚未配置消息服务器用户名");
+                /*
                 if (string.IsNullOrEmpty(messageGroupName))
                     errors.Add("尚未配置消息服务器的组名");
+                    */
             }
 
             if (errors.Count > 0)
