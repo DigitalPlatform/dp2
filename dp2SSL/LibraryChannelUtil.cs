@@ -8,9 +8,11 @@ using System.Xml;
 using Microsoft.VisualStudio.Threading;
 
 using DigitalPlatform;
+using DigitalPlatform.WPF;
+using DigitalPlatform.Xml;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
-using DigitalPlatform.WPF;
+using Microsoft.Data.Sqlite;
 
 namespace dp2SSL
 {
@@ -57,6 +59,8 @@ namespace dp2SSL
 
                         // 先尝试从本地实体库中获得记录
                         var entity_record = context.Entities.Where(o => o.PII == pii).FirstOrDefault();
+                        // EntityItem entity_record = null;   // testing
+
                         if (entity_record != null)
                             result = new GetEntityDataResult
                             {
@@ -119,6 +123,14 @@ namespace dp2SSL
                                 };
 
                                 // 保存到本地数据库
+                                await AddOrUpdateAsync(context, new EntityItem
+                                {
+                                    PII = pii,
+                                    Xml = item_xml,
+                                    RecPath = item_recpath,
+                                    Timestamp = timestamp,
+                                });
+#if NO
                                 context.Entities.Add(new EntityItem
                                 {
                                     PII = pii,
@@ -126,7 +138,21 @@ namespace dp2SSL
                                     RecPath = item_recpath,
                                     Timestamp = timestamp,
                                 });
-                                await context.SaveChangesAsync();
+                                try
+                                {
+                                    await context.SaveChangesAsync();
+                                }
+                                catch (Exception ex)
+                                {
+                                    SqliteException sqlite_exception = ex.InnerException as SqliteException;
+                                    if (sqlite_exception != null && sqlite_exception.SqliteErrorCode == 19)
+                                    {
+                                        // PII 发生重复了
+                                    }
+                                    else
+                                        throw ex;
+                                }
+#endif
                             }
                         }
 
@@ -257,12 +283,93 @@ namespace dp2SSL
             }
             catch (Exception ex)
             {
+                WpfClientInfo.WriteErrorLog($"GetEntityDataAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+
                 return new GetEntityDataResult
                 {
                     Value = -1,
                     ErrorInfo = $"GetEntityDataAsync() 出现异常: {ex.Message}",
                     ErrorCode = ex.GetType().ToString()
                 };
+            }
+        }
+
+        static async Task AddOrUpdateAsync(BiblioCacheContext context,
+            EntityItem item)
+        {
+            try
+            {
+                // 保存到本地数据库
+                context.Entities.Add(item);
+                await context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                SqliteException sqlite_exception = ex.InnerException as SqliteException;
+                if (sqlite_exception != null && sqlite_exception.SqliteErrorCode == 19)
+                {
+                    // PII 发生重复了
+                    goto UPDATE;
+                }
+                else
+                    throw ex;
+            }
+
+        UPDATE:
+            // 更新到本地数据库
+            context.Entities.Update(item);
+            await context.SaveChangesAsync();
+        }
+
+        // 探测和 dp2library 服务器的通讯是否正常
+        // return.Value
+        //      -1  本函数执行出现异常
+        //      0   网络不正常
+        //      1   网络正常
+        public static NormalResult DetectLibraryNetwork()
+        {
+            LibraryChannel channel = App.CurrentApp.GetChannel();
+            var old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromSeconds(5);  // 设置 5 秒超时，避免等待太久
+            try
+            {
+                int nRedoCount = 0;
+            REDO:
+                long lRet = channel.GetClock(null,
+                    out string _,
+                    out string strError);
+                if (lRet == -1)
+                {
+                    // 一次重试机会
+                    if (lRet == -1
+                        && (channel.ErrorCode == ErrorCode.RequestCanceled || channel.ErrorCode == ErrorCode.RequestError)
+                        && nRedoCount < 2)
+                    {
+                        nRedoCount++;
+                        goto REDO;
+                    }
+
+                    return new NormalResult
+                    {
+                        Value = 0,
+                        ErrorInfo = strError
+                    };
+                }
+
+                return new NormalResult { Value = 1 };
+            }
+            catch (Exception ex)
+            {
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"DetectNetwork() 出现异常：{ex.Message}"
+                };
+            }
+            finally
+            {
+                channel.Timeout = old_timeout;
+                App.CurrentApp.ReturnChannel(channel);
             }
         }
 
@@ -273,26 +380,39 @@ namespace dp2SSL
             string item_xml,
             byte[] timestamp)
         {
-            using (BiblioCacheContext context = new BiblioCacheContext())
+            try
             {
-                if (_cacheDbCreated == false)
+                using (BiblioCacheContext context = new BiblioCacheContext())
                 {
-                    context.Database.EnsureCreated();
-                    _cacheDbCreated = true;
+                    if (_cacheDbCreated == false)
+                    {
+                        context.Database.EnsureCreated();
+                        _cacheDbCreated = true;
+                    }
+
+                    // 先尝试从本地实体库中获得原记录
+                    var entity_record = context.Entities.Where(o => o.PII == pii).FirstOrDefault();
+                    if (entity_record == null)
+                        return new NormalResult { Value = 0 };
+
+                    entity_record.Xml = item_xml;
+                    entity_record.Timestamp = timestamp;
+
+                    // 保存到本地数据库
+                    context.Entities.Update(entity_record);
+                    await context.SaveChangesAsync();
+                    return new NormalResult { Value = 1 };
                 }
+            }
+            catch (Exception ex)
+            {
+                WpfClientInfo.WriteErrorLog($"UpdateEntityXmlAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
 
-                // 先尝试从本地实体库中获得原记录
-                var entity_record = context.Entities.Where(o => o.PII == pii).FirstOrDefault();
-                if (entity_record == null)
-                    return new NormalResult { Value = 0 };
-
-                entity_record.Xml = item_xml;
-                entity_record.Timestamp = timestamp;
-
-                // 保存到本地数据库
-                context.Entities.Update(entity_record);
-                await context.SaveChangesAsync();
-                return new NormalResult { Value = 1 };
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"UpdateEntityXmlAsync() 出现异常: {ex.Message}"
+                };
             }
         }
 
@@ -360,6 +480,119 @@ namespace dp2SSL
             public byte[] Timestamp { get; set; }
         }
 
+        // 从本地数据库获取读者记录
+        // return.Value:
+        //      -1  出错
+        //      0   读者记录没有找到
+        //      1   成功
+        public static GetReaderInfoResult GetReaderInfoFromLocal(string pii)
+        {
+            try
+            {
+                using (BiblioCacheContext context = new BiblioCacheContext())
+                {
+                    if (_cacheDbCreated == false)
+                    {
+                        context.Database.EnsureCreated();
+                        _cacheDbCreated = true;
+                    }
+
+                    pii = pii?.ToUpper();
+
+                    string query = $",{pii},";
+                    var patrons = context.Patrons
+                        .Where(o => o.PII == pii || o.Bindings.Contains(query))
+                        .ToList();
+                    if (patrons.Count == 0)
+                        return new GetReaderInfoResult
+                        {
+                            Value = 0,
+                            ErrorInfo = $"PII 为 '{pii}' 的本地读者记录没有找到"
+                        };
+
+                    // 命中读者记录多于一条
+                    if (patrons.Count > 1)
+                    {
+                        return new GetReaderInfoResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"装载本地读者记录失败：'{pii}' 检索命中读者记录 {patrons.Count} 条"
+                        };
+                    }
+
+                    var patron = patrons[0];
+                    return new GetReaderInfoResult
+                    {
+                        Value = 1,
+                        RecPath = patron.RecPath,
+                        ReaderXml = patron.Xml,
+                        Timestamp = patron.Timestamp
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                return new GetReaderInfoResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"装载本地读者记录(PII 为 '{pii}')时出现异常: {ex.Message}"
+                };
+            }
+        }
+
+        // 把读者记录保存(更新)到本地数据库
+        public static NormalResult UpdateLocalPatronRecord(
+            GetReaderInfoResult get_result)
+        {
+            using (BiblioCacheContext context = new BiblioCacheContext())
+            {
+                if (_cacheDbCreated == false)
+                {
+                    context.Database.EnsureCreated();
+                    _cacheDbCreated = true;
+                }
+
+                XmlDocument dom = new XmlDocument();
+                dom.LoadXml(get_result.ReaderXml);
+                string pii = DomUtil.GetElementText(dom.DocumentElement, "barcode");
+                if (string.IsNullOrEmpty(pii))
+                    pii = "@refID:" + DomUtil.GetElementText(dom.DocumentElement, "refID");
+                var patron = context.Patrons
+    .Where(o => o.PII == pii)
+    .FirstOrDefault();
+                if (patron != null)
+                {
+                    Set(patron, dom);
+                    context.Patrons.Update(patron);
+                }
+                else
+                {
+                    patron = new PatronItem
+                    {
+                        PII = pii?.ToUpper(),
+                    };
+                    Set(patron, dom);
+                    context.Patrons.Add(patron);
+                }
+
+                context.SaveChanges();
+                return new NormalResult { Value = 0 };
+            }
+
+            void Set(PatronItem patron, XmlDocument dom)
+            {
+                string cardNumber = DomUtil.GetElementText(dom.DocumentElement, "cardNumber");
+                cardNumber = cardNumber.ToUpper();
+                if (string.IsNullOrEmpty(cardNumber) == false)
+                    cardNumber = "," + cardNumber + ",";
+
+                patron.RecPath = get_result.RecPath;
+                patron.Bindings = cardNumber;
+                patron.Xml = get_result.ReaderXml;
+                patron.Timestamp = get_result.Timestamp;
+            }
+        }
+
         // return.Value:
         //      -1  出错
         //      0   读者记录没有找到
@@ -401,6 +634,13 @@ namespace dp2SSL
                         nRedoCount++;
                         goto REDO;
                     }
+
+                    // 如果发生通讯失败，则主动重新探测一次网络状况
+                    if (channel.ErrorCode == ErrorCode.RequestCanceled || channel.ErrorCode == ErrorCode.RequestError)
+                    {
+                        ShelfData.DetectLibraryNetwork();
+                    }
+
                     return new GetReaderInfoResult
                     {
                         Value = (int)lRet,

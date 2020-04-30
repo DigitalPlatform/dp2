@@ -12,7 +12,7 @@
     <Page.Resources>
         <local:StringToVisibilityConverter x:Key="StringToVis" />
     </Page.Resources>
-    <Grid Background="Black" Name="mainGrid">
+    <Grid Name="mainGrid" Background="Black" >
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="60" />
             <ColumnDefinition Width="*" />

@@ -30,7 +30,7 @@ namespace dp2SSL
     public class PatronItem
     {
         public string PII { get; set; }
-        // 绑定的 UID
+        // 绑定的 UID。形态如 ",xxxx,xxxx,xxxx,"，注意逗号的用法。检索时候用 like "%,xxxx,%"
         public string Bindings { get; set; }
         public string RecPath { get; set; }
         public string Xml { get; set; }

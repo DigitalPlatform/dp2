@@ -170,7 +170,7 @@ namespace dp2SSL
                             // 初始化完成之后，应该是全部门关闭状态，还没有人开始使用，则先关灯，进入等待使用的状态
                             RfidManager.TurnShelfLamp("*", "turnOff");
                         }
-                        catch(Exception ex)
+                        catch (Exception ex)
                         {
                             this.SetGlobalError("initial", $"InitialShelfEntitiesAsync() 出现异常: {ex.Message}");
                             WpfClientInfo.WriteErrorLog($"InitialShelfEntitiesAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
@@ -867,7 +867,7 @@ namespace dp2SSL
                             Thread.Sleep(500);
                         }
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         WpfClientInfo.WriteErrorLog($"等待确认收到开门信号过程中出现异常:{ExceptionUtil.GetDebugText(ex)}");
                     }
@@ -1389,7 +1389,7 @@ namespace dp2SSL
 
             // "initial" 模式下，立即合并到 _all。等关门时候一并提交请求
             // TODO: 不过似乎此时有语音提示放入、取出，似乎更显得实用一些？
-            if (this.Mode == "initial" 
+            if (this.Mode == "initial"
                 || ShelfData.FirstInitialized == false
                 )
             {
@@ -1787,7 +1787,7 @@ namespace dp2SSL
                 // 启动重试任务。此任务长期在后台运行
                 ShelfData.StartSyncTask();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 // 2020/4/29
                 WpfClientInfo.WriteErrorLog($"InitialShelfEntitiesAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
@@ -2177,8 +2177,28 @@ namespace dp2SSL
                     {
                         // testing
                         // Thread.Sleep(1000 * 20);
+                        if (ShelfData.LibraryNetworkCondition == "OK")
+                        {
+                            var get_result = GetReaderInfo(pii);
+                            if (get_result.Value == 1)
+                            {
+                                // 另外单独保存这条记录到本地
+                                _ = Task.Run(() =>
+                                {
+                                    try
+                                    {
+                                        UpdateLocalPatronRecord(get_result);
+                                    }
+                                    catch
+                                    {
 
-                        return GetReaderInfo(pii);
+                                    }
+                                });
+                            }
+                            return get_result;
+                        }
+                        else
+                            return GetReaderInfoFromLocal(pii);
                     }).ConfigureAwait(false);
 
                 debug_infos.Add($"结束 GetReaderInfo(): {GetNowString()}");
@@ -3451,6 +3471,14 @@ namespace dp2SSL
             var pageBorrow = PageMenu.PageBorrow;
             pageBorrow.ActionButtons = buttons;
             this.NavigationService.Navigate(pageBorrow);
+        }
+
+        public void SetBackColor(Brush color)
+        {
+            App.Invoke(new Action(() =>
+            {
+                this.mainGrid.Background = color;
+            }));
         }
 
 #if REMOVED
