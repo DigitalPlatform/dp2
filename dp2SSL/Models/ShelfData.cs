@@ -26,6 +26,7 @@ using static dp2SSL.LibraryChannelUtil;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore;
+using System.Windows.Media;
 
 namespace dp2SSL
 {
@@ -4705,7 +4706,21 @@ Stack:
 
         #region MonitorTask
 
+        // 和 dp2library 服务器之间的通讯状况
+        static string _libraryNetworkCondition = "OK";  // OK/Bad
+        // 可以适当降低探测的频率。比如每五分钟探测一次
+        static TimeSpan _detectPeriod = TimeSpan.FromMinutes(5);
+        static DateTime _lastDetectTime;
+
         static Task _monitorTask = null;
+
+        public static string LibraryNetworkCondition
+        {
+            get
+            {
+                return _libraryNetworkCondition;
+            }
+        }
 
         // 启动一般监控任务
         public static void StartMonitorTask()
@@ -4743,6 +4758,13 @@ Stack:
                             _tagAdded = false;
                         }
 
+                        if (DateTime.Now - _lastDetectTime > _detectPeriod)
+                        {
+                            DetectLibraryNetwork();
+
+                            _lastDetectTime = DateTime.Now;
+                        }
+
                         // 提醒关门
                         WarningCloseDoor();
                     }
@@ -4762,6 +4784,26 @@ Stack:
 token,
 TaskCreationOptions.LongRunning,
 TaskScheduler.Default);
+        }
+
+        public static void DetectLibraryNetwork()
+        {
+            // 探测和 dp2library 服务器的通讯是否正常
+            // return.Value
+            //      -1  本函数执行出现异常
+            //      0   网络不正常
+            //      1   网络正常
+            var detect_result = LibraryChannelUtil.DetectLibraryNetwork();
+            if (detect_result.Value == 1)
+            {
+                _libraryNetworkCondition = "OK";
+                PageMenu.PageShelf.SetBackColor(Brushes.Black);
+            }
+            else
+            {
+                _libraryNetworkCondition = "Bad";
+                PageMenu.PageShelf.SetBackColor(Brushes.DarkBlue);
+            }
         }
 
         // 从打开门开始多少时间开始警告关门

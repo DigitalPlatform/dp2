@@ -11,8 +11,10 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Xml;
-
+using DigitalPlatform;
+using DigitalPlatform.IO;
 using DigitalPlatform.Text;
+using DigitalPlatform.WPF;
 
 namespace dp2SSL
 {
@@ -160,30 +162,84 @@ namespace dp2SSL
 
             // TODO: 照片可以缓存到本地。每次只需要获取 timestamp 即可。如果 timestamp 和缓存的不一致再重新获取一次
 
-            Stream stream = new MemoryStream();
-            var channel = App.CurrentApp.GetChannel();
-            TimeSpan old_timeout = channel.Timeout;
-            channel.Timeout = TimeSpan.FromSeconds(30);
+            Stream stream = null;
             try
             {
-                long lRet = channel.GetRes(
-                    null,
-                    photo_path,
-                    stream,
-                    "data,content", // strGetStyle,
-                    null,   // byte [] input_timestamp,
-                    out string strMetaData,
-                    out byte[] baOutputTimeStamp,
-                    out string strOutputPath,
-                    out string strError);
-                if (lRet == -1)
+                // 先尝试从缓存获取
+                string cacheDir = Path.Combine(WpfClientInfo.UserDir, "photo");
+                PathUtil.CreateDirIfNeed(cacheDir);
+                string fileName = Path.Combine(cacheDir, GetPath(photo_path));
+                if (File.Exists(fileName))
                 {
-                    // SetGlobalError("patron", $"获取读者照片时出错: {strError}");
-                    // return;
-                    throw new Exception($"获取读者照片(path='{photo_path}')时出错: {strError}");
+                    try
+                    {
+                        stream = File.OpenRead(fileName);
+                    }
+                    catch (Exception ex)
+                    {
+                        WpfClientInfo.WriteErrorLog($"从读者照片本地缓存文件 {fileName} 读取内容时出现异常:{ExceptionUtil.GetDebugText(ex)}");
+                        stream = null;
+                    }
                 }
 
-                stream.Seek(0, SeekOrigin.Begin);
+                if (stream == null)
+                {
+                    stream = new MemoryStream();
+                    var channel = App.CurrentApp.GetChannel();
+                    TimeSpan old_timeout = channel.Timeout;
+                    channel.Timeout = TimeSpan.FromSeconds(30);
+                    try
+                    {
+                        long lRet = channel.GetRes(
+                            null,
+                            photo_path,
+                            stream,
+                            "data,content", // strGetStyle,
+                            null,   // byte [] input_timestamp,
+                            out string strMetaData,
+                            out byte[] baOutputTimeStamp,
+                            out string strOutputPath,
+                            out string strError);
+                        if (lRet == -1)
+                        {
+                            // SetGlobalError("patron", $"获取读者照片时出错: {strError}");
+                            // return;
+                            throw new Exception($"获取读者照片(path='{photo_path}')时出错: {strError}");
+                        }
+
+                        // 顺便存储到本地
+                        {
+                            bool suceed = false;
+                            stream.Seek(0, SeekOrigin.Begin);
+                            try
+                            {
+                                using (var file = File.OpenWrite(fileName))
+                                {
+                                    StreamUtil.DumpStream(stream, file);
+                                }
+
+                                suceed = true;
+                            }
+                            catch (Exception ex)
+                            {
+                                WpfClientInfo.WriteErrorLog($"读者照片写入本地缓存文件 {fileName} 时出现异常:{ExceptionUtil.GetDebugText(ex)}");
+                            }
+                            finally
+                            {
+                                if (suceed == false)
+                                    File.Delete(fileName);
+                            }
+                        }
+
+                        stream.Seek(0, SeekOrigin.Begin);
+                    }
+                    finally
+                    {
+                        channel.Timeout = old_timeout;
+                        App.CurrentApp.ReturnChannel(channel);
+                    }
+                }
+
                 App.Invoke(new Action(() =>
                 {
                     this.SetPhoto(stream);
@@ -192,11 +248,14 @@ namespace dp2SSL
             }
             finally
             {
-                channel.Timeout = old_timeout;
-                App.CurrentApp.ReturnChannel(channel);
                 if (stream != null)
                     stream.Dispose();
             }
+        }
+
+        static string GetPath(string text)
+        {
+            return text.Replace("/", "_").Replace("\\", "_");
         }
 
         /*
