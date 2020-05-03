@@ -553,7 +553,19 @@ namespace dp2SSL
                 }
 
                 XmlDocument dom = new XmlDocument();
-                dom.LoadXml(get_result.ReaderXml);
+                try
+                {
+                    dom.LoadXml(get_result.ReaderXml);
+                }
+                catch (Exception ex)
+                {
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"读者记录装载进入 XMLDOM 时出错:{ex.Message}",
+                        ErrorCode = "loadXmlError"
+                    };
+                }
                 string pii = DomUtil.GetElementText(dom.DocumentElement, "barcode");
                 if (string.IsNullOrEmpty(pii))
                     pii = "@refID:" + DomUtil.GetElementText(dom.DocumentElement, "refID");
@@ -586,12 +598,54 @@ namespace dp2SSL
                 if (string.IsNullOrEmpty(cardNumber) == false)
                     cardNumber = "," + cardNumber + ",";
 
-                patron.RecPath = get_result.RecPath;
+                if (get_result.RecPath != null)
+                    patron.RecPath = get_result.RecPath;
                 patron.Bindings = cardNumber;
                 patron.Xml = get_result.ReaderXml;
                 patron.Timestamp = get_result.Timestamp;
             }
         }
+
+        public static NormalResult DeleteLocalPatronRecord(string strXml)
+        {
+            using (BiblioCacheContext context = new BiblioCacheContext())
+            {
+                if (_cacheDbCreated == false)
+                {
+                    context.Database.EnsureCreated();
+                    _cacheDbCreated = true;
+                }
+
+                XmlDocument dom = new XmlDocument();
+                try
+                {
+                    dom.LoadXml(strXml);
+                }
+                catch (Exception ex)
+                {
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"读者记录装载进入 XMLDOM 时出错:{ex.Message}",
+                        ErrorCode = "loadXmlError"
+                    };
+                }
+                string pii = DomUtil.GetElementText(dom.DocumentElement, "barcode");
+                if (string.IsNullOrEmpty(pii))
+                    pii = "@refID:" + DomUtil.GetElementText(dom.DocumentElement, "refID");
+                var patron = context.Patrons
+    .Where(o => o.PII == pii)
+    .FirstOrDefault();
+                if (patron != null)
+                {
+                    context.Patrons.Remove(patron);
+                    context.SaveChanges();
+                }
+
+                return new NormalResult { Value = 0 };
+            }
+        }
+
 
         // return.Value:
         //      -1  出错
