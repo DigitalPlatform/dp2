@@ -498,6 +498,7 @@
     <Compile Include="LibraryChannelUtil.cs" />
     <Compile Include="ManagerBase.cs" />
     <Compile Include="Models\BiblioCacheContext.cs" />
+    <Compile Include="Models\PatronReplication.cs" />
     <Compile Include="Models\RequestContext.cs" />
     <Compile Include="Models\DelayAction.cs" />
     <Compile Include="Models\Door.cs" />

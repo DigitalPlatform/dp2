@@ -27,6 +27,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using System.Windows.Media;
+using dp2SSL.Models;
 
 namespace dp2SSL
 {
@@ -4729,6 +4730,7 @@ Stack:
                 return;
 
             CancellationToken token = _cancel.Token;
+            bool download_complete = false;
 
             _monitorTask = Task.Factory.StartNew(async () =>
             {
@@ -4767,6 +4769,17 @@ Stack:
 
                         // 提醒关门
                         WarningCloseDoor();
+
+                        if (download_complete == false)
+                        {
+                            var repl_result = await PatronReplication.DownloadAllPatronRecordAsync(token);
+                            if (repl_result.Value == -1)
+                            {
+                                // TODO: 判断通讯出错的错误码。如果是通讯出错，则稍后需要重试下载
+                            }
+
+                            download_complete = true;
+                        }
                     }
                     _monitorTask = null;
 
