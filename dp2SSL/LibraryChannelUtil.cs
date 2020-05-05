@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 using System.Xml;
 
 using Microsoft.VisualStudio.Threading;
+using Microsoft.Data.Sqlite;
 
 using DigitalPlatform;
 using DigitalPlatform.WPF;
 using DigitalPlatform.Xml;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
-using Microsoft.Data.Sqlite;
 
 namespace dp2SSL
 {
@@ -320,6 +320,27 @@ namespace dp2SSL
             context.Entities.Update(item);
             await context.SaveChangesAsync();
         }
+
+        public static string GetBiblioSummaryFromLocal(string pii)
+        {
+            try
+            {
+                using (BiblioCacheContext context = new BiblioCacheContext())
+                {
+                    var item = context.BiblioSummaries.Where(o => o.PII == pii).FirstOrDefault();
+                    if (item != null
+                        && string.IsNullOrEmpty(item.BiblioSummary) == false)
+                        return item.BiblioSummary;
+                    return "";
+                }
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+
 
         // 探测和 dp2library 服务器的通讯是否正常
         // return.Value

@@ -24,6 +24,9 @@ namespace dp2SSL
         // 刷新显示
         // 把 actions 中的对象的状态变化更新到当前文档中
         // TODO: 一个办法是整个 Paragraph 替换。一个办法只替换里面的部分 InLine 对象
+        // parameters:
+        //      actions 发生了状态改变的 action。也就是被执行同步了的 action
+        //      skipped 被跳过了(没有处理的) action
         public void Refresh(List<ActionInfo> actions)
         {
             // 更新 _actions 中的对象
@@ -175,12 +178,15 @@ namespace dp2SSL
 
             int return_count = actions.FindAll((o) => { return o.Action == "return"; }).Count;
             int borrow_count = actions.FindAll((o) => { return o.Action == "borrow"; }).Count;
-            
+
             // 修改了 currentLocation 并且向内转移的数量
             int change_currentLocation_count = actions
-                .FindAll((o) => { return o.Action == "transfer" 
-                    && string.IsNullOrEmpty(o.CurrentShelfNo) == false
-                    && o.TransferDirection == "in"; })
+                .FindAll((o) =>
+                {
+                    return o.Action == "transfer"
+      && string.IsNullOrEmpty(o.CurrentShelfNo) == false
+      && o.TransferDirection == "in";
+                })
                 .Count;
 
             // 修改了 location 的数量。这个意味着发生了调拨
@@ -228,7 +234,7 @@ namespace dp2SSL
                 if (borrow_count
                     + return_count
                     + change_currentLocation_count
-                    + change_location_count 
+                    + change_location_count
                     + transferout_count > 0)
                 {
                     List<string> lines = new List<string>();
@@ -445,9 +451,22 @@ namespace dp2SSL
                         Foreground = Brushes.White
                     });
                 }
+                else if (action.SyncErrorCode == "skipped")
+                {
+                    back = Brushes.DeepSkyBlue;
+                    p.Inlines.Add(new Run
+                    {
+                        Text = $" 暂时跳过同步 ",
+                        Background = back,
+                        Foreground = Brushes.White
+                    });
+                }
                 else if (action.State == "commerror" || action.State == "normalerror")
                 {
-                    back = Brushes.DarkRed;
+                    if (ShelfData.LibraryNetworkCondition == "Bad")
+                        back = Brushes.DeepSkyBlue;
+                    else
+                        back = Brushes.DarkRed;
                     p.Inlines.Add(new Run
                     {
                         Text = $" 同步失败({action.State}) ",
@@ -502,6 +521,10 @@ namespace dp2SSL
             if (action.Entity != null)
             {
                 title = MessageDocument.ShortTitle(action.Entity.Title);
+                // 2020/5/6
+                // 尝试从本地缓存中获取书目摘要
+                if (string.IsNullOrEmpty(title))
+                    title = LibraryChannelUtil.GetBiblioSummaryFromLocal(action.Entity.PII);
                 if (string.IsNullOrEmpty(title))
                 {
                     title = ShelfData.GetPiiString(action.Entity);

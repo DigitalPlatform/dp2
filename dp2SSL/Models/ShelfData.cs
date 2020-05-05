@@ -5052,16 +5052,28 @@ TaskScheduler.Default);
                                     await ChangeDatabaseActionStateAsync(action.ID, action);
                                 }
 
+                                // TODO: 通知消息正文是否也告知一下同一个 PII 后面有多少个动作被跳过处理？
                                 MessageNotifyOverflow(result.ProcessedActions);
                             }
 
                             if (progress != null && progress.IsVisible)
                             {
+                                // 根据全部和已处理集合得到未处理(被跳过的)集合
+                                var skipped = GetSkippedActions(group, result.ProcessedActions);
+                                foreach (var action in skipped)
+                                {
+                                    action.State = "_";
+                                    action.SyncErrorCode = "skipped";
+                                    // action.SyncErrorInfo = "暂时跳过同步";
+                                }
+
+                                List<ActionInfo> display = new List<ActionInfo>(result.ProcessedActions);
+                                display.AddRange(skipped);
                                 // Thread.Sleep(3000);
                                 // 刷新显示
                                 App.Invoke(new Action(() =>
                                 {
-                                    progress?.Refresh(result.ProcessedActions);
+                                    progress?.Refresh(display);
                                 }));
                             }
 
@@ -5122,6 +5134,20 @@ TaskScheduler.Default);
 token,
 TaskCreationOptions.LongRunning,
 TaskScheduler.Default);
+        }
+
+        // 根据全部和已处理集合得到未处理(被跳过的)集合
+        static List<ActionInfo> GetSkippedActions(List<ActionInfo> all,
+            List<ActionInfo> proccessed)
+        {
+            List<ActionInfo> results = new List<ActionInfo>();
+            foreach(var action in all)
+            {
+                if (proccessed.IndexOf(action) == -1)
+                    results.Add(action);
+            }
+
+            return results;
         }
 
         static void MessageNotifyOverflow(List<ActionInfo> actions)
