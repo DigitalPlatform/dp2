@@ -13,6 +13,7 @@ using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Text;
 using static dp2SSL.LibraryChannelUtil;
 using DigitalPlatform.WPF;
+using DigitalPlatform.IO;
 
 namespace dp2SSL.Models
 {
@@ -21,21 +22,62 @@ namespace dp2SSL.Models
     /// </summary>
     public static class PatronReplication
     {
+        public class ReplicationPlan : NormalResult
+        {
+            public string StartDate { get; set; }
+        }
+
+        // 整体获得全部读者记录以前，预备获得同步计划信息
+        // 也就是第一次同步开始的位置信息
+        static ReplicationPlan GetReplicationPlan(LibraryChannel channel)
+        {
+            // 开始处理时的日期
+            string strEndDate = DateTimeUtil.DateTimeToString8(DateTime.Now);
+
+            // 获得日志文件中记录的总数
+            // parameters:
+            //      strDate 日志文件的日期，8 字符
+            // return:
+            //      -2  此类型的日志在 dp2library 端尚未启用
+            //      -1  出错
+            //      0   日志文件不存在，或者记录数为 0
+            //      >0  记录数
+            long lCount = OperLogLoader.GetOperLogCount(
+                null,
+                channel,
+                strEndDate,
+                LogType.OperLog,
+                out string strError);
+            if (lCount < 0)
+            {
+                // errorCode: "RequestError" 服务器没有响应
+                return new ReplicationPlan { Value = -1, ErrorInfo = strError, ErrorCode = channel.ErrorCode.ToString() };
+            }
+            return new ReplicationPlan { StartDate = strEndDate + ":" + lCount + "-" };
+        }
+
+
         // 第一阶段：获得全部读者库记录，进入本地数据库
         // result.Value
         //      -1  出错
         //      >=0 实际获得的读者记录条数
-        public static async Task<NormalResult> DownloadAllPatronRecordAsync(CancellationToken token)
+        public static async Task<ReplicationPlan> DownloadAllPatronRecordAsync(CancellationToken token)
         {
             LibraryChannel channel = App.CurrentApp.GetChannel();
             var old_timeout = channel.Timeout;
             channel.Timeout = TimeSpan.FromMinutes(5);  // 设置 5 分钟。因为读者记录检索需要一定时间
             try
             {
+
+                ReplicationPlan plan = GetReplicationPlan(channel);
+                if (plan.Value == -1)
+                    return plan;
+
+
                 int nRedoCount = 0;
             REDO:
                 if (token.IsCancellationRequested)
-                    return new NormalResult
+                    return new ReplicationPlan
                     {
                         Value = -1,
                         ErrorInfo = "用户中断"
@@ -62,7 +104,7 @@ out string strError);
                         goto REDO;
                     }
 
-                    return new NormalResult
+                    return new ReplicationPlan
                     {
                         Value = -1,
                         ErrorInfo = strError,
@@ -96,7 +138,7 @@ out string strError);
                         foreach (DigitalPlatform.LibraryClient.localhost.Record record in loader)
                         {
                             if (token.IsCancellationRequested)
-                                return new NormalResult
+                                return new ReplicationPlan
                                 {
                                     Value = -1,
                                     ErrorInfo = "用户中断"
@@ -122,11 +164,15 @@ out string strError);
                     }
                 }
 
-                return new NormalResult { Value = (int)hitcount };
+                return new ReplicationPlan
+                {
+                    Value = (int)hitcount,
+                    StartDate = plan.StartDate
+                };
             }
             catch (Exception ex)
             {
-                return new NormalResult
+                return new ReplicationPlan
                 {
                     Value = -1,
                     ErrorInfo = $"DownloadAllPatronRecord() 出现异常：{ex.Message}"
@@ -137,7 +183,6 @@ out string strError);
                 channel.Timeout = old_timeout;
                 App.CurrentApp.ReturnChannel(channel);
             }
-
         }
 
         static NormalResult Set(PatronItem patron,
@@ -391,8 +436,8 @@ out string strError);
                             }
 #endif
 
-                        // lProcessCount++;
-                        CONTINUE:
+                            // lProcessCount++;
+                            CONTINUE:
                             // 便于循环外获得这些值
                             strLastItemDate = item.Date;
                             lLastItemIndex = item.Index + 1;

@@ -37,7 +37,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>65</ApplicationRevision>
+    <ApplicationRevision>66</ApplicationRevision>
     <ApplicationVersion>1.4.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -507,6 +507,8 @@
     <Compile Include="Models\Operation.cs" />
     <Compile Include="Models\ResultsetContext.cs" />
     <Compile Include="Models\ShelfData.cs" />
+    <Compile Include="Models\ShelfData_monitor.cs" />
+    <Compile Include="Models\ShelfData_sync.cs" />
     <Compile Include="Models\SpeakList.cs" />
     <Compile Include="Models\SubmitDocument.cs" />
     <Compile Include="Models\TagList.cs" />
