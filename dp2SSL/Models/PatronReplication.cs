@@ -606,7 +606,7 @@ out string strError);
                 return LibraryChannelUtil.UpdateLocalPatronRecord(
                     new GetReaderInfoResult
                     {
-                        RecPath = null, // 表示不加以修改
+                        RecPath = string.IsNullOrEmpty(strNewRecPath) ? null : strNewRecPath, // null 表示不加以修改
                         ReaderXml = strRecord,
                         Timestamp = null,
                     });
