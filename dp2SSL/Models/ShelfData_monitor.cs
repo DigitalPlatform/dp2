@@ -23,9 +23,17 @@ namespace dp2SSL
 
         // 和 dp2library 服务器之间的通讯状况
         static string _libraryNetworkCondition = "OK";  // OK/Bad
+
         // 可以适当降低探测的频率。比如每五分钟探测一次
+        // 两次检测网络之间的间隔
         static TimeSpan _detectPeriod = TimeSpan.FromMinutes(5);
+        // 最近一次检测网络的时间
         static DateTime _lastDetectTime;
+
+        // 两次零星同步之间的间隔
+        static TimeSpan _replicatePeriod = TimeSpan.FromMinutes(1);
+        // 最近一次零星同步的时间
+        static DateTime _lastReplicateTime;
 
         static Task _monitorTask = null;
 
@@ -104,47 +112,62 @@ namespace dp2SSL
 
                         if (download_complete == false)
                         {
-                            SaveStartDate("");
-
-                            var repl_result = await PatronReplication.DownloadAllPatronRecordAsync(token);
-                            if (repl_result.Value == -1)
+                            string startDate = LoadStartDate();
+                            // 如果 Config 中没有记载断点位置，说明以前从来没有首次同步过。需要进行一次首次同步
+                            if (string.IsNullOrEmpty(startDate))
                             {
-                                // TODO: 判断通讯出错的错误码。如果是通讯出错，则稍后需要重试下载
-                            }
-                            else
-                                SaveStartDate(repl_result.StartDate);
+                                // SaveStartDate("");
 
+                                var repl_result = await PatronReplication.DownloadAllPatronRecordAsync(token);
+                                if (repl_result.Value == -1)
+                                {
+                                    // TODO: 判断通讯出错的错误码。如果是通讯出错，则稍后需要重试下载
+                                }
+                                else
+                                    SaveStartDate(repl_result.StartDate);
+
+                                // 立刻允许接着做一次零星同步
+                                ActivateMonitor();
+                            }
                             download_complete = true;
                         }
                         else
                         {
-                            // 进行同步
-
-                            string startDate = LoadStartDate();
-                            if (string.IsNullOrEmpty(startDate) == false)
+                            // 进行零星同步
+                            if (DateTime.Now - _lastReplicateTime > _replicatePeriod)
                             {
-                                string endDate = DateTimeUtil.DateTimeToString8(DateTime.Now);
+                                string startDate = LoadStartDate();
 
-                                // parameters:
-                                //      strLastDate   处理中断或者结束时返回最后处理过的日期
-                                //      last_index  处理或中断返回时最后处理过的位置。以后继续处理的时候可以从这个偏移开始
-                                // return:
-                                //      -1  出错
-                                //      0   中断
-                                //      1   完成
-                                ReplicationResult repl_result = PatronReplication.DoReplication(
-                                    startDate,
-                                    endDate,
-                                    LogType.OperLog,
-                                    token);
-                                if (repl_result.Value == -1)
+                                // testing
+                                // startDate = "20200507:0-";
+
+                                if (string.IsNullOrEmpty(startDate) == false)
                                 {
-                                    WpfClientInfo.WriteErrorLog($"同步出错: {repl_result.ErrorInfo}");
-                                }
-                                else
-                                {
-                                    string lastDate = repl_result.LastDate + ":" + repl_result.LastIndex + "-";    // 注意 - 符号不能少。少了意思就会变成每次只获取一条日志记录了
-                                    SaveStartDate(lastDate);
+                                    string endDate = DateTimeUtil.DateTimeToString8(DateTime.Now);
+
+                                    // parameters:
+                                    //      strLastDate   处理中断或者结束时返回最后处理过的日期
+                                    //      last_index  处理或中断返回时最后处理过的位置。以后继续处理的时候可以从这个偏移开始
+                                    // return:
+                                    //      -1  出错
+                                    //      0   中断
+                                    //      1   完成
+                                    ReplicationResult repl_result = PatronReplication.DoReplication(
+                                        startDate,
+                                        endDate,
+                                        LogType.OperLog,
+                                        token);
+                                    if (repl_result.Value == -1)
+                                    {
+                                        WpfClientInfo.WriteErrorLog($"同步出错: {repl_result.ErrorInfo}");
+                                    }
+                                    else if (repl_result.Value == 1)
+                                    {
+                                        string lastDate = repl_result.LastDate + ":" + repl_result.LastIndex + "-";    // 注意 - 符号不能少。少了意思就会变成每次只获取一条日志记录了
+                                        SaveStartDate(lastDate);
+                                    }
+
+                                    _lastReplicateTime = DateTime.Now;
                                 }
                             }
                         }
