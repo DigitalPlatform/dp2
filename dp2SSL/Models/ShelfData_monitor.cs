@@ -8,12 +8,12 @@ using System.Windows.Media;
 
 using dp2SSL.Models;
 
-using DigitalPlatform.Text;
-using DigitalPlatform.WPF;
-using DigitalPlatform;
 using static dp2SSL.Models.PatronReplication;
-using DigitalPlatform.LibraryClient;
+using DigitalPlatform;
 using DigitalPlatform.IO;
+using DigitalPlatform.WPF;
+using DigitalPlatform.Text;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2SSL
 {
@@ -173,6 +173,10 @@ namespace dp2SSL
                         }
                     }
                     _monitorTask = null;
+
+                }
+                catch(OperationCanceledException)
+                {
 
                 }
                 catch (Exception ex)

@@ -96,10 +96,16 @@ namespace dp2SSL
                 foreach (XmlElement borrow in borrows)
                 {
                     string barcode = borrow.GetAttribute("barcode");
+                    string overflow = borrow.GetAttribute("overflow");
+
                     var new_entity = new Entity { PII = barcode, Container = _borrowedEntities };
                     // 2020/4/17 不用排序，在添加时临时决定是插入到前部还是追加
-                    if (IsState(new_entity, "overflow") == true)
+                    if (IsState(new_entity, "overflow") == true
+                        || string.IsNullOrEmpty(overflow) == false)
+                    {
+                        SetState(new_entity, "overflow");
                         _borrowedEntities.Insert(i++, new_entity);
+                    }
                     else
                         _borrowedEntities.Add(new_entity);
                 }
@@ -109,6 +115,13 @@ namespace dp2SSL
         static bool IsState(Entity entity, string sub)
         {
             return StringUtil.IsInList(sub, entity.State);
+        }
+
+        static void SetState(Entity entity, string sub)
+        {
+            string state = entity.State;
+            StringUtil.SetInList(ref state, sub, true);
+            entity.State = state;
         }
 
         /*

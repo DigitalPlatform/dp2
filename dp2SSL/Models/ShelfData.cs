@@ -1093,7 +1093,7 @@ namespace dp2SSL
             }
         }
 
-        static int max_items = 1;  // 一个读者最多能同时借阅的册数
+        static int max_items = 5;  // 一个读者最多能同时借阅的册数
         static int max_period = 31; // 读者借阅期限天数
 
         // 构造 BorrowInfo 字符串

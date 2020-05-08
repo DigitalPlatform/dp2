@@ -132,6 +132,10 @@ namespace dp2SSL
                     }
                     _sendTask = null;
                 }
+                catch (OperationCanceledException)
+                {
+
+                }
                 catch (Exception ex)
                 {
                     WpfClientInfo.WriteErrorLog($"消息发送专用线程出现异常: {ExceptionUtil.GetDebugText(ex)}");
