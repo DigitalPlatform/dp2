@@ -1198,8 +1198,12 @@ namespace dp2SSL
         // 第二阶段：填充图书信息的 PII 和 Title 字段
         async Task FillBookFieldsAsync(BaseChannel<IRfid> channel,
             List<Entity> entities,
+            string style,
             CancellationToken token)
         {
+            // 2020/5/8
+            // 是否保有处理前的 entity.State 值
+            bool reserve_state = StringUtil.IsInList("reserve_state", style);
             try
             {
                 foreach (Entity entity in entities)
@@ -1241,7 +1245,14 @@ namespace dp2SSL
                             continue;
                         }
                         entity.Title = PageBorrow.GetCaption(result.Title);
+                        string old_state = entity.State;
                         entity.SetData(result.ItemRecPath, result.ItemXml);
+                        if (reserve_state && string.IsNullOrEmpty(old_state) == false)
+                        {
+                            string state = entity.State;
+                            StringUtil.SetInList(ref state, old_state, true);
+                            entity.State = state;
+                        }
                     }
 
                     entity.SetError(null);
@@ -2284,7 +2295,10 @@ namespace dp2SSL
                             BaseChannel<IRfid> channel = RfidManager.GetChannel();
                             try
                             {
-                                await FillBookFieldsAsync(channel, entities, new CancellationToken());
+                                await FillBookFieldsAsync(channel, 
+                                    entities,
+                                    "reserve_state",
+                                    new CancellationToken());
                             }
                             finally
                             {

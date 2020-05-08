@@ -295,6 +295,10 @@ namespace dp2SSL
                     _syncTask = null;
 
                 }
+                catch (OperationCanceledException)
+                {
+
+                }
                 catch (Exception ex)
                 {
                     WpfClientInfo.WriteErrorLog($"重试专用线程出现异常: {ExceptionUtil.GetDebugText(ex)}");

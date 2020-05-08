@@ -545,6 +545,17 @@ namespace dp2SSL
                     }
 
                     var patron = patrons[0];
+
+                    {
+                        // 2020/5/8
+                        // 添加用本地信息模拟出来的 borrows/borrow 元素
+                        XmlDocument patron_dom = new XmlDocument();
+                        patron_dom.LoadXml(patron.Xml);
+                        SetBorrowInfo(patron_dom);
+
+                        patron.Xml = patron_dom.OuterXml;
+                    }
+
                     return new GetReaderInfoResult
                     {
                         Value = 1,
