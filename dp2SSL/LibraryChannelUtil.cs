@@ -13,6 +13,9 @@ using DigitalPlatform.WPF;
 using DigitalPlatform.Xml;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.IO;
+using Microsoft.VisualStudio.OLE.Interop;
+using Newtonsoft.Json;
 
 namespace dp2SSL
 {
@@ -561,6 +564,77 @@ namespace dp2SSL
             }
         }
 
+        static string GetPii(XmlDocument dom)
+        {
+            string pii = DomUtil.GetElementText(dom.DocumentElement, "barcode");
+            if (string.IsNullOrEmpty(pii))
+                pii = "@refID:" + DomUtil.GetElementText(dom.DocumentElement, "refID");
+            return pii;
+        }
+
+        // 根据本地历史记录，在读者记录中添加 borrows/borrow 元素
+        static NormalResult SetBorrowInfo(XmlDocument patron_dom)
+        {
+            string pii = GetPii(patron_dom);
+
+            bool changed = false;
+            XmlElement root = patron_dom.DocumentElement.SelectSingleNode("borrows") as XmlElement;
+            if (root == null)
+            {
+                root = patron_dom.CreateElement("borrows");
+                patron_dom.DocumentElement.AppendChild(root);
+            }
+
+            // 删除原有 borrows/borrow 元素
+            if (root.ChildNodes.Count > 0)
+            {
+                root.RemoveAll();
+                changed = true;
+            }
+
+            using (var context = new RequestContext())
+            {
+                // 显示该读者的在借册情况
+                var borrows = context.Requests
+                    .Where(o => o.OperatorID == pii && o.Action == "borrow" && o.LinkID == null)
+                    .OrderBy(o => o.ID).ToList();
+                foreach (var item in borrows)
+                {
+                    var borrow_info = JsonConvert.DeserializeObject<BorrowInfo>(item.ActionString);
+
+                    XmlElement new_borrow = patron_dom.CreateElement("borrow");
+                    root.AppendChild(new_borrow);
+                    // var title = GetEntityTitle(item.EntityString);
+
+                    new_borrow.SetAttribute("barcode", item.PII);
+                    new_borrow.SetAttribute("borrowDate", DateTimeUtil.Rfc1123DateTimeStringEx(item.OperTime));
+                    if (borrow_info != null)
+                    {
+                        /*
+{"BorrowCount":0,
+"BorrowOperator":"supervisor",
+"DenyPeriod":"",
+"ItemBarcode":"T0000131",
+"LatestReturnTime":"Mon, 08 Jun 2020 12:00:00 +0800",
+"Overflows":null,
+"Period":"31day"}
+* */
+                        new_borrow.SetAttribute("returningDate", borrow_info.LatestReturnTime);
+                        new_borrow.SetAttribute("period", borrow_info.Period);
+                        if (borrow_info.Overflows != null)
+                            new_borrow.SetAttribute("overflow", string.Join("; ", borrow_info.Overflows));
+                        new_borrow.SetAttribute("no", borrow_info.BorrowCount.ToString());
+                    }
+                    changed = true;
+                }
+            }
+
+            if (changed)
+                return new NormalResult { Value = 1 };
+            return new NormalResult();
+        }
+
+
         // 把读者记录保存(更新)到本地数据库
         public static NormalResult UpdateLocalPatronRecord(
             GetReaderInfoResult get_result)
@@ -587,9 +661,12 @@ namespace dp2SSL
                         ErrorCode = "loadXmlError"
                     };
                 }
+                /*
                 string pii = DomUtil.GetElementText(dom.DocumentElement, "barcode");
                 if (string.IsNullOrEmpty(pii))
                     pii = "@refID:" + DomUtil.GetElementText(dom.DocumentElement, "refID");
+                    */
+                string pii = GetPii(dom);
                 var patron = context.Patrons
     .Where(o => o.PII == pii)
     .FirstOrDefault();
@@ -651,9 +728,12 @@ namespace dp2SSL
                         ErrorCode = "loadXmlError"
                     };
                 }
+                /*
                 string pii = DomUtil.GetElementText(dom.DocumentElement, "barcode");
                 if (string.IsNullOrEmpty(pii))
                     pii = "@refID:" + DomUtil.GetElementText(dom.DocumentElement, "refID");
+                    */
+                string pii = GetPii(dom);
                 var patron = context.Patrons
     .Where(o => o.PII == pii)
     .FirstOrDefault();
