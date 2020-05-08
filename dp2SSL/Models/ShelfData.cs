@@ -983,6 +983,7 @@ namespace dp2SSL
                     processed.Add(entity);
                 }
 
+                int borrowed_count = 0;
                 foreach (var entity in ShelfData.l_Removes)
                 {
                     // Debug.Assert(string.IsNullOrEmpty(entity.PII) == false, "");
@@ -1013,7 +1014,8 @@ namespace dp2SSL
                         {
                             Entity = entity.Clone(),
                             Action = "borrow",
-                            Operator = person
+                            Operator = person,
+                            ActionString = BuildBorrowInfo(person.PatronBarcode, entity, borrowed_count ++),
                         });
                     }
 
@@ -1088,6 +1090,82 @@ namespace dp2SSL
                     Actions = actions,
                     //Operations = infos
                 };
+            }
+        }
+
+        static int max_items = 1;  // 一个读者最多能同时借阅的册数
+        static int max_period = 31; // 读者借阅期限天数
+
+        // 构造 BorrowInfo 字符串
+        // 用于在同步之前，为本地数据库记录临时模拟出 BorrowInfo。这样当长期断网的情况下，dp2ssl 能用它进行本地借书权限的判断(判断是否超期、超额)
+        // parameters:
+        //      delta   尚未来得及保存到数据库的已借册数
+        static string BuildBorrowInfo(string patron_pii, 
+            Entity entity, 
+            int delta)
+        {
+            BorrowInfo borrow_info = new BorrowInfo();
+
+            // TODO: 如何判断本册借阅时候是否已经超额？
+            int item_count = GetBorrowItemCount(patron_pii);
+            if (item_count + delta >= max_items)
+            {
+                borrow_info.Overflows = new string[] { $"超过额度 {max_items} 册" };
+                // 一天以后还书
+                SetReturning(1);
+            }
+            else
+            {
+                // 一个月以后还书
+                SetReturning(max_period);
+                //borrow_info.Period = $"{max_period}day";
+                //borrow_info.LatestReturnTime = DateTimeUtil.Rfc1123DateTimeStringEx(DateTime.Now.AddDays(max_period));
+            }
+            
+            if (entity != null)
+                borrow_info.ItemBarcode = entity.PII;
+            return JsonConvert.SerializeObject(borrow_info);
+
+            // 设置 BorrowInfo 里面和还书时间有关的两个成员 Period 和 LatestReturnTime
+            void SetReturning(int days)
+            {
+                borrow_info.Period = $"{days}day";
+                DateTime returning = DateTime.Now.AddDays(days);
+                // 正规化时间
+                returning = RoundTime("day", returning);
+                borrow_info.LatestReturnTime = DateTimeUtil.Rfc1123DateTimeStringEx(returning);
+            }
+        }
+
+        // 注意 time 中的时间应该是本地时间
+        static DateTime RoundTime(string strUnit,
+DateTime time)
+        {
+            if (strUnit == "day" || string.IsNullOrEmpty(strUnit) == true)
+            {
+                return new DateTime(time.Year, time.Month, time.Day,
+                    12, 0, 0, 0);
+            }
+            else if (strUnit == "hour")
+            {
+                return new DateTime(time.Year, time.Month, time.Day,
+                    time.Hour, 0, 0, 0);
+            }
+            else
+            {
+                throw new ArgumentException("未知的时间单位 '" + strUnit + "'");
+            }
+        }
+
+        // 获得一个读者当前的在借册册数
+        static int GetBorrowItemCount(string pii)
+        {
+            using (var context = new RequestContext())
+            {
+                // 该读者的在借册册数
+                return context.Requests
+                    .Where(o => o.OperatorID == pii && o.Action == "borrow" && o.LinkID == null)
+                    .OrderBy(o => o.ID).Count();
             }
         }
 
@@ -4091,19 +4169,22 @@ namespace dp2SSL
 
                     processed.Add(info);
 
-                    if (info.Action == "borrow")
+                    if (lRet != -1)
                     {
-                        if (borrow_info == null)
-                            info.ActionString = null;
+                        if (info.Action == "borrow")
+                        {
+                            if (borrow_info == null)
+                                info.ActionString = null;
+                            else
+                                info.ActionString = JsonConvert.SerializeObject(borrow_info);
+                        }
                         else
-                            info.ActionString = JsonConvert.SerializeObject(borrow_info);
-                    }
-                    else
-                    {
-                        if (return_info == null)
-                            info.ActionString = null;
-                        else
-                            info.ActionString = JsonConvert.SerializeObject(return_info);
+                        {
+                            if (return_info == null)
+                                info.ActionString = null;
+                            else
+                                info.ActionString = JsonConvert.SerializeObject(return_info);
+                        }
                     }
 
                     /*
@@ -4228,7 +4309,6 @@ namespace dp2SSL
                             {
                                 messageItem.ResultType = "information";
                             }
-
                         }
 
                         if (action == "transfer")

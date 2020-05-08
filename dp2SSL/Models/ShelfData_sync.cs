@@ -467,6 +467,7 @@ TaskScheduler.Default);
                 action.SyncErrorCode = request.SyncErrorCode;
                 action.OperTime = request.OperTime;
                 action.SyncOperTime = request.SyncOperTime;
+                action.ActionString = request.ActionString;
                 actions.Add(action);
             }
 
@@ -506,6 +507,7 @@ TaskScheduler.Default);
                     request.OperTime = action.OperTime;
 
                 request.SyncOperTime = action.SyncOperTime;
+                request.ActionString = action.ActionString;
                 requests.Add(request);
             }
 
