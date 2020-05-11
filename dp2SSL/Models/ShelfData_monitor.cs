@@ -215,12 +215,12 @@ TaskScheduler.Default);
             if (detect_result.Value == 1)
             {
                 _libraryNetworkCondition = "OK";
-                PageMenu.PageShelf.SetBackColor(Brushes.Black);
+                PageMenu.PageShelf?.SetBackColor(Brushes.Black);
             }
             else
             {
                 _libraryNetworkCondition = "Bad";
-                PageMenu.PageShelf.SetBackColor(Brushes.DarkBlue);
+                PageMenu.PageShelf?.SetBackColor(Brushes.DarkBlue);
             }
         }
 

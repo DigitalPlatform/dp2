@@ -189,6 +189,9 @@ namespace dp2SSL
 
             StartProcessManager();
 
+            // TODO: 检查网络情况。提示是否允许断网情况下进行初始化
+            SelectMode();
+
             BeginCheckServerUID(_cancelRefresh.Token);
 
             // 
@@ -1238,6 +1241,47 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                     // 标签总数显示 只显示标签数，不再区分图书标签和读者卡
                     this.Number = $"{NewTagList.Tags.Count}";
                 }
+            }
+        }
+
+        public static string StartNetworkMode = ""; // 空/local
+
+        static void SelectMode()
+        {
+            ShelfData.DetectLibraryNetwork();
+            if (ShelfData.LibraryNetworkCondition != "OK")
+            {
+                var result = MessageBox.Show("访问 dp2library 服务器失败。请问是否继续启动？\r\n[Yes] 按照断网模式继续启动; [No] 按照联网模式继续启动; [Cancel] 退出 dp2SSL",
+                    "请选择启动模式",
+                    MessageBoxButton.YesNoCancel,
+                    MessageBoxImage.Question,
+                    MessageBoxResult.Yes, 
+                    MessageBoxOptions.DefaultDesktopOnly);
+                if (result == MessageBoxResult.Yes)
+                    StartNetworkMode = "local";
+                else if (result == MessageBoxResult.Cancel)
+                    App.Current.Shutdown();
+                else
+                    StartNetworkMode = "";
+
+#if NO
+                App.Invoke(new Action(() =>
+                {
+                    NetworkWindow dlg = new NetworkWindow();
+                    //progress.TitleText = "请选择启动模式";
+                    //progress.MessageText = "访问 dp2library 服务器失败。请问是否继续启动？";
+                    dlg.Owner = Application.Current.MainWindow;
+                    dlg.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                    dlg.Background = new SolidColorBrush(Colors.DarkRed);
+                    // App.SetSize(progress, "wide");
+                    // progress.BackColor = "yellow";
+                    var ret = dlg.ShowDialog();
+                    if (ret == false)
+                        App.Current.Shutdown();
+                    StartNetworkMode = dlg.Mode;
+                }
+                ));
+#endif
             }
         }
 

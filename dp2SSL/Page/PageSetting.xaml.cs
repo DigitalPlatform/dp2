@@ -292,7 +292,7 @@ namespace dp2SSL
             finally
             {
                 channel.Timeout = old_timeout;
-                App.CurrentApp.ReturnChannel(channel);
+                App.CurrentApp?.ReturnChannel(channel);
             }
 
             List<string> errors = new List<string>();

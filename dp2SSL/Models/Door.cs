@@ -12,6 +12,7 @@ using System.Threading;
 
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
+using static dp2SSL.LibraryChannelUtil;
 
 namespace dp2SSL
 {
@@ -297,9 +298,23 @@ namespace dp2SSL
         public static List<DoorItem> BuildItems(XmlDocument cfg_dom)
         {
             List<string> location_list = null;
-            var getlocation_result = LibraryChannelUtil.GetLocationList();
+            GetLocationListResult getlocation_result = null;
+            if (App.StartNetworkMode == "local")
+            {
+                getlocation_result = LibraryChannelUtil.GetLocationListFromLocal();
+                if (getlocation_result.Value == 0)
+                    throw new Exception("本地没有馆藏地定义信息。需要联网以后重新启动");
+            }
+            else
+                getlocation_result = LibraryChannelUtil.GetLocationList();
+
             if (getlocation_result.Value != -1)
                 location_list = getlocation_result.List;
+            else
+            {
+                // TODO: 采用特定类型的 Exception 重载类
+                throw new Exception(getlocation_result.ErrorInfo);
+            }
 
             List<DoorItem> results = new List<DoorItem>();
 

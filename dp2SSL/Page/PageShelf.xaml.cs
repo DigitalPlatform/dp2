@@ -165,7 +165,7 @@ namespace dp2SSL
                             // 初始化之前开灯，让使用者感觉舒服一些(感觉机器在活动状态)
                             RfidManager.TurnShelfLamp("*", "turnOn");
 
-                            await InitialShelfEntitiesAsync();
+                            await InitialShelfEntitiesAsync(App.StartNetworkMode);
 
                             // 初始化完成之后，应该是全部门关闭状态，还没有人开始使用，则先关灯，进入等待使用的状态
                             RfidManager.TurnShelfLamp("*", "turnOff");
@@ -1463,7 +1463,9 @@ namespace dp2SSL
         }
 
         // 新版本的首次填充图书信息的函数
-        async Task InitialShelfEntitiesAsync()
+        // parameters:
+        //      networkMode 空/local。其中 local 表示按照断网模式初始化(否则是联网模式)，信息尽量从本地缓存获取
+        async Task InitialShelfEntitiesAsync(string networkMode)
         {
             if (ShelfData.FirstInitialized)
                 return;
@@ -1580,6 +1582,8 @@ namespace dp2SSL
                 // 此时门是关闭状态。让读卡器切换到节省盘点状态
                 ShelfData.RefreshReaderNameList();
 
+                List<ActionInfo> all_actions = new List<ActionInfo>();
+
                 // 对每一个门执行初始化操作
                 foreach (var door in ShelfData.Doors)
                 {
@@ -1660,7 +1664,12 @@ namespace dp2SSL
                                 //await FillBookFields(Removes, token);
                             });
                             */
-                            var fill_result = await ShelfData.FillBookFieldsAsync(part, ShelfData.CancelToken, "refreshCount");
+                            string style = "refreshCount";
+                            if (networkMode == "local")
+                                style += ",localGetEntityInfo";
+                            var fill_result = await ShelfData.FillBookFieldsAsync(part, 
+                                ShelfData.CancelToken,
+                                style);
                             if (fill_result.Errors?.Count > 0)
                             {
                                 string error = StringUtil.MakePathList(fill_result.Errors, "\r\n");
@@ -1675,38 +1684,66 @@ namespace dp2SSL
 
                         DisplayMessage(progress, "自动盘点图书 ...", "green");
 
-                        WpfClientInfo.WriteInfoLog("自动盘点全部图书开始");
 
-                        // result.Value
-                        //      -1  出错
-                        //      0   没有必要处理
-                        //      1   已经处理
-                        var result = await InventoryBooksAsync(progress, part);
-                        WpfClientInfo.WriteInfoLog("自动盘点全部图书结束");
-
-                        if (result.MessageDocument != null
-                            && result.MessageDocument.ErrorCount > 0)
+                        // 构造 actions，用于同步到 dp2library 服务器
+                        var build_result = BuildInventoryActions(part,
+                            out List<ActionInfo> part_actions);
+                        if (build_result.Value == -1)
                         {
-                            string speak = "";
+                            App.Invoke(new Action(() =>
                             {
-                                App.Invoke(new Action(() =>
-                                {
-                                    progress.BackColor = "yellow";
-                                    progress.MessageDocument = result.MessageDocument.BuildDocument(
-                                        MessageDocument.BaseFontSize/*18*/,
-                                        "",
-                                        out speak);
-                                    //if (result.MessageDocument.ErrorCount > 0)
-                                    //    progress = null;
-                                }));
-                            }
-                            if (string.IsNullOrEmpty(speak) == false)
-                                App.CurrentApp.Speak(speak);
+                                progress.BackColor = "yellow";
+                                progress.MessageText = build_result.ErrorInfo;
+                            }));
+                            goto WAIT_RETRY;
+                        }
+
+                        if (networkMode == "local")
+                        {
+                            // *** 断网情形
+                            // 累计起来等待最后写入本地历史数据库
+                            all_actions.AddRange(part_actions);
+                            break;
                         }
                         else
                         {
-                            var test = ShelfData.l_All;
-                            break;
+                            // *** 联网情形
+                            WpfClientInfo.WriteInfoLog($"自动盘点门 {door.Name} 内全部图书开始");
+
+                            // result.Value
+                            //      -1  出错
+                            //      0   没有必要处理
+                            //      1   已经处理
+                            var result = await InventoryBooksAsync(progress,
+                                // part
+                                part_actions
+                                );
+                            WpfClientInfo.WriteInfoLog($"自动盘点门 {door.Name} 内全部图书结束");
+
+                            if (result.MessageDocument != null
+                                && result.MessageDocument.ErrorCount > 0)
+                            {
+                                string speak = "";
+                                {
+                                    App.Invoke(new Action(() =>
+                                    {
+                                        progress.BackColor = "yellow";
+                                        progress.MessageDocument = result.MessageDocument.BuildDocument(
+                                            MessageDocument.BaseFontSize/*18*/,
+                                            "",
+                                            out speak);
+                                        //if (result.MessageDocument.ErrorCount > 0)
+                                        //    progress = null;
+                                    }));
+                                }
+                                if (string.IsNullOrEmpty(speak) == false)
+                                    App.CurrentApp.Speak(speak);
+                            }
+                            else
+                            {
+                                var test = ShelfData.l_All;
+                                break;
+                            }
                         }
 
                     WAIT_RETRY:
@@ -1774,7 +1811,16 @@ namespace dp2SSL
                 }
 
                 // 将刚才初始化涉及到的 action 操作写入本地数据库
+                if (networkMode == "local")
                 {
+                    // *** 断网情况
+                    // 将尚未同步的信息写入本地历史数据库
+                    await ShelfData.SaveActionsToDatabaseAsync(all_actions);
+                }
+                else
+                {
+                    // *** 联网情况
+                    // 构造 inventory 类型的 action 写入本地历史数据库，状态为已经同步
                     DateTime now = DateTime.Now;
                     List<ActionInfo> actions = new List<ActionInfo>();
                     foreach (var entity in ShelfData.l_All)
@@ -2295,7 +2341,7 @@ namespace dp2SSL
                             BaseChannel<IRfid> channel = RfidManager.GetChannel();
                             try
                             {
-                                await FillBookFieldsAsync(channel, 
+                                await FillBookFieldsAsync(channel,
                                     entities,
                                     "reserve_state",
                                     new CancellationToken());
@@ -2696,6 +2742,50 @@ namespace dp2SSL
             return person;
         }
 
+        static NormalResult BuildInventoryActions(
+            IReadOnlyCollection<Entity> entities,
+            out List<ActionInfo> actions)
+        {
+            DateTime now = DateTime.Now;
+
+            actions = new List<ActionInfo>();
+            foreach (var entity in entities)
+            {
+                actions.Add(new ActionInfo
+                {
+                    Entity = entity.Clone(),
+                    Action = "return",
+                    Operator = GetOperator(entity, false),
+                    OperTime = now,
+                });
+                actions.Add(new ActionInfo
+                {
+                    Entity = entity.Clone(),
+                    Action = "transfer",
+                    CurrentShelfNo = ShelfData.GetShelfNo(entity),
+                    Operator = GetOperator(entity, false),
+                    OperTime = now,
+                });
+
+                // 2020/4/2
+                // 还书操作前先尝试修改 EAS
+                {
+                    var eas_result = ShelfData.SetEAS(entity.UID, entity.Antenna, false);
+                    if (eas_result.Value == -1)
+                    {
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"修改册 '{entity.PII}' 的 EAS 失败: {eas_result.ErrorInfo}",
+                            ErrorCode = "setEasError"
+                        };
+                    }
+                }
+            }
+
+            return new NormalResult();
+        }
+
         // TODO: 报错信息尝试用 FlowDocument 改造
         // 首次初始化时候对所有图书进行盘点操作。盘点的意思就是清点在书柜里面的图书
         // 注意观察和测试 PII 在 dp2library 中不存在的情况
@@ -2705,10 +2795,13 @@ namespace dp2SSL
         //      0   没有必要处理
         //      1   已经处理
         async Task<SubmitResult> InventoryBooksAsync(InventoryWindow progress,
-            IReadOnlyCollection<Entity> entities)
+            // IReadOnlyCollection<Entity> entities
+            List<ActionInfo> actions
+            )
         {
             DateTime now = DateTime.Now;
 
+#if NO
             List<ActionInfo> actions = new List<ActionInfo>();
             foreach (var entity in entities)
             {
@@ -2743,6 +2836,8 @@ namespace dp2SSL
                     }
                 }
             }
+
+#endif
 
             if (actions.Count == 0)
                 return new SubmitResult();  // 没有必要处理
