@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
-
+using DigitalPlatform;
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Xml;
@@ -644,20 +644,27 @@ namespace dp2SSL
             return null;
         }
 
+        public class FillResult : NormalResult
+        {
+            // [out] 当 ErrorCode 为 "bookTag" 时，这里返回图书的 PII
+            public string PII { get; set; }
+        }
+
         // 刷新信息
         // Exception:
         //      可能会抛出异常 ArgumentException TagDataException
-        // return:
-        //      false   未进行刷新
-        //      true    成功进行了刷新
-        public bool Fill(OneTag tag)
+        // result.Value:
+        //      -1  出错
+        //      0   未进行刷新
+        //      1   成功进行了刷新
+        public FillResult Fill(OneTag tag)
         {
             string pii = "";
 
             if (tag.TagInfo == null && tag.Protocol == InventoryInfo.ISO15693)
             {
                 // throw new Exception("Fill() taginfo == null");
-                return false;
+                return new FillResult { Value = 0};
             }
 
             if (tag.TagInfo != null && tag.Protocol == InventoryInfo.ISO15693)
@@ -669,16 +676,32 @@ namespace dp2SSL
     "" // tag.TagInfo.LockStatus
     );
                 pii = chip.FindElement(ElementOID.PII)?.Text;
+
+                string typeOfUsage = chip.FindElement(ElementOID.TypeOfUsage)?.Text;
+                if (typeOfUsage != null && typeOfUsage.StartsWith("8"))
+                {
+
+                }
+                else
+                {
+                    return new FillResult
+                    {
+                        Value = -1,
+                        ErrorInfo = "这是一张图书标签",
+                        ErrorCode = "bookTag",
+                        PII = pii,
+                    };
+                }
             }
 
             if (this.UID == tag.UID && this.PII == pii)
-                return true; // 优化
+                return new FillResult { Value = 1}; // 优化
 
             this.Clear();
 
             this.UID = tag.UID;
             this.PII = pii;
-            return true;
+            return new FillResult { Value = 1};
         }
 
         public void Clear()

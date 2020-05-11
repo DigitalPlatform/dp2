@@ -535,7 +535,12 @@ namespace dp2SSL
                     // RFID 来源
                     if (patrons.Count == 1)
                     {
-                        if (_patron.Fill(patrons[0].OneTag) == false)
+                        // result.Value:
+                        //      -1  出错
+                        //      0   未进行刷新
+                        //      1   成功进行了刷新
+                        var fill_result = _patron.Fill(patrons[0].OneTag);
+                        if (fill_result.Value == 0)
                             return;
 
                         SetPatronError("rfid_multi", "");   // 2019/5/22

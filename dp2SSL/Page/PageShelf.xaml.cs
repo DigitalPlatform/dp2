@@ -22,6 +22,8 @@ using dp2SSL.Models;
 using static dp2SSL.LibraryChannelUtil;
 using dp2SSL.Dialog;
 
+using static dp2SSL.App;
+
 using DigitalPlatform;
 using DigitalPlatform.Core;
 using DigitalPlatform.LibraryClient;
@@ -32,10 +34,8 @@ using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.Xml;
-using static dp2SSL.App;
 using DigitalPlatform.Face;
 using DigitalPlatform.WPF;
-// using Microsoft.VisualStudio.Shell;
 
 namespace dp2SSL
 {
@@ -1430,9 +1430,12 @@ namespace dp2SSL
                     e,
                     (t) =>
                     {
+                        /*
                         if (t.ReaderName == ShelfData.PatronReaderName)
                             return "patron";
                         return "book";
+                        */
+                        return DetectTagType(t);
                     });
 
                 if (sep_result.add_patrons.Count > 0 || sep_result.updated_patrons.Count > 0)
@@ -1449,6 +1452,13 @@ namespace dp2SSL
         }
 
 #endif
+
+        static string DetectTagType(OneTag t)
+        {
+            if (t.ReaderName == ShelfData.PatronReaderName)
+                return "patron";
+            return "book";
+        }
 
         bool _initialCancelled = false;
 
@@ -1795,9 +1805,12 @@ namespace dp2SSL
 
                 ShelfData.InitialPatronBookTags((t) =>
                 {
+                    /*
                     if (t.ReaderName == ShelfData.PatronReaderName)
                         return "patron";
                     return "book";
+                    */
+                    return DetectTagType(t);
                 });
 
                 await ShelfData.SelectAntennaAsync();
@@ -2012,8 +2025,40 @@ namespace dp2SSL
                     {
                         try
                         {
-                            if (_patron.Fill(patrons[0].OneTag) == false)
+                            // result.Value:
+                            //      -1  出错
+                            //      0   未进行刷新
+                            //      1   成功进行了刷新
+                            var fill_result = _patron.Fill(patrons[0].OneTag);
+                            if (fill_result.Value == 0)
                                 return;
+                            if (fill_result.Value == -1)
+                            {
+                                if (fill_result.ErrorCode == "bookTag")
+                                {
+                                    // 扫了一张图书标签。触发显示图书信息
+                                    App.Invoke(new Action(() =>
+                                    {
+                                        EntityCollection collection = new EntityCollection();
+                                        collection.Add(fill_result.PII);
+
+                                        BookInfoWindow bookInfoWindow = new BookInfoWindow();
+                                        bookInfoWindow.TitleText = $"";
+                                        bookInfoWindow.Owner = Application.Current.MainWindow;
+                                        bookInfoWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                                        App.SetSize(bookInfoWindow, "wide");
+                                        //bookInfoWindow.Width = Math.Min(1000, this.ActualWidth);
+                                        //bookInfoWindow.Height = Math.Min(700, this.ActualHeight);
+                                        bookInfoWindow.Closed += BookInfoWindow_Closed;
+                                        bookInfoWindow.SetBooks(collection);
+                                        bookInfoWindow.Show();
+                                        AddLayer();
+                                    }));
+                                    return;
+                                }
+                                SetPatronError("patron_tag", fill_result.ErrorInfo);
+                                return;
+                            }
                             SetPatronError("patron_tag", null);
                         }
                         catch (Exception ex)
