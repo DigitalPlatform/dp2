@@ -6026,7 +6026,7 @@ start_time_1,
         false,
         "content,ignorechecktimestamp",
         item_timestamp,
-        out byte [] _,
+        out byte[] _,
         out string _,
         out strError);
                                                 if (lRet == -1)
@@ -8948,7 +8948,7 @@ start_time_1,
 #if DEBUG_LOAN_PARAM
             out string strDebug,
 #endif
- out string strError)
+            out string strError)
         {
             strParamValue = "";
             strError = "";
@@ -8962,17 +8962,17 @@ start_time_1,
             }
 
             return LoanParam.GetLoanParam(
-                   root,    // this.LibraryCfgDom,
-                   strLibraryCode,
-                   strReaderType,
-                   strBookType,
-                   strParamName,
-                    out strParamValue,
-                    out matchresult,
+                root,    // this.LibraryCfgDom,
+                strLibraryCode,
+                strReaderType,
+                strBookType,
+                strParamName,
+                out strParamValue,
+                out matchresult,
 #if DEBUG_LOAN_PARAM
-                    out strDebug,
+                out strDebug,
 #endif
- out strError);
+                out strError);
         }
 
 

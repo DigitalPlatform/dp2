@@ -382,10 +382,34 @@ namespace dp2SSL
         //      可能会抛出异常
         public static NormalResult InitialShelf()
         {
-            ShelfData.InitialDoors();
+            try
+            {
+                ShelfData.InitialDoors();
+            }
+            catch (Exception ex)
+            {
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"InitialDoors() 出现异常: {ex.Message}"
+                };
+            }
 
             // 获得馆藏地列表
-            var result = LibraryChannelUtil.GetLocationList();
+            GetLocationListResult result = null;
+            if (App.StartNetworkMode == "local")
+            {
+                result = LibraryChannelUtil.GetLocationListFromLocal();
+                if (result.Value == 0)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = "本地没有馆藏地定义信息。需要联网以后重新启动"
+                    };
+            }
+            else
+                result = LibraryChannelUtil.GetLocationList();
+
             if (result.Value == -1)
                 return new NormalResult
                 {
@@ -1015,7 +1039,7 @@ namespace dp2SSL
                             Entity = entity.Clone(),
                             Action = "borrow",
                             Operator = person,
-                            ActionString = BuildBorrowInfo(person.PatronBarcode, entity, borrowed_count ++),
+                            ActionString = BuildBorrowInfo(person.PatronBarcode, entity, borrowed_count++),
                         });
                     }
 
@@ -1100,8 +1124,8 @@ namespace dp2SSL
         // 用于在同步之前，为本地数据库记录临时模拟出 BorrowInfo。这样当长期断网的情况下，dp2ssl 能用它进行本地借书权限的判断(判断是否超期、超额)
         // parameters:
         //      delta   尚未来得及保存到数据库的已借册数
-        static string BuildBorrowInfo(string patron_pii, 
-            Entity entity, 
+        static string BuildBorrowInfo(string patron_pii,
+            Entity entity,
             int delta)
         {
             BorrowInfo borrow_info = new BorrowInfo();
@@ -1121,7 +1145,7 @@ namespace dp2SSL
                 //borrow_info.Period = $"{max_period}day";
                 //borrow_info.LatestReturnTime = DateTimeUtil.Rfc1123DateTimeStringEx(DateTime.Now.AddDays(max_period));
             }
-            
+
             if (entity != null)
                 borrow_info.ItemBarcode = entity.PII;
             return JsonConvert.SerializeObject(borrow_info);
@@ -3717,6 +3741,8 @@ DateTime time)
             // 是否刷新门上的数字
             bool refreshCount = StringUtil.IsInList("refreshCount", style);
 
+            bool localGetEntityInfo = StringUtil.IsInList("localGetEntityInfo", style);
+
             // int error_count = 0;
             List<string> errors = new List<string>();
             foreach (Entity entity in entities)
@@ -3783,35 +3809,48 @@ DateTime time)
                 if ((string.IsNullOrEmpty(entity.Title) || refresh_data)
                     && string.IsNullOrEmpty(entity.PII) == false && entity.PII != "(空)")
                 {
-                    GetEntityDataResult result = await GetEntityDataAsync(entity.PII);
-                    if (result.Value == -1 || result.Value == 0)
+                    GetEntityDataResult result = null;
+                    if (localGetEntityInfo)
                     {
-                        // TODO: 条码号没有找到的错误码要单独记下来
-                        // 报错
-                        string error = $"警告：PII 为 {entity.PII} 的标签出错: {result.ErrorInfo}";
-                        if (result.ErrorCode == "NotFound")
-                            error = $"警告：PII 为 {entity.PII} 的图书没有找到记录";
-
-                        // 2020/3/5
-                        WpfClientInfo.WriteErrorLog($"GetEntityData() error: {error}");
-
-                        // TODO: 如果发现当前一直是通讯中断的情况，要避免语音念太多报错
-                        // App.CurrentApp.SpeakSequence(error);
-                        entity.SetError(result.ErrorInfo);
-                        // 2020/4/8
-                        if (result.ErrorCode == "RequestError" || result.ErrorCode == "RequestTimeOut")
-                        {
-                            // 如果是通讯失败导致的出错，应该有办法进行重试获取
-                            entity.FillFinished = false;
-                        }
-                        else
-                            entity.FillFinished = true;
-                        // error_count++;
-                        errors.Add(error);
-                        continue;
+                        // 只从本地数据库中获取
+                        result = LocalGetEntityData(entity.PII);
+                        if (string.IsNullOrEmpty(result.Title) == false)
+                            entity.Title = PageBorrow.GetCaption(result.Title);
+                        if (string.IsNullOrEmpty(result.ItemXml) == false)
+                            entity.SetData(result.ItemRecPath, result.ItemXml);
                     }
-                    entity.Title = PageBorrow.GetCaption(result.Title);
-                    entity.SetData(result.ItemRecPath, result.ItemXml);
+                    else
+                    {
+                        result = await GetEntityDataAsync(entity.PII);
+                        if (result.Value == -1 || result.Value == 0)
+                        {
+                            // TODO: 条码号没有找到的错误码要单独记下来
+                            // 报错
+                            string error = $"警告：PII 为 {entity.PII} 的标签出错: {result.ErrorInfo}";
+                            if (result.ErrorCode == "NotFound")
+                                error = $"警告：PII 为 {entity.PII} 的图书没有找到记录";
+
+                            // 2020/3/5
+                            WpfClientInfo.WriteErrorLog($"GetEntityData() error: {error}");
+
+                            // TODO: 如果发现当前一直是通讯中断的情况，要避免语音念太多报错
+                            // App.CurrentApp.SpeakSequence(error);
+                            entity.SetError(result.ErrorInfo);
+                            // 2020/4/8
+                            if (result.ErrorCode == "RequestError" || result.ErrorCode == "RequestTimeOut")
+                            {
+                                // 如果是通讯失败导致的出错，应该有办法进行重试获取
+                                entity.FillFinished = false;
+                            }
+                            else
+                                entity.FillFinished = true;
+                            // error_count++;
+                            errors.Add(error);
+                            continue;
+                        }
+                        entity.Title = PageBorrow.GetCaption(result.Title);
+                        entity.SetData(result.ItemRecPath, result.ItemXml);
+                    }
                 }
 
                 entity.SetError(null);

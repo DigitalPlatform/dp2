@@ -297,6 +297,77 @@ namespace dp2SSL
             }
         }
 
+        // 从本地数据库获得册记录信息和书目摘要信息
+        // .Value
+        //      0   没有找到
+        //      1   找到一种
+        //      2   两种都找到了
+        public static GetEntityDataResult LocalGetEntityData(string pii)
+        {
+            try
+            {
+                using (BiblioCacheContext context = new BiblioCacheContext())
+                {
+                    if (_cacheDbCreated == false)
+                    {
+                        context.Database.EnsureCreated();
+                        _cacheDbCreated = true;
+                    }
+
+                    GetEntityDataResult result = null;
+
+                    // ***
+                    // 第一步：获取册记录
+
+                    // 先尝试从本地实体库中获得记录
+                    var entity_record = context.Entities.Where(o => o.PII == pii).FirstOrDefault();
+                    // EntityItem entity_record = null;   // testing
+
+                    if (entity_record != null)
+                        result = new GetEntityDataResult
+                        {
+                            Value = 1,
+                            ItemXml = entity_record.Xml,
+                            ItemRecPath = entity_record.RecPath,
+                            Title = "",
+                        };
+
+                    // ***
+                    /// 第二步：获取书目摘要
+
+                    // 先尝试从本地书目库中获取书目摘要
+
+                    var item = context.BiblioSummaries.Where(o => o.PII == pii).FirstOrDefault();
+                    if (item != null
+                        && string.IsNullOrEmpty(item.BiblioSummary) == false)
+                    {
+                        if (result == null)
+                            result = new GetEntityDataResult();
+
+                        result.Title = item.BiblioSummary;
+                        result.Value ++;
+                    }
+
+                    if (result == null)
+                        return new GetEntityDataResult { Value = 0 };
+
+                    return result;
+                }
+            }
+            catch (Exception ex)
+            {
+                WpfClientInfo.WriteErrorLog($"LocalGetEntityDataAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+
+                return new GetEntityDataResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"LocalGetEntityDataAsync() 出现异常: {ex.Message}",
+                    ErrorCode = ex.GetType().ToString()
+                };
+            }
+        }
+
+
         static async Task AddOrUpdateAsync(BiblioCacheContext context,
             EntityItem item)
         {
@@ -988,7 +1059,32 @@ out string strError);
                 results.Add(string.IsNullOrEmpty(strLibraryCode) ? strText : strLibraryCode + "/" + strText);
             }
 
-            return new GetLocationListResult { List = results };
+            // 顺便保存到本地
+            WpfClientInfo.Config.Set("cache",
+                "locationList",
+                JsonConvert.SerializeObject(results));
+
+            return new GetLocationListResult
+            {
+                Value = 1,
+                List = results
+            };
+        }
+
+        // 从本地获得馆藏地列表(不访问 dp2library 服务器)
+        public static GetLocationListResult GetLocationListFromLocal()
+        {
+            string value = WpfClientInfo.Config.Get("cache",
+    "locationList",
+    null);
+            if (value == null)
+                return new GetLocationListResult();
+
+            return new GetLocationListResult
+            {
+                Value = 1,
+                List = JsonConvert.DeserializeObject<List<string>>(value)
+            };
         }
     }
 }

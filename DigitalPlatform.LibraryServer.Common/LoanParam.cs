@@ -16,7 +16,7 @@ namespace DigitalPlatform.LibraryServer
     /// 流通权限参数 
     /// 这一部分前端也需要用到
     /// </summary>
-    public class LoanParam
+    public static class LoanParam
     {
 
         public static string[] reader_d_paramnames = new string[] { 

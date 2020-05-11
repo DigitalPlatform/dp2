@@ -2629,3 +2629,97 @@ new SetErrorEventArgs
                 }
             }
         }
+
+
+        ~~~~~~~~~~~~~
+
+                // TODO: 报错信息尝试用 FlowDocument 改造
+        // 首次初始化时候对所有图书进行盘点操作。盘点的意思就是清点在书柜里面的图书
+        // 注意观察和测试 PII 在 dp2library 中不存在的情况
+        // 算法是对每一册图书尝试进行一次还书操作
+        // result.Value
+        //      -1  出错
+        //      0   没有必要处理
+        //      1   已经处理
+        async Task<SubmitResult> InventoryBooksAsync(InventoryWindow progress,
+            IReadOnlyCollection<Entity> entities)
+        {
+            DateTime now = DateTime.Now;
+
+            List<ActionInfo> actions = new List<ActionInfo>();
+            foreach (var entity in entities)
+            {
+                actions.Add(new ActionInfo
+                {
+                    Entity = entity.Clone(),
+                    Action = "return",
+                    Operator = GetOperator(entity, false),
+                    OperTime = now,
+                });
+                actions.Add(new ActionInfo
+                {
+                    Entity = entity.Clone(),
+                    Action = "transfer",
+                    CurrentShelfNo = ShelfData.GetShelfNo(entity),
+                    Operator = GetOperator(entity, false),
+                    OperTime = now,
+                });
+
+                // 2020/4/2
+                // 还书操作前先尝试修改 EAS
+                {
+                    var eas_result = ShelfData.SetEAS(entity.UID, entity.Antenna, false);
+                    if (eas_result.Value == -1)
+                    {
+                        return new SubmitResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"修改册 '{entity.PII}' 的 EAS 失败: {eas_result.ErrorInfo}",
+                            ErrorCode = "setEasError"
+                        };
+                    }
+                }
+            }
+
+            if (actions.Count == 0)
+                return new SubmitResult();  // 没有必要处理
+
+            // 初始化的操作也要写入本地操作日志
+            // await ShelfData.SaveActionsToDatabase(actions);
+
+            // 立即处理，然后在界面报错
+            var result = await ShelfData.SubmitCheckInOutAsync(
+                (min, max, value, text) =>
+                {
+                    if (progress != null)
+                    {
+                        App.Invoke(new Action(() =>
+                        {
+                            if (min == -1 && max == -1 && value == -1)
+                                progress.ProgressBar.Visibility = Visibility.Collapsed;
+                            else
+                                progress.ProgressBar.Visibility = Visibility.Visible;
+
+                            //if (text != null)
+                            //    progress.MessageText = text;
+
+                            if (min != -1)
+                                progress.ProgressBar.Minimum = min;
+                            if (max != -1)
+                                progress.ProgressBar.Maximum = max;
+                            if (value != -1)
+                                progress.ProgressBar.Value = value;
+                        }));
+                    }
+                },
+                //"", // _patron.Barcode,
+                //"", // _patron.PatronName,
+                actions,
+                "");
+
+            // TODO: 如果不是全部 actions 都成功，则要显示出有问题的图书(特别是所在的门名字)，
+            // 等工作人员解决问题，重新盘点。直到全部成功。
+            // 显示出错误信息后，要提供开门的按钮，方便工作人员打开门取放图书以便重试盘点
+
+            return result;
+        }
