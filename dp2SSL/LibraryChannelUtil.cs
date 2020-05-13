@@ -7,6 +7,7 @@ using System.Xml;
 
 using Microsoft.VisualStudio.Threading;
 using Microsoft.Data.Sqlite;
+using Newtonsoft.Json;
 
 using DigitalPlatform;
 using DigitalPlatform.WPF;
@@ -14,8 +15,6 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.IO;
-using Microsoft.VisualStudio.OLE.Interop;
-using Newtonsoft.Json;
 
 namespace dp2SSL
 {
@@ -345,7 +344,7 @@ namespace dp2SSL
                             result = new GetEntityDataResult();
 
                         result.Title = item.BiblioSummary;
-                        result.Value ++;
+                        result.Value++;
                     }
 
                     if (result == null)
@@ -1085,6 +1084,50 @@ out string strError);
                 Value = 1,
                 List = JsonConvert.DeserializeObject<List<string>>(value)
             };
+        }
+
+        public class GetRightsTableResult : NormalResult
+        {
+            public string Xml { get; set; }
+        }
+
+        // 获得读者权限定义 XML
+        public static GetRightsTableResult GetRightsTable()
+        {
+            LibraryChannel channel = App.CurrentApp.GetChannel();
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromSeconds(10);
+
+            try
+            {
+                long lRet = channel.GetSystemParameter(
+        null,
+        "circulation",
+        "rightsTable",
+        out string strOutputInfo,
+        out string strError);
+                if (lRet == -1)
+                    return new GetRightsTableResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError,
+                        ErrorCode = channel.ErrorCode.ToString()
+                    };
+
+                if (string.IsNullOrEmpty(strOutputInfo) == false)
+                    strOutputInfo = "<rightsTable>" + strOutputInfo + "</rightsTable>";
+
+                return new GetRightsTableResult
+                {
+                    Value = (int)lRet,
+                    Xml = strOutputInfo
+                };
+            }
+            finally
+            {
+                channel.Timeout = old_timeout;
+                App.CurrentApp.ReturnChannel(channel);
+            }
         }
     }
 }

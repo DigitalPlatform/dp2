@@ -24,7 +24,9 @@ using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
-
+using DigitalPlatform.LibraryServer;
+using System.Windows.Markup;
+using DigitalPlatform.Xml;
 
 namespace dp2SSL
 {
@@ -378,6 +380,8 @@ namespace dp2SSL
 
         static List<string> _locationList = null;
 
+        static string _rightTableXml = null;
+
         // exception:
         //      可能会抛出异常
         public static NormalResult InitialShelf()
@@ -395,29 +399,56 @@ namespace dp2SSL
                 };
             }
 
-            // 获得馆藏地列表
-            GetLocationListResult result = null;
-            if (App.StartNetworkMode == "local")
             {
-                result = LibraryChannelUtil.GetLocationListFromLocal();
-                if (result.Value == 0)
+                // 获得馆藏地列表
+                GetLocationListResult result = null;
+                if (App.StartNetworkMode == "local")
+                {
+                    result = LibraryChannelUtil.GetLocationListFromLocal();
+                    if (result.Value == 0)
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = "本地没有馆藏地定义信息。需要联网以后重新启动"
+                        };
+                }
+                else
+                    result = LibraryChannelUtil.GetLocationList();
+
+                if (result.Value == -1)
                     return new NormalResult
                     {
                         Value = -1,
-                        ErrorInfo = "本地没有馆藏地定义信息。需要联网以后重新启动"
+                        ErrorInfo = $"获得馆藏地列表时出错: {result.ErrorInfo}"
+                    };
+                else
+                    _locationList = result.List;
+            }
+
+            if (App.StartNetworkMode == "local")
+            {
+                _rightTableXml = WpfClientInfo.Config.Get("cache", "rightsTable", null);
+                if (string.IsNullOrEmpty(_rightTableXml))
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = "本地没有读者借阅权限定义信息。需要联网以后重新启动"
                     };
             }
             else
-                result = LibraryChannelUtil.GetLocationList();
-
-            if (result.Value == -1)
-                return new NormalResult
-                {
-                    Value = -1,
-                    ErrorInfo = $"获得馆藏地列表时出错: {result.ErrorInfo}"
-                };
-            else
-                _locationList = result.List;
+            {
+                // 获得读者借阅权限定义
+                GetRightsTableResult get_result = LibraryChannelUtil.GetRightsTable();
+                if (get_result.Value == -1)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"获得读者借阅权限定义 XML 时出错: {get_result.ErrorInfo}"
+                    };
+                _rightTableXml = get_result.Xml;
+                // 顺便保存起来
+                WpfClientInfo.Config.Set("cache", "rightsTable", _rightTableXml);
+            }
 
             // 要在初始化以前设定好
             _patronReaderName = GetAllReaderNameList("patron");
@@ -1123,14 +1154,94 @@ namespace dp2SSL
         // 构造 BorrowInfo 字符串
         // 用于在同步之前，为本地数据库记录临时模拟出 BorrowInfo。这样当长期断网的情况下，dp2ssl 能用它进行本地借书权限的判断(判断是否超期、超额)
         // parameters:
-        //      delta   尚未来得及保存到数据库的已借册数
+        //      delta_piis   尚未来得及保存到数据库的已借册的 PII 列表
         static string BuildBorrowInfo(string patron_pii,
             Entity entity,
-            int delta)
+            List<string> delta_piis)
         {
             BorrowInfo borrow_info = new BorrowInfo();
 
+            string patron_type = GetPatronType(patron_pii);
+
             // TODO: 如何判断本册借阅时候是否已经超额？
+            var piis = GetBorrowItems(patron_pii);
+            piis.AddRange(delta_piis);
+
+            // 当前册的图书类型
+            var info_result = GetBookInfo(entity.PII);
+            if (info_result.Value == -1)
+            {
+                // TODO: ??? 如果得不到图书类型，建议按照默认的权限参数处理
+            }
+            // 计算已经借阅的册中和当前册类型相同的册数
+            int thisTypeCount = 0;
+            foreach (string pii in piis)
+            {
+                if (GetBookType(pii) == info_result.BookType)
+                    thisTypeCount++;
+            }
+
+            var max_result = GetTypeMax(info_result.LibraryCode,
+    patron_type,
+    info_result.BookType);
+
+            bool overflow = false;
+            // 图书类型限额超过了
+            if (thisTypeCount + 1 > max_result.Max)
+            {
+                borrow_info.Overflows = new string[] { $"读者 '{ patron_pii}' 所借 '{ info_result.BookType }' 类图书数量将超过 馆代码 '{ info_result.LibraryCode}' 中 该读者类型 '{ patron_type }' 对该图书类型 '{ info_result.BookType }' 的最多 可借册数 值 '{max_result.Max}'" };
+                // 一天以后还书
+                SetReturning(1, "day");
+                overflow = true;
+            }
+            else
+            {
+                var total_max_result = GetTotalMax(info_result.LibraryCode,
+    patron_type);
+                // 读者类型限额超过了
+                if (piis.Count + 1 > total_max_result.Max)
+                {
+                    borrow_info.Overflows = new string[] { $"读者 '{ patron_pii}' 所借图书数量将超过 馆代码 '{ info_result.LibraryCode}' 中 该读者类型 '{ patron_type }' 对所有图书类型的最多 可借册数 值 '{total_max_result.Max}'" };
+                    // 一天以后还书
+                    SetReturning(1, "day");
+                    overflow = true;
+                }
+            }
+
+            if (overflow == false)
+            {
+                // 获得借期
+                var period_result = GetPeriod(info_result.LibraryCode,
+    patron_type,
+    info_result.BookType);
+                if (period_result.Value == -1)
+                {
+                    // 一个月以后还书
+                    SetReturning(max_period, "day");
+                    // TODO: 写入错误日志
+                }
+                else
+                {
+                    int nRet = DateTimeUtil.ParsePeriodUnit(
+    period_result.ErrorCode,
+    "day",
+    out long lPeriodValue,
+    out string strPeriodUnit,
+    out string strError);
+                    if (nRet == -1)
+                    {
+                        // 一个月以后还书
+                        SetReturning(max_period, "day");
+                        // TODO: 写入错误日志
+
+                    }
+                    else
+                        SetReturning((int)lPeriodValue, strPeriodUnit);
+                }
+            }
+
+            /*
+
             int item_count = GetBorrowItemCount(patron_pii);
             if (item_count + delta >= max_items)
             {
@@ -1145,25 +1256,321 @@ namespace dp2SSL
                 //borrow_info.Period = $"{max_period}day";
                 //borrow_info.LatestReturnTime = DateTimeUtil.Rfc1123DateTimeStringEx(DateTime.Now.AddDays(max_period));
             }
+            */
 
             if (entity != null)
                 borrow_info.ItemBarcode = entity.PII;
             return JsonConvert.SerializeObject(borrow_info);
 
             // 设置 BorrowInfo 里面和还书时间有关的两个成员 Period 和 LatestReturnTime
-            void SetReturning(int days)
+            void SetReturning(int days, string unit)
             {
-                borrow_info.Period = $"{days}day";
+                borrow_info.Period = $"{days}{unit}";
                 DateTime returning = DateTime.Now.AddDays(days);
+                if (unit == "hour")
+                    returning = DateTime.Now.AddHours(days);
                 // 正规化时间
-                returning = RoundTime("day", returning);
+                returning = RoundTime(unit, returning);
                 borrow_info.LatestReturnTime = DateTimeUtil.Rfc1123DateTimeStringEx(returning);
             }
         }
 
+        static string GetBookType(string pii)
+        {
+            var result = GetBookInfo(pii);
+            if (result.Value == -1)
+                return null;
+            return result.BookType;
+        }
+
+        // 
+        public class GetBookInfoResult : NormalResult
+        {
+            public string BookType { get; set; }
+            public string LibraryCode { get; set; }
+        }
+
+        // 获得册信息
+        static GetBookInfoResult GetBookInfo(string pii)
+        {
+            var result = LibraryChannelUtil.LocalGetEntityData(pii);
+            if (result.Value == -1)
+                return new GetBookInfoResult
+                {
+                    Value = -1,
+                    ErrorInfo = result.ErrorInfo
+                };
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.LoadXml(result.ItemXml);
+            }
+            catch(Exception ex)
+            {
+                return new GetBookInfoResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"册记录 XML 格式不正确: {ex.Message}",
+                    ErrorCode = ex.GetType().ToString()
+                };
+            }
+
+            string bookType = DomUtil.GetElementText(dom.DocumentElement, "bookType");
+            string location = DomUtil.GetElementText(dom.DocumentElement, "location");
+            location = StringUtil.GetPureLocationString(location);
+
+            // 获得 location 中馆代码部分
+            dp2StringUtil.ParseCalendarName(location,
+    out string strLibraryCode,
+    out string strPureName);
+            return new GetBookInfoResult
+            {
+                Value = 1,
+                BookType = bookType,
+                LibraryCode = strLibraryCode
+            };
+        }
+
+        // 包装后的版本
+        // 获得流通参数
+        // parameters:
+        //      strLibraryCode  图书馆代码, 如果为空,表示使用<library>元素以外的片段
+        // return:
+        //      reader和book类型均匹配 算4分
+        //      只有reader类型匹配，算3分
+        //      只有book类型匹配，算2分
+        //      reader和book类型都不匹配，算1分
+        static int GetLoanParam(
+            string strLibraryCode,
+            string strReaderType,
+            string strBookType,
+            string strParamName,
+            out string strParamValue,
+            out MatchResult matchresult,
+#if DEBUG_LOAN_PARAM
+            out string strDebug,
+#endif
+            out string strError)
+        {
+            strParamValue = "";
+            strError = "";
+            matchresult = MatchResult.None;
+
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.LoadXml(_rightTableXml);
+            }
+            catch (Exception ex)
+            {
+                strError = $"读者借阅权限 XML 装入 DOM 时出错: {ex.Message}";
+                return -1;
+            }
+
+
+            XmlNode root = dom.DocumentElement;
+
+            return LoanParam.GetLoanParam(
+                root,    // this.LibraryCfgDom,
+                strLibraryCode,
+                strReaderType,
+                strBookType,
+                strParamName,
+                out strParamValue,
+                out matchresult,
+#if DEBUG_LOAN_PARAM
+                out strDebug,
+#endif
+                out strError);
+        }
+
+        public class GetTypeMaxResult : NormalResult
+        {
+            public string PatronType { get; set; }
+            public string BookType { get; set; }
+            // 指定图书类型(对于指定读者类型)的允许借阅最大册数
+            public int Max { get; set; }
+        }
+
+        // 获得特定图书类型的最大可借册数
+        static GetTypeMaxResult GetTypeMax(string strLibraryCode,
+            string strReaderType,
+            string strBookType)
+        {
+            // 得到该类图书的册数限制配置
+            // return:
+            //      reader和book类型均匹配 算4分
+            //      只有reader类型匹配，算3分
+            //      只有book类型匹配，算2分
+            //      reader和book类型都不匹配，算1分
+            int nRet = GetLoanParam(
+                //null,
+                strLibraryCode,
+                strReaderType,
+                strBookType,
+                "可借册数",
+                out string strParamValue,
+                out MatchResult matchresult,
+                out string strError);
+            if (nRet == -1 || nRet < 4)
+            {
+                strError = "馆代码 '" + strLibraryCode + "' 中 读者类型 '" + strReaderType + "' 图书类型 '" + strBookType + "' 尚未定义 可借册数 参数";
+                return new GetTypeMaxResult
+                {
+                    Value = -1,
+                    ErrorInfo = strError
+                };
+            }
+
+            // 看看是此类否超过册数限制
+            int nThisTypeMax = 0;
+            try
+            {
+                nThisTypeMax = Convert.ToInt32(strParamValue);
+            }
+            catch
+            {
+                strError = "馆代码 '" + strLibraryCode + "' 中 读者类型 '" + strReaderType + "' 图书类型 '" + strBookType + "' 的 可借册数 参数值 '" + strParamValue + "' 格式有问题";
+                return new GetTypeMaxResult
+                {
+                    Value = -1,
+                    ErrorInfo = strError
+                };
+            }
+
+            return new GetTypeMaxResult
+            {
+                Value = 0,
+                Max = nThisTypeMax,
+                PatronType = strReaderType,
+                BookType = strBookType
+            };
+        }
+
+        // 获得特定读者类型的最大可借册数
+        static GetTypeMaxResult GetTotalMax(string strLibraryCode,
+            string strReaderType)
+        {
+
+            // 得到该读者类型针对所有类型图书的总册数限制配置
+            // return:
+            //      reader和book类型均匹配 算4分
+            //      只有reader类型匹配，算3分
+            //      只有book类型匹配，算2分
+            //      reader和book类型都不匹配，算1分
+            int nRet = GetLoanParam(
+                //null,
+                strLibraryCode,
+                strReaderType,
+                "",
+                "可借总册数",
+                out string strParamValue,
+                out MatchResult matchresult,
+                out string strError);
+            if (nRet == -1)
+            {
+                strError = "在获取馆代码 '" + strLibraryCode + "' 中 读者类型 '" + strReaderType + "' 的 可借总册数 参数过程中出错: " + strError + "。";
+                return new GetTypeMaxResult
+                {
+                    Value = -1,
+                    ErrorInfo = strError
+                };
+            }
+            if (nRet < 3)
+            {
+                strError = "馆代码 '" + strLibraryCode + "' 中 读者类型 '" + strReaderType + "' 尚未定义 可借总册数 参数";
+                return new GetTypeMaxResult
+                {
+                    Value = -1,
+                    ErrorInfo = strError
+                };
+            }
+
+            // 然后看看总册数是否已经超过限制
+            int nMax = 0;
+            try
+            {
+                nMax = Convert.ToInt32(strParamValue);
+            }
+            catch
+            {
+                strError = "馆代码 '" + strLibraryCode + "' 中 读者类型 '" + strReaderType + "' 的 可借总册数 参数值 '" + strParamValue + "' 格式有问题";
+                return new GetTypeMaxResult
+                {
+                    Value = -1,
+                    ErrorInfo = strError
+                };
+            }
+
+            return new GetTypeMaxResult
+            {
+                Value = 0,
+                Max = nMax,
+                PatronType = strReaderType,
+            };
+        }
+
+        // 获得借期
+        static NormalResult GetPeriod(string strLibraryCode,
+            string strReaderType,
+            string strBookType)
+        {
+            // return:
+            //      reader和book类型均匹配 算4分
+            //      只有reader类型匹配，算3分
+            //      只有book类型匹配，算2分
+            //      reader和book类型都不匹配，算1分
+            int nRet = GetLoanParam(
+            //null,
+            strLibraryCode,
+            strReaderType,
+            strBookType,
+            "借期",
+            out string strBorrowPeriodList,
+            out MatchResult matchresult,
+            out string strError);
+            if (nRet == -1)
+            {
+                strError = "借阅失败。获得 馆代码 '" + strLibraryCode + "' 中 读者类型 '" + strReaderType + "' 针对图书类型 '" + strBookType + "' 的 借期 参数时发生错误: " + strError;
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = strError
+                };
+            }
+            if (nRet < 4)  // nRet == 0
+            {
+                strError = "借阅失败。馆代码 '" + strLibraryCode + "' 中 读者类型 '" + strReaderType + "' 针对图书类型 '" + strBookType + "' 的 借期 参数无法获得: " + strError;
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = strError
+                };
+            }
+
+            // 按照逗号分列值，需要根据序号取出某个参数
+            string[] aPeriod = strBorrowPeriodList.Split(new char[] { ',' });
+
+            if (aPeriod.Length == 0)
+            {
+                strError = "借阅失败。馆代码 '" + strLibraryCode + "' 中 读者类型 '" + strReaderType + "' 针对图书类型 '" + strBookType + "' 的 借期 参数 '" + strBorrowPeriodList + "'格式错误";
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = strError
+                };
+            }
+
+            return new NormalResult
+            {
+                Value = 0,
+                ErrorCode = aPeriod[0]
+            };
+        }
+
         // 注意 time 中的时间应该是本地时间
         static DateTime RoundTime(string strUnit,
-DateTime time)
+        DateTime time)
         {
             if (strUnit == "day" || string.IsNullOrEmpty(strUnit) == true)
             {
@@ -1181,6 +1588,7 @@ DateTime time)
             }
         }
 
+#if NO
         // 获得一个读者当前的在借册册数
         static int GetBorrowItemCount(string pii)
         {
@@ -1190,6 +1598,20 @@ DateTime time)
                 return context.Requests
                     .Where(o => o.OperatorID == pii && o.Action == "borrow" && o.LinkID == null)
                     .OrderBy(o => o.ID).Count();
+            }
+        }
+#endif
+
+        // 获得一个读者当前的在借册的 PII 列表
+        static List<string> GetBorrowItems(string pii)
+        {
+            using (var context = new RequestContext())
+            {
+                // 该读者的在借册册数
+                return context.Requests
+                    .Where(o => o.OperatorID == pii && o.Action == "borrow" && o.LinkID == null)
+                    .Select(o => o.PII).ToList();
+                // .OrderBy(o => o.ID).Count();
             }
         }
 
@@ -1207,8 +1629,8 @@ DateTime time)
         }
 
         static void ParseLocation(string strName,
-    out string strLibraryCode,
-    out string strPureName)
+        out string strLibraryCode,
+        out string strPureName)
         {
             strLibraryCode = "";
             strPureName = "";
@@ -1843,9 +2265,9 @@ DateTime time)
                 // Exception:
                 //      可能会抛出异常 ArgumentException TagDataException
                 LogicChip chip = LogicChip.From(data.OneTag.TagInfo.Bytes,
-    (int)data.OneTag.TagInfo.BlockSize,
-    "" // tag.TagInfo.LockStatus
-    );
+        (int)data.OneTag.TagInfo.BlockSize,
+        "" // tag.TagInfo.LockStatus
+        );
                 pii = chip.FindElement(ElementOID.PII)?.Text;
 
                 var typeOfUsage = chip.FindElement(ElementOID.TypeOfUsage)?.Text;
@@ -2841,7 +3263,7 @@ DateTime time)
 
                             // 如果新旧对象所在的门发生了转移
                             if (old_doors.Count > 0 && new_doors.Count > 0
-    && old_doors[0] != new_doors[0])
+        && old_doors[0] != new_doors[0])
                             {
                                 // 新门
                                 ReplaceOrAdd(_adds, tag);
@@ -3161,7 +3583,7 @@ DateTime time)
                     {
                         // 对于 .TagInfo == null 的 ISO15693 标签不敏感
                         if (tag.OneTag.TagInfo == null
-                        && tag.OneTag.Protocol == InventoryInfo.ISO15693)
+                && tag.OneTag.Protocol == InventoryInfo.ISO15693)
                             return;
 
                         var type = func_detectType(tag.OneTag);
@@ -3189,7 +3611,7 @@ DateTime time)
                     {
                         // 对于 .TagInfo == null 的 ISO15693 标签不敏感
                         if (tag.OneTag.TagInfo == null
-                        && tag.OneTag.Protocol == InventoryInfo.ISO15693)
+                && tag.OneTag.Protocol == InventoryInfo.ISO15693)
                             return;
 
                         var type = func_detectType(tag.OneTag);
@@ -3278,7 +3700,7 @@ DateTime time)
                             // 2020/4/17
                             // 如果是 ISO15693 并且 tagInfo 为 null，则不记入新添加的 count 计数
                             if (!(tag.OneTag.Protocol == InventoryInfo.ISO15693
-    && tag.OneTag.TagInfo == null))
+        && tag.OneTag.TagInfo == null))
                                 count++;
                         }
                     }
@@ -3371,7 +3793,7 @@ DateTime time)
                         return false;
                     // 暂时忽略 .TagInfo 为空的那些 ISO15693 的标签
                     if (tag.OneTag.Protocol == InventoryInfo.ISO15693
-                    && tag.OneTag.TagInfo == null)
+            && tag.OneTag.TagInfo == null)
                         return false;
                     try
                     {
@@ -3411,7 +3833,7 @@ DateTime time)
                         // 2020/4/17
                         // 如果是 ISO15693 并且 tagInfo 为 null，则不记入新添加的 count 计数
                         if (!(tag.OneTag.Protocol == InventoryInfo.ISO15693
-&& tag.OneTag.TagInfo == null))
+        && tag.OneTag.TagInfo == null))
                             count++;
                     }
                 }
@@ -3731,9 +4153,9 @@ DateTime time)
         // TODO: 刷新 data 以前，是否先把有关字段都设置为 ?，避免观看者误会
         // TODO: 获取册记录，优先从缓存中获取。注意借书、还书、转移等同步操作后，要及时更新或者废止缓存内容
         public static async Task<FillBookFieldsResult> FillBookFieldsAsync(// BaseChannel<IRfid> channel,
-    IReadOnlyCollection<Entity> entities,
-    CancellationToken token,
-    string style/*,
+        IReadOnlyCollection<Entity> entities,
+        CancellationToken token,
+        string style/*,
     bool refreshCount = true*/)
         {
             // 是否重新获得册记录?
@@ -3779,9 +4201,9 @@ DateTime time)
                         // Exception:
                         //      可能会抛出异常 ArgumentException TagDataException
                         chip = LogicChip.From(entity.TagInfo.Bytes,
-(int)entity.TagInfo.BlockSize,
-"" // tag.TagInfo.LockStatus
-);
+        (int)entity.TagInfo.BlockSize,
+        "" // tag.TagInfo.LockStatus
+        );
                     }
                     catch (Exception ex)
                     {
@@ -4199,8 +4621,8 @@ DateTime time)
 
                     // 2020/3/7
                     if ((error_code == ErrorCode.RequestError
-    || error_code == ErrorCode.RequestTimeOut)
-    && nRedoCount < 2)
+        || error_code == ErrorCode.RequestTimeOut)
+        && nRedoCount < 2)
                     {
                         nRedoCount++;
                         goto REDO;
@@ -4488,19 +4910,19 @@ DateTime time)
                 {
                     /*
                      * 
-ERROR dp2SSL 2020-03-05 16:49:47,472 - 重试专用线程出现异常: Type: System.Threading.Tasks.TaskCanceledException
-Message: 已取消一个任务。
-Stack:
-   在 System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
-   在 System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
-   在 System.Windows.Threading.DispatcherOperation.Wait(TimeSpan timeout)
-   在 System.Windows.Threading.Dispatcher.InvokeImpl(DispatcherOperation operation, CancellationToken cancellationToken, TimeSpan timeout)
-   在 System.Windows.Threading.Dispatcher.Invoke(Action callback, DispatcherPriority priority, CancellationToken cancellationToken, TimeSpan timeout)
-   在 System.Windows.Threading.Dispatcher.Invoke(Action callback)
-   在 dp2SSL.DoorItem.DisplayCount(List`1 entities, List`1 adds, List`1 removes, List`1 errors, List`1 _doors)
-   在 dp2SSL.ShelfData.RefreshCount()
-   在 dp2SSL.ShelfData.SubmitCheckInOut(Delegate_setProgress func_setProgress, IReadOnlyCollection`1 actions)
-   在 dp2SSL.ShelfData.<>c__DisplayClass119_0.<StartRetryTask>b__1()                     * 
+        ERROR dp2SSL 2020-03-05 16:49:47,472 - 重试专用线程出现异常: Type: System.Threading.Tasks.TaskCanceledException
+        Message: 已取消一个任务。
+        Stack:
+        在 System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+        在 System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+        在 System.Windows.Threading.DispatcherOperation.Wait(TimeSpan timeout)
+        在 System.Windows.Threading.Dispatcher.InvokeImpl(DispatcherOperation operation, CancellationToken cancellationToken, TimeSpan timeout)
+        在 System.Windows.Threading.Dispatcher.Invoke(Action callback, DispatcherPriority priority, CancellationToken cancellationToken, TimeSpan timeout)
+        在 System.Windows.Threading.Dispatcher.Invoke(Action callback)
+        在 dp2SSL.DoorItem.DisplayCount(List`1 entities, List`1 adds, List`1 removes, List`1 errors, List`1 _doors)
+        在 dp2SSL.ShelfData.RefreshCount()
+        在 dp2SSL.ShelfData.SubmitCheckInOut(Delegate_setProgress func_setProgress, IReadOnlyCollection`1 actions)
+        在 dp2SSL.ShelfData.<>c__DisplayClass119_0.<StartRetryTask>b__1()                     * 
                      * */
                     // 重新装载读者信息和显示
                     try
