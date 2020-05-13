@@ -29,7 +29,21 @@ namespace dp2Circulation
     /// </summary>
     public partial class CallNumberForm : MyForm
     {
-        public List<MemoTailNumber> MemoNumbers { get; set; }
+        List<MemoTailNumber> _memoMembers = new List<MemoTailNumber>();
+
+        public List<MemoTailNumber> MemoNumbers
+        {
+            get
+            {
+                return _memoMembers;
+            }
+            set
+            {
+                _memoMembers.Clear();
+                if (value != null)
+                    _memoMembers.AddRange(value);
+            }
+        }
 
         /// <summary>
         /// 获得值列表
@@ -377,7 +391,7 @@ namespace dp2Circulation
                         goto ERROR1;
 
                     return m_strMaxNumber;
-                    ERROR1:
+                ERROR1:
                     throw (new Exception(strError));
                 }
                 return m_strMaxNumber;
@@ -408,7 +422,7 @@ namespace dp2Circulation
 
                     m_strTailNumber = strTailNumber;
                     return m_strTailNumber;
-                    ERROR1:
+                ERROR1:
                     throw (new Exception(strError));
 
                 }
@@ -450,7 +464,7 @@ namespace dp2Circulation
                 EventFinish.Set();
             }
 
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -686,7 +700,7 @@ namespace dp2Circulation
                 EnableControls(true);
             }
 
-            END1:
+        END1:
             // 用内存中最新的索取号来刷新
             RefreshByNewlyCallNumberItems();
 
@@ -724,7 +738,7 @@ COLUMN_CALLNUMBER);
             }
 
             return 0;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -1267,7 +1281,7 @@ COLUMN_CALLNUMBER);
                 EventFinish.Set();
             }
 
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1547,8 +1561,8 @@ COLUMN_CALLNUMBER);
                 EnableControls(true);
             }
 
-            // return 0;
-            ERROR1:
+        // return 0;
+        ERROR1:
             return -1;
         }
 
@@ -1579,7 +1593,7 @@ COLUMN_CALLNUMBER);
                 EventFinish.Set();
             }
 
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1613,7 +1627,7 @@ COLUMN_CALLNUMBER);
                 EventFinish.Set();
             }
 
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1669,8 +1683,8 @@ COLUMN_CALLNUMBER);
                 EnableControls(true);
             }
 
-            // return 0;
-            ERROR1:
+        // return 0;
+        ERROR1:
             return -1;
         }
 
@@ -1689,7 +1703,7 @@ COLUMN_CALLNUMBER);
             this.textBox_tailNumber.Text = strOutputNumber;
             // MessageBox.Show(this, "推动尾号成功");
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1745,13 +1759,14 @@ COLUMN_CALLNUMBER);
                     }
                     if (strAction == "unmemo")
                     {
-                        var found = numbers.FindAll((o) => {
+                        var found = numbers.FindAll((o) =>
+                        {
                             // TODO: 是否要判断 strOutputNumber?
                             if (o.Class == strClass && o.Number == strTestNumber)
                                 return true;
                             return false;
                         });
-                        foreach(var number in found)
+                        foreach (var number in found)
                         {
                             numbers.Remove(number);
                         }
@@ -1823,8 +1838,8 @@ COLUMN_CALLNUMBER);
                 EnableControls(true);
             }
 
-            // return 0;
-            ERROR1:
+        // return 0;
+        ERROR1:
             return -1;
         }
 
@@ -1881,8 +1896,8 @@ COLUMN_CALLNUMBER);
                 EnableControls(true);
             }
 
-            // return 0;
-            ERROR1:
+        // return 0;
+        ERROR1:
             return -1;
         }
 
@@ -1908,7 +1923,7 @@ COLUMN_CALLNUMBER);
 
             Clipboard.SetDataObject(strResult);
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1958,7 +1973,7 @@ COLUMN_CALLNUMBER);
 
             }
             return 1;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -2170,7 +2185,7 @@ COLUMN_CALLNUMBER);
 
                 {
 
-                    REDO_INPUT:
+                REDO_INPUT:
                     // 此类从来没有过记录，当前是第一条
                     strNumber = InputDlg.GetInput(
                         this,
@@ -2410,11 +2425,13 @@ COLUMN_CALLNUMBER);
                 return 1;
             }
             return 1;
-            PROTECT_END:
+        PROTECT_END:
             {
                 // 旧版本没有防范重号功能
                 if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.104") < 0)
                     return 1;
+
+                Debug.Assert(this.MemoNumbers != null, "");
 
                 int start = this.MemoNumbers.Count;
                 string strTestNumber = strNumber;
@@ -2428,13 +2445,13 @@ COLUMN_CALLNUMBER);
                     goto ERROR1;
 
                 // 返回本次保护过的号码
-                for(int i = start;i<this.MemoNumbers.Count;i++)
+                for (int i = start; i < this.MemoNumbers.Count; i++)
                 {
                     protectedNumbers.Add(this.MemoNumbers[i]);
                 }
             }
             return 1;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -2489,7 +2506,7 @@ COLUMN_CALLNUMBER);
                         strSummary = strError;
                     }
 
-                    SETTEXT:
+                SETTEXT:
                     ListViewUtil.ChangeItemText(item, COLUMN_SUMMARY, strSummary);
 
                     strPrevBiblioRecPath = strBiblioRecPath;

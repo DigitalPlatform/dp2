@@ -2209,8 +2209,6 @@ root, strLibraryCode);
 
                 // 比较新旧记录的状态是否有改变，如果从其他状态修改为“注销”状态，则应引起注意，后面要进行必要的检查
 
-                string strOldState = "";
-                string strNewState = "";
 
                 // parameters:
                 //      strOldState   顺便返回旧记录中的状态字符串
@@ -2221,8 +2219,8 @@ root, strLibraryCode);
                 //      1   不相等
                 nRet = CompareTwoState(domExist,
                     domNewRec,
-                    out strOldState,
-                    out strNewState,
+                    out string strOldState,
+                    out string strNewState,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;

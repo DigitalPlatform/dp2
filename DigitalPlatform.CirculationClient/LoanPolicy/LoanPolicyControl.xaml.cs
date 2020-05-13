@@ -1099,8 +1099,6 @@ namespace DigitalPlatform.CirculationClient
                     {
                         string strParamName = LoanParam.reader_d_paramnames[k];
 
-                        string strParamValue = "";
-                        MatchResult matchresult;
                         // return:
                         //      reader和book类型均匹配 算4分
                         //      只有reader类型匹配，算3分
@@ -1112,8 +1110,8 @@ namespace DigitalPlatform.CirculationClient
                             row.ReaderType,
                             "",   // 实际上为空
                             strParamName,
-                            out strParamValue,
-                            out matchresult,
+                            out string strParamValue,
+                            out MatchResult matchresult,
                             out strError);
                         if (nRet == -1)
                             return -1;

@@ -36,6 +36,7 @@ namespace DigitalPlatform.LibraryServer
             if (nRet != 0)
                 return 0;
 
+            // TODO: 长期断网运行，是否需要跳过检查 overdue 元素？
             // 检查是否已经有记载了的<overdue>字段
             XmlNodeList nodes = readerdom.DocumentElement.SelectNodes("overdues/overdue");
             if (nodes.Count > 0)

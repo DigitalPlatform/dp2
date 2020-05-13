@@ -25,17 +25,16 @@ using dp2SSL.Dialog;
 using static dp2SSL.App;
 
 using DigitalPlatform;
-using DigitalPlatform.Core;
-using DigitalPlatform.LibraryClient;
-using DigitalPlatform.RFID;
-using DigitalPlatform.Interfaces;
-using DigitalPlatform.Text;
 using DigitalPlatform.IO;
-using DigitalPlatform.LibraryClient.localhost;
-using DigitalPlatform.LibraryServer;
 using DigitalPlatform.Xml;
-using DigitalPlatform.Face;
 using DigitalPlatform.WPF;
+using DigitalPlatform.Core;
+using DigitalPlatform.RFID;
+using DigitalPlatform.Text;
+using DigitalPlatform.Face;
+using DigitalPlatform.Interfaces;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.LibraryServer;
 
 namespace dp2SSL
 {

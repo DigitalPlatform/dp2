@@ -19,20 +19,16 @@ using System.Resources;
 using System.Globalization;
 using System.Runtime.Serialization;
 
+using Jint;
+using Jint.Native;
+
 using DigitalPlatform;	// Stop类
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
-using DigitalPlatform.Script;
-using DigitalPlatform.MarcDom;
 using DigitalPlatform.Marc;
-
-using DigitalPlatform.Message;
 using DigitalPlatform.rms.Client.rmsws_localhost;
-using Jint;
-using Jint.Native;
-using DigitalPlatform.Core;
 
 namespace DigitalPlatform.LibraryServer
 {

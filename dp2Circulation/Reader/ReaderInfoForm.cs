@@ -1835,6 +1835,27 @@ strNewDefault);
                 goto ERROR1;
             }
 
+            // 是否强制修改册条码号
+            bool bChangeReaderBarcode = StringUtil.IsInList("changereaderbarcode", strStyle);
+            bool bChangeReaderForce = StringUtil.IsInList("changereaderforce", strStyle);
+            if (bChangeReaderBarcode && bChangeReaderForce)
+            {
+                strError = "style 不应同时包含 changereaderbarcode 和 changerecordforce";
+                goto ERROR1;
+            }
+
+            if (bChangeReaderForce)
+            {
+                var result = MessageBox.Show(this,
+                    "您确实要强制修改当前读者记录？\r\n\r\n警告：当读者有在借记录的情况下，强制修改保存功能，*** 不会自动修改*** 这些在借册记录，会造成借阅信息关联错误。若只是想在修改证条码号以后保存记录，请改用“保存(强制修改证条码号)功能”",
+                    "谨慎使用“保存(强制修改)”功能", 
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Warning,
+                    MessageBoxDefaultButton.Button2);
+                if (result == DialogResult.No)
+                    return 0;
+            }
+
             bool bVerifyBarcode = StringUtil.IsInList("verifybarcode", strStyle);
 
             // 校验证条码号
@@ -1909,11 +1930,10 @@ strNewDefault);
 
             try
             {
-                string strNewXml = "";
                 nRet = GetReaderXml(
             true,
             false,
-            out strNewXml,
+            out string strNewXml,
             out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -1925,16 +1945,6 @@ strNewDefault);
                     && Global.IsAppendRecPath(strTargetRecPath) == false // 2015/11/16 增加的此句，消除 Bug
                     && strAction == "new")
                     strAction = "change";
-
-                // 是否强制修改册条码号
-                bool bChangeReaderBarcode = StringUtil.IsInList("changereaderbarcode", strStyle);
-                bool bChangeReaderForce = StringUtil.IsInList("changereaderforce", strStyle);
-
-                if (bChangeReaderBarcode && bChangeReaderForce)
-                {
-                    strError = "style 不应同时包含 changereaderbarcode 和 changerecordforce";
-                    goto ERROR1;
-                }
 
                 if (strAction == "change" && bChangeReaderBarcode)
                 {
