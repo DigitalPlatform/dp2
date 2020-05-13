@@ -621,11 +621,10 @@ strField);
 
             // 保存
             // 将MARC格式转换为XML格式
-            string strXml = "";
             nRet = MarcUtil.Marc2Xml(
 strMARC,
 strMarcSyntax,
-out strXml,
+out string strXml,
 out strError);
             if (nRet == -1)
                 goto ERROR1;
@@ -645,7 +644,6 @@ out strError);
 
                 strBiblioRecPath = strBiblioDbName + "/?";
 
-                byte[] baOutputTimestamp = null;
 
                 long lRet = // temp_sessioninfo.Channel.
                     channel.SetBiblioInfo(
@@ -657,7 +655,7 @@ out strError);
             null,
             "",
             out strOutputBiblioRecPath,
-            out baOutputTimestamp,
+            out byte[] baOutputTimestamp,
             out strError);
                 if (lRet == -1)
                 {
