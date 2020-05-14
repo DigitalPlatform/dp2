@@ -1038,7 +1038,8 @@ namespace dp2SSL
                     processed.Add(entity);
                 }
 
-                int borrowed_count = 0;
+                // int borrowed_count = 0;
+                List<string> borrowed_piis = new List<string>();
                 foreach (var entity in ShelfData.l_Removes)
                 {
                     // Debug.Assert(string.IsNullOrEmpty(entity.PII) == false, "");
@@ -1070,8 +1071,10 @@ namespace dp2SSL
                             Entity = entity.Clone(),
                             Action = "borrow",
                             Operator = person,
-                            ActionString = BuildBorrowInfo(person.PatronBarcode, entity, borrowed_count++),
+                            ActionString = BuildBorrowInfo(person.PatronBarcode, entity, borrowed_piis), // borrowed_count++
                         });
+
+                        borrowed_piis.Add(entity.PII);
                     }
 
                     //
@@ -1154,7 +1157,7 @@ namespace dp2SSL
         // 构造 BorrowInfo 字符串
         // 用于在同步之前，为本地数据库记录临时模拟出 BorrowInfo。这样当长期断网的情况下，dp2ssl 能用它进行本地借书权限的判断(判断是否超期、超额)
         // parameters:
-        //      delta_piis   尚未来得及保存到数据库的已借册的 PII 列表
+        //      delta_piis   尚未来得及保存到数据库的已借册的 PII 列表。注意里面的 PII 有可能是空字符串
         static string BuildBorrowInfo(string patron_pii,
             Entity entity,
             List<string> delta_piis)
@@ -1162,6 +1165,8 @@ namespace dp2SSL
             BorrowInfo borrow_info = new BorrowInfo();
 
             string patron_type = GetPatronType(patron_pii);
+            if (patron_type == null)
+                goto DEFAULT;
 
             // TODO: 如何判断本册借阅时候是否已经超额？
             var piis = GetBorrowItems(patron_pii);
@@ -1171,7 +1176,8 @@ namespace dp2SSL
             var info_result = GetBookInfo(entity.PII);
             if (info_result.Value == -1)
             {
-                // TODO: ??? 如果得不到图书类型，建议按照默认的权限参数处理
+                // 如果得不到图书类型，建议按照默认的权限参数处理
+                goto DEFAULT;
             }
             // 计算已经借阅的册中和当前册类型相同的册数
             int thisTypeCount = 0;
@@ -1230,34 +1236,35 @@ namespace dp2SSL
     out string strError);
                     if (nRet == -1)
                     {
-                        // 一个月以后还书
+                        // 只好按照一个月以后还书来处理
                         SetReturning(max_period, "day");
-                        // TODO: 写入错误日志
-
+                        // 写入错误日志
+                        WpfClientInfo.WriteErrorLog($"解析时间段字符串 '{period_result.ErrorCode}' 时发生错误: {strError}");
                     }
                     else
                         SetReturning((int)lPeriodValue, strPeriodUnit);
                 }
             }
 
-            /*
+            goto END;
 
-            int item_count = GetBorrowItemCount(patron_pii);
-            if (item_count + delta >= max_items)
+        DEFAULT:
+            int item_count = GetBorrowItems(patron_pii).Count;
+            if (item_count + delta_piis.Count >= max_items)
             {
                 borrow_info.Overflows = new string[] { $"超过额度 {max_items} 册" };
                 // 一天以后还书
-                SetReturning(1);
+                SetReturning(1, "day");
             }
             else
             {
                 // 一个月以后还书
-                SetReturning(max_period);
+                SetReturning(max_period, "day");
                 //borrow_info.Period = $"{max_period}day";
                 //borrow_info.LatestReturnTime = DateTimeUtil.Rfc1123DateTimeStringEx(DateTime.Now.AddDays(max_period));
             }
-            */
 
+        END:
             if (entity != null)
                 borrow_info.ItemBarcode = entity.PII;
             return JsonConvert.SerializeObject(borrow_info);
@@ -1305,7 +1312,7 @@ namespace dp2SSL
             {
                 dom.LoadXml(result.ItemXml);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return new GetBookInfoResult
                 {
@@ -1329,6 +1336,24 @@ namespace dp2SSL
                 BookType = bookType,
                 LibraryCode = strLibraryCode
             };
+        }
+
+        static string GetPatronType(string patron_pii)
+        {
+            var result = LibraryChannelUtil.GetReaderInfoFromLocal(patron_pii);
+            if (result.Value == -1)
+                return null;
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.LoadXml(result.ReaderXml);
+            }
+            catch
+            {
+                return null;
+            }
+
+            return DomUtil.GetElementText(dom.DocumentElement, "readerType");
         }
 
         // 包装后的版本
