@@ -3612,9 +3612,10 @@ false);
         public ColumnPropertyCollection GetBrowseColumnProperties(string strDbName)
         {
             // ColumnPropertyCollection results = new ColumnPropertyCollection();
-            Debug.Assert(this.NormalDbProperties != null, "this.NormalDbProperties == null");
             if (this.NormalDbProperties == null)
                 return null;    // 2014/12/22
+
+            Debug.Assert(this.NormalDbProperties != null, "this.NormalDbProperties == null");
             for (int i = 0; i < this.NormalDbProperties.Count; i++)
             {
                 NormalDbProperty prop = this.NormalDbProperties[i];

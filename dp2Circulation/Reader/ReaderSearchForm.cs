@@ -12,6 +12,8 @@ using System.Reflection;
 
 using ClosedXML.Excel;
 
+using static dp2Circulation.ReaderInfoForm;
+
 using DigitalPlatform;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
@@ -27,8 +29,6 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.LibraryServer;
-using static dp2Circulation.ReaderInfoForm;
-using DigitalPlatform.Core;
 
 namespace dp2Circulation
 {
@@ -576,7 +576,7 @@ namespace dp2Circulation
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1249,6 +1249,13 @@ out strError);
                     subMenuItem.Enabled = false;
                 menuItem.MenuItems.Add(subMenuItem);
 
+                subMenuItem = new MenuItem("到 XML 文件 [" + this.listView_records.SelectedItems.Count.ToString() + "] (&X)");
+                subMenuItem.Click += new System.EventHandler(this.menu_exportReaderInfoToXmlFile_Click);
+                if (this.listView_records.SelectedItems.Count == 0
+                    || bSearching == true)
+                    subMenuItem.Enabled = false;
+                menuItem.MenuItems.Add(subMenuItem);
+
                 subMenuItem = new MenuItem("导出读者详情到 Excel 文件 [" + this.listView_records.SelectedItems.Count.ToString() + "] (&D)");
                 subMenuItem.Click += new System.EventHandler(this.menu_exportReaderInfoToExcelFile_Click);
                 if (this.listView_records.SelectedItems.Count == 0
@@ -1509,7 +1516,7 @@ MessageBoxDefaultButton.Button2);
 
             MessageBox.Show(this, "成功删除读者记录 " + nDeleteCount + " 条");
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1556,7 +1563,7 @@ MessageBoxDefaultButton.Button2);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1775,7 +1782,7 @@ MessageBoxDefaultButton.Button2);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1822,7 +1829,7 @@ MessageBoxDefaultButton.Button2);
                 //      -1  出错。包括用户中断的情况
                 //      >=0 实际处理的读者记录数
                 int nRet = this.ProcessSelectedPatrons(
-                    (strRecPath, dom, timestamp) =>
+                    (channel, strRecPath, dom, timestamp) =>
                     {
                         this.ShowMessage("正在处理读者记录 " + strRecPath);
                         form.ShowMessage("正在处理读者记录 " + strRecPath);
@@ -1967,7 +1974,7 @@ MessageBoxDefaultButton.Button2);
 
             this.ShowMessage("完成", "green", true);
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -2051,7 +2058,7 @@ MessageBoxDefaultButton.Button2);
 
             // MessageBox.Show(this, "导出完成");
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -2317,7 +2324,7 @@ MessageBoxDefaultButton.Button2);
                     sr.Close();
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -2617,7 +2624,7 @@ MessageBoxDefaultButton.Button2);
 
             DoViewComment(false);
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3069,7 +3076,7 @@ MessageBoxDefaultButton.Button1);
             if (nRet != 0)
                 ShowMessageBox(result.ErrorInfo);
             return;
-            ERROR1:
+        ERROR1:
             ShowMessageBox(result.ErrorInfo);
         }
 
@@ -3086,7 +3093,7 @@ MessageBoxDefaultButton.Button1);
             if (nRet != 0)
                 MessageBox.Show(this, strError);
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3698,7 +3705,7 @@ MessageBoxDefaultButton.Button1);
             }
             MessageBox.Show(this, "成功移动读者记录 " + nCount.ToString() + " 条");
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3730,10 +3737,104 @@ MessageBoxDefaultButton.Button1);
 
             // MessageBox.Show(this, "导出完成");
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
+        // 导出读者记录到 XML 文件
+        void menu_exportReaderInfoToXmlFile_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            // 询问文件名
+            SaveFileDialog dlg = new SaveFileDialog();
+
+            dlg.Title = "请指定要保存的 XML 文件名";
+            dlg.CreatePrompt = false;
+            dlg.OverwritePrompt = true;
+            // dlg.FileName = this.ExportBarcodeFilename;
+            // dlg.InitialDirectory = Environment.CurrentDirectory;
+            dlg.Filter = "读者记录 XML 文件 (*.xml)|*.xml|All files (*.*)|*.*";
+
+            dlg.RestoreDirectory = true;
+
+            if (dlg.ShowDialog() != DialogResult.OK)
+            {
+                return;
+                //strError = "放弃操作";
+                //return 0;
+            }
+
+            string strOutputFileName = dlg.FileName;
+            int count = 0;
+            try
+            {
+                // Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始导出读者 XML 记录</div>");
+
+                using (XmlTextWriter writer = new XmlTextWriter(strOutputFileName, Encoding.UTF8))
+                {
+                    writer.Formatting = Formatting.Indented;
+                    writer.Indentation = 4;
+
+                    writer.WriteStartDocument();
+
+                    writer.WriteStartElement("dprms", "collection", DpNs.dprms);
+
+                    // return:
+                    //      -1  出错。包括用户中断的情况
+                    //      >=0 实际处理的读者记录数
+                    nRet = this.ProcessSelectedPatrons(
+                    (channel, strRecPath, dom, timestamp) =>
+                    {
+                        this.ShowMessage("正在处理读者记录 " + strRecPath);
+
+                        DomUtil.RemoveEmptyElements(dom.DocumentElement);
+
+                        // TODO: 要检查一下代码，看看到底是什么地方为读者记录的根元素添加了一个值为空的 expireDate 属性
+                        dom.DocumentElement.RemoveAttribute("expireDate");
+
+                        ResPath respathtemp = new ResPath();
+                        respathtemp.Url = channel.Url;
+                        respathtemp.Path = strRecPath;
+
+                        // 给根元素设置几个参数
+                        DomUtil.SetAttr(dom.DocumentElement, "path", DpNs.dprms, respathtemp.FullPath);
+                        DomUtil.SetAttr(dom.DocumentElement, "timestamp", DpNs.dprms, ByteArray.GetHexTimeStampString(timestamp));
+
+                        dom.DocumentElement.WriteTo(writer);
+
+                        count++;
+                        return true;
+                    },
+                    out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+
+                    writer.WriteEndElement();
+                    writer.WriteEndDocument();
+
+                }
+            }
+            catch (Exception ex)
+            {
+                strError = "ExportReaderXmlFile() 出现异常: " + ExceptionUtil.GetExceptionText(ex);
+                goto ERROR1;
+            }
+            finally
+            {
+                if (stop != null)
+                    stop.SetMessage("");
+                // Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束导出读者 XML 记录</div>");
+                this.ClearMessage();
+            }
+
+            // TODO: sheet 可以按照单位来区分。例如按照班级
+            this.ShowMessage("共导出读者记录 " + count + " 个", "green", true);
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
 
         // 导出读者详情到 Excel 文件
         void menu_exportReaderInfoToExcelFile_Click(object sender, EventArgs e)
@@ -3757,7 +3858,7 @@ MessageBoxDefaultButton.Button1);
                 goto ERROR1;
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -4168,7 +4269,7 @@ MessageBoxDefaultButton.Button1);
                 goto ERROR1;
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -4701,7 +4802,7 @@ out strError);
 
                 string[] paths = new string[lines.Count];
                 lines.CopyTo(paths);
-                REDO_GETRECORDS:
+            REDO_GETRECORDS:
                 long lRet = this.Channel.GetBrowseRecords(
                     this.stop,
                     paths,
@@ -5397,7 +5498,7 @@ out strFingerprint);
 
             DoViewComment(false);
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5571,7 +5672,7 @@ out strFingerprint);
                 null);
 
             return 0;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -6040,7 +6141,9 @@ dlg.UiState);
             }
         }
 
-        public delegate bool Delegate_processPatron(string strRecPath,
+        public delegate bool Delegate_processPatron(
+            LibraryChannel channel,
+            string strRecPath,
             XmlDocument dom,
             byte[] timestamp);
 
@@ -6130,7 +6233,9 @@ dlg.UiState);
 
                     if (func != null)
                     {
-                        if (func(info.RecPath,
+                        if (func(
+                            this.Channel,
+                            info.RecPath,
                 dom,
                 info.Timestamp) == false)
                             break;
@@ -6250,7 +6355,9 @@ dlg.UiState);
 
                     if (func != null)
                     {
-                        if (func(strOutputRecPath,
+                        if (func(
+                            this.Channel,
+                            strOutputRecPath,
                 dom,
                 baTimestamp) == false)
                             break;
@@ -6468,7 +6575,7 @@ dlg.UiState);
                     nRet = this.ProcessPatrons(
                         reader_barcodes,
                         "", // advancexml_history_bibliosummary
-                        (strRecPath, dom, timestamp) =>
+                        (channel, strRecPath, dom, timestamp) =>
                         {
                             this.ShowMessage("正在处理读者记录 " + strRecPath);
 
@@ -7216,7 +7323,7 @@ dlg.UiState);
                 nRet = this.ProcessPatrons(
                     reader_barcodes,
                     "advancexml,advancexml_borrow_bibliosummary,advancexml_overdue_bibliosummary", // advancexml_history_bibliosummary
-                    (strRecPath, dom, timestamp) =>
+                    (channel, strRecPath, dom, timestamp) =>
                     {
                         this.ShowMessage("正在处理读者记录 " + strRecPath);
 

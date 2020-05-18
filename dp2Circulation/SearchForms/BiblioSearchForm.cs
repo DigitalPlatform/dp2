@@ -1102,7 +1102,7 @@ Keys keyData)
             if (strDbType == "biblio")
             {
                 if (Program.MainForm.BiblioDbFromInfos == null)
-                    throw new Exception("Program.MainForm.DbFromInfos尚未初始化");
+                    throw new Exception("Program.MainForm.DbFromInfos 尚未初始化。这通常是因为刚进入内务时候初始化阶段出现错误导致的。请退出内务重新进入，并注意正确登录");
 
                 Debug.Assert(Program.MainForm.BiblioDbFromInfos != null, "Program.MainForm.BiblioDbFromInfos 尚未初始化");
 

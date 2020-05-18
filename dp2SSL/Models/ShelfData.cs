@@ -2003,6 +2003,8 @@ namespace dp2SSL
         */
 
         // 初始化门控件定义。包括初始化 ShelfCfgDom
+        // 异常：
+        //      可能会抛出 Exception 异常
         public static void InitialDoors()
         {
             {
@@ -2016,7 +2018,10 @@ namespace dp2SSL
             // 2019/12/22
             if (_doors != null)
                 _doors.Clear();
-            _doors = DoorItem.BuildItems(_shelfCfgDom);
+            _doors = DoorItem.BuildItems(_shelfCfgDom, out List<string> errors);
+
+            if (errors.Count > 0)
+                throw new Exception(StringUtil.MakePathList(errors, "; "));
         }
 
         static bool _firstInitial = false;
