@@ -612,6 +612,12 @@ namespace dp2SSL
                 return;
             }
 
+            if (e.Door == null)
+            {
+                ErrorBox("e.Door 尚未初始化完成");
+                return;
+            }
+
             // 没有门锁的门
             if (string.IsNullOrEmpty(e.Door.LockPath))
             {

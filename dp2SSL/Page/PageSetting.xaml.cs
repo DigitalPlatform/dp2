@@ -242,8 +242,11 @@ namespace dp2SSL
 
             // 2019/12/9
             App.CurrentApp.InitialShelfCfg();
+
+            // TODO: 可能会抛出异常
             // 因为 Doors 发生了变化，所以要重新初始化门控件
             PageMenu.PageShelf?.InitialDoorControl();
+
             ShelfData.l_RefreshCount();
 
             // 重新启动 Proccess 监控

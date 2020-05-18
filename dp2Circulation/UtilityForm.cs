@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.Xml;
 using System.IO;
 using System.Web;
+using System.Collections;
 
 using DigitalPlatform.GUI;
 using DigitalPlatform.Text;
@@ -19,7 +20,6 @@ using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Marc;
 using DigitalPlatform.CommonControl;
-using System.Collections;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Core;
 
@@ -1713,6 +1713,58 @@ MessageBoxDefaultButton.Button2);
             }
         ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+        // 测试当前用户登录
+        private void button_health_tryLogin_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            EnableControls(false);
+
+            this.label_health_message.Text = "";
+
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在测试当前用户登录 ...");
+            stop.BeginLoop();
+
+            this.ShowMessage("正在测试当前用户登录");
+
+            try
+            {
+                // 先登出一次
+                long lRet = this.Channel.Logout(out strError);
+
+                lRet = this.Channel.GetSystemParameter(this.stop,
+                    "system",
+                    "biblioDbGroup",
+                    out string strValue,
+                    out strError);
+                if (lRet == -1)
+                    goto ERROR1;
+
+                this.label_health_message.Text = $"登录成功";
+            }
+            finally
+            {
+                this.ClearMessage();
+
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+
+                EnableControls(true);
+            }
+
+            return;
+        ERROR1:
+            this.label_health_message.Text = strError;
+            MessageBox.Show(this, strError);
+        }
+
+        public void Health()
+        {
+            this.tabControl_main.SelectedTab = this.tabPage_health;
+            button_health_tryLogin_Click(this, new EventArgs());
         }
     }
 }

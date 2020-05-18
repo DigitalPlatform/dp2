@@ -213,7 +213,9 @@ KeyTime.FromTimeSpan(TimeSpan.FromSeconds(start + _length))) // KeyTime
         }
 
         // 根据一个 group 元素定义，创建一个 Grid 控件
-        Grid CreateGroupControls(XmlElement group, List<DoorItem> items, ref int index)
+        Grid CreateGroupControls(XmlElement group,
+            List<DoorItem> door_items,
+            ref int index)
         {
             Grid grid = new Grid();
 
@@ -242,9 +244,13 @@ KeyTime.FromTimeSpan(TimeSpan.FromSeconds(start + _length))) // KeyTime
                 button.SetValue(Grid.ColumnProperty, 0);
                 button.Click += Button_Click;
 
-                if (items.Count - 1 < index)
-                    throw new Exception($"门 items 个数({items.Count})不足");
-                button.DataContext = items[index++];
+                if (door_items.Count - 1 < index)
+                {
+                    // throw new Exception($"门 items 个数({door_items.Count})不足");
+                    button.DataContext = null;
+                }
+                else
+                    button.DataContext = door_items[index++];
 
                 grid.Children.Add(button);
                 row++;
@@ -284,10 +290,13 @@ KeyTime.FromTimeSpan(TimeSpan.FromSeconds(start + _length))) // KeyTime
         double _canvas_height = 0;
 
         public void InitializeButtons(XmlDocument cfg_dom,
-            List<DoorItem> items)
+            List<DoorItem> door_items)
         {
             // 2019/12/22
             this.canvas.Children.Clear();
+
+            // testing 
+            // door_items = new List<DoorItem>();
 
             XmlElement root = cfg_dom.DocumentElement;
             CheckAttributes(root, two_attrs);
@@ -312,7 +321,7 @@ KeyTime.FromTimeSpan(TimeSpan.FromSeconds(start + _length))) // KeyTime
                 if (gp.Left == -1 || gp.Top == -1 || gp.Width == -1 || gp.Height == -1)
                     undefined = true;
 
-                Grid grid = CreateGroupControls(shelf, items, ref index);
+                Grid grid = CreateGroupControls(shelf, door_items, ref index);
                 grid.Tag = gp;
 
                 this.canvas.Children.Add(grid);

@@ -295,25 +295,36 @@ namespace dp2SSL
         // public string State { get; set; }
 
         // 根据 shelf.xml 配置文件定义，构建 DoorItem 集合
-        public static List<DoorItem> BuildItems(XmlDocument cfg_dom)
+        public static List<DoorItem> BuildItems(XmlDocument cfg_dom,
+            out List<string> errors)
         {
+            errors = new List<string>();
+
             List<string> location_list = null;
             GetLocationListResult getlocation_result = null;
             if (App.StartNetworkMode == "local")
             {
                 getlocation_result = LibraryChannelUtil.GetLocationListFromLocal();
                 if (getlocation_result.Value == 0)
-                    throw new Exception("本地没有馆藏地定义信息。需要联网以后重新启动");
+                {
+                    // throw new Exception("本地没有馆藏地定义信息。需要联网(确保能访问 dp2library 服务器)以后重新启动 dp2ssl");
+                    errors.Add("本地没有馆藏地定义信息。需要联网(确保能访问 dp2library 服务器)以后重新启动 dp2ssl");
+                    getlocation_result = null;
+                }
             }
             else
                 getlocation_result = LibraryChannelUtil.GetLocationList();
 
-            if (getlocation_result.Value != -1)
-                location_list = getlocation_result.List;
-            else
+            if (getlocation_result != null)
             {
-                // TODO: 采用特定类型的 Exception 重载类
-                throw new Exception(getlocation_result.ErrorInfo);
+                if (getlocation_result.Value != -1)
+                    location_list = getlocation_result.List;
+                else
+                {
+                    // TODO: 采用特定类型的 Exception 重载类
+                    // throw new Exception(getlocation_result.ErrorInfo);
+                    errors.Add(getlocation_result.ErrorInfo);
+                }
             }
 
             List<DoorItem> results = new List<DoorItem>();

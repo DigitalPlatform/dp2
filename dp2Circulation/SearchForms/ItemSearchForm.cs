@@ -11724,7 +11724,7 @@ out strError);
             string strError = "";
             if (Program.MainForm.NormalDbProperties == null)
             {
-                strError = "普通数据库属性尚未初始化";
+                strError = "普通数据库属性尚未初始化。这通常是因为刚进入内务时候初始化阶段出现错误导致的。请退出内务重新进入，并注意正确登录";
                 goto ERROR1;
             }
 
