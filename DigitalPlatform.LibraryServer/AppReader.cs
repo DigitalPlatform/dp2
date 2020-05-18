@@ -344,7 +344,11 @@ namespace DigitalPlatform.LibraryServer
                         // 将 expireDate 覆盖回去
                         nodeExist = domExist.DocumentElement.SelectSingleNode("hire");
                         if (nodeExist != null)
-                            DomUtil.SetAttr(domExist.DocumentElement, "expireDate", strExistExpireDate);
+                        {
+                            // DomUtil.SetAttr(domExist.DocumentElement, "expireDate", strExistExpireDate); // bug!!! 2020/5/19
+                            
+                            DomUtil.SetAttr(nodeExist, "expireDate", strExistExpireDate);   // 2020/5/19 改掉 bug
+                        }
                         else if (string.IsNullOrEmpty(strExistExpireDate) == false)
                         {
                             XmlNode node = DomUtil.SetElementText(domExist.DocumentElement,
@@ -413,6 +417,10 @@ namespace DigitalPlatform.LibraryServer
             string strRefID = DomUtil.GetElementText(domExist.DocumentElement, "refID");
             if (string.IsNullOrEmpty(strRefID) == true)
                 DomUtil.SetElementText(domExist.DocumentElement, "refID", Guid.NewGuid().ToString());
+
+            // 2020/5/19 
+            // 删除以前误为根元素添加的 expireDate 属性
+            domExist.DocumentElement.RemoveAttribute("expireDate");
 
             strMergedXml = domExist.OuterXml;
             return 0;
