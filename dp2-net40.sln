@@ -241,9 +241,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestReporting", "TestReport
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dp2ManageCenter", "dp2ManageCenter\dp2ManageCenter.csproj", "{4DD7602B-FBA3-4172-9542-DD59B9C7677D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.SimpleMessageQueue", "DigitalPlatform.SimpleMessageQueue\DigitalPlatform.SimpleMessageQueue.csproj", "{F2161FB9-EAFB-4667-8830-DC1448C52F32}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DigitalPlatform.SimpleMessageQueue", "DigitalPlatform.SimpleMessageQueue\DigitalPlatform.SimpleMessageQueue.csproj", "{F2161FB9-EAFB-4667-8830-DC1448C52F32}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTestSimpleMessageQueue", "UnitTestSimpleMessageQueue\UnitTestSimpleMessageQueue.csproj", "{557B9979-62C1-49B0-AE97-97E0DE58A71A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnitTestSimpleMessageQueue", "UnitTestSimpleMessageQueue\UnitTestSimpleMessageQueue.csproj", "{557B9979-62C1-49B0-AE97-97E0DE58A71A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "commander", "commander\commander.csproj", "{C92E9E07-A1C1-41CF-A1A9-90EFCF027DBD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -2014,6 +2016,24 @@ Global
 		{557B9979-62C1-49B0-AE97-97E0DE58A71A}.Test|Mixed Platforms.Build.0 = Debug|Any CPU
 		{557B9979-62C1-49B0-AE97-97E0DE58A71A}.Test|x86.ActiveCfg = Debug|Any CPU
 		{557B9979-62C1-49B0-AE97-97E0DE58A71A}.Test|x86.Build.0 = Debug|Any CPU
+		{C92E9E07-A1C1-41CF-A1A9-90EFCF027DBD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C92E9E07-A1C1-41CF-A1A9-90EFCF027DBD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C92E9E07-A1C1-41CF-A1A9-90EFCF027DBD}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{C92E9E07-A1C1-41CF-A1A9-90EFCF027DBD}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{C92E9E07-A1C1-41CF-A1A9-90EFCF027DBD}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C92E9E07-A1C1-41CF-A1A9-90EFCF027DBD}.Debug|x86.Build.0 = Debug|Any CPU
+		{C92E9E07-A1C1-41CF-A1A9-90EFCF027DBD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C92E9E07-A1C1-41CF-A1A9-90EFCF027DBD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C92E9E07-A1C1-41CF-A1A9-90EFCF027DBD}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{C92E9E07-A1C1-41CF-A1A9-90EFCF027DBD}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{C92E9E07-A1C1-41CF-A1A9-90EFCF027DBD}.Release|x86.ActiveCfg = Release|Any CPU
+		{C92E9E07-A1C1-41CF-A1A9-90EFCF027DBD}.Release|x86.Build.0 = Release|Any CPU
+		{C92E9E07-A1C1-41CF-A1A9-90EFCF027DBD}.Test|Any CPU.ActiveCfg = Release|Any CPU
+		{C92E9E07-A1C1-41CF-A1A9-90EFCF027DBD}.Test|Any CPU.Build.0 = Release|Any CPU
+		{C92E9E07-A1C1-41CF-A1A9-90EFCF027DBD}.Test|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{C92E9E07-A1C1-41CF-A1A9-90EFCF027DBD}.Test|Mixed Platforms.Build.0 = Release|Any CPU
+		{C92E9E07-A1C1-41CF-A1A9-90EFCF027DBD}.Test|x86.ActiveCfg = Release|Any CPU
+		{C92E9E07-A1C1-41CF-A1A9-90EFCF027DBD}.Test|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
