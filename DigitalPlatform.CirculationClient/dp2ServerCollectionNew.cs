@@ -19,10 +19,10 @@ namespace DigitalPlatform.CirculationClient
     {
         List<dp2Server> _servers = new List<dp2Server>();
 
-        [JsonIgnore]
+        [NonSerialized]
         string m_strFileName = "";
 
-        [JsonIgnore]
+        [NonSerialized]
         bool m_bChanged = false;
 
         /*
@@ -40,6 +40,7 @@ namespace DigitalPlatform.CirculationClient
         /// <summary>
         /// 内容是否发生过修改
         /// </summary>
+        [JsonIgnore]
         public bool Changed
         {
             get
@@ -52,6 +53,7 @@ namespace DigitalPlatform.CirculationClient
             }
         }
 
+        [JsonIgnore]
         public string FileName
         {
             get
@@ -168,6 +170,7 @@ namespace DigitalPlatform.CirculationClient
             this.m_bChanged = true;
         }
 
+        [JsonIgnore]
         public int Count
         {
             get
@@ -275,6 +278,8 @@ namespace DigitalPlatform.CirculationClient
                         servers = new dp2ServerCollectionNew();
                     if (servers._servers == null)
                         servers._servers = new List<dp2Server>();
+
+                    servers.m_strFileName = strFileName;
                     return servers;
                 }
             }
@@ -311,7 +316,7 @@ namespace DigitalPlatform.CirculationClient
 
             lock (_syncRoot_file)
             {
-                string value = JsonConvert.SerializeObject(this);
+                string value = JsonConvert.SerializeObject(this, Formatting.Indented);
                 File.WriteAllText(strFileName, value);
             }
         }
