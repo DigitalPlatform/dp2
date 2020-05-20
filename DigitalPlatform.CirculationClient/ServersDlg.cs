@@ -21,7 +21,7 @@ namespace DigitalPlatform.CirculationClient
 
         public bool FirstRun = false;
 
-        public dp2ServerCollection Servers = null;  // 引用
+        public dp2ServerCollectionNew Servers = null;  // 引用
 
         bool m_bChanged = false;
 

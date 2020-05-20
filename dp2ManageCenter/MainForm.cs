@@ -32,7 +32,7 @@ namespace dp2ManageCenter
     public partial class MainForm : Form, IChannelManager
     {
         // dp2library服务器数组(缺省用户名/密码等)
-        public dp2ServerCollection Servers = null;
+        public dp2ServerCollectionNew Servers = null;
 
         FloatingMessageForm _floatingMessage = null;
 
@@ -142,7 +142,7 @@ namespace dp2ManageCenter
                 GuiUtil.SetControlFont(dlg, this.Font);
                 ClientInfo.MemoryState(dlg, "manageServers", "state");
 
-                dp2ServerCollection newServers = Servers.Dup();
+                dp2ServerCollectionNew newServers = Servers.Dup();
 
                 if (bFirstRun == true)
                 {
@@ -171,6 +171,15 @@ namespace dp2ManageCenter
 
         void InitialServers()
         {
+            // 2020/5/20
+            int nRet = ConvertServersBin(out string strError);
+            if (nRet == -1)
+            {
+                // this.ReportError("dp2managecenter 转换 servers.bin 文件到 servers.json 时出现错误", "(安静报错)" + strError);
+                MessageBox.Show(this, strError);
+                return;
+            }
+
             // 从文件中装载创建一个dp2ServerCollection对象
             // parameters:
             //		bIgnorFileNotFound	是否不抛出FileNotFoundException异常。
@@ -180,17 +189,17 @@ namespace dp2ManageCenter
             //			SerializationException	版本迁移时容易出现
             try
             {
-                Servers = dp2ServerCollection.Load(
-                    Path.Combine(ClientInfo.UserDir, "servers.bin"),  // this.DataDir
+                Servers = dp2ServerCollectionNew.Load(
+                    Path.Combine(ClientInfo.UserDir, "servers.json"),
                     true);
-                Servers.ownerForm = this;
+                // Servers.ownerForm = this;
             }
             catch (SerializationException ex)
             {
                 MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
-                Servers = new dp2ServerCollection();
+                Servers = new dp2ServerCollectionNew();
                 // 设置文件名，以便本次运行结束时覆盖旧文件
-                Servers.FileName = Path.Combine(ClientInfo.UserDir, "servers.bin");
+                Servers.FileName = Path.Combine(ClientInfo.UserDir, "servers.json");
             }
             catch (Exception ex)
             {
@@ -199,6 +208,42 @@ namespace dp2ManageCenter
 
             this.Servers.ServerChanged += new dp2ServerChangedEventHandle(Servers_ServerChanged);
         }
+
+        // 把 servers.bin 文件转化为新的 servers.json 格式
+        int ConvertServersBin(out string strError)
+        {
+            strError = "";
+
+            try
+            {
+                string sourceFileName = Path.Combine(ClientInfo.UserDir, "servers.bin");
+                string targetFileName = Path.Combine(ClientInfo.UserDir, "servers.json");
+                if (File.Exists(sourceFileName) == false
+                    || File.Exists(targetFileName) == true)
+                    return 0;
+
+                dp2ServerCollection servers = dp2ServerCollection.Load(
+        sourceFileName,
+        true);
+                dp2ServerCollectionNew new_servers = new dp2ServerCollectionNew();
+                foreach (dp2Server server in servers)
+                {
+                    new_servers.Add(server);
+                }
+                new_servers.Changed = true;
+                new_servers.FileName = targetFileName;
+                new_servers.Save(null);
+
+                File.Delete(sourceFileName);
+                return 1;
+            }
+            catch (Exception ex)
+            {
+                strError = "转换 servers.bin 文件到 servers.json 时出现异常: " + ex.Message;
+                return -1;
+            }
+        }
+
 
         void Servers_ServerChanged(object sender, dp2ServerChangedEventArgs e)
         {

@@ -205,7 +205,6 @@ namespace DigitalPlatform.CirculationClient
             e.Url = "";
             e.ServerChangeAction = dp2ServerChangeAction.Import;
             OnServerChanged(this, e);
-
         }
 
         // 创建一个新的Server对象
@@ -282,13 +281,16 @@ namespace DigitalPlatform.CirculationClient
 
             try
             {
-                using(Stream stream = File.Open(strFileName, FileMode.Open, FileAccess.Read, FileShare.Read))
+                lock (_syncRoot_file)
                 {
-                    BinaryFormatter formatter = new BinaryFormatter();
+                    using (Stream stream = File.Open(strFileName, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    {
+                        BinaryFormatter formatter = new BinaryFormatter();
 
-                    servers = (dp2ServerCollection)formatter.Deserialize(stream);
-                    servers.m_strFileName = strFileName;
-                    return servers;
+                        servers = (dp2ServerCollection)formatter.Deserialize(stream);
+                        servers.m_strFileName = strFileName;
+                        return servers;
+                    }
                 }
             }
             catch (FileNotFoundException ex)
@@ -303,6 +305,8 @@ namespace DigitalPlatform.CirculationClient
                 return servers;
             }
         }
+
+        static object _syncRoot_file = new object();
 
         // 保存到文件
         // parameters:
@@ -320,11 +324,28 @@ namespace DigitalPlatform.CirculationClient
                 throw (new Exception("ServerCollection.Save()没有指定保存文件名"));
             }
 
-            using (Stream stream = File.Open(strFileName,
-                FileMode.Create))
+            //using (var temp = new Form())
             {
-                BinaryFormatter formatter = new BinaryFormatter();
-                formatter.Serialize(stream, this);
+                // 2020/5/20
+                // 避免抛出异常 程序集“dp2Catalog, Version=3.2.7445.28152, Culture=neutral, PublicKeyToken=null”中的类型“dp2Catalog.MainForm”未标记为可序列化。
+                //var form = this.ownerForm;
+                //this.ownerForm = temp;
+                try
+                {
+                    lock (_syncRoot_file)
+                    {
+                        using (Stream stream = File.Open(strFileName,
+                            FileMode.Create))
+                        {
+                            BinaryFormatter formatter = new BinaryFormatter();
+                            formatter.Serialize(stream, this);
+                        }
+                    }
+                }
+                finally
+                {
+                    //this.ownerForm = form;
+                }
             }
         }
 

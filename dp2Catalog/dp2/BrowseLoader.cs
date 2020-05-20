@@ -47,7 +47,7 @@ namespace dp2Catalog
 #endif
         public IChannelManager ChannelManager { get; set; }
 
-        public dp2ServerCollection Servers
+        public dp2ServerCollectionNew Servers
         {
             get;
             set;

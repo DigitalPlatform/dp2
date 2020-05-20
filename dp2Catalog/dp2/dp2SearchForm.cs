@@ -1,6 +1,4 @@
-﻿
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -31,7 +29,6 @@ using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
-using DigitalPlatform.Core;
 
 namespace dp2Catalog
 {
@@ -9292,7 +9289,7 @@ out string strError)
             LibraryChannelCollection channels,
 #endif
 IChannelManager channelManager,
-            dp2ServerCollection servers,
+            dp2ServerCollectionNew servers,
             Stop stop,
             List<ListViewItem> items,
             Hashtable cacheTable)
