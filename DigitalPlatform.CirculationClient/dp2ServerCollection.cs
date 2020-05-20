@@ -23,7 +23,7 @@ namespace DigitalPlatform.CirculationClient
         public string DefaultUserName = "";
 
         // [NonSerialized]
-        string StorageDefaultPassword = Cryptography.Encrypt("", "dp2rms");
+        public string StorageDefaultPassword = Cryptography.Encrypt("", "dp2rms");
 
         public bool SavePassword = false;
 
@@ -49,7 +49,7 @@ namespace DigitalPlatform.CirculationClient
             this.UID = refServer.UID;
         }
 
-        // [JsonIgnore]
+        [JsonIgnore]
         public string DefaultPassword
         {
             get
