@@ -32,7 +32,7 @@ namespace DigitalPlatform.CirculationClient
 
         public string Lang = "zh";
 
-        public dp2ServerCollection Servers = null;	// 引用
+        public dp2ServerCollectionNew Servers = null;	// 引用
 #if OLD_CHANNEL
         public LibraryChannelCollection Channels = null;    // 引用
 #endif

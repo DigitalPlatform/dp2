@@ -35,6 +35,7 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.MarcDom;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Core;
+using System.Runtime.CompilerServices;
 
 namespace dp2Catalog
 {
@@ -67,7 +68,7 @@ namespace dp2Catalog
         public dp2ServerInfoCollection ServerInfos = new dp2ServerInfoCollection();
 
         // dp2library服务器数组(缺省用户名/密码等)
-        public dp2ServerCollection Servers = null;
+        public dp2ServerCollectionNew Servers = null;
 
         public CharsetTable EaccCharsetTable = null;
         public Marc8Encoding Marc8Encoding = null;
@@ -275,6 +276,13 @@ namespace dp2Catalog
                 MessageBox.Show(this, strError);
             }
 
+            nRet = ConvertServersBin(out strError);
+            if (nRet == -1)
+            {
+                this.ReportError("dp2catalog 转换 servers.bin 文件到 servers.json 时出现错误", "(安静报错)" + strError);
+                MessageBox.Show(this, strError);
+            }
+
             // 从文件中装载创建一个dp2ServerCollection对象
             // parameters:
             //		bIgnorFileNotFound	是否不抛出FileNotFoundException异常。
@@ -284,21 +292,21 @@ namespace dp2Catalog
             //			SerializationException	版本迁移时容易出现
             try
             {
-                Servers = dp2ServerCollection.Load(
-                    Path.Combine(this.UserDir, "servers.bin"),  // this.DataDir
+                Servers = dp2ServerCollectionNew.Load(
+                    Path.Combine(this.UserDir, "servers.json"),
                     true);
-                Servers.ownerForm = this;
+                // Servers.ownerForm = this;
             }
             catch (SerializationException ex)
             {
                 MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
-                Servers = new dp2ServerCollection();
+                Servers = new dp2ServerCollectionNew();
                 // 设置文件名，以便本次运行结束时覆盖旧文件
-                Servers.FileName = Path.Combine(this.DataDir, "servers.bin");
+                Servers.FileName = Path.Combine(this.DataDir, "servers.json");
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, "servers.bin 装载出现异常: " + ex.Message);
+                MessageBox.Show(this, "servers.json 装载出现异常: " + ex.Message);
             }
 
             this.Servers.ServerChanged += new dp2ServerChangedEventHandle(Servers_ServerChanged);
@@ -339,7 +347,7 @@ namespace dp2Catalog
                 }
                 else
                 {
-                    dp2ServerCollection newServers = Servers.Dup();
+                    dp2ServerCollectionNew newServers = Servers.Dup();
                     dp2Server server = newServers.NewServer(-1);
                     server.Name = first_dialog.ServerName;  // first_dialog.ServerType;
                     if (string.IsNullOrEmpty(server.Name) == true)
@@ -416,6 +424,41 @@ namespace dp2Catalog
             }
         }
 
+        // 把 servers.bin 文件转化为新的 servers.json 格式
+        int ConvertServersBin(out string strError)
+        {
+            strError = "";
+
+            try
+            {
+                string sourceFileName = Path.Combine(this.UserDir, "servers.bin");
+                string targetFileName = Path.Combine(this.UserDir, "servers.json");
+                if (File.Exists(sourceFileName) == false
+                    || File.Exists(targetFileName) == true)
+                    return 0;
+
+                dp2ServerCollection servers = dp2ServerCollection.Load(
+        sourceFileName,
+        true);
+                dp2ServerCollectionNew new_servers = new dp2ServerCollectionNew();
+                foreach (dp2Server server in servers)
+                {
+                    new_servers.Add(server);
+                }
+                new_servers.Changed = true;
+                new_servers.FileName = targetFileName;
+                new_servers.Save(null);
+
+                File.Delete(sourceFileName);
+                return 1;
+            }
+            catch(Exception ex)
+            {
+                strError = "转换 servers.bin 文件到 servers.json 时出现异常: " + ex.Message;
+                return -1;
+            }
+        }
+
         // 将指定文件文件从绿色安装目录或者 ClickOnce 安装的数据目录移动到用户目录
         int MoveDataFile(
             string strPureFileName,
@@ -444,6 +487,9 @@ namespace dp2Catalog
             try
             {
                 File.Copy(strSourceFileName, strTargetFileName, false);
+
+                // 2020/5/20 增加
+                File.Delete(strSourceFileName);
             }
             catch (Exception ex)
             {
@@ -1483,7 +1529,7 @@ string strError)
                 }
 
                 goto CONTINUE;
-                FOUND:
+            FOUND:
 
                 if (child.GetType().Equals(type) == true)
                 {
@@ -1495,7 +1541,7 @@ string strError)
                     return child;
                 }
 
-                CONTINUE:
+            CONTINUE:
                 hwnd = API.GetWindow(hwnd, API.GW_HWNDNEXT);
             }
 
@@ -2162,7 +2208,7 @@ string strError)
             ServersDlg dlg = new ServersDlg();
             GuiUtil.SetControlFont(dlg, this.DefaultFont);
 
-            dp2ServerCollection newServers = Servers.Dup();
+            dp2ServerCollectionNew newServers = Servers.Dup();
 
             if (bFirstRun == true)
             {
@@ -2327,7 +2373,7 @@ out string strError)
 
             string strFileName = Path.Combine(this.DataDir, "rangemessage.xml");
 
-            REDO:
+        REDO:
 
             try
             {
@@ -3107,7 +3153,7 @@ out string strError)
                 return;
             }
 
-            DELETE_FILES:
+        DELETE_FILES:
             FileInfo[] fis = di.GetFiles();
             for (int i = 0; i < fis.Length; i++)
             {
@@ -4066,7 +4112,7 @@ out string strError)
             }
 
             return 0;
-            ERROR1:
+        ERROR1:
             if (string.IsNullOrEmpty(strError) == false)
             {
                 if (strError[0] != ' ')
@@ -4118,7 +4164,7 @@ out string strError)
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -4185,7 +4231,7 @@ out string strError)
             }
 
             return 1;
-            ERROR1:
+        ERROR1:
             // 不让缓存，因为可能出现了编译错误
             // TODO: 精确区分编译错误
             this.Filters.ClearFilter(strFilterFileName);
@@ -4294,7 +4340,7 @@ out string strError)
 
             filter.Assembly = assembly;
             return 1;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -4436,7 +4482,7 @@ out string strError)
             {
             }
 
-            REDO_VERIFY:
+        REDO_VERIFY:
             if (strSerialCode == "test")
             {
                 if (string.IsNullOrEmpty(strRequirFuncList) == true)
@@ -4618,7 +4664,7 @@ out string strError)
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.OriginCode = strOriginCode;
 
-            REDO:
+        REDO:
             dlg.ShowDialog(this);
             if (dlg.DialogResult != DialogResult.OK)
                 return 0;
@@ -4690,7 +4736,7 @@ out string strError)
             string strRequirFuncList = "";  // 因为这里是设置通用的序列号，不具体针对哪个功能，所以对设置后，序列号的功能不做检查。只有等到用到具体功能的时候，才能发现序列号是否包含具体功能的 function = ... 参数
 
             string strSerialCode = "";
-            REDO_VERIFY:
+        REDO_VERIFY:
             if (strSerialCode == "test")
             {
                 this.TestMode = true;
@@ -4751,7 +4797,7 @@ out string strError)
                 goto REDO_VERIFY;
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
 #endif
         }
@@ -4997,6 +5043,11 @@ out string strError)
                 return;
             }
 
+            if (Servers.Changed == true)
+            {
+                SaveServers();
+            }
+
             e.UserName = dlg.UserName;
             e.Password = dlg.Password;
             e.SavePasswordShort = false;
@@ -5032,6 +5083,12 @@ out string strError)
 
             e.SavePasswordLong = true;
             e.LibraryServerUrl = dlg.ServerUrl;
+        }
+
+        void SaveServers()
+        {
+            if (string.IsNullOrEmpty(this.Servers.FileName) == false)
+                this.Servers.Save(null);
         }
 
         ServerDlg SetDefaultAccount(

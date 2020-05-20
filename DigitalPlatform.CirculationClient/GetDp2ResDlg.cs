@@ -26,7 +26,7 @@ namespace DigitalPlatform.CirculationClient
         public IChannelManager ChannelManager = null;
 
         // dp2library服务器数组(缺省用户名/密码等)
-        public dp2ServerCollection Servers = null;
+        public dp2ServerCollectionNew Servers = null;
 
         public int[] EnabledIndices = null;
 
