@@ -197,7 +197,7 @@ namespace dp2Circulation
             }
 
             return 1;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -716,7 +716,7 @@ namespace dp2Circulation
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1356,7 +1356,7 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
                     this.ParentShowMessage("", "", false);
                 }
 
-                REDO:
+            REDO:
                 Program.MainForm.AppInfo.LinkFormState(edit, "EntityEditForm_state");
                 edit.ShowDialog(this);
                 Program.MainForm.AppInfo.UnlinkFormState(edit);
@@ -1668,9 +1668,9 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
         {
             int nRet = 0;
             string strError = "";
-            // bool bOldChanged = this.Changed;
+        // bool bOldChanged = this.Changed;
 
-            REDO_INPUT:
+        REDO_INPUT:
             string strNumber = InputDlg.GetInput(
                 this,
                 "新增多个实体",
@@ -1739,7 +1739,7 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
 
             return;
 
-            ERROR1:
+        ERROR1:
             MessageBox.Show(ForegroundWindow.Instance, strError);
             return;
         }
@@ -1941,7 +1941,7 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
             }
             return;
 
-            ERROR1:
+        ERROR1:
             MessageBox.Show(ForegroundWindow.Instance, strError);
             return;
         }
@@ -2146,7 +2146,7 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
                 }
             }
 
-            SKIP1:
+        SKIP1:
 
             // 对所有实体记录进行条码查重
             if (String.IsNullOrEmpty(strBarcode) == false
@@ -2246,12 +2246,25 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
                             nodes[i].Name, strText);
                     }*/
 
+                    string name = nodes[i].Name;
+
                     // 2009/12/17 changed
                     string strText = nodes[i].OuterXml;
                     if (String.IsNullOrEmpty(strText) == false)
                     {
-                        DomUtil.SetElementOuterXml(domExist.DocumentElement,
-                            nodes[i].Name, strText);
+                        // 2020/5/27
+                        // state 元素值需要新旧值合并
+                        if (name == "state")
+                        {
+                            string oldText = DomUtil.GetElementText(domExist.DocumentElement, name);
+                            string newText = nodes[i].InnerText.Trim();
+
+                            StringUtil.SetInList(ref oldText, newText, true);
+                            DomUtil.SetElementText(domExist.DocumentElement, name, oldText);
+                        }
+                        else
+                            DomUtil.SetElementOuterXml(domExist.DocumentElement,
+                               name, strText);
                     }
                 }
 
@@ -2454,7 +2467,7 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
 
             this.EnableControls(true);
             return 1;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(ForegroundWindow.Instance, strError);
             return -1;
         }

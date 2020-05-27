@@ -1516,15 +1516,14 @@ namespace dp2Circulation
                             "seller", order_item.Seller);
 
                         {
-                            string strOldValue = "";
-                            string strNewValue = "";
+                            // string strOldValue = "";
 
 
                             // source内采用新值
                             // 分离 "old[new]" 内的两个值
                             dp2StringUtil.ParseOldNewValue(order_item.Source,
-                                out strOldValue,
-                                out strNewValue);
+                                out _,
+                                out string strNewValue);
                             DomUtil.SetElementText(dom.DocumentElement,
                                 "source", strNewValue);
                         }

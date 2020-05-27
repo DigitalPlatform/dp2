@@ -5189,12 +5189,11 @@ out string strError)
 #if SN
                 if (server.Verified == false && StringUtil.IsInList("serverlicensed", channel.Rights) == false)
                 {
-                    string strError = "";
                     string strTitle = "dp2 检索窗需要先设置序列号才能访问服务器 " + server.Name + " " + server.Url;
                     int nRet = this.VerifySerialCode(strTitle,
                         "",
                         true,
-                        out strError);
+                        out string strError);
                     if (nRet == -1)
                     {
                         channel.Close();
@@ -5205,7 +5204,30 @@ out string strError)
 #endif
                 server.Verified = true;
             }
+
+            if (_virusScanned == false)
+            {
+                if (StringUtil.IsInList("clientscanvirus", channel.Rights) == true)
+                {
+                    if (DetectVirus.DetectXXX() == true || DetectVirus.DetectGuanjia() == true)
+                    {
+                        {
+                            channel.Close();
+                            e.ErrorInfo = "dp2Catalog 被木马软件干扰，无法运行";
+                            return;
+                        }
+                        /*
+                        channel.Close();
+                        // Program.PromptAndExit(this, );
+                        throw new InterruptException("dp2Catalog 被木马软件干扰，无法运行");
+                        */
+                    }
+                }
+                _virusScanned = true;
+            }
         }
+
+        static bool _virusScanned = false;
 
         #endregion
 

@@ -1801,6 +1801,16 @@ MessageBoxDefaultButton.Button2);
         private void textBox_cardReader_rfidCenterUrl_TextChanged(object sender, EventArgs e)
         {
         }
+
+        private void button_server_fillAuthorNumberUrl_Click(object sender, EventArgs e)
+        {
+            this.textBox_server_authorNumber_gcatUrl.Text = "rest.http://dp2003.com/dp2library/rest";
+        }
+
+        private void button_server_fillPinyinUrl_Click(object sender, EventArgs e)
+        {
+            this.textBox_server_pinyin_gcatUrl.Text = "rest.http://dp2003.com/dp2library/rest";
+        }
     }
 
     // 调用数据加工模块

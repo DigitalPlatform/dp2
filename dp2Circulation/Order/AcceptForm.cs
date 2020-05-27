@@ -257,6 +257,7 @@ namespace dp2Circulation
             Program.MainForm.FillBiblioFromList(this.comboBox_accept_from);
             comboBox_accept_matchStyle_TextChanged(null, null);
 
+            SetCheckBoxEnable();
         }
 
 
@@ -5077,6 +5078,8 @@ Keys keyData)
             // 批次号可能被对话框修改，需要刷新
             //this.tabComboBox_prepare_batchNo.Text = EntityFormOptionDlg.GetFieldValue("quickRegister_default",
             //    "batchNo");
+
+            SetCheckBoxEnable();
         }
 
         private void tabComboBox_prepare_batchNo_Leave(object sender, EventArgs e)
@@ -5084,6 +5087,34 @@ Keys keyData)
             EntityFormOptionDlg.SetFieldValue("quickRegister_default",
                 "batchNo",
                 this.tabComboBox_prepare_batchNo.Text);
+        }
+
+        // 根据默认记录的内容，将两个 checkbox 的状态设置为可修改或者不可修改状态。这样可以避免用户设置出和默认只记录矛盾的 checkbox 状态
+        void SetCheckBoxEnable()
+        {
+            string state = EntityFormOptionDlg.GetFieldValue("quickRegister_default",
+"state");
+            if (StringUtil.IsInList("加工中", state))
+            {
+                this.checkBox_prepare_setProcessingState.Checked = true;
+                this.checkBox_prepare_setProcessingState.Enabled = false;
+            }
+            else
+            {
+                this.checkBox_prepare_setProcessingState.Enabled = true;
+            }
+
+            string accessNo = EntityFormOptionDlg.GetFieldValue("quickRegister_default",
+"accessNo");
+            if (accessNo == "@accessNo")
+            {
+                this.checkBox_prepare_createCallNumber.Checked = true;
+                this.checkBox_prepare_createCallNumber.Enabled = false;
+            }
+            else
+            {
+                this.checkBox_prepare_createCallNumber.Enabled = true;
+            }
         }
     }
 

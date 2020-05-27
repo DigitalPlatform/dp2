@@ -469,8 +469,8 @@ namespace DigitalPlatform.LibraryServer
             }
 
             {
-                // 如果有已经有了<fingerprint>元素，则修正其timestamp属性
-                // 刷新timestamp属性
+                // 如果有已经有了 <fingerprint> 元素，则修正其 timestamp 属性
+                // 刷新 timestamp 属性
                 XmlNode node = dom.DocumentElement.SelectSingleNode("fingerprint");
                 if (node != null)
                     DomUtil.SetAttr(node, "timestamp", DateTime.Now.ToString("u"));
@@ -520,7 +520,10 @@ namespace DigitalPlatform.LibraryServer
             // 如果记录中没有 refID 字段，则主动填充
             string strRefID = DomUtil.GetElementText(dom.DocumentElement, "refID");
             if (string.IsNullOrEmpty(strRefID) == true)
+            {
                 DomUtil.SetElementText(dom.DocumentElement, "refID", Guid.NewGuid().ToString());
+                bChanged = true;
+            }
 
             strXml = dom.OuterXml;
             if (bChanged == true)
@@ -1310,25 +1313,37 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     // 2014/7/4
-                    if (this.VerifyReaderType == true)
+                    if (this.VerifyReaderType == true
+                        && bForce == false) // 2020/5/27
                     {
                         XmlDocument domTemp = new XmlDocument();
                         domTemp.LoadXml(strSavedXml);
 
-                        // 检查一个册记录的读者类型是否符合值列表要求
-                        // parameters:
-                        // return:
-                        //      -1  检查过程出错
-                        //      0   符合要求
-                        //      1   不符合要求
-                        nRet = CheckReaderType(domTemp,
-                            strLibraryCode,
-                            strReaderDbName,
-                            out strError);
-                        if (nRet == -1 || nRet == 1)
+                        // 2020/5/27
+                        // 检查 readerType 元素的值是否为 [blank]
+                        string value = DomUtil.GetElementText(domTemp.DocumentElement, "readerType");
+                        if (value == "[blank]")
                         {
-                            strError = strError + "。创建读者记录操作失败";
-                            goto ERROR1;
+                            DomUtil.SetElementText(domTemp.DocumentElement, "readerType", "");
+                            strSavedXml = domTemp.OuterXml;
+                        }
+                        else
+                        {
+                            // 检查一个册记录的读者类型是否符合值列表要求
+                            // parameters:
+                            // return:
+                            //      -1  检查过程出错
+                            //      0   符合要求
+                            //      1   不符合要求
+                            nRet = CheckReaderType(domTemp,
+                                strLibraryCode,
+                                strReaderDbName,
+                                out strError);
+                            if (nRet == -1 || nRet == 1)
+                            {
+                                strError = strError + "。创建读者记录操作失败";
+                                goto ERROR1;
+                            }
                         }
                     }
 
