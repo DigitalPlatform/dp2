@@ -37,7 +37,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>17</ApplicationRevision>
+    <ApplicationRevision>19</ApplicationRevision>
     <ApplicationVersion>3.1.2.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -68,10 +68,10 @@
     <SignManifests>true</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>80AE8886E9220471869958BEFAF13962C3FA0319</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>6AF85AEF3D710EA412E3251FB895A45EE1B11018</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>代码签名证书-2019.pfx</ManifestKeyFile>
+    <ManifestKeyFile>代码签名证书-2020.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <GenerateManifests>false</GenerateManifests>
@@ -222,6 +222,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <None Include="代码签名证书-2019.pfx" />
+    <None Include="代码签名证书-2020.pfx" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DigitalPlatform.CirculationClient\DigitalPlatform.CirculationClient.csproj">

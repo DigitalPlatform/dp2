@@ -224,7 +224,17 @@ namespace dp2SSL
             _barcodeCapture.Handled = _pauseBarcodeScan == 0;   // 是否把处理过的字符吞掉
             _barcodeCapture.Start();
 
-            InputMethod.SetPreferredImeState(App.Current.MainWindow, InputMethodState.Off);
+            {
+                try
+                {
+                    if (App.Current != null && App.Current.MainWindow != null)
+                        InputMethod.SetPreferredImeState(App.Current.MainWindow, InputMethodState.Off);
+                }
+                catch
+                {
+
+                }
+            }
 
             if (App.Function == "智能书柜")
             {
@@ -1255,7 +1265,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                     "请选择启动模式",
                     MessageBoxButton.YesNoCancel,
                     MessageBoxImage.Question,
-                    MessageBoxResult.Yes, 
+                    MessageBoxResult.Yes,
                     MessageBoxOptions.DefaultDesktopOnly);
                 if (result == MessageBoxResult.Yes)
                     StartNetworkMode = "local";

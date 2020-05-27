@@ -249,7 +249,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "commander", "commander\comm
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.ServiceProcess", "..\dp-library\DigitalPlatform.ServiceProcess\DigitalPlatform.ServiceProcess.csproj", "{F6A351AC-D11E-4A48-8970-632A15F5DB60}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestService", "TestService\TestService.csproj", "{F5768DB7-8AF1-4E04-AB37-AD5F033DB1CB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestService", "TestService\TestService.csproj", "{F5768DB7-8AF1-4E04-AB37-AD5F033DB1CB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestUHF", "TestUHF\TestUHF.csproj", "{C8113357-AF6E-423E-87DD-1F3504EC31A8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -2074,6 +2076,24 @@ Global
 		{F5768DB7-8AF1-4E04-AB37-AD5F033DB1CB}.Test|Mixed Platforms.Build.0 = Debug|Any CPU
 		{F5768DB7-8AF1-4E04-AB37-AD5F033DB1CB}.Test|x86.ActiveCfg = Debug|Any CPU
 		{F5768DB7-8AF1-4E04-AB37-AD5F033DB1CB}.Test|x86.Build.0 = Debug|Any CPU
+		{C8113357-AF6E-423E-87DD-1F3504EC31A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C8113357-AF6E-423E-87DD-1F3504EC31A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C8113357-AF6E-423E-87DD-1F3504EC31A8}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{C8113357-AF6E-423E-87DD-1F3504EC31A8}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{C8113357-AF6E-423E-87DD-1F3504EC31A8}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C8113357-AF6E-423E-87DD-1F3504EC31A8}.Debug|x86.Build.0 = Debug|Any CPU
+		{C8113357-AF6E-423E-87DD-1F3504EC31A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C8113357-AF6E-423E-87DD-1F3504EC31A8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C8113357-AF6E-423E-87DD-1F3504EC31A8}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{C8113357-AF6E-423E-87DD-1F3504EC31A8}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{C8113357-AF6E-423E-87DD-1F3504EC31A8}.Release|x86.ActiveCfg = Release|Any CPU
+		{C8113357-AF6E-423E-87DD-1F3504EC31A8}.Release|x86.Build.0 = Release|Any CPU
+		{C8113357-AF6E-423E-87DD-1F3504EC31A8}.Test|Any CPU.ActiveCfg = Release|Any CPU
+		{C8113357-AF6E-423E-87DD-1F3504EC31A8}.Test|Any CPU.Build.0 = Release|Any CPU
+		{C8113357-AF6E-423E-87DD-1F3504EC31A8}.Test|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{C8113357-AF6E-423E-87DD-1F3504EC31A8}.Test|Mixed Platforms.Build.0 = Release|Any CPU
+		{C8113357-AF6E-423E-87DD-1F3504EC31A8}.Test|x86.ActiveCfg = Release|Any CPU
+		{C8113357-AF6E-423E-87DD-1F3504EC31A8}.Test|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

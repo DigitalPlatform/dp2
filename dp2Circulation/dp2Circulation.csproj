@@ -19,8 +19,8 @@
     <SccProvider>
     </SccProvider>
     <IsWebBootstrapper>true</IsWebBootstrapper>
-    <ManifestCertificateThumbprint>80AE8886E9220471869958BEFAF13962C3FA0319</ManifestCertificateThumbprint>
-    <ManifestKeyFile>代码签名证书-2019.pfx</ManifestKeyFile>
+    <ManifestCertificateThumbprint>6AF85AEF3D710EA412E3251FB895A45EE1B11018</ManifestCertificateThumbprint>
+    <ManifestKeyFile>代码签名证书-2020.pfx</ManifestKeyFile>
     <GenerateManifests>false</GenerateManifests>
     <SignManifests>true</SignManifests>
     <ApplicationIcon>nei.ico</ApplicationIcon>
@@ -52,7 +52,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>22</ApplicationRevision>
+    <ApplicationRevision>24</ApplicationRevision>
     <ApplicationVersion>3.8.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -3143,6 +3143,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="代码签名证书-2019.pfx" />
+    <None Include="代码签名证书-2020.pfx" />
     <None Include="日志文件格式.txt" />
     <None Include="Docs\测试.txt" />
     <None Include="Docs\测试工作单.txt" />
