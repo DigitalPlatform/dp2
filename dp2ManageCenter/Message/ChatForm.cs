@@ -18,6 +18,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.MessageClient;
 using DigitalPlatform.CirculationClient;
+using System.Runtime.CompilerServices;
 
 namespace dp2ManageCenter.Message
 {
@@ -115,12 +116,13 @@ namespace dp2ManageCenter.Message
         "<default>",
         };
 
-        void FillGroupList(List<string> names)
+        void FillGroupList(List<GroupInfo> names)
         {
             this.dpTable_groups.Rows.Clear();
-            foreach (string name in names)
+            foreach (var info in names)
             {
-                AddGroupNameNewRow(name, "");
+                var row = AddGroupNameNewRow(info.DisplayName,info.EchoName, "");
+                // row.Tag = info;
             }
 
             // 自动选择第一个 group
@@ -129,18 +131,27 @@ namespace dp2ManageCenter.Message
                     this.dpTable_groups.Rows[0]);
         }
 
-        DpRow AddGroupNameNewRow(string name, string new_message_count)
+        DpRow AddGroupNameNewRow(string name, 
+            string echoName,
+            string new_message_count)
         {
             DpRow row = new DpRow();
             row.Add(new DpCell());
             row.Add(new DpCell { Text = name });
             row.Add(new DpCell { Text = new_message_count });
             this.dpTable_groups.Rows.Add(row);
+
+            row.Tag = new GroupInfo
+            {
+                DisplayName = name,
+                EchoName = echoName
+            };
+
             return row;
         }
 
 
-        static string speical_chars = "@<>:/";
+        static string speical_chars = "@<>:/,";
 
         // 获得一个在 XML 中可以用于元素名的字符串
         public static string GetSection(string strText)
@@ -181,6 +192,7 @@ namespace dp2ManageCenter.Message
 
         void LoadGroups(string userNameAndUrl)
         {
+            /*
             string value = ClientInfo.Config.Get("groupNames", GetSection(userNameAndUrl), "");
             List<string> names = null;
             if (string.IsNullOrEmpty(value) == false)
@@ -190,15 +202,42 @@ namespace dp2ManageCenter.Message
                 names = new List<string>(default_groups);
 
             FillGroupList(names);
+            */
+            string value = ClientInfo.Config.Get("groupNames", GetSection(userNameAndUrl), "");
+            List<GroupInfo> names = null;
+            try
+            {
+                if (string.IsNullOrEmpty(value) == false)
+                    names = JsonConvert.DeserializeObject<List<GroupInfo>>(value);
+            }
+            catch
+            {
+
+            }
+
+            if (names == null || names.Count == 0)
+                names = new List<GroupInfo>();
+
+            FillGroupList(names);
         }
 
         void SaveGroups(string userNameAndUrl)
         {
+            /*
             List<string> names = new List<string>();
             foreach (var row in this.dpTable_groups.Rows)
             {
                 string name = row[1].Text;
                 names.Add(name);
+            }
+
+            string value = JsonConvert.SerializeObject(names);
+            ClientInfo.Config.Set("groupNames", GetSection(userNameAndUrl), value);
+            */
+            List<GroupInfo> names = new List<GroupInfo>();
+            foreach (var row in this.dpTable_groups.Rows)
+            {
+                names.Add(row.Tag as GroupInfo);
             }
 
             string value = JsonConvert.SerializeObject(names);
@@ -255,8 +294,10 @@ namespace dp2ManageCenter.Message
             contextMenu.Show(this.dpTable_groups, new Point(e.X, e.Y));
         }
 
-        void menu_newGroupName_Click(object sender, EventArgs e)
+        async void menu_newGroupName_Click(object sender, EventArgs e)
         {
+            string strError = "";
+
             var name = InputDlg.GetInput(this,
                 "添加群名",
                 "群名",
@@ -265,7 +306,81 @@ namespace dp2ManageCenter.Message
             if (name == null)
                 return;
 
-            AddGroupNameNewRow(name, "");
+            // TODO: 如果是 un:xxx,un:xxx 这样的形态，则需要转换为 ui:xxx,ui:xxx 的正规化形态
+            var result = await CanonicalizeGroupName(name);
+            if (result.Value == -1)
+            {
+                strError = $"正规化群名 '{name}' 时出错: {result.ErrorInfo}";
+                goto ERROR1;
+            }
+
+            /*
+            GroupInfo info = new GroupInfo
+            {
+                DisplayName = name,
+                EchoName = result.ResultName
+            };
+            */
+
+            var row = AddGroupNameNewRow(name, result.ResultName, "");
+            // row.Tag = info;
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        public class GroupInfo
+        {
+            // 显示名
+            public string DisplayName { get; set; }
+            // dp2mserver 采用的正规群名
+            public string EchoName { get; set; }
+        }
+
+        public class CanonicalizeGroupNameResult : NormalResult
+        {
+            public string ResultName { get; set; }
+        }
+
+        async Task<CanonicalizeGroupNameResult> CanonicalizeGroupName(string name)
+        {
+            if (name.StartsWith("un:"))
+            {
+                P2PConnection connection = await ConnectionPool.GetConnectionAsync(this.UserNameAndUrl);
+                List<MessageRecord> messages = new List<MessageRecord>();
+                MessageRecord record = new MessageRecord();
+                record.groups = name.Split(new char[] { ',' });   // new string[1] { strGroupName };
+                record.data = "test";
+                messages.Add(record);
+
+                SetMessageRequest param = new SetMessageRequest("echo",
+                    "",
+                   messages);
+                var result = await connection.SetMessageAsyncLite(param);
+                if (result.Value == -1)
+                    return new CanonicalizeGroupNameResult
+                    {
+                        Value = -1,
+                        ErrorInfo = result.ErrorInfo
+                    };
+                if (result.Results == null || result.Results.Count == 0)
+                    return new CanonicalizeGroupNameResult
+                    {
+                        Value = -1,
+                        ErrorInfo = "echo 请求返回的 Results 为空"
+                    };
+                return new CanonicalizeGroupNameResult
+                {
+                    Value = 0,
+                    ResultName = BuildName(result.Results[0].groups)
+                };
+            }
+
+            return new CanonicalizeGroupNameResult
+            {
+                Value = 0,
+                ResultName = name
+            };
         }
 
         void menu_deleteGroupName_Click(object sender, EventArgs e)
@@ -509,6 +624,53 @@ namespace dp2ManageCenter.Message
             if (groups == null)
                 return;
 
+            // 可能形态为 ui:xxxxx,ui:xxxxx
+
+            // 存储发现以后剩下的名字
+            List<string> names = new List<string>(groups);
+            string name = BuildName(groups);
+            foreach (var row in this.dpTable_groups.Rows)
+            {
+                var info = row.Tag as GroupInfo;
+                if (info.DisplayName == name || info.EchoName == name)
+                {
+                    string old_value = row[COLUMN_NEWMESSAGECOUNT].Text;
+                    this.Invoke((Action)(() =>
+                    {
+                        // 注意所在线程应该为界面线程
+                        row[COLUMN_NEWMESSAGECOUNT].Text = IncValue(old_value, 1);
+                    }));
+                    return;
+                }
+            }
+
+            // 剩下部分群名在列表中没有找到，需要添加到群名列表中
+            this.Invoke((Action)(() =>
+            {
+                // TODO: 请求服务器得到 DisplayName
+
+                AddGroupNameNewRow(name, name, "1");
+            }));
+            return;
+
+            string IncValue(string old_value, int delta)
+            {
+                if (Int32.TryParse(old_value, out int count) == false)
+                    count = 0;
+                return (count + delta).ToString();
+            }
+        }
+
+#if OLD
+        // 更新左侧群名列表。
+        // 增补群名，和更新名字右侧的新消息数字
+        void UpdateGroupNameList(string[] groups)
+        {
+            if (groups == null)
+                return;
+
+            // 可能形态为 ui:xxxxx,ui:xxxxx
+
             // 存储发现以后剩下的名字
             List<string> names = new List<string>(groups);
             foreach (var row in this.dpTable_groups.Rows)
@@ -547,6 +709,21 @@ namespace dp2ManageCenter.Message
                     count = 0;
                 return (count + delta).ToString();
             }
+        }
+#endif
+        // 构造一个群名字字符串。先把每个部分排序，然后用逗号组合
+        static string BuildName(string[] groups)
+        {
+            List<string> results = new List<string>();
+            foreach (var group in groups)
+            {
+                string name1 = group;
+                if (group.IndexOf(":") != -1)
+                    name1 = StringUtil.ParseTwoPart(group, ":")[1];
+                results.Add(name1);
+            }
+
+            return StringUtil.MakePathList(results, ",");
         }
 
         static bool GroupNameEqual(string string1, string string2)
@@ -1098,7 +1275,7 @@ namespace dp2ManageCenter.Message
 
                 List<MessageRecord> messages = new List<MessageRecord>();
                 MessageRecord record = new MessageRecord();
-                record.groups = new string[1] { strGroupName };
+                record.groups = strGroupName.Split(new char[] { ',' });   // new string[1] { strGroupName };
                 record.data = strText;
                 messages.Add(record);
 
@@ -1149,6 +1326,22 @@ namespace dp2ManageCenter.Message
             connection.AddMessage += Connection_AddMessage;
         }
 
+        GroupInfo Find(string [] groups)
+        {
+            string group_name = BuildName(groups);
+
+            // 在当前所有群中找 GroupInfo
+            foreach(var row in this.dpTable_groups.Rows)
+            {
+                var info = row.Tag as GroupInfo;
+                if (group_name == info.DisplayName || group_name == info.EchoName)
+                {
+                    return info;
+                }
+            }
+            return null;
+        }
+
         // 用于拼接 data 的缓冲区
         StringBuilder _messageData = new StringBuilder();
 
@@ -1163,10 +1356,15 @@ namespace dp2ManageCenter.Message
                 {
                     UpdateGroupNameList(record.groups);
 
-
+                    // TODO: 要建立一个便于搜索的名字对照表
                     // 忽略不是当前群组的消息
+                    var group_info = Find(record.groups);
+                    if (group_info == null || group_info.DisplayName != _currentGroupName)
+                        continue;
+                    /*
                     if (GroupNameContains(record.groups, _currentGroupName) == false)
                         continue;
+                    */
 
                     if (string.IsNullOrEmpty(record.id)
                         && _messageData.Length < MAX_MESSAGE_DATA_LENGTH)

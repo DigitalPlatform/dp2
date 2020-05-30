@@ -127,6 +127,11 @@ namespace dp2SSL
                 return;
             }
 
+            /*
+            Process current = Process.GetCurrentProcess();
+            string name = current.ProcessName;  // "dp2SSL"
+            */
+
             _errorTable = new ErrorTable((s) =>
             {
                 this.Error = s;

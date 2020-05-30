@@ -51,7 +51,11 @@ namespace dp2Circulation
         const int WM_SAVETO = API.WM_USER + 205;
         const int WM_SAVE_RECORD = API.WM_USER + 206;
         const int WM_SAVE_RECORD_BARCODE = API.WM_USER + 207;
-        const int WM_SAVE_RECORD_FORCE = API.WM_USER + 208;
+
+        // 2020/5/26
+        const int WM_SAVE_RECORD_STATE = API.WM_USER + 208;
+
+        const int WM_SAVE_RECORD_FORCE = API.WM_USER + 209;
         const int WM_FOREGIFT = API.WM_USER + 210;
         const int WM_RETURN_FOREGIFT = API.WM_USER + 211;
         const int WM_SET_FOCUS = API.WM_USER + 212;
@@ -374,13 +378,13 @@ namespace dp2Circulation
             {
                 this.Invoke((Action)(() =>
                 {
-                        // 警告尚未保存
-                        DialogResult result = MessageBox.Show(this,
-                "当前有信息被修改后尚未保存。若此时关闭窗口，现有未保存信息将丢失。\r\n\r\n确实要关闭窗口? ",
-                "ReaderInfoForm",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question,
-                MessageBoxDefaultButton.Button2);
+                    // 警告尚未保存
+                    DialogResult result = MessageBox.Show(this,
+            "当前有信息被修改后尚未保存。若此时关闭窗口，现有未保存信息将丢失。\r\n\r\n确实要关闭窗口? ",
+            "ReaderInfoForm",
+            MessageBoxButtons.YesNo,
+            MessageBoxIcon.Question,
+            MessageBoxDefaultButton.Button2);
                     if (result != DialogResult.Yes)
                     {
                         e.Cancel = true;
@@ -554,7 +558,7 @@ MessageBoxDefaultButton.Button2);
                     string strOutputRecPath = "";
                     int nRedoCount = 0;
 
-                    REDO:
+                REDO:
                     stop.SetMessage("正在装入读者记录 " + strBarcode + " ...");
 
                     string[] results = null;
@@ -734,7 +738,7 @@ MessageBoxDefaultButton.Button2);
 
             tabControl_readerInfo_SelectedIndexChanged(this, new EventArgs());
             return 1;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
             return -1;
         }
@@ -960,7 +964,7 @@ MessageBoxDefaultButton.Button2);
 
             tabControl_readerInfo_SelectedIndexChanged(this, new EventArgs());
             return 1;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
             return -1;
         }
@@ -1206,7 +1210,7 @@ MessageBoxDefaultButton.Button2);
             }
 
             return 1;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -1411,7 +1415,7 @@ MessageBoxDefaultButton.Button2);
             {
                 this.EnableControls(true);
             }
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1637,7 +1641,7 @@ select_temp_dlg.SelectedRecordXml);
 
                 this.readerEditControl1.Changed = false;
                 return 1;
-                ERROR1:
+            ERROR1:
                 MessageBox.Show(this, strError);
                 return -1;
             }
@@ -1819,7 +1823,7 @@ strNewDefault);
         /// <summary>
         /// 保存记录
         /// </summary>
-        /// <param name="strStyle">风格。为 displaysuccess/verifybarcode/changereaderbarcode/changereaderforce 之一或者组合。缺省值为 displaysuccess,verifybarcode</param>
+        /// <param name="strStyle">风格。为 displaysuccess/verifybarcode/changereaderbarcode/changestate/changereaderforce 之一或者组合。缺省值为 displaysuccess,verifybarcode</param>
         /// <returns>-1: 出错; 0: 放弃; 1: 成功</returns>
         public int SaveRecord(string strStyle = "displaysuccess,verifybarcode")
         {
@@ -1827,8 +1831,8 @@ strNewDefault);
             int nRet = 0;
 
             bool bControlPressed = (Control.ModifierKeys & Keys.Control) == Keys.Control;
-            
-            if (bControlPressed == false 
+
+            if (bControlPressed == false
                 && string.IsNullOrEmpty(this.readerEditControl1.Barcode) == true)
             {
                 strError = "尚未输入证条码号";
@@ -1837,6 +1841,7 @@ strNewDefault);
 
             // 是否强制修改册条码号
             bool bChangeReaderBarcode = StringUtil.IsInList("changereaderbarcode", strStyle);
+            bool bChangeState = StringUtil.IsInList("changestate", strStyle);
             bool bChangeReaderForce = StringUtil.IsInList("changereaderforce", strStyle);
             if (bChangeReaderBarcode && bChangeReaderForce)
             {
@@ -1848,7 +1853,7 @@ strNewDefault);
             {
                 var result = MessageBox.Show(this,
                     "您确实要强制修改当前读者记录？\r\n\r\n警告：当读者有在借记录的情况下，强制修改保存功能，*** 不会自动修改*** 这些在借册记录，会造成借阅信息关联错误。若只是想在修改证条码号以后保存记录，请改用“保存(强制修改证条码号)功能”",
-                    "谨慎使用“保存(强制修改)”功能", 
+                    "谨慎使用“保存(强制修改)”功能",
                     MessageBoxButtons.YesNo,
                     MessageBoxIcon.Warning,
                     MessageBoxDefaultButton.Button2);
@@ -1948,12 +1953,21 @@ strNewDefault);
 
                 if (strAction == "change" && bChangeReaderBarcode)
                 {
+                    if (bChangeState)
+                    {
+                        strError = "changestate 和 changereaderbarcode 不应同时具备";
+                        goto ERROR1;
+                    }
                     if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.51") < 0)
                     {
                         strError = "需要 dp2library 版本在 2.51 以上才能实现强制修改册条码号的功能。当前 dp2library 版本为 " + Program.MainForm.ServerVersion;
                         goto ERROR1;
                     }
                     strAction = "changereaderbarcode";
+                }
+                else if (strAction == "change" && bChangeState) // 2020/5/28
+                {
+                    strAction = "changestate";
                 }
 
                 if (strAction == "change" && bChangeReaderForce)
@@ -2091,7 +2105,7 @@ strSavedXml);
                         stop.SetMessage("正在装入读者记录 " + strBarcode + " ...");
 
                         int nRedoCount = 0;
-                        REDO_LOAD_HTML:
+                    REDO_LOAD_HTML:
                         string[] results = null;
                         lRet = Channel.GetReaderInfo(
                             stop,
@@ -2198,7 +2212,7 @@ strSavedXml);
                 Program.MainForm.StatusBarMessage = "读者记录保存成功";
             // MessageBox.Show(this, "保存成功");
             return 1;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
             return -1;
         }
@@ -2659,7 +2673,7 @@ strSavedXml);
             else
                 MessageBox.Show(this, "另存成功。");
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
             return;
         }
@@ -2828,7 +2842,7 @@ strSavedXml);
 
             MessageBox.Show(this, "删除成功。\r\n\r\n您会发现编辑窗口中还留着读者记录内容，但请不要担心，数据库里的读者记录已经被删除了。\r\n\r\n如果您这时后悔了，还可以按“保存按钮”把读者记录原样保存回去。");
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
             return;
 
@@ -3422,7 +3436,7 @@ MessageBoxDefaultButton.Button2);
 
             MessageBox.Show(this, "创建租金交费请求 成功");
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
             return;
 
@@ -3641,6 +3655,22 @@ MessageBoxDefaultButton.Button2);
                         EnableToolStrip(true);
                     }
                     return;
+                case WM_SAVE_RECORD_STATE:
+                    EnableToolStrip(false);
+                    try
+                    {
+                        if (this.m_webExternalHost.CanCallNew(
+                            this.commander,
+                            m.Msg) == true)
+                        {
+                            this.SaveRecord("displaysuccess,changestate");
+                        }
+                    }
+                    finally
+                    {
+                        EnableToolStrip(true);
+                    }
+                    return;
                 case WM_SAVE_RECORD_FORCE:
                     EnableToolStrip(false);
                     try
@@ -3777,7 +3807,7 @@ MessageBoxDefaultButton.Button2);
 
             MessageBox.Show(this, "创建" + strActionName + "记录成功");
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
             return;
 
@@ -3883,7 +3913,7 @@ MessageBoxDefaultButton.Button2);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3963,7 +3993,7 @@ MessageBoxDefaultButton.Button2);
                 + strShrinkComment
                 + "\r\n\r\n(但因当前读者记录还未保存，图像数据尚未提交到服务器)\r\n\r\n注意稍后保存当前读者记录。");
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -4033,7 +4063,7 @@ MessageBoxDefaultButton.Button2);
                 + strShrinkComment
                 + "\r\n\r\n(但因当前读者记录还未保存，图像数据尚未提交到服务器)\r\n\r\n注意稍后保存当前读者记录。");
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -4380,7 +4410,7 @@ MessageBoxDefaultButton.Button2);
                 goto ERROR1;
 
             return 0;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -4548,7 +4578,7 @@ MessageBoxDefaultButton.Button2);
                     m_strIdcardXml = "";
                     m_baPhoto = null;
 
-                    REDO:
+                REDO:
                     try
                     {
                         // prameters:
@@ -4939,7 +4969,7 @@ MessageBoxDefaultButton.Button2);
 
             MessageBox.Show(this, "移动成功。");
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
             return;
         }
@@ -5092,7 +5122,7 @@ MessageBoxDefaultButton.Button2);
                 _inFingerprintCall--;
                 EndFingerprintChannel(channel);
             }
-            ERROR1:
+        ERROR1:
             result.ErrorInfo = strError;
             result.Value = -1;
             return result;
@@ -5148,7 +5178,7 @@ MessageBoxDefaultButton.Button2);
                 _inFingerprintCall--;
                 EndFingerprintChannel(channel);
             }
-            ERROR1:
+        ERROR1:
             result.ErrorInfo = strError;
             result.Value = -1;
             return result;
@@ -5309,7 +5339,7 @@ MessageBoxDefaultButton.Button2);
                     goto ERROR1;
                 }
 
-                REDO:
+            REDO:
                 GetFingerprintStringResult result = await ReadFingerprintString(
                     bPractice == true ? "!practice" : this.readerEditControl1.Barcode);
                 if (result.Value == -1)
@@ -5351,7 +5381,7 @@ MessageBoxDefaultButton.Button1);
             // MessageBox.Show(this, strFingerprint);
             Program.MainForm.StatusBarMessage = "指纹信息获取成功";
             return;
-            ERROR1:
+        ERROR1:
             Program.MainForm.StatusBarMessage = strError;
             ShowMessageBox(strError);
         }
@@ -5432,7 +5462,7 @@ MessageBoxDefaultButton.Button1);
 
             Program.MainForm.StatusBarMessage = "导出成功。";
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5506,7 +5536,7 @@ MessageBoxDefaultButton.Button1);
                 this.EnableControls(true);
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5662,7 +5692,7 @@ MessageBoxDefaultButton.Button1);
 
             Program.MainForm.StatusBarMessage = "导出成功。";
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5770,7 +5800,7 @@ MessageBoxDefaultButton.Button1);
             }
             Program.MainForm.StatusBarMessage = strError;
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5802,7 +5832,7 @@ MessageBoxDefaultButton.Button1);
             if (nRet != 1)
                 goto ERROR1;
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5852,7 +5882,7 @@ MessageBoxDefaultButton.Button1);
             if (nRet == -1)
                 goto ERROR1;
             return;
-            ERROR1:
+        ERROR1:
             this.ShowMessage(strError, "red", true);
         }
 
@@ -6299,7 +6329,7 @@ MessageBoxDefaultButton.Button1);
 #endif
             ImageUtil.SetImage(this.pictureBox_qrCode, writer.Write(strCode));  // 2016/12/28
             return;
-            ERROR1:
+        ERROR1:
             this.ShowMessage(strError, "red", true);
         }
 
@@ -6373,7 +6403,7 @@ MessageBoxDefaultButton.Button1);
     result);
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6385,7 +6415,7 @@ MessageBoxDefaultButton.Button1);
             this.EnableControls(false);
             try
             {
-                REDO:
+            REDO:
                 GetFeatureStringResult result = await ReadFeatureString(
                     null,
                     this.readerEditControl1.Barcode,
@@ -6436,7 +6466,7 @@ MessageBoxDefaultButton.Button1);
             Program.MainForm.StatusBarMessage = "人脸信息获取成功";
             // TODO: 记住保存记录时通知 facecenter DoReplication
             return;
-            ERROR1:
+        ERROR1:
             Program.MainForm.StatusBarMessage = strError;
             ShowMessageBox(strError);
         }
@@ -6485,7 +6515,7 @@ MessageBoxDefaultButton.Button1);
                 + strShrinkComment
                 + "\r\n\r\n(但因当前读者记录还未保存，图像数据尚未提交到服务器)\r\n\r\n注意稍后保存当前读者记录。");
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6602,9 +6632,9 @@ MessageBoxDefaultButton.Button1);
                     goto ERROR1;
                 }
 
-                // TODO: 练习模式需要判断版本 2.2 以上
+            // TODO: 练习模式需要判断版本 2.2 以上
 
-                REDO:
+            REDO:
                 GetFingerprintStringResult result = await ReadFingerprintString(
                     bPractice == true ? "!practice" : this.readerEditControl1.Barcode);
                 if (result.Value == -1)
@@ -6646,11 +6676,21 @@ MessageBoxDefaultButton.Button1);
             // MessageBox.Show(this, strFingerprint);
             Program.MainForm.StatusBarMessage = "指纹信息获取成功";
             return;
-            ERROR1:
+        ERROR1:
             Program.MainForm.StatusBarMessage = strError;
             this.ShowMessage(strError, "red", true);
             // ShowMessageBox(strError);
         }
 
+        private void ToolStripMenuItem_saveChangeState_Click(object sender, EventArgs e)
+        {
+            EnableToolStrip(false);
+
+            this.m_webExternalHost.StopPrevious();
+            this.webBrowser_readerInfo.Stop();
+
+            this.commander.AddMessage(WM_SAVE_RECORD_STATE);  // 只修改读者记录状态
+
+        }
     }
 }

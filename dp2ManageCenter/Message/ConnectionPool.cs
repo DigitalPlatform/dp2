@@ -1,12 +1,14 @@
-﻿using DigitalPlatform;
-using DigitalPlatform.Text;
-using Microsoft.VisualStudio.Threading;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
+using Microsoft.VisualStudio.Threading;
+
+using DigitalPlatform;
+using DigitalPlatform.Text;
 
 namespace dp2ManageCenter.Message
 {

@@ -2354,7 +2354,9 @@ root, strLibraryCode);
             DomUtil.SetElementText(domNewRec.DocumentElement, "libraryCode", strLibraryCode);
 
             // 2014/7/4
-            if (this.VerifyReaderType == true)
+            if (this.VerifyReaderType == true
+                && strAction == "change"   // 2020/5/28 除了 change 以外的 changestate changeforegift changereaderbarcode 都不需要检查 readerType 元素
+                && bForce == false) // 2020/5/28
             {
                 string strReaderDbName = "";
 
