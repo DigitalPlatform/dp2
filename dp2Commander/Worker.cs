@@ -5,15 +5,17 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-
+using DigitalPlatform;
+using DigitalPlatform.MessageClient;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace TestService
+namespace dp2Commander
 {
     public class Worker : BackgroundService
     {
         private readonly ILogger<Worker> _logger;
+        P2PConnection _connection = new P2PConnection();
 
         public Worker(ILogger<Worker> logger)
         {
@@ -22,14 +24,108 @@ namespace TestService
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            _connection.AddMessage += _connection_AddMessage;
+            /*
             Test();
             await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
             ExitProcess("dp2SSL");
+            */
+
             while (!stoppingToken.IsCancellationRequested)
             {
                 Console.WriteLine("running ...");
+                await EnsureConnectMessageServerAsync();
                 // _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
-                await Task.Delay(1000, stoppingToken);
+                await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
+            }
+
+            _connection?.CloseConnection();
+        }
+
+        private void _connection_AddMessage(object sender,
+            DigitalPlatform.MessageClient.AddMessageEventArgs e)
+        {
+            if (e.Records != null)
+            {
+                foreach (var record in e.Records)
+                {
+                    Console.WriteLine($"message sender:{record.creator}, userName:{record.userName}, groups:{string.Join(",", record.groups)}, data:{record.data}");
+                }
+
+                Task.Run(async () =>
+                {
+                    await Reply(e.Records);
+                });
+            }
+        }
+
+        async Task Reply(List<MessageRecord> records)
+        {
+            try
+            {
+                List<MessageRecord> new_messages = new List<MessageRecord>();
+                foreach (var record in records)
+                {
+                    new_messages.Add(new MessageRecord
+                    {
+                        groups = record.groups,
+                        data = "reply:" + record.data
+                    });
+                }
+
+                SetMessageRequest param = new SetMessageRequest("create",
+        "dontNotifyMe",
+        new_messages);
+
+                var result = await _connection.SetMessageAsyncLite(param);
+                if (result.Value == -1)
+                {
+                    Console.WriteLine($"reply error: {result.ErrorInfo}");
+                }
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine($"reply() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+            }
+        }
+
+        // 确保连接到消息服务器
+        public async Task EnsureConnectMessageServerAsync()
+        {
+            try
+            {
+                var account_result = Program.GetMessageAccount();
+
+                if (string.IsNullOrEmpty(account_result.Url) == true)
+                {
+                    Console.WriteLine("警告: 尚未设置 dp2mserver 服务器 url 和其他参数");
+                    return;
+                }
+
+                if (string.IsNullOrEmpty(account_result.Url) == false
+                    && _connection.IsDisconnected)
+                {
+                    var connect_result = await _connection.ConnectAsync(account_result.Url,
+                        account_result.UserName,
+                        account_result.Password,
+                        "");
+                    if (connect_result.Value == -1)
+                        Console.WriteLine($"连接消息服务器失败: {connect_result.ErrorInfo}。url={account_result.Url},userName={account_result.UserName},errorCode={connect_result.ErrorCode}");
+                    else
+                        Console.WriteLine("连接消息服务器成功");
+
+                    /*
+                    if (connect_result.Value == -1)
+                        WpfClientInfo.WriteErrorLog($"连接消息服务器失败: {result.ErrorInfo}。url={messageServerUrl},userName={messageUserName},errorCode={result.ErrorCode}");
+                    else
+                    {
+                    }
+                    */
+                }
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine($"EnsureConnectMessageServerAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
             }
         }
 
@@ -122,4 +218,5 @@ namespace TestService
             return count != 0;
         }
     }
+
 }
