@@ -5,18 +5,22 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using DigitalPlatform;
-using DigitalPlatform.MessageClient;
+
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
+using DigitalPlatform;
+using DigitalPlatform.MessageClient;
+
 namespace dp2Commander
 {
-    public class Worker : BackgroundService
+    public class Worker // : BackgroundService
     {
-        private readonly ILogger<Worker> _logger;
+        // private readonly ILogger<Worker> _logger;
         P2PConnection _connection = new P2PConnection();
+        string _userName = "";
 
+#if OLD
         public Worker(ILogger<Worker> logger)
         {
             _logger = logger;
@@ -41,6 +45,64 @@ namespace dp2Commander
 
             _connection?.CloseConnection();
         }
+#endif
+
+        #region TOPSHELF
+
+        private string[] args;
+
+        public Worker(string[] vs)
+        {
+            args = vs;
+        }
+
+        async Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            _connection.AddMessage += _connection_AddMessage;
+            /*
+            Test();
+            await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
+            ExitProcess("dp2SSL");
+            */
+
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                Console.WriteLine("running ...");
+                await EnsureConnectMessageServerAsync();
+                // _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
+                await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
+            }
+
+            _connection.AddMessage -= _connection_AddMessage;
+            _connection?.CloseConnection();
+        }
+
+        CancellationTokenSource _cancel = new CancellationTokenSource();
+
+        public void Start()
+        {
+            Console.WriteLine("Start");
+
+            _cancel?.Cancel();
+            _cancel = new CancellationTokenSource();
+
+            Task.Factory.StartNew(
+                async () =>
+                {
+                    await ExecuteAsync(_cancel.Token);
+                },
+                _cancel.Token,
+                TaskCreationOptions.LongRunning,
+                TaskScheduler.Default);
+        }
+
+        public void Stop()
+        {
+            Console.WriteLine("Stop");
+            _cancel?.Cancel();
+        }
+
+        #endregion
 
         private void _connection_AddMessage(object sender,
             DigitalPlatform.MessageClient.AddMessageEventArgs e)
@@ -54,39 +116,111 @@ namespace dp2Commander
 
                 Task.Run(async () =>
                 {
-                    await Reply(e.Records);
+                    await ProcessAndReply(e.Records);
                 });
             }
         }
 
-        async Task Reply(List<MessageRecord> records)
+        async Task ProcessAndReply(List<MessageRecord> records)
         {
             try
             {
                 List<MessageRecord> new_messages = new List<MessageRecord>();
                 foreach (var record in records)
                 {
+                    var result_text = ProcessCommand(record.data);
+                    if (result_text == null)
+                        continue;
                     new_messages.Add(new MessageRecord
                     {
                         groups = record.groups,
-                        data = "reply:" + record.data
+                        data = result_text
                     });
                 }
 
-                SetMessageRequest param = new SetMessageRequest("create",
-        "dontNotifyMe",
-        new_messages);
-
-                var result = await _connection.SetMessageAsyncLite(param);
-                if (result.Value == -1)
+                if (new_messages.Count > 0)
                 {
-                    Console.WriteLine($"reply error: {result.ErrorInfo}");
+                    SetMessageRequest param = new SetMessageRequest("create",
+            "dontNotifyMe",
+            new_messages);
+
+                    var result = await _connection.SetMessageAsyncLite(param);
+                    if (result.Value == -1)
+                    {
+                        Console.WriteLine($"reply message error: {result.ErrorInfo}");
+                    }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                Console.WriteLine($"reply() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                Console.WriteLine($"ProcessAndReply() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
             }
+        }
+
+        string ProcessCommand(string text)
+        {
+            if (text.StartsWith($"@{_userName}") == false)
+                return null;
+
+            string command = text.Substring($"@{_userName}".Length).Trim();
+
+            if (command.StartsWith("hello"))
+            {
+                return "hello!";
+            }
+
+            // 重启电脑
+            if (command.StartsWith("restart"))
+            {
+                return ProcessRestart(command);
+            }
+
+            return $"未知的命令 '{command}'";
+        }
+
+        string ProcessRestart(string command)
+        {
+            // 子参数
+            string param = command.Substring("restart".Length).Trim();
+            if ( // string.IsNullOrEmpty(param)
+                param.ToLower() == "computer")
+            {
+                // 重启电脑
+                Task.Run(async () =>
+                {
+                    try
+                    {
+                        await Task.Delay(1000);
+                        // https://stackoverflow.com/questions/4286354/restart-computer-from-winforms-app
+                        ProcessStartInfo proc = new ProcessStartInfo();
+                        proc.WindowStyle = ProcessWindowStyle.Hidden;
+                        proc.FileName = "cmd";
+                        proc.Arguments = "/C shutdown -f -r";
+                        Process.Start(proc);
+                    }
+                    catch
+                    {
+
+                    }
+                });
+                return "服务器将在一秒后重新启动";
+            }
+            if (param.ToLower() == "dp2ssl")
+            {
+                // 重启 dp2ssl
+                ExitProcess("dp2SSL", false);
+                Thread.Sleep(5000);
+                if (HasModuleStarted(MutexName) == true)
+                {
+                    ExitProcess("dp2SSL", true);
+                }
+
+                // 启动
+                StartModule(ShortcutPath, "");
+                return "dp2SSL 已经重新启动";
+            }
+
+            return $"命令 '{command}' 未知的子参数 '{param}'";
         }
 
         // 确保连接到消息服务器
@@ -114,6 +248,8 @@ namespace dp2Commander
                     else
                         Console.WriteLine("连接消息服务器成功");
 
+                    _userName = account_result.UserName;
+
                     /*
                     if (connect_result.Value == -1)
                         WpfClientInfo.WriteErrorLog($"连接消息服务器失败: {result.ErrorInfo}。url={messageServerUrl},userName={messageUserName},errorCode={result.ErrorCode}");
@@ -123,7 +259,7 @@ namespace dp2Commander
                     */
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine($"EnsureConnectMessageServerAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
             }
@@ -194,7 +330,7 @@ namespace dp2Commander
         }
 
         // https://stackoverflow.com/questions/3411982/gracefully-killing-a-process
-        public static bool ExitProcess(string processName)
+        public static bool ExitProcess(string processName, bool kill)
         {
             int count = 0;
             foreach (var process in Process.GetProcessesByName(processName))
@@ -208,7 +344,7 @@ namespace dp2Commander
                 //   T:System.InvalidOperationException:
                 //     The process has already exited. -or- No process is associated with this System.Diagnostics.Process
                 //     object.
-                if (process.CloseMainWindow() == false)
+                if (kill == true || process.CloseMainWindow() == false)
                 {
                     process.Kill(true);
                 }

@@ -35,6 +35,8 @@ using DigitalPlatform.Face;
 using DigitalPlatform.Interfaces;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryServer;
+using System.Reflection;
+using System.Deployment.Application;
 
 namespace dp2SSL
 {
@@ -3638,6 +3640,24 @@ namespace dp2SSL
             {
                 this.mainGrid.Background = color;
             }));
+        }
+
+        private void restart_Click(object sender, RoutedEventArgs e)
+        {
+            if (ApplicationDeployment.IsNetworkDeployed == true)
+            {
+                String ApplicationEntryPoint = ApplicationDeployment.CurrentDeployment?.UpdatedApplicationFullName;
+
+                // Process.Start(ApplicationEntryPoint);
+            }
+
+            // string s = Assembly.GetEntryAssembly().Location;
+
+            Application.Current.Shutdown();
+            App.CurrentApp.CloseMutex();
+            // TODO: 测试一下是否可以起到升级的作用
+            // System.Windows.Forms.Application.Restart();
+            // System.Diagnostics.Process.Start(Assembly.GetEntryAssembly().Location);
         }
 
 #if REMOVED

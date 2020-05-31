@@ -8,9 +8,10 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.EventLog;
 
-using DigitalPlatform.Core;
 using DigitalPlatform;
+using DigitalPlatform.Core;
 using DigitalPlatform.Text;
+using Topshelf;
 
 namespace dp2Commander
 {
@@ -23,7 +24,6 @@ namespace dp2Commander
             // 修改配置
             if (args.Length == 1 && args[0].Equals("setting"))
             {
-
                 var result = GetMessageAccount();
 
                 Console.WriteLine("(直接回车表示不修改当前值)");
@@ -54,12 +54,33 @@ namespace dp2Commander
                 return;
             }
 
+            {
+                var rc = HostFactory.Run(x =>                                   //1
+                {
+                    x.Service<Worker>(s =>                                   //2
+                    {
+                        s.ConstructUsing(name => new Worker(args));                //3
+                        s.WhenStarted(tc => tc.Start());                         //4
+                        s.WhenStopped(tc => tc.Stop());                          //5
+                    });
+                    x.RunAsLocalSystem();                                       //6
+
+                    x.SetDescription("dp2 远程控制器");                   //7
+                    x.SetDisplayName("dp2 Commander Service");                                  //8
+                    x.SetServiceName("dp2CommanderService");                                  //9
+                });                                                             //10
+
+                var exitCode = (int)Convert.ChangeType(rc, rc.GetTypeCode());  //11
+                Environment.ExitCode = exitCode;
+            }
+
             // 处理一般管理命令
             // 设置消息服务器参数
 
-            CreateHostBuilder(args).Build().Run();
+            // CreateHostBuilder(args).Build().Run();
         }
 
+#if OLD
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
             .ConfigureLogging(options => options.AddFilter<EventLogLoggerProvider>(level => level >= LogLevel.Information))
@@ -72,9 +93,9 @@ namespace dp2Commander
                         config.SourceName = "dp2Commander";
                     });
             }).UseWindowsService();
+#endif
 
-
-        #region ConfigFile
+#region ConfigFile
 
         static ConfigSetting _config = null;
 
@@ -149,6 +170,6 @@ namespace dp2Commander
             Config.Save();
         }
 
-        #endregion
+#endregion
     }
 }

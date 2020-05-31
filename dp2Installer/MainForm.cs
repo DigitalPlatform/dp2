@@ -5707,5 +5707,120 @@ MessageBoxDefaultButton.Button2);
             }
             MessageDialog.Show(this, result);
         }
+
+        private void MenuItem_dp2Commander_install_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            this._floatingMessage.Text = "正在安装 dp2Commander - 远程控制器 ...";
+            try
+            {
+
+                AppendSectionTitle("安装 dp2Commander 开始");
+
+                AppendString("正在获得可执行文件目录 ...\r\n");
+
+                Application.DoEvents();
+
+                string strExePath = InstallHelper.GetPathOfService("dp2CommanderService");
+                if (string.IsNullOrEmpty(strExePath) == false)
+                {
+                    strError = "dp2library 已经安装过了，不能重复安装";
+                    goto ERROR1;
+                }
+                // strExePath = Unquote(strExePath);
+
+                // program files (x86)/digitalplatform/dp2library
+                string strProgramDir = GetProductDirectory("dp2Commander");
+
+                PathUtil.TryCreateDir(strProgramDir);
+
+                string strZipFileName = Path.Combine(this.DataDir, "commander_app.zip");
+
+                AppendString("安装可执行文件 ...\r\n");
+
+                // 更新可执行目录
+                // return:
+                //      -1  出错
+                //      0   没有必要刷新
+                //      1   已经刷新
+                nRet = RefreshBinFiles(
+                    false,
+                    strZipFileName,
+                    strProgramDir,
+                    null,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                /*
+                // 还需要把 library_data.zip 的内容都展开到程序目录的 temp 子目录中，以兼容以前的 Installer 功能
+                string strTempDir = Path.Combine(strProgramDir, "temp");
+                PathUtil.TryCreateDir(strTempDir);
+                nRet = dp2Library_extractPartDir(strTempDir,
+        "cfgs,templates,other",
+        out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+                */
+
+                List<string> new_instance_names = null;
+
+                // 创建实例
+                AppendString("创建实例 ...\r\n");
+
+                try
+                {
+                    DigitalPlatform.LibraryServer.InstanceDialog dlg = new DigitalPlatform.LibraryServer.InstanceDialog();
+                    GuiUtil.AutoSetDefaultFont(dlg);
+                    dlg.LockingInstances = this.locking_instances;
+                    dlg.TempDir = this.TempDir;
+                    // dlg.DataZipFileName = Path.Combine(this.DataDir, "library_data.zip");
+                    dlg.CopyFiles += dlg_dp2Library_CopyFiles;
+                    dlg.StartPosition = FormStartPosition.CenterScreen;
+                    dlg.ShowDialog(this);   // ForegroundWindow.Instance
+
+                    if (string.IsNullOrEmpty(dlg.DebugInfo) == false)
+                        AppendString("创建实例时的调试信息:\r\n" + dlg.DebugInfo + "\r\n");
+
+                    if (dlg.Changed == true)
+                    {
+                        // 兑现修改
+
+                    }
+
+                    new_instance_names = dlg.NewInstanceNames;
+                }
+                finally
+                {
+                    AppendString("创建实例结束 ...\r\n");
+                }
+
+
+                // 注册为 Windows Service
+                strExePath = Path.Combine(strProgramDir, "dp2Commander.exe");
+
+                AppendString("注册 Windows Service ...\r\n");
+
+                nRet = InstallService(strExePath,
+        true,
+        out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                AppendSectionTitle("安装 dp2Commander 结束");
+                Refresh_dp2library_MenuItems();
+
+                // CreateDefaultDatabases(new_instance_names);
+            }
+            finally
+            {
+                this._floatingMessage.Text = "";
+            }
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
     }
 }
