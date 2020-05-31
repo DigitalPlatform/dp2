@@ -7,9 +7,11 @@ using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Threading;
+using System.Collections;
 
 using Newtonsoft.Json;
 using Microsoft.AspNet.SignalR.Client;
+using Microsoft.VisualStudio.Threading;
 using Z.Expressions;
 
 using DigitalPlatform;
@@ -19,8 +21,6 @@ using DigitalPlatform.WPF;
 using DigitalPlatform.Text;
 using DigitalPlatform.MessageClient;
 using DigitalPlatform.SimpleMessageQueue;
-using Microsoft.VisualStudio.Threading;
-using System.Collections;
 
 namespace dp2SSL
 {
@@ -155,7 +155,7 @@ TaskScheduler.Default);
         public static async Task SendMessageAsync(string[] groups,
             string content)
         {
-            SetMessageRequest request = new SetMessageRequest("create", "",
+            SetMessageRequest request = new SetMessageRequest("create", "dontNotifyMe",
                 new List<MessageRecord> {
                         new MessageRecord {
                             groups = groups,    // new string[] { groupName},
@@ -1411,7 +1411,7 @@ cancellation_token);
             */
 
 
-            SetMessageRequest request = new SetMessageRequest("create", "",
+            SetMessageRequest request = new SetMessageRequest("create", "dontNotifyMe",
                 new List<MessageRecord> {
                         new MessageRecord {
                             groups= groups, // new string[] { groupName},

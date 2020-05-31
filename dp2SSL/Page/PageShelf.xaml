@@ -66,6 +66,7 @@
                       Checked="pauseSubmit_Checked"
                       Unchecked="pauseSubmit_Unchecked">暂停提交</CheckBox>
             <Button Name="inventory" Click="inventory_Click" Visibility="Visible">盘点</Button>
+            <Button Name="restart" Click="restart_Click" Visibility="Visible">重启</Button>
 
         </StackPanel>
         <Button Grid.Row="1" Grid.Column="2">Right</Button>

@@ -12,10 +12,9 @@ using System.Windows;
 using System.Diagnostics;
 using System.Xml;
 using System.IO;
-
-using dp2SSL.Models;
 using System.Text;
 using System.Windows.Input;
+using System.Windows.Media;
 
 using DigitalPlatform;
 using DigitalPlatform.Core;
@@ -27,7 +26,6 @@ using static DigitalPlatform.IO.BarcodeCapture;
 using DigitalPlatform.Face;
 using DigitalPlatform.WPF;
 using DigitalPlatform.MessageClient;
-using System.Windows.Media;
 
 //using Microsoft.VisualStudio.Shell;
 //using Task = System.Threading.Tasks.Task;
@@ -63,6 +61,11 @@ namespace dp2SSL
 
 
         Mutex myMutex;
+
+        public void CloseMutex()
+        {
+            myMutex.Close();
+        }
 
         ErrorTable _errorTable = null;
 
