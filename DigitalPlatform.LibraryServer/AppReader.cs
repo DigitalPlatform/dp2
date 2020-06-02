@@ -9,6 +9,7 @@ using System.Collections;
 using System.Reflection;
 using System.Threading;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 using DigitalPlatform;	// Stop类
 using DigitalPlatform.rms.Client;
@@ -21,7 +22,6 @@ using DigitalPlatform.Marc;
 
 using DigitalPlatform.Message;
 using DigitalPlatform.rms.Client.rmsws_localhost;
-using System.Text.RegularExpressions;
 using DigitalPlatform.Core;
 
 namespace DigitalPlatform.LibraryServer
@@ -2367,21 +2367,25 @@ root, strLibraryCode);
                 XmlDocument domTemp = new XmlDocument();
                 domTemp.LoadXml(strNewXml);
 #endif
-
-                // 检查一个册记录的读者类型是否符合值列表要求
-                // parameters:
-                // return:
-                //      -1  检查过程出错
-                //      0   符合要求
-                //      1   不符合要求
-                nRet = CheckReaderType(domNewRec,   // domTemp,
-                    strLibraryCode,
-                    strReaderDbName,
-                    out strError);
-                if (nRet == -1 || nRet == 1)
+                // 2020/6/2 待审核状态的读者记录不需要检查 readerType 元素值
+                string state = DomUtil.GetElementText(domNewRec.DocumentElement, "state");
+                if (StringUtil.IsInList("待审核", state) == false)
                 {
-                    strError = strError + "。修改读者记录操作失败";
-                    goto ERROR1;
+                    // 检查一个册记录的读者类型是否符合值列表要求
+                    // parameters:
+                    // return:
+                    //      -1  检查过程出错
+                    //      0   符合要求
+                    //      1   不符合要求
+                    nRet = CheckReaderType(domNewRec,   // domTemp,
+                        strLibraryCode,
+                        strReaderDbName,
+                        out strError);
+                    if (nRet == -1 || nRet == 1)
+                    {
+                        strError = strError + "。修改读者记录操作失败";
+                        goto ERROR1;
+                    }
                 }
             }
 

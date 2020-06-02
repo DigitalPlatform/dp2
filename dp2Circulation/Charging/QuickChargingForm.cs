@@ -2173,6 +2173,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                         // TODO: 语音提示
                         MessageBox.Show(this, "这里需要输入 证 条码号，而您输入的 '" + strText + "' 是一个 册 条码号。\r\n\r\n请重新输入");
                         this.textBox_input.SelectAll();
+                        this.textBox_input.Focus(); // 2020/6/2
                         return;
                     }
                 }
@@ -2228,6 +2229,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                             // TODO: 语音提示
                             MessageBox.Show(this, "这里需要输入 证 条码号，而您输入的 '" + strText + "' 是一个 册 条码号。\r\n\r\n请重新输入");
                             this.textBox_input.SelectAll();
+                            this.textBox_input.Focus(); // 2020/6/2
                             return;
                         }
                     }
@@ -2249,6 +2251,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                 {
                     MessageBox.Show(this, "请先输入读者证条码号，然后再输入册条码号");
                     this.textBox_input.SelectAll();
+                    this.textBox_input.Focus(); // 2020/6/2
                     return;
                 }
                 task.ReaderBarcode = GetContent(strText);   // strText
@@ -2270,6 +2273,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                     // TODO: 这里直接出现对话框搜集读者证条码号
                     MessageBox.Show(this, "请先输入读者证条码号，然后再输入册条码号");
                     this.textBox_input.SelectAll();
+                    this.textBox_input.Focus(); // 2020/6/2
                     return;
                 }
                 task.ReaderBarcode = this._taskList.CurrentReaderBarcode;
@@ -2314,6 +2318,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                     // TODO: 这里直接出现对话框搜集读者证条码号
                     MessageBox.Show(this, "请先输入读者证条码号，然后再输入册条码号");
                     this.textBox_input.SelectAll();
+                    this.textBox_input.Focus(); // 2020/6/2
                     return;
                 }
                 task.ReaderBarcode = this._taskList.CurrentReaderBarcode;
@@ -2337,6 +2342,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                     // 提示请输入读者证条码号
                     MessageBox.Show(this, "请先输入读者证条码号，然后再输入册条码号");
                     this.textBox_input.SelectAll();
+                    this.textBox_input.Focus(); // 2020/6/2
                     return;
                 }
                 task.ReaderBarcode = this._taskList.CurrentReaderBarcode;
@@ -2354,6 +2360,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                     // TODO: 这里直接出现对话框搜集读者证条码号
                     MessageBox.Show(this, "请先输入读者证条码号，然后再输入册条码号");
                     this.textBox_input.SelectAll();
+                    this.textBox_input.Focus(); // 2020/6/2
                     return;
                 }
                 task.ReaderBarcode = this._taskList.CurrentReaderBarcode;
@@ -2393,6 +2400,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
             }
 
             this.textBox_input.SelectAll();
+            this.textBox_input.Focus(); // 2020/6/2
 
             try
             {

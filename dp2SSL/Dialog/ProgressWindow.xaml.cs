@@ -19,6 +19,8 @@ namespace dp2SSL
     /// </summary>
     public partial class ProgressWindow : Window
     {
+        public string PressedButton { get; set; }
+
         public ProgressWindow()
         {
             InitializeComponent();
@@ -26,6 +28,8 @@ namespace dp2SSL
 
         private void OkButton_Click(object sender, RoutedEventArgs e)
         {
+            PressedButton = "OK";
+
             this.Close();
         }
 
@@ -150,6 +154,40 @@ namespace dp2SSL
             {
                 title.Text = value;
             }
+        }
+
+        public string OkButtonText
+        {
+            get
+            {
+                return okButton.Content.ToString();
+            }
+            set
+            {
+                okButton.Content = value;
+            }
+        }
+
+        public bool CancelButtonVisible
+        {
+            get
+            {
+                return cancelButton.Visibility == Visibility.Visible;
+            }
+            set
+            {
+                if (value == true)
+                    cancelButton.Visibility = Visibility.Visible;
+                else
+                    cancelButton.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private void cancelButton_Click(object sender, RoutedEventArgs e)
+        {
+            PressedButton = "Cancel";
+
+            this.Close();
         }
     }
 }

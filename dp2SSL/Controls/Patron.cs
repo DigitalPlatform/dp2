@@ -146,6 +146,21 @@ namespace dp2SSL
             }
         }
 
+        private string _protocol;
+
+        public string Protocol
+        {
+            get => _protocol;
+            set
+            {
+                if (_protocol != value)
+                {
+                    _protocol = value;
+                    OnPropertyChanged("Protocol");
+                }
+            }
+        }
+
         internal void OnPropertyChanged(string name)
         {
             if (this.PropertyChanged != null)
@@ -194,6 +209,7 @@ namespace dp2SSL
             dup.Waiting = this.Waiting;
             dup.ReaderName = this.ReaderName;
             dup.Antenna = this.Antenna;
+            dup.Protocol = this.Protocol;
         }
     }
 
@@ -661,10 +677,13 @@ namespace dp2SSL
         {
             string pii = "";
 
+            // 2020/6/2
+            this.Protocol = tag.Protocol;
+
             if (tag.TagInfo == null && tag.Protocol == InventoryInfo.ISO15693)
             {
                 // throw new Exception("Fill() taginfo == null");
-                return new FillResult { Value = 0};
+                return new FillResult { Value = 0 };
             }
 
             if (tag.TagInfo != null && tag.Protocol == InventoryInfo.ISO15693)
@@ -695,13 +714,13 @@ namespace dp2SSL
             }
 
             if (this.UID == tag.UID && this.PII == pii)
-                return new FillResult { Value = 1}; // 优化
+                return new FillResult { Value = 1 }; // 优化
 
             this.Clear();
 
             this.UID = tag.UID;
             this.PII = pii;
-            return new FillResult { Value = 1};
+            return new FillResult { Value = 1 };
         }
 
         public void Clear()

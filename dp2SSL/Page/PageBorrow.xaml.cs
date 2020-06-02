@@ -1327,75 +1327,78 @@ namespace dp2SSL
                 return this.Name;
             }));
 #endif
+            _patron.Waiting = true;
+            try
+            {
 
-            // 已经填充过了
-            if (_patron.PatronName != null
+                // 已经填充过了
+                if (_patron.PatronName != null
                 && force == false)
-                return new NormalResult();
+                    return new NormalResult();
 
-            string pii = _patron.PII;
-            if (string.IsNullOrEmpty(pii))
-                pii = _patron.UID;
+                string pii = _patron.PII;
+                if (string.IsNullOrEmpty(pii))
+                    pii = _patron.UID;
 
-            if (string.IsNullOrEmpty(pii))
-                return new NormalResult();
+                if (string.IsNullOrEmpty(pii))
+                    return new NormalResult();
 
-            // TODO: 改造为 await
-            // return.Value:
-            //      -1  出错
-            //      0   读者记录没有找到
-            //      1   成功
-            GetReaderInfoResult result = await
-                Task<GetReaderInfoResult>.Run(() =>
-                {
-                    return GetReaderInfo(pii);
-                });
-
-            if (result.Value != 1)
-            {
-                string error = $"读者 '{pii}': {result.ErrorInfo}";
-                SetPatronError("getreaderinfo", error);
-                return new NormalResult { Value = -1, ErrorInfo = error };
-            }
-
-            SetPatronError("getreaderinfo", "");
-
-            if (force)
-                _patron.PhotoPath = "";
-            // string old_photopath = _patron.PhotoPath;
-            App.Invoke(new Action(() =>
-            {
-                _patron.SetPatronXml(result.RecPath, result.ReaderXml, result.Timestamp);
-                this.patronControl.SetBorrowed(result.ReaderXml);
-            }));
-
-            // 显示在借图书列表
-            List<Entity> entities = new List<Entity>();
-            foreach (Entity entity in this.patronControl.BorrowedEntities)
-            {
-                entities.Add(entity);
-            }
-            if (entities.Count > 0)
-            {
-                try
-                {
-                    BaseChannel<IRfid> channel = RfidManager.GetChannel();
-                    try
+                // TODO: 改造为 await
+                // return.Value:
+                //      -1  出错
+                //      0   读者记录没有找到
+                //      1   成功
+                GetReaderInfoResult result = await
+                    Task<GetReaderInfoResult>.Run(() =>
                     {
-                        await FillBookFieldsAsync(channel, entities);
-                    }
-                    finally
-                    {
-                        RfidManager.ReturnChannel(channel);
-                    }
-                }
-                catch (Exception ex)
+                        return GetReaderInfo(pii);
+                    });
+
+                if (result.Value != 1)
                 {
-                    string error = $"填充读者信息时出现异常: {ex.Message}";
-                    SetGlobalError("rfid", error);
+                    string error = $"读者 '{pii}': {result.ErrorInfo}";
+                    SetPatronError("getreaderinfo", error);
                     return new NormalResult { Value = -1, ErrorInfo = error };
                 }
-            }
+
+                SetPatronError("getreaderinfo", "");
+
+                if (force)
+                    _patron.PhotoPath = "";
+                // string old_photopath = _patron.PhotoPath;
+                App.Invoke(new Action(() =>
+                {
+                    _patron.SetPatronXml(result.RecPath, result.ReaderXml, result.Timestamp);
+                    this.patronControl.SetBorrowed(result.ReaderXml);
+                }));
+
+                // 显示在借图书列表
+                List<Entity> entities = new List<Entity>();
+                foreach (Entity entity in this.patronControl.BorrowedEntities)
+                {
+                    entities.Add(entity);
+                }
+                if (entities.Count > 0)
+                {
+                    try
+                    {
+                        BaseChannel<IRfid> channel = RfidManager.GetChannel();
+                        try
+                        {
+                            await FillBookFieldsAsync(channel, entities);
+                        }
+                        finally
+                        {
+                            RfidManager.ReturnChannel(channel);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        string error = $"填充读者信息时出现异常: {ex.Message}";
+                        SetGlobalError("rfid", error);
+                        return new NormalResult { Value = -1, ErrorInfo = error };
+                    }
+                }
 #if NO
             // 装载图象
             if (old_photopath != _patron.PhotoPath)
@@ -1405,7 +1408,12 @@ namespace dp2SSL
                 });
             }
 #endif
-            return new NormalResult();
+                return new NormalResult();
+            }
+            finally
+            {
+                _patron.Waiting = false;
+            }
         }
 
 #if NO
@@ -2052,10 +2060,11 @@ out string strError);
             else if (action == "bindPatronCard"
                 || action == "releasePatronCard")
             {
-                string action_name = "绑定新读者卡";
+                string action_name = "绑定新副卡";
                 if (action == "releasePatronCard")
-                    action_name = "解绑指定读者卡";
+                    action_name = "解绑指定副卡";
 
+                /*
                 // 提示信息要考虑到应用了指纹和人脸的情况
                 List<string> styles = new List<string>();
                 styles.Add($"请先{fang}可用的读者卡鉴别身份");
@@ -2065,6 +2074,16 @@ out string strError);
                     styles.Add("或人脸识别");
 
                 message = $"{StringUtil.MakePathList(styles, "，")}，然后再进行{action_name}操作({debug_info})";
+                */
+                // 提示信息要考虑到应用了指纹和人脸的情况
+                List<string> styles = new List<string>();
+                styles.Add($"请{fang}可用的读者卡鉴别身份");
+                if (string.IsNullOrEmpty(App.FingerprintUrl) == false)
+                    styles.Add("或扫入一次指纹");
+                if (string.IsNullOrEmpty(App.FaceUrl) == false)
+                    styles.Add("或人脸识别");
+
+                message = $"{StringUtil.MakePathList(styles, "，")} ...";
             }
             else
             {
@@ -2528,14 +2547,32 @@ out string strError);
             var temp_task = FillPatronDetailAsync(true);
         }
 
-        void DisplayError(ref ProgressWindow progress,
-    string message,
-    string color = "red")
+        void DisplayError(ref SubmitWindow progress,
+string message,
+string color = "red")
         {
             MemoryDialog(progress);
             var temp = progress;
             App.Invoke(new Action(() =>
             {
+                temp.MessageText = message;
+                temp.BackColor = color;
+                temp = null;
+            }));
+            progress = null;
+        }
+
+        void DisplayError(ref ProgressWindow progress,
+    string message,
+    string color = "red",
+    string set_button_text = null)
+        {
+            MemoryDialog(progress);
+            var temp = progress;
+            App.Invoke(new Action(() =>
+            {
+                if (set_button_text != null)
+                    temp.OkButtonText = set_button_text;
                 temp.MessageText = message;
                 temp.BackColor = color;
                 temp = null;
@@ -3277,6 +3314,15 @@ string usage)
             if (App.PatronReaderVertical == true
                 && TagList.Books.Count == 0)
                 BeginDelayClearTask();
+
+            if (_commands != null && _commands.Count > 0)
+            {
+                string action = _commands[0];
+                _commands.RemoveAt(0);
+
+                CloseDialogs();
+                _ = BindPatronCardAsync(action);
+            }
         }
 
         #endregion
@@ -3295,19 +3341,132 @@ string usage)
             await BindPatronCardAsync("releasePatronCard");
         }
 
+        // TODO: 增加读者姓名等显示段落
+        // 构造关于刷卡的提示信息文字段落
+        static FlowDocument BuildScanText(
+            string text,
+            // string binding_list,
+            XmlDocument patron_dom,
+            double baseFontSize)
+        {
+            // 获得已经绑定的 UID 列表
+            string binding_list = DomUtil.GetElementText(patron_dom.DocumentElement, "cardNumber");
+
+            var ids = StringUtil.SplitList(binding_list);
+
+            string name = DomUtil.GetElementText(patron_dom.DocumentElement, "name");
+            string department = DomUtil.GetElementText(patron_dom.DocumentElement, "department");
+
+            FlowDocument doc = new FlowDocument();
+
+            {
+                var p = new Paragraph();
+                p.FontFamily = new FontFamily("微软雅黑");
+                p.FontSize = baseFontSize;
+                p.TextAlignment = TextAlignment.Left;
+                p.Foreground = Brushes.Gray;
+                // p.TextIndent = -20;
+                p.Margin = new Thickness(0, 0, 0, 18);
+                doc.Blocks.Add(p);
+
+                p.Inlines.Add(new Run
+                {
+                    Text = text + "\r\n",
+                    //Background = Brushes.DarkRed,
+                    //Foreground = Brushes.White
+                    // FontFamily = new FontFamily("楷体"),
+                    FontSize = baseFontSize * 2.5,
+                    // FontWeight = FontWeights.Bold,
+                    Foreground = Brushes.White,
+                });
+
+                p.Inlines.Add(new Run
+                {
+                    Text = $"\r\n--- 主卡信息 ---\r\n姓名: {name}\r\n单位: {department}\r\n",
+                    FontSize = baseFontSize,
+                    FontWeight = FontWeights.Bold,
+                    Foreground = Brushes.LightGray,
+                });
+
+                p.Inlines.Add(new Run
+                {
+                    Text = $"\r\n已绑定的 UID (共 {ids.Count} 个):\r\n",
+                    FontSize = baseFontSize,
+                    Foreground = Brushes.LightGray,
+                });
+
+                int i = 0;
+                foreach (var id in ids)
+                {
+                    p.Inlines.Add(new Run
+                    {
+                        Text = $"{(i + 1).ToString()}) {id}\r\n",
+                        FontSize = baseFontSize,
+                        Foreground = Brushes.LightGray,
+                    });
+                    i++;
+                }
+            }
+
+            return doc;
+        }
+
         // return.Value
         //      -1  出错
         //      0   放弃
         //      1   成功获得读者卡 UID，返回在 NormalResult.ErrorCode 中
         async Task<NormalResult> Get14443ACardUIDAsync(ProgressWindow progress,
             string action_caption,
+            // string binding_list,
+            XmlDocument patron_dom,
             CancellationToken token)
         {
-            // TODO: 是否一开始要探测读卡器上是否有没有拿走的读者卡，提醒读者先拿走？
+            try
+            {
+                // TODO: 是否一开始要探测读卡器上是否有没有拿走的读者卡，提醒读者先拿走？
+                while (token.IsCancellationRequested == false)
+                {
+                    if (TagList.Patrons.Count == 0)
+                        break;
+
+                    var tag = TagList.Patrons[0].OneTag;
+                    if (tag.Protocol == InventoryInfo.ISO14443A)
+                    {
+                        App.Invoke(new Action(() =>
+                        {
+                            progress.MessageText = "请先拿开读卡器上的主卡，操作才能继续 ...";
+                        }));
+                    }
+                    else
+                        break;
+
+                    await Task.Delay(TimeSpan.FromMilliseconds(500), token);
+                }
+            }
+            catch (Exception ex)
+            {
+                if (token.IsCancellationRequested)
+                    return new NormalResult
+                    {
+                        Value = 0,
+                        ErrorInfo = "放弃",
+                        ErrorCode = ex.GetType().ToString()
+                    };
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"Get14443ACardUIDAsync() 出现异常: {ex.Message}",
+                    ErrorCode = ex.GetType().ToString()
+                };
+            }
 
             App.Invoke(new Action(() =>
             {
-                progress.MessageText = $"请扫要{action_caption}的读者卡 ...";
+                var doc = BuildScanText(
+                    $"现在，请扫要{action_caption}的副卡 ...",
+                    patron_dom,
+                    10);
+                progress.MessageDocument = doc; // $"请扫要{action_caption}的读者卡 ...\r\n{text}";
             }));
 
             // 使用当前的处理事件
@@ -3320,14 +3479,18 @@ string usage)
                     {
                         App.Invoke(new Action(() =>
                         {
-                            progress.MessageText = $"请扫要{action_caption}的读者卡 ...";
+                            var doc = BuildScanText(
+    $"现在，请扫要{action_caption}的副卡 ...",
+    patron_dom,
+    10);
+                            progress.MessageDocument = doc; //$"请扫要{action_caption}的读者卡 ...\r\n{text}";
                         }));
                     }
                     if (TagList.Patrons.Count > 1)
                     {
                         App.Invoke(new Action(() =>
                         {
-                            progress.MessageText = "请拿走多余的读者卡";
+                            progress.MessageText = "读卡器只应放一张副卡。请拿走多余的副卡";
                         }));
                     }
 
@@ -3348,6 +3511,22 @@ string usage)
                 }
                 return new NormalResult { Value = 0 };
             }
+            catch (Exception ex)
+            {
+                if (token.IsCancellationRequested)
+                    return new NormalResult
+                    {
+                        Value = 0,
+                        ErrorInfo = "放弃",
+                        ErrorCode = ex.GetType().ToString()
+                    };
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"Get14443ACardUIDAsync() 出现异常: {ex.Message}",
+                    ErrorCode = ex.GetType().ToString()
+                };
+            }
             finally
             {
                 // App.CurrentApp.TagChanged -= tagChanged;
@@ -3361,12 +3540,15 @@ string usage)
             */
         }
 
+        List<string> _commands = new List<string>();
+
         int _skipTagChanged = 0;
 
         // 绑定或者解绑(ISO14443A)读者卡
         private async Task BindPatronCardAsync(string action)
         {
             // GetFeatureStringResult result = null;
+            _commands = null;
 
             string action_name = "绑定";
             if (action == "releasePatronCard")
@@ -3374,20 +3556,42 @@ string usage)
 
             // 提前打开对话框
             ProgressWindow progress = null;
+            CancellationTokenSource cancel = new CancellationTokenSource();
 
             App.Invoke(new Action(() =>
             {
                 progress = new ProgressWindow();
-                progress.MessageText = "请扫要绑定的读者卡 ...";
+                progress.TitleText = action_name;
+                progress.MessageText = "请扫要绑定的副卡 ...";
                 progress.Owner = Application.Current.MainWindow;
                 progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                App.SetSize(progress, "middle");
+                progress.OkButtonText = "取消";
                 progress.Closed += (o, e) =>
                 {
+                    cancel.Cancel();
                     RemoveLayer();
+                    if (_commands != null)
+                        _commands.Clear();
                 };
                 progress.Show();
                 AddLayer();
             }));
+
+            // 如果正在倒计时
+            bool fixed_changed = false;
+            App.Invoke(new Action(() =>
+            {
+                if (this.PatronFixed == false)
+                {
+                    _commands = null;
+                    CancelDelayClearTask();
+                    fixed_changed = true;
+                }
+            }));
+
+            string patron_uid = null;
+            string patron_pii = null;
 
             // 暂时断开原来的标签处理事件
             // App.CurrentApp.TagChanged -= CurrentApp_TagChanged;
@@ -3397,32 +3601,60 @@ string usage)
                 if (IsPatronOK(action, out string check_message) == false)
                 {
                     if (string.IsNullOrEmpty(check_message))
-                        check_message = $"读卡器上的当前读者卡状态不正确。无法进行{action_name}读者卡的操作";
+                        check_message = $"读卡器上的当前读者卡状态不正确。无法进行{action_name}副卡的操作";
 
-                    DisplayError(ref progress, check_message, "yellow");
+                    DisplayError(ref progress, check_message, "black");
+
+                    // 放入一个命令，等待扫鉴别身份的读者卡，扫卡时候直接触发重新进入本函数
+                    if (_commands == null)
+                        _commands = new List<string>();
+                    _commands.Add(action);
                     return;
                 }
 
-                // TODO: 弹出一个对话框，检测 ISO14443A 读者卡
-                // 注意探测读者卡的时候，不是要刷新右侧的读者信息，而是把探测到的信息拦截到对话框里面，右侧的读者信息不要有任何变化
-                var result = await Get14443ACardUIDAsync(progress,
-                    action_name,
-                    new CancellationToken());
-                if (result.Value == -1)
+                /*
+                if (_patron.IsRfidSource && _patron.Protocol == InventoryInfo.ISO14443A)
                 {
-                    DisplayError(ref progress, result.ErrorInfo);
+
+                }
+                // TODO: 检查一下，如果此时读卡器上已经放了一张 14443A 的卡，但此时对话框并未提示第二步操作，
+                // 因此这里应该判断为，是第一步刷卡滞留的卡。要怎么处理呢？第一个方法是，延迟几秒钟再提示第二步；第二个方法是，第二步判断的时候，要等待刷一张除了这张卡的其他卡
+                */
+
+                /*
+                try
+                {
+                    while (IsPatronOK(action, out string check_message) == false)
+                    {
+                        if (string.IsNullOrEmpty(check_message))
+                            check_message = $"读卡器上的当前读者卡状态不正确。无法进行{action_name}副卡的操作";
+
+                        // DisplayError(ref progress, check_message, "yellow");
+                        App.Invoke(new Action(() =>
+                        {
+                            progress.MessageText = check_message;
+                            progress.BackColor = "yellow";
+                        }));
+                        if (cancel.Token.IsCancellationRequested)
+                        {
+                            progress = null;
+                            return;
+                        }
+
+                        await Task.Delay(TimeSpan.FromSeconds(1), cancel.Token);
+                    }
+                }
+                catch
+                {
+                    progress = null;
                     return;
                 }
+                */
 
-                if (result.Value == 0)
-                    return;
-
-                string uid = result.ErrorCode;
-
-                App.Invoke(new Action(() =>
-                {
-                    progress.MessageText = "正在修改读者记录 ...";
-                }));
+                patron_uid = _patron.UID;
+                patron_pii = _patron.PII;
+                string patron_xml = _patron.Xml;
+                var patron_timestamp = _patron.Timestamp;
 
                 bool changed = false;
                 XmlDocument dom = new XmlDocument();
@@ -3432,19 +3664,44 @@ string usage)
                 }
                 catch (Exception ex)
                 {
-                    DisplayError(ref progress, $"BindPatronCardAsync() 异常，读者记录 (证条码号:{_patron.Barcode},读者记录路径:{_patron.RecPath}) XML 装载到 XmlDocument 失败: {ex.Message}");
+                    DisplayError(ref progress, $"BindPatronCardAsync() 异常，读者记录 (证条码号:{_patron.Barcode},读者记录路径:{_patron.RecPath}) XML 装载到 XmlDocument 失败: {ex.Message}",
+                        "red", "关闭");
                     return;
                 }
+
+                string patron_name = DomUtil.GetElementText(dom.DocumentElement, "name");
+
+                // TODO: 弹出一个对话框，检测 ISO14443A 读者卡
+                // 注意探测读者卡的时候，不是要刷新右侧的读者信息，而是把探测到的信息拦截到对话框里面，右侧的读者信息不要有任何变化
+                var result = await Get14443ACardUIDAsync(progress,
+                    action_name,
+                    dom,
+                    cancel.Token);
+                if (result.Value == -1)
+                {
+                    DisplayError(ref progress, result.ErrorInfo, "red", "关闭");
+                    return;
+                }
+
+                if (result.Value == 0)
+                    return;
+
+                string bind_uid = result.ErrorCode;
+
+                App.Invoke(new Action(() =>
+                {
+                    progress.MessageText = "正在修改读者记录 ...";
+                }));
 
                 if (action == "bindPatronCard")
                 {
                     // 修改读者 XML 记录中的 cardNumber 元素
                     var modify_result = ModifyBinding(dom,
     "bind",
-    uid);
+    bind_uid);
                     if (modify_result.Value == -1)
                     {
-                        DisplayError(ref progress, $"绑定失败: {modify_result.ErrorInfo}");
+                        DisplayError(ref progress, $"绑定失败: {modify_result.ErrorInfo}", "red", "关闭");
                         return;
                     }
                     changed = true;
@@ -3454,20 +3711,41 @@ string usage)
                     // 从读者记录的 cardNumber 元素中移走指定的 UID
                     var modify_result = ModifyBinding(dom,
 "release",
-uid);
+bind_uid);
                     if (modify_result.Value == -1)
                     {
-                        DisplayError(ref progress, $"解除绑定失败: {modify_result.ErrorInfo}");
+                        DisplayError(ref progress, $"解除绑定失败: {modify_result.ErrorInfo}", "red", "关闭");
                         return;
                     }
 
+                    /*
                     // TODO: 用 WPF 对话框
+                    // 有时候这个对话框可能会被翻到后面。需要改用 WPF 的无模式对话框
                     MessageBoxResult dialog_result = MessageBox.Show(
-    $"确实要解除对读者卡 {uid} 的绑定?\r\n\r\n(解除绑定以后，您将无法使用这一张读者卡进行借书还书操作)",
+    $"确实要解除对副卡 {uid} 的绑定?\r\n\r\n(解除绑定以后，您将无法使用这一张副卡进行借书还书操作)",
     "dp2SSL",
     MessageBoxButton.YesNo,
     MessageBoxImage.Question);
                     if (dialog_result == MessageBoxResult.No)
+                        return;
+                    */
+
+                    string dialog_result = "";
+                    App.Invoke(new Action(() =>
+                    {
+                        var ask = new ProgressWindow();
+                        ask.TitleText = action_name;
+                        ask.MessageText = $"确实要解除读者 {patron_name} 副卡 {bind_uid} 的绑定?\r\n\r\n(解除绑定以后，读者将无法再用这一张副卡对书柜进行任何操作)";
+                        ask.Owner = Application.Current.MainWindow;
+                        ask.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                        App.SetSize(ask, "wide");
+                        ask.OkButtonText = "是";
+                        ask.CancelButtonVisible = true;
+                        ask.ShowDialog();
+                        dialog_result = ask.PressedButton;
+                    }));
+
+                    if (dialog_result != "OK")
                         return;
 
                     changed = true;
@@ -3478,11 +3756,11 @@ uid);
                     // 保存读者记录
                     var save_result = await SetReaderInfoAsync(_patron.RecPath,
                         dom.OuterXml,
-                        _patron.Xml,
-                        _patron.Timestamp);
+                        patron_xml, // _patron.Xml,
+                        patron_timestamp);
                     if (save_result.Value == -1)
                     {
-                        DisplayError(ref progress, save_result.ErrorInfo);
+                        DisplayError(ref progress, save_result.ErrorInfo, "red", "关闭");
                         return;
                     }
 
@@ -3491,10 +3769,11 @@ uid);
                 }
 
                 // TODO: “别忘了拿走读者卡”应该在读者读卡器竖放时候才有必要提示
-                string message = $"{action_name}读者卡成功";
+                string message = $"读者 {patron_name} {action_name}副卡 {bind_uid} 成功";
                 if (action == "releasePatronCard")
                     App.CurrentApp.Speak(message);
-                DisplayError(ref progress, message, "green");
+
+                DisplayError(ref progress, message, "green", "关闭");
             }
             finally
             {
@@ -3506,10 +3785,31 @@ uid);
                     {
                         progress.Close();
                     }));
+
+                if (fixed_changed)
+                    BeginDelayClearTask();
             }
 
+            /*
             // 刷新读者信息区显示
-            var temp_task = FillPatronDetailAsync(true);
+            // TODO: 是否干脆清除读者信息区显示?
+            if (action == "bindPatronCard")
+            {
+                _patron.PII = patron_pii;
+                _patron.UID = patron_uid;
+                _ = FillPatronDetailAsync(true);
+            }
+            else
+            */
+            {
+                CancelDelayClearTask();
+                PatronClear();
+            }
+        }
+
+        private void CancelButton_Click(object sender, RoutedEventArgs e)
+        {
+            throw new NotImplementedException();
         }
 
         public static NormalResult ModifyBinding(XmlDocument dom,
@@ -3517,6 +3817,8 @@ uid);
             string uid)
         {
             uid = uid.ToUpper();
+
+            string patron_name = DomUtil.GetElementText(dom.DocumentElement, "name");
 
             string value = DomUtil.GetElementText(dom.DocumentElement, "cardNumber");
             if (value != null)
@@ -3527,7 +3829,7 @@ uid);
                     return new NormalResult
                     {
                         Value = -1,
-                        ErrorInfo = $"并不存在 UID 为 {uid} 的绑定信息"
+                        ErrorInfo = $"读者 {patron_name} 的记录中并不存在 UID 为 {uid} 的绑定信息"
                     };
             }
             if (action == "bind")
@@ -3536,7 +3838,7 @@ uid);
                     return new NormalResult
                     {
                         Value = -1,
-                        ErrorInfo = $"已经存在 UID 为 {uid} 的绑定信息"
+                        ErrorInfo = $"读者 {patron_name} 的记录中已经存在 UID 为 {uid} 的绑定信息"
                     };
             }
 
