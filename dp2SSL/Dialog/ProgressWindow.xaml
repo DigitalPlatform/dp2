@@ -19,7 +19,8 @@
                 <RowDefinition Height="60"/>
             </Grid.RowDefinitions>
             <TextBox Name="title" Grid.Row="0"
-                     Background="Transparent" BorderThickness="0"
+                     Background="Transparent" Foreground="White"
+                     BorderThickness="0" Text="title"
                      FontSize="14" HorizontalContentAlignment="Center"/>
             <Grid Grid.Row="1">
                 <local:MyFlowDocumentScrollViewer x:Name="richText" Visibility="Collapsed"
@@ -34,12 +35,22 @@
             <ProgressBar Name="progressBar" Grid.Row="2"
                      Height="5" Background="Transparent" BorderThickness="0"/>
 
-            <Button Name="okButton" Grid.Row="3"
+            <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center">
+
+                <Button Name="okButton" 
                     Style="{DynamicResource RoundedButtonStyle}" 
                     Width="120" Height="60" 
                     FontSize="30" FontWeight="ExtraBold" 
                     Foreground="White" 
                     Click="OkButton_Click">关闭</Button>
+                <Button Name="cancelButton" 
+                    Style="{DynamicResource RoundedButtonStyle}" 
+                    Width="120" Height="60" 
+                    FontSize="30" FontWeight="ExtraBold" 
+                    Foreground="White" 
+                    Visibility="Collapsed"
+                    Click="cancelButton_Click">取消</Button>
+            </StackPanel>
         </Grid>
     </Border>
 </Window>
