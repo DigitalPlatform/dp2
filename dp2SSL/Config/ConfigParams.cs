@@ -215,7 +215,7 @@ Description = "是否自动延时清除读者信息"
             }
         }
         */
-
+        /*
         // 默认值 false
         [Display(
 Order = 7,
@@ -234,6 +234,7 @@ Description = "是否允许自助借还时扫入读者证条码"
                 _config.SetBoolean("ssl_operation", "enable_patron_barcode", value);
             }
         }
+        */
 
         // 默认值 true
         [Display(
@@ -295,6 +296,27 @@ Description = "dp2SSL 的功能类型"
                 _config.Set("global", "function", value);
             }
         }
+
+        // 默认值 空
+        [Display(
+Order = 10,
+Name = "读者证条码输入方式",
+Description = "读者证条码的输入方式"
+)]
+        [ItemsSource(typeof(PatronBarcodeStyleSource))]
+        [Category("全局")]
+        public string PatronBarcodeStyle
+        {
+            get
+            {
+                return _config.Get("global", "patron_barcode_style", "禁用");
+            }
+            set
+            {
+                _config.Set("global", "patron_barcode_style", value);
+            }
+        }
+
 
         // 默认值 空
         [Display(

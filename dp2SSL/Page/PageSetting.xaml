@@ -37,6 +37,12 @@
                 <fa:ImageAwesome Icon="LightbulbOutline"
                              Height="40" Foreground="DarkGray" Margin="4"/>
             </Button>
+            <Grid Height="20" />
+            <Menu x:Name="menu"  Width="Auto" Height="20">
+                <MenuItem Header="_安装">
+                    <MenuItem x:Name="setupAsGreen" Header="安装为绿色版" HorizontalAlignment="Left" Width="Auto" Click="setupAsGreen_Click"/>
+                </MenuItem>
+            </Menu>
         </StackPanel>
         <Button Grid.Row="1" Grid.Column="2">Right</Button>
         <!--
@@ -151,6 +157,8 @@
                         <TextBlock>下载 bing 每日壁纸</TextBlock>
                     </Button.Content>
                 </Button>
+
+                <!--
                 <Button Name="AddShortcut"
                     Style="{DynamicResource RoundedButtonStyle}" 
                     Width="260" Height="60" 
@@ -171,6 +179,7 @@
                         <TextBlock>去掉开机自启动</TextBlock>
                     </Button.Content>
                 </Button>
+                -->
                 <Button Name="restartRfidCenter"
                     Style="{DynamicResource RoundedButtonStyle}" 
                     Width="260" Height="60" 

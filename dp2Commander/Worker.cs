@@ -169,6 +169,20 @@ namespace dp2Commander
                 return "hello!";
             }
 
+            if (command.StartsWith("test"))
+            {
+                //bool existence = Directory.Exists("c:\\用户\\xietao\\dp2ssl");
+                //return $"OK={existence}";
+                DirectoryInfo di = new DirectoryInfo("c:\\Users");
+                var fis = di.GetFiles();
+                StringBuilder temp = new StringBuilder();
+                foreach(var fi in fis)
+                {
+                    temp.AppendLine(fi.FullName);
+                }
+                return temp.ToString();
+            }
+
             // 重启电脑
             if (command.StartsWith("restart"))
             {

@@ -21,6 +21,9 @@ using DigitalPlatform.WPF;
 using DigitalPlatform.Text;
 using DigitalPlatform.MessageClient;
 using DigitalPlatform.SimpleMessageQueue;
+using System.Windows;
+using System.Deployment.Application;
+using System.IO;
 
 namespace dp2SSL
 {
@@ -1012,8 +1015,67 @@ cancellation_token);
                 return;
             }
 
+            if (command.StartsWith("restart"))
+            {
+                await SendMessageAsync(new string[] { groupName }, "已经重新启动");
+
+                string ApplicationEntryPoint = null;
+                if (ApplicationDeployment.IsNetworkDeployed == true)
+                {
+                    ApplicationEntryPoint = ApplicationDeployment.CurrentDeployment?.UpdatedApplicationFullName;
+                    WpfClientInfo.WriteInfoLog($"ApplicationDeployment.CurrentDeployment?.UpdatedApplicationFullName='{ApplicationEntryPoint}'");
+                    // Process.Start(ApplicationEntryPoint);
+                }
+
+                App.Invoke(new Action(() =>
+                {
+                    Application.Current.Shutdown();
+                    App.CurrentApp.CloseMutex();
+                    // TODO: 测试一下是否可以起到升级的作用
+                    // System.Diagnostics.Process.Start(Assembly.GetEntryAssembly().Location);
+                    /*
+                    if (string.IsNullOrEmpty(ApplicationEntryPoint) == false)
+                        Process.Start(ApplicationEntryPoint);
+                    else
+                        System.Windows.Forms.Application.Restart();
+                    */
+                    StartModule(ShortcutPath, "");
+                }));
+
+                return;
+            }
+
             await SendMessageAsync(new string[] { groupName }, $"我无法理解这个命令 '{command}'");
         }
+
+        static string ShortcutPath = "DigitalPlatform/dp2 V3/dp2SSL-自助借还";
+
+        public static bool StartModule(
+    string shortcut_path,
+    string arguments)
+        {
+            string strShortcutFilePath = PathUtil.GetShortcutFilePath(
+                    shortcut_path
+                    // "DigitalPlatform/dp2 V3/dp2Library XE V3"
+                    );
+
+            if (File.Exists(strShortcutFilePath) == false)
+                return false;
+
+            // https://stackoverflow.com/questions/558344/clickonce-appref-ms-argument
+            // Process.Start(strShortcutFilePath, arguments);
+
+            // https://stackoverflow.com/questions/46808315/net-core-2-0-process-start-throws-the-specified-executable-is-not-a-valid-appl
+            var p = new Process();
+            p.StartInfo = new ProcessStartInfo(strShortcutFilePath)
+            {
+                UseShellExecute = true,
+                Arguments = arguments,
+            };
+            p.Start();
+            return true;
+        }
+
 
         // 列出操作历史
         // 子参数:

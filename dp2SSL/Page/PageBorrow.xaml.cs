@@ -281,7 +281,8 @@ namespace dp2SSL
         private async void App_LineFeed(object sender, LineFeedEventArgs e)
 #pragma warning restore VSTHRD100 // 避免使用 Async Void 方法
         {
-            if (App.EnablePatronBarcode == false)
+            // if (App.EnablePatronBarcode == false)
+            if (string.IsNullOrEmpty(App.PatronBarcodeStyle) || App.PatronBarcodeStyle == "禁用")
             {
                 SetGlobalError("scan_barcode", "当前设置参数不接受扫入条码");
                 return;
@@ -292,6 +293,23 @@ namespace dp2SSL
             // 检查防范空字符串，和使用工作人员方式(~开头)的字符串
             if (string.IsNullOrEmpty(barcode) || barcode.StartsWith("~"))
                 return;
+
+            // 2020/6/3
+            var styles = StringUtil.SplitList(App.PatronBarcodeStyle, "+");
+            if (barcode.StartsWith("PQR:"))
+            {
+                // 二维码情形
+                if (styles.IndexOf("二维码") == -1)
+                    return;
+            }
+            else
+            {
+                // 一维码情形
+                if (styles.IndexOf("一维码") == -1)
+                    return;
+            }
+
+            SetGlobalError("scan_barcode", null);
 
             SetPatronInfo(new GetMessageResult { Message = barcode });
 
@@ -2077,11 +2095,13 @@ out string strError);
                 */
                 // 提示信息要考虑到应用了指纹和人脸的情况
                 List<string> styles = new List<string>();
-                styles.Add($"请{fang}可用的读者卡鉴别身份");
+                styles.Add($"请{fang}可用的读者 RFID 卡鉴别身份");
                 if (string.IsNullOrEmpty(App.FingerprintUrl) == false)
                     styles.Add("或扫入一次指纹");
                 if (string.IsNullOrEmpty(App.FaceUrl) == false)
                     styles.Add("或人脸识别");
+                if (string.IsNullOrEmpty(App.PatronBarcodeStyle) == false && App.PatronBarcodeStyle != "禁用")
+                    styles.Add("或扫入读者证条码");
 
                 message = $"{StringUtil.MakePathList(styles, "，")} ...";
             }

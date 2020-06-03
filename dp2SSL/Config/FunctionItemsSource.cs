@@ -28,5 +28,17 @@ namespace dp2SSL
             return sizes;
         }
     }
-    
+
+    public class PatronBarcodeStyleSource : IItemsSource
+    {
+        public ItemCollection GetValues()
+        {
+            ItemCollection sizes = new ItemCollection();
+            sizes.Add("禁用");
+            sizes.Add("一维码+二维码");
+            sizes.Add("一维码");
+            sizes.Add("二维码");
+            return sizes;
+        }
+    }
 }

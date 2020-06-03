@@ -80,6 +80,8 @@ namespace dp2SSL
 
                 this.setPassword.Visibility = Visibility.Visible;
                 this.login.Visibility = Visibility.Collapsed;
+
+                this.menu.Visibility = Visibility.Collapsed;
             }
             else
             {
@@ -90,11 +92,15 @@ namespace dp2SSL
 
                     this.setPassword.Visibility = Visibility.Collapsed;
                     this.login.Visibility = Visibility.Visible;
+
+                    this.menu.Visibility = Visibility.Collapsed;
                 }
                 else
                 {
                     this.passwordArea.Visibility = Visibility.Collapsed;
                     this.buttonArea.Visibility = Visibility.Visible;
+
+                    this.menu.Visibility = Visibility.Visible;
                 }
             }
         }
@@ -608,6 +614,12 @@ namespace dp2SSL
         private void sterilamp_Click(object sender, RoutedEventArgs e)
         {
             _ = App.CurrentApp.SterilampAsync();
+        }
+
+        // 安装为绿色版
+        private void setupAsGreen_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

@@ -803,11 +803,27 @@ namespace dp2SSL
         }
         */
 
+        /*
         public static bool EnablePatronBarcode
         {
             get
             {
                 return (bool)WpfClientInfo.Config?.GetBoolean("ssl_operation", "enable_patron_barcode", false);
+            }
+        }
+        */
+
+        /*
+            sizes.Add("禁用");
+            sizes.Add("一维码+二维码");
+            sizes.Add("一维码");
+            sizes.Add("二维码");
+        * */
+        public static string PatronBarcodeStyle
+        {
+            get
+            {
+                return WpfClientInfo.Config?.Get("global", "patron_barcode_style", "禁用");
             }
         }
 

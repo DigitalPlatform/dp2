@@ -8604,6 +8604,7 @@ out strError);
 
             if (strAction == "new"
     || strAction == "change"
+    || strAction == "transfer"  // 2020/6/3
     || strAction == "move")
             {
                 XmlNode node = null;
