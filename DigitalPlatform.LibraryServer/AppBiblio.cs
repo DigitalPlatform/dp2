@@ -5308,9 +5308,26 @@ out strError);
             {
                 if (strDbType == "biblio")
                 {
+                    // 2020/6/3
+                    // 判断一下是否有存取定义的 setbiblioinfo 权限
+                    bool has_rights = false;
+                    if (String.IsNullOrEmpty(sessioninfo.Access) == false)
+                    {
+                        // return:
+                        //      null    指定的操作类型的权限没有定义
+                        //      ""      定义了指定类型的操作权限，但是否定的定义
+                        //      其它      权限列表。* 表示通配的权限列表
+                        string strAccessActionList = GetDbOperRights(sessioninfo.Access,
+                            strBiblioDbName,
+                            strDbType == "biblio" ? "setbiblioinfo" : "setauthorityinfo");
+
+                        if (strAccessActionList == "*" || IsInAccessList(strAction, strAccessActionList, out string _) == true)
+                            has_rights = true;
+                    }
+
                     // 只有order权限的情况
-                    if (StringUtil.IsInList("setbiblioinfo", sessioninfo.RightsOrigin) == false
-                        && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == true)
+                    if ((has_rights == false && StringUtil.IsInList("setbiblioinfo", sessioninfo.RightsOrigin) == false)
+                    && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == true)
                     {
                         // 工作库允许全部操作，非工作库只能追加记录
                         if (IsOrderWorkBiblioDb(strBiblioDbName) == false)
@@ -5318,7 +5335,7 @@ out strError);
                             // 非工作库。要求原来记录不存在
                             if (String.IsNullOrEmpty(strExistingXml) == false)
                             {
-                                strError = "当前帐户只有 order 权限而没有 setbiblioinfo 权限，不能用 change 功能修改已经存在的书目记录 '" + strBiblioRecPath + "'";
+                                strError = "当前帐户只有 order 权限而没有 setbiblioinfo 权限，不能用 change 功能修改已经存在的(位于非工作库中的)书目记录 '" + strBiblioRecPath + "'";
                                 goto ERROR1;
                             }
                         }
@@ -5458,15 +5475,32 @@ out strError);
             {
                 if (strDbType == "biblio")
                 {
+                    // 2020/6/3
+                    // 判断一下是否有存取定义的 setbiblioinfo 权限
+                    bool has_rights = false;
+                    if (String.IsNullOrEmpty(sessioninfo.Access) == false)
+                    {
+                        // return:
+                        //      null    指定的操作类型的权限没有定义
+                        //      ""      定义了指定类型的操作权限，但是否定的定义
+                        //      其它      权限列表。* 表示通配的权限列表
+                        string strAccessActionList = GetDbOperRights(sessioninfo.Access,
+                            strBiblioDbName,
+                            strDbType == "biblio" ? "setbiblioinfo" : "setauthorityinfo");
+
+                        if (strAccessActionList == "*" || IsInAccessList(strAction, strAccessActionList, out string _) == true)
+                            has_rights = true;
+                    }
+
                     // 只有order权限的情况
-                    if (StringUtil.IsInList("setbiblioinfo", sessioninfo.RightsOrigin) == false
+                    if ((has_rights == false && StringUtil.IsInList("setbiblioinfo", sessioninfo.RightsOrigin) == false)
                         && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == true)
                     {
                         // 工作库允许全部操作，非工作库不能删除记录
                         if (IsOrderWorkBiblioDb(strBiblioDbName) == false)
                         {
                             // 非工作库。要求原来记录不存在
-                            strError = "当前帐户只有 order 权限而没有 setbiblioinfo 权限，不能用 delete 功能删除书目记录 '" + strBiblioRecPath + "'";
+                            strError = "当前帐户只有 order 权限而没有 setbiblioinfo 权限，不能用 delete 功能删除(位于非工作库中的)书目记录 '" + strBiblioRecPath + "'";
                             result.Value = -1;
                             result.ErrorInfo = strError;
                             result.ErrorCode = ErrorCode.AccessDenied;
@@ -5582,15 +5616,32 @@ out strError);
             {
                 if (strDbType == "biblio")
                 {
+                    // 2020/6/3
+                    // 判断一下是否有存取定义的 setbiblioinfo 权限
+                    bool has_rights = false;
+                    if (String.IsNullOrEmpty(sessioninfo.Access) == false)
+                    {
+                        // return:
+                        //      null    指定的操作类型的权限没有定义
+                        //      ""      定义了指定类型的操作权限，但是否定的定义
+                        //      其它      权限列表。* 表示通配的权限列表
+                        string strAccessActionList = GetDbOperRights(sessioninfo.Access,
+                            strBiblioDbName,
+                            strDbType == "biblio" ? "setbiblioinfo" : "setauthorityinfo");
+
+                        if (strAccessActionList == "*" || IsInAccessList(strAction, strAccessActionList, out string _) == true)
+                            has_rights = true;
+                    }
+
                     // 只有order权限的情况
-                    if (StringUtil.IsInList("setbiblioinfo", sessioninfo.RightsOrigin) == false
+                    if ((has_rights == false && StringUtil.IsInList("setbiblioinfo", sessioninfo.RightsOrigin) == false)
                         && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == true)
                     {
                         // 工作库允许全部操作，非工作库不能删除记录
                         if (IsOrderWorkBiblioDb(strBiblioDbName) == false)
                         {
                             // 非工作库。要求原来记录不存在
-                            strError = "当前帐户只有order权限而没有setbiblioinfo权限，不能用onlydeletebiblio功能删除书目记录 '" + strBiblioRecPath + "'";
+                            strError = "当前帐户只有 order 权限而没有 setbiblioinfo 权限，不能用 onlydeletebiblio 功能删除(位于非工作库中的)书目记录 '" + strBiblioRecPath + "'";
                             result.Value = -1;
                             result.ErrorInfo = strError;
                             result.ErrorCode = ErrorCode.AccessDenied;
@@ -6451,7 +6502,7 @@ out strError);
                         bReadRightVerified = true;
                     }
 
-                    SKIP_1:
+                SKIP_1:
 
                     // *** 第二步，检查目标数据库相关权限
                     {
@@ -7543,14 +7594,35 @@ out strError);
             }
              * */
 
+            // 2020/6/3
+            // 判断一下是否有存取定义的 setbiblioinfo 权限
+            bool has_rights = false;
+            if (String.IsNullOrEmpty(sessioninfo.Access) == false)
+            {
+                string strSourceDbName = ResPath.GetDbName(strOldRecPath);
+                string strDbType = "biblio";
+
+                // return:
+                //      null    指定的操作类型的权限没有定义
+                //      ""      定义了指定类型的操作权限，但是否定的定义
+                //      其它      权限列表。* 表示通配的权限列表
+                string strAccessActionList = GetDbOperRights(sessioninfo.Access,
+                    strSourceDbName,
+                    strDbType == "biblio" ? "setbiblioinfo" : "setauthorityinfo");
+
+                if (strAccessActionList == "*" || IsInAccessList(strAction, strAccessActionList, out string _) == true)
+                    has_rights = true;
+            }
+
             // 只有order权限的情况
-            if (StringUtil.IsInList("setbiblioinfo", sessioninfo.RightsOrigin) == false
+            if ((has_rights == false && StringUtil.IsInList("setbiblioinfo", sessioninfo.RightsOrigin) == false)
                 && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == true)
             {
                 if (strAction == "onlymovebiblio"
                     || strAction == "move")
                 {
                     string strSourceDbName = ResPath.GetDbName(strOldRecPath);
+
                     // 源头书目库为 非工作库 情况
                     if (IsOrderWorkBiblioDb(strSourceDbName) == false)
                     {
@@ -7558,7 +7630,7 @@ out strError);
                         if (IsOrderWorkBiblioDb(strSourceDbName) == false)
                         {
                             // 非工作库。要求原来记录不存在
-                            strError = "当前帐户只有order权限而没有setbiblioinfo权限，不能用" + strAction + "功能删除源书目记录 '" + strOldRecPath + "'";
+                            strError = "当前帐户只有 order 权限而没有setbiblioinfo权限，不能用" + strAction + "功能删除(位于非工作库中的)源书目记录 '" + strOldRecPath + "'";
                             goto ERROR1;
                         }
                     }
