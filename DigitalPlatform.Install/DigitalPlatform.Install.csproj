@@ -97,6 +97,9 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Ionic.Zip">
+      <HintPath>..\Ionic.Zip.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration.Install" />
     <Reference Include="System.Data" />
@@ -114,6 +117,7 @@
     <Compile Include="DataDirDlg.Designer.cs">
       <DependentUpon>DataDirDlg.cs</DependentUpon>
     </Compile>
+    <Compile Include="GreenInstaller.cs" />
     <Compile Include="InstallHelper.cs" />
     <Compile Include="Isolated.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

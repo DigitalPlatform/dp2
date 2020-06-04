@@ -13,6 +13,8 @@ using System.Xml;
 using System.Collections;
 
 using Ionic.Zip;
+using DigitalPlatform.Text;
+using System.Runtime.Remoting.Activation;
 
 /*
  * 制作和解压绿色更新安装包的实用工具程序
@@ -28,7 +30,7 @@ namespace GreenUtility
     {
         static string TempDir = "";
 
-        static void Main(string[] args)
+        static int Main(string[] args)
         {
             string strError = "";
             int nRet = 0;
@@ -40,8 +42,9 @@ namespace GreenUtility
             string strTargetDir = "";
             string strWaitExe = ""; // 要等待这个 .exe 进程退出才能进行安装操作
             string strFiles = "";   // 安装那些 .zip 文件。纯文件名列表
+            bool silence = false;
 
-            foreach(string arg in args)
+            foreach (string arg in args)
             {
                 if (arg.StartsWith("-source:") == true)
                     strSourceDir = arg.Substring("-source:".Length);
@@ -53,6 +56,9 @@ namespace GreenUtility
                     strWaitExe = arg.Substring("-wait:".Length).ToLower();
                 if (arg.StartsWith("-files:") == true)
                     strFiles = arg.Substring("-files:".Length).ToLower();
+                if (arg.StartsWith("-silence") == true)
+                    silence = true;
+
             }
 
             if (string.IsNullOrEmpty(strSourceDir) == true)
@@ -76,6 +82,7 @@ namespace GreenUtility
 
             if (strAction == "build")
             {
+                /*
                 string strProjectFileName = GetProjectFileName(strSourceDir);
                 if (string.IsNullOrEmpty(strProjectFileName) == true)
                 {
@@ -88,16 +95,22 @@ namespace GreenUtility
             out strError);
                 if (nRet == -1)
                     goto ERROR1;
+                */
+                // 新算法
+                nRet = CreateZipFileNew(strSourceDir,
+strTargetDir,
+out strError);
+                if (nRet == -1)
+                    goto ERROR1;
 
                 Console.WriteLine("创建成功");
-                return;
+                return 0;
             }
 
             var wi = WindowsIdentity.GetCurrent();
             var wp = new WindowsPrincipal(wi);
 
             bool runAsAdmin = wp.IsInRole(WindowsBuiltInRole.Administrator);
-
 
             if (strAction == "install")
             {
@@ -116,9 +129,9 @@ namespace GreenUtility
                             //goto ERROR1;
 
                             // 如果此法失败，则尝试用管理员权限进行安装
-                            if (RestartAsAdministrator() == false)
+                            if (RestartAsAdministrator(silence, out int exitCode) == false)
                                 goto ERROR1;
-                            return;
+                            return exitCode;
                         }
                     }
                 }
@@ -207,8 +220,9 @@ namespace GreenUtility
                     if (nRet == -1)
                     {
                         // 如果此法失败，则尝试用管理员权限进行安装
-                        if (RestartAsAdministrator() == false)
+                        if (RestartAsAdministrator(silence, out int exitCode) == false)
                             goto ERROR1;
+                        return exitCode;
                     }
                 }
                 else
@@ -227,19 +241,26 @@ namespace GreenUtility
                     if (nRet == -1)
                         goto ERROR1;
                     if (nRet == 1)
-                        MessageBox.Show("dp2circulation 安装复制文件已经完成。请重启 Windows，以完成安装");
+                    {
+                        if (silence == false)
+                            MessageBox.Show("dp2circulation 安装复制文件已经完成。请重启 Windows，以完成安装");
+                        return 1;
+                    }
                 }
 
                 Console.WriteLine("升级安装成功");
-                return;
+                return 0;
             }
-            return;
+            return 0;
         ERROR1:
             Console.WriteLine(strError);
+            return -1;
         }
 
-        static bool RestartAsAdministrator()
+        static bool RestartAsAdministrator(bool silence, out int exitCode)
         {
+            exitCode = 0;
+
             var wi = WindowsIdentity.GetCurrent();
             var wp = new WindowsPrincipal(wi);
 
@@ -254,7 +275,7 @@ namespace GreenUtility
                 // The following properties run the new process as administrator
                 processInfo.UseShellExecute = true;
                 processInfo.Verb = "runas";
-                string [] args = Environment.GetCommandLineArgs();
+                string[] args = Environment.GetCommandLineArgs();
                 if (args.Length > 1)
                 {
                     string[] parameters = new string[args.Length - 1];
@@ -265,11 +286,14 @@ namespace GreenUtility
                 // Start the new process
                 try
                 {
-                    Process.Start(processInfo);
+                    var process = Process.Start(processInfo);
+                    process.WaitForExit();
+                    exitCode = process.ExitCode;
                 }
                 catch (Exception)
                 {
-                    MessageBox.Show("GreenUtility 无法运行。\r\n\r\n因为安装复制文件的需要，必须在 Administrator 权限下才能运行");
+                    if (silence == false)
+                        MessageBox.Show("GreenUtility 无法运行。\r\n\r\n因为安装复制文件的需要，必须在 Administrator 权限下才能运行");
                     return false;
                 }
 
@@ -364,13 +388,13 @@ namespace GreenUtility
             catch (DirectoryNotFoundException)
             {
                 // 不存在就算了
-            } 
-            catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 strError = "删除目录 " + strOldDir + " 时出错: " + ex.Message;
                 goto ERROR1;
             }
-            
+
             // *** 将 c:\dp2circulation 目录改名为 c:\dp2circulation_old 目录
             // 如果改名失败，则终止
             try
@@ -493,7 +517,7 @@ namespace GreenUtility
         //      -1  出错
         //      0   成功。不需要 reboot
         //      1   成功。需要 reboot
-        static int ExtractFile(string strZipFileName, 
+        static int ExtractFile(string strZipFileName,
             string strTargetDir,
             bool bAllowDelayOverwrite,
             out string strError)
@@ -536,7 +560,7 @@ namespace GreenUtility
         // return:
         //      false   正常结束
         //      true    发生了 MoveFileEx，需要 reboot 才会发生作用
-        static bool ExtractFile(ZipEntry e, 
+        static bool ExtractFile(ZipEntry e,
             string strTargetDir,
             bool bAllowDelayOverwrite)
         {
@@ -575,7 +599,7 @@ namespace GreenUtility
                             File.Move(strTempPath, strLastFileName);
                             strTempPath = "";
                             if (MoveFileEx(strLastFileName, strTargetPath, MoveFileFlags.DelayUntilReboot | MoveFileFlags.ReplaceExisting) == false)
-                                throw new Exception("MoveFileEx() '"+strLastFileName+"' '"+strTargetPath+"' 失败");
+                                throw new Exception("MoveFileEx() '" + strLastFileName + "' '" + strTargetPath + "' 失败");
                             File.SetLastWriteTime(strLastFileName, e.LastModified);
                             Console.WriteLine("延迟展开文件 " + strTargetPath);
                             return true;
@@ -594,7 +618,7 @@ namespace GreenUtility
             return false;
         }
 
-#region MoveFileEx
+        #region MoveFileEx
 
         [Flags]
         internal enum MoveFileFlags
@@ -614,15 +638,128 @@ namespace GreenUtility
             string lpNewFileName,
             MoveFileFlags dwFlags);
 
-#endregion
+        #endregion
+
+        // 新版，创建 app.zip 和 data.zip 文件。利用 app.publish 子目录
+        static int CreateZipFileNew(string strSourceDir,
+    string strTargetDir,
+    out string strError)
+        {
+            // TODO: 找到 app.publish/Application Files/dp2ssl_1_4_0_75 目录的路径
+            // 注意如果存在多个目录，要用版本号最新的一个目录
+
+            int nRet = FindApplicationFilesDirectory(strSourceDir,
+    out string result,
+    out strError);
+            if (nRet == 0)
+            {
+                strError = $"目录 {strSourceDir} 下没有找到符合条件的 app.publish/Application Files/xxxx 下级目录";
+                return -1;
+            }
+
+            List<string> temp = GetManifestFileNames(result);
+            if (temp.Count == 0)
+            {
+                strError = $"目录 {result} 中没有找到 .manifest 文件";
+                return -1;
+            }
+
+            string manifestFileName = temp[0];
+
+            {
+                // parameters:
+                //      type_list   要获得的文件类型。app data 之一或者组合，逗号间隔
+                nRet = GetFileNamesFromManifest(manifestFileName,
+                    "app",
+                    out List<string> filenames,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+
+                string strZipFileName = Path.Combine(strTargetDir, "app.zip");
+
+                nRet = CompressNew(
+                    Path.GetDirectoryName(manifestFileName),
+                    filenames,
+                    (o) =>
+                    {
+                        return o + ".deploy";
+                    },
+                    Encoding.UTF8,
+                    strZipFileName,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+            }
+
+            {
+                // parameters:
+                //      type_list   要获得的文件类型。app data 之一或者组合，逗号间隔
+                nRet = GetFileNamesFromManifest(manifestFileName,
+                    "data",
+                    out List<string> filenames,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+
+                string strZipFileName = Path.Combine(strTargetDir, "data.zip");
+
+                nRet = CompressNew(
+                    Path.GetDirectoryName(manifestFileName),
+                    filenames,
+                    (o) =>
+                    {
+                        return o + ".deploy";
+                    },
+
+                    Encoding.UTF8,
+                    strZipFileName,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+            }
+
+            return 0;
+        }
+
+        // 找到最后一个 Application Files 下级子目录
+        static int FindApplicationFilesDirectory(string strSourceDir,
+            out string result,
+            out string strError)
+        {
+            result = "";
+            strError = "";
+
+            string dir = Path.Combine(strSourceDir, "bin\\debug\\app.publish\\Application Files");
+            DirectoryInfo di = new DirectoryInfo(dir);
+            var fis = di.GetDirectories();
+            List<string> names = new List<string>();
+            foreach (var fi in fis)
+            {
+                names.Add(fi.Name);
+            }
+
+            if (names.Count == 0)
+                return 0;
+
+            names.Sort((a, b) =>
+            {
+                string version1 = StringUtil.ParseTwoPart(a, "_")[1].Replace("_", ".");
+                string version2 = StringUtil.ParseTwoPart(b, "_")[1].Replace("_", ".");
+                return StringUtil.CompareVersion(version1, version2) * -1; // 大在前
+            });
+
+            result = Path.Combine(dir, names[0]);
+            return 1;
+        }
 
 
         // 在指定目录中找到第一个 *.csproj 文件名
         static string GetProjectFileName(string strSourceDir)
         {
             DirectoryInfo di = new DirectoryInfo(strSourceDir);
-            FileInfo [] fis = di.GetFiles("*.csproj");
-            foreach(FileInfo fi in fis)
+            FileInfo[] fis = di.GetFiles("*.csproj");
+            foreach (FileInfo fi in fis)
             {
                 return fi.FullName;
             }
@@ -647,8 +784,13 @@ namespace GreenUtility
                 return -1;
             }
 
+            XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
+            nsmgr.AddNamespace("ns", "http://schemas.microsoft.com/developer/msbuild/2003");
+
             string strSourceDir = Path.GetDirectoryName(strProjectFileName);
-            List<string> filenames = new List<string>();
+
+            {
+                List<string> filenames = new List<string>();
 
 #if NO
             /*
@@ -685,112 +827,279 @@ namespace GreenUtility
                 filenames.Add(strSourceFileName);
             }
 #endif
-            /*
-    <Content Include="exchangeratetable.css" />
-    <Content Include="getsummary.js">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="history.css">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <None Include="isbn.xml" />
-    <Content Include="itemhandover.css">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-             * */
-            XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
-            nsmgr.AddNamespace("ns", "http://schemas.microsoft.com/developer/msbuild/2003");
+                /*
+        <Content Include="exchangeratetable.css" />
+        <Content Include="getsummary.js">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+        <Content Include="history.css">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+        <None Include="isbn.xml" />
+        <Content Include="itemhandover.css">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+                 * */
+                _referenceTable.Clear();
+                BuildReferenceTable(dom, nsmgr, ref _referenceTable);
 
-            _referenceTable.Clear();
-            BuildReferenceTable(dom, nsmgr, ref _referenceTable);
-
-            XmlNodeList contents = dom.DocumentElement.SelectNodes("//ns:Content", nsmgr);
-            foreach (XmlElement content in contents)
-            {
-                XmlElement copyto = content.SelectSingleNode("ns:CopyToOutputDirectory", nsmgr) as XmlElement;
-                if (copyto == null)
-                    continue;
-                string strCopyTo = copyto.InnerText.Trim();
-                if (string.IsNullOrEmpty(strCopyTo) == true)
-                    continue;
-
-                string strInclude = content.GetAttribute("Include");
-                if (string.IsNullOrEmpty(strInclude) == true)
-                    continue;
-
-                string strSourceFileName = Path.Combine(strSourceDir, strInclude);
-                if (File.Exists(strSourceFileName) == false)
+                XmlNodeList contents = dom.DocumentElement.SelectNodes("//ns:Content", nsmgr);
+                foreach (XmlElement content in contents)
                 {
-                    strError = "拟复制的文件 '" + strSourceFileName + "' 不存在";
+                    XmlElement copyto = content.SelectSingleNode("ns:CopyToOutputDirectory", nsmgr) as XmlElement;
+                    if (copyto == null)
+                        continue;
+                    string strCopyTo = copyto.InnerText.Trim();
+                    if (string.IsNullOrEmpty(strCopyTo) == true)
+                        continue;
+
+                    string strInclude = content.GetAttribute("Include");
+                    if (string.IsNullOrEmpty(strInclude) == true)
+                        continue;
+
+                    string strSourceFileName = Path.Combine(strSourceDir, strInclude);
+                    if (File.Exists(strSourceFileName) == false)
+                    {
+                        strError = "拟复制的文件 '" + strSourceFileName + "' 不存在";
+                        return -1;
+                    }
+                    filenames.Add(strSourceFileName);
+                }
+
+                string strZipFileName = Path.Combine(strTargetDir, "data.zip");
+
+                int nRet = Compress(
+                    strSourceDir,
+                    filenames,
+                    Encoding.UTF8,
+                    strZipFileName,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+            }
+
+            {
+                // .exe .exe.config .exe.manifest
+                string strBinSourceDir = Path.Combine(strSourceDir, "bin\\debug");
+                string strZipFileName = Path.Combine(strTargetDir, "app.zip");
+
+                var filenames = GetExeFileNames(strBinSourceDir);
+
+                // Debug.Assert(false, "");
+                // 添加一些可能遗漏的文件 2016/3/29
+                /*
+        <PublishFile Include="DocumentFormat.OpenXml">
+          <Visible>False</Visible>
+          <Group>
+          </Group>
+          <TargetPath>
+          </TargetPath>
+          <PublishState>Include</PublishState>
+          <IncludeHash>True</IncludeHash>
+          <FileType>Assembly</FileType>
+        </PublishFile>
+                 * */
+                XmlNodeList publishFiles = dom.DocumentElement.SelectNodes("//ns:PublishFile", nsmgr);
+                foreach (XmlElement publishFile in publishFiles)
+                {
+                    string strFileType = GetNodeInnerText(publishFile.SelectSingleNode("ns:FileType", nsmgr));
+                    string strPublishState = GetNodeInnerText(publishFile.SelectSingleNode("ns:PublishState", nsmgr));
+                    if (strFileType != "Assembly" || strPublishState != "Include")
+                        continue;
+                    string strFileName = publishFile.GetAttribute("Include") + ".dll";
+                    string strHintPath = (string)_referenceTable[strFileName];
+                    if (string.IsNullOrEmpty(strHintPath))
+                        continue;
+                    string strFilePath = Path.Combine(strSourceDir, strHintPath);
+
+                    // 复制文件到 bin 目录
+                    string strTargetPath = Path.Combine(strBinSourceDir, strFileName);
+                    File.Copy(strFilePath, strTargetPath, true);
+
+                    Console.WriteLine("追加文件: " + strTargetPath);
+                    strFilePath = new FileInfo(strTargetPath).FullName;
+                    if (filenames.IndexOf(strTargetPath) == -1)
+                        filenames.Add(strTargetPath);
+                }
+
+                int nRet = Compress(
+    strBinSourceDir,
+    filenames,
+    Encoding.UTF8,
+    strZipFileName,
+    out strError);
+                if (nRet == -1)
+                    return -1;
+            }
+
+            /*
+            // 从 .manifest 中获取一些补充的文件名
+            {
+                string strBinSourceDir = Path.Combine(strSourceDir, "bin\\debug");
+                string strZipFileName = Path.Combine(strTargetDir, "app.zip");
+
+                List<string> temp = GetManifestFileNames(strSourceDir);
+                if (temp.Count > 0)
+                {
+                    string manifestFileName = temp[0];
+
+                    int nRet = GetFileNamesFromManifest(manifestFileName,
+    out List<string> filenames,
+    out strError);
+
+                    nRet = Compress(
+    strBinSourceDir,
+    filenames,
+    Encoding.UTF8,
+    strZipFileName,
+    out strError);
+                    if (nRet == -1)
+                        return -1;
+                }
+            }
+            */
+
+            return 0;
+        }
+
+        // parameters:
+        //      type_list   要获得的文件类型。app data 之一或者组合，逗号间隔
+        static int GetFileNamesFromManifest(string manifestFileName,
+            string type_list,
+            out List<string> filenames,
+            out string strError)
+        {
+            strError = "";
+
+            filenames = new List<string>();
+
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.Load(manifestFileName);
+            }
+            catch (Exception ex)
+            {
+                strError = "装载文件 '" + manifestFileName + "' 到 XmlDocument 时出错: " + ex.Message;
+                return -1;
+            }
+
+            /*
+             * app 文件
+  <file name="runtimes\win-x64\native\e_sqlite3.dll" size="1265664">
+    <hash>
+      <dsig:Transforms>
+        <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+      </dsig:Transforms>
+      <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+      <dsig:DigestValue>O3NmFEHgp6Q51bKhGQ0sm7Mm5UvNsYCq2fA2a9vUfgc=</dsig:DigestValue>
+    </hash>
+  </file>
+            * */
+
+            /*
+             * app 文件，依赖文件
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Z.Expressions.Eval.dll" size="393216">
+      <assemblyIdentity name="Z.Expressions.Eval" version="3.1.10.0" publicKeyToken="59B66D028979105B" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>x3kf+5KZS0jg7YeFkKCyVIjyKcbYojinvTOYJuUByfA=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+            * */
+
+            /*
+             * data 文件
+  <file name="sample_shelf.xml" size="583" writeableType="applicationData">
+    <hash>
+      <dsig:Transforms>
+        <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+      </dsig:Transforms>
+      <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+      <dsig:DigestValue>NukgqGCFagXV5d73V8TpfT8c4RVes2j0fUmtvXiLtoQ=</dsig:DigestValue>
+    </hash>
+  </file>
+            * */
+            XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
+            nsmgr.AddNamespace("default", "urn:schemas-microsoft-com:asm.v2");
+
+            string strSourceDir = Path.GetDirectoryName(manifestFileName);
+            // 
+            var files = dom.DocumentElement.SelectNodes("default:file", nsmgr);
+            foreach (XmlElement file in files)
+            {
+                var name = file.GetAttribute("name");
+
+                var writeableType = file.GetAttribute("writeableType");
+                if (writeableType == "applicationData")
+                {
+                    if (StringUtil.IsInList("data", type_list) == false)
+                        continue;
+                }
+                else
+                {
+                    if (StringUtil.IsInList("app", type_list) == false)
+                        continue;
+                }
+
+                var size = file.GetAttribute("size");
+
+                string strSourceFileName = Path.Combine(strSourceDir, name);
+                if (File.Exists(strSourceFileName + ".deploy") == false)
+                {
+                    strError = "(根据 .manifest)拟复制的文件 '" + strSourceFileName + "' 不存在";
                     return -1;
                 }
                 filenames.Add(strSourceFileName);
             }
 
-            string strZipFileName = Path.Combine(strTargetDir, "data.zip");
-
-            int nRet = Compress(
-                strSourceDir,
-                filenames,
-                Encoding.UTF8,
-                strZipFileName,
-                out strError);
-            if (nRet == -1)
-                return -1;
-
-            // .exe .exe.config .exe.manifest
-            string strBinSourceDir = Path.Combine(strSourceDir, "bin\\debug");
-            strZipFileName = Path.Combine(strTargetDir, "app.zip");
-
-            filenames = GetExeFileNames(strBinSourceDir);
-
-            // Debug.Assert(false, "");
-            // 添加一些可能遗漏的文件 2016/3/29
-            /*
-    <PublishFile Include="DocumentFormat.OpenXml">
-      <Visible>False</Visible>
-      <Group>
-      </Group>
-      <TargetPath>
-      </TargetPath>
-      <PublishState>Include</PublishState>
-      <IncludeHash>True</IncludeHash>
-      <FileType>Assembly</FileType>
-    </PublishFile>
-             * */
-            XmlNodeList publishFiles = dom.DocumentElement.SelectNodes("//ns:PublishFile", nsmgr);
-            foreach(XmlElement publishFile in publishFiles)
+            if (StringUtil.IsInList("app", type_list))
             {
-                string strFileType = GetNodeInnerText(publishFile.SelectSingleNode("ns:FileType", nsmgr));
-                string strPublishState = GetNodeInnerText(publishFile.SelectSingleNode("ns:PublishState", nsmgr));
-                if (strFileType != "Assembly" || strPublishState != "Include")
-                    continue;
-                string strFileName = publishFile.GetAttribute("Include") + ".dll";
-                string strHintPath = (string)_referenceTable[strFileName];
-                if (string.IsNullOrEmpty(strHintPath))
-                    continue;
-                string strFilePath = Path.Combine(strSourceDir, strHintPath);
+                files = dom.DocumentElement.SelectNodes("default:dependency/default:dependentAssembly", nsmgr);
+                foreach (XmlElement file in files)
+                {
+                    var dependencyType = file.GetAttribute("dependencyType");
+                    if (dependencyType != "install")
+                        continue;
 
-                // 复制文件到 bin 目录
-                string strTargetPath = Path.Combine(strBinSourceDir, strFileName);
-                File.Copy(strFilePath, strTargetPath, true);
+                    var name = file.GetAttribute("codebase");
+                    var size = file.GetAttribute("size");
 
-                Console.WriteLine("追加文件: " + strTargetPath);
-                strFilePath = new FileInfo(strTargetPath).FullName;
-                if (filenames.IndexOf(strTargetPath) == -1)
-                    filenames.Add(strTargetPath);
+                    string strSourceFileName = Path.Combine(strSourceDir, name);
+                    if (File.Exists(strSourceFileName + ".deploy") == false)
+                    {
+                        strError = "(根据 .manifest)拟复制的文件 '" + strSourceFileName + "' 不存在";
+                        return -1;
+                    }
+                    filenames.Add(strSourceFileName);
+                }
             }
 
-            nRet = Compress(
-strBinSourceDir,
-filenames,
-Encoding.UTF8,
-strZipFileName,
-out strError);
-            if (nRet == -1)
-                return -1;
-
             return 0;
+        }
+
+        static List<string> GetManifestFileNames(string dir)
+        {
+            // string strBinSourceDir = Path.Combine(strSourceDir, "bin\\debug");
+
+            DirectoryInfo di = new DirectoryInfo(dir);
+
+            List<string> results = new List<string>();
+
+            // Debug.Assert(false);
+
+            FileInfo[] fis = di.GetFiles("*.manifest");
+            foreach (FileInfo fi in fis)
+            {
+                results.Add(fi.FullName);
+            }
+
+            return results;
         }
 
         static Hashtable _referenceTable = new Hashtable(); // Reference 对照表。纯文件名 --> 相对路径
@@ -834,12 +1143,70 @@ out strError);
             return node.InnerText.Trim();
         }
 
-        static int Compress(
+        delegate string Delegate_convertFileName(string origin_filename);
+
+        static int CompressNew(
     string strBaseDir,
     List<string> filenames,
+    Delegate_convertFileName convert,
     Encoding encoding,
     string strZipFileName,
     out string strError)
+        {
+            strError = "";
+
+            if (filenames.Count == 0)
+                return 0;
+
+            List<Stream> streams = new List<Stream>();
+
+            try
+
+            {
+                using (ZipFile zip = new ZipFile(encoding))
+                {
+                    // http://stackoverflow.com/questions/15337186/dotnetzip-badreadexception-on-extract
+                    // https://dotnetzip.codeplex.com/workitem/14087
+                    // uncommenting the following line can be used as a work-around
+                    zip.ParallelDeflateThreshold = -1;
+
+                    foreach (string current in filenames)
+                    {
+                        string filename = current;
+                        if (convert != null)
+                            filename = convert(current);
+                        string directoryPathInArchive = current.Substring(strBaseDir.Length + 1);
+                        // zip.AddFile(filename, directoryPathInArchive);
+
+                        var stream = File.OpenRead(filename);
+                        streams.Add(stream);
+
+                        zip.AddEntry(directoryPathInArchive, stream);
+
+                    }
+
+                    zip.UseZip64WhenSaving = Zip64Option.AsNecessary;
+                    zip.Save(strZipFileName);
+                }
+
+
+            }
+            finally
+            {
+                foreach (var stream in streams)
+                {
+                    stream.Dispose();
+                }
+            }
+            return 1;
+        }
+
+        static int Compress(
+string strBaseDir,
+List<string> filenames,
+Encoding encoding,
+string strZipFileName,
+out string strError)
         {
             strError = "";
 

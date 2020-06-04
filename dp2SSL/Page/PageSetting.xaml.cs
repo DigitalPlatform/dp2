@@ -17,6 +17,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Face;
 using DigitalPlatform.WPF;
+using DigitalPlatform.Install;
 
 namespace dp2SSL
 {
@@ -617,9 +618,9 @@ namespace dp2SSL
         }
 
         // 安装为绿色版
-        private void setupAsGreen_Click(object sender, RoutedEventArgs e)
+        private async void setupAsGreen_Click(object sender, RoutedEventArgs e)
         {
-
+            await App.InstallGreenAsync();
         }
     }
 }

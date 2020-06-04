@@ -272,6 +272,8 @@ namespace ZipUtil
         // 压缩一个目录到 .zip 文件
         // parameters:
         //      strBase 在 .zip 文件中的文件名要从全路径中去掉的前面部分
+        // Exception:
+        //      如果目标文件目录不存在，会抛出异常
         static int CompressDirectory(
             string strDirectory,
             string strBase,
@@ -318,6 +320,9 @@ namespace ZipUtil
 
             using (ZipFile zip = new ZipFile(encoding))
             {
+                // https://stackoverflow.com/questions/21583512/access-denied-to-a-tmp-path
+                // zip.TempFileFolder = System.IO.Path.GetTempPath();
+
                 // http://stackoverflow.com/questions/15337186/dotnetzip-badreadexception-on-extract
                 // https://dotnetzip.codeplex.com/workitem/14087
                 // uncommenting the following line can be used as a work-around
@@ -332,6 +337,10 @@ namespace ZipUtil
                 }
 
                 zip.UseZip64WhenSaving = Zip64Option.AsNecessary;
+
+                // 2020/6/4
+                // Directory.CreateDirectory(Path.GetDirectoryName(strZipFileName));
+
                 zip.Save(strZipFileName);
             }
 
