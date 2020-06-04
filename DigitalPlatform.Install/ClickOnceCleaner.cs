@@ -28,6 +28,7 @@ namespace DigitalPlatform.Install
             OpenSubKey("2.0");
             DeleteKey(depKey, appName);
         }
+
         private static void DeleteKey(RegistryKey key, string appName)
         {
             string[] subNames = key.GetSubKeyNames();

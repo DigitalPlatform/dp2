@@ -26,6 +26,7 @@ using static DigitalPlatform.IO.BarcodeCapture;
 using DigitalPlatform.Face;
 using DigitalPlatform.WPF;
 using DigitalPlatform.MessageClient;
+using DigitalPlatform.Install;
 
 //using Microsoft.VisualStudio.Shell;
 //using Task = System.Threading.Tasks.Task;
@@ -1436,6 +1437,124 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
 
             Current.Dispatcher?.Invoke(action);
         }
+
+        // 安装为绿色版本
+        public static async Task InstallGreenAsync()
+        {
+            ProgressWindow progress = null;
+
+            using (var cancel = CancellationTokenSource.CreateLinkedTokenSource(_cancelRefresh.Token))
+            {
+                App.Invoke(new Action(() =>
+                {
+                    progress = new ProgressWindow();
+                    progress.TitleText = "安装为绿色版本";
+                    progress.MessageText = "请等待";
+                    progress.Owner = Application.Current.MainWindow;
+                    progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                    progress.Closed += (s, e) =>
+                    {
+                        cancel.Cancel();
+                    };
+                    progress.okButton.Content = "停止";
+                    progress.Background = new SolidColorBrush(Colors.DarkRed);
+                    App.SetSize(progress, "wide");
+                    progress.BackColor = "yellow";
+                    progress.Show();
+                }));
+
+                try
+                {
+                    var result = await GreenInstaller.InstallFromWeb("http://dp2003.com/dp2ssl/v1_dev",
+    "c:\\dp2ssl",
+    null,
+    "dp2ssl.exe",
+    false,
+    (double min, double max, double value, string text) =>
+    {
+        App.Invoke(new Action(() =>
+        {
+            if (text != null)
+                progress.MessageText = text;
+        }));
+    });
+                    if (result.Value == -1)
+                    {
+                        ErrorBox(result.ErrorInfo);
+                        return;
+                    }
+                    return;
+                }
+                finally
+                {
+
+                    App.Invoke(new Action(() =>
+                    {
+                        progress.Close();
+                    }));
+                }
+            }
+        }
+
+        static void ErrorBox(string message,
+    string color = "red",
+    string style = "")
+        {
+            ProgressWindow progress = null;
+
+            App.Invoke(new Action(() =>
+            {
+                progress = new ProgressWindow();
+                progress.MessageText = "正在处理，请稍候 ...";
+                progress.Owner = Application.Current.MainWindow;
+                progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                App.SetSize(progress, "tall");
+                //progress.Width = Math.Min(700, this.ActualWidth);
+                //progress.Height = Math.Min(900, this.ActualHeight);
+                progress.Closed += (o, e) =>
+                {
+                };
+                if (StringUtil.IsInList("button_ok", style))
+                    progress.okButton.Content = "确定";
+                progress.Show();
+                // AddLayer();
+            }));
+
+
+            if (StringUtil.IsInList("auto_close", style))
+            {
+                App.Invoke(new Action(() =>
+                {
+                    progress.MessageText = message;
+                    if (string.IsNullOrEmpty(color) == false)
+                        progress.BackColor = color;
+                }));
+
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        // TODO: 显示倒计时计数？
+                        await Task.Delay(TimeSpan.FromSeconds(1));
+                        App.Invoke(new Action(() =>
+                        {
+                            progress.Close();
+                        }));
+                    }
+                    catch
+                    {
+                        // TODO: 写入错误日志
+                    }
+                });
+            }
+            else
+                App.Invoke(new Action(() =>
+                {
+                    progress.MessageText = message;
+                    progress.BackColor = color;
+                }));
+        }
+
     }
 
     public delegate void NewTagChangedEventHandler(object sender,

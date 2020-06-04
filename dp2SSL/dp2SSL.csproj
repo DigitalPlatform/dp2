@@ -690,6 +690,10 @@
       <Project>{3ec4344f-a653-47f8-a25d-a58de64c3ffc}</Project>
       <Name>DigitalPlatform.Face</Name>
     </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.Install\DigitalPlatform.Install.csproj">
+      <Project>{fbb88810-6d4a-44fe-b220-cac22e4dbdcd}</Project>
+      <Name>DigitalPlatform.Install</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.Interfaces\DigitalPlatform.Interfaces.csproj">
       <Project>{3C4F8133-8652-40B6-B37B-200B25C2B043}</Project>
       <Name>DigitalPlatform.Interfaces</Name>
