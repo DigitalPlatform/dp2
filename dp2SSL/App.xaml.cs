@@ -27,6 +27,7 @@ using DigitalPlatform.Face;
 using DigitalPlatform.WPF;
 using DigitalPlatform.MessageClient;
 using DigitalPlatform.Install;
+using System.Deployment.Application;
 
 //using Microsoft.VisualStudio.Shell;
 //using Task = System.Threading.Tasks.Task;
@@ -1441,6 +1442,13 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
         // 安装为绿色版本
         public static async Task InstallGreenAsync()
         {
+            if (StringUtil.IsDevelopMode() == false
+                && ApplicationDeployment.IsNetworkDeployed == false)
+            {
+                ErrorBox("当前已经是绿色版本了");
+                return;
+            }
+
             ProgressWindow progress = null;
 
             using (var cancel = CancellationTokenSource.CreateLinkedTokenSource(_cancelRefresh.Token))
@@ -1468,7 +1476,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                     var result = await GreenInstaller.InstallFromWeb("http://dp2003.com/dp2ssl/v1_dev",
     "c:\\dp2ssl",
     null,
-    "dp2ssl.exe",
+    // "dp2ssl.exe",
     false,
     (double min, double max, double value, string text) =>
     {
@@ -1483,6 +1491,15 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                         ErrorBox(result.ErrorInfo);
                         return;
                     }
+                    // 迁移用户文件夹
+                    
+                    string sourceDirectory = Path.Combine(
+Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+"dp2ssl");
+                    string targetDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "dp2\\dp2ssl");
+                    var move_result = GreenInstaller.MoveUserDirectory(sourceDirectory,
+                        targetDirectory,
+                        "maskSource");
                     return;
                 }
                 finally
