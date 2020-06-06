@@ -14,6 +14,8 @@ using DigitalPlatform.IO;
 using DigitalPlatform.WPF;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient;
+using DigitalPlatform.Install;
+using System.Deployment.Application;
 
 namespace dp2SSL
 {
@@ -44,6 +46,13 @@ namespace dp2SSL
                 return _libraryNetworkCondition;
             }
         }
+
+        // 是否已经(升级)更新了
+        static bool _updated = false;
+        // 最近一次检查升级的时刻
+        static DateTime _lastUpdateTime;
+        // 检查升级的时间间隔
+        static TimeSpan _updatePeriod = TimeSpan.FromMinutes(2*60); // 2*60 两个小时
 
         // 监控间隔时间
         static TimeSpan _monitorIdleLength = TimeSpan.FromSeconds(10);
@@ -110,6 +119,7 @@ namespace dp2SSL
                         // 提醒关门
                         WarningCloseDoor();
 
+                        // 下载或同步读者信息
                         if (download_complete == false)
                         {
                             string startDate = LoadStartDate();
@@ -171,11 +181,38 @@ namespace dp2SSL
                                 }
                             }
                         }
+
+                        // 检查升级 dp2ssl
+                        if (_updated == false
+                        && StringUtil.IsDevelopMode() == false
+                        && ApplicationDeployment.IsNetworkDeployed == false
+                        && DateTime.Now - _lastUpdateTime > _updatePeriod)
+                        {
+                            // result.Value:
+                            //      -1  出错
+                            //      0   经过检查发现没有必要升级
+                            //      1   成功
+                            //      2   成功，但需要立即重新启动计算机才能让复制的文件生效
+                            var update_result = await GreenInstaller.InstallFromWeb("http://dp2003.com/dp2ssl/v1_dev",
+                                "c:\\dp2ssl",
+                                null,
+                                true,
+                                null);
+                            if (update_result.Value == -1)
+                                WpfClientInfo.WriteErrorLog($"自动检查升级出错: {update_result.ErrorInfo}");
+                            if (update_result.Value == 1 || update_result.Value == 2)
+                            {
+                                _updated = true;
+                                PageShelf.TrySetMessage(null, "dp2SSL 升级文件已经下载成功，下次重启时可自动升级到新版本");
+                            }
+                            _lastUpdateTime = DateTime.Now;
+
+                        }
                     }
                     _monitorTask = null;
 
                 }
-                catch(OperationCanceledException)
+                catch (OperationCanceledException)
                 {
 
                 }

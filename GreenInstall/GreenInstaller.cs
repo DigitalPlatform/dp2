@@ -1,21 +1,17 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Linq;
+using System.IO.Compression;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Forms.VisualStyles;
 
-using Ionic.Zip;
 
-using DigitalPlatform.IO;
-using DigitalPlatform.Text;
-
-namespace DigitalPlatform.Install
+namespace GreenInstall
 {
     /// <summary>
     /// 绿色安装
@@ -39,9 +35,10 @@ namespace DigitalPlatform.Install
             string targetDirectory,
             string style)
         {
-            int nRet = PathUtil.CopyDirectory(sourceDirectory, 
+            int nRet = Library.CopyDirectory(sourceDirectory,
                 targetDirectory,
-                false, 
+                null,
+                false,
                 out string strError);
             if (nRet == -1)
                 return new NormalResult
@@ -360,7 +357,7 @@ namespace DigitalPlatform.Install
             string content)
         {
             string stateFileName = Path.Combine(installDirectory, "install_state.txt");
-            PathUtil.CreateDirIfNeed(installDirectory);
+            Library.TryCreateDir(installDirectory);
             File.WriteAllText(stateFileName, content);
             return new NormalResult();
         }
@@ -455,6 +452,68 @@ namespace DigitalPlatform.Install
         //      0   成功。不需要 reboot
         //      1   成功。需要 reboot
         static int ExtractFile(string strZipFileName,
+            string strTargetDir,
+            string strTempDir,
+            bool bAllowDelayOverwrite,
+            out string strError)
+        {
+            int delayCount = 0;
+            string tempDir = Path.Combine(strTargetDir, "~zip_temp");
+            Library.TryCreateDir(tempDir);
+
+            // 先解压到一个临时位置
+            ZipFile.ExtractToDirectory(strZipFileName, tempDir);
+
+            // 从临时位置拷贝到目标位置
+            Library.CopyDirectory(tempDir,
+                strTargetDir,
+                (source, target) =>
+                {
+                    try
+                    {
+                        File.Copy(source, target, true);
+                        return;
+                    }
+                    catch(Exception ex)
+                    {
+                        if (bAllowDelayOverwrite == false)
+                            throw new Exception("复制文件 " + source + " 到 " + target + " 的过程中出现错误: " + ex.Message, ex);
+                    }
+
+                    {
+                        string strLastFileName = Path.Combine(strTempDir, Guid.NewGuid().ToString());
+                        File.Move(source, strLastFileName);
+                        // strTempPath = "";
+                        if (MoveFileEx(strLastFileName, target, MoveFileFlags.DelayUntilReboot | MoveFileFlags.ReplaceExisting) == false)
+                            throw new Exception("MoveFileEx() '" + strLastFileName + "' '" + target + "' 失败");
+                        // File.SetLastWriteTime(strLastFileName, e.LastModified);
+                        delayCount ++;
+                    }
+
+                },
+                false,
+                out strError);
+
+            /*
+            // 删除临时位置
+            if (Directory.Exists(strTargetDir) == true)
+            {
+                Library.RemoveReadOnlyAttr(tempDir);   // 怕即将删除的目录中有隐藏文件妨碍删除
+
+                Directory.Delete(tempDir, true);
+            }
+            */
+            if (delayCount > 0)
+                return 1;
+            return 0;
+        }
+
+#if NO
+        // return:
+        //      -1  出错
+        //      0   成功。不需要 reboot
+        //      1   成功。需要 reboot
+        static int ExtractFile0(string strZipFileName,
             string strTargetDir,
             string strTempDir,
             bool bAllowDelayOverwrite,
@@ -566,7 +625,9 @@ namespace DigitalPlatform.Install
             return false;
         }
 
-#region MoveFileEx
+#endif
+
+        #region MoveFileEx
 
         [Flags]
         internal enum MoveFileFlags
@@ -586,7 +647,7 @@ namespace DigitalPlatform.Install
             string lpNewFileName,
             MoveFileFlags dwFlags);
 
-#endregion
+        #endregion
 
         // 启动绿色安装小工具。因为 dp2circulation 正在运行时无法覆盖替换文件，所以需要另外启动一个小程序来完成这个任务
         public static int StartGreenUtility(List<string> _updatedGreenZipFileNames,
@@ -625,7 +686,7 @@ namespace DigitalPlatform.Install
             // this._updatedGreenZipFileNames.Clear(); // 避免后面再次调用本函数
         }
 
-#region 下级函数
+        #region 下级函数
 
         static string GetUtilDir(string strBinDir)
         {
@@ -657,7 +718,7 @@ namespace DigitalPlatform.Install
                         };
                     }
 
-                    if (DateTimeUtil.TryParseRfc1123DateTimeString(strLastModified, out DateTime time) == false)
+                    if (Library.TryParseRfc1123DateTimeString(strLastModified, out DateTime time) == false)
                     {
                         return new NormalResult
                         {
@@ -699,7 +760,7 @@ namespace DigitalPlatform.Install
                 return new NormalResult
                 {
                     Value = -1,
-                    ErrorInfo = ExceptionUtil.GetAutoText(ex),
+                    ErrorInfo = ex.Message, // ExceptionUtil.GetAutoText(ex),
                     ErrorCode = ex.GetType().ToString()
                 };
             }
@@ -749,7 +810,7 @@ namespace DigitalPlatform.Install
                 string strTempFileName = strLocalFileName + ".temp";
 
                 // 2020/6/4
-                PathUtil.CreateDirIfNeed(Path.GetDirectoryName(strTempFileName));
+                Library.TryCreateDir(Path.GetDirectoryName(strTempFileName));
 
                 // TODO: 先下载到临时文件，然后复制到目标文件
                 try
@@ -782,7 +843,7 @@ namespace DigitalPlatform.Install
                     return new NormalResult
                     {
                         Value = -1,
-                        ErrorInfo = ExceptionUtil.GetDebugText(ex),
+                        ErrorInfo = ex.Message, //ExceptionUtil.GetDebugText(ex),
                         ErrorCode = ex.GetType().ToString()
                     };
                 }
@@ -791,14 +852,14 @@ namespace DigitalPlatform.Install
                     return new NormalResult
                     {
                         Value = -1,
-                        ErrorInfo = ExceptionUtil.GetDebugText(ex),
+                        ErrorInfo = ex.Message, // ExceptionUtil.GetDebugText(ex),
                         ErrorCode = ex.GetType().ToString()
                     };
                 }
             }
         }
 
-#endregion
+        #endregion
 
     }
 }
