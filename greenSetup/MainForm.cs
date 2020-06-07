@@ -30,6 +30,7 @@ namespace greenSetup
 
         async Task install()
         {
+            double ratio = 1;
             var result = await GreenInstaller.InstallFromWeb("http://dp2003.com/dp2ssl/v1_dev",
 "c:\\dp2ssl",
 null,
@@ -41,6 +42,23 @@ false,
     {
         if (text != null)
             label_message.Text = text;
+        if (min != -1)
+            progressBar1.Minimum = (Int32)min;
+        if (max != -1)
+        {
+            if (max <= Int32.MaxValue)
+            {
+                ratio = 1;
+                progressBar1.Maximum = (Int32)max;
+            }
+            else
+            {
+                ratio = Int32.MaxValue / max;
+                progressBar1.Maximum = Int32.MaxValue;
+            }
+        }
+        if (value != -1)
+            progressBar1.Value = (int)((double)value * ratio);
     }));
 });
             if (result.Value == -1)

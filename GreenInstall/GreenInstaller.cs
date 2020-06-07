@@ -57,6 +57,12 @@ namespace GreenInstall
             return new NormalResult();
         }
 
+        public class FileNameAndLength
+        {
+            public string FileName { get; set; }
+            public long FileLength { get; set; }
+        }
+
         // -1 -1 n only change progress value
         // -1 -1 -1 hide progress bar
         public delegate void Delegate_setProgress(double min, double max, double value, string text);
@@ -82,7 +88,7 @@ namespace GreenInstall
 
             string strUtilDir = GetUtilDir(strBinDir);
 
-            setProgress?.Invoke(0, 0, 0, "开始自动更新(绿色安装)");
+            setProgress?.Invoke(-1, -1, -1, "开始自动更新(绿色安装)");
 
             // 检查状态文件
             // result.Value
@@ -95,9 +101,20 @@ namespace GreenInstall
             //      5   当前 .zip 比 .exe 要新，需要重启计算机以便展开的文件生效
             var check_result = CheckStateFile(strBinDir);
             if (check_result.Value == -1)
+            {
+                setProgress?.Invoke(-1, -1, -1, $"检查下载状态时出错: {check_result.ErrorInfo}");
                 return check_result;
+            }
             if (check_result.Value == 1 || check_result.Value == 3 || check_result.Value == 5)
+            {
+                if (check_result.Value == 1)
+                    setProgress?.Invoke(-1, -1, -1, "前一次下载正在进行，尚未完成。本次下载被放弃");
+                if (check_result.Value == 3)
+                    setProgress?.Invoke(-1, -1, -1, "前一次下载已经完成，但尚未展开安装。本次下载被放弃");
+                if (check_result.Value == 5)
+                    setProgress?.Invoke(-1, -1, -1, "前一次下载和安装已经完成，等待计算机重启生效。本次下载被放弃");
                 return new NormalResult();
+            }
 
             // 希望下载的文件。纯文件名
             List<string> filenames = new List<string>() {
@@ -106,7 +123,7 @@ namespace GreenInstall
                 "data.zip"};
 
             // 发现更新了并下载的文件。纯文件名
-            List<string> updated_filenames = new List<string>();
+            List<FileNameAndLength> updated_filenames = new List<FileNameAndLength>();
 
             // 需要确保最后被展开的文件。如果下载了而未展开，则下次下载的时候会发现文件已经是最新了，从而不会下载，也不会展开。这就有漏洞了
             // 那么就要在下载和展开这个全过程中断的时候，记住删除已经下载的文件。这样可以迫使下次一定要下载和展开
@@ -114,7 +131,9 @@ namespace GreenInstall
 
             try
             {
-                int downloadCount = 0;
+                // 第一步，先检查更新的文件，计算需要下载的尺寸
+                long downloadLength = 0;
+                // List<string> changed_filenames = new List<string>();
                 foreach (string filename in filenames)
                 {
                     string strUrl = // "http://dp2003.com/dp2circulation/v2/"
@@ -122,6 +141,56 @@ namespace GreenInstall
                         + filename;
                     string strLocalFileName = Path.Combine(strBinDir, filename).ToLower();
 
+                    // 判断 http 服务器上一个文件是否已经更新
+                    // return:
+                    //      -1  出错
+                    //      0   没有更新
+                    //      1   已经更新
+                    var result = await GetServerFileInfo(strUrl,
+                        File.GetLastWriteTimeUtc(strLocalFileName));
+                    if (result.Value == -1)
+                    {
+                        WriteStateFile(strBinDir, "downloadError");
+                        return result;
+                    }
+
+                    if (File.Exists(strLocalFileName) == true)
+                    {
+                        // this.DisplayBackgroundText("检查文件版本 " + strUrl + " ...\r\n");
+                        if (result.Value == 1)
+                        {
+                            updated_filenames.Add(new FileNameAndLength
+                            {
+                                FileName = filename,
+                                FileLength = result.ContentLength
+                            });
+                            downloadLength += result.ContentLength;
+                        }
+                    }
+                    else
+                    {
+                        updated_filenames.Add(new FileNameAndLength
+                        {
+                            FileName = filename,
+                            FileLength = result.ContentLength
+                        });
+                        downloadLength += result.ContentLength;
+                    }
+                }
+
+                // 设置进度条总长度
+                setProgress?.Invoke(0, downloadLength, 0, null);
+
+                int downloadCount = 0;
+                long downloaded = 0;
+                foreach (var info in updated_filenames)
+                {
+                    string strUrl = // "http://dp2003.com/dp2circulation/v2/"
+                        strBaseUrl
+                        + info.FileName;
+                    string strLocalFileName = Path.Combine(strBinDir, info.FileName).ToLower();
+
+                    /*
                     if (File.Exists(strLocalFileName) == true)
                     {
                         // this.DisplayBackgroundText("检查文件版本 " + strUrl + " ...\r\n");
@@ -131,7 +200,7 @@ namespace GreenInstall
                         //      -1  出错
                         //      0   没有更新
                         //      1   已经更新
-                        var result = await IsServerFileUpdated(strUrl,
+                        var result = await GetServerFileInfo(strUrl,
                             File.GetLastWriteTimeUtc(strLocalFileName));
                         if (result.Value == -1)
                         {
@@ -149,20 +218,33 @@ namespace GreenInstall
                     }
                     else
                         updated_filenames.Add(filename);
+                    */
 
-                    if (updated_filenames.IndexOf(filename) != -1)
+                    // if (updated_filenames.IndexOf(filename) != -1)
                     {
                         WriteStateFile(strBinDir, "downloading");
 
-                        setProgress?.Invoke(0, 0, 0, "下载 " + strUrl + " 到 " + strLocalFileName + " ...\r\n");
+                        setProgress?.Invoke(-1, -1, -1, "下载 " + strUrl + " 到 " + strLocalFileName + " ...\r\n");
 
                         var result = await DownloadFileAsync(strUrl,
-                            strLocalFileName);
+                            strLocalFileName,
+                            (o, e) =>
+                            {
+                                // 防止越过 Maximum
+                                if (downloaded + e.BytesReceived > downloadLength)
+                                {
+                                    downloadLength = downloaded + e.BytesReceived;
+                                    setProgress?.Invoke(-1, downloadLength, -1, null);
+                                }
+                                setProgress?.Invoke(-1, -1, downloaded + e.BytesReceived, null);
+                            });
                         if (result.Value == -1)
                         {
                             WriteStateFile(strBinDir, "downloadError");
                             return result;
                         }
+
+                        downloaded += info.FileLength;
 
                         // 下载成功的本地文件，随时可能被删除，如果整个流程没有完成的话
                         temp_filepaths.Add(strLocalFileName);
@@ -170,6 +252,7 @@ namespace GreenInstall
                         downloadCount++;
                     }
                 }
+
 
 #if NO
                 string strGreenUtilityExe = Path.Combine(strUtilDir, "greenutility.exe");
@@ -228,7 +311,11 @@ namespace GreenInstall
             this._updatedGreenZipFileNames.Add("app.zip");
 #else
                 // 给 MainForm 一个标记，当它退出的时候，会自动展开 .zip 文件完成升级安装
-                _updatedGreenZipFileNames = updated_filenames;
+                _updatedGreenZipFileNames = new List<string>();
+                foreach(var info in updated_filenames)
+                {
+                    _updatedGreenZipFileNames.Add(info.FileName);
+                }
 #endif
 
                 WriteStateFile(strBinDir, "downloadComplete");
@@ -237,9 +324,9 @@ namespace GreenInstall
                 {
 
                     if (_updatedGreenZipFileNames.Count > 0)
-                        setProgress?.Invoke(0, 0, 0, "dp2circulation 绿色安装包升级文件已经准备就绪。当退出 dp2circulation 时会自动进行安装。\r\n");
+                        setProgress?.Invoke(-1, -1, -1, "dp2circulation 绿色安装包升级文件已经准备就绪。当退出 dp2circulation 时会自动进行安装。\r\n");
                     else
-                        setProgress?.Invoke(0, 0, 0, "没有发现更新。\r\n");
+                        setProgress?.Invoke(-1, -1, -1, "没有发现更新。\r\n");
 
                     temp_filepaths.Clear(); // 这样 finally 块就不会删除这些文件了
                 }
@@ -249,7 +336,7 @@ namespace GreenInstall
 
                     if (_updatedGreenZipFileNames != null && _updatedGreenZipFileNames.Count > 0)
                     {
-                        setProgress?.Invoke(0, 0, 0, "正在解压文件");
+                        setProgress?.Invoke(-1, -1, -1, "正在解压文件");
 
                         // TODO: 直接解压到目标位置即可
                         string files = StringUtil.MakePathList(_updatedGreenZipFileNames);
@@ -474,7 +561,7 @@ namespace GreenInstall
                         File.Copy(source, target, true);
                         return;
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         if (bAllowDelayOverwrite == false)
                             throw new Exception("复制文件 " + source + " 到 " + target + " 的过程中出现错误: " + ex.Message, ex);
@@ -487,7 +574,7 @@ namespace GreenInstall
                         if (MoveFileEx(strLastFileName, target, MoveFileFlags.DelayUntilReboot | MoveFileFlags.ReplaceExisting) == false)
                             throw new Exception("MoveFileEx() '" + strLastFileName + "' '" + target + "' 失败");
                         // File.SetLastWriteTime(strLastFileName, e.LastModified);
-                        delayCount ++;
+                        delayCount++;
                     }
 
                 },
@@ -693,12 +780,17 @@ namespace GreenInstall
             return Path.Combine(Path.GetDirectoryName(strBinDir), "~" + Path.GetFileName(strBinDir) + "_greenutility");
         }
 
+        class GetServerFileInfoResult : NormalResult
+        {
+            public long ContentLength { get; set; }
+        }
+
         // 判断 http 服务器上一个文件是否已经更新
         // return:
         //      -1  出错
         //      0   没有更新
         //      1   已经更新
-        static async Task<NormalResult> IsServerFileUpdated(string strUrl,
+        static async Task<GetServerFileInfoResult> GetServerFileInfo(string strUrl,
             DateTime local_lastmodify)
         {
             var webRequest = System.Net.WebRequest.Create(strUrl);
@@ -708,29 +800,43 @@ namespace GreenInstall
             {
                 using (var response = await webRequest.GetResponseAsync() as HttpWebResponse)
                 {
+                    string strContentLength = response.GetResponseHeader("Content-Length");
+                    if (Int64.TryParse(strContentLength, out long contentLength) == false)
+                        contentLength = -1;
+
                     string strLastModified = response.GetResponseHeader("Last-Modified");
                     if (string.IsNullOrEmpty(strLastModified) == true)
                     {
-                        return new NormalResult
+                        return new GetServerFileInfoResult
                         {
                             Value = -1,
+                            ContentLength = contentLength,
                             ErrorInfo = "header 中无法获得 Last-Modified 值"
                         };
                     }
 
                     if (Library.TryParseRfc1123DateTimeString(strLastModified, out DateTime time) == false)
                     {
-                        return new NormalResult
+                        return new GetServerFileInfoResult
                         {
                             Value = -1,
+                            ContentLength = contentLength,
                             ErrorInfo = $"从响应中取出的 Last-Modified 字段值 '{ strLastModified}' 格式不合法"
                         };
                     }
 
                     if (time > local_lastmodify)
-                        return new NormalResult { Value = 1 };
+                        return new GetServerFileInfoResult
+                        {
+                            Value = 1,
+                            ContentLength = contentLength
+                        };
 
-                    return new NormalResult { Value = 0 };
+                    return new GetServerFileInfoResult
+                    {
+                        Value = 0,
+                        ContentLength = contentLength
+                    };
                 }
             }
             catch (WebException ex)
@@ -740,7 +846,7 @@ namespace GreenInstall
                 {
                     if (response.StatusCode == HttpStatusCode.NotFound)
                     {
-                        return new NormalResult
+                        return new GetServerFileInfoResult
                         {
                             Value = -1,
                             ErrorInfo = ex.Message,
@@ -748,7 +854,7 @@ namespace GreenInstall
                         };
                     }
                 }
-                return new NormalResult
+                return new GetServerFileInfoResult
                 {
                     Value = -1,
                     ErrorInfo = ex.Message,
@@ -757,7 +863,7 @@ namespace GreenInstall
             }
             catch (Exception ex)
             {
-                return new NormalResult
+                return new GetServerFileInfoResult
                 {
                     Value = -1,
                     ErrorInfo = ex.Message, // ExceptionUtil.GetAutoText(ex),
@@ -795,14 +901,19 @@ namespace GreenInstall
             }
         }
 
+        public delegate void Delegate_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e);
 
         // 从 http 服务器下载一个文件
         // 阻塞式
         static async Task<NormalResult> DownloadFileAsync(string strUrl,
-    string strLocalFileName)
+    string strLocalFileName,
+    Delegate_DownloadProgressChanged progressChanged)
         {
             using (MyWebClient webClient = new MyWebClient())
             {
+                if (progressChanged != null)
+                    webClient.DownloadProgressChanged += (o, e) => { progressChanged(o, e); };
+
                 webClient.ReadWriteTimeout = 30 * 1000; // 30 秒，在读写之前 - 2015/12/3
                 webClient.Timeout = 30 * 60 * 1000; // 30 分钟，整个下载过程 - 2015/12/3
                 webClient.CachePolicy = new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.NoCacheNoStore);
@@ -857,6 +968,11 @@ namespace GreenInstall
                     };
                 }
             }
+        }
+
+        private static void WebClient_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
+        {
+            throw new NotImplementedException();
         }
 
         #endregion
