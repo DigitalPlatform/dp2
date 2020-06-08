@@ -31,8 +31,14 @@ namespace GreenInstall
         */
 
         // 迁移用户文件夹
+        // parameters:
+        //      sourceDirectory 即将被移动的旧位置用户文件夹
+        //      targetDirectory 要移动到的新目标位置用户文件夹
+        //      binDirectory    可执行文件夹。要在里面创建一个 userDirectory.txt 文件，标注目标文件夹位置。如果本参数为 null，表示不创建这个文件
+        //      style   风格。maskSource 表示会在旧位置用户文件夹里面创建一个 userDirectoryMask.txt 文件，表示此文件夹已经被废弃
         public static NormalResult MoveUserDirectory(string sourceDirectory,
             string targetDirectory,
+            string binDirectory,
             string style)
         {
             int nRet = Library.CopyDirectory(sourceDirectory,
@@ -48,14 +54,84 @@ namespace GreenInstall
                 };
 
             // 在源目录中做出标记，以便以后用到这个目录的程序会警告退出
-            if (StringUtil.IsInList("maskSource", style))
+            if (StringUtil0.IsInList("maskSource", style))
             {
                 string strMaskFileName = Path.Combine(sourceDirectory, "userDirectoryMask.txt");
                 File.WriteAllText(strMaskFileName, $"removed:此用户文件夹已经被移动到 {targetDirectory}");
             }
 
+            // 在可执行文件目录中标记用户目录位置
+            if (binDirectory != null)
+            {
+                var set_result = SetUserDirectory(binDirectory, targetDirectory);
+                if (set_result.Value == -1)
+                    return set_result;
+            }
+
             return new NormalResult();
         }
+
+        public static NormalResult SetUserDirectory(string binDirectory,
+            string userDirectory)
+        {
+            Library.TryCreateDir(binDirectory);
+            string filename = Path.Combine(binDirectory, "userDirectory.txt");
+            File.WriteAllText(filename, userDirectory);
+            return new NormalResult();
+        }
+
+        public static NormalResult CreateShortcut(string description,
+            string productName,
+            string executablePath)
+        {
+            var startupFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            var shell = new IWshRuntimeLibrary.WshShell();
+            var shortCutLinkFilePath = Path.Combine(startupFolderPath, productName + ".lnk");
+            var windowsApplicationShortcut = (IWshRuntimeLibrary.IWshShortcut)shell.CreateShortcut(shortCutLinkFilePath);
+            windowsApplicationShortcut.Description = description;
+            windowsApplicationShortcut.WorkingDirectory = Path.GetDirectoryName(executablePath);
+            windowsApplicationShortcut.TargetPath = executablePath;
+            windowsApplicationShortcut.Save();
+
+            return new NormalResult();
+        }
+
+#if NO
+        public static void CreateShortcutToStartMenu(
+string linkName,
+string strAppPath,
+bool bOverwriteExist = true)
+        {
+            string deskDir = Environment.GetFolderPath(Environment.SpecialFolder.Programs);
+
+            string strLnkFilePath = Path.Combine(deskDir, "DigitalPlatform\\" + linkName + ".lnk");
+
+            if (bOverwriteExist == false && File.Exists(strLnkFilePath) == true)
+                return;
+
+            Type t = Type.GetTypeFromCLSID(new Guid("72C24DD5-D70A-438B-8A42-98424B88AFB8")); //Windows Script Host Shell Object
+            dynamic shell = Activator.CreateInstance(t);
+            try
+            {
+                var lnk = shell.CreateShortcut(strLnkFilePath);
+                try
+                {
+                    lnk.TargetPath = strAppPath;    //  @"C:\something";
+                    lnk.IconLocation = strAppPath + ", 0";
+                    lnk.WorkingDirectory = Path.GetDirectoryName(strAppPath);
+                    lnk.Save();
+                }
+                finally
+                {
+                    Marshal.FinalReleaseComObject(lnk);
+                }
+            }
+            finally
+            {
+                Marshal.FinalReleaseComObject(shell);
+            }
+        }
+#endif
 
         public class FileNameAndLength
         {
@@ -75,7 +151,7 @@ namespace GreenInstall
         //      2   成功，但需要立即重新启动计算机才能让复制的文件生效
         public static async Task<NormalResult> InstallFromWeb(string downloadUrl,
             string installDirectory,
-            string userDirectory,
+            // string userDirectory,
             // string waitExe,
             bool delayUpdate,
             Delegate_setProgress setProgress)
@@ -312,11 +388,15 @@ namespace GreenInstall
 #else
                 // 给 MainForm 一个标记，当它退出的时候，会自动展开 .zip 文件完成升级安装
                 _updatedGreenZipFileNames = new List<string>();
-                foreach(var info in updated_filenames)
+                foreach (var info in updated_filenames)
                 {
                     _updatedGreenZipFileNames.Add(info.FileName);
                 }
 #endif
+
+                // 没有必要升级
+                if (_updatedGreenZipFileNames.Count == 0)
+                    return new NormalResult();
 
                 WriteStateFile(strBinDir, "downloadComplete");
 
@@ -339,7 +419,7 @@ namespace GreenInstall
                         setProgress?.Invoke(-1, -1, -1, "正在解压文件");
 
                         // TODO: 直接解压到目标位置即可
-                        string files = StringUtil.MakePathList(_updatedGreenZipFileNames);
+                        string files = StringUtil0.MakePathList(_updatedGreenZipFileNames);
                         // 安装软件。用 MoveFileEx 法
                         // return:
                         //      -1  出错
@@ -395,6 +475,51 @@ namespace GreenInstall
             */
         }
 
+        public static NormalResult ExtractFiles(string strBinDir)
+        {
+            List<string> filenames = new List<string>() {
+                "app.zip",
+                "data.zip"};
+
+            {
+                // setProgress?.Invoke(-1, -1, -1, "正在解压文件");
+
+                // TODO: 直接解压到目标位置即可
+                string files = StringUtil0.MakePathList(filenames);
+                // 安装软件。用 MoveFileEx 法
+                // return:
+                //      -1  出错
+                //      0   成功。不需要 reboot
+                //      1   成功。需要 reboot
+                int nRet = Install_2(strBinDir,
+                    strBinDir,
+                    files,
+                    Path.GetTempPath(),
+                    out string strError);
+                if (nRet == -1)
+                {
+                    // TODO: 这里是否需要删除两个 .zip 文件以便迫使后面重新下载和展开？
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError
+                    };
+                }
+                if (nRet == 1)
+                {
+                    WriteStateFile(strBinDir, "waitingReboot");
+
+                    return new NormalResult
+                    {
+                        Value = 2   // 表示需要重启计算机
+                    };
+                }
+                WriteStateFile(strBinDir, "installed");
+            }
+
+            return new NormalResult();
+        }
+
         // result.Value
         //      -1  出错
         //      0   不存在状态文件
@@ -403,7 +528,7 @@ namespace GreenInstall
         //      3   当前 .zip 比 .exe 要新。需要展开 .zip 进行更新安装
         //      4   下载 .zip 失败。.zip 不完整
         //      5   当前 .zip 比 .exe 要新，需要重启计算机以便展开的文件生效
-        static NormalResult CheckStateFile(string installDirectory)
+        public static NormalResult CheckStateFile(string installDirectory)
         {
             string stateFileName = Path.Combine(installDirectory, "install_state.txt");
             if (File.Exists(stateFileName) == false)
@@ -431,11 +556,13 @@ namespace GreenInstall
                 return new NormalResult
                 {
                     Value = 5,
+                    ErrorInfo = "文件更新完毕，等待 Windows 重启",
                     ErrorCode = "waitingReboot"
                 };
             return new NormalResult
             {
                 Value = 1,
+                ErrorInfo = "正在下载文件",
                 ErrorCode = "downloading"
             };
         }
@@ -544,55 +671,67 @@ namespace GreenInstall
             bool bAllowDelayOverwrite,
             out string strError)
         {
-            int delayCount = 0;
-            string tempDir = Path.Combine(strTargetDir, "~zip_temp");
-            Library.TryCreateDir(tempDir);
-
-            // 先解压到一个临时位置
-            ZipFile.ExtractToDirectory(strZipFileName, tempDir);
-
-            // 从临时位置拷贝到目标位置
-            Library.CopyDirectory(tempDir,
-                strTargetDir,
-                (source, target) =>
-                {
-                    try
-                    {
-                        File.Copy(source, target, true);
-                        return;
-                    }
-                    catch (Exception ex)
-                    {
-                        if (bAllowDelayOverwrite == false)
-                            throw new Exception("复制文件 " + source + " 到 " + target + " 的过程中出现错误: " + ex.Message, ex);
-                    }
-
-                    {
-                        string strLastFileName = Path.Combine(strTempDir, Guid.NewGuid().ToString());
-                        File.Move(source, strLastFileName);
-                        // strTempPath = "";
-                        if (MoveFileEx(strLastFileName, target, MoveFileFlags.DelayUntilReboot | MoveFileFlags.ReplaceExisting) == false)
-                            throw new Exception("MoveFileEx() '" + strLastFileName + "' '" + target + "' 失败");
-                        // File.SetLastWriteTime(strLastFileName, e.LastModified);
-                        delayCount++;
-                    }
-
-                },
-                false,
-                out strError);
-
-            /*
-            // 删除临时位置
-            if (Directory.Exists(strTargetDir) == true)
+            try
             {
-                Library.RemoveReadOnlyAttr(tempDir);   // 怕即将删除的目录中有隐藏文件妨碍删除
+                int delayCount = 0;
+                string tempDir = Path.Combine(strTargetDir, "~zip_temp");
 
-                Directory.Delete(tempDir, true);
+                // 2020/6/8
+                Library.TryDeleteDir(tempDir);
+
+                Library.TryCreateDir(tempDir);
+
+                // 先解压到一个临时位置
+                ZipFile.ExtractToDirectory(strZipFileName, tempDir);
+
+                // 从临时位置拷贝到目标位置
+                Library.CopyDirectory(tempDir,
+                    strTargetDir,
+                    (source, target) =>
+                    {
+                        try
+                        {
+                            File.Copy(source, target, true);
+                            return;
+                        }
+                        catch (Exception ex)
+                        {
+                            if (bAllowDelayOverwrite == false)
+                                throw new Exception("复制文件 " + source + " 到 " + target + " 的过程中出现错误: " + ex.Message, ex);
+                        }
+
+                        {
+                            string strLastFileName = Path.Combine(strTempDir, Guid.NewGuid().ToString());
+                            File.Move(source, strLastFileName);
+                            // strTempPath = "";
+                            if (MoveFileEx(strLastFileName, target, MoveFileFlags.DelayUntilReboot | MoveFileFlags.ReplaceExisting) == false)
+                                throw new Exception("MoveFileEx() '" + strLastFileName + "' '" + target + "' 失败");
+                            // File.SetLastWriteTime(strLastFileName, e.LastModified);
+                            delayCount++;
+                        }
+
+                    },
+                    false,
+                    out strError);
+
+                /*
+                // 删除临时位置
+                if (Directory.Exists(strTargetDir) == true)
+                {
+                    Library.RemoveReadOnlyAttr(tempDir);   // 怕即将删除的目录中有隐藏文件妨碍删除
+
+                    Directory.Delete(tempDir, true);
+                }
+                */
+                if (delayCount > 0)
+                    return 1;
+                return 0;
             }
-            */
-            if (delayCount > 0)
-                return 1;
-            return 0;
+            catch (Exception ex)
+            {
+                strError = $"ExtractFile() 出现异常: {ex.Message}";
+                return -1;
+            }
         }
 
 #if NO
@@ -752,7 +891,7 @@ namespace GreenInstall
                 + strBinDir  // source 是指存储了 .zip 文件的目录
                 + " -target:" + strBinDir // target 是指最终要安装的目录 
                 + (string.IsNullOrEmpty(waitExe) ? "" : $" -wait:{waitExe}")   // " -wait:dp2circulation.exe"
-                + " -files:" + StringUtil.MakePathList(_updatedGreenZipFileNames);
+                + " -files:" + StringUtil0.MakePathList(_updatedGreenZipFileNames);
             try
             {
                 var process = System.Diagnostics.Process.Start(strExePath, strParameters);
@@ -976,6 +1115,21 @@ namespace GreenInstall
         }
 
         #endregion
+
+        public static bool HasModuleStarted(string mutex_name)
+        {
+            bool createdNew = true;
+            // mutex name need contains windows account name. or us programes file path, hashed
+            using (Mutex mutex = new Mutex(true,
+                mutex_name, // "dp2libraryXE V3", 
+                out createdNew))
+            {
+                if (createdNew)
+                    return false;
+                else
+                    return true;
+            }
+        }
 
     }
 }

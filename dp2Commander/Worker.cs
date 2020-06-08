@@ -9,8 +9,10 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
+using GreenInstall;
 using DigitalPlatform;
 using DigitalPlatform.MessageClient;
+using Serilog;
 
 namespace dp2Commander
 {
@@ -58,6 +60,7 @@ namespace dp2Commander
 
         async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            WriteInfoLog("开始工作");
             _connection.AddMessage += _connection_AddMessage;
             /*
             Test();
@@ -75,6 +78,7 @@ namespace dp2Commander
 
             _connection.AddMessage -= _connection_AddMessage;
             _connection?.CloseConnection();
+            WriteInfoLog("结束工作");
         }
 
         CancellationTokenSource _cancel = new CancellationTokenSource();
@@ -229,8 +233,34 @@ namespace dp2Commander
                     ExitProcess("dp2SSL", true);
                 }
 
+                // 启动之前，检查 .zip 是否已经展开
+                {
+                    string binDir = "c:\\dp2ssl";
+                    // *** 检查状态文件
+                    // result.Value
+                    //      -1  出错
+                    //      0   不存在状态文件
+                    //      1   正在下载 .zip 过程中。.zip 不完整
+                    //      2   当前 .zip 和 .exe 已经一样新
+                    //      3   当前 .zip 比 .exe 要新。需要展开 .zip 进行更新安装
+                    //      4   下载 .zip 失败。.zip 不完整
+                    //      5   当前 .zip 比 .exe 要新，需要重启计算机以便展开的文件生效
+                    var check_result = GreenInstaller.CheckStateFile(binDir);
+                    // 展开
+                    if (check_result.Value == 3)
+                    {
+                        var extract_result = GreenInstaller.ExtractFiles(binDir);
+                        if (extract_result.Value == -1)
+                        {
+                            // TODO: 写入错误日志
+                            WriteErrorLog($"展开压缩文件时出错: {extract_result.ErrorInfo}");
+                        }
+                    }
+                }
+
                 // 启动
-                StartModule(ShortcutPath, "");
+                // StartModule(ShortcutPath, "");
+                Process.Start("c:\\dp2ssl\\dp2ssl.exe");
                 return "dp2SSL 已经重新启动";
             }
 
@@ -366,6 +396,16 @@ namespace dp2Commander
             }
 
             return count != 0;
+        }
+
+        static void WriteErrorLog(string text)
+        {
+            Log.Error(text);
+        }
+
+        static void WriteInfoLog(string text)
+        {
+            Log.Information(text);
         }
     }
 

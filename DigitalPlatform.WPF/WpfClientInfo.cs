@@ -15,6 +15,7 @@ using log4net;
 using DigitalPlatform.Core;
 using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient;
+using System.Runtime.CompilerServices;
 
 namespace DigitalPlatform.WPF
 {
@@ -77,10 +78,33 @@ namespace DigitalPlatform.WPF
                 DataDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             }
 
-            UserDir = Path.Combine(
-    Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-    product_name);
-            PathUtil.TryCreateDir(UserDir);
+            UserDir = null;
+
+            // 从 DataDir 中尝试寻找 userDirectory.txt 文件
+            {
+                string filename = Path.Combine(DataDir, "userDirectory.txt");
+                if (File.Exists(filename))
+                {
+                    string value = File.ReadAllText(filename);
+                    if (string.IsNullOrEmpty(value) == false)
+                        UserDir = value;
+                }
+            }
+
+            if (string.IsNullOrEmpty(UserDir))
+            {
+                UserDir = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+        product_name);
+                PathUtil.TryCreateDir(UserDir);
+
+                // 检查文件夹里面是否有 userDirectoryMask.txt 文件
+                string filename = Path.Combine(UserDir, "userDirectoryMask.txt");
+                if (File.Exists(filename))
+                {
+                    throw new Exception($"当前用户文件夹 {UserDir} 已经被标记为废弃状态。{product_name} 放弃启动");
+                }
+            }
 
             UserTempDir = Path.Combine(UserDir, "temp");
             PathUtil.TryCreateDir(UserTempDir);

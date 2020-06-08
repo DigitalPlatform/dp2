@@ -620,7 +620,7 @@ namespace dp2SSL
         // 安装为绿色版
         private async void setupAsGreen_Click(object sender, RoutedEventArgs e)
         {
-            await App.InstallGreenAsync();
+            // await App.InstallGreenAsync();
         }
     }
 }

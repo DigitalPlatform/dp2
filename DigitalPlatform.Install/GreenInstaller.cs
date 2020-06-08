@@ -17,6 +17,7 @@ using DigitalPlatform.Text;
 
 namespace DigitalPlatform.Install
 {
+#if REMOVED
     /// <summary>
     /// 绿色安装
     /// </summary>
@@ -801,4 +802,6 @@ namespace DigitalPlatform.Install
 #endregion
 
     }
+
+#endif
 }
