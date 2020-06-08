@@ -8,15 +8,20 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.EventLog;
 
+using Topshelf;
+
 using DigitalPlatform;
 using DigitalPlatform.Core;
 using DigitalPlatform.Text;
-using Topshelf;
+using Serilog;
+// using log4net;
 
 namespace dp2Commander
 {
-    class Program
+    public static class Program
     {
+        // public static ILog ILog { get; set; }
+
         static void Main(string[] args)
         {
             InitialConfig();
@@ -55,6 +60,24 @@ namespace dp2Commander
             }
 
             {
+                /*
+                string dataDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                string logDir = Path.Combine(dataDir, "log");
+                TryCreateDir(logDir);
+
+                var repository = log4net.LogManager.CreateRepository("main");
+                log4net.GlobalContext.Properties["LogFileName"] = Path.Combine(logDir, "log_");
+                log4net.Config.XmlConfigurator.Configure(repository);
+
+                ILog = LogManager.GetLogger("main", "dp2Commander");
+                */
+                // https://michaelscodingspot.com/logging-in-dotnet/
+                Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Debug()
+            .WriteTo.Console()
+            .WriteTo.File("logs\\.log", rollingInterval: RollingInterval.Day)
+            .CreateLogger();
+
                 var rc = HostFactory.Run(x =>                                   //1
                 {
                     x.Service<Worker>(s =>                                   //2
@@ -64,12 +87,13 @@ namespace dp2Commander
                         s.WhenStopped(tc => tc.Stop());                          //5
                     });
                     x.RunAsLocalSystem();                                       //6
-
+                    x.UseLog4Net();
                     x.SetDescription("dp2 远程控制器");                   //7
                     x.SetDisplayName("dp2 Commander Service");                                  //8
                     x.SetServiceName("dp2CommanderService");                                  //9
                 });                                                             //10
 
+                Log.CloseAndFlush();
                 var exitCode = (int)Convert.ChangeType(rc, rc.GetTypeCode());  //11
                 Environment.ExitCode = exitCode;
             }
@@ -78,6 +102,18 @@ namespace dp2Commander
             // 设置消息服务器参数
 
             // CreateHostBuilder(args).Build().Run();
+        }
+
+        public static bool TryCreateDir(string strDir)
+        {
+            DirectoryInfo di = new DirectoryInfo(strDir);
+            if (di.Exists == false)
+            {
+                di.Create();
+                return true;
+            }
+
+            return false;
         }
 
 #if OLD
@@ -95,7 +131,7 @@ namespace dp2Commander
             }).UseWindowsService();
 #endif
 
-#region ConfigFile
+        #region ConfigFile
 
         static ConfigSetting _config = null;
 
@@ -170,6 +206,6 @@ namespace dp2Commander
             Config.Save();
         }
 
-#endregion
+        #endregion
     }
 }

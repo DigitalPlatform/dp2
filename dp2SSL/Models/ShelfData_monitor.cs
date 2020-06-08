@@ -16,6 +16,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Install;
 using System.Deployment.Application;
+using GreenInstall;
 
 namespace dp2SSL
 {
@@ -188,6 +189,7 @@ namespace dp2SSL
                         && ApplicationDeployment.IsNetworkDeployed == false
                         && DateTime.Now - _lastUpdateTime > _updatePeriod)
                         {
+                            WpfClientInfo.WriteInfoLog("开始自动检查升级");
                             // result.Value:
                             //      -1  出错
                             //      0   经过检查发现没有必要升级
@@ -195,11 +197,14 @@ namespace dp2SSL
                             //      2   成功，但需要立即重新启动计算机才能让复制的文件生效
                             var update_result = await GreenInstaller.InstallFromWeb("http://dp2003.com/dp2ssl/v1_dev",
                                 "c:\\dp2ssl",
-                                null,
+                                // null,
                                 true,
                                 null);
                             if (update_result.Value == -1)
                                 WpfClientInfo.WriteErrorLog($"自动检查升级出错: {update_result.ErrorInfo}");
+                            else
+                                WpfClientInfo.WriteInfoLog("结束自动检查升级");
+
                             if (update_result.Value == 1 || update_result.Value == 2)
                             {
                                 _updated = true;

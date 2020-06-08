@@ -116,6 +116,19 @@ namespace GreenInstall
             }
         }
 
+        public static bool TryDeleteDir(string strDir)
+        {
+            try
+            {
+                Directory.Delete(strDir, true);
+                return true;
+            }
+            catch (DirectoryNotFoundException)
+            {
+                return false;
+            }
+        }
+
         // 如果目录不存在则创建之
         // return:
         //      false   已经存在

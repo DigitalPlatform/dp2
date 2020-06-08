@@ -120,14 +120,14 @@ namespace dp2SSL
             myMutex = new Mutex(true, "{75BAF3F0-FF7F-46BB-9ACD-8FE7429BF291}", out aIsNewInstance);
             if (!aIsNewInstance)
             {
-                MessageBox.Show("dp2SSL 不允许重复启动");
+                StartErrorBox("dp2SSL 不允许重复启动");
                 App.Current.Shutdown();
                 return;
             }
 
             if (DetectVirus.DetectXXX() || DetectVirus.DetectGuanjia())
             {
-                MessageBox.Show("dp2SSL 被木马软件干扰，无法启动");
+                StartErrorBox("dp2SSL 被木马软件干扰，无法启动");
                 System.Windows.Application.Current.Shutdown();
                 return;
             }
@@ -146,7 +146,16 @@ namespace dp2SSL
             if (StringUtil.IsDevelopMode() == false)
                 WpfClientInfo.PrepareCatchException();
 
-            WpfClientInfo.Initial("dp2SSL");
+            try
+            {
+                WpfClientInfo.Initial("dp2SSL");
+            }
+            catch(Exception ex)
+            {
+                StartErrorBox(ex.Message);
+                App.Current.Shutdown();
+                return;
+            }
             base.OnStartup(e);
 
             this._channelPool.BeforeLogin += new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
@@ -262,6 +271,16 @@ namespace dp2SSL
 
                 ShelfData.StartMonitorTask();
             }
+        }
+
+        static void StartErrorBox(string message)
+        {
+            MessageBox.Show(message,
+    "dp2SSL 启动出错",
+    MessageBoxButton.OK,
+    MessageBoxImage.Error,
+    MessageBoxResult.OK,
+    MessageBoxOptions.ServiceNotification);
         }
 
         /*
@@ -1439,6 +1458,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             Current.Dispatcher?.Invoke(action);
         }
 
+#if NO
         // 安装为绿色版本
         public static async Task InstallGreenAsync()
         {
@@ -1512,6 +1532,8 @@ Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
                 }
             }
         }
+
+#endif
 
         static void ErrorBox(string message,
     string color = "red",

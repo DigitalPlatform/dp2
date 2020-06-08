@@ -13,8 +13,163 @@ using System.Xml;
 
 namespace GreenInstall
 {
-    public class StringUtil
+    public class StringUtil0
     {
+        // ***
+        // 构造路径列表字符串，逗号分隔
+        public static string MakePathList(List<string> aPath)
+        {
+            // 2016/11/9
+            if (aPath == null)
+                return "";
+
+            // 2012/9/7
+            if (aPath.Count == 0)
+                return "";
+
+            string[] pathlist = new string[aPath.Count];
+            aPath.CopyTo(pathlist);
+
+            return String.Join(",", pathlist);
+        }
+
+        // ***
+        /// <summary>
+        /// 忽略大小写
+        /// 查找一个小字符串是否包含在大字符串，
+        /// 内部调isInAList函数
+        /// </summary>
+        /// <param name="strSub">小字符串</param>
+        /// <param name="strList">大字符串</param>
+        /// <returns>
+        /// 1:包含
+        /// 0:不包含
+        /// </returns>
+        public static bool IsInList(string strSub,
+            string strList)
+        {
+            /*
+            string[] aTemp;
+            aTemp = strList.Split(new char[]{','});
+
+            int nRet = strList.IndexOfAny(new char[]{' ','\t'});
+            if (nRet != -1) 
+            {
+                for(int i=0;i<aTemp.Length;i++) {
+                    aTemp[i] = aTemp[i].Trim();	// 去除左右空白
+                }
+            }
+ 
+            return IsInAlist(strSub,aTemp);
+            */
+            return IsInList(strSub,
+                strList,
+                true);
+        }
+
+        // parameters:
+        //		bIgnoreCase	是否忽略大小写
+        public static bool IsInList(string strSub,
+            string strList,
+            bool bIgnoreCase)
+        {
+            if (String.IsNullOrEmpty(strList) == true)
+                return false;	// 优化
+
+            string[] aTemp;
+            aTemp = strList.Split(new char[] { ',' });
+
+            int nRet = strList.IndexOfAny(new char[] { ' ', '\t' });
+            if (nRet != -1)
+            {
+                for (int i = 0; i < aTemp.Length; i++)
+                {
+                    aTemp[i] = aTemp[i].Trim();	// 去除左右空白
+                }
+            }
+
+            return IsInAlist(strSub,
+                aTemp,
+                bIgnoreCase);
+        }
+
+        // TODO: 似乎可以用 IndexOf() 代替
+        public static bool IsInList(int v, int[] a)
+        {
+            for (int i = 0; i < a.Length; i++)
+            {
+                if (v == a[i])
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// 查找一个小字符串是否包含在一个字符串数组中
+        /// </summary>
+        /// <param name="strSub">小字符串</param>
+        /// <param name="aList">字符串数组</param>
+        /// <returns>
+        /// 1:包含
+        /// 0:不包含
+        /// </returns>
+        public static bool IsInAlist(string strSub,
+            string[] aList)
+        {
+            /*
+            for(int i=0;i<aList.Length;i++)
+            {
+                if (String.Compare(strSub,aList[i],true) == 0) 
+                {
+                    return true;
+                }
+            }
+            return false;
+            */
+            return IsInAlist(strSub,
+                aList,
+                true);
+        }
+
+        // parameters:
+        //      strSub      要比较的单个值。可以包含多个单独的值，用逗号连接。注：如果是多个值，则只要有一个匹配上，就返回true
+        //		bIgnoreCase	是否忽略大小写
+        public static bool IsInAlist(string strSub,
+            string[] aList,
+            bool bIgnoreCase)
+        {
+            // 2015/5/27
+            if (string.IsNullOrEmpty(strSub) == true)
+                return false;
+
+            string[] sub_parts = strSub.Split(new char[] { ',' });
+
+            // 2012/2/2 增加了处理strSub中包含多个值的能力
+            foreach (string sub in sub_parts)
+            {
+                if (sub == null)
+                    continue;
+
+                string strOne = sub.Trim();
+                if (string.IsNullOrEmpty(strOne) == true)
+                    continue;
+
+                for (int i = 0; i < aList.Length; i++)
+                {
+                    if (String.Compare(strOne, aList[i], bIgnoreCase) == 0)
+                        return true;
+                }
+            }
+            return false;
+        }
+
+    }
+
+
+    public class StringUtil3
+    {
+#if NNNNNN
         public static long TryGetSubInt64(string strText,
 char seperator,
 int index,
@@ -29,6 +184,7 @@ long default_value = 0)
                 return default_value;
             }
         }
+
 
         // exception:
         //      抛出 Int64.Parse() 要抛出的那些异常
@@ -162,6 +318,8 @@ long default_value = 0)
             if (threadEx != null)
                 throw threadEx;
         }
+
+
 
         /// <summary>
         /// 检测一个列表字符串是否包含一个具体的值
@@ -297,6 +455,7 @@ long default_value = 0)
                 return true;
             return false;
         }
+
 
         #region IP 地址匹配
 
@@ -441,7 +600,7 @@ long default_value = 0)
                     results.Add(s);
             }
 
-            return StringUtil.MakePathList(results, ",");
+            return MakePathList(results, ",");
         }
 
         public static bool IsValidCMIS(string strText)
@@ -596,6 +755,7 @@ long default_value = 0)
             }
         }
 
+
         #region 和 Application 有关的功能
 
         public static bool IsDevelopMode()
@@ -640,7 +800,7 @@ long default_value = 0)
             List<string> args = new List<string>();
             if (!string.IsNullOrEmpty(query) && query.StartsWith("?"))
             {
-                args = StringUtil.SplitList(query.Substring(1), '&');
+                args = StringUtil0.SplitList(query.Substring(1), '&');
                 for (int i = 0; i < args.Count; i++)
                 {
                     args[i] = HttpUtility.UrlDecode(args[i]);
@@ -742,6 +902,7 @@ string strTimestamp)
             strMetaData = dom.OuterXml;
         }
 
+#if NNNNNN
         // 解析对象路径
         // parameters:
         //      strPathParam    等待解析的路径
@@ -795,6 +956,7 @@ string strTimestamp)
             strObjectID = StringUtil.GetFirstPartPath(ref strPath);
             return true;
         }
+#endif
 
         // 
         /// <summary>
@@ -1435,7 +1597,7 @@ string strTimestamp)
                 }
 
                 results.Add(strPureLocation);
-                return StringUtil.MakePathList(results);
+                return MakePathList(results);
             }
         }
 
@@ -1741,9 +1903,9 @@ string strTimestamp)
             {
                 // 2013/3/31 去掉表示馆藏地的第一行
                 if (s1 != null && s1.IndexOf("{") != -1)
-                    s1 = StringUtil.BuildLocationClassEntry(s1);
+                    s1 = BuildLocationClassEntry(s1);
                 if (s2 != null && s2.IndexOf("{") != -1)
-                    s2 = StringUtil.BuildLocationClassEntry(s2);
+                    s2 = BuildLocationClassEntry(s2);
             }
 
             string[] parts1 = s1.Split(new char[] { '/' });
@@ -1817,7 +1979,7 @@ string strTimestamp)
             if (strText.Length == 18)
             {
                 string strPrev = strText.Substring(0, 17);
-                if (StringUtil.IsPureNumber(strPrev) == false)
+                if (IsPureNumber(strPrev) == false)
                     return false;
 
                 // 最后一位可能是 'X'
@@ -1832,7 +1994,7 @@ string strTimestamp)
 
             Debug.Assert(strText.Length == 15, "");
 
-            if (StringUtil.IsPureNumber(strText) == false)
+            if (IsPureNumber(strText) == false)
                 return false;
 
             return true;
@@ -1969,6 +2131,7 @@ string strTimestamp)
             return results;
         }
 
+        // ***
         public static List<string> SplitList(string strText,
             char delimeter)
         {
@@ -2192,7 +2355,7 @@ string strTimestamp)
             char chEqualChar = '=',
             string strEncodeStyle = "")
         {
-            Hashtable table = StringUtil.ParseParameters(strParams, chSegChar, chEqualChar, strEncodeStyle);
+            Hashtable table = ParseParameters(strParams, chSegChar, chEqualChar, strEncodeStyle);
             List<string> keys = new List<string>();
             foreach (string key in table.Keys)
             {
@@ -2200,7 +2363,7 @@ string strTimestamp)
             }
 
             keys.Sort();
-            return StringUtil.BuildParameterString(table, keys, chSegChar, chEqualChar, strEncodeStyle);
+            return BuildParameterString(table, keys, chSegChar, chEqualChar, strEncodeStyle);
         }
 
         // 合并两个参数表
@@ -2414,22 +2577,6 @@ string strTimestamp)
         }
          * */
 
-        // 构造路径列表字符串，逗号分隔
-        public static string MakePathList(List<string> aPath)
-        {
-            // 2016/11/9
-            if (aPath == null)
-                return "";
-
-            // 2012/9/7
-            if (aPath.Count == 0)
-                return "";
-
-            string[] pathlist = new string[aPath.Count];
-            aPath.CopyTo(pathlist);
-
-            return String.Join(",", pathlist);
-        }
 
         // 2008/11/17
         public static string MakePathList(List<string> aPath,
@@ -2522,7 +2669,7 @@ string strTimestamp)
             string strEnd = "";
 
             // 把一个被字符引导或结尾的数字分成三部分
-            StringUtil.SplitLedNumber(strLeadNubmer,
+            SplitLedNumber(strLeadNubmer,
                 out strHead,
                 out strNumber,
                 out strEnd);
@@ -2563,7 +2710,7 @@ string strTimestamp)
             string strNumber1 = "";
             string strEnd1 = "";
             // 把一个被字符引导或结尾的数字分成三部分
-            StringUtil.SplitLedNumber(strLedNumber1,
+            SplitLedNumber(strLedNumber1,
                 out strHead1,
                 out strNumber1,
                 out strEnd1);
@@ -2592,7 +2739,7 @@ string strTimestamp)
             string strNumber2 = "";
             string strEnd2 = "";
             // 把一个被字符引导或结尾的数字分成三部分
-            StringUtil.SplitLedNumber(strLedNumber2,
+            SplitLedNumber(strLedNumber2,
                 out strHead2,
                 out strNumber2,
                 out strEnd2);
@@ -2627,7 +2774,7 @@ string strTimestamp)
             int nRet = 0;
             try
             {
-                nRet = StringUtil.CompareLedNumber(strLedNumber1,
+                nRet = CompareLedNumber(strLedNumber1,
                     strLedNumber2);
             }
             catch (Exception ex)
@@ -2903,76 +3050,6 @@ string strTimestamp)
 
 
 
-        /// <summary>
-        /// 忽略大小写
-        /// 查找一个小字符串是否包含在大字符串，
-        /// 内部调isInAList函数
-        /// </summary>
-        /// <param name="strSub">小字符串</param>
-        /// <param name="strList">大字符串</param>
-        /// <returns>
-        /// 1:包含
-        /// 0:不包含
-        /// </returns>
-        public static bool IsInList(string strSub,
-            string strList)
-        {
-            /*
-            string[] aTemp;
-            aTemp = strList.Split(new char[]{','});
-
-            int nRet = strList.IndexOfAny(new char[]{' ','\t'});
-            if (nRet != -1) 
-            {
-                for(int i=0;i<aTemp.Length;i++) {
-                    aTemp[i] = aTemp[i].Trim();	// 去除左右空白
-                }
-            }
- 
-            return IsInAlist(strSub,aTemp);
-            */
-            return IsInList(strSub,
-                strList,
-                true);
-        }
-
-        // parameters:
-        //		bIgnoreCase	是否忽略大小写
-        public static bool IsInList(string strSub,
-            string strList,
-            bool bIgnoreCase)
-        {
-            if (String.IsNullOrEmpty(strList) == true)
-                return false;	// 优化
-
-            string[] aTemp;
-            aTemp = strList.Split(new char[] { ',' });
-
-            int nRet = strList.IndexOfAny(new char[] { ' ', '\t' });
-            if (nRet != -1)
-            {
-                for (int i = 0; i < aTemp.Length; i++)
-                {
-                    aTemp[i] = aTemp[i].Trim();	// 去除左右空白
-                }
-            }
-
-            return IsInAlist(strSub,
-                aTemp,
-                bIgnoreCase);
-        }
-
-        // TODO: 似乎可以用 IndexOf() 代替
-        public static bool IsInList(int v, int[] a)
-        {
-            for (int i = 0; i < a.Length; i++)
-            {
-                if (v == a[i])
-                    return true;
-            }
-
-            return false;
-        }
 
         // 合并两list，去重
         // parameters:
@@ -3387,64 +3464,6 @@ string strTimestamp)
             return bChanged;
         }
 
-        /// <summary>
-        /// 查找一个小字符串是否包含在一个字符串数组中
-        /// </summary>
-        /// <param name="strSub">小字符串</param>
-        /// <param name="aList">字符串数组</param>
-        /// <returns>
-        /// 1:包含
-        /// 0:不包含
-        /// </returns>
-        public static bool IsInAlist(string strSub,
-            string[] aList)
-        {
-            /*
-            for(int i=0;i<aList.Length;i++)
-            {
-                if (String.Compare(strSub,aList[i],true) == 0) 
-                {
-                    return true;
-                }
-            }
-            return false;
-            */
-            return IsInAlist(strSub,
-                aList,
-                true);
-        }
-
-        // parameters:
-        //      strSub      要比较的单个值。可以包含多个单独的值，用逗号连接。注：如果是多个值，则只要有一个匹配上，就返回true
-        //		bIgnoreCase	是否忽略大小写
-        public static bool IsInAlist(string strSub,
-            string[] aList,
-            bool bIgnoreCase)
-        {
-            // 2015/5/27
-            if (string.IsNullOrEmpty(strSub) == true)
-                return false;
-
-            string[] sub_parts = strSub.Split(new char[] { ',' });
-
-            // 2012/2/2 增加了处理strSub中包含多个值的能力
-            foreach (string sub in sub_parts)
-            {
-                if (sub == null)
-                    continue;
-
-                string strOne = sub.Trim();
-                if (string.IsNullOrEmpty(strOne) == true)
-                    continue;
-
-                for (int i = 0; i < aList.Length; i++)
-                {
-                    if (String.Compare(strOne, aList[i], bIgnoreCase) == 0)
-                        return true;
-                }
-            }
-            return false;
-        }
 
 
         // 检索一个字符串是否是数字格式
@@ -3462,7 +3481,7 @@ string strTimestamp)
         {
             foreach (char oneChar in strText)
             {
-                if (StringUtil.IsDigital(oneChar) == false)
+                if (IsDigital(oneChar) == false)
                     return false;
             }
             return true;
@@ -3874,13 +3893,13 @@ string strTimestamp)
         public static string GetStringNumber(string strInputText)
         {
             ArrayList aDigitalList = new ArrayList();
-            if (StringUtil.IsNum(strInputText) == true)
+            if (IsNum(strInputText) == true)
                 return strInputText;
             for (int i = 0; i < strInputText.Length; i++)
             {
                 char oneChar = strInputText[i];
 
-                if ((StringUtil.IsDigital(oneChar) == true))
+                if ((IsDigital(oneChar) == true))
                     aDigitalList.Add(oneChar);
                 else if (oneChar == '.')
                     aDigitalList.Add(oneChar);
@@ -4015,6 +4034,8 @@ string strTimestamp)
             }
             return false;
         }
+
+#endif
 
     }
 
