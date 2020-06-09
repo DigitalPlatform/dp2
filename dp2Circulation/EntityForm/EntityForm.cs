@@ -30,7 +30,7 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Drawing;
-
+using DigitalPlatform.Z3950;
 
 namespace dp2Circulation
 {
@@ -5195,7 +5195,8 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
                                 {
                                     ListViewItem item = (ListViewItem)zchannelTable[c];
                                     if (r.Records != null)
-                                        FillList(c._fetched,
+                                        FillList(c.TargetInfo,
+                                            c._fetched,
                                             c.ZClient.ForcedRecordsEncoding == null ? c.TargetInfo.DefaultRecordsEncoding : c.ZClient.ForcedRecordsEncoding,
                                             c.ServerName,
                                             r.Records,
@@ -5386,7 +5387,8 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
 
                     {
                         if (present_result.Records != null)
-                            FillList(channel._fetched,
+                            FillList(channel.TargetInfo,
+                                channel._fetched,
                 channel.ZClient.ForcedRecordsEncoding == null ? channel.TargetInfo.DefaultRecordsEncoding : channel.ZClient.ForcedRecordsEncoding,
                 channel.ServerName,
                 present_result.Records, item);
@@ -5430,7 +5432,9 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
         }
 
         // (Z39.50)填入浏览记录
-        void FillList(int start,
+        void FillList(
+            TargetInfo targetInfo,
+            int start,
             Encoding encoding,
             string strLibraryName,
             DigitalPlatform.Z3950.RecordCollection records,
@@ -5464,6 +5468,33 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
                     strMarcSyntax = "unimarc";
                 else if (record.m_strSyntaxOID == "1.2.840.10003.5.10")
                     strMarcSyntax = "usmarc";
+
+                // 2020/6/9
+                // 自动探测 MARC 格式
+                if (targetInfo != null && targetInfo.DetectMarcSyntax)
+                {
+                    string strSytaxOID = record.m_strSyntaxOID;
+
+                    // return:
+                    //		-1	无法探测
+                    //		1	UNIMARC	规则：包含200字段
+                    //		10	USMARC	规则：包含008字段(innopac的UNIMARC格式也有一个奇怪的008)
+                    nRet = DetectMARCSyntax(strMARC);
+                    if (nRet == 1)
+                    {
+                        strMarcSyntax = "unimarc";
+                        strSytaxOID = "1.2.840.10003.5.1";
+                    }
+                    else if (nRet == 10)
+                    {
+                        strMarcSyntax = "usmarc";
+                        strSytaxOID = "1.2.840.10003.5.10";
+                    }
+
+                    // 把自动识别的结果保存下来
+                    record.AutoDetectedSyntaxOID = strSytaxOID;
+                }
+
                 nRet = MyForm.BuildMarcBrowseText(
     strMarcSyntax,
     strMARC,
@@ -5533,6 +5564,41 @@ index);// index + i
             // Debug.Assert(e.Start == _searchParam._searchCount, "");
             return;
         }
+
+        // 探测MARC记录从属的格式：
+        // return:
+        //		-1	无法探测
+        //		1	UNIMARC	规则：包含200字段
+        //		10	USMARC	规则：包含008字段(innopac的UNIMARC格式也有一个奇怪的008)
+        public static int DetectMARCSyntax(string strMARC)
+        {
+            int nRet = 0;
+
+            if (String.IsNullOrEmpty(strMARC) == true)
+                return -1;
+
+            string strField = "";
+            string strNextFieldName = "";
+
+            nRet = MarcUtil.GetField(strMARC,
+                "200",
+                0,
+                out strField,
+                out strNextFieldName);
+            if (nRet != -1 && nRet != 0)
+                return 1;	// UNIMARC
+
+            nRet = MarcUtil.GetField(strMARC,
+                "008",
+                0,
+                out strField,
+                out strNextFieldName);
+            if (nRet != -1 && nRet != -1)
+                return 10;	// USMARC
+
+            return -1;
+        }
+
 
         // 开始检索共享书目
         // return:
