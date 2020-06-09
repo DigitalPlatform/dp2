@@ -436,15 +436,15 @@ bool bOverwriteExist = true)
                     }
                 }
 
+                if (downloadCount > 0)
+                    WriteStateFile(strBinDir, "downloadComplete");
+
                 // 没有必要升级
                 if (_updatedGreenZipFileNames.Count == 0)
                     return new NormalResult();
 
-                WriteStateFile(strBinDir, "downloadComplete");
-
                 if (delayUpdate)
                 {
-
                     if (_updatedGreenZipFileNames.Count > 0)
                         setProgress?.Invoke(-1, -1, -1, "dp2circulation 绿色安装包升级文件已经准备就绪。当退出 dp2circulation 时会自动进行安装。\r\n");
                     else

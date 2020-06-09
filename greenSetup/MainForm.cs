@@ -115,7 +115,7 @@ true);
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            _ = Start();
+            _ = Start(true);
         }
 
         void ErrorBox(string message)
@@ -127,7 +127,13 @@ true);
 
         const string _binDir = "c:\\dp2ssl";
 
-        async Task Start()
+        // 启动 dp2ssl.exe；或首次安装；或升级并启动 dp2ssl.exe
+        // parameters:
+        //      delayUpdate 是否延迟让 dp2ssl.exe 启动起来再探测升级？
+        //                  意思就是，== true，让 dp2ssl.exe 去负责升级，而 greensetup.exe 这里不负责下载升级(只负责展开下载好的 .zip)。这样的特点是启动速度快
+        //                  == false，让 greensetup.exe 直接探测下载升级，缺点是 dp2ssl.exe 启动就晚一点
+        //                  但首次安装的时候，则是 greensetup.exe 负责下载 .zip 文件并安装。因为此时 dp2ssl.exe 还并不存在
+        async Task Start(bool delayUpdate)
         {
             // *** 检查 dp2ssl.exe 是否已经在运行
             if (GreenInstaller.HasModuleStarted("{75BAF3F0-FF7F-46BB-9ACD-8FE7429BF291}") == true)
@@ -169,6 +175,7 @@ true);
                 return;
             }
 
+            /*
             if (check_result.Value == 1
                 || check_result.Value == 5)
             {
@@ -176,6 +183,7 @@ true);
                 Application.Exit();
                 return;
             }
+            */
 
             /*
             Debugger.Launch();
@@ -194,6 +202,13 @@ true);
             else
                 MessageBox.Show(this, "not copy greensetup.exe");
             */
+
+            if (firstInstall == false && delayUpdate)
+            {
+                Process.Start(strExePath);
+                Application.Exit();
+                return;
+            }
 
             // *** 从 Web 升级
             double ratio = 1;

@@ -208,6 +208,7 @@ namespace dp2SSL
 
                             if (update_result.Value == 1 || update_result.Value == 2)
                             {
+                                App.TriggerUpdated("重启可使用新版本");
                                 _updated = true;
                                 PageShelf.TrySetMessage(null, "dp2SSL 升级文件已经下载成功，下次重启时可自动升级到新版本");
                             }

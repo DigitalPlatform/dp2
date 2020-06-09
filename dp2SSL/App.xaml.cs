@@ -273,6 +273,11 @@ namespace dp2SSL
             }
         }
 
+        public static void TriggerUpdated(string message)
+        {
+            Updated?.Invoke(null, new UpdatedEventArgs { Message = message });
+        }
+
         static void StartErrorBox(string message)
         {
             MessageBox.Show(message,
