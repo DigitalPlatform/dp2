@@ -199,6 +199,7 @@ namespace dp2SSL
                                 "c:\\dp2ssl",
                                 // null,
                                 true,
+                                true,
                                 null);
                             if (update_result.Value == -1)
                                 WpfClientInfo.WriteErrorLog($"自动检查升级出错: {update_result.ErrorInfo}");

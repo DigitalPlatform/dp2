@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -27,11 +28,17 @@ namespace greenSetup
 
         async Task install()
         {
+            /*
+            string exePath = Assembly.GetExecutingAssembly().Location;
+            bool updateGreenSetupExe = exePath.ToLower() != "c:\\dp2ssl\\greensetup.exe";
+            */
+
             double ratio = 1;
             var result = await GreenInstaller.InstallFromWeb("http://dp2003.com/dp2ssl/v1_dev",
 "c:\\dp2ssl",
 // null,
 false,
+true,
 (double min, double max, double value, string text) =>
 {
     this.Invoke(new Action(() =>
@@ -66,7 +73,9 @@ false,
             // TODO: 从 dp2ssl.exe 中取信息？
 
             // 创建桌面快捷方式
-            GreenInstaller.CreateShortcut("dp2SSL 自助借还(绿色)",
+            GreenInstaller.CreateShortcut(
+                "desktop",
+                "dp2SSL 自助借还(绿色)",
                 "dp2SSL 自助借还(绿色)",
                 "c:\\dp2ssl\\dp2ssl.exe");
 
@@ -90,7 +99,9 @@ Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
 
 
             // 创建桌面快捷方式
-            GreenInstaller.CreateShortcut("dp2SSL 自助借还(绿色)",
+            GreenInstaller.CreateShortcut(
+                "desktop",
+                "dp2SSL 自助借还(绿色)",
                 "dp2SSL 自助借还(绿色)",
                 "c:\\dp2ssl\\dp2ssl.exe");
 
@@ -166,6 +177,24 @@ true);
                 return;
             }
 
+            /*
+            Debugger.Launch();
+
+            // 拷贝 greensetup.exe
+            string exePath = Assembly.GetExecutingAssembly().Location.ToLower();
+            string targetExePath = Path.Combine(_binDir, "greensetup.exe"); 
+            if (exePath.EndsWith("greensetup.exe")
+                && File.Exists(targetExePath) == false
+                && exePath.ToLower() != targetExePath.ToLower())
+            {
+                MessageBox.Show(this, "copy greensetup.exe");
+                Library.TryCreateDir(_binDir);
+                File.Copy(exePath, targetExePath, true);
+            }
+            else
+                MessageBox.Show(this, "not copy greensetup.exe");
+            */
+
             // *** 从 Web 升级
             double ratio = 1;
             // 从 Web 服务器安装或者升级绿色版
@@ -178,6 +207,7 @@ true);
 _binDir,
 // null,
 false,
+true,
 (double min, double max, double value, string text) =>
 {
     this.Invoke(new Action(() =>
@@ -225,9 +255,17 @@ false,
             if (firstInstall)
             {
                 // 创建桌面快捷方式
-                GreenInstaller.CreateShortcut("dp2SSL 自助借还(绿色)",
-                "dp2SSL 自助借还(绿色)",
-                Path.Combine(_binDir, "dp2ssl.exe"));
+                GreenInstaller.CreateShortcut(
+                    "desktop",
+                    "dp2SSL 自助借还(绿色)",
+                    "dp2SSL 自助借还(绿色)",
+                    Path.Combine(_binDir, "greensetup.exe"));   // "dp2ssl.exe"
+
+                GreenInstaller.CreateShortcut(
+    "startup",
+    "dp2SSL 自助借还(绿色)",
+    "dp2SSL 自助借还(绿色)",
+    Path.Combine(_binDir, "greensetup.exe"));   // "dp2ssl.exe"
 
                 // 迁移用户文件夹
                 string sourceDirectory = Path.Combine(

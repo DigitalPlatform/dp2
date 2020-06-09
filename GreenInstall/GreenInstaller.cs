@@ -80,11 +80,18 @@ namespace GreenInstall
             return new NormalResult();
         }
 
-        public static NormalResult CreateShortcut(string description,
+        // parameters:
+        //      type    desktop/startup
+        public static NormalResult CreateShortcut(
+            string type,
+            string description,
             string productName,
             string executablePath)
         {
             var startupFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            if (type == "startup")
+                startupFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.Startup);
+
             var shell = new IWshRuntimeLibrary.WshShell();
             var shortCutLinkFilePath = Path.Combine(startupFolderPath, productName + ".lnk");
             var windowsApplicationShortcut = (IWshRuntimeLibrary.IWshShortcut)shell.CreateShortcut(shortCutLinkFilePath);
@@ -154,6 +161,7 @@ bool bOverwriteExist = true)
             // string userDirectory,
             // string waitExe,
             bool delayUpdate,
+            bool updateGreenSetupExe,
             Delegate_setProgress setProgress)
         {
             string strBaseUrl = downloadUrl;
@@ -192,11 +200,17 @@ bool bOverwriteExist = true)
                 return new NormalResult();
             }
 
+
             // 希望下载的文件。纯文件名
             List<string> filenames = new List<string>() {
                 // "greenutility.zip", // 这是工具软件，不算在 dp2circulation 范围内
                 "app.zip",
                 "data.zip"};
+
+            if (updateGreenSetupExe)
+            {
+                filenames.Insert(0, "greensetup.exe");
+            }
 
             // 发现更新了并下载的文件。纯文件名
             List<FileNameAndLength> updated_filenames = new List<FileNameAndLength>();
@@ -265,6 +279,10 @@ bool bOverwriteExist = true)
                         strBaseUrl
                         + info.FileName;
                     string strLocalFileName = Path.Combine(strBinDir, info.FileName).ToLower();
+
+                    // 特殊一点，先下载到一个临时文件名下
+                    if (info.FileName == "greensetup.exe")
+                        strLocalFileName = Path.Combine(strBinDir, info.FileName + ".tmp").ToLower();
 
                     /*
                     if (File.Exists(strLocalFileName) == true)
@@ -386,13 +404,37 @@ bool bOverwriteExist = true)
             this._updatedGreenZipFileNames = new List<string>();
             this._updatedGreenZipFileNames.Add("app.zip");
 #else
+                List<string> copy_filenames = new List<string>();
+
                 // 给 MainForm 一个标记，当它退出的时候，会自动展开 .zip 文件完成升级安装
                 _updatedGreenZipFileNames = new List<string>();
                 foreach (var info in updated_filenames)
                 {
-                    _updatedGreenZipFileNames.Add(info.FileName);
+
+                    if (info.FileName.EndsWith(".exe") == false)
+                        _updatedGreenZipFileNames.Add(info.FileName);
+                    else
+                        copy_filenames.Add(info.FileName);
                 }
 #endif
+                if (copy_filenames.Count > 0)
+                {
+                    foreach (var filename in copy_filenames)
+                    {
+                        string source = Path.Combine(strBinDir, filename + ".tmp");
+                        string target = Path.Combine(strBinDir, filename);
+
+                        try
+                        {
+                            File.Copy(source, target, true);
+                            File.Delete(source);
+                        }
+                        catch
+                        {
+                            // TODO: 写入错误日志?
+                        }
+                    }
+                }
 
                 // 没有必要升级
                 if (_updatedGreenZipFileNames.Count == 0)
@@ -456,7 +498,18 @@ bool bOverwriteExist = true)
                         WriteStateFile(strBinDir, "installed");
                     }
                 }
+
+
                 return new NormalResult { Value = 1 };
+            }
+            catch (Exception ex)
+            {
+                WriteStateFile(strBinDir, "downloadError");
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"exception: {ex.Message}"
+                };
             }
             finally
             {
