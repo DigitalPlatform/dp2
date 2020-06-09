@@ -595,7 +595,6 @@ queryTermEncoding='utf-8'>
     <database name='UCS01U' />
 </server>";
 
-
             CreateServer(server_xml);
 
             MessageBox.Show(this, "该服务器需要用户名和密码才能访问，请您稍后用“修改”按钮设置");
@@ -619,14 +618,13 @@ port='2100'>
   
         private void ToolStripMenuItem_new_calis_Click(object sender, EventArgs e)
         {
-            string server_xml = @"<root>
+            string server_xml = @"
   <server name='CALIS' addr='zserver1.calis.edu.cn' port='2200'>
     <database name='cn_cat' />
     <database name='we_cat' />
     <database name='jp_cat' />
     <database name='ru_cat' />
-  </server>
-</root>";
+  </server>";
 
             CreateServer(server_xml);
 
@@ -635,11 +633,26 @@ port='2100'>
 
         private void ToolStripMenuItem_new_nbinet_Click(object sender, EventArgs e)
         {
-            string server_xml = @"<root>
-  <server name='NBINET' addr='nbinet3.ncl.edu.tw' port='210' defaultEncoding='utf-8' queryTermEncoding='utf-8'>
+            string server_xml = @"
+  <server name='NBINET' 
+addr='nbinet3.ncl.edu.tw' 
+port='210' 
+defaultEncoding='utf-8' 
+queryTermEncoding='utf-8'
+detectmarcsyntax='1'
+>
     <database name='innopac' />
-  </server>
-</root>";
+  </server>";
+
+            CreateServer(server_xml);
+        }
+
+        private void ToolStripMenuItem_new_lc_Click(object sender, EventArgs e)
+        {
+            string server_xml = @"
+  <server name='Library of Congress' addr='lx2.loc.gov' port='210' defaultEncoding='utf-8' queryTermEncoding='utf-8'>
+    <database name='LCDB' />
+  </server>";
 
             CreateServer(server_xml);
         }

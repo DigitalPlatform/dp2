@@ -4235,6 +4235,10 @@ chi	中文	如果是中文，则为空。
                         if (nRet == -1)
                             goto ERROR1;
 
+                        // 2020/6/9
+                        // 让 DetailForm 里面的成员也随之改变
+                        this.DetailForm.MemoNumbers = dlg.MemoNumbers;
+
                         // 2020/4/8
                         GetCallNumberParameter parameter = new GetCallNumberParameter();
                         if (e.Parameter == null)

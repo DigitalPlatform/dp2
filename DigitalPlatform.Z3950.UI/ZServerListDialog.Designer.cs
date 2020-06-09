@@ -39,6 +39,7 @@
             this.ToolStripMenuItem_new_nlc = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_wangzhong = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_new_calis = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_new_nbinet = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripButton_modify = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_delete = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
@@ -51,7 +52,7 @@
             this.toolStripButton_import = new System.Windows.Forms.ToolStripButton();
             this.button_Cancel = new System.Windows.Forms.Button();
             this.button_OK = new System.Windows.Forms.Button();
-            this.ToolStripMenuItem_new_nbinet = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_new_lc = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -66,9 +67,10 @@
             this.columnHeader_enabled});
             this.listView1.FullRowSelect = true;
             this.listView1.HideSelection = false;
-            this.listView1.Location = new System.Drawing.Point(13, 34);
+            this.listView1.Location = new System.Drawing.Point(16, 40);
+            this.listView1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(775, 365);
+            this.listView1.Size = new System.Drawing.Size(946, 425);
             this.listView1.TabIndex = 1;
             this.listView1.UseCompatibleStateImageBehavior = false;
             this.listView1.View = System.Windows.Forms.View.Details;
@@ -108,7 +110,7 @@
             this.toolStrip1.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.HorizontalStackWithOverflow;
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(800, 31);
+            this.toolStrip1.Size = new System.Drawing.Size(978, 38);
             this.toolStrip1.TabIndex = 2;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -120,18 +122,19 @@
             this.ToolStripMenuItem_new_nlc,
             this.ToolStripMenuItem_wangzhong,
             this.ToolStripMenuItem_new_calis,
-            this.ToolStripMenuItem_new_nbinet});
+            this.ToolStripMenuItem_new_nbinet,
+            this.ToolStripMenuItem_new_lc});
             this.toolStripSplitButton_new1.Image = ((System.Drawing.Image)(resources.GetObject("toolStripSplitButton_new1.Image")));
             this.toolStripSplitButton_new1.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripSplitButton_new1.Name = "toolStripSplitButton_new1";
-            this.toolStripSplitButton_new1.Size = new System.Drawing.Size(67, 28);
+            this.toolStripSplitButton_new1.Size = new System.Drawing.Size(78, 32);
             this.toolStripSplitButton_new1.Text = "新增";
             this.toolStripSplitButton_new1.ButtonClick += new System.EventHandler(this.toolStripSplitButton_new1_ButtonClick);
             // 
             // ToolStripMenuItem_new_hongniba
             // 
             this.ToolStripMenuItem_new_hongniba.Name = "ToolStripMenuItem_new_hongniba";
-            this.ToolStripMenuItem_new_hongniba.Size = new System.Drawing.Size(290, 30);
+            this.ToolStripMenuItem_new_hongniba.Size = new System.Drawing.Size(360, 40);
             this.ToolStripMenuItem_new_hongniba.Text = "红泥巴数字平台云";
             this.ToolStripMenuItem_new_hongniba.ToolTipText = "新增一个 红泥巴数字平台云 服务器节点";
             this.ToolStripMenuItem_new_hongniba.Click += new System.EventHandler(this.ToolStripMenuItem_new_hongniba_Click);
@@ -139,7 +142,7 @@
             // ToolStripMenuItem_new_nlc
             // 
             this.ToolStripMenuItem_new_nlc.Name = "ToolStripMenuItem_new_nlc";
-            this.ToolStripMenuItem_new_nlc.Size = new System.Drawing.Size(290, 30);
+            this.ToolStripMenuItem_new_nlc.Size = new System.Drawing.Size(360, 40);
             this.ToolStripMenuItem_new_nlc.Text = "国家图书馆联合编目中心";
             this.ToolStripMenuItem_new_nlc.ToolTipText = "新增一个 国家图书馆联合编目中心 服务器节点";
             this.ToolStripMenuItem_new_nlc.Click += new System.EventHandler(this.ToolStripMenuItem_new_nlc_Click);
@@ -147,16 +150,23 @@
             // ToolStripMenuItem_wangzhong
             // 
             this.ToolStripMenuItem_wangzhong.Name = "ToolStripMenuItem_wangzhong";
-            this.ToolStripMenuItem_wangzhong.Size = new System.Drawing.Size(290, 30);
+            this.ToolStripMenuItem_wangzhong.Size = new System.Drawing.Size(360, 40);
             this.ToolStripMenuItem_wangzhong.Text = "网众";
             this.ToolStripMenuItem_wangzhong.Click += new System.EventHandler(this.ToolStripMenuItem_wangzhong_Click);
             // 
             // ToolStripMenuItem_new_calis
             // 
             this.ToolStripMenuItem_new_calis.Name = "ToolStripMenuItem_new_calis";
-            this.ToolStripMenuItem_new_calis.Size = new System.Drawing.Size(290, 30);
+            this.ToolStripMenuItem_new_calis.Size = new System.Drawing.Size(360, 40);
             this.ToolStripMenuItem_new_calis.Text = "CALIS";
             this.ToolStripMenuItem_new_calis.Click += new System.EventHandler(this.ToolStripMenuItem_new_calis_Click);
+            // 
+            // ToolStripMenuItem_new_nbinet
+            // 
+            this.ToolStripMenuItem_new_nbinet.Name = "ToolStripMenuItem_new_nbinet";
+            this.ToolStripMenuItem_new_nbinet.Size = new System.Drawing.Size(360, 40);
+            this.ToolStripMenuItem_new_nbinet.Text = "NBINET";
+            this.ToolStripMenuItem_new_nbinet.Click += new System.EventHandler(this.ToolStripMenuItem_new_nbinet_Click);
             // 
             // toolStripButton_modify
             // 
@@ -165,7 +175,7 @@
             this.toolStripButton_modify.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_modify.Image")));
             this.toolStripButton_modify.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_modify.Name = "toolStripButton_modify";
-            this.toolStripButton_modify.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_modify.Size = new System.Drawing.Size(58, 32);
             this.toolStripButton_modify.Text = "修改";
             this.toolStripButton_modify.Click += new System.EventHandler(this.toolStripButton_modify_Click);
             // 
@@ -176,14 +186,14 @@
             this.toolStripButton_delete.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_delete.Image")));
             this.toolStripButton_delete.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_delete.Name = "toolStripButton_delete";
-            this.toolStripButton_delete.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_delete.Size = new System.Drawing.Size(58, 32);
             this.toolStripButton_delete.Text = "删除";
             this.toolStripButton_delete.Click += new System.EventHandler(this.toolStripButton_delete_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 31);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 38);
             // 
             // toolStripButton_enabled
             // 
@@ -193,14 +203,14 @@
             this.toolStripButton_enabled.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_enabled.Image")));
             this.toolStripButton_enabled.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_enabled.Name = "toolStripButton_enabled";
-            this.toolStripButton_enabled.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_enabled.Size = new System.Drawing.Size(58, 32);
             this.toolStripButton_enabled.Text = "启用";
             this.toolStripButton_enabled.Click += new System.EventHandler(this.toolStripButton_enabled_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 31);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 38);
             // 
             // toolStripButton_moveUp
             // 
@@ -209,7 +219,7 @@
             this.toolStripButton_moveUp.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_moveUp.Image")));
             this.toolStripButton_moveUp.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_moveUp.Name = "toolStripButton_moveUp";
-            this.toolStripButton_moveUp.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_moveUp.Size = new System.Drawing.Size(58, 32);
             this.toolStripButton_moveUp.Text = "上移";
             this.toolStripButton_moveUp.Click += new System.EventHandler(this.toolStripButton_moveUp_Click);
             // 
@@ -220,14 +230,14 @@
             this.toolStripButton_moveDown.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_moveDown.Image")));
             this.toolStripButton_moveDown.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_moveDown.Name = "toolStripButton_moveDown";
-            this.toolStripButton_moveDown.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_moveDown.Size = new System.Drawing.Size(58, 32);
             this.toolStripButton_moveDown.Text = "下移";
             this.toolStripButton_moveDown.Click += new System.EventHandler(this.toolStripButton_moveDown_Click);
             // 
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(6, 31);
+            this.toolStripSeparator3.Size = new System.Drawing.Size(6, 38);
             // 
             // toolStripButton_export
             // 
@@ -236,7 +246,7 @@
             this.toolStripButton_export.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_export.Image")));
             this.toolStripButton_export.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_export.Name = "toolStripButton_export";
-            this.toolStripButton_export.Size = new System.Drawing.Size(67, 28);
+            this.toolStripButton_export.Size = new System.Drawing.Size(79, 32);
             this.toolStripButton_export.Text = "导出 ...";
             this.toolStripButton_export.Click += new System.EventHandler(this.toolStripButton_export_Click);
             // 
@@ -246,7 +256,7 @@
             this.toolStripButton_import.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_import.Image")));
             this.toolStripButton_import.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_import.Name = "toolStripButton_import";
-            this.toolStripButton_import.Size = new System.Drawing.Size(67, 28);
+            this.toolStripButton_import.Size = new System.Drawing.Size(79, 32);
             this.toolStripButton_import.Text = "导入 ...";
             this.toolStripButton_import.Click += new System.EventHandler(this.toolStripButton_import_Click);
             // 
@@ -254,9 +264,10 @@
             // 
             this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.button_Cancel.Location = new System.Drawing.Point(704, 405);
+            this.button_Cancel.Location = new System.Drawing.Point(860, 472);
+            this.button_Cancel.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.button_Cancel.Name = "button_Cancel";
-            this.button_Cancel.Size = new System.Drawing.Size(84, 33);
+            this.button_Cancel.Size = new System.Drawing.Size(103, 38);
             this.button_Cancel.TabIndex = 4;
             this.button_Cancel.Text = "取消";
             this.button_Cancel.UseVisualStyleBackColor = true;
@@ -265,32 +276,34 @@
             // button_OK
             // 
             this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_OK.Location = new System.Drawing.Point(612, 405);
+            this.button_OK.Location = new System.Drawing.Point(748, 472);
+            this.button_OK.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.button_OK.Name = "button_OK";
-            this.button_OK.Size = new System.Drawing.Size(84, 33);
+            this.button_OK.Size = new System.Drawing.Size(103, 38);
             this.button_OK.TabIndex = 3;
             this.button_OK.Text = "确定";
             this.button_OK.UseVisualStyleBackColor = true;
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
             // 
-            // ToolStripMenuItem_new_nbinet
+            // ToolStripMenuItem_new_lc
             // 
-            this.ToolStripMenuItem_new_nbinet.Name = "ToolStripMenuItem_new_nbinet";
-            this.ToolStripMenuItem_new_nbinet.Size = new System.Drawing.Size(290, 30);
-            this.ToolStripMenuItem_new_nbinet.Text = "NBINET";
-            this.ToolStripMenuItem_new_nbinet.Click += new System.EventHandler(this.ToolStripMenuItem_new_nbinet_Click);
+            this.ToolStripMenuItem_new_lc.Name = "ToolStripMenuItem_new_lc";
+            this.ToolStripMenuItem_new_lc.Size = new System.Drawing.Size(360, 40);
+            this.ToolStripMenuItem_new_lc.Text = "Library of Congress";
+            this.ToolStripMenuItem_new_lc.Click += new System.EventHandler(this.ToolStripMenuItem_new_lc_Click);
             // 
             // ZServerListDialog
             // 
             this.AcceptButton = this.button_OK;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.button_Cancel;
-            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.ClientSize = new System.Drawing.Size(978, 525);
             this.Controls.Add(this.button_Cancel);
             this.Controls.Add(this.button_OK);
             this.Controls.Add(this.toolStrip1);
             this.Controls.Add(this.listView1);
+            this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.Name = "ZServerListDialog";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
@@ -329,5 +342,6 @@
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_wangzhong;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_new_calis;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_new_nbinet;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_new_lc;
     }
 }

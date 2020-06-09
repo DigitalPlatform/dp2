@@ -12,6 +12,7 @@ using DigitalPlatform.RFID;
 using DigitalPlatform.Xml;
 using static dp2Circulation.CallNumberForm;
 using DigitalPlatform.LibraryClient;
+using System.Web;
 
 namespace dp2Circulation
 {
@@ -1367,6 +1368,15 @@ out strError);
 
             Debug.Assert(strAction == "protect" || strAction == "unmemo", "");
 
+            // 显示到操作历史中
+            {
+                string oper_name = "保护";
+                if (strAction == "unmemo")
+                    oper_name = "解除保护";
+                string text = $"{oper_name} 种次号 '{strTestNumber}' (类号={strClass}, 排架体系名={strArrangeGroupName})";
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug green'>" + HttpUtility.HtmlEncode(text) + "</div>");
+            }
+
             LibraryChannel channel = Program.MainForm.GetChannel();
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = new TimeSpan(0, 1, 0);
@@ -1381,8 +1391,12 @@ out strError);
                     out strOutputNumber,
                     out strError);
                 if (lRet == -1)
+                {
+                    Program.MainForm.OperHistory.AppendHtml("<div class='debug red'>" + HttpUtility.HtmlEncode($"返回出错:{strError}") + "</div>");
                     return -1;
+                }
 
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug yellow'>" + HttpUtility.HtmlEncode($"返回成功:strOutputNumber={strOutputNumber}, lRet={lRet}, strError={strError}") + "</div>");
                 return (int)lRet;
             }
             finally

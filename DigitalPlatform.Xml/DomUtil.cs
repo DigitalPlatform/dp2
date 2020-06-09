@@ -1682,7 +1682,17 @@ namespace DigitalPlatform.Xml
 
                 element.ParentNode.InsertAfter(fragment, element);
 
-                new_element = element.NextSibling as XmlElement;    // 2012/12/12 新增加
+                // 2020/6/9 注意 NextSibling 可能是非 XmlElement 类型的节点
+                XmlNode current = element;
+                while (current.NextSibling != null)
+                {
+                    if (current.NextSibling is XmlElement)
+                    {
+                        new_element = current.NextSibling as XmlElement;    // 2012/12/12 新增加
+                        break;
+                    }
+                    current = current.NextSibling;
+                }
             }
             element.ParentNode.RemoveChild(element);
             return new_element;

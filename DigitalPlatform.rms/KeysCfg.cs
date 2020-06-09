@@ -19,6 +19,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.IO;
 using DigitalPlatform.Core;
+using System.Globalization;
 
 namespace DigitalPlatform.rms
 {
@@ -1503,6 +1504,26 @@ namespace DigitalPlatform.rms
             return 0;
         }
 
+        // https://blogs.infosupport.com/normalizing-unicode-strings-in-c/
+        // https://stackoverflow.com/questions/9349608/how-to-check-if-unicode-character-has-diacritics-in-net
+        static string Normalize(string text)
+        {
+            string resultValue = text.Normalize(NormalizationForm.FormD);
+            StringBuilder normalizedOutputBuilder = new StringBuilder();
+
+            foreach (char c in resultValue)
+            {
+                UnicodeCategory category = CharUnicodeInfo.GetUnicodeCategory(c);
+
+                if (category != UnicodeCategory.NonSpacingMark)
+                {
+                    normalizedOutputBuilder.Append(c);
+                }
+            }
+
+            return normalizedOutputBuilder.ToString();
+        }
+
         // 对字符串类型的检索点进行加工
         // parameter:
         //		strText	待加工的字符串
@@ -1531,6 +1552,15 @@ namespace DigitalPlatform.rms
 
             keys = new List<string>();
 
+            // 2020/6/9
+            try
+            {
+                strText = Normalize(strText);
+            }
+            catch
+            {
+
+            }
 
             // 把传入的字符串作为第一个项
             keys.Add(strText);

@@ -28,6 +28,7 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.Z3950.UI;
+using DigitalPlatform.Z3950;
 
 namespace dp2Circulation
 {
@@ -1645,7 +1646,8 @@ Keys keyData)
                             {
                                 ListViewItem item = (ListViewItem)zchannelTable[c];
                                 if (r.Records != null)
-                                    FillList(c._fetched,
+                                    FillList(c.TargetInfo,
+                                        c._fetched,
                                         c.ZClient.ForcedRecordsEncoding == null ? c.TargetInfo.DefaultRecordsEncoding : c.ZClient.ForcedRecordsEncoding,
                                         c.ServerName,
                                         r.Records,
@@ -1762,7 +1764,9 @@ Keys keyData)
         Z3950Searcher _zsearcher = new Z3950Searcher();
 
         // (Z39.50)填入浏览记录
-        void FillList(int start,
+        void FillList(
+            TargetInfo targetInfo,
+            int start,
             Encoding encoding,
             string strLibraryName,
             DigitalPlatform.Z3950.RecordCollection records,
@@ -1818,6 +1822,33 @@ Keys keyData)
                     strMarcSyntax = "unimarc";
                 else if (record.m_strSyntaxOID == "1.2.840.10003.5.10")
                     strMarcSyntax = "usmarc";
+
+                // 2020/6/9
+                // 自动探测 MARC 格式
+                if (targetInfo != null && targetInfo.DetectMarcSyntax)
+                {
+                    string strSytaxOID = record.m_strSyntaxOID;
+
+                    // return:
+                    //		-1	无法探测
+                    //		1	UNIMARC	规则：包含200字段
+                    //		10	USMARC	规则：包含008字段(innopac的UNIMARC格式也有一个奇怪的008)
+                    nRet = EntityForm.DetectMARCSyntax(strMARC);
+                    if (nRet == 1)
+                    {
+                        strMarcSyntax = "unimarc";
+                        strSytaxOID = "1.2.840.10003.5.1";
+                    }
+                    else if (nRet == 10)
+                    {
+                        strMarcSyntax = "usmarc";
+                        strSytaxOID = "1.2.840.10003.5.10";
+                    }
+
+                    // 把自动识别的结果保存下来
+                    record.AutoDetectedSyntaxOID = strSytaxOID;
+                }
+
                 nRet = MyForm.BuildMarcBrowseText(
     strMarcSyntax,
     strMARC,
@@ -2784,10 +2815,12 @@ out strError);
 
                     {
                         if (present_result.Records != null)
-                            FillList(channel._fetched,
-                channel.ZClient.ForcedRecordsEncoding == null ? channel.TargetInfo.DefaultRecordsEncoding : channel.ZClient.ForcedRecordsEncoding,
-                channel.ServerName,
-                present_result.Records, item);
+                            FillList(channel.TargetInfo,
+                                channel._fetched,
+                                channel.ZClient.ForcedRecordsEncoding == null ? channel.TargetInfo.DefaultRecordsEncoding : channel.ZClient.ForcedRecordsEncoding,
+                                channel.ServerName,
+                                present_result.Records,
+                                item);
                         UpdateCommandLine(item, channel, present_result);
                     }
 
