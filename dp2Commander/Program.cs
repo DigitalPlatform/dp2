@@ -14,13 +14,14 @@ using DigitalPlatform;
 using DigitalPlatform.Core;
 using DigitalPlatform.Text;
 using Serilog;
+using System.Diagnostics;
 // using log4net;
 
 namespace dp2Commander
 {
     public static class Program
     {
-        // public static ILog ILog { get; set; }
+        public static Serilog.ILogger ILog { get; set; }
 
         static void Main(string[] args)
         {
@@ -78,8 +79,12 @@ namespace dp2Commander
             .WriteTo.File("logs\\.log", rollingInterval: RollingInterval.Day)
             .CreateLogger();
 
+                Log.Information("test -------");
+                ILog = Log.Logger;
+
                 var rc = HostFactory.Run(x =>                                   //1
                 {
+                    x.UseSerilog();
                     x.Service<Worker>(s =>                                   //2
                     {
                         s.ConstructUsing(name => new Worker(args));                //3
@@ -87,7 +92,6 @@ namespace dp2Commander
                         s.WhenStopped(tc => tc.Stop());                          //5
                     });
                     x.RunAsLocalSystem();                                       //6
-                    x.UseLog4Net();
                     x.SetDescription("dp2 远程控制器");                   //7
                     x.SetDisplayName("dp2 Commander Service");                                  //8
                     x.SetServiceName("dp2CommanderService");                                  //9
@@ -114,6 +118,48 @@ namespace dp2Commander
             }
 
             return false;
+        }
+
+        public static void WriteErrorLog(string strText)
+        {
+            try
+            {
+                string dataDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                string logDir = Path.Combine(dataDir, "log");
+                TryCreateDir(logDir);
+
+                DateTime now = DateTime.Now;
+                // 每天一个日志文件
+                string strFilename = Path.Combine(logDir, "log_" + DateTimeToString8(now) + ".txt");
+                string strTime = now.ToString();
+                File.AppendAllLines(strFilename, new string[] { strTime + " " + strText + "\r\n" });
+                //StreamUtil.WriteText(strFilename,
+                //    strTime + " " + strText + "\r\n");
+            }
+            catch (Exception ex)
+            {
+                // TODO: 要在安装程序中预先创建事件源
+                // 代码可以参考 unhandle.txt (在本project中)
+
+                /*
+                // Create the source, if it does not already exist.
+                if (!EventLog.SourceExists("dp2library"))
+                {
+                    EventLog.CreateEventSource("dp2library", "DigitalPlatform");
+                }*/
+
+                EventLog Log = new EventLog();
+                Log.Source = "dp2Commander";
+                Log.WriteEntry("因为原本要写入日志文件的操作发生异常， 所以不得不改为写入Windows系统日志(见后一条)。异常信息如下：'" + ExceptionUtil.GetDebugText(ex) + "'", EventLogEntryType.Error);
+                Log.WriteEntry(strText, EventLogEntryType.Error);
+            }
+        }
+
+        public static string DateTimeToString8(DateTime time)
+        {
+            return time.Year.ToString().PadLeft(4, '0')
+                + time.Month.ToString().PadLeft(2, '0')
+                + time.Day.ToString().PadLeft(2, '0');
         }
 
 #if OLD

@@ -13,6 +13,7 @@ using GreenInstall;
 using DigitalPlatform;
 using DigitalPlatform.MessageClient;
 using Serilog;
+using Serilog.Events;
 
 namespace dp2Commander
 {
@@ -58,8 +59,16 @@ namespace dp2Commander
             args = vs;
         }
 
-        async Task ExecuteAsync(CancellationToken stoppingToken)
+        public async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            Log.Information("Enter ExecuteAsync -----");
+
+            /*
+            EventLog logListener = new EventLog("Security");
+            logListener.EntryWritten += LogListener_EntryWritten;
+            logListener.EnableRaisingEvents = true;
+            */
+
             WriteInfoLog("开始工作");
             _connection.AddMessage += _connection_AddMessage;
             /*
@@ -81,11 +90,24 @@ namespace dp2Commander
             WriteInfoLog("结束工作");
         }
 
+        private void LogListener_EntryWritten(object sender, EntryWrittenEventArgs e)
+        {
+            //4624: An account was successfully logged on.
+            //4625: An account failed to log on.
+            //4648: A logon was attempted using explicit credentials.
+            //4675: SIDs were filtered.
+            var events = new int[] { 4624, 4625, 4648, 4675 };
+            if (Array.IndexOf(events, e.Entry.EventID) != -1)
+                WriteInfoLog($"event message: EventID:{e.Entry.EventID},InstanceID:{e.Entry.InstanceId}, TimeGenerated:{e.Entry.TimeGenerated}, Message:{e.Entry.Message}");
+
+            // WriteInfoLog($"event message: EventID:{e.Entry.EventID},InstanceID:{e.Entry.InstanceId}, Message:{e.Entry.Message}");
+        }
+
         CancellationTokenSource _cancel = new CancellationTokenSource();
 
         public void Start()
         {
-            Console.WriteLine("Start");
+            WriteInfoLog("Start");
 
             _cancel?.Cancel();
             _cancel = new CancellationTokenSource();
@@ -102,7 +124,8 @@ namespace dp2Commander
 
         public void Stop()
         {
-            Console.WriteLine("Stop");
+            WriteInfoLog("Stop");
+
             _cancel?.Cancel();
         }
 
@@ -180,7 +203,7 @@ namespace dp2Commander
                 DirectoryInfo di = new DirectoryInfo("c:\\Users");
                 var fis = di.GetFiles();
                 StringBuilder temp = new StringBuilder();
-                foreach(var fi in fis)
+                foreach (var fi in fis)
                 {
                     temp.AppendLine(fi.FullName);
                 }
@@ -400,12 +423,18 @@ namespace dp2Commander
 
         static void WriteErrorLog(string text)
         {
-            Log.Error(text);
+            // Log.Logger.Write(LogEventLevel.Error, text);
+
+            Program.WriteErrorLog(text);
+            // Program.ILog.Error(text);
         }
 
         static void WriteInfoLog(string text)
         {
-            Log.Information(text);
+            //Log.Logger.Write(LogEventLevel.Error, text);
+
+            Program.WriteErrorLog(text);
+            // Program.ILog.Information(text);
         }
     }
 
