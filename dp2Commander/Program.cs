@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using System.IO;
+using System.Diagnostics;
 
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,12 +10,11 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.EventLog;
 
 using Topshelf;
+using Serilog;
 
 using DigitalPlatform;
 using DigitalPlatform.Core;
 using DigitalPlatform.Text;
-using Serilog;
-using System.Diagnostics;
 // using log4net;
 
 namespace dp2Commander
@@ -52,7 +52,6 @@ namespace dp2Commander
 
                 SaveConfig();
 
-
                 Console.WriteLine();
                 Console.WriteLine("注：修改将在服务重启以后生效");
                 Console.WriteLine("(按回车键返回)");
@@ -79,12 +78,13 @@ namespace dp2Commander
             .WriteTo.File("logs\\.log", rollingInterval: RollingInterval.Day)
             .CreateLogger();
 
+                // Serilog.Debugging.SelfLog.Enable(msg => WriteErrorLog(msg));
+
                 Log.Information("test -------");
                 ILog = Log.Logger;
 
                 var rc = HostFactory.Run(x =>                                   //1
                 {
-                    x.UseSerilog();
                     x.Service<Worker>(s =>                                   //2
                     {
                         s.ConstructUsing(name => new Worker(args));                //3
@@ -95,6 +95,7 @@ namespace dp2Commander
                     x.SetDescription("dp2 远程控制器");                   //7
                     x.SetDisplayName("dp2 Commander Service");                                  //8
                     x.SetServiceName("dp2CommanderService");                                  //9
+                    x.UseSerilog();
                 });                                                             //10
 
                 Log.CloseAndFlush();
@@ -120,21 +121,26 @@ namespace dp2Commander
             return false;
         }
 
+        static object _syncRoot_log = new object();
+
         public static void WriteErrorLog(string strText)
         {
             try
             {
-                string dataDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-                string logDir = Path.Combine(dataDir, "log");
-                TryCreateDir(logDir);
+                lock (_syncRoot_log)
+                {
+                    string dataDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                    string logDir = Path.Combine(dataDir, "log");
+                    TryCreateDir(logDir);
 
-                DateTime now = DateTime.Now;
-                // 每天一个日志文件
-                string strFilename = Path.Combine(logDir, "log_" + DateTimeToString8(now) + ".txt");
-                string strTime = now.ToString();
-                File.AppendAllLines(strFilename, new string[] { strTime + " " + strText + "\r\n" });
-                //StreamUtil.WriteText(strFilename,
-                //    strTime + " " + strText + "\r\n");
+                    DateTime now = DateTime.Now;
+                    // 每天一个日志文件
+                    string strFilename = Path.Combine(logDir, "log_" + DateTimeToString8(now) + ".txt");
+                    string strTime = now.ToString();
+                    File.AppendAllLines(strFilename, new string[] { strTime + " " + strText + "\r\n" });
+                    //StreamUtil.WriteText(strFilename,
+                    //    strTime + " " + strText + "\r\n");
+                }
             }
             catch (Exception ex)
             {
