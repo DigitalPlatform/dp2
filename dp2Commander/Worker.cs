@@ -9,11 +9,13 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
+using Serilog;
+
+using murrayju.ProcessExtensions;
+
 using GreenInstall;
 using DigitalPlatform;
 using DigitalPlatform.MessageClient;
-using Serilog;
-using Serilog.Events;
 
 namespace dp2Commander
 {
@@ -59,6 +61,9 @@ namespace dp2Commander
             args = vs;
         }
 
+        // 检查网络连接的间隔时间
+        static TimeSpan _idleLength = TimeSpan.FromMinutes(5);   // 5 // TimeSpan.FromSeconds(10);
+
         public async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             Log.Information("Enter ExecuteAsync -----");
@@ -77,12 +82,24 @@ namespace dp2Commander
             ExitProcess("dp2SSL");
             */
 
-            while (!stoppingToken.IsCancellationRequested)
+            try
             {
-                Console.WriteLine("running ...");
-                await EnsureConnectMessageServerAsync();
-                // _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
-                await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
+                while (!stoppingToken.IsCancellationRequested)
+                {
+                    Console.WriteLine("running ...");
+                    await EnsureConnectMessageServerAsync();
+                    // _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
+
+                    await Task.Delay(_idleLength, stoppingToken);
+                }
+            }
+            catch (TaskCanceledException)
+            {
+
+            }
+            catch (Exception ex)
+            {
+                WriteErrorLog($"ExecuteAsync() 内循环体出现异常: {ExceptionUtil.GetDebugText(ex)}"); ;
             }
 
             _connection.AddMessage -= _connection_AddMessage;
@@ -107,7 +124,7 @@ namespace dp2Commander
 
         public void Start()
         {
-            WriteInfoLog("Start");
+            WriteInfoLog("Service Start");
 
             _cancel?.Cancel();
             _cancel = new CancellationTokenSource();
@@ -124,7 +141,7 @@ namespace dp2Commander
 
         public void Stop()
         {
-            WriteInfoLog("Stop");
+            WriteInfoLog("Service Stop");
 
             _cancel?.Cancel();
         }
@@ -158,6 +175,8 @@ namespace dp2Commander
                     var result_text = ProcessCommand(record.data);
                     if (result_text == null)
                         continue;
+
+                    WriteInfoLog($"响应文字 '{result_text}'");
                     new_messages.Add(new MessageRecord
                     {
                         groups = record.groups,
@@ -174,13 +193,13 @@ namespace dp2Commander
                     var result = await _connection.SetMessageAsyncLite(param);
                     if (result.Value == -1)
                     {
-                        Console.WriteLine($"reply message error: {result.ErrorInfo}");
+                        WriteErrorLog($"reply message error: {result.ErrorInfo}");
                     }
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"ProcessAndReply() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                WriteErrorLog($"ProcessAndReply() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
             }
         }
 
@@ -191,11 +210,14 @@ namespace dp2Commander
 
             string command = text.Substring($"@{_userName}".Length).Trim();
 
+            WriteInfoLog($"收到命令 {text}");
+
             if (command.StartsWith("hello"))
             {
                 return "hello!";
             }
 
+            /*
             if (command.StartsWith("test"))
             {
                 //bool existence = Directory.Exists("c:\\用户\\xietao\\dp2ssl");
@@ -209,6 +231,7 @@ namespace dp2Commander
                 }
                 return temp.ToString();
             }
+            */
 
             // 重启电脑
             if (command.StartsWith("restart"))
@@ -256,39 +279,59 @@ namespace dp2Commander
                     ExitProcess("dp2SSL", true);
                 }
 
-                // 启动之前，检查 .zip 是否已经展开
-                {
-                    string binDir = "c:\\dp2ssl";
-                    // *** 检查状态文件
-                    // result.Value
-                    //      -1  出错
-                    //      0   不存在状态文件
-                    //      1   正在下载 .zip 过程中。.zip 不完整
-                    //      2   当前 .zip 和 .exe 已经一样新
-                    //      3   当前 .zip 比 .exe 要新。需要展开 .zip 进行更新安装
-                    //      4   下载 .zip 失败。.zip 不完整
-                    //      5   当前 .zip 比 .exe 要新，需要重启计算机以便展开的文件生效
-                    var check_result = GreenInstaller.CheckStateFile(binDir);
-                    // 展开
-                    if (check_result.Value == 3)
-                    {
-                        var extract_result = GreenInstaller.ExtractFiles(binDir);
-                        if (extract_result.Value == -1)
-                        {
-                            // TODO: 写入错误日志
-                            WriteErrorLog($"展开压缩文件时出错: {extract_result.ErrorInfo}");
-                        }
-                    }
-                }
 
-                // 启动
-                // StartModule(ShortcutPath, "");
-                Process.Start("c:\\dp2ssl\\dp2ssl.exe");
-                return "dp2SSL 已经重新启动";
+                try
+                {
+                    // 启动
+                    // StartModule(ShortcutPath, "");
+                    // Process.Start("c:\\dp2ssl\\dp2ssl.exe");
+                    string exe_path1 = "c:\\dp2ssl\\greensetup.exe";
+                    string exe_path2 = "c:\\dp2ssl\\dp2ssl.exe";
+                    if (File.Exists(exe_path1))
+                        ProcessExtensions.StartProcessAsCurrentUser(exe_path1);
+                    else if (File.Exists(exe_path2))
+                    {
+                        // 启动之前，检查 .zip 是否已经展开
+                        {
+                            string binDir = "c:\\dp2ssl";
+                            // *** 检查状态文件
+                            // result.Value
+                            //      -1  出错
+                            //      0   不存在状态文件
+                            //      1   正在下载 .zip 过程中。.zip 不完整
+                            //      2   当前 .zip 和 .exe 已经一样新
+                            //      3   当前 .zip 比 .exe 要新。需要展开 .zip 进行更新安装
+                            //      4   下载 .zip 失败。.zip 不完整
+                            //      5   当前 .zip 比 .exe 要新，需要重启计算机以便展开的文件生效
+                            var check_result = GreenInstaller.CheckStateFile(binDir);
+                            // 展开
+                            if (check_result.Value == 3)
+                            {
+                                var extract_result = GreenInstaller.ExtractFiles(binDir);
+                                if (extract_result.Value == -1)
+                                {
+                                    // TODO: 写入错误日志
+                                    WriteErrorLog($"展开压缩文件时出错: {extract_result.ErrorInfo}");
+                                }
+                            }
+                        }
+
+                        ProcessExtensions.StartProcessAsCurrentUser(exe_path2);
+                    }
+                    else
+                        return $"{exe_path1} 和 {exe_path2} 均未找到，无法启动";
+                    return "dp2SSL 已经重新启动";
+                }
+                catch(Exception ex)
+                {
+                    return $"启动过程出现异常: {ExceptionUtil.GetDebugText(ex)}";
+                }
             }
 
             return $"命令 '{command}' 未知的子参数 '{param}'";
         }
+
+        static bool _warning = false;
 
         // 确保连接到消息服务器
         public async Task EnsureConnectMessageServerAsync()
@@ -299,7 +342,11 @@ namespace dp2Commander
 
                 if (string.IsNullOrEmpty(account_result.Url) == true)
                 {
-                    Console.WriteLine("警告: 尚未设置 dp2mserver 服务器 url 和其他参数");
+                    if (_warning == false)
+                    {
+                        WriteInfoLog("警告: 尚未设置 dp2mserver 服务器 url 和其他参数");
+                        _warning = true;
+                    }
                     return;
                 }
 
@@ -311,9 +358,9 @@ namespace dp2Commander
                         account_result.Password,
                         "");
                     if (connect_result.Value == -1)
-                        Console.WriteLine($"连接消息服务器失败: {connect_result.ErrorInfo}。url={account_result.Url},userName={account_result.UserName},errorCode={connect_result.ErrorCode}");
+                        WriteErrorLog($"连接消息服务器失败: {connect_result.ErrorInfo}。url={account_result.Url},userName={account_result.UserName},errorCode={connect_result.ErrorCode}");
                     else
-                        Console.WriteLine("连接消息服务器成功");
+                        WriteInfoLog($"连接消息服务器 {account_result.Url} 成功");
 
                     _userName = account_result.UserName;
 
@@ -328,7 +375,7 @@ namespace dp2Commander
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"EnsureConnectMessageServerAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                WriteErrorLog($"EnsureConnectMessageServerAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
             }
         }
 
@@ -425,16 +472,20 @@ namespace dp2Commander
         {
             // Log.Logger.Write(LogEventLevel.Error, text);
 
-            Program.WriteErrorLog(text);
-            // Program.ILog.Error(text);
+            Program.WriteErrorLog("[ERROR] " + text);
+            //Program.ILog.Error(text);
+
+            Console.WriteLine(text);
         }
 
         static void WriteInfoLog(string text)
         {
             //Log.Logger.Write(LogEventLevel.Error, text);
 
-            Program.WriteErrorLog(text);
-            // Program.ILog.Information(text);
+            Program.WriteErrorLog("[INFO] " + text);
+            //Program.ILog.Information(text);
+
+            Console.WriteLine(text);
         }
     }
 

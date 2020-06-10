@@ -8,6 +8,9 @@ using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Collections;
+using System.Windows;
+using System.Deployment.Application;
+using System.IO;
 
 using Newtonsoft.Json;
 using Microsoft.AspNet.SignalR.Client;
@@ -21,9 +24,7 @@ using DigitalPlatform.WPF;
 using DigitalPlatform.Text;
 using DigitalPlatform.MessageClient;
 using DigitalPlatform.SimpleMessageQueue;
-using System.Windows;
-using System.Deployment.Application;
-using System.IO;
+
 
 namespace dp2SSL
 {
@@ -1017,16 +1018,20 @@ cancellation_token);
 
             if (command.StartsWith("restart"))
             {
-                await SendMessageAsync(new string[] { groupName }, "已经重新启动");
 
                 string ApplicationEntryPoint = null;
                 if (ApplicationDeployment.IsNetworkDeployed == true)
                 {
+                    /*
                     ApplicationEntryPoint = ApplicationDeployment.CurrentDeployment?.UpdatedApplicationFullName;
                     WpfClientInfo.WriteInfoLog($"ApplicationDeployment.CurrentDeployment?.UpdatedApplicationFullName='{ApplicationEntryPoint}'");
                     // Process.Start(ApplicationEntryPoint);
+                    */
+                    await SendMessageAsync(new string[] { groupName }, $"ClickOnce 版本无法远程重启");
+                    return;
                 }
 
+                await SendMessageAsync(new string[] { groupName }, "已经重新启动");
                 App.Invoke(new Action(() =>
                 {
                     Application.Current.Shutdown();
@@ -1039,7 +1044,8 @@ cancellation_token);
                     else
                         System.Windows.Forms.Application.Restart();
                     */
-                    StartModule(ShortcutPath, "");
+                    // StartModule(ShortcutPath, "");
+                    Process.Start("c:\\dp2ssl\\greensetup.exe");
                 }));
 
                 return;

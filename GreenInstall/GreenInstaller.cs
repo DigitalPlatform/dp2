@@ -53,6 +53,13 @@ namespace GreenInstall
                     ErrorInfo = $"CopyDirectory() 出错: {strError}"
                 };
 
+            // 2020/6/10
+            // 将 targetDirectory 中的 userDirectory.txt 文件删除
+            {
+                string filename = Path.Combine(targetDirectory, "userDirectoryMask.txt");
+                File.Delete(filename);
+            }
+
             // 在源目录中做出标记，以便以后用到这个目录的程序会警告退出
             if (StringUtil0.IsInList("maskSource", style))
             {

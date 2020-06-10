@@ -5,9 +5,11 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Media;
+using System.Deployment.Application;
 
 using dp2SSL.Models;
 
+using GreenInstall;
 using static dp2SSL.Models.PatronReplication;
 using DigitalPlatform;
 using DigitalPlatform.IO;
@@ -15,8 +17,6 @@ using DigitalPlatform.WPF;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Install;
-using System.Deployment.Application;
-using GreenInstall;
 
 namespace dp2SSL
 {
