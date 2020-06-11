@@ -236,7 +236,7 @@ namespace dp2ManageCenter.Message
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = ExceptionUtil.GetDebugText(ex);  // ex.Message;
                 goto ERROR1;
             }
             finally
@@ -287,6 +287,9 @@ namespace dp2ManageCenter.Message
 
         static void SetLine(ListViewItem item, RequestItem request)
         {
+            // testing
+            // request.State = null;
+
             string action_info = "";
             if (request.Action == "borrow")
             {
@@ -352,7 +355,7 @@ namespace dp2ManageCenter.Message
                 backColor = Color.DarkBlue;
                 foreColor = GetForeColor();
             }
-            else if (request.State.Contains("error"))
+            else if (request.State != null && request.State.Contains("error"))
             {
                 backColor = Color.DarkRed;
                 foreColor = GetForeColor();

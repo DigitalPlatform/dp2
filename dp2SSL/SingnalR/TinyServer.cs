@@ -1670,13 +1670,13 @@ out string strError);
                 }
 
                 if (request.MatchStyle == "left")
-                    where_list.Add($" x.{use}.StartsWith(\"{queryWordString}\") ");
+                    where_list.Add($" x.{use}?.StartsWith(\"{queryWordString}\") ");
                 else if (request.MatchStyle == "right")
-                    where_list.Add($" x.{use}.EndsWith(\"{queryWordString}\") ");
+                    where_list.Add($" x.{use}?.EndsWith(\"{queryWordString}\") ");
                 else if (request.MatchStyle == "exact")
                     where_list.Add($" x.{use} == \"{queryWordString}\" ");
                 else // if (request.MatchStyle == "middle")
-                    where_list.Add($" x.{use}.IndexOf(\"{queryWordString}\") != -1 ");
+                    where_list.Add($" x.{use}?.IndexOf(\"{queryWordString}\") != -1 ");
             }
 
             text.Append(StringUtil.MakePathList(where_list, "||"));
