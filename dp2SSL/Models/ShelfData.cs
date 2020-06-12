@@ -2112,6 +2112,7 @@ namespace dp2SSL
         // 初始化完成前，先不要允许(开关门变化导致)修改 RfidManager.ReaderNameList
         public static async Task<InitialShelfResult> newVersion_InitialShelfEntitiesAsync(
             List<DoorItem> doors_param,
+            bool silently,
             Delegate_displayText func_display,
             Delegate_cancelled func_cancelled)
         {
@@ -2212,7 +2213,8 @@ namespace dp2SSL
 
                         all.Add(entity);
 
-                        if (string.IsNullOrEmpty(entity.Error) == false)
+                        if (silently == false 
+                            && string.IsNullOrEmpty(entity.Error) == false)
                         {
                             warnings.Add($"UID 为 '{tag.OneTag?.UID}' 的标签解析出错: {entity.Error}");
                             WpfClientInfo.WriteErrorLog($"InitialShelfEntities() 遇到 tag (UID={tag.OneTag?.UID}) 解析出错: {entity.Error}\r\ntag 详情：{tag.ToString()}");
@@ -4211,6 +4213,9 @@ namespace dp2SSL
             public List<string> Errors { get; set; }
         }
 
+        /*
+         * FillBookFieldsAsync() 遇到的报错类型有两种：1) RFID 标签解析出错；2) 在获取册记录信息的过程中，通讯出错，或者册记录没有找到
+         * */
         // TODO: 刷新 data 以前，是否先把有关字段都设置为 ?，避免观看者误会
         // TODO: 获取册记录，优先从缓存中获取。注意借书、还书、转移等同步操作后，要及时更新或者废止缓存内容
         public static async Task<FillBookFieldsResult> FillBookFieldsAsync(// BaseChannel<IRfid> channel,

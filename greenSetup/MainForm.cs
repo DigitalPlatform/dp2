@@ -1,5 +1,4 @@
-﻿using GreenInstall;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -11,6 +10,8 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+
+using GreenInstall;
 
 namespace greenSetup
 {
@@ -125,6 +126,22 @@ true);
             }));
         }
 
+        // 命令行参数里面是否包含了静默初始化？
+        public static bool IsSilently()
+        {
+            string[] args = Environment.GetCommandLineArgs();
+            int i = 0;
+            foreach (string arg in args)
+            {
+                if (i > 0
+                    && (arg == "silently" || arg == "silent" || arg == "silence"))
+                    return true;
+                i++;
+            }
+
+            return false;
+        }
+
         const string _binDir = "c:\\dp2ssl";
 
         // 启动 dp2ssl.exe；或首次安装；或升级并启动 dp2ssl.exe
@@ -165,13 +182,7 @@ true);
                     ErrorBox(extract_result.ErrorInfo);
                     return;
                 }
-                Process.Start(strExePath);
-                Application.Exit();
-                /*
-                this.BeginInvoke((Action)(() => {
-                    this.Close();
-                }));
-                */
+                ProcessStart(strExePath);
                 return;
             }
 
@@ -205,8 +216,7 @@ true);
 
             if (firstInstall == false && delayUpdate)
             {
-                Process.Start(strExePath);
-                Application.Exit();
+                ProcessStart(strExePath);
                 return;
             }
 
@@ -254,8 +264,7 @@ true,
                 {
                     if (File.Exists(strExePath))
                     {
-                        Process.Start(strExePath);
-                        Application.Exit();
+                        ProcessStart(strExePath);
                         return;
                     }
                 }
@@ -296,9 +305,18 @@ true,
                 }
             }
 
-            Process.Start(strExePath);
-            Application.Exit();
+            ProcessStart(strExePath);
             return;
+        }
+
+        void ProcessStart(string strExePath)
+        {
+            string arguments = "";
+            if (IsSilently())
+                arguments = "silently";
+
+            Process.Start(strExePath, arguments);
+            Application.Exit();
         }
     }
 }

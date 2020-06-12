@@ -1018,6 +1018,11 @@ cancellation_token);
 
             if (command.StartsWith("restart"))
             {
+                // 子参数 默认 silently。若为 "interact" 则表示初始化时候要进行交互
+                string param = command.Substring("restart".Length).Trim();
+                bool silently = true;
+                if (param != null && param.StartsWith("interact"))
+                    silently = false;
 
                 string ApplicationEntryPoint = null;
                 if (ApplicationDeployment.IsNetworkDeployed == true)
@@ -1045,7 +1050,9 @@ cancellation_token);
                         System.Windows.Forms.Application.Restart();
                     */
                     // StartModule(ShortcutPath, "");
-                    Process.Start("c:\\dp2ssl\\greensetup.exe");
+                    
+                    Process.Start("c:\\dp2ssl\\greensetup.exe",
+                        silently ? "silently" : "");
                 }));
 
                 return;

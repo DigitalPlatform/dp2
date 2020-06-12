@@ -185,7 +185,7 @@ namespace dp2SSL
 
                         // 检查升级 dp2ssl
                         if (_updated == false
-                        && StringUtil.IsDevelopMode() == false
+                        // && StringUtil.IsDevelopMode() == false
                         && ApplicationDeployment.IsNetworkDeployed == false
                         && DateTime.Now - _lastUpdateTime > _updatePeriod)
                         {
@@ -204,7 +204,7 @@ namespace dp2SSL
                             if (update_result.Value == -1)
                                 WpfClientInfo.WriteErrorLog($"自动检查升级出错: {update_result.ErrorInfo}");
                             else
-                                WpfClientInfo.WriteInfoLog("结束自动检查升级");
+                                WpfClientInfo.WriteInfoLog($"结束自动检查升级 update_result:{update_result.ToString()}");
 
                             if (update_result.Value == 1 || update_result.Value == 2)
                             {

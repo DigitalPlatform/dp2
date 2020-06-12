@@ -166,7 +166,8 @@ namespace dp2SSL
                             // 初始化之前开灯，让使用者感觉舒服一些(感觉机器在活动状态)
                             RfidManager.TurnShelfLamp("*", "turnOn");
 
-                            await InitialShelfEntitiesAsync(App.StartNetworkMode);
+                            await InitialShelfEntitiesAsync(App.StartNetworkMode,
+                                IsSilently() || IsFileSilently());
 
                             // 初始化完成之后，应该是全部门关闭状态，还没有人开始使用，则先关灯，进入等待使用的状态
                             RfidManager.TurnShelfLamp("*", "turnOff");
@@ -210,6 +211,48 @@ namespace dp2SSL
                 });
             }
 #endif
+        }
+
+        // 命令行参数里面是否包含了静默初始化？
+        public static bool IsSilently()
+        {
+            string[] args = Environment.GetCommandLineArgs();
+            int i = 0;
+            foreach (string arg in args)
+            {
+                if (i > 0
+                    && (arg == "silently" || arg == "silent" || arg == "silence"))
+                    return true;
+                i++;
+            }
+
+            return false;
+        }
+
+        // 一次性参数文件里面是否包含了静默初始化？
+        public static bool IsFileSilently()
+        {
+            try
+            {
+                string binDir = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                string fileName = System.IO.Path.Combine(binDir, "cmdlineparam.txt");
+                if (File.Exists(fileName) == false)
+                    return false;
+                string content = File.ReadAllText(fileName);
+                var args = StringUtil.SplitList(content, " ");
+                foreach (string arg in args)
+                {
+                    if (arg == "silently" || arg == "silent" || arg == "silence")
+                        return true;
+                }
+                File.Delete(fileName);  // 用完就删除
+                return false;
+            }
+            catch(Exception ex)
+            {
+                WpfClientInfo.WriteErrorLog($"从命令行参数文件中读取信息时出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                return false;
+            }
         }
 
         private void App_Updated(object sender, UpdatedEventArgs e)
@@ -1482,7 +1525,8 @@ namespace dp2SSL
         // 新版本的首次填充图书信息的函数
         // parameters:
         //      networkMode 空/local。其中 local 表示按照断网模式初始化(否则是联网模式)，信息尽量从本地缓存获取
-        async Task InitialShelfEntitiesAsync(string networkMode)
+        //      silently    是否安静初始化。安静初始化的意思是遇到一些出错不会报错，而是努力完成初始化
+        async Task InitialShelfEntitiesAsync(string networkMode, bool silently = false)
         {
             if (ShelfData.FirstInitialized)
                 return;
@@ -1534,6 +1578,11 @@ namespace dp2SSL
                 };
                 progress.retryButton.Click += (s, e) =>
                 {
+                    eventRetry.Set();
+                };
+                progress.silentlyRetryButton.Click += (s, e) =>
+                {
+                    silently = true;
                     eventRetry.Set();
                 };
                 progress.cancelButton.Click += (s, e) =>
@@ -1612,6 +1661,7 @@ namespace dp2SSL
                         progress.EnableRetryOpenButtons(false);
                     }));
 
+
                     while (true)
                     {
                         // 处理前先从 All 中移走当前门的所有标签
@@ -1624,6 +1674,7 @@ namespace dp2SSL
                         // TODO: 填充 RFID 图书标签信息
                         var initial_result = await ShelfData.newVersion_InitialShelfEntitiesAsync(
                             new List<DoorItem> { door },
+                            silently,
                             (s) =>
                             {
                                 DisplayMessage(progress, s, "green");
@@ -1687,7 +1738,8 @@ namespace dp2SSL
                             var fill_result = await ShelfData.FillBookFieldsAsync(part, 
                                 ShelfData.CancelToken,
                                 style);
-                            if (fill_result.Errors?.Count > 0)
+                            if (silently == false 
+                                && fill_result.Errors?.Count > 0)
                             {
                                 string error = StringUtil.MakePathList(fill_result.Errors, "\r\n");
                                 App.Invoke(new Action(() =>
@@ -1715,7 +1767,7 @@ namespace dp2SSL
                             goto WAIT_RETRY;
                         }
 
-                        if (networkMode == "local")
+                        if (networkMode == "local" || silently)
                         {
                             // *** 断网情形
                             // 累计起来等待最后写入本地历史数据库
@@ -1831,7 +1883,7 @@ namespace dp2SSL
                 }
 
                 // 将刚才初始化涉及到的 action 操作写入本地数据库
-                if (networkMode == "local")
+                if (networkMode == "local" || silently)
                 {
                     // *** 断网情况
                     // 将尚未同步的信息写入本地历史数据库
