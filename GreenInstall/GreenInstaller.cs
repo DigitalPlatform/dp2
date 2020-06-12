@@ -169,6 +169,7 @@ bool bOverwriteExist = true)
             // string waitExe,
             bool delayUpdate,
             bool updateGreenSetupExe,
+            CancellationToken token,
             Delegate_setProgress setProgress)
         {
             string strBaseUrl = downloadUrl;
@@ -233,6 +234,13 @@ bool bOverwriteExist = true)
                 // List<string> changed_filenames = new List<string>();
                 foreach (string filename in filenames)
                 {
+                    if (token.IsCancellationRequested)
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorCode = "canceled"
+                        };
+
                     string strUrl = // "http://dp2003.com/dp2circulation/v2/"
                         strBaseUrl
                         + filename;
@@ -282,6 +290,17 @@ bool bOverwriteExist = true)
                 long downloaded = 0;
                 foreach (var info in updated_filenames)
                 {
+                    if (token.IsCancellationRequested)
+                    {
+                        if (downloadCount > 0)
+                            WriteStateFile(strBinDir, "downloadError");
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorCode = "canceled"
+                        };
+                    }
+
                     string strUrl = // "http://dp2003.com/dp2circulation/v2/"
                         strBaseUrl
                         + info.FileName;
@@ -329,6 +348,7 @@ bool bOverwriteExist = true)
 
                         var result = await DownloadFileAsync(strUrl,
                             strLocalFileName,
+                            token,
                             (o, e) =>
                             {
                                 // 防止越过 Maximum
@@ -505,7 +525,6 @@ bool bOverwriteExist = true)
                         WriteStateFile(strBinDir, "installed");
                     }
                 }
-
 
                 return new NormalResult { Value = 1 };
             }
@@ -1106,12 +1125,18 @@ bool bOverwriteExist = true)
         // 阻塞式
         static async Task<NormalResult> DownloadFileAsync(string strUrl,
     string strLocalFileName,
+    CancellationToken token,
     Delegate_DownloadProgressChanged progressChanged)
         {
             using (MyWebClient webClient = new MyWebClient())
             {
                 if (progressChanged != null)
-                    webClient.DownloadProgressChanged += (o, e) => { progressChanged(o, e); };
+                    webClient.DownloadProgressChanged += (o, e) =>
+                    {
+                        if (token.IsCancellationRequested)
+                            webClient.Cancel();
+                        progressChanged(o, e);
+                    };
 
                 webClient.ReadWriteTimeout = 30 * 1000; // 30 秒，在读写之前 - 2015/12/3
                 webClient.Timeout = 30 * 60 * 1000; // 30 分钟，整个下载过程 - 2015/12/3

@@ -154,8 +154,13 @@ namespace dp2SSL
         public void EnableRetryOpenButtons(bool enable)
         {
             this.retryButton.Visibility = enable ? Visibility.Visible : Visibility.Collapsed;
+            this.silentlyRetryButton.Visibility = enable ? Visibility.Visible : Visibility.Collapsed;
             this.openDoorButton.Visibility = enable ? Visibility.Visible : Visibility.Collapsed;
         }
 
+        private void silentlyRetryButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

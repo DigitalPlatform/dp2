@@ -245,15 +245,18 @@ namespace dp2Commander
         string ProcessRestart(string command)
         {
             // 子参数
-            string param = command.Substring("restart".Length).Trim();
+            string param = command.Substring("restart".Length).Trim().ToLower();
             if ( // string.IsNullOrEmpty(param)
-                param.ToLower() == "computer")
+                param == "computer")
             {
                 // 重启电脑
                 Task.Run(async () =>
                 {
                     try
                     {
+                        // 为 dp2ssl 开机后自动重启预先设定好 cmdlineparam.txt 文件
+                        WriteParameterFile();
+
                         await Task.Delay(1000);
                         // https://stackoverflow.com/questions/4286354/restart-computer-from-winforms-app
                         ProcessStartInfo proc = new ProcessStartInfo();
@@ -269,8 +272,16 @@ namespace dp2Commander
                 });
                 return "服务器将在一秒后重新启动";
             }
-            if (param.ToLower() == "dp2ssl")
+            if (param != null && param.StartsWith("dp2ssl"))
             {
+                // 子参数。默认 silently
+                bool silently = true;
+                {
+                    string arg = param.Substring("dp2ssl".Length).Trim();
+                    if (arg != null && arg.StartsWith("interact"))
+                        silently = false;
+                }
+
                 // 重启 dp2ssl
                 ExitProcess("dp2SSL", false);
                 Thread.Sleep(5000);
@@ -288,7 +299,8 @@ namespace dp2Commander
                     string exe_path1 = "c:\\dp2ssl\\greensetup.exe";
                     string exe_path2 = "c:\\dp2ssl\\dp2ssl.exe";
                     if (File.Exists(exe_path1))
-                        ProcessExtensions.StartProcessAsCurrentUser(exe_path1);
+                        ProcessExtensions.StartProcessAsCurrentUser(exe_path1,
+                            silently ? "silently" : "");
                     else if (File.Exists(exe_path2))
                     {
                         // 启动之前，检查 .zip 是否已经展开
@@ -316,19 +328,41 @@ namespace dp2Commander
                             }
                         }
 
-                        ProcessExtensions.StartProcessAsCurrentUser(exe_path2);
+                        ProcessExtensions.StartProcessAsCurrentUser(exe_path2,
+                            silently ? "silently" : "");
                     }
                     else
                         return $"{exe_path1} 和 {exe_path2} 均未找到，无法启动";
                     return "dp2SSL 已经重新启动";
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     return $"启动过程出现异常: {ExceptionUtil.GetDebugText(ex)}";
                 }
             }
 
             return $"命令 '{command}' 未知的子参数 '{param}'";
+        }
+
+        // 准备命令行参数文件
+        static bool WriteParameterFile()
+        {
+            try
+            {
+                string binDir = "c:\\dp2ssl";
+                if (Directory.Exists(binDir))
+                {
+                    string fileName = System.IO.Path.Combine(binDir, "cmdlineparam.txt");
+                    File.WriteAllText(fileName, "silently");
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                WriteErrorLog($"从命令行参数文件中读取信息时出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                return false;
+            }
         }
 
         static bool _warning = false;

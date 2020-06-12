@@ -528,7 +528,7 @@ namespace dp2SSL
                 ProcessManager.Start(infos,
                     (info, text) =>
                     {
-                        WpfClientInfo.Log?.Info($"{info.Name} {text}");
+                        WpfClientInfo.WriteInfoLog($"{info.Name} {text}");
                     },
                     _cancelProcessMonitor.Token);
             }

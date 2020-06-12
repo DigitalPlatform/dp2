@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:dp2SSL"
         mc:Ignorable="d"
-        Title="ProgressWindow" Width="400" Height="240" 
+        Title="ProgressWindow" Width="500" Height="340" 
         Background="Black" Foreground="White"
         WindowStyle="None"
     AllowsTransparency="True"
@@ -38,21 +38,27 @@
                 <Button Name="openDoorButton" 
                     Style="{DynamicResource RoundedButtonStyle}" 
                     Width="120" Height="60" 
-                    FontSize="30" FontWeight="ExtraBold" 
+                    FontSize="28" FontWeight="ExtraBold" 
                     Foreground="White" 
                     Click="openDoorButton_Click">开门</Button>
                 <Button Name="retryButton" 
                     Style="{DynamicResource RoundedButtonStyle}" 
                     Width="120" Height="60" 
-                    FontSize="30" FontWeight="ExtraBold" 
+                    FontSize="28" FontWeight="ExtraBold" 
                     Foreground="White" 
                     Click="retryButton_Click">重试</Button>
+                <Button Name="silentlyRetryButton" 
+                    Style="{DynamicResource RoundedButtonStyle}" 
+                    Width="160" Height="60" 
+                    FontSize="28" FontWeight="ExtraBold" 
+                    Foreground="White" 
+                    Click="silentlyRetryButton_Click">静默重试</Button>
                 <Button Name="cancelButton" 
                     Style="{DynamicResource RoundedButtonStyle}" 
                     Width="120" Height="60" 
-                    FontSize="30" FontWeight="ExtraBold" 
+                    FontSize="28" FontWeight="ExtraBold" 
                     Foreground="White" 
-                    Click="cancelButton_Click">取消</Button>
+                    Click="cancelButton_Click">中断</Button>
             </StackPanel>
 
         </Grid>

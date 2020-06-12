@@ -10,12 +10,15 @@ using System.Threading.Tasks;
 using System.Windows;
 using DigitalPlatform;
 
+#if LOG4NET
 using log4net;
+#endif
 
 using DigitalPlatform.Core;
 using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient;
 using System.Runtime.CompilerServices;
+using Serilog;
 
 namespace DigitalPlatform.WPF
 {
@@ -114,12 +117,23 @@ namespace DigitalPlatform.WPF
 
             InitialConfig();
 
+#if LOG4NET
             var repository = log4net.LogManager.CreateRepository("main");
             log4net.GlobalContext.Properties["LogFileName"] = Path.Combine(UserLogDir, "log_");
             log4net.Config.XmlConfigurator.Configure(repository);
 
             LibraryChannelManager.Log = LogManager.GetLogger("main", "channellib");
             _log = LogManager.GetLogger("main", ProductName);
+#endif
+
+            {
+                Log.Logger = new LoggerConfiguration()
+.MinimumLevel.Debug()
+// .WriteTo.Console()
+.WriteTo.File(Path.Combine(UserLogDir, "log_.txt"), rollingInterval: RollingInterval.Day)
+// .WriteTo.File("log\\log_.txt", )
+.CreateLogger();
+            }
 
             // 启动时在日志中记载当前 .exe 版本号
             // 此举也能尽早发现日志目录无法写入的问题，会抛出异常
@@ -184,6 +198,7 @@ namespace DigitalPlatform.WPF
 
         #region Log
 
+#if LOG4NET
         static ILog _log = null;
 
         public static ILog Log
@@ -193,6 +208,7 @@ namespace DigitalPlatform.WPF
                 return _log;
             }
         }
+#endif
 
         // 写入错误日志文件
         public static void WriteErrorLog(string strText)
@@ -214,6 +230,7 @@ namespace DigitalPlatform.WPF
         {
             // Console.WriteLine(strText);
 
+#if LOG4NET
             if (_log == null) // 先前写入实例的日志文件发生过错误，所以改为写入 Windows 日志。会加上实例名前缀字符串
                 WriteWindowsLog(strText, EventLogEntryType.Error);
             else
@@ -224,6 +241,11 @@ namespace DigitalPlatform.WPF
                 else
                     _log.Error(strText);
             }
+#endif
+            if (level == "info")
+                Log.Information(strText);
+            else
+                Log.Error(strText);
         }
 
         // 写入 Windows 日志
@@ -248,9 +270,9 @@ namespace DigitalPlatform.WPF
             }
         }
 
-        #endregion
+#endregion
 
-        #region 未捕获的异常处理 
+#region 未捕获的异常处理 
 
         // 准备接管未捕获的异常
         public static void PrepareCatchException()
@@ -338,7 +360,7 @@ namespace DigitalPlatform.WPF
             }
         }
 
-        #endregion
+#endregion
 
         public static NormalResult InstallUpdateSync()
         {
