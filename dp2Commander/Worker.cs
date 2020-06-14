@@ -506,20 +506,20 @@ namespace dp2Commander
         {
             // Log.Logger.Write(LogEventLevel.Error, text);
 
-            Program.WriteErrorLog("[ERROR] " + text);
-            //Program.ILog.Error(text);
+            // Program.WriteErrorLog("[ERROR] " + text);
+            Log.Error(text);
 
-            Console.WriteLine(text);
+            // Console.WriteLine(text);
         }
 
         static void WriteInfoLog(string text)
         {
             //Log.Logger.Write(LogEventLevel.Error, text);
 
-            Program.WriteErrorLog("[INFO] " + text);
-            //Program.ILog.Information(text);
+            // Program.WriteErrorLog("[INFO] " + text);
+            Log.Information(text);
 
-            Console.WriteLine(text);
+            // Console.WriteLine(text);
         }
     }
 

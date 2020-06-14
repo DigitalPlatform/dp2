@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -10,6 +9,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Serilog;
 
 namespace GreenInstall
 {
@@ -158,6 +158,11 @@ bool bOverwriteExist = true)
         public delegate void Delegate_setProgress(double min, double max, double value, string text);
 
         // 从 Web 服务器安装或者升级绿色版
+        // parameters:
+        //      style   处理风格：
+        //              delayExtract    是否延迟展开 .zip 文件?
+        //              updateGreenSetupExe 是否要一并更新 greensetup.exe?
+        //              clearStateFile  处理前是否清除 install_state.txt 文件？(意味着不会受到文件内容为 downloading 的影响)
         // result.Value:
         //      -1  出错
         //      0   经过检查发现没有必要升级
@@ -165,13 +170,16 @@ bool bOverwriteExist = true)
         //      2   成功，但需要立即重新启动计算机才能让复制的文件生效
         public static async Task<NormalResult> InstallFromWeb(string downloadUrl,
             string installDirectory,
-            // string userDirectory,
-            // string waitExe,
-            bool delayUpdate,
-            bool updateGreenSetupExe,
+            string style,
+            //bool delayExtract,
+            //bool updateGreenSetupExe,
             CancellationToken token,
             Delegate_setProgress setProgress)
         {
+            bool delayExtract = StringUtil0.IsInList("delayExtract", style);
+            bool updateGreenSetupExe = StringUtil0.IsInList("updateGreenSetupExe", style);
+            bool clearStateFile = StringUtil0.IsInList("clearStateFile", style);
+
             string strBaseUrl = downloadUrl;
             if (strBaseUrl[strBaseUrl.Length - 1] != '/')
                 strBaseUrl += "/";
@@ -197,7 +205,15 @@ bool bOverwriteExist = true)
                 setProgress?.Invoke(-1, -1, -1, $"检查下载状态时出错: {check_result.ErrorInfo}");
                 return check_result;
             }
-            if (check_result.Value == 1 || check_result.Value == 3 || check_result.Value == 5)
+
+            if (clearStateFile && (check_result.Value == 1 || check_result.Value == 3))
+            {
+                WriteStateFile(strBinDir, null);
+                // 继续处理
+            }
+            else if (check_result.Value == 1
+                || check_result.Value == 3
+                || check_result.Value == 5)
             {
                 if (check_result.Value == 1)
                     setProgress?.Invoke(-1, -1, -1, "前一次下载正在进行，尚未完成。本次下载被放弃");
@@ -470,7 +486,7 @@ bool bOverwriteExist = true)
                 if (_updatedGreenZipFileNames.Count == 0)
                     return new NormalResult();
 
-                if (delayUpdate)
+                if (delayExtract)
                 {
                     if (_updatedGreenZipFileNames.Count > 0)
                         setProgress?.Invoke(-1, -1, -1, "dp2circulation 绿色安装包升级文件已经准备就绪。当退出 dp2circulation 时会自动进行安装。\r\n");
@@ -646,10 +662,17 @@ bool bOverwriteExist = true)
             };
         }
 
+        // parameters:
+        //      content 要写入的内容。如果为 null，表示要删除此文件
         static NormalResult WriteStateFile(string installDirectory,
             string content)
         {
             string stateFileName = Path.Combine(installDirectory, "install_state.txt");
+            if (File.Exists(stateFileName) && content == null)
+            {
+                File.Delete(stateFileName);
+                return new NormalResult();
+            }
             Library.TryCreateDir(installDirectory);
             File.WriteAllText(stateFileName, content);
             return new NormalResult();
@@ -1216,5 +1239,14 @@ bool bOverwriteExist = true)
             }
         }
 
+        public static void WriteErrorLog(string text)
+        {
+            Log.Error(text);
+        }
+
+        public static void WriteInfoLog(string text)
+        {
+            Log.Information(text);
+        }
     }
 }

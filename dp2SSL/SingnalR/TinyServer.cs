@@ -1020,8 +1020,15 @@ cancellation_token);
             {
                 // 子参数 默认 silently。若为 "interact" 则表示初始化时候要进行交互
                 string param = command.Substring("restart".Length).Trim();
+
+                WpfClientInfo.WriteInfoLog($"restart 命令参数：'{param}'");
+
                 bool silently = true;
-                if (param != null && param.StartsWith("interact"))
+                if (ContainsParam(param,
+                    (s) =>
+                    {
+                        return s.StartsWith("interact");
+                    }))
                     silently = false;
 
                 string ApplicationEntryPoint = null;
@@ -1050,15 +1057,38 @@ cancellation_token);
                         System.Windows.Forms.Application.Restart();
                     */
                     // StartModule(ShortcutPath, "");
-                    
-                    Process.Start("c:\\dp2ssl\\greensetup.exe",
-                        silently ? "silently" : "");
-                }));
 
+                    string args = silently ? "silently" : "interact";
+                    WpfClientInfo.WriteInfoLog($"启动 c:\\dp2ssl\\greensetup.exe，参数={args}");
+                    Process.Start("c:\\dp2ssl\\greensetup.exe",
+                        args);  // 
+                }));
                 return;
             }
 
             await SendMessageAsync(new string[] { groupName }, $"我无法理解这个命令 '{command}'");
+        }
+
+        public static bool ContainsParam(string args, string param)
+        {
+            var list = StringUtil.SplitList(args, ' ');
+            return list.IndexOf(param) != -1;
+        }
+        public delegate bool Delegate_contains(string arg);
+
+        public static bool ContainsParam(string args, Delegate_contains contains)
+        {
+            if (args == null)
+                return false;
+
+            var list = StringUtil.SplitList(args, ' ');
+            foreach (var s in list)
+            {
+                if (contains(s))
+                    return true;
+            }
+
+            return false;
         }
 
         static string ShortcutPath = "DigitalPlatform/dp2 V3/dp2SSL-自助借还";

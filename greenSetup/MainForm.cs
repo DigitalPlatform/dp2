@@ -8,15 +8,19 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using GreenInstall;
+using Serilog;
 
 namespace greenSetup
 {
     public partial class MainForm : Form
     {
+        CancellationTokenSource _cancel = new CancellationTokenSource();
+
         public MainForm()
         {
             InitializeComponent();
@@ -24,9 +28,10 @@ namespace greenSetup
 
         private void button_test_Click(object sender, EventArgs e)
         {
-            _ = install();
+            // _ = install();
         }
 
+#if REMOVED
         async Task install()
         {
             /*
@@ -40,6 +45,7 @@ namespace greenSetup
 // null,
 false,
 true,
+_cancel.Token,
 (double min, double max, double value, string text) =>
 {
     this.Invoke(new Action(() =>
@@ -94,7 +100,7 @@ Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
             }
             return;
         }
-
+#endif
         private void button_createShortcut_Click(object sender, EventArgs e)
         {
 
@@ -116,12 +122,23 @@ true);
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            _ = Start(true);
+            InitialLogging();
+
+            GreenInstaller.WriteInfoLog($"**********");
+            GreenInstaller.WriteInfoLog($"greensetup 开始执行");
+
+            string args = string.Join(' ', Environment.GetCommandLineArgs());
+            GreenInstaller.WriteInfoLog($"命令行参数: {args}");
+
+            _ = Start(IsCmdLineUpdate()? false : true);
         }
 
         void ErrorBox(string message)
         {
-            this.Invoke((Action)(() => {
+            GreenInstaller.WriteInfoLog(message);
+
+            this.Invoke((Action)(() =>
+            {
                 MessageBox.Show(this, message);
             }));
         }
@@ -146,7 +163,7 @@ true);
 
         // 启动 dp2ssl.exe；或首次安装；或升级并启动 dp2ssl.exe
         // parameters:
-        //      delayUpdate 是否延迟让 dp2ssl.exe 启动起来再探测升级？
+        //      delayUpdate 是否让 dp2ssl.exe 启动起来再探测升级？
         //                  意思就是，== true，让 dp2ssl.exe 去负责升级，而 greensetup.exe 这里不负责下载升级(只负责展开下载好的 .zip)。这样的特点是启动速度快
         //                  == false，让 greensetup.exe 直接探测下载升级，缺点是 dp2ssl.exe 启动就晚一点
         //                  但首次安装的时候，则是 greensetup.exe 负责下载 .zip 文件并安装。因为此时 dp2ssl.exe 还并不存在
@@ -173,9 +190,14 @@ true);
             //      4   下载 .zip 失败。.zip 不完整
             //      5   当前 .zip 比 .exe 要新，需要重启计算机以便展开的文件生效
             var check_result = GreenInstaller.CheckStateFile(_binDir);
+
+            GreenInstaller.WriteInfoLog($"检查状态文件。check_result:{check_result.ToString()}");
+
             // 展开，并启动 dp2ssl.exe
             if (check_result.Value == 3)
             {
+                GreenInstaller.WriteInfoLog($"以前遗留的 .zip 文件，展开，并立即启动 dp2ssl.exe");
+
                 var extract_result = GreenInstaller.ExtractFiles(_binDir);
                 if (extract_result.Value == -1)
                 {
@@ -216,9 +238,17 @@ true);
 
             if (firstInstall == false && delayUpdate)
             {
+                GreenInstaller.WriteInfoLog($"非首次安装情形。立即启动 dp2ssl.exe");
+
                 ProcessStart(strExePath);
                 return;
             }
+
+            string style = "updateGreenSetupExe";
+            if (delayUpdate == false)
+                style += ",clearStateFile";
+
+            GreenInstaller.WriteInfoLog($"style={style}");
 
             // *** 从 Web 升级
             double ratio = 1;
@@ -229,35 +259,36 @@ true);
             //      1   成功
             //      2   成功，但需要立即重新启动计算机才能让复制的文件生效
             var result = await GreenInstaller.InstallFromWeb("http://dp2003.com/dp2ssl/v1_dev",
-_binDir,
-// null,
-false,
-true,
-(double min, double max, double value, string text) =>
-{
-    this.Invoke(new Action(() =>
-    {
-        if (text != null)
-            label_message.Text = text;
-        if (min != -1)
-            progressBar1.Minimum = (Int32)min;
-        if (max != -1)
-        {
-            if (max <= Int32.MaxValue)
-            {
-                ratio = 1;
-                progressBar1.Maximum = (Int32)max;
-            }
-            else
-            {
-                ratio = Int32.MaxValue / max;
-                progressBar1.Maximum = Int32.MaxValue;
-            }
-        }
-        if (value != -1)
-            progressBar1.Value = (int)((double)value * ratio);
-    }));
-});
+                _binDir,
+                style,
+                //false,
+                //true,
+                _cancel.Token,
+                (double min, double max, double value, string text) =>
+                {
+                    this.Invoke(new Action(() =>
+                    {
+                        if (text != null)
+                            label_message.Text = text;
+                        if (min != -1)
+                            progressBar1.Minimum = (Int32)min;
+                        if (max != -1)
+                        {
+                            if (max <= Int32.MaxValue)
+                            {
+                                ratio = 1;
+                                progressBar1.Maximum = (Int32)max;
+                            }
+                            else
+                            {
+                                ratio = Int32.MaxValue / max;
+                                progressBar1.Maximum = Int32.MaxValue;
+                            }
+                        }
+                        if (value != -1)
+                            progressBar1.Value = (int)((double)value * ratio);
+                    }));
+                });
             if (result.Value == -1)
             {
                 if (result.ErrorCode == "System.Net.WebException")
@@ -278,6 +309,8 @@ true,
             // 首次安装成功
             if (firstInstall)
             {
+                GreenInstaller.WriteInfoLog($"首次安装成功");
+
                 // 创建桌面快捷方式
                 GreenInstaller.CreateShortcut(
                     "desktop",
@@ -302,6 +335,7 @@ true,
                         targetDirectory,
                         _binDir,
                         "maskSource");
+                    GreenInstaller.WriteInfoLog($"迁移用户文件夹 sourceDirectory={sourceDirectory}, targetDirectory={targetDirectory}, move_result={move_result.ToString()}");
                 }
             }
 
@@ -315,8 +349,51 @@ true,
             if (IsSilently())
                 arguments = "silently";
 
+            GreenInstaller.WriteInfoLog($"启动 path='{strExePath}', arguments='{arguments}'");
+
             Process.Start(strExePath, arguments);
             Application.Exit();
+        }
+
+        // 命令行参数中是否有 update?
+        public static bool IsCmdLineUpdate()
+        {
+            string[] args = Environment.GetCommandLineArgs();
+            int i = 0;
+            foreach (string arg in args)
+            {
+                if (i > 0 && arg == "update")
+                    return true;
+                i++;
+            }
+
+            return false;
+        }
+
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            _cancel.Cancel();
+        }
+
+        private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            GreenInstaller.WriteInfoLog($"greensetup 关闭退出");
+        }
+
+        void InitialLogging()
+        {
+            //string dataDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            //string logDir = Path.Combine(dataDir, "greensetup_logs");
+            string logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "dp2\\dp2ssl\\greensetup_logs");
+            Library.TryCreateDir(logDir);
+
+            string pattern = Path.Combine(logDir, "log_{Date}.txt");
+
+            // https://michaelscodingspot.com/logging-in-dotnet/
+            Log.Logger = new LoggerConfiguration()
+        .MinimumLevel.Debug()
+        .WriteTo.RollingFile(pattern, shared: true)
+        .CreateLogger();
         }
     }
 }
