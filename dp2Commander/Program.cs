@@ -15,7 +15,7 @@ using Serilog;
 using DigitalPlatform;
 using DigitalPlatform.Core;
 using DigitalPlatform.Text;
-// using log4net;
+
 
 namespace dp2Commander
 {
@@ -60,10 +60,11 @@ namespace dp2Commander
             }
 
             {
-                /*
                 string dataDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-                string logDir = Path.Combine(dataDir, "log");
+                string logDir = Path.Combine(dataDir, "logs");
                 TryCreateDir(logDir);
+
+                /*
 
                 var repository = log4net.LogManager.CreateRepository("main");
                 log4net.GlobalContext.Properties["LogFileName"] = Path.Combine(logDir, "log_");
@@ -71,11 +72,14 @@ namespace dp2Commander
 
                 ILog = LogManager.GetLogger("main", "dp2Commander");
                 */
+                string pattern = Path.Combine(logDir, "log_{Date}.txt");
+
                 // https://michaelscodingspot.com/logging-in-dotnet/
                 Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Debug()
             .WriteTo.Console()
-            .WriteTo.File("logs\\.log", rollingInterval: RollingInterval.Day)
+            // .WriteTo.File("logs\\.log", rollingInterval: RollingInterval.Day)
+            .WriteTo.RollingFile(pattern, shared: true)
             .CreateLogger();
 
                 // Serilog.Debugging.SelfLog.Enable(msg => WriteErrorLog(msg));
@@ -121,6 +125,7 @@ namespace dp2Commander
             return false;
         }
 
+#if REMOVED
         static object _syncRoot_log = new object();
 
         public static void WriteErrorLog(string strText)
@@ -168,6 +173,9 @@ namespace dp2Commander
                 + time.Day.ToString().PadLeft(2, '0');
         }
 
+#endif
+
+
 #if OLD
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
@@ -183,7 +191,7 @@ namespace dp2Commander
             }).UseWindowsService();
 #endif
 
-        #region ConfigFile
+#region ConfigFile
 
         static ConfigSetting _config = null;
 
@@ -258,6 +266,6 @@ namespace dp2Commander
             Config.Save();
         }
 
-        #endregion
+#endregion
     }
 }

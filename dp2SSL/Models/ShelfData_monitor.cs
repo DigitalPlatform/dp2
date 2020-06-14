@@ -197,9 +197,10 @@ namespace dp2SSL
                             //      2   成功，但需要立即重新启动计算机才能让复制的文件生效
                             var update_result = await GreenInstaller.InstallFromWeb("http://dp2003.com/dp2ssl/v1_dev",
                                 "c:\\dp2ssl",
-                                // null,
-                                true,
-                                true,
+                                "delayExtract,updateGreenSetupExe",
+                                //true,
+                                //true,
+                                token,
                                 null);
                             if (update_result.Value == -1)
                                 WpfClientInfo.WriteErrorLog($"自动检查升级出错: {update_result.ErrorInfo}");

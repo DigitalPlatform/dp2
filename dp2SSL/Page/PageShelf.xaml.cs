@@ -217,6 +217,7 @@ namespace dp2SSL
         public static bool IsSilently()
         {
             string[] args = Environment.GetCommandLineArgs();
+            WpfClientInfo.WriteInfoLog($"dp2ssl 命令行参数为: '{args}'");
             int i = 0;
             foreach (string arg in args)
             {
@@ -237,15 +238,19 @@ namespace dp2SSL
                 string binDir = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
                 string fileName = System.IO.Path.Combine(binDir, "cmdlineparam.txt");
                 if (File.Exists(fileName) == false)
+                {
+                    WpfClientInfo.WriteInfoLog($"{fileName} 文件不存在");
                     return false;
+                }
                 string content = File.ReadAllText(fileName);
+                WpfClientInfo.WriteInfoLog($"{fileName} 文件内容:'{content}'");
+                File.Delete(fileName);  // 用完就删除
                 var args = StringUtil.SplitList(content, " ");
                 foreach (string arg in args)
                 {
                     if (arg == "silently" || arg == "silent" || arg == "silence")
                         return true;
                 }
-                File.Delete(fileName);  // 用完就删除
                 return false;
             }
             catch(Exception ex)
