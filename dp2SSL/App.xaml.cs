@@ -28,6 +28,7 @@ using DigitalPlatform.WPF;
 using DigitalPlatform.MessageClient;
 using DigitalPlatform.Install;
 using System.Deployment.Application;
+using System.Reflection;
 
 //using Microsoft.VisualStudio.Shell;
 //using Task = System.Threading.Tasks.Task;
@@ -1308,21 +1309,31 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
 
         static void SelectMode()
         {
+            // 观察命令行参数
+            bool silently = IsSilently() || IsFileSilently();
+
             ShelfData.DetectLibraryNetwork();
             if (ShelfData.LibraryNetworkCondition != "OK")
             {
-                var result = MessageBox.Show("访问 dp2library 服务器失败。请问是否继续启动？\r\n[Yes] 按照断网模式继续启动; [No] 按照联网模式继续启动; [Cancel] 退出 dp2SSL",
-                    "请选择启动模式",
-                    MessageBoxButton.YesNoCancel,
-                    MessageBoxImage.Question,
-                    MessageBoxResult.Yes,
-                    MessageBoxOptions.DefaultDesktopOnly);
-                if (result == MessageBoxResult.Yes)
+                if (silently)
                     StartNetworkMode = "local";
-                else if (result == MessageBoxResult.Cancel)
-                    App.Current.Shutdown();
                 else
-                    StartNetworkMode = "";
+                {
+                    // TODO: 对话框出现的时候，允许点对点远程选择对话框？
+
+                    var result = MessageBox.Show("访问 dp2library 服务器失败。请问是否继续启动？\r\n[Yes] 按照断网模式继续启动; [No] 按照联网模式继续启动; [Cancel] 退出 dp2SSL",
+                        "请选择启动模式",
+                        MessageBoxButton.YesNoCancel,
+                        MessageBoxImage.Question,
+                        MessageBoxResult.Yes,
+                        MessageBoxOptions.DefaultDesktopOnly);
+                    if (result == MessageBoxResult.Yes)
+                        StartNetworkMode = "local";
+                    else if (result == MessageBoxResult.Cancel)
+                        App.Current.Shutdown();
+                    else
+                        StartNetworkMode = "";
+                }
 
 #if NO
                 App.Invoke(new Action(() =>
@@ -1342,6 +1353,53 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                 }
                 ));
 #endif
+            }
+        }
+
+        // 命令行参数里面是否包含了静默初始化？
+        public static bool IsSilently()
+        {
+            string[] args = Environment.GetCommandLineArgs();
+            WpfClientInfo.WriteInfoLog($"dp2ssl 命令行参数为: '{string.Join(" ", args)}'");
+            int i = 0;
+            foreach (string arg in args)
+            {
+                if (i > 0
+                    && (arg == "silently" || arg == "silent" || arg == "silence"))
+                    return true;
+                i++;
+            }
+
+            return false;
+        }
+
+        // 一次性参数文件里面是否包含了静默初始化？
+        public static bool IsFileSilently()
+        {
+            try
+            {
+                string binDir = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                string fileName = System.IO.Path.Combine(binDir, "cmdlineparam.txt");
+                if (File.Exists(fileName) == false)
+                {
+                    WpfClientInfo.WriteInfoLog($"{fileName} 文件不存在");
+                    return false;
+                }
+                string content = File.ReadAllText(fileName);
+                WpfClientInfo.WriteInfoLog($"{fileName} 文件内容:'{content}'");
+                File.Delete(fileName);  // 用完就删除
+                var args = StringUtil.SplitList(content, " ");
+                foreach (string arg in args)
+                {
+                    if (arg == "silently" || arg == "silent" || arg == "silence")
+                        return true;
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                WpfClientInfo.WriteErrorLog($"从命令行参数文件中读取信息时出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                return false;
             }
         }
 

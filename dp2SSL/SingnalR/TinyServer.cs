@@ -1707,9 +1707,9 @@ out string strError);
                 }
 
                 if (request.MatchStyle == "left")
-                    where_list.Add($" x.{use}?.StartsWith(\"{queryWordString}\") ");
+                    where_list.Add($" x.{use}?.StartsWith(\"{queryWordString}\") == true ");
                 else if (request.MatchStyle == "right")
-                    where_list.Add($" x.{use}?.EndsWith(\"{queryWordString}\") ");
+                    where_list.Add($" x.{use}?.EndsWith(\"{queryWordString}\") == true ");
                 else if (request.MatchStyle == "exact")
                     where_list.Add($" x.{use} == \"{queryWordString}\" ");
                 else // if (request.MatchStyle == "middle")

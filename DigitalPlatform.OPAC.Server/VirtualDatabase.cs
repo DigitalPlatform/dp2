@@ -909,9 +909,11 @@ namespace DigitalPlatform.OPAC.Server
                 all.AddRange(current);
             }
 
+            // 根据 Caption 值去重。以前做法
+            // RemoveDupByCaption(ref all);
 
-            // 根据style值去重
-            RemoveDupByCaption(ref all);
+            // 根据 Style 值去重。2020/6/17 做法
+            RemoveDupByStyle(ref all);
 
             int nIndexOfID = -1;    // __id途径所在的下标
             for (int i = 0; i < all.Count; i++)
@@ -957,6 +959,37 @@ namespace DigitalPlatform.OPAC.Server
                     string strCaption2 = from2.Caption;
 
                     if (strCaption1 == strCaption2)
+                    {
+                        target.RemoveAt(j);
+                        j--;
+                    }
+                }
+            }
+        }
+
+        // 2020/6/17
+        // 根据 Style 去重
+        public static void RemoveDupByStyle(ref List<DbFromInfo> target)
+        {
+            for (int i = 0; i < target.Count; i++)
+            {
+                DbFromInfo from1 = target[i];
+
+                string strStyle1 = from1.Style;
+                // 把caption(特定语种)为空的事项丢弃
+                if (string.IsNullOrEmpty(strStyle1) == true)
+                {
+                    target.RemoveAt(i);
+                    i--;
+                    continue;
+                }
+
+                for (int j = i + 1; j < target.Count; j++)
+                {
+                    DbFromInfo from2 = target[j];
+                    string strStyle2 = from2.Style;
+
+                    if (strStyle1 == strStyle2)
                     {
                         target.RemoveAt(j);
                         j--;

@@ -621,7 +621,7 @@ namespace dp2SSL
                         // 添加用本地信息模拟出来的 borrows/borrow 元素
                         XmlDocument patron_dom = new XmlDocument();
                         patron_dom.LoadXml(patron.Xml);
-                        SetBorrowInfo(patron_dom);
+                        SetBorrowInfo(patron_dom, patron.LastWriteTime);
 
                         patron.Xml = patron_dom.OuterXml;
                     }
@@ -654,7 +654,10 @@ namespace dp2SSL
         }
 
         // 根据本地历史记录，在读者记录中添加 borrows/borrow 元素
-        static NormalResult SetBorrowInfo(XmlDocument patron_dom)
+        // parameters:
+        //      lastWriteTime   读者 XML 记录最近更新时间。只取这个时间以后的本地未还借书动作
+        static NormalResult SetBorrowInfo(XmlDocument patron_dom,
+            DateTime lastWriteTime)
         {
             string pii = GetPii(patron_dom);
 
@@ -666,18 +669,23 @@ namespace dp2SSL
                 patron_dom.DocumentElement.AppendChild(root);
             }
 
+            /*
             // 删除原有 borrows/borrow 元素
             if (root.ChildNodes.Count > 0)
             {
                 root.RemoveAll();
                 changed = true;
             }
+            */
+
+            // TODO: 需要查重和合并 barcode 相同的 borrow 元素
 
             using (var context = new RequestContext())
             {
                 // 显示该读者的在借册情况
                 var borrows = context.Requests
-                    .Where(o => o.OperatorID == pii && o.Action == "borrow" && o.LinkID == null)
+                    .Where(o => o.OperatorID == pii && o.Action == "borrow" && o.LinkID == null 
+                    && o.OperTime > lastWriteTime)
                     .OrderBy(o => o.ID).ToList();
                 foreach (var item in borrows)
                 {
@@ -718,7 +726,8 @@ namespace dp2SSL
 
         // 把读者记录保存(更新)到本地数据库
         public static NormalResult UpdateLocalPatronRecord(
-            GetReaderInfoResult get_result)
+            GetReaderInfoResult get_result,
+            DateTime lastWriteTime)
         {
             using (BiblioCacheContext context = new BiblioCacheContext())
             {
@@ -782,6 +791,7 @@ namespace dp2SSL
                 patron.Bindings = cardNumber;
                 patron.Xml = get_result.ReaderXml;
                 patron.Timestamp = get_result.Timestamp;
+                patron.LastWriteTime = lastWriteTime;
             }
         }
 
@@ -828,6 +838,22 @@ namespace dp2SSL
             }
         }
 
+        public static PatronItem GetPatronItem(string pii)
+        {
+            using (BiblioCacheContext context = new BiblioCacheContext())
+            {
+                if (_cacheDbCreated == false)
+                {
+                    context.Database.EnsureCreated();
+                    _cacheDbCreated = true;
+                }
+
+                var patron = context.Patrons
+    .Where(o => o.PII == pii)
+    .FirstOrDefault();
+                return patron;
+            }
+        }
 
         // return.Value:
         //      -1  出错

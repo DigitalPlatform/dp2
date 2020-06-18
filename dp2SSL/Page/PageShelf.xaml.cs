@@ -213,53 +213,6 @@ namespace dp2SSL
 #endif
         }
 
-        // 命令行参数里面是否包含了静默初始化？
-        public static bool IsSilently()
-        {
-            string[] args = Environment.GetCommandLineArgs();
-            WpfClientInfo.WriteInfoLog($"dp2ssl 命令行参数为: '{args}'");
-            int i = 0;
-            foreach (string arg in args)
-            {
-                if (i > 0
-                    && (arg == "silently" || arg == "silent" || arg == "silence"))
-                    return true;
-                i++;
-            }
-
-            return false;
-        }
-
-        // 一次性参数文件里面是否包含了静默初始化？
-        public static bool IsFileSilently()
-        {
-            try
-            {
-                string binDir = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-                string fileName = System.IO.Path.Combine(binDir, "cmdlineparam.txt");
-                if (File.Exists(fileName) == false)
-                {
-                    WpfClientInfo.WriteInfoLog($"{fileName} 文件不存在");
-                    return false;
-                }
-                string content = File.ReadAllText(fileName);
-                WpfClientInfo.WriteInfoLog($"{fileName} 文件内容:'{content}'");
-                File.Delete(fileName);  // 用完就删除
-                var args = StringUtil.SplitList(content, " ");
-                foreach (string arg in args)
-                {
-                    if (arg == "silently" || arg == "silent" || arg == "silence")
-                        return true;
-                }
-                return false;
-            }
-            catch(Exception ex)
-            {
-                WpfClientInfo.WriteErrorLog($"从命令行参数文件中读取信息时出现异常: {ExceptionUtil.GetDebugText(ex)}");
-                return false;
-            }
-        }
-
         private void App_Updated(object sender, UpdatedEventArgs e)
         {
             App.Invoke(new Action(() =>
@@ -1827,6 +1780,9 @@ namespace dp2SSL
                                 progress.EnableRetryOpenButtons(true);
                             }));
 
+                            // TODO: 发出点对点消息，显示对话框的文本内容和按钮布局
+                            // 然后等待点对点命令。命令为 @robot press 'OK' 这样的形态
+
                             // 等待按钮按下
                             var index = WaitHandle.WaitAny(new WaitHandle[]
                             {
@@ -2345,6 +2301,7 @@ namespace dp2SSL
                         // Thread.Sleep(1000 * 20);
                         if (ShelfData.LibraryNetworkCondition == "OK")
                         {
+                            DateTime now = DateTime.Now;
                             var get_result = GetReaderInfo(pii);
                             if (get_result.Value == 1)
                             {
@@ -2353,7 +2310,7 @@ namespace dp2SSL
                                 {
                                     try
                                     {
-                                        UpdateLocalPatronRecord(get_result);
+                                        UpdateLocalPatronRecord(get_result, now);
                                     }
                                     catch
                                     {

@@ -117,6 +117,8 @@ out string strError);
                 // 把超时时间改短一点
                 channel.Timeout = TimeSpan.FromSeconds(20);
 
+                DateTime search_time = DateTime.Now;
+
                 // 获取和存储记录
                 ResultSetLoader loader = new ResultSetLoader(channel,
     null,
@@ -146,7 +148,7 @@ out string strError);
 
                             PatronItem item = new PatronItem();
 
-                            var result = Set(item, record);
+                            var result = Set(item, record, search_time);
                             if (result.Value == -1)
                             {
                                 // TODO: 是否汇总报错信息？
@@ -186,7 +188,8 @@ out string strError);
         }
 
         static NormalResult Set(PatronItem patron,
-            Record record)
+            Record record,
+            DateTime lastWriteTime)
         {
             XmlDocument dom = new XmlDocument();
             try
@@ -219,7 +222,7 @@ out string strError);
             patron.Bindings = cardNumber;
             patron.Xml = record.RecordBody.Xml;
             patron.Timestamp = record.RecordBody.Timestamp;
-
+            patron.LastWriteTime = lastWriteTime;
             return new NormalResult();
         }
 
@@ -332,7 +335,7 @@ out string strError);
                         AutoCache = false,
                         CacheDir = "",
                         LogType = logType,
-                        Filter = "setReaderInfo",
+                        Filter = "setReaderInfo,borrow,return", // 借书还书时候都会修改读者记录
                         // ServerVersion = serverVersion
                     };
 
@@ -396,6 +399,14 @@ out string strError);
                             if (strOperation == "setReaderInfo")
                             {
                                 var trace_result = TraceSetReaderInfo(
+                                    dom,
+                                    info);
+                                if (trace_result.Value == -1)
+                                    WpfClientInfo.WriteErrorLog("同步 " + item.Date + " " + item.Index.ToString() + " 时出错: " + trace_result.ErrorInfo);
+                            }
+                            else if (strOperation == "borrow" || strOperation == "return")
+                            {
+                                var trace_result = TraceBorrowOrReturn(
                                     dom,
                                     info);
                                 if (trace_result.Value == -1)
@@ -499,156 +510,271 @@ out string strError);
             }
         }
 
+        // Borrow() API 恢复动作
+        /*
+<root>
+  <operation>borrow</operation> 操作类型
+  <readerBarcode>R0000002</readerBarcode> 读者证条码号
+  <itemBarcode>0000001</itemBarcode>  册条码号
+  <borrowDate>Fri, 08 Dec 2006 04:17:31 GMT</borrowDate> 借阅日期
+  <borrowPeriod>30day</borrowPeriod> 借阅期限
+  <no>0</no> 续借次数。0为首次普通借阅，1开始为续借
+  <operator>test</operator> 操作者
+  <operTime>Fri, 08 Dec 2006 04:17:31 GMT</operTime> 操作时间
+  <confirmItemRecPath>...</confirmItemRecPath> 辅助判断用的册记录路径
+  
+  <readerRecord recPath='...'>...</readerRecord>	最新读者记录
+  <itemRecord recPath='...'>...</itemRecord>	最新册记录
+</root>
+         * */
+        // Return() API 恢复动作
+        /*
+<root>
+  <operation>return</operation> 操作类型
+  <action>return</action> 动作。有 return/lost/inventory/read/boxing 几种。恢复动作目前仅恢复 return 和 lost 两种，其余会忽略
+  <itemBarcode>0000001</itemBarcode> 册条码号
+  <readerBarcode>R0000002</readerBarcode> 读者证条码号
+  <operator>test</operator> 操作者
+  <operTime>Fri, 08 Dec 2006 04:17:45 GMT</operTime> 操作时间
+  <overdues>...</overdues> 超期信息 通常内容为一个字符串，为一个<overdue>元素XML文本片断
+  
+  <confirmItemRecPath>...</confirmItemRecPath> 辅助判断用的册记录路径
+  
+  <readerRecord recPath='...'>...</readerRecord>	最新读者记录
+  <itemRecord recPath='...'>...</itemRecord>	最新册记录
+  
+</root>
+
+         * */
+        static NormalResult TraceBorrowOrReturn(
+    XmlDocument domLog,
+    ProcessInfo info)
+        {
+            try
+            {
+                string strAction = DomUtil.GetElementText(domLog.DocumentElement, "action");
+
+                string strReaderBarcode = DomUtil.GetElementText(domLog.DocumentElement,
+    "readerBarcode");
+                if (String.IsNullOrEmpty(strReaderBarcode) == true)
+                {
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = "<readerBarcode>元素值为空"
+                    };
+                }
+
+                string strOperTime = DomUtil.GetElementText(domLog.DocumentElement, "operTime");
+                var operTime = DateTimeUtil.FromRfc1123DateTimeString(strOperTime);
+
+                // 检查缓存的读者记录的最后更新时间
+                var patron = LibraryChannelUtil.GetPatronItem(strReaderBarcode);
+                if (patron == null || patron.LastWriteTime < operTime)
+                {
+                    DateTime now = DateTime.Now;
+                    var get_result = GetReaderInfo(strReaderBarcode);
+                    if (get_result.Value == 1)
+                        UpdateLocalPatronRecord(get_result, now);
+                }
+
+                return new NormalResult();
+            }
+            catch (Exception ex)
+            {
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"TraceBorrowOrReturn() 出现异常: {ex.Message}"
+                };
+            }
+            /*
+            // 读入册记录
+            string strConfirmItemRecPath = DomUtil.GetElementText(domLog.DocumentElement,
+                "confirmItemRecPath");
+            string strItemBarcode = DomUtil.GetElementText(domLog.DocumentElement,
+                "itemBarcode");
+            if (String.IsNullOrEmpty(strItemBarcode) == true)
+            {
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = "<strItemBarcode>元素值为空"
+                };
+            }
+
+            string strBorrowDate = SQLiteUtil.GetLocalTime(DomUtil.GetElementText(domLog.DocumentElement,
+                "borrowDate"));
+            string strBorrowPeriod = DomUtil.GetElementText(domLog.DocumentElement,
+                "borrowPeriod");
+            */
+        }
+
         // SetReaderInfo() API 恢复动作
         /*
 <root>
-	<operation>setReaderInfo</operation> 操作类型
-	<action>...</action> 具体动作。有new change delete move 4种
-	<record recPath='...'>...</record> 新记录
+    <operation>setReaderInfo</operation> 操作类型
+    <action>...</action> 具体动作。有new change delete move 4种
+    <record recPath='...'>...</record> 新记录
     <oldRecord recPath='...'>...</oldRecord> 被覆盖或者删除的记录 动作为change和delete时具备此元素
     <changedEntityRecord itemBarcode='...' recPath='...' oldBorrower='...' newBorrower='...' /> 若干个元素。表示连带发生修改的册记录
-	<operator>test</operator> 操作者
-	<operTime>Fri, 08 Dec 2006 09:01:38 GMT</operTime> 操作时间
+    <operator>test</operator> 操作者
+    <operTime>Fri, 08 Dec 2006 09:01:38 GMT</operTime> 操作时间
 </root>
 
 注: new 的时候只有<record>元素，delete的时候只有<oldRecord>元素，change的时候两者都有
 
          * */
         static NormalResult TraceSetReaderInfo(
-            XmlDocument domLog,
-            ProcessInfo info)
+        XmlDocument domLog,
+        ProcessInfo info)
         {
-            string strAction = DomUtil.GetElementText(domLog.DocumentElement, "action");
-
-            if (strAction == "new"
-                || strAction == "change"
-                || strAction == "move")
+            try
             {
-                string strNewRecPath = "";
-                string strRecord = DomUtil.GetElementText(domLog.DocumentElement,
-                    "record",
-                    out XmlNode node);
-                if (node == null)
-                {
-                    // 2019/11/5
-                    // 注: move 操作，分馆账户获得日志记录时候可能会被 dp2library 滤除 record 元素。
-                    // 此种情况可以理解为 delete 操作
-                    if (strAction != "move")
-                    {
-                        return new NormalResult
-                        {
-                            Value = -1,
-                            ErrorInfo = $"日志记录中缺<record>元素。日志记录内容如下：{domLog.OuterXml}"
-                        };
-                    }
-                }
-                else
-                {
-                    strNewRecPath = DomUtil.GetAttr(node, "recPath");
-                }
+                string strAction = DomUtil.GetElementText(domLog.DocumentElement, "action");
 
-                string strOldRecord = "";
-                string strOldRecPath = "";
-                // if (strAction == "move")
+                string strOperTime = DomUtil.GetElementText(domLog.DocumentElement, "operTime");
+                DateTime operTime = DateTimeUtil.FromRfc1123DateTimeString(strOperTime);
+
+                if (strAction == "new"
+                    || strAction == "change"
+                    || strAction == "move")
                 {
-                    strOldRecord = DomUtil.GetElementText(domLog.DocumentElement,
-                        "oldRecord",
-                        out node);
-                    /*
+                    string strNewRecPath = "";
+                    string strRecord = DomUtil.GetElementText(domLog.DocumentElement,
+                        "record",
+                        out XmlNode node);
                     if (node == null)
                     {
-                        strError = "日志记录中缺<oldRecord>元素";
-                        return -1;
-                    }*/
-
-                    if (node != null)
-                    {
-                        strOldRecPath = DomUtil.GetAttr(node, "recPath");
-                        if (string.IsNullOrEmpty(strOldRecPath) == true)
+                        // 2019/11/5
+                        // 注: move 操作，分馆账户获得日志记录时候可能会被 dp2library 滤除 record 元素。
+                        // 此种情况可以理解为 delete 操作
+                        if (strAction != "move")
                         {
                             return new NormalResult
                             {
                                 Value = -1,
-                                ErrorInfo = "日志记录中<oldRecord>元素内缺recPath属性值"
+                                ErrorInfo = $"日志记录中缺<record>元素。日志记录内容如下：{domLog.OuterXml}"
                             };
                         }
                     }
+                    else
+                    {
+                        strNewRecPath = DomUtil.GetAttr(node, "recPath");
+                    }
 
-                    // 如果移动过程中没有修改，则要用旧的记录内容写入目标
-                    // 注意：如果 record 元素都不存在，则应该理解为 delete。如果 record 元素存在，即 recPath 属性存在但 InnerText 不存在，则当作移动过程记录没有变化，即采用 oldRecord 的 InnerText 作为新记录内容
-                    if (string.IsNullOrEmpty(strRecord) == true
-                        && string.IsNullOrEmpty(strNewRecPath) == false)
-                        strRecord = strOldRecord;
-                }
+                    string strOldRecord = "";
+                    string strOldRecPath = "";
+                    // if (strAction == "move")
+                    {
+                        strOldRecord = DomUtil.GetElementText(domLog.DocumentElement,
+                            "oldRecord",
+                            out node);
+                        /*
+                        if (node == null)
+                        {
+                            strError = "日志记录中缺<oldRecord>元素";
+                            return -1;
+                        }*/
 
-                // TODO: change 动作也可能删除 face 元素
+                        if (node != null)
+                        {
+                            strOldRecPath = DomUtil.GetAttr(node, "recPath");
+                            if (string.IsNullOrEmpty(strOldRecPath) == true)
+                            {
+                                return new NormalResult
+                                {
+                                    Value = -1,
+                                    ErrorInfo = "日志记录中<oldRecord>元素内缺recPath属性值"
+                                };
+                            }
+                        }
 
-                /*
-                // 删除旧记录对应的指纹缓存
-                if (strAction == "move"
-                    && string.IsNullOrEmpty(strOldRecord) == false)
-                {
-                    if (DeleteFingerPrint(strOldRecord, info, out strError) == -1)
-                        return -1;
-                }
-                */
+                        // 如果移动过程中没有修改，则要用旧的记录内容写入目标
+                        // 注意：如果 record 元素都不存在，则应该理解为 delete。如果 record 元素存在，即 recPath 属性存在但 InnerText 不存在，则当作移动过程记录没有变化，即采用 oldRecord 的 InnerText 作为新记录内容
+                        if (string.IsNullOrEmpty(strRecord) == true
+                            && string.IsNullOrEmpty(strNewRecPath) == false)
+                            strRecord = strOldRecord;
+                    }
 
+                    // TODO: change 动作也可能删除 face 元素
 
-                /*
-                if (ModifyFingerPrint(strOldRecord,
-                    strRecord,
-                    info,
-                    out strError) == -1)
-                    return -1;
+                    /*
+                    // 删除旧记录对应的指纹缓存
+                    if (strAction == "move"
+                        && string.IsNullOrEmpty(strOldRecord) == false)
+                    {
+                        if (DeleteFingerPrint(strOldRecord, info, out strError) == -1)
+                            return -1;
+                    }
                     */
 
-                // 把读者记录保存(更新)到本地数据库
-                return LibraryChannelUtil.UpdateLocalPatronRecord(
-                    new GetReaderInfoResult
+
+                    /*
+                    if (ModifyFingerPrint(strOldRecord,
+                        strRecord,
+                        info,
+                        out strError) == -1)
+                        return -1;
+                        */
+
+                    // 把读者记录保存(更新)到本地数据库
+                    return LibraryChannelUtil.UpdateLocalPatronRecord(
+                        new GetReaderInfoResult
+                        {
+                            RecPath = string.IsNullOrEmpty(strNewRecPath) ? null : strNewRecPath, // null 表示不加以修改
+                            ReaderXml = strRecord,
+                            Timestamp = null,
+                        },
+                        operTime);
+                }
+                else if (strAction == "delete")
+                {
+                    string strOldRecord = DomUtil.GetElementText(domLog.DocumentElement,
+                        "oldRecord",
+                        out XmlNode node);
+                    if (node == null)
                     {
-                        RecPath = string.IsNullOrEmpty(strNewRecPath) ? null : strNewRecPath, // null 表示不加以修改
-                        ReaderXml = strRecord,
-                        Timestamp = null,
-                    });
-            }
-            else if (strAction == "delete")
-            {
-                string strOldRecord = DomUtil.GetElementText(domLog.DocumentElement,
-                    "oldRecord",
-                    out XmlNode node);
-                if (node == null)
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = "日志记录中缺<oldRecord>元素"
+                        };
+                    }
+                    string strRecPath = DomUtil.GetAttr(node, "recPath");
+
+                    /*
+                    if (string.IsNullOrEmpty(strOldRecord) == false)
+                    {
+                        if (DeleteFingerPrint(strOldRecord, info, out strError) == -1)
+                            return -1;
+                    }
+                    */
+
+                    /*
+                    if (ModifyFingerPrint(strOldRecord,
+        "<root />",
+        info,
+        out strError) == -1)
+                        return -1;
+                        */
+                    return LibraryChannelUtil.DeleteLocalPatronRecord(strOldRecord);
+                }
+                else
                 {
                     return new NormalResult
                     {
                         Value = -1,
-                        ErrorInfo = "日志记录中缺<oldRecord>元素"
+                        ErrorInfo = "无法识别的<action>内容 '" + strAction + "'"
                     };
                 }
-                string strRecPath = DomUtil.GetAttr(node, "recPath");
-
-                /*
-                if (string.IsNullOrEmpty(strOldRecord) == false)
-                {
-                    if (DeleteFingerPrint(strOldRecord, info, out strError) == -1)
-                        return -1;
-                }
-                */
-
-                /*
-                if (ModifyFingerPrint(strOldRecord,
-    "<root />",
-    info,
-    out strError) == -1)
-                    return -1;
-                    */
-                return LibraryChannelUtil.DeleteLocalPatronRecord(strOldRecord);
             }
-            else
+            catch (Exception ex)
             {
                 return new NormalResult
                 {
                     Value = -1,
-                    ErrorInfo = "无法识别的<action>内容 '" + strAction + "'"
+                    ErrorInfo = $"TraceSetReaderInfo() 出现异常: {ex.Message}"
                 };
             }
         }

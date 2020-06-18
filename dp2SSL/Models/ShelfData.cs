@@ -1665,7 +1665,8 @@ namespace dp2SSL
             {
                 // 该读者的在借册册数
                 return context.Requests
-                    .Where(o => o.OperatorID == pii && o.Action == "borrow" && o.LinkID == null)
+                    .Where(o => o.OperatorID == pii && o.Action == "borrow" && o.LinkID == null 
+                    && o.State != "dontsync")   // 2020/6/17 注：dontsync 表示同步时候实际上另外已经有前端对本册进行了操作(若能操作成功可以推测是还书操作)，所以这一册实际上已经换了，不要计入在借册列表中
                     .Select(o => o.PII).ToList();
                 // .OrderBy(o => o.ID).Count();
             }
@@ -4874,7 +4875,7 @@ namespace dp2SSL
                         {
                             if (error_code == ErrorCode.ItemBarcodeNotFound
                                 || error_code == ErrorCode.SyncDenied)  // 2020/4/24
-                                info.State = "dontsync";
+                                info.State = "dontsync";    // 注: borrow 类型的此种 dontsync 可以理解为读者在其他地方已经还书了。在断网情况下此种动作不要计入未还书列表
                             else
                                 info.State = "normalerror";
                         }
