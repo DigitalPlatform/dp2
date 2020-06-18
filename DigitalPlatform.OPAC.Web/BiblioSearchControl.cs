@@ -399,11 +399,11 @@ namespace DigitalPlatform.OPAC.Web
                 listDbName.ID = "db" + Convert.ToString(i);
                 listDbName.Width = new Unit("100%");
                 listDbName.CssClass = "dbname";
-                /*
+
                 listDbName.AutoPostBack = true;
                 listDbName.TextChanged -= new EventHandler(this.DbNameListTextChanged);
                 listDbName.TextChanged += new EventHandler(this.DbNameListTextChanged);
-                 * */
+
                 line.Controls.Add(listDbName);
                 FillDbNameList(listDbName);
 
@@ -638,7 +638,6 @@ namespace DigitalPlatform.OPAC.Web
             // 怎么刷新？
         }
 
-#if NO
         void DbNameListTextChanged(object sender, EventArgs e)
         {
             string strDbName = "";
@@ -665,9 +664,7 @@ namespace DigitalPlatform.OPAC.Web
             if (usedDbName.Value != strDbName)
                 FillFromList(fromlist, strDbName, usedDbName);
         }
-#endif
 
-#if NO
         void FillFromList(DropDownList fromlist,
             string strDbName,
             HiddenField usedDbName)
@@ -715,7 +712,7 @@ namespace DigitalPlatform.OPAC.Web
             }
              */
         }
-#endif
+
         void FillFromList(DropDownList fromlist)
         {
             // string strError = "";

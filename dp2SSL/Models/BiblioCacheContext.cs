@@ -36,6 +36,9 @@ namespace dp2SSL
         public string RecPath { get; set; }
         public string Xml { get; set; }
         public byte[] Timestamp { get; set; }
+
+        // 2020/6/18
+        public DateTime LastWriteTime { get; set; } // 最后更新时间
     }
 
     public class BiblioCacheContext : DbContext

@@ -23,6 +23,7 @@ using DigitalPlatform.Message;
 using DigitalPlatform.rms.Client.rmsws_localhost;
 using Jint;
 using Jint.Native;
+using Microsoft.SqlServer.Server;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -475,7 +476,7 @@ namespace DigitalPlatform.LibraryServer
             }
 
             return nBorrowInfoCount;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -823,7 +824,7 @@ namespace DigitalPlatform.LibraryServer
             }
 
             return nOperCount;
-            ERROR1:
+        ERROR1:
             // Undo已经进行过的操作
             // TODO: 写入错误日志
 
@@ -836,7 +837,7 @@ namespace DigitalPlatform.LibraryServer
                     string strTempError = "";
                     byte[] timestamp = null;
                     byte[] output_timestamp = null;
-                    REDO_DELETE:
+                REDO_DELETE:
                     long lRet = channel.DoDeleteRes(strRecPath,
                         timestamp,
                         out output_timestamp,
@@ -1049,7 +1050,7 @@ namespace DigitalPlatform.LibraryServer
             }
 
             return nOperCount;
-            ERROR1:
+        ERROR1:
             // 不要Undo
             return -1;
         }
@@ -1088,7 +1089,7 @@ namespace DigitalPlatform.LibraryServer
                 byte[] output_timestamp = null;
                 int nRedoCount = 0;
 
-                REDO_DELETE:
+            REDO_DELETE:
 
                 this.EntityLocks.LockForWrite(info.ItemBarcode);
                 try
@@ -1194,7 +1195,7 @@ namespace DigitalPlatform.LibraryServer
 
 
             return nDeletedCount;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -1242,7 +1243,7 @@ namespace DigitalPlatform.LibraryServer
                 goto ERROR1;
 
             return 0;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -1893,7 +1894,7 @@ namespace DigitalPlatform.LibraryServer
                     entityinfo.NewRecord = "";
                     entityinfo.NewTimestamp = null;
                     entityinfo.Action = "";
-                    CONTINUE:
+                CONTINUE:
                     entityinfos.Add(entityinfo);
                 }
 
@@ -1920,7 +1921,7 @@ namespace DigitalPlatform.LibraryServer
             entities = entityinfos.ToArray();
             result.Value = nResultCount;   // entities.Length;
             return result;
-            ERROR1:
+        ERROR1:
             result.Value = -1;
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
@@ -2149,7 +2150,7 @@ namespace DigitalPlatform.LibraryServer
 #endif
 
 
-            SKIP1:
+        SKIP1:
             // 状态
             // string strState = DomUtil.GetElementText(dom.DocumentElement, "state");
 
@@ -2444,7 +2445,7 @@ out strError);
 
             result.ErrorCode = ErrorCodeValue.NoError;
             return 0;
-            ERROR1:
+        ERROR1:
             result.ErrorInfo = strError;
             return -1;
         }
@@ -3587,7 +3588,7 @@ out strError);
 
             result.Value = ErrorInfos.Count;  // 返回信息的数量
             return result;
-            ERROR1:
+        ERROR1:
             // 这里的报错，是比较严重的错误。如果是数组中部分的请求发生的错误，则不在这里报错，而是通过返回错误信息数组的方式来表现
             result.Value = -1;
             result.ErrorInfo = strError;
@@ -3926,7 +3927,7 @@ out strError);
                 // 在管辖范围内
                 return 0;
             }
-            NOTMATCH:
+        NOTMATCH:
             strError = "馆藏地点 '" + strLocation + "' 不在 '" + strLibraryCodeList + "' 管辖范围内";
             return 1;
         }
@@ -4331,7 +4332,7 @@ out strError);
             string strMetaData = "";
             string strExistingXml = "";
 
-            REDOLOAD:
+        REDOLOAD:
 
             // 先读出数据库中此位置的已有记录
             lRet = channel.GetRes(info.NewRecPath,
@@ -4563,7 +4564,7 @@ out strError);
             }
 
             return 0;
-            ERROR1:
+        ERROR1:
             error = new EntityInfo(info);
             error.ErrorInfo = strError;
             error.ErrorCode = ErrorCodeValue.CommonError;
@@ -4640,8 +4641,8 @@ out strError);
             string strOutputPath = "";
             string strMetaData = "";
 
-            // 先读出数据库中即将覆盖位置的已有记录
-            REDOLOAD:
+        // 先读出数据库中即将覆盖位置的已有记录
+        REDOLOAD:
 
             lRet = channel.GetRes(info.NewRecPath,
                 out strExistXml,
@@ -4807,31 +4808,39 @@ out strError);
                     }
                 }
 
+                // 记录中有流通信息时，不允许修改的元素
+                string[] field_names = new string[] { 
+                    "location",
+                    "accessNo" };
+
                 if (bHasCirculationInfo == true)
                 {
-                    // 比较新旧记录中的馆藏地点是否有改变
-                    // return:
-                    //      -1  出错
-                    //      0   相等
-                    //      1   不相等
-                    nRet = CompareTwoField(
-                        "location",
-                        domExist,
-                        domNew,
-                        out string strOldLocation,
-                        out string strNewLocation,
-                        out strError);
-                    if (nRet == -1)
-                        goto ERROR1;
-                    if (nRet == 1)  // 有改变
+                    foreach (string field_name in field_names)
                     {
-                        // 注: transfer 操作是否允许带着流通信息修改 location?
-
-                        if (bForce == false)
-                        {
-                            // 值得注意的是如何记录进操作日志，将来如何进行recover的问题
-                            strError = "修改操作被拒绝。因册记录 '" + info.NewRecPath + "' 中包含有流通信息(" + strDetailInfo + ")，所以修改它时馆藏地点元素内容不能改变。(当前馆藏地点 '" + strOldLocation + "'，试图修改为地点 '" + strNewLocation + "')";
+                        // 比较新旧记录中的馆藏地点是否有改变
+                        // return:
+                        //      -1  出错
+                        //      0   相等
+                        //      1   不相等
+                        nRet = CompareTwoField(
+                            field_name, // "location",
+                            domExist,
+                            domNew,
+                            out string strOldLocation,
+                            out string strNewLocation,
+                            out strError);
+                        if (nRet == -1)
                             goto ERROR1;
+                        if (nRet == 1)  // 有改变
+                        {
+                            // 注: transfer 操作是否允许带着流通信息修改 location?
+
+                            if (bForce == false)
+                            {
+                                // 值得注意的是如何记录进操作日志，将来如何进行recover的问题
+                                strError = $"修改操作被拒绝。因册记录 '{  info.NewRecPath  }' 中包含有流通信息({ strDetailInfo  })，所以修改它时 {field_name} 元素内容不能改变。(当前值 '{ strOldLocation }'，试图修改为 '{ strNewLocation }')";
+                                goto ERROR1;
+                            }
                         }
                     }
                 }
@@ -5156,7 +5165,7 @@ out strError);
 
             return 0;
 
-            ERROR1:
+        ERROR1:
             error = new EntityInfo(info);
             error.ErrorInfo = strError;
             error.ErrorCode = ErrorCodeValue.CommonError;
@@ -5769,7 +5778,7 @@ out strError);
             }
 
             return 0;
-            ERROR1:
+        ERROR1:
             error = new EntityInfo(info);
             error.ErrorInfo = strError;
             error.ErrorCode = ErrorCodeValue.CommonError;
@@ -5792,7 +5801,7 @@ out strError);
             return true;
         }
 
-#endregion
+        #endregion
 
 #if NO
         // 根据册条码号列表，得到记录路径列表
@@ -6124,7 +6133,7 @@ out strError);
                 }
             }
 
-            END1:
+        END1:
             strResult = StringUtil.MakePathList(results);
             return 1;
         }
@@ -6234,7 +6243,7 @@ out strError);
                 int nRedoCount = 0;
                 string strRefID = "";
 
-                REDO_CHANGE:
+            REDO_CHANGE:
 
                 string strXml = info.OldRecord;
                 // 为册记录 XML 内添加 biblio 元素
@@ -6335,7 +6344,7 @@ out strError);
             }
 
             return nDeletedCount;
-            ERROR1:
+        ERROR1:
             return -1;
         }
     }
