@@ -1371,7 +1371,7 @@ namespace dp2SSL
 
         static string GetPatronType(string patron_pii)
         {
-            var result = LibraryChannelUtil.GetReaderInfoFromLocal(patron_pii);
+            var result = LibraryChannelUtil.GetReaderInfoFromLocal(patron_pii, false);
             if (result.Value == -1)
                 return null;
             XmlDocument dom = new XmlDocument();

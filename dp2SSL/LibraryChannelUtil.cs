@@ -575,11 +575,14 @@ namespace dp2SSL
         }
 
         // 从本地数据库获取读者记录
+        // parameters:
+        //      buildBorrowInfo 是否根据本地动作信息合成 borrows/borrow 元素
         // return.Value:
         //      -1  出错
         //      0   读者记录没有找到
         //      1   成功
-        public static GetReaderInfoResult GetReaderInfoFromLocal(string pii)
+        public static GetReaderInfoResult GetReaderInfoFromLocal(string pii,
+            bool buildBorrowInfo)
         {
             try
             {
@@ -616,6 +619,7 @@ namespace dp2SSL
 
                     var patron = patrons[0];
 
+                    if (buildBorrowInfo)
                     {
                         // 2020/5/8
                         // 添加用本地信息模拟出来的 borrows/borrow 元素
@@ -684,11 +688,16 @@ namespace dp2SSL
             {
                 // 显示该读者的在借册情况
                 var borrows = context.Requests
-                    .Where(o => o.OperatorID == pii && o.Action == "borrow" && o.LinkID == null 
+                    .Where(o => o.OperatorID == pii && o.Action == "borrow" && o.LinkID == null
                     && o.OperTime > lastWriteTime)
                     .OrderBy(o => o.ID).ToList();
                 foreach (var item in borrows)
                 {
+                    // 查重
+                    var dup = root.SelectSingleNode($"borrow[@barcode='{item.PII}']") as XmlElement;
+                    if (dup != null)
+                        continue;
+
                     var borrow_info = JsonConvert.DeserializeObject<BorrowInfo>(item.ActionString);
 
                     XmlElement new_borrow = patron_dom.CreateElement("borrow");
@@ -725,6 +734,10 @@ namespace dp2SSL
 
 
         // 把读者记录保存(更新)到本地数据库
+        // result.Value
+        //      -1  出错
+        //      0   没有发生修改
+        //      1   发生了创建或者修改
         public static NormalResult UpdateLocalPatronRecord(
             GetReaderInfoResult get_result,
             DateTime lastWriteTime)
@@ -762,6 +775,9 @@ namespace dp2SSL
     .FirstOrDefault();
                 if (patron != null)
                 {
+                    // 如果已经存在的读者记录比打算写入的要新，则放弃写入
+                    if (patron.LastWriteTime > lastWriteTime)
+                        return new NormalResult { Value = 0 };
                     Set(patron, dom);
                     context.Patrons.Update(patron);
                 }
@@ -776,7 +792,7 @@ namespace dp2SSL
                 }
 
                 context.SaveChanges();
-                return new NormalResult { Value = 0 };
+                return new NormalResult { Value = 1 };
             }
 
             void Set(PatronItem patron, XmlDocument dom)
