@@ -2321,7 +2321,7 @@ namespace dp2SSL
                             return get_result;
                         }
                         else
-                            return GetReaderInfoFromLocal(pii);
+                            return GetReaderInfoFromLocal(pii, true);
                     }).ConfigureAwait(false);
 
                 debug_infos.Add($"结束 GetReaderInfo(): {GetNowString()}");
