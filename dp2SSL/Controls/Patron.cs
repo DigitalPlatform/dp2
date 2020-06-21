@@ -9,7 +9,9 @@ using System.Xml;
 using DigitalPlatform;
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.RFID;
+using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
+using Microsoft.EntityFrameworkCore.ValueGeneration.Internal;
 
 namespace dp2SSL
 {
@@ -545,6 +547,71 @@ namespace dp2SSL
             dup.Xml = this.Xml;
             dup.Timestamp = this.Timestamp;
             dup.RecPath = this.RecPath;
+        }
+
+        // 刷新读者记录中的 可借总册数 和 当前还可借 参数数量
+        public static void RefreshMaxBorrowable(XmlDocument patron_dom)
+        {
+            string libraryCode = DomUtil.GetElementText(patron_dom.DocumentElement, "libraryCode");
+            string readerType = DomUtil.GetElementText(patron_dom.DocumentElement, "readerType");
+            var total_max_result = ShelfData.GetTotalMax(libraryCode,
+readerType);
+
+            // 全部<borrow>元素
+            XmlNodeList borrow_nodes = patron_dom.DocumentElement.SelectNodes("borrows/borrow");
+
+            int nFreeBorrowCount = Math.Max(0, total_max_result.Max - borrow_nodes.Count);
+
+            SetParamValue(patron_dom.DocumentElement, "当前还可借", nFreeBorrowCount.ToString());
+            SetParamValue(patron_dom.DocumentElement, "可借总册数", total_max_result.Max.ToString());
+        }
+
+#if NO
+        static XmlNode EnsureCreateNode(XmlElement root,
+            string path,
+            string value)
+        {
+            var list = StringUtil.SplitList(path, '/');
+            XmlElement current = root;
+            foreach (string level in list)
+            {
+                if (level[0] == '@')
+                {
+                    string name = level.Substring(1);
+                    if (value != null)
+                        current.SetAttribute(name, value);
+                    else
+                    {
+                        current.SetAttribute(name, null);
+                    }
+                    return current.SelectSingleNode(level);
+                }
+                var new_element = current.OwnerDocument.CreateElement(level);
+                current.AppendChild(new_element);
+                current = new_element;
+            }
+
+            if (value != null)
+                current.InnerText = value;
+            return current;
+        }
+#endif
+        static void SetParamValue(XmlElement root, string name, string value)
+        {
+            var info = root.SelectSingleNode("info") as XmlElement;
+            if (info == null)
+            {
+                info = root.AppendChild(root.OwnerDocument.CreateElement("info")) as XmlElement;
+            }
+
+            var item = info.SelectSingleNode($"item[@name='{name}']") as XmlElement;
+            if (item == null)
+            {
+                item = info.AppendChild(root.OwnerDocument.CreateElement("item")) as XmlElement;
+                item.SetAttribute("name", name);
+            }
+
+            item.SetAttribute("value", value);
         }
 
         public void SetPatronXml(string recpath, string xml, byte[] timestamp)

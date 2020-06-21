@@ -2321,7 +2321,20 @@ namespace dp2SSL
                             return get_result;
                         }
                         else
-                            return GetReaderInfoFromLocal(pii, true);
+                        {
+                            var get_result = GetReaderInfoFromLocal(pii, true);
+
+                            // 2020/6/21
+                            // 刷新可借总册数信息
+                            {
+                                XmlDocument patron_dom = new XmlDocument();
+                                patron_dom.LoadXml(get_result.ReaderXml);
+                                Patron.RefreshMaxBorrowable(patron_dom);
+                                get_result.ReaderXml = patron_dom.OuterXml;
+                            }
+
+                            return get_result;
+                        }
                     }).ConfigureAwait(false);
 
                 debug_infos.Add($"结束 GetReaderInfo(): {GetNowString()}");
