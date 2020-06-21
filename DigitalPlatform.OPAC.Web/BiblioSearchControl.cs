@@ -400,9 +400,11 @@ namespace DigitalPlatform.OPAC.Web
                 listDbName.Width = new Unit("100%");
                 listDbName.CssClass = "dbname";
 
+                /*
                 listDbName.AutoPostBack = true;
                 listDbName.TextChanged -= new EventHandler(this.DbNameListTextChanged);
                 listDbName.TextChanged += new EventHandler(this.DbNameListTextChanged);
+                */
 
                 line.Controls.Add(listDbName);
                 FillDbNameList(listDbName);

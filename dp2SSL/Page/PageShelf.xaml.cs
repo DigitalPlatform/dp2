@@ -37,6 +37,8 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryServer;
 using System.Reflection;
 using System.Deployment.Application;
+using Newtonsoft.Json;
+using DigitalPlatform.LibraryClient.localhost;
 
 namespace dp2SSL
 {
@@ -1693,10 +1695,10 @@ namespace dp2SSL
                             string style = "refreshCount";
                             if (networkMode == "local")
                                 style += ",localGetEntityInfo";
-                            var fill_result = await ShelfData.FillBookFieldsAsync(part, 
+                            var fill_result = await ShelfData.FillBookFieldsAsync(part,
                                 ShelfData.CancelToken,
                                 style);
-                            if (silently == false 
+                            if (silently == false
                                 && fill_result.Errors?.Count > 0)
                             {
                                 string error = StringUtil.MakePathList(fill_result.Errors, "\r\n");
@@ -3181,6 +3183,40 @@ namespace dp2SSL
 
                     // 先在对话框里面把信息显示出来。然后同步线程会去提交请求，显示里面的相关事项会被刷新显示
                     {
+                        // 2020/6/21
+                        // 断网状态下特殊显示
+                        if (ShelfData.LibraryNetworkCondition != "OK")
+                        {
+                            foreach (var action in actions)
+                            {
+                                action.State = "_local";
+
+                                // 同步前已经确认为超额的情况
+                                if (action.Action == "borrow"
+                                    && string.IsNullOrEmpty(action.ActionString) == false)
+                                {
+                                    try
+                                    {
+                                        var borrow_info = JsonConvert.DeserializeObject<BorrowInfo>(action.ActionString);
+                                        if (borrow_info.Overflows != null)
+                                        {
+                                            action.SyncErrorCode = "overflow";
+                                            action.SyncErrorInfo = string.Join("; ", borrow_info.Overflows);
+                                            continue;
+                                        }
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        action.SyncErrorInfo = $"反序列化 BorrowInfo 出现异常: {ex.Message}";
+                                        WpfClientInfo.WriteErrorLog($"反序列化 BorrowInfo 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                                    }
+                                }
+
+                                action.SyncErrorCode = "skipped";
+                            }
+                        }
+
+
                         Invoke(() =>
                         {
                             SubmitDocument doc = SubmitDocument.Build(actions,

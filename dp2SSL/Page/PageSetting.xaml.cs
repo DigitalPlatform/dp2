@@ -262,7 +262,7 @@ namespace dp2SSL
             _ = App.CurrentApp.ConnectMessageServerAsync();
         }
 
-        const string dp2library_base_version = "3.27";
+        const string dp2library_base_version = "3.28";
         const string fingerprintcenter_base_version = "2.1";
 
         public static NormalResult CheckServerUID()

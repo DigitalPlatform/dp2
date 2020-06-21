@@ -161,9 +161,9 @@ namespace dp2SSL
                             processed.Add(result.Door);
 
                             if (result.NewState == "open")
-                                App.CurrentApp.Speak($"{result.LockName} 打开");
+                                App.CurrentApp.SpeakSequence($"{result.LockName} 打开");
                             else
-                                App.CurrentApp.Speak($"{result.LockName} 关闭");
+                                App.CurrentApp.SpeakSequence($"{result.LockName} 关闭");
                         }
                     }
                 }

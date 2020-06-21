@@ -82,7 +82,7 @@ namespace dp2SSL
                     this.Blocks.Remove(block);
 
                     // 语音提醒
-                    App.CurrentApp.Speak("警告：借书超额");
+                    App.CurrentApp.SpeakSequence("警告：借书超额");
                 }
             }
 
@@ -343,14 +343,32 @@ namespace dp2SSL
                 doc.Blocks.Add(p);
             }
 #endif
-
-            // 超额信息的占位符
+            // 检查超额图书
+            List<string> overflow_titles = new List<string>();
+            actions.ForEach(item =>
             {
+                if (item.Action == "borrow" && item.SyncErrorCode == "overflow")
+                    overflow_titles.Add($"{ShortTitle(item.Entity.Title)} [{ShelfData.GetPiiString(item.Entity)}]");
+            });
+
+            // 显示超额的信息
+            if (overflow_titles.Count > 0)
+            {
+                var p = doc.BuildOverflowParagraph(overflow_titles);
+                // p.Tag = "#overflow";
+                doc.Blocks.Add(p);
+
+                // 语音提醒
+                App.CurrentApp.SpeakSequence("警告：借书超额");
+            }
+            else
+            {
+                // 超额信息的占位符
                 var p = new Paragraph();
                 p.FontSize = 0.1;
                 p.Margin = new Thickness();
                 p.Padding = new Thickness();
-                p.Tag = "#overflow";
+                p.Tag = OVERFLOW_ID;    // "#overflow";
                 doc.Blocks.Add(p);
             }
 
