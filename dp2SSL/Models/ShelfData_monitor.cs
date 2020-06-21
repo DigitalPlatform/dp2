@@ -53,7 +53,7 @@ namespace dp2SSL
         // 最近一次检查升级的时刻
         static DateTime _lastUpdateTime;
         // 检查升级的时间间隔
-        static TimeSpan _updatePeriod = TimeSpan.FromMinutes(2*60); // 2*60 两个小时
+        static TimeSpan _updatePeriod = TimeSpan.FromMinutes(2 * 60); // 2*60 两个小时
 
         // 监控间隔时间
         static TimeSpan _monitorIdleLength = TimeSpan.FromSeconds(10);
@@ -121,9 +121,10 @@ namespace dp2SSL
                         WarningCloseDoor();
 
                         // 下载或同步读者信息
-                        if (download_complete == false)
+                        string startDate = LoadStartDate();
+                        if (/*download_complete == false || */
+                        string.IsNullOrEmpty(startDate))
                         {
-                            string startDate = LoadStartDate();
                             // 如果 Config 中没有记载断点位置，说明以前从来没有首次同步过。需要进行一次首次同步
                             if (string.IsNullOrEmpty(startDate))
                             {
@@ -140,14 +141,14 @@ namespace dp2SSL
                                 // 立刻允许接着做一次零星同步
                                 ActivateMonitor();
                             }
-                            download_complete = true;
+                            // download_complete = true;
                         }
                         else
                         {
                             // 进行零星同步
                             if (DateTime.Now - _lastReplicateTime > _replicatePeriod)
                             {
-                                string startDate = LoadStartDate();
+                                // string startDate = LoadStartDate();
 
                                 // testing
                                 // startDate = "20200507:0-";
@@ -237,6 +238,11 @@ namespace dp2SSL
 token,
 TaskCreationOptions.LongRunning,
 TaskScheduler.Default);
+        }
+
+        public static void RedoReplicatePatron()
+        {
+            SaveStartDate(null);
         }
 
         static void SaveStartDate(string startDate)

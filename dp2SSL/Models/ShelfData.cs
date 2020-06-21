@@ -1504,7 +1504,7 @@ namespace dp2SSL
         }
 
         // 获得特定读者类型的最大可借册数
-        static GetTypeMaxResult GetTotalMax(string strLibraryCode,
+        public static GetTypeMaxResult GetTotalMax(string strLibraryCode,
             string strReaderType)
         {
 

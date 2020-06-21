@@ -682,7 +682,6 @@ namespace dp2SSL
             }
             */
 
-            // TODO: 需要查重和合并 barcode 相同的 borrow 元素
 
             using (var context = new RequestContext())
             {
@@ -693,7 +692,8 @@ namespace dp2SSL
                     .OrderBy(o => o.ID).ToList();
                 foreach (var item in borrows)
                 {
-                    // 查重
+                    // 2020/6/20
+                    // 查重 合并 barcode 相同的 borrow 元素
                     var dup = root.SelectSingleNode($"borrow[@barcode='{item.PII}']") as XmlElement;
                     if (dup != null)
                         continue;

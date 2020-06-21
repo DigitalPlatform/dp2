@@ -622,5 +622,10 @@ namespace dp2SSL
         {
             // await App.InstallGreenAsync();
         }
+
+        private void redoReplicatePatron_Click(object sender, RoutedEventArgs e)
+        {
+            ShelfData.RedoReplicatePatron();
+        }
     }
 }
