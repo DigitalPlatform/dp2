@@ -1626,11 +1626,16 @@ namespace DigitalPlatform.LibraryServer
                         }
                     }
 
+                    string requestPeriod = StringUtil.GetParameterByPrefix(strStyle, "requestPeriod");
+                    if (string.IsNullOrEmpty(requestPeriod) == false)
+                        requestPeriod = StringUtil.UnescapeString(requestPeriod);
+
                     // 在读者记录和册记录中添加借阅信息
                     // string strNewReaderXml = "";
                     nRet = DoBorrowReaderAndItemXml(
                         bRenew,
                         overflowReasons,
+                        requestPeriod,
                         strLibraryCode,
                         ref readerdom,
                         ref itemdom,
@@ -16614,6 +16619,7 @@ start_time_1,
         // text-level: 用户提示
         // parameters:
         //      bRenew  是否为续借功能。本函数可能修改此值，从 false 修改为 true，表示确实被当作续借执行了
+        //      requestPeriod   前端明确请求的借阅期限，形态为 "31day" 或 "4hour"。如果为 null，表示服务器根据 library.xml 中的借阅权限参数表计算
         //      bAutoRenew  是否为自动续借功能。自动续借，就是当册记录处于已经借出状态并且借者正好是请求借书的读者，则自动转为续借操作
         //      domOperLog 构造日志记录DOM
         //      this_return_time    本次借阅的应还最后时间。GMT时间。
@@ -16624,6 +16630,7 @@ start_time_1,
         int DoBorrowReaderAndItemXml(
             bool bRenew,
             List<string> overflowReasons,
+            string requestPeriod,
             string strLibraryCode,
             ref XmlDocument readerdom,
             ref XmlDocument itemdom,
@@ -16799,7 +16806,12 @@ start_time_1,
 
             string strBorrowPeriodList = "";
 
-            if (overflowReasons.Count > 0)
+            // 2020/6/21
+            if (string.IsNullOrEmpty(requestPeriod) == false)
+            {
+                strBorrowPeriodList = requestPeriod;
+            }
+            else if (overflowReasons.Count > 0)
             {
                 // 溢出情况处理。给一个一天的借期
                 strBorrowPeriodList = "1day";

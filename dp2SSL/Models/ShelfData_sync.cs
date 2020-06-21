@@ -128,6 +128,10 @@ namespace dp2SSL
                         if (PauseSubmit)
                             continue;
 
+                        // 2020/6/21
+                        if (ShelfData.LibraryNetworkCondition != "OK")
+                            continue;
+
                         // TODO: 从本地数据库中装载需要同步的那些 Actions
                         List<ActionInfo> actions = await LoadRetryActionsFromDatabaseAsync();
                         if (actions.Count == 0)
