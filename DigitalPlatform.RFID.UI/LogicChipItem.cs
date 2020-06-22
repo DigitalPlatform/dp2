@@ -832,6 +832,9 @@ namespace DigitalPlatform.RFID.UI
                 text.Append($"\r\n初始字节内容:\r\n{GetBytesString(this.OriginBytes, this.BlockSize, this.OriginLockStatus)}\r\n");
             }
 
+            // 2020/6/22
+            text.Append($"\r\n锁定位置:\r\n{this.OriginLockStatus}\r\n\r\n");
+
             {
                 LogicChip chip = LogicChip.From(this.OriginBytes, this.BlockSize, this.OriginLockStatus);
                 text.Append($"初始元素:(共 {chip.Elements.Count} 个)\r\n");

@@ -711,7 +711,7 @@ new SetErrorEventArgs
             }
             catch (Exception ex)
             {
-                Base.Clear();
+                Base.Clear();   // ??
                 Base.TriggerSetError(ex,
                     new SetErrorEventArgs
                     {

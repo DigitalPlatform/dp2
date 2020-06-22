@@ -626,6 +626,8 @@ namespace DigitalPlatform.LibraryServer
         //                  "overflowable" 表示允许超过借书限额进行借书。但超出限额的册的借期只有一天(必须在当天之内还回)
         //                  "operTime:xxxx" 表示本次借阅操作是同步操作，实际动作时刻其实早于本次提交请求的时刻。xxxx 部分是实际动作时刻，为 RFC1123 格式。
         //                          本函数会检查册记录里面的 checkInOutDate 元素内的时间，如果实际操作时刻早于这个时间，则同步请求会被拒绝
+        //                  "requestPeriod:xxx" 表示前端强制指定借期
+        //                  "overflow:xxx" 表示前端希望本次用溢出方式借阅。借期为一天。xxx 为溢出情况说明
         //      strItemFormat   规定strItemRecord参数所返回的数据格式
         //      strItemRecord   返回册记录
         //      strReaderFormat 规定strReaderRecord参数所返回的数据格式
@@ -916,6 +918,12 @@ namespace DigitalPlatform.LibraryServer
                 }
 
                 List<string> overflowReasons = new List<string>();
+
+                string overflowString = StringUtil.GetParameterByPrefix(strStyle, "overflow");
+                if (string.IsNullOrEmpty(overflowString) == false)
+                    overflowString = StringUtil.UnescapeString(overflowString);
+                if (string.IsNullOrEmpty(overflowString) == false)
+                    overflowReasons = StringUtil.SplitList(overflowString, ';');
 
                 byte[] item_timestamp = null;
                 List<string> aPath = null;
@@ -1462,7 +1470,12 @@ namespace DigitalPlatform.LibraryServer
                         out strError);
                     if (nRet == -1 || nRet == 0)
                     {
-                        if (StringUtil.IsInList("overflowable", strStyle))
+                        if (string.IsNullOrEmpty(overflowString) == false)
+                        {
+
+                        }
+                        else if (StringUtil.IsInList("overflowable", strStyle)
+                            && string.IsNullOrEmpty(overflowString) == true)
                         {
                             overflowReasons.Add(strError);
                         }
@@ -1547,7 +1560,12 @@ namespace DigitalPlatform.LibraryServer
                         goto ERROR1;
                     if (nRet == 1 || nRet == 2)
                     {
-                        if (StringUtil.IsInList("overflowable", strStyle))
+                        if (string.IsNullOrEmpty(overflowString) == false)
+                        {
+
+                        }
+                        else if (StringUtil.IsInList("overflowable", strStyle)
+                            && string.IsNullOrEmpty(overflowString) == true)
                         {
                             overflowReasons.Add(strError);
                         }
@@ -1566,7 +1584,12 @@ namespace DigitalPlatform.LibraryServer
 
                     if (nRet == 3)
                     {
-                        if (StringUtil.IsInList("overflowable", strStyle))
+                        if (string.IsNullOrEmpty(overflowString) == false)
+                        {
+
+                        }
+                        else if (StringUtil.IsInList("overflowable", strStyle)
+                            && string.IsNullOrEmpty(overflowString) == true)
                         {
                             overflowReasons.Add(strError);
                         }
@@ -1634,7 +1657,7 @@ namespace DigitalPlatform.LibraryServer
                     // string strNewReaderXml = "";
                     nRet = DoBorrowReaderAndItemXml(
                         bRenew,
-                        overflowReasons,
+                        string.IsNullOrEmpty(requestPeriod) == true ? overflowReasons : new List<string>(),
                         requestPeriod,
                         strLibraryCode,
                         ref readerdom,
@@ -1836,7 +1859,7 @@ namespace DigitalPlatform.LibraryServer
 
                     // 2019/11/3
                     // 记载溢出情况
-                    if (overflowReasons.Count > 0)
+                    if (overflowReasons.Count > 0 && string.IsNullOrEmpty(requestPeriod) == true)
                     {
                         DomUtil.SetElementText(domOperLog.DocumentElement,
                             "overflow",

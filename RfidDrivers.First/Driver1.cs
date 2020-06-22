@@ -9,12 +9,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 
-using log4net;
 using RFIDLIB;
 
 using DigitalPlatform;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
+using Serilog;
 
 // 锁定全部读卡器靠一个全局锁来实现。锁定一个读卡器靠 RecordLock 来实现。锁定一个读卡器之前，先尝试用 read 方式获得全局锁
 
@@ -854,6 +854,16 @@ namespace RfidDrivers.First
             return readers;
         }
 
+        public static void WriteDebugLog(string text)
+        {
+            Log.Logger.Debug(text);
+        }
+
+        public static void WriteErrorLog(string text)
+        {
+            Log.Logger.Error(text);
+        }
+
         // 枚举所有 COM 读卡器
         private static List<Reader> EnumComReader(string driver_name)
         {
@@ -864,7 +874,7 @@ namespace RfidDrivers.First
             {
                 UInt32 nCOMCnt = RFIDLIB.rfidlib_reader.COMPort_Enum();
 
-                Driver1Manager.Log?.Debug($"COMPort_Enum() return [{nCOMCnt}]");
+                WriteDebugLog($"COMPort_Enum() return [{nCOMCnt}]");
 
                 for (uint i = 0; i < nCOMCnt; i++)
                 {
@@ -873,7 +883,7 @@ namespace RfidDrivers.First
                     RFIDLIB.rfidlib_reader.COMPort_GetEnumItem(i, comName, (UInt32)comName.Capacity);
                     // comName);
 
-                    Driver1Manager.Log?.Debug($"COMPort_Enum() {i}: comName=[{comName.ToString()}]");
+                    WriteDebugLog($"COMPort_Enum() {i}: comName=[{comName.ToString()}]");
 
                     Reader reader = new Reader
                     {
@@ -2016,7 +2026,7 @@ namespace RfidDrivers.First
                 reader.SerialNumber,
                 baudRate,
                 debugInfo);
-            Driver1Manager.Log?.Debug($"FillReaderInfo() OpenReader() return [{result.ToString()}]");
+            WriteDebugLog($"FillReaderInfo() OpenReader() return [{result.ToString()}]");
 
             try
             {
@@ -2031,7 +2041,7 @@ namespace RfidDrivers.First
                 iret = RFIDLIB.rfidlib_reader.RDR_GetReaderInfor(result.ReaderHandle, 0, devInfor, ref nSize);
                 if (iret != 0)
                 {
-                    Driver1Manager.Log?.Debug($"RDR_GetReaderInfor() return [{iret}], debugInfo={debugInfo.ToString()}");
+                    WriteDebugLog($"RDR_GetReaderInfor() return [{iret}], debugInfo={debugInfo.ToString()}");
                     return new NormalResult { Value = -1, ErrorInfo = $"GetReaderInfo() error, iret=[{iret}], debugInfo={debugInfo.ToString()}" };
                 }
                 string dev_info = devInfor.ToString();
@@ -2056,7 +2066,7 @@ namespace RfidDrivers.First
             }
             catch (Exception ex)
             {
-                Driver1Manager.Log?.Error($"FillReaderInfo() exception[{ExceptionUtil.GetExceptionText(ex)}]");
+                WriteErrorLog($"FillReaderInfo() exception[{ExceptionUtil.GetExceptionText(ex)}]");
                 string error = $"FillReaderInfo() 出现异常: {ex.Message}";
                 return new NormalResult { Value = -1, ErrorInfo = error };
             }
@@ -3065,11 +3075,21 @@ out Reader reader);
         {
             // 要确保 Bytes 包含全部 byte，避免以前标签的内容在保存后出现残留
             uint max_count = new_tag_info.BlockSize * new_tag_info.MaxBlockCount;
+
+            // 2020/6/22
+            if (new_tag_info.Bytes != null && new_tag_info.Bytes.Length > max_count)
+            {
+                throw new ArgumentException($"Bytes 中包含的字节数 {new_tag_info.Bytes.Length} 超过了 {new_tag_info.BlockSize}(BlockSize) 和 {new_tag_info.MaxBlockCount}(MaxBlockCount) 的乘积 {max_count}");
+            }
+
             if (new_tag_info.Bytes != null && new_tag_info.Bytes.Length < max_count)
             {
                 List<byte> bytes = new List<byte>(new_tag_info.Bytes);
                 while (bytes.Count < max_count)
+                {
                     bytes.Add(0);
+                }
+
                 new_tag_info.Bytes = bytes.ToArray();
                 return true;
             }
@@ -3087,6 +3107,12 @@ out Reader reader);
                                  // string style
             )
         {
+            StringBuilder debugInfo = new StringBuilder();
+            debugInfo.AppendLine($"WriteTagInfo() one_reader_name={one_reader_name}");
+            debugInfo.AppendLine($"old_tag_info={old_tag_info.ToString()}");
+            debugInfo.AppendLine($"new_tag_info={new_tag_info.ToString()}");
+            WriteDebugLog(debugInfo.ToString());
+
             // 要确保 new_tag_info.Bytes 包含全部 byte，避免以前标签的内容在保存后出现残留
             EnsureBytes(new_tag_info);
             EnsureBytes(old_tag_info);
@@ -3419,7 +3445,7 @@ out Reader reader);
         public NormalResult TestInitialReader()
         {
             _readers.Clear();
-            _readers.Add(new Reader { Name = "test"});
+            _readers.Add(new Reader { Name = "test" });
             return new NormalResult();
         }
 
@@ -3435,7 +3461,7 @@ out Reader reader);
 
             string sleepString = StringUtil.GetParameterByPrefix(style, "sleep", ":");
             Int32.TryParse(sleepString, out int sleepValue);
-            
+
             string timeoutString = StringUtil.GetParameterByPrefix(style, "timeout", ":");
             Int32.TryParse(timeoutString, out int timeoutValue);
 
@@ -4080,7 +4106,7 @@ out Reader reader);
             {
                 UInt32 nCOMCnt = RFIDLIB.rfidlib_reader.COMPort_Enum();
 
-                Driver1Manager.Log?.Debug($"OpenAllLock() COMPort_Enum() return [{nCOMCnt}]");
+                WriteDebugLog($"OpenAllLock() COMPort_Enum() return [{nCOMCnt}]");
 
                 for (uint i = 0; i < nCOMCnt; i++)
                 {
@@ -4088,11 +4114,11 @@ out Reader reader);
                     comName.Append('\0', 64);
                     RFIDLIB.rfidlib_reader.COMPort_GetEnumItem(i, comName, (UInt32)comName.Capacity);
 
-                    Driver1Manager.Log?.Debug($"OpenAllLock() COMPort_Enum() {i}: comName=[{comName.ToString()}]");
+                    WriteDebugLog($"OpenAllLock() COMPort_Enum() {i}: comName=[{comName.ToString()}]");
 
                     if (used_ports.IndexOf(comName.ToString()) != -1)
                     {
-                        Driver1Manager.Log?.Debug($"OpenAllLock() comName=[{comName.ToString()}] used by readers, skiped");
+                        WriteDebugLog($"OpenAllLock() comName=[{comName.ToString()}] used by readers, skiped");
                         continue;
                     }
 
@@ -4115,7 +4141,7 @@ out Reader reader);
                 }
                 else
                 {
-                    Driver1Manager.Log?.Debug($"OpenAllLock() ConnectLock() comName=[{port}] failed, errorinfo={result.ErrorInfo}, errorcode={result.ErrorCode}");
+                    WriteDebugLog($"OpenAllLock() ConnectLock() comName=[{port}] failed, errorinfo={result.ErrorInfo}, errorcode={result.ErrorCode}");
                 }
             }
 
@@ -4132,7 +4158,7 @@ out Reader reader);
             var result = ConnectLamp(port);
             if (result.Value == -1)
             {
-                Driver1Manager.Log?.Debug($"ConnectLamp() comName=[{port}] failed, errorinfo={result.ErrorInfo}, errorcode={result.ErrorCode}");
+                WriteDebugLog($"ConnectLamp() comName=[{port}] failed, errorinfo={result.ErrorInfo}, errorcode={result.ErrorCode}");
                 return result;
             }
             this._shelfLamp = result.ShelfLamp;
@@ -4665,6 +4691,7 @@ out string number);
         public byte[] Bytes { get; set; }
     }
 
+    /*
     /// <summary>
     /// Driver1 函数库全局参数
     /// </summary>
@@ -4672,6 +4699,6 @@ out string number);
     {
         public static ILog Log { get; set; }
     }
-
+    */
 
 }

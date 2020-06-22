@@ -15,6 +15,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.Interfaces;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
+using Serilog;
 
 namespace FingerprintCenter
 {
@@ -579,7 +580,7 @@ namespace FingerprintCenter
 
         public override void StartCapture(CancellationToken token)
         {
-            LibraryChannelManager.Log?.Debug($"StartCapture()");
+            Log.Debug($"StartCapture()");
 
             _captureData.mfpWidth = GetIntParameter(PARAMETER_PICTURE_WIDTH);
             _captureData.mfpHeight = GetIntParameter(PARAMETER_PICTURE_HEIGHT);
@@ -599,7 +600,7 @@ namespace FingerprintCenter
         {
             CancellationToken token = (CancellationToken)obj;
 
-            LibraryChannelManager.Log?.Debug($"Begin CaptureThreadMain()");
+            Log.Debug($"Begin CaptureThreadMain()");
             try
             {
                 // while (!_captureData._cancelToken.IsCancellationRequested)
@@ -630,11 +631,11 @@ namespace FingerprintCenter
             }
             catch (Exception ex)
             {
-                LibraryChannelManager.Log?.Error($"*** CaptureThreadMain() Exception: {ExceptionUtil.GetExceptionText(ex)}");
+                Log.Error($"*** CaptureThreadMain() Exception: {ExceptionUtil.GetExceptionText(ex)}");
             }
             finally
             {
-                LibraryChannelManager.Log?.Debug($"End CaptureThreadMain()");
+                Log.Debug($"End CaptureThreadMain()");
             }
         }
 

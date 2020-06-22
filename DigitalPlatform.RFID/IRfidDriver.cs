@@ -70,6 +70,9 @@ uint new_password);
             string lock_string,
             char ch)
         {
+            // testing
+            // throw new ArgumentException($"test test");
+
             if ((data.Length % block_size) != 0)
                 throw new ArgumentException($"data 的 Length({data.Length}) 必须是 block_size({block_size}) 的整倍数");
 
