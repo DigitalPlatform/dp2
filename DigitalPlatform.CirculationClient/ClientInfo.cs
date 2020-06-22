@@ -11,7 +11,7 @@ using System.Collections;
 using System.Drawing;
 using System.Xml;
 
-using log4net;
+using Serilog;
 
 // using DigitalPlatform;
 using DigitalPlatform.IO;
@@ -19,6 +19,7 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Text;
 using DigitalPlatform.Core;
 using DigitalPlatform.Xml;
+using Serilog.Core;
 
 namespace DigitalPlatform.CirculationClient
 {
@@ -120,13 +121,22 @@ namespace DigitalPlatform.CirculationClient
 
         public static string ProductName = "";
 
+        // https://nblumhardt.com/2014/10/dynamically-changing-the-serilog-level/
+        static LoggingLevelSwitch _loggingLevel = new LoggingLevelSwitch();
+
+        public static void SetLogginLevel(Serilog.Events.LogEventLevel level)
+        {
+            _loggingLevel.MinimumLevel = level;
+        }
+
         // return:
         //      true    不检查序列号
         public delegate bool Delegate_skipSerialNumberCheck();
 
         // parameters:
         //      product_name    例如 "fingerprintcenter"
-        public static void Initial(string product_name, Delegate_skipSerialNumberCheck skipCheck = null)
+        public static void Initial(string product_name, 
+            Delegate_skipSerialNumberCheck skipCheck = null)
         {
             ProductName = product_name;
             ClientVersion = Assembly.GetAssembly(TypeOfProgram).GetName().Version.ToString();
@@ -154,6 +164,7 @@ namespace DigitalPlatform.CirculationClient
 
             InitialConfig();
 
+#if NO
             var repository = log4net.LogManager.CreateRepository("main");
             log4net.GlobalContext.Properties["LogFileName"] = Path.Combine(UserLogDir, "log_");
             log4net.Config.XmlConfigurator.Configure(repository);
@@ -163,6 +174,12 @@ namespace DigitalPlatform.CirculationClient
                 product_name
                 // "fingerprintcenter"
                 );
+#endif
+            Log.Logger = new LoggerConfiguration()
+// .MinimumLevel.Information()
+.MinimumLevel.ControlledBy(_loggingLevel)
+.WriteTo.File(Path.Combine(UserLogDir, "log_.txt"), rollingInterval: RollingInterval.Day)
+.CreateLogger();
 
             // 启动时在日志中记载当前 .exe 版本号
             // 此举也能尽早发现日志目录无法写入的问题，会抛出异常
@@ -198,6 +215,7 @@ namespace DigitalPlatform.CirculationClient
 
         #region Log
 
+#if REMOVED
         static ILog _log = null;
 
         public static ILog Log
@@ -207,6 +225,7 @@ namespace DigitalPlatform.CirculationClient
                 return _log;
             }
         }
+#endif
 
         // 写入错误日志文件
         public static void WriteErrorLog(string strText)
@@ -219,6 +238,11 @@ namespace DigitalPlatform.CirculationClient
             WriteLog("info", strText);
         }
 
+        public static void WriteDebugLog(string strText)
+        {
+            Log.Debug(strText);
+        }
+
         // 写入错误日志文件
         // parameters:
         //      level   info/error
@@ -226,8 +250,7 @@ namespace DigitalPlatform.CirculationClient
         //      可能会抛出异常
         public static void WriteLog(string level, string strText)
         {
-            // Console.WriteLine(strText);
-
+#if REMOVED
             if (_log == null) // 先前写入实例的日志文件发生过错误，所以改为写入 Windows 日志。会加上实例名前缀字符串
                 WriteWindowsLog(strText, EventLogEntryType.Error);
             else
@@ -238,6 +261,11 @@ namespace DigitalPlatform.CirculationClient
                 else
                     _log.Error(strText);
             }
+#endif
+            if (level == "info")
+                Log.Information(strText);
+            else
+                Log.Error(strText);
         }
 
         // 写入 Windows 日志
@@ -246,9 +274,9 @@ namespace DigitalPlatform.CirculationClient
             WriteWindowsLog(strText, EventLogEntryType.Error);
         }
 
-        #endregion
+#endregion
 
-        #region 未捕获的异常处理 
+#region 未捕获的异常处理 
 
         // 准备接管未捕获的异常
         public static void PrepareCatchException()
@@ -394,7 +422,7 @@ namespace DigitalPlatform.CirculationClient
             }
         }
 
-        #endregion
+#endregion
 
         static ConfigSetting _config = null;
 
@@ -583,7 +611,7 @@ namespace DigitalPlatform.CirculationClient
         }
 
 
-        #region 序列号
+#region 序列号
 
         // parameters:
         //      strRequirFuncList   要求必须具备的功能列表。逗号间隔的字符串
@@ -849,9 +877,9 @@ namespace DigitalPlatform.CirculationClient
             return strExtParam;
         }
 
-        #endregion
+#endregion
 
-        #region Form 实用函数
+#region Form 实用函数
 
         public delegate void delegate_action(object o);
 
@@ -939,9 +967,9 @@ delegate_action action)
             }
         }
 
-        #endregion
+#endregion
 
-        #region 错误状态
+#region 错误状态
 
         static void SetWholeColor(Color backColor, Color foreColor)
         {
@@ -1011,7 +1039,7 @@ delegate_action action)
             _errorStateInfo = info;
         }
 
-        #endregion
+#endregion
 
         public static bool IsMinimizeMode()
         {

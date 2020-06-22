@@ -68,7 +68,6 @@ namespace dp2Library
                     this._ip = null;
                 }
             }
-
         }
 
         #region 基础函数
@@ -335,6 +334,9 @@ namespace dp2Library
             {
                 if (OperationContext.Current.SessionId == null)
                 {
+                    //OperationContext.Current.Channel.Closing += Channel_Closing;
+                    //OperationContext.Current.Channel.Closed += Channel_Closed;
+
                     this.RestMode = true;
 
                     string strCookie = WebOperationContext.Current.IncomingRequest.Headers["Cookie"];
@@ -489,6 +491,22 @@ namespace dp2Library
 
             return result;
         }
+
+        /*
+        private void Channel_Closed(object sender, EventArgs e)
+        {
+            this.app.SessionTable.DeleteSession(sessioninfo);
+
+            OperationContext.Current.Channel.Closed -= Channel_Closed;
+        }
+
+        private void Channel_Closing(object sender, EventArgs e)
+        {
+            this.app.SessionTable.DeleteSession(sessioninfo);
+
+            OperationContext.Current.Channel.Closing -= Channel_Closing;
+        }
+        */
 
         #endregion
 

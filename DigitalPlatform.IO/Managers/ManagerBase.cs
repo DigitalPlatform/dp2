@@ -60,15 +60,26 @@ namespace DigitalPlatform.IO
 
         public void Clear()
         {
-            this.Lock.EnterWriteLock();
-            try
+            // 2020/6/22 放入独立的 Task 避免出现死锁
+            Task.Run(() =>
             {
-                _clear();
-            }
-            finally
-            {
-                this.Lock.ExitWriteLock();
-            }
+
+                this.Lock.EnterWriteLock();
+                try
+                {
+                    _clear();
+                }
+                catch
+                {
+
+                }
+                finally
+                {
+                    this.Lock.ExitWriteLock();
+                }
+
+            });
+
 
 #if LOG
             LibraryChannelManager.Log?.Debug($"{this.Name} channels Clear() completed. IdleCount={this.Channels.IdleCount}, UsedCount={this.Channels.UsedCount}");

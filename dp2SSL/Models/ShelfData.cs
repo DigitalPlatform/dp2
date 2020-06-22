@@ -4586,6 +4586,20 @@ namespace dp2SSL
 
                         if (action == "borrow" || action == "renew")
                         {
+                            if (string.IsNullOrEmpty(info.ActionString) == false)
+                            {
+                                var old_borrow_info = JsonConvert.DeserializeObject<BorrowInfo>(info.ActionString);
+                                if (old_borrow_info.Overflows != null && old_borrow_info.Overflows.Length > 0)
+                                {
+                                    string value = StringUtil.EscapeString(string.Join("; ", old_borrow_info.Overflows), ":,");
+                                    strStyle += $",overflow:{value}";
+                                }
+                                else if (string.IsNullOrEmpty(old_borrow_info.Period) == false)
+                                {
+                                    string value = StringUtil.EscapeString(old_borrow_info.Period, ":,");
+                                    strStyle += $",requestPeriod:{value}";
+                                }
+                            }
                             // TODO: 智能书柜要求强制借书。如果册操作前处在被其他读者借阅状态，要自动先还书再进行借书
 
                             lRet = channel.Borrow(null,

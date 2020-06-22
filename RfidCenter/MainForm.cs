@@ -22,10 +22,10 @@ using DigitalPlatform.RFID;
 using DigitalPlatform.RFID.UI;
 using DigitalPlatform.Text;
 
-using log4net;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using RfidDrivers.First;
+using Serilog;
 
 namespace RfidCenter
 {
@@ -129,13 +129,9 @@ namespace RfidCenter
 
             ClientInfo.Initial("rfidcenter");
             {
-                Driver1Manager.Log = LogManager.GetLogger("main", "driver1");
-                /*
-                _log = LogManager.GetLogger("main",
-                    product_name
-                    // "fingerprintcenter"
-                    );
-                    */
+                // Driver1Manager.Log = LogManager.GetLogger("main", "driver1");
+                // string userLogDir = ClientInfo.UserLogDir;
+                ClientInfo.SetLogginLevel(Serilog.Events.LogEventLevel.Information);
             }
             ClearHtml();
 
