@@ -1004,6 +1004,23 @@ cancellation_token);
                 return;
             }
 
+            // 显示当前对话框的内容
+            if (command.StartsWith("showtext"))
+            {
+                string param = command.Substring("showtext".Length).Trim();
+                string text = "";
+                App.Invoke(new Action(() =>
+                {
+                    var window = App.GetActiveWindow();
+                    if (window == null)
+                        text = "";
+                    else
+                        text = App.FindTextChildren(window);
+                }));
+                await SendMessageAsync(new string[] { groupName }, $"==== 对话框文字 ====\r\n{text}");
+                return;
+            }
+
             // 列出操作历史
             if (command.StartsWith("list history"))
             {
