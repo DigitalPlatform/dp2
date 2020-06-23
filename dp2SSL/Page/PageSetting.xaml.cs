@@ -18,6 +18,7 @@ using DigitalPlatform.RFID;
 using DigitalPlatform.Face;
 using DigitalPlatform.WPF;
 using DigitalPlatform.Install;
+using System.Windows.Media;
 
 namespace dp2SSL
 {
@@ -199,67 +200,101 @@ namespace dp2SSL
                 App.ContinueBarcodeScan();
             }
 
-            // 迫使 URL 生效
-            RfidManager.Url = App.RfidUrl;
-            RfidManager.Clear();
-            FingerprintManager.Url = App.FingerprintUrl;
-            FingerprintManager.Clear();
-            FaceManager.Url = App.FaceUrl;
-            FaceManager.Clear();
-            // 迫使 RfidManager.ReaderNameList 反应最新变化
-            ShelfData.RefreshReaderNameList();
-
-            // 2019/6/19
-            // 主动保存一次参数配置
-            WpfClientInfo.SaveConfig();
-
-            // 检查状态，及时报错
+            using (var cancel = CancellationTokenSource.CreateLinkedTokenSource(App.CancelToken))
             {
-                List<string> errors = new List<string>();
+                ProgressWindow progress = null;
+                App.Invoke(new Action(() =>
                 {
-                    var result = RfidManager.GetState("");
-                    if (result.Value == -1)
-                        errors.Add(result.ErrorInfo);
-                }
-
+                    progress = new ProgressWindow();
+                    progress.TitleText = "兑现参数";
+                    progress.MessageText = "正在兑现参数，请稍等 ...";
+                    progress.Owner = Application.Current.MainWindow;
+                    progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                    progress.Closed += (s1, e1) =>
+                    {
+                        cancel.Cancel();
+                    };
+                    progress.okButton.Content = "停止";
+                    progress.Background = new SolidColorBrush(Colors.DarkRed);
+                    App.SetSize(progress, "middle");
+                    progress.BackColor = "black";
+                    progress.Show();
+                }));
+                try
                 {
-                    var result = FingerprintManager.GetState("");
-                    if (result.Value == -1)
-                        errors.Add(result.ErrorInfo);
-                }
+                    // testing
+                    // Thread.Sleep(1000 * 5);
 
+                    // 迫使 URL 生效
+                    RfidManager.Url = App.RfidUrl;
+                    RfidManager.Clear();
+                    FingerprintManager.Url = App.FingerprintUrl;
+                    FingerprintManager.Clear();
+                    FaceManager.Url = App.FaceUrl;
+                    FaceManager.Clear();
+                    // 迫使 RfidManager.ReaderNameList 反应最新变化
+                    ShelfData.RefreshReaderNameList();
+
+                    // 2019/6/19
+                    // 主动保存一次参数配置
+                    WpfClientInfo.SaveConfig();
+
+                    // 检查状态，及时报错
+                    {
+                        List<string> errors = new List<string>();
+                        {
+                            var result = RfidManager.GetState("");
+                            if (result.Value == -1)
+                                errors.Add(result.ErrorInfo);
+                        }
+
+                        {
+                            var result = FingerprintManager.GetState("");
+                            if (result.Value == -1)
+                                errors.Add(result.ErrorInfo);
+                        }
+
+                        {
+                            var result = FaceManager.GetState("camera");
+                            if (result.Value == -1)
+                                errors.Add(result.ErrorInfo);
+                        }
+
+                        {
+                            // 检查 Server UID 关系
+                            var check_result = CheckServerUID();
+                            if (check_result.Value == -1)
+                                errors.Add(check_result.ErrorInfo);
+                        }
+
+                        if (errors.Count > 0)
+                            MessageBox.Show(StringUtil.MakePathList(errors, "\r\n"));
+                    }
+
+                    PageMenu.MenuPage?.UpdateMenu();
+
+                    // 2019/12/9
+                    App.CurrentApp.InitialShelfCfg();
+
+                    // TODO: 可能会抛出异常
+                    // 因为 Doors 发生了变化，所以要重新初始化门控件
+                    PageMenu.PageShelf?.InitialDoorControl();
+
+                    ShelfData.l_RefreshCount();
+
+                    // 重新启动 Proccess 监控
+                    App.CurrentApp.StartProcessManager();
+
+                    _ = App.CurrentApp.ConnectMessageServerAsync();
+                }
+                finally
                 {
-                    var result = FaceManager.GetState("camera");
-                    if (result.Value == -1)
-                        errors.Add(result.ErrorInfo);
+                    App.Invoke(new Action(() =>
+                    {
+                        progress.Close();
+                    }));
                 }
-
-                {
-                    // 检查 Server UID 关系
-                    var check_result = CheckServerUID();
-                    if (check_result.Value == -1)
-                        errors.Add(check_result.ErrorInfo);
-                }
-
-                if (errors.Count > 0)
-                    MessageBox.Show(StringUtil.MakePathList(errors, "\r\n"));
             }
-
-            PageMenu.MenuPage?.UpdateMenu();
-
-            // 2019/12/9
-            App.CurrentApp.InitialShelfCfg();
-
-            // TODO: 可能会抛出异常
-            // 因为 Doors 发生了变化，所以要重新初始化门控件
-            PageMenu.PageShelf?.InitialDoorControl();
-
-            ShelfData.l_RefreshCount();
-
-            // 重新启动 Proccess 监控
-            App.CurrentApp.StartProcessManager();
-
-            _ = App.CurrentApp.ConnectMessageServerAsync();
         }
 
         const string dp2library_base_version = "3.28";

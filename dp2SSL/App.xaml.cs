@@ -29,6 +29,11 @@ using DigitalPlatform.MessageClient;
 using DigitalPlatform.Install;
 using System.Deployment.Application;
 using System.Reflection;
+using System.Windows.Controls;
+using System.Windows.Automation.Peers;
+using System.Windows.Automation.Provider;
+using System.Windows.Interop;
+using System.Runtime.InteropServices;
 
 //using Microsoft.VisualStudio.Shell;
 //using Task = System.Threading.Tasks.Task;
@@ -151,7 +156,7 @@ namespace dp2SSL
             {
                 WpfClientInfo.Initial("dp2SSL");
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 StartErrorBox(ex.Message);
                 App.Current.Shutdown();
@@ -1657,6 +1662,101 @@ Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
                 }));
         }
 
+        public static NormalResult PressButton(string button_name)
+        {
+            var window = GetActiveWindow();
+            if (window == null)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = "没有找到活动窗口",
+                    ErrorCode = "notFoundActiveWindow"
+                };
+            foreach (var button in FindVisualChildren<Button>(window))
+            {
+                string name = button.Content as string;
+                if (name == null || name.IndexOf(button_name) == -1)
+                    continue;
+
+                PressButton(button);
+                return new NormalResult { Value = 1 };
+            }
+
+            return new NormalResult
+            {
+                Value = -1,
+                ErrorInfo = $"窗口 {window.Title} 中没有找到名为 '{button_name}' 的按钮",
+                ErrorCode = "notFoundButton"
+            };
+        }
+
+        public static Window GetActiveWindow()
+        {
+            try
+            {
+                return SortWindowsTopToBottom(Application.Current.Windows.OfType<Window>()).FirstOrDefault();
+
+                    /*
+                // https://stackoverflow.com/questions/2038879/refer-to-active-window-in-wpf
+                return Application.Current.Windows.OfType<Window>().SingleOrDefault(x => x.IsActive);
+                    */
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        // https://stackoverflow.com/questions/974598/find-all-controls-in-wpf-window-by-type
+        public static IEnumerable<T> FindVisualChildren<T>(DependencyObject depObj) where T : DependencyObject
+        {
+            if (depObj != null)
+            {
+                for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
+                {
+                    DependencyObject child = VisualTreeHelper.GetChild(depObj, i);
+                    if (child != null && child is T)
+                    {
+                        yield return (T)child;
+                    }
+
+                    foreach (T childOfChild in FindVisualChildren<T>(child))
+                    {
+                        yield return childOfChild;
+                    }
+                }
+            }
+
+        }
+
+
+        static void PressButton(Button someButton)
+        {
+            ButtonAutomationPeer peer = new ButtonAutomationPeer(someButton);
+            IInvokeProvider invokeProv = peer.GetPattern(PatternInterface.Invoke) as IInvokeProvider;
+            invokeProv.Invoke();
+        }
+
+        #region z-order
+
+        // https://stackoverflow.com/questions/3473016/how-to-sort-windows-by-z-index
+        public static IEnumerable<Window> SortWindowsTopToBottom(IEnumerable<Window> unsorted)
+        {
+            var byHandle = unsorted.ToDictionary(win =>
+              ((HwndSource)PresentationSource.FromVisual(win)).Handle);
+
+            for (IntPtr hWnd = GetTopWindow(IntPtr.Zero); hWnd != IntPtr.Zero; hWnd = GetWindow(hWnd, GW_HWNDNEXT))
+            {
+                if (byHandle.ContainsKey(hWnd))
+                    yield return byHandle[hWnd];
+            }
+        }
+
+        const uint GW_HWNDNEXT = 2;
+        [DllImport("User32")] static extern IntPtr GetTopWindow(IntPtr hWnd);
+        [DllImport("User32")] static extern IntPtr GetWindow(IntPtr hWnd, uint wCmd);
+
+        #endregion
     }
 
     public delegate void NewTagChangedEventHandler(object sender,

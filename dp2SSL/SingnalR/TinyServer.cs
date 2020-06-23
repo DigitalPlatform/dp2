@@ -988,6 +988,22 @@ cancellation_token);
                 return;
             }
 
+            // 触发按钮
+            if (command.StartsWith("press"))
+            {
+                string param = command.Substring("press".Length).Trim();
+                NormalResult press_result = null;
+                App.Invoke(new Action(() =>
+                {
+                    press_result = App.PressButton(param);
+                }));
+                if (press_result.Value == -1)
+                    await SendMessageAsync(new string[] { groupName }, $"触发按钮发生错误: {press_result.ErrorInfo}");
+                else
+                    await SendMessageAsync(new string[] { groupName }, $"触发按钮成功");
+                return;
+            }
+
             // 列出操作历史
             if (command.StartsWith("list history"))
             {
