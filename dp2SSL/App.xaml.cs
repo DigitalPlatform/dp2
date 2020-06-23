@@ -34,6 +34,7 @@ using System.Windows.Automation.Peers;
 using System.Windows.Automation.Provider;
 using System.Windows.Interop;
 using System.Runtime.InteropServices;
+using System.Windows.Documents;
 
 //using Microsoft.VisualStudio.Shell;
 //using Task = System.Threading.Tasks.Task;
@@ -1690,16 +1691,17 @@ Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
             };
         }
 
+        // 获得当前最顶部的窗口
         public static Window GetActiveWindow()
         {
             try
             {
                 return SortWindowsTopToBottom(Application.Current.Windows.OfType<Window>()).FirstOrDefault();
 
-                    /*
-                // https://stackoverflow.com/questions/2038879/refer-to-active-window-in-wpf
-                return Application.Current.Windows.OfType<Window>().SingleOrDefault(x => x.IsActive);
-                    */
+                /*
+            // https://stackoverflow.com/questions/2038879/refer-to-active-window-in-wpf
+            return Application.Current.Windows.OfType<Window>().SingleOrDefault(x => x.IsActive);
+                */
             }
             catch
             {
@@ -1736,6 +1738,62 @@ Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
             IInvokeProvider invokeProv = peer.GetPattern(PatternInterface.Invoke) as IInvokeProvider;
             invokeProv.Invoke();
         }
+
+        public static string FindTextChildren(DependencyObject depObj)
+        {
+            if (depObj != null)
+            {
+                StringBuilder text = new StringBuilder();
+                for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
+                {
+                    DependencyObject child = VisualTreeHelper.GetChild(depObj, i);
+                    if (child != null)
+                    {
+                        string current = "";
+                        if (child is FlowDocument)
+                        {
+                            FlowDocument fd = child as FlowDocument;
+                            TextRange tr = new TextRange(fd.ContentStart, fd.ContentEnd);
+                            current = tr.Text;
+                        }
+                        else if (child is TextBlock)
+                        {
+                            TextBlock tb = child as TextBlock;
+                            TextRange tr = new TextRange(tb.ContentStart, tb.ContentEnd);
+                            current = tr.Text;
+                        }
+                        else if (child is TextBox)
+                        {
+                            TextBox tb = child as TextBox;
+                            current = tb.Text;
+                        }
+                        else if (child is Button)
+                        {
+                            current = FindTextChildren(child);
+                            if (string.IsNullOrEmpty(current) == false)
+                                current = $"[{current.Replace("\r","").Replace("\n","")}]";
+                        }
+                        else
+                            current = FindTextChildren(child);
+
+                        current = Trim(current);
+                        if (string.IsNullOrEmpty(current) == false)
+                            text.AppendLine(current);
+                    }
+                }
+
+                return text.ToString();
+            }
+            return "";
+        }
+
+        static string Trim(string text)
+        {
+            if (text == null)
+                return "";
+            return text.Trim(new char[] { ' ', '\r', '\n' });
+        }
+
 
         #region z-order
 
