@@ -124,7 +124,7 @@ namespace DigitalPlatform.CirculationClient
         // https://nblumhardt.com/2014/10/dynamically-changing-the-serilog-level/
         static LoggingLevelSwitch _loggingLevel = new LoggingLevelSwitch();
 
-        public static void SetLogginLevel(Serilog.Events.LogEventLevel level)
+        public static void SetLoggingLevel(Serilog.Events.LogEventLevel level)
         {
             _loggingLevel.MinimumLevel = level;
         }
