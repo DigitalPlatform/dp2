@@ -1749,6 +1749,71 @@ Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
                     DependencyObject child = VisualTreeHelper.GetChild(depObj, i);
                     if (child != null)
                     {
+                        if (child is UIElement)
+                        {
+                            UIElement ui = child as UIElement;
+                            if (ui.Visibility != Visibility.Visible)
+                                continue;
+                        }
+
+                        string current = "";
+                        if (child is FlowDocumentScrollViewer)
+                        {
+                            FlowDocumentScrollViewer viewer = child as FlowDocumentScrollViewer;
+                            var fd = viewer.Document;
+                            TextRange tr = new TextRange(fd.ContentStart, fd.ContentEnd);
+                            current = tr.Text;
+                        }
+                        /*
+                        else if (child is FlowDocument)
+                        {
+                            FlowDocument fd = child as FlowDocument;
+                            TextRange tr = new TextRange(fd.ContentStart, fd.ContentEnd);
+                            current = tr.Text;
+                        }
+                        */
+                        else if (child is TextBlock)
+                        {
+                            TextBlock tb = child as TextBlock;
+                            TextRange tr = new TextRange(tb.ContentStart, tb.ContentEnd);
+                            current = tr.Text;
+                        }
+                        else if (child is TextBox)
+                        {
+                            TextBox tb = child as TextBox;
+                            current = tb.Text;
+                        }
+                        else if (child is Button)
+                        {
+                            current = FindTextChildren(child);
+                            if (string.IsNullOrEmpty(current) == false)
+                                current = $"[{current.Replace("\r", "").Replace("\n", "")}]";
+                        }
+                        else
+                            current = FindTextChildren(child);
+
+                        current = Trim(current);
+                        if (string.IsNullOrEmpty(current) == false)
+                            text.AppendLine(current);
+                    }
+                }
+
+                return text.ToString();
+            }
+            return "";
+        }
+
+#if NO
+        public static string FindTextChildren(DependencyObject depObj)
+        {
+            if (depObj != null)
+            {
+                StringBuilder text = new StringBuilder();
+                for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
+                {
+                    DependencyObject child = VisualTreeHelper.GetChild(depObj, i);
+                    if (child != null)
+                    {
                         string current = "";
                         if (child is FlowDocument)
                         {
@@ -1786,7 +1851,7 @@ Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
             }
             return "";
         }
-
+#endif
         static string Trim(string text)
         {
             if (text == null)
