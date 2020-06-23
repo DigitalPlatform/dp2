@@ -1005,9 +1005,9 @@ cancellation_token);
             }
 
             // 显示当前对话框的内容
-            if (command.StartsWith("showtext"))
+            if (command.StartsWith("dialog"))
             {
-                string param = command.Substring("showtext".Length).Trim();
+                string param = command.Substring("dialog".Length).Trim();
                 string text = "";
                 App.Invoke(new Action(() =>
                 {
