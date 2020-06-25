@@ -1731,7 +1731,8 @@ Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
 
         }
 
-
+        // 按下一个按钮
+        // https://stackoverflow.com/questions/728432/how-to-programmatically-click-a-button-in-wpf
         static void PressButton(Button someButton)
         {
             ButtonAutomationPeer peer = new ButtonAutomationPeer(someButton);
