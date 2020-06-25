@@ -2510,6 +2510,25 @@ out Reader reader);
 
             if (read_lock_status == false)
             {
+                // 检查读出字节数的合理性
+                if ((bytesRead % block_size) != 0)
+                    return new ReadBlocksResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"实际读出的字节数 {bytesRead} 不是块尺寸 {block_size} 的整倍数",
+                        ErrorCode = "bytesCountError"
+                    };
+                // 实际读出的块个数
+                uint count = bytesRead / block_size;
+                // 核验 blocksRead
+                if (blocksRead != count)
+                    return new ReadBlocksResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"实际读出的块数 {blocksRead} 和实际读出的字节数 {bytesRead} 不符合",
+                        ErrorCode = "blocksCountError"
+                    };
+
                 ReadBlocksResult result = new ReadBlocksResult
                 {
                     Bytes = new byte[bytesRead],
@@ -2520,6 +2539,25 @@ out Reader reader);
             }
             else
             {
+                // 检查读出字节数的合理性
+                if ((bytesRead % (block_size + 1)) != 0)
+                    return new ReadBlocksResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"实际读出的字节数 {bytesRead} 不是单元尺寸 {block_size + 1} 的整倍数(注意每个块后面跟随了一个 byte 的锁定信息。块尺寸为 {block_size})",
+                        ErrorCode = "bytesCountError"
+                    };
+                // 实际读出的块个数
+                uint count = bytesRead / (block_size + 1);
+                // 核验 blocksRead
+                if (blocksRead != count)
+                    return new ReadBlocksResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"实际读出的块数 {blocksRead} 和实际读出的字节数 {bytesRead} 不符合(每个单元含有一个 byte 的锁定信息情形)",
+                        ErrorCode = "blocksCountError"
+                    };
+
                 // BlockBuffer 中分离出 lock status byte
                 List<byte> buffer = new List<byte>(BlockBuffer);
                 StringBuilder status = new StringBuilder();
@@ -2528,6 +2566,15 @@ out Reader reader);
                     byte b = buffer[i * (int)block_size];
                     status.Append(b == 0 ? '.' : 'l');
                     buffer.RemoveAt(i * (int)block_size);
+                }
+
+                // 实际数据长度
+                int data_length = (int)(count * block_size);
+                // 截断最后多余的字节
+                if (buffer.Count > data_length)
+                {
+                    buffer.RemoveRange(data_length, buffer.Count - data_length);
+                    Debug.Assert(buffer.Count == data_length);
                 }
                 ReadBlocksResult result = new ReadBlocksResult
                 {
