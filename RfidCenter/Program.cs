@@ -21,7 +21,7 @@ namespace RfidCenter
 {
     static class Program
     {
-        public static Driver1 Rfid = null;
+        public static RfidDriver1 Rfid = null;
 
         static ExecutionContext context = null;
         static Mutex mutex = null;

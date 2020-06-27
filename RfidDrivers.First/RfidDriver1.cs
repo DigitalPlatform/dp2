@@ -20,7 +20,7 @@ using DigitalPlatform.Text;
 
 namespace RfidDrivers.First
 {
-    public class Driver1 : IRfidDriver
+    public class RfidDriver1 : IRfidDriver
     {
         string _state = "closed";
 

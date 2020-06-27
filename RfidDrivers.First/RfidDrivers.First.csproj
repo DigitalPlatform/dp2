@@ -81,7 +81,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Driver1.cs" />
+    <Compile Include="RfidDriver1.cs" />
     <Compile Include="miniLib_Lock.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="rfidlib.cs" />

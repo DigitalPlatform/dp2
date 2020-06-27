@@ -17,11 +17,14 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Xml;
 using System.IO;
+using System.Reflection;
+using System.Deployment.Application;
+
+using Newtonsoft.Json;
 
 using dp2SSL.Models;
-using static dp2SSL.LibraryChannelUtil;
 using dp2SSL.Dialog;
-
+using static dp2SSL.LibraryChannelUtil;
 using static dp2SSL.App;
 
 using DigitalPlatform;
@@ -35,9 +38,6 @@ using DigitalPlatform.Face;
 using DigitalPlatform.Interfaces;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryServer;
-using System.Reflection;
-using System.Deployment.Application;
-using Newtonsoft.Json;
 using DigitalPlatform.LibraryClient.localhost;
 
 namespace dp2SSL

@@ -235,6 +235,10 @@
       <Project>{FE846FAC-D4CB-4013-AD69-39E72E31D204}</Project>
       <Name>DigitalPlatform.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\LedDriver.First\LedDriver.First.csproj">
+      <Project>{72e558fa-25f2-44d1-8a1b-313af7001ad3}</Project>
+      <Name>LedDriver.First</Name>
+    </ProjectReference>
     <ProjectReference Include="..\RfidDrivers.First\RfidDrivers.First.csproj">
       <Project>{dfadb438-ebff-47fb-acf6-586224cef771}</Project>
       <Name>RfidDrivers.First</Name>

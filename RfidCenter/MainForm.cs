@@ -22,6 +22,7 @@ using DigitalPlatform.RFID;
 using DigitalPlatform.RFID.UI;
 using DigitalPlatform.Text;
 
+using LedDriver.First;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using RfidDrivers.First;
@@ -31,7 +32,8 @@ namespace RfidCenter
 {
     public partial class MainForm : Form
     {
-        Driver1 _driver = new Driver1();
+        RfidDriver1 _rfidDriver = new RfidDriver1();
+        ILedDriver _ledDriver = new LedDriver1();
 
         FloatingMessageForm _floatingMessage = null;
 
@@ -39,7 +41,7 @@ namespace RfidCenter
         {
             ClientInfo.ProgramName = "rfidcenter";
             ClientInfo.MainForm = this;
-            Program.Rfid = _driver;
+            Program.Rfid = _rfidDriver;
 
             InitializeComponent();
 
@@ -159,7 +161,15 @@ namespace RfidCenter
 
             Task.Run(() =>
             {
-                InitializeDriver();
+                try
+                {
+                    InitializeRfidDriver();
+                    InitializeLedDriver();
+                }
+                catch(Exception ex)
+                {
+                    OutputHistory("InitializeRfidDriver() InitializeLedDriver() 出现异常: " + ExceptionUtil.GetDebugText(ex), 2);
+                }
             });
 
             if (StringUtil.IsDevelopMode() == false)
@@ -238,7 +248,8 @@ namespace RfidCenter
             EndChannel();
             EndRemotingServer();
 
-            _driver.ReleaseDriver();
+            _rfidDriver.ReleaseDriver();
+            _ledDriver.ReleaseDriver();
         }
 
         #region 错误状态
@@ -352,7 +363,7 @@ namespace RfidCenter
         // parameters:
         //      message 需要显示的提示文字。如果为 null，表示函数自动决定显示“正在初始化 RFID 设备”
         //      set_hint_table  保存本次获得的暗示表
-        void InitializeDriver(string message = null,
+        void InitializeRfidDriver(string message = null,
             bool set_hint_table = false)
         {
             lock (_syncRoot_start)
@@ -368,7 +379,7 @@ namespace RfidCenter
                     else
                         this.ShowMessage("正在初始化 RFID 设备");
 
-                    _driver.ReleaseDriver();
+                    _rfidDriver.ReleaseDriver();
                     var existing_hint_table = GetHintTable();
 
                     // TODO: 要允许 COM1,COM2 这种形态的内容被输入 combobox 和保存
@@ -390,7 +401,7 @@ namespace RfidCenter
 
                     string cfgFileName = Path.Combine(ClientInfo.UserDir, "readers.xml");
 
-                    InitializeDriverResult result = _driver.InitializeDriver(cfgFileName, lock_param, set_hint_table ? null : existing_hint_table);
+                    InitializeDriverResult result = _rfidDriver.InitializeDriver(cfgFileName, lock_param, set_hint_table ? null : existing_hint_table);
                     // 列出所有可用设备名称
                     UpdateDeviceList(result.Readers);
 
@@ -510,7 +521,7 @@ namespace RfidCenter
 
         private void MenuItem_inventory_Click(object sender, EventArgs e)
         {
-            InventoryResult result = _driver.Inventory(GetCurrentReaderName(), "", "only_new");
+            InventoryResult result = _rfidDriver.Inventory(GetCurrentReaderName(), "", "only_new");
             MessageBox.Show(this, result.ToString());
             if (result.Results != null && result.Results.Count > 0)
                 _inventory_info = result.Results[0];
@@ -521,7 +532,7 @@ namespace RfidCenter
         private void MenuItem_getTagInfo_Click(object sender, EventArgs e)
         {
             // byte[] uid = new byte[8];
-            GetTagInfoResult result = _driver.GetTagInfo(GetCurrentReaderName(), _inventory_info);
+            GetTagInfoResult result = _rfidDriver.GetTagInfo(GetCurrentReaderName(), _inventory_info);
             MessageBox.Show(this, result.ToString());
         }
 
@@ -580,7 +591,7 @@ c0 9e ba a0
                 )
             ));
 #endif
-            GetTagInfoResult result = _driver.GetTagInfo(GetCurrentReaderName(), null);
+            GetTagInfoResult result = _rfidDriver.GetTagInfo(GetCurrentReaderName(), null);
             MessageBox.Show(this, "初始芯片内容: " + result.ToString());
 
             TagInfo new_chip = result.TagInfo.Clone();
@@ -595,13 +606,13 @@ e2 e3 35 d6
 c0 9e ba a0
 6f 6b 00 00");
             new_chip.LockStatus = "ww....www";
-            NormalResult write_result = _driver.WriteTagInfo(GetCurrentReaderName(), result.TagInfo, new_chip);
+            NormalResult write_result = _rfidDriver.WriteTagInfo(GetCurrentReaderName(), result.TagInfo, new_chip);
             MessageBox.Show(this, write_result.ToString());
         }
 
         private void ToolStripMenuItem_testLockBlocks_Click(object sender, EventArgs e)
         {
-            GetTagInfoResult result = _driver.GetTagInfo(GetCurrentReaderName(), null);
+            GetTagInfoResult result = _rfidDriver.GetTagInfo(GetCurrentReaderName(), null);
             MessageBox.Show(this, "初始芯片内容: " + result.ToString());
             if (result.Value == -1)
                 return;
@@ -618,7 +629,7 @@ e2 e3 35 d6
 c0 9e ba a0
 6f 6b 00 00");
             new_chip.LockStatus = "ll....www";
-            NormalResult write_result = _driver.WriteTagInfo(GetCurrentReaderName(), result.TagInfo, new_chip);
+            NormalResult write_result = _rfidDriver.WriteTagInfo(GetCurrentReaderName(), result.TagInfo, new_chip);
             MessageBox.Show(this, write_result.ToString());
         }
 
@@ -754,7 +765,7 @@ c0 9e ba a0
             {
                 UID = uid,
             };
-            GetTagInfoResult result = _driver.GetTagInfo(GetCurrentReaderName(), info);
+            GetTagInfoResult result = _rfidDriver.GetTagInfo(GetCurrentReaderName(), info);
             if (result.Value == -1)
             {
                 this.Invoke((Action)(() =>
@@ -1009,7 +1020,7 @@ bool bClickClose = false)
                 item_info.OldInfo,
                 chip);
 
-            NormalResult result = _driver.WriteTagInfo(GetCurrentReaderName(), item_info.OldInfo, new_tag_info);
+            NormalResult result = _rfidDriver.WriteTagInfo(GetCurrentReaderName(), item_info.OldInfo, new_tag_info);
             if (result.Value == 0)
             {
                 this.ShowMessage("保存成功", "green", true);
@@ -1123,6 +1134,10 @@ bool bClickClose = false)
                     this.comboBox_deviceList,
                     new ComboBoxText(this.comboBox_lock),
                     new ComboBoxText(this.comboBox_lamp),
+                    new ComboBoxText(this.comboBox_led_serialPort),
+                    this.textBox_led_xCount,
+                    this.textBox_led_cellWidth,
+                    this.textBox_led_cellHeight,
                 };
                 return GuiState.GetUiState(controls);
             }
@@ -1136,6 +1151,10 @@ bool bClickClose = false)
                     this.comboBox_deviceList,
                     new ComboBoxText(this.comboBox_lock),
                     new ComboBoxText(this.comboBox_lamp),
+                    new ComboBoxText(this.comboBox_led_serialPort),
+                    this.textBox_led_xCount,
+                    this.textBox_led_cellWidth,
+                    this.textBox_led_cellHeight,
                 };
                 GuiState.SetUiState(controls, value);
             }
@@ -1502,7 +1521,7 @@ string strHtml)
                         if (token.IsCancellationRequested)
                             break;
                         // 迫使重新启动
-                        InitializeDriver();
+                        InitializeRfidDriver();
                         if (token.IsCancellationRequested)
                             break;
 
@@ -1631,7 +1650,7 @@ string strHtml)
             }
 
             {
-                NormalResult result = _driver.LoadFactoryDefault("*");
+                NormalResult result = _rfidDriver.LoadFactoryDefault("*");
                 if (result.Value == -1)
                     MessageBox.Show(this, result.ErrorInfo);
                 else
@@ -1640,15 +1659,15 @@ string strHtml)
 
             // 2019/5/23
             // 如果当前读卡器中有 'R-PAN ISO15693' 这个型号，那需要重新初始化一下设备。不然后面调用 SetConfig() 时其中的读会失败
-            var reader = _driver.Readers.Find((o) => o.Name == "R-PAN ISO15693");
+            var reader = _rfidDriver.Readers.Find((o) => o.Name == "R-PAN ISO15693");
             if (reader != null)
-                InitializeDriver("正在关闭和重新打开读卡器。所需时间较长，请耐心等待 ...");
+                InitializeRfidDriver("正在关闭和重新打开读卡器。所需时间较长，请耐心等待 ...");
 
         }
 
         private void MenuItem_testSetConfig_Click(object sender, EventArgs e)
         {
-            NormalResult result = _driver.SetConfig("*", "beep:-");
+            NormalResult result = _rfidDriver.SetConfig("*", "beep:-");
             if (result.Value == -1)
                 MessageBox.Show(this, result.ErrorInfo);
             else
@@ -1671,7 +1690,7 @@ string strHtml)
             }
 
             {
-                NormalResult result = _driver.LoadFactoryDefault("*");
+                NormalResult result = _rfidDriver.LoadFactoryDefault("*");
                 if (result.Value == -1)
                 {
                     strError = result.ErrorInfo;
@@ -1681,12 +1700,12 @@ string strHtml)
 
             // 2019/5/23
             // 如果当前读卡器中有 'R-PAN ISO15693' 这个型号，那需要重新初始化一下设备。不然后面调用 SetConfig() 时其中的读会失败
-            var reader = _driver.Readers.Find((o) => o.Name == "R-PAN ISO15693");
+            var reader = _rfidDriver.Readers.Find((o) => o.Name == "R-PAN ISO15693");
             if (reader != null)
-                InitializeDriver("正在关闭和重新打开读卡器。所需时间较长，请耐心等待 ...");
+                InitializeRfidDriver("正在关闭和重新打开读卡器。所需时间较长，请耐心等待 ...");
 
             {
-                NormalResult result = _driver.SetConfig("*", "beep:-,mode:host,autoCloseRF:-");
+                NormalResult result = _rfidDriver.SetConfig("*", "beep:-,mode:host,autoCloseRF:-");
                 if (result.Value == -1)
                 {
                     strError = result.ErrorInfo;
@@ -1711,7 +1730,7 @@ string strHtml)
                 strError = $"cfg_no '{strCfgNo}' 不合法";
                 goto ERROR1;
             }
-            ReadConfigResult result = _driver.ReadConfig("*", cfg_no);
+            ReadConfigResult result = _rfidDriver.ReadConfig("*", cfg_no);
             MessageDlg.Show(this, $"cfg_no:{result.CfgNo}\r\nbytes:\r\n{Element.GetHexString(result.Bytes, "4")}", "config info");
             return;
         ERROR1:
@@ -1873,7 +1892,15 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
         {
             Task.Run(() =>
             {
-                InitializeDriver();
+                try
+                {
+                    InitializeRfidDriver();
+                    InitializeLedDriver();
+                }
+                catch (Exception ex)
+                {
+                    OutputHistory("InitializeRfidDriver() InitializeLedDriver() 出现异常: " + ExceptionUtil.GetDebugText(ex), 2);
+                }
             });
         }
 
@@ -1899,7 +1926,7 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
         {
             Task.Run(() =>
             {
-                InitializeDriver("正在探测读卡器 ...",
+                InitializeRfidDriver("正在探测读卡器 ...",
                     true);
             });
         }
@@ -1989,13 +2016,13 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
 
         private void MenuItem_turnOnLamp_Click(object sender, EventArgs e)
         {
-            var result = _driver.TurnShelfLamp("*", "turnOn");
+            var result = _rfidDriver.TurnShelfLamp("*", "turnOn");
             MessageDlg.Show(this, result.ToString(), "开灯");
         }
 
         private void MenuItem_turnOffLamp_Click(object sender, EventArgs e)
         {
-            var result = _driver.TurnShelfLamp("*", "turnOff");
+            var result = _rfidDriver.TurnShelfLamp("*", "turnOff");
             MessageDlg.Show(this, result.ToString(), "关灯");
         }
 
@@ -2022,14 +2049,98 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
 
         private void ToolStripMenuItem_sterilamp_turnOn_Click(object sender, EventArgs e)
         {
-            var result = _driver.TurnSterilamp("*", "turnOn");
+            var result = _rfidDriver.TurnSterilamp("*", "turnOn");
             MessageDlg.Show(this, result.ToString(), "开灯");
         }
 
         private void ToolStripMenuItem_sterilamp_turnOff_Click(object sender, EventArgs e)
         {
-            var result = _driver.TurnSterilamp("*", "turnOff");
+            var result = _rfidDriver.TurnSterilamp("*", "turnOff");
             MessageDlg.Show(this, result.ToString(), "关灯");
+        }
+
+        void InitializeLedDriver()
+        {
+            string strError = "";
+
+            string port = (string)this.Invoke((Func<string>)(() =>
+            {
+                return this.comboBox_led_serialPort.Text;
+            }));
+
+            if (string.IsNullOrEmpty(port) == true
+                || port == "不使用")
+            {
+                _ledDriver.ReleaseDriver();
+                return;
+            }
+
+            int xCount = 0;
+            int cellWidth = 0;
+            int cellHeight = 0;
+
+            {
+                string value = (string)this.Invoke((Func<string>)(() =>
+                {
+                    return this.textBox_led_xCount.Text;
+                }));
+
+                if (Int32.TryParse(value, out xCount) == false)
+                {
+                    strError = $"LED 水平单元数 '{value}' 格式不正确";
+                    goto ERROR1;
+                }
+            }
+
+            {
+                string value = (string)this.Invoke((Func<string>)(() =>
+                {
+                    return this.textBox_led_cellWidth.Text;
+                }));
+
+                if (Int32.TryParse(value, out cellWidth) == false)
+                {
+                    strError = $"LED 单元宽度 '{value}' 格式不正确";
+                    goto ERROR1;
+                }
+            }
+
+            {
+                string value = (string)this.Invoke((Func<string>)(() =>
+                {
+                    return this.textBox_led_cellHeight.Text;
+                }));
+                if (Int32.TryParse(value, out cellHeight) == false)
+                {
+                    strError = $"LED 单元高度 '{value}' 格式不正确";
+                    goto ERROR1;
+                }
+            }
+
+            LedProperty property = new LedProperty
+            {
+                SerialPort = port,
+                CellXCount = xCount,
+                CellWidth = cellWidth,
+                CellHeight = cellHeight,
+            };
+            var result = _ledDriver.InitializeDriver(property, "");
+            if (result.Value == -1)
+            {
+                OutputHistory(result.ErrorInfo, 2);
+                SetErrorState("error", result.ErrorInfo);
+                this.ShowMessage(result.ErrorInfo, "red", true);
+            }
+            else
+            {
+                OutputHistory($"LED 初始化成功", 0);
+            }
+
+            return;
+        ERROR1:
+            OutputHistory(strError, 2);
+            SetErrorState("error", strError);
+            this.ShowMessage(strError, "red", true);
         }
     }
 }
