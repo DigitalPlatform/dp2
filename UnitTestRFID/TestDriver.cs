@@ -15,7 +15,7 @@ namespace UnitTestRFID
         [TestMethod]
         public void Test_lock_1()
         {
-            Driver1 driver = new Driver1();
+            RfidDriver1 driver = new RfidDriver1();
             driver.TestInitialReader();
 
             var result = driver.TestCall("timeout:5000,sleep:3000");
@@ -26,7 +26,7 @@ namespace UnitTestRFID
         [TestMethod]
         public void Test_lock_2()
         {
-            Driver1 driver = new Driver1();
+            RfidDriver1 driver = new RfidDriver1();
             driver.TestInitialReader();
 
             List<string> exception_tasks = new List<string>();
