@@ -69,7 +69,11 @@ namespace dp2Circulation.Charging
             }
 
             // TODO: 此时可否发起一次 GetTagInfo 请求？
-            return new NormalResult { Value = -1, ErrorInfo = $"UID 为 '{uid}' 的标签不在读卡器上，无法获得其天线编号" };
+            return new NormalResult
+            {
+                Value = -1,
+                ErrorInfo = $"UID 为 '{uid}' 的标签不在读卡器上，无法获得其天线编号"
+            };
         }
 
         // 从 TagList.Books 中获得一个标签的 EAS 状态
@@ -98,7 +102,11 @@ namespace dp2Circulation.Charging
             }
 
             // TODO: 此时可否发起一次 GetTagInfo 请求？
-            return new GetEasStateResult { Value = -1, ErrorInfo = $"UID 为 '{uid}' 的标签不在读卡器上，无法获得其 EAS 状态" };
+            return new GetEasStateResult
+            {
+                Value = -1,
+                ErrorInfo = $"UID 为 '{uid}' 的标签不在读卡器上，无法获得其 EAS 状态"
+            };
         }
 
         // 从 TagList.Books 中获得一个标签的 EAS 状态
@@ -139,7 +147,11 @@ namespace dp2Circulation.Charging
                 }
             }
 
-            return new GetEasStateResult { Value = -1, ErrorInfo = $"PII 为 '{pii}' 的标签不在读卡器上，无法获得其 EAS 状态" };
+            return new GetEasStateResult
+            {
+                Value = -1,
+                ErrorInfo = $"PII 为 '{pii}' 的标签不在读卡器上，无法获得其 EAS 状态"
+            };
         }
 
         // result.Value:
@@ -202,7 +214,16 @@ namespace dp2Circulation.Charging
             //      其他 天线编号
             var antenna_result = GetAntennaByUID(uid);
             if (antenna_result.Value == -1)
+            {
+                // 2020/6/28
+                // 尝试找天线编号时候失败，这时候也要加入一个新行，便于工作人员后面放上去图书修复 EAS
+                this.Invoke((Action)(() =>
+                {
+                    // 加入一个新行
+                    AddLine(uid, pii, task);
+                }));
                 return antenna_result;
+            }
 
             NormalResult result = null;
             for (int i = 0; i < 2; i++)
