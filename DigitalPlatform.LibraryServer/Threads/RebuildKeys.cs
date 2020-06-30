@@ -117,7 +117,7 @@ namespace DigitalPlatform.LibraryServer
             if (this.App.PauseBatchTask == true)
                 return;
 
-        REDO_TASK:
+            REDO_TASK:
             try
             {
                 string strError = "";
@@ -182,11 +182,9 @@ namespace DigitalPlatform.LibraryServer
 
                 this.AppendResultText("*********\r\n");
 
+                // 按照断点信息处理
                 if (strDbNameList == "continue")
                 {
-                    // 按照断点信息处理
-                    this.AppendResultText("从上次断点位置继续\r\n");
-
                     // return:
                     //      -1  出错
                     //      0   没有发现断点信息
@@ -196,7 +194,13 @@ namespace DigitalPlatform.LibraryServer
                     if (nRet == -1)
                         goto ERROR1;
                     if (nRet == 0)
+                    {
+                        // 没有发现断点信息
+                        this.AppendResultText("当前没有断点信息。本轮处理被忽略\r\n");
                         return;
+                    }
+
+                    this.AppendResultText("从上次断点位置继续\r\n");
                 }
                 else
                 {
@@ -443,14 +447,13 @@ out strError);
             breakpoints = null;
             List<BatchTaskStartInfo> start_infos = null;
 
-            string strText = "";
             // 从断点记忆文件中读出信息
             // return:
             //      -1  error
             //      0   file not found
             //      1   found
             int nRet = this.App.ReadBatchTaskBreakPointFile(this.DefaultName,
-                out strText,
+                out string strText,
                 out strError);
             if (nRet == -1)
                 return -1;
@@ -736,7 +739,7 @@ out strError);
                 }
                 else
                 {
-                    strError = "获取记录 '"+strRecPath+"'("+strStyle+") 时出错: " + strError;
+                    strError = "获取记录 '" + strRecPath + "'(" + strStyle + ") 时出错: " + strError;
                     return -1;
                 }
             } // end of nRet == -1
@@ -773,7 +776,7 @@ out strError);
                     && nRedoCount < 10)
                 {
                     nRedoCount++;
-                    this.AppendResultText("因时间戳不匹配，重试处理记录 '"+strNextRecPath+"'\r\n");
+                    this.AppendResultText("因时间戳不匹配，重试处理记录 '" + strNextRecPath + "'\r\n");
                     goto REDO_REBUILD;
                 }
                 strError = "保存记录 '" + strNextRecPath + "' 时出错: " + strError;
@@ -1001,7 +1004,7 @@ out string strError)
                 if ((m_nRecordCount % 100) == 0)
                     this.AppendResultText("已重建检索点 记录 " + strOutputPath + "  " + (m_nRecordCount + 1).ToString() + "\r\n");
 
-            // CONTINUE:
+                // CONTINUE:
 
                 // 是否超过循环范围
                 if (Int64.TryParse(strID, out nCur) == false)
@@ -1022,6 +1025,7 @@ out string strError)
                     break;
             }
 
+            this.AppendResultText($"共处理记录 {m_nRecordCount} 条\r\n");
             return 0;
         }
 
@@ -1540,7 +1544,7 @@ out string strError)
             {
                 string strResult = "";
                 strResult += this.DbName;
-                strResult += "(功能="+this.Function+")";
+                strResult += "(功能=" + this.Function + ")";
                 if (string.IsNullOrEmpty(this.RecID) == false)
                 {
                     strResult += " : 从ID " + this.RecID.ToString() + " 开始";

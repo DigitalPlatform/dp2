@@ -973,7 +973,7 @@ namespace dp2Circulation
                 task);
 #endif
             this.Container.AddItemSummaryTask(// task.ItemBarcode,
-                string.IsNullOrEmpty(borrow_info.ItemBarcode) ? task.ItemBarcode : borrow_info.ItemBarcode,
+                string.IsNullOrEmpty(borrow_info?.ItemBarcode) ? task.ItemBarcode : borrow_info?.ItemBarcode,
                 strConfirmItemRecPath,
                 task);
 
@@ -1658,7 +1658,7 @@ end_time);
                 }
                 string strLocation = DomUtil.GetElementText(item_dom.DocumentElement, "location");
 #endif
-                string strLocation = return_info.Location;
+                string strLocation = return_info?.Location;
                 strLocation = StringUtil.GetPureLocation(strLocation);
 
                 if (Container.FilterLocations.IndexOf(strLocation) == -1)
@@ -1673,7 +1673,7 @@ end_time);
             // 修改 Parameters，增加用于显示的调拨方向
             if (lRet != -1
     && strAction == "transfer")
-                task.Parameters += ",direction:" + return_info.Location;
+                task.Parameters += ",direction:" + return_info?.Location;
 
 
             if (lRet == -1)
@@ -1702,7 +1702,7 @@ end_time);
                 task);
 #endif
             this.Container.AddItemSummaryTask( // task.ItemBarcode,
-                string.IsNullOrEmpty(return_info.ItemBarcode) ? task.ItemBarcode : return_info.ItemBarcode,
+                string.IsNullOrEmpty(return_info?.ItemBarcode) ? task.ItemBarcode : return_info?.ItemBarcode,
                 strConfirmItemRecPath,
                 task);
 
