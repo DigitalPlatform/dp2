@@ -236,6 +236,7 @@ namespace dp2Circulation.Charging
                     break;
             }
             TagList.ClearTagTable(uid);
+            TaskList.FillTagList();
 
             if (result.Value != 1)
             {
@@ -260,6 +261,8 @@ namespace dp2Circulation.Charging
 
             return result;
         }
+
+
 
         // TODO: 注意查重。避免插入重复的行
         ListViewItem AddLine(string uid, string pii, object o)

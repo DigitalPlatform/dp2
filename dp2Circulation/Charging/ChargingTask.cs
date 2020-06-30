@@ -1150,6 +1150,7 @@ end_time);
                     }
 
                     TagList.ClearTagTable("");
+                    FillTagList();
 
                     // testing
                     // NormalResult result = new NormalResult { Value = -1, ErrorInfo = "testing" };
@@ -1172,6 +1173,19 @@ end_time);
                 this.Container.WriteErrorLog(text);
                 strError = $"前置修改 RFID 标签 EAS 标志位时出现异常: {ex.Message} (已写入错误日志)";
                 return false;
+            }
+        }
+
+        public static void FillTagList()
+        {
+            BaseChannel<IRfid> channel = RfidManager.GetChannel();
+            try
+            {
+                TagList.FillTagInfo(channel);
+            }
+            finally
+            {
+                RfidManager.ReturnChannel(channel);
             }
         }
 
