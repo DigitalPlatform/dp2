@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.Remoting.Channels.Ipc;
 using System.Text;
 using System.Threading.Tasks;
@@ -500,6 +501,54 @@ namespace DigitalPlatform.RFID
             }
         }
 
+        // 填充 Books 和 Patrons 每个元素的 .TagInfo
+        public static int FillTagInfo(BaseChannel<IRfid> channel)
+        {
+            var news = Books;
+            news.AddRange(Patrons);
+            int count = 0;
+            foreach (TagAndData data in news)
+            {
+                OneTag tag = data.OneTag;
+                if (tag == null)
+                    continue;
+                if (tag.TagInfo != null && data.Error == null)
+                    continue;
+                if (tag.Protocol == InventoryInfo.ISO14443A)
+                    continue;
+
+                if (tag.TagInfo == null)
+                {
+                    // 自动重试一次
+                    GetTagInfoResult gettaginfo_result = null;
+                    for (int i = 0; i < 2; i++)
+                    {
+                        gettaginfo_result = GetTagInfo(channel, tag.ReaderName, tag.UID, tag.AntennaID);
+                        if (gettaginfo_result.Value != -1)
+                            break;
+                    }
+
+                    if (gettaginfo_result.Value == -1)
+                    {
+                        data.Error = gettaginfo_result.ErrorInfo;
+                        continue;
+                    }
+                    else
+                    {
+                        if (string.IsNullOrEmpty(data.Error) == false)
+                        {
+                            data.Error = null;
+                        }
+                    }
+
+                    TagInfo info = gettaginfo_result.TagInfo;
+                    tag.TagInfo = info;
+                    count++;
+                }
+            } // end of foreach
+            return count;
+        }
+
 #if NO
         // (中间版本)
         // parameters:
@@ -929,7 +978,7 @@ namespace DigitalPlatform.RFID
             if (string.IsNullOrEmpty(uid))
             {
                 _tagTable.Clear();
-                // T要把 books 集合中相关 uid 的 TagInfo 设置为 null，迫使后面重新从 RfidCenter 获取
+                // 要把 books 集合中相关 uid 的 TagInfo 设置为 null，迫使后面重新从 RfidCenter 获取
                 ClearTagInfo(null);
             }
             else
