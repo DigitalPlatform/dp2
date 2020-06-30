@@ -139,23 +139,48 @@ namespace dp2Circulation
 
         private void button_OK_Click(object sender, EventArgs e)
         {
+            string strError = "";
+
             // 合成参数
             if (this.checkBox_startAtServerBreakPoint.Checked == true)
                 this.StartInfo.Start = "";
             else
+            {
+                // 2020/6/30
+                if (string.IsNullOrEmpty(this.textBox_dbNameList.Text))
+                {
+                    strError = "尚未指定数据库名";
+                    goto ERROR1;
+                }
+
                 this.StartInfo.Start = BuildStart(this.textBox_dbNameList.Text.Replace("\r\n", ","));
+            }
 
             // 通用启动参数
             this.StartInfo.Param = BuildTaskParam(this.comboBox_function.Text, false);
 
             this.DialogResult = DialogResult.OK;
             this.Close();
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
         }
 
         private void button_Cancel_Click(object sender, EventArgs e)
         {
             this.DialogResult = DialogResult.Cancel;
             this.Close();
+        }
+
+        private void checkBox_startAtServerBreakPoint_CheckedChanged(object sender, EventArgs e)
+        {
+            if (this.checkBox_startAtServerBreakPoint.Checked)
+            {
+                this.textBox_dbNameList.Text = "";
+                this.textBox_dbNameList.ReadOnly = true;
+            }
+            else
+                this.textBox_dbNameList.ReadOnly = false;
         }
     }
 }
