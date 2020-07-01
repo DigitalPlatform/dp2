@@ -42,6 +42,7 @@ namespace RfidCenter
             ClientInfo.ProgramName = "rfidcenter";
             ClientInfo.MainForm = this;
             Program.Rfid = _rfidDriver;
+            Program.Led = _ledDriver;
 
             InitializeComponent();
 

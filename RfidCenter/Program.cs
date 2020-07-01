@@ -16,12 +16,14 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Text;
 
 using DigitalPlatform.Core;
+using DigitalPlatform.RFID;
 
 namespace RfidCenter
 {
     static class Program
     {
         public static RfidDriver1 Rfid = null;
+        public static ILedDriver Led = null;
 
         static ExecutionContext context = null;
         static Mutex mutex = null;

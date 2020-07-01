@@ -24,7 +24,8 @@ using DigitalPlatform.WPF;
 using DigitalPlatform.Text;
 using DigitalPlatform.MessageClient;
 using DigitalPlatform.SimpleMessageQueue;
-
+using System.Runtime.CompilerServices;
+using DigitalPlatform.RFID;
 
 namespace dp2SSL
 {
@@ -1021,6 +1022,14 @@ cancellation_token);
                 return;
             }
 
+            // 在 LED 屏上显示文字
+            if (command.StartsWith("led"))
+            {
+                string param = command.Substring("led".Length).Trim();
+                await LedDisplay(param, groupName);
+                return;
+            }
+
             // 列出操作历史
             if (command.StartsWith("list history"))
             {
@@ -1049,6 +1058,7 @@ cancellation_token);
                 return;
             }
 
+            // 重新启动 dp2ssl
             if (command.StartsWith("restart"))
             {
                 // 子参数 默认 silently。若为 "interact" 则表示初始化时候要进行交互
@@ -1064,7 +1074,7 @@ cancellation_token);
                     }))
                     silently = false;
 
-                string ApplicationEntryPoint = null;
+                // string ApplicationEntryPoint = null;
                 if (ApplicationDeployment.IsNetworkDeployed == true)
                 {
                     /*
@@ -1100,6 +1110,83 @@ cancellation_token);
             }
 
             await SendMessageAsync(new string[] { groupName }, $"我无法理解这个命令 '{command}'");
+        }
+
+        // -x:0
+        // -y:0
+        // -ledName:*
+        // -text:显示文字
+        // -fontSize:24
+        // -effect:moveLeft
+        // -moveSpeed:fast
+        // -duration:1
+        // -horzAlign:left
+        // -vertAlign:top
+        // -style:xxx
+        static async Task LedDisplay(string param, string groupName)
+        {
+            string ledName = "*";
+            DisplayStyle property = new DisplayStyle();
+            int x = 0;
+            int y = 0;
+            string style = "";
+            string text = "";
+
+            List<string> parameters = StringUtil.SplitList(param, " ");
+            foreach (string parameter in parameters)
+            {
+                string name = "";
+                string value = "";
+                if (parameter.StartsWith("-"))
+                {
+                    var parts = StringUtil.ParseTwoPart(parameter.Substring(1), ":");
+                    name = parts[0].ToLower();
+                    value = parts[1];
+                }
+                else
+                {
+                    name = "text";
+                    value = parameter;
+                }
+
+                if (name == "x")
+                    Int32.TryParse(value, out x);
+                else if (name == "y")
+                    Int32.TryParse(value, out y);
+                else if (name == "ledname")
+                    ledName = value;
+                else if (name == "fontsize" || name == "size")
+                    property.FontSize = value;
+                else if (name == "effect")
+                    property.Effect = value;
+                else if (name == "moveSpeed" || name == "speed")
+                    property.MoveSpeed = value;
+                else if (name == "duration")
+                    property.Duration = value;
+                else if (name == "horzalign")
+                    property.HorzAlign = value;
+                else if (name == "vertalign")
+                    property.VertAlign = value;
+                else if (name == "style" || name == "extendStyle")
+                    style = value;
+                else if (name == "text")
+                {
+                    text = value;
+                }
+                else
+                {
+                    await SendMessageAsync(new string[] { groupName }, $"无法识别子参数名 '{name}'");
+                    return;
+                }
+            }
+
+            var result = RfidManager.LedDisplay(ledName,
+                text,
+                x,
+                y,
+                property,
+                style);
+            await SendMessageAsync(new string[] { groupName }, result.Value == -1 ? result.ErrorInfo : $"'{text}' 已成功显示");
         }
 
         public static bool ContainsParam(string args, string param)

@@ -1012,6 +1012,17 @@ new_password);
             return Program.Rfid.ManageReader(reader_name_list, command);
         }
 
+        // 2020/7/1
+        public NormalResult LedDisplay(string ledName,
+            string text,
+            int x,
+            int y,
+            DisplayStyle property,
+            string style)
+        {
+            return Program.Led.Display(ledName, text, x, y, property, style);
+        }
+
 #if SENDKEY
         // 启动或者停止自动盘点
         void StartInventory(bool start)
