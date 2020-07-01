@@ -36,6 +36,7 @@ namespace DigitalPlatform.RFID
     }
 
     // 文字显示特性
+    [Serializable]
     public class DisplayStyle
     {
         public string FontSize { get; set; }    // 数字，像素数 16 24 32

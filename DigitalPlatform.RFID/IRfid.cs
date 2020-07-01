@@ -77,6 +77,15 @@ uint new_password);
         NormalResult TurnSterilamp(string lampName, string action);
 
         NormalResult ManageReader(string reader_name, string command);
+
+
+        // 2020/7/1
+        NormalResult LedDisplay(string ledName,
+            string text,
+            int x,
+            int y,
+            DisplayStyle property,
+            string style);
     }
 
     [Serializable()]
