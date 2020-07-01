@@ -19177,6 +19177,7 @@ handle.CancelTokenSource.Token).Result;
         // parameter:
         //		strRecordID           记录ID
         //      strStyle        可包含 fastmode。ignorechecktimestamp
+        //                      forcedeleteoldkeys 表示强制删除旧记录的所有检索点。常用于检索点配置文件或者检索点算法发生改变以后的删除操作，可以确保把检索点删除干净。2020/7/1 增加
         //		inputTimestamp  输入的时间戳
         //		outputTimestamp out参数,返回的实际的时间戳
         //		strError        out参数,返回出错信息
@@ -19325,7 +19326,8 @@ handle.CancelTokenSource.Token).Result;
                                 }
                             }
 
-                            if (oldDom != null)
+                            if (oldDom != null
+                                && StringUtil.IsInList("forcedeleteoldkeys", strStyle) == false) // 2020/7/1 增加
                             {
                                 // return:
                                 //      -1  出错
