@@ -166,7 +166,7 @@ namespace RfidCenter
                     InitializeRfidDriver();
                     InitializeLedDriver();
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     OutputHistory("InitializeRfidDriver() InitializeLedDriver() 出现异常: " + ExceptionUtil.GetDebugText(ex), 2);
                 }
@@ -2141,6 +2141,73 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
             OutputHistory(strError, 2);
             SetErrorState("error", strError);
             this.ShowMessage(strError, "red", true);
+        }
+
+        private void MenuItem_ledDisplay_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            LedDisplayDialog dlg = new LedDisplayDialog();
+            dlg.button_display.Click += (s1, e1) => {
+                var display_result = Display();
+                if (display_result.Value == -1)
+                    MessageBox.Show(this, display_result.ErrorInfo);
+            };
+            dlg.ShowDialog(this);
+
+            if (dlg.DialogResult == DialogResult.Cancel)
+                return;
+            var result = Display();
+            if (result.Value == -1)
+            {
+                strError = result.ErrorInfo;
+                goto ERROR1;
+            }
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+            return;
+
+            NormalResult Display()
+            {
+                int x = 0;
+                int y = 0;
+
+                if (Int32.TryParse(dlg.X, out x) == false)
+                {
+                    strError = $"X 参数值 '{dlg.X}' 不合法";
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError
+                    };
+                }
+
+                if (Int32.TryParse(dlg.Y, out y) == false)
+                {
+                    strError = $"Y 参数值 '{dlg.Y}' 不合法";
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError
+                    };
+                }
+
+                DisplayStyle property = new DisplayStyle();
+                property.Effect = dlg.Effect;
+                property.FontSize = dlg.FontSize;
+                property.MoveSpeed = dlg.MoveSpeed;
+                property.Duration = dlg.Duration;
+                property.HorzAlign = dlg.HorzAlign;
+                property.VertAlign = dlg.VertAlign;
+
+                return _ledDriver.Display(dlg.LedName,
+                    dlg.DisplayText,
+                    x,
+                    y,
+                    property,
+                    dlg.ExtendStyle);
+            }
         }
     }
 }

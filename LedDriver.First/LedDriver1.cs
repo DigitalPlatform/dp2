@@ -48,7 +48,9 @@ namespace LedDriver.First
 
         // parameters:
         //      style   附加的子参数 
-        public NormalResult Display(string text,
+        public NormalResult Display(
+            string ledName,
+            string text,
             int x,
             int y,
             DisplayStyle property,
@@ -71,50 +73,86 @@ namespace LedDriver.First
 
             // 01 静止, 02 左移, 49 连续左移
             int actionType = 1; // 默认静止
-            if (string.IsNullOrEmpty(property.Effect)
-                || property.Effect == "still")
-                actionType = 1;
-            else if (property.Effect == "moveLeft")
-                actionType = 2;
-            else if (property.Effect == "moveLeftContinue")
-                actionType = 49;
-            else
-                return new NormalResult
-                {
-                    Value = -1,
-                    ErrorInfo = $"effect '{property.Effect}' 格式错误。应为 still moveLeft moveLeftContinue 之一",
-                    ErrorCode = "invalidEffect"
-                };
 
-            int speed = 0;
-            if (string.IsNullOrEmpty(property.MoveSpeed) == false)
+            if (IsNumber(property.Effect))
             {
-                if (Int32.TryParse(property.FontSize, out fontSize) == false)
+                if (Int32.TryParse(property.Effect, out actionType) == false)
                     return new NormalResult
                     {
                         Value = -1,
-                        ErrorInfo = $"moveSpeed '{property.MoveSpeed}' 格式错误，应为 1~99 之间的整数",
+                        ErrorInfo = $"effect '{property.Effect}' 格式错误，应为 0~99 之间的整数",
                         ErrorCode = "invalidMoveSpeed"
                     };
-
-                // 检查值范围
-                if (speed >= 1 && speed <= 99)
-                {
-
-                }
+            }
+            else
+            {
+                if (string.IsNullOrEmpty(property.Effect)
+                || property.Effect == "still")
+                    actionType = 1;
+                else if (property.Effect == "moveLeft")
+                    actionType = 2;
+                else if (property.Effect == "moveLeftCompact")  // 左移，紧凑形态
+                    actionType = 49;
                 else
                     return new NormalResult
                     {
                         Value = -1,
-                        ErrorInfo = $"moveSpeed '{property.MoveSpeed}' 格式错误，应为 1~99 之间的整数",
-                        ErrorCode = "invalidFontSize"
+                        ErrorInfo = $"effect '{property.Effect}' 格式错误。应为 still moveLeft moveLeftContinue 之一",
+                        ErrorCode = "invalidEffect"
                     };
             }
 
-            int duration = 0;
+            // 速度。数字，或者 slow/normal/fast 三者之一。数字 0~99，越大越快
+            int speed = 0;
+            if (IsNumber(property.MoveSpeed))
+            {
+                if (string.IsNullOrEmpty(property.MoveSpeed) == false)
+                {
+                    if (Int32.TryParse(property.MoveSpeed, out speed) == false)
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"moveSpeed '{property.MoveSpeed}' 格式错误，应为 1~99 之间的整数",
+                            ErrorCode = "invalidMoveSpeed"
+                        };
+
+                    // 检查值范围
+                    if (speed >= 0 && speed <= 99)
+                    {
+
+                    }
+                    else
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"moveSpeed '{property.MoveSpeed}' 格式错误，应为 0~99 之间的整数",
+                            ErrorCode = "invalidFontSize"
+                        };
+
+                    speed = 99 - speed;
+                }
+            }
+            else
+            {
+                if (property.MoveSpeed == "slow")
+                    speed = 20;
+                else if (property.MoveSpeed == "normal")
+                    speed = 70;
+                else if (property.MoveSpeed == "fast")
+                    speed = 90;
+                else
+                    speed = 70;
+
+                speed = 99 - speed;
+            }
+
+            // TODO: 可以做成默认 板子数量 * 1 秒
+            int duration_value = Math.Max(10, _ledProperty.CellXCount * 10);    // 默认 1 秒
+            // 浮点数，单位为秒
             if (string.IsNullOrEmpty(property.Duration) == false)
             {
-                if (Int32.TryParse(property.Duration, out duration) == false)
+                float duration = 0;
+                if (float.TryParse(property.Duration, out duration) == false)
                     return new NormalResult
                     {
                         Value = -1,
@@ -122,8 +160,11 @@ namespace LedDriver.First
                         ErrorCode = "invalidDuration"
                     };
 
+                // 变换为 0~9999 整数(单位为 0.1 秒)
+                duration_value = Convert.ToInt32(duration * 10);
+
                 // 检查值范围
-                if (duration >= 0 && duration <= 9999)
+                if (duration_value >= 0 && duration_value <= 9999)
                 {
 
                 }
@@ -131,7 +172,7 @@ namespace LedDriver.First
                     return new NormalResult
                     {
                         Value = -1,
-                        ErrorInfo = $"duration '{property.Duration}' 格式错误，应为 0~9999 之间的整数",
+                        ErrorInfo = $"duration '{property.Duration}' 格式错误，应为 0~999 之间秒数(可以是小数)",
                         ErrorCode = "invalidDuration"
                     };
             }
@@ -141,7 +182,9 @@ namespace LedDriver.First
     totalWidth,
     actionType,
     speed,
-    duration,
+    duration_value,
+    property.HorzAlign,
+    property.VertAlign,
     x,
     y,
     _ledProperty.CellHeight);
@@ -161,6 +204,20 @@ namespace LedDriver.First
             }
 
             return new NormalResult();
+        }
+
+        static bool IsNumber(string strText)
+        {
+            if (string.IsNullOrEmpty(strText))
+                return false;
+
+            for (int i = 0; i < strText.Length; i++)
+            {
+                if (strText[0] < '0' || strText[0] > '9')
+                    return false;
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -221,18 +278,36 @@ namespace LedDriver.First
             int actionType,
             int speed,
             int hold,
+            string horzAlign,
+            string vertAlign,
             int x = 0,
             int y = 0,
             int cellHeight = 32)
         {
             string result = "";
 
+            // 水平方向，1—左对齐 2—居中 3—右对齐
+            if (horzAlign == "center")
+                horzAlign = "2";
+            else if (horzAlign == "right")
+                horzAlign = "3";
+            else
+                horzAlign = "1";
+            /*
             string textAlign = "1";  //默认左对齐
             // 静止的时间水平居中，移动的时候左对齐
             if (actionType == 1)
             {
                 textAlign = "2";
             }
+            */
+            // 垂直方向，1--上对齐 2—居中 3—下对齐
+            if (vertAlign == "center")
+                vertAlign = "2";
+            else if (vertAlign == "bottom")
+                vertAlign = "3";
+            else
+                vertAlign = "1";
 
             string strCellHeight = cellHeight.ToString().PadLeft(4, '0');
 
@@ -245,8 +320,8 @@ namespace LedDriver.First
                    + "%ZS" + speed.ToString().PadLeft(2, '0')
                    + "%ZH" + hold.ToString().PadLeft(4, '0')
                    + "%F" + nFontSize.ToString()     // 字体大小，点阵字库支持16,24,32
-                   + "%AH" + textAlign   // 水平对齐
-                   + "%AV2"    // 垂直居中
+                   + "%AH" + horzAlign   // 水平对齐
+                   + "%AV" + vertAlign  // 垂直居中
                    + "%C1"      // 颜色，单色只有红色
                    + text          // 字符串
                    + "$$";        // 结尾

@@ -17,7 +17,9 @@ namespace DigitalPlatform.RFID
 
         // parameters:
         //      style   附加的子参数 
-        NormalResult Display(string text, 
+        NormalResult Display(
+            string ledName,
+            string text, 
             int x,
             int y,
             DisplayStyle property, 
@@ -36,8 +38,12 @@ namespace DigitalPlatform.RFID
     // 文字显示特性
     public class DisplayStyle
     {
-        public string Effect { get; set; }  // moveLeft still moveLeftContinue
         public string FontSize { get; set; }    // 数字，像素数 16 24 32
+
+        public string HorzAlign { get; set; }   // left/center/right 默认 left
+        public string VertAlign { get; set; }   // top/center/bottom 默认 top
+
+        public string Effect { get; set; }  // moveLeft still moveLeftContinue
         public string MoveSpeed { get; set; }   // 移动速度 01~99
         public string Duration { get; set; }    // 持续时间 0~9999 (0.1 秒单位)
     }
