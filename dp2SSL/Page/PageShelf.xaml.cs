@@ -387,7 +387,7 @@ namespace dp2SSL
                 catch (Exception ex)
                 {
                     App.CurrentApp?.SetError("setMessage", $"发送消息出现异常: {ex.Message}。消息内容:{StringUtil.CutString(text, 100)}");
-                    WpfClientInfo.WriteErrorLog($"发送消息出现异常: {ex.Message}。消息内容:{text}");
+                    WpfClientInfo.WriteErrorLog($"发送消息出现异常: {ExceptionUtil.GetDebugText(ex)}。消息内容:{text}");
                 }
             });
         }
@@ -1248,7 +1248,7 @@ namespace dp2SSL
                     if (string.IsNullOrEmpty(entity.Title)
                         && string.IsNullOrEmpty(entity.PII) == false && entity.PII != "(空)")
                     {
-                        GetEntityDataResult result = await GetEntityDataAsync(entity.PII);
+                        GetEntityDataResult result = await GetEntityDataAsync(entity.PII, "");
                         if (result.Value == -1)
                         {
                             entity.SetError(result.ErrorInfo);
@@ -1692,6 +1692,8 @@ namespace dp2SSL
                                 //await FillBookFields(Removes, token);
                             });
                             */
+
+                            // 获取册信息
                             string style = "refreshCount";
                             if (networkMode == "local")
                                 style += ",localGetEntityInfo";

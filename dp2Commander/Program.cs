@@ -23,8 +23,12 @@ namespace dp2Commander
     {
         public static Serilog.ILogger ILog { get; set; }
 
+        public static string Version { get; set; }
+
         static void Main(string[] args)
         {
+            Version = Assembly.GetAssembly(typeof(Program)).GetName().Version.ToString();
+
             InitialConfig();
 
             // 修改配置

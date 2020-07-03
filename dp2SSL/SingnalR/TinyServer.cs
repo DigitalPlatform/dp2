@@ -501,10 +501,10 @@ IList<MessageRecord> messages)
                 foreach (var message in messages)
                 {
                     // TODO: 忽略自己发出的消息?
-                    if (message.data.StartsWith($"@{_userName}")
+                    if (message.data.StartsWith($"@{_userName} ")
                         && _instantMessageIDs.ContainsKey(message.id) == false)
                     {
-                        string command = message.data.Substring($"@{_userName}".Length).Trim();
+                        string command = message.data.Substring($"@{_userName} ".Length).Trim();
 
                         if (message.groups != null && message.groups.Length > 0)
                             await ProcessCommandAsync(command, message.groups[0]);
@@ -1404,7 +1404,7 @@ cancellation_token);
                     text.AppendLine($"{i++}\r\n{SimpleRequestItem.GetDisplayString(item)}");
                 }
                 // 获得 dp2library 中的册记录
-                var result = await LibraryChannelUtil.GetEntityDataAsync(param);
+                var result = await LibraryChannelUtil.GetEntityDataAsync(param, "");
                 if (result.Value == -1 || result.Value == 0)
                     text.AppendLine($"尝试获得册记录时出错: {result.ErrorInfo}");
                 else
@@ -1616,6 +1616,9 @@ cancellation_token);
         // 不可靠的直接发送消息
         public static Task<SetMessageResult> InnerSetMessageAsync(string[] groups, string content)
         {
+            if (HubProxy == null)
+                return Task.FromResult<SetMessageResult>(new SetMessageResult());
+
             // TODO: 如果 groups 为 null 代表所有加入的群名列表
 
             /*

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using DigitalPlatform;
 using DigitalPlatform.RFID;
+using DigitalPlatform.Text;
 
 namespace LedDriver.First
 {
@@ -86,6 +87,7 @@ namespace LedDriver.First
             }
             else
             {
+                /*
                 if (string.IsNullOrEmpty(property.Effect)
                 || property.Effect == "still")
                     actionType = 1;
@@ -98,6 +100,15 @@ namespace LedDriver.First
                     {
                         Value = -1,
                         ErrorInfo = $"effect '{property.Effect}' 格式错误。应为 still moveLeft moveLeftContinue 之一",
+                        ErrorCode = "invalidEffect"
+                    };
+                */
+                actionType = GetEffectNumber(property.Effect);
+                if (actionType == -1)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"effect '{property.Effect}' 格式错误。应为 still moveLeft moveLeftContinue 等等之一",
                         ErrorCode = "invalidEffect"
                     };
             }
@@ -206,6 +217,81 @@ namespace LedDriver.First
             return new NormalResult();
         }
 
+        static string[] _effectTable = new string[] {
+            "00:随机,random",
+            "01:立即显示,still",
+            "02:左移,moveLeft",
+            "03:右移,moveRight",
+            "04:上移,moveUp",
+            "05:下移,moveDown",
+            "06:飘雪",
+            "07:冒泡",
+            "08:分散拉伸",
+            "09:画卷打开",
+            "10:画卷闭合",
+            "11:向左拉伸",
+            "12:向右拉伸",
+            "13:向上拉伸",
+            "14:向下拉伸",
+            "15:向左镭射",
+            "16:向右镭射",
+            "17:向上镭射",
+            "18:向下镭射",
+            "19:水平百叶",
+            "20:垂直百叶",
+            "21:左覆盖",
+            "22:右覆盖",
+            "23:上覆盖",
+            "24:下覆盖",
+            "25:左上角覆盖(斜线)",
+            "26:右上角覆盖(斜线)",
+            "27:左下角覆盖(斜线)",
+            "28:右下角覆盖(斜线)",
+            "29:左上角覆盖(直线)",
+            "30:右上角覆盖(直线)",
+            "31:左下角覆盖(直线)",
+            "32:右下角覆盖(直线)",
+            "33:左右对开",
+            "34:上下对开",
+            "35:左右闭合",
+            "36:上下闭合",
+            "37:中间向四周(矩形)",
+            "38:四周向中间(矩形)",
+            "39:中间向四周(十字)",
+            "40:四周向中间(十字)",
+            "41:中间向四周(菱形)",
+            "42:四周向中间(菱形)",
+            "43:闪烁",
+            "44:中间移出",
+            "45:左右移入",
+            "46:左右交叉移动",
+            "47:左右交叉覆盖",
+            "48:上下交叉覆盖",
+            "49:连续左移,紧凑左移,moveLeftCompact",
+        };
+
+        // 把特效名字转换为内部特效编号
+        static int GetEffectNumber(string name)
+        {
+            if (string.IsNullOrEmpty(name))
+                return 1;   // 默认 still
+            foreach (string line in _effectTable)
+            {
+                if (line == null || line.Length <= 3)
+                    throw new Exception($"_effectTable 中行 '{line}' 格式错误");
+                string list = line.Substring(3);
+                if (StringUtil.IsInList(name, list))
+                {
+                    string number = line.Substring(0, 2);
+                    if (Int32.TryParse(number, out int value) == false)
+                        throw new Exception($"_effectTable 中行 '{line}' 格式错误: 前两个字符应该为数字");
+                    return value;
+                }
+            }
+
+            return -1;
+        }
+
         static bool IsNumber(string strText)
         {
             if (string.IsNullOrEmpty(strText))
@@ -309,13 +395,14 @@ namespace LedDriver.First
             else
                 vertAlign = "1";
 
-            string strCellHeight = cellHeight.ToString().PadLeft(4, '0');
+            string strHeight = (cellHeight - y).ToString().PadLeft(4, '0');
+            string strWidth = (width - x).ToString().PadLeft(4, '0');
 
             result = "!#"       // 起始标志
                    + "001"       // 控制卡号，一般只有一块控制卡，默认填001
                    + "%ZD00"  // 先把以前的分区全部删除
                    + "%ZI01"   // 创建新的区域，默认编号为01
-                   + "%ZC" + x.ToString().PadLeft(4, '0') + y.ToString().PadLeft(4, '0') + width.ToString().PadLeft(4, '0') + strCellHeight/*"0032"*/ //创建分区,四段分别代表坐标 “起点 X 、起点 Y、 宽度 、高度”
+                   + "%ZC" + x.ToString().PadLeft(4, '0') + y.ToString().PadLeft(4, '0') + strWidth + strHeight/*"0032"*/ //创建分区,四段分别代表坐标 “起点 X 、起点 Y、 宽度 、高度”
                    + "%ZA" + actionType.ToString().PadLeft(2, '0')  //设置区域的特技参数由 2 位数字组成(01—立即显示 49—连续左移)
                    + "%ZS" + speed.ToString().PadLeft(2, '0')
                    + "%ZH" + hold.ToString().PadLeft(4, '0')

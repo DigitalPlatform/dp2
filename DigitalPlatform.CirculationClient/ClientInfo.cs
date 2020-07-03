@@ -12,6 +12,7 @@ using System.Drawing;
 using System.Xml;
 
 using Serilog;
+using Serilog.Core;
 
 // using DigitalPlatform;
 using DigitalPlatform.IO;
@@ -19,7 +20,6 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Text;
 using DigitalPlatform.Core;
 using DigitalPlatform.Xml;
-using Serilog.Core;
 
 namespace DigitalPlatform.CirculationClient
 {

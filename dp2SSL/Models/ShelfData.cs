@@ -4310,7 +4310,7 @@ namespace dp2SSL
                     }
                     else
                     {
-                        result = await GetEntityDataAsync(entity.PII);
+                        result = await GetEntityDataAsync(entity.PII, "");
                         if (result.Value == -1 || result.Value == 0)
                         {
                             // TODO: 条码号没有找到的错误码要单独记下来

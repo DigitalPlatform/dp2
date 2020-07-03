@@ -216,7 +216,8 @@ namespace dp2SSL
             StartProcessManager();
 
             // TODO: 检查网络情况。提示是否允许断网情况下进行初始化
-            SelectMode();
+            if (App.Function == "智能书柜")
+                SelectMode();
 
             BeginCheckServerUID(_cancelRefresh.Token);
 
@@ -262,9 +263,10 @@ namespace dp2SSL
                 }
             }
 
-            if (App.Function == "智能书柜")
+            // TODO: 注意，从自助借还状态切换到智能书柜状态，需要补充执行以下一段
+            if (App.Function == "智能书柜" 
+                && string.IsNullOrEmpty(messageServerUrl) == false)
             {
-
                 await TinyServer.InitialMessageQueueAsync(
     System.IO.Path.Combine(WpfClientInfo.UserDir, "mq.db"),
     _cancelRefresh.Token);
@@ -620,7 +622,8 @@ namespace dp2SSL
 
             try
             {
-                await PageMenu.PageShelf?.SubmitAsync(true);
+                if (PageMenu.PageShelf != null)
+                    await PageMenu.PageShelf?.SubmitAsync(true);
             }
             catch (NullReferenceException)
             {
@@ -1251,35 +1254,20 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             // this.Number = e.Result?.Results?.Count.ToString();
             if (e.Result.Results != null)
             {
-                if (IsPageBorrowActive == true)
+                // TODO: 如果 IsPageShelfActive 和 IsPageBorrowActive 都为 false，则要看 Function 是什么决定如何显示标签数
+                bool isShelf = IsPageShelfActive;
+                bool isBorrow = IsPageBorrowActive;
+                if ((isShelf == false && isBorrow == false)
+                    || (isShelf == true && isBorrow == true))
                 {
-                    TagList.Refresh(sender as BaseChannel<IRfid>,
-                        e.ReaderNameList,
-                        e.Result.Results,
-                            (add_books, update_books, remove_books, add_patrons, update_patrons, remove_patrons) =>
-                            {
-                                TagChanged?.Invoke(sender, new TagChangedEventArgs
-                                {
-                                    AddBooks = add_books,
-                                    UpdateBooks = update_books,
-                                    RemoveBooks = remove_books,
-                                    AddPatrons = add_patrons,
-                                    UpdatePatrons = update_patrons,
-                                    RemovePatrons = remove_patrons
-                                });
-                            },
-                            (type, text) =>
-                            {
-                                RfidManager.TriggerSetError(this, new SetErrorEventArgs { Error = text });
-                                // TagSetError?.Invoke(this, new SetErrorEventArgs { Error = text });
-                            });
-
-                    // 标签总数显示 图书+读者卡
-                    this.Number = $"{TagList.Books.Count}:{TagList.Patrons.Count}";
+                    // TODO: 这一句是否需要 catch 一下
+                    isShelf = Function == "智能书柜";
+                    isBorrow = !isShelf;
                 }
 
+                // bool numberShown = false;
 
-                if (IsPageShelfActive)
+                if (isShelf)
                 {
                     NewTagList.Refresh(// sender as BaseChannel<IRfid>,
                         e.ReaderNameList,
@@ -1307,6 +1295,35 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
 
                     // 标签总数显示 只显示标签数，不再区分图书标签和读者卡
                     this.Number = $"{NewTagList.Tags.Count}";
+                    //numberShown = true;
+                }
+
+                if (isBorrow == true/* || numberShown == false*/)
+                {
+                    TagList.Refresh(sender as BaseChannel<IRfid>,
+                        e.ReaderNameList,
+                        e.Result.Results,
+                            (add_books, update_books, remove_books, add_patrons, update_patrons, remove_patrons) =>
+                            {
+                                TagChanged?.Invoke(sender, new TagChangedEventArgs
+                                {
+                                    AddBooks = add_books,
+                                    UpdateBooks = update_books,
+                                    RemoveBooks = remove_books,
+                                    AddPatrons = add_patrons,
+                                    UpdatePatrons = update_patrons,
+                                    RemovePatrons = remove_patrons
+                                });
+                            },
+                            (type, text) =>
+                            {
+                                RfidManager.TriggerSetError(this, new SetErrorEventArgs { Error = text });
+                                // TagSetError?.Invoke(this, new SetErrorEventArgs { Error = text });
+                            });
+
+                    // 标签总数显示 图书+读者卡
+                    this.Number = $"{TagList.Books.Count}:{TagList.Patrons.Count}";
+                    //numberShown = true;
                 }
             }
         }
