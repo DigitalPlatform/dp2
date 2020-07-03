@@ -1238,6 +1238,10 @@ namespace dp2SSL
                 if (entity.TagInfo == null)
                     continue;
 
+                // 对状态不明(State == null)册记录暂时不处理修正 EAS
+                if (entity.State == null)
+                    continue;
+
                 // 检测 EAS 是否正确
                 NormalResult result = null;
                 if (StringUtil.IsInList("borrowed", entity.State) && entity.TagInfo.EAS == true)
@@ -1541,27 +1545,35 @@ out string strError);
                         entity.PII = GetCaption(pii);
                     }
 
+                    bool clearError = true;
+
                     // 获得 Title
                     // 注：如果 Title 为空，文字中要填入 "(空)"
                     if (string.IsNullOrEmpty(entity.Title)
                         && string.IsNullOrEmpty(entity.PII) == false && entity.PII != "(空)")
                     {
-                        GetEntityDataResult result = await GetEntityDataAsync(entity.PII);
-                        /*
-                        out string title,
-                        out string item_xml,
-                        out string item_recpath);
-                        */
+                        GetEntityDataResult result = await GetEntityDataAsync(entity.PII, "network");
+
                         if (result.Value == -1)
                         {
                             entity.SetError(result.ErrorInfo);
                             continue;
                         }
+
                         entity.Title = GetCaption(result.Title);
                         entity.SetData(result.ItemRecPath, result.ItemXml);
+
+                        // 2020/7/3
+                        // 获得册记录阶段出错，但获得书目摘要成功
+                        if (string.IsNullOrEmpty(result.ErrorCode) == false)
+                        {
+                            entity.SetError(result.ErrorInfo);
+                            clearError = false;
+                        }
                     }
 
-                    entity.SetError(null);
+                    if (clearError == true)
+                        entity.SetError(null);
                     entity.FillFinished = true;
                 }
 
@@ -1712,6 +1724,7 @@ out string strError);
             App.Invoke(new Action(() =>
             {
                 progress = new ProgressWindow();
+                progress.TitleText = action_name;
                 progress.MessageText = "正在处理，请稍候 ...";
                 progress.Owner = Application.Current.MainWindow;
                 progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;

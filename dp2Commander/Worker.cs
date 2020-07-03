@@ -217,6 +217,11 @@ namespace dp2Commander
                 return "hello!";
             }
 
+            if (command.StartsWith("version"))
+            {
+                return Program.Version;
+            }
+
             /*
             if (command.StartsWith("test"))
             {
@@ -233,7 +238,7 @@ namespace dp2Commander
             }
             */
 
-            // 重启电脑
+            // 重启电脑，或者重启 dp2ssl
             if (command.StartsWith("restart"))
             {
                 return ProcessRestart(command);
@@ -290,7 +295,6 @@ namespace dp2Commander
                     ExitProcess("dp2SSL", true);
                 }
 
-
                 try
                 {
                     // 启动
@@ -299,8 +303,11 @@ namespace dp2Commander
                     string exe_path1 = "c:\\dp2ssl\\greensetup.exe";
                     string exe_path2 = "c:\\dp2ssl\\dp2ssl.exe";
                     if (File.Exists(exe_path1))
+                    {
+                        // 注意命令行参数第一个字符应该是空格
                         ProcessExtensions.StartProcessAsCurrentUser(exe_path1,
-                            silently ? "silently" : "");
+                            silently ? " silently" : "");
+                    }
                     else if (File.Exists(exe_path2))
                     {
                         // 启动之前，检查 .zip 是否已经展开
@@ -328,8 +335,9 @@ namespace dp2Commander
                             }
                         }
 
+                        // 注意命令行参数第一个字符应该是空格
                         ProcessExtensions.StartProcessAsCurrentUser(exe_path2,
-                            silently ? "silently" : "");
+                            silently ? " silently" : "");
                     }
                     else
                         return $"{exe_path1} 和 {exe_path2} 均未找到，无法启动";
