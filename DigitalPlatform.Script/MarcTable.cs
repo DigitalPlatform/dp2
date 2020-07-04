@@ -660,6 +660,8 @@ namespace DigitalPlatform.Marc
                 return GetUnimarc_0xx_PrePostfix(subfield);
             if (StringUtil.IsInList(field.Name, "500,501,503,512,513,514,515,516,520,530,531,532,540,541"))
                 return GetUnimarc_5xx_PrePostfix(subfield);
+            if (field.Name.StartsWith("7"))
+                return GetUnimarc_7xx_PrePostfix(subfield);
 
             return new PrePostfix("?");
         }
@@ -1083,7 +1085,7 @@ namespace DigitalPlatform.Marc
             "b|, ",
             "d|: ",
             "e|: ",
-                "f|: ",
+            "f|: ",
             };
 
 

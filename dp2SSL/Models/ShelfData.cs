@@ -1665,7 +1665,7 @@ namespace dp2SSL
             {
                 // 该读者的在借册册数
                 return context.Requests
-                    .Where(o => o.OperatorID == pii && o.Action == "borrow" && o.LinkID == null 
+                    .Where(o => o.OperatorID == pii && o.Action == "borrow" && o.LinkID == null
                     && o.State != "dontsync")   // 2020/6/17 注：dontsync 表示同步时候实际上另外已经有前端对本册进行了操作(若能操作成功可以推测是还书操作)，所以这一册实际上已经换了，不要计入在借册列表中
                     .Select(o => o.PII).ToList();
                 // .OrderBy(o => o.ID).Count();
@@ -2214,7 +2214,7 @@ namespace dp2SSL
 
                         all.Add(entity);
 
-                        if (silently == false 
+                        if (silently == false
                             && string.IsNullOrEmpty(entity.Error) == false)
                         {
                             warnings.Add($"UID 为 '{tag.OneTag?.UID}' 的标签解析出错: {entity.Error}");
@@ -4233,6 +4233,7 @@ namespace dp2SSL
             bool localGetEntityInfo = StringUtil.IsInList("localGetEntityInfo", style);
 
             // int error_count = 0;
+            int request_error_count = 0;    // 请求因为通讯失败的次数
             List<string> errors = new List<string>();
             foreach (Entity entity in entities)
             {
@@ -4330,6 +4331,8 @@ namespace dp2SSL
                             {
                                 // 如果是通讯失败导致的出错，应该有办法进行重试获取
                                 entity.FillFinished = false;
+                                // 统计通讯失败次数
+                                request_error_count++;
                             }
                             else
                                 entity.FillFinished = true;
@@ -4344,6 +4347,21 @@ namespace dp2SSL
 
                 entity.SetError(null);
                 entity.FillFinished = true;
+
+                if (request_error_count >= 2)
+                {
+                    /*
+                    if (App.TrySwitchToLocalMode() == true)
+                        localGetEntityInfo = true;
+                    */
+                    if (localGetEntityInfo == false)
+                        return new FillBookFieldsResult
+                        {
+                            Value = -1,
+                            ErrorInfo = "请求 dp2library 时通讯失败",
+                            ErrorCode = "requestError"
+                        };
+                }
             }
 
             if (token.IsCancellationRequested)
@@ -4702,11 +4720,22 @@ namespace dp2SSL
 
                     // 2020/3/7
                     if ((error_code == ErrorCode.RequestError
-        || error_code == ErrorCode.RequestTimeOut)
-        && nRedoCount < 2)
+        || error_code == ErrorCode.RequestTimeOut))
                     {
                         nRedoCount++;
-                        goto REDO;
+
+                        if (nRedoCount < 2)
+                            goto REDO;
+                        else
+                        {
+                            if (StringUtil.IsInList("network_sensitive", style))
+                                return new SubmitResult
+                                {
+                                    Value = -1,
+                                    ErrorInfo = "因网络出现问题，请求 dp2library 服务器失败",
+                                    ErrorCode = "requestError"
+                                };
+                        }
                     }
 
                     processed.Add(info);
