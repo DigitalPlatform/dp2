@@ -1157,6 +1157,7 @@ int MAX_CHARS = 50)
             "biblio_clc_class -- 中图法分类号",
             "biblio_ktf_class -- 科图法分类号",
             "biblio_rdf_class -- 人大法分类号",
+            "author_accesspoint -- 责任者检索点",
         };
 
             foreach (string line in lines)
@@ -1196,7 +1197,10 @@ int MAX_CHARS = 50)
             "biblio_edition_area -- 版本项",
             "biblio_publisher -- 出版者",
             "biblio_publishtime -- 出版时间",
+            "biblio_isbn -- ISBN",
+            "biblio_issn -- ISSN",
             "biblio_classes -- 分类号",
+            "biblio_author_accesspoint -- 责任者检索点",
             "biblio_recpath -- 书目记录路径",
             };
 

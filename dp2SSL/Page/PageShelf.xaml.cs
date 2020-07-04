@@ -39,6 +39,7 @@ using DigitalPlatform.Interfaces;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.LibraryClient.localhost;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace dp2SSL
 {
@@ -1608,6 +1609,7 @@ namespace dp2SSL
                 // 此时门是关闭状态。让读卡器切换到节省盘点状态
                 ShelfData.RefreshReaderNameList();
 
+            REDO:
                 List<ActionInfo> all_actions = new List<ActionInfo>();
 
                 // 对每一个门执行初始化操作
@@ -1700,6 +1702,31 @@ namespace dp2SSL
                             var fill_result = await ShelfData.FillBookFieldsAsync(part,
                                 ShelfData.CancelToken,
                                 style);
+                            if (fill_result.Value == -1 && fill_result.ErrorCode == "requestError")
+                            {
+                                if (silently == false)
+                                {
+                                    var ask_result = AskChangeNetworkMode($"针对门 {door.Name} 填充图书信息时，" + fill_result.ErrorInfo);
+                                    if (ask_result.ErrorCode == "exit")
+                                        return;
+
+                                    if (ask_result.ErrorCode == "local")
+                                    {
+                                        if (App.TrySwitchToLocalMode() == true)
+                                        {
+                                            // 切换为 local 模式自动重试
+                                            networkMode = "local";
+                                            goto REDO;
+                                        }
+                                    }
+                                }
+                                App.Invoke(new Action(() =>
+                                {
+                                    progress.BackColor = "yellow";
+                                    progress.MessageText = fill_result.ErrorInfo;
+                                }));
+                                goto WAIT_RETRY;
+                            }
                             if (silently == false
                                 && fill_result.Errors?.Count > 0)
                             {
@@ -1714,7 +1741,6 @@ namespace dp2SSL
                         }
 
                         DisplayMessage(progress, "自动盘点图书 ...", "green");
-
 
                         // 构造 actions，用于同步到 dp2library 服务器
                         var build_result = BuildInventoryActions(part,
@@ -1750,6 +1776,38 @@ namespace dp2SSL
                                 part_actions
                                 );
                             WpfClientInfo.WriteInfoLog($"自动盘点门 {door.Name} 内全部图书结束");
+
+                            // 如果中途发现请求 dp2library 时网络出错
+                            if (result.Value == -1 && result.ErrorCode == "requestError")
+                            {
+                                if (networkMode != "local")
+                                {
+                                    // TODO: 是否出现对话框提示确认需要切换为 local 模式
+                                    if (silently == false)
+                                    {
+                                        var ask_result = AskChangeNetworkMode($"针对门 {door.Name} 自动盘点过程中，" + result.ErrorInfo);
+                                        if (ask_result.ErrorCode == "exit")
+                                            return;
+
+                                        if (ask_result.ErrorCode == "local")
+                                        {
+                                            if (App.TrySwitchToLocalMode() == true)
+                                            {
+                                                // 切换为 local 模式自动重试
+                                                networkMode = "local";
+                                                goto REDO;
+                                            }
+                                        }
+                                    }
+                                }
+
+                                App.Invoke(new Action(() =>
+                                {
+                                    progress.BackColor = "yellow";
+                                    progress.MessageText = result.ErrorInfo;
+                                }));
+                                goto WAIT_RETRY;
+                            }
 
                             if (result.MessageDocument != null
                                 && result.MessageDocument.ErrorCount > 0)
@@ -1941,6 +1999,33 @@ namespace dp2SSL
                     DisplayError(ref error, "智能书柜初始化失败。请检查读卡器和门锁参数配置，重新进行初始化 ...");
                     */
                 }
+            }
+
+            NormalResult AskChangeNetworkMode(string text)
+            {
+                string mode = "";
+                App.Invoke(new Action(() =>
+                {
+                    NetworkWindow dlg = new NetworkWindow();
+                    dlg.MessageText = text;
+                    //progress.TitleText = "请选择启动模式";
+                    //progress.MessageText = "访问 dp2library 服务器失败。请问是否继续启动？";
+                    dlg.Owner = Application.Current.MainWindow;
+                    dlg.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                    dlg.Background = new SolidColorBrush(Colors.DarkRed);
+                    // App.SetSize(progress, "wide");
+                    // progress.BackColor = "yellow";
+                    var ret = dlg.ShowDialog();
+                    if (ret == false)
+                    {
+                        App.Current.Shutdown();
+                        mode = "exit";
+                        return;
+                    }
+                    mode = dlg.Mode;
+                }));
+
+                return new NormalResult { Value = 0, ErrorCode = mode };
             }
 
             // TODO: 初始化中断后，是否允许切换到菜单和设置画面？(只是不让进入书架画面)
@@ -2956,7 +3041,7 @@ namespace dp2SSL
                 //"", // _patron.Barcode,
                 //"", // _patron.PatronName,
                 actions,
-                "");
+                "network_sensitive");
 
             // TODO: 如果不是全部 actions 都成功，则要显示出有问题的图书(特别是所在的门名字)，
             // 等工作人员解决问题，重新盘点。直到全部成功。

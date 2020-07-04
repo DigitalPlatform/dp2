@@ -264,7 +264,7 @@ namespace dp2SSL
             }
 
             // TODO: 注意，从自助借还状态切换到智能书柜状态，需要补充执行以下一段
-            if (App.Function == "智能书柜" 
+            if (App.Function == "智能书柜"
                 && string.IsNullOrEmpty(messageServerUrl) == false)
             {
                 await TinyServer.InitialMessageQueueAsync(
@@ -1424,6 +1424,25 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                 WpfClientInfo.WriteErrorLog($"从命令行参数文件中读取信息时出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 return false;
             }
+        }
+
+        // 中途尝试切换为本地模式
+        // return:
+        //      false   没有发生切换
+        //      true    发生了切换
+        public static bool TrySwitchToLocalMode()
+        {
+            if (StartNetworkMode == "local")
+                return false;
+
+            ShelfData.DetectLibraryNetwork();
+            if (ShelfData.LibraryNetworkCondition != "OK")
+            {
+                StartNetworkMode = "local";
+                return true;
+            }
+
+            return false;
         }
 
         public static void SetSize(Window window, string style)

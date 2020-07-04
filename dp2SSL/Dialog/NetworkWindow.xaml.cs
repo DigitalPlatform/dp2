@@ -45,5 +45,41 @@ namespace dp2SSL
             DialogResult = false;
             this.Close();
         }
+
+        public string MessageText
+        {
+            get
+            {
+                return text.Text;
+            }
+            set
+            {
+                text.Text = value;
+                if (value != null)
+                {
+                    text.Visibility = Visibility.Visible;
+                    richText.Visibility = Visibility.Collapsed;
+                }
+            }
+        }
+
+        public FlowDocument MessageDocument
+        {
+            get
+            {
+                return richText.Document;
+            }
+            set
+            {
+                richText.Document = value;
+                if (value != null)
+                {
+                    if (text.Visibility != Visibility.Collapsed)
+                        text.Visibility = Visibility.Collapsed;
+                    if (richText.Visibility != Visibility.Visible)
+                        richText.Visibility = Visibility.Visible;
+                }
+            }
+        }
     }
 }

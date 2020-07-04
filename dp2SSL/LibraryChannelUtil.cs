@@ -328,7 +328,7 @@ namespace dp2SSL
                     // ***
                     // 第一步：获取册记录
 
-                    // 先尝试从本地实体库中获得记录
+                    // 从本地实体库中获得记录
                     var entity_record = context.Entities.Where(o => o.PII == pii).FirstOrDefault();
                     // EntityItem entity_record = null;   // testing
 
@@ -344,7 +344,7 @@ namespace dp2SSL
                     // ***
                     /// 第二步：获取书目摘要
 
-                    // 先尝试从本地书目库中获取书目摘要
+                    // 从本地书目库中获取书目摘要
 
                     var item = context.BiblioSummaries.Where(o => o.PII == pii).FirstOrDefault();
                     if (item != null

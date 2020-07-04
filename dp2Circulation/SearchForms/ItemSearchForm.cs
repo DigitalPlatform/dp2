@@ -13500,7 +13500,10 @@ out strError);
             "biblio_edition_area -- 版本项",
             "biblio_publisher -- 出版者",
             "biblio_publishtime -- 出版时间",
+            "biblio_isbn -- ISBN",
+            "biblio_issn -- ISSN",
             "biblio_classes -- 分类号",
+            "biblio_author_accesspoint -- 责任者检索点"
             };
 
                 foreach (string line in lines)
