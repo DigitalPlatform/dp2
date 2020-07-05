@@ -17,6 +17,9 @@ using dp2SSL.Models;
 using DigitalPlatform;
 using DigitalPlatform.WPF;
 using DigitalPlatform.Text;
+using Microsoft.EntityFrameworkCore;
+using System.Data.SqlClient;
+using System.Xml;
 
 namespace dp2SSL
 {
@@ -332,6 +335,72 @@ TaskScheduler.Default);
             return results;
         }
 
+        public static async Task<NormalResult> BackupRequestsDatabaseAsync(string strOutputFilename)
+        {
+            using (var releaser = await _databaseLimit.EnterAsync())
+            {
+                XmlWriterSettings settings = new XmlWriterSettings();
+                settings.Async = true;
+                settings.Indent = true;
+                using (XmlWriter writer = XmlWriter.Create(strOutputFilename,
+    settings))
+                {
+                    //writer.Formatting = System.Xml.Formatting.Indented;
+                    //writer.Indentation = 4;
+                    await writer.WriteStartDocumentAsync();
+                    await writer.WriteStartElementAsync(null, "collection", null);
+
+                    using (var context = new RequestContext())
+                    using (var connection = context.Database.GetDbConnection())
+                    {
+                        await connection.OpenAsync();
+
+                        using (var command = connection.CreateCommand())
+                        {
+                            command.CommandText = "SELECT * FROM [Requests]";
+
+                            using (var reader = await command.ExecuteReaderAsync() /*as SqlDataReader*/)
+                            {
+                                while (await reader.ReadAsync())
+                                {
+                                    await writer.WriteStartElementAsync(null, "record", null);
+
+                                    // TODO: 记载全部字段名和类型，记载一次
+                                    for (int i = 0; i < reader.FieldCount; i++)
+                                    {
+                                        string name = reader.GetName(i);
+                                        Type type = reader.GetFieldType(i);
+                                        var value = reader[i].ToString();
+                                        if (string.IsNullOrEmpty(value) == false)
+                                        {
+                                            await writer.WriteStartElementAsync(null, "field", null);
+                                            await writer.WriteAttributeStringAsync(null, "name", null, name);
+                                            await writer.WriteStringAsync(value);
+                                            await writer.WriteEndElementAsync();
+                                        }
+                                    }
+
+                                    await writer.WriteEndElementAsync();
+
+                                    /*
+                                    var blog = new Blog();
+                                    blog.Id = Convert.ToInt32(reader["Id"]);
+                                    blog.Name = reader["Name"].ToString();
+                                    blog.Url = reader["Url"].ToString();
+                                    list.Add(blog);
+                                    */
+                                }
+                            }
+                        }
+                    }
+
+                    await writer.WriteEndElementAsync();
+                    await writer.WriteEndDocumentAsync();
+                }
+            }
+
+            return new NormalResult();
+        }
 
         // static object _syncRoot_database = new object();
 

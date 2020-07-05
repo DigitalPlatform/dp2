@@ -292,18 +292,19 @@ namespace dp2SSL
 
             // 2020/7/5
             if (App.Function != "智能书柜")
-                App.InitialRfidManager("borrow");
+                App.InitialRfidManager();
         }
 
-        static string _rfidType = "";   // ""/borrow/shelf
+        static string _rfidType = "";   // ""/自助借还/智能书柜
 
-        public static void InitialRfidManager(string rfidType)
+        public static void InitialRfidManager()
         {
-            if (rfidType == _rfidType)
+            if (_rfidType == App.Function)
                 return;
 
             {
                 _cancelRefresh?.Cancel();
+                _cancelRefresh?.Dispose();
                 _cancelRefresh = new CancellationTokenSource();
 
                 RfidManager.SetError -= RfidManager_SetError;
@@ -333,22 +334,19 @@ namespace dp2SSL
                 RfidManager.StartBase2(_cancelRefresh.Token);
             }
 
-            _rfidType = rfidType;
+            _rfidType = App.Function;
         }
 
         static bool _shelfPrepared = false;
 
         // 为智能书柜执行一些初始化操作
-        public static async Task<NormalResult> PrepareShelf()
+        public static async Task<NormalResult> PrepareShelfAsync()
         {
-            if (_shelfPrepared == true)
+            if (App.Function != "智能书柜")
                 return new NormalResult();
 
-            SelectMode();
-
-            InitialShelfCfg();
-
-            InitialRfidManager("shelf");
+            if (_shelfPrepared == true)
+                return new NormalResult();
 
             // TODO: 注意，从自助借还状态切换到智能书柜状态，需要补充执行以下一段
             if (App.Function == "智能书柜"
@@ -367,6 +365,13 @@ namespace dp2SSL
 
                 ShelfData.StartMonitorTask();
             }
+
+            SelectMode();
+
+            InitialShelfCfg();
+
+            InitialRfidManager();
+
 
             _shelfPrepared = true;
             return new NormalResult();

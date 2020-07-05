@@ -41,6 +41,7 @@
             <Menu x:Name="menu"  Width="Auto" Height="Auto">
                 <MenuItem Header="_维护">
                     <MenuItem x:Name="redoReplicatePatron" Header="重做全量同步读者记录" HorizontalAlignment="Left" Width="Auto" Click="redoReplicatePatron_Click"/>
+                    <MenuItem x:Name="backupRequests" Header="备份本地动作库" HorizontalAlignment="Left" Width="Auto" Click="backupRequests_Click"/>
                 </MenuItem>
                 <MenuItem Header="_安装">
                     <MenuItem x:Name="setupAsGreen" Header="安装为绿色版" HorizontalAlignment="Left" Width="Auto" Click="setupAsGreen_Click"/>
