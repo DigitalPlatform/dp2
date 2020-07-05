@@ -228,7 +228,7 @@ namespace dp2SSL
                 catch (Exception ex)
                 {
                     WpfClientInfo.WriteErrorLog($"监控专用线程出现异常: {ExceptionUtil.GetDebugText(ex)}");
-                    App.CurrentApp?.SetError("monitor", $"监控专用线程出现异常: {ex.Message}");
+                    App.SetError("monitor", $"监控专用线程出现异常: {ex.Message}");
                 }
                 finally
                 {

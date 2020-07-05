@@ -306,7 +306,7 @@ namespace dp2SSL
                 catch (Exception ex)
                 {
                     WpfClientInfo.WriteErrorLog($"重试专用线程出现异常: {ExceptionUtil.GetDebugText(ex)}");
-                    App.CurrentApp?.SetError("sync", $"重试专用线程出现异常: {ex.Message}");
+                    App.SetError("sync", $"重试专用线程出现异常: {ex.Message}");
                 }
                 finally
                 {

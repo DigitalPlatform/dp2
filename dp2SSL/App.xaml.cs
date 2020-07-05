@@ -15,6 +15,14 @@ using System.IO;
 using System.Text;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Deployment.Application;
+using System.Reflection;
+using System.Windows.Controls;
+using System.Windows.Automation.Peers;
+using System.Windows.Automation.Provider;
+using System.Windows.Interop;
+using System.Runtime.InteropServices;
+using System.Windows.Documents;
 
 using DigitalPlatform;
 using DigitalPlatform.Core;
@@ -27,14 +35,7 @@ using DigitalPlatform.Face;
 using DigitalPlatform.WPF;
 using DigitalPlatform.MessageClient;
 using DigitalPlatform.Install;
-using System.Deployment.Application;
-using System.Reflection;
-using System.Windows.Controls;
-using System.Windows.Automation.Peers;
-using System.Windows.Automation.Provider;
-using System.Windows.Interop;
-using System.Runtime.InteropServices;
-using System.Windows.Documents;
+
 
 //using Microsoft.VisualStudio.Shell;
 //using Task = System.Threading.Tasks.Task;
@@ -76,7 +77,7 @@ namespace dp2SSL
             myMutex.Close();
         }
 
-        ErrorTable _errorTable = null;
+        static ErrorTable _errorTable = null;
 
         #region 属性
 
@@ -84,7 +85,7 @@ namespace dp2SSL
 
         void OnPropertyChanged(string name)
         {
-            if (this.PropertyChanged != null)
+            if (PropertyChanged != null)
                 PropertyChanged(this, new PropertyChangedEventArgs(name));
         }
 
@@ -215,15 +216,20 @@ namespace dp2SSL
 
             StartProcessManager();
 
+            /*
             // TODO: 检查网络情况。提示是否允许断网情况下进行初始化
             if (App.Function == "智能书柜")
                 SelectMode();
+            */
 
             BeginCheckServerUID(_cancelRefresh.Token);
 
+            /*
             // 
             InitialShelfCfg();
+            */
 
+            /*
             RfidManager.Base.Name = "RFID 中心";
             RfidManager.EnableBase2();
             RfidManager.Url = App.RfidUrl;
@@ -245,6 +251,7 @@ namespace dp2SSL
                 WpfClientInfo.WriteInfoLog("RfidManager.StartBase2()");
                 RfidManager.StartBase2(_cancelRefresh.Token);
             }
+            */
 
             _barcodeCapture.InputLine += _barcodeCapture_inputLine;
             //_barcodeCapture.InputChar += _barcodeCapture_InputChar;
@@ -263,6 +270,7 @@ namespace dp2SSL
                 }
             }
 
+            /*
             // TODO: 注意，从自助借还状态切换到智能书柜状态，需要补充执行以下一段
             if (App.Function == "智能书柜"
                 && string.IsNullOrEmpty(messageServerUrl) == false)
@@ -280,6 +288,88 @@ namespace dp2SSL
 
                 ShelfData.StartMonitorTask();
             }
+            */
+
+            // 2020/7/5
+            if (App.Function != "智能书柜")
+                App.InitialRfidManager("borrow");
+        }
+
+        static string _rfidType = "";   // ""/borrow/shelf
+
+        public static void InitialRfidManager(string rfidType)
+        {
+            if (rfidType == _rfidType)
+                return;
+
+            {
+                _cancelRefresh?.Cancel();
+                _cancelRefresh = new CancellationTokenSource();
+
+                RfidManager.SetError -= RfidManager_SetError;
+                RfidManager.ListTags -= RfidManager_ListTags;
+                RfidManager.ListLocks -= ShelfData.RfidManager_ListLocks;
+            }
+
+            RfidManager.Base.Name = "RFID 中心";
+            RfidManager.EnableBase2();
+            RfidManager.Url = App.RfidUrl;
+            // RfidManager.AntennaList = "1|2|3|4";    // TODO: 从 shelf.xml 中归纳出天线号范围
+
+            RfidManager.SetError += RfidManager_SetError;
+            RfidManager.ListTags += RfidManager_ListTags;
+            RfidManager.ListLocks += ShelfData.RfidManager_ListLocks;
+
+            // 2019/12/17
+            // 智能书柜一开始假定全部门关闭，所以不需要对任何图书读卡器进行盘点
+            if (App.Function == "智能书柜")
+                RfidManager.ReaderNameList = "";
+
+            WpfClientInfo.WriteInfoLog("FingerprintManager.Start()");
+            RfidManager.Start(_cancelRefresh.Token);
+            if (App.Function == "智能书柜")
+            {
+                WpfClientInfo.WriteInfoLog("RfidManager.StartBase2()");
+                RfidManager.StartBase2(_cancelRefresh.Token);
+            }
+
+            _rfidType = rfidType;
+        }
+
+        static bool _shelfPrepared = false;
+
+        // 为智能书柜执行一些初始化操作
+        public static async Task<NormalResult> PrepareShelf()
+        {
+            if (_shelfPrepared == true)
+                return new NormalResult();
+
+            SelectMode();
+
+            InitialShelfCfg();
+
+            InitialRfidManager("shelf");
+
+            // TODO: 注意，从自助借还状态切换到智能书柜状态，需要补充执行以下一段
+            if (App.Function == "智能书柜"
+                && string.IsNullOrEmpty(messageServerUrl) == false)
+            {
+                await TinyServer.InitialMessageQueueAsync(
+    System.IO.Path.Combine(WpfClientInfo.UserDir, "mq.db"),
+    _cancelRefresh.Token);
+
+                // 这里要等待连接完成，因为后面初始化时候需要发出点对点消息。TODO: 是否要显示一个对话框请用户等待？
+                await ConnectMessageServerAsync();
+
+                await TinyServer.DeleteAllResultsetAsync();
+                TinyServer.StartSendTask(_cancelRefresh.Token);
+                PageShelf.TrySetMessage(null, "我这台智能书柜启动了！");
+
+                ShelfData.StartMonitorTask();
+            }
+
+            _shelfPrepared = true;
+            return new NormalResult();
         }
 
         public static void TriggerUpdated(string message)
@@ -301,7 +391,7 @@ namespace dp2SSL
         static ManualResetEvent _messageServerConnected = new ManualResetEvent(false);
         */
 
-        public async Task ConnectMessageServerAsync()
+        public static async Task ConnectMessageServerAsync()
         {
             try
             {
@@ -369,7 +459,7 @@ namespace dp2SSL
         static bool _isShelfMode = false;
 
         // 可能会在全局错误 "cfg" 中设置出错信息
-        public void InitialShelfCfg()
+        public static void InitialShelfCfg()
         {
             if (App.Function == "智能书柜")
             {
@@ -378,17 +468,17 @@ namespace dp2SSL
                     _isShelfMode = true;
                     var result = ShelfData.InitialShelf();
                     if (result.Value == -1)
-                        this.SetError("cfg", result.ErrorInfo);
+                        SetError("cfg", result.ErrorInfo);
                     else
-                        this.SetError("cfg", null);
+                        SetError("cfg", null);
                 }
                 catch (FileNotFoundException)
                 {
-                    this.SetError("cfg", $"尚未配置 shelf.xml 文件");
+                    SetError("cfg", $"尚未配置 shelf.xml 文件");
                 }
                 catch (Exception ex)
                 {
-                    this.SetError("cfg", $"InitialShelf() 出现异常:{ex.Message}");
+                    SetError("cfg", $"InitialShelf() 出现异常:{ex.Message}");
                 }
             }
             else
@@ -561,7 +651,7 @@ namespace dp2SSL
             SetError("face", e.Error);
         }
 
-        private void RfidManager_SetError(object sender, SetErrorEventArgs e)
+        private static void RfidManager_SetError(object sender, SetErrorEventArgs e)
         {
             SetError("rfid", e.Error);
             // 2019/12/15
@@ -1218,7 +1308,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             _errorTable.SetError(type, StringUtil.MakePathList(results, "; "));
         }
 
-        public void SetError(string type, string error)
+        public static void SetError(string type, string error)
         {
             /*
             if (type == "face" && error != null)
@@ -1230,7 +1320,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             _errorTable.SetError(type, error);
         }
 
-        public void ClearErrors(string type)
+        public static void ClearErrors(string type)
         {
             // _errors.Clear();
             _errorTable.SetError(type, "");
@@ -1241,14 +1331,14 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             return _errorTable.GetError(type);
         }
 
-        public event TagChangedEventHandler TagChanged = null;
+        public static event TagChangedEventHandler TagChanged = null;
 
         // 新版本的事件
-        public event NewTagChangedEventHandler NewTagChanged = null;
+        public static event NewTagChangedEventHandler NewTagChanged = null;
 
         // public event SetErrorEventHandler TagSetError = null;
 
-        private void RfidManager_ListTags(object sender, ListTagsEventArgs e)
+        private static void RfidManager_ListTags(object sender, ListTagsEventArgs e)
         {
             // 标签总数显示
             // this.Number = e.Result?.Results?.Count.ToString();
@@ -1290,11 +1380,11 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                         },
                         (type, text) =>
                         {
-                            RfidManager.TriggerSetError(this, new SetErrorEventArgs { Error = text });
+                            RfidManager.TriggerSetError(null/*this*/, new SetErrorEventArgs { Error = text });
                         });
 
                     // 标签总数显示 只显示标签数，不再区分图书标签和读者卡
-                    this.Number = $"{NewTagList.Tags.Count}";
+                    CurrentApp.Number = $"{NewTagList.Tags.Count}";
                     //numberShown = true;
                 }
 
@@ -1317,12 +1407,12 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                             },
                             (type, text) =>
                             {
-                                RfidManager.TriggerSetError(this, new SetErrorEventArgs { Error = text });
+                                RfidManager.TriggerSetError(null/*this*/, new SetErrorEventArgs { Error = text });
                                 // TagSetError?.Invoke(this, new SetErrorEventArgs { Error = text });
                             });
 
                     // 标签总数显示 图书+读者卡
-                    this.Number = $"{TagList.Books.Count}:{TagList.Patrons.Count}";
+                    CurrentApp.Number = $"{TagList.Books.Count}:{TagList.Patrons.Count}";
                     //numberShown = true;
                 }
             }
@@ -1342,6 +1432,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                     StartNetworkMode = "local";
                 else
                 {
+#if NO
                     // TODO: 对话框出现的时候，允许点对点远程选择对话框？
 
                     var result = MessageBox.Show("访问 dp2library 服务器失败。请问是否继续启动？\r\n[Yes] 按照断网模式继续启动; [No] 按照联网模式继续启动; [Cancel] 退出 dp2SSL",
@@ -1356,26 +1447,28 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                         App.Current.Shutdown();
                     else
                         StartNetworkMode = "";
-                }
+#endif
 
-#if NO
-                App.Invoke(new Action(() =>
-                {
-                    NetworkWindow dlg = new NetworkWindow();
+                    App.Invoke(new Action(() =>
+                    {
+                        NetworkWindow dlg = new NetworkWindow();
                     //progress.TitleText = "请选择启动模式";
                     //progress.MessageText = "访问 dp2library 服务器失败。请问是否继续启动？";
                     dlg.Owner = Application.Current.MainWindow;
-                    dlg.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-                    dlg.Background = new SolidColorBrush(Colors.DarkRed);
+                        dlg.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                        dlg.Background = new SolidColorBrush(Colors.DarkRed);
                     // App.SetSize(progress, "wide");
                     // progress.BackColor = "yellow";
                     var ret = dlg.ShowDialog();
-                    if (ret == false)
-                        App.Current.Shutdown();
-                    StartNetworkMode = dlg.Mode;
+                        if (ret == false)
+                            App.Current.Shutdown();
+                        StartNetworkMode = dlg.Mode;
+                    }
+                    ));
+
+
                 }
-                ));
-#endif
+
             }
         }
 
