@@ -662,5 +662,11 @@ namespace dp2SSL
         {
             ShelfData.RedoReplicatePatron();
         }
+
+        private async void backupRequests_Click(object sender, RoutedEventArgs e)
+        {
+            string fileName = Path.Combine(WpfClientInfo.UserDir, "requests.xml");
+            await ShelfData.BackupRequestsDatabaseAsync(fileName);
+        }
     }
 }

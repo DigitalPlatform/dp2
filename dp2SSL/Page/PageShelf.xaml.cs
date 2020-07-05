@@ -172,7 +172,7 @@ namespace dp2SSL
                             RfidManager.TurnShelfLamp("*", "turnOn");
 
                             // 确保 App.PrepareShelf() 执行过
-                            await App.PrepareShelf();
+                            await App.PrepareShelfAsync();
 
                             RfidManager.ClearCache();
                             // 注：将来也许可以通过(RFID 以外的)其他方式输入图书号码

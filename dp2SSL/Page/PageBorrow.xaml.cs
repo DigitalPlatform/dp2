@@ -231,7 +231,7 @@ namespace dp2SSL
             App.LineFeed += App_LineFeed;
 
             // 2020/7/5
-            App.InitialRfidManager("borrow");
+            App.InitialRfidManager();
 
             RfidManager.ClearCache();
             // 处理以前积累的 tags
