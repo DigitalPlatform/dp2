@@ -110,7 +110,7 @@ namespace dp2SSL
             FingerprintManager.SetError += FingerprintManager_SetError;
             FingerprintManager.Touched += FingerprintManager_Touched;
 
-            App.CurrentApp.TagChanged += CurrentApp_TagChanged;
+            App.TagChanged += CurrentApp_TagChanged;
 
             RfidManager.ListLocks += RfidManager_ListLocks;
 
@@ -160,7 +160,7 @@ namespace dp2SSL
         {
             RfidManager.SetError -= RfidManager_SetError;
 
-            App.CurrentApp.TagChanged -= CurrentApp_TagChanged;
+            App.TagChanged -= CurrentApp_TagChanged;
 
             FingerprintManager.Touched -= FingerprintManager_Touched;
             FingerprintManager.SetError -= FingerprintManager_SetError;
@@ -298,7 +298,7 @@ namespace dp2SSL
         // 设置全局区域错误字符串
         void SetGlobalError(string type, string error)
         {
-            App.CurrentApp.SetError(type, error);
+            App.SetError(type, error);
         }
 
         // 第二阶段：填充图书信息的 PII 和 Title 字段

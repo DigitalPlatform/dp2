@@ -107,7 +107,7 @@ namespace dp2SSL
 #if OLD_TAGCHANGED
             App.CurrentApp.TagChanged += CurrentApp_TagChanged;
 #else
-            App.CurrentApp.NewTagChanged += CurrentApp_NewTagChanged;
+            App.NewTagChanged += CurrentApp_NewTagChanged;
 #endif
 
             // RfidManager.ListLocks += RfidManager_ListLocks;
@@ -115,10 +115,12 @@ namespace dp2SSL
             ShelfData.DoorStateChanged += ShelfData_DoorStateChanged;
             //ShelfData.BookChanged += ShelfData_BookChanged;
 
+            /*
             RfidManager.ClearCache();
             // 注：将来也许可以通过(RFID 以外的)其他方式输入图书号码
             if (string.IsNullOrEmpty(RfidManager.Url))
                 this.SetGlobalError("rfid", "尚未配置 RFID 中心 URL");
+            */
 
             _layer = AdornerLayer.GetAdornerLayer(this.mainGrid);
             _adorner = new LayoutAdorner(this);
@@ -168,6 +170,14 @@ namespace dp2SSL
                         {
                             // 初始化之前开灯，让使用者感觉舒服一些(感觉机器在活动状态)
                             RfidManager.TurnShelfLamp("*", "turnOn");
+
+                            // 确保 App.PrepareShelf() 执行过
+                            await App.PrepareShelf();
+
+                            RfidManager.ClearCache();
+                            // 注：将来也许可以通过(RFID 以外的)其他方式输入图书号码
+                            if (string.IsNullOrEmpty(RfidManager.Url))
+                                this.SetGlobalError("rfid", "尚未配置 RFID 中心 URL");
 
                             await InitialShelfEntitiesAsync(App.StartNetworkMode,
                                 IsSilently() || IsFileSilently());
@@ -387,7 +397,7 @@ namespace dp2SSL
                 }
                 catch (Exception ex)
                 {
-                    App.CurrentApp?.SetError("setMessage", $"发送消息出现异常: {ex.Message}。消息内容:{StringUtil.CutString(text, 100)}");
+                    App.SetError("setMessage", $"发送消息出现异常: {ex.Message}。消息内容:{StringUtil.CutString(text, 100)}");
                     WpfClientInfo.WriteErrorLog($"发送消息出现异常: {ExceptionUtil.GetDebugText(ex)}。消息内容:{text}");
                 }
             });
@@ -1055,7 +1065,7 @@ namespace dp2SSL
 #if OLD_TAGCHANGED
             App.CurrentApp.TagChanged -= CurrentApp_TagChanged;
 #else
-            App.CurrentApp.NewTagChanged += CurrentApp_NewTagChanged;
+            App.NewTagChanged += CurrentApp_NewTagChanged;
 #endif
 
             FingerprintManager.Touched -= FingerprintManager_Touched;
@@ -1203,7 +1213,7 @@ namespace dp2SSL
             if (error != null && error.StartsWith("未"))
                 throw new Exception("test");
                 */
-            App.CurrentApp?.SetError(type, error);
+            App.SetError(type, error);
         }
 
         // 第二阶段：填充图书信息的 PII 和 Title 字段
@@ -1565,7 +1575,7 @@ namespace dp2SSL
                 {
                     DisplayMessage(progress, cfg_error, "red");
                     _initialCancelled = true;
-                    App.CurrentApp.InitialShelfCfg();
+                    App.InitialShelfCfg();
                     return;
                 }
 
@@ -1574,6 +1584,7 @@ namespace dp2SSL
                     // 把门显示出来。因为此时需要看到是否关门的状态
                     this.doorControl.Visibility = Visibility.Visible;
                     this.doorControl.InitializeButtons(ShelfData.ShelfCfgDom, ShelfData.Doors);
+                
                 }));
 
                 // 等待锁控就绪

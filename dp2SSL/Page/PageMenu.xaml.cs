@@ -75,7 +75,7 @@ namespace dp2SSL
                 PageBorrow.BeginNotifyTask();
             }
 
-            App.CurrentApp.TagChanged += CurrentApp_TagChanged;
+            App.TagChanged += CurrentApp_TagChanged;
         }
 
         private void CurrentApp_TagChanged(object sender, TagChangedEventArgs e)
@@ -89,7 +89,7 @@ namespace dp2SSL
 
         private void PageMenu_Unloaded(object sender, RoutedEventArgs e)
         {
-            App.CurrentApp.TagChanged -= CurrentApp_TagChanged;
+            App.TagChanged -= CurrentApp_TagChanged;
         }
 
         public void UpdateMenu()

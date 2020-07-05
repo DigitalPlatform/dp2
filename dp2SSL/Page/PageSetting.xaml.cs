@@ -274,7 +274,7 @@ namespace dp2SSL
                     PageMenu.MenuPage?.UpdateMenu();
 
                     // 2019/12/9
-                    App.CurrentApp.InitialShelfCfg();
+                    App.InitialShelfCfg();
 
                     // TODO: 可能会抛出异常
                     // 因为 Doors 发生了变化，所以要重新初始化门控件
@@ -285,7 +285,7 @@ namespace dp2SSL
                     // 重新启动 Proccess 监控
                     App.CurrentApp.StartProcessManager();
 
-                    _ = App.CurrentApp.ConnectMessageServerAsync();
+                    _ = App.ConnectMessageServerAsync();
                 }
                 finally
                 {
@@ -407,7 +407,7 @@ namespace dp2SSL
             }
 
             // 如果没有配置 RFID 中心 URL 则不检查
-            if (string.IsNullOrEmpty(App.RfidUrl) == false)
+            if (string.IsNullOrEmpty(RfidManager.Url/*App.RfidUrl*/) == false)
             {
                 var result = RfidManager.GetState("getVersion");
                 if (result.Value == -1)

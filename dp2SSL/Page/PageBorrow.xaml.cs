@@ -230,6 +230,9 @@ namespace dp2SSL
 
             App.LineFeed += App_LineFeed;
 
+            // 2020/7/5
+            App.InitialRfidManager("borrow");
+
             RfidManager.ClearCache();
             // 处理以前积累的 tags
             // RfidManager.TriggerLastListTags();
@@ -267,7 +270,7 @@ namespace dp2SSL
             // SetGlobalError("test", "test error");
 
             ////
-            App.CurrentApp.TagChanged += CurrentApp_TagChanged;
+            App.TagChanged += CurrentApp_TagChanged;
             while (true)
             {
                 _tagChangedCount = 0;
@@ -818,7 +821,7 @@ namespace dp2SSL
 
             // 释放 Loaded 里面分配的资源
             // RfidManager.SetError -= RfidManager_SetError;
-            App.CurrentApp.TagChanged -= CurrentApp_TagChanged;
+            App.TagChanged -= CurrentApp_TagChanged;
 
             FingerprintManager.Touched -= FingerprintManager_Touched;
             FingerprintManager.SetError -= FingerprintManager_SetError;
@@ -2291,7 +2294,7 @@ out string strError);
                 */
             // Debug.Assert(type != "face", "");
 
-            App.CurrentApp.SetError(type, error);
+            App.SetError(type, error);
         }
 
 #if NO

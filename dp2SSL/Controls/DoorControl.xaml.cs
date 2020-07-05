@@ -363,6 +363,8 @@ KeyTime.FromTimeSpan(TimeSpan.FromSeconds(start + _length))) // KeyTime
             _canvas_height = canvas_height;
 
             InitialSize();
+
+            SetBackgroundImage();
         }
 
         public void InitialSize()
@@ -495,6 +497,10 @@ this.ActualHeight - (this.Padding.Top + this.Padding.Bottom)));
         void SetBackgroundImage()
         {
             // TODO: ShelfCfgDom 在从自助借还模式切换为智能书柜模式时会成为 null
+
+            // 优化
+            if (this.Background != null)
+                return;
 
             // shelf.xml 中 root 元素的 backImageFile 属性
             string backImageFile = ShelfData.ShelfCfgDom?.DocumentElement?.GetAttribute("backImageFile");
