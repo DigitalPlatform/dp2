@@ -2012,6 +2012,7 @@ namespace dp2SSL
                 }
             }
 
+            // 询问是否改变初始化的网络模式
             NormalResult AskChangeNetworkMode(string text)
             {
                 string mode = "";
@@ -2019,7 +2020,9 @@ namespace dp2SSL
                 {
                     NetworkWindow dlg = new NetworkWindow();
                     dlg.MessageText = text;
-                    //progress.TitleText = "请选择启动模式";
+                    dlg.LocalModeButtonText = "改用断网模式";
+                    dlg.NetworkModeButtonText = "继续用联网模式";
+                    dlg.TitleText = "重新选择启动模式";
                     //progress.MessageText = "访问 dp2library 服务器失败。请问是否继续启动？";
                     dlg.Owner = Application.Current.MainWindow;
                     dlg.WindowStartupLocation = WindowStartupLocation.CenterOwner;

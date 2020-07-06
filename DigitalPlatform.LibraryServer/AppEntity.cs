@@ -3842,7 +3842,11 @@ out strError);
                     return 1;
                 }
 
-                strLibraryCodeList = sessioninfo.LibraryCodeList + "/" + strPersonalLibrary;
+                // 2020/7/9
+                if (sessioninfo.GlobalUser == false)
+                    strLibraryCodeList = sessioninfo.LibraryCodeList + "/" + strPersonalLibrary;
+                else
+                    strLibraryCodeList = strPersonalLibrary;
             }
             else
                 strLibraryCodeList = sessioninfo.LibraryCodeList;

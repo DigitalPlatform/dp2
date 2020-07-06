@@ -1324,7 +1324,7 @@ out strError);
             {
                 try
                 {
-                    this.app.Dbs.KernelApplication.WriteErrorLog("SessionInfo.Close()出错：" + strError);
+                    this.app?.Dbs?.KernelApplication?.WriteErrorLog("SessionInfo.Close()出错：" + strError);
                 }
                 catch
                 {
