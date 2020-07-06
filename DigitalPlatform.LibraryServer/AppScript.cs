@@ -2231,6 +2231,11 @@ namespace DigitalPlatform.LibraryServer
                 strRoom = parts[0];
             }
 
+            bool isPersonalLibrary = false;
+            if (strRoom.StartsWith("~"))
+            {
+                isPersonalLibrary = true;
+            }
             XmlElement item = this.App.GetLocationItemElement(
     strLibraryCode,
     strRoom);
@@ -2241,13 +2246,12 @@ namespace DigitalPlatform.LibraryServer
 || strAction == "transfer"
 || strAction == "move")
             {
-                if (item == null)
+                if (item == null && isPersonalLibrary == false)
                 {
                     strError = "馆代码 '" + strLibraryCode + "' 没有定义馆藏地点 '" + strRoom + "'(根据 <locationTypes> 定义)";
                     // return 1;
                     errors.Add(strError);
                 }
-
             }
 
             // 2014/1/10
@@ -2274,7 +2278,7 @@ namespace DigitalPlatform.LibraryServer
                 }
                 else
                 {
-                    if (this.App.AcceptBlankItemBarcode == false)
+                    if (this.App.AcceptBlankItemBarcode == false && isPersonalLibrary == false)
                     {
                         strError = "册条码号不能为空(根据 AcceptBlankItemBarcode 定义)";
                         // return 1;

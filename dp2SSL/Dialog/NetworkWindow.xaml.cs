@@ -81,5 +81,41 @@ namespace dp2SSL
                 }
             }
         }
+
+        public string TitleText
+        {
+            get
+            {
+                return title.Text;
+            }
+            set
+            {
+                title.Text = value;
+            }
+        }
+
+        public string LocalModeButtonText
+        {
+            get
+            {
+                return this.localMode.Content.ToString();
+            }
+            set
+            {
+                this.localMode.Content = value;
+            }
+        }
+
+        public string NetworkModeButtonText
+        {
+            get
+            {
+                return this.networkMode.Content.ToString();
+            }
+            set
+            {
+                this.networkMode.Content = value;
+            }
+        }
     }
 }
