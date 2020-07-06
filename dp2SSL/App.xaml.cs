@@ -1389,6 +1389,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                         });
 
                     // 标签总数显示 只显示标签数，不再区分图书标签和读者卡
+                    if (CurrentApp != null)
                     CurrentApp.Number = $"{NewTagList.Tags.Count}";
                     //numberShown = true;
                 }
@@ -1417,7 +1418,8 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                             });
 
                     // 标签总数显示 图书+读者卡
-                    CurrentApp.Number = $"{TagList.Books.Count}:{TagList.Patrons.Count}";
+                    if (CurrentApp != null)
+                        CurrentApp.Number = $"{TagList.Books.Count}:{TagList.Patrons.Count}";
                     //numberShown = true;
                 }
             }
@@ -1738,7 +1740,7 @@ Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
 
 #endif
 
-        static void ErrorBox(string message,
+        public static void ErrorBox(string message,
     string color = "red",
     string style = "")
         {
