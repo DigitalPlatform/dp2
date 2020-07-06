@@ -335,8 +335,109 @@ TaskScheduler.Default);
             return results;
         }
 
-        public static async Task<NormalResult> BackupRequestsDatabaseAsync(string strOutputFilename)
+        // 从 XML 文件恢复全部数据到 Requests 表。
+        // 注意要处理好 XML 文件中字段比当前表定义的字段多或者少的情况，和字段改名的情况
+        public static async Task<NormalResult> RestoreRequestsDatabaseAsync(
+            string strInputFileName,
+            Delegate_displayText func_displayText,
+            CancellationToken token)
         {
+            int count = 0;
+            using (var releaser = await _databaseLimit.EnterAsync())
+            {
+                XmlReaderSettings settings = new XmlReaderSettings();
+                settings.Async = true;
+
+                using (XmlReader reader = XmlReader.Create(strInputFileName, settings))
+                {
+                    // 定位到 collection 元素
+                    while (true)
+                    {
+                        bool bRet = await reader.ReadAsync();
+                        if (bRet == false)
+                        {
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = "文件 " + strInputFileName + " 没有根元素"
+                            };
+                        }
+                        if (reader.NodeType == XmlNodeType.Element)
+                            break;
+                    }
+
+                    using (var context = new RequestContext())
+                    using (var connection = context.Database.GetDbConnection())
+                    {
+                        context.Database.EnsureDeleted();
+                        context.Database.EnsureCreated();
+
+                        await connection.OpenAsync();
+
+                        using (var command = connection.CreateCommand())
+                        {
+
+                            while (await reader.ReadAsync())
+                            {
+
+                                if (token.IsCancellationRequested)
+                                    return new NormalResult
+                                    {
+                                        Value = -1,
+                                        ErrorInfo = "用户中断",
+                                        ErrorCode = "abort"
+                                    };
+
+                                if (reader.NodeType == XmlNodeType.Element)
+                                {
+                                    string record_xml = await reader.ReadOuterXmlAsync();
+                                    XmlDocument dom = new XmlDocument();
+                                    dom.LoadXml(record_xml);
+
+                                    List<string> fields = new List<string>();
+                                    List<string> values = new List<string>();
+
+                                    command.Parameters.Clear();
+
+                                    var field_nodes = dom.DocumentElement.SelectNodes("field");
+                                    foreach(XmlElement field_node in field_nodes)
+                                    {
+                                        string name = field_node.GetAttribute("name");
+                                        string value = field_node.InnerText;
+
+                                        //if (name == "ID")
+                                        //    value = "0";
+
+                                        fields.Add(name);
+                                        command.Parameters.Add(new Microsoft.Data.Sqlite.SqliteParameter(name, value));
+                                        values.Add($"@{name}");
+                                    }
+
+                                    //StringBuilder command = new StringBuilder();
+                                    //command.Append("INSERT INTO [Requests] ");
+                                    command.CommandText = $"INSERT INTO [Requests] ({StringUtil.MakePathList(fields)}) VALUES ({StringUtil.MakePathList(values)})";
+                                    await command.ExecuteNonQueryAsync();
+
+                                    count++;
+                                    func_displayText?.Invoke($"已导入记录 {count}");
+                                }
+
+                            }
+                        }
+                    }
+                }
+            }
+
+            return new NormalResult { Value = count };
+        }
+
+        // 把 Requests 表的全部数据备份到一个 XML 文件
+        public static async Task<NormalResult> BackupRequestsDatabaseAsync(
+            string strOutputFilename,
+            Delegate_displayText func_displayText,
+            CancellationToken token)
+        {
+            int count = 0;
             using (var releaser = await _databaseLimit.EnterAsync())
             {
                 XmlWriterSettings settings = new XmlWriterSettings();
@@ -363,6 +464,13 @@ TaskScheduler.Default);
                             {
                                 while (await reader.ReadAsync())
                                 {
+                                    if (token.IsCancellationRequested)
+                                        return new NormalResult
+                                        {
+                                            Value = -1,
+                                            ErrorInfo = "用户中断",
+                                            ErrorCode = "abort"
+                                        };
                                     await writer.WriteStartElementAsync(null, "record", null);
 
                                     // TODO: 记载全部字段名和类型，记载一次
@@ -381,14 +489,8 @@ TaskScheduler.Default);
                                     }
 
                                     await writer.WriteEndElementAsync();
-
-                                    /*
-                                    var blog = new Blog();
-                                    blog.Id = Convert.ToInt32(reader["Id"]);
-                                    blog.Name = reader["Name"].ToString();
-                                    blog.Url = reader["Url"].ToString();
-                                    list.Add(blog);
-                                    */
+                                    count++;
+                                    func_displayText?.Invoke($"已导出记录 {count}");
                                 }
                             }
                         }
@@ -399,7 +501,7 @@ TaskScheduler.Default);
                 }
             }
 
-            return new NormalResult();
+            return new NormalResult { Value = count };
         }
 
         // static object _syncRoot_database = new object();

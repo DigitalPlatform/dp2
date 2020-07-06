@@ -19,6 +19,7 @@ using DigitalPlatform.Face;
 using DigitalPlatform.WPF;
 using DigitalPlatform.Install;
 using System.Windows.Media;
+using Microsoft.Win32;
 
 namespace dp2SSL
 {
@@ -665,8 +666,126 @@ namespace dp2SSL
 
         private async void backupRequests_Click(object sender, RoutedEventArgs e)
         {
-            string fileName = Path.Combine(WpfClientInfo.UserDir, "requests.xml");
-            await ShelfData.BackupRequestsDatabaseAsync(fileName);
+            SaveFileDialog openFileDialog = new SaveFileDialog();
+            openFileDialog.Title = "备份本地动作库 - 请指定输出文件";
+            openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);    // WpfClientInfo.UserDir;
+            openFileDialog.RestoreDirectory = true;
+            openFileDialog.Filter = "XML 文件(*.xml)|*.xml|所有文件(*.*)|*.*";
+            if (openFileDialog.ShowDialog() == false)
+                return;
+
+            using (var cancel = CancellationTokenSource.CreateLinkedTokenSource(App.CancelToken))
+            {
+                ProgressWindow progress = null;
+                App.Invoke(new Action(() =>
+                {
+                    progress = new ProgressWindow();
+                    progress.TitleText = "备份本地动作库";
+                    progress.MessageText = "正在备份本地动作库，请稍等 ...";
+                    progress.Owner = Application.Current.MainWindow;
+                    progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                    progress.Closed += (s1, e1) =>
+                    {
+                        cancel.Cancel();
+                    };
+                    progress.okButton.Content = "停止";
+                    progress.Background = new SolidColorBrush(Colors.DarkRed);
+                    App.SetSize(progress, "middle");
+                    progress.BackColor = "black";
+                    progress.Show();
+                }));
+                try
+                {
+                    var result = await ShelfData.BackupRequestsDatabaseAsync(
+                        openFileDialog.FileName,
+                        (text) =>
+                        {
+                            App.Invoke(new Action(() =>
+                            {
+                                progress.MessageText = text;
+                            }));
+                        },
+                        cancel.Token);
+                    if (result.Value == -1)
+                        App.ErrorBox($"导出过程出错: {result.ErrorInfo}");
+                    else
+                        App.ErrorBox($"导出完成。在文件 {openFileDialog.FileName} 中，共导出记录 {result.Value} 条", "green");
+                }
+                catch (Exception ex)
+                {
+                    WpfClientInfo.WriteErrorLog($"备份本地动作库过程出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                    App.ErrorBox($"备份本地动作库过程出现异常: {ex.Message}");
+                }
+                finally
+                {
+                    App.Invoke(new Action(() =>
+                    {
+                        progress.Close();
+                    }));
+                }
+            }
+        }
+
+        private async void restoreRequests_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Title = "恢复本地动作库 - 请指定输入文件";
+            openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);    // WpfClientInfo.UserDir;
+            openFileDialog.RestoreDirectory = true;
+            openFileDialog.Filter = "XML 文件(*.xml)|*.xml|所有文件(*.*)|*.*";
+            if (openFileDialog.ShowDialog() == false)
+                return;
+
+            using (var cancel = CancellationTokenSource.CreateLinkedTokenSource(App.CancelToken))
+            {
+                ProgressWindow progress = null;
+                App.Invoke(new Action(() =>
+                {
+                    progress = new ProgressWindow();
+                    progress.TitleText = "恢复本地动作库";
+                    progress.MessageText = "正在恢复本地动作库，请稍等 ...";
+                    progress.Owner = Application.Current.MainWindow;
+                    progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                    progress.Closed += (s1, e1) =>
+                    {
+                        cancel.Cancel();
+                    };
+                    progress.okButton.Content = "停止";
+                    progress.Background = new SolidColorBrush(Colors.DarkRed);
+                    App.SetSize(progress, "middle");
+                    progress.BackColor = "black";
+                    progress.Show();
+                }));
+                try
+                {
+                    var result = await ShelfData.RestoreRequestsDatabaseAsync(
+                        openFileDialog.FileName,
+                        (text) =>
+                        {
+                            App.Invoke(new Action(() =>
+                            {
+                                progress.MessageText = text;
+                            }));
+                        },
+                        cancel.Token);
+                    if (result.Value == -1)
+                        App.ErrorBox($"恢复过程出错: {result.ErrorInfo}");
+                    else
+                        App.ErrorBox($"恢复完成。共导入记录 {result.Value} 条", "green");
+                }
+                catch (Exception ex)
+                {
+                    WpfClientInfo.WriteErrorLog($"恢复本地动作库过程出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                    App.ErrorBox($"恢复本地动作库过程出现异常: {ex.Message}");
+                }
+                finally
+                {
+                    App.Invoke(new Action(() =>
+                    {
+                        progress.Close();
+                    }));
+                }
+            }
         }
     }
 }
