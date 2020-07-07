@@ -55,17 +55,21 @@ namespace dp2SSL
         // 主要的通道池，用于当前服务器
         public LibraryChannelPool _channelPool = new LibraryChannelPool();
 
-        static CancellationTokenSource _cancelRefresh = new CancellationTokenSource();
+        // 控制 App 的终止信号
+        static CancellationTokenSource _cancelApp = new CancellationTokenSource();
 
         public static CancellationToken CancelToken
         {
             get
             {
-                if (_cancelRefresh == null)
+                if (_cancelApp == null)
                     return new CancellationToken();
-                return _cancelRefresh.Token;
+                return _cancelApp.Token;
             }
         }
+
+        // 控制 RfidManager 的终止信号
+        static CancellationTokenSource _cancelRfid = new CancellationTokenSource();
 
         CancellationTokenSource _cancelProcessMonitor = new CancellationTokenSource();
 
@@ -200,12 +204,12 @@ namespace dp2SSL
             FingerprintManager.Url = App.FingerprintUrl;
             FingerprintManager.SetError += FingerprintManager_SetError;
             WpfClientInfo.WriteInfoLog("FingerprintManager.Start()");
-            FingerprintManager.Start(_cancelRefresh.Token);
+            FingerprintManager.Start(_cancelApp.Token);
 
             FaceManager.Base.Name = "人脸中心";
             FaceManager.Url = App.FaceUrl;
             FaceManager.SetError += FaceManager_SetError;
-            FaceManager.Start(_cancelRefresh.Token);
+            FaceManager.Start(_cancelApp.Token);
 
             // 自动删除以前残留在 UserDir 中的全部临时文件
             // 用 await 是需要删除完以后再返回，这样才能让后面的 PageMenu 页面开始使用临时文件目录
@@ -222,7 +226,7 @@ namespace dp2SSL
                 SelectMode();
             */
 
-            BeginCheckServerUID(_cancelRefresh.Token);
+            BeginCheckServerUID(_cancelApp.Token);
 
             /*
             // 
@@ -303,9 +307,9 @@ namespace dp2SSL
                 return;
 
             {
-                _cancelRefresh?.Cancel();
-                _cancelRefresh?.Dispose();
-                _cancelRefresh = new CancellationTokenSource();
+                _cancelRfid?.Cancel();
+                _cancelRfid?.Dispose();
+                _cancelRfid = new CancellationTokenSource();
 
                 RfidManager.SetError -= RfidManager_SetError;
                 RfidManager.ListTags -= RfidManager_ListTags;
@@ -327,11 +331,11 @@ namespace dp2SSL
                 RfidManager.ReaderNameList = "";
 
             WpfClientInfo.WriteInfoLog("FingerprintManager.Start()");
-            RfidManager.Start(_cancelRefresh.Token);
+            RfidManager.Start(_cancelRfid.Token);
             if (App.Function == "智能书柜")
             {
                 WpfClientInfo.WriteInfoLog("RfidManager.StartBase2()");
-                RfidManager.StartBase2(_cancelRefresh.Token);
+                RfidManager.StartBase2(_cancelRfid.Token);
             }
 
             _rfidType = App.Function;
@@ -354,13 +358,13 @@ namespace dp2SSL
             {
                 await TinyServer.InitialMessageQueueAsync(
     System.IO.Path.Combine(WpfClientInfo.UserDir, "mq.db"),
-    _cancelRefresh.Token);
+    _cancelApp.Token);
 
                 // 这里要等待连接完成，因为后面初始化时候需要发出点对点消息。TODO: 是否要显示一个对话框请用户等待？
                 await ConnectMessageServerAsync();
 
                 await TinyServer.DeleteAllResultsetAsync();
-                TinyServer.StartSendTask(_cancelRefresh.Token);
+                TinyServer.StartSendTask(_cancelApp.Token);
                 PageShelf.TrySetMessage(null, "我这台智能书柜启动了！");
 
                 ShelfData.StartMonitorTask();
@@ -685,8 +689,9 @@ namespace dp2SSL
 
             // ShelfData.SaveRetryActions();
 
-            _cancelRefresh?.Cancel();
+            _cancelApp?.Cancel();
             _cancelProcessMonitor?.Cancel();
+            _cancelRfid?.Cancel();
             ShelfData.CancelAll();
 
             // 最后关灯
@@ -751,8 +756,9 @@ namespace dp2SSL
 
             }
 
-            _cancelRefresh?.Cancel();
+            _cancelApp?.Cancel();
             _cancelProcessMonitor?.Cancel();
+            _cancelRfid?.Cancel();
             ShelfData.CancelAll();
 
             // EndFingerprint();
@@ -1575,7 +1581,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
         {
             ProgressWindow progress = null;
 
-            using (var cancel = CancellationTokenSource.CreateLinkedTokenSource(_cancelRefresh.Token))
+            using (var cancel = CancellationTokenSource.CreateLinkedTokenSource(_cancelApp.Token))
             {
                 App.Invoke(new Action(() =>
                 {

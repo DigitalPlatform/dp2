@@ -2878,6 +2878,75 @@ out string strNewOrderPrice);
             }
         }
 
+        // 2020/7/7
+        // 根据码洋和实洋计算出折扣
+        // return:
+        //      -1  计算过程出现错误
+        //      0   strFixedPrice 为空，无法计算
+        //      1   计算成功
+        public static int ComputeDiscount(
+            string strOrderPrice,
+            string strFixedPrice,
+            out string strDiscount,
+            out string strError)
+        {
+            strError = "";
+            strDiscount = "";
+
+            if (string.IsNullOrEmpty(strOrderPrice))
+            {
+                strError = "订购价为空，无法计算折扣";
+                return 0;
+            }
+
+            if (string.IsNullOrEmpty(strFixedPrice))
+            {
+                strError = "码洋为空，无法计算折扣";
+                return 0;
+            }
+
+            if (string.IsNullOrEmpty(strFixedPrice) == false
+    && strFixedPrice.StartsWith("{"))
+            {
+                strError = $"ComputeDiscount() 不应用于虚拟字符串 '{strFixedPrice}'";
+                return -1;
+            }
+
+            try
+            {
+                CurrencyItem order_item = CurrencyItem.Parse(strOrderPrice);
+                CurrencyItem fixed_item = CurrencyItem.Parse(strFixedPrice);
+
+                // 缺省货币为人民币
+                SetCurrencyDefault(order_item);
+                SetCurrencyDefault(fixed_item);
+
+                if (order_item.Postfix != fixed_item.Postfix
+                    || order_item.Prefix != fixed_item.Prefix)
+                {
+                    strError = $"订购价 '{strOrderPrice}' 和码洋 '{strFixedPrice}' 的货币类型不同，无法进行折扣计算";
+                    return -1;
+                }
+
+                decimal discount =  order_item.Value / fixed_item.Value;
+                strDiscount = discount.ToString();
+                return 1;
+            }
+            catch (Exception ex)
+            {
+                strError = ex.Message;
+                return -1;
+            }
+        }
+
+        static void SetCurrencyDefault(CurrencyItem item)
+        {
+            // 缺省货币为人民币
+            if (item.Prefix == "" && item.Postfix == "")
+                item.Prefix = "CNY";
+        }
+
+
         // 价格乘以一个倍率
         // 注：可以处理 "{CNY10.00}" 这样的字符串。结果字符串依然保留 {} 形态
         public static string MultiplePrice(string price,
@@ -3799,6 +3868,7 @@ out string strNewOrderPrice);
                 this.comboBox_discount.ComboBox.DropDown += new EventHandler(comboBox_discount_DropDown);
                 this.comboBox_discount.Enter += new EventHandler(control_Enter);
                 this.comboBox_discount.ComboBox.TextChanged += new EventHandler(comboBox_discount_TextChanged);
+                this.comboBox_discount.ComboBox.KeyDown += ComboBox_KeyDown;
 
                 // price
                 this.textBox_price.TextBox.TextChanged += new EventHandler(Price_TextChanged);
@@ -3862,6 +3932,7 @@ out string strNewOrderPrice);
                 this.comboBox_discount.ComboBox.DropDown -= new EventHandler(comboBox_discount_DropDown);
                 this.comboBox_discount.Enter -= new EventHandler(control_Enter);
                 this.comboBox_discount.ComboBox.TextChanged -= new EventHandler(comboBox_copy_TextChanged);
+                this.comboBox_discount.ComboBox.KeyDown -= ComboBox_KeyDown;
 
                 this.textBox_price.TextBox.TextChanged -= new EventHandler(Price_TextChanged);
                 this.textBox_price.TextBox.Enter -= new EventHandler(control_Enter);
@@ -3879,6 +3950,23 @@ out string strNewOrderPrice);
                 this.comboBox_class.SelectedIndexChanged -= new EventHandler(comboBox_seller_SelectedIndexChanged);
                 this.label_sellerAddress.Click -= new EventHandler(control_Enter);
                 this.label_other.Click -= new EventHandler(control_Enter);
+            }
+        }
+
+        private void ComboBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Control && e.KeyCode == Keys.A)
+            {
+                // 自动计算出码洋
+                // 注： 如果 FixedPrice 里面已经是实在价格，那么就不执行这个 Ctrl+A
+                if (string.IsNullOrEmpty(this.Price) == false
+                    && string.IsNullOrEmpty(this.FixedPrice) == false)
+                {
+                    Debug.Assert(this.Price.StartsWith("{") == false, "");
+
+                    RecomputeDiscount();
+                }
+                e.Handled = true;
             }
         }
 
@@ -4457,6 +4545,7 @@ out string strNewOrderPrice);
                     combobox.Items.Add("." + (i + 1).ToString() + "0");
                 }
                 combobox.Items.Add("1.00");
+                combobox.Items.Add("<自动计算>");
             }
         }
 
@@ -4483,7 +4572,6 @@ out string strError);
             }
         }
 
-
         // 反向计算：单价 --> 码洋
         void RecomputFixedPrice()
         {
@@ -4509,11 +4597,37 @@ out string strError);
             }
         }
 
+        // 根据码洋和实洋计算出折扣
+        void RecomputeDiscount()
+        {
+            if (string.IsNullOrEmpty(this.textBox_fixedPrice.Text) == false
+                && OrderDesignControl.IsVirtual(this.textBox_fixedPrice.Text) == false
+                && string.IsNullOrEmpty(this.textBox_price.Text) == false
+                && OrderDesignControl.IsVirtual(this.textBox_price.Text) == false)
+            {
+                int nRet = OrderDesignControl.ComputeDiscount(
+     this.textBox_price.Text,
+     this.textBox_fixedPrice.Text,
+     out string strDiscount,
+     out string strError);
+                if (nRet == 1)
+                {
+                    //if (string.IsNullOrEmpty(strDiscount) == false)
+                    //    strDiscount = "{" + strDiscount + "}";
+                    if (this.comboBox_discount.Text != strDiscount)
+                        this.comboBox_discount.Text = strDiscount;
+                }
+                else
+                    Console.Beep();
+            }
+        }
+
         // 折扣 文字改变
         void comboBox_discount_TextChanged(object sender, EventArgs e)
         {
             if (this.Container.InInitial == true)
                 return;
+
             if (this.Container.ArriveMode == false)
             {
                 // 在订购状态下，新旧值保持统一，以便显示单行

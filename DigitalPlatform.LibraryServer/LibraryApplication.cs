@@ -3144,9 +3144,13 @@ namespace DigitalPlatform.LibraryServer
             if (string.IsNullOrEmpty(libraryName) == false && libraryName.IndexOfAny(new char[] { '/', '\\' }) != -1)
                 errors.Add($"libraryInfo/libraryName 元素中的图书馆名 '{libraryName}' 不合法");
 
-            // 2019/11/27
-            if (DetectVirus.DetectXXX() || DetectVirus.DetectGuanjia())
-                errors.Add("dp2library 被木马软件干扰，无法启动");
+            // 2020/7/1
+            if (StringUtil.IsInList("skipVirusCheck", this.Function) == false)
+            {
+                // 2019/11/27
+                if (DetectVirus.DetectXXX() || DetectVirus.DetectGuanjia())
+                    errors.Add("dp2library 被木马软件干扰，无法启动");
+            }
 
             if (errors.Count > 0)
             {
