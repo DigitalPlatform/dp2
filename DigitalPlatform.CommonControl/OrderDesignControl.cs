@@ -4545,7 +4545,6 @@ out string strNewOrderPrice);
                     combobox.Items.Add("." + (i + 1).ToString() + "0");
                 }
                 combobox.Items.Add("1.00");
-                combobox.Items.Add("<自动计算>");
             }
         }
 
