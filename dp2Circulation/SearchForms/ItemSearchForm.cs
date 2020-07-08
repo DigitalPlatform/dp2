@@ -4066,6 +4066,17 @@ dlg.UiState);
 
         }
 
+        static string VerifyPricePrefix(string prefix)
+        {
+            foreach (var ch in prefix)
+            {
+                if (char.IsLetter(ch) == false)
+                    return $"货币名称 '{prefix}' 中出现了非字母的字符";
+            }
+
+            return null;
+        }
+
         public static List<string> VerifyPrice(string strPrice)
         {
             List<string> errors = new List<string>();
@@ -4078,6 +4089,15 @@ dlg.UiState);
                 out strError);
             if (nRet == -1)
                 errors.Add(strError);
+
+            // 2020/7/8
+            // 检查货币字符串中是否出现了字母以外的字符
+            if (string.IsNullOrEmpty(item.Postfix) == false)
+                errors.Add($"金额字符串 '{strPrice}' 中出现了后缀 '{item.Postfix}' ，这很不常见，一般意味着错误");
+
+            string error1 = VerifyPricePrefix(item.Prefix);
+            if (error1 != null)
+                errors.Add(error1);
 
             string new_value = StringUtil.ToDBC(strPrice);
             if (new_value.IndexOfAny(new char[] { '(', ')' }) != -1)
@@ -4515,12 +4535,11 @@ dlg.UiState);
                             }
                         }
 #endif
-                        string strRfc1123 = "";
                         // 尝试解析混乱的时间字符串
                         // return:
                         //      false   解析失败
                         //      true    解析成功
-                        if (TryParseTimeString(strOrderTime, out strRfc1123) == true)
+                        if (TryParseTimeString(strOrderTime, out string strRfc1123) == true)
                         {
                             DomUtil.SetElementText(dom.DocumentElement, "orderTime", strRfc1123);
                             bChanged = true;
@@ -4562,6 +4581,38 @@ dlg.UiState);
                 }
             }
 
+            // 2020/7/8
+            // 较验 price 元素
+            {
+                string strPrice = DomUtil.GetElementText(dom.DocumentElement, "price");
+                // 拆分为新旧两个部分
+                dp2StringUtil.ParseOldNewValue(strPrice,
+        out string strOldPrice,
+        out string strNewPrice);
+                var temp = VerifyPrice(strOldPrice);
+                foreach (var error in temp)
+                {
+                    errors.Add($"订购价字段内容 '{strPrice}' 出错: {error}");
+                }
+            }
+
+            // 2020/7/8
+            // 较验 fixedPrice 元素
+            {
+                string strPrice = DomUtil.GetElementText(dom.DocumentElement, "fixedPrice");
+                // 拆分为新旧两个部分
+                dp2StringUtil.ParseOldNewValue(strPrice,
+        out string strOldPrice,
+        out string strNewPrice);
+                var temp = VerifyPrice(strOldPrice);
+                foreach (var error in temp)
+                {
+                    errors.Add($"码洋字段内容 '{strPrice}' 出错: {error}");
+                }
+            }
+
+            // TODO: 较验 discount(折扣) 字段
+
             if (errors.Count > 0)
             {
                 strError = StringUtil.MakePathList(errors, "; ");
@@ -4569,6 +4620,8 @@ dlg.UiState);
             }
             return 0;
         }
+
+
 
         // 尝试解析混乱的时间字符串
         // return:
