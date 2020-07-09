@@ -674,6 +674,10 @@ namespace dp2Circulation
         {
             strError = "";
 
+            // 2020/7/9
+            this.refid_table.Clear();
+            this.orderxml_table.Clear();
+
             this.SourceStyle = "recpathfile";
 
             int nDupCount = 0;
@@ -928,7 +932,7 @@ namespace dp2Circulation
                 goto ERROR1;
 
             return;
-            ERROR1:
+        ERROR1:
             this.Text = "打印验收单";
             MessageBox.Show(this, strError);
         }
@@ -1082,7 +1086,7 @@ namespace dp2Circulation
             }
 
             return 1;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -1247,7 +1251,23 @@ namespace dp2Circulation
             string strPrice = DomUtil.GetElementText(dom.DocumentElement,
                 "price");
 
+            List<string> errors = new List<string>();
+
             var price = OldNewValue.Parse(strPrice);
+
+            // 较验 price 字段正确性
+            {
+                var temp = ItemSearchForm.VerifyPrice(price.OldValue);
+                foreach (var error in temp)
+                {
+                    errors.Add($"记录 {strOrderOrIssueRecPath} 中订购价 '{price.OldValue}' 不合法: {error}");
+                }
+                temp = ItemSearchForm.VerifyPrice(price.NewValue);
+                foreach (var error in temp)
+                {
+                    errors.Add($"记录 {strOrderOrIssueRecPath} 中验收价 '{price.NewValue}' 不合法: {error}");
+                }
+            }
 
 #if NO
             string strOrderPrice = "";  // 订购记录中的订购价
@@ -1271,6 +1291,20 @@ namespace dp2Circulation
             string strFixedPrice = DomUtil.GetElementText(dom.DocumentElement,
     "fixedPrice");
             var fixedPrice = OldNewValue.Parse(strFixedPrice);
+
+            // 较验 fixedPrice 字段正确性
+            {
+                var temp = ItemSearchForm.VerifyPrice(fixedPrice.OldValue);
+                foreach (var error in temp)
+                {
+                    errors.Add($"记录 {strOrderOrIssueRecPath} 中订购码洋 '{fixedPrice.OldValue}' 不合法: {error}");
+                }
+                temp = ItemSearchForm.VerifyPrice(fixedPrice.NewValue);
+                foreach (var error in temp)
+                {
+                    errors.Add($"记录 {strOrderOrIssueRecPath} 中验收码洋 '{fixedPrice.NewValue}' 不合法: {error}");
+                }
+            }
 
             // 如果码洋为空，则用单价填充
             if (string.IsNullOrEmpty(fixedPrice.OldValue) && string.IsNullOrEmpty(price.OldValue) == false)
@@ -1328,7 +1362,7 @@ namespace dp2Circulation
             }
             catch (PositionException ex)
             {
-                strError = ex.Message;
+                strError = $"{ex.Message}";
                 goto ERROR1;
             }
             catch (Exception ex)
@@ -1393,8 +1427,15 @@ namespace dp2Circulation
             }
 
             ListViewUtil.ChangeItemText(item, ORIGIN_COLUMN_ACCEPTSUBCOPY, strCopyDetail);
+            
+            if (errors.Count > 0)
+            {
+                strError = $"{StringUtil.MakePathList(errors, "; ")}";
+                goto ERROR1;
+            }
+            
             return;
-            ERROR1:
+        ERROR1:
             ListViewUtil.ChangeItemText(item, ORIGIN_COLUMN_ERRORINFO, strError);
             SetItemColor(item, TYPE_ERROR);
         }
@@ -2031,8 +2072,10 @@ namespace dp2Circulation
         // 根据订购(??? 应该是册)记录DOM设置ListViewItem除第一列以外的文字
         // parameters:
         //      bSetBarcodeColumn   是否要设置第一列记录路径的内容
-        /*public*/
-        static void SetListViewItemText(XmlDocument dom,
+        // return:
+        //      true    成功
+        //      false   出错
+        static bool SetListViewItemText(XmlDocument dom,
             bool bSetRecPathColumn,
             string strRecPath,
             string strBiblioSummary,
@@ -2067,6 +2110,19 @@ namespace dp2Circulation
                 "source");
             string strPrice = DomUtil.GetElementText(dom.DocumentElement,
                 "price");
+
+            List<string> errors = new List<string>();
+            // 校验一下 price 字段
+            {
+                var temp = ItemSearchForm.VerifyPrice(strPrice);
+                if (temp.Count > 0)
+                {
+                    foreach (string s in temp)
+                    {
+                        errors.Add($"价格字符串 '{strPrice}' 不合法: {s}");
+                    }
+                }
+            }
 
             List<int> textchanged_columns = new List<int>();
 
@@ -2137,6 +2193,15 @@ namespace dp2Circulation
 
             if (item.ImageIndex == TYPE_NORMAL)
                 SetItemColor(item, TYPE_NORMAL);
+
+            if (errors.Count > 0)
+            {
+                ListViewUtil.ChangeItemText(item, ORIGIN_COLUMN_ERRORINFO, $"发现记录 {strRecPath} 中存在数据错误: {StringUtil.MakePathList(errors, "; ")}");
+                SetItemColor(item, TYPE_ERROR);
+                return false;
+            }
+
+            return true;
         }
 
         // 设置 原始数据listview 的栏目标题
@@ -2754,7 +2819,7 @@ namespace dp2Circulation
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3380,7 +3445,7 @@ namespace dp2Circulation
                     "<td class='" + strClass + "'>" + strContent + "</td>";
             }
 
-            END1:
+        END1:
             StreamUtil.WriteText(strFileName,
     "<tr class='content'>");
 
@@ -4190,7 +4255,7 @@ out strError);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -4577,7 +4642,7 @@ out strError);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -4839,7 +4904,7 @@ out strError);
             }
 
             return 1;
-            ERROR1:
+        ERROR1:
             {
                 ListViewItem item = new ListViewItem(strRecPath, 0);
 
@@ -5338,7 +5403,7 @@ out strError);
                 EnableControls(true);
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5441,7 +5506,7 @@ out strError);
             // item.ImageIndex = TYPE_NORMAL;
             SetItemColor(item, TYPE_NORMAL);
             return 1;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -5740,7 +5805,7 @@ $"通过累计 '{StringUtil.MakePathList(prices)}' 修正册价格字符串 '{st
 
                     if (source.ImageIndex == TYPE_ERROR)
                     {
-                        strError = "事项 " + (OriginIndex(source) + 1).ToString() + " 的状态为错误，请先排除问题...";
+                        strError = "事项 " + (OriginIndex(source) + 1).ToString() + " 的状态为错误(请留意列表中红色背景的行)，请先排除问题...";
                         return -1;
                     }
 
@@ -5854,6 +5919,8 @@ $"通过累计 '{StringUtil.MakePathList(prices)}' 修正册价格字符串 '{st
                     List<string> total_acceptprices = new List<string>();  // 累积的验收价格字符串
                     List<string> total_acceptfixedprices = new List<string>();  // 累积的验收码洋价格字符串
 
+                    List<string> total_recpaths = new List<string>();   // 来源记录的路径集合。用于报错
+
                     List<string> total_itemprices = new List<string>(); // 累计的册价格
 
                     List<ListViewItem> origin_items = new List<ListViewItem>();
@@ -5871,7 +5938,7 @@ $"通过累计 '{StringUtil.MakePathList(prices)}' 修正册价格字符串 '{st
 
                         if (current_source.ImageIndex == TYPE_ERROR)
                         {
-                            strError = "事项 " + (OriginIndex(current_source) + 1).ToString() + " 的状态为错误，请先排除问题...";
+                            strError = "事项 " + (OriginIndex(current_source) + 1).ToString() + " 的状态为错误(请留意列表中红色背景的行)，请先排除问题...";
                             return -1;
                         }
 
@@ -6019,6 +6086,8 @@ $"通过累计 '{StringUtil.MakePathList(prices)}' 修正册价格字符串 '{st
                             total_acceptprices.Add(strCurrentAcceptPrice);
                         }
 
+                        total_recpaths.Add(strRecPath);
+
                         if (String.IsNullOrEmpty(strCurrentAcceptFixedPrice) == false)
                             total_acceptfixedprices.Add(strCurrentAcceptFixedPrice);
 
@@ -6157,7 +6226,7 @@ $"通过累计 '{StringUtil.MakePathList(prices)}' 修正册价格字符串 '{st
 #endif
                     {
                         string strSumPrice = GetTotalPrice(total_acceptprices,
-                            "累计验收单价字符串 '" + StringUtil.MakePathList(total_acceptprices) + "' 时");
+                            $"累计验收单价字符串 '{ StringUtil.MakePathList(total_acceptprices) }' 时(涉及到册记录{StringUtil.MakePathList(total_recpaths)})");
                         // 验收总价
                         ListViewUtil.ChangeItemText(target, MERGED_COLUMN_ACCEPT_TOTALPRICE,
                             strSumPrice);
@@ -6165,7 +6234,7 @@ $"通过累计 '{StringUtil.MakePathList(prices)}' 修正册价格字符串 '{st
 
                     {
                         string strSumPrice = GetTotalPrice(total_acceptfixedprices,
-                            "累计验收码洋字符串 '" + StringUtil.MakePathList(total_acceptfixedprices) + "' 时");
+                            $"累计验收码洋字符串 '{ StringUtil.MakePathList(total_acceptfixedprices) }' 时(涉及到册记录{StringUtil.MakePathList(total_recpaths)})");
                         // 验收总码洋
                         ListViewUtil.ChangeItemText(target, MERGED_COLUMN_ACCEPT_TOTALFIXEDPRICE,
                             strSumPrice);
@@ -6173,7 +6242,7 @@ $"通过累计 '{StringUtil.MakePathList(prices)}' 修正册价格字符串 '{st
 
                     {
                         string strSumPrice = GetTotalPrice(total_orderprices,
-                            "累计订购单价字符串 '" + StringUtil.MakePathList(total_orderprices) + "' 时");
+                            $"累计订购单价字符串 '{ StringUtil.MakePathList(total_orderprices) } ' 时(涉及到册记录{StringUtil.MakePathList(total_recpaths)})");
                         // 订购总价
                         ListViewUtil.ChangeItemText(target, MERGED_COLUMN_ORDER_TOTALPRICE,
                             strSumPrice);
@@ -6181,7 +6250,7 @@ $"通过累计 '{StringUtil.MakePathList(prices)}' 修正册价格字符串 '{st
 
                     {
                         string strSumPrice = GetTotalPrice(total_orderfixedprices,
-                            "累计订购码洋字符串 '" + StringUtil.MakePathList(total_orderfixedprices) + "' 时");
+                            $"累计订购码洋字符串 '{ StringUtil.MakePathList(total_orderfixedprices) }' 时(涉及到册记录{StringUtil.MakePathList(total_recpaths)})");
                         // 订购总码洋
                         ListViewUtil.ChangeItemText(target, MERGED_COLUMN_ORDER_TOTALFIXEDPRICE,
                             strSumPrice);
@@ -6189,7 +6258,7 @@ $"通过累计 '{StringUtil.MakePathList(prices)}' 修正册价格字符串 '{st
 
                     {
                         string strSumPrice = GetTotalPrice(total_itemprices,
-                            "累计册价格字符串 '" + StringUtil.MakePathList(total_itemprices) + "' 时");
+                            $"累计册价格字符串 '{ StringUtil.MakePathList(total_itemprices) }' 时(涉及到册记录{StringUtil.MakePathList(total_recpaths)})");
                         // 总册价格
                         ListViewUtil.ChangeItemText(target, MERGED_COLUMN_TOTAL_ITEMPRICE,
                             strSumPrice);
@@ -6261,8 +6330,11 @@ $"通过累计 '{StringUtil.MakePathList(prices)}' 修正册价格字符串 '{st
             }
             catch (PositionException ex)
             {
-                strError = "合并原始数据时出错: " + ex.Message;
-                // TODO: 是否要进一步把 merged listview 全部行清空，以防止用户打印输出错误的或者不足的合并数据？
+                strError = $"合并原始数据时出错: {ex.Message}。\r\n\r\n请按照提示修改数据，并重新装载数据";
+                
+                // 2020/7/9
+                // 进一步把 merged listview 全部行清空，以防止用户打印输出错误的或者不足的合并数据？
+                this.listView_merged.Items.Clear();
                 return -1;
             }
             catch (Exception ex)
@@ -6710,7 +6782,7 @@ $"通过累计 '{StringUtil.MakePathList(prices)}' 修正册价格字符串 '{st
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -7143,7 +7215,7 @@ $"通过累计 '{StringUtil.MakePathList(prices)}' 修正册价格字符串 '{st
                     "<td class='" + strClass + "'>" + strContent + "</td>";
             }
 
-            END1:
+        END1:
 
             StreamUtil.WriteText(strFileName,
     "<tr class='content'>");
@@ -7866,7 +7938,7 @@ ORIGIN_COLUMN_ACCEPTSUBCOPY);
             if (nRet == -1)
                 goto ERROR1;
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -8090,7 +8162,7 @@ ORIGIN_COLUMN_ACCEPTSUBCOPY);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -8541,7 +8613,7 @@ false);
             if (nRet == -1)
                 goto ERROR1;
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
