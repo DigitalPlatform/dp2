@@ -2642,7 +2642,7 @@ out strError);
             // 循环，找特定的字段
 
             // p = (LPTSTR)pszMARC;
-            for (int i = 0; i < strMARC.Length; )
+            for (int i = 0; i < strMARC.Length;)
             {
                 ch = strMARC[i];
 
@@ -2862,7 +2862,7 @@ out strError);
             int nStart = 5;
 
             // 找到第一个'$1'符号
-            for (; nStart < strMARC.Length; )
+            for (; nStart < strMARC.Length;)
             // *p&&*p!=FLDEND;) 
             {
                 if (strMARC[nStart] == FLDEND)
@@ -2876,7 +2876,7 @@ out strError);
 
         FOUND:
 
-            for (int i = nStart; i < strMARC.Length; )
+            for (int i = nStart; i < strMARC.Length;)
             {
                 if (strMARC[i] == FLDEND)
                     break;
@@ -3308,7 +3308,7 @@ out strError);
 
             // 循环，找特定的字段
             //p = (LPTSTR)(LPCTSTR)strMARC;
-            for (int i = 0; i < strMARC.Length; )
+            for (int i = 0; i < strMARC.Length;)
             {
                 if (strMARC[i] == RECEND)
                     break;
@@ -3415,7 +3415,7 @@ out strError);
             if (String.IsNullOrEmpty(strField) == true)	// 实际为删除要求
                 return 0;
 
-        FOUND:
+            FOUND:
             if (nLen > 0)
                 strMARC = strMARC.Remove(nStartOffs, nLen);	// 删除原来内容
 
@@ -3508,7 +3508,7 @@ out strError);
 
             } // end
 
-            APPEND:
+        APPEND:
             strField += new string(SUBFLD, 1) + strSubfield;
 
             return 0;	// inserted
@@ -4483,7 +4483,7 @@ out strError);
 
             nLen = baMARC.Length;
 
-            for (nStartPos = 24, nFldStart = 0; ; )
+            for (nStartPos = 24, nFldStart = 0; ;)
             {
                 nPos = ByteArray.IndexOf(baMARC, (byte)FLDEND, nStartPos);
                 // nPos = FindCharInStringA((LPCSTR)advstrMARC, FLDEND, nStartPos);
@@ -5052,7 +5052,9 @@ out strError);
                 int i = 0;
                 foreach (string line in lines)
                 {
-                    string strLine = line;
+                    // 一行右侧连续的 '_' 字符要替换为空格
+                    string strLine = ConvertTailBlanks(line);
+
                     if (i == 0)
                     {
                         // 确保 24 个字符
@@ -5064,12 +5066,26 @@ out strError);
                         i++;
                         continue;
                     }
-                    text.Append(strLine.Replace('@', (char)31) + new string((char)30, 1));
+                    // 注：符号 'ǂ' 是 MARC 编辑器的“复制工作单到剪贴板”功能所使用的子字段符号
+                    text.Append(strLine.Replace('@', (char)31).Replace('ǂ', (char)31) + new string((char)30, 1));
                 }
             }
 
             strMARC = text.ToString();
             return 0;
+        }
+
+        // 2020/7/9
+        // 把一行末尾的连续 _ 字符替换为空格
+        public static string ConvertTailBlanks(string line)
+        {
+            if (string.IsNullOrEmpty(line))
+                return line;
+            int length = line.Length;
+            string temp = line.TrimEnd(new char[] { '_' });
+            if (temp.Length == length)
+                return line;
+            return temp.PadRight(length, ' ');
         }
 
         // 是否为续行？
@@ -5094,7 +5110,7 @@ out strError);
             return false;
         }
 
-#endregion
+        #endregion
     }
 
 
