@@ -9227,7 +9227,7 @@ ORIGIN_COLUMN_COPY);
             }
             catch (PositionException ex)
             {
-                strError = "合并原始数据时出错: " + ex.Message;
+                strError = $"合并原始数据时出错: {ex.Message}";
                 // TODO: 是否要进一步把 merged listview 全部行清空，以防止用户打印输出错误的或者不足的合并数据？
                 return -1;
             }

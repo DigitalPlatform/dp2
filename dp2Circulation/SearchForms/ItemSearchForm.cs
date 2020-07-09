@@ -4081,12 +4081,10 @@ dlg.UiState);
         {
             List<string> errors = new List<string>();
 
-            string strError = "";
-            CurrencyItem item = null;
             // 解析单个金额字符串。例如 CNY10.00 或 -CNY100.00/7
             int nRet = PriceUtil.ParseSinglePrice(strPrice,
-                out item,
-                out strError);
+                out CurrencyItem item,
+                out string strError);
             if (nRet == -1)
                 errors.Add(strError);
 
@@ -4592,7 +4590,12 @@ dlg.UiState);
                 var temp = VerifyPrice(strOldPrice);
                 foreach (var error in temp)
                 {
-                    errors.Add($"订购价字段内容 '{strPrice}' 出错: {error}");
+                    errors.Add($"订购价 '{strOldPrice}' 不合法: {error}");
+                }
+                temp = VerifyPrice(strNewPrice);
+                foreach (var error in temp)
+                {
+                    errors.Add($"验收价 '{strNewPrice}' 不合法: {error}");
                 }
             }
 
@@ -4607,7 +4610,12 @@ dlg.UiState);
                 var temp = VerifyPrice(strOldPrice);
                 foreach (var error in temp)
                 {
-                    errors.Add($"码洋字段内容 '{strPrice}' 出错: {error}");
+                    errors.Add($"订购码洋 '{strOldPrice}' 不合法: {error}");
+                }
+                temp = VerifyPrice(strNewPrice);
+                foreach (var error in temp)
+                {
+                    errors.Add($"验收码洋 '{strNewPrice}' 不合法: {error}");
                 }
             }
 
