@@ -297,6 +297,13 @@ namespace dp2SSL
             // 2020/7/5
             if (App.Function != "智能书柜")
                 App.InitialRfidManager();
+
+            {
+                string binDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
+                string stateFileName = Path.Combine(binDir, "dp2ssl_started");
+                File.WriteAllText(stateFileName, "dp2ssl started");
+            }
         }
 
         static string _rfidType = "";   // ""/自助借还/智能书柜
@@ -352,33 +359,63 @@ namespace dp2SSL
             if (_shelfPrepared == true)
                 return new NormalResult();
 
-            // TODO: 注意，从自助借还状态切换到智能书柜状态，需要补充执行以下一段
-            if (App.Function == "智能书柜"
-                && string.IsNullOrEmpty(messageServerUrl) == false)
+            ProgressWindow progress = null;
+            App.Invoke(new Action(() =>
             {
-                await TinyServer.InitialMessageQueueAsync(
-    System.IO.Path.Combine(WpfClientInfo.UserDir, "mq.db"),
-    _cancelApp.Token);
+                progress = new ProgressWindow();
+                progress.TitleText = "dp2SSL -- 智能书柜";
+                progress.MessageText = "正在启动应用，请稍候 ...";
+                progress.Owner = Application.Current.MainWindow;
+                progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                progress.Closed += (s, e) =>
+                {
+                    // cancel.Cancel();
+                };
+                progress.okButton.Visibility = Visibility.Collapsed;
+                // progress.okButton.Content = "停止";
+                App.SetSize(progress, "middle");
+                progress.BackColor = "green";
+                progress.Show();
+            }));
 
-                // 这里要等待连接完成，因为后面初始化时候需要发出点对点消息。TODO: 是否要显示一个对话框请用户等待？
-                await ConnectMessageServerAsync();
+            try
+            {
 
-                await TinyServer.DeleteAllResultsetAsync();
-                TinyServer.StartSendTask(_cancelApp.Token);
-                PageShelf.TrySetMessage(null, "我这台智能书柜启动了！");
+                // TODO: 注意，从自助借还状态切换到智能书柜状态，需要补充执行以下一段
+                if (App.Function == "智能书柜"
+                    && string.IsNullOrEmpty(messageServerUrl) == false)
+                {
+                    await TinyServer.InitialMessageQueueAsync(
+        System.IO.Path.Combine(WpfClientInfo.UserDir, "mq.db"),
+        _cancelApp.Token);
 
-                ShelfData.StartMonitorTask();
+                    // 这里要等待连接完成，因为后面初始化时候需要发出点对点消息。TODO: 是否要显示一个对话框请用户等待？
+                    await ConnectMessageServerAsync();
+
+                    await TinyServer.DeleteAllResultsetAsync();
+                    TinyServer.StartSendTask(_cancelApp.Token);
+                    PageShelf.TrySetMessage(null, "我这台智能书柜启动了！");
+
+                    ShelfData.StartMonitorTask();
+                }
+
+                SelectMode();
+
+                InitialShelfCfg();
+
+                InitialRfidManager();
+
+
+                _shelfPrepared = true;
+                return new NormalResult();
             }
-
-            SelectMode();
-
-            InitialShelfCfg();
-
-            InitialRfidManager();
-
-
-            _shelfPrepared = true;
-            return new NormalResult();
+            finally
+            {
+                App.Invoke(new Action(() =>
+                {
+                    progress.Close();
+                }));
+            }
         }
 
         public static void TriggerUpdated(string message)

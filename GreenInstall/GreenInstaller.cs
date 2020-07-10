@@ -179,6 +179,7 @@ bool bOverwriteExist = true)
             bool delayExtract = StringUtil0.IsInList("delayExtract", style);
             bool updateGreenSetupExe = StringUtil0.IsInList("updateGreenSetupExe", style);
             bool clearStateFile = StringUtil0.IsInList("clearStateFile", style);
+            bool mustExpandZip = StringUtil0.IsInList("mustExpandZip", style);
 
             string strBaseUrl = downloadUrl;
             if (strBaseUrl[strBaseUrl.Length - 1] != '/')
@@ -367,6 +368,8 @@ bool bOverwriteExist = true)
                             token,
                             (o, e) =>
                             {
+                                // token.ThrowIfCancellationRequested();
+
                                 // 防止越过 Maximum
                                 if (downloaded + e.BytesReceived > downloadLength)
                                 {
@@ -374,6 +377,10 @@ bool bOverwriteExist = true)
                                     setProgress?.Invoke(-1, downloadLength, -1, null);
                                 }
                                 setProgress?.Invoke(-1, -1, downloaded + e.BytesReceived, null);
+                            },
+                            () =>
+                            {
+                                WriteStateFile(strBinDir, "downloadError");
                             });
                         if (result.Value == -1)
                         {
@@ -484,7 +491,23 @@ bool bOverwriteExist = true)
 
                 // 没有必要升级
                 if (_updatedGreenZipFileNames.Count == 0)
-                    return new NormalResult();
+                {
+                    if (mustExpandZip == false)
+                        return new NormalResult();
+                    else
+                    {
+                        // 2020/7/10
+                        _updatedGreenZipFileNames.Add("app.zip");
+                        _updatedGreenZipFileNames.Add("data.zip");
+                    }
+                }
+
+                // 2020/7/10
+                // 只要 _updatedGreenZipFileNames 中有一个 .zip 文件名，就要添加足两个 .zip 文件名，以确保在有些文件缺失的情况下重新从展开获得
+                if (_updatedGreenZipFileNames.IndexOf("app.zip") == -1)
+                    _updatedGreenZipFileNames.Add("app.zip");
+                if (_updatedGreenZipFileNames.IndexOf("data.zip") == -1)
+                    _updatedGreenZipFileNames.Add("data.zip");
 
                 if (delayExtract)
                 {
@@ -654,6 +677,18 @@ bool bOverwriteExist = true)
                     ErrorInfo = "文件更新完毕，等待 Windows 重启",
                     ErrorCode = "waitingReboot"
                 };
+
+            // 2020/7/11
+            // 检查文件的最后修改时间。如果和当前时间距离太远，则当作 downloadError 处理
+            var lastWriteTime = File.GetLastWriteTime(stateFileName);
+            if (DateTime.Now - lastWriteTime > TimeSpan.FromHours(2))
+            {
+                return new NormalResult
+                {
+                    Value = 4,
+                    ErrorCode = "downloadError"
+                };
+            }
             return new NormalResult
             {
                 Value = 1,
@@ -1143,13 +1178,15 @@ bool bOverwriteExist = true)
         }
 
         public delegate void Delegate_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e);
+        public delegate void Delegate_Abort();
 
         // 从 http 服务器下载一个文件
         // 阻塞式
         static async Task<NormalResult> DownloadFileAsync(string strUrl,
     string strLocalFileName,
     CancellationToken token,
-    Delegate_DownloadProgressChanged progressChanged)
+    Delegate_DownloadProgressChanged progressChanged,
+    Delegate_Abort abort)
         {
             using (MyWebClient webClient = new MyWebClient())
             {
@@ -1157,7 +1194,10 @@ bool bOverwriteExist = true)
                     webClient.DownloadProgressChanged += (o, e) =>
                     {
                         if (token.IsCancellationRequested)
+                        {
                             webClient.Cancel();
+                            abort?.Invoke();
+                        }
                         progressChanged(o, e);
                     };
 

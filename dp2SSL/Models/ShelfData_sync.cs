@@ -8,8 +8,11 @@ using System.Windows.Media;
 using System.Windows;
 using System.Diagnostics;
 using System.Collections;
+using System.Data.SqlClient;
+using System.Xml;
 
 using Microsoft.VisualStudio.Threading;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
 using dp2SSL.Models;
@@ -17,9 +20,6 @@ using dp2SSL.Models;
 using DigitalPlatform;
 using DigitalPlatform.WPF;
 using DigitalPlatform.Text;
-using Microsoft.EntityFrameworkCore;
-using System.Data.SqlClient;
-using System.Xml;
 
 namespace dp2SSL
 {
