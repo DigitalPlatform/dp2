@@ -120,6 +120,8 @@ true);
             */
         }
 
+        SplashForm _splashForm = null;
+
         private void MainForm_Load(object sender, EventArgs e)
         {
             InitialLogging();
@@ -130,7 +132,21 @@ true);
             string args = string.Join(' ', Environment.GetCommandLineArgs());
             GreenInstaller.WriteInfoLog($"命令行参数: {args}");
 
-            _ = Start(IsCmdLineUpdate()? false : true);
+
+
+            _ = Start(IsCmdLineUpdate() ? false : true);
+        }
+
+        void ShowSplashWindow()
+        {
+            string splashFileName = Path.Combine(_binDir, "splash.png");
+            if (File.Exists(splashFileName))
+            {
+                _splashForm = new SplashForm();
+                _splashForm.StartPosition = FormStartPosition.CenterScreen;
+                _splashForm.ImageFileName = splashFileName;
+                _splashForm.Show(this);
+            }
         }
 
         void ErrorBox(string message)
@@ -177,6 +193,9 @@ true);
                 return;
             }
 
+            // testing
+            // await Task.Delay(5000);
+
             string strExePath = Path.Combine(_binDir, "dp2ssl.exe");
             bool firstInstall = File.Exists(strExePath) == false;
 
@@ -204,7 +223,7 @@ true);
                     ErrorBox(extract_result.ErrorInfo);
                     return;
                 }
-                ProcessStart(strExePath);
+                await ProcessStart(strExePath);
                 return;
             }
 
@@ -240,13 +259,15 @@ true);
             {
                 GreenInstaller.WriteInfoLog($"非首次安装情形。立即启动 dp2ssl.exe");
 
-                ProcessStart(strExePath);
+                await ProcessStart(strExePath);
                 return;
             }
 
             string style = "updateGreenSetupExe";
             if (delayUpdate == false)
                 style += ",clearStateFile";
+            if (firstInstall)
+                style += ",mustExpandZip";  // 无论是否有更新，都要展开两个 .zip 文件。因为 dp2ssl.exe 不存在，必须要展开 .zip 才能得到
 
             GreenInstaller.WriteInfoLog($"style={style}");
 
@@ -266,28 +287,35 @@ true);
                 _cancel.Token,
                 (double min, double max, double value, string text) =>
                 {
-                    this.Invoke(new Action(() =>
+                    try
                     {
-                        if (text != null)
-                            label_message.Text = text;
-                        if (min != -1)
-                            progressBar1.Minimum = (Int32)min;
-                        if (max != -1)
+                        this.Invoke(new Action(() =>
                         {
-                            if (max <= Int32.MaxValue)
+                            if (text != null)
+                                label_message.Text = text;
+                            if (min != -1)
+                                progressBar1.Minimum = (Int32)min;
+                            if (max != -1)
                             {
-                                ratio = 1;
-                                progressBar1.Maximum = (Int32)max;
+                                if (max <= Int32.MaxValue)
+                                {
+                                    ratio = 1;
+                                    progressBar1.Maximum = (Int32)max;
+                                }
+                                else
+                                {
+                                    ratio = Int32.MaxValue / max;
+                                    progressBar1.Maximum = Int32.MaxValue;
+                                }
                             }
-                            else
-                            {
-                                ratio = Int32.MaxValue / max;
-                                progressBar1.Maximum = Int32.MaxValue;
-                            }
-                        }
-                        if (value != -1)
-                            progressBar1.Value = (int)((double)value * ratio);
-                    }));
+                            if (value != -1)
+                                progressBar1.Value = (int)((double)value * ratio);
+                        }));
+                    }
+                    catch
+                    {
+
+                    }
                 });
             if (result.Value == -1)
             {
@@ -295,7 +323,7 @@ true);
                 {
                     if (File.Exists(strExePath))
                     {
-                        ProcessStart(strExePath);
+                        await ProcessStart(strExePath);
                         return;
                     }
                 }
@@ -339,19 +367,60 @@ true);
                 }
             }
 
-            ProcessStart(strExePath);
+            await ProcessStart(strExePath);
             return;
         }
 
-        void ProcessStart(string strExePath)
+        async Task ProcessStart(string strExePath)
         {
+            ShowSplashWindow();
+
+            // 先删除启动状态文件
+            string stateFileName = Path.Combine(_binDir, "dp2ssl_started");
+            try
+            {
+                File.Delete(stateFileName);
+            }
+            catch
+            {
+
+            }
+
             string arguments = "";
             if (IsSilently())
                 arguments = "silently";
 
             GreenInstaller.WriteInfoLog($"启动 path='{strExePath}', arguments='{arguments}'");
 
-            Process.Start(strExePath, arguments);
+            var proc = Process.Start(strExePath, arguments);
+
+            // 等待 dp2ssl 创建启动状态文件
+            if (_splashForm != null)
+            {
+                DateTime begin_time = DateTime.Now;
+                while (File.Exists(stateFileName) == false)
+                {
+                    await Task.Delay(100);
+
+                    // 等待最多一分钟
+                    if (DateTime.Now - begin_time > TimeSpan.FromSeconds(60))
+                        break;
+                }
+
+                // 最少要等待 5 秒
+                TimeSpan length = TimeSpan.FromSeconds(5);
+                if (DateTime.Now - begin_time < length)
+                {
+                    this.Invoke((Action)(() =>
+                    {
+                        this.Location = new Point(-1000, -1000);
+                        _splashForm.Activate();
+                    }));
+                    await Task.Delay(length - (DateTime.Now - begin_time));
+                }
+            }
+
+            // 等待 dp2ssl 主窗口创建，然后 greensetup.exe 才退出
             Application.Exit();
         }
 

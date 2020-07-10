@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -17,7 +18,23 @@ namespace greenSetup
             Application.SetHighDpiMode(HighDpiMode.SystemAware);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+
+            /*
+            Thread mythread;
+            mythread = new Thread(new ThreadStart(ThreadLoop));
+            mythread.Start();
+            */
+
             Application.Run(new MainForm());
         }
+
+        /*
+        public static void ThreadLoop()
+        {
+            var form = new SplashForm();
+            form.ImageFileName = "c:\\dp2ssl\\splash.png";
+            Application.Run(form);
+        }
+        */
     }
 }
