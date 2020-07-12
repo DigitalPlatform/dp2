@@ -29,6 +29,44 @@ namespace dp2SSL
         }
     }
 
+    public class DoorToBackConverter : IMultiValueConverter
+    {
+        public Color OpenColor { get; set; }
+        public Color CloseColor { get; set; }
+
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            DoorItem door = (values[0] as DoorItem);
+            string state = values[1] as string;
+            /*
+            if (state == "open")
+                return new SolidColorBrush(OpenColor);
+
+            return new SolidColorBrush(CloseColor);
+            */
+
+            if (state == "open")
+                return new SolidColorBrush(door.OpenBrush);
+
+            return new SolidColorBrush(door.CloseBrush);
+            /*
+            BrushConverter convertor = new BrushConverter();
+
+            Brush brush = null;
+            if (state == "open")
+                brush = (Brush)convertor.ConvertFromString(door.OpenColor);
+            else
+                brush = (Brush)convertor.ConvertFromString(door.CloseColor);
+            brush.Freeze();
+            return brush;
+            */
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
 
     public class EntityStateToBackConverter : IValueConverter
     {

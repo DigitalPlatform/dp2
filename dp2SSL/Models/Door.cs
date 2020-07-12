@@ -9,6 +9,7 @@ using System.Windows;
 using System.Xml;
 using System.Diagnostics;
 using System.Threading;
+using System.Windows.Media;
 
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
@@ -25,6 +26,138 @@ namespace dp2SSL
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
+
+        #region 外观
+
+        Thickness _padding = new Thickness(8);
+        public Thickness Padding
+        {
+            get => _padding;
+            set
+            {
+                if (_padding != value)
+                {
+                    _padding = value;
+                    OnPropertyChanged("Padding");
+                }
+            }
+        }
+
+        Thickness _margin = new Thickness();
+        public Thickness Margin
+        {
+            get => _margin;
+            set
+            {
+                if (_margin != value)
+                {
+                    _margin = value;
+                    OnPropertyChanged("Margin");
+                }
+            }
+        }
+
+        Brush _borderBrush = new SolidColorBrush(Colors.DarkGray);
+        public Brush BorderBrush
+        {
+            get => _borderBrush;
+            set
+            {
+                if (_borderBrush != value)
+                {
+                    _borderBrush = value;
+                    OnPropertyChanged("BorderBrush");
+                }
+            }
+        }
+
+        Thickness _borderThickness = new Thickness(1);
+        public Thickness BorderThickness
+        {
+            get => _borderThickness;
+            set
+            {
+                if (_borderThickness != value)
+                {
+                    _borderThickness = value;
+                    OnPropertyChanged("BorderThickness");
+                }
+            }
+        }
+
+        /*
+        string _openColor = "White";
+        public string OpenColor {
+            get
+            {
+                return _openColor;
+            }
+            set
+            {
+                _openColor = value;
+            }
+        }
+
+        string _closeColor = "DarkGray";
+        public string CloseColor
+        {
+            get
+            {
+                return _closeColor;
+            }
+            set
+            {
+                _closeColor = value;
+            }
+        }
+        */
+
+        static Color FromColor(Color color, byte a)
+        {
+            return Color.FromArgb(a, color.R, color.G, color.B);
+        }
+
+        public static Color DefaultOpenColor = FromColor(Colors.MediumAquamarine, 125);
+        public static Color DefaultCloseColor = FromColor(Colors.Navy, 200);
+
+
+        // 开门状态的颜色
+        Color _openBrush = DefaultOpenColor;
+        public Color OpenBrush
+        {
+            get => _openBrush;
+            set
+            {
+                _openBrush = value;
+                /*
+                if (_openBrush != value)
+                {
+                    _openBrush = value;
+                    OnPropertyChanged("OpenBrush");
+                }
+                */
+            }
+        }
+
+        // 关门状态的颜色
+        Color _closeBrush = DefaultCloseColor;
+        public Color CloseBrush
+        {
+            get => _closeBrush;
+            set
+            {
+                _closeBrush = value;
+                /*
+                if (_closeBrush != value)
+                {
+                    _closeBrush = value;
+                    OnPropertyChanged("CloseBrush");
+                }
+                */
+            }
+        }
+
+        #endregion
 
         private string _name;
 
@@ -211,7 +344,7 @@ namespace dp2SSL
             }
         }
 
-        private string _state = "";
+        private string _state = "test";
 
         // 状态
         public string State
@@ -329,12 +462,13 @@ namespace dp2SSL
 
             List<DoorItem> results = new List<DoorItem>();
 
-            XmlNodeList shelfs = cfg_dom.DocumentElement.SelectNodes("shelf");
+            //XmlNodeList shelfs = cfg_dom.DocumentElement.SelectNodes("shelf");
 
             int column = 0;
-            foreach (XmlElement shelf in shelfs)
+            //foreach (XmlElement shelf in shelfs)
             {
-                XmlNodeList doors = shelf.SelectNodes("door");
+                // XmlNodeList doors = shelf.SelectNodes("// door");
+                XmlNodeList doors = cfg_dom.DocumentElement.SelectNodes("// door");
                 int row = 0;
                 foreach (XmlElement door in doors)
                 {

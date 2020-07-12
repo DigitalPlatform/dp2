@@ -624,7 +624,7 @@ namespace dp2Circulation
                 items,
                 "",
                 true,
-                    true,
+                true,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
@@ -1539,8 +1539,8 @@ namespace dp2Circulation
 
                             this.Invoke((Action)(() =>
                             {
-                                item.ListViewItem.BackColor = SystemColors.Info;
-                                item.ListViewItem.ForeColor = SystemColors.InfoText;
+                                item.ListViewItem.BackColor = GlobalParameters.ChangedBackColor;    // SystemColors.Info;
+                                item.ListViewItem.ForeColor = GlobalParameters.ChangedForeColor;    // SystemColors.InfoText;
                             }));
                             nChangedCount++;
                         }

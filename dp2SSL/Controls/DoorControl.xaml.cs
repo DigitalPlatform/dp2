@@ -21,6 +21,7 @@ using System.Xml;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
 using DigitalPlatform.WPF;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace dp2SSL
 {
@@ -108,16 +109,17 @@ namespace dp2SSL
 
         public void AnimateDoors()
         {
+            return;
+
             double start = 0;
             App.Invoke(new Action(() =>
             {
                 // 遍历 Grid 对象
-                foreach (Grid grid in this.canvas.Children)
+                foreach (Button button in this.canvas.Children)
                 {
-                    if (grid == null)
+                    if (button == null)
                         continue;
 
-                    foreach (Button button in grid.Children)
                     {
                         if (button == null)
                             continue;
@@ -133,11 +135,11 @@ namespace dp2SSL
                         colorAnimation.Duration = TimeSpan.FromSeconds(start + _length);
 
                         // TODO: 应该从 <local:StateToBackConverter x:Key="StateToBack" OpenColor="DarkCyan" CloseColor="DarkGreen"/> 中去取
-                        Color oldColor = Colors.DarkGreen;
+                        Color oldColor = door.CloseBrush;
 
                         colorAnimation.KeyFrames.Add(
                new LinearColorKeyFrame(
-                   Colors.DarkOrange, // Target value (KeyValue)
+                   door.OpenBrush,  // Colors.DarkOrange, // Target value (KeyValue)
                    KeyTime.FromTimeSpan(TimeSpan.FromSeconds(start + _top))) // KeyTime
                );
 
@@ -146,6 +148,10 @@ new LinearColorKeyFrame(
 oldColor, // Target value (KeyValue)
 KeyTime.FromTimeSpan(TimeSpan.FromSeconds(start + _length))) // KeyTime
 );
+
+                        // 2020/7/12
+                        SolidColorBrush temp = border.Background as SolidColorBrush;
+                        border.Background = new SolidColorBrush(temp != null ? temp.Color : Colors.Black);
 
                         border.Background.BeginAnimation(SolidColorBrush.ColorProperty, colorAnimation);
                         start += _delay;
@@ -174,19 +180,26 @@ KeyTime.FromTimeSpan(TimeSpan.FromSeconds(start + _length))) // KeyTime
             // 计算居中的 x y 偏移
             Point offset = GetOffset(size, out Size picture_size);
 
-            // 遍历 Grid 对象
-            foreach (Grid grid in this.canvas.Children)
+            // 遍历 ContentControl 对象
+            foreach (Button button in this.canvas.Children)
             {
-                if (grid == null)
+                if (button == null)
                     continue;
-                GroupPosition gp = grid.Tag as GroupPosition;
+                GroupPosition gp = button.Tag as GroupPosition;
                 if (gp == null)
                     continue;
 
-                grid.SetValue(Canvas.LeftProperty, offset.X + (picture_size.Width * gp.Left));
-                grid.SetValue(Canvas.TopProperty, offset.Y + (picture_size.Height * gp.Top));
-                grid.Width = picture_size.Width * gp.Width;
-                grid.Height = picture_size.Height * gp.Height;
+                button.SetValue(Canvas.LeftProperty, offset.X + (picture_size.Width * gp.Left));
+                button.SetValue(Canvas.TopProperty, offset.Y + (picture_size.Height * gp.Top));
+                button.Width = picture_size.Width * gp.Width;
+                button.Height = picture_size.Height * gp.Height;
+                var door_item = button.DataContext as DoorItem;
+                if (door_item != null)
+                {
+                    door_item.Padding = Multiple(gp.Padding, picture_size.Width, picture_size.Height);
+                    door_item.Margin = Multiple(gp.Margin, picture_size.Width, picture_size.Height);
+                    door_item.BorderThickness = Multiple(gp.BorderThickness, picture_size.Width, picture_size.Height);
+                }
             }
         }
 
@@ -210,6 +223,42 @@ KeyTime.FromTimeSpan(TimeSpan.FromSeconds(start + _length))) // KeyTime
             public double Top { get; set; }     // 相对于图片高度的百分比
             public double Width { get; set; }   // 相对于图片宽度的百分比
             public double Height { get; set; }  // 相对于图片宽度的百分比
+
+            public Thickness Padding { get; set; }  // 内边距
+            public Thickness Margin { get; set; }  // 外边距
+
+            public Thickness BorderThickness { get; set; }  // 边框线条宽度
+
+            public Brush BorderBrush { get; set; }  // 边框颜色
+            public Brush OpenBrush { get; set; }
+            public Brush CloseBrush { get; set; }
+            // public DoorItem DoorItem { get; set; }
+        }
+
+        // 根据一个 door 元素定义，创建一个 Button 控件
+        Button CreateDoorControl(XmlElement door,
+            DoorItem door_item)
+        {
+            string door_name = door.GetAttribute("name");
+
+            Button button = new Button
+            {
+                // Name = $"button_{column}_{row}",
+            };
+
+            var template = this.Resources["ButtonTemplate"];
+
+            // button.Children.Add(block);
+            button.SetValue(Button.TemplateProperty, template);
+
+            // button.SetValue(Grid.RowProperty, row);
+            button.SetValue(Grid.ColumnProperty, 0);
+            button.Click += Button_Click;
+
+            button.DataContext = door_item;
+
+            // this.canvas.Children.Add(button);
+            return button;
         }
 
         // 根据一个 group 元素定义，创建一个 Grid 控件
@@ -259,6 +308,64 @@ KeyTime.FromTimeSpan(TimeSpan.FromSeconds(start + _length))) // KeyTime
             return grid;
         }
 
+        static System.Windows.Media.Brush GetBrush(XmlElement element,
+            string attr,
+            System.Windows.Media.Brush default_value)
+        {
+            BrushConverter convertor = new BrushConverter();
+
+            if (element.HasAttribute(attr) == false)
+                return default_value;
+            string s = element.GetAttribute(attr);
+
+            try
+            {
+                System.Windows.Media.Brush value = (System.Windows.Media.Brush)convertor.ConvertFromString(s);
+                return value;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"属性值 {attr} 定义错误({ex.Message}) ({element.OuterXml})");
+            }
+        }
+
+        static Thickness GetThickness(XmlElement element,
+            string attr,
+            Thickness default_value)
+        {
+            ThicknessConverter convertor = new ThicknessConverter();
+
+            if (element.HasAttribute(attr) == false)
+                return default_value;
+            string s = element.GetAttribute(attr);
+
+            try
+            {
+                Thickness value = (Thickness)convertor.ConvertFromString(s);
+                return value;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"属性值 {attr} 定义错误({ex.Message})，应为数字，或 n,n,n,n 形态({element.OuterXml})");
+            }
+        }
+
+        static Thickness Multiple(Thickness thickness, double width, double height)
+        {
+            return new Thickness(thickness.Left * width,
+                thickness.Top * height,
+                thickness.Right * width,
+                thickness.Bottom * height);
+        }
+
+        static Thickness Divide(Thickness thickness, double width, double height)
+        {
+            return new Thickness(thickness.Left / width,
+                thickness.Top / height,
+                thickness.Right / width,
+                thickness.Bottom / height);
+        }
+
         static double GetDouble(XmlElement element, string attr, double default_value)
         {
             if (element.HasAttribute(attr) == false)
@@ -289,6 +396,175 @@ KeyTime.FromTimeSpan(TimeSpan.FromSeconds(start + _length))) // KeyTime
         double _canvas_width = 0;
         double _canvas_height = 0;
 
+        public void InitializeButtons(XmlDocument cfg_dom,
+    List<DoorItem> door_items)
+        {
+            // 2019/12/22
+            this.canvas.Children.Clear();
+
+            // testing 
+            // door_items = new List<DoorItem>();
+
+            XmlElement root = cfg_dom.DocumentElement;
+            CheckAttributes(root, two_attrs);
+
+            double canvas_width = GetDouble(root, "width", 0);
+            double canvas_height = GetDouble(root, "height", 0);
+
+            var doors = cfg_dom.DocumentElement.SelectNodes("//door");
+
+            bool undefined = false;
+            int index = 0;
+            foreach (XmlElement door in doors)
+            {
+                CheckAttributes(door, all_attrs);
+
+                GroupPosition gp = GetPosition(door);
+
+                if (gp.Left == -1 || gp.Top == -1 || gp.Width == -1 || gp.Height == -1)
+                    undefined = true;
+
+                DoorItem door_item = null;
+                if (index < door_items.Count)
+                    door_item = door_items[index++];
+
+                var button = CreateDoorControl(door, door_item);
+                button.Tag = gp;
+
+                if (door_item != null)
+                {
+                    door_item.BorderBrush = gp.BorderBrush;
+                    if (gp.OpenBrush is SolidColorBrush)
+                        door_item.OpenBrush = (gp.OpenBrush as SolidColorBrush).Color;
+                    if (gp.CloseBrush is SolidColorBrush)
+                        door_item.CloseBrush = (gp.CloseBrush as SolidColorBrush).Color;
+                    door_item.BorderThickness = gp.BorderThickness;
+                }
+
+                this.canvas.Children.Add(button);
+            }
+
+            // 对 -1 进行调整
+            if (undefined)
+            {
+                double x = 0;
+                double y = 0;
+                foreach (Button button in this.canvas.Children)
+                {
+                    GroupPosition gp = button.Tag as GroupPosition;
+                    if (gp.Left == -1)
+                    {
+                        gp.Left = 0;
+                        gp.Top = y;
+                        gp.Width = 20;
+                        gp.Height = 10;
+
+                        y += 10;
+                    }
+                }
+                canvas_width = 20;
+                canvas_height = y;
+            }
+
+            // 变换为比率
+            foreach (Button button in this.canvas.Children)
+            {
+                GroupPosition gp = button.Tag as GroupPosition;
+                gp.Left /= canvas_width;
+                gp.Top /= canvas_height;
+                gp.Width /= canvas_width;
+                gp.Height /= canvas_height;
+                gp.Padding = Divide(gp.Padding, canvas_width, canvas_height);
+                gp.Margin = Divide(gp.Margin, canvas_width, canvas_height);
+                gp.BorderThickness = Divide(gp.BorderThickness, canvas_width, canvas_height);
+            }
+
+            // 记忆
+            _canvas_width = canvas_width;
+            _canvas_height = canvas_height;
+
+            InitialSize();
+
+            SetBackgroundImage();
+        }
+
+        // 获得一个 door 元素的位置参数。如果 door 元素缺乏参数，则自动找外围的 group 元素中的参数
+        static GroupPosition GetPosition(XmlElement door)
+        {
+            GroupPosition gp = new GroupPosition();
+            gp.Left = GetDouble(door, "left", -1);
+            gp.Top = GetDouble(door, "top", -1);
+            gp.Width = GetDouble(door, "width", -1);
+            gp.Height = GetDouble(door, "height", -1);
+            gp.Padding = GetThickness(door, "padding", new Thickness(8));
+            gp.Margin = GetThickness(door, "margin", new Thickness(0));
+            gp.BorderBrush = GetBrush(door, "borderBrush", new System.Windows.Media.SolidColorBrush(Colors.DarkGray));
+            gp.OpenBrush = GetBrush(door, "openBrush", new System.Windows.Media.SolidColorBrush(DoorItem.DefaultOpenColor));
+            gp.CloseBrush = GetBrush(door, "closeBrush", new System.Windows.Media.SolidColorBrush(DoorItem.DefaultCloseColor));
+            gp.BorderThickness = GetThickness(door, "borderThickness", new Thickness(1));
+
+            if (gp.Left == -1 || gp.Top == -1 || gp.Width == -1 || gp.Height == -1)
+            {
+                // 找外围的 group 元素
+                XmlElement group = FindGroup(door);
+                if (group == null)
+                {
+                    return gp;
+                    // throw new Exception("door 元素没有定义位置参数，也没有从属于任何 group 元素");
+                }
+                gp.Left = GetDouble(group, "left", -1);
+                gp.Top = GetDouble(group, "top", -1);
+                gp.Width = GetDouble(group, "width", -1);
+                gp.Height = GetDouble(group, "height", -1);
+                gp.Padding = GetThickness(group, "padding", new Thickness(8));
+                gp.Margin = GetThickness(group, "margin", new Thickness(0));
+                gp.BorderBrush = GetBrush(group, "borderBrush", new System.Windows.Media.SolidColorBrush(Colors.DarkGray));
+                gp.OpenBrush = GetBrush(group, "openBrush", new System.Windows.Media.SolidColorBrush(DoorItem.DefaultOpenColor));
+                gp.CloseBrush = GetBrush(group, "closeBrush", new System.Windows.Media.SolidColorBrush(DoorItem.DefaultCloseColor));
+                gp.BorderThickness = GetThickness(group, "borderThickness", new Thickness(1));
+
+                // 看看 door 是 group 的第几个子元素
+                var child_nodes = group.SelectNodes("door");
+                int index = IndexOf(child_nodes, door);
+                if (index == -1)
+                    throw new Exception("door 元素在 group 下级没有找到");
+                double per_height = gp.Height / child_nodes.Count;
+                gp.Top = gp.Top + (index * per_height);
+                gp.Height = per_height;
+            }
+
+            return gp;
+        }
+
+        static int IndexOf(XmlNodeList nodes, XmlElement door)
+        {
+            int index = 0;
+            foreach (var node in nodes)
+            {
+                if (node == door)
+                    return index;
+                index++;
+            }
+
+            return -1;
+        }
+
+        static XmlElement FindGroup(XmlElement door)
+        {
+            // 找外围的 group 元素
+            XmlNode parent = door.ParentNode;
+            while (parent != null)
+            {
+                if (parent.NodeType == XmlNodeType.Element
+                    && parent.Name == "group")
+                    return parent as XmlElement;
+                parent = parent.ParentNode;
+            }
+
+            return null;
+        }
+
+#if OLD
         public void InitializeButtons(XmlDocument cfg_dom,
             List<DoorItem> door_items)
         {
@@ -366,6 +642,7 @@ KeyTime.FromTimeSpan(TimeSpan.FromSeconds(start + _length))) // KeyTime
 
             SetBackgroundImage();
         }
+#endif
 
         public void InitialSize()
         {

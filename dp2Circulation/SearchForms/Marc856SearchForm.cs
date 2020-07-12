@@ -1293,8 +1293,8 @@ dlg.UiState);
                         MarcField field = new MarcField(info.NewField);
                         SetItemColumns(item, null, field, info.Index);
 
-                        item.BackColor = SystemColors.Info;
-                        item.ForeColor = SystemColors.InfoText;
+                        item.BackColor = GlobalParameters.ChangedBackColor; // SystemColors.Info;
+                        item.ForeColor = GlobalParameters.ChangedForeColor; // SystemColors.InfoText;
                     }
 
                     i++;

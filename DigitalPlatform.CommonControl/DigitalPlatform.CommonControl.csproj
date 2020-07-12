@@ -180,6 +180,7 @@
     <Compile Include="GetTimeDialog.designer.cs">
       <DependentUpon>GetTimeDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="GlobalParameters.cs" />
     <Compile Include="GrowLabel.cs">
       <SubType>Component</SubType>
     </Compile>
