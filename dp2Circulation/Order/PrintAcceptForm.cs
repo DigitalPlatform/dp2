@@ -11,6 +11,9 @@ using System.Web;
 using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml;
 
+using Jint;
+using Jint.Native;
+
 using DigitalPlatform;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
@@ -21,8 +24,7 @@ using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.LibraryClient;
 using static DigitalPlatform.CommonControl.OrderDesignControl;
 using DigitalPlatform.Core;
-using Jint;
-using Jint.Native;
+
 
 // 2017/4/9 从 this.Channel 用法改造为 ChannelPool 用法
 
@@ -726,7 +728,6 @@ namespace dp2Circulation
                         // 2008/11/22
                         this.SortColumns_origin.Clear();
                         SortColumns.ClearColumnSortDisplay(this.listView_origin.Columns);
-
                     }
 
                     // 逐行读入文件内容
@@ -884,6 +885,9 @@ namespace dp2Circulation
                 MessageBox.Show(this, "装入过程中有 " + nDupCount.ToString() + "个重复记录路径的事项被忽略。");
             }
 
+            // 在操作历史中列出原始列表红色的行，便于操作者查看
+            OutputOriginListErrorToHistory();
+
             // 填充合并后数据列表
             stop.SetMessage("正在合并数据...");
             nRet = FillMergedList(out strError);
@@ -903,6 +907,19 @@ namespace dp2Circulation
             return 1;
         }
 
+        void OutputOriginListErrorToHistory()
+        {
+            foreach(ListViewItem item in this.listView_origin.Items)
+            {
+                if (item.ImageIndex == TYPE_ERROR)
+                {
+                    string error = ListViewUtil.GetItemText(item, ORIGIN_COLUMN_ERRORINFO);
+                    string recpath = ListViewUtil.GetItemText(item, ORIGIN_COLUMN_RECPATH);
+                    Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode($"{recpath} 装载过程发现错误: {error}") + "</div>");
+                }
+            }
+        }
+
         // TODO: 需要检查记录路径是否来自实体库？
         private void button_load_loadFromRecPathFile_Click(object sender, EventArgs e)
         {
@@ -919,22 +936,32 @@ namespace dp2Circulation
             if (dlg.ShowDialog() != DialogResult.OK)
                 return;
 
-            // 从(已验收的)册记录路径文件装载
-            // return:
-            //      -1  出错
-            //      0   放弃
-            //      1   装载成功
-            int nRet = LoadFromItemRecPathFile(
-                true,
-                dlg.FileName,
-                out strError);
-            if (nRet == -1)
-                goto ERROR1;
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始装载 " + dlg.FileName + "</div>");
 
-            return;
-        ERROR1:
-            this.Text = "打印验收单";
-            MessageBox.Show(this, strError);
+            try
+            {
+                // 从(已验收的)册记录路径文件装载
+                // return:
+                //      -1  出错
+                //      0   放弃
+                //      1   装载成功
+                int nRet = LoadFromItemRecPathFile(
+                    true,
+                    dlg.FileName,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                return;
+            ERROR1:
+                this.Text = "打印验收单";
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(strError) + "</div>");
+                MessageBox.Show(this, strError);
+            }
+            finally
+            {
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束装载 " + dlg.FileName + "</div>");
+            }
         }
 
         // 根据记录路径，装入册记录
@@ -4040,6 +4067,8 @@ namespace dp2Circulation
                 this.orderxml_table.Clear();
             }
 
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始根据验收批次号 " + this.BatchNo + " 装载</div>");
+
             EnableControls(false);
 
             LibraryChannel channel = this.GetChannel();
@@ -4229,6 +4258,9 @@ out strError);
                         break;
                 }
 
+                // 在操作历史中列出原始列表红色的行，便于操作者查看
+                OutputOriginListErrorToHistory();
+
                 // 检查套内册完整性
                 stop.SetMessage("正在 检查套内册完整性...");
                 nRet = CheckSubCopy(out strError);
@@ -4252,10 +4284,13 @@ out strError);
                 this.ReturnChannel(channel);
 
                 EnableControls(true);
+
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束根据验收批次号 " + this.BatchNo + " 装载</div>");
             }
 
             return;
         ERROR1:
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(strError) + "</div>");
             MessageBox.Show(this, strError);
         }
 
@@ -4473,6 +4508,8 @@ out strError);
                 this.orderxml_table.Clear();
             }
 
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始根据订购批次号 " + this.BatchNo + " 装载</div>");
+
             EnableControls(false);
 
             LibraryChannel channel = this.GetChannel();
@@ -4612,6 +4649,9 @@ out strError);
                         break;
                 }
 
+                // 在操作历史中列出原始列表红色的行，便于操作者查看
+                OutputOriginListErrorToHistory();
+
                 // 检查套内册完整性
                 stop.SetMessage("正在 检查套内册完整性...");
                 nRet = CheckSubCopy(out strError);
@@ -4639,10 +4679,13 @@ out strError);
                 this.ReturnChannel(channel);
 
                 EnableControls(true);
+
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束根据订购批次号 " + this.BatchNo + " 装载</div>");
             }
 
             return;
         ERROR1:
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(strError) + "</div>");
             MessageBox.Show(this, strError);
         }
 

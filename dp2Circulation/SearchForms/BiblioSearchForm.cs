@@ -5408,8 +5408,8 @@ MessageBoxDefaultButton.Button1);
                             info.NewXml = strXml;
                         }
 
-                        item.ListViewItem.BackColor = SystemColors.Info;
-                        item.ListViewItem.ForeColor = SystemColors.InfoText;
+                        item.ListViewItem.BackColor = GlobalParameters.ChangedBackColor;    // SystemColors.Info;
+                        item.ListViewItem.ForeColor = GlobalParameters.ChangedForeColor;     // SystemColors.InfoText;
                     }
 
                     // 显示为工作单形式

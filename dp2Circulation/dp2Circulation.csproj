@@ -52,7 +52,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>34</ApplicationRevision>
+    <ApplicationRevision>35</ApplicationRevision>
     <ApplicationVersion>3.8.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -1088,6 +1088,7 @@
     <Compile Include="SearchForms\ExportMarcHoldingDialog.Designer.cs">
       <DependentUpon>ExportMarcHoldingDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="SearchForms\GlobalParameters.cs" />
     <Compile Include="SearchForms\InvoiceSearchForm.cs">
       <SubType>Form</SubType>
     </Compile>

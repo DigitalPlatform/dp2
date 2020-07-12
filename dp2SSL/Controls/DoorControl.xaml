@@ -16,12 +16,24 @@
         <local:IntToAddConverter x:Key="IntToRemove" Direction="-"/>
         <local:IntToAddConverter x:Key="IntToError" Direction=" e:"/>
         <local:StateToBackConverter x:Key="StateToBack" OpenColor="DarkCyan" CloseColor="DarkGreen"/>
+        <local:DoorToBackConverter x:Key="DoorToBack" />
         <local:PercentageConverter x:Key="PercentageConverter" />
         <local:OperatorConverter x:Key="OperatorToName" />
 
         <ControlTemplate x:Key = "ButtonTemplate" TargetType = "Button">
-            <Border  Background="{Binding State,Converter={StaticResource StateToBack}}" 
-                    BorderBrush="DarkGray" BorderThickness="1,1,1,1" Padding="8">
+            <!--  Background="{Binding Path=State, Converter={StaticResource StateToBack}}" -->
+            <Border 
+                    BorderBrush="{Binding BorderBrush}" 
+                    BorderThickness="{Binding BorderThickness}"
+                    Padding="{Binding Padding}"
+                    Margin="{Binding Margin}"
+                    >
+                <Border.Background>
+                    <MultiBinding Converter="{StaticResource DoorToBack}" >
+                        <Binding />
+                        <Binding Path="State" Mode="OneWay"/>
+                    </MultiBinding>
+                </Border.Background>
                 <Grid >
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="auto"/>

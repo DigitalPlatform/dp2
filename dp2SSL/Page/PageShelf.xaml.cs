@@ -2228,6 +2228,7 @@ namespace dp2SSL
             }
             catch (Exception ex)
             {
+                WpfClientInfo.WriteErrorLog($"RefreshPatrons() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 SetGlobalError("patron", $"RefreshPatrons() 出现异常: {ex.Message}");
             }
         }

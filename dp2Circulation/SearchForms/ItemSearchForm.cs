@@ -28,6 +28,7 @@ using DigitalPlatform.LibraryServer;
 using ClosedXML.Excel;
 using DigitalPlatform.Core;
 using System.Threading.Tasks;
+// using DocumentFormat.OpenXml.ExtendedProperties;
 
 // 2013/3/16 添加 XML 注释
 // 2017/4/16 将 this.Channel 改造为 this.GetChannel() 用法
@@ -3479,8 +3480,8 @@ dlg.UiState);
                             // TODO: new 和 old 对比，看 borrower 等敏感元素是否被修改。如果发生了修改，要提示用 force 方式保存，否则这些字段的修改在保存阶段会被忽略。
                         }
 
-                        item.ListViewItem.BackColor = SystemColors.Info;
-                        item.ListViewItem.ForeColor = SystemColors.InfoText;
+                        item.ListViewItem.BackColor = GlobalParameters.ChangedBackColor;    //  SystemColors.Info;
+                        item.ListViewItem.ForeColor = GlobalParameters.ChangedForeColor;    //  SystemColors.InfoText;
                         nModifyCount++;
                     }
 
@@ -13498,6 +13499,130 @@ out strError);
             }
 #endif
 
+        }
+
+        private void ItemSearchForm_DragDrop(object sender, DragEventArgs e)
+        {
+            string strWhole = (String)e.Data.GetData("Text");
+            // 观察形态。分为路径和册条码号两类
+            string[] lines = strWhole.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+            if (lines.Length < 1)
+                return;
+
+            var items = InsertLines(this,
+        lines,
+        this.listView_records,
+        false);
+
+            {
+                RefreshListViewLines(
+        null,
+        items,
+        "",
+        true,
+        true,
+        out string strError);
+                LibraryChannel channel = this.GetChannel();
+                try
+                {
+                    FillBiblioSummaryColumn(
+                        channel,
+                        items,
+                        true,
+                        out strError);
+                }
+                finally
+                {
+                    this.ReturnChannel(channel);
+                }
+            }
+        }
+
+        public static List<ListViewItem> InsertLines(Form form,
+            string[] lines,
+            ListView list,
+            bool bInsertBefore)
+        {
+            List<ListViewItem> items = new List<ListViewItem>();
+            if (lines == null)
+                return items;
+
+            int index = -1;
+
+            if (list.SelectedIndices.Count > 0)
+                index = list.SelectedIndices[0];
+
+            Cursor oldCursor = form.Cursor;
+            form.Cursor = Cursors.WaitCursor;
+
+            list.SelectedItems.Clear();
+
+            int nMaxColumns = 0;
+            list.BeginUpdate();
+            for (int i = 0; i < lines.Length; i++)
+            {
+                string line = lines[i].Trim();
+                var parts = StringUtil.ParseTwoPart(line, " ");
+                line = parts[0];
+
+                ListViewItem item = Global.BuildListViewItem(
+                    list,
+                    line,
+                    false);
+                // 这里单独计算可能速度要快些
+                if (item.SubItems.Count > nMaxColumns)
+                    nMaxColumns = item.SubItems.Count;
+
+                if (index == -1)
+                    list.Items.Add(item);
+                else
+                {
+                    if (bInsertBefore == true)
+                        list.Items.Insert(index, item);
+                    else
+                        list.Items.Insert(index + 1, item);
+
+                    index++;
+                }
+
+                item.Selected = true;
+                items.Add(item);
+            }
+            // 确保列标题数目够
+            ListViewUtil.EnsureColumns(list, nMaxColumns, 100);
+
+            list.EndUpdate();
+
+            form.Cursor = oldCursor;
+
+            return items;
+        }
+
+        private void ItemSearchForm_DragEnter(object sender, DragEventArgs e)
+        {
+
+        }
+
+        private void ItemSearchForm_DragOver(object sender, DragEventArgs e)
+        {
+            // 观察 X Y 是否在 listview 范围
+            Rectangle rect = new Rectangle(0, 0, this.listView_records.Width, this.listView_records.Height);
+            rect = this.listView_records.RectangleToScreen(rect);
+            Point p = new Point(e.X, e.Y);
+            if (rect.Contains(p) == false)
+            {
+                e.Effect = DragDropEffects.None;
+                return;
+            }
+
+            string strWhole = (String)e.Data.GetData("Text");
+
+            // Debug.WriteLine("EntityForm_DragEnter");
+
+            if (string.IsNullOrEmpty(strWhole) == false)
+                e.Effect = e.AllowedEffect; //  DragDropEffects.Copy;
+            else
+                e.Effect = DragDropEffects.None;
         }
     }
 
