@@ -17,7 +17,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Xml;
-
+using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
 using DigitalPlatform.WPF;
@@ -109,8 +109,6 @@ namespace dp2SSL
 
         public void AnimateDoors()
         {
-            return;
-
             double start = 0;
             App.Invoke(new Action(() =>
             {
@@ -127,19 +125,19 @@ namespace dp2SSL
                         if (door.State == "open")
                             continue;
 
-                        var border = GetChildOfType<Border>(button);
+                        var borders = GetChildOfType<Border>(button);
+                        var border = borders[borders.Count - 1];
 
                         // https://docs.microsoft.com/en-us/dotnet/framework/wpf/graphics-multimedia/how-to-animate-color-by-using-key-frames
                         ColorAnimationUsingKeyFrames colorAnimation
         = new ColorAnimationUsingKeyFrames();
                         colorAnimation.Duration = TimeSpan.FromSeconds(start + _length);
 
-                        // TODO: 应该从 <local:StateToBackConverter x:Key="StateToBack" OpenColor="DarkCyan" CloseColor="DarkGreen"/> 中去取
-                        Color oldColor = door.CloseBrush;
+                        Color oldColor = DoorItem.FromColor(door.CloseBrush, 255);  // door.CloseBrush;
 
                         colorAnimation.KeyFrames.Add(
                new LinearColorKeyFrame(
-                   door.OpenBrush,  // Colors.DarkOrange, // Target value (KeyValue)
+                   DoorItem.FromColor(door.OpenBrush, 255),  // Colors.DarkOrange, // Target value (KeyValue)
                    KeyTime.FromTimeSpan(TimeSpan.FromSeconds(start + _top))) // KeyTime
                );
 
@@ -148,11 +146,22 @@ new LinearColorKeyFrame(
 oldColor, // Target value (KeyValue)
 KeyTime.FromTimeSpan(TimeSpan.FromSeconds(start + _length))) // KeyTime
 );
+                        //Binding save = BindingOperations.GetBinding(border, Border.BackgroundProperty);
 
                         // 2020/7/12
-                        SolidColorBrush temp = border.Background as SolidColorBrush;
-                        border.Background = new SolidColorBrush(temp != null ? temp.Color : Colors.Black);
+                        // SolidColorBrush temp = border.Background as SolidColorBrush;
+                        //if (border.Background != null)
+                        //    border.Background = border.Background.CloneCurrentValue();  // new SolidColorBrush(temp != null ? temp.Color : Colors.Black);
+                        border.Background = new SolidColorBrush(oldColor);
 
+                        colorAnimation.FillBehavior = FillBehavior.Stop;
+                        colorAnimation.Completed += (s, e) =>
+                        {
+                            border.Background = null;
+                            // border.Background.BeginAnimation(SolidColorBrush.ColorProperty, null);
+                            // border.Background = new SolidColorBrush(Colors.Red);
+                            // BindingOperations.SetBinding(border, Border.BackgroundProperty, save);
+                        };
                         border.Background.BeginAnimation(SolidColorBrush.ColorProperty, colorAnimation);
                         start += _delay;
                     }
@@ -160,19 +169,26 @@ KeyTime.FromTimeSpan(TimeSpan.FromSeconds(start + _length))) // KeyTime
             }));
         }
 
-        public static T GetChildOfType<T>(DependencyObject depObj)
+        public static List<T> GetChildOfType<T>(DependencyObject depObj)
     where T : DependencyObject
         {
             if (depObj == null) return null;
 
+            List<T> results = new List<T>();
             for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
             {
                 var child = VisualTreeHelper.GetChild(depObj, i);
-
-                var result = (child as T) ?? GetChildOfType<T>(child);
-                if (result != null) return result;
+                if (child is T)
+                    results.Add(child as T);
+                if (child != null)
+                    results.AddRange(GetChildOfType<T>(child));
+                /*
+        var result = (child as T) ?? GetChildOfType<T>(child);
+        if (result != null) return result;
+                */
             }
-            return null;
+            // return null;
+            return results;
         }
 
         void SetSize(Size size)
@@ -232,6 +248,8 @@ KeyTime.FromTimeSpan(TimeSpan.FromSeconds(start + _length))) // KeyTime
             public Brush BorderBrush { get; set; }  // 边框颜色
             public Brush OpenBrush { get; set; }
             public Brush CloseBrush { get; set; }
+            public Brush Foreground { get; set; }   // 前景色
+            public Brush ErrorForeground { get; set; }  // 错误事项的前景色
             // public DoorItem DoorItem { get; set; }
         }
 
@@ -439,6 +457,9 @@ KeyTime.FromTimeSpan(TimeSpan.FromSeconds(start + _length))) // KeyTime
                     if (gp.CloseBrush is SolidColorBrush)
                         door_item.CloseBrush = (gp.CloseBrush as SolidColorBrush).Color;
                     door_item.BorderThickness = gp.BorderThickness;
+                    door_item.Foreground = gp.Foreground;
+                    door_item.ErrorForeground = gp.ErrorForeground;
+
                 }
 
                 this.canvas.Children.Add(button);
@@ -502,6 +523,8 @@ KeyTime.FromTimeSpan(TimeSpan.FromSeconds(start + _length))) // KeyTime
             gp.OpenBrush = GetBrush(door, "openBrush", new System.Windows.Media.SolidColorBrush(DoorItem.DefaultOpenColor));
             gp.CloseBrush = GetBrush(door, "closeBrush", new System.Windows.Media.SolidColorBrush(DoorItem.DefaultCloseColor));
             gp.BorderThickness = GetThickness(door, "borderThickness", new Thickness(1));
+            gp.Foreground = GetBrush(door, "foreground", new System.Windows.Media.SolidColorBrush(DoorItem.DefaultForegroundColor));
+            gp.ErrorForeground = GetBrush(door, "errorForeground", new System.Windows.Media.SolidColorBrush(DoorItem.DefaultErrorForegroundColor));
 
             if (gp.Left == -1 || gp.Top == -1 || gp.Width == -1 || gp.Height == -1)
             {
@@ -522,6 +545,8 @@ KeyTime.FromTimeSpan(TimeSpan.FromSeconds(start + _length))) // KeyTime
                 gp.OpenBrush = GetBrush(group, "openBrush", new System.Windows.Media.SolidColorBrush(DoorItem.DefaultOpenColor));
                 gp.CloseBrush = GetBrush(group, "closeBrush", new System.Windows.Media.SolidColorBrush(DoorItem.DefaultCloseColor));
                 gp.BorderThickness = GetThickness(group, "borderThickness", new Thickness(1));
+                gp.Foreground = GetBrush(group, "foreground", new System.Windows.Media.SolidColorBrush(DoorItem.DefaultForegroundColor));
+                gp.ErrorForeground = GetBrush(group, "errorForeground", new System.Windows.Media.SolidColorBrush(DoorItem.DefaultErrorForegroundColor));
 
                 // 看看 door 是 group 的第几个子元素
                 var child_nodes = group.SelectNodes("door");

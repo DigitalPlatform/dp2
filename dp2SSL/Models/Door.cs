@@ -112,7 +112,40 @@ namespace dp2SSL
         }
         */
 
-        static Color FromColor(Color color, byte a)
+        public static Color DefaultForegroundColor = Colors.White;
+
+        Brush _foreground = new SolidColorBrush(DefaultForegroundColor);
+        public Brush Foreground
+        {
+            get => _foreground;
+            set
+            {
+                if (_foreground != value)
+                {
+                    _foreground = value;
+                    OnPropertyChanged("Foreground");
+                }
+            }
+        }
+
+        public static Color DefaultErrorForegroundColor = Colors.Red;
+
+
+        Brush _errorForeground = new SolidColorBrush(DefaultErrorForegroundColor);
+        public Brush ErrorForeground
+        {
+            get => _errorForeground;
+            set
+            {
+                if (_errorForeground != value)
+                {
+                    _errorForeground = value;
+                    OnPropertyChanged("ErrorForeground");
+                }
+            }
+        }
+
+        public static Color FromColor(Color color, byte a)
         {
             return Color.FromArgb(a, color.R, color.G, color.B);
         }
