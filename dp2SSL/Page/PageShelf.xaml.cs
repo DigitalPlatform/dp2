@@ -1419,31 +1419,21 @@ namespace dp2SSL
             });
             */
 
-            // "initial" 模式下，立即合并到 _all。等关门时候一并提交请求
-            // TODO: 不过似乎此时有语音提示放入、取出，似乎更显得实用一些？
+            // "initial" 模式下，在读者证读卡器上扫 ISO15693 的标签可以查看图书内容
             if (this.Mode == "initial"
                 || ShelfData.FirstInitialized == false
                 )
             {
-                /*
-                var adds = ShelfData.l_Adds; // new List<Entity>(ShelfData.Adds);
+                var sep_result = await ShelfData.SeperateTagsAsync((BaseChannel<IRfid>)sender,
+                e,
+                (t) =>
                 {
-                    ShelfData.l_Add("all", adds);
+                    return DetectTagType(t);
+                });
 
-                    ShelfData.l_Remove("adds", adds);
-                    ShelfData.l_Remove("removes", adds);
-                }
-
-                var removes = ShelfData.l_Removes;
-                {
-                    ShelfData.l_Remove("all", removes);
-
-                    ShelfData.l_Remove("adds", removes);
-                    ShelfData.l_Remove("removes", removes);
-                }
-
-                ShelfData.l_RefreshCount();
-                */
+                // TODO: 小读卡器探测图书或者工作人员卡。工作人员卡用于判断操作者权限，以便允许使用初始化过程中报错对话框的开门和取消按钮
+                if (sep_result.add_patrons.Count > 0 || sep_result.updated_patrons.Count > 0)
+                    DetectPatron();
             }
             else
             {
@@ -1523,6 +1513,8 @@ namespace dp2SSL
                 this.doorControl.Visibility = Visibility.Collapsed;
             }));
 
+            // //
+
             _initialCancelled = false;
 
             AutoResetEvent eventRetry = new AutoResetEvent(false);
@@ -1584,7 +1576,7 @@ namespace dp2SSL
                     // 把门显示出来。因为此时需要看到是否关门的状态
                     this.doorControl.Visibility = Visibility.Visible;
                     this.doorControl.InitializeButtons(ShelfData.ShelfCfgDom, ShelfData.Doors);
-                
+
                 }));
 
                 // 等待锁控就绪
@@ -1856,6 +1848,8 @@ namespace dp2SSL
                             // TODO: 发出点对点消息，显示对话框的文本内容和按钮布局
                             // 然后等待点对点命令。命令为 @robot press 'OK' 这样的形态
 
+                            // TODO: 操作者刷卡鉴别身份以后才能按开门、取消按钮
+
                             // 等待按钮按下
                             var index = WaitHandle.WaitAny(new WaitHandle[]
                             {
@@ -1896,13 +1890,9 @@ namespace dp2SSL
                 if (_initialCancelled)
                     return;
 
+                // 初始化 _patronTags 和 bookTags 两个集合
                 ShelfData.InitialPatronBookTags((t) =>
                 {
-                    /*
-                    if (t.ReaderName == ShelfData.PatronReaderName)
-                        return "patron";
-                    return "book";
-                    */
                     return DetectTagType(t);
                 });
 
@@ -2114,6 +2104,66 @@ namespace dp2SSL
         private void Progress_Cancelled(object sender, EventArgs e)
         {
             _initialCancelled = true;
+        }
+
+        void DetectPatron()
+        {
+            var patrons = ShelfData.PatronTags;
+            if (patrons.Count == 1)
+            {
+                var data = patrons[0];
+                if (data.Type == "patron")
+                    return;
+                try
+                {
+                    var tag = data.OneTag;
+                    string pii = "";
+                    if (tag.TagInfo != null && tag.Protocol == InventoryInfo.ISO15693)
+                    {
+                        // Exception:
+                        //      可能会抛出异常 ArgumentException TagDataException
+                        LogicChip chip = LogicChip.From(tag.TagInfo.Bytes,
+            (int)tag.TagInfo.BlockSize,
+            "" // tag.TagInfo.LockStatus
+            );
+                        pii = chip.FindElement(ElementOID.PII)?.Text;
+
+                        string typeOfUsage = chip.FindElement(ElementOID.TypeOfUsage)?.Text;
+                        if (typeOfUsage != null && typeOfUsage.StartsWith("8"))
+                        {
+                            return;
+                        }
+
+                        // 这是图书标签
+                    }
+
+                    {
+                        // 扫了一张图书标签。触发显示图书信息
+                        App.Invoke(new Action(() =>
+                        {
+                            EntityCollection collection = new EntityCollection();
+                            collection.Add(pii);
+
+                            BookInfoWindow bookInfoWindow = new BookInfoWindow();
+                            bookInfoWindow.TitleText = $"";
+                            bookInfoWindow.Owner = Application.Current.MainWindow;
+                            bookInfoWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                            App.SetSize(bookInfoWindow, "wide");
+                            bookInfoWindow.Closed += BookInfoWindow_Closed;
+                            bookInfoWindow.SetBooks(collection);
+                            bookInfoWindow.Show();
+                            AddLayer();
+                        }));
+                        return;
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    SetPatronError("patron_tag", $"UID 为 {patrons[0].OneTag.UID} 的标签格式不正确: {ex.Message}");
+                    return;
+                }
+            }
         }
 
         // 新版本的，注意读者卡也在 NewTagList.Tags 里面
@@ -2934,6 +2984,10 @@ namespace dp2SSL
             actions = new List<ActionInfo>();
             foreach (var entity in entities)
             {
+                // 对于前面已经出错的标签不修改 EAS
+                if (entity.Error != null)
+                    continue;
+
                 actions.Add(new ActionInfo
                 {
                     Entity = entity.Clone(),

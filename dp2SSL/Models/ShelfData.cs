@@ -3569,13 +3569,15 @@ namespace dp2SSL
             {
                 _patronTags = new List<TagAndData>();
                 _bookTags = new List<TagAndData>();
-                NewTagList.Tags.ForEach((tag) =>
+                if (func_detectType != null)
                 {
-                    var type = func_detectType(tag.OneTag);
-                    if (type == "patron")
-                        _patronTags.Add(tag);
-                    else if (type == "book")
-                        _bookTags.Add(tag);
+                    NewTagList.Tags.ForEach((tag) =>
+                    {
+                        var type = func_detectType(tag.OneTag);
+                        if (type == "patron")
+                            _patronTags.Add(tag);
+                        else if (type == "book")
+                            _bookTags.Add(tag);
 
                     /*
                     try
@@ -3587,7 +3589,8 @@ namespace dp2SSL
                         tag.Error += ($"RFID 标签格式错误: {ex.Message}");
                     }
                     */
-                });
+                    });
+                }
             }
         }
 
@@ -3600,6 +3603,11 @@ namespace dp2SSL
         {
             lock (_syncRoot_patronTags)
             {
+                // 2020/7/13
+                // 临时初始化一下
+                if (_patronTags == null || _bookTags == null)
+                    InitialPatronBookTags(null);
+
 #if NO
                 // ***
                 // 初始化
@@ -4345,7 +4353,7 @@ namespace dp2SSL
                     }
                 }
 
-                entity.SetError(null);
+                // entity.SetError(null);
                 entity.FillFinished = true;
 
                 if (request_error_count >= 2)
