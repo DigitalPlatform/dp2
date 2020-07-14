@@ -980,6 +980,7 @@ namespace dp2SSL
 
                         // 2020/4/2
                         // 还书操作前先尝试修改 EAS
+                        if (entity.Error == null && entity.ErrorCode != "patronCard")
                         {
                             var result = SetEAS(entity.UID, entity.Antenna, false);
                             if (result.Value == -1)
@@ -2500,7 +2501,9 @@ namespace dp2SSL
             {
                 if (throw_exception == false)
                 {
-                    result.AppendError($"RFID 标签格式错误: {ex.Message}");
+                    result.AppendError($"RFID 标签格式错误: {ex.Message}",
+                        "red",
+                        "parseTagError");
                 }
                 else
                     throw ex;
@@ -2517,7 +2520,7 @@ namespace dp2SSL
             {
                 // 避免被当作图书同步到 dp2library
                 result.PII = "(读者卡)" + result.PII;
-                result.AppendError("读者卡误放入书柜");
+                result.AppendError("读者卡误放入书柜", "red", "patronCard");
             }
             return result;
         }
@@ -3607,7 +3610,6 @@ namespace dp2SSL
                 // 临时初始化一下
                 if (_patronTags == null || _bookTags == null)
                     InitialPatronBookTags(null);
-
 #if NO
                 // ***
                 // 初始化
@@ -4500,6 +4502,18 @@ namespace dp2SSL
                         info.State = "dontsync";
                         info.SyncErrorCode = "PiiEmpty";
                         info.SyncErrorInfo = $"UID 为 {entity.UID} 的标签 PII 为空，不再进行同步(标签原出错信息 '{entity.Error}')";
+                        processed.Add(info);
+                        error_actions.Add(info);
+                        continue;
+                    }
+
+                    // 2020/7/14
+                    // 如果误放入了读者卡
+                    if (entity.ErrorCode == "patronCard")
+                    {
+                        info.State = "dontsync";
+                        info.SyncErrorCode = "PatronCard";
+                        info.SyncErrorInfo = $"UID 为 {entity.UID} 的标签是误放入书柜的读者卡，不再进行同步(标签原出错信息 '{entity.Error}')";
                         processed.Add(info);
                         error_actions.Add(info);
                         continue;

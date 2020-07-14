@@ -44,11 +44,26 @@ namespace dp2SSL
 
             return new SolidColorBrush(CloseColor);
             */
-
+            /*
             if (state == "open")
                 return new SolidColorBrush(door.OpenBrush);
 
             return new SolidColorBrush(door.CloseBrush);
+            */
+            Brush brush = null;
+            if (state == "open")
+                brush = door.OpenBrush;
+            else
+                brush = door.CloseBrush;
+            /*
+            if (brush is ImageBrush)
+            {
+                var imageBrush = brush as ImageBrush;
+                return new ImageBrush(imageBrush.ImageSource.Clone());
+            }
+            */
+
+            return brush;
             /*
             BrushConverter convertor = new BrushConverter();
 

@@ -399,6 +399,7 @@ Stack:
             dup.PII = this.PII;
             dup.UID = this.UID;
             dup.Error = this.Error;
+            dup.ErrorCode = this.ErrorCode;
             dup.ErrorColor = this.ErrorColor;
             dup.Waiting = this.Waiting;
             dup.ReaderName = this.ReaderName;
@@ -570,6 +571,7 @@ Stack:
                 this.ShelfState = s;
             }
         }
+
 
         public bool FillFinished { get; set; }
 
