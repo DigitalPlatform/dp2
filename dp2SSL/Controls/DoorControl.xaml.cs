@@ -133,11 +133,17 @@ namespace dp2SSL
         = new ColorAnimationUsingKeyFrames();
                         colorAnimation.Duration = TimeSpan.FromSeconds(start + _length);
 
-                        Color oldColor = DoorItem.FromColor(door.CloseBrush, 255);  // door.CloseBrush;
+                        Color oldColor = Colors.Black;
+                        if (door.CloseBrush is SolidColorBrush)
+                            oldColor = DoorItem.FromColor((door.CloseBrush as SolidColorBrush).Color, 255);  // door.CloseBrush;
+
+                        Color brightColor = Colors.White;
+                        if (door.OpenBrush is SolidColorBrush)
+                            brightColor = DoorItem.FromColor((door.OpenBrush as SolidColorBrush).Color, 255);  // door.CloseBrush;
 
                         colorAnimation.KeyFrames.Add(
                new LinearColorKeyFrame(
-                   DoorItem.FromColor(door.OpenBrush, 255),  // Colors.DarkOrange, // Target value (KeyValue)
+                   brightColor,  // Colors.DarkOrange, // Target value (KeyValue)
                    KeyTime.FromTimeSpan(TimeSpan.FromSeconds(start + _top))) // KeyTime
                );
 
@@ -326,18 +332,52 @@ KeyTime.FromTimeSpan(TimeSpan.FromSeconds(start + _length))) // KeyTime
             return grid;
         }
 
+        // 获得 shelf.xml 中 root 元素的 backImageFileOpen 属性定义的文件的路径
+        static string GetBackImageFileOpenPath()
+        {
+            string backImageFile = ShelfData.ShelfCfgDom?.DocumentElement?.GetAttribute("backImageFile");
+            if (string.IsNullOrEmpty(backImageFile))
+                return null;
+
+            return System.IO.Path.Combine(WpfClientInfo.UserDir, backImageFile);
+        }
+
+        // 根据图像文件名，获得当前元素相关的 ImageSource
+        delegate ImageSource Delegate_GetPartImage(string filename);
+
+
         static System.Windows.Media.Brush GetBrush(XmlElement element,
             string attr,
-            System.Windows.Media.Brush default_value)
+            System.Windows.Media.Brush default_value,
+            Delegate_GetPartImage getPartImage = null)
         {
-            BrushConverter convertor = new BrushConverter();
-
             if (element.HasAttribute(attr) == false)
                 return default_value;
+
             string s = element.GetAttribute(attr);
+
+            if (s != null && s.StartsWith("image:"))
+            {
+                string filename = s.Substring("image:".Length);
+                string filepath = System.IO.Path.Combine(WpfClientInfo.UserDir, filename);
+                var brush = new ImageBrush(GetBitmapImage(filepath));
+                brush.Stretch = Stretch.Fill;
+                return brush;
+            }
+
+            if (s != null && s.StartsWith("imageMap:"))
+            {
+                string filename = s.Substring("imageMap:".Length);
+                var source = getPartImage(filename);
+
+                var brush = new ImageBrush(source);
+                brush.Stretch = Stretch.Fill;
+                return brush;
+            }
 
             try
             {
+                BrushConverter convertor = new BrushConverter();
                 System.Windows.Media.Brush value = (System.Windows.Media.Brush)convertor.ConvertFromString(s);
                 return value;
             }
@@ -452,10 +492,10 @@ KeyTime.FromTimeSpan(TimeSpan.FromSeconds(start + _length))) // KeyTime
                 if (door_item != null)
                 {
                     door_item.BorderBrush = gp.BorderBrush;
-                    if (gp.OpenBrush is SolidColorBrush)
-                        door_item.OpenBrush = (gp.OpenBrush as SolidColorBrush).Color;
-                    if (gp.CloseBrush is SolidColorBrush)
-                        door_item.CloseBrush = (gp.CloseBrush as SolidColorBrush).Color;
+                    // if (gp.OpenBrush is SolidColorBrush)
+                    door_item.OpenBrush = gp.OpenBrush; // (gp.OpenBrush as SolidColorBrush).Color;
+                                                        // if (gp.CloseBrush is SolidColorBrush)
+                    door_item.CloseBrush = gp.CloseBrush;   // (gp.CloseBrush as SolidColorBrush).Color;
                     door_item.BorderThickness = gp.BorderThickness;
                     door_item.Foreground = gp.Foreground;
                     door_item.ErrorForeground = gp.ErrorForeground;
@@ -509,8 +549,40 @@ KeyTime.FromTimeSpan(TimeSpan.FromSeconds(start + _length))) // KeyTime
             SetBackgroundImage();
         }
 
+        static BitmapImage GetBitmapImage(string filename)
+        {
+            try
+            {
+                BitmapImage bitmap = new BitmapImage();
+                bitmap.BeginInit();
+                bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                bitmap.UriSource = new Uri(filename, UriKind.Absolute);
+                bitmap.EndInit();
+
+                return bitmap;
+                /*
+                var brush = new ImageBrush(bitmap);
+                brush.Stretch = Stretch.Uniform;
+                this.Background = brush;
+                */
+            }
+            catch (Exception ex)
+            {
+                // TODO: 用一个报错文字图片设定为背景?
+                return null;
+            }
+        }
+
+        static Int32Rect GetImageRect(GroupPosition gp)
+        {
+            return new Int32Rect((int)(gp.Left + gp.BorderThickness.Left + gp.Margin.Left),
+                        (int)(gp.Top + gp.BorderThickness.Top + gp.Margin.Top),
+                        (int)(gp.Width - gp.BorderThickness.Left - gp.BorderThickness.Right - gp.Margin.Left - gp.Margin.Right),
+                        (int)(gp.Height - gp.BorderThickness.Top - gp.BorderThickness.Bottom - gp.Margin.Top - gp.Margin.Bottom));
+        }
+
         // 获得一个 door 元素的位置参数。如果 door 元素缺乏参数，则自动找外围的 group 元素中的参数
-        static GroupPosition GetPosition(XmlElement door)
+        GroupPosition GetPosition(XmlElement door)
         {
             GroupPosition gp = new GroupPosition();
             gp.Left = GetDouble(door, "left", -1);
@@ -520,11 +592,38 @@ KeyTime.FromTimeSpan(TimeSpan.FromSeconds(start + _length))) // KeyTime
             gp.Padding = GetThickness(door, "padding", new Thickness(8));
             gp.Margin = GetThickness(door, "margin", new Thickness(0));
             gp.BorderBrush = GetBrush(door, "borderBrush", new System.Windows.Media.SolidColorBrush(Colors.DarkGray));
-            gp.OpenBrush = GetBrush(door, "openBrush", new System.Windows.Media.SolidColorBrush(DoorItem.DefaultOpenColor));
-            gp.CloseBrush = GetBrush(door, "closeBrush", new System.Windows.Media.SolidColorBrush(DoorItem.DefaultCloseColor));
             gp.BorderThickness = GetThickness(door, "borderThickness", new Thickness(1));
+            gp.OpenBrush = GetBrush(door,
+                "openBrush",
+                new System.Windows.Media.SolidColorBrush(DoorItem.DefaultOpenColor),
+                (filename) =>
+                {
+                    string filepath = System.IO.Path.Combine(WpfClientInfo.UserDir, filename);
+                    var source = new BitmapImage(new Uri(filepath));
+                    // 转换为物理的 pixel 坐标
+                    return CutBitmap(source, GetImageRect(gp));
+                });
+            gp.CloseBrush = GetBrush(door,
+                "closeBrush",
+                new System.Windows.Media.SolidColorBrush(DoorItem.DefaultCloseColor),
+                (filename) =>
+                {
+                    string filepath = System.IO.Path.Combine(WpfClientInfo.UserDir, filename);
+                    var source = new BitmapImage(new Uri(filepath));
+                    // 转换为物理的 pixel 坐标
+                    return CutBitmap(source, GetImageRect(gp));
+                });
             gp.Foreground = GetBrush(door, "foreground", new System.Windows.Media.SolidColorBrush(DoorItem.DefaultForegroundColor));
             gp.ErrorForeground = GetBrush(door, "errorForeground", new System.Windows.Media.SolidColorBrush(DoorItem.DefaultErrorForegroundColor));
+
+            /*
+            {
+                string testfilename = System.IO.Path.Combine(WpfClientInfo.UserDir, "daily_wallpaper");
+                var brush = new ImageBrush(GetBitmapImage(testfilename));
+                brush.Stretch = Stretch.Uniform;
+                gp.CloseBrush = brush;
+            }
+            */
 
             if (gp.Left == -1 || gp.Top == -1 || gp.Width == -1 || gp.Height == -1)
             {
@@ -542,9 +641,27 @@ KeyTime.FromTimeSpan(TimeSpan.FromSeconds(start + _length))) // KeyTime
                 gp.Padding = GetThickness(group, "padding", new Thickness(8));
                 gp.Margin = GetThickness(group, "margin", new Thickness(0));
                 gp.BorderBrush = GetBrush(group, "borderBrush", new System.Windows.Media.SolidColorBrush(Colors.DarkGray));
-                gp.OpenBrush = GetBrush(group, "openBrush", new System.Windows.Media.SolidColorBrush(DoorItem.DefaultOpenColor));
-                gp.CloseBrush = GetBrush(group, "closeBrush", new System.Windows.Media.SolidColorBrush(DoorItem.DefaultCloseColor));
                 gp.BorderThickness = GetThickness(group, "borderThickness", new Thickness(1));
+                gp.OpenBrush = GetBrush(group,
+                    "openBrush",
+                    new System.Windows.Media.SolidColorBrush(DoorItem.DefaultOpenColor),
+                    (filename) =>
+                    {
+                        string filepath = System.IO.Path.Combine(WpfClientInfo.UserDir, filename);
+                        var source = new BitmapImage(new Uri(filepath));
+                        // 转换为物理的 pixel 坐标
+                        return CutBitmap(source, GetImageRect(gp));
+                    });
+                gp.CloseBrush = GetBrush(group,
+                    "closeBrush",
+                    new System.Windows.Media.SolidColorBrush(DoorItem.DefaultCloseColor),
+                    (filename) =>
+                    {
+                        string filepath = System.IO.Path.Combine(WpfClientInfo.UserDir, filename);
+                        var source = new BitmapImage(new Uri(filepath));
+                        // 转换为物理的 pixel 坐标
+                        return CutBitmap(source, GetImageRect(gp));
+                    });
                 gp.Foreground = GetBrush(group, "foreground", new System.Windows.Media.SolidColorBrush(DoorItem.DefaultForegroundColor));
                 gp.ErrorForeground = GetBrush(group, "errorForeground", new System.Windows.Media.SolidColorBrush(DoorItem.DefaultErrorForegroundColor));
 
@@ -827,6 +944,42 @@ this.ActualHeight - (this.Padding.Top + this.Padding.Bottom)));
             {
                 // TODO: 用一个报错文字图片设定为背景?
             }
+        }
+
+        static BitmapSource CutBitmap(BitmapSource source, Int32Rect rect)
+        {
+
+            //计算Stride
+            var source_stride = source.Format.BitsPerPixel * source.PixelWidth / 8;
+            var target_stride = source.Format.BitsPerPixel * rect.Width / 8;
+            //声明字节数组
+            byte[] data = new byte[rect.Height * target_stride];
+
+            source.CopyPixels(rect, data, target_stride, 0);
+
+            return BitmapSource.Create(rect.Width,
+                rect.Height,
+                source.DpiX,
+                source.DpiY,
+                source.Format,  // PixelFormats.Bgr32,
+                null,
+                data,
+                target_stride);
+            /*
+            // Create WriteableBitmap to copy the pixel data to.      
+            WriteableBitmap target = new WriteableBitmap(
+              rect.Width,
+              rect.Height,
+              source.DpiX,
+              source.DpiY,
+              source.Format, null);
+
+            // Write the pixel data to the WriteableBitmap.
+            target.WritePixels(
+              new Int32Rect(0, 0, rect.Width, rect.Height),
+              data, target_stride, 0);
+            return target;
+            */
         }
 
         private void All_Click(object sender, MouseButtonEventArgs e)

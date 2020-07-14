@@ -154,6 +154,7 @@ namespace dp2SSL
         public static Color DefaultCloseColor = FromColor(Colors.Navy, 200);
 
 
+#if NO
         // 开门状态的颜色
         Color _openBrush = DefaultOpenColor;
         public Color OpenBrush
@@ -189,6 +190,43 @@ namespace dp2SSL
                 */
             }
         }
+#endif
+        // 开门状态的颜色
+        Brush _openBrush = new SolidColorBrush(DefaultOpenColor);
+        public Brush OpenBrush
+        {
+            get => _openBrush;
+            set
+            {
+                _openBrush = value;
+                /*
+                if (_openBrush != value)
+                {
+                    _openBrush = value;
+                    OnPropertyChanged("OpenBrush");
+                }
+                */
+            }
+        }
+
+        // 关门状态的颜色
+        Brush _closeBrush = new SolidColorBrush(DefaultCloseColor);
+        public Brush CloseBrush
+        {
+            get => _closeBrush;
+            set
+            {
+                _closeBrush = value;
+                /*
+                if (_closeBrush != value)
+                {
+                    _closeBrush = value;
+                    OnPropertyChanged("CloseBrush");
+                }
+                */
+            }
+        }
+
 
         #endregion
 
@@ -377,7 +415,7 @@ namespace dp2SSL
             }
         }
 
-        private string _state = "test";
+        private string _state = "";
 
         // 状态
         public string State

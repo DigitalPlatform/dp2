@@ -79,6 +79,10 @@ namespace dp2SSL
             }
         }
 
+        // 2020/7/14
+        // 和 Error 配套，表示错误码
+        public string ErrorCode { get; set; }
+
         public bool Waiting
         {
             get
@@ -181,7 +185,9 @@ namespace dp2SSL
 
         // 2020/4/9
         // 追加一个错误信息
-        public void AppendError(string error, string color = "red")
+        public void AppendError(string error,
+            string color = "red",
+            string errorCode = null)
         {
             if (string.IsNullOrEmpty(error))
             {
@@ -191,6 +197,14 @@ namespace dp2SSL
             if (string.IsNullOrEmpty(this.Error) == false)
                 this.Error += ";";
             this.Error += error;
+
+            if (errorCode != null)
+            {
+                if (string.IsNullOrEmpty(this.ErrorCode) == false)
+                    this.ErrorCode += ",";
+                this.ErrorCode += errorCode;
+            }
+
             this.ErrorColor = color;
             this.Waiting = false;
         }
@@ -207,6 +221,7 @@ namespace dp2SSL
             dup.PII = this.PII;
             dup.UID = this.UID;
             dup.Error = this.Error;
+            dup.ErrorCode = this.ErrorCode;
             dup.ErrorColor = this.ErrorColor;
             dup.Waiting = this.Waiting;
             dup.ReaderName = this.ReaderName;

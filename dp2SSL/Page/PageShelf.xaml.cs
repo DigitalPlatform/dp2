@@ -1891,6 +1891,7 @@ namespace dp2SSL
                     return;
 
                 // 初始化 _patronTags 和 bookTags 两个集合
+
                 ShelfData.InitialPatronBookTags((t) =>
                 {
                     return DetectTagType(t);
@@ -2984,9 +2985,6 @@ namespace dp2SSL
             actions = new List<ActionInfo>();
             foreach (var entity in entities)
             {
-                // 对于前面已经出错的标签不修改 EAS
-                if (entity.Error != null)
-                    continue;
 
                 actions.Add(new ActionInfo
                 {
@@ -3006,6 +3004,9 @@ namespace dp2SSL
 
                 // 2020/4/2
                 // 还书操作前先尝试修改 EAS
+
+                // 对于前面已经出错的标签不修改 EAS
+                if (entity.Error == null && entity.ErrorCode != "patronCard")
                 {
                     var eas_result = ShelfData.SetEAS(entity.UID, entity.Antenna, false);
                     if (eas_result.Value == -1)
