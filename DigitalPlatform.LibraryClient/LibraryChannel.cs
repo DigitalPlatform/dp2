@@ -10104,10 +10104,18 @@ Stack:
                 }
             }
 
-            if (this.m_ws is IClientChannel)
-                ((IClientChannel)this.m_ws).Close();
-            else
-                this.m_ws.Close();
+            // 2020/7/15 增加 try
+            try
+            {
+                if (this.m_ws is IClientChannel)
+                    ((IClientChannel)this.m_ws).Close();
+                else
+                    this.m_ws.Close();
+            }
+            catch
+            {
+
+            }
         }
 
         void SetInnerChannelOperationTimeout(TimeSpan timeout)

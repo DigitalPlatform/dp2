@@ -1027,6 +1027,95 @@ namespace dp2SSL
             }
         }
 
+        #region GetRfidCfg
+
+        public class GetRfidCfgResult : NormalResult
+        {
+            public string Xml { get; set; }
+        }
+
+        // 获得 RFID 配置信息
+        public static GetRfidCfgResult GetRfidCfg()
+        {
+            string strOutputInfo = "";
+            LibraryChannel channel = App.CurrentApp.GetChannel();
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromSeconds(10);
+
+            try
+            {
+                long lRet = channel.GetSystemParameter(
+null,
+                    "system",
+                    "rfid",
+out strOutputInfo,
+out string strError);
+                if (lRet == -1)
+                    return new GetRfidCfgResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError,
+                        ErrorCode = channel.ErrorCode.ToString()
+                    };
+            }
+            finally
+            {
+                channel.Timeout = old_timeout;
+                App.CurrentApp.ReturnChannel(channel);
+            }
+
+            // 
+            /*
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml("<root />");
+
+            XmlDocumentFragment fragment = dom.CreateDocumentFragment();
+            try
+            {
+                fragment.InnerXml = strOutputInfo;
+            }
+            catch (Exception ex)
+            {
+                return new GetLocationListResult
+                {
+                    Value = -1,
+                    ErrorInfo = "fragment XML装入XmlDocumentFragment时出错: " + ex.Message
+                };
+            }
+
+            dom.DocumentElement.AppendChild(fragment);
+            */
+
+            // 顺便保存到本地
+            WpfClientInfo.Config.Set("cache",
+                "rfidCfg",
+                strOutputInfo);
+
+            return new GetRfidCfgResult
+            {
+                Value = 1,
+                Xml = strOutputInfo
+            };
+        }
+
+        // 从本地获得 RFID 配置信息(不访问 dp2library 服务器)
+        public static GetRfidCfgResult GetRfidCfgFromLocal()
+        {
+            string value = WpfClientInfo.Config.Get("cache",
+    "rfidCfg",
+    null);
+            if (value == null)
+                return new GetRfidCfgResult();
+
+            return new GetRfidCfgResult
+            {
+                Value = 1,
+                Xml = value
+            };
+        }
+
+        #endregion
+
         public class GetLocationListResult : NormalResult
         {
             public List<string> List { get; set; }

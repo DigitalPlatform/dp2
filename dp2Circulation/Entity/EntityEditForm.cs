@@ -3,16 +3,16 @@ using System.Collections.Generic;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.Xml;
+using System.Web;
 
+using static dp2Circulation.CallNumberForm;
 using DigitalPlatform;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.RFID.UI;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Xml;
-using static dp2Circulation.CallNumberForm;
 using DigitalPlatform.LibraryClient;
-using System.Web;
 
 namespace dp2Circulation
 {

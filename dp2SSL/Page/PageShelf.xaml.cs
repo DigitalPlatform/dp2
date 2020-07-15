@@ -3006,7 +3006,7 @@ namespace dp2SSL
                 // 还书操作前先尝试修改 EAS
 
                 // 对于前面已经出错的标签不修改 EAS
-                if (entity.Error == null && entity.ErrorCode != "patronCard")
+                if (entity.Error == null && StringUtil.IsInList("patronCard,oiError", entity.ErrorCode) == false)
                 {
                     var eas_result = ShelfData.SetEAS(entity.UID, entity.Antenna, false);
                     if (eas_result.Value == -1)

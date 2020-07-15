@@ -1515,10 +1515,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                         StartNetworkMode = dlg.Mode;
                     }
                     ));
-
-
                 }
-
             }
         }
 
