@@ -34,6 +34,36 @@ namespace dp2SSL
             }
         }
 
+        private string _oi;
+
+        public string OI
+        {
+            get => _oi;
+            set
+            {
+                if (_oi != value)
+                {
+                    _oi = value;
+                    OnPropertyChanged("OI");
+                }
+            }
+        }
+
+        private string _aoi;
+
+        public string AOI
+        {
+            get => _aoi;
+            set
+            {
+                if (_aoi != value)
+                {
+                    _aoi = value;
+                    OnPropertyChanged("AOI");
+                }
+            }
+        }
+
         private string _uid;
         private string _error;  // = "test error line asdlja sdkf; ;jasldf jasdjkf aasdfasdf";
         bool _waiting = true;

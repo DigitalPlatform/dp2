@@ -68,10 +68,12 @@ namespace DigitalPlatform.RFID
         /// </summary>
         /// <param name="bytes"></param>
         /// <returns></returns>
-        public bool Send(byte[] bytes)
+        public bool Send(byte[] bytes, out string strError)
         {
+            strError = "";
             if (!_sp.IsOpen)
             {
+                strError = "_sp 尚未打开";
                 return false;
             }
 
@@ -79,8 +81,9 @@ namespace DigitalPlatform.RFID
             {
                 _sp.Write(bytes, 0, bytes.Length);
             }
-            catch (System.Exception)
+            catch (System.Exception ex)
             {
+                strError = $"Write() 出现异常: {ex.Message}";
                 return false;   //write failed
             }
             return true;        //write successfully
@@ -95,10 +98,16 @@ namespace DigitalPlatform.RFID
         /// <param name="stopBits"></param>
         /// <param name="parity"></param>
         /// <param name="handshake"></param>
-        public void Open(string portName, String baudRate,
-            string dataBits, string stopBits, string parity,
-            string handshake)
+        public bool Open(string portName, 
+            String baudRate,
+            string dataBits,
+            string stopBits, 
+            string parity,
+            string handshake,
+            out string strError)
         {
+            strError = "";
+
             if (_sp.IsOpen)
             {
                 Close();
@@ -135,14 +144,19 @@ namespace DigitalPlatform.RFID
                 // _sp.DataReceived += new SerialDataReceivedEventHandler(DataReceived);
                 args.isOpend = true;
             }
-            catch (System.Exception)
+            catch (System.Exception ex)
             {
                 args.isOpend = false;
+                strError = $"串口打开失败: {ex.Message}";
+                return false;
             }
+
             if (comOpenEvent != null)
             {
                 comOpenEvent.Invoke(this, args);
             }
+
+            return true;
         }
 
 

@@ -323,22 +323,25 @@ namespace LedDriver.First
             try
             {
                 // 打开串口
-                _comModel.Open(portName,
-                "57600",//baudRate,
-                "8",//dataBits,
-                "One",//stopBits,
-                "None",//parity,
-                "None"); //handshake);
+                var ret = _comModel.Open(portName,
+                    "57600",//baudRate,
+                    "8",//dataBits,
+                    "One",//stopBits,
+                    "None",//parity,
+                    "None",//handshake
+                    out error);
+                if (ret == false)
+                    return false;
 
                 // 将字符转为二进制
                 System.Text.Encoding encoding = System.Text.Encoding.GetEncoding("gb2312");
                 byte[] data = encoding.GetBytes(msg);
 
                 // 给串口发送二进制
-                bool bRet = _comModel.Send(data);
+                bool bRet = _comModel.Send(data, out string strError);
                 if (bRet == false)
                 {
-                    error = "给串口发送消息失败";
+                    error = $"给串口({portName})发送消息失败: {strError}";
                     return false;
                 }
             }

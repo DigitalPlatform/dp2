@@ -382,6 +382,10 @@ namespace dp2SSL
 
         static string _rightTableXml = null;
 
+        // 2020/7/15
+        // 从 dp2library library.xml 中获取的 RFID 配置信息
+        static XmlDocument _rfidCfgDom = null;
+
         // exception:
         //      可能会抛出异常
         public static NormalResult InitialShelf()
@@ -424,6 +428,38 @@ namespace dp2SSL
                 else
                     _locationList = result.List;
             }
+
+            {
+                _rfidCfgDom = new XmlDocument();
+
+                // 获得 RFID 配置信息
+                GetRfidCfgResult result = null;
+                if (App.StartNetworkMode == "local")
+                {
+                    result = LibraryChannelUtil.GetRfidCfgFromLocal();
+                    if (result.Value == 0)
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = "本地没有 RFID 配置信息。需要联网以后重新启动"
+                        };
+                }
+                else
+                    result = LibraryChannelUtil.GetRfidCfg();
+
+                if (result.Value == -1)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"从 dp2library 服务器获得 RFID 配置信息时出错: {result.ErrorInfo}"
+                    };
+                else
+                {
+                    _rfidCfgDom = new XmlDocument();
+                    _rfidCfgDom.LoadXml(result.Xml);
+                }
+            }
+
 
             if (App.StartNetworkMode == "local")
             {
@@ -472,6 +508,81 @@ namespace dp2SSL
 
             // _patronReaderName = GetPatronReaderName();
             return new NormalResult();
+        }
+
+        /*
+<rfid>
+<ownerInstitution>
+<item map="海淀分馆/" isil="test" />
+<item map="西城/" alternative="xc" />
+</ownerInstitution>
+</rfid>
+map 为 "/" 或者 "/阅览室" 可以匹配 "图书总库" "阅览室" 这样的 strLocation
+map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" 这样的 strLocation
+最好单元测试一下这个函数
+ * */
+        // parameters:
+        //      cfg_dom 根元素是 rfid
+        //      strLocation 纯净的 location 元素内容。
+        //      isil    [out] 返回 ISIL 形态的代码
+        //      alternative [out] 返回其他形态的代码
+        // return:
+        //      true    找到。信息在 isil 和 alternative 参数里面返回
+        //      false   没有找到
+        public static bool GetOwnerInstitution(
+            // XmlDocument cfg_dom,
+            string strLocation,
+            out string isil,
+            out string alternative)
+        {
+            isil = "";
+            alternative = "";
+
+            var cfg_dom = _rfidCfgDom;
+
+            if (cfg_dom == null)
+                return false;
+
+            // 分析 strLocation 是否属于总馆形态，比如“阅览室”
+            // 如果是总馆形态，则要在前部增加一个 / 字符，以保证可以正确匹配 map 值
+            // ‘/’字符可以理解为在馆代码和阅览室名字之间插入的一个必要的符号。这是为了弥补早期做法的兼容性问题
+            dp2StringUtil.ParseCalendarName(strLocation,
+        out string strLibraryCode,
+        out string strRoom);
+            if (string.IsNullOrEmpty(strLibraryCode))
+                strLocation = "/" + strRoom;
+
+            XmlNodeList items = cfg_dom.DocumentElement.SelectNodes(
+                "ownerInstitution/item");
+            List<HitItem> results = new List<HitItem>();
+            foreach (XmlElement item in items)
+            {
+                string map = item.GetAttribute("map");
+                if (strLocation.StartsWith(map))
+                {
+                    HitItem hit = new HitItem { Map = map, Element = item };
+                    results.Add(hit);
+                }
+            }
+
+            if (results.Count == 0)
+                return false;
+
+            // 如果命中多个，要选出 map 最长的那一个返回
+
+            // 排序，大在前
+            if (results.Count > 0)
+                results.Sort((a, b) => { return b.Map.Length - a.Map.Length; });
+
+            isil = results[0].Element.GetAttribute("isil");
+            alternative = results[0].Element.GetAttribute("alternative");
+            return true;
+        }
+
+        class HitItem
+        {
+            public XmlElement Element { get; set; }
+            public string Map { get; set; }
         }
 
         // 从 shelf.xml 配置文件中获得读者证读卡器名
@@ -980,7 +1091,7 @@ namespace dp2SSL
 
                         // 2020/4/2
                         // 还书操作前先尝试修改 EAS
-                        if (entity.Error == null && entity.ErrorCode != "patronCard")
+                        if (entity.Error == null && StringUtil.IsInList("patronCard,oiError", entity.ErrorCode) == false)
                         {
                             var result = SetEAS(entity.UID, entity.Antenna, false);
                             if (result.Value == -1)
@@ -2309,9 +2420,12 @@ namespace dp2SSL
 
         // Exception:
         //      可能会抛出异常 ArgumentException TagDataException
-        static void SetTagType(TagAndData data, out string pii)
+        static void SetTagType(TagAndData data,
+            out string pii,
+            out LogicChip chip)
         {
             pii = null;
+            chip = null;
 
             if (data.OneTag.Protocol == InventoryInfo.ISO14443A)
             {
@@ -2329,7 +2443,7 @@ namespace dp2SSL
             {
                 // Exception:
                 //      可能会抛出异常 ArgumentException TagDataException
-                LogicChip chip = LogicChip.From(data.OneTag.TagInfo.Bytes,
+                chip = LogicChip.From(data.OneTag.TagInfo.Bytes,
         (int)data.OneTag.TagInfo.BlockSize,
         "" // tag.TagInfo.LockStatus
         );
@@ -2490,11 +2604,12 @@ namespace dp2SSL
                 TagInfo = tag.OneTag.TagInfo,
             };
 
+            LogicChip chip = null;
             // Exception:
             //      可能会抛出异常 ArgumentException TagDataException
             try
             {
-                SetTagType(tag, out string pii);
+                SetTagType(tag, out string pii, out chip);
                 result.PII = pii;
             }
             catch (Exception ex)
@@ -2521,6 +2636,27 @@ namespace dp2SSL
                 // 避免被当作图书同步到 dp2library
                 result.PII = "(读者卡)" + result.PII;
                 result.AppendError("读者卡误放入书柜", "red", "patronCard");
+            }
+
+            // 2020/7/15
+            // 获得图书 RFID 标签的 OI 和 AOI 字段
+            if (tag.Type == "book")
+            {
+                if (chip == null)
+                {
+                    // Exception:
+                    //      可能会抛出异常 ArgumentException TagDataException
+                    chip = LogicChip.From(tag.OneTag.TagInfo.Bytes,
+            (int)tag.OneTag.TagInfo.BlockSize,
+            "" // tag.TagInfo.LockStatus
+            );
+                }
+
+                string oi = chip.FindElement(ElementOID.OI)?.Text;
+                string aoi = chip.FindElement(ElementOID.AOI)?.Text;
+
+                result.OI = oi;
+                result.AOI = aoi;
             }
             return result;
         }
@@ -3582,16 +3718,16 @@ namespace dp2SSL
                         else if (type == "book")
                             _bookTags.Add(tag);
 
-                    /*
-                    try
-                    {
-                        SetTagType(tag, out string pii);
-                    }
-                    catch (Exception ex)
-                    {
-                        tag.Error += ($"RFID 标签格式错误: {ex.Message}");
-                    }
-                    */
+                        /*
+                        try
+                        {
+                            SetTagType(tag, out string pii);
+                        }
+                        catch (Exception ex)
+                        {
+                            tag.Error += ($"RFID 标签格式错误: {ex.Message}");
+                        }
+                        */
                     });
                 }
             }
@@ -3823,7 +3959,7 @@ namespace dp2SSL
                         // 排除 ISO15693 的图书标签
                         try
                         {
-                            SetTagType(tag, out string pii);
+                            SetTagType(tag, out string pii, out _);
                         }
                         catch (Exception ex)
                         {
@@ -3871,7 +4007,7 @@ namespace dp2SSL
                         return false;
                     try
                     {
-                        SetTagType(tag, out string pii);
+                        SetTagType(tag, out string pii, out _);
                     }
                     catch (Exception ex)
                     {
@@ -4353,6 +4489,42 @@ namespace dp2SSL
                         entity.Title = PageBorrow.GetCaption(result.Title);
                         entity.SetData(result.ItemRecPath, result.ItemXml);
                     }
+
+                    // 验证 OI 和 AOI
+                    // return:
+                    //      true    找到。信息在 isil 和 alternative 参数里面返回
+                    //      false   没有找到
+                    var ret = ShelfData.GetOwnerInstitution(
+                        entity.Location,
+                        out string isil,
+                        out string alternative);
+                    if (ret == false)
+                    {
+                        string error = $"册 '{entity.PII}' 馆藏地 '{entity.Location}' 没有找到相关的 OI 定义";
+                        errors.Add(error);
+                        entity.AppendError(error, "red", "oiError");
+                    }
+                    else
+                    {
+                        if (string.IsNullOrEmpty(isil) == false)
+                        {
+                            if (isil != entity.OI)
+                            {
+                                string error = $"册 '{entity.PII}' 的理论 OI '{isil}' 和 RFID 标签中的 OI '{entity.OI}' 不符";
+                                errors.Add(error);
+                                entity.AppendError(error, "red", "oiError");
+                            }
+                        }
+                        else if (string.IsNullOrEmpty(isil) == false)
+                        {
+                            if (alternative != entity.AOI)
+                            {
+                                string error = $"册 '{entity.PII}' 的理论 AOI '{alternative}' 和 RFID 标签中的 OI '{entity.AOI}' 不符";
+                                errors.Add(error);
+                                entity.AppendError(error, "red", "oiError");
+                            }
+                        }
+                    }
                 }
 
                 // entity.SetError(null);
@@ -4509,11 +4681,23 @@ namespace dp2SSL
 
                     // 2020/7/14
                     // 如果误放入了读者卡
-                    if (entity.ErrorCode == "patronCard")
+                    if (StringUtil.IsInList("patronCard", entity.ErrorCode) == true)
                     {
                         info.State = "dontsync";
                         info.SyncErrorCode = "PatronCard";
                         info.SyncErrorInfo = $"UID 为 {entity.UID} 的标签是误放入书柜的读者卡，不再进行同步(标签原出错信息 '{entity.Error}')";
+                        processed.Add(info);
+                        error_actions.Add(info);
+                        continue;
+                    }
+
+                    // 2020/7/15
+                    // 如果 OI 不匹配
+                    if (StringUtil.IsInList("oiError", entity.ErrorCode) == true)
+                    {
+                        info.State = "dontsync";
+                        info.SyncErrorCode = "OiError";
+                        info.SyncErrorInfo = $"UID 为 {entity.UID} 的标签 OI 不匹配，不再进行同步(标签原出错信息 '{entity.Error}')";
                         processed.Add(info);
                         error_actions.Add(info);
                         continue;
