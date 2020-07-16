@@ -298,7 +298,7 @@ namespace dp2SSL
             }
         }
 
-        const string dp2library_base_version = "3.28";
+        const string dp2library_base_version = "3.29";
         const string fingerprintcenter_base_version = "2.1";
 
         public static NormalResult CheckServerUID()

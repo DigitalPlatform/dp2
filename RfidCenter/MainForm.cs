@@ -370,11 +370,11 @@ namespace RfidCenter
             lock (_syncRoot_start)
             {
                 bool success = false;
+                this.SetErrorState("retry", "正在初始化 RFID 设备");
                 try
                 {
 
                     ClearMessage();
-                    this.SetErrorState("retry", "正在初始化 RFID 设备");
                     if (message != null)
                         this.ShowMessage(message);
                     else
@@ -430,7 +430,7 @@ namespace RfidCenter
                         }
                         else
                         {
-                            SetErrorState("normal", "");
+                            // SetErrorState("normal", "");
                             success = true;
                         }
                     }
@@ -460,7 +460,10 @@ namespace RfidCenter
                 finally
                 {
                     if (success)
+                    {
+                        SetErrorState("normal", "");
                         this.ClearMessage();
+                    }
                 }
             }
         }
@@ -2149,7 +2152,8 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
             string strError = "";
 
             LedDisplayDialog dlg = new LedDisplayDialog();
-            dlg.button_display.Click += (s1, e1) => {
+            dlg.button_display.Click += (s1, e1) =>
+            {
                 var display_result = Display();
                 if (display_result.Value == -1)
                     MessageBox.Show(this, display_result.ErrorInfo);

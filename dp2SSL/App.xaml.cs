@@ -587,19 +587,21 @@ namespace dp2SSL
         public static void PauseBarcodeScan()
         {
             _pauseBarcodeScan++;
+            Debug.WriteLine($"Pause() _pauseBarcodeScan={_pauseBarcodeScan}");
             _barcodeCapture.Handled = _pauseBarcodeScan == 0;
         }
 
         public static void ContinueBarcodeScan()
         {
             _pauseBarcodeScan--;
+            Debug.WriteLine($"Continue() _pauseBarcodeScan={_pauseBarcodeScan}");
             _barcodeCapture.Handled = _pauseBarcodeScan == 0;
         }
 
         StringBuilder _line = new StringBuilder();
         static BarcodeCapture _barcodeCapture = new BarcodeCapture();
         // 是否暂停接收输入
-        static int _pauseBarcodeScan = 0;
+        static int _pauseBarcodeScan = 1;   // 第一次 Activated 会把它变回 0
 
         // 单独的线程，监控 server UID 关系
         public void BeginCheckServerUID(CancellationToken token)

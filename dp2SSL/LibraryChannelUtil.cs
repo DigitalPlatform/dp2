@@ -499,11 +499,18 @@ namespace dp2SSL
                     if (entity_record == null)
                         return new NormalResult { Value = 0 };
 
-                    entity_record.Xml = item_xml;
-                    entity_record.Timestamp = timestamp;
+                    if (string.IsNullOrEmpty(item_xml) == true)
+                    {
+                        context.Remove(entity_record);
+                    }
+                    else
+                    {
+                        entity_record.Xml = item_xml;
+                        entity_record.Timestamp = timestamp;
 
-                    // 保存到本地数据库
-                    context.Entities.Update(entity_record);
+                        // 保存到本地数据库
+                        context.Entities.Update(entity_record);
+                    }
                     await context.SaveChangesAsync();
                     return new NormalResult { Value = 1 };
                 }
@@ -1045,11 +1052,11 @@ namespace dp2SSL
             try
             {
                 long lRet = channel.GetSystemParameter(
-null,
+                    null,
                     "system",
                     "rfid",
-out strOutputInfo,
-out string strError);
+                    out strOutputInfo,
+                    out string strError);
                 if (lRet == -1)
                     return new GetRfidCfgResult
                     {

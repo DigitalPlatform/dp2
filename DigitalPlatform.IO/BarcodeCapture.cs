@@ -173,7 +173,8 @@ namespace DigitalPlatform.IO
 
                     if (InputChar != null)
                     {
-                        CharInput input = new CharInput {
+                        CharInput input = new CharInput
+                        {
                             Key = key,
                             KeyChar = keyChar,
                         };
@@ -245,7 +246,11 @@ namespace DigitalPlatform.IO
             }
         END1:
             if (Handled == true)
+            {
+                if (wParam == WM_KEYDOWN)
+                    Console.Beep();
                 return 1;
+            }
             return CallNextHookEx(hKeyboardHook, nCode, wParam, lParam);
         }
 
@@ -286,7 +291,7 @@ namespace DigitalPlatform.IO
             if (_char_table != null)
                 return;
             _char_table = new Hashtable();
-            foreach(string def in char_def)
+            foreach (string def in char_def)
             {
                 int pos = def.IndexOf(':');
                 string name = def.Substring(0, pos);
@@ -321,7 +326,7 @@ namespace DigitalPlatform.IO
                 var def = GetCharDef(name);
                 if (def == null)
                     return "?";
-                return char.ToString(def[shift?1:0]);
+                return char.ToString(def[shift ? 1 : 0]);
                 // return char.ToString(upper_number[key - Keys.D0]);
             }
             // Char keys are returned directly
@@ -336,7 +341,7 @@ namespace DigitalPlatform.IO
                 var def = GetCharDef(name);
                 if (def == null)
                     return "?";
-                return char.ToString(def[shift?1:0]);
+                return char.ToString(def[shift ? 1 : 0]);
 
             }
             else if (key == Keys.Return)

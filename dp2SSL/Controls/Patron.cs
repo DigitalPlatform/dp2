@@ -249,6 +249,8 @@ namespace dp2SSL
         public void CopyTo(RfidItem dup)
         {
             dup.PII = this.PII;
+            dup.OI = this.OI;
+            dup.AOI = this.AOI;
             dup.UID = this.UID;
             dup.Error = this.Error;
             dup.ErrorCode = this.ErrorCode;

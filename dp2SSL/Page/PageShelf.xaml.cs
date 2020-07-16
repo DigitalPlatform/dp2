@@ -1259,7 +1259,7 @@ namespace dp2SSL
                     if (string.IsNullOrEmpty(entity.Title)
                         && string.IsNullOrEmpty(entity.PII) == false && entity.PII != "(空)")
                     {
-                        GetEntityDataResult result = await GetEntityDataAsync(entity.PII, "");
+                        GetEntityDataResult result = await GetEntityDataAsync(entity.GetOiPii(), "");
                         if (result.Value == -1)
                         {
                             entity.SetError(result.ErrorInfo);
@@ -1567,7 +1567,7 @@ namespace dp2SSL
                 {
                     DisplayMessage(progress, cfg_error, "red");
                     _initialCancelled = true;
-                    App.InitialShelfCfg();
+                    App.InitialShelfCfg();  // ? 这里为何要再来一次？
                     return;
                 }
 
@@ -2145,15 +2145,23 @@ namespace dp2SSL
                             EntityCollection collection = new EntityCollection();
                             collection.Add(pii);
 
+                            CloseAllBookInfoWindow();
+
                             BookInfoWindow bookInfoWindow = new BookInfoWindow();
                             bookInfoWindow.TitleText = $"";
                             bookInfoWindow.Owner = Application.Current.MainWindow;
                             bookInfoWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
                             App.SetSize(bookInfoWindow, "wide");
-                            bookInfoWindow.Closed += BookInfoWindow_Closed;
+                            bookInfoWindow.Closed += (o, e) =>
+                            {
+                                _bookInfoWindows.Remove(bookInfoWindow);
+                                RemoveLayer();
+                            };
                             bookInfoWindow.SetBooks(collection);
                             bookInfoWindow.Show();
                             AddLayer();
+
+                            _bookInfoWindows.Add(bookInfoWindow);
                         }));
                         return;
                     }
@@ -2165,6 +2173,20 @@ namespace dp2SSL
                     return;
                 }
             }
+        }
+
+        List<BookInfoWindow> _bookInfoWindows = new List<BookInfoWindow>();
+
+        void CloseAllBookInfoWindow()
+        {
+            List<BookInfoWindow> windows = new List<BookInfoWindow>(_bookInfoWindows);
+            /*
+            foreach (var window in _bookInfoWindows)
+            {
+                windows.Add(window);
+            }
+            */
+            windows.ForEach((o) => { o.Close(); });
         }
 
         // 新版本的，注意读者卡也在 NewTagList.Tags 里面
@@ -2216,6 +2238,8 @@ namespace dp2SSL
                                         EntityCollection collection = new EntityCollection();
                                         collection.Add(fill_result.PII);
 
+                                        CloseAllBookInfoWindow();
+
                                         BookInfoWindow bookInfoWindow = new BookInfoWindow();
                                         bookInfoWindow.TitleText = $"";
                                         bookInfoWindow.Owner = Application.Current.MainWindow;
@@ -2223,10 +2247,16 @@ namespace dp2SSL
                                         App.SetSize(bookInfoWindow, "wide");
                                         //bookInfoWindow.Width = Math.Min(1000, this.ActualWidth);
                                         //bookInfoWindow.Height = Math.Min(700, this.ActualHeight);
-                                        bookInfoWindow.Closed += BookInfoWindow_Closed;
+                                        bookInfoWindow.Closed += (o, e) =>
+                                        {
+                                            _bookInfoWindows.Remove(bookInfoWindow);
+                                            RemoveLayer();
+                                        };
                                         bookInfoWindow.SetBooks(collection);
                                         bookInfoWindow.Show();
                                         AddLayer();
+
+                                        _bookInfoWindows.Add(bookInfoWindow);
                                     }));
                                     return;
                                 }

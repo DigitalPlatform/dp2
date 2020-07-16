@@ -384,7 +384,7 @@ namespace dp2SSL
 
         // 2020/7/15
         // 从 dp2library library.xml 中获取的 RFID 配置信息
-        static XmlDocument _rfidCfgDom = null;
+        // static XmlDocument _rfidCfgDom = null;
 
         // exception:
         //      可能会抛出异常
@@ -429,6 +429,7 @@ namespace dp2SSL
                     _locationList = result.List;
             }
 
+#if NO
             {
                 _rfidCfgDom = new XmlDocument();
 
@@ -455,11 +456,19 @@ namespace dp2SSL
                     };
                 else
                 {
+                    if (string.IsNullOrEmpty(result.Xml))
+                    {
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"从 dp2library 服务器获得 RFID 配置信息时出错: library.xml 中没有定义 rfid 元素"
+                        };
+                    }
                     _rfidCfgDom = new XmlDocument();
                     _rfidCfgDom.LoadXml(result.Xml);
                 }
             }
-
+#endif
 
             if (App.StartNetworkMode == "local")
             {
@@ -510,6 +519,7 @@ namespace dp2SSL
             return new NormalResult();
         }
 
+#if NO
         /*
 <rfid>
 <ownerInstitution>
@@ -584,6 +594,8 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             public XmlElement Element { get; set; }
             public string Map { get; set; }
         }
+
+#endif
 
         // 从 shelf.xml 配置文件中获得读者证读卡器名
         public static string GetPatronReaderName()
@@ -4449,7 +4461,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                     if (localGetEntityInfo)
                     {
                         // 只从本地数据库中获取
-                        result = LocalGetEntityData(entity.PII);
+                        result = LocalGetEntityData(entity.GetOiPii());
                         if (string.IsNullOrEmpty(result.Title) == false)
                             entity.Title = PageBorrow.GetCaption(result.Title);
                         if (string.IsNullOrEmpty(result.ItemXml) == false)
@@ -4457,7 +4469,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                     }
                     else
                     {
-                        result = await GetEntityDataAsync(entity.PII, "");
+                        result = await GetEntityDataAsync(entity.GetOiPii(), "");
                         if (result.Value == -1 || result.Value == 0)
                         {
                             // TODO: 条码号没有找到的错误码要单独记下来
@@ -4490,6 +4502,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                         entity.SetData(result.ItemRecPath, result.ItemXml);
                     }
 
+#if NO
                     // 验证 OI 和 AOI
                     // return:
                     //      true    找到。信息在 isil 和 alternative 参数里面返回
@@ -4525,6 +4538,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                             }
                         }
                     }
+#endif
                 }
 
                 // entity.SetError(null);
@@ -4796,6 +4810,16 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
 
                     string strUserName = info.Operator?.GetWorkerAccountName();
 
+                    // 包含 OI 的 PII
+                    string pii = entity.GetOiPii();
+                    /*
+                    string pii = "." + entity.PII;
+                    if (string.IsNullOrEmpty(entity.OI) == false)
+                        pii = entity.OI + "." + entity.PII;
+                    else if (string.IsNullOrEmpty(entity.AOI) == false)
+                        pii = entity.AOI + "." + entity.PII;
+                    */
+
                     int nRedoCount = 0;
                 REDO:
                     entity.Waiting = true;
@@ -4829,7 +4853,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                             lRet = channel.Borrow(null,
                                 action == "renew",
                                 info.Operator.PatronBarcode,
-                                entity.PII,
+                                pii,    // entity.PII,
                                 entity.ItemRecPath,
                                 false,
                                 null,
@@ -4866,7 +4890,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                             lRet = channel.Return(null,
                                 "return",
                                 "", // _patron.Barcode,
-                                entity.PII,
+                                pii,    // entity.PII,
                                 entity.ItemRecPath,
                                 false,
                                 strStyle + operTimeStyle, // style,
@@ -4898,7 +4922,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                             lRet = channel.Return(null,
                                 "transfer",
                                 "", // _patron.Barcode,
-                                entity.PII,
+                                pii,    // entity.PII,
                                 entity.ItemRecPath,
                                 false,
                                 $"{strStyle},{StringUtil.MakePathList(commands, ",")}" + operTimeStyle, // style,
@@ -5127,6 +5151,19 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                                 info.State = "dontsync";    // 注: borrow 类型的此种 dontsync 可以理解为读者在其他地方已经还书了。在断网情况下此种动作不要计入未还书列表
                             else
                                 info.State = "normalerror";
+
+                            // 2020/7/16
+                            // 清除本地册记录缓存
+                            if (error_code == ErrorCode.ItemBarcodeNotFound)
+                            {
+                                // result.Value
+                                //      0   没有找到记录。没有发生更新
+                                //      1   成功更新
+                                var result = await LibraryChannelUtil.UpdateEntityXmlAsync(pii,
+                                    null,
+                                    null);
+                            }
+
                         }
 
                         if (StringUtil.IsInList("auto_stop", style))
@@ -5199,7 +5236,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                             // result.Value
                             //      0   没有找到记录。没有发生更新
                             //      1   成功更新
-                            var result = await LibraryChannelUtil.UpdateEntityXmlAsync(entity.PII,
+                            var result = await LibraryChannelUtil.UpdateEntityXmlAsync(pii,
                                 entity_xml,
                                 null);
 
@@ -5634,7 +5671,7 @@ TaskScheduler.Default);
 #endif
 
 #if REMOVED
-        #region 门命令延迟执行
+#region 门命令延迟执行
 
         // 门命令(延迟执行)队列。开门时放一个命令进入队列。等得到门开信号的时候再取出这个命令
         static List<CommandItem> _commandQueue = new List<CommandItem>();
@@ -5724,7 +5761,7 @@ TaskScheduler.Default);
         }
 
 
-        #endregion
+#endregion
 #endif
     }
 
