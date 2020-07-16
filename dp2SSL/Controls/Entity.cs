@@ -397,6 +397,8 @@ Stack:
             dup.ShelfNo = this.ShelfNo;
 
             dup.PII = this.PII;
+            dup.OI = this.OI;
+            dup.AOI = this.AOI;
             dup.UID = this.UID;
             dup.Error = this.Error;
             dup.ErrorCode = this.ErrorCode;
@@ -662,6 +664,18 @@ Stack:
                 return false;
             TagList.SetTagInfoEAS(this.TagInfo, enable);
             return true;
+        }
+
+        public string GetOiPii()
+        {
+            // 包含 OI 的 PII
+            string pii = "." + this.PII;
+            if (string.IsNullOrEmpty(this.OI) == false)
+                pii = this.OI + "." + this.PII;
+            else if (string.IsNullOrEmpty(this.AOI) == false)
+                pii = this.AOI + "." + this.PII;
+
+            return pii;
         }
     }
 

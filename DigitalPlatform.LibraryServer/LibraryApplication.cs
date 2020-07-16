@@ -7262,6 +7262,7 @@ out strError);
         public int GetItemRecParent(
     RmsChannel channel,
     string strBarcode,
+    string strOwnerInstitution,
     out string strParentID,
     out string strOutputPath,
     out string strError)
@@ -7271,6 +7272,7 @@ out strError);
             return GetItemRecXml(
 channel,
 strBarcode,
+strOwnerInstitution,
 "parent",
 out strParentID,
 out strOutputPath,
@@ -7289,6 +7291,7 @@ out strError);
             return GetItemRecXml(
     channel,
     strBarcodeParam,
+    null,
     "",
     out strXml,
     out strOutputPath,
@@ -7309,6 +7312,7 @@ out strError);
         public int GetItemRecXml(
             RmsChannel channel,
             string strBarcodeParam,
+            string strOwnerInstitution,
             string strStyle,
             out string strXml,
             out string strOutputPath,
@@ -7371,17 +7375,16 @@ out strError);
             }
 
             string strBrowseStyle = "id,xml,timestamp";
-            if (strStyle == "parent")
+            if (strStyle == "parent" && strOwnerInstitution == null)
                 strBrowseStyle = "id,cols,format:@coldef://parent";
 
-            Record[] records = null;
             long lRet = channel.DoSearchEx(strQueryXml,
                 "default",
                 "", // strOuputStyle
                 1,
                 "zh",
                 strBrowseStyle, // "id,xml,timestamp",
-                out records,
+                out Record[] records,
                 out strError);
             if (lRet == -1)
                 goto ERROR1;
@@ -7401,10 +7404,33 @@ out strError);
                 return -1;
             }
 
+            string parent_id = "";
             if (strStyle == "parent")
             {
                 strOutputPath = records[0].Path;
-                strXml = records[0].Cols[0];
+                if (strOwnerInstitution == null)
+                    parent_id = records[0].Cols[0];
+                else
+                {
+                    Debug.Assert(records[0].RecordBody != null, "");
+
+                    strXml = records[0].RecordBody.Xml;
+                    timestamp = records[0].RecordBody.Timestamp;
+
+                    {
+                        XmlDocument itemdom = new XmlDocument();
+                        try
+                        {
+                            itemdom.LoadXml(strXml);
+                        }
+                        catch (Exception ex)
+                        {
+                            strError = $"册记录 '{strOutputPath}' 装载到 XMLDOM 时出错: {ex.Message}";
+                            goto ERROR1;
+                        }
+                        parent_id = DomUtil.GetElementText(itemdom.DocumentElement, "parent");
+                    }
+                }
             }
             else
             {
@@ -7414,6 +7440,23 @@ out strError);
                 strXml = records[0].RecordBody.Xml;
                 timestamp = records[0].RecordBody.Timestamp;
             }
+
+            if (strOwnerInstitution != null)
+            {
+                // return:
+                //      -1  出错
+                //      0   没有通过较验
+                //      1   通过了较验
+                int nRet = VerifyOI(strOutputPath,
+                    strXml,
+                    strOwnerInstitution,
+                    out strError);
+                if (nRet != 1)
+                    return -1;
+            }
+
+            if (strStyle == "parent")
+                strXml = parent_id;
 
             return (int)lHitCount;
         ERROR1:

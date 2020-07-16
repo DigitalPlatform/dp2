@@ -4780,7 +4780,7 @@ namespace dp2Library
 
                 // 获得一条册、期、订购、评注记录
                 // parameters:
-                //      strRefID    当 strDbType 为 item 时，strRefID 中是册条码号。其他情况，是 refid 字符串
+                //      strRefID    当 strDbType 为 "item" 时，strRefID 中是册条码号。其他情况，是 refid 字符串
                 //      item_dom    [out] 返回记录的 XmlDocument 形态。注意有时候可能为 null (当 strXml 为空时)
                 // return:
                 //      -1  出错
@@ -5794,7 +5794,9 @@ namespace dp2Library
             else if (strDbType == "comment")
                 itemDatabase = app.CommentItemDatabase;
             else if (strDbType == "item")
+            {
                 itemDatabase = null;
+            }
             else
             {
                 strError = "不支持的数据库类型 '" + strDbType + "'";
@@ -6030,6 +6032,18 @@ namespace dp2Library
                 {
                     // *** 针对册条码号或者 @xxx: 途径进行检索
 
+                    string strOwnerInstitution = null;
+                    if (strRefID.StartsWith("@") == false)
+                    {
+                        // 分割 OI 和 PII
+                        if (strRefID.IndexOf(".") != -1)
+                        {
+                            var parts = StringUtil.ParseTwoPart(strRefID, ".");
+                            strOwnerInstitution = parts[0];
+                            strRefID = parts[1];
+                        }
+                    }
+
                     // 获得册记录
                     // 本函数可获得超过1条以上的路径
                     // return:
@@ -6090,6 +6104,22 @@ namespace dp2Library
                             break;
                         }
                     }
+
+                    // 用 OI 判断这一条册记录是否符合要求
+                    if (strOwnerInstitution != null)
+                    {
+                        // return:
+                        //      -1  出错
+                        //      0   没有通过较验
+                        //      1   通过了较验
+                        int nRet0 = app.VerifyOI(
+            PathList != null && PathList.Count > 0 ? PathList[0] : "",
+            strXml,
+            strOwnerInstitution,
+            out strError);
+                        if (nRet0 != 1)
+                            goto ERROR1;
+                    }
                 }
                 else
                 {
@@ -6149,6 +6179,7 @@ namespace dp2Library
                     strError = "记录 " + strIssueRecPath + " 的XML装入DOM时出错: " + ex.Message;
                     goto ERROR1;
                 }
+
 
 #if NO
                     // 根据期库名, 找到对应的书目库名

@@ -1740,7 +1740,7 @@ namespace DigitalPlatform.LibraryServer
         public LibraryServerResult GetBiblioSummary(
             SessionInfo sessioninfo,
             RmsChannel channel,
-            string strItemBarcode,
+            string strItemBarcodeParam,
             string strConfirmItemRecPath,
             string strBiblioRecPathExclude,
             out string strBiblioRecPath,
@@ -1750,6 +1750,8 @@ namespace DigitalPlatform.LibraryServer
             strSummary = "";
             string strError = "";
             LibraryServerResult result = new LibraryServerResult();
+
+            ParseOI(strItemBarcodeParam, out string strItemBarcode, out string strOwnerInstitution);
 
 #if NO
             string strCacheKey = strItemBarcode + "|" + strConfirmItemRecPath + "|" + strBiblioRecPathExclude;
@@ -1856,6 +1858,7 @@ namespace DigitalPlatform.LibraryServer
                 nRet = this.GetItemRecParent(
                     channel,
                     strItemBarcode,
+                    strOwnerInstitution,
                     out strBiblioRecID,
                     out strOutputItemPath,
                     out strError);
