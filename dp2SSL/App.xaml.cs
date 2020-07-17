@@ -588,7 +588,8 @@ namespace dp2SSL
         {
             _pauseBarcodeScan++;
             Debug.WriteLine($"Pause() _pauseBarcodeScan={_pauseBarcodeScan}");
-            _barcodeCapture.Handled = _pauseBarcodeScan == 0;  // 若 > 0 就不吞掉击键
+            // _barcodeCapture.Handled = _pauseBarcodeScan == 0;  // 若 > 0 就不吞掉击键
+            UpdateHandled();
         }
 
         public static void ContinueBarcodeScan()
@@ -599,13 +600,22 @@ namespace dp2SSL
                 Debug.Assert(false, "");
             }
             Debug.WriteLine($"Continue() _pauseBarcodeScan={_pauseBarcodeScan}");
-            _barcodeCapture.Handled = _pauseBarcodeScan == 0;   // 若回到 0 就会吞掉击键
+            // _barcodeCapture.Handled = _pauseBarcodeScan == 0;   // 若回到 0 就会吞掉击键
+            UpdateHandled();
+        }
+
+        static void UpdateHandled()
+        {
+            if (_appActivated == false)
+                _barcodeCapture.Handled = false;
+            else
+                _barcodeCapture.Handled = _pauseBarcodeScan == 0;   // 若回到 0 就会吞掉击键
         }
 
         StringBuilder _line = new StringBuilder();
         static BarcodeCapture _barcodeCapture = new BarcodeCapture();
         // 是否暂停接收扫条码输入。> 0 表示暂停
-        static int _pauseBarcodeScan = 1;   // 第一次 Activated 会把它变回 0
+        static int _pauseBarcodeScan = 0;
 
         // 单独的线程，监控 server UID 关系
         public void BeginCheckServerUID(CancellationToken token)
@@ -1320,10 +1330,14 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             }
         }
 
+        static bool _appActivated = false;
+
         protected override void OnActivated(EventArgs e)
         {
             // dp2ssl 活动起来以后，要接受扫码，并且要吞掉击键
-            ContinueBarcodeScan();
+            // ContinueBarcodeScan();
+            _appActivated = true;
+            UpdateHandled();
 
             // 单独线程执行，避免阻塞 OnActivated() 返回
             _ = Task.Run(() =>
@@ -1344,7 +1358,9 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
         protected override void OnDeactivated(EventArgs e)
         {
             // dp2ssl 失去活动以后，要不接受扫码，并且要不吞掉击键
-            PauseBarcodeScan();
+            // PauseBarcodeScan();
+            _appActivated = false;
+            UpdateHandled();
 
             // Speak("DeActivated");
             base.OnDeactivated(e);
@@ -1441,7 +1457,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
 
                     // 标签总数显示 只显示标签数，不再区分图书标签和读者卡
                     if (CurrentApp != null)
-                    CurrentApp.Number = $"{NewTagList.Tags.Count}";
+                        CurrentApp.Number = $"{NewTagList.Tags.Count}";
                     //numberShown = true;
                 }
 
@@ -1510,14 +1526,14 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                     App.Invoke(new Action(() =>
                     {
                         NetworkWindow dlg = new NetworkWindow();
-                    //progress.TitleText = "请选择启动模式";
-                    //progress.MessageText = "访问 dp2library 服务器失败。请问是否继续启动？";
-                    dlg.Owner = Application.Current.MainWindow;
+                        //progress.TitleText = "请选择启动模式";
+                        //progress.MessageText = "访问 dp2library 服务器失败。请问是否继续启动？";
+                        dlg.Owner = Application.Current.MainWindow;
                         dlg.WindowStartupLocation = WindowStartupLocation.CenterOwner;
                         dlg.Background = new SolidColorBrush(Colors.DarkRed);
-                    // App.SetSize(progress, "wide");
-                    // progress.BackColor = "yellow";
-                    var ret = dlg.ShowDialog();
+                        // App.SetSize(progress, "wide");
+                        // progress.BackColor = "yellow";
+                        var ret = dlg.ShowDialog();
                         if (ret == false)
                             App.Current.Shutdown();
                         StartNetworkMode = dlg.Mode;
