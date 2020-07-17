@@ -260,6 +260,18 @@ namespace dp2SSL
             dup.Antenna = this.Antenna;
             dup.Protocol = this.Protocol;
         }
+
+        public string GetOiPii()
+        {
+            // 包含 OI 的 PII
+            string pii = "." + this.PII;
+            if (string.IsNullOrEmpty(this.OI) == false)
+                pii = this.OI + "." + this.PII;
+            else if (string.IsNullOrEmpty(this.AOI) == false)
+                pii = this.AOI + "." + this.PII;
+
+            return pii;
+        }
     }
 
     // 读者信息
@@ -790,6 +802,8 @@ readerType);
         public FillResult Fill(OneTag tag)
         {
             string pii = "";
+            string oi = "";
+            string aoi = "";
 
             // 2020/6/2
             this.Protocol = tag.Protocol;
@@ -825,6 +839,9 @@ readerType);
                         PII = pii,
                     };
                 }
+
+                oi = chip.FindElement(ElementOID.OI)?.Text;
+                aoi = chip.FindElement(ElementOID.AOI)?.Text;
             }
 
             if (this.UID == tag.UID && this.PII == pii)
@@ -834,6 +851,8 @@ readerType);
 
             this.UID = tag.UID;
             this.PII = pii;
+            this.OI = oi;
+            this.AOI = aoi;
             return new FillResult { Value = 1 };
         }
 

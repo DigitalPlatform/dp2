@@ -42,25 +42,36 @@ namespace dp2SSL
 
         private void PageSetting_Unloaded(object sender, RoutedEventArgs e)
         {
-            // 确保 page 关闭时对话框能自动关闭
-            App.Invoke(new Action(() =>
+            try
             {
-                foreach (var window in _dialogs)
+                // 确保 page 关闭时对话框能自动关闭
+                App.Invoke(new Action(() =>
                 {
-                    window.Close();
-                }
-            }));
-            App.ContinueBarcodeScan();
+                    foreach (var window in _dialogs)
+                    {
+                        window.Close();
+                    }
+                }));
+            }
+            finally
+            {
+                App.ContinueBarcodeScan();
+            }
         }
 
         private void PageSetting_Loaded(object sender, RoutedEventArgs e)
         {
-            // 首次设置密码，或者登录
-            InitialPage();
-            if (this.password.Visibility == Visibility.Visible)
-                this.password.Focus();
-
-            App.PauseBarcodeScan();
+            try
+            {
+                // 首次设置密码，或者登录
+                InitialPage();
+                if (this.password.Visibility == Visibility.Visible)
+                    this.password.Focus();
+            }
+            finally
+            {
+                App.PauseBarcodeScan();
+            }
         }
 
         private void Keyborad_KeyPressed(object sender, KeyPressedEventArgs e)

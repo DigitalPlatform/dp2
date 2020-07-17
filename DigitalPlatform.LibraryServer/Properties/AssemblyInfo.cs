@@ -210,3 +210,4 @@ ItemCanReturn()
 //		3.27 (2020/3/27) Borrow() 和 Return() API 的 strStyle 参数可以包含 operTime:xxx 子参数，表示本次操作为同步操作，xxx 部分是实际操作时间。程序会对实际操作时间和册记录中遗留的 checkInOutDate 元素里面的时间进行比较，有可能会拒绝同步(返回错误码 ErrorCode.SyncDenied)
 //		3.28 (2020/6/21) Borrow() API 的 strStyle 参数可以包含 requestPeriod:xxx 子参数，表示本次借书操作强制使用此借阅期限(不再使用 library.xml 中借阅权限表的相关值)
 //		3.29 (2020/7/16) Borrow() Return() GetBiblioSummary() API 针对 strItemBarcode 参数做了增加，允许使用 xxxx.xxxx 的形态，即点的左边是 RFID 标签的 OI 或者 AOI。相关 API 会自动检查册记录的馆藏地关联的 OI 是否和 strItemBarcode 中的一致。以前没有 . 的形态依然兼容，这种情况下不进行 OI 检查
+//						GetSystemParameter() API 中增加了 "rfid/getOwnerInstitution" 这一种 catagory，用于获得图书或者读者的 OI。返回的字符串为 "xxx|xxx" 格式，左边是 OI，右边是 AOI

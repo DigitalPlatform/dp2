@@ -588,19 +588,23 @@ namespace dp2SSL
         {
             _pauseBarcodeScan++;
             Debug.WriteLine($"Pause() _pauseBarcodeScan={_pauseBarcodeScan}");
-            _barcodeCapture.Handled = _pauseBarcodeScan == 0;
+            _barcodeCapture.Handled = _pauseBarcodeScan == 0;  // 若 > 0 就不吞掉击键
         }
 
         public static void ContinueBarcodeScan()
         {
             _pauseBarcodeScan--;
+            if (_pauseBarcodeScan <= -1)
+            {
+                Debug.Assert(false, "");
+            }
             Debug.WriteLine($"Continue() _pauseBarcodeScan={_pauseBarcodeScan}");
-            _barcodeCapture.Handled = _pauseBarcodeScan == 0;
+            _barcodeCapture.Handled = _pauseBarcodeScan == 0;   // 若回到 0 就会吞掉击键
         }
 
         StringBuilder _line = new StringBuilder();
         static BarcodeCapture _barcodeCapture = new BarcodeCapture();
-        // 是否暂停接收输入
+        // 是否暂停接收扫条码输入。> 0 表示暂停
         static int _pauseBarcodeScan = 1;   // 第一次 Activated 会把它变回 0
 
         // 单独的线程，监控 server UID 关系
@@ -1318,6 +1322,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
 
         protected override void OnActivated(EventArgs e)
         {
+            // dp2ssl 活动起来以后，要接受扫码，并且要吞掉击键
             ContinueBarcodeScan();
 
             // 单独线程执行，避免阻塞 OnActivated() 返回
@@ -1338,6 +1343,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
 
         protected override void OnDeactivated(EventArgs e)
         {
+            // dp2ssl 失去活动以后，要不接受扫码，并且要不吞掉击键
             PauseBarcodeScan();
 
             // Speak("DeActivated");

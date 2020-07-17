@@ -354,9 +354,78 @@ namespace DigitalPlatform.LibraryServer
                     goto NOTFOUND;
                 }
 
+                // 2020/7/17
+                // RFID 相关定义: 获得册记录(或者馆代码)关联的 OI
+                if (strCategory == "rfid/getOwnerInstitution")
+                {
+                    var rfid = this.LibraryCfgDom.DocumentElement.SelectSingleNode("rfid") as XmlElement;
+                    if (rfid == null)
+                    {
+                        strError = $"library.xml 中没有配置 rfid 元素";
+                        nRet = 0;
+                        goto END1;
+                    }
+                    // strName 是纯净的 location
+                    // return:
+                    //      true    找到。信息在 isil 和 alternative 参数里面返回
+                    //      false   没有找到
+                    var ret = GetOwnerInstitution(rfid, 
+                        strName, 
+                        out string isil, 
+                        out string alternative);
+                    if (ret == false)
+                    {
+                        strValue = "";
+                        nRet = 0;
+                    }
+                    else
+                    {
+                        strValue = isil + "|" + alternative;
+                        nRet = 1;
+                    }
+
+                    strError = "category '" + strCategory + "' 中未知的 name '" + strName + "'";
+                    goto NOTFOUND;
+                }
+
+#if REMOVED
+                // 2020/7/17
+                // RFID 相关定义: 获得读者记录的 OI
+                if (strCategory == "rfid/patronOI")
+                {
+                    var rfid = this.LibraryCfgDom.DocumentElement.SelectSingleNode("rfid") as XmlElement;
+                    if (rfid == null)
+                    {
+                        strError = $"library.xml 中没有配置 rfid 元素";
+                        nRet = 0;
+                        goto END1;
+                    }
+                    // strName 是馆代码
+                    // return:
+                    //      true    找到。信息在 isil 和 alternative 参数里面返回
+                    //      false   没有找到
+                    var ret = GetPatronOwnerInstitution(rfid,
+                        strName,
+                        out string isil,
+                        out string alternative);
+                    if (ret == false)
+                    {
+                        strValue = "";
+                        nRet = 0;
+                    }
+                    else
+                    {
+                        strValue = isil + "|" + alternative;
+                        nRet = 1;
+                    }
+
+                    strError = "category '" + strCategory + "' 中未知的 name '" + strName + "'";
+                    goto NOTFOUND;
+                }
+#endif
+
                 if (strCategory == "system")
                 {
-
                     // 2019/1/11
                     // RFID 相关定义
                     if (strName == "rfid")
@@ -1111,7 +1180,7 @@ namespace DigitalPlatform.LibraryServer
                             }
                             break;
                         default:
-                             strError = "category '" + strCategory + "' 中未知的 name '" + strName + "'";
+                            strError = "category '" + strCategory + "' 中未知的 name '" + strName + "'";
                             goto NOTFOUND;
                     }
                     // 2009/10/23 

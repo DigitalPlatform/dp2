@@ -674,6 +674,32 @@ namespace dp2SSL
             return pii;
         }
 
+        // 获得读者的 PII。注意包含了 OI 部分
+        static string GetPatronPii(XmlDocument dom)
+        {
+            string pii = DomUtil.GetElementText(dom.DocumentElement, "barcode");
+            if (string.IsNullOrEmpty(pii))
+            {
+                pii = "@refID:" + DomUtil.GetElementText(dom.DocumentElement, "refID");
+                return pii;
+            }
+
+            // 2020/7/17
+            // 加上 OI 部分
+            string libraryCode = DomUtil.GetElementText(dom.DocumentElement, "libraryCode");
+            var ret = ShelfData.GetOwnerInstitution(libraryCode + "/", out string isil, out string alternative);
+            if (ret == true)
+            {
+                // 应该是 xxx.xxx 形态
+                if (string.IsNullOrEmpty(isil) == false)
+                    pii = isil + "." + pii;
+                else if (string.IsNullOrEmpty(alternative) == false)
+                    pii = alternative + "." + pii;
+            }
+
+            return pii;
+        }
+
         // 根据本地历史记录，在读者记录中添加 borrows/borrow 元素
         // parameters:
         //      lastWriteTime   读者 XML 记录最近更新时间。只取这个时间以后的本地未还借书动作
@@ -786,7 +812,7 @@ namespace dp2SSL
                 if (string.IsNullOrEmpty(pii))
                     pii = "@refID:" + DomUtil.GetElementText(dom.DocumentElement, "refID");
                     */
-                string pii = GetPii(dom);
+                string pii = GetPatronPii(dom);
                 var patron = context.Patrons
     .Where(o => o.PII == pii)
     .FirstOrDefault();
@@ -857,7 +883,7 @@ namespace dp2SSL
                 if (string.IsNullOrEmpty(pii))
                     pii = "@refID:" + DomUtil.GetElementText(dom.DocumentElement, "refID");
                     */
-                string pii = GetPii(dom);
+                string pii = GetPatronPii(dom);
                 var patron = context.Patrons
     .Where(o => o.PII == pii)
     .FirstOrDefault();

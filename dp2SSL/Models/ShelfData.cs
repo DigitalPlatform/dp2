@@ -384,7 +384,7 @@ namespace dp2SSL
 
         // 2020/7/15
         // 从 dp2library library.xml 中获取的 RFID 配置信息
-        // static XmlDocument _rfidCfgDom = null;
+        static XmlDocument _rfidCfgDom = null;
 
         // exception:
         //      可能会抛出异常
@@ -429,7 +429,6 @@ namespace dp2SSL
                     _locationList = result.List;
             }
 
-#if NO
             {
                 _rfidCfgDom = new XmlDocument();
 
@@ -468,7 +467,6 @@ namespace dp2SSL
                     _rfidCfgDom.LoadXml(result.Xml);
                 }
             }
-#endif
 
             if (App.StartNetworkMode == "local")
             {
@@ -519,7 +517,6 @@ namespace dp2SSL
             return new NormalResult();
         }
 
-#if NO
         /*
 <rfid>
 <ownerInstitution>
@@ -594,8 +591,6 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             public XmlElement Element { get; set; }
             public string Map { get; set; }
         }
-
-#endif
 
         // 从 shelf.xml 配置文件中获得读者证读卡器名
         public static string GetPatronReaderName()

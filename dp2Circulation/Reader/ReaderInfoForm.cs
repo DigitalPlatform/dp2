@@ -6523,12 +6523,28 @@ MessageBoxDefaultButton.Button1);
         private void toolStripMenuItem_createRfidCard_Click(object sender, EventArgs e)
         {
             string library_code = Program.MainForm.GetReaderDbLibraryCode(Global.GetDbName(this.ReaderEditControl.RecPath));
-            RfidPatronCardDialog dlg = new RfidPatronCardDialog();
-            MainForm.SetControlFont(dlg, this.Font, false);
-            dlg.SetData(this.ReaderEditControl, library_code);
-            Program.MainForm.AppInfo.LinkFormState(dlg, "ReaderInfoForm_RfidPatronCardDialog_state");
-            dlg.ShowDialog(this);
-            Program.MainForm.AppInfo.UnlinkFormState(dlg);
+            using (RfidPatronCardDialog dlg = new RfidPatronCardDialog())
+            {
+                MainForm.SetControlFont(dlg, this.Font, false);
+                dlg.SetData(this.ReaderEditControl,
+                    library_code,
+                    out string strWarning);
+                if (string.IsNullOrEmpty(strWarning) == false)
+                {
+                    // 警告，询问是否继续创建标签
+                    DialogResult result = MessageBox.Show(this,
+    strWarning + "\r\n\r\n是否继续创建读者卡?\r\n\r\n(Yes: 继续; No: 放弃)",
+    "ReaderInfoForm",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button2);
+                    if (result == DialogResult.No)
+                        return;
+                }
+                Program.MainForm.AppInfo.LinkFormState(dlg, "ReaderInfoForm_RfidPatronCardDialog_state");
+                dlg.ShowDialog(this);
+                Program.MainForm.AppInfo.UnlinkFormState(dlg);
+            }
         }
 
         private void toolStripMenuItem_bindCardNumber_Click(object sender, EventArgs e)

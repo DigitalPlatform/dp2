@@ -346,7 +346,7 @@ namespace DigitalPlatform.LibraryServer
                         if (nodeExist != null)
                         {
                             // DomUtil.SetAttr(domExist.DocumentElement, "expireDate", strExistExpireDate); // bug!!! 2020/5/19
-                            
+
                             DomUtil.SetAttr(nodeExist, "expireDate", strExistExpireDate);   // 2020/5/19 改掉 bug
                         }
                         else if (string.IsNullOrEmpty(strExistExpireDate) == false)
@@ -3869,6 +3869,7 @@ out strError);
 
             string strIdcardNumber = "";
             string strXml = "";
+            string strOwnerInstitution = null;
 
             string strOutputPath = "";
 
@@ -4062,6 +4063,9 @@ out strError);
                         strBarcode = strOutputCode;
                     }
                 }
+
+                ParseOI(strBarcode, out string strPureBarcode, out strOwnerInstitution);
+                strBarcode = strPureBarcode;
 
                 // 加读锁
                 // 可以避免拿到读者记录处理中途的临时状态
@@ -4374,6 +4378,29 @@ out strError);
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
+            }
+
+            // 2020/7/17
+            if (strOwnerInstitution != null)
+            {
+                // return:
+                //      -1  出错
+                //      0   没有通过较验
+                //      1   通过了较验
+                nRet = VerifyPatronOI(
+                    strRecPath,
+                    strLibraryCode,
+                    strOwnerInstitution,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+                if (nRet == 0)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = strError;
+                    result.ErrorCode = ErrorCode.ReaderBarcodeNotFound;
+                    return result;
+                }
             }
 
             {

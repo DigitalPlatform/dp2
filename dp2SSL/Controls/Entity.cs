@@ -666,17 +666,7 @@ Stack:
             return true;
         }
 
-        public string GetOiPii()
-        {
-            // 包含 OI 的 PII
-            string pii = "." + this.PII;
-            if (string.IsNullOrEmpty(this.OI) == false)
-                pii = this.OI + "." + this.PII;
-            else if (string.IsNullOrEmpty(this.AOI) == false)
-                pii = this.AOI + "." + this.PII;
 
-            return pii;
-        }
     }
 
 }

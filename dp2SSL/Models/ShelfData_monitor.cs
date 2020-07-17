@@ -240,9 +240,12 @@ TaskCreationOptions.LongRunning,
 TaskScheduler.Default);
         }
 
+        // TODO: 如何显示进度信息？
+        // 开始重做全量同步读者信息
         public static void RedoReplicatePatron()
         {
             SaveStartDate(null);
+            ActivateMonitor();
         }
 
         static void SaveStartDate(string startDate)

@@ -33,12 +33,14 @@ namespace dp2Circulation
         string _barcode = null;
 
         public void SetData(ReaderEditControl patron,
-            string library_code)
+            string library_code,
+            out string strWarning)
         {
+            strWarning = "";
             try
             {
                 this._barcode = patron.Barcode;
-                this.chipEditor_editing.LogicChipItem = BuildChip(patron, library_code);
+                this.chipEditor_editing.LogicChipItem = BuildChip(patron, library_code, out strWarning);
             }
             catch (Exception ex)
             {
@@ -54,8 +56,11 @@ namespace dp2Circulation
 
         // 根据 BookItem 对象构造一个 LogicChipItem 对象
         public static LogicChipItem BuildChip(ReaderEditControl patron,
-            string library_code)
+            string library_code,
+            out string strWarning)
         {
+            strWarning = "";
+
             if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.11") < 0)
                 throw new Exception("当前连接的 dp2library 必须为 3.11 或以上版本，才能使用 RFID 有关功能");
 
@@ -70,9 +75,9 @@ namespace dp2Circulation
 
             // location --> OwnerInstitution 要配置映射关系
             // 定义一系列前缀对应的 ISIL 编码。如果 location 和前缀前方一致比对成功，则得到 ISIL 编码
-            MainForm.GetOwnerInstitution(
+            var ret = MainForm.GetOwnerInstitution(
                 Program.MainForm.RfidCfgDom,
-                library_code,
+                library_code + "/", // 2020/7/17 增加 "/"
                 out string isil,
                 out string alternative);
             if (string.IsNullOrEmpty(isil) == false)
@@ -82,6 +87,10 @@ namespace dp2Circulation
             else if (string.IsNullOrEmpty(alternative) == false)
             {
                 result.NewElement(ElementOID.AlternativeOwnerInstitution, alternative);
+            }
+            else
+            {
+                strWarning = $"当前 library.xml 中没有为馆代码 '{library_code}' 配置机构代码，这样创建的(没有包含机构代码的) 读者卡容易和其他机构的发生混淆";
             }
 
             // TypeOfUsage?
@@ -151,7 +160,7 @@ namespace dp2Circulation
                 this.chipEditor_existing.LogicChipItem = chip;
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -171,7 +180,7 @@ namespace dp2Circulation
                 goto ERROR1;
             _leftLoaded = true;
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -201,7 +210,7 @@ namespace dp2Circulation
 
             try
             {
-                REDO:
+            REDO:
                 // 出现对话框让选择一个
                 // SelectTagDialog dialog = new SelectTagDialog();
                 using (RfidToolForm dialog = new RfidToolForm())
