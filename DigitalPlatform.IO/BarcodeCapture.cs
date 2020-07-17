@@ -25,6 +25,8 @@ namespace DigitalPlatform.IO
         //定义成静态，这样不会抛出回收异常
         private static HookProc hookproc;
 
+        // 是否吞掉击键。true 表示要吞掉，false 表示不吞掉
+        // 吞掉的意思是，除了监控的程序外，其他程序得不到击键
         public bool Handled = false;
 
         public struct StringInput
@@ -247,8 +249,10 @@ namespace DigitalPlatform.IO
         END1:
             if (Handled == true)
             {
+                /*
                 if (wParam == WM_KEYDOWN)
                     Console.Beep();
+                */
                 return 1;
             }
             return CallNextHookEx(hKeyboardHook, nCode, wParam, lParam);

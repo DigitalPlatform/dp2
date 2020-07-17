@@ -3267,6 +3267,68 @@ start_time_1,
         //      -1  出错
         //      0   没有通过较验
         //      1   通过了较验
+        public int VerifyPatronOI(
+            string strPatronRecPath,
+            string strLibraryCode,
+            string strOwnerInstitution,
+            out string strError)
+        {
+            strError = "";
+
+            // 用 OI 判断这一条册记录是否符合要求
+            if (strOwnerInstitution == null)
+                return 1;
+
+            var rfid = this.LibraryCfgDom.DocumentElement.SelectSingleNode("rfid") as XmlElement;
+            if (rfid == null)
+            {
+                /*
+                // 如果要求必须定义 rfid 元素：
+                strError = $"library.xml 中没有配置 rfid 元素，无法针对请求的所属机构代码 '{strOwnerInstitution}' 进行核实";
+                return -1;
+                */
+                if (strOwnerInstitution == "")
+                    return 1;
+
+                // strError = $"library.xml 中没有配置 rfid 元素，册记录所属机构代码应为空。(但现在是 '{strOwnerInstitution}')";
+                strError = $"当前读者卡来自馆外机构 '{strOwnerInstitution}'";
+                return 0;
+            }
+
+            // return:
+            //      true    找到。信息在 isil 和 alternative 参数里面返回
+            //      false   没有找到
+            var ret = GetOwnerInstitution(
+                rfid,
+                strLibraryCode + "/",
+                out string isil,
+                out string alternative);
+            if (ret == false)
+            {
+                strError = $"library.xml 的 rfid 配置参数中没有找到和馆代码 '{strLibraryCode}' 关联的所属机构代码";
+                return 0;
+            }
+
+            int matched = 0;
+            if (string.IsNullOrEmpty(isil) == false && strOwnerInstitution == isil)
+                matched++;
+            if (string.IsNullOrEmpty(alternative) == false && strOwnerInstitution == alternative)
+                matched++;
+
+            if (matched == 0)
+            {
+                strError = $"当前读者卡来自馆外机构 '{strOwnerInstitution}' (1)";
+                // strError = $"请求的所属机构 '{strOwnerInstitution}' 和册记录 {strOutputItemRecPath} 的所属机构代码 '{isil}' 和 '{alternative}' 不吻合";
+                return 0;
+            }
+
+            return 1;
+        }
+
+        // return:
+        //      -1  出错
+        //      0   没有通过较验
+        //      1   通过了较验
         public int VerifyOI(
             string strOutputItemRecPath,
             string strItemXml,
@@ -3338,12 +3400,76 @@ start_time_1,
             return 1;
         }
 
+#if REMOVED
         /*
 <rfid>
 <ownerInstitution>
 <item map="海淀分馆/" isil="test" />
 <item map="西城/" alternative="xc" />
 </ownerInstitution>
+<patronMaps>
+<item libraryCode="" isil="test" />
+<item libraryCode="海淀分馆" isil="xc" />
+</patronMaps>
+</rfid>
+map 为 "/" 或者 "/阅览室" 可以匹配 "图书总库" "阅览室" 这样的 strLocation
+map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" 这样的 strLocation
+最好单元测试一下这个函数
+* */
+        // parameters:
+        //      cfg_dom 根元素是 rfid
+        //      strLibraryCode 馆代码
+        //      isil    [out] 返回 ISIL 形态的代码
+        //      alternative [out] 返回其他形态的代码
+        // return:
+        //      true    找到。信息在 isil 和 alternative 参数里面返回
+        //      false   没有找到
+        public static bool GetPatronOwnerInstitution(
+            XmlElement rfid,
+            string strLibraryCode,
+            out string isil,
+            out string alternative)
+        {
+            isil = "";
+            alternative = "";
+
+            if (rfid == null)
+                return false;
+
+            XmlNodeList items = rfid.SelectNodes(
+                "patronMaps/item");
+            List<HitItem> results = new List<HitItem>();
+            foreach (XmlElement item in items)
+            {
+                string strCurrentLibraryCode = item.GetAttribute("libraryCode");
+                if (strCurrentLibraryCode == strLibraryCode)
+                {
+                    HitItem hit = new HitItem { Map = strCurrentLibraryCode, Element = item };
+                    results.Add(hit);
+                }
+            }
+
+            if (results.Count == 0)
+                return false;
+
+            // 如果命中多个，要选出 map 最长的那一个返回
+
+            // 排序，大在前
+            if (results.Count > 0)
+                results.Sort((a, b) => { return b.Map.Length - a.Map.Length; });
+
+            isil = results[0].Element.GetAttribute("isil");
+            alternative = results[0].Element.GetAttribute("alternative");
+            return true;
+        }
+#endif
+
+        /*
+<rfid>
+    <ownerInstitution>
+        <item map="海淀分馆/" isil="test" />
+        <item map="西城/" alternative="xc" />
+    </ownerInstitution>
 </rfid>
 map 为 "/" 或者 "/阅览室" 可以匹配 "图书总库" "阅览室" 这样的 strLocation
 map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" 这样的 strLocation
@@ -3352,6 +3478,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
         // parameters:
         //      cfg_dom 根元素是 rfid
         //      strLocation 纯净的 location 元素内容。
+        //                  或者用馆代码，比如 "/" 表示总馆；"海淀分馆/" 表示分馆
         //      isil    [out] 返回 ISIL 形态的代码
         //      alternative [out] 返回其他形态的代码
         // return:

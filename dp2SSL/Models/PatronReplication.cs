@@ -6,12 +6,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 
+using static dp2SSL.LibraryChannelUtil;
 using DigitalPlatform;
 using DigitalPlatform.Xml;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Text;
-using static dp2SSL.LibraryChannelUtil;
 using DigitalPlatform.WPF;
 using DigitalPlatform.IO;
 
@@ -216,6 +216,21 @@ out string strError);
             cardNumber = cardNumber.ToUpper();
             if (string.IsNullOrEmpty(cardNumber) == false)
                 cardNumber = "," + cardNumber + ",";
+
+            // 2020/7/17
+            if (pii.StartsWith("@") == false)
+            {
+                string libraryCode = DomUtil.GetElementText(dom.DocumentElement, "libraryCode");
+                var ret = ShelfData.GetOwnerInstitution(libraryCode + "/", out string isil, out string alternative);
+                if (ret == true)
+                {
+                    // 应该是 xxx.xxx 形态
+                    if (string.IsNullOrEmpty(isil) == false)
+                        pii = isil + "." + pii;
+                    else if (string.IsNullOrEmpty(alternative) == false)
+                        pii = alternative + "." + pii;
+                }
+            }
 
             patron.PII = pii;
             patron.RecPath = record.Path;

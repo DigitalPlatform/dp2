@@ -2463,13 +2463,15 @@ namespace dp2SSL
                         pii = HexToDecimal(_patron.UID);  // 14443A 卡的 UID
                     else
                         pii = _patron.UID;  // 14443A 卡的 UID
-                }
 
-                if (string.IsNullOrEmpty(pii))
-                {
-                    ClearBorrowedEntities();
-                    return new NormalResult();
+                    if (string.IsNullOrEmpty(pii))
+                    {
+                        ClearBorrowedEntities();
+                        return new NormalResult();
+                    }
                 }
+                else
+                    pii = _patron.GetOiPii();
 
                 // TODO: 先显示等待动画
 
@@ -2507,15 +2509,26 @@ namespace dp2SSL
                         }
                         else
                         {
+                            // return.Value:
+                            //      -1  出错
+                            //      0   读者记录没有找到
+                            //      1   成功
                             var get_result = GetReaderInfoFromLocal(pii, true);
 
                             // 2020/6/21
                             // 刷新可借总册数信息
                             {
                                 XmlDocument patron_dom = new XmlDocument();
-                                patron_dom.LoadXml(get_result.ReaderXml);
-                                Patron.RefreshMaxBorrowable(patron_dom);
-                                get_result.ReaderXml = patron_dom.OuterXml;
+                                try
+                                {
+                                    patron_dom.LoadXml(get_result.ReaderXml);
+                                    Patron.RefreshMaxBorrowable(patron_dom);
+                                    get_result.ReaderXml = patron_dom.OuterXml;
+                                }
+                                catch (Exception ex)
+                                {
+
+                                }
                             }
 
                             return get_result;
