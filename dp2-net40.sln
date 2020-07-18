@@ -247,8 +247,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnitTestSimpleMessageQueue"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "commander", "commander\commander.csproj", "{C92E9E07-A1C1-41CF-A1A9-90EFCF027DBD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.ServiceProcess", "..\dp-library\DigitalPlatform.ServiceProcess\DigitalPlatform.ServiceProcess.csproj", "{F6A351AC-D11E-4A48-8970-632A15F5DB60}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestService", "TestService\TestService.csproj", "{F5768DB7-8AF1-4E04-AB37-AD5F033DB1CB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestUHF", "TestUHF\TestUHF.csproj", "{C8113357-AF6E-423E-87DD-1F3504EC31A8}"
@@ -260,6 +258,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GreenInstall", "GreenInstall\GreenInstall.csproj", "{3366EAF9-B030-4BBB-A63A-77E71A5E5400}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LedDriver.First", "LedDriver.First\LedDriver.First.csproj", "{72E558FA-25F2-44D1-8A1B-313AF7001AD3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.ServiceProcess", "dp-library\DigitalPlatform.ServiceProcess\DigitalPlatform.ServiceProcess.csproj", "{F6A351AC-D11E-4A48-8970-632A15F5DB60}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -2048,24 +2048,6 @@ Global
 		{C92E9E07-A1C1-41CF-A1A9-90EFCF027DBD}.Test|Mixed Platforms.Build.0 = Release|Any CPU
 		{C92E9E07-A1C1-41CF-A1A9-90EFCF027DBD}.Test|x86.ActiveCfg = Release|Any CPU
 		{C92E9E07-A1C1-41CF-A1A9-90EFCF027DBD}.Test|x86.Build.0 = Release|Any CPU
-		{F6A351AC-D11E-4A48-8970-632A15F5DB60}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F6A351AC-D11E-4A48-8970-632A15F5DB60}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F6A351AC-D11E-4A48-8970-632A15F5DB60}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{F6A351AC-D11E-4A48-8970-632A15F5DB60}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{F6A351AC-D11E-4A48-8970-632A15F5DB60}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{F6A351AC-D11E-4A48-8970-632A15F5DB60}.Debug|x86.Build.0 = Debug|Any CPU
-		{F6A351AC-D11E-4A48-8970-632A15F5DB60}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F6A351AC-D11E-4A48-8970-632A15F5DB60}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F6A351AC-D11E-4A48-8970-632A15F5DB60}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{F6A351AC-D11E-4A48-8970-632A15F5DB60}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{F6A351AC-D11E-4A48-8970-632A15F5DB60}.Release|x86.ActiveCfg = Release|Any CPU
-		{F6A351AC-D11E-4A48-8970-632A15F5DB60}.Release|x86.Build.0 = Release|Any CPU
-		{F6A351AC-D11E-4A48-8970-632A15F5DB60}.Test|Any CPU.ActiveCfg = Release|Any CPU
-		{F6A351AC-D11E-4A48-8970-632A15F5DB60}.Test|Any CPU.Build.0 = Release|Any CPU
-		{F6A351AC-D11E-4A48-8970-632A15F5DB60}.Test|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{F6A351AC-D11E-4A48-8970-632A15F5DB60}.Test|Mixed Platforms.Build.0 = Release|Any CPU
-		{F6A351AC-D11E-4A48-8970-632A15F5DB60}.Test|x86.ActiveCfg = Release|Any CPU
-		{F6A351AC-D11E-4A48-8970-632A15F5DB60}.Test|x86.Build.0 = Release|Any CPU
 		{F5768DB7-8AF1-4E04-AB37-AD5F033DB1CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F5768DB7-8AF1-4E04-AB37-AD5F033DB1CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F5768DB7-8AF1-4E04-AB37-AD5F033DB1CB}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
@@ -2174,6 +2156,24 @@ Global
 		{72E558FA-25F2-44D1-8A1B-313AF7001AD3}.Test|Mixed Platforms.Build.0 = Release|Any CPU
 		{72E558FA-25F2-44D1-8A1B-313AF7001AD3}.Test|x86.ActiveCfg = Release|Any CPU
 		{72E558FA-25F2-44D1-8A1B-313AF7001AD3}.Test|x86.Build.0 = Release|Any CPU
+		{F6A351AC-D11E-4A48-8970-632A15F5DB60}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6A351AC-D11E-4A48-8970-632A15F5DB60}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F6A351AC-D11E-4A48-8970-632A15F5DB60}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{F6A351AC-D11E-4A48-8970-632A15F5DB60}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{F6A351AC-D11E-4A48-8970-632A15F5DB60}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F6A351AC-D11E-4A48-8970-632A15F5DB60}.Debug|x86.Build.0 = Debug|Any CPU
+		{F6A351AC-D11E-4A48-8970-632A15F5DB60}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F6A351AC-D11E-4A48-8970-632A15F5DB60}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F6A351AC-D11E-4A48-8970-632A15F5DB60}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{F6A351AC-D11E-4A48-8970-632A15F5DB60}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{F6A351AC-D11E-4A48-8970-632A15F5DB60}.Release|x86.ActiveCfg = Release|Any CPU
+		{F6A351AC-D11E-4A48-8970-632A15F5DB60}.Release|x86.Build.0 = Release|Any CPU
+		{F6A351AC-D11E-4A48-8970-632A15F5DB60}.Test|Any CPU.ActiveCfg = Release|Any CPU
+		{F6A351AC-D11E-4A48-8970-632A15F5DB60}.Test|Any CPU.Build.0 = Release|Any CPU
+		{F6A351AC-D11E-4A48-8970-632A15F5DB60}.Test|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{F6A351AC-D11E-4A48-8970-632A15F5DB60}.Test|Mixed Platforms.Build.0 = Release|Any CPU
+		{F6A351AC-D11E-4A48-8970-632A15F5DB60}.Test|x86.ActiveCfg = Release|Any CPU
+		{F6A351AC-D11E-4A48-8970-632A15F5DB60}.Test|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
