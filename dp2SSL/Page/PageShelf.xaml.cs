@@ -1535,6 +1535,8 @@ namespace dp2SSL
                 };
                 progress.openDoorButton.Click += (s, e) =>
                 {
+                    TrySetMessage(null, "“开门”按钮被按下(正在初始化对话框)");
+
                     var open_result = RfidManager.OpenShelfLock(progress.Door.LockPath);
                     if (open_result.Value == -1)
                         ErrorBox(open_result.ErrorInfo);
@@ -1542,16 +1544,20 @@ namespace dp2SSL
                 progress.retryButton.Click += (s, e) =>
                 {
                     eventRetry.Set();
+                    TrySetMessage(null, "“重试”按钮被按下(正在初始化对话框)");
                 };
                 progress.silentlyRetryButton.Click += (s, e) =>
                 {
                     silently = true;
                     eventRetry.Set();
+
+                    TrySetMessage(null, "“静默重试”按钮被按下(正在初始化对话框)");
                 };
                 progress.cancelButton.Click += (s, e) =>
                 {
                     eventCancel.Set();
                     progress.Close();
+                    TrySetMessage(null, "“中断”按钮被按下(正在初始化对话框)");
                 };
                 App.SetSize(progress, "tall");
                 progress.EnableRetryOpenButtons(false);
@@ -1845,8 +1851,10 @@ namespace dp2SSL
                                 progress.EnableRetryOpenButtons(true);
                             }));
 
-                            // TODO: 发出点对点消息，显示对话框的文本内容和按钮布局
+                            // 2020/7/20
+                            // 发出点对点消息，显示对话框的文本内容和按钮布局
                             // 然后等待点对点命令。命令为 @robot press 'OK' 这样的形态
+                            App.SendDialogText(progress, "“正在初始化”");
 
                             // TODO: 操作者刷卡鉴别身份以后才能按开门、取消按钮
 
@@ -1880,7 +1888,7 @@ namespace dp2SSL
                             else
                             {
                                 // 中断
-                                Debug.Assert(index == 3);
+                                Debug.Assert(index == 2);
                                 return;
                             }
                         }
