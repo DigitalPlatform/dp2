@@ -180,15 +180,37 @@ namespace RfidCenter
             }
 
             // 后台自动检查更新
-            Task.Run(() =>
+            Task.Run(async () =>
             {
-                NormalResult result = ClientInfo.InstallUpdateSync();
-                if (result.Value == -1)
-                    OutputHistory("自动更新出错: " + result.ErrorInfo, 2);
-                else if (result.Value == 1)
-                    OutputHistory(result.ErrorInfo, 1);
-                else if (string.IsNullOrEmpty(result.ErrorInfo) == false)
-                    OutputHistory(result.ErrorInfo, 0);
+                try
+                {
+                    var token = _cancel.Token;
+                    // 2020/7/20
+                    // 不断循环，每隔一个小时检查一次软件更新
+                    while (token.IsCancellationRequested == false)
+                    {
+                        await Task.Delay(TimeSpan.FromMinutes(60), token);
+
+                        // result.Value:
+                        //      -1  出错
+                        //      0   没有发现更新
+                        //      1   已经更新，重启可使用新版本
+                        NormalResult result = ClientInfo.InstallUpdateSync();
+                        if (result.Value == -1)
+                            OutputHistory("自动更新出错: " + result.ErrorInfo, 2);
+                        else if (result.Value == 1)
+                        {
+                            OutputHistory(result.ErrorInfo, 1);
+                            break;
+                        }
+                        else if (string.IsNullOrEmpty(result.ErrorInfo) == false)
+                            OutputHistory(result.ErrorInfo, 0);
+                    }
+                }
+                catch(Exception ex)
+                {
+                    ClientInfo.WriteErrorLog($"InstallUpdateSync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                }
             });
 
             if (ClientInfo.IsMinimizeMode())

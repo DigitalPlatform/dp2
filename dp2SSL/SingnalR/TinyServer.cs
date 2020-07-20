@@ -1026,6 +1026,7 @@ cancellation_token);
             if (command.StartsWith("led"))
             {
                 string param = command.Substring("led".Length).Trim();
+                App.LedText = param;    // 保存起来
                 await LedDisplay(param, groupName);
                 return;
             }
@@ -1055,6 +1056,13 @@ cancellation_token);
             if (command.StartsWith("check patron"))
             {
                 await CheckPatronAsync(command, groupName);
+                return;
+            }
+
+            // 开启紫外线杀菌
+            if (command.StartsWith("sterilamp"))
+            {
+                _ = App.CurrentApp.SterilampAsync();
                 return;
             }
 
@@ -1123,7 +1131,7 @@ cancellation_token);
         // -horzAlign:left
         // -vertAlign:top
         // -style:xxx
-        static async Task LedDisplay(string param, string groupName)
+        public static async Task LedDisplay(string param, string groupName)
         {
             string ledName = "*";
             DisplayStyle property = new DisplayStyle();
@@ -1175,7 +1183,7 @@ cancellation_token);
                 }
                 else
                 {
-                    await SendMessageAsync(new string[] { groupName }, $"无法识别子参数名 '{name}'");
+                    await SendMessageAsync(groupName == null ? null : new string[] { groupName }, $"无法识别子参数名 '{name}'");
                     return;
                 }
             }
@@ -1186,7 +1194,7 @@ cancellation_token);
                 y,
                 property,
                 style);
-            await SendMessageAsync(new string[] { groupName }, result.Value == -1 ? result.ErrorInfo : $"'{text}' 已成功显示");
+            await SendMessageAsync(groupName == null ? null : new string[] { groupName }, result.Value == -1 ? result.ErrorInfo : $"'{text}' 已成功显示");
         }
 
         public static bool ContainsParam(string args, string param)

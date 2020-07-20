@@ -405,6 +405,18 @@ namespace dp2SSL
 
                 InitialRfidManager();
 
+                // 首次显示以前遗留的 LED 文字
+                if (string.IsNullOrEmpty(App.LedText) == false)
+                {
+                    try
+                    {
+                        await TinyServer.LedDisplay(App.LedText, null);
+                    }
+                    catch(Exception ex)
+                    {
+                        WpfClientInfo.WriteErrorLog($"LedDisplay() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                    }
+                }
 
                 _shelfPrepared = true;
                 return new NormalResult();
@@ -1074,7 +1086,21 @@ namespace dp2SSL
             }
         }
 
-
+        public static string LedText
+        {
+            get
+            {
+                return WpfClientInfo.Config?.Get("global",
+    "ledText",
+    "");
+            }
+            set
+            {
+                WpfClientInfo.Config?.Set("global",
+    "ledText",
+    value);
+            }
+        }
 
         public static void SetLockingPassword(string password)
         {
@@ -1659,6 +1685,8 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                     progress.Show();
                 }));
 
+                PageShelf.TrySetMessage(null, "即将开始紫外线消毒，正在倒计时 ...");
+
                 try
                 {
                     // 首先倒计时警告远离
@@ -1680,6 +1708,8 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                         progress.BackColor = "red";
                         progress.MessageText = "正在进行紫外线消毒，请不要靠近书柜\r\n\r\n警告：紫外线对眼睛和皮肤有害";
                     }));
+
+                    PageShelf.TrySetMessage(null, "正在进行紫外线消毒，请不要靠近书柜");
 
                     // TODO: 屏幕上可以显示剩余时间
                     // TODO: 背景色动画，闪动
@@ -1710,6 +1740,8 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                     {
                         progress.Close();
                     }));
+
+                    PageShelf.TrySetMessage(null, "紫外线消毒结束");
                 }
             }
         }
