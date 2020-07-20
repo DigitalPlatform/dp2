@@ -412,7 +412,7 @@ namespace dp2SSL
                     {
                         await TinyServer.LedDisplay(App.LedText, null);
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         WpfClientInfo.WriteErrorLog($"LedDisplay() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                     }
@@ -1893,6 +1893,23 @@ Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
                     progress.MessageText = message;
                     progress.BackColor = color;
                 }));
+        }
+
+        // 显示当前对话框的内容
+        public static void SendDialogText(Window window, string title)
+        {
+            string text = "";
+            App.Invoke(new Action(() =>
+            {
+                if (window == null)
+                    window = App.GetActiveWindow();
+
+                if (window == null)
+                    text = "";
+                else
+                    text = App.FindTextChildren(window);
+            }));
+            PageShelf.TrySetMessage(null, $"==== {title} 对话框显示并等待输入 ====\r\n{text}");
         }
 
         public static NormalResult PressButton(string button_name)

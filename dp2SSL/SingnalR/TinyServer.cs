@@ -1194,7 +1194,7 @@ cancellation_token);
                 y,
                 property,
                 style);
-            await SendMessageAsync(groupName == null ? null : new string[] { groupName }, result.Value == -1 ? result.ErrorInfo : $"'{text}' 已成功显示");
+            await SendMessageAsync(groupName == null ? null : new string[] { groupName }, result.Value == -1 ? result.ErrorInfo : $"'{text}' 已成功显示在 LED 屏上");
         }
 
         public static bool ContainsParam(string args, string param)
