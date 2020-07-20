@@ -311,6 +311,7 @@ namespace dp2SSL
 
         const string dp2library_base_version = "3.29";
         const string fingerprintcenter_base_version = "2.1";
+        const string rfidcenter_base_version = "1.7";
 
         public static NormalResult CheckServerUID()
         {
@@ -428,8 +429,8 @@ namespace dp2SSL
                 {
                     try
                     {
-                        if (StringUtil.CompareVersion(result.ErrorCode, "1.5") < 0)
-                            errors.Add($"所连接的 RFID 中心版本太低(为 {result.ErrorCode} 版)。请升级到 1.5 以上版本");
+                        if (StringUtil.CompareVersion(result.ErrorCode, rfidcenter_base_version) < 0)
+                            errors.Add($"所连接的 RFID 中心版本太低(为 {result.ErrorCode} 版)。请升级到 {rfidcenter_base_version} 以上版本");
                     }
                     catch (Exception ex)
                     {

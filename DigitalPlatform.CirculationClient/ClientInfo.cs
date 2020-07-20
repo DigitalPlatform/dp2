@@ -519,6 +519,10 @@ namespace DigitalPlatform.CirculationClient
             }
         }
 
+        // result.Value:
+        //      -1  出错
+        //      0   没有发现更新
+        //      1   已经更新，重启可使用新版本
         public static NormalResult InstallUpdateSync()
         {
             if (ApplicationDeployment.IsNetworkDeployed)
