@@ -547,6 +547,11 @@ namespace dp2SSL
                 {
                     title = ShelfData.GetPiiString(action.Entity);
                 }
+                else
+                {
+                    // 2020/7/22
+                    title = $"[{ShelfData.GetPiiString(action.Entity)}] {title}";
+                }
             }
             else
                 title = "(action.Entity 为空)";

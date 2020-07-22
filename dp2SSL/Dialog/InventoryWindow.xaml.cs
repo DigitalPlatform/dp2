@@ -34,6 +34,18 @@ namespace dp2SSL
         }
         */
 
+        public string GetMessageText()
+        {
+            if (richText.Visibility == Visibility.Visible)
+            {
+                var fd = richText.Document;
+                TextRange tr = new TextRange(fd.ContentStart, fd.ContentEnd);
+                return tr.Text;
+            }
+
+            return MessageText;
+        }
+
         public string MessageText
         {
             get

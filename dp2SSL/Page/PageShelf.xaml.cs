@@ -1471,7 +1471,7 @@ namespace dp2SSL
             return "book";
         }
 
-        bool _initialCancelled = false;
+        // bool _initialCancelled = false;
 
         public void InitialDoorControl()
         {
@@ -1515,7 +1515,8 @@ namespace dp2SSL
 
             // //
 
-            _initialCancelled = false;
+            bool _initialCancelled = false;
+            List<string> errors = new List<string>();
 
             AutoResetEvent eventRetry = new AutoResetEvent(false);
             ManualResetEvent eventCancel = new ManualResetEvent(false);
@@ -1530,6 +1531,7 @@ namespace dp2SSL
                 progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
                 progress.Closed += (s, e) =>
                 {
+                    errors.Add("初始化被取消");
                     _initialCancelled = true;
                     eventCancel.Set();
                 };
@@ -1572,6 +1574,7 @@ namespace dp2SSL
                 if (string.IsNullOrEmpty(cfg_error) == false)
                 {
                     DisplayMessage(progress, cfg_error, "red");
+                    errors.Add(cfg_error);
                     _initialCancelled = true;
                     App.InitialShelfCfg();  // ? 这里为何要再来一次？
                     return;
@@ -1867,6 +1870,10 @@ namespace dp2SSL
                             });
                             if (index == 1)
                             {
+                                App.Invoke(new Action(() =>
+                                {
+                                    errors.Add(progress.GetMessageText());
+                                }));
                                 _initialCancelled = true;   // 表示初始化失败
                                 return;
                             }
@@ -1879,7 +1886,7 @@ namespace dp2SSL
                                     {
                                         if (_initialCancelled)
                                             break;
-                                        DisplayMessage(progress, "请关闭全部柜门，以重试初始化", "yellow");
+                                        DisplayMessage(progress, $"请关闭柜门 {door.Name}，以重试初始化", "yellow");
                                         Thread.Sleep(1000);
                                     }
                                 });
@@ -1969,7 +1976,7 @@ namespace dp2SSL
 
                     if (progress != null)
                     {
-                        progress.Closed -= Progress_Cancelled;
+                        // progress.Closed -= Progress_Cancelled;
                         App.Invoke(new Action(() =>
                         {
                             if (progress != null)
@@ -1992,7 +1999,10 @@ namespace dp2SSL
                     // PageMenu.MenuPage.shelf.Visibility = Visibility.Collapsed;
 
                     // TODO: 页面中央大字显示“书柜初始化失败”。重新进入页面时候应该自动重试初始化
-                    SetGlobalError("initial", "智能书柜初始化失败。请检查读卡器和门锁参数配置，重新进行初始化 ...");
+                    SetGlobalError("initial",
+                        $"智能书柜初始化失败: {StringUtil.MakePathList(errors, "; ")}"
+                        // "智能书柜初始化失败。请检查读卡器和门锁参数配置，重新进行初始化 ..."
+                        );
                     {
                         TrySetMessage(null, "*** 抱歉，我初始化失败了。请管理员帮我解决一下吧！");
                     }                    /*
@@ -2109,11 +2119,13 @@ namespace dp2SSL
             RemoveLayer();
         }
 
+        /*
         // 初始化被中途取消
         private void Progress_Cancelled(object sender, EventArgs e)
         {
             _initialCancelled = true;
         }
+        */
 
         void DetectPatron()
         {

@@ -1438,6 +1438,12 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
 
         private static void RfidManager_ListTags(object sender, ListTagsEventArgs e)
         {
+            // 2020/7/22
+            if (e.Result.Value == -1)
+            {
+                SetError("rfid", e.Result.ErrorInfo);
+            }
+
             // 标签总数显示
             // this.Number = e.Result?.Results?.Count.ToString();
             if (e.Result.Results != null)
