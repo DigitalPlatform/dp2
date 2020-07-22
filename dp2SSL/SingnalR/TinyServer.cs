@@ -26,6 +26,8 @@ using DigitalPlatform.MessageClient;
 using DigitalPlatform.SimpleMessageQueue;
 using System.Runtime.CompilerServices;
 using DigitalPlatform.RFID;
+using System.Runtime.InteropServices.WindowsRuntime;
+using System.Reflection;
 
 namespace dp2SSL
 {
@@ -340,6 +342,14 @@ TaskScheduler.Default);
                 {
                     var handler = HubProxy.On<SetInfoRequest>("setInfo",
                     (param) => OnSetInfoRecieved(param)
+                    );
+                    _handlers.Add(handler);
+                }
+
+                // *** getRes
+                {
+                    var handler = HubProxy.On<GetResRequest>("getRes",
+                    (param) => OnGetResRecieved(param)
                     );
                     _handlers.Add(handler);
                 }
@@ -1167,7 +1177,7 @@ cancellation_token);
                     property.FontSize = value;
                 else if (name == "effect")
                     property.Effect = value;
-                else if (name == "moveSpeed" || name == "speed")
+                else if (name == "movespeed" || name == "speed")
                     property.MoveSpeed = value;
                 else if (name == "duration")
                     property.Duration = value;
@@ -1175,7 +1185,7 @@ cancellation_token);
                     property.HorzAlign = value;
                 else if (name == "vertalign")
                     property.VertAlign = value;
-                else if (name == "style" || name == "extendStyle")
+                else if (name == "style" || name == "extendstyle")
                     style = value;
                 else if (name == "text")
                 {
@@ -2263,6 +2273,641 @@ strError,
                 BatchSize = batch_size
             };
         }
+
+        #endregion
+
+        #region GetRes() API
+
+        static void OnGetResRecieved(GetResRequest param)
+        {
+            _ = Task.Run(async () => GetResAndResponse(param));
+        }
+
+        // TODO: 比对每次获得的时间戳，如果不一致则要报错。
+        static async Task GetResAndResponse(GetResRequest param)
+        {
+            string strError = "";
+            IList<string> results = new List<string>();
+            long batch_size = 4 * 1024;    // 4K
+
+            string strStyle = param.Style;
+            if (StringUtil.IsInList("timestamp", strStyle) == false)
+                StringUtil.SetInList(ref strStyle, "timestamp", true);  // 为了每次 GetRes() 以后比对
+
+            // para.Path 为 "data/" 或者 "program/" 开头
+            string strFilePath = "";
+            if (param.Path.StartsWith("data/"))
+            {
+                string path = param.Path.Substring("data/".Length);
+                strFilePath = Path.Combine(WpfClientInfo.UserDir, path);
+            }
+            else if (param.Path.StartsWith("program/"))
+            {
+                string path = param.Path.Substring("program/".Length);
+                string binDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                strFilePath = Path.Combine(binDir, path);
+            }
+            else
+            {
+                strError = $"路径 {param.Path} 无法识别(应当以 data/ 或 program/ 开头)";
+                goto ERROR1;
+            }
+
+            try
+            {
+                long lTotalLength = 0;  // 对象的总长度
+                long send = 0;  // 累计发送了多少 byte
+                long chunk_size = -1;   // 每次从 dp2library 获取的分片大小
+                long length = -1;    // 本次点对点 API 希望获得的长度
+
+                if (param.Length != -1)
+                {
+                    chunk_size = Math.Min(100 * 1024, (int)param.Length);
+                    length = param.Length;
+                }
+
+                byte[] timestamp = null;
+                for (; ; )
+                {
+                    long lRet = 0;
+                    byte[] baContent = null;
+                    string strMetadata = "";
+                    string strOutputResPath = "";
+                    byte[] baOutputTimestamp = null;
+                    string error_code = "";
+
+                    if (param.Operation == "getRes")
+                    {
+                        Console.WriteLine("getRes() start=" + (param.Start + send)
+                            + " length=" + chunk_size);
+                        // Thread.Sleep(500);
+
+                        /*
+                        lRet = channel.GetRes(param.Path,
+                            param.Start + send,
+                            (int)chunk_size, // (int)param.Length,
+                            strStyle,   // param.Style,
+                            out baContent,
+                            out strMetadata,
+                            out strOutputResPath,
+                            out baOutputTimestamp,
+                            out strError);
+                        */
+
+                        // 下载本地文件
+                        // TODO: 限制 nMaxLength 最大值
+                        // parameters:
+                        //      strStyle    "uploadedPartial" 表示操作都是针对已上载临时部分的。比如希望获得这个局部的长度，时间戳，等等
+                        // return:
+                        //      -2      文件不存在
+                        //		-1      出错
+                        //		>= 0	成功，返回最大长度
+                        lRet = GetFile(
+                            strFilePath,
+                            param.Start + send,
+                            (int)chunk_size,
+                            100 * 1024,
+                            strStyle,
+                            out baContent,
+                            out baOutputTimestamp,
+                            out strError);
+                        if (lRet == -2)
+                        {
+                            error_code = "NotFound";
+                            lRet = -1;
+                        }
+                        else if (lRet == -1)
+                        {
+                            error_code = "SystemError";
+                            lRet = -1;
+                        }
+
+                    }
+                    else
+                    {
+                        strError = "无法识别的 Operation 值 '" + param.Operation + "'";
+                        goto ERROR1;
+                    }
+
+                    if (timestamp != null)
+                    {
+                        if (ByteArray.Compare(timestamp, baOutputTimestamp) != 0)
+                        {
+                            strError = "获取对象过程中发现时间戳发生了变化，本次获取操作无效";
+                            goto ERROR1;
+                        }
+                    }
+
+                    // 记忆下来供下一轮比对之用
+                    timestamp = baOutputTimestamp;
+
+                    lTotalLength = lRet;
+                    if (length == -1)
+                        length = lRet;
+
+                    GetResResponse result = new GetResResponse();
+                    result.TaskID = param.TaskID;
+                    result.TotalLength = lRet;
+                    result.Start = param.Start + send;
+                    result.Path = strOutputResPath;
+                    result.Data = baContent;
+                    if (send == 0)
+                    {
+                        result.Metadata = strMetadata;
+                        if (StringUtil.IsInList("timestamp", param.Style) == true)
+                            result.Timestamp = ByteArray.GetHexTimeStampString(baOutputTimestamp);
+                    }
+                    result.ErrorInfo = strError;
+                    result.ErrorCode = error_code;
+
+                    /*
+                    bool bRet = TryResponseGetRes(result,
+        ref batch_size);
+                    if (bRet == false
+                        || result.Data == null || result.Data.Length == 0
+                        || length == -1)
+                        return;
+                    */
+
+                    var response_result = await TryResponseGetRes(result,
+                    batch_size);
+                    batch_size = response_result.BatchSize;
+                    if (response_result.Value == -1
+                        || result.Data == null || result.Data.Length == 0
+                        || length == -1)
+                        return;
+
+                    if (param.Start + send >= length)
+                        return;
+
+                    send += result.Data.Length;
+
+                    {
+                        chunk_size = length - param.Start - send;
+                        if (chunk_size <= 0)
+                            return;
+                        if (chunk_size >= Int32.MaxValue)
+                            chunk_size = 100 * 1024;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // AddErrorLine("GetResAndResponse() 出现异常: " + ex.Message);
+                strError = ExceptionUtil.GetDebugText(ex);
+                goto ERROR1;
+            }
+
+        ERROR1:
+            {
+                // 报错
+                GetResResponse result = new GetResResponse();
+                result.TaskID = param.TaskID;
+                result.TotalLength = -1;
+                result.ErrorInfo = strError;
+                // result.ErrorCode = error_code;
+
+                await HubProxy.Invoke<MessageResult>("ResponseGetRes",
+result);
+                // ResponseGetRes(result);
+            }
+        }
+
+        /*
+        class ResponseResult : NormalResult
+        {
+            public long batch_size { get; set; }
+        }
+        */
+
+        // TODO: 如果第一次 metadata 和 timestamp 发送成功了，后面的几次就不要发送了，这样可以节省流量
+        // TODO: 如果 dp2mserver 返回值表示需要中断，就不要继续处理了
+        // parameters:
+        //      batch_size  建议的最佳一次发送数目。-1 表示不限制
+        // return:
+        //      true    成功
+        //      false   失败
+        static async Task<ResponseSearchResult> TryResponseGetRes(
+            GetResResponse param,
+            long batch_size/*,
+            ref long batch_size*/)
+        {
+            string strError = "";
+
+            // 修正 2018/10/2
+            if (param.Data != null && param.Data.Length == 0)
+                param.Data = null;
+
+            List<byte> rest = new List<byte>(); // 等待发送的
+            List<byte> current = new List<byte>();  // 当前正在发送的
+            if (param.Data != null)
+            {
+                if (batch_size == -1)
+                    current.AddRange(param.Data);
+                else
+                {
+                    rest.AddRange(param.Data);
+
+                    // 将最多 batch_size 个元素从 rest 中移动到 current 中
+                    for (int i = 0; i < batch_size && rest.Count > 0; i++)
+                    {
+                        current.Add(rest[0]);
+                        rest.RemoveAt(0);
+                    }
+                }
+            }
+
+            long send = 0;  // 已经发送过的元素数
+            while (current.Count > 0 || param.Data == null)
+            {
+                try
+                {
+                    // Wait(new TimeSpan(0, 0, 0, 0, 50)); // 50
+                    await Task.Delay(TimeSpan.FromMilliseconds(50));
+
+                    MessageResult result = await HubProxy.Invoke<MessageResult>("ResponseGetRes",
+                        new GetResResponse(
+                        param.TaskID,
+                        param.TotalLength,
+                        param.Start + send,
+                        param.Path,
+                        current.ToArray(),
+                        send == 0 ? param.Metadata : "",
+                        send == 0 ? param.Timestamp : "",
+                        param.ErrorInfo,
+                        param.ErrorCode));
+                    // _lastTime = DateTime.Now;
+                    if (result.Value == -1)
+                    {
+                        // return false;   // 可能因为服务器端已经中断此 taskID，或者执行 ReponseSearch() 时出错
+                        return new ResponseSearchResult
+                        {
+                            Value = -1,
+                            BatchSize = batch_size,
+                            ErrorInfo = result.ErrorInfo
+                        };
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("(retry)ResponseGetRes() exception=" + ex.Message);
+
+                    if (ex.InnerException is InvalidOperationException)
+                    {
+                        if (current.Count == 1)
+                        {
+                            strError = "向中心发送 ResponseGetRes 消息时出现异常(连一个元素也发送不出去): " + ex.InnerException.Message;
+                            goto ERROR1;
+                        }
+                        // 减少一半元素发送
+                        int half = Math.Max(1, current.Count / 2);
+                        int offs = current.Count - half;
+                        for (int i = 0; current.Count > offs; i++)
+                        {
+                            byte record = current[offs];
+                            rest.Insert(i, record);
+                            current.RemoveAt(offs);
+                        }
+                        batch_size = half;
+                        continue;
+                    }
+
+                    strError = "向中心发送 ResponseGetRes 消息时出现异常: " + ExceptionUtil.GetExceptionText(ex);
+                    goto ERROR1;
+                }
+
+                // Console.WriteLine("成功发送 offset=" + (param.Start + send) + " " + current.Count.ToString());
+
+                send += current.Count;
+                current.Clear();
+                if (batch_size == -1)
+                    current.AddRange(rest);
+                else
+                {
+                    // 将最多 batch_size 个元素从 rest 中移动到 current 中
+                    for (int i = 0; i < batch_size && rest.Count > 0; i++)
+                    {
+                        current.Add(rest[0]);
+                        rest.RemoveAt(0);
+                    }
+                }
+
+                if (param.Data == null)
+                    break;
+            }
+
+            Debug.Assert(rest.Count == 0, "");
+            Debug.Assert(current.Count == 0, "");
+            // return true;
+            return new ResponseSearchResult
+            {
+                Value = 0,
+                BatchSize = batch_size
+            };
+        ERROR1:
+            // 报错
+            {
+                MessageResult result = await HubProxy.Invoke<MessageResult>("ResponseGetRes",
+        new GetResResponse(
+        param.TaskID,
+        -1, // param.TotalLength,
+        param.Start + send,
+        param.Path,
+        current.ToArray(),
+        param.Metadata,
+        param.Timestamp,
+        strError,
+        "_sendResponseGetResError"));
+                // 消息层面发生的错误(表示不是 dp2library 层面的错误)，错误码为 _ 开头
+            }
+            // return false;
+            return new ResponseSearchResult
+            {
+                Value = -1,
+                BatchSize = batch_size,
+                ErrorInfo = strError
+            };
+        }
+
+        /*
+        static void ResponseGetRes(GetResResponse param)
+        {
+            try
+            {
+                MessageResult result = HubProxy.Invoke<MessageResult>("ResponseGetRes",
+ param).Result;
+            }
+            catch
+            {
+            }
+        }
+        */
+
+        // 下载本地文件
+        // TODO: 限制 nMaxLength 最大值
+        // parameters:
+        //      strStyle    "uploadedPartial" 表示操作都是针对已上载临时部分的。比如希望获得这个局部的长度，时间戳，等等
+        //                  "taskID" 在进行 taskResult 和 taskStop 操作时用 taskID 来指定任务 ID
+        //                  "beginTask" 表示本次启动了任务但并不等待任务完成。outputTimestamp 参数会返回 taskID(byte [] 用 UTF-8 Encoding 解释)
+        //                  "getTaskResult" 获取任务是否结束的信息和两个返回参数值
+        //                  "stopTask" 停止一个任务
+        // return:
+        //      -2      文件不存在
+        //		-1      出错
+        //		>= 0	成功，返回最大长度
+        static long GetFile(
+            string strFilePath,
+            long lStart,
+            int nLength,
+            int nMaxLength,
+            string strStyle,
+            out byte[] destBuffer,
+            out byte[] outputTimestamp,
+            out string strError)
+        {
+            destBuffer = null;
+            outputTimestamp = null;
+            strError = "";
+
+            bool isPartial = StringUtil.IsInList("uploadedPartial", strStyle);
+
+            long lTotalLength = 0;
+            strFilePath = strFilePath.Replace("/", "\\");
+
+            FileInfo file = null;
+            if (isPartial)
+            {
+                string strNewFileName = GetNewFileName(strFilePath);
+                file = new FileInfo(strNewFileName);
+                if (file.Exists == false)
+                {
+                    strError = " dp2Library 服务器不存在属于 '" + strFilePath + "' 的已上载局部文件";
+                    return -2;
+                }
+            }
+            else
+            {
+                file = new FileInfo(strFilePath);
+                if (file.Exists == false)
+                {
+                    strError = " dp2Library 服务器不存在物理路径为 '" + strFilePath + "' 的文件";
+                    return -2;
+                }
+            }
+            file.Refresh();
+
+            // 1.取时间戳
+            if (StringUtil.IsInList("timestamp", strStyle) == true)
+            {
+                string strNewFileName = GetNewFileName(strFilePath);
+                if (File.Exists(strNewFileName) == true)
+                {
+                    outputTimestamp = FileUtil.GetFileTimestamp(strNewFileName);
+                }
+                else
+                {
+                    outputTimestamp = FileUtil.GetFileTimestamp(strFilePath);
+                }
+            }
+
+#if NO
+            // 2.取元数据
+            if (StringUtil.IsInList("metadata", strStyle) == true)
+            {
+                string strMetadataFileName = DatabaseUtil.GetMetadataFileName(strFilePath);
+                if (File.Exists(strMetadataFileName) == true)
+                {
+                    strMetadata = FileUtil.File2StringE(strMetadataFileName);
+                }
+            }
+#endif
+
+            // 3.取range
+            if (StringUtil.IsInList("range", strStyle) == true)
+            {
+                string strRangeFileName = GetRangeFileName(strFilePath);
+                if (File.Exists(strRangeFileName) == true)
+                {
+                    string strText = FileUtil.File2StringE(strRangeFileName);
+                    string strTotalLength = "";
+                    string strRange = "";
+                    StringUtil.ParseTwoPart(strText, "|", out strRange, out strTotalLength);
+                }
+            }
+
+            // 4.长度
+            lTotalLength = file.Length;
+            // 这个长度有时候会有迟滞
+            // https://stackoverflow.com/questions/7828132/getting-current-file-length-fileinfo-length-caching-and-stale-information
+
+            // 2020/3/1
+            // lTotalLength = GetFileLength(strFilePath);
+            /*
+            // 2020/2/29
+            // 如果是正在获取当日的操作日志文件
+            if (PathUtil.IsEqual(strFilePath, this.OperLog.CurrentFileName))
+            {
+                // 如果刚才通过 FileInfo.Length 获得的文件长度不准确
+                if (lTotalLength < this.OperLog.GetCurrentStreamLength())
+                {
+                    // this.OperLog.ReOpen();
+                    lTotalLength = this.OperLog.GetCurrentStreamLength();
+                }
+            }
+            */
+
+            // 5.有data风格时,才会取数据
+            if (StringUtil.IsInList("data", strStyle) == true)
+            {
+                if (nLength == 0)  // 取0长度
+                {
+                    destBuffer = new byte[0];
+                    return lTotalLength;
+                }
+
+                // 检查范围是否合法
+                // return:
+                //		-1  出错
+                //		0   成功
+                int nRet = ConvertUtil.GetRealLengthNew(lStart,
+                    nLength,
+                    lTotalLength,
+                    nMaxLength,
+                    out long lOutputLength,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+
+                if (lOutputLength == 0)
+                {
+                    destBuffer = new byte[lOutputLength];
+                }
+                else
+                {
+                    using (FileStream s = new FileStream(strFilePath,
+                        FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                    {
+                        destBuffer = new byte[lOutputLength];
+
+                        Debug.Assert(lStart >= 0, "");
+
+                        s.Seek(lStart, SeekOrigin.Begin);
+                        int readed = s.Read(destBuffer,
+                            0,
+                            (int)lOutputLength);
+                        if (readed < lOutputLength)
+                        {
+                            // 2017/9/4
+                            strError = "希望从文件偏移 " + lStart + " 开始读入 " + lOutputLength + " 字节，但只成功读入了 " + readed + " 字节";
+                            return -1;
+                        }
+                    }
+
+                    /*
+                    StreamItem s = this._physicalFileCache.GetStream(strFilePath,
+    FileMode.Open,
+    FileAccess.Read,
+    lStart > 10 * 1024);
+                    try
+                    {
+                        destBuffer = new byte[lOutputLength];
+
+                        Debug.Assert(lStart >= 0, "");
+                        Debug.Assert(s.FileStream != null, "");
+
+                        s.FileStream.FastSeek(lStart);
+                        int readed = s.FileStream.Read(destBuffer,
+                            0,
+                            (int)lOutputLength);
+                        if (readed < lOutputLength)
+                        {
+                            strError = "希望从文件偏移 " + lStart + " 开始读入 " + lOutputLength + " 字节，但只成功读入了 " + readed + " 字节";
+                            return -1;
+                        }
+                    }
+                    finally
+                    {
+                        _physicalFileCache.ReturnStream(s);
+                    }
+                    */
+
+                    /*
+                    // 2020/2/29
+                    // 顺序获取到最后一次，则清除缓存事项。这样可以确保后面再次获取 FileInfo 的时候能准确一些
+                    if (lStart + lOutputLength >= lTotalLength)
+                    {
+                        _physicalFileCache.ClearItems(strFilePath);
+                    }
+                    */
+                }
+            }
+
+            // TODO: 测试一下获取 30G 尺寸的文件的 MD5 需要多少时间
+            // 取 MD5
+            if (StringUtil.IsInList("md5", strStyle) == true)
+            {
+#if NO
+                if (StringUtil.IsInList("beginTask", strStyle))
+                {
+                    var taskID = _md5Tasks.StartMd5Task(strFilePath);
+                    outputTimestamp = Encoding.UTF8.GetBytes(taskID);
+                }
+                else if (StringUtil.IsInList("getTaskResult", strStyle)
+                    || StringUtil.IsInList("stopTask", strStyle))
+                {
+                    var taskID = StringUtil.GetParameterByPrefix(strStyle, "taskID");
+                    if (string.IsNullOrEmpty(taskID))
+                    {
+                        strError = "没有提供 taskID";
+                        return -1;
+                    }
+                    var task = _md5Tasks.FindMd5Task(taskID);
+                    if (task == null)
+                    {
+                        strError = $"没有找到 taskID 为 '{taskID}' 的 MD5 任务";
+                        return -1;
+                    }
+                    if (StringUtil.IsInList("getTaskResult", strStyle))
+                    {
+                        if (task.Result == null)
+                        {
+                            outputTimestamp = null;
+                            return 0;   // 表示任务尚未完成
+                        }
+                        outputTimestamp = ByteArray.GetTimeStampByteArray(task.Result.ErrorCode);
+                        _md5Tasks.RemoveMd5Task(taskID);
+                        return 1;   // 表示任务已经完成
+                    }
+
+                    _md5Tasks.StopMd5Task(taskID);
+                    return 0;
+                }
+                else
+#endif
+                outputTimestamp = FileUtil.GetFileMd5(strFilePath);
+            }
+
+            return lTotalLength;
+        }
+
+        // 得到 newdata 字段对应的文件名
+        public static string GetNewFileName(string strFilePath)
+        {
+            return strFilePath + ".new~";
+        }
+
+        // 得到 range 字段对应的文件名
+        public static string GetRangeFileName(string strFilePath)
+        {
+            return strFilePath + ".range~";
+        }
+
+        // 得到 timestamp 字段对应的文件名
+        public static string GetTimestampFileName(string strFilePath)
+        {
+            return strFilePath + ".timestamp~";
+        }
+
 
         #endregion
 

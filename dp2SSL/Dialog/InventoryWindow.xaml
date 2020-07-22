@@ -19,8 +19,10 @@
                 <RowDefinition Height="60"/>
             </Grid.RowDefinitions>
             <TextBox Name="title" Grid.Row="0"
-                     Background="Transparent" BorderThickness="0"
-                     FontSize="14" HorizontalContentAlignment="Center"/>
+                     Background="Transparent" Foreground="White"
+                     BorderThickness="0"
+                     FontSize="18" FontWeight="Bold"
+                     HorizontalContentAlignment="Center"/>
             <Grid Grid.Row="1">
                 <local:MyFlowDocumentScrollViewer x:Name="richText" Visibility="Collapsed"
                                           ScrollViewer.PanningMode="Both"

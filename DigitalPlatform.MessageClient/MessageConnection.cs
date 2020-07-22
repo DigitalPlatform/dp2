@@ -1485,6 +1485,97 @@ request).Result;
         public List<MessageRecord> Results { get; set; }
     }
 
+    #region GetRes() 有关
+
+    public class GetResRequest
+    {
+        public string TaskID { get; set; }    // 本次任务 ID。
+        public LoginInfo LoginInfo { get; set; }    // 登录信息 2016/10/22
+        public string Operation { get; set; }   // 操作名。
+        public string Path { get; set; }
+        public long Start { get; set; }   // strItemBarcode 和 strConfirmItemRecPath 都包含
+        public long Length { get; set; }     // 
+        public string Style { get; set; }
+
+        public GetResRequest()
+        {
+
+        }
+
+        public GetResRequest(string taskID,
+            LoginInfo loginInfo,
+            string operation,
+            string path,
+            long start,
+            long length,
+            string style)
+        {
+            this.TaskID = taskID;
+            this.LoginInfo = loginInfo;
+            this.Operation = operation;
+            this.Path = path;
+            this.Start = start;
+            this.Length = length;
+            this.Style = style;
+        }
+    }
+
+    public class GetResResponse
+    {
+        public string TaskID { get; set; }    // 本次检索的任务 ID。由于一个 Connection 可以用于同时进行若干检索操作，本参数用于区分不同的检索操作
+        public long TotalLength { get; set; }
+        public long Start { get; set; }    // 本次响应 Data 的偏移
+        public string Path { get; set; }
+        public byte[] Data { get; set; }
+        public string Metadata { get; set; }
+        public string Timestamp { get; set; }
+        public string ErrorInfo { get; set; }
+        public string ErrorCode { get; set; }
+
+        public GetResResponse()
+        {
+
+        }
+
+        public GetResResponse(string taskID,
+            long totalLength,
+            long start,
+            string path,
+            byte[] data,
+            string metadata,
+            string timestamp,
+            string errorInfo,
+            string errorCode)
+        {
+            this.TaskID = taskID;
+            this.TotalLength = totalLength;
+            this.Start = start;
+            this.Path = path;
+            this.Data = data;
+            this.Metadata = metadata;
+            this.Timestamp = timestamp;
+            this.ErrorInfo = errorInfo;
+            this.ErrorCode = errorCode;
+        }
+
+        public string Dump()
+        {
+            StringBuilder text = new StringBuilder();
+            text.Append("TaskID=" + this.TaskID + "\r\n");
+            text.Append("TotalLength=" + this.TotalLength + "\r\n");
+            text.Append("Start=" + this.Start + "\r\n");
+            text.Append("Data.Length=" + (this.Data != null ? this.Data.Length : 0) + "\r\n");
+            text.Append("Metadata" + this.Metadata + "\r\n");
+            text.Append("Timestamp" + this.Timestamp + "\r\n");
+            text.Append("ErrorInfo=" + this.ErrorInfo + "\r\n");
+            text.Append("ErrorCode=" + this.ErrorCode + "\r\n");
+            return text.ToString();
+        }
+    }
+
+    #endregion
+
+
     /// <summary>
     /// 消息通知事件
     /// </summary>

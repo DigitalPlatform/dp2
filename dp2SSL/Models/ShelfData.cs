@@ -2621,6 +2621,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             }
             catch (Exception ex)
             {
+                App.CurrentApp.SpeakSequence("警告: 标签解析出错");
                 if (throw_exception == false)
                 {
                     result.AppendError($"RFID 标签格式错误: {ex.Message}",
@@ -3601,7 +3602,18 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                 {
                     CancellationToken token = CancelToken;
                     await FillBookFieldsAsync(l_All, token, "refreshCount");
-                    await FillBookFieldsAsync(l_Adds, token, "refreshCount");
+                    var result = await FillBookFieldsAsync(l_Adds, token, "refreshCount");
+                    /*
+                    // 2020/7/22
+                    if (result.Errors != null && result.Errors.Count > 0)
+                    {
+                        App.CurrentApp.SpeakSequence("警告:");
+                        foreach (var error in result.Errors)
+                        {
+                            App.CurrentApp.SpeakSequence(error);
+                        }
+                    }
+                    */
                     await FillBookFieldsAsync(l_Removes, token, "refreshCount");
                     await FillBookFieldsAsync(l_Changes, token, "refreshCount");
                 }
