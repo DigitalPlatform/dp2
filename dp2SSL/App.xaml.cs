@@ -35,6 +35,9 @@ using DigitalPlatform.Face;
 using DigitalPlatform.WPF;
 using DigitalPlatform.MessageClient;
 using DigitalPlatform.Install;
+using Microsoft.Win32;
+using System.Security.Principal;
+using Microsoft.EntityFrameworkCore.Internal;
 
 
 //using Microsoft.VisualStudio.Shell;
@@ -128,6 +131,9 @@ namespace dp2SSL
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:避免使用 Async Void 方法", Justification = "<挂起>")]
         protected async override void OnStartup(StartupEventArgs e)
         {
+            if (DisableEdgeUI() == true)
+                return;
+
             bool aIsNewInstance = false;
             myMutex = new Mutex(true, "{75BAF3F0-FF7F-46BB-9ACD-8FE7429BF291}", out aIsNewInstance);
             if (!aIsNewInstance)
@@ -2134,6 +2140,85 @@ Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
         const uint GW_HWNDNEXT = 2;
         [DllImport("User32")] static extern IntPtr GetTopWindow(IntPtr hWnd);
         [DllImport("User32")] static extern IntPtr GetWindow(IntPtr hWnd, uint wCmd);
+
+        #endregion
+
+        #region EdgeUI
+
+        /*
+HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\EdgeUI
+
+AllowEdgeSwipe DWORD
+
+(delete) = Enable
+0 = Disable
+        * */
+        // 2020/7/23
+        // 禁用 Windows 边沿扫动功能
+        // return:
+        //      false   继续
+        //      true    需要立即退出 Application
+        public static bool DisableEdgeUI()
+        {
+            try
+            {
+                using (RegistryKey item = Registry.LocalMachine.OpenSubKey("SOFTWARE\\Policies\\Microsoft\\Windows\\EdgeUI"))
+                {
+                    if (item != null)
+                    {
+                        int? v = item.GetValue("AllowEdgeSwipe", 1) as int?;
+                        if (v == 0)
+                            return false;
+                    }
+                }
+
+                WindowsIdentity identity = WindowsIdentity.GetCurrent();
+                WindowsPrincipal principal = new WindowsPrincipal(identity);
+                Boolean isRunasAdmin = principal.IsInRole(WindowsBuiltInRole.Administrator);
+                if (isRunasAdmin)
+                {
+                    using (RegistryKey item = Registry.LocalMachine.CreateSubKey("SOFTWARE\\Policies\\Microsoft\\Windows\\EdgeUI"))
+                    {
+                        item.SetValue("AllowEdgeSwipe", 0, RegistryValueKind.DWord);
+                    }
+
+                    string[] args = Environment.GetCommandLineArgs();
+                    if (args.IndexOf<string>("DisableEdgeUI") != -1)
+                    {
+                        // MessageBox.Show("registry changed 1 !");
+                        App.Current.Shutdown();
+                        return true;
+                    }
+                    // MessageBox.Show("registry changed 2 !");
+                }
+                else
+                {
+                    var processInfo = new ProcessStartInfo(Assembly.GetExecutingAssembly().CodeBase);
+
+                    // The following properties run the new process as administrator
+                    processInfo.UseShellExecute = true;
+                    processInfo.Verb = "runas";
+                    processInfo.Arguments = " DisableEdgeUI";
+
+                    // Start the new process
+                    try
+                    {
+                        Process.Start(processInfo);
+                    }
+                    catch (Exception)
+                    {
+                        // MessageBox.Show("dp2ssl 无法以 Administator 身份运行");
+                    }
+                }
+
+                return false;
+            }
+            catch(Exception ex)
+            {
+                WpfClientInfo.WriteErrorLog($"DisableEdgeUI() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                return false;
+            }
+        }
 
         #endregion
     }
