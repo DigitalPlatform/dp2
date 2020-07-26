@@ -452,7 +452,7 @@ namespace DigitalPlatform.LibraryServer
 
             if (strVerify != strHashcode)
             {
-                strError = "PQR 号码格式错误: 校验失败";
+                strError = "读者证号二维码不属于当前图书馆、失效或格式错误";  // "PQR 号码格式错误: 校验失败";
                 return -1;
             }
 
@@ -7290,10 +7290,18 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                             "Return() 中进行预约检查 耗时 ");
                     }
 
+                    // 2020/7/26
+                    // 调整 overflow
+                    nRet = AdjustOverflow(sessioninfo,
+                        readerdom,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    if (nRet == 1)
+                        WriteErrorLog($"AdjustOverflow() (证条码号={strReaderBarcode})过程出现警告: {strError}");
+
                     // 写回读者、册记录
                     // byte[] timestamp = null;
-                    byte[] output_timestamp = null;
-                    string strOutputPath = "";
 
                     /*
                     Channel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
@@ -7310,8 +7318,8 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                         false,
                         "content",  // ,ignorechecktimestamp
                         reader_timestamp,
-                        out output_timestamp,
-                        out strOutputPath,
+                        out byte[] output_timestamp,
+                        out string strOutputPath,
                         out strError);
                     if (lRet == -1)
                     {
@@ -17031,6 +17039,454 @@ start_time_1,
             }
 
             // return 0;
+        }
+
+        // 测算应还书时间
+        static int ComputeReturningDay(
+            DateTime startTime,
+            string strThisBorrowPeriod,
+            out DateTime this_return_time,
+            out string strError)
+        {
+            this_return_time = DateTime.MinValue;
+            strError = "";
+            // 测算本次 借阅/续借 的应还书时间
+            // DateTime now = app.Clock.UtcNow;  //  今天，当下。GMT时间
+
+            {
+                int nRet = LibraryApplication.ParsePeriodUnit(
+                    strThisBorrowPeriod,
+                    out long lPeriodValue,
+                    out string strPeriodUnit,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+
+
+                // parameters:
+                //      calendar    工作日历。如果为null，表示函数不进行非工作日判断。
+                // return:
+                //      -1  出错
+                //      0   成功。timeEnd在工作日范围内。
+                //      1   成功。timeEnd正好在非工作日。nextWorkingDay已经返回了下一个工作日的时间
+                nRet = GetReturnDay(
+                    null,
+                    startTime,
+                    lPeriodValue,
+                    strPeriodUnit,
+                    out this_return_time,
+                    out DateTime nextWorkingDay,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = "测算还书时间过程发生错误: " + strError;
+                    return -1;
+                }
+
+                // 正规化时间
+                nRet = DateTimeUtil.RoundTime(strPeriodUnit,
+                    ref this_return_time,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = "测算还书时间过程发生错误: " + strError;
+                    return -1;
+                }
+            }
+
+            return 0;
+        }
+
+        static int ParseBorrowPeriod(string text,
+            out string strThisBorrowPeriod,
+            out string strThisDenyPeriod,
+            out string strError)
+        {
+            strError = "";
+
+            {
+                List<string> parts = StringUtil.ParseTwoPart(text, "|");
+                strThisBorrowPeriod = parts[0];
+                strThisDenyPeriod = parts[1];
+            }
+            // 检查strBorrowPeriod是否合法
+            {
+                int nRet = LibraryApplication.ParsePeriodUnit(
+                    strThisBorrowPeriod,
+                    out long lPeriodValue,
+                    out string strPeriodUnit,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = "借期 参数中 '" + text + "' 格式错误：'" + strError;
+                    return -1;
+                }
+            }
+
+            return 0;
+        }
+
+        // 修改册记录的信息
+        class ItemModifyInfo
+        {
+            public string ItemBarcode { get; set; }
+            public string ConfirmItemRecPath { get; set; }
+            public string BorrowPeriod { get; set; }
+            public string DenyPeriod { get; set; }
+            public string ReturningDate { get; set; }
+        }
+
+        // 修改册记录中的借期，并去掉 overflow 元素
+        int ModifyItemRecord(
+            SessionInfo sessioninfo,
+            ItemModifyInfo info,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            string strFrom = "册条码号";
+
+            // 获得册记录
+            var result = GetItemRecord(sessioninfo,
+info.ItemBarcode,
+null,   // strOwnerInstitution,
+ref strFrom,
+info.ConfirmItemRecPath,
+// ref strLibraryCode,
+out List<string> aPath,
+out string strItemXml,
+out string strOutputItemRecPath,
+out byte[] item_timestamp);
+            if (aPath.Count > 1)
+            {
+                strError = $"册条码号为 {info.ItemBarcode} 的册记录有 {aPath.Count} 条，无法进行借阅操作";
+                return -1;
+            }
+            if (result.Value == -1)
+            {
+                strError = result.ErrorInfo;
+                return -1;
+            }
+
+            XmlDocument itemdom = null;
+            nRet = LibraryApplication.LoadToDom(strItemXml,
+                out itemdom,
+                out strError);
+            if (nRet == -1)
+            {
+                strError = "装载册记录进入XML DOM时发生错误: " + strError;
+                return -1;
+            }
+
+            // 修改
+            DomUtil.SetElementText(itemdom.DocumentElement, "borrowPeriod", info.BorrowPeriod);
+            if (string.IsNullOrEmpty(info.DenyPeriod) == false)
+                DomUtil.SetElementText(itemdom.DocumentElement, "denyPeriod", info.DenyPeriod);
+            else
+                DomUtil.DeleteElement(itemdom.DocumentElement, "denyPeriod");
+            DomUtil.SetElementText(itemdom.DocumentElement, "returningDate", info.ReturningDate);
+            DomUtil.DeleteElement(itemdom.DocumentElement, "overflow");
+
+            RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                return -1;
+            }
+
+            // 写回册记录
+            long lRet = channel.DoSaveTextRes(strOutputItemRecPath,
+                itemdom.OuterXml,
+                false,
+                "content",
+                item_timestamp,
+                out byte[] output_timestamp,
+                out string strOutputPath,
+                out strError);
+            if (lRet == -1)
+                return -1;
+
+            return 0;
+        }
+
+        // 针对读者记录中的 borrow 元素中 overflow (尚未超期)的，重新计算是否超额。如果不超额的，修改为正常的借期
+        // return:
+        //      -1  出错
+        //      0   成功
+        //      1   有警告信息，在 strError 中返回
+        int AdjustOverflow(
+            SessionInfo sessioninfo,
+            XmlDocument readerdom,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            List<string> warnings = new List<string>();
+            List<ItemModifyInfo> items = new List<ItemModifyInfo>();
+
+            string libraryCode = DomUtil.GetElementText(readerdom.DocumentElement, "libraryCode");
+            string readerType = DomUtil.GetElementText(readerdom.DocumentElement, "readerType");
+            // List<XmlElement> overflows = new List<XmlElement>();
+
+            var nodes = readerdom.DocumentElement.SelectNodes("borrows/borrow");
+            foreach (XmlElement borrow in nodes)
+            {
+                if (borrow.HasAttribute("overflow") == false)
+                    continue;
+
+                string no = borrow.GetAttribute("no");
+                if (string.IsNullOrEmpty(no) == false)
+                {
+                    if (Int32.TryParse(no, out int value) == true)
+                    {
+                        if (value > 0)
+                            continue;   // 续借的情况不考虑
+                    }
+                    else
+                    {
+                        warnings.Add($"续借次数 '{no}' 格式错误");
+                        continue;
+                    }
+                }
+
+                string itemBarcode = borrow.GetAttribute("barcode");
+                if (string.IsNullOrEmpty(itemBarcode))
+                    itemBarcode = "@refid:" + borrow.GetAttribute("refID");
+
+                try
+                {
+                    // 获得借阅开始时间
+                    string borrowDate = borrow.GetAttribute("borrowDate");
+                    DateTime borrowTime = DateTimeUtil.FromRfc1123DateTimeString(borrowDate).ToLocalTime();
+
+                    // 看看是否已经超期。已经超期的不处理
+                    {
+                        string returningDate = borrow.GetAttribute("returningDate");
+                        DateTime returningTime = DateTimeUtil.FromRfc1123DateTimeString(returningDate).ToLocalTime();
+
+                        string period = borrow.GetAttribute("borrowPeriod");
+                        nRet = LibraryApplication.ParsePeriodUnit(period,
+        out long lPeriodValue,
+        out string strPeriodUnit,
+        out strError);
+                        if (nRet == -1)
+                        {
+                            strPeriodUnit = "day";
+                            // continue;
+                        }
+
+                        DateTime now = DateTime.Now;
+                        // 正规化时间
+                        nRet = DateTimeUtil.RoundTime(strPeriodUnit,
+                            ref now,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            warnings.Add($"正规化时间出错(1)。strPeriodUnit={strPeriodUnit}");
+                            continue;
+                        }
+
+                        nRet = DateTimeUtil.RoundTime(strPeriodUnit,
+                            ref returningTime,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            warnings.Add($"正规化时间出错(2)。strPeriodUnit={strPeriodUnit}");
+                            continue;
+                        }
+
+                        if (returningTime < now)
+                            continue;
+                    }
+
+                    string bookType = borrow.GetAttribute("type");
+
+                    // 假设要首次借阅这一册，是否会超额？
+                    {
+                        // 从读者信息中，找出该读者以前已经借阅过的同类图书的册数
+                        int nThisTypeCount = readerdom.DocumentElement.SelectNodes("borrows/borrow[@type='" + bookType + "']").Count;
+
+                        nRet = this.GetLoanParam(
+    //null,
+    libraryCode,
+    readerType,
+    bookType,
+    "可借册数",
+    out string strParamValue,
+    out MatchResult _,
+    out strError);
+                        if (nRet == -1)
+                        {
+                            warnings.Add($"获得 馆代码 '{ libraryCode }' 中 读者类型 '{ readerType }' 针对图书类型 '{ bookType }' 的 可借册数 参数时发生错误: {strError}");
+                            continue;
+                        }
+                        if (nRet < 4)
+                        {
+                            warnings.Add($"馆代码 '{ libraryCode}' 中 读者类型 '{ readerType }' 针对图书类型 '{ bookType }' 的 可借册数 参数无法获得: {strError}");
+                            continue;
+                        }
+
+                        if (Int32.TryParse(strParamValue, out int thisTypeMax) == false)
+                        {
+                            warnings.Add($"馆代码 '{ libraryCode}' 中 读者类型 '{ readerType }' 针对图书类型 '{ bookType }' 的 可借册数 参数 '{strParamValue}' 格式错误");
+                            continue;
+                        }
+
+                        // 依然超额了。不修改
+                        if (nThisTypeCount > thisTypeMax)
+                            continue;
+
+                        // 看 可借总册数
+                        nRet = this.GetLoanParam(
+//null,
+libraryCode,
+readerType,
+"",
+"可借总册数",
+out strParamValue,
+out MatchResult _,
+out strError);
+                        if (nRet == -1)
+                        {
+                            warnings.Add($"获得 馆代码 '{ libraryCode }' 中 读者类型 '{ readerType }' 的 可借总册数 参数时发生错误: {strError}");
+                            continue;
+                        }
+                        if (nRet < 3)
+                        {
+                            warnings.Add($"馆代码 '{ libraryCode}' 中 读者类型 '{ readerType }' 的 可借总册数 参数无法获得: {strError}");
+                            continue;
+                        }
+                        if (Int32.TryParse(strParamValue, out int max) == false)
+                        {
+                            warnings.Add($"馆代码 '{ libraryCode}' 中 读者类型 '{ readerType }' 的 可借总册数 参数 '{strParamValue}' 格式错误");
+                            continue;
+                        }
+
+                        // 从读者信息中，找出该读者已经借阅过的册数
+                        int count = readerdom.DocumentElement.SelectNodes("borrows/borrow").Count;
+                        // 依然超额了。不修改
+                        if (count > max)
+                            continue;
+                    }
+
+
+                    // return:
+                    //      reader和book类型均匹配 算4分
+                    //      只有reader类型匹配，算3分
+                    //      只有book类型匹配，算2分
+                    //      reader和book类型都不匹配，算1分
+                    nRet = this.GetLoanParam(
+                    libraryCode,
+                    readerType,
+                    bookType,
+                    "借期",
+                    out string strBorrowPeriodList,
+                    out MatchResult matchresult,
+                    out strError);
+                    if (nRet == -1)
+                    {
+                        warnings.Add($"获得 馆代码 '{ libraryCode }' 中 读者类型 '{ readerType }' 针对图书类型 '{ bookType }' 的 借期 参数时发生错误: {strError}");
+                        continue;
+                    }
+                    if (nRet < 4)  // nRet == 0
+                    {
+                        warnings.Add($"馆代码 '{ libraryCode}' 中 读者类型 '{ readerType }' 针对图书类型 '{ bookType }' 的 借期 参数无法获得: {strError}");
+                        continue;
+                    }
+
+                    string[] aPeriod = strBorrowPeriodList.Split(new char[] { ',' });
+                    if (aPeriod.Length == 0)
+                    {
+                        warnings.Add($"'{strBorrowPeriodList}' Split error");
+                        continue;
+                    }
+
+                    string borrowPeriod = aPeriod[0];
+                    if (string.IsNullOrEmpty(borrowPeriod))
+                    {
+                        warnings.Add($"期限字符串 '{strBorrowPeriodList}' 中第一部分 '{borrowPeriod}' 为空");
+                        continue;
+                    }
+
+                    nRet = ParseBorrowPeriod(borrowPeriod,
+        out string strThisBorrowPeriod,
+        out string strThisDenyPeriod,
+        out strError);
+                    if (nRet == -1)
+                    {
+                        warnings.Add($"ParseBorrowPeroid() '{borrowPeriod}' error");
+                        continue;
+                    }
+
+
+                    // 计算应还书时间
+                    nRet = ComputeReturningDay(
+        borrowTime,
+        strThisBorrowPeriod,
+        out DateTime this_return_time,
+        out strError);
+                    if (nRet == -1)
+                    {
+                        warnings.Add($"ComputeReturningDay() error. borrowTime='{borrowTime}', strThisBorrowPeriod='{strThisBorrowPeriod}'");
+                        continue;
+                    }
+
+                    borrow.SetAttribute("borrowPeriod",
+        strThisBorrowPeriod);
+                    // 2016/6/7
+                    if (string.IsNullOrEmpty(strThisDenyPeriod) == false)
+                        borrow.SetAttribute("denyPeriod",
+                           strThisDenyPeriod);
+                    else
+                        borrow.RemoveAttribute("denyPeriod");
+
+                    string strReturningDate = DateTimeUtil.Rfc1123DateTimeStringEx(this_return_time.ToLocalTime());
+                    borrow.SetAttribute("returningDate",
+                        strReturningDate);
+
+                    // 删除 overflow 属性
+                    borrow.RemoveAttribute("overflow");
+
+                    items.Add(new ItemModifyInfo
+                    {
+                        ItemBarcode = itemBarcode,
+                        BorrowPeriod = strThisBorrowPeriod,
+                        DenyPeriod = strThisDenyPeriod,
+                        ReturningDate = strReturningDate
+                    });
+                }
+                catch (Exception ex)
+                {
+                    warnings.Add($"册记录 {itemBarcode} 处理过程出现异常: {ex.Message}");
+                }
+            }
+
+            // 修改涉及到的册记录
+            if (items.Count > 0)
+            {
+                foreach (var info in items)
+                {
+                    nRet = ModifyItemRecord(
+        sessioninfo,
+        info,
+        out strError);
+                    if (nRet == -1)
+                    {
+                        warnings.Add($"修改册记录 {info.ItemBarcode} 过程中出错: {strError}");
+                    }
+                }
+            }
+
+
+            if (warnings.Count > 0)
+            {
+                strError = StringUtil.MakePathList(warnings, "; ");
+                return 1;
+            }
+
+            return 0;
         }
 
         // 借阅API的从属函数

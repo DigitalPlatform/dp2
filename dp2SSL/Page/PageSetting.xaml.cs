@@ -9,8 +9,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 
 using Newtonsoft.Json;
+using Microsoft.Win32;
 
 using DigitalPlatform;
 using DigitalPlatform.Text;
@@ -18,8 +20,7 @@ using DigitalPlatform.RFID;
 using DigitalPlatform.Face;
 using DigitalPlatform.WPF;
 using DigitalPlatform.Install;
-using System.Windows.Media;
-using Microsoft.Win32;
+using System.Diagnostics;
 
 namespace dp2SSL
 {
@@ -244,8 +245,12 @@ namespace dp2SSL
                     FingerprintManager.Clear();
                     FaceManager.Url = App.FaceUrl;
                     FaceManager.Clear();
-                    // 迫使 RfidManager.ReaderNameList 反应最新变化
-                    ShelfData.RefreshReaderNameList();
+
+                    if (App.Function == "智能书柜")
+                    {
+                        // 迫使 RfidManager.ReaderNameList 反应最新变化
+                        ShelfData.RefreshReaderNameList();
+                    }
 
                     // 2019/6/19
                     // 主动保存一次参数配置
@@ -285,12 +290,15 @@ namespace dp2SSL
 
                     PageMenu.MenuPage?.UpdateMenu();
 
-                    // 2019/12/9
-                    App.InitialShelfCfg();
+                    if (App.Function == "智能书柜")
+                    {
+                        // 2019/12/9
+                        App.InitialShelfCfg();
 
-                    // TODO: 可能会抛出异常
-                    // 因为 Doors 发生了变化，所以要重新初始化门控件
-                    PageMenu.PageShelf?.InitialDoorControl();
+                        // TODO: 可能会抛出异常
+                        // 因为 Doors 发生了变化，所以要重新初始化门控件
+                        PageMenu.PageShelf?.InitialDoorControl();
+                    }
 
                     ShelfData.l_RefreshCount();
 
@@ -797,6 +805,19 @@ namespace dp2SSL
                         progress.Close();
                     }));
                 }
+            }
+        }
+
+        // 打开触摸键盘
+        private void openTouchKeyboard_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                Process.Start("osk");
+            }
+            catch(Exception ex)
+            {
+                WpfClientInfo.WriteErrorLog($"打开触摸键盘时出现异常: {ExceptionUtil.GetDebugText(ex)}");
             }
         }
     }

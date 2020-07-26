@@ -1070,6 +1070,7 @@ namespace dp2SSL
             }
         }
 
+        /*
         public static string CardNumberConvertMethod
         {
             get
@@ -1079,6 +1080,7 @@ namespace dp2SSL
     "十六进制");
             }
         }
+        */
 
         public static bool DetectBookChange
         {

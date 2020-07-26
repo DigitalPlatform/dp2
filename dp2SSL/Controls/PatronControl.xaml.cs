@@ -98,7 +98,24 @@ namespace dp2SSL
                     string barcode = borrow.GetAttribute("barcode");
                     string overflow = borrow.GetAttribute("overflow");
 
-                    var new_entity = new Entity { PII = barcode, Container = _borrowedEntities };
+                    // 2020/7/26
+                    string borrowInfo = null;
+                    {
+                        string borrowDate = borrow.GetAttribute("borrowDate");
+                        string returningDate = borrow.GetAttribute("returningDate");
+                        string period = borrow.GetAttribute("borrowPeriod");
+                        if (string.IsNullOrEmpty(borrowDate))
+                            borrowInfo = null;
+                        else
+                            borrowInfo = $"借书日期:\t{Entity.ToDate(borrowDate)}\n期限:\t\t{period}\n应还日期:\t{Entity.ToDate(returningDate)}";
+                    }
+
+                    var new_entity = new Entity
+                    {
+                        PII = barcode,
+                        Container = _borrowedEntities,
+                        BorrowInfo = borrowInfo
+                    };
                     // 2020/4/17 不用排序，在添加时临时决定是插入到前部还是追加
                     if (IsState(new_entity, "overflow") == true
                         || string.IsNullOrEmpty(overflow) == false)
@@ -112,15 +129,15 @@ namespace dp2SSL
             }
         }
 
-        static bool IsState(Entity entity, string sub)
+        public static bool IsState(Entity entity, string sub)
         {
             return StringUtil.IsInList(sub, entity.State);
         }
 
-        static void SetState(Entity entity, string sub)
+        public static void SetState(Entity entity, string sub, bool on = true)
         {
             string state = entity.State;
-            StringUtil.SetInList(ref state, sub, true);
+            StringUtil.SetInList(ref state, sub, on);
             entity.State = state;
         }
 

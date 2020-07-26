@@ -317,7 +317,7 @@ Description = "读者证条码的输入方式"
             }
         }
 
-
+        /*
         // 默认值 空
         [Display(
 Order = 10,
@@ -337,6 +337,7 @@ Description = "14443A卡号预处理"
                 _config.Set("global", "card_number_convert_method", value);
             }
         }
+        */
 
         // 默认值 true
         [Display(
