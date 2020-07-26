@@ -67,7 +67,6 @@ namespace TestDp2Library
             }
         }
 
-
         // range 无法匹配
         [TestMethod]
         public void Test03()
@@ -117,6 +116,52 @@ namespace TestDp2Library
                 var result = validator.Validate("海淀分馆1", "P0000001");
                 Assert.AreEqual(false, result.OK);
                 Assert.AreEqual("locationDefNotFound", result.ErrorCode);
+            }
+        }
+
+        // 默认的模式匹配
+        [TestMethod]
+        public void Test_pattern_01()
+        {
+            string xml = @"
+        <collection>
+           <validator location='海淀分馆' >
+               <patron>
+                    <!-- 读者证条码规则 -->
+                   <range value='00000001-99999999' />
+               </patron>
+           </validator>
+        </collection>";
+
+            BarcodeValidator validator = new BarcodeValidator(xml);
+
+            {
+                var result = validator.Validate("海淀分馆", "0ABCEFGA");
+                Assert.AreEqual(false, result.OK);
+                Assert.AreEqual(null, result.Type);
+            }
+        }
+
+        // 指定的模式匹配
+        [TestMethod]
+        public void Test_pattern_02()
+        {
+            string xml = @"
+        <collection>
+           <validator location='海淀分馆' >
+               <patron>
+                    <!-- 读者证条码规则 -->
+                   <range value='00000001-99999999' pattern='[0][0-Z][0-Z][0-Z][0-Z][0-Z][0-Z][0-Z]'/>
+               </patron>
+           </validator>
+        </collection>";
+
+            BarcodeValidator validator = new BarcodeValidator(xml);
+
+            {
+                var result = validator.Validate("海淀分馆", "0ABCEFGA");
+                Assert.AreEqual(true, result.OK);
+                Assert.AreEqual("patron", result.Type);
             }
         }
 
@@ -825,5 +870,43 @@ else
             }
         }
 
+
+        // 中营瑞丽实际案例
+        [TestMethod]
+        public void Test_sample_01()
+        {
+            string xml = @"
+        <collection>
+    <validator location='南开区中营瑞丽小学,南开区中营瑞丽小学/*'>
+        <patron>
+            <CMIS />
+            <range value='ZYRLP00001-ZYRLP99999' />
+        </patron>
+        <entity>
+            <range value='ZYRL000001-ZYRL999999' />
+        </entity>
+    </validator>
+        </collection>";
+
+            BarcodeValidator validator = new BarcodeValidator(xml);
+
+            {
+                var result = validator.Validate("南开区中营瑞丽小学", "ZYRL000010");
+                Assert.AreEqual(true, result.OK);
+                Assert.AreEqual("entity", result.Type);
+            }
+
+            {
+                var result = validator.Validate("南开区中营瑞丽小学", "ZYRL000001");
+                Assert.AreEqual(true, result.OK);
+                Assert.AreEqual("entity", result.Type);
+            }
+
+            {
+                var result = validator.Validate("南开区中营瑞丽小学", "ZYRL000009");
+                Assert.AreEqual(true, result.OK);
+                Assert.AreEqual("entity", result.Type);
+            }
+        }
     }
 }

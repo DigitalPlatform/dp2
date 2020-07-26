@@ -39,6 +39,9 @@
             </Button>
             <Grid Height="20" />
             <Menu x:Name="menu"  Width="Auto" Height="Auto">
+                <MenuItem Header="_工具">
+                    <MenuItem x:Name="openTouchKeyboard" Header="打开触摸键盘" HorizontalAlignment="Left" Width="Auto" Click="openTouchKeyboard_Click"/>
+                </MenuItem>
                 <MenuItem Header="_维护">
                     <MenuItem x:Name="redoReplicatePatron" Header="重做全量同步读者记录" HorizontalAlignment="Left" Width="Auto" Click="redoReplicatePatron_Click"/>
                     <MenuItem x:Name="backupRequests" Header="备份本地动作库" HorizontalAlignment="Left" Width="Auto" Click="backupRequests_Click"/>

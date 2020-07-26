@@ -618,11 +618,22 @@ namespace dp2SSL
                         .Where(o => o.PII == pii || o.Bindings.Contains(query))
                         .ToList();
                     if (patrons.Count == 0)
-                        return new GetReaderInfoResult
+                    {
+                        // 再尝试后方一致匹配一次
+                        if (pii.Contains(".") == false)
                         {
-                            Value = 0,
-                            ErrorInfo = $"PII 为 '{pii}' 的本地读者记录没有找到"
-                        };
+                            patrons = context.Patrons
+                                .Where(o => o.PII.EndsWith($".{pii}"))
+                                .ToList();
+                        }
+
+                        if (patrons.Count == 0)
+                            return new GetReaderInfoResult
+                            {
+                                Value = 0,
+                                ErrorInfo = $"PII 为 '{pii}' 的本地读者记录没有找到"
+                            };
+                    }
 
                     // 命中读者记录多于一条
                     if (patrons.Count > 1)

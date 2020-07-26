@@ -40,6 +40,7 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.LibraryClient.localhost;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using System.IO.IsolatedStorage;
 
 namespace dp2SSL
 {
@@ -699,6 +700,8 @@ namespace dp2SSL
             var person = new Operator
             {
                 PatronBarcode = current_patron.Barcode,
+                // 2020/7/26
+                PatronInstitution = string.IsNullOrEmpty(current_patron.OI) ? current_patron.AOI : current_patron.OI,
                 PatronName = current_patron.PatronName
             };
             string libraryCodeOfDoor = ShelfData.GetLibraryCode(e.Door.ShelfNo);
@@ -1225,6 +1228,8 @@ namespace dp2SSL
             // 2020/5/8
             // 是否保有处理前的 entity.State 值
             bool reserve_state = StringUtil.IsInList("reserve_state", style);
+            // 是否保有处理前的 entity.BorrowInfo 值
+            bool reserve_borrowInfo = StringUtil.IsInList("reserve_borrowInfo", style);
             try
             {
                 foreach (Entity entity in entities)
@@ -1267,12 +1272,22 @@ namespace dp2SSL
                         }
                         entity.Title = PageBorrow.GetCaption(result.Title);
                         string old_state = entity.State;
+
+                        string old_borrowInfo = entity.BorrowInfo;
+                        bool old_overflow = PatronControl.IsState(entity, "overflow");
+
                         entity.SetData(result.ItemRecPath, result.ItemXml);
                         if (reserve_state && string.IsNullOrEmpty(old_state) == false)
                         {
                             string state = entity.State;
                             StringUtil.SetInList(ref state, old_state, true);
                             entity.State = state;
+                        }
+
+                        if (reserve_borrowInfo)
+                        {
+                            entity.BorrowInfo = old_borrowInfo;
+                            PatronControl.SetState(entity, "overflow", old_overflow);
                         }
                     }
 
@@ -1757,7 +1772,7 @@ namespace dp2SSL
                         // 构造 actions，用于同步到 dp2library 服务器
                         var build_result = BuildInventoryActions(part,
                             out List<ActionInfo> part_actions);
-                        if (build_result.Value == -1)
+                        if (build_result.Value == -1 && silently == false)
                         {
                             App.Invoke(new Action(() =>
                             {
@@ -2479,10 +2494,13 @@ namespace dp2SSL
 
                 if (string.IsNullOrEmpty(pii))
                 {
+                    /*
                     if (App.CardNumberConvertMethod == "十进制")
                         pii = HexToDecimal(_patron.UID);  // 14443A 卡的 UID
                     else
                         pii = _patron.UID;  // 14443A 卡的 UID
+                    */
+                    pii = _patron.UID;  // 14443A 卡的 UID
 
                     if (string.IsNullOrEmpty(pii))
                     {
@@ -2638,9 +2656,11 @@ namespace dp2SSL
                             BaseChannel<IRfid> channel = RfidManager.GetChannel();
                             try
                             {
+                                // TODO: 由于册记录中 overflow 元素可能会发生调整，所以这里在网络条件具备的时候要优先从 dp2library 服务器获得最新的册记录
+                                // 或者，一旦发现册记录中有 overflow 元素时，补从 dp2library 服务器再获取一次册记录信息
                                 await FillBookFieldsAsync(channel,
                                     entities,
-                                    "reserve_state",
+                                    "reserve_state,reserve_borrowInfo",
                                     new CancellationToken());
                             }
                             finally
@@ -3048,7 +3068,6 @@ namespace dp2SSL
             actions = new List<ActionInfo>();
             foreach (var entity in entities)
             {
-
                 actions.Add(new ActionInfo
                 {
                     Entity = entity.Clone(),
@@ -3074,6 +3093,9 @@ namespace dp2SSL
                     var eas_result = ShelfData.SetEAS(entity.UID, entity.Antenna, false);
                     if (eas_result.Value == -1)
                     {
+                        string text = $"修改 EAS 动作失败: {eas_result.ErrorInfo}";
+                        entity.AppendError(text, "red", "setEasError");
+
                         return new NormalResult
                         {
                             Value = -1,

@@ -649,7 +649,7 @@ Stack:
                 this.State += ",overflow";
         }
 
-        static string ToDate(string strTime)
+        public static string ToDate(string strTime)
         {
             if (string.IsNullOrEmpty(strTime))
                 return "";

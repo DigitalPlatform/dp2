@@ -482,8 +482,21 @@ namespace DigitalPlatform.LibraryServer.Common
                 if (range.Name == "range")
                 {
                     string value = range.GetAttribute("value");
-                    if (IsInRange(barcode, value))
-                        return true;
+                    // 2020/7/24
+                    string pattern = range.GetAttribute("pattern");
+                    if (string.IsNullOrEmpty(pattern))
+                    {
+                        if (IsInRangeDefault(barcode, value))
+                            return true;
+                    }
+                    else
+                    {
+                        if (StringUtil.RegexCompare(pattern, barcode) == true)
+                        {
+                            if (IsInRange(barcode, value))
+                                return true;
+                        }
+                    }
                 }
 
                 if (range.Name.ToLower() == "cmis")
@@ -570,10 +583,54 @@ namespace DigitalPlatform.LibraryServer.Common
             return false;
         }
 
+        // 一般性的范围比较。注：01-99，0A 也是在范围里面的哟
         static bool IsInRange(string text, string range)
         {
             var parts = StringUtil.ParseTwoPart(range, "-");
             return StringUtil.Between(text, parts[0], parts[1]);
+        }
+
+        // 默认的范围比较。注：要进行逐字符比较，这样 01-99，0A 就不在范围内了
+        static bool IsInRangeDefault(string text, string range)
+        {
+            var parts = StringUtil.ParseTwoPart(range, "-");
+            var ret = VerifyChars(parts[0], parts[1], text);
+            if (ret == false)
+                return false;
+            return StringUtil.Between(text, parts[0], parts[1]);
+        }
+
+        // 验证 text 内的每一个字符的取值范围是否在期望以内
+        // 算法是把 start 和 end 拆为 length 那么多对 char 范围，然后加以比较
+        public static bool VerifyChars(string start, string end, string text)
+        {
+            if (start.Length != end.Length)
+                throw new ArgumentException("start 和 end 应当字符数相同");
+            if (text == null)
+                throw new ArgumentException("text 参数值不能为 null");
+
+            if (text.Length != start.Length)
+                return false;
+
+            for (int i = 0; i < start.Length; i++)
+            {
+                char min = start[i];
+                char max = end[i];
+
+                // 2020/7/25
+                // 如果范围的两端都是数字字符，则默认范围是 '0'-'9'
+                if (char.IsDigit(min) && char.IsDigit(max))
+                {
+                    min = '0';
+                    max = '9';
+                }
+
+                char current = text[i];
+                if (current < min || current > max)
+                    return false;
+            }
+
+            return true;
         }
     }
 

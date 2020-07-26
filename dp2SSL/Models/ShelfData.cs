@@ -1104,7 +1104,8 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                             if (result.Value == -1)
                             {
                                 string text = $"修改 EAS 动作失败: {result.ErrorInfo}";
-                                entity.SetError(text, "yellow");
+                                // entity.SetError(text, "yellow");
+                                entity.AppendError(text, "red", "setEasError");
 
                                 // 写入错误日志
                                 WpfClientInfo.WriteInfoLog($"修改册 '{entity.PII}' 的 EAS 失败: {result.ErrorInfo}");
@@ -1191,7 +1192,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                                 Entity = entity.Clone(),
                                 Action = "borrow",
                                 Operator = person,
-                                ActionString = BuildBorrowInfo(person.PatronBarcode, entity, borrowed_piis), // borrowed_count++
+                                ActionString = BuildBorrowInfo(person.PatronBarcode, person.PatronInstitution, entity, borrowed_piis), // borrowed_count++
                             });
 
                             borrowed_piis.Add(entity.PII);
@@ -1290,17 +1291,21 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
         // parameters:
         //      delta_piis   尚未来得及保存到数据库的已借册的 PII 列表。注意里面的 PII 有可能是空字符串
         static string BuildBorrowInfo(string patron_pii,
+            string patron_oi,
             Entity entity,
             List<string> delta_piis)
         {
             BorrowInfo borrow_info = new BorrowInfo();
 
-            string patron_type = GetPatronType(patron_pii);
+            XmlDocument readerdom = null;
+            string patron_type = GetPatronType(patron_pii,
+                patron_oi,
+                out readerdom);
             if (patron_type == null)
                 goto DEFAULT;
 
             // TODO: 如何判断本册借阅时候是否已经超额？
-            var piis = GetBorrowItems(patron_pii);
+            var piis = GetBorrowItems(patron_pii, readerdom);
             piis.AddRange(delta_piis);
 
             // 当前册的图书类型
@@ -1390,7 +1395,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             goto END;
 
         DEFAULT:
-            int item_count = GetBorrowItems(patron_pii).Count;
+            int item_count = GetBorrowItems(patron_pii, readerdom).Count;
             if (item_count + delta_piis.Count >= max_items)
             {
                 borrow_info.Overflows = new string[] { $"超过额度 {max_items} 册" };
@@ -1488,22 +1493,32 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             };
         }
 
-        static string GetPatronType(string patron_pii)
+        // 获得读者的类型，从本地缓存的读者记录中
+        static string GetPatronType(string patron_pii,
+            string patron_oi,
+            out XmlDocument readerdom)
         {
-            var result = LibraryChannelUtil.GetReaderInfoFromLocal(patron_pii, false);
+            readerdom = null;
+
+            string query = patron_pii;
+            if (string.IsNullOrEmpty(patron_oi) == false)
+                query = patron_oi + "." + patron_pii;
+
+            var result = LibraryChannelUtil.GetReaderInfoFromLocal(query, false);
             if (result.Value == -1)
                 return null;
-            XmlDocument dom = new XmlDocument();
+            readerdom = new XmlDocument();
             try
             {
-                dom.LoadXml(result.ReaderXml);
+                readerdom.LoadXml(result.ReaderXml);
             }
             catch
             {
+                readerdom = null;
                 return null;
             }
 
-            return DomUtil.GetElementText(dom.DocumentElement, "readerType");
+            return DomUtil.GetElementText(readerdom.DocumentElement, "readerType");
         }
 
         // 包装后的版本
@@ -1778,16 +1793,56 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
 #endif
 
         // 获得一个读者当前的在借册的 PII 列表
-        static List<string> GetBorrowItems(string pii)
+        // 用本地读者记录和本地操作记录一起合成
+        // parameters:
+        //      readerdom   用于参考的读者记录 XmlDocument 对象。可以为 null
+        static List<string> GetBorrowItems(string patron_pii,
+            XmlDocument readerdom)
         {
             using (var context = new RequestContext())
             {
-                // 该读者的在借册册数
-                return context.Requests
-                    .Where(o => o.OperatorID == pii && o.Action == "borrow" && o.LinkID == null
+                List<string> results = new List<string>();
+                // 遍历现有读者记录中的在借册
+                if (readerdom != null && readerdom.DocumentElement != null)
+                {
+                    XmlNodeList borrows = readerdom.DocumentElement.SelectNodes("borrows/borrow");
+                    foreach (XmlElement borrow in borrows)
+                    {
+                        string borrowDate = borrow.GetAttribute("borrowDate");
+                        DateTime borrowTime;
+                        try
+                        {
+                            borrowTime = DateTimeUtil.FromRfc1123DateTimeString(borrowDate).ToLocalTime();
+                        }
+                        catch
+                        {
+                            continue;
+                        }
+
+                        var item_pii = borrow.GetAttribute("barcode");
+
+                        // 如果借阅时间以后发生过还书，则排除
+                        var items = context.Requests
+    .Where(o => o.OperTime > borrowTime && o.OperatorID == patron_pii && o.Action == "return" && o.PII == item_pii)
+    .ToList();
+                        if (items.Count > 0)
+                            continue;
+                        results.Add(item_pii);
+                    }
+                }
+
+                // 该读者本地的在借册
+                var local_items = context.Requests
+                    .Where(o => o.OperatorID == patron_pii && o.Action == "borrow" && o.LinkID == null
                     && o.State != "dontsync")   // 2020/6/17 注：dontsync 表示同步时候实际上另外已经有前端对本册进行了操作(若能操作成功可以推测是还书操作)，所以这一册实际上已经换了，不要计入在借册列表中
                     .Select(o => o.PII).ToList();
-                // .OrderBy(o => o.ID).Count();
+                foreach (var current_pii in local_items)
+                {
+                    if (results.IndexOf(current_pii) == -1)
+                        results.Add(current_pii);
+                }
+
+                return results;
             }
         }
 
@@ -5326,6 +5381,9 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
         {
             try
             {
+                // testing
+                // return new NormalResult { Value = -1, ErrorInfo = "修改 EAS 失败，测试" };
+
                 if (uint.TryParse(antenna, out uint antenna_id) == false)
                     antenna_id = 0;
                 var result = RfidManager.SetEAS($"{uid}", antenna_id, enable);
@@ -5678,7 +5736,7 @@ TaskScheduler.Default);
 #endif
 
 #if REMOVED
-#region 门命令延迟执行
+        #region 门命令延迟执行
 
         // 门命令(延迟执行)队列。开门时放一个命令进入队列。等得到门开信号的时候再取出这个命令
         static List<CommandItem> _commandQueue = new List<CommandItem>();
@@ -5768,7 +5826,7 @@ TaskScheduler.Default);
         }
 
 
-#endregion
+        #endregion
 #endif
     }
 
@@ -5777,18 +5835,22 @@ TaskScheduler.Default);
     {
         public string PatronName { get; set; }
         public string PatronBarcode { get; set; }
+        // 2020/7/26
+        // 读者的 OI 或者 AOI
+        public string PatronInstitution { get; set; }
 
         public Operator Clone()
         {
             Operator dup = new Operator();
             dup.PatronName = this.PatronName;
             dup.PatronBarcode = this.PatronBarcode;
+            dup.PatronInstitution = this.PatronInstitution;
             return dup;
         }
 
         public override string ToString()
         {
-            return $"PatronName:{PatronName}, PatronBarcode:{PatronBarcode}";
+            return $"PatronName:{PatronName}, PatronBarcode:{PatronBarcode}, PatronInstitution:{PatronInstitution}";
         }
 
         public string GetDisplayString()
