@@ -12,6 +12,23 @@ namespace GreenInstall
     /// </summary>
     public static class Library
     {
+        // 返回详细调用堆栈
+        public static string GetDebugText(Exception e)
+        {
+            StringBuilder message = new StringBuilder();
+
+            Exception currentException = null;
+            for (currentException = e; currentException != null; currentException = currentException.InnerException)
+            {
+                message.AppendFormat("Type: {0}\r\nMessage: {1}\r\nStack:\r\n{2}\r\n\r\n",
+                                     currentException.GetType().FullName,
+                                     currentException.Message,
+                                     currentException.StackTrace);
+            }
+
+            return message.ToString();
+        }
+
         public delegate void Delegate_copy(string sourceFileName, string targetFileName);
         // 拷贝目录
         // 遇到有同名文件会覆盖

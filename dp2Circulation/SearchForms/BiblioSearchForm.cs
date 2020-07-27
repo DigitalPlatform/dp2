@@ -29,6 +29,7 @@ using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.Z3950.UI;
 using DigitalPlatform.Z3950;
+using System.Runtime.Remoting.Activation;
 
 namespace dp2Circulation
 {
@@ -3358,10 +3359,7 @@ out strError);
 
         void menu_verifyBiblioRecord_Click(object sender, EventArgs e)
         {
-            string strError = "";
-            int nRet = 0;
-
-            nRet = VerifyBiblioRecord(out strError);
+            int nRet = VerifyBiblioRecord(out string strError);
             if (nRet == -1)
                 goto ERROR1;
             MessageBox.Show(this, "共处理 " + nRet.ToString() + " 个书目记录");
@@ -3477,7 +3475,136 @@ out strError);
             }
         }
 
+        // 2020/7/27
+        // 校验一条书目记录
+        // return:
+        //      -1  校验过程出错
+        //      0   校验成功
+        //      1   校验发现记录有错
+        static int VerifyBiblio(
+            LibraryChannel channel,
+            string strBiblioRecPath,
+            string strXml,
+            out string strError)
+        {
+            strError = "";
 
+            // 将XML格式转换为MARC格式
+            // 自动从数据记录中获得MARC语法
+            int nRet = MarcUtil.Xml2Marc(strXml,    // info.OldXml,
+                true,
+                null,
+                out string strMarcSyntax,
+                out string strMARC,
+                out strError);
+            if (nRet == -1)
+            {
+                strError = "XML转换到MARC记录时出错: " + strError;
+                return -1;
+            }
+
+            List<string> errors = new List<string>();
+
+            MarcRecord record = new MarcRecord(strMARC);
+            var targetRecPath = record.select("field[@name='998']/subfield[@name='t']").FirstContent;
+            if (string.IsNullOrEmpty(targetRecPath) == false)
+            {
+                if (targetRecPath == strBiblioRecPath)
+                    errors.Add($"本记录中 998$t 引用了自己 {strBiblioRecPath}");
+                else
+                {
+                    // 检查所链接的记录的题名是否和本记录一致
+                    string title = "";
+                    if (strMarcSyntax == "unimarc")
+                        title = record.select("field[@name='200']/subfield[@name='a']").FirstContent;
+                    else
+                        title = record.select("field[@name='245']/subfield[@name='a']").FirstContent;
+
+                    // return:
+                    //      -1  出错
+                    //      0   书目记录没有找到
+                    //      1   成功
+                    nRet = GetLinkBiblioTitle(channel,
+                        targetRecPath,
+                        out string link_title,
+                        out strError);
+                    if (nRet == -1)
+                        errors.Add($"尝试获得书目记录 {targetRecPath} 过程出错：{strError}");
+                    else if (nRet == 0)
+                        errors.Add($"(998$t 指向的)书目记录 {targetRecPath} 不存在");
+                    else
+                    {
+                        if (title != link_title)
+                            errors.Add($"本记录的题名 '{title}' 和 998$t({targetRecPath}) 指向的目标书目记录的题名 '{link_title}' 不一致。将来典藏转移的时候会出现错误转移");
+                    }
+                }
+            }
+
+            if (errors.Count > 0)
+            {
+                strError = StringUtil.MakePathList(errors, "; ");
+                return 1;
+            }
+            return 0;
+        }
+
+        // return:
+        //      -1  出错
+        //      0   书目记录没有找到
+        //      1   成功
+        static int GetLinkBiblioTitle(LibraryChannel channel,
+            string strBiblioRecPath,
+            out string title,
+            out string strError)
+        {
+            strError = "";
+            title = "";
+
+            long lRet = channel.GetBiblioInfos(
+    null,   // stop,
+    strBiblioRecPath,
+    "",
+    new string[] { "xml" },   // formats
+    out string[] results,
+    out byte[] baNewTimestamp,
+    out strError);
+            if (lRet == 0)
+            {
+                return 0;   // 记录不存在
+            }
+            if (lRet == -1)
+                return -1;
+            if (results == null || results.Length == 0)
+            {
+                strError = "results error";
+                return -1;
+            }
+            string strXml = results[0];
+
+            // 将XML格式转换为MARC格式
+            // 自动从数据记录中获得MARC语法
+            int nRet = MarcUtil.Xml2Marc(strXml,    // info.OldXml,
+                true,
+                null,
+                out string strMarcSyntax,
+                out string strMARC,
+                out strError);
+            if (nRet == -1)
+            {
+                strError = "XML转换到MARC记录时出错: " + strError;
+                return -1;
+            }
+
+            MarcRecord record = new MarcRecord(strMARC);
+            if (strMarcSyntax == "unimarc")
+                title = record.select("field[@name='200']/subfield[@name='a']").FirstContent;
+            else
+                title = record.select("field[@name='245']/subfield[@name='a']").FirstContent;
+
+            return 1;
+        }
+
+        // 校验书目记录
         int VerifyBiblioRecord(out string strError)
         {
             strError = "";
@@ -3567,6 +3694,18 @@ out strError);
                         errors.Add("XML 记录中有非法字符");
                     }
 
+                    // 校验一条书目记录
+                    // return:
+                    //      -1  校验过程出错
+                    //      0   校验成功
+                    //      1   校验发现记录有错
+                    int nRet = VerifyBiblio(
+                        channel,
+                        info.RecPath,
+                        info.OldXml,
+                        out strError);
+                    if (nRet == -1 || nRet == 1)
+                        errors.Add(strError);
 #if NO
                     // 验证唯一性
                     {

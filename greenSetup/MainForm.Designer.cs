@@ -52,7 +52,6 @@
             this.label_message.Name = "label_message";
             this.label_message.Size = new System.Drawing.Size(899, 92);
             this.label_message.TabIndex = 1;
-            this.label_message.Text = "label1";
             // 
             // progressBar1
             // 
