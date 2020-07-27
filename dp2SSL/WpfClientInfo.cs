@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Threading;
 
-using log4net;
+// using log4net;
 
 using DigitalPlatform;
 using DigitalPlatform.Core;

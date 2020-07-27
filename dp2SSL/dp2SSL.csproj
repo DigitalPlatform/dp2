@@ -87,9 +87,6 @@
     <Reference Include="FontAwesome.WPF, Version=4.7.0.37774, Culture=neutral, PublicKeyToken=0758b07a11a4f466, processorArchitecture=MSIL">
       <HintPath>..\packages\FontAwesome.WPF.4.7.0.9\lib\net40\FontAwesome.WPF.dll</HintPath>
     </Reference>
-    <Reference Include="log4net, Version=2.0.8.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
-      <HintPath>..\packages\log4net.2.0.8\lib\net45-full\log4net.dll</HintPath>
-    </Reference>
     <Reference Include="MaterialDesignColors, Version=1.2.3.1244, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\MaterialDesignColors.1.2.3\lib\net45\MaterialDesignColors.dll</HintPath>
     </Reference>
@@ -537,6 +534,8 @@
     <Compile Include="RFID.cs" />
     <Compile Include="Centers\RfidManager.cs" />
     <Compile Include="SingnalR\TinyServer.cs" />
+    <Compile Include="SIP2\SipChannel.cs" />
+    <Compile Include="SIP2\SipChannelUtil.cs" />
     <Compile Include="WpfClientInfo.cs" />
     <Page Include="ConfigWindow.xaml">
       <SubType>Designer</SubType>
@@ -747,6 +746,10 @@
       <Project>{c5b517c1-7344-45a5-89dc-06a9b130ae36}</Project>
       <Name>DigitalPlatform.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\dp-library\DigitalPlatform.SIP\DigitalPlatform.SIP.csproj">
+      <Project>{f1db315d-fc4e-4441-b438-adb591bff431}</Project>
+      <Name>DigitalPlatform.SIP</Name>
+    </ProjectReference>
     <ProjectReference Include="..\GreenInstall\GreenInstall.csproj">
       <Project>{3366eaf9-b030-4bbb-a63a-77e71a5e5400}</Project>
       <Name>GreenInstall</Name>
@@ -799,6 +802,7 @@
       <FileType>File</FileType>
     </PublishFile>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\SQLitePCLRaw.lib.e_sqlite3.2.0.2\build\net461\SQLitePCLRaw.lib.e_sqlite3.targets" Condition="Exists('..\packages\SQLitePCLRaw.lib.e_sqlite3.2.0.2\build\net461\SQLitePCLRaw.lib.e_sqlite3.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

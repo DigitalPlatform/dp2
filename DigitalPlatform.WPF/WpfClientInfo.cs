@@ -221,6 +221,11 @@ namespace DigitalPlatform.WPF
             WriteLog("info", strText);
         }
 
+        public static void WriteDebugLog(string strText)
+        {
+            WriteLog("debug", strText);
+        }
+
         // 写入错误日志文件
         // parameters:
         //      level   info/error
@@ -244,6 +249,8 @@ namespace DigitalPlatform.WPF
 #endif
             if (level == "info")
                 Log.Information(strText);
+            else if (level == "debug")
+                Log.Debug(strText);
             else
                 Log.Error(strText);
         }
