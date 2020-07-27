@@ -754,9 +754,9 @@ namespace dp2SSL
         // 注：Windows 关机或者重启的时候，会触发 OnSessionEnding 事件，但不会触发 OnExit 事件
         protected override void OnSessionEnding(SessionEndingCancelEventArgs e)
         {
-            LibraryChannelManager.Log?.Debug("OnSessionEnding() called");
+            WpfClientInfo.WriteDebugLog("OnSessionEnding() called");
             WpfClientInfo.Finish();
-            LibraryChannelManager.Log?.Debug("End WpfClientInfo.Finish()");
+            WpfClientInfo.WriteDebugLog("End WpfClientInfo.Finish()");
 
             // ShelfData.SaveRetryActions();
 
@@ -801,9 +801,9 @@ namespace dp2SSL
 
             }
 
-            LibraryChannelManager.Log?.Debug("OnExit() called");
+            WpfClientInfo.WriteDebugLog("OnExit() called");
             WpfClientInfo.Finish();
-            LibraryChannelManager.Log?.Debug("End WpfClientInfo.Finish()");
+            WpfClientInfo.WriteDebugLog("End WpfClientInfo.Finish()");
 
             // ShelfData.SaveRetryActions();
 
@@ -857,6 +857,8 @@ namespace dp2SSL
             this._channelPool.Clear();
         }
 
+        #region dp2library 服务器有关
+
         public static string dp2ServerUrl
         {
             get
@@ -864,6 +866,7 @@ namespace dp2SSL
                 return WpfClientInfo.Config.Get("global", "dp2ServerUrl", "");
             }
         }
+
 
         public static string dp2UserName
         {
@@ -880,6 +883,48 @@ namespace dp2SSL
                 return DecryptPasssword(WpfClientInfo.Config.Get("global", "dp2Password", ""));
             }
         }
+
+        #endregion
+
+        // 当前采用的通讯协议
+        public static string Protocol
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(SipServerUrl) == false)
+                    return "sip";
+                return "dp2library";
+            }
+        }
+
+        #region SIP2 服务器有关
+
+        public static string SipServerUrl
+        {
+            get
+            {
+                return WpfClientInfo.Config.Get("global", "sipServerUrl", "");
+            }
+        }
+
+
+        public static string SipUserName
+        {
+            get
+            {
+                return WpfClientInfo.Config.Get("global", "sipUserName", "");
+            }
+        }
+
+        public static string SipPassword
+        {
+            get
+            {
+                return DecryptPasssword(WpfClientInfo.Config.Get("global", "sipPassword", ""));
+            }
+        }
+
+        #endregion
 
         #region 消息服务器相关参数
 

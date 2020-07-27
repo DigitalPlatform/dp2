@@ -23,6 +23,70 @@ namespace dp2SSL
             _config = config;
         }
 
+        #region SIP2 服务器
+
+        [Display(
+            Order = 1,
+            Name = "地址和端口号",
+            Description = "SIP2 服务器的地址和端口号"
+            )]
+        [Category("SIP2 服务器")]
+        public string SipServerUrl
+        {
+            get
+            {
+                return _config.Get("global", "sipServerUrl", "");
+            }
+            set
+            {
+                _config.Set("global", "sipServerUrl", value);
+                // App.CurrentApp.ClearChannelPool();
+            }
+        }
+
+        [Display(
+    Order = 2,
+    Name = "用户名",
+    Description = "SIP2 服务器的用户名"
+    )]
+        [Category("SIP2 服务器")]
+        public string SipUserName
+        {
+            get
+            {
+                return _config.Get("global", "sipUserName", "");
+            }
+            set
+            {
+                _config.Set("global", "sipUserName", value);
+                // App.CurrentApp.ClearChannelPool();
+            }
+        }
+
+        [Display(
+    Order = 3,
+    Name = "密码",
+    Description = "SIP2 服务器的密码"
+    )]
+        [Editor(typeof(PasswordEditor), typeof(PasswordEditor))]
+        [Category("SIP2 服务器")]
+        public string SipPassword
+        {
+            get
+            {
+                return App.DecryptPasssword(_config.Get("global", "sipPassword", ""));
+            }
+            set
+            {
+                _config.Set("global", "sipPassword", App.EncryptPassword(value));
+                // App.CurrentApp.ClearChannelPool();
+            }
+        }
+
+        #endregion
+
+        #region dp2 服务器
+
         [Display(
             Order = 1,
             Name = "URL 地址",
@@ -80,6 +144,8 @@ namespace dp2SSL
                 App.CurrentApp.ClearChannelPool();
             }
         }
+
+        #endregion
 
         // 默认值 ipc://RfidChannel/RfidServer
         [Display(

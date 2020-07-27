@@ -19,6 +19,9 @@ using DigitalPlatform.Text;
 
 namespace dp2SSL
 {
+    /// <summary>
+    /// 和 dp2library 通道有关的功能
+    /// </summary>
     public static class LibraryChannelUtil
     {
         public class GetEntityDataResult : NormalResult

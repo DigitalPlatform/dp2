@@ -1066,7 +1066,7 @@ namespace dp2SSL
             }
             catch (Exception ex)
             {
-                LibraryChannelManager.Log?.Error($"ClearBooksAndPatron() 发生异常: {ExceptionUtil.GetExceptionText(ex)}");
+                WpfClientInfo.WriteErrorLog($"ClearBooksAndPatron() 发生异常: {ExceptionUtil.GetExceptionText(ex)}");
             }
             PatronClear();
         }
@@ -1555,7 +1555,11 @@ out string strError);
                     if (string.IsNullOrEmpty(entity.Title)
                         && string.IsNullOrEmpty(entity.PII) == false && entity.PII != "(空)")
                     {
-                        GetEntityDataResult result = await GetEntityDataAsync(entity.PII, "network");
+                        GetEntityDataResult result = null;
+                        if (App.Protocol == "sip")
+                            result = await SipChannelUtil.GetEntityDataAsync(entity.PII, "network");
+                        else
+                            result = await LibraryChannelUtil.GetEntityDataAsync(entity.PII, "network");
 
                         if (result.Value == -1)
                         {
@@ -1584,7 +1588,7 @@ out string strError);
             }
             catch (Exception ex)
             {
-                LibraryChannelManager.Log?.Error($"FillBookFields() 发生异常: {ExceptionUtil.GetExceptionText(ex)}");   // 2019/9/19
+                WpfClientInfo.WriteErrorLog($"FillBookFields() 发生异常: {ExceptionUtil.GetExceptionText(ex)}");   // 2019/9/19
                 SetGlobalError("current", $"FillBookFields() 发生异常(已写入错误日志): {ex.Message}"); // 2019/9/11 增加 FillBookFields() exception:
             }
         }
