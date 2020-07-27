@@ -297,6 +297,8 @@ namespace dp2Commander
 
                 try
                 {
+                    bool needReboot = false;
+
                     // 启动
                     // StartModule(ShortcutPath, "");
                     // Process.Start("c:\\dp2ssl\\dp2ssl.exe");
@@ -326,11 +328,19 @@ namespace dp2Commander
                             // 展开
                             if (check_result.Value == 3)
                             {
+                                // return:
+                                //      -1  出错
+                                //      0   成功。不需要 reboot
+                                //      2   成功，但需要立即重新启动计算机才能让复制的文件生效
                                 var extract_result = GreenInstaller.ExtractFiles(binDir);
                                 if (extract_result.Value == -1)
                                 {
                                     // TODO: 写入错误日志
                                     WriteErrorLog($"展开压缩文件时出错: {extract_result.ErrorInfo}");
+                                }
+                                else if (extract_result.Value == 2)
+                                {
+                                    needReboot = true;
                                 }
                             }
                         }
@@ -341,6 +351,9 @@ namespace dp2Commander
                     }
                     else
                         return $"{exe_path1} 和 {exe_path2} 均未找到，无法启动";
+
+                    if (needReboot)
+                        return "dp2SSL 已经重新启动。请注意部分文件未能立即更新，需要重新启动 Windows";
                     return "dp2SSL 已经重新启动";
                 }
                 catch (Exception ex)

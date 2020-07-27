@@ -593,6 +593,10 @@ bool bOverwriteExist = true)
             */
         }
 
+        // return:
+        //      -1  出错
+        //      0   成功。不需要 reboot
+        //      2   成功，但需要立即重新启动计算机才能让复制的文件生效
         public static NormalResult ExtractFiles(string strBinDir)
         {
             List<string> filenames = new List<string>() {
@@ -810,13 +814,43 @@ bool bOverwriteExist = true)
         {
             try
             {
+                // 将临时文件根目录放在不同的目录，避免里面的 .dll 被偶然占用
+                string tempStartDir = "c:\\dp2ssl_temp";
+
                 int delayCount = 0;
-                string tempDir = Path.Combine(strTargetDir, "~zip_temp");
+                string tempDir = "";
 
-                // 2020/6/8
-                Library.TryDeleteDir(tempDir);
+                // TODO: 最后用完后删除临时目录
+                // 2020/7/27
+                // 会自动尝试创建临时目录直到成功为止
+                for (int i = 0; i < 10; i++)
+                {
+                    // tempDir = Path.Combine(strTargetDir, $"~zip_temp_{i}");
+                    tempDir = Path.Combine(tempStartDir, $"~zip_temp_{i}");
 
-                Library.TryCreateDir(tempDir);
+                    try
+                    {
+                        // 2020/6/8
+                        Library.TryDeleteDir(tempDir);
+
+                        Library.TryCreateDir(tempDir);
+
+                        WriteInfoLog($"ExtractFile() 使用了临时目录 {tempDir}");
+                        break;
+                    }
+                    catch (Exception ex)
+                    {
+                        WriteErrorLog($"ExtractFile() 中删除和创建子目录 {tempDir} 出现异常: {Library.GetDebugText(ex)}");
+                        tempDir = "";
+                    }
+                }
+
+                if (string.IsNullOrEmpty(tempDir))
+                {
+                    strError = "ExtractFile() 中多次尝试创建临时子目录均出现异常";
+                    WriteErrorLog(strError);
+                    return -1;
+                }
 
                 // 先解压到一个临时位置
                 ZipFile.ExtractToDirectory(strZipFileName, tempDir);
@@ -851,21 +885,30 @@ bool bOverwriteExist = true)
                     false,
                     out strError);
 
-                /*
                 // 删除临时位置
-                if (Directory.Exists(strTargetDir) == true)
+                if (delayCount == 0)
                 {
-                    Library.RemoveReadOnlyAttr(tempDir);   // 怕即将删除的目录中有隐藏文件妨碍删除
+                    if (Directory.Exists(strTargetDir) == true)
+                    {
+                        try
+                        {
+                            Library.RemoveReadOnlyAttr(tempDir);   // 怕即将删除的目录中有隐藏文件妨碍删除
+                            Directory.Delete(tempDir, true);
+                        }
+                        catch
+                        {
 
-                    Directory.Delete(tempDir, true);
+                        }
+                    }
                 }
-                */
+
                 if (delayCount > 0)
                     return 1;
                 return 0;
             }
             catch (Exception ex)
             {
+                WriteErrorLog($"ExtractFile() 出现异常: {Library.GetDebugText(ex)}");
                 strError = $"ExtractFile() 出现异常: {ex.Message}";
                 return -1;
             }

@@ -261,6 +261,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LedDriver.First", "LedDrive
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.ServiceProcess", "dp-library\DigitalPlatform.ServiceProcess\DigitalPlatform.ServiceProcess.csproj", "{F6A351AC-D11E-4A48-8970-632A15F5DB60}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DigitalPlatform.SIP", "dp-library\DigitalPlatform.SIP\DigitalPlatform.SIP.csproj", "{F1DB315D-FC4E-4441-B438-ADB591BFF431}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -2174,6 +2176,24 @@ Global
 		{F6A351AC-D11E-4A48-8970-632A15F5DB60}.Test|Mixed Platforms.Build.0 = Release|Any CPU
 		{F6A351AC-D11E-4A48-8970-632A15F5DB60}.Test|x86.ActiveCfg = Release|Any CPU
 		{F6A351AC-D11E-4A48-8970-632A15F5DB60}.Test|x86.Build.0 = Release|Any CPU
+		{F1DB315D-FC4E-4441-B438-ADB591BFF431}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F1DB315D-FC4E-4441-B438-ADB591BFF431}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F1DB315D-FC4E-4441-B438-ADB591BFF431}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{F1DB315D-FC4E-4441-B438-ADB591BFF431}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{F1DB315D-FC4E-4441-B438-ADB591BFF431}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F1DB315D-FC4E-4441-B438-ADB591BFF431}.Debug|x86.Build.0 = Debug|Any CPU
+		{F1DB315D-FC4E-4441-B438-ADB591BFF431}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F1DB315D-FC4E-4441-B438-ADB591BFF431}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F1DB315D-FC4E-4441-B438-ADB591BFF431}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{F1DB315D-FC4E-4441-B438-ADB591BFF431}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{F1DB315D-FC4E-4441-B438-ADB591BFF431}.Release|x86.ActiveCfg = Release|Any CPU
+		{F1DB315D-FC4E-4441-B438-ADB591BFF431}.Release|x86.Build.0 = Release|Any CPU
+		{F1DB315D-FC4E-4441-B438-ADB591BFF431}.Test|Any CPU.ActiveCfg = Debug|Any CPU
+		{F1DB315D-FC4E-4441-B438-ADB591BFF431}.Test|Any CPU.Build.0 = Debug|Any CPU
+		{F1DB315D-FC4E-4441-B438-ADB591BFF431}.Test|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{F1DB315D-FC4E-4441-B438-ADB591BFF431}.Test|Mixed Platforms.Build.0 = Debug|Any CPU
+		{F1DB315D-FC4E-4441-B438-ADB591BFF431}.Test|x86.ActiveCfg = Debug|Any CPU
+		{F1DB315D-FC4E-4441-B438-ADB591BFF431}.Test|x86.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

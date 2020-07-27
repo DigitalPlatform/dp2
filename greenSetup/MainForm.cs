@@ -149,6 +149,7 @@ true);
             }
         }
 
+        // TODO: 是否在延时一段以后自动关闭？
         void ErrorBox(string message)
         {
             GreenInstaller.WriteInfoLog(message);
@@ -217,11 +218,19 @@ true);
             {
                 GreenInstaller.WriteInfoLog($"以前遗留的 .zip 文件，展开，并立即启动 dp2ssl.exe");
 
+                // return:
+                //      -1  出错
+                //      0   成功。不需要 reboot
+                //      2   成功，但需要立即重新启动计算机才能让复制的文件生效
                 var extract_result = GreenInstaller.ExtractFiles(_binDir);
                 if (extract_result.Value == -1)
                 {
                     ErrorBox(extract_result.ErrorInfo);
                     return;
+                }
+                else if (extract_result.Value == 2)
+                {
+                    // ErrorBox("部分文件更新受阻，请立即重新启动 Windows");
                 }
                 await ProcessStart(strExePath);
                 return;
@@ -331,6 +340,8 @@ true);
                 Application.Exit();
                 return;
             }
+
+            // TODO: result.Value == 2 要提醒重启 Windows 以完成安装
 
             // TODO: 从 dp2ssl.exe 中取信息？
 
