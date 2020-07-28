@@ -655,7 +655,8 @@ readerType);
             return current;
         }
 #endif
-        static void SetParamValue(XmlElement root, string name, string value)
+        // 模拟设置读者 XML 记录中的可借册数有关参数
+        public static void SetParamValue(XmlElement root, string name, string value)
         {
             var info = root.SelectSingleNode("info") as XmlElement;
             if (info == null)

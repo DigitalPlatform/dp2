@@ -12,20 +12,18 @@ using System.Diagnostics;
 using System.Web;
 using System.Threading;
 
+using ClosedXML.Excel;
+
 using DigitalPlatform;
+using DigitalPlatform.IO;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
-using DigitalPlatform.CirculationClient;
-
-using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.Marc;
-
-using DigitalPlatform.LibraryClient.localhost;
-using DigitalPlatform.LibraryClient;
-using ClosedXML.Excel;
 using DigitalPlatform.Core;
 using DigitalPlatform.dp2.Statis;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.LibraryClient.localhost;
 
 // 2017/4/8 从 this.Channel 用法改造为 ChannelPool 用法
 
@@ -560,7 +558,7 @@ this.splitContainer_inAndOutof,
             if (nState != 1)
                 goto ERROR1;
             return;
-            ERROR1:
+        ERROR1:
             this.Text = "典藏移交";
             MessageBox.Show(this, strError);
         }
@@ -810,7 +808,7 @@ this.splitContainer_inAndOutof,
 
                 string[] paths = new string[lines.Count];
                 lines.CopyTo(paths);
-                REDO_GETRECORDS:
+            REDO_GETRECORDS:
                 long lRet = channel.GetBrowseRecords(
                     this.stop,
                     paths,
@@ -1498,11 +1496,11 @@ this.splitContainer_inAndOutof,
                 }
             }
 
-            CONTINUE:
+        CONTINUE:
             // 如果必要，继续进行其他检查
 
             return 1;
-            ERROR1:
+        ERROR1:
             SetItemColor(item, TYPE_ERROR);
 
             // 不破坏原来的列内容，而只是增补到前面
@@ -1986,7 +1984,7 @@ this.splitContainer_inAndOutof,
             //      1   需要进行变换
 
             int nRet = Program.MainForm.NeedTransformBarcode(
-                Program.MainForm.FocusLibraryCode, 
+                Program.MainForm.FocusLibraryCode,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
@@ -2104,7 +2102,7 @@ this.splitContainer_inAndOutof,
             this.textBox_verify_itemBarcode.SelectAll();
             this.textBox_verify_itemBarcode.Focus();
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
 
             this.textBox_verify_itemBarcode.SelectAll();
@@ -2232,7 +2230,7 @@ MessageBoxDefaultButton.Button2);
 
             PrintList("已验证清单", items, strStyle);
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -2335,7 +2333,7 @@ MessageBoxDefaultButton.Button2);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3189,7 +3187,7 @@ strContent);
                 col_index++;
             }
 
-            END1:
+        END1:
             if (string.IsNullOrEmpty(strFileName) == false)
             {
                 if (bBiblioSumLine == false)
@@ -3552,7 +3550,7 @@ strContent);
                 }
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -4225,7 +4223,7 @@ strContent);
 
             MessageBox.Show(this, "成功通知书目记录 " + nNotifiedCount + " 个");
             return;
-            ERROR1:
+        ERROR1:
             this.SetNextButtonEnable();
             MessageBox.Show(this, strError);
         }
@@ -4259,7 +4257,7 @@ strContent);
             if (string.IsNullOrEmpty(strError) == false)
                 MessageBox.Show(this, strError);
             return;
-            ERROR1:
+        ERROR1:
             this.SetNextButtonEnable();
             MessageBox.Show(this, strError);
         }
@@ -4491,7 +4489,7 @@ strContent);
                     MessageBox.Show(this, "没有发生修改和保存");
             }
             return;
-            ERROR1:
+        ERROR1:
             this.SetNextButtonEnable();
             MessageBox.Show(this, strError);
         }
@@ -4552,7 +4550,7 @@ strContent);
             // 重新设置next和其他按钮的状态
             this.SetNextButtonEnable();
             return;
-            ERROR1:
+        ERROR1:
             this.SetNextButtonEnable();
             MessageBox.Show(this, strError);
         }
@@ -4987,19 +4985,15 @@ MessageBoxDefaultButton.Button2);
 
             try
             {
-
                 stop.SetProgressRange(0, this.listView_in.Items.Count);
                 stop.SetProgressValue(0);
 
                 for (int i = 0; i < items.Count; i++)
                 {
-                    if (stop != null)
+                    if (stop != null && stop.State != 0)
                     {
-                        if (stop.State != 0)
-                        {
-                            strError = "用户中断1";
-                            return 1;
-                        }
+                        strError = "用户中断1";
+                        return 1;
                     }
 
 
@@ -5011,7 +5005,6 @@ MessageBoxDefaultButton.Button2);
                         continue;
                      * */
 
-                    string strNewItemRecPath = "";
                     // return:
                     //      -1	出错
                     //      0	没有必要转移。说明文字在strError中返回
@@ -5020,7 +5013,7 @@ MessageBoxDefaultButton.Button2);
                     int nRet = MoveOneRecord(
                         channel,
                         item,
-                        out strNewItemRecPath,
+                        out string strNewItemRecPath,
                         out strError);
                     if (nRet == -1)
                     {
@@ -5964,6 +5957,7 @@ MessageBoxDefaultButton.Button2);
             return 1;
         }
 
+        // 转移到目标库
         private void button_move_moveAll_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -5996,7 +5990,6 @@ MessageBoxDefaultButton.Button2);
                     return;
             }
 
-            int nMovedCount = 0;
             // 转移
             // return:
             //      -1  出错。出错的时候，nMovedCount如果>0，表示已经转移的事项数
@@ -6004,7 +5997,7 @@ MessageBoxDefaultButton.Button2);
             //      1   中途放弃
             nRet = DoMove(
                 items,
-                out nMovedCount,
+                out int nMovedCount,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
@@ -6017,7 +6010,7 @@ MessageBoxDefaultButton.Button2);
             // 重新设置next和其他按钮的状态
             this.SetNextButtonEnable();
             return;
-            ERROR1:
+        ERROR1:
             this.SetNextButtonEnable();
             MessageBox.Show(this, strError);
         }
@@ -6087,7 +6080,7 @@ MessageBoxDefaultButton.Button2);
                     MessageBox.Show(this, "没有发生修改和保存");
             }
             return;
-            ERROR1:
+        ERROR1:
             this.SetNextButtonEnable();
             MessageBox.Show(this, strError);
         }
@@ -6479,7 +6472,7 @@ MessageBoxDefaultButton.Button2);
 
             MessageBox.Show(this, "成功通知书目记录 " + nNotifiedCount + " 个");
             return;
-            ERROR1:
+        ERROR1:
             this.SetNextButtonEnable();
             MessageBox.Show(this, strError);
         }
@@ -6638,7 +6631,7 @@ MessageBoxDefaultButton.Button2);
             if (nState != 1)
                 goto ERROR1;
             return;
-            ERROR1:
+        ERROR1:
             this.Text = "典藏移交";
             MessageBox.Show(this, strError);
         }
@@ -7048,7 +7041,7 @@ MessageBoxDefaultButton.Button2);
                     this.m_lock.ReleaseWriterLock();
                 }
 
-                ERROR1:
+            ERROR1:
                 // Safe_setError(this.Container.listView_in, strError);
                 // 2018/11/6
                 this.Container.ShowMessage(strError, "red", true);
@@ -7232,7 +7225,7 @@ new string[] { "summary", "@isbnissn", "targetrecpath" });
             if (string.IsNullOrEmpty(strError) == false)
                 MessageBox.Show(this, strError);
             return;
-            ERROR1:
+        ERROR1:
             this.SetNextButtonEnable();
             MessageBox.Show(this, strError);
         }

@@ -1,17 +1,22 @@
-﻿using DigitalPlatform;
-using DigitalPlatform.SIP2;
-using DigitalPlatform.Text;
-using DigitalPlatform.WPF;
-using DigitalPlatform.Xml;
-using Microsoft.VisualStudio.Threading;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+
+using Microsoft.VisualStudio.Threading;
 using static dp2SSL.LibraryChannelUtil;
+
+using DigitalPlatform;
+using DigitalPlatform.IO;
+using DigitalPlatform.RFID;
+using DigitalPlatform.SIP2;
+using DigitalPlatform.Text;
+using DigitalPlatform.WPF;
+using DigitalPlatform.Xml;
 
 namespace dp2SSL
 {
@@ -22,25 +27,29 @@ namespace dp2SSL
     {
         static SipChannel _channel = new SipChannel(Encoding.UTF8);
 
+        public static string DateFormat = "yyyy-MM-dd";
+
         static async Task<SipChannel> GetChannelAsync()
         {
-            var parts = StringUtil.ParseTwoPart(App.SipServerUrl, ":");
-            string address = parts[0];
-            string port = parts[1];
+            if (_channel.Connected == false)
+            {
+                var parts = StringUtil.ParseTwoPart(App.SipServerUrl, ":");
+                string address = parts[0];
+                string port = parts[1];
 
-            if (Int32.TryParse(port, out int port_value) == false)
-                throw new Exception($"SIP 服务器和端口号字符串 '{App.SipServerUrl}' 中端口号部分 '{port}' 格式错误");
+                if (Int32.TryParse(port, out int port_value) == false)
+                    throw new Exception($"SIP 服务器和端口号字符串 '{App.SipServerUrl}' 中端口号部分 '{port}' 格式错误");
 
-            var result = await _channel.ConnectionAsync(address,
-                port_value);
-            if (result.Value == -1) // 出错
-                throw new Exception($"连接 SIP 服务器 {App.SipServerUrl} 时出错: {result.ErrorInfo}");
+                var result = await _channel.ConnectionAsync(address,
+                    port_value);
+                if (result.Value == -1) // 出错
+                    throw new Exception($"连接 SIP 服务器 {App.SipServerUrl} 时出错: {result.ErrorInfo}");
 
-            // TODO: 按需登录？避免反复登录
-            var login_result = await _channel.LoginAsync(App.SipUserName,
-                App.SipPassword);
-            if (login_result.Value == -1)
-                throw new Exception($"针对 SIP 服务器 {App.SipServerUrl} 登录出错: {login_result.ErrorInfo}");
+                var login_result = await _channel.LoginAsync(App.SipUserName,
+                    App.SipPassword);
+                if (login_result.Value == -1)
+                    throw new Exception($"针对 SIP 服务器 {App.SipServerUrl} 登录出错: {login_result.ErrorInfo}");
+            }
 
             return _channel;
         }
@@ -92,10 +101,37 @@ namespace dp2SSL
                                     ErrorInfo = get_result.ErrorInfo,
                                     ErrorCode = get_result.ErrorCode
                                 });
+                            else if (get_result.Result.CirculationStatus_2 == "01")
+                            {
+                                errors.Add(new NormalResult
+                                {
+                                    Value = -1,
+                                    ErrorInfo = get_result.Result.AF_ScreenMessage_o,
+                                    ErrorCode = get_result.Result.CirculationStatus_2
+                                });
+                            }
+                            else if (get_result.Result.CirculationStatus_2 == "13")
+                            {
+                                errors.Add(new NormalResult
+                                {
+                                    Value = -1,
+                                    ErrorInfo = get_result.Result.AF_ScreenMessage_o,
+                                    ErrorCode = "itemNotFound"
+                                });
+                            }
                             else
                             {
+
+
                                 XmlDocument itemdom = new XmlDocument();
                                 itemdom.LoadXml("<root />");
+
+                                string state = "";
+                                if (get_result.Result.CirculationStatus_2 == "12")
+                                    state = "丢失";
+
+                                DomUtil.SetElementText(itemdom.DocumentElement, "state", state);
+
                                 DomUtil.SetElementText(itemdom.DocumentElement,
                                     "barcode",
                                     get_result.Result.AB_ItemIdentifier_r);
@@ -105,6 +141,58 @@ namespace dp2SSL
                                 DomUtil.SetElementText(itemdom.DocumentElement,
 "currentLocation",
 get_result.Result.AP_CurrentLocation_o);
+
+                                DomUtil.SetElementText(itemdom.DocumentElement,
+"accessNo",
+get_result.Result.CH_ItemProperties_o);
+
+                                // 借书时间
+                                {
+                                    string borrowDateString = get_result.Result.CM_HoldPickupDate_18;
+                                    if (string.IsNullOrEmpty(borrowDateString) == false)
+                                    {
+                                        if (DateTime.TryParseExact(borrowDateString,
+                                        "yyyyMMdd    HHmmss",
+                                        CultureInfo.InvariantCulture,
+                                        DateTimeStyles.None,
+                                        out DateTime borrowDate))
+                                        {
+                                            DomUtil.SetElementText(itemdom.DocumentElement,
+            "borrowDate",
+            DateTimeUtil.Rfc1123DateTimeStringEx(borrowDate));
+
+                                            DomUtil.SetElementText(itemdom.DocumentElement,
+"borrower",
+"***");
+                                        }
+                                        else
+                                        {
+                                            // 报错，时间字符串格式错误，无法解析
+                                        }
+                                    }
+                                }
+
+                                // 应还书时间
+                                {
+                                    string returnningDateString = get_result.Result.AH_DueDate_o;
+                                    if (string.IsNullOrEmpty(returnningDateString) == false)
+                                    {
+                                        if (DateTime.TryParseExact(returnningDateString,
+                                        DateFormat,
+                                        CultureInfo.InvariantCulture,
+                                        DateTimeStyles.None,
+                                        out DateTime returningDate))
+                                        {
+                                            DomUtil.SetElementText(itemdom.DocumentElement,
+            "returningDate",
+            DateTimeUtil.Rfc1123DateTimeStringEx(returningDate));
+                                        }
+                                        else
+                                        {
+                                            // 报错，时间字符串格式错误，无法解析
+                                        }
+                                    }
+                                }
 
                                 result = new GetEntityDataResult
                                 {
@@ -162,5 +250,115 @@ get_result.Result.AP_CurrentLocation_o);
                 };
             }
         }
+
+        // return.Value:
+        //      -1  出错
+        //      0   读者记录没有找到
+        //      1   成功
+        public static async Task<GetReaderInfoResult> GetReaderInfoAsync(string pii)
+        {
+            try
+            {
+                using (var releaser = await _channelLimit.EnterAsync())
+                {
+                    SipChannel channel = await GetChannelAsync();
+                    try
+                    {
+                        List<NormalResult> errors = new List<NormalResult>();
+
+                        int nRedoCount = 0;
+                    REDO_GETITEMINFO:
+                        var get_result = await _channel.GetPatronInfoAsync(pii);
+                        if (get_result.Value == -1)
+                            return new GetReaderInfoResult
+                            {
+                                Value = -1,
+                                ErrorInfo = get_result.ErrorInfo,
+                                ErrorCode = get_result.ErrorCode
+                            };
+                        /*
+                        else if (get_result.Result.CirculationStatus_2 == "01")
+                        {
+                            errors.Add(new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = get_result.Result.AF_ScreenMessage_o,
+                                ErrorCode = get_result.Result.CirculationStatus_2
+                            });
+                        }
+                        else if (get_result.Result.CirculationStatus_2 == "13")
+                        {
+                            errors.Add(new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = get_result.Result.AF_ScreenMessage_o,
+                                ErrorCode = "itemNotFound"
+                            });
+                        }
+                        */
+                        else
+                        {
+                            XmlDocument readerdom = new XmlDocument();
+                            readerdom.LoadXml("<root />");
+
+                            // 证状态
+                            string state = "***";
+                            if (get_result.Result.BL_ValidPatron_o == "Y")
+                                state = "";
+                            DomUtil.SetElementText(readerdom.DocumentElement,
+                                "state",
+                                state);
+
+                            // 读者证条码号
+                            DomUtil.SetElementText(readerdom.DocumentElement,
+                                "barcode",
+                                get_result.Result.AA_PatronIdentifier_r);
+
+                            // 姓名
+                            DomUtil.SetElementText(readerdom.DocumentElement,
+"name",
+get_result.Result.AE_PersonalName_r);
+
+                            // 可借册数
+                            Patron.SetParamValue(readerdom.DocumentElement, "当前还可借", get_result.Result.BZ_HoldItemsLimit_o);
+                            Patron.SetParamValue(readerdom.DocumentElement, "可借总册数", get_result.Result.CB_ChargedItemsLimit_o);
+
+                            // 在借册
+                            var root = readerdom.DocumentElement.AppendChild(readerdom.CreateElement("borrows")) as XmlElement;
+                            var items = get_result.Result.AU_ChargedItems_o;
+                            foreach (var item in items)
+                            {
+                                var borrow = root.AppendChild(readerdom.CreateElement("borrow")) as XmlElement;
+                                borrow.SetAttribute("barcode", item.Value);
+                            }
+
+                            return new GetReaderInfoResult
+                            {
+                                Value = 1,
+                                ReaderXml = readerdom.OuterXml,
+                                RecPath = "",
+                                Timestamp = null
+                            };
+                        }
+                    }
+                    finally
+                    {
+                        ReturnChannel(channel);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                WpfClientInfo.WriteErrorLog($"GetEntGetReaderInfoAsyncityDataAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+
+                return new GetReaderInfoResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"GetReaderInfoAsync() 出现异常: {ex.Message}",
+                    ErrorCode = ex.GetType().ToString()
+                };
+            }
+        }
+
     }
 }

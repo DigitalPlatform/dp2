@@ -2318,15 +2318,12 @@ namespace DigitalPlatform.LibraryServer
                 }
 
                 // 从数据库中读出记录
-                byte[] exist_timestamp = null;
-                string strOutputPath = "";
-                string strMetaData = "";
 
                 long lRet = channel.GetRes(info.NewRecPath,
                     out strXml,
-                    out strMetaData,
-                    out exist_timestamp,
-                    out strOutputPath,
+                    out string strMetaData,
+                    out byte[] exist_timestamp,
+                    out string strOutputPath,
                     out strError);
                 if (lRet == -1)
                 {
@@ -5621,27 +5618,8 @@ out strError);
                 // TODO: 如果原样移动，目标记录并不被修改，似乎也该允许?
             }
 
-            // 移动记录
-            byte[] output_timestamp = null;
-            string strIdChangeList = "";
+            // 注：原来 DoCopy() 在这个位置
 
-            // TODO: Copy后还要写一次？因为Copy并不写入新记录。(注：Copy/Move有时候会跨库，这样记录中<parent>需要改变)
-            // 其实Copy的意义在于带走资源。否则还不如用Save+Delete
-            lRet = channel.DoCopyRecord(info.OldRecPath,
-                info.NewRecPath,
-                true,   // bDeleteSourceRecord
-                bSimulate ? "simulate" : "",
-                out strIdChangeList,
-                out output_timestamp,
-                out strOutputPath,
-                out strError);
-            if (lRet == -1)
-            {
-                strError = "DoCopyRecord() error :" + strError;
-                goto ERROR1;
-            }
-
-            string strTargetLibraryCode = "";
             // 检查一个册记录的馆藏地点是否符合馆代码列表要求
             // return:
             //      -1  检查过程出错
@@ -5650,7 +5628,7 @@ out strError);
             nRet = CheckItemLibraryCode(strNewXml,
                 sessioninfo,
                 // sessioninfo.LibraryCodeList,
-                out strTargetLibraryCode,
+                out string strTargetLibraryCode,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
@@ -5700,10 +5678,30 @@ out strError);
                     goto ERROR1;
             }
 
+            // ***
+            // 移动记录
+            // 注意移动和覆盖操作要尽量靠近，避免中途失败(引起 Undo 麻烦)
+
+            // TODO: Copy后还要写一次？因为Copy并不写入新记录。(注：Copy/Move有时候会跨库，这样记录中<parent>需要改变)
+            // 其实Copy的意义在于带走资源。否则还不如用Save+Delete
+            lRet = channel.DoCopyRecord(info.OldRecPath,
+                info.NewRecPath,
+                true,   // bDeleteSourceRecord
+                bSimulate ? "simulate" : "",
+                out string strIdChangeList,
+                out byte[] output_timestamp,
+                out strOutputPath,
+                out strError);
+            if (lRet == -1)
+            {
+                strError = "DoCopyRecord() error :" + strError;
+                goto ERROR1;
+            }
 
             // Debug.Assert(strOutputPath == info.NewRecPath);
             string strTargetPath = strOutputPath;
 
+            // TODO: 这一步如果失败，理论上应该 Undo 刚才的 DoCopyRecord() 然后返回
             lRet = channel.DoSaveTextRes(strTargetPath,
                 strNewXml,
                 false,   // include preamble?
@@ -5714,7 +5712,7 @@ out strError);
                 out strError);
             if (lRet == -1)
             {
-                strError = "WriteEntities()API move操作中，实体记录 '" + info.OldRecPath + "' 已经成功移动到 '" + strTargetPath + "' ，但在写入新内容时发生错误: " + strError;
+                strError = $"WriteEntities() API move 操作中，实体记录 '{ info.OldRecPath }' 已经成功移动到 '{ strTargetPath }' ，但在写入新内容时发生错误: " + strError + "。注意此时被移动的册记录内容可能处在错误状态(比如 parent 元素没有来得及修改)，会引起一些系统故障";
 
                 if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch)
                 {

@@ -1373,11 +1373,15 @@ namespace dp2SSL
                 //      -1  出错
                 //      0   读者记录没有找到
                 //      1   成功
-                GetReaderInfoResult result = await
-                    Task<GetReaderInfoResult>.Run(() =>
-                    {
-                        return GetReaderInfo(pii);
-                    });
+                GetReaderInfoResult result = null;
+                if (App.Protocol == "sip")
+                    result = await SipChannelUtil.GetReaderInfoAsync(pii);
+                else
+                    result = await
+                        Task<GetReaderInfoResult>.Run(() =>
+                        {
+                            return LibraryChannelUtil.GetReaderInfo(pii);
+                        });
 
                 if (result.Value != 1)
                 {
