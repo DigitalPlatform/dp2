@@ -3579,11 +3579,16 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                     // 把书柜读卡器上的(ISO15693)读者卡也计算在内
                     removes = e.removed_books?.FindAll(tag =>
                     {
+                        /*
                         // 判断一下 tag 是否属于已经定义的门范围
                         var doors = DoorItem.FindDoors(ShelfData.Doors, tag.OneTag.ReaderName, tag.OneTag.AntennaID.ToString());
                         if (doors.Count > 0)
                             return true;
                         return false;
+                        */
+                        // 注：对 removed_books 里面的 tag 不再进行过滤。相信它们都是符合条件的。
+                        // 特别注意，readerName 和 antenna 可能已经发生变化，不再符合柜门的范围定义。这种变化正是促使这些 tag 需要脱离柜门范围的一个原因
+                        return true;
                     });
                 }
 
@@ -3709,6 +3714,10 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
         }
 
         // 用 UID 找到，并移走
+        // parameters:
+        //      uid 要匹配的 UID
+        //      reader_name 要匹配的读卡器名。若为 "*"，表示任何读卡器名都匹配
+        //      antenna 要匹配的天线编号。若为 uint.MaxValue，表示任何天线编号都匹配
         static List<TagAndData> Remove(List<TagAndData> list,
             string uid,
             string reader_name,
@@ -3721,8 +3730,8 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                 if (tag.OneTag == null)
                     return false;
                 return (tag.OneTag.UID == uid
-                && tag.OneTag.ReaderName == reader_name
-                && tag.OneTag.AntennaID == antenna);
+                && (reader_name == "*" || tag.OneTag.ReaderName == reader_name)
+                && (antenna == uint.MaxValue || tag.OneTag.AntennaID == antenna));
             });
             foreach (var tag in found)
             {
@@ -3903,7 +3912,10 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                         {
                             var one_tag = tag.OneTag;
                             // TODO: 尝试从 _bookTags 里面移走
-                            removed_books.AddRange(Remove(_bookTags, one_tag.UID, one_tag.ReaderName, one_tag.AntennaID));
+                            // removed_books.AddRange(Remove(_bookTags, one_tag.UID, one_tag.ReaderName, one_tag.AntennaID));
+                            
+                            // 注：只匹配 UID 即可。readerName 和 antenna 可能已经变化，无法和已有的信息匹配
+                            removed_books.AddRange(Remove(_bookTags, one_tag.UID, "*", uint.MaxValue));
                             Update(_patronTags, tag);
                             updated_patrons.Add(tag);
                         }
@@ -3911,7 +3923,10 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                         {
                             var one_tag = tag.OneTag;
                             // TODO: 尝试从 _patronTags 里面移走
-                            removed_patrons.AddRange(Remove(_patronTags, one_tag.UID, one_tag.ReaderName, one_tag.AntennaID));
+                            // removed_patrons.AddRange(Remove(_patronTags, one_tag.UID, one_tag.ReaderName, one_tag.AntennaID));
+
+                            // 注：只匹配 UID 即可。readerName 和 antenna 可能已经变化，无法和已有的信息匹配
+                            removed_patrons.AddRange(Remove(_patronTags, one_tag.UID, "*", uint.MaxValue));
                             Update(_bookTags, tag);
                             updated_books.Add(tag);
                         }

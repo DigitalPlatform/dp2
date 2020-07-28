@@ -616,10 +616,31 @@ namespace dp2SSL
             nRet = SIPUtility.ParseMessage(recv_result.RecvMsg, out BaseMessage response, out error);
             if (nRet == -1)
             {
+                try
+                {
+                    dynamic p = response;
+                    if (string.IsNullOrEmpty(p.AF_ScreenMessage_o) == false)
+                        return new SendAndRecvResult
+                        {
+                            RecvMsg = recv_result.RecvMsg,
+                            Response = response,
+                            Value = -1,
+                            ErrorInfo = p.AF_ScreenMessage_o,
+                            ErrorCode = "sipError",
+                        };
+                }
+                catch
+                {
+
+                }
+
                 return new SendAndRecvResult
                 {
+                    RecvMsg = recv_result.RecvMsg,
+                    Response = response,
                     Value = -1,
-                    ErrorInfo = "解析返回的消息异常:" + error + "\r\n" + recv_result.RecvMsg
+                    ErrorInfo = "解析返回的消息异常:" + error + "\r\n" + recv_result.RecvMsg,
+                    ErrorCode = "parseError"
                 };
             }
 
@@ -804,6 +825,211 @@ namespace dp2SSL
                 Result = response18
             };
         }
+
+        public class GetPatronInfoResult : NormalResult
+        {
+            public PatronInformationResponse_64 Result { get; set; }
+        }
+
+        public async Task<GetPatronInfoResult> GetPatronInfoAsync(string patronBarcode)
+        {
+            PatronInformation_63 request = new PatronInformation_63()
+            {
+                TransactionDate_18 = SIPUtility.NowDateTime,
+                AO_InstitutionId_r = SIPConst.AO_Value,
+                AA_PatronIdentifier_r = patronBarcode,
+            };
+            request.SetDefaulValue();//设置其它默认值
+
+            // 发送和接收消息
+            string requestText = request.ToText();
+
+            var result = await SendAndRecvAsync(requestText);
+            if (result.Value == -1)
+            {
+                return new GetPatronInfoResult
+                {
+                    Value = -1,
+                    ErrorInfo = result.ErrorInfo,
+                    ErrorCode = result.ErrorCode
+                };
+            }
+
+            var response64 = result.Response as PatronInformationResponse_64;
+            if (response64 == null)
+            {
+                return new GetPatronInfoResult
+                {
+                    Value = -1,
+                    ErrorInfo = "返回的不是64消息"
+                };
+            }
+
+            return new GetPatronInfoResult
+            {
+                Value = 0,
+                Result = response64
+            };
+        }
+
+        public class CheckoutResult : NormalResult
+        {
+            public CheckoutResponse_12 Result { get; set; }
+        }
+
+        // 借书
+        // return.Value
+        //      -1  出错
+        //      0   请求失败
+        //      1   请求成功
+        public async Task<CheckoutResult> CheckoutAsync(string patronBarcode,
+            string itemBarcode)
+        {
+            Checkout_11 request = new Checkout_11()
+            {
+                TransactionDate_18 = SIPUtility.NowDateTime,
+                AA_PatronIdentifier_r = patronBarcode,
+                AB_ItemIdentifier_r = itemBarcode,
+                AO_InstitutionId_r = SIPConst.AO_Value,
+            };
+            request.SetDefaulValue();//设置其它默认值
+
+            // 发送和接收消息
+            string requestText = request.ToText();
+
+            var result = await SendAndRecvAsync(requestText);
+            if (result.Value == -1)
+            {
+                return new CheckoutResult
+                {
+                    Value = -1,
+                    ErrorInfo = result.ErrorInfo,
+                    ErrorCode = result.ErrorCode
+                };
+            }
+
+            var response12 = result.Response as CheckoutResponse_12;
+            if (response12 == null)
+            {
+                return new CheckoutResult
+                {
+                    Value = -1,
+                    ErrorInfo = "返回的不是12消息"
+                };
+            }
+
+            return new CheckoutResult
+            {
+                Value = response12.Ok_1 == "0" ? 0 : 1,
+                Result = response12
+            };
+        }
+
+        public class CheckinResult : NormalResult
+        {
+            public CheckinResponse_10 Result { get; set; }
+        }
+
+        // 还书
+        // return.Value
+        //      -1  出错
+        //      0   请求失败
+        //      1   请求成功
+        public async Task<CheckinResult> CheckinAsync(string itemBarcode)
+        {
+            Checkin_09 request = new Checkin_09()
+            {
+                TransactionDate_18 = SIPUtility.NowDateTime,
+                ReturnDate_18 = SIPUtility.NowDateTime,
+                AB_ItemIdentifier_r = itemBarcode,
+                AO_InstitutionId_r = SIPConst.AO_Value,
+            };
+            request.SetDefaulValue();//设置其它默认值
+
+            // 发送和接收消息
+            string requestText = request.ToText();
+
+            var result = await SendAndRecvAsync(requestText);
+            if (result.Value == -1)
+            {
+                return new CheckinResult
+                {
+                    Value = -1,
+                    ErrorInfo = result.ErrorInfo,
+                    ErrorCode = result.ErrorCode
+                };
+            }
+
+            var response10 = result.Response as CheckinResponse_10;
+            if (response10 == null)
+            {
+                return new CheckinResult
+                {
+                    Value = -1,
+                    ErrorInfo = "返回的不是10消息"
+                };
+            }
+
+            return new CheckinResult
+            {
+                Value = response10.Ok_1 == "0" ? 0 : 1,
+                Result = response10
+            };
+        }
+
+        public class RenewResult : NormalResult
+        {
+            public RenewResponse_30 Result { get; set; }
+        }
+
+        // 续借
+        // return.Value
+        //      -1  出错
+        //      0   请求失败
+        //      1   请求成功
+        public async Task<RenewResult> RenewAsync(string patronBarcode,
+            string itemBarcode)
+        {
+            Renew_29 request = new Renew_29()
+            {
+                TransactionDate_18 = SIPUtility.NowDateTime,
+                AO_InstitutionId_r = SIPConst.AO_Value,
+                AA_PatronIdentifier_r = patronBarcode,
+                AB_ItemIdentifier_o = itemBarcode,
+            };
+            request.SetDefaulValue();//设置其它默认值
+
+            // 发送和接收消息
+            string requestText = request.ToText();
+
+            var result = await SendAndRecvAsync(requestText);
+            if (result.Value == -1)
+            {
+                return new RenewResult
+                {
+                    Value = -1,
+                    ErrorInfo = result.ErrorInfo,
+                    ErrorCode = result.ErrorCode
+                };
+            }
+
+            var response30 = result.Response as RenewResponse_30;
+            if (response30 == null)
+            {
+                return new RenewResult
+                {
+                    Value = -1,
+                    ErrorInfo = "返回的不是30消息"
+                };
+            }
+
+            return new RenewResult
+            {
+                Value = response30.Ok_1 == "0" ? 0 : 1,
+                Result = response30
+            };
+        }
+
 
         #endregion
     }
