@@ -326,10 +326,15 @@ get_result.Result.AE_PersonalName_r);
                             // 在借册
                             var root = readerdom.DocumentElement.AppendChild(readerdom.CreateElement("borrows")) as XmlElement;
                             var items = get_result.Result.AU_ChargedItems_o;
-                            foreach (var item in items)
+                            if (items != null)
                             {
-                                var borrow = root.AppendChild(readerdom.CreateElement("borrow")) as XmlElement;
-                                borrow.SetAttribute("barcode", item.Value);
+                                foreach (var item in items)
+                                {
+                                    if (item.Value == null)
+                                        continue;
+                                    var borrow = root.AppendChild(readerdom.CreateElement("borrow")) as XmlElement;
+                                    borrow.SetAttribute("barcode", item.Value);
+                                }
                             }
 
                             return new GetReaderInfoResult
@@ -355,6 +360,146 @@ get_result.Result.AE_PersonalName_r);
                 {
                     Value = -1,
                     ErrorInfo = $"GetReaderInfoAsync() 出现异常: {ex.Message}",
+                    ErrorCode = ex.GetType().ToString()
+                };
+            }
+        }
+
+        public static async Task<NormalResult> BorrowAsync(string patronBarcode,
+            string itemBarcode)
+        {
+            try
+            {
+                using (var releaser = await _channelLimit.EnterAsync())
+                {
+
+                    SipChannel channel = await GetChannelAsync();
+                    try
+                    {
+                        var result = await channel.CheckoutAsync(patronBarcode, itemBarcode);
+                        if (result.Value == -1)
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = result.ErrorInfo,
+                                ErrorCode = result.ErrorCode
+                            };
+                        if (result.Value == 0)
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = result.ErrorInfo,
+                                ErrorCode = result.ErrorCode
+                            };
+                        return new NormalResult();
+                    }
+                    finally
+                    {
+                        ReturnChannel(channel);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                WpfClientInfo.WriteErrorLog($"BorrowAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+
+                return new GetEntityDataResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"BorrowAsync() 出现异常: {ex.Message}",
+                    ErrorCode = ex.GetType().ToString()
+                };
+            }
+        }
+
+        public static async Task<NormalResult> ReturnAsync(string itemBarcode)
+        {
+            try
+            {
+                using (var releaser = await _channelLimit.EnterAsync())
+                {
+
+                    SipChannel channel = await GetChannelAsync();
+                    try
+                    {
+                        var result = await channel.CheckinAsync(itemBarcode);
+                        if (result.Value == -1)
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = result.ErrorInfo,
+                                ErrorCode = result.ErrorCode
+                            };
+                        if (result.Value == 0)
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = result.ErrorInfo,
+                                ErrorCode = result.ErrorCode
+                            };
+                        return new NormalResult();
+                    }
+                    finally
+                    {
+                        ReturnChannel(channel);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                WpfClientInfo.WriteErrorLog($"ReturnAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+
+                return new GetEntityDataResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"ReturnAsync() 出现异常: {ex.Message}",
+                    ErrorCode = ex.GetType().ToString()
+                };
+            }
+        }
+
+        public static async Task<NormalResult> RenewAsync(string patronBarcode,
+    string itemBarcode)
+        {
+            try
+            {
+                using (var releaser = await _channelLimit.EnterAsync())
+                {
+
+                    SipChannel channel = await GetChannelAsync();
+                    try
+                    {
+                        var result = await channel.RenewAsync(patronBarcode, itemBarcode);
+                        if (result.Value == -1)
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = result.ErrorInfo,
+                                ErrorCode = result.ErrorCode
+                            };
+                        if (result.Value == 0)
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = result.ErrorInfo,
+                                ErrorCode = result.ErrorCode
+                            };
+                        return new NormalResult();
+                    }
+                    finally
+                    {
+                        ReturnChannel(channel);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                WpfClientInfo.WriteErrorLog($"RenewAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+
+                return new GetEntityDataResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"RenewAsync() 出现异常: {ex.Message}",
                     ErrorCode = ex.GetType().ToString()
                 };
             }

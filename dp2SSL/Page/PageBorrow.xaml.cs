@@ -991,13 +991,21 @@ namespace dp2SSL
         // 决定是否隐藏读者信息控件
         void SetPatronControlVisibility()
         {
-            // 2020/4/16
-            if (returnButton.Visibility == Visibility.Visible
-                || renewButton.Visibility == Visibility.Visible)
-                this.patronControl.Visibility = Visibility.Collapsed;
+            if (App.Protocol == "sip")
+            {
+                if (returnButton.Visibility == Visibility.Visible)
+                    this.patronControl.Visibility = Visibility.Collapsed;
+                else
+                    this.patronControl.Visibility = Visibility.Visible;
+            }
             else
-                this.patronControl.Visibility = Visibility.Visible;
-
+            {
+                if (returnButton.Visibility == Visibility.Visible
+                    || renewButton.Visibility == Visibility.Visible)
+                    this.patronControl.Visibility = Visibility.Collapsed;
+                else
+                    this.patronControl.Visibility = Visibility.Visible;
+            }
             /*
             // (普通)还书和续借操作并不需要读者卡
             if (borrowButton.Visibility != Visibility.Visible)
@@ -1694,15 +1702,15 @@ out string strError);
         // 借书
         private void BorrowButton_Click(object sender, RoutedEventArgs e)
         {
-            _ = Task.Run(() =>
+            _ = Task.Run(async () =>
             {
                 try
                 {
-                    Loan("borrow");
+                    await Loan("borrow");
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // TODO: 写入错误日志
+                    WpfClientInfo.WriteErrorLog($"BorrowButton_Click() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 }
             });
         }
@@ -1722,7 +1730,7 @@ out string strError);
         }
 #endif
 
-        void Loan(string action)
+        async Task Loan(string action)
         {
             ProgressWindow progress = null;
 
@@ -1762,8 +1770,10 @@ out string strError);
                 return;
             }
 
-            // 借书操作必须要有读者卡。(还书和续借，可要可不要)
-            if (action == "borrow")
+            // dp2 协议：借书操作必须要有读者卡。(还书和续借，可要可不要)
+            // sip2 协议：借书和续借都要有读者卡
+            if (action == "borrow"
+                || (action == "renew" && App.Protocol == "sip"))
             {
                 if (string.IsNullOrEmpty(_patron.Barcode))
                 {
@@ -1782,9 +1792,14 @@ out string strError);
                 }
             }
 
-            LibraryChannel channel = App.CurrentApp.GetChannel();
-            TimeSpan old_timeout = channel.Timeout;
-            channel.Timeout = TimeSpan.FromSeconds(10);
+            LibraryChannel channel = null;
+            TimeSpan old_timeout = TimeSpan.FromSeconds(0);
+            if (App.Protocol == "dp2library")
+            {
+                channel = App.CurrentApp.GetChannel();
+                old_timeout = channel.Timeout;
+                channel.Timeout = TimeSpan.FromSeconds(10);
+            }
 
             try
             {
@@ -1803,8 +1818,8 @@ out string strError);
                 foreach (Entity entity in _entities)
                 {
                     long lRet = 0;
-                    string strError = "";
                     string[] item_records = null;
+                    string strError = "";
 
                     if (action == "borrow" || action == "renew")
                     {
@@ -1820,25 +1835,6 @@ out string strError);
                             skip_count++;
                             continue;
                         }
-                        entity.Waiting = true;
-                        lRet = channel.Borrow(null,
-                            action == "renew",
-                            _patron.Barcode,
-                            entity.PII,
-                            entity.ItemRecPath,
-                            false,
-                            null,
-                            "item,reader", // style,
-                            "xml", // item_format_list
-                            out item_records,
-                            "xml",
-                            out string[] reader_records,
-                            "",
-                            out string[] biblio_records,
-                            out string[] dup_path,
-                            out string output_reader_barcode,
-                            out BorrowInfo borrow_info,
-                            out strError);
                     }
                     else if (action == "return")
                     {
@@ -1861,25 +1857,132 @@ out string strError);
                                 continue;
                             }
                         }
+                    }
 
-                        entity.Waiting = true;
-                        lRet = channel.Return(null,
-                            "return",
-                            _patron.Barcode,
-                            entity.PII,
-                            entity.ItemRecPath,
-                            false,
-                            "item,reader", // style,
-                            "xml", // item_format_list
-                            out item_records,
-                            "xml",
-                            out string[] reader_records,
-                            "",
-                            out string[] biblio_records,
-                            out string[] dup_path,
-                            out string output_reader_barcode,
-                            out ReturnInfo return_info,
-                            out strError);
+                    entity.Waiting = true;
+                    if (App.Protocol == "sip")
+                    {
+                        if (action == "borrow")
+                        {
+                            var result = await SipChannelUtil.BorrowAsync(_patron.Barcode, entity.PII);
+                            if (result.Value == -1)
+                            {
+                                lRet = -1;
+                                strError = result.ErrorInfo;
+                            }
+                        }
+                        else if (action == "renew")
+                        {
+                            var result = await SipChannelUtil.RenewAsync(_patron.Barcode, entity.PII);
+                            if (result.Value == -1)
+                            {
+                                lRet = -1;
+                                strError = result.ErrorInfo;
+                            }
+                        }
+                        else if (action == "return")
+                        {
+                            var result = await SipChannelUtil.ReturnAsync(entity.PII);
+                            if (result.Value == -1)
+                            {
+                                lRet = -1;
+                                strError = result.ErrorInfo;
+                            }
+                        }
+                        else
+                        {
+                            lRet = -1;
+                            strError = $"无法识别的 action '{action}'";
+                        }
+                    }
+                    else if (App.Protocol == "dp2library")
+                    {
+
+                        if (action == "borrow" || action == "renew")
+                        {
+                            /*
+                            if (action == "borrow" && StringUtil.IsInList("borrowed", entity.State))
+                            {
+                                entity.SetError($"本册是外借状态。{action_name}操作被忽略", "yellow");
+                                skip_count++;
+                                continue;
+                            }
+                            if (action == "renew" && StringUtil.IsInList("onshelf", entity.State))
+                            {
+                                entity.SetError($"本册是在馆状态。{action_name}操作被忽略 (只有处于外借状态的册才能进行续借)", "yellow");
+                                skip_count++;
+                                continue;
+                            }
+                            */
+
+                            //entity.Waiting = true;
+                            lRet = channel.Borrow(null,
+                                action == "renew",
+                                _patron.Barcode,
+                                entity.PII,
+                                entity.ItemRecPath,
+                                false,
+                                null,
+                                "item,reader", // style,
+                                "xml", // item_format_list
+                                out item_records,
+                                "xml",
+                                out string[] reader_records,
+                                "",
+                                out string[] biblio_records,
+                                out string[] dup_path,
+                                out string output_reader_barcode,
+                                out BorrowInfo borrow_info,
+                                out strError);
+                        }
+                        else if (action == "return")
+                        {
+                            /*
+                            if (StringUtil.IsInList("onshelf", entity.State))
+                            {
+                                entity.SetError($"本册是在馆状态。{action_name}操作被忽略", "yellow");
+                                skip_count++;
+                                continue;
+                            }
+
+                            // TODO: 增加检查 EAS 现有状态功能，如果已经是 true 则不用修改，后面 API 遇到出错后也不要回滚 EAS
+                            // return 操作，提前修改 EAS
+                            // 注: 提前修改 EAS 的好处是比较安全。相比 API 执行完以后再修改 EAS，提前修改 EAS 成功后，无论后面发生什么，读者都无法拿着这本书走出门禁
+                            {
+                                var result = SetEAS(entity.UID, entity.Antenna, action == "return");
+                                if (result.Value == -1)
+                                {
+                                    entity.SetError($"{action_name}时修改 EAS 动作失败: {result.ErrorInfo}", "red");
+                                    errors.Add($"册 '{entity.PII}' {action_name}时修改 EAS 动作失败: {result.ErrorInfo}");
+                                    continue;
+                                }
+                            }
+                            */
+
+                            //entity.Waiting = true;
+                            lRet = channel.Return(null,
+                                "return",
+                                _patron.Barcode,
+                                entity.PII,
+                                entity.ItemRecPath,
+                                false,
+                                "item,reader", // style,
+                                "xml", // item_format_list
+                                out item_records,
+                                "xml",
+                                out string[] reader_records,
+                                "",
+                                out string[] biblio_records,
+                                out string[] dup_path,
+                                out string output_reader_barcode,
+                                out ReturnInfo return_info,
+                                out strError);
+                        }
+                        else
+                        {
+                            lRet = -1;
+                            strError = $"无法识别的 action '{action}'";
+                        }
                     }
 
                     App.Invoke(new Action(() =>
@@ -1919,6 +2022,12 @@ out string strError);
                     {
                         if (item_records?.Length > 0)
                             entity.SetData(entity.ItemRecPath, item_records[0]);
+
+                        if (App.Protocol == "sip")
+                        {
+                            // 刷新册记录状态显示
+                            await RefreshEntityStateAsync(entity);
+                        }
 
                         if (entity.Error != null)
                             continue;
@@ -2011,14 +2120,34 @@ out string strError);
             }
             finally
             {
-                channel.Timeout = old_timeout;
-                App.CurrentApp.ReturnChannel(channel);
+                if (App.Protocol == "dp2library")
+                {
+                    channel.Timeout = old_timeout;
+                    App.CurrentApp.ReturnChannel(channel);
+                }
+
                 App.Invoke(new Action(() =>
                 {
                     if (progress != null)
                         progress.Close();
                 }));
             }
+        }
+
+        static async Task RefreshEntityStateAsync(Entity entity)
+        {
+            if (App.Protocol != "sip")
+                return;
+
+            GetEntityDataResult result = await SipChannelUtil.GetEntityDataAsync(entity.PII, "network");
+            if (result.Value == -1)
+            {
+                entity.AppendError(result.ErrorInfo);
+                return;
+            }
+
+            entity.Title = GetCaption(result.Title);
+            entity.SetData(result.ItemRecPath, result.ItemXml);
         }
 
         private void Progress_Closed(object sender, EventArgs e)
@@ -2199,15 +2328,15 @@ out string strError);
 #endif
         private void ReturnButton_Click(object sender, RoutedEventArgs e)
         {
-            _ = Task.Run(() =>
+            _ = Task.Run(async () =>
             {
                 try
                 {
-                    Loan("return");
+                    await Loan("return");
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // TODO: 写入错误日志
+                    WpfClientInfo.WriteErrorLog($"ReturnButton_Click() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 }
             });
         }
@@ -2215,15 +2344,15 @@ out string strError);
         // 续借
         private void RenewButton_Click(object sender, RoutedEventArgs e)
         {
-            _ = Task.Run(() =>
+            _ = Task.Run(async () =>
             {
                 try
                 {
-                    Loan("renew");
+                    await Loan("renew");
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // TODO: 写入错误日志
+                    WpfClientInfo.WriteErrorLog($"RenewButton_Click() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 }
             });
         }

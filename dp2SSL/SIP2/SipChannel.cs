@@ -921,6 +921,7 @@ namespace dp2SSL
             return new CheckoutResult
             {
                 Value = response12.Ok_1 == "0" ? 0 : 1,
+                ErrorInfo = response12.AF_ScreenMessage_o,
                 Result = response12
             };
         }
@@ -973,6 +974,7 @@ namespace dp2SSL
             return new CheckinResult
             {
                 Value = response10.Ok_1 == "0" ? 0 : 1,
+                ErrorInfo = response10.AF_ScreenMessage_o,
                 Result = response10
             };
         }
@@ -1026,6 +1028,7 @@ namespace dp2SSL
             return new RenewResult
             {
                 Value = response30.Ok_1 == "0" ? 0 : 1,
+                ErrorInfo = response30.AF_ScreenMessage_o,
                 Result = response30
             };
         }
