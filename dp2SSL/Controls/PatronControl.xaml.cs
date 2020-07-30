@@ -11,6 +11,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Xml;
+
 using DigitalPlatform;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
@@ -179,6 +180,27 @@ namespace dp2SSL
             this.photo.Source = imageSource;
         }
 
+        public void ClearPhotoCache(string photo_path)
+        {
+            if (string.IsNullOrEmpty(photo_path))
+                return;
+
+            string cacheDir = Path.Combine(WpfClientInfo.UserDir, "photo");
+            string fileName = Path.Combine(cacheDir, GetPath(photo_path));
+            try
+            {
+                SetPhoto(null);
+                if (File.Exists(fileName))
+                {
+                    File.Delete(fileName);
+                }
+            }
+            catch (Exception ex)
+            {
+                WpfClientInfo.WriteErrorLog($"清除照片缓存文件 '{fileName}' 时出现异常: {ExceptionUtil.GetDebugText(ex)}");
+            }
+        }
+
         public void LoadPhoto(string photo_path)
         {
             if (string.IsNullOrEmpty(photo_path))
@@ -203,7 +225,8 @@ namespace dp2SSL
                 {
                     try
                     {
-                        stream = File.OpenRead(fileName);
+                        stream = new MemoryStream(File.ReadAllBytes(fileName));
+                        // stream = File.OpenRead(fileName);
                     }
                     catch (Exception ex)
                     {

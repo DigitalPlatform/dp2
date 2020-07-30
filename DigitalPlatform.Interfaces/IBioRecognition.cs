@@ -71,6 +71,24 @@ namespace DigitalPlatform.Interfaces
 
         // 事件通知
         NormalResult Notify(string event_name);
+
+
+        // 2020/7/30
+        // 注册一个生物识别特征字符串
+        // parameters:
+        //      imageData   [in] 要提取特征的源图像数据。如果为 null，表示使用 xxxCenter 自动拍摄的图象
+        // return:
+        //      -1  error
+        //      0   放弃输入
+        //      1   成功输入
+        NormalResult RegisterFeatureString(
+            byte[] imageData,
+            string strBarcode,
+            string strStyle);
+
+        // 取消正在进行的 RegisterFeatureString() 操作
+        NormalResult CancelRegisterFeatureString();
+
     }
 
     [Serializable()]
