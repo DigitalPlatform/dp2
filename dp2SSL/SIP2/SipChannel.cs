@@ -778,6 +778,63 @@ namespace dp2SSL
             };
         }
 
+        public class ScStatusResult : NormalResult
+        {
+            public ACSStatus_98 Result { get; set; }
+        }
+
+        // -1出错，0不在线，1正常
+        public async Task<ScStatusResult> ScStatusAsync()
+        {
+            SCStatus_99 request = new SCStatus_99()
+            {
+                StatusCode_1 = "0",
+                MaxPrintWidth_3 = "030",
+                ProtocolVersion_4 = "2.00",
+            };
+
+            // 发送和接收消息
+            string requestText = request.ToText();
+
+            var result = await SendAndRecvAsync(requestText);
+            if (result.Value == -1)
+            {
+                return new ScStatusResult
+                {
+                    Value = -1,
+                    ErrorInfo = result.ErrorInfo,
+                    ErrorCode = result.ErrorCode
+                };
+            }
+
+            var response98 = result.Response as ACSStatus_98;
+            if (response98 == null)
+            {
+                return new ScStatusResult
+                {
+                    Value = -1,
+                    ErrorInfo = "返回的不是 98 消息"
+                };
+            }
+
+            if (response98.OnlineStatus_1 != "Y")
+            {
+                return new ScStatusResult
+                {
+                    Value = 0,
+                    ErrorInfo = "ACS 当前不在线。" + response98.AF_ScreenMessage_o + " " + response98.BX_SupportedMessages_r,
+                    Result = response98
+                };
+            }
+
+            return new ScStatusResult
+            {
+                Value = 1,
+                ErrorInfo = response98.AF_ScreenMessage_o,
+                Result = response98
+            };
+        }
+
         public class GetItemInfoResult : NormalResult
         {
             public ItemInformationResponse_18 Result { get; set; }

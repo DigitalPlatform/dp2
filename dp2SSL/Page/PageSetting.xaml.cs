@@ -320,6 +320,7 @@ namespace dp2SSL
         const string dp2library_base_version = "3.29";
         const string fingerprintcenter_base_version = "2.1";
         const string rfidcenter_base_version = "1.7";
+        const string facecenter_base_version = "1.3";
 
         public static NormalResult CheckServerUID()
         {
@@ -408,6 +409,22 @@ namespace dp2SSL
             // 如果没有配置 人脸中心 URL 则不检查
             if (string.IsNullOrEmpty(App.FaceUrl) == false)
             {
+                var version_result = FaceManager.GetState("getVersion");
+                if (version_result.Value == -1 || version_result.ErrorCode == null)
+                    errors.Add("所连接的 RFID 中心版本太低。请升级到最新版本");
+                else
+                {
+                    try
+                    {
+                        if (StringUtil.CompareVersion(version_result.ErrorCode, facecenter_base_version) < 0)
+                            errors.Add($"所连接的 人脸中心版本太低(为 {version_result.ErrorCode} 版)。请升级到 {rfidcenter_base_version} 以上版本");
+                    }
+                    catch (Exception ex)
+                    {
+                        errors.Add($"所连接的 人脸中心版本太低。请升级到最新版本。({ex.Message})");
+                    }
+                }
+
                 var result = FaceManager.GetState("getLibraryServerUID");
                 if (result.Value == -1)
                 {

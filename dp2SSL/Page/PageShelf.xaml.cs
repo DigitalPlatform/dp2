@@ -267,11 +267,44 @@ namespace dp2SSL
         private async void App_LineFeed(object sender, LineFeedEventArgs e)
 #pragma warning restore VSTHRD100 // 避免使用 Async Void 方法
         {
+            if (string.IsNullOrEmpty(App.PatronBarcodeStyle) || App.PatronBarcodeStyle == "禁用")
+            {
+                SetGlobalError("scan_barcode", "当前设置参数不接受扫入条码");
+                App.CurrentApp.Speak("不允许扫入各种条码");
+                return;
+            }
+
             // 扫入一个条码
             string barcode = e.Text.ToUpper();
             // 检查防范空字符串，和使用工作人员方式(~开头)的字符串
             if (string.IsNullOrEmpty(barcode) || barcode.StartsWith("~"))
+            {
+                App.CurrentApp.Speak("条码不合法");
                 return;
+            }
+
+            // 2020/7/30
+            var styles = StringUtil.SplitList(App.PatronBarcodeStyle, "+");
+            if (barcode.StartsWith("PQR:"))
+            {
+                // 二维码情形
+                if (styles.IndexOf("二维码") == -1)
+                {
+                    App.CurrentApp.Speak("不允许扫入二维码");
+                    return;
+                }
+            }
+            else
+            {
+                // 一维码情形
+                if (styles.IndexOf("一维码") == -1)
+                {
+                    App.CurrentApp.Speak("不允许扫入条码");
+                    return;
+                }
+            }
+
+            SetGlobalError("scan_barcode", null);
 
             // return:
             //      false   没有成功
@@ -2509,7 +2542,29 @@ namespace dp2SSL
                     }
                 }
                 else
+                {
+                    // 针对 ISO15693 读者卡进行检查，要求必须具备 OI 或者 AOI
+                    if (_patron.Protocol == InventoryInfo.ISO15693)
+                    {
+                        if (string.IsNullOrEmpty(_patron.OI) && string.IsNullOrEmpty(_patron.AOI))
+                        {
+                            ClearBorrowedEntities();
+
+                            _patron.Barcode = _patron.PII;
+
+                            string error = "不允许使用机构代码为空的 ISO15693 读者卡";
+                            SetPatronError("getreaderinfo", error);
+
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = error
+                            };
+                        }
+                    }
+
                     pii = _patron.GetOiPii();
+                }
 
                 // TODO: 先显示等待动画
 

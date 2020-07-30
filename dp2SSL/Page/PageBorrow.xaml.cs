@@ -288,6 +288,7 @@ namespace dp2SSL
             if (string.IsNullOrEmpty(App.PatronBarcodeStyle) || App.PatronBarcodeStyle == "禁用")
             {
                 SetGlobalError("scan_barcode", "当前设置参数不接受扫入条码");
+                App.CurrentApp.Speak("不允许扫入各种条码");
                 return;
             }
 
@@ -295,7 +296,10 @@ namespace dp2SSL
             string barcode = e.Text.ToUpper();
             // 检查防范空字符串，和使用工作人员方式(~开头)的字符串
             if (string.IsNullOrEmpty(barcode) || barcode.StartsWith("~"))
+            {
+                App.CurrentApp.Speak("条码不合法");
                 return;
+            }
 
             // 2020/6/3
             var styles = StringUtil.SplitList(App.PatronBarcodeStyle, "+");
@@ -303,13 +307,19 @@ namespace dp2SSL
             {
                 // 二维码情形
                 if (styles.IndexOf("二维码") == -1)
+                {
+                    App.CurrentApp.Speak("不允许扫入二维码");
                     return;
+                }
             }
             else
             {
                 // 一维码情形
                 if (styles.IndexOf("一维码") == -1)
+                {
+                    App.CurrentApp.Speak("不允许扫入条码");
                     return;
+                }
             }
 
             SetGlobalError("scan_barcode", null);
@@ -1706,7 +1716,7 @@ out string strError);
             {
                 try
                 {
-                    await Loan("borrow");
+                    await LoanAsync("borrow");
                 }
                 catch (Exception ex)
                 {
@@ -1730,7 +1740,7 @@ out string strError);
         }
 #endif
 
-        async Task Loan(string action)
+        async Task LoanAsync(string action)
         {
             ProgressWindow progress = null;
 
@@ -2332,7 +2342,7 @@ out string strError);
             {
                 try
                 {
-                    await Loan("return");
+                    await LoanAsync("return");
                 }
                 catch (Exception ex)
                 {
@@ -2348,7 +2358,7 @@ out string strError);
             {
                 try
                 {
-                    await Loan("renew");
+                    await LoanAsync("renew");
                 }
                 catch (Exception ex)
                 {
@@ -2471,6 +2481,7 @@ out string strError);
             await RegisterFaceAsync("registerFace");
         }
 
+#if OLDVERSION
         // 注册或者删除人脸
         private async Task RegisterFaceAsync(string action)
         {
@@ -2515,9 +2526,9 @@ out string strError);
                             {
                                 DisplayVideo(videoRegister);
                             }
-                            catch
+                            catch(Exception ex)
                             {
-                                // TODO: 写入错误日志
+                                WpfClientInfo.WriteErrorLog($"RegisterFaceAsync() DisplayVideo() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                             }
                         });
 
@@ -2562,10 +2573,11 @@ out string strError);
                                     }));
                                 }
                             }
-                            catch
+                            catch (Exception ex)
                             {
-                                // TODO: 写入错误日志
+                                WpfClientInfo.WriteErrorLog($"RegisterFaceAsync() 倒计时过程出现异常: {ExceptionUtil.GetDebugText(ex)}");
                             }
+
                         });
 
 
@@ -2678,6 +2690,13 @@ out string strError);
 
                     _patron.Timestamp = save_result.NewTimestamp;
                     _patron.Xml = dom.OuterXml;
+
+                    // 2020/7/30
+                    // 清除本地人脸缓存文件
+                    if (string.IsNullOrEmpty(_patron.PhotoPath) == false)
+                    {
+                        patronControl.ClearPhotoCache(_patron.PhotoPath);
+                    }
                 }
 
                 if (action == "registerFace")
@@ -2703,6 +2722,179 @@ out string strError);
                     SetGlobalError("face", $"FaceManager.Notify() error: {notify_result.ErrorInfo}");   // 2019/9/11 增加 error:
 
                 string message = $"{action_name}成功";
+                // 注册人脸成功 这句话会和 FaceCenter 的差不多同时的说话“获取人脸信息成功”重叠
+                if (action == "deleteFace")
+                    App.CurrentApp.Speak(message);
+                DisplayError(ref videoRegister, message, "green");
+            }
+            finally
+            {
+                if (videoRegister != null)
+                    App.Invoke(new Action(() =>
+                    {
+                        videoRegister.Close();
+                    }));
+            }
+
+            // 刷新读者信息区显示
+            var temp_task = FillPatronDetailAsync(true);
+        }
+
+#endif
+
+        // 注册或者删除人脸
+        private async Task RegisterFaceAsync(string action)
+        {
+            string action_name = "注册人脸";
+            if (action == "deleteFace")
+                action_name = "删除人脸";
+
+            // TODO: 用 WPF 对话框
+            if (action == "deleteFace")
+            {
+                MessageBoxResult dialog_result = MessageBox.Show(
+                    "确实要删除人脸信息?\r\n\r\n(人脸信息删除以后，您将无法使用人脸识别功能)",
+                    "dp2SSL",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Question);
+                if (dialog_result == MessageBoxResult.No)
+                    return;
+            }
+
+            VideoWindow videoRegister = null;
+            App.Invoke(new Action(() =>
+            {
+                videoRegister = new VideoWindow
+                {
+                    TitleText = $"{action_name} ...",
+                    Owner = Application.Current.MainWindow,
+                    WindowStartupLocation = WindowStartupLocation.CenterOwner
+                };
+                videoRegister.Closed += VideoRegister_Closed;
+                videoRegister.Show();
+                AddLayer();
+            }));
+            try
+            {
+                if (IsPatronOK(action, out string check_message) == false)
+                {
+                    if (string.IsNullOrEmpty(check_message))
+                        check_message = $"读卡器上的当前读者卡状态不正确。无法进行{action_name}操作";
+
+                    DisplayError(ref videoRegister, check_message, "yellow");
+                    return;
+                }
+
+                if (action == "registerFace")
+                {
+                    _stopVideo = false;
+                    try
+                    {
+                        var task = Task.Run(() =>
+                        {
+                            try
+                            {
+                                DisplayVideo(videoRegister);
+                            }
+                            catch (Exception ex)
+                            {
+                                WpfClientInfo.WriteErrorLog($"RegisterFaceAsync() DisplayVideo() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                            }
+                        });
+
+                        // 2019/9/6 增加
+                        {
+                            var state_result = FaceManager.GetState("camera");
+                            if (state_result.Value == -1)
+                            {
+                                DisplayError(ref videoRegister, state_result.ErrorInfo);
+                                return;
+                            }
+                        }
+
+                        // 启动一个单独的显示倒计时数字的任务
+                        var task1 = Task.Run(() =>
+                        {
+                            try
+                            {
+                                for (int i = 5; i > 0; i--)
+                                {
+                                    if (_stopVideo == true)
+                                        break;
+
+                                    if (videoRegister == null)
+                                        break;
+
+                                    if (videoRegister != null)
+                                    {
+                                        App.Invoke(new Action(() =>
+                                        {
+                                            if (videoRegister != null)
+                                                videoRegister.TitleText = $"倒计时 {i}";
+                                        }));
+                                    }
+                                    Thread.Sleep(1000);
+                                }
+                                if (videoRegister != null)
+                                {
+                                    App.Invoke(new Action(() =>
+                                    {
+                                        videoRegister.TitleText = "拍摄";
+                                    }));
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                WpfClientInfo.WriteErrorLog($"RegisterFaceAsync() 倒计时过程出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                            }
+
+                        });
+
+                        var result = await RegisterFeatureStringAsync(_patron.Barcode, "countDown,format:jpeg,action:" + action);
+                        if (result.Value == -1)
+                        {
+                            DisplayError(ref videoRegister, result.ErrorInfo);
+                            return;
+                        }
+
+                        if (result.Value == 0)
+                        {
+                            DisplayError(ref videoRegister, result.ErrorInfo);
+                            return;
+                        }
+
+                        // SetGlobalError("face", null);
+                    }
+                    finally
+                    {
+                        _stopVideo = true;
+                    }
+                    // TODO: 背景变为绿色
+                }
+
+                if (action == "deleteFace")
+                {
+                    var result = await RegisterFeatureStringAsync(_patron.Barcode, "countDown,format:jpeg,action:" + action);
+                    if (result.Value == -1 || result.Value == 0)
+                    {
+                        DisplayError(ref videoRegister, result.ErrorInfo);
+                        return;
+                    }
+                }
+
+                // 清除本地人脸缓存文件
+                if (string.IsNullOrEmpty(_patron.PhotoPath) == false)
+                {
+                    patronControl.ClearPhotoCache(_patron.PhotoPath);
+                }
+
+                // 上传完对象后通知 facecenter DoReplication 一次
+                var notify_result = FaceManager.Notify("faceChanged");
+                if (notify_result.Value == -1)
+                    SetGlobalError("face", $"FaceManager.Notify() error: {notify_result.ErrorInfo}");   // 2019/9/11 增加 error:
+
+                string message = $"{action_name}成功";
+                // 注册人脸成功 这句话会和 FaceCenter 的差不多同时的说话“获取人脸信息成功”重叠
                 if (action == "deleteFace")
                     App.CurrentApp.Speak(message);
                 DisplayError(ref videoRegister, message, "green");
@@ -2769,6 +2961,7 @@ string color = "red")
             videoRegister = null;
         }
 
+#if OLDVERSION
         Task<NormalResult> UploadObjectAsync(
             string object_path,
             byte[] imageData)
@@ -2814,8 +3007,11 @@ string color = "red")
             });
         }
 
+#endif
+
         #region 下级函数
 
+#if OLDVERSION
         // return:
         //      "retry" "skip" 或 "cancel"
         public delegate string delegate_prompt(LibraryChannel channel,
@@ -3112,8 +3308,10 @@ out strError);
             return 0;
         }
 
-
+#endif
         #endregion
+
+#if OLDVERSION
 
         // 删除头像 object 的 dprms:file 元素
         // return:
@@ -3188,6 +3386,8 @@ string usage)
             }
         }
 
+#endif
+
         private void VideoRegister_Closed(object sender, EventArgs e)
         {
             FaceManager.CancelGetFeatureString();
@@ -3195,6 +3395,7 @@ string usage)
             RemoveLayer();
         }
 
+#if OLDVERSION
         async Task<GetFeatureStringResult> GetFeatureStringAsync(string style)
         {
             EnableControls(false);
@@ -3212,6 +3413,33 @@ string usage)
                             ErrorCode = result.ErrorCode
                         };
                     return FaceManager.GetFeatureString(null, "", style);
+                });
+            }
+            finally
+            {
+                EnableControls(true);
+            }
+        }
+
+#endif
+
+        async Task<NormalResult> RegisterFeatureStringAsync(string strBarcode, string style)
+        {
+            EnableControls(false);
+            try
+            {
+                return await Task.Run<NormalResult>(() =>
+                {
+                    // 2019/9/6 增加
+                    var result = FaceManager.GetState("camera");
+                    if (result.Value == -1)
+                        return new GetFeatureStringResult
+                        {
+                            Value = -1,
+                            ErrorInfo = result.ErrorInfo,
+                            ErrorCode = result.ErrorCode
+                        };
+                    return FaceManager.RegisterFeatureString(null, strBarcode, style);
                 });
             }
             finally

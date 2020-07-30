@@ -402,6 +402,88 @@ namespace DigitalPlatform.Face
             }
         }
 
+        public static NormalResult RegisterFeatureString(byte[] imageData,
+    string strBarcode,
+    string strStyle,
+    bool setGlobalError = false)
+        {
+            try
+            {
+                //if (string.IsNullOrEmpty(Base.Url))
+                //    return new GetFeatureStringResult();
+
+                BaseChannel<IBioRecognition> channel = Base.GetChannel();
+                try
+                {
+                    var result = channel.Object.RegisterFeatureString(imageData,
+                        strBarcode,
+                        strStyle);
+                    if (setGlobalError)
+                    {
+                        if (result.Value == -1)
+                            Base.TriggerSetError(result,
+                                new SetErrorEventArgs { Error = result.ErrorInfo });
+                        else
+                            Base.TriggerSetError(result,
+                                new SetErrorEventArgs { Error = null }); // 清除以前的报错
+                    }
+                    return result;
+                }
+                finally
+                {
+                    Base.ReturnChannel(channel);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                if (setGlobalError)
+                    Base.TriggerSetError(ex,
+                        new SetErrorEventArgs
+                        {
+                            Error = $"人脸中心出现异常: {ExceptionUtil.GetAutoText(ex)}"
+                        });
+                return new NormalResult { Value = -1, ErrorInfo = ex.Message };
+            }
+        }
+
+        public static NormalResult CancelRegisterFeatureString()
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(Base.Url))
+                    return new NormalResult();
+
+                BaseChannel<IBioRecognition> channel = Base.GetChannel();
+                try
+                {
+                    var result = channel.Object.CancelRegisterFeatureString();
+                    if (result.Value == -1)
+                        Base.TriggerSetError(result,
+                            new SetErrorEventArgs { Error = result.ErrorInfo });
+                    else
+                        Base.TriggerSetError(result,
+                            new SetErrorEventArgs { Error = null }); // 清除以前的报错
+
+                    return result;
+                }
+                finally
+                {
+                    Base.ReturnChannel(channel);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Base.TriggerSetError(ex,
+                    new SetErrorEventArgs
+                    {
+                        Error = $"人脸中心出现异常: {ExceptionUtil.GetAutoText(ex)}"
+                    });
+                return new NormalResult { Value = -1, ErrorInfo = ex.Message };
+            }
+        }
+
     }
 
 }
