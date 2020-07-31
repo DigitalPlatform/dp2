@@ -853,6 +853,38 @@ namespace dp2SSL
             PatronClear();  // 2019/9/3
         }
 
+        void LoadPhoto()
+        {
+            try
+            {
+                if (App.Protocol == "dp2library")
+                    this.patronControl.LoadPhoto(_patron.PhotoPath);
+
+                if (App.Protocol == "sip" && string.IsNullOrEmpty(App.FaceUrl) == false)
+                {
+                    if (string.IsNullOrEmpty(_patron.PhotoPath))
+                        App.Invoke(new Action(() =>
+                        {
+                            this.patronControl.SetPhoto((byte[])null);
+                        }));
+                    else
+                    {
+                        // 从 FaceCenter 获得头像
+                        var result = FaceManager.GetImage($"patron:{_patron.PhotoPath}");
+                        // TODO: 如何报错?
+                        App.Invoke(new Action(() =>
+                        {
+                            this.patronControl.SetPhoto(result.ImageData);
+                        }));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                SetGlobalError("patron", $"patron exception: {ex.Message}");    // 2019/9/11 增加 patron exception:
+            }
+        }
+
         bool _visiblityChanged = false;
 
         private void _patron_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -861,6 +893,8 @@ namespace dp2SSL
             {
                 _ = Task.Run(() =>
                 {
+                    LoadPhoto();
+                    /*
                     try
                     {
                         this.patronControl.LoadPhoto(_patron.PhotoPath);
@@ -869,6 +903,7 @@ namespace dp2SSL
                     {
                         SetGlobalError("patron", $"patron exception: {ex.Message}");    // 2019/9/11 增加 patron exception:
                     }
+                    */
                 });
             }
 

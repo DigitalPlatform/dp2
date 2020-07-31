@@ -5437,7 +5437,7 @@ MessageBoxButtons.YesNo,
 MessageBoxIcon.Question,
 MessageBoxDefaultButton.Button1);
                 if (result == System.Windows.Forms.DialogResult.Yes)
-                    FirstRunDialog.StartDp2libraryXe(
+                    FormClientUtil.StartDp2libraryXe(
                         this,
                         "dp2Circulation",
                         this.Font,
@@ -5445,9 +5445,9 @@ MessageBoxDefaultButton.Button1);
             }
             else
             {
-                if (FirstRunDialog.HasDp2libraryXeStarted() == false)
+                if (FormClientUtil.HasDp2libraryXeStarted() == false)
                 {
-                    FirstRunDialog.StartDp2libraryXe(
+                    FormClientUtil.StartDp2libraryXe(
                         this,
                         "dp2Circulation",
                         this.Font,

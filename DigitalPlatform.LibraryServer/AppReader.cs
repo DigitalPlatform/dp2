@@ -1319,6 +1319,7 @@ namespace DigitalPlatform.LibraryServer
                         XmlDocument domTemp = new XmlDocument();
                         domTemp.LoadXml(strSavedXml);
 
+                        /*
                         // 2020/5/27
                         // 检查 readerType 元素的值是否为 [blank]
                         string value = DomUtil.GetElementText(domTemp.DocumentElement, "readerType");
@@ -1328,6 +1329,7 @@ namespace DigitalPlatform.LibraryServer
                             strSavedXml = domTemp.OuterXml;
                         }
                         else
+                        */
                         {
                             // 检查一个册记录的读者类型是否符合值列表要求
                             // parameters:
@@ -1338,12 +1340,15 @@ namespace DigitalPlatform.LibraryServer
                             nRet = CheckReaderType(domTemp,
                                 strLibraryCode,
                                 strReaderDbName,
+                                out bool changed,
                                 out strError);
                             if (nRet == -1 || nRet == 1)
                             {
                                 strError = strError + "。创建读者记录操作失败";
                                 goto ERROR1;
                             }
+                            if (changed)
+                                strSavedXml = domTemp.OuterXml;
                         }
                     }
 
@@ -1559,10 +1564,15 @@ strLibraryCode);    // 读者所在的馆代码
         internal int CheckReaderType(XmlDocument dom,
             string strLibraryCode,
             string strReaderDbName,
+            out bool changed,
             out string strError)
         {
+            changed = false;
             strError = "";
             // int nRet = 0;
+
+            string strReaderType = DomUtil.GetElementText(dom.DocumentElement,
+"readerType");
 
             List<string> values = null;
 
@@ -1572,7 +1582,16 @@ strLibraryCode,
 strReaderDbName,
 false);
             if (result == null || result.Length == 0)
+            {
+                if (strReaderType == "[default]" || strReaderType == "[blank]")
+                {
+                    DomUtil.SetElementText(dom.DocumentElement,
+                        "readerType",
+                        "");
+                    changed = true;
+                }
                 return 0;
+            }
             values = new List<string>(result);
             GetPureValue(ref values);
 #if REMOVED
@@ -1593,19 +1612,40 @@ false);
             GetPureValue(ref values);
 
 #endif
-            string strReaderType = DomUtil.GetElementText(dom.DocumentElement,
-    "readerType");
 
-            if (string.IsNullOrEmpty(strReaderType)
-                && values.IndexOf("") != -1)
+
+
+            if (strReaderType == "[blank]")
             {
-                // 允许列表中出现 ""
+                strReaderType = "";
+                DomUtil.SetElementText(dom.DocumentElement,
+                    "readerType",
+                    strReaderType);
+                changed = true;
                 return 0;
             }
             else
             {
-                if (IsInList(strReaderType, values) == true)
+                if (strReaderType == "[default]")
+                {
+                    strReaderType = values[0];
+                    DomUtil.SetElementText(dom.DocumentElement,
+                        "readerType",
+                        strReaderType);
+                    changed = true;
+                }
+
+                if (string.IsNullOrEmpty(strReaderType)
+                    && values.IndexOf("") != -1)
+                {
+                    // 允许列表中出现 ""
                     return 0;
+                }
+                else
+                {
+                    if (IsInList(strReaderType, values) == true)
+                        return 0;
+                }
             }
 
             strError = "读者类型 '" + strReaderType + "' 不是合法的值。应为 '" + StringUtil.MakePathList(values) + "' 之一";
@@ -2380,6 +2420,7 @@ root, strLibraryCode);
                     nRet = CheckReaderType(domNewRec,   // domTemp,
                         strLibraryCode,
                         strReaderDbName,
+                        out bool changed,
                         out strError);
                     if (nRet == -1 || nRet == 1)
                     {

@@ -154,6 +154,7 @@
     </Compile>
     <Compile Include="dp2ServerCollection.cs" />
     <Compile Include="dp2ServerCollectionNew.cs" />
+    <Compile Include="FormClientUtil.cs" />
     <Compile Include="GetDp2ResDlg.cs">
       <SubType>Form</SubType>
     </Compile>

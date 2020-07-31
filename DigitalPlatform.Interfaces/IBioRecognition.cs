@@ -47,6 +47,11 @@ namespace DigitalPlatform.Interfaces
         NormalResult CancelRecognitionFace();
 
         // 2019/6/27
+        // 获得一副图像。
+        // parameters:
+        //      strStyle    风格。
+        //                  camera，或者默认，从摄像头抓取一副图像
+        //                  patron:xxx  读者头像。xxx 为证条码号
         GetImageResult GetImage(string strStyle);
 
         // 验证读者指纹. 1:1比对
@@ -88,7 +93,6 @@ namespace DigitalPlatform.Interfaces
 
         // 取消正在进行的 RegisterFeatureString() 操作
         NormalResult CancelRegisterFeatureString();
-
     }
 
     [Serializable()]

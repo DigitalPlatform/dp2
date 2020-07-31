@@ -410,36 +410,43 @@ namespace dp2SSL
             if (string.IsNullOrEmpty(App.FaceUrl) == false)
             {
                 var version_result = FaceManager.GetState("getVersion");
-                if (version_result.Value == -1 || version_result.ErrorCode == null)
-                    errors.Add("所连接的 RFID 中心版本太低。请升级到最新版本");
-                else
+                if (version_result.Value == -1 && version_result.ErrorCode == "notResponse")
                 {
-                    try
-                    {
-                        if (StringUtil.CompareVersion(version_result.ErrorCode, facecenter_base_version) < 0)
-                            errors.Add($"所连接的 人脸中心版本太低(为 {version_result.ErrorCode} 版)。请升级到 {rfidcenter_base_version} 以上版本");
-                    }
-                    catch (Exception ex)
-                    {
-                        errors.Add($"所连接的 人脸中心版本太低。请升级到最新版本。({ex.Message})");
-                    }
-                }
-
-                var result = FaceManager.GetState("getLibraryServerUID");
-                if (result.Value == -1)
-                {
-                    if (result.ErrorCode != "notResponse")
-                        errors.Add(result.ErrorInfo);
+                    // errors.Add(version_result.ErrorInfo);
                 }
                 else
                 {
-                    string face_uid = result.ErrorCode;
-                    if (string.IsNullOrEmpty(face_uid))
-                        errors.Add("针对人脸中心请求 getLibraryServerUID 失败，返回的 UID 为空，无法检查核对 UID");
+                    if (version_result.Value == -1 || version_result.ErrorCode == null)
+                        errors.Add("所连接的 RFID 中心版本太低。请升级到最新版本");
                     else
                     {
-                        if (face_uid != dp2library_uid)
-                            errors.Add($"dp2SSL 直连的 dp2library 服务器的 UID ('{dp2library_uid}') 和人脸中心所连接的 dp2library UID ('{face_uid}') 不同。请检查配置参数并重新配置");
+                        try
+                        {
+                            if (StringUtil.CompareVersion(version_result.ErrorCode, facecenter_base_version) < 0)
+                                errors.Add($"所连接的 人脸中心版本太低(为 {version_result.ErrorCode} 版)。请升级到 {rfidcenter_base_version} 以上版本");
+                        }
+                        catch (Exception ex)
+                        {
+                            errors.Add($"所连接的 人脸中心版本太低。请升级到最新版本。({ex.Message})");
+                        }
+                    }
+
+                    var result = FaceManager.GetState("getLibraryServerUID");
+                    if (result.Value == -1)
+                    {
+                        if (result.ErrorCode != "notResponse")
+                            errors.Add(result.ErrorInfo);
+                    }
+                    else
+                    {
+                        string face_uid = result.ErrorCode;
+                        if (string.IsNullOrEmpty(face_uid))
+                            errors.Add("针对人脸中心请求 getLibraryServerUID 失败，返回的 UID 为空，无法检查核对 UID");
+                        else
+                        {
+                            if (face_uid != dp2library_uid)
+                                errors.Add($"dp2SSL 直连的 dp2library 服务器的 UID ('{dp2library_uid}') 和人脸中心所连接的 dp2library UID ('{face_uid}') 不同。请检查配置参数并重新配置");
+                        }
                     }
                 }
             }
