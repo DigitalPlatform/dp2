@@ -1527,7 +1527,8 @@ namespace dp2SSL
             {
                 // 把门显示出来
                 this.doorControl.Visibility = Visibility.Visible;
-                this.doorControl.InitializeButtons(ShelfData.ShelfCfgDom, ShelfData.Doors);
+                if (ShelfData.ShelfCfgDom != null)
+                    this.doorControl.InitializeButtons(ShelfData.ShelfCfgDom, ShelfData.Doors);
             }));
         }
 

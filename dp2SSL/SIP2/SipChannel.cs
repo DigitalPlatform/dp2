@@ -591,6 +591,8 @@ namespace dp2SSL
             nRet = SIPUtility.ParseMessage(requestText, out request, out error);
             if (nRet == -1)
             {
+                SipChannelUtil.TryDetectSipNetwork();
+
                 return new SendAndRecvResult
                 {
                     Value = -1,
@@ -602,6 +604,8 @@ namespace dp2SSL
             var send_result = await SendMessageAsync(requestText);
             if (send_result.Value == -1)
             {
+                SipChannelUtil.TryDetectSipNetwork();
+
                 return new SendAndRecvResult(send_result);
             }
 
@@ -609,6 +613,8 @@ namespace dp2SSL
             var recv_result = await RecvMessageAsync();
             if (recv_result.Value == -1)
             {
+                SipChannelUtil.TryDetectSipNetwork();
+
                 return new SendAndRecvResult(recv_result);
             }
 
@@ -651,7 +657,6 @@ namespace dp2SSL
                 Response = response
             };
         }
-
 
         public static void WriteErrorLog(string text)
         {

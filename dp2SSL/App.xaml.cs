@@ -23,6 +23,9 @@ using System.Windows.Automation.Provider;
 using System.Windows.Interop;
 using System.Runtime.InteropServices;
 using System.Windows.Documents;
+using System.Security.Principal;
+using Microsoft.Win32;
+using Microsoft.EntityFrameworkCore.Internal;
 
 using DigitalPlatform;
 using DigitalPlatform.Core;
@@ -35,9 +38,6 @@ using DigitalPlatform.Face;
 using DigitalPlatform.WPF;
 using DigitalPlatform.MessageClient;
 using DigitalPlatform.Install;
-using Microsoft.Win32;
-using System.Security.Principal;
-using Microsoft.EntityFrameworkCore.Internal;
 
 
 //using Microsoft.VisualStudio.Shell;
@@ -302,7 +302,13 @@ namespace dp2SSL
 
             // 2020/7/5
             if (App.Function != "智能书柜")
+            {
                 App.InitialRfidManager();
+
+                // 2020/7/31
+                if (App.Protocol == "sip")
+                    SipChannelUtil.StartMonitorTask();
+            }
 
             {
                 string binDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
@@ -1718,6 +1724,44 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                 window.Height = Math.Min(500, mainWindows.ActualHeight * .95);
             }
         }
+
+        static ProgressWindow _errorWindow = null;
+
+        public static void OpenErrorWindow(string text)
+        {
+            CloseErrorWindow();
+
+            App.Invoke(new Action(() =>
+            {
+                _errorWindow = new ProgressWindow();
+                _errorWindow.TitleText = "系统出现故障";
+                _errorWindow.MessageText = text + "\r\n\r\n请联系管理员排除故障";
+                _errorWindow.Owner = Application.Current.MainWindow;
+                _errorWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                _errorWindow.Closed += (s, e) =>
+                {
+                    _errorWindow = null;
+                };
+                _errorWindow.okButton.Content = "确定";
+                _errorWindow.Background = new SolidColorBrush(Colors.DarkRed);
+                App.SetSize(_errorWindow, "wide");
+                _errorWindow.BackColor = "yellow";
+                _errorWindow.Show();
+            }));
+        }
+
+        public static void CloseErrorWindow()
+        {
+            if (_errorWindow != null)
+            {
+                App.Invoke(new Action(() =>
+                {
+                    _errorWindow.Close();
+                    _errorWindow = null;
+                }));
+            }
+        }
+
 
         // 紫外杀菌
         public async Task SterilampAsync()
