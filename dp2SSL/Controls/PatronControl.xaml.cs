@@ -166,6 +166,19 @@ namespace dp2SSL
         }
         */
 
+        // 2020/7/31
+        public void SetPhoto(byte[] bytes)
+        {
+            if (bytes == null)
+            {
+                this.photo.Source = null;
+                return;
+            }
+
+            MemoryStream stream = new MemoryStream(bytes);
+            SetPhoto(stream);
+        }
+
         public void SetPhoto(Stream stream)
         {
             if (stream == null)
@@ -189,7 +202,7 @@ namespace dp2SSL
             string fileName = Path.Combine(cacheDir, GetPath(photo_path));
             try
             {
-                SetPhoto(null);
+                SetPhoto((Stream)null);
                 if (File.Exists(fileName))
                 {
                     File.Delete(fileName);
@@ -207,7 +220,7 @@ namespace dp2SSL
             {
                 App.Invoke(new Action(() =>
                 {
-                    this.SetPhoto(null);
+                    this.SetPhoto((Stream)null);
                 }));
                 return;
             }

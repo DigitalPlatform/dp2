@@ -694,10 +694,18 @@ readerType);
             this.PatronName = DomUtil.GetElementText(dom.DocumentElement, "name");
             this.Department = DomUtil.GetElementText(dom.DocumentElement, "department");
 
-            // 获得头像路径
-            this.PhotoPath = GetCardPhotoPath(dom,
-                new List<string> { "face", "cardphoto" },
-                recpath);
+            if (App.Protocol == "dp2library")
+            {
+                // 获得头像路径
+                this.PhotoPath = GetCardPhotoPath(dom,
+                    new List<string> { "face", "cardphoto" },
+                    recpath);
+            }
+
+            if (App.Protocol == "sip")
+            {
+                this.PhotoPath = this.Barcode;
+            }
 
             // 2019/11/28
             /*
