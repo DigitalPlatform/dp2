@@ -6,6 +6,8 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using System.Threading;
+using System.Deployment.Application;
 
 using Microsoft.VisualStudio.Threading;
 using static dp2SSL.LibraryChannelUtil;
@@ -17,6 +19,7 @@ using DigitalPlatform.SIP2;
 using DigitalPlatform.Text;
 using DigitalPlatform.WPF;
 using DigitalPlatform.Xml;
+using DigitalPlatform.LibraryClient.localhost;
 
 namespace dp2SSL
 {
@@ -43,12 +46,18 @@ namespace dp2SSL
                 var result = await _channel.ConnectionAsync(address,
                     port_value);
                 if (result.Value == -1) // 出错
+                {
+                    TryDetectSipNetwork();
                     throw new Exception($"连接 SIP 服务器 {App.SipServerUrl} 时出错: {result.ErrorInfo}");
+                }
 
                 var login_result = await _channel.LoginAsync(App.SipUserName,
                     App.SipPassword);
                 if (login_result.Value == -1)
                     throw new Exception($"针对 SIP 服务器 {App.SipServerUrl} 登录出错: {login_result.ErrorInfo}");
+
+                // TODO: ScStatus()
+
             }
 
             return _channel;
@@ -505,5 +514,207 @@ get_result.Result.AE_PersonalName_r);
             }
         }
 
+        static async Task<NormalResult> DetectSipNetworkAsync()
+        {
+            try
+            {
+                using (var releaser = await _channelLimit.EnterAsync())
+                {
+                    SipChannel channel = await GetChannelAsync();
+                    try
+                    {
+                        // -1出错，0不在线，1正常
+                        var result = await channel.ScStatusAsync();
+                        if (result.Value == -1)
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = result.ErrorInfo,
+                                ErrorCode = result.ErrorCode
+                            };
+                        if (result.Value == 0)
+                            return new NormalResult
+                            {
+                                Value = 0,
+                                ErrorInfo = result.ErrorInfo,
+                                ErrorCode = result.ErrorCode
+                            };
+                        return new NormalResult
+                        {
+                            Value = result.Value,
+                            ErrorInfo = result.ErrorInfo,
+                            ErrorCode = result.ErrorCode
+                        };
+                    }
+                    finally
+                    {
+                        ReturnChannel(channel);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                WpfClientInfo.WriteErrorLog($"DetectSipNetworkAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+
+                return new GetEntityDataResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"DetectSipNetworkAsync() 出现异常: {ex.Message}",
+                    ErrorCode = ex.GetType().ToString()
+                };
+            }
+        }
+
+
+        #region 监控
+
+        // 可以适当降低探测的频率。比如每五分钟探测一次
+        // 两次检测网络之间的间隔
+        static TimeSpan _detectPeriod = TimeSpan.FromMinutes(5);
+        // 最近一次检测网络的时间
+        static DateTime _lastDetectTime;
+
+        static Task _monitorTask = null;
+
+        // 是否已经(升级)更新了
+        static bool _updated = false;
+        // 最近一次检查升级的时刻
+        static DateTime _lastUpdateTime;
+        // 检查升级的时间间隔
+        static TimeSpan _updatePeriod = TimeSpan.FromMinutes(2 * 60); // 2*60 两个小时
+
+        // 监控间隔时间
+        static TimeSpan _monitorIdleLength = TimeSpan.FromSeconds(10);
+
+        static AutoResetEvent _eventMonitor = new AutoResetEvent(false);
+
+        // 激活 Monitor 任务
+        public static void ActivateMonitor()
+        {
+            _eventMonitor.Set();
+        }
+
+        static Task _delayTry = null;
+
+        // 立即安排一次检测 SIP 网络
+        public static void TryDetectSipNetwork(bool delay = true)
+        {
+            if (_delayTry != null)
+                return;
+
+            _delayTry = Task.Run(async () =>
+            {
+                try
+                {
+                    if (delay)
+                        await Task.Delay(TimeSpan.FromSeconds(10));
+                    _lastDetectTime = DateTime.MinValue;
+                    ActivateMonitor();
+                    _delayTry = null;
+                }
+                catch
+                {
+
+                }
+            });
+        }
+
+        // 启动一般监控任务
+        public static void StartMonitorTask()
+        {
+            if (_monitorTask != null)
+                return;
+
+            CancellationToken token = App.CancelToken;
+
+            token.Register(() =>
+            {
+                _eventMonitor.Set();
+            });
+
+            _monitorTask = Task.Factory.StartNew(async () =>
+            {
+                WpfClientInfo.WriteInfoLog("SIP 监控专用线程开始");
+                try
+                {
+                    while (token.IsCancellationRequested == false)
+                    {
+                        // await Task.Delay(TimeSpan.FromSeconds(10));
+                        _eventMonitor.WaitOne(_monitorIdleLength);
+
+                        token.ThrowIfCancellationRequested();
+
+                        if (DateTime.Now - _lastDetectTime > _detectPeriod)
+                        {
+                            var detect_result = await DetectSipNetworkAsync();
+                            _lastDetectTime = DateTime.Now;
+
+                            // testing
+                            //detect_result.Value = -1;
+                            //detect_result.ErrorInfo = "测试文字";
+
+                            if (detect_result.Value != 1)
+                                App.OpenErrorWindow(detect_result.ErrorInfo);
+                            else
+                                App.CloseErrorWindow();
+                        }
+
+                        // 检查升级 dp2ssl
+                        if (_updated == false
+                        // && StringUtil.IsDevelopMode() == false
+                        && ApplicationDeployment.IsNetworkDeployed == false
+                        && DateTime.Now - _lastUpdateTime > _updatePeriod)
+                        {
+                            WpfClientInfo.WriteInfoLog("开始自动检查升级");
+                            // result.Value:
+                            //      -1  出错
+                            //      0   经过检查发现没有必要升级
+                            //      1   成功
+                            //      2   成功，但需要立即重新启动计算机才能让复制的文件生效
+                            var update_result = await GreenInstall.GreenInstaller.InstallFromWeb("http://dp2003.com/dp2ssl/v1_dev",
+                                "c:\\dp2ssl",
+                                "delayExtract,updateGreenSetupExe",
+                                //true,
+                                //true,
+                                token,
+                                null);
+                            if (update_result.Value == -1)
+                                WpfClientInfo.WriteErrorLog($"自动检查升级出错: {update_result.ErrorInfo}");
+                            else
+                                WpfClientInfo.WriteInfoLog($"结束自动检查升级 update_result:{update_result.ToString()}");
+
+                            if (update_result.Value == 1 || update_result.Value == 2)
+                            {
+                                App.TriggerUpdated("重启可使用新版本");
+                                _updated = true;
+                                PageShelf.TrySetMessage(null, "dp2SSL 升级文件已经下载成功，下次重启时可自动升级到新版本");
+                            }
+                            _lastUpdateTime = DateTime.Now;
+
+                        }
+                    }
+                    _monitorTask = null;
+
+                }
+                catch (OperationCanceledException)
+                {
+
+                }
+                catch (Exception ex)
+                {
+                    WpfClientInfo.WriteErrorLog($"SIP 监控专用线程出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                    App.SetError("monitor", $"SIP 监控专用线程出现异常: {ex.Message}");
+                }
+                finally
+                {
+                    WpfClientInfo.WriteInfoLog("SIP 监控专用线程结束");
+                }
+            },
+token,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+        }
+
+        #endregion
     }
 }

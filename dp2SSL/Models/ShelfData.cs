@@ -390,6 +390,12 @@ namespace dp2SSL
         //      可能会抛出异常
         public static NormalResult InitialShelf()
         {
+            if (App.Protocol == "sip")
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = "当前版本暂不支持智能书柜连接 SIP2 服务器"
+                };
             try
             {
                 ShelfData.InitialDoors();
