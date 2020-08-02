@@ -249,7 +249,7 @@ namespace DigitalPlatform.RFID
                     foreach (var c in segment.Text)
                     {
                         results.Add(0xfd);
-                        results.Add((byte)c);
+                        results.AddRange(Encoding.UTF8.GetBytes(new char[] { c }));
                     }
                 }
                 else if (segment.Type == "utf8-triple-byte")
@@ -257,7 +257,7 @@ namespace DigitalPlatform.RFID
                     foreach (var c in segment.Text)
                     {
                         results.Add(0xfe);
-                        results.Add((byte)c);
+                        results.AddRange(Encoding.UTF8.GetBytes(new char[] { c }));
                     }
                 }
                 else
@@ -380,17 +380,29 @@ namespace DigitalPlatform.RFID
                     result.Append(UrnCode40_DecodeOneWord(data, offs));
                     offs += 2;
                 }
+                else if (b == 0xfb)
+                {
+                    // long numeric string
+                    result.Append(DecodeLongNumericString(data, start, out int used));
+                    offs += used;
+                }
                 else if (b == 0xfc)
                 {
                     // next byte is ISO/IEC 646 IRV character
                     result.Append(data[offs + 1]);
                     offs += 2;
                 }
-                else if (b == 0xfb)
+                else if (b == 0xfd)
                 {
-                    // long numeric string
-                    result.Append(DecodeLongNumericString(data, start, out int used));
-                    offs += used;
+                    string temp = Encoding.UTF8.GetString(data, offs + 1, 2);
+                    result.Append(temp);
+                    offs += 3;
+                }
+                else if (b == 0xfe)
+                {
+                    string temp = Encoding.UTF8.GetString(data, offs + 1, 3);
+                    result.Append(temp);
+                    offs += 4;
                 }
             }
 
