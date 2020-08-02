@@ -33,68 +33,242 @@ namespace DigitalPlatform.RFID
             return 0;   // 表示 c 不在对照表中
         }
 
-        // 编码 UII
-        public static byte[] EncodeUII(string text)
+        static List<int> GetUrn40Decimal(string text)
         {
-            List<byte> results = new List<byte>();
+            List<int> results = new List<int>();
+            foreach (var c in text)
+            {
+                results.Add(GetUrn40Decimal(c));
+            }
+
+            return results;
+        }
+
+        // 为编码 URN 40 需要的一个段落
+        public class Segment
+        {
+            // 段类型
+            // 为 digit table utf8-one-byte utf8-two-byte utf8-triple-byte 之一
+            public string Type { get; set; }
+            // 段内文字
+            public string Text { get; set; }
+        }
+
+        // (为编码 URN 40)把文字切割为若干个段落
+        public static List<Segment> SplitSegment(string text)
+        {
+            List<Segment> results = new List<Segment>();
 
             List<char> buffer = new List<char>();   // 缓冲区
-            string buffer_type = "";    // table/digit
+            string buffer_type = "";    // 为 digit table utf8-one-byte utf8-two-byte utf8-triple-byte 之一
             foreach (char c in text)
             {
                 int d = GetUrn40Decimal(c);
-                if (d == 0)
-                {
-                    // *** 非表内字符
-
-                    // 如果有累积的，先输出
-                    if (buffer.Count > 0)
-                    {
-                        if (buffer_type == "digit")
-                            results.AddRange(EncodeLongNumericString(buffer.ToString()));
-                        else if (buffer_type == "table")
-                            results.AddRange(EncodeTableDecimals(buffer));
-                        else
-                            throw new Exception($"无法识别的 buffer_type '{buffer_type}'");
-                        buffer.Clear();
-                        buffer_type = "";
-                    }
-
-                    // ISO 646 输出
-                    results.Add(0xfc);
-                    results.Add((byte)c);
-                }
-                else
+                if (d != 0)
                 {
                     // *** 表内字符
 
-                    if (buffer_type == "digit")
+                    if (char.IsDigit(c) == true)
                     {
-                        results.AddRange(EncodeLongNumericString(buffer.ToString()));
-                        buffer.Clear();
-                        buffer_type = "";
-                    }
+                        if (buffer_type != "digit"
+                            && buffer.Count > 0)
+                        {
+                            results.Add(new Segment
+                            {
+                                Type = buffer_type,
+                                Text = new string(buffer.ToArray())
+                            });
 
-                    buffer.Add((char)d);
-                    buffer_type = "table";
+                            buffer.Clear();
+                        }
+                        buffer.Add(c);
+                        buffer_type = "digit";
+                    }
+                    else if (char.IsDigit(c) == false)
+                    {
+                        if (buffer_type != "table"
+                            && buffer.Count > 0)
+                        {
+                            results.Add(new Segment
+                            {
+                                Type = buffer_type,
+                                Text = new string(buffer.ToArray())
+                            });
+
+                            buffer.Clear();
+                        }
+                        buffer.Add(c);
+                        buffer_type = "table";
+                    }
+                    else
+                        throw new Exception("不可能到达这里");
+                }
+                else
+                {
+                    // *** 非表内字符
+
+                    int count = GetUtf8ByteCount(c);
+                    if (count == 1)
+                    {
+                        if (buffer_type != "utf8-one-byte"
+                            && buffer.Count > 0)
+                        {
+                            results.Add(new Segment
+                            {
+                                Type = buffer_type,
+                                Text = new string(buffer.ToArray())
+                            });
+
+                            buffer.Clear();
+                        }
+                        buffer.Add(c);
+                        buffer_type = "utf8-one-byte";
+                    }
+                    else if (count == 2)
+                    {
+                        if (buffer_type != "utf8-two-byte"
+                            && buffer.Count > 0)
+                        {
+                            results.Add(new Segment
+                            {
+                                Type = buffer_type,
+                                Text = new string(buffer.ToArray())
+                            });
+
+                            buffer.Clear();
+                        }
+                        buffer.Add(c);
+                        buffer_type = "utf8-two-byte";
+                    }
+                    else if (count == 3)
+                    {
+                        if (buffer_type != "utf8-triple-byte"
+                            && buffer.Count > 0)
+                        {
+                            results.Add(new Segment
+                            {
+                                Type = buffer_type,
+                                Text = new string(buffer.ToArray())
+                            });
+
+                            buffer.Clear();
+                        }
+                        buffer.Add(c);
+                        buffer_type = "utf8-triple-byte";
+                    }
+                    else
+                    {
+                        throw new Exception($"无法编码字符 '{c}'，因为它是 UTF-8 {count} bytes 形态");
+                    }
                 }
             }
 
             if (buffer.Count > 0)
             {
-                if (buffer_type == "digit")
-                    results.AddRange(EncodeLongNumericString(buffer.ToString()));
-                else if (buffer_type == "table")
-                    results.AddRange(EncodeTableDecimals(buffer));
+                results.Add(new Segment
+                {
+                    Type = buffer_type,
+                    Text = new string(buffer.ToArray())
+                });
+            }
+
+            if (results.Count <= 1 && results[0].Type != "digit")
+                return results;
+
+            // 把不足 9 字符的 digit 段落和前后的 table 段落合并
+            List<Segment> merged = new List<Segment>();
+
+            Segment prev = null;
+            foreach (var segment in results)
+            {
+                if (segment.Type == "digit"
+&& segment.Text.Length < 9)
+                    segment.Type = "table";
+
+                if (prev != null)
+                {
+                    if (segment.Type == "table"
+    && prev.Type == "table")
+                    {
+                        prev = new Segment
+                        {
+                            Type = "table",
+                            Text = prev.Text + segment.Text
+                        };
+                        continue;
+                    }
+                    merged.Add(prev);
+                    prev = null;
+                }
+                prev = segment;
+            }
+            if (prev != null)
+                merged.Add(prev);
+
+            // 如果段落为小于 9 字符的 digit 类型，要改为 table 类型
+            foreach (var segment in merged)
+            {
+                if (segment.Type == "digit"
+                    && segment.Text.Length < 9)
+                    segment.Type = "table";
+            }
+
+            return merged;
+        }
+
+        public static int GetUtf8ByteCount(char c)
+        {
+            return Encoding.UTF8.GetByteCount(new char[] { c });
+        }
+
+        // 编码 UII
+        public static byte[] EncodeUII(string text)
+        {
+            List<byte> results = new List<byte>();
+
+            var segments = SplitSegment(text);
+            foreach (var segment in segments)
+            {
+                if (segment.Type == "digit")
+                    results.AddRange(EncodeLongNumericString(segment.Text));
+                else if (segment.Type == "table")
+                    results.AddRange(
+                        EncodeTableDecimals(GetUrn40Decimal(segment.Text))
+                        );
+                else if (segment.Type == "utf8-one-byte")
+                {
+                    foreach (var c in segment.Text)
+                    {
+                        // ISO 646 输出
+                        results.Add(0xfc);
+                        results.Add((byte)c);
+                    }
+                }
+                else if (segment.Type == "utf8-two-byte")
+                {
+                    foreach (var c in segment.Text)
+                    {
+                        results.Add(0xfd);
+                        results.Add((byte)c);
+                    }
+                }
+                else if (segment.Type == "utf8-triple-byte")
+                {
+                    foreach (var c in segment.Text)
+                    {
+                        results.Add(0xfe);
+                        results.Add((byte)c);
+                    }
+                }
                 else
-                    throw new Exception($"无法识别的 buffer_type '{buffer_type}'");
+                    throw new Exception($"无法识别的 segment type '{segment.Type}'");
             }
 
             return results.ToArray();
         }
 
         // 将 (URN Code 40) 数值每三个编码为两个 bytes
-        public static byte[] EncodeTableDecimals(List<char> chars)
+        public static byte[] EncodeTableDecimals(List<int> chars)
         {
             // 补足到 3 的整倍数
             int delta = 3 - (chars.Count % 3);
@@ -110,9 +284,9 @@ namespace DigitalPlatform.RFID
             int offs = 0;
             while (offs < chars.Count)
             {
-                char c1 = chars[offs++];
-                char c2 = chars[offs++];
-                char c3 = chars[offs++];
+                var c1 = chars[offs++];
+                var c2 = chars[offs++];
+                var c3 = chars[offs++];
 
                 results.AddRange(EncodeTriple(c1, c2, c3));
             }
@@ -121,7 +295,7 @@ namespace DigitalPlatform.RFID
         }
 
         // 编码范围在 'A'-'9' 内的三个字符为两个 bytes
-        public static byte[] EncodeTriple(char c1, char c2, char c3)
+        public static byte[] EncodeTriple(int c1, int c2, int c3)
         {
             List<byte> results = new List<byte>();
             uint v = (1600 * (uint)c1) + (40 * (uint)c2) + (uint)c3 + 1;
@@ -130,7 +304,7 @@ namespace DigitalPlatform.RFID
             return Compact.ReverseBytes(BitConverter.GetBytes((UInt16)v));
         }
 
-        // 以 long numberic string 方式编码一个数字字符串
+        // 以 long numeric string 方式编码一个数字字符串
         // 算法可参考：
         // https://www.ipc.be/~/media/documents/public/operations/rfid/ipc%20rfid%20standard%20for%20test%20letters.pdf?la=en
         public static byte[] EncodeLongNumericString(string text)

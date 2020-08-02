@@ -8,7 +8,7 @@ using System.Drawing;
 namespace DigitalPlatform.CommonControl
 {
     /// <summary>
-    /// 能切换显示不同单位数值的 NumbericUpDown 控件
+    /// 能切换显示不同单位数值的 NumericUpDown 控件
     /// </summary>
     public class UniverseNumericUpDown : NumericUpDown
     {
