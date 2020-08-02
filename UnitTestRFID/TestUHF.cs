@@ -18,7 +18,7 @@ namespace UnitTestRFID
         [TestMethod]
         public void Test_encode_longNumericString()
         {
-            // 以 long numberic string 方式编码一个数字字符串
+            // 以 long numeric string 方式编码一个数字字符串
             var bytes = UhfUtility.EncodeLongNumericString("12312345678");
 
             byte[] correct = Element.FromHexString(
@@ -86,6 +86,20 @@ namespace UnitTestRFID
             Assert.AreEqual(0, ByteArray.Compare(correct, bytes));
         }
 
+        // page 17 of:
+        // https://www.ipc.be/~/media/documents/public/operations/rfid/ipc%20rfid%20standard%20for%20test%20letters.pdf?la=en
+        [TestMethod]
+        public void Test_encode_uii_3()
+        {
+            var bytes = UhfUtility.EncodeUII("B.A12312345678");
+
+            byte[] correct = Element.FromHexString(
+@"10 E2 FB 21 02 DD DF 7C 4E");
+
+            // 
+            Assert.AreEqual(0, ByteArray.Compare(correct, bytes));
+        }
+
         // 测试解码 UII
         [TestMethod]
         public void Test_decode_uii_1()
@@ -122,6 +136,101 @@ namespace UnitTestRFID
 
             // 
             Assert.AreEqual("CH-000134-1.12345678.31", result);
+        }
+
+        // 9 字符才会形成 digit 类型
+        [TestMethod]
+        public void Test_splitSegment_1()
+        {
+            var segments = UhfUtility.SplitSegment("123456789");
+
+            Assert.AreEqual(1, segments.Count);
+            Assert.AreEqual("digit", segments[0].Type);
+            Assert.AreEqual("123456789", segments[0].Text);
+        }
+
+        // 8 字符只能形成 table 类型
+        [TestMethod]
+        public void Test_splitSegment_2()
+        {
+            var segments = UhfUtility.SplitSegment("12345678");
+
+            Assert.AreEqual(1, segments.Count);
+            Assert.AreEqual("table", segments[0].Type);
+            Assert.AreEqual("12345678", segments[0].Text);
+        }
+
+        [TestMethod]
+        public void Test_splitSegment_3()
+        {
+            var segments = UhfUtility.SplitSegment("AB.123456789");
+
+            Assert.AreEqual(2, segments.Count);
+
+            Assert.AreEqual("table", segments[0].Type);
+            Assert.AreEqual("AB.", segments[0].Text);
+
+            Assert.AreEqual("digit", segments[1].Type);
+            Assert.AreEqual("123456789", segments[1].Text);
+        }
+
+        [TestMethod]
+        public void Test_splitSegment_4()
+        {
+            var segments = UhfUtility.SplitSegment("123456789AB.");
+
+            Assert.AreEqual(2, segments.Count);
+
+            Assert.AreEqual("digit", segments[0].Type);
+            Assert.AreEqual("123456789", segments[0].Text);
+
+            Assert.AreEqual("table", segments[1].Type);
+            Assert.AreEqual("AB.", segments[1].Text);
+        }
+
+        [TestMethod]
+        public void Test_splitSegment_5()
+        {
+            var segments = UhfUtility.SplitSegment("1234/56789");
+
+            Assert.AreEqual(3, segments.Count);
+
+            Assert.AreEqual("table", segments[0].Type);
+            Assert.AreEqual("1234", segments[0].Text);
+
+            Assert.AreEqual("utf8-one-byte", segments[1].Type);
+            Assert.AreEqual("/", segments[1].Text);
+
+            Assert.AreEqual("table", segments[2].Type);
+            Assert.AreEqual("56789", segments[2].Text);
+        }
+
+        // 含有 UTF-8 汉字字符
+        [TestMethod]
+        public void Test_splitSegment_6()
+        {
+            var segments = UhfUtility.SplitSegment("1234中国56789");
+
+            Assert.AreEqual(3, segments.Count);
+
+            Assert.AreEqual("table", segments[0].Type);
+            Assert.AreEqual("1234", segments[0].Text);
+
+            Assert.AreEqual("utf8-triple-byte", segments[1].Type);
+            Assert.AreEqual("中国", segments[1].Text);
+
+            Assert.AreEqual("table", segments[2].Type);
+            Assert.AreEqual("56789", segments[2].Text);
+        }
+
+        [TestMethod]
+        public void Test_splitSegment_7()
+        {
+            var segments = UhfUtility.SplitSegment("78.");
+
+            Assert.AreEqual(1, segments.Count);
+            Assert.AreEqual("table", segments[0].Type);
+            Assert.AreEqual("78.", segments[0].Text);
         }
     }
 }
