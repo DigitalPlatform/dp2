@@ -1,9 +1,10 @@
-﻿using DigitalPlatform;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
+using DigitalPlatform;
 
 namespace TestUHF
 {
@@ -19,7 +20,7 @@ namespace TestUHF
 
         public static ParseEpcResult ParseEpcMem(byte [] data, int start)
         {
-
+            return new ParseEpcResult();
         }
     }
 }
