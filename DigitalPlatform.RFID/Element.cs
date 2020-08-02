@@ -1064,6 +1064,7 @@ namespace DigitalPlatform.RFID
     }
 
     // 填充字节溢出异常
+    [Serializable]
     public class PaddingOverflowException : Exception
     {
         public int MaxDelta { get; set; }
@@ -1075,6 +1076,7 @@ namespace DigitalPlatform.RFID
     }
 
     // RFID 标签数据异常
+    [Serializable]
     public class TagDataException : Exception
     {
         public TagDataException(string s)

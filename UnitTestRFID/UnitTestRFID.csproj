@@ -58,6 +58,7 @@
     <Compile Include="TestNewTagList.cs" />
     <Compile Include="TestRfid2.cs" />
     <Compile Include="TestSetElementPos.cs" />
+    <Compile Include="TestUHF.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DigitalPlatform.RFID\DigitalPlatform.RFID.csproj">
