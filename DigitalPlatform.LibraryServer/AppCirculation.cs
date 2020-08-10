@@ -5532,7 +5532,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             // 解析 strItemBarcodeParam 参数
             strItemBarcode = "";
             strOwnerInstitution = "";
-            if (strItemBarcodeParam.IndexOf(".") == -1)
+            if (strItemBarcodeParam == null || strItemBarcodeParam.IndexOf(".") == -1)
             {
                 strItemBarcode = strItemBarcodeParam;
                 strOwnerInstitution = null;

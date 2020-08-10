@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -26,9 +27,13 @@ namespace dp2SSL
         // 命令结束符
         // public char MessageTerminator { get; set; }
 
-        // SIP Server Url 与 Port
-        public string SIPServerUrl { get; set; }
+        // SIP Server 地址 与 端口号
+        public string SIPServerAddr { get; set; }
         public int SIPServerPort { get; set; }
+
+        // 2020/8/10
+        string _userName = null;
+        string _password = null;
 
         #endregion
 
@@ -68,14 +73,50 @@ namespace dp2SSL
             }
         }
 
+        // 连接并登录
+        // parameters:
+        //      serverAddr  服务器地址。如果为 null，表示用上次登录过的地址连同端口号进行连接
+        //      port        服务器端口号
+        //      userName    用户名。如果为 null，表示用上次登录过的用户名连同密码进行登录
+        //      password    密码
+        public async Task<NormalResult> ConnectAndLoginAsync(string serverAddr,
+    int port,
+    string userName,
+    string password)
+        {
+            var connect_result = await ConnectAsync(serverAddr,
+                port);
+            if (connect_result.Value == -1)
+                return connect_result;
+
+            if (userName == null && _userName == null)
+            {
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = "以前没有登录过，无法进行自动登录"
+                };
+            }
+            var login_result = await LoginAsync(userName, password);
+            if (login_result.Value == -1)
+                return login_result;
+
+            return new NormalResult();
+        }
+
+        // parameters:
+        //      serverAddr   服务器 IP 地址或者域名。如果为 null，表示沿用此前用过的 服务器 IP 地址或者名，连同端口号
         // result.Value
         //      -1  失败
         //      0   成功
-        public async Task<NormalResult> ConnectionAsync(string serverUrl,
+        public async Task<NormalResult> ConnectAsync(string serverAddr,
             int port)
         {
-            this.SIPServerUrl = serverUrl;
-            this.SIPServerPort = port;
+            if (serverAddr != null)
+            {
+                this.SIPServerAddr = serverAddr;
+                this.SIPServerPort = port;
+            }
 
             // 先进行关闭
             this.Close();
@@ -87,7 +128,7 @@ namespace dp2SSL
                 // TcpClient client = new TcpClient(hostName, this.SIPServerPort); 
 
                 TcpClient client = new TcpClient();
-                await client.ConnectAsync(this.SIPServerUrl, // IPAddress.Parse(this.SIPServerUrl),
+                await client.ConnectAsync(this.SIPServerAddr, // IPAddress.Parse(this.SIPServerUrl),
                     this.SIPServerPort);
                 this._client = client;
                 this._networkStream = client.GetStream();
@@ -109,7 +150,7 @@ namespace dp2SSL
         {
             error = "";
 
-            this.SIPServerUrl = serverUrl;
+            this.SIPServerAddr = serverUrl;
             this.SIPServerPort = port;
 
             // 先进行关闭
@@ -123,7 +164,7 @@ namespace dp2SSL
                 // TcpClient client = new TcpClient(hostName, this.SIPServerPort); 
 
                 TcpClient client = new TcpClient();
-                client.Connect(IPAddress.Parse(this.SIPServerUrl), this.SIPServerPort);
+                client.Connect(IPAddress.Parse(this.SIPServerAddr), this.SIPServerPort);
                 this._client = client;
                 this._networkStream = client.GetStream();
             }
@@ -213,12 +254,20 @@ namespace dp2SSL
             }
             catch (Exception ex)
             {
-                return new NormalResult
+                var result = new NormalResult
                 {
                     Value = -1,
                     ErrorInfo = ex.Message,
                     ErrorCode = ex.GetType().ToString()
                 };
+
+                if (ex is IOException && ex.InnerException is SocketException)
+                {
+                    // "ConnectionAborted"
+                    result.ErrorCode = ((SocketException)ex.InnerException).SocketErrorCode.ToString();
+                }
+
+                return result;
             }
         }
 
@@ -335,6 +384,24 @@ namespace dp2SSL
                 }
                 catch (SocketException ex)
                 {
+
+                    if (ex.ErrorCode == 10035)
+                    {
+                        System.Threading.Thread.Sleep(100);
+                        continue;
+                    }
+                    return new RecvMessageResult
+                    {
+                        // Exception = ex,
+                        Value = -1,
+                        ErrorInfo = "recv出错1: " + ex.Message,
+                        // "ConnectionAborted"
+                        ErrorCode = ((SocketException)ex).SocketErrorCode.ToString()
+                    };
+                }
+                /*
+                catch (SocketException ex)
+                {
                     // ??这个什么错误码
                     if (ex.ErrorCode == 10035)
                     {
@@ -350,8 +417,24 @@ namespace dp2SSL
                     error = ex1.Message;
                     goto ERROR1;
                 }
+                */
                 catch (Exception ex)
                 {
+                    if (ex is IOException && ex.InnerException is SocketException)
+                    {
+                        this.Close();
+
+                        // "ConnectionAborted"
+                        return new RecvMessageResult
+                        {
+                            // Exception = ex,
+                            Value = -1,
+                            ErrorInfo = "recv出错2: " + ex.Message,
+                            // "ConnectionAborted"
+                            ErrorCode = ((SocketException)ex.InnerException).SocketErrorCode.ToString()
+                        };
+                    }
+
                     error = ExceptionUtil.GetDebugText(ex);
                     goto ERROR1;
                 }
@@ -359,7 +442,12 @@ namespace dp2SSL
                 if (nRet == 0) //返回值为0
                 {
                     error = "Closed by remote peer";
-                    goto ERROR1;
+                    return new RecvMessageResult
+                    {
+                        Value = -1,
+                        ErrorInfo = error,
+                        ErrorCode = "closedByRemotePeer"
+                    };
                 }
 
                 // 得到包的长度
@@ -586,6 +674,8 @@ namespace dp2SSL
             string error = "";
             int nRet = 0;
 
+            int redo_count = 0;
+
             // 校验消息
             BaseMessage request = null;
             nRet = SIPUtility.ParseMessage(requestText, out request, out error);
@@ -600,10 +690,23 @@ namespace dp2SSL
                 };
             }
 
+        REDO_SEND:
             // 发送消息
             var send_result = await SendMessageAsync(requestText);
             if (send_result.Value == -1)
             {
+                if (send_result.ErrorCode == "ConnectionAborted"
+                    && String.IsNullOrEmpty(this.SIPServerAddr) == false
+                    && redo_count < 2)
+                {
+                    var connect_result = await ConnectAndLoginAsync(null, -1, null, null);
+                    if (connect_result.Value != -1)
+                    {
+                        redo_count++;
+                        goto REDO_SEND;
+                    }
+                }
+
                 SipChannelUtil.TryDetectSipNetwork();
 
                 return new SendAndRecvResult(send_result);
@@ -613,8 +716,19 @@ namespace dp2SSL
             var recv_result = await RecvMessageAsync();
             if (recv_result.Value == -1)
             {
-                SipChannelUtil.TryDetectSipNetwork();
+                if (recv_result.ErrorCode == "ConnectionAborted"
+                    && String.IsNullOrEmpty(this.SIPServerAddr) == false
+                    && redo_count < 2)
+                {
+                    var connect_result = await ConnectAndLoginAsync(null, -1, null, null);
+                    if (connect_result.Value != -1)
+                    {
+                        redo_count++;
+                        goto REDO_SEND;
+                    }
+                }
 
+                SipChannelUtil.TryDetectSipNetwork();
                 return new SendAndRecvResult(recv_result);
             }
 
@@ -734,10 +848,16 @@ namespace dp2SSL
         public async Task<LoginResult> LoginAsync(string username,
             string password)
         {
+            if (username != null)
+            {
+                _userName = username;
+                _password = password;
+            }
+
             Login_93 request = new Login_93()
             {
-                CN_LoginUserId_r = username,
-                CO_LoginPassword_r = password,
+                CN_LoginUserId_r = _userName,
+                CO_LoginPassword_r = _password,
             };
             request.SetDefaulValue();
 

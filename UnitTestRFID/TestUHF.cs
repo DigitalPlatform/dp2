@@ -8,6 +8,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using DigitalPlatform.RFID;
 using DigitalPlatform;
+using System.Diagnostics;
+using static DigitalPlatform.RFID.LogicChip;
 
 namespace UnitTestRFID
 {
@@ -231,6 +233,37 @@ namespace UnitTestRFID
             Assert.AreEqual(1, segments.Count);
             Assert.AreEqual("table", segments[0].Type);
             Assert.AreEqual("78.", segments[0].Text);
+        }
+
+        // 编码 MB11
+        // ISO/TS 28560-4:2014(E) page 52
+        [TestMethod]
+        public void Test_encode_mb11_1()
+        {
+            LogicChip chip = new LogicChip();
+            chip.NewElement(ElementOID.SetInformation, "1203");
+            chip.NewElement(ElementOID.ShelfLocation, "QA268.L55");
+            chip.NewElement(ElementOID.OwnerInstitution, "US-InU-Mu").CompactMethod = CompactionScheme.SevenBitCode;    // 如果让 GetBytes() 自动选择压缩方案，这个元素会被选择 ISIL 压缩方案
+            Debug.Write(chip.ToString());
+
+            var result = chip.GetBytes(4 * 9,
+                4,
+                GetBytesStyle.ReserveSequence,
+                out string block_map);
+            string result_string = Element.GetHexString(result, "4");
+            byte[] correct = Element.FromHexString(
+    @"02 01 D0 14 02
+04B3 4607
+441C b6E2
+E335 D653
+08AB 4D6C
+9DD5 56CD
+EB"
+);
+            Assert.IsTrue(result.SequenceEqual(correct));
+
+            // Assert.AreEqual(block_map, "ww....www");
+
         }
     }
 }

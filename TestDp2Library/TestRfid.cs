@@ -647,7 +647,31 @@ ac a2 a6 5f
 
         }
 
-        #endregion
+#if NO
+        // 解析错误的
+        [TestMethod]
+        public void test_errorParse_01()
+        {
+            /*
+            string bytes = @"29 15 56 C5
+2E 87 D2 47
+32 25 2E 54
+D5 16 D4 14
+12 13 20 00
+00 00 00 00";
+            */
+
+            string bytes = @"E15663223E6C39411062767A637149542253E64A4608417B67610000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+
+            byte[] data = Element.FromHexString(bytes);
+            LogicChip chip = LogicChip.From(data, 4);
+            Debug.Write(chip.ToString());
+        }
+
+        // 
+#endif
+
+#endregion
 
     }
 }

@@ -981,8 +981,22 @@
             <Property>
                 <Label xml:lang="en">
                 </Label>
-                <Label xml:lang='zh'>出版地区</Label>
+                <Label xml:lang='zh'>出版地区代码(非国际标准)</Label>
+            </Property>
+        </Subfield>
+        <Subfield name="c">
+            <Property>
+                <Label xml:lang="en">
+                </Label>
+                <Label xml:lang='zh'>出版地区代码(国际标准)</Label>
                 <ValueList ref="marcvaluelist#geographiccode" />
+            </Property>
+        </Subfield>
+        <Subfield name="2">
+            <Property>
+                <Label xml:lang="en">
+                </Label>
+                <Label xml:lang='zh'>非国际标准出版地区代码来源</Label>
             </Property>
         </Subfield>
     </Field>
