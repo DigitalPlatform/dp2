@@ -183,6 +183,9 @@ namespace DigitalPlatform.RFID
             }
         }
 
+        // 编码时候强制使用的压缩方案。.Null 表示自动选择
+        public CompactionScheme CompactMethod = CompactionScheme.Null;
+
         public string Name
         {
             get
@@ -474,14 +477,19 @@ namespace DigitalPlatform.RFID
 
             // 注: SetInformation 的编码方式是根据字符串来自动选定的 (GB/T 35660.2-2017 page 32 例子)
 
-            if (oid == (int)ElementOID.ContentParameter
-                || oid == (int)ElementOID.TypeOfUsage
-                || oid == (int)ElementOID.MediaFormat
-                || oid == (int)ElementOID.SupplyChainStage)
-                compact_method = CompactionScheme.OctectString;
-            else if (oid == (int)ElementOID.OwnerInstitution
-                || oid == (int)ElementOID.IllBorrowingInstitution)
-                compact_method = CompactionScheme.ISIL;
+            if (compact_method == CompactionScheme.Null)
+            {
+                if (oid == (int)ElementOID.ContentParameter
+                    || oid == (int)ElementOID.TypeOfUsage
+                    || oid == (int)ElementOID.MediaFormat
+                    || oid == (int)ElementOID.SupplyChainStage)
+                    compact_method = CompactionScheme.OctectString;
+                else if (oid == (int)ElementOID.OwnerInstitution
+                    || oid == (int)ElementOID.IllBorrowingInstitution)
+                {
+                    compact_method = CompactionScheme.ISIL;
+                }
+            }
 
             // 自动选定压缩方案
             if (compact_method == CompactionScheme.Null)

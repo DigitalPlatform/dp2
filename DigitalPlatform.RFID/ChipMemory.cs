@@ -1,4 +1,6 @@
-﻿using System;
+﻿using DigitalPlatform.Text;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -254,11 +256,24 @@ namespace DigitalPlatform.RFID
         // 但存在一个小问题： Content Parameter 要占用多少 byte? 如果以后元素数量增多，(因为它后面就是锁定区域)它无法变大怎么办？
         public void Sort(int max_bytes,
             int block_size,
-            bool trim_cp_right)
+            bool trim_cp_right,
+            string style = "")
         {
             SetContentParameter(trim_cp_right);
             if (this.IsNew == true)
             {
+                // 保留原来顺序
+                // element --> index
+                Hashtable table = new Hashtable();
+                int index = 0;
+                foreach (var element in this._elements)
+                {
+                    table[element] = index++;
+                }
+
+                // 2020/8/3
+                bool reserve_sequence = StringUtil.IsInList("reserve_sequence", style);
+
                 this._elements.Sort((a, b) =>
                 {
                     // OID 为 1 的始终靠前
@@ -278,8 +293,17 @@ namespace DigitalPlatform.RFID
                     if (delta != 0)
                         return delta;
 
-                    // 最后比较 OID。OID 值小的靠前
-                    delta = a.OID - b.OID;
+                    // 最后比较 OID
+                    if (reserve_sequence)
+                    {
+                        // 维持原始顺序
+                        delta = (int)table[a] - (int)table[b];
+                    }
+                    else
+                    {
+                        // OID 值小的靠前
+                        delta = a.OID - b.OID;
+                    }
                     return delta;
                 });
 
@@ -322,7 +346,7 @@ namespace DigitalPlatform.RFID
 #endif
                     element.OriginData = Element.Compact((int)element.OID,
                         element.Text,
-                        CompactionScheme.Null,
+                        element.CompactMethod,  // CompactionScheme.Null,
                         false);
                     //if (start != element.StartOffs)
                     //    throw new Exception($"element {element.ToString()} 的 StartOffs {element.StartOffs} 不符合预期值 {start}");
@@ -357,7 +381,7 @@ namespace DigitalPlatform.RFID
 
                     element.OriginData = Element.Compact((int)element.OID,
                         element.Text,
-                        CompactionScheme.Null,
+                        element.CompactMethod,  // CompactionScheme.Null,
                         false);
                 }
 
@@ -959,6 +983,7 @@ start);
         {
             None = 0x00,
             ContentParameterFullLength = 0x01,
+            ReserveSequence = 0x02, // 2020/8/3 尽量保留元素的原始顺序
         }
 
         // 打包为 byte[] 形态
@@ -995,7 +1020,8 @@ start);
             // 先对 elements 排序。确保 PII 和 Content Parameter 元素 index 在前两个
             this.Sort(max_bytes,
                 block_size,
-                (style & GetBytesStyle.ContentParameterFullLength) == 0);
+                (style & GetBytesStyle.ContentParameterFullLength) == 0,
+                (style & GetBytesStyle.ReserveSequence) != 0 ? "reserve_sequence" : "");
 
             List<char> map = new List<char>();
             int start = 0;

@@ -36,6 +36,7 @@ namespace dp2SSL
         {
             if (_channel.Connected == false)
             {
+                /*
                 var parts = StringUtil.ParseTwoPart(App.SipServerUrl, ":");
                 string address = parts[0];
                 string port = parts[1];
@@ -45,6 +46,8 @@ namespace dp2SSL
 
                 var result = await _channel.ConnectionAsync(address,
                     port_value);
+                */
+                var result = await ConnectAsync();
                 if (result.Value == -1) // 出错
                 {
                     TryDetectSipNetwork();
@@ -66,6 +69,26 @@ namespace dp2SSL
         static void ReturnChannel(SipChannel channel)
         {
 
+        }
+
+        static async Task<NormalResult>  ConnectAsync()
+        {
+            var parts = StringUtil.ParseTwoPart(App.SipServerUrl, ":");
+            string address = parts[0];
+            string port = parts[1];
+
+            if (Int32.TryParse(port, out int port_value) == false)
+                throw new Exception($"SIP 服务器和端口号字符串 '{App.SipServerUrl}' 中端口号部分 '{port}' 格式错误");
+
+            var result = await _channel.ConnectAsync(address,
+    port_value);
+            if (result.Value == -1) // 出错
+            {
+                // TryDetectSipNetwork();
+                // throw new Exception($"连接 SIP 服务器 {App.SipServerUrl} 时出错: {result.ErrorInfo}");
+            }
+
+            return result;
         }
 
         static AsyncSemaphore _channelLimit = new AsyncSemaphore(1);
@@ -516,6 +539,10 @@ get_result.Result.AE_PersonalName_r);
 
         static async Task<NormalResult> DetectSipNetworkAsync()
         {
+            /*
+            // testing
+            return new NormalResult { Value = 1 };
+            */
             try
             {
                 using (var releaser = await _channelLimit.EnterAsync())
@@ -599,6 +626,11 @@ get_result.Result.AE_PersonalName_r);
         // 立即安排一次检测 SIP 网络
         public static void TryDetectSipNetwork(bool delay = true)
         {
+            /*
+            // testing
+            return;
+            */
+
             if (_delayTry != null)
                 return;
 
