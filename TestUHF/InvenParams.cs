@@ -53,6 +53,14 @@ namespace TestUHF
     public class INVEN_READ
     {
         public Boolean m_enable;
+
+        /*
+         * 内存区域:
+0x00: RFU;
+0x01: EPC;
+0x02: TID;
+0x03: USER;
+         * */
         public Byte m_memBank;
         public UInt32 m_wordPtr;
         public UInt32 m_wordCnt;

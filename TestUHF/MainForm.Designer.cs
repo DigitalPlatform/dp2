@@ -35,6 +35,7 @@
             this.button_closeReader = new System.Windows.Forms.Button();
             this.button_inventory = new System.Windows.Forms.Button();
             this.textBox_result = new System.Windows.Forms.TextBox();
+            this.button_readerData = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -108,11 +109,22 @@
             this.textBox_result.Size = new System.Drawing.Size(868, 377);
             this.textBox_result.TabIndex = 6;
             // 
+            // button_readerData
+            // 
+            this.button_readerData.Location = new System.Drawing.Point(605, 69);
+            this.button_readerData.Name = "button_readerData";
+            this.button_readerData.Size = new System.Drawing.Size(177, 38);
+            this.button_readerData.TabIndex = 7;
+            this.button_readerData.Text = "Read";
+            this.button_readerData.UseVisualStyleBackColor = true;
+            this.button_readerData.Click += new System.EventHandler(this.button_readerData_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(893, 545);
+            this.Controls.Add(this.button_readerData);
             this.Controls.Add(this.textBox_result);
             this.Controls.Add(this.button_inventory);
             this.Controls.Add(this.button_closeReader);
@@ -137,6 +149,7 @@
         private System.Windows.Forms.Button button_closeReader;
         private System.Windows.Forms.Button button_inventory;
         private System.Windows.Forms.TextBox textBox_result;
+        private System.Windows.Forms.Button button_readerData;
     }
 }
 
