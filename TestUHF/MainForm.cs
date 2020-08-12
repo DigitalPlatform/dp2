@@ -1,5 +1,4 @@
-﻿using DigitalPlatform;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -8,6 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+
+using DigitalPlatform;
 
 namespace TestUHF
 {
@@ -429,6 +430,8 @@ namespace TestUHF
             Inventory();
         }
 
+        List<string> _epcs = new List<string>();
+
         void Inventory()
         {
             this.textBox_result.Text = "";
@@ -455,6 +458,16 @@ namespace TestUHF
                 parameters.m_metaFlags.m_timestamp = false; // ckbMetaTimestamp.Checked;
                 parameters.m_metaFlags.m_antennaID = false; // ckbMetaAntennaID.Checked;
             }
+
+            {
+                parameters.m_metaFlags.m_enable = false; // ckbMetaEnable.Checked;
+
+                parameters.m_read.m_enable = true;
+                parameters.m_read.m_memBank = 0x02; // USER Bank
+                parameters.m_read.m_wordPtr = 0;
+                parameters.m_read.m_wordCnt = 10;
+            }
+
 
             byte[] AntennaSel = new byte[] { 1 };
 
@@ -494,6 +507,8 @@ namespace TestUHF
 
             // 显示结果
             {
+                _epcs.Clear();
+
                 StringBuilder text = new StringBuilder();
                 int i = 0;
                 text.AppendLine($"tag count: {results.Count}");
@@ -506,10 +521,20 @@ namespace TestUHF
 
                     text.AppendLine($"{(i + 1)}) tag_id={result.tag_id}, aip_id={result.aip_id}, ant_id={result.ant_id}, metaFlags={result.metaFlags}, tagData={ByteArray.GetHexTimeStampString(result.tagData)}");
                     text.AppendLine($"EPC={parse_result.EPC}, {parse_result.ReadCount} Frequency={parse_result.Frequency}, RSSI={parse_result.RSSI}, Timestamp={parse_result.Timestamp}, ReadData={ByteArray.GetHexTimeStampString(parse_result.ReadData)}");
+
+                    _epcs.Add(parse_result.EPC);
                 }
 
                 this.textBox_result.Text = text.ToString();
             }
+        }
+
+        private void button_readerData_Click(object sender, EventArgs e)
+        {
+            ReadDataDialog dialog = new ReadDataDialog();
+            dialog.Epcs = _epcs;
+            dialog.ReaderHandle = _readerHandle;
+            dialog.ShowDialog(this);
         }
     }
 }
