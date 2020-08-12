@@ -1,5 +1,4 @@
-﻿using DigitalPlatform.Text;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -8,6 +7,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+
+using DigitalPlatform.CommonControl;
+using DigitalPlatform.Text;
 
 namespace TestUHF
 {
@@ -25,8 +27,19 @@ namespace TestUHF
             Task.Run(() =>
             {
                 FillReaderTypes();
+
+                if (_uiState != null)
+                {
+                    this.Invoke((Action)(() =>
+                    {
+                        UiState = _uiState;
+                        _uiState = null;
+                    }));
+                }
             });
         }
+
+        bool _filled = false;
 
         void FillReaderTypes()
         {
@@ -85,6 +98,8 @@ namespace TestUHF
                 if (this.comboBox_readerType.Items.Count > 0)
                     this.comboBox_readerType.SelectedIndex = 0;
             }));
+
+            _filled = true;
         }
 
         List<string> ListUsbSerialNumber(string readerType)
@@ -180,6 +195,34 @@ namespace TestUHF
         {
             this.DialogResult = DialogResult.Cancel;
             this.Close();
+        }
+
+        string _uiState = null;
+
+        public string UiState
+        {
+            get
+            {
+                List<object> controls = new List<object>();
+                controls.Add(this.comboBox_readerType);
+                controls.Add(this.comboBox_usbOpenType);
+
+                return GuiState.GetUiState(controls);
+            }
+            set
+            {
+                if (_filled == false)
+                {
+                    _uiState = value;
+                    return;
+                }
+
+                List<object> controls = new List<object>();
+                controls.Add(this.comboBox_readerType);
+                controls.Add(this.comboBox_usbOpenType);
+
+                GuiState.SetUiState(controls, value);
+            }
         }
     }
 

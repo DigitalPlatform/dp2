@@ -7,6 +7,8 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using DigitalPlatform.CirculationClient;
+
 namespace TestUHF
 {
     static class Program
@@ -21,6 +23,8 @@ namespace TestUHF
         [STAThread]
         static void Main()
         {
+            ClientInfo.TypeOfProgram = typeof(Program);
+
             string folderPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             string assemblyPath = Path.Combine(folderPath, IntPtr.Size == 8 ? "x64" : "x86");
 
