@@ -45,6 +45,7 @@
             this.label4 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.combobox_epcList = new System.Windows.Forms.ComboBox();
+            this.button_readAllBanks = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -235,11 +236,23 @@
             this.combobox_epcList.Size = new System.Drawing.Size(974, 29);
             this.combobox_epcList.TabIndex = 16;
             // 
+            // button_readAllBanks
+            // 
+            this.button_readAllBanks.Location = new System.Drawing.Point(15, 428);
+            this.button_readAllBanks.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
+            this.button_readAllBanks.Name = "button_readAllBanks";
+            this.button_readAllBanks.Size = new System.Drawing.Size(270, 52);
+            this.button_readAllBanks.TabIndex = 19;
+            this.button_readAllBanks.Text = "Read All Banks";
+            this.button_readAllBanks.UseVisualStyleBackColor = true;
+            this.button_readAllBanks.Click += new System.EventHandler(this.button_readAllBanks_Click);
+            // 
             // ReadDataDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1102, 390);
+            this.ClientSize = new System.Drawing.Size(1116, 494);
+            this.Controls.Add(this.button_readAllBanks);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.combobox_epcList);
@@ -272,5 +285,6 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.ComboBox combobox_epcList;
+        private System.Windows.Forms.Button button_readAllBanks;
     }
 }

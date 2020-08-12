@@ -1,4 +1,5 @@
 ﻿using DigitalPlatform;
+using DigitalPlatform.Text;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -142,8 +143,8 @@ namespace TestUHF
                 byte[] AntennaSel = new byte[] { 1 };   // 号码到底从 0 开始还是从 1 开始，要查配置文件
                 byte AntennaSelCount = 1;
 
-                iret = RFIDLIB.rfidlib_reader.RDR_SetMultiAccessAntennas(this.ReaderHandle, 
-                    AntennaSel, 
+                iret = RFIDLIB.rfidlib_reader.RDR_SetMultiAccessAntennas(this.ReaderHandle,
+                    AntennaSel,
                     AntennaSelCount);
                 if (iret != 0)
                 {
@@ -152,10 +153,10 @@ namespace TestUHF
                 }
 
                 iret = RFIDLIB.rfidlib_aip_iso18000p6C.ISO18000p6C_Connect(this.ReaderHandle,
-                    0, 
+                    0,
                     epc,
                     (Byte)epc.Length,
-                    m_accessPwd, 
+                    m_accessPwd,
                     ref ht);
                 if (iret != 0)
                 {
@@ -164,8 +165,8 @@ namespace TestUHF
                 }
 
                 iret = RFIDLIB.rfidlib_aip_iso18000p6C.ISO18000p6C_Read(this.ReaderHandle,
-                    ht, 
-                    memBank, 
+                    ht,
+                    memBank,
                     (UInt32)WordPointer,
                     (UInt32)WordCnt,
                     readData,
@@ -179,6 +180,135 @@ namespace TestUHF
                 }
 
                 this.textbox_data.Text = BitConverter.ToString(readData, 0, (int)nSize).Replace("-", string.Empty);
+                return;
+            }
+            finally
+            {
+                if (ht != UIntPtr.Zero)
+                {
+                    RFIDLIB.rfidlib_reader.RDR_TagDisconnect(this.ReaderHandle, ht);
+                    ht = UIntPtr.Zero;
+                }
+            }
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        private void button_readAllBanks_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            UIntPtr ht = UIntPtr.Zero;
+            try
+            {
+                int WordCnt;
+                int WordPointer;
+                int iret;
+                Byte memBank;
+                Byte[] epc = null;
+                Byte[] readData = new Byte[256];
+                Byte[] accessPwdBytes = null;
+                UInt32 m_accessPwd = 0;
+                // UInt32 nSize = (UInt32)readData.Length;
+
+                if (this.combobox_epcList.Text == "")
+                {
+                    strError = "尚未指定要读取的标签的 EPC";
+                    goto ERROR1;
+                }
+
+                epc = ByteArray.GetTimeStampByteArray(this.combobox_epcList.Text);
+                // epc = StringToByteArrayFastest(cbbEPCs.Text);
+                if (epc == null)
+                {
+                    strError = "GetTimeStampByteArray() error";
+                    goto ERROR1;
+                }
+
+                WordCnt = Convert.ToInt32(this.combobox_wordCount.Text);
+                WordPointer = Convert.ToInt32(this.combobox_startWord.Text);
+
+                switch (this.combobox_memoryBank.SelectedIndex)
+                {
+                    case 0:
+                        memBank = (Byte)RFIDLIB.rfidlib_def.ISO18000p6C_MEM_BANK_RFU;
+                        break;
+                    case 1:
+                        memBank = (Byte)RFIDLIB.rfidlib_def.ISO18000p6C_MEM_BANK_EPC;
+                        break;
+                    case 2:
+                        memBank = (Byte)RFIDLIB.rfidlib_def.ISO18000p6C_MEM_BANK_TID;
+                        break;
+                    case 3:
+                        memBank = (Byte)RFIDLIB.rfidlib_def.ISO18000p6C_MEM_BANK_USER;
+                        break;
+                    default:
+                        memBank = (Byte)RFIDLIB.rfidlib_def.ISO18000p6C_MEM_BANK_EPC;
+                        break;
+                }
+
+                /*
+                AntennaSel = GetSelectAntennas();
+                if (AntennaSel == null)
+                {
+                    AntennaSelCount = 0;
+                }
+                else
+                {
+                    AntennaSelCount = (Byte)AntennaSel.Length;
+                }
+                */
+
+                byte[] AntennaSel = new byte[] { 1 };   // 号码到底从 0 开始还是从 1 开始，要查配置文件
+                byte AntennaSelCount = 1;
+
+                iret = RFIDLIB.rfidlib_reader.RDR_SetMultiAccessAntennas(this.ReaderHandle,
+                    AntennaSel,
+                    AntennaSelCount);
+                if (iret != 0)
+                {
+                    strError = "RDR_SetMultiAccessAntennas() error";
+                    goto ERROR1;
+                }
+
+                iret = RFIDLIB.rfidlib_aip_iso18000p6C.ISO18000p6C_Connect(this.ReaderHandle,
+                    0,
+                    epc,
+                    (Byte)epc.Length,
+                    m_accessPwd,
+                    ref ht);
+                if (iret != 0)
+                {
+                    strError = "ISO18000p6C_Connect() error";
+                    goto ERROR1;
+                }
+
+                string[] bank_names = { "RFU", "EPC", "TID", "USR" };
+
+                List<string> lines = new List<string>();
+
+                for (byte i = 0; i < 4; i++)
+                {
+                    UInt32 nSize = (UInt32)readData.Length;
+
+                    iret = RFIDLIB.rfidlib_aip_iso18000p6C.ISO18000p6C_Read(this.ReaderHandle,
+                        ht,
+                        i,
+                        (UInt32)0,  // WordPointer,
+                        (UInt32)0,  // WordCnt,
+                        readData,
+                        ref nSize);
+                    if (iret != 0)
+                    {
+                        strError = $"ISO18000p6C_Read() (bank {i}) error";
+                        goto ERROR1;
+                    }
+
+                    lines.Add(bank_names[i] + " " + BitConverter.ToString(readData, 0, (int)nSize).Replace("-", string.Empty));
+                }
+
+                Clipboard.SetText("以下四行分别为 RFU EPC TID USER bank:\r\n" + StringUtil.MakePathList(lines, "\r\n"));
+                MessageBox.Show(this, "内容已进入 Windows 剪贴板");
                 return;
             }
             finally

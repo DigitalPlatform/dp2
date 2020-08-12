@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using DigitalPlatform;
+using DigitalPlatform.CirculationClient;
 
 namespace TestUHF
 {
@@ -18,6 +19,9 @@ namespace TestUHF
 
         public MainForm()
         {
+            ClientInfo.ProgramName = "testuhf";
+            ClientInfo.MainForm = this;
+
             InitializeComponent();
         }
 
@@ -27,22 +31,36 @@ namespace TestUHF
 
             using (OpenReaderDialog dlg = new OpenReaderDialog())
             {
+                dlg.UiState = ClientInfo.Config.Get("reader_dialog", "ui_state");
+
                 dlg.ShowDialog(this);
+
+                ClientInfo.Config.Set("reader_dialog", "ui_state", dlg.UiState);
                 if (dlg.DialogResult == DialogResult.Cancel)
                     return;
 
-                var connectionString = dlg.BuildConnectionString();
+                var oldCursor = this.Cursor;
+                this.Cursor = Cursors.WaitCursor;
 
-                var iret = RFIDLIB.rfidlib_reader.RDR_Open(connectionString, ref this._readerHandle);
-                if (iret != 0)
+                try
                 {
-                    strError = "Open Reader Fail";
-                    goto ERROR1;
+                    var connectionString = dlg.BuildConnectionString();
+
+                    var iret = RFIDLIB.rfidlib_reader.RDR_Open(connectionString, ref this._readerHandle);
+                    if (iret != 0)
+                    {
+                        strError = "Open Reader Fail";
+                        goto ERROR1;
+                    }
+                    else
+                    {
+                        this.button_openReader.Enabled = false;
+                        this.button_closeReader.Enabled = true;
+                    }
                 }
-                else
+                finally
                 {
-                    this.button_openReader.Enabled = false;
-                    this.button_closeReader.Enabled = true;
+                    this.Cursor = oldCursor;
                 }
             }
 
@@ -535,6 +553,16 @@ namespace TestUHF
             dialog.Epcs = _epcs;
             dialog.ReaderHandle = _readerHandle;
             dialog.ShowDialog(this);
+        }
+
+        private void MainForm_Load(object sender, EventArgs e)
+        {
+            ClientInfo.Initial("testuhf");
+        }
+
+        private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            ClientInfo.Finish();
         }
     }
 }

@@ -604,6 +604,10 @@ namespace DigitalPlatform.CommonControl
         public static void SetUiState(List<object> controls,
             string strStates)
         {
+            // 2020/8/12
+            if (strStates == null)
+                strStates = "";
+
             string[] sections = strStates.Split(new char[] { ';' });
 
             int i = 0;
