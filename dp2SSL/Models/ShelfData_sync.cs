@@ -20,6 +20,7 @@ using dp2SSL.Models;
 using DigitalPlatform;
 using DigitalPlatform.WPF;
 using DigitalPlatform.Text;
+using DigitalPlatform.LibraryClient.localhost;
 
 namespace dp2SSL
 {
@@ -731,7 +732,12 @@ TaskScheduler.Default);
                 list.Add(action);
             }
 
-            return new List<List<ActionInfo>>(table.Values.Cast<List<ActionInfo>>());
+            var result = new List<List<ActionInfo>>(table.Values.Cast<List<ActionInfo>>());
+            // TODO: 对于同一个门提交的同步请求，应该尽量考虑把还书动作放在靠前，这样可以减少超额的几率
+            // 可以给每个 PII 建立一个“还书权重”，把权重高的排在前面
+            // 只有还书动作的权重较高(同样多的还书动作个数)。
+            SortGroups(result);
+            return result;
             /*
             List<List<ActionInfo>> results = new List<List<ActionInfo>>();
             foreach(var key in table.Keys)
@@ -741,6 +747,44 @@ TaskScheduler.Default);
 
             return results;
             */
+        }
+
+        // 2020/8/13
+        // 排序。还书动作多的 actions 靠前排列
+        static void SortGroups(List<List<ActionInfo>> groups)
+        {
+            // 建立权重对照表
+            // List<ActionInfo> --> int
+            Hashtable weight_table = new Hashtable();
+            foreach(var group in groups)
+            {
+                int weight = ComputeWeight(group);
+                weight_table[group] = weight;
+            }
+
+            // 排序
+            groups.Sort((a, b) => {
+                int weight_a = (int)weight_table[a];
+                int weight_b = (int)weight_table[b];
+                return -1 * (weight_a - weight_b);
+            });
+
+            return;
+
+            // 计算 actions 的权重值
+            int ComputeWeight(List<ActionInfo> actions)
+            {
+                int weight = 0;
+                foreach(var action in actions)
+                {
+                    if (action.Action == "return")
+                        weight ++;
+                    else if (action.Action == "borrow")
+                        weight --;
+                }
+
+                return weight;
+            }
         }
 
         // 获得 PII 字符串。如果 PII 为空，会改取 UID 返回
