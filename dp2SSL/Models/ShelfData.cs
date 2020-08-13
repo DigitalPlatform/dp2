@@ -1039,6 +1039,9 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             {
                 lock (_syncRoot_actions)
                 {
+                    // PII -> patron xml
+                    Hashtable patron_table = new Hashtable();
+
                     List<ActionInfo> actions = new List<ActionInfo>();
                     List<Entity> processed = new List<Entity>();
                     foreach (var entity in ShelfData.l_Adds)
@@ -1117,7 +1120,6 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                                 WpfClientInfo.WriteInfoLog($"修改册 '{entity.PII}' 的 EAS 失败: {result.ErrorInfo}");
                             }
                         }
-
                     }
 
                     foreach (var entity in ShelfData.l_Changes)
@@ -1192,13 +1194,37 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
 
                         if (person.IsWorker == false)
                         {
+                            string patron_xml = null;
+                            // 2020/8/13
+                            // 如果是联网情况下，还是要尽量获得最新的读者记录作为演算借册超期的基础
+                            if (ShelfData.LibraryNetworkCondition == "OK")
+                            {
+                                patron_xml = (string)patron_table[person.PatronBarcode];
+                                if (string.IsNullOrEmpty(patron_xml) == true)
+                                {
+                                    // 尝试获得最新的读者记录
+                                    // return.Value:
+                                    //      -1  出错
+                                    //      0   读者记录没有找到
+                                    //      1   成功
+                                    var get_result = LibraryChannelUtil.GetReaderInfo(person.PatronBarcode);
+                                    patron_xml = get_result.ReaderXml;
+                                    // 记忆
+                                    if (string.IsNullOrEmpty(patron_xml) == false)
+                                        patron_table[person.PatronBarcode] = patron_xml;
+                                }
+                            }
+
                             // 只有读者身份才进行借阅操作
                             actions.Add(new ActionInfo
                             {
                                 Entity = entity.Clone(),
                                 Action = "borrow",
                                 Operator = person,
-                                ActionString = BuildBorrowInfo(person.PatronBarcode, person.PatronInstitution, entity, borrowed_piis), // borrowed_count++
+                                ActionString = BuildBorrowInfo(person.PatronBarcode,
+                                person.PatronInstitution,
+                                patron_xml,
+                                entity, borrowed_piis), // borrowed_count++
                             });
 
                             borrowed_piis.Add(entity.PII);
@@ -1295,18 +1321,34 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
         // 构造 BorrowInfo 字符串
         // 用于在同步之前，为本地数据库记录临时模拟出 BorrowInfo。这样当长期断网的情况下，dp2ssl 能用它进行本地借书权限的判断(判断是否超期、超额)
         // parameters:
+        //      patron_xml  读者记录 XML。如果为 null，表示需要本函数自己去尝试获得读者记录
         //      delta_piis   尚未来得及保存到数据库的已借册的 PII 列表。注意里面的 PII 有可能是空字符串
         static string BuildBorrowInfo(string patron_pii,
             string patron_oi,
+            string patron_xml,
             Entity entity,
             List<string> delta_piis)
         {
             BorrowInfo borrow_info = new BorrowInfo();
 
             XmlDocument readerdom = null;
+            if (string.IsNullOrEmpty(patron_xml) == false)
+            {
+                readerdom = new XmlDocument();
+                try
+                {
+                    readerdom.LoadXml(patron_xml);
+                }
+                catch (Exception ex)
+                {
+                    WpfClientInfo.WriteErrorLog($"读者记录装载进入 XMLDOM 时出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                    readerdom = null;
+                }
+            }
+
             string patron_type = GetPatronType(patron_pii,
                 patron_oi,
-                out readerdom);
+                ref readerdom);
             if (patron_type == null)
                 goto DEFAULT;
 
@@ -1502,26 +1544,27 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
         // 获得读者的类型，从本地缓存的读者记录中
         static string GetPatronType(string patron_pii,
             string patron_oi,
-            out XmlDocument readerdom)
+            ref XmlDocument readerdom)
         {
-            readerdom = null;
-
-            string query = patron_pii;
-            if (string.IsNullOrEmpty(patron_oi) == false)
-                query = patron_oi + "." + patron_pii;
-
-            var result = LibraryChannelUtil.GetReaderInfoFromLocal(query, false);
-            if (result.Value == -1)
-                return null;
-            readerdom = new XmlDocument();
-            try
+            if (readerdom == null)
             {
-                readerdom.LoadXml(result.ReaderXml);
-            }
-            catch
-            {
-                readerdom = null;
-                return null;
+                string query = patron_pii;
+                if (string.IsNullOrEmpty(patron_oi) == false)
+                    query = patron_oi + "." + patron_pii;
+
+                var result = LibraryChannelUtil.GetReaderInfoFromLocal(query, false);
+                if (result.Value == -1)
+                    return null;
+                readerdom = new XmlDocument();
+                try
+                {
+                    readerdom.LoadXml(result.ReaderXml);
+                }
+                catch
+                {
+                    readerdom = null;
+                    return null;
+                }
             }
 
             return DomUtil.GetElementText(readerdom.DocumentElement, "readerType");
@@ -3919,7 +3962,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                             var one_tag = tag.OneTag;
                             // TODO: 尝试从 _bookTags 里面移走
                             // removed_books.AddRange(Remove(_bookTags, one_tag.UID, one_tag.ReaderName, one_tag.AntennaID));
-                            
+
                             // 注：只匹配 UID 即可。readerName 和 antenna 可能已经变化，无法和已有的信息匹配
                             removed_books.AddRange(Remove(_bookTags, one_tag.UID, "*", uint.MaxValue));
                             Update(_patronTags, tag);
