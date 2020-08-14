@@ -1957,6 +1957,7 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
         /// <returns>-1: 出错; 0: 没有必要保存; 1: 保存成功</returns>
         public override int SaveItems(
             LibraryChannel channel,
+            string strStyle,
             out string strError)
         {
             // TODO: 是否要先保存以前的选择，功能执行完以后恢复以前的选择?
@@ -1987,7 +1988,7 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
                 }
             }
 
-            return base.SaveItems(channel, out strError);
+            return base.SaveItems(channel, strStyle, out strError);
         }
 
         // 外部调用，设置一个实体记录。

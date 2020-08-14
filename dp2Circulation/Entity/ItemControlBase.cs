@@ -744,7 +744,7 @@ namespace dp2Circulation
 
                     // 2016/12/19
                     // 刷新已有事项的 old 部分
-                    if (strStyle == "refresh" )
+                    if (strStyle == "refresh")
                     {
                         T dup = null;
                         if (string.IsNullOrEmpty(bookitem.RefID) == false)
@@ -988,7 +988,10 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
         }
 
         // 构造用于保存的实体信息数组
+        // parameters:
+        //      strStyle    风格。如果为 force，表示希望强制修改册记录
         int BuildSaveEntities(
+            string strStyle,
             out EntityInfo[] entities,
             out string strError)
         {
@@ -1018,10 +1021,9 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
 
                 info.RefID = bookitem.RefID; // 2008/2/17
 
-                string strXml = "";
                 nRet = bookitem.BuildRecord(
                     true,   // 要检查 Parent 成员
-                    out strXml,
+                    out string strXml,
                     out strError);
                 if (nRet == -1)
                     return -1;
@@ -1036,7 +1038,11 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
 
                 if (bookitem.ItemDisplayState == ItemDisplayState.Changed)
                 {
-                    info.Action = "change";
+                    // 2020/8/14
+                    if (StringUtil.IsInList("force", strStyle))
+                        info.Action = "forcechange";
+                    else
+                        info.Action = "change";
                     info.OldRecPath = bookitem.RecPath; // 2007/6/2
                     info.NewRecPath = bookitem.RecPath;
 
@@ -1503,6 +1509,8 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
         int m_nInSaveItems = 0;
 
         // 提交实体保存请求
+        // parameters:
+        //      strStyle    风格。如果为 force，表示希望强制修改册记录
         // return:
         //      -1  出错
         //      0   没有必要保存
@@ -1513,6 +1521,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
         /// <returns>-1: 出错; 0: 没有必要保存; 1: 保存成功</returns>
         public virtual int SaveItems(
             LibraryChannel channel,
+            string strStyle,
             out string strError)
         {
             strError = "";
@@ -1558,7 +1567,10 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
                     EntityInfo[] entities = null;
 
                     // 构造需要提交的实体信息数组
+                    // parameters:
+                    //      strStyle    风格。如果为 force，表示希望强制修改册记录
                     nRet = BuildSaveEntities(
+                        strStyle,
                         out entities,
                         out strError);
                     if (nRet == -1)
@@ -1645,10 +1657,13 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
         /// 提交 Items 保存请求
         /// </summary>
         /// <returns>-1: 出错; 0: 没有必要保存; 1: 保存成功</returns>
-        public virtual int DoSaveItems(LibraryChannel channel)
+        public virtual int DoSaveItems(LibraryChannel channel, 
+            string strStyle)
         {
             string strError = "";
-            int nRet = SaveItems(channel, out strError);
+            int nRet = SaveItems(channel, 
+                strStyle,
+                out strError);
 
             if (nRet == -1)
             {
@@ -2159,7 +2174,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.6.7270.28358, Culture=neutral, 
 
                 return 0;
             }
-            catch(ObjectDisposedException)
+            catch (ObjectDisposedException)
             {
                 return -1;
             }
@@ -2398,7 +2413,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.6.7270.28358, Culture=neutral, 
                     lRet = channel.GetOrderInfo(
     Stop,
     strIndex,
-                        // "", // strBiblioRecPath,
+    // "", // strBiblioRecPath,
     null,
     out strItemText,
     out strOutputItemRecPath,
@@ -2415,7 +2430,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.6.7270.28358, Culture=neutral, 
                     lRet = channel.GetIssueInfo(
                          Stop,
                          strIndex,
-                        // "", // strBiblioRecPath,
+                         // "", // strBiblioRecPath,
                          null,
                          out strItemText,
                          out strOutputItemRecPath,
@@ -2432,7 +2447,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.6.7270.28358, Culture=neutral, 
                     lRet = channel.GetCommentInfo(
     Stop,
     strIndex,
-                        // "", // strBiblioRecPath,
+    // "", // strBiblioRecPath,
     null,
     out strItemText,
     out strOutputItemRecPath,

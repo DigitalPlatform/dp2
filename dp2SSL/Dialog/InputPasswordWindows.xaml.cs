@@ -68,6 +68,18 @@ namespace dp2SSL
             }
         }
 
+        public string LoginButtonText
+        {
+            get
+            {
+                return loginButton.Content as string;
+            }
+            set
+            {
+                loginButton.Content = value;
+            }
+        }
+
         private void Password_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)

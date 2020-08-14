@@ -1492,9 +1492,17 @@ MessageBoxDefaultButton.Button1);
 
                 MainForm.SetControlFont(this, this.DefaultFont);
 
-                AppInfo.LoadFormStates(this,
-                    "mainformstate",
-                    FormWindowState.Maximized);
+                // 2020/8/14
+                if (Control.ModifierKeys == Keys.Control)
+                {
+                    // 不首次设置主窗口大小位置。主要是为了特殊情况下恢复窗口可见
+                }
+                else
+                {
+                    AppInfo.LoadFormStates(this,
+                        "mainformstate",
+                        FormWindowState.Maximized);
+                }
 
                 // 程序一启动就把这些参数设置为初始状态
                 this.DisplayScriptErrorDialog = false;

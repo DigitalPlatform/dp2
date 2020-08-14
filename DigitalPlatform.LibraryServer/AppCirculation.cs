@@ -4214,8 +4214,15 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                 if (debugInfo != null)
                     debugInfo.Append("获得馆代码 '" + strItemLibraryCode + "' 的可以借阅的馆藏地列表为: '" + LocationType.ToString(locations) + "'\r\n");
 
-                if (location == null
-                    || location.CanReturn == "no")
+                // 2020/814
+                // 没有找到馆藏地定义事项，默认倾向于允许还回
+                if (location == null)
+                {
+                    return 1;
+                }
+
+                if (location != null
+                    && location.CanReturn == "no")
                 {
                     // text-level: 用户提示
                     strError = string.Format("册 {0} 的馆藏地点为 {1}，按规定(<locationTypes>配置)此册不允许还回。",

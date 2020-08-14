@@ -8035,6 +8035,7 @@ out strError);
                         // form.DoSaveAll();
                         nRet = form.EntityControl.SaveItems(
                             channel,
+                            "",
                             out strError);
                         if (nRet == -1)
                             goto ERROR;

@@ -4533,6 +4533,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
                     channel,
                     info,
                     null,
+                    Control.ModifierKeys == Keys.Control ? "force" : "",
                     out string strError);
                 if (nRet == -1)
                     return -1;
@@ -4605,10 +4606,13 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
             public int ErrorCount = 0;
         }
 
+        // parameters:
+        //      strStyle    风格。如果为 force 表示希望强制保存
         int SaveSubRecords(
             LibraryChannel channel,
             SavedInfo info,
             string strBiblioRecPath,
+            string strStyle,
             out string strError)
         {
             strError = "";
@@ -4654,7 +4658,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
                 //      -1  出错
                 //      0   没有必要保存
                 //      1   保存成功
-                nRet = this.orderControl1.DoSaveItems(channel);
+                nRet = this.orderControl1.DoSaveItems(channel, strStyle);
                 if (nRet == 1)
                 {
                     info.bOrdersSaved = true;
@@ -4677,7 +4681,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
                 //      -1  出错
                 //      0   没有必要保存
                 //      1   保存成功
-                nRet = this.issueControl1.DoSaveItems(channel);
+                nRet = this.issueControl1.DoSaveItems(channel, strStyle);
                 if (nRet == 1)
                 {
                     info.bIssuesSaved = true;
@@ -4703,7 +4707,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
                     //      -1  出错
                     //      0   没有必要保存
                     //      1   保存成功
-                    nRet = this.entityControl1.DoSaveItems(channel);
+                    nRet = this.entityControl1.DoSaveItems(channel, strStyle);
                     if (nRet == 1)
                     {
                         ReleaseProtectedTailNumbers();    // 册记录已经保存成功，可以释放对临时种次号的保护了
@@ -4724,7 +4728,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
                 //      -1  出错
                 //      0   没有必要保存
                 //      1   保存成功
-                nRet = this.commentControl1.DoSaveItems(channel);
+                nRet = this.commentControl1.DoSaveItems(channel, strStyle);
                 if (nRet == 1)
                 {
                     info.bCommentsSaved = true;
@@ -10532,7 +10536,7 @@ MessageBoxDefaultButton.Button1);
                 if (IsISBnBarcode(this.textBox_itemBarcode.Text) == true)
                 {
                     // 保存当前册信息
-                    nRet = this.entityControl1.DoSaveItems(channel);
+                    nRet = this.entityControl1.DoSaveItems(channel, "");
                     if (nRet == -1)
                         return; // 放弃进一步操作
 
@@ -13190,6 +13194,7 @@ merge_dlg.UiState);
                     nRet = SaveSubRecords(channel,
                         info,
                         strOutputBiblioRecPath,
+                        "",
                         out strError);
                     if (nRet == -1)
                         return -1;
