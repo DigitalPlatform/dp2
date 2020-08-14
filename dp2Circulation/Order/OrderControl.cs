@@ -743,7 +743,8 @@ namespace dp2Circulation
             throw new Exception(strError);
         }
 
-        public override int DoSaveItems(LibraryChannel channel)
+        public override int DoSaveItems(LibraryChannel channel,
+            string strStyle)
         {
             if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.4") < 0)
             {
@@ -754,7 +755,7 @@ namespace dp2Circulation
                     return -1;
                 }
             }
-            return base.DoSaveItems(channel);
+            return base.DoSaveItems(channel, strStyle);
         }
 
         // 检查即将保存的订购记录里面是否有 fixedPrice 和 discount 元素

@@ -1532,6 +1532,35 @@ namespace dp2SSL
             }));
         }
 
+        string GetPassword()
+        {
+            string password = null;
+            App.Invoke(new Action(() =>
+            {
+                InputPasswordWindows dialog = null;
+                App.PauseBarcodeScan();
+                try
+                {
+                    dialog = new InputPasswordWindows();
+                    dialog.TitleText = $"输入锁屏密码才能开门";
+                    dialog.Owner = App.CurrentApp.MainWindow;
+                    dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                    dialog.LoginButtonText = "开门";
+                    dialog.ShowDialog();
+                    if (dialog.Result == "OK")
+                        password = dialog.password.Password;
+                }
+                finally
+                {
+                    App.ContinueBarcodeScan();
+                }
+
+                // dialog_result = _passwordDialog.Result;
+            }));
+
+            return password;
+        }
+
         // 新版本的首次填充图书信息的函数
         // parameters:
         //      networkMode 空/local。其中 local 表示按照断网模式初始化(否则是联网模式)，信息尽量从本地缓存获取
@@ -1570,6 +1599,9 @@ namespace dp2SSL
             AutoResetEvent eventRetry = new AutoResetEvent(false);
             ManualResetEvent eventCancel = new ManualResetEvent(false);
 
+            int passwordErrorCount = 0;
+            Task delayClear = null;
+
             InventoryWindow progress = null;
             App.Invoke(new Action(() =>
             {
@@ -1586,11 +1618,51 @@ namespace dp2SSL
                 };
                 progress.openDoorButton.Click += (s, e) =>
                 {
-                    TrySetMessage(null, "“开门”按钮被按下(正在初始化对话框)");
+                    if (passwordErrorCount > 5)
+                    {
+                        string error = "密码错误次数太多，开门功能被禁用";
+                        TrySetMessage(null, error);
+                        ErrorBox(error);
+                        // 延时 10 分钟清除 passwordErrorCount
+                        if (delayClear == null)
+                        {
+                            delayClear = Task.Run(async () =>
+                            {
+                                await Task.Delay(TimeSpan.FromMinutes(5));
+                                passwordErrorCount = 0;
+                                delayClear = null;
+                            });
+                        }
+                        return;
+                    }
 
-                    var open_result = RfidManager.OpenShelfLock(progress.Door.LockPath);
-                    if (open_result.Value == -1)
-                        ErrorBox(open_result.ErrorInfo);
+                    TrySetMessage(null, "“开门”按钮被按下(正在初始化对话框)，等待现场操作者输入管理密码");
+
+                    var password = GetPassword();
+                    if (password == null)
+                    {
+                        TrySetMessage(null, "放弃输入密码开门");
+                        // ErrorBox("放弃输入密码开门");
+                    }
+                    else
+                    {
+                        // TODO: 密码连续输入次数太多，则锁定开门功能十分钟
+                        if (App.MatchLockingPassword(password) == false)
+                        {
+                            passwordErrorCount++;
+                            TrySetMessage(null, "密码错误，无法开门");
+                            ErrorBox("密码错误，无法开门");
+                        }
+                        else
+                        {
+                            var open_result = RfidManager.OpenShelfLock(progress.Door.LockPath);
+                            if (open_result.Value == -1)
+                            {
+                                TrySetMessage(null, open_result.ErrorInfo);
+                                ErrorBox(open_result.ErrorInfo);
+                            }
+                        }
+                    }
                 };
                 progress.retryButton.Click += (s, e) =>
                 {

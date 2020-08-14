@@ -48,6 +48,7 @@
     <Compile Include="Compact.cs" />
     <Compile Include="ComUtil.cs" />
     <Compile Include="Element.cs" />
+    <Compile Include="GaoxiaoUtility.cs" />
     <Compile Include="ILedDriver.cs" />
     <Compile Include="IRfid.cs" />
     <Compile Include="IRfidDriver.cs" />

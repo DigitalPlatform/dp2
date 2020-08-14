@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Diagnostics;
 
 using Newtonsoft.Json;
 using Microsoft.Win32;
@@ -19,8 +20,6 @@ using DigitalPlatform.Text;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Face;
 using DigitalPlatform.WPF;
-using DigitalPlatform.Install;
-using System.Diagnostics;
 
 namespace dp2SSL
 {
