@@ -584,14 +584,14 @@ namespace DigitalPlatform.RFID
             List<int> results = new List<int>();
             for (int i = 0; i < 8; i++)
             {
-                bool on = ((two_bytes[1] >> i) & 0x01) != 0;
+                bool on = ((two_bytes[0] >> i) & 0x01) != 0;
                 if (on)
                     results.Add((byte)GetOID(i));
             }
 
             for (int i = 0; i < 8; i++)
             {
-                bool on = ((two_bytes[0] >> i) & 0x01) != 0;
+                bool on = ((two_bytes[1] >> i) & 0x01) != 0;
                 if (on)
                     results.Add((byte)GetOID(i + 8));
             }
@@ -704,8 +704,8 @@ namespace DigitalPlatform.RFID
                 Array.Copy(data, 2, second,0, 2);
                 second = Compact.ReverseBytes(second);
 
-                var no = BitConverter.ToUInt16(first, 0).ToString();
-                var count = BitConverter.ToUInt16(second, 0).ToString();
+                var count = BitConverter.ToUInt16(first, 0).ToString();
+                var no = BitConverter.ToUInt16(second, 0).ToString();
                 return no + "/" + count;
             }
 
@@ -727,6 +727,55 @@ namespace DigitalPlatform.RFID
                 if (result[0] == '6')
                     return "9" + result.Substring(1);
                 return result;
+            }
+
+            if (oid == 5)
+            {
+                // type of usage
+                // 总 2 字节定长字段，其中：高字节存放馆藏类别(主限定标识)，低字节存放馆藏状态(次限定标识)
+                if (data.Length != 2)
+                    throw new Exception($"OID 为 5 时，data 应为 2 字节(但现在为 {data.Length} 字节)");
+
+                byte pimary = data[0];
+                byte secondary = data[1];
+                return pimary + "." + secondary;
+                /*
+主限定标识(应用类别) 取值(数字) 次限定标识(馆藏状态) 取值(数字)
+文献 0
+    可外借 0
+    不可外借 1
+    剔旧 2
+    处理中 3
+    自定义 4-255
+光盘 1
+    可外借 0
+    不可外借 1
+    处理中 2
+    自定义 3-255
+架标/层标 2 自定义 0-255
+证件 3 自定义 0-255
+设备 4 自定义 0-255
+预留 5-255 自定义 0-255
+                * 
+                 * */
+            }
+
+            if (oid == 6 || oid == 12 || oid == 14 || oid == 15 || oid == 16 || oid == 24 || oid == 26)
+            {
+                // 6: item location
+                // 12: ILL Borrowing Transaction Number 馆际互借事务号
+                // 14: Alternative Item Identifier
+                // 15: Temporary Item Locatio
+                // 16: Subject
+                // 24: Subsidiary of an Owner Library
+                // 26: ISBN/ISSN
+                return Encoding.UTF8.GetString(data);
+            }
+
+            if (oid >= 27 && oid <= 31)
+            {
+                // 保留的字段
+                return Encoding.UTF8.GetString(data);
             }
 
             // 其他。暂时用 hex string 来表示

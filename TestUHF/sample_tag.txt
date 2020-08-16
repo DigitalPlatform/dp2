@@ -55,9 +55,9 @@ result = {
 PII=01557071,
 EncodingType=0,
 Version=5,
-ContentParameters=16,24,28,30,
+ContentParameters=3,4,11,14
 Lending=False,
 Reserve=0,
 Picking=1}
 
-OID 16 是主题，24 是分馆标识，28 30 为保留
+OID 3 是所属馆标识，4 是卷册信息，11 是馆际互借借入馆标识, 14 是备选的馆藏标识符
