@@ -2,6 +2,7 @@
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -626,6 +627,119 @@ namespace DigitalPlatform.RFID
         }
 
         #endregion
+
+        #region USER 区的编码解码
+
+        public static List<GaoxiaoUserElement> DecodeUserBank(byte[] data)
+        {
+            List<GaoxiaoUserElement> results = new List<GaoxiaoUserElement>();
+            int start = 0;
+            for (; ; )
+            {
+                if (start >= data.Length || data[start] == 0)
+                    break;
+                // OID 第一字节的 6-bit
+                int oid = (data[start] >> 2) & 0x3f;
+                // length 第一字节的后 2-bit + 第二字节的 8-bit
+                int length = (data[start] & 0x03) << 8;
+                length |= data[start + 1] & 0xff;
+                List<byte> bytes = new List<byte>();
+                for (int i = 0; i < length; i++)
+                {
+                    bytes.Add(data[start + 2 + i]);
+                }
+
+                results.Add(new GaoxiaoUserElement
+                {
+                    OID = oid,
+                    Content = DecodeUserElementContent(oid, bytes.ToArray())
+                });
+
+                start += 2 + length;
+            }
+
+            return results;
+        }
+
+
+        // 解码用户区元素
+        static string DecodeUserElementContent(int oid, byte [] data)
+        {
+            if (data.Length == 0)
+                return "";
+
+            if (oid == 3)
+            {
+                /*
+取值方式：2 字节整型数。参照中华人民共和国教育部行业标准 JY/T1001-2012，《教育管理信
+息-教育管理基础代码》中的《中国高等院校代码表》取值，以 5 位数字所代表的高等院校代
+码来标识所属馆。其中，针对首位数字为 9（军事院校，例如：90001 代表国防大学）的情况，
+在存放时，需要将 9 变成为 6，然后以 2 字节整型数存储，在读取后，需要将 6 变成为 9，恢
+复成原始代码。
+* */
+                if (data.Length != 2)
+                    throw new Exception($"OID 为 3 时，data 应为 2 字节(但现在为 {data.Length} 字节)");
+
+                data = Compact.ReverseBytes(data);
+
+                var result = BitConverter.ToUInt16(data, 0).ToString().PadLeft(5, '0');
+                if (result[0] == '6')
+                    return "9" + result.Substring(1);
+                return result;
+            }
+
+            if (oid == 4)
+            {
+                /*
+取值方式：总 4 字节定长字段，其中：高 2 字节存放卷册总数（最多 65536 卷册），低 2 字节
+存放卷册序号（1 - 65536）。
+                * */
+                if (data.Length != 4)
+                    throw new Exception($"OID 为 4 时，data 应为 4 字节(但现在为 {data.Length} 字节)");
+
+                byte[] first = new byte[2];
+                Array.Copy(data, first, 2);
+                first = Compact.ReverseBytes(first);
+                byte[] second = new byte[2];
+                Array.Copy(data, 2, second,0, 2);
+                second = Compact.ReverseBytes(second);
+
+                var no = BitConverter.ToUInt16(first, 0).ToString();
+                var count = BitConverter.ToUInt16(second, 0).ToString();
+                return no + "/" + count;
+            }
+
+            if (oid == 11)
+            {
+                /*
+取值方式：2 字节整型数。参照中华人民共和国教育部行业标准 JY/T1001-2012，《教育管理信
+息-教育管理基础代码》中的《中国高等院校代码表》取值，以 5 位数字所代表的高等院校代
+码来标识所属馆。其中，针对首位数字为 9（军事院校，例如：90001 代表国防大学）的情况，
+在存放时，需要将 9 变成为 6，然后以 2 字节整型数存储，在读取后，需要将 6 变成为 9，恢
+复成原始代码。
+                * */
+                if (data.Length != 2)
+                    throw new Exception($"OID 为 11 时，data 应为 2 字节(但现在为 {data.Length} 字节)");
+
+                data = Compact.ReverseBytes(data);
+
+                var result = BitConverter.ToUInt16(data, 0).ToString().PadLeft(5, '0');
+                if (result[0] == '6')
+                    return "9" + result.Substring(1);
+                return result;
+            }
+
+            // 其他。暂时用 hex string 来表示
+            return Element.GetHexString(data);
+        }
+
+        #endregion
+    }
+
+    public class GaoxiaoUserElement
+    {
+        public int OID { get; set; }
+        public string Content { get; set; }
     }
 
     // 高校联盟 EPC 信息结构
@@ -668,5 +782,25 @@ namespace DigitalPlatform.RFID
         // 馆藏标识符
         public string PII { get; set; }
 
+
+        public override string ToString()
+        {
+            return $"PII={PII},EncodingType={EncodingType},Version={Version},ContentParameters={ToString(ContentParameters)},Lending={Lending},Reserve={Reserve},Picking={Picking}";
+        }
+
+        static string ToString(int[] list)
+        {
+            StringBuilder text = new StringBuilder();
+            int i = 0;
+            foreach (var v in list)
+            {
+                if (i > 0)
+                    text.Append(",");
+                text.Append(v);
+                i++;
+            }
+
+            return text.ToString();
+        }
     }
 }
