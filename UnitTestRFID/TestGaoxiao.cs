@@ -8,6 +8,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using DigitalPlatform.RFID;
 using DigitalPlatform;
+using System.Diagnostics;
 
 namespace UnitTestRFID
 {
@@ -651,5 +652,22 @@ namespace UnitTestRFID
             test_decode_128bit(source, correct);
         }
 
+        // 某小学 UHF 标签
+        [TestMethod]
+        public void Test_decode_epc_binary_1()
+        {
+            // string source_hex = "E200 0017 2217 0133 1260 9896";
+            string source_hex = "0104 5300 1853 0440 0D0B 0000";
+
+            var source = Element.FromHexString(source_hex);
+            var result = GaoxiaoUtility.DecodeGaoxiaoEpc(source);
+            Debug.WriteLine(result);
+
+
+            string user_hex = "0C02D9941004000100012C00380000000000000000000000000000000000";
+
+            var elements = GaoxiaoUtility.DecodeUserBank(Element.FromHexString(user_hex));
+            Debug.WriteLine(elements);
+        }
     }
 }
