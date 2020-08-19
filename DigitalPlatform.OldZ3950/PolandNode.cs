@@ -1221,11 +1221,17 @@ Stack:
             string strToken,
             int nType)
         {
-            Debug.Assert(nType <= 0xffff, "");	// 避免转换为unsigned short int时候出问题
+            Debug.Assert(nType <= 0xffff, "");  // 避免转换为unsigned short int时候出问题
 
+            /*
             param.NewChildCharNode((ushort)nType,
                 ASN1_CONTEXT,
                 Encoding.UTF8.GetBytes(strToken)); // ,0);?????
+            */
+            // 2020/8/20
+            param.NewChildCharNode((ushort)nType,
+    ASN1_CONTEXT,
+    new byte[0]);
 
             return 0;
         }
