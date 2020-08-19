@@ -378,6 +378,9 @@ namespace dp2SSL
             }
         }
 
+        // 图书馆名字
+        static string _libraryName = null;
+
         static List<string> _locationList = null;
 
         static string _rightTableXml = null;
@@ -471,6 +474,8 @@ namespace dp2SSL
                     }
                     _rfidCfgDom = new XmlDocument();
                     _rfidCfgDom.LoadXml(result.Xml);
+
+                    _libraryName = result.LibraryName;
                 }
             }
 

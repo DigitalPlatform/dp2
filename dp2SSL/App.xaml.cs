@@ -308,6 +308,20 @@ namespace dp2SSL
                 // 2020/7/31
                 if (App.Protocol == "sip")
                     SipChannelUtil.StartMonitorTask();
+
+                // 获得 RFID 配置信息和 图书馆名
+                _ = Task.Run(() => {
+                    try
+                    {
+                        var result = LibraryChannelUtil.GetRfidCfg();
+                        LibraryName = result.LibraryName;
+                    }
+                    catch
+                    {
+
+                    }
+                });
+
             }
 
             {
@@ -317,6 +331,8 @@ namespace dp2SSL
                 File.WriteAllText(stateFileName, "dp2ssl started");
             }
         }
+
+        public static string LibraryName { get; set; }
 
         static string _rfidType = "";   // ""/自助借还/智能书柜
 
@@ -2317,7 +2333,7 @@ AllowEdgeSwipe DWORD
 
                 return false;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 WpfClientInfo.WriteErrorLog($"DisableEdgeUI() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 return false;

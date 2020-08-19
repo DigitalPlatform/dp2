@@ -828,7 +828,9 @@ otherInfo {
 
             if (struSearch_request.m_nQuery_type == 101)
             {
-                nRet = make_type_101(struSearch_request.m_strQuery, subroot);
+                nRet = make_type_101(struSearch_request.m_strQuery,
+                    struSearch_request.m_queryTermEncoding,
+                    subroot);
                 if (nRet == -1)
                 {
                     Debug.Assert(false, "");
@@ -973,6 +975,7 @@ otherInfo {
         //		-1	error
         //		0	succeed
         int make_type_101(string strQuery,
+            Encoding queryTermEncoding, // 2020/8/19
             BerNode subroot)
         {
             BerNode param = null;
@@ -984,6 +987,8 @@ otherInfo {
             param.NewChildOIDsNode(6,
                 BerNode.ASN1_UNIVERSAL,
                 "1.2.840.10003.3.1");
+            // 2020/8/19
+            poland.m_queryTermEncoding = queryTermEncoding;
             poland.ChangeOrgToRPN();
             /*
             int i;

@@ -2228,11 +2228,14 @@ out string strError);
                         string caption = "借书";
                         if (action == "renew")
                             caption = "续借";
+
                         text.AppendLine($"*** {caption} ***");
-                        text.AppendLine(entity.Title);
+                        text.AppendLine($"[{entity.PII}] {entity.Title}");
                         text.AppendLine($"{caption}时间: " + DateTime.Now.ToString());
                         text.AppendLine("期    限: " + period);
                         text.AppendLine("应还日期: " + time_string);
+                        if (string.IsNullOrEmpty(App.LibraryName) == false)
+                            text.AppendLine($"=== {App.LibraryName} ===");
                     }
                 }
                 else if (action == "return")
@@ -2241,8 +2244,10 @@ out string strError);
                     {
                         // TODO: 最好增加显示超期信息(是否超期)
                         text.AppendLine("*** 还书 ***");
-                        text.AppendLine(entity.Title);
+                        text.AppendLine($"[{entity.PII}] {entity.Title}");
                         text.AppendLine("还书时间: " + DateTime.Now.ToString());
+                        if (string.IsNullOrEmpty(App.LibraryName) == false)
+                            text.AppendLine($"=== {App.LibraryName} ===");
                     }
                 }
 

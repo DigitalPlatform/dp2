@@ -1079,12 +1079,15 @@ namespace dp2SSL
         public class GetRfidCfgResult : NormalResult
         {
             public string Xml { get; set; }
+            public string LibraryName { get; set; }
         }
 
         // 获得 RFID 配置信息
         public static GetRfidCfgResult GetRfidCfg()
         {
             string strOutputInfo = "";
+            string libraryName = "";
+
             LibraryChannel channel = App.CurrentApp.GetChannel();
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = TimeSpan.FromSeconds(10);
@@ -1104,6 +1107,13 @@ namespace dp2SSL
                         ErrorInfo = strError,
                         ErrorCode = channel.ErrorCode.ToString()
                     };
+
+                lRet = channel.GetSystemParameter(
+                    null,
+                    "library",
+                    "name",
+                    out libraryName,
+                    out strError);
             }
             finally
             {
@@ -1138,10 +1148,15 @@ namespace dp2SSL
                 "rfidCfg",
                 strOutputInfo);
 
+            WpfClientInfo.Config.Set("cache",
+    "libraryName",
+    libraryName);
+
             return new GetRfidCfgResult
             {
                 Value = 1,
-                Xml = strOutputInfo
+                Xml = strOutputInfo,
+                LibraryName = libraryName,
             };
         }
 
@@ -1157,7 +1172,10 @@ namespace dp2SSL
             return new GetRfidCfgResult
             {
                 Value = 1,
-                Xml = value
+                Xml = value,
+                LibraryName = WpfClientInfo.Config.Get("cache",
+    "libraryName",
+    null)
             };
         }
 
