@@ -436,7 +436,13 @@ namespace DigitalPlatform.RFID
         static string UrnCode40_DecodeOneWord(byte[] data,
             int start)
         {
+            if (start >= data.Length - 1)
+                return "";
+
             uint v = ((((uint)data[start]) << 8) & 0xff00) + ((uint)data[start + 1] & 0x00ff);
+            // 2020/8/17
+            if (v == 0)
+                return "";
             /*
             byte[] word = new byte[2];
             word[0] = data[start + 0];

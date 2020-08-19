@@ -670,6 +670,7 @@ namespace DigitalPlatform.RFID
 
             if (oid == 3)
             {
+                // 所属馆标识 Owner Library
                 /*
 取值方式：2 字节整型数。参照中华人民共和国教育部行业标准 JY/T1001-2012，《教育管理信
 息-教育管理基础代码》中的《中国高等院校代码表》取值，以 5 位数字所代表的高等院校代
@@ -690,6 +691,7 @@ namespace DigitalPlatform.RFID
 
             if (oid == 4)
             {
+                // 卷册信息 Set Information
                 /*
 取值方式：总 4 字节定长字段，其中：高 2 字节存放卷册总数（最多 65536 卷册），低 2 字节
 存放卷册序号（1 - 65536）。
@@ -700,44 +702,25 @@ namespace DigitalPlatform.RFID
                 byte[] first = new byte[2];
                 Array.Copy(data, first, 2);
                 first = Compact.ReverseBytes(first);
+
                 byte[] second = new byte[2];
                 Array.Copy(data, 2, second,0, 2);
                 second = Compact.ReverseBytes(second);
 
-                var count = BitConverter.ToUInt16(first, 0).ToString();
-                var no = BitConverter.ToUInt16(second, 0).ToString();
+                var no = BitConverter.ToUInt16(first, 0).ToString();
+                var count = BitConverter.ToUInt16(second, 0).ToString();
                 return no + "/" + count;
-            }
-
-            if (oid == 11)
-            {
-                /*
-取值方式：2 字节整型数。参照中华人民共和国教育部行业标准 JY/T1001-2012，《教育管理信
-息-教育管理基础代码》中的《中国高等院校代码表》取值，以 5 位数字所代表的高等院校代
-码来标识所属馆。其中，针对首位数字为 9（军事院校，例如：90001 代表国防大学）的情况，
-在存放时，需要将 9 变成为 6，然后以 2 字节整型数存储，在读取后，需要将 6 变成为 9，恢
-复成原始代码。
-                * */
-                if (data.Length != 2)
-                    throw new Exception($"OID 为 11 时，data 应为 2 字节(但现在为 {data.Length} 字节)");
-
-                data = Compact.ReverseBytes(data);
-
-                var result = BitConverter.ToUInt16(data, 0).ToString().PadLeft(5, '0');
-                if (result[0] == '6')
-                    return "9" + result.Substring(1);
-                return result;
             }
 
             if (oid == 5)
             {
-                // type of usage
+                // 馆藏类别与状态 type of usage
                 // 总 2 字节定长字段，其中：高字节存放馆藏类别(主限定标识)，低字节存放馆藏状态(次限定标识)
                 if (data.Length != 2)
                     throw new Exception($"OID 为 5 时，data 应为 2 字节(但现在为 {data.Length} 字节)");
 
-                byte pimary = data[0];
-                byte secondary = data[1];
+                byte secondary = data[0];
+                byte pimary = data[1];
                 return pimary + "." + secondary;
                 /*
 主限定标识(应用类别) 取值(数字) 次限定标识(馆藏状态) 取值(数字)
@@ -762,14 +745,35 @@ namespace DigitalPlatform.RFID
 
             if (oid == 6 || oid == 12 || oid == 14 || oid == 15 || oid == 16 || oid == 24 || oid == 26)
             {
-                // 6: item location
-                // 12: ILL Borrowing Transaction Number 馆际互借事务号
-                // 14: Alternative Item Identifier
-                // 15: Temporary Item Locatio
-                // 16: Subject
-                // 24: Subsidiary of an Owner Library
+                // 6: 馆藏位置 Item Location
+                // 12: 馆际互借事务号 ILL Borrowing Transaction Number
+                // 14: 备选的馆藏标识符 Alternative Item Identifier
+                // 15: 临时馆藏位置 Temporary Item Location
+                // 16: 主题 Subject
+                // 24: 分馆标识 Subsidiary of an Owner Library
                 // 26: ISBN/ISSN
                 return Encoding.UTF8.GetString(data);
+            }
+
+            if (oid == 11)
+            {
+                // 馆际互借借入馆标识 ILL Borrowing Library
+                /*
+取值方式：2 字节整型数。参照中华人民共和国教育部行业标准 JY/T1001-2012，《教育管理信
+息-教育管理基础代码》中的《中国高等院校代码表》取值，以 5 位数字所代表的高等院校代
+码来标识所属馆。其中，针对首位数字为 9（军事院校，例如：90001 代表国防大学）的情况，
+在存放时，需要将 9 变成为 6，然后以 2 字节整型数存储，在读取后，需要将 6 变成为 9，恢
+复成原始代码。
+                * */
+                if (data.Length != 2)
+                    throw new Exception($"OID 为 11 时，data 应为 2 字节(但现在为 {data.Length} 字节)");
+
+                data = Compact.ReverseBytes(data);
+
+                var result = BitConverter.ToUInt16(data, 0).ToString().PadLeft(5, '0');
+                if (result[0] == '6')
+                    return "9" + result.Substring(1);
+                return result;
             }
 
             if (oid >= 27 && oid <= 31)

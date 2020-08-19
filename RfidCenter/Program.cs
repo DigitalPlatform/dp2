@@ -24,6 +24,7 @@ namespace RfidCenter
     {
         public static RfidDriver1 Rfid = null;
         public static ILedDriver Led = null;
+        public static IPosPrinterDriver Printer = null;
 
         static ExecutionContext context = null;
         static Mutex mutex = null;

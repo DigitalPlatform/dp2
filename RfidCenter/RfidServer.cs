@@ -1023,6 +1023,18 @@ new_password);
             return Program.Led.Display(ledName, text, x, y, property, style);
         }
 
+        // 2020/8/19
+        // 小票打印
+        // parameters:
+        //      style   附加的子参数 
+        public NormalResult PosPrint(
+            string action,
+            string text,
+            string style)
+        {
+            return Program.Printer.Print(action, text, style);
+        }
+
 #if SENDKEY
         // 启动或者停止自动盘点
         void StartInventory(bool start)

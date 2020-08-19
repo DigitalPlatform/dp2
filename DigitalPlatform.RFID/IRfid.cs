@@ -86,6 +86,15 @@ uint new_password);
             int y,
             DisplayStyle property,
             string style);
+
+        // 2020/8/19
+        // 小票打印
+        // parameters:
+        //      style   附加的子参数 
+        NormalResult PosPrint(
+            string action,
+            string text,
+            string style);
     }
 
     [Serializable()]

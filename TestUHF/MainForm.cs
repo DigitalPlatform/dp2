@@ -429,6 +429,10 @@ namespace TestUHF
                         });
                     }
 
+                    // TODO: 观察读到的 bank 数据
+                    // invenParams.m_read.m_wordPtr, (Byte)invenParams.m_read.m_wordCnt);
+
+
                     TagDataReport = RFIDLIB.rfidlib_reader.RDR_GetTagDataReport(hreader, RFIDLIB.rfidlib_def.RFID_SEEK_NEXT); //next
                 }
                 if (iret == -21) // stop trigger occur,need to inventory left tags
@@ -477,6 +481,7 @@ namespace TestUHF
                 parameters.m_metaFlags.m_antennaID = false; // ckbMetaAntennaID.Checked;
             }
 
+            /*
             {
                 parameters.m_metaFlags.m_enable = false; // ckbMetaEnable.Checked;
 
@@ -485,7 +490,7 @@ namespace TestUHF
                 parameters.m_read.m_wordPtr = 0;
                 parameters.m_read.m_wordCnt = 10;
             }
-
+            */
 
             byte[] AntennaSel = new byte[] { 1 };
 

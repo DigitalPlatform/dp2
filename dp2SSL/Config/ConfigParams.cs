@@ -383,6 +383,26 @@ Description = "读者证条码的输入方式"
             }
         }
 
+        // 默认值 空
+        [Display(
+Order = 11,
+Name = "凭条打印方式",
+Description = "凭条(小票)打印方式"
+)]
+        [ItemsSource(typeof(PosPrintStyleSource))]
+        [Category("全局")]
+        public string PosPrintStyle
+        {
+            get
+            {
+                return _config.Get("global", "pos_print_style", "不打印");
+            }
+            set
+            {
+                _config.Set("global", "pos_print_style", value);
+            }
+        }
+
         /*
         // 默认值 空
         [Display(

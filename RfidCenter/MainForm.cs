@@ -25,6 +25,7 @@ using DigitalPlatform.Text;
 using LedDriver.First;
 using Microsoft.Win32;
 using Newtonsoft.Json;
+using PrinterDriver.Yanke;
 using RfidDrivers.First;
 using Serilog;
 
@@ -34,6 +35,7 @@ namespace RfidCenter
     {
         RfidDriver1 _rfidDriver = new RfidDriver1();
         ILedDriver _ledDriver = new LedDriver1();
+        IPosPrinterDriver _printerDriver = new YankePrinterDriver();
 
         FloatingMessageForm _floatingMessage = null;
 
@@ -43,6 +45,7 @@ namespace RfidCenter
             ClientInfo.MainForm = this;
             Program.Rfid = _rfidDriver;
             Program.Led = _ledDriver;
+            Program.Printer = _printerDriver;
 
             InitializeComponent();
 
@@ -166,6 +169,8 @@ namespace RfidCenter
                 {
                     InitializeRfidDriver();
                     InitializeLedDriver();
+                    // 2020/8/19
+                    InitializePrinterDriver();
                 }
                 catch (Exception ex)
                 {
@@ -273,6 +278,7 @@ namespace RfidCenter
 
             _rfidDriver.ReleaseDriver();
             _ledDriver.ReleaseDriver();
+            _printerDriver.ReleaseDriver();
         }
 
         #region 错误状态
@@ -1164,6 +1170,7 @@ bool bClickClose = false)
                     this.textBox_led_xCount,
                     this.textBox_led_cellWidth,
                     this.textBox_led_cellHeight,
+                    new ComboBoxText(this.comboBox_printer_serialPort),
                 };
                 return GuiState.GetUiState(controls);
             }
@@ -1181,6 +1188,7 @@ bool bClickClose = false)
                     this.textBox_led_xCount,
                     this.textBox_led_cellWidth,
                     this.textBox_led_cellHeight,
+                    new ComboBoxText(this.comboBox_printer_serialPort),
                 };
                 GuiState.SetUiState(controls, value);
             }
@@ -1922,6 +1930,8 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
                 {
                     InitializeRfidDriver();
                     InitializeLedDriver();
+                    // 2020/8/19
+                    InitializePrinterDriver();
                 }
                 catch (Exception ex)
                 {
@@ -2085,6 +2095,44 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
             MessageDlg.Show(this, result.ToString(), "关灯");
         }
 
+        void InitializePrinterDriver()
+        {
+            string strError = "";
+
+            string port = (string)this.Invoke((Func<string>)(() =>
+            {
+                return this.comboBox_printer_serialPort.Text;
+            }));
+
+            if (string.IsNullOrEmpty(port) == true
+                || port == "不使用")
+            {
+                _printerDriver.ReleaseDriver();
+                return;
+            }
+
+            var result = _printerDriver.InitializeDriver(port, "");
+            if (result.Value == -1)
+            {
+                OutputHistory(result.ErrorInfo, 2);
+                SetErrorState("error", result.ErrorInfo);
+                this.ShowMessage(result.ErrorInfo, "red", true);
+            }
+            else
+            {
+                OutputHistory($"POS 打印机初始化成功", 0);
+            }
+
+            return;
+            /*
+        ERROR1:
+            OutputHistory(strError, 2);
+            SetErrorState("error", strError);
+            this.ShowMessage(strError, "red", true);
+            */
+        }
+
+
         void InitializeLedDriver()
         {
             string strError = "";
@@ -2233,6 +2281,41 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
                     x,
                     y,
                     property,
+                    dlg.ExtendStyle);
+            }
+        }
+
+        // 测试小票打印
+        private void MenuItem_print_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            PosPrintDialog dlg = new PosPrintDialog();
+            dlg.button_print.Click += (s1, e1) =>
+            {
+                var display_result = Print();
+                if (display_result.Value == -1)
+                    MessageBox.Show(this, display_result.ErrorInfo);
+            };
+            dlg.ShowDialog(this);
+
+            if (dlg.DialogResult == DialogResult.Cancel)
+                return;
+            var result = Print();
+            if (result.Value == -1)
+            {
+                strError = result.ErrorInfo;
+                goto ERROR1;
+            }
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+            return;
+
+            NormalResult Print()
+            {
+                return _printerDriver.Print(dlg.ActionString,
+                    dlg.PrintText,
                     dlg.ExtendStyle);
             }
         }

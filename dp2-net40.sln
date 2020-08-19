@@ -263,6 +263,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.ServiceProc
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DigitalPlatform.SIP", "dp-library\DigitalPlatform.SIP\DigitalPlatform.SIP.csproj", "{F1DB315D-FC4E-4441-B438-ADB591BFF431}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrinterDriver.Yanke", "PrinterDriver.Yanke\PrinterDriver.Yanke.csproj", "{10ED8302-0E72-4D0C-BECE-9388E9550D54}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -2194,6 +2196,24 @@ Global
 		{F1DB315D-FC4E-4441-B438-ADB591BFF431}.Test|Mixed Platforms.Build.0 = Debug|Any CPU
 		{F1DB315D-FC4E-4441-B438-ADB591BFF431}.Test|x86.ActiveCfg = Debug|Any CPU
 		{F1DB315D-FC4E-4441-B438-ADB591BFF431}.Test|x86.Build.0 = Debug|Any CPU
+		{10ED8302-0E72-4D0C-BECE-9388E9550D54}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{10ED8302-0E72-4D0C-BECE-9388E9550D54}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{10ED8302-0E72-4D0C-BECE-9388E9550D54}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{10ED8302-0E72-4D0C-BECE-9388E9550D54}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{10ED8302-0E72-4D0C-BECE-9388E9550D54}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{10ED8302-0E72-4D0C-BECE-9388E9550D54}.Debug|x86.Build.0 = Debug|Any CPU
+		{10ED8302-0E72-4D0C-BECE-9388E9550D54}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{10ED8302-0E72-4D0C-BECE-9388E9550D54}.Release|Any CPU.Build.0 = Release|Any CPU
+		{10ED8302-0E72-4D0C-BECE-9388E9550D54}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{10ED8302-0E72-4D0C-BECE-9388E9550D54}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{10ED8302-0E72-4D0C-BECE-9388E9550D54}.Release|x86.ActiveCfg = Release|Any CPU
+		{10ED8302-0E72-4D0C-BECE-9388E9550D54}.Release|x86.Build.0 = Release|Any CPU
+		{10ED8302-0E72-4D0C-BECE-9388E9550D54}.Test|Any CPU.ActiveCfg = Release|Any CPU
+		{10ED8302-0E72-4D0C-BECE-9388E9550D54}.Test|Any CPU.Build.0 = Release|Any CPU
+		{10ED8302-0E72-4D0C-BECE-9388E9550D54}.Test|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{10ED8302-0E72-4D0C-BECE-9388E9550D54}.Test|Mixed Platforms.Build.0 = Release|Any CPU
+		{10ED8302-0E72-4D0C-BECE-9388E9550D54}.Test|x86.ActiveCfg = Release|Any CPU
+		{10ED8302-0E72-4D0C-BECE-9388E9550D54}.Test|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
