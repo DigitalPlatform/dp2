@@ -27,6 +27,8 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Core;
 using DigitalPlatform.Face;
 using DigitalPlatform.WPF;
+using System.Text;
+using System.Data.SqlClient;
 
 namespace dp2SSL
 {
@@ -1865,6 +1867,8 @@ out string strError);
                     long lRet = 0;
                     string[] item_records = null;
                     string strError = "";
+                    string returning_date = null;
+                    string period = null;
 
                     if (action == "borrow" || action == "renew")
                     {
@@ -1979,6 +1983,12 @@ out string strError);
                                 out string output_reader_barcode,
                                 out BorrowInfo borrow_info,
                                 out strError);
+
+                            if (borrow_info != null)
+                            {
+                                returning_date = borrow_info.LatestReturnTime;
+                                period = borrow_info.Period;
+                            }
                         }
                         else if (action == "return")
                         {
@@ -2062,6 +2072,10 @@ out string strError);
                             errors.Add($"册 '{entity.PII}' {action_name}操作成功，但修改 EAS 动作失败: {result.ErrorInfo}");
                         }
                     }
+
+                    // 2020/8/19
+                    // 打印凭条
+                    PosPrint(action, period, returning_date, entity);
 
                     // 刷新显示
                     {
@@ -2176,6 +2190,77 @@ out string strError);
                     if (progress != null)
                         progress.Close();
                 }));
+            }
+        }
+
+        // 凭条打印
+        // TODO: 加上图书馆名字
+        void PosPrint(string action, string period, string returning_date, Entity entity)
+        {
+            try
+            {
+                var style = App.PosPrintStyle.Replace("+", ",");
+                if (style == "不打印")
+                    return;
+
+                StringBuilder text = new StringBuilder();
+
+                if (action == "borrow" || action == "renew")
+                {
+                    if (StringUtil.IsInList("借书", style))
+                    {
+                        // 注意：可能会抛出异常
+                        string time_string = "";
+
+                        try
+                        {
+                            time_string = DateTimeUtil.FromRfc1123DateTimeString(returning_date).ToLocalTime().ToLongDateString();
+                        }
+                        catch
+                        {
+                            time_string = returning_date;
+                        }
+
+                        if (period == null)
+                            period = "";
+                        period = period.Replace("day", "天").Replace("hour", "小时");
+
+                        string caption = "借书";
+                        if (action == "renew")
+                            caption = "续借";
+                        text.AppendLine($"*** {caption} ***");
+                        text.AppendLine(entity.Title);
+                        text.AppendLine($"{caption}时间: " + DateTime.Now.ToString());
+                        text.AppendLine("期    限: " + period);
+                        text.AppendLine("应还日期: " + time_string);
+                    }
+                }
+                else if (action == "return")
+                {
+                    if (StringUtil.IsInList("还书", style))
+                    {
+                        // TODO: 最好增加显示超期信息(是否超期)
+                        text.AppendLine("*** 还书 ***");
+                        text.AppendLine(entity.Title);
+                        text.AppendLine("还书时间: " + DateTime.Now.ToString());
+                    }
+                }
+
+                if (text.Length > 0)
+                {
+                    var result = RfidManager.PosPrint("printline", text.ToString(), "");
+                    if (result.Value == -1)
+                        SetGlobalError("posprint", $"打印凭条时出错: {result.ErrorInfo}");
+                    else
+                        SetGlobalError("posprint", null);
+
+                    RfidManager.PosPrint("cut", "", "");
+                }
+            }
+            catch(Exception ex)
+            {
+                WpfClientInfo.WriteErrorLog($"PosPrint() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                SetGlobalError("posprint", $"PosPrint() 出现异常: {ex.Message}");
             }
         }
 

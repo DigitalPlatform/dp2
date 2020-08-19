@@ -32,8 +32,8 @@ using System.Runtime.InteropServices;
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 // 方法是按如下所示使用“*”: :
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.7.*")]
-[assembly: AssemblyFileVersion("1.7.0.0")]
+[assembly: AssemblyVersion("1.8.*")]
+[assembly: AssemblyFileVersion("1.8.0.0")]
 
 // V1.1 2019/2/21 支持 32-bit Windows 环境
 // V1.2 2019/4/12 采用了最新 dp-library submodule 的版本
@@ -42,3 +42,4 @@ using System.Runtime.InteropServices;
 // V1.5 2019/12/5 对 ListTags() API 做了增强，允许它同时执行 getLockState 动作
 // V1.6 2020/4/13 修正了 reader_locks.LockForWrite() 异常未处理的 bug
 // V1.7 2020/7/20 增加 LED 显示屏 API
+// V1.8 2020/8/19 增加 小票打印 API

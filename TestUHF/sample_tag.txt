@@ -61,3 +61,27 @@ Reserve=0,
 Picking=1}
 
 OID 3 是所属馆标识，4 是卷册信息，11 是馆际互借借入馆标识, 14 是备选的馆藏标识符
+
+***
+2020/8/17
+BWZ 提供的 UHF 标签
+
+RFU 000000000000000000002CDD157A
+EPC AB3E3400C225080020003C3B64F4000500000000
+TID E280110520007912136C0A12000000000000000000000000
+USR 000000000000000000000000000000000000000000000000000000000000
+
+EPC bank 分析：
+AB3E 3400 C225 0800 2000 3C3B 64F4 0005 0000 0000
+1) CRC
+AB3E 应该是 CRC word
+2) PC
+3400 应该是 PC word。
+变换为二进制形态 (pc)00110100 (attr/AFI)00000000,
+其中 前 5 bit 为 00110，等于 0x6(word 数)，是 Length 值(除了 PC 和 ATTR/AFI word，后面有 6 个 word)
+后继 3 bit 为 100，表示 USR 区有信息、XPC 没有信息、toggle 为 0 表示后继内容采用 EPC 格式(而不是 AFI)
+后继 8 bit 为 00000000，这是 ATTR bits
+3) EPC Binary Encoding
+内容为 C225 0800 2000 3C3B 64F4 0005 0000 0000
+
+C2 在 EPC Binary Header Values Table 中表示“Reserved until 64 bit Sunset”。所以显然不能当作普通 EPC 标签来解析

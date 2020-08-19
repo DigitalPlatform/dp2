@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.29.*")]
-[assembly: AssemblyFileVersion("3.29.0.0")]
+[assembly: AssemblyVersion("3.30.*")]
+[assembly: AssemblyFileVersion("3.30.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -211,3 +211,4 @@ ItemCanReturn()
 //		3.28 (2020/6/21) Borrow() API 的 strStyle 参数可以包含 requestPeriod:xxx 子参数，表示本次借书操作强制使用此借阅期限(不再使用 library.xml 中借阅权限表的相关值)
 //		3.29 (2020/7/16) Borrow() Return() GetBiblioSummary() API 针对 strItemBarcode 参数做了增加，允许使用 xxxx.xxxx 的形态，即点的左边是 RFID 标签的 OI 或者 AOI。相关 API 会自动检查册记录的馆藏地关联的 OI 是否和 strItemBarcode 中的一致。以前没有 . 的形态依然兼容，这种情况下不进行 OI 检查
 //						GetSystemParameter() API 中增加了 "rfid/getOwnerInstitution" 这一种 catagory，用于获得图书或者读者的 OI。返回的字符串为 "xxx|xxx" 格式，左边是 OI，右边是 AOI
+//		3.30 (2020/7/16) 997 字段查重键的构成算法，增加了一个版本项(UNIMARC 205$a/MARC21 150$a)和一个 998$k 子字段。key 算法的版本号(997$v)从 0.03 变为 0.04，以前版本的 997 key 需要重建

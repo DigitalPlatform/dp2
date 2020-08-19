@@ -1,6 +1,4 @@
-﻿using DigitalPlatform;
-using DigitalPlatform.Text;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -9,6 +7,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+
+using DigitalPlatform;
+using DigitalPlatform.Text;
 
 namespace TestUHF
 {
@@ -228,6 +229,7 @@ namespace TestUHF
                 WordCnt = Convert.ToInt32(this.combobox_wordCount.Text);
                 WordPointer = Convert.ToInt32(this.combobox_startWord.Text);
 
+                /*
                 switch (this.combobox_memoryBank.SelectedIndex)
                 {
                     case 0:
@@ -246,6 +248,7 @@ namespace TestUHF
                         memBank = (Byte)RFIDLIB.rfidlib_def.ISO18000p6C_MEM_BANK_EPC;
                         break;
                 }
+                */
 
                 /*
                 AntennaSel = GetSelectAntennas();
@@ -300,8 +303,12 @@ namespace TestUHF
                         ref nSize);
                     if (iret != 0)
                     {
+                        /*
                         strError = $"ISO18000p6C_Read() (bank {i}) error";
                         goto ERROR1;
+                        */
+                        lines.Add($"read bank {i} error");
+                        continue;
                     }
 
                     lines.Add(bank_names[i] + " " + BitConverter.ToString(readData, 0, (int)nSize).Replace("-", string.Empty));

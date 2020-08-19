@@ -87,6 +87,8 @@
             this.ToolStripMenuItem_sterilamp_turnOn = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_sterilamp_turnOff = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.MenuItem_ledDisplay = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator8 = new System.Windows.Forms.ToolStripSeparator();
             this.ToolStripMenuItem_exit = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_testing = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_openReader = new System.Windows.Forms.ToolStripMenuItem();
@@ -115,8 +117,11 @@
             this.MenuItem_manual = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_about = new System.Windows.Forms.ToolStripMenuItem();
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
-            this.MenuItem_ledDisplay = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator8 = new System.Windows.Forms.ToolStripSeparator();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.comboBox_printer_serialPort = new System.Windows.Forms.ComboBox();
+            this.label15 = new System.Windows.Forms.Label();
+            this.MenuItem_print = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator9 = new System.Windows.Forms.ToolStripSeparator();
             this.tabControl_main.SuspendLayout();
             this.tabPage_start.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_start)).BeginInit();
@@ -129,6 +134,7 @@
             this.statusStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
+            this.groupBox2.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl_main
@@ -152,7 +158,7 @@
             this.tabPage_start.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_start.Name = "tabPage_start";
             this.tabPage_start.Padding = new System.Windows.Forms.Padding(4);
-            this.tabPage_start.Size = new System.Drawing.Size(952, 386);
+            this.tabPage_start.Size = new System.Drawing.Size(952, 387);
             this.tabPage_start.TabIndex = 0;
             this.tabPage_start.Text = "开始";
             this.tabPage_start.UseVisualStyleBackColor = true;
@@ -174,7 +180,7 @@
             // splitContainer_start.Panel2
             // 
             this.splitContainer_start.Panel2.Controls.Add(this.label_message);
-            this.splitContainer_start.Size = new System.Drawing.Size(939, 290);
+            this.splitContainer_start.Size = new System.Drawing.Size(939, 291);
             this.splitContainer_start.SplitterDistance = 252;
             this.splitContainer_start.SplitterWidth = 15;
             this.splitContainer_start.TabIndex = 5;
@@ -189,7 +195,7 @@
             this.listView_chips.HideSelection = false;
             this.listView_chips.Location = new System.Drawing.Point(0, 0);
             this.listView_chips.Name = "listView_chips";
-            this.listView_chips.Size = new System.Drawing.Size(252, 290);
+            this.listView_chips.Size = new System.Drawing.Size(252, 291);
             this.listView_chips.TabIndex = 0;
             this.listView_chips.UseCompatibleStateImageBehavior = false;
             this.listView_chips.View = System.Windows.Forms.View.Details;
@@ -213,14 +219,14 @@
             this.label_message.Location = new System.Drawing.Point(0, 0);
             this.label_message.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label_message.Name = "label_message";
-            this.label_message.Size = new System.Drawing.Size(672, 290);
+            this.label_message.Size = new System.Drawing.Size(672, 291);
             this.label_message.TabIndex = 0;
             this.label_message.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // button_cancel
             // 
             this.button_cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_cancel.Location = new System.Drawing.Point(783, 307);
+            this.button_cancel.Location = new System.Drawing.Point(783, 308);
             this.button_cancel.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.button_cancel.Name = "button_cancel";
             this.button_cancel.Size = new System.Drawing.Size(160, 63);
@@ -235,7 +241,7 @@
             this.tabPage_operHistory.Location = new System.Drawing.Point(4, 37);
             this.tabPage_operHistory.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_operHistory.Name = "tabPage_operHistory";
-            this.tabPage_operHistory.Size = new System.Drawing.Size(952, 387);
+            this.tabPage_operHistory.Size = new System.Drawing.Size(952, 386);
             this.tabPage_operHistory.TabIndex = 2;
             this.tabPage_operHistory.Text = "操作历史";
             this.tabPage_operHistory.UseVisualStyleBackColor = true;
@@ -247,12 +253,13 @@
             this.webBrowser1.Margin = new System.Windows.Forms.Padding(4);
             this.webBrowser1.MinimumSize = new System.Drawing.Size(24, 27);
             this.webBrowser1.Name = "webBrowser1";
-            this.webBrowser1.Size = new System.Drawing.Size(952, 387);
+            this.webBrowser1.Size = new System.Drawing.Size(952, 386);
             this.webBrowser1.TabIndex = 1;
             // 
             // tabPage_cfg
             // 
             this.tabPage_cfg.AutoScroll = true;
+            this.tabPage_cfg.Controls.Add(this.groupBox2);
             this.tabPage_cfg.Controls.Add(this.groupBox1);
             this.tabPage_cfg.Controls.Add(this.comboBox_lamp);
             this.tabPage_cfg.Controls.Add(this.label1);
@@ -266,7 +273,7 @@
             this.tabPage_cfg.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_cfg.Name = "tabPage_cfg";
             this.tabPage_cfg.Padding = new System.Windows.Forms.Padding(4);
-            this.tabPage_cfg.Size = new System.Drawing.Size(952, 387);
+            this.tabPage_cfg.Size = new System.Drawing.Size(952, 386);
             this.tabPage_cfg.TabIndex = 1;
             this.tabPage_cfg.Text = "配置参数";
             this.tabPage_cfg.UseVisualStyleBackColor = true;
@@ -587,6 +594,8 @@
             this.toolStripSeparator3,
             this.MenuItem_ledDisplay,
             this.toolStripSeparator8,
+            this.MenuItem_print,
+            this.toolStripSeparator9,
             this.ToolStripMenuItem_exit});
             this.MenuItem_file.Name = "MenuItem_file";
             this.MenuItem_file.Size = new System.Drawing.Size(72, 33);
@@ -684,14 +693,14 @@
             // ToolStripMenuItem_sterilamp_turnOn
             // 
             this.ToolStripMenuItem_sterilamp_turnOn.Name = "ToolStripMenuItem_sterilamp_turnOn";
-            this.ToolStripMenuItem_sterilamp_turnOn.Size = new System.Drawing.Size(315, 40);
+            this.ToolStripMenuItem_sterilamp_turnOn.Size = new System.Drawing.Size(150, 40);
             this.ToolStripMenuItem_sterilamp_turnOn.Text = "开";
             this.ToolStripMenuItem_sterilamp_turnOn.Click += new System.EventHandler(this.ToolStripMenuItem_sterilamp_turnOn_Click);
             // 
             // ToolStripMenuItem_sterilamp_turnOff
             // 
             this.ToolStripMenuItem_sterilamp_turnOff.Name = "ToolStripMenuItem_sterilamp_turnOff";
-            this.ToolStripMenuItem_sterilamp_turnOff.Size = new System.Drawing.Size(315, 40);
+            this.ToolStripMenuItem_sterilamp_turnOff.Size = new System.Drawing.Size(150, 40);
             this.ToolStripMenuItem_sterilamp_turnOff.Text = "关";
             this.ToolStripMenuItem_sterilamp_turnOff.Click += new System.EventHandler(this.ToolStripMenuItem_sterilamp_turnOff_Click);
             // 
@@ -699,6 +708,18 @@
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
             this.toolStripSeparator3.Size = new System.Drawing.Size(312, 6);
+            // 
+            // MenuItem_ledDisplay
+            // 
+            this.MenuItem_ledDisplay.Name = "MenuItem_ledDisplay";
+            this.MenuItem_ledDisplay.Size = new System.Drawing.Size(315, 40);
+            this.MenuItem_ledDisplay.Text = "LED 显示文字";
+            this.MenuItem_ledDisplay.Click += new System.EventHandler(this.MenuItem_ledDisplay_Click);
+            // 
+            // toolStripSeparator8
+            // 
+            this.toolStripSeparator8.Name = "toolStripSeparator8";
+            this.toolStripSeparator8.Size = new System.Drawing.Size(312, 6);
             // 
             // ToolStripMenuItem_exit
             // 
@@ -914,17 +935,58 @@
             this.notifyIcon1.Visible = true;
             this.notifyIcon1.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon1_MouseDoubleClick);
             // 
-            // MenuItem_ledDisplay
+            // groupBox2
             // 
-            this.MenuItem_ledDisplay.Name = "MenuItem_ledDisplay";
-            this.MenuItem_ledDisplay.Size = new System.Drawing.Size(315, 40);
-            this.MenuItem_ledDisplay.Text = "LED 显示文字";
-            this.MenuItem_ledDisplay.Click += new System.EventHandler(this.MenuItem_ledDisplay_Click);
+            this.groupBox2.Controls.Add(this.comboBox_printer_serialPort);
+            this.groupBox2.Controls.Add(this.label15);
+            this.groupBox2.Location = new System.Drawing.Point(15, 577);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(669, 330);
+            this.groupBox2.TabIndex = 13;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "小票打印机";
             // 
-            // toolStripSeparator8
+            // comboBox_printer_serialPort
             // 
-            this.toolStripSeparator8.Name = "toolStripSeparator8";
-            this.toolStripSeparator8.Size = new System.Drawing.Size(312, 6);
+            this.comboBox_printer_serialPort.FormattingEnabled = true;
+            this.comboBox_printer_serialPort.Items.AddRange(new object[] {
+            "COM1",
+            "COM2",
+            "COM3",
+            "COM4",
+            "COM5",
+            "COM6",
+            "COM7",
+            "COM8",
+            "COM9",
+            "COM10",
+            "USB",
+            "<不使用>"});
+            this.comboBox_printer_serialPort.Location = new System.Drawing.Point(176, 52);
+            this.comboBox_printer_serialPort.Name = "comboBox_printer_serialPort";
+            this.comboBox_printer_serialPort.Size = new System.Drawing.Size(283, 36);
+            this.comboBox_printer_serialPort.TabIndex = 3;
+            // 
+            // label15
+            // 
+            this.label15.AutoSize = true;
+            this.label15.Location = new System.Drawing.Point(28, 55);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(86, 28);
+            this.label15.TabIndex = 2;
+            this.label15.Text = "串口(&P):";
+            // 
+            // MenuItem_print
+            // 
+            this.MenuItem_print.Name = "MenuItem_print";
+            this.MenuItem_print.Size = new System.Drawing.Size(315, 40);
+            this.MenuItem_print.Text = "小票打印";
+            this.MenuItem_print.Click += new System.EventHandler(this.MenuItem_print_Click);
+            // 
+            // toolStripSeparator9
+            // 
+            this.toolStripSeparator9.Name = "toolStripSeparator9";
+            this.toolStripSeparator9.Size = new System.Drawing.Size(312, 6);
             // 
             // MainForm
             // 
@@ -961,6 +1023,8 @@
             this.toolStrip1.PerformLayout();
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
+            this.groupBox2.ResumeLayout(false);
+            this.groupBox2.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1055,6 +1119,11 @@
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_ledDisplay;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator8;
+        private System.Windows.Forms.GroupBox groupBox2;
+        private System.Windows.Forms.ComboBox comboBox_printer_serialPort;
+        private System.Windows.Forms.Label label15;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_print;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator9;
     }
 }
 

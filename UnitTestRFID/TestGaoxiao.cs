@@ -20,7 +20,7 @@ namespace UnitTestRFID
         [TestMethod]
         public void Test_decode_contentParameter_1()
         {
-            byte[] bytes = new byte[] { 0x00, 0xa1 };
+            byte[] bytes = new byte[] {  0xa1, 0x00 };
             int[] results = GaoxiaoUtility.DecodeContentParameter(bytes);
 
             Assert.AreEqual(3, results.Length);
@@ -669,5 +669,21 @@ namespace UnitTestRFID
             var elements = GaoxiaoUtility.DecodeUserBank(Element.FromHexString(user_hex));
             Debug.WriteLine(elements);
         }
+
+        /*
+        // bwz 提供的 UHF 标签
+        [TestMethod]
+        public void Test_decode_epc_binary_2()
+        {
+            // string source_hex = "C225080020003C3B64F4000500000000";
+            string source_hex = "C225080020003C3B64F3000500000000";
+            
+            var source = Element.FromHexString(source_hex);
+            var result = GaoxiaoUtility.DecodeGaoxiaoEpc(source);
+            // var result = UhfUtility.DecodeUII(source, 0, source.Length);
+            Debug.WriteLine(result);
+
+        }
+        */
     }
 }

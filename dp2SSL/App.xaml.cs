@@ -1086,6 +1086,19 @@ namespace dp2SSL
             }
         }
 
+        /*
+            sizes.Add("不打印");
+            sizes.Add("借书");
+            sizes.Add("借书+还书");
+         * */
+        public static string PosPrintStyle
+        {
+            get
+            {
+                return WpfClientInfo.Config?.Get("global", "pos_print_style", "不打印");
+            }
+        }
+
         public static bool ProcessMonitor
         {
             get

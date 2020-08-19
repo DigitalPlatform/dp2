@@ -2929,6 +2929,10 @@ out string strError)
             return 1;
         }
 
+        // 997 内查重键的构造算法版本
+        // 0.04 (2020/8/19) 增加了版本项和 998$k 子字段
+        static string key_version = "0.04";
+
         // TODO: 根据多个 ISBN 创建多个 997 字段。查重算法也要改造，变成根据多个 key 分别检索
         // 创建查重键字段
         // 要创建的字段名和 MARC 格式无关，都是 997 字段。但要提取的书名等信息在什么字段，和具体的 MARC 格式有关
@@ -3011,6 +3015,26 @@ out string strError)
 
                 }
 
+                // 2020/8/19
+                // 版本
+                {
+                    List<string> temp_keys = record.select("field[@name='205']/subfield[@name='a']").Contents;
+                    StringUtil.CanonializeWideChars(temp_keys);
+                    // CanonializeVersion(temp_keys);
+                    Sort(temp_keys);
+                    segments.Add(StringUtil.MakePathList(temp_keys));
+                }
+
+                // 2020/8/19
+                // 临时区分
+                {
+                    List<string> temp_keys = record.select("field[@name='998']/subfield[@name='k']").Contents;
+                    if (temp_keys.Count > 0)
+                    {
+                        Sort(temp_keys);
+                        segments.Add(StringUtil.MakePathList(temp_keys));
+                    }
+                }
 #if NO
                 // pages
                 // size
@@ -3034,7 +3058,7 @@ out string strError)
                 strKey = StringUtil.MakePathList(segments, "|");
                 strCode = StringUtil.GetMd5(strKey);
 
-                record.setFirstField("997", "  ", MarcQuery.SUBFLD + "a" + strKey + MarcQuery.SUBFLD + "h" + strCode + MarcQuery.SUBFLD + "v0.03");
+                record.setFirstField("997", "  ", MarcQuery.SUBFLD + "a" + strKey + MarcQuery.SUBFLD + "h" + strCode + MarcQuery.SUBFLD + "v" + key_version);
 
                 strMARC = record.Text;
             }
@@ -3108,6 +3132,26 @@ out string strError)
                     segments.Add(StringUtil.MakePathList(publishers) + "," + StringUtil.MakePathList(dates));
                 }
 
+                // 2020/8/19
+                // 版本
+                {
+                    List<string> temp_keys = record.select("field[@name='250']/subfield[@name='a']").Contents;
+                    TrimEndChar(temp_keys);
+                    // CanonializeVersion(temp_keys);
+                    Sort(temp_keys);
+                    segments.Add(StringUtil.MakePathList(temp_keys));
+                }
+
+                // 2020/8/19
+                // 临时区分
+                {
+                    List<string> temp_keys = record.select("field[@name='998']/subfield[@name='k']").Contents;
+                    if (temp_keys.Count > 0)
+                    {
+                        Sort(temp_keys);
+                        segments.Add(StringUtil.MakePathList(temp_keys));
+                    }
+                }
 #if NO
                 // pages
                 // size
@@ -3131,7 +3175,7 @@ out string strError)
                 strKey = StringUtil.MakePathList(segments, "|");
                 strCode = StringUtil.GetMd5(strKey);
 
-                record.setFirstField("997", "  ", MarcQuery.SUBFLD + "a" + strKey + MarcQuery.SUBFLD + "h" + strCode + MarcQuery.SUBFLD + "v0.03");
+                record.setFirstField("997", "  ", MarcQuery.SUBFLD + "a" + strKey + MarcQuery.SUBFLD + "h" + strCode + MarcQuery.SUBFLD + "v" + key_version);
 
                 strMARC = record.Text;
             }

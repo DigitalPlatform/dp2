@@ -41,4 +41,16 @@ namespace dp2SSL
             return sizes;
         }
     }
+
+    public class PosPrintStyleSource : IItemsSource
+    {
+        public ItemCollection GetValues()
+        {
+            ItemCollection sizes = new ItemCollection();
+            sizes.Add("不打印");
+            sizes.Add("借书");
+            sizes.Add("借书+还书");
+            return sizes;
+        }
+    }
 }
