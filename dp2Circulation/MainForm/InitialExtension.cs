@@ -1523,6 +1523,7 @@ MessageBoxDefaultButton.Button1);
 
             LinkStopToBackgroundForm(true);
 
+            // TODO: 是否每次重新启动 dp2circulation 都自动清除一次缓存？
             // cfgcache
             Debug.Assert(string.IsNullOrEmpty(this.UserDir) == false, "");
             // 2015/10/3 改在 UserDir 下
@@ -3905,6 +3906,8 @@ Culture=neutral, PublicKeyToken=null
                             catch (Exception ex)
                             {
                                 strError = "数据库 " + normal.DbName + " 的 browse 配置文件内容装入XMLDOM时出错: " + ex.Message;
+                                // 2020/8/20
+                                this.cfgCache.ClearCfgCache();
                                 goto ERROR1;
                             }
                         }

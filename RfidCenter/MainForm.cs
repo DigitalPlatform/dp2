@@ -2115,7 +2115,9 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
             if (result.Value == -1)
             {
                 OutputHistory(result.ErrorInfo, 2);
-                SetErrorState("error", result.ErrorInfo);
+                // 注：如果小票打印机初始化出错，暂不把 RfidCenter 整个设为错误状态。这样允许 RFID 基本功能被正常使用
+                // TODO: 可以考虑建立警告字符串集合，让 dp2ssl 可以获得警告信息
+                // SetErrorState("error", result.ErrorInfo);
                 this.ShowMessage(result.ErrorInfo, "red", true);
             }
             else

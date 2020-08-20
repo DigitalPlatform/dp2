@@ -2194,7 +2194,7 @@ out string strError);
         }
 
         // 凭条打印
-        // TODO: 加上图书馆名字
+        // TODO: 加上 location shelfNo
         void PosPrint(string action, string period, string returning_date, Entity entity)
         {
             try
@@ -2231,6 +2231,7 @@ out string strError);
 
                         text.AppendLine($"*** {caption} ***");
                         text.AppendLine($"[{entity.PII}] {entity.Title}");
+                        text.AppendLine($"馆藏地点: {entity.Location} {entity.ShelfNo} {entity.AccessNo}");
                         text.AppendLine($"{caption}时间: " + DateTime.Now.ToString());
                         text.AppendLine("期    限: " + period);
                         text.AppendLine("应还日期: " + time_string);
@@ -2245,6 +2246,7 @@ out string strError);
                         // TODO: 最好增加显示超期信息(是否超期)
                         text.AppendLine("*** 还书 ***");
                         text.AppendLine($"[{entity.PII}] {entity.Title}");
+                        text.AppendLine($"馆藏地点: {entity.Location} {entity.ShelfNo} {entity.AccessNo}");
                         text.AppendLine("还书时间: " + DateTime.Now.ToString());
                         if (string.IsNullOrEmpty(App.LibraryName) == false)
                             text.AppendLine($"=== {App.LibraryName} ===");

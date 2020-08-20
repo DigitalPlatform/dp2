@@ -237,6 +237,16 @@ namespace dp2SSL
             }
         }
 
+        static PageSetting _pageSetting = null;
+
+        void NavigatePageSetting()
+        {
+            if (_pageSetting == null)
+                _pageSetting = new PageSetting();
+
+            this.NavigationService.Navigate(_pageSetting);
+        }
+
         static PageBorrow _pageBorrow = null;
 
         void NavigatePageBorrow(string buttons)
@@ -285,13 +295,17 @@ namespace dp2SSL
             //Window cfg_window = new ConfigWindow();
             //cfg_window.ShowDialog();
 
+            /*
             // 测试用
             if (Keyboard.Modifiers == ModifierKeys.Control)
             {
                 System.Windows.Application.Current.Shutdown();
                 return;
             }
-            this.NavigationService.Navigate(new PageSetting());
+            */
+
+            NavigatePageSetting();
+            //this.NavigationService.Navigate(new PageSetting());
         }
 
         private void ReturnButton_Click(object sender, RoutedEventArgs e)

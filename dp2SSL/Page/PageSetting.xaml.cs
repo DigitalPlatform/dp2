@@ -37,7 +37,7 @@ namespace dp2SSL
             this.Loaded += PageSetting_Loaded;
             this.Unloaded += PageSetting_Unloaded;
 
-            this.keyborad.KeyPressed += Keyborad_KeyPressed;
+            // this.keyborad.KeyPressed += Keyborad_KeyPressed;
         }
 
         private void PageSetting_Unloaded(object sender, RoutedEventArgs e)
@@ -55,12 +55,16 @@ namespace dp2SSL
             }
             finally
             {
-                App.ContinueBarcodeScan();
+                // App.ContinueBarcodeScan();
             }
         }
 
-        private void PageSetting_Loaded(object sender, RoutedEventArgs e)
+        static int passwordErrorCount = 0;
+        static Task delayClear = null;
+
+        private async void PageSetting_Loaded(object sender, RoutedEventArgs e)
         {
+            /*
             try
             {
                 // 首次设置密码，或者登录
@@ -72,8 +76,176 @@ namespace dp2SSL
             {
                 App.PauseBarcodeScan();
             }
+            */
+
+            // 首次设置密码
+            if (App.IsLockingPasswordEmpty())
+            {
+                REDO_SET:
+                var password = GetPassword("首次设置锁屏密码");
+                if (password == null)
+                {
+                    ErrorBox("放弃设置锁屏密码", "yellow", "auto_close");
+                    this.NavigationService.Navigate(PageMenu.MenuPage);
+                    return;
+                }
+                if (string.IsNullOrEmpty(password))
+                {
+                    ErrorBox("锁屏密码不允许设置为空", "red", "auto_close");
+                    await Task.Delay(TimeSpan.FromSeconds(1));
+                    goto REDO_SET;
+                }
+                App.SetLockingPassword(password);
+                return;
+            }
+
+
+            // 验证锁屏密码
+            {
+            REDO:
+                if (passwordErrorCount > 5)
+                {
+                    ErrorBox("密码错误次数太多，功能被禁用", "red", "auto_close");
+                    // 延时 10 分钟清除 passwordErrorCount
+                    if (delayClear == null)
+                    {
+                        delayClear = Task.Run(async () =>
+                        {
+                            await Task.Delay(TimeSpan.FromMinutes(5));
+                            passwordErrorCount = 0;
+                            delayClear = null;
+                        });
+                    }
+
+                    this.NavigationService.Navigate(PageMenu.MenuPage);
+                    return;
+                }
+                var password = GetPassword("验证锁屏密码");
+                if (password == null)
+                {
+                    this.NavigationService.Navigate(PageMenu.MenuPage);
+                    return;
+                }
+                if (App.MatchLockingPassword(password) == false)
+                {
+                    passwordErrorCount++;
+                    ErrorBox("密码不正确", "red", "auto_close");
+                    await Task.Delay(TimeSpan.FromSeconds(1));
+                    goto REDO;
+                }
+            }
         }
 
+        string GetPassword(string title)
+        {
+            string password = null;
+            App.Invoke(new Action(() =>
+            {
+                InputPasswordWindows dialog = null;
+                App.PauseBarcodeScan();
+                try
+                {
+                    dialog = new InputPasswordWindows();
+                    dialog.TitleText = title;   // $"验证锁屏密码";
+                    dialog.Owner = App.CurrentApp.MainWindow;
+                    dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                    dialog.LoginButtonText = "确定";
+                    dialog.ShowDialog();
+                    if (dialog.Result == "OK")
+                        password = dialog.password.Password;
+                }
+                finally
+                {
+                    App.ContinueBarcodeScan();
+                }
+
+                // dialog_result = _passwordDialog.Result;
+            }));
+
+            return password;
+        }
+
+        void ErrorBox(string message,
+    string color = "red",
+    string style = "")
+        {
+            ProgressWindow progress = null;
+
+            App.Invoke(new Action(() =>
+            {
+                progress = new ProgressWindow();
+                progress.MessageText = "正在处理，请稍候 ...";
+                progress.Owner = Application.Current.MainWindow;
+                progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                App.SetSize(progress, "tall");
+                //progress.Width = Math.Min(700, this.ActualWidth);
+                //progress.Height = Math.Min(900, this.ActualHeight);
+                progress.Closed += (o1, e1) => {
+                    //RemoveLayer();
+                };
+                if (StringUtil.IsInList("button_ok", style))
+                    progress.okButton.Content = "确定";
+                progress.Show();
+                //AddLayer();
+            }));
+
+
+            if (StringUtil.IsInList("auto_close", style))
+            {
+                DisplayMessage(progress, message, color);
+
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        // TODO: 显示倒计时计数？
+                        await Task.Delay(TimeSpan.FromSeconds(1));
+                        App.Invoke(new Action(() =>
+                        {
+                            progress.Close();
+                        }));
+                    }
+                    catch
+                    {
+                        // TODO: 写入错误日志
+                    }
+                });
+            }
+            else
+                DisplayError(ref progress, message, color);
+        }
+
+        void DisplayError(ref ProgressWindow progress,
+string message,
+string color = "red")
+        {
+            if (progress == null)
+                return;
+            MemoryDialog(progress);
+            var temp = progress;
+            App.Invoke(new Action(() =>
+            {
+                temp.MessageText = message;
+                temp.BackColor = color;
+                temp = null;
+            }));
+            progress = null;
+        }
+
+        void DisplayMessage(ProgressWindow progress,
+            string message,
+            string color = "")
+        {
+            App.Invoke(new Action(() =>
+            {
+                progress.MessageText = message;
+                if (string.IsNullOrEmpty(color) == false)
+                    progress.BackColor = color;
+            }));
+        }
+
+
+#if REMOVED
         private void Keyborad_KeyPressed(object sender, KeyPressedEventArgs e)
         {
             if (e.Key == '\r')
@@ -84,7 +256,9 @@ namespace dp2SSL
 
             this.password.Password = this.keyborad.Text;
         }
+#endif
 
+#if REMOVED
         void InitialPage()
         {
             if (App.IsLockingPasswordEmpty())
@@ -118,6 +292,7 @@ namespace dp2SSL
                 }
             }
         }
+#endif
 
 #if NO
         static App App
@@ -193,7 +368,7 @@ namespace dp2SSL
             }
         }
 
-        #endregion
+#endregion
 
 
         private void Config_Click(object sender, RoutedEventArgs e)
@@ -486,6 +661,7 @@ namespace dp2SSL
             this.NavigationService.Navigate(PageMenu.MenuPage);
         }
 
+#if REMOVED
         // 首次设置密码
         private void SetPassword_Click(object sender, RoutedEventArgs e)
         {
@@ -514,6 +690,7 @@ namespace dp2SSL
             this.HasLoggedin = true;
             InitialPage();
         }
+#endif
 
         private void OpenProgramFolderButton_Click(object sender, RoutedEventArgs e)
         {
@@ -568,6 +745,23 @@ namespace dp2SSL
         }
 
         List<Window> _dialogs = new List<Window>();
+
+        void CloseDialogs()
+        {
+            // 确保 page 关闭时对话框能自动关闭
+            App.Invoke(new Action(() =>
+            {
+                foreach (var window in _dialogs)
+                {
+                    window.Close();
+                }
+            }));
+        }
+
+        void MemoryDialog(Window dialog)
+        {
+            _dialogs.Add(dialog);
+        }
 
         // https://blog.csdn.net/m0_37682004/article/details/82314055
         Task DownloadBingWallPaperAsync(string filename)
@@ -669,6 +863,7 @@ namespace dp2SSL
             FaceManager.GetState("restart");
         }
 
+#if REMOVED
         private void Password_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
             if (e.Key == System.Windows.Input.Key.Enter)
@@ -689,6 +884,7 @@ namespace dp2SSL
                 Login_Click(this.login, new RoutedEventArgs());
             }
         }
+#endif
 
         // 紫外线杀菌
         private void sterilamp_Click(object sender, RoutedEventArgs e)
