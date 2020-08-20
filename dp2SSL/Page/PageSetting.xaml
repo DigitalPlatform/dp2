@@ -74,6 +74,7 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
             <!-- 密码区域 -->
+            <!--
             <Grid Name="passwordArea" Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="auto"/>
@@ -101,6 +102,8 @@
                         Click="Login_Click"
                         FontSize="14" Width="100" Height="36" Margin="4" Padding="4">登录</Button>
             </Grid>
+            -->
+            
             <!-- 按钮区域 -->
             <WrapPanel Name="buttonArea" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3" 
                         Orientation="Horizontal" HorizontalAlignment="Center"

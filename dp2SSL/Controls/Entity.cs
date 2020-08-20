@@ -395,6 +395,7 @@ Stack:
             dup.State = this.State;
             dup.CurrentLocation = this.CurrentLocation;
             dup.ShelfNo = this.ShelfNo;
+            dup.AccessNo = this.AccessNo;
 
             dup.PII = this.PII;
             dup.OI = this.OI;
@@ -507,6 +508,23 @@ Stack:
                 }
             }
         }
+
+        private string _accessNo;
+
+        // 索取号
+        public string AccessNo
+        {
+            get => _accessNo;
+            set
+            {
+                if (_accessNo != value)
+                {
+                    _accessNo = value;
+                    OnPropertyChanged("AccessNo");
+                }
+            }
+        }
+
         private string _borrowInfo;
 
         public string BorrowInfo
@@ -608,6 +626,9 @@ Stack:
 
             string shelfNo = DomUtil.GetElementText(dom.DocumentElement, "shelfNo");
             this.ShelfNo = shelfNo;
+
+            // 2020/8/20
+            this.AccessNo = DomUtil.GetElementText(dom.DocumentElement, "accessNo");
 
             string borrowDate = DomUtil.GetElementText(dom.DocumentElement, "borrowDate");
             string returningDate = DomUtil.GetElementText(dom.DocumentElement, "returningDate");
