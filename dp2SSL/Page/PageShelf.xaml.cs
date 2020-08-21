@@ -47,10 +47,12 @@ namespace dp2SSL
     /// <summary>
     /// PageShelf.xaml 的交互逻辑
     /// </summary>
-    public partial class PageShelf : Page, INotifyPropertyChanged
+    public partial class PageShelf : MyPage, INotifyPropertyChanged
     {
+        /*
         LayoutAdorner _adorner = null;
         AdornerLayer _layer = null;
+        */
 
         // EntityCollection _entities = new EntityCollection();
         Patron _patron = new Patron();
@@ -123,8 +125,11 @@ namespace dp2SSL
                 this.SetGlobalError("rfid", "尚未配置 RFID 中心 URL");
             */
 
+            /*
             _layer = AdornerLayer.GetAdornerLayer(this.mainGrid);
             _adorner = new LayoutAdorner(this);
+            */
+            InitializeLayer(this.mainGrid);
 
             {
                 List<string> style = new List<string>();
@@ -550,6 +555,7 @@ namespace dp2SSL
             }));
         }
 
+#if REMOVED
         List<Window> _dialogs = new List<Window>();
 
         void CloseDialogs()
@@ -568,6 +574,7 @@ namespace dp2SSL
         {
             _dialogs.Add(dialog);
         }
+#endif
 
         delegate string Delegate_process(ProgressWindow progress);
 
@@ -3001,7 +3008,7 @@ namespace dp2SSL
             }
         }
 
-        #region patron 分类报错机制
+#region patron 分类报错机制
 
         // 错误类别 --> 错误字符串
         // 错误类别有：rfid fingerprint getreaderinfo
@@ -3021,7 +3028,7 @@ namespace dp2SSL
             }
         }
 
-        #endregion
+#endregion
 
         bool _visiblityChanged = false;
 
@@ -3104,6 +3111,7 @@ namespace dp2SSL
             RemoveLayer();
         }
 
+        /*
         void AddLayer()
         {
             try
@@ -3120,6 +3128,7 @@ namespace dp2SSL
         {
             _layer.Remove(_adorner);
         }
+        */
 
         private void GoHome_Click(object sender, RoutedEventArgs e)
         {
@@ -3708,7 +3717,7 @@ namespace dp2SSL
             return text.ToString();
         }
 
-        #region 延迟清除读者信息
+#region 延迟清除读者信息
 
         DelayAction _delayClearPatronTask = null;
 
@@ -3769,9 +3778,9 @@ namespace dp2SSL
             }
         }
 
-        #endregion
+#endregion
 
-        #region 模拟柜门灯亮灭
+#region 模拟柜门灯亮灭
 
         public void SimulateLamp(bool on)
         {
@@ -3784,9 +3793,9 @@ namespace dp2SSL
             }));
         }
 
-        #endregion
+#endregion
 
-        #region 人脸识别功能
+#region 人脸识别功能
 
         bool _stopVideo = false;
 
@@ -3991,7 +4000,7 @@ namespace dp2SSL
             }
         }
 
-        #endregion
+#endregion
 
         private void ClearPatron_Click(object sender, RoutedEventArgs e)
         {
@@ -4095,7 +4104,7 @@ namespace dp2SSL
 
 #if REMOVED
 
-        #region 绑定和解绑读者功能
+#region 绑定和解绑读者功能
 
 #pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
         private async void bindPatronCard_Click(object sender, RoutedEventArgs e)
@@ -4306,7 +4315,7 @@ uid);
             return new NormalResult { Value = 0 };
         }
 
-        #endregion
+#endregion
 
 #endif
     }

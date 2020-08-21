@@ -35,7 +35,8 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.MarcDom;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Core;
-using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using System.Web;
 
 namespace dp2Catalog
 {
@@ -394,6 +395,14 @@ namespace dp2Catalog
 #endif
         }
 
+        void AppendString(string text)
+        {
+            this.Invoke((Action)(() =>
+            {
+                this.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(DateTime.Now.ToString() + " " + text) + "</div>");
+            }));
+        }
+
         // 将 zserver.xml 文件中绿色安装目录或者 ClickOnce 安装的数据目录移动到用户目录
         void MoveZServerXml()
         {
@@ -452,7 +461,7 @@ namespace dp2Catalog
                 File.Delete(sourceFileName);
                 return 1;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 strError = "转换 servers.bin 文件到 servers.json 时出现异常: " + ex.Message;
                 return -1;
@@ -3100,6 +3109,34 @@ out string strError)
                                     out strError);
                                 if (nRet == -1)
                                     MessageBox.Show(this, strError);
+                            }
+
+                            // 2020/8/21
+                            // 后台自动检查更新
+                            if (ApplicationDeployment.IsNetworkDeployed)
+                            {
+                                _ = Task.Run(() =>
+                                {
+                                    AppendString("开始后台 ClickOnce 升级");
+                                    try
+                                    {
+                                        var result = ClientInfo.InstallUpdateSync();
+                                        if (result.Value == -1)
+                                            AppendString($"ClickOnce 后台自动更新出错: {result.ErrorInfo}\r\n");
+                                        else if (result.Value == 1)
+                                            AppendString($"ClickOnce 后台自动更新: {result.ErrorInfo}\r\n");
+                                        else if (string.IsNullOrEmpty(result.ErrorInfo) == false)
+                                            AppendString($"ClickOnce 后台自动更新: {result.ErrorInfo}\r\n");
+                                    }
+                                    catch(Exception ex)
+                                    {
+                                        AppendString($"后台自动升级出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                                    }
+                                    finally
+                                    {
+                                        AppendString("结束后台 ClickOnce 升级");
+                                    }
+                                });
                             }
                         }
                         finally

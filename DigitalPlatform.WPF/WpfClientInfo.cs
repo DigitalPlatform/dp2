@@ -277,9 +277,9 @@ namespace DigitalPlatform.WPF
             }
         }
 
-#endregion
+        #endregion
 
-#region 未捕获的异常处理 
+        #region 未捕获的异常处理 
 
         // 准备接管未捕获的异常
         public static void PrepareCatchException()
@@ -367,7 +367,7 @@ namespace DigitalPlatform.WPF
             }
         }
 
-#endregion
+        #endregion
 
         public static NormalResult InstallUpdateSync()
         {

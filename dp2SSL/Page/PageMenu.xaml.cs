@@ -19,6 +19,7 @@ using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
 using DigitalPlatform.WPF;
@@ -76,6 +77,28 @@ namespace dp2SSL
             }
 
             App.TagChanged += CurrentApp_TagChanged;
+
+            // testing
+            // ShowUpdated();
+
+            if (App.Function == "智能书柜")
+                this.SetSystemName("智能书柜");
+            else
+                this.SetSystemName("自助借还系统");
+
+            SetCompanyName();
+        }
+
+        void SetCompanyName()
+        {
+            string filename = System.IO.Path.Combine(WpfClientInfo.UserDir, "oem");
+            if (File.Exists(filename))
+            {
+                App.Invoke(new Action(() =>
+                {
+                    companyName.Foreground = Brushes.Transparent;
+                }));
+            }
         }
 
         private void CurrentApp_TagChanged(object sender, TagChangedEventArgs e)
@@ -331,38 +354,41 @@ namespace dp2SSL
         {
             if (e.ChangedButton == MouseButton.Right)
                 Clipboard.SetDataObject(this.message.Text, true);
-            if (e.ChangedButton == MouseButton.Left)
-            {
-                // 测试功能
-                MessageDocument doc = new MessageDocument();
-                DateTime now = DateTime.Now;
-                doc.Add(new Operator { PatronName = "姓名" }, now, "borrow", "succeed", "", "", new Entity { Title = "书名1" });
-                doc.Add(new Operator { PatronName = "姓名" }, now, "borrow", "succeed", "", "", new Entity { Title = "书名2" });
-                doc.Add(new Operator { PatronName = "姓名" }, now, "return", "warning", "这是警告信息", "", new Entity { Title = "书名3" });
-                doc.Add(new Operator { PatronName = "姓名" }, now, "return", "error", "还书出错", "errorCode", new Entity { Title = "书名4" });
 
-                ProgressWindow progress = null;
+            /*
+                        if (e.ChangedButton == MouseButton.Left)
+                        {
+                            // 测试功能
+                            MessageDocument doc = new MessageDocument();
+                            DateTime now = DateTime.Now;
+                            doc.Add(new Operator { PatronName = "姓名" }, now, "borrow", "succeed", "", "", new Entity { Title = "书名1" });
+                            doc.Add(new Operator { PatronName = "姓名" }, now, "borrow", "succeed", "", "", new Entity { Title = "书名2" });
+                            doc.Add(new Operator { PatronName = "姓名" }, now, "return", "warning", "这是警告信息", "", new Entity { Title = "书名3" });
+                            doc.Add(new Operator { PatronName = "姓名" }, now, "return", "error", "还书出错", "errorCode", new Entity { Title = "书名4" });
 
-                App.Invoke(new Action(() =>
-                {
+                            ProgressWindow progress = null;
 
-                    progress = new ProgressWindow();
-                    // progress.MessageText = "正在处理，请稍候 ...";
-                    progress.MessageDocument = doc.BuildDocument(
-                        MessageDocument.BaseFontSize,
-                        "",
-                        out string speak);
-                    progress.Owner = Application.Current.MainWindow;
-                    progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-                    //progress.Closed += Progress_Closed;
-                    App.SetSize(progress, "wide");
+                            App.Invoke(new Action(() =>
+                            {
 
-                    //progress.Width = Math.Min(700, this.ActualWidth);
-                    //progress.Height = Math.Min(500, this.ActualHeight);
-                    progress.Show();
-                    //AddLayer();
-                }));
-            }
+                                progress = new ProgressWindow();
+                                // progress.MessageText = "正在处理，请稍候 ...";
+                                progress.MessageDocument = doc.BuildDocument(
+                                    MessageDocument.BaseFontSize,
+                                    "",
+                                    out string speak);
+                                progress.Owner = Application.Current.MainWindow;
+                                progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                                //progress.Closed += Progress_Closed;
+                                App.SetSize(progress, "wide");
+
+                                //progress.Width = Math.Min(700, this.ActualWidth);
+                                //progress.Height = Math.Min(500, this.ActualHeight);
+                                progress.Show();
+                                //AddLayer();
+                            }));
+                        }
+            */
         }
 
         private void RegisterFace_Click(object sender, RoutedEventArgs e)
@@ -383,7 +409,29 @@ namespace dp2SSL
             NavigatePageBorrow("bindPatronCard,releasePatronCard");
         }
 
+        public void ShowUpdated()
+        {
+            App.Invoke(new Action(() =>
+            {
+                this.message.Background = Brushes.DarkOrange;
+            }));
+        }
 
+        public void SetLibraryName(string libraryName)
+        {
+            App.Invoke(new Action(() =>
+            {
+                this.libraryName.Text = libraryName;
+            }));
+        }
+
+        public void SetSystemName(string systemName)
+        {
+            App.Invoke(new Action(() =>
+            {
+                this.systemName.Text = systemName;
+            }));
+        }
 
 #if NO
         // https://blog.csdn.net/m0_37682004/article/details/82314055

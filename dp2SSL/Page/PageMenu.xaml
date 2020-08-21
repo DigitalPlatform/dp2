@@ -12,9 +12,32 @@
     <Page.Resources>
         <local:StringToVisibilityConverter x:Key="StringToVis" />
     </Page.Resources>
-    <UniformGrid Width="500" Height="500" >
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="60"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="60"/>
+        </Grid.RowDefinitions>
+        <TextBlock x:Name="libraryName" 
+                   Grid.Row="0" Foreground="#FFD0CECE" Background="#4C000000"
+                   VerticalAlignment="Center" HorizontalAlignment="Center"
+                   FontSize="30" Padding="100,10,100,10">
+            图书馆名字
+        </TextBlock>
+        <TextBlock x:Name="systemName"
+            Grid.Row="1" Foreground="#FFD7D2D2"
+                   VerticalAlignment="Center" HorizontalAlignment="Center"
+                   FontSize="20">
+            自助借还系统
+        </TextBlock>
+        <UniformGrid Grid.Row="2" Width="500" Height="500" 
+                     VerticalAlignment="Center" HorizontalAlignment="Center">
 
-        <!--
+            <!--
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="Auto"/>
@@ -27,47 +50,54 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 -->
-        <Button 
+            <Button 
                 Name="borrowButton" Content="借书" Click="Button_Borrow_Click"
                 Background="DarkBlue" Foreground="White" FontSize="40" BorderThickness="0"/>
-        <Button 
+            <Button 
                 Name="returnButton" Content="还书" Click="ReturnButton_Click"
                 Background="BlueViolet" Foreground="White" FontSize="40" BorderThickness="0"/>
-        <TextBlock Name="message"
+            <TextBlock Name="message"
                    Text="message" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center"
                    FontSize="16"
                    MouseDown="Message_MouseDown"
                    Background="Transparent" Foreground="White"/>
-        <Button  
+            <Button  
                 Name="renewButton" Content="续借" Click="RenewBotton_Click"
                 Background="CadetBlue" Foreground="White" FontSize="40" BorderThickness="0"/>
 
-        <Button 
+            <Button 
                 Name="registerFace" Content="注册人脸" Click="RegisterFace_Click"
                 Background="#FFB1D21C" Foreground="Black" FontSize="36" BorderThickness="0"/>
-        <Button 
+            <Button 
             Name="shelf" Content="书柜"  Click="Shelf_Click"
                 Background="#FF0A7832" Foreground="White" FontSize="40" BorderThickness="0"/>
 
-        <Button 
+            <Button 
             Name="config" Content="设置"  Click="Config_Click"
                 Background="#FF254276" Foreground="White" FontSize="40" BorderThickness="0"/>
-        <Grid Background="Black" Opacity="0.7">
-            <TextBlock Name="number"
+            <Grid Background="Black" Opacity="0.7">
+                <TextBlock Name="number"
                    Text="{Binding Path=Number,Mode=OneWay}"
                    TextAlignment="Center" FontSize="100"
                    VerticalAlignment="Center" HorizontalAlignment="Center"
                    Background="Transparent" Foreground="White"/>
-        </Grid>
-        
-        <Button 
+            </Grid>
+
+            <Button 
                 Name="bindPatronCard" Content="绑定读者卡" Click="bindPatronCard_Click"
                 Background="#FF7FC1AB" Foreground="Black" FontSize="24" BorderThickness="0"/>
 
 
-        <Button Name="error" Content="错误信息"  Click="Error_Click"
+            <Button Name="error" Content="错误信息"  Click="Error_Click"
                 Visibility="{Binding Path=Error, Mode=OneWay, Converter={StaticResource StringToVis}}"
                 Background="DarkRed" Foreground="White" FontSize="36" BorderThickness="0"/>
 
-    </UniformGrid>
+        </UniformGrid>
+        <TextBlock x:Name="companyName"  Grid.Row="3" Foreground="#FFB6B4B4"
+                   VerticalAlignment="Center" HorizontalAlignment="Center">
+            <Run Text="数字平台(北京)软件有限责任公司"/>
+            <LineBreak/>
+            <Run Text="http://dp2003.com"/>
+        </TextBlock>
+    </Grid>
 </Page>

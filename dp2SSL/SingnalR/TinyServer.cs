@@ -162,6 +162,10 @@ TaskScheduler.Default);
         public static async Task SendMessageAsync(string[] groups,
             string content)
         {
+            // 2020/8/20
+            if (_queue == null)
+                return;
+
             SetMessageRequest request = new SetMessageRequest("create", "dontNotifyMe",
                 new List<MessageRecord> {
                         new MessageRecord {

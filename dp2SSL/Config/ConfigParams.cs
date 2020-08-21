@@ -425,7 +425,8 @@ Description = "14443A卡号预处理"
         }
         */
 
-        // 默认值 true
+        /*
+        // 默认值 false
         [Display(
 Order = 1,
 Name = "动态反馈图书变动数",
@@ -436,13 +437,14 @@ Description = "是否动态反馈图书变动数"
         {
             get
             {
-                return _config.GetBoolean("shelf_operation", "detect_book_change", true);
+                return _config.GetBoolean("shelf_operation", "detect_book_change", false);
             }
             set
             {
                 _config.SetBoolean("shelf_operation", "detect_book_change", value);
             }
         }
+        */
 
         #region 消息服务器相关参数
 

@@ -32,10 +32,12 @@ namespace dp2SSL
     /// <summary>
     /// PageShelf.xaml 的交互逻辑
     /// </summary>
-    public partial class PageShelfSave : Page, INotifyPropertyChanged
+    public partial class PageShelfSave : MyPage, INotifyPropertyChanged
     {
+        /*
         LayoutAdorner _adorner = null;
         AdornerLayer _layer = null;
+        */
 
         EntityCollection _entities = new EntityCollection();
         Patron _patron = new Patron();
@@ -119,8 +121,11 @@ namespace dp2SSL
             if (string.IsNullOrEmpty(RfidManager.Url))
                 this.SetGlobalError("rfid", "尚未配置 RFID 中心 URL");
 
+            /*
             _layer = AdornerLayer.GetAdornerLayer(this.mainGrid);
             _adorner = new LayoutAdorner(this);
+            */
+            InitializeLayer(this.mainGrid);
 
             {
                 List<string> style = new List<string>();
@@ -762,6 +767,7 @@ namespace dp2SSL
             RemoveLayer();
         }
 
+        /*
         void AddLayer()
         {
             _layer.Add(_adorner);
@@ -771,6 +777,7 @@ namespace dp2SSL
         {
             _layer.Remove(_adorner);
         }
+        */
 
         private void GoHome_Click(object sender, RoutedEventArgs e)
         {

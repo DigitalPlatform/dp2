@@ -37,7 +37,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>132</ApplicationRevision>
+    <ApplicationRevision>139</ApplicationRevision>
     <ApplicationVersion>1.4.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -499,6 +499,7 @@
     <Compile Include="LibraryChannelUtil.cs" />
     <Compile Include="ManagerBase.cs" />
     <Compile Include="Models\BiblioCacheContext.cs" />
+    <Compile Include="Models\GlobalMonitor.cs" />
     <Compile Include="Models\PatronReplication.cs" />
     <Compile Include="Models\RequestContext.cs" />
     <Compile Include="Models\DelayAction.cs" />
@@ -513,6 +514,7 @@
     <Compile Include="Models\SpeakList.cs" />
     <Compile Include="Models\SubmitDocument.cs" />
     <Compile Include="Models\TagList.cs" />
+    <Compile Include="Page\MyPage.cs" />
     <Compile Include="Page\PageError.xaml.cs">
       <DependentUpon>PageError.xaml</DependentUpon>
     </Compile>

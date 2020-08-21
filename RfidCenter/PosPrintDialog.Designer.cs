@@ -117,7 +117,9 @@
             "cut",
             "cuthalf",
             "printline",
-            "print"});
+            "print",
+            "getstatus",
+            "init"});
             this.comboBox_action.Location = new System.Drawing.Point(144, 17);
             this.comboBox_action.Name = "comboBox_action";
             this.comboBox_action.Size = new System.Drawing.Size(200, 29);
