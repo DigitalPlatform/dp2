@@ -1032,6 +1032,9 @@ new_password);
             string text,
             string style)
         {
+            if (action == "getstatus")
+                return Program.Printer.GetStatus(style);
+
             return Program.Printer.Print(action, text, style);
         }
 

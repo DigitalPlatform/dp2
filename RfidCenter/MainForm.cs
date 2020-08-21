@@ -1556,6 +1556,10 @@ string strHtml)
                             break;
                         // 迫使重新启动
                         InitializeRfidDriver();
+
+                        // 2020/8/21
+                        InitializePrinterDriver();
+
                         if (token.IsCancellationRequested)
                             break;
 
@@ -2296,15 +2300,15 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
             dlg.button_print.Click += (s1, e1) =>
             {
                 var display_result = Print();
-                if (display_result.Value == -1)
-                    MessageBox.Show(this, display_result.ErrorInfo);
+                if (display_result.Value == -1 || dlg.ActionString == "getstatus")
+                    MessageBox.Show(this, $"result={display_result.ToString()}");
             };
             dlg.ShowDialog(this);
 
             if (dlg.DialogResult == DialogResult.Cancel)
                 return;
             var result = Print();
-            if (result.Value == -1)
+            if (result.Value == -1 || dlg.ActionString == "getstatus")
             {
                 strError = result.ErrorInfo;
                 goto ERROR1;

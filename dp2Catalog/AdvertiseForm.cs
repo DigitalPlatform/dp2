@@ -41,10 +41,11 @@ namespace dp2Catalog
 
             this.Invoke(new Action(LoadPage));
         }
-
+        
         void LoadPage()
         {
             this.webBrowser1.Url = new Uri("http://dp2003.com/dp2portal/view.aspx?link=opensource.xml");
+            // this.webBrowser1.Url = new Uri("http://www.ilovelibrary.cn/");
         }
 
         private void AdvertiseForm_FormClosing(object sender, FormClosingEventArgs e)

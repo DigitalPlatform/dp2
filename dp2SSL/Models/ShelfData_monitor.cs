@@ -48,12 +48,14 @@ namespace dp2SSL
             }
         }
 
+#if REMOVED
         // 是否已经(升级)更新了
         static bool _updated = false;
         // 最近一次检查升级的时刻
         static DateTime _lastUpdateTime;
         // 检查升级的时间间隔
         static TimeSpan _updatePeriod = TimeSpan.FromMinutes(2 * 60); // 2*60 两个小时
+#endif
 
         // 监控间隔时间
         static TimeSpan _monitorIdleLength = TimeSpan.FromSeconds(10);
@@ -73,7 +75,7 @@ namespace dp2SSL
                 return;
 
             CancellationToken token = _cancel.Token;
-            bool download_complete = false;
+            // bool download_complete = false;
 
             token.Register(() =>
             {
@@ -82,7 +84,7 @@ namespace dp2SSL
 
             _monitorTask = Task.Factory.StartNew(async () =>
             {
-                WpfClientInfo.WriteInfoLog("监控专用线程开始");
+                WpfClientInfo.WriteInfoLog("书柜监控专用线程开始");
                 try
                 {
                     while (token.IsCancellationRequested == false)
@@ -184,6 +186,7 @@ namespace dp2SSL
                             }
                         }
 
+#if REMOVED
                         // 检查升级 dp2ssl
                         if (_updated == false
                         // && StringUtil.IsDevelopMode() == false
@@ -217,6 +220,7 @@ namespace dp2SSL
                             _lastUpdateTime = DateTime.Now;
 
                         }
+#endif
                     }
                     _monitorTask = null;
 
@@ -227,12 +231,12 @@ namespace dp2SSL
                 }
                 catch (Exception ex)
                 {
-                    WpfClientInfo.WriteErrorLog($"监控专用线程出现异常: {ExceptionUtil.GetDebugText(ex)}");
-                    App.SetError("monitor", $"监控专用线程出现异常: {ex.Message}");
+                    WpfClientInfo.WriteErrorLog($"书柜监控专用线程出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                    App.SetError("shelf_monitor", $"书柜监控专用线程出现异常: {ex.Message}");
                 }
                 finally
                 {
-                    WpfClientInfo.WriteInfoLog("监控专用线程结束");
+                    WpfClientInfo.WriteInfoLog("书柜监控专用线程结束");
                 }
             },
 token,
@@ -305,6 +309,6 @@ TaskScheduler.Default);
                 App.CurrentApp.SpeakSequence($"不要忘记关门 {StringUtil.MakePathList(doors, ",")}");
         }
 
-        #endregion
+#endregion
     }
 }

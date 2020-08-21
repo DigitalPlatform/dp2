@@ -11,6 +11,8 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Xml;
 using System.Windows.Media;
+using System.Text;
+using System.Data.SqlClient;
 
 using dp2SSL.Dialog;
 using dp2SSL.Models;
@@ -27,8 +29,6 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Core;
 using DigitalPlatform.Face;
 using DigitalPlatform.WPF;
-using System.Text;
-using System.Data.SqlClient;
 
 namespace dp2SSL
 {
@@ -36,10 +36,8 @@ namespace dp2SSL
     /// 借书功能页面
     /// PageBorrow.xaml 的交互逻辑
     /// </summary>
-    public partial class PageBorrow : Page, INotifyPropertyChanged
+    public partial class PageBorrow : MyPage, INotifyPropertyChanged
     {
-        LayoutAdorner _adorner = null;
-        AdornerLayer _layer = null;
 
         // Timer _timer = null;
 
@@ -243,8 +241,11 @@ namespace dp2SSL
             if (string.IsNullOrEmpty(RfidManager.Url))
                 this.SetGlobalError("rfid", "尚未配置 RFID 中心 URL");
 
+            /*
             _layer = AdornerLayer.GetAdornerLayer(this.mainGrid);
             _adorner = new LayoutAdorner(this);
+            */
+            InitializeLayer(this.mainGrid);
 
             {
                 /*
@@ -805,24 +806,7 @@ namespace dp2SSL
             MessageBox.Show(Message);
         }
 #endif
-        List<Window> _dialogs = new List<Window>();
 
-        void CloseDialogs()
-        {
-            // 确保 page 关闭时对话框能自动关闭
-            App.Invoke(new Action(() =>
-            {
-                foreach (var window in _dialogs)
-                {
-                    window.Close();
-                }
-            }));
-        }
-
-        void MemoryDialog(Window dialog)
-        {
-            _dialogs.Add(dialog);
-        }
 
         private void PageBorrow_Unloaded(object sender, RoutedEventArgs e)
         {
@@ -939,15 +923,7 @@ namespace dp2SSL
         }
 
 
-        void AddLayer()
-        {
-            _layer.Add(_adorner);
-        }
 
-        void RemoveLayer()
-        {
-            _layer.Remove(_adorner);
-        }
 
         // CancellationTokenSource _cancelRefresh = null;
 

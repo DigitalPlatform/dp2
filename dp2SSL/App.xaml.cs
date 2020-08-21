@@ -38,6 +38,7 @@ using DigitalPlatform.Face;
 using DigitalPlatform.WPF;
 using DigitalPlatform.MessageClient;
 using DigitalPlatform.Install;
+using dp2SSL.Models;
 
 
 //using Microsoft.VisualStudio.Shell;
@@ -184,17 +185,24 @@ namespace dp2SSL
             // 后台自动检查更新
             var task = Task.Run(() =>
             {
-                NormalResult result = WpfClientInfo.InstallUpdateSync();
-                if (result.Value == -1)
-                    OutputHistory("自动更新出错: " + result.ErrorInfo, 2);
-                else if (result.Value == 1)
+                try
                 {
-                    OutputHistory(result.ErrorInfo, 1);
-                    Updated?.Invoke(this, new UpdatedEventArgs { Message = result.ErrorInfo });
-                    // MessageBox.Show(result.ErrorInfo);
+                    NormalResult result = WpfClientInfo.InstallUpdateSync();
+                    if (result.Value == -1)
+                        OutputHistory("自动更新出错: " + result.ErrorInfo, 2);
+                    else if (result.Value == 1)
+                    {
+                        OutputHistory(result.ErrorInfo, 1);
+                        Updated?.Invoke(this, new UpdatedEventArgs { Message = result.ErrorInfo });
+                        // MessageBox.Show(result.ErrorInfo);
+                    }
+                    else if (string.IsNullOrEmpty(result.ErrorInfo) == false)
+                        OutputHistory(result.ErrorInfo, 0);
                 }
-                else if (string.IsNullOrEmpty(result.ErrorInfo) == false)
-                    OutputHistory(result.ErrorInfo, 0);
+                catch (Exception ex)
+                {
+                    WpfClientInfo.WriteErrorLog($"后台 ClickOnce 自动升级出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                }
             });
 
 #if REMOVED
@@ -309,8 +317,12 @@ namespace dp2SSL
                 if (App.Protocol == "sip")
                     SipChannelUtil.StartMonitorTask();
 
+                // 2020/8/20
+                GlobalMonitor.StartMonitorTask();
+
                 // 获得 RFID 配置信息和 图书馆名
-                _ = Task.Run(() => {
+                _ = Task.Run(() =>
+                {
                     try
                     {
                         var result = LibraryChannelUtil.GetRfidCfg();
@@ -330,9 +342,19 @@ namespace dp2SSL
                 string stateFileName = Path.Combine(binDir, "dp2ssl_started");
                 File.WriteAllText(stateFileName, "dp2ssl started");
             }
+
         }
 
-        public static string LibraryName { get; set; }
+        static string _libraryName;
+        public static string LibraryName
+        {
+            get { return _libraryName; }
+            set
+            {
+                _libraryName = value;
+                PageMenu.MenuPage.SetLibraryName(value);
+            }
+        }
 
         static string _rfidType = "";   // ""/自助借还/智能书柜
 
@@ -460,6 +482,9 @@ namespace dp2SSL
 
         public static void TriggerUpdated(string message)
         {
+            // 让版本号文字的背景变成深黄色
+            PageMenu.MenuPage.ShowUpdated();
+
             Updated?.Invoke(null, new UpdatedEventArgs { Message = message });
         }
 
@@ -1162,6 +1187,7 @@ namespace dp2SSL
         }
         */
 
+        /*
         public static bool DetectBookChange
         {
             get
@@ -1170,9 +1196,10 @@ namespace dp2SSL
                     return true;
                 return (bool)WpfClientInfo.Config?.GetBoolean("shelf_operation",
     "detect_book_change",
-    true);
+    false);
             }
         }
+        */
 
         public static string LedText
         {

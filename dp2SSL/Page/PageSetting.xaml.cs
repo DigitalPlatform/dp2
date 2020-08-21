@@ -26,7 +26,7 @@ namespace dp2SSL
     /// <summary>
     /// PageSetting.xaml 的交互逻辑
     /// </summary>
-    public partial class PageSetting : Page, INotifyPropertyChanged
+    public partial class PageSetting : MyPage, INotifyPropertyChanged
     {
         public PageSetting()
         {
@@ -38,10 +38,12 @@ namespace dp2SSL
             this.Unloaded += PageSetting_Unloaded;
 
             // this.keyborad.KeyPressed += Keyborad_KeyPressed;
+            InitializeLayer(this.mainGrid);
         }
 
         private void PageSetting_Unloaded(object sender, RoutedEventArgs e)
         {
+            /*
             try
             {
                 // 确保 page 关闭时对话框能自动关闭
@@ -57,6 +59,8 @@ namespace dp2SSL
             {
                 // App.ContinueBarcodeScan();
             }
+            */
+            CloseDialogs();
         }
 
         static int passwordErrorCount = 0;
@@ -77,62 +81,75 @@ namespace dp2SSL
                 App.PauseBarcodeScan();
             }
             */
-
-            // 首次设置密码
-            if (App.IsLockingPasswordEmpty())
+            App.Invoke(new Action(() =>
             {
+                this.mainGrid.Visibility = Visibility.Collapsed;
+            }));
+            try
+            {
+                // 首次设置密码
+                if (App.IsLockingPasswordEmpty())
+                {
                 REDO_SET:
-                var password = GetPassword("首次设置锁屏密码");
-                if (password == null)
-                {
-                    ErrorBox("放弃设置锁屏密码", "yellow", "auto_close");
-                    this.NavigationService.Navigate(PageMenu.MenuPage);
-                    return;
-                }
-                if (string.IsNullOrEmpty(password))
-                {
-                    ErrorBox("锁屏密码不允许设置为空", "red", "auto_close");
-                    await Task.Delay(TimeSpan.FromSeconds(1));
-                    goto REDO_SET;
-                }
-                App.SetLockingPassword(password);
-                return;
-            }
-
-
-            // 验证锁屏密码
-            {
-            REDO:
-                if (passwordErrorCount > 5)
-                {
-                    ErrorBox("密码错误次数太多，功能被禁用", "red", "auto_close");
-                    // 延时 10 分钟清除 passwordErrorCount
-                    if (delayClear == null)
+                    var password = GetPassword("首次设置锁屏密码");
+                    if (password == null)
                     {
-                        delayClear = Task.Run(async () =>
-                        {
-                            await Task.Delay(TimeSpan.FromMinutes(5));
-                            passwordErrorCount = 0;
-                            delayClear = null;
-                        });
+                        ErrorBox("放弃设置锁屏密码", "yellow", "auto_close");
+                        this.NavigationService.Navigate(PageMenu.MenuPage);
+                        return;
                     }
+                    if (string.IsNullOrEmpty(password))
+                    {
+                        ErrorBox("锁屏密码不允许设置为空", "red", "auto_close");
+                        await Task.Delay(TimeSpan.FromSeconds(1));
+                        goto REDO_SET;
+                    }
+                    App.SetLockingPassword(password);
+                    return;
+                }
 
-                    this.NavigationService.Navigate(PageMenu.MenuPage);
-                    return;
-                }
-                var password = GetPassword("验证锁屏密码");
-                if (password == null)
+
+                // 验证锁屏密码
                 {
-                    this.NavigationService.Navigate(PageMenu.MenuPage);
-                    return;
+                REDO:
+                    if (passwordErrorCount > 5)
+                    {
+                        ErrorBox("密码错误次数太多，功能被禁用", "red", "auto_close");
+                        // 延时 10 分钟清除 passwordErrorCount
+                        if (delayClear == null)
+                        {
+                            delayClear = Task.Run(async () =>
+                            {
+                                await Task.Delay(TimeSpan.FromMinutes(5));
+                                passwordErrorCount = 0;
+                                delayClear = null;
+                            });
+                        }
+
+                        this.NavigationService.Navigate(PageMenu.MenuPage);
+                        return;
+                    }
+                    var password = GetPassword("验证锁屏密码");
+                    if (password == null)
+                    {
+                        this.NavigationService.Navigate(PageMenu.MenuPage);
+                        return;
+                    }
+                    if (App.MatchLockingPassword(password) == false)
+                    {
+                        passwordErrorCount++;
+                        ErrorBox("密码不正确", "red", "auto_close");
+                        await Task.Delay(TimeSpan.FromSeconds(1));
+                        goto REDO;
+                    }
                 }
-                if (App.MatchLockingPassword(password) == false)
+            }
+            finally
+            {
+                App.Invoke(new Action(() =>
                 {
-                    passwordErrorCount++;
-                    ErrorBox("密码不正确", "red", "auto_close");
-                    await Task.Delay(TimeSpan.FromSeconds(1));
-                    goto REDO;
-                }
+                    this.mainGrid.Visibility = Visibility.Visible;
+                }));
             }
         }
 
@@ -744,6 +761,7 @@ string color = "red")
             }
         }
 
+#if REMOVED
         List<Window> _dialogs = new List<Window>();
 
         void CloseDialogs()
@@ -762,6 +780,7 @@ string color = "red")
         {
             _dialogs.Add(dialog);
         }
+#endif
 
         // https://blog.csdn.net/m0_37682004/article/details/82314055
         Task DownloadBingWallPaperAsync(string filename)
@@ -794,7 +813,10 @@ string color = "red")
                             string url = obj.images[0].url;
                             url = $"https://cn.bing.com{url}";
                             client.DownloadFile(url, filename);
-                            _dialogs.Add(progress);
+
+                            // _dialogs.Add(progress);
+                            MemoryDialog(progress);
+
                             App.Invoke(new Action(() =>
                             {
                                 progress.MessageText = "下载完成";
@@ -804,7 +826,9 @@ string color = "red")
                         }
                         catch (Exception ex)
                         {
-                            _dialogs.Add(progress);
+                            // _dialogs.Add(progress);
+                            MemoryDialog(progress);
+
                             App.Invoke(new Action(() =>
                             {
                                 progress.MessageText = $"下载 bing 壁纸过程出现异常: {ExceptionUtil.GetExceptionText(ex)}";

@@ -361,12 +361,14 @@ namespace dp2SSL
             else
             {
                 string list = "";
+                /*
                 if (App.DetectBookChange == true)
                     list = GetReaderNameList(Doors,
                         (d) =>
                         {
                             return (d.State == "open");
                         });
+                */
 
                 // 打开图书读卡器(同时也使用读者证读卡器)
                 if (RfidManager.ReaderNameList != list)
