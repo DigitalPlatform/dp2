@@ -107,6 +107,17 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
             }
             set
             {
+                // 2020/8/23
+                if (string.IsNullOrEmpty(value) == false)
+                {
+                    int nRet = DomUtil.GetIndentXml(value,
+        true,
+        out string strXml,
+        out string strError);
+                    if (nRet != -1)
+                        value = strXml;
+                }
+
                 this.textBox_editor.Text = value;
 
                 this.ItemXmlChanged = true;
@@ -493,7 +504,7 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
 
             tabControl_item_SelectedIndexChanged(this, new EventArgs());
             return 1;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
             return -1;
         }
@@ -786,7 +797,7 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
 
             tabControl_item_SelectedIndexChanged(this, new EventArgs());
             return 1;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
             return -1;
         }
@@ -835,7 +846,7 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
             }
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1204,7 +1215,7 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1371,7 +1382,7 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
             // 重新装载内容
             this.Reload();
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1516,7 +1527,7 @@ out strError);
             }
 
             return 1;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -2009,7 +2020,7 @@ out strError);
             if (nRet == -1)
                 goto ERROR1;
             return;
-            ERROR1:
+        ERROR1:
             this.ShowMessage(strError, "red", true);
         }
 
@@ -2408,7 +2419,7 @@ out strError);
             MessageBox.Show(this, "封面图像已经成功创建。\r\n"
                 + "\r\n\r\n(但因当前记录还未保存，图像数据尚未提交到服务器)\r\n\r\n注意稍后保存当前记录。");
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -2467,14 +2478,13 @@ out strError);
             this.ItemXmlChanged = true;
         }
 
+        // 规整 XML
         private void ToolStripMenuItem_edit_indentXml_Click(object sender, EventArgs e)
         {
-            string strError = "";
-            string strXml = "";
             int nRet = DomUtil.GetIndentXml(this.textBox_editor.Text,
                 true,
-                out strXml,
-                out strError);
+                out string strXml,
+                out string strError);
             if (nRet == -1)
             {
                 MessageBox.Show(this, strError);
@@ -2500,7 +2510,16 @@ out strError);
 
             DomUtil.RemoveEmptyElements(dom.DocumentElement, false);
             if (dom.DocumentElement != null)
-                this.textBox_editor.Text = DomUtil.GetIndentInnerXml(dom.DocumentElement);  // dom.DocumentElement.OuterXml;
+            {
+                int nRet = DomUtil.GetIndentXml(dom.OuterXml,
+    true,
+    out string strXml,
+    out string strError);
+                if (nRet == -1)
+                    this.textBox_editor.Text = dom.OuterXml;
+                else
+                    this.textBox_editor.Text = strXml;
+            }
             else
                 this.textBox_editor.Text = "";
         }

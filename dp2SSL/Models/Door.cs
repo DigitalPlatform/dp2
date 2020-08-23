@@ -57,6 +57,21 @@ namespace dp2SSL
             }
         }
 
+        // 2020/8/23
+        CornerRadius _cornerRadiius = new CornerRadius();
+        public CornerRadius CornerRadius
+        {
+            get => _cornerRadiius;
+            set
+            {
+                if (_cornerRadiius != value)
+                {
+                    _cornerRadiius = value;
+                    OnPropertyChanged("CornerRadius");
+                }
+            }
+        }
+
         Brush _borderBrush = new SolidColorBrush(Colors.DarkGray);
         public Brush BorderBrush
         {

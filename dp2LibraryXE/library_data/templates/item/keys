@@ -353,6 +353,16 @@ public class MyKeysHost : KeysHost
     <caption lang="en">Library Barcode</caption>
   </table>
 
+  <key>
+    <xpath>*/uid</xpath>
+    <from>uid</from>
+    <table ref="uid" />
+  </key>
+  <table name="uid" id="14">
+    <caption lang="zh-CN">RFID UID</caption>
+    <caption lang="en">RFID UID</caption>
+  </table>
+
   <!-- ******************配置非用字**************************************** -->
   <stopword>
     <stopwordTable name="title">

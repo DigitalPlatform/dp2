@@ -17,11 +17,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Xml;
-using DigitalPlatform.LibraryClient.localhost;
-using DigitalPlatform.RFID;
-using DigitalPlatform.Text;
+
 using DigitalPlatform.WPF;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace dp2SSL
 {
@@ -221,6 +218,7 @@ KeyTime.FromTimeSpan(TimeSpan.FromSeconds(start + _length))) // KeyTime
                     door_item.Padding = Multiple(gp.Padding, picture_size.Width, picture_size.Height);
                     door_item.Margin = Multiple(gp.Margin, picture_size.Width, picture_size.Height);
                     door_item.BorderThickness = Multiple(gp.BorderThickness, picture_size.Width, picture_size.Height);
+                    door_item.CornerRadius = Multiple(gp.CornerRadius, picture_size.Width, picture_size.Height);
                 }
             }
         }
@@ -250,6 +248,7 @@ KeyTime.FromTimeSpan(TimeSpan.FromSeconds(start + _length))) // KeyTime
             public Thickness Margin { get; set; }  // 外边距
 
             public Thickness BorderThickness { get; set; }  // 边框线条宽度
+            public CornerRadius CornerRadius { get; set; }  // 边框圆角
 
             public Brush BorderBrush { get; set; }  // 边框颜色
             public Brush OpenBrush { get; set; }
@@ -408,6 +407,45 @@ KeyTime.FromTimeSpan(TimeSpan.FromSeconds(start + _length))) // KeyTime
             }
         }
 
+        static CornerRadius GetCornerRadius(XmlElement element,
+    string attr,
+    CornerRadius default_value)
+        {
+            CornerRadiusConverter convertor = new CornerRadiusConverter();
+
+            if (element.HasAttribute(attr) == false)
+                return default_value;
+            string s = element.GetAttribute(attr);
+
+            try
+            {
+                CornerRadius value = (CornerRadius)convertor.ConvertFromString(s);
+                return value;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"属性值 {attr} 定义错误({ex.Message})，应为数字，或 n,n,n,n 形态({element.OuterXml})");
+            }
+        }
+
+
+        static CornerRadius Multiple(CornerRadius radius, double width, double height)
+        {
+            // double topLeft, double topRight, double bottomRight, double bottomLeft
+            return new CornerRadius(radius.TopLeft * width,
+                radius.TopRight * width,
+                radius.BottomRight * width,
+                radius.BottomLeft * width);
+        }
+
+        static CornerRadius Divide(CornerRadius radius, double width, double height)
+        {
+            return new CornerRadius(radius.TopLeft / width,
+    radius.TopRight / width,
+    radius.BottomRight / width,
+    radius.BottomLeft / width);
+        }
+
         static Thickness Multiple(Thickness thickness, double width, double height)
         {
             return new Thickness(thickness.Left * width,
@@ -497,6 +535,7 @@ KeyTime.FromTimeSpan(TimeSpan.FromSeconds(start + _length))) // KeyTime
                                                         // if (gp.CloseBrush is SolidColorBrush)
                     door_item.CloseBrush = gp.CloseBrush;   // (gp.CloseBrush as SolidColorBrush).Color;
                     door_item.BorderThickness = gp.BorderThickness;
+                    door_item.CornerRadius = gp.CornerRadius;
                     door_item.Foreground = gp.Foreground;
                     door_item.ErrorForeground = gp.ErrorForeground;
 
@@ -538,6 +577,7 @@ KeyTime.FromTimeSpan(TimeSpan.FromSeconds(start + _length))) // KeyTime
                 gp.Padding = Divide(gp.Padding, canvas_width, canvas_height);
                 gp.Margin = Divide(gp.Margin, canvas_width, canvas_height);
                 gp.BorderThickness = Divide(gp.BorderThickness, canvas_width, canvas_height);
+                gp.CornerRadius = Divide(gp.CornerRadius, canvas_width, canvas_height);
             }
 
             // 记忆
@@ -593,6 +633,7 @@ KeyTime.FromTimeSpan(TimeSpan.FromSeconds(start + _length))) // KeyTime
             gp.Margin = GetThickness(door, "margin", new Thickness(0));
             gp.BorderBrush = GetBrush(door, "borderBrush", new System.Windows.Media.SolidColorBrush(Colors.DarkGray));
             gp.BorderThickness = GetThickness(door, "borderThickness", new Thickness(1));
+            gp.CornerRadius = GetCornerRadius(door, "cornerRadius", new CornerRadius(0));
             gp.OpenBrush = GetBrush(door,
                 "openBrush",
                 new System.Windows.Media.SolidColorBrush(DoorItem.DefaultOpenColor),
@@ -642,6 +683,7 @@ KeyTime.FromTimeSpan(TimeSpan.FromSeconds(start + _length))) // KeyTime
                 gp.Margin = GetThickness(group, "margin", new Thickness(0));
                 gp.BorderBrush = GetBrush(group, "borderBrush", new System.Windows.Media.SolidColorBrush(Colors.DarkGray));
                 gp.BorderThickness = GetThickness(group, "borderThickness", new Thickness(1));
+                gp.CornerRadius = GetCornerRadius(group, "cornerRadius", new CornerRadius(0));
                 gp.OpenBrush = GetBrush(group,
                     "openBrush",
                     new System.Windows.Media.SolidColorBrush(DoorItem.DefaultOpenColor),

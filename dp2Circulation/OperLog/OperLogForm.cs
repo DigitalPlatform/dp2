@@ -2809,6 +2809,7 @@ strOldMarc);
                 out strError);
         }
 
+        // TODO: 把没有明确定义的元素也显示出来
         // 获得册记录 HTML 字符串。不包括外面的<html><body>
         int GetItemInfoString(
             bool bDisplayBorrowHistory,
@@ -2848,6 +2849,7 @@ out string strError)
             string strBorrowPeriod = DomUtil.GetElementInnerText(item_dom.DocumentElement, "borrowPeriod");
             string strIntact = DomUtil.GetElementInnerText(item_dom.DocumentElement, "intact");
             string strRefID = DomUtil.GetElementInnerText(item_dom.DocumentElement, "refID");
+            string strUID = DomUtil.GetElementInnerText(item_dom.DocumentElement, "uid");
 
             string strBinding = FormatInnerXml(
                 DomUtil.GetElementInnerXml(item_dom.DocumentElement, "binding"));
@@ -2891,6 +2893,7 @@ out string strError)
                 + BuildHtmlLine("借阅期限", strBorrowPeriod)
                 + BuildHtmlLine("完好率", strIntact)
                 + BuildHtmlLine("参考ID", strRefID)
+                + BuildHtmlLine("RFID UID", strUID)
                 + BuildHtmlLine("父记录ID", strParent)
                 + BuildHtmlEncodedLine("装订信息", strBinding)
                 + BuildHtmlEncodedLine("操作历史", strOperations)
