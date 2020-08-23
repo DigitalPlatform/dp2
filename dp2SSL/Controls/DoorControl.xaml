@@ -28,6 +28,7 @@
                     BorderThickness="{Binding BorderThickness}"
                     Padding="{Binding Padding}"
                     Margin="{Binding Margin}"
+                    CornerRadius="{Binding CornerRadius}"
                     >
                 <Border.Background>
                     <MultiBinding Converter="{StaticResource DoorToBack}" >

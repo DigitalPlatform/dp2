@@ -58,6 +58,7 @@ namespace DigitalPlatform.LibraryServer
                 "oldRefID", // 2016/12/19
                 "shelfNo", // 2017/6/15 架号。例如 10-1 表示第十个架的第一排
                 "currentLocation",  // 2019/7/27 新增
+                "uid",  // 2020/8/23 RFID 标签的 UID
             };
 
         static string[] transfer_entity_element_names = new string[] {

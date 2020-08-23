@@ -54,6 +54,9 @@
   <col title="参考ID" type="item_refid">
     <xpath>*/refID</xpath>
   </col>
+  <col title="RFID ID" type="item_uid">
+    <xpath>*/uid</xpath>
+  </col>
   <col title="流通次数">
     <xpath>*/borrowHistory/@count</xpath>
   </col>
