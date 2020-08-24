@@ -1063,5 +1063,29 @@ string color = "red")
                 WpfClientInfo.WriteErrorLog($"打开触摸键盘时出现异常: {ExceptionUtil.GetDebugText(ex)}");
             }
         }
+
+        // 小票打印机清空缓冲区
+        private void posPrint_clearMemory_Click(object sender, RoutedEventArgs e)
+        {
+            var result = RfidManager.PosPrint("init", "", "");
+            if (result.Value == -1)
+                ErrorBox($"清空小票打印机缓冲区时出错: {result.ErrorInfo}");
+            else
+                ErrorBox("成功清空缓冲区", "green");
+        }
+
+        private void posPrint_cutPaper_Click(object sender, RoutedEventArgs e)
+        {
+            var result = RfidManager.PosPrint("cut", "", "");
+            if (result.Value == -1)
+                ErrorBox($"切纸时出错: {result.ErrorInfo}");
+        }
+
+        private void posPrint_feed_Click(object sender, RoutedEventArgs e)
+        {
+            var result = RfidManager.PosPrint("feed", "", "");
+            if (result.Value == -1)
+                ErrorBox($"走纸时出错: {result.ErrorInfo}");
+        }
     }
 }

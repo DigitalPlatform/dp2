@@ -1171,6 +1171,7 @@ bool bClickClose = false)
                     this.textBox_led_cellWidth,
                     this.textBox_led_cellHeight,
                     new ComboBoxText(this.comboBox_printer_serialPort),
+                    new ComboBoxText(this.comboBox_printer_baudRate),
                 };
                 return GuiState.GetUiState(controls);
             }
@@ -1189,6 +1190,7 @@ bool bClickClose = false)
                     this.textBox_led_cellWidth,
                     this.textBox_led_cellHeight,
                     new ComboBoxText(this.comboBox_printer_serialPort),
+                    new ComboBoxText(this.comboBox_printer_baudRate),
                 };
                 GuiState.SetUiState(controls, value);
             }
@@ -2107,6 +2109,10 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
             {
                 return this.comboBox_printer_serialPort.Text;
             }));
+            string baudRate = (string)this.Invoke((Func<string>)(() =>
+            {
+                return this.comboBox_printer_baudRate.Text;
+            }));
 
             if (string.IsNullOrEmpty(port) == true
                 || port == "不使用")
@@ -2115,7 +2121,9 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
                 return;
             }
 
-            var result = _printerDriver.InitializeDriver(port, "");
+            string style = $"baudRate:{baudRate}";
+
+            var result = _printerDriver.InitializeDriver(port, style);
             if (result.Value == -1)
             {
                 OutputHistory(result.ErrorInfo, 2);
@@ -2300,7 +2308,7 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
             dlg.button_print.Click += (s1, e1) =>
             {
                 var display_result = Print();
-                if (display_result.Value == -1 || dlg.ActionString == "getstatus")
+                if (display_result.Value == -1 || NeedReturnInfo(dlg.ActionString))
                     MessageBox.Show(this, $"result={display_result.ToString()}");
             };
             dlg.ShowDialog(this);
@@ -2308,7 +2316,7 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
             if (dlg.DialogResult == DialogResult.Cancel)
                 return;
             var result = Print();
-            if (result.Value == -1 || dlg.ActionString == "getstatus")
+            if (result.Value == -1 || NeedReturnInfo(dlg.ActionString))
             {
                 strError = result.ErrorInfo;
                 goto ERROR1;
@@ -2324,6 +2332,20 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
                     dlg.PrintText,
                     dlg.ExtendStyle);
             }
+
+            bool NeedReturnInfo(string action)
+            {
+                if (action == "getstatus"
+                    || action == "init")
+                    return true;
+                return false;
+            }
+        }
+
+        private void comboBox_printer_serialPort_TextChanged(object sender, EventArgs e)
+        {
+            if (this.comboBox_printer_serialPort.Text == "USB")
+                this.comboBox_printer_baudRate.Text = "";
         }
     }
 }

@@ -714,6 +714,21 @@ bool bOverwriteExist = true)
             }
             Library.TryCreateDir(installDirectory);
             File.WriteAllText(stateFileName, content);
+
+            // 2020/8/24
+            // 一旦 Windows 重启以后文件会被删除(移走)
+            if (content == "waitingReboot" || content == "downloading")
+            {
+                try
+                {
+                    string target = Path.Combine(installDirectory, "install_state.txt.removed");
+                    MoveFileEx(stateFileName, target, MoveFileFlags.DelayUntilReboot | MoveFileFlags.ReplaceExisting);
+                }
+                catch
+                {
+
+                }
+            }
             return new NormalResult();
         }
 

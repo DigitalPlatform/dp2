@@ -22,6 +22,18 @@ namespace PrinterDriver.Yanke
         {
             try
             {
+                var baudRateString = StringUtil.GetParameterByPrefix(style, "baudRate", ":");
+                int baudRate = 38400;
+                if (string.IsNullOrEmpty(baudRateString) == false)
+                {
+                    if (Int32.TryParse(baudRateString, out baudRate) == false)
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"style 字符串 '{style}' 中波特率值 '{baudRateString}' 格式错误，应为一个数字"
+                        };
+                }
+
                 int iport = 0;
 
                 if (port.ToLower() == "usb")
@@ -34,6 +46,7 @@ namespace PrinterDriver.Yanke
                     {
                         // String serial = sb.ToString();
                         iport = 13;
+                        baudRate = 0;
                     }
                     else
                         return new NormalResult
@@ -63,7 +76,7 @@ namespace PrinterDriver.Yanke
 
                 //函数功能：连接打印机设备
                 //返回值：0 -- 成功   -1  --  失败
-                int ret = Printer.YkOpenDevice(iport, 0, 0);
+                int ret = Printer.YkOpenDevice(iport, baudRate, 0);
                 if (ret == -1)
                 {
                     return new NormalResult
@@ -92,7 +105,7 @@ namespace PrinterDriver.Yanke
                 int ret = Printer.YkCloseDevice();
                 return new NormalResult();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return new NormalResult
                 {
@@ -127,6 +140,17 @@ namespace PrinterDriver.Yanke
             * */
             if (action == "init")
             {
+                /*
+                nRet = Printer.POS_Reset();
+                if (nRet == Printer.POS_SUCCESS)
+                    return new NormalResult();
+                else
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = "ResetPrinter Fail"
+                    };
+                */
                 //返回值：0 -- 成功   -1  --  失败
                 nRet = Printer.YkInitPrinter();
                 if (nRet == 0)

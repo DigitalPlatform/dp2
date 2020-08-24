@@ -89,6 +89,8 @@ namespace dp2SSL.Models
                             App.SetError("printer", "小票打印机状态异常");
                         else if (StringUtil.IsInList("paperout", check_result.ErrorCode))
                             App.SetError("printer", "小票打印机缺纸");
+                        else if (StringUtil.IsInList("paperwillout", check_result.ErrorCode))
+                            App.SetError("printer", "小票打印机即将缺纸");
                         else
                             App.SetError("printer", null);
 
