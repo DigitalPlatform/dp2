@@ -341,7 +341,11 @@ true);
                 return;
             }
 
-            // TODO: result.Value == 2 要提醒重启 Windows 以完成安装
+            // result.Value == 2 要提醒重启 Windows 以完成安装
+            if (result.Value == 2)
+            {
+                ErrorBox(result.ErrorInfo);
+            }
 
             // TODO: 从 dp2ssl.exe 中取信息？
 

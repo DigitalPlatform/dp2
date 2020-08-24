@@ -672,6 +672,9 @@ bool bClickClose = false)
             AbortReplication(false);
             TryDisposeReplicationCancel();
 
+            // 2020/8/25
+            _channelPool?.Close();
+
             SystemEvents.PowerModeChanged -= SystemEvents_PowerModeChanged;
             // UsbNotification.UnregisterUsbDeviceNotification();
 
