@@ -11,6 +11,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
@@ -339,6 +340,22 @@ KeyTime.FromTimeSpan(TimeSpan.FromSeconds(start + _length))) // KeyTime
                 return null;
 
             return System.IO.Path.Combine(WpfClientInfo.UserDir, backImageFile);
+        }
+
+        public static Brush GetPanelBackground()
+        {
+            var root = ShelfData.ShelfCfgDom?.DocumentElement;
+            if (root.HasAttribute("background"))
+                return GetBrush(root,
+                    "background",
+                    null,   // new SolidColorBrush(Colors.Transparent),
+                    null);
+            // 尝试寻找下级元素
+            var element = root.SelectSingleNode("background");
+            if (element == null)
+                return null;
+
+            return XamlReader.Parse(element.InnerXml) as Brush;
         }
 
         // 根据图像文件名，获得当前元素相关的 ImageSource

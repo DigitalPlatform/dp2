@@ -99,7 +99,8 @@
                 <!-- 60 -->
             </Grid.RowDefinitions>
             <!-- 柜门控件 -->
-            <Grid  Grid.Column="0">
+            <Grid x:Name="doorControlPanel" 
+                  Grid.Column="0">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="20"/>
                     <RowDefinition Height="*"/>
