@@ -1708,8 +1708,13 @@ namespace dp2SSL
                     return;
                 }
 
+
                 App.Invoke(new Action(() =>
                 {
+                    // 2020/8/25
+                    var back = DoorControl.GetPanelBackground();
+                    if (back != null)
+                        this.doorControlPanel.Background = back;
                     // 把门显示出来。因为此时需要看到是否关门的状态
                     this.doorControl.Visibility = Visibility.Visible;
                     this.doorControl.InitializeButtons(ShelfData.ShelfCfgDom, ShelfData.Doors);
@@ -3008,7 +3013,7 @@ namespace dp2SSL
             }
         }
 
-#region patron 分类报错机制
+        #region patron 分类报错机制
 
         // 错误类别 --> 错误字符串
         // 错误类别有：rfid fingerprint getreaderinfo
@@ -3028,7 +3033,7 @@ namespace dp2SSL
             }
         }
 
-#endregion
+        #endregion
 
         bool _visiblityChanged = false;
 
@@ -3717,7 +3722,7 @@ namespace dp2SSL
             return text.ToString();
         }
 
-#region 延迟清除读者信息
+        #region 延迟清除读者信息
 
         DelayAction _delayClearPatronTask = null;
 
@@ -3778,9 +3783,9 @@ namespace dp2SSL
             }
         }
 
-#endregion
+        #endregion
 
-#region 模拟柜门灯亮灭
+        #region 模拟柜门灯亮灭
 
         public void SimulateLamp(bool on)
         {
@@ -3793,9 +3798,9 @@ namespace dp2SSL
             }));
         }
 
-#endregion
+        #endregion
 
-#region 人脸识别功能
+        #region 人脸识别功能
 
         bool _stopVideo = false;
 
@@ -4000,7 +4005,7 @@ namespace dp2SSL
             }
         }
 
-#endregion
+        #endregion
 
         private void ClearPatron_Click(object sender, RoutedEventArgs e)
         {
@@ -4104,7 +4109,7 @@ namespace dp2SSL
 
 #if REMOVED
 
-#region 绑定和解绑读者功能
+        #region 绑定和解绑读者功能
 
 #pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
         private async void bindPatronCard_Click(object sender, RoutedEventArgs e)
@@ -4315,7 +4320,7 @@ uid);
             return new NormalResult { Value = 0 };
         }
 
-#endregion
+        #endregion
 
 #endif
     }
