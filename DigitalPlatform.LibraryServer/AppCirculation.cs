@@ -15940,6 +15940,15 @@ start_time_1,
             DomUtil.DeleteElements(itemdom.DocumentElement,
     "borrowDate");
 
+            // 2020/8/26
+            string borrowID = DomUtil.GetElementText(itemdom.DocumentElement, "borrowID");
+            if (nodeOldBorrower != null)
+                DomUtil.SetAttr(nodeOldBorrower,
+               "borrowID",
+               borrowID);
+            DomUtil.DeleteElements(itemdom.DocumentElement,
+    "borrowID");
+
             // 2020/3/27
             // 最近一次借还本册操作的时间。用于同步借还请求判断先后关系
             // 注意这里应该写入实际操作时间。同步的时候，同步成功的时间有可能晚于实际操作时间。实际操作时间有 style 参数里面的 operTime 子参数给出
@@ -16112,7 +16121,11 @@ start_time_1,
             }
 
             return_info.ItemBarcode = strItemBarcode;
+            // 2020/8/26
+            return_info.BorrowID = borrowID;
 
+            if (domOperLog != null)
+                DomUtil.SetElementText(domOperLog.DocumentElement, "borrowID", borrowID);
             return 0;
         }
 
@@ -17658,7 +17671,6 @@ out strError);
                 DomUtil.SetAttr(nodeBorrow, "recPath", strItemRecPath); // 2006/12/24
                 string strParentID = DomUtil.GetElementText(itemdom.DocumentElement, "parent");
 
-                string strBiblioRecPath = "";
                 // 通过册记录路径和parentid得知从属的种记录路径
                 // parameters:
                 // return:
@@ -17667,7 +17679,7 @@ out strError);
                 nRet = GetBiblioRecPathByItemRecPath(
                     strItemRecPath,
                     strParentID,
-                    out strBiblioRecPath,
+                    out string strBiblioRecPath,
                     out strError);
                 if (nRet == -1)
                 {
@@ -18011,6 +18023,10 @@ out strError);
                 DomUtil.SetAttr(nodeBorrow, "denyPeriod",
                    strThisDenyPeriod);
 
+            string borrowID = Guid.NewGuid().ToString();
+            // 2020/8/26
+            DomUtil.SetAttr(nodeBorrow, "borrowID", borrowID);
+
             // 2014/11/14
             // returningDate
             string strReturningDate = DateTimeUtil.Rfc1123DateTimeStringEx(this_return_time.ToLocalTime());
@@ -18081,6 +18097,11 @@ out strError);
             DomUtil.SetElementText(itemdom.DocumentElement,
                 "borrowDate",
                 strOperTime);
+
+            // 2020/8/26
+            DomUtil.SetElementText(itemdom.DocumentElement,
+                "borrowID",
+                borrowID);
 
             // 2020/3/27
             // 最近一次借还本册操作的时间。用于同步借还请求判断先后关系
@@ -18191,6 +18212,9 @@ out strError);
             DomUtil.SetElementText(domOperLog.DocumentElement, "operTime",
                 strOperTime);   // 操作时间
 
+            DomUtil.SetElementText(domOperLog.DocumentElement, "borrowID",
+    borrowID);
+
             // 返回借阅成功的信息
 
             // 返回满足RFC1123的时间值字符串 GMT时间
@@ -18208,7 +18232,7 @@ out strError);
             borrow_info.Location = strLocation;
              * */
             borrow_info.ItemBarcode = strItemBarcode;
-
+            borrow_info.BorrowID = borrowID;
             return 0;
         }
 
@@ -22907,6 +22931,11 @@ out strError);
         [DataMember]
         public string[] Overflows = null;
 
+        // 2020/8/26
+        // 借书事务编号
+        [DataMember]
+        public string BorrowID = "";
+
         /*
         // 2008/5/9
         // 所借的册的图书类型
@@ -22977,6 +23006,11 @@ out strError);
         // 可能是 @refID:xxxx 形态
         [DataMember]
         public string ItemBarcode = "";
+
+        // 2020/8/26
+        // 本次还书所针对的借书事务 ID
+        [DataMember]
+        public string BorrowID = "";
     }
 
 }

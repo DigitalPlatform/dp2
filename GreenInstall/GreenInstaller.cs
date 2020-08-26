@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.IO;
 using System.IO.Compression;
 using System.Net;
+using System.Net.Cache;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -157,6 +158,7 @@ bool bOverwriteExist = true)
         // -1 -1 -1 hide progress bar
         public delegate void Delegate_setProgress(double min, double max, double value, string text);
 
+        // TODO: 增加日志机制，用于观察缓存影响升级判断的问题
         // 从 Web 服务器安装或者升级绿色版
         // parameters:
         //      style   处理风格：
@@ -1128,6 +1130,12 @@ bool bOverwriteExist = true)
             DateTime local_lastmodify)
         {
             var webRequest = System.Net.WebRequest.Create(strUrl);
+
+            // 2020/8/27
+            // Define a cache policy for this request only.
+            HttpRequestCachePolicy noCachePolicy = new HttpRequestCachePolicy(HttpRequestCacheLevel.NoCacheNoStore);
+            webRequest.CachePolicy = noCachePolicy;
+
             webRequest.Method = "HEAD";
             webRequest.Timeout = 5000;
             try

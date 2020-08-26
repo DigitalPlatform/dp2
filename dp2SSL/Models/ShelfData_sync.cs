@@ -21,6 +21,7 @@ using DigitalPlatform;
 using DigitalPlatform.WPF;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.IO;
 
 namespace dp2SSL
 {
@@ -530,6 +531,46 @@ TaskScheduler.Default);
                 }
             }
         }
+
+        // 2020/8/26
+        // 把本地动作库中符合指定 borrowID 的状态修改为 “dontsync”
+        internal static async Task ChangeDatabaseBorrowStateAsync(string borrowID)
+        {
+            using (var releaser = await _databaseLimit.EnterAsync())
+            {
+                using (var context = new RequestContext())
+                {
+                    var items = context.Requests.Where(o => o.Action == "borrow" && o.LinkID == null && string.IsNullOrEmpty(o.ActionString) == false).ToList();
+                    RequestItem request = null;
+                    foreach(var item in items)
+                    {
+                        try
+                        {
+                            var borrow_info = JsonConvert.DeserializeObject<BorrowInfo>(item.ActionString);
+                            if (borrow_info.BorrowID == borrowID)
+                            {
+                                request = item;
+                                break;
+                            }
+                        }
+                        catch(Exception ex)
+                        {
+                            WpfClientInfo.WriteErrorLog($"解析 borrow_info 字符串 '{item.ActionString}' 时出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                        }
+                    }
+
+                    if (request != null)
+                    {
+                        // request.State = "dontsync";
+
+                        // 表示这个借书动作已经发生了还书
+                        request.LinkID = $"borrowID={borrowID}";
+                        context.SaveChanges();
+                    }
+                }
+            }
+        }
+
 
         static async Task ChangeDatabaseActionStateAsync(int id, ActionInfo action)
         {

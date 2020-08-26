@@ -361,7 +361,7 @@ namespace dp2SSL
                     var result = await ShelfData.RefreshInventoryAsync(e.Door);
 
                     // 2020/4/21 把这两句移动到 try 范围内
-                    SaveDoorActions(e.Door, true);
+                    await SaveDoorActions(e.Door, true);
                     actions = ShelfData.PullActions();
                 }
                 finally
@@ -849,7 +849,7 @@ namespace dp2SSL
                         */
                         {
                             await ShelfData.RefreshInventoryAsync(e.Door);
-                            SaveDoorActions(e.Door, false);
+                            await SaveDoorActions(e.Door, false);
                         }
                     }
                     catch (Exception ex)
@@ -923,7 +923,7 @@ namespace dp2SSL
                                 WpfClientInfo.WriteInfoLog($"超时情况下，对门 {e.Door.Name} 补做一次 submit");
 
                                 await ShelfData.RefreshInventoryAsync(e.Door);
-                                SaveDoorActions(e.Door, true);
+                                await SaveDoorActions(e.Door, true);
                                 await DoRequestAsync(ShelfData.PullActions());   // "silence"
                                 break;
                             }
@@ -1100,7 +1100,7 @@ namespace dp2SSL
 
             // 提交尚未提交的取出和放入
             // PatronClear(true);
-            SaveAllActions();
+            await SaveAllActions();
             await SubmitAsync(true);
 
             RfidManager.SetError -= RfidManager_SetError;
@@ -3348,9 +3348,9 @@ namespace dp2SSL
         }
 
         // 将指定门的暂存的信息保存为 Action。但并不立即提交
-        void SaveDoorActions(DoorItem door, bool clearOperator)
+        async Task SaveDoorActions(DoorItem door, bool clearOperator)
         {
-            var result = ShelfData.SaveActions((entity) =>
+            var result = await ShelfData.SaveActions((entity) =>
             {
                 var results = DoorItem.FindDoors(ShelfData.Doors, entity.ReaderName, entity.Antenna);
                 // TODO: 如果遇到 results.Count > 1 是否抛出异常?
@@ -3391,9 +3391,9 @@ namespace dp2SSL
         }
 
         // 将所有暂存信息保存为 Action，但并不立即提交
-        void SaveAllActions()
+        async Task SaveAllActions()
         {
-            ShelfData.SaveActions((entity) =>
+            await ShelfData.SaveActions((entity) =>
             {
                 return GetOperator(entity, true);
             });

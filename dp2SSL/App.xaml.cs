@@ -308,6 +308,21 @@ namespace dp2SSL
             }
             */
 
+            // 获得 RFID 配置信息和 图书馆名
+            _ = Task.Run(() =>
+            {
+                try
+                {
+                    var result = LibraryChannelUtil.GetRfidCfg();
+                    // WpfClientInfo.WriteInfoLog($"GetRfidCfg() return {result.ToString()}");
+                    LibraryName = result.LibraryName;
+                }
+                catch
+                {
+
+                }
+            });
+
             // 2020/7/5
             if (App.Function != "智能书柜")
             {
@@ -319,20 +334,6 @@ namespace dp2SSL
 
                 // 2020/8/20
                 GlobalMonitor.StartMonitorTask();
-
-                // 获得 RFID 配置信息和 图书馆名
-                _ = Task.Run(() =>
-                {
-                    try
-                    {
-                        var result = LibraryChannelUtil.GetRfidCfg();
-                        LibraryName = result.LibraryName;
-                    }
-                    catch
-                    {
-
-                    }
-                });
 
             }
 
