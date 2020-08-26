@@ -1838,7 +1838,12 @@ out string strError);
                 int skip_count = 0;
                 int success_count = 0;
                 List<string> errors = new List<string>();
-                foreach (Entity entity in _entities)
+
+                // 2020/8/26
+                // 先复制出来，避免受到 _entities 中途变化的影响
+                List<Entity> entities = new List<Entity>(_entities);
+
+                foreach (Entity entity in entities)
                 {
                     long lRet = 0;
                     string[] item_records = null;

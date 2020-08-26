@@ -1080,6 +1080,11 @@ namespace dp2SSL
         {
             public string Xml { get; set; }
             public string LibraryName { get; set; }
+
+            public override string ToString()
+            {
+                return $"Xml='{Xml}',LibraryName='{LibraryName}'," + base.ToString();
+            }
         }
 
         // 获得 RFID 配置信息

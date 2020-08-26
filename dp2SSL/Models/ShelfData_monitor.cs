@@ -166,7 +166,7 @@ namespace dp2SSL
                                     //      -1  出错
                                     //      0   中断
                                     //      1   完成
-                                    ReplicationResult repl_result = PatronReplication.DoReplication(
+                                    ReplicationResult repl_result = await PatronReplication.DoReplication(
                                         startDate,
                                         endDate,
                                         LogType.OperLog,

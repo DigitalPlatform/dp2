@@ -508,7 +508,7 @@ string color = "red")
             }
         }
 
-        const string dp2library_base_version = "3.29";
+        const string dp2library_base_version = "3.31";
         const string fingerprintcenter_base_version = "2.1";
         const string rfidcenter_base_version = "1.8";
         const string facecenter_base_version = "1.3";

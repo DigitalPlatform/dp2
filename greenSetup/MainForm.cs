@@ -374,11 +374,18 @@ true);
                 if (Directory.Exists(sourceDirectory))
                 {
                     string targetDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "dp2\\dp2ssl");
-                    var move_result = GreenInstaller.MoveUserDirectory(sourceDirectory,
-                        targetDirectory,
-                        _binDir,
-                        "maskSource");
-                    GreenInstaller.WriteInfoLog($"迁移用户文件夹 sourceDirectory={sourceDirectory}, targetDirectory={targetDirectory}, move_result={move_result.ToString()}");
+                    if (Directory.Exists(targetDirectory) == false)
+                    {
+                        var move_result = GreenInstaller.MoveUserDirectory(sourceDirectory,
+                            targetDirectory,
+                            _binDir,
+                            "maskSource");
+                        GreenInstaller.WriteInfoLog($"迁移用户文件夹 sourceDirectory={sourceDirectory}, targetDirectory={targetDirectory}, move_result={move_result.ToString()}");
+                    }
+                    else
+                    {
+                        GreenInstaller.WriteInfoLog($"绿色版用户文件夹 targetDirectory={targetDirectory} 已经存在，不再重复进行迁移");
+                    }
                 }
             }
 

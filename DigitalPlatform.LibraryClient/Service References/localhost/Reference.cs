@@ -2002,6 +2002,9 @@ namespace DigitalPlatform.LibraryClient.localhost {
         private long BorrowCountField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string BorrowIDField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
         private string BorrowOperatorField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
@@ -2038,6 +2041,19 @@ namespace DigitalPlatform.LibraryClient.localhost {
                 if ((this.BorrowCountField.Equals(value) != true)) {
                     this.BorrowCountField = value;
                     this.RaisePropertyChanged("BorrowCount");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string BorrowID {
+            get {
+                return this.BorrowIDField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.BorrowIDField, value) != true)) {
+                    this.BorrowIDField = value;
+                    this.RaisePropertyChanged("BorrowID");
                 }
             }
         }
@@ -2146,6 +2162,9 @@ namespace DigitalPlatform.LibraryClient.localhost {
         private long BorrowCountField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string BorrowIDField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
         private string BorrowOperatorField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
@@ -2204,6 +2223,19 @@ namespace DigitalPlatform.LibraryClient.localhost {
                 if ((this.BorrowCountField.Equals(value) != true)) {
                     this.BorrowCountField = value;
                     this.RaisePropertyChanged("BorrowCount");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string BorrowID {
+            get {
+                return this.BorrowIDField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.BorrowIDField, value) != true)) {
+                    this.BorrowIDField = value;
+                    this.RaisePropertyChanged("BorrowID");
                 }
             }
         }

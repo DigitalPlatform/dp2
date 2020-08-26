@@ -277,7 +277,7 @@ out string strError);
         //      -1  出错
         //      0   中断
         //      1   完成
-        public static ReplicationResult DoReplication(
+        public static async Task<ReplicationResult> DoReplication(
             string strStartDate,
             string strEndDate,
             LogType logType,
@@ -421,7 +421,7 @@ out string strError);
                             }
                             else if (strOperation == "borrow" || strOperation == "return")
                             {
-                                var trace_result = TraceBorrowOrReturn(
+                                var trace_result = await TraceBorrowOrReturn(
                                     dom,
                                     info);
                                 if (trace_result.Value == -1)
@@ -561,12 +561,14 @@ out string strError);
 </root>
 
          * */
-        static NormalResult TraceBorrowOrReturn(
+        static async Task<NormalResult> TraceBorrowOrReturn(
     XmlDocument domLog,
     ProcessInfo info)
         {
             try
             {
+                string strOperation = DomUtil.GetElementText(domLog.DocumentElement, "operation");
+
                 string strAction = DomUtil.GetElementText(domLog.DocumentElement, "action");
 
                 string strReaderBarcode = DomUtil.GetElementText(domLog.DocumentElement,
@@ -591,6 +593,16 @@ out string strError);
                     var get_result = GetReaderInfo(strReaderBarcode);
                     if (get_result.Value == 1)
                         UpdateLocalPatronRecord(get_result, now);
+                }
+
+                // 别处的还书动作兑现到 dp2ssl 本地动作库
+                if (strOperation == "return" && strAction == "return")
+                {
+                    string borrowID = DomUtil.GetElementText(domLog.DocumentElement, "borrowID");
+                    if (string.IsNullOrEmpty(borrowID) == false)
+                    {
+                        await ShelfData.ChangeDatabaseBorrowStateAsync(borrowID);
+                    }
                 }
 
                 return new NormalResult();
