@@ -11,6 +11,7 @@ using System.Collections;
 using System.Windows;
 using System.Deployment.Application;
 using System.IO;
+using System.Reflection;
 
 using Newtonsoft.Json;
 using Microsoft.AspNet.SignalR.Client;
@@ -24,10 +25,7 @@ using DigitalPlatform.WPF;
 using DigitalPlatform.Text;
 using DigitalPlatform.MessageClient;
 using DigitalPlatform.SimpleMessageQueue;
-using System.Runtime.CompilerServices;
 using DigitalPlatform.RFID;
-using System.Runtime.InteropServices.WindowsRuntime;
-using System.Reflection;
 
 namespace dp2SSL
 {
@@ -1895,9 +1893,11 @@ out string strError);
         }
 
         // 创建一个结果集
-        static async Task CreateResultsetAsync(IOrderedQueryable<RequestItem> result,
+        // IOrderedQueryable
+        static async Task<int> CreateResultsetAsync(IEnumerable<RequestItem> result,
             string resultsetName)
         {
+            int count = 0;
             using (var context = new ResultsetContext())
             {
                 context.Database.EnsureCreated();
@@ -1910,9 +1910,12 @@ out string strError);
                         ResultsetName = resultsetName,
                         ID = item.ID
                     });
+                    count++;
                 }
                 await context.SaveChangesAsync();
             }
+
+            return count;
         }
 
         // 删除一个结果集
@@ -1949,6 +1952,115 @@ out string strError);
                 return context.Items.Where(o => o.ResultsetName == resultsetName).Count();
             }
         }
+
+        class Scanner : IEnumerable<RequestItem>
+        {
+            public RequestContext Context { get; set; }
+            public SearchRequest SearchParam { get; set; }
+
+            public IEnumerator<RequestItem> GetEnumerator()
+            {
+                List<RequestItem> results = new List<RequestItem>();
+                if (SearchParam.UseList == "Operator")
+                {
+                    foreach (var item in Context.Requests)
+                    {
+                        var oper = item.OperatorString == null ? null :
+            JsonConvert.DeserializeObject<Operator>(item.OperatorString);
+                        if (Match(SearchParam.MatchStyle, oper.PatronBarcode, SearchParam.QueryWord))
+                            yield return item;
+                    }
+                }
+                else if (SearchParam.UseList == "ItemRecPath")
+                {
+                    foreach (var item in Context.Requests)
+                    {
+                        var entity = item.EntityString == null ? null :
+            JsonConvert.DeserializeObject<Entity>(item.EntityString);
+                        if (Match(SearchParam.MatchStyle, entity.ItemRecPath, SearchParam.QueryWord))
+                            yield return item;
+                    }
+                }
+                else
+                    throw new Exception($"未知的 UseList '{SearchParam.UseList}'");
+            }
+
+            static bool Match(string matchStyle, string text, string query)
+            {
+                if (text == null)
+                    text = "";
+
+                if (matchStyle == "left")
+                    return text.StartsWith(query);
+                else if (matchStyle == "right")
+                    return text.EndsWith(query);
+                else if (matchStyle == "exact")
+                    return text == query;
+                else // if (request.MatchStyle == "middle")
+                    return text.IndexOf(query) != -1;
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                List<RequestItem> results = new List<RequestItem>();
+                if (SearchParam.UseList == "Operator")
+                {
+                    foreach (var item in Context.Requests)
+                    {
+                        var oper = item.OperatorString == null ? null :
+            JsonConvert.DeserializeObject<Operator>(item.OperatorString);
+                        if (Match(SearchParam.MatchStyle, oper.PatronBarcode, SearchParam.QueryWord))
+                            yield return item;
+                    }
+                }
+                else if (SearchParam.UseList == "ItemRecPath")
+                {
+                    foreach (var item in Context.Requests)
+                    {
+                        var entity = item.EntityString == null ? null :
+            JsonConvert.DeserializeObject<Entity>(item.EntityString);
+                        if (Match(SearchParam.MatchStyle, entity.ItemRecPath, SearchParam.QueryWord))
+                            yield return item;
+                    }
+                }
+                else
+                    throw new Exception($"未知的 UseList '{SearchParam.UseList}'");
+            }
+        }
+
+#if REMOVED
+        static IEnumerable<RequestItem> Scan(RequestContext context,
+            SearchRequest searchParam)
+        {
+            List<RequestItem> results = new List<RequestItem>();
+            if (searchParam.UseList == "Operator")
+            {
+                foreach (var item in context.Requests)
+                {
+                    var oper = item.OperatorString == null ? null :
+        JsonConvert.DeserializeObject<Operator>(item.OperatorString);
+                    if (Match(searchParam.MatchStyle, oper.PatronBarcode, searchParam.QueryWord))
+                        results.Add(item);
+                }
+
+                return results;
+            }
+            else if (searchParam.UseList == "ItemRecPath")
+            {
+                foreach (var item in context.Requests)
+                {
+                    var entity = item.EntityString == null ? null :
+        JsonConvert.DeserializeObject<Entity>(item.EntityString);
+                    if (Match(searchParam.MatchStyle, entity.ItemRecPath, searchParam.QueryWord))
+                        results.Add(item);
+                }
+
+                return results;
+            }
+            else
+                throw new Exception($"未知的 UseList '{searchParam.UseList}'");
+        }
+#endif
 
         static string _libraryUID = Guid.NewGuid().ToString();
 
@@ -2008,17 +2120,43 @@ records,
                     // TODO: .Operation == "searchBiblio"
                     using (var context = new RequestContext())
                     {
-                        // https://stackoverflow.com/questions/37078256/entity-framework-building-where-clause-on-the-fly-using-expression
-                        string query = BuildQuery(searchParam);
+                        int result_count = 0;
 
-                        var query_result = context.Requests.WhereDynamic(x => query)
-    .OrderBy(o => o.ID);
-                        int result_count = query_result.Count();
-
-                        // 创建一个结果集
-                        if (result_count > 0)
+                        // 2020/8/27
+                        if (searchParam.UseList == "Operator"
+                            || searchParam.UseList == "ItemRecPath")
                         {
-                            await CreateResultsetAsync(query_result, strResultSetName);
+                            Scanner scanner = new Scanner
+                            {
+                                SearchParam = searchParam,
+                                Context = context
+                            };
+
+                            /*
+                            var results = Scan(context, searchParam);
+                            if (results == null)
+                                result_count = 0;
+                            else
+                                result_count = results.Count();
+                            */
+
+                            // 创建一个结果集
+                                result_count = await CreateResultsetAsync(scanner, strResultSetName);
+                        }
+                        else
+                        {
+                            // https://stackoverflow.com/questions/37078256/entity-framework-building-where-clause-on-the-fly-using-expression
+                            string query = BuildQuery(searchParam);
+
+                            var query_result = context.Requests.WhereDynamic(x => query)
+        .OrderBy(o => o.ID);
+                            result_count = query_result.Count();
+
+                            // 创建一个结果集
+                            if (result_count > 0)
+                            {
+                                await CreateResultsetAsync(query_result, strResultSetName);
+                            }
                         }
 
                         if (result_count == 0)
@@ -2278,9 +2416,9 @@ strError,
             };
         }
 
-        #endregion
+#endregion
 
-        #region GetRes() API
+#region GetRes() API
 
         static void OnGetResRecieved(GetResRequest param)
         {
@@ -2913,10 +3051,10 @@ result);
         }
 
 
-        #endregion
+#endregion
 
 
-        #region SetInfo() API
+#region SetInfo() API
 
         static void OnSetInfoRecieved(SetInfoRequest param)
         {
@@ -3146,9 +3284,9 @@ strError);
             }
         }
 
-        #endregion
+#endregion
 
-        #region GetUsers()
+#region GetUsers()
 
         public static Task<GetUserResult> GetUsersAsync(string userName,
             int start,
@@ -3160,6 +3298,6 @@ strError);
                 count);
         }
 
-        #endregion
+#endregion
     }
 }

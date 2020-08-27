@@ -45,7 +45,9 @@
             this.columnHeader_id = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_action = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_operator = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_name = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_pii = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_bookTitle = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_operTime = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_state = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_errorCode = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -58,8 +60,6 @@
             this.columnHeader_toShelfNo = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_toLocation = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_transferDirection = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader_bookTitle = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader_name = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.panel_query.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -113,9 +113,9 @@
             "ID",
             "Action",
             "State",
-            "Operator-",
+            "Operator",
             "PII",
-            "ItemRecPath-",
+            "ItemRecPath",
             "OperTime",
             "BatchNo",
             "CurrentShelfNo",
@@ -266,10 +266,20 @@
             this.columnHeader_operator.Text = "操作者";
             this.columnHeader_operator.Width = 151;
             // 
+            // columnHeader_name
+            // 
+            this.columnHeader_name.Text = "姓名";
+            this.columnHeader_name.Width = 80;
+            // 
             // columnHeader_pii
             // 
             this.columnHeader_pii.Text = "PII";
             this.columnHeader_pii.Width = 186;
+            // 
+            // columnHeader_bookTitle
+            // 
+            this.columnHeader_bookTitle.Text = "书名";
+            this.columnHeader_bookTitle.Width = 100;
             // 
             // columnHeader_operTime
             // 
@@ -330,16 +340,6 @@
             // 
             this.columnHeader_transferDirection.Text = "典藏移交方向";
             this.columnHeader_transferDirection.Width = 180;
-            // 
-            // columnHeader_bookTitle
-            // 
-            this.columnHeader_bookTitle.Text = "书名";
-            this.columnHeader_bookTitle.Width = 100;
-            // 
-            // columnHeader_name
-            // 
-            this.columnHeader_name.Text = "姓名";
-            this.columnHeader_name.Width = 80;
             // 
             // ShelfSearchForm
             // 
