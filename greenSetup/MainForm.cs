@@ -371,6 +371,7 @@ true);
                 string sourceDirectory = Path.Combine(
     Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
     "dp2ssl");
+                /*
                 if (Directory.Exists(sourceDirectory))
                 {
                     string targetDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "dp2\\dp2ssl");
@@ -387,6 +388,16 @@ true);
                         GreenInstaller.WriteInfoLog($"绿色版用户文件夹 targetDirectory={targetDirectory} 已经存在，不再重复进行迁移");
                     }
                 }
+                */
+                string targetDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "dp2\\dp2ssl");
+                {
+                    var move_result = GreenInstaller.MoveUserDirectory(sourceDirectory,
+                        targetDirectory,
+                        _binDir,
+                        "maskSource");
+                    GreenInstaller.WriteInfoLog($"迁移用户文件夹 sourceDirectory={sourceDirectory}, targetDirectory={targetDirectory}, move_result={move_result.ToString()}");
+                }
+
             }
 
             await ProcessStart(strExePath);

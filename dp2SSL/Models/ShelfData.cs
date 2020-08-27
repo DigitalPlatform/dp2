@@ -654,7 +654,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             Hashtable name_table = new Hashtable();
 
             {
-                XmlNodeList doors = ShelfCfgDom.DocumentElement.SelectNodes("shelf/door");
+                XmlNodeList doors = ShelfCfgDom.DocumentElement.SelectNodes("//door");
                 foreach (XmlElement door in doors)
                 {
                     DoorItem.ParseReaderString(door.GetAttribute("antenna"),
@@ -1392,14 +1392,13 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
 
             debugInfo?.AppendLine($"和 delta_piis 合并后的在借列表为 '{StringUtil.MakePathList(piis)}'");
 
-
             // 当前册的图书类型
-            var info_result = await GetBookInfoAsync(entity.PII);
+            var info_result = await GetBookInfoAsync(entity.GetOiPii());
             if (info_result.Value == -1)
             {
                 // 如果得不到图书类型，建议按照默认的权限参数处理
-                debugInfo?.AppendLine($"因为没有找到 PII '{entity.PII}' 为 的图书的图书类型，只好采用默认的借阅总册数 {max_items}");
-                WpfClientInfo.WriteInfoLog($"因为没有找到 PII '{entity.PII}' 为 的图书的图书类型，只好采用默认的借阅总册数 {max_items}");
+                debugInfo?.AppendLine($"因为没有找到 PII 为 '{entity.PII}' 的图书的图书类型({info_result.ToString()})，只好采用默认的借阅总册数 {max_items}");
+                WpfClientInfo.WriteInfoLog($"因为没有找到 PII 为'{entity.PII}' 的图书的图书类型({info_result.ToString()})，只好采用默认的借阅总册数 {max_items}");
                 goto DEFAULT;
             }
 
@@ -1558,9 +1557,11 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             }
         }
 
-        static async Task<string> GetBookType(string pii)
+        // parameters:
+        //      oi_pii  形态为 OI.PII
+        static async Task<string> GetBookType(string oi_pii)
         {
-            var result = await GetBookInfoAsync(pii);
+            var result = await GetBookInfoAsync(oi_pii);
             if (result.Value == -1)
                 return null;
             return result.BookType;
@@ -1580,18 +1581,34 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
 
         // TODO: 要增加从 dp2library 服务器直接获取的分支
         // 获得册信息
-        static async Task<GetBookInfoResult> GetBookInfoAsync(string pii)
+        // parameters:
+        //      oi_pii  形态为 OI.PII
+        // return:
+        //      -1  出错(包括册记录没有找到的情况)
+        //      0   成功
+        static async Task<GetBookInfoResult> GetBookInfoAsync(string oi_pii)
         {
-            var result = LibraryChannelUtil.LocalGetEntityData(pii);
-            if (result.Value == -1)
+            // 2020/8/27
+            // Debug.Assert(pii.IndexOf(".") != -1, "GetBookInfoAsync() 所使用的 PII 中必须有点");
+            
+            var result = LibraryChannelUtil.LocalGetEntityData(oi_pii);
+            if (result.Value == -1 || result.Value == 0)
             {
                 if (ShelfData.LibraryNetworkCondition == "OK")
-                    result = await LibraryChannelUtil.GetEntityDataAsync(pii, "network");
-                if (result.Value == -1)
+                    result = await LibraryChannelUtil.GetEntityDataAsync(oi_pii, "network");
+                if (result.Value == -1 || result.Value == 0)
                     return new GetBookInfoResult
                     {
                         Value = -1,
-                        ErrorInfo = result.ErrorInfo
+                        ErrorInfo = result.ErrorInfo,
+                        ErrorCode = result.ErrorCode,
+                    };
+                if (string.IsNullOrEmpty(result.ItemXml))
+                    return new GetBookInfoResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"PII 为 '{oi_pii}' 的册记录没有找到",
+                        ErrorCode = "notFound"
                     };
             }
 
@@ -2538,10 +2555,19 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
 
                         all.Add(entity);
 
+                        /*
+                        if (silently == false
+    && string.IsNullOrEmpty(entity.OI) == true && string.IsNullOrEmpty(entity.AOI) == true)
+                        {
+                            warnings.Add($"UID 为 '{tag.OneTag?.UID}' 的标签解析出错: 没有 OI 或 AOI 字段");
+                            WpfClientInfo.WriteErrorLog($"InitialShelfEntities() 遇到 tag (UID={tag.OneTag?.UID}) 解析出错: 没有 OI 或 AOI 字段");
+                        }
+                        */
+
                         if (silently == false
                             && string.IsNullOrEmpty(entity.Error) == false)
                         {
-                            warnings.Add($"UID 为 '{tag.OneTag?.UID}' 的标签解析出错: {entity.Error}");
+                            warnings.Add($"UID 为 '{tag.OneTag?.UID}' (PII 为 '{entity.PII}') 的标签解析出错: {entity.Error}");
                             WpfClientInfo.WriteErrorLog($"InitialShelfEntities() 遇到 tag (UID={tag.OneTag?.UID}) 解析出错: {entity.Error}\r\ntag 详情：{tag.ToString()}");
                         }
                     }
@@ -2870,6 +2896,11 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
 
                 result.OI = oi;
                 result.AOI = aoi;
+
+                // 2020/8/27
+                // 严格要求必须有 OI(AOI) 字段
+                if (string.IsNullOrEmpty(oi) && string.IsNullOrEmpty(aoi))
+                    result.AppendError("没有 OI 或 AOI 字段", "red", "missingOI");
             }
             return result;
         }

@@ -343,7 +343,7 @@ namespace dp2SSL
                     if (string.IsNullOrEmpty(entity.Title)
                         && string.IsNullOrEmpty(entity.PII) == false && entity.PII != "(空)")
                     {
-                        GetEntityDataResult result = await GetEntityDataAsync(entity.PII, "");
+                        GetEntityDataResult result = await GetEntityDataAsync(entity.GetOiPii(), "");
                         if (result.Value == -1)
                         {
                             entity.SetError(result.ErrorInfo);

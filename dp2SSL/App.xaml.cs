@@ -332,10 +332,10 @@ namespace dp2SSL
                 if (App.Protocol == "sip")
                     SipChannelUtil.StartMonitorTask();
 
-                // 2020/8/20
-                GlobalMonitor.StartMonitorTask();
-
             }
+
+            // 2020/8/20
+            GlobalMonitor.StartMonitorTask();
 
             {
                 string binDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
