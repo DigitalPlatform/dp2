@@ -73,6 +73,19 @@ namespace dp2SSL
                         {
                             // 先尝试从本地实体库中获得记录
                             entity_record = context.Entities.Where(o => o.PII == pii).FirstOrDefault();
+                            // 2020/8/27
+                            if (entity_record == null && pii.Contains(".") == false)
+                            {
+                                // 如果 pii 是不含有点的，则尝试后方一致匹配数据库
+                                entity_record = context.Entities.Where(o => o.PII.EndsWith("." + pii)).FirstOrDefault();
+                            }
+                            else if (entity_record == null && pii.Contains(".") == true)
+                            {
+                                // 如果 pii 是含有点的，则改为用纯净 PII 部分进行匹配
+                                string pure_pii = GetPurePII(pii);
+                                entity_record = context.Entities.Where(o => o.PII == pure_pii).FirstOrDefault();
+                            }
+
                             // EntityItem entity_record = null;   // testing
                         }
 
@@ -137,6 +150,8 @@ namespace dp2SSL
                                     Title = "",
                                 };
 
+                                // TODO: item_xml 里面最好包含 OI 字符串，便于建立本地缓存
+                                // TODO: 如何做到尽量保存 xxx.xxx 形态的 PII 作为 key?
                                 // 保存到本地数据库
                                 await AddOrUpdateAsync(context, new EntityItem
                                 {
@@ -309,6 +324,16 @@ namespace dp2SSL
             }
         }
 
+        // 从 OI.PII 中获得 PII 部分
+        static string GetPurePII(string text)
+        {
+            if (text == null)
+                return "";
+            if (text.Contains(".") == false)
+                return text;
+            return StringUtil.ParseTwoPart(text, ".")[1];
+        }
+
         // 从本地数据库获得册记录信息和书目摘要信息
         // .Value
         //      0   没有找到
@@ -379,10 +404,33 @@ namespace dp2SSL
             }
         }
 
+        static void SetPII(EntityItem item)
+        {
+            try
+            {
+                XmlDocument itemdom = new XmlDocument();
+                itemdom.LoadXml(item.Xml);
+
+                string oi = DomUtil.GetElementText(itemdom.DocumentElement, "oi");
+                string barcode = DomUtil.GetElementText(itemdom.DocumentElement, "barcode");
+
+                if (string.IsNullOrEmpty(oi))
+                    item.PII = barcode;
+                else
+                    item.PII = oi + "." + barcode;
+            }
+            catch
+            {
+
+            }
+        }
 
         static async Task AddOrUpdateAsync(BiblioCacheContext context,
             EntityItem item)
         {
+            // 调整 PII 字段，尽量规整为 OI.PII 形态
+            SetPII(item);
+
             try
             {
                 // 保存到本地数据库

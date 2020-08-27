@@ -4037,7 +4037,7 @@ namespace dp2SSL
         private async void CloseRF_Click(object sender, RoutedEventArgs e)
         {
             var result = await ShelfData.SelectAntennaAsync();
-            MessageBox.Show(result.ErrorInfo);
+            MessageBox.Show($"result={result.ToString()}");
         }
 
         private void pauseSubmit_Checked(object sender, RoutedEventArgs e)

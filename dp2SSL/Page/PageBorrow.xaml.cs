@@ -1594,7 +1594,7 @@ out string strError);
                         if (App.Protocol == "sip")
                             result = await SipChannelUtil.GetEntityDataAsync(entity.PII, "network");
                         else
-                            result = await LibraryChannelUtil.GetEntityDataAsync(entity.PII, "network");
+                            result = await LibraryChannelUtil.GetEntityDataAsync(entity.GetOiPii(), "network");
 
                         if (result.Value == -1)
                         {

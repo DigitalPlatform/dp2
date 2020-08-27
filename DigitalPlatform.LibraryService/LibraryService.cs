@@ -5016,7 +5016,19 @@ namespace dp2Library
                 }
                 else if (String.Compare(strResultType, "xml", true) == 0)
                 {
-                    strResult = strXml;
+                    // 2020/8/27
+                    // 加上 oi 元素
+                    try
+                    {
+                        XmlDocument itemdom = new XmlDocument();
+                        itemdom.LoadXml(strXml);
+                        app.AddItemOI(itemdom);
+                        strResult = itemdom.DocumentElement.OuterXml;
+                    }
+                    catch
+                    {
+                        strResult = strXml;
+                    }
                 }
                 else if (String.Compare(strResultType, "html", true) == 0)
                 {

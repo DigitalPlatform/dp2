@@ -42,30 +42,45 @@ namespace GreenInstall
             string binDirectory,
             string style)
         {
-            int nRet = Library.CopyDirectory(sourceDirectory,
-                targetDirectory,
-                null,
-                false,
-                out string strError);
-            if (nRet == -1)
-                return new NormalResult
-                {
-                    Value = -1,
-                    ErrorInfo = $"CopyDirectory() 出错: {strError}"
-                };
+            List<string> infos = new List<string>();
+
+            if (Directory.Exists(sourceDirectory) == true
+                && Directory.Exists(targetDirectory) == false)
+            {
+                int nRet = Library.CopyDirectory(sourceDirectory,
+                    targetDirectory,
+                    null,
+                    false,
+                    out string strError);
+                if (nRet == -1)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"CopyDirectory() 出错: {strError}"
+                    };
+                infos.Add($"复制目录 {sourceDirectory} 到目标位置 {targetDirectory}");
+            }
 
             // 2020/6/10
             // 将 targetDirectory 中的 userDirectory.txt 文件删除
+            if (Directory.Exists(targetDirectory))
             {
                 string filename = Path.Combine(targetDirectory, "userDirectoryMask.txt");
                 File.Delete(filename);
+
+                infos.Add($"删除目标目录 {targetDirectory} 内的 userDirectoryMask.txt 文件");
             }
 
             // 在源目录中做出标记，以便以后用到这个目录的程序会警告退出
-            if (StringUtil0.IsInList("maskSource", style))
+            if (Directory.Exists(sourceDirectory))
             {
-                string strMaskFileName = Path.Combine(sourceDirectory, "userDirectoryMask.txt");
-                File.WriteAllText(strMaskFileName, $"removed:此用户文件夹已经被移动到 {targetDirectory}");
+                if (StringUtil0.IsInList("maskSource", style))
+                {
+                    string strMaskFileName = Path.Combine(sourceDirectory, "userDirectoryMask.txt");
+                    File.WriteAllText(strMaskFileName, $"removed:此用户文件夹已经被移动到 {targetDirectory}");
+
+                    infos.Add($"在源目录 {sourceDirectory} 中创建 userDirectoryMask.txt 文件，标注 removed 状态");
+                }
             }
 
             // 在可执行文件目录中标记用户目录位置
@@ -74,9 +89,11 @@ namespace GreenInstall
                 var set_result = SetUserDirectory(binDirectory, targetDirectory);
                 if (set_result.Value == -1)
                     return set_result;
+
+                infos.Add($"在可执行文件目录 {binDirectory} 中创建文件 userDirectory.txt 标记用户目录位置");
             }
 
-            return new NormalResult();
+            return new NormalResult { ErrorInfo = string.Join(";", infos.ToArray())};
         }
 
         public static NormalResult SetUserDirectory(string binDirectory,
