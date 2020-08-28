@@ -10594,7 +10594,6 @@ Stack:
                                 goto ERROR1;
                             app.ActivateManagerThread();
                             goto END1;
-
                         }
 
                         XmlNode root = app.LibraryCfgDom.DocumentElement.SelectSingleNode("callNumber");
@@ -10852,6 +10851,12 @@ Stack:
 
             END1:
                 result.Value = nRet;
+                if (WriteOperLog(strCategory,
+                    strName, 
+                    strValue,
+                    sessioninfo.LibraryCodeList,
+                    out strError) == -1)
+                    goto ERROR1;
                 return result;
             ERROR1:
                 result.Value = -1;
@@ -10873,6 +10878,57 @@ Stack:
             {
                 app.UnlockForWrite();
             }
+        }
+
+        // 2020/8/28
+        int WriteOperLog(string strCategory,
+            string strName,
+            string strValue,
+            string strLibraryCodeList,
+            out string strError)
+        {
+            XmlDocument domOperLog = new XmlDocument();
+            domOperLog.LoadXml("<root />");
+
+            DomUtil.SetElementText(domOperLog.DocumentElement,
+                "operation",
+                "setSystemParameter");
+
+            DomUtil.SetElementText(domOperLog.DocumentElement,
+    "category",
+    strCategory);
+
+            DomUtil.SetElementText(domOperLog.DocumentElement,
+"name",
+strName);
+
+            DomUtil.SetElementText(domOperLog.DocumentElement,
+"value",
+strValue);
+
+            // 请求者所管辖的分馆代码列表
+            DomUtil.SetElementText(domOperLog.DocumentElement,
+"libraryCodeList",
+strLibraryCodeList);
+            
+            DomUtil.SetElementText(domOperLog.DocumentElement, "operator",
+    sessioninfo.UserID);
+
+            string strOperTime = app.Clock.GetClock();
+
+            DomUtil.SetElementText(domOperLog.DocumentElement, "operTime",
+                strOperTime);
+
+            int nRet = app.OperLog.WriteOperLog(domOperLog,
+                sessioninfo.ClientAddress,
+                out strError);
+            if (nRet == -1)
+            {
+                strError = "GetSystemParameter() API 写入日志时发生错误: " + strError;
+                return -1;
+            }
+
+            return 0;
         }
 
         static string ConvertCrLf(string strText)

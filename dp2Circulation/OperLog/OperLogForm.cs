@@ -501,6 +501,8 @@ namespace dp2Circulation
                 nRet = GetManageDatabaseString(dom, out strHtml, out strError);
             else if (strOperation == "statis")
                 nRet = GetStatisString(dom, out strHtml, out strError);
+            else if (strOperation == "setSystemParameter")
+                nRet = GetSetSystemParameterString(dom, out strHtml, out strError);
             else
             {
                 strError = "未知的操作类型 '" + strOperation + "'";
@@ -2125,6 +2127,49 @@ DomUtil.GetElementInnerXml(dom.DocumentElement, "deletedCommentRecords"));
 
             return 0;
         }
+
+        // SetSystemParameter
+        int GetSetSystemParameterString(XmlDocument dom,
+    out string strHtml,
+    out string strError)
+        {
+            strHtml = "";
+            strError = "";
+            int nRet = 0;
+
+            /*
+            string strLibraryCode = DomUtil.GetElementText(dom.DocumentElement, "libraryCode", out node);
+            if (node != null && string.IsNullOrEmpty(strLibraryCode) == true)
+                strLibraryCode = "<空>";
+             * */
+
+            string strOperation = DomUtil.GetElementText(dom.DocumentElement, "operation");
+
+            string strOperator = DomUtil.GetElementText(dom.DocumentElement, "operator");
+            string strOperTime = GetRfc1123DisplayString(
+                DomUtil.GetElementText(dom.DocumentElement, "operTime"));
+
+            string strCategory = DomUtil.GetElementText(dom.DocumentElement, "category");
+            string strName = DomUtil.GetElementText(dom.DocumentElement, "name");
+            string strValue = DomUtil.GetElementText(dom.DocumentElement, "value");
+
+            string strLibraryCodeList = DomUtil.GetElementText(dom.DocumentElement, "libraryCodeList");
+
+            strHtml =
+                "<table class='operlog'>" +
+                BuildHtmlLine("操作类型", strOperation + " -- 设置系统参数") +
+                BuildHtmlLine("参数目录", strCategory) +
+                BuildHtmlLine("参数名字", strName) +
+                BuildHtmlLine("参数值", strValue) +
+                BuildHtmlLine("操作者管辖的分馆代码", strLibraryCodeList) +
+                BuildHtmlLine("操作者", strOperator) +
+                BuildHtmlLine("操作时间", strOperTime) +
+                BuildClientAddressLine(dom) +
+                "</table>";
+
+            return 0;
+        }
+
 
         static string GetActionName(string strOperation,
             string strAction)

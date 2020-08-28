@@ -1037,6 +1037,10 @@ namespace DigitalPlatform.LibraryServer
             {
                 // 统计 2019/6/24
             }
+            else if (strOperation == "setSystemParameter")
+            {
+                // 只读 2020/8/28
+            }
             else if (strOperation == "manageDatabase")
             {
                 // 管理数据库 2017/5/23
