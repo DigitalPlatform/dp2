@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.32.*")]
-[assembly: AssemblyFileVersion("3.32.0.0")]
+[assembly: AssemblyVersion("3.33.*")]
+[assembly: AssemblyFileVersion("3.33.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -214,3 +214,4 @@ ItemCanReturn()
 //		3.30 (2020/7/16) 997 字段查重键的构成算法，增加了一个版本项(UNIMARC 205$a/MARC21 150$a)和一个 998$k 子字段。key 算法的版本号(997$v)从 0.03 变为 0.04，以前版本的 997 key 需要重建
 //		3.31 (2020/8/27) Borrow() API 要在读者记录和册记录中产生 borrowID 属性或者元素，并且 Borrow() 和 Return() API 的 BorrowInfo 和 ReturnInfo 结构中增加了 BorrowID 成员
 //		3.32 (2020/8/27) GetItemInfo() API 返回 XML 记录的时候，记录中会包含一个即时发生的 oi 元素
+//		3.33 (2020/8/28) 为 SetSystemParameter() API 增加了操作日志。前端可以通过拉取此类日志记录感知服务器配置参数的变化

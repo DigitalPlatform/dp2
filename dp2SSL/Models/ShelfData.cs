@@ -493,6 +493,10 @@ namespace dp2SSL
             }
             else
             {
+                var get_result = GetRightsTableFromServer();
+                if (get_result.Value == -1)
+                    return get_result;
+                /*
                 // 获得读者借阅权限定义
                 GetRightsTableResult get_result = LibraryChannelUtil.GetRightsTable();
                 if (get_result.Value == -1)
@@ -504,6 +508,7 @@ namespace dp2SSL
                 _rightTableXml = get_result.Xml;
                 // 顺便保存起来
                 WpfClientInfo.Config.Set("cache", "rightsTable", _rightTableXml);
+                */
             }
 
             // 要在初始化以前设定好
@@ -527,6 +532,22 @@ namespace dp2SSL
             WpfClientInfo.WriteInfoLog($"LockCommands '{RfidManager.LockCommands}'");
 
             // _patronReaderName = GetPatronReaderName();
+            return new NormalResult();
+        }
+
+        public static NormalResult GetRightsTableFromServer()
+        {
+            // 获得读者借阅权限定义
+            GetRightsTableResult get_result = LibraryChannelUtil.GetRightsTable();
+            if (get_result.Value == -1)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"获得读者借阅权限定义 XML 时出错: {get_result.ErrorInfo}"
+                };
+            _rightTableXml = get_result.Xml;
+            // 顺便保存起来
+            WpfClientInfo.Config.Set("cache", "rightsTable", _rightTableXml);
             return new NormalResult();
         }
 
@@ -1427,7 +1448,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             if (thisTypeCount + 1 > max_result.Max)
             {
                 debugInfo?.AppendLine($"thisTypeCount={thisTypeCount} 加 1 大于 {max_result.Max}，具体图书类型超额了");
-                
+
                 borrow_info.Overflows = new string[] { $"读者 '{ patron_pii}' 所借 '{ info_result.BookType }' 类图书数量将超过 馆代码 '{ info_result.LibraryCode}' 中 该读者类型 '{ patron_type }' 对该图书类型 '{ info_result.BookType }' 的最多 可借册数 值 '{max_result.Max}'" };
                 // 一天以后还书
                 SetReturning(1, "day");
@@ -1460,7 +1481,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
     info_result.BookType);
 
                 debugInfo?.AppendLine($"获得读者类型 '{patron_type}' 针对图书类型 '{info_result.BookType}' 的借期(馆代码 '{info_result.LibraryCode}')，返回 {period_result.ToString()}");
-                
+
                 if (period_result.Value == -1)
                 {
                     debugInfo?.AppendLine($"(1)只好按照 {max_period} 天的默认天数");
@@ -1590,7 +1611,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
         {
             // 2020/8/27
             // Debug.Assert(pii.IndexOf(".") != -1, "GetBookInfoAsync() 所使用的 PII 中必须有点");
-            
+
             var result = LibraryChannelUtil.LocalGetEntityData(oi_pii);
             if (result.Value == -1 || result.Value == 0)
             {

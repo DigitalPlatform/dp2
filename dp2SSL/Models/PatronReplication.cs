@@ -350,7 +350,7 @@ out string strError);
                         AutoCache = false,
                         CacheDir = "",
                         LogType = logType,
-                        Filter = "setReaderInfo,borrow,return", // 借书还书时候都会修改读者记录
+                        Filter = "setReaderInfo,borrow,return,setSystemParameter", // 借书还书时候都会修改读者记录
                         // ServerVersion = serverVersion
                     };
 
@@ -422,6 +422,14 @@ out string strError);
                             else if (strOperation == "borrow" || strOperation == "return")
                             {
                                 var trace_result = await TraceBorrowOrReturn(
+                                    dom,
+                                    info);
+                                if (trace_result.Value == -1)
+                                    WpfClientInfo.WriteErrorLog("同步 " + item.Date + " " + item.Index.ToString() + " 时出错: " + trace_result.ErrorInfo);
+                            }
+                            else if (strOperation == "setSystemParameter")
+                            {
+                                var trace_result = TraceSetSystemParameter(
                                     dom,
                                     info);
                                 if (trace_result.Value == -1)
@@ -807,5 +815,57 @@ out string strError);
         }
 
 
+        /*
+<root>
+  <operation>setSystemParameter</operation>
+  <category>circulation</category>
+  <name>rightsTable</name>
+  <value>...</value>
+  <libraryCodeList>
+  </libraryCodeList>
+  <operator>supervisor</operator>
+  <operTime>Fri, 28 Aug 2020 12:02:28 +0800</operTime>
+  <clientAddress via="net.pipe://localhost/dp2library/xe">localhost</clientAddress>
+  <version>1.08</version>
+</root>
+         * */
+        static NormalResult TraceSetSystemParameter(
+XmlDocument domLog,
+ProcessInfo info)
+        {
+            try
+            {
+                string strCategory = DomUtil.GetElementText(domLog.DocumentElement, "category");
+                string strName = DomUtil.GetElementText(domLog.DocumentElement, "name");
+
+                if (strCategory == "circulation" && strName == "rightsTable")
+                {
+                    // 获得读者借阅权限定义
+                    var result = ShelfData.GetRightsTableFromServer();
+                    if (result.Value == -1)
+                    {
+                        WpfClientInfo.WriteErrorLog($"同步获取读者借阅权限定义时出错: {result.ErrorInfo}");
+                        // TODO: 延时后尝试重新获取?
+                    }
+                    else
+                    {
+                        string strOperTime = DomUtil.GetElementText(domLog.DocumentElement, "operTime");
+                        // DateTime operTime = DateTimeUtil.FromRfc1123DateTimeString(strOperTime);
+
+                        WpfClientInfo.WriteInfoLog($"更新读者权限定义。操作日志创建时间 {strOperTime}");
+                    }
+                }
+
+                return new NormalResult();
+            }
+            catch (Exception ex)
+            {
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"TraceSetSystemParameter() 出现异常: {ex.Message}"
+                };
+            }
+        }
     }
 }
