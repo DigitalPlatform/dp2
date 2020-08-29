@@ -1,4 +1,4 @@
-﻿<Page x:Class="dp2SSL.PageInventory"
+﻿<local:MyPage x:Class="dp2SSL.PageInventory"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -7,9 +7,33 @@
       xmlns:fa="http://schemas.fontawesome.io/icons/"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
-      Title="PageInventory">
+      Title="PageInventory" Background="Black">
     <Page.Resources>
         <local:StringToVisibilityConverter x:Key="StringToVis" />
+        <Style x:Key="myHeaderStyle" TargetType="{x:Type GridViewColumnHeader}">
+            <Setter Property="Background" Value="DarkGray"/>
+            <Setter Property="Foreground" Value="White" />
+        </Style>
+        <Style TargetType="{x:Type ListViewItem}">
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="true" >
+                    <Setter Property="Foreground" Value="White" />
+                    <Setter Property="Background" Value="Transparent" />
+                </Trigger>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="Transparent" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <DataTemplate x:Key="myHeaderTemplate">
+            <DockPanel>
+                <TextBlock FontSize="16" Foreground="White" Background="Black">
+                    <TextBlock.Text>
+                        <Binding/>
+                    </TextBlock.Text>
+                </TextBlock>
+            </DockPanel>
+        </DataTemplate>
     </Page.Resources>
     <Grid Name="mainGrid">
         <Grid.ColumnDefinitions>
@@ -63,15 +87,33 @@
         <Grid Grid.Row="1" Grid.Column="1" Background="Transparent">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="10" />
-                <ColumnDefinition Width="300" />
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>
+                <RowDefinition Height="20"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
+            <ListView Margin="10" Name="list" Grid.Row="1" Background="Transparent" Foreground="LightGray" FontSize="20">
+                <ListView.View>
+                    <GridView>
 
+                        <GridViewColumn Header="UID" Width="200" DisplayMemberBinding="{Binding UID}"
+                                        HeaderContainerStyle="{StaticResource myHeaderStyle}">
+
+                        </GridViewColumn>
+                        <GridViewColumn Header="PII" Width="150" DisplayMemberBinding="{Binding PII}"
+                                        HeaderContainerStyle="{StaticResource myHeaderStyle}"/>
+                        <GridViewColumn Header="Title" Width="200"
+                                        HeaderContainerStyle="{StaticResource myHeaderStyle}">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Title}" TextDecorations="Underline" Foreground="Red" Cursor="Hand" />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                    </GridView>
+                </ListView.View>
+            </ListView>
         </Grid>
     </Grid>
 
-</Page>
+</local:MyPage>

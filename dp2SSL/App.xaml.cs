@@ -566,9 +566,10 @@ namespace dp2SSL
 
         public static bool IsPageBorrowActive { get; set; }
         public static bool IsPageShelfActive { get; set; }
+        public static bool IsPageInventoryActive { get; set; }
 
         // 比 App.Funcion == "智能书柜" 判断起来更快
-        static bool _isShelfMode = false;
+        // static bool _isShelfMode = false;
 
         // 可能会在全局错误 "cfg" 中设置出错信息
         public static void InitialShelfCfg()
@@ -577,7 +578,7 @@ namespace dp2SSL
             {
                 try
                 {
-                    _isShelfMode = true;
+                    // _isShelfMode = true;
                     var result = ShelfData.InitialShelf();
                     if (result.Value == -1)
                         SetError("cfg", result.ErrorInfo);
@@ -594,7 +595,9 @@ namespace dp2SSL
                 }
             }
             else
-                _isShelfMode = false;
+            {
+                // _isShelfMode = false;
+            }
         }
 
         private void _barcodeCapture_InputChar(CharInput input)
@@ -1567,6 +1570,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                 // TODO: 如果 IsPageShelfActive 和 IsPageBorrowActive 都为 false，则要看 Function 是什么决定如何显示标签数
                 bool isShelf = IsPageShelfActive;
                 bool isBorrow = IsPageBorrowActive;
+                bool isInventory = IsPageInventoryActive;
                 if ((isShelf == false && isBorrow == false)
                     || (isShelf == true && isBorrow == true))
                 {
@@ -1577,7 +1581,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
 
                 // bool numberShown = false;
 
-                if (isShelf)
+                if (isShelf || isInventory)
                 {
                     NewTagList.Refresh(// sender as BaseChannel<IRfid>,
                         e.ReaderNameList,
