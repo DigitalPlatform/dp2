@@ -28,7 +28,30 @@
             </Setter>
         </Style>
 
-
+        <Style x:Key="RoundedButtonLightStyle" TargetType="{x:Type Button}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border RenderTransformOrigin="0.5,0.5" x:Name="RootGrid" CornerRadius="30" 
+                                Background="#FF90CAF9" BorderThickness="1" Padding="2">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <!--
+                        https://stackoverflow.com/questions/27441292/pushed-effect-on-button-press
+                        -->
+                        <ControlTemplate.Triggers>
+                            <Trigger Property ="IsPressed" Value ="True">
+                                <Setter TargetName="RootGrid" Property="RenderTransform">
+                                    <Setter.Value>
+                                        <ScaleTransform ScaleX="0.9" ScaleY="0.9"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
 
     </Application.Resources>
 </Application>

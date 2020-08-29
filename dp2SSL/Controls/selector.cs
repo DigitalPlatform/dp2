@@ -51,6 +51,7 @@ namespace dp2SSL
             return null;
         }
 
+        /*
         public static IEnumerable<T> FindVisualChildren<T>(DependencyObject depObj) where T : DependencyObject
         {
             if (depObj != null)
@@ -70,5 +71,6 @@ namespace dp2SSL
                 }
             }
         }
+        */
     }
 }

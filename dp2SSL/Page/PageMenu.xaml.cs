@@ -83,8 +83,10 @@ namespace dp2SSL
 
             if (App.Function == "智能书柜")
                 this.SetSystemName("智能书柜");
-            else
+            else if (App.Function == "自助借还")
                 this.SetSystemName("自助借还系统");
+            else
+                this.SetSystemName("盘点系统");
 
             SetCompanyName();
         }
@@ -118,7 +120,7 @@ namespace dp2SSL
         public void UpdateMenu()
         {
             if (string.IsNullOrEmpty(App.FaceUrl))
-                this.registerFace.Visibility = Visibility.Hidden;
+                this.registerFace.Visibility = Visibility.Collapsed;
             else
                 this.registerFace.Visibility = Visibility.Visible;
 
@@ -128,14 +130,32 @@ namespace dp2SSL
                 this.borrowButton.Visibility = Visibility.Collapsed;
                 this.returnButton.Visibility = Visibility.Collapsed;
                 this.renewButton.Visibility = Visibility.Collapsed;
+                this.inventory.Visibility = Visibility.Collapsed;
+
+                this.bindPatronCard.Visibility = Visibility.Visible;
             }
-            else
+            else if (App.Function == "自助借还")
             {
                 this.shelf.Visibility = Visibility.Collapsed;
 
                 this.borrowButton.Visibility = Visibility.Visible;
                 this.returnButton.Visibility = Visibility.Visible;
                 this.renewButton.Visibility = Visibility.Visible;
+                this.inventory.Visibility = Visibility.Collapsed;
+
+                this.bindPatronCard.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                this.inventory.Visibility = Visibility.Visible;
+
+                this.shelf.Visibility = Visibility.Collapsed;
+                this.borrowButton.Visibility = Visibility.Collapsed;
+                this.returnButton.Visibility = Visibility.Collapsed;
+                this.renewButton.Visibility = Visibility.Collapsed;
+
+                this.registerFace.Visibility = Visibility.Collapsed;
+                this.bindPatronCard.Visibility = Visibility.Collapsed;
             }
         }
 
@@ -300,6 +320,16 @@ namespace dp2SSL
             this.NavigationService.Navigate(_pageShelf);
         }
 
+        static PageInventory _pageInventory = null;
+
+        void NavigatePageInventory()
+        {
+            if (_pageInventory == null)
+                _pageInventory = new PageInventory();
+
+            this.NavigationService.Navigate(_pageInventory);
+        }
+
         private void Button_Borrow_Click(object sender, RoutedEventArgs e)
         {
             NavigatePageBorrow("borrow");
@@ -431,6 +461,12 @@ namespace dp2SSL
             {
                 this.systemName.Text = systemName;
             }));
+        }
+
+        // 盘点
+        private void inventory_Click(object sender, RoutedEventArgs e)
+        {
+            NavigatePageInventory();
         }
 
 #if NO

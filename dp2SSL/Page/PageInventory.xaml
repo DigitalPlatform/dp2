@@ -1,0 +1,77 @@
+﻿<Page x:Class="dp2SSL.PageInventory"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:dp2SSL"
+      xmlns:fa="http://schemas.fontawesome.io/icons/"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Title="PageInventory">
+    <Page.Resources>
+        <local:StringToVisibilityConverter x:Key="StringToVis" />
+    </Page.Resources>
+    <Grid Name="mainGrid">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="60" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="0" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="0"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="60"/>
+        </Grid.RowDefinitions>
+        <!--
+        <Button Grid.Row="0" Grid.ColumnSpan="3">Top</Button>
+        -->
+        <!-- left bar -->
+        <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Vertical">
+            <Grid Height="20" />
+            <Button Name="goHome" Background="Transparent" BorderThickness="0" Click="goHome_Click">
+                <fa:ImageAwesome Icon="Home"
+                             Height="40" Foreground="DarkGray" Margin="4"/>
+            </Button>
+            <Grid Height="20" />
+            <Button Name="goHelp" Background="Transparent" BorderThickness="0">
+                <fa:ImageAwesome Icon="LightbulbOutline"
+                             Height="40" Foreground="DarkGray" Margin="4"/>
+            </Button>
+            <Grid Height="20" />
+            <Menu x:Name="menu"  Width="Auto" Height="Auto">
+                <MenuItem Header="_工具">
+                    <MenuItem x:Name="openTouchKeyboard" Header="打开触摸键盘" HorizontalAlignment="Left" Width="Auto" />
+                </MenuItem>
+                <MenuItem Header="_维护">
+                    <MenuItem x:Name="redoReplicatePatron" Header="重做全量同步读者记录" HorizontalAlignment="Left" Width="Auto" />
+                    <MenuItem x:Name="backupRequests" Header="备份本地动作库" HorizontalAlignment="Left" Width="Auto" />
+                    <MenuItem x:Name="restoreRequests" Header="恢复本地动作库" HorizontalAlignment="Left" Width="Auto" />
+                </MenuItem>
+            </Menu>
+        </StackPanel>
+        <Button Grid.Row="1" Grid.Column="2">Right</Button>
+        <!--
+        <Button Grid.Row="2" Grid.ColumnSpan="3">Bottom</Button>
+        <TextBlock Grid.Row="2" Grid.ColumnSpan="3"
+            Name="error" Visibility="Collapsed">Error Text</TextBlock>
+        -->
+        <TextBlock Grid.Row="2" Grid.ColumnSpan="3" Text="{Binding Error}"
+                                       FontSize="20" FontWeight="Bold" Foreground="White" Background="DarkRed"
+                                       Visibility="{Binding Path=Error, Converter={StaticResource StringToVis}}"
+                                       TextWrapping="WrapWithOverflow"/>
+
+        <Grid Grid.Row="1" Grid.Column="1" Background="Transparent">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="10" />
+                <ColumnDefinition Width="300" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+        </Grid>
+    </Grid>
+
+</Page>

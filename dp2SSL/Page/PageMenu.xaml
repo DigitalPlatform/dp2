@@ -6,7 +6,7 @@
       xmlns:local="clr-namespace:dp2SSL"
       mc:Ignorable="d" 
       Background="Black"
-      d:DesignHeight="500" d:DesignWidth="500"
+      d:DesignHeight="600" d:DesignWidth="500"
       WindowTitle="主菜单" Title="主菜单"
       >
     <Page.Resources>
@@ -87,6 +87,9 @@
                 Name="bindPatronCard" Content="绑定读者卡" Click="bindPatronCard_Click"
                 Background="#FF7FC1AB" Foreground="Black" FontSize="24" BorderThickness="0"/>
 
+            <Button 
+                Name="inventory" Content="盘点" Click="inventory_Click"
+                Background="#FF74A484" Foreground="Black" FontSize="40" BorderThickness="0"/>
 
             <Button Name="error" Content="错误信息"  Click="Error_Click"
                 Visibility="{Binding Path=Error, Mode=OneWay, Converter={StaticResource StringToVis}}"

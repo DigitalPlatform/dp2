@@ -518,6 +518,9 @@
     <Compile Include="Page\PageError.xaml.cs">
       <DependentUpon>PageError.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Page\PageInventory.xaml.cs">
+      <DependentUpon>PageInventory.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Page\PageSetting.xaml.cs">
       <DependentUpon>PageSetting.xaml</DependentUpon>
     </Compile>
@@ -626,6 +629,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Page\PageBorrow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Page\PageInventory.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
