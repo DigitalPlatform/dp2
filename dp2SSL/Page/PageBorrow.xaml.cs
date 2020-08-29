@@ -276,12 +276,19 @@ namespace dp2SSL
             App.TagChanged += CurrentApp_TagChanged;
             _ = Task.Run(async () =>
             {
-                while (true)
+                try
                 {
-                    _tagChangedCount = 0;
-                    await InitialEntitiesAsync();
-                    if (_tagChangedCount == 0)
-                        break;  // 只有当初始化过程中没有被 TagChanged 事件打扰过，才算初始化成功了。否则就要重新初始化
+                    while (true)
+                    {
+                        _tagChangedCount = 0;
+                        await InitialEntitiesAsync();
+                        if (_tagChangedCount == 0)
+                            break;  // 只有当初始化过程中没有被 TagChanged 事件打扰过，才算初始化成功了。否则就要重新初始化
+                    }
+                }
+                catch(Exception ex)
+                {
+                    WpfClientInfo.WriteErrorLog($"InitialEntitiesAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 }
             });
         }

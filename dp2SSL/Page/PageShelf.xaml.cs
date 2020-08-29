@@ -1108,7 +1108,7 @@ namespace dp2SSL
 #if OLD_TAGCHANGED
             App.CurrentApp.TagChanged -= CurrentApp_TagChanged;
 #else
-            App.NewTagChanged += CurrentApp_NewTagChanged;
+            App.NewTagChanged -= CurrentApp_NewTagChanged;
 #endif
 
             FingerprintManager.Touched -= FingerprintManager_Touched;
