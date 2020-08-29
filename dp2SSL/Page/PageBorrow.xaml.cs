@@ -274,13 +274,16 @@ namespace dp2SSL
 
             ////
             App.TagChanged += CurrentApp_TagChanged;
-            while (true)
+            _ = Task.Run(async () =>
             {
-                _tagChangedCount = 0;
-                await InitialEntitiesAsync();
-                if (_tagChangedCount == 0)
-                    break;  // 只有当初始化过程中没有被 TagChanged 事件打扰过，才算初始化成功了。否则就要重新初始化
-            }
+                while (true)
+                {
+                    _tagChangedCount = 0;
+                    await InitialEntitiesAsync();
+                    if (_tagChangedCount == 0)
+                        break;  // 只有当初始化过程中没有被 TagChanged 事件打扰过，才算初始化成功了。否则就要重新初始化
+                }
+            });
         }
 
 #pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
@@ -1590,27 +1593,36 @@ out string strError);
                     if (string.IsNullOrEmpty(entity.Title)
                         && string.IsNullOrEmpty(entity.PII) == false && entity.PII != "(空)")
                     {
-                        GetEntityDataResult result = null;
-                        if (App.Protocol == "sip")
-                            result = await SipChannelUtil.GetEntityDataAsync(entity.PII, "network");
-                        else
-                            result = await LibraryChannelUtil.GetEntityDataAsync(entity.GetOiPii(), "network");
-
-                        if (result.Value == -1)
+                        var waiting = entity.Waiting;
+                        entity.Waiting = true;
+                        try
                         {
-                            entity.SetError(result.ErrorInfo);
-                            continue;
+                            GetEntityDataResult result = null;
+                            if (App.Protocol == "sip")
+                                result = await SipChannelUtil.GetEntityDataAsync(entity.PII, "network");
+                            else
+                                result = await LibraryChannelUtil.GetEntityDataAsync(entity.GetOiPii(), "network");
+
+                            if (result.Value == -1)
+                            {
+                                entity.SetError(result.ErrorInfo);
+                                continue;
+                            }
+
+                            entity.Title = GetCaption(result.Title);
+                            entity.SetData(result.ItemRecPath, result.ItemXml);
+
+                            // 2020/7/3
+                            // 获得册记录阶段出错，但获得书目摘要成功
+                            if (string.IsNullOrEmpty(result.ErrorCode) == false)
+                            {
+                                entity.SetError(result.ErrorInfo);
+                                clearError = false;
+                            }
                         }
-
-                        entity.Title = GetCaption(result.Title);
-                        entity.SetData(result.ItemRecPath, result.ItemXml);
-
-                        // 2020/7/3
-                        // 获得册记录阶段出错，但获得书目摘要成功
-                        if (string.IsNullOrEmpty(result.ErrorCode) == false)
+                        finally
                         {
-                            entity.SetError(result.ErrorInfo);
-                            clearError = false;
+                            entity.Waiting = waiting;
                         }
                     }
 
@@ -2245,7 +2257,7 @@ out string strError);
                     RfidManager.PosPrint("cut", "", "");
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 WpfClientInfo.WriteErrorLog($"PosPrint() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 SetGlobalError("posprint", $"PosPrint() 出现异常: {ex.Message}");

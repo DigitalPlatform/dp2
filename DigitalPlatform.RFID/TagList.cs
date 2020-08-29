@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.Remoting.Channels.Ipc;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace DigitalPlatform.RFID
@@ -1028,6 +1029,9 @@ namespace DigitalPlatform.RFID
             // 2019/5/21
             if (channel.Started == false)
                 return new GetTagInfoResult { Value = -1, ErrorInfo = "RFID 通道尚未启动" };
+
+            // testing
+            // Thread.Sleep(1000);
 
             TagInfo info = (TagInfo)_tagTable[uid];
             if (info == null)

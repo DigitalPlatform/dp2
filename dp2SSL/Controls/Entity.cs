@@ -160,7 +160,7 @@ namespace dp2SSL
                 UID = data.OneTag.UID,
                 Antenna = data.OneTag.AntennaID.ToString(),
                 ReaderName = data.OneTag.ReaderName,
-                TagInfo = data.OneTag.TagInfo
+                TagInfo = data.OneTag.TagInfo,
             };
             this.Add(entity);
 
@@ -168,7 +168,8 @@ namespace dp2SSL
             //      可能会抛出异常 ArgumentException
             SetPII(entity);
 
-            entity.AppendError(data.Error);
+            if (string.IsNullOrEmpty(data.Error) == false)
+                entity.AppendError(data.Error);
             return entity;
         }
 

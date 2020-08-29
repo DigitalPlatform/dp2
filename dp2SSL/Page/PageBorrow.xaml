@@ -158,10 +158,10 @@
             </Grid>
             <StackPanel Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3" Orientation="Horizontal" HorizontalAlignment="Center">
                 <Button Name="borrowButton"
-                    Style="{DynamicResource RoundedButtonStyle}" 
+                    Style="{DynamicResource RoundedButtonLightStyle}" 
                     Width="160" Height="60" 
                     FontSize="30" FontWeight="ExtraBold" 
-                    Foreground="White" 
+                    Foreground="Black" 
                      Click="BorrowButton_Click">
                     <Button.Content>
                         <TextBlock><Run Text="借"/><Run FontSize="20" Text=" ("/><Run FontSize="20" Text="{Binding ElementName=booksControl, Path=Borrowable, UpdateSourceTrigger=PropertyChanged}" /><Run FontSize="20" Text=")"/>
@@ -169,10 +169,10 @@
                     </Button.Content>
                 </Button>
                 <Button Name="returnButton"
-                    Style="{DynamicResource RoundedButtonStyle}" 
+                    Style="{DynamicResource RoundedButtonLightStyle}" 
                     Width="160" Height="60" 
                     FontSize="30" FontWeight="ExtraBold" 
-                    Foreground="White" 
+                    Foreground="Black" 
                      Click="ReturnButton_Click">
                     <Button.Content>
                         <TextBlock>
@@ -181,10 +181,10 @@
                     </Button.Content>
                 </Button>
                 <Button Name="renewButton"
-                    Style="{DynamicResource RoundedButtonStyle}" 
+                    Style="{DynamicResource RoundedButtonLightStyle}" 
                     Width="160" Height="60" 
                     FontSize="30" FontWeight="ExtraBold" 
-                    Foreground="White" 
+                    Foreground="Black" 
                      Click="RenewButton_Click">
                     <Button.Content>
                         <TextBlock><Run Text="续借"/><Run FontSize="20" Text=" ("/><Run FontSize="20" Text="{Binding ElementName=booksControl, Path=Renewable, UpdateSourceTrigger=PropertyChanged}" /><Run FontSize="20" Text=")"/>
@@ -192,20 +192,20 @@
                     </Button.Content>
                 </Button>
                 <Button Name="registerFace"
-                    Style="{DynamicResource RoundedButtonStyle}" 
+                    Style="{DynamicResource RoundedButtonLightStyle}" 
                     Width="160" Height="60" 
                     FontSize="30" FontWeight="ExtraBold" 
-                    Foreground="White" 
+                    Foreground="Black" 
                      Click="RegisterFace_Click">
                     <Button.Content>
                         <TextBlock>注册人脸</TextBlock>
                     </Button.Content>
                 </Button>
                 <Button Name="deleteFace"
-                    Style="{DynamicResource RoundedButtonStyle}" 
+                    Style="{DynamicResource RoundedButtonLightStyle}" 
                     Width="160" Height="60" 
                     FontSize="30" FontWeight="ExtraBold" 
-                    Foreground="White" 
+                    Foreground="Black" 
                      Click="DeleteFace_Click">
                     <Button.Content>
                         <TextBlock>删除人脸</TextBlock>
@@ -213,20 +213,20 @@
                 </Button>
 
                 <Button Name="bindPatronCard"
-                    Style="{DynamicResource RoundedButtonStyle}" 
+                    Style="{DynamicResource RoundedButtonLightStyle}" 
                     Width="200" Height="60" 
                     FontSize="30" FontWeight="ExtraBold" 
-                    Foreground="White" 
+                    Foreground="Black" 
                      Click="bindPatronCard_Click">
                     <Button.Content>
                         <TextBlock>绑定读者卡</TextBlock>
                     </Button.Content>
                 </Button>
                 <Button Name="releasPatronCard"
-                    Style="{DynamicResource RoundedButtonStyle}" 
+                    Style="{DynamicResource RoundedButtonLightStyle}" 
                     Width="200" Height="60" 
                     FontSize="30" FontWeight="ExtraBold" 
-                    Foreground="White" 
+                    Foreground="Black" 
                      Click="releasePatronCard_Click">
                     <Button.Content>
                         <TextBlock>解绑读者卡</TextBlock>
