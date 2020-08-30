@@ -1,10 +1,12 @@
 ﻿using DigitalPlatform;
 using DigitalPlatform.RFID;
+using DigitalPlatform.WPF;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -15,6 +17,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using static dp2SSL.InventoryData;
 
 namespace dp2SSL
 {
@@ -39,6 +42,26 @@ namespace dp2SSL
             */
             this.Loaded += PageInventory_Loaded;
             this.Unloaded += PageInventory_Unloaded;
+
+            /*
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    while (true)
+                    {
+                        _tagChangedCount = 0;
+                        await InitialEntitiesAsync();
+                        if (_tagChangedCount == 0)
+                            break;  // 只有当初始化过程中没有被 TagChanged 事件打扰过，才算初始化成功了。否则就要重新初始化
+                    }
+                }
+                catch (Exception ex)
+                {
+                    WpfClientInfo.WriteErrorLog($"InitialEntitiesAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                }
+            });
+            */
         }
 
         private void PageInventory_Unloaded(object sender, RoutedEventArgs e)
@@ -66,6 +89,25 @@ namespace dp2SSL
             this.NavigationService.Navigate(PageMenu.MenuPage);
         }
 
+        int _tagChangedCount = 0;
+
+        // 首次初始化 Entity 列表
+        async Task<NormalResult> InitialEntitiesAsync()
+        {
+            App.Invoke(new Action(() =>
+            {
+                _entities.Clear();  // 2019/9/4
+            }));
+
+            foreach (var tag in NewTagList.Tags)
+            {
+                ProcessTag(tag);
+            }
+
+            return new NormalResult();
+        }
+
+
         // 新版本的事件
 #pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
         private async void CurrentApp_NewTagChanged(object sender, NewTagChangedEventArgs e)
@@ -85,28 +127,42 @@ namespace dp2SSL
 
             // TODO: 对离开的 tag 变化为灰色颜色
 
-            foreach(var tag in e.AddTags)
+            foreach (var tag in e.AddTags)
             {
-                var entity = InventoryData.AddEntity(tag, out bool isNewly);
-                if (isNewly)
-                {
-                    App.Invoke(new Action(() =>
-                    {
-                        _entities.Add(entity);
-                    }));
-                }
+                ProcessTag(tag);
             }
 
             foreach (var tag in e.UpdateTags)
             {
-                var entity = InventoryData.AddEntity(tag, out bool isNewly);
-                if (isNewly)
+                ProcessTag(tag);
+            }
+        }
+
+        void ProcessTag(TagAndData tag)
+        {
+            var entity = InventoryData.AddEntity(tag, out bool isNewly);
+
+            var info = entity.Tag as ProcessInfo;
+            if (info == null)
+            {
+                info = new ProcessInfo();
+                entity.Tag = info;
+            }
+
+            if (isNewly)
+            {
+                App.Invoke(new Action(() =>
                 {
-                    App.Invoke(new Action(() =>
-                    {
-                        _entities.Add(entity);
-                    }));
-                }
+                    _entities.Add(entity);
+                }));
+            }
+
+            if (string.IsNullOrEmpty(entity.PII) == false
+                && string.IsNullOrEmpty(info.State))
+            {
+                info.State = "processing";
+                InventoryData.AppendList(entity);
+                InventoryData.ActivateInventory();
             }
         }
 

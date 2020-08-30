@@ -17,6 +17,8 @@ namespace dp2SSL
 {
     public class RfidItem : INotifyPropertyChanged
     {
+        public object Tag { get; set; }
+
         private string _pii;
 
         public string PII
@@ -259,6 +261,7 @@ namespace dp2SSL
             dup.ReaderName = this.ReaderName;
             dup.Antenna = this.Antenna;
             dup.Protocol = this.Protocol;
+            dup.Tag = this.Tag;
         }
 
         public string GetOiPii()

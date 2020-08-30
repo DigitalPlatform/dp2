@@ -1,9 +1,12 @@
-﻿using DigitalPlatform.RFID;
+﻿using DigitalPlatform;
+using DigitalPlatform.RFID;
+using DigitalPlatform.WPF;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace dp2SSL
@@ -157,5 +160,140 @@ namespace dp2SSL
             }
         }
 
+
+        // Entity 附加的处理信息
+        public class ProcessInfo
+        {
+            // 状态
+            public string State { get; set; }
+        }
+
+        #region 处理列表
+
+        static List<Entity> _entityList = new List<Entity>();
+        static object _entityListSyncRoot = new object();
+
+        // 复制列表
+        public static List<Entity> CopyList()
+        {
+            lock (_entityListSyncRoot)
+            {
+                return new List<Entity>(_entityList);
+            }
+        }
+
+        // 追加元素
+        public static void AppendList(Entity entity)
+        {
+            lock (_entityListSyncRoot)
+            {
+                _entityList.Add(entity);
+            }
+        }
+
+        public static void RemoveList(List<Entity> entities)
+        {
+            lock (_entityListSyncRoot)
+            {
+                foreach (var entity in entities)
+                {
+                    _entityList.Remove(entity);
+                }
+            }
+        }
+
+        #endregion
+
+        #region 后台任务
+
+        static Task _inventoryTask = null;
+
+        // 监控间隔时间
+        static TimeSpan _inventoryIdleLength = TimeSpan.FromSeconds(10);
+
+        static AutoResetEvent _eventInventory = new AutoResetEvent(false);
+
+        // 激活任务
+        public static void ActivateInventory()
+        {
+            _eventInventory.Set();
+        }
+
+        // 启动盘点后台任务
+        public static void StartInventoryTask()
+        {
+            if (_inventoryTask != null)
+                return;
+
+            CancellationToken token = App.CancelToken;
+
+            token.Register(() =>
+            {
+                _eventInventory.Set();
+            });
+
+            _inventoryTask = Task.Factory.StartNew(async () =>
+            {
+                WpfClientInfo.WriteInfoLog("盘点后台线程开始");
+                try
+                {
+                    while (token.IsCancellationRequested == false)
+                    {
+                        // await Task.Delay(TimeSpan.FromSeconds(10));
+                        _eventInventory.WaitOne(_inventoryIdleLength);
+
+                        token.ThrowIfCancellationRequested();
+
+                        //
+                        await Processing();
+                    }
+                    _inventoryTask = null;
+                }
+                catch (OperationCanceledException)
+                {
+
+                }
+                catch (Exception ex)
+                {
+                    WpfClientInfo.WriteErrorLog($"盘点后台线程出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                    App.SetError("inventory_worker", $"盘点后台线程出现异常: {ex.Message}");
+                }
+                finally
+                {
+                    WpfClientInfo.WriteInfoLog("盘点后台线程结束");
+                }
+            },
+token,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+        }
+
+        static async Task Processing()
+        {
+            var list = CopyList();
+            foreach(var entity in list)
+            {
+                // 获得册记录和书目摘要
+                // .Value
+                //      -1  出错
+                //      0   没有找到
+                //      1   找到
+                var result = await LibraryChannelUtil.GetEntityDataAsync(entity.PII, "network");
+                if (result.Value == -1)
+                    entity.AppendError(result.ErrorInfo, "red", result.ErrorCode);
+                else
+                {
+                    if (string.IsNullOrEmpty(result.Title) == false)
+                        entity.Title = PageBorrow.GetCaption(result.Title);
+                    if (string.IsNullOrEmpty(result.ItemXml) == false)
+                        entity.SetData(result.ItemRecPath, result.ItemXml);
+                }
+            }
+
+            // 把处理过的 entity 从 list 中移走
+            RemoveList(list);
+        }
+
+        #endregion
     }
 }
