@@ -135,7 +135,10 @@ namespace DigitalPlatform.CirculationClient
 
         // parameters:
         //      product_name    例如 "fingerprintcenter"
-        public static void Initial(string product_name, 
+        // return:
+        //      true    初始化成功
+        //      false   初始化失败，应立刻退出应用程序
+        public static bool Initial(string product_name, 
             Delegate_skipSerialNumberCheck skipCheck = null)
         {
             ProductName = product_name;
@@ -194,18 +197,25 @@ namespace DigitalPlatform.CirculationClient
                     // 在用户目录中写入一个隐藏文件，表示序列号功能已经启用
                     // this.WriteSerialNumberStatusFile();
 
+                    ClientInfo.WriteInfoLog($"尝试打开序列号对话框");
+
                     int nRet = VerifySerialCode($"{product_name}需要先设置序列号才能使用",
                         "",
                         "reinput",
                         out string strError);
                     if (nRet == -1)
                     {
+                        ClientInfo.WriteErrorLog($"序列号不正确，{product_name} 退出");
                         MessageBox.Show(MainForm, $"{product_name}需要先设置序列号才能使用");
                         API.PostMessage(MainForm.Handle, API.WM_CLOSE, 0, 0);
-                        return;
+                        return false;
                     }
+
+                    ClientInfo.WriteInfoLog($"序列号对话框被确认。nRet={nRet}, strError={strError}");
                 }
             }
+
+            return true;
         }
 
         public static void Finish()

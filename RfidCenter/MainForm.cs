@@ -133,7 +133,14 @@ namespace RfidCenter
                 return;
             }
 
-            ClientInfo.Initial("rfidcenter");
+            var bRet = ClientInfo.Initial("rfidcenter");
+            // 2020/8/30
+            if (bRet == false)
+            {
+                Application.Exit();
+                return;
+            }
+
             {
                 // Driver1Manager.Log = LogManager.GetLogger("main", "driver1");
                 // string userLogDir = ClientInfo.UserLogDir;

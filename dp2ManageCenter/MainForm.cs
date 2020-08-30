@@ -56,7 +56,13 @@ namespace dp2ManageCenter
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            ClientInfo.Initial("dp2managecenter");
+            var bRet = ClientInfo.Initial("dp2managecenter");
+            // 2020/8/30
+            if (bRet == false)
+            {
+                Application.Exit();
+                return;
+            }
 
             this.UiState = ClientInfo.Config.Get("global", "ui_state", ""); // Properties.Settings.Default.ui_state;
 
