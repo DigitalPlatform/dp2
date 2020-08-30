@@ -77,9 +77,17 @@ namespace FingerprintCenter
                 case PowerModes.Resume:
                     Task.Run(() =>
                     {
-                        Task.Delay(TimeSpan.FromSeconds(5)).Wait();
-                        this.Speak("指纹中心被唤醒");
-                        BeginRefreshReaders("connected", new CancellationToken());
+                        try
+                        {
+                            Task.Delay(TimeSpan.FromSeconds(5)).Wait();
+                            this.Speak("指纹中心被唤醒");
+                            BeginRefreshReaders("connected", new CancellationToken());
+                        }
+                        catch (Exception ex)
+                        {
+                            // 2020/8/30
+                            ClientInfo.WriteErrorLog($"BeginRefreshReaders() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                        }
                     });
                     break;
                 case PowerModes.Suspend:
@@ -185,6 +193,7 @@ bool bClickClose = false)
 
             if (DetectVirus.DetectXXX() || DetectVirus.DetectGuanjia())
             {
+                ClientInfo.WriteErrorLog("fingerprintcenter 被木马软件干扰，无法启动");
                 MessageBox.Show(this, "fingerprintcenter 被木马软件干扰，无法启动");
                 Application.Exit();
                 return;
@@ -196,22 +205,38 @@ bool bClickClose = false)
             // 这要放在检查序列号之前启动
             Task.Run(() =>
             {
-                Task.Delay(TimeSpan.FromSeconds(5)).Wait();
-                NormalResult result = ClientInfo.InstallUpdateSync();
-                if (result.Value == -1)
-                    OutputHistory("自动更新出错: " + result.ErrorInfo, 2);
-                else if (result.Value == 1)
-                    OutputHistory(result.ErrorInfo, 1);
-                else if (string.IsNullOrEmpty(result.ErrorInfo) == false)
-                    OutputHistory(result.ErrorInfo, 0);
+                try
+                {
+                    Task.Delay(TimeSpan.FromSeconds(5)).Wait();
+                    NormalResult result = ClientInfo.InstallUpdateSync();
+                    if (result.Value == -1)
+                        OutputHistory("自动更新出错: " + result.ErrorInfo, 2);
+                    else if (result.Value == 1)
+                        OutputHistory(result.ErrorInfo, 1);
+                    else if (string.IsNullOrEmpty(result.ErrorInfo) == false)
+                        OutputHistory(result.ErrorInfo, 0);
+                }
+                catch (Exception ex)
+                {
+                    // 2020/8/30
+                    ClientInfo.WriteErrorLog($"自动后台更新出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                }
+
             });
 
             ClientInfo.SerialNumberMode = "must";
             ClientInfo.CopyrightKey = "fingerprintcenter_sn_key";
-            ClientInfo.Initial("fingerprintcenter",
+            // return:
+            //      true    初始化成功
+            //      false   初始化失败，应立刻退出应用程序
+            var bRet = ClientInfo.Initial("fingerprintcenter",
                 () =>
                 {
+
                     this.UiState = ClientInfo.Config.Get("global", "ui_state", ""); // Properties.Settings.Default.ui_state;
+
+                    if (StringUtil.IsDevelopMode())
+                        return true;
 
                     try
                     {
@@ -226,6 +251,13 @@ bool bClickClose = false)
                         return false;
                     }
                 });
+
+            // 2020/8/30
+            if (bRet == false)
+            {
+                Application.Exit();
+                return;
+            }
 
             if (StringUtil.IsDevelopMode() == false)
                 MenuItem_testing.Visible = false;
@@ -280,7 +312,16 @@ bool bClickClose = false)
             {
                 Task.Run(() =>
                 {
-                    FirstSetup();
+                    try
+                    {
+                        FirstSetup();
+                    }
+                    catch (Exception ex)
+                    {
+                        // 2020/8/30
+                        ClientInfo.WriteErrorLog($"FirstSetup() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                    }
+
                 });
             }
             else
@@ -290,17 +331,24 @@ bool bClickClose = false)
 
             // DisplayText("1");
 
-
-
             if (ClientInfo.IsMinimizeMode())
             {
                 Task.Run(() =>
                 {
-                    Task.Delay(2000).Wait();
-                    this.BeginInvoke((Action)(() =>
+                    try
                     {
-                        this.WindowState = FormWindowState.Minimized;
-                    }));
+                        Task.Delay(2000).Wait();
+                        this.BeginInvoke((Action)(() =>
+                        {
+                            this.WindowState = FormWindowState.Minimized;
+                        }));
+                    }
+                    catch (Exception ex)
+                    {
+                        // 2020/8/30
+                        ClientInfo.WriteErrorLog($"设置窗口状态出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                    }
+
                 });
             }
         }
@@ -326,28 +374,50 @@ bool bClickClose = false)
                 this.OutputHistory("重新创建指纹缓存");
             await Task.Run(() =>
             {
-                NormalResult result = StartFingerPrint();
-                if (result.Value == -1)
+                try
                 {
-                    string strError = "指纹功能启动失败: " + result.ErrorInfo;
-                    Speak(strError, true);
-                    this.ShowMessage(strError, "red", true);
-                    OutputHistory(strError, 2);
-
-                    if (result.ErrorCode == "driver not install")
+                    NormalResult result = StartFingerPrint();
+                    if (result.Value == -1)
                     {
-                        Task.Run(() => { InstallDriver("您的电脑上尚未安装'中控'指纹仪厂家驱动。"); });
+                        ClientInfo.WriteErrorLog($"StartFingerPrint() result={result.ToString()}");
+
+                        string strError = "指纹功能启动失败: " + result.ErrorInfo;
+                        Speak(strError, true);
+                        this.ShowMessage(strError, "red", true);
+                        OutputHistory(strError, 2);
+
+                        if (result.ErrorCode == "driver not install")
+                        {
+                            Task.Run(() =>
+                            {
+                                try
+                                {
+                                    InstallDriver("您的电脑上尚未安装'中控'指纹仪厂家驱动。");
+                                }
+                                catch (Exception ex)
+                                {
+                                    // 2020/8/30
+                                    ClientInfo.WriteErrorLog($"InstallDriver() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                                }
+
+                            });
+                        }
+                        else
+                        {
+
+                        }
                     }
                     else
                     {
-
+                        _initialized = true;
+                        Speak("指纹功能启动成功");
+                        OutputHistory("指纹功能启动成功", 0);
                     }
                 }
-                else
+                catch (Exception ex)
                 {
-                    _initialized = true;
-                    Speak("指纹功能启动成功");
-                    OutputHistory("指纹功能启动成功", 0);
+                    // 2020/8/30
+                    ClientInfo.WriteErrorLog($"启动过程出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 }
             });
         }
@@ -360,9 +430,9 @@ bool bClickClose = false)
             {
                 DisplayText("StartFingerPrint ...");
 
-                _cancel.Cancel();
+                _cancel?.Cancel();
 
-                _cancel.Dispose();
+                _cancel?.Dispose();
                 _cancel = new CancellationTokenSource();
 
                 DisplayText("正在初始化指纹环境 ...");
@@ -371,15 +441,24 @@ bool bClickClose = false)
                 try
                 {
                     FingerPrint.Free();
+
+                    ClientInfo.WriteInfoLog("Before FingerPrint.Init()");
+
                     NormalResult result = FingerPrint.Init(CurrentDeviceIndex);
                     if (result.Value == -1)
                     {
+                        ClientInfo.WriteErrorLog($"FingerPrint.Init({CurrentDeviceIndex}) result={result.ToString()}");
                         ClientInfo.SetErrorState("error", result.ErrorInfo);
                         return result;
+                    }
+                    else
+                    {
+                        ClientInfo.WriteInfoLog($"FingerPrint.Init({CurrentDeviceIndex}) result={result.ToString()}");
                     }
                 }
                 catch (Exception ex)
                 {
+                    ClientInfo.WriteErrorLog($"StartFingerPrint() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                     return new NormalResult
                     {
                         Value = -1,
@@ -1001,13 +1080,22 @@ out strError);
         {
             Task.Run(() =>
             {
-                // return:
-                //      -1  出错
-                //      0   没有获得任何数据
-                //      >=1 获得了数据
-                var result = _initFingerprintCache();
-                if (result.Value == -1)
-                    ShowMessageBox(result.ErrorInfo);
+                try
+                {
+                    // return:
+                    //      -1  出错
+                    //      0   没有获得任何数据
+                    //      >=1 获得了数据
+                    var result = _initFingerprintCache();
+                    if (result.Value == -1)
+                        ShowMessageBox(result.ErrorInfo);
+                }
+                catch (Exception ex)
+                {
+                    // 2020/8/30
+                    ClientInfo.WriteErrorLog($"_initFingerprintCache() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                }
+
             });
         }
 
@@ -1560,32 +1648,41 @@ Keys keyData)
             this.OutputHistory($"new task _refreshCount={_refreshCount}", 0);
             _refreshTask = Task.Run(() =>
             {
-                int delta = 1;  // 第一次额外增加的秒数
-                while (_refreshCount-- >= 0)
+                try
                 {
-                    this.OutputHistory($"delay begin", 0);
-                    Task.Delay(TimeSpan.FromSeconds(_delaySeconds + delta)).Wait(token);
-                    this.OutputHistory($"delay end", 0);
+                    int delta = 1;  // 第一次额外增加的秒数
+                    while (_refreshCount-- >= 0)
+                    {
+                        this.OutputHistory($"delay begin", 0);
+                        Task.Delay(TimeSpan.FromSeconds(_delaySeconds + delta)).Wait(token);
+                        this.OutputHistory($"delay end", 0);
 
-                    if (token.IsCancellationRequested)
-                        break;
-                    // 迫使重新启动
-                    _initialized = false;
-                    this.OutputHistory($"initial begin", 0);
-                    BeginStart().Wait(token);
-                    this.OutputHistory($"initial end", 0);
-                    if (token.IsCancellationRequested)
-                        break;
+                        if (token.IsCancellationRequested)
+                            break;
+                        // 迫使重新启动
+                        _initialized = false;
+                        this.OutputHistory($"initial begin", 0);
+                        BeginStart().Wait(token);
+                        this.OutputHistory($"initial end", 0);
+                        if (token.IsCancellationRequested)
+                            break;
 
-                    // 如果初始化没有成功，则要追加初始化
-                    if (ClientInfo.ErrorState == "normal")
-                        break;
+                        // 如果初始化没有成功，则要追加初始化
+                        if (ClientInfo.ErrorState == "normal")
+                            break;
 
-                    delta = 0;
+                        delta = 0;
+                    }
+                    _refreshTask = null;
+                    _refreshCount = 0;
+                    this.OutputHistory($"task = null", 0);
                 }
-                _refreshTask = null;
-                _refreshCount = 0;
-                this.OutputHistory($"task = null", 0);
+                catch (Exception ex)
+                {
+                    // 2020/8/30
+                    ClientInfo.WriteErrorLog($"_refreshTask 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                }
+
             });
         }
 
@@ -1733,13 +1830,22 @@ Keys keyData)
 
             Task.Run(() =>
             {
-                // 先把正在运行的中断
-                AbortReplication(true);
+                try
+                {
+                    // 先把正在运行的中断
+                    AbortReplication(true);
 
-                // 无论是 _cancel 还是 _cancelReplication 触发 Cancel，都能停止复制过程
-                TryDisposeReplicationCancel();
-                _cancelReplication = CancellationTokenSource.CreateLinkedTokenSource(_cancel.Token);
-                DpReplication(_cancelReplication.Token);
+                    // 无论是 _cancel 还是 _cancelReplication 触发 Cancel，都能停止复制过程
+                    TryDisposeReplicationCancel();
+                    _cancelReplication = CancellationTokenSource.CreateLinkedTokenSource(_cancel.Token);
+                    DpReplication(_cancelReplication.Token);
+                }
+                catch (Exception ex)
+                {
+                    // 2020/8/30
+                    ClientInfo.WriteErrorLog($"BeginReplication() 1 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                }
+
             });
         }
 
@@ -1907,6 +2013,14 @@ token);
                 this.ShowMessage("请配置参数。\r\n配置完成后，请用菜单命令“文件/启动”来开始首次运行。\r\n\r\n(请用鼠标点此文字继续)", "green", true);
                 this.WaitClicked();
             }
+            catch(ObjectDisposedException)
+            {
+
+            }
+            catch(Exception ex)
+            {
+                ClientInfo.WriteErrorLog($"FirstSetup() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+            }
             finally
             {
                 this._floatingMessage.Clicked -= _floatingMessage_Clicked;
@@ -2061,7 +2175,18 @@ token);
 
         private void MenuItem_setupDriver_Click(object sender, EventArgs e)
         {
-            Task.Run(() => { InstallDriver("本功能将重新安装'中控'指纹仪厂家驱动。"); });
+            Task.Run(() => {
+                try
+                {
+                    InstallDriver("本功能将重新安装'中控'指纹仪厂家驱动。");
+                }
+                catch (Exception ex)
+                {
+                    // 2020/8/30
+                    ClientInfo.WriteErrorLog($"InstallDriver() 2 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                }
+
+            });
         }
 
         private void button_setDefaultThreshold_Click(object sender, EventArgs e)
