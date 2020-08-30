@@ -24,6 +24,7 @@ using System.Windows.Interop;
 using System.Runtime.InteropServices;
 using System.Windows.Documents;
 using System.Security.Principal;
+
 using Microsoft.Win32;
 using Microsoft.EntityFrameworkCore.Internal;
 
@@ -324,14 +325,21 @@ namespace dp2SSL
             });
 
             // 2020/7/5
-            if (App.Function != "智能书柜")
+            if (App.Function == "自助借还")
             {
                 App.InitialRfidManager();
 
                 // 2020/7/31
                 if (App.Protocol == "sip")
                     SipChannelUtil.StartMonitorTask();
+            }
 
+            // 2020/8/30
+            if (App.Function == "盘点")
+            {
+                App.InitialRfidManager();
+
+                InventoryData.StartInventoryTask();
             }
 
             // 2020/8/20

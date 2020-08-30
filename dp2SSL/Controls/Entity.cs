@@ -408,7 +408,7 @@ Stack:
             dup.Waiting = this.Waiting;
             dup.ReaderName = this.ReaderName;
             dup.Antenna = this.Antenna;
-
+            dup.Tag = this.Tag;
             return dup;
         }
 

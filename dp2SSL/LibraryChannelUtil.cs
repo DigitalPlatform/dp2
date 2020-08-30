@@ -39,6 +39,7 @@ namespace dp2SSL
         // parameters:
         //      style   风格。network 表示只从网络获取册记录；否则优先从本地获取，本地没有再从网络获取册记录。无论如何，书目摘要都是尽量从本地获取
         // .Value
+        //      -1  出错
         //      0   没有找到
         //      1   找到
         public static async Task<GetEntityDataResult> GetEntityDataAsync(string pii,
