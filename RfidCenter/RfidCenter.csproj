@@ -287,6 +287,7 @@
     <Content Include="x64\Drivers\rfidlib_drv_RD5100.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="x64\Drivers\rfidlib_drv_RD5200.dll" />
     <Content Include="x64\Drivers\rfidlib_drv_RL8000.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -333,6 +334,7 @@
     <Content Include="x86\Drivers\rfidlib_drv_rd5100.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="x86\Drivers\rfidlib_drv_RD5200.dll" />
     <Content Include="x86\Drivers\rfidlib_drv_RL8000.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

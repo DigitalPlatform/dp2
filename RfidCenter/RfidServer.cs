@@ -349,6 +349,8 @@ namespace RfidCenter
                     // 目前是 1:1 次数分配
                     if (lockNameList != null)
                     {
+                        Thread.Sleep(100);
+
                         if (output_time)
                             watch = new Stopwatch();
                         else
