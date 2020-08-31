@@ -286,7 +286,7 @@ namespace dp2SSL
                             break;  // 只有当初始化过程中没有被 TagChanged 事件打扰过，才算初始化成功了。否则就要重新初始化
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     WpfClientInfo.WriteErrorLog($"InitialEntitiesAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 }
@@ -484,7 +484,10 @@ namespace dp2SSL
         // 首次初始化 Entity 列表
         async Task<NormalResult> InitialEntitiesAsync()
         {
-            _entities.Clear();  // 2019/9/4
+            App.Invoke(new Action(() =>
+            {
+                _entities.Clear();  // 2019/9/4
+            }));
 
             if (booksControl.Visibility == Visibility.Visible)  // 2020/4/8
             {
@@ -495,8 +498,11 @@ namespace dp2SSL
 
                     foreach (var tag in books)
                     {
-                        var entity = _entities.Add(tag);
-                        update_entities.Add(entity);
+                        App.Invoke(new Action(() =>
+                        {
+                            var entity = _entities.Add(tag);
+                            update_entities.Add(entity);
+                        }));
                     }
 
                     if (update_entities.Count > 0)

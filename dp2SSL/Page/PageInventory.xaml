@@ -34,6 +34,15 @@
                 </TextBlock>
             </DockPanel>
         </DataTemplate>
+        <DataTemplate x:Key="myCellTemplate">
+            <DockPanel>
+                <TextBlock FontSize="16" Foreground="Blue" Background="Red">
+                    <TextBlock.Text>
+                        <Binding/>
+                    </TextBlock.Text>
+                </TextBlock>
+            </DockPanel>
+        </DataTemplate>
     </Page.Resources>
     <Grid Name="mainGrid">
         <Grid.ColumnDefinitions>
@@ -98,7 +107,15 @@
 
                         <GridViewColumn Header="UID" Width="200" DisplayMemberBinding="{Binding UID}"
                                         HeaderContainerStyle="{StaticResource myHeaderStyle}">
-
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock FontSize="16" Foreground="Blue" Background="Red">
+                                        <TextBlock.Text>
+                                            <Binding/>
+                                        </TextBlock.Text>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
                         </GridViewColumn>
                         <GridViewColumn Header="PII" Width="150" DisplayMemberBinding="{Binding PII}"
                                         HeaderContainerStyle="{StaticResource myHeaderStyle}"/>

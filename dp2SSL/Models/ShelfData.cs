@@ -1385,11 +1385,17 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
 
             if (debugInfo != null)
             {
-                DomUtil.DeleteElement(readerdom.DocumentElement, "borrowHistory");
-                DomUtil.DeleteElement(readerdom.DocumentElement, "fingerprint");
-                DomUtil.DeleteElement(readerdom.DocumentElement, "face");
-                DomUtil.RemoveEmptyElements(readerdom.DocumentElement);
-                debugInfo?.AppendLine($"patron_xml='{DomUtil.GetIndentXml(readerdom)}'");
+                if (readerdom != null && readerdom.DocumentElement != null)
+                {
+                    DomUtil.DeleteElement(readerdom.DocumentElement, "borrowHistory");
+                    DomUtil.DeleteElement(readerdom.DocumentElement, "fingerprint");
+                    DomUtil.DeleteElement(readerdom.DocumentElement, "face");
+                    DomUtil.RemoveEmptyElements(readerdom.DocumentElement);
+                }
+                if (readerdom != null)
+                    debugInfo?.AppendLine($"patron_xml='{DomUtil.GetIndentXml(readerdom)}'");
+                else
+                    debugInfo?.AppendLine($"patron_xml=null");
             }
 
             string patron_type = GetPatronType(patron_pii,

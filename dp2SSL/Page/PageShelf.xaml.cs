@@ -39,8 +39,6 @@ using DigitalPlatform.Interfaces;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.LibraryClient.localhost;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using System.IO.IsolatedStorage;
 
 namespace dp2SSL
 {
@@ -3368,6 +3366,16 @@ namespace dp2SSL
                 return null;
             });
 
+            if (result.Value == -1)
+            {
+                SetGlobalError("save_actions", $"SaveDoorActions() 出错: {result.ErrorInfo}");
+                TrySetMessage(null, $"SaveDoorActions() 出错: {result.ErrorInfo}。这是一个严重错误，请管理员及时介入处理");
+            }
+            else
+            {
+                SetGlobalError("save_actions", null);
+            }
+
             // 2019/12/21
             if (clearOperator == true && door.State == "close")
                 door.Operator = null; // 清掉门上的操作者名字
@@ -3393,12 +3401,21 @@ namespace dp2SSL
         // 将所有暂存信息保存为 Action，但并不立即提交
         async Task SaveAllActions()
         {
-            await ShelfData.SaveActions((entity) =>
+            var result = await ShelfData.SaveActions((entity) =>
             {
                 return GetOperator(entity, true);
             });
-        }
 
+            if (result.Value == -1)
+            {
+                SetGlobalError("save_actions", $"SaveAllActions() 出错: {result.ErrorInfo}");
+                TrySetMessage(null, $"SaveAllActions() 出错: {result.ErrorInfo}。这是一个严重错误，请管理员及时介入处理");
+            }
+            else
+            {
+                SetGlobalError("save_actions", null);
+            }
+        }
 
         SubmitWindow _progressWindow = null;
 

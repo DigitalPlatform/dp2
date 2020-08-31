@@ -327,11 +327,13 @@ namespace RfidDrivers.First
                     if (fill_result.Value == -1)
                         continue;
 
+                    StringBuilder debugInfo = new StringBuilder();
                     OpenReaderResult result = OpenReader(reader.DriverName,
                         reader.Type,
                         reader.SerialNumber,
                         baudRate,
-                        null);
+                        debugInfo);
+                    WriteInfoLog($"打开 COM 口读卡器 {reader.SerialNumber} 返回={result.ToString()}。调试信息={debugInfo.ToString()}");
                     if (result.Value == -1)
                         continue;
 
@@ -421,11 +423,13 @@ namespace RfidDrivers.First
                     return new List<Reader>();
                 }
 
+                StringBuilder debugInfo = new StringBuilder();
                 OpenReaderResult result = OpenReader(reader.DriverName,
                     reader.Type,
                     reader.SerialNumber,
                     "",
-                    null);
+                    debugInfo);
+                WriteInfoLog($"打开 USB 读卡器 {reader.SerialNumber} 返回={result.ToString()}。调试信息={debugInfo.ToString()}");
                 reader.Result = result;
                 reader.ReaderHandle = result.ReaderHandle;
 
@@ -524,11 +528,13 @@ namespace RfidDrivers.First
                     return new List<Reader>();
                 }
 
+                StringBuilder debugInfo = new StringBuilder();
                 OpenReaderResult result = OpenReader(reader.DriverName,
                     reader.Type,
                     reader.SerialNumber,
                     "",
-                    null);
+                    debugInfo);
+                WriteInfoLog($"打开 TCP 读卡器 {reader.SerialNumber} 返回={result.ToString()}。调试信息={debugInfo.ToString()}");
                 reader.Result = result;
                 reader.ReaderHandle = result.ReaderHandle;
 
@@ -862,6 +868,11 @@ namespace RfidDrivers.First
         public static void WriteErrorLog(string text)
         {
             Log.Logger.Error(text);
+        }
+
+        public static void WriteInfoLog(string text)
+        {
+            Log.Logger.Information(text);
         }
 
         // 枚举所有 COM 读卡器
