@@ -245,7 +245,7 @@ namespace dp2SSL
                         token.ThrowIfCancellationRequested();
 
                         //
-                        await Processing();
+                        await ProcessingAsync();
                     }
                     _inventoryTask = null;
                 }
@@ -268,7 +268,7 @@ TaskCreationOptions.LongRunning,
 TaskScheduler.Default);
         }
 
-        static async Task Processing()
+        static async Task ProcessingAsync()
         {
             var list = CopyList();
             foreach(var entity in list)
