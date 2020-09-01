@@ -454,9 +454,10 @@ namespace dp2SSL
                     await TinyServer.DeleteAllResultsetAsync();
                     TinyServer.StartSendTask(_cancelApp.Token);
                     PageShelf.TrySetMessage(null, "我这台智能书柜启动了！");
-
-                    ShelfData.StartMonitorTask();
                 }
+
+                if (App.Function == "智能书柜")
+                    ShelfData.StartMonitorTask();
 
                 SelectMode();
 

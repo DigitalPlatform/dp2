@@ -40,12 +40,12 @@ namespace dp2SSL.Models
         */
         static Task _monitorTask = null;
 
-        // 是否已经(升级)更新了
-        static bool _updated = false;
+        // 是否需要重启计算机
+        static bool _needReboot = false;
         // 最近一次检查升级的时刻
         static DateTime _lastUpdateTime;
         // 检查升级的时间间隔
-        static TimeSpan _updatePeriod = TimeSpan.FromMinutes(2 * 60); // 2*60 两个小时
+        static TimeSpan _updatePeriod = TimeSpan.FromMinutes(10); // 2*60 两个小时
 
         // 监控间隔时间
         static TimeSpan _monitorIdleLength = TimeSpan.FromSeconds(10);
@@ -95,7 +95,7 @@ namespace dp2SSL.Models
                             App.SetError("printer", null);
 
                         // 检查升级 dp2ssl
-                        if (_updated == false
+                        if (_needReboot == false
                         // && StringUtil.IsDevelopMode() == false
                         && ApplicationDeployment.IsNetworkDeployed == false
                         && DateTime.Now - _lastUpdateTime > _updatePeriod)
@@ -108,7 +108,7 @@ namespace dp2SSL.Models
                             //      2   成功，但需要立即重新启动计算机才能让复制的文件生效
                             var update_result = await GreenInstall.GreenInstaller.InstallFromWeb("http://dp2003.com/dp2ssl/v1_dev",
                                 "c:\\dp2ssl",
-                                "delayExtract,updateGreenSetupExe",
+                                "delayExtract,updateGreenSetupExe,clearStateFile,debugInfo",
                                 //true,
                                 //true,
                                 token,
@@ -118,11 +118,22 @@ namespace dp2SSL.Models
                             else
                                 WpfClientInfo.WriteInfoLog($"结束自动检查升级 update_result:{update_result.ToString()}");
 
+                            // 2020/9/1
+                            WpfClientInfo.WriteInfoLog($"InstallFromWeb() 调试信息如下:\r\n{update_result.DebugInfo}");
+
                             if (update_result.Value == 1 || update_result.Value == 2)
                             {
-                                App.TriggerUpdated("重启可使用新版本");
-                                _updated = true;
-                                PageShelf.TrySetMessage(null, "dp2SSL 升级文件已经下载成功，下次重启时可自动升级到新版本");
+                                if (update_result.Value == 1)
+                                {
+                                    App.TriggerUpdated("重启 dp2ssl(greensetup) 可使用新版本");
+                                    PageShelf.TrySetMessage(null, "dp2SSL 升级文件已经下载成功，下次重启 dp2ssl(greensetup) 时可自动升级到新版本");
+                                }
+                                else if (update_result.Value == 2)
+                                {
+                                    _needReboot = true;
+                                    App.TriggerUpdated("重启计算机可使用新版本");
+                                    PageShelf.TrySetMessage(null, "dp2SSL 升级文件已经下载成功，下次重启计算机时可自动升级到新版本");
+                                }
                             }
                             _lastUpdateTime = DateTime.Now;
 

@@ -93,7 +93,7 @@ namespace GreenInstall
                 infos.Add($"在可执行文件目录 {binDirectory} 中创建文件 userDirectory.txt 标记用户目录位置");
             }
 
-            return new NormalResult { ErrorInfo = string.Join(";", infos.ToArray())};
+            return new NormalResult { ErrorInfo = string.Join(";", infos.ToArray()) };
         }
 
         public static NormalResult SetUserDirectory(string binDirectory,
@@ -169,6 +169,40 @@ bool bOverwriteExist = true)
         {
             public string FileName { get; set; }
             public long FileLength { get; set; }
+
+            public static List<string> GetFileNames(List<FileNameAndLength> items)
+            {
+                List<string> results = new List<string>();
+                foreach (var item in items)
+                {
+                    results.Add(item.FileName);
+                }
+
+                return results;
+            }
+        }
+
+        public class InstallResult : NormalResult
+        {
+            public string DebugInfo { get; set; }
+
+            public InstallResult(NormalResult result, string debugInfo = null)
+            {
+                this.Value = result.Value;
+                this.ErrorInfo = result.ErrorInfo;
+                this.ErrorCode = result.ErrorCode;
+                this.DebugInfo = debugInfo;
+            }
+
+            public InstallResult()
+            {
+
+            }
+
+            public override string ToString()
+            {
+                return base.ToString() + $",DebugInfo={DebugInfo}";
+            }
         }
 
         // -1 -1 n only change progress value
@@ -182,16 +216,15 @@ bool bOverwriteExist = true)
         //              delayExtract    是否延迟展开 .zip 文件?
         //              updateGreenSetupExe 是否要一并更新 greensetup.exe?
         //              clearStateFile  处理前是否清除 install_state.txt 文件？(意味着不会受到文件内容为 downloading 的影响)
+        //              debugInfo   InstallResult.DebugInfo 要返回调试信息
         // result.Value:
         //      -1  出错
         //      0   经过检查发现没有必要升级
         //      1   成功
         //      2   成功，但需要立即重新启动计算机才能让复制的文件生效
-        public static async Task<NormalResult> InstallFromWeb(string downloadUrl,
+        public static async Task<InstallResult> InstallFromWeb(string downloadUrl,
             string installDirectory,
             string style,
-            //bool delayExtract,
-            //bool updateGreenSetupExe,
             CancellationToken token,
             Delegate_setProgress setProgress)
         {
@@ -199,6 +232,13 @@ bool bOverwriteExist = true)
             bool updateGreenSetupExe = StringUtil0.IsInList("updateGreenSetupExe", style);
             bool clearStateFile = StringUtil0.IsInList("clearStateFile", style);
             bool mustExpandZip = StringUtil0.IsInList("mustExpandZip", style);
+            bool debug = StringUtil0.IsInList("debugInfo", style);
+
+            StringBuilder debugInfo = null;
+            if (debug)
+                debugInfo = new StringBuilder();
+
+            debugInfo?.AppendLine($"调用参数: downloadUrl={downloadUrl}, installDirectory={installDirectory}, style={style}");
 
             string strBaseUrl = downloadUrl;
             if (strBaseUrl[strBaseUrl.Length - 1] != '/')
@@ -220,14 +260,17 @@ bool bOverwriteExist = true)
             //      4   下载 .zip 失败。.zip 不完整
             //      5   当前 .zip 比 .exe 要新，需要重启计算机以便展开的文件生效
             var check_result = CheckStateFile(strBinDir);
+            debugInfo?.AppendLine($"检查下载状态返回: {check_result.ToString()}");
             if (check_result.Value == -1)
             {
+                debugInfo?.AppendLine($"检查下载状态时出错: {check_result.ToString()}, InstallFromWeb() 返回 -1");
                 setProgress?.Invoke(-1, -1, -1, $"检查下载状态时出错: {check_result.ErrorInfo}");
-                return check_result;
+                return new InstallResult(check_result, debugInfo?.ToString());
             }
 
             if (clearStateFile && (check_result.Value == 1 || check_result.Value == 3))
             {
+                debugInfo?.AppendLine($"clearStateFile == true，(清理状态文件) 继续往后处理");
                 WriteStateFile(strBinDir, null);
                 // 继续处理
             }
@@ -235,13 +278,45 @@ bool bOverwriteExist = true)
                 || check_result.Value == 3
                 || check_result.Value == 5)
             {
+                debugInfo?.AppendLine($"检查状态文件返回 1 3 5 情形");
+
                 if (check_result.Value == 1)
+                {
                     setProgress?.Invoke(-1, -1, -1, "前一次下载正在进行，尚未完成。本次下载被放弃");
+                    return new InstallResult
+                    {
+                        Value = -1,
+                        ErrorInfo = "前一次下载正在进行，尚未完成。本次下载被放弃",
+                        DebugInfo = debugInfo?.ToString()
+                    };
+                }
                 if (check_result.Value == 3)
+                {
                     setProgress?.Invoke(-1, -1, -1, "前一次下载已经完成，但尚未展开安装。本次下载被放弃");
+                    return new InstallResult
+                    {
+                        Value = 1,
+                        ErrorInfo = "前一次下载已经完成，但尚未展开安装。本次下载被放弃",
+                        DebugInfo = debugInfo?.ToString()
+                    };
+                }
                 if (check_result.Value == 5)
+                {
                     setProgress?.Invoke(-1, -1, -1, "前一次下载和安装已经完成，等待计算机重启生效。本次下载被放弃");
-                return new NormalResult();
+                    return new InstallResult
+                    {
+                        Value = -1,
+                        ErrorInfo = "前一次下载和安装已经完成，等待计算机重启生效。本次下载被放弃",
+                        DebugInfo = debugInfo?.ToString()
+                    };
+                }
+
+                return new InstallResult
+                {
+                    Value = -1,
+                    ErrorInfo = "不可能走到这里",
+                    DebugInfo = debugInfo?.ToString()
+                };
             }
 
 
@@ -265,16 +340,18 @@ bool bOverwriteExist = true)
 
             try
             {
+                debugInfo?.AppendLine($"*** 第一步，检查需要更新的文件 {StringUtil0.MakePathList(filenames)}");
                 // 第一步，先检查更新的文件，计算需要下载的尺寸
                 long downloadLength = 0;
                 // List<string> changed_filenames = new List<string>();
                 foreach (string filename in filenames)
                 {
                     if (token.IsCancellationRequested)
-                        return new NormalResult
+                        return new InstallResult
                         {
                             Value = -1,
-                            ErrorCode = "canceled"
+                            ErrorCode = "canceled",
+                            DebugInfo = debugInfo?.ToString()
                         };
 
                     string strUrl = // "http://dp2003.com/dp2circulation/v2/"
@@ -282,17 +359,23 @@ bool bOverwriteExist = true)
                         + filename;
                     string strLocalFileName = Path.Combine(strBinDir, filename).ToLower();
 
+                    // 注: 即便本地文件不存在，也要继续获取服务器端文件的尺寸，以便可以正确显示进度条
+
+                    long fileLength = GetFileLength(strLocalFileName);
                     // 判断 http 服务器上一个文件是否已经更新
                     // return:
                     //      -1  出错
                     //      0   没有更新
                     //      1   已经更新
                     var result = await GetServerFileInfo(strUrl,
-                        File.GetLastWriteTimeUtc(strLocalFileName));
+                        File.GetLastWriteTimeUtc(strLocalFileName),
+                        fileLength);
+                    debugInfo?.AppendLine($"=== 探测文件 {filename} 过程: {result.ToString()}");
                     if (result.Value == -1)
                     {
                         WriteStateFile(strBinDir, "downloadError");
-                        return result;
+                        debugInfo?.AppendLine("InstallFromWeb() 函数返回");
+                        return new InstallResult(result);
                     }
 
                     if (File.Exists(strLocalFileName) == true)
@@ -300,6 +383,8 @@ bool bOverwriteExist = true)
                         // this.DisplayBackgroundText("检查文件版本 " + strUrl + " ...\r\n");
                         if (result.Value == 1)
                         {
+                            debugInfo?.AppendLine($"本地文件 {strLocalFileName} 存在，尺寸和服务器文件不同");
+
                             updated_filenames.Add(new FileNameAndLength
                             {
                                 FileName = filename,
@@ -307,9 +392,15 @@ bool bOverwriteExist = true)
                             });
                             downloadLength += result.ContentLength;
                         }
+                        else
+                        {
+                            debugInfo?.AppendLine($"本地文件 {strLocalFileName} 存在，并且和服务器文件完全相同");
+                        }
                     }
                     else
                     {
+                        debugInfo?.AppendLine($"本地文件 {strLocalFileName} 不存在，需要新下载");
+
                         updated_filenames.Add(new FileNameAndLength
                         {
                             FileName = filename,
@@ -320,7 +411,10 @@ bool bOverwriteExist = true)
                 }
 
                 // 设置进度条总长度
+                debugInfo?.AppendLine($"设置进度条总长度 {downloadLength}");
                 setProgress?.Invoke(0, downloadLength, 0, null);
+
+                debugInfo?.AppendLine($"*** 第二步，开始更新文件，一共有 {updated_filenames.Count} 个文件，名字分别为: {StringUtil0.MakePathList(FileNameAndLength.GetFileNames(updated_filenames))}");
 
                 int downloadCount = 0;
                 long downloaded = 0;
@@ -330,10 +424,11 @@ bool bOverwriteExist = true)
                     {
                         if (downloadCount > 0)
                             WriteStateFile(strBinDir, "downloadError");
-                        return new NormalResult
+                        return new InstallResult
                         {
                             Value = -1,
-                            ErrorCode = "canceled"
+                            ErrorCode = "canceled",
+                            DebugInfo = debugInfo?.ToString()
                         };
                     }
 
@@ -346,40 +441,11 @@ bool bOverwriteExist = true)
                     if (info.FileName == "greensetup.exe")
                         strLocalFileName = Path.Combine(strBinDir, info.FileName + ".tmp").ToLower();
 
-                    /*
-                    if (File.Exists(strLocalFileName) == true)
-                    {
-                        // this.DisplayBackgroundText("检查文件版本 " + strUrl + " ...\r\n");
-
-                        // 判断 http 服务器上一个文件是否已经更新
-                        // return:
-                        //      -1  出错
-                        //      0   没有更新
-                        //      1   已经更新
-                        var result = await GetServerFileInfo(strUrl,
-                            File.GetLastWriteTimeUtc(strLocalFileName));
-                        if (result.Value == -1)
-                        {
-                            if (downloadCount > 0)
-                                WriteStateFile(strBinDir, "downloadError");
-
-                            return result;
-                        }
-                        if (result.Value == 1)
-                            updated_filenames.Add(filename);
-#if NO
-                        else
-                            this.DisplayBackgroundText("没有更新。\r\n");
-#endif
-                    }
-                    else
-                        updated_filenames.Add(filename);
-                    */
-
                     // if (updated_filenames.IndexOf(filename) != -1)
                     {
                         WriteStateFile(strBinDir, "downloading");
 
+                        debugInfo?.AppendLine($"下载 {strUrl} 到本地 {strLocalFileName}");
                         setProgress?.Invoke(-1, -1, -1, "下载 " + strUrl + " 到 " + strLocalFileName + " ...\r\n");
 
                         var result = await DownloadFileAsync(strUrl,
@@ -399,13 +465,17 @@ bool bOverwriteExist = true)
                             },
                             () =>
                             {
+                                debugInfo?.AppendLine("下载失败");
                                 WriteStateFile(strBinDir, "downloadError");
                             });
                         if (result.Value == -1)
                         {
+                            debugInfo?.AppendLine($"下载出错，InstallFromWeb() 返回: {result.ToString()}");
                             WriteStateFile(strBinDir, "downloadError");
-                            return result;
+                            return new InstallResult(result);
                         }
+
+                        debugInfo?.AppendLine("下载成功");
 
                         downloaded += info.FileLength;
 
@@ -415,57 +485,6 @@ bool bOverwriteExist = true)
                         downloadCount++;
                     }
                 }
-
-
-#if NO
-                string strGreenUtilityExe = Path.Combine(strUtilDir, "greenutility.exe");
-
-                if (updated_filenames.IndexOf("greenutility.zip") != -1
-                    || File.Exists(strGreenUtilityExe) == false)
-                {
-                    // 将 greenutility.zip 展开到 c:\dp2circulation_temp
-                    string strZipFileName = Path.Combine(strBinDir, "greenutility.zip").ToLower();
-                    string strTargetDir = strUtilDir;
-
-                    setProgress?.Invoke(0, 0, 0, "展开文件 " + strZipFileName + " 到 " + strTargetDir + " ...\r\n");
-                    try
-                    {
-                        using (ZipFile zip = ZipFile.Read(strZipFileName))
-                        {
-                            foreach (ZipEntry e in zip)
-                            {
-                                e.Extract(strTargetDir, ExtractExistingFileAction.OverwriteSilently);
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        string strError = "展开文件 '" + strZipFileName + "' 到目录 '" + strTargetDir + "' 时出现异常" + ex.Message;
-                        // 删除文件，以便下次能重新下载和展开
-                        try
-                        {
-                            File.Delete(Path.Combine(strTargetDir, "greenutility.zip"));
-                        }
-                        catch
-                        {
-
-                        }
-                        /*
-                        ReportError("dp2circulation 展开 greenutility.zip 时出错", strError);
-                        return;
-                        */
-                        return new NormalResult
-                        {
-                            Value = -1,
-                            ErrorInfo = strError
-                        };
-                    }
-
-                    updated_filenames.Remove("greenutility.zip");
-                    temp_filepaths.Remove(strZipFileName);
-                }
-
-#endif
 
                 List<string> _updatedGreenZipFileNames = new List<string>();
 #if TEST
@@ -479,7 +498,6 @@ bool bOverwriteExist = true)
                 _updatedGreenZipFileNames = new List<string>();
                 foreach (var info in updated_filenames)
                 {
-
                     if (info.FileName.EndsWith(".exe") == false)
                         _updatedGreenZipFileNames.Add(info.FileName);
                     else
@@ -488,33 +506,46 @@ bool bOverwriteExist = true)
 #endif
                 if (copy_filenames.Count > 0)
                 {
+                    debugInfo?.AppendLine($"*** 第三步，转移覆盖文件 {StringUtil0.MakePathList(copy_filenames)}");
+
                     foreach (var filename in copy_filenames)
                     {
                         string source = Path.Combine(strBinDir, filename + ".tmp");
                         string target = Path.Combine(strBinDir, filename);
 
+                        debugInfo?.AppendLine($"=== 将文件 {source} 拷贝覆盖到 {target}，然后删除源文件");
                         try
                         {
                             File.Copy(source, target, true);
                             File.Delete(source);
+
+                            debugInfo?.AppendLine("拷贝成功");
                         }
-                        catch
+                        catch (Exception ex)
                         {
                             // TODO: 写入错误日志?
+                            debugInfo?.AppendLine($"拷贝失败: {Library.GetDebugText(ex)}");
                         }
                     }
                 }
 
                 if (downloadCount > 0)
+                {
+                    debugInfo?.AppendLine("写入状态文件内容 downloadComplete");
                     WriteStateFile(strBinDir, "downloadComplete");
+                }
 
                 // 没有必要升级
                 if (_updatedGreenZipFileNames.Count == 0)
                 {
                     if (mustExpandZip == false)
-                        return new NormalResult();
+                    {
+                        debugInfo?.AppendLine("InstallFromWeb() 返回 0，表示没有必要升级");
+                        return new InstallResult { DebugInfo = debugInfo?.ToString() };
+                    }
                     else
                     {
+                        debugInfo?.AppendLine("因必须要展开 .zip 文件，继续往后处理");
                         // 2020/7/10
                         _updatedGreenZipFileNames.Add("app.zip");
                         _updatedGreenZipFileNames.Add("data.zip");
@@ -524,16 +555,28 @@ bool bOverwriteExist = true)
                 // 2020/7/10
                 // 只要 _updatedGreenZipFileNames 中有一个 .zip 文件名，就要添加足两个 .zip 文件名，以确保在有些文件缺失的情况下重新从展开获得
                 if (_updatedGreenZipFileNames.IndexOf("app.zip") == -1)
+                {
+                    debugInfo?.AppendLine("给 _updatedGreenZipFileNames 集合添加 app.zip");
                     _updatedGreenZipFileNames.Add("app.zip");
+                }
                 if (_updatedGreenZipFileNames.IndexOf("data.zip") == -1)
+                {
+                    debugInfo?.AppendLine("给 _updatedGreenZipFileNames 集合添加 data.zip");
                     _updatedGreenZipFileNames.Add("data.zip");
+                }
 
                 if (delayExtract)
                 {
                     if (_updatedGreenZipFileNames.Count > 0)
+                    {
+                        debugInfo?.AppendLine($"文件 {StringUtil0.MakePathList(_updatedGreenZipFileNames)} 已下载成功，等下次重启时候会被 greensetup.exe 展开");
                         setProgress?.Invoke(-1, -1, -1, "dp2circulation 绿色安装包升级文件已经准备就绪。当退出 dp2circulation 时会自动进行安装。\r\n");
+                    }
                     else
+                    {
+                        debugInfo?.AppendLine("没有发现更新");
                         setProgress?.Invoke(-1, -1, -1, "没有发现更新。\r\n");
+                    }
 
                     temp_filepaths.Clear(); // 这样 finally 块就不会删除这些文件了
                 }
@@ -547,6 +590,8 @@ bool bOverwriteExist = true)
 
                         // TODO: 直接解压到目标位置即可
                         string files = StringUtil0.MakePathList(_updatedGreenZipFileNames);
+
+                        debugInfo?.AppendLine($"*** 第四步，立即解压文件 {files}");
                         // 安装软件。用 MoveFileEx 法
                         // return:
                         //      -1  出错
@@ -559,20 +604,25 @@ bool bOverwriteExist = true)
                             out string strError);
                         if (nRet == -1)
                         {
+                            debugInfo?.AppendLine($"解压出错: nRet={nRet},strError={strError}。InstallFromWeb() 返回 -1");
                             // TODO: 这里是否需要删除两个 .zip 文件以便迫使后面重新下载和展开？
-                            return new NormalResult
+                            return new InstallResult
                             {
                                 Value = -1,
-                                ErrorInfo = strError
+                                ErrorInfo = strError,
+                                DebugInfo = debugInfo?.ToString()
                             };
                         }
                         if (nRet == 1)
                         {
+                            debugInfo?.AppendLine($"解压成功: nRet={nRet},strError={strError}。已写入状态文件内容 waitingReboot(如果计算机重启，该状态文件会自动删除)。InstallFromWeb() 返回 2，表示要重启计算更改才能生效");
+
                             WriteStateFile(strBinDir, "waitingReboot");
 
-                            return new NormalResult
+                            return new InstallResult
                             {
-                                Value = 2   // 表示需要重启计算机
+                                Value = 2,   // 表示需要重启计算机
+                                DebugInfo = debugInfo?.ToString()
                             };
                         }
                         /*
@@ -581,18 +631,25 @@ bool bOverwriteExist = true)
                             waitExe);
                         */
                         WriteStateFile(strBinDir, "installed");
+                        debugInfo?.AppendLine($"解压成功: nRet={nRet},strError={strError}。已写入状态文件内容 installed。InstallFromWeb() 返回 1");
                     }
                 }
 
-                return new NormalResult { Value = 1 };
+                debugInfo?.AppendLine("InstallFromWeb() 返回 1");
+                return new InstallResult
+                {
+                    Value = 1,
+                    DebugInfo = debugInfo?.ToString()
+                };
             }
             catch (Exception ex)
             {
                 WriteStateFile(strBinDir, "downloadError");
-                return new NormalResult
+                return new InstallResult
                 {
                     Value = -1,
-                    ErrorInfo = $"exception: {ex.Message}"
+                    ErrorInfo = $"exception: {ex.Message}",
+                    DebugInfo = debugInfo?.ToString()
                 };
             }
             finally
@@ -610,6 +667,33 @@ bool bOverwriteExist = true)
             this.DisplayBackgroundText("绿色更新过程出错: " + strError + "\r\n");
             ReportError("dp2circulation GreenUpdate() 出错", strError);
             */
+        }
+
+        // 获得文件尺寸。这个版本可以避免使用 FileInfo 可能遇到的信息陈旧的问题
+        public static long GetFileLength(string strFilePath)
+        {
+            // 如果出现异常，则改用 FileInfo.Length
+            try
+            {
+                using (FileStream s = new FileStream(strFilePath,
+        FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
+                {
+                    return s.Length;
+                }
+            }
+            catch
+            {
+            }
+
+            try
+            {
+                FileInfo fi = new FileInfo(strFilePath);
+                return fi.Length;
+            }
+            catch
+            {
+                return -1;
+            }
         }
 
         // return:
@@ -1136,16 +1220,34 @@ bool bOverwriteExist = true)
         class GetServerFileInfoResult : NormalResult
         {
             public long ContentLength { get; set; }
+            // 2020/9/1
+            public DateTime LastModified { get; set; }
+
+            // 2020/9/1
+            public string DebugInfo { get; set; }
+
+            public override string ToString()
+            {
+                return base.ToString() + $",ContentLength={ContentLength}, LastModified={LastModified.ToString()}, DebugInfo={DebugInfo}";
+            }
         }
 
         // 判断 http 服务器上一个文件是否已经更新
+        // parameters:
+        //      local_lastmodify    本地文件最后修改时间
+        //      local_filelength    本地文件尺寸
         // return:
         //      -1  出错
         //      0   没有更新
         //      1   已经更新
         static async Task<GetServerFileInfoResult> GetServerFileInfo(string strUrl,
-            DateTime local_lastmodify)
+            DateTime local_lastmodify,
+            long local_fileLength)
         {
+            StringBuilder debugInfo = new StringBuilder();
+
+            debugInfo?.AppendLine($"调用参数: strUrl={strUrl},local_lastmodify={local_lastmodify.ToString()}");
+
             var webRequest = System.Net.WebRequest.Create(strUrl);
 
             // 2020/8/27
@@ -1160,10 +1262,13 @@ bool bOverwriteExist = true)
                 using (var response = await webRequest.GetResponseAsync() as HttpWebResponse)
                 {
                     string strContentLength = response.GetResponseHeader("Content-Length");
+                    debugInfo?.AppendLine($"strContentLength={strContentLength}");
+
                     if (Int64.TryParse(strContentLength, out long contentLength) == false)
                         contentLength = -1;
 
                     string strLastModified = response.GetResponseHeader("Last-Modified");
+                    debugInfo?.AppendLine($"strLastModified={strLastModified}");
                     if (string.IsNullOrEmpty(strLastModified) == true)
                     {
                         return new GetServerFileInfoResult
@@ -1185,16 +1290,37 @@ bool bOverwriteExist = true)
                     }
 
                     if (time > local_lastmodify)
+                    {
+                        debugInfo?.AppendLine($"服务器一端的文件时间 {time.ToString()} 晚于本地文件时间 {local_lastmodify.ToString()}");
                         return new GetServerFileInfoResult
                         {
                             Value = 1,
-                            ContentLength = contentLength
+                            ContentLength = contentLength,
+                            LastModified = time,
+                            DebugInfo = debugInfo?.ToString()
                         };
+                    }
+
+                    if (contentLength != local_fileLength)
+                    {
+                        debugInfo?.AppendLine($"服务器一端的文件尺寸 {contentLength} 不同于本地文件尺寸 {local_fileLength}");
+                        return new GetServerFileInfoResult
+                        {
+                            Value = 1,
+                            ContentLength = contentLength,
+                            LastModified = time,
+                            DebugInfo = debugInfo?.ToString()
+                        };
+                    }
+
+                    debugInfo?.AppendLine($"服务器一端的文件和本地文件的最后修改时间、尺寸均未发现不同");
 
                     return new GetServerFileInfoResult
                     {
                         Value = 0,
-                        ContentLength = contentLength
+                        ContentLength = contentLength,
+                        LastModified = time,
+                        DebugInfo = debugInfo?.ToString()
                     };
                 }
             }
