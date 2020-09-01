@@ -201,7 +201,7 @@ namespace dp2Catalog
             // label_copyright.Text = "(C) 版权所有 2006-2015 数字平台(北京)软件有限责任公司\r\nDigital Platform (Beijing) Software Corp. Ltd.";
             label_copyright.Text = @"(C) 版权所有 2006-2015 数字平台(北京)软件有限责任公司; 
 2015 年以 Apache 2.0 License 开源:
-http://github.com/DigitalPlatform/dp2";
+https://github.com/DigitalPlatform/dp2";
 
             Assembly myAssembly;
 
