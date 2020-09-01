@@ -567,7 +567,7 @@ dp2 图书馆集成系统 图书馆应用服务器 "
 (C) 版权所有 2014-2015 数字平台(北京)软件有限责任公司
 http://dp2003.com
 2015 年以 Apache License Version 2.0 方式开源
-http://github.com/digitalplatform/dp2"
+https://github.com/digitalplatform/dp2"
 + (this.IsServer == false ? "" : @"
 ---
 最大通道数： " + this.MaxClients.ToString())
@@ -3286,7 +3286,7 @@ miniServer	-- enterprise mini
 
             MessageBox.Show(this, "dp2Library XE\r\ndp2 图书馆集成系统 图书馆应用服务器 单机版/小型版\r\n\r\n(C)2006-2015 版权所有 数字平台(北京)软件有限责任公司\r\n"
                 + "2015 年以 Apache License Version 2.0 方式开源\r\n"
-                + "http://github.com/digitalplatform/dp2\r\n");
+                + "https://github.com/digitalplatform/dp2\r\n");
         }
 
         private async void MenuItem_setListeningUrl_Click(object sender, EventArgs e)

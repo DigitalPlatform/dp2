@@ -68,7 +68,7 @@
             <br />
             <hr />
             <p class='copyright'>
-                数字平台(北京)软件有限责任公司 <a href="http://github.com/digitalplatform/dp2">开源的图书馆业务软件 dp2</a>
+                数字平台(北京)软件有限责任公司 <a href="https://github.com/digitalplatform/dp2">开源的图书馆业务软件 dp2</a>
             </p>
             <p class='visitcounter'>
                 您是自2006年3月以来 第

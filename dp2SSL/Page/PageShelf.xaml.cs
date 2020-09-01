@@ -2675,12 +2675,31 @@ namespace dp2SSL
                                     {
                                         UpdateLocalPatronRecord(get_result, now);
                                     }
-                                    catch
+                                    catch(Exception ex)
                                     {
-
+                                        WpfClientInfo.WriteErrorLog($"保存读者记录到本地过程中出现异常: {ExceptionUtil.GetDebugText(ex)}");
                                     }
                                 });
                             }
+
+                            // 2020/9/1
+                            // 虽然是联网状态，也仿照断网情况刷新可借总册数信息，这样能让借书时候计算超额的算法和刷卡显示的这里一致
+                            if (string.IsNullOrEmpty(get_result.ReaderXml) == false)
+                            {
+                                XmlDocument patron_dom = new XmlDocument();
+                                try
+                                {
+                                    patron_dom.LoadXml(get_result.ReaderXml);
+                                    ShelfData.AddLocalBorrowItems(patron_dom);
+                                    Patron.RefreshMaxBorrowable(patron_dom);
+                                    get_result.ReaderXml = patron_dom.OuterXml;
+                                }
+                                catch (Exception ex)
+                                {
+                                    WpfClientInfo.WriteErrorLog($"刷新读者记录中可借总册数信息过程中出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                                }
+                            }
+
                             return get_result;
                         }
                         else
@@ -2693,17 +2712,19 @@ namespace dp2SSL
 
                             // 2020/6/21
                             // 刷新可借总册数信息
+                            if (string.IsNullOrEmpty(get_result.ReaderXml) == false)
                             {
                                 XmlDocument patron_dom = new XmlDocument();
                                 try
                                 {
                                     patron_dom.LoadXml(get_result.ReaderXml);
+                                    ShelfData.AddLocalBorrowItems(patron_dom);
                                     Patron.RefreshMaxBorrowable(patron_dom);
                                     get_result.ReaderXml = patron_dom.OuterXml;
                                 }
                                 catch (Exception ex)
                                 {
-
+                                    WpfClientInfo.WriteErrorLog($"刷新读者记录中可借总册数信息过程中出现异常: {ExceptionUtil.GetDebugText(ex)}");
                                 }
                             }
 
@@ -2757,6 +2778,10 @@ namespace dp2SSL
                 foreach (Entity entity in this.patronControl.BorrowedEntities)
                 {
                     entities.Add(entity);
+
+                    // 2020/9/2
+                    // 本地补充的 borrow 元素通常无法获得 item_xml，所以要专门给调整一下显示状态
+                    PatronControl.SetState(entity, "borrowed", true);
                 }
                 if (entities.Count > 0)
                 {

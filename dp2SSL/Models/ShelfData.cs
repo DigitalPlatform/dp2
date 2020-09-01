@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Documents;
 using System.Xml;
+using System.Windows.Markup;
 
 using Newtonsoft.Json;
 
@@ -25,7 +26,6 @@ using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryServer;
-using System.Windows.Markup;
 using DigitalPlatform.Xml;
 
 namespace dp2SSL
@@ -1983,6 +1983,118 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
         }
 #endif
 
+        // 在读者记录中调整增减本地操作的册
+        public static void AddLocalBorrowItems(XmlDocument readerdom)
+        {
+            string patron_pii = DomUtil.GetElementText(readerdom.DocumentElement, "barcode");
+
+            using (var context = new RequestContext())
+            {
+                List<string> results = new List<string>();
+                // 遍历现有读者记录中的在借册
+                if (readerdom != null && readerdom.DocumentElement != null)
+                {
+                    // 打算删除的 borrow 元素
+                    List<XmlElement> remove_borrows = new List<XmlElement>();
+
+                    XmlNodeList borrows = readerdom.DocumentElement.SelectNodes("borrows/borrow");
+                    foreach (XmlElement borrow in borrows)
+                    {
+                        string borrowDate = borrow.GetAttribute("borrowDate");
+                        DateTime borrowTime;
+                        try
+                        {
+                            borrowTime = DateTimeUtil.FromRfc1123DateTimeString(borrowDate).ToLocalTime();
+                        }
+                        catch
+                        {
+                            continue;
+                        }
+
+                        var item_pii = borrow.GetAttribute("barcode");
+
+                        // 如果借阅时间以后发生过还书，则排除
+                        var items = context.Requests
+    .Where(o => o.OperTime > borrowTime && o.OperatorID == patron_pii && o.Action == "return" && o.PII == item_pii)
+    .ToList();
+                        if (items.Count > 0)
+                        {
+                            remove_borrows.Add(borrow);
+                            continue;
+                        }
+                        results.Add(item_pii);
+                    }
+
+                    foreach (var borrow in remove_borrows)
+                    {
+                        borrow.ParentNode.RemoveChild(borrow);
+                    }
+                }
+
+                // TODO: 在联网情况下，不计入本地的在借册？
+
+                XmlElement container = readerdom.DocumentElement.SelectSingleNode("borrows") as XmlElement;
+                if (container == null)
+                {
+                    container = readerdom.CreateElement("borrows");
+                    readerdom.DocumentElement.AppendChild(container);
+                }
+
+                // 该读者本地的在借册
+                var local_items = context.Requests
+                    .Where(o => o.OperatorID == patron_pii && o.Action == "borrow" && o.LinkID == null
+                    && o.State != "dontsync")   // 2020/6/17 注：dontsync 表示同步时候实际上另外已经有前端对本册进行了操作(若能操作成功可以推测是还书操作)，所以这一册实际上已经还了，不要计入在借册列表中
+                    .ToList();  // .Select(o => o.PII).ToList();
+                foreach (var item in local_items)
+                {
+                    string current_pii = item.PII;
+                    if (results.IndexOf(current_pii) == -1)
+                    {
+                        // 添加 borrow 元素
+                        var borrow = container.AppendChild(readerdom.CreateElement("borrow")) as XmlElement;
+                        borrow.SetAttribute("barcode", current_pii);
+                        borrow.SetAttribute("borrowDate", DateTimeUtil.Rfc1123DateTimeStringEx(item.OperTime));
+
+                        /*
+                        if (string.IsNullOrEmpty(item.OperatorString) == false)
+                        {
+                            try
+                            {
+                                var person = JsonConvert.DeserializeObject<Operator>(item.OperatorString);
+                                borrow.SetAttribute("borrower", person.PatronBarcode);
+                            }
+                            catch
+                            {
+
+                            }
+                        }
+                        */
+
+                        if (string.IsNullOrEmpty(item.ActionString) == false)
+                        {
+                            try
+                            {
+                                var borrow_info = JsonConvert.DeserializeObject<BorrowInfo>(item.ActionString);
+                                borrow.SetAttribute("borrowPeriod", borrow_info.Period);
+                                borrow.SetAttribute("returningDate", borrow_info.LatestReturnTime);
+                                borrow.SetAttribute("operator", borrow_info.BorrowOperator);
+                                borrow.SetAttribute("borrowID", borrow_info.BorrowID);
+                                if (borrow_info.Overflows != null && borrow_info.Overflows.Length > 0)
+                                    borrow.SetAttribute("overflow", string.Join("; ", borrow_info.Overflows));
+                            }
+                            catch
+                            {
+
+                            }
+                        }
+
+                        results.Add(current_pii);
+                    }
+                }
+            }
+        }
+
+        // TODO: 用 AddLocalBorrowItems() 实现这个函数，以防止两边出现不一致
         // 获得一个读者当前的在借册的 PII 列表
         // 用本地读者记录和本地操作记录一起合成
         // parameters:

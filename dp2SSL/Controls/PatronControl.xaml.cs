@@ -138,7 +138,12 @@ namespace dp2SSL
         public static void SetState(Entity entity, string sub, bool on = true)
         {
             string state = entity.State;
+            if (state == null)
+                state = "";
+            // TODO: 要加固一下代码，保证 state 为 null 时不会出现异常
             StringUtil.SetInList(ref state, sub, on);
+            if (state == "")
+                state = null;
             entity.State = state;
         }
 
