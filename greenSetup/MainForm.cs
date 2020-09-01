@@ -272,7 +272,7 @@ true);
                 return;
             }
 
-            string style = "updateGreenSetupExe";
+            string style = "updateGreenSetupExe,debugInfo";
             if (delayUpdate == false)
                 style += ",clearStateFile";
             if (firstInstall)
@@ -326,6 +326,9 @@ true);
 
                     }
                 });
+
+            GreenInstaller.WriteInfoLog($"InstallFromWeb() 返回: \r\n{result.ToString()}");
+
             if (result.Value == -1)
             {
                 if (result.ErrorCode == "System.Net.WebException")

@@ -691,6 +691,7 @@ get_result.Result.AE_PersonalName_r);
                                 App.CloseErrorWindow();
                         }
 
+#if REMOVED
                         // 检查升级 dp2ssl
                         if (_updated == false
                         // && StringUtil.IsDevelopMode() == false
@@ -724,6 +725,7 @@ get_result.Result.AE_PersonalName_r);
                             _lastUpdateTime = DateTime.Now;
 
                         }
+#endif
                     }
                     _monitorTask = null;
 
