@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
@@ -10,6 +11,7 @@ using DigitalPlatform.rms.Client;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 
+[assembly: InternalsVisibleTo("TestDp2Library")]
 namespace DigitalPlatform.LibraryServer
 {
     public partial class LibraryApplication
@@ -370,18 +372,19 @@ XmlDocument readerdom,
 StringBuilder debugInfo,
 out string strError)
         {
-            int nRet0 = AdjustOverflow(
+            var result = AdjustOverflow(
 readerdom,
-debugInfo,
-out List<ItemModifyInfo> modifies,
-out strError);
-            if (nRet0 == -1)
+debugInfo);
+            if (result.Value == -1)
+            {
+                strError = result.ErrorInfo;
                 return -1;
+            }
 
             // 修改涉及到的册记录
-            if (modifies.Count > 0 && sessioninfo != null)
+            if (result.Modifies.Count > 0 && sessioninfo != null)
             {
-                foreach (var info in modifies)
+                foreach (var info in result.Modifies)
                 {
                     int nRet = ModifyItemRecord(
         sessioninfo,
@@ -392,39 +395,53 @@ out strError);
                 }
             }
 
-            return nRet0;
+            strError = result.ErrorInfo;
+            return result.Value;
+        }
+
+        internal class AdjustOverflowResult : NormalResult
+        {
+            public List<ItemModifyInfo> Modifies { get; set; }
         }
 
         // 针对读者记录中的 borrow 元素中 overflow (尚未超期)的，重新计算是否超额。如果不超额的，修改为正常的借期
-        // return:
+        // return.Value:
         //      -1  出错
         //      0   成功
         //      1   有警告信息，在 strError 中返回
-        public int AdjustOverflow(
-        // SessionInfo sessioninfo,
+        internal AdjustOverflowResult AdjustOverflow(
         XmlDocument readerdom,
-        StringBuilder debugInfo,
-        out List<ItemModifyInfo> modifies,
-        out string strError)
+        StringBuilder debugInfo)
         {
-            strError = "";
-            modifies = new List<ItemModifyInfo>();
-            int nRet = 0;
+            List<ItemModifyInfo> modifies = new List<ItemModifyInfo>();
 
-            nRet = BuildBorrowItemInfo(readerdom,
+            int nRet = BuildBorrowItemInfo(readerdom,
     out List<BorrowItemInfo> items,
-    out strError);
+    out string strError);
             if (nRet == -1)
-                return -1;
+                return new AdjustOverflowResult
+                {
+                    Value = -1,
+                    ErrorInfo = strError,
+                    Modifies = modifies
+                };
 
             // 没有任何在借事项
             if (items.Count == 0)
-                return 0;
+                return new AdjustOverflowResult
+                {
+                    Value = 0,
+                    Modifies = modifies
+                };
 
             int overflow_count = BorrowItemInfo.CountOverflow(items);
             // 没有超额事项可供调整
             if (overflow_count == 0)
-                return 0;
+                return new AdjustOverflowResult
+                {
+                    Value = 0,
+                    Modifies = modifies
+                };
 
             // 获得总的最大可借数
             // return:
@@ -434,9 +451,12 @@ out strError);
     readerdom,
     out strError);
             if (totalMax == -1)
-            {
-                return -1;
-            }
+                return new AdjustOverflowResult
+                {
+                    Value = -1,
+                    ErrorInfo = strError,
+                    Modifies = modifies
+                };
 
             List<string> warnings = new List<string>();
 
@@ -558,10 +578,19 @@ out strError);
             if (warnings.Count > 0)
             {
                 strError = StringUtil.MakePathList(warnings, "; ");
-                return 1;
+                return new AdjustOverflowResult
+                {
+                    Value = 1,
+                    ErrorInfo = strError,
+                    Modifies = modifies
+                };
             }
 
-            return 0;
+            return new AdjustOverflowResult
+            {
+                Value = 0,
+                Modifies = modifies
+            };
         }
 
 #if NO
