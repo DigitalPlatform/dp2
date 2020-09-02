@@ -83,16 +83,23 @@ namespace SendFace
             // 后台自动检查更新
             var task = Task.Run(() =>
             {
-                NormalResult result = WpfClientInfo.InstallUpdateSync();
-                if (result.Value == -1)
-                    SetError("update", "自动更新出错: " + result.ErrorInfo);
-                else if (result.Value == 1)
+                try
                 {
-                    SetError("update", result.ErrorInfo);
-                    // Updated?.Invoke(this, new UpdatedEventArgs { Message = result.ErrorInfo });
+                    NormalResult result = WpfClientInfo.InstallUpdateSync();
+                    if (result.Value == -1)
+                        SetError("update", "自动更新出错: " + result.ErrorInfo);
+                    else if (result.Value == 1)
+                    {
+                        SetError("update", result.ErrorInfo);
+                        // Updated?.Invoke(this, new UpdatedEventArgs { Message = result.ErrorInfo });
+                    }
+                    else if (string.IsNullOrEmpty(result.ErrorInfo) == false)
+                        SetError("update", result.ErrorInfo);
                 }
-                else if (string.IsNullOrEmpty(result.ErrorInfo) == false)
-                    SetError("update", result.ErrorInfo);
+                catch(Exception ex)
+                {
+                    WpfClientInfo.WriteErrorLog($"自动后台更新出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                }
             });
         }
 

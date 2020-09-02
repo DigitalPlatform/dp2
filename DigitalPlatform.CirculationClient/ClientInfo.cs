@@ -186,7 +186,7 @@ namespace DigitalPlatform.CirculationClient
 
             // 启动时在日志中记载当前 .exe 版本号
             // 此举也能尽早发现日志目录无法写入的问题，会抛出异常
-            WriteInfoLog(Assembly.GetAssembly(typeof(ClientInfo)).FullName);
+            WriteInfoLog(Assembly.GetAssembly(TypeOfProgram/*typeof(ClientInfo)*/).FullName);
 
             {
                 // 检查序列号

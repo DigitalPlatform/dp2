@@ -2348,7 +2348,7 @@ out Reader reader);
                     return new InventoryResult
                     {
                         Value = -1,
-                        ErrorInfo = $"Inventory() error, errorCode={error_code}",
+                        ErrorInfo = $"Inventory() error, errorCode={error_code}, ret={ret}, readerName={reader.Name}",
                         ErrorCode = error_code
                     };
                 }
