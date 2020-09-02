@@ -533,16 +533,9 @@ namespace TestDp2Library
   <readerType>本科生</readerType>
 </root>";
 
-            var app = PrepareApp(_xml);
-
-            XmlDocument readerdom = new XmlDocument();
-            readerdom.LoadXml(patron_xml);
-
-            int nRet = app.AdjustOverflow(
-            readerdom,
-            null,
-            out List<ItemModifyInfo> modifies,
-            out string strError);
+            int nRet = CallAdjustOverflow1(_xml,
+                patron_xml,
+                out List<ItemModifyInfo> modifies);
 
             Assert.AreEqual(0, nRet);
             Assert.AreEqual(0, modifies.Count);
@@ -565,16 +558,9 @@ namespace TestDp2Library
   <readerType>本科生</readerType>
 </root>";
 
-            var app = PrepareApp(_xml);
-
-            XmlDocument readerdom = new XmlDocument();
-            readerdom.LoadXml(patron_xml);
-
-            int nRet = app.AdjustOverflow(
-            readerdom,
-            null,
-            out List<ItemModifyInfo> modifies,
-            out string strError);
+            int nRet = CallAdjustOverflow1(_xml,
+                patron_xml,
+                out List<ItemModifyInfo> modifies);
 
             Assert.AreEqual(0, nRet);
             Assert.AreEqual(1, modifies.Count);
@@ -582,7 +568,54 @@ namespace TestDp2Library
             Assert.AreEqual("31day", modifies[0].BorrowPeriod);
         }
 
+        // 调用私有函数 AdjustOverflow()
+        // https://stackoverflow.com/questions/9122708/unit-testing-private-methods-in-c-sharp
+        // 示范如何测试私有函数。返回类型也是私有的
+        static int CallAdjustOverflow(string rightsTableXml,
+            string patron_xml,
+            out List<ItemModifyInfo> modifies)
+        {
+            var app = PrepareApp(rightsTableXml);
 
+            XmlDocument readerdom = new XmlDocument();
+            readerdom.LoadXml(patron_xml);
+
+            PrivateObject obj = new PrivateObject(app);
+
+            object result = obj.Invoke("AdjustOverflow",
+            readerdom,
+            null);
+
+            PrivateObject obj1 = new PrivateObject(result);
+            int nRet = (int)obj1.GetFieldOrProperty("Value");
+            modifies = (List<ItemModifyInfo>)obj1.GetFieldOrProperty("Modifies");
+
+            return nRet;
+        }
+
+        // 调用私有函数 AdjustOverflow()
+        // https://stackoverflow.com/questions/9122708/unit-testing-private-methods-in-c-sharp
+        // 示范如何使用 [assembly: InternalsVisibleTo("TestDp2Library")] 访问私有方法和类型
+        static int CallAdjustOverflow1(string rightsTableXml,
+    string patron_xml,
+    out List<ItemModifyInfo> modifies)
+        {
+            var app = PrepareApp(rightsTableXml);
+
+            XmlDocument readerdom = new XmlDocument();
+            readerdom.LoadXml(patron_xml);
+
+            AdjustOverflowResult result = app.AdjustOverflow(readerdom,
+            null);
+
+            PrivateObject obj1 = new PrivateObject(result);
+            int nRet = result.Value;
+            modifies = result.Modifies;
+
+            return nRet;
+        }
+
+        // 准备 LibraryApplication 对象
         static LibraryApplication PrepareApp(string rightsTableXml)
         {
             LibraryApplication app = new LibraryApplication();
@@ -591,8 +624,6 @@ namespace TestDp2Library
             app.LibraryCfgDom.LoadXml("<root ><rightsTable /></root>");
             XmlElement tableRoot = app.LibraryCfgDom.DocumentElement.SelectSingleNode("rightsTable") as XmlElement;
             DomUtil.SetElementOuterXml(tableRoot, rightsTableXml);
-
-
             return app;
         }
     }
