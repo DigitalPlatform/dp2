@@ -219,6 +219,10 @@ namespace RfidCenter
                             OutputHistory(result.ErrorInfo, 0);
                     }
                 }
+                catch(TaskCanceledException)
+                {
+
+                }
                 catch(Exception ex)
                 {
                     ClientInfo.WriteErrorLog($"InstallUpdateSync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
@@ -286,6 +290,24 @@ namespace RfidCenter
             _rfidDriver.ReleaseDriver();
             _ledDriver.ReleaseDriver();
             _printerDriver.ReleaseDriver();
+        }
+
+        public void RestartRfidDriver(string text)
+        {
+            Task.Run(() =>
+            {
+                try
+                {
+                    string error = $"*** 自动重启 RFID *** {text}";
+                    OutputHistory(error, 1);
+                    ClientInfo.WriteErrorLog(error);
+                    InitializeRfidDriver();
+                }
+                catch (Exception ex)
+                {
+                    OutputHistory("重启 InitializeRfidDriver() 出现异常: " + ExceptionUtil.GetDebugText(ex), 2);
+                }
+            });
         }
 
         #region 错误状态

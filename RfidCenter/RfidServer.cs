@@ -15,6 +15,7 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Core;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
+using Serilog;
 
 namespace RfidCenter
 {
@@ -444,6 +445,10 @@ namespace RfidCenter
         //static uint _currenAntenna = 1;
         //DateTime _lastTime;
 
+        static DateTime _lastCompactTime;
+        static TimeSpan _compactLength = TimeSpan.FromMinutes(10);
+        static int _inventoryErrorCount = 0;
+
         // parameters:
         //      reader_name_list    读卡器名字列表。形态为 "*" 或 "name1,name2" 或 "name1:1|2|3|4,name2"
         //      style   如果为 "getTagInfo"，表示要在结果中返回 TagInfo
@@ -483,8 +488,38 @@ namespace RfidCenter
                     antenna_list,
                     style   // ""
                     );
+
+                /*
+                // testing
+                inventory_result.Value = -1;
+                inventory_result.ErrorInfo = "模拟 inventory 出错";
+                inventory_result.ErrorCode = "test";
+                */
+
                 if (inventory_result.Value == -1)
                 {
+                    // TODO: 统计单位时间内出错的总数，如果超过一定限度则重新初始化全部读卡器
+                    _ = _compactLog.Add("inventory 出错: {0}", new object[] { inventory_result.ErrorInfo });
+                    _inventoryErrorCount++;
+
+                    // 每隔一段时间写入日志一次
+                    if (DateTime.Now - _lastCompactTime > _compactLength)
+                    {
+                        _compactLog?.WriteToLog((text) =>
+                        {
+                            Log.Logger.Error(text);
+                            Program.MainForm.OutputHistory(text, 2);
+                        });
+                        _lastCompactTime = DateTime.Now;
+
+                        if (_inventoryErrorCount > 10)
+                        {
+                            // 发出信号，重启
+                            Program.MainForm.RestartRfidDriver($"因最近阶段内 inventory 出错次数为 {_inventoryErrorCount}");
+                            _inventoryErrorCount = 0;
+                        }
+                    }
+
                     return new ListTagsResult { Value = -1, ErrorInfo = inventory_result.ErrorInfo, ErrorCode = inventory_result.ErrorCode };
                 }
 
