@@ -103,7 +103,10 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
+        // parameters:
+        //      now 当前时间。本地时间格式。这是用来判断是否超期的依据
         static bool IsOverdue(XmlElement borrow,
+            DateTime now,
             out List<string> warnings)
         {
             warnings = new List<string>();
@@ -130,7 +133,7 @@ out string strError);
                 // continue;
             }
 
-            DateTime now = DateTime.Now;
+            // DateTime now = DateTime.Now;
             // 正规化时间
             nRet = DateTimeUtil.RoundTime(strPeriodUnit,
                 ref now,
@@ -162,7 +165,10 @@ out string strError);
         }
 
         // 构造 ItemInfo List
+        // parameters:
+        //      now 当前时间。本地时间格式。这是用来判断是否超期的依据
         static int BuildBorrowItemInfo(XmlDocument readerdom,
+            DateTime now,
             out List<BorrowItemInfo> results,
             out string strError)
         {
@@ -178,7 +184,7 @@ out string strError);
                 info.Element = borrow;
                 info.BookType = borrow.GetAttribute("type");
                 info.Overflowed = borrow.HasAttribute("overflow");
-                info.Overdued = IsOverdue(borrow, out List<string> warnings);
+                info.Overdued = IsOverdue(borrow, now, out List<string> warnings);
                 if (warnings != null && warnings.Count > 0)
                     info.Errors = warnings;
                 info.BorrowDate = borrow.GetAttribute("borrowDate");
@@ -374,6 +380,7 @@ out string strError)
         {
             var result = AdjustOverflow(
 readerdom,
+DateTime.Now,
 debugInfo);
             if (result.Value == -1)
             {
@@ -405,19 +412,23 @@ debugInfo);
         }
 
         // 针对读者记录中的 borrow 元素中 overflow (尚未超期)的，重新计算是否超额。如果不超额的，修改为正常的借期
+        // parameters:
+        //      now 当前时间。本地时间格式。这是用来判断是否超期的依据
         // return.Value:
         //      -1  出错
         //      0   成功
         //      1   有警告信息，在 strError 中返回
         internal AdjustOverflowResult AdjustOverflow(
         XmlDocument readerdom,
+        DateTime now,
         StringBuilder debugInfo)
         {
             List<ItemModifyInfo> modifies = new List<ItemModifyInfo>();
 
             int nRet = BuildBorrowItemInfo(readerdom,
-    out List<BorrowItemInfo> items,
-    out string strError);
+                now,
+                out List<BorrowItemInfo> items,
+                out string strError);
             if (nRet == -1)
                 return new AdjustOverflowResult
                 {
