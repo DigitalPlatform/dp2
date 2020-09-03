@@ -359,6 +359,12 @@ namespace dp2SSL
 
                     // 从本地实体库中获得记录
                     var entity_record = context.Entities.Where(o => o.PII == pii).FirstOrDefault();
+                    
+                    // 2020/9/3
+                    // 对没有点的 PII 字符串尝试后方一致匹配
+                    if (entity_record == null && pii.IndexOf(".") == -1)
+                        entity_record = context.Entities.Where(o => o.PII.EndsWith("." + pii)).FirstOrDefault();
+
                     // EntityItem entity_record = null;   // testing
 
                     if (entity_record != null)
