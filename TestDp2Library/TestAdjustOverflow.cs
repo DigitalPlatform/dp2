@@ -608,7 +608,7 @@ namespace TestDp2Library
   <refID>be13ecc5-6a9c-4400-9453-a072c50cede1</refID>
   <libraryCode>新分馆</libraryCode>
   <borrows>
-    <borrow barcode='T0000050' overflow='test' recPath='中文图书实体/1268' biblioRecPath='中文图书/614' location='智能书柜' borrowDate='Wed, 02 Sep 2020 00:08:25 +0800' borrowPeriod='31day' borrowID='a8d5815e-d8f1-40c9-96be-dd0c83f8e3d1' returningDate='Sat, 03 Oct 2020 12:00:00 +0800' operator='supervisor' type='普通' price='' />
+    <borrow barcode='T0000050' overflow='test' recPath='中文图书实体/1268' biblioRecPath='中文图书/614' location='智能书柜' borrowDate='Wed, 02 Sep 2020 00:08:25 +0800' borrowPeriod='1day' borrowID='a8d5815e-d8f1-40c9-96be-dd0c83f8e3d1' returningDate='Thu, 03 Sep 2020 12:00:00 +0800' operator='supervisor' type='普通' price='' />
     <borrow barcode='T0000131' recPath='中文图书实体/1349' biblioRecPath='中文图书/623' location='智能书柜' borrowDate='Wed, 02 Sep 2020 00:08:25 +0800' borrowPeriod='31day' borrowID='2eb9902e-3463-4049-a7c5-f65c04c52a90' returningDate='Sat, 03 Oct 2020 12:00:00 +0800' operator='supervisor' type='普通' price='' />
   </borrows>
   <readerType>本科生</readerType>
@@ -633,6 +633,57 @@ namespace TestDp2Library
             Assert.AreEqual(1, result.Modifies.Count);
             Assert.AreEqual("T0000050", result.Modifies[0].ItemBarcode);
             Assert.AreEqual("31day", result.Modifies[0].BorrowPeriod);
+        }
+
+        // 有一个 overflow 册。调整后不受数量限制。但因为调用时已经超期，所以无法调整
+        [TestMethod]
+        public void Test_adjust_2_a()
+        {
+            string rights_xml = @"<rightsTable>
+       <library code='新分馆'>
+        <type reader='本科生'>
+            <param name='可借总册数' value='10' />
+            <param name='可预约册数' value='10' />
+            <param name='以停代金因子' value='1' />
+            <param name='工作日历名' value='' />
+            <type book='普通'>
+                <param name='可借册数' value='10' />
+                <param name='借期' value='31day' />
+                <param name='超期违约金因子' value='CNY1.00/day' />
+                <param name='丢失违约金因子' value='1' />
+            </type>
+        </type>
+        <readerTypes>
+            <item>本科生</item>
+        </readerTypes>
+        <bookTypes>
+            <item>普通</item>
+        </bookTypes>
+    </library>
+</rightsTable>";
+
+            string patron_xml = @"<root>
+  <barcode>R0000001</barcode>
+  <name>张三</name>
+  <refID>be13ecc5-6a9c-4400-9453-a072c50cede1</refID>
+  <libraryCode>新分馆</libraryCode>
+  <borrows>
+    <borrow barcode='T0000050' overflow='test' recPath='中文图书实体/1268' biblioRecPath='中文图书/614' location='智能书柜' borrowDate='Wed, 02 Sep 2020 00:08:25 +0800' borrowPeriod='1day' borrowID='a8d5815e-d8f1-40c9-96be-dd0c83f8e3d1' returningDate='Thu, 03 Sep 2020 12:00:00 +0800' operator='supervisor' type='普通' price='' />
+    <borrow barcode='T0000131' recPath='中文图书实体/1349' biblioRecPath='中文图书/623' location='智能书柜' borrowDate='Wed, 02 Sep 2020 00:08:25 +0800' borrowPeriod='31day' borrowID='2eb9902e-3463-4049-a7c5-f65c04c52a90' returningDate='Sat, 03 Oct 2020 12:00:00 +0800' operator='supervisor' type='普通' price='' />
+  </borrows>
+  <readerType>本科生</readerType>
+</root>";
+
+            var result = CallAdjustOverflow1(rights_xml,
+    patron_xml,
+    new DateTime(2020, 9, 4));
+
+            Assert.AreEqual(0, result.Value);
+            Assert.AreEqual(0, result.Modifies.Count);
+            /*
+            Assert.AreEqual("T0000050", result.Modifies[0].ItemBarcode);
+            Assert.AreEqual("31day", result.Modifies[0].BorrowPeriod);
+            */
         }
 
         // 有一个 overflow 册。调整后会碰到类型数量限制，因此无法调整成功
@@ -668,7 +719,7 @@ namespace TestDp2Library
   <refID>be13ecc5-6a9c-4400-9453-a072c50cede1</refID>
   <libraryCode>新分馆</libraryCode>
   <borrows>
-    <borrow barcode='T0000050' overflow='test' recPath='中文图书实体/1268' biblioRecPath='中文图书/614' location='智能书柜' borrowDate='Wed, 02 Sep 2020 00:08:25 +0800' borrowPeriod='31day' borrowID='a8d5815e-d8f1-40c9-96be-dd0c83f8e3d1' returningDate='Sat, 03 Oct 2020 12:00:00 +0800' operator='supervisor' type='普通' price='' />
+    <borrow barcode='T0000050' overflow='test' recPath='中文图书实体/1268' biblioRecPath='中文图书/614' location='智能书柜' borrowDate='Wed, 02 Sep 2020 00:08:25 +0800' borrowPeriod='1day' borrowID='a8d5815e-d8f1-40c9-96be-dd0c83f8e3d1' returningDate='Thu, 03 Sep 2020 12:00:00 +0800' operator='supervisor' type='普通' price='' />
     <borrow barcode='T0000131' recPath='中文图书实体/1349' biblioRecPath='中文图书/623' location='智能书柜' borrowDate='Wed, 02 Sep 2020 00:08:25 +0800' borrowPeriod='31day' borrowID='2eb9902e-3463-4049-a7c5-f65c04c52a90' returningDate='Sat, 03 Oct 2020 12:00:00 +0800' operator='supervisor' type='普通' price='' />
     <borrow barcode='T0000132' recPath='中文图书实体/1350' biblioRecPath='中文图书/623' location='智能书柜' borrowDate='Wed, 02 Sep 2020 00:08:25 +0800' borrowPeriod='31day' borrowID='xxx' returningDate='Sat, 03 Oct 2020 12:00:00 +0800' operator='supervisor' type='普通' price='' />
   </borrows>
@@ -716,7 +767,7 @@ namespace TestDp2Library
   <refID>be13ecc5-6a9c-4400-9453-a072c50cede1</refID>
   <libraryCode>新分馆</libraryCode>
   <borrows>
-    <borrow barcode='T0000050' overflow='test' recPath='中文图书实体/1268' biblioRecPath='中文图书/614' location='智能书柜' borrowDate='Wed, 02 Sep 2020 00:08:25 +0800' borrowPeriod='31day' borrowID='a8d5815e-d8f1-40c9-96be-dd0c83f8e3d1' returningDate='Sat, 03 Oct 2020 12:00:00 +0800' operator='supervisor' type='普通' price='' />
+    <borrow barcode='T0000050' overflow='test' recPath='中文图书实体/1268' biblioRecPath='中文图书/614' location='智能书柜' borrowDate='Wed, 02 Sep 2020 00:08:25 +0800' borrowPeriod='1day' borrowID='a8d5815e-d8f1-40c9-96be-dd0c83f8e3d1' returningDate='Thu, 03 Sep 2020 12:00:00 +0800' operator='supervisor' type='普通' price='' />
     <borrow barcode='T0000131' recPath='中文图书实体/1349' biblioRecPath='中文图书/623' location='智能书柜' borrowDate='Wed, 02 Sep 2020 00:08:25 +0800' borrowPeriod='31day' borrowID='2eb9902e-3463-4049-a7c5-f65c04c52a90' returningDate='Sat, 03 Oct 2020 12:00:00 +0800' operator='supervisor' type='普通' price='' />
     <borrow barcode='T0000132' recPath='中文图书实体/1350' biblioRecPath='中文图书/623' location='智能书柜' borrowDate='Wed, 02 Sep 2020 00:08:25 +0800' borrowPeriod='31day' borrowID='xxx' returningDate='Sat, 03 Oct 2020 12:00:00 +0800' operator='supervisor' type='普通' price='' />
   </borrows>

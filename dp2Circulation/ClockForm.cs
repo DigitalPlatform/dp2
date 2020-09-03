@@ -196,7 +196,7 @@ MessageBoxDefaultButton.Button2);
                 if (lRet == -1)
                     return -1;
 
-                // TODO: 最好转换为 GMT 为东八区的 RFC1123 字符串显示
+                // 已经采用带有时区的 RFC1123 字符串显示
                 this.RFC1123TimeString = strTime;
                 return 0;
             }
@@ -305,9 +305,9 @@ MessageBoxDefaultButton.Button2);
             {
                 if (String.IsNullOrEmpty(this.textBox_time.Text) == true)
                 {
-                    DateTime time = this.dateTimePicker1.Value.ToUniversalTime();
+                    DateTime time = this.dateTimePicker1.Value; // .ToUniversalTime();
 
-                    return DateTimeUtil.Rfc1123DateTimeString(time);
+                    return DateTimeUtil.Rfc1123DateTimeStringEx(time);
                 }
                 return this.textBox_time.Text;
             }
@@ -339,9 +339,9 @@ MessageBoxDefaultButton.Button2);
 
         private void dateTimePicker1_ValueChanged(object sender, EventArgs e)
         {
-            DateTime time = this.dateTimePicker1.Value.ToUniversalTime();
+            DateTime time = this.dateTimePicker1.Value; // .ToUniversalTime();
 
-            this.textBox_time.Text = DateTimeUtil.Rfc1123DateTimeString(time);
+            this.textBox_time.Text = DateTimeUtil.Rfc1123DateTimeStringEx(time);
         }
 
 
