@@ -244,6 +244,13 @@ TaskCreationOptions.LongRunning,
 TaskScheduler.Default);
         }
 
+        // 初始化阶段探测本地读者缓存数据是否存在，如果不存在则设法启动首次读者同步
+        public static void DetectPatronLocalDatabase()
+        {
+            if (PatronReplication.PatronDataExists() == false)
+                SaveStartDate(null);
+        }
+
         // TODO: 如何显示进度信息？
         // 开始重做全量同步读者信息
         public static void RedoReplicatePatron()

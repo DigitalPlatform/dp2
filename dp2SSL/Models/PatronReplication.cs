@@ -867,5 +867,22 @@ ProcessInfo info)
                 };
             }
         }
+
+        public static bool PatronDataExists()
+        {
+            try
+            {
+                using (BiblioCacheContext context = new BiblioCacheContext())
+                {
+                    context.Database.EnsureCreated();
+                    return context.Patrons.Any();
+                }
+            }
+            catch(Exception ex)
+            {
+                WpfClientInfo.WriteErrorLog($"PatronDataExists() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                return false;
+            }
+        }
     }
 }
