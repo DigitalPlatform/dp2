@@ -186,6 +186,9 @@ namespace dp2SSL
                             await InitialShelfEntitiesAsync(App.StartNetworkMode,
                                 IsSilently() || IsFileSilently());
 
+                            // 检查读者本地缓存是否存在
+                            ShelfData.DetectPatronLocalDatabase();
+
                             // 初始化完成之后，应该是全部门关闭状态，还没有人开始使用，则先关灯，进入等待使用的状态
                             RfidManager.TurnShelfLamp("*", "turnOff");
                         }
