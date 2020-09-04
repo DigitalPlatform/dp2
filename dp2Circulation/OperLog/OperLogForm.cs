@@ -2211,6 +2211,7 @@ DomUtil.GetElementInnerXml(dom.DocumentElement, "deletedCommentRecords"));
                 DomUtil.GetElementText(dom.DocumentElement, "operTime"));
 
             string strBorrowID = DomUtil.GetElementText(dom.DocumentElement, "borrowID");
+            string strPatronBarcode = DomUtil.GetElementText(dom.DocumentElement, "patronBarcode");
             string strItemBarcode = DomUtil.GetElementText(dom.DocumentElement, "itemBarcode");
             string strConfirmItemRecPath = DomUtil.GetElementText(dom.DocumentElement, "confirmItemRecPath");
 
@@ -2225,6 +2226,7 @@ DomUtil.GetElementInnerXml(dom.DocumentElement, "deletedCommentRecords"));
                 BuildHtmlLine("馆代码", strLibraryCode) +
                 BuildHtmlLine("借阅事务 ID", strBorrowID) +
                 BuildHtmlLine("册条码号", strItemBarcode) +
+                BuildHtmlLine("读者证条码号", strPatronBarcode) +
                 BuildHtmlLine("册记录路径", strConfirmItemRecPath) +
                 BuildHtmlLine("借阅日期", strBorrowDate) +
                 BuildHtmlLine("期限", strBorrowPeriod) +

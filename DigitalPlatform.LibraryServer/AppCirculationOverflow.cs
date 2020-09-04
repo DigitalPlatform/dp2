@@ -431,6 +431,7 @@ debugInfo);
             // DomUtil.SetElementText(domOperLog.DocumentElement, "action", strAction);
 
             DomUtil.SetElementText(domOperLog.DocumentElement, "borrowID", info.BorrowID);
+            DomUtil.SetElementText(domOperLog.DocumentElement, "patronBarcode", info.PatronBarcode);
             DomUtil.SetElementText(domOperLog.DocumentElement, "itemBarcode", info.ItemBarcode);
             DomUtil.SetElementText(domOperLog.DocumentElement, "confirmItemRecPath", info.ConfirmItemRecPath);
             DomUtil.SetElementText(domOperLog.DocumentElement, "borrowDate", info.BorrowDate);
@@ -617,6 +618,7 @@ debugInfo);
                 modifies.Add(new ItemModifyInfo
                 {
                     LibraryCode = DomUtil.GetElementText(readerdom.DocumentElement, "libraryCode"),
+                    PatronBarcode = DomUtil.GetElementText(readerdom.DocumentElement, "barcode"),
                     BorrowID = item.Element.GetAttribute("borrowID"),
                     ItemBarcode = item.Barcode,
                     BorrowDate = item.Element.GetAttribute("borrowDate"),
@@ -1012,6 +1014,7 @@ out strError);
             public string BorrowDate { get; set; }
 
             public string LibraryCode { get; set; }
+            public string PatronBarcode { get; set; }
             public string BorrowID { get; set; }
         }
 
