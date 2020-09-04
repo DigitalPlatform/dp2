@@ -380,7 +380,7 @@ out string strError)
         {
             var result = AdjustOverflow(
 readerdom,
-DateTime.Now,
+this.Clock.Now,
 debugInfo);
             if (result.Value == -1)
             {
@@ -399,11 +399,68 @@ debugInfo);
         out strError);
                     if (nRet == -1)
                         return -1;
+
+                    // 写入操作日志
+                    nRet = WriteAdjustOverflowOperLog(
+                        sessioninfo,
+                        info,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
                 }
             }
 
             strError = result.ErrorInfo;
             return result.Value;
+        }
+
+        // 写入操作日志
+        int WriteAdjustOverflowOperLog(
+            SessionInfo sessioninfo,
+            ItemModifyInfo info,
+            out string strError)
+        {
+            strError = "";
+
+            XmlDocument domOperLog = new XmlDocument();
+            domOperLog.LoadXml("<root />");
+            DomUtil.SetElementText(domOperLog.DocumentElement,
+                "libraryCode",
+                info.LibraryCode);    // 读者所在的馆代码
+            DomUtil.SetElementText(domOperLog.DocumentElement, "operation", "adjustOverflow");
+            // DomUtil.SetElementText(domOperLog.DocumentElement, "action", strAction);
+
+            DomUtil.SetElementText(domOperLog.DocumentElement, "borrowID", info.BorrowID);
+            DomUtil.SetElementText(domOperLog.DocumentElement, "itemBarcode", info.ItemBarcode);
+            DomUtil.SetElementText(domOperLog.DocumentElement, "confirmItemRecPath", info.ConfirmItemRecPath);
+            DomUtil.SetElementText(domOperLog.DocumentElement, "borrowDate", info.BorrowDate);
+
+            DomUtil.SetElementText(domOperLog.DocumentElement, "borrowPeriod", info.BorrowPeriod);
+            DomUtil.SetElementText(domOperLog.DocumentElement, "returningDate", info.ReturningDate);
+            if (string.IsNullOrEmpty(info.DenyPeriod) == false)
+                DomUtil.SetElementText(domOperLog.DocumentElement, "denyPeriod", info.DenyPeriod);
+
+            // 修改前的 borrow 元素
+            var borrow = domOperLog.DocumentElement.AppendChild(domOperLog.CreateElement("borrow")) as XmlElement;
+            DomUtil.SetElementOuterXml(borrow, info.OldBorrowInfo);
+
+            DomUtil.SetElementText(domOperLog.DocumentElement, "operator",
+    sessioninfo.UserID);
+
+            string strOperTime = this.Clock.GetClock();
+            DomUtil.SetElementText(domOperLog.DocumentElement, "operTime",
+                strOperTime);
+
+            int nRet = this.OperLog.WriteOperLog(domOperLog,
+    sessioninfo.ClientAddress,
+    out strError);
+            if (nRet == -1)
+            {
+                strError = "写入 AdjustOverflow 操作日志时发生错误: " + strError;
+                return -1;
+            }
+
+            return 0;
         }
 
         internal class AdjustOverflowResult : NormalResult
@@ -517,16 +574,15 @@ debugInfo);
                     else
                         break;
                 }
-
             }
-
-
 
             // 开始修改 borrow 元素
             foreach (var item in items)
             {
                 if (item.ModifyAction != "removeOverflow")
                     continue;
+
+                string strOldBorrowInfo = item.Element.OuterXml;
 
                 // 获得一册书的借阅参数
                 nRet = GetBorrowParam(
@@ -560,10 +616,14 @@ debugInfo);
 
                 modifies.Add(new ItemModifyInfo
                 {
+                    LibraryCode = DomUtil.GetElementText(readerdom.DocumentElement, "libraryCode"),
+                    BorrowID = item.Element.GetAttribute("borrowID"),
                     ItemBarcode = item.Barcode,
+                    BorrowDate = item.Element.GetAttribute("borrowDate"),
                     BorrowPeriod = borrowPeriod,
                     DenyPeriod = denyPeriod,
-                    ReturningDate = returningDate
+                    ReturningDate = returningDate,
+                    OldBorrowInfo = strOldBorrowInfo,
                 });
             }
 
@@ -947,6 +1007,12 @@ out strError);
             public string BorrowPeriod { get; set; }
             public string DenyPeriod { get; set; }
             public string ReturningDate { get; set; }
+
+            public string OldBorrowInfo { get; set; }
+            public string BorrowDate { get; set; }
+
+            public string LibraryCode { get; set; }
+            public string BorrowID { get; set; }
         }
 
         // 修改册记录中的借期，并去掉 overflow 元素

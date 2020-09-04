@@ -4002,58 +4002,100 @@ MessageBoxDefaultButton.Button2);
             string strError = "";
             string strShrinkComment = "";
 
-#if NO
-            UtilityForm form = Program.MainForm.EnsureUtilityForm();
-            form.Activate();
-            form.ActivateWebCameraPage();
-#endif
-            Program.MainForm.DisableCamera();
-            try
+            if (string.IsNullOrEmpty(Program.MainForm.FaceReaderUrl))
             {
-                // 注： new CameraPhotoDialog() 可能会抛出异常
-                using (CameraPhotoDialog dlg = new CameraPhotoDialog())
+                Program.MainForm.DisableCamera();
+                try
                 {
-                    // MainForm.SetControlFont(dlg, this.Font, false);
-                    dlg.Font = this.Font;
-
-                    dlg.CurrentCamera = Program.MainForm.AppInfo.GetString(
-                        "readerinfoform",
-                        "current_camera",
-                        "");
-
-                    Program.MainForm.AppInfo.LinkFormState(dlg, "CameraPhotoDialog_state");
-                    dlg.ShowDialog(this);
-                    Program.MainForm.AppInfo.UnlinkFormState(dlg);
-
-                    Program.MainForm.AppInfo.SetString(
-                        "readerinfoform",
-                        "current_camera",
-                        dlg.CurrentCamera);
-
-                    if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
-                        return;
-
-                    int nRet = 0;
-
-                    Image image = dlg.Image;
-
-                    using (image)
+                    // 注： new CameraPhotoDialog() 可能会抛出异常
+                    using (CameraPhotoDialog dlg = new CameraPhotoDialog())
                     {
-                        // 自动缩小图像
-                        nRet = SetCardPhoto(image,
-                    "cardphoto",
-                        out strShrinkComment,
-                        out strError);
-                        if (nRet == -1)
-                            goto ERROR1;
+                        // MainForm.SetControlFont(dlg, this.Font, false);
+                        dlg.Font = this.Font;
+
+                        dlg.CurrentCamera = Program.MainForm.AppInfo.GetString(
+                            "readerinfoform",
+                            "current_camera",
+                            "");
+
+                        Program.MainForm.AppInfo.LinkFormState(dlg, "CameraPhotoDialog_state");
+                        dlg.ShowDialog(this);
+                        Program.MainForm.AppInfo.UnlinkFormState(dlg);
+
+                        Program.MainForm.AppInfo.SetString(
+                            "readerinfoform",
+                            "current_camera",
+                            dlg.CurrentCamera);
+
+                        if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                            return;
+
+                        int nRet = 0;
+
+                        Image image = dlg.Image;
+
+                        using (image)
+                        {
+                            // 自动缩小图像
+                            nRet = SetCardPhoto(image,
+                        "cardphoto",
+                            out strShrinkComment,
+                            out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+                        }
                     }
                 }
-            }
-            finally
-            {
-                Application.DoEvents();
+                finally
+                {
+                    Application.DoEvents();
 
-                Program.MainForm.EnableCamera();
+                    Program.MainForm.EnableCamera();
+                }
+            }
+            else
+            {
+                // 利用人脸中心捕获读者照片
+                try
+                {
+                    // 注： new CameraPhotoDialog() 可能会抛出异常
+                    using (PatronPhotoDialog dlg = new PatronPhotoDialog())
+                    {
+                        // MainForm.SetControlFont(dlg, this.Font, false);
+                        dlg.Font = this.Font;
+
+                        Program.MainForm.AppInfo.LinkFormState(dlg, "CameraPhotoDialog_state");
+                        dlg.ShowDialog(this);
+                        Program.MainForm.AppInfo.UnlinkFormState(dlg);
+
+                        if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                            return;
+
+                        int nRet = 0;
+
+                        Image image = dlg.Image;
+
+                        using (image)
+                        {
+                            // 自动缩小图像
+                            nRet = SetCardPhoto(image,
+                        "cardphoto",
+                            out strShrinkComment,
+                            out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+                        }
+                    }
+                }
+                catch(Exception ex)
+                {
+
+                }
+                finally
+                {
+                }
+
+
             }
 
             // 切换到对象属性页，以便操作者能看到刚刚创建的对象行

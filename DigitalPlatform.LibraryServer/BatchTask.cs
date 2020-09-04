@@ -1041,6 +1041,10 @@ namespace DigitalPlatform.LibraryServer
             {
                 // 只读 2020/8/28
             }
+            else if (strOperation == "adjustOverflow")
+            {
+                // 只读 2020/9/4
+            }
             else if (strOperation == "manageDatabase")
             {
                 // 管理数据库 2017/5/23

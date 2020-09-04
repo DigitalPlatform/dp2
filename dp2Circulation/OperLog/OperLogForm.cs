@@ -503,6 +503,8 @@ namespace dp2Circulation
                 nRet = GetStatisString(dom, out strHtml, out strError);
             else if (strOperation == "setSystemParameter")
                 nRet = GetSetSystemParameterString(dom, out strHtml, out strError);
+            else if (strOperation == "adjustOverflow")
+                nRet = GetAdjustOverflowString(dom, out strHtml, out strError);
             else
             {
                 strError = "未知的操作类型 '" + strOperation + "'";
@@ -2170,6 +2172,72 @@ DomUtil.GetElementInnerXml(dom.DocumentElement, "deletedCommentRecords"));
             return 0;
         }
 
+        /*
+<root>
+  <libraryCode>
+  </libraryCode>
+  <operation>adjustOverflow</operation>
+  <borrowID>b85ca86b-e39e-4058-bbcb-85f70134b75c</borrowID>
+  <itemBarcode>T0000050</itemBarcode>
+  <confirmItemRecPath>
+  </confirmItemRecPath>
+  <borrowDate>Fri, 04 Sep 2020 21:35:35 +0800</borrowDate>
+  <borrowPeriod>31day</borrowPeriod>
+  <returningDate>Mon, 05 Oct 2020 12:00:00 +0800</returningDate>
+  <borrow barcode="T0000050" recPath="中文图书实体/1268" biblioRecPath="中文图书/614" location="智能书柜" overflow="读者 'R0000001' 所借图书数量将超过 馆代码 '' 中 该读者类型 '本科生' 对所有图书类型的最多 可借册数 值 '1'" borrowDate="Fri, 04 Sep 2020 21:35:35 +0800" borrowPeriod="1day" borrowID="b85ca86b-e39e-4058-bbcb-85f70134b75c" returningDate="Sat, 05 Sep 2020 12:00:00 +0800" operator="supervisor" type="普通" price="" />
+  <operator>supervisor</operator>
+  <operTime>Fri, 04 Sep 2020 21:36:41 +0800</operTime>
+  <clientAddress via="net.pipe://localhost/dp2library/xe">localhost</clientAddress>
+  <version>1.08</version>
+</root>
+        * */
+        // AdjustOverflow
+        int GetAdjustOverflowString(XmlDocument dom,
+    out string strHtml,
+    out string strError)
+        {
+            strHtml = "";
+            strError = "";
+            int nRet = 0;
+
+            string strLibraryCode = DomUtil.GetElementText(dom.DocumentElement, "libraryCode", out XmlNode node);
+            if (node != null && string.IsNullOrEmpty(strLibraryCode) == true)
+                strLibraryCode = "<空>";
+
+            string strOperation = DomUtil.GetElementText(dom.DocumentElement, "operation");
+
+            string strOperator = DomUtil.GetElementText(dom.DocumentElement, "operator");
+            string strOperTime = GetRfc1123DisplayString(
+                DomUtil.GetElementText(dom.DocumentElement, "operTime"));
+
+            string strBorrowID = DomUtil.GetElementText(dom.DocumentElement, "borrowID");
+            string strItemBarcode = DomUtil.GetElementText(dom.DocumentElement, "itemBarcode");
+            string strConfirmItemRecPath = DomUtil.GetElementText(dom.DocumentElement, "confirmItemRecPath");
+
+            string strBorrowDate = DomUtil.GetElementText(dom.DocumentElement, "borrowDate");
+            string strBorrowPeriod = DomUtil.GetElementText(dom.DocumentElement, "borrowPeriod");
+            string strReturningDate = DomUtil.GetElementText(dom.DocumentElement, "returningDate");
+            string strOldBorrowInfo = DomUtil.GetElementOuterXml(dom.DocumentElement, "borrow");
+            
+            strHtml =
+                "<table class='operlog'>" +
+                BuildHtmlLine("操作类型", strOperation + " -- 调整超额") +
+                BuildHtmlLine("馆代码", strLibraryCode) +
+                BuildHtmlLine("借阅事务 ID", strBorrowID) +
+                BuildHtmlLine("册条码号", strItemBarcode) +
+                BuildHtmlLine("册记录路径", strConfirmItemRecPath) +
+                BuildHtmlLine("借阅日期", strBorrowDate) +
+                BuildHtmlLine("期限", strBorrowPeriod) +
+                BuildHtmlLine("应还日期", strReturningDate) +
+                BuildHtmlLine("调整前", strOldBorrowInfo) +
+
+                BuildHtmlLine("操作者", strOperator) +
+                BuildHtmlLine("操作时间", strOperTime) +
+                BuildClientAddressLine(dom) +
+                "</table>";
+
+            return 0;
+        }
 
         static string GetActionName(string strOperation,
             string strAction)

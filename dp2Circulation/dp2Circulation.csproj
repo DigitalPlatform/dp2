@@ -52,7 +52,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>40</ApplicationRevision>
+    <ApplicationRevision>41</ApplicationRevision>
     <ApplicationVersion>3.8.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -838,6 +838,12 @@
     </Compile>
     <Compile Include="Reader\BindCardNumberDialog.Designer.cs">
       <DependentUpon>BindCardNumberDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Reader\PatronPhotoDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Reader\PatronPhotoDialog.Designer.cs">
+      <DependentUpon>PatronPhotoDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="Reader\ChangeStateActionControl.cs">
       <SubType>UserControl</SubType>
@@ -1973,6 +1979,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Reader\BindCardNumberDialog.resx">
       <DependentUpon>BindCardNumberDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Reader\PatronPhotoDialog.resx">
+      <DependentUpon>PatronPhotoDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Reader\ChangeStateActionControl.resx">
       <DependentUpon>ChangeStateActionControl.cs</DependentUpon>
