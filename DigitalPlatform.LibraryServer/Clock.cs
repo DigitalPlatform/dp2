@@ -110,6 +110,7 @@ namespace DigitalPlatform.LibraryServer
 
         }
 
+        // 本地时间
         public DateTime Now
         {
             get
@@ -126,6 +127,7 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
+        // UTC 时间
         public DateTime UtcNow
         {
             get

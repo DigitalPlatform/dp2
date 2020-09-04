@@ -2109,7 +2109,7 @@ out string strError)
 
         internal int _inFaceCall = 0; // >0 表示正在调用人脸识别 API 尚未返回
 
-        public FaceChannel StartFaceChannel(
+        public static FaceChannel StartFaceChannel(
     string strUrl,
     out string strError)
         {
@@ -2141,7 +2141,7 @@ out string strError)
             }
         }
 
-        public void EndFaceChannel(FaceChannel channel)
+        public static void EndFaceChannel(FaceChannel channel)
         {
             if (channel != null && channel.Channel != null)
             {

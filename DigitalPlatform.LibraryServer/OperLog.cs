@@ -1133,8 +1133,7 @@ namespace DigitalPlatform.LibraryServer
             string strClientAddress,
             out string strError)
         {
-            string strRefID = "";
-            return WriteOperLog(dom, strClientAddress, new DateTime(0), out strRefID, out strError);
+            return WriteOperLog(dom, strClientAddress, new DateTime(0), out string _, out strError);
         }
 
         // 写入一条操作日志
