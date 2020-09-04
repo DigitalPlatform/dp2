@@ -245,6 +245,11 @@ namespace DigitalPlatform.LibraryServer
                     out strBodyXml,
                     out strReaderBarcode,
                     out strReaderRefID);
+                else if (strOperation == "adjustOverflow")  // 2020/9/5
+                    BuildAdjustOverflowRecord(domOperLog,
+                    out strBodyXml,
+                    out strReaderBarcode,
+                    out strReaderRefID);
             }
             catch (Exception ex)
             {
@@ -680,6 +685,37 @@ out string strReaderRefID)
 
             strBodyXml = bodydom.DocumentElement.OuterXml;
         }
+
+        void BuildAdjustOverflowRecord(XmlDocument domOperLog,
+out string strBodyXml,
+out string strReaderBarcode,
+out string strReaderRefID)
+        {
+            strBodyXml = "";
+            strReaderBarcode = "";
+            strReaderRefID = "";
+
+            string strLibraryCode = DomUtil.GetElementText(domOperLog.DocumentElement, "libraryCode");
+            strReaderBarcode = DomUtil.GetElementText(domOperLog.DocumentElement, "patronBarcode");
+
+            // 构造内容
+            XmlDocument bodydom = new XmlDocument();
+            bodydom.LoadXml("<root />");
+
+            DomUtil.SetElementText(bodydom.DocumentElement, "type", "调整超额");
+
+            // 复制日志记录中的一级元素
+            {
+                XmlNodeList nodes = domOperLog.DocumentElement.SelectNodes("*");
+                foreach (XmlNode node in nodes)
+                {
+                    DomUtil.SetElementOuterXml(bodydom.DocumentElement, node.Name, node.OuterXml);
+                }
+            }
+
+            strBodyXml = bodydom.DocumentElement.OuterXml;
+        }
+
 
         // 从 MSMQ 队列获得若干消息
         // parameters:
