@@ -686,6 +686,7 @@ out string strReaderRefID)
             strBodyXml = bodydom.DocumentElement.OuterXml;
         }
 
+        // 2020/9/5
         void BuildAdjustOverflowRecord(XmlDocument domOperLog,
 out string strBodyXml,
 out string strReaderBarcode,
