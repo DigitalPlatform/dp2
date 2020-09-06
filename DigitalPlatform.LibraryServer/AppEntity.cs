@@ -24,6 +24,7 @@ using DigitalPlatform.rms.Client.rmsws_localhost;
 using Jint;
 using Jint.Native;
 using Microsoft.SqlServer.Server;
+using Jint.Parser.Ast;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -75,7 +76,7 @@ namespace DigitalPlatform.LibraryServer
         // 合并新旧记录
         // parameters:
         //      element_names   要害元素名列表。如果为 null，表示会用到 core_entity_element_names
-        static int MergeTwoEntityXml(XmlDocument domExist,
+        int MergeTwoEntityXml(XmlDocument domExist,
             XmlDocument domNew,
             string[] element_names,
             out string strMergedXml,
@@ -85,7 +86,13 @@ namespace DigitalPlatform.LibraryServer
             strError = "";
 
             if (element_names == null)
-                element_names = core_entity_element_names;
+            {
+                // 2020/9/7
+                if (this.ItemAdditionalFields != null && this.ItemAdditionalFields.Count > 0)
+                    element_names = StringUtil.Append(element_names, this.ItemAdditionalFields.ToArray());
+                else
+                    element_names = core_entity_element_names;
+            }
 
             // 算法的要点是, 把"新记录"中的要害字段, 覆盖到"已存在记录"中
             foreach (string name in element_names)
@@ -4811,7 +4818,7 @@ out strError);
                 }
 
                 // 记录中有流通信息时，不允许修改的元素
-                string[] field_names = new string[] { 
+                string[] field_names = new string[] {
                     "location",
                     "accessNo" };
 

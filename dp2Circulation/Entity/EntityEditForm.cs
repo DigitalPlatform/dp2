@@ -13,6 +13,7 @@ using DigitalPlatform.RFID.UI;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Xml;
 using DigitalPlatform.LibraryClient;
+using System.IO;
 
 namespace dp2Circulation
 {
@@ -149,6 +150,28 @@ namespace dp2Circulation
 
             this.entityEditControl_editing.LocationStringChanged -= new TextChangeEventHandler(entityEditControl_editing_LocationStringChanged);
             this.entityEditControl_editing.LocationStringChanged += new TextChangeEventHandler(entityEditControl_editing_LocationStringChanged);
+
+            LoadExternalFields();
+        }
+
+        void LoadExternalFields()
+        {
+            string strError = "";
+            // 从配置文件装载字段配置，初始化这些字段
+            string strFileName = Path.Combine(Program.MainForm.UserDir, "item_extend.xml");
+            if (File.Exists(strFileName) == true)
+            {
+                int nRet = this.entityEditControl_editing.LoadConfig(strFileName,
+                    out strError);
+                if (nRet == -1)
+                    MessageBox.Show(this, strError);
+                //if (nRet == -1)
+                //    this.ShowMessage(strError, "red", true);
+                nRet = this.entityEditControl_existing.LoadConfig(strFileName,
+                    out strError);
+                if (nRet == -1)
+                    MessageBox.Show(this, strError);
+            }
         }
 
         void entityEditControl_editing_LocationStringChanged(object sender, TextChangeEventArgs e)

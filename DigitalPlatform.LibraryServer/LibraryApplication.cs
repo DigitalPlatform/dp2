@@ -449,6 +449,11 @@ namespace DigitalPlatform.LibraryServer
         // 用于读者同步的字段列表。如果第一个元素为 空，表示替换原有列表；否则是追加补充字段定义的意思
         public List<string> PatronReplicationFields = new List<string>();
 
+        // 2020/9/7
+        // 册记录中的扩展字段
+        // 不要试图在运行中途修改它。它不会回写到 library.xml 中
+        public List<string> ItemAdditionalFields = new List<string>();
+
         // 构造函数
         public LibraryApplication()
         {
@@ -955,6 +960,15 @@ namespace DigitalPlatform.LibraryServer
                                 this.ItemAdditionalFroms = new List<string>();
                         }
 
+                        // 2020/9/7
+                        {
+                            string strList = DomUtil.GetAttr(node, "itemAdditionalFields");
+                            if (string.IsNullOrEmpty(strList) == false)
+                                this.ItemAdditionalFields = StringUtil.SplitList(strList);
+                            else
+                                this.ItemAdditionalFields = new List<string>();
+                        }
+
                         nRet = DomUtil.GetIntegerParam(node,
         "maxItemHistoryItems",
         10, // 100,
@@ -1007,6 +1021,7 @@ namespace DigitalPlatform.LibraryServer
                         this.VerifyRegisterNoDup = true;
 
                         this.ItemAdditionalFroms = new List<string>();
+                        this.ItemAdditionalFields = new List<string>();
                     }
 
                     // <channel>

@@ -1219,6 +1219,8 @@ namespace dp2Circulation
                 string strError = "操作信息(<operations>元素)内嵌XML片段 '" + this.Operations + "' 格式出错: " + ex.Message;
                 throw new Exception(strError);
             }
+
+            base.RefreshDom();
         }
 
         public void FocusField(string name, bool bSelectAll)
