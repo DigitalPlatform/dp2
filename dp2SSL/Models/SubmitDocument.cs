@@ -542,7 +542,7 @@ namespace dp2SSL
                 // 2020/5/6
                 // 尝试从本地缓存中获取书目摘要
                 if (string.IsNullOrEmpty(title))
-                    title = LibraryChannelUtil.GetBiblioSummaryFromLocal(action.Entity.PII);
+                    title = LibraryChannelUtil.GetBiblioSummaryFromLocal(action.Entity.GetOiPii(true));
                 if (string.IsNullOrEmpty(title))
                 {
                     title = ShelfData.GetPiiString(action.Entity);

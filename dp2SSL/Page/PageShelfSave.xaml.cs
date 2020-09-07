@@ -401,7 +401,7 @@ namespace dp2SSL
                     string pii = record.Cols[0];
                     App.Invoke(new Action(() =>
                     {
-                        entities.Add(pii);
+                        entities.Add(pii, "", "");
                     }));
                 }
             }

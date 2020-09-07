@@ -1298,6 +1298,10 @@ namespace dp2SSL
 );
                         string pii = chip.FindElement(ElementOID.PII)?.Text;
                         entity.PII = PageBorrow.GetCaption(pii);
+
+                        // 2020/9/8
+                        entity.OI = chip.FindElement(ElementOID.OI)?.Text;
+                        entity.AOI = chip.FindElement(ElementOID.AOI)?.Text;
                     }
 
                     // 获得 Title
@@ -1305,7 +1309,7 @@ namespace dp2SSL
                     if (string.IsNullOrEmpty(entity.Title)
                         && string.IsNullOrEmpty(entity.PII) == false && entity.PII != "(空)")
                     {
-                        GetEntityDataResult result = await GetEntityDataAsync(entity.GetOiPii(), "");
+                        GetEntityDataResult result = await GetEntityDataAsync(entity.GetOiPii(true), "");
                         if (result.Value == -1)
                         {
                             entity.SetError(result.ErrorInfo);
@@ -1344,6 +1348,7 @@ namespace dp2SSL
             }
         }
 
+#if REMOVED
         // 初始化时列出当前馆藏地应有的全部图书
         // 本函数中，只给 Entity 对象里面设置好了 PII，其他成员尚未设置
         static void FillLocationBooks(EntityCollection entities,
@@ -1383,7 +1388,7 @@ namespace dp2SSL
                     string pii = record.Cols[0];
                     App.Invoke(new Action(() =>
                     {
-                        entities.Add(pii);
+                        entities.Add(pii, "", "");
                     }));
                 }
             }
@@ -1393,6 +1398,8 @@ namespace dp2SSL
                 App.CurrentApp.ReturnChannel(channel);
             }
         }
+
+#endif
 
 #if OLD_TAGCHANGED
 
@@ -2273,6 +2280,8 @@ namespace dp2SSL
                 {
                     var tag = data.OneTag;
                     string pii = "";
+                    string oi = "";
+                    string aoi = "";
                     if (tag.TagInfo != null && tag.Protocol == InventoryInfo.ISO15693)
                     {
                         // Exception:
@@ -2282,6 +2291,10 @@ namespace dp2SSL
             "" // tag.TagInfo.LockStatus
             );
                         pii = chip.FindElement(ElementOID.PII)?.Text;
+
+                        // 2020/9/8
+                        oi = chip.FindElement(ElementOID.OI)?.Text;
+                        aoi = chip.FindElement(ElementOID.AOI)?.Text;
 
                         string typeOfUsage = chip.FindElement(ElementOID.TypeOfUsage)?.Text;
                         if (typeOfUsage != null && typeOfUsage.StartsWith("8"))
@@ -2297,7 +2310,7 @@ namespace dp2SSL
                         App.Invoke(new Action(() =>
                         {
                             EntityCollection collection = new EntityCollection();
-                            collection.Add(pii);
+                            collection.Add(pii, oi, aoi);
 
                             CloseAllBookInfoWindow();
 
@@ -2390,7 +2403,7 @@ namespace dp2SSL
                                     App.Invoke(new Action(() =>
                                     {
                                         EntityCollection collection = new EntityCollection();
-                                        collection.Add(fill_result.PII);
+                                        collection.Add(fill_result.PII, fill_result.OI, fill_result.AOI);
 
                                         CloseAllBookInfoWindow();
 
@@ -2678,7 +2691,7 @@ namespace dp2SSL
                                     {
                                         UpdateLocalPatronRecord(get_result, now);
                                     }
-                                    catch(Exception ex)
+                                    catch (Exception ex)
                                     {
                                         WpfClientInfo.WriteErrorLog($"保存读者记录到本地过程中出现异常: {ExceptionUtil.GetDebugText(ex)}");
                                     }

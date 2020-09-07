@@ -264,8 +264,18 @@ namespace dp2SSL
             dup.Tag = this.Tag;
         }
 
-        public string GetOiPii()
+        // parameters:
+        //      strict  是否为严格方式。严格方式下，如果 OI 和 AOI 为空，会返回 ".xxxx" 形态
+        public string GetOiPii(bool strict = false)
         {
+            if (strict == true)
+            {
+                if (string.IsNullOrEmpty(this.OI) == false)
+                    return this.OI + "." + this.PII;
+                else if (string.IsNullOrEmpty(this.AOI) == false)
+                    return this.AOI + "." + this.PII;
+                return "." + this.PII;
+            }
             // 包含 OI 的 PII
             string pii = this.PII;
             if (string.IsNullOrEmpty(this.OI) == false)
@@ -802,6 +812,10 @@ readerType);
         {
             // [out] 当 ErrorCode 为 "bookTag" 时，这里返回图书的 PII
             public string PII { get; set; }
+            // [out] 当 ErrorCode 为 "bookTag" 时，这里返回图书的 OI 或者 AOI
+            public string OI { get; set; }
+            // [out] 当 ErrorCode 为 "bookTag" 时，这里返回图书的 AOI
+            public string AOI { get; set; }
         }
 
         // 刷新信息
@@ -836,6 +850,9 @@ readerType);
     );
                 pii = chip.FindElement(ElementOID.PII)?.Text;
 
+                oi = chip.FindElement(ElementOID.OI)?.Text;
+                aoi = chip.FindElement(ElementOID.AOI)?.Text;
+
                 string typeOfUsage = chip.FindElement(ElementOID.TypeOfUsage)?.Text;
                 if (typeOfUsage != null && typeOfUsage.StartsWith("8"))
                 {
@@ -849,11 +866,10 @@ readerType);
                         ErrorInfo = "这是一张图书标签",
                         ErrorCode = "bookTag",
                         PII = pii,
+                        OI = oi,
+                        AOI = aoi,
                     };
                 }
-
-                oi = chip.FindElement(ElementOID.OI)?.Text;
-                aoi = chip.FindElement(ElementOID.AOI)?.Text;
             }
 
             if (this.UID == tag.UID && this.PII == pii)
