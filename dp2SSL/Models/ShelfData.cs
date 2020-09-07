@@ -1260,7 +1260,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                             ActionString = await BuildBorrowInfo(person.PatronBarcode,
                             person.PatronInstitution,
                             patron_xml,
-                            entity, 
+                            entity,
                             borrowed_piis,
                             returned_piis), // borrowed_count++
                         });
@@ -1631,7 +1631,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             if (readerdom.DocumentElement == null)
                 return;
 
-            foreach(var pii in returned_piis)
+            foreach (var pii in returned_piis)
             {
                 XmlElement borrow = readerdom.DocumentElement.SelectSingleNode($"borrows/borrow[@barcode='{pii}']") as XmlElement;
                 if (borrow == null)
@@ -1678,8 +1678,8 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             // Debug.Assert(pii.IndexOf(".") != -1, "GetBookInfoAsync() 所使用的 PII 中必须有点");
 
             var result = LibraryChannelUtil.LocalGetEntityData(oi_pii);
-            if (result.Value == -1 
-                || result.Value == 0 
+            if (result.Value == -1
+                || result.Value == 0
                 || string.IsNullOrEmpty(result.ItemXml)/* 2020/9/3 增加*/)
             {
                 if (ShelfData.LibraryNetworkCondition == "OK")
@@ -4908,6 +4908,10 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                     }
 
                     entity.PII = PageBorrow.GetCaption(pii);
+
+                    // 2020/9/5
+                    entity.OI = chip.FindElement(ElementOID.OI)?.Text;
+                    entity.AOI = chip.FindElement(ElementOID.AOI)?.Text;
                 }
 
                 // 获得 Title
@@ -4919,7 +4923,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                     if (localGetEntityInfo)
                     {
                         // 只从本地数据库中获取
-                        result = LocalGetEntityData(entity.GetOiPii());
+                        result = LocalGetEntityData(entity.GetOiPii(true));
                         if (string.IsNullOrEmpty(result.Title) == false)
                             entity.Title = PageBorrow.GetCaption(result.Title);
                         if (string.IsNullOrEmpty(result.ItemXml) == false)
@@ -4927,7 +4931,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                     }
                     else
                     {
-                        result = await GetEntityDataAsync(entity.GetOiPii(), "");
+                        result = await GetEntityDataAsync(entity.GetOiPii(true), "");
                         if (result.Value == -1 || result.Value == 0)
                         {
                             // TODO: 条码号没有找到的错误码要单独记下来

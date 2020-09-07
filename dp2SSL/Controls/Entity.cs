@@ -14,6 +14,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
+using DigitalPlatform;
 
 namespace dp2SSL
 {
@@ -43,12 +44,23 @@ namespace dp2SSL
             return null;
         }
 
+        static bool IsEqual(string s1, string s2)
+        {
+            if (s1 == s2)
+                return true;
+            if (string.IsNullOrEmpty(s1) && string.IsNullOrEmpty(s2))
+                return true;
+            return false;
+        }
+
         // 2019/8/6
-        public Entity FindEntityByPII(string pii)
+        public Entity FindEntityByPII(string pii, string oi, string aoi)
         {
             foreach (Entity entity in this)
             {
-                if (entity.PII == pii)
+                if (entity.PII == pii
+                    && IsEqual(entity.OI, oi)
+                    && IsEqual(entity.AOI, aoi))
                     return entity;
             }
             return null;
@@ -64,10 +76,10 @@ namespace dp2SSL
         }
 
         // 根据已知的 PII 在结合中添加一个 Entity 元素
-        public Entity Add(string pii, bool auto_update = true)
+        public Entity Add(string pii, string oi, string aoi, bool auto_update = true)
         {
             // 查重
-            Entity entity = FindEntityByPII(pii);
+            Entity entity = FindEntityByPII(pii, oi, aoi);
             if (entity != null)
             {
                 //if (auto_update)
@@ -79,6 +91,8 @@ namespace dp2SSL
             {
                 Container = this,
                 PII = pii,
+                OI = oi,
+                AOI = aoi,
                 OnShelf = false,
                 UID = null,
                 TagInfo = null
@@ -98,11 +112,11 @@ namespace dp2SSL
             if (data.OneTag.TagInfo == null)
                 return null;
 
-            string pii = GetPII(data.OneTag.TagInfo);
-            if (string.IsNullOrEmpty(pii))
+            var result = GetPII(data.OneTag.TagInfo);
+            if (string.IsNullOrEmpty(result.PII))
                 return null;
 
-            var entity = FindEntityByPII(pii);
+            var entity = FindEntityByPII(result.PII, result.OI, result.AOI);
             if (entity == null)
                 return null;
 
@@ -121,11 +135,11 @@ namespace dp2SSL
             if (data.OneTag.TagInfo == null)
                 return null;
 
-            string pii = GetPII(data.OneTag.TagInfo);
-            if (string.IsNullOrEmpty(pii))
+            var result = GetPII(data.OneTag.TagInfo);
+            if (string.IsNullOrEmpty(result.PII))
                 return null;
 
-            var entity = FindEntityByPII(pii);
+            var entity = FindEntityByPII(result.PII, result.OI, result.AOI);
             if (entity != null)
             {
                 // 馆藏地属于本书架的图书
@@ -220,7 +234,14 @@ namespace dp2SSL
             return entity;
         }
 
-        public static string GetPII(TagInfo tagInfo)
+        public class GetPIIResult : NormalResult
+        {
+            public string PII { get; set; }
+            public string OI { get; set; }
+            public string AOI { get; set; }
+        }
+
+        public static GetPIIResult GetPII(TagInfo tagInfo)
         {
             // Exception:
             //      可能会抛出异常 ArgumentException TagDataException
@@ -228,7 +249,12 @@ namespace dp2SSL
 (int)tagInfo.BlockSize,
 "" // tagInfo.LockStatus
 );
-            return chip.FindElement(ElementOID.PII)?.Text;
+            return new GetPIIResult
+            {
+                PII = chip.FindElement(ElementOID.PII)?.Text,
+                OI = chip.FindElement(ElementOID.OI)?.Text,
+                AOI = chip.FindElement(ElementOID.AOI)?.Text,
+            };
         }
 
         // 2020/4/11
