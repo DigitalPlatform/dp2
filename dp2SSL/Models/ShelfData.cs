@@ -1071,6 +1071,9 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                 // PII -> patron xml
                 Hashtable patron_table = new Hashtable();
 
+                List<string> returned_piis = new List<string>();
+
+
                 List<ActionInfo> actions = new List<ActionInfo>();
                 List<Entity> processed = new List<Entity>();
                 foreach (var entity in ShelfData.l_Adds)
@@ -1090,6 +1093,10 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                         Action = "return",
                         Operator = person,
                     });
+
+                    // 2020/9/7
+                    returned_piis.Add(entity.PII);
+
                     // 没有更新的，才进行一次 transfer。更新的留在后面专门做
                     // “更新”的意思是从这个门移动到了另外一个门
                     if (ShelfData.Find(ShelfData.l_Changes, (o) => o.UID == entity.UID).Count == 0)
@@ -1253,7 +1260,9 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                             ActionString = await BuildBorrowInfo(person.PatronBarcode,
                             person.PatronInstitution,
                             patron_xml,
-                            entity, borrowed_piis), // borrowed_count++
+                            entity, 
+                            borrowed_piis,
+                            returned_piis), // borrowed_count++
                         });
 
                         borrowed_piis.Add(entity.PII);
@@ -1352,11 +1361,13 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
         // parameters:
         //      patron_xml  读者记录 XML。如果为 null，表示需要本函数自己去尝试获得读者记录
         //      delta_piis   尚未来得及保存到数据库的已借册的 PII 列表。注意里面的 PII 有可能是空字符串
+        //      returned_piis   尚未来得及保存到数据库的已还册的 PII 列表
         static async Task<string> BuildBorrowInfo(string patron_pii,
             string patron_oi,
             string patron_xml,
             Entity entity,
-            List<string> delta_piis)
+            List<string> delta_piis,
+            List<string> returned_piis)
         {
             StringBuilder debugInfo = new StringBuilder();
 
@@ -1410,6 +1421,16 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
 
             debugInfo?.AppendLine($"读者类型为 '{patron_type}'");
 
+            /*
+            // 从读者记录中去掉已经还书的 borrows/borrow 元素
+            if (readerdom != null && returned_piis.Count > 0)
+            {
+                RemoveReturnedBorrows(readerdom,
+                    returned_piis);
+                debugInfo?.AppendLine($"从读者记录中去掉已经还书若干 PII '{StringUtil.MakePathList(returned_piis)}' 后, 读者记录变为:\r\n{DomUtil.GetIndentXml(readerdom)}");
+            }
+            */
+
             // TODO: 如何判断本册借阅时候是否已经超额？
             var piis = GetBorrowItems(patron_pii, readerdom);
 
@@ -1418,6 +1439,16 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             piis.AddRange(delta_piis);
 
             debugInfo?.AppendLine($"和 delta_piis 合并后的在借列表为 '{StringUtil.MakePathList(piis)}'");
+
+            // 2020/9/7
+            if (returned_piis.Count > 0)
+            {
+                foreach (var pii in returned_piis)
+                {
+                    piis.Remove(pii);
+                }
+                debugInfo?.AppendLine($"去掉 returned_piis 中已还(还来不及同步的)在借列表为 '{StringUtil.MakePathList(piis)}'");
+            }
 
             // 当前册的图书类型
             var info_result = await GetBookInfoAsync(entity.GetOiPii());
@@ -1589,6 +1620,23 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                 returning = RoundTime(unit, returning);
                 borrow_info.LatestReturnTime = DateTimeUtil.Rfc1123DateTimeStringEx(returning);
                 return null;
+            }
+        }
+
+        // 2020/9/7
+        // 把读者记录中已经还书的那些 borrows/borrow 元素删除
+        static void RemoveReturnedBorrows(XmlDocument readerdom,
+            List<string> returned_piis)
+        {
+            if (readerdom.DocumentElement == null)
+                return;
+
+            foreach(var pii in returned_piis)
+            {
+                XmlElement borrow = readerdom.DocumentElement.SelectSingleNode($"borrows/borrow[@barcode='{pii}']") as XmlElement;
+                if (borrow == null)
+                    continue;
+                borrow.ParentNode.RemoveChild(borrow);
             }
         }
 
