@@ -6129,6 +6129,13 @@ namespace dp2Library
             strXml,
             strOwnerInstitution,
             out strError);
+                        if (nRet0 == 0)
+                        {
+                            result.Value = 0;
+                            result.ErrorInfo = strError;
+                            result.ErrorCode = ErrorCode.NotFound;
+                            return 0;
+                        }
                         if (nRet0 != 1)
                             goto ERROR1;
                     }
@@ -10852,7 +10859,7 @@ Stack:
             END1:
                 result.Value = nRet;
                 if (WriteOperLog(strCategory,
-                    strName, 
+                    strName,
                     strValue,
                     sessioninfo.LibraryCodeList,
                     out strError) == -1)
@@ -10910,7 +10917,7 @@ strValue);
             DomUtil.SetElementText(domOperLog.DocumentElement,
 "libraryCodeList",
 strLibraryCodeList);
-            
+
             DomUtil.SetElementText(domOperLog.DocumentElement, "operator",
     sessioninfo.UserID);
 

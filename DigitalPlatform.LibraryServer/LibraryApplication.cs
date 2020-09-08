@@ -7466,6 +7466,8 @@ out strError);
                     strXml,
                     strOwnerInstitution,
                     out strError);
+                if (nRet == 0)
+                    return 0;
                 if (nRet != 1)
                     return -1;
             }
