@@ -3211,7 +3211,7 @@ start_time_1,
                 //      -1  出错
                 //      0   没有通过较验
                 //      1   通过了较验
-                nRet = VerifyOI(
+                nRet = VerifyItemOI(
     strOutputItemRecPath,
     strItemXml,
     strOwnerInstitution,
@@ -3325,6 +3325,7 @@ start_time_1,
 
             if (matched == 0)
             {
+                //string oi = string.IsNullOrEmpty(isil) ? alternative : isil;
                 strError = $"当前读者卡来自馆外机构 '{strOwnerInstitution}' (1)";
                 // strError = $"请求的所属机构 '{strOwnerInstitution}' 和册记录 {strOutputItemRecPath} 的所属机构代码 '{isil}' 和 '{alternative}' 不吻合";
                 return 0;
@@ -3337,7 +3338,7 @@ start_time_1,
         //      -1  出错
         //      0   没有通过较验
         //      1   通过了较验
-        public int VerifyOI(
+        public int VerifyItemOI(
             string strOutputItemRecPath,
             string strItemXml,
             string strOwnerInstitution,
@@ -3401,7 +3402,9 @@ start_time_1,
 
             if (matched == 0)
             {
-                strError = $"请求的所属机构 '{strOwnerInstitution}' 和册记录 {strOutputItemRecPath} 的所属机构代码 '{isil}' 和 '{alternative}' 不吻合";
+                //string oi = string.IsNullOrEmpty(isil) ? alternative : isil;
+                strError = $"当前册来自馆外机构 '{strOwnerInstitution}'";
+                // strError = $"请求的所属机构 '{strOwnerInstitution}' 和册记录 {strOutputItemRecPath} 的所属机构代码 '{isil}' 和 '{alternative}' 不吻合";
                 return 0;
             }
 

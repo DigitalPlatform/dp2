@@ -7462,7 +7462,7 @@ out strError);
                 //      -1  出错
                 //      0   没有通过较验
                 //      1   通过了较验
-                int nRet = VerifyOI(strOutputPath,
+                int nRet = VerifyItemOI(strOutputPath,
                     strXml,
                     strOwnerInstitution,
                     out strError);
