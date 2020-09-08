@@ -60,6 +60,12 @@ namespace GreenInstall
                     };
                 infos.Add($"复制目录 {sourceDirectory} 到目标位置 {targetDirectory}");
             }
+            else
+            {
+                // 2020/9/8
+                infos.Add($"源目录 {sourceDirectory} 是否存在: {Directory.Exists(sourceDirectory)}");
+                infos.Add($"目标目录 {targetDirectory} 是否存在: {Directory.Exists(targetDirectory)}");
+            }
 
             // 2020/6/10
             // 将 targetDirectory 中的 userDirectory.txt 文件删除

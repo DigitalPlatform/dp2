@@ -1072,7 +1072,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                 Hashtable patron_table = new Hashtable();
 
                 List<string> returned_piis = new List<string>();
-
+                List<string> special_piis = new List<string>();
 
                 List<ActionInfo> actions = new List<ActionInfo>();
                 List<Entity> processed = new List<Entity>();
@@ -1262,7 +1262,8 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                             patron_xml,
                             entity,
                             borrowed_piis,
-                            returned_piis), // borrowed_count++
+                            returned_piis,
+                            special_piis), // borrowed_count++
                         });
 
                         borrowed_piis.Add(entity.GetOiPii(true));
@@ -1367,7 +1368,8 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             string patron_xml,
             Entity entity,
             List<string> delta_piis,
-            List<string> returned_piis)
+            List<string> returned_piis,
+            List<string> special_piis)
         {
             StringBuilder debugInfo = new StringBuilder();
 
@@ -1450,10 +1452,23 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                 debugInfo?.AppendLine($"去掉 returned_piis 中已还(还来不及同步的)在借列表为 '{StringUtil.MakePathList(piis)}'");
             }
 
+            // 2020/9/8
+            if (special_piis.Count > 0)
+            {
+                foreach (var pii in special_piis)
+                {
+                    piis.Remove(pii);
+                }
+                debugInfo?.AppendLine($"去掉 special_piis 中特殊的标签以后在借列表为 '{StringUtil.MakePathList(piis)}'");
+            }
+
             // 当前册的图书类型
             var info_result = await GetBookInfoAsync(entity.GetOiPii(true));
             if (info_result.Value == -1)
             {
+                // 加入特殊列表，避免影响后面其他册计算超额
+                if (info_result.ErrorCode == "notFoundWhileNetwork")
+                    special_piis.Add(entity.GetOiPii(true));
                 // 如果得不到图书类型，建议按照默认的权限参数处理
                 debugInfo?.AppendLine($"因为没有找到 PII 为 '{entity.PII}' 的图书的图书类型({info_result.ToString()})，只好采用默认的借阅总册数 {max_items}");
                 WpfClientInfo.WriteInfoLog($"因为没有找到 PII 为'{entity.PII}' 的图书的图书类型({info_result.ToString()})，只好采用默认的借阅总册数 {max_items}");
@@ -1669,9 +1684,9 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
         // 获得册信息
         // parameters:
         //      oi_pii  形态为 OI.PII
-        // return:
+        // return.Value:
         //      -1  出错(包括册记录没有找到的情况)
-        //      0   成功
+        //      1   成功
         static async Task<GetBookInfoResult> GetBookInfoAsync(string oi_pii)
         {
             // 2020/8/27
@@ -1683,7 +1698,18 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                 || string.IsNullOrEmpty(result.ItemXml)/* 2020/9/3 增加*/)
             {
                 if (ShelfData.LibraryNetworkCondition == "OK")
+                {
                     result = await LibraryChannelUtil.GetEntityDataAsync(oi_pii, "network");
+                    // 联网状态下确定没有找到
+                    if (result.ErrorCode == "NotFound")
+                        return new GetBookInfoResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"PII 为 '{oi_pii}' 的册记录没有找到",
+                            ErrorCode = "notFoundWhileNetwork"
+                        };
+                }
+
                 if (result.Value == -1 || result.Value == 0)
                     return new GetBookInfoResult
                     {

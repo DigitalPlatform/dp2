@@ -16,6 +16,7 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
+using System.Runtime.Remoting.Activation;
 
 namespace dp2SSL
 {
@@ -141,6 +142,13 @@ namespace dp2SSL
                                 };
                                 */
                             }
+                            else if (lRet == 0)
+                                errors.Add(new NormalResult
+                                {
+                                    Value = 0,
+                                    ErrorInfo = strError,
+                                    ErrorCode = channel.ErrorCode.ToString()
+                                });
                             else
                             {
                                 result = new GetEntityDataResult
