@@ -2672,7 +2672,12 @@ namespace dp2SSL
                         }
                     }
 
-                    pii = _patron.GetOiPii();
+                    WpfClientInfo.WriteInfoLog($"_patron.Protocol='{_patron.Protocol}'");
+
+                    if (_patron.Protocol == InventoryInfo.ISO15693)
+                        pii = _patron.GetOiPii(true);   // 严格
+                    else
+                        pii = _patron.GetOiPii(false);  // 宽松
                 }
 
                 // TODO: 先显示等待动画
