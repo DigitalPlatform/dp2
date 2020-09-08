@@ -1166,7 +1166,7 @@ namespace dp2SSL
 
             if (result.Value == -1)
             {
-                SetPatronError("fingerprint", $"指纹中心出错: {result.ErrorInfo}, 错误码: {result.ErrorCode}");
+                SetPatronError("fingerprint", $"指纹或人脸中心出错: {result.ErrorInfo}, 错误码: {result.ErrorCode}");
                 if (_patron.IsFingerprintSource)
                     PatronClear();    // 只有当面板上的读者信息来源是指纹仪时，才清除面板上的读者信息
                 return false;
@@ -1183,6 +1183,11 @@ namespace dp2SSL
             PatronClear();
             _patron.IsFingerprintSource = true;
             _patron.PII = result.Message;
+
+            // 2020/9/8
+            _patron.OI = null;
+            _patron.AOI = null;
+            _patron.Protocol = null;
             return true;
         }
 

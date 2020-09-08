@@ -912,6 +912,9 @@ readerType);
             // 2019/12/10
             this.Error = null;
 
+            // 2020/9/8
+            this.Protocol = null;
+
             this.SetNotEmpty();
         }
 
