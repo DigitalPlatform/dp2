@@ -646,6 +646,8 @@ TaskScheduler.Default);
         // 从操作日志数据库中把一些需要重试的事项移走
         // 原理：当首次初始化以后，已经初始化确认在书架内的图书，已经进行了还书操作，那么此前累积的需要重试借书或者还书的同步请求，都可以不执行了。这样不会造成图书丢失。但可能会丢掉一些中间操作信息
         // 改进：可以不删除，但把这些事项的状态标记为 “放弃重试”
+        // parameters:
+        //      piis    PII 字符串集合。每个 PII 字符串里面会包含点
         public static async Task RemoveRetryActionsFromDatabaseAsync(IEnumerable<string> piis)
         {
             using (var releaser = await _databaseLimit.EnterAsync())
@@ -705,7 +707,8 @@ TaskScheduler.Default);
                 // 2020/4/27
                 request.OperatorID = action.Operator?.PatronBarcode;
 
-                request.PII = action.Entity?.PII;
+                // 注: 2020/9/8 把 request.PII 修改为带点的字符串形态
+                request.PII = action.Entity.GetOiPii(true); // action.Entity?.PII;
                 // TODO: 若 PII 为空，写入 UID?
                 request.OperatorString = action.Operator == null ? null : JsonConvert.SerializeObject(action.Operator);
                 request.EntityString = JsonConvert.SerializeObject(action.Entity);

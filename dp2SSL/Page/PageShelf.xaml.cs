@@ -2058,7 +2058,12 @@ namespace dp2SSL
                 // 将 操作历史库 里面的 PII 和 ShelfData.All 里面 PII 相同的事项的状态标记为“放弃同步”。因为刚才已经成功同步了它们
                 // ShelfData.RemoveFromRetryActions(new List<Entity>(ShelfData.All));
                 {
-                    var piis = ShelfData.l_All.Select(x => x.UID);
+                    List<string> piis = new List<string>();
+                    foreach(var entity in ShelfData.l_All)
+                    {
+                        piis.Add(entity.GetOiPii(true));
+                    }
+                    // var piis = ShelfData.l_All.Select(x => x.UID);  // x.UID 错的
                     // TODO: 虽然状态被修改为 dontsync，但依然需要在 SyncErrorInfo 里面注解一下为何 dontsync(因为初始化盘点时候已经同步成功了)
                     await ShelfData.RemoveRetryActionsFromDatabaseAsync(piis);
                 }

@@ -703,6 +703,10 @@ readerType);
             Timestamp = timestamp;
 
             this.Barcode = DomUtil.GetElementText(dom.DocumentElement, "barcode");
+            
+            // 2020/9/8
+            // 暂时无法区分 OI 和 AOI，都放到 OI 里面
+            this.OI = DomUtil.GetElementText(dom.DocumentElement, "oi");
 
             this.PatronName = DomUtil.GetElementText(dom.DocumentElement, "name");
             this.Department = DomUtil.GetElementText(dom.DocumentElement, "department");

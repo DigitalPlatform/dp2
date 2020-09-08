@@ -451,6 +451,13 @@ namespace DigitalPlatform.LibraryServer
                 bChanged = true;
             }
 
+            // 2020/9/8
+            string oldOI = DomUtil.GetElementText(readerdom.DocumentElement, "oi");
+            App.AddPatronOI(readerdom, strLibraryCode);
+            string newOI = DomUtil.GetElementText(readerdom.DocumentElement, "oi");
+            if (oldOI != newOI)
+                bChanged = true;
+
             string strReaderBarcode = DomUtil.GetElementText(readerdom.DocumentElement,
                 "barcode");
             string strRefID = DomUtil.GetElementText(readerdom.DocumentElement,
