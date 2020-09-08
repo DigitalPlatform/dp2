@@ -12,6 +12,8 @@
   <ItemGroup>
     <Reference Include="Interop.IWshRuntimeLibrary">
       <HintPath>..\dp2Circulation\obj\Debug\Interop.IWshRuntimeLibrary.dll</HintPath>
+      <Private></Private>
+      <EmbedInteropTypes></EmbedInteropTypes>
     </Reference>
   </ItemGroup>
 
