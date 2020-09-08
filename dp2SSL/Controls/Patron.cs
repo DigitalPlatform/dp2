@@ -879,8 +879,11 @@ readerType);
             if (this.UID == tag.UID && this.PII == pii)
                 return new FillResult { Value = 1 }; // 优化
 
+            string protocol_save = this.Protocol;
+
             this.Clear();
 
+            this.Protocol = protocol_save;
             this.UID = tag.UID;
             this.PII = pii;
             this.OI = oi;
