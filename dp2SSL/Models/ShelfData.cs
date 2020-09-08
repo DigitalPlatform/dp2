@@ -1451,7 +1451,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             }
 
             // 当前册的图书类型
-            var info_result = await GetBookInfoAsync(entity.GetOiPii());
+            var info_result = await GetBookInfoAsync(entity.GetOiPii(true));
             if (info_result.Value == -1)
             {
                 // 如果得不到图书类型，建议按照默认的权限参数处理
@@ -5278,7 +5278,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                     string strUserName = info.Operator?.GetWorkerAccountName();
 
                     // 包含 OI 的 PII
-                    string pii = entity.GetOiPii();
+                    string pii = entity.GetOiPii(true);
                     /*
                     string pii = "." + entity.PII;
                     if (string.IsNullOrEmpty(entity.OI) == false)

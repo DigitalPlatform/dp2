@@ -97,6 +97,7 @@ namespace dp2SSL
                 foreach (XmlElement borrow in borrows)
                 {
                     string barcode = borrow.GetAttribute("barcode");
+                    string oi = borrow.GetAttribute("oi");
                     string overflow = borrow.GetAttribute("overflow");
 
                     // 2020/7/26
@@ -114,6 +115,7 @@ namespace dp2SSL
                     var new_entity = new Entity
                     {
                         PII = barcode,
+                        OI = oi,    // 2020/9/8
                         Container = _borrowedEntities,
                         BorrowInfo = borrowInfo
                     };
