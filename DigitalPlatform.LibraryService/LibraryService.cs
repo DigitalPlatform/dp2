@@ -6124,7 +6124,7 @@ namespace dp2Library
                         //      -1  出错
                         //      0   没有通过较验
                         //      1   通过了较验
-                        int nRet0 = app.VerifyOI(
+                        int nRet0 = app.VerifyItemOI(
             PathList != null && PathList.Count > 0 ? PathList[0] : "",
             strXml,
             strOwnerInstitution,

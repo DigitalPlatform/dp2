@@ -744,6 +744,25 @@ namespace dp2SSL
         }
 
         // 获得读者的 PII。注意包含了 OI 部分
+        static string GetPatronOiPii(XmlDocument dom)
+        {
+            string pii = DomUtil.GetElementText(dom.DocumentElement, "barcode");
+            if (string.IsNullOrEmpty(pii))
+            {
+                pii = "@refID:" + DomUtil.GetElementText(dom.DocumentElement, "refID");
+                return pii;
+            }
+
+            string oi = DomUtil.GetElementText(dom.DocumentElement, "oi");
+            if (oi == null)
+                oi = "";
+
+            return oi + "." + pii;
+        }
+
+
+#if REMOVED
+        // 获得读者的 PII。注意包含了 OI 部分
         static string GetPatronPii(XmlDocument dom)
         {
             string pii = DomUtil.GetElementText(dom.DocumentElement, "barcode");
@@ -768,6 +787,8 @@ namespace dp2SSL
 
             return pii;
         }
+
+#endif
 
         // 获得 oi.pii 的 oi 部分
         public static string GetOiPart(string oi_pii, bool return_null)
@@ -904,9 +925,9 @@ namespace dp2SSL
                 if (string.IsNullOrEmpty(pii))
                     pii = "@refID:" + DomUtil.GetElementText(dom.DocumentElement, "refID");
                     */
-                string pii = GetPatronPii(dom);
+                string oi_pii = GetPatronOiPii(dom);
                 var patron = context.Patrons
-    .Where(o => o.PII == pii)
+    .Where(o => o.PII == oi_pii)
     .FirstOrDefault();
                 if (patron != null)
                 {
@@ -920,7 +941,7 @@ namespace dp2SSL
                 {
                     patron = new PatronItem
                     {
-                        PII = pii?.ToUpper(),
+                        PII = oi_pii?.ToUpper(),
                     };
                     Set(patron, dom);
                     context.Patrons.Add(patron);
@@ -975,9 +996,9 @@ namespace dp2SSL
                 if (string.IsNullOrEmpty(pii))
                     pii = "@refID:" + DomUtil.GetElementText(dom.DocumentElement, "refID");
                     */
-                string pii = GetPatronPii(dom);
+                string oi_pii = GetPatronOiPii(dom);
                 var patron = context.Patrons
-    .Where(o => o.PII == pii)
+    .Where(o => o.PII == oi_pii)
     .FirstOrDefault();
                 if (patron != null)
                 {
