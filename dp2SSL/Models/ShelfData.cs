@@ -1095,7 +1095,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                     });
 
                     // 2020/9/7
-                    returned_piis.Add(entity.PII);
+                    returned_piis.Add(entity.GetOiPii(true));
 
                     // 没有更新的，才进行一次 transfer。更新的留在后面专门做
                     // “更新”的意思是从这个门移动到了另外一个门
@@ -1265,7 +1265,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                             returned_piis), // borrowed_count++
                         });
 
-                        borrowed_piis.Add(entity.PII);
+                        borrowed_piis.Add(entity.GetOiPii(true));
                     }
 
                     //
@@ -1360,8 +1360,8 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
         // 用于在同步之前，为本地数据库记录临时模拟出 BorrowInfo。这样当长期断网的情况下，dp2ssl 能用它进行本地借书权限的判断(判断是否超期、超额)
         // parameters:
         //      patron_xml  读者记录 XML。如果为 null，表示需要本函数自己去尝试获得读者记录
-        //      delta_piis   尚未来得及保存到数据库的已借册的 PII 列表。注意里面的 PII 有可能是空字符串
-        //      returned_piis   尚未来得及保存到数据库的已还册的 PII 列表
+        //      delta_piis   尚未来得及保存到数据库的已借册的 PII 列表。注意里面的 PII 有可能是空字符串。PII 字符串是有“点”的格式
+        //      returned_piis   尚未来得及保存到数据库的已还册的 PII 列表。PII 字符串里面有“点”
         static async Task<string> BuildBorrowInfo(string patron_pii,
             string patron_oi,
             string patron_xml,
@@ -2073,17 +2073,19 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                         }
 
                         var item_pii = borrow.GetAttribute("barcode");
+                        var item_oi = borrow.GetAttribute("oi");
+                        string oi_pii = item_oi + "." + item_pii;
 
                         // 如果借阅时间以后发生过还书，则排除
                         var items = context.Requests
-    .Where(o => o.OperTime > borrowTime && o.OperatorID == patron_pii && o.Action == "return" && o.PII == item_pii)
+    .Where(o => o.OperTime > borrowTime && o.OperatorID == patron_pii && o.Action == "return" && o.PII == oi_pii)
     .ToList();
                         if (items.Count > 0)
                         {
                             remove_borrows.Add(borrow);
                             continue;
                         }
-                        results.Add(item_pii);
+                        results.Add(oi_pii);
                     }
 
                     foreach (var borrow in remove_borrows)
@@ -2101,7 +2103,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                     readerdom.DocumentElement.AppendChild(container);
                 }
 
-                // 该读者本地的在借册
+                // 该读者本地的在借册。注：字符串中含有点
                 var local_items = context.Requests
                     .Where(o => o.OperatorID == patron_pii && o.Action == "borrow" && o.LinkID == null
                     && o.State != "dontsync")   // 2020/6/17 注：dontsync 表示同步时候实际上另外已经有前端对本册进行了操作(若能操作成功可以推测是还书操作)，所以这一册实际上已经还了，不要计入在借册列表中
@@ -2113,7 +2115,8 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                     {
                         // 添加 borrow 元素
                         var borrow = container.AppendChild(readerdom.CreateElement("borrow")) as XmlElement;
-                        borrow.SetAttribute("barcode", current_pii);
+                        borrow.SetAttribute("barcode", GetPiiPart(current_pii));
+                        borrow.SetAttribute("oi", GetOiPart(current_pii, false));
                         borrow.SetAttribute("borrowDate", DateTimeUtil.Rfc1123DateTimeStringEx(item.OperTime));
 
                         /*
@@ -2149,7 +2152,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                             }
                         }
 
-                        results.Add(current_pii);
+                        results.Add(current_pii);   // 含有点
                     }
                 }
             }
@@ -2184,20 +2187,22 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                         }
 
                         var item_pii = borrow.GetAttribute("barcode");
+                        var item_oi = borrow.GetAttribute("oi");
+                        string oi_pii = item_oi + "." + item_pii;
 
                         // 如果借阅时间以后发生过还书，则排除
                         var items = context.Requests
-    .Where(o => o.OperTime > borrowTime && o.OperatorID == patron_pii && o.Action == "return" && o.PII == item_pii)
+    .Where(o => o.OperTime > borrowTime && o.OperatorID == patron_pii && o.Action == "return" && o.PII == oi_pii)
     .ToList();
                         if (items.Count > 0)
                             continue;
-                        results.Add(item_pii);
+                        results.Add(oi_pii);
                     }
                 }
 
                 // TODO: 在联网情况下，不计入本地的在借册？
 
-                // 该读者本地的在借册
+                // 该读者本地的在借册。注：字符串中含有点
                 var local_items = context.Requests
                     .Where(o => o.OperatorID == patron_pii && o.Action == "borrow" && o.LinkID == null
                     && o.State != "dontsync")   // 2020/6/17 注：dontsync 表示同步时候实际上另外已经有前端对本册进行了操作(若能操作成功可以推测是还书操作)，所以这一册实际上已经还了，不要计入在借册列表中

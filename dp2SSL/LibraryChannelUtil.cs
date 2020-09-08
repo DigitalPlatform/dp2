@@ -359,7 +359,7 @@ namespace dp2SSL
 
                     // 从本地实体库中获得记录
                     var entity_record = context.Entities.Where(o => o.PII == pii).FirstOrDefault();
-                    
+
                     // 2020/9/3
                     // 对没有点的 PII 字符串尝试后方一致匹配
                     if (entity_record == null && pii.IndexOf(".") == -1)
@@ -769,6 +769,28 @@ namespace dp2SSL
             return pii;
         }
 
+        // 获得 oi.pii 的 oi 部分
+        public static string GetOiPart(string oi_pii, bool return_null)
+        {
+            if (oi_pii.IndexOf(".") == -1)
+            {
+                if (return_null)
+                    return null;
+                return "";
+            }
+            var parts = StringUtil.ParseTwoPart(oi_pii, ".");
+            return parts[0];
+        }
+
+        // 获得 oi.pii 的 pii 部分
+        public static string GetPiiPart(string oi_pii)
+        {
+            if (oi_pii.IndexOf(".") == -1)
+                return oi_pii;
+            var parts = StringUtil.ParseTwoPart(oi_pii, ".");
+            return parts[1];
+        }
+
         // 根据本地历史记录，在读者记录中添加 borrows/borrow 元素
         // parameters:
         //      lastWriteTime   读者 XML 记录最近更新时间。只取这个时间以后的本地未还借书动作
@@ -806,7 +828,7 @@ namespace dp2SSL
                 {
                     // 2020/6/20
                     // 查重 合并 barcode 相同的 borrow 元素
-                    var dup = root.SelectSingleNode($"borrow[@barcode='{item.PII}']") as XmlElement;
+                    var dup = root.SelectSingleNode($"borrow[@barcode='{GetPiiPart(item.PII)}' AND @oi='{GetOiPart(item.PII, false)}']") as XmlElement;
                     if (dup != null)
                         continue;
 
@@ -816,7 +838,8 @@ namespace dp2SSL
                     root.AppendChild(new_borrow);
                     // var title = GetEntityTitle(item.EntityString);
 
-                    new_borrow.SetAttribute("barcode", item.PII);
+                    new_borrow.SetAttribute("barcode", GetPiiPart(item.PII));
+                    new_borrow.SetAttribute("oi", GetOiPart(item.PII, false));
                     new_borrow.SetAttribute("borrowDate", DateTimeUtil.Rfc1123DateTimeStringEx(item.OperTime));
                     if (borrow_info != null)
                     {

@@ -4449,6 +4449,8 @@ out strError);
                 {
                     DomUtil.DeleteElement(readerdom.DocumentElement, "password");
                     DomUtil.SetElementText(readerdom.DocumentElement, "libraryCode", strLibraryCode);
+                    // 2020/9/8
+                    AddPatronOI(readerdom, strLibraryCode);
                 }
                 if (string.IsNullOrEmpty(strXml) == false)
                 {
@@ -4465,6 +4467,8 @@ out strError);
 
                     DomUtil.DeleteElement(temp.DocumentElement, "password");
                     DomUtil.SetElementText(temp.DocumentElement, "libraryCode", strLibraryCode);
+                    // 2020/9/8
+                    AddPatronOI(temp, strLibraryCode);
                     strXml = temp.DocumentElement.OuterXml;
                 }
             }
