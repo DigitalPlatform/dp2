@@ -7456,7 +7456,8 @@ out strError);
                 timestamp = records[0].RecordBody.Timestamp;
             }
 
-            if (strOwnerInstitution != null)
+            if (strOwnerInstitution != null
+                && string.IsNullOrEmpty(strXml) == false)
             {
                 // return:
                 //      -1  出错

@@ -104,6 +104,8 @@ namespace dp2Circulation
             this.m_listView = this.listView;
             this.ItemType = "item";
             this.ItemTypeName = "册";
+
+            // this.listView.Columns.Add("test");
         }
 
         // 

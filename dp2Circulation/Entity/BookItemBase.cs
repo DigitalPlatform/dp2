@@ -13,6 +13,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
+using DocumentFormat.OpenXml.Drawing.Charts;
 
 namespace dp2Circulation
 {
@@ -365,16 +366,14 @@ namespace dp2Circulation
             ListViewItem item = new ListViewItem();
             item.ImageIndex = 0;
 
+            list.Items.Add(item);
+            this.ListViewItem = item;
+            this.ListViewItem.Tag = this;   // 将 BookItem 对象引用保存在 ListViewItem 事项中
+
             // 2013/1/18
             SetItemColumns(item);
 
             this.SetItemBackColor(item);
-
-            list.Items.Add(item);
-
-            this.ListViewItem = item;
-
-            this.ListViewItem.Tag = this;   // 将 BookItem 对象引用保存在 ListViewItem 事项中
             return item;
         }
 
@@ -467,6 +466,33 @@ namespace dp2Circulation
             throw new Exception("尚未重载 SetItemColumns()");
         }
 
+        public List<ColumnInfo> FindColumnDefs(ListView listview)
+        {
+            return BookItemContext.GetColumnDefDefinition(listview);
+        }
+
+        // 2020/9/9
+        // 获得列的定义
+        // parameters:
+        //      index   希望获得信息的列号。如果为 -1，表示希望获得全部列信息
+        public virtual List<ColumnInfo> GetItemColumnInfo(int index)
+        {
+            var defs = FindColumnDefs(this.ListViewItem.ListView);
+            if (defs == null)
+                throw new Exception("尚未重载 GetItemColumnInfo()");
+
+            if (index == -1)
+                return defs;
+            var result = defs.Find((o) =>
+            {
+                if (o.Index == index)
+                    return true;
+                return false;
+            });
+            if (result == null)
+                throw new Exception($"不存在列号为 {index} 的列定义");
+            return new List<ColumnInfo> { result };
+        }
 
         // 
         /// <summary>
@@ -981,6 +1007,95 @@ namespace dp2Circulation
                     if (bClearOthersHilight == true)
                         listview_item.Selected = false;
                 }
+            }
+        }
+    }
+
+    public class ColumnInfo
+    {
+        public string Caption { get; set; }
+        public int Index { get; set; }  // 列号，从 0 开始
+        public int PixelWidth { get; set; } // 像素宽度
+        public string DataElement { get; set; } // 对应的数据元素名
+
+        /*
+<editor>
+<field element="add1">
+<caption lang="zh">新增字段1</caption>
+</field>
+<field element="add2">
+<caption lang="zh">新增字段2</caption>
+</field>
+<field element="add3">
+<caption lang="zh">新增字段3</caption>
+</field>
+</editor>
+        * */
+        // 根据 XML 构造列定义
+        public static List<ColumnInfo> BuildColumnInfoList(string xml,
+            string lang = "zh")
+        {
+            List<ColumnInfo> results = new List<ColumnInfo>();
+
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml(xml);
+
+            int index = 0;
+            var nodes = dom.DocumentElement.SelectNodes("field");
+            foreach (XmlElement element in nodes)
+            {
+                ColumnInfo info = new ColumnInfo();
+                results.Add(info);
+
+                info.Caption = DomUtil.GetCaption(lang, element);
+                info.DataElement = element.GetAttribute("element");
+                int nRet = DomUtil.GetIntegerParam(element,
+                    "width",
+                    100,
+                    out int value,
+                    out string strError);
+                if (nRet == -1)
+                    throw new Exception($"获得 width 属性时出错: {strError}");
+                info.PixelWidth = value;
+                info.Index = index++;
+            }
+
+            return results;
+        }
+    }
+
+    // 全局存储机制。存储每个 listview 对应的栏目定义
+    public static class BookItemContext
+    {
+        // 列定义对象表。ListView --> List<ColumnInfo>
+        static Hashtable _column_def_table = new Hashtable();
+
+        public static void SetColumnDefinition(ListView listview, List<ColumnInfo> infos)
+        {
+            _column_def_table[listview] = infos;
+        }
+
+        public static List<ColumnInfo> GetColumnDefDefinition(ListView listview)
+        {
+            return _column_def_table[listview] as List<ColumnInfo>;
+        }
+
+        // 给 ListView 创建列标题行
+        public static void CreateColumns(ListView listview)
+        {
+            var defs = GetColumnDefDefinition(listview);
+            if (defs == null)
+                return;
+
+            listview.Columns.Clear();
+
+            foreach(var def in defs)
+            {
+                var header = new System.Windows.Forms.ColumnHeader();
+                header.Text = def.Caption;
+                header.Width = def.PixelWidth;
+
+                listview.Columns.Add(header);
             }
         }
     }

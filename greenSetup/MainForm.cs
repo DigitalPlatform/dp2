@@ -487,9 +487,8 @@ true);
 
         void InitialLogging()
         {
-            //string dataDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            //string logDir = Path.Combine(dataDir, "greensetup_logs");
-            string logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "dp2\\dp2ssl\\greensetup_logs");
+            // string logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "dp2\\dp2ssl\\greensetup_logs");
+            string logDir = "c:\\dp2ssl\\greensetup_logs";  // 注：这里不能使用 c:\programdata\dp2ssl 和其下的子目录作为 greensetup.exe 本身的 log 子目录，因为这样会让迁移数据目录的阶段判断错误，以为目标数据目录在安装前已经存在
             Library.TryCreateDir(logDir);
 
             string pattern = Path.Combine(logDir, "log_{Date}.txt");

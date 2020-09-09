@@ -6118,7 +6118,8 @@ namespace dp2Library
                     }
 
                     // 用 OI 判断这一条册记录是否符合要求
-                    if (strOwnerInstitution != null)
+                    if (strOwnerInstitution != null
+                        && string.IsNullOrEmpty(strXml) == false)
                     {
                         // return:
                         //      -1  出错

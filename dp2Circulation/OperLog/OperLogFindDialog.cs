@@ -53,6 +53,8 @@ namespace dp2Circulation
             "setUser\t设置用户",
             "crashReport\t崩溃报告",
             "memo\t注记",
+            "adjustOverflow\t调整超额",
+            "setSystemParameter\t设置系统参数",
             "manageDatabase\t管理数据库",
             "statis\t统计",
             });
