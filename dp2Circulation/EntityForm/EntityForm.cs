@@ -593,7 +593,7 @@ namespace dp2Circulation
             // 保存当前活动的属性页名字，因为后面可能要清除有关page
             this.m_strUsedActiveItemPage = GetActiveItemPageName();
 
-            InitialEntityColumnDefs(Path.Combine(Program.MainForm.UserDir, "entity_list.xml"));
+            InitialEntityColumnDefs(Path.Combine(Program.MainForm.UserDir, "item_list.xml"));
             InitialEntityControl(true);
             this.EnableItemsPage(false);
 
@@ -813,18 +813,109 @@ true);
             {
                 selected_templates.Build(strSelectedTemplates);
             }
-
         }
+
+        // 默认的列定义
+        static string _defaultEntityColumnDef = @"<collection>
+  <field element='barcode' width='150'>
+    <caption lang='zh'>册条码号</caption>
+  </field>
+  <field element='ErrorInfo:this' width='200'>
+    <caption lang='zh'>错误信息</caption>
+  </field>
+  <field element='state' width='100'>
+    <caption lang='zh'>状态</caption>
+  </field>
+  <field element='publishTime' width='180'>
+    <caption lang='zh'>出版时间(期定位信息)</caption>
+  </field>
+  <field element='location' width='150'>
+    <caption lang='zh'>馆藏地点</caption>
+  </field>
+  <field element='shelfNo' width='150'>
+    <caption lang='zh'>架号</caption>
+  </field>
+  <field element='currentLocation' width='150'>
+    <caption lang='zh'>当前位置</caption>
+  </field>
+  <field element='seller' width='100'>
+    <caption lang='zh'>订购渠道</caption>
+  </field>
+  <field element='source' width='100'>
+    <caption lang='zh'>经费来源</caption>
+  </field>
+  <field element='price' width='150'>
+    <caption lang='zh'>册价格</caption>
+  </field>
+  <field element='volume' width='150'>
+    <caption lang='zh'>卷期</caption>
+  </field>
+  <field element='accessNo' width='150'>
+    <caption lang='zh'>索取号</caption>
+  </field>
+  <field element='bookType' width='150'>
+    <caption lang='zh'>册类型</caption>
+  </field>
+  <field element='registerNo' width='150'>
+    <caption lang='zh'>登录号</caption>
+  </field>
+  <field element='comment' width='150'>
+    <caption lang='zh'>附注</caption>
+  </field>
+  <field element='mergeComment' width='150'>
+    <caption lang='zh'>合并注释</caption>
+  </field>
+  <field element='batchNo' width='100'>
+    <caption lang='zh'>批次号</caption>
+  </field>
+  <field element='borrower' width='150'>
+    <caption lang='zh'>借阅者</caption>
+  </field>
+  <field element='borrowDate' width='150'>
+    <caption lang='zh'>借阅日期</caption>
+  </field>
+  <field element='borrowPeriod' width='150'>
+    <caption lang='zh'>借阅期限</caption>
+  </field>
+  <field element='intact' width='150'>
+    <caption lang='zh'>完好率</caption>
+  </field>
+  <field element='bindingCost' width='150'>
+    <caption lang='zh'>装订费</caption>
+  </field>
+  <field element='binding:innerXml' width='150'>
+    <caption lang='zh'>装订</caption>
+  </field>
+  <field element='operations:innerXml' width='150'>
+    <caption lang='zh'>操作</caption>
+  </field>
+  <field element='RecPath:this' width='200'>
+    <caption lang='zh'>册记录路径</caption>
+  </field>
+  <field element='refID' width='200'>
+    <caption lang='zh'>参考 ID</caption>
+  </field>
+</collection>";
 
         // 设置列定义
         void InitialEntityColumnDefs(string filename)
         {
+            string xml = "";
             if (File.Exists(filename) == false)
-                return;
-            string xml = File.ReadAllText(filename);
-            var defs = ColumnInfo.BuildColumnInfoList(xml, "zh");
-            BookItemContext.SetColumnDefinition(this.entityControl1.ListView, defs);
-            BookItemContext.CreateColumns(this.entityControl1.ListView);
+                xml = _defaultEntityColumnDef;
+            else
+                xml = File.ReadAllText(filename);
+            try
+            {
+                var defs = ColumnInfo.BuildColumnInfoList(xml, "zh");
+                BookItemContext.SetColumnDefinition(this.entityControl1.ListView, defs);
+                BookItemContext.CreateColumns(this.entityControl1.ListView);
+            }
+            catch(Exception ex)
+            {
+                this.ShowMessage($"InitialEntityColumnDefs() 出现异常: {ex.Message}");
+                MainForm.WriteErrorLog($"InitialEntityColumnDefs() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+            }
         }
 
         void InitialEntityControl(bool bInitial)
