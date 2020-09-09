@@ -3159,6 +3159,17 @@ namespace DigitalPlatform.LibraryServer
             if (string.IsNullOrEmpty(libraryName) == false && libraryName.IndexOfAny(new char[] { '/', '\\' }) != -1)
                 errors.Add($"libraryInfo/libraryName 元素中的图书馆名 '{libraryName}' 不合法");
 
+            // 2020/9/10
+            // 检查 circulation/@itemAdditionalFields 中的元素名是否和册记录核心元素名重复了
+            if (this.ItemAdditionalFields != null)
+            {
+                foreach (var name in this.ItemAdditionalFields)
+                {
+                    if (Array.IndexOf(core_entity_element_names, name) != -1)
+                        errors.Add($"circulation/@itemAdditionalFields 属性中的名字 '{name}' 和册记录基本元素名字冲突了");
+                }
+            }
+
             // 2020/7/1
             if (StringUtil.IsInList("skipVirusCheck", this.Function) == false)
             {
