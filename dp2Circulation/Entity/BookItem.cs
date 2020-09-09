@@ -12,6 +12,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.GUI;
 
 using DigitalPlatform.LibraryClient.localhost;  // EntityInfo
+using DigitalPlatform.Text;
 
 namespace dp2Circulation
 {
@@ -461,7 +462,7 @@ namespace dp2Circulation
             set
             {
                 DomUtil.SetElementText(this.RecordDom.DocumentElement, "shelfNo", value);
-                this.Changed = true; 
+                this.Changed = true;
             }
         }
 
@@ -663,6 +664,57 @@ namespace dp2Circulation
             return nChangeCount;
         }
 
+#if NO
+        // 2020/9/9
+        // 获得列的定义
+        // parameters:
+        //      index   希望获得信息的列号。如果为 -1，表示希望获得全部列信息
+        public override List<ColumnInfo> GetItemColumnInfo(int index)
+        {
+            var defs = ColumnInfo.BuildColumnInfoList(ColumnDefXml, "zh");
+            if (index == -1)
+                return defs;
+            var result = defs.Find((o) =>
+            {
+                if (o.Index == index)
+                    return true;
+                return false;
+            });
+            if (result == null)
+                throw new Exception($"不存在列号为 {index} 的列定义");
+            return new List<ColumnInfo> { result };
+        }
+#endif
+
+        // 可能会抛出异常
+        public string GetData(string dataElement)
+        {
+            // 一般 XML 元素 content
+            if (dataElement.IndexOf(":") == -1)
+                return DomUtil.GetElementText(this.RecordDom.DocumentElement, dataElement);
+
+            var parts = StringUtil.ParseTwoPart(dataElement, ":");
+            string name = parts[0];
+            string type = parts[1];
+            if (type == "innerXml")
+                return DomUtil.GetElementInnerXml(this.RecordDom.DocumentElement, name);
+            if (type == "this")
+            {
+                {
+                    var info = this.GetType().GetProperty(name);
+                    if (info != null)
+                        return (string)info.GetValue(this);
+                }
+                {
+                    var info = this.GetType().GetField(name);
+                    if (info == null)
+                        throw new Exception($"BookItem 对象中没有 {name} 成员");
+                    return (string)info.GetValue(this);
+                }
+            }
+
+            throw new Exception($"未知的类型 '{type}'");
+        }
 
         /// <summary>
         /// 将内存值更新到显示的栏目
@@ -670,6 +722,23 @@ namespace dp2Circulation
         /// <param name="item">ListViewItem事项，ListView中的一行</param>
         public override void SetItemColumns(ListViewItem item)
         {
+            var defs = FindColumnDefs(item.ListView);
+
+            if (defs != null)
+            {
+                // var defs = GetItemColumnInfo(-1);
+                foreach (var def in defs)
+                {
+                    string value = GetData(def.DataElement);
+                    ListViewUtil.ChangeItemText(item,
+            def.Index,
+            value);
+                }
+
+                return;
+            }
+
+            // 原先的代码
             ListViewUtil.ChangeItemText(item,
     COLUMN_BARCODE,
     this.Barcode);
@@ -706,7 +775,6 @@ namespace dp2Circulation
             ListViewUtil.ChangeItemText(item,
     COLUMN_SHELFNO,
     this.ShelfNo);
-
 
             ListViewUtil.ChangeItemText(item,
                 COLUMN_BOOKTYPE,

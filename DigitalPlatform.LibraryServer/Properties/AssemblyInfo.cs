@@ -215,5 +215,5 @@ ItemCanReturn()
 //		3.31 (2020/8/27) Borrow() API 要在读者记录和册记录中产生 borrowID 属性或者元素，并且 Borrow() 和 Return() API 的 BorrowInfo 和 ReturnInfo 结构中增加了 BorrowID 成员
 //		3.32 (2020/8/27) GetItemInfo() API 返回 XML 记录的时候，记录中会包含一个即时发生的 oi 元素
 //		3.33 (2020/8/28) 为 SetSystemParameter() API 增加了操作日志。前端可以通过拉取此类日志记录感知服务器配置参数的变化
-//		3.34 (2020/9/4) 增加调整超额这一种操作日志记录
+//		3.34 (2020/9/4) 增加调整超额这一种操作日志记录类型 adjustOverflow
 //		3.35 (2020/9/8) Borrow() API 在读者记录中创建的 borrows/borrow 元素中增加了 oi 属性。GetReaderInfo() API 返回的读者记录 XML 中增加了 oi 元素
