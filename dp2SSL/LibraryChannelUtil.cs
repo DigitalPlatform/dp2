@@ -853,11 +853,17 @@ namespace dp2SSL
                     .Where(o => o.OperatorID == pii && o.Action == "borrow" && o.LinkID == null
                     && o.OperTime > lastWriteTime)
                     .OrderBy(o => o.ID).ToList();
+                /* testing
+                var borrows = context.Requests
+    .Where(o => o.OperatorID == pii && o.Action == "borrow")
+    .OrderBy(o => o.ID).ToList();
+                */
                 foreach (var item in borrows)
                 {
                     // 2020/6/20
                     // 查重 合并 barcode 相同的 borrow 元素
-                    var dup = root.SelectSingleNode($"borrow[@barcode='{GetPiiPart(item.PII)}' AND @oi='{GetOiPart(item.PII, false)}']") as XmlElement;
+                    // 注意，XPath 中 and 不能用大写，只能用小写
+                    var dup = root.SelectSingleNode($"borrow[@barcode='{GetPiiPart(item.PII)}' and @oi='{GetOiPart(item.PII, false)}']") as XmlElement;
                     if (dup != null)
                         continue;
 

@@ -3132,7 +3132,7 @@ namespace dp2rms
                     mngr.AddNamespace("dprms", DpNs.dprms);
 
                     // 保护unimarc usmarc名字空间以外的元素
-                    // XmlNodeList filenodes = dom.DocumentElement.SelectNodes("child::*[not(unimarc:controlfield) AND not(unimarc:datafield) AND not(unimarc:leader)]", mngr);    // "//dprms:file"
+                    // XmlNodeList filenodes = dom.DocumentElement.SelectNodes("child::*[not(unimarc:controlfield) and not(unimarc:datafield) AND not(unimarc:leader)]", mngr);    // "//dprms:file"
                     List<XmlNode> filenodes = new List<XmlNode>();
                     for (int i = 0; i < dom.DocumentElement.ChildNodes.Count; i++)
                     {

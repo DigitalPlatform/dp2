@@ -106,11 +106,22 @@ namespace dp2SSL
             {
                 try
                 {
-                    DisplayVideo(videoRecognition);
+                    DisplayVideo(videoRecognition, TimeSpan.FromMinutes(1));
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // TODO: 写入错误日志
+                    // 写入错误日志
+                    WpfClientInfo.WriteErrorLog($"(PageBorrow) DisplayVideo() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                }
+                finally
+                {
+                    // 2020/9/10
+                    if (videoRecognition != null)
+                        App.Invoke(new Action(() =>
+                        {
+                            videoRecognition.Close();
+                        }));
+                    App.CurrentApp.SpeakSequence($"放弃人脸识别");
                 }
             });
             try
@@ -146,10 +157,13 @@ namespace dp2SSL
             Welcome(fill_result.Value == -1);
         }
 
-        void DisplayVideo(VideoWindow window)
+        void DisplayVideo(VideoWindow window, TimeSpan timeout)
         {
+            DateTime start = DateTime.Now;
             while (_stopVideo == false)
             {
+                if (DateTime.Now - start > timeout)
+                    break;
                 var result = FaceManager.GetImage("");
                 if (result.ImageData == null)
                 {
@@ -1642,6 +1656,8 @@ out string strError);
                     if (clearError == true)
                         entity.SetError(null);
                     entity.FillFinished = true;
+                    // 2020/9/10
+                    entity.Waiting = false;
                 }
 
                 booksControl.SetBorrowable();
@@ -2927,11 +2943,23 @@ out string strError);
                         {
                             try
                             {
-                                DisplayVideo(videoRegister);
+                                DisplayVideo(videoRegister, TimeSpan.FromMinutes(2));
                             }
                             catch (Exception ex)
                             {
                                 WpfClientInfo.WriteErrorLog($"RegisterFaceAsync() DisplayVideo() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                            }
+                            finally
+                            {
+                                /*
+                                // 2020/9/10
+                                if (videoRegister != null)
+                                    App.Invoke(new Action(() =>
+                                    {
+                                        videoRegister.Close();
+                                    }));
+                                App.CurrentApp.SpeakSequence($"放弃注册人脸");
+                                */
                             }
                         });
 

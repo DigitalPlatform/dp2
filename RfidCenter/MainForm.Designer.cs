@@ -42,6 +42,8 @@
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
             this.tabPage_cfg = new System.Windows.Forms.TabPage();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.comboBox_printer_baudRate = new System.Windows.Forms.ComboBox();
+            this.label10 = new System.Windows.Forms.Label();
             this.comboBox_printer_serialPort = new System.Windows.Forms.ComboBox();
             this.label15 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
@@ -122,8 +124,9 @@
             this.MenuItem_manual = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_about = new System.Windows.Forms.ToolStripMenuItem();
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
-            this.comboBox_printer_baudRate = new System.Windows.Forms.ComboBox();
-            this.label10 = new System.Windows.Forms.Label();
+            this.MenuItem_help_test = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_help_test_outputYellowLine = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_help_test_outputNormalLine = new System.Windows.Forms.ToolStripMenuItem();
             this.tabControl_main.SuspendLayout();
             this.tabPage_start.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_start)).BeginInit();
@@ -243,7 +246,7 @@
             this.tabPage_operHistory.Location = new System.Drawing.Point(4, 37);
             this.tabPage_operHistory.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_operHistory.Name = "tabPage_operHistory";
-            this.tabPage_operHistory.Size = new System.Drawing.Size(952, 386);
+            this.tabPage_operHistory.Size = new System.Drawing.Size(952, 387);
             this.tabPage_operHistory.TabIndex = 2;
             this.tabPage_operHistory.Text = "操作历史";
             this.tabPage_operHistory.UseVisualStyleBackColor = true;
@@ -255,7 +258,7 @@
             this.webBrowser1.Margin = new System.Windows.Forms.Padding(4);
             this.webBrowser1.MinimumSize = new System.Drawing.Size(24, 27);
             this.webBrowser1.Name = "webBrowser1";
-            this.webBrowser1.Size = new System.Drawing.Size(952, 386);
+            this.webBrowser1.Size = new System.Drawing.Size(952, 387);
             this.webBrowser1.TabIndex = 1;
             // 
             // tabPage_cfg
@@ -292,6 +295,29 @@
             this.groupBox2.TabIndex = 13;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "小票打印机";
+            // 
+            // comboBox_printer_baudRate
+            // 
+            this.comboBox_printer_baudRate.FormattingEnabled = true;
+            this.comboBox_printer_baudRate.Items.AddRange(new object[] {
+            "38400",
+            "9600",
+            "19200",
+            "38400",
+            "115200"});
+            this.comboBox_printer_baudRate.Location = new System.Drawing.Point(176, 94);
+            this.comboBox_printer_baudRate.Name = "comboBox_printer_baudRate";
+            this.comboBox_printer_baudRate.Size = new System.Drawing.Size(283, 36);
+            this.comboBox_printer_baudRate.TabIndex = 5;
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(28, 97);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(107, 28);
+            this.label10.TabIndex = 4;
+            this.label10.Text = "波特率(&B):";
             // 
             // comboBox_printer_serialPort
             // 
@@ -644,86 +670,86 @@
             this.toolStripSeparator9,
             this.ToolStripMenuItem_exit});
             this.MenuItem_file.Name = "MenuItem_file";
-            this.MenuItem_file.Size = new System.Drawing.Size(72, 32);
+            this.MenuItem_file.Size = new System.Drawing.Size(72, 33);
             this.MenuItem_file.Text = "文件";
             // 
             // MenuItem_restart
             // 
             this.MenuItem_restart.Name = "MenuItem_restart";
-            this.MenuItem_restart.Size = new System.Drawing.Size(298, 40);
+            this.MenuItem_restart.Size = new System.Drawing.Size(315, 40);
             this.MenuItem_restart.Text = "重新启动";
             this.MenuItem_restart.Click += new System.EventHandler(this.MenuItem_restart_Click);
             // 
             // MenuItem_openSendKey
             // 
             this.MenuItem_openSendKey.Name = "MenuItem_openSendKey";
-            this.MenuItem_openSendKey.Size = new System.Drawing.Size(298, 40);
+            this.MenuItem_openSendKey.Size = new System.Drawing.Size(315, 40);
             this.MenuItem_openSendKey.Text = "打开 发送";
             this.MenuItem_openSendKey.Click += new System.EventHandler(this.MenuItem_openSendKey_Click);
             // 
             // MenuItem_closeSendKey
             // 
             this.MenuItem_closeSendKey.Name = "MenuItem_closeSendKey";
-            this.MenuItem_closeSendKey.Size = new System.Drawing.Size(298, 40);
+            this.MenuItem_closeSendKey.Size = new System.Drawing.Size(315, 40);
             this.MenuItem_closeSendKey.Text = "关闭 发送";
             this.MenuItem_closeSendKey.Click += new System.EventHandler(this.MenuItem_closeSendKey_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(295, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(312, 6);
             // 
             // MenuItem_simuLock
             // 
             this.MenuItem_simuLock.Name = "MenuItem_simuLock";
-            this.MenuItem_simuLock.Size = new System.Drawing.Size(298, 40);
+            this.MenuItem_simuLock.Size = new System.Drawing.Size(315, 40);
             this.MenuItem_simuLock.Text = "模拟锁";
             this.MenuItem_simuLock.Click += new System.EventHandler(this.MenuItem_simuLock_Click);
             // 
             // MenuItem_openLock
             // 
             this.MenuItem_openLock.Name = "MenuItem_openLock";
-            this.MenuItem_openLock.Size = new System.Drawing.Size(298, 40);
+            this.MenuItem_openLock.Size = new System.Drawing.Size(315, 40);
             this.MenuItem_openLock.Text = "开锁";
             this.MenuItem_openLock.Click += new System.EventHandler(this.MenuItem_openLock_Click);
             // 
             // MenuItem_closeLock
             // 
             this.MenuItem_closeLock.Name = "MenuItem_closeLock";
-            this.MenuItem_closeLock.Size = new System.Drawing.Size(298, 40);
+            this.MenuItem_closeLock.Size = new System.Drawing.Size(315, 40);
             this.MenuItem_closeLock.Text = "关门";
             this.MenuItem_closeLock.Click += new System.EventHandler(this.MenuItem_closeLock_Click);
             // 
             // MenuItem_getLockState
             // 
             this.MenuItem_getLockState.Name = "MenuItem_getLockState";
-            this.MenuItem_getLockState.Size = new System.Drawing.Size(298, 40);
+            this.MenuItem_getLockState.Size = new System.Drawing.Size(315, 40);
             this.MenuItem_getLockState.Text = "探测锁状态";
             this.MenuItem_getLockState.Click += new System.EventHandler(this.MenuItem_getLockState_Click);
             // 
             // MenuItem_getComPortInfo
             // 
             this.MenuItem_getComPortInfo.Name = "MenuItem_getComPortInfo";
-            this.MenuItem_getComPortInfo.Size = new System.Drawing.Size(298, 40);
+            this.MenuItem_getComPortInfo.Size = new System.Drawing.Size(315, 40);
             this.MenuItem_getComPortInfo.Text = "探测 COM 口信息";
             this.MenuItem_getComPortInfo.Click += new System.EventHandler(this.MenuItem_getComPortInfo_Click);
             // 
             // toolStripSeparator7
             // 
             this.toolStripSeparator7.Name = "toolStripSeparator7";
-            this.toolStripSeparator7.Size = new System.Drawing.Size(295, 6);
+            this.toolStripSeparator7.Size = new System.Drawing.Size(312, 6);
             // 
             // MenuItem_turnOnLamp
             // 
             this.MenuItem_turnOnLamp.Name = "MenuItem_turnOnLamp";
-            this.MenuItem_turnOnLamp.Size = new System.Drawing.Size(298, 40);
+            this.MenuItem_turnOnLamp.Size = new System.Drawing.Size(315, 40);
             this.MenuItem_turnOnLamp.Text = "开灯";
             this.MenuItem_turnOnLamp.Click += new System.EventHandler(this.MenuItem_turnOnLamp_Click);
             // 
             // MenuItem_turnOffLamp
             // 
             this.MenuItem_turnOffLamp.Name = "MenuItem_turnOffLamp";
-            this.MenuItem_turnOffLamp.Size = new System.Drawing.Size(298, 40);
+            this.MenuItem_turnOffLamp.Size = new System.Drawing.Size(315, 40);
             this.MenuItem_turnOffLamp.Text = "关灯";
             this.MenuItem_turnOffLamp.Click += new System.EventHandler(this.MenuItem_turnOffLamp_Click);
             // 
@@ -733,7 +759,7 @@
             this.ToolStripMenuItem_sterilamp_turnOn,
             this.ToolStripMenuItem_sterilamp_turnOff});
             this.toolStripMenuItem_sterilamp.Name = "toolStripMenuItem_sterilamp";
-            this.toolStripMenuItem_sterilamp.Size = new System.Drawing.Size(298, 40);
+            this.toolStripMenuItem_sterilamp.Size = new System.Drawing.Size(315, 40);
             this.toolStripMenuItem_sterilamp.Text = "紫外灯";
             // 
             // ToolStripMenuItem_sterilamp_turnOn
@@ -753,36 +779,36 @@
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(295, 6);
+            this.toolStripSeparator3.Size = new System.Drawing.Size(312, 6);
             // 
             // MenuItem_ledDisplay
             // 
             this.MenuItem_ledDisplay.Name = "MenuItem_ledDisplay";
-            this.MenuItem_ledDisplay.Size = new System.Drawing.Size(298, 40);
+            this.MenuItem_ledDisplay.Size = new System.Drawing.Size(315, 40);
             this.MenuItem_ledDisplay.Text = "LED 显示文字";
             this.MenuItem_ledDisplay.Click += new System.EventHandler(this.MenuItem_ledDisplay_Click);
             // 
             // toolStripSeparator8
             // 
             this.toolStripSeparator8.Name = "toolStripSeparator8";
-            this.toolStripSeparator8.Size = new System.Drawing.Size(295, 6);
+            this.toolStripSeparator8.Size = new System.Drawing.Size(312, 6);
             // 
             // MenuItem_print
             // 
             this.MenuItem_print.Name = "MenuItem_print";
-            this.MenuItem_print.Size = new System.Drawing.Size(298, 40);
+            this.MenuItem_print.Size = new System.Drawing.Size(315, 40);
             this.MenuItem_print.Text = "小票打印";
             this.MenuItem_print.Click += new System.EventHandler(this.MenuItem_print_Click);
             // 
             // toolStripSeparator9
             // 
             this.toolStripSeparator9.Name = "toolStripSeparator9";
-            this.toolStripSeparator9.Size = new System.Drawing.Size(295, 6);
+            this.toolStripSeparator9.Size = new System.Drawing.Size(312, 6);
             // 
             // ToolStripMenuItem_exit
             // 
             this.ToolStripMenuItem_exit.Name = "ToolStripMenuItem_exit";
-            this.ToolStripMenuItem_exit.Size = new System.Drawing.Size(298, 40);
+            this.ToolStripMenuItem_exit.Size = new System.Drawing.Size(315, 40);
             this.ToolStripMenuItem_exit.Text = "退出(&X)";
             this.ToolStripMenuItem_exit.Click += new System.EventHandler(this.ToolStripMenuItem_exit_Click);
             // 
@@ -802,7 +828,7 @@
             this.MenuItem_readConfig,
             this.MenuItem_writePassword});
             this.MenuItem_testing.Name = "MenuItem_testing";
-            this.MenuItem_testing.Size = new System.Drawing.Size(72, 32);
+            this.MenuItem_testing.Size = new System.Drawing.Size(72, 33);
             this.MenuItem_testing.Text = "测试";
             // 
             // MenuItem_openReader
@@ -901,10 +927,11 @@
             this.MenuItem_openDataFolder,
             this.MenuItem_openProgramFolder,
             this.toolStripSeparator6,
+            this.MenuItem_help_test,
             this.MenuItem_manual,
             this.MenuItem_about});
             this.MenuItem_help.Name = "MenuItem_help";
-            this.MenuItem_help.Size = new System.Drawing.Size(72, 32);
+            this.MenuItem_help.Size = new System.Drawing.Size(72, 33);
             this.MenuItem_help.Text = "帮助";
             // 
             // MenuItem_loadFactoryDefault
@@ -993,28 +1020,28 @@
             this.notifyIcon1.Visible = true;
             this.notifyIcon1.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon1_MouseDoubleClick);
             // 
-            // comboBox_printer_baudRate
+            // MenuItem_help_test
             // 
-            this.comboBox_printer_baudRate.FormattingEnabled = true;
-            this.comboBox_printer_baudRate.Items.AddRange(new object[] {
-            "38400",
-            "9600",
-            "19200",
-            "38400",
-            "115200"});
-            this.comboBox_printer_baudRate.Location = new System.Drawing.Point(176, 94);
-            this.comboBox_printer_baudRate.Name = "comboBox_printer_baudRate";
-            this.comboBox_printer_baudRate.Size = new System.Drawing.Size(283, 36);
-            this.comboBox_printer_baudRate.TabIndex = 5;
+            this.MenuItem_help_test.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.MenuItem_help_test_outputYellowLine,
+            this.MenuItem_help_test_outputNormalLine});
+            this.MenuItem_help_test.Name = "MenuItem_help_test";
+            this.MenuItem_help_test.Size = new System.Drawing.Size(382, 40);
+            this.MenuItem_help_test.Text = "测试";
             // 
-            // label10
+            // MenuItem_help_test_outputYellowLine
             // 
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(28, 97);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(107, 28);
-            this.label10.TabIndex = 4;
-            this.label10.Text = "波特率(&B):";
+            this.MenuItem_help_test_outputYellowLine.Name = "MenuItem_help_test_outputYellowLine";
+            this.MenuItem_help_test_outputYellowLine.Size = new System.Drawing.Size(315, 40);
+            this.MenuItem_help_test_outputYellowLine.Text = "输出黄色文字行";
+            this.MenuItem_help_test_outputYellowLine.Click += new System.EventHandler(this.MenuItem_help_test_outputYellowLine_Click);
+            // 
+            // MenuItem_help_test_outputNormalLine
+            // 
+            this.MenuItem_help_test_outputNormalLine.Name = "MenuItem_help_test_outputNormalLine";
+            this.MenuItem_help_test_outputNormalLine.Size = new System.Drawing.Size(315, 40);
+            this.MenuItem_help_test_outputNormalLine.Text = "输出普通文字行";
+            this.MenuItem_help_test_outputNormalLine.Click += new System.EventHandler(this.MenuItem_help_test_outputNormalLine_Click);
             // 
             // MainForm
             // 
@@ -1154,6 +1181,9 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator9;
         private System.Windows.Forms.ComboBox comboBox_printer_baudRate;
         private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_help_test;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_help_test_outputYellowLine;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_help_test_outputNormalLine;
     }
 }
 

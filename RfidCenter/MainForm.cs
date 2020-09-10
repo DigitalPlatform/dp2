@@ -2376,5 +2376,15 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
             if (this.comboBox_printer_serialPort.Text == "USB")
                 this.comboBox_printer_baudRate.Text = "";
         }
+
+        private void MenuItem_help_test_outputYellowLine_Click(object sender, EventArgs e)
+        {
+            OutputHistory("黄色背景文字", 1);
+        }
+
+        private void MenuItem_help_test_outputNormalLine_Click(object sender, EventArgs e)
+        {
+            OutputHistory("普通文字", 0);
+        }
     }
 }
