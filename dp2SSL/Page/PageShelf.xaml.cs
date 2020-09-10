@@ -513,11 +513,14 @@ namespace dp2SSL
             string debug_info = $"uid:[{patron.UID}],barcode:[{patron.Barcode}]";
             if (action == "open")
             {
+                message = $"请先{GetStyleMessage()}，然后再开门";
+                /*
                 // 提示信息要考虑到应用了指纹的情况
                 if (string.IsNullOrEmpty(App.FingerprintUrl) == false)
-                    message = $"请先刷读者卡，或扫入一次指纹，然后再开门\r\n({debug_info})";
+                    message = $"请先刷读者卡，或扫入一次指纹，然后再开门";  // \r\n({debug_info})
                 else
-                    message = $"请先刷读者卡，然后再开门\r\n({debug_info})";
+                    message = $"请先刷读者卡，然后再开门";  // \r\n({debug_info})
+            */
             }
             else
             {
@@ -525,6 +528,21 @@ namespace dp2SSL
                 message = $"读卡器上的当前读者卡状态不正确。无法进行 {action} 操作\r\n({debug_info})";
             }
             return false;
+        }
+
+        // 2020/9/10
+        static string GetStyleMessage()
+        {
+            // 提示信息要考虑到应用了指纹和人脸的情况
+            List<string> styles = new List<string>();
+            styles.Add($"刷读者 RFID 卡鉴别身份");
+            if (string.IsNullOrEmpty(App.FingerprintUrl) == false)
+                styles.Add("或扫入一次指纹");
+            if (string.IsNullOrEmpty(App.FaceUrl) == false)
+                styles.Add("或人脸识别");
+            if (string.IsNullOrEmpty(App.PatronBarcodeStyle) == false && App.PatronBarcodeStyle != "禁用")
+                styles.Add("或扫入读者证条码");
+            return StringUtil.MakePathList(styles, "，");
         }
 
         void DisplayError(ref ProgressWindow progress,
@@ -610,7 +628,9 @@ namespace dp2SSL
             }
         }
 
-        void ErrorBox(string message,
+        void ErrorBox(
+            string title,
+            string message,
             string color = "red",
             string style = "")
         {
@@ -619,6 +639,7 @@ namespace dp2SSL
             App.Invoke(new Action(() =>
             {
                 progress = new ProgressWindow();
+                progress.TitleText = title;
                 progress.MessageText = "正在处理，请稍候 ...";
                 progress.Owner = Application.Current.MainWindow;
                 progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
@@ -672,20 +693,20 @@ namespace dp2SSL
 
             if (e.Door == null)
             {
-                ErrorBox("e.Door 尚未初始化完成");
+                ErrorBox("", "e.Door 尚未初始化完成");
                 return;
             }
 
             // 没有门锁的门
             if (string.IsNullOrEmpty(e.Door.LockPath))
             {
-                ErrorBox("没有门锁");
+                ErrorBox("", "没有门锁");
                 return;
             }
 
             if (ShelfData.FirstInitialized == false)
             {
-                ErrorBox("书柜尚未完成初始化，不允许开门");
+                ErrorBox("", "书柜尚未完成初始化，不允许开门");
                 return;
             }
 
@@ -703,7 +724,7 @@ namespace dp2SSL
             if (e.Door.State == "open")
             {
                 App.CurrentApp.Speak("已经打开");
-                ErrorBox("已经打开", "yellow", "auto_close,button_ok");
+                ErrorBox("", "已经打开", "yellow", "auto_close,button_ok");
                 return;
             }
 
@@ -734,7 +755,7 @@ namespace dp2SSL
                 if (string.IsNullOrEmpty(check_message))
                     check_message = $"(读卡器上的)当前读者卡状态不正确。无法进行开门操作";
 
-                ErrorBox(check_message);
+                ErrorBox("提示", check_message, "yellow");
                 return;
             }
 
@@ -760,7 +781,7 @@ namespace dp2SSL
                     out string strError);
                 if (nRet != 1)
                 {
-                    ErrorBox(strError);
+                    ErrorBox("无法开门", strError);
                     return;
                 }
 
@@ -768,7 +789,7 @@ namespace dp2SSL
                 string libraryCodeOfPatron = DomUtil.GetElementText(readerdom.DocumentElement, "libraryCode");
                 if (libraryCodeOfDoor != libraryCodeOfPatron)
                 {
-                    ErrorBox($"权限不足，无法开门。\r\n\r\n详情: 读者 {_patron.PatronName} 所属馆代码 '{libraryCodeOfPatron}' 和门所属馆代码 '{libraryCodeOfDoor}' 不同");
+                    ErrorBox("无法开门", $"权限不足，无法开门。\r\n\r\n详情: 读者 {_patron.PatronName} 所属馆代码 '{libraryCodeOfPatron}' 和门所属馆代码 '{libraryCodeOfDoor}' 不同");
                     return;
                 }
             }
@@ -779,14 +800,14 @@ namespace dp2SSL
                 var account = App.CurrentApp.FindAccount(person.GetWorkerAccountName());
                 if (account == null)
                 {
-                    ErrorBox($"FindAccount('{person.GetWorkerAccountName()}') return null");
+                    ErrorBox("错误", $"FindAccount('{person.GetWorkerAccountName()}') return null");
                     return;
                 }
 
                 if (Account.IsGlobalUser(account.LibraryCodeList) == false
                     && StringUtil.IsInList(libraryCodeOfDoor, account.LibraryCodeList) == false)
                 {
-                    ErrorBox($"权限不足，无法开门。\r\n\r\n详情: 工作人员 {person.GetWorkerAccountName()} 所属馆代码 '{account.LibraryCodeList}' 无法管辖门所属馆代码 '{libraryCodeOfDoor}'");
+                    ErrorBox("无法开门", $"权限不足，无法开门。\r\n\r\n详情: 工作人员 {person.GetWorkerAccountName()} 所属馆代码 '{account.LibraryCodeList}' 无法管辖门所属馆代码 '{libraryCodeOfDoor}'");
                     return;
                 }
             }
@@ -1642,7 +1663,7 @@ namespace dp2SSL
                     {
                         string error = "密码错误次数太多，开门功能被禁用";
                         TrySetMessage(null, error);
-                        ErrorBox(error);
+                        ErrorBox("", error);
                         // 延时 10 分钟清除 passwordErrorCount
                         if (delayClear == null)
                         {
@@ -1671,7 +1692,7 @@ namespace dp2SSL
                         {
                             passwordErrorCount++;
                             TrySetMessage(null, "密码错误，无法开门");
-                            ErrorBox("密码错误，无法开门");
+                            ErrorBox("", "密码错误，无法开门");
                         }
                         else
                         {
@@ -1679,7 +1700,7 @@ namespace dp2SSL
                             if (open_result.Value == -1)
                             {
                                 TrySetMessage(null, open_result.ErrorInfo);
-                                ErrorBox(open_result.ErrorInfo);
+                                ErrorBox("", open_result.ErrorInfo);
                             }
                         }
                     }
@@ -2064,7 +2085,7 @@ namespace dp2SSL
                 // ShelfData.RemoveFromRetryActions(new List<Entity>(ShelfData.All));
                 {
                     List<string> piis = new List<string>();
-                    foreach(var entity in ShelfData.l_All)
+                    foreach (var entity in ShelfData.l_All)
                     {
                         piis.Add(entity.GetOiPii(true));
                     }
@@ -3195,7 +3216,7 @@ namespace dp2SSL
 
             if (ShelfData.OpeningDoorCount > 0)
             {
-                ErrorBox("请先关闭全部柜门，才能返回主菜单页面", "yellow", "button_ok");
+                ErrorBox("", "请先关闭全部柜门，才能返回主菜单页面", "yellow", "button_ok");
                 return;
             }
 
@@ -3901,11 +3922,22 @@ namespace dp2SSL
             {
                 try
                 {
-                    DisplayVideo(_videoRecognition);
+                    DisplayVideo(_videoRecognition, TimeSpan.FromMinutes(1));
                 }
-                catch
+                catch(Exception ex)
                 {
-                    // TODO: 写入错误日志
+                    // 写入错误日志
+                    WpfClientInfo.WriteErrorLog($"(PageShelf) DisplayVideo() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                }
+                finally
+                {
+                    // 2020/9/10
+                    if (_videoRecognition != null)
+                        App.Invoke(new Action(() =>
+                        {
+                            _videoRecognition.Close();
+                        }));
+                    App.CurrentApp.SpeakSequence($"放弃人脸识别");
                 }
             });
             try
@@ -3992,10 +4024,13 @@ namespace dp2SSL
             }));
         }
 
-        void DisplayVideo(VideoWindow window)
+        void DisplayVideo(VideoWindow window, TimeSpan timeout)
         {
+            DateTime start = DateTime.Now;
             while (_stopVideo == false)
             {
+                if (DateTime.Now - start > timeout)
+                    break;
                 var result = FaceManager.GetImage("");
                 if (result.ImageData == null)
                 {

@@ -1413,7 +1413,8 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
 
             string patron_type = GetPatronType(patron_pii,
                 patron_oi,
-                ref readerdom);
+                ref readerdom,
+                out string patronLibraryCode);
             if (patron_type == null)
             {
                 debugInfo?.AppendLine($"因为没有找到证条码号为 '{patron_pii}' OI 为 '{patron_oi}' 的读者的读者类型，只好采用默认的借阅总册数 {max_items}");
@@ -1477,31 +1478,42 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
 
             debugInfo?.AppendLine($"当前册 (PII 为 '{entity.PII}') 的册类型为 '{info_result.ToString()}'");
 
-
-            // 计算已经借阅的册中和当前册类型相同的册数
+            GetTypeMaxResult max_result = null;
             int thisTypeCount = 0;
-            foreach (string pii in piis)
+
+            if (info_result.LibraryCode != patronLibraryCode)
             {
-                var book_type = await GetBookType(pii);
-                debugInfo?.AppendLine($"计算在借册数过程: 获得 'pii' 的图书类型，返回 book_type='{book_type}'");
-                if (book_type == info_result.BookType)
+                debugInfo?.AppendLine($"*** 当前册 (PII 为 '{entity.PII}') 的馆代码为 '{info_result.LibraryCode}'，和当前读者的馆代码 '{patronLibraryCode}' 不吻合，");
+                debugInfo?.AppendLine($"所以图书类型 '{info_result.BookType}' 的最大借阅许可数，被当作 0 处理");
+                max_result = new GetTypeMaxResult { Max = 0 };
+            }
+            else
+            {
+                // 计算已经借阅的册中和当前册类型相同的册数
+                foreach (string pii in piis)
                 {
-                    debugInfo?.AppendLine($"匹配 图书类型 '{book_type}' 和 info_result.BookType '{info_result.BookType}' 匹配上了，加一");
-                    thisTypeCount++;
+                    var book_type = await GetBookType(pii);
+                    debugInfo?.AppendLine($"计算在借册数过程: 获得 'pii' 的图书类型，返回 book_type='{book_type}'");
+                    if (book_type == info_result.BookType)
+                    {
+                        debugInfo?.AppendLine($"匹配 图书类型 '{book_type}' 和 info_result.BookType '{info_result.BookType}' 匹配上了，加一");
+                        thisTypeCount++;
+                    }
+                    else
+                    {
+                        debugInfo?.AppendLine($"不匹配 图书类型 '{book_type}' 和 info_result.BookType '{info_result.BookType}'");
+                    }
                 }
-                else
-                {
-                    debugInfo?.AppendLine($"不匹配 图书类型 '{book_type}' 和 info_result.BookType '{info_result.BookType}'");
-                }
+
+                debugInfo?.AppendLine($"和 '{info_result.BookType}' 相同的在借册数为 {thisTypeCount}");
+
+                max_result = GetTypeMax(info_result.LibraryCode,
+        patron_type,
+        info_result.BookType);
+
+                debugInfo?.AppendLine($"获得图书类型 '{info_result.BookType}' 的最大借阅许可数，返回 {max_result.ToString()}");
             }
 
-            debugInfo?.AppendLine($"和 '{info_result.BookType}' 相同的在借册数为 {thisTypeCount}");
-
-            var max_result = GetTypeMax(info_result.LibraryCode,
-    patron_type,
-    info_result.BookType);
-
-            debugInfo?.AppendLine($"获得图书类型 '{info_result.BookType}' 的最大借阅许可数，返回 {max_result.ToString()}");
 
             bool overflow = false;
             // 图书类型限额超过了
@@ -1761,8 +1773,11 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
         // 获得读者的类型，从本地缓存的读者记录中
         static string GetPatronType(string patron_pii,
             string patron_oi,
-            ref XmlDocument readerdom)
+            ref XmlDocument readerdom,
+            out string libraryCode)
         {
+            libraryCode = "";
+
             if (readerdom == null)
             {
                 string query = patron_pii;
@@ -1790,6 +1805,9 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                     return null;
                 }
             }
+
+            // 2020/9/10
+            libraryCode = DomUtil.GetElementText(readerdom.DocumentElement, "libraryCode");
 
             return DomUtil.GetElementText(readerdom.DocumentElement, "readerType");
         }

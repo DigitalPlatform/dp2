@@ -8202,8 +8202,9 @@ out strError);
                     continue;
                 }
 
+                // TODO: 这里可能有误，需要测试一下 2020/9/10
                 // 是实体库、订购库、期库、评注库名么?
-                XmlAttribute attr = container.SelectSingleNode("database[@name='" + name + "' OR @orderDbName='" + name + "' OR @issueDbName='" + name + "' OR @commentDbName='" + name + "']") as XmlAttribute;
+                XmlAttribute attr = container.SelectSingleNode("database[@name='" + name + "' or @orderDbName='" + name + "' or @issueDbName='" + name + "' or @commentDbName='" + name + "']") as XmlAttribute;
                 if (attr != null)
                 {
                     attr.ParentNode.RemoveChild(attr);
