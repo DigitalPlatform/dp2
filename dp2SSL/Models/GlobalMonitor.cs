@@ -106,7 +106,7 @@ namespace dp2SSL.Models
                             //      0   经过检查发现没有必要升级
                             //      1   成功
                             //      2   成功，但需要立即重新启动计算机才能让复制的文件生效
-                            var update_result = await GreenInstall.GreenInstaller.InstallFromWeb("http://dp2003.com/dp2ssl/v1_dev",
+                            var update_result = await GreenInstall.GreenInstaller.InstallFromWeb(GreenInstall.GreenInstaller.dp2ssl_weburl,  // "http://dp2003.com/dp2ssl/v1_dev",
                                 "c:\\dp2ssl",
                                 "delayExtract,updateGreenSetupExe,clearStateFile,debugInfo",
                                 //true,
