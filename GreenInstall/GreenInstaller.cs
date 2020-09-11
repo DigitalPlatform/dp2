@@ -886,7 +886,10 @@ bool bOverwriteExist = true)
             foreach (string file in files)
             {
                 string strZipFileName = Path.Combine(strSourceDir, file);
-                Console.WriteLine("展开 " + strZipFileName + " 到 " + strTargetDir + " ...");
+
+                GreenInstaller.WriteInfoLog($"展开 { strZipFileName } 到 {strTargetDir} ...");
+
+                // Console.WriteLine("展开 " + strZipFileName + " 到 " + strTargetDir + " ...");
                 // return:
                 //      -1  出错
                 //      0   成功。不需要 reboot
@@ -978,6 +981,7 @@ bool bOverwriteExist = true)
 
                 // 先解压到一个临时位置
                 ZipFile.ExtractToDirectory(strZipFileName, tempDir);
+                GreenInstaller.WriteInfoLog($"解压 {strZipFileName} 到临时位置 {tempDir}");
 
                 // 从临时位置拷贝到目标位置
                 Library.CopyDirectory(tempDir,
@@ -987,6 +991,7 @@ bool bOverwriteExist = true)
                         try
                         {
                             File.Copy(source, target, true);
+                            GreenInstaller.WriteInfoLog($"从临时位置内 {source} 拷贝到 {target} 成功");
                             return;
                         }
                         catch (Exception ex)
@@ -1003,6 +1008,8 @@ bool bOverwriteExist = true)
                                 throw new Exception("MoveFileEx() '" + strLastFileName + "' '" + target + "' 失败");
                             // File.SetLastWriteTime(strLastFileName, e.LastModified);
                             delayCount++;
+
+                            GreenInstaller.WriteInfoLog($">>> 从临时位置内 {source} 拷贝到 {target} 受阻。改存到临时文件 {strLastFileName} 中，等下一次 Windows 重启时候它会自动覆盖到 {target} ");
                         }
 
                     },
@@ -1018,10 +1025,11 @@ bool bOverwriteExist = true)
                         {
                             Library.RemoveReadOnlyAttr(tempDir);   // 怕即将删除的目录中有隐藏文件妨碍删除
                             Directory.Delete(tempDir, true);
+                            GreenInstaller.WriteInfoLog($"删除临时位置 {tempDir} 成功");
                         }
-                        catch
+                        catch(Exception ex)
                         {
-
+                            GreenInstaller.WriteInfoLog($"删除临时位置 {tempDir} 出现异常: {Library.GetDebugText(ex)}");
                         }
                     }
                 }
