@@ -19,6 +19,7 @@ namespace greenSetup
 {
     public partial class MainForm : Form
     {
+
         CancellationTokenSource _cancel = new CancellationTokenSource();
 
         public MainForm()
@@ -31,80 +32,8 @@ namespace greenSetup
             // _ = install();
         }
 
-#if REMOVED
-        async Task install()
-        {
-            /*
-            string exePath = Assembly.GetExecutingAssembly().Location;
-            bool updateGreenSetupExe = exePath.ToLower() != "c:\\dp2ssl\\greensetup.exe";
-            */
-
-            double ratio = 1;
-            var result = await GreenInstaller.InstallFromWeb("http://dp2003.com/dp2ssl/v1_dev",
-"c:\\dp2ssl",
-// null,
-false,
-true,
-_cancel.Token,
-(double min, double max, double value, string text) =>
-{
-    this.Invoke(new Action(() =>
-    {
-        if (text != null)
-            label_message.Text = text;
-        if (min != -1)
-            progressBar1.Minimum = (Int32)min;
-        if (max != -1)
-        {
-            if (max <= Int32.MaxValue)
-            {
-                ratio = 1;
-                progressBar1.Maximum = (Int32)max;
-            }
-            else
-            {
-                ratio = Int32.MaxValue / max;
-                progressBar1.Maximum = Int32.MaxValue;
-            }
-        }
-        if (value != -1)
-            progressBar1.Value = (int)((double)value * ratio);
-    }));
-});
-            if (result.Value == -1)
-            {
-                MessageBox.Show(this, result.ErrorInfo);
-                return;
-            }
-
-            // TODO: 从 dp2ssl.exe 中取信息？
-
-            // 创建桌面快捷方式
-            GreenInstaller.CreateShortcut(
-                "desktop",
-                "dp2SSL 自助借还(绿色)",
-                "dp2SSL 自助借还(绿色)",
-                "c:\\dp2ssl\\dp2ssl.exe");
-
-            // 迁移用户文件夹
-            string sourceDirectory = Path.Combine(
-Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-"dp2ssl");
-            if (Directory.Exists(sourceDirectory))
-            {
-                string targetDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "dp2\\dp2ssl");
-                var move_result = GreenInstaller.MoveUserDirectory(sourceDirectory,
-                    targetDirectory,
-                    "c:\\dp2ssl",
-                    "maskSource");
-            }
-            return;
-        }
-#endif
         private void button_createShortcut_Click(object sender, EventArgs e)
         {
-
-
             // 创建桌面快捷方式
             GreenInstaller.CreateShortcut(
                 "desktop",
@@ -296,7 +225,7 @@ true);
             //      0   经过检查发现没有必要升级
             //      1   成功
             //      2   成功，但需要立即重新启动计算机才能让复制的文件生效
-            var result = await GreenInstaller.InstallFromWeb("http://dp2003.com/dp2ssl/v1_dev",
+            var result = await GreenInstaller.InstallFromWeb(GreenInstaller.dp2ssl_weburl,
                 _binDir,
                 style,
                 //false,
