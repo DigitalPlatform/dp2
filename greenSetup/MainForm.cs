@@ -143,7 +143,7 @@ true);
             GreenInstaller.WriteInfoLog($"检查状态文件。check_result:{check_result.ToString()}");
 
             // 展开，并启动 dp2ssl.exe
-            if (check_result.Value == 3 
+            if (check_result.Value == 3
                 || check_result.Value == 0) // 2020/9/11 增加
             {
                 GreenInstaller.WriteInfoLog($"将此前已经下载的 .zip 文件，展开，并立即启动 dp2ssl.exe");
@@ -158,6 +158,11 @@ true);
 
                 if (extract_result.Value == -1)
                 {
+                    if (extract_result.ErrorCode == "sourceFileNotFound")
+                    {
+                        GreenInstaller.WriteInfoLog($"{extract_result.ErrorInfo}, 所以改为进行首次安装");
+                        goto FIRST_INSTALL;
+                    }
                     ErrorBox(extract_result.ErrorInfo);
                     return;
                 }
@@ -208,6 +213,8 @@ true);
                 await ProcessStart(strExePath);
                 return;
             }
+
+        FIRST_INSTALL:  // 第一次安装
 
             string style = "updateGreenSetupExe,debugInfo";
             if (delayUpdate == false)
