@@ -715,6 +715,20 @@ bool bOverwriteExist = true)
                 "app.zip",
                 "data.zip"};
 
+            // 2020/9/11
+            // 检查源文件是否已经存在
+            foreach(var filename in filenames)
+            {
+                var filepath = Path.Combine(strBinDir, filename);
+                if (File.Exists(filepath) == false)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"拟展开的源文件 {filepath} 不存在",
+                        ErrorCode = "sourceFileNotFound"
+                    };
+            }
+
             {
                 // setProgress?.Invoke(-1, -1, -1, "正在解压文件");
 
