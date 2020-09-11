@@ -214,15 +214,19 @@ true);
             GreenInstaller.WriteInfoLog($"检查状态文件。check_result:{check_result.ToString()}");
 
             // 展开，并启动 dp2ssl.exe
-            if (check_result.Value == 3)
+            if (check_result.Value == 3 
+                || check_result.Value == 0) // 2020/9/11 增加
             {
-                GreenInstaller.WriteInfoLog($"以前遗留的 .zip 文件，展开，并立即启动 dp2ssl.exe");
+                GreenInstaller.WriteInfoLog($"将此前已经下载的 .zip 文件，展开，并立即启动 dp2ssl.exe");
 
                 // return:
                 //      -1  出错
                 //      0   成功。不需要 reboot
                 //      2   成功，但需要立即重新启动计算机才能让复制的文件生效
                 var extract_result = GreenInstaller.ExtractFiles(_binDir);
+
+                GreenInstaller.WriteInfoLog($"展开文件。extract_result:{extract_result.ToString()}");
+
                 if (extract_result.Value == -1)
                 {
                     ErrorBox(extract_result.ErrorInfo);
@@ -230,7 +234,11 @@ true);
                 }
                 else if (extract_result.Value == 2)
                 {
+                    // 2020/9/11
+                    GreenInstaller.WriteInfoLog($"展开过程中发现部分文件被锁定了无法覆盖，已经被写入特殊文件，需要等下次 Windows 重启以后才能生效。本次依然用当前可执行文件启动 dp2ssl.exe");
                     // ErrorBox("部分文件更新受阻，请立即重新启动 Windows");
+
+                    // TODO: 需要有个命令行参数，让 dp2ssl.exe 启动起来后明显提示用户看到信息和状态，需要重启 Windows
                 }
                 await ProcessStart(strExePath);
                 return;
