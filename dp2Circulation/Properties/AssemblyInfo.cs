@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.10.*")]
-[assembly: AssemblyFileVersion("3.10.0.0")]
+[assembly: AssemblyVersion("3.11.*")]
+[assembly: AssemblyFileVersion("3.11.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -71,3 +71,4 @@ using System.Runtime.InteropServices;
 // 3.9 2020/2/26 登录对话框可以从 dp2ManageCenter 的服务器管理对话框里面复制到 Windows 剪贴板的 JSON 定义粘贴
 //              下载和上传文件的功能中，针对最新版 dp2library 服务器时，改用任务式的获取 MD5 功能
 // 3.10 2020/4/28 快捷出纳窗的 Return() API 会携带当前时间的 operTime 子参数。这样，当遇到“没有被借出”报错时候，工作人员应当收下这一册图书(如果读者坚持要拿走，则需要重新办理一次借出操作)
+// 3.11 2020/9/13 种册窗“采购”属性页的上下文菜单增加“为新验收的册设置‘加工中’状态”命令。和种册窗“期”属性页的同名命令效果相同，并且关联同一个系统参数。订购窗里面的同名 checkbox 也关联同一个系统参数。相比以前版本，减少了记忆和理解维护的难度

@@ -54,10 +54,12 @@ namespace dp2Circulation
         /// </summary>
         public bool InputItemsBarcode = true;   // 是否要在验收操作末段自动出现允许输入册条码号的界面?
 
+        /*
         /// <summary>
         /// 是否为新创建的册记录设置“加工中”状态
         /// </summary>
         public bool SetProcessingState = true;   // 是否为新创建的册记录设置“加工中”状态 2009/10/19
+        */
 
         /// <summary>
         /// 是否为新创建的册记录创建索取号
@@ -1528,7 +1530,7 @@ namespace dp2Circulation
 
             menuItem = new MenuItem("为新验收的册设置“加工中”状态(&P)");
             menuItem.Click += new System.EventHandler(this.menu_toggleSetProcessingState_Click);
-            if (this.SetProcessingState == true)
+            if (AcceptForm.SetProcessingState == true)
                 menuItem.Checked = true;
             contextMenu.MenuItems.Add(menuItem);
 
@@ -1764,10 +1766,10 @@ namespace dp2Circulation
 
         void menu_toggleSetProcessingState_Click(object sender, EventArgs e)
         {
-            if (this.SetProcessingState == true)
-                this.SetProcessingState = false;
+            if (AcceptForm.SetProcessingState == true)
+                AcceptForm.SetProcessingState = false;
             else
-                this.SetProcessingState = true;
+                AcceptForm.SetProcessingState = true;
         }
 
         // 装订
@@ -1803,7 +1805,7 @@ namespace dp2Circulation
                 this.TargetRecPath = e.TargetRecPath;
                 this.AcceptBatchNo = e.AcceptBatchNo;
                 this.InputItemsBarcode = e.InputItemsBarcode;
-                this.SetProcessingState = e.SetProcessingState;
+                // this.SetProcessingState = e.SetProcessingState;
                 this.CreateCallNumber = e.CreateCallNumber;
 
                 if (String.IsNullOrEmpty(e.WarningInfo) == false)
@@ -1853,7 +1855,7 @@ namespace dp2Circulation
                     if (Program.MainForm != null)
                         dlg.LibraryCodeList = Program.MainForm._currentLibraryCodeList;
 
-                    dlg.SetProcessingState = this.SetProcessingState;
+                    dlg.SetProcessingState = AcceptForm.SetProcessingState;
                     /*
                     dlg.GetItemInfo -= new GetItemInfoEventHandler(dlg_GetItemInfo);
                     dlg.GetItemInfo += new GetItemInfoEventHandler(dlg_GetItemInfo);
@@ -2956,7 +2958,7 @@ namespace dp2Circulation
 
             GenerateEntityEventArgs data_container = new GenerateEntityEventArgs();
             data_container.InputItemBarcode = this.InputItemsBarcode;
-            data_container.SetProcessingState = this.SetProcessingState;
+            data_container.SetProcessingState = AcceptForm.SetProcessingState;
             data_container.CreateCallNumber = this.CreateCallNumber;
             data_container.SeriesMode = true;
 
@@ -3029,7 +3031,7 @@ namespace dp2Circulation
 
                         // 2009/10/19
                         // 状态
-                        if (this.SetProcessingState == true)
+                        if (AcceptForm.SetProcessingState == true)
                         {
                             // 增补“加工中”值
                             string strOldState = DomUtil.GetElementText(dom.DocumentElement,

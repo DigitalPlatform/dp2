@@ -89,10 +89,11 @@
             this.tabControl_main.Controls.Add(this.tabPage_finish);
             this.tabControl_main.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl_main.Location = new System.Drawing.Point(0, 0);
+            this.tabControl_main.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabControl_main.Multiline = true;
             this.tabControl_main.Name = "tabControl_main";
             this.tabControl_main.SelectedIndex = 0;
-            this.tabControl_main.Size = new System.Drawing.Size(493, 431);
+            this.tabControl_main.Size = new System.Drawing.Size(603, 503);
             this.tabControl_main.TabIndex = 0;
             this.tabControl_main.SelectedIndexChanged += new System.EventHandler(this.tabControl_main_SelectedIndexChanged);
             // 
@@ -116,19 +117,23 @@
             this.tabPage_prepare.Controls.Add(this.button_viewDatabaseDefs);
             this.tabPage_prepare.Controls.Add(this.label1);
             this.tabPage_prepare.Location = new System.Drawing.Point(4, 4);
+            this.tabPage_prepare.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabPage_prepare.Name = "tabPage_prepare";
-            this.tabPage_prepare.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage_prepare.Size = new System.Drawing.Size(485, 399);
+            this.tabPage_prepare.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.tabPage_prepare.Size = new System.Drawing.Size(595, 468);
             this.tabPage_prepare.TabIndex = 0;
             this.tabPage_prepare.Text = "准备";
             this.tabPage_prepare.UseVisualStyleBackColor = true;
+            this.tabPage_prepare.Enter += new System.EventHandler(this.tabPage_prepare_Enter);
+            this.tabPage_prepare.Leave += new System.EventHandler(this.tabPage_prepare_Leave);
             // 
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(6, 73);
+            this.label5.Location = new System.Drawing.Point(7, 85);
+            this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(134, 18);
+            this.label5.Size = new System.Drawing.Size(160, 21);
             this.label5.TabIndex = 14;
             this.label5.Text = "书商(渠道)(&S):";
             // 
@@ -138,17 +143,19 @@
             this.comboBox_sellerFilter.FormattingEnabled = true;
             this.comboBox_sellerFilter.Items.AddRange(new object[] {
             "<不筛选>"});
-            this.comboBox_sellerFilter.Location = new System.Drawing.Point(157, 70);
+            this.comboBox_sellerFilter.Location = new System.Drawing.Point(192, 82);
+            this.comboBox_sellerFilter.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.comboBox_sellerFilter.Name = "comboBox_sellerFilter";
-            this.comboBox_sellerFilter.Size = new System.Drawing.Size(197, 26);
+            this.comboBox_sellerFilter.Size = new System.Drawing.Size(240, 29);
             this.comboBox_sellerFilter.TabIndex = 15;
             // 
             // button_defaultEntityFields
             // 
             this.button_defaultEntityFields.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button_defaultEntityFields.Location = new System.Drawing.Point(9, 218);
+            this.button_defaultEntityFields.Location = new System.Drawing.Point(11, 254);
+            this.button_defaultEntityFields.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.button_defaultEntityFields.Name = "button_defaultEntityFields";
-            this.button_defaultEntityFields.Size = new System.Drawing.Size(345, 45);
+            this.button_defaultEntityFields.Size = new System.Drawing.Size(422, 52);
             this.button_defaultEntityFields.TabIndex = 13;
             this.button_defaultEntityFields.Text = "册记录默认值...";
             this.button_defaultEntityFields.UseVisualStyleBackColor = true;
@@ -158,9 +165,10 @@
             // 
             this.checkBox_prepare_createCallNumber.AutoSize = true;
             this.checkBox_prepare_createCallNumber.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.checkBox_prepare_createCallNumber.Location = new System.Drawing.Point(8, 153);
+            this.checkBox_prepare_createCallNumber.Location = new System.Drawing.Point(10, 178);
+            this.checkBox_prepare_createCallNumber.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.checkBox_prepare_createCallNumber.Name = "checkBox_prepare_createCallNumber";
-            this.checkBox_prepare_createCallNumber.Size = new System.Drawing.Size(254, 22);
+            this.checkBox_prepare_createCallNumber.Size = new System.Drawing.Size(298, 25);
             this.checkBox_prepare_createCallNumber.TabIndex = 6;
             this.checkBox_prepare_createCallNumber.Text = "为新验收的册创建索取号(&C)";
             this.checkBox_prepare_createCallNumber.UseVisualStyleBackColor = true;
@@ -168,9 +176,10 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(4, 182);
+            this.label4.Location = new System.Drawing.Point(5, 212);
+            this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(134, 18);
+            this.label4.Size = new System.Drawing.Size(159, 21);
             this.label4.TabIndex = 7;
             this.label4.Text = "册价格首选(&P):";
             // 
@@ -183,26 +192,30 @@
             "订购价",
             "验收价",
             "空白"});
-            this.comboBox_prepare_priceDefault.Location = new System.Drawing.Point(157, 179);
+            this.comboBox_prepare_priceDefault.Location = new System.Drawing.Point(192, 209);
+            this.comboBox_prepare_priceDefault.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.comboBox_prepare_priceDefault.Name = "comboBox_prepare_priceDefault";
-            this.comboBox_prepare_priceDefault.Size = new System.Drawing.Size(197, 26);
+            this.comboBox_prepare_priceDefault.Size = new System.Drawing.Size(240, 29);
             this.comboBox_prepare_priceDefault.TabIndex = 8;
             this.comboBox_prepare_priceDefault.Text = "验收价";
             // 
             // groupBox1
             // 
-            this.groupBox1.Location = new System.Drawing.Point(360, 3);
+            this.groupBox1.Location = new System.Drawing.Point(440, 3);
+            this.groupBox1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(2, 204);
+            this.groupBox1.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.groupBox1.Size = new System.Drawing.Size(2, 238);
             this.groupBox1.TabIndex = 10;
             this.groupBox1.TabStop = false;
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(5, 276);
+            this.label2.Location = new System.Drawing.Point(6, 322);
+            this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(188, 18);
+            this.label2.Size = new System.Drawing.Size(222, 21);
             this.label2.TabIndex = 11;
             this.label2.Text = "参与检索的书目库(&N):";
             // 
@@ -213,9 +226,10 @@
             this.checkedListBox_prepare_dbNames.FormattingEnabled = true;
             this.checkedListBox_prepare_dbNames.HorizontalScrollbar = true;
             this.checkedListBox_prepare_dbNames.IntegralHeight = false;
-            this.checkedListBox_prepare_dbNames.Location = new System.Drawing.Point(7, 299);
+            this.checkedListBox_prepare_dbNames.Location = new System.Drawing.Point(9, 349);
+            this.checkedListBox_prepare_dbNames.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.checkedListBox_prepare_dbNames.Name = "checkedListBox_prepare_dbNames";
-            this.checkedListBox_prepare_dbNames.Size = new System.Drawing.Size(347, 149);
+            this.checkedListBox_prepare_dbNames.Size = new System.Drawing.Size(424, 173);
             this.checkedListBox_prepare_dbNames.TabIndex = 12;
             this.checkedListBox_prepare_dbNames.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.checkedListBox_prepare_dbNames_ItemCheck);
             // 
@@ -223,12 +237,14 @@
             // 
             this.checkBox_prepare_setProcessingState.AutoSize = true;
             this.checkBox_prepare_setProcessingState.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.checkBox_prepare_setProcessingState.Location = new System.Drawing.Point(8, 129);
+            this.checkBox_prepare_setProcessingState.Location = new System.Drawing.Point(10, 150);
+            this.checkBox_prepare_setProcessingState.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.checkBox_prepare_setProcessingState.Name = "checkBox_prepare_setProcessingState";
-            this.checkBox_prepare_setProcessingState.Size = new System.Drawing.Size(326, 22);
+            this.checkBox_prepare_setProcessingState.Size = new System.Drawing.Size(382, 25);
             this.checkBox_prepare_setProcessingState.TabIndex = 5;
             this.checkBox_prepare_setProcessingState.Text = "为新验收的册设置“加工中”状态(&U)";
             this.checkBox_prepare_setProcessingState.UseVisualStyleBackColor = true;
+            this.checkBox_prepare_setProcessingState.CheckedChanged += new System.EventHandler(this.checkBox_prepare_setProcessingState_CheckedChanged);
             // 
             // tabComboBox_prepare_batchNo
             // 
@@ -236,10 +252,11 @@
             this.tabComboBox_prepare_batchNo.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.tabComboBox_prepare_batchNo.FormattingEnabled = true;
             this.tabComboBox_prepare_batchNo.LeftFontStyle = System.Drawing.FontStyle.Bold;
-            this.tabComboBox_prepare_batchNo.Location = new System.Drawing.Point(157, 8);
+            this.tabComboBox_prepare_batchNo.Location = new System.Drawing.Point(192, 9);
+            this.tabComboBox_prepare_batchNo.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabComboBox_prepare_batchNo.Name = "tabComboBox_prepare_batchNo";
             this.tabComboBox_prepare_batchNo.RightFontStyle = System.Drawing.FontStyle.Italic;
-            this.tabComboBox_prepare_batchNo.Size = new System.Drawing.Size(197, 29);
+            this.tabComboBox_prepare_batchNo.Size = new System.Drawing.Size(240, 32);
             this.tabComboBox_prepare_batchNo.TabIndex = 1;
             this.tabComboBox_prepare_batchNo.DropDown += new System.EventHandler(this.tabComboBox_prepare_batchNo_DropDown);
             this.tabComboBox_prepare_batchNo.TextChanged += new System.EventHandler(this.tabComboBox_prepare_batchNo_TextChanged);
@@ -249,9 +266,10 @@
             // 
             this.checkBox_prepare_inputItemBarcode.AutoSize = true;
             this.checkBox_prepare_inputItemBarcode.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.checkBox_prepare_inputItemBarcode.Location = new System.Drawing.Point(8, 105);
+            this.checkBox_prepare_inputItemBarcode.Location = new System.Drawing.Point(10, 122);
+            this.checkBox_prepare_inputItemBarcode.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.checkBox_prepare_inputItemBarcode.Name = "checkBox_prepare_inputItemBarcode";
-            this.checkBox_prepare_inputItemBarcode.Size = new System.Drawing.Size(254, 22);
+            this.checkBox_prepare_inputItemBarcode.Size = new System.Drawing.Size(298, 25);
             this.checkBox_prepare_inputItemBarcode.TabIndex = 4;
             this.checkBox_prepare_inputItemBarcode.Text = "验收时立即输入册条码号(&I)";
             this.checkBox_prepare_inputItemBarcode.UseVisualStyleBackColor = true;
@@ -259,9 +277,10 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(6, 43);
+            this.label3.Location = new System.Drawing.Point(7, 50);
+            this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(134, 18);
+            this.label3.Size = new System.Drawing.Size(159, 21);
             this.label3.TabIndex = 2;
             this.label3.Text = "出版物类型(&T):";
             // 
@@ -272,9 +291,10 @@
             this.comboBox_prepare_type.Items.AddRange(new object[] {
             "图书",
             "连续出版物"});
-            this.comboBox_prepare_type.Location = new System.Drawing.Point(157, 40);
+            this.comboBox_prepare_type.Location = new System.Drawing.Point(192, 47);
+            this.comboBox_prepare_type.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.comboBox_prepare_type.Name = "comboBox_prepare_type";
-            this.comboBox_prepare_type.Size = new System.Drawing.Size(197, 26);
+            this.comboBox_prepare_type.Size = new System.Drawing.Size(240, 29);
             this.comboBox_prepare_type.TabIndex = 3;
             this.comboBox_prepare_type.Text = "图书";
             this.comboBox_prepare_type.SelectedIndexChanged += new System.EventHandler(this.comboBox_prepare_type_SelectedIndexChanged);
@@ -284,9 +304,10 @@
             // 
             this.button_viewDatabaseDefs.AutoSize = true;
             this.button_viewDatabaseDefs.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button_viewDatabaseDefs.Location = new System.Drawing.Point(7, 479);
+            this.button_viewDatabaseDefs.Location = new System.Drawing.Point(9, 559);
+            this.button_viewDatabaseDefs.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.button_viewDatabaseDefs.Name = "button_viewDatabaseDefs";
-            this.button_viewDatabaseDefs.Size = new System.Drawing.Size(347, 45);
+            this.button_viewDatabaseDefs.Size = new System.Drawing.Size(424, 52);
             this.button_viewDatabaseDefs.TabIndex = 9;
             this.button_viewDatabaseDefs.Text = "观察数据库定义...";
             this.button_viewDatabaseDefs.UseVisualStyleBackColor = true;
@@ -295,9 +316,10 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(6, 11);
+            this.label1.Location = new System.Drawing.Point(7, 13);
+            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(134, 18);
+            this.label1.Size = new System.Drawing.Size(159, 21);
             this.label1.TabIndex = 0;
             this.label1.Text = "验收批次号(&B):";
             // 
@@ -312,9 +334,10 @@
             this.tabPage_accept.Controls.Add(this.button_accept_searchISBN);
             this.tabPage_accept.Controls.Add(this.textBox_accept_queryWord);
             this.tabPage_accept.Location = new System.Drawing.Point(4, 4);
+            this.tabPage_accept.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabPage_accept.Name = "tabPage_accept";
-            this.tabPage_accept.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage_accept.Size = new System.Drawing.Size(485, 399);
+            this.tabPage_accept.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.tabPage_accept.Size = new System.Drawing.Size(595, 468);
             this.tabPage_accept.TabIndex = 1;
             this.tabPage_accept.Text = "验收";
             this.tabPage_accept.UseVisualStyleBackColor = true;
@@ -325,9 +348,10 @@
             this.label_biblioSource.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
             this.label_biblioSource.Image = ((System.Drawing.Image)(resources.GetObject("label_biblioSource.Image")));
             this.label_biblioSource.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.label_biblioSource.Location = new System.Drawing.Point(3, 81);
+            this.label_biblioSource.Location = new System.Drawing.Point(4, 94);
+            this.label_biblioSource.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label_biblioSource.Name = "label_biblioSource";
-            this.label_biblioSource.Size = new System.Drawing.Size(84, 21);
+            this.label_biblioSource.Size = new System.Drawing.Size(103, 24);
             this.label_biblioSource.TabIndex = 13;
             this.label_biblioSource.Text = "外源(空)";
             this.label_biblioSource.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -348,9 +372,10 @@
             "后方一致",
             "精确一致",
             "空值"});
-            this.comboBox_accept_matchStyle.Location = new System.Drawing.Point(112, 6);
+            this.comboBox_accept_matchStyle.Location = new System.Drawing.Point(137, 7);
+            this.comboBox_accept_matchStyle.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.comboBox_accept_matchStyle.Name = "comboBox_accept_matchStyle";
-            this.comboBox_accept_matchStyle.Size = new System.Drawing.Size(103, 26);
+            this.comboBox_accept_matchStyle.Size = new System.Drawing.Size(125, 29);
             this.comboBox_accept_matchStyle.TabIndex = 12;
             this.comboBox_accept_matchStyle.TextChanged += new System.EventHandler(this.comboBox_accept_matchStyle_TextChanged);
             // 
@@ -361,9 +386,10 @@
             this.comboBox_accept_from.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.comboBox_accept_from.FormattingEnabled = true;
             this.comboBox_accept_from.IntegralHeight = false;
-            this.comboBox_accept_from.Location = new System.Drawing.Point(4, 6);
+            this.comboBox_accept_from.Location = new System.Drawing.Point(5, 7);
+            this.comboBox_accept_from.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.comboBox_accept_from.Name = "comboBox_accept_from";
-            this.comboBox_accept_from.Size = new System.Drawing.Size(103, 26);
+            this.comboBox_accept_from.Size = new System.Drawing.Size(125, 29);
             this.comboBox_accept_from.TabIndex = 11;
             // 
             // label_target
@@ -372,9 +398,10 @@
             this.label_target.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(192)))));
             this.label_target.Image = ((System.Drawing.Image)(resources.GetObject("label_target.Image")));
             this.label_target.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.label_target.Location = new System.Drawing.Point(3, 58);
+            this.label_target.Location = new System.Drawing.Point(4, 68);
+            this.label_target.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label_target.Name = "label_target";
-            this.label_target.Size = new System.Drawing.Size(84, 21);
+            this.label_target.Size = new System.Drawing.Size(103, 24);
             this.label_target.TabIndex = 10;
             this.label_target.Text = "目标(空)";
             this.label_target.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -390,9 +417,10 @@
             this.label_source.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(255)))));
             this.label_source.Image = ((System.Drawing.Image)(resources.GetObject("label_source.Image")));
             this.label_source.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.label_source.Location = new System.Drawing.Point(3, 36);
+            this.label_source.Location = new System.Drawing.Point(4, 42);
+            this.label_source.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label_source.Name = "label_source";
-            this.label_source.Size = new System.Drawing.Size(84, 21);
+            this.label_source.Size = new System.Drawing.Size(103, 24);
             this.label_source.TabIndex = 9;
             this.label_source.Text = "源(空)";
             this.label_source.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -417,9 +445,10 @@
             this.listView_accept_records.FullRowSelect = true;
             this.listView_accept_records.HideSelection = false;
             this.listView_accept_records.LargeImageList = this.imageList_lineType;
-            this.listView_accept_records.Location = new System.Drawing.Point(87, 36);
+            this.listView_accept_records.Location = new System.Drawing.Point(106, 42);
+            this.listView_accept_records.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.listView_accept_records.Name = "listView_accept_records";
-            this.listView_accept_records.Size = new System.Drawing.Size(390, 311);
+            this.listView_accept_records.Size = new System.Drawing.Size(476, 362);
             this.listView_accept_records.SmallImageList = this.imageList_lineType;
             this.listView_accept_records.TabIndex = 8;
             this.listView_accept_records.UseCompatibleStateImageBehavior = false;
@@ -467,9 +496,10 @@
             // 
             this.button_accept_searchISBN.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_accept_searchISBN.AutoSize = true;
-            this.button_accept_searchISBN.Location = new System.Drawing.Point(355, 3);
+            this.button_accept_searchISBN.Location = new System.Drawing.Point(434, 3);
+            this.button_accept_searchISBN.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.button_accept_searchISBN.Name = "button_accept_searchISBN";
-            this.button_accept_searchISBN.Size = new System.Drawing.Size(122, 42);
+            this.button_accept_searchISBN.Size = new System.Drawing.Size(149, 49);
             this.button_accept_searchISBN.TabIndex = 4;
             this.button_accept_searchISBN.Text = "检索(&S)";
             this.button_accept_searchISBN.UseVisualStyleBackColor = true;
@@ -480,9 +510,10 @@
             this.textBox_accept_queryWord.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_accept_queryWord.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.textBox_accept_queryWord.Location = new System.Drawing.Point(219, 6);
+            this.textBox_accept_queryWord.Location = new System.Drawing.Point(268, 7);
+            this.textBox_accept_queryWord.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.textBox_accept_queryWord.Name = "textBox_accept_queryWord";
-            this.textBox_accept_queryWord.Size = new System.Drawing.Size(130, 28);
+            this.textBox_accept_queryWord.Size = new System.Drawing.Size(158, 31);
             this.textBox_accept_queryWord.TabIndex = 3;
             this.textBox_accept_queryWord.Enter += new System.EventHandler(this.textBox_accept_isbn_Enter);
             this.textBox_accept_queryWord.Leave += new System.EventHandler(this.textBox_accept_isbn_Leave);
@@ -491,8 +522,9 @@
             // 
             this.tabPage_finish.Controls.Add(this.button_finish_printAcceptList);
             this.tabPage_finish.Location = new System.Drawing.Point(4, 4);
+            this.tabPage_finish.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabPage_finish.Name = "tabPage_finish";
-            this.tabPage_finish.Size = new System.Drawing.Size(485, 399);
+            this.tabPage_finish.Size = new System.Drawing.Size(595, 468);
             this.tabPage_finish.TabIndex = 2;
             this.tabPage_finish.Text = "结尾";
             this.tabPage_finish.UseVisualStyleBackColor = true;
@@ -502,9 +534,10 @@
             this.button_finish_printAcceptList.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.button_finish_printAcceptList.AutoSize = true;
             this.button_finish_printAcceptList.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button_finish_printAcceptList.Location = new System.Drawing.Point(95, 132);
+            this.button_finish_printAcceptList.Location = new System.Drawing.Point(116, 154);
+            this.button_finish_printAcceptList.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.button_finish_printAcceptList.Name = "button_finish_printAcceptList";
-            this.button_finish_printAcceptList.Size = new System.Drawing.Size(273, 45);
+            this.button_finish_printAcceptList.Size = new System.Drawing.Size(334, 52);
             this.button_finish_printAcceptList.TabIndex = 0;
             this.button_finish_printAcceptList.Text = "打印验收清单(&P)...";
             this.button_finish_printAcceptList.UseVisualStyleBackColor = true;
@@ -517,9 +550,10 @@
             this.button_next.Enabled = false;
             this.button_next.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button_next.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.button_next.Location = new System.Drawing.Point(303, 393);
+            this.button_next.Location = new System.Drawing.Point(370, 455);
+            this.button_next.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.button_next.Name = "button_next";
-            this.button_next.Size = new System.Drawing.Size(188, 37);
+            this.button_next.Size = new System.Drawing.Size(230, 47);
             this.button_next.TabIndex = 1;
             this.button_next.Text = "下一环节(&N)";
             this.button_next.UseVisualStyleBackColor = true;
@@ -531,19 +565,21 @@
             this.panel_main.Controls.Add(this.tabControl_main);
             this.panel_main.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel_main.Location = new System.Drawing.Point(0, 0);
+            this.panel_main.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.panel_main.Name = "panel_main";
-            this.panel_main.Size = new System.Drawing.Size(493, 431);
+            this.panel_main.Size = new System.Drawing.Size(603, 503);
             this.panel_main.TabIndex = 2;
             // 
             // AcceptForm
             // 
             this.AcceptButton = this.button_next;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(493, 431);
+            this.ClientSize = new System.Drawing.Size(603, 503);
             this.Controls.Add(this.panel_main);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.Name = "AcceptForm";
             this.ShowInTaskbar = false;
             this.Text = "验收";
@@ -552,6 +588,8 @@
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.AcceptForm_FormClosed);
             this.Load += new System.EventHandler(this.AcceptForm_Load);
             this.SizeChanged += new System.EventHandler(this.AcceptForm_SizeChanged);
+            this.Enter += new System.EventHandler(this.AcceptForm_Enter);
+            this.Leave += new System.EventHandler(this.AcceptForm_Leave);
             this.tabControl_main.ResumeLayout(false);
             this.tabPage_prepare.ResumeLayout(false);
             this.tabPage_prepare.PerformLayout();

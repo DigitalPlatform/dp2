@@ -644,11 +644,13 @@ namespace dp2Circulation
                 "entity_form",
                 "issueControl_input_item_barcode",
                 true);
+            /*
             // 2011/9/8
             this.issueControl1.SetProcessingState = Program.MainForm.AppInfo.GetBoolean(
                 "entity_form",
                 "issueControl_set_processing_state",
                 true);
+            */
             // 2012/5/7
             this.issueControl1.CreateCallNumber = Program.MainForm.AppInfo.GetBoolean(
                 "entity_form",
@@ -2689,10 +2691,13 @@ true);
                 Program.MainForm.AppInfo.SetBoolean("entity_form",
                     "issueControl_input_item_barcode",
                     this.issueControl1.InputItemsBarcode);
+                /*
                 Program.MainForm.AppInfo.SetBoolean(
         "entity_form",
         "issueControl_set_processing_state",
         this.issueControl1.SetProcessingState);
+                */
+
                 // 2012/5/7
                 Program.MainForm.AppInfo.SetBoolean(
                     "entity_form",
