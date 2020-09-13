@@ -196,10 +196,6 @@ namespace dp2Circulation
                 "input_item_barcode",
                 true);
 
-            this.checkBox_prepare_setProcessingState.Checked = Program.MainForm.AppInfo.GetBoolean(
-                "accept_form",
-                "set_processing_state",
-                true);
 
             this.checkBox_prepare_createCallNumber.Checked = Program.MainForm.AppInfo.GetBoolean(
     "accept_form",
@@ -229,6 +225,9 @@ namespace dp2Circulation
                 "accept_form",
                 "ui_state",
                 "");
+
+            // 是否添加加工中状态，是例外
+            this.checkBox_prepare_setProcessingState.Checked = SetProcessingState;
 
             // 批次号是例外，需要从默认值模板里面获得
             this.tabComboBox_prepare_batchNo.Text = EntityFormOptionDlg.GetFieldValue("quickRegister_default",
@@ -397,6 +396,9 @@ this.checkBox_prepare_createCallNumber.Checked);
 
                 Program.MainForm.AppInfo.AppInfoChanged -= AppInfo_AppInfoChanged;
 
+                // 是否添加加工中状态，是例外，要单独保存
+                SetProcessingState = this.checkBox_prepare_setProcessingState.Checked;
+
                 // 批次号是例外，需要保存到默认值模板
                 EntityFormOptionDlg.SetFieldValue("quickRegister_default",
     "batchNo",
@@ -417,7 +419,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                 controls.Add(this.comboBox_prepare_type);
                 controls.Add(this.comboBox_prepare_priceDefault);
                 controls.Add(this.checkBox_prepare_inputItemBarcode);
-                controls.Add(checkBox_prepare_setProcessingState);
+                // controls.Add(checkBox_prepare_setProcessingState);
                 controls.Add(checkBox_prepare_createCallNumber);
                 controls.Add(listView_accept_records);
                 controls.Add(new ComboBoxText(comboBox_accept_from));
@@ -434,7 +436,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                 controls.Add(this.comboBox_prepare_type);
                 controls.Add(this.comboBox_prepare_priceDefault);
                 controls.Add(this.checkBox_prepare_inputItemBarcode);
-                controls.Add(checkBox_prepare_setProcessingState);
+                // controls.Add(checkBox_prepare_setProcessingState);
                 controls.Add(checkBox_prepare_createCallNumber);
                 controls.Add(listView_accept_records);
                 controls.Add(new ComboBoxText(comboBox_accept_from));
@@ -1886,8 +1888,10 @@ this.checkBox_prepare_createCallNumber.Checked);
             // 2010/12/5
             e.PriceDefault = this.comboBox_prepare_priceDefault.Text;
 
+            /*
             // 为新创建的册记录设置“加工中”状态
             e.SetProcessingState = this.checkBox_prepare_setProcessingState.Checked;
+            */
 
             // 2012/5/7
             e.CreateCallNumber = this.checkBox_prepare_createCallNumber.Checked;
@@ -4926,6 +4930,26 @@ this.checkBox_prepare_createCallNumber.Checked);
             }
         }
 
+        // 2020/9/13
+        // 创建册记录的时候是否要自动给 state 字段添加“加工中”状态值
+        public static bool SetProcessingState
+        {
+            get
+            {
+                return Program.MainForm.AppInfo.GetBoolean(
+                     "accept_form",
+    "set_processing_state",
+    true);
+            }
+            set
+            {
+                Program.MainForm.AppInfo.SetBoolean(
+     "accept_form",
+"set_processing_state",
+value);
+            }
+        }
+
         private void listView_accept_records_DoubleClick(object sender, EventArgs e)
         {
             if (this.SingleClickLoadDetail == true)
@@ -5115,6 +5139,32 @@ Keys keyData)
             {
                 this.checkBox_prepare_createCallNumber.Enabled = true;
             }
+        }
+
+        private void checkBox_prepare_setProcessingState_CheckedChanged(object sender, EventArgs e)
+        {
+            // 是否添加加工中状态，是例外，要单独保存
+            SetProcessingState = this.checkBox_prepare_setProcessingState.Checked;
+        }
+
+        private void AcceptForm_Enter(object sender, EventArgs e)
+        {
+        }
+
+        private void AcceptForm_Leave(object sender, EventArgs e)
+        {
+        }
+
+        private void tabPage_prepare_Enter(object sender, EventArgs e)
+        {
+            if (this.checkBox_prepare_setProcessingState.Checked != AcceptForm.SetProcessingState)
+                this.checkBox_prepare_setProcessingState.Checked = AcceptForm.SetProcessingState;
+        }
+
+        private void tabPage_prepare_Leave(object sender, EventArgs e)
+        {
+            if (AcceptForm.SetProcessingState != this.checkBox_prepare_setProcessingState.Checked)
+                AcceptForm.SetProcessingState = this.checkBox_prepare_setProcessingState.Checked;
         }
     }
 

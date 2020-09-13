@@ -486,6 +486,10 @@ namespace RfidDrivers.First
                 new_reader.Type = "NET";
                 new_reader.SerialNumber = reader.GetAttribute("ip") + ":" + reader.GetAttribute("port");
                 results.Add(new_reader);
+
+                // 如果在 reader 元素里面使用 name 属性，则会优先使用这个名字(而不是软件自动给出名字)
+                if (reader.HasAttribute("name"))
+                    new_reader.PreferName = reader.GetAttribute("name");
             }
 
             return results;
@@ -539,8 +543,22 @@ namespace RfidDrivers.First
                 reader.ReaderHandle = result.ReaderHandle;
 
                 // 构造 Name
-                // 重复的 ProductName 后面要加上序号
+                if (string.IsNullOrEmpty(reader.PreferName) == false)
                 {
+                    // 2020/9/12
+                    // *** readers.xml 中主动给出了名字
+                    reader.Name = reader.PreferName;
+                    if (name_table.ContainsKey(reader.Name) == true)
+                    {
+                        // 发生冲突，给一个随机后缀
+                        reader.Name = reader.PreferName + "_" + Guid.NewGuid().ToString();
+                    }
+                    name_table[reader.Name] = 0;
+                }
+                else
+                {
+                    // *** 软件自动给出名字
+                    // 重复的 ProductName 后面要加上序号
                     int count = 0;
                     if (name_table.ContainsKey(reader.ProductName) == true)
                         count = (int)name_table[reader.ProductName];

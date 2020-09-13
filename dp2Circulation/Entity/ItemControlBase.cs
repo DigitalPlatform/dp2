@@ -1713,7 +1713,6 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
             MessageBox.Show(this/*ForegroundWindow.Instance*/, strError);
         }
 
-
         // 改变归属
         // 即修改实体信息的<parent>元素内容，使指向另外一条书目记录
         internal void menu_changeParent_Click(object sender, EventArgs e)

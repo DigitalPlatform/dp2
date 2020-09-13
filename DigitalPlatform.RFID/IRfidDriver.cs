@@ -379,6 +379,8 @@ uint new_password);
         [NonSerialized]
         public OpenReaderResult Result = null;
 
+        public string PreferName { get; set; }  // 推荐使用的名字 2020/9/12
+
         public override string ToString()
         {
             return $"Name={Name},SerialNumber={SerialNumber},DriverPath={DriverPath},Result={Result?.ToString()}";
