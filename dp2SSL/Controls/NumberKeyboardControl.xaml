@@ -17,6 +17,7 @@
             <RowDefinition />
             <RowDefinition />
             <RowDefinition />
+            <RowDefinition />
         </Grid.RowDefinitions>
         <Button Name="key_0" 
                 Content="0"
@@ -26,28 +27,36 @@
                 Content="1"
                 Grid.Column="0" Grid.Row="2"
                 Click="Key_0_Click"/>
-        <Button Content="2"
+        <Button Name="key_2"
+            Content="2"
                 Grid.Column="1" Grid.Row="2"
                 Click="Key_0_Click"/>
-        <Button Content="3"
+        <Button Name="key_3"
+            Content="3"
                 Grid.Column="2" Grid.Row="2"
                 Click="Key_0_Click"/>
-        <Button Content="4"
+        <Button Name="key_4"
+            Content="4"
                 Grid.Column="0" Grid.Row="1"
                 Click="Key_0_Click"/>
-        <Button Content="5"
+        <Button Name="key_5"
+            Content="5"
                 Grid.Column="1" Grid.Row="1"
                 Click="Key_0_Click"/>
-        <Button Content="6"
+        <Button Name="key_6"
+            Content="6"
                 Grid.Column="2" Grid.Row="1"
                 Click="Key_0_Click"/>
-        <Button Content="7"
+        <Button Name="key_7"
+            Content="7"
                 Grid.Column="0" Grid.Row="0"
                 Click="Key_0_Click"/>
-        <Button Content="8"
+        <Button Name="key_8"
+            Content="8"
                 Grid.Column="1" Grid.Row="0"
                 Click="Key_0_Click"/>
-        <Button Content="9"
+        <Button Name="key_9"
+            Content="9"
                 Grid.Column="2" Grid.Row="0"
                 Click="Key_0_Click"/>
         <Button Name="key_backspace" 
@@ -58,6 +67,17 @@
                 Content="Enter"
                 Grid.Column="2" Grid.Row="3" 
                 Click="Key_0_Click"/>
-
+        <Button Name="key_prev" 
+                Content="&lt;"
+                Grid.Column="0" Grid.Row="4" 
+                Click="Key_0_Click"/>
+        <Button Name="key_next" 
+                Content="&gt;"
+                Grid.Column="1" Grid.Row="4" 
+                Click="Key_0_Click"/>
+        <ToggleButton Name="key_capslock" 
+                Content="caps"
+                Grid.Column="2" Grid.Row="4" 
+                Click="Key_0_Click"/>
     </Grid>
 </UserControl>

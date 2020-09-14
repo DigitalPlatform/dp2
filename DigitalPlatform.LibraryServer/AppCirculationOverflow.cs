@@ -114,6 +114,12 @@ namespace DigitalPlatform.LibraryServer
             // 看看是否已经超期。已经超期的不处理
             string returningDate = borrow.GetAttribute("returningDate");
 
+            // 2020/9/14
+            // 较旧的 dp2library 版本中没有 returningDate 属性，这种情况意味着所借图书的借阅时间很早很早了，可以简单当作已经超期来处理
+            // 注：也可以考虑这里尝试用 borrowDate 加上 borrowPeriod 来计算出应还时间，只是比较麻烦一点
+            if (string.IsNullOrEmpty(returningDate) == true)
+                return true;
+
             debugInfo?.AppendLine($"returningDate='{returningDate}'");
 
             DateTime returningTime = DateTimeUtil.FromRfc1123DateTimeString(returningDate).ToLocalTime();

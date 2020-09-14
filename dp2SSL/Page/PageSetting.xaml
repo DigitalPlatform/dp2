@@ -53,7 +53,7 @@
                     <MenuItem x:Name="posPrint_feed" Header="走纸" HorizontalAlignment="Left" Width="Auto" Click="posPrint_feed_Click"/>
                 </MenuItem>
                 <MenuItem Header="_安装">
-                    <MenuItem x:Name="setupAsGreen" Header="安装为绿色版" HorizontalAlignment="Left" Width="Auto" Click="setupAsGreen_Click"/>
+                    <MenuItem x:Name="disableEdgeUI" Header="禁用边沿 UI" HorizontalAlignment="Left" Width="Auto" Click="disableEdgeUI_Click"/>
                 </MenuItem>
             </Menu>
         </StackPanel>

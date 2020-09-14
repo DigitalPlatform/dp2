@@ -916,12 +916,6 @@ string color = "red")
             _ = App.CurrentApp.SterilampAsync();
         }
 
-        // 安装为绿色版
-        private async void setupAsGreen_Click(object sender, RoutedEventArgs e)
-        {
-            // await App.InstallGreenAsync();
-        }
-
         private void redoReplicatePatron_Click(object sender, RoutedEventArgs e)
         {
             ShelfData.RedoReplicatePatron();
@@ -1086,6 +1080,16 @@ string color = "red")
             var result = RfidManager.PosPrint("feed", "", "");
             if (result.Value == -1)
                 ErrorBox($"走纸时出错: {result.ErrorInfo}");
+        }
+
+        // 禁用边沿 UI
+        // 不管是 ClickOnce 状态还是绿色状态，都可以使用本命令
+        private void disableEdgeUI_Click(object sender, RoutedEventArgs e)
+        {
+            if (App.DisableEdgeUI() == true)
+                return;
+
+            ErrorBox("Windows 注册表参数已经成功修改", "green");
         }
     }
 }
