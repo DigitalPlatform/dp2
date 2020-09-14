@@ -133,8 +133,14 @@ namespace dp2SSL
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:避免使用 Async Void 方法", Justification = "<挂起>")]
         protected async override void OnStartup(StartupEventArgs e)
         {
-            if (DisableEdgeUI() == true)
-                return;
+            bool isAdmin = IsAdministrator();
+            // 2020/9/14
+            // ClickOnce 版本暂时不自动修改边沿 UI 参数
+            if (isAdmin || ApplicationDeployment.IsNetworkDeployed == false)
+            {
+                if (DisableEdgeUI() == true)
+                    return;
+            }
 
             bool aIsNewInstance = false;
             myMutex = new Mutex(true, "{75BAF3F0-FF7F-46BB-9ACD-8FE7429BF291}", out aIsNewInstance);
@@ -2252,15 +2258,22 @@ AllowEdgeSwipe DWORD
                     {
                         int? v = item.GetValue("AllowEdgeSwipe", 1) as int?;
                         if (v == 0)
+                        {
+                            WpfClientInfo.WriteInfoLog("注册表中 AllowEdgeSwipe 已经是 0");
                             return false;
+                        }
                     }
                 }
+
+                WpfClientInfo.WriteInfoLog("检查当前进程是否为 Administrator 身份");
 
                 WindowsIdentity identity = WindowsIdentity.GetCurrent();
                 WindowsPrincipal principal = new WindowsPrincipal(identity);
                 Boolean isRunasAdmin = principal.IsInRole(WindowsBuiltInRole.Administrator);
                 if (isRunasAdmin)
                 {
+                    WpfClientInfo.WriteInfoLog("检查当前进程是 Administrator 身份，那么修改 AllowEdgeSwipe 为 0");
+
                     using (RegistryKey item = Registry.LocalMachine.CreateSubKey("SOFTWARE\\Policies\\Microsoft\\Windows\\EdgeUI"))
                     {
                         item.SetValue("AllowEdgeSwipe", 0, RegistryValueKind.DWord);
@@ -2269,14 +2282,22 @@ AllowEdgeSwipe DWORD
                     string[] args = Environment.GetCommandLineArgs();
                     if (args.IndexOf<string>("DisableEdgeUI") != -1)
                     {
+                        WpfClientInfo.WriteInfoLog("当前进程是专门用来修改 EdgeUI 参数的，使命已经完成，退出进程");
+
                         // MessageBox.Show("registry changed 1 !");
                         App.Current.Shutdown();
                         return true;
                     }
+
+                    WpfClientInfo.WriteInfoLog("当前进程修改完 EdgeUI 参数以后继续运行");
+
                     // MessageBox.Show("registry changed 2 !");
                 }
                 else
                 {
+                    WpfClientInfo.WriteInfoLog("尝试用 Administrator 身份再启动一个 dp2ssl 进程，预期用户会看到 UAC 对话框");
+
+
                     var processInfo = new ProcessStartInfo(Assembly.GetExecutingAssembly().CodeBase);
 
                     // The following properties run the new process as administrator
@@ -2289,9 +2310,9 @@ AllowEdgeSwipe DWORD
                     {
                         Process.Start(processInfo);
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
-                        // MessageBox.Show("dp2ssl 无法以 Administator 身份运行");
+                        WpfClientInfo.WriteErrorLog($"dp2ssl 无法以 Administator 身份运行。异常信息: {ExceptionUtil.GetDebugText(ex)}");
                     }
                 }
 
@@ -2302,6 +2323,13 @@ AllowEdgeSwipe DWORD
                 WpfClientInfo.WriteErrorLog($"DisableEdgeUI() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 return false;
             }
+        }
+
+        public static bool IsAdministrator()
+        {
+            WindowsIdentity identity = WindowsIdentity.GetCurrent();
+            WindowsPrincipal principal = new WindowsPrincipal(identity);
+            return principal.IsInRole(WindowsBuiltInRole.Administrator);
         }
 
         #endregion

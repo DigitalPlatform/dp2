@@ -96,7 +96,7 @@ namespace dp2SSL.Models
 
                         // 检查升级 dp2ssl
                         if (_needReboot == false
-                        // && StringUtil.IsDevelopMode() == false
+                        && StringUtil.IsDevelopMode() == false
                         && ApplicationDeployment.IsNetworkDeployed == false
                         && DateTime.Now - _lastUpdateTime > _updatePeriod)
                         {
