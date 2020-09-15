@@ -94,7 +94,7 @@ namespace dp2SSL.Models
                         else
                             App.SetError("printer", null);
 
-                        // 检查升级 dp2ssl
+                        // 检查升级绿色 dp2ssl
                         if (_needReboot == false
                         && StringUtil.IsDevelopMode() == false
                         && ApplicationDeployment.IsNetworkDeployed == false
@@ -136,7 +136,41 @@ namespace dp2SSL.Models
                                 }
                             }
                             _lastUpdateTime = DateTime.Now;
+                        }
 
+                        // 2020/9/15
+                        // 检查升级 ClickOnce dp2ssl
+                        if (StringUtil.IsDevelopMode() == false
+                        && ApplicationDeployment.IsNetworkDeployed == true
+                        && DateTime.Now - _lastUpdateTime > _updatePeriod)
+                        {
+                            try
+                            {
+                                // result.Value:
+                                //      -1  出错
+                                //      0   没有发现新版本
+                                //      1   发现新版本，重启后可以使用新版本
+                                NormalResult result = WpfClientInfo.InstallUpdateSync();
+                                WpfClientInfo.WriteInfoLog($"ClickOnce 后台升级 dp2ssl 返回: {result.ToString()}");
+                                if (result.Value == -1)
+                                    WpfClientInfo.WriteErrorLog($"升级出错: {result.ErrorInfo}");
+                                else if (result.Value == 1)
+                                {
+                                    WpfClientInfo.WriteInfoLog($"升级成功: {result.ErrorInfo}");
+                                    App.TriggerUpdated(result.ErrorInfo);
+                                    // MessageBox.Show(result.ErrorInfo);
+                                }
+                                else if (string.IsNullOrEmpty(result.ErrorInfo) == false)
+                                {
+                                    WpfClientInfo.WriteInfoLog($"{result.ErrorInfo}");
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                WpfClientInfo.WriteErrorLog($"后台 ClickOnce 自动升级出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                            }
+
+                            _lastUpdateTime = DateTime.Now;
                         }
                     }
                     _monitorTask = null;

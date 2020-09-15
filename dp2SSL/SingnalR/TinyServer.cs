@@ -1078,6 +1078,18 @@ cancellation_token);
                 return;
             }
 
+            // 退出 dp2ssl
+            if (command.StartsWith("exit"))
+            {
+                await SendMessageAsync(new string[] { groupName }, $"即将退出 dp2ssl");
+                App.Invoke(new Action(() =>
+                {
+                    WpfClientInfo.WriteInfoLog($"远程命令退出 dp2ssl");
+                    Application.Current.Shutdown();
+                }));
+                return;
+            }
+
             // 重新启动 dp2ssl
             if (command.StartsWith("restart"))
             {
@@ -1106,6 +1118,13 @@ cancellation_token);
                     return;
                 }
 
+                string greensetup_path = "c:\\dp2ssl\\greensetup.exe";
+                if (File.Exists(greensetup_path) == false)
+                {
+                    await SendMessageAsync(new string[] { groupName }, $"尚未安装绿色启动器 {greensetup_path}，无法对 dp2ssl.exe 进行远程重启");
+                    return;
+                }
+
                 await SendMessageAsync(new string[] { groupName }, "已经重新启动");
                 App.Invoke(new Action(() =>
                 {
@@ -1122,8 +1141,8 @@ cancellation_token);
                     // StartModule(ShortcutPath, "");
 
                     string args = silently ? "silently" : "interact";
-                    WpfClientInfo.WriteInfoLog($"启动 c:\\dp2ssl\\greensetup.exe，参数={args}");
-                    Process.Start("c:\\dp2ssl\\greensetup.exe",
+                    WpfClientInfo.WriteInfoLog($"启动 {greensetup_path}，参数={args}");
+                    Process.Start(greensetup_path,
                         args);  // 
                 }));
                 return;
@@ -2141,7 +2160,7 @@ records,
                             */
 
                             // 创建一个结果集
-                                result_count = await CreateResultsetAsync(scanner, strResultSetName);
+                            result_count = await CreateResultsetAsync(scanner, strResultSetName);
                         }
                         else
                         {
@@ -2416,9 +2435,9 @@ strError,
             };
         }
 
-#endregion
+        #endregion
 
-#region GetRes() API
+        #region GetRes() API
 
         static void OnGetResRecieved(GetResRequest param)
         {
@@ -3051,10 +3070,10 @@ result);
         }
 
 
-#endregion
+        #endregion
 
 
-#region SetInfo() API
+        #region SetInfo() API
 
         static void OnSetInfoRecieved(SetInfoRequest param)
         {
@@ -3284,9 +3303,9 @@ strError);
             }
         }
 
-#endregion
+        #endregion
 
-#region GetUsers()
+        #region GetUsers()
 
         public static Task<GetUserResult> GetUsersAsync(string userName,
             int start,
@@ -3298,6 +3317,6 @@ strError);
                 count);
         }
 
-#endregion
+        #endregion
     }
 }

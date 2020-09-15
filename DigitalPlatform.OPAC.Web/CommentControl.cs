@@ -1846,6 +1846,8 @@ out strError);
             Debug.Assert(String.IsNullOrEmpty(sessioninfo.UserID) == false, "");
 
             EntityInfo info = new EntityInfo();
+
+            // TODO: 是否应该从 strOldXml 中取得？
             info.RefID = Guid.NewGuid().ToString();
 
             string strTargetBiblioRecID = StringUtil.GetRecordId(strBiblioRecPath);
