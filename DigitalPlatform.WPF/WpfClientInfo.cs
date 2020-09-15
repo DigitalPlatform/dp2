@@ -369,6 +369,10 @@ namespace DigitalPlatform.WPF
 
         #endregion
 
+        // result.Value:
+        //      -1  出错
+        //      0   没有发现新版本
+        //      1   发现新版本，重启后可以使用新版本
         public static NormalResult InstallUpdateSync()
         {
             if (ApplicationDeployment.IsNetworkDeployed)

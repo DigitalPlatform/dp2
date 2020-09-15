@@ -343,6 +343,8 @@ namespace dp2Commander
                                     needReboot = true;
                                 }
                             }
+                            else if (check_result.Value == 5)
+                                needReboot = true;
                         }
 
                         // 注意命令行参数第一个字符应该是空格

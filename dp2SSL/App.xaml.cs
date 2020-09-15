@@ -138,7 +138,8 @@ namespace dp2SSL
             // ClickOnce 版本暂时不自动修改边沿 UI 参数
             if (isAdmin || ApplicationDeployment.IsNetworkDeployed == false)
             {
-                if (DisableEdgeUI() == true)
+                var result = DisableEdgeUI();
+                if (result.Value == 1)
                     return;
             }
 
@@ -189,6 +190,7 @@ namespace dp2SSL
 
             // InitialFingerPrint();
 
+#if REMOVED
             // 后台自动检查更新
             var task = Task.Run(() =>
             {
@@ -211,6 +213,7 @@ namespace dp2SSL
                     WpfClientInfo.WriteErrorLog($"后台 ClickOnce 自动升级出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 }
             });
+#endif
 
 #if REMOVED
             // 用于重试初始化指纹环境的 Timer
@@ -269,7 +272,7 @@ namespace dp2SSL
             if (App.Function == "智能书柜")
                 RfidManager.ReaderNameList = "";
 
-            WpfClientInfo.WriteInfoLog("FingerprintManager.Start()");
+            WpfClientInfo.WriteInfoLog("RfidManager.Start()");
             RfidManager.Start(_cancelRefresh.Token);
             if (App.Function == "智能书柜")
             {
@@ -402,7 +405,7 @@ namespace dp2SSL
             if (App.Function == "智能书柜")
                 RfidManager.ReaderNameList = "";
 
-            WpfClientInfo.WriteInfoLog("FingerprintManager.Start()");
+            WpfClientInfo.WriteInfoLog("RfidManager.Start()");
             RfidManager.Start(_cancelRfid.Token);
             if (App.Function == "智能书柜")
             {
@@ -2245,10 +2248,11 @@ AllowEdgeSwipe DWORD
         * */
         // 2020/7/23
         // 禁用 Windows 边沿扫动功能
-        // return:
-        //      false   继续
-        //      true    需要立即退出 Application
-        public static bool DisableEdgeUI()
+        // return.Value:
+        //      -1  出错(当前 Application 继续运行)
+        //      0   当前 Application 继续运行
+        //      1    需要立即退出 Application
+        public static NormalResult DisableEdgeUI()
         {
             try
             {
@@ -2260,7 +2264,7 @@ AllowEdgeSwipe DWORD
                         if (v == 0)
                         {
                             WpfClientInfo.WriteInfoLog("注册表中 AllowEdgeSwipe 已经是 0");
-                            return false;
+                            return new NormalResult { Value = 0 };
                         }
                     }
                 }
@@ -2286,7 +2290,7 @@ AllowEdgeSwipe DWORD
 
                         // MessageBox.Show("registry changed 1 !");
                         App.Current.Shutdown();
-                        return true;
+                        return new NormalResult { Value = 1 };
                     }
 
                     WpfClientInfo.WriteInfoLog("当前进程修改完 EdgeUI 参数以后继续运行");
@@ -2313,15 +2317,21 @@ AllowEdgeSwipe DWORD
                     catch (Exception ex)
                     {
                         WpfClientInfo.WriteErrorLog($"dp2ssl 无法以 Administator 身份运行。异常信息: {ExceptionUtil.GetDebugText(ex)}");
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"dp2ssl 无法以 Administator 身份运行。{ex.Message}",
+                            ErrorCode = "startAdministratorError"
+                        };
                     }
                 }
 
-                return false;
+                return new NormalResult { Value = 0 };
             }
             catch (Exception ex)
             {
                 WpfClientInfo.WriteErrorLog($"DisableEdgeUI() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
-                return false;
+                return new NormalResult { Value = 0 };
             }
         }
 

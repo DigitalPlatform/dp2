@@ -197,7 +197,8 @@ namespace dp2SSL
                 App.SetSize(progress, "tall");
                 //progress.Width = Math.Min(700, this.ActualWidth);
                 //progress.Height = Math.Min(900, this.ActualHeight);
-                progress.Closed += (o1, e1) => {
+                progress.Closed += (o1, e1) =>
+                {
                     //RemoveLayer();
                 };
                 if (StringUtil.IsInList("button_ok", style))
@@ -385,7 +386,7 @@ string color = "red")
             }
         }
 
-#endregion
+        #endregion
 
 
         private void Config_Click(object sender, RoutedEventArgs e)
@@ -1052,7 +1053,7 @@ string color = "red")
             {
                 Process.Start("osk");
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 WpfClientInfo.WriteErrorLog($"打开触摸键盘时出现异常: {ExceptionUtil.GetDebugText(ex)}");
             }
@@ -1086,10 +1087,13 @@ string color = "red")
         // 不管是 ClickOnce 状态还是绿色状态，都可以使用本命令
         private void disableEdgeUI_Click(object sender, RoutedEventArgs e)
         {
-            if (App.DisableEdgeUI() == true)
-                return;
-
-            ErrorBox("Windows 注册表参数已经成功修改", "green");
+            var result = App.DisableEdgeUI();
+            if (result.Value == 1)
+                return; // Application 马上会重新启动
+            if (result.Value == -1)
+                ErrorBox(result.ErrorInfo, "red");
+            else
+                ErrorBox("Windows 注册表参数已经成功修改", "green");
         }
     }
 }

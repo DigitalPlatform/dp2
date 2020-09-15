@@ -19,8 +19,8 @@ namespace GreenInstall
     /// </summary>
     public static class GreenInstaller
     {
-        // public static string dp2ssl_weburl = "http://dp2003.com/dp2ssl/v1_dev";
-        public static string dp2ssl_weburl = "http://dp2003.com/dp2ssl/v1";
+        public static string dp2ssl_weburl = "http://dp2003.com/dp2ssl/v1_dev";
+        // public static string dp2ssl_weburl = "http://dp2003.com/dp2ssl/v1";
 
         /*
         // 软件安装包下载路径。例如 http://dp2003.com/dp2ssl/v1

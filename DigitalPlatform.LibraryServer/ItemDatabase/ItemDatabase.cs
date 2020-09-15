@@ -552,7 +552,7 @@ namespace DigitalPlatform.LibraryServer
                 goto ERROR1;
 
             return (int)lHitCount;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -639,7 +639,7 @@ namespace DigitalPlatform.LibraryServer
             }
 
             return (int)lHitCount;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -774,7 +774,7 @@ namespace DigitalPlatform.LibraryServer
             string strMetaData = "";
             string strExistingXml = "";
 
-            REDOLOAD:
+        REDOLOAD:
 
             // 先读出数据库中此位置的已有记录
             lRet = channel.GetRes(info.NewRecPath,
@@ -944,7 +944,7 @@ namespace DigitalPlatform.LibraryServer
             }
 
             return 0;
-            ERROR1:
+        ERROR1:
             error = new EntityInfo(info);
             error.ErrorInfo = strError;
             error.ErrorCode = ErrorCodeValue.CommonError;
@@ -1282,7 +1282,7 @@ out strError);
             }
 
             return 0;
-            ERROR1:
+        ERROR1:
             error = new EntityInfo(info);
             error.ErrorInfo = strError;
             error.ErrorCode = ErrorCodeValue.CommonError;
@@ -1348,8 +1348,8 @@ out strError);
             string strMetaData = "";
 
 
-            // 先读出数据库中即将覆盖位置的已有记录
-            REDOLOAD:
+        // 先读出数据库中即将覆盖位置的已有记录
+        REDOLOAD:
             lRet = channel.GetRes(info.NewRecPath,
                 out strExistXml,
                 out strMetaData,
@@ -1583,7 +1583,7 @@ out strError);
             }
 
             return 0;
-            ERROR1:
+        ERROR1:
             error = new EntityInfo(info);
             error.ErrorInfo = strError;
             error.ErrorCode = ErrorCodeValue.CommonError;
@@ -2212,7 +2212,7 @@ out strError);
                             catch (Exception ex)
                             {
                                 EntityInfo error = new EntityInfo(info);
-                                error.ErrorInfo = "将拟创建的XML记录装入DOM时出错：" + ex.Message;
+                                error.ErrorInfo = "将拟创建的 XML 记录装入 DOM 时出错：" + ex.Message;
                                 error.ErrorCode = ErrorCodeValue.CommonError;
                                 ErrorInfos.Add(error);
                                 continue;
@@ -2222,7 +2222,13 @@ out strError);
                             {
                                 string strOldRefID = DomUtil.GetElementText(domNew.DocumentElement, "refID");
                                 if (string.IsNullOrEmpty(strOldRefID))
-                                    DomUtil.SetElementText(domNew.DocumentElement, "refID", Guid.NewGuid().ToString());
+                                {
+                                    // 2020/9/14
+                                    if (string.IsNullOrEmpty(info.RefID) == false)
+                                        DomUtil.SetElementText(domNew.DocumentElement, "refID", info.RefID);
+                                    else
+                                        DomUtil.SetElementText(domNew.DocumentElement, "refID", Guid.NewGuid().ToString());
+                                }
                             }
 
                             // 2011/4/11
@@ -2246,6 +2252,9 @@ out strError);
                                 ErrorInfos.Add(error);
                                 continue;
                             }
+
+                            // 2020/9/14
+                            strNewXml = domNew.OuterXml;
                         }
 
                         // 2010/4/8
@@ -2421,7 +2430,7 @@ out strError);
 
             result.Value = ErrorInfos.Count;  // 返回信息的数量
             return result;
-            ERROR1:
+        ERROR1:
             // 这里的报错，是比较严重的错误。如果是数组中部分的请求发生的错误，则不在这里报错，而是通过返回错误信息数组的方式来表现
             result.Value = -1;
             result.ErrorInfo = strError;
@@ -2795,7 +2804,7 @@ out strError);
                     iteminfo.NewTimestamp = null;
                     iteminfo.Action = "";
 
-                    CONTINUE:
+                CONTINUE:
                     iteminfos.Add(iteminfo);
                 }
 
@@ -2824,7 +2833,7 @@ out strError);
 
             result.Value = nResultCount;    // items.Length;
             return result;
-            ERROR1:
+        ERROR1:
             result.Value = -1;
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
@@ -2878,7 +2887,7 @@ out strError);
 
             result.Value = paths.Length;
             return result;
-            ERROR1:
+        ERROR1:
             result.Value = -1;
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
@@ -3132,7 +3141,7 @@ out strError);
             }
 
             return 1;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -3279,7 +3288,7 @@ out strError);
                 root.ParentNode.RemoveChild(root);
 
             return nOperCount;
-            ERROR1:
+        ERROR1:
             // Undo已经进行过的操作
             if (strAction == "copy")
             {
@@ -3290,7 +3299,7 @@ out strError);
                     string strTempError = "";
                     byte[] timestamp = null;
                     byte[] output_timestamp = null;
-                    REDO_DELETE:
+                REDO_DELETE:
                     long lRet = channel.DoDeleteRes(strRecPath,
                         timestamp,
                         out output_timestamp,
@@ -3382,7 +3391,7 @@ out strError);
                 byte[] output_timestamp = null;
                 int nRedoCount = 0;
 
-                REDO_DELETE:
+            REDO_DELETE:
 
                 // this.EntityLocks.LockForWrite(info.ItemBarcode);
                 try
@@ -3496,7 +3505,7 @@ out strError);
 
 
             return nDeletedCount;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -3551,7 +3560,7 @@ out strError);
                 goto ERROR1;
 
             return 0;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 

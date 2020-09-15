@@ -1564,14 +1564,13 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
                         return -1;
                     }
 
-                    EntityInfo[] entities = null;
 
                     // 构造需要提交的实体信息数组
                     // parameters:
                     //      strStyle    风格。如果为 force，表示希望强制修改册记录
                     nRet = BuildSaveEntities(
                         strStyle,
-                        out entities,
+                        out EntityInfo[] entities,
                         out strError);
                     if (nRet == -1)
                         return -1;

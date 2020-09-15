@@ -1480,12 +1480,13 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
 
             GetTypeMaxResult max_result = null;
             int thisTypeCount = 0;
-
+            bool bLibraryCodeMismatch = false;
             if (info_result.LibraryCode != patronLibraryCode)
             {
                 debugInfo?.AppendLine($"*** 当前册 (PII 为 '{entity.PII}') 的馆代码为 '{info_result.LibraryCode}'，和当前读者的馆代码 '{patronLibraryCode}' 不吻合，");
                 debugInfo?.AppendLine($"所以图书类型 '{info_result.BookType}' 的最大借阅许可数，被当作 0 处理");
                 max_result = new GetTypeMaxResult { Max = 0 };
+                bLibraryCodeMismatch = true;
             }
             else
             {
@@ -1521,7 +1522,10 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             {
                 debugInfo?.AppendLine($"thisTypeCount={thisTypeCount} 加 1 大于 {max_result.Max}，具体图书类型超额了");
 
-                borrow_info.Overflows = new string[] { $"读者 '{ patron_pii}' 所借 '{ info_result.BookType }' 类图书数量将超过 馆代码 '{ info_result.LibraryCode}' 中 该读者类型 '{ patron_type }' 对该图书类型 '{ info_result.BookType }' 的最多 可借册数 值 '{max_result.Max}'" };
+                if (bLibraryCodeMismatch)   // 2020/9/14
+                    borrow_info.Overflows = new string[] { $"读者 '{ patron_pii}' 的馆代码 '{patronLibraryCode}' 和册的馆代码 '{ info_result.LibraryCode}' 不匹配" };
+                else
+                    borrow_info.Overflows = new string[] { $"读者 '{ patron_pii}' 所借 '{ info_result.BookType }' 类图书数量将超过 馆代码 '{ info_result.LibraryCode}' 中 该读者类型 '{ patron_type }' 对该图书类型 '{ info_result.BookType }' 的最多 可借册数 值 '{max_result.Max}'" };
                 // 一天以后还书
                 SetReturning(1, "day");
                 overflow = true;
