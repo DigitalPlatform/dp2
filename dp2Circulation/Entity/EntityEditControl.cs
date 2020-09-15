@@ -1114,6 +1114,9 @@ namespace dp2Circulation
 
             this.RecPath = strRecPath;
 
+            // 2020/9/15
+            base.DomToMember(strRecPath);
+
             AdjustScrollSize();
         }
 
