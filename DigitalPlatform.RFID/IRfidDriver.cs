@@ -383,7 +383,7 @@ uint new_password);
 
         public override string ToString()
         {
-            return $"Name={Name},SerialNumber={SerialNumber},DriverPath={DriverPath},Result={Result?.ToString()}";
+            return $"Name={Name},SerialNumber={SerialNumber},DriverPath={DriverPath},Result={Result?.ToString()},DriverName={DriverName}, ProductName={ProductName}, Protocols={Protocols}, AntennaCount={AntannaCount}";
         }
 
         /*

@@ -55,6 +55,9 @@ namespace dp2Circulation
 
             this.chipEditor_existing.Title = "标签中原有内容";
             this.chipEditor_editing.Title = "即将写入的内容";
+
+            // 2020/9/15 移动到这里
+            LoadExternalFields();
         }
 
         /// <summary>
@@ -151,7 +154,7 @@ namespace dp2Circulation
             this.entityEditControl_editing.LocationStringChanged -= new TextChangeEventHandler(entityEditControl_editing_LocationStringChanged);
             this.entityEditControl_editing.LocationStringChanged += new TextChangeEventHandler(entityEditControl_editing_LocationStringChanged);
 
-            LoadExternalFields();
+            //
         }
 
         void LoadExternalFields()

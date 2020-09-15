@@ -245,14 +245,22 @@ namespace RfidDrivers.First
             List<Reader> readers = OpenUsbReaders(name_table, out NormalResult error);
             if (error != null)
                 return error;
-            readers.AddRange(OpenComReaders(name_table, hint_table, out output_hint_table));
+            readers.AddRange(OpenComReaders(name_table, hint_table, out output_hint_table, out error));
+
+            // 2020/9/15
+            if (error != null)
+                return error;
+
             _readers = readers;
 
             // 2019/8/24 添加
             // 使用了暗示信息，但始终没有找到任何一个读卡器，这时候要尝试一次不使用暗示信息
             if (readers.Count == 0 && hint_table != null)
             {
-                _readers = OpenComReaders(name_table, null, out output_hint_table);
+                _readers = OpenComReaders(name_table, null, out output_hint_table, out error);
+                // 2020/9/15
+                if (error != null)
+                    return error;
             }
 
             // 2019/10/23
@@ -295,8 +303,11 @@ namespace RfidDrivers.First
         //                  注：暗示信息表可以加快 COM 口读卡器打开的速度
         static List<Reader> OpenComReaders(Hashtable name_table,
             List<HintInfo> hint_table,
-            out List<HintInfo> output_hint_table)
+            out List<HintInfo> output_hint_table,
+            out NormalResult error)
         {
+            error = null;
+
             output_hint_table = new List<HintInfo>();
             // 枚举所有的 COM 口 reader
             List<Reader> readers = EnumComReader("M201");
@@ -318,14 +329,30 @@ namespace RfidDrivers.First
             // 打开所有的 reader
             foreach (Reader reader in readers)
             {
+                WriteInfoLog($"优化前的 rates {StringUtil.MakePathList(rates)}");
+
                 List<string> rate_list = adjust_seq(rates,
     hint_table,
     reader.SerialNumber);
+                /*
+                // testing
+                List<string> rate_list = new List<string>(rates);
+                */
+                WriteInfoLog($"针对 {reader.SerialNumber} 遍历尝试波特率(优化后的) '{StringUtil.MakePathList(rate_list)}'");
+
                 foreach (string baudRate in rate_list)
                 {
                     var fill_result = FillReaderInfo(reader, baudRate);
                     if (fill_result.Value == -1)
+                    {
+                        if (fill_result.ErrorCode == "driverNameNotFound")
+                            error = new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = $"探测读卡器型号过程出错: {fill_result.ErrorInfo}"
+                            };
                         continue;
+                    }
 
                     StringBuilder debugInfo = new StringBuilder();
                     OpenReaderResult result = OpenReader(reader.DriverName,
@@ -333,9 +360,12 @@ namespace RfidDrivers.First
                         reader.SerialNumber,
                         baudRate,
                         debugInfo);
-                    WriteInfoLog($"打开 COM 口读卡器 {reader.SerialNumber} 返回={result.ToString()}。调试信息={debugInfo.ToString()}");
                     if (result.Value == -1)
+                    {
+                        WriteInfoLog($"以波特率 {baudRate} 成功打开 COM 口读卡器 {reader.SerialNumber} 返回失败={result.ToString()}。调试信息={debugInfo.ToString()}");
                         continue;
+                    }
+                    WriteInfoLog($"*** 以波特率 {baudRate} 成功打开 COM 口读卡器 {reader.SerialNumber} 返回成功={result.ToString()}。调试信息={debugInfo.ToString()}");
 
                     output_hint_table.Add(new HintInfo
                     {
@@ -1927,6 +1957,122 @@ namespace RfidDrivers.First
     </function>
   </device>
 
+  <!--RD2100 ??? -->
+  <device product='RD2100'>
+    <basic>
+      <id>680701</id>
+      <driver>680600</driver>
+      <type>reader</type>
+      <picture>RD2100.jpg</picture>
+      <noise>true</noise>
+      <range>middle</range>
+      <min_antenna_id>1</min_antenna_id>
+      <antena_count>0</antena_count>
+      <buffer_mode>false</buffer_mode>
+      <save_block>true</save_block>
+      <cfg_antenna auto_check='true' antenna_cnt='4'/>
+      <communication usb ='true' com='true' tcp_ip='true'/>
+    </basic>
+    <protocol>
+      <HF ISO15693='true'/>
+    </protocol>
+    <upgrade Enable='true' MCU='STM32'  EnableTransparent='false'></upgrade>
+    <function>
+      <configuration>
+        <save_block>true</save_block>
+      </configuration>
+      <command>
+        <information>true</information>
+        <set_output enable='true'>
+          <port id='1' name='RD2100_o1'/>
+        </set_output>
+        <input_status enable='true'>
+          <port id='1' name='RD2100_i1'/>
+        </input_status>
+        <RF_Operation>true</RF_Operation>
+        <check_mux>false</check_mux>
+        <reset_sys>true</reset_sys>
+      </command>
+      <multiple_tags/>
+      <single_tag>
+        <Transceive>
+          <ISO15693_Transceive Multiple_Antenna='true'/>
+        </Transceive>
+      </single_tag>
+      <device_diagnosis>
+        <temperature_check RF_Power='true' PA_Current='true'>true</temperature_check>
+        <error_check>
+          <DiagnosisFlg>
+            <Content Bit='0' Des='RD2100_b0'/>
+            <Content Bit='1' Des='RD2100_b1'/>
+            <Content Bit='2' Des='RD2100_b2'/>
+            <Content Bit='3' Des='RD2100_b3'/>
+            <Content Bit='4' Des='RD2100_b4'/>
+          </DiagnosisFlg>
+        </error_check>
+        <noise_check Get_Nosiebase='true'>true</noise_check>
+      </device_diagnosis>
+    </function>
+  </device>
+
+
+  <!--RD2100-->
+  <device product='RD2100'>
+    <basic>
+      <id>680700</id>
+      <driver>680600</driver>
+      <type>reader</type>
+      <picture>RD2100.jpg</picture>
+      <noise>true</noise>
+      <range>middle</range>
+      <min_antenna_id>1</min_antenna_id>
+      <antena_count>0</antena_count>
+      <buffer_mode>false</buffer_mode>
+      <save_block>true</save_block>
+      <cfg_antenna auto_check='true' antenna_cnt='4'/>
+      <communication usb ='true' com='true' tcp_ip='true'/>
+    </basic>
+    <protocol>
+      <HF ISO15693='true'/>
+    </protocol>
+    <upgrade Enable='true' MCU='STM32'  EnableTransparent='false'></upgrade>
+    <function>
+      <configuration>
+        <save_block>true</save_block>
+      </configuration>
+      <command>
+        <information>true</information>
+        <set_output enable='true'>
+          <port id='1' name='RD2100_o1'/>
+        </set_output>
+        <input_status enable='true'>
+          <port id='1' name='RD2100_i1'/>
+        </input_status>
+        <RF_Operation>true</RF_Operation>
+        <check_mux>false</check_mux>
+        <reset_sys>true</reset_sys>
+      </command>
+      <multiple_tags/>
+      <single_tag>
+        <Transceive>
+          <ISO15693_Transceive Multiple_Antenna='true'/>
+        </Transceive>
+      </single_tag>
+      <device_diagnosis>
+        <temperature_check RF_Power='true' PA_Current='true'>true</temperature_check>
+        <error_check>
+          <DiagnosisFlg>
+            <Content Bit='0' Des='RD2100_b0'/>
+            <Content Bit='1' Des='RD2100_b1'/>
+            <Content Bit='2' Des='RD2100_b2'/>
+            <Content Bit='3' Des='RD2100_b3'/>
+            <Content Bit='4' Des='RD2100_b4'/>
+          </DiagnosisFlg>
+        </error_check>
+        <noise_check Get_Nosiebase='true'>true</noise_check>
+      </device_diagnosis>
+    </function>
+  </device>
 
   <!--M22-->
   <device product='M22'>
@@ -2055,7 +2201,7 @@ namespace RfidDrivers.First
                 reader.SerialNumber,
                 baudRate,
                 debugInfo);
-            WriteDebugLog($"FillReaderInfo() OpenReader() return [{result.ToString()}]");
+            WriteDebugLog($"FillReaderInfo() 中 OpenReader() return [{result.ToString()}] debugInfo={debugInfo?.ToString()}");
 
             try
             {
@@ -2068,15 +2214,20 @@ namespace RfidDrivers.First
                 UInt32 nSize;
                 nSize = (UInt32)devInfor.Capacity;
                 iret = RFIDLIB.rfidlib_reader.RDR_GetReaderInfor(result.ReaderHandle, 0, devInfor, ref nSize);
+                WriteDebugLog($"RDR_GetReaderInfor() return [{iret}]");
                 if (iret != 0)
                 {
-                    WriteDebugLog($"RDR_GetReaderInfor() return [{iret}], debugInfo={debugInfo.ToString()}");
+                    WriteDebugLog("FillReaderInfo() 返回调主");
                     return new NormalResult { Value = -1, ErrorInfo = $"GetReaderInfo() error, iret=[{iret}], debugInfo={debugInfo.ToString()}" };
                 }
                 string dev_info = devInfor.ToString();
                 string[] parts = dev_info.Split(new char[] { ';' });
                 if (parts.Length < 3)
+                {
+                    WriteDebugLog("FillReaderInfo() 返回调主。(1)");
                     return new NormalResult { Value = -1, ErrorInfo = $"所得到的结果字符串 '{dev_info}' 格式不正确。应该为分号间隔的三段形态" };
+                }
+
                 string product_id = parts[1];
 
                 bool bRet = GetDriverName(product_id,
@@ -2085,12 +2236,21 @@ namespace RfidDrivers.First
                     out string protocols,
                     out int antenna_count);
                 if (bRet == false)
-                    return new NormalResult { Value = -1, ErrorInfo = $"product_id {product_id} 没有找到 driver name" };
+                {
+                    WriteDebugLog($"FillReaderInfo() 返回调主。GetDriverName({product_id}) return false");
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"product_id {product_id} 在读卡器元数据中没有找到对应的 driver name",
+                        ErrorCode = "driverNameNotFound"
+                    };
+                }
 
                 reader.DriverName = driver_name;
                 reader.ProductName = product_name;
                 reader.Protocols = protocols;
                 reader.AntannaCount = antenna_count;
+                WriteDebugLog($"FillReaderInfo() 成功得到 Reader 信息。{reader.ToString()}");
                 return new NormalResult();
             }
             catch (Exception ex)
@@ -4777,4 +4937,16 @@ out string number);
     }
     */
 
+    public class ReaderException : Exception
+    {
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        /// <param name="error"></param>
+        /// <param name="strText"></param>
+        public ReaderException(string strText)
+            : base(strText)
+        {
+        }
+    }
 }
