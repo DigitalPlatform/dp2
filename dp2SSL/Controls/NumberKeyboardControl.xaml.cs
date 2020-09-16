@@ -84,7 +84,7 @@ namespace dp2SSL
     "7894561230",
     "abcdefghij",
     "klmnopqrst",
-    "uvwxyz    "
+    "uvwxyz,./:"
     };
         void RefreshKeys()
         {
