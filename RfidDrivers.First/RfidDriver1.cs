@@ -1967,7 +1967,7 @@ namespace RfidDrivers.First
       <noise>true</noise>
       <range>middle</range>
       <min_antenna_id>1</min_antenna_id>
-      <antena_count>0</antena_count>
+      <antena_count>4</antena_count>
       <buffer_mode>false</buffer_mode>
       <save_block>true</save_block>
       <cfg_antenna auto_check='true' antenna_cnt='4'/>
@@ -2026,7 +2026,7 @@ namespace RfidDrivers.First
       <noise>true</noise>
       <range>middle</range>
       <min_antenna_id>1</min_antenna_id>
-      <antena_count>0</antena_count>
+      <antena_count>4</antena_count>
       <buffer_mode>false</buffer_mode>
       <save_block>true</save_block>
       <cfg_antenna auto_check='true' antenna_cnt='4'/>
@@ -2730,12 +2730,25 @@ out Reader reader);
             {
                 // 检查读出字节数的合理性
                 if ((bytesRead % (block_size + 1)) != 0)
-                    return new ReadBlocksResult
+                {
+#if NO
+                    // 2020/9/16 
+                    // 调整过大的 bytesRead 值
+                    uint adjusted_size = blockToRead * (block_size + 1);
+                    if (bytesRead > adjusted_size)
                     {
-                        Value = -1,
-                        ErrorInfo = $"实际读出的字节数 {bytesRead} 不是单元尺寸 {block_size + 1} 的整倍数(注意每个块后面跟随了一个 byte 的锁定信息。块尺寸为 {block_size})",
-                        ErrorCode = "bytesCountError"
-                    };
+                        WriteInfoLog($"读出的字节数 {bytesRead} 比预料的 {adjusted_size} ({blockToRead}个 block)要大。但做了调整，继续运行");
+                        bytesRead = adjusted_size;
+                    }
+                    else
+#endif
+                        return new ReadBlocksResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"实际读出的字节数 {bytesRead} 不是单元尺寸 {block_size + 1} 的整倍数(注意每个块后面跟随了一个 byte 的锁定信息。块尺寸为 {block_size})",
+                            ErrorCode = "bytesCountError"
+                        };
+                }
                 // 实际读出的块个数
                 uint count = bytesRead / (block_size + 1);
                 // 核验 blocksRead
@@ -4312,7 +4325,7 @@ out Reader reader);
         }
 
 
-        #region ShelfLock
+#region ShelfLock
 
         void CloseAllLocks()
         {
@@ -4485,7 +4498,7 @@ out Reader reader);
             };
         }
 
-        #endregion
+#endregion
 
         List<ShelfLock> GetLocksByName(string lock_name)
         {

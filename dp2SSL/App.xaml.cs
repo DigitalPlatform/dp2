@@ -40,6 +40,7 @@ using DigitalPlatform.WPF;
 using DigitalPlatform.MessageClient;
 using DigitalPlatform.Install;
 using dp2SSL.Models;
+using System.Security.AccessControl;
 
 
 //using Microsoft.VisualStudio.Shell;
@@ -820,11 +821,38 @@ namespace dp2SSL
             // OutputText(DateTime.Now.ToShortTimeString() + " " + strText, nWarningLevel);
         }
 
+        // 如果当前是 Administrator 身份，把指定文件修改为 everyone 可以访问修改
+        // https://stackoverflow.com/questions/9108399/how-to-grant-full-permission-to-a-file-created-by-my-application-for-all-users
+        public static void GrantAccess(string fullPath)
+        {
+            if (IsAdministrator())
+            {
+                try
+                {
+                    DirectoryInfo dInfo = new DirectoryInfo(fullPath);
+                    DirectorySecurity dSecurity = dInfo.GetAccessControl();
+                    dSecurity.AddAccessRule(new FileSystemAccessRule(
+                        new SecurityIdentifier(WellKnownSidType.WorldSid, null),
+                        FileSystemRights.FullControl,
+                        InheritanceFlags.ObjectInherit | InheritanceFlags.ContainerInherit,
+                        PropagationFlags.NoPropagateInherit,
+                        AccessControlType.Allow));
+                    dInfo.SetAccessControl(dSecurity);
+
+                    WpfClientInfo.WriteInfoLog($"文件 {fullPath} 被修改权限，以便任何用户都可以访问和修改它");
+                }
+                catch(Exception ex)
+                {
+                    WpfClientInfo.WriteErrorLog($"GrantAccess({fullPath}) 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                }
+            }
+        }
+
         // 注：Windows 关机或者重启的时候，会触发 OnSessionEnding 事件，但不会触发 OnExit 事件
         protected override void OnSessionEnding(SessionEndingCancelEventArgs e)
         {
             WpfClientInfo.WriteDebugLog("OnSessionEnding() called");
-            WpfClientInfo.Finish();
+            WpfClientInfo.Finish(GrantAccess);
             WpfClientInfo.WriteDebugLog("End WpfClientInfo.Finish()");
 
             // ShelfData.SaveRetryActions();
@@ -871,7 +899,7 @@ namespace dp2SSL
             }
 
             WpfClientInfo.WriteDebugLog("OnExit() called");
-            WpfClientInfo.Finish();
+            WpfClientInfo.Finish(GrantAccess);
             WpfClientInfo.WriteDebugLog("End WpfClientInfo.Finish()");
 
             // ShelfData.SaveRetryActions();
@@ -1398,14 +1426,35 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             e.Cancel = true;
         }
 
-        string _currentUserName = "";
+        static string _baseRights = "getsystemparameter,getbiblioinfo,getbibliosummary,getiteminfo,getoperlog,getreaderinfo,getres,searchbiblio,searchitem,searchreader,borrow,renew,return,setreaderinfo,writeobject,setiteminfo";
 
-        public string ServerUID = "";
+        static void VerifyRights(string rights)
+        {
+            List<string> missing_rights = new List<string>();
+            var base_rights = StringUtil.SplitList(_baseRights);
+            foreach(var right in base_rights)
+            {
+                if (StringUtil.IsInList(right, rights) == false)
+                    missing_rights.Add(right);
+            }
+
+            if (missing_rights.Count > 0)
+                throw new Exception($"账户 {_currentUserName} 缺乏必备的权限 {StringUtil.MakePathList(missing_rights)}");
+        }
+
+        static string _currentUserName = "";
+
+        // public static string ServerUID = "";
 
         internal void Channel_AfterLogin(object sender, AfterLoginEventArgs e)
         {
             LibraryChannel channel = sender as LibraryChannel;
             _currentUserName = channel.UserName;
+
+            // 2020/9/18
+            // 检查 rights
+            VerifyRights(channel.Rights);
+
             //_currentUserRights = channel.Rights;
             //_currentLibraryCodeList = channel.LibraryCodeList;
         }

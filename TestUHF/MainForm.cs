@@ -10,6 +10,7 @@ using System.Windows.Forms;
 
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
+using static TestUHF.TestShutdown;
 
 namespace TestUHF
 {
@@ -568,6 +569,11 @@ namespace TestUHF
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             ClientInfo.Finish();
+        }
+
+        private void toolStripButton_test_Click(object sender, EventArgs e)
+        {
+            TestShutdown.DoExitWindows(ExitWindows.Reboot);
         }
     }
 }

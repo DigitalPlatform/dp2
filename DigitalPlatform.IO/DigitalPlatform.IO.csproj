@@ -179,6 +179,7 @@
     <Compile Include="Managers\ProcessManager.cs" />
     <Compile Include="PathUtil.cs" />
     <Compile Include="ProcessUtil.cs" />
+    <Compile Include="ShutdownUtil.cs" />
     <Compile Include="StreamCache.cs" />
     <Compile Include="StreamUtil.cs" />
     <Compile Include="TextEncodingDetect.cs" />

@@ -20,6 +20,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Face;
 using DigitalPlatform.WPF;
+using DigitalPlatform.IO;
 
 namespace dp2SSL
 {
@@ -446,7 +447,7 @@ string color = "red")
 
                     // 2019/6/19
                     // 主动保存一次参数配置
-                    WpfClientInfo.SaveConfig();
+                    WpfClientInfo.SaveConfig(App.GrantAccess);
 
                     // 检查状态，及时报错
                     {
@@ -1094,6 +1095,22 @@ string color = "red")
                 ErrorBox(result.ErrorInfo, "red");
             else
                 ErrorBox("Windows 注册表参数已经成功修改", "green");
+        }
+
+        private void shutdownButton_Click(object sender, RoutedEventArgs e)
+        {
+            var result = MessageBox.Show("确实要关机？",
+    "请选择启动模式",
+    MessageBoxButton.YesNo,
+    MessageBoxImage.Question,
+    MessageBoxResult.No,
+    MessageBoxOptions.DefaultDesktopOnly);
+            if (result == MessageBoxResult.No)
+                return;
+
+            WpfClientInfo.WriteInfoLog("用户命令关机");
+
+            ShutdownUtil.DoExitWindows(ShutdownUtil.ExitWindows.ShutDown);
         }
     }
 }

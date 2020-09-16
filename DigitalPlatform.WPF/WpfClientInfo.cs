@@ -164,9 +164,9 @@ namespace DigitalPlatform.WPF
 #endif
         }
 
-        public static void Finish()
+        public static void Finish(delegate_fileCreated func_fileCreated)
         {
-            SaveConfig();
+            SaveConfig(func_fileCreated);
         }
 
         static ConfigSetting _config = null;
@@ -188,12 +188,26 @@ namespace DigitalPlatform.WPF
             _config = ConfigSetting.Open(filename, true);
         }
 
+        // 配置文件被首次创建成功
+        public delegate void delegate_fileCreated(string filename);
+
         // 允许反复调用
-        public static void SaveConfig()
+        public static void SaveConfig(delegate_fileCreated func_fileCreated)
         {
             // Save the configuration file.
             if (_config != null && _config.Changed)
+            {
+                bool exists = string.IsNullOrEmpty(_config.FileName) == false && File.Exists(_config.FileName);
+
                 _config.Save();
+
+                // 首次创建文件
+                if (exists == false
+                    && string.IsNullOrEmpty(_config.FileName) == false && File.Exists(_config.FileName))
+                {
+                    func_fileCreated?.Invoke(_config.FileName);
+                }
+            }
         }
 
         #region Log

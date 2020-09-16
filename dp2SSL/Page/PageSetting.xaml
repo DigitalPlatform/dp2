@@ -133,6 +133,16 @@
                         <TextBlock>退出 dp2SSL</TextBlock>
                     </Button.Content>
                 </Button>
+                <Button Name="shutdownButton"
+                    Style="{DynamicResource RoundedButtonStyle}" 
+                    Width="260" Height="60" 
+                    FontSize="30" FontWeight="ExtraBold" 
+                    Foreground="White" 
+                     Click="shutdownButton_Click">
+                    <Button.Content>
+                        <TextBlock>关机</TextBlock>
+                    </Button.Content>
+                </Button>
                 <Button Name="openUserFolderButton"
                     Style="{DynamicResource RoundedButtonStyle}" 
                     Width="260" Height="60" 
