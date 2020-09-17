@@ -20,10 +20,11 @@
 // 2014/11/8    读者照片加入 img 元素加入 pending class 
 // 2014/12/27	BC:xxxxx 借阅信息列表中摘要包含图书封面
 // 2015/10/2    借阅列表和借阅历史表格中，BC:xxxx 中增加了第三段 | 书目记录路径
-// 2015/10/18    this.Formats 中可以包含 style_dark 这样的风格名称。注意多个子串之间是用 ',' 分隔的
+// 2015/10/18   this.Formats 中可以包含 style_dark 这样的风格名称。注意多个子串之间是用 ',' 分隔的
 // 2016/9/11    增加微信绑定标志 icon
 // 2016/12/4    预约到书区域显示增加了 boxing 状态显示
-// 2017/5/22	册信息显示增加了 卷册 列
+// 2017/5/22    	册信息显示增加了 卷册 列
+// 2020/9/17    使用读者照片的顺序改为先看有没有 "face" 用途的，如果没有再看 "photo" 用途的
 
 using System;
 using System.Collections.Generic;
@@ -701,7 +702,7 @@ public class MyConverter : ReaderConverter
         XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
         nsmgr.AddNamespace("dprms", DpNs.dprms);
 
-        XmlNodeList nodes = readerdom.DocumentElement.SelectNodes("//dprms:file[@usage='cardphoto']", nsmgr);
+        XmlNodeList nodes = readerdom.DocumentElement.SelectNodes("//dprms:file[@usage='face'] | //dprms:file[@usage='cardphoto']", nsmgr);
 
         if (nodes.Count == 0)
             return null;

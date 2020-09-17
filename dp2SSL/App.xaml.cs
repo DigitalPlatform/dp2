@@ -865,6 +865,19 @@ namespace dp2SSL
             // 最后关灯
             RfidManager.TurnShelfLamp("*", "turnOff");
 
+            try
+            {
+                if (PageMenu.PageShelf != null)
+                {
+                    // 2020/9/17
+                    WpfClientInfo.Config?.Set("pageShelf", "splitterPosition", PageMenu.PageShelf?.SplitterPosition);
+                }
+            }
+            catch(NullReferenceException)
+            {
+
+            }
+
             PageShelf.TrySetMessage(null, $"我这台智能书柜停止了哟！({e.ReasonSessionEnding})");
 
             try
@@ -891,7 +904,12 @@ namespace dp2SSL
             try
             {
                 if (PageMenu.PageShelf != null)
+                {
                     await PageMenu.PageShelf?.SubmitAsync(true);
+
+                    // 2020/9/17
+                    WpfClientInfo.Config?.Set("pageShelf", "splitterPosition", PageMenu.PageShelf?.SplitterPosition);
+                }
             }
             catch (NullReferenceException)
             {
