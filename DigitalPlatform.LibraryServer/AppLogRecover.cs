@@ -2846,6 +2846,7 @@ out strError);
                         nRet = MergeTwoEntityXml(domExist,
                             domNew,
                             strAction == "transfer" ? transfer_entity_element_names : null,
+                            false,
                             out strNewXml,
                             out strError);
                         if (nRet == -1)
@@ -3221,6 +3222,7 @@ out strError);
                         nRet = MergeTwoEntityXml(domExist,
                             domNew,
                             strAction == "transfer" ? transfer_entity_element_names : null,
+                            false,
                             out strNewXml,
                             out strError);
                         if (nRet == -1)

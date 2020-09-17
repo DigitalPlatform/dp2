@@ -4816,7 +4816,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
                     //      -1  出错
                     //      0   没有必要保存
                     //      1   保存成功
-                    nRet = this.entityControl1.DoSaveItems(channel, strStyle);
+                    nRet = this.entityControl1.DoSaveItems(channel, strStyle + ",outofrangeAsError");
                     if (nRet == 1)
                     {
                         ReleaseProtectedTailNumbers();    // 册记录已经保存成功，可以释放对临时种次号的保护了

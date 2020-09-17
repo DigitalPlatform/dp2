@@ -71,14 +71,76 @@ namespace DigitalPlatform.LibraryServer
                 "operations",
             };
 
+        // 用于借书还书的工作元素
+        static string[] checkinout_element_names = new string[] {
+                "borrower",
+                "borrowPeriod",
+                "borrowDate",
+                "returningDate",
+                "denyPeriod",
+                "borrowHistory",
+                "operations",
+                "libraryCode",
+                "oi",
+                "http://dp2003.com/dprms:file",
+            };
+
+        static string GetNamespaceName(XmlElement element)
+        {
+            if (string.IsNullOrEmpty(element.NamespaceURI))
+                return element.LocalName;
+            return element.NamespaceURI + ":" + element.LocalName;
+        }
+
+        // 2020/9/17
+        // 检查新记录中是否有超出定义范围的元素
+        int CheckOutofRangeElements(XmlDocument domNew,
+            out string strError)
+        {
+            strError = "";
+            List<string> range = new List<string>(core_entity_element_names);
+            if (this.ItemAdditionalFields != null && this.ItemAdditionalFields.Count > 0)
+                range.AddRange(this.ItemAdditionalFields);
+            range.AddRange(checkinout_element_names);
+            var out_of = HasOutOfRangeElements(domNew, range);
+            if (out_of.Count > 0)
+            {
+                strError = $"册记录中出现了元素 {StringUtil.MakePathList(out_of)}, 超过定义范围，无法保存 ";
+                return -1;
+            }
+
+            return 0;
+        }
+
+        static List<string> HasOutOfRangeElements(XmlDocument dom,
+                    List<string> element_names)
+        {
+            List<string> out_of = new List<string>();
+
+            XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
+            nsmgr.AddNamespace("dprms", DpNs.dprms);
+
+            XmlNodeList nodes = dom.DocumentElement.SelectNodes("*", nsmgr);
+            foreach (XmlElement element in nodes)
+            {
+                var name = GetNamespaceName(element);
+                int index = element_names.IndexOf(name);
+                if (index == -1)
+                    out_of.Add(name);
+            }
+
+            return out_of;
+        }
 
         // <DoEntityOperChange()的下级函数>
         // 合并新旧记录
         // parameters:
         //      element_names   要害元素名列表。如果为 null，表示会用到 core_entity_element_names
+        //      check_outof_elements    是否检查并报错超范围的 XML 元素。
         int MergeTwoEntityXml(XmlDocument domExist,
             XmlDocument domNew,
             string[] element_names,
+            bool check_outof_elements,
             out string strMergedXml,
             out string strError)
         {
@@ -89,9 +151,18 @@ namespace DigitalPlatform.LibraryServer
             {
                 // 2020/9/7
                 if (this.ItemAdditionalFields != null && this.ItemAdditionalFields.Count > 0)
-                    element_names = StringUtil.Append(element_names, this.ItemAdditionalFields.ToArray());
+                    element_names = StringUtil.Append(core_entity_element_names, this.ItemAdditionalFields.ToArray());
                 else
                     element_names = core_entity_element_names;
+            }
+
+            // 2020/9/17
+            // 检查提交保存的新记录中是否有超出定义范围的元素，如果有则报错返回
+            if (check_outof_elements)
+            {
+                int nRet = CheckOutofRangeElements(domNew, out strError);
+                if (nRet == -1)
+                    return -1;
             }
 
             // 算法的要点是, 把"新记录"中的要害字段, 覆盖到"已存在记录"中
@@ -4175,7 +4246,7 @@ out strError);
         // 构造出适合保存的新册记录
         // 主要是为了把待加工的记录中，可能出现的属于“流通信息”的字段去除，避免出现安全性问题
         // parameters:
-        static int BuildNewEntityRecord(string strOriginXml,
+        int BuildNewEntityRecord(string strOriginXml,
             out string strXml,
             out string strError)
         {
@@ -4219,6 +4290,12 @@ out strError);
 #endif
                 DomUtil.DeleteElement(dom.DocumentElement, name);
             }
+
+            // 2020/9/17
+            // 检查新记录中是否有超出定义范围的元素
+            int nRet = CheckOutofRangeElements(dom, out strError);
+            if (nRet == -1)
+                return -1;
 
             // 2017/1/13
             DomUtil.RemoveEmptyElements(dom.DocumentElement);
@@ -5028,6 +5105,7 @@ out strError);
                 nRet = MergeTwoEntityXml(domExist,
                     domNew,
                     strAction == "transfer" ? transfer_entity_element_names : null,
+                    StringUtil.IsInList("outofrangeAsError", strStyle),
                     out strNewXml,
                     out strError);
                 if (nRet == -1)
@@ -5575,6 +5653,7 @@ out strError);
             nRet = MergeTwoEntityXml(domSourceExist,
                 domNew,
                 null,
+                StringUtil.IsInList("outofrangeAsError", strStyle),
                 out string strNewXml,
                 out strError);
             if (nRet == -1)
