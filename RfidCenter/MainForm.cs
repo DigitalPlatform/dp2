@@ -124,6 +124,15 @@ namespace RfidCenter
                 notifyIcon1.ShowBalloonTip(1000);
             }
 
+            ClientInfo.BeginUpdate(
+    TimeSpan.FromMinutes(2),
+    TimeSpan.FromMinutes(60),
+    _cancel.Token,
+    (text, level) =>
+    {
+        OutputHistory(text, level);
+    });
+
             SetErrorState("retry", "正在启动");
 
             if (DetectVirus.DetectXXX() || DetectVirus.DetectGuanjia())
@@ -191,6 +200,7 @@ namespace RfidCenter
                 this.toolStripButton_autoInventory.Visible = false;
             }
 
+#if REMOVED
             // 后台自动检查更新
             Task.Run(async () =>
             {
@@ -228,6 +238,7 @@ namespace RfidCenter
                     ClientInfo.WriteErrorLog($"InstallUpdateSync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 }
             });
+#endif
 
             if (ClientInfo.IsMinimizeMode())
             {
@@ -310,7 +321,7 @@ namespace RfidCenter
             });
         }
 
-        #region 错误状态
+#region 错误状态
 
         void SetWholeColor(Color backColor, Color foreColor)
         {
@@ -379,7 +390,7 @@ namespace RfidCenter
             _errorStateInfo = info;
         }
 
-        #endregion
+#endregion
 
 
         void UpdateDeviceList(List<Reader> readers)
@@ -1225,7 +1236,7 @@ bool bClickClose = false)
             }
         }
 
-        #region remoting server
+#region remoting server
 
 #if HTTP_CHANNEL
         HttpChannel m_serverChannel = null;
@@ -1273,9 +1284,9 @@ bool bClickClose = false)
             }
         }
 
-        #endregion
+#endregion
 
-        #region ipc channel
+#region ipc channel
 
         public static bool CallActivate(string strUrl)
         {
@@ -1349,7 +1360,7 @@ bool bClickClose = false)
             }
         }
 
-        #endregion
+#endregion
 
         private void ToolStripMenuItem_testRfidChannel_Click(object sender, EventArgs e)
         {
@@ -1357,7 +1368,7 @@ bool bClickClose = false)
             MessageBox.Show(this, result.ToString());
         }
 
-        #region 浏览器控件
+#region 浏览器控件
 
         public void ClearHtml()
         {
@@ -1510,7 +1521,7 @@ string strHtml)
             AppendHtml("<div class='debug " + strClass + "'>" + HttpUtility.HtmlEncode(strText).Replace("\r\n", "<br/>") + "</div>");
         }
 
-        #endregion
+#endregion
 
         private void MenuItem_openSendKey_Click(object sender, EventArgs e)
         {

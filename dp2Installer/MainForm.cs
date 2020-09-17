@@ -33,6 +33,8 @@ namespace dp2Installer
 {
     public partial class MainForm : Form
     {
+        CancellationTokenSource _cancel = new CancellationTokenSource();
+
         // 被锁定的实例名数组
         // 正在进行恢复操作的实例名，会进入本数组。以防中途被启动
         List<string> locking_instances = new List<string>();
@@ -85,6 +87,15 @@ namespace dp2Installer
         private void MainForm_Load(object sender, EventArgs e)
         {
             GuiUtil.AutoSetDefaultFont(this);
+
+            ClientInfo.BeginUpdate(
+TimeSpan.FromMinutes(2),
+TimeSpan.FromMinutes(60),
+_cancel.Token,
+(text, level) =>
+{
+    AppendString($"{text}\r\n");
+});
 
             stopManager.Initial(this.toolButton_stop,
 (object)this.toolStripStatusLabel_main,
@@ -181,6 +192,7 @@ FormWindowState.Normal);
 
             this.BeginInvoke(new Action<object, EventArgs>(MenuItem_autoUpgrade_Click), this, new EventArgs());
 
+#if REMOVED
             // 2019/2/15
             // 后台自动检查更新
             Task.Run(() =>
@@ -193,6 +205,7 @@ FormWindowState.Normal);
                 else if (string.IsNullOrEmpty(result.ErrorInfo) == false)
                     AppendString($"ClickOnce 后台自动更新: {result.ErrorInfo}\r\n");
             });
+#endif
         }
 
         void DisplayCopyRight()
@@ -207,6 +220,9 @@ FormWindowState.Normal);
 
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
+            // 2020/9/17
+            _cancel?.Cancel();
+
             if (_versionManager != null)
             {
                 _versionManager.AutoSave();
@@ -530,7 +546,7 @@ FormWindowState.Normal);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -871,7 +887,7 @@ MessageBoxDefaultButton.Button2);
                 this._floatingMessage.Text = "";
             }
             return;
-            ERROR1:
+        ERROR1:
             AppendString("出错: " + strError + "\r\n");
             MessageBox.Show(this, strError);
         }
@@ -1298,7 +1314,7 @@ MessageBoxDefaultButton.Button2);
 
             AppendSectionTitle("更新结束");
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1398,7 +1414,7 @@ MessageBoxDefaultButton.Button2);
                     AppendString("实例 '" + strInstanceName + "' 的序列号 " + strSerialCode + " 失效了，正在请求重新设置 ...\r\n");
 
                     string strOldSerialCode = strSerialCode;
-                    REDO_INPUT:
+                REDO_INPUT:
                     // 出现对话框重新设置序列号
                     // return:
                     //      0   Cancel
@@ -1473,7 +1489,7 @@ MessageBoxDefaultButton.Button2);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1553,7 +1569,7 @@ MessageBoxDefaultButton.Button2);
                 this._floatingMessage.Text = "";
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
 
         }
@@ -1632,7 +1648,7 @@ MessageBoxDefaultButton.Button2);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1824,7 +1840,7 @@ MessageBoxDefaultButton.Button1);
                 else
                     menuItem.Enabled = false;
                 return;
-                ERROR1:
+            ERROR1:
                 menuItem.DropDownItems.Add(new ToolStripMenuItem(strError));
                 if (menuItem.DropDownItems.Count > 0)
                     menuItem.Enabled = true;
@@ -1981,7 +1997,7 @@ MessageBoxDefaultButton.Button1);
                 this._floatingMessage.Text = "";
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -2552,7 +2568,7 @@ MessageBoxDefaultButton.Button1);
 #endif
 
             return filenames;
-            ERROR1:
+        ERROR1:
             throw new Exception(strError);
         }
 
@@ -2990,7 +3006,7 @@ MessageBoxDefaultButton.Button1);
                 this._floatingMessage.Text = "";
             }
             return;
-            ERROR1:
+        ERROR1:
             AppendString("出错: " + strError + "\r\n");
             MessageBox.Show(this, strError);
         }
@@ -3193,7 +3209,7 @@ MessageBoxDefaultButton.Button1);
                 this._floatingMessage.Text = "";
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3327,7 +3343,7 @@ MessageBoxDefaultButton.Button1);
                 goto ERROR1;
             AppendString("dp2kernel 服务成功启动\r\n");
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3357,7 +3373,7 @@ MessageBoxDefaultButton.Button1);
                 goto ERROR1;
             AppendString("dp2kernel 服务已经停止\r\n");
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3500,7 +3516,7 @@ out string strError)
                 this._floatingMessage.Text = "";
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3582,7 +3598,7 @@ out string strError)
                 goto ERROR1;
             AppendString("dp2library 服务成功启动\r\n");
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3618,7 +3634,7 @@ out string strError)
                 goto ERROR1;
             AppendString("dp2library 服务已经停止\r\n");
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3744,7 +3760,7 @@ out string strError)
                 this.Refresh_dp2ZServer_MenuItems();
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3893,8 +3909,8 @@ MessageBoxDefaultButton.Button2);
 
                 AppendString("删除程序目录\r\n");
 
-                // 删除程序目录
-                REDO_DELETE_PROGRAMDIR:
+            // 删除程序目录
+            REDO_DELETE_PROGRAMDIR:
                 try
                 {
                     PathUtil.DeleteDirectory(Path.GetDirectoryName(strExePath));
@@ -3919,7 +3935,7 @@ MessageBoxDefaultButton.Button2);
                 this._floatingMessage.Text = "";
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -4004,7 +4020,7 @@ MessageBoxDefaultButton.Button2);
                 this._floatingMessage.Text = "";
             }
             return;
-            ERROR1:
+        ERROR1:
             AppendString("出错: " + strError + "\r\n");
             MessageBox.Show(this, strError);
         }
@@ -4204,7 +4220,7 @@ MessageBoxDefaultButton.Button2);
                 goto ERROR1;
 
             return;
-            ERROR1:
+        ERROR1:
             AppendString("出错: " + strError + "\r\n");
             MessageBox.Show(this, strError);
         }
@@ -4748,8 +4764,8 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
 
                     AppendString("注销 Windows Service 结束\r\n");
 
-                    // 删除程序目录
-                    REDO_DELETE_PROGRAMDIR:
+                // 删除程序目录
+                REDO_DELETE_PROGRAMDIR:
                     try
                     {
                         PathUtil.DeleteDirectory(Path.GetDirectoryName(strExePath));
@@ -4779,7 +4795,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                 this._floatingMessage.Text = "";
             }
             return;
-            ERROR1:
+        ERROR1:
             AppendString("出错: " + strError + "\r\n");
             MessageBox.Show(this, strError);
         }
@@ -4840,7 +4856,7 @@ C:\WINDOWS\SysNative\dism.exe /NoRestart /Online /Enable-Feature /FeatureName:MS
              * */
 
             return;
-            ERROR1:
+        ERROR1:
             AppendString("出错: " + strError + "\r\n");
             MessageBox.Show(this, strError);
         }
@@ -5021,7 +5037,7 @@ C:\WINDOWS\SysNative\dism.exe /NoRestart /Online /Enable-Feature /FeatureName:MS
                 }
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5144,7 +5160,7 @@ C:\WINDOWS\SysNative\dism.exe /NoRestart /Online /Enable-Feature /FeatureName:MS
                 this._floatingMessage.Text = "";
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5235,8 +5251,8 @@ MessageBoxDefaultButton.Button2);
 
                 AppendString("注销 Windows Service 结束\r\n");
 
-                // 删除程序目录
-                REDO_DELETE_PROGRAMDIR:
+            // 删除程序目录
+            REDO_DELETE_PROGRAMDIR:
                 try
                 {
                     PathUtil.DeleteDirectory(Path.GetDirectoryName(strExePath));
@@ -5261,7 +5277,7 @@ MessageBoxDefaultButton.Button2);
                 this._floatingMessage.Text = "";
             }
             return;
-            ERROR1:
+        ERROR1:
             AppendString("出错: " + strError + "\r\n");
             MessageBox.Show(this, strError);
         }
@@ -5329,7 +5345,7 @@ MessageBoxDefaultButton.Button2);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5381,7 +5397,7 @@ MessageBoxDefaultButton.Button2);
                 goto ERROR1;
             AppendString("dp2ZServer 服务成功启动\r\n");
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
 
         }
@@ -5412,7 +5428,7 @@ MessageBoxDefaultButton.Button2);
                 goto ERROR1;
             AppendString("dp2ZServer 服务已经停止\r\n");
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5604,7 +5620,7 @@ MessageBoxDefaultButton.Button2);
                 this._floatingMessage.Text = "";
             }
             return;
-            ERROR1:
+        ERROR1:
             AppendString("出错: " + strError + "\r\n");
             MessageBox.Show(this, strError);
         }
@@ -5685,7 +5701,7 @@ MessageBoxDefaultButton.Button2);
                     StringBuilder text = new StringBuilder();
                     foreach (var filename in dlg.FileNames)
                     {
-                        this._floatingMessage.Text = $"正在运算 {i+1}) {filename} 的 MD5, 请等待 ...";
+                        this._floatingMessage.Text = $"正在运算 {i + 1}) {filename} 的 MD5, 请等待 ...";
                         // using (FileStream stream = File.OpenRead(filename))
                         // 注意要用共享方式打开。因为操作日志文件有可能此时被其他进程打开使用
                         using (FileStream stream = new FileStream(filename,

@@ -189,6 +189,15 @@ bool bClickClose = false)
                 notifyIcon1.ShowBalloonTip(1000);
             }
 
+            ClientInfo.BeginUpdate(
+TimeSpan.FromMinutes(2),
+TimeSpan.FromMinutes(60),
+_cancel.Token,
+(text, level) =>
+{
+OutputHistory(text, level);
+});
+
             ClientInfo.SetErrorState("retry", "正在启动");
 
             if (DetectVirus.DetectXXX() || DetectVirus.DetectGuanjia())
@@ -201,6 +210,7 @@ bool bClickClose = false)
 
             // ClearHtml();
 
+#if REMOVED
             // 后台自动检查更新
             // 这要放在检查序列号之前启动
             Task.Run(() =>
@@ -223,6 +233,7 @@ bool bClickClose = false)
                 }
 
             });
+#endif
 
             ClientInfo.SerialNumberMode = "must";
             ClientInfo.CopyrightKey = "fingerprintcenter_sn_key";
@@ -1155,7 +1166,7 @@ MessageBoxDefaultButton.Button2);
             _cancel.Cancel();
         }
 
-        #region ipc channel
+#region ipc channel
 
         public static bool CallActivate(string strUrl)
         {
@@ -1230,7 +1241,7 @@ MessageBoxDefaultButton.Button2);
             }
         }
 
-        #endregion
+#endregion
 
         delegate void _ActivateWindow(bool bActive);
 
@@ -1293,7 +1304,7 @@ MessageBoxDefaultButton.Button2);
             FingerPrint.CancelRegisterString();
         }
 
-        #region 浏览器控件
+#region 浏览器控件
 
         public void ClearHtml()
         {
@@ -1447,7 +1458,7 @@ string strHtml)
             AppendHtml("<div class='debug " + strClass + "'>" + HttpUtility.HtmlEncode(strText).Replace("\r\n", "<br/>") + "</div>");
         }
 
-        #endregion
+#endregion
 
         void DisplayText(string text,
             string textColor = "white",
@@ -1510,7 +1521,7 @@ Keys keyData)
         }
 
 #if NO
-        #region device changed
+#region device changed
 
         const int WM_DEVICECHANGE = 0x0219; //see msdn site
         const int DBT_DEVNODES_CHANGED = 0x0007;
@@ -1542,7 +1553,7 @@ Keys keyData)
             base.WndProc(ref m);
         }
 
-        #endregion
+#endregion
 #endif
 
         public void ActivateWindow()

@@ -56,6 +56,15 @@ namespace dp2ManageCenter
 
         private void MainForm_Load(object sender, EventArgs e)
         {
+            ClientInfo.BeginUpdate(
+TimeSpan.FromMinutes(2),
+TimeSpan.FromMinutes(60),
+_cancel.Token,
+(text, level) =>
+{
+OutputHistory(text, level);
+});
+
             var bRet = ClientInfo.Initial("dp2managecenter");
             // 2020/8/30
             if (bRet == false)

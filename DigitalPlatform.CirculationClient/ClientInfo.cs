@@ -20,6 +20,7 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Text;
 using DigitalPlatform.Core;
 using DigitalPlatform.Xml;
+using System.Threading.Tasks;
 
 namespace DigitalPlatform.CirculationClient
 {
@@ -527,6 +528,61 @@ namespace DigitalPlatform.CirculationClient
 
                 }
             }
+        }
+
+        public delegate void delegate_showText(string text, int warning_level);
+
+        // 2020/9/17
+        public static void BeginUpdate(
+            TimeSpan firstDelay,
+            TimeSpan idleLength,
+            CancellationToken token,
+            delegate_showText func_showText)
+        {
+            if (ApplicationDeployment.IsNetworkDeployed == false)
+                return;
+
+            Task.Factory.StartNew(async () =>
+            {
+                try
+                {
+                    // 第一次延迟
+                    await Task.Delay(firstDelay, token);
+
+                    while (token.IsCancellationRequested == false)
+                    {
+                        //      -1  出错
+                        //      0   没有发现更新
+                        //      1   已经更新，重启可使用新版本
+                        NormalResult result = ClientInfo.InstallUpdateSync();
+                        WriteInfoLog($"后台 ClickOnce 自动更新返回: {result.ToString()}");
+
+                        if (result.Value == -1)
+                            func_showText?.Invoke("自动更新出错: " + result.ErrorInfo, 2);
+                        else if (result.Value == 1)
+                        {
+                            func_showText?.Invoke(result.ErrorInfo, 1);
+                            return; // 只要更新了一次就返回
+                        }
+                        else if (string.IsNullOrEmpty(result.ErrorInfo) == false)
+                            func_showText?.Invoke(result.ErrorInfo, 0);
+
+                        // 以后的每次延迟
+                        await Task.Delay(idleLength, token);
+                    }
+                }
+                catch (OperationCanceledException)
+                {
+
+                }
+                catch (Exception ex)
+                {
+                    WriteErrorLog($"后台 ClickOnce 自动更新出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                }
+            },
+    token,
+    TaskCreationOptions.LongRunning,
+    TaskScheduler.Default);
         }
 
         // result.Value:

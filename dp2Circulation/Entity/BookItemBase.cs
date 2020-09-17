@@ -291,6 +291,10 @@ namespace dp2Circulation
                     return -1;
             }
 
+            // 2020/9/17
+            // 把 XML 中多余的元素删除
+            DomUtil.RemoveEmptyElements(this.RecordDom.DocumentElement);
+
             strXml = this.RecordDom.OuterXml;
             return 0;
         }
@@ -318,6 +322,13 @@ namespace dp2Circulation
 
             }
 
+        }
+
+        // 2020/9/17
+        // 禁用 _objects 功能
+        public void DisableObjects()
+        {
+            _objects = null;
         }
 
         public int LoadObjects(

@@ -780,6 +780,8 @@ namespace dp2Circulation
                             errors.Add(strError);
                         }
                     }
+                    else
+                        bookitem.DisableObjects();  // 2020/9/17
 
                     this.Items.Add(bookitem);
 
@@ -990,6 +992,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
         // 构造用于保存的实体信息数组
         // parameters:
         //      strStyle    风格。如果为 force，表示希望强制修改册记录
+        //                  如果包含 outofrangeAsError，则 dp2library 会把超过范围的元素当作报错
         int BuildSaveEntities(
             string strStyle,
             out EntityInfo[] entities,
@@ -1027,6 +1030,11 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
                     out strError);
                 if (nRet == -1)
                     return -1;
+
+                // 2020/9/17
+                // 是否要把超过范围的元素当作报错？如果 style 中没有这个值则不报错
+                if (StringUtil.IsInList("outofrangeAsError", strStyle))
+                    info.Style = "outofrangeAsError";
 
                 if (bookitem.ItemDisplayState == ItemDisplayState.New)
                 {
@@ -1656,11 +1664,11 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
         /// 提交 Items 保存请求
         /// </summary>
         /// <returns>-1: 出错; 0: 没有必要保存; 1: 保存成功</returns>
-        public virtual int DoSaveItems(LibraryChannel channel, 
+        public virtual int DoSaveItems(LibraryChannel channel,
             string strStyle)
         {
             string strError = "";
-            int nRet = SaveItems(channel, 
+            int nRet = SaveItems(channel,
                 strStyle,
                 out strError);
 
