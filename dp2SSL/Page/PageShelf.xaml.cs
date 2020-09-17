@@ -4215,6 +4215,21 @@ namespace dp2SSL
             // System.Diagnostics.Process.Start(Assembly.GetEntryAssembly().Location);
         }
 
+        // 获得、设置分割条位置
+        public string SplitterPosition
+        {
+            get
+            {
+                GridLengthConverter glc = new GridLengthConverter();
+                return glc.ConvertToString(this.patronColumn.Width);
+            }
+            set
+            {
+                GridLengthConverter glc = new GridLengthConverter();
+                this.patronColumn.Width = (GridLength)glc.ConvertFromString(value);
+            }
+        }
+
 #if REMOVED
 
         #region 绑定和解绑读者功能

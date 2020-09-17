@@ -97,9 +97,9 @@
 -->
         <Grid Grid.Row="1" Grid.Column="1" Background="Transparent">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" MinWidth="100"/>
                 <ColumnDefinition Width="10" />
-                <ColumnDefinition Width="300" />
+                <ColumnDefinition Width="300" Name="patronColumn" MinWidth="100"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>

@@ -313,7 +313,14 @@ namespace dp2SSL
         void NavigatePageShelf(string mode)
         {
             if (_pageShelf == null)
+            {
                 _pageShelf = new PageShelf(mode);
+
+                // 2020/9/17
+                var pos = WpfClientInfo.Config.Get("pageShelf", "splitterPosition", null);
+                if (pos != null)
+                    _pageShelf.SplitterPosition = pos;
+            }
             else
                 _pageShelf.Mode = mode;
 
