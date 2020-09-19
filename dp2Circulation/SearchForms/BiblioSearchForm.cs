@@ -9250,7 +9250,7 @@ MessageBoxDefaultButton.Button1);
                             stop,
                             strRecPath,
                             "",
-                            new string[] { "table:areas|coverimageurl" },   // formats
+                            new string[] { "table:areas|coverimageurl|summary|subjects|classes" },   // formats
                             out string[] results,
                             out byte[] baTimestamp,
                             out strError);
