@@ -78,6 +78,7 @@ namespace DigitalPlatform.LibraryServer
                 "borrowDate",
                 "returningDate",
                 "denyPeriod",
+                "checkInOutDate",   // 2020/9/18 新增
                 "borrowHistory",
                 "operations",
                 "libraryCode",

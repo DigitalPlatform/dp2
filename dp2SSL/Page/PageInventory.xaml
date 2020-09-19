@@ -9,6 +9,12 @@
       d:DesignHeight="450" d:DesignWidth="800"
       Title="PageInventory" Background="Black">
     <Page.Resources>
+
+        <local:StateToIconConverter x:Key="StateToIcon" />
+        <local:StateToTextConverter x:Key="StateToText" />
+        <local:EntityStateToBackConverter x:Key="StateToBack" OverdueColor="DarkGoldenrod" OverflowColor="DarkRed"/>
+
+
         <local:StringToVisibilityConverter x:Key="StringToVis" />
         <Style x:Key="myHeaderStyle" TargetType="{x:Type GridViewColumnHeader}">
             <Setter Property="Background" Value="DarkGray"/>
@@ -104,7 +110,23 @@
             <ListView Margin="10" Name="list" Grid.Row="1" Background="Transparent" Foreground="LightGray" FontSize="20">
                 <ListView.View>
                     <GridView>
-
+                        <GridViewColumn Header="状态" Width="150"
+                                        HeaderContainerStyle="{StaticResource myHeaderStyle}">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Orientation="Horizontal"
+                                Background="{Binding Path=State, Converter={StaticResource StateToBack}}">
+                                        <fa:ImageAwesome 
+                                     Height="14" Foreground="DarkGray"
+                                    Icon="{Binding Path=State, Converter={StaticResource StateToIcon}}" 
+                                    HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                        <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Margin="4,2,2,2"
+                                   FontSize="11" 
+                                   Text="{Binding Path=State, Converter={StaticResource StateToText}}"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
                         <GridViewColumn Header="UID" Width="200" DisplayMemberBinding="{Binding UID}"
                                         HeaderContainerStyle="{StaticResource myHeaderStyle}">
                             <GridViewColumn.CellTemplate>
@@ -119,11 +141,11 @@
                         </GridViewColumn>
                         <GridViewColumn Header="PII" Width="150" DisplayMemberBinding="{Binding PII}"
                                         HeaderContainerStyle="{StaticResource myHeaderStyle}"/>
-                        <GridViewColumn Header="Title" Width="200"
+                        <GridViewColumn Header="题名" Width="200"
                                         HeaderContainerStyle="{StaticResource myHeaderStyle}">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
-                                    <TextBlock Text="{Binding Title}" TextDecorations="Underline" Foreground="Red" Cursor="Hand" />
+                                    <TextBlock Text="{Binding Title}" FontSize="12"/>
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>

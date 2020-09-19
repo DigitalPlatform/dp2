@@ -31,7 +31,7 @@
 
     </UserControl.Resources>
     <Border BorderThickness="2" BorderBrush="Black"
-            Margin="20" CornerRadius="8" >
+            Margin="20" CornerRadius="8" MinWidth="200">
         <Border.Background>
             <LinearGradientBrush EndPoint="1,1" StartPoint="0,0">
                 <GradientStop Color="Black" Offset="0"/>
