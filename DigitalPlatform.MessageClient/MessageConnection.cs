@@ -12,6 +12,7 @@ using System.IO;
 using Microsoft.AspNet.SignalR.Client;
 using Microsoft.AspNet.SignalR.Client.Transports;
 using DigitalPlatform.Core;
+using DigitalPlatform.Text;
 
 namespace DigitalPlatform.MessageClient
 {
@@ -1389,6 +1390,18 @@ request).Result;
             this.subjects = record.subjects;
             this.publishTime = record.publishTime;
             this.expireTime = record.expireTime;
+        }
+
+        public override string ToString()
+        {
+            return $"id={id},groups={ToString(groups)},creator={creator},userName={userName},data={data},format={format},type={type},thread={thread},subjects={ToString(subjects)},publishTime={publishTime},expireTime={expireTime}";
+        }
+
+        static string ToString(string [] list)
+        {
+            if (list == null)
+                return "(null)";
+            return string.Join(",", list);
         }
     }
 
