@@ -17,6 +17,9 @@
             {
                 components.Dispose();
             }
+            //if (disposing)
+            //    dpTable_groups?.Dispose();
+
             base.Dispose(disposing);
         }
 

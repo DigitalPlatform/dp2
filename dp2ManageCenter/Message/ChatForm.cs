@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Collections;
 using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
 
 using Newtonsoft.Json;
 
@@ -18,7 +19,6 @@ using DigitalPlatform.Text;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.MessageClient;
 using DigitalPlatform.CirculationClient;
-using System.Runtime.CompilerServices;
 
 namespace dp2ManageCenter.Message
 {
@@ -121,7 +121,7 @@ namespace dp2ManageCenter.Message
             this.dpTable_groups.Rows.Clear();
             foreach (var info in names)
             {
-                var row = AddGroupNameNewRow(info.DisplayName,info.EchoName, "");
+                var row = AddGroupNameNewRow(info.DisplayName, info.EchoName, "");
                 // row.Tag = info;
             }
 
@@ -131,7 +131,7 @@ namespace dp2ManageCenter.Message
                     this.dpTable_groups.Rows[0]);
         }
 
-        DpRow AddGroupNameNewRow(string name, 
+        DpRow AddGroupNameNewRow(string name,
             string echoName,
             string new_message_count)
         {
@@ -139,7 +139,6 @@ namespace dp2ManageCenter.Message
             row.Add(new DpCell());
             row.Add(new DpCell { Text = name });
             row.Add(new DpCell { Text = new_message_count });
-            this.dpTable_groups.Rows.Add(row);
 
             row.Tag = new GroupInfo
             {
@@ -147,6 +146,7 @@ namespace dp2ManageCenter.Message
                 EchoName = echoName
             };
 
+            this.dpTable_groups.Rows.Add(row);
             return row;
         }
 
@@ -621,37 +621,47 @@ namespace dp2ManageCenter.Message
         // 增补群名，和更新名字右侧的新消息数字
         void UpdateGroupNameList(string[] groups)
         {
-            if (groups == null)
-                return;
-
-            // 可能形态为 ui:xxxxx,ui:xxxxx
-
-            // 存储发现以后剩下的名字
-            List<string> names = new List<string>(groups);
-            string name = BuildName(groups);
-            foreach (var row in this.dpTable_groups.Rows)
+            try
             {
-                var info = row.Tag as GroupInfo;
-                if (info.DisplayName == name || info.EchoName == name)
+                if (groups == null)
                 {
-                    string old_value = row[COLUMN_NEWMESSAGECOUNT].Text;
-                    this.Invoke((Action)(() =>
-                    {
-                        // 注意所在线程应该为界面线程
-                        row[COLUMN_NEWMESSAGECOUNT].Text = IncValue(old_value, 1);
-                    }));
+                    // ClientInfo.WriteInfoLog("groups == null");
                     return;
                 }
+
+                // 可能形态为 ui:xxxxx,ui:xxxxx
+
+                // 存储发现以后剩下的名字
+                List<string> names = new List<string>(groups);
+                string name = BuildName(groups);
+                foreach (var row in this.dpTable_groups.Rows)
+                {
+                    var info = row.Tag as GroupInfo;
+                    if (info.DisplayName == name || info.EchoName == name)
+                    {
+                        string old_value = row[COLUMN_NEWMESSAGECOUNT].Text;
+                        this.Invoke((Action)(() =>
+                        {
+                            // 注意所在线程应该为界面线程
+                            row[COLUMN_NEWMESSAGECOUNT].Text = IncValue(old_value, 1);
+                        }));
+                        // ClientInfo.WriteInfoLog($"found row in dpTable_groups.Rows");
+                        return;
+                    }
+                }
+
+                // 剩下部分群名在列表中没有找到，需要添加到群名列表中
+                this.Invoke((Action)(() =>
+                {
+                    // TODO: 请求服务器得到 DisplayName
+                    AddGroupNameNewRow(name, name, "1");
+                }));
+                return;
             }
-
-            // 剩下部分群名在列表中没有找到，需要添加到群名列表中
-            this.Invoke((Action)(() =>
+            catch (Exception ex)
             {
-                // TODO: 请求服务器得到 DisplayName
-
-                AddGroupNameNewRow(name, name, "1");
-            }));
-            return;
+                ClientInfo.WriteErrorLog($"UpdateGroupNameList() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+            }
 
             string IncValue(string old_value, int delta)
             {
@@ -1326,12 +1336,12 @@ namespace dp2ManageCenter.Message
             connection.AddMessage += Connection_AddMessage;
         }
 
-        GroupInfo Find(string [] groups)
+        GroupInfo Find(string[] groups)
         {
             string group_name = BuildName(groups);
 
             // 在当前所有群中找 GroupInfo
-            foreach(var row in this.dpTable_groups.Rows)
+            foreach (var row in this.dpTable_groups.Rows)
             {
                 var info = row.Tag as GroupInfo;
                 if (group_name == info.DisplayName || group_name == info.EchoName)
@@ -1354,6 +1364,8 @@ namespace dp2ManageCenter.Message
                 // TODO: 要 if e.Action; 更新的 action 要更新已经显示的行的内容，删除的 action 要兑现删除效果
                 foreach (var record in e.Records)
                 {
+                    // ClientInfo.WriteInfoLog($"Connection_AddMessage() 收到消息 {record.ToString()}");
+
                     UpdateGroupNameList(record.groups);
 
                     // TODO: 要建立一个便于搜索的名字对照表

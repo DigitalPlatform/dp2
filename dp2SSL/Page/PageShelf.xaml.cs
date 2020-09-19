@@ -3995,6 +3995,8 @@ namespace dp2SSL
             BeginDelayClearTask();
 
             this.doorControl.AnimateDoors();
+
+            TrySetMessage(null, $"读者 {(string.IsNullOrEmpty(_patron.PatronName) ? _patron.Barcode : _patron.PatronName)} 刷卡");
         }
 
         void DisplayError(ref VideoWindow videoRegister,

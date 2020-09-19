@@ -62,7 +62,7 @@ TimeSpan.FromMinutes(60),
 _cancel.Token,
 (text, level) =>
 {
-OutputHistory(text, level);
+    OutputHistory(text, level);
 });
 
             var bRet = ClientInfo.Initial("dp2managecenter");
@@ -5479,11 +5479,42 @@ MessageBoxDefaultButton.Button2);
             form.Show(this);
         }
 
+        ChatForm _chatDialog = null;
+
         private void ToolStripMenuItem_chat_Click(object sender, EventArgs e)
         {
-            ChatForm dlg = new ChatForm();
-            dlg.Font = this.Font;
-            dlg.Show(this);
+            /*
+            if (_chatDialog != null)
+            {
+                _chatDialog.Close();
+                _chatDialog = null;
+            }
+
+            _chatDialog = new ChatForm();
+            _chatDialog.FormClosed += (o1, e1) => {
+                _chatDialog?.Dispose();
+                _chatDialog = null;
+            };
+            _chatDialog.Font = this.Font;
+            _chatDialog.Show(this);
+            */
+            if (_chatDialog == null)
+            {
+
+                _chatDialog = new ChatForm();
+                _chatDialog.FormClosing += (o1, e1) =>
+                {
+                    if (e1.CloseReason == CloseReason.ApplicationExitCall
+                    || e1.CloseReason == CloseReason.FormOwnerClosing)
+                        return;
+                    _chatDialog.Visible = false;
+                    e1.Cancel = true;
+                };
+                _chatDialog.Font = this.Font;
+                _chatDialog.Show(this);
+            }
+            else
+                _chatDialog.Visible = true;
         }
     }
 }
