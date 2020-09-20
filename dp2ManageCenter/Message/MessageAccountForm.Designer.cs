@@ -83,12 +83,12 @@
             // columnHeader_serverUrl
             // 
             this.columnHeader_serverUrl.Text = "消息服务器 URL";
-            this.columnHeader_serverUrl.Width = 313;
+            this.columnHeader_serverUrl.Width = 453;
             // 
             // columnHeader_userName
             // 
             this.columnHeader_userName.Text = "用户名";
-            this.columnHeader_userName.Width = 233;
+            this.columnHeader_userName.Width = 288;
             // 
             // MessageAccountForm
             // 

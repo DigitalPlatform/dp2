@@ -33,6 +33,7 @@ namespace dp2ManageCenter.Message
 
         string _userNameAndUrl = "";
 
+        // 当前用户名和 dp2mserver 服务器 URL
         public string UserNameAndUrl
         {
             get
@@ -43,6 +44,9 @@ namespace dp2ManageCenter.Message
             {
                 _userNameAndUrl = value;
                 this.Text = $"聊天 {_userNameAndUrl}";
+
+                // 2020/9/20
+                RemoveEvents();
 
                 _ = AddEventAsync();
             }
@@ -66,7 +70,7 @@ namespace dp2ManageCenter.Message
 
         private void ChatForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-
+            RemoveEvents();
         }
 
         // TODO: 把装载信息的起始日期记载下来。删除一个范围后，要能自动修改这个起始日期
@@ -118,6 +122,9 @@ namespace dp2ManageCenter.Message
 
         void FillGroupList(List<GroupInfo> names)
         {
+            // 2020/9/20
+            this.dpTable_messages.Rows.Clear();
+
             this.dpTable_groups.Rows.Clear();
             foreach (var info in names)
             {
@@ -263,7 +270,8 @@ namespace dp2ManageCenter.Message
 
                 this.LoadGroups(this.UserNameAndUrl);
                 this.LoadStartTime(this.UserNameAndUrl, _currentGroupName);
-                await LoadMessageAsync(_currentGroupName, this._startDate, "", "clearAll");
+                if (string.IsNullOrEmpty(_currentGroupName) == false)
+                    await LoadMessageAsync(_currentGroupName, this._startDate, "", "clearAll");
             }
         }
 
@@ -400,6 +408,10 @@ namespace dp2ManageCenter.Message
             if (this.dpTable_groups.SelectedRows.Count == 1)
             {
                 newGroupName = this.dpTable_groups.SelectedRows[0][1].Text;
+            }
+            else
+            {
+                this.dpTable_messages.Rows.Clear();
             }
 
             if (newGroupName != _currentGroupName)
@@ -653,8 +665,14 @@ namespace dp2ManageCenter.Message
                 // 剩下部分群名在列表中没有找到，需要添加到群名列表中
                 this.Invoke((Action)(() =>
                 {
+                    int count = this.dpTable_groups.Rows.Count;
+
                     // TODO: 请求服务器得到 DisplayName
-                    AddGroupNameNewRow(name, name, "1");
+                    var row = AddGroupNameNewRow(name, name, "1");
+
+                    // 如果是列表中第一次增加行，择自动选中它
+                    if (count == 0)
+                        row.Selected = true;
                 }));
                 return;
             }
@@ -1325,6 +1343,9 @@ namespace dp2ManageCenter.Message
             }));
         }
 
+        // 当前窗口用过的 P2PConnection 对象
+        List<P2PConnection> _usedConnections = new List<P2PConnection>();
+
         async Task AddEventAsync()
         {
             // 挂接事件
@@ -1332,8 +1353,25 @@ namespace dp2ManageCenter.Message
             if (get_result.Value == -1)
                 return;
             P2PConnection connection = get_result.Connection;
+
+            // 记忆
+            if (_usedConnections.IndexOf(connection) == -1)
+                _usedConnections.Add(connection);
+
             connection.AddMessage -= Connection_AddMessage;
             connection.AddMessage += Connection_AddMessage;
+        }
+
+        // 2020/9/20
+        // 解挂所有 AddMessage 事件
+        void RemoveEvents()
+        {
+            if (_usedConnections == null)
+                return;
+            foreach (var connection in _usedConnections)
+            {
+                connection.AddMessage -= Connection_AddMessage;
+            }
         }
 
         GroupInfo Find(string[] groups)

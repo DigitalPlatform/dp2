@@ -2628,7 +2628,7 @@ Color.FromArgb(100, this.m_hoverBackColor)
                 if (bMoved == false)
                     return;
 
-            SKIP1:
+                SKIP1:
                 DpRow line = this.Rows[y];
                 if (line.IsSeperator == true)
                     goto REDO;
@@ -5627,6 +5627,9 @@ this.TextHeight + cell_padding.Vertical);
                 }
 #endif
 
+                // 2020/9/20
+                if (row != null && row.Selected == true)
+                    this.Control.TriggerSelectionChanged();
             }
 
             return bRet;
@@ -5636,6 +5639,10 @@ this.TextHeight + cell_padding.Vertical);
         {
             DpRow row = this[index];
             this.Remove(row);
+
+            // 2020/9/20
+            if (row.Selected == true)
+                this.Control.TriggerSelectionChanged();
         }
 
         public new void Insert(int nIndex, DpRow row)

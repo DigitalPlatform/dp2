@@ -5498,9 +5498,9 @@ MessageBoxDefaultButton.Button2);
             _chatDialog.Font = this.Font;
             _chatDialog.Show(this);
             */
+
             if (_chatDialog == null)
             {
-
                 _chatDialog = new ChatForm();
                 _chatDialog.FormClosing += (o1, e1) =>
                 {
@@ -5515,6 +5515,12 @@ MessageBoxDefaultButton.Button2);
             }
             else
                 _chatDialog.Visible = true;
+
+            /*
+            ChatForm dlg = new ChatForm();
+            dlg.Font = this.Font;
+            dlg.Show(this);
+            */
         }
     }
 }
