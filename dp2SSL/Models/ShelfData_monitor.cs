@@ -254,7 +254,7 @@ TaskScheduler.Default);
         }
 
         // 从打开门开始多少时间开始警告关门
-        static TimeSpan _warningDoorLength = TimeSpan.FromSeconds(30);
+        static TimeSpan _warningDoorLength = TimeSpan.FromSeconds(15);  // 30
         static DateTime _lastWarningTime;
 
         static void WarningCloseDoor()
@@ -262,7 +262,7 @@ TaskScheduler.Default);
             var now = DateTime.Now;
 
             // 控制进入本函数的频率
-            if (now - _lastWarningTime < TimeSpan.FromSeconds(20))
+            if (now - _lastWarningTime < TimeSpan.FromSeconds(10))  // 20
                 return;
 
             _lastWarningTime = now;

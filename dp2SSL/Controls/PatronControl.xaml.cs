@@ -200,25 +200,61 @@ namespace dp2SSL
             this.photo.Source = imageSource;
         }
 
-        public void ClearPhotoCache(string photo_path)
+        public static bool ClearPhotoCacheFile(string photo_path)
         {
             if (string.IsNullOrEmpty(photo_path))
-                return;
+                return false;
 
+            string fileName = GetCachePhotoPath(photo_path);
+            try
+            {
+                if (File.Exists(fileName))
+                {
+                    File.Delete(fileName);
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                WpfClientInfo.WriteErrorLog($"删除照片缓存文件 '{fileName}' 时出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                return false;
+            }
+        }
+
+        public bool ClearPhotoCache(string photo_path)
+        {
+            if (string.IsNullOrEmpty(photo_path))
+                return false;
+
+            /*
             string cacheDir = Path.Combine(WpfClientInfo.UserDir, "photo");
             string fileName = Path.Combine(cacheDir, GetPath(photo_path));
+            */
+            string fileName = GetCachePhotoPath(photo_path);
             try
             {
                 SetPhoto((Stream)null);
                 if (File.Exists(fileName))
                 {
                     File.Delete(fileName);
+                    return true;
                 }
+                return false;
             }
             catch (Exception ex)
             {
                 WpfClientInfo.WriteErrorLog($"清除照片缓存文件 '{fileName}' 时出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                return false;
             }
+        }
+
+        // 将照片对象路径变换为缓存的物理文件路径
+        public static string GetCachePhotoPath(string photo_path)
+        {
+            string cacheDir = Path.Combine(WpfClientInfo.UserDir, "photo");
+            PathUtil.CreateDirIfNeed(cacheDir);
+            return Path.Combine(cacheDir, GetPath(photo_path));
         }
 
         public void LoadPhoto(string photo_path)
@@ -238,9 +274,12 @@ namespace dp2SSL
             try
             {
                 // 先尝试从缓存获取
+                /*
                 string cacheDir = Path.Combine(WpfClientInfo.UserDir, "photo");
                 PathUtil.CreateDirIfNeed(cacheDir);
                 string fileName = Path.Combine(cacheDir, GetPath(photo_path));
+                */
+                string fileName = GetCachePhotoPath(photo_path);
                 if (File.Exists(fileName))
                 {
                     try
