@@ -1346,6 +1346,7 @@ namespace dp2ManageCenter.Message
         // 当前窗口用过的 P2PConnection 对象
         List<P2PConnection> _usedConnections = new List<P2PConnection>();
 
+        // 为当前 this.UserNameAndUrl 挂接 AddMessage 事件
         async Task AddEventAsync()
         {
             // 挂接事件
@@ -1368,10 +1369,13 @@ namespace dp2ManageCenter.Message
         {
             if (_usedConnections == null)
                 return;
+
             foreach (var connection in _usedConnections)
             {
                 connection.AddMessage -= Connection_AddMessage;
             }
+
+            _usedConnections.Clear();
         }
 
         GroupInfo Find(string[] groups)

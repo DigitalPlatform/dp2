@@ -14,6 +14,7 @@ using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Text;
 using DigitalPlatform.WPF;
 using DigitalPlatform.IO;
+using System.IO;
 
 namespace dp2SSL.Models
 {
@@ -350,7 +351,7 @@ out string strError);
                         AutoCache = false,
                         CacheDir = "",
                         LogType = logType,
-                        Filter = "setReaderInfo,borrow,return,setSystemParameter", // 借书还书时候都会修改读者记录
+                        Filter = "setReaderInfo,borrow,return,setSystemParameter,writeRes", // 借书还书时候都会修改读者记录
                         // ServerVersion = serverVersion
                     };
 
@@ -430,6 +431,14 @@ out string strError);
                             else if (strOperation == "setSystemParameter")
                             {
                                 var trace_result = TraceSetSystemParameter(
+                                    dom,
+                                    info);
+                                if (trace_result.Value == -1)
+                                    WpfClientInfo.WriteErrorLog("同步 " + item.Date + " " + item.Index.ToString() + " 时出错: " + trace_result.ErrorInfo);
+                            }
+                            else if (strOperation == "writeRes")
+                            {
+                                var trace_result = TraceWriteRes(
                                     dom,
                                     info);
                                 if (trace_result.Value == -1)
@@ -882,6 +891,47 @@ ProcessInfo info)
             {
                 WpfClientInfo.WriteErrorLog($"PatronDataExists() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 return false;
+            }
+        }
+
+        /*
+<root>
+  <operation>writeRes</operation>
+  <operator>supervisor</operator>
+  <operTime>Mon, 21 Sep 2020 11:01:56 +0800</operTime>
+  <requestResPath>读者/1/object/0</requestResPath>
+  <resPath>读者/0000000001/object/0</resPath>
+  <ranges>0-72044</ranges>
+  <totalLength>72045</totalLength>
+  <metadata>&lt;file mimetype="image/pjpeg" localpath="a10d0d2e-c3e7-44f4-83ab-e31f7608d429" /&gt;</metadata>
+  <style>
+  </style>
+  <clientAddress via="net.pipe://localhost/dp2library/xe">localhost</clientAddress>
+  <version>1.06</version>
+</root>
+        * */
+        static NormalResult TraceWriteRes(
+XmlDocument domLog,
+ProcessInfo info)
+        {
+            try
+            {
+                string strResPath = DomUtil.GetElementText(domLog.DocumentElement, "requestResPath");
+                if (string.IsNullOrEmpty(strResPath) == false)
+                {
+                    var ret = PatronControl.ClearPhotoCacheFile(strResPath);
+                    if (ret == true)
+                        WpfClientInfo.WriteInfoLog($"路径 {strResPath} 对应的照片本地缓存文件被同步过程删除");
+                }
+                return new NormalResult();
+            }
+            catch (Exception ex)
+            {
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"TraceWriteRes() 出现异常: {ex.Message}"
+                };
             }
         }
     }

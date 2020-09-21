@@ -702,10 +702,16 @@ public class MyConverter : ReaderConverter
         XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
         nsmgr.AddNamespace("dprms", DpNs.dprms);
 
-        XmlNodeList nodes = readerdom.DocumentElement.SelectNodes("//dprms:file[@usage='face'] | //dprms:file[@usage='cardphoto']", nsmgr);
-
+        // 先找 "face"
+        XmlNodeList nodes = readerdom.DocumentElement.SelectNodes("//dprms:file[@usage='face']", nsmgr);
         if (nodes.Count == 0)
-            return null;
+        {
+            // 2020/9/21
+            // 再找 "cardphoto"
+            nodes = readerdom.DocumentElement.SelectNodes("//dprms:file[@usage='cardphoto']", nsmgr);
+            if (nodes.Count == 0)
+                return null;
+        }
 
         string strID = DomUtil.GetAttr(nodes[0], "id");
         if (string.IsNullOrEmpty(strID) == true)

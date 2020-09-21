@@ -267,7 +267,7 @@ namespace dp2SSL
                         //Background = Brushes.DarkRed,
                         //Foreground = Brushes.White
                         FontFamily = new FontFamily("楷体"),
-                        FontSize = baseFontSize * 3.5,  // 2.5,
+                        FontSize = baseFontSize * 5.5,  // 3.5,
                         // FontWeight = FontWeights.Bold,
                         Foreground = Brushes.White,
                     });
@@ -280,7 +280,7 @@ namespace dp2SSL
                             //Background = Brushes.DarkRed,
                             Foreground = Brushes.Green,
                             // FontFamily = new FontFamily("楷体"),
-                            FontSize = baseFontSize,
+                            FontSize = baseFontSize * 2.0,    // 1.0
                             // FontWeight = FontWeights.Bold,
                         });
                     }
@@ -290,9 +290,11 @@ namespace dp2SSL
                         Text = $"\r\n{StringUtil.MakePathList(lines, ", ")}\r\n",
                         //Background = Brushes.DarkRed,
                         //Foreground = Brushes.White
-                        FontSize = baseFontSize * 1.2,
+                        FontSize = baseFontSize * 3.0,  // * 1.2,
                         Foreground = Brushes.White,
                     });
+
+                    App.CurrentApp.SpeakSequence(StringUtil.MakePathList(lines, ", "));
                 }
 
 #if NO

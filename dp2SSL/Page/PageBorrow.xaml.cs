@@ -3865,7 +3865,8 @@ string usage)
                 clearPatron.IsEnabled = true;
             }));
 
-            App.CurrentApp.Speak($"欢迎您，{(string.IsNullOrEmpty(_patron.PatronName) ? _patron.Barcode : _patron.PatronName)}");
+            // 欢迎您，
+            App.CurrentApp.Speak($"{(string.IsNullOrEmpty(_patron.PatronName) ? _patron.Barcode : _patron.PatronName)}");
 
             // 身份读写器平放
             if (App.PatronReaderVertical == false)
