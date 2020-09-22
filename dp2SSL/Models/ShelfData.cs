@@ -122,6 +122,11 @@ namespace dp2SSL
 
         static int _openingDoorCount = -1; // 当前处于打开状态的门的个数。-1 表示个数尚未初始化
 
+        static List<string> _openDoorSpeakList = new List<string>();
+        public static void AddOpenDoorSpeak(string text)
+        {
+            _openDoorSpeakList.Add(text);
+        }
 
         public static void RfidManager_ListLocks(object sender, ListLocksEventArgs e)
         {
@@ -161,7 +166,10 @@ namespace dp2SSL
                             processed.Add(result.Door);
 
                             if (result.NewState == "open")
-                                App.CurrentApp.SpeakSequence($"{result.LockName} 打开");
+                            {
+                                App.CurrentApp.SpeakSequence($"{result.LockName} 打开。{StringUtil.MakePathList(_openDoorSpeakList, ", ")}");
+                                _openDoorSpeakList.Clear();
+                            }
                             else
                                 App.CurrentApp.SpeakSequence($"{result.LockName} 关闭");
                         }
@@ -1235,7 +1243,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                         // 如果是联网情况下，还是要尽量获得最新的读者记录作为演算借册超期的基础
                         if (ShelfData.LibraryNetworkCondition == "OK")
                         {
-                            patron_xml = (string)patron_table[person.PatronBarcode];
+                            patron_xml = (string)patron_table[GetString(person.PatronBarcode)];
                             if (string.IsNullOrEmpty(patron_xml) == true)
                             {
                                 // 尝试获得最新的读者记录
@@ -1247,7 +1255,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                                 patron_xml = get_result.ReaderXml;
                                 // 记忆
                                 if (string.IsNullOrEmpty(patron_xml) == false)
-                                    patron_table[person.PatronBarcode] = patron_xml;
+                                    patron_table[GetString(person.PatronBarcode)] = patron_xml;
                             }
                         }
 
@@ -1351,6 +1359,13 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                     Value = -1,
                     ErrorInfo = $"SaveActions() 出现异常: {ex.Message}"
                 };
+            }
+
+            string GetString(string text)
+            {
+                if (text == null)
+                    return "";
+                return text;
             }
         }
 
