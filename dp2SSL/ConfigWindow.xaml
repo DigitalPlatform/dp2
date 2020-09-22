@@ -6,10 +6,15 @@
         xmlns:local="clr-namespace:dp2SSL"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
-        Title="系统参数" Height="465.666" Width="571.334">
+        Title="系统参数" Height="465.666" Width="571.334" Background="DarkGray">
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="60"/>
+        </Grid.RowDefinitions>
         <xctk:PropertyGrid
-            x:Name="_propertyGrid" Margin="10,10,9.667,10"
+            x:Name="_propertyGrid" Grid.Row="0"
+            Margin="10,10,9.667,10"
                                      AutoGenerateProperties="True" ShowSearchBox="False" ShowTitle="False">
             <xctk:PropertyGrid.EditorDefinitions>
                 <!--  EditorTemplateDefinition #2
@@ -34,6 +39,20 @@
                 </xctk:EditorTemplateDefinition>
             </xctk:PropertyGrid.EditorDefinitions>
         </xctk:PropertyGrid>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center">
+            <Button Name="openKeyboard" 
+                    Width="100" Height="30" 
+                    FontSize="14" FontWeight="ExtraBold" Margin="10"
+                    Foreground="White" Background="DarkGray" BorderThickness="0"
+                    Click="openKeyboard_Click">打开触摸键盘</Button>
 
+            <Button Name="okButton" 
+                    Style="{DynamicResource RoundedButtonStyle}" 
+                    Width="200" Height="60" 
+                    FontSize="30" FontWeight="ExtraBold" 
+                    Foreground="White" 
+                    Click="okButton_Click">关闭</Button>
+
+        </StackPanel>
     </Grid>
 </Window>

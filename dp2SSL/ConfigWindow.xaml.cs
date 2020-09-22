@@ -1,6 +1,8 @@
-﻿using DigitalPlatform.WPF;
+﻿using DigitalPlatform;
+using DigitalPlatform.WPF;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -53,6 +55,23 @@ namespace dp2SSL
             Button button = (Button)sender;
             PropertyItem item = (PropertyItem)button.DataContext;
             item.Value = "";
+        }
+
+        private void okButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+
+        private void openKeyboard_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                Process.Start("osk");
+            }
+            catch (Exception ex)
+            {
+                WpfClientInfo.WriteErrorLog($"打开触摸键盘时出现异常: {ExceptionUtil.GetDebugText(ex)}");
+            }
         }
     }
 }
