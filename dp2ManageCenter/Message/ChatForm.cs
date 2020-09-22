@@ -1407,6 +1407,7 @@ namespace dp2ManageCenter.Message
                 foreach (var record in e.Records)
                 {
                     // ClientInfo.WriteInfoLog($"Connection_AddMessage() 收到消息 {record.ToString()}");
+                    ClientInfo.Speak("有新消息");
 
                     UpdateGroupNameList(record.groups);
 

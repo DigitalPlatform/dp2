@@ -12,13 +12,12 @@ using System.Windows.Forms;
 using Newtonsoft.Json;
 
 using DigitalPlatform;
+using DigitalPlatform.IO;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Text;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.MessageClient;
 using DigitalPlatform.CirculationClient;
-// using DigitalPlatform.LibraryClient.localhost;
-using DigitalPlatform.IO;
 
 namespace dp2ManageCenter.Message
 {
@@ -151,17 +150,24 @@ namespace dp2ManageCenter.Message
 
         void EnableSearchButtons(bool bEnable)
         {
-            this.Invoke((Action)(() =>
+            try
             {
-                this.comboBox_query_from.Enabled = bEnable;
-                this.comboBox_query_matchStyle.Enabled = bEnable;
-                this.comboBox_query_myAccount.Enabled = bEnable;
-                this.comboBox_query_shelfAccount.Enabled = bEnable;
-                this.textBox_query_word.Enabled = bEnable;
+                this.Invoke((Action)(() =>
+                {
+                    this.comboBox_query_from.Enabled = bEnable;
+                    this.comboBox_query_matchStyle.Enabled = bEnable;
+                    this.comboBox_query_myAccount.Enabled = bEnable;
+                    this.comboBox_query_shelfAccount.Enabled = bEnable;
+                    this.textBox_query_word.Enabled = bEnable;
 
-                this.button_search.Enabled = bEnable;
-                this.button_stop.Enabled = !bEnable;
-            }));
+                    this.button_search.Enabled = bEnable;
+                    this.button_stop.Enabled = !bEnable;
+                }));
+            }
+            catch(InvalidOperationException)
+            {
+                // 可能是因为窗口被摧毁后调用的原因
+            }
         }
 
 

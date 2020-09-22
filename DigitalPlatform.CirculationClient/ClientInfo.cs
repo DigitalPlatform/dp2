@@ -21,6 +21,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.Core;
 using DigitalPlatform.Xml;
 using System.Threading.Tasks;
+using System.Speech.Synthesis;
 
 namespace DigitalPlatform.CirculationClient
 {
@@ -1224,5 +1225,51 @@ delegate_action action)
                 ClientInfo.Config.Set(section, entry, state);
             };
         }
+
+        static SpeechSynthesizer m_speech = new SpeechSynthesizer();
+        static string m_strSpeakContent = "";
+
+        public static void Speak(string strText,
+            bool bError = false,
+            bool cancel_before = true)
+        {
+#if NO
+            string color = "gray";
+            if (bError)
+                color = "darkred";
+
+            DisplayText(strText, "white", color);
+#endif
+
+            if (m_speech == null)
+                return;
+
+            if (SpeakOn == false)
+                return;
+
+            m_strSpeakContent = strText;
+            MainForm.BeginInvoke((Action)(() =>
+            {
+                try
+                {
+                    if (cancel_before)
+                        m_speech.SpeakAsyncCancelAll();
+                    m_speech.SpeakAsync(strText);
+                }
+                catch (System.Runtime.InteropServices.COMException ex)
+                {
+                    WriteErrorLog($"ClientInfo::Speak() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                }
+            }));
+        }
+
+        public static bool SpeakOn
+        {
+            get
+            {
+                return true;    // for testing
+            }
+        }
+
     }
 }
