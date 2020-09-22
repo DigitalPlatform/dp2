@@ -1452,6 +1452,12 @@ this.toolStripButton_autoFixEas.Checked);
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
+            menuItem = new MenuItem("测试创建 PII 为空的标签内容 [" + this.listView_tags.SelectedItems.Count.ToString() + "] (&S)");
+            menuItem.Click += new System.EventHandler(this.menu_saveSelectedErrorTagContent_1_Click);
+            if (this.listView_tags.SelectedItems.Count == 0)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
             contextMenu.Show(this.listView_tags, new Point(e.X, e.Y));
         }
 
@@ -1617,6 +1623,76 @@ this.toolStripButton_autoFixEas.Checked);
             else
                 this.ShowMessage("没有需要保存的事项", "yellow", true);
         }
+
+        async void menu_saveSelectedErrorTagContent_1_Click(object sender, EventArgs e)
+        {
+            int count = 0;
+            foreach (ListViewItem item in this.listView_tags.SelectedItems)
+            {
+                if (await SaveBlankPiiTagContent(item) == true)
+                    count++;
+            }
+
+            listView_tags_SelectedIndexChanged(this, new EventArgs());
+
+            UpdateSaveButton();
+
+            if (count > 0)
+                this.ShowMessage($"保存成功({count})", "green", true);
+            else
+                this.ShowMessage("没有需要保存的事项", "yellow", true);
+        }
+
+        // 故意写入 PII 为空的标签内容
+        async Task<bool> SaveBlankPiiTagContent(ListViewItem item)
+        {
+            ItemInfo item_info = (ItemInfo)item.Tag;
+            if (item_info.LogicChipItem == null)
+                return false;
+
+            string strError = "";
+
+            try
+            {
+                var old_tag_info = item_info.OneTag.TagInfo;
+
+                // 删除 PII
+                item_info.LogicChipItem.RemoveElement(ElementOID.PII);
+
+                var new_tag_info = BuildNewTagInfo(
+    old_tag_info,
+    item_info.LogicChipItem);
+
+                TagList.ClearTagTable(item_info.OneTag.UID);
+                var result = RfidManager.WriteTagInfo(item_info.OneTag.ReaderName,
+                    old_tag_info,
+                    new_tag_info);
+                if (result.Value == -1)
+                {
+                    strError = result.ErrorInfo;
+                    goto ERROR1;
+                }
+
+                await Task.Run(() => { GetTagInfo(item); });
+
+                UpdateChanged(item_info.LogicChipItem);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                strError = "SaveBlankPiiTagContent() 出现异常: " + ex.Message;
+                goto ERROR1;
+            }
+        ERROR1:
+            this.Invoke((Action)(() =>
+            {
+                ListViewUtil.ChangeItemText(item, COLUMN_PII, "error:" + strError);
+                // 把 item 修改为红色背景，表示出错的状态
+                SetItemColor(item, "error");
+            }));
+            return false;
+        }
+
 
         async void menu_saveSelectedErrorTagContent_Click(object sender, EventArgs e)
         {

@@ -2663,6 +2663,18 @@ namespace dp2SSL
                     else
                         pii = _patron.UID;  // 14443A 卡的 UID
                     */
+                    if (_patron.Protocol == InventoryInfo.ISO15693)
+                    {
+                        string error = "不允许使用 PII 为空的 ISO15693 读者卡";
+                        SetPatronError("getreaderinfo", error);
+
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = error
+                        };
+                    }
+
                     pii = _patron.UID;  // 14443A 卡的 UID
 
                     if (string.IsNullOrEmpty(pii))
@@ -3924,7 +3936,7 @@ namespace dp2SSL
                 {
                     DisplayVideo(_videoRecognition, TimeSpan.FromMinutes(1));
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     // 写入错误日志
                     WpfClientInfo.WriteErrorLog($"(PageShelf) DisplayVideo() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
@@ -3993,6 +4005,8 @@ namespace dp2SSL
 
             App.CurrentApp.Speak($"欢迎您，{(string.IsNullOrEmpty(_patron.PatronName) ? _patron.Barcode : _patron.PatronName)}");
             BeginDelayClearTask();
+
+            ShelfData.AddOpenDoorSpeak("取放图书后请及时关门");
 
             this.doorControl.AnimateDoors();
 
