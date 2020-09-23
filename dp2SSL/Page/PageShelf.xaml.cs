@@ -1297,6 +1297,9 @@ namespace dp2SSL
             bool reserve_state = StringUtil.IsInList("reserve_state", style);
             // 是否保有处理前的 entity.BorrowInfo 值
             bool reserve_borrowInfo = StringUtil.IsInList("reserve_borrowInfo", style);
+            // 是否弹性使用 OI
+            bool loose_oi = StringUtil.IsInList("loose_oi", style);
+
             try
             {
                 foreach (Entity entity in entities)
@@ -1335,7 +1338,7 @@ namespace dp2SSL
                     if (string.IsNullOrEmpty(entity.Title)
                         && string.IsNullOrEmpty(entity.PII) == false && entity.PII != "(空)")
                     {
-                        GetEntityDataResult result = await GetEntityDataAsync(entity.GetOiPii(true), "");
+                        GetEntityDataResult result = await GetEntityDataAsync(entity.GetOiPii(!loose_oi), "");
                         if (result.Value == -1)
                         {
                             entity.SetError(result.ErrorInfo);
@@ -2887,7 +2890,7 @@ namespace dp2SSL
                                 // 或者，一旦发现册记录中有 overflow 元素时，补从 dp2library 服务器再获取一次册记录信息
                                 await FillBookFieldsAsync(channel,
                                     entities,
-                                    "reserve_state,reserve_borrowInfo",
+                                    "reserve_state,reserve_borrowInfo,loose_oi",
                                     new CancellationToken());
                             }
                             finally
@@ -3645,6 +3648,20 @@ namespace dp2SSL
                     {
                         var infos = ShelfData.BuildOperationInfos(actions);
 
+                        // 2020/9/23
+                        // 可能因为获得书目摘要耽误一点时间，所以选择在独立的 Task 中执行
+                        _ = Task.Run(async () =>
+                        {
+                            try
+                            {
+                                await SendMessagesAsync(infos, actions[0].Operator);
+                            }
+                            catch(Exception ex)
+                            {
+                                WpfClientInfo.WriteErrorLog($"SendMessagesAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                            }
+                        });
+#if REMOVED
                         StringBuilder text = new StringBuilder();
                         text.AppendLine($"{actions[0].Operator.GetDisplayString()}");
                         int i = 0;
@@ -3660,6 +3677,7 @@ namespace dp2SSL
                             i++;
                         }
                         TrySetMessage(null, text.ToString());
+#endif
                     }
 
                     // TODO: 加入的时候应带有归并功能。但注意 Retry 线程里面正在处理的集合应该暂时从 RetryActions 里面移走，避免和归并过程掺和
@@ -3814,6 +3832,42 @@ namespace dp2SSL
                 }));
                 */
             }
+        }
+
+        // TODO: 把 还书 和 上架，归并为一条 还书并上架
+        static async Task SendMessagesAsync(List<ShelfData.OperationInfo> infos,
+            Operator person)
+        {
+            StringBuilder text = new StringBuilder();
+            text.AppendLine($"{person.GetDisplayString()}");
+            int i = 0;
+            foreach (var info in infos)
+            {
+                // TODO: 为啥 Entity.Title 为空
+                string title = info.Entity.Title;
+                if (string.IsNullOrEmpty(title) == true)
+                {
+                    if (ShelfData.LibraryNetworkCondition != "OK")
+                        title = LibraryChannelUtil.GetBiblioSummaryFromLocal(info.Entity.PII);
+                    else
+                    {
+                        // 先尝试从本地缓存获得
+                        title = LibraryChannelUtil.GetBiblioSummaryFromLocal(info.Entity.PII);
+                        // 再尝试从 dp2library 服务器获得
+                        if (string.IsNullOrEmpty(title))
+                            title = await LibraryChannelUtil.GetBiblioSummaryFromNetworkAsync(info.Entity.PII);
+                    }
+                }
+
+                text.Append($"{i + 1}) {info.Operation} {SubmitDocument.ShortTitle(title)} [{info.Entity.PII}]");
+                if (string.IsNullOrEmpty(info.Location) == false)
+                    text.Append($" 调拨到:{info.Location}");
+                if (string.IsNullOrEmpty(info.ShelfNo) == false)
+                    text.Append($" 新架位:{info.ShelfNo}");
+                text.AppendLine();
+                i++;
+            }
+            TrySetMessage(null, text.ToString());
         }
 
         static string MakeList(List<string> list)

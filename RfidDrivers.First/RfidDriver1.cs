@@ -2742,12 +2742,12 @@ out Reader reader);
                     }
                     else
 #endif
-                        return new ReadBlocksResult
-                        {
-                            Value = -1,
-                            ErrorInfo = $"实际读出的字节数 {bytesRead} 不是单元尺寸 {block_size + 1} 的整倍数(注意每个块后面跟随了一个 byte 的锁定信息。块尺寸为 {block_size})",
-                            ErrorCode = "bytesCountError"
-                        };
+                    return new ReadBlocksResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"实际读出的字节数 {bytesRead} 不是单元尺寸 {block_size + 1} 的整倍数(注意每个块后面跟随了一个 byte 的锁定信息。块尺寸为 {block_size})",
+                        ErrorCode = "bytesCountError"
+                    };
                 }
                 // 实际读出的块个数
                 uint count = bytesRead / (block_size + 1);
@@ -3222,6 +3222,7 @@ out Reader reader);
         // 设置 EAS 和 AFI
         // parameters:
         //      reader_name 读卡器名字。可以为 "*"，表示所有读卡器，此时会自动在多个读卡器上寻找 uid 符合的标签并进行修改
+        //      style   处理风格。如果包含 "detect"，表示修改之前会先读出，如果没有必要修改则不会执行修改
         // return result.Value
         //      -1  出错
         //      0   成功
@@ -3229,7 +3230,8 @@ out Reader reader);
     string reader_name,
     string uid,
     uint antenna_id,
-    bool enable)
+    bool enable,
+    string style)
         {
             /*
             List<object> handles = GetAllReaderHandle(reader_name);
@@ -3616,6 +3618,44 @@ out Reader reader);
                     ErrorCode = GetErrorCode(iret, hreader)
                 };
             return new NormalResult();
+        }
+
+        class ReadAfiResult : NormalResult
+        {
+            public byte AFI { get; set; }
+        }
+
+        ReadAfiResult ReadAFI(
+            UIntPtr hreader,
+            UIntPtr hTag,
+            string uid_string)
+        {
+            int iret;
+            Byte[] uid = new Byte[8];
+            uid = Element.FromHexString(uid_string);
+
+            Byte dsfid, afi, icref;
+            UInt32 blkSize, blkNum;
+            dsfid = afi = icref = 0;
+            blkSize = blkNum = 0;
+            iret = RFIDLIB.rfidlib_aip_iso15693.ISO15693_GetSystemInfo(
+                hreader,
+                hTag,
+                uid,
+                ref dsfid,
+                ref afi,
+                ref blkSize,
+                ref blkNum,
+                ref icref);
+            if (iret != 0)
+                return new ReadAfiResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"ISO15693_GetSystemInfo() error 3. iret:{iret},uid:{Element.GetHexString(uid)}",
+                    ErrorCode = GetErrorCode(iret, hreader)
+                };
+
+            return new ReadAfiResult { AFI = afi };
         }
 
         // TODO: 最好让函数可以适应标签不支持 EAS 的情况
@@ -4325,7 +4365,7 @@ out Reader reader);
         }
 
 
-#region ShelfLock
+        #region ShelfLock
 
         void CloseAllLocks()
         {
@@ -4498,7 +4538,7 @@ out Reader reader);
             };
         }
 
-#endregion
+        #endregion
 
         List<ShelfLock> GetLocksByName(string lock_name)
         {

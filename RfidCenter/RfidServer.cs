@@ -10,12 +10,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using Serilog;
+
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Core;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
-using Serilog;
 
 namespace RfidCenter
 {
@@ -808,10 +809,24 @@ bool enable)
         }
         */
 
+        // 兼容以前的版本
+        public NormalResult SetEAS(
+string reader_name,
+string tag_name,
+uint antenna_id,
+bool enable)
+        {
+            return SetEAS(reader_name, 
+                tag_name,
+                antenna_id,
+                enable,
+                "");
+        }
+
         // parameters:
         //      reader_name 读卡器名字。也可以为 "*"，表示所有读卡器
         //      tag_name    标签名字。为 pii:xxxx 或者 uid:xxxx 形态。若没有冒号，则默认为是 UID
-        //      style   如果标签所在的天线不是 1 号天线，要用 antenna:1|2|3|4 来进行调用(列出一个或者多个可能的天线号)
+        //      style   处理风格。如果包含 "detect"，表示修改之前会先读出，如果没有必要修改则不会执行修改
         // return result.Value:
         //      -1  出错
         //      0   没有找到指定的标签
@@ -820,7 +835,8 @@ bool enable)
 string reader_name,
 string tag_name,
 uint antenna_id,
-bool enable)
+bool enable,
+string style)
         {
             string uid = "";
             List<string> parts = StringUtil.ParseTwoPart(tag_name, ":");
@@ -865,7 +881,8 @@ bool enable)
 reader_name,
 uid,
 antenna_id,
-enable);
+enable,
+style);
                 if (result.Value == -1)
                     return result;
                 return new NormalResult { Value = 1 };

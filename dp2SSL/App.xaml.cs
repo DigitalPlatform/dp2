@@ -841,7 +841,7 @@ namespace dp2SSL
 
                     WpfClientInfo.WriteInfoLog($"文件 {fullPath} 被修改权限，以便任何用户都可以访问和修改它");
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     WpfClientInfo.WriteErrorLog($"GrantAccess({fullPath}) 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 }
@@ -873,7 +873,7 @@ namespace dp2SSL
                     WpfClientInfo.Config?.Set("pageShelf", "splitterPosition", PageMenu.PageShelf?.SplitterPosition);
                 }
             }
-            catch(NullReferenceException)
+            catch (NullReferenceException)
             {
 
             }
@@ -1450,7 +1450,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
         {
             List<string> missing_rights = new List<string>();
             var base_rights = StringUtil.SplitList(_baseRights);
-            foreach(var right in base_rights)
+            foreach (var right in base_rights)
             {
                 if (StringUtil.IsInList(right, rights) == false)
                     missing_rights.Add(right);
@@ -2113,11 +2113,14 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
         }
 
         // 获得当前最顶部的窗口
+        // 注意，需要忽略隐藏状态的窗口
         public static Window GetActiveWindow()
         {
             try
             {
-                return SortWindowsTopToBottom(Application.Current.Windows.OfType<Window>()).FirstOrDefault();
+                return SortWindowsTopToBottom(Application.Current.Windows.OfType<Window>())
+                    .Where(o => o.IsVisible == true)    // 2020/9/23
+                    .FirstOrDefault();
 
                 /*
             // https://stackoverflow.com/questions/2038879/refer-to-active-window-in-wpf
