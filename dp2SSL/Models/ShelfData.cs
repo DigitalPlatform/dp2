@@ -978,6 +978,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
         }
 
         // 根据 ActionInfo 对象构建 OperationInfo 对象
+        // TODO: 把 还书 和 上架，归并为一条 还书并上架
         public static List<OperationInfo> BuildOperationInfos(List<ActionInfo> actions)
         {
             List<OperationInfo> results = new List<OperationInfo>();

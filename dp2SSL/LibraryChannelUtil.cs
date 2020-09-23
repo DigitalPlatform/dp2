@@ -262,6 +262,7 @@ namespace dp2SSL
                                 {
                                     try
                                     {
+                                        /*
                                         var exist_item = context.BiblioSummaries.Where(o => o.PII == pii).FirstOrDefault();
 
                                         if (exist_item != null)
@@ -279,6 +280,13 @@ namespace dp2SSL
                                                 BiblioSummary = strSummary
                                             });
                                         await context.SaveChangesAsync();
+                                        */
+                                        // 2020/9/23
+                                        await AddOrUpdateAsync(context, new BiblioSummaryItem
+                                        {
+                                            PII = pii,
+                                            BiblioSummary = strSummary
+                                        });
                                     }
                                     catch (Exception ex)
                                     {
@@ -333,6 +341,34 @@ namespace dp2SSL
                 };
             }
         }
+
+        static async Task AddOrUpdateAsync(BiblioCacheContext context,
+    BiblioSummaryItem item)
+        {
+            try
+            {
+                // 保存到本地数据库
+                context.BiblioSummaries.Add(item);
+                await context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                SqliteException sqlite_exception = ex.InnerException as SqliteException;
+                if (sqlite_exception != null && sqlite_exception.SqliteErrorCode == 19)
+                {
+                    // PII 发生重复了
+                    goto UPDATE;
+                }
+                else
+                    throw ex;
+            }
+
+        UPDATE:
+            // 更新到本地数据库
+            context.BiblioSummaries.Update(item);
+            await context.SaveChangesAsync();
+        }
+
 
         // 从 OI.PII 中获得 PII 部分
         static string GetPurePII(string text)
@@ -490,7 +526,50 @@ namespace dp2SSL
             }
         }
 
+        // 2020/9/23
+        // 从 dp2library 服务器获得书目摘要
+        public static async Task<string> GetBiblioSummaryFromNetworkAsync(string pii)
+        {
+            using (var releaser = await _channelLimit.EnterAsync())
+            {
+                LibraryChannel channel = App.CurrentApp.GetChannel();
+                TimeSpan old_timeout = channel.Timeout;
+                channel.Timeout = TimeSpan.FromSeconds(10);
+                try
+                {
+                    // 从 dp2library 服务器获取书目摘要
+                    int nRedoCount = 0;
+                REDO_GETBIBLIOSUMMARY:
+                    long lRet = channel.GetBiblioSummary(
+        null,
+        pii,
+        "", // strConfirmItemRecPath,
+        null,
+        out _,
+        out string strSummary,
+        out string strError);
+                    if (lRet == -1)
+                    {
+                        if ((channel.ErrorCode == ErrorCode.RequestError ||
+        channel.ErrorCode == ErrorCode.RequestTimeOut)
+        && nRedoCount < 2)
+                        {
+                            nRedoCount++;
+                            goto REDO_GETBIBLIOSUMMARY;
+                        }
 
+                        return null;
+                    }
+
+                    return strSummary?.Replace(". -- ", "\r\n");
+                }
+                finally
+                {
+                    channel.Timeout = old_timeout;
+                    App.CurrentApp.ReturnChannel(channel);
+                }
+            }
+        }
 
         // 探测和 dp2library 服务器的通讯是否正常
         // return.Value

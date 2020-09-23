@@ -52,6 +52,14 @@ string tag_name,
 uint antenna_id,
 bool enable);
 
+        // 2020/9/23 新增加的版本，增加了 style 参数
+        NormalResult SetEAS(
+string reader_name,
+string tag_name,
+uint antenna_id,
+bool enable,
+string style);
+
         NormalResult ChangePassword(string reader_name,
 string uid,
 string type,
