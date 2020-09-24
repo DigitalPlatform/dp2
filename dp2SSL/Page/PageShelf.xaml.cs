@@ -3656,7 +3656,7 @@ namespace dp2SSL
                             {
                                 await SendMessagesAsync(infos, actions[0].Operator);
                             }
-                            catch(Exception ex)
+                            catch (Exception ex)
                             {
                                 WpfClientInfo.WriteErrorLog($"SendMessagesAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                             }
@@ -3845,21 +3845,22 @@ namespace dp2SSL
             {
                 // TODO: 为啥 Entity.Title 为空
                 string title = info.Entity.Title;
+                string oi_pii = info.Entity.GetOiPii(true);
                 if (string.IsNullOrEmpty(title) == true)
                 {
                     if (ShelfData.LibraryNetworkCondition != "OK")
-                        title = LibraryChannelUtil.GetBiblioSummaryFromLocal(info.Entity.PII);
+                        title = LibraryChannelUtil.GetBiblioSummaryFromLocal(oi_pii);
                     else
                     {
                         // 先尝试从本地缓存获得
-                        title = LibraryChannelUtil.GetBiblioSummaryFromLocal(info.Entity.PII);
+                        title = LibraryChannelUtil.GetBiblioSummaryFromLocal(oi_pii);
                         // 再尝试从 dp2library 服务器获得
                         if (string.IsNullOrEmpty(title))
-                            title = await LibraryChannelUtil.GetBiblioSummaryFromNetworkAsync(info.Entity.PII);
+                            title = await LibraryChannelUtil.GetBiblioSummaryFromNetworkAsync(oi_pii);
                     }
                 }
 
-                text.Append($"{i + 1}) {info.Operation} {SubmitDocument.ShortTitle(title)} [{info.Entity.PII}]");
+                text.Append($"{i + 1}) {info.Operation} {SubmitDocument.ShortTitle(title)} [{oi_pii}]");
                 if (string.IsNullOrEmpty(info.Location) == false)
                     text.Append($" 调拨到:{info.Location}");
                 if (string.IsNullOrEmpty(info.ShelfNo) == false)

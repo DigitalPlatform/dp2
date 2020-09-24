@@ -45,7 +45,7 @@ namespace dp2SSL.Models
         // 最近一次检查升级的时刻
         static DateTime _lastUpdateTime;
         // 检查升级的时间间隔
-        static TimeSpan _updatePeriod = TimeSpan.FromMinutes(10); // 2*60 两个小时
+        static TimeSpan _updatePeriod = TimeSpan.FromMinutes(60); // 2*60 两个小时
 
         // 监控间隔时间
         static TimeSpan _monitorIdleLength = TimeSpan.FromSeconds(10);

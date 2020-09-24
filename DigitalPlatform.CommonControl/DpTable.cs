@@ -591,6 +591,14 @@ namespace DigitalPlatform.CommonControl
 
         internal bool m_bDelayUpdate = false;
 
+        public bool DelayUpdate
+        {
+            get
+            {
+                return m_bDelayUpdate;
+            }
+        }
+
         public void BeginUpdate()
         {
             this.m_bDelayUpdate = true;
@@ -2748,6 +2756,10 @@ Color.FromArgb(100, this.m_hoverBackColor)
         //      是否发生卷滚了
         public bool EnsureVisible(DpRow line)
         {
+            // 2020/9/24
+            if (line == null)
+                return false;
+
             RectangleF rectUpdate = line.GetViewRect();
 
             RectangleF rectCell = rectUpdate;

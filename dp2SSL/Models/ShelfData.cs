@@ -1510,7 +1510,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                 foreach (string pii in piis)
                 {
                     var book_type = await GetBookType(pii);
-                    debugInfo?.AppendLine($"计算在借册数过程: 获得 'pii' 的图书类型，返回 book_type='{book_type}'");
+                    debugInfo?.AppendLine($"计算在借册数过程: 获得 '{pii}' 的图书类型，返回 book_type='{book_type}'");
                     if (book_type == info_result.BookType)
                     {
                         debugInfo?.AppendLine($"匹配 图书类型 '{book_type}' 和 info_result.BookType '{info_result.BookType}' 匹配上了，加一");
@@ -2253,6 +2253,10 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                         var item_pii = borrow.GetAttribute("barcode");
                         var item_oi = borrow.GetAttribute("oi");
                         string oi_pii = item_oi + "." + item_pii;
+                        // 2020/9/24
+                        // 注意早期的读者记录中 borrow 元素没有 oi 属性。这时宽容一点处理
+                        if (string.IsNullOrEmpty(item_oi))
+                            oi_pii = item_pii;
 
                         // 如果借阅时间以后发生过还书，则排除
                         var items = context.Requests
