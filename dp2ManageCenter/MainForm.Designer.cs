@@ -48,6 +48,7 @@
             this.ToolStripMenuItem_searchShelf = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.ToolStripMenuItem_messageAccounts = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_chat = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_help = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_openUserFolder = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_openDataFolder = new System.Windows.Forms.ToolStripMenuItem();
@@ -79,7 +80,6 @@
             this.columnHeader8 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.tabPage_history = new System.Windows.Forms.TabPage();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
-            this.ToolStripMenuItem_chat = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.tabControl_main.SuspendLayout();
@@ -253,6 +253,13 @@
             this.ToolStripMenuItem_messageAccounts.Size = new System.Drawing.Size(315, 40);
             this.ToolStripMenuItem_messageAccounts.Text = "设置消息账户";
             this.ToolStripMenuItem_messageAccounts.Click += new System.EventHandler(this.ToolStripMenuItem_messageAccounts_Click);
+            // 
+            // ToolStripMenuItem_chat
+            // 
+            this.ToolStripMenuItem_chat.Name = "ToolStripMenuItem_chat";
+            this.ToolStripMenuItem_chat.Size = new System.Drawing.Size(315, 40);
+            this.ToolStripMenuItem_chat.Text = "聊天";
+            this.ToolStripMenuItem_chat.Click += new System.EventHandler(this.ToolStripMenuItem_chat_Click);
             // 
             // MenuItem_help
             // 
@@ -537,13 +544,6 @@
             this.webBrowser1.Name = "webBrowser1";
             this.webBrowser1.Size = new System.Drawing.Size(962, 450);
             this.webBrowser1.TabIndex = 3;
-            // 
-            // ToolStripMenuItem_chat
-            // 
-            this.ToolStripMenuItem_chat.Name = "ToolStripMenuItem_chat";
-            this.ToolStripMenuItem_chat.Size = new System.Drawing.Size(315, 40);
-            this.ToolStripMenuItem_chat.Text = "聊天";
-            this.ToolStripMenuItem_chat.Click += new System.EventHandler(this.ToolStripMenuItem_chat_Click);
             // 
             // MainForm
             // 

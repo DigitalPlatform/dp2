@@ -5514,7 +5514,13 @@ MessageBoxDefaultButton.Button2);
                 _chatDialog.Show(this);
             }
             else
+            {
                 _chatDialog.Visible = true;
+                if (_chatDialog.WindowState == FormWindowState.Minimized)
+                    _chatDialog.WindowState = FormWindowState.Normal;
+
+                _chatDialog.Activate();
+            }
 
             /*
             ChatForm dlg = new ChatForm();

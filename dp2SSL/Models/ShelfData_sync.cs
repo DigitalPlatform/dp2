@@ -402,7 +402,7 @@ TaskScheduler.Default);
                                     command.Parameters.Clear();
 
                                     var field_nodes = dom.DocumentElement.SelectNodes("field");
-                                    foreach(XmlElement field_node in field_nodes)
+                                    foreach (XmlElement field_node in field_nodes)
                                     {
                                         string name = field_node.GetAttribute("name");
                                         string value = field_node.InnerText;
@@ -526,7 +526,8 @@ TaskScheduler.Default);
                     var items = context.Requests.Where(o => o.State != "sync" && o.State != "dontsync")
                         .OrderBy(o => o.ID).ToList();
                     var actions = FromRequests(items);
-                    WpfClientInfo.WriteInfoLog($"从本地数据库装载 Actions 成功。内容如下：\r\n{ActionInfo.ToString(actions)}");
+                    if (actions.Count > 0)
+                        WpfClientInfo.WriteInfoLog($"从本地数据库装载 Actions 成功。内容如下：\r\n{ActionInfo.ToString(actions)}");
                     return actions;
                 }
             }
@@ -542,7 +543,7 @@ TaskScheduler.Default);
                 {
                     var items = context.Requests.Where(o => o.Action == "borrow" && o.LinkID == null && string.IsNullOrEmpty(o.ActionString) == false).ToList();
                     RequestItem request = null;
-                    foreach(var item in items)
+                    foreach (var item in items)
                     {
                         try
                         {
@@ -553,7 +554,7 @@ TaskScheduler.Default);
                                 break;
                             }
                         }
-                        catch(Exception ex)
+                        catch (Exception ex)
                         {
                             WpfClientInfo.WriteErrorLog($"解析 borrow_info 字符串 '{item.ActionString}' 时出现异常: {ExceptionUtil.GetDebugText(ex)}");
                         }
@@ -800,14 +801,15 @@ TaskScheduler.Default);
             // 建立权重对照表
             // List<ActionInfo> --> int
             Hashtable weight_table = new Hashtable();
-            foreach(var group in groups)
+            foreach (var group in groups)
             {
                 int weight = ComputeWeight(group);
                 weight_table[group] = weight;
             }
 
             // 排序
-            groups.Sort((a, b) => {
+            groups.Sort((a, b) =>
+            {
                 int weight_a = (int)weight_table[a];
                 int weight_b = (int)weight_table[b];
                 return -1 * (weight_a - weight_b);
@@ -819,12 +821,12 @@ TaskScheduler.Default);
             int ComputeWeight(List<ActionInfo> actions)
             {
                 int weight = 0;
-                foreach(var action in actions)
+                foreach (var action in actions)
                 {
                     if (action.Action == "return")
-                        weight ++;
+                        weight++;
                     else if (action.Action == "borrow")
-                        weight --;
+                        weight--;
                 }
 
                 return weight;

@@ -539,8 +539,11 @@ namespace dp2ManageCenter.Message
                     ));
                     _lastMessage = null;
                 }
-                this.Invoke((Action)(() => this.DislayProgress("正在获取消息，请等待 ...")));
-
+                this.Invoke((Action)(() =>
+                {
+                    this.DislayProgress("正在获取消息，请等待 ...");
+                    this.dpTable_messages.BeginUpdate();
+                }));
                 //EnableControls(false);
                 try
                 {
@@ -594,7 +597,14 @@ namespace dp2ManageCenter.Message
                 finally
                 {
                     //EnableControls(true);
-                    this.Invoke((Action)(() => this.DislayProgress("")));
+                    this.Invoke((Action)(() =>
+                    {
+                        this.dpTable_messages.EndUpdate();
+                        if (_bVertBottom)
+                            this.dpTable_messages.EnsureVisible(this.dpTable_messages.Rows.LastOrDefault());
+
+                        this.DislayProgress("");
+                    }));
                 }
             ERROR1:
                 //this.Invoke((Action)(() => MessageBox.Show(this, strError)));
@@ -905,7 +915,7 @@ namespace dp2ManageCenter.Message
                 {
                     this.dpTable_messages.Rows.Add(row);
 
-                    if (_bVertBottom)
+                    if (_bVertBottom && this.dpTable_messages.DelayUpdate == false)
                         this.dpTable_messages.EnsureVisible(row);
                 }
                 else
