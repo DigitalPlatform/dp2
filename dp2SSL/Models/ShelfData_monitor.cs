@@ -132,7 +132,13 @@ namespace dp2SSL
                             {
                                 // SaveStartDate("");
 
-                                var repl_result = await PatronReplication.DownloadAllPatronRecordAsync(token);
+                                var repl_result = await PatronReplication.DownloadAllPatronRecordAsync(
+                                    (text) =>
+                                    {
+                                        WpfClientInfo.WriteInfoLog(text);
+                                        PageShelf.TrySetMessage(null, text);
+                                    },
+                                    token);
                                 if (repl_result.Value == -1)
                                 {
                                     // TODO: 判断通讯出错的错误码。如果是通讯出错，则稍后需要重试下载

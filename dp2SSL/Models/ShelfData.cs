@@ -1058,6 +1058,10 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             return results;
         }
 
+        // 2020/9/24
+        // 限制 actions 操作，同一时刻只能进行一轮次操作
+        internal static AsyncSemaphore _actionsLimit = new AsyncSemaphore(1);
+
         public class SaveActionResult : NormalResult
         {
             // public List<OperationInfo> Operations { get; set; }
@@ -1074,48 +1078,116 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             // List<OperationInfo> infos = new List<OperationInfo>();
             try
             {
-                // lock (_syncRoot_actions)
-                // {
-
-                // PII -> patron xml
-                Hashtable patron_table = new Hashtable();
-
-                List<string> returned_piis = new List<string>();
-                List<string> special_piis = new List<string>();
-
-                List<ActionInfo> actions = new List<ActionInfo>();
-                List<Entity> processed = new List<Entity>();
-                foreach (var entity in ShelfData.l_Adds)
+                using (var releaser = await _actionsLimit.EnterAsync())
                 {
-                    // Debug.Assert(string.IsNullOrEmpty(entity.PII) == false, "");
 
-                    if (ShelfData.BelongToNormal(entity) == false)
-                        continue;
-                    var person = func_getOperator?.Invoke(entity);
-                    if (person == null)
-                        continue;
+                    // PII -> patron xml
+                    Hashtable patron_table = new Hashtable();
 
+                    List<string> returned_piis = new List<string>();
+                    List<string> special_piis = new List<string>();
 
-                    actions.Add(new ActionInfo
+                    List<ActionInfo> actions = new List<ActionInfo>();
+                    List<Entity> processed = new List<Entity>();
+                    foreach (var entity in ShelfData.l_Adds)
                     {
-                        Entity = entity.Clone(),
-                        Action = "return",
-                        Operator = person,
-                    });
+                        // Debug.Assert(string.IsNullOrEmpty(entity.PII) == false, "");
 
-                    // 2020/9/7
-                    returned_piis.Add(entity.GetOiPii(true));
+                        if (ShelfData.BelongToNormal(entity) == false)
+                            continue;
+                        var person = func_getOperator?.Invoke(entity);
+                        if (person == null)
+                            continue;
 
-                    // 没有更新的，才进行一次 transfer。更新的留在后面专门做
-                    // “更新”的意思是从这个门移动到了另外一个门
-                    if (ShelfData.Find(ShelfData.l_Changes, (o) => o.UID == entity.UID).Count == 0)
+
+                        actions.Add(new ActionInfo
+                        {
+                            Entity = entity.Clone(),
+                            Action = "return",
+                            Operator = person,
+                        });
+
+                        // 2020/9/7
+                        returned_piis.Add(entity.GetOiPii(true));
+
+                        // 没有更新的，才进行一次 transfer。更新的留在后面专门做
+                        // “更新”的意思是从这个门移动到了另外一个门
+                        if (ShelfData.Find(ShelfData.l_Changes, (o) => o.UID == entity.UID).Count == 0)
+                        {
+                            string location = "";
+                            // 工作人员身份，还可能要进行馆藏位置向内转移
+                            if (person.IsWorker == true)
+                            {
+                                location = GetLocationPart(ShelfData.GetShelfNo(entity));
+                            }
+                            actions.Add(new ActionInfo
+                            {
+                                Entity = entity.Clone(),
+                                Action = "transfer",
+                                TransferDirection = "in",
+                                Location = location,
+                                CurrentShelfNo = ShelfData.GetShelfNo(entity),
+                                Operator = person
+                            });
+                        }
+
+                        /*
+                        // 用于显示的操作信息
+                        {
+                            var operation = new OperationInfo
+                            {
+                                Operation = "还书",
+                                Entity = entity,
+                                Operator = person,
+                                ShelfNo = ShelfData.GetShelfNo(entity),
+                            };
+                            if (person.IsWorker == true)
+                            {
+                                operation.Operation = "转入";
+                            }
+                            infos.Add(operation);
+                        }
+                        */
+
+                        processed.Add(entity);
+
+                        // 2020/4/2
+                        ShelfData.Add("all", entity);
+
+                        // 2020/4/2
+                        // 还书操作前先尝试修改 EAS
+                        if (entity.Error == null && StringUtil.IsInList("patronCard,oiError", entity.ErrorCode) == false)
+                        {
+                            var result = SetEAS(entity.UID, entity.Antenna, false);
+                            if (result.Value == -1)
+                            {
+                                string text = $"修改 EAS 动作失败: {result.ErrorInfo}";
+                                // entity.SetError(text, "yellow");
+                                entity.AppendError(text, "red", "setEasError");
+
+                                // 写入错误日志
+                                WpfClientInfo.WriteInfoLog($"修改册 '{entity.PII}' 的 EAS 失败: {result.ErrorInfo}");
+                            }
+                        }
+                    }
+
+                    foreach (var entity in ShelfData.l_Changes)
                     {
+                        // Debug.Assert(string.IsNullOrEmpty(entity.PII) == false, "");
+
+                        if (ShelfData.BelongToNormal(entity) == false)
+                            continue;
+                        var person = func_getOperator?.Invoke(entity);
+                        if (person == null)
+                            continue;
+
                         string location = "";
-                        // 工作人员身份，还可能要进行馆藏位置向内转移
+                        // 工作人员身份，还可能要进行馆藏位置转移
                         if (person.IsWorker == true)
                         {
                             location = GetLocationPart(ShelfData.GetShelfNo(entity));
                         }
+                        // 更新
                         actions.Add(new ActionInfo
                         {
                             Entity = entity.Clone(),
@@ -1125,231 +1197,163 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                             CurrentShelfNo = ShelfData.GetShelfNo(entity),
                             Operator = person
                         });
-                    }
 
-                    /*
-                    // 用于显示的操作信息
-                    {
-                        var operation = new OperationInfo
+                        /*
+                        // 用于显示的操作信息
                         {
-                            Operation = "还书",
-                            Entity = entity,
-                            Operator = person,
-                            ShelfNo = ShelfData.GetShelfNo(entity),
-                        };
-                        if (person.IsWorker == true)
-                        {
-                            operation.Operation = "转入";
-                        }
-                        infos.Add(operation);
-                    }
-                    */
-
-                    processed.Add(entity);
-
-                    // 2020/4/2
-                    ShelfData.Add("all", entity);
-
-                    // 2020/4/2
-                    // 还书操作前先尝试修改 EAS
-                    if (entity.Error == null && StringUtil.IsInList("patronCard,oiError", entity.ErrorCode) == false)
-                    {
-                        var result = SetEAS(entity.UID, entity.Antenna, false);
-                        if (result.Value == -1)
-                        {
-                            string text = $"修改 EAS 动作失败: {result.ErrorInfo}";
-                            // entity.SetError(text, "yellow");
-                            entity.AppendError(text, "red", "setEasError");
-
-                            // 写入错误日志
-                            WpfClientInfo.WriteInfoLog($"修改册 '{entity.PII}' 的 EAS 失败: {result.ErrorInfo}");
-                        }
-                    }
-                }
-
-                foreach (var entity in ShelfData.l_Changes)
-                {
-                    // Debug.Assert(string.IsNullOrEmpty(entity.PII) == false, "");
-
-                    if (ShelfData.BelongToNormal(entity) == false)
-                        continue;
-                    var person = func_getOperator?.Invoke(entity);
-                    if (person == null)
-                        continue;
-
-                    string location = "";
-                    // 工作人员身份，还可能要进行馆藏位置转移
-                    if (person.IsWorker == true)
-                    {
-                        location = GetLocationPart(ShelfData.GetShelfNo(entity));
-                    }
-                    // 更新
-                    actions.Add(new ActionInfo
-                    {
-                        Entity = entity.Clone(),
-                        Action = "transfer",
-                        TransferDirection = "in",
-                        Location = location,
-                        CurrentShelfNo = ShelfData.GetShelfNo(entity),
-                        Operator = person
-                    });
-
-                    /*
-                    // 用于显示的操作信息
-                    {
-                        var operation = new OperationInfo
-                        {
-                            Operation = "调整位置",
-                            Entity = entity,
-                            Operator = person,
-                            ShelfNo = ShelfData.GetShelfNo(entity),
-                        };
-
-                        infos.Add(operation);
-                    }
-                    */
-
-                    processed.Add(entity);
-                }
-
-                // int borrowed_count = 0;
-                List<string> borrowed_piis = new List<string>();
-                foreach (var entity in ShelfData.l_Removes)
-                {
-                    // Debug.Assert(string.IsNullOrEmpty(entity.PII) == false, "");
-
-                    if (ShelfData.BelongToNormal(entity) == false)
-                        continue;
-                    var person = func_getOperator?.Invoke(entity);
-                    if (person == null)
-                        continue;
-
-                    // 2020/4/19
-                    // 检查一下 actions 里面是否已经有了针对同一个 PII 的 return 动作。
-                    // 如果已经有了，则删除 return 动作，并且也忽略新的 borrow 动作
-                    var returns = actions.FindAll(o => o.Action == "return" && o.Entity.PII == entity.PII);
-                    if (returns.Count > 0)
-                    {
-                        foreach (var r in returns)
-                        {
-                            actions.Remove(r);
-                        }
-                        continue;
-                    }
-
-                    if (person.IsWorker == false)
-                    {
-                        string patron_xml = null;
-                        // 2020/8/13
-                        // 如果是联网情况下，还是要尽量获得最新的读者记录作为演算借册超期的基础
-                        if (ShelfData.LibraryNetworkCondition == "OK")
-                        {
-                            patron_xml = (string)patron_table[GetString(person.PatronBarcode)];
-                            if (string.IsNullOrEmpty(patron_xml) == true)
+                            var operation = new OperationInfo
                             {
-                                // 尝试获得最新的读者记录
-                                // return.Value:
-                                //      -1  出错
-                                //      0   读者记录没有找到
-                                //      1   成功
-                                var get_result = LibraryChannelUtil.GetReaderInfo(person.PatronBarcode);
-                                patron_xml = get_result.ReaderXml;
-                                // 记忆
-                                if (string.IsNullOrEmpty(patron_xml) == false)
-                                    patron_table[GetString(person.PatronBarcode)] = patron_xml;
-                            }
+                                Operation = "调整位置",
+                                Entity = entity,
+                                Operator = person,
+                                ShelfNo = ShelfData.GetShelfNo(entity),
+                            };
+
+                            infos.Add(operation);
                         }
+                        */
 
-                        // 只有读者身份才进行借阅操作
-                        actions.Add(new ActionInfo
-                        {
-                            Entity = entity.Clone(),
-                            Action = "borrow",
-                            Operator = person,
-                            ActionString = await BuildBorrowInfo(person.PatronBarcode,
-                            person.PatronInstitution,
-                            patron_xml,
-                            entity,
-                            borrowed_piis,
-                            returned_piis,
-                            special_piis), // borrowed_count++
-                        });
-
-                        borrowed_piis.Add(entity.GetOiPii(true));
+                        processed.Add(entity);
                     }
 
-                    //
-                    if (person.IsWorker == true)
+                    // int borrowed_count = 0;
+                    List<string> borrowed_piis = new List<string>();
+                    foreach (var entity in ShelfData.l_Removes)
                     {
-                        // 工作人员身份，还可能要进行馆藏位置向外转移
-                        string location = "%checkout_location%";
-                        actions.Add(new ActionInfo
+                        // Debug.Assert(string.IsNullOrEmpty(entity.PII) == false, "");
+
+                        if (ShelfData.BelongToNormal(entity) == false)
+                            continue;
+                        var person = func_getOperator?.Invoke(entity);
+                        if (person == null)
+                            continue;
+
+                        // 2020/4/19
+                        // 检查一下 actions 里面是否已经有了针对同一个 PII 的 return 动作。
+                        // 如果已经有了，则删除 return 动作，并且也忽略新的 borrow 动作
+                        var returns = actions.FindAll(o => o.Action == "return" && o.Entity.PII == entity.PII);
+                        if (returns.Count > 0)
                         {
-                            Entity = entity.Clone(),
-                            Action = "transfer",
-                            TransferDirection = "out",
-                            Location = location,
-                            // 注: ShelfNo 成员不使用。意在保持册记录中 currentLocation 元素不变
-                            Operator = person
-                        });
+                            foreach (var r in returns)
+                            {
+                                actions.Remove(r);
+                            }
+                            continue;
+                        }
+
+                        if (person.IsWorker == false)
+                        {
+                            string patron_xml = null;
+                            // 2020/8/13
+                            // 如果是联网情况下，还是要尽量获得最新的读者记录作为演算借册超期的基础
+                            if (ShelfData.LibraryNetworkCondition == "OK")
+                            {
+                                patron_xml = (string)patron_table[GetString(person.PatronBarcode)];
+                                if (string.IsNullOrEmpty(patron_xml) == true)
+                                {
+                                    // 尝试获得最新的读者记录
+                                    // return.Value:
+                                    //      -1  出错
+                                    //      0   读者记录没有找到
+                                    //      1   成功
+                                    var get_result = LibraryChannelUtil.GetReaderInfo(person.PatronBarcode);
+                                    patron_xml = get_result.ReaderXml;
+                                    // 记忆
+                                    if (string.IsNullOrEmpty(patron_xml) == false)
+                                        patron_table[GetString(person.PatronBarcode)] = patron_xml;
+                                }
+                            }
+
+                            // 只有读者身份才进行借阅操作
+                            actions.Add(new ActionInfo
+                            {
+                                Entity = entity.Clone(),
+                                Action = "borrow",
+                                Operator = person,
+                                ActionString = await BuildBorrowInfo(person.PatronBarcode,
+                                person.PatronInstitution,
+                                patron_xml,
+                                entity,
+                                borrowed_piis,
+                                returned_piis,
+                                special_piis), // borrowed_count++
+                            });
+
+                            borrowed_piis.Add(entity.GetOiPii(true));
+                        }
+
+                        //
+                        if (person.IsWorker == true)
+                        {
+                            // 工作人员身份，还可能要进行馆藏位置向外转移
+                            string location = "%checkout_location%";
+                            actions.Add(new ActionInfo
+                            {
+                                Entity = entity.Clone(),
+                                Action = "transfer",
+                                TransferDirection = "out",
+                                Location = location,
+                                // 注: ShelfNo 成员不使用。意在保持册记录中 currentLocation 元素不变
+                                Operator = person
+                            });
+                        }
+
+                        /*
+                        // 用于显示的操作信息
+                        {
+                            var operation = new OperationInfo
+                            {
+                                Operation = "借书",
+                                Entity = entity,
+                                Operator = person,
+                                ShelfNo = ShelfData.GetShelfNo(entity),
+                            };
+                            if (person.IsWorker == true)
+                            {
+                                operation.Operation = "转出";
+                            }
+                            infos.Add(operation);
+                        }
+                        */
+
+                        processed.Add(entity);
+
+                        // 2020/4/2
+                        ShelfData.Remove("all", entity);
                     }
 
                     /*
-                    // 用于显示的操作信息
+                    foreach (var entity in processed)
                     {
-                        var operation = new OperationInfo
-                        {
-                            Operation = "借书",
-                            Entity = entity,
-                            Operator = person,
-                            ShelfNo = ShelfData.GetShelfNo(entity),
-                        };
-                        if (person.IsWorker == true)
-                        {
-                            operation.Operation = "转出";
-                        }
-                        infos.Add(operation);
+                        ShelfData.Remove("all", entity);
+                        ShelfData.Remove("adds", entity);
+                        ShelfData.Remove("removes", entity);
+                        ShelfData.Remove("changes", entity);
                     }
                     */
-
-                    processed.Add(entity);
+                    {
+                        // ShelfData.Remove("all", processed);
+                        ShelfData.l_Remove("adds", processed);
+                        ShelfData.l_Remove("removes", processed);
+                        ShelfData.l_Remove("changes", processed);
+                    }
 
                     // 2020/4/2
-                    ShelfData.Remove("all", entity);
-                }
+                    ShelfData.l_RefreshCount();
 
-                /*
-                foreach (var entity in processed)
-                {
-                    ShelfData.Remove("all", entity);
-                    ShelfData.Remove("adds", entity);
-                    ShelfData.Remove("removes", entity);
-                    ShelfData.Remove("changes", entity);
-                }
-                */
-                {
-                    // ShelfData.Remove("all", processed);
-                    ShelfData.l_Remove("adds", processed);
-                    ShelfData.l_Remove("removes", processed);
-                    ShelfData.l_Remove("changes", processed);
-                }
-
-                // 2020/4/2
-                ShelfData.l_RefreshCount();
-
-                if (actions.Count == 0)
+                    if (actions.Count == 0)
+                        return new SaveActionResult
+                        {
+                            Actions = actions,
+                            //Operations = infos
+                        };  // 没有必要处理
+                    ShelfData.PushActions(actions);
                     return new SaveActionResult
                     {
                         Actions = actions,
                         //Operations = infos
-                    };  // 没有必要处理
-                ShelfData.PushActions(actions);
-                return new SaveActionResult
-                {
-                    Actions = actions,
-                    //Operations = infos
-                };
-                // }
+                    };
+                }
             }
             catch (Exception ex)
             {

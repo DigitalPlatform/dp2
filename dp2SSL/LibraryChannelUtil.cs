@@ -781,8 +781,8 @@ namespace dp2SSL
                             };
                     }
 
-                    // 命中读者记录多于一条
-                    if (patrons.Count > 1)
+                    // 命中读者记录多于一条，并且 PII 里面包含了 OI
+                    if (patrons.Count > 1 && pii.IndexOf(".") != -1)
                     {
                         return new GetReaderInfoResult
                         {
@@ -845,6 +845,22 @@ namespace dp2SSL
             if (oi == null)
                 oi = "";
 
+            // 2020/9/25
+            // 如果读者记录中没有 oi 元素，则从 libraryCode 元素推导
+            if (string.IsNullOrEmpty(oi))
+            {
+                string libraryCode = DomUtil.GetElementText(dom.DocumentElement, "libraryCode");
+                var ret = ShelfData.GetOwnerInstitution(libraryCode + "/", out string isil, out string alternative);
+                if (ret == true)
+                {
+                    if (string.IsNullOrEmpty(isil) == false)
+                        oi = isil;
+                    else if (string.IsNullOrEmpty(alternative) == false)
+                        oi = alternative;
+                }
+            }
+
+            // 注意返回的是严格形态
             return oi + "." + pii;
         }
 
@@ -1058,6 +1074,34 @@ namespace dp2SSL
                 patron.Xml = get_result.ReaderXml;
                 patron.Timestamp = get_result.Timestamp;
                 patron.LastWriteTime = lastWriteTime;
+
+#if REMOVED
+                // 2020/9/25
+                // 把 PII 规整为包含 OI 的形态
+                if (patron.PII == null
+                    || patron.PII?.IndexOf(".") == -1 || patron.PII.StartsWith("."))
+                {
+                    string pii = DomUtil.GetElementText(dom.DocumentElement, "barcode");
+                    if (string.IsNullOrEmpty(pii))
+                        pii = "@refID:" + DomUtil.GetElementText(dom.DocumentElement, "refID");
+
+                    if (pii.StartsWith("@") == false)
+                    {
+                        string libraryCode = DomUtil.GetElementText(dom.DocumentElement, "libraryCode");
+                        var ret = ShelfData.GetOwnerInstitution(libraryCode + "/", out string isil, out string alternative);
+                        if (ret == true)
+                        {
+                            // 应该是 xxx.xxx 形态
+                            if (string.IsNullOrEmpty(isil) == false)
+                                pii = isil + "." + pii;
+                            else if (string.IsNullOrEmpty(alternative) == false)
+                                pii = alternative + "." + pii;
+                        }
+                        WpfClientInfo.WriteInfoLog($"写入本地读者缓存以前，修正 PII '{patron.PII}' 为 '{pii}' (UpdateLocalPatronRecord())");
+                        patron.PII = pii;
+                    }
+                }
+#endif
             }
         }
 
@@ -1267,7 +1311,7 @@ namespace dp2SSL
             }
         }
 
-        #region GetRfidCfg
+#region GetRfidCfg
 
         public class GetRfidCfgResult : NormalResult
         {
@@ -1377,7 +1421,7 @@ namespace dp2SSL
             };
         }
 
-        #endregion
+#endregion
 
         public class GetLocationListResult : NormalResult
         {

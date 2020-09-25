@@ -1001,6 +1001,28 @@ cancellation_token);
                 return;
             }
 
+            if (command.StartsWith("help") || command.StartsWith("?"))
+            {
+                await SendMessageAsync(new string[] { groupName },
+                    @"可用命令如下:
+hello
+version
+error
+dialog
+press 按钮文字
+led 命令参数
+rebuild patron cache
+list history
+change history
+check book
+check patron
+sterilamp
+exit
+restart
+"
+);
+            }
+
             // 触发按钮
             if (command.StartsWith("press"))
             {
@@ -1040,6 +1062,13 @@ cancellation_token);
                 string param = command.Substring("led".Length).Trim();
                 App.LedText = param;    // 保存起来
                 await LedDisplay(param, groupName);
+                return;
+            }
+
+            if (command.StartsWith("rebuild patron cache"))
+            {
+                ShelfData.RedoReplicatePatron();
+                await SendMessageAsync(new string[] { groupName }, $"已启动重建读者本地缓存任务");
                 return;
             }
 
@@ -1125,7 +1154,7 @@ cancellation_token);
                     return;
                 }
 
-                await SendMessageAsync(new string[] { groupName }, "已经重新启动");
+                await SendMessageAsync(new string[] { groupName }, "开始重新启动。请等待至少 30 秒");
                 App.Invoke(new Action(() =>
                 {
                     Application.Current.Shutdown();
@@ -1143,7 +1172,7 @@ cancellation_token);
                     string args = silently ? "silently" : "interact";
                     WpfClientInfo.WriteInfoLog($"启动 {greensetup_path}，参数={args}");
                     Process.Start(greensetup_path,
-                        args);  // 
+                        args + " delay");  // 延迟 30 秒启动 dp2ssl，以便前一个 dp2ssl 进程能完全退出，避免错误日志文件出现 _001
                 }));
                 return;
             }

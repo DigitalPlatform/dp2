@@ -341,8 +341,8 @@ namespace DigitalPlatform.CirculationClient
                                     throw new ChannelException(channel.ErrorCode, strError);
                             }
 
-                            // lProcessCount++;
-                            CONTINUE:
+                        // lProcessCount++;
+                        CONTINUE:
                             // 便于循环外获得这些值
                             strLastItemDate = item.Date;
                             lLastItemIndex = item.Index + 1;
@@ -782,8 +782,25 @@ namespace DigitalPlatform.CirculationClient
             return new ReplicationPlan { StartDate = strEndDate + ":" + lCount + "-" };
         }
 
+        static int GetDbNamesByCacheDir(string strDir,
+            out List<string> dbnames,
+            out string strError)
+        {
+            strError = "";
+            dbnames = new List<string>();
+
+            DirectoryInfo di = new DirectoryInfo(strDir);
+            FileInfo[] fis = di.GetFiles("*.");
+            foreach (var fi in fis)
+            {
+                dbnames.Add(fi.Name);
+            }
+
+            return 1;
+        }
 
         // parameters:
+        //      channel 通讯通道。如果为 null，表示希望根据以前的缓存文件初始化生物特征高速缓存，而不是从 dp2library 获取和更新信息
         // return:
         //      -1  出错
         //      >=0   成功。返回实际初始化的事项
@@ -807,13 +824,28 @@ namespace DigitalPlatform.CirculationClient
 
                 // this.Prompt("正在初始化指纹缓存 ...\r\n请不要关闭本窗口\r\n\r\n(在此过程中，与指纹识别无关的窗口和功能不受影响，可前往使用)\r\n");
 
-                nRet = GetCurrentOwnerReaderNameList(
-                    channel,
-                    out List<string> readerdbnames,
-                    out strError);
-                if (nRet == -1)
+                List<string> readerdbnames = null;
+                if (channel == null)
                 {
-                    return new NormalResult { Value = -1, ErrorInfo = strError, ErrorCode = channel.ErrorCode.ToString() };
+                    // 根据已存在的缓存文件名列出读者库名
+                    nRet = GetDbNamesByCacheDir(strDir,
+    out readerdbnames,
+    out strError);
+                    if (nRet == -1)
+                    {
+                        return new NormalResult { Value = -1, ErrorInfo = strError, ErrorCode = channel.ErrorCode.ToString() };
+                    }
+                }
+                else
+                {
+                    nRet = GetCurrentOwnerReaderNameList(
+                        channel,
+                        out readerdbnames,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        return new NormalResult { Value = -1, ErrorInfo = strError, ErrorCode = channel.ErrorCode.ToString() };
+                    }
                 }
                 if (readerdbnames.Count == 0)
                 {
@@ -1039,6 +1071,8 @@ out string strFingerprint);
         public string ElementName = "fingerprint";
 
         // 初始化一个读者库的指纹缓存
+        // parameters:
+        //      channel 通讯通道。如果为 null，表示希望根据以前的缓存文件初始化生物特征高速缓存，而不是从 dp2library 获取和更新信息
         // return:
         //      -1  出错
         //      >=0 实际发送给接口程序的事项数目
@@ -1064,6 +1098,11 @@ out string strFingerprint);
 
             if (File.Exists(strResultsetFilename) == false)
             {
+                if (channel == null)
+                {
+                    strError = $"缓存文件 '{strResultsetFilename}' 不存在，无法进行脱机初始化高速缓存操作";
+                    return -1;
+                }
                 resultset = new DpResultSet(false, false);
                 resultset.Create(strResultsetFilename,
                     strResultsetFilename + ".index");
@@ -1071,6 +1110,26 @@ out string strFingerprint);
             }
             else
                 bCreate = false;
+
+            // 2020/9/25
+            // 利用以前的缓存文件建立高速缓存
+            if (channel == null)
+            {
+                resultset = new DpResultSet(false, false);
+                resultset.Attach(strResultsetFilename,
+        strResultsetFilename + ".index");
+
+                // return:
+                //      -2  remoting服务器连接失败。驱动程序尚未启动
+                //      -1  出错
+                //      >=0 实际发送给接口程序的事项数目
+                nRet = CreateFingerprintCache(resultset, null,
+                    out strError);
+                if (nRet == -1 || nRet == -2)
+                    return -1;
+
+                return nRet;
+            }
 
             // *** 第一阶段， 创建新的结果集文件；或者获取全部读者记录中的指纹时间戳
 
