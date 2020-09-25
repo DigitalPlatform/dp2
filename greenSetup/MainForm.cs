@@ -61,8 +61,6 @@ true);
             string args = string.Join(' ', Environment.GetCommandLineArgs());
             GreenInstaller.WriteInfoLog($"命令行参数: {args}");
 
-
-
             _ = Start(IsCmdLineUpdate() ? false : true);
         }
 
@@ -141,6 +139,10 @@ true);
 
             // testing
             // await Task.Delay(5000);
+
+            // 延时 30 秒，避免上一个 dp2ssl.exe 尚未彻底退出。如果没有彻底退出，会导致本次展开 .zip 文件时候覆盖失败
+            if (IsDelay())
+                await Task.Delay(TimeSpan.FromSeconds(30));
 
             string strExePath = Path.Combine(_binDir, "dp2ssl.exe");
             bool firstInstall = File.Exists(strExePath) == false;
@@ -388,9 +390,11 @@ true);
 
             GreenInstaller.WriteInfoLog($"启动 path='{strExePath}', arguments='{arguments}'");
 
+            /*
             // 延时 30 秒
             if (IsDelay() == true)
                 await Task.Delay(TimeSpan.FromSeconds(30));
+            */
 
             var proc = Process.Start(strExePath, arguments);
 

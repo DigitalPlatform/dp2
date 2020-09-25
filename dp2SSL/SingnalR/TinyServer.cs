@@ -1021,6 +1021,7 @@ exit
 restart
 "
 );
+                return;
             }
 
             // 触发按钮
@@ -1065,10 +1066,20 @@ restart
                 return;
             }
 
+            // 2020/9/25
+            // 重建读者本地缓存
             if (command.StartsWith("rebuild patron cache"))
             {
                 ShelfData.RedoReplicatePatron();
                 await SendMessageAsync(new string[] { groupName }, $"已启动重建读者本地缓存任务");
+                return;
+            }
+
+            // 2020/9/25
+            // 立即更新版本
+            if (command.StartsWith("update"))
+            {
+                Models.GlobalMonitor.ActivateUpdate();
                 return;
             }
 

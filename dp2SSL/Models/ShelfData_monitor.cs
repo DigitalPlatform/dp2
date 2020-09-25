@@ -62,6 +62,8 @@ namespace dp2SSL
 
         static AutoResetEvent _eventMonitor = new AutoResetEvent(false);
 
+        static int _replicatePatronError = 0;
+
         // 激活 Monitor 任务
         public static void ActivateMonitor()
         {
@@ -125,7 +127,8 @@ namespace dp2SSL
                         // 下载或同步读者信息
                         string startDate = LoadStartDate();
                         if (/*download_complete == false || */
-                        string.IsNullOrEmpty(startDate))
+                        string.IsNullOrEmpty(startDate)
+                        && _replicatePatronError == 0)
                         {
                             // 如果 Config 中没有记载断点位置，说明以前从来没有首次同步过。需要进行一次首次同步
                             if (string.IsNullOrEmpty(startDate))
@@ -142,6 +145,7 @@ namespace dp2SSL
                                 if (repl_result.Value == -1)
                                 {
                                     // TODO: 判断通讯出错的错误码。如果是通讯出错，则稍后需要重试下载
+                                    _replicatePatronError++;
                                 }
                                 else
                                     SaveStartDate(repl_result.StartDate);
@@ -286,6 +290,6 @@ TaskScheduler.Default);
                 App.CurrentApp.SpeakSequence($"不要忘记关门 {StringUtil.MakePathList(doors, ",")}");
         }
 
-#endregion
+        #endregion
     }
 }

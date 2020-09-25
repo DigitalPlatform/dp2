@@ -781,8 +781,8 @@ namespace dp2SSL
                             };
                     }
 
-                    // 命中读者记录多于一条，并且 PII 里面包含了 OI
-                    if (patrons.Count > 1 && pii.IndexOf(".") != -1)
+                    // 命中读者记录多于一条
+                    if (patrons.Count > 1)
                     {
                         return new GetReaderInfoResult
                         {
