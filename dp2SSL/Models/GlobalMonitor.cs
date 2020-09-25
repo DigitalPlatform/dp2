@@ -180,6 +180,20 @@ TaskCreationOptions.LongRunning,
 TaskScheduler.Default);
         }
 
+        // 立即进行升级
+        public static void ActivateUpdate()
+        {
+            if (_updateSucceedCount > 0)
+            {
+                PageShelf.TrySetMessage(null, "稍早已经更新过了，现在重启 dp2ssl 可以使用此新版本");
+                return;
+            }
+
+            PageShelf.TrySetMessage(null, "开始更新");
+            _lastUpdateTime = DateTime.MinValue;
+            ActivateMonitor();
+        }
+
         // 检查小票打印机状态
         static DigitalPlatform.NormalResult CheckPosPrinter()
         {

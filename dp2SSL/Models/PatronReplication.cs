@@ -15,6 +15,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.WPF;
 using DigitalPlatform.IO;
 using System.IO;
+using System.Collections;
 
 namespace dp2SSL.Models
 {
@@ -64,6 +65,8 @@ namespace dp2SSL.Models
 
         public delegate void Delegate_writeLog(string text);
 
+        static int _inDownloadingPatron = 0;
+
         // 第一阶段：获得全部读者库记录，进入本地数据库
         // result.Value
         //      -1  出错
@@ -72,8 +75,21 @@ namespace dp2SSL.Models
             Delegate_writeLog writeLog,
             CancellationToken token)
         {
-            writeLog?.Invoke($"开始下载全部读者记录到本地缓存");
+            _inDownloadingPatron++;
 
+            // 2020/9/26
+            if (_inDownloadingPatron > 1)
+            {
+                _inDownloadingPatron--;
+                return new ReplicationPlan
+                {
+                    Value = -1,
+                    ErrorCode = "running",
+                    ErrorInfo = "前一次的“下载全部读者记录到本地缓存”过程还在进行中，本次触发被放弃"
+                };
+            }
+
+            writeLog?.Invoke($"开始下载全部读者记录到本地缓存");
             LibraryChannel channel = App.CurrentApp.GetChannel();
             var old_timeout = channel.Timeout;
             channel.Timeout = TimeSpan.FromMinutes(5);  // 设置 5 分钟。因为读者记录检索需要一定时间
@@ -136,6 +152,10 @@ out string strError);
 
                 DateTime search_time = DateTime.Now;
 
+                Hashtable pii_table = new Hashtable();
+                int skip_count = 0;
+                int error_count = 0;
+
                 // 获取和存储记录
                 ResultSetLoader loader = new ResultSetLoader(channel,
     null,
@@ -165,12 +185,34 @@ out string strError);
 
                             PatronItem item = new PatronItem();
 
+                            // result.Value:
+                            //      -1  出错
+                            //      0   需要跳过这条读者记录
+                            //      1   成功
                             var result = Set(item, record, search_time);
-                            if (result.Value == -1)
+                            if (result.Value == -1 || result.Value == 0)
                             {
                                 // TODO: 是否汇总报错信息？
+
+                                if (result.Value == -1)
+                                {
+                                    writeLog?.Invoke($"Set() ({item.RecPath}) 出错: {result.ErrorInfo}");
+                                    error_count++;
+                                }
+                                if (result.Value == 0)
+                                    skip_count++;
                                 continue;
                             }
+
+                            // 
+                            if (pii_table.ContainsKey(result.PII))
+                            {
+                                string recpath = (string)pii_table[result.PII];
+                                writeLog?.Invoke($"发现读者记录 {item.RecPath} 的 PII '{result.PII}' 和 {recpath} 的 PII 重复了。跳过它");
+                                continue;
+                            }
+
+                            pii_table[result.PII] = item.RecPath;
 
                             // TODO: PII 应该是包含 OI 的严格形态
                             context.Patrons.Add(item);
@@ -185,7 +227,7 @@ out string strError);
                     }
                 }
 
-                writeLog?.Invoke($"plan.StartDate='{plan.StartDate}'。返回");
+                writeLog?.Invoke($"plan.StartDate='{plan.StartDate}'。skip_count={skip_count}, error_count={error_count}。返回");
 
                 return new ReplicationPlan
                 {
@@ -195,6 +237,9 @@ out string strError);
             }
             catch (Exception ex)
             {
+                // 2020/9/26
+                writeLog?.Invoke($"DownloadAllPatronRecord() 出现异常：{ExceptionUtil.GetDebugText(ex)}");
+
                 return new ReplicationPlan
                 {
                     Value = -1,
@@ -207,10 +252,22 @@ out string strError);
                 App.CurrentApp.ReturnChannel(channel);
 
                 writeLog?.Invoke($"结束下载全部读者记录到本地缓存");
+
+                _inDownloadingPatron--;
             }
         }
 
-        static NormalResult Set(PatronItem patron,
+        class SetResult : NormalResult
+        {
+            public string PII { get; set; }
+        }
+
+        // 设置 PatronItem 对象成员
+        // result.Value:
+        //      -1  出错
+        //      0   需要跳过这条读者记录
+        //      1   成功
+        static SetResult Set(PatronItem patron,
             Record record,
             DateTime lastWriteTime)
         {
@@ -221,7 +278,7 @@ out string strError);
             }
             catch (Exception ex)
             {
-                return new NormalResult
+                return new SetResult
                 {
                     Value = -1,
                     ErrorInfo = $"读者记录装载进入 XMLDOM 时出错:{ex.Message}",
@@ -229,9 +286,25 @@ out string strError);
                 };
             }
 
+            string state = DomUtil.GetElementText(dom.DocumentElement, "state");
+            if (string.IsNullOrEmpty(state) == false)
+                return new SetResult
+                {
+                    Value = 0,
+                    ErrorInfo = $"读者证状态为 '{state}'。即不为空"
+                };
+
             // TODO: 如果 XML 记录尺寸太大，可以考虑删除一些无关紧要的元素以后进入 patron.Xml，避免溢出 SQLite 一条记录可以存储的最大尺寸
 
             string pii = DomUtil.GetElementText(dom.DocumentElement, "barcode");
+
+            if (string.IsNullOrEmpty(pii))
+                return new SetResult
+                {
+                    Value = 0,
+                    ErrorInfo = "读者证条码号为空"
+                };
+
             if (string.IsNullOrEmpty(pii))
                 pii = "@refID:" + DomUtil.GetElementText(dom.DocumentElement, "refID");
 
@@ -261,7 +334,11 @@ out string strError);
             patron.Xml = record.RecordBody.Xml;
             patron.Timestamp = record.RecordBody.Timestamp;
             patron.LastWriteTime = lastWriteTime;
-            return new NormalResult();
+            return new SetResult
+            {
+                Value = 1,
+                PII = pii
+            };
         }
 
         public class ReplicationResult : NormalResult
@@ -909,7 +986,7 @@ ProcessInfo info)
                     return context.Patrons.Any();
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 WpfClientInfo.WriteErrorLog($"PatronDataExists() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 return false;
