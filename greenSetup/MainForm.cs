@@ -105,6 +105,22 @@ true);
             return false;
         }
 
+        // 命令行参数里面是否包含了“延迟启动 dp2ssl”？
+        public static bool IsDelay()
+        {
+            string[] args = Environment.GetCommandLineArgs();
+            int i = 0;
+            foreach (string arg in args)
+            {
+                if (i > 0
+                    && (arg == "delay"))
+                    return true;
+                i++;
+            }
+
+            return false;
+        }
+
         const string _binDir = "c:\\dp2ssl";
 
         // 启动 dp2ssl.exe；或首次安装；或升级并启动 dp2ssl.exe
@@ -371,6 +387,10 @@ true);
                 arguments = "silently";
 
             GreenInstaller.WriteInfoLog($"启动 path='{strExePath}', arguments='{arguments}'");
+
+            // 延时 30 秒
+            if (IsDelay() == true)
+                await Task.Delay(TimeSpan.FromSeconds(30));
 
             var proc = Process.Start(strExePath, arguments);
 

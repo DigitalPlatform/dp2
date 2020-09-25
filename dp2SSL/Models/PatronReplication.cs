@@ -26,6 +26,11 @@ namespace dp2SSL.Models
         public class ReplicationPlan : NormalResult
         {
             public string StartDate { get; set; }
+
+            public override string ToString()
+            {
+                return base.ToString() + $",StartDate={StartDate}";
+            }
         }
 
         // 整体获得全部读者记录以前，预备获得同步计划信息
@@ -57,13 +62,18 @@ namespace dp2SSL.Models
             return new ReplicationPlan { StartDate = strEndDate + ":" + lCount + "-" };
         }
 
+        public delegate void Delegate_writeLog(string text);
 
         // 第一阶段：获得全部读者库记录，进入本地数据库
         // result.Value
         //      -1  出错
         //      >=0 实际获得的读者记录条数
-        public static async Task<ReplicationPlan> DownloadAllPatronRecordAsync(CancellationToken token)
+        public static async Task<ReplicationPlan> DownloadAllPatronRecordAsync(
+            Delegate_writeLog writeLog,
+            CancellationToken token)
         {
+            writeLog?.Invoke($"开始下载全部读者记录到本地缓存");
+
             LibraryChannel channel = App.CurrentApp.GetChannel();
             var old_timeout = channel.Timeout;
             channel.Timeout = TimeSpan.FromMinutes(5);  // 设置 5 分钟。因为读者记录检索需要一定时间
@@ -71,9 +81,11 @@ namespace dp2SSL.Models
             {
 
                 ReplicationPlan plan = GetReplicationPlan(channel);
+
+                writeLog?.Invoke($"GetReplicationPlan() return {plan.ToString()}");
+
                 if (plan.Value == -1)
                     return plan;
-
 
                 int nRedoCount = 0;
             REDO:
@@ -96,6 +108,8 @@ null,   // strResultSetName
 out string strError);
                 if (lRet == -1)
                 {
+                    writeLog?.Invoke($"SearchReader() 出错, strError={strError}, channel.ErrorCode={channel.ErrorCode}");
+
                     // 一次重试机会
                     if (lRet == -1
                         && (channel.ErrorCode == ErrorCode.RequestCanceled || channel.ErrorCode == ErrorCode.RequestError)
@@ -114,6 +128,8 @@ out string strError);
                 }
 
                 long hitcount = lRet;
+
+                writeLog?.Invoke($"共检索命中读者记录 {hitcount} 条");
 
                 // 把超时时间改短一点
                 channel.Timeout = TimeSpan.FromSeconds(20);
@@ -155,6 +171,8 @@ out string strError);
                                 // TODO: 是否汇总报错信息？
                                 continue;
                             }
+
+                            // TODO: PII 应该是包含 OI 的严格形态
                             context.Patrons.Add(item);
 
                             if ((i % 10) == 0)
@@ -166,6 +184,8 @@ out string strError);
                         await context.SaveChangesAsync(token);
                     }
                 }
+
+                writeLog?.Invoke($"plan.StartDate='{plan.StartDate}'。返回");
 
                 return new ReplicationPlan
                 {
@@ -185,6 +205,8 @@ out string strError);
             {
                 channel.Timeout = old_timeout;
                 App.CurrentApp.ReturnChannel(channel);
+
+                writeLog?.Invoke($"结束下载全部读者记录到本地缓存");
             }
         }
 
@@ -678,7 +700,7 @@ out string strError);
                 string strAction = DomUtil.GetElementText(domLog.DocumentElement, "action");
 
                 string strOperTime = DomUtil.GetElementText(domLog.DocumentElement, "operTime");
-                DateTime operTime = DateTimeUtil.FromRfc1123DateTimeString(strOperTime);
+                DateTime operTime = DateTimeUtil.FromRfc1123DateTimeString(strOperTime).ToLocalTime();
 
                 if (strAction == "new"
                     || strAction == "change"

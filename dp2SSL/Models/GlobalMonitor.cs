@@ -17,27 +17,6 @@ namespace dp2SSL.Models
     // 全局监控任务
     public static class GlobalMonitor
     {
-        /*
-        // 可以适当降低探测的频率。比如每五分钟探测一次
-        // 两次检测网络之间的间隔
-        static TimeSpan _detectPeriod = TimeSpan.FromMinutes(5);
-        // 最近一次检测网络的时间
-        static DateTime _lastDetectTime;
-
-        // 两次零星同步之间的间隔
-        static TimeSpan _replicatePeriod = TimeSpan.FromMinutes(1);
-        // 最近一次零星同步的时间
-        static DateTime _lastReplicateTime;
-
-
-        public static string LibraryNetworkCondition
-        {
-            get
-            {
-                return _libraryNetworkCondition;
-            }
-        }
-        */
         static Task _monitorTask = null;
 
         // 是否需要重启计算机
@@ -46,6 +25,9 @@ namespace dp2SSL.Models
         static DateTime _lastUpdateTime;
         // 检查升级的时间间隔
         static TimeSpan _updatePeriod = TimeSpan.FromMinutes(60); // 2*60 两个小时
+
+        // 成功升级的次数
+        static int _updateSucceedCount = 0;
 
         // 监控间隔时间
         static TimeSpan _monitorIdleLength = TimeSpan.FromSeconds(10);
@@ -98,6 +80,7 @@ namespace dp2SSL.Models
                         if (_needReboot == false
                         && StringUtil.IsDevelopMode() == false
                         && ApplicationDeployment.IsNetworkDeployed == false
+                        && _updateSucceedCount == 0 // 一旦更新成功一次以后便不再更新
                         && DateTime.Now - _lastUpdateTime > _updatePeriod)
                         {
                             WpfClientInfo.WriteInfoLog("开始自动检查升级");
@@ -123,10 +106,11 @@ namespace dp2SSL.Models
 
                             if (update_result.Value == 1 || update_result.Value == 2)
                             {
+                                _updateSucceedCount++;
                                 if (update_result.Value == 1)
                                 {
                                     App.TriggerUpdated("重启 dp2ssl(greensetup) 可使用新版本");
-                                    PageShelf.TrySetMessage(null, "dp2SSL 升级文件已经下载成功，下次重启 dp2ssl(greensetup) 时可自动升级到新版本");
+                                    PageShelf.TrySetMessage(null, "dp2SSL 升级文件已经下载成功，下次重启 dp2ssl(greensetup) 时可自动启用新版本");
                                 }
                                 else if (update_result.Value == 2)
                                 {
@@ -142,6 +126,7 @@ namespace dp2SSL.Models
                         // 检查升级 ClickOnce dp2ssl
                         if (StringUtil.IsDevelopMode() == false
                         && ApplicationDeployment.IsNetworkDeployed == true
+                        && _updateSucceedCount == 0 // 一旦更新成功一次以后便不再更新
                         && DateTime.Now - _lastUpdateTime > _updatePeriod)
                         {
                             try
@@ -156,6 +141,7 @@ namespace dp2SSL.Models
                                     WpfClientInfo.WriteErrorLog($"升级出错: {result.ErrorInfo}");
                                 else if (result.Value == 1)
                                 {
+                                    _updateSucceedCount++;
                                     WpfClientInfo.WriteInfoLog($"升级成功: {result.ErrorInfo}");
                                     App.TriggerUpdated(result.ErrorInfo);
                                     // MessageBox.Show(result.ErrorInfo);

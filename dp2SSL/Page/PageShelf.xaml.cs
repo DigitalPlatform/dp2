@@ -1511,46 +1511,51 @@ namespace dp2SSL
             });
             */
 
-            // "initial" 模式下，在读者证读卡器上扫 ISO15693 的标签可以查看图书内容
-            if (this.Mode == "initial"
+            // 2020/9/25
+            using (var releaser = await ShelfData._actionsLimit.EnterAsync())
+            {
+
+                // "initial" 模式下，在读者证读卡器上扫 ISO15693 的标签可以查看图书内容
+                if (this.Mode == "initial"
                 || ShelfData.FirstInitialized == false
                 )
-            {
-                var sep_result = await ShelfData.SeperateTagsAsync((BaseChannel<IRfid>)sender,
-                e,
-                (t) =>
                 {
-                    return DetectTagType(t);
-                });
-
-                // TODO: 小读卡器探测图书或者工作人员卡。工作人员卡用于判断操作者权限，以便允许使用初始化过程中报错对话框的开门和取消按钮
-                if (sep_result.add_patrons.Count > 0 || sep_result.updated_patrons.Count > 0)
-                    DetectPatron();
-            }
-            else
-            {
-                var sep_result = await ShelfData.SeperateTagsAsync((BaseChannel<IRfid>)sender,
+                    var sep_result = await ShelfData.SeperateTagsAsync((BaseChannel<IRfid>)sender,
                     e,
                     (t) =>
                     {
-                        /*
-                        if (t.ReaderName == ShelfData.PatronReaderName)
-                            return "patron";
-                        return "book";
-                        */
                         return DetectTagType(t);
                     });
 
-                if (sep_result.add_patrons.Count > 0 || sep_result.updated_patrons.Count > 0)
-                    await RefreshPatronsAsync();
+                    // TODO: 小读卡器探测图书或者工作人员卡。工作人员卡用于判断操作者权限，以便允许使用初始化过程中报错对话框的开门和取消按钮
+                    if (sep_result.add_patrons.Count > 0 || sep_result.updated_patrons.Count > 0)
+                        DetectPatron();
+                }
+                else
+                {
+                    var sep_result = await ShelfData.SeperateTagsAsync((BaseChannel<IRfid>)sender,
+                        e,
+                        (t) =>
+                        {
+                            /*
+                            if (t.ReaderName == ShelfData.PatronReaderName)
+                                return "patron";
+                            return "book";
+                            */
+                            return DetectTagType(t);
+                        });
 
-                await ShelfData.ChangeEntitiesAsync((BaseChannel<IRfid>)sender,
-                    sep_result,
-                    () =>
-                    {
-                        // 如果图书数量有变动，要自动清除挡在前面的残留的对话框
-                        CloseDialogs();
-                    });
+                    if (sep_result.add_patrons.Count > 0 || sep_result.updated_patrons.Count > 0)
+                        await RefreshPatronsAsync();
+
+                    await ShelfData.ChangeEntitiesAsync((BaseChannel<IRfid>)sender,
+                        sep_result,
+                        () =>
+                        {
+                            // 如果图书数量有变动，要自动清除挡在前面的残留的对话框
+                            CloseDialogs();
+                        });
+                }
             }
         }
 
@@ -1923,6 +1928,11 @@ namespace dp2SSL
                         }
 
                         DisplayMessage(progress, "自动盘点图书 ...", "green");
+
+                        App.Invoke(new Action(() =>
+                        {
+                            progress.EnableRetryOpenButtons(false);
+                        }));
 
                         // 构造 actions，用于同步到 dp2library 服务器
                         var build_result = BuildInventoryActions(part,
