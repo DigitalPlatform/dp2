@@ -315,7 +315,7 @@ namespace dp2SSL
             // return:
             //      false   没有成功
             //      true    成功
-            SetPatronInfo(new GetMessageResult { Message = barcode });
+            SetPatronInfo(new GetMessageResult { Message = barcode }, "barcode");
 
             // resut.Value
             //      -1  出错
@@ -1155,7 +1155,7 @@ namespace dp2SSL
             // return:
             //      false   没有成功
             //      true    成功
-            SetPatronInfo(e.Result);
+            SetPatronInfo(e.Result, "fingerprint");
 
             // resut.Value
             //      -1  出错
@@ -1177,7 +1177,7 @@ namespace dp2SSL
         // return:
         //      false   没有成功
         //      true    成功
-        bool SetPatronInfo(GetMessageResult result)
+        bool SetPatronInfo(GetMessageResult result, string protocol)
         {
             if (ClosePasswordDialog() == true)
             {
@@ -1209,6 +1209,9 @@ namespace dp2SSL
             _patron.OI = null;
             _patron.AOI = null;
             _patron.Protocol = null;
+
+            // 2020/9/27
+            _patron.Protocol = protocol;
             return true;
         }
 
@@ -3849,7 +3852,8 @@ namespace dp2SSL
             Operator person)
         {
             StringBuilder text = new StringBuilder();
-            text.AppendLine($"{person.GetDisplayString()}");
+            // text.AppendLine($"{person.GetDisplayString()}");
+            text.AppendLine($"{person.PatronName} ({person.PatronBarcode})");
             int i = 0;
             foreach (var info in infos)
             {
@@ -4047,7 +4051,7 @@ namespace dp2SSL
             // return:
             //      false   没有成功
             //      true    成功
-            SetPatronInfo(message);
+            SetPatronInfo(message, "face");
             SetQuality("");
 
             // resut.Value
@@ -4075,7 +4079,23 @@ namespace dp2SSL
 
             this.doorControl.AnimateDoors();
 
-            TrySetMessage(null, $"读者 {(string.IsNullOrEmpty(_patron.PatronName) ? _patron.Barcode : _patron.PatronName)} 刷卡");
+            var name = $"读者 {_patron.PatronName} ({_patron.Barcode}, {_patron.Department})";
+            if (Operator.IsPatronBarcodeWorker(_patron.Barcode))
+                name = $"工作人员 {_patron.Barcode}";
+
+            var style = _patron.Protocol;
+            if (_patron.Protocol == InventoryInfo.ISO14443A)
+                style = "IC 卡";
+            else if (_patron.Protocol == InventoryInfo.ISO15693)
+                style = "RFID 卡";
+            else if (_patron.Protocol == "barcode")
+                style = "条码卡";
+            else if (_patron.Protocol == "fingerprint")
+                style = "指纹";
+            else if (_patron.Protocol == "face")
+                style = "人脸";
+
+            TrySetMessage(null, $"{name} 刷{style}");
         }
 
         void DisplayError(ref VideoWindow videoRegister,

@@ -21,6 +21,7 @@ using DigitalPlatform.RFID;
 using DigitalPlatform.Face;
 using DigitalPlatform.WPF;
 using DigitalPlatform.IO;
+using DigitalPlatform.Net;
 
 namespace dp2SSL
 {
@@ -966,14 +967,14 @@ string color = "red")
                         },
                         cancel.Token);
                     if (result.Value == -1)
-                        App.ErrorBox($"导出过程出错: {result.ErrorInfo}");
+                        App.ErrorBox("备份本地动作库", $"导出过程出错: {result.ErrorInfo}");
                     else
-                        App.ErrorBox($"导出完成。在文件 {openFileDialog.FileName} 中，共导出记录 {result.Value} 条", "green");
+                        App.ErrorBox("备份本地动作库", $"导出完成。在文件 {openFileDialog.FileName} 中，共导出记录 {result.Value} 条", "green");
                 }
                 catch (Exception ex)
                 {
                     WpfClientInfo.WriteErrorLog($"备份本地动作库过程出现异常: {ExceptionUtil.GetDebugText(ex)}");
-                    App.ErrorBox($"备份本地动作库过程出现异常: {ex.Message}");
+                    App.ErrorBox("备份本地动作库", $"备份本地动作库过程出现异常: {ex.Message}");
                 }
                 finally
                 {
@@ -1028,14 +1029,14 @@ string color = "red")
                         },
                         cancel.Token);
                     if (result.Value == -1)
-                        App.ErrorBox($"恢复过程出错: {result.ErrorInfo}");
+                        App.ErrorBox("恢复本地动作库", $"恢复过程出错: {result.ErrorInfo}");
                     else
-                        App.ErrorBox($"恢复完成。共导入记录 {result.Value} 条", "green");
+                        App.ErrorBox("恢复本地动作库", $"恢复完成。共导入记录 {result.Value} 条", "green");
                 }
                 catch (Exception ex)
                 {
                     WpfClientInfo.WriteErrorLog($"恢复本地动作库过程出现异常: {ExceptionUtil.GetDebugText(ex)}");
-                    App.ErrorBox($"恢复本地动作库过程出现异常: {ex.Message}");
+                    App.ErrorBox("恢复本地动作库", $"恢复本地动作库过程出现异常: {ex.Message}");
                 }
                 finally
                 {
@@ -1111,6 +1112,19 @@ string color = "red")
             WpfClientInfo.WriteInfoLog("用户命令关机");
 
             ShutdownUtil.DoExitWindows(ShutdownUtil.ExitWindows.ShutDown);
+        }
+
+        // 检测网络
+        private void detectNetwork_Click(object sender, RoutedEventArgs e)
+        {
+            // ping dp2003.com
+            var ret = NetUtil.Ping("dp2003.com", out string strInfomation);
+            if (ret == false)
+                App.ErrorBox("检测网络", "网络不通");
+            else
+                App.ErrorBox("检测网络", "网络通畅", "green");
+
+            // 尝试连接 dp2library
         }
     }
 }
