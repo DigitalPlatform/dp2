@@ -142,7 +142,28 @@ true);
 
             // 延时 30 秒，避免上一个 dp2ssl.exe 尚未彻底退出。如果没有彻底退出，会导致本次展开 .zip 文件时候覆盖失败
             if (IsDelay())
-                await Task.Delay(TimeSpan.FromSeconds(30));
+            {
+                // TODO: 出现 Splash 窗口或者文字提示请等待
+                var old_style = this.progressBar1.Style;
+                this.Invoke(new Action(() =>
+                {
+                    this.progressBar1.Style = ProgressBarStyle.Marquee;
+                    this.label_message.Text = "请等待 ...";
+                }));
+
+                try
+                {
+                    // TODO: 可以改进为不断观察，等到另一个 dp2ssl.exe 如果退出则结束等待
+                    await Task.Delay(TimeSpan.FromSeconds(30));
+                }
+                finally
+                {
+                    this.Invoke(new Action(() =>
+                    {
+                        this.progressBar1.Style = old_style;
+                    }));
+                }
+            }
 
             string strExePath = Path.Combine(_binDir, "dp2ssl.exe");
             bool firstInstall = File.Exists(strExePath) == false;

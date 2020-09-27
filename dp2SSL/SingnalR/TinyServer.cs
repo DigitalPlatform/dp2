@@ -1057,6 +1057,17 @@ restart
                 return;
             }
 
+            // 让书柜说话
+            if (command.StartsWith("speak"))
+            {
+                string param = command.Substring("speak".Length).Trim();
+
+                App.CurrentApp.SpeakSequence(param);
+
+                await SendMessageAsync(new string[] { groupName }, $"正在朗读: {param}");
+                return;
+            }
+
             // 在 LED 屏上显示文字
             if (command.StartsWith("led"))
             {
@@ -2481,7 +2492,7 @@ strError,
 
         static void OnGetResRecieved(GetResRequest param)
         {
-            _ = Task.Run(async () => GetResAndResponse(param));
+            _ = Task.Run(async () => await GetResAndResponse(param));
         }
 
         // TODO: 比对每次获得的时间戳，如果不一致则要报错。

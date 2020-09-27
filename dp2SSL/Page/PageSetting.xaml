@@ -38,7 +38,7 @@
                              Height="40" Foreground="DarkGray" Margin="4"/>
             </Button>
             <Grid Height="20" />
-            <Menu x:Name="menu"  Width="Auto" Height="Auto">
+            <Menu x:Name="menu"  Width="Auto" Height="Auto" FontSize="14">
                 <MenuItem Header="_工具">
                     <MenuItem x:Name="openTouchKeyboard" Header="打开触摸键盘" HorizontalAlignment="Left" Width="Auto" Click="openTouchKeyboard_Click"/>
                 </MenuItem>
@@ -69,15 +69,7 @@
                                        TextWrapping="WrapWithOverflow"/>
 
         <Grid Grid.Row="1" Grid.Column="1" Background="Transparent">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="10" />
-                <ColumnDefinition Width="300" />
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
+
             <!-- 密码区域 -->
             <!--
             <Grid Name="passwordArea" Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="0">
@@ -110,9 +102,9 @@
             -->
             
             <!-- 按钮区域 -->
-            <WrapPanel Name="buttonArea" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3" 
+            <WrapPanel Name="buttonArea" Grid.ColumnSpan="3" 
                         Orientation="Horizontal" HorizontalAlignment="Center"
-                        >
+                        Margin="20">
                 <Button Name="config"
                     Style="{DynamicResource RoundedButtonStyle}" 
                     Width="260" Height="60" 
@@ -244,6 +236,16 @@
                      Click="sterilamp_Click">
                     <Button.Content>
                         <TextBlock>紫外线杀菌</TextBlock>
+                    </Button.Content>
+                </Button>
+                <Button Name="detectNetwork"
+                    Style="{DynamicResource RoundedButtonStyle}" 
+                    Width="260" Height="60" 
+                    FontSize="20" FontWeight="Normal" 
+                    Foreground="White" 
+                     Click="detectNetwork_Click">
+                    <Button.Content>
+                        <TextBlock>检测网络</TextBlock>
                     </Button.Content>
                 </Button>
             </WrapPanel>

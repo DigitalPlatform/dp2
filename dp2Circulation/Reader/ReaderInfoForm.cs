@@ -561,11 +561,15 @@ MessageBoxDefaultButton.Button2);
                 REDO:
                     stop.SetMessage("正在装入读者记录 " + strBarcode + " ...");
 
+                    string formats = "xml,html";
+                    if (Control.ModifierKeys == Keys.Control)
+                        formats = "xml";
+
                     string[] results = null;
                     long lRet = Channel.GetReaderInfo(
                         stop,
                         strBarcode,
-                        "xml,html",
+                        formats,
                         out results,
                         out strOutputRecPath,
                         out baTimestamp,
@@ -640,16 +644,18 @@ MessageBoxDefaultButton.Button2);
                      */
 
 
-                    if (results == null || results.Length < 2)
-                    {
-                        strError = "返回的results不正常。";
+                    // if (results == null || results.Length < 2)
+                        if (results == null || results.Length < 1)
+                        {
+                            strError = "返回的results不正常。";
                         goto ERROR1;
                     }
 
                     string strXml = "";
                     string strHtml = "";
                     strXml = results[0];
-                    strHtml = results[1];
+                    if (results.Length >= 2)
+                        strHtml = results[1];
 
                     nRet = this.readerEditControl1.SetData(
                         strXml,
@@ -888,7 +894,8 @@ MessageBoxDefaultButton.Button2);
                         goto ERROR1;
                     }
 
-                    if (results == null || results.Length < 2)
+                    // if (results == null || results.Length < 2)
+                    if (results == null || results.Length < 1)
                     {
                         strError = "返回的results不正常。";
                         goto ERROR1;
@@ -897,7 +904,8 @@ MessageBoxDefaultButton.Button2);
                     string strXml = "";
                     string strHtml = "";
                     strXml = results[0];
-                    strHtml = results[1];
+                    if (results.Length >= 2)
+                        strHtml = results[1];
 
                     int nRet = this.readerEditControl1.SetData(
                         strXml,
@@ -4087,7 +4095,7 @@ MessageBoxDefaultButton.Button2);
                         }
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
 
                 }

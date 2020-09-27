@@ -2008,7 +2008,9 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             Current.Dispatcher?.Invoke(action);
         }
 
-        public static void ErrorBox(string message,
+        public static void ErrorBox(
+            string title,
+            string message,
     string color = "red",
     string style = "")
         {
@@ -2017,6 +2019,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             App.Invoke(new Action(() =>
             {
                 progress = new ProgressWindow();
+                progress.TitleText = title;
                 progress.MessageText = "正在处理，请稍候 ...";
                 progress.Owner = Application.Current.MainWindow;
                 progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;

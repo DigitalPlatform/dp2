@@ -25,6 +25,7 @@
 // 2016/12/4    预约到书区域显示增加了 boxing 状态显示
 // 2017/5/22    	册信息显示增加了 卷册 列
 // 2020/9/17    使用读者照片的顺序改为先看有没有 "face" 用途的，如果没有再看 "photo" 用途的
+// 2020/9/27    显示在借册信息的行数最多限制 100，多出来的会被略去
 
 using System;
 using System.Collections.Generic;
@@ -368,7 +369,7 @@ public class MyConverter : ReaderConverter
         {
             strResult.Append( "<tr class='columntitle'><td>册条码号</td><td>摘要</td><td>卷册</td><td>价格</td><td>续借次</td><td>借阅日期</td><td>期限</td><td>操作者</td><td>应还日期</td><td>续借注</td></tr>");
 
-            for (int i = 0; i < nodes.Count; i++)
+            for (int i = 0; i < Math.Min(nodes.Count, 100); i++)
             {
                 XmlNode node = nodes[i];
                 string strBarcode = DomUtil.GetAttr(node, "barcode");
@@ -383,7 +384,7 @@ public class MyConverter : ReaderConverter
                 string strPrice = DomUtil.GetAttr(node, "price");
                 string strTimeReturning = DomUtil.GetAttr(node, "timeReturning");
 
-		string strVolume = DomUtil.GetAttr(node, "volume");
+		        string strVolume = DomUtil.GetAttr(node, "volume");
 
 #if NO
                 string strOverDue = "";
@@ -480,6 +481,14 @@ public class MyConverter : ReaderConverter
                 strResult.Append( "<td class='returndate' width='30%'>" + strOverDue + "</td>");
                 strResult.Append( "<td class='renewcomment' width='30%'>" + strRenewComment.Replace(";", "<br/>") + "</td>");
                 strResult.Append( "</tr>");
+            }
+
+            if (nodes.Count > 100)
+            {
+                int rest = nodes.Count - 100;
+                strResult.Append("<tr class='content'>");
+                strResult.Append("<td class='barcode' colspan='10' >(剩余 "+rest.ToString()+" 项被略去 ...)</td>");
+                strResult.Append("</tr>");
             }
         }
 
