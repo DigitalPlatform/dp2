@@ -383,7 +383,7 @@ namespace dp2Commander
             }
             catch (Exception ex)
             {
-                WriteErrorLog($"从命令行参数文件中读取信息时出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                WriteErrorLog($"准备命令行参数文件时出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 return false;
             }
         }

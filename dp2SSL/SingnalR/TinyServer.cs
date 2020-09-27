@@ -1149,6 +1149,33 @@ restart
 
                 WpfClientInfo.WriteInfoLog($"restart 命令参数：'{param}'");
 
+                // 重启计算机
+                if (ContainsParam(param,
+                    (s) =>
+                    {
+                        return s.StartsWith("computer");
+                    }))
+                {
+                    // 重启电脑
+                    _ = Task.Run(async () =>
+                    {
+                        try
+                        {
+                            // 为 dp2ssl 开机后自动重启预先设定好 cmdlineparam.txt 文件
+                            WriteParameterFile();
+
+                            await Task.Delay(1000);
+                            ShutdownUtil.DoExitWindows(ShutdownUtil.ExitWindows.Reboot);
+                        }
+                        catch(Exception ex)
+                        {
+                            WpfClientInfo.WriteErrorLog($"接受远程命令重启电脑过程出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                        }
+                    });
+                    await SendMessageAsync(new string[] { groupName }, $"Windows 将在一秒后重新启动");
+                    return;
+                }
+
                 bool silently = true;
                 if (ContainsParam(param,
                     (s) =>
@@ -1200,6 +1227,27 @@ restart
             }
 
             await SendMessageAsync(new string[] { groupName }, $"我无法理解这个命令 '{command}'");
+        }
+
+        // 准备命令行参数文件
+        static bool WriteParameterFile()
+        {
+            try
+            {
+                string binDir = "c:\\dp2ssl";
+                if (Directory.Exists(binDir))
+                {
+                    string fileName = System.IO.Path.Combine(binDir, "cmdlineparam.txt");
+                    File.WriteAllText(fileName, "silently");
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                WpfClientInfo.WriteErrorLog($"准备命令行参数文件时出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                return false;
+            }
         }
 
         // -x:0
