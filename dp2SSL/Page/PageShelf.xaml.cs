@@ -546,6 +546,7 @@ namespace dp2SSL
         }
 
         void DisplayError(ref ProgressWindow progress,
+            string title,
     string message,
     string color = "red")
         {
@@ -555,6 +556,7 @@ namespace dp2SSL
             var temp = progress;
             App.Invoke(new Action(() =>
             {
+                temp.TitleText = title;
                 temp.MessageText = message;
                 temp.BackColor = color;
                 temp = null;
@@ -597,7 +599,9 @@ namespace dp2SSL
 
         delegate string Delegate_process(ProgressWindow progress);
 
-        void ProcessBox(string start_message,
+        void ProcessBox(
+            string title,
+            string start_message,
             Delegate_process func)
         {
             ProgressWindow progress = null;
@@ -605,6 +609,7 @@ namespace dp2SSL
             App.Invoke(new Action(() =>
             {
                 progress = new ProgressWindow();
+                progress.TitleText = title;
                 progress.MessageText = start_message;
                 progress.Owner = Application.Current.MainWindow;
                 progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
@@ -618,7 +623,7 @@ namespace dp2SSL
             string result_message = func?.Invoke(progress);
 
             if (string.IsNullOrEmpty(result_message) == false)
-                DisplayError(ref progress, result_message, "red");
+                DisplayError(ref progress, title, result_message, "red");
             else
             {
                 App.Invoke(new Action(() =>
@@ -676,7 +681,7 @@ namespace dp2SSL
                 });
             }
             else
-                DisplayError(ref progress, message, color);
+                DisplayError(ref progress, title, message, color);
         }
 
 
@@ -900,7 +905,7 @@ namespace dp2SSL
                 if (result.Value == -1)
                 {
                     //MessageBox.Show(result.ErrorInfo);
-                    DisplayError(ref progress, result.ErrorInfo);
+                    DisplayError(ref progress, "开门", result.ErrorInfo);
                     e.Door.Operator = null;
                     /*
                     ShelfData.PopCommand(e.Door, "cancelled");
@@ -2660,7 +2665,7 @@ namespace dp2SSL
                     ClearBorrowedEntities();
 
                     // 出现登录对话框，要求输入密码登录验证
-                    var login_result = await WorkerLoginAsync(pii).ConfigureAwait(false);
+                    var login_result = await WorkerLoginAsync(_patron?.UID, pii).ConfigureAwait(false);
                     if (login_result.Value == -1)
                     {
                         PatronClear();
@@ -2966,11 +2971,20 @@ namespace dp2SSL
             return found;
         }
 
-        async Task<NormalResult> WorkerLoginAsync(string pii)
+        async Task<NormalResult> WorkerLoginAsync(string uid, string pii)
         {
+            bool cache = App.CacheWorkerPassword;
+
             App.CurrentApp.SpeakSequence("请登录");
             string userName = pii.Substring(1);
             string password = "";
+
+            if (cache)
+            {
+                password = PasswordCache.GetPassword(uid, userName);
+                if (password != null)
+                    goto LOGIN;
+            }
 
             bool closed = false;
             string dialog_result = "";
@@ -3015,13 +3029,19 @@ namespace dp2SSL
                     Value = -1,
                     ErrorCode = "cancelled"
                 };
+
+
+            LOGIN:
             _patron.Barcode = pii;
+
 
             // 登录
             {
                 LoginResult result = null;
                 // 显示一个处理对话框
-                ProcessBox("正在登录 ...",
+                ProcessBox(
+                    "工作人员登录",
+                    "正在登录 ...",
                     (progress) =>
                     {
                         result = LibraryChannelUtil.WorkerLogin(userName, password);
@@ -3031,12 +3051,19 @@ namespace dp2SSL
                     });
 
                 if (result.Value != 1)
+                {
+                    if (cache)
+                        PasswordCache.DeletePassword(uid, userName);
                     return new NormalResult
                     {
                         Value = -1,
                         ErrorCode = "loginFail",
                         ErrorInfo = result.ErrorInfo,
                     };
+                }
+
+                if (cache)
+                    PasswordCache.SavePassword(uid, userName, password);
 
                 App.CurrentApp.SetAccount(userName, password, result.LibraryCode);
                 return new NormalResult();
@@ -3049,7 +3076,7 @@ namespace dp2SSL
                 || ShelfData.l_Removes.Count > 0
                 || ShelfData.l_Changes.Count > 0)
             {
-                SaveAllActions();
+                await SaveAllActions();
                 await DoRequestAsync(ShelfData.PullActions(), silently ? "silence" : "");
                 // await SubmitCheckInOut("silence");
             }

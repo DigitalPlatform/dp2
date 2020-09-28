@@ -17233,7 +17233,7 @@ start_time_1,
             return 0;
         }
 
-
+        public static int MAX_BORROW_COUNT = 500;
 
         // 借阅API的从属函数
         // 在读者记录和册记录中加入借书信息
@@ -17270,6 +17270,16 @@ start_time_1,
             strError = "";
             int nRet = 0;
             borrow_info = new BorrowInfo();
+
+            // 2020/9/28
+            // 检查 borrow 元素总数
+            var borrows = readerdom.DocumentElement.SelectNodes("borrows/borrow");
+            if (bRenew == false && borrows.Count > MAX_BORROW_COUNT)
+            {
+                error_code = ErrorCode.AccessDenied;    // TODO: 增加特定的错误码 EXCEED_LIMIT
+                strError = $"当前读者借书已经超过 {MAX_BORROW_COUNT} 册，不允许再借书 (但可以还书)";
+                return -1;
+            }
 
             // 2019/11/3
             if (overflowReasons.Count > 0)

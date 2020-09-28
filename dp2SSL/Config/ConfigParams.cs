@@ -403,6 +403,25 @@ Description = "凭条(小票)打印方式"
             }
         }
 
+        // 默认值 false
+        [Display(
+Order = 12,
+Name = "工作人员刷卡便利",
+Description = "工作人员刷卡成功登录后，一分钟内再刷卡不用输入密码"
+)]
+        [Category("全局")]
+        public bool CacheWorkerPassword
+        {
+            get
+            {
+                return _config.GetBoolean("global", "memory_worker_password", false);
+            }
+            set
+            {
+                _config.SetBoolean("global", "memory_worker_password", value);
+            }
+        }
+
         /*
         // 默认值 空
         [Display(

@@ -1208,6 +1208,14 @@ namespace dp2SSL
             }
         }
 
+        public static bool CacheWorkerPassword
+        {
+            get
+            {
+                return (bool)WpfClientInfo.Config?.GetBoolean("global", "memory_worker_password", false);
+            }
+        }
+
         public static bool ProcessMonitor
         {
             get

@@ -164,5 +164,19 @@ namespace dp2SSL
             this.Selection = "not";
             this.Close();
         }
+
+        private void expandButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (this.expandButton.Content as string == "+")
+            {
+                this.expandButton.Content = "-";
+                this.notButton.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                this.expandButton.Content = "+";
+                this.notButton.Visibility = Visibility.Collapsed;
+            }
+        }
     }
 }
