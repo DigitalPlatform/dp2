@@ -11,6 +11,7 @@ using DigitalPlatform.WPF;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient.localhost;
+using System.Text.RegularExpressions;
 
 namespace dp2SSL.Models
 {
@@ -66,7 +67,7 @@ namespace dp2SSL.Models
                         token.ThrowIfCancellationRequested();
 
                         // 清除 PasswordCache
-                        PasswordCache.CleanIdlePassword(TimeSpan.FromSeconds(60));
+                        PasswordCache.CleanIdlePassword(ToTimeLength(App.CacheWorkerPasswordLength));
 
                         // 检查小票打印机状态
                         var check_result = CheckPosPrinter();
@@ -181,6 +182,66 @@ namespace dp2SSL.Models
 token,
 TaskCreationOptions.LongRunning,
 TaskScheduler.Default);
+        }
+
+        // https://mattyrowan.com/2008/01/01/parse-timespan-string/
+        public static TimeSpan ParseTimeSpan(string s)
+        {
+            const string Quantity = "quantity";
+            const string Unit = "unit";
+
+            const string Days = @"(d(ays?)?)";
+            const string Hours = @"(h((ours?)|(rs?))?)";
+            const string Minutes = @"(m((inutes?)|(ins?))?)";
+            const string Seconds = @"(s((econds?)|(ecs?))?)";
+
+            Regex timeSpanRegex = new Regex(
+                string.Format(@"\s*(?<{0}>\d+)\s*(?<{1}>({2}|{3}|{4}|{5}|\Z))",
+                              Quantity, Unit, Days, Hours, Minutes, Seconds),
+                              RegexOptions.IgnoreCase);
+            MatchCollection matches = timeSpanRegex.Matches(s);
+
+            TimeSpan ts = new TimeSpan();
+            foreach (Match match in matches)
+            {
+                if (Regex.IsMatch(match.Groups[Unit].Value, @"\A" + Days))
+                {
+                    ts = ts.Add(TimeSpan.FromDays(double.Parse(match.Groups[Quantity].Value)));
+                }
+                else if (Regex.IsMatch(match.Groups[Unit].Value, Hours))
+                {
+                    ts = ts.Add(TimeSpan.FromHours(double.Parse(match.Groups[Quantity].Value)));
+                }
+                else if (Regex.IsMatch(match.Groups[Unit].Value, Minutes))
+                {
+                    ts = ts.Add(TimeSpan.FromMinutes(double.Parse(match.Groups[Quantity].Value)));
+                }
+                else if (Regex.IsMatch(match.Groups[Unit].Value, Seconds))
+                {
+                    ts = ts.Add(TimeSpan.FromSeconds(double.Parse(match.Groups[Quantity].Value)));
+                }
+                else
+                {
+                    // Quantity given but no unit, default to Hours
+                    ts = ts.Add(TimeSpan.FromHours(double.Parse(match.Groups[Quantity].Value)));
+                }
+            }
+            return ts;
+        }
+
+        static TimeSpan ToTimeLength(string name)
+        {
+            if (string.IsNullOrEmpty(name) || name == "无")
+                return TimeSpan.FromMinutes(0);
+
+            try
+            {
+                return ParseTimeSpan(name);
+            }
+            catch
+            {
+                return TimeSpan.FromMinutes(1);
+            }
         }
 
         // 立即进行升级

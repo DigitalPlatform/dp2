@@ -54,4 +54,17 @@ namespace dp2SSL
             return sizes;
         }
     }
+
+    public class CachePasswordLengthSource : IItemsSource
+    {
+        public ItemCollection GetValues()
+        {
+            ItemCollection sizes = new ItemCollection();
+            sizes.Add("无");
+            sizes.Add("1min");
+            sizes.Add("5min");
+            sizes.Add("10min");
+            return sizes;
+        }
+    }
 }
