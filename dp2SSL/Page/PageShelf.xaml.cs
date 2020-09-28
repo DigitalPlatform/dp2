@@ -2973,7 +2973,7 @@ namespace dp2SSL
 
         async Task<NormalResult> WorkerLoginAsync(string uid, string pii)
         {
-            bool cache = App.CacheWorkerPassword;
+            bool cache = string.IsNullOrEmpty(App.CacheWorkerPasswordLength) == false && App.CacheWorkerPasswordLength != "无";
 
             App.CurrentApp.SpeakSequence("请登录");
             string userName = pii.Substring(1);

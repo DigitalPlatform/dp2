@@ -406,19 +406,20 @@ Description = "凭条(小票)打印方式"
         // 默认值 false
         [Display(
 Order = 12,
-Name = "工作人员刷卡便利",
-Description = "工作人员刷卡成功登录后，一分钟内再刷卡不用输入密码"
+Name = "工作人员刷卡免密码时长",
+Description = "工作人员刷卡成功登录后，多少时间内再刷卡不用输入密码"
 )]
+        [ItemsSource(typeof(CachePasswordLengthSource))]
         [Category("全局")]
-        public bool CacheWorkerPassword
+        public string CacheWorkerPasswordLength
         {
             get
             {
-                return _config.GetBoolean("global", "memory_worker_password", false);
+                return _config.Get("global", "memory_worker_password", "无");
             }
             set
             {
-                _config.SetBoolean("global", "memory_worker_password", value);
+                _config.Set("global", "memory_worker_password", value);
             }
         }
 
