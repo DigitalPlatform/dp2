@@ -65,6 +65,9 @@ namespace dp2SSL.Models
 
                         token.ThrowIfCancellationRequested();
 
+                        // 清除 PasswordCache
+                        PasswordCache.CleanIdlePassword(TimeSpan.FromSeconds(60));
+
                         // 检查小票打印机状态
                         var check_result = CheckPosPrinter();
                         if (check_result.Value == -1)
