@@ -1589,6 +1589,20 @@ request).Result;
     #endregion
 
 
+    #region Close() 相关
+
+    public class CloseRequest
+    {
+        public string Action { get; set; }
+
+        public CloseRequest(string action)
+        {
+            this.Action = action;
+        }
+    }
+
+    #endregion
+
     /// <summary>
     /// 消息通知事件
     /// </summary>
