@@ -564,7 +564,7 @@ namespace dp2SSL
         */
 
         // 确保连接到消息服务器
-        public async Task EnsureConnectMessageServerAsync()
+        public static async Task EnsureConnectMessageServerAsync()
         {
             if (string.IsNullOrEmpty(messageServerUrl) == false
                 && TinyServer.IsDisconnected)

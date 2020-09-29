@@ -356,6 +356,22 @@ TaskScheduler.Default);
                     _handlers.Add(handler);
                 }
 
+                // 2020/9/29
+                // *** close
+                {
+                    var handler = HubProxy.On<CloseRequest>("close",
+                    (param) =>
+                    {
+                        if (param.Action == "reconnect")
+                        {
+                            _ = App.ConnectMessageServerAsync(); // 不用等待完成
+                        }
+                        else
+                            CloseConnection();
+                    });
+                    _handlers.Add(handler);
+                }
+
                 /*
                 // *** webCall
                 {
@@ -365,13 +381,6 @@ TaskScheduler.Default);
                     _handlers.Add(handler);
                 }
 
-                // *** close
-                {
-                    var handler = HubProxy.On<CloseRequest>("close",
-                    (param) => OnCloseRecieved(param)
-                    );
-                    _handlers.Add(handler);
-                }
                 */
             }
 
@@ -1167,7 +1176,7 @@ restart
                             await Task.Delay(1000);
                             ShutdownUtil.DoExitWindows(ShutdownUtil.ExitWindows.Reboot);
                         }
-                        catch(Exception ex)
+                        catch (Exception ex)
                         {
                             WpfClientInfo.WriteErrorLog($"接受远程命令重启电脑过程出现异常: {ExceptionUtil.GetDebugText(ex)}");
                         }
