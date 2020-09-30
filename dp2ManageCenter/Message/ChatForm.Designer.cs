@@ -49,6 +49,9 @@
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.button_send = new System.Windows.Forms.Button();
             this.textBox_input = new System.Windows.Forms.TextBox();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripDropDownButton_utility = new System.Windows.Forms.ToolStripDropDownButton();
+            this.ToolStripMenuItem_clearConnection = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_main)).BeginInit();
             this.splitContainer_main.Panel1.SuspendLayout();
@@ -67,7 +70,9 @@
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(28, 28);
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButton_selectAccount,
-            this.toolStripLabel_message});
+            this.toolStripLabel_message,
+            this.toolStripSeparator1,
+            this.toolStripDropDownButton_utility});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(1111, 38);
@@ -298,6 +303,29 @@
             this.textBox_input.Size = new System.Drawing.Size(711, 90);
             this.textBox_input.TabIndex = 0;
             // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 38);
+            // 
+            // toolStripDropDownButton_utility
+            // 
+            this.toolStripDropDownButton_utility.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripDropDownButton_utility.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.ToolStripMenuItem_clearConnection});
+            this.toolStripDropDownButton_utility.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton_utility.Image")));
+            this.toolStripDropDownButton_utility.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripDropDownButton_utility.Name = "toolStripDropDownButton_utility";
+            this.toolStripDropDownButton_utility.Size = new System.Drawing.Size(48, 32);
+            this.toolStripDropDownButton_utility.Text = "...";
+            // 
+            // ToolStripMenuItem_clearConnection
+            // 
+            this.ToolStripMenuItem_clearConnection.Name = "ToolStripMenuItem_clearConnection";
+            this.ToolStripMenuItem_clearConnection.Size = new System.Drawing.Size(315, 40);
+            this.ToolStripMenuItem_clearConnection.Text = "ClearConnection";
+            this.ToolStripMenuItem_clearConnection.Click += new System.EventHandler(this.ToolStripMenuItem_clearConnection_Click);
+            // 
             // ChatForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
@@ -349,5 +377,8 @@
         private System.Windows.Forms.ToolStripButton toolStripButton_selectAccount;
         private System.Windows.Forms.ToolStripLabel toolStripLabel_message;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton_utility;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_clearConnection;
     }
 }

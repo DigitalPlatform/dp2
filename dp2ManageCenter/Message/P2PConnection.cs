@@ -106,6 +106,36 @@ namespace dp2ManageCenter.Message
                     _handlers.Add(handler);
                 }
 
+                // *** close
+                {
+                    var handler = HubProxy.On<CloseRequest>("close",
+                        (param) =>
+                        {
+                            if (param.Action == "reconnect")
+                            {
+                                _ = Task.Run(async () =>
+                                {
+                                    try
+                                    {
+                                        await ConnectAsync(url,
+                                            userName,
+                                            password,
+                                            parameters);
+                                    }
+                                    catch
+                                    {
+
+                                    }
+                                });
+
+                                // _ = App.ConnectMessageServerAsync(); // 不用等待完成
+                            }
+                            else
+                                CloseConnection();
+                        });
+                    _handlers.Add(handler);
+                }
+
                 /*
                 // *** search
                 {
@@ -125,13 +155,7 @@ namespace dp2ManageCenter.Message
                     _handlers.Add(handler);
                 }
 
-                // *** close
-                {
-                    var handler = HubProxy.On<CloseRequest>("close",
-                    (param) => OnCloseRecieved(param)
-                    );
-                    _handlers.Add(handler);
-                }
+
                 */
             }
 
@@ -803,6 +827,98 @@ CancellationToken token)
                 }
             }
         }
+
+        #endregion
+
+
+        #region GetConnectionInfo() API
+
+#if REMOVED
+        public class GetConnectionInfoResult
+        {
+            public long ResultCount = 0;
+            public List<ConnectionRecord> Records = null;
+            public string ErrorInfo = "";
+            public string ErrorCode = "";
+        }
+#endif
+        public async Task<GetConnectionInfoResult> GetConnectionInfoAsync(
+GetConnectionInfoRequest request,
+TimeSpan timeout,
+CancellationToken token)
+        {
+            GetConnectionInfoResult result = new GetConnectionInfoResult();
+            if (result.Records == null)
+                result.Records = new List<ConnectionRecord>();
+
+            if (string.IsNullOrEmpty(request.TaskID) == true)
+                request.TaskID = Guid.NewGuid().ToString();
+
+            using (WaitEvents wait_events = new WaitEvents())    // 表示中途数据到来
+            {
+                using (var handler = HubProxy.On<
+                    string, long, long, IList<ConnectionRecord>, string, string>(
+                    "responseGetConnectionInfo",
+                    (taskID, resultCount, start, records, errorInfo, errorCode) =>
+                    {
+                        if (taskID != request.TaskID)
+                            return;
+
+                        // 装载命中结果
+                        if (resultCount == -1 || start == -1)
+                        {
+                            if (start == -1)
+                            {
+                                // 表示发送响应过程已经结束。只是起到通知的作用，不携带任何信息
+                                // result.Finished = true;
+                            }
+                            else
+                            {
+                                result.ResultCount = resultCount;
+                                result.ErrorInfo = errorInfo;
+                                result.ErrorCode = errorCode;
+                            }
+                            wait_events.finish_event.Set();
+                            return;
+                        }
+
+                        result.ResultCount = resultCount;
+                        // TODO: 似乎应该关注 start 位置
+                        result.Records.AddRange(records);
+                        result.ErrorInfo = errorInfo;
+                        result.ErrorCode = errorCode;
+
+                        if (IsComplete(request.Start, request.Count, resultCount, result.Records.Count) == true)
+                            wait_events.finish_event.Set();
+                        else
+                            wait_events.active_event.Set();
+                    }))
+                {
+                    MessageResult message = await HubProxy.Invoke<MessageResult>(
+        "RequestGetConnectionInfo",
+        request).ConfigureAwait(false);
+                    if (message.Value == -1 || message.Value == 0)
+                    {
+                        result.ErrorInfo = message.ErrorInfo;
+                        result.ResultCount = -1;
+                        result.ErrorCode = message.String;
+                        return result;
+                    }
+
+                    // result.String 里面是返回的 taskID
+
+                    // start_time = DateTime.Now;
+
+                    await WaitAsync(
+    request.TaskID,
+    wait_events,
+    timeout,
+    token).ConfigureAwait(false);
+                    return result;
+                }
+            }
+        }
+
 
         #endregion
 
