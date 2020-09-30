@@ -1323,11 +1323,18 @@ namespace dp2ManageCenter.Message
 
                 var result = await connection.SetMessageAsyncLite(param);
                 if (result.Value == -1)
+                {
+                    if (result.String == "_connectionNotFound")
+                    {
+                        // TODO: 尝试重新发送消息一次
+                    }
+
                     return new NormalResult
                     {
                         Value = -1,
                         ErrorInfo = result.ErrorInfo
                     };
+                }
                 return new NormalResult();
             }
             catch (Exception ex)
@@ -1475,6 +1482,24 @@ namespace dp2ManageCenter.Message
             }
 
             // DislayProgress($"e.Position={e.Action},_bVertBottom:{_bVertBottom}");
+        }
+
+        // 2020/9/30
+        // 测试 Clear Connection
+        private async void ToolStripMenuItem_clearConnection_Click(object sender, EventArgs e)
+        {
+            P2PConnection connection = await ConnectionPool.GetConnectionAsync(this.UserNameAndUrl);
+            GetConnectionInfoRequest request = new GetConnectionInfoRequest
+            {
+                QueryWord = "!myself",
+                Operation = "clear"
+            };
+
+            var result = await connection.GetConnectionInfoAsync(request,
+                TimeSpan.FromSeconds(30),
+                new CancellationToken());
+            string text = $"result.ResultCount={result.ResultCount},result.ErrorInfo={result.ErrorInfo}";
+            MessageBox.Show(this, text);
         }
 
 
