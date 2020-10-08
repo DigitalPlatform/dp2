@@ -78,8 +78,11 @@
             </Button>
             <Grid Height="20" />
             <Menu x:Name="menu"  Width="Auto" Height="Auto">
-                <MenuItem Header="_工具">
-                    <MenuItem x:Name="openTouchKeyboard" Header="打开触摸键盘" HorizontalAlignment="Left" Width="Auto" />
+                <MenuItem Header="_测试">
+                    <MenuItem x:Name="clearList" Header="清除列表" HorizontalAlignment="Left" Width="Auto" Click="clearList_Click"/>
+                    <MenuItem x:Name="beginSound" Header="开始发声" HorizontalAlignment="Left" Width="Auto" Click="beginSound_Click"/>
+                    <MenuItem x:Name="stopSound" Header="结束发声" HorizontalAlignment="Left" Width="Auto" Click="stopSound_Click"/>
+                    <MenuItem x:Name="addSound" Header="增加发声" HorizontalAlignment="Left" Width="Auto" Click="addSound_Click"/>
                 </MenuItem>
                 <MenuItem Header="_维护">
                     <MenuItem x:Name="redoReplicatePatron" Header="重做全量同步读者记录" HorizontalAlignment="Left" Width="Auto" />
@@ -114,6 +117,15 @@
                                         HeaderContainerStyle="{StaticResource myHeaderStyle}">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
+                                    <TextBlock Text="{Binding Error}" FontSize="12" TextWrapping="Wrap"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <!--
+                        <GridViewColumn Header="状态" Width="150"
+                                        HeaderContainerStyle="{StaticResource myHeaderStyle}">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
                                     <StackPanel Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Orientation="Horizontal"
                                 Background="{Binding Path=State, Converter={StaticResource StateToBack}}">
                                         <fa:ImageAwesome 
@@ -127,6 +139,7 @@
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
+                        -->
                         <GridViewColumn Header="UID" Width="200" DisplayMemberBinding="{Binding UID}"
                                         HeaderContainerStyle="{StaticResource myHeaderStyle}">
                             <GridViewColumn.CellTemplate>

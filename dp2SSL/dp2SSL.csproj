@@ -501,6 +501,7 @@
     <Compile Include="Models\BiblioCacheContext.cs" />
     <Compile Include="Models\GlobalMonitor.cs" />
     <Compile Include="Models\InventoryData.cs" />
+    <Compile Include="Models\NewTagList2.cs" />
     <Compile Include="Models\PasswordCache.cs" />
     <Compile Include="Models\PatronReplication.cs" />
     <Compile Include="Models\RequestContext.cs" />
@@ -513,6 +514,7 @@
     <Compile Include="Models\ShelfData.cs" />
     <Compile Include="Models\ShelfData_monitor.cs" />
     <Compile Include="Models\ShelfData_sync.cs" />
+    <Compile Include="Models\SoundMaker.cs" />
     <Compile Include="Models\SpeakList.cs" />
     <Compile Include="Models\SubmitDocument.cs" />
     <Compile Include="Models\TagList.cs" />
@@ -769,6 +771,10 @@
       <Project>{3366eaf9-b030-4bbb-a63a-77e71a5e5400}</Project>
       <Name>GreenInstall</Name>
     </ProjectReference>
+    <ProjectReference Include="..\midi-dot-net\Midi\Midi.csproj">
+      <Project>{f60d8b7b-2d2e-4b94-a736-3783ffe1a25c}</Project>
+      <Name>Midi</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">
@@ -783,6 +789,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Models\盘点算法.txt" />
     <Content Include="photo_not_available.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

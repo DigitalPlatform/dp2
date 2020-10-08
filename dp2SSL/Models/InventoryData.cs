@@ -1,13 +1,14 @@
-﻿using DigitalPlatform;
-using DigitalPlatform.RFID;
-using DigitalPlatform.WPF;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+
+using DigitalPlatform;
+using DigitalPlatform.RFID;
+using DigitalPlatform.WPF;
 
 namespace dp2SSL
 {
@@ -16,6 +17,28 @@ namespace dp2SSL
     /// </summary>
     public static class InventoryData
     {
+        // 预先从全部实体记录中准备好 UID 到 PII 的对照关系。这一部分标签就不需要 GetTagData 了
+        // UID --> PII
+        static Hashtable _uidTable = new Hashtable();
+
+        // 检查是否存在 UID --> PII 事项
+        public static bool UidExsits(string uid, out string pii)
+        {
+            pii = (string)_uidTable[uid];
+            if (string.IsNullOrEmpty(pii) == false)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        // 清除所有列表
+        public static void Clear()
+        {
+            _entityTable.Clear();
+            RemoveList(null);
+        }
+
         // UID --> entity
         static Hashtable _entityTable = new Hashtable();
 
@@ -39,7 +62,7 @@ namespace dp2SSL
         // 注：所创建的 Entity 对象其 Error 成员可能有值，表示有出错信息
         // Exception:
         //      可能会抛出异常 ArgumentException
-        static Entity NewEntity(TagAndData tag, 
+        static Entity NewEntity(TagAndData tag,
             Entity entity,
             bool throw_exception = true)
         {
@@ -63,7 +86,8 @@ namespace dp2SSL
                 try
                 {
                     SetTagType(tag, out string pii, out chip);
-                    result.PII = pii;
+                    if (tag.OneTag.TagInfo != null)
+                        result.PII = pii;
                 }
                 catch (Exception ex)
                 {
@@ -170,6 +194,7 @@ namespace dp2SSL
 
         #region 处理列表
 
+        // 正在获取册信息的 Entity 集合
         static List<Entity> _entityList = new List<Entity>();
         static object _entityListSyncRoot = new object();
 
@@ -195,9 +220,14 @@ namespace dp2SSL
         {
             lock (_entityListSyncRoot)
             {
-                foreach (var entity in entities)
+                if (entities == null)
+                    _entityList.Clear();
+                else
                 {
-                    _entityList.Remove(entity);
+                    foreach (var entity in entities)
+                    {
+                        _entityList.Remove(entity);
+                    }
                 }
             }
         }
@@ -271,7 +301,7 @@ TaskScheduler.Default);
         static async Task ProcessingAsync()
         {
             var list = CopyList();
-            foreach(var entity in list)
+            foreach (var entity in list)
             {
                 // 获得册记录和书目摘要
                 // .Value
@@ -279,6 +309,13 @@ TaskScheduler.Default);
                 //      0   没有找到
                 //      1   找到
                 var result = await LibraryChannelUtil.GetEntityDataAsync(entity.PII, "network");
+
+                /*
+                // testing
+                result.Value = -1;
+                result.ErrorInfo = "获得册信息出错";
+                */
+
                 if (result.Value == -1)
                     entity.AppendError(result.ErrorInfo, "red", result.ErrorCode);
                 else
