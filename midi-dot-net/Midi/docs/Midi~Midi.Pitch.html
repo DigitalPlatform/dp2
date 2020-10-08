@@ -1,0 +1,192 @@
+﻿<html dir="LTR" xmlns:ndoc="urn:ndoc-schema">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta content="history" name="save" />
+    <meta name="vs_targetSchema" content="http://schemas.microsoft.com/intellisense/ie5" />
+    <title>Pitch Enumeration</title>
+    <xml>
+    </xml>
+    <link rel="stylesheet" type="text/css" href="MSDN.css" />
+  </head>
+  <body id="bodyID" class="dtBODY">
+    <div id="nsbanner">
+      <div id="bannerrow1">
+        <table class="bannerparthead" cellspacing="0">
+          <tr id="hdr">
+            <td class="runninghead">A MIDI Library for .NET</td>
+            <td class="product">
+            </td>
+          </tr>
+        </table>
+      </div>
+      <div id="TitleRow">
+        <h1 class="dtH1">Pitch Enumeration</h1>
+      </div>
+    </div>
+    <div id="nstext">
+      <p> Pitches supported by MIDI. </p>
+      <div class="syntax">
+        <div>public enum Pitch</div>
+      </div>
+      <h4 class="dtH4">Remarks</h4>
+      <p>MIDI defines 127 distinct pitches, in semitone intervals, ranging from C five octaves below middle C, up to G five octaves above middle C. This covers several octaves above and below the range of a normal 88-key piano.</p>
+      <p>These 127 pitches are the only ones directly expressible in MIDI. Precise variations in frequency can be achieved with <a href="Midi~Midi.OutputDevice.SendPitchBend.html">Pitch Bend</a> messages, though Pitch Bend messages apply to the whole channel at once.</p>
+      <p>In this enum, pitches are given C Major note names (eg "F", "GSharp") followed by the octave number. Octaves use standard piano terminology: Middle C is in octave 4. (Note that this is different from "MIDI octaves", which have Middle C in octave 0.)</p>
+      <p>This enum has extension methods, such as <a href="Midi~Midi.PitchExtensionMethods.NotePreferringSharps.html">NotePreferringSharps</a> and <a href="Midi~Midi.PitchExtensionMethods.IsInMidiRange.html">IsInMidiRange</a>, defined in <a href="Midi~Midi.PitchExtensionMethods.html">PitchExtensionMethods</a>. </p>
+      <h4 class="dtH4">Members</h4>
+      <div class="tablediv">
+        <table class="dtTABLE" cellspacing="0">
+          <tr valign="top">
+            <th width="50%">Member Name</th>
+            <th width="50%">Description</th>
+          </tr>
+<tr valign="top"><td><b>CNeg1</b></td><td>C in octave -1.</td></tr>
+<tr valign="top"><td><b>CSharpNeg1</b></td><td>C# in octave -1.</td></tr>
+<tr valign="top"><td><b>DNeg1</b></td><td>D in octave -1.</td></tr>
+<tr valign="top"><td><b>DSharpNeg1</b></td><td>D# in octave -1.</td></tr>
+<tr valign="top"><td><b>ENeg1</b></td><td>E in octave -1.</td></tr>
+<tr valign="top"><td><b>FNeg1</b></td><td>F in octave -1.</td></tr>
+<tr valign="top"><td><b>FSharpNeg1</b></td><td>F# in octave -1.</td></tr>
+<tr valign="top"><td><b>GNeg1</b></td><td>G in octave -1.</td></tr>
+<tr valign="top"><td><b>GSharpNeg1</b></td><td>G# in octave -1.</td></tr>
+<tr valign="top"><td><b>ANeg1</b></td><td>A in octave -1.</td></tr>
+<tr valign="top"><td><b>ASharpNeg1</b></td><td>A# in octave -1.</td></tr>
+<tr valign="top"><td><b>BNeg1</b></td><td>B in octave -1.</td></tr>
+<tr valign="top"><td><b>C0</b></td><td>C in octave 0.</td></tr>
+<tr valign="top"><td><b>CSharp0</b></td><td>C# in octave 0.</td></tr>
+<tr valign="top"><td><b>D0</b></td><td>D in octave 0.</td></tr>
+<tr valign="top"><td><b>DSharp0</b></td><td>D# in octave 0.</td></tr>
+<tr valign="top"><td><b>E0</b></td><td>E in octave 0.</td></tr>
+<tr valign="top"><td><b>F0</b></td><td>F in octave 0.</td></tr>
+<tr valign="top"><td><b>FSharp0</b></td><td>F# in octave 0.</td></tr>
+<tr valign="top"><td><b>G0</b></td><td>G in octave 0.</td></tr>
+<tr valign="top"><td><b>GSharp0</b></td><td>G# in octave 0.</td></tr>
+<tr valign="top"><td><b>A0</b></td><td>A in octave 0.</td></tr>
+<tr valign="top"><td><b>ASharp0</b></td><td>A# in octave 0, usually the lowest key on an 88-key keyboard.</td></tr>
+<tr valign="top"><td><b>B0</b></td><td>B in octave 0.</td></tr>
+<tr valign="top"><td><b>C1</b></td><td>C in octave 1.</td></tr>
+<tr valign="top"><td><b>CSharp1</b></td><td>C# in octave 1.</td></tr>
+<tr valign="top"><td><b>D1</b></td><td>D in octave 1.</td></tr>
+<tr valign="top"><td><b>DSharp1</b></td><td>D# in octave 1.</td></tr>
+<tr valign="top"><td><b>E1</b></td><td>E in octave 1.</td></tr>
+<tr valign="top"><td><b>F1</b></td><td>F in octave 1.</td></tr>
+<tr valign="top"><td><b>FSharp1</b></td><td>F# in octave 1.</td></tr>
+<tr valign="top"><td><b>G1</b></td><td>G in octave 1.</td></tr>
+<tr valign="top"><td><b>GSharp1</b></td><td>G# in octave 1.</td></tr>
+<tr valign="top"><td><b>A1</b></td><td>A in octave 1.</td></tr>
+<tr valign="top"><td><b>ASharp1</b></td><td>A# in octave 1.</td></tr>
+<tr valign="top"><td><b>B1</b></td><td>B in octave 1.</td></tr>
+<tr valign="top"><td><b>C2</b></td><td>C in octave 2.</td></tr>
+<tr valign="top"><td><b>CSharp2</b></td><td>C# in octave 2.</td></tr>
+<tr valign="top"><td><b>D2</b></td><td>D in octave 2.</td></tr>
+<tr valign="top"><td><b>DSharp2</b></td><td>D# in octave 2.</td></tr>
+<tr valign="top"><td><b>E2</b></td><td>E in octave 2.</td></tr>
+<tr valign="top"><td><b>F2</b></td><td>F in octave 2.</td></tr>
+<tr valign="top"><td><b>FSharp2</b></td><td>F# in octave 2.</td></tr>
+<tr valign="top"><td><b>G2</b></td><td>G in octave 2.</td></tr>
+<tr valign="top"><td><b>GSharp2</b></td><td>G# in octave 2.</td></tr>
+<tr valign="top"><td><b>A2</b></td><td>A in octave 2.</td></tr>
+<tr valign="top"><td><b>ASharp2</b></td><td>A# in octave 2.</td></tr>
+<tr valign="top"><td><b>B2</b></td><td>B in octave 2.</td></tr>
+<tr valign="top"><td><b>C3</b></td><td>C in octave 3.</td></tr>
+<tr valign="top"><td><b>CSharp3</b></td><td>C# in octave 3.</td></tr>
+<tr valign="top"><td><b>D3</b></td><td>D in octave 3.</td></tr>
+<tr valign="top"><td><b>DSharp3</b></td><td>D# in octave 3.</td></tr>
+<tr valign="top"><td><b>E3</b></td><td>E in octave 3.</td></tr>
+<tr valign="top"><td><b>F3</b></td><td>F in octave 3.</td></tr>
+<tr valign="top"><td><b>FSharp3</b></td><td>F# in octave 3.</td></tr>
+<tr valign="top"><td><b>G3</b></td><td>G in octave 3.</td></tr>
+<tr valign="top"><td><b>GSharp3</b></td><td>G# in octave 3.</td></tr>
+<tr valign="top"><td><b>A3</b></td><td>A in octave 3.</td></tr>
+<tr valign="top"><td><b>ASharp3</b></td><td>A# in octave 3.</td></tr>
+<tr valign="top"><td><b>B3</b></td><td>B in octave 3.</td></tr>
+<tr valign="top"><td><b>C4</b></td><td>C in octave 4, also known as Middle C.</td></tr>
+<tr valign="top"><td><b>CSharp4</b></td><td>C# in octave 4.</td></tr>
+<tr valign="top"><td><b>D4</b></td><td>D in octave 4.</td></tr>
+<tr valign="top"><td><b>DSharp4</b></td><td>D# in octave 4.</td></tr>
+<tr valign="top"><td><b>E4</b></td><td>E in octave 4.</td></tr>
+<tr valign="top"><td><b>F4</b></td><td>F in octave 4.</td></tr>
+<tr valign="top"><td><b>FSharp4</b></td><td>F# in octave 4.</td></tr>
+<tr valign="top"><td><b>G4</b></td><td>G in octave 4.</td></tr>
+<tr valign="top"><td><b>GSharp4</b></td><td>G# in octave 4.</td></tr>
+<tr valign="top"><td><b>A4</b></td><td>A in octave 4.</td></tr>
+<tr valign="top"><td><b>ASharp4</b></td><td>A# in octave 4.</td></tr>
+<tr valign="top"><td><b>B4</b></td><td>B in octave 4.</td></tr>
+<tr valign="top"><td><b>C5</b></td><td>C in octave 5.</td></tr>
+<tr valign="top"><td><b>CSharp5</b></td><td>C# in octave 5.</td></tr>
+<tr valign="top"><td><b>D5</b></td><td>D in octave 5.</td></tr>
+<tr valign="top"><td><b>DSharp5</b></td><td>D# in octave 5.</td></tr>
+<tr valign="top"><td><b>E5</b></td><td>E in octave 5.</td></tr>
+<tr valign="top"><td><b>F5</b></td><td>F in octave 5.</td></tr>
+<tr valign="top"><td><b>FSharp5</b></td><td>F# in octave 5.</td></tr>
+<tr valign="top"><td><b>G5</b></td><td>G in octave 5.</td></tr>
+<tr valign="top"><td><b>GSharp5</b></td><td>G# in octave 5.</td></tr>
+<tr valign="top"><td><b>A5</b></td><td>A in octave 5.</td></tr>
+<tr valign="top"><td><b>ASharp5</b></td><td>A# in octave 5.</td></tr>
+<tr valign="top"><td><b>B5</b></td><td>B in octave 5.</td></tr>
+<tr valign="top"><td><b>C6</b></td><td>C in octave 6.</td></tr>
+<tr valign="top"><td><b>CSharp6</b></td><td>C# in octave 6.</td></tr>
+<tr valign="top"><td><b>D6</b></td><td>D in octave 6.</td></tr>
+<tr valign="top"><td><b>DSharp6</b></td><td>D# in octave 6.</td></tr>
+<tr valign="top"><td><b>E6</b></td><td>E in octave 6.</td></tr>
+<tr valign="top"><td><b>F6</b></td><td>F in octave 6.</td></tr>
+<tr valign="top"><td><b>FSharp6</b></td><td>F# in octave 6.</td></tr>
+<tr valign="top"><td><b>G6</b></td><td>G in octave 6.</td></tr>
+<tr valign="top"><td><b>GSharp6</b></td><td>G# in octave 6.</td></tr>
+<tr valign="top"><td><b>A6</b></td><td>A in octave 6.</td></tr>
+<tr valign="top"><td><b>ASharp6</b></td><td>A# in octave 6.</td></tr>
+<tr valign="top"><td><b>B6</b></td><td>B in octave 6.</td></tr>
+<tr valign="top"><td><b>C7</b></td><td>C in octave 7.</td></tr>
+<tr valign="top"><td><b>CSharp7</b></td><td>C# in octave 7.</td></tr>
+<tr valign="top"><td><b>D7</b></td><td>D in octave 7.</td></tr>
+<tr valign="top"><td><b>DSharp7</b></td><td>D# in octave 7.</td></tr>
+<tr valign="top"><td><b>E7</b></td><td>E in octave 7.</td></tr>
+<tr valign="top"><td><b>F7</b></td><td>F in octave 7.</td></tr>
+<tr valign="top"><td><b>FSharp7</b></td><td>F# in octave 7.</td></tr>
+<tr valign="top"><td><b>G7</b></td><td>G in octave 7.</td></tr>
+<tr valign="top"><td><b>GSharp7</b></td><td>G# in octave 7.</td></tr>
+<tr valign="top"><td><b>A7</b></td><td>A in octave 7.</td></tr>
+<tr valign="top"><td><b>ASharp7</b></td><td>A# in octave 7.</td></tr>
+<tr valign="top"><td><b>B7</b></td><td>B in octave 7.</td></tr>
+<tr valign="top"><td><b>C8</b></td><td>C in octave 8, usually the highest key on an 88-key keyboard.</td></tr>
+<tr valign="top"><td><b>CSharp8</b></td><td>C# in octave 8.</td></tr>
+<tr valign="top"><td><b>D8</b></td><td>D in octave 8.</td></tr>
+<tr valign="top"><td><b>DSharp8</b></td><td>D# in octave 8.</td></tr>
+<tr valign="top"><td><b>E8</b></td><td>E in octave 8.</td></tr>
+<tr valign="top"><td><b>F8</b></td><td>F in octave 8.</td></tr>
+<tr valign="top"><td><b>FSharp8</b></td><td>F# in octave 8.</td></tr>
+<tr valign="top"><td><b>G8</b></td><td>G in octave 8.</td></tr>
+<tr valign="top"><td><b>GSharp8</b></td><td>G# in octave 8.</td></tr>
+<tr valign="top"><td><b>A8</b></td><td>A in octave 8.</td></tr>
+<tr valign="top"><td><b>ASharp8</b></td><td>A# in octave 8.</td></tr>
+<tr valign="top"><td><b>B8</b></td><td>B in octave 8.</td></tr>
+<tr valign="top"><td><b>C9</b></td><td>C in octave 9.</td></tr>
+<tr valign="top"><td><b>CSharp9</b></td><td>C# in octave 9.</td></tr>
+<tr valign="top"><td><b>D9</b></td><td>D in octave 9.</td></tr>
+<tr valign="top"><td><b>DSharp9</b></td><td>D# in octave 9.</td></tr>
+<tr valign="top"><td><b>E9</b></td><td>E in octave 9.</td></tr>
+<tr valign="top"><td><b>F9</b></td><td>F in octave 9.</td></tr>
+<tr valign="top"><td><b>FSharp9</b></td><td>F# in octave 9.</td></tr>
+<tr valign="top"><td><b>G9</b></td><td>G in octave 9.</td></tr></table>
+      </div>
+      <h4 class="dtH4">Requirements</h4>
+      <p>
+        <b>Namespace: </b>
+        <a href="~Midi.html">Midi</a>
+      </p>
+      <p>
+        <b>Assembly: </b>Midi (in Midi.dll)
+					</p>
+      <h4 class="dtH4">See Also</h4>
+      <p>
+        <a href="~Midi.html">Midi Namespace</a> | <a href="Midi~Midi.Note.html">Note</a> | <a href="Midi~Midi.Interval.html">Interval</a></p>
+      <hr />
+      <div id="footer">
+        <p>
+          <a>Copyright © 2009 Tom Lokovic</a>
+        </p>
+        <p>Generated from assembly Midi [1.1.0.0] by <a href="http://ndoc3.sourceforget.net">NDoc3</a></p>
+      </div>
+    </div>
+  </body>
+</html>

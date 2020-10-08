@@ -1,0 +1,61 @@
+﻿<html dir="LTR" xmlns:ndoc="urn:ndoc-schema">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta content="history" name="save" />
+    <meta name="vs_targetSchema" content="http://schemas.microsoft.com/intellisense/ie5" />
+    <title>Clock.Start Method</title>
+    <xml>
+    </xml>
+    <link rel="stylesheet" type="text/css" href="MSDN.css" />
+  </head>
+  <body id="bodyID" class="dtBODY">
+    <div id="nsbanner">
+      <div id="bannerrow1">
+        <table class="bannerparthead" cellspacing="0">
+          <tr id="hdr">
+            <td class="runninghead">A MIDI Library for .NET</td>
+            <td class="product">
+            </td>
+          </tr>
+        </table>
+      </div>
+      <div id="TitleRow">
+        <h1 class="dtH1">Clock.Start Method</h1>
+      </div>
+    </div>
+    <div id="nstext">
+      <p> Starts or resumes the clock. </p>
+      <div class="syntax">public <a href="">void</a> Start();</div>
+      <h4 class="dtH4">Remarks</h4>
+      <p>This method causes the clock to start progressing at the rate given in the <a href="Midi~Midi.Clock.BeatsPerMinute.html">BeatsPerMinute</a> property. It may only be called when the clock is not yet rnuning.</p>
+      <p>If this is the first time Start is called, the clock starts at time zero and progresses from there. If the clock was previously started, stopped, and not reset, then Start effectively "unpauses" the clock, picking up at the left-off time, and resuming scheduling of any as-yet-unsent messages.</p>
+      <p>This method creates a new thread which runs in the background and sends messages at the appropriate times. All <a href="Midi~Midi.Message.SendNow.html">Message.SendNow</a> methods and <a href="Midi~Midi.CallbackMessage.html">CallbackMessage</a>s will be called in that thread.</p>
+      <p>The scheduler thread is joined (shut down) in <a href="Midi~Midi.Clock.Stop.html">Stop</a>.</p>
+      <h4 class="dtH4">Exceptions</h4>
+      <div class="tablediv">
+        <table class="dtTABLE" cellspacing="0">
+          <tr valign="top">
+            <th width="50%">Exception Type</th>
+            <th width="50%">Condition</th>
+          </tr>
+          <tr valign="top">
+            <td width="50%">
+              <a href="http://msdn.microsoft.com/en-us/library/System.InvalidOperationException(VS.90).aspx">InvalidOperationException</a>
+            </td>
+            <td width="50%">Clock is already running.</td>
+          </tr>
+        </table>
+      </div>
+      <h4 class="dtH4">See Also</h4>
+      <p>
+        <a href="Midi~Midi.Clock.html">Clock Class</a> | <a href="~Midi.html">Midi Namespace</a> | <a href="Midi~Midi.Clock.Stop.html">Stop</a> | <a href="Midi~Midi.Clock.Reset.html">Reset</a></p>
+      <hr />
+      <div id="footer">
+        <p>
+          <a>Copyright © 2009 Tom Lokovic</a>
+        </p>
+        <p>Generated from assembly Midi [1.1.0.0] by <a href="http://ndoc3.sourceforget.net">NDoc3</a></p>
+      </div>
+    </div>
+  </body>
+</html>

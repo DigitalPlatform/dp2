@@ -1,0 +1,61 @@
+﻿<html dir="LTR" xmlns:ndoc="urn:ndoc-schema">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta content="history" name="save" />
+    <meta name="vs_targetSchema" content="http://schemas.microsoft.com/intellisense/ie5" />
+    <title>Clock.Stop Method</title>
+    <xml>
+    </xml>
+    <link rel="stylesheet" type="text/css" href="MSDN.css" />
+  </head>
+  <body id="bodyID" class="dtBODY">
+    <div id="nsbanner">
+      <div id="bannerrow1">
+        <table class="bannerparthead" cellspacing="0">
+          <tr id="hdr">
+            <td class="runninghead">A MIDI Library for .NET</td>
+            <td class="product">
+            </td>
+          </tr>
+        </table>
+      </div>
+      <div id="TitleRow">
+        <h1 class="dtH1">Clock.Stop Method</h1>
+      </div>
+    </div>
+    <div id="nstext">
+      <p> Stops the clock (but does not reset its time or discard pending events). </p>
+      <div class="syntax">public <a href="">void</a> Stop();</div>
+      <h4 class="dtH4">Remarks</h4>
+      <p>This method stops the progression of the clock. It may only be called when the clock is running.</p>
+      <p>Any scheduled but as-yet-unsent messages remain in the queue. A consecutive call to <a href="Midi~Midi.Clock.Start.html">Start</a> can re-start the progress of the clock, or <a href="Midi~Midi.Clock.Reset.html">Reset</a> can discard pending messages and reset the clock to zero.</p>
+      <p>This method waits for any in-progress messages to be processed and joins (shuts down) the scheduler thread before returning, so when it returns you can be sure that no more messages will be sent or callbacks invoked.</p>
+      <p>It is illegal to call Stop from the scheduler thread (ie, from any <a href="Midi~Midi.Message.SendNow.html">Message.SendNow</a> method or <a href="Midi~Midi.CallbackMessage.html">CallbackMessage</a>. If a callback really needs to stop the clock, consider using BeginInvoke to arrange for it to happen in another thread.</p>
+      <h4 class="dtH4">Exceptions</h4>
+      <div class="tablediv">
+        <table class="dtTABLE" cellspacing="0">
+          <tr valign="top">
+            <th width="50%">Exception Type</th>
+            <th width="50%">Condition</th>
+          </tr>
+          <tr valign="top">
+            <td width="50%">
+              <a href="http://msdn.microsoft.com/en-us/library/System.InvalidOperationException(VS.90).aspx">InvalidOperationException</a>
+            </td>
+            <td width="50%">Clock is not running or Stop was invoked from the scheduler thread.</td>
+          </tr>
+        </table>
+      </div>
+      <h4 class="dtH4">See Also</h4>
+      <p>
+        <a href="Midi~Midi.Clock.html">Clock Class</a> | <a href="~Midi.html">Midi Namespace</a> | <a href="Midi~Midi.Clock.Start.html">Start</a> | <a href="Midi~Midi.Clock.Reset.html">Reset</a></p>
+      <hr />
+      <div id="footer">
+        <p>
+          <a>Copyright © 2009 Tom Lokovic</a>
+        </p>
+        <p>Generated from assembly Midi [1.1.0.0] by <a href="http://ndoc3.sourceforget.net">NDoc3</a></p>
+      </div>
+    </div>
+  </body>
+</html>

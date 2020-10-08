@@ -1,0 +1,80 @@
+﻿<html dir="LTR" xmlns:ndoc="urn:ndoc-schema">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta content="history" name="save" />
+    <meta name="vs_targetSchema" content="http://schemas.microsoft.com/intellisense/ie5" />
+    <title>Channel Enumeration</title>
+    <xml>
+    </xml>
+    <link rel="stylesheet" type="text/css" href="MSDN.css" />
+  </head>
+  <body id="bodyID" class="dtBODY">
+    <div id="nsbanner">
+      <div id="bannerrow1">
+        <table class="bannerparthead" cellspacing="0">
+          <tr id="hdr">
+            <td class="runninghead">A MIDI Library for .NET</td>
+            <td class="product">
+            </td>
+          </tr>
+        </table>
+      </div>
+      <div id="TitleRow">
+        <h1 class="dtH1">Channel Enumeration</h1>
+      </div>
+    </div>
+    <div id="nstext">
+      <p> A MIDI Channel. </p>
+      <div class="syntax">
+        <div>public enum Channel</div>
+      </div>
+      <h4 class="dtH4">Remarks</h4>
+      <p>Each MIDI device has 16 independent channels. Channels are named starting at 1, but are encoded programmatically starting at 0.</p>
+      <p>All of the channels are general-purpose except for Channel10, which is the dedicated percussion channel. Any notes sent to that channel will play <a href="Midi~Midi.Percussion.html">percussion notes</a>, regardless of any <a href="Midi~Midi.OutputDevice.SendProgramChange.html">Program Change</a> messages sent on that channel.</p>
+      <p>This enum has extension methods, such as <a href="Midi~Midi.ChannelExtensionMethods.Name.html">Name</a> and <a href="Midi~Midi.ChannelExtensionMethods.IsValid.html">IsValid</a>, defined in <a href="Midi~Midi.ChannelExtensionMethods.html">ChannelExtensionMethods</a>. </p>
+      <h4 class="dtH4">Members</h4>
+      <div class="tablediv">
+        <table class="dtTABLE" cellspacing="0">
+          <tr valign="top">
+            <th width="50%">Member Name</th>
+            <th width="50%">Description</th>
+          </tr>
+<tr valign="top"><td><b>Channel1</b></td><td> MIDI Channel 1. </td></tr>
+<tr valign="top"><td><b>Channel2</b></td><td> MIDI Channel 2. </td></tr>
+<tr valign="top"><td><b>Channel3</b></td><td> MIDI Channel 3. </td></tr>
+<tr valign="top"><td><b>Channel4</b></td><td> MIDI Channel 4. </td></tr>
+<tr valign="top"><td><b>Channel5</b></td><td> MIDI Channel 5. </td></tr>
+<tr valign="top"><td><b>Channel6</b></td><td> MIDI Channel 6. </td></tr>
+<tr valign="top"><td><b>Channel7</b></td><td> MIDI Channel 7. </td></tr>
+<tr valign="top"><td><b>Channel8</b></td><td> MIDI Channel 8. </td></tr>
+<tr valign="top"><td><b>Channel9</b></td><td> MIDI Channel 9. </td></tr>
+<tr valign="top"><td><b>Channel10</b></td><td> MIDI Channel 10, the dedicated percussion channel. </td></tr>
+<tr valign="top"><td><b>Channel11</b></td><td> MIDI Channel 11. </td></tr>
+<tr valign="top"><td><b>Channel12</b></td><td> MIDI Channel 12. </td></tr>
+<tr valign="top"><td><b>Channel13</b></td><td> MIDI Channel 13. </td></tr>
+<tr valign="top"><td><b>Channel14</b></td><td> MIDI Channel 14. </td></tr>
+<tr valign="top"><td><b>Channel15</b></td><td> MIDI Channel 15. </td></tr>
+<tr valign="top"><td><b>Channel16</b></td><td> MIDI Channel 16. </td></tr></table>
+      </div>
+      <h4 class="dtH4">Requirements</h4>
+      <p>
+        <b>Namespace: </b>
+        <a href="~Midi.html">Midi</a>
+      </p>
+      <p>
+        <b>Assembly: </b>Midi (in Midi.dll)
+					</p>
+      <h4 class="dtH4">See Also</h4>
+      <p>
+        <a href="~Midi.html">Midi Namespace</a>
+      </p>
+      <hr />
+      <div id="footer">
+        <p>
+          <a>Copyright © 2009 Tom Lokovic</a>
+        </p>
+        <p>Generated from assembly Midi [1.1.0.0] by <a href="http://ndoc3.sourceforget.net">NDoc3</a></p>
+      </div>
+    </div>
+  </body>
+</html>

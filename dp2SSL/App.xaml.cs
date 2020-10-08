@@ -1674,7 +1674,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
 
                 // bool numberShown = false;
 
-                if (isShelf || isInventory)
+                if (isShelf)
                 {
                     NewTagList.Refresh(// sender as BaseChannel<IRfid>,
                         e.ReaderNameList,
@@ -1704,6 +1704,47 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                     if (CurrentApp != null)
                         CurrentApp.Number = $"{NewTagList.Tags.Count}";
                     //numberShown = true;
+                }
+
+                // 2020/10/1
+                if (isInventory)
+                {
+                    SoundMaker.Start();
+
+                    NewTagList2.Refresh(
+                        e.ReaderNameList,
+                        e.Result.Results,
+                        /*
+                        (readerName, uid, antennaID) =>
+                        {
+                            if (InventoryData.UidExsits(uid, out string pii))
+                                return new GetTagInfoResult { Value = 1, TagInfo = new TagInfo { Tag = pii } };
+                            var channel = sender as BaseChannel<IRfid>;
+                            if (channel.Started == false)
+                                return new GetTagInfoResult { Value = -1, ErrorInfo = "RFID 通道尚未启动" };
+                            return channel.Object.GetTagInfo(readerName, uid, antennaID);
+                        },
+                        */
+                        (add_tags, update_tags, remove_tags) =>
+                        {
+                            NewTagChanged?.Invoke(sender, new NewTagChangedEventArgs
+                            {
+                                AddTags = add_tags,
+                                UpdateTags = update_tags,
+                                RemoveTags = remove_tags,
+                            });
+                        },
+                        (type, text) =>
+                        {
+                            RfidManager.TriggerSetError(null/*this*/, new SetErrorEventArgs { Error = text });
+                        });
+
+                    // 标签总数显示 只显示标签数，不再区分图书标签和读者卡
+                    if (CurrentApp != null)
+                        CurrentApp.Number = $"{NewTagList.Tags.Count}";
+                    //numberShown = true;
+
+                    SoundMaker.Stop();
                 }
 
                 if (isBorrow == true/* || numberShown == false*/)

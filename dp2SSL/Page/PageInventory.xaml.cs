@@ -1,7 +1,4 @@
-﻿using DigitalPlatform;
-using DigitalPlatform.RFID;
-using DigitalPlatform.WPF;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -18,6 +15,9 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using static dp2SSL.InventoryData;
+
+using DigitalPlatform;
+using DigitalPlatform.RFID;
 
 namespace dp2SSL
 {
@@ -101,7 +101,7 @@ namespace dp2SSL
 
             foreach (var tag in NewTagList.Tags)
             {
-                ProcessTag(tag);
+                ProcessTag(null, tag);
             }
 
             return new NormalResult();
@@ -125,20 +125,21 @@ namespace dp2SSL
             }
             */
 
+            var channel = (BaseChannel<IRfid>)sender;
             // TODO: 对离开的 tag 变化为灰色颜色
 
             foreach (var tag in e.AddTags)
             {
-                ProcessTag(tag);
+                ProcessTag(channel, tag);
             }
 
             foreach (var tag in e.UpdateTags)
             {
-                ProcessTag(tag);
+                ProcessTag(channel, tag);
             }
         }
 
-        void ProcessTag(TagAndData tag)
+        void ProcessTag(BaseChannel<IRfid> channel, TagAndData tag)
         {
             var entity = InventoryData.AddEntity(tag, out bool isNewly);
 
@@ -157,15 +158,83 @@ namespace dp2SSL
                 }));
             }
 
+            // 2020/10/7
+            // 尝试获取 PII
+            if (string.IsNullOrEmpty(entity.PII))
+            {
+                if (InventoryData.UidExsits(entity.UID, out string pii))
+                {
+                    entity.PII = pii;
+                }
+                else
+                {
+                    string error = null;
+                    if (channel.Started == false)
+                        error = "RFID 通道尚未启动";
+                    else
+                    {
+                        var get_result = channel.Object.GetTagInfo(entity.ReaderName, entity.UID, Convert.ToUInt32(entity.Antenna));
+
+                        /*
+                        // testing
+                        get_result.Value = -1;
+                        get_result.ErrorInfo = "GetTagInfo() error error 1234 error 1345";
+                        */
+
+                        if (get_result.Value == -1)
+                        {
+                            SoundMaker.ErrorSound();
+
+                            info.State = "errorGetTagInfo";
+                            error = get_result.ErrorInfo;
+
+                            // TODO: 当有一行以上 GetTagInfo() 出错时，要不断发出响声警告。
+                        
+                        }
+                        else
+                        {
+                            // 把 PII 显示出来
+                            tag.OneTag.TagInfo = get_result.TagInfo;
+                            InventoryData.AddEntity(tag, out isNewly);
+                            info.State = "";
+                        }
+                    }
+
+                    entity.Error = error;
+                }
+            }
+
             if (string.IsNullOrEmpty(entity.PII) == false
                 && string.IsNullOrEmpty(info.State))
             {
-                info.State = "processing";
+                info.State = "processing";  // 正在获取册信息
                 InventoryData.AppendList(entity);
                 InventoryData.ActivateInventory();
             }
         }
 
+        private void clearList_Click(object sender, RoutedEventArgs e)
+        {
+            App.Invoke(new Action(() =>
+            {
+                _entities.Clear();
+            }));
+            InventoryData.Clear();
+        }
 
+        private void beginSound_Click(object sender, RoutedEventArgs e)
+        {
+            SoundMaker.Start();
+        }
+
+        private void stopSound_Click(object sender, RoutedEventArgs e)
+        {
+            SoundMaker.Stop();
+        }
+
+        private void addSound_Click(object sender, RoutedEventArgs e)
+        {
+            SoundMaker.AddSound();
+        }
     }
 }
