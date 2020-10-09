@@ -53,15 +53,103 @@ namespace dp2SSL
             _outputDevice.SendNoteOff(Channel.Channel1, Pitch.C4, 50);
         }
 
+        static List<int> _sequence = new List<int>();
+        static int _currentPitch = -1; // -1 表示尚未开始
+
+        // 初始化音符序列
+        public static void InitialSequence(int count)
+        {
+            StopCurrent();
+
+            var chord = new Chord("C");
+
+            int start = (int)Pitch.C4;
+            _sequence = new List<int>();
+            while (_sequence.Count < count)
+            {
+                if (chord.Contains((Pitch)start))
+                    _sequence.Add(start);
+
+                start++;
+            }
+
+            _sequence.Reverse();
+
+            _currentPitch = -1;
+        }
+
+        static void InitialChannel1()
+        {
+            if (_outputDevice == null)
+            {
+                Open();
+                _outputDevice.SendProgramChange(Channel.Channel1, Instrument.Violin);
+            }
+        }
+
+        static void InitialChannel2()
+        {
+            if (_outputDevice == null)
+            {
+                Open();
+            }
+            _outputDevice.SendProgramChange(Channel.Channel2, Instrument.ElectricBassPick);
+        }
+
+        public static void StopCurrent()
+        {
+            InitialChannel1();
+            if (_currentPitch != -1)
+            {
+                _outputDevice.SendNoteOff(Channel.Channel1, (Pitch)_currentPitch, 50);
+                _currentPitch = -1;
+            }
+        }
+
+        public static void FirstSound(int offset)
+        {
+            InitialChannel1();
+
+            StopCurrent();
+
+            _currentPitch = (int)Pitch.C4 + offset;
+            _outputDevice.SendNoteOn(Channel.Channel1, (Pitch)_currentPitch, 50);
+        }
+
+
+        public static void NextSound()
+        {
+            InitialChannel1();
+
+            StopCurrent();
+
+            if (_sequence.Count == 0)
+                _currentPitch = (int)Pitch.C4;
+            else
+            {
+                _currentPitch = _sequence[0];
+                _sequence.RemoveAt(0);
+            }
+
+            _outputDevice.SendNoteOn(Channel.Channel1, (Pitch)_currentPitch, 50);
+        }
+
         // 表示出错的声音
         public static void ErrorSound()
         {
-            _outputDevice.SendControlChange(Channel.Channel2, Control.SustainPedal, 100);
-            _outputDevice.SendNoteOn(Channel.Channel2, Pitch.B4, 127);
-            _outputDevice.SendNoteOff(Channel.Channel2, Pitch.B4, 100);
+            InitialChannel2();
+
+            // _outputDevice.SendControlChange(Channel.Channel2, Control.SustainPedal, 10);
+            _outputDevice.SendNoteOn(Channel.Channel2, Pitch.B4, 50);
+
+            _ = Task.Run(async () =>
+            {
+                await Task.Delay(500);
+                _outputDevice.SendNoteOff(Channel.Channel2, Pitch.B4, 50);
+            });
         }
 
-            public static void AddSound()
+        public static void AddSound()
         {
             _outputDevice.SendControlChange(Channel.Channel2, Control.SustainPedal, 100);
             _outputDevice.SendNoteOn(Channel.Channel2, Pitch.G4, 127);

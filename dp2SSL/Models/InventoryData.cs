@@ -37,6 +37,7 @@ namespace dp2SSL
         {
             _entityTable.Clear();
             RemoveList(null);
+            _errorEntities.Clear();
         }
 
         // UID --> entity
@@ -231,6 +232,31 @@ namespace dp2SSL
                 }
             }
         }
+
+        #region GetTagInfo() 后出错状态的 Entity 集合
+
+        static List<Entity> _errorEntities = new List<Entity>();
+
+        public static int AddErrorEntity(Entity entity, out bool changed)
+        {
+            int old_count = _errorEntities.Count;
+            if (_errorEntities.IndexOf(entity) == -1)
+                _errorEntities.Add(entity);
+            int new_count = _errorEntities.Count;
+            changed = !(old_count == new_count);
+            return _errorEntities.Count;
+        }
+
+        public static int RemoveErrorEntity(Entity entity, out bool changed)
+        {
+            int old_count = _errorEntities.Count;
+            _errorEntities.Remove(entity);
+            int new_count = _errorEntities.Count;
+            changed = !(old_count == new_count);
+            return _errorEntities.Count;
+        }
+
+        #endregion
 
         #endregion
 
