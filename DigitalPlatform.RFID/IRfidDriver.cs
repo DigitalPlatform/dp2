@@ -24,7 +24,10 @@ namespace DigitalPlatform.RFID
 
         InventoryResult Inventory(string reader_name, string antenna_list, string style);
 
-        GetTagInfoResult GetTagInfo(string reader_name, InventoryInfo info);
+        // 2020/10/10 增加 style 参数
+        GetTagInfoResult GetTagInfo(string reader_name, 
+            InventoryInfo info, 
+            string style);
 
         NormalResult WriteTagInfo(
             string reader_name,

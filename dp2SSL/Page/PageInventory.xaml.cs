@@ -128,15 +128,22 @@ namespace dp2SSL
             var channel = (BaseChannel<IRfid>)sender;
             // TODO: 对离开的 tag 变化为灰色颜色
 
+            SoundMaker.InitialSequence(e.AddTags.Count);
+
             foreach (var tag in e.AddTags)
             {
+                SoundMaker.NextSound();
                 ProcessTag(channel, tag);
             }
 
+            SoundMaker.StopCurrent();
+
+            /*
             foreach (var tag in e.UpdateTags)
             {
                 ProcessTag(channel, tag);
             }
+            */
         }
 
         void ProcessTag(BaseChannel<IRfid> channel, TagAndData tag)
@@ -173,7 +180,7 @@ namespace dp2SSL
                         error = "RFID 通道尚未启动";
                     else
                     {
-                        var get_result = channel.Object.GetTagInfo(entity.ReaderName, entity.UID, Convert.ToUInt32(entity.Antenna));
+                        var get_result = channel.Object.GetTagInfo(entity.ReaderName, entity.UID, Convert.ToUInt32(entity.Antenna), "quick");
 
                         /*
                         // testing
@@ -184,6 +191,11 @@ namespace dp2SSL
                         if (get_result.Value == -1)
                         {
                             SoundMaker.ErrorSound();
+
+                            // 朗读出错 entity 数量
+                            var count = InventoryData.AddErrorEntity(entity, out bool changed);
+                            if (changed == true)
+                                App.CurrentApp.SpeakSequence(count.ToString());
 
                             info.State = "errorGetTagInfo";
                             error = get_result.ErrorInfo;
@@ -197,6 +209,11 @@ namespace dp2SSL
                             tag.OneTag.TagInfo = get_result.TagInfo;
                             InventoryData.AddEntity(tag, out isNewly);
                             info.State = "";
+
+                            // 朗读出错 entity 数量
+                            var count = InventoryData.RemoveErrorEntity(entity, out bool changed);
+                            if (changed == true)
+                                App.CurrentApp.SpeakSequence(count.ToString());
                         }
                     }
 

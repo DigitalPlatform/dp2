@@ -1709,7 +1709,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                 // 2020/10/1
                 if (isInventory)
                 {
-                    SoundMaker.Start();
+                    SoundMaker.FirstSound(e.Result.Results.Count);
 
                     NewTagList2.Refresh(
                         e.ReaderNameList,
@@ -1744,7 +1744,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                         CurrentApp.Number = $"{NewTagList.Tags.Count}";
                     //numberShown = true;
 
-                    SoundMaker.Stop();
+                    SoundMaker.StopCurrent();
                 }
 
                 if (isBorrow == true/* || numberShown == false*/)

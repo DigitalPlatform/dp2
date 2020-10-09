@@ -23,6 +23,12 @@ namespace DigitalPlatform.RFID
         GetTagInfoResult GetTagInfo(string reader_name, string uid,
             uint antenna_id);
 
+        // 2020/10/10
+        GetTagInfoResult GetTagInfo(string reader_name,
+            string uid,
+            uint antenna_id,
+            string style);
+
         /*
         GetTagInfoResult GetTagInfo(string reader_name,
     InventoryInfo info);

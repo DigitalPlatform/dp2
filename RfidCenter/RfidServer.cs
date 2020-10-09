@@ -748,6 +748,60 @@ namespace RfidCenter
             return new GetTagInfoResult { ErrorCode = "notFoundReader" };
         }
 
+        // 2020/10/10
+        public GetTagInfoResult GetTagInfo(string reader_name,
+    string uid,
+    uint antenna_id,
+    string style)
+        {
+            if (Program.MainForm.ErrorState != "normal")
+                return new GetTagInfoResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"{Program.MainForm.ErrorStateInfo}",
+                    ErrorCode = $"state:{Program.MainForm.ErrorState}"
+                };
+
+            List<GetTagInfoResult> errors = new List<GetTagInfoResult>();
+            foreach (Reader reader in Program.Rfid.Readers)
+            {
+                if (Reader.MatchReaderName(reader_name, reader.Name, out string antenna_list) == false)
+                    continue;
+
+                InventoryInfo info = new InventoryInfo
+                {
+                    UID = uid,
+                    AntennaID = antenna_id
+                };
+
+                // result.Value
+                //      -1
+                //      0
+                GetTagInfoResult result0 = Program.Rfid.GetTagInfo(reader.Name, info, style);
+
+                // 继续尝试往后寻找
+                if (result0.Value == -1
+                    // && result0.ErrorCode == "errorFromReader=4"
+                    )
+                {
+                    errors.Add(result0);
+                    continue;
+                }
+
+                if (result0.Value == -1)
+                    return result0;
+
+                // found
+                return result0;
+            }
+
+            // 2019/2/13
+            if (errors.Count > 0)
+                return errors[0];
+
+            return new GetTagInfoResult { ErrorCode = "notFoundReader" };
+        }
+
         public NormalResult WriteTagInfo(
     string reader_name,
     TagInfo old_tag_info,

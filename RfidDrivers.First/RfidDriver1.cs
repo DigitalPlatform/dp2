@@ -3776,12 +3776,15 @@ out Reader reader);
         //      0
         public GetTagInfoResult GetTagInfo(// byte[] uid, UInt32 tag_type
             string one_reader_name,
-            InventoryInfo info)
+            InventoryInfo info,
+            string style = "")
         {
             NormalResult result = GetReader(one_reader_name,
     out Reader reader);
             if (result.Value == -1)
                 return new GetTagInfoResult(result);
+
+            bool quick = StringUtil.IsInList("quick", style);
 
             // 锁定一个读卡器
             LockReader(reader);
@@ -3886,9 +3889,13 @@ out Reader reader);
                             ErrorCode = result0.ErrorCode
                         };
 
-                    NormalResult eas_result = CheckEAS(reader.ReaderHandle, hTag);
-                    if (eas_result.Value == -1)
-                        return new GetTagInfoResult { Value = -1, ErrorInfo = eas_result.ErrorInfo, ErrorCode = eas_result.ErrorCode };
+                    NormalResult eas_result = new NormalResult();
+                    if (quick == false)
+                    {
+                        eas_result = CheckEAS(reader.ReaderHandle, hTag);
+                        if (eas_result.Value == -1)
+                            return new GetTagInfoResult { Value = -1, ErrorInfo = eas_result.ErrorInfo, ErrorCode = eas_result.ErrorCode };
+                    }
 
                     GetTagInfoResult result1 = new GetTagInfoResult
                     {
@@ -3916,8 +3923,11 @@ out Reader reader);
                 finally
                 {
                     _disconnectTag(reader.ReaderHandle, ref hTag);
-                    // 2019/11/18 尝试关闭射频
-                    RFIDLIB.rfidlib_reader.RDR_CloseRFTransmitter(reader.ReaderHandle);
+                    if (quick == false)
+                    {
+                        // 2019/11/18 尝试关闭射频
+                        RFIDLIB.rfidlib_reader.RDR_CloseRFTransmitter(reader.ReaderHandle);
+                    }
                 }
             }
             finally
