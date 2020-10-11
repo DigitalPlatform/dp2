@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
+using System.IO;
+using System.Collections;
 
 using static dp2SSL.LibraryChannelUtil;
 using DigitalPlatform;
@@ -14,8 +16,6 @@ using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Text;
 using DigitalPlatform.WPF;
 using DigitalPlatform.IO;
-using System.IO;
-using System.Collections;
 
 namespace dp2SSL.Models
 {

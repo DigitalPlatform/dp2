@@ -93,7 +93,7 @@ namespace dp2SSL
             {
                 Open();
             }
-            _outputDevice.SendProgramChange(Channel.Channel2, Instrument.ElectricBassPick);
+            _outputDevice.SendProgramChange(Channel.Channel2, Instrument.BirdTweet);
         }
 
         public static void StopCurrent()
@@ -131,7 +131,14 @@ namespace dp2SSL
                 _sequence.RemoveAt(0);
             }
 
-            _outputDevice.SendNoteOn(Channel.Channel1, (Pitch)_currentPitch, 50);
+            try
+            {
+                _outputDevice.SendNoteOn(Channel.Channel1, (Pitch)_currentPitch, 50);
+            }
+            catch(Exception ex)
+            {
+
+            }
         }
 
         // 表示出错的声音
@@ -140,12 +147,12 @@ namespace dp2SSL
             InitialChannel2();
 
             // _outputDevice.SendControlChange(Channel.Channel2, Control.SustainPedal, 10);
-            _outputDevice.SendNoteOn(Channel.Channel2, Pitch.B4, 50);
+            _outputDevice.SendNoteOn(Channel.Channel2, Pitch.B4, 100);
 
             _ = Task.Run(async () =>
             {
                 await Task.Delay(500);
-                _outputDevice.SendNoteOff(Channel.Channel2, Pitch.B4, 50);
+                _outputDevice.SendNoteOff(Channel.Channel2, Pitch.B4, 100);
             });
         }
 
