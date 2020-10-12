@@ -2590,6 +2590,7 @@ out strError);
                 if (strAction == "new"
                     || strAction == "change"
                     || strAction == "transfer"
+                    || strAction == "setuid"
                     || strAction == "move")
                 {
                     XmlNode node = null;
@@ -2735,6 +2736,7 @@ out strError);
                 if (strAction == "new"
                     || strAction == "change"
                     || strAction == "transfer"
+                    || strAction == "setuid"
                     || strAction == "move")
                 {
                     string strRecord = DomUtil.GetElementText(domLog.DocumentElement,
@@ -2773,12 +2775,13 @@ out strError);
 
                     if ((strAction == "change"
                         || strAction == "transfer"
+                        || strAction == "setuid"
                         || strAction == "move")
                         && bForce == false) // 2008/10/6
                     {
                         string strSourceRecPath = "";
 
-                        if (strAction == "change" || strAction == "transfer")
+                        if (strAction == "change" || strAction == "transfer" || strAction == "setuid")
                             strSourceRecPath = strNewRecPath;
                         if (strAction == "move")
                             strSourceRecPath = strOldRecPath;
@@ -2843,9 +2846,16 @@ out strError);
 
                     if (bForce == false)
                     {
+                        // 2020/10/12
+                        string[] elements = null;
+                        if (strAction == "transfer")
+                            elements = transfer_entity_element_names;
+                        else if (strAction == "setuid")
+                            elements = setuid_entity_element_names;
+
                         nRet = MergeTwoEntityXml(domExist,
                             domNew,
-                            strAction == "transfer" ? transfer_entity_element_names : null,
+                            elements,   // strAction == "transfer" ? transfer_entity_element_names : null,
                             false,
                             out strNewXml,
                             out strError);
@@ -2946,6 +2956,7 @@ out strError);
                 // 和数据库中已有记录合并，然后保存
                 if (strAction == "change"
                     || strAction == "transfer"
+                    || strAction == "setuid"
                     || strAction == "new")
                 {
                     string strRecord = DomUtil.GetElementText(domLog.DocumentElement,
@@ -2976,7 +2987,7 @@ out strError);
                         out node);
                     if (node == null)
                     {
-                        if (strAction == "change" || strAction == "transfer")
+                        if (strAction == "change" || strAction == "transfer" || strAction == "setuid")
                         {
                             strError = "日志记录中缺<oldRecord>元素";
                             return -1;
@@ -3036,7 +3047,7 @@ out strError);
                             out strError);
                         if (nRet == 0 || nRet == -1)
                         {
-                            if (strAction == "change" || strAction == "transfer")
+                            if (strAction == "change" || strAction == "transfer" || strAction == "setuid")
                             {
                                 /*
                                 // 从库中没有找到，只好依日志记录中记载的旧记录
@@ -3154,7 +3165,7 @@ out strError);
                         return -1;
                     }
 
-                    if (strAction == "change" || strAction == "transfer")
+                    if (strAction == "change" || strAction == "transfer" || strAction == "setuid")
                     {
                         if (strNewItemBarcode != ""
                             && strNewItemBarcode != strOldItemBarcode)
@@ -3219,9 +3230,16 @@ out strError);
 
                     if (bForce == false)
                     {
+                        // 2020/10/12
+                        string[] elements = null;
+                        if (strAction == "transfer")
+                            elements = transfer_entity_element_names;
+                        else if (strAction == "setuid")
+                            elements = setuid_entity_element_names;
+
                         nRet = MergeTwoEntityXml(domExist,
                             domNew,
-                            strAction == "transfer" ? transfer_entity_element_names : null,
+                            elements,   // strAction == "transfer" ? transfer_entity_element_names : null,
                             false,
                             out strNewXml,
                             out strError);

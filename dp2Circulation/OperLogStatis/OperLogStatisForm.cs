@@ -10,6 +10,7 @@ using System.Xml;
 using System.Reflection;
 using System.Diagnostics;
 using System.Runtime.Remoting;
+using System.Linq;
 
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
@@ -102,7 +103,7 @@ namespace dp2Circulation
 #endif
 
             // 方案名
-            this.textBox_projectName.Text = Program.MainForm.AppInfo.GetString(
+            this.comboBox_projectName.Text = Program.MainForm.AppInfo.GetString(
                 "operlogstatisform",
                 "projectname",
                 "");
@@ -173,7 +174,7 @@ namespace dp2Circulation
             Program.MainForm.AppInfo.SetString(
                 "operlogstatisform",
                 "projectname",
-                this.textBox_projectName.Text);
+                this.comboBox_projectName.Text);
 
             // 起始日期
             Program.MainForm.AppInfo.SetString(
@@ -601,7 +602,7 @@ namespace dp2Circulation
                 loader.Level = Program.MainForm.OperLogLevel;
                 loader.AutoCache = StringUtil.IsInList("autocache", strStyle);    // false;
                 loader.CacheDir = Program.MainForm.OperLogCacheDir;
-                loader.LogType = bAccessLog ? LogType.AccessLog : LogType.OperLog; 
+                loader.LogType = bAccessLog ? LogType.AccessLog : LogType.OperLog;
                 // loader.Filter = "borrow,return";
 
                 loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
@@ -621,7 +622,7 @@ namespace dp2Circulation
                     if (string.IsNullOrEmpty(item.Xml) == true)
                         continue;
 
-                    nRet = procDoRecord(item.Date + ".log", 
+                    nRet = procDoRecord(item.Date + ".log",
                         item.Xml,
                         false,  // bInCacheFile,
                         0,
@@ -635,7 +636,7 @@ namespace dp2Circulation
 
                 return 0;
             }
-            catch(InterruptException ex)
+            catch (InterruptException ex)
             {
                 strError = ex.Message;
                 return 1;
@@ -846,15 +847,14 @@ namespace dp2Circulation
 
             if (this.tabControl_main.SelectedTab == this.tabPage_selectProject)
             {
-                string strProjectName = this.textBox_projectName.Text;
+                string strProjectName = this.comboBox_projectName.Text;
 
                 if (String.IsNullOrEmpty(strProjectName) == true)
                 {
                     strError = "尚未指定方案名";
-                    this.textBox_projectName.Focus();
+                    this.comboBox_projectName.Focus();
                     goto ERROR1;
                 }
-
 
                 // 切换到时间范围page
                 this.tabControl_main.SelectedTab = this.tabPage_timeRange;
@@ -884,11 +884,11 @@ namespace dp2Circulation
                     goto ERROR1;
                 }
 
-                string strProjectName = this.textBox_projectName.Text;
+                string strProjectName = this.comboBox_projectName.Text;
                 if (String.IsNullOrEmpty(strProjectName) == true)
                 {
                     strError = "尚未指定方案名";
-                    this.textBox_projectName.Focus();
+                    this.comboBox_projectName.Focus();
                     goto ERROR1;
                 }
 
@@ -903,45 +903,60 @@ namespace dp2Circulation
 #endif
 
                 string strProjectLocate = "";
-                // 获得方案参数
-                // strProjectNamePath	方案名，或者路径
-                // return:
-                //		-1	error
-                //		0	not found project
-                //		1	found
-                nRet = this.ScriptManager.GetProjectData(
-                    strProjectName,
-                    out strProjectLocate);
 
-                if (nRet == 0)
+                if (strProjectName.StartsWith("#") == true)
                 {
-                    strError = "方案 " + strProjectName + " 没有找到...";
-                    this.tabControl_main.SelectedTab = this.tabPage_selectProject;
-                    goto ERROR1;
+                    // 内置方案
+                    if (strProjectName == "#典藏移交清单")
+                    {
+                        nRet = TransferList(out strError);
+                        if (nRet == -1)
+                        {
+                            strError = $"TransferList() 出错: {strError}";
+                            goto ERROR1;
+                        }
+                    }
                 }
-                if (nRet == -1)
+                else
                 {
-                    strError = "scriptManager.GetProjectData() error ...";
-                    goto ERROR1;
-                }
-
-                // 切换到执行page
-                this.tabControl_main.SelectedTab = this.tabPage_runStatis;
-
-                this.Running = true;
-                try
-                {
-
-                    nRet = RunScript(strProjectName,
-                        strProjectLocate,
-                        out strError);
-
-                    if (nRet == -1)
+                    // 获得方案参数
+                    // strProjectNamePath	方案名，或者路径
+                    // return:
+                    //		-1	error
+                    //		0	not found project
+                    //		1	found
+                    nRet = this.ScriptManager.GetProjectData(
+                        strProjectName,
+                        out strProjectLocate);
+                    if (nRet == 0)
+                    {
+                        strError = "方案 " + strProjectName + " 没有找到...";
+                        this.tabControl_main.SelectedTab = this.tabPage_selectProject;
                         goto ERROR1;
-                }
-                finally
-                {
-                    this.Running = false;
+                    }
+                    if (nRet == -1)
+                    {
+                        strError = "scriptManager.GetProjectData() error ...";
+                        goto ERROR1;
+                    }
+
+                    // 切换到执行page
+                    this.tabControl_main.SelectedTab = this.tabPage_runStatis;
+
+                    this.Running = true;
+                    try
+                    {
+                        nRet = RunScript(strProjectName,
+                            strProjectLocate,
+                            out strError);
+
+                        if (nRet == -1)
+                            goto ERROR1;
+                    }
+                    finally
+                    {
+                        this.Running = false;
+                    }
                 }
 
                 this.tabControl_main.SelectedTab = this.tabPage_runStatis;
@@ -950,8 +965,6 @@ namespace dp2Circulation
                 return;
             }
 
-
-
             if (this.tabControl_main.SelectedTab == this.tabPage_runStatis)
             {
                 // 切换到...
@@ -959,10 +972,134 @@ namespace dp2Circulation
 
                 this.button_next.Enabled = false;
             }
-
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+        // 典藏移交清单。内置统计方案
+        // return:
+        //      -1  出错
+        //      0   成功
+        //      1   用户中断
+        int TransferList(out string strError)
+        {
+            strError = "";
+
+            EnableControls(false);
+
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在执行脚本 ...");
+            stop.BeginLoop();
+            try
+            {
+
+                var items = new List<TransferItem>();
+
+                // 搜集信息
+                int nRet = DoLoop((string strLogFileName,
+                    string strXml,
+                    bool bInCacheFile,
+                    long lHint,
+                    long lIndex,
+                    long lAttachmentTotalLength,
+                    object param,
+                    out string strError1) =>
+                    {
+                        strError1 = "";
+
+                        XmlDocument dom = new XmlDocument();
+                        dom.LoadXml(strXml);
+
+                        // 搜集全部相关日志记录
+                        string operation = DomUtil.GetElementText(dom.DocumentElement, "operation");
+                        if (operation != "setEntity")
+                            return 0;
+
+                        string action = DomUtil.GetElementText(dom.DocumentElement, "action");
+                        if (action != "transfer")
+                            return 0;
+
+                        var item = new TransferItem();
+                        item.BatchNo = DomUtil.GetElementText(dom.DocumentElement, "batchNo");
+
+                        XmlDocument old_itemdom = new XmlDocument();
+                        old_itemdom.LoadXml(DomUtil.GetElementText(dom.DocumentElement, "oldRecord"));
+
+                        item.SourceLocation = DomUtil.GetElementText(old_itemdom.DocumentElement, "location");
+
+                        string new_xml = DomUtil.GetElementText(dom.DocumentElement, "record", out XmlNode node);
+                        XmlDocument new_itemdom = new XmlDocument();
+                        new_itemdom.LoadXml(new_xml);
+
+                        item.TargetLocation = DomUtil.GetElementText(new_itemdom.DocumentElement, "location");
+                        item.Barcode = DomUtil.GetElementText(new_itemdom.DocumentElement, "barcode");
+                        item.RecPath = ((XmlElement)node).GetAttribute("recPath");
+                        items.Add(item);
+                        return 0;
+                    },
+                    out strError);
+                if (nRet == -1 || nRet == 1)
+                    return nRet;
+
+                // 让用户选择需要统计的范围。根据批次号、目标位置来进行选择
+                var list = items.GroupBy(
+                    x => new { x.BatchNo, x.TargetLocation },
+                    (key, item_list) => new TransferGroup
+                    {
+                        BatchNo = key.BatchNo,
+                        TargetLocation = key.TargetLocation,
+                        Items = new List<TransferItem>(item_list)
+                    }).ToList();
+
+                using (var dlg = new SelectOutputRangeDialog())
+                {
+                    dlg.Groups = list;
+                    dlg.ShowDialog(this);
+                    if (dlg.DialogResult == DialogResult.Cancel)
+                        return 1;
+                }
+
+                return 0;
+            }
+            finally
+            {
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+                stop.HideProgress();
+
+                EnableControls(true);
+            }
+        }
+
+
+
+        int _transferList(string strLogFileName,
+    string strXml,
+    bool bInCacheFile,
+    long lHint,
+    long lIndex,
+    long lAttachmentTotalLength,
+    object param,
+    out string strError)
+        {
+            strError = "";
+
+            if (string.IsNullOrEmpty(strXml) == true)
+                return 0;
+
+            string strDate = "";
+            int nRet = strLogFileName.IndexOf(".");
+            if (nRet != -1)
+                strDate = strLogFileName.Substring(0, nRet);
+            else
+                strDate = strLogFileName;
+
+            DateTime currentDate = DateTimeUtil.Long8ToDateTime(strDate);
+
+
+            return 0;
         }
 
         // 获得方案名
@@ -973,7 +1110,7 @@ namespace dp2Circulation
             MainForm.SetControlFont(dlg, this.Font, false);
 
             dlg.scriptManager = this.ScriptManager;
-            dlg.ProjectName = this.textBox_projectName.Text;
+            dlg.ProjectName = this.comboBox_projectName.Text;
             dlg.NoneProject = false;
 
             Program.MainForm.AppInfo.LinkFormState(dlg, "GetProjectNameDlg_state");
@@ -984,7 +1121,7 @@ namespace dp2Circulation
             if (dlg.DialogResult != DialogResult.OK)
                 return;
 
-            this.textBox_projectName.Text = dlg.ProjectName;
+            this.comboBox_projectName.Text = dlg.ProjectName;
         }
 
         /// <summary>
@@ -1349,7 +1486,7 @@ namespace dp2Circulation
         // 内置统计方案 #1
         private void button_defaultProject_1_Click(object sender, EventArgs e)
         {
-            this.textBox_projectName.Text = "#1";
+            this.comboBox_projectName.Text = "#1";
         }
 
 

@@ -21,10 +21,7 @@ using DigitalPlatform.Marc;
 
 using DigitalPlatform.Message;
 using DigitalPlatform.rms.Client.rmsws_localhost;
-using Jint;
-using Jint.Native;
-using Microsoft.SqlServer.Server;
-using Jint.Parser.Ast;
+
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -67,6 +64,13 @@ namespace DigitalPlatform.LibraryServer
                 "shelfNo", // 架号。例如 10-1 表示第十个架的第一排
                 "accessNo",
                 "currentLocation",  // 2019/7/27 新增
+                "batchNo",
+                "operations",
+            };
+
+        // 2020/10/12
+        static string[] setuid_entity_element_names = new string[] {
+                "uid",
                 "batchNo",
                 "operations",
             };
@@ -2998,6 +3002,7 @@ out strError);
                     if (info.Action == "new"
                         || info.Action == "change"
                         || info.Action == "transfer"
+                        || info.Action == "setuid"
                         || info.Action == "delete"
                         || info.Action == "move")
                     {
@@ -3024,6 +3029,7 @@ out strError);
                         if (info.Action == "new"
                             || info.Action == "change"
                             || (info.Action == "transfer" && StringUtil.IsInList("dont_lock", info.Style) == false)
+                            || info.Action == "setuid"
                             || info.Action == "move")
                             strLockBarcode = strNewBarcode;
                         else if (info.Action == "delete")
@@ -3062,6 +3068,7 @@ out strError);
                         if ((info.Action == "new"
                                 || info.Action == "change"
                                 || info.Action == "transfer"
+                                || info.Action == "setuid"
                                 || info.Action == "move")       // delete操作不校验记录
                             && bNoCheckDup == false
                             // && bSimulate == false
@@ -3538,7 +3545,10 @@ out strError);
                             }
                         }
                     }
-                    else if (info.Action == "change" || info.Action == "transfer")
+                    else if (info.Action == "change"
+                        || info.Action == "transfer"
+                        || info.Action == "setuid"
+                        || info.Action == "setuid") // 2020/10/12
                     {
                         if (bSimulate == true)
                         {
@@ -4884,9 +4894,17 @@ out strError);
 
                 if (nRet == 1)  // 册条码号有改变
                 {
+                    // TODO: 顺带检查一下 oi 元素是否被改变
+                    // 2020/10/12
+                    if (strAction == "setuid")
+                    {
+                        strError = "修改操作(setuid)被拒绝。册记录 '" + info.NewRecPath + "' 中册条码号元素内容不允许改变。(当前册条码号 '" + strOldBarcode + "'，试图修改为条码号 '" + strNewBarcode + "')";
+                        goto ERROR1;
+                    }
+
                     if (bHasCirculationInfo == true
                         && bForce == false
-                        && strAction != "transfer")
+                        && strAction != "transfer" && strAction != "setuid")
                     {
                         // TODO: 可否增加允许同时修改所关联的已借阅读者记录修改能力?
                         // 值得注意的是如何记录进操作日志，将来如何进行recover的问题
@@ -4949,7 +4967,7 @@ out strError);
                 if (nRet == -1)
                     goto ERROR1;
 
-                if (nRet == 1 && strAction != "transfer")
+                if (nRet == 1 && strAction != "transfer" && strAction != "setuid")
                 {
                     if ((strOldState != "注销" && strOldState != "丢失")
                         && (strNewState == "注销" || strNewState == "丢失")
@@ -5058,13 +5076,20 @@ out strError);
 
                 if (bForce == false)
                 {
+                    // 2020/10/12
+                    string[] elements = null;
+                    if (strAction == "transfer")
+                        elements = transfer_entity_element_names;
+                    else if (strAction == "setuid")
+                        elements = setuid_entity_element_names;
+
                     // 比较两个记录, 看看和册登录有关的字段是否发生了变化
                     // return:
                     //      0   没有变化
                     //      1   有变化
                     nRet = IsRegisterInfoChanged(domOld,
                         domExist,
-                        strAction == "transfer" ? transfer_entity_element_names : null);
+                        elements/*strAction == "transfer" ? transfer_entity_element_names : null*/);
                 }
 
                 if (nRet == 1 || bForce == true) // 2008/5/29 changed
@@ -5103,9 +5128,16 @@ out strError);
                         goto ERROR1;
                 }
 
+                // 2020/10/12
+                string[] elements = null;
+                if (strAction == "transfer")
+                    elements = transfer_entity_element_names;
+                else if (strAction == "setuid")
+                    elements = setuid_entity_element_names;
+
                 nRet = MergeTwoEntityXml(domExist,
                     domNew,
-                    strAction == "transfer" ? transfer_entity_element_names : null,
+                    elements,   // strAction == "transfer" ? transfer_entity_element_names : null,
                     StringUtil.IsInList("outofrangeAsError", strStyle),
                     out strNewXml,
                     out strError);
@@ -5226,7 +5258,7 @@ out strError);
         strSourceLibraryCode + "," + strTargetLibraryCode);    // 册所在的馆代码
 
                     DomUtil.SetElementText(domOperLog.DocumentElement,
-                        "action", strAction == "transfer" ? strAction : "change");
+                        "action", strAction == "transfer" || strAction == "setuid" ? strAction : "change");
                     if (String.IsNullOrEmpty(strStyle) == false)
                         DomUtil.SetElementText(domOperLog.DocumentElement, "style", strStyle);
 

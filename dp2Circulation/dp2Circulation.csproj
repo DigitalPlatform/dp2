@@ -721,6 +721,12 @@
     <Compile Include="OperLogStatis\OperLogItemLoader.cs" />
     <Compile Include="OperLogStatis\OperLogLoader.cs" />
     <Compile Include="OperLogStatis\OperLogStatisTask1.cs" />
+    <Compile Include="OperLogStatis\SelectOutputRangeDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="OperLogStatis\SelectOutputRangeDialog.Designer.cs">
+      <DependentUpon>SelectOutputRangeDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="OperLog\OperLogReport.cs" />
     <Compile Include="Order\BatchOrder\BatchOrderForm.cs">
       <SubType>Form</SubType>
@@ -1923,6 +1929,9 @@
     <EmbeddedResource Include="Monitor\StartRebuildKeysDlg.resx">
       <DependentUpon>StartRebuildKeysDlg.cs</DependentUpon>
       <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="OperLogStatis\SelectOutputRangeDialog.resx">
+      <DependentUpon>SelectOutputRangeDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Order\BatchOrder\BatchOrderForm.resx">
       <DependentUpon>BatchOrderForm.cs</DependentUpon>
