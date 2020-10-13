@@ -139,6 +139,12 @@ namespace dp2Circulation
             int i = 0;
             foreach (string col in col_list)
             {
+                // 2020/10/13
+                if (string.IsNullOrEmpty(col))
+                {
+                    i++;
+                    continue;
+                }
                 string strValue = "";
                 if (col == "recpath" || col.EndsWith("_recpath"))
                     strValue = strBiblioRecPath;

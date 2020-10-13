@@ -9,11 +9,9 @@ using System.IO;
 using System.Xml;
 using System.Reflection;
 using System.Diagnostics;
-using System.Runtime.Remoting;
-using System.Linq;
+
 
 using DigitalPlatform;
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Script;
 using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
@@ -977,130 +975,6 @@ namespace dp2Circulation
             MessageBox.Show(this, strError);
         }
 
-        // 典藏移交清单。内置统计方案
-        // return:
-        //      -1  出错
-        //      0   成功
-        //      1   用户中断
-        int TransferList(out string strError)
-        {
-            strError = "";
-
-            EnableControls(false);
-
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在执行脚本 ...");
-            stop.BeginLoop();
-            try
-            {
-
-                var items = new List<TransferItem>();
-
-                // 搜集信息
-                int nRet = DoLoop((string strLogFileName,
-                    string strXml,
-                    bool bInCacheFile,
-                    long lHint,
-                    long lIndex,
-                    long lAttachmentTotalLength,
-                    object param,
-                    out string strError1) =>
-                    {
-                        strError1 = "";
-
-                        XmlDocument dom = new XmlDocument();
-                        dom.LoadXml(strXml);
-
-                        // 搜集全部相关日志记录
-                        string operation = DomUtil.GetElementText(dom.DocumentElement, "operation");
-                        if (operation != "setEntity")
-                            return 0;
-
-                        string action = DomUtil.GetElementText(dom.DocumentElement, "action");
-                        if (action != "transfer")
-                            return 0;
-
-                        var item = new TransferItem();
-                        item.BatchNo = DomUtil.GetElementText(dom.DocumentElement, "batchNo");
-
-                        XmlDocument old_itemdom = new XmlDocument();
-                        old_itemdom.LoadXml(DomUtil.GetElementText(dom.DocumentElement, "oldRecord"));
-
-                        item.SourceLocation = DomUtil.GetElementText(old_itemdom.DocumentElement, "location");
-
-                        string new_xml = DomUtil.GetElementText(dom.DocumentElement, "record", out XmlNode node);
-                        XmlDocument new_itemdom = new XmlDocument();
-                        new_itemdom.LoadXml(new_xml);
-
-                        item.TargetLocation = DomUtil.GetElementText(new_itemdom.DocumentElement, "location");
-                        item.Barcode = DomUtil.GetElementText(new_itemdom.DocumentElement, "barcode");
-                        item.RecPath = ((XmlElement)node).GetAttribute("recPath");
-                        items.Add(item);
-                        return 0;
-                    },
-                    out strError);
-                if (nRet == -1 || nRet == 1)
-                    return nRet;
-
-                // 让用户选择需要统计的范围。根据批次号、目标位置来进行选择
-                var list = items.GroupBy(
-                    x => new { x.BatchNo, x.TargetLocation },
-                    (key, item_list) => new TransferGroup
-                    {
-                        BatchNo = key.BatchNo,
-                        TargetLocation = key.TargetLocation,
-                        Items = new List<TransferItem>(item_list)
-                    }).ToList();
-
-                using (var dlg = new SelectOutputRangeDialog())
-                {
-                    dlg.Groups = list;
-                    dlg.ShowDialog(this);
-                    if (dlg.DialogResult == DialogResult.Cancel)
-                        return 1;
-                }
-
-                return 0;
-            }
-            finally
-            {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-                stop.HideProgress();
-
-                EnableControls(true);
-            }
-        }
-
-
-
-        int _transferList(string strLogFileName,
-    string strXml,
-    bool bInCacheFile,
-    long lHint,
-    long lIndex,
-    long lAttachmentTotalLength,
-    object param,
-    out string strError)
-        {
-            strError = "";
-
-            if (string.IsNullOrEmpty(strXml) == true)
-                return 0;
-
-            string strDate = "";
-            int nRet = strLogFileName.IndexOf(".");
-            if (nRet != -1)
-                strDate = strLogFileName.Substring(0, nRet);
-            else
-                strDate = strLogFileName;
-
-            DateTime currentDate = DateTimeUtil.Long8ToDateTime(strDate);
-
-
-            return 0;
-        }
 
         // 获得方案名
         private void button_getProjectName_Click(object sender, EventArgs e)
@@ -1489,6 +1363,7 @@ namespace dp2Circulation
             this.comboBox_projectName.Text = "#1";
         }
 
-
     }
+
+
 }

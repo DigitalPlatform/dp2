@@ -85,8 +85,38 @@ namespace dp2Circulation
                     ListViewUtil.ChangeItemText(item, 2, group.Items.Count.ToString());
                     item.Tag = group.Items;
 
+                    item.Checked = true;
+
                     this.listView1.Items.Add(item);
                 }
+            }
+        }
+
+        private void toolStripButton_selectAll_Click(object sender, EventArgs e)
+        {
+            foreach(ListViewItem item in this.listView1.Items)
+            {
+                item.Checked = true;
+            }
+        }
+
+        private void toolStripButton_clearAll_Click(object sender, EventArgs e)
+        {
+            foreach (ListViewItem item in this.listView1.Items)
+            {
+                item.Checked = false;
+            }
+        }
+
+        public bool OutputOneSheet
+        {
+            get
+            {
+                return this.toolStripButton_outputOneSheet.Checked;
+            }
+            set
+            {
+                this.toolStripButton_outputOneSheet.Checked = value;
             }
         }
     }
@@ -112,5 +142,11 @@ namespace dp2Circulation
         public string SourceLocation { get; set; }
         // 目标 location
         public string TargetLocation { get; set; }
+
+        public DateTime OperTime { get; set; }
+        public string Operator { get; set; }
+
+        // 更新后的册记录 XML
+        public string NewXml { get; set; }
     }
 }

@@ -720,6 +720,9 @@
     </Compile>
     <Compile Include="OperLogStatis\OperLogItemLoader.cs" />
     <Compile Include="OperLogStatis\OperLogLoader.cs" />
+    <Compile Include="OperLogStatis\OperLogStatisForm_transfer.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="OperLogStatis\OperLogStatisTask1.cs" />
     <Compile Include="OperLogStatis\SelectOutputRangeDialog.cs">
       <SubType>Form</SubType>

@@ -59,6 +59,7 @@ namespace dp2Circulation
             this.button_projectManage = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
             this.button3 = new System.Windows.Forms.Button();
+            this.button_option = new System.Windows.Forms.Button();
             this.tabControl_main.SuspendLayout();
             this.tabPage_selectProject.SuspendLayout();
             this.tabPage_timeRange.SuspendLayout();
@@ -88,6 +89,7 @@ namespace dp2Circulation
             // 
             // tabPage_selectProject
             // 
+            this.tabPage_selectProject.Controls.Add(this.button_option);
             this.tabPage_selectProject.Controls.Add(this.comboBox_projectName);
             this.tabPage_selectProject.Controls.Add(this.button_defaultProject_1);
             this.tabPage_selectProject.Controls.Add(this.button_getProjectName);
@@ -115,7 +117,7 @@ namespace dp2Circulation
             // 
             // button_defaultProject_1
             // 
-            this.button_defaultProject_1.Location = new System.Drawing.Point(149, 61);
+            this.button_defaultProject_1.Location = new System.Drawing.Point(149, 128);
             this.button_defaultProject_1.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.button_defaultProject_1.Name = "button_defaultProject_1";
             this.button_defaultProject_1.Size = new System.Drawing.Size(183, 40);
@@ -434,6 +436,17 @@ namespace dp2Circulation
             this.button3.Text = "button3";
             this.button3.UseVisualStyleBackColor = true;
             // 
+            // button_option
+            // 
+            this.button_option.Location = new System.Drawing.Point(149, 53);
+            this.button_option.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
+            this.button_option.Name = "button_option";
+            this.button_option.Size = new System.Drawing.Size(183, 40);
+            this.button_option.TabIndex = 4;
+            this.button_option.Text = "СЎПо ...";
+            this.button_option.UseVisualStyleBackColor = true;
+            this.button_option.Click += new System.EventHandler(this.button_option_Click);
+            // 
             // OperLogStatisForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
@@ -497,5 +510,6 @@ namespace dp2Circulation
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.ComboBox comboBox_projectName;
+        private System.Windows.Forms.Button button_option;
     }
 }
