@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using DigitalPlatform.CommonControl;
 using DigitalPlatform.GUI;
 
 namespace dp2Circulation
@@ -119,6 +120,37 @@ namespace dp2Circulation
                 this.toolStripButton_outputOneSheet.Checked = value;
             }
         }
+
+        private void listView1_ItemChecked(object sender, ItemCheckedEventArgs e)
+        {
+            var item = e.Item;
+            if (item.Checked)
+            {
+                item.ForeColor = Color.White;
+                item.BackColor = Color.DarkGreen;
+            }
+            else
+            {
+                item.ForeColor = SystemColors.ControlText;
+                item.BackColor = SystemColors.Control;
+            }
+        }
+
+        public string UiState
+        {
+            get
+            {
+                List<object> controls = new List<object>();
+                controls.Add(this.listView1);
+                return GuiState.GetUiState(controls);
+            }
+            set
+            {
+                List<object> controls = new List<object>();
+                controls.Add(this.listView1);
+                GuiState.SetUiState(controls, value);
+            }
+        }
     }
 
     // 一组 TransferItem
@@ -129,7 +161,7 @@ namespace dp2Circulation
         public List<TransferItem> Items { get; set; }
     }
 
-    // 典藏移交动作
+    // 典藏移交动作。全部是从 setEntity - transfer 日志记录中获取信息
     public class TransferItem
     {
         // 册记录路径
@@ -148,5 +180,8 @@ namespace dp2Circulation
 
         // 更新后的册记录 XML
         public string NewXml { get; set; }
+
+        // 日志记录中 style 元素
+        public string Style { get; set; }
     }
 }

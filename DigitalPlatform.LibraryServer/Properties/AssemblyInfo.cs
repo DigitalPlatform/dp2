@@ -218,4 +218,4 @@ ItemCanReturn()
 //		3.34 (2020/9/4) 增加调整超额这一种操作日志记录类型 adjustOverflow
 //		3.35 (2020/9/8) Borrow() API 在读者记录中创建的 borrows/borrow 元素中增加了 oi 属性。GetReaderInfo() API 返回的读者记录 XML 中增加了 oi 元素
 //		3.36 (2020/9/11) 配合 dp2ssl 发布正式版，dp2library 专用版本号
-//		3.37 (2020/10/12) SetEntities() API 的 Action 增加 "setuid" 子功能
+//		3.37 (2020/10/12-14) SetEntities() API 的 Action 增加 "setuid" 子功能；Style 增加 "onlyWriteLog" 表示只写入操作日志，不修改册记录(注意操作日志记录中 style 元素里面有请求的 strStyle 值可供判断)

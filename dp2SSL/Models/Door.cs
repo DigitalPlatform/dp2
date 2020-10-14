@@ -680,13 +680,20 @@ namespace dp2SSL
             foreach (var door in _doors)
             {
                 if (door.Antenna.ToString() == antenna
-                    && IsEqual(door.ReaderName, readerName))
+                    && IsReaderNameEqual(door.ReaderName, readerName))
                     results.Add(door);
             }
             return results;
         }
 
-        public static bool IsEqual(string name1, string name2)
+        public static bool IsReaderNameEqual(string name1, string name2)
+        {
+            if (name1 == "*" || name2 == "*")
+                return true;
+            return name1 == name2;
+        }
+
+        public static bool IsLockNameEqual(string name1, string name2)
         {
             if (name1 == "*" || name2 == "*")
                 return true;
@@ -697,7 +704,7 @@ namespace dp2SSL
         {
             ParseLockName(path1, out string lockName1, out string card1, out string number1);
             ParseLockName(path2, out string lockName2, out string card2, out string number2);
-            if (IsEqual(lockName1, lockName2) == false)
+            if (IsLockNameEqual(lockName1, lockName2) == false)
                 return false;
             if (card1 != card2)
                 return false;

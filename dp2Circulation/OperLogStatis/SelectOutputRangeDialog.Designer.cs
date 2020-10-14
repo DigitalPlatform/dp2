@@ -86,6 +86,7 @@
             this.listView1.TabIndex = 8;
             this.listView1.UseCompatibleStateImageBehavior = false;
             this.listView1.View = System.Windows.Forms.View.Details;
+            this.listView1.ItemChecked += new System.Windows.Forms.ItemCheckedEventHandler(this.listView1_ItemChecked);
             // 
             // columnHeader_batchNo
             // 
@@ -113,9 +114,9 @@
             this.toolStripButton_clearAll,
             this.toolStripSeparator1,
             this.toolStripButton_outputOneSheet});
-            this.toolStrip1.Location = new System.Drawing.Point(13, 440);
+            this.toolStrip1.Location = new System.Drawing.Point(13, 446);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(444, 44);
+            this.toolStrip1.Size = new System.Drawing.Size(390, 38);
             this.toolStrip1.TabIndex = 9;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -125,7 +126,7 @@
             this.toolStripButton_selectAll.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_selectAll.Image")));
             this.toolStripButton_selectAll.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_selectAll.Name = "toolStripButton_selectAll";
-            this.toolStripButton_selectAll.Size = new System.Drawing.Size(58, 38);
+            this.toolStripButton_selectAll.Size = new System.Drawing.Size(58, 32);
             this.toolStripButton_selectAll.Text = "全选";
             this.toolStripButton_selectAll.Click += new System.EventHandler(this.toolStripButton_selectAll_Click);
             // 
@@ -135,14 +136,14 @@
             this.toolStripButton_clearAll.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_clearAll.Image")));
             this.toolStripButton_clearAll.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_clearAll.Name = "toolStripButton_clearAll";
-            this.toolStripButton_clearAll.Size = new System.Drawing.Size(142, 38);
+            this.toolStripButton_clearAll.Size = new System.Drawing.Size(142, 32);
             this.toolStripButton_clearAll.Text = "清除全部选择";
             this.toolStripButton_clearAll.Click += new System.EventHandler(this.toolStripButton_clearAll_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 44);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 38);
             // 
             // toolStripButton_outputOneSheet
             // 
@@ -151,7 +152,7 @@
             this.toolStripButton_outputOneSheet.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_outputOneSheet.Image")));
             this.toolStripButton_outputOneSheet.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_outputOneSheet.Name = "toolStripButton_outputOneSheet";
-            this.toolStripButton_outputOneSheet.Size = new System.Drawing.Size(163, 38);
+            this.toolStripButton_outputOneSheet.Size = new System.Drawing.Size(163, 32);
             this.toolStripButton_outputOneSheet.Text = "输出为一个表单";
             // 
             // SelectOutputRangeDialog

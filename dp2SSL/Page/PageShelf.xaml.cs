@@ -1823,9 +1823,13 @@ namespace dp2SSL
                     {
                         // 处理前先从 All 中移走当前门的所有标签
                         {
-                            var remove_entities = ShelfData.Find(ShelfData.l_All, (o) => o.Antenna == door.Antenna.ToString());
+                            var remove_entities = ShelfData.Find(ShelfData.l_All,
+                                (o) => o.Antenna == door.Antenna.ToString() 
+                                && DoorItem.IsReaderNameEqual(o.ReaderName, door.ReaderName));  // 2020/10/14 增加此句，消除“冲掉同天线号的另外一门的图书数字的 bug”
                             if (remove_entities.Count > 0)
                                 ShelfData.l_Remove("all", remove_entities);
+
+                            WpfClientInfo.WriteInfoLog($"初始化开始时，从 all 集合中移走属于门 {door.Name} 的标签共 {remove_entities.Count} 个");
                         }
 
                         // TODO: 填充 RFID 图书标签信息
@@ -3350,7 +3354,7 @@ namespace dp2SSL
                 actions.Add(new ActionInfo
                 {
                     Entity = entity.Clone(),
-                    Action = "transfer",
+                    Action = "transfer",    // 这里是试探性的 transfer，如果册记录不发生变化则不写入操作日志
                     CurrentShelfNo = ShelfData.GetShelfNo(entity),
                     Operator = GetOperator(entity, false),
                     OperTime = now,
@@ -3638,16 +3642,6 @@ namespace dp2SSL
                     (action) =>
                     {
                         var entity = action.Entity;
-                        /*
-                        if (action.Action == "transfer")
-                        {
-                            ShelfData.Remove("all", entity);
-                            ShelfData.Remove("adds", entity);
-                            ShelfData.Remove("removes", entity);
-                            ShelfData.Remove("changes", entity);
-                            changed = true;
-                        }
-                        */
                     });
 
                 if (changed)

@@ -2592,6 +2592,7 @@ out strError);
         // parameters:
         //      strBiblioRecPath    书目记录路径，仅包含库名和id部分。库名可以用来确定书目库，id可以被实体记录用来设置<parent>元素内容。另外书目库名和EntityInfo中的NewRecPath形成映照关系，需要检查它们是否正确对应
         //      entityinfos 要提交的的实体信息数组
+        //      EntityInfo.Style    onlyWriteLog 只写入操作日志，不修改册记录 (2020/10/14)
         // 权限：需要有setentities权限
         // TODO: 写入册库中的记录, 还缺乏<operator>和<operTime>字段
         // TODO: 需要检查册记录的<parent>元素内容是否合法。不能为问号
@@ -5219,17 +5220,26 @@ out strError);
             }
 
             // 保存新记录
-            lRet = channel.DoSaveTextRes(info.NewRecPath,
-    strNewXml,
-    false,   // include preamble?
-    "content" + (bSimulate ? ",simulate" : ""),
-    exist_timestamp,
-    out byte[] output_timestamp,
-    out strOutputPath,
-    out strError);
+            byte[] output_timestamp = exist_timestamp;
+            if (StringUtil.IsInList("onlyWriteLog", strStyle))
+            {
+                // 跳过写入册记录
+                lRet = 0;
+            }
+            else
+            {
+                lRet = channel.DoSaveTextRes(info.NewRecPath,
+        strNewXml,
+        false,   // include preamble?
+        "content" + (bSimulate ? ",simulate" : ""),
+        exist_timestamp,
+        out output_timestamp,
+        out strOutputPath,
+        out strError);
+            }
+
             if (lRet == -1)
             {
-
                 if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch)
                 {
                     if (nRedoCount > 10)

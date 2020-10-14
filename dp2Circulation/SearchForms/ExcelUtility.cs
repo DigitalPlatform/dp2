@@ -112,7 +112,7 @@ namespace dp2Circulation
         }
 
         // 输出一行书目信息
-        public static void OutputBiblioLine(
+        public static List<IXLCell> OutputBiblioLine(
     string strBiblioRecPath,
     string strXml,
     // int nBiblioIndex,
@@ -166,8 +166,12 @@ namespace dp2Circulation
                         cell.Style.Fill.SetBackgroundColor(XLColor.DarkRed);
                         cell.Style.Font.SetFontColor(XLColor.White);
                     }
+
+                    cells.Add(cell);
                 }
             }
+
+            return cells;
         }
 
         // 根据 type 在 Table XML 中获得一个内容值

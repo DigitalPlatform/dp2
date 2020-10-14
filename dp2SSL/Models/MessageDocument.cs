@@ -110,14 +110,14 @@ namespace dp2SSL
 
             int return_count = items.FindAll((o) => { return o.Operation == "return"; }).Count;
             int borrow_count = items.FindAll((o) => { return o.Operation == "borrow"; }).Count;
-            int transfer_count = items.FindAll((o) => { return o.Operation == "transfer"; }).Count;
+            int transfer_count = items.FindAll((o) => { return o.Operation.StartsWith("transfer"); }).Count;
 
             int succeed_count = items.FindAll((o) => { return o.ResultType == "succeed" || string.IsNullOrEmpty(o.ResultType); }).Count;
             int error_count = items.FindAll((o) => { return o.ResultType == "error"; }).Count;
             int warning_count = items.FindAll((o) => { return o.ResultType == "warning"; }).Count;
             int information_count = 0;
             if (display_transfer == false)
-                information_count = items.FindAll((o) => { return o.ResultType == "information" && o.Operation != "transfer"; }).Count;
+                information_count = items.FindAll((o) => { return o.ResultType == "information" && o.Operation.StartsWith("transfer") == false; }).Count;
             else
                 information_count = items.FindAll((o) => { return o.ResultType == "information"; }).Count;
 
@@ -354,7 +354,9 @@ namespace dp2SSL
             string style)
         {
             bool display_transfer = StringUtil.IsInList("transfer", style);
-            if (Operation == "transfer" && display_transfer == false)
+            if (Operation.StartsWith("transfer")
+                && display_transfer == false
+                && ResultType != "error")   // 2020/10/14
                 return null;
 
             var p = new Paragraph();
@@ -422,7 +424,7 @@ namespace dp2SSL
             });
 
             // 转移方向
-            if (Operation == "transfer" && string.IsNullOrEmpty(Direction) == false)
+            if (Operation.StartsWith("transfer") && string.IsNullOrEmpty(Direction) == false)
             {
                 p.Inlines.Add(new Run
                 {
