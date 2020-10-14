@@ -183,7 +183,7 @@ namespace dp2SSL
             int change_currentLocation_count = actions
                 .FindAll((o) =>
                 {
-                    return o.Action == "transfer"
+                    return o.Action.StartsWith("transfer")
       && string.IsNullOrEmpty(o.CurrentShelfNo) == false
       && o.TransferDirection == "in";
                 })
@@ -191,12 +191,12 @@ namespace dp2SSL
 
             // 修改了 location 的数量。这个意味着发生了调拨
             int change_location_count = actions
-                .FindAll(o => { return o.Action == "transfer" && string.IsNullOrEmpty(o.Location) == false; })
+                .FindAll(o => { return o.Action.StartsWith("transfer") && string.IsNullOrEmpty(o.Location) == false; })
                 .Count;
 
             // (工作人员)普通下架。特点是去向不明，但至少知道这些图书是离开书柜了
             int transferout_count = actions
-    .FindAll(o => { return o.Action == "transfer" && o.TransferDirection == "out"; })
+    .FindAll(o => { return o.Action.StartsWith("transfer") && o.TransferDirection == "out"; })
     .Count;
 
             // 总结一下涉及到的门
@@ -417,7 +417,7 @@ namespace dp2SSL
         {
             // 是否显示 transfer (in) 条目。注意，即便 false, 也要显示 transfer (out) 条目的
             bool display_transfer = StringUtil.IsInList("transfer", style);
-            if (action.Action == "transfer" && action.TransferDirection == "in"
+            if (action.Action.StartsWith("transfer") && action.TransferDirection == "in"
                 && display_transfer == false)
                 return null;
 
@@ -517,7 +517,7 @@ namespace dp2SSL
             }
 
             // 转移方向
-            if (action.Action == "transfer"
+            if (action.Action.StartsWith("transfer")
                 /*&& string.IsNullOrEmpty(action.TransferDirection) == false*/)
             {
                 p.Inlines.Add(new Run
@@ -573,7 +573,7 @@ namespace dp2SSL
             }
 
             // 对于上架/下架来说，还要补充显示一些细节信息：location 去向；和 currentLocation 去向
-            if (action.Action == "transfer")
+            if (action.Action.StartsWith("transfer"))
             {
                 List<string> details = new List<string>();
                 if (string.IsNullOrEmpty(action.Location) == false)

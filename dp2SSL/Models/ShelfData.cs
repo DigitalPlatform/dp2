@@ -1020,7 +1020,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                     results.Add(operation);
                 }
 
-                if (action.Action == "transfer" && action.TransferDirection == "in")
+                if (action.Action.StartsWith("transfer") && action.TransferDirection == "in")
                 {
                     string name = "上架";
                     if (string.IsNullOrEmpty(action.Location) == false)
@@ -1037,7 +1037,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                     results.Add(operation);
                 }
 
-                if (action.Action == "transfer" && action.TransferDirection == "out")
+                if (action.Action.StartsWith("transfer") && action.TransferDirection == "out")
                 {
                     string name = "下架";
                     if (string.IsNullOrEmpty(action.Location) == false)
@@ -2350,7 +2350,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                 List<ActionInfo> transferins = new List<ActionInfo>();
                 foreach (var action in actions)
                 {
-                    if (action.Action == "transfer"
+                    if (action.Action.StartsWith("transfer")
                         && action.TransferDirection == "in"
                         && string.IsNullOrEmpty(action.Location) == false)
                     {
@@ -2439,7 +2439,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                 List<ActionInfo> transferouts = new List<ActionInfo>();
                 foreach (var action in actions)
                 {
-                    if (action.Action == "transfer"
+                    if (action.Action.StartsWith("transfer")
                         && action.TransferDirection == "out"
                         && string.IsNullOrEmpty(action.Location) == false)
                     {
@@ -5256,7 +5256,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                         continue;
                     }
 
-                    if (info.Action == "transfer"
+                    if (info.Action.StartsWith("transfer")
                         && info.TransferDirection == "out"
                         && string.IsNullOrEmpty(info.Location) == true
                         && string.IsNullOrEmpty(info.CurrentShelfNo) == true)
@@ -5268,15 +5268,6 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                         error_actions.Add(info);
                         continue;
                     }
-#if REMOVED
-                    string action_name = "借书";
-                    if (action == "return")
-                        action_name = "还书";
-                    else if (action == "renew")
-                        action_name = "续借";
-                    else if (action == "transfer")
-                        action_name = "转移";
-#endif
 
                     // 借书操作必须要有读者身份的请求者
                     if (action == "borrow")
@@ -5444,7 +5435,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                                 out return_info,
                                 out strError);
                         }
-                        else if (action == "transfer")
+                        else if (action.StartsWith("transfer"))
                         {
                             // currentLocation 元素内容。格式为 馆藏地:架号
                             // 注意馆藏地和架号字符串里面不应包含逗号和冒号
@@ -5454,7 +5445,12 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                             if (string.IsNullOrEmpty(info.Location) == false)
                                 commands.Add($"location:{StringUtil.EscapeString(info.Location, ":,")}");
                             if (string.IsNullOrEmpty(info.BatchNo) == false)
+                            {
                                 commands.Add($"batchNo:{StringUtil.EscapeString(info.BatchNo, ":,")}");
+                                // 2020/10/14
+                                // 即便册记录没有发生修改，也要产生 transfer 操作日志记录。这样便于进行典藏移交清单统计打印
+                                commands.Add("forceLog");
+                            }
 
                             // string currentLocation = GetRandomString(); // testing
                             // TODO: 如果先前 entity.Title 已经有了内容，就不要在本次 Return() API 中要求返 biblio summary
@@ -5651,7 +5647,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                             }
                         }
 
-                        if (action == "transfer")
+                        if (action.StartsWith("transfer"))
                         {
                             if (error_code == ErrorCode.NotChanged)
                             {

@@ -82,7 +82,7 @@ namespace DigitalPlatform.RFID
         static bool InRange(OneTag tag, string readerNameList)
         {
             // 匹配读卡器名字
-            var ret = Reader.MatchReaderName(readerNameList,tag.ReaderName, out string antenna_list);
+            var ret = Reader.MatchReaderName(readerNameList, tag.ReaderName, out string antenna_list);
             if (ret == false)
                 return false;
             var list = GetAntennaList(antenna_list);

@@ -6922,6 +6922,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                             strBatchNo,
                             strNewLocation,
                             strNewCurrentLocation,
+                            StringUtil.IsInList("forceLog", strStyle),  // 即便册记录没有发生变化，也要产生操作日志记录。注意这种只产生操作日志记录(但没有修改册记录)的情况下，操作日志记录 XML 中的 style 元素中的值包含 onlyWriteLog
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
@@ -8412,6 +8413,8 @@ start_time_1,
         }
 
         // 执行典藏移交
+        // parameters:
+        //      writeLog    是否要在没有实质性修改的情况下也写入(setEntity-transfer)操作日志
         // return:
         //      -1  出错
         //      0   没有实质性修改
@@ -8424,6 +8427,7 @@ start_time_1,
     string strBatchNo,
     string strNewLocation,
     string strNewCurrentLocation,
+    bool writeLog,
     out string strError)
         {
             strError = "";
@@ -8472,7 +8476,7 @@ start_time_1,
             }
             */
 
-            if (changed == false)
+            if (changed == false && writeLog == false)
                 return 0;
 
             List<EntityInfo> entity_list = new List<EntityInfo>();
@@ -8486,6 +8490,9 @@ start_time_1,
             info.NewRecPath = strItemRecPath;
             info.NewRecord = new_itemdom.OuterXml;
             info.Style = "dont_lock";
+
+            if (writeLog == true && changed == false)
+                info.Style += ",onlyWriteLog";   // 表示只写入操作日志，并不修改册记录
 
             if (string.IsNullOrEmpty(strBatchNo) == false)
                 info.Style += ",batchNo:" + strBatchNo;

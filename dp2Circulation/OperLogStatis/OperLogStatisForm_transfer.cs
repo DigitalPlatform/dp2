@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -81,6 +82,7 @@ namespace dp2Circulation
                     item.Barcode = DomUtil.GetElementText(new_itemdom.DocumentElement, "barcode");
                     item.RecPath = ((XmlElement)node).GetAttribute("recPath");
                     item.NewXml = new_xml;
+                    item.Style = DomUtil.GetElementText(dom.DocumentElement, "style");
                     items.Add(item);
                     return 0;
                 },
@@ -113,8 +115,22 @@ namespace dp2Circulation
             bool output_one_sheet = true;
             using (var dlg = new SelectOutputRangeDialog())
             {
+                dlg.Font = this.Font;
                 dlg.Groups = list;
+
+
+                dlg.UiState = Program.MainForm.AppInfo.GetString(
+"OperLogStatisForm",
+"SelectOutputRangeDialog_uiState",
+"");
+                Program.MainForm.AppInfo.LinkFormState(dlg, "SelectOutputRangeDialog_formstate");
                 dlg.ShowDialog(this);
+
+                Program.MainForm.AppInfo.SetString(
+"OperLogStatisForm",
+"SelectOutputRangeDialog_uiState",
+dlg.UiState);
+
                 if (dlg.DialogResult == DialogResult.Cancel)
                     return 1;
                 groups = dlg.SelectedGroups;
@@ -137,7 +153,6 @@ namespace dp2Circulation
                 RestoreDirectory = true
             })
             {
-
                 if (dlg.ShowDialog() != DialogResult.OK)
                     return 0;
 
@@ -163,10 +178,13 @@ namespace dp2Circulation
                 }
                 else
                 {
+                    int count = groups.Count;
+                    int i = 0;
                     foreach (var group in groups)
                     {
                         CreateSheet(doc,
-                            group.BatchNo + "-" + group.TargetLocation,
+                            $"{++i} {count} {group.BatchNo}-{group.TargetLocation}",
+                            // Cut($"({++i} of {count})", 31),
                             new List<TransferGroup> { group });
                     }
                 }
@@ -186,6 +204,13 @@ namespace dp2Circulation
 
             }
             return 0;
+        }
+
+        static string Cut(string text, int length)
+        {
+            if (text.Length > length)
+                return text.Substring(0, length);
+            return text;
         }
 
         static string GetSheetName(string text)
@@ -245,13 +270,18 @@ namespace dp2Circulation
                 throw new Exception(strError1);
 
             // 输出一行书目信息
-            ExcelUtility.OutputBiblioLine(
+            var cells = ExcelUtility.OutputBiblioLine(
             strBiblioRecPath,
             strTableXml,
             sheet,
             col,
             type_list2,
             row);
+
+            foreach (var cell in cells)
+            {
+                cell.Style.Alignment.WrapText = true;
+            }
         }
 
         // 创建一个 Sheet
@@ -259,10 +289,10 @@ namespace dp2Circulation
             string sheet_name,
             List<TransferGroup> groups)
         {
-            IXLWorksheet sheet = doc.Worksheets.Add(GetSheetName(sheet_name));
+            IXLWorksheet sheet = doc.Worksheets.Add(Cut(GetSheetName(sheet_name), 31));
 
             // 每个列的最大字符数
-            List<int> column_max_chars = new List<int>();
+            // List<int> column_max_chars = new List<int>();
 
             // 准备书目列标题
             var biblio_column_option = new TransferColumnOption(Program.MainForm.UserDir);
@@ -311,13 +341,37 @@ namespace dp2Circulation
                 //cell.Style.Alignment.Horizontal = alignments[nColIndex - 1];
                 nColIndex++;
             }
+            {
+                // 设置边框
+                var range = sheet.Range(nRowIndex, 1, nRowIndex, biblio_title_list.Count);
+                range.Style.Border.SetBottomBorderColor(XLColor.Black);
+                range.Style.Border.SetBottomBorder(XLBorderStyleValues.Medium);
+            }
+
             nRowIndex++;
+
+            // 用于发现重复的册
+            // recpath --> (此路径的第一个) TransferItem
+            Hashtable recpath_table = new Hashtable();
+            int dup_count = 0;      // 记录路径发生重复的行数
+            int notchange_count = 0;    // 馆藏地没有发生改变的行数
 
             int nNo = 1;
             foreach (var group in groups)
             {
                 foreach (var item in group.Items)
                 {
+                    bool dup = false;
+                    if (recpath_table.ContainsKey(item.RecPath))
+                    {
+                        dup = true;
+                        dup_count++;
+                    }
+                    else
+                        recpath_table[item.RecPath] = item;
+
+                    bool onlyWriteLog = StringUtil.IsInList("onlyWriteLog", item.Style);
+
                     nColIndex = 1;
                     // WriteCell(nNo.ToString());
                     // WriteCell(item.Barcode);
@@ -336,7 +390,7 @@ namespace dp2Circulation
                         nColIndex - 1,
                         nRowIndex - 1);
 
-                    OutputTransferLine(
+                    OutputTransferColumns(
                         nNo,
                         item,
                         sheet,
@@ -353,23 +407,89 @@ namespace dp2Circulation
                     WriteCell(item.OperTime.ToString());
                     WriteCell(item.Operator);
                     */
+
+                    // 设置边框
+                    var range = sheet.Range(nRowIndex, 1, nRowIndex, biblio_title_list.Count);
+                    range.Style.Border.SetBottomBorderColor(XLColor.Black);
+                    range.Style.Border.SetBottomBorder(XLBorderStyleValues.Hair);
+
+                    if (dup)
+                        range.Style.Fill.BackgroundColor = XLColor.Yellow;
+
+                    if (onlyWriteLog)
+                    {
+                        notchange_count++;
+                        // 寻找 SourceLocation 和 TargetLocation 列
+                        {
+                            int index = biblio_title_list.FindIndex(o => o.Type == "log_sourceLocation");
+                            if (index != -1)
+                                sheet.Cell(nRowIndex, 1 + index).Style.Fill.BackgroundColor = XLColor.LightBlue;
+                        }
+
+                        {
+                            int index = biblio_title_list.FindIndex(o => o.Type == "log_targetLocation");
+                            if (index != -1)
+                                sheet.Cell(nRowIndex, 1 + index).Style.Fill.BackgroundColor = XLColor.LightBlue;
+                        }
+                    }
+
                     nRowIndex++;
                     nNo++;
                 }
             }
+
+            // 警告行
+            if (dup_count > 0)
+            {
+                nRowIndex++;
+                var range = sheet.Range(nRowIndex, nColIndex, nRowIndex, nColIndex + headers.Count - 1);
+                range.Merge();
+
+                range.Style.Fill.BackgroundColor = XLColor.DarkGray;
+                range.Style.Font.FontColor = XLColor.White;
+                range.Style.Font.Bold = true;
+
+                range.SetValue($"警告：表中有 {dup_count} 个重复的册记录行。这些行已显示为黄色背景色");
+                range.Style.Alignment.WrapText = true;
+                range.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Left;
+                nRowIndex++;
+            }
+
+            // 警告行
+            if (notchange_count > 0)
+            {
+                var range = sheet.Range(nRowIndex, nColIndex, nRowIndex, nColIndex + headers.Count - 1);
+                range.Merge();
+
+                range.Style.Fill.BackgroundColor = XLColor.DarkGray;
+                range.Style.Font.FontColor = XLColor.White;
+
+                range.SetValue($"提醒：表中有 {notchange_count} 个册记录行在移交操作中馆藏地并没有发生变化。这些行的源、目标馆藏地列已显示为蓝色背景色");
+                range.Style.Alignment.WrapText = true;
+                range.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Left;
+                nRowIndex++;
+            }
+
+            // TODO: 设置 header 和 footer
+            // https://stackoverflow.com/questions/34104107/closedxml-change-existing-footer-header
 
             double char_width = DigitalPlatform.dp2.Statis.ClosedXmlUtil.GetAverageCharPixelWidth(Program.MainForm);
 
             // 字符数太多的列不要做 width auto adjust
             const int MAX_CHARS = 30;   // 60
             int i = 0;
-            foreach (IXLColumn column in sheet.Columns())
+            foreach (IXLColumn column in sheet.ColumnsUsed())
             {
-                // int nChars = column_max_chars[i];
-                int nChars = DigitalPlatform.dp2.Statis.ClosedXmlUtil.GetMaxChars(column_max_chars, i);
+                int nChars = GetMaxChars(column);
 
+                column.Width = Math.Min(nChars, MAX_CHARS);
+
+#if NO
                 if (nChars < MAX_CHARS)
-                    column.AdjustToContents();
+                {
+                    // column.AdjustToContents();
+                    column.Width = nChars;
+                }
                 else
                 {
                     int nColumnWidth = 100;
@@ -380,6 +500,8 @@ namespace dp2Circulation
                     */
                     column.Width = (double)nColumnWidth / char_width;  // Math.Min(MAX_CHARS, nChars);
                 }
+#endif
+
                 i++;
             }
 
@@ -409,6 +531,37 @@ namespace dp2Circulation
 #endif
         }
 
+        // 统计一列里面所有单元的最大字符数。注：字符数约定按照西文字符数计算，一个汉字等于两个西文字符
+        static int GetMaxChars(IXLColumn column)
+        {
+            int max = 0;
+            foreach (IXLCell cell in column.CellsUsed())
+            {
+                // 跳过 Merged 的 Cell。也就是表格标题
+                if (cell.IsMerged())
+                    continue;
+
+                string text = cell.GetString();
+                int current = GetCharWidth(text);
+                if (current > max)
+                    max = current;
+            }
+
+            return max;
+        }
+
+        // 计算一个字符串的“西文字符宽度”。汉字相当于两个西文字符宽度
+        static int GetCharWidth(string strText)
+        {
+            int result = 0;
+            foreach (char c in strText)
+            {
+                result += StringUtil.IsHanzi(c) == true ? 2 : 1;
+            }
+
+            return result;
+        }
+
         static string GetPropertyOrField(object obj, string name)
         {
             var pi = obj.GetType().GetProperty(name);
@@ -422,7 +575,7 @@ namespace dp2Circulation
         }
 
         // 输出一行日志或册信息
-        static void OutputTransferLine(
+        static void OutputTransferColumns(
             int no,
             TransferItem transfer_item,
     IXLWorksheet sheet,
@@ -478,8 +631,13 @@ namespace dp2Circulation
                     continue;
                 }
 
+
                 {
                     IXLCell cell = sheet.Cell(nRowIndex + 1, nStartColIndex + (i++) + 1).SetValue(strValue);
+
+                    // 统计最大字符数
+                    // DigitalPlatform.dp2.Statis.ClosedXmlUtil.SetMaxChars(column_max_chars, cell.Address.ColumnNumber - 1, strValue?.Length);
+
                     cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
                     if (col == "recpath" || col.EndsWith("_recpath"))
                         cell.Style.Font.FontColor = XLColor.LightGray;
@@ -588,7 +746,7 @@ namespace dp2Circulation
             "OperLogStatisForm",
             "columnDialog_uiState",
             "");
-                        Program.MainForm.AppInfo.LinkFormState(dlg, "OperLogStatisForm_formstate");
+                        Program.MainForm.AppInfo.LinkFormState(dlg, "OperLogStatisForm_transferOption_formstate");
                         dlg.ShowDialog(this);
                         Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
