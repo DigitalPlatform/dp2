@@ -25,8 +25,8 @@ namespace DigitalPlatform.RFID
         InventoryResult Inventory(string reader_name, string antenna_list, string style);
 
         // 2020/10/10 增加 style 参数
-        GetTagInfoResult GetTagInfo(string reader_name, 
-            InventoryInfo info, 
+        GetTagInfoResult GetTagInfo(string reader_name,
+            InventoryInfo info,
             string style);
 
         NormalResult WriteTagInfo(
@@ -380,7 +380,8 @@ uint new_password);
         public string Protocols { get; set; }   // 支持的协议。ISO15693,ISO14443A 等
         public string SerialNumber { get; set; }    // 序列号(USB)，或者 COM 端口号
         public string DriverPath { get; set; }
-        public int AntannaCount { get; set; }   // 天线数量
+        public int AntennaCount { get; set; }   // 天线数量
+        public int AntennaStart { get; set; }   // 天线编号开始号
 
         public UIntPtr ReaderHandle { get; set; }
         [NonSerialized]
@@ -390,7 +391,7 @@ uint new_password);
 
         public override string ToString()
         {
-            return $"Name={Name},SerialNumber={SerialNumber},DriverPath={DriverPath},Result={Result?.ToString()},DriverName={DriverName}, ProductName={ProductName}, Protocols={Protocols}, AntennaCount={AntannaCount}";
+            return $"Name={Name},SerialNumber={SerialNumber},DriverPath={DriverPath},Result={Result?.ToString()},DriverName={DriverName}, ProductName={ProductName}, Protocols={Protocols}, AntennaCount={AntennaCount}, AntennaStart={AntennaStart}";
         }
 
         /*
@@ -424,7 +425,7 @@ uint new_password);
             string[] names = list.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
             //if (Array.IndexOf(names, one) != -1)
             //    return true;
-            foreach(string name in names)
+            foreach (string name in names)
             {
                 var parts = StringUtil.ParseTwoPart(name, ":");
 
@@ -435,6 +436,23 @@ uint new_password);
                 }
             }
             return false;
+        }
+
+        // 获得全部天线编号列表
+        public byte[] GetAntennaList()
+        {
+            if (AntennaStart == -1)
+                throw new Exception($"读卡器 '{Name}' 的 AntennaStart 成员尚未初始化");
+            if (AntennaCount <= 0)
+                throw new Exception($"读卡器 '{Name}' 的 AntennaCount 值({AntennaCount})不合法");
+
+            List<byte> results = new List<byte>();
+            for (int i = 0; i < AntennaCount; i++)
+            {
+                results.Add((byte)(i + AntennaStart));
+            }
+
+            return results.ToArray();
         }
     }
 

@@ -1252,7 +1252,6 @@ namespace RfidDrivers.First
       <picture>M60.jpg</picture>
       <min_antenna_id>1</min_antenna_id>
       <antena_count>1</antena_count>
-      <antena_count>1</antena_count>
       <communication com='true' usb='true'/>
     </basic>
     <protocol>
@@ -1572,7 +1571,7 @@ namespace RfidDrivers.First
       <picture>rd122.jpg</picture>
       <range>short</range>
       <min_antenna_id>0</min_antenna_id>
-      <antena_count>0</antena_count>
+      <antena_count>0</antena_count><!-- 0 是错的吧？-->
       <communication usb='true'/>
     </basic>
     <protocol>
@@ -1852,7 +1851,7 @@ namespace RfidDrivers.First
       <picture>um200.jpg</picture>
       <range>long</range>
       <min_antenna_id>0</min_antenna_id>
-      <antena_count>0</antena_count>
+      <antena_count>0</antena_count><!-- 0 是错的吧？-->
     </basic>
 
     <protocol>
@@ -1920,7 +1919,7 @@ namespace RfidDrivers.First
       <noise>true</noise>
       <range>long</range>
       <min_antenna_id>1</min_antenna_id>
-      <antena_count>0</antena_count>
+      <antena_count>0</antena_count><!-- 0 是错的吧？-->
       <buffer_mode>false</buffer_mode>
       <save_block>true</save_block>
       <communication usb ='true' com='true' tcp_ip='true'/>
@@ -2130,12 +2129,14 @@ namespace RfidDrivers.First
             out string driver_name,
             out string product_name,
             out string protocols,
-            out int antenna_count)
+            out int antenna_count,
+            out int min_antenna_id)
         {
             driver_name = "";
             product_name = "";
             protocols = "";
             antenna_count = 0;
+            min_antenna_id = -1;
 
             if (_product_dom == null)
             {
@@ -2175,7 +2176,26 @@ namespace RfidDrivers.First
             {
                 XmlElement count = _product_dom.DocumentElement.SelectSingleNode($"device/basic/id[text()='{product_id}']/../antena_count") as XmlElement;
                 if (count != null)
-                    Int32.TryParse(count.InnerText.Trim(), out antenna_count);
+                {
+                    var ret = Int32.TryParse(count.InnerText.Trim(), out antenna_count);
+                    if (ret == false)
+                        throw new Exception($"product_id {product_id} 中 antenna_count 值({count.InnerText.Trim()})不合法");
+                    if (antenna_count <= 0)
+                        throw new Exception($"product_id {product_id} 中 antenna_count 值({count.InnerText.Trim()})不合法，不应小于 1");
+                }
+            }
+
+            // 2020/10/15
+            {
+                XmlElement count = _product_dom.DocumentElement.SelectSingleNode($"device/basic/id[text()='{product_id}']/../min_antenna_id") as XmlElement;
+                if (count != null)
+                {
+                    var ret = Int32.TryParse(count.InnerText.Trim(), out min_antenna_id);
+                    if (ret == false)
+                        throw new Exception($"product_id {product_id} 中 min_antenna_id 值({count.InnerText.Trim()})不合法");
+                }
+                else
+                    min_antenna_id = -1;
             }
 
             return true;
@@ -2234,7 +2254,8 @@ namespace RfidDrivers.First
                     out string driver_name,
                     out string product_name,
                     out string protocols,
-                    out int antenna_count);
+                    out int antenna_count,
+                    out int min_antenna_id);
                 if (bRet == false)
                 {
                     WriteDebugLog($"FillReaderInfo() 返回调主。GetDriverName({product_id}) return false");
@@ -2249,7 +2270,8 @@ namespace RfidDrivers.First
                 reader.DriverName = driver_name;
                 reader.ProductName = product_name;
                 reader.Protocols = protocols;
-                reader.AntannaCount = antenna_count;
+                reader.AntennaCount = antenna_count;
+                reader.AntennaStart = min_antenna_id;
                 WriteDebugLog($"FillReaderInfo() 成功得到 Reader 信息。{reader.ToString()}");
                 return new NormalResult();
             }
@@ -2431,10 +2453,19 @@ namespace RfidDrivers.First
             }
         }
 #endif
-        byte[] GetAntennaList(string list)
+
+
+        static byte[] GetAntennaList(string list, Reader reader)
         {
             if (string.IsNullOrEmpty(list) == true)
-                return new byte[] { 1 };    // 默认是一号天线
+            {
+                // return new byte[] { 1 };    // 默认是一号天线
+
+                // 2020/10/15
+                // 列出全部天线编号
+                return reader.GetAntennaList();
+            }
+
             string[] numbers = list.Split(new char[] { '|', ',' });
             List<byte> bytes = new List<byte>();
             foreach (string number in numbers)
@@ -2474,7 +2505,7 @@ namespace RfidDrivers.First
         // 对一个读卡器进行盘点
         // parameters:
         //      reader_name     一个读卡器名字。注意，不应包含多个读卡器名字
-        //      antenna_list    内容为形态 "1|2|3|4"。如果为空，相当于 1。
+        //      antenna_list    内容为形态 "1|2|3|4"。如果为空，相当于 1(注: ListTags() API 当 readername_list 参数为 "*" 时，就会被当作天线列表为空)。
         //      style   可由下列值组成
         //              only_new    每次只列出最新发现的那些标签(否则全部列出)
         // exception:
@@ -2487,6 +2518,9 @@ namespace RfidDrivers.First
 out Reader reader);
             if (result.Value == -1)
                 return new InventoryResult(result);
+
+            // TODO: reader.AntannaCount 里面有天线数量，此外还需要知道天线编号的开始号，这样就可以枚举所有天线了
+
 
             // TODO: 这里要按照一个读卡器粒度来锁定就好了。因为带有天线的读卡器 inventory 操作速度较慢
             LockReader(reader);
@@ -2509,7 +2543,7 @@ out Reader reader);
                 // 天线列表
                 // 1|2|3|4 这样的形态
                 // string antenna_list = StringUtil.GetParameterByPrefix(style, "antenna", ":");
-                byte[] antennas = GetAntennaList(antenna_list);
+                byte[] antennas = GetAntennaList(antenna_list, reader);
 
                 UInt32 nTagCount = 0;
                 int ret = tag_inventory(
@@ -2813,7 +2847,6 @@ out Reader reader);
             if (readers.Count == 0)
                 return new FindTagResult { Value = -1, ErrorInfo = $"没有找到名为 {reader_name} 的读卡器" };
 
-            byte[] antennas = GetAntennaList(antenna_list);
 
             // 锁定所有读卡器?
             Lock();
@@ -2825,6 +2858,8 @@ out Reader reader);
                 {
                     if (StringUtil.IsInList(reader.Protocols, protocols) == false)
                         continue;
+
+                    byte[] antennas = GetAntennaList(antenna_list, reader);
 
                     // UIntPtr hreader = reader.ReaderHandle;
                     // 枚举所有标签
@@ -2855,7 +2890,7 @@ out Reader reader);
                     foreach (InventoryInfo info in results)
                     {
                         // 选择天线
-                        if (reader.AntannaCount > 1)
+                        if (reader.AntennaCount > 1)
                         {
                             var hr = rfidlib_reader.RDR_SetAcessAntenna(reader.ReaderHandle,
                                 (byte)info.AntennaID);
@@ -3252,7 +3287,7 @@ out Reader reader);
                 foreach (var reader in readers)
                 {
                     // 选择天线
-                    if (reader.AntannaCount > 1)
+                    if (reader.AntennaCount > 1)
                     {
                         Debug.WriteLine($"antenna_id={antenna_id}");
                         var hr = rfidlib_reader.RDR_SetAcessAntenna(reader.ReaderHandle,
@@ -3387,7 +3422,7 @@ out Reader reader);
                 // TODO: 选择天线
                 // 2019/9/27
                 // 选择天线
-                if (reader.AntannaCount > 1)
+                if (reader.AntennaCount > 1)
                 {
                     var hr = rfidlib_reader.RDR_SetAcessAntenna(reader.ReaderHandle,
                         (byte)old_tag_info.AntennaID);
@@ -3806,7 +3841,7 @@ out Reader reader);
                 // 2019/9/27
                 // 选择天线
                 int antenna_id = -1;    // -1 表示尚未使用
-                if (info != null && reader.AntannaCount > 1)
+                if (info != null && reader.AntennaCount > 1)
                 {
                     antenna_id = (int)info.AntennaID;
                     var hr = rfidlib_reader.RDR_SetAcessAntenna(reader.ReaderHandle,

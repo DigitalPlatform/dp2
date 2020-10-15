@@ -121,12 +121,12 @@
             this.MenuItem_openDataFolder = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_openProgramFolder = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
-            this.MenuItem_manual = new System.Windows.Forms.ToolStripMenuItem();
-            this.MenuItem_about = new System.Windows.Forms.ToolStripMenuItem();
-            this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
             this.MenuItem_help_test = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_help_test_outputYellowLine = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_help_test_outputNormalLine = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_manual = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_about = new System.Windows.Forms.ToolStripMenuItem();
+            this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
             this.tabControl_main.SuspendLayout();
             this.tabPage_start.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_start)).BeginInit();
@@ -148,11 +148,11 @@
             this.tabControl_main.Controls.Add(this.tabPage_operHistory);
             this.tabControl_main.Controls.Add(this.tabPage_cfg);
             this.tabControl_main.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tabControl_main.Location = new System.Drawing.Point(0, 76);
+            this.tabControl_main.Location = new System.Drawing.Point(0, 77);
             this.tabControl_main.Margin = new System.Windows.Forms.Padding(4);
             this.tabControl_main.Name = "tabControl_main";
             this.tabControl_main.SelectedIndex = 0;
-            this.tabControl_main.Size = new System.Drawing.Size(960, 428);
+            this.tabControl_main.Size = new System.Drawing.Size(960, 427);
             this.tabControl_main.TabIndex = 2;
             // 
             // tabPage_start
@@ -163,7 +163,7 @@
             this.tabPage_start.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_start.Name = "tabPage_start";
             this.tabPage_start.Padding = new System.Windows.Forms.Padding(4);
-            this.tabPage_start.Size = new System.Drawing.Size(952, 387);
+            this.tabPage_start.Size = new System.Drawing.Size(952, 386);
             this.tabPage_start.TabIndex = 0;
             this.tabPage_start.Text = "开始";
             this.tabPage_start.UseVisualStyleBackColor = true;
@@ -185,7 +185,7 @@
             // splitContainer_start.Panel2
             // 
             this.splitContainer_start.Panel2.Controls.Add(this.label_message);
-            this.splitContainer_start.Size = new System.Drawing.Size(939, 292);
+            this.splitContainer_start.Size = new System.Drawing.Size(939, 291);
             this.splitContainer_start.SplitterDistance = 252;
             this.splitContainer_start.SplitterWidth = 15;
             this.splitContainer_start.TabIndex = 5;
@@ -200,7 +200,7 @@
             this.listView_chips.HideSelection = false;
             this.listView_chips.Location = new System.Drawing.Point(0, 0);
             this.listView_chips.Name = "listView_chips";
-            this.listView_chips.Size = new System.Drawing.Size(252, 292);
+            this.listView_chips.Size = new System.Drawing.Size(252, 291);
             this.listView_chips.TabIndex = 0;
             this.listView_chips.UseCompatibleStateImageBehavior = false;
             this.listView_chips.View = System.Windows.Forms.View.Details;
@@ -224,14 +224,14 @@
             this.label_message.Location = new System.Drawing.Point(0, 0);
             this.label_message.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label_message.Name = "label_message";
-            this.label_message.Size = new System.Drawing.Size(672, 292);
+            this.label_message.Size = new System.Drawing.Size(672, 291);
             this.label_message.TabIndex = 0;
             this.label_message.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // button_cancel
             // 
             this.button_cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_cancel.Location = new System.Drawing.Point(783, 309);
+            this.button_cancel.Location = new System.Drawing.Point(783, 308);
             this.button_cancel.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.button_cancel.Name = "button_cancel";
             this.button_cancel.Size = new System.Drawing.Size(160, 63);
@@ -583,7 +583,7 @@
             this.toolStripDropDownButton_stopAll,
             this.toolStripSeparator4,
             this.toolStripButton_autoInventory});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 38);
+            this.toolStrip1.Location = new System.Drawing.Point(0, 39);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(960, 38);
             this.toolStrip1.TabIndex = 1;
@@ -643,7 +643,7 @@
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Padding = new System.Windows.Forms.Padding(7, 3, 0, 3);
-            this.menuStrip1.Size = new System.Drawing.Size(960, 38);
+            this.menuStrip1.Size = new System.Drawing.Size(960, 39);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -999,6 +999,29 @@
             this.toolStripSeparator6.Name = "toolStripSeparator6";
             this.toolStripSeparator6.Size = new System.Drawing.Size(379, 6);
             // 
+            // MenuItem_help_test
+            // 
+            this.MenuItem_help_test.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.MenuItem_help_test_outputYellowLine,
+            this.MenuItem_help_test_outputNormalLine});
+            this.MenuItem_help_test.Name = "MenuItem_help_test";
+            this.MenuItem_help_test.Size = new System.Drawing.Size(382, 40);
+            this.MenuItem_help_test.Text = "测试";
+            // 
+            // MenuItem_help_test_outputYellowLine
+            // 
+            this.MenuItem_help_test_outputYellowLine.Name = "MenuItem_help_test_outputYellowLine";
+            this.MenuItem_help_test_outputYellowLine.Size = new System.Drawing.Size(276, 40);
+            this.MenuItem_help_test_outputYellowLine.Text = "输出黄色文字行";
+            this.MenuItem_help_test_outputYellowLine.Click += new System.EventHandler(this.MenuItem_help_test_outputYellowLine_Click);
+            // 
+            // MenuItem_help_test_outputNormalLine
+            // 
+            this.MenuItem_help_test_outputNormalLine.Name = "MenuItem_help_test_outputNormalLine";
+            this.MenuItem_help_test_outputNormalLine.Size = new System.Drawing.Size(276, 40);
+            this.MenuItem_help_test_outputNormalLine.Text = "输出普通文字行";
+            this.MenuItem_help_test_outputNormalLine.Click += new System.EventHandler(this.MenuItem_help_test_outputNormalLine_Click);
+            // 
             // MenuItem_manual
             // 
             this.MenuItem_manual.Name = "MenuItem_manual";
@@ -1019,29 +1042,6 @@
             this.notifyIcon1.Text = "dp2-RFID中心";
             this.notifyIcon1.Visible = true;
             this.notifyIcon1.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon1_MouseDoubleClick);
-            // 
-            // MenuItem_help_test
-            // 
-            this.MenuItem_help_test.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.MenuItem_help_test_outputYellowLine,
-            this.MenuItem_help_test_outputNormalLine});
-            this.MenuItem_help_test.Name = "MenuItem_help_test";
-            this.MenuItem_help_test.Size = new System.Drawing.Size(382, 40);
-            this.MenuItem_help_test.Text = "测试";
-            // 
-            // MenuItem_help_test_outputYellowLine
-            // 
-            this.MenuItem_help_test_outputYellowLine.Name = "MenuItem_help_test_outputYellowLine";
-            this.MenuItem_help_test_outputYellowLine.Size = new System.Drawing.Size(315, 40);
-            this.MenuItem_help_test_outputYellowLine.Text = "输出黄色文字行";
-            this.MenuItem_help_test_outputYellowLine.Click += new System.EventHandler(this.MenuItem_help_test_outputYellowLine_Click);
-            // 
-            // MenuItem_help_test_outputNormalLine
-            // 
-            this.MenuItem_help_test_outputNormalLine.Name = "MenuItem_help_test_outputNormalLine";
-            this.MenuItem_help_test_outputNormalLine.Size = new System.Drawing.Size(315, 40);
-            this.MenuItem_help_test_outputNormalLine.Text = "输出普通文字行";
-            this.MenuItem_help_test_outputNormalLine.Click += new System.EventHandler(this.MenuItem_help_test_outputNormalLine_Click);
             // 
             // MainForm
             // 
