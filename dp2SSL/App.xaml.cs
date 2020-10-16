@@ -24,23 +24,23 @@ using System.Windows.Interop;
 using System.Runtime.InteropServices;
 using System.Windows.Documents;
 using System.Security.Principal;
+using System.Security.AccessControl;
 
 using Microsoft.Win32;
 using Microsoft.EntityFrameworkCore.Internal;
 
+using dp2SSL.Models;
+using static DigitalPlatform.IO.BarcodeCapture;
 using DigitalPlatform;
 using DigitalPlatform.Core;
 using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
-using static DigitalPlatform.IO.BarcodeCapture;
 using DigitalPlatform.Face;
 using DigitalPlatform.WPF;
 using DigitalPlatform.MessageClient;
 using DigitalPlatform.Install;
-using dp2SSL.Models;
-using System.Security.AccessControl;
 
 
 //using Microsoft.VisualStudio.Shell;

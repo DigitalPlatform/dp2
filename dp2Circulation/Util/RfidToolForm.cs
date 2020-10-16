@@ -21,6 +21,7 @@ using DigitalPlatform.RFID;
 using DigitalPlatform.RFID.UI;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
+using Microsoft.VisualStudio.Threading;
 
 namespace dp2Circulation
 {
@@ -113,7 +114,7 @@ namespace dp2Circulation
                 MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
 
-            Task.Run(() =>
+            _ = Task.Run(() =>
             {
                 //InitialRfidChannel();
                 OpenRfidCapture(false);
@@ -127,7 +128,7 @@ namespace dp2Circulation
                 "auto_refresh",
                 true);
             if (this.toolStripButton_autoRefresh.Checked == false)
-                Task.Run(() => { UpdateChipList(true); });
+                _ = Task.Run(async () => { await UpdateChipList(true); });
 
             this.toolStripButton_autoFixEas.Checked = Program.MainForm.AppInfo.GetBoolean("rfidtoolform",
     "auto_fix_eas",
@@ -190,7 +191,7 @@ this.toolStripButton_autoFixEas.Checked);
         }
 
         // 新 Tag 到来、变化、消失
-        private void MainForm_TagChanged(object sender, TagChangedEventArgs e)
+        private async void MainForm_TagChanged(object sender, TagChangedEventArgs e)
         {
             if (this.PauseRfid)
                 return;
@@ -201,7 +202,7 @@ this.toolStripButton_autoFixEas.Checked);
             }));
 
             if (auto_refresh)
-                UpdateChipList(false);
+                await UpdateChipList(false);
         }
 
 
@@ -215,7 +216,8 @@ this.toolStripButton_autoFixEas.Checked);
         int _inUpdate = 0;
 
         // 更新标签列表
-        bool UpdateChipList(bool show_messageBox)
+        // 注意这个函数是在非界面线程中执行
+        async Task<bool> UpdateChipList(bool show_messageBox)
         {
             int nRet = Interlocked.Increment(ref _inUpdate);
             try
@@ -260,7 +262,7 @@ this.toolStripButton_autoFixEas.Checked);
                     tags.AddRange(TagList.Patrons);
 #endif
 
-                    List<Task> tasks = new List<Task>();
+                    // List<Task> tasks = new List<Task>();
                     bool is_empty = false;
                     bool changed = false;
                     this.Invoke((Action)(() =>
@@ -297,13 +299,21 @@ this.toolStripButton_autoFixEas.Checked);
 
                                 if (tag.TagInfo == null)
                                 {
+                                    /*
                                     // 启动单独的线程去填充 .TagInfo
                                     tasks.Add(Task.Run(() => { GetTagInfo(item); }));
+                                    */
+                                    // 既然是在非界面线程中运行，就安心等待运行完
+                                    GetTagInfo(item);
                                 }
                                 else
                                 {
+                                    /*
                                     if (TagInfoFilled(item) == false)
                                         tasks.Add(Task.Run(() => { FillTagInfo(item); }));
+                                    */
+                                    // 既然是在非界面线程中运行，就安心等待运行完
+                                    FillTagInfo(item);
                                 }
                             }
                             else
@@ -316,13 +326,21 @@ this.toolStripButton_autoFixEas.Checked);
                                     item.Tag = new ItemInfo { OneTag = tag };
                                     if (tag.TagInfo == null)
                                     {
+                                        /*
                                         // 启动单独的线程去填充 .TagInfo
                                         tasks.Add(Task.Run(() => { GetTagInfo(item); }));
+                                        */
+                                        // 既然是在非界面线程中运行，就安心等待运行完
+                                        GetTagInfo(item);
                                     }
                                     else
                                     {
+                                        /*
                                         if (TagInfoFilled(item) == false)
                                             tasks.Add(Task.Run(() => { FillTagInfo(item); }));
+                                        */
+                                        // 既然是在非界面线程中运行，就安心等待运行完
+                                        FillTagInfo(item);
                                     }
                                 }
 
@@ -357,16 +375,17 @@ this.toolStripButton_autoFixEas.Checked);
                     }));
 
                     // 再建立一个 task，等待 tasks 执行完以后，自动选定一个 item
-                    if (tasks.Count > 0 || changed)
+                    if (/*tasks.Count > 0 || */changed)
                     {
-                        Task.Run(() =>
+                        // _ = Task.Run(async () =>
                         {
+                            /*
                             Task.WaitAll(tasks.ToArray());
+                            */
                             bool closed = false;
 
                             try
                             {
-
                                 this.Invoke((Action)(() =>
                                 {
                                     // 首次填充，自动设好选定状态
@@ -392,14 +411,14 @@ this.toolStripButton_autoFixEas.Checked);
                             }
                             catch (ObjectDisposedException)
                             {
-                                return;
+                                return false;
                             }
 
                             if (closed == false)
                             {
                                 //this.Invoke((Action)(() =>
                                 //{
-                                FillEntityInfo();
+                                await FillEntityInfoAsync();
                                 //}));
 
                                 if (this._mode.StartsWith("auto_fix_eas"))
@@ -421,7 +440,8 @@ this.toolStripButton_autoFixEas.Checked);
                                     }
                                 }
                             }
-                        });
+                        }
+                        // );
                     }
                     else
                     {
@@ -503,7 +523,7 @@ this.toolStripButton_autoFixEas.Checked);
 
         private void toolStripButton_loadRfid_Click(object sender, EventArgs e)
         {
-            Task.Run(() => { UpdateChipList(true); });
+            _ = Task.Run(async () => { await UpdateChipList(true); });
         }
 
         class IdInfo
@@ -925,24 +945,31 @@ this.toolStripButton_autoFixEas.Checked);
             }
         }
 
+        static AsyncSemaphore _channelLimit = new AsyncSemaphore(1);
+
         // 填充所有的册记录信息
         // TODO: 返回值最好能体现实际是否发生过刷新
-        void FillEntityInfo()
+        async Task FillEntityInfoAsync()
         {
-            LibraryChannel channel = this.GetChannel();
-            try
+            using (var releaser = await _channelLimit.EnterAsync())
             {
+                // TODO: 还要通过 typeOfUsage 判断是否读者证卡，如果是，要用 GetReaderInfo() 获得读者记录
                 var items = (List<ListViewItem>)this.Invoke(new Func<List<ListViewItem>>(() =>
-                {
-                    List<ListViewItem> results = new List<ListViewItem>();
-                    results.AddRange(this.listView_tags.Items.Cast<ListViewItem>());
-                    return results;
-                }));
-
+            {
+                List<ListViewItem> results = new List<ListViewItem>();
+                results.AddRange(this.listView_tags.Items.Cast<ListViewItem>());
+                return results;
+            }));
 
                 foreach (ListViewItem item in items)
                 {
                     ItemInfo item_info = (ItemInfo)item.Tag;
+
+                    // 2020/10/16
+                    // 前面已经装载过了
+                    if (string.IsNullOrEmpty(item_info.Xml) == false)
+                        continue;
+
                     var tag_info = item_info.OneTag.TagInfo;
                     if (tag_info == null)
                         continue;
@@ -954,32 +981,34 @@ this.toolStripButton_autoFixEas.Checked);
                     if (string.IsNullOrEmpty(pii))
                         continue;
 
-                    // TODO: 还要通过 typeOfUsage 判断是否读者证卡，如果是，要用 GetReaderInfo() 获得读者记录
-
-                    long lRet = channel.GetItemInfo(null,
-                        pii,
-                        "xml",
-                        out string xml,
-                        "",
-                        out string biblio,
-                        out string strError);
-
-                    if (lRet == -1)
+                    LibraryChannel channel = this.GetChannel();
+                    try
                     {
-                        // TODO: 给 item 设置出错状态
-                        continue;
-                    }
+                        long lRet = channel.GetItemInfo(null,
+                            pii,
+                            "xml",
+                            out string xml,
+                            "",
+                            out string biblio,
+                            out string strError);
 
-                    item_info.Xml = xml;
+                        if (lRet == -1)
+                        {
+                            // TODO: 给 item 设置出错状态
+                            continue;
+                        }
+
+                        item_info.Xml = xml;
+                    }
+                    catch (Exception ex)
+                    {
+                        // TODO: 如何报错？让操作者从册信息界面上可以看出报错
+                    }
+                    finally
+                    {
+                        this.ReturnChannel(channel);
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                // TODO: 如何报错？让操作者从册信息界面上可以看出报错
-            }
-            finally
-            {
-                this.ReturnChannel(channel);
             }
         }
 
@@ -1259,7 +1288,7 @@ this.toolStripButton_autoFixEas.Checked);
         {
             if (this.PauseRfid)
                 return;
-            UpdateChipList(false);
+            _ = UpdateChipList(false);
         }
 
         private bool DoOK(bool show_messageBox)
