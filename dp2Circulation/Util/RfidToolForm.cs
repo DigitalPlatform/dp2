@@ -128,7 +128,7 @@ namespace dp2Circulation
                 "auto_refresh",
                 true);
             if (this.toolStripButton_autoRefresh.Checked == false)
-                _ = Task.Run(async () => { await UpdateChipList(true); });
+                _ = Task.Run(async () => { await UpdateChipListAsync(true); });
 
             this.toolStripButton_autoFixEas.Checked = Program.MainForm.AppInfo.GetBoolean("rfidtoolform",
     "auto_fix_eas",
@@ -202,7 +202,7 @@ this.toolStripButton_autoFixEas.Checked);
             }));
 
             if (auto_refresh)
-                await UpdateChipList(false);
+                await UpdateChipListAsync(false);
         }
 
 
@@ -217,7 +217,7 @@ this.toolStripButton_autoFixEas.Checked);
 
         // 更新标签列表
         // 注意这个函数是在非界面线程中执行
-        async Task<bool> UpdateChipList(bool show_messageBox)
+        async Task<bool> UpdateChipListAsync(bool show_messageBox)
         {
             int nRet = Interlocked.Increment(ref _inUpdate);
             try
@@ -523,7 +523,7 @@ this.toolStripButton_autoFixEas.Checked);
 
         private void toolStripButton_loadRfid_Click(object sender, EventArgs e)
         {
-            _ = Task.Run(async () => { await UpdateChipList(true); });
+            _ = Task.Run(async () => { await UpdateChipListAsync(true); });
         }
 
         class IdInfo
@@ -1288,7 +1288,7 @@ this.toolStripButton_autoFixEas.Checked);
         {
             if (this.PauseRfid)
                 return;
-            _ = UpdateChipList(false);
+            _ = UpdateChipListAsync(false);
         }
 
         private bool DoOK(bool show_messageBox)

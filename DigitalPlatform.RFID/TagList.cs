@@ -195,11 +195,17 @@ namespace DigitalPlatform.RFID
                     if (book != null)
                     {
                         found_books.Add(book);
-                        if (book.OneTag.AntennaID != tag.AntennaID)
+                        if (book.OneTag.AntennaID != tag.AntennaID
+                            || book.OneTag.ReaderName != tag.ReaderName)    // // 2020/10/17
                         {
                             // 修改 AntennaID
                             book.OneTag.AntennaID = tag.AntennaID;
+                            // 修改 ReaderName
+                            book.OneTag.ReaderName = tag.ReaderName;
                             changed_books.Add(book);
+
+                            // 只清理缓存
+                            _tagTable.Remove(book.OneTag.UID);
                         }
 
                         if (string.IsNullOrEmpty(book.Error) == false)
@@ -1034,6 +1040,18 @@ namespace DigitalPlatform.RFID
             // Thread.Sleep(1000);
 
             TagInfo info = (TagInfo)_tagTable[uid];
+
+            // 2020/10/17
+            // 检查 reader_name 和 antenna
+            if (info != null)
+            {
+                if (info.ReaderName != reader_name || info.AntennaID != antenna)
+                {
+                    info = null;
+                    _tagTable.Remove(uid);
+                }
+            }
+
             if (info == null)
             {
                 var result = channel.Object.GetTagInfo(reader_name, uid, antenna);
