@@ -412,6 +412,18 @@ namespace DigitalPlatform.RFID
             //    return new GetTagInfoResult { Value = -1, ErrorInfo = "RFID 通道尚未启动" };
 
             TagInfo info = (TagInfo)_tagTable[uid];
+
+            // 2020/10/17
+            // 检查 reader_name 和 antenna
+            if (info != null)
+            {
+                if (info.ReaderName != reader_name || info.AntennaID != antenna)
+                {
+                    info = null;
+                    _tagTable.Remove(uid);
+                }
+            }
+
             if (info == null)
             {
                 var result = getTagInfo(reader_name, uid, antenna);
