@@ -118,6 +118,12 @@
   <wsdl:message name="dp2libraryREST_SetPinyin_OutputMessage">
     <wsdl:part name="parameters" element="tns:SetPinyinResponse" />
   </wsdl:message>
+  <wsdl:message name="dp2libraryREST_OnlineStatis_InputMessage">
+    <wsdl:part name="parameters" element="tns:OnlineStatis" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_OnlineStatis_OutputMessage">
+    <wsdl:part name="parameters" element="tns:OnlineStatisResponse" />
+  </wsdl:message>
   <wsdl:message name="dp2libraryREST_GetVersion_InputMessage">
     <wsdl:part name="parameters" element="tns:GetVersion" />
   </wsdl:message>
@@ -697,6 +703,10 @@
     <wsdl:operation name="SetPinyin">
       <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetPinyin" message="tns:dp2libraryREST_SetPinyin_InputMessage" />
       <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetPinyinResponse" message="tns:dp2libraryREST_SetPinyin_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="OnlineStatis">
+      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/OnlineStatis" message="tns:dp2libraryREST_OnlineStatis_InputMessage" />
+      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/OnlineStatisResponse" message="tns:dp2libraryREST_OnlineStatis_OutputMessage" />
     </wsdl:operation>
     <wsdl:operation name="GetVersion">
       <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetVersion" message="tns:dp2libraryREST_GetVersion_InputMessage" />

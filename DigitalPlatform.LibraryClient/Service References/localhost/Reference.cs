@@ -3794,6 +3794,14 @@ namespace DigitalPlatform.LibraryClient.localhost {
         
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetPinyin(System.IAsyncResult result);
         
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/OnlineStatis", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/OnlineStatisResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult OnlineStatis(out string[] results, string action, string category, string uid, string style);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/OnlineStatis", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/OnlineStatisResponse")]
+        System.IAsyncResult BeginOnlineStatis(string action, string category, string uid, string style, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndOnlineStatis(out string[] results, System.IAsyncResult result);
+        
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetVersion", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetVersionResponse")]
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetVersion(out string uid);
         
@@ -5021,6 +5029,32 @@ namespace DigitalPlatform.LibraryClient.localhost {
             get {
                 base.RaiseExceptionIfNecessary();
                 return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class OnlineStatisCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results1;
+        
+        public OnlineStatisCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results1 = results;
+        }
+        
+        public string[] results {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string[])(this.results1[0]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results1[1]));
             }
         }
     }
@@ -7524,6 +7558,12 @@ namespace DigitalPlatform.LibraryClient.localhost {
         
         private System.Threading.SendOrPostCallback onSetPinyinCompletedDelegate;
         
+        private BeginOperationDelegate onBeginOnlineStatisDelegate;
+        
+        private EndOperationDelegate onEndOnlineStatisDelegate;
+        
+        private System.Threading.SendOrPostCallback onOnlineStatisCompletedDelegate;
+        
         private BeginOperationDelegate onBeginGetVersionDelegate;
         
         private EndOperationDelegate onEndGetVersionDelegate;
@@ -8088,6 +8128,8 @@ namespace DigitalPlatform.LibraryClient.localhost {
         public event System.EventHandler<GetPinyinCompletedEventArgs> GetPinyinCompleted;
         
         public event System.EventHandler<SetPinyinCompletedEventArgs> SetPinyinCompleted;
+        
+        public event System.EventHandler<OnlineStatisCompletedEventArgs> OnlineStatisCompleted;
         
         public event System.EventHandler<GetVersionCompletedEventArgs> GetVersionCompleted;
         
@@ -9313,6 +9355,64 @@ namespace DigitalPlatform.LibraryClient.localhost {
             }
             base.InvokeAsync(this.onBeginSetPinyinDelegate, new object[] {
                         strPinyinXml}, this.onEndSetPinyinDelegate, this.onSetPinyinCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult OnlineStatis(out string[] results, string action, string category, string uid, string style) {
+            return base.Channel.OnlineStatis(out results, action, category, uid, style);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginOnlineStatis(string action, string category, string uid, string style, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginOnlineStatis(action, category, uid, style, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndOnlineStatis(out string[] results, System.IAsyncResult result) {
+            return base.Channel.EndOnlineStatis(out results, result);
+        }
+        
+        private System.IAsyncResult OnBeginOnlineStatis(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string action = ((string)(inValues[0]));
+            string category = ((string)(inValues[1]));
+            string uid = ((string)(inValues[2]));
+            string style = ((string)(inValues[3]));
+            return this.BeginOnlineStatis(action, category, uid, style, callback, asyncState);
+        }
+        
+        private object[] OnEndOnlineStatis(System.IAsyncResult result) {
+            string[] results = this.GetDefaultValueForInitialization<string[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndOnlineStatis(out results, result);
+            return new object[] {
+                    results,
+                    retVal};
+        }
+        
+        private void OnOnlineStatisCompleted(object state) {
+            if ((this.OnlineStatisCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.OnlineStatisCompleted(this, new OnlineStatisCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void OnlineStatisAsync(string action, string category, string uid, string style) {
+            this.OnlineStatisAsync(action, category, uid, style, null);
+        }
+        
+        public void OnlineStatisAsync(string action, string category, string uid, string style, object userState) {
+            if ((this.onBeginOnlineStatisDelegate == null)) {
+                this.onBeginOnlineStatisDelegate = new BeginOperationDelegate(this.OnBeginOnlineStatis);
+            }
+            if ((this.onEndOnlineStatisDelegate == null)) {
+                this.onEndOnlineStatisDelegate = new EndOperationDelegate(this.OnEndOnlineStatis);
+            }
+            if ((this.onOnlineStatisCompletedDelegate == null)) {
+                this.onOnlineStatisCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnOnlineStatisCompleted);
+            }
+            base.InvokeAsync(this.onBeginOnlineStatisDelegate, new object[] {
+                        action,
+                        category,
+                        uid,
+                        style}, this.onEndOnlineStatisDelegate, this.onOnlineStatisCompletedDelegate, userState);
         }
         
         public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetVersion(out string uid) {
@@ -14423,6 +14523,14 @@ namespace DigitalPlatform.LibraryClient.localhost {
         
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetPinyin(System.IAsyncResult result);
         
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/OnlineStatis", ReplyAction="http://dp2003.com/dp2library/dp2library/OnlineStatisResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult OnlineStatis(out string[] results, string action, string category, string uid, string style);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/OnlineStatis", ReplyAction="http://dp2003.com/dp2library/dp2library/OnlineStatisResponse")]
+        System.IAsyncResult BeginOnlineStatis(string action, string category, string uid, string style, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndOnlineStatis(out string[] results, System.IAsyncResult result);
+        
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetVersion", ReplyAction="http://dp2003.com/dp2library/dp2library/GetVersionResponse")]
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetVersion(out string uid);
         
@@ -15644,6 +15752,32 @@ namespace DigitalPlatform.LibraryClient.localhost {
             get {
                 base.RaiseExceptionIfNecessary();
                 return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class OnlineStatisCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results1;
+        
+        public OnlineStatisCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results1 = results;
+        }
+        
+        public string[] results {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string[])(this.results1[0]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results1[1]));
             }
         }
     }
@@ -18147,6 +18281,12 @@ namespace DigitalPlatform.LibraryClient.localhost {
         
         private System.Threading.SendOrPostCallback onSetPinyinCompletedDelegate;
         
+        private BeginOperationDelegate onBeginOnlineStatisDelegate;
+        
+        private EndOperationDelegate onEndOnlineStatisDelegate;
+        
+        private System.Threading.SendOrPostCallback onOnlineStatisCompletedDelegate;
+        
         private BeginOperationDelegate onBeginGetVersionDelegate;
         
         private EndOperationDelegate onEndGetVersionDelegate;
@@ -18711,6 +18851,8 @@ namespace DigitalPlatform.LibraryClient.localhost {
         public event System.EventHandler<GetPinyinCompletedEventArgs1> GetPinyinCompleted;
         
         public event System.EventHandler<SetPinyinCompletedEventArgs1> SetPinyinCompleted;
+        
+        public event System.EventHandler<OnlineStatisCompletedEventArgs1> OnlineStatisCompleted;
         
         public event System.EventHandler<GetVersionCompletedEventArgs1> GetVersionCompleted;
         
@@ -19936,6 +20078,64 @@ namespace DigitalPlatform.LibraryClient.localhost {
             }
             base.InvokeAsync(this.onBeginSetPinyinDelegate, new object[] {
                         strPinyinXml}, this.onEndSetPinyinDelegate, this.onSetPinyinCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult OnlineStatis(out string[] results, string action, string category, string uid, string style) {
+            return base.Channel.OnlineStatis(out results, action, category, uid, style);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginOnlineStatis(string action, string category, string uid, string style, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginOnlineStatis(action, category, uid, style, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndOnlineStatis(out string[] results, System.IAsyncResult result) {
+            return base.Channel.EndOnlineStatis(out results, result);
+        }
+        
+        private System.IAsyncResult OnBeginOnlineStatis(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string action = ((string)(inValues[0]));
+            string category = ((string)(inValues[1]));
+            string uid = ((string)(inValues[2]));
+            string style = ((string)(inValues[3]));
+            return this.BeginOnlineStatis(action, category, uid, style, callback, asyncState);
+        }
+        
+        private object[] OnEndOnlineStatis(System.IAsyncResult result) {
+            string[] results = this.GetDefaultValueForInitialization<string[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndOnlineStatis(out results, result);
+            return new object[] {
+                    results,
+                    retVal};
+        }
+        
+        private void OnOnlineStatisCompleted(object state) {
+            if ((this.OnlineStatisCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.OnlineStatisCompleted(this, new OnlineStatisCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void OnlineStatisAsync(string action, string category, string uid, string style) {
+            this.OnlineStatisAsync(action, category, uid, style, null);
+        }
+        
+        public void OnlineStatisAsync(string action, string category, string uid, string style, object userState) {
+            if ((this.onBeginOnlineStatisDelegate == null)) {
+                this.onBeginOnlineStatisDelegate = new BeginOperationDelegate(this.OnBeginOnlineStatis);
+            }
+            if ((this.onEndOnlineStatisDelegate == null)) {
+                this.onEndOnlineStatisDelegate = new EndOperationDelegate(this.OnEndOnlineStatis);
+            }
+            if ((this.onOnlineStatisCompletedDelegate == null)) {
+                this.onOnlineStatisCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnOnlineStatisCompleted);
+            }
+            base.InvokeAsync(this.onBeginOnlineStatisDelegate, new object[] {
+                        action,
+                        category,
+                        uid,
+                        style}, this.onEndOnlineStatisDelegate, this.onOnlineStatisCompletedDelegate, userState);
         }
         
         public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetVersion(out string uid) {

@@ -22,6 +22,7 @@ using DigitalPlatform.Face;
 using DigitalPlatform.WPF;
 using DigitalPlatform.IO;
 using DigitalPlatform.Net;
+using System.Windows.Navigation;
 
 namespace dp2SSL
 {
@@ -134,7 +135,8 @@ namespace dp2SSL
                     var password = GetPassword("验证锁屏密码");
                     if (password == null)
                     {
-                        this.NavigationService.Navigate(PageMenu.MenuPage);
+                        PageMenu.RetunMenuPage();
+                        // this.NavigationService.Navigate(PageMenu.MenuPage);
                         return;
                     }
                     if (App.MatchLockingPassword(password) == false)
@@ -165,11 +167,17 @@ namespace dp2SSL
                 try
                 {
                     dialog = new InputPasswordWindows();
+
+                    this.MemoryDialog(dialog);
+
                     dialog.TitleText = title;   // $"验证锁屏密码";
                     dialog.Owner = App.CurrentApp.MainWindow;
                     dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
                     dialog.LoginButtonText = "确定";
                     dialog.ShowDialog();
+
+                    this.ForgetDialog(dialog);
+
                     if (dialog.Result == "OK")
                         password = dialog.password.Password;
                 }

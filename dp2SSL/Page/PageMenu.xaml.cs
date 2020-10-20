@@ -3,25 +3,15 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Interop;
 using System.Windows.Media;
-using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
+using System.Windows.Threading;
 
 using DigitalPlatform.RFID;
-using DigitalPlatform.Text;
 using DigitalPlatform.WPF;
 
 namespace dp2SSL
@@ -46,7 +36,15 @@ namespace dp2SSL
             InitWallpaper();
 
             MenuPage = this;
+
+            {
+                // https://stackoverflow.com/questions/4963135/wpf-inactivity-and-activity
+                InputManager.Current.PreProcessInput += OnActivity;
+                _activityTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(30), IsEnabled = true };
+                _activityTimer.Tick += OnInactivity;
+            }
         }
+
 
         ~PageMenu()
         {
@@ -475,6 +473,77 @@ namespace dp2SSL
         {
             NavigatePageInventory();
         }
+
+        #region 不活跃探测
+
+        private readonly DispatcherTimer _activityTimer;
+        private Point _inactiveMousePosition = new Point(0, 0);
+
+        void OnInactivity(object sender, EventArgs e)
+        {
+            // remember mouse position
+            _inactiveMousePosition = Mouse.GetPosition(this);
+
+            /*
+            // set UI on inactivity
+            rectangle.Visibility = Visibility.Hidden;
+            */
+            // MessageBox.Show("Idle!");
+
+            var nav = (NavigationWindow)App.Current.MainWindow;
+            if ((nav.Content == PageMenu.PageBorrow && PageMenu.PageBorrow.IsEmpty())
+                || nav.Content == PageMenu._pageSetting
+                || nav.Content.GetType() == typeof(PageError))
+            {
+                nav.Navigate(PageMenu.MenuPage);
+            }
+        }
+
+        // 返回到菜单页面
+        public static void RetunMenuPage()
+        {
+            var nav = (NavigationWindow)App.Current.MainWindow;
+            nav.Navigate(PageMenu.MenuPage);
+        }
+
+        void OnActivity(object sender, PreProcessInputEventArgs e)
+        {
+            InputEventArgs inputEventArgs = e.StagingItem.Input;
+
+            if (inputEventArgs is MouseEventArgs || inputEventArgs is KeyboardEventArgs)
+            {
+                if (e.StagingItem.Input is MouseEventArgs)
+                {
+                    MouseEventArgs mouseEventArgs = (MouseEventArgs)e.StagingItem.Input;
+
+                    // no button is pressed and the position is still the same as the application became inactive
+                    if (mouseEventArgs.LeftButton == MouseButtonState.Released &&
+                        mouseEventArgs.RightButton == MouseButtonState.Released &&
+                        mouseEventArgs.MiddleButton == MouseButtonState.Released &&
+                        mouseEventArgs.XButton1 == MouseButtonState.Released &&
+                        mouseEventArgs.XButton2 == MouseButtonState.Released &&
+                        _inactiveMousePosition == mouseEventArgs.GetPosition(this))
+                        return;
+                }
+
+                /*
+                // set UI on activity
+                rectangle.Visibility = Visibility.Visible;
+                */
+
+                _activityTimer.Stop();
+                _activityTimer.Start();
+            }
+        }
+
+        public void ResetActivityTimer()
+        {
+            _activityTimer.Stop();
+            _activityTimer.Start();
+        }
+
+        #endregion
+
 
 #if NO
         // https://blog.csdn.net/m0_37682004/article/details/82314055

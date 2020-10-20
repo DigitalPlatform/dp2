@@ -93,6 +93,17 @@ namespace DigitalPlatform.LibraryServer
                 }
             }
 
+            // 2020/10/19
+            try
+            {
+                OnlineStatis.ClearIdle(TimeSpan.FromMinutes(60));
+            }
+            catch (Exception ex)
+            {
+                string strErrorText = "OnlineStatis.ClearIdle() 出现异常: " + ExceptionUtil.GetDebugText(ex);
+                this.App.WriteErrorLog(strErrorText);
+            }
+
             // 清除文件 Stream
             if (this.App._physicalFileCache != null)
             {

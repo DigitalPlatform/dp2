@@ -394,6 +394,10 @@ namespace dp2SSL
                 return;
 
             _tagChangedCount++;
+
+            // 重置活跃时钟
+            PageMenu.MenuPage.ResetActivityTimer();
+
             await ChangeEntitiesAsync((BaseChannel<IRfid>)sender, e);
         }
 
@@ -493,6 +497,17 @@ namespace dp2SSL
                 if (_entities.Count == 0 && TagList.TagTableCount > 0)
                     TagList.ClearTagTable(null);
             }
+        }
+
+        // 是否为“图书读卡器上没有图书、读者信息区为空”
+        public bool IsEmpty()
+        {
+            if (_entities.Count > 0)
+                return false;
+            if (_patron.NotEmpty == true)
+                return false;
+
+            return true;
         }
 
         // 首次初始化 Entity 列表

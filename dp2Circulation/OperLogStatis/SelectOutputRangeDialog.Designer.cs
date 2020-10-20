@@ -170,6 +170,7 @@
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
             this.Text = "选择输出范围";
+            this.Load += new System.EventHandler(this.SelectOutputRangeDialog_Load);
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
             this.ResumeLayout(false);

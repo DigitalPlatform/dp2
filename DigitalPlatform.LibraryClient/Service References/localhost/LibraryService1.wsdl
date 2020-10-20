@@ -781,6 +781,44 @@
       </wsp:All>
     </wsp:ExactlyOne>
   </wsp:Policy>
+  <wsp:Policy wsu:Id="WSHttpBinding_dp2library_OnlineStatis_Input_policy">
+    <wsp:ExactlyOne>
+      <wsp:All>
+        <sp:SignedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+          <sp:Header Name="To" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="From" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="FaultTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="ReplyTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="MessageID" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="RelatesTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="Action" Namespace="http://www.w3.org/2005/08/addressing" />
+        </sp:SignedParts>
+        <sp:EncryptedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+        </sp:EncryptedParts>
+      </wsp:All>
+    </wsp:ExactlyOne>
+  </wsp:Policy>
+  <wsp:Policy wsu:Id="WSHttpBinding_dp2library_OnlineStatis_output_policy">
+    <wsp:ExactlyOne>
+      <wsp:All>
+        <sp:SignedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+          <sp:Header Name="To" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="From" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="FaultTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="ReplyTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="MessageID" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="RelatesTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="Action" Namespace="http://www.w3.org/2005/08/addressing" />
+        </sp:SignedParts>
+        <sp:EncryptedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+        </sp:EncryptedParts>
+      </wsp:All>
+    </wsp:ExactlyOne>
+  </wsp:Policy>
   <wsp:Policy wsu:Id="WSHttpBinding_dp2library_GetVersion_Input_policy">
     <wsp:ExactlyOne>
       <wsp:All>
@@ -4118,6 +4156,12 @@
   <wsdl:message name="dp2library_SetPinyin_OutputMessage">
     <wsdl:part name="parameters" element="tns:SetPinyinResponse" />
   </wsdl:message>
+  <wsdl:message name="dp2library_OnlineStatis_InputMessage">
+    <wsdl:part name="parameters" element="tns:OnlineStatis" />
+  </wsdl:message>
+  <wsdl:message name="dp2library_OnlineStatis_OutputMessage">
+    <wsdl:part name="parameters" element="tns:OnlineStatisResponse" />
+  </wsdl:message>
   <wsdl:message name="dp2library_GetVersion_InputMessage">
     <wsdl:part name="parameters" element="tns:GetVersion" />
   </wsdl:message>
@@ -4698,6 +4742,10 @@
       <wsdl:input wsaw:Action="http://dp2003.com/dp2library/dp2library/SetPinyin" message="tns:dp2library_SetPinyin_InputMessage" />
       <wsdl:output wsaw:Action="http://dp2003.com/dp2library/dp2library/SetPinyinResponse" message="tns:dp2library_SetPinyin_OutputMessage" />
     </wsdl:operation>
+    <wsdl:operation msc:isInitiating="true" msc:isTerminating="false" name="OnlineStatis">
+      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/dp2library/OnlineStatis" message="tns:dp2library_OnlineStatis_InputMessage" />
+      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/dp2library/OnlineStatisResponse" message="tns:dp2library_OnlineStatis_OutputMessage" />
+    </wsdl:operation>
     <wsdl:operation msc:isInitiating="true" msc:isTerminating="false" name="GetVersion">
       <wsdl:input wsaw:Action="http://dp2003.com/dp2library/dp2library/GetVersion" message="tns:dp2library_GetVersion_InputMessage" />
       <wsdl:output wsaw:Action="http://dp2003.com/dp2library/dp2library/GetVersionResponse" message="tns:dp2library_GetVersion_OutputMessage" />
@@ -5236,6 +5284,17 @@
       </wsdl:input>
       <wsdl:output>
         <wsp:PolicyReference URI="#WSHttpBinding_dp2library_SetPinyin_output_policy" />
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="OnlineStatis">
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/OnlineStatis" style="document" />
+      <wsdl:input>
+        <wsp:PolicyReference URI="#WSHttpBinding_dp2library_OnlineStatis_Input_policy" />
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <wsp:PolicyReference URI="#WSHttpBinding_dp2library_OnlineStatis_output_policy" />
         <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
@@ -6329,6 +6388,15 @@
     </wsdl:operation>
     <wsdl:operation name="SetPinyin">
       <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SetPinyin" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="OnlineStatis">
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/OnlineStatis" style="document" />
       <wsdl:input>
         <soap12:body use="literal" />
       </wsdl:input>

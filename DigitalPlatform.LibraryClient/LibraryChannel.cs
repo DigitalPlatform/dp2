@@ -9925,6 +9925,61 @@ string strPinyinXml,
             }
         }
 
+        // 2020/10/13
+        public long OnlineStatis(
+            string action,
+            string category,
+            string uid,
+            string style,
+            out List<string> results,
+            out string strError)
+        {
+            strError = "";
+            results = null;
+
+        REDO:
+            try
+            {
+                IAsyncResult soapresult = this.ws.BeginOnlineStatis(
+                    action,
+                    category,
+                    uid,
+                    style,
+                    null,
+                    null);
+
+                WaitComplete(soapresult);
+
+                if (this.m_ws == null)
+                {
+                    strError = "用户中断";
+                    this.ErrorCode = localhost.ErrorCode.RequestCanceled;
+                    return -1;
+                }
+
+                LibraryServerResult result = this.ws.EndOnlineStatis(
+                    out results,
+                    soapresult);
+                if (result.Value == -1 && result.ErrorCode == ErrorCode.NotLogin)
+                {
+                    if (DoNotLogin(ref strError) == 1)
+                        goto REDO;
+                    return -1;
+                }
+                strError = result.ErrorInfo;
+                this.ErrorCode = result.ErrorCode;
+                this.ClearRedoCount();
+                return result.Value;
+            }
+            catch (Exception ex)
+            {
+                int nRet = ConvertWebError(ex, out strError);
+                if (nRet == 0)
+                    return -1;
+                goto REDO;
+            }
+        }
+
         public void DoStop()
         {
             // 2015/7/30 增加捕获异常语句

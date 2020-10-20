@@ -864,5 +864,14 @@ SessionMode = SessionMode.NotAllowed)]
         [OperationContract]
         LibraryServerResult SetPinyin(
 string strPinyinXml);
+
+        // 在线统计
+        [OperationContract]
+        LibraryServerResult OnlineStatis(
+        string action,
+        string category,
+        string uid,
+        string style,
+        out List<string> results);
     }
 }

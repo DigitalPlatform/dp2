@@ -78,7 +78,7 @@ namespace dp2Circulation
             set
             {
                 this.listView1.Items.Clear();
-                foreach(var group in value)
+                foreach (var group in value)
                 {
                     ListViewItem item = new ListViewItem();
                     ListViewUtil.ChangeItemText(item, 0, group.BatchNo);
@@ -95,7 +95,7 @@ namespace dp2Circulation
 
         private void toolStripButton_selectAll_Click(object sender, EventArgs e)
         {
-            foreach(ListViewItem item in this.listView1.Items)
+            foreach (ListViewItem item in this.listView1.Items)
             {
                 item.Checked = true;
             }
@@ -134,6 +134,13 @@ namespace dp2Circulation
                 item.ForeColor = SystemColors.ControlText;
                 item.BackColor = SystemColors.Control;
             }
+
+            EnableOKButton();
+        }
+
+        void EnableOKButton()
+        {
+            this.button_OK.Enabled = this.listView1.CheckedItems.Count != 0;
         }
 
         public string UiState
@@ -150,6 +157,11 @@ namespace dp2Circulation
                 controls.Add(this.listView1);
                 GuiState.SetUiState(controls, value);
             }
+        }
+
+        private void SelectOutputRangeDialog_Load(object sender, EventArgs e)
+        {
+            EnableOKButton();
         }
     }
 

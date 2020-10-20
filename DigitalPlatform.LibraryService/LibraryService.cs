@@ -14900,6 +14900,51 @@ true);
                 return result;
             }
         }
+
+        // 在线统计
+        public LibraryServerResult OnlineStatis(
+        string action,
+        string category,
+        string uid,
+        string style,
+        out List<string> results)
+        {
+            results = null;
+
+            LibraryServerResult result = this.PrepareEnvironment("OnlineStatis", false,
+false);
+            if (result.Value == -1)
+                return result;
+
+            try
+            {
+                if (action == "activate")
+                {
+                    result.Value = DigitalPlatform.LibraryServer.OnlineStatis.Activate(uid, category);
+                }
+                else if (action == "getCount")
+                {
+                    result.Value = DigitalPlatform.LibraryServer.OnlineStatis.GetCount(category);
+                }
+                else
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = $"未知的 action '{action}'";
+                }
+                return result;
+            }
+            catch (Exception ex)
+            {
+                string strErrorText = "dp2Library OnlineStatis() API出现异常: " + ExceptionUtil.GetDebugText(ex);
+                app.WriteErrorLog(strErrorText);
+
+                result.Value = -1;
+                result.ErrorCode = ErrorCode.SystemError;
+                result.ErrorInfo = strErrorText;
+                return result;
+            }
+        }
+
     }
 
     [DataContract(Namespace = "http://dp2003.com/dp2library/")]

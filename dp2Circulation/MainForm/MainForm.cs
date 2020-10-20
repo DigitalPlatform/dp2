@@ -1617,7 +1617,7 @@ Stack:
             if (e.Section == "cardreader"
                 && e.Entry == "rfidCenterUrl")
             {
-                Task.Run(() =>
+                _ = Task.Run(() =>
                 {
                     // 迫使 URL 生效
                     //RfidManager.Url = this.RfidCenterUrl;
