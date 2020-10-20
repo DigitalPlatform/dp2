@@ -26,6 +26,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.MessageClient;
 using DigitalPlatform.SimpleMessageQueue;
 using DigitalPlatform.RFID;
+using System.Windows.Navigation;
 
 namespace dp2SSL
 {
@@ -1188,6 +1189,13 @@ restart
             // 重新启动 dp2ssl
             if (command.StartsWith("restart"))
             {
+                // 若当前为书柜界面，则需要检查是否有打开的门
+                if (IsInShelfPage() && ShelfData.OpeningDoorCount > 0)
+                {
+                    await SendMessageAsync(new string[] { groupName }, $"当前有 {ShelfData.OpeningDoorCount} 个柜门处于打开状态，因此拒绝执行 restart 命令");
+                    return;
+                }
+
                 // 子参数 默认 silently。若为 "interact" 则表示初始化时候要进行交互
                 string param = command.Substring("restart".Length).Trim();
 
@@ -1271,6 +1279,18 @@ restart
             }
 
             await SendMessageAsync(new string[] { groupName }, $"我无法理解这个命令 '{command}'");
+        }
+
+        // 当前是否正处在书柜页面
+        static bool IsInShelfPage()
+        {
+            bool result = false;
+            App.Invoke(new Action(() =>
+            {
+                var nav = (NavigationWindow)App.Current.MainWindow;
+                result =  nav.Content.GetType() == typeof(PageShelf);
+            }));
+            return result;
         }
 
         // 准备命令行参数文件

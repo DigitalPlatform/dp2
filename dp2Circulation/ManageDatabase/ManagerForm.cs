@@ -9521,7 +9521,7 @@ namespace dp2Circulation
             this.BarcodeValidationChanged = false;
 
             // 重新装载
-            Task.Run(() =>
+            _ = Task.Run(() =>
             {
                 Program.MainForm.GetBarcodeValidationInfo();
             });

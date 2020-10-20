@@ -23,12 +23,18 @@ namespace dp2SSL
                 {
                     window.Close();
                 }
+                _dialogs.Clear();
             }));
         }
 
         internal void MemoryDialog(Window dialog)
         {
             _dialogs.Add(dialog);
+        }
+
+        internal void ForgetDialog(Window dialog)
+        {
+            _dialogs.Remove(dialog);
         }
 
         LayoutAdorner _adorner = null;

@@ -840,6 +840,14 @@ namespace dp2Library
         LibraryServerResult SetPinyin(
 string strPinyinXml);
 
+        // 在线统计
+        [OperationContract(IsInitiating = true, IsTerminating = false)]
+        LibraryServerResult OnlineStatis(
+        string action,
+        string category,
+        string uid,
+        string style,
+        out List<string> results);
     }
 
 

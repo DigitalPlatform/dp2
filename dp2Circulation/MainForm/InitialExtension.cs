@@ -2528,7 +2528,7 @@ AppInfo.GetString("config",
                         if (nRet != 0)
                             MessageBox.Show(this, strError);
 
-                        Task.Run(() =>
+                        _ = Task.Run(() =>
                         {
                             string location = AppInfo.GetString("global", "currentLocation", "");
                             this.Invoke((Action)(() =>

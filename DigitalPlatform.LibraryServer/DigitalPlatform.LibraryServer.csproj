@@ -204,6 +204,7 @@
     <Compile Include="MessageMonitor.cs" />
     <Compile Include="MongoDb\MongoDatabase.cs" />
     <Compile Include="MongoDb\ReadingOperDatabase.cs" />
+    <Compile Include="OnlineStatis.cs" />
     <Compile Include="OperLog.cs" />
     <Compile Include="FilterHost.cs" />
     <Compile Include="deleted\FooterControl.cs" />
