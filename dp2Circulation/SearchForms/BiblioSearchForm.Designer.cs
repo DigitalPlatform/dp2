@@ -55,6 +55,8 @@
             this.ToolStripMenuItem_searchShareBiblio = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem_searchZ3950 = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_filterRecords = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
+            this.ToolStripMenuItem_z3950ServerList = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripDropDownButton_inputTimeString = new System.Windows.Forms.ToolStripDropDownButton();
             this.ToolStripMenuItem_rfc1123Single = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_uSingle = new System.Windows.Forms.ToolStripMenuItem();
@@ -64,6 +66,7 @@
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButton_prevQuery = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_nextQuery = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButton_multiLine = new System.Windows.Forms.ToolStripButton();
             this.button_search = new System.Windows.Forms.Button();
             this.comboBox_location = new System.Windows.Forms.ComboBox();
             this.tableLayoutPanel_main = new System.Windows.Forms.TableLayoutPanel();
@@ -76,8 +79,6 @@
             this.listView_records = new DigitalPlatform.GUI.ListViewNF();
             this.columnHeader_path = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
-            this.ToolStripMenuItem_z3950ServerList = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip_biblioDb.SuspendLayout();
             this.tableLayoutPanel_query.SuspendLayout();
             this.toolStrip_search.SuspendLayout();
@@ -95,10 +96,10 @@
             // 
             this.label2.AutoSize = true;
             this.label2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label2.Location = new System.Drawing.Point(6, 77);
-            this.label2.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.label2.Location = new System.Drawing.Point(7, 85);
+            this.label2.Margin = new System.Windows.Forms.Padding(7, 0, 7, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(116, 41);
+            this.label2.Size = new System.Drawing.Size(138, 46);
             this.label2.TabIndex = 5;
             this.label2.Text = "检索途径(&F):";
             this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -108,10 +109,11 @@
             this.textBox_queryWord.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.textBox_queryWord.Dock = System.Windows.Forms.DockStyle.Fill;
             this.textBox_queryWord.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.textBox_queryWord.Location = new System.Drawing.Point(134, 6);
-            this.textBox_queryWord.Margin = new System.Windows.Forms.Padding(6);
+            this.textBox_queryWord.Location = new System.Drawing.Point(159, 7);
+            this.textBox_queryWord.Margin = new System.Windows.Forms.Padding(7);
+            this.textBox_queryWord.MaxLength = 0;
             this.textBox_queryWord.Name = "textBox_queryWord";
-            this.textBox_queryWord.Size = new System.Drawing.Size(254, 28);
+            this.textBox_queryWord.Size = new System.Drawing.Size(313, 31);
             this.textBox_queryWord.TabIndex = 1;
             this.textBox_queryWord.TextChanged += new System.EventHandler(this.textBox_queryWord_TextChanged);
             this.textBox_queryWord.Enter += new System.EventHandler(this.textBox_queryWord_Enter);
@@ -122,10 +124,10 @@
             this.label1.AutoSize = true;
             this.label1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.label1.ImageAlign = System.Drawing.ContentAlignment.TopLeft;
-            this.label1.Location = new System.Drawing.Point(6, 0);
-            this.label1.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.label1.Location = new System.Drawing.Point(7, 0);
+            this.label1.Margin = new System.Windows.Forms.Padding(7, 0, 7, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(116, 40);
+            this.label1.Size = new System.Drawing.Size(138, 45);
             this.label1.TabIndex = 0;
             this.label1.Text = "检索词(&W):";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -135,10 +137,10 @@
             this.label_biblioDbName.AutoSize = true;
             this.label_biblioDbName.ContextMenuStrip = this.contextMenuStrip_biblioDb;
             this.label_biblioDbName.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label_biblioDbName.Location = new System.Drawing.Point(4, 40);
-            this.label_biblioDbName.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label_biblioDbName.Location = new System.Drawing.Point(5, 45);
+            this.label_biblioDbName.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label_biblioDbName.Name = "label_biblioDbName";
-            this.label_biblioDbName.Size = new System.Drawing.Size(120, 37);
+            this.label_biblioDbName.Size = new System.Drawing.Size(142, 40);
             this.label_biblioDbName.TabIndex = 3;
             this.label_biblioDbName.Text = "书目库(&D):";
             this.label_biblioDbName.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -149,12 +151,12 @@
             this.contextMenuStrip_biblioDb.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.MenuItem_viewBiblioDbProperty});
             this.contextMenuStrip_biblioDb.Name = "contextMenuStrip_biblioDb";
-            this.contextMenuStrip_biblioDb.Size = new System.Drawing.Size(242, 32);
+            this.contextMenuStrip_biblioDb.Size = new System.Drawing.Size(274, 38);
             // 
             // MenuItem_viewBiblioDbProperty
             // 
             this.MenuItem_viewBiblioDbProperty.Name = "MenuItem_viewBiblioDbProperty";
-            this.MenuItem_viewBiblioDbProperty.Size = new System.Drawing.Size(241, 28);
+            this.MenuItem_viewBiblioDbProperty.Size = new System.Drawing.Size(273, 34);
             this.MenuItem_viewBiblioDbProperty.Text = "观察书目库属性(&P)...";
             this.MenuItem_viewBiblioDbProperty.Click += new System.EventHandler(this.MenuItem_viewBiblioDbProperty_Click);
             // 
@@ -178,9 +180,9 @@
             this.tableLayoutPanel_query.Controls.Add(this.button_search, 2, 1);
             this.tableLayoutPanel_query.Controls.Add(this.comboBox_location, 1, 4);
             this.tableLayoutPanel_query.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel_query.Location = new System.Drawing.Point(4, 4);
+            this.tableLayoutPanel_query.Location = new System.Drawing.Point(5, 5);
             this.tableLayoutPanel_query.Margin = new System.Windows.Forms.Padding(0);
-            this.tableLayoutPanel_query.MaximumSize = new System.Drawing.Size(600, 0);
+            this.tableLayoutPanel_query.MaximumSize = new System.Drawing.Size(733, 0);
             this.tableLayoutPanel_query.Name = "tableLayoutPanel_query";
             this.tableLayoutPanel_query.RowCount = 6;
             this.tableLayoutPanel_query.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -189,17 +191,17 @@
             this.tableLayoutPanel_query.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_query.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_query.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel_query.Size = new System.Drawing.Size(600, 209);
+            this.tableLayoutPanel_query.Size = new System.Drawing.Size(733, 245);
             this.tableLayoutPanel_query.TabIndex = 8;
             // 
             // label4
             // 
             this.label4.AutoSize = true;
             this.label4.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label4.Location = new System.Drawing.Point(6, 156);
-            this.label4.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.label4.Location = new System.Drawing.Point(7, 174);
+            this.label4.Margin = new System.Windows.Forms.Padding(7, 0, 7, 0);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(116, 38);
+            this.label4.Size = new System.Drawing.Size(138, 43);
             this.label4.TabIndex = 15;
             this.label4.Text = "馆藏地(&L):";
             this.label4.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -212,10 +214,10 @@
             this.comboBox_from.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.comboBox_from.FormattingEnabled = true;
             this.comboBox_from.IntegralHeight = false;
-            this.comboBox_from.Location = new System.Drawing.Point(134, 83);
-            this.comboBox_from.Margin = new System.Windows.Forms.Padding(6);
+            this.comboBox_from.Location = new System.Drawing.Point(159, 92);
+            this.comboBox_from.Margin = new System.Windows.Forms.Padding(7);
             this.comboBox_from.Name = "comboBox_from";
-            this.comboBox_from.Size = new System.Drawing.Size(254, 29);
+            this.comboBox_from.Size = new System.Drawing.Size(313, 32);
             this.comboBox_from.TabIndex = 6;
             this.comboBox_from.SizeChanged += new System.EventHandler(this.comboBox_from_SizeChanged);
             // 
@@ -223,10 +225,10 @@
             // 
             this.label_matchStyle.AutoSize = true;
             this.label_matchStyle.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label_matchStyle.Location = new System.Drawing.Point(6, 118);
-            this.label_matchStyle.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.label_matchStyle.Location = new System.Drawing.Point(7, 131);
+            this.label_matchStyle.Margin = new System.Windows.Forms.Padding(7, 0, 7, 0);
             this.label_matchStyle.Name = "label_matchStyle";
-            this.label_matchStyle.Size = new System.Drawing.Size(116, 38);
+            this.label_matchStyle.Size = new System.Drawing.Size(138, 43);
             this.label_matchStyle.TabIndex = 7;
             this.label_matchStyle.Text = "匹配方式(&M):";
             this.label_matchStyle.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -242,10 +244,10 @@
             "后方一致",
             "精确一致",
             "空值"});
-            this.comboBox_matchStyle.Location = new System.Drawing.Point(134, 124);
-            this.comboBox_matchStyle.Margin = new System.Windows.Forms.Padding(6);
+            this.comboBox_matchStyle.Location = new System.Drawing.Point(159, 138);
+            this.comboBox_matchStyle.Margin = new System.Windows.Forms.Padding(7);
             this.comboBox_matchStyle.Name = "comboBox_matchStyle";
-            this.comboBox_matchStyle.Size = new System.Drawing.Size(254, 26);
+            this.comboBox_matchStyle.Size = new System.Drawing.Size(313, 29);
             this.comboBox_matchStyle.TabIndex = 8;
             this.comboBox_matchStyle.Text = "前方一致";
             this.comboBox_matchStyle.SizeChanged += new System.EventHandler(this.comboBox_matchStyle_SizeChanged);
@@ -256,11 +258,12 @@
             this.checkedComboBox_biblioDbNames.BackColor = System.Drawing.SystemColors.Window;
             this.checkedComboBox_biblioDbNames.Dock = System.Windows.Forms.DockStyle.Fill;
             this.checkedComboBox_biblioDbNames.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.checkedComboBox_biblioDbNames.Location = new System.Drawing.Point(132, 44);
+            this.checkedComboBox_biblioDbNames.Location = new System.Drawing.Point(156, 49);
             this.checkedComboBox_biblioDbNames.Margin = new System.Windows.Forms.Padding(4);
             this.checkedComboBox_biblioDbNames.Name = "checkedComboBox_biblioDbNames";
             this.checkedComboBox_biblioDbNames.Padding = new System.Windows.Forms.Padding(4);
-            this.checkedComboBox_biblioDbNames.Size = new System.Drawing.Size(258, 29);
+            this.checkedComboBox_biblioDbNames.ReadOnly = false;
+            this.checkedComboBox_biblioDbNames.Size = new System.Drawing.Size(319, 32);
             this.checkedComboBox_biblioDbNames.TabIndex = 9;
             this.checkedComboBox_biblioDbNames.DropDown += new System.EventHandler(this.checkedComboBox_biblioDbNames_DropDown);
             this.checkedComboBox_biblioDbNames.ItemChecked += new System.Windows.Forms.ItemCheckedEventHandler(this.checkedComboBox_biblioDbNames_ItemChecked);
@@ -279,12 +282,12 @@
             this.toolStripDropDownButton_inputTimeString,
             this.toolStripSeparator1,
             this.toolStripButton_prevQuery,
-            this.toolStripButton_nextQuery});
-            this.toolStrip_search.Location = new System.Drawing.Point(394, 0);
+            this.toolStripButton_nextQuery,
+            this.toolStripButton_multiLine});
+            this.toolStrip_search.Location = new System.Drawing.Point(479, 0);
             this.toolStrip_search.Name = "toolStrip_search";
-            this.toolStrip_search.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
             this.toolStrip_search.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
-            this.toolStrip_search.Size = new System.Drawing.Size(206, 40);
+            this.toolStrip_search.Size = new System.Drawing.Size(254, 45);
             this.toolStrip_search.TabIndex = 13;
             this.toolStrip_search.Text = "检索";
             // 
@@ -294,14 +297,14 @@
             this.toolStripButton_search.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_search.Image")));
             this.toolStripButton_search.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_search.Name = "toolStripButton_search";
-            this.toolStripButton_search.Size = new System.Drawing.Size(28, 37);
+            this.toolStripButton_search.Size = new System.Drawing.Size(40, 39);
             this.toolStripButton_search.Text = "检索";
             this.toolStripButton_search.Click += new System.EventHandler(this.toolStripButton_search_Click);
             // 
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(6, 40);
+            this.toolStripSeparator3.Size = new System.Drawing.Size(6, 45);
             // 
             // toolStripDropDownButton_searchKeys
             // 
@@ -320,14 +323,14 @@
             this.toolStripDropDownButton_searchKeys.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.toolStripDropDownButton_searchKeys.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripDropDownButton_searchKeys.Name = "toolStripDropDownButton_searchKeys";
-            this.toolStripDropDownButton_searchKeys.Size = new System.Drawing.Size(18, 37);
+            this.toolStripDropDownButton_searchKeys.Size = new System.Drawing.Size(21, 39);
             this.toolStripDropDownButton_searchKeys.Text = "更多命令...";
             // 
             // ToolStripMenuItem_continueLoad
             // 
             this.ToolStripMenuItem_continueLoad.Enabled = false;
             this.ToolStripMenuItem_continueLoad.Name = "ToolStripMenuItem_continueLoad";
-            this.ToolStripMenuItem_continueLoad.Size = new System.Drawing.Size(263, 30);
+            this.ToolStripMenuItem_continueLoad.Size = new System.Drawing.Size(327, 40);
             this.ToolStripMenuItem_continueLoad.Text = "继续装入";
             this.ToolStripMenuItem_continueLoad.ToolTipText = "继续装入中断时尚未装入的那些浏览行";
             this.ToolStripMenuItem_continueLoad.Click += new System.EventHandler(this.ToolStripMenuItem_continueLoad_Click);
@@ -335,42 +338,54 @@
             // toolStripMenuItem_searchKeyID
             // 
             this.toolStripMenuItem_searchKeyID.Name = "toolStripMenuItem_searchKeyID";
-            this.toolStripMenuItem_searchKeyID.Size = new System.Drawing.Size(263, 30);
+            this.toolStripMenuItem_searchKeyID.Size = new System.Drawing.Size(327, 40);
             this.toolStripMenuItem_searchKeyID.Text = "带检索点的检索";
             this.toolStripMenuItem_searchKeyID.Click += new System.EventHandler(this.toolStripMenuItem_searchKeyID_Click);
             // 
             // toolStripMenuItem_searchKeys
             // 
             this.toolStripMenuItem_searchKeys.Name = "toolStripMenuItem_searchKeys";
-            this.toolStripMenuItem_searchKeys.Size = new System.Drawing.Size(263, 30);
+            this.toolStripMenuItem_searchKeys.Size = new System.Drawing.Size(327, 40);
             this.toolStripMenuItem_searchKeys.Text = "仅获得检索点";
             this.toolStripMenuItem_searchKeys.Click += new System.EventHandler(this.toolStripMenuItem_searchKeys_Click);
             // 
             // toolStripSeparator4
             // 
             this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(260, 6);
+            this.toolStripSeparator4.Size = new System.Drawing.Size(324, 6);
             // 
             // ToolStripMenuItem_searchShareBiblio
             // 
             this.ToolStripMenuItem_searchShareBiblio.Name = "ToolStripMenuItem_searchShareBiblio";
-            this.ToolStripMenuItem_searchShareBiblio.Size = new System.Drawing.Size(263, 30);
+            this.ToolStripMenuItem_searchShareBiblio.Size = new System.Drawing.Size(327, 40);
             this.ToolStripMenuItem_searchShareBiblio.Text = "使用共享网络";
             this.ToolStripMenuItem_searchShareBiblio.Click += new System.EventHandler(this.ToolStripMenuItem_searchShareBiblio_Click);
             // 
             // toolStripMenuItem_searchZ3950
             // 
             this.toolStripMenuItem_searchZ3950.Name = "toolStripMenuItem_searchZ3950";
-            this.toolStripMenuItem_searchZ3950.Size = new System.Drawing.Size(263, 30);
+            this.toolStripMenuItem_searchZ3950.Size = new System.Drawing.Size(327, 40);
             this.toolStripMenuItem_searchZ3950.Text = "使用 Z39.50";
             this.toolStripMenuItem_searchZ3950.Click += new System.EventHandler(this.toolStripMenuItem_searchZ3950_Click);
             // 
             // ToolStripMenuItem_filterRecords
             // 
             this.ToolStripMenuItem_filterRecords.Name = "ToolStripMenuItem_filterRecords";
-            this.ToolStripMenuItem_filterRecords.Size = new System.Drawing.Size(263, 30);
+            this.ToolStripMenuItem_filterRecords.Size = new System.Drawing.Size(327, 40);
             this.ToolStripMenuItem_filterRecords.Text = "智能筛选 ...";
             this.ToolStripMenuItem_filterRecords.Click += new System.EventHandler(this.ToolStripMenuItem_filterRecords_Click);
+            // 
+            // toolStripSeparator5
+            // 
+            this.toolStripSeparator5.Name = "toolStripSeparator5";
+            this.toolStripSeparator5.Size = new System.Drawing.Size(324, 6);
+            // 
+            // ToolStripMenuItem_z3950ServerList
+            // 
+            this.ToolStripMenuItem_z3950ServerList.Name = "ToolStripMenuItem_z3950ServerList";
+            this.ToolStripMenuItem_z3950ServerList.Size = new System.Drawing.Size(327, 40);
+            this.ToolStripMenuItem_z3950ServerList.Text = "Z39.50 服务器列表 ...";
+            this.ToolStripMenuItem_z3950ServerList.Click += new System.EventHandler(this.ToolStripMenuItem_z3950ServerList_Click);
             // 
             // toolStripDropDownButton_inputTimeString
             // 
@@ -384,13 +399,13 @@
             this.toolStripDropDownButton_inputTimeString.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton_inputTimeString.Image")));
             this.toolStripDropDownButton_inputTimeString.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripDropDownButton_inputTimeString.Name = "toolStripDropDownButton_inputTimeString";
-            this.toolStripDropDownButton_inputTimeString.Size = new System.Drawing.Size(42, 37);
+            this.toolStripDropDownButton_inputTimeString.Size = new System.Drawing.Size(45, 39);
             this.toolStripDropDownButton_inputTimeString.Text = "和时间有关的功能";
             // 
             // ToolStripMenuItem_rfc1123Single
             // 
             this.ToolStripMenuItem_rfc1123Single.Name = "ToolStripMenuItem_rfc1123Single";
-            this.ToolStripMenuItem_rfc1123Single.Size = new System.Drawing.Size(272, 30);
+            this.ToolStripMenuItem_rfc1123Single.Size = new System.Drawing.Size(336, 40);
             this.ToolStripMenuItem_rfc1123Single.Text = "RFC1123时间值...";
             this.ToolStripMenuItem_rfc1123Single.Visible = false;
             this.ToolStripMenuItem_rfc1123Single.Click += new System.EventHandler(this.ToolStripMenuItem_rfc1123Single_Click);
@@ -398,19 +413,19 @@
             // ToolStripMenuItem_uSingle
             // 
             this.ToolStripMenuItem_uSingle.Name = "ToolStripMenuItem_uSingle";
-            this.ToolStripMenuItem_uSingle.Size = new System.Drawing.Size(272, 30);
+            this.ToolStripMenuItem_uSingle.Size = new System.Drawing.Size(336, 40);
             this.ToolStripMenuItem_uSingle.Text = "u时间值...";
             this.ToolStripMenuItem_uSingle.Click += new System.EventHandler(this.ToolStripMenuItem_uSingle_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(269, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(333, 6);
             // 
             // ToolStripMenuItem_rfc1123Range
             // 
             this.ToolStripMenuItem_rfc1123Range.Name = "ToolStripMenuItem_rfc1123Range";
-            this.ToolStripMenuItem_rfc1123Range.Size = new System.Drawing.Size(272, 30);
+            this.ToolStripMenuItem_rfc1123Range.Size = new System.Drawing.Size(336, 40);
             this.ToolStripMenuItem_rfc1123Range.Text = "RFC1123时间值范围...";
             this.ToolStripMenuItem_rfc1123Range.Visible = false;
             this.ToolStripMenuItem_rfc1123Range.Click += new System.EventHandler(this.ToolStripMenuItem_rfc1123Range_Click);
@@ -418,14 +433,14 @@
             // ToolStripMenuItem_uRange
             // 
             this.ToolStripMenuItem_uRange.Name = "ToolStripMenuItem_uRange";
-            this.ToolStripMenuItem_uRange.Size = new System.Drawing.Size(272, 30);
+            this.ToolStripMenuItem_uRange.Size = new System.Drawing.Size(336, 40);
             this.ToolStripMenuItem_uRange.Text = "u时间值范围...";
             this.ToolStripMenuItem_uRange.Click += new System.EventHandler(this.ToolStripMenuItem_uRange_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 40);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 45);
             this.toolStripSeparator1.Visible = false;
             // 
             // toolStripButton_prevQuery
@@ -435,7 +450,7 @@
             this.toolStripButton_prevQuery.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_prevQuery.Image")));
             this.toolStripButton_prevQuery.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_prevQuery.Name = "toolStripButton_prevQuery";
-            this.toolStripButton_prevQuery.Size = new System.Drawing.Size(28, 37);
+            this.toolStripButton_prevQuery.Size = new System.Drawing.Size(40, 39);
             this.toolStripButton_prevQuery.Text = "后退";
             this.toolStripButton_prevQuery.Click += new System.EventHandler(this.toolStripButton_prevQuery_Click);
             // 
@@ -446,14 +461,25 @@
             this.toolStripButton_nextQuery.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_nextQuery.Image")));
             this.toolStripButton_nextQuery.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_nextQuery.Name = "toolStripButton_nextQuery";
-            this.toolStripButton_nextQuery.Size = new System.Drawing.Size(28, 37);
+            this.toolStripButton_nextQuery.Size = new System.Drawing.Size(40, 39);
             this.toolStripButton_nextQuery.Text = "前进";
             this.toolStripButton_nextQuery.Click += new System.EventHandler(this.toolStripButton_nextQuery_Click);
             // 
+            // toolStripButton_multiLine
+            // 
+            this.toolStripButton_multiLine.CheckOnClick = true;
+            this.toolStripButton_multiLine.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_multiLine.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_multiLine.Image")));
+            this.toolStripButton_multiLine.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_multiLine.Name = "toolStripButton_multiLine";
+            this.toolStripButton_multiLine.Size = new System.Drawing.Size(58, 39);
+            this.toolStripButton_multiLine.Text = "多行";
+            this.toolStripButton_multiLine.CheckedChanged += new System.EventHandler(this.toolStripButton_multiLine_CheckedChanged);
+            // 
             // button_search
             // 
-            this.button_search.Location = new System.Drawing.Point(398, 43);
-            this.button_search.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.button_search.Location = new System.Drawing.Point(484, 48);
+            this.button_search.Margin = new System.Windows.Forms.Padding(5, 3, 5, 3);
             this.button_search.Name = "button_search";
             this.button_search.Size = new System.Drawing.Size(0, 0);
             this.button_search.TabIndex = 14;
@@ -466,10 +492,10 @@
             this.comboBox_location.Dock = System.Windows.Forms.DockStyle.Fill;
             this.comboBox_location.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.comboBox_location.FormattingEnabled = true;
-            this.comboBox_location.Location = new System.Drawing.Point(134, 162);
-            this.comboBox_location.Margin = new System.Windows.Forms.Padding(6);
+            this.comboBox_location.Location = new System.Drawing.Point(159, 181);
+            this.comboBox_location.Margin = new System.Windows.Forms.Padding(7);
             this.comboBox_location.Name = "comboBox_location";
-            this.comboBox_location.Size = new System.Drawing.Size(254, 26);
+            this.comboBox_location.Size = new System.Drawing.Size(313, 29);
             this.comboBox_location.TabIndex = 16;
             // 
             // tableLayoutPanel_main
@@ -480,30 +506,30 @@
             this.tableLayoutPanel_main.Controls.Add(this.splitContainer_main, 0, 0);
             this.tableLayoutPanel_main.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel_main.Location = new System.Drawing.Point(0, 0);
-            this.tableLayoutPanel_main.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.tableLayoutPanel_main.Margin = new System.Windows.Forms.Padding(5, 3, 5, 3);
             this.tableLayoutPanel_main.Name = "tableLayoutPanel_main";
-            this.tableLayoutPanel_main.Padding = new System.Windows.Forms.Padding(0, 18, 0, 18);
+            this.tableLayoutPanel_main.Padding = new System.Windows.Forms.Padding(0, 21, 0, 21);
             this.tableLayoutPanel_main.RowCount = 2;
             this.tableLayoutPanel_main.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel_main.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel_main.Size = new System.Drawing.Size(734, 555);
+            this.tableLayoutPanel_main.Size = new System.Drawing.Size(897, 647);
             this.tableLayoutPanel_main.TabIndex = 0;
             // 
             // label_message
             // 
             this.label_message.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.label_message.Location = new System.Drawing.Point(0, 504);
+            this.label_message.Location = new System.Drawing.Point(0, 588);
             this.label_message.Margin = new System.Windows.Forms.Padding(0, 3, 0, 0);
             this.label_message.Name = "label_message";
-            this.label_message.Size = new System.Drawing.Size(734, 33);
+            this.label_message.Size = new System.Drawing.Size(897, 38);
             this.label_message.TabIndex = 1;
             // 
             // splitContainer_main
             // 
             this.splitContainer_main.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer_main.Location = new System.Drawing.Point(4, 22);
-            this.splitContainer_main.Margin = new System.Windows.Forms.Padding(4);
+            this.splitContainer_main.Location = new System.Drawing.Point(5, 26);
+            this.splitContainer_main.Margin = new System.Windows.Forms.Padding(5);
             this.splitContainer_main.Name = "splitContainer_main";
             this.splitContainer_main.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
@@ -514,9 +540,9 @@
             // splitContainer_main.Panel2
             // 
             this.splitContainer_main.Panel2.Controls.Add(this.listView_records);
-            this.splitContainer_main.Size = new System.Drawing.Size(726, 475);
-            this.splitContainer_main.SplitterDistance = 249;
-            this.splitContainer_main.SplitterWidth = 12;
+            this.splitContainer_main.Size = new System.Drawing.Size(887, 554);
+            this.splitContainer_main.SplitterDistance = 290;
+            this.splitContainer_main.SplitterWidth = 14;
             this.splitContainer_main.TabIndex = 2;
             // 
             // tabControl_query
@@ -525,21 +551,21 @@
             this.tabControl_query.Controls.Add(this.tabPage_logic);
             this.tabControl_query.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl_query.Location = new System.Drawing.Point(0, 0);
-            this.tabControl_query.Margin = new System.Windows.Forms.Padding(4);
+            this.tabControl_query.Margin = new System.Windows.Forms.Padding(5);
             this.tabControl_query.Name = "tabControl_query";
             this.tabControl_query.SelectedIndex = 0;
-            this.tabControl_query.Size = new System.Drawing.Size(726, 249);
+            this.tabControl_query.Size = new System.Drawing.Size(887, 290);
             this.tabControl_query.TabIndex = 1;
             // 
             // tabPage_simple
             // 
             this.tabPage_simple.AutoScroll = true;
             this.tabPage_simple.Controls.Add(this.tableLayoutPanel_query);
-            this.tabPage_simple.Location = new System.Drawing.Point(4, 28);
-            this.tabPage_simple.Margin = new System.Windows.Forms.Padding(4);
+            this.tabPage_simple.Location = new System.Drawing.Point(4, 31);
+            this.tabPage_simple.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_simple.Name = "tabPage_simple";
-            this.tabPage_simple.Padding = new System.Windows.Forms.Padding(4);
-            this.tabPage_simple.Size = new System.Drawing.Size(718, 217);
+            this.tabPage_simple.Padding = new System.Windows.Forms.Padding(5);
+            this.tabPage_simple.Size = new System.Drawing.Size(879, 255);
             this.tabPage_simple.TabIndex = 0;
             this.tabPage_simple.Text = "简单";
             this.tabPage_simple.UseVisualStyleBackColor = true;
@@ -548,11 +574,11 @@
             // 
             this.tabPage_logic.AutoScroll = true;
             this.tabPage_logic.Controls.Add(this.dp2QueryControl1);
-            this.tabPage_logic.Location = new System.Drawing.Point(4, 28);
-            this.tabPage_logic.Margin = new System.Windows.Forms.Padding(4);
+            this.tabPage_logic.Location = new System.Drawing.Point(4, 31);
+            this.tabPage_logic.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_logic.Name = "tabPage_logic";
-            this.tabPage_logic.Padding = new System.Windows.Forms.Padding(4);
-            this.tabPage_logic.Size = new System.Drawing.Size(718, 217);
+            this.tabPage_logic.Padding = new System.Windows.Forms.Padding(5);
+            this.tabPage_logic.Size = new System.Drawing.Size(879, 255);
             this.tabPage_logic.TabIndex = 1;
             this.tabPage_logic.Text = "逻辑";
             this.tabPage_logic.UseVisualStyleBackColor = true;
@@ -560,11 +586,11 @@
             // dp2QueryControl1
             // 
             this.dp2QueryControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dp2QueryControl1.Location = new System.Drawing.Point(4, 4);
-            this.dp2QueryControl1.Margin = new System.Windows.Forms.Padding(9);
+            this.dp2QueryControl1.Location = new System.Drawing.Point(5, 5);
+            this.dp2QueryControl1.Margin = new System.Windows.Forms.Padding(11, 10, 11, 10);
             this.dp2QueryControl1.Name = "dp2QueryControl1";
             this.dp2QueryControl1.PanelMode = DigitalPlatform.CommonControl.PanelMode.None;
-            this.dp2QueryControl1.Size = new System.Drawing.Size(710, 209);
+            this.dp2QueryControl1.Size = new System.Drawing.Size(869, 245);
             this.dp2QueryControl1.TabIndex = 0;
             this.dp2QueryControl1.GetList += new DigitalPlatform.CommonControl.GetListEventHandler(this.dp2QueryControl1_GetList);
             this.dp2QueryControl1.ViewXml += new System.EventHandler(this.dp2QueryControl1_ViewXml);
@@ -583,7 +609,7 @@
             this.listView_records.Location = new System.Drawing.Point(0, 0);
             this.listView_records.Margin = new System.Windows.Forms.Padding(0);
             this.listView_records.Name = "listView_records";
-            this.listView_records.Size = new System.Drawing.Size(726, 214);
+            this.listView_records.Size = new System.Drawing.Size(887, 250);
             this.listView_records.TabIndex = 0;
             this.listView_records.UseCompatibleStateImageBehavior = false;
             this.listView_records.View = System.Windows.Forms.View.Details;
@@ -603,26 +629,14 @@
             this.columnHeader_1.Text = "1";
             this.columnHeader_1.Width = 300;
             // 
-            // toolStripSeparator5
-            // 
-            this.toolStripSeparator5.Name = "toolStripSeparator5";
-            this.toolStripSeparator5.Size = new System.Drawing.Size(260, 6);
-            // 
-            // ToolStripMenuItem_z3950ServerList
-            // 
-            this.ToolStripMenuItem_z3950ServerList.Name = "ToolStripMenuItem_z3950ServerList";
-            this.ToolStripMenuItem_z3950ServerList.Size = new System.Drawing.Size(263, 30);
-            this.ToolStripMenuItem_z3950ServerList.Text = "Z39.50 服务器列表 ...";
-            this.ToolStripMenuItem_z3950ServerList.Click += new System.EventHandler(this.ToolStripMenuItem_z3950ServerList_Click);
-            // 
             // BiblioSearchForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(734, 555);
+            this.ClientSize = new System.Drawing.Size(897, 647);
             this.Controls.Add(this.tableLayoutPanel_main);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.Margin = new System.Windows.Forms.Padding(5, 3, 5, 3);
             this.Name = "BiblioSearchForm";
             this.ShowInTaskbar = false;
             this.Text = "书目查询";
@@ -697,5 +711,6 @@
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_searchZ3950;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_z3950ServerList;
+        private System.Windows.Forms.ToolStripButton toolStripButton_multiLine;
     }
 }

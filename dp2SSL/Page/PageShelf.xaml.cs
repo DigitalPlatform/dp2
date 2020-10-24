@@ -1599,11 +1599,17 @@ namespace dp2SSL
                 try
                 {
                     dialog = new InputPasswordWindows();
+
+                    this.MemoryDialog(dialog);
+
                     dialog.TitleText = $"输入锁屏密码才能开门";
                     dialog.Owner = App.CurrentApp.MainWindow;
                     dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
                     dialog.LoginButtonText = "开门";
                     dialog.ShowDialog();
+
+                    this.ForgetDialog(dialog);
+
                     if (dialog.Result == "OK")
                         password = dialog.password.Password;
                 }
@@ -2225,6 +2231,9 @@ namespace dp2SSL
                 App.Invoke(new Action(() =>
                 {
                     NetworkWindow dlg = new NetworkWindow();
+
+                    this.MemoryDialog(dlg);
+
                     dlg.MessageText = text;
                     dlg.LocalModeButtonText = "改用断网模式";
                     dlg.NetworkModeButtonText = "继续用联网模式";
@@ -2236,6 +2245,9 @@ namespace dp2SSL
                     // App.SetSize(progress, "wide");
                     // progress.BackColor = "yellow";
                     var ret = dlg.ShowDialog();
+
+                    this.ForgetDialog(dlg);
+
                     if (ret == false)
                     {
                         App.Current.Shutdown();

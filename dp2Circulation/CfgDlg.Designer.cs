@@ -31,6 +31,8 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CfgDlg));
             this.tabControl_main = new System.Windows.Forms.TabControl();
             this.tabPage_server = new System.Windows.Forms.TabPage();
+            this.button_server_fillPinyinUrl = new System.Windows.Forms.Button();
+            this.button_server_fillAuthorNumberUrl = new System.Windows.Forms.Button();
             this.textBox_server_greenPackage = new System.Windows.Forms.TextBox();
             this.label31 = new System.Windows.Forms.Label();
             this.textBox_server_pinyin_gcatUrl = new System.Windows.Forms.TextBox();
@@ -231,8 +233,8 @@
             this.button_z3950_servers = new System.Windows.Forms.Button();
             this.button_OK = new System.Windows.Forms.Button();
             this.button_Cancel = new System.Windows.Forms.Button();
-            this.button_server_fillAuthorNumberUrl = new System.Windows.Forms.Button();
-            this.button_server_fillPinyinUrl = new System.Windows.Forms.Button();
+            this.label36 = new System.Windows.Forms.Label();
+            this.numericUpDown_search_multiline_maxBiblioResultCount = new System.Windows.Forms.NumericUpDown();
             this.tabControl_main.SuspendLayout();
             this.tabPage_server.SuspendLayout();
             this.toolStrip_server.SuspendLayout();
@@ -277,6 +279,7 @@
             this.tabPage_labelPrint.SuspendLayout();
             this.tabPage_message.SuspendLayout();
             this.tabPage_z3950.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_search_multiline_maxBiblioResultCount)).BeginInit();
             this.SuspendLayout();
             // 
             // tabControl_main
@@ -305,7 +308,7 @@
             this.tabControl_main.Controls.Add(this.tabPage_message);
             this.tabControl_main.Controls.Add(this.tabPage_z3950);
             this.tabControl_main.Location = new System.Drawing.Point(18, 17);
-            this.tabControl_main.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.tabControl_main.Margin = new System.Windows.Forms.Padding(5);
             this.tabControl_main.Multiline = true;
             this.tabControl_main.Name = "tabControl_main";
             this.tabControl_main.SelectedIndex = 0;
@@ -327,20 +330,42 @@
             this.tabPage_server.Controls.Add(this.label1);
             this.tabPage_server.Controls.Add(this.toolStrip_server);
             this.tabPage_server.Location = new System.Drawing.Point(4, 85);
-            this.tabPage_server.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.tabPage_server.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_server.Name = "tabPage_server";
-            this.tabPage_server.Padding = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.tabPage_server.Padding = new System.Windows.Forms.Padding(5);
             this.tabPage_server.Size = new System.Drawing.Size(905, 459);
             this.tabPage_server.TabIndex = 0;
             this.tabPage_server.Text = " 服务器 ";
             this.tabPage_server.UseVisualStyleBackColor = true;
+            // 
+            // button_server_fillPinyinUrl
+            // 
+            this.button_server_fillPinyinUrl.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_server_fillPinyinUrl.Location = new System.Drawing.Point(770, 310);
+            this.button_server_fillPinyinUrl.Name = "button_server_fillPinyinUrl";
+            this.button_server_fillPinyinUrl.Size = new System.Drawing.Size(105, 30);
+            this.button_server_fillPinyinUrl.TabIndex = 10;
+            this.button_server_fillPinyinUrl.Text = "常用值";
+            this.button_server_fillPinyinUrl.UseVisualStyleBackColor = true;
+            this.button_server_fillPinyinUrl.Click += new System.EventHandler(this.button_server_fillPinyinUrl_Click);
+            // 
+            // button_server_fillAuthorNumberUrl
+            // 
+            this.button_server_fillAuthorNumberUrl.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_server_fillAuthorNumberUrl.Location = new System.Drawing.Point(770, 217);
+            this.button_server_fillAuthorNumberUrl.Name = "button_server_fillAuthorNumberUrl";
+            this.button_server_fillAuthorNumberUrl.Size = new System.Drawing.Size(105, 30);
+            this.button_server_fillAuthorNumberUrl.TabIndex = 9;
+            this.button_server_fillAuthorNumberUrl.Text = "常用值";
+            this.button_server_fillAuthorNumberUrl.UseVisualStyleBackColor = true;
+            this.button_server_fillAuthorNumberUrl.Click += new System.EventHandler(this.button_server_fillAuthorNumberUrl_Click);
             // 
             // textBox_server_greenPackage
             // 
             this.textBox_server_greenPackage.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_server_greenPackage.Location = new System.Drawing.Point(17, 364);
-            this.textBox_server_greenPackage.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.textBox_server_greenPackage.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_server_greenPackage.Name = "textBox_server_greenPackage";
             this.textBox_server_greenPackage.Size = new System.Drawing.Size(858, 31);
             this.textBox_server_greenPackage.TabIndex = 8;
@@ -360,7 +385,7 @@
             this.textBox_server_pinyin_gcatUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_server_pinyin_gcatUrl.Location = new System.Drawing.Point(17, 271);
-            this.textBox_server_pinyin_gcatUrl.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.textBox_server_pinyin_gcatUrl.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_server_pinyin_gcatUrl.Name = "textBox_server_pinyin_gcatUrl";
             this.textBox_server_pinyin_gcatUrl.Size = new System.Drawing.Size(858, 31);
             this.textBox_server_pinyin_gcatUrl.TabIndex = 5;
@@ -380,7 +405,7 @@
             this.textBox_server_authorNumber_gcatUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_server_authorNumber_gcatUrl.Location = new System.Drawing.Point(17, 178);
-            this.textBox_server_authorNumber_gcatUrl.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.textBox_server_authorNumber_gcatUrl.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_server_authorNumber_gcatUrl.Name = "textBox_server_authorNumber_gcatUrl";
             this.textBox_server_authorNumber_gcatUrl.Size = new System.Drawing.Size(858, 31);
             this.textBox_server_authorNumber_gcatUrl.TabIndex = 3;
@@ -400,7 +425,7 @@
             this.textBox_server_dp2LibraryServerUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_server_dp2LibraryServerUrl.Location = new System.Drawing.Point(17, 40);
-            this.textBox_server_dp2LibraryServerUrl.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.textBox_server_dp2LibraryServerUrl.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_server_dp2LibraryServerUrl.Name = "textBox_server_dp2LibraryServerUrl";
             this.textBox_server_dp2LibraryServerUrl.Size = new System.Drawing.Size(858, 31);
             this.textBox_server_dp2LibraryServerUrl.TabIndex = 1;
@@ -476,9 +501,9 @@
             this.tabPage_defaultAccount.Controls.Add(this.label3);
             this.tabPage_defaultAccount.Controls.Add(this.label2);
             this.tabPage_defaultAccount.Location = new System.Drawing.Point(4, 85);
-            this.tabPage_defaultAccount.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.tabPage_defaultAccount.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_defaultAccount.Name = "tabPage_defaultAccount";
-            this.tabPage_defaultAccount.Padding = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.tabPage_defaultAccount.Padding = new System.Windows.Forms.Padding(5);
             this.tabPage_defaultAccount.Size = new System.Drawing.Size(905, 459);
             this.tabPage_defaultAccount.TabIndex = 1;
             this.tabPage_defaultAccount.Text = "默认帐户 ";
@@ -487,7 +512,7 @@
             // checkBox_defaulAccount_savePasswordLong
             // 
             this.checkBox_defaulAccount_savePasswordLong.Location = new System.Drawing.Point(18, 317);
-            this.checkBox_defaulAccount_savePasswordLong.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.checkBox_defaulAccount_savePasswordLong.Margin = new System.Windows.Forms.Padding(5);
             this.checkBox_defaulAccount_savePasswordLong.Name = "checkBox_defaulAccount_savePasswordLong";
             this.checkBox_defaulAccount_savePasswordLong.Size = new System.Drawing.Size(286, 33);
             this.checkBox_defaulAccount_savePasswordLong.TabIndex = 9;
@@ -509,7 +534,7 @@
             // 
             this.textBox_defaultAccount_location.ImeMode = System.Windows.Forms.ImeMode.Off;
             this.textBox_defaultAccount_location.Location = new System.Drawing.Point(193, 248);
-            this.textBox_defaultAccount_location.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.textBox_defaultAccount_location.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_defaultAccount_location.Name = "textBox_defaultAccount_location";
             this.textBox_defaultAccount_location.Size = new System.Drawing.Size(283, 31);
             this.textBox_defaultAccount_location.TabIndex = 7;
@@ -527,7 +552,7 @@
             // 
             this.checkBox_defaultAccount_isReader.AutoSize = true;
             this.checkBox_defaultAccount_isReader.Location = new System.Drawing.Point(193, 87);
-            this.checkBox_defaultAccount_isReader.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.checkBox_defaultAccount_isReader.Margin = new System.Windows.Forms.Padding(5);
             this.checkBox_defaultAccount_isReader.Name = "checkBox_defaultAccount_isReader";
             this.checkBox_defaultAccount_isReader.Size = new System.Drawing.Size(111, 25);
             this.checkBox_defaultAccount_isReader.TabIndex = 2;
@@ -537,7 +562,7 @@
             // checkBox_defaulAccount_savePasswordShort
             // 
             this.checkBox_defaulAccount_savePasswordShort.Location = new System.Drawing.Point(193, 185);
-            this.checkBox_defaulAccount_savePasswordShort.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.checkBox_defaulAccount_savePasswordShort.Margin = new System.Windows.Forms.Padding(5);
             this.checkBox_defaulAccount_savePasswordShort.Name = "checkBox_defaulAccount_savePasswordShort";
             this.checkBox_defaulAccount_savePasswordShort.Size = new System.Drawing.Size(286, 33);
             this.checkBox_defaulAccount_savePasswordShort.TabIndex = 5;
@@ -547,7 +572,7 @@
             // 
             this.textBox_defaultAccount_password.ImeMode = System.Windows.Forms.ImeMode.Off;
             this.textBox_defaultAccount_password.Location = new System.Drawing.Point(193, 138);
-            this.textBox_defaultAccount_password.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.textBox_defaultAccount_password.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_defaultAccount_password.Name = "textBox_defaultAccount_password";
             this.textBox_defaultAccount_password.PasswordChar = '*';
             this.textBox_defaultAccount_password.Size = new System.Drawing.Size(283, 31);
@@ -557,7 +582,7 @@
             // 
             this.textBox_defaultAccount_userName.ImeMode = System.Windows.Forms.ImeMode.Off;
             this.textBox_defaultAccount_userName.Location = new System.Drawing.Point(193, 38);
-            this.textBox_defaultAccount_userName.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.textBox_defaultAccount_userName.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_defaultAccount_userName.Name = "textBox_defaultAccount_userName";
             this.textBox_defaultAccount_userName.Size = new System.Drawing.Size(283, 31);
             this.textBox_defaultAccount_userName.TabIndex = 1;
@@ -721,9 +746,9 @@
             // 
             this.groupBox_charging_selectItemDialog.Controls.Add(this.checkBox_charging_autoOperItemDialogSingleItem);
             this.groupBox_charging_selectItemDialog.Location = new System.Drawing.Point(18, 731);
-            this.groupBox_charging_selectItemDialog.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.groupBox_charging_selectItemDialog.Margin = new System.Windows.Forms.Padding(5);
             this.groupBox_charging_selectItemDialog.Name = "groupBox_charging_selectItemDialog";
-            this.groupBox_charging_selectItemDialog.Padding = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.groupBox_charging_selectItemDialog.Padding = new System.Windows.Forms.Padding(5);
             this.groupBox_charging_selectItemDialog.Size = new System.Drawing.Size(462, 175);
             this.groupBox_charging_selectItemDialog.TabIndex = 21;
             this.groupBox_charging_selectItemDialog.TabStop = false;
@@ -755,7 +780,7 @@
             // 
             this.checkBox_charging_patronBarcodeAllowHanzi.AutoSize = true;
             this.checkBox_charging_patronBarcodeAllowHanzi.Location = new System.Drawing.Point(18, 350);
-            this.checkBox_charging_patronBarcodeAllowHanzi.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.checkBox_charging_patronBarcodeAllowHanzi.Margin = new System.Windows.Forms.Padding(5);
             this.checkBox_charging_patronBarcodeAllowHanzi.Name = "checkBox_charging_patronBarcodeAllowHanzi";
             this.checkBox_charging_patronBarcodeAllowHanzi.Size = new System.Drawing.Size(353, 25);
             this.checkBox_charging_patronBarcodeAllowHanzi.TabIndex = 8;
@@ -766,7 +791,7 @@
             // 
             this.checkBox_charging_speakNameWhenLoadReaderRecord.AutoSize = true;
             this.checkBox_charging_speakNameWhenLoadReaderRecord.Location = new System.Drawing.Point(18, 633);
-            this.checkBox_charging_speakNameWhenLoadReaderRecord.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.checkBox_charging_speakNameWhenLoadReaderRecord.Margin = new System.Windows.Forms.Padding(5);
             this.checkBox_charging_speakNameWhenLoadReaderRecord.Name = "checkBox_charging_speakNameWhenLoadReaderRecord";
             this.checkBox_charging_speakNameWhenLoadReaderRecord.Size = new System.Drawing.Size(437, 25);
             this.checkBox_charging_speakNameWhenLoadReaderRecord.TabIndex = 14;
@@ -777,7 +802,7 @@
             // 
             this.checkBox_charging_stopFillingWhenCloseInfoDlg.AutoSize = true;
             this.checkBox_charging_stopFillingWhenCloseInfoDlg.Location = new System.Drawing.Point(18, 443);
-            this.checkBox_charging_stopFillingWhenCloseInfoDlg.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.checkBox_charging_stopFillingWhenCloseInfoDlg.Margin = new System.Windows.Forms.Padding(5);
             this.checkBox_charging_stopFillingWhenCloseInfoDlg.Name = "checkBox_charging_stopFillingWhenCloseInfoDlg";
             this.checkBox_charging_stopFillingWhenCloseInfoDlg.Size = new System.Drawing.Size(321, 25);
             this.checkBox_charging_stopFillingWhenCloseInfoDlg.TabIndex = 10;
@@ -788,7 +813,7 @@
             // 
             this.checkBox_charging_veifyReaderPassword.AutoSize = true;
             this.checkBox_charging_veifyReaderPassword.Location = new System.Drawing.Point(18, 577);
-            this.checkBox_charging_veifyReaderPassword.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.checkBox_charging_veifyReaderPassword.Margin = new System.Windows.Forms.Padding(5);
             this.checkBox_charging_veifyReaderPassword.Name = "checkBox_charging_veifyReaderPassword";
             this.checkBox_charging_veifyReaderPassword.Size = new System.Drawing.Size(248, 25);
             this.checkBox_charging_veifyReaderPassword.TabIndex = 13;
@@ -947,7 +972,7 @@
             this.tabPage_quickCharging.Controls.Add(this.checkBox_quickCharging_noBorrowHistory);
             this.tabPage_quickCharging.Controls.Add(this.checkBox_quickCharging_verifyBarcode);
             this.tabPage_quickCharging.Location = new System.Drawing.Point(4, 85);
-            this.tabPage_quickCharging.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.tabPage_quickCharging.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_quickCharging.Name = "tabPage_quickCharging";
             this.tabPage_quickCharging.Size = new System.Drawing.Size(905, 459);
             this.tabPage_quickCharging.TabIndex = 17;
@@ -1038,9 +1063,9 @@
             // 
             this.groupBox_quickCharging_selectItemDialog.Controls.Add(this.checkBox_quickCharging_autoOperItemDialogSingleItem);
             this.groupBox_quickCharging_selectItemDialog.Location = new System.Drawing.Point(22, 381);
-            this.groupBox_quickCharging_selectItemDialog.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.groupBox_quickCharging_selectItemDialog.Margin = new System.Windows.Forms.Padding(5);
             this.groupBox_quickCharging_selectItemDialog.Name = "groupBox_quickCharging_selectItemDialog";
-            this.groupBox_quickCharging_selectItemDialog.Padding = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.groupBox_quickCharging_selectItemDialog.Padding = new System.Windows.Forms.Padding(5);
             this.groupBox_quickCharging_selectItemDialog.Size = new System.Drawing.Size(462, 175);
             this.groupBox_quickCharging_selectItemDialog.TabIndex = 11;
             this.groupBox_quickCharging_selectItemDialog.TabStop = false;
@@ -1071,7 +1096,7 @@
             // 
             this.checkBox_quickCharging_speakBookTitle.AutoSize = true;
             this.checkBox_quickCharging_speakBookTitle.Location = new System.Drawing.Point(22, 234);
-            this.checkBox_quickCharging_speakBookTitle.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.checkBox_quickCharging_speakBookTitle.Margin = new System.Windows.Forms.Padding(5);
             this.checkBox_quickCharging_speakBookTitle.Name = "checkBox_quickCharging_speakBookTitle";
             this.checkBox_quickCharging_speakBookTitle.Size = new System.Drawing.Size(164, 25);
             this.checkBox_quickCharging_speakBookTitle.TabIndex = 7;
@@ -1082,7 +1107,7 @@
             // 
             this.checkBox_quickCharging_speakNameWhenLoadReaderRecord.AutoSize = true;
             this.checkBox_quickCharging_speakNameWhenLoadReaderRecord.Location = new System.Drawing.Point(22, 196);
-            this.checkBox_quickCharging_speakNameWhenLoadReaderRecord.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.checkBox_quickCharging_speakNameWhenLoadReaderRecord.Margin = new System.Windows.Forms.Padding(5);
             this.checkBox_quickCharging_speakNameWhenLoadReaderRecord.Name = "checkBox_quickCharging_speakNameWhenLoadReaderRecord";
             this.checkBox_quickCharging_speakNameWhenLoadReaderRecord.Size = new System.Drawing.Size(437, 25);
             this.checkBox_quickCharging_speakNameWhenLoadReaderRecord.TabIndex = 6;
@@ -1146,7 +1171,7 @@
             // textBox_itemManagement_maxPicWidth
             // 
             this.textBox_itemManagement_maxPicWidth.Location = new System.Drawing.Point(423, 409);
-            this.textBox_itemManagement_maxPicWidth.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.textBox_itemManagement_maxPicWidth.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_itemManagement_maxPicWidth.Name = "textBox_itemManagement_maxPicWidth";
             this.textBox_itemManagement_maxPicWidth.Size = new System.Drawing.Size(160, 31);
             this.textBox_itemManagement_maxPicWidth.TabIndex = 9;
@@ -1293,7 +1318,7 @@
             // button_ui_getDefaultFont
             // 
             this.button_ui_getDefaultFont.Location = new System.Drawing.Point(560, 192);
-            this.button_ui_getDefaultFont.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.button_ui_getDefaultFont.Margin = new System.Windows.Forms.Padding(5);
             this.button_ui_getDefaultFont.Name = "button_ui_getDefaultFont";
             this.button_ui_getDefaultFont.Size = new System.Drawing.Size(88, 40);
             this.button_ui_getDefaultFont.TabIndex = 6;
@@ -1304,7 +1329,7 @@
             // textBox_ui_defaultFont
             // 
             this.textBox_ui_defaultFont.Location = new System.Drawing.Point(253, 196);
-            this.textBox_ui_defaultFont.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.textBox_ui_defaultFont.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_ui_defaultFont.Name = "textBox_ui_defaultFont";
             this.textBox_ui_defaultFont.Size = new System.Drawing.Size(292, 31);
             this.textBox_ui_defaultFont.TabIndex = 5;
@@ -1428,7 +1453,7 @@
             this.groupBox6.Controls.Add(this.checkBox_search_commentPushFilling);
             this.groupBox6.Controls.Add(this.label19);
             this.groupBox6.Controls.Add(this.numericUpDown_search_maxCommentResultCount);
-            this.groupBox6.Location = new System.Drawing.Point(7, 1052);
+            this.groupBox6.Location = new System.Drawing.Point(7, 1163);
             this.groupBox6.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.groupBox6.Name = "groupBox6";
             this.groupBox6.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
@@ -1493,7 +1518,7 @@
             this.groupBox5.Controls.Add(this.checkBox_search_issuePushFilling);
             this.groupBox5.Controls.Add(this.label18);
             this.groupBox5.Controls.Add(this.numericUpDown_search_maxIssueResultCount);
-            this.groupBox5.Location = new System.Drawing.Point(7, 852);
+            this.groupBox5.Location = new System.Drawing.Point(7, 963);
             this.groupBox5.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.groupBox5.Name = "groupBox5";
             this.groupBox5.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
@@ -1558,7 +1583,7 @@
             this.groupBox4.Controls.Add(this.checkBox_search_orderPushFilling);
             this.groupBox4.Controls.Add(this.label17);
             this.groupBox4.Controls.Add(this.numericUpDown_search_maxOrderResultCount);
-            this.groupBox4.Location = new System.Drawing.Point(7, 640);
+            this.groupBox4.Location = new System.Drawing.Point(7, 751);
             this.groupBox4.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.groupBox4.Name = "groupBox4";
             this.groupBox4.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
@@ -1634,7 +1659,7 @@
             this.groupBox3.Controls.Add(this.checkBox_search_itemPushFilling);
             this.groupBox3.Controls.Add(this.label11);
             this.groupBox3.Controls.Add(this.numericUpDown_search_maxItemResultCount);
-            this.groupBox3.Location = new System.Drawing.Point(7, 430);
+            this.groupBox3.Location = new System.Drawing.Point(7, 541);
             this.groupBox3.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
@@ -1699,7 +1724,7 @@
             this.groupBox2.Controls.Add(this.checkBox_search_readerPushFilling);
             this.groupBox2.Controls.Add(this.label10);
             this.groupBox2.Controls.Add(this.numericUpDown_search_maxReaderResultCount);
-            this.groupBox2.Location = new System.Drawing.Point(7, 261);
+            this.groupBox2.Location = new System.Drawing.Point(7, 372);
             this.groupBox2.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
@@ -1760,6 +1785,8 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.label36);
+            this.groupBox1.Controls.Add(this.numericUpDown_search_multiline_maxBiblioResultCount);
             this.groupBox1.Controls.Add(this.checkBox_search_biblioPushFilling);
             this.groupBox1.Controls.Add(this.checkBox_search_hideBiblioMatchStyle);
             this.groupBox1.Controls.Add(this.label9);
@@ -1768,7 +1795,7 @@
             this.groupBox1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.groupBox1.Size = new System.Drawing.Size(579, 171);
+            this.groupBox1.Size = new System.Drawing.Size(579, 267);
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = " 书目查询窗 ";
@@ -2059,7 +2086,7 @@
             this.tabPage_cardReader.Controls.Add(this.groupBox11);
             this.tabPage_cardReader.Controls.Add(this.groupBox8);
             this.tabPage_cardReader.Location = new System.Drawing.Point(4, 85);
-            this.tabPage_cardReader.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.tabPage_cardReader.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_cardReader.Name = "tabPage_cardReader";
             this.tabPage_cardReader.Size = new System.Drawing.Size(905, 459);
             this.tabPage_cardReader.TabIndex = 12;
@@ -2073,9 +2100,9 @@
             this.groupBox11.Controls.Add(this.button_cardReader_setRfidUrlDefaultValue);
             this.groupBox11.Controls.Add(this.textBox_cardReader_rfidCenterUrl);
             this.groupBox11.Location = new System.Drawing.Point(5, 205);
-            this.groupBox11.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.groupBox11.Margin = new System.Windows.Forms.Padding(5);
             this.groupBox11.Name = "groupBox11";
-            this.groupBox11.Padding = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.groupBox11.Padding = new System.Windows.Forms.Padding(5);
             this.groupBox11.Size = new System.Drawing.Size(825, 154);
             this.groupBox11.TabIndex = 1;
             this.groupBox11.TabStop = false;
@@ -2085,7 +2112,7 @@
             // 
             this.button_cardReader_setRfidUrlDefaultValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_cardReader_setRfidUrlDefaultValue.Location = new System.Drawing.Point(621, 82);
-            this.button_cardReader_setRfidUrlDefaultValue.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.button_cardReader_setRfidUrlDefaultValue.Margin = new System.Windows.Forms.Padding(5);
             this.button_cardReader_setRfidUrlDefaultValue.Name = "button_cardReader_setRfidUrlDefaultValue";
             this.button_cardReader_setRfidUrlDefaultValue.Size = new System.Drawing.Size(193, 40);
             this.button_cardReader_setRfidUrlDefaultValue.TabIndex = 1;
@@ -2098,7 +2125,7 @@
             this.textBox_cardReader_rfidCenterUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_cardReader_rfidCenterUrl.Location = new System.Drawing.Point(11, 35);
-            this.textBox_cardReader_rfidCenterUrl.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.textBox_cardReader_rfidCenterUrl.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_cardReader_rfidCenterUrl.Name = "textBox_cardReader_rfidCenterUrl";
             this.textBox_cardReader_rfidCenterUrl.Size = new System.Drawing.Size(800, 31);
             this.textBox_cardReader_rfidCenterUrl.TabIndex = 0;
@@ -2111,9 +2138,9 @@
             this.groupBox8.Controls.Add(this.button_cardReader_setIdcardUrlDefaultValue);
             this.groupBox8.Controls.Add(this.textBox_cardReader_idcardReaderUrl);
             this.groupBox8.Location = new System.Drawing.Point(5, 28);
-            this.groupBox8.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.groupBox8.Margin = new System.Windows.Forms.Padding(5);
             this.groupBox8.Name = "groupBox8";
-            this.groupBox8.Padding = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.groupBox8.Padding = new System.Windows.Forms.Padding(5);
             this.groupBox8.Size = new System.Drawing.Size(825, 154);
             this.groupBox8.TabIndex = 0;
             this.groupBox8.TabStop = false;
@@ -2123,7 +2150,7 @@
             // 
             this.button_cardReader_setIdcardUrlDefaultValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_cardReader_setIdcardUrlDefaultValue.Location = new System.Drawing.Point(621, 82);
-            this.button_cardReader_setIdcardUrlDefaultValue.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.button_cardReader_setIdcardUrlDefaultValue.Margin = new System.Windows.Forms.Padding(5);
             this.button_cardReader_setIdcardUrlDefaultValue.Name = "button_cardReader_setIdcardUrlDefaultValue";
             this.button_cardReader_setIdcardUrlDefaultValue.Size = new System.Drawing.Size(193, 40);
             this.button_cardReader_setIdcardUrlDefaultValue.TabIndex = 1;
@@ -2136,7 +2163,7 @@
             this.textBox_cardReader_idcardReaderUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_cardReader_idcardReaderUrl.Location = new System.Drawing.Point(11, 35);
-            this.textBox_cardReader_idcardReaderUrl.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.textBox_cardReader_idcardReaderUrl.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_cardReader_idcardReaderUrl.Name = "textBox_cardReader_idcardReaderUrl";
             this.textBox_cardReader_idcardReaderUrl.Size = new System.Drawing.Size(800, 31);
             this.textBox_cardReader_idcardReaderUrl.TabIndex = 0;
@@ -2149,7 +2176,7 @@
             this.tabPage_patron.Controls.Add(this.checkBox_patron_verifyBarcode);
             this.tabPage_patron.Controls.Add(this.checkBox_patron_displaySetReaderBarcodeDialog);
             this.tabPage_patron.Location = new System.Drawing.Point(4, 85);
-            this.tabPage_patron.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.tabPage_patron.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_patron.Name = "tabPage_patron";
             this.tabPage_patron.Size = new System.Drawing.Size(905, 459);
             this.tabPage_patron.TabIndex = 13;
@@ -2160,7 +2187,7 @@
             // 
             this.checkBox_patron_disableIdcardReaderKeyboardSimulation.AutoSize = true;
             this.checkBox_patron_disableIdcardReaderKeyboardSimulation.Location = new System.Drawing.Point(5, 206);
-            this.checkBox_patron_disableIdcardReaderKeyboardSimulation.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.checkBox_patron_disableIdcardReaderKeyboardSimulation.Margin = new System.Windows.Forms.Padding(5);
             this.checkBox_patron_disableIdcardReaderKeyboardSimulation.Name = "checkBox_patron_disableIdcardReaderKeyboardSimulation";
             this.checkBox_patron_disableIdcardReaderKeyboardSimulation.Size = new System.Drawing.Size(532, 25);
             this.checkBox_patron_disableIdcardReaderKeyboardSimulation.TabIndex = 3;
@@ -2171,7 +2198,7 @@
             // 
             this.checkBox_patron_autoRetryReaderCard.AutoSize = true;
             this.checkBox_patron_autoRetryReaderCard.Location = new System.Drawing.Point(5, 47);
-            this.checkBox_patron_autoRetryReaderCard.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.checkBox_patron_autoRetryReaderCard.Margin = new System.Windows.Forms.Padding(5);
             this.checkBox_patron_autoRetryReaderCard.Name = "checkBox_patron_autoRetryReaderCard";
             this.checkBox_patron_autoRetryReaderCard.Size = new System.Drawing.Size(353, 25);
             this.checkBox_patron_autoRetryReaderCard.TabIndex = 0;
@@ -2193,7 +2220,7 @@
             // 
             this.checkBox_patron_displaySetReaderBarcodeDialog.AutoSize = true;
             this.checkBox_patron_displaySetReaderBarcodeDialog.Location = new System.Drawing.Point(5, 86);
-            this.checkBox_patron_displaySetReaderBarcodeDialog.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.checkBox_patron_displaySetReaderBarcodeDialog.Margin = new System.Windows.Forms.Padding(5);
             this.checkBox_patron_displaySetReaderBarcodeDialog.Name = "checkBox_patron_displaySetReaderBarcodeDialog";
             this.checkBox_patron_displaySetReaderBarcodeDialog.Size = new System.Drawing.Size(427, 25);
             this.checkBox_patron_displaySetReaderBarcodeDialog.TabIndex = 1;
@@ -2209,7 +2236,7 @@
             this.tabPage_operLog.Controls.Add(this.checkBox_operLog_displayItemBorrowHistory);
             this.tabPage_operLog.Controls.Add(this.checkBox_operLog_displayReaderBorrowHistory);
             this.tabPage_operLog.Location = new System.Drawing.Point(4, 85);
-            this.tabPage_operLog.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.tabPage_operLog.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_operLog.Name = "tabPage_operLog";
             this.tabPage_operLog.Size = new System.Drawing.Size(905, 459);
             this.tabPage_operLog.TabIndex = 15;
@@ -2224,7 +2251,7 @@
             "1 -- 简略",
             "2 -- 最简略"});
             this.comboBox_operLog_level.Location = new System.Drawing.Point(291, 243);
-            this.comboBox_operLog_level.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.comboBox_operLog_level.Margin = new System.Windows.Forms.Padding(5);
             this.comboBox_operLog_level.Name = "comboBox_operLog_level";
             this.comboBox_operLog_level.Size = new System.Drawing.Size(338, 29);
             this.comboBox_operLog_level.TabIndex = 5;
@@ -2243,7 +2270,7 @@
             // 
             this.checkBox_operLog_autoCache.AutoSize = true;
             this.checkBox_operLog_autoCache.Location = new System.Drawing.Point(5, 129);
-            this.checkBox_operLog_autoCache.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.checkBox_operLog_autoCache.Margin = new System.Windows.Forms.Padding(5);
             this.checkBox_operLog_autoCache.Name = "checkBox_operLog_autoCache";
             this.checkBox_operLog_autoCache.Size = new System.Drawing.Size(237, 25);
             this.checkBox_operLog_autoCache.TabIndex = 3;
@@ -2253,7 +2280,7 @@
             // button_operLog_clearCacheDirectory
             // 
             this.button_operLog_clearCacheDirectory.Location = new System.Drawing.Point(5, 168);
-            this.button_operLog_clearCacheDirectory.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.button_operLog_clearCacheDirectory.Margin = new System.Windows.Forms.Padding(5);
             this.button_operLog_clearCacheDirectory.Name = "button_operLog_clearCacheDirectory";
             this.button_operLog_clearCacheDirectory.Size = new System.Drawing.Size(367, 40);
             this.button_operLog_clearCacheDirectory.TabIndex = 2;
@@ -2265,7 +2292,7 @@
             // 
             this.checkBox_operLog_displayItemBorrowHistory.AutoSize = true;
             this.checkBox_operLog_displayItemBorrowHistory.Location = new System.Drawing.Point(5, 72);
-            this.checkBox_operLog_displayItemBorrowHistory.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.checkBox_operLog_displayItemBorrowHistory.Margin = new System.Windows.Forms.Padding(5);
             this.checkBox_operLog_displayItemBorrowHistory.Name = "checkBox_operLog_displayItemBorrowHistory";
             this.checkBox_operLog_displayItemBorrowHistory.Size = new System.Drawing.Size(470, 25);
             this.checkBox_operLog_displayItemBorrowHistory.TabIndex = 1;
@@ -2276,7 +2303,7 @@
             // 
             this.checkBox_operLog_displayReaderBorrowHistory.AutoSize = true;
             this.checkBox_operLog_displayReaderBorrowHistory.Location = new System.Drawing.Point(5, 33);
-            this.checkBox_operLog_displayReaderBorrowHistory.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.checkBox_operLog_displayReaderBorrowHistory.Margin = new System.Windows.Forms.Padding(5);
             this.checkBox_operLog_displayReaderBorrowHistory.Name = "checkBox_operLog_displayReaderBorrowHistory";
             this.checkBox_operLog_displayReaderBorrowHistory.Size = new System.Drawing.Size(512, 25);
             this.checkBox_operLog_displayReaderBorrowHistory.TabIndex = 0;
@@ -2294,7 +2321,7 @@
             this.tabPage_global.Controls.Add(this.checkBox_global_autoSelPinyin);
             this.tabPage_global.Controls.Add(this.checkBox_global_displayScriptErrorDialog);
             this.tabPage_global.Location = new System.Drawing.Point(4, 85);
-            this.tabPage_global.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.tabPage_global.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_global.Name = "tabPage_global";
             this.tabPage_global.Size = new System.Drawing.Size(905, 459);
             this.tabPage_global.TabIndex = 14;
@@ -2326,7 +2353,7 @@
             // 
             this.checkBox_global_upperInputBarcode.AutoSize = true;
             this.checkBox_global_upperInputBarcode.Location = new System.Drawing.Point(5, 222);
-            this.checkBox_global_upperInputBarcode.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.checkBox_global_upperInputBarcode.Margin = new System.Windows.Forms.Padding(5);
             this.checkBox_global_upperInputBarcode.Name = "checkBox_global_upperInputBarcode";
             this.checkBox_global_upperInputBarcode.Size = new System.Drawing.Size(384, 25);
             this.checkBox_global_upperInputBarcode.TabIndex = 18;
@@ -2337,7 +2364,7 @@
             // 
             this.checkBox_global_saveOriginCoverImage.AutoSize = true;
             this.checkBox_global_saveOriginCoverImage.Location = new System.Drawing.Point(5, 157);
-            this.checkBox_global_saveOriginCoverImage.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.checkBox_global_saveOriginCoverImage.Margin = new System.Windows.Forms.Padding(5);
             this.checkBox_global_saveOriginCoverImage.Name = "checkBox_global_saveOriginCoverImage";
             this.checkBox_global_saveOriginCoverImage.Size = new System.Drawing.Size(279, 25);
             this.checkBox_global_saveOriginCoverImage.TabIndex = 17;
@@ -2358,7 +2385,7 @@
             // 
             this.checkBox_global_autoSelPinyin.AutoSize = true;
             this.checkBox_global_autoSelPinyin.Location = new System.Drawing.Point(5, 91);
-            this.checkBox_global_autoSelPinyin.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.checkBox_global_autoSelPinyin.Margin = new System.Windows.Forms.Padding(5);
             this.checkBox_global_autoSelPinyin.Name = "checkBox_global_autoSelPinyin";
             this.checkBox_global_autoSelPinyin.Size = new System.Drawing.Size(300, 25);
             this.checkBox_global_autoSelPinyin.TabIndex = 15;
@@ -2369,7 +2396,7 @@
             // 
             this.checkBox_global_displayScriptErrorDialog.AutoSize = true;
             this.checkBox_global_displayScriptErrorDialog.Location = new System.Drawing.Point(5, 26);
-            this.checkBox_global_displayScriptErrorDialog.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.checkBox_global_displayScriptErrorDialog.Margin = new System.Windows.Forms.Padding(5);
             this.checkBox_global_displayScriptErrorDialog.Name = "checkBox_global_displayScriptErrorDialog";
             this.checkBox_global_displayScriptErrorDialog.Size = new System.Drawing.Size(363, 25);
             this.checkBox_global_displayScriptErrorDialog.TabIndex = 14;
@@ -2384,7 +2411,7 @@
             this.tabPage_fingerprint.Controls.Add(this.groupBox7);
             this.tabPage_fingerprint.Controls.Add(this.button_fingerprint_clearLocalCacheFiles);
             this.tabPage_fingerprint.Location = new System.Drawing.Point(4, 85);
-            this.tabPage_fingerprint.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.tabPage_fingerprint.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_fingerprint.Name = "tabPage_fingerprint";
             this.tabPage_fingerprint.Size = new System.Drawing.Size(905, 459);
             this.tabPage_fingerprint.TabIndex = 16;
@@ -2398,10 +2425,10 @@
             this.groupBox10.Controls.Add(this.button_face_setDefaultValue);
             this.groupBox10.Controls.Add(this.textBox_face_readerUrl);
             this.groupBox10.Location = new System.Drawing.Point(5, 201);
-            this.groupBox10.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.groupBox10.Margin = new System.Windows.Forms.Padding(5);
             this.groupBox10.Name = "groupBox10";
-            this.groupBox10.Padding = new System.Windows.Forms.Padding(5, 5, 5, 5);
-            this.groupBox10.Size = new System.Drawing.Size(825, 147);
+            this.groupBox10.Padding = new System.Windows.Forms.Padding(5);
+            this.groupBox10.Size = new System.Drawing.Size(795, 147);
             this.groupBox10.TabIndex = 3;
             this.groupBox10.TabStop = false;
             this.groupBox10.Text = "人脸识别接口 URL ";
@@ -2409,8 +2436,8 @@
             // button_face_setDefaultValue
             // 
             this.button_face_setDefaultValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_face_setDefaultValue.Location = new System.Drawing.Point(622, 82);
-            this.button_face_setDefaultValue.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.button_face_setDefaultValue.Location = new System.Drawing.Point(592, 82);
+            this.button_face_setDefaultValue.Margin = new System.Windows.Forms.Padding(5);
             this.button_face_setDefaultValue.Name = "button_face_setDefaultValue";
             this.button_face_setDefaultValue.Size = new System.Drawing.Size(193, 40);
             this.button_face_setDefaultValue.TabIndex = 1;
@@ -2423,9 +2450,9 @@
             this.textBox_face_readerUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_face_readerUrl.Location = new System.Drawing.Point(11, 35);
-            this.textBox_face_readerUrl.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.textBox_face_readerUrl.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_face_readerUrl.Name = "textBox_face_readerUrl";
-            this.textBox_face_readerUrl.Size = new System.Drawing.Size(800, 31);
+            this.textBox_face_readerUrl.Size = new System.Drawing.Size(770, 31);
             this.textBox_face_readerUrl.TabIndex = 0;
             // 
             // groupBox9
@@ -2435,9 +2462,9 @@
             this.groupBox9.Controls.Add(this.label21);
             this.groupBox9.Controls.Add(this.label24);
             this.groupBox9.Location = new System.Drawing.Point(17, 406);
-            this.groupBox9.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.groupBox9.Margin = new System.Windows.Forms.Padding(5);
             this.groupBox9.Name = "groupBox9";
-            this.groupBox9.Padding = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.groupBox9.Padding = new System.Windows.Forms.Padding(5);
             this.groupBox9.Size = new System.Drawing.Size(565, 168);
             this.groupBox9.TabIndex = 2;
             this.groupBox9.TabStop = false;
@@ -2447,7 +2474,7 @@
             // 
             this.textBox_fingerprint_password.ImeMode = System.Windows.Forms.ImeMode.Off;
             this.textBox_fingerprint_password.Location = new System.Drawing.Point(230, 100);
-            this.textBox_fingerprint_password.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.textBox_fingerprint_password.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_fingerprint_password.Name = "textBox_fingerprint_password";
             this.textBox_fingerprint_password.PasswordChar = '*';
             this.textBox_fingerprint_password.Size = new System.Drawing.Size(283, 31);
@@ -2457,7 +2484,7 @@
             // 
             this.textBox_fingerprint_userName.ImeMode = System.Windows.Forms.ImeMode.Off;
             this.textBox_fingerprint_userName.Location = new System.Drawing.Point(230, 52);
-            this.textBox_fingerprint_userName.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.textBox_fingerprint_userName.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_fingerprint_userName.Name = "textBox_fingerprint_userName";
             this.textBox_fingerprint_userName.Size = new System.Drawing.Size(283, 31);
             this.textBox_fingerprint_userName.TabIndex = 6;
@@ -2488,10 +2515,10 @@
             this.groupBox7.Controls.Add(this.button_fingerprint_setDefaultValue);
             this.groupBox7.Controls.Add(this.textBox_fingerprint_readerUrl);
             this.groupBox7.Location = new System.Drawing.Point(5, 24);
-            this.groupBox7.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.groupBox7.Margin = new System.Windows.Forms.Padding(5);
             this.groupBox7.Name = "groupBox7";
-            this.groupBox7.Padding = new System.Windows.Forms.Padding(5, 5, 5, 5);
-            this.groupBox7.Size = new System.Drawing.Size(825, 147);
+            this.groupBox7.Padding = new System.Windows.Forms.Padding(5);
+            this.groupBox7.Size = new System.Drawing.Size(795, 147);
             this.groupBox7.TabIndex = 0;
             this.groupBox7.TabStop = false;
             this.groupBox7.Text = " 指纹阅读器接口 URL ";
@@ -2499,8 +2526,8 @@
             // button_fingerprint_setDefaultValue
             // 
             this.button_fingerprint_setDefaultValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_fingerprint_setDefaultValue.Location = new System.Drawing.Point(622, 82);
-            this.button_fingerprint_setDefaultValue.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.button_fingerprint_setDefaultValue.Location = new System.Drawing.Point(592, 82);
+            this.button_fingerprint_setDefaultValue.Margin = new System.Windows.Forms.Padding(5);
             this.button_fingerprint_setDefaultValue.Name = "button_fingerprint_setDefaultValue";
             this.button_fingerprint_setDefaultValue.Size = new System.Drawing.Size(193, 40);
             this.button_fingerprint_setDefaultValue.TabIndex = 1;
@@ -2513,15 +2540,15 @@
             this.textBox_fingerprint_readerUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_fingerprint_readerUrl.Location = new System.Drawing.Point(11, 35);
-            this.textBox_fingerprint_readerUrl.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.textBox_fingerprint_readerUrl.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_fingerprint_readerUrl.Name = "textBox_fingerprint_readerUrl";
-            this.textBox_fingerprint_readerUrl.Size = new System.Drawing.Size(800, 31);
+            this.textBox_fingerprint_readerUrl.Size = new System.Drawing.Size(770, 31);
             this.textBox_fingerprint_readerUrl.TabIndex = 0;
             // 
             // button_fingerprint_clearLocalCacheFiles
             // 
             this.button_fingerprint_clearLocalCacheFiles.Location = new System.Drawing.Point(17, 357);
-            this.button_fingerprint_clearLocalCacheFiles.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.button_fingerprint_clearLocalCacheFiles.Margin = new System.Windows.Forms.Padding(5);
             this.button_fingerprint_clearLocalCacheFiles.Name = "button_fingerprint_clearLocalCacheFiles";
             this.button_fingerprint_clearLocalCacheFiles.Size = new System.Drawing.Size(340, 40);
             this.button_fingerprint_clearLocalCacheFiles.TabIndex = 1;
@@ -2534,7 +2561,7 @@
             this.tabPage_labelPrint.Controls.Add(this.comboBox_labelPrint_accessNoSource);
             this.tabPage_labelPrint.Controls.Add(this.label28);
             this.tabPage_labelPrint.Location = new System.Drawing.Point(4, 85);
-            this.tabPage_labelPrint.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.tabPage_labelPrint.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_labelPrint.Name = "tabPage_labelPrint";
             this.tabPage_labelPrint.Size = new System.Drawing.Size(905, 459);
             this.tabPage_labelPrint.TabIndex = 18;
@@ -2550,7 +2577,7 @@
             "从书目记录",
             "顺次从册记录、书目记录"});
             this.comboBox_labelPrint_accessNoSource.Location = new System.Drawing.Point(242, 17);
-            this.comboBox_labelPrint_accessNoSource.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.comboBox_labelPrint_accessNoSource.Margin = new System.Windows.Forms.Padding(5);
             this.comboBox_labelPrint_accessNoSource.Name = "comboBox_labelPrint_accessNoSource";
             this.comboBox_labelPrint_accessNoSource.Size = new System.Drawing.Size(286, 29);
             this.comboBox_labelPrint_accessNoSource.TabIndex = 1;
@@ -2578,7 +2605,7 @@
             this.tabPage_message.Controls.Add(this.label_comment);
             this.tabPage_message.Controls.Add(this.checkBox_message_shareBiblio);
             this.tabPage_message.Location = new System.Drawing.Point(4, 85);
-            this.tabPage_message.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.tabPage_message.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_message.Name = "tabPage_message";
             this.tabPage_message.Size = new System.Drawing.Size(905, 459);
             this.tabPage_message.TabIndex = 19;
@@ -2589,7 +2616,7 @@
             // 
             this.button_message_setDefaultUrl.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_message_setDefaultUrl.Location = new System.Drawing.Point(702, 168);
-            this.button_message_setDefaultUrl.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.button_message_setDefaultUrl.Margin = new System.Windows.Forms.Padding(5);
             this.button_message_setDefaultUrl.Name = "button_message_setDefaultUrl";
             this.button_message_setDefaultUrl.Size = new System.Drawing.Size(180, 40);
             this.button_message_setDefaultUrl.TabIndex = 23;
@@ -2601,7 +2628,7 @@
             // 
             this.textBox_message_password.ImeMode = System.Windows.Forms.ImeMode.Off;
             this.textBox_message_password.Location = new System.Drawing.Point(196, 310);
-            this.textBox_message_password.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.textBox_message_password.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_message_password.Name = "textBox_message_password";
             this.textBox_message_password.PasswordChar = '*';
             this.textBox_message_password.Size = new System.Drawing.Size(283, 31);
@@ -2611,7 +2638,7 @@
             // 
             this.textBox_message_userName.ImeMode = System.Windows.Forms.ImeMode.Off;
             this.textBox_message_userName.Location = new System.Drawing.Point(196, 262);
-            this.textBox_message_userName.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.textBox_message_userName.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_message_userName.Name = "textBox_message_userName";
             this.textBox_message_userName.Size = new System.Drawing.Size(283, 31);
             this.textBox_message_userName.TabIndex = 20;
@@ -2639,7 +2666,7 @@
             this.textBox_message_dp2MServerUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_message_dp2MServerUrl.Location = new System.Drawing.Point(20, 215);
-            this.textBox_message_dp2MServerUrl.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.textBox_message_dp2MServerUrl.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_message_dp2MServerUrl.Name = "textBox_message_dp2MServerUrl";
             this.textBox_message_dp2MServerUrl.Size = new System.Drawing.Size(858, 31);
             this.textBox_message_dp2MServerUrl.TabIndex = 18;
@@ -2670,7 +2697,7 @@
             this.checkBox_message_shareBiblio.AutoSize = true;
             this.checkBox_message_shareBiblio.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.checkBox_message_shareBiblio.Location = new System.Drawing.Point(20, 45);
-            this.checkBox_message_shareBiblio.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.checkBox_message_shareBiblio.Margin = new System.Windows.Forms.Padding(5);
             this.checkBox_message_shareBiblio.Name = "checkBox_message_shareBiblio";
             this.checkBox_message_shareBiblio.Size = new System.Drawing.Size(193, 25);
             this.checkBox_message_shareBiblio.TabIndex = 15;
@@ -2703,7 +2730,7 @@
             // 
             this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_OK.Location = new System.Drawing.Point(643, 577);
-            this.button_OK.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.button_OK.Margin = new System.Windows.Forms.Padding(5);
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(137, 38);
             this.button_OK.TabIndex = 1;
@@ -2716,7 +2743,7 @@
             this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.button_Cancel.Location = new System.Drawing.Point(792, 577);
-            this.button_Cancel.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.button_Cancel.Margin = new System.Windows.Forms.Padding(5);
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(137, 38);
             this.button_Cancel.TabIndex = 2;
@@ -2724,27 +2751,33 @@
             this.button_Cancel.UseVisualStyleBackColor = true;
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
-            // button_server_fillAuthorNumberUrl
+            // label36
             // 
-            this.button_server_fillAuthorNumberUrl.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_server_fillAuthorNumberUrl.Location = new System.Drawing.Point(770, 217);
-            this.button_server_fillAuthorNumberUrl.Name = "button_server_fillAuthorNumberUrl";
-            this.button_server_fillAuthorNumberUrl.Size = new System.Drawing.Size(105, 30);
-            this.button_server_fillAuthorNumberUrl.TabIndex = 9;
-            this.button_server_fillAuthorNumberUrl.Text = "常用值";
-            this.button_server_fillAuthorNumberUrl.UseVisualStyleBackColor = true;
-            this.button_server_fillAuthorNumberUrl.Click += new System.EventHandler(this.button_server_fillAuthorNumberUrl_Click);
+            this.label36.AutoSize = true;
+            this.label36.Location = new System.Drawing.Point(20, 180);
+            this.label36.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label36.Name = "label36";
+            this.label36.Size = new System.Drawing.Size(411, 21);
+            this.label36.TabIndex = 4;
+            this.label36.Text = "多行检索时每一个检索词最大命中条数(&M):";
             // 
-            // button_server_fillPinyinUrl
+            // numericUpDown_search_multiline_maxBiblioResultCount
             // 
-            this.button_server_fillPinyinUrl.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_server_fillPinyinUrl.Location = new System.Drawing.Point(770, 310);
-            this.button_server_fillPinyinUrl.Name = "button_server_fillPinyinUrl";
-            this.button_server_fillPinyinUrl.Size = new System.Drawing.Size(105, 30);
-            this.button_server_fillPinyinUrl.TabIndex = 10;
-            this.button_server_fillPinyinUrl.Text = "常用值";
-            this.button_server_fillPinyinUrl.UseVisualStyleBackColor = true;
-            this.button_server_fillPinyinUrl.Click += new System.EventHandler(this.button_server_fillPinyinUrl_Click);
+            this.numericUpDown_search_multiline_maxBiblioResultCount.Location = new System.Drawing.Point(249, 215);
+            this.numericUpDown_search_multiline_maxBiblioResultCount.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.numericUpDown_search_multiline_maxBiblioResultCount.Maximum = new decimal(new int[] {
+            1000000,
+            0,
+            0,
+            0});
+            this.numericUpDown_search_multiline_maxBiblioResultCount.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            -2147483648});
+            this.numericUpDown_search_multiline_maxBiblioResultCount.Name = "numericUpDown_search_multiline_maxBiblioResultCount";
+            this.numericUpDown_search_multiline_maxBiblioResultCount.Size = new System.Drawing.Size(165, 31);
+            this.numericUpDown_search_multiline_maxBiblioResultCount.TabIndex = 5;
             // 
             // CfgDlg
             // 
@@ -2757,7 +2790,7 @@
             this.Controls.Add(this.button_OK);
             this.Controls.Add(this.tabControl_main);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.Margin = new System.Windows.Forms.Padding(5);
             this.Name = "CfgDlg";
             this.ShowInTaskbar = false;
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
@@ -2840,6 +2873,7 @@
             this.tabPage_message.ResumeLayout(false);
             this.tabPage_message.PerformLayout();
             this.tabPage_z3950.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_search_multiline_maxBiblioResultCount)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -3050,5 +3084,7 @@
         private System.Windows.Forms.Label label35;
         private System.Windows.Forms.Button button_server_fillPinyinUrl;
         private System.Windows.Forms.Button button_server_fillAuthorNumberUrl;
+        private System.Windows.Forms.Label label36;
+        private System.Windows.Forms.NumericUpDown numericUpDown_search_multiline_maxBiblioResultCount;
     }
 }

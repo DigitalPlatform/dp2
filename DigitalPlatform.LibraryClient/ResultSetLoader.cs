@@ -19,7 +19,13 @@ namespace DigitalPlatform.LibraryClient
         /// </summary>
         public event MessagePromptEventHandler Prompt = null;
 
+        public event GettingEventHandler Getting = null;
+        public event EventHandler Getted = null;
+
         public string ResultSetName { get; set; }
+
+        // 最多装入的事项数。<=0 表示不限制
+        public long MaxResultCount { get; set; }
 
         public LibraryChannel Channel { get; set; }
 
@@ -52,19 +58,52 @@ namespace DigitalPlatform.LibraryClient
             this.Lang = lang;
         }
 
+        bool IsMaxResultCountValid()
+        {
+            return this.MaxResultCount > 0;
+        }
+
         public IEnumerator GetEnumerator()
         {
             string strError = "";
 
             long lHitCount = -1;
             long lStart = this.Start;
-            long nPerCount = this.BatchSize == 0 ? -1 : this.BatchSize;
+            long nBasePerCount = this.BatchSize == 0 ? -1 : this.BatchSize;
             // nPerCount = 1;  // test
             for (; ; )
             {
+                if (this.Stop != null && this.Stop.State != 0)
+                {
+                    throw new InterruptException($"用户中断");
+                }
+
                 Record[] searchresults = null;
 
-            REDO:
+                long nPerCount = nBasePerCount;
+                if (nPerCount != -1 && IsMaxResultCountValid()
+                    && nPerCount > this.MaxResultCount)
+                    nPerCount = this.MaxResultCount;
+                else if (nPerCount == -1 && IsMaxResultCountValid()
+                    && this.MaxResultCount > this.BatchSize)
+                    nPerCount = this.MaxResultCount;
+
+                // 限制 nPerCount，不要超过余下的记录数
+                if (nPerCount != -1 && lHitCount != -1
+                    && nPerCount > lHitCount - lStart)
+                    nPerCount = lHitCount - lStart;
+
+                REDO:
+                var e1 = new GettingEventArgs
+                {
+                    Start = lStart,
+                    PerCount = nPerCount,
+                    ResultSetName = this.ResultSetName
+                };
+                this.Getting?.Invoke(this, e1);
+                if (e1.Cancelled == true)
+                    yield break;
+
                 long lRet = this.Channel.GetSearchResult(
                     this.Stop,
                     this.ResultSetName, // "default",
@@ -74,6 +113,17 @@ namespace DigitalPlatform.LibraryClient
                     string.IsNullOrEmpty(this.Lang) ? "zh" : this.Lang,
                     out searchresults,
                     out strError);
+
+                var e2 = new GettedEventArgs
+                {
+                    Count = lRet,
+                    ErrorInfo = strError,
+                    ErrorCode = Channel.ErrorCode
+                };
+                this.Getted?.Invoke(this, e2);
+                if (e2.Cancelled == true)
+                    yield break;
+
                 if (lRet == -1)
                 {
                     if (this.Prompt != null)
@@ -108,11 +158,19 @@ namespace DigitalPlatform.LibraryClient
                     strError = "searchresults.Length == 0";
                     throw new Exception(strError);
                 }
-                lHitCount = lRet;
 
+                if (IsMaxResultCountValid() == false)
+                    lHitCount = lRet;
+                else
+                    lHitCount = lRet == -1 ? -1 : Math.Min(MaxResultCount, lRet);
+
+                long i = 0;
                 foreach (Record record in searchresults)
                 {
+                    if (lStart + i >= lHitCount)
+                        yield break;
                     yield return record;
+                    i++;
                 }
 
                 lStart += searchresults.Length;
@@ -123,4 +181,30 @@ namespace DigitalPlatform.LibraryClient
 
     }
 
+
+    public delegate void GettingEventHandler(object sender,
+GettingEventArgs e);
+
+    public class GettingEventArgs : EventArgs
+    {
+        public long Start { get; set; }
+        public long PerCount { get; set; }
+        public string ResultSetName { get; set; }
+
+        // [out]
+        public bool Cancelled { get; set; }
+    }
+
+    public delegate void GettedEventHandler(object sender,
+GettedEventArgs e);
+
+    public class GettedEventArgs : EventArgs
+    {
+        public long Count { get; set; }
+        public string ErrorInfo { get; set; }
+        public ErrorCode ErrorCode { get; set; }
+
+        // [out]
+        public bool Cancelled { get; set; }
+    }
 }
