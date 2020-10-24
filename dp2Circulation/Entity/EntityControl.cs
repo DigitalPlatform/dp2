@@ -1360,7 +1360,17 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
 
             REDO:
                 Program.MainForm.AppInfo.LinkFormState(edit, "EntityEditForm_state");
+                edit.UiState = Program.MainForm.AppInfo.GetString(
+    "EntityEditForm",
+    "uiState",
+    "");
+
                 edit.ShowDialog(this);
+
+                Program.MainForm.AppInfo.SetString(
+    "EntityEditForm",
+    "uiState",
+    edit.UiState);
                 Program.MainForm.AppInfo.UnlinkFormState(edit);
 
                 if (edit.DialogResult != DialogResult.OK)
@@ -1909,7 +1919,17 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
                 }
                 //REDO:
                 Program.MainForm.AppInfo.LinkFormState(edit, "EntityEditForm_state");
+                edit.UiState = Program.MainForm.AppInfo.GetString(
+    "EntityEditForm",
+    "uiState",
+    "");
+                
                 edit.ShowDialog(this);
+
+                Program.MainForm.AppInfo.SetString(
+"EntityEditForm",
+"uiState",
+edit.UiState);
                 Program.MainForm.AppInfo.UnlinkFormState(edit);
 
                 if (edit.DialogResult != DialogResult.OK)

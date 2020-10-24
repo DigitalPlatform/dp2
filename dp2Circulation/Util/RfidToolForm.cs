@@ -196,13 +196,20 @@ this.toolStripButton_autoFixEas.Checked);
             if (this.PauseRfid)
                 return;
 
-            bool auto_refresh = (bool)this.Invoke((Func<bool>)(() =>
+            try
             {
-                return this.toolStripButton_autoRefresh.Checked;
-            }));
+                bool auto_refresh = (bool)this.Invoke((Func<bool>)(() =>
+                {
+                    return this.toolStripButton_autoRefresh.Checked;
+                }));
 
-            if (auto_refresh)
-                await UpdateChipListAsync(false);
+                if (auto_refresh)
+                    await UpdateChipListAsync(false);
+            }
+            catch(ObjectDisposedException)
+            {
+
+            }
         }
 
 

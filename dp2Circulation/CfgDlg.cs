@@ -410,6 +410,12 @@ false);
                 "push_filling_browse",
                 false);
 
+            // 2020/10/24
+            this.numericUpDown_search_multiline_maxBiblioResultCount.Value = ap.GetInt(
+    "biblio_search_form",
+    "multiline_max_result_count",
+    10);
+
             this.numericUpDown_search_maxReaderResultCount.Value = ap.GetInt(
                 "reader_search_form",
                 "max_result_count",
@@ -1061,6 +1067,11 @@ false);
                     "push_filling_browse",
                     this.checkBox_search_biblioPushFilling.Checked);
 
+                // 2020/10/24
+                ap.SetInt(
+    "biblio_search_form",
+    "multiline_max_result_count",
+    (int)this.numericUpDown_search_multiline_maxBiblioResultCount.Value);
 
                 ap.SetInt(
                     "reader_search_form",

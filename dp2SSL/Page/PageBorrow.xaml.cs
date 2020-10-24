@@ -4312,6 +4312,9 @@ bind_uid);
                     App.Invoke(new Action(() =>
                     {
                         var ask = new ProgressWindow();
+
+                        this.MemoryDialog(ask);
+
                         ask.TitleText = action_name;
                         ask.MessageText = $"确实要解除读者 {patron_name} 副卡 {bind_uid} 的绑定?\r\n\r\n(解除绑定以后，读者将无法再用这一张副卡对书柜进行任何操作)";
                         ask.Owner = Application.Current.MainWindow;
@@ -4320,6 +4323,9 @@ bind_uid);
                         ask.OkButtonText = "是";
                         ask.CancelButtonVisible = true;
                         ask.ShowDialog();
+
+                        this.ForgetDialog(ask);
+
                         dialog_result = ask.PressedButton;
                     }));
 

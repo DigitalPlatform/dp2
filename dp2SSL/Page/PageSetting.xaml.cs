@@ -406,8 +406,13 @@ string color = "red")
             try
             {
                 Window cfg_window = new ConfigWindow();
+
+                this.MemoryDialog(cfg_window);
+
                 cfg_window.Owner = App.CurrentApp.MainWindow;
                 cfg_window.ShowDialog();
+
+                this.ForgetDialog(cfg_window);
             }
             finally
             {

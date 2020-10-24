@@ -14,6 +14,7 @@ using DigitalPlatform.RFID;
 using DigitalPlatform.Xml;
 using DigitalPlatform.LibraryClient;
 using System.IO;
+using DigitalPlatform.CommonControl;
 
 namespace dp2Circulation
 {
@@ -1431,6 +1432,23 @@ out strError);
                 Program.MainForm.ReturnChannel(channel);
             }
         }
+
+        public string UiState
+        {
+            get
+            {
+                List<object> controls = new List<object>();
+                controls.Add(this.splitContainer_back);
+                return GuiState.GetUiState(controls);
+            }
+            set
+            {
+                List<object> controls = new List<object>();
+                controls.Add(this.splitContainer_back);
+                GuiState.SetUiState(controls, value);
+            }
+        }
+
 
 #if NO
         // 装入以前的标签信息
