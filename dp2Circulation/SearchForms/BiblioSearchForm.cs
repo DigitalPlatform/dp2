@@ -1415,9 +1415,14 @@ Keys keyData)
                     {
                         stop?.SetProgressValue(word_index);
                         stop?.SetMessage($"正在检索 '{ query_word }' ({word_index + 1}/{query_words.Count})...");
+                    
+                        this.ShowMessage($"正在检索 '{ query_word }' ({word_index + 1}/{query_words.Count})...");
                     }
-
-                    this.ShowMessage($"正在检索 '{ query_word }' ({word_index + 1}/{query_words.Count})...");
+                    else
+                    {
+                        stop?.SetMessage($"正在检索 '{ query_word }' ...");
+                        this.ShowMessage($"正在检索 '{ query_word }' ...");
+                    }
 
                     word_index++;
 

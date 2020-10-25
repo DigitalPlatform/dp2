@@ -22,9 +22,14 @@ namespace RfidCenter
 {
     public class RfidServer : MarshalByRefObject, IRfid, IDisposable
     {
+        // 紧凑日志
         static CompactLog _compactLog = new CompactLog();
 
+        // 模拟门锁
         static SimuLock _simuLock = new SimuLock(2, 24); // 2 块锁控版，每块上面控制 24 个门
+
+        // 模拟读卡器
+        static SimuReader _simuReader = new SimuReader();
 
         public void Dispose()
         {
@@ -32,6 +37,11 @@ namespace RfidCenter
             _cancelInventory?.Cancel();
             _cancelInventory?.Dispose();
 #endif
+        }
+
+        public static void CreateSimuReaders(List<string> names)
+        {
+            _simuReader.Create(names);
         }
 
         // 获得门锁状态
@@ -63,7 +73,7 @@ namespace RfidCenter
             return new GetLockStateResult { Value = 0, States = states };
         }
 
-        // 开锁
+        // 开锁。包括真实开锁和模拟开锁功能
         public NormalResult OpenShelfLock(string lockName)
         {
             if (Program.MainForm.InSimuLock)
@@ -470,7 +480,11 @@ namespace RfidCenter
             // uid --> OneTag
             Hashtable uid_table = new Hashtable();
 
-            foreach (Reader reader in Program.Rfid.Readers)
+            var readers = Program.Rfid.Readers;
+            if (Program.MainForm.InSimuReader)
+                readers = _simuReader.Readers;
+
+            foreach (Reader reader in readers)
             {
 #if NO
                 if (reader_name == "*" || reader.Name == reader_name)
