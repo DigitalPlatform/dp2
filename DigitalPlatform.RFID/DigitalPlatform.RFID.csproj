@@ -53,6 +53,7 @@
     <Compile Include="IPosPrinterDriver.cs" />
     <Compile Include="IRfid.cs" />
     <Compile Include="IRfidDriver.cs" />
+    <Compile Include="Lock\LockStateMemory.cs" />
     <Compile Include="NewTagList.cs" />
     <Compile Include="Permutation.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -69,5 +70,6 @@
       <Name>DigitalPlatform.Core</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

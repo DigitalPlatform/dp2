@@ -321,7 +321,7 @@ namespace RfidCenter
             });
         }
 
-#region 错误状态
+        #region 错误状态
 
         void SetWholeColor(Color backColor, Color foreColor)
         {
@@ -390,7 +390,7 @@ namespace RfidCenter
             _errorStateInfo = info;
         }
 
-#endregion
+        #endregion
 
 
         void UpdateDeviceList(List<Reader> readers)
@@ -1236,7 +1236,7 @@ bool bClickClose = false)
             }
         }
 
-#region remoting server
+        #region remoting server
 
 #if HTTP_CHANNEL
         HttpChannel m_serverChannel = null;
@@ -1284,9 +1284,9 @@ bool bClickClose = false)
             }
         }
 
-#endregion
+        #endregion
 
-#region ipc channel
+        #region ipc channel
 
         public static bool CallActivate(string strUrl)
         {
@@ -1360,7 +1360,7 @@ bool bClickClose = false)
             }
         }
 
-#endregion
+        #endregion
 
         private void ToolStripMenuItem_testRfidChannel_Click(object sender, EventArgs e)
         {
@@ -1368,7 +1368,7 @@ bool bClickClose = false)
             MessageBox.Show(this, result.ToString());
         }
 
-#region 浏览器控件
+        #region 浏览器控件
 
         public void ClearHtml()
         {
@@ -1521,7 +1521,7 @@ string strHtml)
             AppendHtml("<div class='debug " + strClass + "'>" + HttpUtility.HtmlEncode(strText).Replace("\r\n", "<br/>") + "</div>");
         }
 
-#endregion
+        #endregion
 
         private void MenuItem_openSendKey_Click(object sender, EventArgs e)
         {
@@ -2028,6 +2028,16 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
             }
         }
 
+        bool _inSimuReader = false;   // 是否处于模拟读卡器状态
+
+        public bool InSimuReader
+        {
+            get
+            {
+                return _inSimuReader;
+            }
+        }
+
         // SimuLock _simuLock = new SimuLock(1, 8);
 
         private void MenuItem_openLock_Click(object sender, EventArgs e)
@@ -2396,6 +2406,114 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
         private void MenuItem_help_test_outputNormalLine_Click(object sender, EventArgs e)
         {
             OutputHistory("普通文字", 0);
+        }
+
+        private void ToolStripMenuItem_test_simuOpenLocks_Click(object sender, EventArgs e)
+        {
+            EnterSimuLockMode();
+
+            string strError = "";
+
+            string[] paths = new string[] {
+            "*.1.1",
+            "*.1.2",
+            "*.1.3",
+            "*.1.4",
+            "*.1.5",
+            "*.1.6",
+            "*.1.7",
+            "*.1.8",
+
+            "*.2.1",
+            "*.2.2",
+            "*.2.3",
+            "*.2.4",
+            "*.2.5",
+            "*.2.6",
+            "*.2.7",
+            "*.2.8",
+            };
+            foreach (var path in paths)
+            {
+                // parameters:
+                //      lockNameParam   为 "锁控板名字.卡编号.锁编号"。
+                //                      其中卡编号部分可以是 "1" 也可以是 "1|2" 这样的形态
+                //                      其中锁编号部分可以是 "1" 也可以是 "1|2|3|4" 这样的形态
+                //                      如果缺乏卡编号和锁编号部分，缺乏的部分默认为 "1"
+                var result = m_rfidObj?.OpenShelfLock(path);
+                if (result.Value == -1)
+                {
+                    strError = result.ErrorInfo;
+                    goto ERROR1;
+                }
+            }
+            MessageBox.Show(this, "OK");
+            return;
+        ERROR1:
+            MessageDlg.Show(this, strError, "模拟开门");
+        }
+
+        private void ToolStripMenuItem_test_simuCloseLocks_Click(object sender, EventArgs e)
+        {
+            EnterSimuLockMode();
+
+            string strError = "";
+
+            string[] paths = new string[] {
+            "*.1.1",
+            "*.1.2",
+            "*.1.3",
+            "*.1.4",
+            "*.1.5",
+            "*.1.6",
+            "*.1.7",
+            "*.1.8",
+
+            "*.2.1",
+            "*.2.2",
+            "*.2.3",
+            "*.2.4",
+            "*.2.5",
+            "*.2.6",
+            "*.2.7",
+            "*.2.8",
+            };
+            foreach (var path in paths)
+            {
+                // parameters:
+                //      lockNameParam   为 "锁控板名字.卡编号.锁编号"。
+                //                      其中卡编号部分可以是 "1" 也可以是 "1|2" 这样的形态
+                //                      其中锁编号部分可以是 "1" 也可以是 "1|2|3|4" 这样的形态
+                //                      如果缺乏卡编号和锁编号部分，缺乏的部分默认为 "1"
+                var result = m_rfidObj?.CloseShelfLock(path);
+                if (result.Value == -1)
+                {
+                    strError = result.ErrorInfo;
+                    goto ERROR1;
+                }
+            }
+            MessageBox.Show(this, "OK");
+            return;
+        ERROR1:
+            MessageDlg.Show(this, strError, "模拟关门");
+        }
+
+        void EnterSimuLockMode()
+        {
+            if (_inSimuLock == false)
+            {
+                _inSimuLock = true;
+                MenuItem_simuLock.Checked = true;
+            }
+        }
+
+        // 进入模拟读卡器状态
+        private void ToolStripMenuItem_test_simuReader_Click(object sender, EventArgs e)
+        {
+            RfidServer.CreateSimuReaders(new List<string> {
+                "RD5100",
+                "RD5100(2)",
+                "RL8600" });
         }
     }
 }

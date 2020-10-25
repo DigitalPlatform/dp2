@@ -1,4 +1,6 @@
-﻿using System;
+﻿#define VERIFY_OPENDOOR // 开门命令后立即追加一个检查门状态的命令，看看门是否是打开状态
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -2125,7 +2127,7 @@ namespace RfidDrivers.First
 
         static XmlDocument _product_dom = null;
 
-        static bool GetDriverName(string product_id,
+        public static bool GetDriverName(string product_id,
             out string driver_name,
             out string product_name,
             out string protocols,
@@ -4689,6 +4691,27 @@ out string number);
                         if (string.IsNullOrEmpty(number) == false)
                             Int32.TryParse(number, out index);
 
+                        string current_path = $"{current_lock.Name}.{addr}.{index}";
+
+                        // 2020/10/25
+                        // 优化速度。记忆中处于关闭状态的锁不用探测状态，因为它没法被越过 API 打开。只要经过 API 打开的，记忆都能兑现修改
+                        // 但打开状态的锁需要跟踪，因为用户是用手关闭它，只能用 SDK 探测它的状态变化
+                        string mem_state = _lockMemory.GetState(current_path);
+                        if (mem_state == "close")
+                        {
+                            states.Add(new LockState
+                            {
+                                // Path
+                                Path = $"{current_lock.Name}.{addr}.{index}",
+                                // 锁名字
+                                Lock = current_lock.Name,
+                                Board = addr,
+                                Index = index,
+                                State = "close"
+                            });
+                            continue;
+                        }
+
                         Byte sta = 0x00;
                         int iret = RFIDLIB.miniLib_Lock.Mini_GetDoorStatus(current_lock.LockHandle,
                             (Byte)addr, // 1,
@@ -4701,10 +4724,13 @@ out string number);
                                 ErrorInfo = $"getDoorStatus error (lock name='{current_lock.Name}' index={index})"
                             };
 
+                        // 2020/10/23
+                        _lockMemory.Set(current_path, sta == 0x00 ? "open" : "close");
+
                         states.Add(new LockState
                         {
                             // Path
-                            Path = $"{current_lock.Name}.{addr}.{index}",
+                            Path = current_path,    // $"{current_lock.Name}.{addr}.{index}",
                             // 锁名字
                             Lock = current_lock.Name,
                             Board = addr,
@@ -4796,6 +4822,142 @@ out string number);
             return lockName + "." + number;
         }
         */
+
+        // 开门
+        // parameters:
+        //      lockNameParam   为 "锁控板名字.卡编号.锁编号"。
+        //                      其中卡编号部分可以是 "1" 也可以是 "1|2" 这样的形态
+        //                      其中锁编号部分可以是 "1" 也可以是 "1|2|3|4" 这样的形态
+        //                      如果缺乏卡编号和锁编号部分，缺乏的部分默认为 "1"
+        public NormalResult OpenShelfLock(string lockNameParam)
+        {
+            var path = LockPath.Parse(lockNameParam);
+
+            /*
+            ParseLockName(lockNameParam,
+                out string lockName,
+out string card,
+out string number);
+*/
+
+            List<ShelfLock> locks = GetLocksByName(path.LockName);
+            if (locks.Count == 0)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"当前不存在名为 '{path.LockName}' 的门锁对象",
+                    ErrorCode = "lockNotFound"
+                };
+
+            List<LockState> states = new List<LockState>();
+
+            int count = 0;
+            foreach (var current_lock in locks)
+            {
+                foreach (var card in path.CardNameList)
+                {
+                    foreach (var number in path.NumberList)
+                    {
+                        int addr = 1;
+                        int index = 1;
+                        if (string.IsNullOrEmpty(card) == false)
+                            Int32.TryParse(card, out addr);
+                        if (string.IsNullOrEmpty(number) == false)
+                            Int32.TryParse(number, out index);
+
+                        {
+                            int iret = RFIDLIB.miniLib_Lock.Mini_OpenDoor(current_lock.LockHandle,
+                                (Byte)addr,   // 1,
+                                (Byte)index);
+                            if (iret != 0)
+                                return new NormalResult
+                                {
+                                    Value = -1,
+                                    ErrorInfo = $"openDoor error (lock name='{current_lock.Name}' index={index})"
+                                };
+                        }
+
+#if VERIFY_OPENDOOR
+                        {
+                            Byte sta = 0x00;
+                            int iret = RFIDLIB.miniLib_Lock.Mini_GetDoorStatus(current_lock.LockHandle,
+                                (Byte)addr, // 1,
+                                (Byte)index,
+                                ref sta);
+                            if (sta != 0x00)
+                                return new NormalResult
+                                {
+                                    Value = -1,
+                                    ErrorInfo = $"openDoor verify after open error (lock name='{current_lock.Name}' index={index})",
+                                    ErrorCode = "verifyAfterOpenError",
+                                };
+                        }
+#endif
+                        // 2020/10/23
+                        _lockMemory.Set($"{current_lock.Name}.{addr}.{index}", "open");
+                        
+                        count++;
+                    }
+                }
+            }
+
+            return new NormalResult
+            {
+                Value = count
+            };
+        }
+
+        LockStateMemory _lockMemory = new LockStateMemory();
+
+#if REMOVED
+        // 开门
+        public NormalResult OpenShelfLock(string lockNameParam)
+        {
+            ParseLockName(lockNameParam,
+                out string lockName,
+out string card,
+out string number);
+
+            int addr = 1;
+            int index = 1;
+            if (string.IsNullOrEmpty(card) == false)
+                Int32.TryParse(card, out addr);
+            if (string.IsNullOrEmpty(number) == false)
+                Int32.TryParse(number, out index);
+
+            List<ShelfLock> locks = GetLocksByName(lockName);
+            if (locks.Count == 0)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"当前不存在名为 '{lockName}' 的门锁对象",
+                    ErrorCode = "lockNotFound"
+                };
+
+            List<LockState> states = new List<LockState>();
+
+            int count = 0;
+            foreach (var current_lock in locks)
+            {
+                int iret = RFIDLIB.miniLib_Lock.Mini_OpenDoor(current_lock.LockHandle,
+                    (Byte)addr,   // 1,
+                    (Byte)index);
+                if (iret != 0)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"openDoor error (lock name='{current_lock.Name}' index={index})"
+                    };
+                count++;
+            }
+
+            return new NormalResult
+            {
+                Value = count
+            };
+        }
+
+#endif
 
         // 开/关紫外灯
         // parameters:
@@ -4896,119 +5058,6 @@ out string number);
                     ErrorCode = "unknownAction"
                 };
         }
-
-        // 开门
-        // parameters:
-        //      lockNameParam   为 "锁控板名字.卡编号.锁编号"。
-        //                      其中卡编号部分可以是 "1" 也可以是 "1|2" 这样的形态
-        //                      其中锁编号部分可以是 "1" 也可以是 "1|2|3|4" 这样的形态
-        //                      如果缺乏卡编号和锁编号部分，缺乏的部分默认为 "1"
-        public NormalResult OpenShelfLock(string lockNameParam)
-        {
-            var path = LockPath.Parse(lockNameParam);
-
-            /*
-            ParseLockName(lockNameParam,
-                out string lockName,
-out string card,
-out string number);
-*/
-
-            List<ShelfLock> locks = GetLocksByName(path.LockName);
-            if (locks.Count == 0)
-                return new NormalResult
-                {
-                    Value = -1,
-                    ErrorInfo = $"当前不存在名为 '{path.LockName}' 的门锁对象",
-                    ErrorCode = "lockNotFound"
-                };
-
-            List<LockState> states = new List<LockState>();
-
-            int count = 0;
-            foreach (var current_lock in locks)
-            {
-                foreach (var card in path.CardNameList)
-                {
-                    foreach (var number in path.NumberList)
-                    {
-                        int addr = 1;
-                        int index = 1;
-                        if (string.IsNullOrEmpty(card) == false)
-                            Int32.TryParse(card, out addr);
-                        if (string.IsNullOrEmpty(number) == false)
-                            Int32.TryParse(number, out index);
-
-                        int iret = RFIDLIB.miniLib_Lock.Mini_OpenDoor(current_lock.LockHandle,
-                            (Byte)addr,   // 1,
-                            (Byte)index);
-                        if (iret != 0)
-                            return new NormalResult
-                            {
-                                Value = -1,
-                                ErrorInfo = $"openDoor error (lock name='{current_lock.Name}' index={index})"
-                            };
-                        count++;
-                    }
-                }
-            }
-
-            return new NormalResult
-            {
-                Value = count
-            };
-        }
-
-
-#if REMOVED
-        // 开门
-        public NormalResult OpenShelfLock(string lockNameParam)
-        {
-            ParseLockName(lockNameParam,
-                out string lockName,
-out string card,
-out string number);
-
-            int addr = 1;
-            int index = 1;
-            if (string.IsNullOrEmpty(card) == false)
-                Int32.TryParse(card, out addr);
-            if (string.IsNullOrEmpty(number) == false)
-                Int32.TryParse(number, out index);
-
-            List<ShelfLock> locks = GetLocksByName(lockName);
-            if (locks.Count == 0)
-                return new NormalResult
-                {
-                    Value = -1,
-                    ErrorInfo = $"当前不存在名为 '{lockName}' 的门锁对象",
-                    ErrorCode = "lockNotFound"
-                };
-
-            List<LockState> states = new List<LockState>();
-
-            int count = 0;
-            foreach (var current_lock in locks)
-            {
-                int iret = RFIDLIB.miniLib_Lock.Mini_OpenDoor(current_lock.LockHandle,
-                    (Byte)addr,   // 1,
-                    (Byte)index);
-                if (iret != 0)
-                    return new NormalResult
-                    {
-                        Value = -1,
-                        ErrorInfo = $"openDoor error (lock name='{current_lock.Name}' index={index})"
-                    };
-                count++;
-            }
-
-            return new NormalResult
-            {
-                Value = count
-            };
-        }
-
-#endif
     }
 
     public class CReaderDriverInf

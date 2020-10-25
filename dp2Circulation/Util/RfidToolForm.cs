@@ -128,7 +128,7 @@ namespace dp2Circulation
                 "auto_refresh",
                 true);
             if (this.toolStripButton_autoRefresh.Checked == false)
-                _ = Task.Run(async () => { await UpdateChipListAsync(true); });
+                _ = Task.Run(async () => { await UpdateChipListAsync(_cancel.Token, true); });
 
             this.toolStripButton_autoFixEas.Checked = Program.MainForm.AppInfo.GetBoolean("rfidtoolform",
     "auto_fix_eas",
@@ -166,8 +166,12 @@ namespace dp2Circulation
 
         }
 
+        CancellationTokenSource _cancel = new CancellationTokenSource();
+
         private void RfidToolForm_FormClosed(object sender, FormClosedEventArgs e)
         {
+            _cancel.Cancel();
+
             Program.MainForm.TagChanged -= MainForm_TagChanged;
             RfidManager.SetError -= RfidManager_SetError;
 
@@ -204,11 +208,18 @@ this.toolStripButton_autoFixEas.Checked);
                 }));
 
                 if (auto_refresh)
-                    await UpdateChipListAsync(false);
+                    await UpdateChipListAsync(_cancel.Token, false);
             }
-            catch(ObjectDisposedException)
+            catch (ObjectDisposedException)
             {
 
+            }
+            catch (Exception ex)
+            {
+                if (_cancel.IsCancellationRequested)
+                    return;
+                this.ShowMessage($"MainForm_TagChanged() 出现异常: {ex.Message}");
+                MainForm.WriteErrorLog($"MainForm_TagChanged() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
             }
         }
 
@@ -224,7 +235,8 @@ this.toolStripButton_autoFixEas.Checked);
 
         // 更新标签列表
         // 注意这个函数是在非界面线程中执行
-        async Task<bool> UpdateChipListAsync(bool show_messageBox)
+        async Task<bool> UpdateChipListAsync(CancellationToken token,
+            bool show_messageBox)
         {
             int nRet = Interlocked.Increment(ref _inUpdate);
             try
@@ -283,6 +295,7 @@ this.toolStripButton_autoFixEas.Checked);
                         foreach (TagAndData data in tags)
 #endif
                         {
+                            token.ThrowIfCancellationRequested();
 #if !OLD_CODE
                             var tag = data.OneTag;
 #endif
@@ -425,7 +438,7 @@ this.toolStripButton_autoFixEas.Checked);
                             {
                                 //this.Invoke((Action)(() =>
                                 //{
-                                await FillEntityInfoAsync();
+                                await FillEntityInfoAsync(token);
                                 //}));
 
                                 if (this._mode.StartsWith("auto_fix_eas"))
@@ -530,7 +543,7 @@ this.toolStripButton_autoFixEas.Checked);
 
         private void toolStripButton_loadRfid_Click(object sender, EventArgs e)
         {
-            _ = Task.Run(async () => { await UpdateChipListAsync(true); });
+            _ = Task.Run(async () => { await UpdateChipListAsync(_cancel.Token, true); });
         }
 
         class IdInfo
@@ -956,7 +969,7 @@ this.toolStripButton_autoFixEas.Checked);
 
         // 填充所有的册记录信息
         // TODO: 返回值最好能体现实际是否发生过刷新
-        async Task FillEntityInfoAsync()
+        async Task FillEntityInfoAsync(CancellationToken token)
         {
             using (var releaser = await _channelLimit.EnterAsync())
             {
@@ -970,6 +983,8 @@ this.toolStripButton_autoFixEas.Checked);
 
                 foreach (ListViewItem item in items)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     ItemInfo item_info = (ItemInfo)item.Tag;
 
                     // 2020/10/16
@@ -991,6 +1006,8 @@ this.toolStripButton_autoFixEas.Checked);
                     LibraryChannel channel = this.GetChannel();
                     try
                     {
+                        token.ThrowIfCancellationRequested();
+
                         long lRet = channel.GetItemInfo(null,
                             pii,
                             "xml",
@@ -1295,7 +1312,7 @@ this.toolStripButton_autoFixEas.Checked);
         {
             if (this.PauseRfid)
                 return;
-            _ = UpdateChipListAsync(false);
+            _ = UpdateChipListAsync(_cancel.Token, false);
         }
 
         private bool DoOK(bool show_messageBox)

@@ -177,6 +177,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RfidServer.cs" />
     <Compile Include="SimuLock.cs" />
+    <Compile Include="SimuReader.cs" />
     <Compile Include="UsbNotification.cs" />
     <EmbeddedResource Include="ChipDialog.resx">
       <DependentUpon>ChipDialog.cs</DependentUpon>
