@@ -924,14 +924,25 @@ namespace dp2Circulation
         // 写入右侧的信息到标签
         private void toolStripButton_saveRfid_Click(object sender, EventArgs e)
         {
+            string strError = "";
+
             {
                 BookItem item = this.Item.Clone();
                 item.RecordDom = this._editing.DataDom;
+                // 确保自动创建索取号
                 EnsureCreateAccessNo(item);
+
+                // 2020/10/27
+                // 检查册记录编辑器里面 PII (册条码号) 是否为空
+                string barcode = DomUtil.GetElementText(item.RecordDom.DocumentElement, "barcode");
+                if (string.IsNullOrEmpty(barcode))
+                {
+                    strError = "在写入 RFID 标签以前，请先为册记录输入正确的册条码号";
+                    goto ERROR1;
+                }
             }
 
             // 写入以前，装载标签内容到左侧，然后调整右侧(中间可能会警告)。然后再保存
-            string strError = "";
 
             // string pii = this.chipEditor_editing.LogicChipItem.FindElement(ElementOID.PII).Text;
             string pii = GetPII(this.Item.OldRecord);   // 从修改前的册记录中获得册条码号
@@ -1254,6 +1265,15 @@ out strError);
                 Debug.WriteLine("333 " + (_tagExisting.TagInfo != null ? "!=null" : "==null"));
 
                 Debug.Assert(_tagExisting.TagInfo != null, "");
+
+                // 2020/10/27
+                // 检查 PII 是否为空
+                string barcode = this.chipEditor_editing.LogicChipItem.FindElement(ElementOID.PII)?.Text;
+                if (string.IsNullOrEmpty(barcode))
+                {
+                    strError = "PII 不允许为空";
+                    return -1;
+                }
 
                 TagInfo new_tag_info = LogicChipItem.ToTagInfo(
                     _tagExisting.TagInfo,

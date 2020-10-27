@@ -4563,6 +4563,9 @@ out Reader reader);
 
         ConnectLockResult ConnectLock(string port)
         {
+            // 清除记忆的状态。这样所有门锁都被认为是不确定状态。因为初始化的时候有可能部分门锁是打开状态
+            _lockMemory.Clear();
+
             UIntPtr hElectronicLock = UIntPtr.Zero; //Electronic lock handle
 
             int ret = RFIDLIB.miniLib_Lock.Mini_Connect(port, 9600, "8N1", ref hElectronicLock);

@@ -1297,6 +1297,7 @@ Keys keyData)
             Hashtable zchannelTable = new Hashtable();
 
             var first_query_word = GetFirstQueryWord(this.textBox_queryWord.Text);
+            long lTotalHitCount = 0;
 
             LibraryChannel channel = this.GetChannel();
 
@@ -1385,7 +1386,6 @@ Keys keyData)
                     bNeedShareSearch = true;
                 }
 
-                long lTotalHitCount = 0;
                 List<string> query_words = new List<string>();
                 {
                     query_words = StringUtil.SplitList(this.textBox_queryWord.Text.Replace("\r\n", "\r"), '\r');
@@ -1397,8 +1397,8 @@ Keys keyData)
                 if (query_words.Count > 1)
                 {
                     stop.SetProgressRange(0, query_words.Count);
-                    stop.Style = StopStyle.EnableHalfStop;
                 }
+                stop.Style = StopStyle.EnableHalfStop;
 
                 int word_index = 0;
                 foreach (string query_word in query_words)
@@ -1415,7 +1415,7 @@ Keys keyData)
                     {
                         stop?.SetProgressValue(word_index);
                         stop?.SetMessage($"正在检索 '{ query_word }' ({word_index + 1}/{query_words.Count})...");
-                    
+
                         this.ShowMessage($"正在检索 '{ query_word }' ({word_index + 1}/{query_words.Count})...");
                     }
                     else
@@ -1928,6 +1928,11 @@ Keys keyData)
                     this.label_message.Text = "未命中";
                 else
                     this.label_message.Text = "检索共命中 " + lTotalHitCount.ToString() + " 条书目记录，已全部装入";
+            }
+            catch(InterruptException)
+            {
+                this.label_message.Text = "检索共命中 " + lTotalHitCount.ToString() + " 条书目记录，已装入 " + this.listView_records.Items.Count.ToString() + " 条，用户中断...";
+                return;
             }
             catch (Exception ex)
             {

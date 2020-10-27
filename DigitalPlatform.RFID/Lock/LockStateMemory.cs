@@ -8,7 +8,8 @@ using System.Threading.Tasks;
 namespace DigitalPlatform.RFID
 {
     /// <summary>
-    /// 记忆门锁状态的类
+    /// 记忆门锁状态的类。
+    /// 用于优化检测门锁状态过程。请求锁控探测状态是要消耗一定时间的，优化的策略是，关闭状态的门锁不必请求锁控，只有打开状态的门锁才有必要请求锁控探测
     /// </summary>
     public class LockStateMemory
     {
