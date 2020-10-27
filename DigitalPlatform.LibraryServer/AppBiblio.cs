@@ -5646,6 +5646,7 @@ out strError);
                 strAction,
                 strBiblioRecPath,
                 strExistingXml,
+                strStyle,
                 baTimestamp,
                 ref bBiblioNotFound,
                 ref strBiblio,
@@ -5857,6 +5858,7 @@ out strError);
             string strAction,
             string strBiblioRecPath,
             string strExistingXml,
+            string strStyleParam,
             byte[] baTimestamp,
             ref bool bBiblioNotFound,
             ref string strBiblio,
@@ -5869,6 +5871,8 @@ out strError);
             int nRet = 0;
             long lRet = 0;
 
+            bool bWhenChildEmpty = StringUtil.IsInList("whenChildEmpty", strStyleParam);     // 是否仅当没有子记录时才删除书目记录？2020/10/27
+
             // 这个删除不是那么简单，需要同时删除下属的实体记录
             // 要对种和实体都进行锁定
             this.BiblioLocks.LockForWrite(strBiblioRecPath);
@@ -5876,7 +5880,7 @@ out strError);
             {
                 // 探测书目记录有没有下属的实体记录(也顺便看看实体记录里面是否有流通信息)?
                 List<DeleteEntityInfo> entityinfos = null;
-                string strStyle = "check_borrow_info";
+                string strDetectStyle = "check_borrow_info";
                 long lHitCount = 0;
 
                 RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
@@ -5892,7 +5896,7 @@ out strError);
                 //      >=0 含有流通信息的实体记录个数
                 nRet = SearchChildEntities(channel,
                     strBiblioRecPath,
-                    strStyle,
+                    strDetectStyle,
                     sessioninfo.GlobalUser == false ? CheckItemRecord : (Delegate_checkRecord)null,
                     sessioninfo.GlobalUser == false ? sessioninfo.LibraryCodeList : null,
                     out lHitCount,
@@ -5909,6 +5913,16 @@ out strError);
                 // 如果有实体记录，则要求setentities权限，才能一同删除实体们
                 if (entityinfos != null && entityinfos.Count > 0)
                 {
+                    // 2020/10/27
+                    if (bWhenChildEmpty)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = "设置书目信息的删除(delete)操作(带有 whenChildEmpty 条件)被拒绝。因拟删除的书目记录带有下属的实体记录，不允许删除书目记录";
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        // return result;
+                        return 1;
+                    }
+
                     // 权限字符串
                     if (StringUtil.IsInList("setentities,setiteminfo", sessioninfo.RightsOrigin) == false
                         && StringUtil.IsInList("", sessioninfo.RightsOrigin) == false)
@@ -5944,8 +5958,8 @@ out strError);
                 nRet = this.OrderItemDatabase.SearchChildItems(channel,
                     strBiblioRecPath,
                     "check_circulation_info", // 在DeleteEntityInfo结构中*不*返回OldRecord内容
-                (DigitalPlatform.LibraryServer.LibraryApplication.Delegate_checkRecord)null,
-                null,
+                    (DigitalPlatform.LibraryServer.LibraryApplication.Delegate_checkRecord)null,
+                    null,
                     out lHitCount,
                     out orderinfos,
                     out strError);
@@ -5960,6 +5974,15 @@ out strError);
                 // 如果有订购记录，则要求setorders权限，才能一同删除它们
                 if (orderinfos != null && orderinfos.Count > 0)
                 {
+                    // 2020/10/27
+                    if (bWhenChildEmpty)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = "设置书目信息的删除(delete)操作(带有 whenChildEmpty 条件)被拒绝。因拟删除的书目记录带有下属的订购记录，不允许删除书目记录";
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        return 1;
+                    }
+
                     // 权限字符串
                     if (StringUtil.IsInList("setorders,setorderinfo,order", sessioninfo.RightsOrigin) == false)
                     {
@@ -5994,8 +6017,8 @@ out strError);
                 nRet = this.IssueItemDatabase.SearchChildItems(channel,
                     strBiblioRecPath,
                     "check_circulation_info", // 在DeleteEntityInfo结构中*不*返回OldRecord内容
-                (DigitalPlatform.LibraryServer.LibraryApplication.Delegate_checkRecord)null,
-                null,
+                    (DigitalPlatform.LibraryServer.LibraryApplication.Delegate_checkRecord)null,
+                    null,
                     out lHitCount,
                     out issueinfos,
                     out strError);
@@ -6010,6 +6033,15 @@ out strError);
                 // 如果有期记录，则要求setissues权限，才能一同删除它们
                 if (issueinfos != null && issueinfos.Count > 0)
                 {
+                    // 2020/10/27
+                    if (bWhenChildEmpty)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = "设置书目信息的删除(delete)操作(带有 whenChildEmpty 条件)被拒绝。因拟删除的书目记录带有下属的期记录，不允许删除书目记录";
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        return 1;
+                    }
+
                     // 权限字符串
                     if (StringUtil.IsInList("setissues,setissueinfo", sessioninfo.RightsOrigin) == false)
                     {
@@ -6040,8 +6072,8 @@ out strError);
                 nRet = this.CommentItemDatabase.SearchChildItems(channel,
                     strBiblioRecPath,
                     "check_circulation_info", // 在DeleteEntityInfo结构中*不*返回OldRecord内容
-                (DigitalPlatform.LibraryServer.LibraryApplication.Delegate_checkRecord)null,
-                null,
+                    (DigitalPlatform.LibraryServer.LibraryApplication.Delegate_checkRecord)null,
+                    null,
                     out lHitCount,
                     out commentinfos,
                     out strError);
@@ -6056,6 +6088,15 @@ out strError);
                 // 如果有评注记录，则要求setcommentinfo权限，才能一同删除它们
                 if (commentinfos != null && commentinfos.Count > 0)
                 {
+                    // 2020/10/27
+                    if (bWhenChildEmpty)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = "设置书目信息的删除(delete)操作(带有 whenChildEmpty 条件)被拒绝。因拟删除的书目记录带有下属的评注记录，不允许删除书目记录";
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        return 1;
+                    }
+
                     // 权限字符串
                     if (StringUtil.IsInList("setcommentinfo", sessioninfo.RightsOrigin) == false)
                     {

@@ -11,7 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
-
+using AsyncFriendlyStackTrace;
 using DigitalPlatform;
 using DigitalPlatform.Core;
 using DigitalPlatform.GUI;
@@ -176,7 +176,9 @@ namespace dp2Circulation
             RfidManager.SetError -= RfidManager_SetError;
 
             if (_timerRefresh != null)
+            {
                 _timerRefresh.Dispose();
+            }
 
 #if OLD_CODE
             _rfidChannels?.Close((channel) =>
@@ -243,6 +245,7 @@ this.toolStripButton_autoFixEas.Checked);
             {
                 if (nRet != 1)
                     return false;
+
                 // this.ClearMessage();
                 string strError = "";
                 if (string.IsNullOrEmpty(Program.MainForm.RfidCenterUrl))
@@ -279,6 +282,7 @@ this.toolStripButton_autoFixEas.Checked);
                     }
 
                     tags.AddRange(TagList.Patrons);
+
 #endif
 
                     // List<Task> tasks = new List<Task>();
@@ -299,6 +303,10 @@ this.toolStripButton_autoFixEas.Checked);
 #if !OLD_CODE
                             var tag = data.OneTag;
 #endif
+
+                            Debug.Assert(tag != null, "tag 不应该为 null");
+                            if (tag == null)
+                                continue;
 
                             if (this.ProtocolFilter != null
                                 && StringUtil.IsInList(tag.Protocol, this.ProtocolFilter) == false)
@@ -406,14 +414,19 @@ this.toolStripButton_autoFixEas.Checked);
 
                             try
                             {
+                                // 注意：Invoke() 里面抛出的异常，在外部 catch 以后，里面的 StackTrace 会丢失，也就是说看不到 this.Invoke() 里面的调用栈
                                 this.Invoke((Action)(() =>
                                 {
                                     // 首次填充，自动设好选定状态
                                     // if (is_empty)
                                     {
-                                        // TODO: 只有当列表发生了实质性刷新的时候，才有必要调用一次 SelectItem。也就是说，不要每秒都无条件调用一次
-                                        var ret = SelectItem(this.SelectedID != null ? this.SelectedID : this.SelectedPII);
+                                        // MainForm.WriteErrorLog($"=== UpdateChipListAsync() this={this}, this.SelectedID={this.SelectedID}, this.SelectedPII={this.SelectedPII}");
 
+                                        // TODO: 只有当列表发生了实质性刷新的时候，才有必要调用一次 SelectItem。也就是说，不要每秒都无条件调用一次
+                                        string id = this.SelectedID != null ? this.SelectedID : this.SelectedPII;
+                                        // MainForm.WriteErrorLog($"=== UpdateChipListAsync() id='{id}'");
+
+                                        var ret = SelectItem(id);
                                         if (// string.IsNullOrEmpty(this.SelectedPII) == false
                                             ret == true
                                             && this.AutoCloseDialog)
@@ -427,7 +440,6 @@ this.toolStripButton_autoFixEas.Checked);
                                         }
                                     }
                                 }));
-
                             }
                             catch (ObjectDisposedException)
                             {
@@ -476,12 +488,13 @@ this.toolStripButton_autoFixEas.Checked);
                 }
                 catch (RemotingException ex)
                 {
-                    strError = "UpdateChipList() 出现异常: " + ex.Message;
+                    strError = "UpdateChipList() 内出现异常: " + ex.Message;
                     goto ERROR1;
                 }
                 catch (Exception ex)
                 {
-                    strError = "UpdateChipList() 出现异常: " + ExceptionUtil.GetDebugText(ex);
+                    strError = "UpdateChipList() 内出现异常: " + ExceptionUtil.GetDebugText(ex);    // ex.ToAsyncString(); 
+                    MainForm.WriteErrorLog(strError);
                     goto ERROR1;
                 }
                 finally
@@ -586,6 +599,10 @@ this.toolStripButton_autoFixEas.Checked);
                 return false;
 
             IdInfo info = IdInfo.Parse(id);
+            // 2020/10/26
+            if (info == null)
+                return false;
+
             List<ListViewItem> level1_items = new List<ListViewItem>();
             List<ListViewItem> level2_items = new List<ListViewItem>();
             // List<ItemAndWeight> results = new List<ItemAndWeight>();

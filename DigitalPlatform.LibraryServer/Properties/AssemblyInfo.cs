@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.37.*")]
-[assembly: AssemblyFileVersion("3.37.0.0")]
+[assembly: AssemblyVersion("3.38.*")]
+[assembly: AssemblyFileVersion("3.38.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -219,3 +219,4 @@ ItemCanReturn()
 //		3.35 (2020/9/8) Borrow() API 在读者记录中创建的 borrows/borrow 元素中增加了 oi 属性。GetReaderInfo() API 返回的读者记录 XML 中增加了 oi 元素
 //		3.36 (2020/9/11) 配合 dp2ssl 发布正式版，dp2library 专用版本号
 //		3.37 (2020/10/12-14) SetEntities() API 的 Action 增加 "setuid" 子功能；Style 增加 "onlyWriteLog" 表示只写入操作日志，不修改册记录(注意操作日志记录中 style 元素里面有请求的 strStyle 值可供判断)
+//		3.38 (2020/10/27) SetBiblioInfo() API 的 strStyle 增加 "whenChildEmpty"，表示只有当书目记录没有下级记录时才允许删除，否则会返回错误码 AccessDenied。

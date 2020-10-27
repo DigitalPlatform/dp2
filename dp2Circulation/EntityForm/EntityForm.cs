@@ -8517,11 +8517,13 @@ MessageBoxDefaultButton.Button2);
             if (nCommentCount != 0)
                 subRecord_warnings.Add(nCommentCount.ToString() + " 个评注记录");
 
+            // 是否为安全删除方式。所谓“安全删除”就是只允许删除没有下级记录的书目记录
+            bool safeDelete = StringUtil.IsInList("client_deletebibliosubrecords",
+                    this.CurrentRights) == false;
             if (subRecord_warnings.Count > 0)
             {
                 // 检查前端权限
-                if (StringUtil.IsInList("client_deletebibliosubrecords",
-                    this.CurrentRights) == false)
+                if (safeDelete)
                 {
                     strError = "书目记录 " + this.BiblioRecPath + " 包含下属的 "
                         + StringUtil.MakePathList(subRecord_warnings, "、")
@@ -8588,6 +8590,7 @@ MessageBoxDefaultButton.Button2);
 
             int nRet = DeleteBiblioRecordFromDatabase(this.BiblioRecPath,
                 "delete",
+                safeDelete ? "whenChildEmpty" : "",
                 this.BiblioTimestamp,
                 out strError);
             if (nRet == -1)
@@ -8964,6 +8967,7 @@ MessageBoxDefaultButton.Button1);
         // 从数据库中删除书目记录
         int DeleteBiblioRecordFromDatabase(string strPath,
             string strAction,
+            string strStyle,
             byte[] baTimestamp,
             out string strError)
         {
@@ -8992,6 +8996,7 @@ MessageBoxDefaultButton.Button1);
                     "", // strXml,
                     baTimestamp,
                     "",
+                    strStyle,
                     out strOutputPath,
                     out baNewTimestamp,
                     out strError);
@@ -13055,6 +13060,7 @@ merge_dlg.UiState);
                         // TODO: 测试的时候，注意不用下述调用而测试保留目标书目记录中对象的可能性
                         nRet = DeleteBiblioRecordFromDatabase(strTargetRecPathParam,
                             (merge_style & MergeStyle.ReserveSourceBiblio) != 0 ? "delete" : "onlydeletesubrecord",
+                            "",
                             timestamp,
                             out strError);
                         if (nRet == -1)

@@ -18,6 +18,7 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace dp2SSL
 {
@@ -1434,10 +1435,12 @@ namespace dp2SSL
             string strOutputInfo = "";
             LibraryChannel channel = App.CurrentApp.GetChannel();
             TimeSpan old_timeout = channel.Timeout;
-            channel.Timeout = TimeSpan.FromSeconds(10);
+            channel.Timeout = TimeSpan.FromSeconds(30); // dp2library 刚启动后，第一次响应 GetSystemParameter() API 可能比较慢
 
             try
             {
+                int nRedoCount = 0;
+                REDO:
                 long lRet = channel.GetSystemParameter(
 null,
 "circulation",
@@ -1445,12 +1448,22 @@ null,
 out strOutputInfo,
 out string strError);
                 if (lRet == -1)
+                {
+                    if ((channel.ErrorCode == ErrorCode.RequestTimeOut
+                        || channel.ErrorCode == ErrorCode.ServerTimeout)
+                        && nRedoCount < 3)
+                    {
+                        nRedoCount++;
+                        goto REDO;
+                    }
+
                     return new GetLocationListResult
                     {
                         Value = -1,
                         ErrorInfo = strError,
                         ErrorCode = channel.ErrorCode.ToString()
                     };
+                }
             }
             finally
             {
