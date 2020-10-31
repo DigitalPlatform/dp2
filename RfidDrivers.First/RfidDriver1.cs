@@ -17,6 +17,8 @@ using RFIDLIB;
 using DigitalPlatform;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
+using System.Runtime.ExceptionServices;
+using System.Security;
 
 // 锁定全部读卡器靠一个全局锁来实现。锁定一个读卡器靠 RecordLock 来实现。锁定一个读卡器之前，先尝试用 read 方式获得全局锁
 
@@ -1958,11 +1960,11 @@ namespace RfidDrivers.First
     </function>
   </device>
 
-  <!--RD2100 ??? -->
-  <device product='RD2100'>
+  <!--RD2104 ???  -->
+  <device product='RD2104'>
     <basic>
       <id>680701</id>
-      <driver>680600</driver>
+      <driver>680530</driver><!-- 这个 ID 是从 RF5100 那儿抄过来的-->
       <type>reader</type>
       <picture>RD2100.jpg</picture>
       <noise>true</noise>
@@ -2572,6 +2574,7 @@ out Reader reader);
             }
             catch (Exception ex)
             {
+                WriteErrorLog($"Inventory() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 return new InventoryResult
                 {
                     Value = -1,
@@ -2834,6 +2837,8 @@ out Reader reader);
         //      result.Value    1   找到了。result.UID 和 result.ReaderName 里面有返回值
         // exception:
         //      可能会抛出 System.AccessViolationException 异常
+        [HandleProcessCorruptedStateExceptions]
+        [SecurityCritical]
         public FindTagResult FindTagByPII(
             string reader_name,
             string protocols,   // 2019/8/28
@@ -4063,7 +4068,12 @@ out Reader reader);
         //      AIType  RFIDLIB.rfidlib_def.AI_TYPE_NEW / RFIDLIB.rfidlib_def.AI_TYPE_CONTINUE
         //      AntinnaSel  从 1 开始？
         // exception:
+        //      可能会抛出 Exception 异常
         //      可能会抛出 System.AccessViolationException 异常
+        //      2020/10/31 已捕获 System.AccessViolationException 异常
+        // https://stackoverflow.com/questions/3469368/how-to-handle-accessviolationexception
+        [HandleProcessCorruptedStateExceptions]
+        [SecurityCritical]
         public int tag_inventory(
             UIntPtr hreader,
             string protocols,
@@ -4198,6 +4208,11 @@ out Reader reader);
 
                 RFIDLIB.rfidlib_reader.RDR_ResetCommuImmeTimeout(hreader);
                 return iret;
+            }
+            catch (AccessViolationException ex)
+            {
+                WriteErrorLog($"tag_inventory() 出现致命异常: {ExceptionUtil.GetDebugText(ex)}");
+                throw new Exception($"tag_inventory() 出现致命异常: {ex.Message}", ex);
             }
             finally
             {

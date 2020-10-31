@@ -1656,125 +1656,135 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                 SetError("rfid", e.Result.ErrorInfo);
             }
 
-            // 标签总数显示
-            // this.Number = e.Result?.Results?.Count.ToString();
-            if (e.Result.Results != null)
+            try
             {
-                // TODO: 如果 IsPageShelfActive 和 IsPageBorrowActive 都为 false，则要看 Function 是什么决定如何显示标签数
-                bool isShelf = IsPageShelfActive;
-                bool isBorrow = IsPageBorrowActive;
-                bool isInventory = IsPageInventoryActive;
-                if ((isShelf == false && isBorrow == false)
-                    || (isShelf == true && isBorrow == true))
-                {
-                    // TODO: 这一句是否需要 catch 一下
-                    isShelf = Function == "智能书柜";
-                    isBorrow = !isShelf;
-                }
 
-                // bool numberShown = false;
-
-                if (isShelf)
+                // 标签总数显示
+                // this.Number = e.Result?.Results?.Count.ToString();
+                if (e.Result.Results != null)
                 {
-                    NewTagList.Refresh(// sender as BaseChannel<IRfid>,
-                        e.ReaderNameList,
-                        e.Result.Results,
-                        (readerName, uid, antennaID) =>
-                        {
-                            var channel = sender as BaseChannel<IRfid>;
-                            if (channel.Started == false)
-                                return new GetTagInfoResult { Value = -1, ErrorInfo = "RFID 通道尚未启动" };
-                            return channel.Object.GetTagInfo(readerName, uid, antennaID);
-                        },
-                        (add_tags, update_tags, remove_tags) =>
-                        {
-                            NewTagChanged?.Invoke(sender, new NewTagChangedEventArgs
+                    // TODO: 如果 IsPageShelfActive 和 IsPageBorrowActive 都为 false，则要看 Function 是什么决定如何显示标签数
+                    bool isShelf = IsPageShelfActive;
+                    bool isBorrow = IsPageBorrowActive;
+                    bool isInventory = IsPageInventoryActive;
+                    if ((isShelf == false && isBorrow == false)
+                        || (isShelf == true && isBorrow == true))
+                    {
+                        // TODO: 这一句是否需要 catch 一下
+                        isShelf = Function == "智能书柜";
+                        isBorrow = !isShelf;
+                    }
+
+                    // bool numberShown = false;
+
+                    if (isShelf)
+                    {
+                        NewTagList.Refresh(// sender as BaseChannel<IRfid>,
+                            e.ReaderNameList,
+                            e.Result.Results,
+                            (readerName, uid, antennaID) =>
                             {
-                                AddTags = add_tags,
-                                UpdateTags = update_tags,
-                                RemoveTags = remove_tags,
-                            });
-                        },
-                        (type, text) =>
-                        {
-                            RfidManager.TriggerSetError(null/*this*/, new SetErrorEventArgs { Error = text });
-                        });
-
-                    // 标签总数显示 只显示标签数，不再区分图书标签和读者卡
-                    if (CurrentApp != null)
-                        CurrentApp.Number = $"{NewTagList.Tags.Count}";
-                    //numberShown = true;
-                }
-
-                // 2020/10/1
-                if (isInventory)
-                {
-                    SoundMaker.FirstSound(e.Result.Results.Count);
-
-                    NewTagList2.Refresh(
-                        e.ReaderNameList,
-                        e.Result.Results,
-                        /*
-                        (readerName, uid, antennaID) =>
-                        {
-                            if (InventoryData.UidExsits(uid, out string pii))
-                                return new GetTagInfoResult { Value = 1, TagInfo = new TagInfo { Tag = pii } };
-                            var channel = sender as BaseChannel<IRfid>;
-                            if (channel.Started == false)
-                                return new GetTagInfoResult { Value = -1, ErrorInfo = "RFID 通道尚未启动" };
-                            return channel.Object.GetTagInfo(readerName, uid, antennaID);
-                        },
-                        */
-                        (add_tags, update_tags, remove_tags) =>
-                        {
-                            NewTagChanged?.Invoke(sender, new NewTagChangedEventArgs
+                                var channel = sender as BaseChannel<IRfid>;
+                                if (channel.Started == false)
+                                    return new GetTagInfoResult { Value = -1, ErrorInfo = "RFID 通道尚未启动" };
+                                return channel.Object.GetTagInfo(readerName, uid, antennaID);
+                            },
+                            (add_tags, update_tags, remove_tags) =>
                             {
-                                AddTags = add_tags,
-                                UpdateTags = update_tags,
-                                RemoveTags = remove_tags,
-                            });
-                        },
-                        (type, text) =>
-                        {
-                            RfidManager.TriggerSetError(null/*this*/, new SetErrorEventArgs { Error = text });
-                        });
-
-                    // 标签总数显示 只显示标签数，不再区分图书标签和读者卡
-                    if (CurrentApp != null)
-                        CurrentApp.Number = $"{NewTagList.Tags.Count}";
-                    //numberShown = true;
-
-                    SoundMaker.StopCurrent();
-                }
-
-                if (isBorrow == true/* || numberShown == false*/)
-                {
-                    TagList.Refresh(sender as BaseChannel<IRfid>,
-                        e.ReaderNameList,
-                        e.Result.Results,
-                            (add_books, update_books, remove_books, add_patrons, update_patrons, remove_patrons) =>
-                            {
-                                TagChanged?.Invoke(sender, new TagChangedEventArgs
+                                NewTagChanged?.Invoke(sender, new NewTagChangedEventArgs
                                 {
-                                    AddBooks = add_books,
-                                    UpdateBooks = update_books,
-                                    RemoveBooks = remove_books,
-                                    AddPatrons = add_patrons,
-                                    UpdatePatrons = update_patrons,
-                                    RemovePatrons = remove_patrons
+                                    AddTags = add_tags,
+                                    UpdateTags = update_tags,
+                                    RemoveTags = remove_tags,
                                 });
                             },
                             (type, text) =>
                             {
                                 RfidManager.TriggerSetError(null/*this*/, new SetErrorEventArgs { Error = text });
+                            });
+
+                        // 标签总数显示 只显示标签数，不再区分图书标签和读者卡
+                        if (CurrentApp != null)
+                            CurrentApp.Number = $"{NewTagList.Tags.Count}";
+                        //numberShown = true;
+                    }
+
+                    // 2020/10/1
+                    if (isInventory)
+                    {
+                        SoundMaker.FirstSound(e.Result.Results.Count);
+
+                        NewTagList2.Refresh(
+                            e.ReaderNameList,
+                            e.Result.Results,
+                            /*
+                            (readerName, uid, antennaID) =>
+                            {
+                                if (InventoryData.UidExsits(uid, out string pii))
+                                    return new GetTagInfoResult { Value = 1, TagInfo = new TagInfo { Tag = pii } };
+                                var channel = sender as BaseChannel<IRfid>;
+                                if (channel.Started == false)
+                                    return new GetTagInfoResult { Value = -1, ErrorInfo = "RFID 通道尚未启动" };
+                                return channel.Object.GetTagInfo(readerName, uid, antennaID);
+                            },
+                            */
+                            (add_tags, update_tags, remove_tags) =>
+                            {
+                                NewTagChanged?.Invoke(sender, new NewTagChangedEventArgs
+                                {
+                                    AddTags = add_tags,
+                                    UpdateTags = update_tags,
+                                    RemoveTags = remove_tags,
+                                });
+                            },
+                            (type, text) =>
+                            {
+                                RfidManager.TriggerSetError(null/*this*/, new SetErrorEventArgs { Error = text });
+                            });
+
+                        // 标签总数显示 只显示标签数，不再区分图书标签和读者卡
+                        if (CurrentApp != null)
+                            CurrentApp.Number = $"{NewTagList.Tags.Count}";
+                        //numberShown = true;
+
+                        SoundMaker.StopCurrent();
+                    }
+
+                    if (isBorrow == true/* || numberShown == false*/)
+                    {
+                        TagList.Refresh(sender as BaseChannel<IRfid>,
+                            e.ReaderNameList,
+                            e.Result.Results,
+                                (add_books, update_books, remove_books, add_patrons, update_patrons, remove_patrons) =>
+                                {
+                                    TagChanged?.Invoke(sender, new TagChangedEventArgs
+                                    {
+                                        AddBooks = add_books,
+                                        UpdateBooks = update_books,
+                                        RemoveBooks = remove_books,
+                                        AddPatrons = add_patrons,
+                                        UpdatePatrons = update_patrons,
+                                        RemovePatrons = remove_patrons
+                                    });
+                                },
+                                (type, text) =>
+                                {
+                                    RfidManager.TriggerSetError(null/*this*/, new SetErrorEventArgs { Error = text });
                                 // TagSetError?.Invoke(this, new SetErrorEventArgs { Error = text });
                             });
 
-                    // 标签总数显示 图书+读者卡
-                    if (CurrentApp != null)
-                        CurrentApp.Number = $"{TagList.Books.Count}:{TagList.Patrons.Count}";
-                    //numberShown = true;
+                        // 标签总数显示 图书+读者卡
+                        if (CurrentApp != null)
+                            CurrentApp.Number = $"{TagList.Books.Count}:{TagList.Patrons.Count}";
+                        //numberShown = true;
+                    }
                 }
+            }
+            catch(Exception ex)
+            {
+                // 2020/10/30
+                SetError("rfid", ex.Message);
+                WpfClientInfo.WriteErrorLog($"RfidManager_ListTags() 捕获到异常: {ExceptionUtil.GetDebugText(ex)}");
             }
         }
 

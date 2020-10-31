@@ -67,7 +67,17 @@ namespace dp2SSL
             _sequence = new List<int>();
             while (_sequence.Count < count)
             {
-                if (chord.Contains((Pitch)start))
+                // 音符不要越过最大值
+                // TODO: 试验一下找一个不是特别高的音作为最高音
+                if (start >= (int)Pitch.G9)
+                {
+                    // 保护
+                    if (_sequence.Count == 0)
+                        break;
+
+                    _sequence.Add(_sequence[_sequence.Count - 1]);  // 用最后一个重复填充
+                }
+                else if (chord.Contains((Pitch)start))
                     _sequence.Add(start);
 
                 start++;
@@ -98,11 +108,18 @@ namespace dp2SSL
 
         public static void StopCurrent()
         {
-            InitialChannel1();
-            if (_currentPitch != -1)
+            try
             {
-                _outputDevice.SendNoteOff(Channel.Channel1, (Pitch)_currentPitch, 50);
-                _currentPitch = -1;
+                InitialChannel1();
+                if (_currentPitch != -1)
+                {
+                    _outputDevice.SendNoteOff(Channel.Channel1, (Pitch)_currentPitch, 50);
+                    _currentPitch = -1;
+                }
+            }
+            catch (ArgumentOutOfRangeException ex)
+            {
+                throw new ArgumentOutOfRangeException($"pitch 越过正常值范围。_currentPich={_currentPitch}", ex);
             }
         }
 
@@ -112,7 +129,9 @@ namespace dp2SSL
 
             StopCurrent();
 
-            _currentPitch = (int)Pitch.C4 + offset;
+            // 最大值 G9 = 127
+            // 起点值 C4 = 60,
+            _currentPitch = (int)Pitch.C4 + Math.Min(offset, Pitch.G9 - Pitch.C4);
             _outputDevice.SendNoteOn(Channel.Channel1, (Pitch)_currentPitch, 50);
         }
 
@@ -135,7 +154,7 @@ namespace dp2SSL
             {
                 _outputDevice.SendNoteOn(Channel.Channel1, (Pitch)_currentPitch, 50);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
 
             }

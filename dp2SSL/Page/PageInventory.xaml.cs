@@ -14,12 +14,13 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Collections;
+
 using static dp2SSL.InventoryData;
 
 using DigitalPlatform;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
-using System.Collections;
 using DigitalPlatform.WPF;
 
 namespace dp2SSL
@@ -77,6 +78,8 @@ namespace dp2SSL
         {
             App.NewTagChanged += CurrentApp_NewTagChanged;
             App.IsPageInventoryActive = true;
+
+            RefreshActionModeMenu();
 
             _ = Task.Run(() =>
             {
@@ -510,6 +513,48 @@ namespace dp2SSL
         private void addSound_Click(object sender, RoutedEventArgs e)
         {
             SoundMaker.AddSound();
+        }
+
+        // 动作模式
+        /* setUID               设置 UID --> PII 对照关系。即，写入册记录的 UID 字段
+         * setCurrentLocation   设置册记录的 currentLocation 字段内容为当前层架标编号
+         * setLocation          设置册记录的 location 字段为当前阅览室/书库位置。即调拨图书
+         * verifyEAS            校验 RFID 标签的 EAS 状态是否正确。过程中需要检查册记录的外借状态
+         * */
+        static string _actionMode = "setUID";    // 空/setUID/setCurrentLocation/setLocation/verifyEAS 中之一或者组合
+
+        public static string ActionMode
+        {
+            get
+            {
+                return _actionMode;
+            }
+        }
+
+        void UpdateActionMode()
+        {
+            var value = _actionMode;
+            StringUtil.SetInList(ref value, "setUID", this.actionSetUID.IsChecked);
+            StringUtil.SetInList(ref value, "setCurrentLocation", this.actionSetCurrentLocation.IsChecked);
+            StringUtil.SetInList(ref value, "setLocation", this.actionSetLocation.IsChecked);
+            StringUtil.SetInList(ref value, "verifyEAS", this.actionVerifyEas.IsChecked);
+            _actionMode = value;
+        }
+
+        void RefreshActionModeMenu()
+        {
+            var value = _actionMode;
+            this.actionSetUID.IsChecked = StringUtil.IsInList("setUID", value);
+            this.actionSetCurrentLocation.IsChecked = StringUtil.IsInList("setCurrentLocation", value);
+            this.actionSetLocation.IsChecked = StringUtil.IsInList("setLocation", value);
+            this.actionVerifyEas.IsChecked = StringUtil.IsInList("verifyEAS", value);
+        }
+
+        private void actionMenu_Click(object sender, RoutedEventArgs e)
+        {
+            MenuItem menuItem = sender as MenuItem;
+            menuItem.IsChecked = !menuItem.IsChecked;
+            UpdateActionMode();
         }
     }
 }

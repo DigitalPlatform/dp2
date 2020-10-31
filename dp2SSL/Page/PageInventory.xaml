@@ -89,6 +89,12 @@
                     <MenuItem x:Name="backupRequests" Header="备份本地动作库" HorizontalAlignment="Left" Width="Auto" />
                     <MenuItem x:Name="restoreRequests" Header="恢复本地动作库" HorizontalAlignment="Left" Width="Auto" />
                 </MenuItem>
+                <MenuItem Header="_盘点动作">
+                    <MenuItem x:Name="actionSetUID" Header="设置册记录 UID" HorizontalAlignment="Left" Width="Auto" Click="actionMenu_Click"/>
+                    <MenuItem x:Name="actionSetCurrentLocation" Header="更新当前位置" HorizontalAlignment="Left" Width="Auto" Click="actionMenu_Click"/>
+                    <MenuItem x:Name="actionSetLocation" Header="更新永久馆藏地" HorizontalAlignment="Left" Width="Auto" Click="actionMenu_Click"/>
+                    <MenuItem x:Name="actionVerifyEas" Header="校验 EAS" HorizontalAlignment="Left" Width="Auto" Click="actionMenu_Click"/>
+                </MenuItem>
             </Menu>
         </StackPanel>
         <Button Grid.Row="1" Grid.Column="2">Right</Button>
