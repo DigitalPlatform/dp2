@@ -150,8 +150,15 @@ namespace DigitalPlatform.OPAC.Web
                 return false;
                  * */
 
-                // 2013/12/7
-                string strClientIP = HttpContext.Current.Request.UserHostAddress.ToString();
+                // 2020/10/29
+                string strClientIP = HttpContext.Current.Request.Headers.Get("X-Real-IP");
+
+                if (strClientIP == null)
+                {
+                    // 2013/12/7
+                    strClientIP = HttpContext.Current.Request.UserHostAddress.ToString();
+                }
+
                 // 增量计数
                 if (app != null)
                 {

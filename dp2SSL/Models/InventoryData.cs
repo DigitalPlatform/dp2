@@ -312,6 +312,16 @@ out chip);
 
             // GetTagInfo() 出错的次数
             public int ErrorCount { get; set; }
+
+            // 批次号
+            public string BatchNo { get; set; }
+
+            // 希望修改成的 currentLocation 字段内容
+            public string TargetCurrentLocation { get; set; }
+            // 希望修改成的 location 字段内容
+            public string TargetLocation { get; set; }
+            // 操作者(工作人员)用户名
+            public string UserName { get; set; }
         }
 
         #region 处理列表
@@ -481,6 +491,26 @@ TaskScheduler.Default);
                         entity.Title = PageBorrow.GetCaption(result.Title);
                     if (string.IsNullOrEmpty(result.ItemXml) == false)
                         entity.SetData(result.ItemRecPath, result.ItemXml);
+                }
+
+                // 请求 dp2library Inventory()
+                if (string.IsNullOrEmpty(entity.PII) == false)
+                {
+                    var info = entity.Tag as ProcessInfo;
+
+                    var request_result = RequestInventory(entity.UID,
+    entity.PII,
+    info.TargetCurrentLocation,
+    info.TargetLocation,
+    info.BatchNo,
+    info.UserName,
+    PageInventory.ActionMode);
+                    if (request_result.Value == -1)
+                    {
+                        // TODO: 语音提示引起操作者注意
+                        entity.AppendError(request_result.ErrorInfo, "red", request_result.ErrorCode);
+                    }
+
                 }
             }
 
@@ -653,5 +683,90 @@ TaskScheduler.Default);
             }
         }
 
+        // 向 dp2library 服务器发出盘点请求
+        public static NormalResult RequestInventory(string uid,
+            string pii,
+            string currentLocation,
+            string location,
+            string batchNo,
+            string strUserName,
+            string style)
+        {
+
+            // TODO: 是否要用特定的工作人员身份进行盘点?
+            LibraryChannel channel = App.CurrentApp.GetChannel(strUserName);
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromSeconds(10);
+
+            try
+            {
+                // currentLocation 元素内容。格式为 馆藏地:架号
+                // 注意馆藏地和架号字符串里面不应包含逗号和冒号
+                List<string> commands = new List<string>();
+                if (string.IsNullOrEmpty(currentLocation) == false)
+                    commands.Add($"currentLocation:{StringUtil.EscapeString(currentLocation, ":,")}");
+                if (string.IsNullOrEmpty(location) == false)
+                    commands.Add($"location:{StringUtil.EscapeString(location, ":,")}");
+                if (string.IsNullOrEmpty(batchNo) == false)
+                {
+                    commands.Add($"batchNo:{StringUtil.EscapeString(batchNo, ":,")}");
+
+                    /*
+                    // 即便册记录没有发生修改，也要产生 transfer 操作日志记录。这样便于进行典藏移交清单统计打印
+                    commands.Add("forceLog");
+                    */
+                }
+
+                string strStyle = "item";
+
+                int nRedoCount = 0;
+            REDO:
+                long lRet = channel.Return(null,
+                    "transfer",
+                    "", // _patron.Barcode,
+                    pii,    // entity.PII,
+                    null,   // entity.ItemRecPath,
+                    false,
+                    $"{strStyle},{StringUtil.MakePathList(commands, ",")}", // style,
+                    "xml", // item_format_list
+                    out string[] item_records,
+                    "xml",
+                    out string[] reader_records,
+                    "summary",
+                    out string[] biblio_records,
+                    out string[] dup_path,
+                    out string output_reader_barcode,
+                    out ReturnInfo return_info,
+                    out string strError);
+                if (lRet == -1)
+                {
+                    if ((channel.ErrorCode == ErrorCode.RequestError
+        || channel.ErrorCode == ErrorCode.RequestTimeOut))
+                    {
+                        nRedoCount++;
+
+                        if (nRedoCount < 2)
+                            goto REDO;
+                        else
+                        {
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = "因网络出现问题，请求 dp2library 服务器失败",
+                                ErrorCode = "requestError"
+                            };
+                        }
+                    }
+                }
+
+                return new NormalResult();
+            }
+            finally
+            {
+                channel.Timeout = old_timeout;
+                App.CurrentApp.ReturnChannel(channel);
+            }
+
+        }
     }
 }
