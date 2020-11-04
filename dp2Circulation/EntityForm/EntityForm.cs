@@ -5276,7 +5276,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
                         this.browseWindow?.ShowMessage("等待 Z39.50 检索响应 ...");
 
                         {
-                            NormalResult result = await _zsearcher.Search(
+                            NormalResult result = await _zsearcher.SearchAsync(
             Program.MainForm.UseList,   // UseCollection useList,
             Program.MainForm.IsbnSplitter,
                             this.textBox_queryWord.Text,

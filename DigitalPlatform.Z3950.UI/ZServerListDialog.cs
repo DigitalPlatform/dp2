@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
@@ -263,6 +264,7 @@ MessageBoxDefaultButton.Button2);
                 if (old_enabled != new_enabled)
                 {
                     ListViewUtil.ChangeItemText(item, COLUMN_ENABLED, new_enabled ? "是" : "否");
+                    SetItemColor(item);
                     server.SetAttribute("enabled", new_enabled ? "yes" : "no");
                     this.Changed = true;
                 }
@@ -450,8 +452,23 @@ MessageBoxDefaultButton.Button2);
                 ListViewUtil.ChangeItemText(item, COLUMN_NAME, name);
                 ListViewUtil.ChangeItemText(item, COLUMN_DATABASE, ZServerUtil.GetDatabaseList(server));
                 ListViewUtil.ChangeItemText(item, COLUMN_ENABLED, IsEnabled(enabled, true) ? "是" : "否");
-
+                SetItemColor(item);
                 this.listView1.Items.Add(item);
+            }
+        }
+
+        static void SetItemColor(ListViewItem item)
+        {
+            var enabled = ListViewUtil.GetItemText(item, COLUMN_ENABLED);
+            if (enabled == "是")
+            {
+                item.BackColor = System.Drawing.Color.DarkGreen;
+                item.ForeColor = System.Drawing.Color.White;
+            }    
+            else
+            {
+                item.BackColor = SystemColors.Window;
+                item.ForeColor = SystemColors.WindowText;
             }
         }
 
@@ -535,6 +552,7 @@ MessageBoxDefaultButton.Button2);
                     ListViewUtil.ChangeItemText(item, COLUMN_NAME, name);
                     ListViewUtil.ChangeItemText(item, COLUMN_DATABASE, ZServerUtil.GetDatabaseList(server));
                     ListViewUtil.ChangeItemText(item, COLUMN_ENABLED, "是");
+                    SetItemColor(item);
 
                     this.listView1.Items.Add(item);
                 }
@@ -575,6 +593,7 @@ username='@hnb'>
                     ListViewUtil.ChangeItemText(item, COLUMN_NAME, name);
                     ListViewUtil.ChangeItemText(item, COLUMN_DATABASE, ZServerUtil.GetDatabaseList(server));
                     ListViewUtil.ChangeItemText(item, COLUMN_ENABLED, "是");
+                    SetItemColor(item);
 
                     this.listView1.Items.Add(item);
                 }

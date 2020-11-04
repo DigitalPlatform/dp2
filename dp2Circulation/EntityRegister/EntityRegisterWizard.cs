@@ -917,7 +917,7 @@ MessageBoxDefaultButton.Button1);
 
                     int nMaxSearchResultCount = 1000;
                     {
-                        NormalResult result = await _zsearcher.Search(
+                        NormalResult result = await _zsearcher.SearchAsync(
         Program.MainForm.UseList,   // UseCollection useList,
         Program.MainForm.IsbnSplitter,
                         this.textBox_queryWord.Text,

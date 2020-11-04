@@ -102,7 +102,7 @@ namespace DigitalPlatform.LibraryClient
                 };
                 this.Getting?.Invoke(this, e1);
                 if (e1.Cancelled == true)
-                    yield break;
+                    throw new InterruptException($"用户中断");
 
                 long lRet = this.Channel.GetSearchResult(
                     this.Stop,
@@ -122,7 +122,7 @@ namespace DigitalPlatform.LibraryClient
                 };
                 this.Getted?.Invoke(this, e2);
                 if (e2.Cancelled == true)
-                    yield break;
+                    throw new InterruptException($"用户中断");
 
                 if (lRet == -1)
                 {

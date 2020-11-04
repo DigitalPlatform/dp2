@@ -32,6 +32,7 @@ using DigitalPlatform.Z3950;
 using System.Runtime.Remoting.Activation;
 using DigitalPlatform.CirculationClient;
 using Jint.Parser.Ast;
+using System.Linq;
 
 namespace dp2Circulation
 {
@@ -1298,6 +1299,7 @@ Keys keyData)
 
             var first_query_word = GetFirstQueryWord(this.textBox_queryWord.Text);
             long lTotalHitCount = 0;
+            bool multiline = this.toolStripButton_multiLine.Checked;
 
             LibraryChannel channel = this.GetChannel();
 
@@ -1390,7 +1392,7 @@ Keys keyData)
                 {
                     query_words = StringUtil.SplitList(this.textBox_queryWord.Text.Replace("\r\n", "\r"), '\r');
                     StringUtil.RemoveBlank(ref query_words);
-                    if (query_words.Count == 0)
+                    if (query_words.Count == 0 && multiline == false)
                         query_words.Add("");
                 }
 
@@ -1399,6 +1401,8 @@ Keys keyData)
                     stop.SetProgressRange(0, query_words.Count);
                 }
                 stop.Style = StopStyle.EnableHalfStop;
+
+                bool zserver_loaded = false;
 
                 int word_index = 0;
                 foreach (string query_word in query_words)
@@ -1449,10 +1453,8 @@ Keys keyData)
                     channel.Timeout = new TimeSpan(0, 5, 0);
 
                     int max_count = MaxSearchResultCount;
-                    /*
-                    if (this.toolStripButton_multiLine.Checked)
+                    if (multiline)
                         max_count = MultilineMaxSearchResultCount;
-                    */
 
                     long lRet = channel.SearchBiblio(stop,
                         this.checkedComboBox_biblioDbNames.Text,
@@ -1491,6 +1493,7 @@ Keys keyData)
 
                     long lHitCount = lRet;
 
+                    lTotalHitCount += lHitCount;
 
                     this.m_lHitCount = lHitCount;
 
@@ -1528,7 +1531,7 @@ Keys keyData)
     stop,
     null,
     strBrowseStyle);
-                        if (this.toolStripButton_multiLine.Checked)
+                        if (multiline)
                             loader.MaxResultCount = MultilineMaxSearchResultCount;
 
                         loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
@@ -1650,7 +1653,7 @@ Keys keyData)
                                 count++;
                             }
 
-                            lTotalHitCount += count;
+                            // lTotalHitCount += count;
                         }
                         finally
                         {
@@ -1831,11 +1834,12 @@ Keys keyData)
 
                     if (this.SearchZ3950 && string.IsNullOrEmpty(query_word/*this.textBox_queryWord.Text*/) == false)
                     {
-                        nRet = Program.MainForm.LoadUseList(true, out strError);
-                        if (nRet == -1)
-                            goto ERROR1;
-
+                        if (zserver_loaded == false)
                         {
+                            nRet = Program.MainForm.LoadUseList(true, out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+
                             string xmlFileName = Path.Combine(Program.MainForm.UserDir, "zserver.xml");
                             var result = _zsearcher.LoadServer(xmlFileName, Program.MainForm.Marc8Encoding);
                             if (result.Value == -1)
@@ -1844,11 +1848,16 @@ Keys keyData)
                                 goto ERROR1;
                                 // this.ShowMessage(result.ErrorInfo, "red", true);
                             }
+                            zserver_loaded = true;
                         }
+
                         this.ShowMessage("等待 Z39.50 检索响应 ...");
 
                         {
-                            NormalResult result = await _zsearcher.Search(
+                            if (query_words.Count > 1)
+                                _zsearcher.PresentBatchSize = max_count;
+
+                            NormalResult result = await _zsearcher.SearchAsync(
             Program.MainForm.UseList,   // UseCollection useList,
             Program.MainForm.IsbnSplitter,
                             query_word, // this.textBox_queryWord.Text,
@@ -1865,6 +1874,8 @@ Keys keyData)
                                     this.listView_records.Items.Add(item);
                                     UpdateCommandLine(item, c, r);
                                 }));
+
+                                Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode($"'{query_word}' 命中 {r.ResultCount} 条 (Z39.50 : {c.ServerName})") + "</div>");
                             },
                             (c, r) =>
                             {
@@ -1879,9 +1890,13 @@ Keys keyData)
                                             r.Records,
                                             item);
                                     UpdateCommandLine(item, c, r);
+                                    if (multiline)
+                                        item.Tag = null;
                                 }));
                             }
                             );
+
+                            // TODO: 如果 result 出错要显示出来?
                         }
                     }
 
@@ -1929,7 +1944,7 @@ Keys keyData)
                 else
                     this.label_message.Text = "检索共命中 " + lTotalHitCount.ToString() + " 条书目记录，已全部装入";
             }
-            catch(InterruptException)
+            catch (InterruptException)
             {
                 this.label_message.Text = "检索共命中 " + lTotalHitCount.ToString() + " 条书目记录，已装入 " + this.listView_records.Items.Count.ToString() + " 条，用户中断...";
                 return;
@@ -3068,6 +3083,12 @@ Keys keyData)
             {
                 ListViewItem item = this.listView_records.SelectedItems[0];
                 ZClientChannel channel = (ZClientChannel)item.Tag;
+                
+                if (channel == null)
+                {
+                    this.ShowMessage("无法载入下一批记录(多行模式)", "yellow", true);
+                    return;
+                }
 
                 if (channel._fetched >= channel._resultCount)
                 {
