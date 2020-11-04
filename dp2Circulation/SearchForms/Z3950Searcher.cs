@@ -12,6 +12,9 @@ using DigitalPlatform.Z3950;
 using DigitalPlatform.Z3950.UI;
 using System.Threading;
 using DigitalPlatform.Core;
+using Microsoft.VisualStudio.Threading;
+using DigitalPlatform.Text;
+using System.Diagnostics;
 
 namespace dp2Circulation
 {
@@ -233,7 +236,7 @@ namespace dp2Circulation
 #endif
         // 独立 Task 版本
         // 首次检索
-        public async Task<NormalResult> Search(
+        public async Task<NormalResult> SearchAsync(
             UseCollection useList,
             IsbnSplitter isbnSplitter,
             string strQueryWord,
@@ -246,7 +249,8 @@ namespace dp2Circulation
             _searching = true;
             try
             {
-                List<Task> tasks = new List<Task>();
+                List<Task<NormalResult>> tasks = new List<Task<NormalResult>>();
+                List<ZClientChannel> channels = new List<ZClientChannel>();
                 foreach (ZClientChannel channel in _channels)
                 {
                     if (_searching == false)
@@ -255,10 +259,10 @@ namespace dp2Circulation
                     if (channel.Enabled == false)
                         continue;
 
-                    var task = Task.Factory.StartNew<NormalResult>(
-                        () =>
+                    var task = Task.Factory.StartNew(
+                        async () =>
                         {
-                            return SearchOne(channel,
+                            return await SearchOne(channel,
                                    useList,
                                    isbnSplitter,
                                    strQueryWord,
@@ -267,15 +271,49 @@ namespace dp2Circulation
                                    strMatchStyle,
                                    searchCompleted,
                                    presentCompleted);
-                        });
-                    tasks.Add(task);
+                        },
+                        new CancellationToken(),
+    TaskCreationOptions.PreferFairness,
+    TaskScheduler.Default);
+
+                    // tasks 和 channels 下标一一对应
+                    tasks.Add(task.Unwrap());
+                    channels.Add(channel);
+                    Debug.Assert(tasks.Count == channels.Count);
                 }
 
+                /*
                 await Task.Run(() =>
                 {
                     Task.WaitAll(tasks.ToArray(), TimeSpan.FromMinutes(1));
                 }).ConfigureAwait(false);
-                return new NormalResult();
+                */
+                await Task.WhenAny(Task.WhenAll(tasks), Task.Delay(TimeSpan.FromMinutes(1)));
+
+                // 2020/11/4 观察返回值
+                List<string> errors = new List<string>();
+                foreach (var task in tasks)
+                {
+                    if (task.IsCompleted == false)
+                    {
+                        // 中断那些超时后还没有结束的 channel
+                        int index = tasks.IndexOf(task);
+                        var channel = channels[index];
+                        channel.ZClient.CloseConnection();
+                        continue;   // 不计入报错？
+                    }
+                    var result = await task;
+                    if (result.Value == -1)
+                        errors.Add(result.ErrorInfo);
+                }
+                if (errors.Count == 0)
+                    return new NormalResult();
+                else
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = StringUtil.MakePathList(errors, "; ")
+                    };
             }
             finally
             {
@@ -283,7 +321,11 @@ namespace dp2Circulation
             }
         }
 
-        NormalResult SearchOne(
+        // 获取结果集时的每批数量
+        public int PresentBatchSize = 10;
+
+        // 针对一个特定 Z30.50 服务器发起检索
+        async Task<NormalResult> SearchOne(
             ZClientChannel channel,
             UseCollection useList,
             IsbnSplitter isbnSplitter,
@@ -342,7 +384,7 @@ namespace dp2Circulation
                     }
                 }
 
-                REDO_SEARCH:
+            REDO_SEARCH:
                 {
                     // return Value:
                     //      -1  出错
@@ -350,7 +392,7 @@ namespace dp2Circulation
                     //      1   调用前已经是初始化过的状态，本次没有进行初始化
                     // InitialResult result = _zclient.TryInitialize(_targetInfo).GetAwaiter().GetResult();
                     // InitialResult result = _zclient.TryInitialize(_targetInfo).Result;
-                    InitialResult result = channel.ZClient.TryInitialize(_targetInfo).Result;
+                    InitialResult result = await channel.ZClient.TryInitialize(_targetInfo);
                     if (result.Value == -1)
                     {
                         searchCompleted?.Invoke(channel, new SearchResult(result));
@@ -365,12 +407,12 @@ namespace dp2Circulation
                 //		1	succeed
                 // result.ResultCount:
                 //      命中结果集内记录条数 (当 result.Value 为 1 时)
-                SearchResult search_result = channel.ZClient.Search(
+                SearchResult search_result = await channel.ZClient.Search(
         strQueryString,
         _targetInfo.DefaultQueryTermEncoding,
         _targetInfo.DbNames,
         _targetInfo.PreferredRecordSyntax,
-        "default").Result;
+        "default");
                 if (search_result.Value == -1 || search_result.Value == 0)
                 {
                     if (search_result.ErrorCode == "ConnectionAborted")
@@ -388,7 +430,7 @@ namespace dp2Circulation
                     || search_result.ResultCount == 0)
                     return new NormalResult();  // continue
 
-                var present_result = _fetchRecords(channel, 10).Result;
+                var present_result = await _fetchRecords(channel, PresentBatchSize/*10*/);
 
                 presentCompleted?.Invoke(channel, present_result);
 
