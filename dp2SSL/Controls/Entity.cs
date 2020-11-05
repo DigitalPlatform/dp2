@@ -376,6 +376,16 @@ namespace dp2SSL
 
             return changed;
         }
+
+        // 2020/11/5
+        // 移动到列表末尾
+        public void MoveToTail(Entity entity)
+        {
+            if (this.Remove(entity) == true)
+            {
+                this.Add(entity);
+            }
+        }
     }
 
     public class Entity : RfidItem

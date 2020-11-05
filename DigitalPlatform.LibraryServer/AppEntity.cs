@@ -3548,7 +3548,7 @@ out strError);
                     }
                     else if (info.Action == "change"
                         || info.Action == "transfer"
-                        || info.Action == "setuid"
+                        // || info.Action == "setuid"
                         || info.Action == "setuid") // 2020/10/12
                     {
                         if (bSimulate == true)

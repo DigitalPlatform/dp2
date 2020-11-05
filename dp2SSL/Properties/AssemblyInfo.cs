@@ -51,7 +51,7 @@ using System.Windows;
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 // 方法是按如下所示使用“*”: :
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.5.18")]    // 1.5.*
+[assembly: AssemblyVersion("1.5.19")]    // 1.5.*
 [assembly: AssemblyFileVersion("1.5.0.0")]  // 1.5.0.0
 
 // 1.0 2019/2/21 第一个版本
@@ -61,3 +61,4 @@ using System.Windows;
 // 1.4 2020/4/2 重构算法。书柜 SaveActions() 阶段即刷新门控件上的数字，和与 dp2library 同步无关。具有本地数据库保存操作
 // 1.5 2020/9/8 新增加 greensetup.exe 绿色安装，并测试完成
 //      1.5.18 (2020/10/14) 消除“清掉前一个同天线号的门的图书数字 bug”
+//      1.5.19 (2020/11/5) 增加 “盘点”功能

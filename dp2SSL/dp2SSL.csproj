@@ -37,7 +37,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>44</ApplicationRevision>
+    <ApplicationRevision>45</ApplicationRevision>
     <ApplicationVersion>1.5.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -74,7 +74,7 @@
     <ManifestKeyFile>代码签名证书-2020.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestTimestampUrl>http://timestamp.comodoca.com/rfc3161</ManifestTimestampUrl>
+    <ManifestTimestampUrl>http://timestamp.digicert.com</ManifestTimestampUrl>
   </PropertyGroup>
   <PropertyGroup>
     <GenerateManifests>false</GenerateManifests>
@@ -462,6 +462,9 @@
     <Compile Include="Dialog\AskTransferWindow.xaml.cs">
       <DependentUpon>AskTransferWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Dialog\BeginInventoryWindow.xaml.cs">
+      <DependentUpon>BeginInventoryWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Dialog\BookInfoWindow.xaml.cs">
       <DependentUpon>BookInfoWindow.xaml</DependentUpon>
     </Compile>
@@ -567,6 +570,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Dialog\AskTransferWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Dialog\BeginInventoryWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

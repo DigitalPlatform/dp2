@@ -22,6 +22,7 @@ using DigitalPlatform;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
 using DigitalPlatform.WPF;
+using static dp2SSL.LibraryChannelUtil;
 
 namespace dp2SSL
 {
@@ -83,53 +84,106 @@ namespace dp2SSL
 
             _ = Task.Run(() =>
             {
-                CancellationTokenSource cancel = new CancellationTokenSource();
+                // 获得馆藏地列表
+                GetLocationListResult get_result = LibraryChannelUtil.GetLocationList();
+                if (get_result.Value == -1)
+                    App.SetError("inventory", $"获得馆藏地列表时出错: {get_result.ErrorInfo}");
 
-                ProgressWindow progress = null;
+                string batchNo = "inventory_" + DateTime.Now.ToShortDateString();
+
+                bool dialog_result = false;
+                // “开始盘点”对话框
                 App.Invoke(new Action(() =>
                 {
-                    progress = new ProgressWindow();
-                    progress.TitleText = "dp2SSL -- 盘点";
-                    progress.MessageText = "正在获取 UID 对照信息，请稍候 ...";
-                    progress.Owner = Application.Current.MainWindow;
-                    progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-                    progress.Closed += (s, e1) =>
+                    App.PauseBarcodeScan();
+                    try
                     {
-                        cancel.Cancel();
-                    };
-                    progress.okButton.Visibility = Visibility.Collapsed;
-                    // progress.okButton.Content = "停止";
-                    App.SetSize(progress, "middle");
-                    progress.BackColor = "green";
-                    progress.Show();
+                        BeginInventoryWindow dialog = new BeginInventoryWindow();
+                        dialog.TitleText = $"开始盘点";
+                        // dialog.Text = $"如何处理以上放入 {door_names} 的 {collection.Count} 册图书？";
+                        dialog.Owner = App.CurrentApp.MainWindow;
+                        // dialog.BatchNo = batchNo;
+                        dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                        App.SetSize(dialog, "tall");
+                        dialog.location.ItemsSource = get_result.List;  // result.List;
+                        dialog.BatchNo = batchNo;
+                        dialog.ActionMode = ActionMode;
+                        dialog.ShowDialog();
+                        if (dialog.DialogResult == false)
+                            dialog_result = false;
+                        else
+                        {
+                            dialog_result = true;
+
+                            {
+                                _actionMode = dialog.ActionMode;
+                                RefreshActionModeMenu();
+                            }
+
+                            CurrentLocation = dialog.Location;
+                            // batchNo = dialog.BatchNo;
+
+                        }
+                    }
+                    finally
+                    {
+                        App.ContinueBarcodeScan();
+                    }
                 }));
 
-                try
+
+                if (dialog_result == true)
                 {
-                    Hashtable uid_table = new Hashtable();
-                    var result = InventoryData.DownloadUidTable(
-            null,
-            uid_table,
-            (text) =>
-            {
-                App.Invoke(new Action(() =>
-                {
-                    progress.MessageText = text;
-                }));
-            },
-            cancel.Token);
-                    InventoryData.SetUidTable(uid_table);
-                }
-                catch (Exception ex)
-                {
-                    WpfClientInfo.WriteErrorLog($"准备册记录过程出现异常: {ExceptionUtil.GetDebugText(ex)}");
-                }
-                finally
+                    ClearList();
+
+                    CancellationTokenSource cancel = new CancellationTokenSource();
+
+                    ProgressWindow progress = null;
+                    App.Invoke(new Action(() =>
+                    {
+                        progress = new ProgressWindow();
+                        progress.TitleText = "dp2SSL -- 盘点";
+                        progress.MessageText = "正在获取 UID 对照信息，请稍候 ...";
+                        progress.Owner = Application.Current.MainWindow;
+                        progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                        progress.Closed += (s, e1) =>
+                        {
+                            cancel.Cancel();
+                        };
+                        progress.okButton.Visibility = Visibility.Collapsed;
+                        // progress.okButton.Content = "停止";
+                        App.SetSize(progress, "middle");
+                        progress.BackColor = "green";
+                        progress.Show();
+                    }));
+
+                    try
+                    {
+                        Hashtable uid_table = new Hashtable();
+                        var result = InventoryData.DownloadUidTable(
+                null,
+                uid_table,
+                (text) =>
                 {
                     App.Invoke(new Action(() =>
                     {
-                        progress.Close();
+                        progress.MessageText = text;
                     }));
+                },
+                cancel.Token);
+                        InventoryData.SetUidTable(uid_table);
+                    }
+                    catch (Exception ex)
+                    {
+                        WpfClientInfo.WriteErrorLog($"准备册记录过程出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                    }
+                    finally
+                    {
+                        App.Invoke(new Action(() =>
+                        {
+                            progress.Close();
+                        }));
+                    }
                 }
             });
 
@@ -230,7 +284,9 @@ namespace dp2SSL
         // 筛选出需要 GetTagInfo() 的那些标签
         void FilterTags(BaseChannel<IRfid> channel, List<TagAndData> tags)
         {
+            // PII 尚为空的那些 entity
             List<Entity> entities1 = new List<Entity>();
+
             List<Entity> all = new List<Entity>();
 
             foreach (var tag in tags)
@@ -255,6 +311,19 @@ namespace dp2SSL
                     entities1.Add(entity);
 
                 all.Add(entity);
+
+                // TODO: 如果发现 PII 不为空的层架标，要用于切换当前 CurrentShelfNo
+                if (info != null && info.IsLocation == true)
+                {
+                    SwitchCurrentShelfNo(entity);
+                    if (isNewly == false)
+                    {
+                        App.Invoke(new Action(() =>
+                        {
+                            _entities.MoveToTail(entity);
+                        }));
+                    }
+                }
             }
 
             // 准备音阶
@@ -286,7 +355,8 @@ namespace dp2SSL
                 var info = entity.Tag as ProcessInfo;
 
                 if (string.IsNullOrEmpty(entity.PII) == false
-&& string.IsNullOrEmpty(info.State))
+                    && string.IsNullOrEmpty(info.State)
+                    && info.IsLocation == false)
                 {
                     info.State = "processing";  // 正在获取册信息
                     InventoryData.AppendList(entity);
@@ -333,6 +403,7 @@ namespace dp2SSL
                 if (InventoryData.UidExsits(entity.UID, out string pii))
                 {
                     entity.PII = pii;
+                    SetTargetCurrentLocation(info);
                 }
                 else
                 {
@@ -376,8 +447,25 @@ namespace dp2SSL
                             entity.Error = null;
 
                             // 把 PII 显示出来
-                            InventoryData.UpdateEntity(entity, get_result.TagInfo);
+                            InventoryData.UpdateEntity(entity,
+                                get_result.TagInfo,
+                                out string type);
                             info.State = "";
+
+                            // 层架标
+                            if (type == "location")
+                            {
+                                info.IsLocation = true;
+                                if (string.IsNullOrEmpty(entity.PII) == false)
+                                {
+                                    // 设置当前层架标
+                                    SwitchCurrentShelfNo(entity);
+                                }
+                            }
+                            else
+                            {
+                                SetTargetCurrentLocation(info);
+                            }
 
                             // 朗读出错 entity 数量
                             var count = InventoryData.RemoveErrorEntity(entity, out bool changed);
@@ -392,12 +480,40 @@ namespace dp2SSL
             }
 
             if (string.IsNullOrEmpty(entity.PII) == false
-                && string.IsNullOrEmpty(info.State))
+                && string.IsNullOrEmpty(info.State)
+                && info.IsLocation == false)
             {
                 info.State = "processing";  // 正在获取册信息
                 InventoryData.AppendList(entity);
                 InventoryData.ActivateInventory();
             }
+        }
+
+        // 切换当前层架标
+        void SwitchCurrentShelfNo(Entity entity)
+        {
+            if (string.IsNullOrEmpty(entity.PII) == false)
+            {
+                CurrentShelfNo = entity.PII;
+                App.CurrentApp.SpeakSequence($"切换层架标 {entity.PII}");
+            }
+        }
+
+        // 给册事项里面添加 目标当前架位 参数。
+        // 注意，如果 actionMode 里面不包含 setCurrentLocation，则没有必要做这一步
+        void SetTargetCurrentLocation(ProcessInfo info)
+        {
+            info.TargetLocation = CurrentLocation;
+
+            if (string.IsNullOrEmpty(CurrentShelfNo) == true)
+            {
+                if (StringUtil.IsInList("setCurrentLocation", ActionMode) == false)
+                    return;
+
+                App.CurrentApp.SpeakSequence("请先扫层架标，再扫图书");
+                return;
+            }
+            info.TargetCurrentLocation = CurrentLocation + ":" + CurrentShelfNo;
         }
 
         string FindTitle(int index)
@@ -492,6 +608,11 @@ namespace dp2SSL
         }
 
         private void clearList_Click(object sender, RoutedEventArgs e)
+        {
+            ClearList();
+        }
+
+        void ClearList()
         {
             App.Invoke(new Action(() =>
             {

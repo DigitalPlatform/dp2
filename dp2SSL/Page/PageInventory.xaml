@@ -168,6 +168,12 @@
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
+
+                        <GridViewColumn Header="当前位置" Width="150" DisplayMemberBinding="{Binding CurrentLocation}"
+                                        HeaderContainerStyle="{StaticResource myHeaderStyle}"/>
+                        <GridViewColumn Header="永久馆藏地" Width="150" DisplayMemberBinding="{Binding Location}"
+                                        HeaderContainerStyle="{StaticResource myHeaderStyle}"/>
+
                     </GridView>
                 </ListView.View>
             </ListView>
