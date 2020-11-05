@@ -391,7 +391,7 @@ namespace dp2SSL
         // 图书馆名字
         static string _libraryName = null;
 
-        static List<string> _locationList = null;
+        static internal List<string> _locationList = null;
 
         static string _rightTableXml = null;
 

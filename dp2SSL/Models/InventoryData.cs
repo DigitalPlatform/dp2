@@ -5,6 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml;
+
+using Microsoft.VisualStudio.Threading;
 
 using DigitalPlatform;
 using DigitalPlatform.LibraryClient;
@@ -12,6 +15,7 @@ using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
 using DigitalPlatform.WPF;
+using DigitalPlatform.Xml;
 
 namespace dp2SSL
 {
@@ -68,13 +72,17 @@ namespace dp2SSL
             return entity;
         }
 
-        public static void UpdateEntity(Entity entity, TagInfo tagInfo)
+        public static void UpdateEntity(Entity entity,
+            TagInfo tagInfo,
+            out string type)
         {
+            type = "";
+
             entity.TagInfo = tagInfo;
 
             bool throw_exception = false;
             LogicChip chip = null;
-            string type = "";
+            // string type = "";
             if (string.IsNullOrEmpty(type))
             {
                 // Exception:
@@ -108,6 +116,11 @@ out chip);
                 // 避免被当作图书同步到 dp2library
                 entity.PII = "(读者卡)" + entity.PII;
                 entity.AppendError("读者卡误放入书柜", "red", "patronCard");
+            }
+
+            if (type == "location")
+            {
+                entity.Title = $"(层架标) {entity.PII}";
             }
 
             // 2020/7/15
@@ -144,6 +157,7 @@ out chip);
             }
         }
 
+        // 解析标签内容，返回 PII 和 typeOfUsage。注：typeOfUsage ‘30’ 表示层架标
         static void ParseTagInfo(TagInfo tagInfo,
     out string pii,
     out string type,
@@ -165,7 +179,9 @@ out chip);
             pii = chip.FindElement(ElementOID.PII)?.Text;
 
             var typeOfUsage = chip.FindElement(ElementOID.TypeOfUsage)?.Text;
-            if (typeOfUsage != null && typeOfUsage.StartsWith("8"))
+            if (typeOfUsage == "30")
+                type = "location";  // 层架标 2020/11/5
+            else if (typeOfUsage != null && typeOfUsage.StartsWith("8"))
                 type = "patron";
             else
                 type = "book";
@@ -309,6 +325,11 @@ out chip);
         {
             // 状态
             public string State { get; set; }
+
+            // 是否为层架标？
+            public bool IsLocation { get; set; }
+
+            public string ItemXml { get; set; }
 
             // GetTagInfo() 出错的次数
             public int ErrorCount { get; set; }
@@ -470,6 +491,8 @@ TaskScheduler.Default);
             var list = CopyList();
             foreach (var entity in list)
             {
+                var info = entity.Tag as ProcessInfo;
+
                 // 获得册记录和书目摘要
                 // .Value
                 //      -1  出错
@@ -490,12 +513,20 @@ TaskScheduler.Default);
                     if (string.IsNullOrEmpty(result.Title) == false)
                         entity.Title = PageBorrow.GetCaption(result.Title);
                     if (string.IsNullOrEmpty(result.ItemXml) == false)
+                    {
+                        if (info != null)
+                            info.ItemXml = result.ItemXml;
                         entity.SetData(result.ItemRecPath, result.ItemXml);
+                    }
                 }
 
+
                 // 请求 dp2library Inventory()
-                if (string.IsNullOrEmpty(entity.PII) == false)
+                if (string.IsNullOrEmpty(entity.PII) == false
+                    && info != null && info.IsLocation == false)
                 {
+                    _ = BeginInventoryAsync(entity, PageInventory.ActionMode);
+                    /*
                     var info = entity.Tag as ProcessInfo;
 
                     var request_result = RequestInventory(entity.UID,
@@ -510,7 +541,7 @@ TaskScheduler.Default);
                         // TODO: 语音提示引起操作者注意
                         entity.AppendError(request_result.ErrorInfo, "red", request_result.ErrorCode);
                     }
-
+                    */
                 }
             }
 
@@ -683,8 +714,75 @@ TaskScheduler.Default);
             }
         }
 
+        // 显示对书柜门的 Iventory 操作，同一时刻只能一个函数进入
+        static AsyncSemaphore _requestLimit = new AsyncSemaphore(1);
+
+        public static async Task BeginInventoryAsync(Entity entity,
+            string actionMode)
+        {
+            using (var releaser = await _requestLimit.EnterAsync().ConfigureAwait(false))
+            {
+                var info = entity.Tag as ProcessInfo;
+
+                // 设置 UID
+                if (StringUtil.IsInList("setUID", actionMode)
+                    && string.IsNullOrEmpty(info.ItemXml) == false)
+                {
+                    var request_result = RequestSetUID(entity.ItemRecPath,
+                        info.ItemXml,
+                        null,
+                        entity.UID,
+                        info.UserName,
+                        "");
+                    if (request_result.Value == -1)
+                    {
+                        // TODO: 语音提示引起操作者注意
+                        // TODO: NotChanged 处理
+                        entity.AppendError(request_result.ErrorInfo, "red", request_result.ErrorCode);
+                    }
+                    else
+                    {
+                        info.ItemXml = request_result.NewItemXml;
+                    }
+                }
+
+                // 动作模式
+                /* setUID               设置 UID --> PII 对照关系。即，写入册记录的 UID 字段
+                 * setCurrentLocation   设置册记录的 currentLocation 字段内容为当前层架标编号
+                 * setLocation          设置册记录的 location 字段为当前阅览室/书库位置。即调拨图书
+                 * verifyEAS            校验 RFID 标签的 EAS 状态是否正确。过程中需要检查册记录的外借状态
+                 * */
+
+                {
+                    var request_result = RequestInventory(entity.UID,
+    entity.PII,
+    StringUtil.IsInList("setCurrentLocation", actionMode) ? info.TargetCurrentLocation : null,
+    StringUtil.IsInList("setLocation", actionMode) ? info.TargetLocation : null,
+    info.BatchNo,
+    info.UserName,
+    PageInventory.ActionMode);
+                    if (request_result.Value == -1)
+                    {
+                        // TODO: 语音提示引起操作者注意
+                        // TODO: NotChanged 处理
+                        entity.AppendError(request_result.ErrorInfo, "red", request_result.ErrorCode);
+                    }
+                    else
+                    {
+                        if (string.IsNullOrEmpty(request_result.ItemXml) == false)
+                            entity.SetData(entity.ItemRecPath, request_result.ItemXml);
+                    }
+                }
+            }
+        }
+
+        public class RequestInventoryResult : NormalResult
+        {
+            public string ItemXml { get; set; }
+        }
+
         // 向 dp2library 服务器发出盘点请求
-        public static NormalResult RequestInventory(string uid,
+        public static RequestInventoryResult RequestInventory(string uid,
             string pii,
             string currentLocation,
             string location,
@@ -692,6 +790,8 @@ TaskScheduler.Default);
             string strUserName,
             string style)
         {
+            if (currentLocation == null && location == null)
+                return new RequestInventoryResult { Value = 0 };    // 没有必要修改
 
             // TODO: 是否要用特定的工作人员身份进行盘点?
             LibraryChannel channel = App.CurrentApp.GetChannel(strUserName);
@@ -738,6 +838,113 @@ TaskScheduler.Default);
                     out string output_reader_barcode,
                     out ReturnInfo return_info,
                     out string strError);
+                if (lRet == -1 && channel.ErrorCode != ErrorCode.NotChanged)
+                {
+                    if ((channel.ErrorCode == ErrorCode.RequestError
+        || channel.ErrorCode == ErrorCode.RequestTimeOut))
+                    {
+                        nRedoCount++;
+
+                        if (nRedoCount < 2)
+                            goto REDO;
+                        else
+                        {
+                            return new RequestInventoryResult
+                            {
+                                Value = -1,
+                                ErrorInfo = "因网络出现问题，请求 dp2library 服务器失败",
+                                ErrorCode = "requestError"
+                            };
+                        }
+                    }
+
+                    return new RequestInventoryResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError,
+                        ErrorCode = channel.ErrorCode.ToString()
+                    };
+                }
+
+                // 更新册记录
+                string entity_xml = null;
+                if (item_records?.Length > 0)
+                    entity_xml = item_records[0];
+                return new RequestInventoryResult { ItemXml = entity_xml };
+            }
+            finally
+            {
+                channel.Timeout = old_timeout;
+                App.CurrentApp.ReturnChannel(channel);
+            }
+        }
+
+        // 当前层架标
+        public static string CurrentShelfNo { get; set; }
+
+        // 当前馆藏地。例如 “海淀分馆/阅览室”
+        public static string CurrentLocation { get; set; }
+
+        public class RequestSetUidResult : NormalResult
+        {
+            public string NewItemXml { get; set; }
+            public byte[] NewTimestamp { get; set; }
+        }
+
+        // 向 dp2library 服务器发出设置册记录 UID 的请求
+        public static RequestSetUidResult RequestSetUID(
+            string strRecPath,
+            string strOldXml,
+            byte[] old_timestamp,
+            string uid,
+            // string batchNo,
+            string strUserName,
+            string style)
+        {
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml(strOldXml);
+
+            string old_uid = DomUtil.GetElementText(dom.DocumentElement, "uid");
+            if (old_uid == uid)
+            {
+                return new RequestSetUidResult { Value = 0 };    // 没有必要修改
+            }
+            DomUtil.SetElementText(dom.DocumentElement, "uid", uid);
+
+
+            List<EntityInfo> entityArray = new List<EntityInfo>();
+
+            {
+                EntityInfo item_info = new EntityInfo();
+
+                item_info.OldRecPath = strRecPath;
+                item_info.Action = "setuid";
+                item_info.NewRecPath = strRecPath;
+
+                item_info.NewRecord = dom.OuterXml;
+                item_info.NewTimestamp = null;
+
+                item_info.OldRecord = strOldXml;
+                item_info.OldTimestamp = old_timestamp;
+
+                entityArray.Add(item_info);
+            }
+
+            // TODO: 是否要用特定的工作人员身份进行盘点?
+            LibraryChannel channel = App.CurrentApp.GetChannel(strUserName);
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromSeconds(10);
+
+            try
+            {
+                int nRedoCount = 0;
+            REDO:
+                long lRet = channel.SetEntities(
+                 null,
+                 "",
+                 entityArray.ToArray(),
+                 out EntityInfo[] errorinfos,
+                 out string strError);
                 if (lRet == -1)
                 {
                     if ((channel.ErrorCode == ErrorCode.RequestError
@@ -749,7 +956,7 @@ TaskScheduler.Default);
                             goto REDO;
                         else
                         {
-                            return new NormalResult
+                            return new RequestSetUidResult
                             {
                                 Value = -1,
                                 ErrorInfo = "因网络出现问题，请求 dp2library 服务器失败",
@@ -757,16 +964,59 @@ TaskScheduler.Default);
                             };
                         }
                     }
+
+                    return new RequestSetUidResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError,
+                        ErrorCode = channel.ErrorCode.ToString()
+                    };
                 }
 
-                return new NormalResult();
+                if (errorinfos == null)
+                    return new RequestSetUidResult { };
+
+                List<string> errors = new List<string>();
+                string strNewXml = "";
+                byte[] baNewTimestamp = null;
+                for (int i = 0; i < errorinfos.Length; i++)
+                {
+                    var info = errorinfos[i];
+
+                    if (i == 0)
+                    {
+                        baNewTimestamp = info.NewTimestamp;
+                        strNewXml = info.NewRecord;
+                    }
+
+                    // 正常信息处理
+                    if (info.ErrorCode == ErrorCodeValue.NoError)
+                        continue;
+
+                    errors.Add(info.RefID + " 在提交保存过程中发生错误 -- " + info.ErrorInfo);
+                }
+
+                if (errors.Count > 0)
+                    return new RequestSetUidResult
+                    {
+                        Value = -1,
+                        ErrorInfo = StringUtil.MakePathList(errors, ";")
+                    };
+
+                return new RequestSetUidResult
+                {
+                    Value = 1,
+                    NewItemXml = strNewXml,
+                    NewTimestamp = baNewTimestamp
+                };
             }
             finally
             {
                 channel.Timeout = old_timeout;
                 App.CurrentApp.ReturnChannel(channel);
             }
-
         }
+
+
     }
 }
