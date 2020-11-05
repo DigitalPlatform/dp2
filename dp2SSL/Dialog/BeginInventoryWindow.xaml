@@ -23,22 +23,50 @@
                      Background="Transparent" Foreground="LightGray" BorderThickness="0"
                      FontSize="24" HorizontalContentAlignment="Center"/>
 
-            <StackPanel Grid.Row="1" Margin="20" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <StackPanel Grid.Row="1" Margin="10" HorizontalAlignment="Center" VerticalAlignment="Center">
                 <CheckBox x:Name="actionSetUID" Foreground="LightGray"
-                          FontSize="26">设置册记录 UID</CheckBox>
+                          FontSize="13" 
+                          Margin="4"
+                          Unchecked="actionSetUID_Checked"
+                          Checked="actionSetUID_Checked">设置册记录 UID
+                    <CheckBox.LayoutTransform>
+                        <ScaleTransform ScaleX="2" ScaleY="2" />
+                    </CheckBox.LayoutTransform>
+                </CheckBox>
                 <CheckBox x:Name="actionSetCurrentLocation" Foreground="LightGray" 
-                          FontSize="26">更新当前位置</CheckBox>
+                          FontSize="13" 
+                          Margin="4"
+                          Unchecked="actionSetUID_Checked"
+                          Checked="actionSetUID_Checked">更新当前位置
+                    <CheckBox.LayoutTransform>
+                        <ScaleTransform ScaleX="2" ScaleY="2" />
+                    </CheckBox.LayoutTransform>
+                </CheckBox>
                 <CheckBox x:Name="actionSetLocation" Foreground="LightGray" 
-                          FontSize="26">更新永久馆藏地</CheckBox>
+                          FontSize="13" 
+                          Margin="4"
+                          Unchecked="actionSetUID_Checked"
+                          Checked="actionSetUID_Checked">更新永久馆藏地
+                    <CheckBox.LayoutTransform>
+                        <ScaleTransform ScaleX="2" ScaleY="2" />
+                    </CheckBox.LayoutTransform>
+                </CheckBox>
                 <CheckBox x:Name="actionVerifyEas" Foreground="LightGray" 
-                          FontSize="26" Visibility="Collapsed">校验 EAS</CheckBox>
+                          FontSize="13" Visibility="Collapsed"
+                          Margin="4"
+                          Unchecked="actionSetUID_Checked"
+                          Checked="actionSetUID_Checked">校验 EAS
+                    <CheckBox.LayoutTransform>
+                        <ScaleTransform ScaleX="2" ScaleY="2" />
+                    </CheckBox.LayoutTransform>
+                </CheckBox>
             </StackPanel>
 
             <TextBox Name="text" Grid.Row="2"  Margin="10"
                    VerticalAlignment="Center" HorizontalAlignment="Center"
                    FontSize="20" TextWrapping="Wrap"
                  Background="Transparent" Foreground="White" 
-                 VerticalScrollBarVisibility="Auto" BorderThickness="0">Text</TextBox>
+                 VerticalScrollBarVisibility="Auto" BorderThickness="0">---</TextBox>
 
             <!-- 按钮区 -->
             <StackPanel Grid.Row="3" Orientation="Horizontal">
@@ -69,6 +97,16 @@
                 <Border BorderThickness="0" BorderBrush="Gray"
                         Margin="10" Padding="10" Width="250">
                     <StackPanel VerticalAlignment="Bottom" Orientation="Vertical">
+                        <CheckBox x:Name="slowMode" Foreground="LightGray" 
+                          FontSize="12"
+                          Unchecked="actionSetUID_Checked"
+                          Checked="actionSetUID_Checked"
+                                  Margin="10">慢速模式
+                            <CheckBox.LayoutTransform>
+                                <ScaleTransform ScaleX="1.6" ScaleY="1.6" />
+                            </CheckBox.LayoutTransform>
+                        </CheckBox>
+
                         <Button Name="cancelButton"
                     Style="{DynamicResource RoundedButtonStyle}" 
                     Width="180" Height="60" 

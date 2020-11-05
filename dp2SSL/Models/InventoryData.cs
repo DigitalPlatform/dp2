@@ -47,6 +47,7 @@ namespace dp2SSL
         // 清除所有列表
         public static void Clear()
         {
+            _uidTable.Clear();
             _entityTable.Clear();
             RemoveList(null);
             _errorEntities.Clear();
@@ -54,6 +55,11 @@ namespace dp2SSL
 
         // UID --> entity
         static Hashtable _entityTable = new Hashtable();
+
+        public static void RemoveEntity(Entity entity)
+        {
+            _entityTable.Remove(entity.UID);
+        }
 
         public static Entity AddEntity(TagAndData tag, out bool isNewly)
         {

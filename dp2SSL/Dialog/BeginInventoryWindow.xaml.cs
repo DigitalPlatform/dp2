@@ -1,5 +1,4 @@
-﻿using DigitalPlatform.Text;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,6 +11,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+
+using DigitalPlatform.Text;
 
 namespace dp2SSL
 {
@@ -73,6 +74,19 @@ namespace dp2SSL
             }
         }
 
+        // 慢速模式。故意令 UID --> PII 对照表为空，迫使盘点过程从 RFID 标签获取 PII
+        public bool SlowMode
+        {
+            get
+            {
+                return (bool)this.slowMode.IsChecked;
+            }
+            set
+            {
+                this.slowMode.IsChecked = value;
+            }
+        }
+
         // 动作模式
         /* setUID               设置 UID --> PII 对照关系。即，写入册记录的 UID 字段
          * setCurrentLocation   设置册记录的 currentLocation 字段内容为当前层架标编号
@@ -121,6 +135,19 @@ namespace dp2SSL
         private void cancelButton_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
+        }
+
+        private void actionSetUID_Checked(object sender, RoutedEventArgs e)
+        {
+            CheckBox checkbox = sender as CheckBox;
+            if (checkbox.IsChecked == true)
+            {
+                checkbox.FontWeight = FontWeights.Bold;
+            }
+            else
+            {
+                checkbox.FontWeight = FontWeights.Normal;
+            }
         }
     }
 }
