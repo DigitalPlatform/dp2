@@ -91,6 +91,7 @@ namespace dp2SSL
 
                 string batchNo = "inventory_" + DateTime.Now.ToShortDateString();
 
+                bool slow_mode = false;
                 bool dialog_result = false;
                 // “开始盘点”对话框
                 App.Invoke(new Action(() =>
@@ -122,7 +123,7 @@ namespace dp2SSL
 
                             CurrentLocation = dialog.Location;
                             // batchNo = dialog.BatchNo;
-
+                            slow_mode = dialog.SlowMode;
                         }
                     }
                     finally
@@ -131,11 +132,10 @@ namespace dp2SSL
                     }
                 }));
 
+                ClearList();
 
-                if (dialog_result == true)
+                if (dialog_result == true && slow_mode == false)
                 {
-                    ClearList();
-
                     CancellationTokenSource cancel = new CancellationTokenSource();
 
                     ProgressWindow progress = null;
@@ -388,6 +388,16 @@ namespace dp2SSL
             FillEntity(channel, entity);
         }
 #endif
+        void RemoveEntity(Entity entity)
+        {
+            // 删除这个事项，以便后面可以重新处理
+            App.Invoke(new Action(() =>
+            {
+                _entities.Remove(entity);
+            }));
+            InventoryData.RemoveEntity(entity);
+        }
+
         delegate bool delegate_speakLocation(Entity entity);
 
         void FillEntity(BaseChannel<IRfid> channel,
@@ -403,7 +413,12 @@ namespace dp2SSL
                 if (InventoryData.UidExsits(entity.UID, out string pii))
                 {
                     entity.PII = pii;
-                    SetTargetCurrentLocation(info);
+                    var set_result = SetTargetCurrentLocation(info);
+                    if (set_result.Value == -1 && set_result.ErrorCode == "noCurrentShelfNo")
+                    {
+                        // 删除这个事项，以便后面可以重新处理
+                        RemoveEntity(entity);
+                    }
                 }
                 else
                 {
@@ -464,7 +479,12 @@ namespace dp2SSL
                             }
                             else
                             {
-                                SetTargetCurrentLocation(info);
+                                var set_result = SetTargetCurrentLocation(info);
+                                if (set_result.Value == -1 && set_result.ErrorCode == "noCurrentShelfNo")
+                                {
+                                    // 删除这个事项，以便后面可以重新处理
+                                    RemoveEntity(entity);
+                                }
                             }
 
                             // 朗读出错 entity 数量
@@ -501,19 +521,24 @@ namespace dp2SSL
 
         // 给册事项里面添加 目标当前架位 参数。
         // 注意，如果 actionMode 里面不包含 setCurrentLocation，则没有必要做这一步
-        void SetTargetCurrentLocation(ProcessInfo info)
+        NormalResult SetTargetCurrentLocation(ProcessInfo info)
         {
             info.TargetLocation = CurrentLocation;
 
             if (string.IsNullOrEmpty(CurrentShelfNo) == true)
             {
                 if (StringUtil.IsInList("setCurrentLocation", ActionMode) == false)
-                    return;
+                    return new NormalResult();
 
                 App.CurrentApp.SpeakSequence("请先扫层架标，再扫图书");
-                return;
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorCode = "noCurrentShelfNo"
+                };
             }
             info.TargetCurrentLocation = CurrentLocation + ":" + CurrentShelfNo;
+            return new NormalResult();
         }
 
         string FindTitle(int index)
@@ -619,6 +644,7 @@ namespace dp2SSL
                 _entities.Clear();
             }));
             InventoryData.Clear();
+            InventoryData.CurrentShelfNo = null;
         }
 
         private void beginSound_Click(object sender, RoutedEventArgs e)
