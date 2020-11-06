@@ -47,7 +47,14 @@
   </action>
   <action element="shelfNo" type="">
     <caption lang="zh">架号</caption>
-  </action>  <action element="intact" type="">
+  </action>
+  <action element="currentLocation" type="">
+    <caption lang="zh">当前架位</caption>
+  </action>
+  <action element="uid" type="">
+    <caption lang="zh">RFID UID</caption>
+  </action>
+  <action element="intact" type="">
     <caption lang="zh">完好率</caption>
   </action>
 </root>

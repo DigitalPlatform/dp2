@@ -530,7 +530,7 @@ namespace dp2SSL
                 if (StringUtil.IsInList("setCurrentLocation", ActionMode) == false)
                     return new NormalResult();
 
-                App.CurrentApp.SpeakSequence("请先扫层架标，再扫图书");
+                App.CurrentApp.Speak("请先扫层架标，再扫图书");
                 return new NormalResult
                 {
                     Value = -1,

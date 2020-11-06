@@ -480,7 +480,7 @@ namespace dp2SSL
                 {
                     try
                     {
-                        await TinyServer.LedDisplay(App.LedText, null);
+                        await TinyServer.LedDisplayAsync(App.LedText, null);
                     }
                     catch (Exception ex)
                     {

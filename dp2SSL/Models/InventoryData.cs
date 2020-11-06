@@ -730,6 +730,37 @@ TaskScheduler.Default);
             {
                 var info = entity.Tag as ProcessInfo;
 
+                // 还书
+                if (info != null
+                    && (StringUtil.IsInList("setLocation", actionMode)
+                    || StringUtil.IsInList("setCurrentLocation", actionMode)
+                    || StringUtil.IsInList("verifyEAS", actionMode))
+                    && HasBorrowed(info.ItemXml)
+                    )
+                {
+                    var request_result = RequestReturn(
+    entity.PII,
+    entity.ItemRecPath,
+    info.BatchNo,
+    info.UserName,
+    "");
+                    if (request_result.Value == -1)
+                    {
+                        App.CurrentApp.SpeakSequence($"{entity.PII} 还书请求出错");
+                        entity.AppendError(request_result.ErrorInfo, "red", request_result.ErrorCode);
+                    }
+                    else
+                    {
+                        // 提醒操作者发生了还书操作
+                        App.CurrentApp.SpeakSequence($"还书成功 {entity.PII}");
+
+                        if (string.IsNullOrEmpty(request_result.ItemXml) == false)
+                            info.ItemXml = request_result.ItemXml;
+
+                        // TODO: 提请修改 EAS。可能会通过反复操作才能修改成功
+                    }
+                }
+
                 // 设置 UID
                 if (StringUtil.IsInList("setUID", actionMode)
                     && string.IsNullOrEmpty(info.ItemXml) == false)
@@ -742,13 +773,14 @@ TaskScheduler.Default);
                         "");
                     if (request_result.Value == -1)
                     {
-                        // TODO: 语音提示引起操作者注意
+                        App.CurrentApp.SpeakSequence($"{entity.UID} 设置 UID 请求出错");
                         // TODO: NotChanged 处理
                         entity.AppendError(request_result.ErrorInfo, "red", request_result.ErrorCode);
                     }
                     else
                     {
-                        info.ItemXml = request_result.NewItemXml;
+                        if (string.IsNullOrEmpty(request_result.NewItemXml) == false)
+                            info.ItemXml = request_result.NewItemXml;
                     }
                 }
 
@@ -769,7 +801,7 @@ TaskScheduler.Default);
     PageInventory.ActionMode);
                     if (request_result.Value == -1)
                     {
-                        // TODO: 语音提示引起操作者注意
+                        App.CurrentApp.SpeakSequence($"{entity.PII} 盘点请求出错");
                         // TODO: NotChanged 处理
                         entity.AppendError(request_result.ErrorInfo, "red", request_result.ErrorCode);
                     }
@@ -780,6 +812,27 @@ TaskScheduler.Default);
                     }
                 }
             }
+        }
+
+        // 观察册记录 XML 中是否有 borrower 元素
+        static bool HasBorrowed(string item_xml)
+        {
+            if (string.IsNullOrEmpty(item_xml))
+                return false;
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.LoadXml(item_xml);
+            }
+            catch
+            {
+                return false;
+            }
+
+            string borrower = DomUtil.GetElementText(dom.DocumentElement, "borrower");
+            if (string.IsNullOrEmpty(borrower) == false)
+                return true;
+            return false;
         }
 
         public class RequestInventoryResult : NormalResult
@@ -1023,6 +1076,83 @@ TaskScheduler.Default);
             }
         }
 
+        // 向 dp2library 服务器发出还书请求
+        public static RequestInventoryResult RequestReturn(
+            string pii,
+            string itemRecPath,
+            string batchNo,
+            string strUserName,
+            string style)
+        {
+            // TODO: 是否要用特定的工作人员身份进行还书?
+            LibraryChannel channel = App.CurrentApp.GetChannel(strUserName);
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromSeconds(10);
+
+            try
+            {
+                string strStyle = "item";
+                string operTimeStyle = "";
+
+                int nRedoCount = 0;
+            REDO:
+                long lRet = channel.Return(null,
+                    "return",
+                    "", // _patron.Barcode,
+                    pii,    // entity.PII,
+                    itemRecPath,
+                    false,
+                    strStyle + operTimeStyle, // style,
+                    "xml", // item_format_list
+                    out string[] item_records,
+                    "xml",
+                    out string[] reader_records,
+                    "summary",
+                    out string[] biblio_records,
+                    out string[] dup_path,
+                    out string output_reader_barcode,
+                    out ReturnInfo return_info,
+                    out string strError);
+                if (lRet == -1 && channel.ErrorCode != ErrorCode.NotBorrowed)
+                {
+                    if ((channel.ErrorCode == ErrorCode.RequestError
+        || channel.ErrorCode == ErrorCode.RequestTimeOut))
+                    {
+                        nRedoCount++;
+
+                        if (nRedoCount < 2)
+                            goto REDO;
+                        else
+                        {
+                            return new RequestInventoryResult
+                            {
+                                Value = -1,
+                                ErrorInfo = "因网络出现问题，请求 dp2library 服务器失败",
+                                ErrorCode = "requestError"
+                            };
+                        }
+                    }
+
+                    return new RequestInventoryResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError,
+                        ErrorCode = channel.ErrorCode.ToString()
+                    };
+                }
+
+                // 更新册记录
+                string entity_xml = null;
+                if (item_records?.Length > 0)
+                    entity_xml = item_records[0];
+                return new RequestInventoryResult { ItemXml = entity_xml };
+            }
+            finally
+            {
+                channel.Timeout = old_timeout;
+                App.CurrentApp.ReturnChannel(channel);
+            }
+        }
 
     }
 }
