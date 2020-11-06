@@ -137,7 +137,7 @@ namespace dp2SSL
             this.Close();
         }
 
-        private void actionSetUID_Checked(object sender, RoutedEventArgs e)
+        private void checkbox_Checked(object sender, RoutedEventArgs e)
         {
             CheckBox checkbox = sender as CheckBox;
             if (checkbox.IsChecked == true)

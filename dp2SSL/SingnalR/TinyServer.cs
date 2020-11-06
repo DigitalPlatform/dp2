@@ -1118,7 +1118,7 @@ restart
             {
                 string param = command.Substring("led".Length).Trim();
                 App.LedText = param;    // 保存起来
-                await LedDisplay(param, groupName);
+                await LedDisplayAsync(param, groupName);
                 return;
             }
 
@@ -1325,7 +1325,7 @@ restart
         // -horzAlign:left
         // -vertAlign:top
         // -style:xxx
-        public static async Task LedDisplay(string param, string groupName)
+        public static async Task LedDisplayAsync(string param, string groupName)
         {
             string ledName = "*";
             DisplayStyle property = new DisplayStyle();
@@ -1348,7 +1348,8 @@ restart
                 else
                 {
                     name = "text";
-                    value = parameter;
+                    // Unescape
+                    value = Unescape(parameter);
                 }
 
                 if (name == "x")
@@ -1389,6 +1390,13 @@ restart
                 property,
                 style);
             await SendMessageAsync(groupName == null ? null : new string[] { groupName }, result.Value == -1 ? result.ErrorInfo : $"'{text}' 已成功显示在 LED 屏上");
+        }
+
+        static string Unescape(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+                return text;
+            return System.Text.RegularExpressions.Regex.Unescape(text.Replace("\\w", " "));
         }
 
         public static bool ContainsParam(string args, string param)

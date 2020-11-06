@@ -27,8 +27,8 @@
                 <CheckBox x:Name="actionSetUID" Foreground="LightGray"
                           FontSize="13" 
                           Margin="4"
-                          Unchecked="actionSetUID_Checked"
-                          Checked="actionSetUID_Checked">设置册记录 UID
+                          Unchecked="checkbox_Checked"
+                          Checked="checkbox_Checked">设置册记录 UID
                     <CheckBox.LayoutTransform>
                         <ScaleTransform ScaleX="2" ScaleY="2" />
                     </CheckBox.LayoutTransform>
@@ -36,8 +36,8 @@
                 <CheckBox x:Name="actionSetCurrentLocation" Foreground="LightGray" 
                           FontSize="13" 
                           Margin="4"
-                          Unchecked="actionSetUID_Checked"
-                          Checked="actionSetUID_Checked">更新当前位置
+                          Unchecked="checkbox_Checked"
+                          Checked="checkbox_Checked">更新当前位置
                     <CheckBox.LayoutTransform>
                         <ScaleTransform ScaleX="2" ScaleY="2" />
                     </CheckBox.LayoutTransform>
@@ -45,8 +45,8 @@
                 <CheckBox x:Name="actionSetLocation" Foreground="LightGray" 
                           FontSize="13" 
                           Margin="4"
-                          Unchecked="actionSetUID_Checked"
-                          Checked="actionSetUID_Checked">更新永久馆藏地
+                          Unchecked="checkbox_Checked"
+                          Checked="checkbox_Checked">更新永久馆藏地
                     <CheckBox.LayoutTransform>
                         <ScaleTransform ScaleX="2" ScaleY="2" />
                     </CheckBox.LayoutTransform>
@@ -54,8 +54,8 @@
                 <CheckBox x:Name="actionVerifyEas" Foreground="LightGray" 
                           FontSize="13" Visibility="Collapsed"
                           Margin="4"
-                          Unchecked="actionSetUID_Checked"
-                          Checked="actionSetUID_Checked">校验 EAS
+                          Unchecked="checkbox_Checked"
+                          Checked="checkbox_Checked">校验 EAS
                     <CheckBox.LayoutTransform>
                         <ScaleTransform ScaleX="2" ScaleY="2" />
                     </CheckBox.LayoutTransform>
@@ -99,8 +99,8 @@
                     <StackPanel VerticalAlignment="Bottom" Orientation="Vertical">
                         <CheckBox x:Name="slowMode" Foreground="LightGray" 
                           FontSize="12"
-                          Unchecked="actionSetUID_Checked"
-                          Checked="actionSetUID_Checked"
+                          Unchecked="checkbox_Checked"
+                          Checked="checkbox_Checked"
                                   Margin="10">慢速模式
                             <CheckBox.LayoutTransform>
                                 <ScaleTransform ScaleX="1.6" ScaleY="1.6" />
