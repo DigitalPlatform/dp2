@@ -231,79 +231,79 @@ namespace dp2Circulation
         /// <summary>
         /// 书目库检索路径信息集合
         /// </summary>
-        public BiblioDbFromInfo[] BiblioDbFromInfos = null;   // 书目库检索路径信息
+        public BiblioDbFromInfo[] BiblioDbFromInfos = new BiblioDbFromInfo[] { };   // 书目库检索路径信息
 
         /// <summary>
         /// 读者库检索路径信息集合
         /// </summary>
-        public BiblioDbFromInfo[] ReaderDbFromInfos = null;   // 读者库检索路径信息 2012/2/8
+        public BiblioDbFromInfo[] ReaderDbFromInfos = new BiblioDbFromInfo[] { };   // 读者库检索路径信息 2012/2/8
 
         /// <summary>
         /// 规范库检索路径信息集合
         /// </summary>
-        public BiblioDbFromInfo[] AuthorityDbFromInfos = null;
+        public BiblioDbFromInfo[] AuthorityDbFromInfos = new BiblioDbFromInfo[] { };
 
         /// <summary>
         /// 实体库检索路径信息集合
         /// </summary>
-        public BiblioDbFromInfo[] ItemDbFromInfos = null;   // 实体库检索路径信息 2012/5/5
+        public BiblioDbFromInfo[] ItemDbFromInfos = new BiblioDbFromInfo[] { };   // 实体库检索路径信息 2012/5/5
 
         /// <summary>
         /// 订购库检索路径信息集合
         /// </summary>
-        public BiblioDbFromInfo[] OrderDbFromInfos = null;   // 订购库检索路径信息 2012/5/5
+        public BiblioDbFromInfo[] OrderDbFromInfos = new BiblioDbFromInfo[] { };   // 订购库检索路径信息 2012/5/5
 
         /// <summary>
         /// 期库检索路径信息集合
         /// </summary>
-        public BiblioDbFromInfo[] IssueDbFromInfos = null;   // 期库检索路径信息 2012/5/5
+        public BiblioDbFromInfo[] IssueDbFromInfos = new BiblioDbFromInfo[] { };   // 期库检索路径信息 2012/5/5
 
         /// <summary>
         /// 评注库检索路径信息集合
         /// </summary>
-        public BiblioDbFromInfo[] CommentDbFromInfos = null;   // 评注库检索路径信息 2012/5/5
+        public BiblioDbFromInfo[] CommentDbFromInfos = new BiblioDbFromInfo[] { };   // 评注库检索路径信息 2012/5/5
 
         /// <summary>
         /// 发票库检索路径信息集合
         /// </summary>
-        public BiblioDbFromInfo[] InvoiceDbFromInfos = null;   // 发票库检索路径信息 2012/11/8
+        public BiblioDbFromInfo[] InvoiceDbFromInfos = new BiblioDbFromInfo[] { };   // 发票库检索路径信息 2012/11/8
 
         /// <summary>
         /// 违约金库检索路径信息集合
         /// </summary>
-        public BiblioDbFromInfo[] AmerceDbFromInfos = null;   // 违约金库检索路径信息 2012/11/8
+        public BiblioDbFromInfo[] AmerceDbFromInfos = new BiblioDbFromInfo[] { };   // 违约金库检索路径信息 2012/11/8
 
         /// <summary>
         /// 预约到书库检索路径信息集合
         /// </summary>
-        public BiblioDbFromInfo[] ArrivedDbFromInfos = null;   // 预约到书库检索路径信息 2015/6/13
+        public BiblioDbFromInfo[] ArrivedDbFromInfos = new BiblioDbFromInfo[] { };   // 预约到书库检索路径信息 2015/6/13
 
         /// <summary>
         /// 书目库属性集合
         /// </summary>
-        public List<BiblioDbProperty> BiblioDbProperties = null;
+        public List<BiblioDbProperty> BiblioDbProperties = new List<BiblioDbProperty>();
 
         /// <summary>
         /// 普通库属性集合
         /// </summary>
-        public List<NormalDbProperty> NormalDbProperties = null;
+        public List<NormalDbProperty> NormalDbProperties = new List<NormalDbProperty>();
 
         // public string[] ReaderDbNames = null;
         /// <summary>
         /// 读者库属性集合
         /// </summary>
-        public List<ReaderDbProperty> ReaderDbProperties = null;
+        public List<ReaderDbProperty> ReaderDbProperties = new List<ReaderDbProperty>();
 
         /// <summary>
         /// 规范库属性集合
         /// </summary>
-        public List<BiblioDbProperty> AuthorityDbProperties = null;
+        public List<BiblioDbProperty> AuthorityDbProperties = new List<BiblioDbProperty>();
 
 
         /// <summary>
         /// 实用库属性集合
         /// </summary>
-        public List<UtilDbProperty> UtilDbProperties = null;
+        public List<UtilDbProperty> UtilDbProperties = new List<UtilDbProperty>();
 
         #endregion
 
