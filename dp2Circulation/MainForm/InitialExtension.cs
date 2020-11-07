@@ -587,7 +587,7 @@ Stack:
             }
 
             return;
-            ERROR1:
+        ERROR1:
             // ShowMessageBox(strError);
             this.DisplayBackgroundText("绿色更新过程出错: " + strError + "\r\n");
             ReportError("dp2circulation GreenUpdate() 出错", strError);
@@ -746,7 +746,7 @@ MessageBoxDefaultButton.Button1);
                 }
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1061,7 +1061,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             this.ReportError("dp2circulation 迁移打印模板目录时出错", strError);
             MessageBox.Show(this, "迁移打印模板目录时出错: " + strError);
         }
@@ -1110,7 +1110,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             this.ReportError("dp2circulation 迁移统计方案目录时出错", strError);
             MessageBox.Show(this, "迁移统计方案目录时出错: " + strError);
         }
@@ -1160,7 +1160,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             return true;
-            ERROR1:
+        ERROR1:
             Program.PromptAndExit(this, "用户目录 '" + this.UserDir + "' 创建失败或者权限不足。请确保当前 Windows 用户能访问和修改这个目录以及下级子目录、文件，并确保它或者上级目录不是隐藏的状态");
             return false;
         }
@@ -1710,7 +1710,7 @@ MessageBoxDefaultButton.Button1);
             // 标签总数显示
             if (e.Result.Results != null)
             {
-                TagList.Refresh(sender as BaseChannel<IRfid>, 
+                TagList.Refresh(sender as BaseChannel<IRfid>,
                     e.ReaderNameList,
                     e.Result.Results,
                         (add_books, update_books, remove_books, add_patrons, update_patrons, remove_patrons) =>
@@ -2198,7 +2198,7 @@ MessageBoxDefaultButton.Button1);
                 goto ERROR1;
             }
             return true;
-            ERROR1:
+        ERROR1:
             // MessageBox.Show(this, strError);
             return false;
         }
@@ -2551,7 +2551,7 @@ AppInfo.GetString("config",
                     }
                 }
 
-                END1:
+            END1:
 
 #if NO
                 // 安装条码字体
@@ -2753,7 +2753,7 @@ Culture=neutral, PublicKeyToken=null
         /// <returns>-1: 出错，不希望继续以后的操作; 0: 成功; 1: 出错，但希望继续后面的操作</returns>
         public int TouchServer(bool bPrepareSearch = true)
         {
-            REDO:
+        REDO:
 #if NO
             if (bPrepareSearch == true)
             {
@@ -2801,7 +2801,7 @@ Culture=neutral, PublicKeyToken=null
             }
 
             return 0;
-            ERROR1:
+        ERROR1:
             DialogResult result = MessageBox.Show(this,
                 strError + "\r\n\r\n是否重试?",
                 "dp2Circulation",
@@ -2997,7 +2997,7 @@ Culture=neutral, PublicKeyToken=null
         /// <returns>-1: 出错，不希望继续以后的操作; 0: 成功; 1: 出错，但希望继续后面的操作</returns>
         public int GetDbFromInfos(bool bPrepareSearch = true)
         {
-            REDO:
+        REDO:
 #if NO
             if (bPrepareSearch == true)
             {
@@ -3018,12 +3018,10 @@ Culture=neutral, PublicKeyToken=null
             try
             {
                 // 获得书目库的检索途径
-                BiblioDbFromInfo[] infos = null;
-
                 long lRet = channel.ListDbFroms(Stop,
                     "biblio",
                     this.Lang,
-                    out infos,
+                    out BiblioDbFromInfo[] infos,
                     out strError);
                 if (lRet == -1)
                 {
@@ -3031,7 +3029,7 @@ Culture=neutral, PublicKeyToken=null
                     goto ERROR1;
                 }
 
-                this.BiblioDbFromInfos = infos;
+                this.BiblioDbFromInfos = (infos ?? Array.Empty<BiblioDbFromInfo>());
 
                 if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.6") >= 0)
                 {
@@ -3047,7 +3045,7 @@ Culture=neutral, PublicKeyToken=null
                         goto ERROR1;
                     }
 
-                    this.AuthorityDbFromInfos = infos;
+                    this.AuthorityDbFromInfos = (infos ?? Array.Empty<BiblioDbFromInfo>());
                 }
 
                 // 获得读者库的检索途径
@@ -3068,11 +3066,11 @@ Culture=neutral, PublicKeyToken=null
                     && infos[0].Caption == this.BiblioDbFromInfos[0].Caption)
                 {
                     // 如果第一个元素的caption一样，则说明GetDbFroms API是旧版本的，不支持获取读者库的检索途径功能
-                    this.ReaderDbFromInfos = null;
+                    this.ReaderDbFromInfos = new BiblioDbFromInfo[] { };
                 }
                 else
                 {
-                    this.ReaderDbFromInfos = infos;
+                    this.ReaderDbFromInfos = (infos ?? Array.Empty<BiblioDbFromInfo>());    // infos;
                 }
 
                 if (StringUtil.CompareVersion(this.ServerVersion, "2.11") >= 0)
@@ -3089,7 +3087,7 @@ Culture=neutral, PublicKeyToken=null
                         strError = "针对服务器 " + channel.Url + " 列出实体库检索途径过程发生错误：" + strError;
                         goto ERROR1;
                     }
-                    this.ItemDbFromInfos = infos;
+                    this.ItemDbFromInfos = (infos ?? Array.Empty<BiblioDbFromInfo>());
 
                     // 获得期库的检索途径
                     infos = null;
@@ -3103,7 +3101,7 @@ Culture=neutral, PublicKeyToken=null
                         strError = "针对服务器 " + channel.Url + " 列出期库检索途径过程发生错误：" + strError;
                         goto ERROR1;
                     }
-                    this.IssueDbFromInfos = infos;
+                    this.IssueDbFromInfos = (infos ?? Array.Empty<BiblioDbFromInfo>());
 
                     // 获得订购库的检索途径
                     infos = null;
@@ -3117,7 +3115,7 @@ Culture=neutral, PublicKeyToken=null
                         strError = "针对服务器 " + channel.Url + " 列出订购库检索途径过程发生错误：" + strError;
                         goto ERROR1;
                     }
-                    this.OrderDbFromInfos = infos;
+                    this.OrderDbFromInfos = (infos ?? Array.Empty<BiblioDbFromInfo>());
 
                     // 获得评注库的检索途径
                     infos = null;
@@ -3131,7 +3129,7 @@ Culture=neutral, PublicKeyToken=null
                         strError = "针对服务器 " + channel.Url + " 列出评注库检索途径过程发生错误：" + strError;
                         goto ERROR1;
                     }
-                    this.CommentDbFromInfos = infos;
+                    this.CommentDbFromInfos = (infos ?? Array.Empty<BiblioDbFromInfo>());
                 }
 
                 if (StringUtil.CompareVersion(this.ServerVersion, "2.17") >= 0)
@@ -3149,7 +3147,7 @@ Culture=neutral, PublicKeyToken=null
                         goto ERROR1;
                     }
 
-                    this.InvoiceDbFromInfos = infos;
+                    this.InvoiceDbFromInfos = (infos ?? Array.Empty<BiblioDbFromInfo>());
 
                     // 获得违约金库的检索途径
                     infos = null;
@@ -3164,7 +3162,7 @@ Culture=neutral, PublicKeyToken=null
                         goto ERROR1;
                     }
 
-                    this.AmerceDbFromInfos = infos;
+                    this.AmerceDbFromInfos = (infos ?? Array.Empty<BiblioDbFromInfo>());
 
                 }
 
@@ -3183,7 +3181,7 @@ Culture=neutral, PublicKeyToken=null
                         goto ERROR1;
                     }
 
-                    this.ArrivedDbFromInfos = infos;
+                    this.ArrivedDbFromInfos = (infos ?? Array.Empty<BiblioDbFromInfo>());
                 }
 
                 // 需要检查一下Caption是否有重复(但是style不同)的，如果有，需要修改Caption名
@@ -3205,7 +3203,7 @@ Culture=neutral, PublicKeyToken=null
             }
 
             return 0;
-            ERROR1:
+        ERROR1:
             if (this.Visible == false || this.IsDisposed)
                 return -1;
             DialogResult result = MessageBox.Show(this,
@@ -3286,7 +3284,7 @@ Culture=neutral, PublicKeyToken=null
                         return 0;   // 不必再次获得内容了
                 }
 
-                REDO:
+            REDO:
                 Stop.SetMessage("正在下载系统文件 " + strFileName + " ...");
 
                 string strPrevFileTime = "";
@@ -3442,7 +3440,7 @@ Culture=neutral, PublicKeyToken=null
         /// <returns>-1: 出错，不希望继续以后的操作; 0: 成功; 1: 出错，但希望继续后面的操作</returns>
         public int GetServerMappedFile(bool bPrepareSearch = true)
         {
-            REDO:
+        REDO:
 #if NO
             if (bPrepareSearch == true)
             {
@@ -3507,7 +3505,7 @@ Culture=neutral, PublicKeyToken=null
                     fullnames.Add(Path.Combine(strServerMappedPath, strFileName).ToLower());
                 }
 
-                DELETE_FILES:
+            DELETE_FILES:
                 // 删除没有用到的文件
                 nRet = RemoveFiles(strServerMappedPath,
                     fullnames,
@@ -3529,7 +3527,7 @@ Culture=neutral, PublicKeyToken=null
             }
 
             return 0;
-            ERROR1:
+        ERROR1:
             DialogResult result = MessageBox.Show(this,
                 strError + "\r\n\r\n是否重试?",
                 "dp2Circulation",
@@ -3555,7 +3553,7 @@ Culture=neutral, PublicKeyToken=null
         /// <returns>-1: 出错，不希望继续以后的操作; 0: 成功; 1: 出错，但希望继续后面的操作</returns>
         public int GetLibraryInfo(bool bPrepareSearch = true)
         {
-            REDO:
+        REDO:
 #if NO
             if (bPrepareSearch == true)
             {
@@ -3635,7 +3633,7 @@ Culture=neutral, PublicKeyToken=null
             }
 
             return 0;
-            ERROR1:
+        ERROR1:
             DialogResult result = MessageBox.Show(this,
                 strError + "\r\n\r\n是否重试?",
                 "dp2Circulation",
@@ -3664,7 +3662,7 @@ Culture=neutral, PublicKeyToken=null
         /// <returns>-1: 出错，不希望继续以后的操作; 0: 成功; 1: 出错，但希望继续后面的操作</returns>
         public int InitialNormalDbProperties(bool bPrepareSearch)
         {
-            REDO:
+        REDO:
 #if NO
             if (bPrepareSearch == true)
             {
@@ -3997,7 +3995,7 @@ Culture=neutral, PublicKeyToken=null
             }
 
             return 0;
-            ERROR1:
+        ERROR1:
             DialogResult result = MessageBox.Show(this,
                 strError + "\r\n\r\n是否重试?",
                 "dp2Circulation",
@@ -4056,7 +4054,7 @@ Culture=neutral, PublicKeyToken=null
         /// <returns>-1: 出错，不希望继续以后的操作; 0: 成功; 1: 出错，但希望继续后面的操作</returns>
         public int GetAllDatabaseInfo(bool bPrepareSearch = true)
         {
-            REDO:
+        REDO:
 #if NO
             if (bPrepareSearch == true)
             {
@@ -4129,7 +4127,7 @@ Culture=neutral, PublicKeyToken=null
             }
 
             return 0;
-            ERROR1:
+        ERROR1:
             DialogResult result = MessageBox.Show(this,
                 strError + "\r\n\r\n是否重试?",
                 "dp2Circulation",
@@ -4652,7 +4650,7 @@ Culture=neutral, PublicKeyToken=null
         // 初始化预约到书库的相关属性
         public int InitialArrivedDbProperties(bool bPrepareSearch = true)
         {
-            REDO:
+        REDO:
 #if NO
             if (bPrepareSearch == true)
             {
@@ -4703,7 +4701,7 @@ Culture=neutral, PublicKeyToken=null
 #endif
             }
             return 0;
-            ERROR1:
+        ERROR1:
             DialogResult result = MessageBox.Show(this,
                 strError + "\r\n\r\n是否重试?",
                 "dp2Circulation",
@@ -4862,7 +4860,7 @@ Culture=neutral, PublicKeyToken=null
         /// <returns>-1: 出错，不希望继续以后的操作; 0: 成功; 1: 出错，但希望继续后面的操作</returns>
         public int GetClientFineInterfaceInfo(bool bPrepareSearch = true)
         {
-            REDO:
+        REDO:
 #if NO
             if (bPrepareSearch == true)
             {
@@ -4928,7 +4926,7 @@ Culture=neutral, PublicKeyToken=null
             }
 
             return 0;
-            ERROR1:
+        ERROR1:
             DialogResult result = MessageBox.Show(this,
                 strError + "\r\n\r\n是否重试?",
                 "dp2Circulation",
@@ -5016,7 +5014,7 @@ Culture=neutral, PublicKeyToken=null
             }
 
             return 0;
-            ERROR1:
+        ERROR1:
             /*
             DialogResult result = MessageBox.Show(this,
                 strError + "\r\n\r\n是否要继续?",
@@ -5091,13 +5089,13 @@ Culture=neutral, PublicKeyToken=null
             }
 
             return 0;
-            ERROR1:
+        ERROR1:
             return 1;
         }
 
         public int GetBarcodeValidationInfo()
         {
-            REDO:
+        REDO:
             LibraryChannel channel = this.GetChannel();
 
             string strError = "";
@@ -5160,7 +5158,7 @@ out strError);
             }
 
             return 0;
-            ERROR1:
+        ERROR1:
             DialogResult result = (DialogResult)this.Invoke((Func<DialogResult>)(() =>
             {
                 return MessageBox.Show(this,
