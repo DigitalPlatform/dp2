@@ -259,6 +259,13 @@ namespace dp2SSL
         // 门名字 --> bool
         static Hashtable _lampTable = new Hashtable();
 
+        public static bool GetLampState(string doorName)
+        {
+            if (_lampTable.ContainsKey(doorName) == false)
+                return false;
+            return (bool)_lampTable[doorName];
+        }
+
         // parameters:
         //      style   on 或者 off
         //              delay   表示延迟关灯
