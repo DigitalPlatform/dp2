@@ -17,6 +17,7 @@ using DigitalPlatform.WPF;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Install;
+using FluentScheduler;
 
 namespace dp2SSL
 {
@@ -70,11 +71,14 @@ namespace dp2SSL
             _eventMonitor.Set();
         }
 
+
         // 启动一般监控任务
         public static void StartMonitorTask()
         {
             if (_monitorTask != null)
                 return;
+
+            PerdayTask.StartPerdayTask();
 
             CancellationToken token = _cancel.Token;
             // bool download_complete = false;

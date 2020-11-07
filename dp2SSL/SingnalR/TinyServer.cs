@@ -375,7 +375,7 @@ TaskScheduler.Default);
                                         password,
                                         parameters);
                                 }
-                                catch(Exception ex)
+                                catch (Exception ex)
                                 {
                                     WpfClientInfo.WriteErrorLog($"(close handler) ConnectAsync() 出现异常:{ExceptionUtil.GetDebugText(ex)}");
                                 }
@@ -1061,6 +1061,7 @@ list history
 change history
 check book
 check patron
+set lamp time
 sterilamp
 exit
 restart
@@ -1119,6 +1120,44 @@ restart
                 string param = command.Substring("led".Length).Trim();
                 App.LedText = param;    // 保存起来
                 await LedDisplayAsync(param, groupName);
+                return;
+            }
+
+            // 2020/11/7
+            // 设置每日亮灯时间段
+            if (command.StartsWith("set lamp time"))
+            {
+                string param = command.Substring("set lamp time".Length).Trim();
+                string old_param = PerdayTask.GetPerdayTask();
+                var result = PerdayTask.ChangePerdayTask(param);
+                if (result.Value == -1)
+                    await SendMessageAsync(new string[] { groupName }, $"设置每日亮灯时间范围时出错: {result.ErrorInfo}");
+                else
+                    await SendMessageAsync(new string[] { groupName }, $"已设置每日亮灯时间范围 {param}。(上次的时间范围是 {old_param})");
+                return;
+            }
+
+            // 开灯、关灯
+            // lamp 获得灯状态
+            // lamp on 开灯
+            // lanp off 关灯
+            // 注意，这是控制背景灯。开关门引起的开灯关灯会和背景灯变量叠加，最后决定灯的亮灭
+            if (command.StartsWith("lamp"))
+            {
+                string param = command.Substring("lamp".Length).Trim();
+                if (string.IsNullOrEmpty(param))
+                {
+                    var state = PerdayTask.GetBackLampState();
+                    await SendMessageAsync(new string[] { groupName }, $"当前灯状态为 {(state ? "亮" : "灭")}");
+                    return;
+                }
+
+                param = param.ToLower();
+                if (param == "on")
+                    PerdayTask.TurnBackLampOn();
+                else
+                    PerdayTask.TurnBackLampOff();
+                await SendMessageAsync(new string[] { groupName }, param == "on" ? "已开灯" : "已关灯");
                 return;
             }
 
@@ -1288,7 +1327,7 @@ restart
             App.Invoke(new Action(() =>
             {
                 var nav = (NavigationWindow)App.Current.MainWindow;
-                result =  nav.Content.GetType() == typeof(PageShelf);
+                result = nav.Content.GetType() == typeof(PageShelf);
             }));
             return result;
         }

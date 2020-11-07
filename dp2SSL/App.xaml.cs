@@ -39,9 +39,6 @@ using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
 using DigitalPlatform.Face;
 using DigitalPlatform.WPF;
-using DigitalPlatform.MessageClient;
-using DigitalPlatform.Install;
-
 
 //using Microsoft.VisualStudio.Shell;
 //using Task = System.Threading.Tasks.Task;
