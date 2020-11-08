@@ -50,7 +50,7 @@ namespace dp2Circulation
             prop.ClearCache();
         }
 
-        private void Marc856SearchForm_Load(object sender, EventArgs e)
+        private async void Marc856SearchForm_Load(object sender, EventArgs e)
         {
             if (Program.MainForm != null && Program.MainForm.AppInfo != null)
                 this.UiState = Program.MainForm.AppInfo.GetString(
@@ -58,6 +58,12 @@ namespace dp2Circulation
                     "uistate", "");
 
             CreateColumns();
+
+            var ret = await Program.MainForm.EnsureConnectLibraryServerAsync();
+            if (ret == false)
+            {
+                this.ShowMessage("连接到 dp2library 失败，本窗口部分功能无法使用", "red");
+            }
         }
 
         private void Marc856SearchForm_FormClosing(object sender, FormClosingEventArgs e)

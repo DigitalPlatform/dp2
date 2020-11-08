@@ -189,7 +189,7 @@ namespace dp2Circulation
             prop.ClearCache();
         }
 
-        private void BiblioSearchForm_Load(object sender, EventArgs e)
+        private async void BiblioSearchForm_Load(object sender, EventArgs e)
         {
             this.commander = new Commander(this);
             this.commander.IsBusy -= new IsBusyEventHandler(commander_IsBusy);
@@ -197,6 +197,12 @@ namespace dp2Circulation
 
             Program.MainForm.AppInfo.LoadMdiLayout += new EventHandler(AppInfo_LoadMdiLayout);
             Program.MainForm.AppInfo.SaveMdiLayout += new EventHandler(AppInfo_SaveMdiLayout);
+
+            var ret = await Program.MainForm.EnsureConnectLibraryServerAsync();
+            if (ret == false)
+            {
+                this.ShowMessage("连接到 dp2library 失败，本窗口部分功能无法使用", "red");
+            }
 
             if (this._dbType == "biblio")
                 Program.MainForm.FillBiblioFromList(this.comboBox_from);
@@ -289,6 +295,8 @@ namespace dp2Circulation
     "location_filter",
     "<不筛选>");
             }
+
+
         }
 
         // TabComboBox版本

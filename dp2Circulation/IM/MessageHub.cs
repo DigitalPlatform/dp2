@@ -186,6 +186,12 @@ false);
                 }
                 doc = doc.OpenNew(true);
             }
+            /*
+            catch(InvalidCastException ex)
+            {
+                webBrowser1.Navigate("about:blank");
+            }
+            */
 
             Global.WriteHtml(this.webBrowser1,
                 "<html><head>" + strLink + strJs + "</head><body>");

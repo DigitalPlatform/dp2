@@ -37,7 +37,7 @@ namespace dp2Circulation
             InitializeComponent();
         }
 
-        private void TestSearchForm_Load(object sender, EventArgs e)
+        private async void TestSearchForm_Load(object sender, EventArgs e)
         {
             if (Program.MainForm != null)
             {
@@ -62,6 +62,12 @@ namespace dp2Circulation
                 "testsearchform",
                 "looptimes",
                 "1");
+
+            var ret = await Program.MainForm.EnsureConnectLibraryServerAsync();
+            if (ret == false)
+            {
+                this.ShowMessage("连接到 dp2library 失败，本窗口部分功能无法使用", "red");
+            }
 
             BeginWorkerThread();
         }

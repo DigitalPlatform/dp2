@@ -110,7 +110,7 @@ namespace dp2Circulation
         }
 
 
-        private void ReaderSearchForm_Load(object sender, EventArgs e)
+        private async void ReaderSearchForm_Load(object sender, EventArgs e)
         {
             this.comboBox_readerDbName.Text = Program.MainForm.AppInfo.GetString(
                 "readersearchform",
@@ -151,6 +151,12 @@ namespace dp2Circulation
             }
 
             comboBox_matchStyle_TextChanged(null, null);
+
+            var ret = await Program.MainForm.EnsureConnectLibraryServerAsync();
+            if (ret == false)
+            {
+                this.ShowMessage("连接到 dp2library 失败，本窗口部分功能无法使用", "red");
+            }
 
             if (Program.MainForm.ReaderDbFromInfos != null)
             {
