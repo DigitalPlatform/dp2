@@ -13,6 +13,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.Marc;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient.localhost;
+using System.ServiceModel.Channels;
 
 namespace dp2Circulation
 {
@@ -74,7 +75,7 @@ namespace dp2Circulation
 
         }
 
-        private void Iso2709StatisForm_Load(object sender, EventArgs e)
+        private async void Iso2709StatisForm_Load(object sender, EventArgs e)
         {
             if (Program.MainForm != null)
             {
@@ -148,7 +149,14 @@ namespace dp2Circulation
                 "projectname",
                 "");
 
-
+            /*
+            var ret = await Program.MainForm.EnsureConnectLibraryServerAsync();
+            if (ret == false)
+            {
+                MessageBox.Show(this, "连接到 dp2library 失败，ISO2709 统计窗无法打开");
+                this.Close();
+            }
+            */
         }
 
         private void Iso2709StatisForm_FormClosing(object sender, FormClosingEventArgs e)

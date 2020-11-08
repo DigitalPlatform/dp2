@@ -1401,6 +1401,7 @@ MessageBoxDefaultButton.Button1);
                         MessageBox.Show(this, "删除以前遗留的文件目录时发生错误: " + strError);
                     }
                 }
+
                 // 2015/10/3
                 strDir = PathUtil.MergePath(this.DataDir, "cfgcache");
                 if (Directory.Exists(strDir) == true)
@@ -2233,6 +2234,27 @@ MessageBoxDefaultButton.Button1);
             return 0;
         }
 
+        // InitialProperties() 是否至少执行成功过一次
+        static bool _initialPropertiesComplete = false;
+
+        // 2020/11/8
+        // 确保 MainForm 连接成功过 dp2library 服务器
+        // return:
+        //      false   没有成功
+        //      true    成功
+        public async Task<bool> EnsureConnectLibraryServerAsync()
+        {
+            if (_initialPropertiesComplete)
+                return true;
+            await Task.Run(() =>
+            {
+                InitialProperties(false, false);
+            });
+            if (_initialPropertiesComplete)
+                return true;
+            return false;
+        }
+
         // 初始化各种参数
         bool InitialProperties(bool bFullInitial, bool bRestoreLastOpenedWindow)
         {
@@ -2539,10 +2561,14 @@ AppInfo.GetString("config",
                                 SetCurrentLocation(location);
                             }));
                         });
+
+                        _initialPropertiesComplete = true;
+
                         // this.BeginInvoke(new Action(FillLibraryCodeListMenu));
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
+                        WriteErrorLog($"InitialProperties() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                         return false;
                     }
                     finally
@@ -2669,8 +2695,10 @@ Culture=neutral, PublicKeyToken=null
                 {
                     // 初始化 MessageHub
                     this.MessageHub = new MessageHub();
-                    this.MessageHub.Initial(// this,
-                        this.webBrowser_messageHub);
+                    this.Invoke((Action)(() =>
+                    {
+                        this.MessageHub.Initial(this.webBrowser_messageHub);
+                    }));
                 }
                 else
                 {
@@ -2684,8 +2712,10 @@ Culture=neutral, PublicKeyToken=null
                 }
 
                 // 启动自动更新。m_backgroundForm 延迟关闭。但取消和 stop 的关联
-
-                ClearBackground();
+                this.Invoke((Action)(() =>
+                {
+                    ClearBackground();
+                }));
 
                 // 若第一次复制绿色版本失败，则需要再进行一次
                 if (_copyGreenError == true)

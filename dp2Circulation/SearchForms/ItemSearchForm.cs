@@ -164,8 +164,14 @@ namespace dp2Circulation
             // e.ListViewProperty.SetSortStyle(2, ColumnSortStyle.LeftAlign);   // 应该根据 type为item_barcode 来决定排序方式
         }
 
-        private void ItemSearchForm_Load(object sender, EventArgs e)
+        private async void ItemSearchForm_Load(object sender, EventArgs e)
         {
+            var ret = await Program.MainForm.EnsureConnectLibraryServerAsync();
+            if (ret == false)
+            {
+                this.ShowMessage("连接到 dp2library 失败，本窗口部分功能无法使用", "red");
+            }
+
             GetBiblioColumns();
 
             this.FillFromList();
