@@ -52,7 +52,7 @@
                     </CheckBox.LayoutTransform>
                 </CheckBox>
                 <CheckBox x:Name="actionVerifyEas" Foreground="LightGray" 
-                          FontSize="13" Visibility="Collapsed"
+                          FontSize="13" 
                           Margin="4"
                           Unchecked="checkbox_Checked"
                           Checked="checkbox_Checked">校验 EAS
