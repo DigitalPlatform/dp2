@@ -325,6 +325,14 @@ out chip);
             }
         }
 
+        // 任务完成情况
+        public class TaskInfo
+        {
+            // 任务名
+            public string Name { get; set; }
+            // 执行结果。Value == 0 表示成功
+            public NormalResult Result { get; set; }
+        }
 
         // Entity 附加的处理信息
         public class ProcessInfo
@@ -337,6 +345,7 @@ out chip);
 
             public string ItemXml { get; set; }
 
+            public string GetTagInfoError { get; set; }
             // GetTagInfo() 出错的次数
             public int ErrorCount { get; set; }
 
@@ -347,8 +356,65 @@ out chip);
             public string TargetCurrentLocation { get; set; }
             // 希望修改成的 location 字段内容
             public string TargetLocation { get; set; }
+
+            // 希望修改成的 EAS 内容。on/off/(null) 其中 (null) 表示不必进行修改
+            public string TargetEas { get; set; }
+
+            public List<TaskInfo> Tasks { get; set; }
+
             // 操作者(工作人员)用户名
             public string UserName { get; set; }
+
+            // 设置任务信息
+            // parameters:
+            //      result  要设置的 NormalResult 对象。如果为 null，表示要删除这个任务条目
+            public void SetTaskInfo(string name, NormalResult result)
+            {
+                if (Tasks == null)
+                    Tasks = new List<TaskInfo>();
+                var info = Tasks.Find((t) => t.Name == name);
+                if (info == null)
+                {
+                    if (result == null)
+                        return;
+                    Tasks.Add(new TaskInfo
+                    {
+                        Name = name,
+                        Result = result
+                    });
+                }
+                else
+                {
+                    if (result == null)
+                    {
+                        Tasks.Remove(info);
+                        return;
+                    }
+                    info.Result = result;
+                }
+            }
+
+            // 检测一个任务是否已经完成
+            public bool IsTaskCompleted(string name)
+            {
+                if (Tasks == null)
+                    return false;
+
+                var info = Tasks.Find((t) => t.Name == name);
+                if (info == null)
+                    return false;
+                return info.Result.Value == 0;
+            }
+
+            // 探测是否包含指定名字的任务信息
+            public bool ContainTask(string name)
+            {
+                if (Tasks == null)
+                    return false;
+
+                var info = Tasks.Find((t) => t.Name == name);
+                return info != null;
+            }
         }
 
         #region 处理列表
@@ -492,62 +558,84 @@ TaskCreationOptions.LongRunning,
 TaskScheduler.Default);
         }
 
+        // 从 _entityList 中取出一批事项进行处理。由于是复制出来处理的，所以整个处理过程中(除了取出和最后删除的瞬间)不用对 _entityList 加锁
+        // 对每一个事项，要进行如下处理：
+        //  1) 获得册记录和书目摘要
+        //  2) 尝试请求还书
+        //  3) 请求设置 UID
+        //  4) 修改 currentLocation 和 location
         static async Task ProcessingAsync()
         {
             var list = CopyList();
             foreach (var entity in list)
             {
                 var info = entity.Tag as ProcessInfo;
-
-                // 获得册记录和书目摘要
-                // .Value
-                //      -1  出错
-                //      0   没有找到
-                //      1   找到
-                var result = await LibraryChannelUtil.GetEntityDataAsync(entity.PII, "network");
-
-                /*
-                // testing
-                result.Value = -1;
-                result.ErrorInfo = "获得册信息出错";
-                */
-
-                if (result.Value == -1)
-                    entity.AppendError(result.ErrorInfo, "red", result.ErrorCode);
-                else
+                info.State = "processing";
+                try
                 {
-                    if (string.IsNullOrEmpty(result.Title) == false)
-                        entity.Title = PageBorrow.GetCaption(result.Title);
-                    if (string.IsNullOrEmpty(result.ItemXml) == false)
+                    if (info.IsTaskCompleted("getItemXml") == false)
                     {
-                        if (info != null)
-                            info.ItemXml = result.ItemXml;
-                        entity.SetData(result.ItemRecPath, result.ItemXml);
+                        // 获得册记录和书目摘要
+                        // .Value
+                        //      -1  出错
+                        //      0   没有找到
+                        //      1   找到
+                        var result = await LibraryChannelUtil.GetEntityDataAsync(entity.PII, "network");
+
+                        /*
+                        // testing
+                        result.Value = -1;
+                        result.ErrorInfo = "获得册信息出错";
+                        */
+                        info.SetTaskInfo("getItemXml", result);
+                        if (result.Value == -1)
+                            entity.AppendError(result.ErrorInfo, "red", result.ErrorCode);
+                        else
+                        {
+                            if (string.IsNullOrEmpty(result.Title) == false)
+                                entity.Title = PageBorrow.GetCaption(result.Title);
+                            if (string.IsNullOrEmpty(result.ItemXml) == false)
+                            {
+                                if (info != null)
+                                    info.ItemXml = result.ItemXml;
+                                entity.SetData(result.ItemRecPath, result.ItemXml);
+                            }
+                        }
                     }
+
+                    // 请求 dp2library Inventory()
+                    if (string.IsNullOrEmpty(entity.PII) == false
+                        && info != null && info.IsLocation == false)
+                    {
+                        _ = BeginInventoryAsync(entity, PageInventory.ActionMode);
+                        /*
+                        var info = entity.Tag as ProcessInfo;
+
+                        var request_result = RequestInventory(entity.UID,
+        entity.PII,
+        info.TargetCurrentLocation,
+        info.TargetLocation,
+        info.BatchNo,
+        info.UserName,
+        PageInventory.ActionMode);
+                        if (request_result.Value == -1)
+                        {
+                            // TODO: 语音提示引起操作者注意
+                            entity.AppendError(request_result.ErrorInfo, "red", request_result.ErrorCode);
+                        }
+                        */
+                    }
+
+                    App.SetError("processing", null);
                 }
-
-
-                // 请求 dp2library Inventory()
-                if (string.IsNullOrEmpty(entity.PII) == false
-                    && info != null && info.IsLocation == false)
+                catch (Exception ex)
                 {
-                    _ = BeginInventoryAsync(entity, PageInventory.ActionMode);
-                    /*
-                    var info = entity.Tag as ProcessInfo;
-
-                    var request_result = RequestInventory(entity.UID,
-    entity.PII,
-    info.TargetCurrentLocation,
-    info.TargetLocation,
-    info.BatchNo,
-    info.UserName,
-    PageInventory.ActionMode);
-                    if (request_result.Value == -1)
-                    {
-                        // TODO: 语音提示引起操作者注意
-                        entity.AppendError(request_result.ErrorInfo, "red", request_result.ErrorCode);
-                    }
-                    */
+                    WpfClientInfo.WriteErrorLog($"ProcessingAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                    App.SetError("processing", $"ProcessingAsync() 出现异常: {ex.Message}");
+                }
+                finally
+                {
+                    info.State = "";
                 }
             }
 
@@ -736,6 +824,7 @@ TaskScheduler.Default);
                     || StringUtil.IsInList("setCurrentLocation", actionMode)
                     || StringUtil.IsInList("verifyEAS", actionMode))
                     && HasBorrowed(info.ItemXml)
+                    && info.IsTaskCompleted("return") == false
                     )
                 {
                     var request_result = RequestReturn(
@@ -744,6 +833,7 @@ TaskScheduler.Default);
     info.BatchNo,
     info.UserName,
     "");
+                    info.SetTaskInfo("return", request_result);
                     if (request_result.Value == -1)
                     {
                         App.CurrentApp.SpeakSequence($"{entity.PII} 还书请求出错");
@@ -757,13 +847,66 @@ TaskScheduler.Default);
                         if (string.IsNullOrEmpty(request_result.ItemXml) == false)
                             info.ItemXml = request_result.ItemXml;
 
-                        // TODO: 提请修改 EAS。可能会通过反复操作才能修改成功
+                        // 提请修改 EAS。可能会通过反复操作才能修改成功
+                        // return:
+                        //      1 为 on; 0 为 off; -1 表示不合法的值
+                        var ret = GetEas(entity);
+                        if (ret == -2)
+                        {
+                            // 当前无法判断，需要等 GetTagInfo() 以后再重试
+                            info.TargetEas = "?";
+                            info.SetTaskInfo("changeEAS", new NormalResult
+                            {
+                                Value = -1,
+                                ErrorCode = "initial"   // 表示需要处理但尚未开始处理
+                            });
+                        }
+                        else if ( ret != 1)
+                        {
+                            info.TargetEas = "on";
+                            info.SetTaskInfo("changeEAS", new NormalResult
+                            {
+                                Value = -1,
+                                ErrorCode = "initial"   // 表示需要处理但尚未开始处理
+                            });
+
+                            // 如果 RFID 标签此时正好在读卡器上，则立即触发处理
+                            // result.Value
+                            //      -1  出错
+                            //      0   标签不在读卡器上所有没有执行
+                            //      1   成功执行修改
+                            var result = await TryChangeEas(entity, true);
+
+                            // TODO: 语音提醒，有等待处理的 EAS
+                            if (result.Value != 1)
+                            {
+                                App.CurrentApp.SpeakSequence($"等待修改 EAS : {CutTitle(entity.Title)} ");
+                            }
+                        }
                     }
                 }
 
+                // 确保还书成功后，再执行 EAS 检查
+                if ((info.ContainTask("return") == false || info.IsTaskCompleted("return") == true)
+                    && StringUtil.IsInList("verifyEAS", actionMode))
+                {
+                    await VerifyEas(entity);
+                }
+
+                /*
+                // 如果有以前尚未执行成功的修改 EAS 的任务，则尝试再执行一次
+                if (info.TargetEas != null
+                    && info.ContainTask("changeEAS") == true
+                    && info.IsTaskCompleted("changeEAS") == false)
+                {
+                    TryChangeEas(entity, info.TargetEas == "on");
+                }
+                */
+
                 // 设置 UID
                 if (StringUtil.IsInList("setUID", actionMode)
-                    && string.IsNullOrEmpty(info.ItemXml) == false)
+                    && string.IsNullOrEmpty(info.ItemXml) == false
+                    && info.IsTaskCompleted("setUID") == false)
                 {
                     var request_result = RequestSetUID(entity.ItemRecPath,
                         info.ItemXml,
@@ -771,6 +914,7 @@ TaskScheduler.Default);
                         entity.UID,
                         info.UserName,
                         "");
+                    info.SetTaskInfo("setUID", request_result);
                     if (request_result.Value == -1)
                     {
                         App.CurrentApp.SpeakSequence($"{entity.UID} 设置 UID 请求出错");
@@ -791,6 +935,8 @@ TaskScheduler.Default);
                  * verifyEAS            校验 RFID 标签的 EAS 状态是否正确。过程中需要检查册记录的外借状态
                  * */
 
+                // 修改 currentLocation 和 location
+                if (info.IsTaskCompleted("setLocation") == false)
                 {
                     var request_result = RequestInventory(entity.UID,
     entity.PII,
@@ -799,6 +945,8 @@ TaskScheduler.Default);
     info.BatchNo,
     info.UserName,
     PageInventory.ActionMode);
+                    // 两个动作当作一个 setLocation 来识别
+                    info.SetTaskInfo("setLocation", request_result);
                     if (request_result.Value == -1)
                     {
                         App.CurrentApp.SpeakSequence($"{entity.PII} 盘点请求出错");
@@ -812,6 +960,183 @@ TaskScheduler.Default);
                     }
                 }
             }
+        }
+
+        // 检测 RFID 标签 EAS 位是否正确
+        // return.Value
+        //      -1  出错
+        //      0   没有进行验证
+        //      1   已经成功进行验证
+        public static async Task<NormalResult> VerifyEas(Entity entity)
+        {
+            var info = entity.Tag as ProcessInfo;
+            if (string.IsNullOrEmpty(info.ItemXml))
+            {
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = "因 ItemXml 为空，无法进行 EAS 验证"
+                };
+            }
+            var borrowed = HasBorrowed(info.ItemXml);
+            var ret = GetEas(entity);
+            if (ret == -2)
+            {
+                // 当前无法判断，需要等 GetTagInfo() 以后再重试
+                info.TargetEas = "?";
+                info.SetTaskInfo("changeEAS", new NormalResult
+                {
+                    Value = -1,
+                    ErrorCode = "initial"   // 表示需要处理但尚未开始处理
+                });
+            }
+            else if (ret == -1
+                || (ret == 1 && borrowed == true)
+                || (ret == 0 && borrowed == false))
+            {
+                info.TargetEas = borrowed ? "off" : "on";
+                info.SetTaskInfo("changeEAS", new NormalResult
+                {
+                    Value = -1,
+                    ErrorCode = "initial"   // 表示需要处理但尚未开始处理
+                });
+
+                // result.Value
+                //      -1  出错
+                //      0   标签不在读卡器上所有没有执行
+                //      1   成功执行修改
+                var result = await TryChangeEas(entity, !borrowed);
+
+                // TODO: 语音提醒，有等待处理的 EAS
+                if (result.Value != 1)
+                {
+                    App.CurrentApp.SpeakSequence($"等待修改 EAS : {CutTitle(entity.Title)} ");
+                }
+
+                return new NormalResult { Value = 1 };
+            }
+
+            return new NormalResult();
+        }
+
+        static AsyncSemaphore _easLimit = new AsyncSemaphore(1);
+
+        // 尝试修改 RFID 标签的 EAS
+        // result.Value
+        //      -1  出错
+        //      0   标签不在读卡器上所有没有执行
+        //      1   成功执行修改
+        public static async Task<NormalResult> TryChangeEas(Entity entity, bool enable)
+        {
+            using (var releaser = await _requestLimit.EnterAsync().ConfigureAwait(false))
+            {
+                var info = entity.Tag as ProcessInfo;
+                if (entity.TagInfo == null)
+                {
+                    info.GetTagInfoError = "errorGetTagInfo";    // 表示希望获得 TagInfo
+                    int count = AddErrorEntity(entity, out bool changed);
+                    if (changed == true)
+                        App.CurrentApp.SpeakSequence(count.ToString());
+                    return new NormalResult();  // 没有执行
+                }
+
+                // 如果 RFID 标签此时正好在读卡器上，则立即触发处理
+                var tag_data = NewTagList2.Tags.Find((t) => t.OneTag.UID == entity.UID);
+                if (tag_data != null)
+                {
+                    if (entity.TagInfo.EAS == enable)
+                        info.SetTaskInfo("changeEAS", new NormalResult());
+                    else
+                    {
+                        var set_result = SetEAS(entity.UID,
+                            entity.Antenna,
+                            enable);
+                        info.SetTaskInfo("changeEAS", set_result);
+                        if (set_result.Value == -1)
+                        {
+                            // TODO: 是否在界面显示失败？
+                            // 声音提示失败
+                            SoundMaker.ErrorSound();
+                            App.CurrentApp.SpeakSequence($"修改 EAS 失败: {CutTitle(entity.Title)} ");
+                            return set_result;
+                        }
+                        else
+                        {
+                            SetTagInfoEAS(entity.TagInfo, enable);
+
+                            // 检查 tag_data
+                            if (entity.TagInfo.EAS != enable)
+                                throw new Exception("EAS 修改后检查失败");
+
+                            info.TargetEas = null;  // 表示任务成功执行完成。后面看到 TargetEas 为 null 则不会再执行
+                            App.CurrentApp.SpeakSequence($"修改 EAS 成功: {CutTitle(entity.Title)} ");
+                            return new NormalResult { Value = 1 };  // 返回成功
+                        }
+                    }
+                }
+
+                return new NormalResult();  // 没有执行
+            }
+        }
+
+        public static void SetTagInfoEAS(TagInfo tagInfo, bool enable)
+        {
+            tagInfo.AFI = enable ? (byte)0x07 : (byte)0xc2;
+            tagInfo.EAS = enable;
+        }
+
+        public static NormalResult SetEAS(string uid, string antenna, bool enable)
+        {
+            try
+            {
+                // testing
+                // return new NormalResult { Value = -1, ErrorInfo = "修改 EAS 失败，测试" };
+
+                if (uint.TryParse(antenna, out uint antenna_id) == false)
+                    antenna_id = 0;
+                var result = RfidManager.SetEAS($"{uid}", antenna_id, enable);
+                if (result.Value != -1)
+                {
+#if OLD_TAGCHANGED
+
+                    TagList.SetEasData(uid, enable);
+#else
+                    NewTagList2.SetEasData(uid, enable);
+#endif
+                }
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new NormalResult { Value = -1, ErrorInfo = ex.Message };
+            }
+        }
+
+        // 判断当前 entity 对应的 RFID 标签的 EAS 状态
+        // 注：通过 AFI 进行判断。0x07 为 on；0xc2 为 off
+        // return:
+        //      1 为 on; 0 为 off; -1 表示不合法的值; -2 表示 TagInfo 为 null 无法获得 AFI
+        static int GetEas(Entity entity)
+        {
+            // tagInfo.AFI = enable ? (byte)0x07 : (byte)0xc2;
+            var info = entity.Tag as ProcessInfo;
+
+            // TagInfo 为 null ?
+            if (entity.TagInfo == null)
+            {
+                info.GetTagInfoError = "errorGetTagInfo";    // 表示希望获得 TagInfo
+                int count = AddErrorEntity(entity, out bool changed);
+                if (changed == true)
+                    App.CurrentApp.SpeakSequence(count.ToString());
+                return -2;
+            }
+
+            var afi = entity.TagInfo.AFI;
+            if (afi == 0x07)
+                return 1;
+            if (afi == 0xc2)
+                return 0;
+            return -1;   // -1 表示不合法的值
         }
 
         // 观察册记录 XML 中是否有 borrower 元素
@@ -1152,6 +1477,21 @@ TaskScheduler.Default);
                 channel.Timeout = old_timeout;
                 App.CurrentApp.ReturnChannel(channel);
             }
+        }
+
+        public static string CutTitle(string title)
+        {
+            if (title == null)
+                return null;
+
+            int index = title.IndexOf("/");
+            if (index != -1)
+                title = title.Substring(0, index).Trim();
+
+            if (title.Length > 20)
+                return title.Substring(0, 20);
+
+            return title;
         }
 
     }

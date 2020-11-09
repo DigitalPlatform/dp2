@@ -259,7 +259,7 @@ namespace dp2SSL
             }
 
             // 筛选出需要 GetTagInfo() 的那些标签
-            FilterTags(channel, e.AddTags);
+            await FilterTags(channel, e.AddTags);
 
 #if NO
             SoundMaker.InitialSequence(e.AddTags.Count);
@@ -282,12 +282,13 @@ namespace dp2SSL
         }
 
         // 筛选出需要 GetTagInfo() 的那些标签
-        void FilterTags(BaseChannel<IRfid> channel, List<TagAndData> tags)
+        async Task FilterTags(BaseChannel<IRfid> channel, List<TagAndData> tags)
         {
-            // PII 尚为空的那些 entity
-            List<Entity> entities1 = new List<Entity>();
+            // PII 尚为空的那些 entities
+            List<Entity> empty_piis = new List<Entity>();
 
-            List<Entity> all = new List<Entity>();
+            // 其他 entities
+            List<Entity> rests = new List<Entity>();
 
             foreach (var tag in tags)
             {
@@ -308,11 +309,21 @@ namespace dp2SSL
                 }
 
                 if (string.IsNullOrEmpty(entity.PII))
-                    entities1.Add(entity);
+                    empty_piis.Add(entity);
+                else
+                {
+                    // 对 PII 不为空的，但有任务没有完成的，要加入列表寻求再次被后台处理
+                    rests.Add(entity);
+                    /*
+                    if (info.IsLocation == false)
+                    {
+                        InventoryData.AppendList(entity);
+                        InventoryData.ActivateInventory();
+                    }
+                    */
+                }
 
-                all.Add(entity);
-
-                // TODO: 如果发现 PII 不为空的层架标，要用于切换当前 CurrentShelfNo
+                // 如果发现 PII 不为空的层架标，要用于切换当前 CurrentShelfNo
                 if (info != null && info.IsLocation == true)
                 {
                     SwitchCurrentShelfNo(entity);
@@ -327,12 +338,14 @@ namespace dp2SSL
             }
 
             // 准备音阶
-            SoundMaker.InitialSequence(entities1.Count);
+            SoundMaker.InitialSequence(empty_piis.Count);
 
             bool speaked = false;
             // 集中 GetTagInfo()
-            foreach (var entity in entities1)
+            foreach (var entity in empty_piis)
             {
+                var info = entity.Tag as ProcessInfo;
+
                 SoundMaker.NextSound();
 
                 FillEntity(channel, entity,
@@ -344,23 +357,88 @@ namespace dp2SSL
                         speaked = SpeakLocation(e);
                         return speaked;
                     });
+
+                // 进入后台队列
+                if (string.IsNullOrEmpty(entity.PII) == false
+    && info.IsLocation == false)
+                {
+                    InventoryData.AppendList(entity);
+                    InventoryData.ActivateInventory();
+                }
             }
 
             // 停止音阶响声
             SoundMaker.StopCurrent();
 
-            // 获取题名等
-            foreach (var entity in all)
+            // 其余的也要进入后台队列
+            foreach (var entity in rests)
+            {
+                var info = entity.Tag as ProcessInfo;
+                if (info.IsLocation == true)
+                    continue;
+
+                // 尝试重新赋予目标 location 和 currentLocation，观察参数是否发生变化、重做后台任务
+                var old_targetLocation = info.TargetLocation;
+                var old_targetCurrentLocation = info.TargetCurrentLocation;
+                var result = SetTargetCurrentLocation(info);
+                if (result.Value != -1)
+                {
+                    if (old_targetLocation != info.TargetLocation
+                        || old_targetCurrentLocation != info.TargetCurrentLocation)
+                    {
+                        // 删除条目，这样可以迫使用新 target 重做后台任务
+                        info.SetTaskInfo("setLocation", null);
+                        // 视觉上移动到最末行，让操作者意识到发生了重做后台任务
+                        App.Invoke(new Action(() =>
+                        {
+                            _entities.MoveToTail(entity);
+                        }));
+                    }
+                }
+
+                if (string.IsNullOrEmpty(entity.PII) == false
+                    && info.IsLocation == false)
+                {
+                    InventoryData.AppendList(entity);
+                    InventoryData.ActivateInventory();
+                }
+            }
+
+            // 2020/11/9
+            // 执行修改 EAS 任务
+            foreach (var entity in rests)
             {
                 var info = entity.Tag as ProcessInfo;
 
-                if (string.IsNullOrEmpty(entity.PII) == false
-                    && string.IsNullOrEmpty(info.State)
-                    && info.IsLocation == false)
+                // 如果有以前尚未执行成功的修改 EAS 的任务，则尝试再执行一次
+                if (info != null
+                    && info.TargetEas != null
+                    && info.ContainTask("changeEAS") == true
+                    && info.IsTaskCompleted("changeEAS") == false)
                 {
-                    info.State = "processing";  // 正在获取册信息
-                    InventoryData.AppendList(entity);
-                    InventoryData.ActivateInventory();
+                    try
+                    {
+                        if (info.TargetEas == "?")
+                        {
+                            await InventoryData.VerifyEas(entity);
+                        }
+                        else
+                        {
+
+                            // TODO: 记载轮空和出错的次数。
+                            // result.Value
+                            //      -1  出错
+                            //      0   标签不在读卡器上所有没有执行
+                            //      1   成功执行修改
+                            await InventoryData.TryChangeEas(entity, info.TargetEas == "on");
+
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        WpfClientInfo.WriteErrorLog($"FilterTags() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                        App.SetError("processing", $"FilterTags() 出现异常: {ex.Message}");
+                    }
                 }
             }
         }
@@ -408,9 +486,11 @@ namespace dp2SSL
 
             // 2020/10/7
             // 尝试获取 PII
-            if (string.IsNullOrEmpty(entity.PII))
+            if (string.IsNullOrEmpty(entity.PII)
+                || info.GetTagInfoError == "errorGetTagInfo")
             {
-                if (InventoryData.UidExsits(entity.UID, out string pii))
+                if (InventoryData.UidExsits(entity.UID, out string pii)
+                    && info.GetTagInfoError != "errorGetTagInfo")
                 {
                     entity.PII = pii;
                     var set_result = SetTargetCurrentLocation(info);
@@ -444,7 +524,7 @@ namespace dp2SSL
                             if (changed == true)
                                 App.CurrentApp.SpeakSequence(count.ToString());
 
-                            info.State = "errorGetTagInfo";
+                            info.GetTagInfoError = "errorGetTagInfo";
                             info.ErrorCount++;
                             error = get_result.ErrorInfo;
 
@@ -465,7 +545,7 @@ namespace dp2SSL
                             InventoryData.UpdateEntity(entity,
                                 get_result.TagInfo,
                                 out string type);
-                            info.State = "";
+                            info.GetTagInfoError = "";
 
                             // 层架标
                             if (type == "location")
@@ -497,15 +577,6 @@ namespace dp2SSL
                         }
                     }
                 }
-            }
-
-            if (string.IsNullOrEmpty(entity.PII) == false
-                && string.IsNullOrEmpty(info.State)
-                && info.IsLocation == false)
-            {
-                info.State = "processing";  // 正在获取册信息
-                InventoryData.AppendList(entity);
-                InventoryData.ActivateInventory();
             }
         }
 
@@ -617,20 +688,6 @@ namespace dp2SSL
 
 #endif
 
-        static string CutTitle(string title)
-        {
-            if (title == null)
-                return null;
-
-            int index = title.IndexOf("/");
-            if (index != -1)
-                title = title.Substring(0, index).Trim();
-
-            if (title.Length > 20)
-                return title.Substring(0, 20);
-
-            return title;
-        }
 
         private void clearList_Click(object sender, RoutedEventArgs e)
         {

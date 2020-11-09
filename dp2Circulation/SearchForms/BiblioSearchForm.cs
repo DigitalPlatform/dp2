@@ -29,10 +29,7 @@ using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.Z3950.UI;
 using DigitalPlatform.Z3950;
-using System.Runtime.Remoting.Activation;
-using DigitalPlatform.CirculationClient;
-using Jint.Parser.Ast;
-using System.Linq;
+
 
 namespace dp2Circulation
 {

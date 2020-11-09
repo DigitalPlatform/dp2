@@ -8,6 +8,9 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace TestDp2Library
 {
+    /// <summary>
+    /// 测试 Unescape() 函数。该函数目前用于 dp2ssl 的 TinyServer.cs 中
+    /// </summary>
     [TestClass]
     public class TestString
     {
