@@ -6903,6 +6903,14 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                             goto ERROR1;
                         }
 
+                        // 2020/11/10
+                        // 新的永久架位
+                        string strNewShelfNo = StringUtil.GetParameterByPrefix(strStyle, "shelfNo");
+                        // 注意参数值里面的逗号和冒号在请求时候要处理为转义字符
+                        if (strNewShelfNo != null)
+                            strNewShelfNo = StringUtil.UnescapeString(strNewShelfNo);
+
+
                         string strOldLocation = DomUtil.GetElementText(itemdom.DocumentElement,
     "location");
 
@@ -6921,6 +6929,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                             strOutputItemRecPath,
                             strBatchNo,
                             strNewLocation,
+                            strNewShelfNo,
                             strNewCurrentLocation,
                             StringUtil.IsInList("forceLog", strStyle),  // 即便册记录没有发生变化，也要产生操作日志记录。注意这种只产生操作日志记录(但没有修改册记录)的情况下，操作日志记录 XML 中的 style 元素中的值包含 onlyWriteLog
                             out strError);
@@ -8426,6 +8435,7 @@ start_time_1,
     string strItemRecPath,
     string strBatchNo,
     string strNewLocation,
+    string strNewShelfNo,
     string strNewCurrentLocation,
     bool writeLog,
     out string strError)
@@ -8446,6 +8456,20 @@ start_time_1,
                 {
                     DomUtil.SetElementText(new_itemdom.DocumentElement,
                         "location", strNewLocation);    // TODO: 注意保留 #reservation 部分
+                    changed = true;
+                }
+            }
+
+            // 2020/11/10
+            // 修改 shelfNo 元素
+            if (strNewShelfNo != null)
+            {
+                string old_shelfNo = DomUtil.GetElementText(new_itemdom.DocumentElement,
+                    "shelfNo");
+                if (old_shelfNo != strNewShelfNo)
+                {
+                    DomUtil.SetElementText(new_itemdom.DocumentElement,
+                        "shelfNo", strNewShelfNo);
                     changed = true;
                 }
             }

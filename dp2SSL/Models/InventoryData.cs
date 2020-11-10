@@ -51,6 +51,9 @@ namespace dp2SSL
             _entityTable.Clear();
             RemoveList(null);
             _errorEntities.Clear();
+
+            // 清除 _tags 中的所有内容
+            NewTagList2.Clear();
         }
 
         // UID --> entity
@@ -356,6 +359,8 @@ out chip);
             public string TargetCurrentLocation { get; set; }
             // 希望修改成的 location 字段内容
             public string TargetLocation { get; set; }
+            // 希望修改成的 shelfNo 字段内容
+            public string TargetShelfNo { get; set; }
 
             // 希望修改成的 EAS 内容。on/off/(null) 其中 (null) 表示不必进行修改
             public string TargetEas { get; set; }
@@ -818,6 +823,9 @@ TaskScheduler.Default);
             {
                 var info = entity.Tag as ProcessInfo;
 
+                // 是否校验 EAS。临时决定
+                bool need_verifyEas = false;
+
                 // 还书
                 if (info != null
                     && (StringUtil.IsInList("setLocation", actionMode)
@@ -847,6 +855,9 @@ TaskScheduler.Default);
                         if (string.IsNullOrEmpty(request_result.ItemXml) == false)
                             info.ItemXml = request_result.ItemXml;
 
+                        // 标记，即将 VerifyEas
+                        need_verifyEas = true;
+#if NO
                         // 提请修改 EAS。可能会通过反复操作才能修改成功
                         // return:
                         //      1 为 on; 0 为 off; -1 表示不合法的值
@@ -883,14 +894,17 @@ TaskScheduler.Default);
                                 App.CurrentApp.SpeakSequence($"等待修改 EAS : {CutTitle(entity.Title)} ");
                             }
                         }
+#endif
                     }
                 }
 
                 // 确保还书成功后，再执行 EAS 检查
-                if ((info.ContainTask("return") == false || info.IsTaskCompleted("return") == true)
-                    && StringUtil.IsInList("verifyEAS", actionMode))
+                if (
+                    (info.ContainTask("return") == false || info.IsTaskCompleted("return") == true)
+                    && (need_verifyEas == true || StringUtil.IsInList("verifyEAS", actionMode))
+                    )
                 {
-                    await VerifyEas(entity);
+                    await VerifyEasAsync(entity);
                 }
 
                 /*
@@ -899,7 +913,7 @@ TaskScheduler.Default);
                     && info.ContainTask("changeEAS") == true
                     && info.IsTaskCompleted("changeEAS") == false)
                 {
-                    TryChangeEas(entity, info.TargetEas == "on");
+                    await TryChangeEas(entity, info.TargetEas == "on");
                 }
                 */
 
@@ -942,6 +956,7 @@ TaskScheduler.Default);
     entity.PII,
     StringUtil.IsInList("setCurrentLocation", actionMode) ? info.TargetCurrentLocation : null,
     StringUtil.IsInList("setLocation", actionMode) ? info.TargetLocation : null,
+    StringUtil.IsInList("setLocation", actionMode) ? info.TargetShelfNo : null,
     info.BatchNo,
     info.UserName,
     PageInventory.ActionMode);
@@ -965,9 +980,9 @@ TaskScheduler.Default);
         // 检测 RFID 标签 EAS 位是否正确
         // return.Value
         //      -1  出错
-        //      0   没有进行验证
+        //      0   没有进行验证(已经加入后台验证任务)
         //      1   已经成功进行验证
-        public static async Task<NormalResult> VerifyEas(Entity entity)
+        public static async Task<NormalResult> VerifyEasAsync(Entity entity)
         {
             var info = entity.Tag as ProcessInfo;
             if (string.IsNullOrEmpty(info.ItemXml))
@@ -978,6 +993,7 @@ TaskScheduler.Default);
                     ErrorInfo = "因 ItemXml 为空，无法进行 EAS 验证"
                 };
             }
+
             var borrowed = HasBorrowed(info.ItemXml);
             var ret = GetEas(entity);
             if (ret == -2)
@@ -1005,12 +1021,13 @@ TaskScheduler.Default);
                 //      -1  出错
                 //      0   标签不在读卡器上所有没有执行
                 //      1   成功执行修改
-                var result = await TryChangeEas(entity, !borrowed);
+                var result = await TryChangeEasAsync(entity, !borrowed);
 
                 // TODO: 语音提醒，有等待处理的 EAS
                 if (result.Value != 1)
                 {
                     App.CurrentApp.SpeakSequence($"等待修改 EAS : {CutTitle(entity.Title)} ");
+                    return new NormalResult();
                 }
 
                 return new NormalResult { Value = 1 };
@@ -1026,26 +1043,44 @@ TaskScheduler.Default);
         //      -1  出错
         //      0   标签不在读卡器上所有没有执行
         //      1   成功执行修改
-        public static async Task<NormalResult> TryChangeEas(Entity entity, bool enable)
+        public static async Task<NormalResult> TryChangeEasAsync(Entity entity, bool enable)
         {
-            using (var releaser = await _requestLimit.EnterAsync().ConfigureAwait(false))
+            using (var releaser = await _easLimit.EnterAsync().ConfigureAwait(false))
             {
                 var info = entity.Tag as ProcessInfo;
+
                 if (entity.TagInfo == null)
                 {
-                    info.GetTagInfoError = "errorGetTagInfo";    // 表示希望获得 TagInfo
-                    int count = AddErrorEntity(entity, out bool changed);
-                    if (changed == true)
-                        App.CurrentApp.SpeakSequence(count.ToString());
-                    return new NormalResult();  // 没有执行
+                    // 标签正好在读卡器上，读 TagInfo 一次
+                    if (TagOnReader(entity))
+                    {
+                        var get_result = RfidManager.GetTagInfo(entity.ReaderName, entity.UID, Convert.ToUInt32(entity.Antenna));
+                        if (get_result.Value != -1)
+                            entity.TagInfo = get_result.TagInfo;
+                    }
+
+                    if (entity.TagInfo == null)
+                    {
+                        info.GetTagInfoError = "errorGetTagInfo";    // 表示希望获得 TagInfo
+                        int count = AddErrorEntity(entity, out bool changed);
+                        if (changed == true)
+                            App.CurrentApp.SpeakSequence(count.ToString());
+                        return new NormalResult();  // 没有执行
+                    }
                 }
 
                 // 如果 RFID 标签此时正好在读卡器上，则立即触发处理
-                var tag_data = NewTagList2.Tags.Find((t) => t.OneTag.UID == entity.UID);
-                if (tag_data != null)
+                // var tag_data = NewTagList2.Tags.Find((t) => t.OneTag.UID == entity.UID);
+                if (TagOnReader(entity))
                 {
-                    if (entity.TagInfo.EAS == enable)
+                    if (entity.TagInfo.EAS == enable)  // EAS 状态已经到位，不必真正修改
+                    {
                         info.SetTaskInfo("changeEAS", new NormalResult());
+
+                        info.TargetEas = null;  // 表示任务成功执行完成。后面看到 TargetEas 为 null 则不会再执行
+                        // App.CurrentApp.SpeakSequence($"修改 EAS 成功: {CutTitle(entity.Title)} ");
+                        return new NormalResult { Value = 1 };  // 返回成功
+                    }
                     else
                     {
                         var set_result = SetEAS(entity.UID,
@@ -1062,6 +1097,8 @@ TaskScheduler.Default);
                         }
                         else
                         {
+                            // 修改成功后处理
+
                             SetTagInfoEAS(entity.TagInfo, enable);
 
                             // 检查 tag_data
@@ -1079,6 +1116,7 @@ TaskScheduler.Default);
             }
         }
 
+        // 单独修改 TagInfo 里面的 AFI 和 EAS 成员
         public static void SetTagInfoEAS(TagInfo tagInfo, bool enable)
         {
             tagInfo.AFI = enable ? (byte)0x07 : (byte)0xc2;
@@ -1112,6 +1150,14 @@ TaskScheduler.Default);
             }
         }
 
+        // 判断标签是否正好在读卡器上
+        static bool TagOnReader(Entity entity)
+        {
+            // 如果 RFID 标签此时正好在读卡器上，则立即触发处理
+            var tag_data = NewTagList2.Tags.Find((t) => t.OneTag.UID == entity.UID);
+            return (tag_data != null);
+        }
+
         // 判断当前 entity 对应的 RFID 标签的 EAS 状态
         // 注：通过 AFI 进行判断。0x07 为 on；0xc2 为 off
         // return:
@@ -1124,11 +1170,22 @@ TaskScheduler.Default);
             // TagInfo 为 null ?
             if (entity.TagInfo == null)
             {
-                info.GetTagInfoError = "errorGetTagInfo";    // 表示希望获得 TagInfo
-                int count = AddErrorEntity(entity, out bool changed);
-                if (changed == true)
-                    App.CurrentApp.SpeakSequence(count.ToString());
-                return -2;
+                // 标签正好在读卡器上，读 TagInfo 一次
+                if (TagOnReader(entity))
+                {
+                    var get_result = RfidManager.GetTagInfo(entity.ReaderName, entity.UID, Convert.ToUInt32(entity.Antenna));
+                    if (get_result.Value != -1)
+                        entity.TagInfo = get_result.TagInfo;
+                }
+                else
+                {
+                    // 加入 error 队列，等待后面处理
+                    info.GetTagInfoError = "errorGetTagInfo";    // 表示希望获得 TagInfo
+                    int count = AddErrorEntity(entity, out bool changed);
+                    if (changed == true)
+                        App.CurrentApp.SpeakSequence(count.ToString());
+                    return -2;
+                }
             }
 
             var afi = entity.TagInfo.AFI;
@@ -1170,6 +1227,7 @@ TaskScheduler.Default);
             string pii,
             string currentLocation,
             string location,
+            string shelfNo,
             string batchNo,
             string strUserName,
             string style)
@@ -1191,6 +1249,8 @@ TaskScheduler.Default);
                     commands.Add($"currentLocation:{StringUtil.EscapeString(currentLocation, ":,")}");
                 if (string.IsNullOrEmpty(location) == false)
                     commands.Add($"location:{StringUtil.EscapeString(location, ":,")}");
+                if (string.IsNullOrEmpty(shelfNo) == false)
+                    commands.Add($"shelfNo:{StringUtil.EscapeString(shelfNo, ":,")}");
                 if (string.IsNullOrEmpty(batchNo) == false)
                 {
                     commands.Add($"batchNo:{StringUtil.EscapeString(batchNo, ":,")}");

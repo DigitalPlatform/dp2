@@ -11,7 +11,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
+
+using Microsoft.VisualStudio.Threading;
 using AsyncFriendlyStackTrace;
+
 using DigitalPlatform;
 using DigitalPlatform.Core;
 using DigitalPlatform.GUI;
@@ -21,7 +24,6 @@ using DigitalPlatform.RFID;
 using DigitalPlatform.RFID.UI;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
-using Microsoft.VisualStudio.Threading;
 
 namespace dp2Circulation
 {
@@ -1528,7 +1530,20 @@ this.toolStripButton_autoFixEas.Checked);
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
+            menuItem = new MenuItem("清除标签缓存 (&C)");
+            menuItem.Click += new System.EventHandler(this.menu_clearTagsCache_Click);
+            contextMenu.MenuItems.Add(menuItem);
+
             contextMenu.Show(this.listView_tags, new Point(e.X, e.Y));
+        }
+
+        void menu_clearTagsCache_Click(object sender, EventArgs e)
+        {
+            TagList.ClearTagTable(null);
         }
 
         void menu_test_Click(object sender, EventArgs e)
