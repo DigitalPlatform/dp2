@@ -48,6 +48,8 @@ namespace dp2SSL
             this.Loaded += PageInventory_Loaded;
             this.Unloaded += PageInventory_Unloaded;
 
+            App.CurrentApp.PropertyChanged += CurrentApp_PropertyChanged;
+
             /*
             _ = Task.Run(async () =>
             {
@@ -189,6 +191,14 @@ namespace dp2SSL
 
         }
 
+        private void CurrentApp_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "Error")
+            {
+                OnPropertyChanged(e.PropertyName);
+            }
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         void OnPropertyChanged(string name)
@@ -196,6 +206,15 @@ namespace dp2SSL
             if (this.PropertyChanged != null)
                 PropertyChanged(this, new PropertyChangedEventArgs(name));
         }
+
+        public string Error
+        {
+            get
+            {
+                return App.CurrentApp.Error;
+            }
+        }
+
 
         private void goHome_Click(object sender, RoutedEventArgs e)
         {
@@ -379,11 +398,13 @@ namespace dp2SSL
 
                 // 尝试重新赋予目标 location 和 currentLocation，观察参数是否发生变化、重做后台任务
                 var old_targetLocation = info.TargetLocation;
+                var old_targetShelfNo = info.TargetShelfNo;
                 var old_targetCurrentLocation = info.TargetCurrentLocation;
                 var result = SetTargetCurrentLocation(info);
                 if (result.Value != -1)
                 {
                     if (old_targetLocation != info.TargetLocation
+                        || old_targetShelfNo != info.TargetShelfNo
                         || old_targetCurrentLocation != info.TargetCurrentLocation)
                     {
                         // 删除条目，这样可以迫使用新 target 重做后台任务
@@ -420,7 +441,7 @@ namespace dp2SSL
                     {
                         if (info.TargetEas == "?")
                         {
-                            await InventoryData.VerifyEas(entity);
+                            await InventoryData.VerifyEasAsync(entity);
                         }
                         else
                         {
@@ -430,8 +451,7 @@ namespace dp2SSL
                             //      -1  出错
                             //      0   标签不在读卡器上所有没有执行
                             //      1   成功执行修改
-                            await InventoryData.TryChangeEas(entity, info.TargetEas == "on");
-
+                            await InventoryData.TryChangeEasAsync(entity, info.TargetEas == "on");
                         }
                     }
                     catch (Exception ex)
@@ -487,10 +507,15 @@ namespace dp2SSL
             // 2020/10/7
             // 尝试获取 PII
             if (string.IsNullOrEmpty(entity.PII)
-                || info.GetTagInfoError == "errorGetTagInfo")
+                || info.GetTagInfoError == "errorGetTagInfo"
+                || StringUtil.IsInList("verifyEAS", ActionMode))
             {
+                // 是否强迫获取标签内容
+                bool force = info.GetTagInfoError == "errorGetTagInfo"
+                || StringUtil.IsInList("verifyEAS", ActionMode);
+
                 if (InventoryData.UidExsits(entity.UID, out string pii)
-                    && info.GetTagInfoError != "errorGetTagInfo")
+                    && force == false)
                 {
                     entity.PII = pii;
                     var set_result = SetTargetCurrentLocation(info);
@@ -595,6 +620,7 @@ namespace dp2SSL
         NormalResult SetTargetCurrentLocation(ProcessInfo info)
         {
             info.TargetLocation = CurrentLocation;
+            info.TargetShelfNo = CurrentShelfNo;
 
             if (string.IsNullOrEmpty(CurrentShelfNo) == true)
             {

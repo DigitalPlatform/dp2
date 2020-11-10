@@ -122,7 +122,8 @@ namespace dp2SSL
 
         private void beginButton_Click(object sender, RoutedEventArgs e)
         {
-            if (string.IsNullOrEmpty(this.location.Text))
+            if ((this.actionSetCurrentLocation.IsChecked == true|| this.actionSetLocation.IsChecked == true)
+                && string.IsNullOrEmpty(this.location.Text))
             {
                 MessageBox.Show("请选择当前馆藏地");
                 return;
