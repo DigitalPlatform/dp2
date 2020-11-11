@@ -578,6 +578,8 @@ TaskScheduler.Default);
                 info.State = "processing";
                 try
                 {
+                    // throw new Exception("testing processing");
+
                     if (info.IsTaskCompleted("getItemXml") == false)
                     {
                         // 获得册记录和书目摘要
@@ -1177,7 +1179,8 @@ TaskScheduler.Default);
                     if (get_result.Value != -1)
                         entity.TagInfo = get_result.TagInfo;
                 }
-                else
+
+                if (entity.TagInfo == null)
                 {
                     // 加入 error 队列，等待后面处理
                     info.GetTagInfoError = "errorGetTagInfo";    // 表示希望获得 TagInfo

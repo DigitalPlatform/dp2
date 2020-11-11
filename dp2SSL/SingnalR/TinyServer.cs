@@ -1387,8 +1387,7 @@ restart
                 else
                 {
                     name = "text";
-                    // Unescape
-                    value = Unescape(parameter);
+                    value = parameter;
                 }
 
                 if (name == "x")
@@ -1413,7 +1412,7 @@ restart
                     style = value;
                 else if (name == "text")
                 {
-                    text = value;
+                    text = Unescape(value);
                 }
                 else
                 {
