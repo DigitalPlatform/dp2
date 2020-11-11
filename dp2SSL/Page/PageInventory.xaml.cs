@@ -246,39 +246,31 @@ namespace dp2SSL
         private async void CurrentApp_NewTagChanged(object sender, NewTagChangedEventArgs e)
 #pragma warning restore VSTHRD100 // 避免使用 Async Void 方法
         {
-            /*
+            try
             {
-                await ShelfData.ChangeEntitiesAsync((BaseChannel<IRfid>)sender,
-                    sep_result,
-                    () =>
-                    {
-                        // 如果图书数量有变动，要自动清除挡在前面的残留的对话框
-                        CloseDialogs();
-                    });
-            }
-            */
+                // throw new Exception("testing");
 
-            var channel = (BaseChannel<IRfid>)sender;
-            // TODO: 对离开的 tag 变化为灰色颜色
+                var channel = (BaseChannel<IRfid>)sender;
+                // TODO: 对离开的 tag 变化为灰色颜色
 
-            bool speaked = false;
-            // 2020/10/10
-            // TODO: 发出什么响声表示?
-            // 把以前遗留的出错 entity 尝试重新 GetTagInfo()
-            foreach (var entity in InventoryData.ErrorEntities)
-            {
-                FillEntity(channel, entity, (e1) =>
+                bool speaked = false;
+                // 2020/10/10
+                // TODO: 发出什么响声表示?
+                // 把以前遗留的出错 entity 尝试重新 GetTagInfo()
+                foreach (var entity in InventoryData.ErrorEntities)
                 {
+                    FillEntity(channel, entity, (e1) =>
+                    {
                     // 说过一次便不再说
                     if (speaked == true)
-                        return false;
-                    speaked = SpeakLocation(e1);
-                    return speaked;
-                });
-            }
+                            return false;
+                        speaked = SpeakLocation(e1);
+                        return speaked;
+                    });
+                }
 
-            // 筛选出需要 GetTagInfo() 的那些标签
-            await FilterTags(channel, e.AddTags);
+                // 筛选出需要 GetTagInfo() 的那些标签
+                await FilterTags(channel, e.AddTags);
 
 #if NO
             SoundMaker.InitialSequence(e.AddTags.Count);
@@ -292,12 +284,20 @@ namespace dp2SSL
             SoundMaker.StopCurrent();
 #endif
 
-            /*
-            foreach (var tag in e.UpdateTags)
-            {
-                ProcessTag(channel, tag);
+                /*
+                foreach (var tag in e.UpdateTags)
+                {
+                    ProcessTag(channel, tag);
+                }
+                */
+
+                App.SetError("NewTagChanged", null);
             }
-            */
+            catch (Exception ex)
+            {
+                App.SetError("NewTagChanged", $"CurrentApp_NewTagChanged() 捕获异常: {ex.Message}");
+                WpfClientInfo.WriteErrorLog($"CurrentApp_NewTagChanged() 捕获异常: {ExceptionUtil.GetDebugText(ex)}");
+            }
         }
 
         // 筛选出需要 GetTagInfo() 的那些标签
@@ -504,15 +504,17 @@ namespace dp2SSL
         {
             var info = entity.Tag as ProcessInfo;
 
+            // 是否强迫获取标签内容
+            bool force = info.GetTagInfoError == "errorGetTagInfo"
+            || StringUtil.IsInList("verifyEAS", ActionMode);
+
+            // bool force = info.GetTagInfoError == "errorGetTagInfo"; // testing
+
             // 2020/10/7
             // 尝试获取 PII
             if (string.IsNullOrEmpty(entity.PII)
-                || info.GetTagInfoError == "errorGetTagInfo"
-                || StringUtil.IsInList("verifyEAS", ActionMode))
+                || force)
             {
-                // 是否强迫获取标签内容
-                bool force = info.GetTagInfoError == "errorGetTagInfo"
-                || StringUtil.IsInList("verifyEAS", ActionMode);
 
                 if (InventoryData.UidExsits(entity.UID, out string pii)
                     && force == false)
@@ -640,6 +642,10 @@ namespace dp2SSL
 
         string FindTitle(int index)
         {
+            Entity current = _entities[index];
+            if (string.IsNullOrEmpty(current.Title) == false)
+                return current.Title;
+
             int prev_index = index;
             int next_index = index;
 
