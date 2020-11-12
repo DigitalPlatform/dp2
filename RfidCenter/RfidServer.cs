@@ -499,10 +499,19 @@ namespace RfidCenter
                 if (Reader.MatchReaderName(reader_name_list, reader.Name, out string antenna_list) == false)
                     continue;
 
-                InventoryResult inventory_result = Program.Rfid.Inventory(reader.Name,
+                InventoryResult inventory_result = null;
+
+                if (Program.MainForm.InSimuReader)
+                    inventory_result = _simuReader.Inventory(reader.Name,
+                    antenna_list,
+                    style);
+                else
+                    inventory_result = Program.Rfid.Inventory(reader.Name,
                     antenna_list,
                     style   // ""
                     );
+
+
 
                 /*
                 // testing
@@ -580,7 +589,11 @@ namespace RfidCenter
                         && tag.TagInfo == null)
                     {
                         // TODO: 这里要利用 Hashtable 缓存
-                        GetTagInfoResult result0 = Program.Rfid.GetTagInfo(reader.Name, info);
+                        GetTagInfoResult result0 = null;
+                        if (Program.MainForm.InSimuReader)
+                            result0 = _simuReader.GetTagInfo(reader.Name, info);
+                        else
+                            result0 = Program.Rfid.GetTagInfo(reader.Name, info);
                         if (result0.Value == -1)
                         {
                             tag.TagInfo = null;
@@ -673,7 +686,11 @@ namespace RfidCenter
                 // result.Value
                 //      -1
                 //      0
-                GetTagInfoResult result0 = Program.Rfid.GetTagInfo(reader.Name, info);
+                GetTagInfoResult result0 = null;
+                if (Program.MainForm.InSimuReader)
+                    result0 = _simuReader.GetTagInfo(reader.Name, info);
+                else
+                    result0 = Program.Rfid.GetTagInfo(reader.Name, info);
 
                 // 继续尝试往后寻找
                 if (result0.Value == -1
@@ -737,7 +754,11 @@ namespace RfidCenter
                 // result.Value
                 //      -1
                 //      0
-                GetTagInfoResult result0 = Program.Rfid.GetTagInfo(reader.Name, info);
+                GetTagInfoResult result0 = null;
+                if (Program.MainForm.InSimuReader)
+                    result0 = _simuReader.GetTagInfo(reader.Name, info);
+                else
+                    result0 = Program.Rfid.GetTagInfo(reader.Name, info);
 
                 // 继续尝试往后寻找
                 if (result0.Value == -1
@@ -791,7 +812,11 @@ namespace RfidCenter
                 // result.Value
                 //      -1
                 //      0
-                GetTagInfoResult result0 = Program.Rfid.GetTagInfo(reader.Name, info, style);
+                GetTagInfoResult result0 = null;
+                if (Program.MainForm.InSimuReader)
+                    result0 = _simuReader.GetTagInfo(reader.Name, info, style);
+                else
+                    result0 = Program.Rfid.GetTagInfo(reader.Name, info, style);
 
                 // 继续尝试往后寻找
                 if (result0.Value == -1
@@ -843,7 +868,11 @@ namespace RfidCenter
                     UID = old_tag_info.UID,
                     AntennaID = old_tag_info.AntennaID  // 2019/9/27
                 };
-                GetTagInfoResult result0 = Program.Rfid.GetTagInfo(reader.Name, info);
+                GetTagInfoResult result0 = null;
+                if (Program.MainForm.InSimuReader)
+                    result0 = _simuReader.GetTagInfo(reader.Name, info);
+                else
+                    result0 = Program.Rfid.GetTagInfo(reader.Name, info);
 
                 if (result0.Value == -1 && result0.ErrorCode == "errorFromReader=4")
                     continue;
@@ -853,9 +882,14 @@ namespace RfidCenter
 
                 // TODO: 是否对照检查 old_tag_info 和 result0.TagInfo ?
 
-                return Program.Rfid.WriteTagInfo(reader.Name,
+                if (Program.MainForm.InSimuReader)
+                    return _simuReader.WriteTagInfo(reader.Name,
                     old_tag_info,
                     new_tag_info);
+                else
+                    return Program.Rfid.WriteTagInfo(reader.Name,
+                        old_tag_info,
+                        new_tag_info);
             }
 
             return new NormalResult
@@ -884,7 +918,7 @@ string tag_name,
 uint antenna_id,
 bool enable)
         {
-            return SetEAS(reader_name, 
+            return SetEAS(reader_name,
                 tag_name,
                 antenna_id,
                 enable,
@@ -913,12 +947,20 @@ string style)
                 // 2019/9/24
                 // 天线列表
                 // 1|2|3|4 这样的形态
+                FindTagResult result = null;
+                if (Program.MainForm.InSimuReader)
+                    result = _simuReader.FindTagByPII(
+reader_name,
+InventoryInfo.ISO15693, // 只有 ISO15693 才有 EAS (2019/8/28)
+antenna_id.ToString(),
+parts[1]);
+                else
+                    result = Program.Rfid.FindTagByPII(
+                        reader_name,
+                        InventoryInfo.ISO15693, // 只有 ISO15693 才有 EAS (2019/8/28)
+                        antenna_id.ToString(),
+                        parts[1]);
 
-                FindTagResult result = Program.Rfid.FindTagByPII(
-                    reader_name,
-                    InventoryInfo.ISO15693, // 只有 ISO15693 才有 EAS (2019/8/28)
-                    antenna_id.ToString(),
-                    parts[1]);
                 if (result.Value != 1)
                     return new NormalResult
                     {
@@ -945,12 +987,21 @@ string style)
                 // return result.Value
                 //      -1  出错
                 //      0   成功
-                NormalResult result = Program.Rfid.SetEAS(
+                NormalResult result = null;
+                if (Program.MainForm.InSimuReader)
+                    result = _simuReader.SetEAS(
 reader_name,
 uid,
 antenna_id,
 enable,
 style);
+                else
+                    result = Program.Rfid.SetEAS(
+    reader_name,
+    uid,
+    antenna_id,
+    enable,
+    style);
                 if (result.Value == -1)
                     return result;
                 return new NormalResult { Value = 1 };
