@@ -27,6 +27,8 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.Xml;
+using static DigitalPlatform.RFID.LogicChip;
+using Microsoft.Extensions.DependencyModel.Resolution;
 
 namespace dp2SSL
 {
@@ -5882,6 +5884,66 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             {
                 return new NormalResult { Value = -1, ErrorInfo = ex.Message };
             }
+        }
+
+        // 将 RfidCenter 切换为模拟标签模式，并添加好标签
+        public static NormalResult InitialSimuTags()
+        {
+            List<string> names = new List<string>();
+            foreach (var door in Doors)
+            {
+                names.Add(door.ReaderName);
+            }
+            StringUtil.RemoveDupNoSort(ref names);
+
+            {
+                var result = RfidManager.SimuTagInfo("switchToSimuMode", null, $"readerNameList:{StringUtil.MakePathList(names, "|")}");
+                if (result.Value == -1)
+                {
+                    App.SetError("simuReader", result.ErrorInfo);
+                    return result;
+                }
+            }
+            List<TagInfo> tags = new List<TagInfo>();
+            // 对当前每个柜门，都给填充一定数量的标签
+            int index = 1;
+            foreach (var door in Doors)
+            {
+                for (int i = 0; i < 30; i++)
+                {
+                    LogicChip chip = new LogicChip();
+                    chip.NewElement(ElementOID.PII, $"B{(index++).ToString().PadLeft(8, '0')}");
+                    chip.NewElement(ElementOID.ShelfLocation, "QA268.L55");
+                    chip.NewElement(ElementOID.OwnerInstitution, "US-InU-Mu").WillLock = true;
+
+                    var bytes = chip.GetBytes(4 * 9,
+    4,
+    GetBytesStyle.None,
+    out string block_map);
+
+                    var tag = new TagInfo
+                    {
+                        ReaderName = door.ReaderName,
+                        AntennaID = (uint)door.Antenna,
+                        BlockSize = 4,
+                        MaxBlockCount = 28,
+                        Bytes = bytes
+                    };
+
+                    tags.Add(tag);
+                }
+            }
+
+            {
+                var result = RfidManager.SimuTagInfo("setTag", tags, "");
+                if (result.Value == -1)
+                {
+                    App.SetError("simuReader", result.ErrorInfo);
+                    return result;
+                }
+            }
+            App.SetError("simuReader", null);
+            return new NormalResult();
         }
 
         /*

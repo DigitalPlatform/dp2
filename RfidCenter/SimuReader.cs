@@ -86,7 +86,8 @@ namespace RfidCenter
         "M201 690201",
         "RL8600 118001",
         "RD5100 680530",
-        "RD5100(2) 680530"
+        "RD5100(2) 680530",
+        "RD2104 680701"
         };
 
         static string GetProductID(string name)
@@ -134,7 +135,7 @@ namespace RfidCenter
                 reader.Protocols = protocols;
                 reader.AntennaCount = antenna_count;
                 reader.AntennaStart = min_antenna_id;
-
+                reader.Result = new OpenReaderResult();
                 _readers.Add(reader);
             }
         }
@@ -161,8 +162,10 @@ namespace RfidCenter
             List<Reader> results = new List<Reader>();
             foreach (Reader reader in _readers)
             {
+                /*
                 if (reader.ReaderHandle == UIntPtr.Zero)
                     continue;
+                */
                 // if (reader_name == "*" || reader_name == reader.Name)
                 if (Reader.MatchReaderName(reader_name, reader.Name, out string antenna_list))
                     results.Add(reader);
@@ -183,6 +186,8 @@ namespace RfidCenter
             string antenna_list,
             string style)
         {
+            // Debug.Assert(false);
+
             NormalResult result = GetReader(reader_name,
 out Reader reader);
             if (result.Value == -1)
@@ -621,7 +626,11 @@ out Reader reader);
 
                 var tag = FindTag(old_tag_info.UID, reader.Name);
                 if (tag == null)
-                    return new NormalResult { Value = -1, ErrorInfo = "connectTag Error" };
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = "connectTag Error"
+                    };
 
                 var tagInfo = tag.TagInfo;
                 /*
@@ -757,6 +766,39 @@ out Reader reader);
             }
         }
 
+        public NormalResult SimuTagInfo(string action,
+    List<TagInfo> tags,
+    string style)
+        {
+            // 设置标签。如果已经有相同 UID 的标签，则覆盖；如果没有，则新增加
+            if (action == "setTag")
+            {
+                string protocol = StringUtil.GetParameterByPrefix(style, "protocol");
+                if (string.IsNullOrEmpty(protocol))
+                    protocol = InventoryInfo.ISO15693;
+
+                foreach (var tag in tags)
+                {
+                    var data = this.Set(tag, protocol);
+                }
+            }
+
+            // 移走标签
+            if (action == "removeTag")
+            {
+                foreach (var tag in tags)
+                {
+                    var found = FindTag(tag.UID, null);
+                    if (found != null)
+                    {
+                        _tags.Remove(found);
+                    }
+                }
+            }
+
+            return new NormalResult();
+        }
+
         #region
 
         // 给 byte [] 后面补足内容
@@ -877,11 +919,15 @@ out Reader reader);
             var results = new List<InventoryInfo>();
             foreach (var tag in _tags)
             {
+                Debug.Assert(string.IsNullOrEmpty(tag.ReaderName) == false);
                 if (tag.ReaderName == reader.Name)
                 {
-                    int index = Array.IndexOf(antennas, tag.InventoryInfo.AntennaID);
+                    int index = Array.IndexOf<byte>(antennas, (byte)tag.InventoryInfo.AntennaID);
                     if (index == -1)
+                    {
+                        // Debug.Assert(false);
                         continue;
+                    }
                     results.Add(tag.InventoryInfo);
                 }
             }
@@ -908,11 +954,14 @@ out Reader reader);
             return results;
         }
 
+        // parameters:
+        //      readerName  读卡器名。如果为 null 表示匹配所有读卡器
         TagData FindTag(string uid, string readerName)
         {
             foreach (var tag in _tags)
             {
-                if (tag.InventoryInfo.UID == uid && tag.ReaderName == readerName)
+                if (tag.InventoryInfo.UID == uid
+                    && (readerName == null || tag.ReaderName == readerName))
                 {
                     Debug.Assert(tag.InventoryInfo.UID == tag.TagInfo.UID);
                     return tag;
@@ -927,6 +976,107 @@ out Reader reader);
         {
             return FindTag(uid, readerName)?.TagInfo;
         }
+
+        public TagData Set(TagInfo source,
+            string protocol = InventoryInfo.ISO15693)
+        {
+            var tag = this.Build(source, protocol);
+            var exist = FindTag(source.UID, null);
+            if (exist == null)
+                _tags.Add(tag);
+            else
+            {
+                _tags.Remove(exist);
+                _tags.Add(tag);
+            }
+
+            return tag;
+        }
+
+        // 根据前端发来的 tagInfo 构造一个 TagData 对象
+        public TagData Build(TagInfo source,
+            string protocol = InventoryInfo.ISO15693)
+        {
+            // Debug.Assert(false);    // testing
+
+            if (this._readers.Count == 0)
+                throw new Exception("当前没有任何(模拟的)读卡器，因此无法添加标签信息");
+
+            var tag = TagData.Build(source, protocol);
+
+            InventoryInfo inventory = tag.InventoryInfo;
+            TagInfo tagInfo = tag.TagInfo;
+
+            // 自动生成一些成员
+
+            // inventory
+            inventory.TagType = 0;  // ???
+
+            inventory.AipID = 0;    // ???
+
+            // tagInfo
+
+            Reader reader = null;
+
+            if (string.IsNullOrEmpty(tagInfo.ReaderName))
+            {
+                // 自动取协议合适的第一个读卡器？
+                reader = _readers.Find((r) =>
+                {
+                    return StringUtil.IsInList(protocol, r.Protocols) == true;
+                });
+                if (reader == null)
+                    throw new Exception($"没有找到满足 '{protocol}' 协议的读卡器");
+            }
+            else
+            {
+                var result = GetReader(tagInfo.ReaderName, out reader);
+                if (result.Value == -1)
+                    throw new Exception($"读卡器 '{tagInfo.ReaderName}' 没有找到");
+
+                Debug.Assert(reader != null);
+            }
+
+            // tagInfo.ReaderName;  
+            if (string.IsNullOrEmpty(tagInfo.ReaderName))
+            {
+                Debug.Assert(string.IsNullOrEmpty(reader.Name) == false);
+
+                tagInfo.ReaderName = reader.Name;
+            }
+
+            // tagInfo.UID; // 自动发生
+            // 8 bytes?
+            if (string.IsNullOrEmpty(tagInfo.UID))
+                tagInfo.UID = ByteArray.GetHexTimeStampString(Guid.NewGuid().ToByteArray());
+
+            // public byte DSFID { get; set; }
+            // public byte AFI { get; set; }
+            // public byte IcRef { get; set; }
+
+            // 每个块内包含的字节数
+            tagInfo.BlockSize = 4; // 设置为默认值
+                                   // 块最大总数
+            tagInfo.MaxBlockCount = 28;  // 设置为默认值
+
+            // public bool EAS { get; set; }
+
+            // tagInfo.AntennaID;   // 检查是否符合范围。否则设置为第一个天线
+            if (tagInfo.AntennaID < reader.AntennaStart
+                || tagInfo.AntennaID >= reader.AntennaStart + reader.AntennaCount)
+                tagInfo.AntennaID = (uint)reader.AntennaStart;
+
+            // 锁定状态字符串。表达每个块的锁定状态
+            // 例如 "ll....lll"。'l' 表示锁定，'.' 表示没有锁定。缺省为 '.'。空字符串表示全部块都没有被锁定
+            // LockStatus { get; set; }
+
+            // 芯片全部内容字节
+            // Bytes { get; set; }
+
+            tag.RefreshInventoryInfo();
+            return tag;
+        }
+
 
         /*
         // 获得一个标签的 TagInfo
@@ -953,12 +1103,65 @@ out Reader reader);
         public InventoryInfo InventoryInfo { get; set; }
         public TagInfo TagInfo { get; set; }
 
-        // 根据 TagInfo 刷新 InventoryInfo 内的同名成员
+        // 根据前端发来的 tagInfo 构造一个 TagData 对象
+        public static TagData Build(TagInfo tagInfo,
+            string protocol = InventoryInfo.ISO15693)
+        {
+            TagData result = new TagData();
+            InventoryInfo inventory = new InventoryInfo();
+            result.InventoryInfo = inventory;
+            result.TagInfo = tagInfo;
+
+            if (protocol != InventoryInfo.ISO15693
+                && protocol != InventoryInfo.ISO14443A)
+                throw new ArgumentException($"标签协议名必须为 {InventoryInfo.ISO15693} {InventoryInfo.ISO14443A} 之一", nameof(protocol));
+
+            // inventory
+            inventory.Protocol = protocol;
+            inventory.UID = tagInfo.UID;
+            inventory.TagType = 0;  // ???
+
+            inventory.AipID = 0;    // ???
+            inventory.AntennaID = tagInfo.AntennaID;
+            inventory.DsfID = tagInfo.DSFID;
+
+            // tagInfo
+            tagInfo.Tag = null;
+
+            // tagInfo.ReaderName;  // 自动取协议合适的第一个读卡器？
+
+            // tagInfo.UID; // 自动发生
+            // public byte DSFID { get; set; }
+            // public byte AFI { get; set; }
+            // public byte IcRef { get; set; }
+
+            // 每个块内包含的字节数
+            // tagInfo.BlockSize = 0; // 设置为默认值
+            // 块最大总数
+            // tagInfo.MaxBlockCount = 0;  // 设置为默认值
+
+            // public bool EAS { get; set; }
+
+            // tagInfo.AntennaID;   // 检查是否符合范围。-1 表示设置为第一个天线
+
+            // 锁定状态字符串。表达每个块的锁定状态
+            // 例如 "ll....lll"。'l' 表示锁定，'.' 表示没有锁定。缺省为 '.'。空字符串表示全部块都没有被锁定
+            // LockStatus { get; set; }
+
+            // 芯片全部内容字节
+            // Bytes { get; set; }
+
+            return result;
+        }
+
+        // 根据 TagInfo 刷新 InventoryInfo 内的同名成员，和 this.ReaderName
         public void RefreshInventoryInfo()
         {
             this.InventoryInfo.UID = TagInfo.UID;
             this.InventoryInfo.AntennaID = TagInfo.AntennaID;
             this.InventoryInfo.DsfID = TagInfo.DSFID;
+
+            this.ReaderName = TagInfo.ReaderName;
         }
 
         // return:

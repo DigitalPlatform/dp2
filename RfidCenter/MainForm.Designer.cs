@@ -110,6 +110,10 @@
             this.MenuItem_testSetConfig = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_readConfig = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_writePassword = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_test_simulock = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_test_simuOpenLocks = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_test_simuCloseLocks = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_test_simuReader = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_help = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_loadFactoryDefault = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_resetReaderToDigitalPlatformState = new System.Windows.Forms.ToolStripMenuItem();
@@ -127,10 +131,8 @@
             this.MenuItem_manual = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_about = new System.Windows.Forms.ToolStripMenuItem();
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
-            this.ToolStripMenuItem_test_simulock = new System.Windows.Forms.ToolStripMenuItem();
-            this.ToolStripMenuItem_test_simuOpenLocks = new System.Windows.Forms.ToolStripMenuItem();
-            this.ToolStripMenuItem_test_simuCloseLocks = new System.Windows.Forms.ToolStripMenuItem();
-            this.ToolStripMenuItem_test_simuReader = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_simuReader = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_simuReader_state = new System.Windows.Forms.ToolStripMenuItem();
             this.tabControl_main.SuspendLayout();
             this.tabPage_start.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_start)).BeginInit();
@@ -643,6 +645,7 @@
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.MenuItem_file,
             this.MenuItem_testing,
+            this.MenuItem_simuReader,
             this.MenuItem_help});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
@@ -920,6 +923,36 @@
             this.MenuItem_writePassword.Text = "WritePassword";
             this.MenuItem_writePassword.Click += new System.EventHandler(this.MenuItem_writePassword_Click);
             // 
+            // ToolStripMenuItem_test_simulock
+            // 
+            this.ToolStripMenuItem_test_simulock.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.ToolStripMenuItem_test_simuOpenLocks,
+            this.ToolStripMenuItem_test_simuCloseLocks});
+            this.ToolStripMenuItem_test_simulock.Name = "ToolStripMenuItem_test_simulock";
+            this.ToolStripMenuItem_test_simulock.Size = new System.Drawing.Size(360, 40);
+            this.ToolStripMenuItem_test_simulock.Text = "模拟门锁";
+            // 
+            // ToolStripMenuItem_test_simuOpenLocks
+            // 
+            this.ToolStripMenuItem_test_simuOpenLocks.Name = "ToolStripMenuItem_test_simuOpenLocks";
+            this.ToolStripMenuItem_test_simuOpenLocks.Size = new System.Drawing.Size(255, 40);
+            this.ToolStripMenuItem_test_simuOpenLocks.Text = "打开多个门锁";
+            this.ToolStripMenuItem_test_simuOpenLocks.Click += new System.EventHandler(this.ToolStripMenuItem_test_simuOpenLocks_Click);
+            // 
+            // ToolStripMenuItem_test_simuCloseLocks
+            // 
+            this.ToolStripMenuItem_test_simuCloseLocks.Name = "ToolStripMenuItem_test_simuCloseLocks";
+            this.ToolStripMenuItem_test_simuCloseLocks.Size = new System.Drawing.Size(255, 40);
+            this.ToolStripMenuItem_test_simuCloseLocks.Text = "关闭多个门锁";
+            this.ToolStripMenuItem_test_simuCloseLocks.Click += new System.EventHandler(this.ToolStripMenuItem_test_simuCloseLocks_Click);
+            // 
+            // ToolStripMenuItem_test_simuReader
+            // 
+            this.ToolStripMenuItem_test_simuReader.Name = "ToolStripMenuItem_test_simuReader";
+            this.ToolStripMenuItem_test_simuReader.Size = new System.Drawing.Size(360, 40);
+            this.ToolStripMenuItem_test_simuReader.Text = "模拟读卡器";
+            this.ToolStripMenuItem_test_simuReader.Click += new System.EventHandler(this.ToolStripMenuItem_test_simuReader_Click);
+            // 
             // MenuItem_help
             // 
             this.MenuItem_help.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -1049,35 +1082,20 @@
             this.notifyIcon1.Visible = true;
             this.notifyIcon1.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon1_MouseDoubleClick);
             // 
-            // ToolStripMenuItem_test_simulock
+            // MenuItem_simuReader
             // 
-            this.ToolStripMenuItem_test_simulock.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.ToolStripMenuItem_test_simuOpenLocks,
-            this.ToolStripMenuItem_test_simuCloseLocks});
-            this.ToolStripMenuItem_test_simulock.Name = "ToolStripMenuItem_test_simulock";
-            this.ToolStripMenuItem_test_simulock.Size = new System.Drawing.Size(360, 40);
-            this.ToolStripMenuItem_test_simulock.Text = "模拟门锁";
+            this.MenuItem_simuReader.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.ToolStripMenuItem_simuReader_state});
+            this.MenuItem_simuReader.Name = "MenuItem_simuReader";
+            this.MenuItem_simuReader.Size = new System.Drawing.Size(135, 33);
+            this.MenuItem_simuReader.Text = "模拟读卡器";
             // 
-            // ToolStripMenuItem_test_simuOpenLocks
+            // ToolStripMenuItem_simuReader_state
             // 
-            this.ToolStripMenuItem_test_simuOpenLocks.Name = "ToolStripMenuItem_test_simuOpenLocks";
-            this.ToolStripMenuItem_test_simuOpenLocks.Size = new System.Drawing.Size(315, 40);
-            this.ToolStripMenuItem_test_simuOpenLocks.Text = "打开多个门锁";
-            this.ToolStripMenuItem_test_simuOpenLocks.Click += new System.EventHandler(this.ToolStripMenuItem_test_simuOpenLocks_Click);
-            // 
-            // ToolStripMenuItem_test_simuCloseLocks
-            // 
-            this.ToolStripMenuItem_test_simuCloseLocks.Name = "ToolStripMenuItem_test_simuCloseLocks";
-            this.ToolStripMenuItem_test_simuCloseLocks.Size = new System.Drawing.Size(315, 40);
-            this.ToolStripMenuItem_test_simuCloseLocks.Text = "关闭多个门锁";
-            this.ToolStripMenuItem_test_simuCloseLocks.Click += new System.EventHandler(this.ToolStripMenuItem_test_simuCloseLocks_Click);
-            // 
-            // ToolStripMenuItem_test_simuReader
-            // 
-            this.ToolStripMenuItem_test_simuReader.Name = "ToolStripMenuItem_test_simuReader";
-            this.ToolStripMenuItem_test_simuReader.Size = new System.Drawing.Size(360, 40);
-            this.ToolStripMenuItem_test_simuReader.Text = "模拟读卡器";
-            this.ToolStripMenuItem_test_simuReader.Click += new System.EventHandler(this.ToolStripMenuItem_test_simuReader_Click);
+            this.ToolStripMenuItem_simuReader_state.Name = "ToolStripMenuItem_simuReader_state";
+            this.ToolStripMenuItem_simuReader_state.Size = new System.Drawing.Size(315, 40);
+            this.ToolStripMenuItem_simuReader_state.Text = "模拟读卡器状态";
+            this.ToolStripMenuItem_simuReader_state.Click += new System.EventHandler(this.ToolStripMenuItem_simuReader_state_Click);
             // 
             // MainForm
             // 
@@ -1224,6 +1242,8 @@
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_test_simuOpenLocks;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_test_simuCloseLocks;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_test_simuReader;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_simuReader;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_simuReader_state;
     }
 }
 

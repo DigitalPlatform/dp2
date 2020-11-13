@@ -2026,6 +2026,7 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
             {
                 return _inSimuLock;
             }
+
         }
 
         bool _inSimuReader = false;   // 是否处于模拟读卡器状态
@@ -2036,6 +2037,20 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
             {
                 return _inSimuReader;
             }
+            set
+            {
+                _inSimuReader = value;
+
+                OnSimuReaderChanged();
+            }
+        }
+
+        void OnSimuReaderChanged()
+        {
+            this.Invoke((Action)(() =>
+            {
+                ToolStripMenuItem_simuReader_state.Checked = _inSimuReader;
+            }));
         }
 
         // SimuLock _simuLock = new SimuLock(1, 8);
@@ -2514,6 +2529,15 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
                 "RD5100",
                 "RD5100(2)",
                 "RL8600" });
+        }
+
+        private void ToolStripMenuItem_simuReader_state_Click(object sender, EventArgs e)
+        {
+            this.InSimuReader = !this.InSimuReader;
+            string text = $"{(_inSimuReader ? "进入" : "退出")} 模拟门锁状态";
+
+            OutputHistory(text);
+            Speak(text);
         }
     }
 }

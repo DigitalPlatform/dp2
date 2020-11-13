@@ -72,6 +72,11 @@ string type,
 uint old_password,
 uint new_password);
 
+        // 和模拟标签有关的功能
+        NormalResult SimuTagInfo(string action,
+            List<TagInfo> tags,
+            string style);
+
         // 开始或者结束捕获标签
         NormalResult BeginCapture(bool begin);
 

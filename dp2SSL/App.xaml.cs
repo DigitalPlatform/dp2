@@ -30,10 +30,10 @@ using Microsoft.Win32;
 using Microsoft.EntityFrameworkCore.Internal;
 
 using dp2SSL.Models;
-using static DigitalPlatform.IO.BarcodeCapture;
 using DigitalPlatform;
 using DigitalPlatform.Core;
 using DigitalPlatform.IO;
+using static DigitalPlatform.IO.BarcodeCapture;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
@@ -401,7 +401,13 @@ namespace dp2SSL
             // 2019/12/17
             // 智能书柜一开始假定全部门关闭，所以不需要对任何图书读卡器进行盘点
             if (App.Function == "智能书柜")
+            {
                 RfidManager.ReaderNameList = "";
+
+#if AUTO_TEST
+                ShelfData.InitialSimuTags();
+#endif
+            }
 
             WpfClientInfo.WriteInfoLog("RfidManager.Start()");
             RfidManager.Start(_cancelRfid.Token);
@@ -471,6 +477,8 @@ namespace dp2SSL
                 InitialShelfCfg();
 
                 InitialRfidManager();
+
+
 
                 // 首次显示以前遗留的 LED 文字
                 if (string.IsNullOrEmpty(App.LedText) == false)
@@ -969,7 +977,7 @@ namespace dp2SSL
             this._channelPool.Clear();
         }
 
-        #region dp2library 服务器有关
+#region dp2library 服务器有关
 
         public static string dp2ServerUrl
         {
@@ -996,7 +1004,7 @@ namespace dp2SSL
             }
         }
 
-        #endregion
+#endregion
 
         // 当前采用的通讯协议
         public static string Protocol
@@ -1009,7 +1017,7 @@ namespace dp2SSL
             }
         }
 
-        #region SIP2 服务器有关
+#region SIP2 服务器有关
 
         public static string SipServerUrl
         {
@@ -1036,9 +1044,9 @@ namespace dp2SSL
             }
         }
 
-        #endregion
+#endregion
 
-        #region 消息服务器相关参数
+#region 消息服务器相关参数
 
         public static string messageServerUrl
         {
@@ -1107,7 +1115,7 @@ namespace dp2SSL
             return new NormalResult();
         }
 
-        #endregion
+#endregion
 
         public static string RfidUrl
         {
@@ -1338,7 +1346,7 @@ namespace dp2SSL
             return Cryptography.Encrypt(strPlainText, EncryptKey);
         }
 
-        #region LibraryChannel
+#region LibraryChannel
 
         public class Account
         {
@@ -1601,7 +1609,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             base.OnDeactivated(e);
         }
 
-        #endregion
+#endregion
 
         public void AddErrors(string type, List<string> errors)
         {
@@ -2344,7 +2352,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
         }
 
 
-        #region z-order
+#region z-order
 
         // https://stackoverflow.com/questions/3473016/how-to-sort-windows-by-z-index
         public static IEnumerable<Window> SortWindowsTopToBottom(IEnumerable<Window> unsorted)
@@ -2363,9 +2371,9 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
         [DllImport("User32")] static extern IntPtr GetTopWindow(IntPtr hWnd);
         [DllImport("User32")] static extern IntPtr GetWindow(IntPtr hWnd, uint wCmd);
 
-        #endregion
+#endregion
 
-        #region EdgeUI
+#region EdgeUI
 
         /*
 HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\EdgeUI
@@ -2471,7 +2479,7 @@ AllowEdgeSwipe DWORD
             return principal.IsInRole(WindowsBuiltInRole.Administrator);
         }
 
-        #endregion
+#endregion
     }
 
     public delegate void NewTagChangedEventHandler(object sender,
