@@ -28,6 +28,8 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.Core;
+using Jint;
+using Jint.Native;
 
 // 2017/4/9 从 this.Channel 用法改造为 ChannelPool 用法
 
@@ -505,7 +507,7 @@ namespace dp2Circulation
 
                 string[] paths = new string[lines.Count];
                 lines.CopyTo(paths);
-                REDO_GETRECORDS:
+            REDO_GETRECORDS:
                 long lRet = channel.GetBrowseRecords(
                     this.stop,
                     paths,
@@ -751,7 +753,7 @@ namespace dp2Circulation
 
                     string[] paths = new string[lines.Count];
                     lines.CopyTo(paths);
-                    REDO_GETRECORDS:
+                REDO_GETRECORDS:
                     lRet = channel.GetBrowseRecords(
                         this.stop,
                         paths,
@@ -1086,7 +1088,7 @@ namespace dp2Circulation
 
             DisplayNotFillSummary();
             return;
-            ERROR1:
+        ERROR1:
             this.Text = "打印财产帐";
             MessageBox.Show(this, strError);
         }
@@ -1569,7 +1571,7 @@ namespace dp2Circulation
 
             DisplayNotFillSummary();
             return;
-            ERROR1:
+        ERROR1:
             this.Text = "打印财产帐";
             MessageBox.Show(this, strError);
         }
@@ -2451,7 +2453,7 @@ namespace dp2Circulation
             }
 
             return;
-            ERROR1:
+        ERROR1:
             ListViewUtil.ChangeItemText(item, EXTEND_COLUMN_CATALOGNO, strError);
         }
 
@@ -3001,7 +3003,7 @@ namespace dp2Circulation
 
             this.SetNextButtonEnable();
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3259,8 +3261,9 @@ namespace dp2Circulation
             }
 
             return;
-            ERROR1:
-            MessageBox.Show(this, strError);
+        ERROR1:
+            MessageDlg.Show(this, strError, "(HTML)打印");
+            // MessageBox.Show(this, strError);
         }
 
         void WriteWordXmlHead(XmlTextWriter writer)
@@ -3701,11 +3704,24 @@ null,
                 string strContent = "";
                 if (string.IsNullOrEmpty(column.Evalue) == false)
                 {
+                    /*
                     Jurassic.ScriptEngine engine = new Jurassic.ScriptEngine();
                     engine.EnableExposedClrTypes = true;
                     engine.SetGlobalValue("syntax", strOutMarcSyntax);
                     engine.SetGlobalValue("biblio", new MarcRecord(strMARC));
                     strContent = engine.Evaluate(column.Evalue).ToString();
+                    */
+                    // 改用 Jint
+                    try
+                    {
+                        strContent = RunScript(strMARC,
+        strOutMarcSyntax,
+        column.Evalue);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new Exception($"解析栏目 {column.Name} 脚本代码\r\n---\r\n{column.Evalue}\r\n---\r\n时出现异常: {ex.Message}", ex);
+                    }
                 }
                 else
                 {
@@ -3790,7 +3806,7 @@ null,
             writer.WriteEndElement();
             // sw.WriteLine(strLineContent);
             return 0;
-            ERROR1:
+        ERROR1:
             // <w:tr>
             writer.WriteStartElement("w", "tr", m_strWordMlNsUri);
 
@@ -4491,12 +4507,24 @@ strTotalPrice);
                 string strContent = "";
                 if (string.IsNullOrEmpty(column.Evalue) == false)
                 {
+                    /*
                     Jurassic.ScriptEngine engine = new Jurassic.ScriptEngine();
                     engine.EnableExposedClrTypes = true;
                     engine.SetGlobalValue("syntax", strOutMarcSyntax);
                     engine.SetGlobalValue("biblio", new MarcRecord(strMARC));
                     strContent = engine.Evaluate(column.Evalue).ToString();
-
+                    */
+                    // 改用 Jint
+                    try
+                    {
+                        strContent = RunScript(strMARC,
+        strOutMarcSyntax,
+        column.Evalue);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new Exception($"解析栏目 {column.Name} 脚本代码\r\n---\r\n{column.Evalue}\r\n---\r\n时出现异常: {ex.Message}", ex);
+                    }
                 }
                 else
                 {
@@ -4605,7 +4633,7 @@ strTotalPrice);
 #endif
 
             return 0;
-            ERROR1:
+        ERROR1:
             if (sw != null)
                 sw.WriteLine(strError);
             if (sheet != null)
@@ -4932,7 +4960,7 @@ strTotalPrice);
 
                 return 0;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 strError = "BuildHtml() 出现异常: " + ExceptionUtil.GetAutoText(ex);
                 return -1;
@@ -5262,6 +5290,7 @@ strTotalPrice);
 
                 if (string.IsNullOrEmpty(column.Evalue) == false)
                 {
+                    /*
                     Jurassic.ScriptEngine engine = new Jurassic.ScriptEngine();
                     engine.EnableExposedClrTypes = true;
                     engine.SetGlobalValue("syntax", strOutMarcSyntax);
@@ -5274,6 +5303,18 @@ strTotalPrice);
                     catch (Exception ex)
                     {
                         throw new Exception("解析 javascript 代码 '" + column.Evalue + "' 时出现异常: " + ex.Message, ex);
+                    }
+                    */
+                    // 改用 Jint
+                    try
+                    {
+                        strContent = RunScript(strMARC,
+        strOutMarcSyntax,
+        column.Evalue);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new Exception($"解析栏目 {column.Name} 脚本代码\r\n---\r\n{column.Evalue}\r\n---\r\n时出现异常: {ex.Message}", ex);
                     }
                 }
                 else
@@ -5337,7 +5378,7 @@ strTotalPrice);
                     IndentString(4) + "<td class='" + strClass + "'>" + strContent + "</td>\r\n";
             }
 
-            END1:
+        END1:
 
             string strOdd = "";
             if (((nLine + 1) % 2) != 0) // 用每页内的行号来计算奇数
@@ -5362,6 +5403,47 @@ strTotalPrice);
             return 0;
         }
 
+        static void SetValue(Engine engine, string name, object o)
+        {
+            if (o == null)
+                engine.SetValue(name, JsValue.Null);
+            else
+                engine.SetValue(name, o);
+        }
+
+        static string GetString(Engine engine, string name, string default_value)
+        {
+            var result_obj = engine.GetValue(name);
+            string value = result_obj.IsUndefined() ? default_value : result_obj.ToObject().ToString();
+            if (value == null)
+                value = "";
+            return value;
+        }
+
+        static string RunScript(string strMARC,
+            string strOutMarcSyntax,
+            string strScript)
+        {
+            Engine engine = new Engine(cfg => cfg.AllowClr(typeof(MarcQuery).Assembly));
+
+            SetValue(engine,
+"biblio",
+new MarcRecord(strMARC));
+
+            SetValue(engine,
+                "syntax",
+                strOutMarcSyntax);
+
+            engine.Execute("var DigitalPlatform = importNamespace('DigitalPlatform');\r\n"
+                + strScript) // execute a statement
+                ?.GetCompletionValue() // get the latest statement completion value
+                ?.ToObject()?.ToString() // converts the value to .NET
+                ;
+            string result = GetString(engine, "result", "(请返回 result)");
+            string message = GetString(engine, "message", "");
+
+            return result;
+        }
 
         // 获得栏目内容
         string GetColumnContent(ListViewItem item,
@@ -6000,7 +6082,7 @@ strTotalPrice);
 
             DisplayNotFillSummary();
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -7109,6 +7191,11 @@ MessageBoxDefaultButton.Button1);
                 Program.MainForm.StatusBarMessage = "财产帐簿内容 " + nCount.ToString() + "个 已成功" + strExportStyle + "到文件 " + this.ExportTextFilename;
 
             }
+            catch(Exception ex)
+            {
+                strError = $"输出到文本文件过程出现异常: {ex.Message}";
+                goto ERROR1;
+            }
             finally
             {
                 if (sw != null)
@@ -7123,8 +7210,9 @@ MessageBoxDefaultButton.Button1);
             }
 
             return;
-            ERROR1:
-            MessageBox.Show(this, strError);
+        ERROR1:
+            MessageDlg.Show(this, strError, "输出文本文件");
+            // MessageBox.Show(this, strError);
         }
 
         // 配置打印选项 WordXML
@@ -7439,14 +7527,20 @@ MessageBoxDefaultButton.Button1);
                     }
                 }
             }
+            catch(Exception ex)
+            {
+                strError = $"输出到 WordML 过程出现异常: {ex.Message}";
+                goto ERROR1;
+            }
             finally
             {
                 EnableControls(true);
             }
 
             return;
-            ERROR1:
-            MessageBox.Show(this, strError);
+        ERROR1:
+            MessageDlg.Show(this, strError, "输出 WordML");
+            // MessageBox.Show(this, strError);
         }
 
         private void AccountBookForm_Activated(object sender, EventArgs e)
@@ -7591,7 +7685,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -7695,7 +7789,7 @@ MessageBoxDefaultButton.Button1);
                 null);
 
             return 0;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -7831,9 +7925,24 @@ MessageBoxDefaultButton.Button1);
                     // Close the document.
                     // doc.Close();
                     doc.SaveAs(this.ExportExcelFilename);
+
+                    // 尝试自动打开 Excel 文件
+                    try
+                    {
+                        Process.Start(this.ExportExcelFilename);
+                    }
+                    catch
+                    {
+
+                    }
                 }
 
                 Program.MainForm.StatusBarMessage = "财产帐簿内容 " + nCount.ToString() + "个 已成功输出到文件 " + this.ExportExcelFilename;
+            }
+            catch(Exception ex)
+            {
+                strError = $"输出到 Excel 文件过程出现异常: {ex.Message}";
+                goto ERROR1;
             }
             finally
             {
@@ -7846,8 +7955,9 @@ MessageBoxDefaultButton.Button1);
             }
 
             return;
-            ERROR1:
-            MessageBox.Show(this, strError);
+        ERROR1:
+            MessageDlg.Show(this, strError, "输出文本文件");
+            // MessageBox.Show(this, strError);
         }
 
 #if NO

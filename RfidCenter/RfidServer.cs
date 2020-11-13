@@ -182,7 +182,7 @@ namespace RfidCenter
         {
             // 选出已经成功打开的部分 Reader 返回
             List<string> readers = new List<string>();
-            foreach (Reader reader in Program.Rfid.Readers)
+            foreach (Reader reader in this.Readers)
             {
                 if (reader.Result.Value == 0)
                     readers.Add(reader.Name);
@@ -290,6 +290,8 @@ namespace RfidCenter
         //              dont_delay  不根据 session 来进行探测、延迟。也就是说确保要做一次 invetnory 并且立即返回
         public ListTagsResult ListTags(string reader_name, string style)
         {
+            // Debug.Assert(false);
+
             if (Program.Rfid.Pause)
                 return new ListTagsResult
                 {
@@ -453,6 +455,16 @@ namespace RfidCenter
             }
         }
 
+        List<Reader> Readers
+        {
+            get
+            {
+                if (Program.MainForm.InSimuReader)
+                    return _simuReader.Readers;
+                return Program.Rfid.Readers;
+            }
+        }
+
         //static uint _currenAntenna = 1;
         //DateTime _lastTime;
 
@@ -480,11 +492,7 @@ namespace RfidCenter
             // uid --> OneTag
             Hashtable uid_table = new Hashtable();
 
-            var readers = Program.Rfid.Readers;
-            if (Program.MainForm.InSimuReader)
-                readers = _simuReader.Readers;
-
-            foreach (Reader reader in readers)
+            foreach (Reader reader in this.Readers)
             {
 #if NO
                 if (reader_name == "*" || reader.Name == reader_name)
@@ -678,7 +686,7 @@ namespace RfidCenter
                 };
 
             List<GetTagInfoResult> errors = new List<GetTagInfoResult>();
-            foreach (Reader reader in Program.Rfid.Readers)
+            foreach (Reader reader in this.Readers)
             {
                 if (Reader.MatchReaderName(reader_name, reader.Name, out string antenna_list) == false)
                     continue;
@@ -732,7 +740,7 @@ namespace RfidCenter
                 };
 
             List<GetTagInfoResult> errors = new List<GetTagInfoResult>();
-            foreach (Reader reader in Program.Rfid.Readers)
+            foreach (Reader reader in this.Readers)
             {
 #if NO
                 if (reader_name == "*" || reader.Name == reader_name)
@@ -798,7 +806,7 @@ namespace RfidCenter
                 };
 
             List<GetTagInfoResult> errors = new List<GetTagInfoResult>();
-            foreach (Reader reader in Program.Rfid.Readers)
+            foreach (Reader reader in this.Readers)
             {
                 if (Reader.MatchReaderName(reader_name, reader.Name, out string antenna_list) == false)
                     continue;
@@ -848,7 +856,7 @@ namespace RfidCenter
         {
             // TODO: 对 old_tag_info 和 new_tag_info 合法性进行一系列检查
 
-            foreach (Reader reader in Program.Rfid.Readers)
+            foreach (Reader reader in this.Readers)
             {
 #if NO
                 if (reader_name == "*" || reader.Name == reader_name)
@@ -1020,6 +1028,42 @@ uid,
 type,
 old_password,
 new_password);
+        }
+
+        // 和模拟标签有关的功能
+        public NormalResult SimuTagInfo(string action,
+            List<TagInfo> tags,
+            string style)
+        {
+            if (action == "switchToSimuMode")
+            {
+                try
+                {
+                    var readerNameList = StringUtil.GetParameterByPrefix(style, "readerNameList");
+                    Program.MainForm.InSimuReader = true;
+                    _simuReader.Create(StringUtil.SplitList(readerNameList, '|'));
+                    return new NormalResult();
+                }
+                catch(Exception ex)
+                {
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"switchToSimuMode 出现异常: {ex.Message}"
+                    };
+                }
+            }
+
+            if (Program.MainForm.InSimuReader)
+                return _simuReader.SimuTagInfo(action,
+                tags,
+                style);
+            else
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = "因当前不在模拟标签状态，无法使用设置模拟标签的功能"
+                };
         }
 
 #if SENDKEY
