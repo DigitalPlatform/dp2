@@ -934,6 +934,9 @@ namespace dp2SSL
             // 添加 items 中多出来的对象
             foreach (var item in items)
             {
+#if AUTO_TEST
+                Debug.Assert(string.IsNullOrEmpty(item.PII) == false);
+#endif
                 // 用 UID 来搜索
                 var found = collection.FindEntityByUID(item.UID);
                 if (found == null)
@@ -971,6 +974,9 @@ namespace dp2SSL
             // 添加 items 中多出来的对象
             foreach (var item in items)
             {
+#if AUTO_TEST
+                Debug.Assert(string.IsNullOrEmpty(item.PII) == false);
+#endif
                 // 用 UID 来搜索
                 var found = collection.FindEntityByUID(item.UID);
                 if (found != null)

@@ -48,10 +48,10 @@ namespace dp2Circulation
             // 
             this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(7, 170);
-            this.label2.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label2.Location = new System.Drawing.Point(13, 298);
+            this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(53, 12);
+            this.label2.Size = new System.Drawing.Size(96, 21);
             this.label2.TabIndex = 2;
             this.label2.Text = "类型(&T):";
             // 
@@ -61,30 +61,30 @@ namespace dp2Circulation
             this.comboBox_type.FormattingEnabled = true;
             this.comboBox_type.Items.AddRange(new object[] {
             "biblio"});
-            this.comboBox_type.Location = new System.Drawing.Point(10, 184);
-            this.comboBox_type.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.comboBox_type.Location = new System.Drawing.Point(18, 322);
+            this.comboBox_type.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.comboBox_type.Name = "comboBox_type";
-            this.comboBox_type.Size = new System.Drawing.Size(134, 20);
+            this.comboBox_type.Size = new System.Drawing.Size(242, 29);
             this.comboBox_type.TabIndex = 3;
             // 
             // textBox_scriptFile
             // 
             this.textBox_scriptFile.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_scriptFile.Location = new System.Drawing.Point(9, 229);
-            this.textBox_scriptFile.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.textBox_scriptFile.Location = new System.Drawing.Point(17, 401);
+            this.textBox_scriptFile.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.textBox_scriptFile.Name = "textBox_scriptFile";
-            this.textBox_scriptFile.Size = new System.Drawing.Size(368, 21);
+            this.textBox_scriptFile.Size = new System.Drawing.Size(671, 31);
             this.textBox_scriptFile.TabIndex = 5;
             // 
             // label3
             // 
             this.label3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(7, 214);
-            this.label3.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label3.Location = new System.Drawing.Point(13, 374);
+            this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(89, 12);
+            this.label3.Size = new System.Drawing.Size(159, 21);
             this.label3.TabIndex = 4;
             this.label3.Text = "脚本文件名(&S):";
             // 
@@ -92,10 +92,10 @@ namespace dp2Circulation
             // 
             this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.button_Cancel.Location = new System.Drawing.Point(320, 261);
-            this.button_Cancel.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.button_Cancel.Location = new System.Drawing.Point(587, 457);
+            this.button_Cancel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.button_Cancel.Name = "button_Cancel";
-            this.button_Cancel.Size = new System.Drawing.Size(56, 22);
+            this.button_Cancel.Size = new System.Drawing.Size(103, 38);
             this.button_Cancel.TabIndex = 7;
             this.button_Cancel.Text = "取消";
             this.button_Cancel.UseVisualStyleBackColor = true;
@@ -104,10 +104,10 @@ namespace dp2Circulation
             // button_OK
             // 
             this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_OK.Location = new System.Drawing.Point(260, 261);
-            this.button_OK.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.button_OK.Location = new System.Drawing.Point(477, 457);
+            this.button_OK.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.button_OK.Name = "button_OK";
-            this.button_OK.Size = new System.Drawing.Size(56, 22);
+            this.button_OK.Size = new System.Drawing.Size(103, 38);
             this.button_OK.TabIndex = 6;
             this.button_OK.Text = "确定";
             this.button_OK.UseVisualStyleBackColor = true;
@@ -121,11 +121,11 @@ namespace dp2Circulation
             this.groupBox_formatName.Controls.Add(this.label5);
             this.groupBox_formatName.Controls.Add(this.button_virtualDatabaseName_newBlankLine);
             this.groupBox_formatName.Controls.Add(this.captionEditControl_formatName);
-            this.groupBox_formatName.Location = new System.Drawing.Point(9, 10);
-            this.groupBox_formatName.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.groupBox_formatName.Location = new System.Drawing.Point(17, 18);
+            this.groupBox_formatName.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.groupBox_formatName.Name = "groupBox_formatName";
-            this.groupBox_formatName.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
-            this.groupBox_formatName.Size = new System.Drawing.Size(368, 157);
+            this.groupBox_formatName.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox_formatName.Size = new System.Drawing.Size(675, 275);
             this.groupBox_formatName.TabIndex = 8;
             this.groupBox_formatName.TabStop = false;
             this.groupBox_formatName.Text = "显示格式名";
@@ -135,21 +135,21 @@ namespace dp2Circulation
             this.label5.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.label5.BackColor = System.Drawing.SystemColors.Info;
-            this.label5.Location = new System.Drawing.Point(10, 120);
-            this.label5.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label5.Location = new System.Drawing.Point(18, 210);
+            this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label5.Name = "label5";
-            this.label5.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
-            this.label5.Size = new System.Drawing.Size(344, 33);
+            this.label5.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.label5.Size = new System.Drawing.Size(631, 58);
             this.label5.TabIndex = 6;
             this.label5.Text = "注：需要给显示格式取名字。至少要有一个中文(语言代码为zh)的名字。";
             // 
             // button_virtualDatabaseName_newBlankLine
             // 
             this.button_virtualDatabaseName_newBlankLine.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.button_virtualDatabaseName_newBlankLine.Location = new System.Drawing.Point(12, 95);
-            this.button_virtualDatabaseName_newBlankLine.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.button_virtualDatabaseName_newBlankLine.Location = new System.Drawing.Point(22, 166);
+            this.button_virtualDatabaseName_newBlankLine.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.button_virtualDatabaseName_newBlankLine.Name = "button_virtualDatabaseName_newBlankLine";
-            this.button_virtualDatabaseName_newBlankLine.Size = new System.Drawing.Size(110, 22);
+            this.button_virtualDatabaseName_newBlankLine.Size = new System.Drawing.Size(202, 38);
             this.button_virtualDatabaseName_newBlankLine.TabIndex = 5;
             this.button_virtualDatabaseName_newBlankLine.Text = "新增空白行(&N)";
             this.button_virtualDatabaseName_newBlankLine.UseVisualStyleBackColor = true;
@@ -162,39 +162,40 @@ namespace dp2Circulation
             | System.Windows.Forms.AnchorStyles.Right)));
             this.captionEditControl_formatName.CellBorderStyle = System.Windows.Forms.TableLayoutPanelCellBorderStyle.None;
             this.captionEditControl_formatName.Changed = false;
-            this.captionEditControl_formatName.Location = new System.Drawing.Point(12, 19);
-            this.captionEditControl_formatName.Margin = new System.Windows.Forms.Padding(2);
+            this.captionEditControl_formatName.Location = new System.Drawing.Point(22, 33);
+            this.captionEditControl_formatName.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.captionEditControl_formatName.Name = "captionEditControl_formatName";
-            this.captionEditControl_formatName.Size = new System.Drawing.Size(342, 71);
+            this.captionEditControl_formatName.Size = new System.Drawing.Size(627, 124);
             this.captionEditControl_formatName.TabIndex = 2;
             // 
             // label1
             // 
             this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(174, 170);
-            this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label1.Location = new System.Drawing.Point(319, 298);
+            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(53, 12);
+            this.label1.Size = new System.Drawing.Size(96, 21);
             this.label1.TabIndex = 9;
             this.label1.Text = "特性(&S):";
             // 
             // textBox_style
             // 
-            this.textBox_style.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_style.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_style.Location = new System.Drawing.Point(176, 183);
+            this.textBox_style.Location = new System.Drawing.Point(323, 320);
+            this.textBox_style.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.textBox_style.Name = "textBox_style";
-            this.textBox_style.Size = new System.Drawing.Size(201, 21);
+            this.textBox_style.Size = new System.Drawing.Size(365, 31);
             this.textBox_style.TabIndex = 10;
             // 
             // OpacBrowseFormatDialog
             // 
             this.AcceptButton = this.button_OK;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.button_Cancel;
-            this.ClientSize = new System.Drawing.Size(386, 293);
+            this.ClientSize = new System.Drawing.Size(708, 513);
             this.Controls.Add(this.textBox_style);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.groupBox_formatName);
@@ -205,7 +206,7 @@ namespace dp2Circulation
             this.Controls.Add(this.comboBox_type);
             this.Controls.Add(this.label2);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "OpacBrowseFormatDialog";
             this.ShowInTaskbar = false;
             this.Text = "OPAC记录显示格式";

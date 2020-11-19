@@ -31,6 +31,8 @@ namespace dp2SSL
         // 开门事件
         public event OpenDoorEventHandler OpenDoor = null;
 
+        public event EventHandler ContextMenuOpen111 = null;
+
         // List<Door> _doors = new List<Door>();
 
         public DoorControl()
@@ -309,6 +311,7 @@ KeyTime.FromTimeSpan(TimeSpan.FromSeconds(start + _length))) // KeyTime
                 };
 
                 var template = this.Resources["ButtonTemplate"];
+                //var contextMenuTemplate = this.Resources["ContextMenuTemplate"];
 
                 // button.Children.Add(block);
                 button.SetValue(Button.TemplateProperty, template);
@@ -316,6 +319,10 @@ KeyTime.FromTimeSpan(TimeSpan.FromSeconds(start + _length))) // KeyTime
                 button.SetValue(Grid.RowProperty, row);
                 button.SetValue(Grid.ColumnProperty, 0);
                 button.Click += Button_Click;
+                // button.PreviewMouseLeftButtonDown += Button_MouseRightButtonUp;
+
+                button.ContextMenu = new ContextMenu();
+                button.ContextMenuOpening += Button_ContextMenuOpening;
 
                 if (door_items.Count - 1 < index)
                 {
@@ -330,6 +337,37 @@ KeyTime.FromTimeSpan(TimeSpan.FromSeconds(start + _length))) // KeyTime
             }
 
             return grid;
+        }
+
+        private void Button_ContextMenuOpening(object sender, ContextMenuEventArgs e)
+        {
+            FrameworkElement fe = e.Source as FrameworkElement;
+            fe.ContextMenu = BuildMenu();
+        }
+
+        ContextMenu BuildMenu()
+        {
+            ContextMenu theMenu = new ContextMenu();
+            MenuItem mia = new MenuItem();
+            mia.Header = "Item1";
+            MenuItem mib = new MenuItem();
+            mib.Header = "Item2";
+            MenuItem mic = new MenuItem();
+            mic.Header = "Item3";
+            theMenu.Items.Add(mia);
+            theMenu.Items.Add(mib);
+            theMenu.Items.Add(mic);
+            return theMenu;
+        }
+
+        private void Button_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            Button button = (Button)sender;
+
+            MessageBox.Show("right button up");
+
+            button.ContextMenu = BuildMenu();
+            this.ContextMenu.IsOpen = true;
         }
 
         // 获得 shelf.xml 中 root 元素的 backImageFileOpen 属性定义的文件的路径
@@ -982,6 +1020,14 @@ this.ActualHeight - (this.Padding.Top + this.Padding.Bottom)));
             });
 
             e.Handled = true;
+        }
+
+        private void Border_ContextMenuOpening(object sender, ContextMenuEventArgs e)
+        {
+            //var button = (Border)sender;
+            //DoorItem door = button.DataContext as DoorItem;
+
+            ContextMenuOpen111?.Invoke(sender, e);
         }
     }
 

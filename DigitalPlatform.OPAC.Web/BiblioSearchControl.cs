@@ -400,11 +400,10 @@ namespace DigitalPlatform.OPAC.Web
                 listDbName.Width = new Unit("100%");
                 listDbName.CssClass = "dbname";
 
-                /*
+                // 数据库名字被重选后，回传，触发改变 Froms 列表内容
                 listDbName.AutoPostBack = true;
                 listDbName.TextChanged -= new EventHandler(this.DbNameListTextChanged);
                 listDbName.TextChanged += new EventHandler(this.DbNameListTextChanged);
-                */
 
                 line.Controls.Add(listDbName);
                 FillDbNameList(listDbName);
@@ -1382,9 +1381,16 @@ namespace DigitalPlatform.OPAC.Web
 
             if (app.vdbs != null)   // 2015/1/26
             {
-                for (int i = 0; i < app.vdbs.Count; i++)
+                // for (int i = 0; i < app.vdbs.Count; i++)
+                foreach(var database in app.vdbs)
                 {
-                    string strName = app.vdbs[i].GetName(this.Lang);
+                    // string strName = app.vdbs[i].GetName(this.Lang);
+
+                    // 2020/11/17
+                    if (database.Visible == false)
+                        continue;
+
+                    string strName = database.GetName(this.Lang);
 
                     ListItem item = new ListItem(strName, strName);
                     list.Items.Add(item);

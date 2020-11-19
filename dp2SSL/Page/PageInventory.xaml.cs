@@ -124,7 +124,7 @@ namespace dp2SSL
                             }
 
                             CurrentLocation = dialog.Location;
-                            // batchNo = dialog.BatchNo;
+                            CurrentBatchNo = dialog.BatchNo;
                             slow_mode = dialog.SlowMode;
                         }
                     }
@@ -531,7 +531,7 @@ namespace dp2SSL
                 {
                     string error = null;
                     if (channel.Started == false)
-                        error = "RFID 通道尚未启动";
+                        error = "22 RFID 通道尚未启动";
                     else
                     {
                         var get_result = channel.Object.GetTagInfo(entity.ReaderName, entity.UID, Convert.ToUInt32(entity.Antenna), "quick");
@@ -623,6 +623,7 @@ namespace dp2SSL
         {
             info.TargetLocation = CurrentLocation;
             info.TargetShelfNo = CurrentShelfNo;
+            info.BatchNo = CurrentBatchNo;
 
             if (string.IsNullOrEmpty(CurrentShelfNo) == true)
             {

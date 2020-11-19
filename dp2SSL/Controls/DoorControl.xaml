@@ -29,7 +29,15 @@
                     Padding="{Binding Padding}"
                     Margin="{Binding Margin}"
                     CornerRadius="{Binding CornerRadius}"
+                ContextMenuOpening="Border_ContextMenuOpening"
                     >
+                <!--
+                <Border.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem>Initial menu; this will be replaced ...</MenuItem>
+                    </ContextMenu>
+                </Border.ContextMenu>
+                -->
                 <Border.Background>
                     <MultiBinding Converter="{StaticResource DoorToBack}" >
                         <Binding />

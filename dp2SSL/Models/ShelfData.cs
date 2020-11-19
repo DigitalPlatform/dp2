@@ -2183,7 +2183,8 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                 // 该读者本地的在借册。注：字符串中含有点
                 var local_items = context.Requests
                     .Where(o => o.OperatorID == patron_pii && o.Action == "borrow" && o.LinkID == null
-                    && o.State != "dontsync")   // 2020/6/17 注：dontsync 表示同步时候实际上另外已经有前端对本册进行了操作(若能操作成功可以推测是还书操作)，所以这一册实际上已经还了，不要计入在借册列表中
+                    && o.State != "dontsync"   // 2020/6/17 注：dontsync 表示同步时候实际上另外已经有前端对本册进行了操作(若能操作成功可以推测是还书操作)，所以这一册实际上已经还了，不要计入在借册列表中
+                    && o.SyncErrorCode != "AlreadyBorrowed") // 2020/11/17  过滤掉 书柜借书时服务器返回已经是在借状态，借书被拒绝的情况。
                     .ToList();  // .Select(o => o.PII).ToList();
                 foreach (var item in local_items)
                 {
@@ -2767,6 +2768,10 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                     try
                     {
                         await RfidManager.TriggerListTagsEvent(list, result, true);
+
+#if AUTO_TEST
+                        NewTagList.AssertTagInfo();
+#endif
                     }
                     catch (TagInfoException ex)
                     {
@@ -2832,10 +2837,19 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
 
                     try
                     {
+#if AUTO_TEST
+                        Debug.Assert(tag.OneTag.TagInfo != null);
+                        tag.Type = null;
+#endif
+
                         // 注：所创建的 Entity 对象其 Error 成员可能有值，表示有出错信息
                         // Exception:
                         //      可能会抛出异常 ArgumentException
                         var entity = NewEntity(tag, false);
+
+#if AUTO_TEST
+                        Debug.Assert(string.IsNullOrEmpty(entity.PII) == false);
+#endif
 
                         func_display($"正在填充图书队列 ({GetPiiString(entity)})...");
 
@@ -2904,9 +2918,11 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
 #endif
             }
 
+            /*
             // DoorItem.DisplayCount(_all, _adds, _removes, App.CurrentApp.Doors);
             // TODO: 只刷新指定门的数字即可
             l_RefreshCount();
+            */
 
             // TryReturn(progress, _all);
             // _firstInitial = true;   // 第一次初始化已经完成
@@ -2972,6 +2988,10 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
         "" // tag.TagInfo.LockStatus
         );
                 pii = chip.FindElement(ElementOID.PII)?.Text;
+
+#if AUTO_TEST
+                Debug.Assert(string.IsNullOrEmpty(pii) == false);
+#endif
 
                 var typeOfUsage = chip.FindElement(ElementOID.TypeOfUsage)?.Text;
                 if (typeOfUsage != null && typeOfUsage.StartsWith("8"))
@@ -3134,6 +3154,10 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             try
             {
                 SetTagType(tag, out string pii, out chip);
+#if AUTO_TEST
+                Debug.Assert(string.IsNullOrEmpty(pii) == false);
+                Debug.Assert(chip != null);
+#endif
                 result.PII = pii;
             }
             catch (Exception ex)
@@ -4939,6 +4963,9 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             List<string> errors = new List<string>();
             foreach (Entity entity in entities)
             {
+#if AUTO_TEST
+                Debug.Assert(string.IsNullOrEmpty(entity.PII) == false);
+#endif
                 if (token.IsCancellationRequested)
                     return new FillBookFieldsResult
                     {
@@ -5886,6 +5913,12 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             }
         }
 
+#if AUTO_TEST
+
+        #region 模拟标签测试
+
+        const int TAG_COUNT_PER_DOOR = 30;
+
         // 将 RfidCenter 切换为模拟标签模式，并添加好标签
         public static NormalResult InitialSimuTags()
         {
@@ -5895,6 +5928,20 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                 names.Add(door.ReaderName);
             }
             StringUtil.RemoveDupNoSort(ref names);
+
+            List<SimuTagInfo> tagInfos = null;
+            {
+                var result = LibraryChannelUtil.DownloadTagsInfo(null,
+                    Doors.Count * TAG_COUNT_PER_DOOR,
+                    null,
+                    App.CancelToken);
+                if (result.Value == -1)
+                {
+                    App.SetError("simuReader", result.ErrorInfo);
+                    return result;
+                }
+                tagInfos = result.TagInfos;
+            }
 
             {
                 var result = RfidManager.SimuTagInfo("switchToSimuMode", null, $"readerNameList:{StringUtil.MakePathList(names, "|")}");
@@ -5906,17 +5953,27 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             }
             List<TagInfo> tags = new List<TagInfo>();
             // 对当前每个柜门，都给填充一定数量的标签
-            int index = 1;
+            int index = 0;
             foreach (var door in Doors)
             {
-                for (int i = 0; i < 30; i++)
+                for (int i = 0; i < TAG_COUNT_PER_DOOR; i++)
                 {
                     LogicChip chip = new LogicChip();
-                    chip.NewElement(ElementOID.PII, $"B{(index++).ToString().PadLeft(8, '0')}");
-                    chip.NewElement(ElementOID.ShelfLocation, "QA268.L55");
-                    chip.NewElement(ElementOID.OwnerInstitution, "US-InU-Mu").WillLock = true;
+                    SimuTagInfo info = null;
+                    if (index < tagInfos.Count)
+                        info = tagInfos[index];
+                    else
+                        info = new SimuTagInfo
+                        {
+                            PII = $"B{(index + 1).ToString().PadLeft(8, '0')}",
+                            AccessNo = "?",
+                            OI = "testoi"
+                        };
+                    chip.NewElement(ElementOID.PII, $"{info.PII}");
+                    chip.NewElement(ElementOID.ShelfLocation, info.AccessNo);
+                    chip.NewElement(ElementOID.OwnerInstitution, info.OI).WillLock = true;
 
-                    var bytes = chip.GetBytes(4 * 9,
+                    var bytes = chip.GetBytes(4 * 20,
     4,
     GetBytesStyle.None,
     out string block_map);
@@ -5931,6 +5988,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                     };
 
                     tags.Add(tag);
+                    index++;
                 }
             }
 
@@ -5945,6 +6003,10 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             App.SetError("simuReader", null);
             return new NormalResult();
         }
+
+        #endregion
+
+#endif
 
         /*
         static Operator OperatorFromRequest(RequestItem request)

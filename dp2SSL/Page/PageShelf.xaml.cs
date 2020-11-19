@@ -79,6 +79,7 @@ namespace dp2SSL
             this._patron.PropertyChanged += _patron_PropertyChanged;
 
             this.doorControl.OpenDoor += DoorControl_OpenDoor;
+            this.doorControl.ContextMenuOpen111 += DoorControl_ContextMenuOpen111;
 
             App.CurrentApp.PropertyChanged += CurrentApp_PropertyChanged;
 
@@ -87,6 +88,30 @@ namespace dp2SSL
             // this.error.Text = "test";
         }
 
+        private void DoorControl_ContextMenuOpen111(object sender, EventArgs e)
+        {
+            FrameworkElement fe = (e as ContextMenuEventArgs).Source as FrameworkElement;
+            // var border = sender as Border;
+            if (fe.ContextMenu == null)
+                fe.ContextMenu = BuildMenu();
+            // MessageBox.Show("popup");
+        }
+
+        ContextMenu BuildMenu()
+        {
+            ContextMenu theMenu = new ContextMenu();
+            theMenu.IsOpen = true;
+            MenuItem mia = new MenuItem();
+            mia.Header = "Item1";
+            MenuItem mib = new MenuItem();
+            mib.Header = "Item2";
+            MenuItem mic = new MenuItem();
+            mic.Header = "Item3";
+            theMenu.Items.Add(mia);
+            theMenu.Items.Add(mib);
+            theMenu.Items.Add(mic);
+            return theMenu;
+        }
         // parameters:
         //      mode    空字符串或者“initial”
         public PageShelf(string mode) : this()
@@ -1804,6 +1829,12 @@ namespace dp2SSL
                     }
                 });
 
+                // 等待 NewTagList.Refresh() 第一次完整完成
+                DisplayMessage(progress, "等待 RFID 标签读取完成 ...", "green");
+
+                // 等待 RfidManager 通道启动
+                // TagListRefreshFinish.WaitOne();
+
                 if (_initialCancelled)
                     return;
 
@@ -1830,7 +1861,7 @@ namespace dp2SSL
                         // 处理前先从 All 中移走当前门的所有标签
                         {
                             var remove_entities = ShelfData.Find(ShelfData.l_All,
-                                (o) => o.Antenna == door.Antenna.ToString() 
+                                (o) => o.Antenna == door.Antenna.ToString()
                                 && DoorItem.IsReaderNameEqual(o.ReaderName, door.ReaderName));  // 2020/10/14 增加此句，消除“冲掉同天线号的另外一门的图书数字的 bug”
                             if (remove_entities.Count > 0)
                                 ShelfData.l_Remove("all", remove_entities);

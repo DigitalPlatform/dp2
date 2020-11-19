@@ -2881,6 +2881,7 @@ namespace dp2Circulation
                 string strName = node.GetAttribute("name");
                 string strAlias = node.GetAttribute("alias");
                 string strType = node.Name;
+                bool visible = DomUtil.GetBooleanParam(node, "visible", true);
 
                 // 对于<virtualDatabase>元素，要选出<caption>里面的中文名称
                 if (node.Name == "virtualDatabase")
@@ -2894,6 +2895,8 @@ namespace dp2Circulation
                 ListViewUtil.ChangeItemText(item, COLUMN_OPAC_TYPE, GetOpacDatabaseTypeDisplayString(strType));
                 // item.SubItems.Add(GetOpacDatabaseTypeDisplayString(strType));
                 ListViewUtil.ChangeItemText(item, COLUMN_OPAC_ALIAS, strAlias);
+                ListViewUtil.ChangeItemText(item, COLUMN_OPAC_VISIBLE, visible ? "是" : "否");
+
                 item.Tag = node.OuterXml;   // 记载XML定义片断
 
                 this.listView_opacDatabases.Items.Add(item);
@@ -2905,7 +2908,8 @@ namespace dp2Circulation
         const int COLUMN_OPAC_NAME = 0;
         const int COLUMN_OPAC_TYPE = 1;
         const int COLUMN_OPAC_ALIAS = 2;
-        const int COLUMN_OPAC_COMMENT = 3;
+        const int COLUMN_OPAC_VISIBLE = 3;
+        const int COLUMN_OPAC_COMMENT = 4;
 
         // 获得OPAC数据库类型的显示字符串
         // 所谓显示字符串，就是“虚拟库” “普通库”
@@ -3630,6 +3634,7 @@ namespace dp2Circulation
                 dlg.ManagerForm = this;
                 dlg.DatabaseName = DomUtil.GetAttr(dom.DocumentElement, "name");
                 dlg.DatabaseAlias = dom.DocumentElement.GetAttribute("alias");
+                dlg.DatabaseVisible = DomUtil.GetBooleanParam(dom.DocumentElement, "visible", true);
 
                 Program.MainForm.AppInfo.LinkFormState(dlg, "ManagerForm_OpacNormalDatabaseDialog_state");
                 dlg.ShowDialog(this);
@@ -3646,6 +3651,14 @@ namespace dp2Circulation
                     dom.DocumentElement.RemoveAttribute("alias");
                 else
                     dom.DocumentElement.SetAttribute("alias", dlg.DatabaseAlias);
+
+                if (dlg.DatabaseVisible == false)
+                    dom.DocumentElement.SetAttribute("visible", "false");
+                else
+                    dom.DocumentElement.RemoveAttribute("visible");
+
+                ListViewUtil.ChangeItemText(item, COLUMN_OPAC_VISIBLE, dlg.DatabaseVisible ? "是" : "否");
+
                 ListViewUtil.ChangeItemText(item, COLUMN_OPAC_ALIAS, dlg.DatabaseAlias);
                 item.Tag = dom.DocumentElement.OuterXml;   // 记载XML定义片断
 
@@ -3723,6 +3736,7 @@ namespace dp2Circulation
                     if (string.IsNullOrEmpty(alias) == false)
                         dom.DocumentElement.SetAttribute("alias", alias);
                     ListViewUtil.ChangeItemText(item, COLUMN_OPAC_ALIAS, alias);
+                    ListViewUtil.ChangeItemText(item, COLUMN_OPAC_VISIBLE, "是");
 
                     item.Tag = dom.DocumentElement.OuterXml;   // 记载XML定义片断
 
@@ -5288,7 +5302,7 @@ namespace dp2Circulation
 
                 // 获得布尔型的属性参数值
                 // return:
-                //      -1  出错。但是nValue中已经有了nDefaultValue值，可以不加警告而直接使用
+                //      -1  出错。但是bValue中已经有了bDefaultValue值，可以不加警告而直接使用
                 //      0   正常获得明确定义的参数值
                 //      1   参数没有定义，因此代替以缺省参数值返回
                 nRet = DomUtil.GetBooleanParam(node,

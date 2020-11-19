@@ -54,53 +54,55 @@ namespace DigitalPlatform.CommonControl
             this.tableLayoutPanel_main.Controls.Add(this.label_topleft, 0, 0);
             this.tableLayoutPanel_main.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel_main.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel_main.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tableLayoutPanel_main.Name = "tableLayoutPanel_main";
             this.tableLayoutPanel_main.RowCount = 2;
             this.tableLayoutPanel_main.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_main.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel_main.Size = new System.Drawing.Size(336, 150);
+            this.tableLayoutPanel_main.Size = new System.Drawing.Size(462, 210);
             this.tableLayoutPanel_main.TabIndex = 1;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("SimSun", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label1.Location = new System.Drawing.Point(23, 6);
-            this.label1.Margin = new System.Windows.Forms.Padding(3, 6, 3, 3);
+            this.label1.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label1.Location = new System.Drawing.Point(31, 8);
+            this.label1.Margin = new System.Windows.Forms.Padding(4, 8, 4, 4);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(39, 15);
+            this.label1.Size = new System.Drawing.Size(54, 21);
             this.label1.TabIndex = 1;
             this.label1.Text = "风格";
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Font = new System.Drawing.Font("SimSun", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label2.Location = new System.Drawing.Point(68, 6);
-            this.label2.Margin = new System.Windows.Forms.Padding(3, 6, 3, 3);
+            this.label2.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label2.Location = new System.Drawing.Point(93, 8);
+            this.label2.Margin = new System.Windows.Forms.Padding(4, 8, 4, 4);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(71, 15);
+            this.label2.Size = new System.Drawing.Size(98, 21);
             this.label2.TabIndex = 2;
             this.label2.Text = "显示文字";
             // 
             // label_topleft
             // 
             this.label_topleft.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label_topleft.Font = new System.Drawing.Font("SimSun", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label_topleft.Location = new System.Drawing.Point(3, 6);
-            this.label_topleft.Margin = new System.Windows.Forms.Padding(3, 6, 3, 3);
+            this.label_topleft.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label_topleft.Location = new System.Drawing.Point(4, 8);
+            this.label_topleft.Margin = new System.Windows.Forms.Padding(4, 8, 4, 4);
             this.label_topleft.Name = "label_topleft";
-            this.label_topleft.Size = new System.Drawing.Size(14, 15);
+            this.label_topleft.Size = new System.Drawing.Size(19, 29);
             this.label_topleft.TabIndex = 6;
             this.label_topleft.MouseUp += new System.Windows.Forms.MouseEventHandler(this.label_topleft_MouseUp);
             // 
             // FromEditControl
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.tableLayoutPanel_main);
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "FromEditControl";
-            this.Size = new System.Drawing.Size(336, 150);
+            this.Size = new System.Drawing.Size(462, 210);
             this.tableLayoutPanel_main.ResumeLayout(false);
             this.tableLayoutPanel_main.PerformLayout();
             this.ResumeLayout(false);

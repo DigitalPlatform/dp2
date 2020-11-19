@@ -108,6 +108,7 @@ namespace RfidCenter
         public void Create(List<string> names)
         {
             _readers.Clear();
+            _tags.Clear();
             foreach (string name in names)
             {
                 var reader = new Reader();
@@ -791,6 +792,7 @@ out Reader reader);
                     var found = FindTag(tag.UID, null);
                     if (found != null)
                     {
+
                         _tags.Remove(found);
                     }
                 }
@@ -917,7 +919,7 @@ out Reader reader);
         List<InventoryInfo> Inventory(Reader reader, byte[] antennas)
         {
             var results = new List<InventoryInfo>();
-            foreach (var tag in _tags)
+            foreach (var tag in _tags.GetList())
             {
                 Debug.Assert(string.IsNullOrEmpty(tag.ReaderName) == false);
                 if (tag.ReaderName == reader.Name)
@@ -940,7 +942,7 @@ out Reader reader);
         List<TagData> GetTags(Reader reader, byte[] antennas)
         {
             var results = new List<TagData>();
-            foreach (var tag in _tags)
+            foreach (var tag in _tags.GetList())
             {
                 if (tag.ReaderName == reader.Name)
                 {
@@ -958,7 +960,7 @@ out Reader reader);
         //      readerName  读卡器名。如果为 null 表示匹配所有读卡器
         TagData FindTag(string uid, string readerName)
         {
-            foreach (var tag in _tags)
+            foreach (var tag in _tags.GetList())
             {
                 if (tag.InventoryInfo.UID == uid
                     && (readerName == null || tag.ReaderName == readerName))
@@ -1239,9 +1241,42 @@ out Reader reader);
     }
 
     // 标签信息集合
-    public class TagCollection : List<TagData>
+    public class TagCollection // : List<TagData>
     {
+        List<TagData> _tags = new List<TagData>();
+        object _syncRoot = new object();
 
+        public void Clear()
+        {
+            lock (_syncRoot)
+            {
+                _tags.Clear();
+            }
+        }
+
+        public void Remove(TagData tag)
+        {
+            lock (_syncRoot)
+            {
+                _tags.Remove(tag);
+            }
+        }
+
+        public void Add(TagData tag)
+        {
+            lock (_syncRoot)
+            {
+                _tags.Add(tag);
+            }
+        }
+
+        public List<TagData> GetList()
+        {
+            lock (_syncRoot)
+            {
+                return new List<TagData>(_tags);
+            }
+        }
     }
 
 }
