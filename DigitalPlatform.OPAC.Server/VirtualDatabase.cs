@@ -18,6 +18,31 @@ namespace DigitalPlatform.OPAC.Server
     {
         internal XmlNode nodeDatabase = null;
 
+        // 2020/11/17
+        // 是否显示在数据库名列表中
+        // 缺省为 true。
+        public bool Visible
+        {
+            get
+            {
+                if (nodeDatabase == null)
+                    return true;
+
+                // 获得布尔型的属性参数值
+                // return:
+                //      -1  出错。但是bValue中已经有了bDefaultValue值，可以不加警告而直接使用
+                //      0   正常获得明确定义的参数值
+                //      1   参数没有定义，因此代替以缺省参数值返回
+                int nRet = DomUtil.GetBooleanParam(nodeDatabase,
+                    "visible",
+                    true,
+                    out bool bValue,
+                    out string strError);
+
+                return bValue;
+            }
+        }
+
         // 是否不在<all>之列
         // 缺省为false。
         // 本参数用来控制不希望出现在<all>范围内的数据库，例如“用户”库
@@ -30,9 +55,9 @@ namespace DigitalPlatform.OPAC.Server
 
                 bool bValue = false;
                 string strError = "";
-                // 获得整数型的属性参数值
+                // 获得布尔型的属性参数值
                 // return:
-                //      -1  出错。但是nValue中已经有了nDefaultValue值，可以不加警告而直接使用
+                //      -1  出错。但是bValue中已经有了bDefaultValue值，可以不加警告而直接使用
                 //      0   正常获得明确定义的参数值
                 //      1   参数没有定义，因此代替以缺省参数值返回
                 int nRet = DomUtil.GetBooleanParam(nodeDatabase,

@@ -9,7 +9,6 @@ using System.Xml;
 using System.Diagnostics;
 
 using DigitalPlatform.Xml;
-using DigitalPlatform.Core;
 
 namespace DigitalPlatform.CommonControl
 {
@@ -63,7 +62,12 @@ namespace DigitalPlatform.CommonControl
                 foreach (FromElement line in this.Elements)
                 {
                     line.captions.HasTitleLine = this.m_bHasCaptionsTitleLine;
+
+                    // 2020/11/17 增加
+                    line.SetCaptionsHeight(true);
                 }
+
+
             }
         }
 
@@ -162,7 +166,6 @@ namespace DigitalPlatform.CommonControl
                 {
                     line.SetCaptionsHeight(true);
                 }
-
             }
             finally
             {
@@ -391,10 +394,8 @@ namespace DigitalPlatform.CommonControl
             XmlNodeList nodes = dom.DocumentElement.SelectNodes("from");
 
             this.DisableUpdate();
-
             try
             {
-
                 for (int i = 0; i < nodes.Count; i++)
                 {
                     XmlNode node = nodes[i];
@@ -404,6 +405,7 @@ namespace DigitalPlatform.CommonControl
                     element.Style = DomUtil.GetAttr(node, "style");
                     try
                     {
+                        // TODO: 注意这里可能会引起 CaptionEditControl 的内容高度像素改变
                         element.CaptionsXml = node.InnerXml;
                     }
                     catch (Exception ex)
@@ -412,9 +414,7 @@ namespace DigitalPlatform.CommonControl
                         return -1;
                     }
                 }
-
                 this.SetElementsHeight();
-
             }
             finally
             {
@@ -424,10 +424,19 @@ namespace DigitalPlatform.CommonControl
             return 0;
         }
 
+        RowStyle GetRowStyle()
+        {
+            // return new RowStyle(SizeType.Absolute, child.Height);
+            return new RowStyle();
+        }
+
         public FromElement AppendNewElement()
         {
             this.tableLayoutPanel_main.RowCount += 1;
-            this.tableLayoutPanel_main.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel_main.RowStyles.Add(
+                // new System.Windows.Forms.RowStyle()
+                GetRowStyle()
+                );
 
             FromElement line = new FromElement(this);
 
@@ -435,13 +444,19 @@ namespace DigitalPlatform.CommonControl
 
             this.Elements.Add(line);
 
+            // this.PerformAutoScale();
+            this.PerformLayout();
             return line;
         }
+
 
         public FromElement InsertNewElement(int index)
         {
             this.tableLayoutPanel_main.RowCount += 1;
-            this.tableLayoutPanel_main.RowStyles.Insert(index + 1, new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel_main.RowStyles.Insert(index + 1,
+                // new System.Windows.Forms.RowStyle()
+                GetRowStyle()
+                );
 
             FromElement line = new FromElement(this);
 
@@ -453,6 +468,8 @@ namespace DigitalPlatform.CommonControl
 
             SelectElement(line, true);  // 2008/6/10
 
+            // this.PerformAutoScale();
+            this.PerformLayout();
             return line;
         }
 
@@ -502,7 +519,6 @@ namespace DigitalPlatform.CommonControl
         public void EnableUpdate()
         {
             this.m_nInSuspend--;
-
 
             if (this.m_nInSuspend == 0)
             {
@@ -1211,7 +1227,8 @@ namespace DigitalPlatform.CommonControl
         {
             CaptionEditControl captions = this.captions;
 
-            captions.Size = new Size(captions.Size.Width, (28 + 2) * (captions.Elements.Count + (captions.HasTitleLine == true ? 1 : 0)));
+            // 2020/11/17 +1
+            captions.Size = new Size(captions.Size.Width, (28 + 2) * ((captions.Elements.Count + 1) + (captions.HasTitleLine == true ? 1 : 0)));
 
             // captions.Size = new Size(captions.Size.Width, this.Container.tableLayoutPanel_main.DisplayRectangle.Height);
         }

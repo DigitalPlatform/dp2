@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -26,6 +27,16 @@ namespace DigitalPlatform.RFID
                     results.AddRange(_tags);
                     return results;
                 }
+            }
+        }
+
+        public static void AssertTagInfo()
+        {
+            int i = 0;
+            foreach(var tag in Tags)
+            {
+                Debug.Assert(tag.OneTag.TagInfo != null, $"i={i} tag={tag.ToString()}");
+                i++;
             }
         }
 

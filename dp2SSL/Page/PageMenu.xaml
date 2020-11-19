@@ -4,6 +4,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:dp2SSL"
+      xmlns:fa="http://schemas.fontawesome.io/icons/"
       mc:Ignorable="d" 
       Background="Black"
       d:DesignHeight="600" d:DesignWidth="500"
@@ -71,10 +72,11 @@
             <Button 
             Name="shelf" Content="书柜"  Click="Shelf_Click"
                 Background="#FF0A7832" Foreground="White" FontSize="40" BorderThickness="0"/>
-
+<!--
             <Button 
             Name="config" Content="设置"  Click="Config_Click"
                 Background="#FF254276" Foreground="White" FontSize="40" BorderThickness="0"/>
+            -->
             <Grid Background="Black" Opacity="0.7">
                 <TextBlock Name="number"
                    Text="{Binding Path=Number,Mode=OneWay}"
@@ -96,6 +98,12 @@
                 Background="DarkRed" Foreground="White" FontSize="36" BorderThickness="0"/>
 
         </UniformGrid>
+        <Button x:Name="settingsButton" Grid.Row="3" HorizontalAlignment="Right"
+                Background="Transparent" BorderThickness="0"
+                Click="Config_Click">
+            <fa:ImageAwesome Icon="Gear"
+                             Height="40" Foreground="DarkGray" Margin="4"/>
+        </Button>
         <TextBlock x:Name="companyName"  Grid.Row="3" Foreground="#FFB6B4B4"
                    VerticalAlignment="Center" HorizontalAlignment="Center">
             <Run Text="数字平台(北京)软件有限责任公司"/>

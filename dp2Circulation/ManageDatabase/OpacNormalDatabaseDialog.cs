@@ -92,5 +92,18 @@ namespace dp2Circulation
                 this.textBox_databaseAlias.Text = value;
             }
         }
+
+        // 2020/11/17
+        public bool DatabaseVisible
+        {
+            get
+            {
+                return this.checkBox_visible.Checked;
+            }
+            set
+            {
+                this.checkBox_visible.Checked = value;
+            }
+        }
     }
 }

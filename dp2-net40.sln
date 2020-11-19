@@ -267,6 +267,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrinterDriver.Yanke", "Prin
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Midi", "midi-dot-net\Midi\Midi.csproj", "{F60D8B7B-2D2E-4B94-A736-3783FFE1A25C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RfidTool", "RfidTool\RfidTool.csproj", "{0C564184-EFA2-4690-9FA2-D987074641D8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -2239,6 +2241,24 @@ Global
 		{F60D8B7B-2D2E-4B94-A736-3783FFE1A25C}.Test|Mixed Platforms.Build.0 = Debug|Any CPU
 		{F60D8B7B-2D2E-4B94-A736-3783FFE1A25C}.Test|x86.ActiveCfg = Debug|Any CPU
 		{F60D8B7B-2D2E-4B94-A736-3783FFE1A25C}.Test|x86.Build.0 = Debug|Any CPU
+		{0C564184-EFA2-4690-9FA2-D987074641D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0C564184-EFA2-4690-9FA2-D987074641D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0C564184-EFA2-4690-9FA2-D987074641D8}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{0C564184-EFA2-4690-9FA2-D987074641D8}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{0C564184-EFA2-4690-9FA2-D987074641D8}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{0C564184-EFA2-4690-9FA2-D987074641D8}.Debug|x86.Build.0 = Debug|Any CPU
+		{0C564184-EFA2-4690-9FA2-D987074641D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0C564184-EFA2-4690-9FA2-D987074641D8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0C564184-EFA2-4690-9FA2-D987074641D8}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{0C564184-EFA2-4690-9FA2-D987074641D8}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{0C564184-EFA2-4690-9FA2-D987074641D8}.Release|x86.ActiveCfg = Release|Any CPU
+		{0C564184-EFA2-4690-9FA2-D987074641D8}.Release|x86.Build.0 = Release|Any CPU
+		{0C564184-EFA2-4690-9FA2-D987074641D8}.Test|Any CPU.ActiveCfg = Debug|Any CPU
+		{0C564184-EFA2-4690-9FA2-D987074641D8}.Test|Any CPU.Build.0 = Debug|Any CPU
+		{0C564184-EFA2-4690-9FA2-D987074641D8}.Test|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{0C564184-EFA2-4690-9FA2-D987074641D8}.Test|Mixed Platforms.Build.0 = Debug|Any CPU
+		{0C564184-EFA2-4690-9FA2-D987074641D8}.Test|x86.ActiveCfg = Debug|Any CPU
+		{0C564184-EFA2-4690-9FA2-D987074641D8}.Test|x86.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

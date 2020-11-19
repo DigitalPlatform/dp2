@@ -146,6 +146,11 @@ namespace dp2Circulation
             {
 
             }
+
+            /*
+            this.PerformAutoScale();
+            this.PerformLayout();
+            */
         }
 
         private void button_OK_Click(object sender, EventArgs e)

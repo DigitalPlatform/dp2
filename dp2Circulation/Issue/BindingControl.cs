@@ -2971,7 +2971,7 @@ namespace dp2Circulation
                         bool bMissing = false;
                         // 获得布尔型的属性参数值
                         // return:
-                        //      -1  出错。但是nValue中已经有了nDefaultValue值，可以不加警告而直接使用
+                        //      -1  出错。但是bValue中已经有了bDefaultValue值，可以不加警告而直接使用
                         //      0   正常获得明确定义的参数值
                         //      1   参数没有定义，因此代替以缺省参数值返回
                         DomUtil.GetBooleanParam(node,

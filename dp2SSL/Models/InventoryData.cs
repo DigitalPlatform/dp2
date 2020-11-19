@@ -811,7 +811,7 @@ TaskScheduler.Default);
                 channel.Timeout = old_timeout;
                 App.CurrentApp.ReturnChannel(channel);
 
-                WpfClientInfo.WriteInfoLog($"结束下载全部读者记录到本地缓存");
+                WpfClientInfo.WriteInfoLog($"结束下载全部册记录到本地缓存");
             }
         }
 
@@ -1331,6 +1331,9 @@ TaskScheduler.Default);
 
         // 当前馆藏地。例如 “海淀分馆/阅览室”
         public static string CurrentLocation { get; set; }
+
+        // 当前批次号
+        public static string CurrentBatchNo { get; set; }
 
         public class RequestSetUidResult : NormalResult
         {

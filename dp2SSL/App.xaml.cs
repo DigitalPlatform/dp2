@@ -372,6 +372,17 @@ namespace dp2SSL
             }
         }
 
+        /*
+        public static ManualResetEvent TagListRefreshFinish
+        {
+            get
+            {
+                return _refreshFinish;
+            }
+        }
+        static ManualResetEvent _refreshFinish = new ManualResetEvent(false);
+        */
+
         static string _rfidType = "";   // ""/自助借还/智能书柜
 
         public static void InitialRfidManager()
@@ -418,6 +429,8 @@ namespace dp2SSL
             }
 
             _rfidType = App.Function;
+
+            // _refreshFinish.Set();
         }
 
         static bool _shelfPrepared = false;
@@ -1653,6 +1666,8 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
 
         // public event SetErrorEventHandler TagSetError = null;
 
+
+
         private static void RfidManager_ListTags(object sender, ListTagsEventArgs e)
         {
             // 2020/7/22
@@ -1690,8 +1705,10 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                             (readerName, uid, antennaID) =>
                             {
                                 var channel = sender as BaseChannel<IRfid>;
+                                /*
                                 if (channel.Started == false)
-                                    return new GetTagInfoResult { Value = -1, ErrorInfo = "RFID 通道尚未启动" };
+                                    return new GetTagInfoResult { Value = -1, ErrorInfo = "11 RFID 通道尚未启动" };
+                                */
                                 return channel.Object.GetTagInfo(readerName, uid, antennaID);
                             },
                             (add_tags, update_tags, remove_tags) =>

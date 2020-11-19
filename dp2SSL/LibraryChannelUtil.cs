@@ -18,7 +18,7 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
-using Microsoft.EntityFrameworkCore.Infrastructure;
+using System.Threading;
 
 namespace dp2SSL
 {
@@ -1312,7 +1312,7 @@ namespace dp2SSL
             }
         }
 
-#region GetRfidCfg
+        #region GetRfidCfg
 
         public class GetRfidCfgResult : NormalResult
         {
@@ -1422,7 +1422,7 @@ namespace dp2SSL
             };
         }
 
-#endregion
+        #endregion
 
         public class GetLocationListResult : NormalResult
         {
@@ -1440,7 +1440,7 @@ namespace dp2SSL
             try
             {
                 int nRedoCount = 0;
-                REDO:
+            REDO:
                 long lRet = channel.GetSystemParameter(
 null,
 "circulation",
@@ -1590,5 +1590,208 @@ out string strError);
                 App.CurrentApp.ReturnChannel(channel);
             }
         }
+
+        public delegate void delegate_showText(string text);
+
+        public class SimuTagInfo
+        {
+            public string PII { get; set; }
+            public string OI { get; set; }
+            public string UID { get; set; }
+            public string AccessNo { get; set; }
+        }
+
+        public class TagsInfoResult : NormalResult
+        {
+            public List<SimuTagInfo> TagInfos { get; set; }
+        }
+
+        // 从 dp2library 服务器检索获得模拟 RFID 图书标签所需的数据
+        // parameters:
+        //
+        public static TagsInfoResult DownloadTagsInfo(
+            List<string> item_dbnames,
+            int max_count,
+            delegate_showText func_showProgress,
+            CancellationToken token)
+        {
+            WpfClientInfo.WriteInfoLog($"开始 DownloadTagsInfo()");
+            LibraryChannel channel = App.CurrentApp.GetChannel();
+            var old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromMinutes(5);  // 设置 5 分钟。因为册记录检索需要一定时间
+            try
+            {
+                List<SimuTagInfo> infos = new List<SimuTagInfo>();
+
+                if (item_dbnames == null)
+                {
+                    long lRet = channel.GetSystemParameter(
+    null,
+    "item",
+    "dbnames",
+    out string strValue,
+    out string strError);
+                    if (lRet == -1)
+                        return new TagsInfoResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError,
+                            ErrorCode = channel.ErrorCode.ToString()
+                        };
+                    item_dbnames = StringUtil.SplitList(strValue);
+                    StringUtil.RemoveBlank(ref item_dbnames);
+                }
+
+                foreach (string dbName in item_dbnames)
+                {
+                    func_showProgress?.Invoke($"正在从 {dbName} 获取信息 ...");
+
+                    int nRedoCount = 0;
+                REDO:
+                    if (token.IsCancellationRequested)
+                        return new TagsInfoResult
+                        {
+                            Value = -1,
+                            ErrorInfo = "用户中断"
+                        };
+                    // 检索全部读者库记录
+                    long lRet = channel.SearchItem(null,
+    dbName, // "<all>",
+    "",
+    -1,
+    "__id",
+    "left",
+    "zh",
+    null,   // strResultSetName
+    "", // strSearchStyle
+    "", // strOutputStyle
+    out string strError);
+                    if (lRet == -1)
+                    {
+                        WpfClientInfo.WriteErrorLog($"SearchItem() 出错, strError={strError}, channel.ErrorCode={channel.ErrorCode}");
+
+                        // 一次重试机会
+                        if (lRet == -1
+                            && (channel.ErrorCode == ErrorCode.RequestCanceled || channel.ErrorCode == ErrorCode.RequestError)
+                            && nRedoCount < 2)
+                        {
+                            nRedoCount++;
+                            goto REDO;
+                        }
+
+                        return new TagsInfoResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError,
+                            ErrorCode = channel.ErrorCode.ToString()
+                        };
+                    }
+
+                    long hitcount = lRet;
+
+                    WpfClientInfo.WriteInfoLog($"{dbName} 共检索命中册记录 {hitcount} 条");
+
+                    // 把超时时间改短一点
+                    channel.Timeout = TimeSpan.FromSeconds(20);
+
+                    DateTime search_time = DateTime.Now;
+
+                    int skip_count = 0;
+                    int error_count = 0;
+
+                    if (hitcount > 0)
+                    {
+                        // string strStyle = "id,cols,format:@coldef:*/barcode|*/location|*/uid";
+
+                        // 获取和存储记录
+                        ResultSetLoader loader = new ResultSetLoader(channel,
+            null,
+            null,
+            "id,xml",
+            "zh");
+
+                        // loader.Prompt += this.Loader_Prompt;
+                        int i = 0;
+                        foreach (DigitalPlatform.LibraryClient.localhost.Record record in loader)
+                        {
+                            if (token.IsCancellationRequested)
+                                return new TagsInfoResult
+                                {
+                                    Value = -1,
+                                    ErrorInfo = "用户中断"
+                                };
+
+                            var xml = record.RecordBody.Xml;
+
+                            XmlDocument dom = new XmlDocument();
+                            dom.LoadXml(xml);
+
+                            var info = new SimuTagInfo();
+                            info.PII = DomUtil.GetElementText(dom.DocumentElement, "barcode");
+
+                            if (string.IsNullOrEmpty(info.PII))
+                                continue;
+
+                            if (info.PII.Contains("_"))
+                                continue;
+
+                            {
+                                string oi = "";
+                                string location = DomUtil.GetElementText(dom.DocumentElement, "location");
+                                location = StringUtil.GetPureLocation(location);
+                                var ret = ShelfData.GetOwnerInstitution(location, out string isil, out string alternative);
+                                if (ret == true)
+                                {
+                                    if (string.IsNullOrEmpty(isil) == false)
+                                        oi = isil;
+                                    else if (string.IsNullOrEmpty(alternative) == false)
+                                        oi = alternative;
+                                }
+                                info.OI = oi;
+                            }
+
+                            // info.OI = DomUtil.GetElementText(dom.DocumentElement, "oi");
+
+                            if (string.IsNullOrEmpty(info.OI))
+                                continue;
+
+                            info.UID = DomUtil.GetElementText(dom.DocumentElement, "uid");
+                            info.AccessNo = DomUtil.GetElementText(dom.DocumentElement, "accessNo");
+                            infos.Add(info);
+                            i++;
+
+                            if (i >= max_count)
+                                break;
+                        }
+
+                    }
+
+                    WpfClientInfo.WriteInfoLog($"dbName='{dbName}'。skip_count={skip_count}, error_count={error_count}");
+
+                }
+                return new TagsInfoResult
+                {
+                    TagInfos = infos,
+                };
+            }
+            catch (Exception ex)
+            {
+                WpfClientInfo.WriteErrorLog($"DownloadTagsInfo() 出现异常：{ExceptionUtil.GetDebugText(ex)}");
+
+                return new TagsInfoResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"DownloadTagsInfo() 出现异常：{ex.Message}"
+                };
+            }
+            finally
+            {
+                channel.Timeout = old_timeout;
+                App.CurrentApp.ReturnChannel(channel);
+
+                WpfClientInfo.WriteInfoLog($"结束 DownloadTagsInfo()");
+            }
+        }
+
     }
 }

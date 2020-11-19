@@ -544,7 +544,6 @@ namespace dp2SSL
 
         #endregion
 
-
 #if NO
         // https://blog.csdn.net/m0_37682004/article/details/82314055
         Task SetWallPaper()

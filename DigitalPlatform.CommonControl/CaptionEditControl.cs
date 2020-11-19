@@ -326,10 +326,8 @@ namespace DigitalPlatform.CommonControl
             XmlNodeList nodes = dom.DocumentElement.SelectNodes("caption");
 
             this.DisableUpdate();
-
             try
             {
-
                 for (int i = 0; i < nodes.Count; i++)
                 {
                     XmlNode node = nodes[i];
@@ -339,7 +337,6 @@ namespace DigitalPlatform.CommonControl
                     element.Language = DomUtil.GetAttr(node, "lang");
                     element.Value = node.InnerText;
                 }
-
 
                 this.Changed = false;
             }
@@ -364,6 +361,8 @@ namespace DigitalPlatform.CommonControl
             if (this.ElementCountChanged != null)
                 this.ElementCountChanged(this, new EventArgs());
 
+            // 2020/11/17
+            this.PerformLayout();
             return line;
         }
 
@@ -437,7 +436,6 @@ namespace DigitalPlatform.CommonControl
         public void EnableUpdate()
         {
             this.m_nInSuspend--;
-
 
             if (this.m_nInSuspend == 0)
             {
