@@ -2026,7 +2026,12 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
             {
                 return _inSimuLock;
             }
+            set
+            {
+                _inSimuLock = value;
 
+                OnSimuLockChanged();
+            }
         }
 
         bool _inSimuReader = false;   // 是否处于模拟读卡器状态
@@ -2104,21 +2109,35 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
         private void MenuItem_simuLock_Click(object sender, EventArgs e)
         {
             string text = "";
-            if (_inSimuLock == false)
+            if (this.InSimuLock == false)
             {
+                this.InSimuLock = true;
+                /*
                 _inSimuLock = true;
                 MenuItem_simuLock.Checked = true;
+                */
                 text = "进入模拟门锁状态";
             }
             else
             {
+                this.InSimuLock = false;
+                /*
                 _inSimuLock = false;
                 MenuItem_simuLock.Checked = false;
+                */
                 text = "退出模拟门锁状态";
             }
 
             OutputHistory(text);
             Speak(text);
+        }
+
+        void OnSimuLockChanged()
+        {
+            this.Invoke((Action)(() =>
+            {
+                MenuItem_simuLock.Checked = _inSimuLock;
+            }));
         }
 
         private void MenuItem_turnOnLamp_Click(object sender, EventArgs e)
@@ -2515,10 +2534,10 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
 
         void EnterSimuLockMode()
         {
-            if (_inSimuLock == false)
+            if (this.InSimuLock == false)
             {
-                _inSimuLock = true;
-                MenuItem_simuLock.Checked = true;
+                this.InSimuLock = true;
+                // MenuItem_simuLock.Checked = true;
             }
         }
 

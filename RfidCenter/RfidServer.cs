@@ -96,7 +96,7 @@ namespace RfidCenter
             return new NormalResult
             {
                 Value = -1,
-                ErrorInfo = "CloseShelfLock() 只能在 _simuLock == true 状态时调用"
+                ErrorInfo = "CloseShelfLock() 只能在 InSimuLock == true 状态时调用"
             };
 
             // parameters:
@@ -1039,9 +1039,15 @@ new_password);
             {
                 try
                 {
-                    var readerNameList = StringUtil.GetParameterByPrefix(style, "readerNameList");
+                    // 进入模拟读卡器状态
                     Program.MainForm.InSimuReader = true;
+
+                    // 重新创建模拟读卡器对象
+                    var readerNameList = StringUtil.GetParameterByPrefix(style, "readerNameList");
                     _simuReader.Create(StringUtil.SplitList(readerNameList, '|'));
+
+                    // 也要进入模拟锁状态
+                    Program.MainForm.InSimuLock = true;
                     return new NormalResult();
                 }
                 catch(Exception ex)
