@@ -86,12 +86,13 @@ namespace RfidCenter
         "M201 690201",
         "RL8600 118001",
         "RD5100 680530",
-        "RD5100(2) 680530",
+        // "RD5100(2) 680530",
         "RD2104 680701"
         };
 
         static string GetProductID(string name)
         {
+            name = GetPureName(name);
             foreach (var s in product_id_table)
             {
                 var parts = StringUtil.ParseTwoPart(s, " ");
@@ -100,6 +101,24 @@ namespace RfidCenter
             }
 
             return null;
+        }
+
+        // 取名字前的纯净部分。以非字母和数字的字符作为分割点
+        static string GetPureName(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+                return text;
+            StringBuilder result = new StringBuilder();
+            foreach(char ch in text)
+            {
+                if (char.IsWhiteSpace(ch) ||
+                    (char.IsDigit(ch) == false && char.IsLetter(ch) == false)
+                    )
+                    return result.ToString();
+                result.Append(ch);
+            }
+
+            return result.ToString();
         }
 
         // 创建若干读卡器
@@ -789,10 +808,9 @@ out Reader reader);
             {
                 foreach (var tag in tags)
                 {
-                    var found = FindTag(tag.UID, null);
+                    var found = FindTag(tag.UID, null); // 无所谓在哪个读卡器上
                     if (found != null)
                     {
-
                         _tags.Remove(found);
                     }
                 }

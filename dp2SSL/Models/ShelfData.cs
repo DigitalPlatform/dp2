@@ -1279,6 +1279,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                                 Entity = entity.Clone(),
                                 Action = "borrow",
                                 Operator = person,
+                                // TODO: 让 patron_xml 可以累积变化，这样可以大幅度提高速度
                                 ActionString = await BuildBorrowInfo(person.PatronBarcode,
                                 person.PatronInstitution,
                                 patron_xml,
@@ -1400,286 +1401,297 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             List<string> returned_piis,
             List<string> special_piis)
         {
-            StringBuilder debugInfo = new StringBuilder();
+            StringBuilder debugInfo = null; // new StringBuilder();
 
-            // 输入参数
-            debugInfo?.AppendLine($"=== 进入 BuildBorrowInfo() ===");
-            debugInfo?.AppendLine($"patron_pii='{patron_pii}'");
-            debugInfo?.AppendLine($"patron_oi='{patron_oi}'");
-            debugInfo?.AppendLine($"entity='PII={entity.PII},Title='{entity.Title}''");
-
-            BorrowInfo borrow_info = new BorrowInfo();
-
-            XmlDocument readerdom = null;
-            if (string.IsNullOrEmpty(patron_xml) == false)
+            DateTime start = DateTime.Now;
+            try
             {
-                readerdom = new XmlDocument();
-                try
+                // 输入参数
+                debugInfo?.AppendLine($"=== 进入 BuildBorrowInfo() ===");
+                debugInfo?.AppendLine($"patron_pii='{patron_pii}'");
+                debugInfo?.AppendLine($"patron_oi='{patron_oi}'");
+                debugInfo?.AppendLine($"entity='PII={entity.PII},Title='{entity.Title}''");
+
+                BorrowInfo borrow_info = new BorrowInfo();
+
+                XmlDocument readerdom = null;
+                if (string.IsNullOrEmpty(patron_xml) == false)
                 {
-                    readerdom.LoadXml(patron_xml);
-                }
-                catch (Exception ex)
-                {
-                    WpfClientInfo.WriteErrorLog($"读者记录装载进入 XMLDOM 时出现异常: {ExceptionUtil.GetDebugText(ex)}");
-                    readerdom = null;
-                }
-            }
-
-            if (debugInfo != null)
-            {
-                if (readerdom != null && readerdom.DocumentElement != null)
-                {
-                    DomUtil.DeleteElement(readerdom.DocumentElement, "borrowHistory");
-                    DomUtil.DeleteElement(readerdom.DocumentElement, "fingerprint");
-                    DomUtil.DeleteElement(readerdom.DocumentElement, "face");
-                    DomUtil.RemoveEmptyElements(readerdom.DocumentElement);
-                }
-                if (readerdom != null)
-                    debugInfo?.AppendLine($"patron_xml='{DomUtil.GetIndentXml(readerdom)}'");
-                else
-                    debugInfo?.AppendLine($"patron_xml=null");
-            }
-
-            string patron_type = GetPatronType(patron_pii,
-                patron_oi,
-                ref readerdom,
-                out string patronLibraryCode);
-            if (patron_type == null)
-            {
-                debugInfo?.AppendLine($"因为没有找到证条码号为 '{patron_pii}' OI 为 '{patron_oi}' 的读者的读者类型，只好采用默认的借阅总册数 {max_items}");
-                WpfClientInfo.WriteInfoLog($"因为没有找到证条码号为 '{patron_pii}' OI 为 '{patron_oi}' 的读者的读者类型，只好采用默认的借阅总册数 {max_items}");
-                goto DEFAULT;
-            }
-
-            debugInfo?.AppendLine($"读者类型为 '{patron_type}'");
-
-            /*
-            // 从读者记录中去掉已经还书的 borrows/borrow 元素
-            if (readerdom != null && returned_piis.Count > 0)
-            {
-                RemoveReturnedBorrows(readerdom,
-                    returned_piis);
-                debugInfo?.AppendLine($"从读者记录中去掉已经还书若干 PII '{StringUtil.MakePathList(returned_piis)}' 后, 读者记录变为:\r\n{DomUtil.GetIndentXml(readerdom)}");
-            }
-            */
-
-            // TODO: 如何判断本册借阅时候是否已经超额？
-            var piis = GetBorrowItems(patron_pii, readerdom);
-
-            debugInfo?.AppendLine($"readerdom 中的 在借图书列表为 '{StringUtil.MakePathList(piis)}'");
-
-            piis.AddRange(delta_piis);
-
-            debugInfo?.AppendLine($"和 delta_piis 合并后的在借列表为 '{StringUtil.MakePathList(piis)}'");
-
-            // 2020/9/7
-            if (returned_piis.Count > 0)
-            {
-                foreach (var pii in returned_piis)
-                {
-                    piis.Remove(pii);
-                }
-                debugInfo?.AppendLine($"去掉 returned_piis 中已还(还来不及同步的)在借列表为 '{StringUtil.MakePathList(piis)}'");
-            }
-
-            // 2020/9/8
-            if (special_piis.Count > 0)
-            {
-                foreach (var pii in special_piis)
-                {
-                    piis.Remove(pii);
-                }
-                debugInfo?.AppendLine($"去掉 special_piis 中特殊的标签以后在借列表为 '{StringUtil.MakePathList(piis)}'");
-            }
-
-            // 当前册的图书类型
-            var info_result = await GetBookInfoAsync(entity.GetOiPii(true));
-            if (info_result.Value == -1)
-            {
-                // 加入特殊列表，避免影响后面其他册计算超额
-                if (info_result.ErrorCode == "notFoundWhileNetwork")
-                    special_piis.Add(entity.GetOiPii(true));
-                // 如果得不到图书类型，建议按照默认的权限参数处理
-                debugInfo?.AppendLine($"因为没有找到 PII 为 '{entity.PII}' 的图书的图书类型({info_result.ToString()})，只好采用默认的借阅总册数 {max_items}");
-                WpfClientInfo.WriteInfoLog($"因为没有找到 PII 为'{entity.PII}' 的图书的图书类型({info_result.ToString()})，只好采用默认的借阅总册数 {max_items}");
-                goto DEFAULT;
-            }
-
-            debugInfo?.AppendLine($"当前册 (PII 为 '{entity.PII}') 的册类型为 '{info_result.ToString()}'");
-
-            GetTypeMaxResult max_result = null;
-            int thisTypeCount = 0;
-            bool bLibraryCodeMismatch = false;
-            if (info_result.LibraryCode != patronLibraryCode)
-            {
-                debugInfo?.AppendLine($"*** 当前册 (PII 为 '{entity.PII}') 的馆代码为 '{info_result.LibraryCode}'，和当前读者的馆代码 '{patronLibraryCode}' 不吻合，");
-                debugInfo?.AppendLine($"所以图书类型 '{info_result.BookType}' 的最大借阅许可数，被当作 0 处理");
-                max_result = new GetTypeMaxResult { Max = 0 };
-                bLibraryCodeMismatch = true;
-            }
-            else
-            {
-                // 计算已经借阅的册中和当前册类型相同的册数
-                foreach (string pii in piis)
-                {
-                    var book_type = await GetBookType(pii);
-                    debugInfo?.AppendLine($"计算在借册数过程: 获得 '{pii}' 的图书类型，返回 book_type='{book_type}'");
-                    if (book_type == info_result.BookType)
+                    readerdom = new XmlDocument();
+                    try
                     {
-                        debugInfo?.AppendLine($"匹配 图书类型 '{book_type}' 和 info_result.BookType '{info_result.BookType}' 匹配上了，加一");
-                        thisTypeCount++;
+                        readerdom.LoadXml(patron_xml);
                     }
+                    catch (Exception ex)
+                    {
+                        WpfClientInfo.WriteErrorLog($"读者记录装载进入 XMLDOM 时出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                        readerdom = null;
+                    }
+                }
+
+                if (debugInfo != null)
+                {
+                    if (readerdom != null && readerdom.DocumentElement != null)
+                    {
+                        DomUtil.DeleteElement(readerdom.DocumentElement, "borrowHistory");
+                        DomUtil.DeleteElement(readerdom.DocumentElement, "fingerprint");
+                        DomUtil.DeleteElement(readerdom.DocumentElement, "face");
+                        DomUtil.RemoveEmptyElements(readerdom.DocumentElement);
+                    }
+                    if (readerdom != null)
+                        debugInfo?.AppendLine($"patron_xml='{DomUtil.GetIndentXml(readerdom)}'");
                     else
-                    {
-                        debugInfo?.AppendLine($"不匹配 图书类型 '{book_type}' 和 info_result.BookType '{info_result.BookType}'");
-                    }
+                        debugInfo?.AppendLine($"patron_xml=null");
                 }
 
-                debugInfo?.AppendLine($"和 '{info_result.BookType}' 相同的在借册数为 {thisTypeCount}");
-
-                max_result = GetTypeMax(info_result.LibraryCode,
-        patron_type,
-        info_result.BookType);
-
-                debugInfo?.AppendLine($"获得图书类型 '{info_result.BookType}' 的最大借阅许可数，返回 {max_result.ToString()}");
-            }
-
-
-            bool overflow = false;
-            // 图书类型限额超过了
-            if (thisTypeCount + 1 > max_result.Max)
-            {
-                debugInfo?.AppendLine($"thisTypeCount={thisTypeCount} 加 1 大于 {max_result.Max}，具体图书类型超额了");
-
-                if (bLibraryCodeMismatch)   // 2020/9/14
-                    borrow_info.Overflows = new string[] { $"读者 '{ patron_pii}' 的馆代码 '{patronLibraryCode}' 和册的馆代码 '{ info_result.LibraryCode}' 不匹配" };
-                else
-                    borrow_info.Overflows = new string[] { $"读者 '{ patron_pii}' 所借 '{ info_result.BookType }' 类图书数量将超过 馆代码 '{ info_result.LibraryCode}' 中 该读者类型 '{ patron_type }' 对该图书类型 '{ info_result.BookType }' 的最多 可借册数 值 '{max_result.Max}'" };
-                // 一天以后还书
-                SetReturning(1, "day");
-                overflow = true;
-            }
-            else
-            {
-                var total_max_result = GetTotalMax(info_result.LibraryCode,
-    patron_type);
-
-                debugInfo?.AppendLine($"获得读者类型 '{patron_type}' 的总借阅许可数，返回 {total_max_result.ToString()}");
-
-                // 读者类型限额超过了
-                if (piis.Count + 1 > total_max_result.Max)
+                string patron_type = GetPatronType(patron_pii,
+                    patron_oi,
+                    ref readerdom,
+                    out string patronLibraryCode);
+                if (patron_type == null)
                 {
-                    debugInfo?.AppendLine($"piis.Count={piis.Count} 加 1 大于 {total_max_result.Max}，读者类型总限额超额了");
+                    debugInfo?.AppendLine($"因为没有找到证条码号为 '{patron_pii}' OI 为 '{patron_oi}' 的读者的读者类型，只好采用默认的借阅总册数 {max_items}");
+                    WpfClientInfo.WriteInfoLog($"因为没有找到证条码号为 '{patron_pii}' OI 为 '{patron_oi}' 的读者的读者类型，只好采用默认的借阅总册数 {max_items}");
+                    goto DEFAULT;
+                }
 
-                    borrow_info.Overflows = new string[] { $"读者 '{ patron_pii}' 所借图书数量将超过 馆代码 '{ info_result.LibraryCode}' 中 该读者类型 '{ patron_type }' 对所有图书类型的最多 可借册数 值 '{total_max_result.Max}'" };
+                debugInfo?.AppendLine($"读者类型为 '{patron_type}'");
+
+                /*
+                // 从读者记录中去掉已经还书的 borrows/borrow 元素
+                if (readerdom != null && returned_piis.Count > 0)
+                {
+                    RemoveReturnedBorrows(readerdom,
+                        returned_piis);
+                    debugInfo?.AppendLine($"从读者记录中去掉已经还书若干 PII '{StringUtil.MakePathList(returned_piis)}' 后, 读者记录变为:\r\n{DomUtil.GetIndentXml(readerdom)}");
+                }
+                */
+
+                // TODO: 如何判断本册借阅时候是否已经超额？
+                var piis = GetBorrowItems(patron_pii, readerdom);
+
+                debugInfo?.AppendLine($"readerdom 中的 在借图书列表为 '{StringUtil.MakePathList(piis)}'");
+
+                piis.AddRange(delta_piis);
+
+                debugInfo?.AppendLine($"和 delta_piis 合并后的在借列表为 '{StringUtil.MakePathList(piis)}'");
+
+                // 2020/9/7
+                if (returned_piis.Count > 0)
+                {
+                    foreach (var pii in returned_piis)
+                    {
+                        piis.Remove(pii);
+                    }
+                    debugInfo?.AppendLine($"去掉 returned_piis 中已还(还来不及同步的)在借列表为 '{StringUtil.MakePathList(piis)}'");
+                }
+
+                // 2020/9/8
+                if (special_piis.Count > 0)
+                {
+                    foreach (var pii in special_piis)
+                    {
+                        piis.Remove(pii);
+                    }
+                    debugInfo?.AppendLine($"去掉 special_piis 中特殊的标签以后在借列表为 '{StringUtil.MakePathList(piis)}'");
+                }
+
+                // 当前册的图书类型
+                var info_result = await GetBookInfoAsync(entity.GetOiPii(true));
+                if (info_result.Value == -1)
+                {
+                    // 加入特殊列表，避免影响后面其他册计算超额
+                    if (info_result.ErrorCode == "notFoundWhileNetwork")
+                        special_piis.Add(entity.GetOiPii(true));
+                    // 如果得不到图书类型，建议按照默认的权限参数处理
+                    debugInfo?.AppendLine($"因为没有找到 PII 为 '{entity.PII}' 的图书的图书类型({info_result.ToString()})，只好采用默认的借阅总册数 {max_items}");
+                    WpfClientInfo.WriteInfoLog($"因为没有找到 PII 为'{entity.PII}' 的图书的图书类型({info_result.ToString()})，只好采用默认的借阅总册数 {max_items}");
+                    goto DEFAULT;
+                }
+
+                debugInfo?.AppendLine($"当前册 (PII 为 '{entity.PII}') 的册类型为 '{info_result.ToString()}'");
+
+                GetTypeMaxResult max_result = null;
+                int thisTypeCount = 0;
+                bool bLibraryCodeMismatch = false;
+                if (info_result.LibraryCode != patronLibraryCode)
+                {
+                    debugInfo?.AppendLine($"*** 当前册 (PII 为 '{entity.PII}') 的馆代码为 '{info_result.LibraryCode}'，和当前读者的馆代码 '{patronLibraryCode}' 不吻合，");
+                    debugInfo?.AppendLine($"所以图书类型 '{info_result.BookType}' 的最大借阅许可数，被当作 0 处理");
+                    max_result = new GetTypeMaxResult { Max = 0 };
+                    bLibraryCodeMismatch = true;
+                }
+                else
+                {
+                    // 计算已经借阅的册中和当前册类型相同的册数
+                    foreach (string pii in piis)
+                    {
+                        var book_type = await GetBookType(pii);
+                        debugInfo?.AppendLine($"计算在借册数过程: 获得 '{pii}' 的图书类型，返回 book_type='{book_type}'");
+                        if (book_type == info_result.BookType)
+                        {
+                            debugInfo?.AppendLine($"匹配 图书类型 '{book_type}' 和 info_result.BookType '{info_result.BookType}' 匹配上了，加一");
+                            thisTypeCount++;
+                        }
+                        else
+                        {
+                            debugInfo?.AppendLine($"不匹配 图书类型 '{book_type}' 和 info_result.BookType '{info_result.BookType}'");
+                        }
+                    }
+
+                    debugInfo?.AppendLine($"和 '{info_result.BookType}' 相同的在借册数为 {thisTypeCount}");
+
+                    max_result = GetTypeMax(info_result.LibraryCode,
+            patron_type,
+            info_result.BookType);
+
+                    debugInfo?.AppendLine($"获得图书类型 '{info_result.BookType}' 的最大借阅许可数，返回 {max_result.ToString()}");
+                }
+
+
+                bool overflow = false;
+                // 图书类型限额超过了
+                if (thisTypeCount + 1 > max_result.Max)
+                {
+                    debugInfo?.AppendLine($"thisTypeCount={thisTypeCount} 加 1 大于 {max_result.Max}，具体图书类型超额了");
+
+                    if (bLibraryCodeMismatch)   // 2020/9/14
+                        borrow_info.Overflows = new string[] { $"读者 '{ patron_pii}' 的馆代码 '{patronLibraryCode}' 和册的馆代码 '{ info_result.LibraryCode}' 不匹配" };
+                    else
+                        borrow_info.Overflows = new string[] { $"读者 '{ patron_pii}' 所借 '{ info_result.BookType }' 类图书数量将超过 馆代码 '{ info_result.LibraryCode}' 中 该读者类型 '{ patron_type }' 对该图书类型 '{ info_result.BookType }' 的最多 可借册数 值 '{max_result.Max}'" };
                     // 一天以后还书
                     SetReturning(1, "day");
                     overflow = true;
                 }
-            }
-
-            if (overflow == false)
-            {
-                // 获得借期
-                var period_result = GetPeriod(info_result.LibraryCode,
-    patron_type,
-    info_result.BookType);
-
-                debugInfo?.AppendLine($"获得读者类型 '{patron_type}' 针对图书类型 '{info_result.BookType}' 的借期(馆代码 '{info_result.LibraryCode}')，返回 {period_result.ToString()}");
-
-                if (period_result.Value == -1)
-                {
-                    debugInfo?.AppendLine($"(1)只好按照 {max_period} 天的默认天数");
-
-                    // 一个月以后还书
-                    SetReturning(max_period, "day");
-                    // TODO: 写入错误日志
-                }
                 else
                 {
-                    int nRet = DateTimeUtil.ParsePeriodUnit(
-    period_result.ErrorCode,
-    "day",
-    out long lPeriodValue,
-    out string strPeriodUnit,
-    out string strError);
-                    if (nRet == -1)
-                    {
-                        debugInfo?.AppendLine($"(2)只好按照 {max_period} 天的默认天数");
+                    var total_max_result = GetTotalMax(info_result.LibraryCode,
+        patron_type);
 
-                        // 只好按照一个月以后还书来处理
+                    debugInfo?.AppendLine($"获得读者类型 '{patron_type}' 的总借阅许可数，返回 {total_max_result.ToString()}");
+
+                    // 读者类型限额超过了
+                    if (piis.Count + 1 > total_max_result.Max)
+                    {
+                        debugInfo?.AppendLine($"piis.Count={piis.Count} 加 1 大于 {total_max_result.Max}，读者类型总限额超额了");
+
+                        borrow_info.Overflows = new string[] { $"读者 '{ patron_pii}' 所借图书数量将超过 馆代码 '{ info_result.LibraryCode}' 中 该读者类型 '{ patron_type }' 对所有图书类型的最多 可借册数 值 '{total_max_result.Max}'" };
+                        // 一天以后还书
+                        SetReturning(1, "day");
+                        overflow = true;
+                    }
+                }
+
+                if (overflow == false)
+                {
+                    // 获得借期
+                    var period_result = GetPeriod(info_result.LibraryCode,
+        patron_type,
+        info_result.BookType);
+
+                    debugInfo?.AppendLine($"获得读者类型 '{patron_type}' 针对图书类型 '{info_result.BookType}' 的借期(馆代码 '{info_result.LibraryCode}')，返回 {period_result.ToString()}");
+
+                    if (period_result.Value == -1)
+                    {
+                        debugInfo?.AppendLine($"(1)只好按照 {max_period} 天的默认天数");
+
+                        // 一个月以后还书
                         SetReturning(max_period, "day");
-                        // 写入错误日志
-                        WpfClientInfo.WriteErrorLog($"解析时间段字符串 '{period_result.ErrorCode}' 时发生错误: {strError}");
+                        // TODO: 写入错误日志
                     }
                     else
                     {
-                        debugInfo?.AppendLine($"解析时间段字符串 '{period_result.ErrorCode}' 成功");
-
-                        string error = SetReturning((int)lPeriodValue, strPeriodUnit);
-                        // 2020/6/10
-                        if (error != null)
+                        int nRet = DateTimeUtil.ParsePeriodUnit(
+        period_result.ErrorCode,
+        "day",
+        out long lPeriodValue,
+        out string strPeriodUnit,
+        out string strError);
+                        if (nRet == -1)
                         {
-                            debugInfo?.AppendLine($"SetReturning() 返回 '{error}', (3)只好按照 {max_period} 天的默认天数");
+                            debugInfo?.AppendLine($"(2)只好按照 {max_period} 天的默认天数");
 
                             // 只好按照一个月以后还书来处理
                             SetReturning(max_period, "day");
+                            // 写入错误日志
+                            WpfClientInfo.WriteErrorLog($"解析时间段字符串 '{period_result.ErrorCode}' 时发生错误: {strError}");
+                        }
+                        else
+                        {
+                            debugInfo?.AppendLine($"解析时间段字符串 '{period_result.ErrorCode}' 成功");
 
-                            WpfClientInfo.WriteErrorLog($"时间段字符串 '{period_result.ErrorCode}' 格式错误: {error}");
+                            string error = SetReturning((int)lPeriodValue, strPeriodUnit);
+                            // 2020/6/10
+                            if (error != null)
+                            {
+                                debugInfo?.AppendLine($"SetReturning() 返回 '{error}', (3)只好按照 {max_period} 天的默认天数");
+
+                                // 只好按照一个月以后还书来处理
+                                SetReturning(max_period, "day");
+
+                                WpfClientInfo.WriteErrorLog($"时间段字符串 '{period_result.ErrorCode}' 格式错误: {error}");
+                            }
                         }
                     }
                 }
-            }
 
-            goto END;
+                goto END;
 
-        DEFAULT:
-            int item_count = GetBorrowItems(patron_pii, readerdom).Count;
-            if (item_count + delta_piis.Count >= max_items)
-            {
-                debugInfo?.AppendLine($"默认处理，达到或超过 max_items ({max_items}) 情形(item_count={item_count},delta_piis.Count={delta_piis.Count})");
-
-                borrow_info.Overflows = new string[] { $"超过额度(额度是 {max_items} 册)" };
-                // 一天以后还书
-                SetReturning(1, "day");
-            }
-            else
-            {
-                debugInfo?.AppendLine($"默认处理，未超过 max_items ({max_items}) 情形");
-
-                // 一个月以后还书
-                SetReturning(max_period, "day");
-                //borrow_info.Period = $"{max_period}day";
-                //borrow_info.LatestReturnTime = DateTimeUtil.Rfc1123DateTimeStringEx(DateTime.Now.AddDays(max_period));
-            }
-
-        END:
-            if (entity != null)
-                borrow_info.ItemBarcode = entity.PII;
-            string json = JsonConvert.SerializeObject(borrow_info);
-
-            WpfClientInfo.WriteInfoLog($"{debugInfo.ToString()}\r\nborrow_info={json}");
-            return json;
-
-            // 设置 BorrowInfo 里面和还书时间有关的两个成员 Period 和 LatestReturnTime
-            string SetReturning(int days, string unit)
-            {
-                // 检查 unit
-                if (unit != "day" && unit != "hour")
+            DEFAULT:
+                int item_count = GetBorrowItems(patron_pii, readerdom).Count;
+                if (item_count + delta_piis.Count >= max_items)
                 {
-                    string error = $"出现了无法理解的时间单位字符串 '{unit}'";
-                    WpfClientInfo.WriteErrorLog(error);
-                    return error;
+                    debugInfo?.AppendLine($"默认处理，达到或超过 max_items ({max_items}) 情形(item_count={item_count},delta_piis.Count={delta_piis.Count})");
+
+                    borrow_info.Overflows = new string[] { $"超过额度(额度是 {max_items} 册)" };
+                    // 一天以后还书
+                    SetReturning(1, "day");
+                }
+                else
+                {
+                    debugInfo?.AppendLine($"默认处理，未超过 max_items ({max_items}) 情形");
+
+                    // 一个月以后还书
+                    SetReturning(max_period, "day");
+                    //borrow_info.Period = $"{max_period}day";
+                    //borrow_info.LatestReturnTime = DateTimeUtil.Rfc1123DateTimeStringEx(DateTime.Now.AddDays(max_period));
                 }
 
-                borrow_info.Period = $"{days}{unit}";
-                DateTime returning = DateTime.Now.AddDays(days);
-                if (unit == "hour")
-                    returning = DateTime.Now.AddHours(days);
-                // 正规化时间
-                returning = RoundTime(unit, returning);
-                borrow_info.LatestReturnTime = DateTimeUtil.Rfc1123DateTimeStringEx(returning);
-                return null;
+            END:
+                if (entity != null)
+                    borrow_info.ItemBarcode = entity.PII;
+                string json = JsonConvert.SerializeObject(borrow_info);
+
+                if (debugInfo != null)
+                    WpfClientInfo.WriteInfoLog($"{debugInfo.ToString()}\r\nborrow_info={json}");
+                return json;
+
+
+                // 设置 BorrowInfo 里面和还书时间有关的两个成员 Period 和 LatestReturnTime
+                string SetReturning(int days, string unit)
+                {
+                    // 检查 unit
+                    if (unit != "day" && unit != "hour")
+                    {
+                        string error = $"出现了无法理解的时间单位字符串 '{unit}'";
+                        WpfClientInfo.WriteErrorLog(error);
+                        return error;
+                    }
+
+                    borrow_info.Period = $"{days}{unit}";
+                    DateTime returning = DateTime.Now.AddDays(days);
+                    if (unit == "hour")
+                        returning = DateTime.Now.AddHours(days);
+                    // 正规化时间
+                    returning = RoundTime(unit, returning);
+                    borrow_info.LatestReturnTime = DateTimeUtil.Rfc1123DateTimeStringEx(returning);
+                    return null;
+                }
+
+            }
+            finally
+            {
+                WpfClientInfo.WriteInfoLog($"BuildBorrowInfo() 耗时 {(DateTime.Now - start).TotalSeconds.ToString()} (读者 {patron_pii} 针对册 {entity.PII})");
             }
         }
 
@@ -5917,7 +5929,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
 
         #region 模拟标签测试
 
-        const int TAG_COUNT_PER_DOOR = 30;
+        const int TAG_COUNT_PER_DOOR = 30;   // 30
 
         // 将 RfidCenter 切换为模拟标签模式，并添加好标签
         public static NormalResult InitialSimuTags()
@@ -5927,6 +5939,8 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             {
                 names.Add(door.ReaderName);
             }
+            if (string.IsNullOrEmpty(ShelfData._patronReaderName) == false)
+                names.Add(ShelfData._patronReaderName);
             StringUtil.RemoveDupNoSort(ref names);
 
             List<SimuTagInfo> tagInfos = null;
@@ -6000,10 +6014,143 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                     return result;
                 }
             }
+
             App.SetError("simuReader", null);
             return new NormalResult();
         }
 
+        // 为读者卡读卡器添加标签
+        public static NormalResult SimuAddPatronTag()
+        {
+            List<TagInfo> tags = new List<TagInfo>();
+            TagInfo tag = new TagInfo
+            {
+                UID = "6DB28CAF",
+                ReaderName = ShelfData._patronReaderName
+            };
+            tags.Add(tag);
+
+            var result = RfidManager.SimuTagInfo("setTag",
+                tags,
+                $"protocol:{InventoryInfo.ISO14443A}");
+            if (result.Value == -1)
+            {
+                App.SetError("simuReader", result.ErrorInfo);
+                return result;
+            }
+            App.SetError("simuReader", null);
+            return new NormalResult();
+        }
+
+        // 模拟移走读者卡
+        // result.Value:
+        //      -1  出错
+        //      0   没有找到需要移走的读者卡
+        //      其他  移走的读者卡数量
+        public static NormalResult SimuRemovePatronTag()
+        {
+            List<TagInfo> tags = new List<TagInfo>();
+            // 先寻找读者卡
+            foreach (var tag in NewTagList.Tags)
+            {
+                if (tag.OneTag.Protocol == InventoryInfo.ISO14443A
+                    || tag.Type == "patron")
+                {
+                    // tags.Add(tag.OneTag.TagInfo);
+                    tags.Add(new TagInfo { UID = tag.OneTag.UID });
+                }
+            }
+            if (tags.Count == 0)
+                return new NormalResult();
+
+            {
+                var result = RfidManager.SimuTagInfo("removeTag", tags, "");
+                if (result.Value == -1)
+                {
+                    App.SetError("simuReader", result.ErrorInfo);
+                    return result;
+                }
+
+                App.SetError("simuReader", null);
+                return new NormalResult { Value = tags.Count };
+            }
+        }
+
+        public static List<TagInfo> GetAllTagInfo(List<DoorItem> doors)
+        {
+            List<TagInfo> results = new List<TagInfo>();
+            foreach (var entity in ShelfData.l_All)
+            {
+                if (Match(doors, entity))
+                    results.Add(entity.TagInfo);
+            }
+            return results;
+        }
+
+        /*
+        public static List<string> GetAllTagsUid(List<DoorItem> doors)
+        {
+            List<string> results = new List<string>();
+            foreach (var entity in ShelfData.l_All)
+            {
+                if (Match(doors, entity))
+                    results.Add(entity.UID);
+            }
+            return results;
+        }
+        */
+
+        static bool Match(List<DoorItem> doors, Entity entity)
+        {
+            foreach (var door in doors)
+            {
+                if (Match(door, entity))
+                    return true;
+            }
+
+            return false;
+        }
+
+        static bool Match(DoorItem door, Entity entity)
+        {
+            if (entity.ReaderName == door.ReaderName && entity.Antenna == door.Antenna.ToString())
+                return true;
+            return false;
+        }
+
+        // 从读卡器上移走指定的标签
+        public static NormalResult SimuRemoveTags(List<TagInfo> tags)
+        {
+            var result = RfidManager.SimuTagInfo("removeTag", tags, "");
+            if (result.Value == -1)
+            {
+                App.SetError("simuReader", result.ErrorInfo);
+                return result;
+            }
+
+            return new NormalResult();
+        }
+
+        /*
+        // 从读卡器上移走指定的标签
+        public static NormalResult SimuRemoveTags(List<string> uids)
+        {
+            List<TagInfo> tags = new List<TagInfo>();
+            foreach (var uid in uids)
+            {
+                tags.Add(new TagInfo { UID = uid });
+            }
+
+            var result = RfidManager.SimuTagInfo("removeTag", tags, "");
+            if (result.Value == -1)
+            {
+                App.SetError("simuReader", result.ErrorInfo);
+                return result;
+            }
+
+            return new NormalResult();
+        }
+        */
         #endregion
 
 #endif

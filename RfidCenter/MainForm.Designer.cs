@@ -114,6 +114,8 @@
             this.ToolStripMenuItem_test_simuOpenLocks = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_test_simuCloseLocks = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_test_simuReader = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_simuReader = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_simuReader_state = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_help = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_loadFactoryDefault = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_resetReaderToDigitalPlatformState = new System.Windows.Forms.ToolStripMenuItem();
@@ -131,8 +133,6 @@
             this.MenuItem_manual = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_about = new System.Windows.Forms.ToolStripMenuItem();
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
-            this.MenuItem_simuReader = new System.Windows.Forms.ToolStripMenuItem();
-            this.ToolStripMenuItem_simuReader_state = new System.Windows.Forms.ToolStripMenuItem();
             this.tabControl_main.SuspendLayout();
             this.tabPage_start.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_start)).BeginInit();
@@ -953,6 +953,21 @@
             this.ToolStripMenuItem_test_simuReader.Text = "模拟读卡器";
             this.ToolStripMenuItem_test_simuReader.Click += new System.EventHandler(this.ToolStripMenuItem_test_simuReader_Click);
             // 
+            // MenuItem_simuReader
+            // 
+            this.MenuItem_simuReader.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.ToolStripMenuItem_simuReader_state});
+            this.MenuItem_simuReader.Name = "MenuItem_simuReader";
+            this.MenuItem_simuReader.Size = new System.Drawing.Size(135, 33);
+            this.MenuItem_simuReader.Text = "模拟读卡器";
+            // 
+            // ToolStripMenuItem_simuReader_state
+            // 
+            this.ToolStripMenuItem_simuReader_state.Name = "ToolStripMenuItem_simuReader_state";
+            this.ToolStripMenuItem_simuReader_state.Size = new System.Drawing.Size(276, 40);
+            this.ToolStripMenuItem_simuReader_state.Text = "模拟读卡器状态";
+            this.ToolStripMenuItem_simuReader_state.Click += new System.EventHandler(this.ToolStripMenuItem_simuReader_state_Click);
+            // 
             // MenuItem_help
             // 
             this.MenuItem_help.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -1081,21 +1096,6 @@
             this.notifyIcon1.Text = "dp2-RFID中心";
             this.notifyIcon1.Visible = true;
             this.notifyIcon1.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon1_MouseDoubleClick);
-            // 
-            // MenuItem_simuReader
-            // 
-            this.MenuItem_simuReader.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.ToolStripMenuItem_simuReader_state});
-            this.MenuItem_simuReader.Name = "MenuItem_simuReader";
-            this.MenuItem_simuReader.Size = new System.Drawing.Size(135, 33);
-            this.MenuItem_simuReader.Text = "模拟读卡器";
-            // 
-            // ToolStripMenuItem_simuReader_state
-            // 
-            this.ToolStripMenuItem_simuReader_state.Name = "ToolStripMenuItem_simuReader_state";
-            this.ToolStripMenuItem_simuReader_state.Size = new System.Drawing.Size(315, 40);
-            this.ToolStripMenuItem_simuReader_state.Text = "模拟读卡器状态";
-            this.ToolStripMenuItem_simuReader_state.Click += new System.EventHandler(this.ToolStripMenuItem_simuReader_state_Click);
             // 
             // MainForm
             // 

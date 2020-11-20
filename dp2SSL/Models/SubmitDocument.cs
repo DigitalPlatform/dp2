@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -20,6 +21,30 @@ namespace dp2SSL
         // public List<string> DoorNames { get; set; }
 
         internal List<ActionInfo> _actions = new List<ActionInfo>();
+
+        // 超额语音提醒记载表
+        // 姓名 --> 最后一次提醒时间
+        Hashtable _overflowSpeakTable = new Hashtable();
+
+        bool HasOverflowSpeaked(string name, TimeSpan period)
+        {
+            lock (_overflowSpeakTable.SyncRoot)
+            {
+                // 防止内容太多
+                if (_overflowSpeakTable.Count > 1000)
+                    _overflowSpeakTable.Clear();
+
+                bool existing = false;
+                if (_overflowSpeakTable.ContainsKey(name))
+                {
+                    DateTime time = (DateTime)_overflowSpeakTable[name];
+                    if (DateTime.Now - time < period)
+                        existing = true;
+                }
+                _overflowSpeakTable[name] = DateTime.Now;
+                return existing;
+            }
+        }
 
         // 刷新显示
         // 把 actions 中的对象的状态变化更新到当前文档中
@@ -81,8 +106,21 @@ namespace dp2SSL
                     this.Blocks.InsertBefore(block, p);
                     this.Blocks.Remove(block);
 
+                    // 获得人名
+                    List<string> names = new List<string>();
+                    {
+                        actions.ForEach((o) =>
+                        {
+                            if (o.Operator != null)
+                                names.Add(string.IsNullOrEmpty(o.Operator.PatronName) ? o.Operator.PatronBarcode : o.Operator.PatronName);
+                        });
+                        StringUtil.RemoveDupNoSort(ref names);
+                    }
+
                     // 语音提醒
-                    App.CurrentApp.SpeakSequence("警告：借书超额");
+                    // 针对同一个人，短时间内密集提醒要注意避免
+                    if (HasOverflowSpeaked(StringUtil.MakePathList(names), TimeSpan.FromSeconds(30)) == false)
+                        App.CurrentApp.SpeakSequence("警告：借书超额");
                 }
             }
 

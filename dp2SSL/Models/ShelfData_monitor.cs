@@ -268,7 +268,7 @@ TaskScheduler.Default);
         }
 
         // 从打开门开始多少时间开始警告关门
-        static TimeSpan _warningDoorLength = TimeSpan.FromSeconds(15);  // 30
+        static TimeSpan _warningDoorLength = TimeSpan.FromSeconds(15);  // 15
         static DateTime _lastWarningTime;
 
         static void WarningCloseDoor()
@@ -276,7 +276,13 @@ TaskScheduler.Default);
             var now = DateTime.Now;
 
             // 控制进入本函数的频率
-            if (now - _lastWarningTime < TimeSpan.FromSeconds(10))  // 20
+            if (now - _lastWarningTime < TimeSpan.FromSeconds(10))  // 10
+                return;
+
+            // 2020/11/20
+            // 在密集进行兑现借书、还书过程中，要抑制这里的语音提醒
+            var progress = PageMenu.PageShelf.ProgressWindow;
+            if (progress != null && progress.IsVisible == true)
                 return;
 
             _lastWarningTime = now;

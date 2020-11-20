@@ -78,7 +78,7 @@ namespace dp2SSL
         public static bool PauseSubmit { get; set; }
 
         // 同步重试间隔时间
-        static TimeSpan _syncIdleLength = TimeSpan.FromSeconds(10);
+        static TimeSpan _syncIdleLength = TimeSpan.FromSeconds(10); // 10
 
         // 启动同步任务。此任务长期在后台运行
         public static void StartSyncTask()

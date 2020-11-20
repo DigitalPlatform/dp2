@@ -31,7 +31,7 @@ namespace dp2SSL
         // 开门事件
         public event OpenDoorEventHandler OpenDoor = null;
 
-        public event EventHandler ContextMenuOpen111 = null;
+        public event ContextMenuOpenEventHandler ContextMenuOpen111 = null;
 
         // List<Door> _doors = new List<Door>();
 
@@ -321,8 +321,8 @@ KeyTime.FromTimeSpan(TimeSpan.FromSeconds(start + _length))) // KeyTime
                 button.Click += Button_Click;
                 // button.PreviewMouseLeftButtonDown += Button_MouseRightButtonUp;
 
-                button.ContextMenu = new ContextMenu();
-                button.ContextMenuOpening += Button_ContextMenuOpening;
+                //button.ContextMenu = new ContextMenu();
+                //button.ContextMenuOpening += Button_ContextMenuOpening;
 
                 if (door_items.Count - 1 < index)
                 {
@@ -339,6 +339,7 @@ KeyTime.FromTimeSpan(TimeSpan.FromSeconds(start + _length))) // KeyTime
             return grid;
         }
 
+        /*
         private void Button_ContextMenuOpening(object sender, ContextMenuEventArgs e)
         {
             FrameworkElement fe = e.Source as FrameworkElement;
@@ -369,6 +370,7 @@ KeyTime.FromTimeSpan(TimeSpan.FromSeconds(start + _length))) // KeyTime
             button.ContextMenu = BuildMenu();
             this.ContextMenu.IsOpen = true;
         }
+        */
 
         // 获得 shelf.xml 中 root 元素的 backImageFileOpen 属性定义的文件的路径
         static string GetBackImageFileOpenPath()
@@ -1024,11 +1026,24 @@ this.ActualHeight - (this.Padding.Top + this.Padding.Bottom)));
 
         private void Border_ContextMenuOpening(object sender, ContextMenuEventArgs e)
         {
-            //var button = (Border)sender;
-            //DoorItem door = button.DataContext as DoorItem;
+            var border = (Border)sender;
+            DoorItem door = border.DataContext as DoorItem;
 
-            ContextMenuOpen111?.Invoke(sender, e);
+            ContextMenuOpen111?.Invoke(sender, new DoorContextMenuArgs
+            {
+                OriginArgs = e,
+                Door = door
+            });
         }
+    }
+
+    public delegate void ContextMenuOpenEventHandler(object sender,
+DoorContextMenuArgs e);
+
+    public class DoorContextMenuArgs : EventArgs
+    {
+        public ContextMenuEventArgs OriginArgs { get; set; }
+        public DoorItem Door { get; set; }
     }
 
     public delegate void OpenDoorEventHandler(object sender,

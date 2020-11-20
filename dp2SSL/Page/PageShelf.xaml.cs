@@ -39,6 +39,8 @@ using DigitalPlatform.Interfaces;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.LibraryClient.localhost;
+using Microsoft.VisualStudio.Shell.TableManager;
+using Microsoft.VisualStudio.TextManager.Interop;
 
 namespace dp2SSL
 {
@@ -88,30 +90,268 @@ namespace dp2SSL
             // this.error.Text = "test";
         }
 
-        private void DoorControl_ContextMenuOpen111(object sender, EventArgs e)
+        private void DoorControl_ContextMenuOpen111(object sender, DoorContextMenuArgs e)
         {
-            FrameworkElement fe = (e as ContextMenuEventArgs).Source as FrameworkElement;
-            // var border = sender as Border;
+            FrameworkElement fe = (e.OriginArgs as ContextMenuEventArgs).Source as FrameworkElement;
+
             if (fe.ContextMenu == null)
-                fe.ContextMenu = BuildMenu();
+                fe.ContextMenu = BuildMenu(e.Door);
             // MessageBox.Show("popup");
         }
 
-        ContextMenu BuildMenu()
+        #region 门控件上的右鼠标键上下文菜单
+
+        ContextMenu BuildMenu(DoorItem door)
         {
             ContextMenu theMenu = new ContextMenu();
             theMenu.IsOpen = true;
-            MenuItem mia = new MenuItem();
-            mia.Header = "Item1";
-            MenuItem mib = new MenuItem();
-            mib.Header = "Item2";
-            MenuItem mic = new MenuItem();
-            mic.Header = "Item3";
-            theMenu.Items.Add(mia);
-            theMenu.Items.Add(mib);
-            theMenu.Items.Add(mic);
+            {
+                MenuItem item = new MenuItem();
+                item.Background = new SolidColorBrush(Colors.DarkRed);
+                item.Foreground = new SolidColorBrush(Colors.White);
+
+                item.Header = $"! 强制开门 {door.Name} (注意这会引起错误)";
+                item.Tag = door;
+                item.Click += SimuOpenLock_Click;
+                theMenu.Items.Add(item);
+            }
+            {
+                MenuItem item = new MenuItem();
+                item.Header = $"模拟关门 {door.Name}";
+                item.Tag = door;
+                item.Click += SimuCloseDoor_Click;
+                theMenu.Items.Add(item);
+            }
+
+            // 分隔行
+            {
+                theMenu.Items.Add(new Separator());
+            }
+
+            {
+                MenuItem item = new MenuItem();
+                item.Background = new SolidColorBrush(Colors.DarkRed);
+                item.Foreground = new SolidColorBrush(Colors.White);
+
+                item.Header = $"! 强制打开全部 {ShelfData.Doors.Count} 个门 (注意这会引起错误)";
+                item.Click += SimuOpenAllLock_Click;
+                theMenu.Items.Add(item);
+            }
+            {
+                MenuItem item = new MenuItem();
+                item.Header = $"模拟关闭全部 {ShelfData.Doors.Count} 个门";
+                item.Click += SimuCloseAllDoor_Click;
+                theMenu.Items.Add(item);
+            }
+
+            // 分隔行
+            {
+                theMenu.Items.Add(new Separator());
+            }
+
+            {
+                MenuItem item = new MenuItem();
+                item.Header = $"添加读者证(标签)";
+                item.Click += SimuAddPatronTag_Click;
+                theMenu.Items.Add(item);
+            }
+
+            {
+                MenuItem item = new MenuItem();
+                item.Header = $"移走读者证(标签)";
+                item.Click += SimuRemovePatronTag_Click;
+                theMenu.Items.Add(item);
+            }
+
+            // 分隔行
+            {
+                theMenu.Items.Add(new Separator());
+            }
+
+            {
+                MenuItem item = new MenuItem();
+                item.Header = $"模拟移走当前门 {door.Name} 内全部 RFID 标签";
+                item.Tag = door;
+                item.Click += SimuRemoveTagsInDoor_Click;
+                theMenu.Items.Add(item);
+            }
+
+            {
+                MenuItem item = new MenuItem();
+                item.Header = $"模拟移走全部 {ShelfData.Doors.Count} 门内 RFID 标签";
+                item.Click += SimuRemoveTagsInAllDoor_Click;
+                theMenu.Items.Add(item);
+            }
+
+            {
+                MenuItem item = new MenuItem();
+                item.Header = $"放回 {_removed_tags.Count} 个先前移走的 RFID 标签";
+                item.Loaded += MenuItem_addReomved_Loaded;
+                item.Click += SimuAddRemovedTags_Click;
+                theMenu.Items.Add(item);
+            }
+
             return theMenu;
         }
+
+        // 动态更新菜单文字内容
+        private void MenuItem_addReomved_Loaded(object sender, RoutedEventArgs e)
+        {
+            var item = sender as MenuItem;
+            item.Header = $"放回 {_removed_tags.Count} 个先前移走的 RFID 标签";
+        }
+
+        // 模拟开门
+        private void SimuOpenLock_Click(object sender, RoutedEventArgs e)
+        {
+            var door = (sender as MenuItem).Tag as DoorItem;
+
+            var result = RfidManager.OpenShelfLock(door.LockPath);
+
+            App.CurrentApp.SpeakSequence("注意强制开门可能会引起错误");
+        }
+
+        // 模拟打开全部门
+        private void SimuOpenAllLock_Click(object sender, RoutedEventArgs e)
+        {
+            foreach (var door in ShelfData.Doors)
+            {
+                var result = RfidManager.OpenShelfLock(door.LockPath);
+            }
+
+            App.CurrentApp.SpeakSequence("注意强制开门可能会引起错误");
+        }
+
+        // 模拟关门
+        private void SimuCloseDoor_Click(object sender, RoutedEventArgs e)
+        {
+            var door = (sender as MenuItem).Tag as DoorItem;
+
+            var result = RfidManager.CloseShelfLock(door.LockPath);
+        }
+
+        // 模拟关全部门
+        private void SimuCloseAllDoor_Click(object sender, RoutedEventArgs e)
+        {
+            foreach (var door in ShelfData.Doors)
+            {
+                var result = RfidManager.CloseShelfLock(door.LockPath);
+            }
+        }
+
+        void SimuAddPatronTag_Click(object sender, RoutedEventArgs e)
+        {
+            _ = Task.Run(() =>
+            {
+                // 如果当前已经有一张卡在读者证读卡器上，先拿走它
+                {
+                    var result = ShelfData.SimuRemovePatronTag();
+                    if (result.Value >= 1)
+                    {
+                        Thread.Sleep(1000);
+                        // TODO: Sleep() 可以改进为确保给一个 inventory 机会
+                    }
+                }
+
+                ShelfData.SimuAddPatronTag();
+            });
+
+        }
+
+        void SimuRemovePatronTag_Click(object sender, RoutedEventArgs e)
+        {
+            /*
+            if (string.IsNullOrEmpty(_patron.UID))
+            {
+                MessageBox.Show("当前读者证读卡器上没有证卡");
+                return;
+            }
+            */
+            ShelfData.SimuRemovePatronTag();
+        }
+
+        static List<TagInfo> _removed_tags = new List<TagInfo>();
+
+        // 模拟移走一个门内全部 RFID 标签
+        private void SimuRemoveTagsInDoor_Click(object sender, RoutedEventArgs e)
+        {
+            var door = (sender as MenuItem).Tag as DoorItem;
+            var tags = ShelfData.GetAllTagInfo(new List<DoorItem>() { door });
+            if (tags.Count > 0)
+            {
+                var result = ShelfData.SimuRemoveTags(tags);
+                if (result.Value != -1)
+                    App.CurrentApp.Speak($"成功移走 {tags.Count} 个标签");
+                else
+                {
+                    string error = $"移走标签过程出错: {result.ErrorInfo}";
+                    App.CurrentApp.Speak(error);
+                    MessageBox.Show(error);
+                }
+                _removed_tags.AddRange(tags);
+            }
+            else
+            {
+                MessageBox.Show($"门 {door.Name} 内没有任何标签可供移走");
+            }
+        }
+
+        // 模拟移走全部门内的 RFID 标签
+        private void SimuRemoveTagsInAllDoor_Click(object sender, RoutedEventArgs e)
+        {
+            int count = 0;
+            List<string> errors = new List<string>();
+            foreach (var door in ShelfData.Doors)
+            {
+                var tags = ShelfData.GetAllTagInfo(new List<DoorItem>() { door });
+                if (tags.Count > 0)
+                {
+                    var result = ShelfData.SimuRemoveTags(tags);
+                    if (result.Value != -1)
+                        count += tags.Count;
+                    else
+                    {
+                        string error = $"移走标签过程出错: {result.ErrorInfo}";
+                        errors.Add(error);
+                    }
+                }
+                else
+                {
+                    errors.Add($"门 {door.Name} 内没有任何标签可供移走");
+                }
+
+                _removed_tags.AddRange(tags);
+            }
+
+
+            if (errors.Count > 0)
+            {
+                string error = StringUtil.MakePathList(errors, "; ");
+                App.CurrentApp.Speak(error);
+                MessageBox.Show(error);
+            }
+            else
+            {
+                App.CurrentApp.Speak($"成功移走 {count} 个标签");
+            }
+        }
+
+        // 放回先前移走的标签
+        void SimuAddRemovedTags_Click(object sender, RoutedEventArgs e)
+        {
+            var result = RfidManager.SimuTagInfo("setTag", _removed_tags, "");
+            if (result.Value == -1)
+            {
+                MessageBox.Show(result.ErrorInfo);
+                return;
+            }
+
+            App.CurrentApp.Speak($"成功放回 {_removed_tags.Count} 个标签");
+            _removed_tags.Clear();
+        }
+
+        #endregion
+
         // parameters:
         //      mode    空字符串或者“initial”
         public PageShelf(string mode) : this()
@@ -384,11 +624,24 @@ namespace dp2SSL
                         // TODO: 是否可以越过无法解析的标签，继续解析其他标签？
                     });
                     */
+                    DateTime start = DateTime.Now;
+
                     var result = await ShelfData.RefreshInventoryAsync(e.Door);
+
+                    WpfClientInfo.WriteInfoLog($"针对门 {e.Door.Name} 执行 RefreshInventoryAsync() 耗时 {(DateTime.Now - start).TotalSeconds.ToString()}");
+
+                    start = DateTime.Now;
 
                     // 2020/4/21 把这两句移动到 try 范围内
                     await SaveDoorActions(e.Door, true);
+
+                    WpfClientInfo.WriteInfoLog($"针对门 {e.Door.Name} 执行 SaveDoorActions() 耗时 {(DateTime.Now - start).TotalSeconds.ToString()}");
+
+
+                    start = DateTime.Now;
+
                     actions = ShelfData.PullActions();
+                    WpfClientInfo.WriteInfoLog($"针对门 {e.Door.Name} 执行 PullActions() 耗时 {(DateTime.Now - start).TotalSeconds.ToString()}");
                 }
                 finally
                 {
