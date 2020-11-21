@@ -4694,76 +4694,90 @@ out string number);
                     ErrorCode = "lockNotFound"
                 };
 
-            List<LockState> states = new List<LockState>();
-
-            foreach (var current_lock in locks)
+            lock (_syncShelfLock)
             {
-                foreach (var card in path.CardNameList)
+
+                List<LockState> states = new List<LockState>();
+
+                foreach (var current_lock in locks)
                 {
-                    foreach (var number in path.NumberList)
+                    foreach (var card in path.CardNameList)
                     {
-                        int addr = 1;
-                        int index = 1;
-                        if (string.IsNullOrEmpty(card) == false)
-                            Int32.TryParse(card, out addr);
-                        if (string.IsNullOrEmpty(number) == false)
-                            Int32.TryParse(number, out index);
-
-                        string current_path = $"{current_lock.Name}.{addr}.{index}";
-
-                        // 2020/10/25
-                        // 优化速度。记忆中处于关闭状态的锁不用探测状态，因为它没法被越过 API 打开。只要经过 API 打开的，记忆都能兑现修改
-                        // 但打开状态的锁需要跟踪，因为用户是用手关闭它，只能用 SDK 探测它的状态变化
-                        string mem_state = _lockMemory.GetState(current_path);
-                        if (mem_state == "close")
+                        foreach (var number in path.NumberList)
                         {
-                            states.Add(new LockState
+                            int addr = 1;
+                            int index = 1;
+                            if (string.IsNullOrEmpty(card) == false)
+                                Int32.TryParse(card, out addr);
+                            if (string.IsNullOrEmpty(number) == false)
+                                Int32.TryParse(number, out index);
+
+                            string current_path = $"{current_lock.Name}.{addr}.{index}";
+
+                            // 2020/10/25
+                            // 优化速度。记忆中处于关闭状态的锁不用探测状态，因为它没法被越过 API 打开。只要经过 API 打开的，记忆都能兑现修改
+                            // 但打开状态的锁需要跟踪，因为用户是用手关闭它，只能用 SDK 探测它的状态变化
+                            string mem_state = _lockMemory.GetState(current_path);
+                            if (mem_state == "close")
                             {
-                                // Path
-                                Path = $"{current_lock.Name}.{addr}.{index}",
-                                // 锁名字
-                                Lock = current_lock.Name,
-                                Board = addr,
-                                Index = index,
-                                State = "close"
-                            });
-                            continue;
+                                // 2020/11/21
+                                // 观察这个锁是否曾经打开过而没有来得及获取至少一次状态？
+                                var opened = _lockMemory.IsOpened(current_path);
+
+                                states.Add(new LockState
+                                {
+                                    // Path
+                                    Path = $"{current_lock.Name}.{addr}.{index}",
+                                    // 锁名字
+                                    Lock = current_lock.Name,
+                                    Board = addr,
+                                    Index = index,
+                                    State = opened ? "open,close" : "close"
+                                });
+                                continue;
+                            }
+
+                            {
+                                Byte sta = 0x00;
+                                int iret = RFIDLIB.miniLib_Lock.Mini_GetDoorStatus(current_lock.LockHandle,
+                                    (Byte)addr, // 1,
+                                    (Byte)index,
+                                    ref sta);
+                                if (iret != 0)
+                                    return new GetLockStateResult
+                                    {
+                                        Value = -1,
+                                        ErrorInfo = $"getDoorStatus error (lock name='{current_lock.Name}' index={index})"
+                                    };
+
+                                // 2020/10/23
+                                _lockMemory.Set(current_path, sta == 0x00 ? "open" : "close");
+
+                                // 2020/11/21
+                                // 清除曾经打开痕迹
+                                var opened = _lockMemory.IsOpened(current_path);
+
+                                states.Add(new LockState
+                                {
+                                    // Path
+                                    Path = current_path,    // $"{current_lock.Name}.{addr}.{index}",
+                                                            // 锁名字
+                                    Lock = current_lock.Name,
+                                    Board = addr,
+                                    Index = index,
+                                    State = (sta == 0x00 ? "open" : (opened ? "open,close" : "close"))
+                                });
+                            }
                         }
-
-                        Byte sta = 0x00;
-                        int iret = RFIDLIB.miniLib_Lock.Mini_GetDoorStatus(current_lock.LockHandle,
-                            (Byte)addr, // 1,
-                            (Byte)index,
-                            ref sta);
-                        if (iret != 0)
-                            return new GetLockStateResult
-                            {
-                                Value = -1,
-                                ErrorInfo = $"getDoorStatus error (lock name='{current_lock.Name}' index={index})"
-                            };
-
-                        // 2020/10/23
-                        _lockMemory.Set(current_path, sta == 0x00 ? "open" : "close");
-
-                        states.Add(new LockState
-                        {
-                            // Path
-                            Path = current_path,    // $"{current_lock.Name}.{addr}.{index}",
-                            // 锁名字
-                            Lock = current_lock.Name,
-                            Board = addr,
-                            Index = index,
-                            State = (sta == 0x00 ? "open" : "close")
-                        });
                     }
                 }
-            }
 
-            return new GetLockStateResult
-            {
-                Value = 0,
-                States = states
-            };
+                return new GetLockStateResult
+                {
+                    Value = 0,
+                    States = states
+                };
+            }
         }
 
 
@@ -4841,6 +4855,8 @@ out string number);
         }
         */
 
+        static object _syncShelfLock = new object();
+
         // 开门
         // parameters:
         //      lockNameParam   为 "锁控板名字.卡编号.锁编号"。
@@ -4867,62 +4883,73 @@ out string number);
                     ErrorCode = "lockNotFound"
                 };
 
-            List<LockState> states = new List<LockState>();
-
-            int count = 0;
-            foreach (var current_lock in locks)
+            lock (_syncShelfLock)
             {
-                foreach (var card in path.CardNameList)
+                List<LockState> states = new List<LockState>();
+
+                int count = 0;
+                foreach (var current_lock in locks)
                 {
-                    foreach (var number in path.NumberList)
+                    foreach (var card in path.CardNameList)
                     {
-                        int addr = 1;
-                        int index = 1;
-                        if (string.IsNullOrEmpty(card) == false)
-                            Int32.TryParse(card, out addr);
-                        if (string.IsNullOrEmpty(number) == false)
-                            Int32.TryParse(number, out index);
-
+                        foreach (var number in path.NumberList)
                         {
-                            int iret = RFIDLIB.miniLib_Lock.Mini_OpenDoor(current_lock.LockHandle,
-                                (Byte)addr,   // 1,
-                                (Byte)index);
-                            if (iret != 0)
-                                return new NormalResult
-                                {
-                                    Value = -1,
-                                    ErrorInfo = $"openDoor error (lock name='{current_lock.Name}' index={index})"
-                                };
-                        }
+                            // TODO: 对锁 path 加锁，和探测锁状态的语句组互斥
 
+                            int addr = 1;
+                            int index = 1;
+                            if (string.IsNullOrEmpty(card) == false)
+                                Int32.TryParse(card, out addr);
+                            if (string.IsNullOrEmpty(number) == false)
+                                Int32.TryParse(number, out index);
+
+                            {
+                                int iret = RFIDLIB.miniLib_Lock.Mini_OpenDoor(current_lock.LockHandle,
+                                    (Byte)addr,   // 1,
+                                    (Byte)index);
+                                if (iret != 0)
+                                    return new NormalResult
+                                    {
+                                        Value = -1,
+                                        ErrorInfo = $"openDoor error (lock name='{current_lock.Name}' index={index})"
+                                    };
+                            }
+
+                            var current_path = $"{current_lock.Name}.{addr}.{index}";
+                            // 2020/11/21
+                            // 加入一个表示发生过开门的状态，让后继获得状态的 API 至少能返回一次打开状态
+                            _lockMemory.MemoryOpen(current_path);
 #if VERIFY_OPENDOOR
-                        {
-                            Byte sta = 0x00;
-                            int iret = RFIDLIB.miniLib_Lock.Mini_GetDoorStatus(current_lock.LockHandle,
-                                (Byte)addr, // 1,
-                                (Byte)index,
-                                ref sta);
-                            if (sta != 0x00)
-                                return new NormalResult
-                                {
-                                    Value = -1,
-                                    ErrorInfo = $"openDoor verify after open error (lock name='{current_lock.Name}' index={index})",
-                                    ErrorCode = "verifyAfterOpenError",
-                                };
-                        }
+                            // 验证：RS232 锁一旦打开后马上调用获得其状态，应该是打开状态
+                            {
+                                Byte sta = 0x00;
+                                int iret = RFIDLIB.miniLib_Lock.Mini_GetDoorStatus(current_lock.LockHandle,
+                                    (Byte)addr, // 1,
+                                    (Byte)index,
+                                    ref sta);
+                                if (sta != 0x00)
+                                    return new NormalResult
+                                    {
+                                        Value = -1,
+                                        ErrorInfo = $"openDoor verify after open error (lock name='{current_lock.Name}' index={index})",
+                                        ErrorCode = "verifyAfterOpenError",
+                                    };
+                            }
 #endif
-                        // 2020/10/23
-                        _lockMemory.Set($"{current_lock.Name}.{addr}.{index}", "open");
-                        
-                        count++;
+                            // 2020/10/23
+                            _lockMemory.Set(/*$"{current_lock.Name}.{addr}.{index}"*/
+                                current_path, "open");
+
+                            count++;
+                        }
                     }
                 }
-            }
 
-            return new NormalResult
-            {
-                Value = count
-            };
+                return new NormalResult
+                {
+                    Value = count
+                };
+            }
         }
 
         LockStateMemory _lockMemory = new LockStateMemory();

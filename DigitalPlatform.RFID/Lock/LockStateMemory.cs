@@ -17,13 +17,48 @@ namespace DigitalPlatform.RFID
         // 没有包含的路径，对应锁状态为“未知”
         Hashtable _stateTable = new Hashtable();
 
+        // 曾经打开过的标志表。
+        // 每当前端 API 获取锁状态时使用一次并清除相关对象。也就是说确保锁被打开后，获取状态至少有一次是获得一次打开状态
+        // lock path --> DateTime
+        Hashtable _openedTable = new Hashtable();
+
         public void Clear()
         {
             lock (_stateTable.SyncRoot)
             {
                 _stateTable.Clear();
             }
+
+            lock (_openedTable.SyncRoot)
+            {
+                _openedTable.Clear();
+            }
         }
+
+        #region 记忆短暂打开过的机制
+
+        // 记忆一次打开
+        public void MemoryOpen(string path)
+        {
+            lock (_openedTable.SyncRoot)
+            {
+                _openedTable[path] = DateTime.Now;
+            }
+        }
+
+        // 是否刚才打开过？(虽然判断的当时锁未必是打开状态，但曾经打开过，并且没有被查询过状态)
+        public bool IsOpened(string path)
+        {
+            lock (_openedTable.SyncRoot)
+            {
+                bool opened = _openedTable.ContainsKey(path);
+                if (opened)
+                    _openedTable.Remove(path);
+                return opened;
+            }
+        }
+
+        #endregion
 
         // 设定是否追踪
         // parameters:

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -90,6 +91,13 @@ TaskScheduler.Default);
                 // state.State = "???";
                 try
                 {
+                    if (state.NewState == "open")
+                    {
+                        continue;
+                    }
+
+                    Debug.Assert(state.NewState == "close");
+
                     List<ActionInfo> actions = null;
 
                     try
@@ -106,7 +114,6 @@ TaskScheduler.Default);
                         await SaveDoorActions(state.Door, true);
 
                         WpfClientInfo.WriteInfoLog($"针对门 {state.Door.Name} 执行 SaveDoorActions() 耗时 {(DateTime.Now - start).TotalSeconds.ToString()}");
-
 
                         start = DateTime.Now;
 
@@ -138,6 +145,11 @@ TaskScheduler.Default);
 
             // 把处理过的 entity 从 list 中移走
             RemoveList(list);
+
+            // 2020/11/21
+            // 如果发现队列里面又有新的对象，则立即激活任务
+            if (GetListCount() > 0)
+                ActivateTask();
         }
 
         // 将指定门的暂存的信息保存为 Action。但并不立即提交
@@ -228,6 +240,13 @@ TaskScheduler.Default);
             }
         }
 
+        public static int GetListCount()
+        {
+            lock (_changeListSyncRoot)
+            {
+                return _changeList.Count;
+            }
+        }
 
     }
 }

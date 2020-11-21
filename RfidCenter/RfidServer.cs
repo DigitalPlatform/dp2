@@ -77,7 +77,21 @@ namespace RfidCenter
         public NormalResult OpenShelfLock(string lockName)
         {
             if (Program.MainForm.InSimuLock)
-                return _simuLock.OpenShelfLock(lockName);
+                return _simuLock.OpenShelfLock(lockName, "");
+
+            // parameters:
+            //      lockNameParam   为 "锁控板名字.卡编号.锁编号"。
+            //                      其中卡编号部分可以是 "1" 也可以是 "1|2" 这样的形态
+            //                      其中锁编号部分可以是 "1" 也可以是 "1|2|3|4" 这样的形态
+            //                      如果缺乏卡编号和锁编号部分，缺乏的部分默认为 "1"
+            return Program.Rfid.OpenShelfLock(lockName);
+        }
+
+        // 新版本
+        public NormalResult OpenShelfLock(string lockName, string style)
+        {
+            if (Program.MainForm.InSimuLock)
+                return _simuLock.OpenShelfLock(lockName, style);
 
             // parameters:
             //      lockNameParam   为 "锁控板名字.卡编号.锁编号"。
@@ -91,7 +105,7 @@ namespace RfidCenter
         public NormalResult CloseShelfLock(string lockName)
         {
             if (Program.MainForm.InSimuLock)
-                return _simuLock.OpenShelfLock(lockName, false);
+                return _simuLock.OpenShelfLock(lockName, "", false);
 
             return new NormalResult
             {

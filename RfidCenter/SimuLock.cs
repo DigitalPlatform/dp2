@@ -7,6 +7,8 @@ using static RfidDrivers.First.RfidDriver1;
 
 using DigitalPlatform;
 using DigitalPlatform.RFID;
+using DigitalPlatform.Text;
+using System.Diagnostics;
 
 namespace RfidCenter
 {
@@ -38,7 +40,11 @@ namespace RfidCenter
         }
 
         // 开门
-        public NormalResult OpenShelfLock(string lockNameParam, bool open = true)
+        // parameters:
+        //      style   如果包含 "open+close"，表示用于模拟开门并立即关门的动作
+        public NormalResult OpenShelfLock(string lockNameParam,
+            string style,
+            bool open = true)
         {
             var path = LockPath.Parse(lockNameParam);
 
@@ -57,7 +63,10 @@ namespace RfidCenter
                             ErrorCode = "lockNotFound"
                         };
 
-                    state.State = open ? "open" : "close";
+                    if (StringUtil.IsInList("open+close", style))
+                        state.State = "open,close";
+                    else
+                        state.State = open ? "open" : "close";
                     count++;
                 }
             }
@@ -152,6 +161,13 @@ namespace RfidCenter
                         Index = Convert.ToInt32(current_path.NumberList[0]),
                         State = state.State,
                     });
+
+                    // 2020/11/21
+                    // 只要获得一次就立刻变为 "close"
+                    if (state.State == "open,close")
+                        state.State = "close";
+
+                    Debug.Assert(state.State == "open" || state.State == "close");
                 }
             }
 

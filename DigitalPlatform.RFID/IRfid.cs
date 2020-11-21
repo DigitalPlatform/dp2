@@ -87,6 +87,10 @@ uint new_password);
         // 开锁
         NormalResult OpenShelfLock(string lockName);
 
+        // 2020/11/21
+        // 开锁。新版本 API，多了个 style 参数
+        NormalResult OpenShelfLock(string lockName, string style);
+
         // 模拟关门
         NormalResult CloseShelfLock(string lockName);
 

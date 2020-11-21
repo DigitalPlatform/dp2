@@ -767,7 +767,7 @@ namespace dp2SSL
                     if (patrons.Count == 0)
                     {
                         // 再尝试后方一致匹配一次
-                        if (pii.Contains(".") == false)
+                        if (pii != null && pii.Contains(".") == false)
                         {
                             patrons = context.Patrons
                                 .Where(o => o.PII.EndsWith($".{pii}"))

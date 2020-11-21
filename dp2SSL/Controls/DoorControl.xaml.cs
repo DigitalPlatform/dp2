@@ -1065,6 +1065,9 @@ OpenDoorEventArgs e);
 
         // 触发位置。空/count/add/remove/error
         public string ButtonName { get; set; }
+
+        // 附加参数
+        public object Tag { get; set; }
     }
 
     public class LockChanged

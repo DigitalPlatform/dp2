@@ -718,6 +718,11 @@ namespace dp2SSL
             List<DoorItem> _doors,
             LockState state)
         {
+            // 2020/11/21
+            // 检查参数，确保是单纯形态
+            if (state.State.Contains(","))
+                throw new ArgumentException($"状态字符串中不应存在逗号 ('{state.State}')", nameof(state));
+
             List<LockChanged> results = new List<LockChanged>();
 
             int i = 0;

@@ -8,16 +8,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Xml;
 using System.IO;
-using System.Reflection;
 using System.Deployment.Application;
 
 using Newtonsoft.Json;
@@ -36,7 +29,6 @@ using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
 using DigitalPlatform.Face;
 using DigitalPlatform.Interfaces;
-using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.LibraryClient.localhost;
 
@@ -79,7 +71,9 @@ namespace dp2SSL
             this._patron.PropertyChanged += _patron_PropertyChanged;
 
             this.doorControl.OpenDoor += DoorControl_OpenDoor;
+#if AUTO_TEST
             this.doorControl.ContextMenuOpen111 += DoorControl_ContextMenuOpen111;
+#endif
 
             App.CurrentApp.PropertyChanged += CurrentApp_PropertyChanged;
 
@@ -87,6 +81,8 @@ namespace dp2SSL
 
             // this.error.Text = "test";
         }
+
+#if AUTO_TEST
 
         private void DoorControl_ContextMenuOpen111(object sender, DoorContextMenuArgs e)
         {
@@ -97,7 +93,8 @@ namespace dp2SSL
             // MessageBox.Show("popup");
         }
 
-        #region 门控件上的右鼠标键上下文菜单
+
+#region 门控件上的右鼠标键上下文菜单
 
         ContextMenu BuildMenu(DoorItem door)
         {
@@ -119,6 +116,20 @@ namespace dp2SSL
                 item.Tag = door;
                 item.Click += SimuCloseDoor_Click;
                 theMenu.Items.Add(item);
+            }
+
+            {
+                MenuItem item = new MenuItem();
+                item.Header = $"特殊测试 {door.Name}";
+                theMenu.Items.Add(item);
+
+                {
+                    MenuItem subitem = new MenuItem();
+                    subitem.Header = $"强制开门 {door.Name} 并立即关门";
+                    subitem.Tag = door;
+                    subitem.Click += SimuOpenAndClose_Click;
+                    item.Items.Add(subitem);
+                }
             }
 
             // 分隔行
@@ -149,8 +160,15 @@ namespace dp2SSL
 
             {
                 MenuItem item = new MenuItem();
-                item.Header = $"添加读者证(标签)";
+                item.Header = $"添加读者证(标签)[ISO14443A]";
                 item.Click += SimuAddPatronTag_Click;
+                theMenu.Items.Add(item);
+            }
+
+            {
+                MenuItem item = new MenuItem();
+                item.Header = $"添加工作人员卡(标签)[ISO15693]";
+                item.Click += SimuAddWorkerTag_Click;
                 theMenu.Items.Add(item);
             }
 
@@ -190,6 +208,21 @@ namespace dp2SSL
             }
 
             return theMenu;
+        }
+
+        // 模拟开门并立即关门
+        private void SimuOpenAndClose_Click(object sender, RoutedEventArgs e)
+        {
+            var door = (sender as MenuItem).Tag as DoorItem;
+
+            // 模拟按钮空白处触发
+            var e1 = new OpenDoorEventArgs
+            {
+                Door = door,
+                ButtonName = null,
+                Tag = "open+close",
+            };
+            DoorControl_OpenDoor(sender, e1);
         }
 
         // 动态更新菜单文字内容
@@ -252,6 +285,25 @@ namespace dp2SSL
                 }
 
                 ShelfData.SimuAddPatronTag();
+            });
+
+        }
+
+        void SimuAddWorkerTag_Click(object sender, RoutedEventArgs e)
+        {
+            _ = Task.Run(() =>
+            {
+                // 如果当前已经有一张卡在读者证读卡器上，先拿走它
+                {
+                    var result = ShelfData.SimuRemovePatronTag();
+                    if (result.Value >= 1)
+                    {
+                        Thread.Sleep(1000);
+                        // TODO: Sleep() 可以改进为确保给一个 inventory 机会
+                    }
+                }
+
+                ShelfData.SimuAddWorkerTag();
             });
 
         }
@@ -349,7 +401,9 @@ namespace dp2SSL
             _removed_tags.Clear();
         }
 
-        #endregion
+#endregion
+
+#endif
 
         // parameters:
         //      mode    空字符串或者“initial”
@@ -1141,6 +1195,7 @@ namespace dp2SSL
                 }
 
                 // 2019/12/21
+                // 特殊情况处理
                 if (e.Door.Operator != null)
                 {
                     WpfClientInfo.WriteInfoLog($"开门前发现门 {e.Door.Name} 的 Operator 不为空(为 '{e.Door.Operator.ToString()}')，所以补做一次 Inventory");
@@ -1156,6 +1211,7 @@ namespace dp2SSL
                         });
                         */
                         {
+                            App.CurrentApp.SpeakSequence("补做一次盘点");
                             await ShelfData.RefreshInventoryAsync(e.Door);
                             await DoorStateTask.SaveDoorActions(e.Door, false);
                         }
@@ -1182,7 +1238,12 @@ namespace dp2SSL
 
                 long startTicks = RfidManager.LockHeartbeat;
 
-                var result = RfidManager.OpenShelfLock(e.Door.LockPath);
+                // 测试时用来传递参数
+                string style = "";
+                if (e.Tag is string)
+                    style = e.Tag as string;
+
+                var result = RfidManager.OpenShelfLock(e.Door.LockPath, style);
                 if (result.Value == -1)
                 {
                     //MessageBox.Show(result.ErrorInfo);
@@ -1210,9 +1271,13 @@ namespace dp2SSL
                 // 开门动作会中断延迟任务
                 CancelDelayClearTask();
 
+#if REMOVED
+#else
                 // 一旦成功，门的 waiting 状态会在 PopCommand 的同时被改回 false
-                // succeed = true;
+                succeed = true;
+#endif
 
+#if REMOVED
                 // 等待确认收到开门信号
                 await Task.Run(async () =>
                 {
@@ -1244,6 +1309,7 @@ namespace dp2SSL
                         WpfClientInfo.WriteErrorLog($"等待确认收到开门信号过程中出现异常:{ExceptionUtil.GetDebugText(ex)}");
                     }
                 });
+#endif
             }
             finally
             {
@@ -3451,7 +3517,7 @@ namespace dp2SSL
             }
         }
 
-        #region patron 分类报错机制
+#region patron 分类报错机制
 
         // 错误类别 --> 错误字符串
         // 错误类别有：rfid fingerprint getreaderinfo
@@ -3471,7 +3537,7 @@ namespace dp2SSL
             }
         }
 
-        #endregion
+#endregion
 
         bool _visiblityChanged = false;
 
@@ -4169,7 +4235,7 @@ namespace dp2SSL
             return text.ToString();
         }
 
-        #region 延迟清除读者信息
+#region 延迟清除读者信息
 
         DelayAction _delayClearPatronTask = null;
 
@@ -4230,9 +4296,9 @@ namespace dp2SSL
             }
         }
 
-        #endregion
+#endregion
 
-        #region 模拟柜门灯亮灭
+#region 模拟柜门灯亮灭
 
         public void SimulateLamp(bool on)
         {
@@ -4245,9 +4311,9 @@ namespace dp2SSL
             }));
         }
 
-        #endregion
+#endregion
 
-        #region 人脸识别功能
+#region 人脸识别功能
 
         bool _stopVideo = false;
 
@@ -4486,7 +4552,7 @@ namespace dp2SSL
             }
         }
 
-        #endregion
+#endregion
 
         private void ClearPatron_Click(object sender, RoutedEventArgs e)
         {
@@ -4605,7 +4671,7 @@ namespace dp2SSL
 
 #if REMOVED
 
-        #region 绑定和解绑读者功能
+#region 绑定和解绑读者功能
 
 #pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
         private async void bindPatronCard_Click(object sender, RoutedEventArgs e)
@@ -4816,7 +4882,7 @@ uid);
             return new NormalResult { Value = 0 };
         }
 
-        #endregion
+#endregion
 
 #endif
     }

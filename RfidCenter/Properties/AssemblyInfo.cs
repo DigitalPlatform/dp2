@@ -32,8 +32,8 @@ using System.Runtime.InteropServices;
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 // 方法是按如下所示使用“*”: :
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.10.*")]
-[assembly: AssemblyFileVersion("1.10.0.0")]
+[assembly: AssemblyVersion("1.11.*")]
+[assembly: AssemblyFileVersion("1.11.0.0")]
 
 // V1.1 2019/2/21 支持 32-bit Windows 环境
 // V1.2 2019/4/12 采用了最新 dp-library submodule 的版本
@@ -45,3 +45,4 @@ using System.Runtime.InteropServices;
 // V1.8 2020/8/19 增加 小票打印 API
 // V1.9 2020/9/2 用上了 RFID SDK 2020 年 4 月的 DLL。并且增加了 CompactLog 机制用来记录 inventory() error，当十分钟内这类出错累计超过 10 次，则会自动重启一次 RFID 驱动
 // V1.10 2020/9/22 用回 RFID SDK 2019 年底的 DLL
+// V1.11 2020/11/21 OpenShelfLock() API 增加了一个新版本。锁被打开后立即关闭情况得到了解决；优化了锁关闭状态下探测状态的速度
