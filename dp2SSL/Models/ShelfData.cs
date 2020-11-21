@@ -124,10 +124,59 @@ namespace dp2SSL
 
         static int _openingDoorCount = -1; // 当前处于打开状态的门的个数。-1 表示个数尚未初始化
 
+        // 提示多个门所用的名字集合
         static List<string> _openDoorSpeakList = new List<string>();
         public static void AddOpenDoorSpeak(string text)
         {
             _openDoorSpeakList.Add(text);
+        }
+
+        public static void ClearOpenDoorSpeak()
+        {
+            _openDoorSpeakList.Clear();
+        }
+
+        // 获得一个描述若干门名字的语句
+        public static string GetOpenDoorSpeakText()
+        {
+            if (_openDoorSpeakList.Count > 2)
+                return $"{_openDoorSpeakList.Count} 个门";
+            return StringUtil.MakePathList(_openDoorSpeakList, ", ");
+        }
+
+        // 把状态变换为比较简单的形态。"open,close" 要拆成两个
+        static List<LockState> ConvertLockStates(List<LockState> states)
+        {
+            List<LockState> results = new List<LockState>();
+            foreach (var state in states)
+            {
+                if (state.State.Contains(","))
+                {
+                    var parts = StringUtil.SplitList(state.State);
+                    foreach (var part in parts)
+                    {
+                        /*
+        public string Path { get; set; }
+        public string Lock { get; set; }
+        public int Board { get; set; }
+        public int Index { get; set; }
+        public string State { get; set; }
+                        * */
+                        results.Add(new LockState
+                        {
+                            Path = state.Path,
+                            Lock = state.Lock,
+                            Board = state.Board,
+                            Index = state.Index,
+                            State = part
+                        });
+                    }
+                }
+                else
+                    results.Add(state);
+            }
+
+            return results;
         }
 
         public static void RfidManager_ListLocks(object sender, ListLocksEventArgs e)
@@ -139,11 +188,13 @@ namespace dp2SSL
                 return;
             }
 
-            List<DoorItem> processed = new List<DoorItem>();
+            // List<DoorItem> processed = new List<DoorItem>();
             // bool triggerAllClosed = false;
             {
                 int count = 0;
-                foreach (var state in e.Result.States)
+                // 转为单纯形态
+                var states = ConvertLockStates(e.Result.States);
+                foreach (var state in states)
                 {
                     if (state.State == "open")
                         count++;
@@ -176,7 +227,31 @@ namespace dp2SSL
                                 PageShelf.TrySetMessage(null, text);
                             }
 
-                            if (result.NewState == "close")
+                            if (StringUtil.IsInList("open", result.NewState))
+                            {
+                                // 2020/11/21
+                                // 门收到打开信号后，停止等待动画
+                                result.Door.DecWaiting();
+
+                                /*
+                                // 添加一个表示开门动作的(状态变化)事项
+                                DoorStateTask.AppendList(new DoorStateTask.DoorStateChange
+                                {
+                                    Door = result.Door,
+                                    OldState = result.OldState,
+                                    NewState = "open",
+                                });
+                                DoorStateTask.ActivateTask();
+                                */
+
+                                // 语音提示
+                                {
+                                    App.CurrentApp.SpeakSequence($"{result.LockName} 打开。{GetOpenDoorSpeakText()}");
+                                    ClearOpenDoorSpeak();
+                                }
+                            }
+
+                            if (StringUtil.IsInList("close", result.NewState))
                             {
                                 // List<ActionInfo> actions = null;
                                 // 2019/12/15
@@ -188,20 +263,15 @@ namespace dp2SSL
                                 {
                                     Door = result.Door,
                                     OldState = result.OldState,
-                                    NewState = result.NewState,
+                                    NewState = "close",
                                 });
                                 DoorStateTask.ActivateTask();
-                            }
 
-                            processed.Add(result.Door);
-
-                            if (result.NewState == "open")
-                            {
-                                App.CurrentApp.SpeakSequence($"{result.LockName} 打开。{StringUtil.MakePathList(_openDoorSpeakList, ", ")}");
-                                _openDoorSpeakList.Clear();
-                            }
-                            else
+                                // 语音提示
                                 App.CurrentApp.SpeakSequence($"{result.LockName} 关闭");
+                            }
+
+                            // processed.Add(result.Door);
                         }
                     }
                 }
@@ -6047,7 +6117,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             return new NormalResult();
         }
 
-        // 为读者卡读卡器添加标签
+        // 为读者卡读卡器添加证卡
         public static NormalResult SimuAddPatronTag()
         {
             List<TagInfo> tags = new List<TagInfo>();
@@ -6070,6 +6140,47 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             return new NormalResult();
         }
 
+        // 为读者卡读卡器添加工作人员身份卡
+        public static NormalResult SimuAddWorkerTag()
+        {
+            List<TagInfo> tags = new List<TagInfo>();
+
+            // 构造工作人员卡
+            {
+                LogicChip chip = new LogicChip();
+
+                chip.NewElement(ElementOID.PII, $"~supervisor");
+                chip.NewElement(ElementOID.TypeOfUsage, "80");
+
+                var bytes = chip.GetBytes(4 * 20,
+4,
+GetBytesStyle.None,
+out string block_map);
+
+                var tag = new TagInfo
+                {
+                    UID = "12345678",
+                    ReaderName = ShelfData._patronReaderName,
+                    // AntennaID = (uint)door.Antenna,
+                    BlockSize = 4,
+                    MaxBlockCount = 28,
+                    Bytes = bytes
+                };
+                tags.Add(tag);
+            }
+
+            var result = RfidManager.SimuTagInfo("setTag",
+                tags,
+                $"protocol:{InventoryInfo.ISO15693}");
+            if (result.Value == -1)
+            {
+                App.SetError("simuReader", result.ErrorInfo);
+                return result;
+            }
+            App.SetError("simuReader", null);
+            return new NormalResult();
+        }
+
         // 模拟移走读者卡
         // result.Value:
         //      -1  出错
@@ -6082,7 +6193,8 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             foreach (var tag in NewTagList.Tags)
             {
                 if (tag.OneTag.Protocol == InventoryInfo.ISO14443A
-                    || tag.Type == "patron")
+                    || tag.Type == "patron" 
+                    || tag.OneTag.ReaderName == _patronReaderName)
                 {
                     // tags.Add(tag.OneTag.TagInfo);
                     tags.Add(new TagInfo { UID = tag.OneTag.UID });
