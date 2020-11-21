@@ -1187,6 +1187,8 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             {
                 using (var releaser = await _actionsLimit.EnterAsync())
                 {
+                    // oi_pii --> bookType string
+                    Hashtable bookTypeCache = new Hashtable();
 
                     // PII -> patron xml
                     Hashtable patron_table = new Hashtable();
@@ -1378,13 +1380,15 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                                 Action = "borrow",
                                 Operator = person,
                                 // TODO: 让 patron_xml 可以累积变化，这样可以大幅度提高速度
-                                ActionString = await BuildBorrowInfo(person.PatronBarcode,
-                                person.PatronInstitution,
-                                patron_xml,
-                                entity,
-                                borrowed_piis,
-                                returned_piis,
-                                special_piis), // borrowed_count++
+                                ActionString = await BuildBorrowInfo(
+                                    bookTypeCache,
+                                    person.PatronBarcode,
+                                    person.PatronInstitution,
+                                    patron_xml,
+                                    entity,
+                                    borrowed_piis,
+                                    returned_piis,
+                                    special_piis), // borrowed_count++
                             });
 
                             borrowed_piis.Add(entity.GetOiPii(true));
@@ -1491,7 +1495,9 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
         //      patron_xml  读者记录 XML。如果为 null，表示需要本函数自己去尝试获得读者记录
         //      delta_piis   尚未来得及保存到数据库的已借册的 PII 列表。注意里面的 PII 有可能是空字符串。PII 字符串是有“点”的格式
         //      returned_piis   尚未来得及保存到数据库的已还册的 PII 列表。PII 字符串里面有“点”
-        static async Task<string> BuildBorrowInfo(string patron_pii,
+        static async Task<string> BuildBorrowInfo(
+            Hashtable bookTypeCache,
+            string patron_pii,
             string patron_oi,
             string patron_xml,
             Entity entity,
@@ -1624,7 +1630,8 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                     // 计算已经借阅的册中和当前册类型相同的册数
                     foreach (string pii in piis)
                     {
-                        var book_type = await GetBookType(pii);
+                        // 此函数比较费时间
+                        string book_type = await GetBookType(bookTypeCache, pii);
                         debugInfo?.AppendLine($"计算在借册数过程: 获得 '{pii}' 的图书类型，返回 book_type='{book_type}'");
                         if (book_type == info_result.BookType)
                         {
@@ -1812,14 +1819,30 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
 
         // parameters:
         //      oi_pii  形态为 OI.PII
-        static async Task<string> GetBookType(string oi_pii)
+        static async Task<string> GetBookType(Hashtable bookTypeCache,
+            string oi_pii)
         {
+            // 先尝试从 cache 中找
+            if (bookTypeCache != null)
+            {
+                string bookType = bookTypeCache[oi_pii] as string;
+                if (bookType != null)
+                    return bookType;
+            }
+
             var result = await GetBookInfoAsync(oi_pii);
             if (result.Value == -1)
             {
                 WpfClientInfo.WriteErrorLog($"GetBookType() 用 '{oi_pii}' 获得图书类型返回出错 {result.ToString()}");
                 return null;
             }
+
+            // 加入 cache
+            if (bookTypeCache != null)
+            {
+                bookTypeCache[oi_pii] = result.BookType;
+            }
+
             return result.BookType;
         }
 
