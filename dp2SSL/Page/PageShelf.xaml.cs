@@ -39,8 +39,6 @@ using DigitalPlatform.Interfaces;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.LibraryClient.localhost;
-using Microsoft.VisualStudio.Shell.TableManager;
-using Microsoft.VisualStudio.TextManager.Interop;
 
 namespace dp2SSL
 {
@@ -330,7 +328,8 @@ namespace dp2SSL
                 App.CurrentApp.Speak(error);
                 MessageBox.Show(error);
             }
-            else
+
+            if (count > 0)
             {
                 App.CurrentApp.Speak($"成功移走 {count} 个标签");
             }
@@ -378,7 +377,9 @@ namespace dp2SSL
 
             // RfidManager.ListLocks += RfidManager_ListLocks;
             ShelfData.OpenCountChanged += CurrentApp_OpenCountChanged;
+#if REMOVED
             ShelfData.DoorStateChanged += ShelfData_DoorStateChanged;
+#endif
             //ShelfData.BookChanged += ShelfData_BookChanged;
 
             /*
@@ -593,6 +594,7 @@ namespace dp2SSL
 
         // object _syncRoot_save = new object();
 
+#if REMOVED
         // 门状态变化。从这里触发提交
 #pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
         private async void ShelfData_DoorStateChanged(object sender, DoorStateChangedEventArgs e)
@@ -690,6 +692,7 @@ namespace dp2SSL
             ShelfData.DoorMonitor.RemoveMessages(e.Door);
 #endif
         }
+#endif
 
         public static void TrySetMessage(string[] groups, string text)
         {
@@ -1014,7 +1017,7 @@ namespace dp2SSL
             if (e.Door.Waiting > 0)
             {
                 // 正在开门中，要放弃重复开门的动作
-                App.CurrentApp.Speak("正在打开，请稍等");   // 打开或者关闭都会造成这个状态
+                App.CurrentApp.Speak("正在处理中，无法打开");   // 打开或者关闭都会造成这个状态
                 return;
             }
 
@@ -1154,7 +1157,7 @@ namespace dp2SSL
                         */
                         {
                             await ShelfData.RefreshInventoryAsync(e.Door);
-                            await SaveDoorActions(e.Door, false);
+                            await DoorStateTask.SaveDoorActions(e.Door, false);
                         }
                     }
                     catch (Exception ex)
@@ -1228,7 +1231,7 @@ namespace dp2SSL
                                 WpfClientInfo.WriteInfoLog($"超时情况下，对门 {e.Door.Name} 补做一次 submit");
 
                                 await ShelfData.RefreshInventoryAsync(e.Door);
-                                await SaveDoorActions(e.Door, true);
+                                await DoorStateTask.SaveDoorActions(e.Door, true);
                                 await DoRequestAsync(ShelfData.PullActions());   // "silence"
                                 break;
                             }
@@ -1421,7 +1424,9 @@ namespace dp2SSL
 
             // RfidManager.ListLocks -= RfidManager_ListLocks;
             ShelfData.OpenCountChanged -= CurrentApp_OpenCountChanged;
+#if REMOVED
             ShelfData.DoorStateChanged -= ShelfData_DoorStateChanged;
+#endif
 
             if (_progressWindow != null)
                 _progressWindow.Close();
@@ -2442,6 +2447,9 @@ namespace dp2SSL
 
                 // 启动重试任务。此任务长期在后台运行
                 ShelfData.StartSyncTask();
+                // 2020/11/21
+                // 启动门状态处理任务。此任务长期在后台运行
+                DoorStateTask.StartTask();
             }
             catch (Exception ex)
             {
@@ -3777,59 +3785,6 @@ namespace dp2SSL
             return result;
         }
 
-        // 将指定门的暂存的信息保存为 Action。但并不立即提交
-        async Task SaveDoorActions(DoorItem door, bool clearOperator)
-        {
-            var result = await ShelfData.SaveActions((entity) =>
-            {
-                var results = DoorItem.FindDoors(ShelfData.Doors, entity.ReaderName, entity.Antenna);
-                // TODO: 如果遇到 results.Count > 1 是否抛出异常?
-                if (results.Count > 1)
-                {
-                    WpfClientInfo.WriteErrorLog($"读卡器名 '{entity.ReaderName}' 天线编号 {entity.Antenna} 匹配上 {results.Count} 个门");
-                    throw new Exception($"读卡器名 '{entity.ReaderName}' 天线编号 {entity.Antenna} 匹配上 {results.Count} 个门。请检查 shelf.xml 并修正配置此错误，确保只匹配一个门");
-                }
-
-                if (results.IndexOf(door) != -1)
-                {
-                    return door.Operator;
-                    // return GetOperator(entity);
-                }
-                return null;
-            });
-
-            if (result.Value == -1)
-            {
-                SetGlobalError("save_actions", $"SaveDoorActions() 出错: {result.ErrorInfo}");
-                TrySetMessage(null, $"SaveDoorActions() 出错: {result.ErrorInfo}。这是一个严重错误，请管理员及时介入处理");
-            }
-            else
-            {
-                SetGlobalError("save_actions", null);
-            }
-
-            // 2019/12/21
-            if (clearOperator == true && door.State == "close")
-                door.Operator = null; // 清掉门上的操作者名字
-
-            /*
-            // 发出点对点消息
-            if (result.Operations != null && result.Operations.Count > 0)
-            {
-                StringBuilder text = new StringBuilder();
-                text.AppendLine($"{result.Operations[0].Operator.GetDisplayString()}");
-                int i = 0;
-                foreach (var info in result.Operations)
-                {
-                    // TODO: 为啥 Entity.Title 为空
-                    text.AppendLine($"{i + 1}) {info.Operation} {SubmitDocument.ShortTitle(info.Entity.Title)} [{info.Entity.PII}] 架位:{info.ShelfNo}");
-                    i++;
-                }
-                TrySetMessage(text.ToString());
-            }
-            */
-        }
-
         // 将所有暂存信息保存为 Action，但并不立即提交
         async Task SaveAllActions()
         {
@@ -3908,7 +3863,7 @@ namespace dp2SSL
         // 向服务器提交 actions 中存储的全部出纳请求
         // parameters:
         //      clearPatron 操作完成后是否自动清除右侧的读者信息
-        async Task DoRequestAsync(List<ActionInfo> actions,
+        public async Task DoRequestAsync(List<ActionInfo> actions,
             string strStyle = "")
         {
             if (actions.Count == 0)

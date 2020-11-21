@@ -156,6 +156,7 @@ namespace dp2SSL
                         if (result.NewState != result.OldState
                             && string.IsNullOrEmpty(result.OldState) == false)
                         {
+                            /*
                             // 触发单独一个门被关闭的事件
                             // 注意此时 door 对象的 State 状态已经变化为新状态了
                             DoorStateChanged?.Invoke(null, new DoorStateChangedEventArgs
@@ -164,6 +165,33 @@ namespace dp2SSL
                                 OldState = result.OldState,
                                 NewState = result.NewState
                             });
+                            */
+
+                            {
+                                string text = "";
+                                if (result.NewState == "open")
+                                    text = $"门 '{result.Door.Name}' 被 {result.Door.Operator?.GetDisplayString()} 打开";
+                                else
+                                    text = $"门 '{result.Door.Name}' 被 {result.Door.Operator?.GetDisplayString()} 关上";
+                                PageShelf.TrySetMessage(null, text);
+                            }
+
+                            if (result.NewState == "close")
+                            {
+                                // List<ActionInfo> actions = null;
+                                // 2019/12/15
+                                // 补做一次 inventory，确保不会漏掉 RFID 变动信息
+                                //WpfClientInfo.WriteInfoLog($"++incWaiting() door '{e.Door.Name}' state changed");
+                                result.Door.IncWaiting();  // inventory 期间显示等待动画
+
+                                DoorStateTask.AppendList(new DoorStateTask.DoorStateChange
+                                {
+                                    Door = result.Door,
+                                    OldState = result.OldState,
+                                    NewState = result.NewState,
+                                });
+                                DoorStateTask.ActivateTask();
+                            }
 
                             processed.Add(result.Door);
 

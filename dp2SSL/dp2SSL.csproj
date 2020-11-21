@@ -520,6 +520,7 @@
     <Compile Include="Models\ResultsetContext.cs" />
     <Compile Include="Models\ShelfData.cs" />
     <Compile Include="Models\ShelfData_monitor.cs" />
+    <Compile Include="Models\DoorStateTask.cs" />
     <Compile Include="Models\ShelfData_sync.cs" />
     <Compile Include="Models\SoundMaker.cs" />
     <Compile Include="Models\SpeakList.cs" />
