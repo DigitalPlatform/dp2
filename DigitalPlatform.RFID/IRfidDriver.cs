@@ -47,7 +47,8 @@ uint new_password);
 
         GetLockStateResult GetShelfLockState(string lockName);
 
-        NormalResult OpenShelfLock(string lockName);
+        // 2020/11/23 增加 style 参数
+        NormalResult OpenShelfLock(string lockName, string style);
 
         NormalResult TurnShelfLamp(string lampName, string action);
 

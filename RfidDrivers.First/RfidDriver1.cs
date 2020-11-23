@@ -4863,9 +4863,11 @@ out string number);
         //                      其中卡编号部分可以是 "1" 也可以是 "1|2" 这样的形态
         //                      其中锁编号部分可以是 "1" 也可以是 "1|2|3|4" 这样的形态
         //                      如果缺乏卡编号和锁编号部分，缺乏的部分默认为 "1"
-        public NormalResult OpenShelfLock(string lockNameParam)
+        public NormalResult OpenShelfLock(string lockNameParam, string style)
         {
             var path = LockPath.Parse(lockNameParam);
+
+            var open_and_close = StringUtil.IsInList("open+close", style);
 
             /*
             ParseLockName(lockNameParam,
@@ -4894,14 +4896,23 @@ out string number);
                     {
                         foreach (var number in path.NumberList)
                         {
-                            // TODO: 对锁 path 加锁，和探测锁状态的语句组互斥
-
                             int addr = 1;
                             int index = 1;
                             if (string.IsNullOrEmpty(card) == false)
                                 Int32.TryParse(card, out addr);
                             if (string.IsNullOrEmpty(number) == false)
                                 Int32.TryParse(number, out index);
+
+                            var current_path = $"{current_lock.Name}.{addr}.{index}";
+
+                            // 2020//1//23
+                            if (open_and_close)
+                            {
+                                // 为了模拟开门后立即关门，这里加入开过门的痕迹，但并不真正开门
+                                _lockMemory.MemoryOpen(current_path);
+                                count++;
+                                continue;
+                            }
 
                             {
                                 int iret = RFIDLIB.miniLib_Lock.Mini_OpenDoor(current_lock.LockHandle,
@@ -4915,7 +4926,6 @@ out string number);
                                     };
                             }
 
-                            var current_path = $"{current_lock.Name}.{addr}.{index}";
                             // 2020/11/21
                             // 加入一个表示发生过开门的状态，让后继获得状态的 API 至少能返回一次打开状态
                             _lockMemory.MemoryOpen(current_path);
