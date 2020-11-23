@@ -12,6 +12,7 @@ using System.Windows;
 using System.Deployment.Application;
 using System.IO;
 using System.Reflection;
+using System.Windows.Navigation;
 
 using Newtonsoft.Json;
 using Microsoft.AspNet.SignalR.Client;
@@ -26,7 +27,6 @@ using DigitalPlatform.Text;
 using DigitalPlatform.MessageClient;
 using DigitalPlatform.SimpleMessageQueue;
 using DigitalPlatform.RFID;
-using System.Windows.Navigation;
 
 namespace dp2SSL
 {

@@ -99,23 +99,145 @@ namespace dp2SSL
         static bool _initialized = false;
 
         // 修改每日定时亮灯参数
-        public static NormalResult ChangePerdayTask(string time_range)
+        // -range:8:00-11:00 -weekday:*,-0,-6
+        // -range:8:00-11:00 -weekday:+1,+2,+3,+4,+5
+        public static NormalResult ChangePerdayTask(string param)
         {
+            string time_range = null;
+            string weekdays = null;
+
+            List<string> parameters = StringUtil.SplitList(param, " ");
+            foreach (string parameter in parameters)
+            {
+                string name = "";
+                string value = "";
+                if (parameter.StartsWith("-"))
+                {
+                    var parts = StringUtil.ParseTwoPart(parameter.Substring(1), ":");
+                    name = parts[0].ToLower();
+                    value = parts[1];
+                }
+                else
+                {
+                    name = "range";
+                    value = parameter;
+                }
+
+                if (name == "range")
+                    time_range = value;
+                else if (name == "weekday")
+                    weekdays = value;
+                else
+                {
+                    throw new Exception($"无法识别子参数名 '{name}'");
+                }
+            }
+
             // 每日亮灯时段
             WpfClientInfo.Config.Set("tasks", "lamp", time_range);
+            WpfClientInfo.Config.Set("tasks", "lamp_weekday", weekdays);
             return StartPerdayTask();
         }
 
         public static string GetPerdayTask()
         {
             // 每日亮灯时段
-            return WpfClientInfo.Config.Get("tasks", "lamp", null);
+            string time_range = WpfClientInfo.Config.Get("tasks", "lamp", null);
+            string weekdays = WpfClientInfo.Config.Get("tasks", "lamp_weekday", null);
+            List<string> results = new List<string>();
+            if (time_range != null)
+                results.Add(time_range);
+            if (weekdays != null)
+                results.Add(weekdays);
+            return StringUtil.MakePathList(results, " ");
         }
 
         static DateTime GetTodayTime(PerdayTime time)
         {
             DateTime now = DateTime.Now;
             return new DateTime(now.Year, now.Month, now.Day, time.Hour, time.Minute, 0);
+        }
+
+        /*
+        //
+        // 摘要:
+        //     表示星期日。
+        Sunday = 0,
+        //
+        // 摘要:
+        //     表示星期一。
+        Monday = 1,
+        //
+        // 摘要:
+        //     表示星期二。
+        Tuesday = 2,
+        //
+        // 摘要:
+        //     表示星期三。
+        Wednesday = 3,
+        //
+        // 摘要:
+        //     表示星期四。
+        Thursday = 4,
+        //
+        // 摘要:
+        //     表示星期五。
+        Friday = 5,
+        //
+        // 摘要:
+        //     表示星期六。
+        Saturday = 6
+        * */
+        // 将周内日期定义转换为一个描述应包含日期的集合
+        static List<DayOfWeek> ParseDayOfWeekDef(string weekdays)
+        {
+            List<DayOfWeek> results = new List<DayOfWeek>();
+            List<string> parts = StringUtil.SplitList(weekdays, ',');
+            foreach (string part in parts)
+            {
+                string s = part.Trim();
+                if (s == "*")
+                {
+                    // 星号代表一周内所有日子
+                    for (int i = 0; i < 7; i++)
+                    {
+                        results.Add((DayOfWeek)i);
+                    }
+                    continue;
+                }
+
+                char action = '+';
+                // 先分离加减号
+                if (s[0] == '+' || s[0] == '-')
+                {
+                    action = s[0];
+                    s = s.Substring(1);
+                }
+                DayOfWeek day;
+                if (s.Length == 1 && char.IsDigit(s[0]))
+                {
+                    if (int.TryParse(s, out int v) == false)
+                        throw new Exception($"'{s}' 是无法识别的周内日期名。应在 0-6 范围");
+
+                    day = (DayOfWeek)v;
+                }
+                else if (Enum.TryParse<DayOfWeek>(s, out day) == false)
+                    throw new Exception($"'{s}' 是无法识别的周内日期名");
+
+                if (action == '+')
+                {
+                    if (results.IndexOf(day) == -1)
+                        results.Add(day);
+                }
+                else
+                {
+                    // '-'
+                    if (results.IndexOf(day) != -1)
+                        results.Remove(day);
+                }
+            }
+
+            return results;
         }
 
         // 启动每日定时亮灯过程
@@ -132,6 +254,13 @@ namespace dp2SSL
 
             // 每日亮灯时段
             string time_range = WpfClientInfo.Config.Get("tasks", "lamp", null);
+            string weekday = WpfClientInfo.Config.Get("tasks", "lamp_weekday", null);
+
+            /*
+            // testing
+            string time_range = "1:00-9:00";
+            string weekday = "*,-0,-6"; // +1,+2,+3,+4,+5
+            */
 
             if (string.IsNullOrEmpty(time_range))
                 return new NormalResult();
@@ -148,7 +277,8 @@ namespace dp2SSL
                 DateTime current_end = GetTodayTime(end);
                 if (now >= current_start && now <= current_end)
                 {
-                    TurnBackLampOn();
+                    if (InWeekday() == true)
+                        TurnBackLampOn();
                 }
 
                 // 安排任务
@@ -156,7 +286,8 @@ namespace dp2SSL
                 JobManager.AddJob(
                     () =>
                     {
-                        TurnBackLampOn();
+                        if (InWeekday() == true)
+                            TurnBackLampOn();
                     },
                     s => s.ToRunEvery(1).Days().At(start.Hour, start.Minute)
                 );
@@ -164,9 +295,10 @@ namespace dp2SSL
                 JobManager.AddJob(
                     () =>
                     {
-                        TurnBackLampOff();
+                        if (InWeekday() == true)
+                            TurnBackLampOff();
                     },
-                    s => s.ToRunEvery(1).Days().At(end.Hour, end.Minute)
+                    s => s.ToRunEvery(0).Days().At(end.Hour, end.Minute)
                 );
 
                 /*
@@ -183,6 +315,18 @@ namespace dp2SSL
                     Value = -1,
                     ErrorInfo = $"解析每日亮灯时间范围字符串时发现错误: { ex.Message}"
                 };
+            }
+
+            // 检查当前日期是否在允许之列
+            bool InWeekday()
+            {
+                if (string.IsNullOrEmpty(weekday))
+                    return true;
+                DateTime now = DateTime.Now;
+                var days = ParseDayOfWeekDef(weekday);
+                if (days.IndexOf(now.DayOfWeek) == -1)
+                    return false;
+                return true;
             }
         }
     }
