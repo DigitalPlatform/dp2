@@ -79,6 +79,15 @@ namespace dp2Circulation
                     new_itemdom.LoadXml(new_xml);
 
                     item.TargetLocation = DomUtil.GetElementText(new_itemdom.DocumentElement, "location");
+
+                    // 2020/11/23
+                    item.SourceCurrentLocation = DomUtil.GetElementText(old_itemdom.DocumentElement, "currentLocation");
+                    item.TargetCurrentLocation = DomUtil.GetElementText(new_itemdom.DocumentElement, "currentLocation");
+
+                    // 2020/11/23
+                    item.SourceShelfNo = DomUtil.GetElementText(old_itemdom.DocumentElement, "shelfNo");
+                    item.TargetShelfNo = DomUtil.GetElementText(new_itemdom.DocumentElement, "shelfNo");
+
                     item.Barcode = DomUtil.GetElementText(new_itemdom.DocumentElement, "barcode");
                     item.RecPath = ((XmlElement)node).GetAttribute("recPath");
                     item.NewXml = new_xml;
@@ -356,6 +365,9 @@ dlg.UiState);
             int dup_count = 0;      // 记录路径发生重复的行数
             int notchange_count = 0;    // 馆藏地没有发生改变的行数
 
+            // changed column name --> changed count
+            Hashtable changed_table = new Hashtable();
+
             int nNo = 1;
             foreach (var group in groups)
             {
@@ -390,13 +402,27 @@ dlg.UiState);
                         nColIndex - 1,
                         nRowIndex - 1);
 
-                    OutputTransferColumns(
+                    var output_result = OutputTransferColumns(
                         nNo,
                         item,
                         sheet,
                         nColIndex - 1,
                         Order.ColumnProperty.GetTypeList(biblio_title_list, false),
                         nRowIndex - 1);
+
+                    // 累积发生变化的行数
+                    if (output_result.ChangedColumnNames != null)
+                    {
+                        foreach (var name in output_result.ChangedColumnNames)
+                        {
+                            int value = 0;
+                            if (changed_table.ContainsKey(name))
+                                value = (int)changed_table[name];
+
+                            value++;
+                            changed_table[name] = value;
+                        }
+                    }
 
                     /*
                     nColIndex += biblio_title_list.Count;
@@ -468,6 +494,45 @@ dlg.UiState);
                 range.Style.Alignment.WrapText = true;
                 range.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Left;
                 nRowIndex++;
+            }
+
+            // 变化的行统计表
+            {
+                string[] target_names = new string[] {
+                "log_targetLocation",
+                "log_targetCurrentLocation",
+                "log_targetShelfNo",
+            };
+                string[] target_captions = new string[] {
+                "永久馆藏地",
+                "当前馆藏地",
+                "架号",
+            };
+                List<string> changes = new List<string>();
+                int c = 0;
+                foreach (var name in target_names)
+                {
+                    if (changed_table.Contains(name) == false)
+                        continue;
+                    int value = (int)changed_table[name];
+                    changes.Add($"{target_captions[c]}: {value}");
+                    c++;
+                }
+
+                if (changes.Count > 0)
+                {
+                    var range = sheet.Range(nRowIndex, nColIndex, nRowIndex, nColIndex + headers.Count - 1);
+                    range.Merge();
+
+                    range.Row(1).WorksheetRow().Height = (changes.Count + 1) * range.Row(1).WorksheetRow().Height;
+                    range.Style.Fill.BackgroundColor = XLColor.DarkGray;
+                    range.Style.Font.FontColor = XLColor.White;
+
+                    range.SetValue($"源和目标对比发生变化的行数：\r\n{StringUtil.MakePathList(changes, "\r\n")}");
+                    range.Style.Alignment.WrapText = true;
+                    range.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Left;
+                    nRowIndex++;
+                }
             }
 
             // TODO: 设置 header 和 footer
@@ -574,14 +639,26 @@ dlg.UiState);
             return (string)fi.GetValue(obj);
         }
 
+        class ValueAndCell
+        {
+            public string Name { get; set; }
+            public string Value { get; set; }
+            public IXLCell Cell { get; set; }
+        }
+
+        class OutputTransferColumnResult : NormalResult
+        {
+            public List<string> ChangedColumnNames { get; set; }
+        }
+
         // 输出一行日志或册信息
-        static void OutputTransferColumns(
+        static OutputTransferColumnResult OutputTransferColumns(
             int no,
             TransferItem transfer_item,
-    IXLWorksheet sheet,
-    int nStartColIndex,     // 从 0 开始计数
-    List<string> col_list,
-    int nRowIndex)  // 从 0 开始计数。
+            IXLWorksheet sheet,
+            int nStartColIndex,     // 从 0 开始计数
+            List<string> col_list,
+            int nRowIndex)  // 从 0 开始计数。
         {
             string strError = "";
             XmlDocument dom = new XmlDocument();
@@ -595,6 +672,9 @@ dlg.UiState);
                 strError = $"!error: 装载册记录 XML 到 DOM 时出错: {ex.Message}";
                 dom.LoadXml("<root />");
             }
+
+            // 需要对比的值
+            Hashtable table = new Hashtable();
 
             List<IXLCell> cells = new List<IXLCell>();
 
@@ -632,8 +712,9 @@ dlg.UiState);
                 }
 
 
+                IXLCell cell = null;
                 {
-                    IXLCell cell = sheet.Cell(nRowIndex + 1, nStartColIndex + (i++) + 1).SetValue(strValue);
+                    cell = sheet.Cell(nRowIndex + 1, nStartColIndex + (i++) + 1).SetValue(strValue);
 
                     // 统计最大字符数
                     // DigitalPlatform.dp2.Statis.ClosedXmlUtil.SetMaxChars(column_max_chars, cell.Address.ColumnNumber - 1, strValue?.Length);
@@ -647,7 +728,44 @@ dlg.UiState);
                         cell.Style.Font.SetFontColor(XLColor.White);
                     }
                 }
+
+                if (col.Contains("log_source") || col.Contains("log_target"))
+                    table[col] = new ValueAndCell
+                    {
+                        Name = col,
+                        Value = strValue,
+                        Cell = cell
+                    };
             }
+
+            List<string> changed_column_names = new List<string>();
+
+            string[] source_names = new string[] {
+                "log_sourceLocation",
+                "log_sourceCurrentLocation",
+                "log_sourceShelfNo",
+            };
+
+            // 对比 source 和 target，如果有变化则显示为粗体、斜体
+            foreach (var source_name in source_names)
+            {
+                ValueAndCell source_item = table[source_name] as ValueAndCell;
+                if (source_item == null)
+                    continue;
+                string target_name = source_name.Replace("source", "target");
+                ValueAndCell target_item = table[target_name] as ValueAndCell;
+                if (target_item == null)
+                    continue;
+                if (source_item.Value != target_item.Value)
+                {
+                    changed_column_names.Add(target_item.Name);
+
+                    target_item.Cell.Style.Font.Italic = true;
+                    target_item.Cell.Style.Font.Bold = true;
+                }
+            }
+
+            return new OutputTransferColumnResult { ChangedColumnNames = changed_column_names };
         }
 
 
@@ -794,8 +912,15 @@ dlg.UiState);
                     "biblio_publisher -- 出版者",
                     "biblio_publishtime -- 出版时间",
 
-                    "log_sourceLocation -- 源馆藏地",
-                    "log_targetLocation -- 目标馆藏地",
+                    "log_sourceCurrentLocation -- 源当前馆藏地",
+                    "log_targetCurrentLocation -- 目标当前馆藏地",
+
+                    "log_sourceLocation -- 源永久馆藏地",
+                    "log_targetLocation -- 目标永久馆藏地",
+
+                    "log_sourceShelfNo -- 源架位",
+                    "log_targetShelfNo -- 目标架位",
+
                     "log_batchNo -- 批次号",
                     "log_operTime -- 操作时间",
                     "log_operator -- 操作者",
@@ -813,8 +938,15 @@ dlg.UiState);
                     // TransferItem 成员
                     "log_no -- 序号",
                     "log_barcode -- 册条码号",
-                    "log_sourceLocation -- 源馆藏地",
-                    "log_targetLocation -- 目标馆藏地",
+                    "log_sourceLocation -- 源永久馆藏地",
+                    "log_targetLocation -- 目标永久馆藏地",
+
+                    "log_sourceCurrentLocation -- 源当前馆藏地",
+                    "log_targetCurrentLocation -- 目标当前馆藏地",
+
+                    "log_sourceShelfNo -- 源架位",
+                    "log_targetShelfNo -- 目标架位",
+
                     "log_batchNo -- 批次号",
                     "log_operTime -- 操作时间",
                     "log_operator -- 操作者",

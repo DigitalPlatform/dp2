@@ -6046,9 +6046,25 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             }
         }
 
-#if AUTO_TEST
 
         #region 模拟标签测试
+
+        // 将 RfidCenter 切换到真实标签模式
+        public static NormalResult RestoreRealTags()
+        {
+            var result = RfidManager.SimuTagInfo("switchToRealMode", null, "");
+            if (result.Value == -1)
+            {
+                App.SetError("simuReader", result.ErrorInfo);
+                return result;
+            }
+
+            App.SetError("simuReader", null);
+            return new NormalResult();
+        }
+
+#if AUTO_TEST
+
 
         const int TAG_COUNT_PER_DOOR = 30;   // 30
 
@@ -6314,9 +6330,9 @@ out string block_map);
             return new NormalResult();
         }
         */
+#endif
         #endregion
 
-#endif
 
         /*
         static Operator OperatorFromRequest(RequestItem request)

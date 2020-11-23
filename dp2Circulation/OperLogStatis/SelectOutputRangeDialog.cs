@@ -187,6 +187,12 @@ namespace dp2Circulation
         // 目标 location
         public string TargetLocation { get; set; }
 
+        public string SourceCurrentLocation { get; set; }
+        public string TargetCurrentLocation { get; set; }
+
+        public string SourceShelfNo { get; set; }
+        public string TargetShelfNo { get; set; }
+
         public DateTime OperTime { get; set; }
         public string Operator { get; set; }
 

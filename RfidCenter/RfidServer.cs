@@ -84,7 +84,7 @@ namespace RfidCenter
             //                      其中卡编号部分可以是 "1" 也可以是 "1|2" 这样的形态
             //                      其中锁编号部分可以是 "1" 也可以是 "1|2|3|4" 这样的形态
             //                      如果缺乏卡编号和锁编号部分，缺乏的部分默认为 "1"
-            return Program.Rfid.OpenShelfLock(lockName);
+            return Program.Rfid.OpenShelfLock(lockName, "");
         }
 
         // 新版本
@@ -98,7 +98,7 @@ namespace RfidCenter
             //                      其中卡编号部分可以是 "1" 也可以是 "1|2" 这样的形态
             //                      其中锁编号部分可以是 "1" 也可以是 "1|2|3|4" 这样的形态
             //                      如果缺乏卡编号和锁编号部分，缺乏的部分默认为 "1"
-            return Program.Rfid.OpenShelfLock(lockName);
+            return Program.Rfid.OpenShelfLock(lockName, style);
         }
 
         // 模拟关门
@@ -1049,6 +1049,27 @@ new_password);
             List<TagInfo> tags,
             string style)
         {
+            if (action == "switchToRealMode")
+            {
+                try
+                {
+                    // 退出模拟读卡器状态
+                    Program.MainForm.InSimuReader = false;
+
+                    // 也要退出模拟锁状态
+                    Program.MainForm.InSimuLock = false;
+                    return new NormalResult();
+                }
+                catch (Exception ex)
+                {
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"switchToSimuMode 出现异常: {ex.Message}"
+                    };
+                }
+            }
+
             if (action == "switchToSimuMode")
             {
                 try

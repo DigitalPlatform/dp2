@@ -417,6 +417,8 @@ namespace dp2SSL
 
 #if AUTO_TEST
                 ShelfData.InitialSimuTags();
+#else
+                ShelfData.RestoreRealTags();
 #endif
             }
 

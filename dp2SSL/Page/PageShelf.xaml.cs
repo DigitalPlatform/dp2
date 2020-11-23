@@ -71,9 +71,7 @@ namespace dp2SSL
             this._patron.PropertyChanged += _patron_PropertyChanged;
 
             this.doorControl.OpenDoor += DoorControl_OpenDoor;
-#if AUTO_TEST
             this.doorControl.ContextMenuOpen111 += DoorControl_ContextMenuOpen111;
-#endif
 
             App.CurrentApp.PropertyChanged += CurrentApp_PropertyChanged;
 
@@ -81,8 +79,6 @@ namespace dp2SSL
 
             // this.error.Text = "test";
         }
-
-#if AUTO_TEST
 
         private void DoorControl_ContextMenuOpen111(object sender, DoorContextMenuArgs e)
         {
@@ -94,12 +90,14 @@ namespace dp2SSL
         }
 
 
-#region 门控件上的右鼠标键上下文菜单
+        #region 门控件上的右鼠标键上下文菜单
 
         ContextMenu BuildMenu(DoorItem door)
         {
             ContextMenu theMenu = new ContextMenu();
             theMenu.IsOpen = true;
+
+#if AUTO_TEST
             {
                 MenuItem item = new MenuItem();
                 item.Background = new SolidColorBrush(Colors.DarkRed);
@@ -116,20 +114,6 @@ namespace dp2SSL
                 item.Tag = door;
                 item.Click += SimuCloseDoor_Click;
                 theMenu.Items.Add(item);
-            }
-
-            {
-                MenuItem item = new MenuItem();
-                item.Header = $"特殊测试 {door.Name}";
-                theMenu.Items.Add(item);
-
-                {
-                    MenuItem subitem = new MenuItem();
-                    subitem.Header = $"强制开门 {door.Name} 并立即关门";
-                    subitem.Tag = door;
-                    subitem.Click += SimuOpenAndClose_Click;
-                    item.Items.Add(subitem);
-                }
             }
 
             // 分隔行
@@ -206,6 +190,20 @@ namespace dp2SSL
                 item.Click += SimuAddRemovedTags_Click;
                 theMenu.Items.Add(item);
             }
+#endif
+            {
+                MenuItem item = new MenuItem();
+                item.Header = $"特殊测试 {door.Name}";
+                theMenu.Items.Add(item);
+
+                {
+                    MenuItem subitem = new MenuItem();
+                    subitem.Header = $"强制开门 {door.Name} 并立即关门";
+                    subitem.Tag = door;
+                    subitem.Click += SimuOpenAndClose_Click;
+                    item.Items.Add(subitem);
+                }
+            }
 
             return theMenu;
         }
@@ -225,6 +223,7 @@ namespace dp2SSL
             DoorControl_OpenDoor(sender, e1);
         }
 
+#if AUTO_TEST
         // 动态更新菜单文字内容
         private void MenuItem_addReomved_Loaded(object sender, RoutedEventArgs e)
         {
@@ -401,9 +400,9 @@ namespace dp2SSL
             _removed_tags.Clear();
         }
 
-#endregion
-
 #endif
+
+        #endregion
 
         // parameters:
         //      mode    空字符串或者“initial”
@@ -3517,7 +3516,7 @@ namespace dp2SSL
             }
         }
 
-#region patron 分类报错机制
+        #region patron 分类报错机制
 
         // 错误类别 --> 错误字符串
         // 错误类别有：rfid fingerprint getreaderinfo
@@ -3537,7 +3536,7 @@ namespace dp2SSL
             }
         }
 
-#endregion
+        #endregion
 
         bool _visiblityChanged = false;
 
@@ -4235,7 +4234,7 @@ namespace dp2SSL
             return text.ToString();
         }
 
-#region 延迟清除读者信息
+        #region 延迟清除读者信息
 
         DelayAction _delayClearPatronTask = null;
 
@@ -4296,9 +4295,9 @@ namespace dp2SSL
             }
         }
 
-#endregion
+        #endregion
 
-#region 模拟柜门灯亮灭
+        #region 模拟柜门灯亮灭
 
         public void SimulateLamp(bool on)
         {
@@ -4311,9 +4310,9 @@ namespace dp2SSL
             }));
         }
 
-#endregion
+        #endregion
 
-#region 人脸识别功能
+        #region 人脸识别功能
 
         bool _stopVideo = false;
 
@@ -4552,7 +4551,7 @@ namespace dp2SSL
             }
         }
 
-#endregion
+        #endregion
 
         private void ClearPatron_Click(object sender, RoutedEventArgs e)
         {
@@ -4671,7 +4670,7 @@ namespace dp2SSL
 
 #if REMOVED
 
-#region 绑定和解绑读者功能
+        #region 绑定和解绑读者功能
 
 #pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
         private async void bindPatronCard_Click(object sender, RoutedEventArgs e)
@@ -4882,7 +4881,7 @@ uid);
             return new NormalResult { Value = 0 };
         }
 
-#endregion
+        #endregion
 
 #endif
     }

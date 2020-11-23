@@ -268,7 +268,7 @@ TaskScheduler.Default);
         }
 
         // 从打开门开始多少时间开始警告关门
-        static TimeSpan _warningDoorLength = TimeSpan.FromSeconds(15);  // 15
+        static TimeSpan _warningDoorLength = TimeSpan.FromSeconds(20);  // 15
         static DateTime _lastWarningTime;
 
         static void WarningCloseDoor()
@@ -276,7 +276,7 @@ TaskScheduler.Default);
             var now = DateTime.Now;
 
             // 控制进入本函数的频率
-            if (now - _lastWarningTime < TimeSpan.FromSeconds(10))  // 10
+            if (now - _lastWarningTime < TimeSpan.FromSeconds(15))  // 10
                 return;
 
             // 2020/11/20
@@ -297,7 +297,15 @@ TaskScheduler.Default);
             }
 
             if (doors.Count > 0)
-                App.CurrentApp.SpeakSequence($"不要忘记关门 {StringUtil.MakePathList(doors, ",")}");
+                App.CurrentApp.SpeakSequence($"不要忘记关门 {GetDoorNameSpeakText(doors)}");
+        }
+
+        // 获得一个描述若干门名字的语句
+        public static string GetDoorNameSpeakText(List<string> names)
+        {
+            if (names.Count > 2)
+                return $"{names.Count} 个门";
+            return StringUtil.MakePathList(names, ", ");
         }
 
         #endregion
