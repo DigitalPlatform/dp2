@@ -487,6 +487,10 @@ out Reader reader);
                     return result1;
 
 #endif
+                    // 2020/11/24
+                    // 模拟时间耗费。假定一个标签耗费 100 毫秒
+                    Thread.Sleep(100);
+
                     return new GetTagInfoResult { TagInfo = tagInfo };
                 }
                 finally
@@ -952,6 +956,12 @@ out Reader reader);
                 }
             }
 
+            // 2020/11/24
+            // 模拟时间耗费。假定 100 毫秒一个标签
+            if (results.Count > 0)
+            {
+                Thread.Sleep(100 * results.Count);
+            }
             return results;
         }
 

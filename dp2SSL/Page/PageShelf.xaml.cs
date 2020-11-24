@@ -1905,7 +1905,7 @@ namespace dp2SSL
             */
 
             // 2020/9/25
-            using (var releaser = await ShelfData._actionsLimit.EnterAsync())
+            // using (var releaser = await ShelfData._actionsLimit.EnterAsync())
             {
 
                 // "initial" 模式下，在读者证读卡器上扫 ISO15693 的标签可以查看图书内容

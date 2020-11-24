@@ -33,7 +33,7 @@ namespace DigitalPlatform.RFID
         public static void AssertTagInfo()
         {
             int i = 0;
-            foreach(var tag in Tags)
+            foreach (var tag in Tags)
             {
                 Debug.Assert(tag.OneTag.TagInfo != null, $"i={i} tag={tag.ToString()}");
                 i++;
@@ -234,7 +234,7 @@ namespace DigitalPlatform.RFID
 
             // 交叉运算
             // 注意对那些在 readerNameList 以外的标签不要当作 removed 处理
-            foreach (TagAndData book in _tags)
+            foreach (TagAndData book in Tags/*_tags*/)
             {
                 if (InRange(book.OneTag, readerNameList) == false)
                     continue;
@@ -270,7 +270,10 @@ namespace DigitalPlatform.RFID
                 notifyChanged?.Invoke(new_books, changed_books, remove_books);
 
             List<TagAndData> news = new List<TagAndData>();
-            news.AddRange(_tags);
+            lock (_sync_tags)
+            {
+                news.AddRange(_tags);
+            }
 
             new_books = new List<TagAndData>();
             remove_books = new List<TagAndData>();
