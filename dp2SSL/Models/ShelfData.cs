@@ -1168,7 +1168,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
 
         // 2020/9/24
         // 限制 actions 操作，同一时刻只能进行一轮次操作
-        internal static AsyncSemaphore _actionsLimit = new AsyncSemaphore(1);
+        // internal static AsyncSemaphore _actionsLimit = new AsyncSemaphore(1);
 
         public class SaveActionResult : NormalResult
         {
@@ -1186,7 +1186,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             // List<OperationInfo> infos = new List<OperationInfo>();
             try
             {
-                using (var releaser = await _actionsLimit.EnterAsync())
+                // using (var releaser = await _actionsLimit.EnterAsync())
                 {
                     // oi_pii --> bookType string
                     Hashtable bookTypeCache = new Hashtable();
