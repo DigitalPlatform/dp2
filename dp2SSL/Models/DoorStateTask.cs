@@ -123,7 +123,7 @@ TaskScheduler.Default);
                     finally
                     {
                         state.Door.DecWaiting();
-                        //WpfClientInfo.WriteInfoLog($"--decWaiting() door '{e.Door.Name}' state changed");
+                        WpfClientInfo.WriteInfoLog($"--decWaiting() door '{state.Door.Name}' in ProcessingAsync()");
                     }
 
 

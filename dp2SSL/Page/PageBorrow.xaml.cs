@@ -279,7 +279,10 @@ namespace dp2SSL
             {
                 // 身份读卡器竖向放置，才有固定读者信息的必要
                 if (App.PatronReaderVertical)
+                {
+                    // TODO: 这里可以提供一个定制特性的点位，让用户自定义是否出现固定按钮
                     fixAndClear.Visibility = Visibility.Visible;
+                }
                 else
                     fixAndClear.Visibility = Visibility.Collapsed;
             }));
@@ -478,14 +481,23 @@ namespace dp2SSL
                 if (_entities.Count == 0
         && changed == true  // 限定为，当数量减少到 0 这一次，才进行清除
         && (_patron.IsFingerprintSource || App.PatronReaderVertical == true))
+                {
                     PatronClear(true);
+                }
 
                 // 2019/7/1
                 // 当读卡器上的图书全部拿走时候，自动关闭残留的模式对话框
                 if (_entities.Count == 0
     && changed == true  // 限定为，当数量减少到 0 这一次，才进行清除
     )
+                {
                     CloseDialogs();
+
+                    // 自动返回菜单页面
+                    if (App.AutoBackMenuPage 
+                        && (_patron.IsFingerprintSource || App.PatronReaderVertical == true || TagList.Patrons.Count == 0))
+                        TryBackMenuPage();
+                }
 
                 // 当图书全部被移走时，如果身份读卡器横向放置，需要延时提醒不要忘记拿走读者卡
                 if (_entities.Count == 0 && changed == true
@@ -590,6 +602,7 @@ namespace dp2SSL
             }));
         }
 
+        static int _prev_patron_count = 0;
         // ReaderWriterLockSlim _lock_refreshPatrons = new ReaderWriterLockSlim();
 
         // TODO: 要和以前比对，读者信息是否发生了变化。如果没有变化就不要刷新界面了
@@ -647,7 +660,12 @@ namespace dp2SSL
                         {
                             // 2019/12/8
                             if (App.PatronReaderVertical == false)
+                            {
                                 PatronClear();
+                                // 自动返回菜单页面
+                                if (App.AutoBackMenuPage && _entities.Count == 0 && _prev_patron_count > 0)
+                                    TryBackMenuPage();
+                            }
 
                             SetPatronError("rfid_multi", "");   // 2019/5/20
                         }
@@ -664,6 +682,7 @@ namespace dp2SSL
             finally
             {
                 //_lock_refreshPatrons.ExitWriteLock();
+                _prev_patron_count = TagList.Patrons.Count;
             }
         }
 
@@ -1347,7 +1366,7 @@ namespace dp2SSL
             {
                 SetPatronError("fingerprint", $"指纹中心出错: {result.ErrorInfo}, 错误码: {result.ErrorCode}");
                 if (_patron.IsFingerprintSource || App.PatronReaderVertical == true)
-                    PatronClear();    // 只有当面板上的读者信息来源是指纹仪时(或者 RFID 读者卡配置了不持久特性)，才清除面板上的读者信息
+                    PatronClear();    // 只有当面板上的读者信息来源是指纹仪时(或者身份读卡器竖放)，才清除面板上的读者信息
                 return;
             }
             else
@@ -2534,6 +2553,24 @@ out string strError);
         private void GoHome_Click(object sender, RoutedEventArgs e)
         {
             this.NavigationService.Navigate(PageMenu.MenuPage);
+        }
+
+        void TryBackMenuPage()
+        {
+            _ = Task.Run(async ()=> {
+                try
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(2));
+                    App.Invoke(new Action(() =>
+                    {
+                        this.NavigationService.Navigate(PageMenu.MenuPage);
+                    }));
+                }
+                catch
+                {
+
+                }
+            });
         }
 
         #region patron 分类报错机制

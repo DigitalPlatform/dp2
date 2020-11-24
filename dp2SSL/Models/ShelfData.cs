@@ -232,6 +232,7 @@ namespace dp2SSL
                                 // 2020/11/21
                                 // 门收到打开信号后，停止等待动画
                                 result.Door.DecWaiting();
+                                WpfClientInfo.WriteInfoLog($"--decWaiting() door '{result.Door.Name}' in _listLocks()");
 
                                 /*
                                 // 添加一个表示开门动作的(状态变化)事项
@@ -256,7 +257,7 @@ namespace dp2SSL
                                 // List<ActionInfo> actions = null;
                                 // 2019/12/15
                                 // 补做一次 inventory，确保不会漏掉 RFID 变动信息
-                                //WpfClientInfo.WriteInfoLog($"++incWaiting() door '{e.Door.Name}' state changed");
+                                WpfClientInfo.WriteInfoLog($"++incWaiting() door '{result.Door.Name}' in _listLocks()");
                                 result.Door.IncWaiting();  // inventory 期间显示等待动画
 
                                 DoorStateTask.AppendList(new DoorStateTask.DoorStateChange

@@ -1181,6 +1181,15 @@ namespace dp2SSL
             }
         }
 
+        // 自动返回菜单页面
+        public static bool AutoBackMenuPage
+        {
+            get
+            {
+                return (bool)WpfClientInfo.Config?.GetBoolean("ssl_operation", "auto_back_menu_page", false);
+            }
+        }
+
         /*
         public static bool PatronInfoDelayClear
         {

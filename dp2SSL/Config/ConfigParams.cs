@@ -261,6 +261,26 @@ Description = "RFID读者卡读卡器是否竖向放置"
             }
         }
 
+
+        // 默认值 false
+        [Display(
+Order = 8,
+Name = "立即自动返回菜单页面",
+Description = "借书还书操作完成后是否立即自动返回菜单页面"
+)]
+        [Category("自助借还操作风格")]
+        public bool AutoBackMenuPage
+        {
+            get
+            {
+                return _config.GetBoolean("ssl_operation", "auto_back_menu_page", false);
+            }
+            set
+            {
+                _config.SetBoolean("ssl_operation", "auto_back_menu_page", value);
+            }
+        }
+
         /*
         // 默认值 false
         [Display(
