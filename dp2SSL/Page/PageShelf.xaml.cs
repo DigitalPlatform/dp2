@@ -191,6 +191,18 @@ namespace dp2SSL
                 theMenu.Items.Add(item);
             }
 #endif
+
+            {
+                MenuItem item = new MenuItem();
+                item.Background = new SolidColorBrush(Colors.DarkRed);
+                item.Foreground = new SolidColorBrush(Colors.White);
+
+                item.Header = $"延时触发开门 {door.Name}";
+                item.Tag = door;
+                item.Click += DelayOpenLock_Click;
+                theMenu.Items.Add(item);
+            }
+
             {
                 MenuItem item = new MenuItem();
                 item.Header = $"特殊测试 {door.Name}";
@@ -206,6 +218,29 @@ namespace dp2SSL
             }
 
             return theMenu;
+        }
+
+        // 延迟触发开门。可方便“一开门就立刻关闭”测试
+        private void DelayOpenLock_Click(object sender, RoutedEventArgs e)
+        {
+            _ = Task.Run(async () =>
+            {
+                // TODO: 最好倒计时
+                await Task.Delay(TimeSpan.FromSeconds(5));
+
+                App.Invoke(new Action(() =>
+                {
+                    var door = (sender as MenuItem).Tag as DoorItem;
+
+                    // 模拟按钮空白处触发
+                    var e1 = new OpenDoorEventArgs
+                    {
+                        Door = door,
+                        ButtonName = null,
+                    };
+                    DoorControl_OpenDoor(sender, e1);
+                }));
+            });
         }
 
         // 模拟开门并立即关门
@@ -1180,7 +1215,8 @@ namespace dp2SSL
             }));
 #endif
             bool succeed = false;
-            //WpfClientInfo.WriteInfoLog($"++incWaiting() door '{e.Door.Name}' open door");
+
+            WpfClientInfo.WriteInfoLog($"++incWaiting() door '{e.Door.Name}' open door");
             e.Door.IncWaiting();
 
             try
@@ -1245,6 +1281,7 @@ namespace dp2SSL
                 var result = RfidManager.OpenShelfLock(e.Door.LockPath, style);
                 if (result.Value == -1)
                 {
+                    WpfClientInfo.WriteErrorLog($"OpenShelfLock() error: {result.ErrorInfo}");
                     //MessageBox.Show(result.ErrorInfo);
                     DisplayError(ref progress, "开门", result.ErrorInfo);
                     e.Door.Operator = null;
@@ -1324,7 +1361,7 @@ namespace dp2SSL
                 if (succeed == false)
                 {
                     e.Door.DecWaiting();
-                    //WpfClientInfo.WriteInfoLog($"--decWaiting() door '{e.Door.Name}' on cancel");
+                    WpfClientInfo.WriteInfoLog($"--decWaiting() door '{e.Door.Name}' on _OpenDoor() cancel");
                 }
             }
         }

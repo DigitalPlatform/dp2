@@ -1,4 +1,4 @@
-﻿#define VERIFY_OPENDOOR // 开门命令后立即追加一个检查门状态的命令，看看门是否是打开状态
+﻿// #define VERIFY_OPENDOOR // 开门命令后立即追加一个检查门状态的命令，看看门是否是打开状态
 
 using System;
 using System.Collections;
@@ -4929,6 +4929,8 @@ out string number);
                             // 2020/11/21
                             // 加入一个表示发生过开门的状态，让后继获得状态的 API 至少能返回一次打开状态
                             _lockMemory.MemoryOpen(current_path);
+
+                            /* // 注：如果开门后非常短瞬间关门，那么这里也可能会错过开门状态。所以这一段验证代码应被废止不用
 #if VERIFY_OPENDOOR
                             // 验证：RS232 锁一旦打开后马上调用获得其状态，应该是打开状态
                             {
@@ -4946,6 +4948,9 @@ out string number);
                                     };
                             }
 #endif
+                            */
+
+
                             // 2020/10/23
                             _lockMemory.Set(/*$"{current_lock.Name}.{addr}.{index}"*/
                                 current_path, "open");
