@@ -19,7 +19,8 @@ namespace UnitTestRFID
         [TestMethod]
         public void Test_add_1()
         {
-            NewTagList.Clear();
+            // NewTagList.Clear();
+            NewTagList newTagList = new NewTagList();
 
             List<OneTag> tag_list = new List<OneTag>();
 
@@ -32,7 +33,7 @@ namespace UnitTestRFID
 
             List<TypeAndError> errors = new List<TypeAndError>();
 
-            NewTagList.Refresh(
+            newTagList.Refresh(
                 "*",
                 tag_list,
                 (readerName, uid, antennaID) =>
@@ -69,7 +70,7 @@ namespace UnitTestRFID
             Assert.AreEqual(0, changed_results.Count);
             Assert.AreEqual(0, removed_results.Count);
 
-            Assert.AreEqual(1, NewTagList.Tags.Count);
+            Assert.AreEqual(1, newTagList.Tags.Count);
         }
 
         // 测试添加一个标签到空列表中
@@ -77,7 +78,7 @@ namespace UnitTestRFID
         [TestMethod]
         public void Test_add_2()
         {
-            NewTagList.Clear();
+            NewTagList newTagList = new NewTagList();
 
             List<OneTag> tag_list = new List<OneTag>();
 
@@ -90,7 +91,7 @@ namespace UnitTestRFID
 
             List<TypeAndError> errors = new List<TypeAndError>();
 
-            NewTagList.Refresh(
+            newTagList.Refresh(
                 "*",
                 tag_list,
                 (readerName, uid, antennaID) =>
@@ -145,7 +146,7 @@ namespace UnitTestRFID
             Assert.AreEqual(1, changed_results.Count);
             Assert.AreEqual(0, removed_results.Count);
 
-            Assert.AreEqual(1, NewTagList.Tags.Count);
+            Assert.AreEqual(1, newTagList.Tags.Count);
         }
 
         // TODO: 如果两个读卡器都发现了一个同样 UID 的标签，要做一下取舍
@@ -154,13 +155,13 @@ namespace UnitTestRFID
         [TestMethod]
         public void Test_update_1()
         {
-            NewTagList.Clear();
+            NewTagList newTagList = new NewTagList();
 
             List<OneTag> tag_list = new List<OneTag>();
 
             // 准备内容
             tag_list.Add(BuildOne15693Tag("M201", 1, "111111"));
-            NewTagList.Refresh(
+            newTagList.Refresh(
                 "*",
                 tag_list,
                 (readerName, uid, antennaID) =>
@@ -176,7 +177,7 @@ namespace UnitTestRFID
                 null);
 
             // 检查一下
-            Assert.AreEqual(1, NewTagList.Tags.Count);
+            Assert.AreEqual(1, newTagList.Tags.Count);
 
             List<TagAndData> new_results = new List<TagAndData>();
             List<TagAndData> changed_results = new List<TagAndData>();
@@ -189,7 +190,7 @@ namespace UnitTestRFID
             update_list.Add(BuildOne15693Tag("RL8600", 2, "111111"));
 
             // 用 update_list 集合来刷新
-            NewTagList.Refresh(
+            newTagList.Refresh(
                 "*",
                 update_list,
                 (readerName, uid, antennaID) =>
@@ -247,21 +248,21 @@ namespace UnitTestRFID
             Assert.AreEqual(1, changed_results.Count);  // 两阶段也是可能的
             Assert.AreEqual(0, removed_results.Count);
 
-            Assert.AreEqual(1, NewTagList.Tags.Count);
+            Assert.AreEqual(1, newTagList.Tags.Count);
         }
 
         // 测试在不同读卡器之间对标签进行转移。从一个读卡器变动到另一个读卡器，当一个读卡器加了标签后，另外一个读卡器在 Tags 里面的对象被夺走(尽管还没有 Refresh() 刷新)
         [TestMethod]
         public void Test_transfer_1()
         {
-            NewTagList.Clear();
+            NewTagList newTagList = new NewTagList();
 
             List<OneTag> tag_list = new List<OneTag>();
 
             // ***
             // 0) 准备内容
             tag_list.Add(BuildOne15693Tag("M201", 1, "111111"));
-            NewTagList.Refresh(
+            newTagList.Refresh(
                 "M201",
                 tag_list,
                 (readerName, uid, antennaID) =>
@@ -277,7 +278,7 @@ namespace UnitTestRFID
                 null);
 
             // 检查一下
-            Assert.AreEqual(1, NewTagList.Tags.Count);
+            Assert.AreEqual(1, newTagList.Tags.Count);
 
             // ***
             // 1) RL8600 读卡器上放了这张标签。但此时 M201 读卡器上的信息还没有来得及刷新
@@ -295,7 +296,7 @@ namespace UnitTestRFID
 
                 // 用 update_list 集合来刷新
                 // 这次应该产生的是 add 动作
-                NewTagList.Refresh(
+                newTagList.Refresh(
                     "RL8600",
                     update_list,
                     (readerName, uid, antennaID) =>
@@ -374,7 +375,7 @@ namespace UnitTestRFID
                 Assert.AreEqual(0, removed_results.Count);
 
                 // Assert.AreEqual(2, NewTagList.Tags.Count);
-                Assert.AreEqual(1, NewTagList.Tags.Count);
+                Assert.AreEqual(1, newTagList.Tags.Count);
             }
 
             // ***
@@ -386,7 +387,7 @@ namespace UnitTestRFID
                 List<TagAndData> removed_results = new List<TagAndData>();
 
                 List<TypeAndError> errors = new List<TypeAndError>();
-                NewTagList.Refresh(
+                newTagList.Refresh(
                     "M201",
                     new List<OneTag>(),
                     (readerName, uid, antennaID) =>
@@ -437,7 +438,7 @@ namespace UnitTestRFID
                 // Assert.AreEqual(1, removed_results.Count);
                 Assert.AreEqual(0, removed_results.Count);
 
-                Assert.AreEqual(1, NewTagList.Tags.Count);
+                Assert.AreEqual(1, newTagList.Tags.Count);
             }
         }
 
@@ -626,14 +627,14 @@ namespace UnitTestRFID
         [TestMethod]
         public void Test_transfer_2()
         {
-            NewTagList.Clear();
+            NewTagList newTagList = new NewTagList();
 
             List<OneTag> tag_list = new List<OneTag>();
 
             // ***
             // 0) 准备内容
             tag_list.Add(BuildOne15693Tag("M201", 1, "111111"));
-            NewTagList.Refresh(
+            newTagList.Refresh(
                 "M201",
                 tag_list,
                 (readerName, uid, antennaID) =>
@@ -649,7 +650,7 @@ namespace UnitTestRFID
                 null);
 
             // 检查一下
-            Assert.AreEqual(1, NewTagList.Tags.Count);
+            Assert.AreEqual(1, newTagList.Tags.Count);
 
             // ***
             // 1) M201 读卡器上把标签先拿走了
@@ -660,7 +661,7 @@ namespace UnitTestRFID
                 List<TagAndData> removed_results = new List<TagAndData>();
 
                 List<TypeAndError> errors = new List<TypeAndError>();
-                NewTagList.Refresh(
+                newTagList.Refresh(
                     "M201",
                     new List<OneTag>(),
                     (readerName, uid, antennaID) =>
@@ -706,7 +707,7 @@ namespace UnitTestRFID
                 Assert.AreEqual(0, changed_results.Count);  // 两阶段也是可能的
                 Assert.AreEqual(1, removed_results.Count);
 
-                Assert.AreEqual(0, NewTagList.Tags.Count);
+                Assert.AreEqual(0, newTagList.Tags.Count);
             }
 
             // ***
@@ -724,7 +725,7 @@ namespace UnitTestRFID
 
                 // 用 update_list 集合来刷新
                 // 这次应该产生的是 add 动作
-                NewTagList.Refresh(
+                newTagList.Refresh(
                     "RL8600",
                     update_list,
                     (readerName, uid, antennaID) =>
@@ -794,7 +795,7 @@ namespace UnitTestRFID
                 Assert.AreEqual(1, changed_results.Count);  // 两阶段也是可能的
                 Assert.AreEqual(0, removed_results.Count);
 
-                Assert.AreEqual(1, NewTagList.Tags.Count);
+                Assert.AreEqual(1, newTagList.Tags.Count);
             }
         }
 
@@ -804,13 +805,13 @@ namespace UnitTestRFID
         [TestMethod]
         public void Test_remove_1()
         {
-            NewTagList.Clear();
+            NewTagList newTagList = new NewTagList();
 
             List<OneTag> tag_list = new List<OneTag>();
 
             // 准备内容
             tag_list.Add(BuildOne15693Tag("M201", 1, "111111"));
-            NewTagList.Refresh(
+            newTagList.Refresh(
                 "*",
                 tag_list,
                 (readerName, uid, antennaID) =>
@@ -832,7 +833,7 @@ namespace UnitTestRFID
             List<TypeAndError> errors = new List<TypeAndError>();
 
             // 用空集合来刷新
-            NewTagList.Refresh(
+            newTagList.Refresh(
                 "*",
                 new List<OneTag>(),
                 (readerName, uid, antennaID) =>
@@ -878,7 +879,7 @@ namespace UnitTestRFID
             Assert.AreEqual(0, changed_results.Count);
             Assert.AreEqual(1, removed_results.Count);
 
-            Assert.AreEqual(0, NewTagList.Tags.Count);
+            Assert.AreEqual(0, newTagList.Tags.Count);
         }
 
         public static OneTag BuildOne15693Tag(string readerName,

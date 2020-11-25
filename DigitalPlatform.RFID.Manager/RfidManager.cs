@@ -222,6 +222,7 @@ namespace DigitalPlatform.RFID
             Base2.Name = Base.Name;
         }
 
+#if SYNC_ROOT
 
         static object _syncRoot = new object();
 
@@ -232,6 +233,8 @@ namespace DigitalPlatform.RFID
                 return _syncRoot;
             }
         }
+
+#endif
 
         // static AsyncSemaphore _limit = new AsyncSemaphore(1);
 
@@ -316,7 +319,9 @@ new SetErrorEventArgs
                     // 触发 ListTags 事件时要加锁
                     if (string.IsNullOrEmpty(readerNameList) == false)
                     {
+#if SYNC_ROOT
                         lock (_syncRoot)
+#endif
                         // using(var releaser = await _limit.EnterAsync().ConfigureAwait(false))
                         {
                             if (ListTags != null)
@@ -328,7 +333,8 @@ new SetErrorEventArgs
                                 ListTags(channel, new ListTagsEventArgs
                                 {
                                     ReaderNameList = readerNameList,
-                                    Result = result
+                                    Result = result,
+                                    Source = "base2",
                                 });
                             }
                             else
@@ -463,7 +469,9 @@ new SetErrorEventArgs
 
                     if (string.IsNullOrEmpty(readerNameList) == false)
                     {
+#if SYNC_ROOT
                         lock (_syncRoot)
+#endif
                         // using (var releaser = await _limit.EnterAsync().ConfigureAwait(false))
                         {
                             if (ListTags != null)
@@ -475,7 +483,8 @@ new SetErrorEventArgs
                                 ListTags(channel, new ListTagsEventArgs
                                 {
                                     ReaderNameList = readerNameList,
-                                    Result = result
+                                    Result = result,
+                                    Source = "base",
                                 });
                             }
                             else
@@ -556,9 +565,12 @@ new SetErrorEventArgs
             Base.ReturnChannel(channel);
         }
 
+        // parameters:
+        //      source  触发者来源信息
         public static async Task TriggerListTagsEvent(
             string reader_name_list,
-            ListTagsResult result/*,
+            ListTagsResult result,
+            string source/*,
             StringBuilder debugInfo*/,
             bool throwException)
         {
@@ -574,8 +586,9 @@ new SetErrorEventArgs
                 try
                 {
                     //debugInfo.AppendLine("3");
-
+#if SYNC_ROOT
                     lock (_syncRoot)
+#endif
                     // using (var releaser = await _limit.EnterAsync().ConfigureAwait(false))
                     {
                         //debugInfo.AppendLine("4");
@@ -584,7 +597,8 @@ new SetErrorEventArgs
                         {
                             ReaderNameList = reader_name_list,
                             // Result = new ListTagsResult { Results = _lastTags }
-                            Result = result
+                            Result = result,
+                            Source = source,    // 可能是 base/base2/initial/refresh
                         });
 
                         //debugInfo.AppendLine("5");
@@ -1189,7 +1203,7 @@ new SetErrorEventArgs
                 BaseChannel<IRfid> channel = Base.GetChannel();
                 try
                 {
-                    var result = channel.Object.LedDisplay(ledName,text,x,y,property,style);
+                    var result = channel.Object.LedDisplay(ledName, text, x, y, property, style);
                     if (result.Value == -1)
                         Base.TriggerSetError(result,
                             new SetErrorEventArgs { Error = result.ErrorInfo });
@@ -1307,6 +1321,8 @@ new SetErrorEventArgs
         public string ReaderNameList { get; set; }
 
         public ListTagsResult Result { get; set; }
+
+        public string Source { get; set; }   // 触发者
     }
 
     public delegate void ListLocksEventHandler(object sender,

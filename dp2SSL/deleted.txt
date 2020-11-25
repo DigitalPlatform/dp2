@@ -2723,3 +2723,424 @@ new SetErrorEventArgs
 
             return result;
         }
+
+
+        ~~~~~~~~~
+
+                // 初始化 _patronTags 和 bookTags 两个集合
+        public static void InitialPatronBookTags(
+            // Delegate_detectType func_detectType
+            bool fill)
+        {
+            lock (_syncRoot_patronTags)
+            {
+                _patronTags = new List<TagAndData>();
+                if (fill)
+                    _patronTags.AddRange(PatronTagList.Tags);
+                /*
+                if (func_detectType != null)
+                {
+                    PatronTagList.Tags.ForEach((tag) =>
+                    {
+                        var type = func_detectType(tag.OneTag);
+                        if (type == "patron")
+                            _patronTags.Add(tag);
+                        else if (type == "book")
+                            _bookTags.Add(tag);
+                    });
+                }
+                */
+            }
+
+            lock (_syncRoot_bookTags)
+            {
+                _bookTags = new List<TagAndData>();
+                if (fill)
+                    _bookTags.AddRange(BookTagList.Tags);
+                /*
+                if (func_detectType != null)
+                {
+                    BookTagList.Tags.ForEach((tag) =>
+                    {
+                        var type = func_detectType(tag.OneTag);
+                        if (type == "patron")
+                            _patronTags.Add(tag);
+                        else if (type == "book")
+                            _bookTags.Add(tag);
+                    });
+                }
+                */
+            }
+        }
+
+
+        ~~~~~~~~~
+
+                // 更新 _patronTags 和 _bookTags 集合
+        // 要返回新增加的两类标签的数目
+        // TODO: 要能处理 ISO15693 图书标签放到读者读卡器上的动作。可以弹出一个窗口显示这一本图书的信息
+        public static async Task<SeperateResult> SeperateTagsAsync(BaseChannel<IRfid> channel,
+            NewTagChangedEventArgs e,
+            Delegate_detectType func_detectType)
+        {
+            // 2020/7/13
+            // 临时初始化一下
+            if (_patronTags == null || _bookTags == null)
+                InitialPatronBookTags(false/*null*/);
+
+            lock (_syncRoot_bookTags)
+            {
+#if NO
+                // ***
+                // 初始化
+                if (_patronTags == null || _bookTags == null)
+                {
+                    _patronTags = new List<TagAndData>();
+                    _bookTags = new List<TagAndData>();
+                    NewTagList.Tags.ForEach((tag) =>
+                    {
+                        var type = func_detectType(tag.OneTag);
+                        if (type == "patron")
+                            _patronTags.Add(tag);
+                        else if (type == "book")
+                            _bookTags.Add(tag);
+
+                        /*
+                        try
+                        {
+                            SetTagType(tag, out string pii);
+                        }
+                        catch (Exception ex)
+                        {
+                            tag.Error += ($"RFID 标签格式错误: {ex.Message}");
+                        }
+                        */
+                    });
+                }
+
+#endif
+
+                List<TagAndData> add_books = new List<TagAndData>();
+                List<TagAndData> add_patrons = new List<TagAndData>();
+                List<TagAndData> updated_books = new List<TagAndData>();
+                List<TagAndData> updated_patrons = new List<TagAndData>();
+                List<TagAndData> removed_books = new List<TagAndData>();
+                List<TagAndData> removed_patrons = new List<TagAndData>();
+
+                // ****
+                // 处理需要添加的对象
+                List<TagAndData> tags = new List<TagAndData>();
+                if (e.AddTags != null && e.AddTags.Count > 0)
+                {
+                    // 分离新添加的标签
+                    e.AddTags.ForEach((tag) =>
+                    {
+                        // 对于 .TagInfo == null 的 ISO15693 标签不敏感
+                        if (tag.OneTag.TagInfo == null
+                && tag.OneTag.Protocol == InventoryInfo.ISO15693)
+                            return;
+
+                        var type = func_detectType(tag.OneTag);
+                        if (type == "patron")
+                        {
+                            var ret = Add(_patronTags, tag);
+                            if (ret == true)
+                                add_patrons.Add(tag);
+                        }
+                        else if (type == "book")
+                        {
+                            var ret = Add(_bookTags, tag);
+                            if (ret == true)
+                                add_books.Add(tag);
+                        }
+                    });
+                }
+
+                // *** 
+                // 处理更新了的对象
+                if (e.UpdateTags != null && e.UpdateTags.Count > 0)
+                {
+                    // 分离更新了的标签
+                    e.UpdateTags.ForEach((tag) =>
+                    {
+                        // 对于 .TagInfo == null 的 ISO15693 标签不敏感
+                        if (tag.OneTag.TagInfo == null
+                && tag.OneTag.Protocol == InventoryInfo.ISO15693)
+                            return;
+
+                        var type = func_detectType(tag.OneTag);
+                        if (type == "patron")
+                        {
+                            var one_tag = tag.OneTag;
+                            // TODO: 尝试从 _bookTags 里面移走
+                            // removed_books.AddRange(Remove(_bookTags, one_tag.UID, one_tag.ReaderName, one_tag.AntennaID));
+
+                            // 注：只匹配 UID 即可。readerName 和 antenna 可能已经变化，无法和已有的信息匹配
+                            removed_books.AddRange(Remove(_bookTags, one_tag.UID, "*", uint.MaxValue));
+                            Update(_patronTags, tag);
+                            updated_patrons.Add(tag);
+                        }
+                        else if (type == "book")
+                        {
+                            var one_tag = tag.OneTag;
+                            // TODO: 尝试从 _patronTags 里面移走
+                            // removed_patrons.AddRange(Remove(_patronTags, one_tag.UID, one_tag.ReaderName, one_tag.AntennaID));
+
+                            // 注：只匹配 UID 即可。readerName 和 antenna 可能已经变化，无法和已有的信息匹配
+                            removed_patrons.AddRange(Remove(_patronTags, one_tag.UID, "*", uint.MaxValue));
+                            Update(_bookTags, tag);
+                            updated_books.Add(tag);
+                        }
+                    });
+                }
+
+                // ***
+                // 处理移走了的对象
+                if (e.RemoveTags != null && e.RemoveTags.Count > 0)
+                {
+                    // 分离移走了的标签
+                    e.RemoveTags.ForEach((tag) =>
+                    {
+                        var one_tag = tag.OneTag;
+                        var type = func_detectType(one_tag);
+                        if (type == "patron" || type == "book")
+                        {
+                            // 注意，只有当 UID 和 读卡器名字 和 天线编号都相同才予以删除
+                            removed_books.AddRange(Remove(_bookTags, one_tag.UID, one_tag.ReaderName, one_tag.AntennaID));
+                            removed_patrons.AddRange(Remove(_patronTags, one_tag.UID, one_tag.ReaderName, one_tag.AntennaID));
+                        }
+                    });
+                }
+
+                /*
+                {
+                    var filtered = tags.FindAll(tag =>
+                    {
+                        if (tag.OneTag.ReaderName != _patronReaderName)
+                            return false;
+                        // 暂时忽略 .TagInfo 为空的那些 ISO15693 的标签
+                        if (tag.OneTag.Protocol == InventoryInfo.ISO15693
+                        && tag.OneTag.TagInfo == null)
+                            return false;
+                        try
+                        {
+                            SetTagType(tag, out string pii);
+                        }
+                        catch (Exception ex)
+                        {
+                            tag.Error += ($"RFID 标签格式错误: {ex.Message}");
+                        }
+                        if (tag.Type == "book")
+                            return false;
+                        return true;
+                    });
+
+                    tags = filtered;
+                }
+
+                lock (_syncRoot_patronTags)
+                {
+                    foreach (var tag in tags)
+                    {
+                        var found = _patronTags.FindAll(o =>
+                        {
+                            return o.OneTag.UID == tag.OneTag.UID;
+                        });
+
+                        if (found.Count > 0)
+                        {
+                            // 替换
+                            int index = _patronTags.IndexOf(found[0]);
+                            _patronTags[index] = tag;
+                            count++;
+                        }
+                        else
+                        {
+                            _patronTags.Add(tag);
+                            // 2020/4/17
+                            // 如果是 ISO15693 并且 tagInfo 为 null，则不记入新添加的 count 计数
+                            if (!(tag.OneTag.Protocol == InventoryInfo.ISO15693
+        && tag.OneTag.TagInfo == null))
+                                count++;
+                        }
+                    }
+                }
+                */
+
+                // 2020/4/19
+                foreach (var tag in updated_books)
+                {
+                    tag.Type = null;    // 迫使 NewEntity 重新解析标签
+                }
+                foreach (var tag in updated_patrons)
+                {
+                    tag.Type = null;    // 迫使 NewEntity 重新解析标签
+                }
+
+                return new SeperateResult
+                {
+                    add_books = add_books,
+                    add_patrons = add_patrons,
+                    updated_books = updated_books,
+                    updated_patrons = updated_patrons,
+                    removed_books = removed_books,
+                    removed_patrons = removed_patrons,
+                };
+            }
+        }
+
+
+        ~~~~~~~~~
+
+        
+        // 更新 _patronTags 集合
+        // TODO: 要能处理 ISO15693 图书标签放到读者读卡器上的动作。可以弹出一个窗口显示这一本图书的信息
+        public static async Task<NormalResult> ChangePatronTagsAsync(BaseChannel<IRfid> channel,
+            NewTagChangedEventArgs e)
+        {
+            int count = 0;
+            // 初始化
+            if (_patronTags == null)
+            {
+#if REMOVED
+                lock (_syncRoot_patronTags)
+                {
+                    _patronTags = PatronTagList.Tags.FindAll((tag) =>
+                    {
+                        if (tag.OneTag.ReaderName != _patronReaderName)
+                            return false;
+                        // TODO: ISO15693 的 .TagInfo 是否可能为 null?
+                        // 排除 ISO15693 的图书标签
+                        try
+                        {
+                            SetTagType(tag, out string pii, out _);
+                        }
+                        catch (Exception ex)
+                        {
+                            tag.Error += ($"RFID 标签格式错误: {ex.Message}");
+                        }
+                        if (tag.Type == "book")
+                            return false;
+                        return true;
+                    });
+                }
+                return new NormalResult { Value = 1 };
+#endif
+                InitialPatronTags(true);
+            }
+
+            // ****
+            // 处理需要添加的对象
+            List<TagAndData> tags = new List<TagAndData>();
+            if (e.AddTags != null)
+            {
+                tags.AddRange(e.AddTags);
+                /*
+                // 延时触发 SelectAntenna()
+                if (e.AddTags.Count > 0)
+                    _tagAdded = true;
+                    */
+            }
+
+            if (e.UpdateTags != null)
+            {
+                tags.AddRange(e.UpdateTags);
+                /*
+                // 2020/4/15
+                if (e.UpdateTags.Count > 0)
+                    _tagAdded = true;
+                    */
+            }
+
+            {
+                var filtered = tags.FindAll(tag =>
+                {
+                    if (tag.OneTag.ReaderName != _patronReaderName)
+                        return false;
+                    // 暂时忽略 .TagInfo 为空的那些 ISO15693 的标签
+                    if (tag.OneTag.Protocol == InventoryInfo.ISO15693
+            && tag.OneTag.TagInfo == null)
+                        return false;
+                    try
+                    {
+                        SetTagType(tag, out string pii, out _);
+                    }
+                    catch (Exception ex)
+                    {
+                        tag.Error += ($"RFID 标签格式错误: {ex.Message}");
+                    }
+                    if (tag.Type == "book")
+                        return false;
+                    return true;
+                });
+
+                tags = filtered;
+            }
+
+            lock (_syncRoot_patronTags)
+            {
+                foreach (var tag in tags)
+                {
+                    var found = _patronTags.FindAll(o =>
+                    {
+                        return o.OneTag.UID == tag.OneTag.UID;
+                    });
+
+                    if (found.Count > 0)
+                    {
+                        // 替换
+                        int index = _patronTags.IndexOf(found[0]);
+                        _patronTags[index] = tag;
+                        count++;
+                    }
+                    else
+                    {
+                        _patronTags.Add(tag);
+                        // 2020/4/17
+                        // 如果是 ISO15693 并且 tagInfo 为 null，则不记入新添加的 count 计数
+                        if (!(tag.OneTag.Protocol == InventoryInfo.ISO15693
+        && tag.OneTag.TagInfo == null))
+                            count++;
+                    }
+                }
+            }
+
+            // ****
+            // 处理需要移走的对象
+            List<TagAndData> removes = null;
+            {
+                // 2020/4/9
+                // 把书柜读卡器上的(ISO15693)读者卡也计算在内
+                removes = e.RemoveTags?.FindAll(tag =>
+                {
+                    if (tag.OneTag.ReaderName != _patronReaderName)
+                        return false;
+                    return true;
+                });
+            }
+
+            if (removes != null && removes.Count > 0)
+            {
+                lock (_syncRoot_patronTags)
+                {
+                    foreach (var tag in removes)
+                    {
+                        Remove(_patronTags, tag.OneTag.UID);
+                        // count++;
+                    }
+                }
+            }
+            return new NormalResult { Value = count };
+
+            void Remove(List<TagAndData> collection, string uid)
+            {
+                var found = collection.FindAll(o =>
+                {
+                    return o.OneTag.UID == uid;
+                });
+                foreach (var tag in found)
+                {
+                    collection.Remove(tag);
+                }
+            }
+        }

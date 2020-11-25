@@ -4694,7 +4694,7 @@ out string number);
                     ErrorCode = "lockNotFound"
                 };
 
-            lock (_syncShelfLock)
+            // lock (_syncShelfLock)
             {
 
                 List<LockState> states = new List<LockState>();
@@ -4855,7 +4855,7 @@ out string number);
         }
         */
 
-        static object _syncShelfLock = new object();
+        // static object _syncShelfLock = new object();
 
         // 开门
         // parameters:
@@ -4885,7 +4885,7 @@ out string number);
                     ErrorCode = "lockNotFound"
                 };
 
-            lock (_syncShelfLock)
+            // lock (_syncShelfLock)
             {
                 List<LockState> states = new List<LockState>();
 

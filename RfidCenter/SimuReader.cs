@@ -488,8 +488,8 @@ out Reader reader);
 
 #endif
                     // 2020/11/24
-                    // 模拟时间耗费。假定一个标签耗费 100 毫秒
-                    Thread.Sleep(100);
+                    // 模拟时间耗费。假定一个标签耗费 500 毫秒
+                    Thread.Sleep(500);
 
                     return new GetTagInfoResult { TagInfo = tagInfo };
                 }

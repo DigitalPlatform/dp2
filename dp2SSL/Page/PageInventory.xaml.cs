@@ -74,12 +74,12 @@ namespace dp2SSL
         private void PageInventory_Unloaded(object sender, RoutedEventArgs e)
         {
             App.IsPageInventoryActive = false;
-            App.NewTagChanged -= CurrentApp_NewTagChanged;
+            App.BookTagChanged -= CurrentApp_NewTagChanged;
         }
 
         private void PageInventory_Loaded(object sender, RoutedEventArgs e)
         {
-            App.NewTagChanged += CurrentApp_NewTagChanged;
+            App.BookTagChanged += CurrentApp_NewTagChanged;
             App.IsPageInventoryActive = true;
 
             RefreshActionModeMenu();

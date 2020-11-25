@@ -186,7 +186,7 @@ namespace dp2SSL
             {
                 MenuItem item = new MenuItem();
                 item.Header = $"放回 {_removed_tags.Count} 个先前移走的 RFID 标签";
-                item.Loaded += MenuItem_addReomved_Loaded;
+                item.Loaded += MenuItem_addRemoved_Loaded;
                 item.Click += SimuAddRemovedTags_Click;
                 theMenu.Items.Add(item);
             }
@@ -260,7 +260,7 @@ namespace dp2SSL
 
 #if AUTO_TEST
         // 动态更新菜单文字内容
-        private void MenuItem_addReomved_Loaded(object sender, RoutedEventArgs e)
+        private void MenuItem_addRemoved_Loaded(object sender, RoutedEventArgs e)
         {
             var item = sender as MenuItem;
             item.Header = $"放回 {_removed_tags.Count} 个先前移走的 RFID 标签";
@@ -431,6 +431,9 @@ namespace dp2SSL
                 return;
             }
 
+            // 顺便清除标签缓存。这样后面关门时就能感知到较慢的真实速度
+            ShelfData.BookTagList.ClearTagTable(null);
+
             App.CurrentApp.Speak($"成功放回 {_removed_tags.Count} 个标签");
             _removed_tags.Clear();
         }
@@ -460,7 +463,8 @@ namespace dp2SSL
 #if OLD_TAGCHANGED
             App.CurrentApp.TagChanged += CurrentApp_TagChanged;
 #else
-            App.NewTagChanged += CurrentApp_NewTagChanged;
+            App.BookTagChanged += CurrentApp_BookTagChanged;
+            App.PatronTagChanged += App_PatronTagChanged;
 #endif
 
             // RfidManager.ListLocks += RfidManager_ListLocks;
@@ -586,6 +590,7 @@ namespace dp2SSL
             }
 #endif
         }
+
 
         private void App_Updated(object sender, UpdatedEventArgs e)
         {
@@ -1518,7 +1523,8 @@ namespace dp2SSL
 #if OLD_TAGCHANGED
             App.CurrentApp.TagChanged -= CurrentApp_TagChanged;
 #else
-            App.NewTagChanged -= CurrentApp_NewTagChanged;
+            App.BookTagChanged -= CurrentApp_BookTagChanged;
+            App.PatronTagChanged -= App_PatronTagChanged;
 #endif
 
             FingerprintManager.Touched -= FingerprintManager_Touched;
@@ -1886,9 +1892,49 @@ namespace dp2SSL
         }
 
 #else
+
+        static int _patronReadCount = 0;
+
+#pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
+        private async void App_PatronTagChanged(object sender, NewTagChangedEventArgs e)
+#pragma warning restore VSTHRD100 // 避免使用 Async Void 方法
+        {
+            if (e.Source == "base2")
+            {
+                _patronReadCount++;
+                App.Invoke(new Action(() =>
+                {
+                    patronReaderInfo.Text = _patronReadCount.ToString();
+                }));
+            }
+
+            {
+                // "initial" 模式下，在读者证读卡器上扫 ISO15693 的标签可以查看图书内容
+                if (this.Mode == "initial"
+                || ShelfData.FirstInitialized == false
+                )
+                {
+                    var sep_result = await ShelfData.SeperatePatronTagsAsync((BaseChannel<IRfid>)sender,
+                    e);
+
+                    // TODO: 小读卡器探测图书或者工作人员卡。工作人员卡用于判断操作者权限，以便允许使用初始化过程中报错对话框的开门和取消按钮
+                    if (sep_result.add_patrons.Count > 0 || sep_result.updated_patrons.Count > 0)
+                        DetectPatron();
+                }
+                else
+                {
+                    var sep_result = await ShelfData.SeperatePatronTagsAsync((BaseChannel<IRfid>)sender,
+                        e);
+                    if (sep_result.add_patrons.Count > 0 || sep_result.updated_patrons.Count > 0)
+                        await RefreshPatronsAsync();
+                }
+            }
+        }
+
+
         // 新版本的事件
 #pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
-        private async void CurrentApp_NewTagChanged(object sender, NewTagChangedEventArgs e)
+        private async void CurrentApp_BookTagChanged(object sender, NewTagChangedEventArgs e)
 #pragma warning restore VSTHRD100 // 避免使用 Async Void 方法
         {
             // TODO: 对已经拿走的读者卡，用 TagList.ClearTagTable() 清除它的缓存内容
@@ -1904,6 +1950,8 @@ namespace dp2SSL
             });
             */
 
+
+
             // 2020/9/25
             // using (var releaser = await ShelfData._actionsLimit.EnterAsync())
             {
@@ -1913,33 +1961,24 @@ namespace dp2SSL
                 || ShelfData.FirstInitialized == false
                 )
                 {
-                    var sep_result = await ShelfData.SeperateTagsAsync((BaseChannel<IRfid>)sender,
-                    e,
-                    (t) =>
-                    {
-                        return DetectTagType(t);
-                    });
+                    var sep_result = await ShelfData.SeperateBookTagsAsync((BaseChannel<IRfid>)sender,
+                    e);
 
+                    /*
                     // TODO: 小读卡器探测图书或者工作人员卡。工作人员卡用于判断操作者权限，以便允许使用初始化过程中报错对话框的开门和取消按钮
                     if (sep_result.add_patrons.Count > 0 || sep_result.updated_patrons.Count > 0)
                         DetectPatron();
+                    */
                 }
                 else
                 {
-                    var sep_result = await ShelfData.SeperateTagsAsync((BaseChannel<IRfid>)sender,
-                        e,
-                        (t) =>
-                        {
-                            /*
-                            if (t.ReaderName == ShelfData.PatronReaderName)
-                                return "patron";
-                            return "book";
-                            */
-                            return DetectTagType(t);
-                        });
+                    var sep_result = await ShelfData.SeperateBookTagsAsync((BaseChannel<IRfid>)sender,
+                        e);
 
+                    /*
                     if (sep_result.add_patrons.Count > 0 || sep_result.updated_patrons.Count > 0)
                         await RefreshPatronsAsync();
+                    */
 
                     await ShelfData.ChangeEntitiesAsync((BaseChannel<IRfid>)sender,
                         sep_result,
@@ -1954,12 +1993,14 @@ namespace dp2SSL
 
 #endif
 
+        /*
         static string DetectTagType(OneTag t)
         {
             if (t.ReaderName == ShelfData.PatronReaderName)
                 return "patron";
             return "book";
         }
+        */
 
         // bool _initialCancelled = false;
 
@@ -2496,10 +2537,14 @@ namespace dp2SSL
 
                 // 初始化 _patronTags 和 bookTags 两个集合
 
+                /*
                 ShelfData.InitialPatronBookTags((t) =>
                 {
                     return DetectTagType(t);
                 });
+                */
+                ShelfData.InitialPatronTags(true);
+                ShelfData.InitialBookTags(true);
 
                 await ShelfData.SelectAntennaAsync();
 
@@ -3678,12 +3723,20 @@ namespace dp2SSL
         private void GoHome_Click(object sender, RoutedEventArgs e)
         {
             // 检查全部门是否关闭
+            var closed = ShelfData.IsAllDoorClosed(out string message);
+            if (closed == false)
+            {
+                ErrorBox("", $"{message}。\r\n\r\n请先关闭全部柜门并等待后台事务全部完成，才能返回主菜单页面", "yellow", "button_ok");
+                return;
+            }
 
+            /*
             if (ShelfData.OpeningDoorCount > 0)
             {
                 ErrorBox("", "请先关闭全部柜门，才能返回主菜单页面", "yellow", "button_ok");
                 return;
             }
+            */
 
             /*
             await Task.Run(() =>
@@ -4449,7 +4502,9 @@ namespace dp2SSL
             App.CurrentApp.Speak($"欢迎您，{(string.IsNullOrEmpty(_patron.PatronName) ? _patron.Barcode : _patron.PatronName)}");
             BeginDelayClearTask();
 
-            ShelfData.AddOpenDoorSpeak("取放图书后请及时关门");
+            // TODO: 对同一个读者只需要提醒一次，不用反复提醒
+            if (ShelfData.HasNotified(_patron.GetOiPii()) == false)
+                ShelfData.AddOpenDoorSpeak("取放图书后请及时关门");
 
             this.doorControl.AnimateDoors();
 
@@ -4654,6 +4709,14 @@ namespace dp2SSL
         // 转到绑定读者证画面
         private void register_Click(object sender, RoutedEventArgs e)
         {
+            // 检查全部门是否关闭
+            var closed = ShelfData.IsAllDoorClosed(out string message);
+            if (closed == false)
+            {
+                ErrorBox("", $"{message}。\r\n\r\n请先关闭全部柜门并等待后台事务全部完成，才能切换到其他页面", "yellow", "button_ok");
+                return;
+            }
+
             NavigatePageBorrow("bindPatronCard,releasePatronCard");
         }
 

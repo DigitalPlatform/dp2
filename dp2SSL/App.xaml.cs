@@ -1672,8 +1672,13 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
 
         public static event TagChangedEventHandler TagChanged = null;
 
-        // 新版本的事件
-        public static event NewTagChangedEventHandler NewTagChanged = null;
+        // (新版本的事件)
+        // 图书标签发生改变
+        public static event NewTagChangedEventHandler BookTagChanged = null;
+        // 读者证卡标签发生改变
+        public static event NewTagChangedEventHandler PatronTagChanged = null;
+
+        public static event DigitalPlatform.ProgressChangedEventHandler GetTagInfoProgressChanged = null;
 
         // public event SetErrorEventHandler TagSetError = null;
 
@@ -1708,13 +1713,34 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
 
                     // bool numberShown = false;
 
-                    if (isShelf)
+                    // 书柜的图书读卡器
+                    if (isShelf && e.Source != "base2")
                     {
-                        NewTagList.Refresh(// sender as BaseChannel<IRfid>,
+                        int index = 0;
+
+                        // 设置进度条范围
+                        GetTagInfoProgressChanged?.Invoke(sender,
+      new DigitalPlatform.ProgressChangedEventArgs
+      {
+          Start = 0,
+          End = e.Result.Results.Count,
+          Value = -1,
+      });
+                        bool triggered = false;
+                        ShelfData.BookTagList.Refresh(// sender as BaseChannel<IRfid>,
                             e.ReaderNameList,
                             e.Result.Results,
                             (readerName, uid, antennaID) =>
                             {
+                                // TODO: source == "initial" 时这里详细显示进度
+                                GetTagInfoProgressChanged?.Invoke(sender, 
+                                    new DigitalPlatform.ProgressChangedEventArgs { 
+                                        Message = $"{uid}",
+                                        Start = 0,
+                                        End = e.Result.Results.Count,
+                                        Value = index++,
+                                    });
+
                                 var channel = sender as BaseChannel<IRfid>;
                                 /*
                                 if (channel.Started == false)
@@ -1724,12 +1750,66 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                             },
                             (add_tags, update_tags, remove_tags) =>
                             {
-                                NewTagChanged?.Invoke(sender, new NewTagChangedEventArgs
+                                BookTagChanged?.Invoke(sender, new NewTagChangedEventArgs
                                 {
                                     AddTags = add_tags,
                                     UpdateTags = update_tags,
                                     RemoveTags = remove_tags,
+                                    Source = e.Source,
                                 });
+                                triggered = true;
+                            },
+                            (type, text) =>
+                            {
+                                RfidManager.TriggerSetError(null/*this*/, new SetErrorEventArgs { Error = text });
+                            });
+
+                        // 表示到达末尾
+                        GetTagInfoProgressChanged?.Invoke(sender,
+new DigitalPlatform.ProgressChangedEventArgs
+{
+Start = 0,
+End = e.Result.Results.Count,
+Value = e.Result.Results.Count,
+});
+
+                        // 标签总数显示 只显示标签数，不再区分图书标签和读者卡
+                        if (CurrentApp != null)
+                            CurrentApp.Number = $"{ShelfData.BookTagList.Tags.Count}:{ShelfData.PatronTagList.Tags.Count}";
+                        //numberShown = true;
+
+                        // 让 BookTagChanged 事件也能感知到心跳
+                        if (triggered == false)
+                        {
+                            BookTagChanged?.Invoke(sender, new NewTagChangedEventArgs
+                            {
+                                Source = e.Source,
+                            });
+                        }
+                    }
+
+                    // 书柜的读者证读卡器
+                    if (isShelf && e.Source == "base2")
+                    {
+                        bool triggered = false;
+                        ShelfData.PatronTagList.Refresh(// sender as BaseChannel<IRfid>,
+                            e.ReaderNameList,
+                            e.Result.Results,
+                            (readerName, uid, antennaID) =>
+                            {
+                                var channel = sender as BaseChannel<IRfid>;
+                                return channel.Object.GetTagInfo(readerName, uid, antennaID);
+                            },
+                            (add_tags, update_tags, remove_tags) =>
+                            {
+                                PatronTagChanged?.Invoke(sender, new NewTagChangedEventArgs
+                                {
+                                    AddTags = add_tags,
+                                    UpdateTags = update_tags,
+                                    RemoveTags = remove_tags,
+                                    Source = e.Source,
+                                });
+                                triggered = true;
                             },
                             (type, text) =>
                             {
@@ -1738,9 +1818,19 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
 
                         // 标签总数显示 只显示标签数，不再区分图书标签和读者卡
                         if (CurrentApp != null)
-                            CurrentApp.Number = $"{NewTagList.Tags.Count}";
-                        //numberShown = true;
+                            CurrentApp.Number = $"{ShelfData.BookTagList.Tags.Count}:{ShelfData.PatronTagList.Tags.Count}";
+
+                        // 让 PatronTagChanged 事件也能感知到心跳
+                        if (triggered == false)
+                        {
+                            PatronTagChanged?.Invoke(sender, new NewTagChangedEventArgs
+                            {
+                                Source = e.Source,
+                            });
+                        }
                     }
+
+
 
                     // 2020/10/1
                     if (isInventory)
@@ -1763,7 +1853,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                             */
                             (add_tags, update_tags, remove_tags) =>
                             {
-                                NewTagChanged?.Invoke(sender, new NewTagChangedEventArgs
+                                BookTagChanged?.Invoke(sender, new NewTagChangedEventArgs
                                 {
                                     AddTags = add_tags,
                                     UpdateTags = update_tags,
@@ -1777,7 +1867,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
 
                         // 标签总数显示 只显示标签数，不再区分图书标签和读者卡
                         if (CurrentApp != null)
-                            CurrentApp.Number = $"{NewTagList.Tags.Count}";
+                            CurrentApp.Number = $"{ShelfData.BookTagList.Tags.Count}";
                         //numberShown = true;
 
                         SoundMaker.StopCurrent();
@@ -2521,6 +2611,7 @@ NewTagChangedEventArgs e);
         public List<TagAndData> AddTags { get; set; }
         public List<TagAndData> UpdateTags { get; set; }
         public List<TagAndData> RemoveTags { get; set; }
+        public string Source { get; set; }   // 触发者
     }
 
 

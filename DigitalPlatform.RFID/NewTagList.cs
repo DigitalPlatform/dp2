@@ -12,12 +12,12 @@ namespace DigitalPlatform.RFID
     // 这个新版本不再区分 Book 和 Patron。把区分类型的事情留给应用程序。这样简化了本部分的程序代码，也提高了整体运行效率
     // **************
     // 存储 Tag 的数据结构。可以动态表现当前读卡器上的所有标签
-    public static class NewTagList
+    public class NewTagList
     {
-        static object _sync_tags = new object();
-        static List<TagAndData> _tags = new List<TagAndData>();
+        object _sync_tags = new object();
+        List<TagAndData> _tags = new List<TagAndData>();
 
-        public static List<TagAndData> Tags
+        public List<TagAndData> Tags
         {
             get
             {
@@ -30,7 +30,7 @@ namespace DigitalPlatform.RFID
             }
         }
 
-        public static void AssertTagInfo()
+        public void AssertTagInfo()
         {
             int i = 0;
             foreach (var tag in Tags)
@@ -41,7 +41,7 @@ namespace DigitalPlatform.RFID
         }
 
         // 清除 _tags 中的所有内容
-        public static void Clear()
+        public void Clear()
         {
             lock (_sync_tags)
             {
@@ -50,7 +50,7 @@ namespace DigitalPlatform.RFID
         }
 
         // 清除 _tags 中特定对象的 .TagInfo 属性
-        static void ClearTagInfo(string uid)
+        void ClearTagInfo(string uid)
         {
             lock (_sync_tags)
             {
@@ -65,7 +65,7 @@ namespace DigitalPlatform.RFID
             }
         }
 
-        static TagAndData FindBookTag(string uid)
+        TagAndData FindBookTag(string uid)
         {
             lock (_sync_tags)
             {
@@ -146,7 +146,7 @@ namespace DigitalPlatform.RFID
         //      readerNameList  list中包含的内容的读卡器名(列表)。注意 list 中包含的标签，可能并不是全部读卡器的标签。对没有包含在其中的标签，本函数需要注意跳过(维持现状)，不要当作被删除处理
         // 异常：
         //      
-        public static void Refresh(// BaseChannel<IRfid> channel,
+        public void Refresh(// BaseChannel<IRfid> channel,
             string readerNameList,
             List<OneTag> list_param,
             delegate_getTagInfo getTagInfo,
@@ -368,9 +368,9 @@ namespace DigitalPlatform.RFID
         }
 
         // uid --> TagInfo
-        static Hashtable _tagTable = new Hashtable();
+        Hashtable _tagTable = new Hashtable();
 
-        public static void ClearTagTable(string uid)
+        public void ClearTagTable(string uid)
         {
             if (string.IsNullOrEmpty(uid))
             {
@@ -393,7 +393,7 @@ namespace DigitalPlatform.RFID
         }
 
         // 修改和 EAS 有关的内存数据
-        public static bool SetEasData(string uid, bool enable)
+        public bool SetEasData(string uid, bool enable)
         {
             _tagTable.Remove(uid);
             // 找到对应事项，修改 EAS 和 AFI
@@ -408,7 +408,7 @@ namespace DigitalPlatform.RFID
             return false;
         }
 
-        public static int TagTableCount
+        public int TagTableCount
         {
             get
             {
@@ -417,7 +417,7 @@ namespace DigitalPlatform.RFID
         }
 
         // 从缓存中获取标签信息
-        static GetTagInfoResult GetTagInfo(delegate_getTagInfo getTagInfo,
+        GetTagInfoResult GetTagInfo(delegate_getTagInfo getTagInfo,
             string reader_name,
             string uid,
             uint antenna)

@@ -9,6 +9,7 @@ using DigitalPlatform;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
 using System.Diagnostics;
+using System.Threading;
 
 namespace RfidCenter
 {
@@ -134,6 +135,8 @@ namespace RfidCenter
                     ErrorCode = "lockNotFound"
                 };
                 */
+            // 处于开门状态的门的个数。用它来大致模拟时间消耗
+            int open_count = 0;
 
             List<LockState> states = new List<LockState>();
 
@@ -150,6 +153,10 @@ namespace RfidCenter
                             ErrorInfo = $"当前不存在路径为 '{search_path}' 的模拟门锁对象",
                             ErrorCode = "lockNotFound"
                         };
+
+                    if (state.State == "open")
+                        open_count++;
+
                     var current_path = LockPath.Parse(state.Path);
                     states.Add(new LockState
                     {
@@ -169,6 +176,13 @@ namespace RfidCenter
 
                     Debug.Assert(state.State == "open" || state.State == "close");
                 }
+            }
+
+            // 2020/11/25
+            // 模拟时间消耗
+            if (open_count > 0)
+            {
+                Thread.Sleep(open_count * 500);
             }
 
             return new GetLockStateResult
