@@ -909,15 +909,18 @@ namespace dp2SSL
 
                 if (bChanged)
                 {
+                    ShelfData.l_RefreshCount();
+
                     _ = Task.Run(async () =>
                     {
                         try
                         {
+                            string style = "";  // "refreshCount";
                             CancellationToken token = ShelfData.CancelToken;
-                            await ShelfData.FillBookFieldsAsync(door._allEntities, token, "refreshCount");
-                            await ShelfData.FillBookFieldsAsync(door._removeEntities, token, "refreshCount");
-                            await ShelfData.FillBookFieldsAsync(door._addEntities, token, "refreshCount");
-                            await ShelfData.FillBookFieldsAsync(door._errorEntities, token, "refreshCount");
+                            await ShelfData.FillBookFieldsAsync(door._allEntities, token, style);
+                            await ShelfData.FillBookFieldsAsync(door._removeEntities, token, style);
+                            await ShelfData.FillBookFieldsAsync(door._addEntities, token, style);
+                            await ShelfData.FillBookFieldsAsync(door._errorEntities, token, style);
                         }
                         catch
                         {
