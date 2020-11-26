@@ -255,11 +255,17 @@ namespace dp2SSL
                 var states = ConvertLockStates(e.Result.States);
                 foreach (var state in states)
                 {
+                    // TODO: 这里有重复计算 count 的风险
                     if (state.State == "open")
                         count++;
 
                     // 刷新门锁对象的 State 状态
                     var results = DoorItem.SetLockState(ShelfData.Doors, state);
+
+                    // 2020/11/26
+                    if (ShelfData.FirstInitialized == false)
+                        continue;
+
                     // 注：有可能一个锁和多个门关联
                     foreach (LockChanged result in results)
                     {
@@ -2939,12 +2945,18 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
         public static async Task<InitialShelfResult> newVersion_InitialShelfEntitiesAsync(
             List<DoorItem> doors_param,
             bool silently,
-            Delegate_displayText func_display,
+            Delegate_setProgress func_setProgress,
+            // Delegate_displayText func_display,
             Delegate_cancelled func_cancelled)
         {
             // TODO: 出现“正在初始化”的对话框。另外需要注意如果 DataReady 信号永远来不了怎么办
             WpfClientInfo.WriteInfoLog("开始初始化图书信息");
             func_display("开始初始化图书信息 ...");
+
+            void func_display(string text)
+            {
+                func_setProgress?.Invoke(-1, -1, -1, text);
+            }
 
             // 一个一个门地填充图书信息
             int i = 0;
@@ -2958,7 +2970,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                 string style = $"dont_delay";   // 确保 inventory 并立即返回
 
                 // func_display($"{i + 1}/{Doors.Count} 门 {door.Name} ({list}) ...");
-                func_display($"门 {door.Name} ({list}) ...");
+                func_display($"列举标签 {door.Name} ({list}) ...");
 
                 using (var releaser = await _inventoryLimit.EnterAsync().ConfigureAwait(false))
                 {
@@ -2994,10 +3006,11 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
 
                 void App_GetTagInfoProgressChanged(object sender, ProgressChangedEventArgs e)
                 {
+                    /*
                     if (e.Message != null)
                         func_display($"门 {door.Name} ({list}) {e.Message}...");
-
-                    // func_display?.Invoke(e.Message);
+                    */
+                    func_setProgress(e.Start, e.End, e.Value, $"读卡器\t{list}\r\n标签\t{e.Message}...");
                 }
 
                 i++;

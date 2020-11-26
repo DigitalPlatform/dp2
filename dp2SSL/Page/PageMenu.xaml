@@ -80,7 +80,7 @@
             <Grid Background="Black" Opacity="0.7">
                 <TextBlock Name="number"
                    Text="{Binding Path=Number,Mode=OneWay}"
-                   TextAlignment="Center" FontSize="100"
+                   TextAlignment="Center" FontSize="84"
                    VerticalAlignment="Center" HorizontalAlignment="Center"
                    Background="Transparent" Foreground="White"/>
             </Grid>

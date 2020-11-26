@@ -46,6 +46,18 @@ namespace dp2SSL
             return MessageText;
         }
 
+        public FontFamily MessageFont
+        {
+            get
+            {
+                return text.FontFamily;
+            }
+            set
+            {
+                text.FontFamily = value;
+            }
+        }
+
         public string MessageText
         {
             get
