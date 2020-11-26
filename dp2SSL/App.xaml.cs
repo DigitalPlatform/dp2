@@ -1736,8 +1736,8 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                                 GetTagInfoProgressChanged?.Invoke(sender, 
                                     new DigitalPlatform.ProgressChangedEventArgs { 
                                         Message = $"{uid}",
-                                        Start = 0,
-                                        End = e.Result.Results.Count,
+                                        Start = -1, // 0,
+                                        End = -1,   // e.Result.Results.Count,
                                         Value = index++,
                                     });
 

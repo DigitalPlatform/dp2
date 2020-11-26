@@ -2050,11 +2050,12 @@ namespace dp2SSL
             return password;
         }
 
-        // 新版本的首次填充图书信息的函数
+        // (新版本的)首次填充图书信息的函数
         // parameters:
         //      networkMode 空/local。其中 local 表示按照断网模式初始化(否则是联网模式)，信息尽量从本地缓存获取
         //      silently    是否安静初始化。安静初始化的意思是遇到一些出错不会报错，而是努力完成初始化
-        async Task InitialShelfEntitiesAsync(string networkMode, bool silently = false)
+        async Task InitialShelfEntitiesAsync(string networkMode,
+            bool silently = false)
         {
             if (ShelfData.FirstInitialized)
                 return;
@@ -2155,6 +2156,7 @@ namespace dp2SSL
                 };
                 progress.retryButton.Click += (s, e) =>
                 {
+                    silently = false;
                     eventRetry.Set();
                     TrySetMessage(null, "“重试”按钮被按下(正在初始化对话框)");
                 };
@@ -2270,19 +2272,53 @@ namespace dp2SSL
                             WpfClientInfo.WriteInfoLog($"初始化开始时，从 all 集合中移走属于门 {door.Name} 的标签共 {remove_entities.Count} 个");
                         }
 
+                        //FontFamily old_font = null;
+                        App.Invoke(new Action(() =>
+                        {
+                            //old_font = progress.MessageFont;
+                            // 设为等宽字体
+                            //progress.MessageFont = new FontFamily("Courier New");
+                            progress.ProgressBar.Value = 0;
+                            progress.ProgressBar.Visibility = Visibility.Visible;
+                        }));
+
                         // TODO: 填充 RFID 图书标签信息
                         var initial_result = await ShelfData.newVersion_InitialShelfEntitiesAsync(
-                            new List<DoorItem> { door },
-                            silently,
-                            (s) =>
-                            {
-                                DisplayMessage(progress, s, "green");
-                                // Thread.Sleep(1000);
-                            },
-                            () =>
-                            {
-                                return _initialCancelled;
-                            }).ConfigureAwait(false);
+                        new List<DoorItem> { door },
+                        silently,
+                        /*
+                        (s) =>
+                        {
+                            DisplayMessage(progress, s, "green");
+                        },
+                        */
+                        (double min, double max, double value, string text) =>
+                        {
+                            if (min != -1 || max != -1 || value != -1)
+                                App.Invoke(new Action(() =>
+                                {
+                                    if (min != -1)
+                                        progress.ProgressBar.Minimum = min;
+                                    if (max != -1)
+                                        progress.ProgressBar.Maximum = max;
+                                    if (value != -1)
+                                        progress.ProgressBar.Value = value;
+                                }));
+                            if (text != null)
+                                DisplayMessage(progress, text);
+                        },
+                        () =>
+                        {
+                            return _initialCancelled;
+                        }).ConfigureAwait(false);
+
+                        /*
+                        // 恢复原先字体
+                        App.Invoke(new Action(() =>
+                        {
+                            progress.MessageFont = old_font;
+                        }));
+                        */
 
                         if (_initialCancelled)
                             return;

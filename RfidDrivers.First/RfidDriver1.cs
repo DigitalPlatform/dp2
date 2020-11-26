@@ -4694,15 +4694,22 @@ out string number);
                     ErrorCode = "lockNotFound"
                 };
 
-            // lock (_syncShelfLock)
+            lock (_syncShelfLock)
             {
 
                 List<LockState> states = new List<LockState>();
 
                 foreach (var current_lock in locks)
                 {
+                    int card_count = 0;
                     foreach (var card in path.CardNameList)
                     {
+                        /*
+                        // card 发生变化的时候故意延时一定时间
+                        if (card_count > 0)
+                            Thread.Sleep(10);
+                        */
+
                         foreach (var number in path.NumberList)
                         {
                             int addr = 1;
@@ -4739,15 +4746,29 @@ out string number);
 
                             {
                                 Byte sta = 0x00;
-                                int iret = RFIDLIB.miniLib_Lock.Mini_GetDoorStatus(current_lock.LockHandle,
-                                    (Byte)addr, // 1,
-                                    (Byte)index,
-                                    ref sta);
+                                int iret = 0;
+                                // 2020/11/26
+                                // 具备重试能力
+                                for (int i = 0; i < 2; i++)
+                                {
+                                    sta = 0x00;
+                                    iret = RFIDLIB.miniLib_Lock.Mini_GetDoorStatus(current_lock.LockHandle,
+                                        (Byte)addr, // 1,
+                                        (Byte)index,
+                                        ref sta);
+                                    if (iret == 0)
+                                        break;
+
+                                    /*
+                                    Thread.Sleep(10);
+                                    */
+                                }
+
                                 if (iret != 0)
                                     return new GetLockStateResult
                                     {
                                         Value = -1,
-                                        ErrorInfo = $"getDoorStatus error (lock name='{current_lock.Name}' index={index})"
+                                        ErrorInfo = $"getDoorStatus error (lock name='{current_lock.Name}' index={index} addr={addr})"
                                     };
 
                                 // 2020/10/23
@@ -4769,6 +4790,8 @@ out string number);
                                 });
                             }
                         }
+
+                        card_count++;
                     }
                 }
 
@@ -4855,7 +4878,7 @@ out string number);
         }
         */
 
-        // static object _syncShelfLock = new object();
+        static object _syncShelfLock = new object();
 
         // 开门
         // parameters:
@@ -4885,7 +4908,7 @@ out string number);
                     ErrorCode = "lockNotFound"
                 };
 
-            // lock (_syncShelfLock)
+            lock (_syncShelfLock)
             {
                 List<LockState> states = new List<LockState>();
 
