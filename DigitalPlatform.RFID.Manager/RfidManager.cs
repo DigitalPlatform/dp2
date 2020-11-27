@@ -351,7 +351,7 @@ new SetErrorEventArgs
                 && LockCommands != null)
                 {
 
-                    List<LockState> states = new List<LockState>();
+                    // List<LockState> states = new List<LockState>();
                     {
                         // parameters:
                         //      lockNameParam   为 "锁控板名字.卡编号.锁编号"。
@@ -364,6 +364,7 @@ new SetErrorEventArgs
                         else
                             Base.TriggerSetError(lock_result,
                                 new SetErrorEventArgs { Error = null }); // 清除以前的报错
+                        /*
                         if (lock_result.Value == -1)
                         {
                             // 注意 lock_result.Value == -1 时也会触发这个事件
@@ -374,8 +375,17 @@ new SetErrorEventArgs
                         }
                         if (lock_result.States != null)
                             states.AddRange(lock_result.States);
+                        */
+
+                        // 注意 lock_result.Value == -1 时也会触发这个事件
+                        ListLocks?.Invoke(channel, new ListLocksEventArgs
+                        {
+                            Result = lock_result
+                        });
+
                     }
 
+                    /*
                     if (states.Count > 0)
                     {
                         // 注意 lock_result.Value == -1 时也会触发这个事件
@@ -384,6 +394,8 @@ new SetErrorEventArgs
                             Result = new GetLockStateResult { States = states }
                         });
                     }
+                    */
+
                     // 门锁状态就绪
                     _lockReady = true;
                 }
@@ -499,7 +511,7 @@ new SetErrorEventArgs
                 if (_lockThread != "base2"
                 && lock_result != null)
                 {
-                    List<LockState> states = new List<LockState>();
+                    // List<LockState> states = new List<LockState>();
                     {
                         // parameters:
                         //      lockNameParam   为 "锁控板名字.卡编号.锁编号"。
@@ -512,6 +524,7 @@ new SetErrorEventArgs
                         else
                             Base.TriggerSetError(lock_result,
                                 new SetErrorEventArgs { Error = null }); // 清除以前的报错
+                        /*
                         if (lock_result.Value == -1)
                         {
                             // 注意 lock_result.Value == -1 时也会触发这个事件
@@ -522,8 +535,15 @@ new SetErrorEventArgs
                         }
                         if (lock_result.States != null)
                             states.AddRange(lock_result.States);
+                        */
+                        // 注意 lock_result.Value == -1 时也会触发这个事件
+                        ListLocks?.Invoke(channel, new ListLocksEventArgs
+                        {
+                            Result = lock_result
+                        });
                     }
 
+                    /*
                     if (states.Count > 0)
                     {
                         // 注意 lock_result.Value == -1 时也会触发这个事件
@@ -532,6 +552,8 @@ new SetErrorEventArgs
                             Result = new GetLockStateResult { States = states }
                         });
                     }
+                    */
+
                     // 门锁状态就绪
                     _lockReady = true;
                 }

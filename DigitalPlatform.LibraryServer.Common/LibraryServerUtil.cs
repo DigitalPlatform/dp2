@@ -101,20 +101,21 @@ namespace DigitalPlatform.LibraryServer
                 try
                 {
                     string strBorrowDate = ToLocalTime(borrow.GetAttribute("borrowDate"), "yyyy-MM-dd HH:mm");
-                    // string strBorrowPeriod = GetDisplayTimePeriodString(borrow.GetAttribute("borrowPeriod"));
-                    string strReturningDate = ToLocalTime(borrow.GetAttribute("returningDate"), "yyyy-MM-dd");
+                    // string strReturningDate = ToLocalTime(borrow.GetAttribute("returningDate"), "yyyy-MM-dd");
                     string strRecPath = borrow.GetAttribute("recPath");
-                    //string strIsOverdue = borrow.GetAttribute("isOverdue");
-                    //string strOverdueInfo = borrow.GetAttribute("overdueInfo1");
 
                     string strPeriod = borrow.GetAttribute("borrowPeriod");
                     string strRfc1123String = borrow.GetAttribute("returningDate");
 
                     if (string.IsNullOrEmpty(strRfc1123String) == false)
                     {
-                        DateTime time = DateTimeUtil.FromRfc1123DateTimeString(strRfc1123String);
-                        TimeSpan delta = DateTime.Now - time.ToLocalTime();
+                        string strUnit = "day";
                         if (strPeriod.IndexOf("hour") != -1)
+                            strUnit = "hour";
+
+                        DateTime time = DateTimeUtil.FromRfc1123DateTimeString(strRfc1123String);
+                        TimeSpan delta = RoundTime(strUnit, DateTime.Now) - RoundTime(strUnit, time.ToLocalTime());
+                        if (strUnit == "hour")
                         {
                             // TODO: 如果没有册条码号则用 refID 代替
                             if (delta.Hours > 0)
@@ -146,6 +147,26 @@ namespace DigitalPlatform.LibraryServer
             }
 
             return 0;
+        }
+
+        // 注意 time 中的时间应该是本地时间
+        public static DateTime RoundTime(string strUnit,
+        DateTime time)
+        {
+            if (strUnit == "day" || string.IsNullOrEmpty(strUnit) == true)
+            {
+                return new DateTime(time.Year, time.Month, time.Day,
+                    12, 0, 0, 0);
+            }
+            else if (strUnit == "hour")
+            {
+                return new DateTime(time.Year, time.Month, time.Day,
+                    time.Hour, 0, 0, 0);
+            }
+            else
+            {
+                throw new ArgumentException("未知的时间单位 '" + strUnit + "'");
+            }
         }
 
         // 检查借阅证是否超期，是否有挂失等状态

@@ -530,6 +530,8 @@ namespace dp2SSL
                     {
                         try
                         {
+                            // SetGlobalError("test", "content");
+
                             // 初始化之前开灯，让使用者感觉舒服一些(感觉机器在活动状态)
                             RfidManager.TurnShelfLamp("*", "turnOn");
 
