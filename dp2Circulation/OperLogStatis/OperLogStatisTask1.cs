@@ -442,12 +442,13 @@ connection))
 
 #endif
 
+    /*
     // 任务数据结构
     public class Task1
     {
         TableCollection tables = new TableCollection();
 
     }
-
+    */
 
 }

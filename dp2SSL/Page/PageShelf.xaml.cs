@@ -54,6 +54,10 @@ namespace dp2SSL
         {
             InitializeComponent();
 
+#if PATRONREADER_HEARTBEAT
+            patronReaderInfo.Visibility = Visibility.Visible;
+#endif
+
             _patronErrorTable = new ErrorTable((e) =>
             {
                 _patron.Error = e;
@@ -1895,12 +1899,15 @@ namespace dp2SSL
 
 #else
 
+#if PATRONREADER_HEARTBEAT
         static int _patronReadCount = 0;
+#endif
 
 #pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
         private async void App_PatronTagChanged(object sender, NewTagChangedEventArgs e)
 #pragma warning restore VSTHRD100 // 避免使用 Async Void 方法
         {
+#if PATRONREADER_HEARTBEAT
             if (e.Source == "base2")
             {
                 _patronReadCount++;
@@ -1909,6 +1916,7 @@ namespace dp2SSL
                     patronReaderInfo.Text = _patronReadCount.ToString();
                 }));
             }
+#endif
 
             {
                 // "initial" 模式下，在读者证读卡器上扫 ISO15693 的标签可以查看图书内容

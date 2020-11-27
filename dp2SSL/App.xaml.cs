@@ -992,7 +992,7 @@ namespace dp2SSL
             this._channelPool.Clear();
         }
 
-#region dp2library 服务器有关
+        #region dp2library 服务器有关
 
         public static string dp2ServerUrl
         {
@@ -1019,7 +1019,7 @@ namespace dp2SSL
             }
         }
 
-#endregion
+        #endregion
 
         // 当前采用的通讯协议
         public static string Protocol
@@ -1032,7 +1032,7 @@ namespace dp2SSL
             }
         }
 
-#region SIP2 服务器有关
+        #region SIP2 服务器有关
 
         public static string SipServerUrl
         {
@@ -1059,9 +1059,9 @@ namespace dp2SSL
             }
         }
 
-#endregion
+        #endregion
 
-#region 消息服务器相关参数
+        #region 消息服务器相关参数
 
         public static string messageServerUrl
         {
@@ -1130,7 +1130,7 @@ namespace dp2SSL
             return new NormalResult();
         }
 
-#endregion
+        #endregion
 
         public static string RfidUrl
         {
@@ -1370,7 +1370,7 @@ namespace dp2SSL
             return Cryptography.Encrypt(strPlainText, EncryptKey);
         }
 
-#region LibraryChannel
+        #region LibraryChannel
 
         public class Account
         {
@@ -1633,7 +1633,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             base.OnDeactivated(e);
         }
 
-#endregion
+        #endregion
 
         public void AddErrors(string type, List<string> errors)
         {
@@ -1733,8 +1733,9 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                             (readerName, uid, antennaID) =>
                             {
                                 // TODO: source == "initial" 时这里详细显示进度
-                                GetTagInfoProgressChanged?.Invoke(sender, 
-                                    new DigitalPlatform.ProgressChangedEventArgs { 
+                                GetTagInfoProgressChanged?.Invoke(sender,
+                                    new DigitalPlatform.ProgressChangedEventArgs
+                                    {
                                         Message = $"{uid}",
                                         Start = -1, // 0,
                                         End = -1,   // e.Result.Results.Count,
@@ -1768,9 +1769,9 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                         GetTagInfoProgressChanged?.Invoke(sender,
 new DigitalPlatform.ProgressChangedEventArgs
 {
-Start = 0,
-End = e.Result.Results.Count,
-Value = e.Result.Results.Count,
+    Start = 0,
+    End = e.Result.Results.Count,
+    Value = e.Result.Results.Count,
 });
 
                         // 标签总数显示 只显示标签数，不再区分图书标签和读者卡
@@ -1791,7 +1792,9 @@ Value = e.Result.Results.Count,
                     // 书柜的读者证读卡器
                     if (isShelf && e.Source == "base2")
                     {
+#if PATRONREADER_HEARTBEAT
                         bool triggered = false;
+#endif
                         ShelfData.PatronTagList.Refresh(// sender as BaseChannel<IRfid>,
                             e.ReaderNameList,
                             e.Result.Results,
@@ -1809,7 +1812,9 @@ Value = e.Result.Results.Count,
                                     RemoveTags = remove_tags,
                                     Source = e.Source,
                                 });
+#if PATRONREADER_HEARTBEAT
                                 triggered = true;
+#endif
                             },
                             (type, text) =>
                             {
@@ -1820,6 +1825,7 @@ Value = e.Result.Results.Count,
                         if (CurrentApp != null)
                             CurrentApp.Number = $"{ShelfData.BookTagList.Tags.Count}:{ShelfData.PatronTagList.Tags.Count}";
 
+#if PATRONREADER_HEARTBEAT
                         // 让 PatronTagChanged 事件也能感知到心跳
                         if (triggered == false)
                         {
@@ -1828,6 +1834,7 @@ Value = e.Result.Results.Count,
                                 Source = e.Source,
                             });
                         }
+#endif
                     }
 
 
@@ -1893,8 +1900,8 @@ Value = e.Result.Results.Count,
                                 (type, text) =>
                                 {
                                     RfidManager.TriggerSetError(null/*this*/, new SetErrorEventArgs { Error = text });
-                                // TagSetError?.Invoke(this, new SetErrorEventArgs { Error = text });
-                            });
+                                    // TagSetError?.Invoke(this, new SetErrorEventArgs { Error = text });
+                                });
 
                         // 标签总数显示 图书+读者卡
                         if (CurrentApp != null)
@@ -1903,7 +1910,7 @@ Value = e.Result.Results.Count,
                     }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 // 2020/10/30
                 SetError("rfid", ex.Message);
@@ -2470,7 +2477,7 @@ Value = e.Result.Results.Count,
         }
 
 
-#region z-order
+        #region z-order
 
         // https://stackoverflow.com/questions/3473016/how-to-sort-windows-by-z-index
         public static IEnumerable<Window> SortWindowsTopToBottom(IEnumerable<Window> unsorted)
@@ -2489,9 +2496,9 @@ Value = e.Result.Results.Count,
         [DllImport("User32")] static extern IntPtr GetTopWindow(IntPtr hWnd);
         [DllImport("User32")] static extern IntPtr GetWindow(IntPtr hWnd, uint wCmd);
 
-#endregion
+        #endregion
 
-#region EdgeUI
+        #region EdgeUI
 
         /*
 HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\EdgeUI
@@ -2597,7 +2604,7 @@ AllowEdgeSwipe DWORD
             return principal.IsInRole(WindowsBuiltInRole.Administrator);
         }
 
-#endregion
+        #endregion
     }
 
     public delegate void NewTagChangedEventHandler(object sender,

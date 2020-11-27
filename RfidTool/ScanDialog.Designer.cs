@@ -56,6 +56,7 @@ namespace RfidTool
             this.textBox_barcode.Name = "textBox_barcode";
             this.textBox_barcode.Size = new System.Drawing.Size(326, 67);
             this.textBox_barcode.TabIndex = 1;
+            this.textBox_barcode.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBox_barcode_KeyPress);
             // 
             // label2
             // 
@@ -131,9 +132,13 @@ namespace RfidTool
             this.Controls.Add(this.label2);
             this.Controls.Add(this.textBox_barcode);
             this.Controls.Add(this.label1);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
             this.Name = "ScanDialog";
             this.ShowIcon = false;
             this.Text = "扫描并写入";
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.ScanDialog_FormClosed);
+            this.Load += new System.EventHandler(this.ScanDialog_Load);
+            this.VisibleChanged += new System.EventHandler(this.ScanDialog_VisibleChanged);
             this.ResumeLayout(false);
             this.PerformLayout();
 

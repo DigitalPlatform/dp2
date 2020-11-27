@@ -31,6 +31,7 @@ namespace RfidTool
         {
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.MenuItem_file = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_writeBookTags = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_exit = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
@@ -41,7 +42,6 @@ namespace RfidTool
             this.columnHeader_pii = new System.Windows.Forms.ColumnHeader();
             this.columnHeader_tou = new System.Windows.Forms.ColumnHeader();
             this.columnHeader_oi = new System.Windows.Forms.ColumnHeader();
-            this.MenuItem_writeBookTags = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage_writeTag.SuspendLayout();
@@ -54,7 +54,7 @@ namespace RfidTool
             this.MenuItem_file});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(800, 36);
+            this.menuStrip1.Size = new System.Drawing.Size(985, 36);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -67,28 +67,33 @@ namespace RfidTool
             this.MenuItem_file.Size = new System.Drawing.Size(97, 32);
             this.MenuItem_file.Text = "文件(&F)";
             // 
+            // MenuItem_writeBookTags
+            // 
+            this.MenuItem_writeBookTags.Name = "MenuItem_writeBookTags";
+            this.MenuItem_writeBookTags.Size = new System.Drawing.Size(303, 40);
+            this.MenuItem_writeBookTags.Text = "写入图书标签(&B) ...";
+            // 
             // MenuItem_exit
             // 
             this.MenuItem_exit.Name = "MenuItem_exit";
             this.MenuItem_exit.Size = new System.Drawing.Size(303, 40);
             this.MenuItem_exit.Text = "退出";
-            this.MenuItem_exit.Click += MenuItem_exit_Click;
             // 
             // toolStrip1
             // 
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(28, 28);
             this.toolStrip1.Location = new System.Drawing.Point(0, 36);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(800, 25);
+            this.toolStrip1.Size = new System.Drawing.Size(985, 25);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
             // statusStrip1
             // 
             this.statusStrip1.ImageScalingSize = new System.Drawing.Size(28, 28);
-            this.statusStrip1.Location = new System.Drawing.Point(0, 428);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 518);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(800, 22);
+            this.statusStrip1.Size = new System.Drawing.Size(985, 22);
             this.statusStrip1.TabIndex = 2;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -99,7 +104,7 @@ namespace RfidTool
             this.tabControl1.Location = new System.Drawing.Point(0, 61);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(800, 367);
+            this.tabControl1.Size = new System.Drawing.Size(985, 457);
             this.tabControl1.TabIndex = 3;
             // 
             // tabPage_writeTag
@@ -108,7 +113,7 @@ namespace RfidTool
             this.tabPage_writeTag.Location = new System.Drawing.Point(4, 37);
             this.tabPage_writeTag.Name = "tabPage_writeTag";
             this.tabPage_writeTag.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage_writeTag.Size = new System.Drawing.Size(792, 326);
+            this.tabPage_writeTag.Size = new System.Drawing.Size(977, 416);
             this.tabPage_writeTag.TabIndex = 0;
             this.tabPage_writeTag.Text = "写入标签";
             this.tabPage_writeTag.UseVisualStyleBackColor = true;
@@ -126,7 +131,7 @@ namespace RfidTool
             this.listView_writeHistory.Location = new System.Drawing.Point(3, 3);
             this.listView_writeHistory.MultiSelect = false;
             this.listView_writeHistory.Name = "listView_writeHistory";
-            this.listView_writeHistory.Size = new System.Drawing.Size(786, 320);
+            this.listView_writeHistory.Size = new System.Drawing.Size(971, 410);
             this.listView_writeHistory.TabIndex = 0;
             this.listView_writeHistory.UseCompatibleStateImageBehavior = false;
             this.listView_writeHistory.View = System.Windows.Forms.View.Details;
@@ -155,18 +160,11 @@ namespace RfidTool
             this.columnHeader_oi.Text = "OI(所属机构)";
             this.columnHeader_oi.Width = 260;
             // 
-            // MenuItem_writeBookTags
-            // 
-            this.MenuItem_writeBookTags.Name = "MenuItem_writeBookTags";
-            this.MenuItem_writeBookTags.Size = new System.Drawing.Size(303, 40);
-            this.MenuItem_writeBookTags.Text = "写入图书标签(&B) ...";
-            this.MenuItem_writeBookTags.Click += MenuItem_writeBookTags_Click;
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(13F, 28F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.ClientSize = new System.Drawing.Size(985, 540);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.toolStrip1);
@@ -174,6 +172,9 @@ namespace RfidTool
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "MainForm";
             this.Text = "Form1";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainForm_FormClosed);
+            this.Load += new System.EventHandler(this.MainForm_Load);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.tabControl1.ResumeLayout(false);
