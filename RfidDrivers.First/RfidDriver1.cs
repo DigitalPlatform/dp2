@@ -4667,6 +4667,13 @@ out Reader reader);
         }
         */
 
+        const int RETRY_COUNT = 2;  // 2
+
+        // 出错次数
+        static int _getErrorCount = 0;
+        // 重试后依然出错的次数
+        static int _getRetryErrorCount = 0;
+
         // 探测锁状态
         // parameters:
         // parameters:
@@ -4694,11 +4701,12 @@ out string number);
                     ErrorCode = "lockNotFound"
                 };
 
-            lock (_syncShelfLock)
+            // lock (_syncShelfLock)
             {
 
                 List<LockState> states = new List<LockState>();
-
+                List<string> errors = new List<string>();
+                int warning_count = 0;
                 foreach (var current_lock in locks)
                 {
                     int card_count = 0;
@@ -4706,8 +4714,10 @@ out string number);
                     {
                         /*
                         // card 发生变化的时候故意延时一定时间
-                        if (card_count > 0)
-                            Thread.Sleep(10);
+                        if (_getErrorCount > 0 // 曾经发生过错误
+                            && card_count > 0
+                            )
+                            Thread.Sleep(1000);
                         */
 
                         foreach (var number in path.NumberList)
@@ -4749,8 +4759,15 @@ out string number);
                                 int iret = 0;
                                 // 2020/11/26
                                 // 具备重试能力
-                                for (int i = 0; i < 2; i++)
+                                for (int i = 0; i < RETRY_COUNT; i++)
                                 {
+                                    /*
+                                    if (i > 0)
+                                    {
+                                        Thread.Sleep(10);
+                                    } 
+                                    */
+                                    
                                     sta = 0x00;
                                     iret = RFIDLIB.miniLib_Lock.Mini_GetDoorStatus(current_lock.LockHandle,
                                         (Byte)addr, // 1,
@@ -4759,17 +4776,26 @@ out string number);
                                     if (iret == 0)
                                         break;
 
-                                    /*
-                                    Thread.Sleep(10);
-                                    */
+                                    if (i > 0)
+                                    {
+                                        _getErrorCount++;
+                                        warning_count++;
+                                    }
                                 }
 
                                 if (iret != 0)
+                                {
+                                    _getRetryErrorCount++;
+                                    /*
                                     return new GetLockStateResult
                                     {
                                         Value = -1,
                                         ErrorInfo = $"getDoorStatus error (lock name='{current_lock.Name}' index={index} addr={addr})"
                                     };
+                                    */
+                                    // 累积到最后返回前统一报错
+                                    errors.Add($"getDoorStatus error (lock name='{current_lock.Name}' index={index} addr={addr})");
+                                }
 
                                 // 2020/10/23
                                 _lockMemory.Set(current_path, sta == 0x00 ? "open" : "close");
@@ -4795,10 +4821,23 @@ out string number);
                     }
                 }
 
+                // testing
+                // warning_count = 2;
+
+                // 最后统一报错
+                if (errors.Count > 0)
+                    return new GetLockStateResult
+                    {
+                        States = states,    // 虽然报错，但依然给出了部分可用的返回状态
+                        Value = -1,
+                        ErrorInfo = StringUtil.MakePathList(errors, "; "),
+                    };
                 return new GetLockStateResult
                 {
                     Value = 0,
-                    States = states
+                    States = states,
+                    ErrorInfo = warning_count == 0 ? null : $"有 {warning_count} 次出错经重试解决",
+                    ErrorCode = warning_count == 0 ? null : "retryWarning"  // 曾经发生过重试
                 };
             }
         }
@@ -4878,7 +4917,7 @@ out string number);
         }
         */
 
-        static object _syncShelfLock = new object();
+        // static object _syncShelfLock = new object();
 
         // 开门
         // parameters:
@@ -4908,7 +4947,7 @@ out string number);
                     ErrorCode = "lockNotFound"
                 };
 
-            lock (_syncShelfLock)
+            // lock (_syncShelfLock)
             {
                 List<LockState> states = new List<LockState>();
 

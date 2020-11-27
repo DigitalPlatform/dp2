@@ -47,6 +47,11 @@ namespace RfidCenter
         // 获得门锁状态
         public GetLockStateResult GetShelfLockState(string lockNameList)
         {
+            GetLockStateResult total_result = new GetLockStateResult();
+
+            List<string> warnings = new List<string>();
+            List<string> errorcodes = new List<string>();
+
             List<LockState> states = new List<LockState>();
             string[] list = lockNameList.Split(new char[] { ',' });
             foreach (var one in list)
@@ -67,10 +72,27 @@ namespace RfidCenter
 
                 if (result.Value == -1)
                     return result;
+                if (result.ErrorInfo != null)
+                    warnings.Add(result.ErrorInfo);
+                if (result.ErrorCode != null)
+                    errorcodes.Add(result.ErrorCode);
                 states.AddRange(result.States);
             }
 
-            return new GetLockStateResult { Value = 0, States = states };
+            if (warnings.Count > 0)
+            {
+                StringUtil.RemoveDupNoSort(ref warnings);
+                total_result.ErrorInfo = StringUtil.MakePathList(warnings, "; ");
+            }
+            if (errorcodes.Count > 0)
+            {
+                StringUtil.RemoveDupNoSort(ref errorcodes);
+                total_result.ErrorCode = StringUtil.MakePathList(errorcodes, "; ");
+            }
+
+            total_result.States = states;
+            return total_result;
+            // return new GetLockStateResult { Value = 0, States = states };
         }
 
         // 开锁。包括真实开锁和模拟开锁功能
@@ -1085,7 +1107,7 @@ new_password);
                     Program.MainForm.InSimuLock = true;
                     return new NormalResult();
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     return new NormalResult
                     {

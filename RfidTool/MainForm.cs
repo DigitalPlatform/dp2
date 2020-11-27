@@ -17,5 +17,15 @@ namespace RfidTool
             InitializeComponent();
         }
 
+        private void MenuItem_writeBookTags_Click(object sender, System.EventArgs e)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        private void MenuItem_exit_Click(object sender, System.EventArgs e)
+        {
+            throw new System.NotImplementedException();
+        }
+
     }
 }

@@ -30,15 +30,21 @@ namespace RfidTool
         private void InitializeComponent()
         {
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.MenuItem_file = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_exit = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.tabControl1 = new System.Windows.Forms.TabControl();
-            this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.MenuItem_file = new System.Windows.Forms.ToolStripMenuItem();
-            this.MenuItem_exit = new System.Windows.Forms.ToolStripMenuItem();
+            this.tabPage_writeTag = new System.Windows.Forms.TabPage();
+            this.listView_writeHistory = new System.Windows.Forms.ListView();
+            this.columnHeader_uid = new System.Windows.Forms.ColumnHeader();
+            this.columnHeader_pii = new System.Windows.Forms.ColumnHeader();
+            this.columnHeader_tou = new System.Windows.Forms.ColumnHeader();
+            this.columnHeader_oi = new System.Windows.Forms.ColumnHeader();
+            this.MenuItem_writeBookTags = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
+            this.tabPage_writeTag.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -51,6 +57,22 @@ namespace RfidTool
             this.menuStrip1.Size = new System.Drawing.Size(800, 36);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
+            // 
+            // MenuItem_file
+            // 
+            this.MenuItem_file.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.MenuItem_writeBookTags,
+            this.MenuItem_exit});
+            this.MenuItem_file.Name = "MenuItem_file";
+            this.MenuItem_file.Size = new System.Drawing.Size(97, 32);
+            this.MenuItem_file.Text = "文件(&F)";
+            // 
+            // MenuItem_exit
+            // 
+            this.MenuItem_exit.Name = "MenuItem_exit";
+            this.MenuItem_exit.Size = new System.Drawing.Size(303, 40);
+            this.MenuItem_exit.Text = "退出";
+            this.MenuItem_exit.Click += MenuItem_exit_Click;
             // 
             // toolStrip1
             // 
@@ -72,8 +94,7 @@ namespace RfidTool
             // 
             // tabControl1
             // 
-            this.tabControl1.Controls.Add(this.tabPage1);
-            this.tabControl1.Controls.Add(this.tabPage2);
+            this.tabControl1.Controls.Add(this.tabPage_writeTag);
             this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl1.Location = new System.Drawing.Point(0, 61);
             this.tabControl1.Name = "tabControl1";
@@ -81,39 +102,65 @@ namespace RfidTool
             this.tabControl1.Size = new System.Drawing.Size(800, 367);
             this.tabControl1.TabIndex = 3;
             // 
-            // tabPage1
+            // tabPage_writeTag
             // 
-            this.tabPage1.Location = new System.Drawing.Point(4, 37);
-            this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(792, 326);
-            this.tabPage1.TabIndex = 0;
-            this.tabPage1.Text = "tabPage1";
-            this.tabPage1.UseVisualStyleBackColor = true;
+            this.tabPage_writeTag.Controls.Add(this.listView_writeHistory);
+            this.tabPage_writeTag.Location = new System.Drawing.Point(4, 37);
+            this.tabPage_writeTag.Name = "tabPage_writeTag";
+            this.tabPage_writeTag.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage_writeTag.Size = new System.Drawing.Size(792, 326);
+            this.tabPage_writeTag.TabIndex = 0;
+            this.tabPage_writeTag.Text = "写入标签";
+            this.tabPage_writeTag.UseVisualStyleBackColor = true;
             // 
-            // tabPage2
+            // listView_writeHistory
             // 
-            this.tabPage2.Location = new System.Drawing.Point(4, 37);
-            this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(792, 338);
-            this.tabPage2.TabIndex = 1;
-            this.tabPage2.Text = "tabPage2";
-            this.tabPage2.UseVisualStyleBackColor = true;
+            this.listView_writeHistory.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnHeader_uid,
+            this.columnHeader_pii,
+            this.columnHeader_tou,
+            this.columnHeader_oi});
+            this.listView_writeHistory.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.listView_writeHistory.FullRowSelect = true;
+            this.listView_writeHistory.HideSelection = false;
+            this.listView_writeHistory.Location = new System.Drawing.Point(3, 3);
+            this.listView_writeHistory.MultiSelect = false;
+            this.listView_writeHistory.Name = "listView_writeHistory";
+            this.listView_writeHistory.Size = new System.Drawing.Size(786, 320);
+            this.listView_writeHistory.TabIndex = 0;
+            this.listView_writeHistory.UseCompatibleStateImageBehavior = false;
+            this.listView_writeHistory.View = System.Windows.Forms.View.Details;
             // 
-            // MenuItem_file
+            // columnHeader_uid
             // 
-            this.MenuItem_file.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.MenuItem_exit});
-            this.MenuItem_file.Name = "MenuItem_file";
-            this.MenuItem_file.Size = new System.Drawing.Size(97, 32);
-            this.MenuItem_file.Text = "文件(&F)";
+            this.columnHeader_uid.Name = "columnHeader_uid";
+            this.columnHeader_uid.Text = "UID";
+            this.columnHeader_uid.Width = 160;
             // 
-            // MenuItem_exit
+            // columnHeader_pii
             // 
-            this.MenuItem_exit.Name = "MenuItem_exit";
-            this.MenuItem_exit.Size = new System.Drawing.Size(171, 40);
-            this.MenuItem_exit.Text = "退出";
+            this.columnHeader_pii.Name = "columnHeader_pii";
+            this.columnHeader_pii.Text = "PII(条码号)";
+            this.columnHeader_pii.Width = 160;
+            // 
+            // columnHeader_tou
+            // 
+            this.columnHeader_tou.Name = "columnHeader_tou";
+            this.columnHeader_tou.Text = "TOU(用途)";
+            this.columnHeader_tou.Width = 160;
+            // 
+            // columnHeader_oi
+            // 
+            this.columnHeader_oi.Name = "columnHeader_oi";
+            this.columnHeader_oi.Text = "OI(所属机构)";
+            this.columnHeader_oi.Width = 260;
+            // 
+            // MenuItem_writeBookTags
+            // 
+            this.MenuItem_writeBookTags.Name = "MenuItem_writeBookTags";
+            this.MenuItem_writeBookTags.Size = new System.Drawing.Size(303, 40);
+            this.MenuItem_writeBookTags.Text = "写入图书标签(&B) ...";
+            this.MenuItem_writeBookTags.Click += MenuItem_writeBookTags_Click;
             // 
             // MainForm
             // 
@@ -130,6 +177,7 @@ namespace RfidTool
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.tabControl1.ResumeLayout(false);
+            this.tabPage_writeTag.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -141,10 +189,15 @@ namespace RfidTool
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.TabControl tabControl1;
-        private System.Windows.Forms.TabPage tabPage1;
-        private System.Windows.Forms.TabPage tabPage2;
+        private System.Windows.Forms.TabPage tabPage_writeTag;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_file;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_exit;
+        private System.Windows.Forms.ListView listView_writeHistory;
+        private System.Windows.Forms.ColumnHeader columnHeader_uid;
+        private System.Windows.Forms.ColumnHeader columnHeader_pii;
+        private System.Windows.Forms.ColumnHeader columnHeader_tou;
+        private System.Windows.Forms.ColumnHeader columnHeader_oi;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_writeBookTags;
     }
 }
 

@@ -32,7 +32,7 @@ using System.Runtime.InteropServices;
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 // 方法是按如下所示使用“*”: :
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.11.*")]
+[assembly: AssemblyVersion("1.11.3")]   // 1.11.*
 [assembly: AssemblyFileVersion("1.11.0.0")]
 
 // V1.1 2019/2/21 支持 32-bit Windows 环境
@@ -46,3 +46,6 @@ using System.Runtime.InteropServices;
 // V1.9 2020/9/2 用上了 RFID SDK 2020 年 4 月的 DLL。并且增加了 CompactLog 机制用来记录 inventory() error，当十分钟内这类出错累计超过 10 次，则会自动重启一次 RFID 驱动
 // V1.10 2020/9/22 用回 RFID SDK 2019 年底的 DLL
 // V1.11 2020/11/21 OpenShelfLock() API 增加了一个新版本。锁被打开后立即关闭情况得到了解决；优化了锁关闭状态下探测状态的速度
+//      1.11.1 (2020/11/27) 读取锁状态增加了重试机制
+//      1.11.2 去掉了锁操作的 lock()
+//      1.11.3 读取锁状态出错重试以后即便解决了，也会返回警告错误代码

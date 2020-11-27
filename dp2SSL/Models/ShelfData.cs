@@ -247,6 +247,11 @@ namespace dp2SSL
                 return;
             }
 
+            if (e.Result.ErrorCode == "retryWarning")
+                App.SetError("shelfLock", "警告: " + e.Result.ErrorInfo);
+            else
+                App.SetError("shelfLock", null);
+
             // List<DoorItem> processed = new List<DoorItem>();
             // bool triggerAllClosed = false;
             {
@@ -1858,7 +1863,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                     if (unit == "hour")
                         returning = DateTime.Now.AddHours(days);
                     // 正规化时间
-                    returning = RoundTime(unit, returning);
+                    returning = LibraryServerUtil.RoundTime(unit, returning);
                     borrow_info.LatestReturnTime = DateTimeUtil.Rfc1123DateTimeStringEx(returning);
                     return null;
                 }
@@ -2290,25 +2295,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             };
         }
 
-        // 注意 time 中的时间应该是本地时间
-        static DateTime RoundTime(string strUnit,
-        DateTime time)
-        {
-            if (strUnit == "day" || string.IsNullOrEmpty(strUnit) == true)
-            {
-                return new DateTime(time.Year, time.Month, time.Day,
-                    12, 0, 0, 0);
-            }
-            else if (strUnit == "hour")
-            {
-                return new DateTime(time.Year, time.Month, time.Day,
-                    time.Hour, 0, 0, 0);
-            }
-            else
-            {
-                throw new ArgumentException("未知的时间单位 '" + strUnit + "'");
-            }
-        }
+
 
 #if NO
         // 获得一个读者当前的在借册册数
