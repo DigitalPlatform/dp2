@@ -1,0 +1,126 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{27C5FC08-F902-4707-81E2-B7FE5DC5E16F}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>TestShelfLock</RootNamespace>
+    <AssemblyName>TestShelfLock</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Form1.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form1.Designer.cs">
+      <DependentUpon>Form1.cs</DependentUpon>
+    </Compile>
+    <Compile Include="IShelfLockDriver.cs" />
+    <Compile Include="GetLockStateDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GetLockStateDialog.Designer.cs">
+      <DependentUpon>GetLockStateDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="OpenLockDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="OpenLockDialog.Designer.cs">
+      <DependentUpon>OpenLockDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ShelfLockDriver.cs" />
+    <EmbeddedResource Include="Form1.resx">
+      <DependentUpon>Form1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GetLockStateDialog.resx">
+      <DependentUpon>GetLockStateDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="OpenLockDialog.resx">
+      <DependentUpon>OpenLockDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DigitalPlatform.CirculationClient\DigitalPlatform.CirculationClient.csproj">
+      <Project>{397bb898-88e0-41d6-8d01-09233c7ffc75}</Project>
+      <Name>DigitalPlatform.CirculationClient</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.CommonControl\DigitalPlatform.CommonControl.csproj">
+      <Project>{334e1b2b-5373-4c80-a971-bff213ff304b}</Project>
+      <Name>DigitalPlatform.CommonControl</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.RFID\DigitalPlatform.RFID.csproj">
+      <Project>{9d26d2ad-eabb-4c32-8706-fb9e323faf01}</Project>
+      <Name>DigitalPlatform.RFID</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform\4.0\DigitalPlatform.csproj">
+      <Project>{bdd43275-eaa0-4670-8ba3-0db5cd7598dd}</Project>
+      <Name>DigitalPlatform</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\dp-library\DigitalPlatform.Core\DigitalPlatform.Core.csproj">
+      <Project>{c5b517c1-7344-45a5-89dc-06a9b130ae36}</Project>
+      <Name>DigitalPlatform.Core</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

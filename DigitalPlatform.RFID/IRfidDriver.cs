@@ -510,7 +510,7 @@ uint new_password);
                 text.Append($"States.Count={States.Count}\r\n");
                 foreach (var state in this.States)
                 {
-                    text.Append($"{i + 1}) {state.ToString()}");
+                    text.Append($"{i + 1}) {state.ToString()}\r\n");
                     i++;
                 }
             }
