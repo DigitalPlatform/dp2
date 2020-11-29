@@ -139,9 +139,10 @@ namespace DigitalPlatform.RFID
                 _sp.StopBits = (StopBits)Enum.Parse(typeof(StopBits), stopBits);
                 _sp.Parity = (Parity)Enum.Parse(typeof(Parity), parity);
                 _sp.Handshake = (Handshake)Enum.Parse(typeof(Handshake), handshake);
-                _sp.WriteTimeout = 1000; /*Write time out*/
+                _sp.WriteTimeout = 2000; /*Write time out*/
+                _sp.ErrorReceived += _sp_ErrorReceived;
+                _sp.DataReceived += new SerialDataReceivedEventHandler(DataReceived);
                 _sp.Open();
-                // _sp.DataReceived += new SerialDataReceivedEventHandler(DataReceived);
                 args.isOpend = true;
             }
             catch (System.Exception ex)
@@ -159,6 +160,12 @@ namespace DigitalPlatform.RFID
             return true;
         }
 
+        public SerialError SerialError { get; set; }
+
+        private void _sp_ErrorReceived(object sender, SerialErrorReceivedEventArgs e)
+        {
+            this.SerialError = e.EventType;
+        }
 
         /**
          *  Take care to avoid deadlock when calling Close on the SerialPort 

@@ -267,7 +267,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrinterDriver.Yanke", "Prin
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Midi", "midi-dot-net\Midi\Midi.csproj", "{F60D8B7B-2D2E-4B94-A736-3783FFE1A25C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RfidTool", "RfidTool\RfidTool.csproj", "{0C564184-EFA2-4690-9FA2-D987074641D8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RfidTool", "RfidTool\RfidTool.csproj", "{0C564184-EFA2-4690-9FA2-D987074641D8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestShelfLock", "TestShelfLock\TestShelfLock.csproj", "{27C5FC08-F902-4707-81E2-B7FE5DC5E16F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -2259,6 +2261,24 @@ Global
 		{0C564184-EFA2-4690-9FA2-D987074641D8}.Test|Mixed Platforms.Build.0 = Debug|Any CPU
 		{0C564184-EFA2-4690-9FA2-D987074641D8}.Test|x86.ActiveCfg = Debug|Any CPU
 		{0C564184-EFA2-4690-9FA2-D987074641D8}.Test|x86.Build.0 = Debug|Any CPU
+		{27C5FC08-F902-4707-81E2-B7FE5DC5E16F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{27C5FC08-F902-4707-81E2-B7FE5DC5E16F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{27C5FC08-F902-4707-81E2-B7FE5DC5E16F}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{27C5FC08-F902-4707-81E2-B7FE5DC5E16F}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{27C5FC08-F902-4707-81E2-B7FE5DC5E16F}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{27C5FC08-F902-4707-81E2-B7FE5DC5E16F}.Debug|x86.Build.0 = Debug|Any CPU
+		{27C5FC08-F902-4707-81E2-B7FE5DC5E16F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{27C5FC08-F902-4707-81E2-B7FE5DC5E16F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{27C5FC08-F902-4707-81E2-B7FE5DC5E16F}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{27C5FC08-F902-4707-81E2-B7FE5DC5E16F}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{27C5FC08-F902-4707-81E2-B7FE5DC5E16F}.Release|x86.ActiveCfg = Release|Any CPU
+		{27C5FC08-F902-4707-81E2-B7FE5DC5E16F}.Release|x86.Build.0 = Release|Any CPU
+		{27C5FC08-F902-4707-81E2-B7FE5DC5E16F}.Test|Any CPU.ActiveCfg = Debug|Any CPU
+		{27C5FC08-F902-4707-81E2-B7FE5DC5E16F}.Test|Any CPU.Build.0 = Debug|Any CPU
+		{27C5FC08-F902-4707-81E2-B7FE5DC5E16F}.Test|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{27C5FC08-F902-4707-81E2-B7FE5DC5E16F}.Test|Mixed Platforms.Build.0 = Debug|Any CPU
+		{27C5FC08-F902-4707-81E2-B7FE5DC5E16F}.Test|x86.ActiveCfg = Debug|Any CPU
+		{27C5FC08-F902-4707-81E2-B7FE5DC5E16F}.Test|x86.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
