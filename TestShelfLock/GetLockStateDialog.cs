@@ -126,6 +126,12 @@ namespace TestShelfLock
                         break;
                     count++;
                 }
+
+                this.Invoke((Action)(() =>
+                {
+                    this.button_stopLoop.Enabled = false;
+                    this.button_loopQuery.Enabled = true;
+                }));
             });
         }
 
