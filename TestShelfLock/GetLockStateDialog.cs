@@ -155,5 +155,13 @@ namespace TestShelfLock
                     "");
             }
         }
+
+        private void button_openLock_Click(object sender, EventArgs e)
+        {
+            OpenDriver();
+
+            var result = _driver.OpenShelfLock(this.textBox_lockPath.Text, "");
+            this.textBox_result.Text = result.ToString();
+        }
     }
 }
