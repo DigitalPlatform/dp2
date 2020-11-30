@@ -5,13 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
+using System.Collections;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using DigitalPlatform;
-using DigitalPlatform.RFID;
+// using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
-using System.Collections;
 
 namespace TestShelfLock
 {
@@ -239,13 +239,25 @@ namespace TestShelfLock
             return new NormalResult { Value = count };
         }
 
-        public GetLockStateResult GetShelfLockState(string lockNameList)
+        // parameters:
+        //      style   如果包含 "compact"，表示只在 result.StateBytes 中返回密集形态的锁状态值。
+        //              否则就是在 States 中返回一个一个锁状态
+        // result.Value:
+        //      -1  出错
+        //      其他  成功
+        // result.StateBytes
+        //      返回密集形态的锁状态值
+        public GetLockStateResult GetShelfLockState(string lockNameList,
+            string style)
         {
             List<LockState> states = new List<LockState>();
             // LockPath 集合
             List<LockPath> paths = new List<LockPath>();
             // 板子名集合
             List<string> cards = new List<string>();
+
+            bool compact = StringUtil.IsInList("compact", style);
+            List<byte> result_bytes = new List<byte>();
 
             string[] list = lockNameList.Split(new char[] { ',' });
             foreach (var one in list)
@@ -315,6 +327,12 @@ namespace TestShelfLock
                         ErrorCode = "parseResultError"
                     };
 
+                if (compact)
+                {
+                    result_bytes.AddRange(parse_result.States);
+                    continue;
+                }
+
                 // TODO: 根据实际情况只返回部分 index 的
                 int byte_offset = 0;
                 foreach (var b in parse_result.States)
@@ -340,6 +358,9 @@ namespace TestShelfLock
                     byte_offset++;
                 }
             }
+
+            if (compact)
+                return new GetLockStateResult { StateBytes = result_bytes };
 
             // 分配状态
             foreach (var path in paths)
@@ -789,7 +810,7 @@ BYTE[0] BYTE[1] BYTE[2] BYTE[3] BYTE[4] BYTE[5] BYTE[6] BYTE[7]
             LockPath result = new LockPath();
 
             result.LockName = "*";
-            result.CardNameList = default_cardNameList == null ?  new List<string> { "1" } : default_cardNameList;
+            result.CardNameList = default_cardNameList == null ? new List<string> { "1" } : default_cardNameList;
             result.NumberList = default_numberList == null ? new List<string> { "1" } : default_numberList;
 
             string[] parts = text.Split(new char[] { '.' });
