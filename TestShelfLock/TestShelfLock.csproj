@@ -109,10 +109,6 @@
       <Project>{334e1b2b-5373-4c80-a971-bff213ff304b}</Project>
       <Name>DigitalPlatform.CommonControl</Name>
     </ProjectReference>
-    <ProjectReference Include="..\DigitalPlatform.RFID\DigitalPlatform.RFID.csproj">
-      <Project>{9d26d2ad-eabb-4c32-8706-fb9e323faf01}</Project>
-      <Name>DigitalPlatform.RFID</Name>
-    </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform\4.0\DigitalPlatform.csproj">
       <Project>{bdd43275-eaa0-4670-8ba3-0db5cd7598dd}</Project>
       <Name>DigitalPlatform</Name>

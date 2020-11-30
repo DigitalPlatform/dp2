@@ -80,7 +80,7 @@ namespace TestShelfLock
         {
             OpenDriver();
 
-            var result = _driver.GetShelfLockState(this.textBox_lockPath.Text);
+            var result = _driver.GetShelfLockState(this.textBox_lockPath.Text, "");
             this.textBox_result.Text = result.ToString();
         }
 
@@ -112,26 +112,33 @@ namespace TestShelfLock
 
             await Task.Run(() =>
             {
-                int count = 0;
-                while (token.IsCancellationRequested == false)
+                try
                 {
-                    var result = _driver.GetShelfLockState(this.textBox_lockPath.Text);
+                    int count = 0;
+                    while (token.IsCancellationRequested == false)
+                    {
+                        var result = _driver.GetShelfLockState(this.textBox_lockPath.Text, "");
+
+                        this.Invoke((Action)(() =>
+                        {
+                            this.textBox_result.Text = count.ToString() + "\r\n" + result.ToString();
+                        }));
+
+                        if (result.Value == -1)
+                            break;
+                        count++;
+                    }
 
                     this.Invoke((Action)(() =>
                     {
-                        this.textBox_result.Text = count.ToString() + "\r\n" + result.ToString();
+                        this.button_stopLoop.Enabled = false;
+                        this.button_loopQuery.Enabled = true;
                     }));
-
-                    if (result.Value == -1)
-                        break;
-                    count++;
                 }
-
-                this.Invoke((Action)(() =>
+                catch(ObjectDisposedException)
                 {
-                    this.button_stopLoop.Enabled = false;
-                    this.button_loopQuery.Enabled = true;
-                }));
+
+                }
             });
         }
 

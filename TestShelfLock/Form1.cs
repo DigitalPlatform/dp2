@@ -8,7 +8,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-using DigitalPlatform.RFID;
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
 
