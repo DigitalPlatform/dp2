@@ -158,10 +158,13 @@ namespace dp2Commander
                     Console.WriteLine($"message sender:{record.creator}, userName:{record.userName}, groups:{string.Join(",", record.groups)}, data:{record.data}");
                 }
 
-                Task.Run(async () =>
+                if (e.Action == "create")   // 2020/11/30
                 {
-                    await ProcessAndReply(e.Records);
-                });
+                    Task.Run(async () =>
+                    {
+                        await ProcessAndReply(e.Records);
+                    });
+                }
             }
         }
 

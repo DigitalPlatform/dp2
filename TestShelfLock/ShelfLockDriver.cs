@@ -35,7 +35,7 @@ namespace TestShelfLock
         }
 
         // 当前连接的板子数量
-        int _cardAmount = 0;
+        // int _cardAmount = 0;
 
         // 初始化时需要提供端口号等参数
         // parameters:
@@ -53,6 +53,7 @@ namespace TestShelfLock
             if (result.Value == -1)
                 return result;
 
+            /*
             var query_result = QueryCard();
             if (query_result.Value == -1)
                 return new NormalResult
@@ -61,6 +62,7 @@ namespace TestShelfLock
                     ErrorInfo = $"查询锁控板数量时出错: {query_result.ErrorInfo}"
                 };
             _cardAmount = query_result.Value;
+            */
             Name = property.SerialPort.ToUpper();
             return new NormalResult();
         }
@@ -102,6 +104,7 @@ namespace TestShelfLock
                 _sp.StopBits = (StopBits)Enum.Parse(typeof(StopBits), stopBits);
                 _sp.Parity = (Parity)Enum.Parse(typeof(Parity), parity);
                 _sp.Handshake = (Handshake)Enum.Parse(typeof(Handshake), handshake);
+                _sp.ReadTimeout = 2000;
                 _sp.WriteTimeout = 2000; /*Write time out*/
                 _sp.Open();
                 // args.isOpend = true;
@@ -262,6 +265,7 @@ namespace TestShelfLock
                         };
                 }
 
+                /*
                 if (addr <= 0 || addr > _cardAmount)
                 {
                     return new GetLockStateResult
@@ -269,7 +273,7 @@ namespace TestShelfLock
                         Value = -1,
                         ErrorInfo = $"锁控板编号 '{addr}' 超过当前可用值范围 1-{_cardAmount}"
                     };
-                }
+                }*/
 
                 // 构造请求消息
                 var message = BuildGetLockStateMessage((byte)addr);
@@ -332,18 +336,51 @@ namespace TestShelfLock
 
                 byte[] buffer = new byte[readLength];
 
-                var read_result = Read(buffer, readLength, TimeSpan.FromSeconds(2));
+                var read_result = Read(buffer, readLength/*, TimeSpan.FromSeconds(2)*/);
                 if (read_result.Value == -1)
                     return new ReadResult
                     {
                         Value = -1,
                         ErrorInfo = read_result.ErrorInfo,
-                        ErrorCode = "readError"
+                        ErrorCode = read_result.ErrorCode
                     };
                 return new ReadResult { Result = buffer };
             }
         }
 
+        NormalResult Read(byte[] buffer,
+    int length)
+        {
+            try
+            {
+                int index = 0;
+                DateTime start_time = DateTime.Now;
+                while (true)
+                {
+                    {
+                        var count = _sp.Read(buffer, index, length);
+                        index += count;
+                        length -= count;
+                        if (length <= 0)
+                            return new NormalResult();
+                    }
+
+                    Thread.Sleep(0);
+                }
+            }
+            catch (TimeoutException ex)
+            {
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = "",
+                    ErrorCode = "readTimeout"
+                };
+            }
+        }
+
+
+#if REMOVED
         NormalResult Read(byte[] buffer,
             int length,
             TimeSpan timeout)
@@ -371,6 +408,7 @@ namespace TestShelfLock
                 Thread.Sleep(0);
             }
         }
+#endif
 
         /*
 板地址查询：

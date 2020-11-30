@@ -140,8 +140,8 @@ namespace DigitalPlatform.RFID
                 _sp.Parity = (Parity)Enum.Parse(typeof(Parity), parity);
                 _sp.Handshake = (Handshake)Enum.Parse(typeof(Handshake), handshake);
                 _sp.WriteTimeout = 2000; /*Write time out*/
-                _sp.ErrorReceived += _sp_ErrorReceived;
-                _sp.DataReceived += new SerialDataReceivedEventHandler(DataReceived);
+                // _sp.ErrorReceived += _sp_ErrorReceived;
+                // _sp.DataReceived += new SerialDataReceivedEventHandler(DataReceived);
                 _sp.Open();
                 args.isOpend = true;
             }

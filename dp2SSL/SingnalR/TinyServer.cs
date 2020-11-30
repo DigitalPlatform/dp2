@@ -1065,6 +1065,7 @@ set lamp time
 sterilamp
 exit
 restart
+update
 "
 );
                 return;
