@@ -38,6 +38,7 @@ namespace TestShelfLock
             this.textBox_lockPath = new System.Windows.Forms.TextBox();
             this.button_loopQuery = new System.Windows.Forms.Button();
             this.button_stopLoop = new System.Windows.Forms.Button();
+            this.button_openLock = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // comboBox_comPort
@@ -77,7 +78,7 @@ namespace TestShelfLock
             // 
             // button_getLockState
             // 
-            this.button_getLockState.Location = new System.Drawing.Point(202, 119);
+            this.button_getLockState.Location = new System.Drawing.Point(201, 137);
             this.button_getLockState.Name = "button_getLockState";
             this.button_getLockState.Size = new System.Drawing.Size(200, 51);
             this.button_getLockState.TabIndex = 6;
@@ -117,7 +118,7 @@ namespace TestShelfLock
             // 
             // button_loopQuery
             // 
-            this.button_loopQuery.Location = new System.Drawing.Point(434, 119);
+            this.button_loopQuery.Location = new System.Drawing.Point(433, 137);
             this.button_loopQuery.Name = "button_loopQuery";
             this.button_loopQuery.Size = new System.Drawing.Size(227, 51);
             this.button_loopQuery.TabIndex = 10;
@@ -128,7 +129,7 @@ namespace TestShelfLock
             // button_stopLoop
             // 
             this.button_stopLoop.Enabled = false;
-            this.button_stopLoop.Location = new System.Drawing.Point(667, 119);
+            this.button_stopLoop.Location = new System.Drawing.Point(666, 137);
             this.button_stopLoop.Name = "button_stopLoop";
             this.button_stopLoop.Size = new System.Drawing.Size(103, 51);
             this.button_stopLoop.TabIndex = 11;
@@ -136,11 +137,22 @@ namespace TestShelfLock
             this.button_stopLoop.UseVisualStyleBackColor = true;
             this.button_stopLoop.Click += new System.EventHandler(this.button_stopLoop_Click);
             // 
+            // button_openLock
+            // 
+            this.button_openLock.Location = new System.Drawing.Point(202, 85);
+            this.button_openLock.Name = "button_openLock";
+            this.button_openLock.Size = new System.Drawing.Size(200, 51);
+            this.button_openLock.TabIndex = 12;
+            this.button_openLock.Text = "开锁(&O)";
+            this.button_openLock.UseVisualStyleBackColor = true;
+            this.button_openLock.Click += new System.EventHandler(this.button_openLock_Click);
+            // 
             // GetLockStateDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.button_openLock);
             this.Controls.Add(this.button_stopLoop);
             this.Controls.Add(this.button_loopQuery);
             this.Controls.Add(this.textBox_lockPath);
@@ -169,5 +181,6 @@ namespace TestShelfLock
         private System.Windows.Forms.TextBox textBox_lockPath;
         private System.Windows.Forms.Button button_loopQuery;
         private System.Windows.Forms.Button button_stopLoop;
+        private System.Windows.Forms.Button button_openLock;
     }
 }

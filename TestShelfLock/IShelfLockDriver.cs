@@ -27,6 +27,6 @@ namespace TestShelfLock
     public class LockProperty
     {
         public string SerialPort { get; set; }  // 串口端口号
-
+        public int LockAmountPerBoard { get; set; } // 每个板子最多的锁数量
     }
 }

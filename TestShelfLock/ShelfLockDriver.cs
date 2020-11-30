@@ -11,6 +11,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using DigitalPlatform;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
+using System.Collections;
 
 namespace TestShelfLock
 {
@@ -34,6 +35,11 @@ namespace TestShelfLock
             // 
         }
 
+        public LockProperty LockProperty { get; set; }
+
+        // '*' 解释成的锁编号数组
+        List<string> _default_numbers = null;
+
         // 当前连接的板子数量
         // int _cardAmount = 0;
 
@@ -53,6 +59,7 @@ namespace TestShelfLock
             if (result.Value == -1)
                 return result;
 
+            this.LockProperty = property;
             /*
             var query_result = QueryCard();
             if (query_result.Value == -1)
@@ -63,6 +70,16 @@ namespace TestShelfLock
                 };
             _cardAmount = query_result.Value;
             */
+
+            if (this.LockProperty.LockAmountPerBoard == 0)
+                this.LockProperty.LockAmountPerBoard = 8;
+
+            _default_numbers = new List<string>();
+            for (int i = 0; i < this.LockProperty.LockAmountPerBoard; i++)
+            {
+                _default_numbers.Add($"{i + 1}");
+            }
+
             Name = property.SerialPort.ToUpper();
             return new NormalResult();
         }
@@ -159,7 +176,7 @@ namespace TestShelfLock
             int count = 0;
             foreach (var one in list)
             {
-                var path = LockPath.Parse(one);
+                var path = LockPath.Parse(one, null, _default_numbers);
 
                 if (path.LockName == "*" || this.Name == path.LockName)
                 {
@@ -224,7 +241,6 @@ namespace TestShelfLock
 
         public GetLockStateResult GetShelfLockState(string lockNameList)
         {
-
             List<LockState> states = new List<LockState>();
             // LockPath 集合
             List<LockPath> paths = new List<LockPath>();
@@ -234,7 +250,7 @@ namespace TestShelfLock
             string[] list = lockNameList.Split(new char[] { ',' });
             foreach (var one in list)
             {
-                var path = LockPath.Parse(one);
+                var path = LockPath.Parse(one, null, _default_numbers);
 
                 if (path.LockName == "*" || this.Name == path.LockName)
                 {
@@ -250,6 +266,9 @@ namespace TestShelfLock
             }
 
             StringUtil.RemoveDup(ref cards, false);
+
+            // path string --> LockState
+            Hashtable table = new Hashtable();
 
             // 按照每个板子来获取状态
             foreach (var card in cards)
@@ -302,14 +321,20 @@ namespace TestShelfLock
                 {
                     for (int i = 0; i < 8; i++)
                     {
-                        int index = (byte_offset * 8) + i + 1;
-                        LockState state = new LockState();
-                        state.Lock = this.Name;
-                        state.Path = $"{this.Name}.{(card)}.{index}";
-                        state.Board = addr;
-                        state.Index = index;
-                        state.State = ((b >> i) & 0x01) != 0 ? "close" : "open";
-                        states.Add(state);
+                        // 优化为 close 状态的对象不加入 states 集合
+                        if (((b >> i) & 0x01) == 0)
+                        {
+                            LockState state = new LockState();
+                            state.State = "open";
+                            int index = (byte_offset * 8) + i + 1;
+                            state.Lock = this.Name;
+                            state.Path = $"{this.Name}.{(card)}.{index}";
+                            state.Board = addr;
+                            state.Index = index;
+                            // state.State = ((b >> i) & 0x01) != 0 ? "close" : "open";
+                            // states.Add(state);
+                            table[state.Path] = state;
+                        }
                     }
 
                     byte_offset++;
@@ -317,6 +342,30 @@ namespace TestShelfLock
             }
 
             // 分配状态
+            foreach (var path in paths)
+            {
+                foreach (string card in path.CardNameList)
+                {
+                    var numberList = path.NumberList;
+                    if (numberList[0] == "*")
+                        numberList = _default_numbers;
+                    foreach (string number in numberList)
+                    {
+                        string path_string = $"{this.Name}.{card}.{number}";
+                        LockState state = table[path_string] as LockState;
+                        if (state == null)
+                        {
+                            state = new LockState();
+                            state.State = "close";
+                            state.Lock = this.Name;
+                            state.Path = path_string;
+                            state.Board = Convert.ToInt32(card);
+                            state.Index = Convert.ToInt32(number);
+                        }
+                        states.Add(state);
+                    }
+                }
+            }
 
             return new GetLockStateResult { States = states };
         }
@@ -733,21 +782,25 @@ BYTE[0] BYTE[1] BYTE[2] BYTE[3] BYTE[4] BYTE[5] BYTE[6] BYTE[7]
         public List<string> CardNameList { get; set; }
         public List<string> NumberList { get; set; }
 
-        public static LockPath Parse(string text)
+        public static LockPath Parse(string text,
+            List<string> default_cardNameList = null,
+            List<string> default_numberList = null)
         {
             LockPath result = new LockPath();
 
             result.LockName = "*";
-            result.CardNameList = new List<string> { "1" };
-            result.NumberList = new List<string> { "1" };
+            result.CardNameList = default_cardNameList == null ?  new List<string> { "1" } : default_cardNameList;
+            result.NumberList = default_numberList == null ? new List<string> { "1" } : default_numberList;
 
             string[] parts = text.Split(new char[] { '.' });
 
             if (parts.Length > 0)
                 result.LockName = parts[0];
-            if (parts.Length > 1 && string.IsNullOrEmpty(parts[1]) == false)
+            if (parts.Length > 1 && string.IsNullOrEmpty(parts[1]) == false
+                && parts[1] != "*")
                 result.CardNameList = StringUtil.SplitList(parts[1], '|');
-            if (parts.Length > 2 && string.IsNullOrEmpty(parts[2]) == false)
+            if (parts.Length > 2 && string.IsNullOrEmpty(parts[2]) == false
+                && parts[2] != "*")
                 result.NumberList = StringUtil.SplitList(parts[2], '|');
 
             return result;
