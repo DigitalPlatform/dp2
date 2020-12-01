@@ -51,12 +51,20 @@ namespace RfidTool
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            DataModel.StartRfidManager("ipc://RfidChannel/RfidServer");
+            this.Enabled = false;
+            _ = Task.Run(() =>
+            {
+                DataModel.InitialDriver();
+                this.Invoke((Action)(() =>
+                {
+                    this.Enabled = true;
+                }));
+            });
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            DataModel.StopRfidManager();
+            DataModel.ReleaseDriver();
         }
 
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)

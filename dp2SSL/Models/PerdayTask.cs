@@ -298,7 +298,7 @@ namespace dp2SSL
                         if (InWeekday() == true)
                             TurnBackLampOff();
                     },
-                    s => s.ToRunEvery(0).Days().At(end.Hour, end.Minute)
+                    s => s.ToRunEvery(1).Days().At(end.Hour, end.Minute)
                 );
 
                 /*

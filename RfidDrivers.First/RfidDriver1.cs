@@ -10,6 +10,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
+using System.Runtime.ExceptionServices;
+using System.Security;
 
 using Serilog;
 using RFIDLIB;
@@ -17,8 +19,6 @@ using RFIDLIB;
 using DigitalPlatform;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
-using System.Runtime.ExceptionServices;
-using System.Security;
 
 // 锁定全部读卡器靠一个全局锁来实现。锁定一个读卡器靠 RecordLock 来实现。锁定一个读卡器之前，先尝试用 read 方式获得全局锁
 
