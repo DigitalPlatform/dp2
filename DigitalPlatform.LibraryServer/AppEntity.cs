@@ -92,6 +92,20 @@ namespace DigitalPlatform.LibraryServer
             return element.NamespaceURI + ":" + element.LocalName;
         }
 
+        // (核心元素名以外)一些和借还业务有关的元素名，和其他元素名
+        static string[] other_names = {
+                "borrower",
+                "borrowerReaderType",
+                "borrowerRecPath",
+                "borrowDate",
+                "borrowPeriod",
+                "returningDate",
+                "lastReturningDate",
+                "operator",
+                "no",
+                "renewComment",
+                "borrowID"};
+
         // 2020/9/17
         // 检查新记录中是否有超出定义范围的元素
         int CheckOutofRangeElements(XmlDocument domNew,
@@ -99,6 +113,7 @@ namespace DigitalPlatform.LibraryServer
         {
             strError = "";
             List<string> range = new List<string>(core_entity_element_names);
+            range.AddRange(other_names);
             if (this.ItemAdditionalFields != null && this.ItemAdditionalFields.Count > 0)
                 range.AddRange(this.ItemAdditionalFields);
             range.AddRange(checkinout_element_names);

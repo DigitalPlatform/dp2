@@ -7,8 +7,134 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DigitalPlatform.RFID.Manager\DigitalPlatform.RFID.Manager.csproj" />
+    <None Remove="x64\Drivers\rfidlib_ANM201.dll" />
+    <None Remove="x64\Drivers\rfidlib_ANRD120M.dll" />
+    <None Remove="x64\Drivers\rfidlib_ANRD242.dll" />
+    <None Remove="x64\Drivers\rfidlib_ANSSR100.dll" />
+    <None Remove="x64\Drivers\rfidlib_drv_RD5100.dll" />
+    <None Remove="x64\Drivers\rfidlib_drv_RL8000.dll" />
+    <None Remove="x64\Drivers\rfidlib_drv_rpan.dll" />
+    <None Remove="x64\MiniBookcaseLockLib.dll" />
+    <None Remove="x64\rfidlib_aip_iso14443a.dll" />
+    <None Remove="x64\rfidlib_aip_iso14443b.dll" />
+    <None Remove="x64\rfidlib_aip_iso15693.dll" />
+    <None Remove="x64\rfidlib_aip_iso18000p3m3.dll" />
+    <None Remove="x64\rfidlib_nfc.dll" />
+    <None Remove="x64\rfidlib_reader.dll" />
+    <None Remove="x64\YkPosdll.dll" />
+    <None Remove="x86\Drivers\rfidlib_ANM201.dll" />
+    <None Remove="x86\Drivers\rfidlib_ANRD120M.dll" />
+    <None Remove="x86\Drivers\rfidlib_ANRD201.dll" />
+    <None Remove="x86\Drivers\rfidlib_ANRD242.dll" />
+    <None Remove="x86\Drivers\rfidlib_ANSSR100.dll" />
+    <None Remove="x86\Drivers\rfidlib_drv_rd5100.dll" />
+    <None Remove="x86\Drivers\rfidlib_drv_RL8000.dll" />
+    <None Remove="x86\Drivers\rfidlib_drv_rpan.dll" />
+    <None Remove="x86\MiniBookcaseLockLib.dll" />
+    <None Remove="x86\rfidlib_aip_iso14443A.dll" />
+    <None Remove="x86\rfidlib_aip_iso14443B.dll" />
+    <None Remove="x86\rfidlib_aip_iso15693.dll" />
+    <None Remove="x86\rfidlib_aip_iso18000p3m3.dll" />
+    <None Remove="x86\rfidlib_nfc.dll" />
+    <None Remove="x86\rfidlib_reader.dll" />
+    <None Remove="x86\YkPosdll.dll" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="x64\Drivers\rfidlib_ANM201.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x64\Drivers\rfidlib_ANRD120M.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x64\Drivers\rfidlib_ANRD242.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x64\Drivers\rfidlib_ANSSR100.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x64\Drivers\rfidlib_drv_RD5100.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x64\Drivers\rfidlib_drv_RL8000.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x64\Drivers\rfidlib_drv_rpan.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x64\MiniBookcaseLockLib.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x64\rfidlib_aip_iso14443a.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x64\rfidlib_aip_iso14443b.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x64\rfidlib_aip_iso15693.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x64\rfidlib_aip_iso18000p3m3.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x64\rfidlib_nfc.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x64\rfidlib_reader.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x64\YkPosdll.dll" />
+    <Content Include="x86\Drivers\rfidlib_ANM201.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x86\Drivers\rfidlib_ANRD120M.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x86\Drivers\rfidlib_ANRD201.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x86\Drivers\rfidlib_ANRD242.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x86\Drivers\rfidlib_ANSSR100.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x86\Drivers\rfidlib_drv_rd5100.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x86\Drivers\rfidlib_drv_RL8000.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x86\Drivers\rfidlib_drv_rpan.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x86\MiniBookcaseLockLib.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x86\rfidlib_aip_iso14443A.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x86\rfidlib_aip_iso14443B.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x86\rfidlib_aip_iso15693.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x86\rfidlib_aip_iso18000p3m3.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x86\rfidlib_nfc.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x86\rfidlib_reader.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x86\YkPosdll.dll" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\DigitalPlatform.RFID\DigitalPlatform.RFID.csproj" />
+    <ProjectReference Include="..\RfidDrivers.First\RfidDrivers.First.csproj" />
   </ItemGroup>
 
   <ItemGroup>

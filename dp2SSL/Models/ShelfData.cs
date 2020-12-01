@@ -4396,6 +4396,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
 
         #region 分离图书和读者标签的算法
 
+        /*
         static object _syncRoot_patronTags = new object();
         static List<TagAndData> _patronTags = null;
 
@@ -4409,6 +4410,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                 }
             }
         }
+        */
 
         static object _syncRoot_bookTags = new object();
         static List<TagAndData> _bookTags = null;
@@ -4495,6 +4497,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
         // 特殊地，.TagInfo 为 null 的 ISO15693 会暂时被当作 "book"
         public delegate string Delegate_detectType(OneTag tag);
 
+        /*
         // 初始化 _patronTags 集合
         public static void InitialPatronTags(
             bool fill)
@@ -4507,6 +4510,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             }
 
         }
+        */
 
         // 初始化 _bookTags 集合
         public static void InitialBookTags(
@@ -4627,6 +4631,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             }
         }
 
+#if REMOVED
         // 更新 _patronTags 集合
         // 要返回新增加的两类标签的数目
         // TODO: 要能处理 ISO15693 图书标签放到读者读卡器上的动作。可以弹出一个窗口显示这一本图书的信息
@@ -4635,7 +4640,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
         {
             // 临时初始化一下
             if (_patronTags == null)
-                InitialPatronTags(false);
+                InitialPatronTags(true);
 
             lock (_syncRoot_patronTags)
             {
@@ -4715,6 +4720,12 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                     tag.Type = null;    // 迫使 NewEntity 重新解析标签
                 }
 
+                /*
+                // testing
+                _patronTags.Clear();
+                _patronTags.AddRange(PatronTagList.Tags);
+                */
+
                 return new SeperateResult
                 {
                     //add_books = add_books,
@@ -4726,7 +4737,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                 };
             }
         }
-
+#endif
 
         #endregion
 

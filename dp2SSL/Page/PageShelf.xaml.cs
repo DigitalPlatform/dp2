@@ -1581,6 +1581,8 @@ namespace dp2SSL
         //      true    成功
         bool SetPatronInfo(GetMessageResult result, string protocol)
         {
+            SetPatronError("rfid_multi", "");   // 2020/12/1
+
             if (ClosePasswordDialog() == true)
             {
                 // 这次刷卡的作用是取消了上次登录
@@ -1918,6 +1920,7 @@ namespace dp2SSL
             }
 #endif
 
+#if REMOVED
             {
                 // "initial" 模式下，在读者证读卡器上扫 ISO15693 的标签可以查看图书内容
                 if (this.Mode == "initial"
@@ -1937,6 +1940,26 @@ namespace dp2SSL
                         e);
                     if (sep_result.add_patrons.Count > 0 || sep_result.updated_patrons.Count > 0)
                         await RefreshPatronsAsync();
+                }
+            }
+#endif
+
+            {
+                // "initial" 模式下，在读者证读卡器上扫 ISO15693 的标签可以查看图书内容
+                if (this.Mode == "initial"
+                || ShelfData.FirstInitialized == false
+                )
+                {
+                    // TODO: 小读卡器探测图书或者工作人员卡。工作人员卡用于判断操作者权限，以便允许使用初始化过程中报错对话框的开门和取消按钮
+                    if (e.AddTags?.Count > 0 || e.UpdateTags?.Count > 0)
+                        DetectPatron();
+                }
+                else
+                {
+                    if (e.AddTags?.Count > 0 || e.UpdateTags?.Count > 0)
+                    {
+                        await RefreshPatronsAsync(ShelfData.PatronTagList.Tags);
+                    }
                 }
             }
         }
@@ -2003,18 +2026,18 @@ namespace dp2SSL
 
 #endif
 
-        /*
-        static string DetectTagType(OneTag t)
-        {
-            if (t.ReaderName == ShelfData.PatronReaderName)
-                return "patron";
-            return "book";
-        }
-        */
+            /*
+            static string DetectTagType(OneTag t)
+            {
+                if (t.ReaderName == ShelfData.PatronReaderName)
+                    return "patron";
+                return "book";
+            }
+            */
 
-        // bool _initialCancelled = false;
+            // bool _initialCancelled = false;
 
-        public void InitialDoorControl()
+            public void InitialDoorControl()
         {
             App.Invoke(new Action(() =>
             {
@@ -2589,7 +2612,7 @@ namespace dp2SSL
                     return DetectTagType(t);
                 });
                 */
-                ShelfData.InitialPatronTags(true);
+                // ShelfData.InitialPatronTags(true);
                 ShelfData.InitialBookTags(true);
 
                 await ShelfData.SelectAntennaAsync();
@@ -2823,7 +2846,8 @@ namespace dp2SSL
 
         void DetectPatron()
         {
-            var patrons = ShelfData.PatronTags;
+            // var patrons = ShelfData.PatronTags;
+            var patrons = ShelfData.PatronTagList.Tags;
             if (patrons.Count == 1)
             {
                 var data = patrons[0];
@@ -2912,13 +2936,13 @@ namespace dp2SSL
         // 新版本的，注意读者卡也在 NewTagList.Tags 里面
         // 刷新读者信息
         // TODO: 当读者信息更替时，要检查前一个读者是否有 _adds 和 _removes 队列需要提交，先提交，再刷成后一个读者信息
-        async Task RefreshPatronsAsync()
+        async Task RefreshPatronsAsync(List<TagAndData> patrons)
         {
             try
             {
                 // 2020/4/11
                 // 只关注 shelf.xml 中定义的读者卡读卡器上的卡
-                var patrons = ShelfData.PatronTags;
+                // var patrons = ShelfData.PatronTags;
 
                 if (patrons.Count == 1)
                     _patron.IsRfidSource = true;
@@ -4487,11 +4511,13 @@ namespace dp2SSL
                 {
                     // 2020/9/10
                     if (_videoRecognition != null)
+                    {
                         App.Invoke(new Action(() =>
                         {
                             _videoRecognition.Close();
                         }));
-                    App.CurrentApp.SpeakSequence($"放弃人脸识别");
+                        App.CurrentApp.SpeakSequence($"放弃人脸识别");
+                    }
                 }
             });
             try

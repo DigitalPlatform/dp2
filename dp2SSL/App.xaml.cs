@@ -1767,18 +1767,19 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
 
                         // 表示到达末尾
                         GetTagInfoProgressChanged?.Invoke(sender,
-new DigitalPlatform.ProgressChangedEventArgs
-{
-    Start = 0,
-    End = e.Result.Results.Count,
-    Value = e.Result.Results.Count,
-});
+                            new DigitalPlatform.ProgressChangedEventArgs
+                            {
+                                Start = 0,
+                                End = e.Result.Results.Count,
+                                Value = e.Result.Results.Count,
+                            });
 
                         // 标签总数显示 只显示标签数，不再区分图书标签和读者卡
                         if (CurrentApp != null)
                             CurrentApp.Number = $"{ShelfData.BookTagList.Tags.Count}:{ShelfData.PatronTagList.Tags.Count}";
                         //numberShown = true;
 
+                        /*
                         // 让 BookTagChanged 事件也能感知到心跳
                         if (triggered == false)
                         {
@@ -1787,6 +1788,7 @@ new DigitalPlatform.ProgressChangedEventArgs
                                 Source = e.Source,
                             });
                         }
+                        */
                     }
 
                     // 书柜的读者证读卡器
