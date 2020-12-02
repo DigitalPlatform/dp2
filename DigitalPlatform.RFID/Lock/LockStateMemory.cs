@@ -101,5 +101,28 @@ namespace DigitalPlatform.RFID
                 return ret ? "open" : "close";
             }
         }
+
+        // 查看一个板子的整体开闭状态
+        public string GetBoardState(string path)
+        {
+            lock (_stateTable.SyncRoot)
+            {
+                int count = 0;
+                foreach (string key in _stateTable.Keys)
+                {
+                    if (key.StartsWith(path))
+                    {
+                        bool value = (bool)_stateTable[key];
+                        if (value == true)
+                            return "partial_open";
+                        count++;
+                    }
+                }
+
+                if (count == 0)
+                    return "unknown";   // 表示不确定是否有打开的门，因为没有探测过
+                return "all_close";
+            }
+        }
     }
 }

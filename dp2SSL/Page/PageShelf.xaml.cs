@@ -1282,14 +1282,20 @@ namespace dp2SSL
                 ShelfData.PushCommand(e.Door, person, RfidManager.LockHeartbeat);
                 */
 
-                long startTicks = RfidManager.LockHeartbeat;
+                // long startTicks = RfidManager.LockHeartbeat;
 
                 // 测试时用来传递参数
                 string style = "";
                 if (e.Tag is string)
                     style = e.Tag as string;
 
-                var result = RfidManager.OpenShelfLock(e.Door.LockPath, style);
+                // 不阻塞显示
+                var result = await Task<NormalResult>.Run(() =>
+                {
+                    // Thread.Sleep(1000);
+                    return RfidManager.OpenShelfLock(e.Door.LockPath, style);
+                });
+                // var result = RfidManager.OpenShelfLock(e.Door.LockPath, style);
                 if (result.Value == -1)
                 {
                     WpfClientInfo.WriteErrorLog($"OpenShelfLock() error: {result.ErrorInfo}");
@@ -1951,14 +1957,14 @@ namespace dp2SSL
                 )
                 {
                     // TODO: 小读卡器探测图书或者工作人员卡。工作人员卡用于判断操作者权限，以便允许使用初始化过程中报错对话框的开门和取消按钮
-                    if (e.AddTags?.Count > 0 
+                    if (e.AddTags?.Count > 0
                         || e.UpdateTags?.Count > 0
                         || e.RemoveTags?.Count > 0)
                         DetectPatron();
                 }
                 else
                 {
-                    if (e.AddTags?.Count > 0 
+                    if (e.AddTags?.Count > 0
                         || e.UpdateTags?.Count > 0
                         || e.RemoveTags?.Count > 0)
                     {
@@ -2030,18 +2036,18 @@ namespace dp2SSL
 
 #endif
 
-            /*
-            static string DetectTagType(OneTag t)
-            {
-                if (t.ReaderName == ShelfData.PatronReaderName)
-                    return "patron";
-                return "book";
-            }
-            */
+        /*
+        static string DetectTagType(OneTag t)
+        {
+            if (t.ReaderName == ShelfData.PatronReaderName)
+                return "patron";
+            return "book";
+        }
+        */
 
-            // bool _initialCancelled = false;
+        // bool _initialCancelled = false;
 
-            public void InitialDoorControl()
+        public void InitialDoorControl()
         {
             App.Invoke(new Action(() =>
             {

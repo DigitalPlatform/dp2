@@ -12,12 +12,15 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using DigitalPlatform;
 // using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
+using DigitalPlatform.RFID;
 
 namespace TestShelfLock
 {
     [TestClass]
     public class ShelfLockDriver : IShelfLockDriver
     {
+        LockStateMemory _lockMemory = new LockStateMemory();
+
         private object _syncRoot = new object();
 
         private SerialPort _sp = new SerialPort();
@@ -81,6 +84,9 @@ namespace TestShelfLock
             }
 
             Name = property.SerialPort.ToUpper();
+
+            _lockMemory.Clear();
+
             return new NormalResult();
         }
 
@@ -231,6 +237,11 @@ namespace TestShelfLock
                         if (parse_result.Value == -1)
                             return parse_result;
 
+                        // 加入一个表示发生过开门的状态，让后继获得状态的 API 至少能返回一次打开状态
+                        _lockMemory.MemoryOpen(current_path);
+
+                        _lockMemory.Set(current_path, "open");
+
                         count++;
                     }
                 }
@@ -305,6 +316,12 @@ namespace TestShelfLock
                         ErrorInfo = $"锁控板编号 '{addr}' 超过当前可用值范围 1-{_cardAmount}"
                     };
                 }*/
+
+                string board_path = $"{this.Name}.{addr}.";
+                // 如果门全部关闭，则不需要具体探测状态
+                // 即：只有打开状态的门才有必要探测状态，看看它们是否被手动关闭了
+                if (_lockMemory.GetBoardState(board_path) == "all_close")
+                    continue;
 
                 // 构造请求消息
                 var message = BuildGetLockStateMessage((byte)addr);
@@ -384,6 +401,9 @@ namespace TestShelfLock
                             state.Index = Convert.ToInt32(number);
                         }
                         states.Add(state);
+
+                        // 记忆开闭状态
+                        _lockMemory.Set(path_string, state.State);
                     }
                 }
             }

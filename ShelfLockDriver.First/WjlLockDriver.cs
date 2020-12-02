@@ -165,7 +165,7 @@ namespace ShelfLockDriver.First
 
             var read_result = Read(buffer, 5, TimeSpan.FromSeconds(2));
             */
-            var read_result = WriteAndRead(message, 5);
+            var read_result = WriteAndRead(message, 5, false);
             if (read_result.Value == -1)
                 return read_result;
 
@@ -239,7 +239,7 @@ namespace ShelfLockDriver.First
 
                         var read_result = Read(buffer, 5, TimeSpan.FromSeconds(2));
                         */
-                        var read_result = WriteAndRead(message, 5);
+                        var read_result = WriteAndRead(message, 5, false);
                         if (read_result.Value == -1)
                             return read_result;
 
@@ -250,6 +250,7 @@ namespace ShelfLockDriver.First
                         // 加入一个表示发生过开门的状态，让后继获得状态的 API 至少能返回一次打开状态
                         _lockMemory.MemoryOpen(current_path);
 
+                        _lockMemory.Set(current_path, "open");
                         count++;
                     }
                 }
@@ -315,6 +316,12 @@ namespace ShelfLockDriver.First
                         };
                 }
 
+                string board_path = $"{this.Name}.{addr}.";
+                // 如果门全部关闭，则不需要具体探测状态
+                // 即：只有打开状态的门才有必要探测状态，看看它们是否被手动关闭了
+                if (_lockMemory.GetBoardState(board_path) == "all_close")
+                    continue;
+
                 /*
                 if (addr <= 0 || addr > _cardAmount)
                 {
@@ -328,7 +335,7 @@ namespace ShelfLockDriver.First
                 // 构造请求消息
                 var message = BuildGetLockStateMessage((byte)addr);
 
-                var read_result = WriteAndRead(message, 8);
+                var read_result = WriteAndRead(message, 8, true);
                 if (read_result.Value == -1)
                     return new GetLockStateResult
                     {
@@ -405,6 +412,9 @@ namespace ShelfLockDriver.First
                         }
                         states.Add(state);
 
+                        // 记忆开闭状态
+                        _lockMemory.Set(path_string, state.State);
+
                         // 观察这个锁是否曾经打开过而没有来得及获取至少一次状态？
                         var opened = _lockMemory.IsOpened(path_string);
                         if (opened && state.State == "close")
@@ -427,7 +437,8 @@ namespace ShelfLockDriver.First
         public int RetryLimit { get; set; }
 
         ReadResult WriteAndRead(byte[] message,
-            int readLength)
+            int readLength,
+            bool delayRecv)
         {
             NormalResult read_result = null;
             for (int i = 0; i < RetryLimit + 1; i++)
@@ -441,7 +452,8 @@ namespace ShelfLockDriver.First
                         _sp.Write(message, 0, message.Length);
 
                         // 厂家建议这里延迟 100 毫秒
-                        Thread.Sleep(100);
+                        if (delayRecv)
+                            Thread.Sleep(100);
 
                         byte[] buffer = new byte[readLength];
 
