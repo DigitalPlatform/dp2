@@ -31,7 +31,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>62</ApplicationRevision>
+    <ApplicationRevision>64</ApplicationRevision>
     <ApplicationVersion>1.4.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -265,6 +265,10 @@
     <ProjectReference Include="..\RfidDrivers.First\RfidDrivers.First.csproj">
       <Project>{dfadb438-ebff-47fb-acf6-586224cef771}</Project>
       <Name>RfidDrivers.First</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ShelfLockDriver.First\ShelfLockDriver.First.csproj">
+      <Project>{6b3ccf98-d61e-48a9-9646-9d2c9831261e}</Project>
+      <Name>ShelfLockDriver.First</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

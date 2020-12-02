@@ -271,6 +271,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RfidTool", "RfidTool\RfidTo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestShelfLock", "TestShelfLock\TestShelfLock.csproj", "{27C5FC08-F902-4707-81E2-B7FE5DC5E16F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShelfLockDriver.First", "ShelfLockDriver.First\ShelfLockDriver.First.csproj", "{6B3CCF98-D61E-48A9-9646-9D2C9831261E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -2279,6 +2281,24 @@ Global
 		{27C5FC08-F902-4707-81E2-B7FE5DC5E16F}.Test|Mixed Platforms.Build.0 = Debug|Any CPU
 		{27C5FC08-F902-4707-81E2-B7FE5DC5E16F}.Test|x86.ActiveCfg = Debug|Any CPU
 		{27C5FC08-F902-4707-81E2-B7FE5DC5E16F}.Test|x86.Build.0 = Debug|Any CPU
+		{6B3CCF98-D61E-48A9-9646-9D2C9831261E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B3CCF98-D61E-48A9-9646-9D2C9831261E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B3CCF98-D61E-48A9-9646-9D2C9831261E}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{6B3CCF98-D61E-48A9-9646-9D2C9831261E}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{6B3CCF98-D61E-48A9-9646-9D2C9831261E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{6B3CCF98-D61E-48A9-9646-9D2C9831261E}.Debug|x86.Build.0 = Debug|Any CPU
+		{6B3CCF98-D61E-48A9-9646-9D2C9831261E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B3CCF98-D61E-48A9-9646-9D2C9831261E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6B3CCF98-D61E-48A9-9646-9D2C9831261E}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{6B3CCF98-D61E-48A9-9646-9D2C9831261E}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{6B3CCF98-D61E-48A9-9646-9D2C9831261E}.Release|x86.ActiveCfg = Release|Any CPU
+		{6B3CCF98-D61E-48A9-9646-9D2C9831261E}.Release|x86.Build.0 = Release|Any CPU
+		{6B3CCF98-D61E-48A9-9646-9D2C9831261E}.Test|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B3CCF98-D61E-48A9-9646-9D2C9831261E}.Test|Any CPU.Build.0 = Debug|Any CPU
+		{6B3CCF98-D61E-48A9-9646-9D2C9831261E}.Test|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{6B3CCF98-D61E-48A9-9646-9D2C9831261E}.Test|Mixed Platforms.Build.0 = Debug|Any CPU
+		{6B3CCF98-D61E-48A9-9646-9D2C9831261E}.Test|x86.ActiveCfg = Debug|Any CPU
+		{6B3CCF98-D61E-48A9-9646-9D2C9831261E}.Test|x86.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

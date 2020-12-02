@@ -28,6 +28,7 @@ using Newtonsoft.Json;
 using PrinterDriver.Yanke;
 using RfidDrivers.First;
 using Serilog;
+using ShelfLockDriver.First;
 
 namespace RfidCenter
 {
@@ -36,6 +37,7 @@ namespace RfidCenter
         RfidDriver1 _rfidDriver = new RfidDriver1();
         ILedDriver _ledDriver = new LedDriver1();
         IPosPrinterDriver _printerDriver = new YankePrinterDriver();
+        IShelfLockDriver _shelLockDriver = new WjlLockDriver();
 
         FloatingMessageForm _floatingMessage = null;
 
@@ -46,6 +48,7 @@ namespace RfidCenter
             Program.Rfid = _rfidDriver;
             Program.Led = _ledDriver;
             Program.Printer = _printerDriver;
+            Program.ShelfLock = _shelLockDriver;
 
             InitializeComponent();
 
@@ -185,6 +188,7 @@ namespace RfidCenter
                 {
                     InitializeRfidDriver();
                     InitializeLedDriver();
+                    InitializeLockDriver();
                     // 2020/8/19
                     InitializePrinterDriver();
                 }
@@ -451,8 +455,10 @@ namespace RfidCenter
                     _rfidDriver.ReleaseDriver();
                     var existing_hint_table = GetHintTable();
 
+                    string lock_param = "";
+#if OLD_SHELFLOCK
                     // TODO: 要允许 COM1,COM2 这种形态的内容被输入 combobox 和保存
-                    string lock_param = GetLockParam().Replace(",", "|").ToUpper();
+                    lock_param = GetLockParam().Replace(",", "|").ToUpper();
                     if (string.IsNullOrEmpty(lock_param) == false
                         && lock_param != "<不使用>")
                     {
@@ -460,6 +466,7 @@ namespace RfidCenter
                             lock_param = "";
                         lock_param = $"lock:{lock_param}";
                     }
+#endif
 
                     string lamp_param = GetLampParam().Replace(",", "|").ToUpper();
                     if (string.IsNullOrEmpty(lamp_param) == false
@@ -1236,7 +1243,7 @@ bool bClickClose = false)
             }
         }
 
-        #region remoting server
+#region remoting server
 
 #if HTTP_CHANNEL
         HttpChannel m_serverChannel = null;
@@ -1284,9 +1291,9 @@ bool bClickClose = false)
             }
         }
 
-        #endregion
+#endregion
 
-        #region ipc channel
+#region ipc channel
 
         public static bool CallActivate(string strUrl)
         {
@@ -1360,7 +1367,7 @@ bool bClickClose = false)
             }
         }
 
-        #endregion
+#endregion
 
         private void ToolStripMenuItem_testRfidChannel_Click(object sender, EventArgs e)
         {
@@ -1368,7 +1375,7 @@ bool bClickClose = false)
             MessageBox.Show(this, result.ToString());
         }
 
-        #region 浏览器控件
+#region 浏览器控件
 
         public void ClearHtml()
         {
@@ -1521,7 +1528,7 @@ string strHtml)
             AppendHtml("<div class='debug " + strClass + "'>" + HttpUtility.HtmlEncode(strText).Replace("\r\n", "<br/>") + "</div>");
         }
 
-        #endregion
+#endregion
 
         private void MenuItem_openSendKey_Click(object sender, EventArgs e)
         {
@@ -1976,6 +1983,7 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
                 {
                     InitializeRfidDriver();
                     InitializeLedDriver();
+                    InitializeLockDriver();
                     // 2020/8/19
                     InitializePrinterDriver();
                 }
@@ -2230,6 +2238,41 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
             */
         }
 
+        void InitializeLockDriver()
+        {
+            string strError = "";
+
+            string port = GetLockParam();
+
+            if (string.IsNullOrEmpty(port) == true
+                || port == "<不使用>")
+            {
+                _shelLockDriver.ReleaseDriver();
+                return;
+            }
+
+            var property = new LockProperty
+            {
+                SerialPort = port,
+            };
+            var result = _shelLockDriver.InitializeDriver(property, "");
+            if (result.Value == -1)
+            {
+                OutputHistory(result.ErrorInfo, 2);
+                SetErrorState("error", result.ErrorInfo);
+                this.ShowMessage(result.ErrorInfo, "red", true);
+            }
+            else
+            {
+                OutputHistory($"锁控板初始化成功", 0);
+            }
+
+            return;
+        ERROR1:
+            OutputHistory(strError, 2);
+            SetErrorState("error", strError);
+            this.ShowMessage(strError, "red", true);
+        }
 
         void InitializeLedDriver()
         {
@@ -2241,7 +2284,7 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
             }));
 
             if (string.IsNullOrEmpty(port) == true
-                || port == "不使用")
+                || port == "<不使用>")
             {
                 _ledDriver.ReleaseDriver();
                 return;

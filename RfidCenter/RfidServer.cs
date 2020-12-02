@@ -68,7 +68,13 @@ namespace RfidCenter
                 if (Program.MainForm.InSimuLock)
                     result = _simuLock.GetShelfLockState(one);
                 else
+                {
+#if OLD_SHELFLOCK
                     result = Program.Rfid.GetShelfLockState(one);
+#else
+                    result = Program.ShelfLock.GetShelfLockState(one, "");
+#endif
+                }
 
                 if (result.Value == -1)
                     return result;
@@ -101,12 +107,16 @@ namespace RfidCenter
             if (Program.MainForm.InSimuLock)
                 return _simuLock.OpenShelfLock(lockName, "");
 
+#if OLD_SHELFLOCK
             // parameters:
             //      lockNameParam   为 "锁控板名字.卡编号.锁编号"。
             //                      其中卡编号部分可以是 "1" 也可以是 "1|2" 这样的形态
             //                      其中锁编号部分可以是 "1" 也可以是 "1|2|3|4" 这样的形态
             //                      如果缺乏卡编号和锁编号部分，缺乏的部分默认为 "1"
             return Program.Rfid.OpenShelfLock(lockName, "");
+#else
+            return Program.ShelfLock.OpenShelfLock(lockName, "");
+#endif
         }
 
         // 新版本
@@ -115,12 +125,17 @@ namespace RfidCenter
             if (Program.MainForm.InSimuLock)
                 return _simuLock.OpenShelfLock(lockName, style);
 
+#if OLD_SHELFLOCK
+
             // parameters:
             //      lockNameParam   为 "锁控板名字.卡编号.锁编号"。
             //                      其中卡编号部分可以是 "1" 也可以是 "1|2" 这样的形态
             //                      其中锁编号部分可以是 "1" 也可以是 "1|2|3|4" 这样的形态
             //                      如果缺乏卡编号和锁编号部分，缺乏的部分默认为 "1"
             return Program.Rfid.OpenShelfLock(lockName, style);
+#else
+            return Program.ShelfLock.OpenShelfLock(lockName, style);
+#endif
         }
 
         // 模拟关门
@@ -1131,7 +1146,7 @@ new_password);
 
 #if SENDKEY
 
-        #region Tag List
+#region Tag List
 
         // 当前在读卡器探测范围内的标签
         static List<OneTag> _tagList = new List<OneTag>();
@@ -1244,7 +1259,7 @@ new_password);
             });
         }
 
-        #endregion
+#endregion
 
 #endif
 

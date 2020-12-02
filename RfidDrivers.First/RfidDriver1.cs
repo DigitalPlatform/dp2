@@ -180,6 +180,7 @@ namespace RfidDrivers.First
                 string lock_param = StringUtil.GetParameterByPrefix(style, "lock");
                 if (lock_param != null)
                 {
+#if OLD_SHELFLOCK
                     var lock_result = OpenAllLocks(lock_param);
                     if (lock_result.Value == -1)
                         return new InitializeDriverResult
@@ -187,6 +188,13 @@ namespace RfidDrivers.First
                             Value = -1,
                             ErrorInfo = lock_result.ErrorInfo
                         };
+#else
+                    return new InitializeDriverResult
+                    {
+                        Value = -1,
+                        ErrorInfo = "style 中 lock 子参数已经被废弃。请改用单独的 ShelfLockDriver"
+                    };
+#endif
                 }
 
                 // 2019/11/12
@@ -225,8 +233,9 @@ namespace RfidDrivers.First
             try
             {
                 FreeLamp();
+#if OLD_SHELFLOCK
                 CloseAllLocks();
-
+#endif
                 return CloseAllReaders();
             }
             finally
@@ -4429,6 +4438,7 @@ out Reader reader);
 
         #region ShelfLock
 
+#if OLD_SHELFLOCK
         void CloseAllLocks()
         {
             foreach (var shelfLock in this._shelfLocks)
@@ -4500,6 +4510,7 @@ out Reader reader);
 
             return new NormalResult();
         }
+#endif
 
         // parameters:
         //      port  COM口名称。形如 COM1
@@ -4563,6 +4574,7 @@ out Reader reader);
             };
         }
 
+#if OLD_SHELFLOCK
         class ConnectLockResult : NormalResult
         {
             public ShelfLock ShelfLock { get; set; }
@@ -4602,6 +4614,7 @@ out Reader reader);
                 }
             };
         }
+#endif
 
         #endregion
 
@@ -4619,6 +4632,7 @@ out Reader reader);
             return results;
         }
 
+#if OLD_SHELFLOCK
         // 解析锁名称字符串以后得到的细部结构
         public class LockPath
         {
@@ -4647,11 +4661,13 @@ out Reader reader);
             }
         }
 
+#endif
+
         /*
         public static void ParseLockName(string text, 
             out string lockName,
-    out string card,
-    out string number)
+        out string card,
+        out string number)
         {
             lockName = "*";
             card = "1";
@@ -4667,6 +4683,7 @@ out Reader reader);
         }
         */
 
+#if OLD_SHELFLOCK
         const int RETRY_COUNT = 2;  // 2
 
         // 出错次数
@@ -4841,7 +4858,7 @@ out string number);
                 };
             }
         }
-
+#endif
 
 #if REMOVED
         // 探测锁状态
@@ -4916,6 +4933,8 @@ out string number);
             return lockName + "." + number;
         }
         */
+
+#if OLD_SHELFLOCK
 
         // static object _syncShelfLock = new object();
 
@@ -5030,6 +5049,8 @@ out string number);
         }
 
         LockStateMemory _lockMemory = new LockStateMemory();
+
+#endif
 
 #if REMOVED
         // 开门
