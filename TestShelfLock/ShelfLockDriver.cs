@@ -402,14 +402,13 @@ namespace TestShelfLock
         ReadResult WriteAndRead(byte[] message,
             int readLength)
         {
-
             NormalResult read_result = null;
             for (int i = 0; i < RetryLimit + 1; i++)
             {
-                bool suceed = false;
-                try
+                lock (_syncRoot)
                 {
-                    lock (_syncRoot)
+                    bool suceed = false;
+                    try
                     {
                         // 发送消息
                         _sp.Write(message, 0, message.Length);
@@ -425,13 +424,13 @@ namespace TestShelfLock
 
                         Thread.Sleep(100);
                     }
-                }
-                finally
-                {
-                    if (suceed == false)
+                    finally
                     {
-                        _sp.DiscardOutBuffer();
-                        _sp.DiscardInBuffer();
+                        if (suceed == false)
+                        {
+                            _sp.DiscardOutBuffer();
+                            _sp.DiscardInBuffer();
+                        }
                     }
                 }
             }
@@ -442,7 +441,6 @@ namespace TestShelfLock
                 ErrorInfo = read_result.ErrorInfo,
                 ErrorCode = read_result.ErrorCode
             };
-
         }
 
         NormalResult Read(byte[] buffer,
