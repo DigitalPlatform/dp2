@@ -1581,7 +1581,7 @@ namespace dp2SSL
         //      true    成功
         bool SetPatronInfo(GetMessageResult result, string protocol)
         {
-            SetPatronError("rfid_multi", "");   // 2020/12/1
+            // SetPatronError("rfid_multi", "");   // 2020/12/1
 
             if (ClosePasswordDialog() == true)
             {
@@ -1951,12 +1951,16 @@ namespace dp2SSL
                 )
                 {
                     // TODO: 小读卡器探测图书或者工作人员卡。工作人员卡用于判断操作者权限，以便允许使用初始化过程中报错对话框的开门和取消按钮
-                    if (e.AddTags?.Count > 0 || e.UpdateTags?.Count > 0)
+                    if (e.AddTags?.Count > 0 
+                        || e.UpdateTags?.Count > 0
+                        || e.RemoveTags?.Count > 0)
                         DetectPatron();
                 }
                 else
                 {
-                    if (e.AddTags?.Count > 0 || e.UpdateTags?.Count > 0)
+                    if (e.AddTags?.Count > 0 
+                        || e.UpdateTags?.Count > 0
+                        || e.RemoveTags?.Count > 0)
                     {
                         await RefreshPatronsAsync(ShelfData.PatronTagList.Tags);
                     }
@@ -2844,6 +2848,8 @@ namespace dp2SSL
         }
         */
 
+        // 初始化阶段，探测身份读卡器上是否有放卡动作，并作出响应
+        // TODO: 如果放上去两张图书标签，最好也能显示两册图书的信息
         void DetectPatron()
         {
             // var patrons = ShelfData.PatronTags;
