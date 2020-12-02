@@ -26,6 +26,11 @@ namespace RfidTool
 
         public static NewTagList TagList = new NewTagList();
 
+        static string _prev_uids = "";
+        static int _prev_count = 0;
+
+        static Task _task = null;
+
         public static InitializeDriverResult InitialDriver()
         {
             var initial_result = _driver.InitializeDriver(
@@ -34,11 +39,13 @@ namespace RfidTool
                     null/*hint_table*/);
             var token = _cancelRfidManager.Token;
 
-            Task.Factory.StartNew(
+            _task = Task.Factory.StartNew(
                 () =>
                 {
                     while (token.IsCancellationRequested == false)
                     {
+                        Thread.Sleep(100);
+
                         string readerNameList = "*";
                         var result = _listTags(readerNameList, "");
                         if (result.Value == -1)
@@ -47,6 +54,20 @@ namespace RfidTool
                         else
                             SetError?.Invoke(result,
                                 new SetErrorEventArgs { Error = null }); // 清除以前的报错
+
+                        /*
+                        // TODO: 归纳一下 UID 列表，如果不一样才继续往后处理
+                        int count = result.Results.Count;
+                        if (count == _prev_count)
+                        {
+                            string uids = GetUidString(result.Results);
+                            if (uids == _prev_uids)
+                                continue;
+                            _prev_uids = uids;
+                        }
+
+                        _prev_count = result.Results.Count;
+                        */
 
                         TagList.Refresh(// sender as BaseChannel<IRfid>,
                             readerNameList,
@@ -72,7 +93,7 @@ namespace RfidTool
                             },
                             (type, text) =>
                             {
-                                SetError(null/*this*/, new SetErrorEventArgs { Error = text });
+                                SetError?.Invoke(null/*this*/, new SetErrorEventArgs { Error = text });
                             });
 
                     }
@@ -81,9 +102,21 @@ namespace RfidTool
             return initial_result;
         }
 
+        static string GetUidString(List<OneTag> tags)
+        {
+            StringBuilder result = new StringBuilder();
+            foreach (var tag in tags)
+            {
+                result.Append($"{tag.UID},");
+            }
+
+            return result.ToString();
+        }
+
         public static void ReleaseDriver()
         {
             _cancelRfidManager?.Cancel();
+            _task?.Wait();
             _driver.ReleaseDriver();
         }
 

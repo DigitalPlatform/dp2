@@ -342,7 +342,7 @@ string strColor = "",
 int delay = 2000,
 bool bClickClose = false)
         {
-            Task.Run(() =>
+            _ = Task.Run(() =>
             {
                 ShowMessage(strMessage,
     strColor,

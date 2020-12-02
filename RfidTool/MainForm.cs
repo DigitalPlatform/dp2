@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DigitalPlatform.CommonControl;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -14,6 +15,70 @@ namespace RfidTool
     {
         ScanDialog _scanDialog = new ScanDialog();
 
+        #region floating message
+        internal FloatingMessageForm _floatingMessage = null;
+
+        public FloatingMessageForm FloatingMessageForm
+        {
+            get
+            {
+                return this._floatingMessage;
+            }
+            set
+            {
+                this._floatingMessage = value;
+            }
+        }
+
+        public void ShowMessageAutoClear(string strMessage,
+string strColor = "",
+int delay = 2000,
+bool bClickClose = false)
+        {
+            _ = Task.Run(() =>
+            {
+                ShowMessage(strMessage,
+    strColor,
+    bClickClose);
+                System.Threading.Thread.Sleep(delay);
+                // 中间一直没有变化才去消除它
+                if (_floatingMessage.Text == strMessage)
+                    ClearMessage();
+            });
+        }
+
+        public void ShowMessage(string strMessage,
+    string strColor = "",
+    bool bClickClose = false)
+        {
+            if (this._floatingMessage == null)
+                return;
+
+            Color color = Color.FromArgb(80, 80, 80);
+
+            if (strColor == "red")          // 出错
+                color = Color.DarkRed;
+            else if (strColor == "yellow")  // 成功，提醒
+                color = Color.DarkGoldenrod;
+            else if (strColor == "green")   // 成功
+                color = Color.Green;
+            else if (strColor == "progress")    // 处理过程
+                color = Color.FromArgb(80, 80, 80);
+
+            this._floatingMessage.SetMessage(strMessage, color, bClickClose);
+        }
+
+        // 线程安全
+        public void ClearMessage()
+        {
+            if (this._floatingMessage == null)
+                return;
+
+            this._floatingMessage.Text = "";
+        }
+
+        #endregion
+
         public MainForm()
         {
             InitializeComponent();
@@ -22,6 +87,21 @@ namespace RfidTool
             this.MenuItem_writeBookTags.Click += MenuItem_writeBookTags_Click;
 
             _scanDialog.FormClosing += _scanDialog_FormClosing;
+
+            {
+                _floatingMessage = new FloatingMessageForm(this, true);
+                // _floatingMessage.AutoHide = false;
+                _floatingMessage.Font = new System.Drawing.Font(this.Font.FontFamily, this.Font.Size * 2, FontStyle.Bold);
+                _floatingMessage.Opacity = 0.7;
+                _floatingMessage.RectColor = Color.Green;
+                _floatingMessage.Show(this);
+
+                this.Move += (s1, o1) =>
+                {
+                    if (this._floatingMessage != null)
+                        this._floatingMessage.OnResizeOrMove();
+                };
+            }
         }
 
         private void _scanDialog_FormClosing(object sender, FormClosingEventArgs e)
@@ -51,14 +131,11 @@ namespace RfidTool
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            this.Enabled = false;
+            this.ShowMessage("正在连接 RFID 读卡器");
             _ = Task.Run(() =>
             {
                 DataModel.InitialDriver();
-                this.Invoke((Action)(() =>
-                {
-                    this.Enabled = true;
-                }));
+                this.ClearMessage();
             });
         }
 

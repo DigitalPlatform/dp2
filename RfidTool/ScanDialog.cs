@@ -51,7 +51,29 @@ namespace RfidTool
         // 读卡器上的标签发生变化
         private void DataModel_TagChanged(object sender, NewTagChangedEventArgs e)
         {
-            throw new NotImplementedException();
+            if (e.AddTags != null && e.AddTags.Count > 0)
+            {
+                this.Invoke((Action)(() =>
+                {
+                    UpdateTags(e.AddTags);
+                }));
+            }
+
+            if (e.UpdateTags != null && e.UpdateTags.Count > 0)
+            {
+                this.Invoke((Action)(() =>
+                {
+                    UpdateTags(e.UpdateTags);
+                }));
+            }
+
+            if (e.RemoveTags != null && e.RemoveTags.Count > 0)
+            {
+                this.Invoke((Action)(() =>
+                {
+                    RemoveTags(e.RemoveTags);
+                }));
+            }
         }
 
         const int COLUMN_UID = 0;
@@ -67,6 +89,34 @@ namespace RfidTool
 
                 ListViewItem item = new ListViewItem();
                 ListViewUtil.ChangeItemText(item, COLUMN_UID, tag.OneTag.UID);
+                this.listView_tags.Items.Add(item);
+            }
+        }
+
+        // 更新 tags
+        void UpdateTags(List<TagAndData> tags)
+        {
+            foreach (var tag in tags)
+            {
+                ListViewItem item = ListViewUtil.FindItem(this.listView_tags, tag.OneTag.UID, COLUMN_UID);
+                if (item == null)
+                {
+                    item = new ListViewItem();
+                    ListViewUtil.ChangeItemText(item, COLUMN_UID, tag.OneTag.UID);
+                    this.listView_tags.Items.Add(item);
+                }
+            }
+        }
+
+        void RemoveTags(List<TagAndData> tags)
+        {
+            foreach (var tag in tags)
+            {
+                ListViewItem item = ListViewUtil.FindItem(this.listView_tags, tag.OneTag.UID, COLUMN_UID);
+                if (item != null)
+                {
+                    this.listView_tags.Items.Remove(item);
+                }
             }
         }
     }

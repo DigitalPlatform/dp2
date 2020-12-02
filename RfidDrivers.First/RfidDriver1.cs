@@ -287,8 +287,19 @@ namespace RfidDrivers.First
             List<HintInfo> hint_table,
             string com_name)
         {
+            /*
             if (hint_table == null)
                 return new List<string>(rates);
+            */
+            // 2020/12/2
+            // 没有暗示表的情况下，只选择第一个波特率返回
+            if (hint_table == null)
+            {
+                var results = new List<string>();
+                if (rates.Length > 0)
+                    results.Add(rates[0]);
+                return new List<string>(results);
+            }
 
             var hint_item = hint_table.Find((o) => { return o.COM == com_name; });
             if (hint_item == null)
@@ -297,16 +308,18 @@ namespace RfidDrivers.First
             if (hint_item.BaudRate == "!")  // 这个 COM 口不是读卡器，需要跳过
                 return new List<string>();
 
-            List<string> results = new List<string>();
-            results.Add(hint_item.BaudRate);
-            foreach (string rate in rates)
             {
-                if (rate == hint_item.BaudRate)
-                    continue;
-                results.Add(rate);
-            }
+                List<string> results = new List<string>();
+                results.Add(hint_item.BaudRate);
+                foreach (string rate in rates)
+                {
+                    if (rate == hint_item.BaudRate)
+                        continue;
+                    results.Add(rate);
+                }
 
-            return results;
+                return results;
+            }
         }
 
         // 打开所有 COM 口读卡器
