@@ -43,12 +43,15 @@ uint new_password);
 
         //void ConnectTag();
 
-        //void DisconnectTag();
+//void DisconnectTag();
+
+#if OLD_SHELFLOCK
 
         GetLockStateResult GetShelfLockState(string lockName);
 
         // 2020/11/23 增加 style 参数
         NormalResult OpenShelfLock(string lockName, string style);
+#endif
 
         NormalResult TurnShelfLamp(string lampName, string action);
 
@@ -478,6 +481,8 @@ uint new_password);
         public UIntPtr LockHandle { get; set; }
     }
 
+#if OLD_SHELFLOCK
+
     [Serializable()]
     public class LockState
     {
@@ -517,4 +522,6 @@ uint new_password);
             return text.ToString();
         }
     }
+
+#endif
 }

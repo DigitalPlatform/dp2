@@ -1,30 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO.Ports;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Threading;
+using System.IO.Ports;
 using System.Collections;
+using System.Threading;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using DigitalPlatform;
-// using DigitalPlatform.RFID;
+using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
 
-namespace TestShelfLock
+namespace ShelfLockDriver.First
 {
     [TestClass]
-    public class ShelfLockDriver : IShelfLockDriver
+    public class WjlLockDriver : IShelfLockDriver
     {
+        LockStateMemory _lockMemory = new LockStateMemory();
+
         private object _syncRoot = new object();
 
         private SerialPort _sp = new SerialPort();
 
         public string Name { get; set; }
 
-        public ShelfLockDriver()
+        public WjlLockDriver()
         {
             // _sp.DataReceived += _sp_DataReceived;
             _sp.ErrorReceived += _sp_ErrorReceived;
@@ -81,6 +83,10 @@ namespace TestShelfLock
             }
 
             Name = property.SerialPort.ToUpper();
+
+            // 清除记忆的状态。这样所有门锁都被认为是不确定状态。因为初始化的时候有可能部分门锁是打开状态
+            _lockMemory.Clear();
+            RetryLimit = 1; // 遇到出错后重试一次
             return new NormalResult();
         }
 
@@ -172,6 +178,8 @@ namespace TestShelfLock
 
         public NormalResult OpenShelfLock(string lockNameList, string style)
         {
+            var open_and_close = StringUtil.IsInList("open+close", style);
+
             string[] list = lockNameList.Split(new char[] { ',' });
             int count = 0;
             foreach (var one in list)
@@ -212,6 +220,14 @@ namespace TestShelfLock
 
                         var current_path = $"{this.Name}.{addr}.{index}";
 
+                        if (open_and_close)
+                        {
+                            // 为了模拟开门后立即关门，这里加入开过门的痕迹，但并不真正开门
+                            _lockMemory.MemoryOpen(current_path);
+                            count++;
+                            continue;
+                        }
+
                         // 构造请求消息
                         var message = BuildOpenLockMessage((byte)addr, (byte)index);
 
@@ -230,6 +246,9 @@ namespace TestShelfLock
                         var parse_result = ParseOpenLockResultMessage(read_result.Result);
                         if (parse_result.Value == -1)
                             return parse_result;
+
+                        // 加入一个表示发生过开门的状态，让后继获得状态的 API 至少能返回一次打开状态
+                        _lockMemory.MemoryOpen(current_path);
 
                         count++;
                     }
@@ -373,6 +392,7 @@ namespace TestShelfLock
                     foreach (string number in numberList)
                     {
                         string path_string = $"{this.Name}.{card}.{number}";
+
                         LockState state = table[path_string] as LockState;
                         if (state == null)
                         {
@@ -384,6 +404,13 @@ namespace TestShelfLock
                             state.Index = Convert.ToInt32(number);
                         }
                         states.Add(state);
+
+                        // 观察这个锁是否曾经打开过而没有来得及获取至少一次状态？
+                        var opened = _lockMemory.IsOpened(path_string);
+                        if (opened && state.State == "close")
+                        {
+                            state.State = "open,close";
+                        };
                     }
                 }
             }
@@ -413,6 +440,9 @@ namespace TestShelfLock
                         // 发送消息
                         _sp.Write(message, 0, message.Length);
 
+                        // 厂家建议这里延迟 100 毫秒
+                        Thread.Sleep(100);
+
                         byte[] buffer = new byte[readLength];
 
                         read_result = Read(buffer, readLength/*, TimeSpan.FromSeconds(2)*/);
@@ -423,6 +453,15 @@ namespace TestShelfLock
                         }
 
                         Thread.Sleep(100);
+                    }
+                    catch (Exception ex)
+                    {
+                        read_result = new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"WriteAndRead() 出现异常: {ex.Message}",
+                            ErrorCode = ex.GetType().ToString()
+                        };
                     }
                     finally
                     {
@@ -821,36 +860,6 @@ BYTE[0] BYTE[1] BYTE[2] BYTE[3] BYTE[4] BYTE[5] BYTE[6] BYTE[7]
         }
     }
 
-    // 解析锁名称字符串以后得到的细部结构
-    public class LockPath
-    {
-        public string LockName { get; set; }
-        public List<string> CardNameList { get; set; }
-        public List<string> NumberList { get; set; }
 
-        public static LockPath Parse(string text,
-            List<string> default_cardNameList = null,
-            List<string> default_numberList = null)
-        {
-            LockPath result = new LockPath();
-
-            result.LockName = "*";
-            result.CardNameList = default_cardNameList == null ? new List<string> { "1" } : default_cardNameList;
-            result.NumberList = default_numberList == null ? new List<string> { "1" } : default_numberList;
-
-            string[] parts = text.Split(new char[] { '.' });
-
-            if (parts.Length > 0)
-                result.LockName = parts[0];
-            if (parts.Length > 1 && string.IsNullOrEmpty(parts[1]) == false
-                && parts[1] != "*")
-                result.CardNameList = StringUtil.SplitList(parts[1], '|');
-            if (parts.Length > 2 && string.IsNullOrEmpty(parts[2]) == false
-                && parts[2] != "*")
-                result.NumberList = StringUtil.SplitList(parts[2], '|');
-
-            return result;
-        }
-    }
 
 }
