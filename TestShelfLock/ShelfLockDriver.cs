@@ -396,25 +396,50 @@ namespace TestShelfLock
             public byte[] Result { get; set; }
         }
 
+        // 最多允许重试的次数。0 表示不重试
+        public int RetryLimit { get; set; }
+
         ReadResult WriteAndRead(byte[] message,
             int readLength)
         {
-            lock (_syncRoot)
+            bool suceed = false;
+            try
             {
-                // 发送消息
-                _sp.Write(message, 0, message.Length);
-
-                byte[] buffer = new byte[readLength];
-
-                var read_result = Read(buffer, readLength/*, TimeSpan.FromSeconds(2)*/);
-                if (read_result.Value == -1)
-                    return new ReadResult
+                NormalResult read_result = null;
+                for (int i = 0; i < RetryLimit + 1; i++)
+                {
+                    lock (_syncRoot)
                     {
-                        Value = -1,
-                        ErrorInfo = read_result.ErrorInfo,
-                        ErrorCode = read_result.ErrorCode
-                    };
-                return new ReadResult { Result = buffer };
+                        // 发送消息
+                        _sp.Write(message, 0, message.Length);
+
+                        byte[] buffer = new byte[readLength];
+
+                        read_result = Read(buffer, readLength/*, TimeSpan.FromSeconds(2)*/);
+                        if (read_result.Value != -1)
+                        {
+                            suceed = true;
+                            return new ReadResult { Result = buffer };
+                        }
+
+                        Thread.Sleep(100);
+                    }
+                }
+
+                return new ReadResult
+                {
+                    Value = -1,
+                    ErrorInfo = read_result.ErrorInfo,
+                    ErrorCode = read_result.ErrorCode
+                };
+            }
+            finally
+            {
+                if (suceed == false)
+                {
+                    _sp.DiscardOutBuffer();
+                    _sp.DiscardInBuffer();
+                }
             }
         }
 
