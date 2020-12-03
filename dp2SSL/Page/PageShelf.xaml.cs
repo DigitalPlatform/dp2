@@ -1259,7 +1259,7 @@ namespace dp2SSL
                         {
                             App.CurrentApp.SpeakSequence("补做一次盘点");
                             await ShelfData.RefreshInventoryAsync(e.Door);
-                            await DoorStateTask.SaveDoorActions(e.Door, false);
+                            await DoorStateTask.BuildDoorActionsAsync(e.Door, false);
                         }
                     }
                     catch (Exception ex)
@@ -1527,7 +1527,7 @@ namespace dp2SSL
 
             // 提交尚未提交的取出和放入
             // PatronClear(true);
-            await SaveAllActions();
+            await BuildAllActionsAsync();
             await SubmitAsync(true);
 
             RfidManager.SetError -= RfidManager_SetError;
@@ -3613,7 +3613,7 @@ namespace dp2SSL
                 || ShelfData.l_Removes.Count > 0
                 || ShelfData.l_Changes.Count > 0)
             {
-                await SaveAllActions();
+                await BuildAllActionsAsync();
                 await DoRequestAsync(ShelfData.PullActions(), silently ? "silence" : "");
                 // await SubmitCheckInOut("silence");
             }
@@ -4022,10 +4022,10 @@ namespace dp2SSL
             return result;
         }
 
-        // 将所有暂存信息保存为 Action，但并不立即提交
-        async Task SaveAllActions()
+        // 将所有暂存信息构造为 Action，但并不立即提交
+        async Task BuildAllActionsAsync()
         {
-            var result = await ShelfData.SaveActions((entity) =>
+            var result = await ShelfData.BuildActionsAsync((entity) =>
             {
                 return GetOperator(entity, true);
             });

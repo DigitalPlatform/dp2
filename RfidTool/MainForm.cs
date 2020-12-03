@@ -1,4 +1,5 @@
-﻿using DigitalPlatform.CommonControl;
+﻿using DigitalPlatform.CirculationClient;
+using DigitalPlatform.CommonControl;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -131,6 +132,13 @@ bool bClickClose = false)
 
         private void MainForm_Load(object sender, EventArgs e)
         {
+            var ret = ClientInfo.Initial("TestShelfLock");
+            if (ret == false)
+            {
+                Application.Exit();
+                return;
+            }
+
             this.ShowMessage("正在连接 RFID 读卡器");
             _ = Task.Run(() =>
             {
@@ -146,7 +154,7 @@ bool bClickClose = false)
 
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-
+            ClientInfo.Finish();
         }
     }
 }

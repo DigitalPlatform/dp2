@@ -1139,5 +1139,13 @@ string color = "red")
 
             // 尝试连接 dp2library
         }
+
+        // 2020/12/3
+        // 清除 RFID 标签缓存
+        private void clearTagCache_Click(object sender, RoutedEventArgs e)
+        {
+            ShelfData.BookTagList.ClearTagTable(null);
+            ShelfData.PatronTagList.ClearTagTable(null);
+        }
     }
 }

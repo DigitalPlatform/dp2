@@ -12,6 +12,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using DigitalPlatform;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
+using System.Diagnostics;
 
 namespace ShelfLockDriver.First
 {
@@ -320,7 +321,10 @@ namespace ShelfLockDriver.First
                 // 如果门全部关闭，则不需要具体探测状态
                 // 即：只有打开状态的门才有必要探测状态，看看它们是否被手动关闭了
                 if (_lockMemory.GetBoardState(board_path) == "all_close")
+                {
+                    result_bytes.AddRange(GetAllCloseBytes());
                     continue;
+                }
 
                 /*
                 if (addr <= 0 || addr > _cardAmount)
@@ -426,11 +430,58 @@ namespace ShelfLockDriver.First
             }
 
             return new GetLockStateResult { States = states };
+
+            // 构造表示全 Close 的一组状态 bytes
+            List<byte> GetAllCloseBytes()
+            {
+                return new List<byte> { 0xff, 0xff, 0xff, 0xff };
+            }
         }
 
         class ReadResult : NormalResult
         {
             public byte[] Result { get; set; }
+        }
+
+        // 通过原始的 bytes 得到 LockState 集合
+        public List<LockState> BuildStates(List<string> cards,
+            List<byte> bytes)
+        {
+            Debug.Assert(cards.Count == bytes.Count / 4);
+            if (cards.Count != (bytes.Count / 4))
+                throw new ArgumentException($"cards({cards.Count}) 与 bytes({bytes.Count}) 数量关系不正确");
+            
+            List<LockState> results = new List<LockState>();
+            foreach (var card in cards)
+            {
+                var current_bytes = bytes.GetRange(0, 4);
+                bytes.RemoveRange(0, 4);
+                int byte_offset = 0;
+                foreach (var b in current_bytes)
+                {
+                    for (int i = 0; i < 8; i++)
+                    {
+                        string lock_state = (((b >> i) & 0x01) == 0) ? "open" : "close";
+
+                        int board = Convert.ToInt32(card);
+                        int index = (byte_offset * 8) + i + 1;
+
+                        var state = new LockState
+                        {
+                            Path = $"{this.Name}.{board}.{index}",
+                            Lock = this.Name,
+                            Board = board,
+                            Index = index,
+                            State = lock_state,
+                        };
+                        results.Add(state);
+                    }
+
+                    byte_offset++;
+                }
+            }
+
+            return results;
         }
 
         // 最多允许重试的次数。0 表示不重试
