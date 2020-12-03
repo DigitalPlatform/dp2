@@ -38,6 +38,8 @@ namespace RfidTool
             this.columnHeader_tou = new System.Windows.Forms.ColumnHeader();
             this.columnHeader_oi = new System.Windows.Forms.ColumnHeader();
             this.button_write = new System.Windows.Forms.Button();
+            this.columnHeader_antenna = new System.Windows.Forms.ColumnHeader();
+            this.columnHeader_readerName = new System.Windows.Forms.ColumnHeader();
             this.SuspendLayout();
             // 
             // label1
@@ -76,7 +78,9 @@ namespace RfidTool
             this.columnHeader_uid,
             this.columnHeader_pii,
             this.columnHeader_tou,
-            this.columnHeader_oi});
+            this.columnHeader_oi,
+            this.columnHeader_antenna,
+            this.columnHeader_readerName});
             this.listView_tags.FullRowSelect = true;
             this.listView_tags.HideSelection = false;
             this.listView_tags.Location = new System.Drawing.Point(12, 168);
@@ -122,6 +126,17 @@ namespace RfidTool
             this.button_write.Text = "写入(&W)";
             this.button_write.UseVisualStyleBackColor = true;
             // 
+            // columnHeader_antenna
+            // 
+            this.columnHeader_antenna.Name = "columnHeader_antenna";
+            this.columnHeader_antenna.Text = "天线";
+            // 
+            // columnHeader_readerName
+            // 
+            this.columnHeader_readerName.Name = "columnHeader_readerName";
+            this.columnHeader_readerName.Text = "读卡器";
+            this.columnHeader_readerName.Width = 160;
+            // 
             // ScanDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(13F, 28F);
@@ -155,5 +170,7 @@ namespace RfidTool
         private System.Windows.Forms.ColumnHeader columnHeader_tou;
         private System.Windows.Forms.ColumnHeader columnHeader_oi;
         private System.Windows.Forms.Button button_write;
+        private System.Windows.Forms.ColumnHeader columnHeader_antenna;
+        private System.Windows.Forms.ColumnHeader columnHeader_readerName;
     }
 }

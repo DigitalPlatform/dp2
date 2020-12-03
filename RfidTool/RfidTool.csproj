@@ -133,6 +133,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\DigitalPlatform.CirculationClient\DigitalPlatform.CirculationClient.csproj" />
     <ProjectReference Include="..\DigitalPlatform.CommonControl\DigitalPlatform.CommonControl.csproj" />
     <ProjectReference Include="..\DigitalPlatform.RFID\DigitalPlatform.RFID.csproj" />
     <ProjectReference Include="..\RfidDrivers.First\RfidDrivers.First.csproj" />

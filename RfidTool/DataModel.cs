@@ -12,6 +12,7 @@ using DigitalPlatform;
 using DigitalPlatform.IO;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
+using DigitalPlatform.CirculationClient;
 
 namespace RfidTool
 {
@@ -26,8 +27,10 @@ namespace RfidTool
 
         public static NewTagList TagList = new NewTagList();
 
+        /*
         static string _prev_uids = "";
         static int _prev_count = 0;
+        */
 
         static Task _task = null;
 
@@ -118,6 +121,41 @@ namespace RfidTool
             _cancelRfidManager?.Cancel();
             _task?.Wait();
             _driver.ReleaseDriver();
+        }
+
+        // 拟写入 RFID 标签的 OI 字符串
+        public static string DefaultOiString
+        {
+            get
+            {
+                return ClientInfo.Config.Get("rfid", "default_oi", null);
+            }
+            set
+            {
+                ClientInfo.Config.Set("rfid", "default_oi", value);
+            }
+        }
+
+        // 拟写入 RFID 标签的 AOI 字符串
+        public static string DefaultAoiString
+        {
+            get
+            {
+                return ClientInfo.Config.Get("rfid", "default_aoi", null);
+            }
+            set
+            {
+                ClientInfo.Config.Set("rfid", "default_aoi", value);
+            }
+        }
+
+
+        // 写入标签
+        public static NormalResult WriteTagInfo(string one_reader_name,
+            TagInfo old_tag_info,
+            TagInfo new_tag_info)
+        {
+            return _driver.WriteTagInfo(one_reader_name, old_tag_info, new_tag_info);
         }
 
         /*

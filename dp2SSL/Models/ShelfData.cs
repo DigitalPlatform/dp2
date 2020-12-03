@@ -1251,10 +1251,10 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             public List<ActionInfo> Actions { get; set; }
         }
 
-        // 将暂存的信息保存为 Action。但并不立即提交
+        // 将暂存的信息构造为 Action。但并不立即提交
         // parameters:
         //      patronBarcode   读者证条码号。如果为 "*"，表示希望针对全部读者的都提交
-        public static async Task<SaveActionResult> SaveActions(
+        public static async Task<SaveActionResult> BuildActionsAsync(
             // string patronBarcode,
             Delegate_getOperator func_getOperator)
         {
@@ -4304,12 +4304,23 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                 // 拿走标签
                 foreach (var tag in removes)
                 {
+                    /*
                     if (tag.OneTag.TagInfo == null)
                         continue;
+                    */
+                    
+                    /*
+                    // testing
+                    tag.OneTag.TagInfo = null;
+                    */
 
                     // 刚添加过的标签，这里就不要去移走了。即，添加比移除要优先
                     if (add_uids.IndexOf(tag.OneTag.UID) != -1)
                         continue;
+
+                    // 2020/12/3
+                    // 对于拿出书柜的标签，清掉其 RFID 标签缓存
+                    BookTagList.ClearTagTable(tag.OneTag.UID);
 
                     // TODO: 特别注意，对于书柜门内的标签，要所属门完全一致才允许 remove
 
@@ -5956,12 +5967,23 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             }
         }
 
-        public static NormalResult SetEAS(string uid, string antenna, bool enable)
+        public static NormalResult SetEAS(string uid,
+            string antenna, 
+            bool enable)
         {
             try
             {
                 // testing
                 // return new NormalResult { Value = -1, ErrorInfo = "修改 EAS 失败，测试" };
+                
+                // 2020/12/3 (减少真正需要发送指令给读写器执行修改 EAS 的次数)
+                // 先尝试观察内存中的标签信息，看 EAS 是否已经到位
+                var tag = BookTagList.FindTag(uid);
+                if (tag != null && tag.OneTag.TagInfo != null)
+                {
+                    if (NewTagList.VerifyTagInfoEas(tag.OneTag.TagInfo, enable) == true)
+                        return new NormalResult();
+                }
 
                 if (uint.TryParse(antenna, out uint antenna_id) == false)
                     antenna_id = 0;

@@ -111,7 +111,7 @@ TaskScheduler.Default);
                         start = DateTime.Now;
 
                         // 2020/4/21 把这两句移动到 try 范围内
-                        await SaveDoorActions(state.Door, true);
+                        await BuildDoorActionsAsync(state.Door, true);
 
                         WpfClientInfo.WriteInfoLog($"针对门 {state.Door.Name} 执行 SaveDoorActions() 耗时 {(DateTime.Now - start).TotalSeconds.ToString()}");
 
@@ -152,10 +152,11 @@ TaskScheduler.Default);
                 ActivateTask();
         }
 
-        // 将指定门的暂存的信息保存为 Action。但并不立即提交
-        public async static Task SaveDoorActions(DoorItem door, bool clearOperator)
+        // 将指定门的暂存的信息构造为 Action。但并不立即提交
+        public async static Task BuildDoorActionsAsync(DoorItem door, 
+            bool clearOperator)
         {
-            var result = await ShelfData.SaveActions((entity) =>
+            var result = await ShelfData.BuildActionsAsync((entity) =>
             {
                 var results = DoorItem.FindDoors(ShelfData.Doors, entity.ReaderName, entity.Antenna);
                 // TODO: 如果遇到 results.Count > 1 是否抛出异常?

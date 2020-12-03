@@ -65,7 +65,8 @@ namespace DigitalPlatform.RFID
             }
         }
 
-        TagAndData FindBookTag(string uid)
+        // 从当前在读卡器上的标签集合中查找一个标签信息
+        public TagAndData FindTag(string uid)
         {
             lock (_sync_tags)
             {
@@ -181,7 +182,7 @@ namespace DigitalPlatform.RFID
             foreach (OneTag tag in list)
             {
                 // 检查以前的列表中是否已经有了
-                var book = FindBookTag(tag.UID);
+                var book = FindTag(tag.UID);
 
                 /*
                 // 2020/4/19 验证性做法：从一个读卡器变动到另一个读卡器，第一种顺序，瞬间集合里面可能会有相同 UID 的两个对象
@@ -367,6 +368,7 @@ namespace DigitalPlatform.RFID
             }
         }
 
+        // 标签信息缓存
         // uid --> TagInfo
         Hashtable _tagTable = new Hashtable();
 
@@ -386,10 +388,25 @@ namespace DigitalPlatform.RFID
             }
         }
 
+        // 修改一个 tagInfo 中的 EAS 相关值
         public static void SetTagInfoEAS(TagInfo tagInfo, bool enable)
         {
             tagInfo.AFI = enable ? (byte)0x07 : (byte)0xc2;
             tagInfo.EAS = enable;
+        }
+
+        // 校验一个 tagInfo 中的 EAS 值是否符合。
+        // return:
+        //      false   不符合
+        //      true    符合
+        public static bool VerifyTagInfoEas(TagInfo tagInfo, bool enable)
+        {
+            var afi = enable ? (byte)0x07 : (byte)0xc2;
+            if (afi != tagInfo.AFI)
+                return false;
+            if (tagInfo.EAS != enable)
+                return false;
+            return true;
         }
 
         // 修改和 EAS 有关的内存数据
@@ -397,7 +414,7 @@ namespace DigitalPlatform.RFID
         {
             _tagTable.Remove(uid);
             // 找到对应事项，修改 EAS 和 AFI
-            var data = FindBookTag(uid);
+            var data = FindTag(uid);
             if (data == null)
                 return false;
             if (data.OneTag != null && data.OneTag.TagInfo != null)

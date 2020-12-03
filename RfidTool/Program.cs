@@ -1,3 +1,4 @@
+using DigitalPlatform.CirculationClient;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -25,6 +26,9 @@ namespace RfidTool
             string assemblyPath = Path.Combine(folderPath, IntPtr.Size == 8 ? "x64" : "x86");
 
             SetDllDirectory(assemblyPath);
+
+            ClientInfo.TypeOfProgram = typeof(Program);
+
 
             Application.SetHighDpiMode(HighDpiMode.SystemAware);
             Application.EnableVisualStyles();
