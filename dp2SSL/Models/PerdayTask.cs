@@ -1,13 +1,15 @@
-﻿using DigitalPlatform;
-using DigitalPlatform.Text;
-using DigitalPlatform.WPF;
-using FluentScheduler;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Automation.Provider;
+
+using FluentScheduler;
+
+using DigitalPlatform;
+using DigitalPlatform.Text;
+using DigitalPlatform.WPF;
 
 namespace dp2SSL
 {
@@ -17,6 +19,11 @@ namespace dp2SSL
         {
             public int Hour { get; set; }
             public int Minute { get; set; }
+
+            public override string ToString()
+            {
+                return $"{Hour}:{Minute}";
+            }
         }
 
         class ParseTimeResult : DigitalPlatform.NormalResult
@@ -248,13 +255,18 @@ namespace dp2SSL
             {
                 JobManager.Initialize();
                 _initialized = true;
+                WpfClientInfo.WriteInfoLog($"初始化 JobManager");
             }
 
             TurnBackLampOff();
+            WpfClientInfo.WriteInfoLog($"先关掉书柜灯");
 
             // 每日亮灯时段
             string time_range = WpfClientInfo.Config.Get("tasks", "lamp", null);
             string weekday = WpfClientInfo.Config.Get("tasks", "lamp_weekday", null);
+
+            WpfClientInfo.WriteInfoLog($"time_range={time_range}");
+            WpfClientInfo.WriteInfoLog($"weekday={weekday}");
 
             /*
             // testing
@@ -263,7 +275,10 @@ namespace dp2SSL
             */
 
             if (string.IsNullOrEmpty(time_range))
+            {
+                WpfClientInfo.WriteInfoLog($"time_range 为空, 结束 StartPerdayTask()");
                 return new NormalResult();
+            }
 
             try
             {
@@ -271,14 +286,24 @@ namespace dp2SSL
                 var start = times[0];
                 var end = times[1];
 
+                WpfClientInfo.WriteInfoLog($"time_range '{time_range}' 解析后得到 start='{start.ToString()}' end='{end.ToString()}'");
+
                 // 专门检查是否在亮灯时间范围内
                 DateTime now = DateTime.Now;
                 DateTime current_start = GetTodayTime(start);
                 DateTime current_end = GetTodayTime(end);
                 if (now >= current_start && now <= current_end)
                 {
+                    WpfClientInfo.WriteInfoLog($"当前时间 '{now.ToString()}' 处在 current_start '{current_start.ToString()}' 和 current_end '{current_end.ToString()}' 之间，下面进一步判断 weekday");
                     if (InWeekday() == true)
+                    {
                         TurnBackLampOn();
+                        WpfClientInfo.WriteInfoLog("当前时间在 weekday 范围内，因此开灯");
+                    }
+                    else
+                    {
+                        WpfClientInfo.WriteInfoLog("当前时间不在 weekday 范围内，因此未开灯");
+                    }
                 }
 
                 // 安排任务
@@ -287,7 +312,12 @@ namespace dp2SSL
                     () =>
                     {
                         if (InWeekday() == true)
+                        {
                             TurnBackLampOn();
+                            WpfClientInfo.WriteInfoLog("job head 触发开灯");
+                        }
+                        else
+                            WpfClientInfo.WriteInfoLog("job head 触发，但因为当前时间不在 weekday 范围，未开灯");
                     },
                     s => s.ToRunEvery(1).Days().At(start.Hour, start.Minute)
                 );
@@ -296,7 +326,13 @@ namespace dp2SSL
                     () =>
                     {
                         if (InWeekday() == true)
+                        {
                             TurnBackLampOff();
+                            WpfClientInfo.WriteInfoLog("job tail 触发关灯");
+                        }
+                        else
+                            WpfClientInfo.WriteInfoLog("job tail 触发，但因为当前时间不在 weekday 范围，未关灯");
+
                     },
                     s => s.ToRunEvery(1).Days().At(end.Hour, end.Minute)
                 );

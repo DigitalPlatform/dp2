@@ -8602,6 +8602,12 @@ out strError);
             string strAction = DomUtil.GetElementText(domLog.DocumentElement,
                 "action");
 
+            // 2020/12/4
+            if (strAction == "setuid")
+            {
+                return 0;
+            }
+
             if (strAction == "new"
     || strAction == "change"
     || strAction == "transfer"  // 2020/6/3

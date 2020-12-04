@@ -409,6 +409,9 @@ namespace dp2SSL
             RfidManager.ListTags += RfidManager_ListTags;
             RfidManager.ListLocks += ShelfData.RfidManager_ListLocks;
 
+            // 补一次。先前可能有失败的开关灯动作
+            ShelfData.TurnLamp("", "refresh");
+
             // 2019/12/17
             // 智能书柜一开始假定全部门关闭，所以不需要对任何图书读卡器进行盘点
             if (App.Function == "智能书柜")
@@ -884,6 +887,7 @@ namespace dp2SSL
 
             // 最后关灯
             RfidManager.TurnShelfLamp("*", "turnOff");
+            WpfClientInfo.WriteInfoLog("物理关灯 OnSessionEnding()");
 
             try
             {
@@ -975,6 +979,7 @@ namespace dp2SSL
 
             // 最后关灯
             RfidManager.TurnShelfLamp("*", "turnOff");
+            WpfClientInfo.WriteInfoLog("物理关灯 OnExit()");
 
             base.OnExit(e);
         }

@@ -1,45 +1,160 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
-
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{EF59437E-87D5-46C9-94CC-59676CB4DA93}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net5.0-windows</TargetFramework>
-    <UseWindowsForms>true</UseWindowsForms>
+    <RootNamespace>RfidTool</RootNamespace>
+    <AssemblyName>RfidTool</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
   </PropertyGroup>
-
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
   <ItemGroup>
-    <None Remove="x64\Drivers\rfidlib_ANM201.dll" />
-    <None Remove="x64\Drivers\rfidlib_ANRD120M.dll" />
-    <None Remove="x64\Drivers\rfidlib_ANRD242.dll" />
-    <None Remove="x64\Drivers\rfidlib_ANSSR100.dll" />
-    <None Remove="x64\Drivers\rfidlib_drv_RD5100.dll" />
-    <None Remove="x64\Drivers\rfidlib_drv_RL8000.dll" />
-    <None Remove="x64\Drivers\rfidlib_drv_rpan.dll" />
-    <None Remove="x64\MiniBookcaseLockLib.dll" />
-    <None Remove="x64\rfidlib_aip_iso14443a.dll" />
-    <None Remove="x64\rfidlib_aip_iso14443b.dll" />
-    <None Remove="x64\rfidlib_aip_iso15693.dll" />
-    <None Remove="x64\rfidlib_aip_iso18000p3m3.dll" />
-    <None Remove="x64\rfidlib_nfc.dll" />
-    <None Remove="x64\rfidlib_reader.dll" />
-    <None Remove="x64\YkPosdll.dll" />
-    <None Remove="x86\Drivers\rfidlib_ANM201.dll" />
-    <None Remove="x86\Drivers\rfidlib_ANRD120M.dll" />
-    <None Remove="x86\Drivers\rfidlib_ANRD201.dll" />
-    <None Remove="x86\Drivers\rfidlib_ANRD242.dll" />
-    <None Remove="x86\Drivers\rfidlib_ANSSR100.dll" />
-    <None Remove="x86\Drivers\rfidlib_drv_rd5100.dll" />
-    <None Remove="x86\Drivers\rfidlib_drv_RL8000.dll" />
-    <None Remove="x86\Drivers\rfidlib_drv_rpan.dll" />
-    <None Remove="x86\MiniBookcaseLockLib.dll" />
-    <None Remove="x86\rfidlib_aip_iso14443A.dll" />
-    <None Remove="x86\rfidlib_aip_iso14443B.dll" />
-    <None Remove="x86\rfidlib_aip_iso15693.dll" />
-    <None Remove="x86\rfidlib_aip_iso18000p3m3.dll" />
-    <None Remove="x86\rfidlib_nfc.dll" />
-    <None Remove="x86\rfidlib_reader.dll" />
-    <None Remove="x86\YkPosdll.dll" />
+    <Reference Include="ClosedXML, Version=0.95.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ClosedXML.0.95.3\lib\net46\ClosedXML.dll</HintPath>
+    </Reference>
+    <Reference Include="DocumentFormat.OpenXml, Version=2.7.2.0, Culture=neutral, PublicKeyToken=8fb06cb64d019a17, processorArchitecture=MSIL">
+      <HintPath>..\packages\DocumentFormat.OpenXml.2.7.2\lib\net46\DocumentFormat.OpenXml.dll</HintPath>
+    </Reference>
+    <Reference Include="ExcelNumberFormat, Version=1.0.10.0, Culture=neutral, PublicKeyToken=23c6f5d73be07eca, processorArchitecture=MSIL">
+      <HintPath>..\packages\ExcelNumberFormat.1.0.10\lib\net20\ExcelNumberFormat.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.IO.FileSystem.Primitives, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.IO.FileSystem.Primitives.4.0.1\lib\net46\System.IO.FileSystem.Primitives.dll</HintPath>
+      <Private>True</Private>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.IO.Packaging, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.IO.Packaging.4.0.0\lib\net46\System.IO.Packaging.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
-
+  <ItemGroup>
+    <Compile Include="DataModel.cs" />
+    <Compile Include="MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainForm.Designer.cs">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ScanDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ScanDialog.designer.cs">
+      <DependentUpon>ScanDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SettingDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SettingDialog.designer.cs">
+      <DependentUpon>SettingDialog.cs</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="MainForm.resx">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="ScanDialog.resx">
+      <DependentUpon>ScanDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SettingDialog.resx">
+      <DependentUpon>SettingDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <None Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DigitalPlatform.CirculationClient\DigitalPlatform.CirculationClient.csproj">
+      <Project>{397bb898-88e0-41d6-8d01-09233c7ffc75}</Project>
+      <Name>DigitalPlatform.CirculationClient</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.CommonControl\DigitalPlatform.CommonControl.csproj">
+      <Project>{334e1b2b-5373-4c80-a971-bff213ff304b}</Project>
+      <Name>DigitalPlatform.CommonControl</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.dp2.Statis\DigitalPlatform.dp2.Statis.csproj">
+      <Project>{060dd22d-8c7a-4d17-ac72-06b45ae65174}</Project>
+      <Name>DigitalPlatform.dp2.Statis</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.IO\DigitalPlatform.IO.csproj">
+      <Project>{441cb814-af78-4503-91ef-dce5f3269502}</Project>
+      <Name>DigitalPlatform.IO</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.RFID\DigitalPlatform.RFID.csproj">
+      <Project>{9d26d2ad-eabb-4c32-8706-fb9e323faf01}</Project>
+      <Name>DigitalPlatform.RFID</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.Text\DigitalPlatform.Text.csproj">
+      <Project>{26f96cc3-a4a9-4bc4-a10a-bc7e25581ff6}</Project>
+      <Name>DigitalPlatform.Text</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform\4.0\DigitalPlatform.csproj">
+      <Project>{bdd43275-eaa0-4670-8ba3-0db5cd7598dd}</Project>
+      <Name>DigitalPlatform</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\dp-library\DigitalPlatform.Core\DigitalPlatform.Core.csproj">
+      <Project>{c5b517c1-7344-45a5-89dc-06a9b130ae36}</Project>
+      <Name>DigitalPlatform.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RfidDrivers.First\RfidDrivers.First.csproj">
+      <Project>{dfadb438-ebff-47fb-acf6-586224cef771}</Project>
+      <Name>RfidDrivers.First</Name>
+    </ProjectReference>
+  </ItemGroup>
   <ItemGroup>
     <Content Include="x64\Drivers\rfidlib_ANM201.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -131,27 +246,5 @@
     </Content>
     <Content Include="x86\YkPosdll.dll" />
   </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\DigitalPlatform.CirculationClient\DigitalPlatform.CirculationClient.csproj" />
-    <ProjectReference Include="..\DigitalPlatform.CommonControl\DigitalPlatform.CommonControl.csproj" />
-    <ProjectReference Include="..\DigitalPlatform.RFID\DigitalPlatform.RFID.csproj" />
-    <ProjectReference Include="..\RfidDrivers.First\RfidDrivers.First.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="Properties\Settings.Designer.cs">
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-    </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-  </ItemGroup>
-
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
