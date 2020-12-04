@@ -29,19 +29,29 @@ namespace RfidTool
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.MenuItem_file = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_writeBookTags = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_writeShelfTags = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.MenuItem_saveToExcelFile = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.MenuItem_settings = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_exit = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage_writeTag = new System.Windows.Forms.TabPage();
             this.listView_writeHistory = new System.Windows.Forms.ListView();
-            this.columnHeader_uid = new System.Windows.Forms.ColumnHeader();
-            this.columnHeader_pii = new System.Windows.Forms.ColumnHeader();
-            this.columnHeader_tou = new System.Windows.Forms.ColumnHeader();
-            this.columnHeader_oi = new System.Windows.Forms.ColumnHeader();
+            this.columnHeader_uid = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_pii = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_tou = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_oi = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_aoi = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_writeTime = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.MenuItem_writePatronTags = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage_writeTag.SuspendLayout();
@@ -49,12 +59,14 @@ namespace RfidTool
             // 
             // menuStrip1
             // 
+            this.menuStrip1.GripMargin = new System.Windows.Forms.Padding(2, 2, 0, 2);
             this.menuStrip1.ImageScalingSize = new System.Drawing.Size(28, 28);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.MenuItem_file});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(985, 36);
+            this.menuStrip1.Padding = new System.Windows.Forms.Padding(6, 3, 0, 3);
+            this.menuStrip1.Size = new System.Drawing.Size(1018, 39);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -62,38 +74,83 @@ namespace RfidTool
             // 
             this.MenuItem_file.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.MenuItem_writeBookTags,
+            this.MenuItem_writeShelfTags,
+            this.MenuItem_writePatronTags,
+            this.toolStripSeparator3,
+            this.MenuItem_saveToExcelFile,
+            this.toolStripSeparator1,
+            this.MenuItem_settings,
+            this.toolStripSeparator2,
             this.MenuItem_exit});
             this.MenuItem_file.Name = "MenuItem_file";
-            this.MenuItem_file.Size = new System.Drawing.Size(97, 32);
+            this.MenuItem_file.Size = new System.Drawing.Size(97, 33);
             this.MenuItem_file.Text = "文件(&F)";
             // 
             // MenuItem_writeBookTags
             // 
             this.MenuItem_writeBookTags.Name = "MenuItem_writeBookTags";
-            this.MenuItem_writeBookTags.Size = new System.Drawing.Size(303, 40);
+            this.MenuItem_writeBookTags.Size = new System.Drawing.Size(387, 40);
             this.MenuItem_writeBookTags.Text = "写入图书标签(&B) ...";
+            this.MenuItem_writeBookTags.Click += new System.EventHandler(this.MenuItem_writeBookTags_Click);
+            // 
+            // MenuItem_writeShelfTags
+            // 
+            this.MenuItem_writeShelfTags.Name = "MenuItem_writeShelfTags";
+            this.MenuItem_writeShelfTags.Size = new System.Drawing.Size(387, 40);
+            this.MenuItem_writeShelfTags.Text = "写入层架标(&S) ...";
+            this.MenuItem_writeShelfTags.Click += new System.EventHandler(this.MenuItem_writeShelfTags_Click);
+            // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(384, 6);
+            // 
+            // MenuItem_saveToExcelFile
+            // 
+            this.MenuItem_saveToExcelFile.Name = "MenuItem_saveToExcelFile";
+            this.MenuItem_saveToExcelFile.Size = new System.Drawing.Size(387, 40);
+            this.MenuItem_saveToExcelFile.Text = "保存列表到 Excel 文件(&S) ...";
+            this.MenuItem_saveToExcelFile.Click += new System.EventHandler(this.MenuItem_saveToExcelFile_Click);
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(384, 6);
+            // 
+            // MenuItem_settings
+            // 
+            this.MenuItem_settings.Name = "MenuItem_settings";
+            this.MenuItem_settings.Size = new System.Drawing.Size(387, 40);
+            this.MenuItem_settings.Text = "设置(&S) ...";
+            this.MenuItem_settings.Click += new System.EventHandler(this.MenuItem_settings_Click);
+            // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(384, 6);
             // 
             // MenuItem_exit
             // 
             this.MenuItem_exit.Name = "MenuItem_exit";
-            this.MenuItem_exit.Size = new System.Drawing.Size(303, 40);
+            this.MenuItem_exit.Size = new System.Drawing.Size(387, 40);
             this.MenuItem_exit.Text = "退出";
+            this.MenuItem_exit.Click += new System.EventHandler(this.MenuItem_exit_Click);
             // 
             // toolStrip1
             // 
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(28, 28);
-            this.toolStrip1.Location = new System.Drawing.Point(0, 36);
+            this.toolStrip1.Location = new System.Drawing.Point(0, 39);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(985, 25);
+            this.toolStrip1.Size = new System.Drawing.Size(1018, 25);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
             // statusStrip1
             // 
             this.statusStrip1.ImageScalingSize = new System.Drawing.Size(28, 28);
-            this.statusStrip1.Location = new System.Drawing.Point(0, 518);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 572);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(985, 22);
+            this.statusStrip1.Size = new System.Drawing.Size(1018, 22);
             this.statusStrip1.TabIndex = 2;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -101,19 +158,21 @@ namespace RfidTool
             // 
             this.tabControl1.Controls.Add(this.tabPage_writeTag);
             this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tabControl1.Location = new System.Drawing.Point(0, 61);
+            this.tabControl1.Location = new System.Drawing.Point(0, 64);
+            this.tabControl1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(985, 457);
+            this.tabControl1.Size = new System.Drawing.Size(1018, 508);
             this.tabControl1.TabIndex = 3;
             // 
             // tabPage_writeTag
             // 
             this.tabPage_writeTag.Controls.Add(this.listView_writeHistory);
             this.tabPage_writeTag.Location = new System.Drawing.Point(4, 37);
+            this.tabPage_writeTag.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabPage_writeTag.Name = "tabPage_writeTag";
-            this.tabPage_writeTag.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage_writeTag.Size = new System.Drawing.Size(977, 416);
+            this.tabPage_writeTag.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.tabPage_writeTag.Size = new System.Drawing.Size(1010, 467);
             this.tabPage_writeTag.TabIndex = 0;
             this.tabPage_writeTag.Text = "写入标签";
             this.tabPage_writeTag.UseVisualStyleBackColor = true;
@@ -124,14 +183,17 @@ namespace RfidTool
             this.columnHeader_uid,
             this.columnHeader_pii,
             this.columnHeader_tou,
-            this.columnHeader_oi});
+            this.columnHeader_oi,
+            this.columnHeader_aoi,
+            this.columnHeader_writeTime});
             this.listView_writeHistory.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listView_writeHistory.FullRowSelect = true;
             this.listView_writeHistory.HideSelection = false;
-            this.listView_writeHistory.Location = new System.Drawing.Point(3, 3);
+            this.listView_writeHistory.Location = new System.Drawing.Point(4, 3);
+            this.listView_writeHistory.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.listView_writeHistory.MultiSelect = false;
             this.listView_writeHistory.Name = "listView_writeHistory";
-            this.listView_writeHistory.Size = new System.Drawing.Size(971, 410);
+            this.listView_writeHistory.Size = new System.Drawing.Size(1002, 461);
             this.listView_writeHistory.TabIndex = 0;
             this.listView_writeHistory.UseCompatibleStateImageBehavior = false;
             this.listView_writeHistory.View = System.Windows.Forms.View.Details;
@@ -140,7 +202,7 @@ namespace RfidTool
             // 
             this.columnHeader_uid.Name = "columnHeader_uid";
             this.columnHeader_uid.Text = "UID";
-            this.columnHeader_uid.Width = 160;
+            this.columnHeader_uid.Width = 221;
             // 
             // columnHeader_pii
             // 
@@ -160,18 +222,38 @@ namespace RfidTool
             this.columnHeader_oi.Text = "OI(所属机构)";
             this.columnHeader_oi.Width = 260;
             // 
+            // columnHeader_aoi
+            // 
+            this.columnHeader_aoi.Text = "AOI(非标准所属机构)";
+            this.columnHeader_aoi.Width = 222;
+            // 
+            // columnHeader_writeTime
+            // 
+            this.columnHeader_writeTime.Text = "写入时间";
+            this.columnHeader_writeTime.Width = 260;
+            // 
+            // MenuItem_writePatronTags
+            // 
+            this.MenuItem_writePatronTags.Name = "MenuItem_writePatronTags";
+            this.MenuItem_writePatronTags.Size = new System.Drawing.Size(387, 40);
+            this.MenuItem_writePatronTags.Text = "写入读者证(&P) ...";
+            this.MenuItem_writePatronTags.Click += new System.EventHandler(this.MenuItem_writePatronTags_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(13F, 28F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(985, 540);
+            this.ClientSize = new System.Drawing.Size(1018, 594);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.toolStrip1);
             this.Controls.Add(this.menuStrip1);
+            this.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
+            this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.Name = "MainForm";
-            this.Text = "Form1";
+            this.Text = "RfidTool - RFID 工具";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainForm_FormClosed);
             this.Load += new System.EventHandler(this.MainForm_Load);
@@ -199,6 +281,15 @@ namespace RfidTool
         private System.Windows.Forms.ColumnHeader columnHeader_tou;
         private System.Windows.Forms.ColumnHeader columnHeader_oi;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_writeBookTags;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_settings;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+        private System.Windows.Forms.ColumnHeader columnHeader_aoi;
+        private System.Windows.Forms.ColumnHeader columnHeader_writeTime;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_saveToExcelFile;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_writeShelfTags;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_writePatronTags;
     }
 }
 

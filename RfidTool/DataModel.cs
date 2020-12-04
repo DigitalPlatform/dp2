@@ -155,7 +155,14 @@ namespace RfidTool
             TagInfo old_tag_info,
             TagInfo new_tag_info)
         {
-            return _driver.WriteTagInfo(one_reader_name, old_tag_info, new_tag_info);
+            var result = _driver.WriteTagInfo(one_reader_name, old_tag_info, new_tag_info);
+
+            // 清除缓存
+            TagList.ClearTagTable(old_tag_info.UID);
+            if (old_tag_info.UID != new_tag_info.UID)
+                TagList.ClearTagTable(new_tag_info.UID);
+
+            return result;
         }
 
         /*

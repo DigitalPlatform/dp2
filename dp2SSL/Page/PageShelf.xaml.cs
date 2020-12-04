@@ -537,7 +537,8 @@ namespace dp2SSL
                             // SetGlobalError("test", "content");
 
                             // 初始化之前开灯，让使用者感觉舒服一些(感觉机器在活动状态)
-                            RfidManager.TurnShelfLamp("*", "turnOn");
+                            ShelfData.TurnLamp("initial", "on");
+                            // RfidManager.TurnShelfLamp("*", "turnOn");
 
                             // 确保 App.PrepareShelf() 执行过
                             await App.PrepareShelfAsync();
@@ -554,7 +555,8 @@ namespace dp2SSL
                             ShelfData.DetectPatronLocalDatabase();
 
                             // 初始化完成之后，应该是全部门关闭状态，还没有人开始使用，则先关灯，进入等待使用的状态
-                            RfidManager.TurnShelfLamp("*", "turnOff");
+                            // RfidManager.TurnShelfLamp("*", "turnOff");
+                            ShelfData.TurnLamp("initial", "off");
                         }
                         catch (Exception ex)
                         {

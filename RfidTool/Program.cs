@@ -1,4 +1,5 @@
 using DigitalPlatform.CirculationClient;
+using DigitalPlatform.Core;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -22,15 +23,16 @@ namespace RfidTool
         [STAThread]
         static void Main()
         {
+            ClientInfo.TypeOfProgram = typeof(Program);
+
             string folderPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             string assemblyPath = Path.Combine(folderPath, IntPtr.Size == 8 ? "x64" : "x86");
 
             SetDllDirectory(assemblyPath);
 
-            ClientInfo.TypeOfProgram = typeof(Program);
+            ProgramUtil.SetDpiAwareness();
 
-
-            Application.SetHighDpiMode(HighDpiMode.SystemAware);
+            // Application.SetHighDpiMode(HighDpiMode.SystemAware);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new MainForm());

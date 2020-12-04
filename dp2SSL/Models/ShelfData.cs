@@ -434,9 +434,12 @@ namespace dp2SSL
 
         public static bool GetLampState(string doorName)
         {
-            if (_lampTable.ContainsKey(doorName) == false)
-                return false;
-            return (bool)_lampTable[doorName];
+            lock (_lampTable.SyncRoot)
+            {
+                if (_lampTable.ContainsKey(doorName) == false)
+                    return false;
+                return (bool)_lampTable[doorName];
+            }
         }
 
         // parameters:
@@ -445,23 +448,61 @@ namespace dp2SSL
         //              skip 表示不真正开关物理灯，只是改变 hashtable 里面计数
         public static void TurnLamp(string doorName, string style)
         {
-            bool on = StringUtil.IsInList("on", style);
-            int oldCount = _lampTable.Count;
+            bool refresh = StringUtil.IsInList("refresh", style);
 
-            if (on)
-                _lampTable[doorName] = true;
-            else
-                _lampTable.Remove(doorName);
+            int oldCount = 0;
+            int newCount = 0;
+            lock (_lampTable.SyncRoot)
+            {
+                oldCount = _lampTable.Count;
 
-            int newCount = _lampTable.Count;
+                if (refresh == false)
+                {
+                    bool on = StringUtil.IsInList("on", style);
+                    if (on)
+                        _lampTable[doorName] = true;
+                    else
+                        _lampTable.Remove(doorName);
+
+                    newCount = _lampTable.Count;
+                }
+            }
+
+            if (refresh)
+            {
+                string action = oldCount > 0 ? "turnOn" : "turnOff";
+                WpfClientInfo.WriteInfoLog($"物理 {action} 灯 (refresh)");
+                var result = RfidManager.TurnShelfLamp("*", action);
+                if (result.Value == -1 && result.ErrorCode != "notFound")
+                {
+                    WpfClientInfo.WriteErrorLog($"RfidManager.TurnShelfLamp({action}) (refresh 时) 出错: {result.ErrorInfo}");
+                }
+                else
+                {
+                    if (result.Value == -1 && result.ErrorCode == "notFound")
+                        WpfClientInfo.WriteInfoLog($"虽然返回出错，但模拟灯的控件依然亮起。RfidManager.TurnShelfLamp({action}) (refresh 时) 出错: {result.ErrorInfo}");
+
+                    // 用控件模拟灯亮灭，便于调试
+                    PageMenu.PageShelf?.SimulateLamp(action == "turnOn" ? true : false);
+                }
+                return;
+            }
 
             if (oldCount == 0 && newCount > 0)
             {
                 if (StringUtil.IsInList("skip", style) == false)
                 {
-                    // 用控件模拟灯亮灭，便于调试
-                    PageMenu.PageShelf?.SimulateLamp(true);
-                    RfidManager.TurnShelfLamp("*", "turnOn");   // TODO: 遇到出错如何报错?
+                    WpfClientInfo.WriteInfoLog("物理开灯");
+                    var result = RfidManager.TurnShelfLamp("*", "turnOn");
+                    if (result.Value == -1)
+                    {
+                        WpfClientInfo.WriteErrorLog($"RfidManager.TurnShelfLamp(turnOn) 出错: {result.ErrorInfo}");
+                    }
+                    else
+                    {
+                        // 用控件模拟灯亮灭，便于调试
+                        PageMenu.PageShelf?.SimulateLamp(true);
+                    }
                 }
             }
             else if (oldCount > 0 && newCount == 0)
@@ -470,9 +511,17 @@ namespace dp2SSL
                     BeginDelayTurnOffTask();
                 else
                 {
-                    // 用控件模拟灯亮灭，便于调试
-                    PageMenu.PageShelf.SimulateLamp(false);
-                    RfidManager.TurnShelfLamp("*", "turnOff");
+                    WpfClientInfo.WriteInfoLog("物理关灯");
+                    var result = RfidManager.TurnShelfLamp("*", "turnOff");
+                    if (result.Value == -1)
+                    {
+                        WpfClientInfo.WriteErrorLog($"RfidManager.TurnShelfLamp(turnOff) 出错: {result.ErrorInfo}");
+                    }
+                    else
+                    {
+                        // 用控件模拟灯亮灭，便于调试
+                        PageMenu.PageShelf.SimulateLamp(false);
+                    }
                 }
             }
         }
@@ -4308,7 +4357,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                     if (tag.OneTag.TagInfo == null)
                         continue;
                     */
-                    
+
                     /*
                     // testing
                     tag.OneTag.TagInfo = null;
@@ -5968,14 +6017,14 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
         }
 
         public static NormalResult SetEAS(string uid,
-            string antenna, 
+            string antenna,
             bool enable)
         {
             try
             {
                 // testing
                 // return new NormalResult { Value = -1, ErrorInfo = "修改 EAS 失败，测试" };
-                
+
                 // 2020/12/3 (减少真正需要发送指令给读写器执行修改 EAS 的次数)
                 // 先尝试观察内存中的标签信息，看 EAS 是否已经到位
                 var tag = BookTagList.FindTag(uid);

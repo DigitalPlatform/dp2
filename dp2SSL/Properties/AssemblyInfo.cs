@@ -51,7 +51,7 @@ using System.Windows;
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 // 方法是按如下所示使用“*”: :
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.5.23")]    // 1.5.*
+[assembly: AssemblyVersion("1.5.24")]    // 1.5.*
 [assembly: AssemblyFileVersion("1.5.0.0")]  // 1.5.0.0
 
 // 1.0 2019/2/21 第一个版本
@@ -66,3 +66,4 @@ using System.Windows;
 //      1.5.21 (2020/11/25) 智能书柜的 NewTagList 算法重构，彻底分离图书和读者证读卡器的线程和标签内存列表，以获得任何时候刷读者卡的敏捷性。增加了处理过程中防范返回主菜单的机制
 //      1.5.22 (2020/11/30) 预备 1.6 版本
 //      1.5.23 (2020/12/1) 简化 PageShelf 中的 PatronTags 算法，直接用 ShelfData.PatronTagList.Tags
+//      1.5.24 (2020/12/4) 增加物理开关灯错误日志记载

@@ -3,4 +3,5 @@
   <Profiles>
     <Profile Name="(Default)" />
   </Profiles>
+  <Settings />
 </SettingsFile>
