@@ -40,6 +40,10 @@ namespace RfidTool
         public ScanDialog()
         {
             InitializeComponent();
+
+            toolTip1.SetToolTip(this.textBox_barcode, "输入条码号");
+            toolTip1.SetToolTip(this.textBox_processingBarcode, "待处理的条码号");
+            toolTip1.SetToolTip(this.button_clearProcessingBarcode, "清除待处理的条码号");
         }
 
         private void textBox_barcode_KeyPress(object sender, KeyPressEventArgs e)

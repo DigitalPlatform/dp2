@@ -435,9 +435,9 @@ namespace RfidCenter
 
         // parameters:
         //      message 需要显示的提示文字。如果为 null，表示函数自动决定显示“正在初始化 RFID 设备”
-        //      set_hint_table  保存本次获得的暗示表
+        //      reset_hint_table  重新获得并保存暗示表
         void InitializeRfidDriver(string message = null,
-            bool set_hint_table = false)
+            bool reset_hint_table = false)
         {
             lock (_syncRoot_start)
             {
@@ -477,7 +477,7 @@ namespace RfidCenter
 
                     string cfgFileName = Path.Combine(ClientInfo.UserDir, "readers.xml");
 
-                    InitializeDriverResult result = _rfidDriver.InitializeDriver(cfgFileName, lock_param, set_hint_table ? null : existing_hint_table);
+                    InitializeDriverResult result = _rfidDriver.InitializeDriver(cfgFileName, lock_param, reset_hint_table ? null : existing_hint_table);
                     // 列出所有可用设备名称
                     UpdateDeviceList(result.Readers);
 
@@ -490,7 +490,7 @@ namespace RfidCenter
                     else
                     {
                         // 记忆
-                        if (set_hint_table || existing_hint_table == null)
+                        if (reset_hint_table || existing_hint_table == null)
                             SetHintTable(result.HintTable);
 
                         // 一开始就启动捕捉状态
