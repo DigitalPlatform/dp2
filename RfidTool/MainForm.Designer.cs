@@ -73,7 +73,7 @@ namespace RfidTool
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Padding = new System.Windows.Forms.Padding(6, 3, 0, 3);
-            this.menuStrip1.Size = new System.Drawing.Size(1018, 42);
+            this.menuStrip1.Size = new System.Drawing.Size(1018, 38);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -92,7 +92,7 @@ namespace RfidTool
             this.toolStripSeparator2,
             this.MenuItem_exit});
             this.MenuItem_file.Name = "MenuItem_file";
-            this.MenuItem_file.Size = new System.Drawing.Size(97, 36);
+            this.MenuItem_file.Size = new System.Drawing.Size(97, 32);
             this.MenuItem_file.Text = "文件(&F)";
             // 
             // MenuItem_writeBookTags
@@ -157,7 +157,7 @@ namespace RfidTool
             this.MenuItem_help.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.MenuItem_about});
             this.MenuItem_help.Name = "MenuItem_help";
-            this.MenuItem_help.Size = new System.Drawing.Size(102, 36);
+            this.MenuItem_help.Size = new System.Drawing.Size(102, 32);
             this.MenuItem_help.Text = "帮助(&H)";
             // 
             // MenuItem_about
@@ -170,9 +170,9 @@ namespace RfidTool
             // toolStrip1
             // 
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(28, 28);
-            this.toolStrip1.Location = new System.Drawing.Point(0, 42);
+            this.toolStrip1.Location = new System.Drawing.Point(0, 38);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(1018, 44);
+            this.toolStrip1.Size = new System.Drawing.Size(1018, 25);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -191,11 +191,11 @@ namespace RfidTool
             // 
             this.tabControl1.Controls.Add(this.tabPage_writeTag);
             this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tabControl1.Location = new System.Drawing.Point(0, 86);
+            this.tabControl1.Location = new System.Drawing.Point(0, 63);
             this.tabControl1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(1018, 471);
+            this.tabControl1.Size = new System.Drawing.Size(1018, 494);
             this.tabControl1.TabIndex = 3;
             // 
             // tabPage_writeTag
@@ -205,7 +205,7 @@ namespace RfidTool
             this.tabPage_writeTag.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabPage_writeTag.Name = "tabPage_writeTag";
             this.tabPage_writeTag.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.tabPage_writeTag.Size = new System.Drawing.Size(1010, 430);
+            this.tabPage_writeTag.Size = new System.Drawing.Size(1010, 453);
             this.tabPage_writeTag.TabIndex = 0;
             this.tabPage_writeTag.Text = "写入标签";
             this.tabPage_writeTag.UseVisualStyleBackColor = true;
@@ -226,7 +226,7 @@ namespace RfidTool
             this.listView_writeHistory.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.listView_writeHistory.MultiSelect = false;
             this.listView_writeHistory.Name = "listView_writeHistory";
-            this.listView_writeHistory.Size = new System.Drawing.Size(1002, 424);
+            this.listView_writeHistory.Size = new System.Drawing.Size(1002, 447);
             this.listView_writeHistory.TabIndex = 0;
             this.listView_writeHistory.UseCompatibleStateImageBehavior = false;
             this.listView_writeHistory.View = System.Windows.Forms.View.Details;
@@ -299,7 +299,7 @@ namespace RfidTool
             this.MainMenuStrip = this.menuStrip1;
             this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.Name = "MainForm";
-            this.Text = "RfidTool - RFID 工具";
+            this.Text = "RfidTool - RFID 工具箱";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainForm_FormClosed);
             this.Load += new System.EventHandler(this.MainForm_Load);

@@ -11,6 +11,7 @@ using System.Windows.Forms;
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.CommonControl;
+using DigitalPlatform.Core;
 using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.GUI;
 using DigitalPlatform.RFID;
@@ -21,6 +22,8 @@ namespace RfidTool
     public partial class MainForm : Form
     {
         ScanDialog _scanDialog = null;
+
+        ErrorTable _errorTable = null;
 
         #region floating message
 
@@ -45,17 +48,27 @@ bool bClickClose = false)
         {
             _ = Task.Run(() =>
             {
-                ShowMessage(strMessage,
+                _showMessage(strMessage,
     strColor,
     bClickClose);
                 System.Threading.Thread.Sleep(delay);
                 // 中间一直没有变化才去消除它
                 if (_floatingMessage.Text == strMessage)
-                    ClearMessage();
+                    _clearMessage();
             });
         }
 
-        public void ShowMessage(string strMessage,
+        public void ShowMessage(string message)
+        {
+            _errorTable.SetError("message", message, false);
+        }
+
+        public void ShowErrorMessage(string type, string message)
+        {
+            _errorTable.SetError(type, message, false);
+        }
+
+        public void _showMessage(string strMessage,
     string strColor = "",
     bool bClickClose = false)
         {
@@ -77,7 +90,7 @@ bool bClickClose = false)
         }
 
         // 线程安全
-        public void ClearMessage()
+        public void _clearMessage()
         {
             if (this._floatingMessage == null)
                 return;
@@ -109,6 +122,31 @@ bool bClickClose = false)
                 };
             }
 
+            DataModel.SetError += DataModel_SetError;
+
+            _errorTable = new ErrorTable((s) =>
+            {
+                this.Invoke((Action)(() =>
+                {
+                    bool error = _errorTable.GetError("error") != null || _errorTable.GetError("error_initial") != null;
+                    if (string.IsNullOrEmpty(s) == false)
+                    {
+                        if (error)
+                            this._showMessage(s.Replace(";", "\r\n"), "red", true);
+                        else
+                            this._showMessage(s.Replace(";", "\r\n"));
+                    }
+                    else
+                        this._clearMessage();
+                }));
+            });
+
+        }
+
+
+        private void DataModel_SetError(object sender, SetErrorEventArgs e)
+        {
+            _errorTable.SetError("error", e.Error, false);
         }
 
         void CreateScanDialog()
@@ -168,6 +206,7 @@ bool bClickClose = false)
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
+
             {
                 if (_scanDialog != null)
                     ClientInfo.Config.Set("scanDialog", "uiState", _scanDialog.UiState);
@@ -178,6 +217,7 @@ bool bClickClose = false)
 
             this.ShowMessage("正在退出 ...");
 
+            DataModel.SetError -= DataModel_SetError;
             DataModel.ReleaseDriver();
         }
 
@@ -290,7 +330,7 @@ bool bClickClose = false)
             finally
             {
                 this.EnableControls(true);
-                this.ClearMessage();
+                this.ShowMessage(null);
             }
 
             return;
@@ -371,11 +411,20 @@ bool bClickClose = false)
         void BeginConnectReader(string message,
             bool reset_hint_table = false)
         {
-            this.ShowMessage(message);
             _ = Task.Run(() =>
             {
             REDO:
+                this.ShowErrorMessage("error_initial", null);
+                this.ShowMessage(message);
+                DataModel.ReleaseDriver();
                 var result = DataModel.InitialDriver(reset_hint_table);
+
+                /*
+                // testing
+                result.Value = -1;
+                result.ErrorInfo = "test";
+                */
+
                 if (result.Value == -1)
                 {
                     bool check = false;
@@ -400,10 +449,13 @@ bool bClickClose = false)
                         reset_hint_table = false;
                         goto REDO;
                     }
-                    this.ShowMessage($"连接读写器失败: {result.ErrorInfo}", "red", false);
+                    this.ShowErrorMessage("error_initial", $"连接读写器失败: {result.ErrorInfo}");
                 }
                 else
-                    this.ClearMessage();
+                {
+                    this.ShowMessage(null);
+                    this.ShowErrorMessage("error_initial", null);
+                }
             });
         }
 
