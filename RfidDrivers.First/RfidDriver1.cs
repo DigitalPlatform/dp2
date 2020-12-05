@@ -153,6 +153,7 @@ namespace RfidDrivers.First
             }
         }
 
+        // TODO: 增加 CancellationToken 可中断
         // parameters:
         //      style   风格列表。xxx,xxx,xxx 形态
         //              其中，lock:COM1|COM2 指定锁控 COM 口

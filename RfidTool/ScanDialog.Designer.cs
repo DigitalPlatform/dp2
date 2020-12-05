@@ -29,6 +29,7 @@ namespace RfidTool
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.label1 = new System.Windows.Forms.Label();
             this.textBox_barcode = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
@@ -44,6 +45,7 @@ namespace RfidTool
             this.textBox_processingBarcode = new System.Windows.Forms.TextBox();
             this.button_clearProcessingBarcode = new System.Windows.Forms.Button();
             this.label_message = new System.Windows.Forms.Label();
+            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.SuspendLayout();
             // 
             // label1
@@ -94,6 +96,7 @@ namespace RfidTool
             this.listView_tags.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.listView_tags.MultiSelect = false;
             this.listView_tags.Name = "listView_tags";
+            this.listView_tags.ShowItemToolTips = true;
             this.listView_tags.Size = new System.Drawing.Size(847, 333);
             this.listView_tags.TabIndex = 3;
             this.listView_tags.UseCompatibleStateImageBehavior = false;
@@ -139,7 +142,7 @@ namespace RfidTool
             // columnHeader_readerName
             // 
             this.columnHeader_readerName.Name = "columnHeader_readerName";
-            this.columnHeader_readerName.Text = "读卡器";
+            this.columnHeader_readerName.Text = "读写器";
             this.columnHeader_readerName.Width = 160;
             // 
             // button_write
@@ -233,5 +236,6 @@ namespace RfidTool
         private System.Windows.Forms.Button button_clearProcessingBarcode;
         private System.Windows.Forms.Label label_message;
         private System.Windows.Forms.ColumnHeader columnHeader_aoi;
+        private System.Windows.Forms.ToolTip toolTip1;
     }
 }

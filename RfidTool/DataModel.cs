@@ -13,6 +13,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
 using DigitalPlatform.CirculationClient;
+using Newtonsoft.Json;
 
 namespace RfidTool
 {
@@ -34,13 +35,23 @@ namespace RfidTool
 
         static Task _task = null;
 
-        public static InitializeDriverResult InitialDriver()
+        public static InitializeDriverResult InitialDriver(
+            bool reset_hint_table = false)
         {
+            var token = _cancelRfidManager.Token;
+            var existing_hint_table = GetHintTable();
+
+            _driver.ReleaseDriver();
             var initial_result = _driver.InitializeDriver(
                     null,   // cfgFileName,
                     "", // style,
-                    null/*hint_table*/);
-            var token = _cancelRfidManager.Token;
+                    reset_hint_table ? null : existing_hint_table);
+            if (initial_result.Value == -1)
+                return initial_result;
+
+            // 记忆
+            if (reset_hint_table || existing_hint_table == null)
+                SetHintTable(initial_result.HintTable);
 
             _task = Task.Factory.StartNew(
                 () =>
@@ -103,6 +114,30 @@ namespace RfidTool
                 }, token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
 
             return initial_result;
+        }
+
+        static List<HintInfo> GetHintTable()
+        {
+            string value = ClientInfo.Config.Get("readers", "hint_table");
+            if (string.IsNullOrEmpty(value))
+                return null;
+            return JsonConvert.DeserializeObject<List<HintInfo>>(value);
+        }
+
+        static void SetHintTable(List<HintInfo> hint_table)
+        {
+            string value = JsonConvert.SerializeObject(hint_table);
+            ClientInfo.Config.Set("readers", "hint_table", value);
+        }
+
+        public static List<string> GetReadNameList()
+        {
+            List<string> results = new List<string>();
+            foreach(var reader in _driver.Readers)
+            {
+                results.Add(reader.Name);
+            }
+            return results;
         }
 
         static string GetUidString(List<OneTag> tags)

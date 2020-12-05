@@ -14,6 +14,7 @@ using DigitalPlatform.CommonControl;
 using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.GUI;
 using DigitalPlatform.RFID;
+using DigitalPlatform.Text;
 
 namespace RfidTool
 {
@@ -22,6 +23,7 @@ namespace RfidTool
         ScanDialog _scanDialog = null;
 
         #region floating message
+
         internal FloatingMessageForm _floatingMessage = null;
 
         public FloatingMessageForm FloatingMessageForm
@@ -97,6 +99,7 @@ bool bClickClose = false)
                 _floatingMessage.Font = new System.Drawing.Font(this.Font.FontFamily, this.Font.Size * 2, FontStyle.Bold);
                 _floatingMessage.Opacity = 0.7;
                 _floatingMessage.RectColor = Color.Green;
+                _floatingMessage.AutoHide = false;
                 _floatingMessage.Show(this);
 
                 this.Move += (s1, o1) =>
@@ -152,12 +155,15 @@ bool bClickClose = false)
 
             LoadSettings();
 
-            this.ShowMessage("正在连接 RFID 读卡器");
+            /*
+            this.ShowMessage("正在连接 RFID 读写器");
             _ = Task.Run(() =>
             {
                 DataModel.InitialDriver();
                 this.ClearMessage();
             });
+            */
+            BeginConnectReader("正在连接 RFID 读写器 ...");
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -346,6 +352,85 @@ bool bClickClose = false)
             _scanDialog.TypeOfUsage = "80"; // 读者
             if (_scanDialog.Visible == false)
                 _scanDialog.Show(this);
+        }
+
+        // 关于
+        private void MenuItem_about_Click(object sender, EventArgs e)
+        {
+            var text = $"RFID 工具 (版本号: {ClientInfo.ClientVersion})\r\n数字平台(北京)软件有限责任公司\r\nhttp://dp2003.com\r\n\r\n\r\n当前可用读写器:\r\n{StringUtil.MakePathList(DataModel.GetReadNameList(), "\r\n")}";
+            MessageDlg.Show(this, text, "关于");
+        }
+
+        // 重新连接读写器
+        private void MenuItem_reconnectReader_Click(object sender, EventArgs e)
+        {
+            BeginConnectReader("正在重新连接 RFID 读写器 ...");
+        }
+
+        // 连接读写器
+        void BeginConnectReader(string message,
+            bool reset_hint_table = false)
+        {
+            this.ShowMessage(message);
+            _ = Task.Run(() =>
+            {
+            REDO:
+                var result = DataModel.InitialDriver(reset_hint_table);
+                if (result.Value == -1)
+                {
+                    bool check = false;
+                    var dlg_result = (DialogResult)this.Invoke((Func<DialogResult>)(() =>
+                    {
+                        return MessageDlg.Show(this,
+                            $"连接读写器失败: {result.ErrorInfo}。\r\n\r\n是否重新探测?",
+                            "连接读写器",
+                            MessageBoxButtons.YesNoCancel,
+                            MessageBoxDefaultButton.Button1,
+                            ref check,
+                            new string[] { "重新探测", "重试连接", "取消" });
+                    }));
+
+                    if (dlg_result == DialogResult.Yes)
+                    {
+                        reset_hint_table = true;
+                        goto REDO;
+                    }
+                    if (dlg_result == DialogResult.No)
+                    {
+                        reset_hint_table = false;
+                        goto REDO;
+                    }
+                    this.ShowMessage($"连接读写器失败: {result.ErrorInfo}", "red", false);
+                }
+                else
+                    this.ClearMessage();
+            });
+        }
+
+        // 重新探测读写器
+        private void MenuItem_resetConnectReader_Click(object sender, EventArgs e)
+        {
+            /*
+            this.ShowMessage("正在重新探测 RFID 读写器");
+            _ = Task.Run(() =>
+            {
+                DataModel.InitialDriver(true);
+                this.ClearMessage();
+            });
+            */
+            BeginConnectReader("正在重新探测 RFID 读写器\r\n\r\n时间可能稍长，请耐心等待 ...", true);
+        }
+
+        public string StatusMessage
+        {
+            get
+            {
+                return this.toolStripStatusLabel_message.Text;
+            }
+            set
+            {
+                this.toolStripStatusLabel_message.Text = value;
+            }
         }
     }
 
