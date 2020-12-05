@@ -683,7 +683,9 @@ namespace dp2SSL
         // 设置读者区域错误字符串
         void SetPatronError(string type, string error)
         {
-            _patronErrorTable.SetError(type, error);
+            _patronErrorTable.SetError(type, 
+                error,
+                true);
         }
 
         #endregion

@@ -88,9 +88,23 @@ namespace RfidTool
         private void ScanDialog_VisibleChanged(object sender, EventArgs e)
         {
             if (this.Visible)
+            {
                 DataModel.TagChanged += DataModel_TagChanged;
+                DataModel.SetError += DataModel_SetError;
+            }
             else
+            {
                 DataModel.TagChanged -= DataModel_TagChanged;
+                DataModel.SetError -= DataModel_SetError;
+            }
+        }
+
+        private void DataModel_SetError(object sender, SetErrorEventArgs e)
+        {
+            if (string.IsNullOrEmpty(e.Error))
+                this.ShowMessage("", "");
+            else
+                this.ShowMessage(e.Error, "red");
         }
 
         // 读卡器上的标签发生变化
@@ -629,15 +643,30 @@ namespace RfidTool
             this.button_clearProcessingBarcode.Enabled = (this.textBox_processingBarcode.Text.Length > 0);
         }
 
-        void ShowMessage(string text)
+        void ShowMessage(string text, string color = "")
         {
             if (this.InvokeRequired)
                 this.Invoke((Action)(() =>
                 {
-                    this.label_message.Text = text;
+                    _showMessage(text, color);
                 }));
             else
-                this.label_message.Text = text;
+                _showMessage(text, color);
+        }
+
+        void _showMessage(string text, string color = "")
+        {
+            this.label_message.Text = text;
+            if (color == "red")
+            {
+                this.label_message.BackColor = Color.DarkRed;
+                this.label_message.ForeColor = Color.White;
+            }
+            else
+            {
+                this.label_message.BackColor = SystemColors.Control;
+                this.label_message.ForeColor = SystemColors.ControlText;
+            }
         }
 
         public string UiState

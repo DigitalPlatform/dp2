@@ -1649,7 +1649,9 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                 results.Add($"{now.ToShortTimeString()} {error}");
             }
 
-            _errorTable.SetError(type, StringUtil.MakePathList(results, "; "));
+            _errorTable.SetError(type,
+                StringUtil.MakePathList(results, "; "),
+                true);
         }
 
         public static void SetError(string type, string error)
@@ -1661,13 +1663,13 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             }
             */
 
-            _errorTable.SetError(type, error);
+            _errorTable.SetError(type, error, true);
         }
 
         public static void ClearErrors(string type)
         {
             // _errors.Clear();
-            _errorTable.SetError(type, "");
+            _errorTable.SetError(type, "", true);
         }
 
         public string GetError(string type)

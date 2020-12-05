@@ -38,10 +38,14 @@ namespace RfidTool
         public static InitializeDriverResult InitialDriver(
             bool reset_hint_table = false)
         {
+            _cancelRfidManager?.Cancel();
+            _cancelRfidManager?.Dispose();
+
+            _cancelRfidManager = new CancellationTokenSource();
             var token = _cancelRfidManager.Token;
             var existing_hint_table = GetHintTable();
 
-            _driver.ReleaseDriver();
+            // _driver.ReleaseDriver();
             var initial_result = _driver.InitializeDriver(
                     null,   // cfgFileName,
                     "", // style,
@@ -66,8 +70,10 @@ namespace RfidTool
                             SetError?.Invoke(result,
                                 new SetErrorEventArgs { Error = result.ErrorInfo });
                         else
+                        {
                             SetError?.Invoke(result,
                                 new SetErrorEventArgs { Error = null }); // 清除以前的报错
+                        }
 
                         /*
                         // TODO: 归纳一下 UID 列表，如果不一样才继续往后处理
@@ -154,7 +160,14 @@ namespace RfidTool
         public static void ReleaseDriver()
         {
             _cancelRfidManager?.Cancel();
-            _task?.Wait();
+            try
+            {
+                _task?.Wait(TimeSpan.FromSeconds(5));
+            }
+            catch
+            {
+
+            }
             _driver.ReleaseDriver();
         }
 
@@ -338,7 +351,7 @@ namespace RfidTool
             return new ListTagsResult { Results = tags };
         }
 
-        public static SetErrorEventHandler SetError = null;
+        public static event SetErrorEventHandler SetError = null;
 
         public static event NewTagChangedEventHandler TagChanged = null;
 
