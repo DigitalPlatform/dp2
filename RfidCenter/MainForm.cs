@@ -305,6 +305,9 @@ namespace RfidCenter
             _rfidDriver.ReleaseDriver();
             _ledDriver.ReleaseDriver();
             _printerDriver.ReleaseDriver();
+            _shelLockDriver.ReleaseDriver();    // 2020/12/7
+
+            ((WjlLockDriver)_shelLockDriver)?.Dispose();
         }
 
         public void RestartRfidDriver(string text)
@@ -483,9 +486,10 @@ namespace RfidCenter
 
                     if (result.Value == -1)
                     {
-                        OutputHistory(result.ErrorInfo, 2);
-                        SetErrorState("error", result.ErrorInfo);
-                        this.ShowMessage(result.ErrorInfo, "red", true);
+                        string error = $"初始化 RFID 读写器阶段出错: {result.ErrorInfo}";
+                        OutputHistory(error, 2);
+                        SetErrorState("error", error);
+                        this.ShowMessage(error, "red", true);
                     }
                     else
                     {
@@ -2195,7 +2199,7 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
 
         void InitializePrinterDriver()
         {
-            string strError = "";
+            // string strError = "";
 
             string port = (string)this.Invoke((Func<string>)(() =>
             {
@@ -2218,11 +2222,12 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
             var result = _printerDriver.InitializeDriver(port, style);
             if (result.Value == -1)
             {
-                OutputHistory(result.ErrorInfo, 2);
+                string error = $"初始化凭条打印机阶段出错: {result.ErrorInfo}";
+                OutputHistory(error, 2);
                 // 注：如果小票打印机初始化出错，暂不把 RfidCenter 整个设为错误状态。这样允许 RFID 基本功能被正常使用
                 // TODO: 可以考虑建立警告字符串集合，让 dp2ssl 可以获得警告信息
                 // SetErrorState("error", result.ErrorInfo);
-                this.ShowMessage(result.ErrorInfo, "red", true);
+                this.ShowMessage(error, "red", true);
             }
             else
             {
@@ -2240,7 +2245,7 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
 
         void InitializeLockDriver()
         {
-            string strError = "";
+            // string strError = "";
 
             string port = GetLockParam();
 
@@ -2258,9 +2263,10 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
             var result = _shelLockDriver.InitializeDriver(property, "");
             if (result.Value == -1)
             {
-                OutputHistory(result.ErrorInfo, 2);
-                SetErrorState("error", result.ErrorInfo);
-                this.ShowMessage(result.ErrorInfo, "red", true);
+                string error = $"初始化锁控阶段出错: {result.ErrorInfo}";
+                OutputHistory(error , 2);
+                SetErrorState("error", error);
+                this.ShowMessage(error, "red", true);
             }
             else
             {
@@ -2268,10 +2274,12 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
             }
 
             return;
+            /*
         ERROR1:
             OutputHistory(strError, 2);
             SetErrorState("error", strError);
             this.ShowMessage(strError, "red", true);
+            */
         }
 
         void InitializeLedDriver()
@@ -2342,9 +2350,10 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
             var result = _ledDriver.InitializeDriver(property, "");
             if (result.Value == -1)
             {
-                OutputHistory(result.ErrorInfo, 2);
-                SetErrorState("error", result.ErrorInfo);
-                this.ShowMessage(result.ErrorInfo, "red", true);
+                string error = $"初始化 LED 控制卡阶段出错: {result.ErrorInfo}";
+                OutputHistory(error, 2);
+                SetErrorState("error", error);
+                this.ShowMessage(error, "red", true);
             }
             else
             {
