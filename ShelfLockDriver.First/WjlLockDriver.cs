@@ -6,18 +6,18 @@ using System.Threading.Tasks;
 using System.IO.Ports;
 using System.Collections;
 using System.Threading;
+using System.Diagnostics;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using DigitalPlatform;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
-using System.Diagnostics;
 
 namespace ShelfLockDriver.First
 {
     [TestClass]
-    public class WjlLockDriver : IShelfLockDriver
+    public class WjlLockDriver : IShelfLockDriver, IDisposable
     {
         LockStateMemory _lockMemory = new LockStateMemory();
 
@@ -921,8 +921,13 @@ BYTE[0] BYTE[1] BYTE[2] BYTE[3] BYTE[4] BYTE[5] BYTE[6] BYTE[7]
             var result = ComputeCheck(bytes);
             Assert.AreEqual(0x80, result);
         }
+
+        public void Dispose()
+        {
+            if (_sp.IsOpen)
+                _sp.Close();
+
+            ((IDisposable)_sp).Dispose();
+        }
     }
-
-
-
 }
