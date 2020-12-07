@@ -2563,7 +2563,7 @@ out string strError);
                     await Task.Delay(TimeSpan.FromSeconds(2));
                     App.Invoke(new Action(() =>
                     {
-                        this.NavigationService.Navigate(PageMenu.MenuPage);
+                        this.NavigationService?.Navigate(PageMenu.MenuPage);
                     }));
                 }
                 catch
