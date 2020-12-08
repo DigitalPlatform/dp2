@@ -32,8 +32,8 @@ using System.Runtime.InteropServices;
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 // 方法是按如下所示使用“*”: :
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.11.5")]   // 1.11.*
-[assembly: AssemblyFileVersion("1.11.0.0")]
+[assembly: AssemblyVersion("1.12.0")]   // 1.11.*
+[assembly: AssemblyFileVersion("1.12.0.0")]
 
 // V1.1 2019/2/21 支持 32-bit Windows 环境
 // V1.2 2019/4/12 采用了最新 dp-library submodule 的版本
@@ -51,3 +51,5 @@ using System.Runtime.InteropServices;
 //      1.11.3 读取锁状态出错重试以后即便解决了，也会返回警告错误代码
 //      1.11.4 (2020/12/2) 锁控重构为使用单独的 Driver，解决两块锁控板情景的特定问题
 //      1.11.5 (2020/12/7) ShelfLockDriver.First 增加了 Dispose() 接口
+// V1.12 2020/12/8 锁控改用独立的 Driver
+//      1.12.0 (2020/12/8)

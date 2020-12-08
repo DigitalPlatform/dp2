@@ -51,8 +51,8 @@ using System.Windows;
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 // 方法是按如下所示使用“*”: :
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.5.25")]    // 1.5.*
-[assembly: AssemblyFileVersion("1.5.0.0")]  // 1.5.0.0
+[assembly: AssemblyVersion("1.6.0")]    // 1.5.*
+[assembly: AssemblyFileVersion("1.6.0.0")]  // 1.5.0.0
 
 // 1.0 2019/2/21 第一个版本
 // 1.1 2019/2/26 可以显示版本号了
@@ -68,3 +68,6 @@ using System.Windows;
 //      1.5.23 (2020/12/1) 简化 PageShelf 中的 PatronTags 算法，直接用 ShelfData.PatronTagList.Tags
 //      1.5.24 (2020/12/4) 增加物理开关灯错误日志记载
 //      1.5.25 (2020/12/7) 预备 1.6 版本，回归测试自助借还功能
+//      1.5.26 (2020/12/8) RestoreRealTags() 不显示错误信息，而是直接写入错误日志文件
+// 1.6 2020/12/8 增加了盘点功能，重构了开关门相关算法
+//      1.6.0 (2020/12/8) 新版本

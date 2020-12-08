@@ -6063,11 +6063,14 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             var result = RfidManager.SimuTagInfo("switchToRealMode", null, "");
             if (result.Value == -1)
             {
-                App.SetError("simuReader", result.ErrorInfo);
+                // 这里只写入错误日志，不调用 App.SetError("simuReader")。
+                // 原因是：一般是 dp2ssl 带动 RfidCenter 启动时调用一次切换状态，如果用 SetError() 报错，后面没有提供机会重试和清除报错，那么错误信息会一直没法消除
+                WpfClientInfo.WriteErrorLog($"RestoreRealTags() error: {result.ErrorInfo}");
+                // App.SetError("simuReader", result.ErrorInfo);
                 return result;
             }
 
-            App.SetError("simuReader", null);
+            // App.SetError("simuReader", null);
             return new NormalResult();
         }
 
