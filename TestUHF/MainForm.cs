@@ -30,6 +30,9 @@ namespace TestUHF
         {
             string strError = "";
 
+            // UInt32 nCount = RFIDLIB.rfidlib_reader.HID_Enum("690600");
+
+
             using (OpenReaderDialog dlg = new OpenReaderDialog())
             {
                 dlg.UiState = ClientInfo.Config.Get("reader_dialog", "ui_state");

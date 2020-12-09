@@ -194,6 +194,10 @@ namespace DigitalPlatform.RFID
             this._isNew = false;
             this._elements.Clear();
 
+            // 2020/12/9
+            if (block_size == 0)
+                throw new ArgumentException($"block_size 不应为 0");
+
             int start = 0;
             while (start < data.Length)
             {

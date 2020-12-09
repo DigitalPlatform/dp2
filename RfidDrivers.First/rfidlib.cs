@@ -55,8 +55,10 @@ namespace RFIDLIB
         public const int HID_ENUM_INF_TYPE_SERIALNUM = 1;
         public const int HID_ENUM_INF_TYPE_DRIVERPATH = 2;
 
-
-
+        public const int INVEN_STOP_TRIGGER_TYPE_Tms = 0;
+        public const int INVEN_STOP_TRIGGER_TYPE_N_attempt = 1;
+        public const int INVEN_STOP_TRIGGER_TYPE_N_found = 2;
+        public const int INVEN_STOP_TRIGGER_TYPE_TIMEOUT = 3;
 
         /*
         * Open connection string 
@@ -107,10 +109,36 @@ namespace RFIDLIB
         public const byte COMMTYPE_USB_EN = 0x02;
         public const byte COMMTYPE_NET_EN = 0x04;
 
+        //iso18000p6C session
+        public const byte ISO18000p6C_S0 = 0;
+        public const byte ISO18000p6C_S1 = 1;
+        public const byte ISO18000p6C_S2 = 2;
+        public const byte ISO18000p6C_S3 = 3;
+        //ISO18000p6C Memory bank 
+        public const uint ISO18000p6C_MEM_BANK_RFU = 0x00;
+        public const uint ISO18000p6C_MEM_BANK_EPC = 0x01;
+        public const uint ISO18000p6C_MEM_BANK_TID = 0x02;
+        public const uint ISO18000p6C_MEM_BANK_USER = 0x03;
+        //iso18000p6c target
+        public const byte ISO18000p6C_TARGET_A = 0x00;
+        public const byte ISO18000p6C_TARGET_B = 0x01;
 
         //Q value
         public const byte ISO18000p6C_Dynamic_Q = 0xFF;
 
+        // 2020/12/9
+        public const UInt32 ISO18000p6C_META_BIT_MASK_EPC = 0x01;
+        public const UInt32 ISO18000P6C_META_BIT_MASK_TIMESTAMP = 0x02;
+        public const UInt32 ISO18000P6C_META_BIT_MASK_FREQUENCY = 0x04;
+        public const UInt32 ISO18000p6C_META_BIT_MASK_RSSI = 0x08;
+        public const UInt32 ISO18000P6C_META_BIT_MASK_READCOUNT = 0x10;
+        public const UInt32 ISO18000P6C_META_BIT_MASK_TAGDATA = 0x20;
+
+        public const uint ISO18000p6C_SELECT_TARGET_INV_S0 = 0x00;
+        public const uint ISO18000p6C_SELECT_TARGET_INV_S1 = 0x01;
+        public const uint ISO18000p6C_SELECT_TARGET_INV_S2 = 0x02;
+        public const uint ISO18000p6C_SELECT_TARGET_INV_S3 = 0x03;
+        public const uint ISO18000p6C_SELECT_TARGET_INV_SL = 0x04;
 
     }
 }

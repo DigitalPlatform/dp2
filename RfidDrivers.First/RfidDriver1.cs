@@ -2184,19 +2184,36 @@ namespace RfidDrivers.First
             product_name = _product_dom.DocumentElement.SelectSingleNode($"device[basic/id[text()='{product_id}']]/@product")?.Value;
 
             {
-                XmlElement hf = _product_dom.DocumentElement.SelectSingleNode($"device/basic/id[text()='{product_id}']/../../protocol/HF") as XmlElement;
-                if (hf != null)
+                List<string> list = new List<string>();
                 {
-                    List<string> list = new List<string>();
-                    foreach (XmlAttribute attr in hf.Attributes)
+                    XmlElement hf = _product_dom.DocumentElement.SelectSingleNode($"device/basic/id[text()='{product_id}']/../../protocol/HF") as XmlElement;
+                    if (hf != null)
                     {
-                        if (attr.Value != "true")
-                            continue;
-                        list.Add(attr.Name);
-                    }
+                        foreach (XmlAttribute attr in hf.Attributes)
+                        {
+                            if (attr.Value != "true")
+                                continue;
+                            list.Add(attr.Name);
+                        }
 
-                    protocols = StringUtil.MakePathList(list);
+                    }
                 }
+
+                {
+                    XmlElement uhf = _product_dom.DocumentElement.SelectSingleNode($"device/basic/id[text()='{product_id}']/../../protocol/UHF") as XmlElement;
+                    if (uhf != null)
+                    {
+                        foreach (XmlAttribute attr in uhf.Attributes)
+                        {
+                            if (attr.Value != "true")
+                                continue;
+                            list.Add(attr.Name);
+                        }
+
+                    }
+                }
+
+                protocols = StringUtil.MakePathList(list);
             }
 
             // 2019/9/27
@@ -2621,6 +2638,35 @@ out Reader reader);
             }
 
             return true;
+        }
+
+        // 连接 UHF 标签
+        UIntPtr _connectUhfTag(UIntPtr hreader,
+            string UID)
+        {
+            var epc = Element.FromHexString(UID);  // ByteArray.GetTimeStampByteArray(UID);
+            if (epc == null)
+            {
+                // strError = "GetTimeStampByteArray() error";
+                return UIntPtr.Zero;
+            }
+
+            UInt32 m_accessPwd = 0;
+            UIntPtr ht = UIntPtr.Zero;
+
+            var iret = RFIDLIB.rfidlib_aip_iso18000p6C.ISO18000p6C_Connect(hreader,
+    0,
+    epc,
+    (Byte)epc.Length,
+    m_accessPwd,
+    ref ht);
+            if (iret != 0)
+            {
+                // strError = "ISO18000p6C_Connect() error";
+                return UIntPtr.Zero;
+            }
+
+            return ht;
         }
 
         // UIntPtr.Zero
@@ -3891,7 +3937,12 @@ out Reader reader);
                 if (info != null && info.UID == "00000000")
                     return new GetTagInfoResult();
 
-                UIntPtr hTag = _connectTag(
+                UIntPtr hTag = UIntPtr.Zero;
+                if (info.Protocol == InventoryInfo.ISO18000P6C)
+                    hTag = _connectUhfTag(reader.ReaderHandle,
+                        info?.UID);
+                else
+                    hTag = _connectTag(
                     reader.ReaderHandle,
                     info?.UID,
                     info == null ? RFIDLIB.rfidlib_def.RFID_ISO15693_PICC_ICODE_SLI_ID : info.TagType);
@@ -3906,6 +3957,54 @@ out Reader reader);
                         uid = Element.FromHexString(info.UID);
                         //Debug.Assert(info.UID.Length >= 8);
                         //Array.Copy(info.UID, uid, uid.Length);
+                    }
+
+                    if (info.Protocol == InventoryInfo.ISO18000P6C)
+                    {
+                        var memBank = (Byte)RFIDLIB.rfidlib_def.ISO18000p6C_MEM_BANK_USER;
+                        int WordCnt = 0;    // 0 表示读全部
+                        int WordPointer = 0;
+
+                        Byte[] readData = new Byte[256];
+                        UInt32 nSize = (UInt32)readData.Length;
+
+                        iret = RFIDLIB.rfidlib_aip_iso18000p6C.ISO18000p6C_Read(reader.ReaderHandle,
+    hTag,
+    memBank,
+    (UInt32)WordPointer,
+    (UInt32)WordCnt,
+    readData,
+    ref nSize);
+                        if (iret != 0)
+                            return new GetTagInfoResult
+                            {
+                                Value = -1,
+                                ErrorInfo = $"ISO18000p6C_Read() error 2. iret:{iret},reader_name:{one_reader_name},uid:{Element.GetHexString(uid)},antenna_id:{antenna_id}",
+                                ErrorCode = GetErrorCode(iret, reader.ReaderHandle)
+                            };
+
+                        return new GetTagInfoResult
+                        {
+                            TagInfo = new TagInfo
+                            {
+                                // 这里返回真正 GetTagInfo 成功的那个 ReaderName。而 Inventory 可能返回类似 reader1,reader2 这样的字符串
+                                ReaderName = one_reader_name,
+                                UID = Element.GetHexString(uid),
+                                /*
+                                AFI = afi,
+                                DSFID = dsfid,
+                                BlockSize = blkSize,
+                                MaxBlockCount = blkNum,
+                                IcRef = icref,
+                                LockStatus = result0.LockStatus,
+                                */
+                                Bytes = readData,
+                                /*
+                                EAS = eas_result.Value == 1,
+                                */
+                                AntennaID = (uint)(antenna_id == -1 ? 0 : antenna_id),
+                            }
+                        };
                     }
 
                     Byte dsfid, afi, icref;
@@ -4110,12 +4209,16 @@ out Reader reader);
             {
                 results = new List<InventoryInfo>();
 
+                // UHF 盘点参数结构
+                PARAMETERS invenParams = null;
+
                 Byte enableAFI = 0;
                 int iret;
                 UIntPtr InvenParamSpecList = RFIDLIB.rfidlib_reader.RDR_CreateInvenParamSpecList();
                 if (InvenParamSpecList.ToUInt64() != 0)
                 {
-                    RFIDLIB.rfidlib_aip_iso15693.ISO15693_CreateInvenParam(
+                    if (StringUtil.IsInList("ISO15693", protocols))
+                        RFIDLIB.rfidlib_aip_iso15693.ISO15693_CreateInvenParam(
                         InvenParamSpecList,
                         0,
                         enableAFI,
@@ -4124,6 +4227,29 @@ out Reader reader);
 
                     if (StringUtil.IsInList("ISO14443A", protocols))
                         RFIDLIB.rfidlib_aip_iso14443A.ISO14443A_CreateInvenParam(InvenParamSpecList, 0);
+
+                    if (StringUtil.IsInList("ISO18000P6C", protocols))
+                    {
+                        invenParams = new PARAMETERS();
+
+                        {
+                            invenParams.m_metaFlags.m_enable = true; // ckbMetaEnable.Checked;
+                            invenParams.m_metaFlags.m_EPC = true;    // ckbMetaEPC.Checked;
+                            invenParams.m_metaFlags.m_frequency = true;  // ckbMetaFrequency.Checked;
+                            invenParams.m_metaFlags.m_readCnt = false;   // ckbMetaReadCnt.Checked;
+                            invenParams.m_metaFlags.m_RSSI = false;  //  ckbMetaRSS.Checked;
+                            invenParams.m_metaFlags.m_tagData = false;   // ckbMetaTagData.Checked;
+                            invenParams.m_metaFlags.m_timestamp = false; // ckbMetaTimestamp.Checked;
+                            invenParams.m_metaFlags.m_antennaID = false; // ckbMetaAntennaID.Checked;
+                        }
+
+                        SetUhfInventParamList(
+    InvenParamSpecList,
+    invenParams);
+
+                    }
+
+                    // TODO: 如果一个协议也没有匹配上，要立即返回
                 }
                 nTagCount = 0;
             LABEL_TAG_INVENTORY:
@@ -4150,6 +4276,7 @@ out Reader reader);
                         Byte[] uid = new Byte[8];  // 16
 
                         /* Parse iso15693 tag report */
+                        if (StringUtil.IsInList("ISO15693", protocols))
                         {
                             iret = RFIDLIB.rfidlib_aip_iso15693.ISO15693_ParseTagDataReport(TagDataReport,
                                 ref aip_id,
@@ -4216,6 +4343,82 @@ out Reader reader);
                             }
                         }
 
+                        if (StringUtil.IsInList("ISO18000P6C", protocols))
+                        {
+                            Byte[] tagData = new Byte[256];
+                            UInt32 nSize = (UInt32)tagData.Length;
+                            UInt32 metaFlags = 0;
+
+                            iret = RFIDLIB.rfidlib_aip_iso18000p6C.ISO18000p6C_ParseTagReport(
+                                TagDataReport,
+                                ref aip_id,
+                                ref tag_id,
+                                ref ant_id,
+                                ref metaFlags,
+                                tagData,
+                                ref nSize);
+                            if (iret == 0)
+                            {
+                                String writeOper = "";
+                                String lockOper = "";
+                                if (invenParams.m_write.m_enable)
+                                {
+                                    iret = RFIDLIB.rfidlib_aip_iso18000p6C.ISO18000p6C_CheckTAWriteResult(TagDataReport);
+                                    if (iret != 0)
+                                    {
+                                        writeOper = "fail";
+                                    }
+                                    else
+                                    {
+                                        writeOper = "success";
+                                    }
+                                }
+                                if (invenParams.m_lock.m_enable)
+                                {
+                                    iret = RFIDLIB.rfidlib_aip_iso18000p6C.ISO18000p6C_CheckTALockResult(TagDataReport);
+                                    if (iret != 0)
+                                    {
+                                        lockOper = "fail";
+                                    }
+                                    else
+                                    {
+                                        lockOper = "success";
+                                    }
+                                }
+
+                                ParseDataResult parse_result = ParseData(metaFlags,
+tagData,
+nSize);
+                                if (parse_result.Value == -1)
+                                    throw new Exception($"ParseData() error: {parse_result.ErrorInfo}");
+
+                                InventoryInfo result = new InventoryInfo
+                                {
+                                    Protocol = InventoryInfo.ISO18000P6C,
+                                    AipID = aip_id,
+                                    TagType = tag_id,
+                                    AntennaID = ant_id,
+                                    DsfID = dsfid,
+                                    UID = parse_result.EPC,
+                                };
+                                results.Add(result);
+
+                                /*
+                                results.Add(new UhfInventoryItem
+                                {
+                                    aip_id = aip_id,
+                                    tag_id = tag_id,
+                                    ant_id = ant_id,
+                                    metaFlags = metaFlags,
+                                    tagData = tagData,
+                                    nSize = nSize,
+                                    writeOper = writeOper,
+                                    lockOper = lockOper
+                                });
+                                */
+                            }
+                        }
+
                         /* Get Next report from buffer */
                         TagDataReport = RFIDLIB.rfidlib_reader.RDR_GetTagDataReport(hreader, RFIDLIB.rfidlib_def.RFID_SEEK_NEXT); //next
                     }
@@ -4240,6 +4443,251 @@ out Reader reader);
             finally
             {
                 // RFIDLIB.rfidlib_reader.RDR_CloseRFTransmitter(hreader);
+            }
+        }
+
+        #region Parse UHF data
+
+        public class ParseDataResult : NormalResult
+        {
+            public string EPC { get; set; }
+            // public string UID { get; set; }
+            public uint Timestamp { get; set; }
+            public uint Frequency { get; set; }
+            public byte RSSI { get; set; }
+            public byte ReadCount { get; set; }
+            public byte[] ReadData { get; set; }
+        }
+
+        public static ParseDataResult ParseData(uint metaFlags,
+            byte[] tagData,
+            uint datlen)
+        {
+            UInt16 epcBitsLen = 0;
+            int idx = 0;
+            List<Byte> epc;
+            List<Byte> readData;
+            int i;
+            // String strAntId;
+            UInt32 timestamp;
+            UInt32 frequency;
+            Byte rssi;
+            Byte readCnt;
+
+            // strAntId = antID.ToString();
+
+            epc = new List<byte>();
+            readData = new List<byte>();
+            timestamp = 0;
+            frequency = 0;
+            rssi = 0;
+            readCnt = 0;
+            if (metaFlags == 0) metaFlags |= RFIDLIB.rfidlib_def.ISO18000p6C_META_BIT_MASK_EPC;
+            if ((metaFlags & RFIDLIB.rfidlib_def.ISO18000p6C_META_BIT_MASK_EPC) > 0)
+            {
+                if (datlen < 2)
+                {
+                    //error data size 
+                    // return;
+                    throw new Exception("error data size");
+                }
+
+                epcBitsLen = (UInt16)(tagData[idx] | (tagData[idx + 1] << 8));
+                idx += 2;
+                int epcBytes = ((epcBitsLen + 7) / 8);
+                if ((datlen - idx) < epcBytes)
+                {
+                    // error data size 
+                    // return;
+                    throw new Exception("error data size 1");
+                }
+                for (i = 0; i < epcBytes; i++)
+                {
+                    epc.Add(tagData[idx + i]);
+                }
+
+                idx += epcBytes;
+            }
+            if ((metaFlags & RFIDLIB.rfidlib_def.ISO18000P6C_META_BIT_MASK_TIMESTAMP) > 0)
+            {
+                if ((datlen - idx) < 4)
+                {
+                    //error data size 
+                    // return;
+                    throw new Exception("error data size 2");
+                }
+                timestamp = (UInt32)(tagData[idx] | (tagData[idx + 1] << 8 & 0xff00) | (tagData[idx + 2] << 16 & 0xff0000) | (tagData[idx + 3] << 24 & 0xff000000));
+                idx += 4;
+            }
+            if ((metaFlags & RFIDLIB.rfidlib_def.ISO18000P6C_META_BIT_MASK_FREQUENCY) > 0)
+            {
+                if ((datlen - idx) < 4)
+                {
+                    //error data size 
+                    // return;
+                    throw new Exception("error data size 3");
+
+                }
+                frequency = (UInt32)(tagData[idx] | (tagData[idx + 1] << 8 & 0xff00) | (tagData[idx + 2] << 16 & 0xff0000) | (tagData[idx + 3] << 24 & 0xff000000));
+                idx += 4;
+            }
+            if ((metaFlags & RFIDLIB.rfidlib_def.ISO18000p6C_META_BIT_MASK_RSSI) > 0)
+            {
+                if ((datlen - idx) < 1)
+                {
+                    //error data size 
+                    // return;
+                    throw new Exception("error data size 4");
+
+                }
+                rssi = tagData[idx];
+                idx += 1;
+            }
+            if ((metaFlags & RFIDLIB.rfidlib_def.ISO18000P6C_META_BIT_MASK_READCOUNT) > 0)
+            {
+                if ((datlen - idx) < 1)
+                {
+                    //error data size 
+                    // return;
+                    throw new Exception("error data size 5");
+
+                }
+                readCnt = tagData[idx];
+                idx += 1;
+            }
+            if ((metaFlags & RFIDLIB.rfidlib_def.ISO18000P6C_META_BIT_MASK_TAGDATA) > 0)
+            {
+                for (i = idx; i < datlen; i++)
+                {
+                    readData.Add(tagData[i]);
+                }
+            }
+
+            String strEPC = BitConverter.ToString(epc.ToArray(), 0, epc.Count).Replace("-", string.Empty);
+            // String strUid = BitConverter.ToString(readData.ToArray(), 0, readData.Count).Replace("-", string.Empty);
+
+            return new ParseDataResult
+            {
+                EPC = strEPC,
+                // UID = strUid,
+                Timestamp = timestamp,
+                Frequency = frequency,
+                RSSI = rssi,
+                ReadCount = readCnt,
+                ReadData = readData?.ToArray()
+            };
+        }
+
+
+        #endregion
+
+        // 设置超高频盘点参数
+        static void SetUhfInventParamList(
+            UIntPtr InvenParamSpecList,
+            PARAMETERS invenParams)
+        {
+            /* set timeout */
+            RFIDLIB.rfidlib_reader.RDR_SetInvenStopTrigger(InvenParamSpecList,
+                RFIDLIB.rfidlib_def.INVEN_STOP_TRIGGER_TYPE_TIMEOUT,
+                invenParams.m_timeout,
+                0);
+            /* create ISO18000p6C air protocol inventory parameters */
+            UIntPtr AIPIso18000p6c = RFIDLIB.rfidlib_aip_iso18000p6C.ISO18000p6C_CreateInvenParam(InvenParamSpecList,
+                0,
+                0,
+                RFIDLIB.rfidlib_def.ISO18000p6C_S0,
+                RFIDLIB.rfidlib_def.ISO18000p6C_TARGET_A,
+                RFIDLIB.rfidlib_def.ISO18000p6C_Dynamic_Q);
+            if (AIPIso18000p6c.ToUInt64() != 0)
+            {
+                //set selection parameters
+                if (invenParams.m_sel.m_enable)
+                {
+                    Byte[] maskBits = invenParams.m_sel.m_maskBits.ToArray();
+                    RFIDLIB.rfidlib_aip_iso18000p6C.ISO18000p6C_SetInvenSelectParam(AIPIso18000p6c, invenParams.m_sel.m_target, invenParams.m_sel.m_action, invenParams.m_sel.m_memBank, invenParams.m_sel.m_pointer, maskBits, invenParams.m_sel.m_maskBitsLength, 0);
+
+                }
+                // set inventory read parameters
+                if (invenParams.m_read.m_enable)
+                {
+                    RFIDLIB.rfidlib_aip_iso18000p6C.ISO18000p6C_SetInvenReadParam(AIPIso18000p6c, invenParams.m_read.m_memBank, invenParams.m_read.m_wordPtr, (Byte)invenParams.m_read.m_wordCnt);
+                }
+
+                // Add Embedded commands
+                if (invenParams.m_write.m_enable)
+                {
+                    Byte[] writeDatas = invenParams.m_write.m_datas.ToArray();
+
+                    RFIDLIB.rfidlib_aip_iso18000p6C.ISO18000p6C_CreateTAWrite(AIPIso18000p6c, invenParams.m_write.m_memBank, invenParams.m_write.m_wordPtr, invenParams.m_write.m_wordCnt, writeDatas, (UInt32)writeDatas.Length);
+                }
+
+                if (invenParams.m_lock.m_enable)
+                {
+                    UInt16 mask, action;
+                    mask = action = 0;
+                    if (invenParams.m_lock.m_userMemSelected)
+                    {
+                        mask |= 0x03;
+                        action |= (UInt16)(invenParams.m_lock.m_userMem);
+                    }
+                    if (invenParams.m_lock.m_TIDMemSelected)
+                    {
+                        mask |= (0x03 << 2);
+                        action |= (UInt16)(invenParams.m_lock.m_TIDMem << 2);
+                    }
+                    if (invenParams.m_lock.m_EPCMemSelected)
+                    {
+                        mask |= (0x03 << 4);
+                        action |= (UInt16)(invenParams.m_lock.m_EPCMem << 4);
+                    }
+                    if (invenParams.m_lock.m_accessPwdSelected)
+                    {
+                        mask |= (0x03 << 6);
+                        action |= (UInt16)(invenParams.m_lock.m_accessPwd << 6);
+                    }
+                    if (invenParams.m_lock.m_killPwdSelected)
+                    {
+                        mask |= (0x03 << 8);
+                        action |= (UInt16)(invenParams.m_lock.m_killPwd << 8);
+                    }
+
+                    RFIDLIB.rfidlib_aip_iso18000p6C.ISO18000p6C_CreateTALock(AIPIso18000p6c, mask, action);
+                }
+                // set meta flags 
+                if (invenParams.m_metaFlags.m_enable)
+                {
+                    UInt32 metaFlags = 0;
+                    if (invenParams.m_metaFlags.m_EPC)
+                    {
+                        metaFlags |= RFIDLIB.rfidlib_def.ISO18000p6C_META_BIT_MASK_EPC;
+                    }
+                    if (invenParams.m_metaFlags.m_timestamp)
+                    {
+                        metaFlags |= RFIDLIB.rfidlib_def.ISO18000P6C_META_BIT_MASK_TIMESTAMP;
+                    }
+                    if (invenParams.m_metaFlags.m_frequency)
+                    {
+                        metaFlags |= RFIDLIB.rfidlib_def.ISO18000P6C_META_BIT_MASK_FREQUENCY;
+                    }
+                    if (invenParams.m_metaFlags.m_RSSI)
+                    {
+                        metaFlags |= RFIDLIB.rfidlib_def.ISO18000p6C_META_BIT_MASK_RSSI;
+                    }
+                    if (invenParams.m_metaFlags.m_readCnt)
+                    {
+                        metaFlags |= RFIDLIB.rfidlib_def.ISO18000P6C_META_BIT_MASK_READCOUNT;
+                    }
+                    if (invenParams.m_metaFlags.m_tagData)
+                    {
+                        metaFlags |= RFIDLIB.rfidlib_def.ISO18000P6C_META_BIT_MASK_TAGDATA;
+                    }
+                    RFIDLIB.rfidlib_aip_iso18000p6C.ISO18000p6C_SetInvenMetaDataFlags(AIPIso18000p6c, metaFlags);
+                }
+                // set access password
+                if (invenParams.m_read.m_enable || invenParams.m_write.m_enable || invenParams.m_lock.m_enable)
+                {
+                    RFIDLIB.rfidlib_aip_iso18000p6C.ISO18000p6C_SetInvenAccessPassword(AIPIso18000p6c, invenParams.m_accessPwd);
+                }
             }
         }
 

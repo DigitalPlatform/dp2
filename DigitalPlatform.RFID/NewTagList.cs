@@ -84,7 +84,7 @@ namespace DigitalPlatform.RFID
             List<TagAndData> changed_books,
             List<TagAndData> removed_books);
         public delegate void delegate_setError(string type, string error);
-        public delegate GetTagInfoResult delegate_getTagInfo(string readerName, string uid, uint antennaID);
+        public delegate GetTagInfoResult delegate_getTagInfo(string readerName, string uid, uint antennaID, string protocol);
 
         // TODO: 维持一个 UID --> typeOfUsage 的对照表，加快对图书和读者类型标签的分离判断过程
         // UID --> typeOfUsage string
@@ -302,7 +302,7 @@ namespace DigitalPlatform.RFID
                         for (int i = 0; i < 2; i++)
                         {
                             // gettaginfo_result = GetTagInfo(channel, tag.ReaderName, tag.UID, tag.AntennaID);
-                            gettaginfo_result = GetTagInfo(getTagInfo, tag.ReaderName, tag.UID, tag.AntennaID);
+                            gettaginfo_result = GetTagInfo(getTagInfo, tag.ReaderName, tag.UID, tag.AntennaID, tag.Protocol);
                             if (gettaginfo_result.Value != -1)
                                 break;
                         }
@@ -437,7 +437,8 @@ namespace DigitalPlatform.RFID
         GetTagInfoResult GetTagInfo(delegate_getTagInfo getTagInfo,
             string reader_name,
             string uid,
-            uint antenna)
+            uint antenna,
+            string protocol)
         {
             //if (channel.Started == false)
             //    return new GetTagInfoResult { Value = -1, ErrorInfo = "RFID 通道尚未启动" };
@@ -457,7 +458,7 @@ namespace DigitalPlatform.RFID
 
             if (info == null)
             {
-                var result = getTagInfo(reader_name, uid, antenna);
+                var result = getTagInfo(reader_name, uid, antenna, protocol);
                 if (result.Value == -1)
                     return result;
                 info = result.TagInfo;

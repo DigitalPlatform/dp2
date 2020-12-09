@@ -1738,7 +1738,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                         ShelfData.BookTagList.Refresh(// sender as BaseChannel<IRfid>,
                             e.ReaderNameList,
                             e.Result.Results,
-                            (readerName, uid, antennaID) =>
+                            (readerName, uid, antennaID, protocol) =>
                             {
                                 // TODO: source == "initial" 时这里详细显示进度
                                 GetTagInfoProgressChanged?.Invoke(sender,
@@ -1808,7 +1808,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                         ShelfData.PatronTagList.Refresh(// sender as BaseChannel<IRfid>,
                             e.ReaderNameList,
                             e.Result.Results,
-                            (readerName, uid, antennaID) =>
+                            (readerName, uid, antennaID, protocol) =>
                             {
                                 var channel = sender as BaseChannel<IRfid>;
                                 return channel.Object.GetTagInfo(readerName, uid, antennaID);
