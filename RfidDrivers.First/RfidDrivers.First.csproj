@@ -81,12 +81,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="InvenParams.cs" />
     <Compile Include="RfidDriver1.cs" />
     <Compile Include="miniLib_Lock.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="rfidlib.cs" />
     <Compile Include="rfidlib_aip_iso14443A.cs" />
     <Compile Include="rfidlib_aip_iso15693.cs" />
+    <Compile Include="rfidlib_aip_iso18000p6C.cs" />
     <Compile Include="rfidlib_reader.cs" />
   </ItemGroup>
   <ItemGroup>

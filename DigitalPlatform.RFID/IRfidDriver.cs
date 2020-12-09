@@ -172,6 +172,7 @@ uint new_password);
         // 协议类型
         public const string ISO15693 = "ISO15693";
         public const string ISO14443A = "ISO14443A";
+        public const string ISO18000P6C = "ISO18000P6C";
 
         public string Protocol { get; set; }
         public string UID { get; set; }

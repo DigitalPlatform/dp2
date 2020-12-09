@@ -48,6 +48,11 @@ namespace RFIDLIB
         [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
         public static extern int RDR_TagDisconnect(UIntPtr hr, UIntPtr hTag);
         [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
+
+        // 2020/12/9
+        public static extern int RDR_SetMultiAccessAntennas(UIntPtr hr, Byte[] antennas, Byte nSize);
+        [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
+
         public static extern int RDR_SetAcessAntenna(UIntPtr hr, Byte AntennaID);
         [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
         public static extern int RDR_OpenRFTransmitter(UIntPtr hr);
@@ -153,6 +158,10 @@ namespace RFIDLIB
         [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
         public static extern int RDR_LoadFactoryDefault(UIntPtr hr);
 
+        // 2020/12/9
+        [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
+        public static extern int RDR_SetInvenStopTrigger(UIntPtr hInvenParams, Byte stopTriggerType, UInt32 maxTimeout, UInt32 triggerValue);
+
 #else
 
         /**************************************************Use Multi-Byte Character Set***********************************************/
@@ -191,6 +200,11 @@ namespace RFIDLIB
         public static extern int RDR_DisableAsyncTagReportOutput(UIntPtr hr);
         [DllImport("rfidlib_reader.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]
         public static extern int RDR_TagDisconnect(UIntPtr hr, UIntPtr hTag);
+
+        // 2020/12/9
+        [DllImport("rfidlib_reader.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]
+        public static extern int RDR_SetMultiAccessAntennas(UIntPtr hr, Byte[] antennas, Byte nSize);
+
         [DllImport("rfidlib_reader.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]
         public static extern int RDR_SetAcessAntenna(UIntPtr hr, Byte AntennaID);
         [DllImport("rfidlib_reader.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]
@@ -293,6 +307,14 @@ namespace RFIDLIB
         public static extern int RDR_GetAIPTypeName(UIntPtr hr, UInt32 AIP_ID, StringBuilder nameBuf, ref UInt32 nSize);
         [DllImport("rfidlib_reader.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]
         public static extern int RDR_GetTagTypeName(UIntPtr hr, UInt32 AIP_ID, UInt32 TAG_ID, StringBuilder nameBuf, ref UInt32 nSize);
+
+        // 2019/1/24
+        [DllImport("rfidlib_reader.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]
+        public static extern int RDR_LoadFactoryDefault(UIntPtr hr);
+
+        // 2020/12/19
+        [DllImport("rfidlib_reader.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]
+        public static extern int RDR_SetInvenStopTrigger(UIntPtr hInvenParams, Byte stopTriggerType, UInt32 maxTimeout, UInt32 triggerValue);
 
 #endif
     }

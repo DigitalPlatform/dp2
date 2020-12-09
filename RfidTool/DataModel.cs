@@ -6,6 +6,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Newtonsoft.Json;
+
 using RfidDrivers.First;
 
 using DigitalPlatform;
@@ -13,7 +15,6 @@ using DigitalPlatform.IO;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
 using DigitalPlatform.CirculationClient;
-using Newtonsoft.Json;
 
 namespace RfidTool
 {
@@ -92,10 +93,11 @@ namespace RfidTool
                         TagList.Refresh(// sender as BaseChannel<IRfid>,
                             readerNameList,
                             result.Results,
-                            (readerName, uid, antennaID) =>
+                            (readerName, uid, antennaID, protocol) =>
                             {
                                 InventoryInfo info = new InventoryInfo
                                 {
+                                    Protocol = protocol,
                                     UID = uid,
                                     AntennaID = antennaID
                                 };
