@@ -3645,6 +3645,9 @@ namespace dp2SSL
             lock (_syncRoot_patron)
             {
                 _patron.Clear();
+                // 2020/12/9
+                // 清除 ErrorTable 中的全部出错信息，避免残余内容后面重新出现在界面上
+                _patronErrorTable.SetError(null, null);
             }
 
 
