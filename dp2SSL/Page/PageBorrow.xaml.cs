@@ -275,10 +275,11 @@ namespace dp2SSL
                 this.patronControl.SetStartMessage(GetPageStyleList());
             }
 
+#if NO
             App.Invoke(new Action(() =>
             {
                 // 身份读卡器竖向放置，才有固定读者信息的必要
-                if (App.PatronReaderVertical)
+                if (IsVerticalCard()/*App.PatronReaderVertical*/)
                 {
                     // TODO: 这里可以提供一个定制特性的点位，让用户自定义是否出现固定按钮
                     fixAndClear.Visibility = Visibility.Visible;
@@ -286,6 +287,7 @@ namespace dp2SSL
                 else
                     fixAndClear.Visibility = Visibility.Collapsed;
             }));
+#endif
 
             // SetGlobalError("test", "test error");
 
@@ -480,7 +482,7 @@ namespace dp2SSL
             {
                 if (_entities.Count == 0
         && changed == true  // 限定为，当数量减少到 0 这一次，才进行清除
-        && (_patron.IsFingerprintSource || App.PatronReaderVertical == true))
+        && IsVerticalCard()/*(_patron.IsFingerprintSource || App.PatronReaderVertical == true)*/)
                 {
                     PatronClear(true);
                 }
@@ -495,13 +497,13 @@ namespace dp2SSL
 
                     // 自动返回菜单页面
                     if (App.AutoBackMenuPage 
-                        && (_patron.IsFingerprintSource || App.PatronReaderVertical == true || TagList.Patrons.Count == 0))
+                        && (IsVerticalCard()/*_patron.IsFingerprintSource || App.PatronReaderVertical == true*/ || TagList.Patrons.Count == 0))
                         TryBackMenuPage();
                 }
 
                 // 当图书全部被移走时，如果身份读卡器横向放置，需要延时提醒不要忘记拿走读者卡
                 if (_entities.Count == 0 && changed == true
-                    && App.PatronReaderVertical == false)
+                    && IsVerticalCard()/*App.PatronReaderVertical*/ == false)
                     BeginNotifyTask();
 
                 // 当列表为空的时候，主动清空一次 tag 缓存。这样读者可以用拿走全部标签一次的方法来迫使清除缓存(比如中途利用内务修改过 RFID 标签的 EAS)
@@ -647,7 +649,7 @@ namespace dp2SSL
                     else
                     {
                         // 会顺便清掉读者信息区的错误信息
-                        if (App.PatronReaderVertical == false)
+                        if (IsVerticalCard()/*App.PatronReaderVertical*/ == false)
                             SetPatronError("getreaderinfo", "");
 
                         if (patrons.Count > 1)
@@ -659,7 +661,7 @@ namespace dp2SSL
                         else
                         {
                             // 2019/12/8
-                            if (App.PatronReaderVertical == false)
+                            if (IsVerticalCard()/*App.PatronReaderVertical*/ == false)
                             {
                                 PatronClear();
                                 // 自动返回菜单页面
@@ -1365,7 +1367,7 @@ namespace dp2SSL
             if (result.Value == -1)
             {
                 SetPatronError("fingerprint", $"指纹中心出错: {result.ErrorInfo}, 错误码: {result.ErrorCode}");
-                if (_patron.IsFingerprintSource || App.PatronReaderVertical == true)
+                if (IsVerticalCard()/*_patron.IsFingerprintSource || App.PatronReaderVertical == true*/)
                     PatronClear();    // 只有当面板上的读者信息来源是指纹仪时(或者身份读卡器竖放)，才清除面板上的读者信息
                 return;
             }
@@ -1713,7 +1715,7 @@ out string strError);
 
 
 
-        #region 属性
+#region 属性
 
 #if NO
         private void Entities_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -1795,7 +1797,7 @@ out string strError);
         }
 
 
-        #endregion
+#endregion
 
         // 借书
         private void BorrowButton_Click(object sender, RoutedEventArgs e)
@@ -2396,7 +2398,7 @@ out string strError);
                 return true;
 
             string fang = "放好";
-            if (App.PatronReaderVertical)
+            if (IsVerticalCard()/*App.PatronReaderVertical*/)
                 fang = "扫";
 
             string debug_info = $"uid:[{_patron.UID}],barcode:[{_patron.Barcode}]";
@@ -2573,7 +2575,7 @@ out string strError);
             });
         }
 
-        #region patron 分类报错机制
+#region patron 分类报错机制
 
         // 错误类别 --> 错误字符串
         // 错误类别有：rfid fingerprint getreaderinfo
@@ -2624,9 +2626,9 @@ out string strError);
         }
 #endif
 
-        #endregion
+#endregion
 
-        #region global 分类报错机制
+#region global 分类报错机制
 
         // 错误类别 --> 错误字符串
         // 错误类别有：rfid fingerprint
@@ -2675,7 +2677,7 @@ out string strError);
         }
 #endif
 
-        #endregion
+#endregion
 
 #pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
         private async void RegisterFace_Click(object sender, RoutedEventArgs e)
@@ -3224,7 +3226,7 @@ string color = "red")
 
 #endif
 
-        #region 下级函数
+#region 下级函数
 
 #if OLDVERSION
         // return:
@@ -3524,7 +3526,7 @@ out strError);
         }
 
 #endif
-        #endregion
+#endregion
 
 #if OLDVERSION
 
@@ -3678,13 +3680,16 @@ string usage)
                 BeginWarningCard((s) =>
                 {
                     // 延迟清除
-                    if (s == "cancelled" && App.PatronReaderVertical)
+                    if (s == "cancelled" && IsVerticalCard()/*App.PatronReaderVertical*/)
                         PatronClear(false);
                 });
                 return;
             }
 
             _patron.Clear();
+            // 2020/12/9
+            // 清除 ErrorTable 中的全部出错信息，避免残余内容后面重新出现在界面上
+            _patronErrorTable.SetError(null, null);
 
             if (this.patronControl.BorrowedEntities.Count > 0)
             {
@@ -3727,7 +3732,7 @@ string usage)
             PatronClear();
         }
 
-        #region 提醒拿走读者卡
+#region 提醒拿走读者卡
 
         static DelayAction _delayNotifyCard = null;
 
@@ -3771,9 +3776,9 @@ string usage)
                 });
         }
 
-        #endregion
+#endregion
 
-        #region 延迟清除读者信息
+#region 延迟清除读者信息
 
         DelayAction _delayClearPatronTask = null;
 
@@ -3789,7 +3794,7 @@ string usage)
         void BeginDelayClearTask()
         {
             // 横向放置身份证读卡器时，没有必要延迟清除。意思就是说横向情况是需要人主动拿走卡，屏幕上信息才能清除
-            if (App.PatronReaderVertical == false)
+            if (IsVerticalCard()/*App.PatronReaderVertical*/ == false)
                 return;
 
             CancelDelayClearTask();
@@ -3902,13 +3907,16 @@ string usage)
         // 开始启动延时自动清除读者信息的过程。如果中途放上去图书，则延时过程被取消(也就是说读者信息不再会被自动清除)
         void Welcome(bool errorOccur)
         {
+            // 2020/12/8
+            SetFixVisible();
+
             if (errorOccur)
             {
                 // 身份读写器平放
-                if (App.PatronReaderVertical == false)
+                if (IsVerticalCard()/*App.PatronReaderVertical*/ == false)
                     BeginNotifyTask();
 
-                if (App.PatronReaderVertical == true
+                if (IsVerticalCard()/*App.PatronReaderVertical*/ == true
     && TagList.Books.Count == 0)
                     BeginDelayClearTask();
                 return;
@@ -3923,12 +3931,12 @@ string usage)
             App.CurrentApp.Speak($"{(string.IsNullOrEmpty(_patron.PatronName) ? _patron.Barcode : _patron.PatronName)}");
 
             // 身份读写器平放
-            if (App.PatronReaderVertical == false)
+            if (IsVerticalCard() /*App.PatronReaderVertical*/ == false)
                 BeginNotifyTask();
 
             // 身份读写器竖放
             // 读写器上没有图书的时候，才启动延时清除
-            if (App.PatronReaderVertical == true
+            if (IsVerticalCard() /*App.PatronReaderVertical == true*/
                 && TagList.Books.Count == 0)
                 BeginDelayClearTask();
 
@@ -3942,7 +3950,7 @@ string usage)
             }
         }
 
-        #endregion
+#endregion
 
 #pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
         private async void bindPatronCard_Click(object sender, RoutedEventArgs e)
@@ -4468,6 +4476,28 @@ bind_uid);
             StringUtil.SetInList(ref value, uid, action == "bind");
             DomUtil.SetElementText(dom.DocumentElement, "cardNumber", value);
             return new NormalResult();
+        }
+
+        // 是否是竖向的卡，或者人脸、指纹、一维码、二维码方式？
+        // (这种方式下需要固定读者信息一段时间)
+        bool IsVerticalCard()
+        {
+            return (App.PatronReaderVertical || _patron.IsFingerprintSource);
+        }
+
+        void SetFixVisible()
+        {
+            App.Invoke(new Action(() =>
+            {
+                // 身份读卡器竖向放置，才有固定读者信息的必要
+                if (IsVerticalCard()/*App.PatronReaderVertical*/)
+                {
+                    // TODO: 这里可以提供一个定制特性的点位，让用户自定义是否出现固定按钮
+                    fixAndClear.Visibility = Visibility.Visible;
+                }
+                else
+                    fixAndClear.Visibility = Visibility.Collapsed;
+            }));
         }
     }
 }
