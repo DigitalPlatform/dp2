@@ -46,6 +46,7 @@ namespace RfidTool
             this.button_clearProcessingBarcode = new System.Windows.Forms.Button();
             this.label_message = new System.Windows.Forms.Label();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.columnHeader_eas = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.SuspendLayout();
             // 
             // label1
@@ -86,6 +87,7 @@ namespace RfidTool
             this.columnHeader_uid,
             this.columnHeader_pii,
             this.columnHeader_tou,
+            this.columnHeader_eas,
             this.columnHeader_oi,
             this.columnHeader_aoi,
             this.columnHeader_antenna,
@@ -193,6 +195,11 @@ namespace RfidTool
             this.label_message.TabIndex = 7;
             this.label_message.Text = "请扫入条码号 ...";
             // 
+            // columnHeader_eas
+            // 
+            this.columnHeader_eas.Text = "EAS(防盗标志)";
+            this.columnHeader_eas.Width = 159;
+            // 
             // ScanDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
@@ -237,5 +244,6 @@ namespace RfidTool
         private System.Windows.Forms.Label label_message;
         private System.Windows.Forms.ColumnHeader columnHeader_aoi;
         private System.Windows.Forms.ToolTip toolTip1;
+        private System.Windows.Forms.ColumnHeader columnHeader_eas;
     }
 }

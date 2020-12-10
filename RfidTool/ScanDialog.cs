@@ -44,6 +44,10 @@ namespace RfidTool
             toolTip1.SetToolTip(this.textBox_barcode, "输入条码号");
             toolTip1.SetToolTip(this.textBox_processingBarcode, "待处理的条码号");
             toolTip1.SetToolTip(this.button_clearProcessingBarcode, "清除待处理的条码号");
+
+            DataModel.TagChanged += DataModel_TagChanged;
+            DataModel.SetError += DataModel_SetError;
+
         }
 
         private void textBox_barcode_KeyPress(object sender, KeyPressEventArgs e)
@@ -71,6 +75,8 @@ namespace RfidTool
 
         private void ScanDialog_FormClosed(object sender, FormClosedEventArgs e)
         {
+            DataModel.TagChanged -= DataModel_TagChanged;
+            DataModel.SetError -= DataModel_SetError;
         }
 
         void SetTitle()
@@ -87,6 +93,7 @@ namespace RfidTool
 
         private void ScanDialog_VisibleChanged(object sender, EventArgs e)
         {
+            /*
             if (this.Visible)
             {
                 DataModel.TagChanged += DataModel_TagChanged;
@@ -97,6 +104,7 @@ namespace RfidTool
                 DataModel.TagChanged -= DataModel_TagChanged;
                 DataModel.SetError -= DataModel_SetError;
             }
+            */
         }
 
         private void DataModel_SetError(object sender, SetErrorEventArgs e)
@@ -115,7 +123,10 @@ namespace RfidTool
             {
                 this.Invoke((Action)(() =>
                 {
-                    UpdateTags(e.AddTags);
+                    lock (_syncRootFill)
+                    {
+                        UpdateTags(e.AddTags);
+                    }
                 }));
                 hasAdded = true;
             }
@@ -124,7 +135,10 @@ namespace RfidTool
             {
                 this.Invoke((Action)(() =>
                 {
-                    UpdateTags(e.UpdateTags);
+                    lock (_syncRootFill)
+                    {
+                        UpdateTags(e.UpdateTags);
+                    }
                 }));
                 hasAdded = true;
             }
@@ -144,24 +158,30 @@ namespace RfidTool
         const int COLUMN_UID = 0;
         const int COLUMN_PII = 1;
         const int COLUMN_TOU = 2;
-        const int COLUMN_OI = 3;
-        const int COLUMN_AOI = 4;
-        const int COLUMN_ANTENNA = 5;
-        const int COLUMN_READERNAME = 6;
+        const int COLUMN_EAS = 3;
+        const int COLUMN_OI = 4;
+        const int COLUMN_AOI = 5;
+        const int COLUMN_ANTENNA = 6;
+        const int COLUMN_READERNAME = 7;
+
+        object _syncRootFill = new object();
 
         // TODO: 注意和 DataModel_TagChanged() 处理互斥
         void FillAllTags()
         {
-            this.listView_tags.Items.Clear();
-            foreach (var tag in DataModel.TagList.Tags)
+            lock (_syncRootFill)
             {
-                if (tag.OneTag.Protocol == InventoryInfo.ISO14443A)
-                    continue;
+                this.listView_tags.Items.Clear();
+                foreach (var tag in DataModel.TagList.Tags)
+                {
+                    if (tag.OneTag.Protocol == InventoryInfo.ISO14443A)
+                        continue;
 
-                ListViewItem item = new ListViewItem();
-                item.Tag = new ItemInfo { TagData = tag };
-                this.listView_tags.Items.Add(item);
-                RefreshItem(item, tag);
+                    ListViewItem item = new ListViewItem();
+                    item.Tag = new ItemInfo { TagData = tag };
+                    this.listView_tags.Items.Add(item);
+                    RefreshItem(item, tag);
+                }
             }
         }
 
@@ -198,6 +218,7 @@ namespace RfidTool
         {
             string pii = "";
             string tou = "";
+            string eas = "";
             string oi = "";
             string aoi = "";
 
@@ -215,6 +236,7 @@ namespace RfidTool
     "");
                 pii = chip.FindElement(ElementOID.PII)?.Text;
                 tou = chip.FindElement(ElementOID.TypeOfUsage)?.Text;
+                eas = taginfo.EAS ? "On" : "Off";
                 oi = chip.FindElement(ElementOID.OI)?.Text;
                 aoi = chip.FindElement(ElementOID.AOI)?.Text;
             }
@@ -222,6 +244,7 @@ namespace RfidTool
 
             ListViewUtil.ChangeItemText(item, COLUMN_PII, pii);
             ListViewUtil.ChangeItemText(item, COLUMN_TOU, tou);
+            ListViewUtil.ChangeItemText(item, COLUMN_EAS, eas);
             ListViewUtil.ChangeItemText(item, COLUMN_OI, oi);
             ListViewUtil.ChangeItemText(item, COLUMN_AOI, aoi);
         }
@@ -436,9 +459,11 @@ namespace RfidTool
             ContextMenu contextMenu = new ContextMenu();
             MenuItem menuItem = null;
 
+            /*
             menuItem = new MenuItem("全选(&A)");
             menuItem.Click += new System.EventHandler(this.menu_selectAll_Click);
             contextMenu.MenuItems.Add(menuItem);
+            */
 
             /*
             // ---
@@ -508,16 +533,24 @@ namespace RfidTool
             TagList.ClearTagTable(null);
         }
 
+#if REMOVED
         void menu_selectAll_Click(object sender, EventArgs e)
         {
             ListViewUtil.SelectAllItems(this.listView_tags);
+            /*
+            foreach(ListViewItem item in this.listView_tags.Items)
+            {
+                item.Selected = true;
+            }
+            */
         }
+#endif
 
         void menu_clearSelectedTagContent_Click(object sender, EventArgs e)
         {
             DialogResult result = MessageBox.Show(this,
     $"确实要清除选定的 {this.listView_tags.SelectedItems.Count} 个标签的内容?",
-    "RfidToolForm",
+    "RfidTool",
     MessageBoxButtons.YesNo,
     MessageBoxIcon.Question,
     MessageBoxDefaultButton.Button2);

@@ -262,6 +262,9 @@ namespace DigitalPlatform.GUI
         /// <param name="list">The listview whose items are to be selected</param>
         public static void SelectAllItems(ListView list)
         {
+            // 2020/12/10
+            if (list.MultiSelect == false)
+                throw new ArgumentException("ListView.MultiSelect 为 false，不支持 SelectAllItems()");
             SetItemState(list, -1, 2, 2);
         }
 
