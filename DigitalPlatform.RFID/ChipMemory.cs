@@ -38,10 +38,18 @@ namespace DigitalPlatform.RFID
     /// </summary>
     public class LogicChip
     {
+        // 默认的 GB 35660 DSFID 值
+        public static byte DefaultDSFID = 0x06;
+
         // 默认的图书 AFI 值。归架状态
         public static byte DefaultBookAFI = 0x07;
         // 默认的读者 AFI 值。“借出”状态
         public static byte DefaultPatronAFI = 0xC2;
+
+        // 默认的图书 EAS 值。归架状态
+        public static bool DefaultBookEAS = true;
+        // 默认的读者 EAS 值。Disabled
+        public static bool DefaultPatronEAS = false;
 
         // 是否为“新创建”状态？
         // 这种状态，表明数据只在内存，还没有写入芯片

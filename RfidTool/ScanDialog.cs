@@ -460,7 +460,7 @@ namespace RfidTool
                 out string block_map);
             new_tag_info.LockStatus = block_map;
 
-            new_tag_info.DSFID = 0x06;  // 图书
+            new_tag_info.DSFID = LogicChip.DefaultDSFID;  // 图书
 
             // 上架状态
             /*
