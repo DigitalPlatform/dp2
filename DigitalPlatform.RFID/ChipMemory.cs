@@ -38,6 +38,11 @@ namespace DigitalPlatform.RFID
     /// </summary>
     public class LogicChip
     {
+        // 默认的图书 AFI 值。归架状态
+        public static byte DefaultBookAFI = 0x07;
+        // 默认的读者 AFI 值。“借出”状态
+        public static byte DefaultPatronAFI = 0xC2;
+
         // 是否为“新创建”状态？
         // 这种状态，表明数据只在内存，还没有写入芯片
         bool _isNew = true;

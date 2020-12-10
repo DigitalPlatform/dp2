@@ -319,6 +319,21 @@ namespace RfidTool
             if (string.IsNullOrEmpty(barcode))
                 return;
 
+            string error = VerifyOiSetting();
+            if (error != null)
+            {
+                ClientInfo.Speak("O I (所属机构代码) 和 A O I (非标准所属机构代码) 尚未配置");
+                MessageBox.Show(this, error);
+                using (SettingDialog dlg = new SettingDialog())
+                {
+                    GuiUtil.SetControlFont(dlg, this.Font);
+                    ClientInfo.MemoryState(dlg, "settingDialog", "state");
+
+                    dlg.ShowDialog(this);
+                }
+                return;
+            }
+
             OneTag tag = null;
             if (selectedItem == null)
             {
@@ -359,7 +374,11 @@ namespace RfidTool
                 chip.SetElement(ElementOID.AOI, aoi);
             chip.SetElement(ElementOID.TypeOfUsage, tou);
 
-            TagInfo new_tag_info = GetTagInfo(tag.TagInfo, chip);
+            bool eas = false;
+            if (string.IsNullOrEmpty(this.TypeOfUsage) || this.TypeOfUsage == "10")
+                eas = true;
+
+            TagInfo new_tag_info = GetTagInfo(tag.TagInfo, chip, eas);
 
             var write_result = DataModel.WriteTagInfo(tag.ReaderName, tag.TagInfo,
                 new_tag_info);
@@ -381,6 +400,16 @@ namespace RfidTool
             ClientInfo.Speak($"{barcode} 写入成功");
             ShowMessage($"{barcode} 写入成功");
             ClearBarcode();
+        }
+
+        // 校验 OI 和 AOI 参数是否正确设置了
+        public static string VerifyOiSetting()
+        {
+            string oi = DataModel.DefaultOiString;
+            string aoi = DataModel.DefaultAoiString;
+            if (string.IsNullOrEmpty(oi) && string.IsNullOrEmpty(aoi))
+                return "OI(所属机构代码) 和 AOI(非标准所属机构代码) 尚未配置";
+            return null;
         }
 
         // 正在处理的条码号
@@ -420,7 +449,8 @@ namespace RfidTool
         }
 
         public static TagInfo GetTagInfo(TagInfo existing,
-    LogicChip chip)
+    LogicChip chip,
+    bool eas)
         {
             TagInfo new_tag_info = existing.Clone();
             new_tag_info.Bytes = chip.GetBytes(
@@ -433,8 +463,19 @@ namespace RfidTool
             new_tag_info.DSFID = 0x06;  // 图书
 
             // 上架状态
-            new_tag_info.AFI = 0x07;
-            new_tag_info.EAS = true;
+            /*
+            if (eas == true)
+            {
+                new_tag_info.AFI = 0x07;
+                new_tag_info.EAS = true;
+            }
+            else
+            {
+                new_tag_info.AFI = 0xc2;
+                new_tag_info.EAS = false;
+            }
+            */
+            new_tag_info.SetEas(eas);
 
             return new_tag_info;
         }

@@ -264,6 +264,20 @@ uint new_password);
             Array.Copy(source, result, source.Length);
             return result;
         }
+
+        public void SetEas(bool enable)
+        {
+            if (enable == true)
+            {
+                this.AFI = 0x07;
+                this.EAS = true;
+            }
+            else
+            {
+                this.AFI = 0xc2;
+                this.EAS = false;
+            }
+        }
     }
 
     [Serializable()]
