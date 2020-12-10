@@ -73,10 +73,6 @@ namespace DigitalPlatform.RFID.UI
             }
         }
 
-        // 默认的图书 AFI 值。归架状态
-        public static byte DefaultBookAFI = 0x07;
-        // 默认的读者 AFI 值。“借出”状态
-        public static byte DefaultPatronAFI = 0xC2;
 
         byte _dsfid = 0;
         [DisplayName("DSFID"), Description("DSFID")]
