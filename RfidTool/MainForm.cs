@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -14,6 +15,7 @@ using DigitalPlatform.CommonControl;
 using DigitalPlatform.Core;
 using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.GUI;
+using DigitalPlatform.IO;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
 
@@ -24,6 +26,10 @@ namespace RfidTool
         ScanDialog _scanDialog = null;
 
         ErrorTable _errorTable = null;
+
+        CancellationTokenSource _cancel = new CancellationTokenSource();
+
+        bool _historyChanged = false;
 
         #region floating message
 
@@ -131,18 +137,84 @@ bool bClickClose = false)
                     bool error = _errorTable.GetError("error") != null || _errorTable.GetError("error_initial") != null;
                     if (string.IsNullOrEmpty(s) == false)
                     {
-                        if (error)
-                            this._showMessage(s.Replace(";", "\r\n"), "red", true);
-                        else
-                            this._showMessage(s.Replace(";", "\r\n"));
+                        string text = s.Replace(";", "\r\n");
+                        if (text != this._floatingMessage.Text)
+                        {
+                            if (error)
+                                this._showMessage(text, "red", true);
+                            else
+                                this._showMessage(text);
+                        }
                     }
                     else
                         this._clearMessage();
                 }));
             });
 
+            UsbInfo.StartWatch((add_count, remove_count) =>
+            {
+                // this.OutputHistory($"add_count:{add_count}, remove_count:{remove_count}", 1);
+                string type = "disconnected";
+                if (add_count > 0)
+                    type = "connected";
+
+                BeginRefreshReaders(type, new CancellationToken());
+            },
+_cancel.Token);
         }
 
+        int _refreshCount = 0;
+        const int _delaySeconds = 5;
+        Task _refreshTask = null;
+
+        public void BeginRefreshReaders(string action,
+            CancellationToken token)
+        {
+            if (_refreshTask != null)
+            {
+                if (action == "disconnected")
+                {
+                    if (_refreshCount < 1)
+                        _refreshCount++;
+                }
+                else
+                    _refreshCount++;
+                return;
+            }
+
+            // _refreshCount = 2;
+            _refreshTask = Task.Run(() =>
+            {
+                try
+                {
+                    while (_refreshCount-- >= 0)
+                    {
+                        Task.Delay(TimeSpan.FromSeconds(_delaySeconds)).Wait(token);
+                        if (token.IsCancellationRequested)
+                            break;
+                        // 迫使重新启动
+                        BeginConnectReader("正在重新连接读卡器 ...", false);
+
+                        if (token.IsCancellationRequested)
+                            break;
+
+                        break;
+                        /*
+                        // 如果初始化没有成功，则要追加初始化
+                        if (this.ErrorState == "normal")
+                            break;
+                        */
+                    }
+                    _refreshTask = null;
+                    _refreshCount = 0;
+                }
+                catch
+                {
+                    _refreshTask = null;
+                    _refreshCount = 0;
+                }
+            });
+        }
 
         private void DataModel_SetError(object sender, SetErrorEventArgs e)
         {
@@ -169,6 +241,7 @@ bool bClickClose = false)
             this.Invoke((Action)(() =>
             {
                 AppendItem(e.Chip, e.TagInfo);
+                _historyChanged = true;
             }));
         }
 
@@ -184,28 +257,28 @@ bool bClickClose = false)
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            var ret = ClientInfo.Initial("TestShelfLock");
+            var ret = ClientInfo.Initial("rfidtool");
             if (ret == false)
             {
                 Application.Exit();
                 return;
             }
 
+            Storeage.Initialize();
+
             LoadSettings();
 
-            /*
-            this.ShowMessage("正在连接 RFID 读写器");
+            BeginConnectReader("正在连接 RFID 读写器 ...");
+
             _ = Task.Run(() =>
             {
-                DataModel.InitialDriver();
-                this.ClearMessage();
+                LoadHistory();
             });
-            */
-            BeginConnectReader("正在连接 RFID 读写器 ...");
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
+            _cancel?.Cancel();
 
             {
                 if (_scanDialog != null)
@@ -223,7 +296,13 @@ bool bClickClose = false)
 
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
+            _cancel?.Dispose();
+
             SaveSettings();
+
+            if (_historyChanged)
+                SaveHistory();
+            Storeage.Finish();
         }
 
         void LoadSettings()
@@ -407,54 +486,81 @@ bool bClickClose = false)
             BeginConnectReader("正在重新连接 RFID 读写器 ...");
         }
 
+        Task _taskConnect = null;
+
         // 连接读写器
         void BeginConnectReader(string message,
             bool reset_hint_table = false)
         {
-            _ = Task.Run(() =>
+            // 避免重入
+            if (_taskConnect != null)
+                return;
+
+            _taskConnect = Task.Run(() =>
             {
-            REDO:
-                this.ShowErrorMessage("error_initial", null);
-                this.ShowMessage(message);
-                DataModel.ReleaseDriver();
-                var result = DataModel.InitialDriver(reset_hint_table);
-
-                /*
-                // testing
-                result.Value = -1;
-                result.ErrorInfo = "test";
-                */
-
-                if (result.Value == -1)
+                try
                 {
-                    bool check = false;
-                    var dlg_result = (DialogResult)this.Invoke((Func<DialogResult>)(() =>
-                    {
-                        return MessageDlg.Show(this,
-                            $"连接读写器失败: {result.ErrorInfo}。\r\n\r\n是否重新探测?",
-                            "连接读写器",
-                            MessageBoxButtons.YesNoCancel,
-                            MessageBoxDefaultButton.Button1,
-                            ref check,
-                            new string[] { "重新探测", "重试连接", "取消" });
-                    }));
-
-                    if (dlg_result == DialogResult.Yes)
-                    {
-                        reset_hint_table = true;
-                        goto REDO;
-                    }
-                    if (dlg_result == DialogResult.No)
-                    {
-                        reset_hint_table = false;
-                        goto REDO;
-                    }
-                    this.ShowErrorMessage("error_initial", $"连接读写器失败: {result.ErrorInfo}");
-                }
-                else
-                {
-                    this.ShowMessage(null);
+                REDO:
                     this.ShowErrorMessage("error_initial", null);
+                    this.ShowMessage(message);
+                    DataModel.ReleaseDriver();
+                    var result = DataModel.InitialDriver(reset_hint_table);
+
+                    /*
+                    // testing
+                    result.Value = -1;
+                    result.ErrorInfo = "test";
+                    */
+
+                    if (result.Value == -1)
+                    {
+                        bool check = false;
+                        var dlg_result = (DialogResult)this.Invoke((Func<DialogResult>)(() =>
+                        {
+                            return MessageDlg.Show(this,
+                                $"连接读写器失败: {result.ErrorInfo}。\r\n\r\n是否重新探测?",
+                                "连接读写器",
+                                MessageBoxButtons.YesNoCancel,
+                                MessageBoxDefaultButton.Button1,
+                                ref check,
+                                new string[] { "重新探测", "重试连接", "取消" });
+                        }));
+
+                        if (dlg_result == DialogResult.Yes)
+                        {
+                            reset_hint_table = true;
+                            goto REDO;
+                        }
+                        if (dlg_result == DialogResult.No)
+                        {
+                            reset_hint_table = false;
+                            goto REDO;
+                        }
+                        this.ShowErrorMessage("error_initial", $"连接读写器失败: {result.ErrorInfo}");
+                    }
+                    else
+                    {
+                        this.ShowMessage(null);
+
+                        var count = DataModel.GetReadNameList().Count;
+                        this.Invoke((Action)(() =>
+                        {
+                            this.StatusReaderCount = $"读写器: {count}";
+                        }));
+
+                        if (count == 0)
+                        {
+                            this.ShowErrorMessage("error_initial", $"当前没有连接任何读卡器");
+                        }
+                        else
+                        {
+                            this.ShowErrorMessage("error_initial", null);
+                        }
+                    }
+                }
+                finally
+                {
+                    _taskConnect = null;
                 }
             });
         }
@@ -483,6 +589,73 @@ bool bClickClose = false)
             {
                 this.toolStripStatusLabel_message.Text = value;
             }
+        }
+
+        // 状态行中读写器数量显示
+        public string StatusReaderCount
+        {
+            get
+            {
+                return this.toolStripStatusLabel_readerCount.Text;
+            }
+            set
+            {
+                this.toolStripStatusLabel_readerCount.Text = value;
+            }
+        }
+
+        void LoadHistory()
+        {
+            var items = Storeage.LoadItems();
+            this.Invoke((Action)(() =>
+            {
+                foreach (var history in items)
+                {
+                    ListViewItem item = new ListViewItem();
+                    this.listView_writeHistory.Items.Add(item);
+                    item.EnsureVisible();
+                    ListViewUtil.ChangeItemText(item, COLUMN_UID, history.UID);
+                    ListViewUtil.ChangeItemText(item, COLUMN_PII, history.PII);
+                    ListViewUtil.ChangeItemText(item, COLUMN_TOU, history.TOU);
+                    ListViewUtil.ChangeItemText(item, COLUMN_OI, history.OI);
+                    ListViewUtil.ChangeItemText(item, COLUMN_AOI, history.AOI);
+                    ListViewUtil.ChangeItemText(item, COLUMN_WRITETIME, history.WriteTime);
+                }
+            }));
+        }
+
+        void SaveHistory()
+        {
+            List<HistoryItem> items = new List<HistoryItem>();
+            int i = 0;
+            foreach (ListViewItem item in this.listView_writeHistory.Items)
+            {
+                HistoryItem history = new HistoryItem();
+                history.Id = i + 1;
+                history.UID = ListViewUtil.GetItemText(item, COLUMN_UID);
+                history.PII = ListViewUtil.GetItemText(item, COLUMN_PII);
+                history.TOU = ListViewUtil.GetItemText(item, COLUMN_TOU);
+                history.OI = ListViewUtil.GetItemText(item, COLUMN_OI);
+                history.AOI = ListViewUtil.GetItemText(item, COLUMN_AOI);
+                history.WriteTime = ListViewUtil.GetItemText(item, COLUMN_WRITETIME);
+                items.Add(history);
+            }
+
+            Storeage.SaveItems(items);
+        }
+
+        private void MenuItem_clearAllHistory_Click(object sender, EventArgs e)
+        {
+            DialogResult result = MessageBox.Show(this,
+$"确实要清除全部 {this.listView_writeHistory.Items.Count} 个历史事项?",
+"RfidTool",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+            if (result != DialogResult.Yes)
+                return;
+            this.listView_writeHistory.Items.Clear();
+            _historyChanged = true;
         }
     }
 

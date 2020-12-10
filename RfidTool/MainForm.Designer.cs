@@ -39,12 +39,16 @@ namespace RfidTool
             this.MenuItem_saveToExcelFile = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_settings = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_reconnectReader = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_resetConnectReader = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_exit = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_help = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_about = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
+            this.toolStripStatusLabel_message = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripStatusLabel_readerCount = new System.Windows.Forms.ToolStripStatusLabel();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage_writeTag = new System.Windows.Forms.TabPage();
             this.listView_writeHistory = new System.Windows.Forms.ListView();
@@ -54,9 +58,7 @@ namespace RfidTool
             this.columnHeader_oi = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_aoi = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_writeTime = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.MenuItem_reconnectReader = new System.Windows.Forms.ToolStripMenuItem();
-            this.MenuItem_resetConnectReader = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripStatusLabel_message = new System.Windows.Forms.ToolStripStatusLabel();
+            this.MenuItem_clearAllHistory = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
@@ -73,7 +75,7 @@ namespace RfidTool
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Padding = new System.Windows.Forms.Padding(6, 3, 0, 3);
-            this.menuStrip1.Size = new System.Drawing.Size(1018, 38);
+            this.menuStrip1.Size = new System.Drawing.Size(1018, 39);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -85,6 +87,7 @@ namespace RfidTool
             this.MenuItem_writePatronTags,
             this.toolStripSeparator3,
             this.MenuItem_saveToExcelFile,
+            this.MenuItem_clearAllHistory,
             this.toolStripSeparator1,
             this.MenuItem_settings,
             this.MenuItem_reconnectReader,
@@ -92,7 +95,7 @@ namespace RfidTool
             this.toolStripSeparator2,
             this.MenuItem_exit});
             this.MenuItem_file.Name = "MenuItem_file";
-            this.MenuItem_file.Size = new System.Drawing.Size(97, 32);
+            this.MenuItem_file.Size = new System.Drawing.Size(97, 33);
             this.MenuItem_file.Text = "文件(&F)";
             // 
             // MenuItem_writeBookTags
@@ -140,6 +143,20 @@ namespace RfidTool
             this.MenuItem_settings.Text = "设置(&S) ...";
             this.MenuItem_settings.Click += new System.EventHandler(this.MenuItem_settings_Click);
             // 
+            // MenuItem_reconnectReader
+            // 
+            this.MenuItem_reconnectReader.Name = "MenuItem_reconnectReader";
+            this.MenuItem_reconnectReader.Size = new System.Drawing.Size(387, 40);
+            this.MenuItem_reconnectReader.Text = "重新连接读写器";
+            this.MenuItem_reconnectReader.Click += new System.EventHandler(this.MenuItem_reconnectReader_Click);
+            // 
+            // MenuItem_resetConnectReader
+            // 
+            this.MenuItem_resetConnectReader.Name = "MenuItem_resetConnectReader";
+            this.MenuItem_resetConnectReader.Size = new System.Drawing.Size(387, 40);
+            this.MenuItem_resetConnectReader.Text = "重新探测读写器";
+            this.MenuItem_resetConnectReader.Click += new System.EventHandler(this.MenuItem_resetConnectReader_Click);
+            // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
@@ -157,7 +174,7 @@ namespace RfidTool
             this.MenuItem_help.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.MenuItem_about});
             this.MenuItem_help.Name = "MenuItem_help";
-            this.MenuItem_help.Size = new System.Drawing.Size(102, 32);
+            this.MenuItem_help.Size = new System.Drawing.Size(102, 33);
             this.MenuItem_help.Text = "帮助(&H)";
             // 
             // MenuItem_about
@@ -170,7 +187,7 @@ namespace RfidTool
             // toolStrip1
             // 
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(28, 28);
-            this.toolStrip1.Location = new System.Drawing.Point(0, 38);
+            this.toolStrip1.Location = new System.Drawing.Point(0, 39);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(1018, 25);
             this.toolStrip1.TabIndex = 1;
@@ -180,22 +197,36 @@ namespace RfidTool
             // 
             this.statusStrip1.ImageScalingSize = new System.Drawing.Size(28, 28);
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripStatusLabel_message});
+            this.toolStripStatusLabel_message,
+            this.toolStripStatusLabel_readerCount});
             this.statusStrip1.Location = new System.Drawing.Point(0, 557);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Size = new System.Drawing.Size(1018, 37);
             this.statusStrip1.TabIndex = 2;
             this.statusStrip1.Text = "statusStrip1";
             // 
+            // toolStripStatusLabel_message
+            // 
+            this.toolStripStatusLabel_message.Name = "toolStripStatusLabel_message";
+            this.toolStripStatusLabel_message.Size = new System.Drawing.Size(986, 28);
+            this.toolStripStatusLabel_message.Spring = true;
+            this.toolStripStatusLabel_message.Text = "...";
+            // 
+            // toolStripStatusLabel_readerCount
+            // 
+            this.toolStripStatusLabel_readerCount.Name = "toolStripStatusLabel_readerCount";
+            this.toolStripStatusLabel_readerCount.Size = new System.Drawing.Size(17, 28);
+            this.toolStripStatusLabel_readerCount.Text = ".";
+            // 
             // tabControl1
             // 
             this.tabControl1.Controls.Add(this.tabPage_writeTag);
             this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tabControl1.Location = new System.Drawing.Point(0, 63);
+            this.tabControl1.Location = new System.Drawing.Point(0, 64);
             this.tabControl1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(1018, 494);
+            this.tabControl1.Size = new System.Drawing.Size(1018, 493);
             this.tabControl1.TabIndex = 3;
             // 
             // tabPage_writeTag
@@ -205,9 +236,9 @@ namespace RfidTool
             this.tabPage_writeTag.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabPage_writeTag.Name = "tabPage_writeTag";
             this.tabPage_writeTag.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.tabPage_writeTag.Size = new System.Drawing.Size(1010, 453);
+            this.tabPage_writeTag.Size = new System.Drawing.Size(1010, 452);
             this.tabPage_writeTag.TabIndex = 0;
-            this.tabPage_writeTag.Text = "写入标签";
+            this.tabPage_writeTag.Text = "写入历史";
             this.tabPage_writeTag.UseVisualStyleBackColor = true;
             // 
             // listView_writeHistory
@@ -226,7 +257,7 @@ namespace RfidTool
             this.listView_writeHistory.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.listView_writeHistory.MultiSelect = false;
             this.listView_writeHistory.Name = "listView_writeHistory";
-            this.listView_writeHistory.Size = new System.Drawing.Size(1002, 447);
+            this.listView_writeHistory.Size = new System.Drawing.Size(1002, 446);
             this.listView_writeHistory.TabIndex = 0;
             this.listView_writeHistory.UseCompatibleStateImageBehavior = false;
             this.listView_writeHistory.View = System.Windows.Forms.View.Details;
@@ -265,25 +296,12 @@ namespace RfidTool
             this.columnHeader_writeTime.Text = "写入时间";
             this.columnHeader_writeTime.Width = 260;
             // 
-            // MenuItem_reconnectReader
+            // MenuItem_clearAllHistory
             // 
-            this.MenuItem_reconnectReader.Name = "MenuItem_reconnectReader";
-            this.MenuItem_reconnectReader.Size = new System.Drawing.Size(387, 40);
-            this.MenuItem_reconnectReader.Text = "重新连接读写器";
-            this.MenuItem_reconnectReader.Click += new System.EventHandler(this.MenuItem_reconnectReader_Click);
-            // 
-            // MenuItem_resetConnectReader
-            // 
-            this.MenuItem_resetConnectReader.Name = "MenuItem_resetConnectReader";
-            this.MenuItem_resetConnectReader.Size = new System.Drawing.Size(387, 40);
-            this.MenuItem_resetConnectReader.Text = "重新探测读写器";
-            this.MenuItem_resetConnectReader.Click += new System.EventHandler(this.MenuItem_resetConnectReader_Click);
-            // 
-            // toolStripStatusLabel_message
-            // 
-            this.toolStripStatusLabel_message.Name = "toolStripStatusLabel_message";
-            this.toolStripStatusLabel_message.Size = new System.Drawing.Size(27, 28);
-            this.toolStripStatusLabel_message.Text = "...";
+            this.MenuItem_clearAllHistory.Name = "MenuItem_clearAllHistory";
+            this.MenuItem_clearAllHistory.Size = new System.Drawing.Size(387, 40);
+            this.MenuItem_clearAllHistory.Text = "清除“写入历史”列表(&C)";
+            this.MenuItem_clearAllHistory.Click += new System.EventHandler(this.MenuItem_clearAllHistory_Click);
             // 
             // MainForm
             // 
@@ -343,6 +361,8 @@ namespace RfidTool
         private System.Windows.Forms.ToolStripMenuItem MenuItem_reconnectReader;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_resetConnectReader;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel_message;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel_readerCount;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_clearAllHistory;
     }
 }
 
