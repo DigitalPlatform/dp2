@@ -37,6 +37,7 @@ namespace RfidTool
             this.label1 = new System.Windows.Forms.Label();
             this.button_OK = new System.Windows.Forms.Button();
             this.button_Cancel = new System.Windows.Forms.Button();
+            this.linkLabel_oiHelp = new System.Windows.Forms.LinkLabel();
             this.tabControl1.SuspendLayout();
             this.tabPage_rfid.SuspendLayout();
             this.SuspendLayout();
@@ -56,6 +57,7 @@ namespace RfidTool
             // 
             // tabPage_rfid
             // 
+            this.tabPage_rfid.Controls.Add(this.linkLabel_oiHelp);
             this.tabPage_rfid.Controls.Add(this.textBox_rfid_aoi);
             this.tabPage_rfid.Controls.Add(this.label2);
             this.tabPage_rfid.Controls.Add(this.textBox_rfid_oi);
@@ -127,10 +129,23 @@ namespace RfidTool
             this.button_Cancel.UseVisualStyleBackColor = true;
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
+            // linkLabel_oiHelp
+            // 
+            this.linkLabel_oiHelp.AutoSize = true;
+            this.linkLabel_oiHelp.Location = new System.Drawing.Point(6, 140);
+            this.linkLabel_oiHelp.Name = "linkLabel_oiHelp";
+            this.linkLabel_oiHelp.Size = new System.Drawing.Size(262, 21);
+            this.linkLabel_oiHelp.TabIndex = 4;
+            this.linkLabel_oiHelp.TabStop = true;
+            this.linkLabel_oiHelp.Text = "帮助：如何设置机构代码？";
+            this.linkLabel_oiHelp.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel_oiHelp_LinkClicked);
+            // 
             // SettingDialog
             // 
+            this.AcceptButton = this.button_OK;
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.CancelButton = this.button_Cancel;
             this.ClientSize = new System.Drawing.Size(740, 469);
             this.Controls.Add(this.button_Cancel);
             this.Controls.Add(this.button_OK);
@@ -160,5 +175,6 @@ namespace RfidTool
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox textBox_rfid_aoi;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.LinkLabel linkLabel_oiHelp;
     }
 }

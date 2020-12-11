@@ -37,6 +37,7 @@ namespace RfidTool
             this.MenuItem_writePatronTags = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_saveToExcelFile = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_clearAllHistory = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_settings = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_reconnectReader = new System.Windows.Forms.ToolStripMenuItem();
@@ -44,6 +45,7 @@ namespace RfidTool
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_exit = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_help = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_userManual = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_about = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
@@ -58,7 +60,6 @@ namespace RfidTool
             this.columnHeader_oi = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_aoi = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_writeTime = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.MenuItem_clearAllHistory = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
@@ -131,6 +132,13 @@ namespace RfidTool
             this.MenuItem_saveToExcelFile.Text = "保存列表到 Excel 文件(&S) ...";
             this.MenuItem_saveToExcelFile.Click += new System.EventHandler(this.MenuItem_saveToExcelFile_Click);
             // 
+            // MenuItem_clearAllHistory
+            // 
+            this.MenuItem_clearAllHistory.Name = "MenuItem_clearAllHistory";
+            this.MenuItem_clearAllHistory.Size = new System.Drawing.Size(387, 40);
+            this.MenuItem_clearAllHistory.Text = "清除“写入历史”列表(&C)";
+            this.MenuItem_clearAllHistory.Click += new System.EventHandler(this.MenuItem_clearAllHistory_Click);
+            // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
@@ -172,15 +180,23 @@ namespace RfidTool
             // MenuItem_help
             // 
             this.MenuItem_help.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.MenuItem_userManual,
             this.MenuItem_about});
             this.MenuItem_help.Name = "MenuItem_help";
             this.MenuItem_help.Size = new System.Drawing.Size(102, 33);
             this.MenuItem_help.Text = "帮助(&H)";
             // 
+            // MenuItem_userManual
+            // 
+            this.MenuItem_userManual.Name = "MenuItem_userManual";
+            this.MenuItem_userManual.Size = new System.Drawing.Size(354, 40);
+            this.MenuItem_userManual.Text = "RfidTool 使用指南(&U) ...";
+            this.MenuItem_userManual.Click += new System.EventHandler(this.MenuItem_userManual_Click);
+            // 
             // MenuItem_about
             // 
             this.MenuItem_about.Name = "MenuItem_about";
-            this.MenuItem_about.Size = new System.Drawing.Size(315, 40);
+            this.MenuItem_about.Size = new System.Drawing.Size(354, 40);
             this.MenuItem_about.Text = "关于(&A)...";
             this.MenuItem_about.Click += new System.EventHandler(this.MenuItem_about_Click);
             // 
@@ -296,13 +312,6 @@ namespace RfidTool
             this.columnHeader_writeTime.Text = "写入时间";
             this.columnHeader_writeTime.Width = 260;
             // 
-            // MenuItem_clearAllHistory
-            // 
-            this.MenuItem_clearAllHistory.Name = "MenuItem_clearAllHistory";
-            this.MenuItem_clearAllHistory.Size = new System.Drawing.Size(387, 40);
-            this.MenuItem_clearAllHistory.Text = "清除“写入历史”列表(&C)";
-            this.MenuItem_clearAllHistory.Click += new System.EventHandler(this.MenuItem_clearAllHistory_Click);
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(13F, 28F);
@@ -363,6 +372,7 @@ namespace RfidTool
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel_message;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel_readerCount;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_clearAllHistory;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_userManual;
     }
 }
 

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -656,6 +657,13 @@ MessageBoxDefaultButton.Button2);
                 return;
             this.listView_writeHistory.Items.Clear();
             _historyChanged = true;
+        }
+
+        private void MenuItem_userManual_Click(object sender, EventArgs e)
+        {
+            string url = "https://github.com/DigitalPlatform/dp2/issues/764";
+
+            Process.Start(url);
         }
     }
 

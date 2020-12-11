@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -70,6 +71,13 @@ namespace RfidTool
         {
             this.DialogResult = DialogResult.Cancel;
             this.Close();
+        }
+
+        private void linkLabel_oiHelp_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            string url = "https://github.com/DigitalPlatform/dp2/issues/764#issuecomment-742960673";
+
+            Process.Start(url);
         }
     }
 }
