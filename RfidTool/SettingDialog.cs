@@ -48,12 +48,19 @@ namespace RfidTool
 
                 if (string.IsNullOrEmpty(this.textBox_rfid_oi.Text) == false)
                 {
+                    // 所属机构ISIL由拉丁字母、阿拉伯数字（0-9），分隔符（-/:)组成，总长度不超过16个字符。
                     if (DigitalPlatform.RFID.Compact.CheckIsil(this.textBox_rfid_oi.Text, false) == false)
                     {
                         strError = $"机构代码 '{this.textBox_rfid_oi.Text}' 中出现了非法字符";
                         goto ERROR1;
                     }
 
+                    // 总长度不超过16个字符
+                    if (this.textBox_rfid_oi.Text.Length > 16)
+                    {
+                        strError = $"机构代码 '{this.textBox_rfid_oi.Text}' 不合法，因其字符数超过了 16 个({this.textBox_rfid_oi.Text.Length})";
+                        goto ERROR1;
+                    }
                 }
             }
 
