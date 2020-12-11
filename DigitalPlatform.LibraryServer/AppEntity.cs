@@ -147,9 +147,13 @@ namespace DigitalPlatform.LibraryServer
             return out_of;
         }
 
-        // TODO: 需要单元测试一下
         // 合并新旧记录的 currentLocation 元素内容
-        static int MergeCurrentLocation(XmlDocument domExist,
+        // 单元测试代码 -- TestDp2Library.TestMergeCurrentLocation 类
+        // return:
+        //      -1  出错
+        //      0   domNew 内容没有发生实质性修改
+        //      1   domNew 内容发生了修改
+        public static int MergeCurrentLocation(XmlDocument domExist,
             XmlDocument domNew,
             out string strError)
         {
