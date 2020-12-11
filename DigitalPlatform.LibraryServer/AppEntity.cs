@@ -147,6 +147,60 @@ namespace DigitalPlatform.LibraryServer
             return out_of;
         }
 
+        // TODO: 需要单元测试一下
+        // 合并新旧记录的 currentLocation 元素内容
+        static int MergeCurrentLocation(XmlDocument domExist,
+            XmlDocument domNew,
+            out string strError)
+        {
+            strError = "";
+
+            string oldValue = DomUtil.GetElementText(domExist.DocumentElement, "currentLocation");
+            string newValue = DomUtil.GetElementText(domNew.DocumentElement, "currentLocation");
+
+            // 没有改变过
+            if (oldValue == newValue)
+                return 0;
+
+            // 若新值不包含 '*' 字符
+            if (newValue == null && newValue.Contains("*") == false)
+                return 0;
+
+            var parts = StringUtil.ParseTwoPart(newValue, ":");
+            string new_left = parts[0];
+            string new_right = parts[1];
+
+            parts = StringUtil.ParseTwoPart(oldValue, ":");
+            string old_left = parts[0];
+            string old_right = parts[1];
+
+            bool changed = false;
+            if (new_left == "*")
+            {
+                new_left = old_left;
+                changed = true;
+            }
+            if (new_right == "*")
+            {
+                new_right = old_right;
+                changed = true;
+            }
+
+            // 没有发生替换
+            if (changed == false)
+                return 0;
+
+            // 合成
+            if (string.IsNullOrEmpty(new_right))
+                newValue = new_left;
+            else
+                newValue = new_left + ":" + new_right;
+            DomUtil.SetElementText(domNew.DocumentElement,
+                "currentLocation",
+                newValue);
+            return 1;
+        }
+
         // <DoEntityOperChange()的下级函数>
         // 合并新旧记录
         // parameters:
@@ -5121,6 +5175,14 @@ out strError);
 
                 // exist_timestamp此时已经反映了库中被修改后的记录的时间戳
             }
+
+            // 2020/12/11
+            // 检查 currentLocation 元素内容是否为 *:xxx 或者 xxx:* 形态
+            nRet = MergeCurrentLocation(domExist,
+    domNew,
+    out strError);
+            if (nRet == -1)
+                goto ERROR1;
 
             // 合并新旧记录
             string strNewXml = "";

@@ -33,10 +33,11 @@ using System.Runtime.InteropServices;
 //通过使用 "*"，如下所示:
 // [assembly: AssemblyVersion("1.0.*")]
 
-[assembly: AssemblyVersion("1.0.2")]
+[assembly: AssemblyVersion("1.0.3")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
 
 // 1.0.1 (2020/12/10) 增加保存“写入历史”列表功能; 感知 USB 插拔、自动重新连接读写器;
 //                      读写器连接成功后，会在状态行显示可用读卡器数量;
 //                      ScanDialog 中 TagChanged 事件不再和对话框显示、隐藏挂钩，改为一直挂接
-// 1.0.2 (2020/12/10) 写入层架标和读者卡时 EAS 为 Off                     
+// 1.0.2 (2020/12/10) 写入层架标和读者卡时 EAS 为 Off   
+// 1.0.3 (2020/12/11) 弹出“OI 和 AOI 尚未配置” MessageBox 的时候暂时禁用条码处理模块，避免这时候放标签到读卡器上引起再次弹出 MessageBox

@@ -307,99 +307,116 @@ namespace RfidTool
             return new FindTagResult { Value = 0 };
         }
 
+        int _inProcessing = 0;
+
         // 寻找适当的 RFID 标签完成写入操作
         void ProcessBarcode(ListViewItem selectedItem)
         {
-            string barcode = "";
-            this.Invoke((Action)(() =>
+            _inProcessing++;
+            try
             {
-                barcode = this.ProcessingBarcode;
-            }));
-
-            if (string.IsNullOrEmpty(barcode))
-                return;
-
-            string error = VerifyOiSetting();
-            if (error != null)
-            {
-                ClientInfo.Speak("O I (所属机构代码) 和 A O I (非标准所属机构代码) 尚未配置");
-                MessageBox.Show(this, error);
-                using (SettingDialog dlg = new SettingDialog())
+                // 防止重入
+                if (_inProcessing > 1)
                 {
-                    GuiUtil.SetControlFont(dlg, this.Font);
-                    ClientInfo.MemoryState(dlg, "settingDialog", "state");
-
-                    dlg.ShowDialog(this);
-                }
-                return;
-            }
-
-            OneTag tag = null;
-            if (selectedItem == null)
-            {
-                var find_result = FindBlankTag(barcode);
-                if (find_result.Value == 0)
-                {
-                    ClientInfo.Speak($"请在读写器上放好空白标签，或双击选择其他可用标签");
-                    ShowMessage($"请在读写器上放好空白标签，或双击选择其他可用标签");
+                    Console.Beep();
                     return;
                 }
 
-                tag = find_result.Tag;
+                string barcode = "";
+                this.Invoke((Action)(() =>
+                {
+                    barcode = this.ProcessingBarcode;
+                }));
+
+                if (string.IsNullOrEmpty(barcode))
+                    return;
+
+                string error = VerifyOiSetting();
+                if (error != null)
+                {
+                    ClientInfo.Speak("O I (所属机构代码) 和 A O I (非标准所属机构代码) 尚未配置");
+                    MessageBox.Show(this, error);
+                    using (SettingDialog dlg = new SettingDialog())
+                    {
+                        GuiUtil.SetControlFont(dlg, this.Font);
+                        ClientInfo.MemoryState(dlg, "settingDialog", "state");
+
+                        dlg.ShowDialog(this);
+                    }
+                    return;
+                }
+
+                OneTag tag = null;
+                if (selectedItem == null)
+                {
+                    var find_result = FindBlankTag(barcode);
+                    if (find_result.Value == 0)
+                    {
+                        ClientInfo.Speak($"请在读写器上放好空白标签，或双击选择其他可用标签");
+                        ShowMessage($"请在读写器上放好空白标签，或双击选择其他可用标签");
+                        return;
+                    }
+
+                    tag = find_result.Tag;
+                }
+                else
+                {
+                    tag = (selectedItem.Tag as ItemInfo).TagData.OneTag;
+                }
+
+                string oi = DataModel.DefaultOiString;
+                string aoi = DataModel.DefaultAoiString;
+
+                if (string.IsNullOrEmpty(oi) && string.IsNullOrEmpty(aoi))
+                {
+                    ShowMessage($"警告: 尚未设置机构代码或非标准机构代码");
+                    // TODO: 弹出对话框警告一次。可以选择不再警告
+                }
+
+                var uid = tag.UID;
+                var tou = this.TypeOfUsage;
+                if (string.IsNullOrEmpty(tou))
+                    tou = "10"; // 默认图书
+
+                var chip = new LogicChip();
+                chip.SetElement(ElementOID.PII, barcode);
+                if (string.IsNullOrEmpty(oi) == false)
+                    chip.SetElement(ElementOID.OI, oi);
+                if (string.IsNullOrEmpty(aoi) == false)
+                    chip.SetElement(ElementOID.AOI, aoi);
+                chip.SetElement(ElementOID.TypeOfUsage, tou);
+
+                bool eas = false;
+                if (string.IsNullOrEmpty(this.TypeOfUsage) || this.TypeOfUsage == "10")
+                    eas = true;
+
+                TagInfo new_tag_info = GetTagInfo(tag.TagInfo, chip, eas);
+
+                var write_result = DataModel.WriteTagInfo(tag.ReaderName, tag.TagInfo,
+                    new_tag_info);
+
+                if (write_result.Value == -1)
+                {
+                    ShowMessage(write_result.ErrorInfo);
+                    ShowMessageBox(write_result.ErrorInfo);
+                    return;
+                }
+
+                WriteComplete?.Invoke(this, new WriteCompleteventArgs
+                {
+                    Chip = chip,
+                    TagInfo = new_tag_info
+                });
+
+                // 语音提示写入成功
+                ClientInfo.Speak($"{barcode} 写入成功");
+                ShowMessage($"{barcode} 写入成功");
+                ClearBarcode();
             }
-            else
+            finally
             {
-                tag = (selectedItem.Tag as ItemInfo).TagData.OneTag;
+                _inProcessing--;
             }
-
-            string oi = DataModel.DefaultOiString;
-            string aoi = DataModel.DefaultAoiString;
-
-            if (string.IsNullOrEmpty(oi) && string.IsNullOrEmpty(aoi))
-            {
-                ShowMessage($"警告: 尚未设置机构代码或非标准机构代码");
-                // TODO: 弹出对话框警告一次。可以选择不再警告
-            }
-
-            var uid = tag.UID;
-            var tou = this.TypeOfUsage;
-            if (string.IsNullOrEmpty(tou))
-                tou = "10"; // 默认图书
-
-            var chip = new LogicChip();
-            chip.SetElement(ElementOID.PII, barcode);
-            if (string.IsNullOrEmpty(oi) == false)
-                chip.SetElement(ElementOID.OI, oi);
-            if (string.IsNullOrEmpty(aoi) == false)
-                chip.SetElement(ElementOID.AOI, aoi);
-            chip.SetElement(ElementOID.TypeOfUsage, tou);
-
-            bool eas = false;
-            if (string.IsNullOrEmpty(this.TypeOfUsage) || this.TypeOfUsage == "10")
-                eas = true;
-
-            TagInfo new_tag_info = GetTagInfo(tag.TagInfo, chip, eas);
-
-            var write_result = DataModel.WriteTagInfo(tag.ReaderName, tag.TagInfo,
-                new_tag_info);
-
-            if (write_result.Value == -1)
-            {
-                ShowMessage(write_result.ErrorInfo);
-                ShowMessageBox(write_result.ErrorInfo);
-                return;
-            }
-
-            WriteComplete?.Invoke(this, new WriteCompleteventArgs
-            {
-                Chip = chip,
-                TagInfo = new_tag_info
-            });
-
-            // 语音提示写入成功
-            ClientInfo.Speak($"{barcode} 写入成功");
-            ShowMessage($"{barcode} 写入成功");
-            ClearBarcode();
         }
 
         // 校验 OI 和 AOI 参数是否正确设置了
