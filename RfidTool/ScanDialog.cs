@@ -226,27 +226,51 @@ namespace RfidTool
             ListViewUtil.ChangeItemText(item, COLUMN_ANTENNA, tag.OneTag.AntennaID.ToString());
             ListViewUtil.ChangeItemText(item, COLUMN_READERNAME, tag.OneTag.ReaderName);
 
-            var taginfo = tag.OneTag.TagInfo;
-            if (taginfo != null)
+            try
             {
-                // Exception:
-                //      可能会抛出异常 ArgumentException TagDataException
-                var chip = LogicChip.From(taginfo.Bytes,
-    (int)taginfo.BlockSize,
-    "");
-                pii = chip.FindElement(ElementOID.PII)?.Text;
-                tou = chip.FindElement(ElementOID.TypeOfUsage)?.Text;
-                eas = taginfo.EAS ? "On" : "Off";
-                oi = chip.FindElement(ElementOID.OI)?.Text;
-                aoi = chip.FindElement(ElementOID.AOI)?.Text;
+                var taginfo = tag.OneTag.TagInfo;
+                if (taginfo != null)
+                {
+                    LogicChip chip = null;
+
+                    if (taginfo.BlockSize == 0)
+                    {
+                        var parse_result = GaoxiaoUtility.ParseTag(
+            Element.FromHexString(taginfo.UID),
+            taginfo.Bytes);
+                        if (parse_result.Value == -1)
+                            throw new Exception(parse_result.ErrorInfo);
+                        chip = parse_result.LogicChip;
+                        taginfo.EAS = !parse_result.EpcInfo.Lending;
+                    }
+                    else
+                    {
+                        // Exception:
+                        //      可能会抛出异常 ArgumentException TagDataException
+                        chip = LogicChip.From(taginfo.Bytes,
+            (int)taginfo.BlockSize,
+            "");
+                    }
+
+                    pii = chip.FindElement(ElementOID.PII)?.Text;
+                    tou = chip.FindElement(ElementOID.TypeOfUsage)?.Text;
+                    eas = taginfo.EAS ? "On" : "Off";
+                    oi = chip.FindElement(ElementOID.OI)?.Text;
+                    aoi = chip.FindElement(ElementOID.AOI)?.Text;
+                }
+
+
+                ListViewUtil.ChangeItemText(item, COLUMN_PII, pii);
+                ListViewUtil.ChangeItemText(item, COLUMN_TOU, tou);
+                ListViewUtil.ChangeItemText(item, COLUMN_EAS, eas);
+                ListViewUtil.ChangeItemText(item, COLUMN_OI, oi);
+                ListViewUtil.ChangeItemText(item, COLUMN_AOI, aoi);
             }
-
-
-            ListViewUtil.ChangeItemText(item, COLUMN_PII, pii);
-            ListViewUtil.ChangeItemText(item, COLUMN_TOU, tou);
-            ListViewUtil.ChangeItemText(item, COLUMN_EAS, eas);
-            ListViewUtil.ChangeItemText(item, COLUMN_OI, oi);
-            ListViewUtil.ChangeItemText(item, COLUMN_AOI, aoi);
+            catch(Exception ex)
+            {
+                ListViewUtil.ChangeItemText(item, COLUMN_PII, "error:" + ex.Message);
+                SetItemColor(item, "error");
+            }
         }
 
         class FindTagResult : NormalResult

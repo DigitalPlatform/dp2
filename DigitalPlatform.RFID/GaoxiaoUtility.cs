@@ -663,7 +663,7 @@ namespace DigitalPlatform.RFID
 
 
         // 解码用户区元素
-        static string DecodeUserElementContent(int oid, byte [] data)
+        static string DecodeUserElementContent(int oid, byte[] data)
         {
             if (data.Length == 0)
                 return "";
@@ -704,7 +704,7 @@ namespace DigitalPlatform.RFID
                 first = Compact.ReverseBytes(first);
 
                 byte[] second = new byte[2];
-                Array.Copy(data, 2, second,0, 2);
+                Array.Copy(data, 2, second, 0, 2);
                 second = Compact.ReverseBytes(second);
 
                 var no = BitConverter.ToUInt16(first, 0).ToString();
@@ -787,6 +787,51 @@ namespace DigitalPlatform.RFID
         }
 
         #endregion
+
+        public class ParseGaoxiaoResult : NormalResult
+        {
+            // 逻辑标签内容
+            public LogicChip LogicChip { get; set; }
+            // EPC 信息
+            public GaoxiaoEpcInfo EpcInfo { get; set; }
+            // user bank 解析出的若干元素
+            public List<GaoxiaoUserElement> UserElements { get; set; }
+        }
+
+        // 解析标签信息。
+        // 根据 EPC 和 USR 两个 bank 的信息来进行解析
+        public static ParseGaoxiaoResult ParseTag(
+            byte[] epc_bank,
+            byte[] user_bank)
+        {
+            // 跳过 4 个 byte
+            List<byte> bytes = new List<byte>(epc_bank);
+            bytes.RemoveRange(0, 4);
+
+            var epc_info = DecodeGaoxiaoEpc(bytes.ToArray());
+            var elements = DecodeUserBank(user_bank);
+
+            var chip = new LogicChip();
+            chip.SetElement(ElementOID.PII, epc_info.PII);
+            foreach (var element in elements)
+            {
+                var oid = (ElementOID)element.OID;
+                if (oid == ElementOID.SetInformation)
+                {
+                    // TODO: 将 1/1 规范化为国标形态
+                    continue;
+                }
+                chip.SetElement(oid, element.Content);
+            }
+
+
+            return new ParseGaoxiaoResult
+            {
+                LogicChip = chip,
+                EpcInfo = epc_info,
+                UserElements = elements
+            };
+        }
     }
 
     public class GaoxiaoUserElement
