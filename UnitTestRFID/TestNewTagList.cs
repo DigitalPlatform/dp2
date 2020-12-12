@@ -36,7 +36,7 @@ namespace UnitTestRFID
             newTagList.Refresh(
                 "*",
                 tag_list,
-                (readerName, uid, antennaID) =>
+                (readerName, uid, antennaID, protocol) =>
                 {
                     // 获得标签内容
                     return new GetTagInfoResult { };
@@ -94,7 +94,7 @@ namespace UnitTestRFID
             newTagList.Refresh(
                 "*",
                 tag_list,
-                (readerName, uid, antennaID) =>
+                (readerName, uid, antennaID, protocol) =>
                 {
                     // 获得标签内容
                     return new GetTagInfoResult
@@ -164,7 +164,7 @@ namespace UnitTestRFID
             newTagList.Refresh(
                 "*",
                 tag_list,
-                (readerName, uid, antennaID) =>
+                (readerName, uid, antennaID, protocol) =>
                 {
                     // 获得标签内容
                     return new GetTagInfoResult
@@ -193,7 +193,7 @@ namespace UnitTestRFID
             newTagList.Refresh(
                 "*",
                 update_list,
-                (readerName, uid, antennaID) =>
+                (readerName, uid, antennaID, protocol) =>
                 {
                     // 获得标签内容
                     return new GetTagInfoResult
@@ -265,7 +265,7 @@ namespace UnitTestRFID
             newTagList.Refresh(
                 "M201",
                 tag_list,
-                (readerName, uid, antennaID) =>
+                (readerName, uid, antennaID, protocol) =>
                 {
                     // 获得标签内容
                     return new GetTagInfoResult
@@ -299,7 +299,7 @@ namespace UnitTestRFID
                 newTagList.Refresh(
                     "RL8600",
                     update_list,
-                    (readerName, uid, antennaID) =>
+                    (readerName, uid, antennaID, protocol) =>
                     {
                         // 获得标签内容
                         return new GetTagInfoResult
@@ -390,7 +390,7 @@ namespace UnitTestRFID
                 newTagList.Refresh(
                     "M201",
                     new List<OneTag>(),
-                    (readerName, uid, antennaID) =>
+                    (readerName, uid, antennaID, protocol) =>
                     {
                         throw new Exception("不应该走到这里 1");
                     },
@@ -637,7 +637,7 @@ namespace UnitTestRFID
             newTagList.Refresh(
                 "M201",
                 tag_list,
-                (readerName, uid, antennaID) =>
+                (readerName, uid, antennaID, protocol) =>
                 {
                     // 获得标签内容
                     return new GetTagInfoResult
@@ -664,7 +664,7 @@ namespace UnitTestRFID
                 newTagList.Refresh(
                     "M201",
                     new List<OneTag>(),
-                    (readerName, uid, antennaID) =>
+                    (readerName, uid, antennaID, protocol) =>
                     {
                         throw new Exception("不应该走到这里 1");
                     },
@@ -728,7 +728,7 @@ namespace UnitTestRFID
                 newTagList.Refresh(
                     "RL8600",
                     update_list,
-                    (readerName, uid, antennaID) =>
+                    (readerName, uid, antennaID, protocol) =>
                     {
                         // 获得标签内容
                         return new GetTagInfoResult
@@ -814,7 +814,7 @@ namespace UnitTestRFID
             newTagList.Refresh(
                 "*",
                 tag_list,
-                (readerName, uid, antennaID) =>
+                (readerName, uid, antennaID, protocol) =>
                 {
                     // 获得标签内容
                     return new GetTagInfoResult
@@ -836,7 +836,7 @@ namespace UnitTestRFID
             newTagList.Refresh(
                 "*",
                 new List<OneTag>(),
-                (readerName, uid, antennaID) =>
+                (readerName, uid, antennaID, protocol) =>
                 {
                     throw new Exception("不应该被调用");
                 },

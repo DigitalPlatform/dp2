@@ -56,6 +56,7 @@
     <Compile Include="TestChip2.cs" />
     <Compile Include="TestDriver.cs" />
     <Compile Include="TestGaoxiao.cs" />
+    <Compile Include="TestGaoxiao1.cs" />
     <Compile Include="TestNewTagList.cs" />
     <Compile Include="TestRfid2.cs" />
     <Compile Include="TestSetElementPos.cs" />

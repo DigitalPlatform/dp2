@@ -142,7 +142,7 @@ bool bClickClose = false)
                         if (text != this._floatingMessage.Text)
                         {
                             if (error)
-                                this._showMessage(text, "red", true);
+                                this._showMessage(text, "red", false);
                             else
                                 this._showMessage(text);
                         }
@@ -551,7 +551,7 @@ _cancel.Token);
 
                         if (count == 0)
                         {
-                            this.ShowErrorMessage("error_initial", $"当前没有连接任何读卡器");
+                            this.ShowErrorMessage("error_initial", $"当前没有连接任何读写器");
                         }
                         else
                         {
