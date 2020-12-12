@@ -1,10 +1,13 @@
 ﻿using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+
+using DigitalPlatform.Text;
 
 namespace DigitalPlatform.RFID
 {
@@ -14,7 +17,7 @@ namespace DigitalPlatform.RFID
     /// </summary>
     public static class GaoxiaoUtility
     {
-        public static byte[] EncodeGaoxiapEpc(GaoxiaoEpcInfo info)
+        public static byte[] EncodeGaoxiaoEpc(GaoxiaoEpcInfo info)
         {
             List<byte> result = new List<byte>();
 
@@ -630,6 +633,32 @@ namespace DigitalPlatform.RFID
 
         #region USER 区的编码解码
 
+        // 编码 User Bank
+        public static byte[] EncodeUserBank(List<GaoxiaoUserElement> elements)
+        {
+            List<byte> results = new List<byte>();
+            foreach (var element in elements)
+            {
+                var bytes = EncodeUserElementContent(element.OID, element.Content);
+                int length = bytes.Length;
+                // OID 第一字节的 6-bit
+                // length 第一字节的后 2-bit + 第二字节的 8-bit
+                byte first = (byte)(((element.OID << 2) & 0xfc) + ((length >> 8) & 0x03));
+                byte second = (byte)(length & 0xff);
+
+                results.Add(first);
+                results.Add(second);
+                results.AddRange(bytes);
+            }
+
+            // 补齐偶数字节数
+            if ((results.Count % 2) != 0)
+                results.Add(0);
+
+            return results.ToArray();
+        }
+
+        // 解码 User Bank
         public static List<GaoxiaoUserElement> DecodeUserBank(byte[] data)
         {
             List<GaoxiaoUserElement> results = new List<GaoxiaoUserElement>();
@@ -661,9 +690,131 @@ namespace DigitalPlatform.RFID
             return results;
         }
 
+        public static byte[] EncodeUserElementContent(int oid, string content)
+        {
+            if (oid == 3)
+            {
+                // 所属馆标识 Owner Library
+                /*
+取值方式：2 字节整型数。参照中华人民共和国教育部行业标准 JY/T1001-2012，《教育管理信
+息-教育管理基础代码》中的《中国高等院校代码表》取值，以 5 位数字所代表的高等院校代
+码来标识所属馆。其中，针对首位数字为 9（军事院校，例如：90001 代表国防大学）的情况，
+在存放时，需要将 9 变成为 6，然后以 2 字节整型数存储，在读取后，需要将 6 变成为 9，恢
+复成原始代码。
+* */
+                if (string.IsNullOrEmpty(content) == false
+                    && content[0] == '6')
+                    throw new ArgumentException($"机构代码不允许用 '6' 开头，因为它被 '9' 挪用了");
+
+                return GetLibraryCode("所属馆标识");
+            }
+
+            if (oid == 4)
+            {
+                // 卷册信息 Set Information
+                /*
+取值方式：总 4 字节定长字段，其中：高 2 字节存放卷册总数（最多 65536 卷册），低 2 字节
+存放卷册序号（1 - 65536）。
+                * */
+                if (content.Contains("/") == false)
+                    throw new ArgumentException($"卷册信息 '{content}' 格式不正确，应为 n/m 形态");
+                var parts = StringUtil.ParseTwoPart(content, "/");
+                string index_string = parts[0];
+                string count_string = parts[1];
+
+                if (UInt16.TryParse(index_string, out UInt16 index_value) == false)
+                    throw new ArgumentException($"卷册信息 '{content}' 中的序号部分 '{index_string}'不合法。应该是 1-65536 范围内数字");
+                if (UInt16.TryParse(count_string, out UInt16 count_value) == false)
+                    throw new ArgumentException($"卷册信息 '{content}' 中的总数部分 '{index_string}'不合法。应该是 1-65536 范围内数字");
+
+                var index_bytes = BitConverter.GetBytes(index_value);
+                var count_bytes = BitConverter.GetBytes(count_value);
+
+                List<byte> results = new List<byte>();
+                results.AddRange(index_bytes);
+                results.AddRange(count_bytes);
+
+                return results.ToArray();
+            }
+
+            if (oid == 5)
+            {
+                // 馆藏类别与状态 type of usage
+                // 总 2 字节定长字段，其中：高字节存放馆藏类别(主限定标识)，低字节存放馆藏状态(次限定标识)
+                var parts = StringUtil.ParseTwoPart(content, ".");
+                string pimary_string = parts[0];
+                string secondary_string = parts[1];
+
+                if (UInt16.TryParse(pimary_string, out UInt16 pimary_value) == false)
+                    throw new ArgumentException($"馆藏类别 '{content}' 中的左侧部分 '{pimary_string}'不合法。应该是 0-255 范围内数字");
+                UInt16 secondary_value = 0;
+                if (string.IsNullOrEmpty(secondary_string) == false)
+                {
+                    if (UInt16.TryParse(secondary_string, out secondary_value) == false)
+                        throw new ArgumentException($"馆藏类别 '{content}' 中的右侧部分 '{secondary_string}'不合法。应该是 0-255 范围内数字");
+                }
+
+                List<byte> results = new List<byte>();
+                results.Add((byte)secondary_value);
+                results.Add((byte)pimary_value);
+
+                Debug.Assert(results.Count == 2);
+                return results.ToArray();
+            }
+
+            if (oid == 6 || oid == 12 || oid == 14 || oid == 15 || oid == 16 || oid == 24 || oid == 26)
+            {
+                // 6: 馆藏位置 Item Location
+                // 12: 馆际互借事务号 ILL Borrowing Transaction Number
+                // 14: 备选的馆藏标识符 Alternative Item Identifier
+                // 15: 临时馆藏位置 Temporary Item Location
+                // 16: 主题 Subject
+                // 24: 分馆标识 Subsidiary of an Owner Library
+                // 26: ISBN/ISSN
+                return Encoding.UTF8.GetBytes(content);
+            }
+
+            if (oid == 11)
+            {
+                // 馆际互借借入馆标识 ILL Borrowing Library
+                /*
+取值方式：2 字节整型数。参照中华人民共和国教育部行业标准 JY/T1001-2012，《教育管理信
+息-教育管理基础代码》中的《中国高等院校代码表》取值，以 5 位数字所代表的高等院校代
+码来标识所属馆。其中，针对首位数字为 9（军事院校，例如：90001 代表国防大学）的情况，
+在存放时，需要将 9 变成为 6，然后以 2 字节整型数存储，在读取后，需要将 6 变成为 9，恢
+复成原始代码。
+                * */
+                return GetLibraryCode("馆际互借借入馆标识");
+            }
+
+
+            if (oid >= 27 && oid <= 31)
+            {
+                // 保留的字段
+                return Encoding.UTF8.GetBytes(content);
+            }
+
+            // 其他。暂时用 hex string 来表示
+            return Element.FromHexString(content);
+
+            byte[] GetLibraryCode(string name)
+            {
+                if (content.Length != 5)
+                    throw new ArgumentException($"{name}应该是 5 位数字，但实际是 {content.Length} 位('{content}')");
+                // 若第一字符为 '9'，需要变为 '6'
+                if (content[0] == '9')
+                    content = "6" + content.Substring(1);
+                if (UInt16.TryParse(content, out UInt16 value) == false)
+                    throw new ArgumentException($"{name} '{content}' 不合法。应该是 5 位数字");
+                var result = BitConverter.GetBytes(value);
+                Debug.Assert(result.Length == 2);
+                return result;
+                // return Compact.ReverseBytes(result);
+            }
+        }
 
         // 解码用户区元素
-        static string DecodeUserElementContent(int oid, byte[] data)
+        public static string DecodeUserElementContent(int oid, byte[] data)
         {
             if (data.Length == 0)
                 return "";
@@ -681,7 +832,7 @@ namespace DigitalPlatform.RFID
                 if (data.Length != 2)
                     throw new Exception($"OID 为 3 时，data 应为 2 字节(但现在为 {data.Length} 字节)");
 
-                data = Compact.ReverseBytes(data);
+                // data = Compact.ReverseBytes(data);
 
                 var result = BitConverter.ToUInt16(data, 0).ToString().PadLeft(5, '0');
                 if (result[0] == '6')
@@ -701,11 +852,11 @@ namespace DigitalPlatform.RFID
 
                 byte[] first = new byte[2];
                 Array.Copy(data, first, 2);
-                first = Compact.ReverseBytes(first);
+                //first = Compact.ReverseBytes(first);
 
                 byte[] second = new byte[2];
                 Array.Copy(data, 2, second, 0, 2);
-                second = Compact.ReverseBytes(second);
+                //second = Compact.ReverseBytes(second);
 
                 var no = BitConverter.ToUInt16(first, 0).ToString();
                 var count = BitConverter.ToUInt16(second, 0).ToString();
@@ -721,7 +872,7 @@ namespace DigitalPlatform.RFID
 
                 byte secondary = data[0];
                 byte pimary = data[1];
-                return pimary + "." + secondary;
+                return ((int)pimary).ToString() + "." + ((int)secondary).ToString();
                 /*
 主限定标识(应用类别) 取值(数字) 次限定标识(馆藏状态) 取值(数字)
 文献 0
@@ -788,6 +939,77 @@ namespace DigitalPlatform.RFID
 
         #endregion
 
+        public class BuildGaoxiaoReuslt : NormalResult
+        {
+            public byte[] EpcBank { get; set; }
+            public byte[] UserBank { get; set; }
+        }
+
+        // 根据 LogicChip 对象构造标签内容
+        public static BuildGaoxiaoReuslt BuildTag(LogicChip chip)
+        {
+            List<GaoxiaoUserElement> user_elements = new List<GaoxiaoUserElement>();
+            foreach (var element in chip.Elements)
+            {
+                // user bank 中不包含 PII
+                if (element.OID == ElementOID.PII)
+                    continue;
+
+                var user_element = new GaoxiaoUserElement
+                {
+                    OID = (int)element.OID,
+                    Content = element.Text,
+                };
+
+                // TODO: 要从国标元素内容映射到高校联盟形态
+
+                user_elements.Add(user_element);
+
+            }
+            var user_bank = EncodeUserBank(user_elements);
+
+            var pc_info = new ProtocolControlWord();
+            pc_info.UMI = true;
+            pc_info.XPC = false;
+            pc_info.ISO = false;
+            pc_info.AFI = 0xc2;
+            pc_info.LengthIndicator = user_bank.Length / 2; // 这里是 word(一个 word 等于两个 bytes) 数
+            var pc = UhfUtility.EncodePC(pc_info);
+
+            var epc_info = new GaoxiaoEpcInfo();
+            epc_info.Lending = false;
+            epc_info.Version = 1;
+            epc_info.ContentParameters = BuildContentParameter(chip);
+            epc_info.PII = chip.FindElement(ElementOID.PII)?.Text;
+
+            var epc_bank = EncodeGaoxiaoEpc(epc_info);
+
+            return new BuildGaoxiaoReuslt
+            {
+                EpcBank = epc_bank,
+                UserBank = user_bank
+            };
+        }
+
+        static int [] BuildContentParameter(LogicChip chip)
+        {
+            List<int> results = new List<int>();
+            foreach(var element in chip.Elements)
+            {
+                int oid = (int)element.OID;
+                results.Add(oid);
+            }
+
+            return results.ToArray();
+            /*
+            int FindOidOffset(int oid)
+            {
+                int index = Array.IndexOf(offset_table, oid);
+                return index;
+            }
+            */
+        }
+
         public class ParseGaoxiaoResult : NormalResult
         {
             // 逻辑标签内容
@@ -804,6 +1026,21 @@ namespace DigitalPlatform.RFID
             byte[] epc_bank,
             byte[] user_bank)
         {
+            // 协议控制字 Protocol Control Word
+            ProtocolControlWord pc = UhfUtility.ParsePC(epc_bank, 2);
+
+            /*
+            if (pc.ISO == true)
+            {
+                if (pc.AFI != 0xc2)
+                    throw new Exception("目前仅支持 AFI 为 0xc2 的图书馆应用家族标签");
+            }
+            else
+            {
+                throw new Exception("目前暂不支持 GC1/EPC 的 MB01");
+            }
+            */
+
             // 跳过 4 个 byte
             List<byte> bytes = new List<byte>(epc_bank);
             bytes.RemoveRange(0, 4);
@@ -824,7 +1061,6 @@ namespace DigitalPlatform.RFID
                 chip.SetElement(oid, element.Content);
             }
 
-
             return new ParseGaoxiaoResult
             {
                 LogicChip = chip,
@@ -834,10 +1070,20 @@ namespace DigitalPlatform.RFID
         }
     }
 
+    // User Bank 内容元素(高校联盟标准)
     public class GaoxiaoUserElement
     {
         public int OID { get; set; }
         public string Content { get; set; }
+
+        public bool Equal(GaoxiaoUserElement element)
+        {
+            if (this.OID != element.OID)
+                return false;
+            if (this.Content != element.Content)
+                return false;
+            return true;
+        }
     }
 
     // 高校联盟 EPC 信息结构

@@ -366,6 +366,19 @@ namespace DigitalPlatform.RFID
             return result;
         }
 
+        public static byte[] EncodePC(ProtocolControlWord pc_info)
+        {
+            List<byte> results = new List<byte>();
+
+            int value = (pc_info.LengthIndicator << 3) & 0xf8;
+            value += ((pc_info.UMI ? 1 : 0) << 2) & 0x04;
+            value += ((pc_info.XPC ? 1 : 0) << 1) & 0x02;
+            value += (pc_info.ISO ? 1 : 0);
+            results.Add((byte)value);
+            results.Add((byte)pc_info.AFI);
+            return results.ToArray();
+        }
+
         // 解码 UII
         public static string DecodeUII(byte[] data, int start, int length)
         {
