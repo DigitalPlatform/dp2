@@ -924,6 +924,7 @@ namespace RfidCenter
 
                 InventoryInfo info = new InventoryInfo
                 {
+                    Protocol = old_tag_info.Protocol,
                     UID = old_tag_info.UID,
                     AntennaID = old_tag_info.AntennaID  // 2019/9/27
                 };

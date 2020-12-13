@@ -143,7 +143,9 @@ namespace DigitalPlatform.RFID.UI
             return element.Text;
         }
 
-        void SetElementValue(string fieldName, string value)
+        void SetElementValue(string fieldName,
+            string value,
+            bool verify = true)
         {
             ElementOID oid = Element.GetOidByName(fieldName);
             Element element = FindElement(oid);
@@ -154,11 +156,14 @@ namespace DigitalPlatform.RFID.UI
                 return;
 
             // 检查 value 是否合法
-            string error = Element.VerifyElementText(oid, value);
-            if (string.IsNullOrEmpty(error) == false)
-                throw new Exception($"值 '{value}' 不合法: {error}");
+            if (verify)
+            {
+                string error = Element.VerifyElementText(oid, value);
+                if (string.IsNullOrEmpty(error) == false)
+                    throw new Exception($"值 '{value}' 不合法: {error}");
+            }
 
-            SetElement(oid, value);
+            SetElement(oid, value, verify);
             SetChanged(true);
         }
 

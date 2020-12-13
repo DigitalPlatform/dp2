@@ -233,7 +233,7 @@ namespace RfidTool
                 {
                     LogicChip chip = null;
 
-                    if (taginfo.BlockSize == 0)
+                    if (taginfo.Protocol == InventoryInfo.ISO18000P6C)
                     {
                         var parse_result = GaoxiaoUtility.ParseTag(
             Element.FromHexString(taginfo.UID),
@@ -252,7 +252,7 @@ namespace RfidTool
             "");
                     }
 
-                    pii = chip.FindElement(ElementOID.PII)?.Text;
+                    pii = chip.Elements.Count == 0 ? "(空)" : chip.FindElement(ElementOID.PII)?.Text;
                     tou = chip.FindElement(ElementOID.TypeOfUsage)?.Text;
                     eas = taginfo.EAS ? "On" : "Off";
                     oi = chip.FindElement(ElementOID.OI)?.Text;
@@ -308,7 +308,7 @@ namespace RfidTool
                         Tag = info.TagData.OneTag,
                     };
                 }
-                else if (string.IsNullOrEmpty(current_pii) == true
+                else if ((string.IsNullOrEmpty(current_pii) == true || current_pii == "(空)")
                     && info.TagData.OneTag.TagInfo != null)
                 {
                     blank_result = new FindTagResult
@@ -493,32 +493,46 @@ namespace RfidTool
     LogicChip chip,
     bool eas)
         {
-            TagInfo new_tag_info = existing.Clone();
-            new_tag_info.Bytes = chip.GetBytes(
-                (int)(new_tag_info.MaxBlockCount * new_tag_info.BlockSize),
-                (int)new_tag_info.BlockSize,
-                LogicChip.GetBytesStyle.None,
-                out string block_map);
-            new_tag_info.LockStatus = block_map;
-
-            new_tag_info.DSFID = LogicChip.DefaultDSFID;  // 图书
-
-            // 上架状态
-            /*
-            if (eas == true)
+            if (existing.Protocol == InventoryInfo.ISO15693)
             {
-                new_tag_info.AFI = 0x07;
-                new_tag_info.EAS = true;
-            }
-            else
-            {
-                new_tag_info.AFI = 0xc2;
-                new_tag_info.EAS = false;
-            }
-            */
-            new_tag_info.SetEas(eas);
+                TagInfo new_tag_info = existing.Clone();
+                new_tag_info.Bytes = chip.GetBytes(
+                    (int)(new_tag_info.MaxBlockCount * new_tag_info.BlockSize),
+                    (int)new_tag_info.BlockSize,
+                    LogicChip.GetBytesStyle.None,
+                    out string block_map);
+                new_tag_info.LockStatus = block_map;
 
-            return new_tag_info;
+                new_tag_info.DSFID = LogicChip.DefaultDSFID;  // 图书
+
+                // 上架状态
+                /*
+                if (eas == true)
+                {
+                    new_tag_info.AFI = 0x07;
+                    new_tag_info.EAS = true;
+                }
+                else
+                {
+                    new_tag_info.AFI = 0xc2;
+                    new_tag_info.EAS = false;
+                }
+                */
+                new_tag_info.SetEas(eas);
+
+                return new_tag_info;
+            }
+
+            if (existing.Protocol == InventoryInfo.ISO18000P6C)
+            {
+                var result = GaoxiaoUtility.BuildTag(chip, eas);
+                TagInfo new_tag_info = existing.Clone();
+                new_tag_info.Bytes = result.UserBank;
+                new_tag_info.UID = existing.UID.Substring(0, 4) + Element.GetHexString(result.EpcBank);
+                return new_tag_info;
+            }
+
+            throw new ArgumentException($"目前暂不支持 {existing.Protocol} 协议标签的写入操作");
         }
 
         private void button_write_Click(object sender, EventArgs e)

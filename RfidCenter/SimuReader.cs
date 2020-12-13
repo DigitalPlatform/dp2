@@ -1187,6 +1187,7 @@ out Reader reader);
         // 根据 TagInfo 刷新 InventoryInfo 内的同名成员，和 this.ReaderName
         public void RefreshInventoryInfo()
         {
+            // ? this.InventoryInfo.Protocol = TagInfo.Protocol;
             this.InventoryInfo.UID = TagInfo.UID;
             this.InventoryInfo.AntennaID = TagInfo.AntennaID;
             this.InventoryInfo.DsfID = TagInfo.DSFID;
