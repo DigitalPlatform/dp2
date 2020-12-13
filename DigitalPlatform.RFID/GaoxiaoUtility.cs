@@ -17,7 +17,8 @@ namespace DigitalPlatform.RFID
     /// </summary>
     public static class GaoxiaoUtility
     {
-        public static byte[] EncodeGaoxiaoEpc(GaoxiaoEpcInfo info)
+        // 编码高校联盟 EPC bank。注意返回的内容没有包含前 4 bytes(校验码和 PC)
+        public static byte[] EncodeGaoxiaoEpcPayload(GaoxiaoEpcInfo info)
         {
             List<byte> result = new List<byte>();
 
@@ -65,7 +66,9 @@ namespace DigitalPlatform.RFID
 
             result.AddRange(pii_bytes);
 
-            // TODO: 检查 result 的字节数是否为偶数，如果必要补齐偶数
+            // 检查 result 的字节数是否为偶数，如果必要补齐偶数
+            if ((result.Count % 2) != 0)
+                result.Add(0);
 
             return result.ToArray();
         }
@@ -626,7 +629,9 @@ namespace DigitalPlatform.RFID
                 value |= (UInt16)(0x00000001 << offset);
             }
 
-            return Compact.ReverseBytes(BitConverter.GetBytes(value));
+            return BitConverter.GetBytes(value);
+
+            // return Compact.ReverseBytes(BitConverter.GetBytes(value));
         }
 
         #endregion
@@ -639,6 +644,11 @@ namespace DigitalPlatform.RFID
             List<byte> results = new List<byte>();
             foreach (var element in elements)
             {
+                // 检查 OID 是否在高校联盟允许的范围
+                var index = FindOidOffset(element.OID);
+                if (index == -1)
+                    throw new ArgumentException($"高校联盟 UHF 标准不支持 OID 为 {element.OID} 的 User Bank 内容元素");
+
                 var bytes = EncodeUserElementContent(element.OID, element.Content);
                 int length = bytes.Length;
                 // OID 第一字节的 6-bit
@@ -766,7 +776,7 @@ namespace DigitalPlatform.RFID
             {
                 // 6: 馆藏位置 Item Location
                 // 12: 馆际互借事务号 ILL Borrowing Transaction Number
-                // 14: 备选的馆藏标识符 Alternative Item Identifier
+                // 14: 备选的馆藏标识符(条码号) Alternative Item Identifier
                 // 15: 临时馆藏位置 Temporary Item Location
                 // 16: 主题 Subject
                 // 24: 分馆标识 Subsidiary of an Owner Library
@@ -790,6 +800,9 @@ namespace DigitalPlatform.RFID
 
             if (oid >= 27 && oid <= 31)
             {
+                // 注：
+                // 27: 备选项，数字平台计划用作 AOI
+
                 // 保留的字段
                 return Encoding.UTF8.GetBytes(content);
             }
@@ -946,14 +959,25 @@ namespace DigitalPlatform.RFID
         }
 
         // 根据 LogicChip 对象构造标签内容
-        public static BuildGaoxiaoReuslt BuildTag(LogicChip chip)
+        public static BuildGaoxiaoReuslt BuildTag(LogicChip chip,
+            bool eas = true)
         {
             List<GaoxiaoUserElement> user_elements = new List<GaoxiaoUserElement>();
             foreach (var element in chip.Elements)
             {
-                // user bank 中不包含 PII
-                if (element.OID == ElementOID.PII)
+                // user bank 中不包含 PII 和 ContentParameter
+                if (element.OID == ElementOID.PII
+                    || element.OID == ElementOID.ContentParameter)
                     continue;
+
+                // 检查 OI 元素内容是否符合高校 OI 的形态。如果不符合，则转为用备选的 27 元素
+                if (element.OID == ElementOID.OI)
+                {
+                    if (string.IsNullOrEmpty(element.Text))
+                        continue;
+                    if (VerifyOI(element.Text) == false)
+                        element.OID = (ElementOID)27;
+                }
 
                 var user_element = new GaoxiaoUserElement
                 {
@@ -964,50 +988,98 @@ namespace DigitalPlatform.RFID
                 // TODO: 要从国标元素内容映射到高校联盟形态
 
                 user_elements.Add(user_element);
-
             }
             var user_bank = EncodeUserBank(user_elements);
 
+            var epc_info = new GaoxiaoEpcInfo();
+            epc_info.Lending = !eas;
+            epc_info.Version = 1;
+            epc_info.ContentParameters = BuildContentParameter(user_elements);
+            epc_info.PII = chip.FindElement(ElementOID.PII)?.Text;
+
+            // 编码高校联盟 EPC bank。注意返回的内容没有包含前 4 bytes(校验码和 PC)
+            var epc_payload = EncodeGaoxiaoEpcPayload(epc_info);
+
+            // 构造 PC (Protocal Control Word)
             var pc_info = new ProtocolControlWord();
             pc_info.UMI = true;
             pc_info.XPC = false;
             pc_info.ISO = false;
             pc_info.AFI = 0xc2;
-            pc_info.LengthIndicator = user_bank.Length / 2; // 这里是 word(一个 word 等于两个 bytes) 数
+            // 最后计算载荷的实际长度
+            pc_info.LengthIndicator = epc_payload.Length / 2; // 这里是 word(一个 word 等于两个 bytes) 数
             var pc = UhfUtility.EncodePC(pc_info);
 
-            var epc_info = new GaoxiaoEpcInfo();
-            epc_info.Lending = false;
-            epc_info.Version = 1;
-            epc_info.ContentParameters = BuildContentParameter(chip);
-            epc_info.PII = chip.FindElement(ElementOID.PII)?.Text;
-
-            var epc_bank = EncodeGaoxiaoEpc(epc_info);
+            List<byte> temp = new List<byte>();
+            temp.AddRange(pc);
+            temp.AddRange(epc_payload);
+            epc_payload = temp.ToArray();
 
             return new BuildGaoxiaoReuslt
             {
-                EpcBank = epc_bank,
+                EpcBank = epc_payload,
                 UserBank = user_bank
             };
         }
 
-        static int [] BuildContentParameter(LogicChip chip)
+        static bool VerifyOI(string oi)
         {
-            List<int> results = new List<int>();
-            foreach(var element in chip.Elements)
+            if (oi == null)
+                return false;
+            if (oi.Length != 5)
+                return false;
+            foreach (var ch in oi)
             {
-                int oid = (int)element.OID;
-                results.Add(oid);
+                if (char.IsDigit(ch) == false)
+                    return false;
+            }
+
+            char first_char = oi[0];
+            if (first_char == '8'
+                || first_char == '7'
+                || first_char == '6')
+                return false;
+
+            return true;
+        }
+
+        static int[] BuildContentParameter(List<GaoxiaoUserElement> user_elements)
+        {
+            int first_oid = offset_table[0];
+            List<int> results = new List<int>();
+            foreach (var element in user_elements)
+            {
+                int oid = element.OID;
+                if (oid < first_oid)
+                    continue;
+                int index = FindOidOffset(oid);
+                if (index >= 0)
+                    results.Add(oid);
             }
 
             return results.ToArray();
-            /*
-            int FindOidOffset(int oid)
+        }
+
+#if REMOVED
+        static int[] BuildContentParameter(LogicChip chip)
+        {
+            List<int> results = new List<int>();
+            foreach (var element in chip.Elements)
             {
-                int index = Array.IndexOf(offset_table, oid);
-                return index;
+                int oid = (int)element.OID;
+                int index = FindOidOffset(oid);
+                if (index == -1)
+                    results.Add(oid);
             }
-            */
+
+            return results.ToArray();
+        }
+#endif
+
+        static int FindOidOffset(int oid)
+        {
+            int index = Array.IndexOf(offset_table, oid);
+            return index;
         }
 
         public class ParseGaoxiaoResult : NormalResult
@@ -1026,47 +1098,249 @@ namespace DigitalPlatform.RFID
             byte[] epc_bank,
             byte[] user_bank)
         {
-            // 协议控制字 Protocol Control Word
-            ProtocolControlWord pc = UhfUtility.ParsePC(epc_bank, 2);
-
-            /*
-            if (pc.ISO == true)
+            try
             {
-                if (pc.AFI != 0xc2)
-                    throw new Exception("目前仅支持 AFI 为 0xc2 的图书馆应用家族标签");
+                // 协议控制字 Protocol Control Word
+                ProtocolControlWord pc = UhfUtility.ParsePC(epc_bank, 2);
+
+                /*
+                if (pc.ISO == true)
+                {
+                    if (pc.AFI != 0xc2)
+                        throw new Exception("目前仅支持 AFI 为 0xc2 的图书馆应用家族标签");
+                }
+                else
+                {
+                    throw new Exception("目前暂不支持 GC1/EPC 的 MB01");
+                }
+                */
+
+                // 跳过 4 个 byte
+                List<byte> bytes = new List<byte>(epc_bank);
+                bytes.RemoveRange(0, 4);
+
+                var epc_info = DecodeGaoxiaoEpc(bytes.ToArray());
+                if (pc.UMI == false
+                    && epc_info.ContentParameters.Length != 0)
+                {
+                    if (pc.AFI == 0
+                        && pc.ISO == false
+                        && pc.UMI == false
+                        && pc.XPC == false
+                        && pc.LengthIndicator == 8)
+                    {
+                        return new ParseGaoxiaoResult
+                        {
+                            Value = 0,
+                            ErrorInfo = "空白标签",
+                            ErrorCode = "blank",
+                            LogicChip = new LogicChip(),
+                            EpcInfo = epc_info,
+                            UserElements = new List<GaoxiaoUserElement>()
+                        };
+                    }
+                    return new ParseGaoxiaoResult
+                    {
+                        Value = -1,
+                        ErrorInfo = "标签内容无法解析。ECP UMI 位和(高校联盟) ContentParameters 不符",
+                        ErrorCode = "parseEpcError",
+                        EpcInfo = epc_info,
+                        UserElements = new List<GaoxiaoUserElement>()
+                    };
+                }
+
+                var elements = DecodeUserBank(user_bank);
+
+                var chip = new LogicChip();
+                chip.SetElement(ElementOID.PII, epc_info.PII);
+                foreach (var element in elements)
+                {
+                    var oid = (ElementOID)element.OID;
+                    /*
+                    if (oid == ElementOID.SetInformation)
+                    {
+                        // TODO: 将 1/1 规范化为国标形态
+                        continue;
+                    }
+                    */
+                    chip.SetElement(oid, element.Content, false);
+                }
+
+                return new ParseGaoxiaoResult
+                {
+                    LogicChip = chip,
+                    EpcInfo = epc_info,
+                    UserElements = elements
+                };
             }
-            else
+            catch (Exception ex)
             {
-                throw new Exception("目前暂不支持 GC1/EPC 的 MB01");
+                return new ParseGaoxiaoResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"标签内容无法解析。{ex.Message}",
+                    ErrorCode = "parseError"
+                };
             }
-            */
+        }
 
-            // 跳过 4 个 byte
-            List<byte> bytes = new List<byte>(epc_bank);
-            bytes.RemoveRange(0, 4);
+        /*
+        // 将元素值从高校联盟标准转换为国标形态
+        public static NormalResult ToGB(List<GaoxiaoUserElement> elements)
+        {
 
-            var epc_info = DecodeGaoxiaoEpc(bytes.ToArray());
-            var elements = DecodeUserBank(user_bank);
+        }
+        */
 
-            var chip = new LogicChip();
-            chip.SetElement(ElementOID.PII, epc_info.PII);
+
+        // 将元素值从高校联盟形态转换为中立形态
+        public static List<GaoxiaoUserElement> ToNeutral(List<GaoxiaoUserElement> elements)
+        {
+            List<GaoxiaoUserElement> results = new List<GaoxiaoUserElement>();
             foreach (var element in elements)
             {
-                var oid = (ElementOID)element.OID;
-                if (oid == ElementOID.SetInformation)
+                if (element.OID == (int)(ElementOID.TypeOfUsage))
                 {
-                    // TODO: 将 1/1 规范化为国标形态
-                    continue;
+                    // xxx.xxx
+                    var parts = StringUtil.ParseTwoPart(element.Content, ".");
+                    string pimary = parts[0];
+                    string secondary = parts[1];
+                    string neutral = "gx:" + pimary;
+                    switch (pimary)
+                    {
+
+                        /*
+ * 附录 B：馆藏类别与状态参考代码
+主限定标识(应用类别) 取值(数字) 
+----次限定标识(馆藏状态) 取值(数字)
+文献 0
+----可外借 0
+----不可外借 1
+----剔旧 2
+----处理中 3
+----自定义 4-255
+光盘 1
+----可外借 0
+----不可外借 1
+----处理中 2
+----自定义 3-255
+架标/层标 2 
+----自定义 0-255
+证件 3 
+----自定义 0-255
+设备 4 
+----自定义 0-255
+预留 5-255 
+----自定义 0-255
+* */
+                        case "0":
+                            neutral = "{馆藏}";
+                            break;
+                        case "1":
+                            neutral = "{光盘}";
+                            break;
+                        case "2":
+                            neutral = "{层架标}";
+                            break;
+                        case "3":
+                            neutral = "{读者证}";
+                            break;
+                        case "4":
+                            neutral = "{设备}";
+                            break;
+                    }
+                    element.Content = neutral;
                 }
-                chip.SetElement(oid, element.Content);
+
+                if (element.OID == (int)(ElementOID.SetInformation))
+                {
+                    // xx/xx
+                    // 文字保持原样，外加 {}
+                    if (string.IsNullOrEmpty(element.Content) == false)
+                        element.Content = "{" + element.Content + "}";
+                }
             }
 
-            return new ParseGaoxiaoResult
+            return results;
+        }
+
+        // 将元素值从中立形态转换为高校联盟形态
+        public static List<GaoxiaoUserElement> FromNeutral(List<GaoxiaoUserElement> elements)
+        {
+            List<GaoxiaoUserElement> results = new List<GaoxiaoUserElement>();
+            foreach (var element in elements)
             {
-                LogicChip = chip,
-                EpcInfo = epc_info,
-                UserElements = elements
-            };
+                // 将 AOI 转换到 27
+                // 将不是 5 位数字的 OI 转换到 27
+
+                if (element.OID == (int)(ElementOID.TypeOfUsage))
+                {
+                    if (element.Content.Contains("{") == false)
+                    {
+
+                    }
+                    else
+                    {
+                        // {xxx.xxx}
+                        string temp = StringUtil.Unquote(element.Content, "{}");
+                        var parts = StringUtil.ParseTwoPart(temp, ".");
+                        string pimary = parts[0];
+                        string secondary = parts[1];
+                        string neutral = "origin:" + pimary;
+                        switch (pimary)
+                        {
+
+                            /*
+     * 附录 B：馆藏类别与状态参考代码
+    主限定标识(应用类别) 取值(数字) 
+    ----次限定标识(馆藏状态) 取值(数字)
+    文献 0
+    ----可外借 0
+    ----不可外借 1
+    ----剔旧 2
+    ----处理中 3
+    ----自定义 4-255
+    光盘 1
+    ----可外借 0
+    ----不可外借 1
+    ----处理中 2
+    ----自定义 3-255
+    架标/层标 2 
+    ----自定义 0-255
+    证件 3 
+    ----自定义 0-255
+    设备 4 
+    ----自定义 0-255
+    预留 5-255 
+    ----自定义 0-255
+    * */
+                            case "馆藏":
+                                neutral = "0";
+                                break;
+                            case "光盘":
+                                neutral = "1";
+                                break;
+                            case "层架标":
+                                neutral = "2";
+                                break;
+                            case "读者证":
+                                neutral = "3";
+                                break;
+                            case "设备":
+                                neutral = "4";
+                                break;
+                        }
+                        element.Content = neutral;
+                    }
+                }
+
+                if (element.OID == (int)(ElementOID.SetInformation))
+                {
+                    // xx/xx
+                    element.Content = StringUtil.Unquote(element.Content, "{}");
+                }
+            }
+            return results;
         }
     }
 

@@ -34,7 +34,7 @@ namespace UnitTestRFID
         public void Test_encode_contentParameter_1()
         {
             int[] oid_list = new int[] { 3, 12, 15 };
-            byte[] correct = new byte[] { 0x00, 0xa1 };
+            byte[] correct = new byte[] { 0xa1, 0x00,  };
 
             byte[] results = GaoxiaoUtility.EncodeContentParameter(oid_list);
 

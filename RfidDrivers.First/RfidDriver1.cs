@@ -3475,9 +3475,12 @@ out Reader reader);
             debugInfo.AppendLine($"new_tag_info={new_tag_info.ToString()}");
             WriteDebugLog(debugInfo.ToString());
 
-            // 要确保 new_tag_info.Bytes 包含全部 byte，避免以前标签的内容在保存后出现残留
-            EnsureBytes(new_tag_info);
-            EnsureBytes(old_tag_info);
+            if (old_tag_info.Protocol != InventoryInfo.ISO18000P6C)
+            {
+                // 要确保 new_tag_info.Bytes 包含全部 byte，避免以前标签的内容在保存后出现残留
+                EnsureBytes(new_tag_info);
+                EnsureBytes(old_tag_info);
+            }
 
             NormalResult result = GetReader(one_reader_name,
     out Reader reader);
@@ -3514,11 +3517,107 @@ out Reader reader);
                 }
 
                 UInt32 tag_type = RFIDLIB.rfidlib_def.RFID_ISO15693_PICC_ICODE_SLI_ID;
-                UIntPtr hTag = _connectTag(reader.ReaderHandle, old_tag_info.UID, tag_type);
+                UIntPtr hTag = UIntPtr.Zero;
+                if (old_tag_info.Protocol == InventoryInfo.ISO18000P6C)
+                    hTag = _connectUhfTag(reader.ReaderHandle,
+                        old_tag_info.UID);
+                else
+                    hTag = _connectTag(reader.ReaderHandle, old_tag_info.UID, tag_type);
                 if (hTag == UIntPtr.Zero)
-                    return new NormalResult { Value = -1, ErrorInfo = "connectTag Error" };
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = "connectTag Error"
+                    };
                 try
                 {
+                    if (old_tag_info.Protocol == InventoryInfo.ISO18000P6C)
+                    {
+                        //var memBank = (Byte)RFIDLIB.rfidlib_def.ISO18000p6C_MEM_BANK_USER;
+                        //int WordCnt = 0;    // 0 表示读全部
+                        //int WordPointer = 0;
+
+                        //Byte[] readData = new Byte[256];
+                        //UInt32 nSize = (UInt32)readData.Length;
+
+                        if ((new_tag_info.Bytes.Length % 2) != 0)
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = "new_tag_info.Bytes 的 byte 数必须为偶数"
+                            };
+
+                        int iret = 0;
+
+                        // 先写入 User Bank
+                        iret = RFIDLIB.rfidlib_aip_iso18000p6C.ISO18000p6C_Write(
+                            reader.ReaderHandle,
+                            hTag,
+                            (Byte)RFIDLIB.rfidlib_def.ISO18000p6C_MEM_BANK_USER,
+                            0,  // (UInt32)WordPointer,
+                            (UInt32)new_tag_info.Bytes.Length / 2,
+                            new_tag_info.Bytes,
+                            (UInt32)new_tag_info.Bytes.Length);
+
+                        if (iret != 0)
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = $"ISO18000p6C_Write() User Bank error. iret:{iret},reader_name:{one_reader_name},uid:{old_tag_info.UID},antenna_id:{old_tag_info.AntennaID}",
+                                ErrorCode = GetErrorCode(iret, reader.ReaderHandle)
+                            };
+
+                        // 写入 EPC Bank
+                        // TODO: 确保写入的 length 为偶数
+                        if (new_tag_info.UID != old_tag_info.UID)
+                        {
+                            var epc_bytes = Element.FromHexString(new_tag_info.UID);
+
+                            if ((epc_bytes.Length % 2) != 0)
+                                return new NormalResult
+                                {
+                                    Value = -1,
+                                    ErrorInfo = "UID 的 byte 数必须为偶数"
+                                };
+
+                            /*
+                            // 跳过 4 个 byte
+                            List<byte> temp = new List<byte>(epc_bytes);
+                            temp.RemoveRange(0, 4);
+                            epc_bytes = temp.ToArray();
+                            */
+                            // 跳过 2 个 byte
+                            List<byte> temp = new List<byte>(epc_bytes);
+                            temp.RemoveRange(0, 2);
+                            epc_bytes = temp.ToArray();
+
+
+                            iret = RFIDLIB.rfidlib_aip_iso18000p6C.ISO18000p6C_Write(
+        reader.ReaderHandle,
+        hTag,
+        (Byte)RFIDLIB.rfidlib_def.ISO18000p6C_MEM_BANK_EPC,
+        1,  // 必须从 word 偏移 2 开始写入
+        (UInt32)(epc_bytes.Length / 2),
+        epc_bytes,
+        (UInt32)epc_bytes.Length);
+                            if (iret != 0)
+                                return new NormalResult
+                                {
+                                    Value = -1,
+                                    ErrorInfo = $"ISO18000p6C_Write() EPC Bank error. iret:{iret},reader_name:{one_reader_name},uid:{old_tag_info.UID},antenna_id:{old_tag_info.AntennaID}",
+                                    ErrorCode = GetErrorCode(iret, reader.ReaderHandle)
+                                };
+                            // TODO: 写入后是否立即 inventory，返回新的 UID? 这样可以方便连续写入
+                        }
+
+
+
+                        return new NormalResult
+                        {
+                            Value = 0,
+                        };
+                    }
+
                     // TODO: 如果是新标签，第一次执行修改密码命令
 
                     // *** 分段写入内容 bytes
@@ -3947,7 +4046,11 @@ out Reader reader);
                     info?.UID,
                     info == null ? RFIDLIB.rfidlib_def.RFID_ISO15693_PICC_ICODE_SLI_ID : info.TagType);
                 if (hTag == UIntPtr.Zero)
-                    return new GetTagInfoResult { Value = -1, ErrorInfo = "connectTag Error" };
+                    return new GetTagInfoResult
+                    {
+                        Value = -1,
+                        ErrorInfo = "connectTag Error"
+                    };
                 try
                 {
                     int iret;
@@ -3987,6 +4090,8 @@ out Reader reader);
                         {
                             TagInfo = new TagInfo
                             {
+                                // 2020/12/13
+                                Protocol = info.Protocol,
                                 // 这里返回真正 GetTagInfo 成功的那个 ReaderName。而 Inventory 可能返回类似 reader1,reader2 这样的字符串
                                 ReaderName = one_reader_name,
                                 UID = Element.GetHexString(uid),
@@ -4065,6 +4170,8 @@ out Reader reader);
                     {
                         TagInfo = new TagInfo
                         {
+                            // 2020/12/11
+                            Protocol = info.Protocol,
                             // 这里返回真正 GetTagInfo 成功的那个 ReaderName。而 Inventory 可能返回类似 reader1,reader2 这样的字符串
                             ReaderName = one_reader_name,   // 2019/2/27
 

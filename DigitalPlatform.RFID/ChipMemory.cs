@@ -109,17 +109,30 @@ namespace DigitalPlatform.RFID
         }
 
         // 修改一个元素的文本。如果不存在这个元素，会自动创建
-        public Element SetElement(ElementOID oid, string content)
+        public Element SetElement(ElementOID oid,
+            string content,
+            bool verify = true)
         {
             Element element = FindElement(oid);
             if (element == null)
-                return NewElement(oid, content);
+                return NewElement(oid, content, verify);
+
+            // 2020/12/13
+            if (verify)
+            {
+                string verify_result = Element.VerifyElementText(oid, content);
+                if (verify_result != null)
+                    throw new Exception($"修改元素值 oid={oid},content={content} 时数据不合法: {verify_result}");
+            }
+
             element.Text = content;
             return element;
         }
 
         // 创建一个元素
-        public Element NewElement(ElementOID oid, string content)
+        public Element NewElement(ElementOID oid,
+            string content,
+            bool verify = true)
         {
             // 查重
             {
@@ -130,9 +143,12 @@ namespace DigitalPlatform.RFID
                 }
             }
 
-            string verify_result = Element.VerifyElementText(oid, content);
-            if (verify_result != null)
-                throw new Exception($"创建元素 oid={oid},content={content} 时数据不合法: {verify_result}");
+            if (verify)
+            {
+                string verify_result = Element.VerifyElementText(oid, content);
+                if (verify_result != null)
+                    throw new Exception($"创建元素 oid={oid},content={content} 时数据不合法: {verify_result}");
+            }
 
             {
                 Element element = new Element(-1)

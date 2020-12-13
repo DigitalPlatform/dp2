@@ -218,6 +218,10 @@ uint new_password);
         // 附加的数据
         public object Tag { get; set; }
 
+        // 2020/12/13
+        // 芯片所采用的协议。如果为空表示 ISO15693
+        public string Protocol { get; set; }
+
         public override string ToString()
         {
             return $"uid={UID},dsfid={Element.GetHexString(DSFID)},afi={Element.GetHexString(AFI)},icref={Element.GetHexString(IcRef)},blkSize={BlockSize},blkNum={MaxBlockCount},lock={LockStatus},AntennaID={AntennaID},Bytes={Element.GetHexString(Bytes)}";
@@ -242,6 +246,7 @@ uint new_password);
         {
             TagInfo result = new TagInfo
             {
+                Protocol = this.Protocol,
                 UID = this.UID,
                 DSFID = this.DSFID,
                 AFI = this.AFI,
