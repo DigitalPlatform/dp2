@@ -65,6 +65,33 @@ namespace DigitalPlatform.RFID
             }
         }
 
+#if REMOVED
+        // 2020/12/14
+        // 从 Tags 集合中删除一个对象。如果 uid 参数为 null，表示删除全部对象
+        public void RemoveTag(string uid)
+        {
+            lock (_sync_tags)
+            {
+                var tags = new List<TagAndData>();
+                foreach (TagAndData data in _tags)
+                {
+                    if (data.OneTag == null)
+                        continue;
+
+                    if (string.IsNullOrEmpty(uid)
+                        || data.OneTag.UID == uid)
+                        tags.Add(data);
+                }
+
+                foreach(var tag in tags)
+                {
+                    _tags.Remove(tag);
+                    // TODO: 如何通知前端?
+                }
+            }
+        }
+#endif
+
         // 从当前在读卡器上的标签集合中查找一个标签信息
         public TagAndData FindTag(string uid)
         {
@@ -372,19 +399,27 @@ namespace DigitalPlatform.RFID
         // uid --> TagInfo
         Hashtable _tagTable = new Hashtable();
 
-        public void ClearTagTable(string uid)
+        public void ClearTagTable(string uid, bool clearTagInfo = true)
         {
             if (string.IsNullOrEmpty(uid))
             {
                 _tagTable.Clear();
-                // T要把 books 集合中相关 uid 的 TagInfo 设置为 null，迫使后面重新从 RfidCenter 获取
-                ClearTagInfo(null);
+
+                if (clearTagInfo)
+                {
+                    // T要把 books 集合中相关 uid 的 TagInfo 设置为 null，迫使后面重新从 RfidCenter 获取
+                    ClearTagInfo(null);
+                }
             }
             else
             {
                 _tagTable.Remove(uid);
-                // 要把 books 集合中相关 uid 的 TagInfo 设置为 null，迫使后面重新从 RfidCenter 获取
-                ClearTagInfo(uid);
+
+                if (clearTagInfo)
+                {
+                    // 要把 books 集合中相关 uid 的 TagInfo 设置为 null，迫使后面重新从 RfidCenter 获取
+                    ClearTagInfo(uid);
+                }
             }
         }
 

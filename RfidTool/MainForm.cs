@@ -145,6 +145,8 @@ bool bClickClose = false)
                                 this._showMessage(text, "red", false);
                             else
                                 this._showMessage(text);
+
+                            // ClientInfo.WriteErrorLog(text);
                         }
                     }
                     else

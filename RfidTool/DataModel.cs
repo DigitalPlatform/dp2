@@ -141,7 +141,7 @@ namespace RfidTool
         public static List<string> GetReadNameList()
         {
             List<string> results = new List<string>();
-            foreach(var reader in _driver.Readers)
+            foreach (var reader in _driver.Readers)
             {
                 results.Add(reader.Name);
             }
@@ -207,10 +207,13 @@ namespace RfidTool
         {
             var result = _driver.WriteTagInfo(one_reader_name, old_tag_info, new_tag_info);
 
+            // 从 Tags 中清除。避免瞬间的报错信息
+            // TagList.RemoveTag(old_tag_info.UID);
+
             // 清除缓存
-            TagList.ClearTagTable(old_tag_info.UID);
+            TagList.ClearTagTable(old_tag_info.UID, false);
             if (old_tag_info.UID != new_tag_info.UID)
-                TagList.ClearTagTable(new_tag_info.UID);
+                TagList.ClearTagTable(new_tag_info.UID, false);
 
             return result;
         }
