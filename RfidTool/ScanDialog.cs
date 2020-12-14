@@ -257,6 +257,12 @@ namespace RfidTool
                     eas = taginfo.EAS ? "On" : "Off";
                     oi = chip.FindElement(ElementOID.OI)?.Text;
                     aoi = chip.FindElement(ElementOID.AOI)?.Text;
+                    if (taginfo.Protocol == InventoryInfo.ISO18000P6C)
+                    {
+                        // 数字平台针对高校联盟扩充的 AOI
+                        if (string.IsNullOrEmpty(oi) && string.IsNullOrEmpty(aoi))
+                            aoi = chip.FindElement((ElementOID)27)?.Text;
+                    }
                 }
 
 
@@ -266,7 +272,7 @@ namespace RfidTool
                 ListViewUtil.ChangeItemText(item, COLUMN_OI, oi);
                 ListViewUtil.ChangeItemText(item, COLUMN_AOI, aoi);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 ListViewUtil.ChangeItemText(item, COLUMN_PII, "error:" + ex.Message);
                 SetItemColor(item, "error");
@@ -408,7 +414,8 @@ namespace RfidTool
                     chip.SetElement(ElementOID.OI, oi);
                 if (string.IsNullOrEmpty(aoi) == false)
                     chip.SetElement(ElementOID.AOI, aoi);
-                chip.SetElement(ElementOID.TypeOfUsage, tou);
+                // chip.SetElement(ElementOID.TypeOfUsage, tou);
+                SetTypeOfUsage(chip, tag.Protocol);
 
                 bool eas = false;
                 if (string.IsNullOrEmpty(this.TypeOfUsage) || this.TypeOfUsage == "10")
@@ -441,6 +448,36 @@ namespace RfidTool
             {
                 _inProcessing--;
             }
+        }
+
+        // 设置 TU 字段。国标和高校联盟的取值表完全不同
+        void SetTypeOfUsage(LogicChip chip, string protocol)
+        {
+            string tou = this.TypeOfUsage;
+            if (string.IsNullOrEmpty(tou))
+                tou = "10"; // 默认图书
+
+            // 高校联盟
+            if (protocol == InventoryInfo.ISO18000P6C)
+            {
+                switch (tou)
+                {
+                    case "10":  // 图书
+                        tou = "0.0";
+                        break;
+                    case "80":  // 读者证
+                        tou = "3.0";
+                        break;
+                    case "30":  // 层架标
+                        tou = "2.0";
+                        break;
+                    default:
+                        throw new Exception($"高校联盟不支持的国标 TU 值 '{tou}'");
+                }
+                chip.SetElement(ElementOID.TypeOfUsage, tou, false);
+            }
+            else
+                chip.SetElement(ElementOID.TypeOfUsage, tou);
         }
 
         // 校验 OI 和 AOI 参数是否正确设置了
