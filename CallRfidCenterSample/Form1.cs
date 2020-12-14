@@ -55,11 +55,36 @@ namespace CallRfidCenterSample
 
         public static event TagChangedEventHandler TagChanged = null;
 
+        public static NewTagList TagList = new NewTagList();
+
         private void RfidManager_ListTags(object sender, ListTagsEventArgs e)
         {
             // 标签总数显示
             if (e.Result.Results != null)
             {
+                TagList.Refresh(
+                    e.ReaderNameList,
+                    e.Result.Results,
+                    (readerName, uid, antennaID, protocol) =>
+                    {
+                        var channel = sender as BaseChannel<IRfid>;
+                        return channel.Object.GetTagInfo(readerName, uid, antennaID);
+                    },
+                    (add_books, update_books, remove_books) =>
+                    {
+                        TagChanged?.Invoke(sender, new TagChangedEventArgs
+                        {
+                            AddBooks = add_books,
+                            UpdateBooks = update_books,
+                            RemoveBooks = remove_books,
+                        });
+                    },
+                    (type, text) =>
+                    {
+                        RfidManager.TriggerSetError(this, new SetErrorEventArgs { Error = text });
+                        // TagSetError?.Invoke(this, new SetErrorEventArgs { Error = text });
+                    });
+#if REMOVED
                 TagList.Refresh(sender as BaseChannel<IRfid>,
                     e.ReaderNameList,
                     e.Result.Results,
@@ -80,6 +105,7 @@ namespace CallRfidCenterSample
                             RfidManager.TriggerSetError(this, new SetErrorEventArgs { Error = text });
                             // TagSetError?.Invoke(this, new SetErrorEventArgs { Error = text });
                         });
+#endif
 
                 // 标签总数显示 图书+读者卡
                 // this.Number = $"{TagList.Books.Count}:{TagList.Patrons.Count}";

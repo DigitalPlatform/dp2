@@ -20,7 +20,9 @@ namespace DigitalPlatform.RFID
 
         ListTagsResult ListTags(string reader_name, string style);
 
-        GetTagInfoResult GetTagInfo(string reader_name, string uid,
+        // 注意这个版本的函数只支持 HF，不支持 UHF 标签
+        GetTagInfoResult GetTagInfo(string reader_name,
+            string uid,
             uint antenna_id);
 
         // 2020/10/10

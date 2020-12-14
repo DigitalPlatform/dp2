@@ -194,7 +194,7 @@ namespace UnitTestRFID
                 Content = "中文/english"
             });
 
-            var bytes = GaoxiaoUtility.EncodeUserBank(elements);
+            var bytes = GaoxiaoUtility.EncodeUserBank(elements, false);
             var results = GaoxiaoUtility.DecodeUserBank(bytes);
 
             // 判断是否完全还原

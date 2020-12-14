@@ -639,7 +639,8 @@ namespace DigitalPlatform.RFID
         #region USER 区的编码解码
 
         // 编码 User Bank
-        public static byte[] EncodeUserBank(List<GaoxiaoUserElement> elements)
+        public static byte[] EncodeUserBank(List<GaoxiaoUserElement> elements,
+            bool tail_zero)
         {
             List<byte> results = new List<byte>();
             foreach (var element in elements)
@@ -664,6 +665,14 @@ namespace DigitalPlatform.RFID
             // 补齐偶数字节数
             if ((results.Count % 2) != 0)
                 results.Add(0);
+            else if (tail_zero)
+            {
+                // 为了解析时候能终止，填充 0
+                results.Add(0);
+                results.Add(0);
+
+                // TODO: 元素数也可以根据 ContentParameter 内容测算，可以不用特意填充 0
+            }
 
             return results.ToArray();
         }
@@ -682,6 +691,10 @@ namespace DigitalPlatform.RFID
                 // length 第一字节的后 2-bit + 第二字节的 8-bit
                 int length = (data[start] & 0x03) << 8;
                 length |= data[start + 1] & 0xff;
+
+                if (start + length > data.Length)
+                    throw new Exception($"start={start} 处的 element 长度 {length} 越界");
+
                 List<byte> bytes = new List<byte>();
                 for (int i = 0; i < length; i++)
                 {
@@ -989,7 +1002,7 @@ namespace DigitalPlatform.RFID
 
                 user_elements.Add(user_element);
             }
-            var user_bank = EncodeUserBank(user_elements);
+            var user_bank = EncodeUserBank(user_elements, true);
 
             var epc_info = new GaoxiaoEpcInfo();
             epc_info.Lending = !eas;
