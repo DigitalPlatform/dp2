@@ -297,6 +297,7 @@ out Reader reader);
                             {
                                 Value = 1,
                                 ReaderName = reader.Name,
+                                AntennaID = tag.InventoryInfo.AntennaID,    // 2020/12/14
                                 UID = tag.TagInfo.UID
                             };
                     }

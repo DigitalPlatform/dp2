@@ -2965,6 +2965,33 @@ out Reader reader);
 
                     foreach (InventoryInfo info in results)
                     {
+                        // TODO: UHF 标签可以通过 EPC 直接解析出 PII，不需要再获取 User Bank 内容
+                        if (info.Protocol == InventoryInfo.ISO18000P6C)
+                        {
+                            // TODO: 需要判断格式为国标还是高校联盟
+                            try
+                            {
+                                // 高校联盟
+                                // 跳过 4 个 byte
+                                var bytes = Element.FromHexString(info.UID.Substring(8));
+                                var epc_info = GaoxiaoUtility.DecodeGaoxiaoEpc(bytes.ToArray());
+                                // TODO: 要考虑适应 xxx.xxx 形态的 PII
+                                if (pii == epc_info.PII)
+                                    return new FindTagResult
+                                    {
+                                        Value = 1,
+                                        ReaderName = reader.Name,
+                                        AntennaID = info.AntennaID,
+                                        UID = info.UID
+                                    };
+                            }
+                            catch
+                            {
+                                // 无法解析
+                            }
+                            continue;
+                        }
+
                         // 选择天线
                         if (reader.AntennaCount > 1)
                         {
@@ -3054,6 +3081,7 @@ out Reader reader);
                                 {
                                     Value = 1,
                                     ReaderName = reader.Name,   // 2019/8/28
+                                    AntennaID = info.AntennaID,
                                     UID = info.UID
                                 };
                         }

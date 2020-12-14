@@ -773,7 +773,7 @@ namespace RfidCenter
             return new GetTagInfoResult { ErrorCode = "notFoundReader" };
         }
 
-        // TODO: 要改造一下。天线编号要放在 reader_name 中？
+        // TODO: 即将废除
         // 2019/9/27 增加的 antenna_id
         // result.Value
         //      -1
@@ -848,9 +848,25 @@ namespace RfidCenter
         }
 
         // 2020/10/10
+        // 旧版本接口
         public GetTagInfoResult GetTagInfo(string reader_name,
     string uid,
     uint antenna_id,
+    string style)
+        {
+            return GetTagInfo(reader_name,
+                uid,
+                antenna_id,
+                null,
+                style);
+        }
+
+        // 2020/12/14
+        // 最新版接口
+        public GetTagInfoResult GetTagInfo(string reader_name,
+    string uid,
+    uint antenna_id,
+    string protocol_param,
     string style)
         {
             if (Program.MainForm.ErrorState != "normal")
@@ -868,8 +884,13 @@ namespace RfidCenter
                     continue;
 
                 string protocol = InventoryInfo.ISO15693;
-                if (StringUtil.IsInList(InventoryInfo.ISO18000P6C, reader.Protocols) == true)
-                    protocol = InventoryInfo.ISO18000P6C;
+                if (string.IsNullOrEmpty(protocol_param))
+                {
+                    if (StringUtil.IsInList(InventoryInfo.ISO18000P6C, reader.Protocols) == true)
+                        protocol = InventoryInfo.ISO18000P6C;
+                }
+                else
+                    protocol = protocol_param;
 
                 InventoryInfo info = new InventoryInfo
                 {

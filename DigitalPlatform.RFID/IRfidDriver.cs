@@ -333,6 +333,9 @@ uint new_password);
         public string ReaderName { get; set; }
         public string UID { get; set; }
 
+        // 2020/12/14
+        public uint AntennaID { get; set; }
+
         public override string ToString()
         {
             return $"{base.ToString()},ReaderName={ReaderName},UID={UID}";
