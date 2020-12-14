@@ -804,8 +804,13 @@ namespace RfidCenter
                 if (Reader.MatchReaderName(reader_name, reader.Name, out string antenna_list) == false)
                     continue;
 
+                string protocol = InventoryInfo.ISO15693;
+                if (StringUtil.IsInList(InventoryInfo.ISO18000P6C, reader.Protocols) == true)
+                    protocol = InventoryInfo.ISO18000P6C;
+
                 InventoryInfo info = new InventoryInfo
                 {
+                    Protocol = protocol,
                     UID = uid,
                     AntennaID = antenna_id
                 };
@@ -862,8 +867,13 @@ namespace RfidCenter
                 if (Reader.MatchReaderName(reader_name, reader.Name, out string antenna_list) == false)
                     continue;
 
+                string protocol = InventoryInfo.ISO15693;
+                if (StringUtil.IsInList(InventoryInfo.ISO18000P6C, reader.Protocols) == true)
+                    protocol = InventoryInfo.ISO18000P6C;
+
                 InventoryInfo info = new InventoryInfo
                 {
+                    Protocol = protocol,
                     UID = uid,
                     AntennaID = antenna_id
                 };
@@ -1147,7 +1157,7 @@ new_password);
 
 #if SENDKEY
 
-#region Tag List
+        #region Tag List
 
         // 当前在读卡器探测范围内的标签
         static List<OneTag> _tagList = new List<OneTag>();
@@ -1260,7 +1270,7 @@ new_password);
             });
         }
 
-#endregion
+        #endregion
 
 #endif
 

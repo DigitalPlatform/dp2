@@ -2990,7 +2990,7 @@ out Reader reader);
                             temp_result = new FindTagResult
                             {
                                 Value = -1,
-                                ErrorInfo = "connectTag Error"
+                                ErrorInfo = "connectTag (ISO15693) Error"
                             };
                             continue;
                         }
@@ -3527,7 +3527,7 @@ out Reader reader);
                     return new NormalResult
                     {
                         Value = -1,
-                        ErrorInfo = "connectTag Error"
+                        ErrorInfo = "connectTag (ISO15693) Error"
                     };
                 try
                 {
@@ -4049,7 +4049,7 @@ out Reader reader);
                     return new GetTagInfoResult
                     {
                         Value = -1,
-                        ErrorInfo = "connectTag Error"
+                        ErrorInfo = "connectTag (ISO15693) Error"
                     };
                 try
                 {
