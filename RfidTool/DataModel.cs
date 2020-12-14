@@ -207,13 +207,12 @@ namespace RfidTool
         {
             var result = _driver.WriteTagInfo(one_reader_name, old_tag_info, new_tag_info);
 
-            // 从 Tags 中清除。避免瞬间的报错信息
-            // TagList.RemoveTag(old_tag_info.UID);
-
+            // UHF 保存后 EPC 会发生变化，为了避免引起不必要的 GetTagInfo 动作，ClearTagTable() 时第二参数应该为 false
+            bool clearTagInfo = (old_tag_info.Protocol == InventoryInfo.ISO15693 ? true : false);
             // 清除缓存
-            TagList.ClearTagTable(old_tag_info.UID, false);
+            TagList.ClearTagTable(old_tag_info.UID, clearTagInfo);
             if (old_tag_info.UID != new_tag_info.UID)
-                TagList.ClearTagTable(new_tag_info.UID, false);
+                TagList.ClearTagTable(new_tag_info.UID, clearTagInfo);
 
             return result;
         }
