@@ -47,7 +47,6 @@ namespace RfidTool
 
             DataModel.TagChanged += DataModel_TagChanged;
             DataModel.SetError += DataModel_SetError;
-
         }
 
         private void textBox_barcode_KeyPress(object sender, KeyPressEventArgs e)
@@ -163,6 +162,7 @@ namespace RfidTool
         const int COLUMN_AOI = 5;
         const int COLUMN_ANTENNA = 6;
         const int COLUMN_READERNAME = 7;
+        const int COLUMN_PROTOCOL = 8;
 
         object _syncRootFill = new object();
 
@@ -222,9 +222,12 @@ namespace RfidTool
             string oi = "";
             string aoi = "";
 
+            var iteminfo = item.Tag as ItemInfo;
+
             ListViewUtil.ChangeItemText(item, COLUMN_UID, tag.OneTag.UID);
             ListViewUtil.ChangeItemText(item, COLUMN_ANTENNA, tag.OneTag.AntennaID.ToString());
             ListViewUtil.ChangeItemText(item, COLUMN_READERNAME, tag.OneTag.ReaderName);
+            ListViewUtil.ChangeItemText(item, COLUMN_PROTOCOL, tag.OneTag.Protocol);
 
             try
             {
@@ -235,13 +238,32 @@ namespace RfidTool
 
                     if (taginfo.Protocol == InventoryInfo.ISO18000P6C)
                     {
-                        var parse_result = GaoxiaoUtility.ParseTag(
-            Element.FromHexString(taginfo.UID),
-            taginfo.Bytes);
-                        if (parse_result.Value == -1)
-                            throw new Exception(parse_result.ErrorInfo);
-                        chip = parse_result.LogicChip;
-                        taginfo.EAS = !parse_result.EpcInfo.Lending;
+                        var epc_bank = Element.FromHexString(taginfo.UID);
+                        var isGB = UhfUtility.IsISO285604Format(epc_bank, taginfo.Bytes);
+                        if (isGB)
+                        {
+                            // 国标 UHF
+                            var parse_result = UhfUtility.ParseTag(epc_bank,
+                taginfo.Bytes,
+                4);
+                            if (parse_result.Value == -1)
+                                throw new Exception(parse_result.ErrorInfo);
+                            chip = parse_result.LogicChip;
+                            taginfo.EAS = false;    // TODO
+                            iteminfo.UhfProtocol = "gb";
+                        }
+                        else
+                        {
+                            // 高校联盟 UHF
+                            var parse_result = GaoxiaoUtility.ParseTag(
+                epc_bank,
+                taginfo.Bytes);
+                            if (parse_result.Value == -1)
+                                throw new Exception(parse_result.ErrorInfo);
+                            chip = parse_result.LogicChip;
+                            taginfo.EAS = !parse_result.EpcInfo.Lending;
+                            iteminfo.UhfProtocol = "gxlm";
+                        }
                     }
                     else
                     {
@@ -259,9 +281,12 @@ namespace RfidTool
                     aoi = chip.FindElement(ElementOID.AOI)?.Text;
                     if (taginfo.Protocol == InventoryInfo.ISO18000P6C)
                     {
-                        // 数字平台针对高校联盟扩充的 AOI
-                        if (string.IsNullOrEmpty(oi) && string.IsNullOrEmpty(aoi))
-                            aoi = chip.FindElement((ElementOID)27)?.Text;
+                        if (iteminfo.UhfProtocol == "gxlm")
+                        {
+                            // 数字平台针对高校联盟扩充的 AOI
+                            if (string.IsNullOrEmpty(oi) && string.IsNullOrEmpty(aoi))
+                                aoi = chip.FindElement((ElementOID)27)?.Text;
+                        }
                     }
                 }
 
@@ -271,6 +296,15 @@ namespace RfidTool
                 ListViewUtil.ChangeItemText(item, COLUMN_EAS, eas);
                 ListViewUtil.ChangeItemText(item, COLUMN_OI, oi);
                 ListViewUtil.ChangeItemText(item, COLUMN_AOI, aoi);
+
+                // 刷新协议栏
+                if (tag.OneTag.Protocol == InventoryInfo.ISO18000P6C)
+                {
+                    string name = "国标";
+                    if (iteminfo.UhfProtocol == "gxlm")
+                        name = "高校联盟";
+                    ListViewUtil.ChangeItemText(item, COLUMN_PROTOCOL, tag.OneTag.Protocol + ":" + name);
+                }
             }
             catch (Exception ex)
             {
@@ -562,6 +596,13 @@ namespace RfidTool
 
             if (existing.Protocol == InventoryInfo.ISO18000P6C)
             {
+                // TODO: 判断标签内容是空白/国标/高校联盟格式，采取不同的写入格式
+                /*
+高校联盟格式
+国标格式
+空白标签用高校联盟格式，其余依从原格式
+空白标签用国标格式，其余依从原格式
+* */
                 var result = GaoxiaoUtility.BuildTag(chip, eas);
                 TagInfo new_tag_info = existing.Clone();
                 new_tag_info.Bytes = result.UserBank;
@@ -859,5 +900,7 @@ namespace RfidTool
     public class ItemInfo
     {
         public TagAndData TagData { get; set; }
+        // 标签所用的 UHF 标准。空/gb/gxlm 其中空表示未知
+        public string UhfProtocol { get; set; }
     }
 }

@@ -93,10 +93,10 @@ namespace UnitTestRFID
         [TestMethod]
         public void Test_encode_uii_3()
         {
-            var bytes = UhfUtility.EncodeUII("B.A12312345678");
+            var bytes = UhfUtility.EncodeUII("B.A12312345678", true);
 
             byte[] correct = Element.FromHexString(
-@"10 E2 FB 21 02 DD DF 7C 4E");
+@"10 E2 FB 21 02 DD DF 7C 4E 00");  // 注意补齐偶数，最后增加了一个 0 byte
 
             // 
             Assert.AreEqual(0, ByteArray.Compare(correct, bytes));
@@ -235,10 +235,10 @@ namespace UnitTestRFID
             Assert.AreEqual("78.", segments[0].Text);
         }
 
-        // 编码 MB11
+        // 编码 MB11 (User Bank)
         // ISO/TS 28560-4:2014(E) page 52
         [TestMethod]
-        public void Test_encode_mb11_1()
+        public void Test_encode_userbank_1()
         {
             LogicChip chip = new LogicChip();
             chip.NewElement(ElementOID.SetInformation, "1203");
@@ -264,6 +264,112 @@ EB"
 
             // Assert.AreEqual(block_map, "ww....www");
 
+        }
+
+
+        // 编码 MB11 (User Bank)
+        // ISO/TS 28560-4:2014(E) page 52
+        [TestMethod]
+        public void Test_encode_userbank_2()
+        {
+            LogicChip chip = new LogicChip();
+            chip.NewElement(ElementOID.SetInformation, "1203");
+            chip.NewElement(ElementOID.ShelfLocation, "QA268.L55");
+            chip.NewElement(ElementOID.OwnerInstitution, "US-InU-Mu").CompactMethod = CompactionScheme.SevenBitCode;    // 如果让 GetBytes() 自动选择压缩方案，这个元素会被选择 ISIL 压缩方案
+            Debug.Write(chip.ToString());
+
+            var result = UhfUtility.EncodeUserBank(chip,
+                4 * 52,
+                4,
+                true,
+                out string block_map);
+            string result_string = Element.GetHexString(result, "4");
+            byte[] correct = Element.FromHexString(
+    @"06 02 01 D0 14 02
+04B3 4607
+441C b6E2
+E335 D653
+08AB 4D6C
+9DD5 56CD
+EB00"
+);
+            Assert.IsTrue(result.SequenceEqual(correct));
+
+            // Assert.AreEqual(block_map, "ww....www");
+
+        }
+
+        [TestMethod]
+        public void Test_decode_userbank_1()
+        {
+            byte[] userbank = Element.FromHexString(
+@"06 02 01 D0 14 02
+04B3 4607
+441C b6E2
+E335 D653
+08AB 4D6C
+9DD5 56CD
+EB00"
+);
+            /*
+            // 解码 User Bank，和解码高频标签的 Bytes 一样
+            List<byte> temp = new List<byte>(userbank);
+            temp.RemoveAt(0);
+
+            var chip = LogicChip.From(temp.ToArray(),
+                4);
+            */
+            var result = UhfUtility.ParsUserBank(userbank, 4);
+
+            Assert.AreEqual(0, result.Value);
+
+            var chip = result.LogicChip;
+
+            Assert.AreEqual(4, chip.Elements.Count);    // 3 + 还有一个 Content Parameter 元素
+
+            // 验证 Content Parameter
+            var contentParameter = chip.FindElement(ElementOID.ContentParameter)?.Content;
+            string description = Element.GetContentParameterDesription(contentParameter);
+            Assert.AreEqual("OwnerInstitution,SetInformation,ShelfLocation", description);
+            
+            Assert.AreEqual("1203",
+                chip.FindElement(ElementOID.SetInformation)?.Text);
+            Assert.AreEqual("QA268.L55",
+                chip.FindElement(ElementOID.ShelfLocation)?.Text);
+            Assert.AreEqual("US-InU-Mu",
+                chip.FindElement(ElementOID.OwnerInstitution)?.Text);
+        }
+
+        // 编码 EPC bank
+        [TestMethod]
+        public void Test_encode_epcbank_1()
+        {
+            var bytes = UhfUtility.EncodeEpcBank("CH-000134-1.12345678.31");
+
+            byte[] correct = Element.FromHexString(
+@"45c2 141c c04f c70b adb5 c6e2 da1d ed4d d319");
+
+            // 
+            Assert.AreEqual(0, ByteArray.Compare(correct, bytes));
+        }
+
+        // 解码 EPC Bank
+        [TestMethod]
+        public void Test_decode_epcbank_1()
+        {
+            byte[] epc_bank = Element.FromHexString(
+@"0000 45c2 141c c04f c70b adb5 c6e2 da1d ed4d d319");
+            var result = UhfUtility.ParseEpcBank(epc_bank);
+
+            Assert.AreEqual(0, result.Value);
+            var pc = result.PC;
+            Assert.AreEqual(true, pc.UMI);
+            Assert.AreEqual(false, pc.XPC);
+            Assert.AreEqual(true, pc.ISO);
+            Assert.AreEqual(0xc2, pc.AFI);
+            Assert.AreEqual((epc_bank.Length - 2/*校验码*/ - 2/*PC*/) / 2, pc.LengthIndicator);
+
+            Assert.AreEqual("CH-000134-1.12345678.31", result.UII);
         }
     }
 }
