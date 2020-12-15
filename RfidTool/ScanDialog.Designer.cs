@@ -37,6 +37,7 @@ namespace RfidTool
             this.columnHeader_uid = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_pii = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_tou = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_eas = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_oi = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_aoi = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_antenna = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -46,7 +47,7 @@ namespace RfidTool
             this.button_clearProcessingBarcode = new System.Windows.Forms.Button();
             this.label_message = new System.Windows.Forms.Label();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.columnHeader_eas = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_protocol = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.SuspendLayout();
             // 
             // label1
@@ -91,7 +92,8 @@ namespace RfidTool
             this.columnHeader_oi,
             this.columnHeader_aoi,
             this.columnHeader_antenna,
-            this.columnHeader_readerName});
+            this.columnHeader_readerName,
+            this.columnHeader_protocol});
             this.listView_tags.FullRowSelect = true;
             this.listView_tags.HideSelection = false;
             this.listView_tags.Location = new System.Drawing.Point(10, 142);
@@ -124,6 +126,11 @@ namespace RfidTool
             this.columnHeader_tou.Name = "columnHeader_tou";
             this.columnHeader_tou.Text = "TOU(用途)";
             this.columnHeader_tou.Width = 160;
+            // 
+            // columnHeader_eas
+            // 
+            this.columnHeader_eas.Text = "EAS(防盗标志)";
+            this.columnHeader_eas.Width = 159;
             // 
             // columnHeader_oi
             // 
@@ -195,10 +202,10 @@ namespace RfidTool
             this.label_message.TabIndex = 7;
             this.label_message.Text = "请扫入条码号 ...";
             // 
-            // columnHeader_eas
+            // columnHeader_protocol
             // 
-            this.columnHeader_eas.Text = "EAS(防盗标志)";
-            this.columnHeader_eas.Width = 159;
+            this.columnHeader_protocol.Text = "协议";
+            this.columnHeader_protocol.Width = 200;
             // 
             // ScanDialog
             // 
@@ -245,5 +252,6 @@ namespace RfidTool
         private System.Windows.Forms.ColumnHeader columnHeader_aoi;
         private System.Windows.Forms.ToolTip toolTip1;
         private System.Windows.Forms.ColumnHeader columnHeader_eas;
+        private System.Windows.Forms.ColumnHeader columnHeader_protocol;
     }
 }

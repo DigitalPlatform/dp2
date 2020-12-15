@@ -199,6 +199,24 @@ namespace RfidTool
             }
         }
 
+        /*
+高校联盟格式
+国标格式
+空白标签用高校联盟格式，其余依从原格式
+空白标签用国标格式，其余依从原格式
+        * */
+        // 写入 UHF 标签时所用的数据格式
+        public static string UhfWriteFormat
+        {
+            get
+            {
+                return ClientInfo.Config.Get("rfid", "uhf_write_format", "国标格式");
+            }
+            set
+            {
+                ClientInfo.Config.Set("rfid", "uhf_write_format", value);
+            }
+        }
 
         // 写入标签
         public static NormalResult WriteTagInfo(string one_reader_name,

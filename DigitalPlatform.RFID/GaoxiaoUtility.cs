@@ -17,6 +17,33 @@ namespace DigitalPlatform.RFID
     /// </summary>
     public static class GaoxiaoUtility
     {
+        // 判断标签内容是否采用了 高校联盟 编码格式
+        // 疑问：可否认为凡是不符合国标格式的就是高校联盟格式？
+        public static bool IsISO285604Format(byte[] epc_bank,
+            byte[] user_bank)
+        {
+            if (user_bank != null && user_bank.Length >= 1)
+            {
+                // 检查 User Bank 特征？
+                
+            }
+
+            /*
+            {
+                var pc = UhfUtility.ParsePC(epc_bank, 2);
+                if (pc.AFI != 0xc2)
+                    return false;
+                if (user_bank != null && pc.UMI == false)
+                    return false;
+                if (pc.ISO == false)
+                    return false;
+            }
+            */
+
+            return true;
+        }
+
+
         // 编码高校联盟 EPC bank。注意返回的内容没有包含前 4 bytes(校验码和 PC)
         public static byte[] EncodeGaoxiaoEpcPayload(GaoxiaoEpcInfo info)
         {

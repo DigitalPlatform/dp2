@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static DigitalPlatform.RFID.LogicChip;
 
 namespace DigitalPlatform.RFID
 {
@@ -11,7 +12,111 @@ namespace DigitalPlatform.RFID
     /// </summary>
     public static class UhfUtility
     {
+        public static bool IsBlankTag(byte[] epc_bank,
+            byte[] user_bank)
+        {
+            if (user_bank != null && user_bank.Length > 0)
+            {
+                bool not_empty = false;
+                foreach(byte b in user_bank)
+                {
+                    if (b != 0)
+                    {
+                        not_empty = true;
+                        break;
+                    }
+                }
+
+                if (not_empty == true)
+                    return false;
+                return true;
+            }
+            else
+            {
+                // 标签制造的时候不存在 User Bank，那么需要判断 EPC bank
+
+                // TODO: EPC 空白的标志是什么？
+            }
+
+            return true;
+        }
+
+        // 判断标签内容是否采用了 ISO28560-4 (UHF 国标)编码格式
+        public static bool IsISO285604Format(byte[] epc_bank,
+            byte[] user_bank)
+        {
+            if (user_bank != null && user_bank.Length >= 1)
+            {
+                // 检查 User Bank 第一 byte，DSFID 是否为 0x06
+                if (user_bank[0] != 0x06)
+                    return false;
+            }
+
+            {
+                var pc = ParsePC(epc_bank, 2);
+                if (pc.AFI != 0xc2)
+                    return false;
+                if (user_bank != null && pc.UMI == false)
+                    return false;
+                if (pc.ISO == false)
+                    return false;
+            }
+
+            return true;
+        }
+
         #region 编码
+
+        // 2020/12/15
+        // 编码 MB01 也就是 EPC Bank
+        // 注意返回的 bytes 不包含校验码 1 word 部分(这部分一般是由读写器驱动自动计算和补充写入)
+        public static byte[] EncodeEpcBank(string uii)
+        {
+            var uii_bytes = EncodeUII(uii, true);
+
+            ProtocolControlWord pc_info = new ProtocolControlWord();
+            pc_info.UMI = true;
+            pc_info.XPC = false;
+            pc_info.ISO = true;
+            pc_info.AFI = 0xc2;
+            pc_info.LengthIndicator = uii_bytes.Length / 2;
+            var pc_bytes = UhfUtility.EncodePC(pc_info);
+
+            List<byte> results = new List<byte>(pc_bytes);
+            results.AddRange(uii_bytes);
+            return results.ToArray();
+        }
+
+        // 2020/12/15
+        // 编码 MB11 也就是 User Bank
+        // parameters:
+        //      max_bytes   最大容量字节数。注意不包含 head 字节
+        public static byte[] EncodeUserBank(LogicChip chip,
+            int max_bytes,
+            int block_size,
+            bool word,
+            out string block_map)
+        {
+            block_map = "";
+
+            // 注意 chip 里面不应该包含 PII 元素
+            if (chip.FindElement(ElementOID.PII) != null)
+                throw new ArgumentException($"chip 的 Elements 中不应包含 PII 元素");
+
+            var bytes = chip.GetBytes(max_bytes,
+                block_size,
+                GetBytesStyle.ReserveSequence,
+                out block_map);
+            var head = new byte[] { 0x06 };
+            List<byte> results = new List<byte>(head);
+            results.AddRange(bytes);
+
+            // 补齐偶数字节
+            if (word && (results.Count % 2) != 0)
+                results.Add(0);
+
+            return results.ToArray();
+        }
 
         // 将字符翻译为 URN40 对照表中的数值
         static int GetUrn40Decimal(char c)
@@ -222,7 +327,9 @@ namespace DigitalPlatform.RFID
         }
 
         // 编码 UII
-        public static byte[] EncodeUII(string text)
+        // parameters:
+        //      word    是否要自动补齐偶数字节数
+        public static byte[] EncodeUII(string text, bool word = true)
         {
             List<byte> results = new List<byte>();
 
@@ -263,6 +370,10 @@ namespace DigitalPlatform.RFID
                 else
                     throw new Exception($"无法识别的 segment type '{segment.Type}'");
             }
+
+            // 补齐偶数字节
+            if (word && (results.Count % 2) != 0)
+                results.Add(0);
 
             return results.ToArray();
         }
@@ -330,24 +441,118 @@ namespace DigitalPlatform.RFID
 
         #region 解码
 
+        public class ParseGbResult : NormalResult
+        {
+            public ProtocolControlWord PC { get; set; }
+            public string UII { get; set; }
+
+            // 逻辑标签内容
+            public LogicChip LogicChip { get; set; }
+        }
+
+        // 解析一个 UHF 国标标签全部内容
+        public static ParseGbResult ParseTag(byte[] epc_bank,
+            byte[] user_bank,
+            int block_size,
+            string block_map = "")
+        {
+            var epc_result = ParseEpcBank(epc_bank);
+            if (epc_result.Value == -1)
+                return new ParseGbResult
+                {
+                    Value = -1,
+                    ErrorInfo = epc_result.ErrorInfo,
+                    ErrorCode = epc_result.ErrorCode
+                };
+            var user_result = ParsUserBank(user_bank,
+                block_size,
+                block_map);
+            if (user_result.Value == -1)
+                return new ParseGbResult
+                {
+                    Value = -1,
+                    ErrorInfo = user_result.ErrorInfo,
+                    ErrorCode = user_result.ErrorCode
+                };
+            return new ParseGbResult
+            {
+                PC = epc_result.PC,
+                UII = epc_result.UII,
+                LogicChip = user_result.LogicChip,
+            };
+        }
+
         // 解析 MB01 数据结构
         // parameters:
         //      data    MB01 包含的数据。注意开头 2 bytes 是校验码，从 0x10 bits 偏移位置开始是协议控制字(PC)
-        public static MB01Info ParseMB01(byte[] data)
+        public static ParseEpcBankResult ParseEpcBank(byte[] data)
         {
-            MB01Info result = new MB01Info();
-            result.PC = ParsePC(data, 2);
-            if (result.PC.ISO == true)
+            if (data.Length <= 4)
+                return new ParseEpcBankResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"data 长度不足",
+                    ErrorCode = "lengthError",
+                };
+
+            var pc = ParsePC(data, 2);
+            if (pc.ISO == true)
             {
-                if (result.PC.AFI != 0xc2)
-                    throw new Exception("目前仅支持 AFI 为 0xc2 的图书馆应用家族标签");
+                if (pc.AFI != 0xc2)
+                    return new ParseEpcBankResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"(PC.ISO=true, PC.AFI={Element.GetHexString((byte)pc.AFI)}) 目前仅支持 AFI 为 0xc2 的图书馆应用家族标签",
+                        ErrorCode = "notSupportAFI",
+                    };
             }
             else
             {
-                throw new Exception("目前暂不支持 GC1/EPC 的 MB01");
+                return new ParseEpcBankResult
+                {
+                    Value = -1,
+                    ErrorInfo = "(PC.ISO=false) 目前暂不支持 GC1/EPC 的 MB01(EPC Bank)",
+                    ErrorCode = "notSupportISO",
+                };
             }
 
+            ParseEpcBankResult result = new ParseEpcBankResult();
+            result.PC = pc;
+            result.UII = DecodeUII(data, 4, data.Length - 4);
             return result;
+        }
+
+        // 解析 User Bank。注意 data 第一 byte 是 DSFID，第二 byte 开始才是数据
+        public static ParseUserBankResult ParsUserBank(byte[] data,
+            int block_size,
+            string block_map = "")
+        {
+            if (data.Length <= 1)
+                return new ParseUserBankResult
+                {
+                    Value = -1,
+                    ErrorInfo = "data 长度不足"
+                };
+            try
+            {
+                // 解码 User Bank，和解码高频标签的 Bytes 一样
+                List<byte> temp = new List<byte>(data);
+                temp.RemoveAt(0);
+
+                var chip = LogicChip.From(temp.ToArray(),
+                    block_size,
+                    block_map);
+
+                return new ParseUserBankResult { LogicChip = chip };
+            }
+            catch (Exception ex)
+            {
+                return new ParseUserBankResult
+                {
+                    Value = -1,
+                    ErrorInfo = ex.Message
+                };
+            }
         }
 
         // 解析协议控制字(Protocol Control Word)
@@ -358,7 +563,7 @@ namespace DigitalPlatform.RFID
 
             ProtocolControlWord result = new ProtocolControlWord();
             // 0x0 1 2 3 4 bits
-            result.LengthIndicator = (data[0] >> 3) & 0x1f;
+            result.LengthIndicator = (data[start] >> 3) & 0x1f;
             result.UMI = (data[start] & 0x4) != 0;
             result.XPC = (data[start] & 0x2) != 0;
             result.ISO = (data[start] & 0x1) != 0;
@@ -516,14 +721,25 @@ namespace DigitalPlatform.RFID
 
     }
 
-    public class MB01Info
+    public class ParseEpcBankResult : NormalResult
     {
         // Protocol Control Word
         public ProtocolControlWord PC { get; set; }
         // 
         public string UII { get; set; }
+
+        public override string ToString()
+        {
+            return $"UII='{UII}',PC='{PC.ToString()}',{base.ToString()}";
+        }
     }
 
+    public class ParseUserBankResult : NormalResult
+    {
+        public LogicChip LogicChip { get; set; }
+    }
+
+    // 协议控制字(PC)之解析结构
     public class ProtocolControlWord
     {
         // Length Indicator
@@ -536,5 +752,10 @@ namespace DigitalPlatform.RFID
         public bool ISO { get; set; }
         // 图书馆应用的 AFI 应该为 0xc2
         public int AFI { get; set; }
+
+        public override string ToString()
+        {
+            return $"LengthIndicator={LengthIndicator}, UMI={UMI}, XPC={XPC}, ISO={ISO}, AFI={Element.GetHexString((byte)AFI)}";
+        }
     }
 }

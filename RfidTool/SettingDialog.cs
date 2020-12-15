@@ -22,6 +22,8 @@ namespace RfidTool
         {
             this.textBox_rfid_oi.Text = DataModel.DefaultOiString;
             this.textBox_rfid_aoi.Text = DataModel.DefaultAoiString;
+
+            this.comboBox_uhfDataFormat.Text = DataModel.UhfWriteFormat;
         }
 
         private void SettingDialog_FormClosing(object sender, FormClosingEventArgs e)
@@ -62,10 +64,18 @@ namespace RfidTool
                         goto ERROR1;
                     }
                 }
+
+                if (string.IsNullOrEmpty(this.comboBox_uhfDataFormat.Text))
+                {
+                    strError = "尚未指定 UHF 标签写入格式";
+                    goto ERROR1;
+                }
             }
 
             DataModel.DefaultOiString = this.textBox_rfid_oi.Text;
             DataModel.DefaultAoiString = this.textBox_rfid_aoi.Text;
+
+            DataModel.UhfWriteFormat = this.comboBox_uhfDataFormat.Text;
 
             this.DialogResult = DialogResult.OK;
             this.Close();
