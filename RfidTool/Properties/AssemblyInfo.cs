@@ -33,7 +33,7 @@ using System.Runtime.InteropServices;
 //通过使用 "*"，如下所示:
 // [assembly: AssemblyVersion("1.0.*")]
 
-[assembly: AssemblyVersion("1.0.4")]
+[assembly: AssemblyVersion("1.0.5")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
 
 // 1.0.1 (2020/12/10) 增加保存“写入历史”列表功能; 感知 USB 插拔、自动重新连接读写器;
@@ -42,3 +42,4 @@ using System.Runtime.InteropServices;
 // 1.0.2 (2020/12/10) 写入层架标和读者卡时 EAS 为 Off   
 // 1.0.3 (2020/12/11) 弹出“OI 和 AOI 尚未配置” MessageBox 的时候暂时禁用条码处理模块，避免这时候放标签到读卡器上引起再次弹出 MessageBox
 // 1.0.4 (2020/12/14) 增加写入 UHF 高校联盟格式标签的功能(使用 M60 读写器)
+// 1.0.5 (2020/12/16) 增加写入 UHF 国标格式标签的功能(使用 M60 读写器)

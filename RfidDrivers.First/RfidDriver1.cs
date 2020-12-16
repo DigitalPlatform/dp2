@@ -3417,6 +3417,10 @@ out Reader reader);
                 // foreach (UIntPtr hreader in handles)
                 foreach (var reader in readers)
                 {
+                    string protocol = InventoryInfo.ISO15693;
+                    if (StringUtil.IsInList(InventoryInfo.ISO18000P6C, reader.Protocols) == true)
+                        protocol = InventoryInfo.ISO18000P6C;
+
                     // 选择天线
                     if (reader.AntennaCount > 1)
                     {
@@ -3435,11 +3439,55 @@ out Reader reader);
                     }
 
                     UInt32 tag_type = RFIDLIB.rfidlib_def.RFID_ISO15693_PICC_ICODE_SLI_ID;
-                    UIntPtr hTag = _connectTag(reader.ReaderHandle, uid, tag_type);
+                    UIntPtr hTag = UIntPtr.Zero;
+                    if (protocol == InventoryInfo.ISO18000P6C)
+                        hTag = _connectUhfTag(reader.ReaderHandle,
+                            uid);
+                    else
+                        hTag = _connectTag(reader.ReaderHandle, uid, tag_type);
                     if (hTag == UIntPtr.Zero)
                         continue;
                     try
                     {
+                        if (protocol == InventoryInfo.ISO18000P6C)
+                        {
+                            var pc_bytes = GetPcBytes(uid);
+
+                            if (pc_bytes.Length != 2)
+                                return new NormalResult
+                                {
+                                    Value = -1,
+                                    ErrorInfo = "UID 中解析的 PC bytes 数必须为 2"
+                                };
+
+                            var pc = UhfUtility.ParsePC(pc_bytes, 0);
+                            /*
+                            bool old_enabled = pc.AFI == 0x07 ? true : false;
+                            if (old_enabled == enable)  // 没有必要更新
+                                return new NormalResult();
+                            */
+                            pc.AFI = enable ? 0x07 : 0xc2;
+                            var new_pc_bytes = UhfUtility.EncodePC(pc);
+
+                            var iret = RFIDLIB.rfidlib_aip_iso18000p6C.ISO18000p6C_Write(
+        reader.ReaderHandle,
+        hTag,
+        (Byte)RFIDLIB.rfidlib_def.ISO18000p6C_MEM_BANK_EPC,
+        1,
+        (UInt32)(new_pc_bytes.Length / 2),
+        new_pc_bytes,
+        (UInt32)new_pc_bytes.Length);
+                            if (iret != 0)
+                                return new NormalResult
+                                {
+                                    Value = -1,
+                                    ErrorInfo = $"ISO18000p6C_Write() EPC Bank error. iret:{iret},reader_name:{reader_name},uid:{uid},antenna_id:{antenna_id}",
+                                    ErrorCode = GetErrorCode(iret, reader.ReaderHandle)
+                                };
+
+                            return new NormalResult();
+                        }
+
                         // 写入 AFI
                         {
                             NormalResult result0 = WriteAFI(reader.ReaderHandle,
@@ -3485,6 +3533,17 @@ out Reader reader);
             {
                 Unlock();
             }
+        }
+
+        // 从 UID hex string 中解析出 PC 两个 Bytes
+        static byte [] GetPcBytes(string hex_string)
+        {
+            if (hex_string.Length < 8)
+                throw new ArgumentException($"hex string 的长度必须在 8 bytes 以上");
+            string part = hex_string.Substring(4, 4);
+            var results = Element.FromHexString(part);
+            Debug.Assert(results.Length == 2);
+            return results;
         }
 
         // 给 byte [] 后面补足内容
@@ -3675,7 +3734,7 @@ out Reader reader);
         reader.ReaderHandle,
         hTag,
         (Byte)RFIDLIB.rfidlib_def.ISO18000p6C_MEM_BANK_EPC,
-        1,  // 必须从 word 偏移 2 开始写入
+        1,  // 必须从 word 偏移 1 开始写入
         (UInt32)(epc_bytes.Length / 2),
         epc_bytes,
         (UInt32)epc_bytes.Length);

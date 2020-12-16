@@ -328,7 +328,7 @@ EB00"
             var chip = LogicChip.From(temp.ToArray(),
                 4);
             */
-            var result = UhfUtility.ParsUserBank(userbank, 4);
+            var result = UhfUtility.ParseUserBank(userbank, 4);
 
             Assert.AreEqual(0, result.Value);
 

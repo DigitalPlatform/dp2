@@ -1,9 +1,10 @@
-﻿using DigitalPlatform.Text;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
+using DigitalPlatform.Text;
 
 using static DigitalPlatform.RFID.LogicChip;
 
@@ -17,6 +18,13 @@ namespace DigitalPlatform.RFID
         public static bool IsBlankTag(byte[] epc_bank,
             byte[] user_bank)
         {
+            // 空白标签
+            if (epc_bank.Length >= 4
+                && epc_bank[2] == 0 && epc_bank[3] == 0)
+                return true;
+
+            return false;
+            /*
             if (user_bank != null && user_bank.Length > 0)
             {
                 bool not_empty = false;
@@ -41,6 +49,7 @@ namespace DigitalPlatform.RFID
             }
 
             return true;
+            */
         }
 
         // 判断标签内容是否采用了 ISO28560-4 (UHF 国标)编码格式
@@ -70,6 +79,18 @@ namespace DigitalPlatform.RFID
             }
             */
             return true;
+        }
+
+        // 根据指定的 PC 创建空的 EPC Bank 内容
+        public static byte [] BuildBlankEpcBank()
+        {
+            ProtocolControlWord pc = new ProtocolControlWord();
+            pc.UMI = false;
+            pc.XPC = false;
+            pc.ISO = false;
+            pc.AFI = 0;
+            pc.LengthIndicator = 0; // 载荷为 0
+            return UhfUtility.EncodePC(pc);
         }
 
         #region 编码
@@ -524,7 +545,7 @@ namespace DigitalPlatform.RFID
             LogicChip chip = null;
             if (user_bank != null)
             {
-                var user_result = ParsUserBank(user_bank,
+                var user_result = ParseUserBank(user_bank,
                     block_size,
                     block_map);
                 if (user_result.Value == -1)
@@ -586,7 +607,7 @@ namespace DigitalPlatform.RFID
         }
 
         // 解析 User Bank。注意 data 第一 byte 是 DSFID，第二 byte 开始才是数据
-        public static ParseUserBankResult ParsUserBank(byte[] data,
+        public static ParseUserBankResult ParseUserBank(byte[] data,
             int block_size,
             string block_map = "")
         {

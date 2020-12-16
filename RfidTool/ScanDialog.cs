@@ -255,34 +255,43 @@ namespace RfidTool
                     if (taginfo.Protocol == InventoryInfo.ISO18000P6C)
                     {
                         var epc_bank = Element.FromHexString(taginfo.UID);
-                        var isGB = UhfUtility.IsISO285604Format(epc_bank, taginfo.Bytes);
-                        if (isGB)
+
+                        if (UhfUtility.IsBlankTag(epc_bank, taginfo.Bytes) == true)
                         {
-                            // *** 国标 UHF
-                            var parse_result = UhfUtility.ParseTag(epc_bank,
-                taginfo.Bytes,
-                4);
-                            if (parse_result.Value == -1)
-                                throw new Exception(parse_result.ErrorInfo);
-                            chip = parse_result.LogicChip;
-                            taginfo.EAS = false;    // TODO
-                            iteminfo.UhfProtocol = "gb";
-                            pii = GetPIICaption(GetPiiPart(parse_result.UII));
-                            oi = GetOiPart(parse_result.UII, false);
+                            // 空白标签
+                            pii = GetPIICaption(null);
                         }
                         else
                         {
-                            // *** 高校联盟 UHF
-                            var parse_result = GaoxiaoUtility.ParseTag(
-                epc_bank,
-                taginfo.Bytes);
-                            if (parse_result.Value == -1)
-                                throw new Exception(parse_result.ErrorInfo);
-                            chip = parse_result.LogicChip;
-                            taginfo.EAS = !parse_result.EpcInfo.Lending;
-                            iteminfo.UhfProtocol = "gxlm";
-                            pii = GetPIICaption(GetPiiPart(parse_result.EpcInfo.PII));
-                            oi = GetOiPart(parse_result.EpcInfo.PII, false);
+                            var isGB = UhfUtility.IsISO285604Format(epc_bank, taginfo.Bytes);
+                            if (isGB)
+                            {
+                                // *** 国标 UHF
+                                var parse_result = UhfUtility.ParseTag(epc_bank,
+                    taginfo.Bytes,
+                    4);
+                                if (parse_result.Value == -1)
+                                    throw new Exception(parse_result.ErrorInfo);
+                                chip = parse_result.LogicChip;
+                                taginfo.EAS = false;    // TODO
+                                iteminfo.UhfProtocol = "gb";
+                                pii = GetPIICaption(GetPiiPart(parse_result.UII));
+                                oi = GetOiPart(parse_result.UII, false);
+                            }
+                            else
+                            {
+                                // *** 高校联盟 UHF
+                                var parse_result = GaoxiaoUtility.ParseTag(
+                    epc_bank,
+                    taginfo.Bytes);
+                                if (parse_result.Value == -1)
+                                    throw new Exception(parse_result.ErrorInfo);
+                                chip = parse_result.LogicChip;
+                                taginfo.EAS = !parse_result.EpcInfo.Lending;
+                                iteminfo.UhfProtocol = "gxlm";
+                                pii = GetPIICaption(GetPiiPart(parse_result.EpcInfo.PII));
+                                oi = GetOiPart(parse_result.EpcInfo.PII, false);
+                            }
                         }
                     }
                     else
@@ -728,8 +737,8 @@ MessageBoxDefaultButton.Button2);
                     }
                     SetTypeOfUsage(chip, "gb");
 
-                    var result = UhfUtility.BuildTag(chip, 
-                        true, 
+                    var result = UhfUtility.BuildTag(chip,
+                        true,
                         eas ? "afi_eas_on" : "");
                     if (result.Value == -1)
                         throw new Exception(result.ErrorInfo);
@@ -786,6 +795,12 @@ MessageBoxDefaultButton.Button2);
 
             menuItem = new MenuItem("清除标签内容 [" + this.listView_tags.SelectedItems.Count.ToString() + "] (&C)");
             menuItem.Click += new System.EventHandler(this.menu_clearSelectedTagContent_Click);
+            if (this.listView_tags.SelectedItems.Count == 0)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
+            menuItem = new MenuItem("修改标签 EAS [" + this.listView_tags.SelectedItems.Count.ToString() + "] (&E)");
+            menuItem.Click += new System.EventHandler(this.menu_changeSelectedTagEas_Click);
             if (this.listView_tags.SelectedItems.Count == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
@@ -849,6 +864,11 @@ MessageBoxDefaultButton.Button2);
         }
 #endif
 
+        void menu_changeSelectedTagEas_Click(object sender, EventArgs e)
+        {
+
+        }
+
         void menu_clearSelectedTagContent_Click(object sender, EventArgs e)
         {
             DialogResult result = MessageBox.Show(this,
@@ -869,6 +889,7 @@ MessageBoxDefaultButton.Button2);
             // listView_tags_SelectedIndexChanged(this, new EventArgs());
         }
 
+        // TODO: 针对 UHF 实现
         void ClearTagContent(ListViewItem item)
         {
             string strError = "";
@@ -883,13 +904,22 @@ MessageBoxDefaultButton.Button2);
                     new_tag_info.AFI = 0;
                     new_tag_info.DSFID = 0;
                     new_tag_info.EAS = false;
-                    List<byte> bytes = new List<byte>();
-                    for (int i = 0; i < new_tag_info.BlockSize * new_tag_info.MaxBlockCount; i++)
+                    if (old_tag_info.Protocol == InventoryInfo.ISO15693)
                     {
-                        bytes.Add(0);
+                        List<byte> bytes = new List<byte>();
+                        for (int i = 0; i < new_tag_info.BlockSize * new_tag_info.MaxBlockCount; i++)
+                        {
+                            bytes.Add(0);
+                        }
+                        new_tag_info.Bytes = bytes.ToArray();
+                        new_tag_info.LockStatus = "";
                     }
-                    new_tag_info.Bytes = bytes.ToArray();
-                    new_tag_info.LockStatus = "";
+                    else if (old_tag_info.Protocol == InventoryInfo.ISO18000P6C)
+                    {
+                        // var pc = UhfUtility.ParsePC(Element.FromHexString(old_tag_info.UID), 2);
+                        new_tag_info.UID = "0000" + Element.GetHexString(UhfUtility.BuildBlankEpcBank());
+                        new_tag_info.Bytes = null;  // 这样可使得 User Bank 被清除
+                    }
                 }
 
                 var result = DataModel.WriteTagInfo(item_info.TagData.OneTag.ReaderName,
@@ -918,6 +948,7 @@ MessageBoxDefaultButton.Button2);
                 ListViewUtil.ChangeItemText(item, COLUMN_PII, "error:" + strError);
                 // 把 item 修改为红色背景，表示出错的状态
                 SetItemColor(item, "error");
+                MessageBox.Show(this, strError);
             }));
         }
 
