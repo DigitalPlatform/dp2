@@ -133,25 +133,32 @@ bool bClickClose = false)
 
             _errorTable = new ErrorTable((s) =>
             {
-                this.Invoke((Action)(() =>
+                try
                 {
-                    bool error = _errorTable.GetError("error") != null || _errorTable.GetError("error_initial") != null;
-                    if (string.IsNullOrEmpty(s) == false)
+                    this.Invoke((Action)(() =>
                     {
-                        string text = s.Replace(";", "\r\n");
-                        if (text != this._floatingMessage.Text)
+                        bool error = _errorTable.GetError("error") != null || _errorTable.GetError("error_initial") != null;
+                        if (string.IsNullOrEmpty(s) == false)
                         {
-                            if (error)
-                                this._showMessage(text, "red", false);
-                            else
-                                this._showMessage(text);
+                            string text = s.Replace(";", "\r\n");
+                            if (text != this._floatingMessage.Text)
+                            {
+                                if (error)
+                                    this._showMessage(text, "red", false);
+                                else
+                                    this._showMessage(text);
 
                             // ClientInfo.WriteErrorLog(text);
                         }
-                    }
-                    else
-                        this._clearMessage();
-                }));
+                        }
+                        else
+                            this._clearMessage();
+                    }));
+                }
+                catch(ObjectDisposedException)
+                {
+
+                }
             });
 
             UsbInfo.StartWatch((add_count, remove_count) =>

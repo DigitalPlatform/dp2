@@ -2640,6 +2640,33 @@ out Reader reader);
             return true;
         }
 
+        // 获得一个全部为 0 的 byte []
+        static byte[] BuildZeroBytes(byte[] source)
+        {
+            // 从最后开始，找到最后一个不是 0 的位置
+            int length = 0;
+            for (int i = source.Length - 1; i >= 0; i--)
+            {
+                if (source[i] != 0)
+                {
+                    length = i;
+                    break;
+                }
+            }
+
+            // 补齐偶数
+            if ((length % 2) != 0)
+                length++;
+
+            List<byte> bytes = new List<byte>();
+            for (int i = 0; i < length; i++)
+            {
+                bytes.Add(0);
+            }
+
+            return bytes.ToArray();
+        }
+
         // 连接 UHF 标签
         UIntPtr _connectUhfTag(UIntPtr hreader,
             string UID)
@@ -3568,7 +3595,9 @@ out Reader reader);
                         //Byte[] readData = new Byte[256];
                         //UInt32 nSize = (UInt32)readData.Length;
 
-                        if ((new_tag_info.Bytes.Length % 2) != 0)
+                        // 检查 User Bank 内容的 word 边界
+                        if (new_tag_info.Bytes != null
+                            && (new_tag_info.Bytes.Length % 2) != 0)
                             return new NormalResult
                             {
                                 Value = -1,
@@ -3578,14 +3607,36 @@ out Reader reader);
                         int iret = 0;
 
                         // 先写入 User Bank
-                        iret = RFIDLIB.rfidlib_aip_iso18000p6C.ISO18000p6C_Write(
-                            reader.ReaderHandle,
-                            hTag,
-                            (Byte)RFIDLIB.rfidlib_def.ISO18000p6C_MEM_BANK_USER,
-                            0,  // (UInt32)WordPointer,
-                            (UInt32)new_tag_info.Bytes.Length / 2,
-                            new_tag_info.Bytes,
-                            (UInt32)new_tag_info.Bytes.Length);
+                        if (new_tag_info.Bytes != null)
+                        {
+                            iret = RFIDLIB.rfidlib_aip_iso18000p6C.ISO18000p6C_Write(
+                                reader.ReaderHandle,
+                                hTag,
+                                (Byte)RFIDLIB.rfidlib_def.ISO18000p6C_MEM_BANK_USER,
+                                0,  // (UInt32)WordPointer,
+                                (UInt32)new_tag_info.Bytes.Length / 2,
+                                new_tag_info.Bytes,
+                                (UInt32)new_tag_info.Bytes.Length);
+                        }
+                        else
+                        {
+                            // 尝试清除原有的 User Bank 内容
+                            if (old_tag_info.Bytes != null
+                                && old_tag_info.Bytes.Length > 0
+                                && IsZero(old_tag_info.Bytes) == false)
+                            {
+                                var zero_bytes = BuildZeroBytes(old_tag_info.Bytes);
+                                iret = RFIDLIB.rfidlib_aip_iso18000p6C.ISO18000p6C_Write(
+    reader.ReaderHandle,
+    hTag,
+    (Byte)RFIDLIB.rfidlib_def.ISO18000p6C_MEM_BANK_USER,
+    0,
+    (UInt32)zero_bytes.Length / 2,
+    zero_bytes,
+    (UInt32)zero_bytes.Length);
+
+                            }
+                        }
 
                         if (iret != 0)
                             return new NormalResult
@@ -3637,8 +3688,6 @@ out Reader reader);
                                 };
                             // TODO: 写入后是否立即 inventory，返回新的 UID? 这样可以方便连续写入
                         }
-
-
 
                         return new NormalResult
                         {
@@ -3761,6 +3810,8 @@ out Reader reader);
                 UnlockReader(reader);
             }
         }
+
+
 
         // return:
         //      null 或者 "" 表示没有发现错误

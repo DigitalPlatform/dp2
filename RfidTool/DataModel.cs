@@ -90,33 +90,34 @@ namespace RfidTool
                         _prev_count = result.Results.Count;
                         */
 
-                        TagList.Refresh(// sender as BaseChannel<IRfid>,
-                            readerNameList,
-                            result.Results,
-                            (readerName, uid, antennaID, protocol) =>
-                            {
-                                InventoryInfo info = new InventoryInfo
+                        if (result.Results != null && result.Results.Count > 0)
+                            TagList.Refresh(// sender as BaseChannel<IRfid>,
+                                readerNameList,
+                                result.Results,
+                                (readerName, uid, antennaID, protocol) =>
                                 {
-                                    Protocol = protocol,
-                                    UID = uid,
-                                    AntennaID = antennaID
-                                };
-                                return _driver.GetTagInfo(readerName, info);
-                            },
-                            (add_tags, update_tags, remove_tags) =>
-                            {
-                                TagChanged?.Invoke(_driver, new NewTagChangedEventArgs
+                                    InventoryInfo info = new InventoryInfo
+                                    {
+                                        Protocol = protocol,
+                                        UID = uid,
+                                        AntennaID = antennaID
+                                    };
+                                    return _driver.GetTagInfo(readerName, info);
+                                },
+                                (add_tags, update_tags, remove_tags) =>
                                 {
-                                    AddTags = add_tags,
-                                    UpdateTags = update_tags,
-                                    RemoveTags = remove_tags,
-                                    Source = "driver",
+                                    TagChanged?.Invoke(_driver, new NewTagChangedEventArgs
+                                    {
+                                        AddTags = add_tags,
+                                        UpdateTags = update_tags,
+                                        RemoveTags = remove_tags,
+                                        Source = "driver",
+                                    });
+                                },
+                                (type, text) =>
+                                {
+                                    SetError?.Invoke(null/*this*/, new SetErrorEventArgs { Error = text });
                                 });
-                            },
-                            (type, text) =>
-                            {
-                                SetError?.Invoke(null/*this*/, new SetErrorEventArgs { Error = text });
-                            });
 
                     }
                 }, token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
@@ -215,6 +216,31 @@ namespace RfidTool
             set
             {
                 ClientInfo.Config.Set("rfid", "uhf_write_format", value);
+            }
+        }
+
+        // 
+        public static bool WarningWhenUhfFormatMismatch
+        {
+            get
+            {
+                return ClientInfo.Config.GetBoolean("rfid", "uhf_warningWhenFormatMismatch", true);
+            }
+            set
+            {
+                ClientInfo.Config.SetBoolean("rfid", "uhf_warningWhenFormatMismatch", value);
+            }
+        }
+
+        public static bool WriteUhfUserBank
+        {
+            get
+            {
+                return ClientInfo.Config.GetBoolean("rfid", "uhf_writeUserBank", true);
+            }
+            set
+            {
+                ClientInfo.Config.SetBoolean("rfid", "uhf_writeUserBank", value);
             }
         }
 

@@ -13,6 +13,7 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.GUI;
 using DigitalPlatform.RFID;
+using DigitalPlatform.Text;
 
 namespace RfidTool
 {
@@ -80,6 +81,7 @@ namespace RfidTool
 
         void SetTitle()
         {
+            /*
             if (this.TypeOfUsage == "30")
                 this.Text = "扫描并写入 层架标";
             else if (string.IsNullOrEmpty(this.TypeOfUsage) || this.TypeOfUsage == "10")
@@ -88,6 +90,20 @@ namespace RfidTool
                 this.Text = "扫描并写入 读者证";
             else
                 this.Text = $"扫描并写入 '{this.TypeOfUsage}'";
+            */
+            this.Text = $"扫描并写入 {GetCaption(this.TypeOfUsage)}";
+        }
+
+        public string GetCaption(string tu)
+        {
+            if (tu == "30")
+                return "层架标";
+            else if (string.IsNullOrEmpty(tu) || tu == "10")
+                return "图书标签";
+            else if (tu == "80")
+                return "读者证";
+            else
+                return $"'{tu}'";
         }
 
         private void ScanDialog_VisibleChanged(object sender, EventArgs e)
@@ -242,7 +258,7 @@ namespace RfidTool
                         var isGB = UhfUtility.IsISO285604Format(epc_bank, taginfo.Bytes);
                         if (isGB)
                         {
-                            // 国标 UHF
+                            // *** 国标 UHF
                             var parse_result = UhfUtility.ParseTag(epc_bank,
                 taginfo.Bytes,
                 4);
@@ -251,10 +267,12 @@ namespace RfidTool
                             chip = parse_result.LogicChip;
                             taginfo.EAS = false;    // TODO
                             iteminfo.UhfProtocol = "gb";
+                            pii = GetPIICaption(GetPiiPart(parse_result.UII));
+                            oi = GetOiPart(parse_result.UII, false);
                         }
                         else
                         {
-                            // 高校联盟 UHF
+                            // *** 高校联盟 UHF
                             var parse_result = GaoxiaoUtility.ParseTag(
                 epc_bank,
                 taginfo.Bytes);
@@ -263,29 +281,40 @@ namespace RfidTool
                             chip = parse_result.LogicChip;
                             taginfo.EAS = !parse_result.EpcInfo.Lending;
                             iteminfo.UhfProtocol = "gxlm";
+                            pii = GetPIICaption(GetPiiPart(parse_result.EpcInfo.PII));
+                            oi = GetOiPart(parse_result.EpcInfo.PII, false);
                         }
                     }
                     else
                     {
-                        // Exception:
-                        //      可能会抛出异常 ArgumentException TagDataException
-                        chip = LogicChip.From(taginfo.Bytes,
-            (int)taginfo.BlockSize,
-            "");
+                        // *** ISO15693 HF
+                        if (taginfo.Bytes != null)
+                        {
+                            // Exception:
+                            //      可能会抛出异常 ArgumentException TagDataException
+                            chip = LogicChip.From(taginfo.Bytes,
+                (int)taginfo.BlockSize,
+                "");
+                            pii = GetPIICaption(chip.FindElement(ElementOID.PII)?.Text);
+                        }
                     }
 
-                    pii = chip.Elements.Count == 0 ? "(空)" : chip.FindElement(ElementOID.PII)?.Text;
-                    tou = chip.FindElement(ElementOID.TypeOfUsage)?.Text;
+                    tou = chip?.FindElement(ElementOID.TypeOfUsage)?.Text;
                     eas = taginfo.EAS ? "On" : "Off";
-                    oi = chip.FindElement(ElementOID.OI)?.Text;
-                    aoi = chip.FindElement(ElementOID.AOI)?.Text;
+
+                    if (string.IsNullOrEmpty(oi))
+                    {
+                        oi = chip?.FindElement(ElementOID.OI)?.Text;
+                        aoi = chip?.FindElement(ElementOID.AOI)?.Text;
+                    }
+
                     if (taginfo.Protocol == InventoryInfo.ISO18000P6C)
                     {
                         if (iteminfo.UhfProtocol == "gxlm")
                         {
                             // 数字平台针对高校联盟扩充的 AOI
                             if (string.IsNullOrEmpty(oi) && string.IsNullOrEmpty(aoi))
-                                aoi = chip.FindElement((ElementOID)27)?.Text;
+                                aoi = chip?.FindElement((ElementOID)27)?.Text;
                         }
                     }
                 }
@@ -300,10 +329,13 @@ namespace RfidTool
                 // 刷新协议栏
                 if (tag.OneTag.Protocol == InventoryInfo.ISO18000P6C)
                 {
-                    string name = "国标";
+                    string name = iteminfo.UhfProtocol;
                     if (iteminfo.UhfProtocol == "gxlm")
                         name = "高校联盟";
-                    ListViewUtil.ChangeItemText(item, COLUMN_PROTOCOL, tag.OneTag.Protocol + ":" + name);
+                    else if (iteminfo.UhfProtocol == "gb")
+                        name = "国标";
+                    ListViewUtil.ChangeItemText(item, COLUMN_PROTOCOL,
+                        string.IsNullOrEmpty(name) ? tag.OneTag.Protocol : tag.OneTag.Protocol + ":" + name);
                 }
             }
             catch (Exception ex)
@@ -311,6 +343,36 @@ namespace RfidTool
                 ListViewUtil.ChangeItemText(item, COLUMN_PII, "error:" + ex.Message);
                 SetItemColor(item, "error");
             }
+        }
+
+        // 获得 oi.pii 的 oi 部分
+        public static string GetOiPart(string oi_pii, bool return_null)
+        {
+            if (oi_pii.IndexOf(".") == -1)
+            {
+                if (return_null)
+                    return null;
+                return "";
+            }
+            var parts = StringUtil.ParseTwoPart(oi_pii, ".");
+            return parts[0];
+        }
+
+        // 获得 oi.pii 的 pii 部分
+        public static string GetPiiPart(string oi_pii)
+        {
+            if (oi_pii.IndexOf(".") == -1)
+                return oi_pii;
+            var parts = StringUtil.ParseTwoPart(oi_pii, ".");
+            return parts[1];
+        }
+
+
+        static string GetPIICaption(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+                return "(空)";
+            return text;
         }
 
         class FindTagResult : NormalResult
@@ -411,6 +473,7 @@ namespace RfidTool
                 }
 
                 OneTag tag = null;
+                ItemInfo iteminfo = null;
                 if (selectedItem == null)
                 {
                     var find_result = FindBlankTag(barcode);
@@ -422,10 +485,12 @@ namespace RfidTool
                     }
 
                     tag = find_result.Tag;
+                    iteminfo = find_result.Item.Tag as ItemInfo;
                 }
                 else
                 {
-                    tag = (selectedItem.Tag as ItemInfo).TagData.OneTag;
+                    iteminfo = (selectedItem.Tag as ItemInfo);
+                    tag = iteminfo.TagData.OneTag;
                 }
 
                 string oi = DataModel.DefaultOiString;
@@ -448,8 +513,6 @@ namespace RfidTool
                     chip.SetElement(ElementOID.OI, oi);
                 if (string.IsNullOrEmpty(aoi) == false)
                     chip.SetElement(ElementOID.AOI, aoi);
-                // chip.SetElement(ElementOID.TypeOfUsage, tou);
-                SetTypeOfUsage(chip, tag.Protocol);
 
                 bool eas = false;
                 if (string.IsNullOrEmpty(this.TypeOfUsage) || this.TypeOfUsage == "10")
@@ -478,21 +541,31 @@ namespace RfidTool
                 ShowMessage($"{barcode} 写入成功");
                 ClearBarcode();
             }
+            catch (Exception ex)
+            {
+                string error = $"写入失败: {ex.Message}";
+                ClientInfo.Speak(error);
+                ShowMessage(error, "red");
+                ClientInfo.WriteErrorLog($"写入标签时出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                MessageBox.Show(this, error);
+            }
             finally
             {
                 _inProcessing--;
             }
         }
 
-        // 设置 TU 字段。国标和高校联盟的取值表完全不同
-        void SetTypeOfUsage(LogicChip chip, string protocol)
+        // 设置 TU 字段。注意 国标和高校联盟的取值表完全不同
+        // parameters:
+        //      data_format gb/gxlm
+        void SetTypeOfUsage(LogicChip chip, string data_format)
         {
             string tou = this.TypeOfUsage;
             if (string.IsNullOrEmpty(tou))
                 tou = "10"; // 默认图书
 
             // 高校联盟
-            if (protocol == InventoryInfo.ISO18000P6C)
+            if (data_format == "gxlm")
             {
                 switch (tou)
                 {
@@ -560,12 +633,14 @@ namespace RfidTool
             }));
         }
 
-        public static TagInfo GetTagInfo(TagInfo existing,
+        public TagInfo GetTagInfo(TagInfo existing,
     LogicChip chip,
     bool eas)
         {
             if (existing.Protocol == InventoryInfo.ISO15693)
             {
+                SetTypeOfUsage(chip, "gb");
+
                 TagInfo new_tag_info = existing.Clone();
                 new_tag_info.Bytes = chip.GetBytes(
                     (int)(new_tag_info.MaxBlockCount * new_tag_info.BlockSize),
@@ -596,17 +671,71 @@ namespace RfidTool
 
             if (existing.Protocol == InventoryInfo.ISO18000P6C)
             {
+                var build_user_bank = DataModel.WriteUhfUserBank;
+
+                // 读者卡和层架标必须有 User Bank，不然 TU 字段没有地方放
+                if (build_user_bank == false
+    && this.TypeOfUsage != "10")
+                    throw new Exception($"{GetCaption(this.TypeOfUsage)}必须写入 User Bank");
+
                 // TODO: 判断标签内容是空白/国标/高校联盟格式，采取不同的写入格式
                 /*
 高校联盟格式
 国标格式
-空白标签用高校联盟格式，其余依从原格式
-空白标签用国标格式，其余依从原格式
 * */
-                var result = GaoxiaoUtility.BuildTag(chip, eas);
+                var isExistingGB = UhfUtility.IsISO285604Format(Element.FromHexString(existing.UID), existing.Bytes);
+
                 TagInfo new_tag_info = existing.Clone();
-                new_tag_info.Bytes = result.UserBank;
-                new_tag_info.UID = existing.UID.Substring(0, 4) + Element.GetHexString(result.EpcBank);
+                if (DataModel.UhfWriteFormat == "高校联盟格式")
+                {
+                    // 写入高校联盟数据格式
+                    if (isExistingGB)
+                    {
+                        string warning = $"警告：即将用高校联盟格式覆盖原有国标格式";
+                        DialogResult dialog_result = MessageBox.Show(this,
+$"{warning}\r\n\r\n确实要覆盖？",
+$"ScanDialog",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+                        if (dialog_result == DialogResult.No)
+                            throw new Exception("放弃写入");
+                    }
+
+                    // chip.SetElement(ElementOID.TypeOfUsage, tou);
+                    SetTypeOfUsage(chip, "gxlm");
+
+                    var result = GaoxiaoUtility.BuildTag(chip, build_user_bank, eas);
+                    if (result.Value == -1)
+                        throw new Exception(result.ErrorInfo);
+                    new_tag_info.Bytes = build_user_bank ? result.UserBank : null;
+                    new_tag_info.UID = existing.UID.Substring(0, 4) + Element.GetHexString(result.EpcBank);
+                }
+                else
+                {
+                    // 写入国标数据格式
+                    if (isExistingGB == false)
+                    {
+                        string warning = $"警告：即将用国标格式覆盖原有高校联盟格式";
+                        DialogResult dialog_result = MessageBox.Show(this,
+$"{warning}\r\n\r\n确实要覆盖？",
+$"ScanDialog",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+                        if (dialog_result == DialogResult.No)
+                            throw new Exception("放弃写入");
+                    }
+                    SetTypeOfUsage(chip, "gb");
+
+                    var result = UhfUtility.BuildTag(chip, 
+                        true, 
+                        eas ? "afi_eas_on" : "");
+                    if (result.Value == -1)
+                        throw new Exception(result.ErrorInfo);
+                    new_tag_info.Bytes = build_user_bank ? result.UserBank : null;
+                    new_tag_info.UID = existing.UID.Substring(0, 4) + Element.GetHexString(result.EpcBank);
+                }
                 return new_tag_info;
             }
 

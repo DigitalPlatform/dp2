@@ -322,6 +322,40 @@ namespace DigitalPlatform.RFID
                     if (tag.Protocol == InventoryInfo.ISO14443A)
                         continue;
 
+                    // 2020/12/16
+                    // 根据 PC 判断是否需要读出 User Bank
+                    if (tag.Protocol == InventoryInfo.ISO18000P6C)
+                    {
+                        // TODO: UID 字符串转换为 byte [] 速度慢。最好是专门取特定位置两个字符即可
+                        var umi = UhfUtility.GetUMI(Element.FromHexString(tag.UID), 2);
+                        if (umi == false)
+                        {
+                            var info = new TagInfo
+                            {
+                                // 2020/12/13
+                                Protocol = tag.Protocol,
+                                ReaderName = tag.ReaderName,
+                                UID = tag.UID,
+                                Bytes = null,
+                                AntennaID = tag.AntennaID,
+                            };
+
+                            // 记下来。避免以后重复再次去获取了
+                            if (tag.TagInfo == null && info != null)
+                            {
+                                tag.TagInfo = info;
+                                taginfo_changed = true;
+
+                                {
+                                    if (update_books.IndexOf(data) == -1)
+                                        update_books.Add(data);
+                                }
+                            }
+                            continue;
+                        }
+                    }
+
+
                     if (getTagInfo != null)
                     {
                         // 自动重试一次

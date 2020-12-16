@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(TagListForm));
             this.listView_tags = new System.Windows.Forms.ListView();
             this.columnHeader_uid = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_pii = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -36,7 +37,13 @@
             this.columnHeader_protocol = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_antenna = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_readerName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.button_writeGaoxiao = new System.Windows.Forms.Button();
+            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+            this.toolStripDropDownButton_writeUhf = new System.Windows.Forms.ToolStripDropDownButton();
+            this.ToolStripMenuItem_writeUhf_gaoxiao_noUserBank = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_writeUhf_gaoxiao = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_writeUhf_gb_noUserBank = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_writeUhf_gb = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // listView_tags
@@ -98,31 +105,78 @@
             this.columnHeader_readerName.Text = "读卡器名";
             this.columnHeader_readerName.Width = 120;
             // 
-            // button_writeGaoxiao
+            // toolStrip1
             // 
-            this.button_writeGaoxiao.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.button_writeGaoxiao.Enabled = false;
-            this.button_writeGaoxiao.Location = new System.Drawing.Point(16, 458);
-            this.button_writeGaoxiao.Name = "button_writeGaoxiao";
-            this.button_writeGaoxiao.Size = new System.Drawing.Size(277, 54);
-            this.button_writeGaoxiao.TabIndex = 1;
-            this.button_writeGaoxiao.Text = "测试写入 高校联盟 格式";
-            this.button_writeGaoxiao.UseVisualStyleBackColor = true;
-            this.button_writeGaoxiao.Click += new System.EventHandler(this.button_writeGaoxiao_Click);
+            this.toolStrip1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.toolStrip1.Dock = System.Windows.Forms.DockStyle.None;
+            this.toolStrip1.ImageScalingSize = new System.Drawing.Size(28, 28);
+            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripDropDownButton_writeUhf});
+            this.toolStrip1.Location = new System.Drawing.Point(16, 461);
+            this.toolStrip1.Name = "toolStrip1";
+            this.toolStrip1.Size = new System.Drawing.Size(289, 44);
+            this.toolStrip1.TabIndex = 2;
+            this.toolStrip1.Text = "toolStrip1";
+            // 
+            // toolStripDropDownButton_writeUhf
+            // 
+            this.toolStripDropDownButton_writeUhf.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripDropDownButton_writeUhf.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.ToolStripMenuItem_writeUhf_gaoxiao_noUserBank,
+            this.ToolStripMenuItem_writeUhf_gaoxiao,
+            this.ToolStripMenuItem_writeUhf_gb_noUserBank,
+            this.ToolStripMenuItem_writeUhf_gb});
+            this.toolStripDropDownButton_writeUhf.Enabled = false;
+            this.toolStripDropDownButton_writeUhf.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton_writeUhf.Image")));
+            this.toolStripDropDownButton_writeUhf.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripDropDownButton_writeUhf.Name = "toolStripDropDownButton_writeUhf";
+            this.toolStripDropDownButton_writeUhf.Size = new System.Drawing.Size(214, 38);
+            this.toolStripDropDownButton_writeUhf.Text = "写入 UHF 图书标签";
+            // 
+            // ToolStripMenuItem_writeUhf_gaoxiao_noUserBank
+            // 
+            this.ToolStripMenuItem_writeUhf_gaoxiao_noUserBank.Name = "ToolStripMenuItem_writeUhf_gaoxiao_noUserBank";
+            this.ToolStripMenuItem_writeUhf_gaoxiao_noUserBank.Size = new System.Drawing.Size(404, 40);
+            this.ToolStripMenuItem_writeUhf_gaoxiao_noUserBank.Text = "高校联盟格式，无 User Bank";
+            this.ToolStripMenuItem_writeUhf_gaoxiao_noUserBank.Click += new System.EventHandler(this.ToolStripMenuItem_writeUhf_gaoxiao_noUserBank_Click);
+            // 
+            // ToolStripMenuItem_writeUhf_gaoxiao
+            // 
+            this.ToolStripMenuItem_writeUhf_gaoxiao.Name = "ToolStripMenuItem_writeUhf_gaoxiao";
+            this.ToolStripMenuItem_writeUhf_gaoxiao.Size = new System.Drawing.Size(404, 40);
+            this.ToolStripMenuItem_writeUhf_gaoxiao.Text = "高校联盟格式，有 User Bank";
+            this.ToolStripMenuItem_writeUhf_gaoxiao.Click += new System.EventHandler(this.ToolStripMenuItem_writeUhf_gaoxiao_Click);
+            // 
+            // ToolStripMenuItem_writeUhf_gb_noUserBank
+            // 
+            this.ToolStripMenuItem_writeUhf_gb_noUserBank.Name = "ToolStripMenuItem_writeUhf_gb_noUserBank";
+            this.ToolStripMenuItem_writeUhf_gb_noUserBank.Size = new System.Drawing.Size(404, 40);
+            this.ToolStripMenuItem_writeUhf_gb_noUserBank.Text = "国标格式，无 User Bank";
+            this.ToolStripMenuItem_writeUhf_gb_noUserBank.Click += new System.EventHandler(this.ToolStripMenuItem_writeUhf_gb_noUserBank_Click);
+            // 
+            // ToolStripMenuItem_writeUhf_gb
+            // 
+            this.ToolStripMenuItem_writeUhf_gb.Name = "ToolStripMenuItem_writeUhf_gb";
+            this.ToolStripMenuItem_writeUhf_gb.Size = new System.Drawing.Size(404, 40);
+            this.ToolStripMenuItem_writeUhf_gb.Text = "国标格式，有 UserBank";
+            this.ToolStripMenuItem_writeUhf_gb.Click += new System.EventHandler(this.ToolStripMenuItem_writeUhf_gb_Click);
             // 
             // TagListForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(978, 525);
-            this.Controls.Add(this.button_writeGaoxiao);
+            this.Controls.Add(this.toolStrip1);
             this.Controls.Add(this.listView_tags);
             this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.Name = "TagListForm";
             this.Text = "TagListForm";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.TagListForm_FormClosed);
             this.Load += new System.EventHandler(this.TagListForm_Load);
+            this.toolStrip1.ResumeLayout(false);
+            this.toolStrip1.PerformLayout();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -136,6 +190,11 @@
         private System.Windows.Forms.ColumnHeader columnHeader_tu;
         private System.Windows.Forms.ColumnHeader columnHeader_readerName;
         private System.Windows.Forms.ColumnHeader columnHeader_oi;
-        private System.Windows.Forms.Button button_writeGaoxiao;
+        private System.Windows.Forms.ToolStrip toolStrip1;
+        private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton_writeUhf;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_writeUhf_gaoxiao_noUserBank;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_writeUhf_gaoxiao;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_writeUhf_gb_noUserBank;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_writeUhf_gb;
     }
 }
