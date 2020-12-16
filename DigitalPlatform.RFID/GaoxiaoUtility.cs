@@ -992,14 +992,11 @@ namespace DigitalPlatform.RFID
 
         #endregion
 
-        public class BuildGaoxiaoReuslt : NormalResult
-        {
-            public byte[] EpcBank { get; set; }
-            public byte[] UserBank { get; set; }
-        }
-
         // 根据 LogicChip 对象构造标签内容
-        public static BuildGaoxiaoReuslt BuildTag(LogicChip chip,
+        // parameters:
+        //      build_user_bank 是否要构造 User Bank 内容。如果不构造的话，Content Parameter 中就不会包含任何 index 信息
+        public static BuildTagResult BuildTag(LogicChip chip,
+            bool build_user_bank,
             bool eas = true)
         {
             List<GaoxiaoUserElement> user_elements = new List<GaoxiaoUserElement>();
@@ -1029,12 +1026,18 @@ namespace DigitalPlatform.RFID
 
                 user_elements.Add(user_element);
             }
-            var user_bank = EncodeUserBank(user_elements, true);
+            byte[] user_bank = null;
+            
+            if (build_user_bank)
+                user_bank = EncodeUserBank(user_elements, true);
 
             var epc_info = new GaoxiaoEpcInfo();
             epc_info.Lending = !eas;
             epc_info.Version = 1;
-            epc_info.ContentParameters = BuildContentParameter(user_elements);
+            if (build_user_bank)
+                epc_info.ContentParameters = BuildContentParameter(user_elements);
+            else
+                epc_info.ContentParameters = new int[0];
             epc_info.PII = chip.FindElement(ElementOID.PII)?.Text;
 
             // 编码高校联盟 EPC bank。注意返回的内容没有包含前 4 bytes(校验码和 PC)
@@ -1055,7 +1058,7 @@ namespace DigitalPlatform.RFID
             temp.AddRange(epc_payload);
             epc_payload = temp.ToArray();
 
-            return new BuildGaoxiaoReuslt
+            return new BuildTagResult
             {
                 EpcBank = epc_payload,
                 UserBank = user_bank
@@ -1189,28 +1192,33 @@ namespace DigitalPlatform.RFID
                     };
                 }
 
-                var elements = DecodeUserBank(user_bank);
-
-                var chip = new LogicChip();
-                chip.SetElement(ElementOID.PII, epc_info.PII);
-                foreach (var element in elements)
+                List<GaoxiaoUserElement> elements = null;
+                LogicChip chip = null;
+                if (user_bank != null)
                 {
-                    var oid = (ElementOID)element.OID;
-                    /*
-                    if (oid == ElementOID.SetInformation)
+                    elements = DecodeUserBank(user_bank);
+
+                    chip = new LogicChip();
+                    chip.SetElement(ElementOID.PII, epc_info.PII);
+                    foreach (var element in elements)
                     {
-                        // TODO: 将 1/1 规范化为国标形态
-                        continue;
+                        var oid = (ElementOID)element.OID;
+                        /*
+                        if (oid == ElementOID.SetInformation)
+                        {
+                            // TODO: 将 1/1 规范化为国标形态
+                            continue;
+                        }
+                        */
+                        chip.SetElement(oid, element.Content, false);
                     }
-                    */
-                    chip.SetElement(oid, element.Content, false);
                 }
 
                 return new ParseGaoxiaoResult
                 {
-                    LogicChip = chip,
+                    LogicChip = chip,   // 如果 chip 为 null，表示没有 User Bank
                     EpcInfo = epc_info,
-                    UserElements = elements
+                    UserElements = elements // 如果 elements 为 null，是因为没有 User Bank
                 };
             }
             catch (Exception ex)

@@ -1,8 +1,10 @@
-﻿using System;
+﻿using DigitalPlatform.Text;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
 using static DigitalPlatform.RFID.LogicChip;
 
 namespace DigitalPlatform.RFID
@@ -18,7 +20,7 @@ namespace DigitalPlatform.RFID
             if (user_bank != null && user_bank.Length > 0)
             {
                 bool not_empty = false;
-                foreach(byte b in user_bank)
+                foreach (byte b in user_bank)
                 {
                     if (b != 0)
                     {
@@ -45,32 +47,86 @@ namespace DigitalPlatform.RFID
         public static bool IsISO285604Format(byte[] epc_bank,
             byte[] user_bank)
         {
-            if (user_bank != null && user_bank.Length >= 1)
-            {
-                // 检查 User Bank 第一 byte，DSFID 是否为 0x06
-                if (user_bank[0] != 0x06)
-                    return false;
-            }
+            var pc = ParsePC(epc_bank, 2);
+            if ((pc.AFI == 0xc2 || pc.AFI == 0x07)
+                && pc.ISO == true)
+                return true;
+            else
+                return false;
+            /*
+            if (user_bank != null && pc.UMI == false)
+                return false;
+            if (pc.ISO == false)
+                return false;
 
+            if (pc.UMI == true)
             {
-                var pc = ParsePC(epc_bank, 2);
-                if (pc.AFI != 0xc2)
-                    return false;
-                if (user_bank != null && pc.UMI == false)
-                    return false;
-                if (pc.ISO == false)
-                    return false;
+                if (user_bank != null && user_bank.Length >= 1)
+                {
+                    // 检查 User Bank 第一 byte，DSFID 是否为 0x06
+                    if (user_bank[0] != 0x06)
+                        return false;
+                }
             }
-
+            */
             return true;
         }
 
         #region 编码
 
+        // 根据 LogicChip 对象构造标签内容
+        // parameters:
+        //      uii_include_oi  是否要把 OI 装配到 UII 字符串中？
+        //      style   如果包含 "afi_eas_on" 表示 AFI 用 0x07(否则用 0xc2)
+        public static BuildTagResult BuildTag(LogicChip chip,
+            bool uii_include_oi = true,
+            string style = "")
+        {
+            string pii = chip.FindElement(ElementOID.PII)?.Text;
+            string oi = chip.FindElement(ElementOID.OI)?.Text;
+            string aoi = chip.FindElement(ElementOID.AOI)?.Text;
+
+            string uii = "";
+            if (string.IsNullOrEmpty(oi) == false)
+            {
+                uii = oi + "." + pii;
+                chip.RemoveElement(ElementOID.OI);
+            }
+            else if (string.IsNullOrEmpty(aoi) == false)
+            {
+                uii = aoi + "." + pii;
+                chip.RemoveElement(ElementOID.AOI);
+            }
+            else
+                uii = pii;
+
+            chip.RemoveElement(ElementOID.PII);
+
+            var user_bank = EncodeUserBank(chip,
+                4 * 52,
+                4,
+                true,
+                out string block_map);
+
+            int afi = 0xc2;
+            if (StringUtil.IsInList("afi_eas_on", style) == true)
+                afi = 0x07;
+
+            // 注意返回的 bytes 不包含校验码 1 word 部分(这部分一般是由读写器驱动自动计算和补充写入)
+            var epc_payload = EncodeEpcBank(uii, afi);
+
+            return new BuildTagResult
+            {
+                EpcBank = epc_payload,
+                UserBank = user_bank
+            };
+        }
+
+
         // 2020/12/15
         // 编码 MB01 也就是 EPC Bank
         // 注意返回的 bytes 不包含校验码 1 word 部分(这部分一般是由读写器驱动自动计算和补充写入)
-        public static byte[] EncodeEpcBank(string uii)
+        public static byte[] EncodeEpcBank(string uii, int afi = 0xc2)
         {
             var uii_bytes = EncodeUII(uii, true);
 
@@ -78,7 +134,7 @@ namespace DigitalPlatform.RFID
             pc_info.UMI = true;
             pc_info.XPC = false;
             pc_info.ISO = true;
-            pc_info.AFI = 0xc2;
+            pc_info.AFI = afi;
             pc_info.LengthIndicator = uii_bytes.Length / 2;
             var pc_bytes = UhfUtility.EncodePC(pc_info);
 
@@ -464,21 +520,28 @@ namespace DigitalPlatform.RFID
                     ErrorInfo = epc_result.ErrorInfo,
                     ErrorCode = epc_result.ErrorCode
                 };
-            var user_result = ParsUserBank(user_bank,
-                block_size,
-                block_map);
-            if (user_result.Value == -1)
-                return new ParseGbResult
-                {
-                    Value = -1,
-                    ErrorInfo = user_result.ErrorInfo,
-                    ErrorCode = user_result.ErrorCode
-                };
+
+            LogicChip chip = null;
+            if (user_bank != null)
+            {
+                var user_result = ParsUserBank(user_bank,
+                    block_size,
+                    block_map);
+                if (user_result.Value == -1)
+                    return new ParseGbResult
+                    {
+                        Value = -1,
+                        ErrorInfo = user_result.ErrorInfo,
+                        ErrorCode = user_result.ErrorCode
+                    };
+                chip = user_result.LogicChip;
+            }
+
             return new ParseGbResult
             {
                 PC = epc_result.PC,
                 UII = epc_result.UII,
-                LogicChip = user_result.LogicChip,
+                LogicChip = chip,   // chip 如果为空，表示没有 User Bank
             };
         }
 
@@ -498,11 +561,11 @@ namespace DigitalPlatform.RFID
             var pc = ParsePC(data, 2);
             if (pc.ISO == true)
             {
-                if (pc.AFI != 0xc2)
+                if (pc.AFI != 0xc2 && pc.AFI != 0x07)
                     return new ParseEpcBankResult
                     {
                         Value = -1,
-                        ErrorInfo = $"(PC.ISO=true, PC.AFI={Element.GetHexString((byte)pc.AFI)}) 目前仅支持 AFI 为 0xc2 的图书馆应用家族标签",
+                        ErrorInfo = $"(PC.ISO=true, PC.AFI={Element.GetHexString((byte)pc.AFI)}) 目前仅支持 AFI 为 0xc2 或 0x07 的图书馆应用家族标签",
                         ErrorCode = "notSupportAFI",
                     };
             }
@@ -558,8 +621,8 @@ namespace DigitalPlatform.RFID
         // 解析协议控制字(Protocol Control Word)
         public static ProtocolControlWord ParsePC(byte[] data, int start)
         {
-            if (data.Length < 2)
-                throw new ArgumentException($"data 内应包含至少 2 bytes(但现在只有 {data.Length})", nameof(data));
+            if (data.Length - start < 2)
+                throw new ArgumentException($"data 内应包含至少 {(start + 2)} bytes(但现在只有 {data.Length})", nameof(data));
 
             ProtocolControlWord result = new ProtocolControlWord();
             // 0x0 1 2 3 4 bits
@@ -569,6 +632,20 @@ namespace DigitalPlatform.RFID
             result.ISO = (data[start] & 0x1) != 0;
             result.AFI = data[start + 1];
             return result;
+        }
+
+        // 观察 EPC Bank 中的 UMI 标志位
+        public static bool GetUMI(byte[] data, int start)
+        {
+            if (data.Length < 2)
+                return false;
+
+            // 0x0 1 2 3 4 bits
+            // result.LengthIndicator = (data[start] >> 3) & 0x1f;
+            return (data[start] & 0x4) != 0;
+            // result.XPC = (data[start] & 0x2) != 0;
+            // result.ISO = (data[start] & 0x1) != 0;
+            // result.AFI = data[start + 1];
         }
 
         public static byte[] EncodePC(ProtocolControlWord pc_info)
@@ -607,7 +684,7 @@ namespace DigitalPlatform.RFID
                 else if (b == 0xfc)
                 {
                     // next byte is ISO/IEC 646 IRV character
-                    result.Append(data[offs + 1]);
+                    result.Append((char)(data[offs + 1]));
                     offs += 2;
                 }
                 else if (b == 0xfd)
@@ -757,5 +834,11 @@ namespace DigitalPlatform.RFID
         {
             return $"LengthIndicator={LengthIndicator}, UMI={UMI}, XPC={XPC}, ISO={ISO}, AFI={Element.GetHexString((byte)AFI)}";
         }
+    }
+
+    public class BuildTagResult : NormalResult
+    {
+        public byte[] EpcBank { get; set; }
+        public byte[] UserBank { get; set; }
     }
 }

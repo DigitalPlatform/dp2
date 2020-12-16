@@ -24,6 +24,8 @@ namespace RfidTool
             this.textBox_rfid_aoi.Text = DataModel.DefaultAoiString;
 
             this.comboBox_uhfDataFormat.Text = DataModel.UhfWriteFormat;
+            this.checkBox_writeUserBank.Checked = DataModel.WriteUhfUserBank;
+            this.checkBox_warningWhenUhfFormatMismatch.Checked = DataModel.WarningWhenUhfFormatMismatch;
         }
 
         private void SettingDialog_FormClosing(object sender, FormClosingEventArgs e)
@@ -76,6 +78,8 @@ namespace RfidTool
             DataModel.DefaultAoiString = this.textBox_rfid_aoi.Text;
 
             DataModel.UhfWriteFormat = this.comboBox_uhfDataFormat.Text;
+            DataModel.WriteUhfUserBank = this.checkBox_writeUserBank.Checked;
+            DataModel.WarningWhenUhfFormatMismatch = this.checkBox_warningWhenUhfFormatMismatch.Checked;
 
             this.DialogResult = DialogResult.OK;
             this.Close();

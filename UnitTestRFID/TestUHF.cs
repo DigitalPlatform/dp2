@@ -140,6 +140,15 @@ namespace UnitTestRFID
             Assert.AreEqual("CH-000134-1.12345678.31", result);
         }
 
+        // 测试包含小写字母的情形
+        [TestMethod]
+        public void Test_decode_uii_3()
+        {
+            var bytes = UhfUtility.EncodeUII("aaaaa");
+            var result = UhfUtility.DecodeUII(bytes, 0, bytes.Length);
+            Assert.AreEqual("aaaaa", result);
+        }
+
         // 9 字符才会形成 digit 类型
         [TestMethod]
         public void Test_splitSegment_1()
