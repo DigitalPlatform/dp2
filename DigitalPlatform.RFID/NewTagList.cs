@@ -355,7 +355,6 @@ namespace DigitalPlatform.RFID
                         }
                     }
 
-
                     if (getTagInfo != null)
                     {
                         // 自动重试一次
