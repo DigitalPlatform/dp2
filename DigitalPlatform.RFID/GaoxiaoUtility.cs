@@ -25,7 +25,7 @@ namespace DigitalPlatform.RFID
             if (user_bank != null && user_bank.Length >= 1)
             {
                 // 检查 User Bank 特征？
-                
+
             }
 
             /*
@@ -1027,7 +1027,7 @@ namespace DigitalPlatform.RFID
                 user_elements.Add(user_element);
             }
             byte[] user_bank = null;
-            
+
             if (build_user_bank)
                 user_bank = EncodeUserBank(user_elements, true);
 
@@ -1162,34 +1162,38 @@ namespace DigitalPlatform.RFID
                 List<byte> bytes = new List<byte>(epc_bank);
                 bytes.RemoveRange(0, 4);
 
-                var epc_info = DecodeGaoxiaoEpc(bytes.ToArray());
-                if (pc.UMI == false
-                    && epc_info.ContentParameters.Length != 0)
+                GaoxiaoEpcInfo epc_info = null;
+                if (bytes.Count > 0)
                 {
-                    if (pc.AFI == 0
-                        && pc.ISO == false
-                        && pc.UMI == false
-                        && pc.XPC == false
-                        && pc.LengthIndicator == 8)
+                    epc_info = DecodeGaoxiaoEpc(bytes.ToArray());
+                    if (pc.UMI == false
+                        && epc_info.ContentParameters.Length != 0)
                     {
+                        if (pc.AFI == 0
+                            && pc.ISO == false
+                            && pc.UMI == false
+                            && pc.XPC == false
+                            && pc.LengthIndicator == 8)
+                        {
+                            return new ParseGaoxiaoResult
+                            {
+                                Value = 0,
+                                ErrorInfo = "空白标签",
+                                ErrorCode = "blank",
+                                LogicChip = new LogicChip(),
+                                EpcInfo = epc_info,
+                                UserElements = new List<GaoxiaoUserElement>()
+                            };
+                        }
                         return new ParseGaoxiaoResult
                         {
-                            Value = 0,
-                            ErrorInfo = "空白标签",
-                            ErrorCode = "blank",
-                            LogicChip = new LogicChip(),
+                            Value = -1,
+                            ErrorInfo = "标签内容无法解析。ECP UMI 位和(高校联盟) ContentParameters 不符",
+                            ErrorCode = "parseEpcError",
                             EpcInfo = epc_info,
                             UserElements = new List<GaoxiaoUserElement>()
                         };
                     }
-                    return new ParseGaoxiaoResult
-                    {
-                        Value = -1,
-                        ErrorInfo = "标签内容无法解析。ECP UMI 位和(高校联盟) ContentParameters 不符",
-                        ErrorCode = "parseEpcError",
-                        EpcInfo = epc_info,
-                        UserElements = new List<GaoxiaoUserElement>()
-                    };
                 }
 
                 List<GaoxiaoUserElement> elements = null;
@@ -1199,7 +1203,8 @@ namespace DigitalPlatform.RFID
                     elements = DecodeUserBank(user_bank);
 
                     chip = new LogicChip();
-                    chip.SetElement(ElementOID.PII, epc_info.PII);
+                    if (epc_info != null)
+                        chip.SetElement(ElementOID.PII, epc_info.PII);
                     foreach (var element in elements)
                     {
                         var oid = (ElementOID)element.OID;

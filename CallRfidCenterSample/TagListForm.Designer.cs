@@ -43,6 +43,10 @@
             this.ToolStripMenuItem_writeUhf_gaoxiao = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_writeUhf_gb_noUserBank = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_writeUhf_gb = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripDropDownButton_setEAS = new System.Windows.Forms.ToolStripDropDownButton();
+            this.ToolStripMenuItem_setEas_on = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_setEas_off = new System.Windows.Forms.ToolStripMenuItem();
+            this.columnHeader_eas = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -55,6 +59,7 @@
             this.columnHeader_uid,
             this.columnHeader_pii,
             this.columnHeader_tu,
+            this.columnHeader_eas,
             this.columnHeader_oi,
             this.columnHeader_protocol,
             this.columnHeader_antenna,
@@ -111,10 +116,11 @@
             this.toolStrip1.Dock = System.Windows.Forms.DockStyle.None;
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(28, 28);
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripDropDownButton_writeUhf});
-            this.toolStrip1.Location = new System.Drawing.Point(16, 461);
+            this.toolStripDropDownButton_writeUhf,
+            this.toolStripDropDownButton_setEAS});
+            this.toolStrip1.Location = new System.Drawing.Point(16, 467);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(289, 44);
+            this.toolStrip1.Size = new System.Drawing.Size(355, 38);
             this.toolStrip1.TabIndex = 2;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -130,7 +136,7 @@
             this.toolStripDropDownButton_writeUhf.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton_writeUhf.Image")));
             this.toolStripDropDownButton_writeUhf.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripDropDownButton_writeUhf.Name = "toolStripDropDownButton_writeUhf";
-            this.toolStripDropDownButton_writeUhf.Size = new System.Drawing.Size(214, 38);
+            this.toolStripDropDownButton_writeUhf.Size = new System.Drawing.Size(214, 32);
             this.toolStripDropDownButton_writeUhf.Text = "写入 UHF 图书标签";
             // 
             // ToolStripMenuItem_writeUhf_gaoxiao_noUserBank
@@ -160,6 +166,38 @@
             this.ToolStripMenuItem_writeUhf_gb.Size = new System.Drawing.Size(404, 40);
             this.ToolStripMenuItem_writeUhf_gb.Text = "国标格式，有 UserBank";
             this.ToolStripMenuItem_writeUhf_gb.Click += new System.EventHandler(this.ToolStripMenuItem_writeUhf_gb_Click);
+            // 
+            // toolStripDropDownButton_setEAS
+            // 
+            this.toolStripDropDownButton_setEAS.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripDropDownButton_setEAS.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.ToolStripMenuItem_setEas_on,
+            this.ToolStripMenuItem_setEas_off});
+            this.toolStripDropDownButton_setEAS.Enabled = false;
+            this.toolStripDropDownButton_setEAS.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton_setEAS.Image")));
+            this.toolStripDropDownButton_setEAS.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripDropDownButton_setEAS.Name = "toolStripDropDownButton_setEAS";
+            this.toolStripDropDownButton_setEAS.Size = new System.Drawing.Size(120, 32);
+            this.toolStripDropDownButton_setEAS.Text = "设置 EAS";
+            // 
+            // ToolStripMenuItem_setEas_on
+            // 
+            this.ToolStripMenuItem_setEas_on.Name = "ToolStripMenuItem_setEas_on";
+            this.ToolStripMenuItem_setEas_on.Size = new System.Drawing.Size(208, 40);
+            this.ToolStripMenuItem_setEas_on.Text = "设为 On";
+            this.ToolStripMenuItem_setEas_on.Click += new System.EventHandler(this.ToolStripMenuItem_setEas_on_Click);
+            // 
+            // ToolStripMenuItem_setEas_off
+            // 
+            this.ToolStripMenuItem_setEas_off.Name = "ToolStripMenuItem_setEas_off";
+            this.ToolStripMenuItem_setEas_off.Size = new System.Drawing.Size(208, 40);
+            this.ToolStripMenuItem_setEas_off.Text = "设为 Off";
+            this.ToolStripMenuItem_setEas_off.Click += new System.EventHandler(this.ToolStripMenuItem_setEas_off_Click);
+            // 
+            // columnHeader_eas
+            // 
+            this.columnHeader_eas.Text = "EAS";
+            this.columnHeader_eas.Width = 100;
             // 
             // TagListForm
             // 
@@ -196,5 +234,9 @@
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_writeUhf_gaoxiao;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_writeUhf_gb_noUserBank;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_writeUhf_gb;
+        private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton_setEAS;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_setEas_on;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_setEas_off;
+        private System.Windows.Forms.ColumnHeader columnHeader_eas;
     }
 }

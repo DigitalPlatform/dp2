@@ -18,12 +18,8 @@ namespace DigitalPlatform.RFID
         public static bool IsBlankTag(byte[] epc_bank,
             byte[] user_bank)
         {
-            // 空白标签
-            if (epc_bank.Length >= 4
-                && epc_bank[2] == 0 && epc_bank[3] == 0)
-                return true;
+            return IsBlankEpcBank(epc_bank);
 
-            return false;
             /*
             if (user_bank != null && user_bank.Length > 0)
             {
@@ -50,6 +46,16 @@ namespace DigitalPlatform.RFID
 
             return true;
             */
+        }
+
+        public static bool IsBlankEpcBank(byte[] epc_bank)
+        {
+            // 空白的 EPC
+            if (epc_bank.Length >= 4
+                && epc_bank[2] == 0 && epc_bank[3] == 0)
+                return true;
+
+            return false;
         }
 
         // 判断标签内容是否采用了 ISO28560-4 (UHF 国标)编码格式
