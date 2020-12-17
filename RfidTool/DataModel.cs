@@ -90,7 +90,7 @@ namespace RfidTool
                         _prev_count = result.Results.Count;
                         */
 
-                        if (result.Results != null && result.Results.Count > 0)
+                        if (result.Results != null)
                             TagList.Refresh(// sender as BaseChannel<IRfid>,
                                 readerNameList,
                                 result.Results,
