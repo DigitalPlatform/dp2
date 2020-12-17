@@ -3451,41 +3451,81 @@ out Reader reader);
                     {
                         if (protocol == InventoryInfo.ISO18000P6C)
                         {
-                            var pc_bytes = GetPcBytes(uid);
-
-                            if (pc_bytes.Length != 2)
+                            var epc_bank = Element.FromHexString(uid);
+                            if (UhfUtility.IsBlankEpcBank(epc_bank) == true)
+                            {
                                 return new NormalResult
                                 {
                                     Value = -1,
-                                    ErrorInfo = "UID 中解析的 PC bytes 数必须为 2"
+                                    ErrorInfo = "对空白的 UHF 标签无法修改 EAS"
                                 };
+                            }
 
-                            var pc = UhfUtility.ParsePC(pc_bytes, 0);
-                            /*
-                            bool old_enabled = pc.AFI == 0x07 ? true : false;
-                            if (old_enabled == enable)  // 没有必要更新
-                                return new NormalResult();
-                            */
-                            pc.AFI = enable ? 0x07 : 0xc2;
-                            var new_pc_bytes = UhfUtility.EncodePC(pc);
+                            // 判断标签到底是国标还是高校联盟格式
+                            var isGB = UhfUtility.IsISO285604Format(epc_bank, null);
+                            if (isGB)
+                            {
+                                var pc_bytes = GetPcBytes(uid);
 
-                            var iret = RFIDLIB.rfidlib_aip_iso18000p6C.ISO18000p6C_Write(
-        reader.ReaderHandle,
-        hTag,
-        (Byte)RFIDLIB.rfidlib_def.ISO18000p6C_MEM_BANK_EPC,
-        1,
-        (UInt32)(new_pc_bytes.Length / 2),
-        new_pc_bytes,
-        (UInt32)new_pc_bytes.Length);
-                            if (iret != 0)
-                                return new NormalResult
-                                {
-                                    Value = -1,
-                                    ErrorInfo = $"ISO18000p6C_Write() EPC Bank error. iret:{iret},reader_name:{reader_name},uid:{uid},antenna_id:{antenna_id}",
-                                    ErrorCode = GetErrorCode(iret, reader.ReaderHandle)
-                                };
+                                if (pc_bytes.Length != 2)
+                                    return new NormalResult
+                                    {
+                                        Value = -1,
+                                        ErrorInfo = "UID 中解析的 PC bytes 数必须为 2"
+                                    };
 
-                            return new NormalResult();
+                                var pc = UhfUtility.ParsePC(pc_bytes, 0);
+                                pc.AFI = enable ? 0x07 : 0xc2;
+                                var new_pc_bytes = UhfUtility.EncodePC(pc);
+
+                                Debug.Assert(new_pc_bytes.Length == 2);
+
+                                var iret = RFIDLIB.rfidlib_aip_iso18000p6C.ISO18000p6C_Write(
+            reader.ReaderHandle,
+            hTag,
+            (Byte)RFIDLIB.rfidlib_def.ISO18000p6C_MEM_BANK_EPC,
+            1,
+            (UInt32)(new_pc_bytes.Length / 2),
+            new_pc_bytes,
+            (UInt32)new_pc_bytes.Length);
+                                if (iret != 0)
+                                    return new NormalResult
+                                    {
+                                        Value = -1,
+                                        ErrorInfo = $"ISO18000p6C_Write() EPC Bank (gb) error. iret:{iret},reader_name:{reader_name},uid:{uid},antenna_id:{antenna_id}",
+                                        ErrorCode = GetErrorCode(iret, reader.ReaderHandle)
+                                    };
+
+                                return new NormalResult { ErrorInfo = "设置国标 UHF EAS 成功"};
+                            }
+                            else
+                            {
+                                // 高校联盟格式
+                                // 跳过 4 个 bytes
+                                var bytes = Element.FromHexString(uid.Substring(8));
+
+                                var epc_info = GaoxiaoUtility.DecodeGaoxiaoEpc(bytes.ToArray());
+                                epc_info.Lending = !enable;
+                                var payload = GaoxiaoUtility.EncodeGaoxiaoEpcPayload(epc_info);
+                                // TODO: 可以优化为只写入最小一个 word 范围
+                                var iret = RFIDLIB.rfidlib_aip_iso18000p6C.ISO18000p6C_Write(
+                                    reader.ReaderHandle,
+                                    hTag,
+                                    (Byte)RFIDLIB.rfidlib_def.ISO18000p6C_MEM_BANK_EPC,
+                                    2,
+                                    (UInt32)(payload.Length / 2),
+                                    payload,
+                                    (UInt32)payload.Length);
+                                if (iret != 0)
+                                    return new NormalResult
+                                    {
+                                        Value = -1,
+                                        ErrorInfo = $"ISO18000p6C_Write() EPC Bank (gaoxiao) error. iret:{iret},reader_name:{reader_name},uid:{uid},antenna_id:{antenna_id}",
+                                        ErrorCode = GetErrorCode(iret, reader.ReaderHandle)
+                                    };
+
+                                return new NormalResult { ErrorInfo = "设置高校联盟 UHF EAS 成功" };
+                            }
                         }
 
                         // 写入 AFI
@@ -3536,7 +3576,7 @@ out Reader reader);
         }
 
         // 从 UID hex string 中解析出 PC 两个 Bytes
-        static byte [] GetPcBytes(string hex_string)
+        static byte[] GetPcBytes(string hex_string)
         {
             if (hex_string.Length < 8)
                 throw new ArgumentException($"hex string 的长度必须在 8 bytes 以上");
@@ -3788,10 +3828,10 @@ out Reader reader);
                             {
                                 NormalResult result0 = WriteBlocks(
                                     reader.ReaderHandle,
-                            hTag,
-                            (uint)current_block_count,
-                            (uint)range.BlockCount,
-                            range.Bytes);
+                                    hTag,
+                                    (uint)current_block_count,
+                                    (uint)range.BlockCount,
+                                    range.Bytes);
                                 if (result0.Value == -1)
                                     return new NormalResult { Value = -1, ErrorInfo = result0.ErrorInfo, ErrorCode = result0.ErrorCode };
                             }

@@ -793,7 +793,9 @@ new SetErrorEventArgs
             }
         }
 
-        public static NormalResult SetEAS(string uid, uint antenna_id, bool enable)
+        public static NormalResult SetEAS(string uid, 
+            uint antenna_id,
+            bool enable)
         {
             try
             {

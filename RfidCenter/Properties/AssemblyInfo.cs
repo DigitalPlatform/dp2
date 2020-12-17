@@ -32,7 +32,7 @@ using System.Runtime.InteropServices;
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 // 方法是按如下所示使用“*”: :
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.13.1")]   // 1.11.*
+[assembly: AssemblyVersion("1.13.2")]   // 1.11.*
 [assembly: AssemblyFileVersion("1.13.0.0")]
 
 // V1.1 2019/2/21 支持 32-bit Windows 环境
@@ -55,3 +55,4 @@ using System.Runtime.InteropServices;
 //      1.12.0 (2020/12/8)
 // V1.13 2020/12/14 增加对 UHF 读写器的支持，首先支持高校联盟数据格式
 //      1.13.1 (2020/12/16) 增加对 UHF 国标数据格式的支持
+//      1.13.2 (2020/12/17) SetEAS() API 增加对 UHF 的支持

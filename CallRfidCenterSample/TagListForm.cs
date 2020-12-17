@@ -94,10 +94,11 @@ namespace CallRfidCenterSample
         const int COLUMN_UID = 0;
         const int COLUMN_PII = 1;
         const int COLUMN_TU = 2;
-        const int COLUMN_OI = 3;
-        const int COLUMN_PROTOCOL = 4;
-        const int COLUMN_ANTENNA = 5;
-        const int COLUMN_READERNAME = 6;
+        const int COLUMN_EAS = 3;
+        const int COLUMN_OI = 4;
+        const int COLUMN_PROTOCOL = 5;
+        const int COLUMN_ANTENNA = 6;
+        const int COLUMN_READERNAME = 7;
 
         // 添加一个新行
         ListViewItem AddItem(TagAndData tag)
@@ -135,49 +136,61 @@ namespace CallRfidCenterSample
                     if (taginfo.Protocol == InventoryInfo.ISO18000P6C)
                     {
                         var epc_bank = Element.FromHexString(taginfo.UID);
-                        var isGB = UhfUtility.IsISO285604Format(epc_bank, taginfo.Bytes);
-                        if (isGB)
+
+                        if (UhfUtility.IsBlankTag(epc_bank, taginfo.Bytes) == true)
                         {
-                            // *** 国标 UHF
-                            var parse_result = UhfUtility.ParseTag(epc_bank,
-                taginfo.Bytes,
-                4);
-                            if (parse_result.Value == -1)
-                                throw new Exception(parse_result.ErrorInfo);
-                            chip = parse_result.LogicChip;
-                            taginfo.EAS = false;    // TODO
-                            uhfProtocol = "gb";
-                            pii = GetPIICaption(GetPiiPart(parse_result.UII));
-                            oi = GetOiPart(parse_result.UII, false);
+                            // 空白标签
+                            pii = GetPIICaption(null);
                         }
                         else
                         {
-                            /*
-                            var parse_result = GaoxiaoUtility.ParseTag(
-                Element.FromHexString(taginfo.UID),
-                taginfo.Bytes);
-                            if (parse_result.Value == -1)
+
+                            var isGB = UhfUtility.IsISO285604Format(epc_bank, taginfo.Bytes);
+                            if (isGB)
                             {
-                                ListViewUtil.ChangeItemText(item, COLUMN_PII, "error:" + parse_result.ErrorInfo);
-                                return;
+                                // *** 国标 UHF
+                                var parse_result = UhfUtility.ParseTag(epc_bank,
+                    taginfo.Bytes,
+                    4);
+                                if (parse_result.Value == -1)
+                                    throw new Exception(parse_result.ErrorInfo);
+                                chip = parse_result.LogicChip;
+                                uhfProtocol = "gb";
+                                pii = GetPIICaption(GetPiiPart(parse_result.UII));
+                                oi = GetOiPart(parse_result.UII, false);
+                                eas = parse_result.PC.AFI == 0x07 ? "On" : "Off";
                             }
-                            chip = parse_result.LogicChip;
-                            taginfo.EAS = !parse_result.EpcInfo.Lending;
-                            */
-                            // *** 高校联盟 UHF
-                            var parse_result = GaoxiaoUtility.ParseTag(
-                epc_bank,
-                taginfo.Bytes);
-                            if (parse_result.Value == -1)
+                            else
                             {
-                                ListViewUtil.ChangeItemText(item, COLUMN_PII, "error:" + parse_result.ErrorInfo);
-                                return;
+                                /*
+                                var parse_result = GaoxiaoUtility.ParseTag(
+                    Element.FromHexString(taginfo.UID),
+                    taginfo.Bytes);
+                                if (parse_result.Value == -1)
+                                {
+                                    ListViewUtil.ChangeItemText(item, COLUMN_PII, "error:" + parse_result.ErrorInfo);
+                                    return;
+                                }
+                                chip = parse_result.LogicChip;
+                                taginfo.EAS = !parse_result.EpcInfo.Lending;
+                                */
+                                // *** 高校联盟 UHF
+                                var parse_result = GaoxiaoUtility.ParseTag(
+                    epc_bank,
+                    taginfo.Bytes);
+                                if (parse_result.Value == -1)
+                                {
+                                    ListViewUtil.ChangeItemText(item, COLUMN_PII, "error:" + parse_result.ErrorInfo);
+                                    return;
+                                }
+                                chip = parse_result.LogicChip;
+                                if (parse_result.EpcInfo != null)
+                                    taginfo.EAS = !parse_result.EpcInfo.Lending;
+                                uhfProtocol = "gxlm";
+                                pii = GetPIICaption(GetPiiPart(parse_result.EpcInfo?.PII));
+                                oi = GetOiPart(parse_result.EpcInfo?.PII, false);
+                                eas = parse_result.EpcInfo?.Lending == false ? "On" : "Off";
                             }
-                            chip = parse_result.LogicChip;
-                            taginfo.EAS = !parse_result.EpcInfo.Lending;
-                            uhfProtocol = "gxlm";
-                            pii = GetPIICaption(GetPiiPart(parse_result.EpcInfo.PII));
-                            oi = GetOiPart(parse_result.EpcInfo.PII, false);
                         }
                     }
                     else if (taginfo.Protocol == InventoryInfo.ISO15693)
@@ -192,6 +205,8 @@ namespace CallRfidCenterSample
                 "");
                             pii = GetPIICaption(chip.FindElement(ElementOID.PII)?.Text);
                         }
+
+                        eas = taginfo.EAS ? "On" : "Off";
                     }
 
                     /*
@@ -205,7 +220,6 @@ namespace CallRfidCenterSample
 
 
                     tu = chip?.FindElement(ElementOID.TypeOfUsage)?.Text;
-                    eas = taginfo.EAS ? "On" : "Off";
 
                     if (string.IsNullOrEmpty(oi))
                     {
@@ -226,9 +240,8 @@ namespace CallRfidCenterSample
 
                 ListViewUtil.ChangeItemText(item, COLUMN_PII, pii);
                 ListViewUtil.ChangeItemText(item, COLUMN_TU, tu);
-                //ListViewUtil.ChangeItemText(item, COLUMN_EAS, eas);
+                ListViewUtil.ChangeItemText(item, COLUMN_EAS, eas);
                 ListViewUtil.ChangeItemText(item, COLUMN_OI, oi);
-                //ListViewUtil.ChangeItemText(item, COLUMN_AOI, aoi);
 
                 // 刷新协议栏
                 if (tag.OneTag.Protocol == InventoryInfo.ISO18000P6C)
@@ -279,6 +292,10 @@ namespace CallRfidCenterSample
         // 获得 oi.pii 的 oi 部分
         public static string GetOiPart(string oi_pii, bool return_null)
         {
+            // 2020/12/17
+            if (string.IsNullOrEmpty(oi_pii))
+                return oi_pii;
+
             if (oi_pii.IndexOf(".") == -1)
             {
                 if (return_null)
@@ -292,6 +309,10 @@ namespace CallRfidCenterSample
         // 获得 oi.pii 的 pii 部分
         public static string GetPiiPart(string oi_pii)
         {
+            // 2020/12/17
+            if (string.IsNullOrEmpty(oi_pii))
+                return oi_pii;
+
             if (oi_pii.IndexOf(".") == -1)
                 return oi_pii;
             var parts = StringUtil.ParseTwoPart(oi_pii, ".");
@@ -388,15 +409,12 @@ bool eas)
             if (this.listView_tags.SelectedItems.Count == 0)
             {
                 this.toolStripDropDownButton_writeUhf.Enabled = false;
-                /*
-                this.ToolStripMenuItem_writeUhf_gaoxiao.Enabled = false;
-                this.ToolStripMenuItem_writeUhf_gaoxiao_noUserBank.Enabled = false;
-                this.button_writeGaoxiao.Enabled = false;
-                */
+                this.toolStripDropDownButton_setEAS.Enabled = false;
             }
             else
             {
                 this.toolStripDropDownButton_writeUhf.Enabled = true;
+                this.toolStripDropDownButton_setEAS.Enabled = true;
             }
         }
 
@@ -572,6 +590,58 @@ bool eas)
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+        private void ToolStripMenuItem_setEas_on_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            int nRet = SetEAS(true, out strError);
+            if (nRet == -1)
+                goto ERROR1;
+            MessageBox.Show(this, "设置 EAS 成功");
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        private void ToolStripMenuItem_setEas_off_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            int nRet = SetEAS(false, out strError);
+            if (nRet == -1)
+                goto ERROR1;
+            MessageBox.Show(this, "设置 EAS 成功");
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+
+        }
+
+        int SetEAS(bool enable,
+            out string strError)
+        {
+            strError = "";
+
+            foreach (ListViewItem item in this.listView_tags.SelectedItems)
+            {
+                TagAndData data = item.Tag as TagAndData;
+                var write_result = RfidManager.SetEAS(data.OneTag.ReaderName,
+        "uid:" + data.OneTag.UID,
+        data.OneTag.AntennaID,
+        enable);
+                if (write_result.Value == -1)
+                {
+                    strError = write_result.ErrorInfo;
+                    return -1;
+                }
+
+                // 清掉标签缓冲，迫使刷新列表显示
+                Form1.TagList.ClearTagTable(data.OneTag.UID);
+            }
+
+            return 0;
         }
     }
 }
