@@ -660,7 +660,7 @@ namespace UnitTestRFID
             string source_hex = "0104 5300 1853 0440 0D0B 0000";
 
             var source = Element.FromHexString(source_hex);
-            var result = GaoxiaoUtility.DecodeGaoxiaoEpc(source);
+            var result = GaoxiaoUtility.DecodeGaoxiaoEpcPayload(source);
             Debug.WriteLine(result);
 
 

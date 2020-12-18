@@ -1502,15 +1502,29 @@ namespace DigitalPlatform.LibraryServer
                     if (string.IsNullOrEmpty(entity.OldRecord) == false)
                     {
                         // TODO: 这里如果抛出异常怎么办?
-                        XmlDocument item_dom = new XmlDocument();
-                        item_dom.LoadXml(entity.OldRecord);
-                        item.InnerXml = item_dom.DocumentElement.InnerXml;
+                        try
+                        {
+                            XmlDocument item_dom = new XmlDocument();
+                            item_dom.LoadXml(entity.OldRecord);
+                            item.InnerXml = item_dom.DocumentElement.InnerXml;
+                        }
+                        catch(Exception ex)
+                        {
+                            // itemTotalCount=-1 表示 AccessDenied
+                            dom.DocumentElement.SetAttribute(strItemElementName + "TotalCount", "-1");
+                            // 加入错误原因属性，以便前端判断和处理
+                            dom.DocumentElement.SetAttribute(strItemElementName + "ErrorInfo", $"册记录 {entity.RecPath} XML 解析出错: {ex.Message}");
+                            dom.DocumentElement.SetAttribute(strItemElementName + "ErrorCode", "");
+                            return;
+                        }
                     }
                 }
             }
 
             // itemTotalCount=-1 表示 AccessDenied
             dom.DocumentElement.SetAttribute(strItemElementName + "TotalCount", lHitCount.ToString());
+            dom.DocumentElement.SetAttribute(strItemElementName + "ErrorInfo", $"权限不足，无法获取 {strItemElementName}记录");
+            dom.DocumentElement.SetAttribute(strItemElementName + "ErrorCode", "AccessDenied");
         }
 
 #if NO

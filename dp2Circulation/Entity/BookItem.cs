@@ -229,6 +229,12 @@ namespace dp2Circulation
         {
             get
             {
+                /*
+                if (this.RecordDom == null)
+                    return null;
+                if (this.RecordDom.DocumentElement == null)
+                    return null;
+                */
                 return DomUtil.GetElementText(this.RecordDom.DocumentElement, "barcode");
             }
             set
@@ -722,19 +728,45 @@ namespace dp2Circulation
         /// <param name="item">ListViewItem事项，ListView中的一行</param>
         public override void SetItemColumns(ListViewItem item)
         {
+            // 2020/12/18
+            if (this.RecordDom.DocumentElement == null)
+            {
+                /*
+                // 把行显示为错误状态红色
+                item.BackColor = Color.DarkRed;
+                item.ForeColor = Color.White;
+                */
+                this.ErrorInfo += " XML 错误，缺乏根元素";
+                ListViewUtil.ChangeItemText(item,
+    COLUMN_ERRORINFO,
+    this.ErrorInfo);
+            }
+
             var defs = FindColumnDefs(item.ListView);
 
             if (defs != null)
             {
-                // var defs = GetItemColumnInfo(-1);
-                foreach (var def in defs)
+                if (this.RecordDom.DocumentElement != null)
                 {
-                    string value = GetData(def.DataElement);
-                    ListViewUtil.ChangeItemText(item,
-            def.Index,
-            value);
+                    // var defs = GetItemColumnInfo(-1);
+                    foreach (var def in defs)
+                    {
+                        // TODO: 处理异常
+                        try
+                        {
+                            string value = GetData(def.DataElement);
+                            ListViewUtil.ChangeItemText(item,
+                    def.Index,
+                    value);
+                        }
+                        catch (Exception ex)
+                        {
+                            ListViewUtil.ChangeItemText(item,
+    def.Index,
+    $"error:{ex.Message}");
+                        }
+                    }
                 }
-
                 return;
             }
 

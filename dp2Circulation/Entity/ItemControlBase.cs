@@ -735,12 +735,22 @@ namespace dp2Circulation
                              entity.OldTimestamp,
                              out strError);
                     if (nRet == -1)
+                    {
+                        /*
+                        strError = $"解析册记录 {entity.OldRecPath} 的 XML 记录时出错: {strError}";
                         return -1;
-
-                    if (entity.ErrorCode == ErrorCodeValue.NoError)
-                        bookitem.Error = null;
-                    else
+                        */
                         bookitem.Error = entity;
+                        bookitem.ErrorInfo = $"解析册记录 {entity.OldRecPath} 的 XML 记录时出错: {strError}";
+                        errors.Add(bookitem.ErrorInfo);
+                    }
+                    else
+                    {
+                        if (entity.ErrorCode == ErrorCodeValue.NoError)
+                            bookitem.Error = null;
+                        else
+                            bookitem.Error = entity;
+                    }
 
                     // 2016/12/19
                     // 刷新已有事项的 old 部分

@@ -2908,45 +2908,10 @@ start_time_1,
                 goto ERROR1;
             }
 
-            // 如果已经有确定的册记录路径
-            if (String.IsNullOrEmpty(strConfirmItemRecPath) == false)
+            // 先尝试用册条码号定位记录
+            // 2020/12/18 改变先后顺序。原先是先尝试用 strConfirmItemRecPath
+            if (string.IsNullOrEmpty(strItemBarcode) == false)
             {
-                // 检查路径中的库名，是不是实体库名
-                // return:
-                //      -1  error
-                //      0   不是实体库名
-                //      1   是实体库名
-                nRet = this.CheckItemRecPath(strConfirmItemRecPath,
-                    out strError);
-                if (nRet == -1)
-                    goto ERROR1;
-                if (nRet == 0)
-                {
-                    strError = strConfirmItemRecPath + strError;
-                    goto ERROR1;
-                }
-
-
-                long lRet = channel.GetRes(strConfirmItemRecPath,
-                    out strItemXml,
-                    out string strMetaData,
-                    out item_timestamp,
-                    out strOutputItemRecPath,
-                    out strError);
-                if (lRet == -1)
-                {
-                    // text-level: 内部错误
-                    strError = "根据strConfirmItemRecPath '" + strConfirmItemRecPath + "' 获得册记录失败: " + strError;
-                    goto ERROR1;
-                }
-            }
-            else
-            {
-                if (string.IsNullOrEmpty(strItemBarcode) == true)
-                {
-                    strError = "册条码号不应为空";
-                    goto ERROR1;
-                }
 
                 // 从册条码号获得册记录
 
@@ -3202,6 +3167,42 @@ start_time_1,
                         strOutputItemRecPath = aPath[0];
                     }
                 }
+            }
+            // 如果已经有确定的册记录路径
+            else if (String.IsNullOrEmpty(strConfirmItemRecPath) == false)
+            {
+                // 检查路径中的库名，是不是实体库名
+                // return:
+                //      -1  error
+                //      0   不是实体库名
+                //      1   是实体库名
+                nRet = this.CheckItemRecPath(strConfirmItemRecPath,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+                if (nRet == 0)
+                {
+                    strError = strConfirmItemRecPath + strError;
+                    goto ERROR1;
+                }
+
+                long lRet = channel.GetRes(strConfirmItemRecPath,
+                    out strItemXml,
+                    out string strMetaData,
+                    out item_timestamp,
+                    out strOutputItemRecPath,
+                    out strError);
+                if (lRet == -1)
+                {
+                    // text-level: 内部错误
+                    strError = "(GetItemRecord)根据 strConfirmItemRecPath '" + strConfirmItemRecPath + "' 获得册记录失败: " + strError;
+                    goto ERROR1;
+                }
+            }
+            else
+            {
+                strError = "册条码号和 strConfirmItemRecPath 同时为空，无法定位册记录";
+                goto ERROR1;
             }
 
             // 用 OI 判断这一条册记录是否符合要求

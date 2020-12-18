@@ -148,9 +148,21 @@ namespace ShelfLockDriver.First
 
         public NormalResult ReleaseDriver()
         {
-            if (_sp.IsOpen)
-                _sp.Close();
-            return new NormalResult();
+            try
+            {
+                if (_sp.IsOpen)
+                    _sp.Close();
+                return new NormalResult();
+            }
+            catch(Exception ex)
+            {
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = ex.Message,
+                    ErrorCode = ex.GetType().ToString()
+                };
+            }
         }
 
         public NormalResult QueryCard()
