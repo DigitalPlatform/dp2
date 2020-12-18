@@ -913,7 +913,7 @@ true);
                 BookItemContext.SetColumnDefinition(this.entityControl1.ListView, defs);
                 BookItemContext.CreateColumns(this.entityControl1.ListView);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 this.ShowMessage($"InitialEntityColumnDefs() 出现异常: {ex.Message}");
                 MainForm.WriteErrorLog($"InitialEntityColumnDefs() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
@@ -3183,6 +3183,25 @@ true);
         {
             if (collection_dom.DocumentElement == null)
                 return false;
+            string errorCode = collection_dom.DocumentElement.GetAttribute(strElementName + "ErrorCode");
+            string strTotalCount = collection_dom.DocumentElement.GetAttribute(strElementName + "TotalCount");
+            if (strTotalCount == "-1" && errorCode == "AccessDenied")
+                return true;
+            return false;
+        }
+
+        static bool IsError(XmlDocument collection_dom,
+string strElementName,
+out string strErrorInfo,
+out string strErrorCode)
+        {
+            strErrorInfo = "";
+            strErrorCode = "";
+
+            if (collection_dom.DocumentElement == null)
+                return false;
+            strErrorCode = collection_dom.DocumentElement.GetAttribute(strElementName + "ErrorCode");
+            strErrorInfo = collection_dom.DocumentElement.GetAttribute(strElementName + "ErrorInfo");
             string strTotalCount = collection_dom.DocumentElement.GetAttribute(strElementName + "TotalCount");
             if (strTotalCount == "-1")
                 return true;
@@ -3199,7 +3218,8 @@ true);
             if (string.IsNullOrEmpty(strTotalCount))
                 return null;
             int nTotalCount = 0;
-            Int32.TryParse(strTotalCount, out nTotalCount);
+            if (Int32.TryParse(strTotalCount, out nTotalCount) == false)
+                return null;    // 2020/12/18
             XmlNodeList nodes = collection_dom.DocumentElement.SelectNodes(strElementName);
             if (nodes.Count < nTotalCount)
                 return null;    // 迫使后面重新获取
@@ -3461,7 +3481,21 @@ true);
                         false,
                         out strError);
                     if (nRet == -1)
-                        return -1;
+                    {
+                        if (String.IsNullOrEmpty(strTotalError) == false)
+                            strTotalError += "\r\n";
+                        strTotalError += strError;
+                        bError = true;
+                    }
+
+                    // 2020/12/18
+                    if (info.bError == true)
+                    {
+                        if (String.IsNullOrEmpty(strTotalError) == false)
+                            strTotalError += "\r\n";
+                        strTotalError += StringUtil.MakePathList(info.TotalError, "\r\n");
+                        bError = true;
+                    }
                 }
 
                 if (String.IsNullOrEmpty(strOutputBiblioRecPath) == false)
@@ -3519,8 +3553,8 @@ true);
 
                 // 2013/11/13
                 if (bBiblioRecordExist == false
-&& info.bSubrecordExist == false
-&& bSubrecordListCleared == true)
+    && info.bSubrecordExist == false
+    && bSubrecordListCleared == true)
                     return -1;
 
                 // 2008/11/26 
@@ -3602,6 +3636,8 @@ true);
                     this.entityControl1.ErrorInfo = "权限不足，获取实体信息被拒绝";
                 else
                 {
+                    collection_dom = new XmlDocument();
+
                     string strStyle = this.DisplayOtherLibraryItem == true ? "getotherlibraryitem" : "";
                     if (bRefresh)
                         strStyle += ",_refresh";
@@ -3647,6 +3683,13 @@ true);
 
                 if (IsAccessDenied(collection_dom, "issue"))
                     this.issueControl1.ErrorInfo = "权限不足，获取期信息被拒绝";
+                else if (IsError(collection_dom, "issue",
+                    out string errorInfo,
+                    out string errorCode))
+                {
+                    strError = errorInfo;
+                    return -1;
+                }
                 else
                 {
 
@@ -3695,6 +3738,13 @@ true);
 
                 if (IsAccessDenied(collection_dom, "order"))
                     this.orderControl1.ErrorInfo = "权限不足，获取订购信息被拒绝";
+                else if (IsError(collection_dom, "order",
+                    out string errorInfo,
+                    out string errorCode))
+                {
+                    strError = errorInfo;
+                    return -1;
+                }
                 else
                 {
 
@@ -3739,6 +3789,13 @@ true);
 
                 if (IsAccessDenied(collection_dom, "comment"))
                     this.commentControl1.ErrorInfo = "权限不足，获取评注信息被拒绝";
+                else if (IsError(collection_dom, "comment",
+                    out string errorInfo,
+                    out string errorCode))
+                {
+                    strError = errorInfo;
+                    return -1;
+                }
                 else
                 {
 
@@ -4029,11 +4086,11 @@ true);
             {
                 // 警告尚未保存
                 DialogResult result = MessageBox.Show(this,
-    "当前有编目信息被修改后尚未保存。若此时装载新内容，现有未保存信息将丢失。\r\n\r\n确实要装入新内容? ",
-    "EntityForm",
-    MessageBoxButtons.YesNo,
-    MessageBoxIcon.Question,
-    MessageBoxDefaultButton.Button2);
+        "当前有编目信息被修改后尚未保存。若此时装载新内容，现有未保存信息将丢失。\r\n\r\n确实要装入新内容? ",
+        "EntityForm",
+        MessageBoxButtons.YesNo,
+        MessageBoxIcon.Question,
+        MessageBoxDefaultButton.Button2);
                 if (result != DialogResult.Yes)
                 {
                     strError = "放弃装载书目记录";
@@ -4361,35 +4418,35 @@ true);
         int m_nInDisable = 0;
 
         /*
-操作类型 crashReport -- 异常报告 
-主题 dp2circulation 
-发送者 xxx 
-媒体类型 text 
-内容 发生未捕获的界面线程异常: 
-Type: System.NullReferenceException
-Message: 未将对象引用设置到对象的实例。
-Stack:
-在 System.Windows.Forms.ToolStripControlHost.set_Enabled(Boolean value)
-在 dp2Circulation.EntityForm.EnableControls(Boolean bEnable)
-在 dp2Circulation.EntityForm.MoveTo(String strAction, String strTargetRecPathParam, CopyParam copy_param, MergeStyle auto_mergeStyle, String& strError)
-在 dp2Circulation.EntityForm.MoveTo(String strTargetRecPathParam, String& strError)
-在 dp2Circulation.EntityForm.toolStripButton_marcEditor_moveTo_Click(Object sender, EventArgs e)
-在 System.Windows.Forms.ToolStripItem.RaiseEvent(Object key, EventArgs e)
-在 System.Windows.Forms.ToolStripButton.OnClick(EventArgs e)
-在 System.Windows.Forms.ToolStripItem.HandleClick(EventArgs e)
-在 System.Windows.Forms.ToolStripItem.HandleMouseUp(MouseEventArgs e)
-在 System.Windows.Forms.ToolStrip.OnMouseUp(MouseEventArgs mea)
-在 System.Windows.Forms.Control.WmMouseUp(Message& m, MouseButtons button, Int32 clicks)
-在 System.Windows.Forms.Control.WndProc(Message& m)
-在 System.Windows.Forms.ToolStrip.WndProc(Message& m)
-在 System.Windows.Forms.NativeWindow.Callback(IntPtr hWnd, Int32 msg, IntPtr wparam, IntPtr lparam)
+        操作类型 crashReport -- 异常报告 
+        主题 dp2circulation 
+        发送者 xxx 
+        媒体类型 text 
+        内容 发生未捕获的界面线程异常: 
+        Type: System.NullReferenceException
+        Message: 未将对象引用设置到对象的实例。
+        Stack:
+        在 System.Windows.Forms.ToolStripControlHost.set_Enabled(Boolean value)
+        在 dp2Circulation.EntityForm.EnableControls(Boolean bEnable)
+        在 dp2Circulation.EntityForm.MoveTo(String strAction, String strTargetRecPathParam, CopyParam copy_param, MergeStyle auto_mergeStyle, String& strError)
+        在 dp2Circulation.EntityForm.MoveTo(String strTargetRecPathParam, String& strError)
+        在 dp2Circulation.EntityForm.toolStripButton_marcEditor_moveTo_Click(Object sender, EventArgs e)
+        在 System.Windows.Forms.ToolStripItem.RaiseEvent(Object key, EventArgs e)
+        在 System.Windows.Forms.ToolStripButton.OnClick(EventArgs e)
+        在 System.Windows.Forms.ToolStripItem.HandleClick(EventArgs e)
+        在 System.Windows.Forms.ToolStripItem.HandleMouseUp(MouseEventArgs e)
+        在 System.Windows.Forms.ToolStrip.OnMouseUp(MouseEventArgs mea)
+        在 System.Windows.Forms.Control.WmMouseUp(Message& m, MouseButtons button, Int32 clicks)
+        在 System.Windows.Forms.Control.WndProc(Message& m)
+        在 System.Windows.Forms.ToolStrip.WndProc(Message& m)
+        在 System.Windows.Forms.NativeWindow.Callback(IntPtr hWnd, Int32 msg, IntPtr wparam, IntPtr lparam)
 
-dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, PublicKeyToken=null
-操作系统：Microsoft Windows NT 6.1.7601 Service Pack 1
-本机 MAC 地址: xxx 
-操作时间 2019/3/22 16:58:39 (Fri, 22 Mar 2019 16:58:39 +0800) 
-前端地址 xxx 经由 http://dp2003.com/dp2library 
-* */
+        dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, PublicKeyToken=null
+        操作系统：Microsoft Windows NT 6.1.7601 Service Pack 1
+        本机 MAC 地址: xxx 
+        操作时间 2019/3/22 16:58:39 (Fri, 22 Mar 2019 16:58:39 +0800) 
+        前端地址 xxx 经由 http://dp2003.com/dp2library 
+        * */
         /// <summary>
         /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
         /// </summary>
@@ -4585,7 +4642,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
                 {
                     // 2014/7/3
                     if (bVerifyData == true
-    && this.ForceVerifyData == true)
+        && this.ForceVerifyData == true)
                     {
                         GenerateDataEventArgs e1 = new GenerateDataEventArgs();
                         e1.FocusedControl = this.m_marcEditor;
@@ -4625,11 +4682,11 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
 
                         // 询问是否继续保存下级记录
                         DialogResult result = MessageBox.Show(this,
-    "是否继续保存下级记录? ",
-    "EntityForm",
-    MessageBoxButtons.YesNo,
-    MessageBoxIcon.Question,
-    MessageBoxDefaultButton.Button2);
+        "是否继续保存下级记录? ",
+        "EntityForm",
+        MessageBoxButtons.YesNo,
+        MessageBoxIcon.Question,
+        MessageBoxDefaultButton.Button2);
                         if (result == System.Windows.Forms.DialogResult.No)
                         {
                             info.ErrorCount = -1;
@@ -4650,7 +4707,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
                 if (string.IsNullOrEmpty(strHtml) == false)
                 {
                     this.m_webExternalHost_biblio.SetHtmlString(strHtml,
-    "entityform_biblio");
+        "entityform_biblio");
                 }
 
                 if (bDisplaySuccess == true)
@@ -5034,7 +5091,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
 
         // bool _browseWindowSelected = false;     // 小浏览窗口是否被确定选择记录而关闭的
         bool _willCloseBrowseWindow = false;    // 是否要在检索结束后自动关闭浏览窗口(一般是因为中途 X 按钮被触发过了)
-        // 进行检索
+                                                // 进行检索
         private async void button_search_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -5203,7 +5260,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
                         // 装入浏览格式
                         for (; ; )
                         {
-                            Application.DoEvents();	// 出让界面控制权
+                            Application.DoEvents(); // 出让界面控制权
 
                             if ((Progress != null && Progress.State != 0)
                                 || _willCloseBrowseWindow)
@@ -5609,11 +5666,11 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
                 }
 
                 nRet = MyForm.BuildMarcBrowseText(
-    strMarcSyntax,
-    strMARC,
-    out string strBrowseText,
-    out string strColumnTitles,
-    out strError);
+        strMarcSyntax,
+        strMARC,
+        out string strBrowseText,
+        out string strColumnTitles,
+        out strError);
                 if (nRet == -1)
                 {
                     AddErrorLine("记录 " + strRecPath + " 创建浏览格式时出错: " + strError);
@@ -5660,10 +5717,10 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
                     int index = insert_pos.ListView.Items.IndexOf(insert_pos);
 
                     item = Global.InsertNewLine(
-this.browseWindow.RecordsList,
-strRecPath,
-cols,
-index);// index + i
+        this.browseWindow.RecordsList,
+        strRecPath,
+        cols,
+        index);// index + i
                 }
                 ));
 
@@ -5699,7 +5756,7 @@ index);// index + i
                 out strField,
                 out strNextFieldName);
             if (nRet != -1 && nRet != 0)
-                return 1;	// UNIMARC
+                return 1;   // UNIMARC
 
             nRet = MarcUtil.GetField(strMARC,
                 "008",
@@ -5707,7 +5764,7 @@ index);// index + i
                 out strField,
                 out strNextFieldName);
             if (nRet != -1 && nRet != -1)
-                return 10;	// USMARC
+                return 10;  // USMARC
 
             return -1;
         }
@@ -5743,17 +5800,17 @@ index);// index + i
                     new LoginInfo("public", false),
                     "searchBiblio",
                 "<全部>",
-strQueryWord,
-strFromStyle,
-strMatchStyle,
-"",
-"id,xml",   // id
-1000,
-0,
--1,
-_searchParam._serverPushEncoding),
-out strOutputSearchID,
-out strError);
+        strQueryWord,
+        strFromStyle,
+        strMatchStyle,
+        "",
+        "id,xml",   // id
+        1000,
+        0,
+        -1,
+        _searchParam._serverPushEncoding),
+        out strOutputSearchID,
+        out strError);
             if (nRet == -1)
             {
                 // 检索过程结束
@@ -5938,8 +5995,8 @@ out strError);
         }
 
         void FillList(long lStart,
-    string strLibraryName,
-    IList<DigitalPlatform.MessageClient.Record> Records)
+        string strLibraryName,
+        IList<DigitalPlatform.MessageClient.Record> Records)
         {
             string strError = "";
             int nRet = 0;
@@ -5968,7 +6025,7 @@ out strError);
         out strColumnTitles,
         out strError);
                     }
-));
+        ));
                     if (nRet == -1)
                     {
                         AddErrorLine("记录 " + strRecPath + " 创建浏览格式时出: " + strError);
@@ -6023,11 +6080,11 @@ out strError);
             this.Invoke((Action)(() =>
             {
                 ListViewItem item = Global.AppendNewLine(
-    this.browseWindow.RecordsList,
-    "error",
-    cols);
+        this.browseWindow.RecordsList,
+        "error",
+        cols);
             }
-));
+        ));
         }
 
         public void CloseBrowseWindow()
@@ -6135,39 +6192,39 @@ out strError);
         }
 
         /*
-操作类型 crashReport -- 异常报告 
-主题 dp2circulation 
-发送者 xxx 
-媒体类型 text 
-内容 发生未捕获的界面线程异常: 
-Type: System.ObjectDisposedException
-Message: 无法访问已释放的对象。
-对象名:“BrowseSearchResultForm”。
-Stack:
-在 System.Windows.Forms.Control.CreateHandle()
-在 System.Windows.Forms.Form.CreateHandle()
-在 System.Windows.Forms.Control.get_Handle()
-在 System.Windows.Forms.Control.SetVisibleCore(Boolean value)
-在 System.Windows.Forms.Form.SetVisibleCore(Boolean value)
-在 System.Windows.Forms.Control.set_Visible(Boolean value)
-在 dp2Circulation.EntityForm.ShowBrowseWindow(Int64 lHitCount)
-在 dp2Circulation.EntityForm.button_search_Click(Object sender, EventArgs e)
-在 System.Windows.Forms.Control.OnClick(EventArgs e)
-在 System.Windows.Forms.Button.OnClick(EventArgs e)
-在 System.Windows.Forms.Button.OnMouseUp(MouseEventArgs mevent)
-在 System.Windows.Forms.Control.WmMouseUp(Message& m, MouseButtons button, Int32 clicks)
-在 System.Windows.Forms.Control.WndProc(Message& m)
-在 System.Windows.Forms.ButtonBase.WndProc(Message& m)
-在 System.Windows.Forms.Button.WndProc(Message& m)
-在 System.Windows.Forms.Control.ControlNativeWindow.OnMessage(Message& m)
-在 System.Windows.Forms.Control.ControlNativeWindow.WndProc(Message& m)
-在 System.Windows.Forms.NativeWindow.Callback(IntPtr hWnd, Int32 msg, IntPtr wparam, IntPtr lparam)
+        操作类型 crashReport -- 异常报告 
+        主题 dp2circulation 
+        发送者 xxx 
+        媒体类型 text 
+        内容 发生未捕获的界面线程异常: 
+        Type: System.ObjectDisposedException
+        Message: 无法访问已释放的对象。
+        对象名:“BrowseSearchResultForm”。
+        Stack:
+        在 System.Windows.Forms.Control.CreateHandle()
+        在 System.Windows.Forms.Form.CreateHandle()
+        在 System.Windows.Forms.Control.get_Handle()
+        在 System.Windows.Forms.Control.SetVisibleCore(Boolean value)
+        在 System.Windows.Forms.Form.SetVisibleCore(Boolean value)
+        在 System.Windows.Forms.Control.set_Visible(Boolean value)
+        在 dp2Circulation.EntityForm.ShowBrowseWindow(Int64 lHitCount)
+        在 dp2Circulation.EntityForm.button_search_Click(Object sender, EventArgs e)
+        在 System.Windows.Forms.Control.OnClick(EventArgs e)
+        在 System.Windows.Forms.Button.OnClick(EventArgs e)
+        在 System.Windows.Forms.Button.OnMouseUp(MouseEventArgs mevent)
+        在 System.Windows.Forms.Control.WmMouseUp(Message& m, MouseButtons button, Int32 clicks)
+        在 System.Windows.Forms.Control.WndProc(Message& m)
+        在 System.Windows.Forms.ButtonBase.WndProc(Message& m)
+        在 System.Windows.Forms.Button.WndProc(Message& m)
+        在 System.Windows.Forms.Control.ControlNativeWindow.OnMessage(Message& m)
+        在 System.Windows.Forms.Control.ControlNativeWindow.WndProc(Message& m)
+        在 System.Windows.Forms.NativeWindow.Callback(IntPtr hWnd, Int32 msg, IntPtr wparam, IntPtr lparam)
 
 
-dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, PublicKeyToken=null
-操作系统：Microsoft Windows NT 5.1.2600 Service Pack 3 
-操作时间 2015/8/24 14:12:46 (Mon, 24 Aug 2015 14:12:46 +0800) 
-前端地址 xxx 经由 http://dp2003.com/dp2library 
+        dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, PublicKeyToken=null
+        操作系统：Microsoft Windows NT 5.1.2600 Service Pack 3 
+        操作时间 2015/8/24 14:12:46 (Mon, 24 Aug 2015 14:12:46 +0800) 
+        前端地址 xxx 经由 http://dp2003.com/dp2library 
          * */
         void browseWindow_FormClosing(object sender, FormClosingEventArgs e)
         {
@@ -6285,9 +6342,9 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
             get
             {
                 return Program.MainForm.AppInfo.GetBoolean(
-    "entity_form",
-    "search_dup_when_saving",
-    false);
+        "entity_form",
+        "search_dup_when_saving",
+        false);
             }
         }
 
@@ -6300,9 +6357,9 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
             get
             {
                 return Program.MainForm.AppInfo.GetBoolean(
-    "entity_form",
-    "verify_data_when_saving",
-    false);
+        "entity_form",
+        "verify_data_when_saving",
+        false);
             }
         }
 
@@ -7428,7 +7485,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
 
             selected = this.selected_templates.Find(strBiblioDbName);
 
-            this.BiblioRecPath = dbname_dlg.DbName + "/?";	// 为了追加保存
+            this.BiblioRecPath = dbname_dlg.DbName + "/?";  // 为了追加保存
 
             // 下载配置文件
             string strContent = "";
@@ -7540,7 +7597,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
                 "(空白)");
 #endif
             this.m_webExternalHost_biblio.SetHtmlString("(空白)",
-    "entityform_error");
+        "entityform_error");
 
             InitialPages(strBiblioDbName);
 
@@ -8038,14 +8095,14 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
                 if (nEntityCount > 0)
                 {
                     DialogResult result = MessageBox.Show(this,
-"如果您用本功能将刚删除的书目记录保存回数据库，那么书目记录下属的 "
-+ nEntityCount.ToString()
-+ " 条实体记录将不会被保存回实体库。\r\n\r\n如果要在保存书目数据的同时也完整保存这些被删除的实体记录，请先在种册窗工具条上选择“.../使能编辑保存”功能，然后再使用“全部保存”按钮"
-+ "\r\n\r\n是否要在不保存实体记录的情况下单独保存书目记录？ (Yes 是 / No 放弃单独保存书目记录的操作)",
-"EntityForm",
-MessageBoxButtons.YesNo,
-MessageBoxIcon.Question,
-MessageBoxDefaultButton.Button2);
+        "如果您用本功能将刚删除的书目记录保存回数据库，那么书目记录下属的 "
+        + nEntityCount.ToString()
+        + " 条实体记录将不会被保存回实体库。\r\n\r\n如果要在保存书目数据的同时也完整保存这些被删除的实体记录，请先在种册窗工具条上选择“.../使能编辑保存”功能，然后再使用“全部保存”按钮"
+        + "\r\n\r\n是否要在不保存实体记录的情况下单独保存书目记录？ (Yes 是 / No 放弃单独保存书目记录的操作)",
+        "EntityForm",
+        MessageBoxButtons.YesNo,
+        MessageBoxIcon.Question,
+        MessageBoxDefaultButton.Button2);
                     if (result == DialogResult.No)
                     {
                         strError = "放弃保存书目记录";
@@ -8703,9 +8760,9 @@ MessageBoxDefaultButton.Button2);
 
 
             tempdlg.Text = "请选择要修改的模板记录";
-            tempdlg.CheckNameExist = false;	// 按OK按钮时不警告"名字不存在",这样允许新建一个模板
-            //tempdlg.ap = Program.MainForm.applicationInfo;
-            //tempdlg.ApCfgTitle = "detailform_selecttemplatedlg";
+            tempdlg.CheckNameExist = false; // 按OK按钮时不警告"名字不存在",这样允许新建一个模板
+                                            //tempdlg.ap = Program.MainForm.applicationInfo;
+                                            //tempdlg.ApCfgTitle = "detailform_selecttemplatedlg";
             tempdlg.ShowDialog(this);
 
             if (tempdlg.DialogResult != DialogResult.OK)
@@ -8780,7 +8837,7 @@ MessageBoxDefaultButton.Button2);
             strError = "";
 
             if (tempdlg.Changed == false    // DOM 内容没有变化
-                && tempdlg.textBox_name.Text == "")	// 没有选定要保存的模板名
+                && tempdlg.textBox_name.Text == "") // 没有选定要保存的模板名
                 return 0;
 
 
@@ -8924,11 +8981,11 @@ MessageBoxDefaultButton.Button2);
                     {
                         strError = "保存书目记录 '" + strPath + "' 时出错: 原记录已经不存在";
                         DialogResult result = MessageBox.Show(this,
-strError + "\r\n\r\n请问是否改为重新创建此记录?",
-"EntityForm",
-MessageBoxButtons.YesNo,
-MessageBoxIcon.Question,
-MessageBoxDefaultButton.Button1);
+        strError + "\r\n\r\n请问是否改为重新创建此记录?",
+        "EntityForm",
+        MessageBoxButtons.YesNo,
+        MessageBoxIcon.Question,
+        MessageBoxDefaultButton.Button1);
                         if (result == System.Windows.Forms.DialogResult.Yes)
                         {
                             strAction = "new";
@@ -9082,7 +9139,7 @@ MessageBoxDefaultButton.Button1);
                 string strHtml = "";
                 SaveBiblioToDatabase(null, true, out strHtml);
                 this.m_webExternalHost_biblio.SetHtmlString(strHtml,
-    "entityform_biblio");
+        "entityform_biblio");
 
                 if (this.AutoVerifyData == true
                     && bVerifyed == false)
@@ -10419,11 +10476,11 @@ MessageBoxDefaultButton.Button1);
             if (string.IsNullOrEmpty(strTargetRecPath) == false)
             {
                 DialogResult result = MessageBox.Show(this,
-    "当前窗口内的记录原本是从 '" + strTargetRecPath + "' 复制过来的。是否要复制回原有位置？\r\n\r\nYes: 是; No: 否，继续进行普通复制操作; Cancel: 放弃本次操作",
-    "EntityForm",
-    MessageBoxButtons.YesNoCancel,
-    MessageBoxIcon.Question,
-    MessageBoxDefaultButton.Button1);
+        "当前窗口内的记录原本是从 '" + strTargetRecPath + "' 复制过来的。是否要复制回原有位置？\r\n\r\nYes: 是; No: 否，继续进行普通复制操作; Cancel: 放弃本次操作",
+        "EntityForm",
+        MessageBoxButtons.YesNoCancel,
+        MessageBoxIcon.Question,
+        MessageBoxDefaultButton.Button1);
                 if (result == System.Windows.Forms.DialogResult.Cancel)
                     return;
                 if (result == System.Windows.Forms.DialogResult.Yes)
@@ -10529,9 +10586,9 @@ MessageBoxDefaultButton.Button1);
                     dlg.CopyChildRecords);
             }
             Program.MainForm.AppInfo.SetString(
-    "entity_form",
-    "save_to_used_path",
-    dlg.RecPath);
+        "entity_form",
+        "save_to_used_path",
+        dlg.RecPath);
 
             // 源记录就是 ？
             if (bSaveAs == true)
@@ -12181,12 +12238,12 @@ MessageBoxDefaultButton.Button1);
             if (nRet > 0)
             {
                 DialogResult result = MessageBox.Show(this,
-    "升级后创建的 " + nCount + " 个期记录中有以下已经存在：\r\n" + strError + "\r\n\r\n这些重复的期不能加入期记录列表。\r\n\r\n请问是否继续接受其余 "
-    + dlg.Xmls.Count.ToString() + " 个期记录? ",
-    "EntityForm",
-    MessageBoxButtons.YesNo,
-    MessageBoxIcon.Question,
-    MessageBoxDefaultButton.Button2);
+        "升级后创建的 " + nCount + " 个期记录中有以下已经存在：\r\n" + strError + "\r\n\r\n这些重复的期不能加入期记录列表。\r\n\r\n请问是否继续接受其余 "
+        + dlg.Xmls.Count.ToString() + " 个期记录? ",
+        "EntityForm",
+        MessageBoxButtons.YesNo,
+        MessageBoxIcon.Question,
+        MessageBoxDefaultButton.Button2);
                 if (result == DialogResult.No)
                     return;
             }
@@ -12233,7 +12290,7 @@ MessageBoxDefaultButton.Button1);
         /// <param name="keyData">System.Windows.Forms.Keys 值之一，它表示要处理的键。</param>
         /// <returns>如果控件处理并使用击键，则为 true；否则为 false，以允许进一步处理</returns>
         protected override bool ProcessDialogKey(
-Keys keyData)
+        Keys keyData)
         {
             /*
             if (keyData == Keys.Enter)
@@ -12552,9 +12609,9 @@ Keys keyData)
             {
                 this.flowLayoutPanel_query.Visible = value;
                 Program.MainForm.AppInfo.SetBoolean(
-"entityform",
-"queryPanel_visibie",
-value);
+        "entityform",
+        "queryPanel_visibie",
+        value);
             }
         }
 
@@ -12581,9 +12638,9 @@ value);
             {
                 this.panel_itemQuickInput.Visible = value;
                 Program.MainForm.AppInfo.SetBoolean(
-"entityform",
-"itemQuickInputPanel_visibie",
-value);
+        "entityform",
+        "itemQuickInputPanel_visibie",
+        value);
             }
         }
 
@@ -12763,11 +12820,11 @@ value);
             if (string.IsNullOrEmpty(strTargetRecPath) == false)
             {
                 DialogResult result = MessageBox.Show(this,
-    "当前窗口内的记录原本是从 '" + strTargetRecPath + "' 复制过来的。是否要移动回原有位置？\r\n\r\nYes: 是; No: 否，继续进行普通移动操作; Cancel: 放弃本次操作",
-    "EntityForm",
-    MessageBoxButtons.YesNoCancel,
-    MessageBoxIcon.Question,
-    MessageBoxDefaultButton.Button1);
+        "当前窗口内的记录原本是从 '" + strTargetRecPath + "' 复制过来的。是否要移动回原有位置？\r\n\r\nYes: 是; No: 否，继续进行普通移动操作; Cancel: 放弃本次操作",
+        "EntityForm",
+        MessageBoxButtons.YesNoCancel,
+        MessageBoxIcon.Question,
+        MessageBoxDefaultButton.Button1);
                 if (result == System.Windows.Forms.DialogResult.Cancel)
                     return;
                 if (result == System.Windows.Forms.DialogResult.Yes)
@@ -12827,9 +12884,9 @@ value);
             }
 
             Program.MainForm.AppInfo.SetString(
-    "entity_form",
-    "move_to_used_path",
-    dlg.RecPath);
+        "entity_form",
+        "move_to_used_path",
+        dlg.RecPath);
 
             nRet = MoveTo(dlg.RecPath, out strError);
             if (nRet == -1)
@@ -12840,7 +12897,7 @@ value);
         }
 
         public int MoveTo(string strTargetRecPathParam,
-    out string strError)
+        out string strError)
         {
             return MoveTo(
                 "move",
@@ -13028,9 +13085,9 @@ value);
                         merge_dlg.ShowDialog(this);
                         Program.MainForm.AppInfo.UnlinkFormState(merge_dlg);
                         Program.MainForm.AppInfo.SetString(
-"entity_form",
+        "entity_form",
         "GetMergeStyleDialog_" + strAction + "_uiState",
-merge_dlg.UiState);
+        merge_dlg.UiState);
 
                         if (merge_dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                             return 0;
@@ -13275,13 +13332,13 @@ merge_dlg.UiState);
 
                     LoadSubRecordsInfo load_info = new LoadSubRecordsInfo();
                     nRet = LoadSubRecords(
-    channel,
-    strOutputBiblioRecPath,
-    strXml, // null,   // strXml, // 书目记录 XML
-    "", // strSubRecords,
-    load_info,
-    false,
-    out strError);
+        channel,
+        strOutputBiblioRecPath,
+        strXml, // null,   // strXml, // 书目记录 XML
+        "", // strSubRecords,
+        load_info,
+        false,
+        out strError);
                     if (nRet == -1)
                         goto ERROR1;
                 }
@@ -13471,9 +13528,9 @@ merge_dlg.UiState);
                     "<script type='text/javascript' charset='UTF-8' src='%datadir%\\getsummary.js" + "'></script>" +
                     "</head>";
             return
-    "<head>" +
-    "<LINK href='" + strCssFilePath + "' type='text/css' rel='stylesheet'>" +
-    "</head>";
+        "<head>" +
+        "<LINK href='" + strCssFilePath + "' type='text/css' rel='stylesheet'>" +
+        "</head>";
         }
 
         void DoViewComment(bool bOpenWindow)
@@ -13523,8 +13580,8 @@ merge_dlg.UiState);
 
             // 2015/1/3
             string strCoverImageFragment = BiblioSearchForm.GetCoverImageHtmlFragment(
-this.BiblioRecPath,
-strMARC);
+        this.BiblioRecPath,
+        strMARC);
             string strIsbnImageFragment = BiblioSearchForm.GetIsbnImageHtmlFragment(strMARC, this.MarcSyntax);
 
             strHtml = MarcUtil.GetHtmlOfMarc(strMARC,
@@ -13544,12 +13601,12 @@ strMARC);
 
             // TODO: 如果有改变，则显示先后对照?
             strHtml = "<html>" +
-    GetHeadString() +
-    "<body>" +
-    strFilterTitle +
-    strHtml +
-    GetTimestampHtml(this.BiblioTimestamp) +
-    "</body></html>";
+        GetHeadString() +
+        "<body>" +
+        strFilterTitle +
+        strHtml +
+        GetTimestampHtml(this.BiblioTimestamp) +
+        "</body></html>";
             bool bNew = false;
             if (this.m_commentViewer == null
                 || (bOpenWindow == true && this.m_commentViewer.Visible == false))
@@ -13685,9 +13742,9 @@ strMARC);
             {
                 // 显示其他分馆的册记录
                 return Program.MainForm.AppInfo.GetBoolean(
-    "entityform",
-    "displayOtherLibraryItem",
-    false);
+        "entityform",
+        "displayOtherLibraryItem",
+        false);
             }
         }
 
@@ -13987,11 +14044,11 @@ strMARC);
                             + "$2dp2res").Replace('$', (char)31);
 #endif
                         field_856.IndicatorAndValue = Build856IndiAndValue(
-this.MarcSyntax,
-strID,
-strType,
-strSize,
-type.ProcessCommand);
+        this.MarcSyntax,
+        strID,
+        strType,
+        strSize,
+        type.ProcessCommand);
                     }
                 }
             }
@@ -14136,11 +14193,11 @@ type.ProcessCommand);
 
                 // field_856.IndicatorAndValue = ("72$3Cover Image$" + DetailHost.LinkSubfieldName + "uri:" + strID + "$xtype:" + strType + ";size:" + strSize + "$2dp2res").Replace('$', (char)31);
                 field_856.IndicatorAndValue = Build856IndiAndValue(
-    this.MarcSyntax,
-    strID,
-    strType,
-    strSize,
-    "");
+        this.MarcSyntax,
+        strID,
+        strType,
+        strSize,
+        "");
             }
 
             if (this.tabControl_biblioInfo.SelectedTab == this.tabPage_template)
@@ -14169,11 +14226,11 @@ type.ProcessCommand);
 #endif
 
         static string Build856IndiAndValue(
-    string strMarcSyntax,
-    string strID,
-    string strType,
-    string strSize,
-    string strProcessCommand)
+        string strMarcSyntax,
+        string strID,
+        string strType,
+        string strSize,
+        string strProcessCommand)
         {
             string strAccessMethodSubfieldName = "2";
             if (strMarcSyntax == "unimarc")
@@ -14569,11 +14626,11 @@ type.ProcessCommand);
         void MenuItem_marcEditor_loadRecord_Click(object sender, EventArgs e)
         {
             string strBiblioRecPath = InputDlg.GetInput(
-this,
-"请指定书目记录路径",
-"书目记录路径(格式'书目库名/ID'): ",
-"",
-Program.MainForm.DefaultFont);
+        this,
+        "请指定书目记录路径",
+        "书目记录路径(格式'书目库名/ID'): ",
+        "",
+        Program.MainForm.DefaultFont);
             if (strBiblioRecPath == null)
                 return;
 

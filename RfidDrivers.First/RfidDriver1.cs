@@ -3001,7 +3001,7 @@ out Reader reader);
                                 // 高校联盟
                                 // 跳过 4 个 byte
                                 var bytes = Element.FromHexString(info.UID.Substring(8));
-                                var epc_info = GaoxiaoUtility.DecodeGaoxiaoEpc(bytes.ToArray());
+                                var epc_info = GaoxiaoUtility.DecodeGaoxiaoEpcPayload(bytes.ToArray());
                                 // TODO: 要考虑适应 xxx.xxx 形态的 PII
                                 if (pii == epc_info.PII)
                                     return new FindTagResult
@@ -3504,7 +3504,7 @@ out Reader reader);
                                 // 跳过 4 个 bytes
                                 var bytes = Element.FromHexString(uid.Substring(8));
 
-                                var epc_info = GaoxiaoUtility.DecodeGaoxiaoEpc(bytes.ToArray());
+                                var epc_info = GaoxiaoUtility.DecodeGaoxiaoEpcPayload(bytes.ToArray());
                                 epc_info.Lending = !enable;
                                 var payload = GaoxiaoUtility.EncodeGaoxiaoEpcPayload(epc_info);
                                 // TODO: 可以优化为只写入最小一个 word 范围

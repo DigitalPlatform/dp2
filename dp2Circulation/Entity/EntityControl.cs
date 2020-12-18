@@ -1324,6 +1324,12 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
 
             Debug.Assert(bookitem != null, "");
 
+            if (bookitem.RecordDom == null || bookitem.RecordDom.DocumentElement == null)
+            {
+                MessageBox.Show(ForegroundWindow.Instance, $"册记录 RecordDom 处于错误状态，无法进行修改。({bookitem.ErrorInfo})");
+                return;
+            }
+
             string strOldBarcode = bookitem.Barcode;
 
             using (EntityEditForm edit = new EntityEditForm())

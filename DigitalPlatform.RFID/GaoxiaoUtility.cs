@@ -112,8 +112,8 @@ namespace DigitalPlatform.RFID
             return 3;   // TODO：注意检查 text 字符数是否超过最大限制
         }
 
-        // 解码
-        public static GaoxiaoEpcInfo DecodeGaoxiaoEpc(byte[] data)
+        // 解码 高校联盟 EPC 载荷部分。注意不包含 校验码 word 和 PC word
+        public static GaoxiaoEpcInfo DecodeGaoxiaoEpcPayload(byte[] data)
         {
             GaoxiaoEpcInfo result = new GaoxiaoEpcInfo();
 
@@ -1165,7 +1165,7 @@ namespace DigitalPlatform.RFID
                 GaoxiaoEpcInfo epc_info = null;
                 if (bytes.Count > 0)
                 {
-                    epc_info = DecodeGaoxiaoEpc(bytes.ToArray());
+                    epc_info = DecodeGaoxiaoEpcPayload(bytes.ToArray());
                     if (pc.UMI == false
                         && epc_info.ContentParameters.Length != 0)
                     {

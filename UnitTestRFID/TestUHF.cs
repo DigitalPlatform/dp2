@@ -380,5 +380,19 @@ EB00"
 
             Assert.AreEqual("CH-000134-1.12345678.31", result.UII);
         }
+
+        [TestMethod]
+        public void display_epc_1()
+        {
+            var crc = Element.FromHexString("C41E");
+            
+            // 协议控制字 Protocol Control Word
+            var pc = UhfUtility.ParsePC(crc, 0);
+            Debug.WriteLine(pc.ToString());
+
+            var bytes = Element.FromHexString("300833B2DDD901400000000000000000");
+            GaoxiaoEpcInfo info = GaoxiaoUtility.DecodeGaoxiaoEpcPayload(bytes);
+            Debug.WriteLine(info.ToString());
+        }
     }
 }

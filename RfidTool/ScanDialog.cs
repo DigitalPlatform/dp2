@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -529,9 +530,18 @@ namespace RfidTool
 
                 TagInfo new_tag_info = GetTagInfo(tag.TagInfo, chip, eas);
 
-                var write_result = DataModel.WriteTagInfo(tag.ReaderName, tag.TagInfo,
-                    new_tag_info);
+                NormalResult write_result = null;
+                for (int i = 0; i < 2; i++)
+                {
+                    // 重试前延时半秒
+                    if (i > 0)
+                        Thread.Sleep(500);
 
+                    write_result = DataModel.WriteTagInfo(tag.ReaderName, tag.TagInfo,
+                        new_tag_info);
+                    if (write_result.Value != -1)
+                        break;
+                }
                 if (write_result.Value == -1)
                 {
                     ShowMessage(write_result.ErrorInfo);
