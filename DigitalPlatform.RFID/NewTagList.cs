@@ -355,7 +355,8 @@ namespace DigitalPlatform.RFID
                         }
                     }
 
-                    if (getTagInfo != null)
+                    if (getTagInfo != null
+                        && data.Error == null)
                     {
                         // 自动重试一次
                         GetTagInfoResult gettaginfo_result = null;
@@ -372,6 +373,7 @@ namespace DigitalPlatform.RFID
                             setError?.Invoke("rfid", gettaginfo_result.ErrorInfo);
                             // TODO: 是否直接在标签上显示错误文字?
                             data.Error = gettaginfo_result.ErrorInfo;
+                            tag.TagInfo = gettaginfo_result.TagInfo;    // 虽然出错了，也返回了不包含 User Bank 的 TagInfo
                             update_books.Add(data);
                             continue;
                         }

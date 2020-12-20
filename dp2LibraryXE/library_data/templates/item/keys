@@ -363,6 +363,17 @@ public class MyKeysHost : KeysHost
     <caption lang="en">RFID UID</caption>
   </table>
 
+  <!-- Current Location 当前位置 2020/12/20 -->
+  <key>
+    <xpath>*/currentLocation</xpath>
+    <from>curLoc</from>
+    <table ref="curLoc" />
+  </key>
+  <table name="curLoc" id="15" type="currentLocation">
+    <caption lang="zh-CN">当前位置</caption>
+    <caption lang="en">Current Location</caption>
+  </table>
+
   <!-- ******************配置非用字**************************************** -->
   <stopword>
     <stopwordTable name="title">

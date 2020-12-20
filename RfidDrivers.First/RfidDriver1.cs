@@ -3496,7 +3496,7 @@ out Reader reader);
                                         ErrorCode = GetErrorCode(iret, reader.ReaderHandle)
                                     };
 
-                                return new NormalResult { ErrorInfo = "设置国标 UHF EAS 成功"};
+                                return new NormalResult { ErrorInfo = "设置国标 UHF EAS 成功" };
                             }
                             else
                             {
@@ -4232,61 +4232,75 @@ out Reader reader);
                 try
                 {
                     int iret;
+                    string uid_string = info?.UID;
+
+                    /*
                     Byte[] uid = new Byte[8];
                     if (info != null && string.IsNullOrEmpty(info.UID) == false)
                     {
                         uid = Element.FromHexString(info.UID);
-                        //Debug.Assert(info.UID.Length >= 8);
-                        //Array.Copy(info.UID, uid, uid.Length);
                     }
+                    */
 
                     if (info.Protocol == InventoryInfo.ISO18000P6C)
                     {
-                        var memBank = (Byte)RFIDLIB.rfidlib_def.ISO18000p6C_MEM_BANK_USER;
-                        int WordCnt = 0;    // 0 表示读全部
-                        int WordPointer = 0;
+                        var taginfo = new TagInfo
+                        {
+                            // 2020/12/13
+                            Protocol = info.Protocol,
+                            // 这里返回真正 GetTagInfo 成功的那个 ReaderName。而 Inventory 可能返回类似 reader1,reader2 这样的字符串
+                            ReaderName = one_reader_name,
+                            UID = uid_string,
+                            Bytes = null,
+                            AntennaID = (uint)(antenna_id == -1 ? 0 : antenna_id),
+                        };
 
-                        Byte[] readData = new Byte[256];
-                        UInt32 nSize = (UInt32)readData.Length;
+                        Byte[] readData = null;
 
-                        iret = RFIDLIB.rfidlib_aip_iso18000p6C.ISO18000p6C_Read(reader.ReaderHandle,
-    hTag,
-    memBank,
-    (UInt32)WordPointer,
-    (UInt32)WordCnt,
-    readData,
-    ref nSize);
-                        if (iret != 0)
-                            return new GetTagInfoResult
+                        // PC.UMI 如果为 false 就不需要读入 User Bank 了
+                        var pc_bytes = GetPcBytes(uid_string);
+                        var pc = UhfUtility.ParsePC(pc_bytes, 0);
+                        if (pc.UMI == false)
+                        {
+                            readData = null;
+                        }
+                        else
+                        {
+                            var memBank = (Byte)RFIDLIB.rfidlib_def.ISO18000p6C_MEM_BANK_USER;
+                            int WordCnt = 0;    // 0 表示读全部
+                            int WordPointer = 0;
+
+                            readData = new Byte[256];
+                            UInt32 nSize = (UInt32)readData.Length;
+
+                            iret = RFIDLIB.rfidlib_aip_iso18000p6C.ISO18000p6C_Read(reader.ReaderHandle,
+        hTag,
+        memBank,
+        (UInt32)WordPointer,
+        (UInt32)WordCnt,
+        readData,
+        ref nSize);
+                            if (iret != 0)
+                                return new GetTagInfoResult
+                                {
+                                    Value = -1,
+                                    ErrorInfo = $"readUserBankError. ISO18000p6C_Read() error 2. iret:{iret},reader_name:{one_reader_name},uid:{uid_string},antenna_id:{antenna_id}",
+                                    ErrorCode = "readUserBankError:" + GetErrorCode(iret, reader.ReaderHandle),
+                                    TagInfo = taginfo,
+                                };
+
+                            // 截短 readData
                             {
-                                Value = -1,
-                                ErrorInfo = $"ISO18000p6C_Read() error 2. iret:{iret},reader_name:{one_reader_name},uid:{Element.GetHexString(uid)},antenna_id:{antenna_id}",
-                                ErrorCode = GetErrorCode(iret, reader.ReaderHandle)
-                            };
+                                byte[] temp = new byte[nSize];
+                                Array.Copy(readData, temp, nSize);
+                                readData = temp;
+                            }
+                        }
 
+                        taginfo.Bytes = readData;
                         return new GetTagInfoResult
                         {
-                            TagInfo = new TagInfo
-                            {
-                                // 2020/12/13
-                                Protocol = info.Protocol,
-                                // 这里返回真正 GetTagInfo 成功的那个 ReaderName。而 Inventory 可能返回类似 reader1,reader2 这样的字符串
-                                ReaderName = one_reader_name,
-                                UID = Element.GetHexString(uid),
-                                /*
-                                AFI = afi,
-                                DSFID = dsfid,
-                                BlockSize = blkSize,
-                                MaxBlockCount = blkNum,
-                                IcRef = icref,
-                                LockStatus = result0.LockStatus,
-                                */
-                                Bytes = readData,
-                                /*
-                                EAS = eas_result.Value == 1,
-                                */
-                                AntennaID = (uint)(antenna_id == -1 ? 0 : antenna_id),
-                            }
+                            TagInfo = taginfo,
                         };
                     }
 
@@ -4297,7 +4311,7 @@ out Reader reader);
                     iret = RFIDLIB.rfidlib_aip_iso15693.ISO15693_GetSystemInfo(
                         reader.ReaderHandle,
                         hTag,
-                        uid,
+                        Element.FromHexString(uid_string),
                         ref dsfid,
                         ref afi,
                         ref blkSize,
@@ -4307,7 +4321,7 @@ out Reader reader);
                         return new GetTagInfoResult
                         {
                             Value = -1,
-                            ErrorInfo = $"ISO15693_GetSystemInfo() error 2. iret:{iret},reader_name:{one_reader_name},uid:{Element.GetHexString(uid)},antenna_id:{antenna_id}",
+                            ErrorInfo = $"ISO15693_GetSystemInfo() error 2. iret:{iret},reader_name:{one_reader_name},uid:{uid_string},antenna_id:{antenna_id}",
                             ErrorCode = GetErrorCode(iret, reader.ReaderHandle)
                         };
 
@@ -4353,7 +4367,7 @@ out Reader reader);
                             // 这里返回真正 GetTagInfo 成功的那个 ReaderName。而 Inventory 可能返回类似 reader1,reader2 这样的字符串
                             ReaderName = one_reader_name,   // 2019/2/27
 
-                            UID = Element.GetHexString(uid),
+                            UID = uid_string,
                             AFI = afi,
                             DSFID = dsfid,
                             BlockSize = blkSize,

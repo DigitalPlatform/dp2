@@ -330,7 +330,14 @@ namespace RfidTool
                 }
 
 
-                ListViewUtil.ChangeItemText(item, COLUMN_PII, pii);
+                if (string.IsNullOrEmpty(tag.Error) == false)
+                {
+                    ListViewUtil.ChangeItemText(item, COLUMN_PII, pii + " error:" + tag.Error);
+                    SetItemColor(item, "error");
+                }
+                else
+                    ListViewUtil.ChangeItemText(item, COLUMN_PII, pii);
+
                 ListViewUtil.ChangeItemText(item, COLUMN_TOU, tou);
                 ListViewUtil.ChangeItemText(item, COLUMN_EAS, eas);
                 ListViewUtil.ChangeItemText(item, COLUMN_OI, oi);
