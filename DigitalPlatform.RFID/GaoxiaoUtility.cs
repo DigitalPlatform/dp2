@@ -114,10 +114,10 @@ namespace DigitalPlatform.RFID
 
         // 判断高校联盟格式的 EPC 载荷里面，图书是否处于外借状态
         // parameters:
-        //      first_byte_of_epc_layload EPC 载荷的第一 byte
-        public static bool IsLending(byte first_byte_of_epc_layload)
+        //      first_byte_of_epc_payload EPC 载荷的第一 byte
+        public static bool IsLending(byte first_byte_of_epc_payload)
         {
-            return (first_byte_of_epc_layload & 0x80) != 0;
+            return (first_byte_of_epc_payload & 0x80) != 0;
         }
 
         // 解码 高校联盟 EPC 载荷部分。注意不包含 校验码 word 和 PC word
