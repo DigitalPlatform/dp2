@@ -3022,7 +3022,8 @@ out strError);
                 }
                 catch (Exception ex)
                 {
-                    strError = "info.OldRecord XML记录装载到DOM时出错: " + ex.Message;
+                    // 2020/12/21
+                    strError = "info.OldRecord XML记录装载到 XMLDOM 时出错: " + ex.Message;
 
                     EntityInfo error = new EntityInfo(info);
                     error.ErrorInfo = strError;
@@ -3030,7 +3031,6 @@ out strError);
                     ErrorInfos.Add(error);
                     continue;
                 }
-
 
                 // REDO_ENTITY:
 
@@ -3683,7 +3683,7 @@ out strError);
                                 channel,
                                 info,
                                 strOldBarcode,
-                                strNewBarcode,
+                                // strNewBarcode,
                                 domOldRec,
                                 ref domOperLog,
                                 ref ErrorInfos);
@@ -4391,7 +4391,7 @@ out strError);
             RmsChannel channel,
             EntityInfo info,
             string strOldBarcode,
-            string strNewBarcode,   // TODO: 本参数是否可以废除?
+            // string strNewBarcode,   // TODO: 本参数是否可以废除?
             XmlDocument domOldRec,
             ref XmlDocument domOperLog,
             ref List<EntityInfo> ErrorInfos)
@@ -4527,6 +4527,9 @@ out strError);
                 }
             }
 
+            bool force_clear_keys = (StringUtil.IsInList("force_clear_keys", info.Style) == true);
+
+
             // 把记录装入DOM
             XmlDocument domExist = new XmlDocument();
 
@@ -4536,12 +4539,20 @@ out strError);
             }
             catch (Exception ex)
             {
-                strError = "strExistXml装载进入DOM时发生错误: " + ex.Message;
-                goto ERROR1;
+                if (force_clear_keys == true)
+                {
+                    domExist.LoadXml("<root />");
+                }
+                else
+                {
+                    strError = "strExistXml装载进入DOM时发生错误: " + ex.Message;
+                    goto ERROR1;
+                }
             }
 
             // 观察已经存在的记录中，册条码号是否和strOldBarcode一致
-            if (String.IsNullOrEmpty(strOldBarcode) == false)
+            if (String.IsNullOrEmpty(strOldBarcode) == false
+                && force_clear_keys == false)
             {
                 string strExistingBarcode = DomUtil.GetElementText(domExist.DocumentElement, "barcode");
                 if (strExistingBarcode != strOldBarcode)
@@ -4673,15 +4684,22 @@ out strError);
                 if (nRet != 0)
                 {
                     strError = "即将被删除的册记录 '" + info.NewRecPath + "' 其馆藏地点不符合要求: " + strError;
+                    if (force_clear_keys == true)
+                        strError += "。可重新用全局账户身份登录来进行删除";
                     goto ERROR1;
                 }
             }
 
             byte[] output_timestamp = null;
 
+            string style = bSimulate ? "simulate" : "";
+            if (force_clear_keys)
+                style += ",deletekeysbyid";
+
+            // TODO: 如果旧记录的 XML 解析出错，则需要用强制删除全部检索点的方式来删除数据库记录
             lRet = channel.DoDeleteRes(info.NewRecPath,
                 info.OldTimestamp,
-                bSimulate ? "simulate" : "",
+                style,
                 out output_timestamp,
                 out strError);
             if (lRet == -1)
