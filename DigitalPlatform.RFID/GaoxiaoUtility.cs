@@ -112,6 +112,14 @@ namespace DigitalPlatform.RFID
             return 3;   // TODO：注意检查 text 字符数是否超过最大限制
         }
 
+        // 判断高校联盟格式的 EPC 载荷里面，图书是否处于外借状态
+        // parameters:
+        //      first_byte_of_epc_layload EPC 载荷的第一 byte
+        public static bool IsLending(byte first_byte_of_epc_layload)
+        {
+            return (first_byte_of_epc_layload & 0x80) != 0;
+        }
+
         // 解码 高校联盟 EPC 载荷部分。注意不包含 校验码 word 和 PC word
         public static GaoxiaoEpcInfo DecodeGaoxiaoEpcPayload(byte[] data)
         {
@@ -1413,10 +1421,10 @@ namespace DigitalPlatform.RFID
         }
     }
 
-    // 高校联盟 EPC 信息结构
+    // 高校联盟 EPC 载荷信息结构
     public class GaoxiaoEpcInfo
     {
-        // *** EPC 的第 1 字节
+        // *** EPC 载荷的第 1 字节
 
         // 安全位：第 7bit（最高 bit）为安全位，有 0 和 1 两个取值，0 代表未出借状态（馆内存放），1 代表出借状态。
         public bool Lending { get; set; }
@@ -1427,7 +1435,7 @@ namespace DigitalPlatform.RFID
         // 分拣信息: 第 0-4bit 为分拣信息，可用于标识馆藏分拣时所属的分拣箱号，目前共定义了 32 种不同的取值。
         public int Picking { get; set; }
 
-        // *** EPC 的第二字节
+        // *** EPC 载荷的第二字节
 
         // 编码方式
         /*
@@ -1443,12 +1451,12 @@ namespace DigitalPlatform.RFID
         //  0-5bit（低 6bit）为版本说明，可用于标识 64 种不同的版本信息(0-63)。
         public int Version { get; set; }
 
-        // *** EPC 的第 3-4 字节
+        // *** EPC 载荷的第 3-4 字节
 
         // 内容索引。OID 的数组
         public int[] ContentParameters { get; set; }
 
-        // *** EPC 的第 5-12/16/18 字节
+        // *** EPC 载荷的第 5-12/16/18 字节
 
         // 馆藏标识符
         public string PII { get; set; }
