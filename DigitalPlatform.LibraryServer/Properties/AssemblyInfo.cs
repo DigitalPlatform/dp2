@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.40.*")]
-[assembly: AssemblyFileVersion("3.40.0.0")]
+[assembly: AssemblyVersion("3.41.*")]
+[assembly: AssemblyFileVersion("3.41.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -222,3 +222,4 @@ ItemCanReturn()
 //		3.38 (2020/10/27) SetBiblioInfo() API 的 strStyle 增加 "whenChildEmpty"，表示只有当书目记录没有下级记录时才允许删除，否则会返回错误码 AccessDenied。
 //		3.39 (2020/11/10) Return() API 的 "transfer" 功能，strStyle 参数可以包含 shelfNo:xxx 子参数，用于请求修改册记录的永久架位
 //		3.40 (2020/12/11) SetEntities() API 和 Return() API 的 "transfer" 功能，新的册记录中 currentLocation 字段内容可以用这样的形态: *:xxx 或者 xxx:*，其中星号表示不变的部分
+//		3.41 (2020/12/21) SetEntities() API 的 delete action 功能，style 可以包含使用 "force_clear_keys"，用于删除 XML 结构已经被破坏的册记录，作用是提醒 dp2kernel 层(根据记录 id)强制删除册记录的检索点 key

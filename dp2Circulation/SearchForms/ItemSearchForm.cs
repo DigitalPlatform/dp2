@@ -10,6 +10,9 @@ using System.Windows.Forms;
 using System.Diagnostics;
 using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
+
+using ClosedXML.Excel;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
@@ -25,10 +28,6 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryServer;
 
-using ClosedXML.Excel;
-using DigitalPlatform.Core;
-using System.Threading.Tasks;
-// using DocumentFormat.OpenXml.ExtendedProperties;
 
 // 2013/3/16 添加 XML 注释
 // 2017/4/16 将 this.Channel 改造为 this.GetChannel() 用法
@@ -6022,7 +6021,7 @@ Program.MainForm.DefaultFont);
         {
             DialogResult result = MessageBox.Show(this,
     "确实要从数据库中删除所选定的 " + this.listView_records.SelectedItems.Count.ToString() + " 个" + this.DbTypeCaption + "记录?\r\n\r\n(OK 删除；Cancel 取消)",
-    "BiblioSearchForm",
+    "ItemSearchForm",
     MessageBoxButtons.OKCancel,
     MessageBoxIcon.Question,
     MessageBoxDefaultButton.Button2);
@@ -6094,6 +6093,18 @@ Program.MainForm.DefaultFont);
                     entity.NewTimestamp = null;
                     entity.OldRecord = info.OldXml;
                     entity.OldTimestamp = info.Timestamp;
+
+                    // 2020/12/21
+                    // 检查发送给服务器的册记录 XML，XML 格式是否合法。如果不合法，则要使用强制删除参数
+                    if (string.IsNullOrEmpty(entity.OldRecord) == false)
+                    {
+                        if (VerifyXml(entity.OldRecord) == false)
+                        {
+                            entity.OldRecord = null;
+                            entity.Style = "force_clear_keys";
+                        }
+                    }
+
 #if NO
                     entity.RefID = "";
 
@@ -6186,6 +6197,20 @@ Program.MainForm.DefaultFont);
             return;
         ERROR1:
             ShowMessageBox(strError);
+        }
+
+        static bool VerifyXml(string xml)
+        {
+            try
+            {
+                XmlDocument dom = new XmlDocument();
+                dom.LoadXml(xml);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         // 快速修改记录
@@ -9288,14 +9313,14 @@ MessageBoxDefaultButton.Button1);
             get
             {
                 return Program.MainForm.AppInfo.GetString(
-                    "bibliosearchform",
+                    "itemsearchform",
                     "last_iso2709_filename",
                     "");
             }
             set
             {
                 Program.MainForm.AppInfo.SetString(
-                    "bibliosearchform",
+                    "itemsearchform",
                     "last_iso2709_filename",
                     value);
             }
@@ -9310,14 +9335,14 @@ MessageBoxDefaultButton.Button1);
             get
             {
                 return Program.MainForm.AppInfo.GetBoolean(
-                    "bibliosearchform",
+                    "itemsearchform",
                     "last_iso2709_crlf",
                     false);
             }
             set
             {
                 Program.MainForm.AppInfo.SetBoolean(
-                    "bibliosearchform",
+                    "itemsearchform",
                     "last_iso2709_crlf",
                     value);
             }
@@ -9332,14 +9357,14 @@ MessageBoxDefaultButton.Button1);
             get
             {
                 return Program.MainForm.AppInfo.GetString(
-                    "bibliosearchform",
+                    "itemsearchform",
                     "last_encoding_name",
                     "");
             }
             set
             {
                 Program.MainForm.AppInfo.SetString(
-                    "bibliosearchform",
+                    "itemsearchform",
                     "last_encoding_name",
                     value);
             }
@@ -9354,14 +9379,14 @@ MessageBoxDefaultButton.Button1);
             get
             {
                 return Program.MainForm.AppInfo.GetString(
-                    "bibliosearchform",
+                    "itemsearchform",
                     "last_cataloging_rule",
                     "<无限制>");
             }
             set
             {
                 Program.MainForm.AppInfo.SetString(
-                    "bibliosearchform",
+                    "itemsearchform",
                     "last_cataloging_rule",
                     value);
             }
@@ -10318,15 +10343,15 @@ dlg.UiState);
                 MainForm.SetControlFont(dlg_905, this.Font);
 
                 dlg_905.UiState = Program.MainForm.AppInfo.GetString(
-                    "BiblioSearchForm",
+                    "ItemSearchForm",
                     "ExportMarcHoldingDialog_uiState",
                     "");
 
-                Program.MainForm.AppInfo.LinkFormState(dlg_905, "BiblioSearchForm_ExportMarcHoldingDialog_state");
+                Program.MainForm.AppInfo.LinkFormState(dlg_905, "ItemSearchForm_ExportMarcHoldingDialog_state");
                 dlg_905.ShowDialog(this);
 
                 Program.MainForm.AppInfo.SetString(
-                    "BiblioSearchForm",
+                    "ItemSearchForm",
                     "ExportMarcHoldingDialog_uiState",
                     dlg_905.UiState);
 
@@ -13146,7 +13171,7 @@ out strError);
             dlg.XmlString = strQueryXml;
             // dlg.StartPosition = FormStartPosition.CenterScreen;
 
-            Program.MainForm.AppInfo.LinkFormState(dlg, "bibliosearchform_viewqueryxml");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "itemsearchform_viewqueryxml");
             dlg.ShowDialog(this);
             Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
