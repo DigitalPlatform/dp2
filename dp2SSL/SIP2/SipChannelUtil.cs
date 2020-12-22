@@ -19,7 +19,6 @@ using DigitalPlatform.SIP2;
 using DigitalPlatform.Text;
 using DigitalPlatform.WPF;
 using DigitalPlatform.Xml;
-using DigitalPlatform.LibraryClient.localhost;
 
 namespace dp2SSL
 {

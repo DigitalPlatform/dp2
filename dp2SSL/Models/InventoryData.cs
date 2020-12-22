@@ -16,6 +16,7 @@ using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
 using DigitalPlatform.WPF;
 using DigitalPlatform.Xml;
+using static dp2SSL.LibraryChannelUtil;
 
 namespace dp2SSL
 {
@@ -587,7 +588,11 @@ TaskScheduler.Default);
                         //      -1  出错
                         //      0   没有找到
                         //      1   找到
-                        var result = await LibraryChannelUtil.GetEntityDataAsync(entity.PII, "network");
+                        GetEntityDataResult result = null;
+                        if (App.Protocol == "sip")
+                            result = await SipChannelUtil.GetEntityDataAsync(entity.PII, "network");
+                        else
+                            result = await LibraryChannelUtil.GetEntityDataAsync(entity.PII, "network");
 
                         /*
                         // testing
