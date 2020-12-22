@@ -6019,6 +6019,15 @@ Program.MainForm.DefaultFont);
         // 删除所选择的记录
         void menu_deleteSelectedRecords_Click(object sender, EventArgs e)
         {
+            string strError = "";
+
+            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.41") < 0)
+            {
+                //		dp2library 3.41 (2020/12/21) SetEntities() API 的 delete action 功能，style 可以包含使用 "force_clear_keys"，用于删除 XML 结构已经被破坏的册记录，作用是提醒 dp2kernel 层(根据记录 id)强制删除册记录的检索点 key
+                strError = "本功能只能和 dp2library 3.41 及以上版本配套使用";
+                goto ERROR1;
+            }
+
             DialogResult result = MessageBox.Show(this,
     "确实要从数据库中删除所选定的 " + this.listView_records.SelectedItems.Count.ToString() + " 个" + this.DbTypeCaption + "记录?\r\n\r\n(OK 删除；Cancel 取消)",
     "ItemSearchForm",
@@ -6034,8 +6043,6 @@ Program.MainForm.DefaultFont);
                 if (string.IsNullOrEmpty(item.Text) == false)
                     items.Add(item);
             }
-
-            string strError = "";
 
             if (stop.IsInLoop == true)
             {

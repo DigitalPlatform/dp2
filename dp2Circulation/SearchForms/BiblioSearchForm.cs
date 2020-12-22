@@ -3088,7 +3088,7 @@ Keys keyData)
             {
                 ListViewItem item = this.listView_records.SelectedItems[0];
                 ZClientChannel channel = (ZClientChannel)item.Tag;
-                
+
                 if (channel == null)
                 {
                     this.ShowMessage("无法载入下一批记录(多行模式)", "yellow", true);
@@ -8398,8 +8398,12 @@ Keys keyData)
         // 删除所选择的书目记录
         void menu_deleteSelectedRecords_Click(object sender, EventArgs e)
         {
+            string delete_style = "";
+            if ((Control.ModifierKeys & Keys.Control) == Keys.Control)
+                delete_style = "noeventlog";
+
             DialogResult result = MessageBox.Show(this,
-        "确实要从数据库中删除所选定的 " + this.listView_records.SelectedItems.Count.ToString() + " 个书目记录?\r\n\r\n(警告：书目记录被删除后，无法恢复。如果删除书目记录，则其下属的册、期、订购、评注记录和对象资源会一并删除)\r\n\r\n(OK 删除；Cancel 取消)",
+        $"确实要从数据库中删除所选定的 { this.listView_records.SelectedItems.Count.ToString() } 个书目记录?\r\n\r\n{(string.IsNullOrEmpty(delete_style) == false ? "style:" + delete_style : "")}\r\n\r\n(警告：书目记录被删除后，无法恢复。如果删除书目记录，则其下属的册、期、订购、评注记录和对象资源会一并删除)\r\n\r\n(OK 删除；Cancel 取消)",
         "BiblioSearchForm",
         MessageBoxButtons.OKCancel,
         MessageBoxIcon.Question,
@@ -8421,6 +8425,10 @@ Keys keyData)
                 // this.Channel.Rights
                 Program.MainForm.GetCurrentUserRights()
                 );
+
+            // bool bDontPrompt = false;
+            DialogResult dialog_result = DialogResult.Yes;  // yes no cancel
+            List<string> skipped_recpath = new List<string>();
 
             LibraryChannel channel = this.GetChannel();
 
@@ -8461,6 +8469,9 @@ Keys keyData)
 
                     stop.SetMessage("正在删除书目记录 " + strRecPath);
 
+                    int nRedoCount = 0;
+                REDO_LOAD:
+
                     long lRet = channel.GetBiblioInfos(
                         stop,
                         strRecPath,
@@ -8470,9 +8481,47 @@ Keys keyData)
                         out baTimestamp,
                         out strError);
                     if (lRet == 0)
-                        goto ERROR1;
+                    {
+                        // 记录不存在。接着处理后面的删除
+                        skipped_recpath.Add(strRecPath);
+                        continue;
+                        // goto ERROR1;
+                    }
                     if (lRet == -1)
                     {
+                        if (channel.ErrorCode == ErrorCode.NotFound)
+                        {
+                            skipped_recpath.Add(strRecPath);
+                            continue;
+                        }
+
+                        string message = $"在获得记录 {strRecPath} 时间戳时出错:\r\n{strError}\r\n---\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)";
+                        dialog_result = (DialogResult)Application.OpenForms[0].Invoke(new Func<DialogResult>(() =>
+                        {
+                            // return:
+                            //      DialogResult.Retry 表示超时了
+                            //      DialogResult.OK 表示点了 OK 按钮
+                            //      DialogResult.Cancel 表示点了右上角的 Close 按钮
+                            return AutoCloseMessageBox.Show(this,
+message,
+20 * 1000,
+"BiblioSearchForm");
+                        }));
+                        if (dialog_result != DialogResult.Cancel)
+                        {
+                            // 重试次数太多了还不行，就跳过
+                            if (nRedoCount >= 10)
+                            {
+                                skipped_recpath.Add(strRecPath);
+                                continue;
+                            }
+
+                            nRedoCount++;
+                            goto REDO_LOAD;
+                        }
+
+                        goto ERROR1;
+                        /*
                         result = MessageBox.Show(this,
         "在获得记录 '" + strRecPath + "' 的时间戳的过程中出现错误: " + strError + "。\r\n\r\n是否继续强行删除此记录? (Yes 强行删除；No 不删除；Cancel 放弃当前未完成的全部删除操作)",
         "BiblioSearchForm",
@@ -8483,6 +8532,7 @@ Keys keyData)
                             goto ERROR1;
                         if (result == System.Windows.Forms.DialogResult.No)
                             continue;
+                        */
                     }
 
                     if (bDeleteSub == false)
@@ -8511,6 +8561,7 @@ Keys keyData)
                         }
                     }
 
+                REDO_DELETE:
                     byte[] baNewTimestamp = null;
 
                     channel.Timeout = new TimeSpan(0, 5, 0);
@@ -8522,11 +8573,78 @@ Keys keyData)
                         "", // strXml,
                         baTimestamp,
                         "",
+                        delete_style,
                         out strOutputPath,
                         out baNewTimestamp,
                         out strError);
                     if (lRet == -1)
+                    {
+                        if (channel.ErrorCode == ErrorCode.NotFound)
+                        {
+                            skipped_recpath.Add(strRecPath);
+                            continue;
+                        }
+
+                        string message = $"删除书目记录 {strRecPath} 时出错:\r\n{strError}\r\n---\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)";
+                        dialog_result = (DialogResult)Application.OpenForms[0].Invoke(new Func<DialogResult>(() =>
+                        {
+                            // return:
+                            //      DialogResult.Retry 表示超时了
+                            //      DialogResult.OK 表示点了 OK 按钮
+                            //      DialogResult.Cancel 表示点了右上角的 Close 按钮
+                            return AutoCloseMessageBox.Show(this,
+message,
+20 * 1000,
+"BiblioSearchForm");
+                        }));
+                        if (dialog_result != DialogResult.Cancel)
+                        {
+                            // 重试次数太多了还不行，就跳过
+                            if (nRedoCount >= 10)
+                            {
+                                skipped_recpath.Add(strRecPath);
+                                continue;
+                            }
+
+                            nRedoCount++;
+                            if (channel.ErrorCode == ErrorCode.TimestampMismatch)
+                                goto REDO_LOAD;
+
+                            goto REDO_DELETE;
+                        }
+
+#if REMOVED
+                        // 2020/12/22
+                        if (bDontPrompt == false || nRedoCount >= 10)
+                        {
+                            bool temp = bDontPrompt;
+                            string message = $"删除书目记录 {strRecPath} 时出错:\r\n{strError}\r\n---\r\n\r\n是否重试?\r\n\r\n注：\r\n[重试] 重试删除\r\n[跳过] 放弃删除当前记录，但继续后面的处理\r\n[中断] 中断整批操作";
+                            dialog_result = (DialogResult)Application.OpenForms[0].Invoke(new Func<DialogResult>(() =>
+                            {
+                                return MessageDlg.Show(this,
+                                message,
+                                "BiblioSearchForm",
+                                MessageBoxButtons.YesNoCancel,
+                                MessageBoxDefaultButton.Button1,
+                                ref temp,
+                                new string[] { "重试", "跳过", "中断" },
+                                "下次不再询问");
+                            }));
+                            bDontPrompt = temp;
+                        }
+                        if (dialog_result == DialogResult.Yes)
+                        {
+                            nRedoCount++;
+                            if (channel.ErrorCode == ErrorCode.TimestampMismatch)
+                                goto REDO_LOAD;
+
+                            goto REDO_DELETE;
+                        }
+                        if (dialog_result == DialogResult.No)
+                            continue;
+#endif
                         goto ERROR1;
+                    }
 
                     nDeleteCount++;
 
@@ -8549,7 +8667,12 @@ Keys keyData)
                 this.listView_records.Enabled = true;
             }
 
-            MessageBox.Show(this, "成功删除书目记录 " + nDeleteCount + " 条");
+            {
+                string message = "成功删除书目记录 " + nDeleteCount + " 条";
+                if (skipped_recpath.Count > 0)
+                    message += $"。但有 {skipped_recpath} 条书目记录跳过了删除";
+                MessageBox.Show(this, message);
+            }
             return;
         ERROR1:
             MessageBox.Show(this, strError);
