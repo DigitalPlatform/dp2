@@ -555,6 +555,12 @@ out strError);
                         result.ErrorString = strError;
 
                         record.RecordBody.Result = result;
+
+                        // 2020/12/23
+                        // 出错情况下也应该有 .Path
+                        if (bHasID == true)
+                            record.Path = db.GetCaptionSafety(strLang) + "/" + path.CompressedID;
+
                         goto CONTINUE;
                         // return lRet;
                     }

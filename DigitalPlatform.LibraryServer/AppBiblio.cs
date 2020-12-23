@@ -1055,7 +1055,8 @@ namespace DigitalPlatform.LibraryServer
                                 out strError);
                             if (nRet == -1)
                             {
-                                strBiblio = strError;
+                                // 如果 subrecords xml 有错，则会以 "error:" 开头，前端可以据此判断
+                                strBiblio = "error:" + strError;
                                 goto CONTINUE;
                             }
 
