@@ -565,6 +565,7 @@ namespace dp2Circulation
                     int nRet = FillEntities(
                         channel,
                         preload_entities,
+                        Global.GetRecordID(strBiblioRecPath),
                         StringUtil.IsInList("_refresh", strStyle) ? "refresh" : "",
                         ref errors,
                         out strError);
@@ -606,42 +607,42 @@ namespace dp2Circulation
                         else if (this.ItemType == "order")
                         {
                             lRet = channel.GetOrders(
-        Stop,
-        strBiblioRecPath,
-        lStart,
-        lCount,
-        "",
-        "zh",
-        out entities,
-        out strError);
+                                Stop,
+                                strBiblioRecPath,
+                                lStart,
+                                lCount,
+                                "",
+                                "zh",
+                                out entities,
+                                out strError);
                             if (lRet == -1)
                                 return -1;
                         }
                         else if (this.ItemType == "issue")
                         {
                             lRet = channel.GetIssues(
-                Stop,
-        strBiblioRecPath,
-            lStart,
-            lCount,
-            "",
-            "zh",
-        out entities,
-        out strError);
+                                Stop,
+                                strBiblioRecPath,
+                                lStart,
+                                lCount,
+                                "",
+                                "zh",
+                                out entities,
+                                out strError);
                             if (lRet == -1)
                                 return -1;
                         }
                         else if (this.ItemType == "comment")
                         {
                             lRet = channel.GetComments(
-        Stop,
-        strBiblioRecPath,
-        lStart,
-        lCount,
-        "",
-        "zh",
-        out entities,
-        out strError);
+                                Stop,
+                                strBiblioRecPath,
+                                lStart,
+                                lCount,
+                                "",
+                                "zh",
+                                out entities,
+                                out strError);
                             if (lRet == -1)
                                 return -1;
                         }
@@ -662,6 +663,7 @@ namespace dp2Circulation
                         int nRet = FillEntities(
                             channel,
                             entities,
+                            Global.GetRecordID(strBiblioRecPath),
                             StringUtil.IsInList("_refresh", strStyle) ? "refresh" : "",
                             ref errors,
                             out strError);
@@ -700,9 +702,12 @@ namespace dp2Circulation
             }
         }
 
+        // parameters:
+        //      parent_id   (下级记录所从属的)书目记录的 ID。用于补充有错误的下级记录的内存结构
         int FillEntities(
             LibraryChannel channel,
             EntityInfo[] entities,
+            string parent_id,
             string strStyle,
             ref List<string> errors,
             out string strError)
@@ -717,31 +722,39 @@ namespace dp2Circulation
             {
                 foreach (EntityInfo entity in entities)
                 {
+                    /*
                     if (entity.ErrorCode != ErrorCodeValue.NoError)
                     {
                         strError = "路径为 '" + entity.OldRecPath + "' 的" + this.ItemTypeName + "记录装载中发生错误: " + entity.ErrorInfo;  // NewRecPath
                         return -1;
                     }
+                    */
+                    bool has_error = entity.ErrorCode != ErrorCodeValue.NoError;
 
                     // 所返回的记录有可能是被过滤掉的
-                    if (string.IsNullOrEmpty(entity.OldRecord) == true)
+                    if (string.IsNullOrEmpty(entity.OldRecord) == true
+                        && entity.ErrorCode == ErrorCodeValue.NoError)
                         continue;
 
                     // 剖析一个册的xml记录，取出有关信息放入listview中
                     T bookitem = new T();
 
                     int nRet = bookitem.SetData(entity.OldRecPath, // NewRecPath
-                             entity.OldRecord,
+                             has_error ? "<root />" : entity.OldRecord,
                              entity.OldTimestamp,
                              out strError);
-                    if (nRet == -1)
+                    if (nRet == -1 || has_error)
                     {
                         /*
                         strError = $"解析册记录 {entity.OldRecPath} 的 XML 记录时出错: {strError}";
                         return -1;
                         */
+                        bookitem.Parent = parent_id;    // 避免后面构造保存(删除)请求信息阶段报错
                         bookitem.Error = entity;
-                        bookitem.ErrorInfo = $"解析册记录 {entity.OldRecPath} 的 XML 记录时出错: {strError}";
+                        if (has_error)
+                            bookitem.ErrorInfo = entity.ErrorInfo;
+                        else
+                            bookitem.ErrorInfo = $"解析册记录 {entity.OldRecPath} 的 XML 记录时出错: {strError}";
                         errors.Add(bookitem.ErrorInfo);
                     }
                     else

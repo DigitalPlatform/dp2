@@ -3592,6 +3592,7 @@ out string strErrorCode)
 
         // 装载下级记录
         // parameters:
+        //      strSubRecords   若干子记录的 XML 组合内容。若以 "error:" 开头，表示里面是报错信息，不能当作 XML 字符串
         //      bRefresh    是否要刷新列表中已有的事项的 old 部分信息
         int LoadSubRecords(
             LibraryChannel channel,
@@ -3606,7 +3607,8 @@ out string strErrorCode)
             int nRet = 0;
 
             XmlDocument collection_dom = new XmlDocument();
-            if (string.IsNullOrEmpty(strSubRecords) == false)
+            if (string.IsNullOrEmpty(strSubRecords) == false
+                && strSubRecords.StartsWith("error:") == false)
             {
                 try
                 {

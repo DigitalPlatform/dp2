@@ -1951,6 +1951,14 @@ namespace DigitalPlatform.LibraryServer
                             strXml = record.RecordBody.Xml;
                             timestamp = record.RecordBody.Timestamp;
                             strOutputPath = record.Path;
+
+                            // 2020/12/23
+                            if (record.RecordBody.Result != null
+                                && record.RecordBody.Result.ErrorCode != ErrorCodeValue.NoError)
+                            {
+                                entityinfo.ErrorCode = ErrorCodeValue.CommonError;
+                                entityinfo.ErrorInfo = record.RecordBody.Result.ErrorString;
+                            }
                         }
                         else
                         {
@@ -4517,7 +4525,7 @@ out strError);
                     ErrorInfos.Add(error);
                     return -1;
                 }
-                else
+                else if (channel.ErrorCode != ChannelErrorCode.NotFoundObjectFile)
                 {
                     error = new EntityInfo(info);
                     error.ErrorInfo = "删除操作发生错误, 在读入原有记录 '" + info.NewRecPath + "' 阶段:" + strError;
@@ -4529,7 +4537,6 @@ out strError);
 
             bool force_clear_keys = (StringUtil.IsInList("force_clear_keys", info.Style) == true);
 
-
             // 把记录装入DOM
             XmlDocument domExist = new XmlDocument();
 
@@ -4539,7 +4546,7 @@ out strError);
             }
             catch (Exception ex)
             {
-                if (force_clear_keys == true)
+                if (force_clear_keys == true || string.IsNullOrEmpty(strExistingXml) == true)
                 {
                     domExist.LoadXml("<root />");
                 }
