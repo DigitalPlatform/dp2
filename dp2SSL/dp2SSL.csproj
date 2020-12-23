@@ -507,6 +507,7 @@
     <Compile Include="Models\BiblioCacheContext.cs" />
     <Compile Include="Models\GlobalMonitor.cs" />
     <Compile Include="Models\InventoryData.cs" />
+    <Compile Include="Models\ItemCacheContext.cs" />
     <Compile Include="Models\NewTagList2.cs" />
     <Compile Include="Models\PasswordCache.cs" />
     <Compile Include="Models\PatronReplication.cs" />

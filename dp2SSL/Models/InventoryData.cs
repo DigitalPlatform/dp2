@@ -840,7 +840,7 @@ TaskScheduler.Default);
                     || StringUtil.IsInList("verifyEAS", actionMode))
                     && HasBorrowed(info.ItemXml)
                     && info.IsTaskCompleted("return") == false
-                    )
+                    && App.Protocol != "sip")
                 {
                     var request_result = RequestReturn(
     entity.PII,
@@ -909,7 +909,7 @@ TaskScheduler.Default);
                 if (
                     (info.ContainTask("return") == false || info.IsTaskCompleted("return") == true)
                     && (need_verifyEas == true || StringUtil.IsInList("verifyEAS", actionMode))
-                    )
+                    && App.Protocol != "sip")
                 {
                     await VerifyEasAsync(entity);
                 }
@@ -927,8 +927,10 @@ TaskScheduler.Default);
                 // 设置 UID
                 if (StringUtil.IsInList("setUID", actionMode)
                     && string.IsNullOrEmpty(info.ItemXml) == false
-                    && info.IsTaskCompleted("setUID") == false)
+                    && info.IsTaskCompleted("setUID") == false
+                    && App.Protocol != "sip")
                 {
+                    // TODO: SIP2 模式下，UID - PII 对照信息可以设置到 dp2ssl 本地数据库
                     var request_result = RequestSetUID(entity.ItemRecPath,
                         info.ItemXml,
                         null,
@@ -959,7 +961,18 @@ TaskScheduler.Default);
                 // 修改 currentLocation 和 location
                 if (info.IsTaskCompleted("setLocation") == false)
                 {
-                    var request_result = RequestInventory(entity.UID,
+                    RequestInventoryResult request_result = null;
+                    if (App.Protocol == "sip")
+                        request_result = await RequestInventory_sip2(entity.UID,
+    entity.PII,
+    StringUtil.IsInList("setCurrentLocation", actionMode) ? info.TargetCurrentLocation : null,
+    StringUtil.IsInList("setLocation", actionMode) ? info.TargetLocation : null,
+    StringUtil.IsInList("setLocation", actionMode) ? info.TargetShelfNo : null,
+    info.BatchNo,
+    info.UserName,
+    PageInventory.ActionMode);
+                    else
+                        request_result = RequestInventory(entity.UID,
     entity.PII,
     StringUtil.IsInList("setCurrentLocation", actionMode) ? info.TargetCurrentLocation : null,
     StringUtil.IsInList("setLocation", actionMode) ? info.TargetLocation : null,
@@ -1223,6 +1236,48 @@ TaskScheduler.Default);
             if (string.IsNullOrEmpty(borrower) == false)
                 return true;
             return false;
+        }
+
+        // 向 SIP2 服务器发出盘点请求
+        public static async Task<RequestInventoryResult> RequestInventory_sip2(
+            string uid,
+            string pii,
+            string currentLocationString,
+            string location,
+            string shelfNo,
+            string batchNo,
+            string strUserName,
+            string style)
+        {
+            if (currentLocationString == null && location == null)
+                return new RequestInventoryResult { Value = 0 };    // 没有必要修改
+
+            // 分解 currentLocation 字符串
+            var parts = StringUtil.ParseTwoPart(currentLocationString, ":");
+            string currentLocation = parts[0];
+            string currentShelfNo = parts[1];
+            var update_result = await SipChannelUtil.UpdateItemStatusAsync(
+    "", // oi,
+    pii,
+    location,
+    currentLocation,
+    shelfNo,
+    currentShelfNo);
+            if (update_result.Value == -1)
+                return new RequestInventoryResult
+                {
+                    Value = -1,
+                    ErrorInfo = update_result.ErrorInfo,
+                    ErrorCode = update_result.ErrorCode
+                };
+
+            // 重新获得册记录 XML
+            var get_result = await SipChannelUtil.GetEntityDataAsync(pii, "network");
+            if (get_result.Value == -1)
+            {
+                // TODO: 如何报错？
+            }
+            return new RequestInventoryResult { ItemXml = get_result.ItemXml };
         }
 
         public class RequestInventoryResult : NormalResult

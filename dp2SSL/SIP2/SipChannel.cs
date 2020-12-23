@@ -1008,6 +1008,71 @@ namespace dp2SSL
             };
         }
 
+        public class ItemStatusUpdateResult : NormalResult
+        {
+            public ItemStatusUpdateResponse_20 Result { get; set; }
+        }
+
+        public async Task<ItemStatusUpdateResult> ItemStatusUpdateAsync(
+            string oi,
+            string itemBarcode,
+            string Location,
+            string currentLocation,
+            string shelfNo,
+            string currentShelfNo)
+        {
+            ItemStatusUpdate_19 request = new ItemStatusUpdate_19()
+            {
+                TransactionDate_18 = SIPUtility.NowDateTime,
+
+                AO_InstitutionId_r = oi,
+                //AC_TerminalPassword_o = "",
+                //CH_ItemProperties_r = ""
+
+            };
+            request.SetDefaulValue();
+            request.AB_ItemIdentifier_r = itemBarcode;
+
+            if (Location != null)
+                request.AQ_PermanentLocation_o = Location;
+            if (shelfNo != null)
+                request.KQ_PermanentShelfNo_o = shelfNo;
+            if (currentLocation != null)
+                request.AP_CurrentLocation_o = currentLocation;
+            if (currentShelfNo != null)
+                request.KP_CurrentShelfNo_o = currentShelfNo;
+
+            // 发送和接收消息
+            string requestText = request.ToText();
+
+            var result = await SendAndRecvAsync(requestText);
+            if (result.Value == -1)
+            {
+                return new ItemStatusUpdateResult
+                {
+                    Value = -1,
+                    ErrorInfo = result.ErrorInfo,
+                    ErrorCode = result.ErrorCode
+                };
+            }
+
+            var response20 = result.Response as ItemStatusUpdateResponse_20;
+            if (response20 == null)
+            {
+                return new ItemStatusUpdateResult
+                {
+                    Value = -1,
+                    ErrorInfo = "返回的不是20消息"
+                };
+            }
+
+            return new ItemStatusUpdateResult
+            {
+                Value = 0,
+                Result = response20
+            };
+        }
+
         public class GetPatronInfoResult : NormalResult
         {
             public PatronInformationResponse_64 Result { get; set; }
