@@ -86,6 +86,8 @@ namespace dp2SSL
 
             _ = Task.Run(() =>
             {
+                // TODO: SIP2 协议模式下需要配置馆藏地列表
+
                 // 获得馆藏地列表
                 GetLocationListResult get_result = LibraryChannelUtil.GetLocationList();
                 if (get_result.Value == -1)
@@ -136,7 +138,8 @@ namespace dp2SSL
 
                 ClearList();
 
-                if (dialog_result == true && slow_mode == false)
+                if (dialog_result == true && slow_mode == false
+            && App.Protocol != "sip")
                 {
                     CancellationTokenSource cancel = new CancellationTokenSource();
 
@@ -261,8 +264,8 @@ namespace dp2SSL
                 {
                     FillEntity(channel, entity, (e1) =>
                     {
-                    // 说过一次便不再说
-                    if (speaked == true)
+                        // 说过一次便不再说
+                        if (speaked == true)
                             return false;
                         speaked = SpeakLocation(e1);
                         return speaked;
