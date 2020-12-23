@@ -109,9 +109,10 @@ bool bClickClose = false)
 
         public MainForm()
         {
-            InitializeComponent();
-
+            ClientInfo.ProgramName = "rfidtool";
             ClientInfo.MainForm = this;
+
+            InitializeComponent();
 
             {
                 _floatingMessage = new FloatingMessageForm(this, true);
@@ -267,7 +268,9 @@ _cancel.Token);
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            var ret = ClientInfo.Initial("rfidtool");
+            ClientInfo.SerialNumberMode = "must";
+            var ret = ClientInfo.Initial("rfidtool",
+                () => StringUtil.IsDevelopMode());
             if (ret == false)
             {
                 Application.Exit();
@@ -673,6 +676,23 @@ MessageBoxDefaultButton.Button2);
             string url = "https://github.com/DigitalPlatform/dp2/issues/764";
 
             Process.Start(url);
+        }
+
+        private void MenuItem_resetSerialCode_Click(object sender, EventArgs e)
+        {
+            // return:
+            //      -1  出错
+            //      0   正确
+            int nRet = ClientInfo.VerifySerialCode(
+                "", // strTitle,
+                "", // strRequirFuncList,
+                "reset",
+                out string strError);
+            if (nRet == -1)
+                goto ERROR1;
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
         }
     }
 

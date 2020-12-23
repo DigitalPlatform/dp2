@@ -70,7 +70,7 @@ namespace dp2SSL
 
         }
 
-        static async Task<NormalResult>  ConnectAsync()
+        static async Task<NormalResult> ConnectAsync()
         {
             var parts = StringUtil.ParseTwoPart(App.SipServerUrl, ":");
             string address = parts[0];
@@ -92,6 +92,55 @@ namespace dp2SSL
 
         static AsyncSemaphore _channelLimit = new AsyncSemaphore(1);
 
+        public static async Task<NormalResult> UpdateItemStatusAsync(
+            string oi,
+            string pii,
+            string location,
+            string currentLocation,
+            string shelfNo,
+            string currentShelfNo)
+        {
+            try
+            {
+                using (var releaser = await _channelLimit.EnterAsync())
+                {
+                    SipChannel channel = await GetChannelAsync();
+                    try
+                    {
+                        var result = await _channel.ItemStatusUpdateAsync(
+    oi,
+    pii,
+    location,
+    currentLocation,
+    shelfNo,
+    currentShelfNo);
+                        if (result.Value == -1)
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = result.ErrorInfo,
+                                ErrorCode = result.ErrorCode
+                            };
+                        return new NormalResult();
+                    }
+                    finally
+                    {
+                        ReturnChannel(channel);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                WpfClientInfo.WriteErrorLog($"UpdateItemStatusAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"GetEntityDataAsync() 出现异常: {ex.Message}",
+                    ErrorCode = ex.GetType().ToString()
+                };
+            }
+        }
 
         // 获得册记录信息和书目摘要信息
         // parameters:
@@ -161,21 +210,37 @@ namespace dp2SSL
                                 if (get_result.Result.CirculationStatus_2 == "12")
                                     state = "丢失";
 
-                                DomUtil.SetElementText(itemdom.DocumentElement, "state", state);
+                                // 册状态
+                                DomUtil.SetElementText(itemdom.DocumentElement,
+                                    "state",
+                                    state);
 
+                                // 册条码号
                                 DomUtil.SetElementText(itemdom.DocumentElement,
                                     "barcode",
                                     get_result.Result.AB_ItemIdentifier_r);
+                                // 永久馆藏地
                                 DomUtil.SetElementText(itemdom.DocumentElement,
-    "location",
-    get_result.Result.AQ_PermanentLocation_o);
-                                DomUtil.SetElementText(itemdom.DocumentElement,
-"currentLocation",
-get_result.Result.AP_CurrentLocation_o);
+                                    "location",
+                                    get_result.Result.AQ_PermanentLocation_o);
+                                // 永久架位
+                                if (string.IsNullOrEmpty(get_result.Result.KQ_PermanentShelfNo_o) == false)
+                                    DomUtil.SetElementText(itemdom.DocumentElement,
+                                        "shelfNo",
+                                        get_result.Result.KQ_PermanentShelfNo_o);
+                                // 当前位置
+                                string currentLocation = BuildCurrentLocation(
+        get_result.Result.AP_CurrentLocation_o,
+        get_result.Result.KP_CurrentShelfNo_o);
+                                if (string.IsNullOrEmpty(currentLocation) == false)
+                                    DomUtil.SetElementText(itemdom.DocumentElement,
+        "currentLocation",
+        currentLocation);
 
+                                // 索取号
                                 DomUtil.SetElementText(itemdom.DocumentElement,
-"accessNo",
-get_result.Result.CH_ItemProperties_o);
+                                    "accessNo",
+                                    get_result.Result.KC_CallNo_o);    // 原来是 .CH_ItemProperties_o
 
                                 // 借书时间
                                 {
@@ -280,6 +345,14 @@ get_result.Result.CH_ItemProperties_o);
                     ErrorCode = ex.GetType().ToString()
                 };
             }
+        }
+
+        // 根据馆藏地和架号字符串构造册记录 currentLocation 元素值
+        static string BuildCurrentLocation(string location, string shelfNo)
+        {
+            if (string.IsNullOrEmpty(shelfNo) == false)
+                return location + ":" + shelfNo;
+            return location;
         }
 
         // return.Value:

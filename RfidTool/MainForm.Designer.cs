@@ -60,6 +60,7 @@ namespace RfidTool
             this.columnHeader_oi = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_aoi = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_writeTime = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.MenuItem_resetSerialCode = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
@@ -181,6 +182,7 @@ namespace RfidTool
             // 
             this.MenuItem_help.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.MenuItem_userManual,
+            this.MenuItem_resetSerialCode,
             this.MenuItem_about});
             this.MenuItem_help.Name = "MenuItem_help";
             this.MenuItem_help.Size = new System.Drawing.Size(102, 33);
@@ -312,6 +314,13 @@ namespace RfidTool
             this.columnHeader_writeTime.Text = "写入时间";
             this.columnHeader_writeTime.Width = 260;
             // 
+            // MenuItem_resetSerialCode
+            // 
+            this.MenuItem_resetSerialCode.Name = "MenuItem_resetSerialCode";
+            this.MenuItem_resetSerialCode.Size = new System.Drawing.Size(354, 40);
+            this.MenuItem_resetSerialCode.Text = "设置序列号(&R) ...";
+            this.MenuItem_resetSerialCode.Click += new System.EventHandler(this.MenuItem_resetSerialCode_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(13F, 28F);
@@ -373,6 +382,7 @@ namespace RfidTool
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel_readerCount;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_clearAllHistory;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_userManual;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_resetSerialCode;
     }
 }
 

@@ -140,7 +140,7 @@ namespace DigitalPlatform.CirculationClient
         // return:
         //      true    初始化成功
         //      false   初始化失败，应立刻退出应用程序
-        public static bool Initial(string product_name, 
+        public static bool Initial(string product_name,
             Delegate_skipSerialNumberCheck skipCheck = null)
         {
             ProductName = product_name;
@@ -286,9 +286,9 @@ namespace DigitalPlatform.CirculationClient
             WriteWindowsLog(strText, EventLogEntryType.Error);
         }
 
-#endregion
+        #endregion
 
-#region 未捕获的异常处理 
+        #region 未捕获的异常处理 
 
         // 准备接管未捕获的异常
         public static void PrepareCatchException()
@@ -434,7 +434,7 @@ namespace DigitalPlatform.CirculationClient
             }
         }
 
-#endregion
+        #endregion
 
         static ConfigSetting _config = null;
 
@@ -682,7 +682,7 @@ namespace DigitalPlatform.CirculationClient
         }
 
 
-#region 序列号
+        #region 序列号
 
         // parameters:
         //      strRequirFuncList   要求必须具备的功能列表。逗号间隔的字符串
@@ -811,6 +811,8 @@ namespace DigitalPlatform.CirculationClient
                 strOriginCode = "!error";
             else
             {
+                if (string.IsNullOrEmpty(CopyrightKey))
+                    throw new Exception("请提前准备好 CopyrightKey 内容");
                 Debug.Assert(string.IsNullOrEmpty(CopyrightKey) == false);
                 strOriginCode = Cryptography.Encrypt(strOriginCode,
                 CopyrightKey);
@@ -824,6 +826,8 @@ namespace DigitalPlatform.CirculationClient
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.OriginCode = strOriginCode;
 
+            // 2020/12/24
+            dlg.ShowInTaskbar = true;
         REDO:
             dlg.ShowDialog(MainForm);
             if (dlg.DialogResult != DialogResult.OK)
@@ -948,9 +952,9 @@ namespace DigitalPlatform.CirculationClient
             return strExtParam;
         }
 
-#endregion
+        #endregion
 
-#region Form 实用函数
+        #region Form 实用函数
 
         public delegate void delegate_action(object o);
 
@@ -1038,9 +1042,9 @@ delegate_action action)
             }
         }
 
-#endregion
+        #endregion
 
-#region 错误状态
+        #region 错误状态
 
         static void SetWholeColor(Color backColor, Color foreColor)
         {
@@ -1110,7 +1114,7 @@ delegate_action action)
             _errorStateInfo = info;
         }
 
-#endregion
+        #endregion
 
         public static bool IsMinimizeMode()
         {
