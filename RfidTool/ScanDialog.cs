@@ -519,6 +519,16 @@ namespace RfidTool
                     // TODO: 弹出对话框警告一次。可以选择不再警告
                 }
 
+                // 判断序列号中的功能类型
+                {
+                    string function_type = "HF";
+                    if (tag.TagInfo.Protocol == InventoryInfo.ISO18000P6C)
+                        function_type = "UHF";
+
+                    if (HasLicense(function_type) == false)
+                        return;
+                }
+
                 var uid = tag.UID;
                 var tou = this.TypeOfUsage;
                 if (string.IsNullOrEmpty(tou))
@@ -967,6 +977,19 @@ MessageBoxDefaultButton.Button2);
                 SetItemColor(item, "error");
                 MessageBox.Show(this, strError);
             }));
+        }
+
+        // 判断序列号中的功能类型是否匹配
+        bool HasLicense(string function_type)
+        {
+            int nRet = ClientInfo.VerifySerialCode(
+    $"设置序列号({function_type})",
+    function_type,
+    "reinput",
+    out string strError);
+            if (nRet == 0)
+                return true;
+            return false;
         }
 
         static void SetItemColor(ListViewItem item, string state)

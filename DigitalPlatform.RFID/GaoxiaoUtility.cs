@@ -623,16 +623,18 @@ namespace DigitalPlatform.RFID
         public static int[] DecodeContentParameter(byte[] two_bytes)
         {
             List<int> results = new List<int>();
-            for (int i = 0; i < 8; i++)
-            {
-                bool on = ((two_bytes[0] >> i) & 0x01) != 0;
-                if (on)
-                    results.Add((byte)GetOID(i));
-            }
-
+            // 低 byte (字节流中顺序靠后的才是低 byte)
             for (int i = 0; i < 8; i++)
             {
                 bool on = ((two_bytes[1] >> i) & 0x01) != 0;
+                if (on)
+                    results.Add((byte)GetOID(i));
+            }
+            
+            // 高 byte
+            for (int i = 0; i < 8; i++)
+            {
+                bool on = ((two_bytes[0] >> i) & 0x01) != 0;
                 if (on)
                     results.Add((byte)GetOID(i + 8));
             }
@@ -664,9 +666,7 @@ namespace DigitalPlatform.RFID
                 value |= (UInt16)(0x00000001 << offset);
             }
 
-            return BitConverter.GetBytes(value);
-
-            // return Compact.ReverseBytes(BitConverter.GetBytes(value));
+            return Compact.ReverseBytes(BitConverter.GetBytes(value));
         }
 
         #endregion
@@ -788,9 +788,12 @@ namespace DigitalPlatform.RFID
                 var index_bytes = BitConverter.GetBytes(index_value);
                 var count_bytes = BitConverter.GetBytes(count_value);
 
+                index_bytes = Compact.ReverseBytes(index_bytes);
+                count_bytes = Compact.ReverseBytes(count_bytes);
+
                 List<byte> results = new List<byte>();
+                results.AddRange(count_bytes);  // 总数为“高”byte，高即是字节流中靠前的意思
                 results.AddRange(index_bytes);
-                results.AddRange(count_bytes);
 
                 return results.ToArray();
             }
@@ -869,8 +872,8 @@ namespace DigitalPlatform.RFID
                     throw new ArgumentException($"{name} '{content}' 不合法。应该是 5 位数字");
                 var result = BitConverter.GetBytes(value);
                 Debug.Assert(result.Length == 2);
-                return result;
-                // return Compact.ReverseBytes(result);
+                // return result;
+                return Compact.ReverseBytes(result);
             }
         }
 
@@ -893,7 +896,7 @@ namespace DigitalPlatform.RFID
                 if (data.Length != 2)
                     throw new Exception($"OID 为 3 时，data 应为 2 字节(但现在为 {data.Length} 字节)");
 
-                // data = Compact.ReverseBytes(data);
+                data = Compact.ReverseBytes(data);
 
                 var result = BitConverter.ToUInt16(data, 0).ToString().PadLeft(5, '0');
                 if (result[0] == '6')
@@ -911,16 +914,16 @@ namespace DigitalPlatform.RFID
                 if (data.Length != 4)
                     throw new Exception($"OID 为 4 时，data 应为 4 字节(但现在为 {data.Length} 字节)");
 
-                byte[] first = new byte[2];
-                Array.Copy(data, first, 2);
-                //first = Compact.ReverseBytes(first);
+                byte[] high = new byte[2];
+                Array.Copy(data, high, 2);
+                high = Compact.ReverseBytes(high);
 
-                byte[] second = new byte[2];
-                Array.Copy(data, 2, second, 0, 2);
-                //second = Compact.ReverseBytes(second);
+                byte[] low = new byte[2];
+                Array.Copy(data, 2, low, 0, 2);
+                low = Compact.ReverseBytes(low);
 
-                var no = BitConverter.ToUInt16(first, 0).ToString();
-                var count = BitConverter.ToUInt16(second, 0).ToString();
+                var no = BitConverter.ToUInt16(low, 0).ToString();
+                var count = BitConverter.ToUInt16(high, 0).ToString();
                 return no + "/" + count;
             }
 

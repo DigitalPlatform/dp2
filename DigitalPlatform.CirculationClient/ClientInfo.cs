@@ -895,6 +895,10 @@ namespace DigitalPlatform.CirculationClient
         {
             Hashtable table = StringUtil.ParseParameters(strEnvString);
             string strFuncValue = (string)table["function"];
+            // 2020/12/24
+            if (strFuncValue != null)
+                strFuncValue = strFuncValue.Replace("|", ",");
+
             string[] parts = strFuncList.Split(new char[] { ',' });
             foreach (string part in parts)
             {
