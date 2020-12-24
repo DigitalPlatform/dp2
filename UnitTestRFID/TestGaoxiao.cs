@@ -20,7 +20,7 @@ namespace UnitTestRFID
         [TestMethod]
         public void Test_decode_contentParameter_1()
         {
-            byte[] bytes = new byte[] {  0xa1, 0x00 };
+            byte[] bytes = new byte[] { 0x00, 0xa1 };
             int[] results = GaoxiaoUtility.DecodeContentParameter(bytes);
 
             Assert.AreEqual(3, results.Length);
@@ -34,7 +34,7 @@ namespace UnitTestRFID
         public void Test_encode_contentParameter_1()
         {
             int[] oid_list = new int[] { 3, 12, 15 };
-            byte[] correct = new byte[] { 0xa1, 0x00,  };
+            byte[] correct = new byte[] {  0x00, 0xa1, };
 
             byte[] results = GaoxiaoUtility.EncodeContentParameter(oid_list);
 
