@@ -816,8 +816,8 @@ namespace DigitalPlatform.RFID
                 }
 
                 List<byte> results = new List<byte>();
-                results.Add((byte)secondary_value);
                 results.Add((byte)pimary_value);
+                results.Add((byte)secondary_value);
 
                 Debug.Assert(results.Count == 2);
                 return results.ToArray();
@@ -895,13 +895,15 @@ namespace DigitalPlatform.RFID
 * */
                 if (data.Length != 2)
                     throw new Exception($"OID 为 3 时，data 应为 2 字节(但现在为 {data.Length} 字节)");
-
+#if REMOVED
                 data = Compact.ReverseBytes(data);
 
                 var result = BitConverter.ToUInt16(data, 0).ToString().PadLeft(5, '0');
                 if (result[0] == '6')
                     return "9" + result.Substring(1);
                 return result;
+#endif
+                return DecodeLibraryCode(data);
             }
 
             if (oid == 4)
@@ -934,8 +936,8 @@ namespace DigitalPlatform.RFID
                 if (data.Length != 2)
                     throw new Exception($"OID 为 5 时，data 应为 2 字节(但现在为 {data.Length} 字节)");
 
-                byte secondary = data[0];
-                byte pimary = data[1];
+                byte pimary = data[0];
+                byte secondary = data[1];
                 return ((int)pimary).ToString() + "." + ((int)secondary).ToString();
                 /*
 主限定标识(应用类别) 取值(数字) 次限定标识(馆藏状态) 取值(数字)
@@ -983,12 +985,15 @@ namespace DigitalPlatform.RFID
                 if (data.Length != 2)
                     throw new Exception($"OID 为 11 时，data 应为 2 字节(但现在为 {data.Length} 字节)");
 
+#if REMOVED
                 data = Compact.ReverseBytes(data);
 
                 var result = BitConverter.ToUInt16(data, 0).ToString().PadLeft(5, '0');
                 if (result[0] == '6')
                     return "9" + result.Substring(1);
                 return result;
+#endif
+                return DecodeLibraryCode(data);
             }
 
             if (oid >= 27 && oid <= 31)
@@ -999,9 +1004,22 @@ namespace DigitalPlatform.RFID
 
             // 其他。暂时用 hex string 来表示
             return Element.GetHexString(data);
+
+            string DecodeLibraryCode(byte [] bytes)
+            {
+                if (bytes.Length != 2)
+                    throw new Exception($"DecodeLibraryCode()，data 应为 2 字节(但现在为 {bytes.Length} 字节)");
+
+                bytes = Compact.ReverseBytes(bytes);
+
+                var result = BitConverter.ToUInt16(bytes, 0).ToString().PadLeft(5, '0');
+                if (result[0] == '6')
+                    return "9" + result.Substring(1);
+                return result;
+            }
         }
 
-        #endregion
+#endregion
 
         // 根据 LogicChip 对象构造标签内容
         // parameters:
@@ -1138,6 +1156,7 @@ namespace DigitalPlatform.RFID
 
         public class ParseGaoxiaoResult : NormalResult
         {
+            public ProtocolControlWord PC { get; set; }
             // 逻辑标签内容
             public LogicChip LogicChip { get; set; }
             // EPC 信息
@@ -1152,10 +1171,11 @@ namespace DigitalPlatform.RFID
             byte[] epc_bank,
             byte[] user_bank)
         {
+            ProtocolControlWord pc = null;
             try
             {
                 // 协议控制字 Protocol Control Word
-                ProtocolControlWord pc = UhfUtility.ParsePC(epc_bank, 2);
+                pc = UhfUtility.ParsePC(epc_bank, 2);
 
                 /*
                 if (pc.ISO == true)
@@ -1193,7 +1213,8 @@ namespace DigitalPlatform.RFID
                                 ErrorCode = "blank",
                                 LogicChip = new LogicChip(),
                                 EpcInfo = epc_info,
-                                UserElements = new List<GaoxiaoUserElement>()
+                                UserElements = new List<GaoxiaoUserElement>(),
+                                PC = pc,
                             };
                         }
                         return new ParseGaoxiaoResult
@@ -1202,7 +1223,8 @@ namespace DigitalPlatform.RFID
                             ErrorInfo = "标签内容无法解析。ECP UMI 位和(高校联盟) ContentParameters 不符",
                             ErrorCode = "parseEpcError",
                             EpcInfo = epc_info,
-                            UserElements = new List<GaoxiaoUserElement>()
+                            UserElements = new List<GaoxiaoUserElement>(),
+                            PC = pc,
                         };
                     }
                 }
@@ -1234,7 +1256,8 @@ namespace DigitalPlatform.RFID
                 {
                     LogicChip = chip,   // 如果 chip 为 null，表示没有 User Bank
                     EpcInfo = epc_info,
-                    UserElements = elements // 如果 elements 为 null，是因为没有 User Bank
+                    UserElements = elements, // 如果 elements 为 null，是因为没有 User Bank
+                    PC = pc,
                 };
             }
             catch (Exception ex)
@@ -1243,7 +1266,8 @@ namespace DigitalPlatform.RFID
                 {
                     Value = -1,
                     ErrorInfo = $"标签内容无法解析。{ex.Message}",
-                    ErrorCode = "parseError"
+                    ErrorCode = "parseError",
+                    PC = pc,
                 };
             }
         }
