@@ -14,7 +14,6 @@ public class MyKeysHost : KeysHost
 
 	public void getNameAndBirthdate()
 	{
-
 		XmlNode node = this.DataDom.SelectSingleNode("//name");
 		if (node == null)
 			return;
@@ -40,7 +39,6 @@ public class MyKeysHost : KeysHost
 		}
 
 		this.ResultString = strName + "|" + strBirthdate;
-
 	}
 
 }
@@ -89,7 +87,7 @@ public class MyKeysHost : KeysHost
     <from>namePinyin</from>
     <table ref="namePinyin" />
   </key>
-  <table name="namePinyin" id="14">
+  <table name="namePinyin" id="3">
     <convert>
       <string style="upper,removeblank" />
     </convert>
@@ -105,7 +103,7 @@ public class MyKeysHost : KeysHost
     <from>department</from>
     <table ref="department" />
   </key>
-  <table name="department" id="3">
+  <table name="department" id="4">
     <convert>
       <string style="upper,simplify" />
     </convert>
@@ -120,7 +118,7 @@ public class MyKeysHost : KeysHost
     <from>idCardNumber</from>
     <table ref="idCardNumber" />
   </key>
-  <table name="idCardNumber" id="4">
+  <table name="idCardNumber" id="5">
     <convert>
       <string style="upper" />
     </convert>
@@ -135,7 +133,7 @@ public class MyKeysHost : KeysHost
     <from>namebirthdate</from>
     <table ref="namebirthdate" />
   </key>
-  <table name="namebirthdate" id="5">
+  <table name="namebirthdate" id="6">
     <convert>
       <string style="upper,simplify" />
     </convert>
@@ -150,7 +148,7 @@ public class MyKeysHost : KeysHost
     <from>email</from>
     <table ref="email" />
   </key>
-  <table name="email" id="6">
+  <table name="email" id="7">
     <convert>
       <string style="upper,split" />
     </convert>
@@ -165,7 +163,7 @@ public class MyKeysHost : KeysHost
     <from>tel</from>
     <table ref="tel" />
   </key>
-  <table name="tel" id="7">
+  <table name="tel" id="8">
     <caption lang="zh-CN">电话</caption>
     <caption lang="en">Telephone</caption>
   </table>
@@ -175,7 +173,7 @@ public class MyKeysHost : KeysHost
     <from>borrowitem</from>
     <table ref="borrowitem" />
   </key>
-  <table name="borrowitem" id="8" type="borrowitem">
+  <table name="borrowitem" id="9" type="borrowitem">
     <caption lang="zh-CN">所借册条码号</caption>
     <caption lang="zh-CN">所借册条码</caption>
     <caption lang="en">Borrow item barcode</caption>
@@ -186,7 +184,7 @@ public class MyKeysHost : KeysHost
     <from>expireDate</from>
     <table ref="expireDate" />
   </key>
-  <table name="expireDate" id="9">
+  <table name="expireDate" id="10">
     <convert>
       <number style="rfc1123time" />
     </convert>
@@ -202,7 +200,7 @@ public class MyKeysHost : KeysHost
     <from>state</from>
     <table ref="state" />
   </key>
-  <table name="state" id="10">
+  <table name="state" id="11">
     <convert>
       <string style="upper,split" />
     </convert>
@@ -218,7 +216,7 @@ public class MyKeysHost : KeysHost
     <from>dname</from>
     <table ref="dname" />
   </key>
-  <table name="dname" id="11">
+  <table name="dname" id="12">
     <convert>
       <string style="upper,simplify" />
     </convert>
@@ -234,7 +232,7 @@ public class MyKeysHost : KeysHost
     <from>cardNumber</from>
     <table ref="cardNumber" />
   </key>
-  <table name="cardNumber" id="12">
+  <table name="cardNumber" id="13">
     <convert>
       <string style="upper,split" />
     </convert>
@@ -250,7 +248,7 @@ public class MyKeysHost : KeysHost
     <from>fTimestamp</from>
     <table ref="fTimestamp" />
   </key>
-  <table name="fTimestamp" id="13">
+  <table name="fTimestamp" id="14">
     <convert>
       <number style="utime" />
     </convert>
@@ -266,9 +264,42 @@ public class MyKeysHost : KeysHost
     <from>refID</from>
     <table ref="refID" />
   </key>
-  <table name="refID" id="14">
+  <table name="refID" id="15">
     <caption lang="zh-CN">参考ID</caption>
     <caption lang="en">Reference ID</caption>
+  </table>
+
+  <key>
+    <xpath>*/face/@timestamp</xpath>
+    <from>faceTimestamp</from>
+    <table ref="faceTimestamp" />
+  </key>
+  <table name="faceTimestamp" id="16">
+    <convert>
+      <number style="utime" />
+    </convert>
+    <convertquery>
+      <number style="utime" />
+    </convertquery>
+    <caption lang="zh-CN">人脸时间戳</caption>
+    <caption lang="en">Face Timestamp</caption>
+  </table>
+
+
+  <key>
+    <xpath>*/palm/@timestamp</xpath>
+    <from>palmTimestamp</from>
+    <table ref="palmTimestamp" />
+  </key>
+  <table name="palmTimestamp" id="17">
+    <convert>
+      <number style="utime" />
+    </convert>
+    <convertquery>
+      <number style="utime" />
+    </convertquery>
+    <caption lang="zh-CN">掌纹时间戳</caption>
+    <caption lang="en">Palm Timestamp</caption>
   </table>
 
 </root>

@@ -121,6 +121,15 @@ namespace dp2SSL
                                 ErrorInfo = result.ErrorInfo,
                                 ErrorCode = result.ErrorCode
                             };
+                        if (result.Result.ItemPropertiesOk_1 != "1")
+                        {
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = result.Result.AF_ScreenMessage_o,
+                                ErrorCode = "sipErrorCode:" + result.Result.ItemPropertiesOk_1
+                            };
+                        }
                         return new NormalResult();
                     }
                     finally

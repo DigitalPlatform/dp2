@@ -10236,6 +10236,43 @@ Stack:
         {
             this.Abort();
         }
+
+        // 2020/12/29
+        // 进行验证性登录
+        // return:
+        //      -1  error
+        //      0   登录未成功
+        //      1   登录成功
+        public static int VerifyLogin(
+            string libraryServerUrl,
+            string strUserName,
+            string strPassword,
+            string clientLocation,
+            string clientAndVerion, // 例如 dp2ZServer|0.01
+            out string strError)
+        {
+            strError = "";
+
+            using (LibraryChannel Channel = new LibraryChannel())
+            {
+
+                Channel.Url = libraryServerUrl;
+
+                // return:
+                //      -1  error
+                //      0   登录未成功
+                //      1   登录成功
+                long lRet = Channel.Login(strUserName,
+                    strPassword,
+                    $"location={clientLocation},type=worker,client={clientAndVerion}",
+                    out strError);
+                if (lRet == -1)
+                    return -1;
+
+                return (int)lRet;
+            }
+        }
+
     }
 
     /// <summary>

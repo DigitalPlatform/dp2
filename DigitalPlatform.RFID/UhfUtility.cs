@@ -606,9 +606,16 @@ namespace DigitalPlatform.RFID
                 };
             }
 
+            // 载荷部分长度
+            int payloadLength = data.Length - 4;
+            if (payloadLength < pc.LengthIndicator * 2)
+                throw new Exception($"data 中载荷部分长度(byte 数) {payloadLength} 小于 PC.LengthIndicator 中的 word 数 {pc.LengthIndicator}");
+
             ParseEpcBankResult result = new ParseEpcBankResult();
             result.PC = pc;
-            result.UII = DecodeUII(data, 4, data.Length - 4);
+            result.UII = DecodeUII(data,
+                4,
+                Math.Min(pc.LengthIndicator * 2, payloadLength));
             return result;
         }
 

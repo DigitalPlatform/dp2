@@ -128,6 +128,22 @@
             this.MenuItem_dp2ZServer_uninstallService = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator26 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_dp2ZServer_uninstall = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_palmCenter = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_palmCenter_install = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_palmCenter_update = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator33 = new System.Windows.Forms.ToolStripSeparator();
+            this.MenuItem_palmCenter_openProgramFolder = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator34 = new System.Windows.Forms.ToolStripSeparator();
+            this.MenuItem_palmCenter_config = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator35 = new System.Windows.Forms.ToolStripSeparator();
+            this.MenuItem_palmCenter_tool = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_palmCenter_startService = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_palmCenter_stopService = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator36 = new System.Windows.Forms.ToolStripSeparator();
+            this.MenuItem_palmCenter_installService = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_palmCenter_uninstallService = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator37 = new System.Windows.Forms.ToolStripSeparator();
+            this.MenuItem_palmCenter_uninstall = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_help = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_openUserFolder = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_openDataFolder = new System.Windows.Forms.ToolStripMenuItem();
@@ -162,11 +178,13 @@
             this.MenuItem_dp2OPAC,
             this.MenuItem_dp2Commander,
             this.MenuItem_dp2zserver,
+            this.MenuItem_palmCenter,
             this.MenuItem_help});
+            this.menuStrip1.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.Flow;
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Padding = new System.Windows.Forms.Padding(11, 3, 0, 3);
-            this.menuStrip1.Size = new System.Drawing.Size(1060, 39);
+            this.menuStrip1.Size = new System.Drawing.Size(667, 103);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -180,7 +198,7 @@
             this.toolStripSeparator8,
             this.MenuItem_exit});
             this.MenuItem_file.Name = "MenuItem_file";
-            this.MenuItem_file.Size = new System.Drawing.Size(97, 33);
+            this.MenuItem_file.Size = new System.Drawing.Size(97, 32);
             this.MenuItem_file.Text = "文件(&F)";
             // 
             // MenuItem_autoUpgrade
@@ -234,7 +252,7 @@
             this.toolStripSeparator10,
             this.MenuItem_dp2kernel_tools});
             this.MenuItem_dp2Kernel.Name = "MenuItem_dp2Kernel";
-            this.MenuItem_dp2Kernel.Size = new System.Drawing.Size(132, 33);
+            this.MenuItem_dp2Kernel.Size = new System.Drawing.Size(132, 32);
             this.MenuItem_dp2Kernel.Text = "dp2Kernel";
             // 
             // MenuItem_dp2kernel_install
@@ -361,7 +379,7 @@
             this.toolStripSeparator13,
             this.MenuItem_dp2library_tools});
             this.dp2LibraryToolStripMenuItem.Name = "dp2LibraryToolStripMenuItem";
-            this.dp2LibraryToolStripMenuItem.Size = new System.Drawing.Size(137, 33);
+            this.dp2LibraryToolStripMenuItem.Size = new System.Drawing.Size(137, 32);
             this.dp2LibraryToolStripMenuItem.Text = "dp2Library";
             // 
             // MenuItem_dp2library_install
@@ -530,7 +548,7 @@
             this.toolStripSeparator17,
             this.toolStripMenuItem1});
             this.MenuItem_dp2OPAC.Name = "MenuItem_dp2OPAC";
-            this.MenuItem_dp2OPAC.Size = new System.Drawing.Size(127, 33);
+            this.MenuItem_dp2OPAC.Size = new System.Drawing.Size(127, 32);
             this.MenuItem_dp2OPAC.Text = "dp2OPAC";
             // 
             // MenuItem_dp2opac_install
@@ -597,7 +615,7 @@
             this.toolStripSeparator30,
             this.toolStripMenuItem10});
             this.MenuItem_dp2Commander.Name = "MenuItem_dp2Commander";
-            this.MenuItem_dp2Commander.Size = new System.Drawing.Size(193, 33);
+            this.MenuItem_dp2Commander.Size = new System.Drawing.Size(193, 32);
             this.MenuItem_dp2Commander.Text = "dp2Commander";
             this.MenuItem_dp2Commander.Visible = false;
             // 
@@ -718,7 +736,7 @@
             this.toolStripSeparator22,
             this.MenuItem_dp2ZServer_tools});
             this.MenuItem_dp2zserver.Name = "MenuItem_dp2zserver";
-            this.MenuItem_dp2zserver.Size = new System.Drawing.Size(144, 33);
+            this.MenuItem_dp2zserver.Size = new System.Drawing.Size(144, 32);
             this.MenuItem_dp2zserver.Text = "dp2ZServer";
             this.MenuItem_dp2zserver.Visible = false;
             // 
@@ -851,6 +869,124 @@
             this.MenuItem_dp2ZServer_uninstall.Text = "卸载 dp2ZServer";
             this.MenuItem_dp2ZServer_uninstall.Click += new System.EventHandler(this.MenuItem_dp2ZServer_uninstall_Click);
             // 
+            // MenuItem_palmCenter
+            // 
+            this.MenuItem_palmCenter.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.MenuItem_palmCenter_install,
+            this.MenuItem_palmCenter_update,
+            this.toolStripSeparator33,
+            this.MenuItem_palmCenter_openProgramFolder,
+            this.toolStripSeparator34,
+            this.MenuItem_palmCenter_config,
+            this.toolStripSeparator35,
+            this.MenuItem_palmCenter_tool});
+            this.MenuItem_palmCenter.Name = "MenuItem_palmCenter";
+            this.MenuItem_palmCenter.Size = new System.Drawing.Size(148, 32);
+            this.MenuItem_palmCenter.Text = "palmCenter";
+            // 
+            // MenuItem_palmCenter_install
+            // 
+            this.MenuItem_palmCenter_install.Name = "MenuItem_palmCenter_install";
+            this.MenuItem_palmCenter_install.Size = new System.Drawing.Size(315, 40);
+            this.MenuItem_palmCenter_install.Text = "安装 palmCenter";
+            this.MenuItem_palmCenter_install.Click += new System.EventHandler(this.MenuItem_palmCenter_install_Click);
+            // 
+            // MenuItem_palmCenter_update
+            // 
+            this.MenuItem_palmCenter_update.Name = "MenuItem_palmCenter_update";
+            this.MenuItem_palmCenter_update.Size = new System.Drawing.Size(315, 40);
+            this.MenuItem_palmCenter_update.Text = "升级 palmCenter";
+            this.MenuItem_palmCenter_update.Click += new System.EventHandler(this.MenuItem_palmCenter_update_Click);
+            // 
+            // toolStripSeparator33
+            // 
+            this.toolStripSeparator33.Name = "toolStripSeparator33";
+            this.toolStripSeparator33.Size = new System.Drawing.Size(312, 6);
+            // 
+            // MenuItem_palmCenter_openProgramFolder
+            // 
+            this.MenuItem_palmCenter_openProgramFolder.Name = "MenuItem_palmCenter_openProgramFolder";
+            this.MenuItem_palmCenter_openProgramFolder.Size = new System.Drawing.Size(315, 40);
+            this.MenuItem_palmCenter_openProgramFolder.Text = "打开程序文件夹";
+            this.MenuItem_palmCenter_openProgramFolder.Click += new System.EventHandler(this.MenuItem_palmCenter_openProgramFolder_Click);
+            // 
+            // toolStripSeparator34
+            // 
+            this.toolStripSeparator34.Name = "toolStripSeparator34";
+            this.toolStripSeparator34.Size = new System.Drawing.Size(312, 6);
+            // 
+            // MenuItem_palmCenter_config
+            // 
+            this.MenuItem_palmCenter_config.Name = "MenuItem_palmCenter_config";
+            this.MenuItem_palmCenter_config.Size = new System.Drawing.Size(315, 40);
+            this.MenuItem_palmCenter_config.Text = "配置";
+            this.MenuItem_palmCenter_config.Click += new System.EventHandler(this.MenuItem_palmCenter_config_Click);
+            // 
+            // toolStripSeparator35
+            // 
+            this.toolStripSeparator35.Name = "toolStripSeparator35";
+            this.toolStripSeparator35.Size = new System.Drawing.Size(312, 6);
+            this.toolStripSeparator35.Visible = false;
+            // 
+            // MenuItem_palmCenter_tool
+            // 
+            this.MenuItem_palmCenter_tool.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.MenuItem_palmCenter_startService,
+            this.MenuItem_palmCenter_stopService,
+            this.toolStripSeparator36,
+            this.MenuItem_palmCenter_installService,
+            this.MenuItem_palmCenter_uninstallService,
+            this.toolStripSeparator37,
+            this.MenuItem_palmCenter_uninstall});
+            this.MenuItem_palmCenter_tool.Name = "MenuItem_palmCenter_tool";
+            this.MenuItem_palmCenter_tool.Size = new System.Drawing.Size(315, 40);
+            this.MenuItem_palmCenter_tool.Text = "工具";
+            // 
+            // MenuItem_palmCenter_startService
+            // 
+            this.MenuItem_palmCenter_startService.Name = "MenuItem_palmCenter_startService";
+            this.MenuItem_palmCenter_startService.Size = new System.Drawing.Size(348, 40);
+            this.MenuItem_palmCenter_startService.Text = "启动 Windows Service";
+            this.MenuItem_palmCenter_startService.Click += new System.EventHandler(this.MenuItem_palmCenter_startService_Click);
+            // 
+            // MenuItem_palmCenter_stopService
+            // 
+            this.MenuItem_palmCenter_stopService.Name = "MenuItem_palmCenter_stopService";
+            this.MenuItem_palmCenter_stopService.Size = new System.Drawing.Size(348, 40);
+            this.MenuItem_palmCenter_stopService.Text = "停止 Windows Service";
+            this.MenuItem_palmCenter_stopService.Click += new System.EventHandler(this.MenuItem_palmCenter_stopService_Click);
+            // 
+            // toolStripSeparator36
+            // 
+            this.toolStripSeparator36.Name = "toolStripSeparator36";
+            this.toolStripSeparator36.Size = new System.Drawing.Size(345, 6);
+            // 
+            // MenuItem_palmCenter_installService
+            // 
+            this.MenuItem_palmCenter_installService.Name = "MenuItem_palmCenter_installService";
+            this.MenuItem_palmCenter_installService.Size = new System.Drawing.Size(348, 40);
+            this.MenuItem_palmCenter_installService.Text = "注册 Windows Service";
+            this.MenuItem_palmCenter_installService.Click += new System.EventHandler(this.MenuItem_palmCenter_installService_Click);
+            // 
+            // MenuItem_palmCenter_uninstallService
+            // 
+            this.MenuItem_palmCenter_uninstallService.Name = "MenuItem_palmCenter_uninstallService";
+            this.MenuItem_palmCenter_uninstallService.Size = new System.Drawing.Size(348, 40);
+            this.MenuItem_palmCenter_uninstallService.Text = "注销 Windows Service";
+            this.MenuItem_palmCenter_uninstallService.Click += new System.EventHandler(this.MenuItem_palmCenter_uninstallService_Click);
+            // 
+            // toolStripSeparator37
+            // 
+            this.toolStripSeparator37.Name = "toolStripSeparator37";
+            this.toolStripSeparator37.Size = new System.Drawing.Size(345, 6);
+            // 
+            // MenuItem_palmCenter_uninstall
+            // 
+            this.MenuItem_palmCenter_uninstall.Name = "MenuItem_palmCenter_uninstall";
+            this.MenuItem_palmCenter_uninstall.Size = new System.Drawing.Size(348, 40);
+            this.MenuItem_palmCenter_uninstall.Text = "卸载 palmCenter";
+            this.MenuItem_palmCenter_uninstall.Click += new System.EventHandler(this.MenuItem_palmCenter_uninstall_Click);
+            // 
             // MenuItem_help
             // 
             this.MenuItem_help.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -864,7 +1000,7 @@
             this.toolStripSeparator24,
             this.MenuItem_copyright});
             this.MenuItem_help.Name = "MenuItem_help";
-            this.MenuItem_help.Size = new System.Drawing.Size(102, 33);
+            this.MenuItem_help.Size = new System.Drawing.Size(102, 32);
             this.MenuItem_help.Text = "帮助(&H)";
             // 
             // MenuItem_openUserFolder
@@ -936,14 +1072,14 @@
             this.statusStrip_main.Name = "statusStrip_main";
             this.statusStrip_main.Padding = new System.Windows.Forms.Padding(2, 0, 26, 0);
             this.statusStrip_main.RenderMode = System.Windows.Forms.ToolStripRenderMode.ManagerRenderMode;
-            this.statusStrip_main.Size = new System.Drawing.Size(1060, 33);
+            this.statusStrip_main.Size = new System.Drawing.Size(667, 33);
             this.statusStrip_main.TabIndex = 3;
             this.statusStrip_main.Text = "statusStrip1";
             // 
             // toolStripStatusLabel_main
             // 
             this.toolStripStatusLabel_main.Name = "toolStripStatusLabel_main";
-            this.toolStripStatusLabel_main.Size = new System.Drawing.Size(845, 24);
+            this.toolStripStatusLabel_main.Size = new System.Drawing.Size(452, 24);
             this.toolStripStatusLabel_main.Spring = true;
             // 
             // toolStripProgressBar_main
@@ -960,9 +1096,9 @@
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolButton_stop,
             this.toolStripDropDownButton_stopAll});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 39);
+            this.toolStrip1.Location = new System.Drawing.Point(0, 103);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(1060, 34);
+            this.toolStrip1.Size = new System.Drawing.Size(667, 34);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -996,11 +1132,11 @@
             // webBrowser1
             // 
             this.webBrowser1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.webBrowser1.Location = new System.Drawing.Point(0, 73);
+            this.webBrowser1.Location = new System.Drawing.Point(0, 137);
             this.webBrowser1.Margin = new System.Windows.Forms.Padding(5);
             this.webBrowser1.MinimumSize = new System.Drawing.Size(37, 35);
             this.webBrowser1.Name = "webBrowser1";
-            this.webBrowser1.Size = new System.Drawing.Size(1060, 529);
+            this.webBrowser1.Size = new System.Drawing.Size(667, 465);
             this.webBrowser1.TabIndex = 4;
             // 
             // MainForm
@@ -1008,7 +1144,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Control;
-            this.ClientSize = new System.Drawing.Size(1060, 635);
+            this.ClientSize = new System.Drawing.Size(667, 635);
             this.Controls.Add(this.webBrowser1);
             this.Controls.Add(this.toolStrip1);
             this.Controls.Add(this.statusStrip_main);
@@ -1146,6 +1282,22 @@
         private System.Windows.Forms.ToolStripMenuItem MenuItem_dp2Commander_uninstallService;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator32;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_dp2Commander_uninstall;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_palmCenter;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_palmCenter_install;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_palmCenter_update;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator33;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_palmCenter_openProgramFolder;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator34;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_palmCenter_config;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator35;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_palmCenter_tool;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_palmCenter_startService;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_palmCenter_stopService;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator36;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_palmCenter_installService;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_palmCenter_uninstallService;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator37;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_palmCenter_uninstall;
     }
 }
 

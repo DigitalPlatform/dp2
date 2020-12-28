@@ -5838,5 +5838,54 @@ MessageBoxDefaultButton.Button2);
         ERROR1:
             MessageBox.Show(this, strError);
         }
+
+        private void MenuItem_palmCenter_install_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void MenuItem_palmCenter_update_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void MenuItem_palmCenter_openProgramFolder_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        // 配置 掌纹中心
+        private void MenuItem_palmCenter_config_Click(object sender, EventArgs e)
+        {
+            using (var dlg = new PalmCenter.Install.SettingDialog())
+            {
+                dlg.ShowDialog(this);
+            }
+        }
+
+        private void MenuItem_palmCenter_startService_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void MenuItem_palmCenter_stopService_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void MenuItem_palmCenter_installService_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void MenuItem_palmCenter_uninstallService_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void MenuItem_palmCenter_uninstall_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }
