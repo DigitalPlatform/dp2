@@ -44,7 +44,9 @@ namespace DigitalPlatform.RFID
         }
 
 
-        // 编码高校联盟 EPC bank。注意返回的内容没有包含前 4 bytes(校验码和 PC)
+        // 编码高校联盟 EPC bank 的载荷部分。
+        // return:
+        //      返回 EPC 载荷字节数组。字节数会自动确保为偶数。注意返回的内容没有包含前 4 bytes(校验码和 PC)
         public static byte[] EncodeGaoxiaoEpcPayload(GaoxiaoEpcInfo info)
         {
             List<byte> result = new List<byte>();
@@ -121,12 +123,21 @@ namespace DigitalPlatform.RFID
         }
 
         // 解码 高校联盟 EPC 载荷部分。注意不包含 校验码 word 和 PC word
-        public static GaoxiaoEpcInfo DecodeGaoxiaoEpcPayload(byte[] data)
+        public static GaoxiaoEpcInfo DecodeGaoxiaoEpcPayload(byte[] data,
+            int length)
         {
+            if (data.Length < length)
+                throw new ArgumentException($"data 的字节数 ({data.Length}) 小于 length 参数值 {length}");
+
             GaoxiaoEpcInfo result = new GaoxiaoEpcInfo();
 
+            if (length < 5)
+                throw new ArgumentException($"data 的字节数 ({length}) 不应小于 5");
+            /*
             if (data.Length < 1)
                 throw new ArgumentException("data 的字节数不应小于 1");
+            */
+
             byte first = data[0];
             // 安全位
             result.Lending = (first & 0x80) != 0;
@@ -157,8 +168,8 @@ namespace DigitalPlatform.RFID
             result.ContentParameters = DecodeContentParameter(content_parameter);
 
             // *** EPC 的第 5-12/16/18 字节
-            byte[] rest = new byte[data.Length - 4];
-            Array.Copy(data, 4, rest, 0, data.Length - 4);
+            byte[] rest = new byte[length - 4];
+            Array.Copy(data, 4, rest, 0, length - 4);
             if (result.EncodingType == 0)
                 result.PII = DecodeIpc96bit(rest);
             else if (result.EncodingType == 1)
@@ -1062,7 +1073,7 @@ namespace DigitalPlatform.RFID
 
             var epc_info = new GaoxiaoEpcInfo();
             epc_info.Lending = !eas;
-            epc_info.Version = 1;
+            epc_info.Version = 1;   // ?
             if (build_user_bank)
                 epc_info.ContentParameters = BuildContentParameter(user_elements);
             else
@@ -1077,7 +1088,7 @@ namespace DigitalPlatform.RFID
             pc_info.UMI = true;
             pc_info.XPC = false;
             pc_info.ISO = false;
-            pc_info.AFI = 0xc2;
+            pc_info.AFI = 0;
             // 最后计算载荷的实际长度
             pc_info.LengthIndicator = epc_payload.Length / 2; // 这里是 word(一个 word 等于两个 bytes) 数
             var pc = UhfUtility.EncodePC(pc_info);
@@ -1196,7 +1207,8 @@ namespace DigitalPlatform.RFID
                 GaoxiaoEpcInfo epc_info = null;
                 if (bytes.Count > 0)
                 {
-                    epc_info = DecodeGaoxiaoEpcPayload(bytes.ToArray());
+                    epc_info = DecodeGaoxiaoEpcPayload(bytes.ToArray(), 
+                        Math.Min(pc.LengthIndicator * 2, bytes.Count));
                     if (pc.UMI == false
                         && epc_info.ContentParameters.Length != 0)
                     {

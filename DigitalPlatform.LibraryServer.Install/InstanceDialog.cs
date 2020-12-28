@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Configuration.Install;
 using System.Runtime.Remoting.Channels.Ipc;
 using System.Runtime.Remoting.Channels;
+using System.Linq;
 
 using DigitalPlatform.Install;
 using DigitalPlatform.GUI;
@@ -16,7 +17,6 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.Interfaces;
-using System.Linq;
 
 namespace DigitalPlatform.LibraryServer
 {

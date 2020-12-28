@@ -242,3 +242,11 @@ FaceDrivers.ArcSoft/
 FaceDrivers.EyeCool/
 FaceDrivers.Hanwang/
 
+!/RfidTool/x86/
+!/RfidTool/x86/Drivers/
+!/RfidTool/x64/
+!/RfidTool/x64/Drivers/
+
+PalmCenter/
+
+PalmDrivers.First/

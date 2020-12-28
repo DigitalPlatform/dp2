@@ -2999,9 +2999,15 @@ out Reader reader);
                             try
                             {
                                 // 高校联盟
-                                // 跳过 4 个 byte
+                                // 跳过 2 个 byte
+                                var parse_result = GaoxiaoUtility.ParseTag(Element.FromHexString(info.UID.Substring(4)), null);
+                                if (parse_result.Value == -1)
+                                    continue;
+                                /*
                                 var bytes = Element.FromHexString(info.UID.Substring(8));
                                 var epc_info = GaoxiaoUtility.DecodeGaoxiaoEpcPayload(bytes.ToArray());
+                                */
+                                var epc_info = parse_result.EpcInfo;
                                 // TODO: 要考虑适应 xxx.xxx 形态的 PII
                                 if (pii == epc_info.PII)
                                     return new FindTagResult
@@ -3460,13 +3466,12 @@ out Reader reader);
                                     ErrorInfo = "对空白的 UHF 标签无法修改 EAS"
                                 };
                             }
-
+                            var pc_bytes = GetPcBytes(uid);
+                            var pc = UhfUtility.ParsePC(pc_bytes, 0);
                             // 判断标签到底是国标还是高校联盟格式
                             var isGB = UhfUtility.IsISO285604Format(epc_bank, null);
                             if (isGB)
                             {
-                                var pc_bytes = GetPcBytes(uid);
-
                                 if (pc_bytes.Length != 2)
                                     return new NormalResult
                                     {
@@ -3474,7 +3479,6 @@ out Reader reader);
                                         ErrorInfo = "UID 中解析的 PC bytes 数必须为 2"
                                     };
 
-                                var pc = UhfUtility.ParsePC(pc_bytes, 0);
                                 pc.AFI = enable ? 0x07 : 0xc2;
                                 var new_pc_bytes = UhfUtility.EncodePC(pc);
 
@@ -3504,7 +3508,8 @@ out Reader reader);
                                 // 跳过 4 个 bytes
                                 var bytes = Element.FromHexString(uid.Substring(8));
 
-                                var epc_info = GaoxiaoUtility.DecodeGaoxiaoEpcPayload(bytes.ToArray());
+                                var epc_info = GaoxiaoUtility.DecodeGaoxiaoEpcPayload(bytes.ToArray(),
+                                    Math.Min(pc.LengthIndicator * 2, bytes.Length));
                                 epc_info.Lending = !enable;
                                 var payload = GaoxiaoUtility.EncodeGaoxiaoEpcPayload(epc_info);
                                 // TODO: 可以优化为只写入最小一个 word 范围

@@ -1252,10 +1252,16 @@ TaskScheduler.Default);
             if (currentLocationString == null && location == null)
                 return new RequestInventoryResult { Value = 0 };    // 没有必要修改
 
-            // 分解 currentLocation 字符串
-            var parts = StringUtil.ParseTwoPart(currentLocationString, ":");
-            string currentLocation = parts[0];
-            string currentShelfNo = parts[1];
+            string currentLocation = null;
+            string currentShelfNo = null;
+
+            if (currentLocationString != null)
+            {
+                // 分解 currentLocation 字符串
+                var parts = StringUtil.ParseTwoPart(currentLocationString, ":");
+                currentLocation = parts[0];
+                currentShelfNo = parts[1];
+            }
             var update_result = await SipChannelUtil.UpdateItemStatusAsync(
     "", // oi,
     pii,

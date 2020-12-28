@@ -1027,7 +1027,7 @@ namespace dp2SSL
 
                 AO_InstitutionId_r = oi,
                 //AC_TerminalPassword_o = "",
-                //CH_ItemProperties_r = ""
+                CH_ItemProperties_r = ""
 
             };
             request.SetDefaulValue();

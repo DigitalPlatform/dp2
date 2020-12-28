@@ -392,9 +392,21 @@ EB00"
             Debug.WriteLine(pc.ToString());
 
             var bytes = Element.FromHexString("300833B2DDD901400000000000000000");
-            GaoxiaoEpcInfo info = GaoxiaoUtility.DecodeGaoxiaoEpcPayload(bytes);
+            GaoxiaoEpcInfo info = GaoxiaoUtility.DecodeGaoxiaoEpcPayload(bytes, bytes.Length);
             Debug.WriteLine(info.ToString());
         }
 
+        // 
+        // 不明格式尝试
+        [TestMethod]
+        public void display_epc_2()
+        {
+            var epc_bank = Element.FromHexString("A3623D07150CC6B7C697ADB45964B3CFC1C123EF");
+            var result = UhfUtility.ParseTag(epc_bank,
+                null,
+                4);
+
+            Debug.WriteLine(result.ToString());
+        }
     }
 }
