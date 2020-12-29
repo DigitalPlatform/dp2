@@ -118,9 +118,9 @@ namespace PalmCenter.Install
 
         static string GetFileName()
         {
-            string dir = Utility.GetProductDirectory("palmCenter");
+            string dir = Utility.GetServiceUserDirectory("palmCenter");
             PathUtil.CreateDirIfNeed(dir);
-            return Path.Combine(dir, "setting.xml");
+            return Path.Combine(dir, "settings.xml");
         }
 
         void LoadConfig()
@@ -171,7 +171,7 @@ namespace PalmCenter.Install
         "clientLocation",
         this.textBox_cfg_location.Text);
 
-            _config.Get(
+            _config.Set(
         "libraryServer",
         "replicationStart",
         this.textBox_replicationStart.Text);

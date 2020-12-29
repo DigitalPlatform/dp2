@@ -7661,6 +7661,21 @@ value);  // 常用值 "ipc://RfidChannel/RfidServer"
         }
 
         /// <summary>
+        /// 掌纹阅读器 URL
+        /// </summary>
+        public string PalmprintReaderUrl
+        {
+            get
+            {
+                if (this.AppInfo == null)
+                    return "";
+                return this.AppInfo.GetString("palmprint",
+                    "palmPrintReaderUrl",
+                    "");  // 常用值 "ipc://PalmChannel/PalmServer"
+            }
+        }
+
+        /// <summary>
         /// 人脸识别接口 URL
         /// </summary>
         public string FaceReaderUrl

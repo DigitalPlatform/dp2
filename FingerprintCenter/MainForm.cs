@@ -43,7 +43,7 @@ namespace FingerprintCenter
         public MainForm()
         {
             ClientInfo.ProgramName = "fingerprintcenter";
-            ClientInfo.MainForm = this;
+            FormClientInfo.MainForm = this;
 
             InitializeComponent();
 
@@ -198,7 +198,7 @@ _cancel.Token,
 OutputHistory(text, level);
 });
 
-            ClientInfo.SetErrorState("retry", "正在启动");
+            FormClientInfo.SetErrorState("retry", "正在启动");
 
             if (DetectVirus.DetectXXX() || DetectVirus.DetectGuanjia())
             {
@@ -235,12 +235,12 @@ OutputHistory(text, level);
             });
 #endif
 
-            ClientInfo.SerialNumberMode = "must";
-            ClientInfo.CopyrightKey = "fingerprintcenter_sn_key";
+            FormClientInfo.SerialNumberMode = "must";
+            FormClientInfo.CopyrightKey = "fingerprintcenter_sn_key";
             // return:
             //      true    初始化成功
             //      false   初始化失败，应立刻退出应用程序
-            var bRet = ClientInfo.Initial("fingerprintcenter",
+            var bRet = FormClientInfo.Initial("fingerprintcenter",
                 () =>
                 {
 
@@ -459,7 +459,7 @@ OutputHistory(text, level);
                     if (result.Value == -1)
                     {
                         ClientInfo.WriteErrorLog($"FingerPrint.Init({CurrentDeviceIndex}) result={result.ToString()}");
-                        ClientInfo.SetErrorState("error", result.ErrorInfo);
+                        FormClientInfo.SetErrorState("error", result.ErrorInfo);
                         return result;
                     }
                     else
@@ -567,15 +567,15 @@ OutputHistory(text, level);
                 // 密码不正确的情况不要自动重试。因为重试超过十次会让当前账户被加入黑名单十分钟
 
                 if (_timer == null)
-                    ClientInfo.SetErrorState("error", result.ErrorInfo);
+                    FormClientInfo.SetErrorState("error", result.ErrorInfo);
                 else
-                    ClientInfo.SetErrorState("retry", result.ErrorInfo);
+                    FormClientInfo.SetErrorState("retry", result.ErrorInfo);
 
                 return result;
             }
             else
             {
-                ClientInfo.SetErrorState("normal", "");
+                FormClientInfo.SetErrorState("normal", "");
             }
             if (result.Value == 0)
                 this.ShowMessage(result.ErrorInfo, "yellow", true);
@@ -2233,7 +2233,7 @@ token);
             // return:
             //      -1  出错
             //      0   正确
-            int nRet = ClientInfo.VerifySerialCode(
+            int nRet = FormClientInfo.VerifySerialCode(
                 "", // strTitle,
                 "", // strRequirFuncList,
                 "reset",

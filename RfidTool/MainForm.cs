@@ -268,8 +268,8 @@ _cancel.Token);
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            ClientInfo.SerialNumberMode = "must";
-            var ret = ClientInfo.Initial("rfidtool",
+            FormClientInfo.SerialNumberMode = "must";
+            var ret = FormClientInfo.Initial("rfidtool",
                 () => StringUtil.IsDevelopMode());
             if (ret == false)
             {

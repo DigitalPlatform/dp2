@@ -11,14 +11,12 @@ namespace PalmCenter.Install
 {
     public static class Utility
     {
-        // 获得 dpkernel 或 dp2library 的程序存储目录
-        // 在 64 位操作系统下，获得 Program files (x86)
-        // 在 32 位操作系统下，获得 Program Files
-        // 目前 dp2kernel 和 dp2library 在 64 位操作系统下还都是 32 位的模块
-        public static string GetProductDirectory(
+        // 获得一个 Service 产品的用户目录
+        public static string GetServiceUserDirectory(
             string strProduct,
-            string strCompany = "digitalplatform")
+            string strCompany = "dp2")
         {
+            /*
             string strProgramDir = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86);
             if (string.IsNullOrEmpty(strProgramDir) == true)
                 strProgramDir = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
@@ -26,11 +24,13 @@ namespace PalmCenter.Install
             Debug.Assert(string.IsNullOrEmpty(strProgramDir) == false, "");
 
             return Path.Combine(strProgramDir, strCompany + "\\" + strProduct);
+            */
+            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), $"{strCompany}\\{strProduct}");
         }
 
         static string EncryptKey = "palmcenter_password_key";
 
-        internal static string DecryptPasssword(string strEncryptedText)
+        public static string DecryptPasssword(string strEncryptedText)
         {
             if (String.IsNullOrEmpty(strEncryptedText) == false)
             {
@@ -50,7 +50,7 @@ namespace PalmCenter.Install
             return "";
         }
 
-        internal static string EncryptPassword(string strPlainText)
+        public static string EncryptPassword(string strPlainText)
         {
             return Cryptography.Encrypt(strPlainText, EncryptKey);
         }

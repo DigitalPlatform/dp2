@@ -74,7 +74,7 @@ namespace dp2ManageCenter
 
         private void kernelResTree1_ReturnChannel(object sender, DigitalPlatform.LibraryClient.ReturnChannelEventArgs e)
         {
-            ((ClientInfo.MainForm) as MainForm).ReturnChannel(e.Channel);
+            ((FormClientInfo.MainForm) as MainForm).ReturnChannel(e.Channel);
         }
 
         void RefreshTitle()

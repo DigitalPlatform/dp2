@@ -59,6 +59,7 @@ namespace DigitalPlatform.LibraryServer
                 "outofReservations",    // 预约未取参数
                 "nation",   // 2011/9/24
                 "fingerprint", // 2012/1/15
+                "palmprint",    // 2020/12/29
                 "rights", // 2014/7/8
                 "personalLibrary", // 2014/7/8
                 "friends", // 2014/9/9
@@ -297,6 +298,7 @@ namespace DigitalPlatform.LibraryServer
 
                     // 2013/1/15 <fingerprint>元素单独处理
                     if (strElementName == "fingerprint"
+                        || strElementName == "palmprint"
                         || strElementName == "face")
                     {
                         string strTextOld = DomUtil.GetElementOuterXml(domExist.DocumentElement,
@@ -480,6 +482,14 @@ namespace DigitalPlatform.LibraryServer
                 // 如果有已经有了<face>元素，则修正其timestamp属性
                 // 刷新timestamp属性
                 XmlNode node = dom.DocumentElement.SelectSingleNode("face");
+                if (node != null)
+                    DomUtil.SetAttr(node, "timestamp", DateTime.Now.ToString("u"));
+            }
+
+            {
+                // 如果有已经有了 <palmprint> 元素，则修正其 timestamp 属性
+                // 刷新 timestamp 属性
+                XmlNode node = dom.DocumentElement.SelectSingleNode("palmprint");
                 if (node != null)
                     DomUtil.SetAttr(node, "timestamp", DateTime.Now.ToString("u"));
             }
@@ -5938,6 +5948,7 @@ out strError);
                 DomUtil.DeleteElement(readerdom.DocumentElement, "borrowHistory");
                 DomUtil.DeleteElement(readerdom.DocumentElement, "password");
                 DomUtil.DeleteElement(readerdom.DocumentElement, "fingerprint");
+                DomUtil.DeleteElement(readerdom.DocumentElement, "palmprint");
                 DomUtil.DeleteElement(readerdom.DocumentElement, "face");
                 DomUtil.DeleteElement(readerdom.DocumentElement, "borrows");
 

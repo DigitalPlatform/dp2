@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <col title="掌纹时间戳">
-    <xpath>*/palm/@timestamp</xpath>
+    <xpath>*/palmprint/@timestamp</xpath>
   </col>
   <col title="证条码号">
     <xpath>*/barcode</xpath>

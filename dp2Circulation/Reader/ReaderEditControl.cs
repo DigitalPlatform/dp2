@@ -265,6 +265,80 @@ namespace dp2Circulation
         }
 
         /// <summary>
+        /// 掌纹特征字符串。
+        /// base64编码方式
+        /// </summary>
+        public string PalmprintFeature
+        {
+            get
+            {
+                if (this._dataDom == null)
+                {
+                    this._dataDom = new XmlDocument();
+                    this._dataDom.LoadXml("<root />");
+                }
+                return DomUtil.GetElementText(this._dataDom.DocumentElement, "palmprint");
+            }
+            set
+            {
+                if (this._dataDom == null)
+                {
+                    this._dataDom = new XmlDocument();
+                    this._dataDom.LoadXml("<root />");
+                }
+                DomUtil.SetElementText(this._dataDom.DocumentElement, "palmprint", value);
+
+                // 清除<palmprint>元素
+                if (string.IsNullOrEmpty(value) == true)
+                {
+                    XmlNode node = this._dataDom.DocumentElement.SelectSingleNode("palmprint");
+                    if (node != null)
+                    {
+                        node.ParentNode.RemoveChild(node);
+                    }
+                }
+            }
+        }
+
+        // 掌纹特征字符串的版本号
+        /// <summary>
+        /// 指纹特征字符串的版本号
+        /// </summary>
+        public string PalmprintFeatureVersion
+        {
+            get
+            {
+                if (this._dataDom == null)
+                {
+                    this._dataDom = new XmlDocument();
+                    this._dataDom.LoadXml("<root />");
+                }
+                XmlNode node = this._dataDom.DocumentElement.SelectSingleNode("palmprint");
+                if (node == null)
+                    return "";
+                return DomUtil.GetAttr(node, "version");
+            }
+            set
+            {
+                if (this._dataDom == null)
+                {
+                    this._dataDom = new XmlDocument();
+                    this._dataDom.LoadXml("<root />");
+                }
+                XmlNode node = this._dataDom.DocumentElement.SelectSingleNode("palmprint");
+                if (node == null)
+                {
+                    if (string.IsNullOrEmpty(value) == true)
+                        return; // 正好,既然元素不存在, 就不用删除了
+                    node = this._dataDom.CreateElement("palmrprint");
+                    this._dataDom.DocumentElement.AppendChild(node);
+                }
+
+                DomUtil.SetAttr(node, "version", value);
+            }
+        }
+
+        /// <summary>
         /// 读者记录状态
         /// </summary>
         public string State

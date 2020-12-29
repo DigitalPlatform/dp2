@@ -287,11 +287,11 @@ public class MyKeysHost : KeysHost
 
 
   <key>
-    <xpath>*/palm/@timestamp</xpath>
-    <from>palmTimestamp</from>
-    <table ref="palmTimestamp" />
+    <xpath>*/palmprint/@timestamp</xpath>
+    <from>pTimestamp</from>
+    <table ref="pTimestamp" />
   </key>
-  <table name="palmTimestamp" id="17">
+  <table name="pTimestamp" id="17">
     <convert>
       <number style="utime" />
     </convert>
@@ -299,7 +299,7 @@ public class MyKeysHost : KeysHost
       <number style="utime" />
     </convertquery>
     <caption lang="zh-CN">掌纹时间戳</caption>
-    <caption lang="en">Palm Timestamp</caption>
+    <caption lang="en">Palmprint Timestamp</caption>
   </table>
 
 </root>
