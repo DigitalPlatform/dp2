@@ -152,6 +152,8 @@
             this.label10 = new System.Windows.Forms.Label();
             this.numericUpDown_search_maxReaderResultCount = new System.Windows.Forms.NumericUpDown();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.label36 = new System.Windows.Forms.Label();
+            this.numericUpDown_search_multiline_maxBiblioResultCount = new System.Windows.Forms.NumericUpDown();
             this.checkBox_search_biblioPushFilling = new System.Windows.Forms.CheckBox();
             this.checkBox_search_hideBiblioMatchStyle = new System.Windows.Forms.CheckBox();
             this.label9 = new System.Windows.Forms.Label();
@@ -233,8 +235,9 @@
             this.button_z3950_servers = new System.Windows.Forms.Button();
             this.button_OK = new System.Windows.Forms.Button();
             this.button_Cancel = new System.Windows.Forms.Button();
-            this.label36 = new System.Windows.Forms.Label();
-            this.numericUpDown_search_multiline_maxBiblioResultCount = new System.Windows.Forms.NumericUpDown();
+            this.groupBox12 = new System.Windows.Forms.GroupBox();
+            this.button_palmprint_setDefaulValue = new System.Windows.Forms.Button();
+            this.textBox_palmprint_readerUrl = new System.Windows.Forms.TextBox();
             this.tabControl_main.SuspendLayout();
             this.tabPage_server.SuspendLayout();
             this.toolStrip_server.SuspendLayout();
@@ -261,6 +264,7 @@
             this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_search_maxReaderResultCount)).BeginInit();
             this.groupBox1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_search_multiline_maxBiblioResultCount)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_search_maxBiblioResultCount)).BeginInit();
             this.tabPage_print.SuspendLayout();
             this.toolStrip_print.SuspendLayout();
@@ -279,7 +283,7 @@
             this.tabPage_labelPrint.SuspendLayout();
             this.tabPage_message.SuspendLayout();
             this.tabPage_z3950.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_search_multiline_maxBiblioResultCount)).BeginInit();
+            this.groupBox12.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl_main
@@ -1800,6 +1804,34 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = " 书目查询窗 ";
             // 
+            // label36
+            // 
+            this.label36.AutoSize = true;
+            this.label36.Location = new System.Drawing.Point(20, 180);
+            this.label36.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label36.Name = "label36";
+            this.label36.Size = new System.Drawing.Size(411, 21);
+            this.label36.TabIndex = 4;
+            this.label36.Text = "多行检索时每一个检索词最大命中条数(&M):";
+            // 
+            // numericUpDown_search_multiline_maxBiblioResultCount
+            // 
+            this.numericUpDown_search_multiline_maxBiblioResultCount.Location = new System.Drawing.Point(249, 215);
+            this.numericUpDown_search_multiline_maxBiblioResultCount.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.numericUpDown_search_multiline_maxBiblioResultCount.Maximum = new decimal(new int[] {
+            1000000,
+            0,
+            0,
+            0});
+            this.numericUpDown_search_multiline_maxBiblioResultCount.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            -2147483648});
+            this.numericUpDown_search_multiline_maxBiblioResultCount.Name = "numericUpDown_search_multiline_maxBiblioResultCount";
+            this.numericUpDown_search_multiline_maxBiblioResultCount.Size = new System.Drawing.Size(165, 31);
+            this.numericUpDown_search_multiline_maxBiblioResultCount.TabIndex = 5;
+            // 
             // checkBox_search_biblioPushFilling
             // 
             this.checkBox_search_biblioPushFilling.AutoSize = true;
@@ -2406,6 +2438,7 @@
             // tabPage_fingerprint
             // 
             this.tabPage_fingerprint.AutoScroll = true;
+            this.tabPage_fingerprint.Controls.Add(this.groupBox12);
             this.tabPage_fingerprint.Controls.Add(this.groupBox10);
             this.tabPage_fingerprint.Controls.Add(this.groupBox9);
             this.tabPage_fingerprint.Controls.Add(this.groupBox7);
@@ -2424,11 +2457,11 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox10.Controls.Add(this.button_face_setDefaultValue);
             this.groupBox10.Controls.Add(this.textBox_face_readerUrl);
-            this.groupBox10.Location = new System.Drawing.Point(5, 201);
+            this.groupBox10.Location = new System.Drawing.Point(5, 341);
             this.groupBox10.Margin = new System.Windows.Forms.Padding(5);
             this.groupBox10.Name = "groupBox10";
             this.groupBox10.Padding = new System.Windows.Forms.Padding(5);
-            this.groupBox10.Size = new System.Drawing.Size(795, 147);
+            this.groupBox10.Size = new System.Drawing.Size(765, 147);
             this.groupBox10.TabIndex = 3;
             this.groupBox10.TabStop = false;
             this.groupBox10.Text = "人脸识别接口 URL ";
@@ -2436,7 +2469,7 @@
             // button_face_setDefaultValue
             // 
             this.button_face_setDefaultValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_face_setDefaultValue.Location = new System.Drawing.Point(592, 82);
+            this.button_face_setDefaultValue.Location = new System.Drawing.Point(562, 82);
             this.button_face_setDefaultValue.Margin = new System.Windows.Forms.Padding(5);
             this.button_face_setDefaultValue.Name = "button_face_setDefaultValue";
             this.button_face_setDefaultValue.Size = new System.Drawing.Size(193, 40);
@@ -2452,7 +2485,7 @@
             this.textBox_face_readerUrl.Location = new System.Drawing.Point(11, 35);
             this.textBox_face_readerUrl.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_face_readerUrl.Name = "textBox_face_readerUrl";
-            this.textBox_face_readerUrl.Size = new System.Drawing.Size(770, 31);
+            this.textBox_face_readerUrl.Size = new System.Drawing.Size(740, 31);
             this.textBox_face_readerUrl.TabIndex = 0;
             // 
             // groupBox9
@@ -2461,7 +2494,7 @@
             this.groupBox9.Controls.Add(this.textBox_fingerprint_userName);
             this.groupBox9.Controls.Add(this.label21);
             this.groupBox9.Controls.Add(this.label24);
-            this.groupBox9.Location = new System.Drawing.Point(17, 406);
+            this.groupBox9.Location = new System.Drawing.Point(17, 546);
             this.groupBox9.Margin = new System.Windows.Forms.Padding(5);
             this.groupBox9.Name = "groupBox9";
             this.groupBox9.Padding = new System.Windows.Forms.Padding(5);
@@ -2518,7 +2551,7 @@
             this.groupBox7.Margin = new System.Windows.Forms.Padding(5);
             this.groupBox7.Name = "groupBox7";
             this.groupBox7.Padding = new System.Windows.Forms.Padding(5);
-            this.groupBox7.Size = new System.Drawing.Size(795, 147);
+            this.groupBox7.Size = new System.Drawing.Size(765, 147);
             this.groupBox7.TabIndex = 0;
             this.groupBox7.TabStop = false;
             this.groupBox7.Text = " 指纹阅读器接口 URL ";
@@ -2526,7 +2559,7 @@
             // button_fingerprint_setDefaultValue
             // 
             this.button_fingerprint_setDefaultValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_fingerprint_setDefaultValue.Location = new System.Drawing.Point(592, 82);
+            this.button_fingerprint_setDefaultValue.Location = new System.Drawing.Point(562, 82);
             this.button_fingerprint_setDefaultValue.Margin = new System.Windows.Forms.Padding(5);
             this.button_fingerprint_setDefaultValue.Name = "button_fingerprint_setDefaultValue";
             this.button_fingerprint_setDefaultValue.Size = new System.Drawing.Size(193, 40);
@@ -2542,12 +2575,12 @@
             this.textBox_fingerprint_readerUrl.Location = new System.Drawing.Point(11, 35);
             this.textBox_fingerprint_readerUrl.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_fingerprint_readerUrl.Name = "textBox_fingerprint_readerUrl";
-            this.textBox_fingerprint_readerUrl.Size = new System.Drawing.Size(770, 31);
+            this.textBox_fingerprint_readerUrl.Size = new System.Drawing.Size(740, 31);
             this.textBox_fingerprint_readerUrl.TabIndex = 0;
             // 
             // button_fingerprint_clearLocalCacheFiles
             // 
-            this.button_fingerprint_clearLocalCacheFiles.Location = new System.Drawing.Point(17, 357);
+            this.button_fingerprint_clearLocalCacheFiles.Location = new System.Drawing.Point(17, 497);
             this.button_fingerprint_clearLocalCacheFiles.Margin = new System.Windows.Forms.Padding(5);
             this.button_fingerprint_clearLocalCacheFiles.Name = "button_fingerprint_clearLocalCacheFiles";
             this.button_fingerprint_clearLocalCacheFiles.Size = new System.Drawing.Size(340, 40);
@@ -2751,33 +2784,42 @@
             this.button_Cancel.UseVisualStyleBackColor = true;
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
-            // label36
+            // groupBox12
             // 
-            this.label36.AutoSize = true;
-            this.label36.Location = new System.Drawing.Point(20, 180);
-            this.label36.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label36.Name = "label36";
-            this.label36.Size = new System.Drawing.Size(411, 21);
-            this.label36.TabIndex = 4;
-            this.label36.Text = "多行检索时每一个检索词最大命中条数(&M):";
+            this.groupBox12.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox12.Controls.Add(this.button_palmprint_setDefaulValue);
+            this.groupBox12.Controls.Add(this.textBox_palmprint_readerUrl);
+            this.groupBox12.Location = new System.Drawing.Point(5, 184);
+            this.groupBox12.Margin = new System.Windows.Forms.Padding(5);
+            this.groupBox12.Name = "groupBox12";
+            this.groupBox12.Padding = new System.Windows.Forms.Padding(5);
+            this.groupBox12.Size = new System.Drawing.Size(765, 147);
+            this.groupBox12.TabIndex = 4;
+            this.groupBox12.TabStop = false;
+            this.groupBox12.Text = "掌纹阅读器接口 URL ";
             // 
-            // numericUpDown_search_multiline_maxBiblioResultCount
+            // button_palmprint_setDefaulValue
             // 
-            this.numericUpDown_search_multiline_maxBiblioResultCount.Location = new System.Drawing.Point(249, 215);
-            this.numericUpDown_search_multiline_maxBiblioResultCount.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.numericUpDown_search_multiline_maxBiblioResultCount.Maximum = new decimal(new int[] {
-            1000000,
-            0,
-            0,
-            0});
-            this.numericUpDown_search_multiline_maxBiblioResultCount.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            -2147483648});
-            this.numericUpDown_search_multiline_maxBiblioResultCount.Name = "numericUpDown_search_multiline_maxBiblioResultCount";
-            this.numericUpDown_search_multiline_maxBiblioResultCount.Size = new System.Drawing.Size(165, 31);
-            this.numericUpDown_search_multiline_maxBiblioResultCount.TabIndex = 5;
+            this.button_palmprint_setDefaulValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_palmprint_setDefaulValue.Location = new System.Drawing.Point(562, 82);
+            this.button_palmprint_setDefaulValue.Margin = new System.Windows.Forms.Padding(5);
+            this.button_palmprint_setDefaulValue.Name = "button_palmprint_setDefaulValue";
+            this.button_palmprint_setDefaulValue.Size = new System.Drawing.Size(193, 40);
+            this.button_palmprint_setDefaulValue.TabIndex = 1;
+            this.button_palmprint_setDefaulValue.Text = "设为常用值";
+            this.button_palmprint_setDefaulValue.UseVisualStyleBackColor = true;
+            this.button_palmprint_setDefaulValue.Click += new System.EventHandler(this.button_palmprint_setDefaulValue_Click);
+            // 
+            // textBox_palmprint_readerUrl
+            // 
+            this.textBox_palmprint_readerUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_palmprint_readerUrl.Location = new System.Drawing.Point(11, 35);
+            this.textBox_palmprint_readerUrl.Margin = new System.Windows.Forms.Padding(5);
+            this.textBox_palmprint_readerUrl.Name = "textBox_palmprint_readerUrl";
+            this.textBox_palmprint_readerUrl.Size = new System.Drawing.Size(740, 31);
+            this.textBox_palmprint_readerUrl.TabIndex = 0;
             // 
             // CfgDlg
             // 
@@ -2841,6 +2883,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_search_maxReaderResultCount)).EndInit();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_search_multiline_maxBiblioResultCount)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_search_maxBiblioResultCount)).EndInit();
             this.tabPage_print.ResumeLayout(false);
             this.tabPage_print.PerformLayout();
@@ -2873,7 +2916,8 @@
             this.tabPage_message.ResumeLayout(false);
             this.tabPage_message.PerformLayout();
             this.tabPage_z3950.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_search_multiline_maxBiblioResultCount)).EndInit();
+            this.groupBox12.ResumeLayout(false);
+            this.groupBox12.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -3086,5 +3130,8 @@
         private System.Windows.Forms.Button button_server_fillAuthorNumberUrl;
         private System.Windows.Forms.Label label36;
         private System.Windows.Forms.NumericUpDown numericUpDown_search_multiline_maxBiblioResultCount;
+        private System.Windows.Forms.GroupBox groupBox12;
+        private System.Windows.Forms.Button button_palmprint_setDefaulValue;
+        private System.Windows.Forms.TextBox textBox_palmprint_readerUrl;
     }
 }

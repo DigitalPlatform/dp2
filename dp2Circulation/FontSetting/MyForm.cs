@@ -2591,9 +2591,11 @@ out string strError)
             return 0;
         }
 
-        public async Task<NormalResult> FingerprintGetState(string strStyle)
+        public async Task<NormalResult> FingerprintGetState(
+            string url,
+            string strStyle)
         {
-            if (string.IsNullOrEmpty(Program.MainForm.FingerprintReaderUrl) == true)
+            if (string.IsNullOrEmpty(url) == true)
             {
                 return new NormalResult
                 {
@@ -2603,7 +2605,7 @@ out string strError)
             }
 
             var channel = StartFingerprintChannel(
-                Program.MainForm.FingerprintReaderUrl,
+                url,
                 out string strError);
             if (channel == null)
                 return new NormalResult
@@ -2622,7 +2624,7 @@ out string strError)
             }
             catch (Exception ex)
             {
-                strError = "针对 " + Program.MainForm.FingerprintReaderUrl + " 的 GetState() 操作失败: " + ex.Message;
+                strError = $"针对 {url} 的 GetState() 操作失败: " + ex.Message;
                 return new NormalResult
                 {
                     Value = -1,

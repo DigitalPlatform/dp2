@@ -44,7 +44,7 @@ namespace RfidCenter
         public MainForm()
         {
             ClientInfo.ProgramName = "rfidcenter";
-            ClientInfo.MainForm = this;
+            FormClientInfo.MainForm = this;
             Program.Rfid = _rfidDriver;
             Program.Led = _ledDriver;
             Program.Printer = _printerDriver;
@@ -334,7 +334,7 @@ namespace RfidCenter
         {
             this.Invoke((Action)(() =>
             {
-                ClientInfo.ProcessControl(this,
+                FormClientInfo.ProcessControl(this,
     (o) =>
     {
         dynamic d = o;

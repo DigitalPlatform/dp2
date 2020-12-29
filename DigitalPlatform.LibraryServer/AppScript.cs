@@ -3409,6 +3409,7 @@ namespace DigitalPlatform.LibraryServer
                 DomUtil.DeleteElement(record, "borrowHistory");
                 DomUtil.DeleteElement(record, "password");
                 DomUtil.DeleteElement(record, "fingerprint");
+                DomUtil.DeleteElement(record, "palmprint");
                 DomUtil.DeleteElement(record, "face");
                 // TODO: 是否包含 libraryCode 元素?
             }

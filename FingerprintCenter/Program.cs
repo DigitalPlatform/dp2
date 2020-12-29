@@ -48,7 +48,7 @@ namespace FingerprintCenter
             ClientInfo.TypeOfProgram = typeof(Program);
 
             if (StringUtil.IsDevelopMode() == false)
-                ClientInfo.PrepareCatchException();
+                FormClientInfo.PrepareCatchException();
 
             // http://stackoverflow.com/questions/184084/how-to-force-c-sharp-net-app-to-run-only-one-instance-in-windows
 

@@ -41,7 +41,7 @@ namespace dp2ManageCenter
         public MainForm()
         {
             ClientInfo.ProgramName = "dp2managecenter";
-            ClientInfo.MainForm = this;
+            FormClientInfo.MainForm = this;
 
             InitializeComponent();
 

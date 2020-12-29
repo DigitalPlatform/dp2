@@ -15,7 +15,7 @@ namespace dp2ManageCenter
         {
             get
             {
-                return (MainForm)ClientInfo.MainForm;
+                return (MainForm)FormClientInfo.MainForm;
             }
         }
 
@@ -28,7 +28,7 @@ namespace dp2ManageCenter
             ClientInfo.TypeOfProgram = typeof(Program);
 
             if (StringUtil.IsDevelopMode() == false)
-                ClientInfo.PrepareCatchException();
+                FormClientInfo.PrepareCatchException();
 
             ProgramUtil.SetDpiAwareness();
 

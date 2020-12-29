@@ -565,6 +565,15 @@ false);
             "fingerPrintReaderUrl",
             "");    // 常用值 "ipc://FingerprintChannel/FingerprintServer"
 
+            // *** 掌纹
+
+            // 掌纹阅读器接口URL
+            this.textBox_palmprint_readerUrl.Text =
+            ap.GetString("palmprint",
+            "palmPrintReaderUrl",
+            "");    // 常用值 "ipc://PalmChannel/PalmServer"
+
+
             // 人脸识别接口URL
             this.textBox_face_readerUrl.Text =
                 ap.GetString("face",
@@ -1207,6 +1216,12 @@ false);
                     "fingerPrintReaderUrl",
                     this.textBox_fingerprint_readerUrl.Text);
 
+                // ** 掌纹
+                // 掌纹阅读器URL
+                ap.SetString("palmprint",
+                    "palmPrintReaderUrl",
+                    this.textBox_palmprint_readerUrl.Text);
+
                 // 人脸识别接口URL
                 ap.SetString("face",
                 "faceReaderUrl",
@@ -1821,6 +1836,22 @@ MessageBoxDefaultButton.Button2);
         private void button_server_fillPinyinUrl_Click(object sender, EventArgs e)
         {
             this.textBox_server_pinyin_gcatUrl.Text = "rest.http://dp2003.com/dp2library/rest";
+        }
+
+        private void button_palmprint_setDefaulValue_Click(object sender, EventArgs e)
+        {
+            string strDefaultValue = "ipc://palmChannel/palmServer";
+
+            DialogResult result = MessageBox.Show(this,
+    "确实要将 掌纹阅读器接口URL 的值设置为常用值\r\n \"" + strDefaultValue + "\" ? ",
+    "CfgDlg",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button2);
+            if (result != DialogResult.Yes)
+                return;
+
+            this.textBox_palmprint_readerUrl.Text = strDefaultValue;
         }
     }
 

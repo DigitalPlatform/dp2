@@ -14,28 +14,31 @@ namespace DigitalPlatform.IO
 {
     // 查看 USB 设备，感知 USB 插拔变化的实用类
     // https://stackoverflow.com/questions/3331043/get-list-of-connected-usb-devices
-    public class UsbInfo
+    public static class UsbInfo
     {
         public delegate void delegate_changed(int add_count, int remove_count);
+
+        static ManagementObjectSearcher _searcherUsb = null;
 
         // 启动观察线程
         public static void StartWatch(delegate_changed callback,
             CancellationToken token)
         {
-            List<USBDeviceInfo> Infos = new List<USBDeviceInfo>();
-
-            Infos = GetUSBDevices();
 #if SERIAL
             Infos.AddRange(GetSerialDevices());
 #endif
-
-            Task.Run(() =>
+            _ = Task.Factory.StartNew(async () =>
             {
                 try
                 {
+                    _searcherUsb = new ManagementObjectSearcher(@"Select * From Win32_USBHub");
+
+                    List<USBDeviceInfo> Infos = new List<USBDeviceInfo>();
+                    Infos = GetUSBDevices();
+
                     while (token.IsCancellationRequested == false)
                     {
-                        Task.Delay(TimeSpan.FromSeconds(2)).Wait(token);
+                        await Task.Delay(TimeSpan.FromSeconds(2), token);
                         if (token.IsCancellationRequested)
                             break;
                         var result = GetUSBDevices();
@@ -59,7 +62,15 @@ namespace DigitalPlatform.IO
                 {
 
                 }
-            });
+                finally
+                {
+                    _searcherUsb?.Dispose();
+                }
+
+            },
+token,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
         }
 
         // 比较两个集合的变化
@@ -121,23 +132,32 @@ rfidcenter 版本: RfidCenter, Version=1.2.7110.20005, Culture=neutral, PublicKe
             // return devices; // testing
             try
             {
+                /*
                 using (var searcher = new ManagementObjectSearcher(@"Select * From Win32_USBHub"))
                 {
-                    using (ManagementObjectCollection collection = searcher.Get())
+                */
+                var searcher = _searcherUsb;
+
+                using (ManagementObjectCollection collection = searcher.Get())
+                {
+                    if (collection == null)
+                        return devices;
+
+                    foreach (var device in collection)
                     {
-                        foreach (var device in collection)
-                        {
-                            devices.Add(new USBDeviceInfo(
-                            (string)device.GetPropertyValue("DeviceID"),
-                            (string)device.GetPropertyValue("PNPDeviceID"),
-                            (string)device.GetPropertyValue("Description")
-                            ));
-                        }
+                        devices.Add(new USBDeviceInfo(
+                        (string)device.GetPropertyValue("DeviceID"),
+                        (string)device.GetPropertyValue("PNPDeviceID"),
+                        (string)device.GetPropertyValue("Description")
+                        ));
                     }
                 }
+                /*
+            }
+                */
                 return devices;
             }
-            catch(Exception)
+            catch (Exception)
             {
                 // TODO: 可考虑写入错误日志
                 return devices;
@@ -209,9 +229,9 @@ rfidcenter 版本: RfidCenter, Version=1.2.7110.20005, Culture=neutral, PublicKe
         {
             StringBuilder text = new StringBuilder();
             int i = 0;
-            foreach(var info in infos)
+            foreach (var info in infos)
             {
-                text.Append($"{i+1}) {info.ToString()}\r\n");
+                text.Append($"{i + 1}) {info.ToString()}\r\n");
                 i++;
             }
             return text.ToString();

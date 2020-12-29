@@ -5358,6 +5358,171 @@ MessageBoxDefaultButton.Button2);
 
         #endregion
 
+        #region 掌纹登记功能
+
+        // 局部更新掌纹信息高速缓存
+        // return:
+        //      -2  remoting服务器连接失败。驱动程序尚未启动
+        //      -1  出错
+        //      0   成功
+        int UpdatePalmprintCache(
+            string strBarcode,
+            string strFingerprint,
+            out string strError)
+        {
+            strError = "";
+
+            if (string.IsNullOrEmpty(Program.MainForm.PalmprintReaderUrl) == true)
+            {
+                strError = "尚未配置 掌纹阅读器URL 系统参数，无法更新掌纹高速缓存";
+                return -1;
+            }
+
+            FingerprintChannel channel = StartFingerprintChannel(
+                Program.MainForm.PalmprintReaderUrl,
+                out strError);
+            if (channel == null)
+                return -1;
+            _inFingerprintCall++;
+            try
+            {
+                List<FingerprintItem> items = new List<FingerprintItem>();
+
+                FingerprintItem item = new FingerprintItem();
+                item.ReaderBarcode = strBarcode;
+                item.FingerprintString = strFingerprint;
+                items.Add(item);
+
+                // return:
+                //      -2  remoting服务器连接失败。驱动程序尚未启动
+                //      -1  出错
+                //      0   成功
+                int nRet = AddItems(
+                    channel,
+                    items,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+                if (nRet == -2)
+                    return -2;
+            }
+            finally
+            {
+                _inFingerprintCall--;
+                EndFingerprintChannel(channel);
+            }
+
+            return 0;
+        }
+
+        async Task<GetFingerprintStringResult> CancelReadPalmprintString()
+        {
+            string strError = "";
+            GetFingerprintStringResult result = new GetFingerprintStringResult();
+
+            if (string.IsNullOrEmpty(Program.MainForm.PalmprintReaderUrl) == true)
+            {
+                strError = "尚未配置 掌纹阅读器URL 系统参数，无法读取掌纹信息";
+                goto ERROR1;
+            }
+
+            FingerprintChannel channel = StartFingerprintChannel(
+                Program.MainForm.PalmprintReaderUrl,
+                out strError);
+            if (channel == null)
+                goto ERROR1;
+
+            _inFingerprintCall++;
+            try
+            {
+                try
+                {
+                    return await Task.Factory.StartNew<GetFingerprintStringResult>(
+                        () =>
+                        {
+                            GetFingerprintStringResult temp_result = new GetFingerprintStringResult();
+                            try
+                            {
+                                temp_result.Value = channel.Object.CancelGetFingerprintString();
+                                if (temp_result.Value == -1)
+                                    temp_result.ErrorInfo = "API cancel return error";
+                                return temp_result;
+                            }
+                            catch (RemotingException ex)
+                            {
+                                temp_result.ErrorInfo = ex.Message;
+                                temp_result.Value = 0;  // 让调主认为没有出错
+                                return temp_result;
+                            }
+                            catch (Exception ex)
+                            {
+                                temp_result.ErrorInfo = ex.Message;
+                                temp_result.Value = -1;
+                                return temp_result;
+                            }
+                        });
+                }
+                catch (Exception ex)
+                {
+                    strError = "针对 " + Program.MainForm.PalmprintReaderUrl + " 的 GetFingerprintString() 操作失败: " + ex.Message;
+                    goto ERROR1;
+                }
+            }
+            finally
+            {
+                _inFingerprintCall--;
+                EndFingerprintChannel(channel);
+            }
+        ERROR1:
+            result.ErrorInfo = strError;
+            result.Value = -1;
+            return result;
+        }
+
+        // return:
+        //      -1  error
+        //      0   放弃输入
+        //      1   成功输入
+        async Task<GetFingerprintStringResult> ReadPalmprintString(string strExcludeBarcodes)
+        {
+            string strError = "";
+            GetFingerprintStringResult result = new GetFingerprintStringResult();
+
+            if (string.IsNullOrEmpty(Program.MainForm.PalmprintReaderUrl) == true)
+            {
+                strError = "尚未配置 掌纹阅读器URL 系统参数，无法读取掌纹信息";
+                goto ERROR1;
+            }
+
+            FingerprintChannel channel = StartFingerprintChannel(
+                Program.MainForm.PalmprintReaderUrl,
+                out strError);
+            if (channel == null)
+                goto ERROR1;
+
+            _inFingerprintCall++;
+            try
+            {
+                return await GetFingerprintString(channel, strExcludeBarcodes);
+            }
+            catch (Exception ex)
+            {
+                strError = "针对 " + Program.MainForm.PalmprintReaderUrl + " 的 GetFingerprintString() 操作失败: " + ex.Message;
+                goto ERROR1;
+            }
+            finally
+            {
+                _inFingerprintCall--;
+                EndFingerprintChannel(channel);
+            }
+        ERROR1:
+            result.ErrorInfo = strError;
+            result.Value = -1;
+            return result;
+        }
+
+        #endregion
+
         private async void toolStripButton_registerFingerprint_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -5369,14 +5534,14 @@ MessageBoxDefaultButton.Button2);
             // Program.MainForm.StatusBarMessage = "等待扫描指纹...";
             try
             {
-                NormalResult getstate_result = await FingerprintGetState("");
+                NormalResult getstate_result = await FingerprintGetState(Program.MainForm.FingerprintReaderUrl, "");
                 if (getstate_result.Value == -1)
                 {
                     strError = $"指纹中心当前状态不正确：{getstate_result.ErrorInfo}";
                     goto ERROR1;
                 }
 
-                getstate_result = await FingerprintGetState("getLibraryServerUID");
+                getstate_result = await FingerprintGetState(Program.MainForm.FingerprintReaderUrl, "getLibraryServerUID");
                 if (getstate_result.Value == -1)
                 {
                     strError = getstate_result.ErrorInfo;
@@ -6678,14 +6843,14 @@ MessageBoxDefaultButton.Button1);
             // Program.MainForm.StatusBarMessage = "等待扫描指纹...";
             try
             {
-                NormalResult getstate_result = await FingerprintGetState("");
+                NormalResult getstate_result = await FingerprintGetState(Program.MainForm.FingerprintReaderUrl, "");
                 if (getstate_result.Value == -1)
                 {
                     strError = $"指纹中心当前状态不正确：{getstate_result.ErrorInfo}";
                     goto ERROR1;
                 }
 
-                getstate_result = await FingerprintGetState("getLibraryServerUID");
+                getstate_result = await FingerprintGetState(Program.MainForm.FingerprintReaderUrl, "getLibraryServerUID");
                 if (getstate_result.Value == -1)
                 {
                     strError = getstate_result.ErrorInfo;
@@ -6758,5 +6923,96 @@ MessageBoxDefaultButton.Button1);
             this.commander.AddMessage(WM_SAVE_RECORD_STATE);  // 只修改读者记录状态
 
         }
+
+        // 2020/12/29
+        // 登记掌纹
+        private async void toolStripSplitButton_registerPalmprint_ButtonClick(object sender, EventArgs e)
+        {
+            await registerPalmprint(false);
+        }
+
+        async Task registerPalmprint(bool bPractice)
+        {
+            string strError = "";
+
+            this.ShowMessage("等待扫描掌纹 ...");
+            this.EnableControls(false);
+            try
+            {
+                NormalResult getstate_result = await FingerprintGetState(Program.MainForm.PalmprintReaderUrl, "");
+                if (getstate_result.Value == -1)
+                {
+                    strError = $"掌纹中心当前状态不正确：{getstate_result.ErrorInfo}";
+                    goto ERROR1;
+                }
+
+                getstate_result = await FingerprintGetState(Program.MainForm.PalmprintReaderUrl, "getLibraryServerUID");
+                if (getstate_result.Value == -1)
+                {
+                    strError = getstate_result.ErrorInfo;
+                    goto ERROR1;
+                }
+                else if (getstate_result.ErrorCode != null &&
+                    getstate_result.ErrorCode != Program.MainForm.ServerUID)
+                {
+                    strError = $"掌纹中心所连接的 dp2library 服务器 UID {getstate_result.ErrorCode} 和内务当前所连接的 UID {Program.MainForm.ServerUID} 不同。无法进行掌纹登记";
+                    goto ERROR1;
+                }
+
+            // TODO: 练习模式需要判断版本 2.2 以上
+
+            REDO:
+                GetFingerprintStringResult result = await ReadPalmprintString(
+                    bPractice == true ? "!practice" : this.readerEditControl1.Barcode);
+                if (result.Value == -1)
+                {
+                    DialogResult temp_result = MessageBox.Show(this,
+result.ErrorInfo + "\r\n\r\n是否重试?",
+"ReaderInfoForm",
+MessageBoxButtons.RetryCancel,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button1);
+                    if (temp_result == DialogResult.Retry)
+                        goto REDO;
+                }
+
+                if (result.Value == -1 || result.Value == 0)
+                {
+                    strError = result.ErrorInfo;
+                    goto ERROR1;
+                }
+
+#if NO
+                strFingerprint = "12345";   // test
+                strVersion = "test-version";
+#endif
+
+                if (bPractice == false)
+                {
+                    this.readerEditControl1.PalmprintFeature = result.Fingerprint;   // strFingerprint;
+                    this.readerEditControl1.PalmprintFeatureVersion = result.Version;    // strVersion;
+                    this.readerEditControl1.Changed = true;
+                }
+            }
+            finally
+            {
+                this.EnableControls(true);
+                this.ClearMessage();
+            }
+
+            Program.MainForm.StatusBarMessage = "掌纹信息获取成功";
+            return;
+        ERROR1:
+            Program.MainForm.StatusBarMessage = strError;
+            this.ShowMessage(strError, "red", true);
+        }
+
+        private void toolStripMenuItem_clearPalmprint_Click(object sender, EventArgs e)
+        {
+            this.readerEditControl1.PalmprintFeatureVersion = "";
+            this.readerEditControl1.PalmprintFeature = "";
+            this.readerEditControl1.Changed = true;
+        }
+
     }
 }
