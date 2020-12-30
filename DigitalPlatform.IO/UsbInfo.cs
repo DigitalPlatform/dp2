@@ -21,12 +21,64 @@ namespace DigitalPlatform.IO
         static ManagementObjectSearcher _searcherUsb = null;
 
         // 启动观察线程
-        public static void StartWatch(delegate_changed callback,
-            CancellationToken token)
+        public static void StartWatch(delegate_changed callback_param,
+            CancellationToken token_param)
         {
+            // TODO: 用独立 Thread 实现。把 Thread 的 Stack Size 变大
 #if SERIAL
             Infos.AddRange(GetSerialDevices());
 #endif
+
+#if NO
+            int stackSize = 1024 * 1024 * 64;
+            Thread th = new Thread(() =>
+            {
+                try
+                {
+                    _searcherUsb = new ManagementObjectSearcher(@"Select * From Win32_USBHub");
+
+                    List<USBDeviceInfo> Infos = new List<USBDeviceInfo>();
+                    Infos = GetUSBDevices();
+
+                    while (token.IsCancellationRequested == false)
+                    {
+                        Task.Delay(TimeSpan.FromSeconds(2), token).Wait(token);
+                        if (token.IsCancellationRequested)
+                            break;
+                        var result = GetUSBDevices();
+                        if (token.IsCancellationRequested)
+                            break;
+
+#if SERIAL
+                        result.AddRange(GetSerialDevices());
+#endif
+                        // 和 Infos 比较
+                        Compare(Infos,
+        result,
+        out int add_count,
+        out int remove_count);
+                        Infos = result;
+                        if (add_count != 0 || remove_count != 0)
+                            callback?.Invoke(add_count, remove_count);
+                    }
+                }
+                catch
+                {
+
+                }
+                finally
+                {
+                    _searcherUsb?.Dispose();
+                }
+            },
+                stackSize);
+
+            th.Start();
+            th.Join();
+#endif
+
+            delegate_changed callback = callback_param;
+            CancellationToken token = token_param;
             _ = Task.Factory.StartNew(async () =>
             {
                 try
