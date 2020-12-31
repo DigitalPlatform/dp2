@@ -641,7 +641,7 @@ namespace DigitalPlatform.RFID
                 if (on)
                     results.Add((byte)GetOID(i));
             }
-            
+
             // 高 byte
             for (int i = 0; i < 8; i++)
             {
@@ -1016,7 +1016,7 @@ namespace DigitalPlatform.RFID
             // 其他。暂时用 hex string 来表示
             return Element.GetHexString(data);
 
-            string DecodeLibraryCode(byte [] bytes)
+            string DecodeLibraryCode(byte[] bytes)
             {
                 if (bytes.Length != 2)
                     throw new Exception($"DecodeLibraryCode()，data 应为 2 字节(但现在为 {bytes.Length} 字节)");
@@ -1030,7 +1030,7 @@ namespace DigitalPlatform.RFID
             }
         }
 
-#endregion
+        #endregion
 
         // 根据 LogicChip 对象构造标签内容
         // parameters:
@@ -1180,8 +1180,12 @@ namespace DigitalPlatform.RFID
         // 根据 EPC 和 USR 两个 bank 的信息来进行解析
         public static ParseGaoxiaoResult ParseTag(
             byte[] epc_bank,
-            byte[] user_bank)
+            byte[] user_bank,
+            string style = "")
         {
+            bool dontCheckUMI = StringUtil.IsInList("dontCheckUMI", style);
+            List<string> warnings = new List<string>();
+
             ProtocolControlWord pc = null;
             try
             {
@@ -1207,7 +1211,7 @@ namespace DigitalPlatform.RFID
                 GaoxiaoEpcInfo epc_info = null;
                 if (bytes.Count > 0)
                 {
-                    epc_info = DecodeGaoxiaoEpcPayload(bytes.ToArray(), 
+                    epc_info = DecodeGaoxiaoEpcPayload(bytes.ToArray(),
                         Math.Min(pc.LengthIndicator * 2, bytes.Count));
                     if (pc.UMI == false
                         && epc_info.ContentParameters.Length != 0)
@@ -1229,15 +1233,19 @@ namespace DigitalPlatform.RFID
                                 PC = pc,
                             };
                         }
-                        return new ParseGaoxiaoResult
-                        {
-                            Value = -1,
-                            ErrorInfo = "标签内容无法解析。ECP UMI 位和(高校联盟) ContentParameters 不符",
-                            ErrorCode = "parseEpcError",
-                            EpcInfo = epc_info,
-                            UserElements = new List<GaoxiaoUserElement>(),
-                            PC = pc,
-                        };
+
+                        if (dontCheckUMI == false)
+                            return new ParseGaoxiaoResult
+                            {
+                                Value = -1,
+                                ErrorInfo = "标签内容无法解析。ECP UMI 位和(高校联盟) ContentParameters 不符",
+                                ErrorCode = "parseEpcError",
+                                EpcInfo = epc_info,
+                                UserElements = new List<GaoxiaoUserElement>(),
+                                PC = pc,
+                            };
+                        else
+                            warnings.Add("UMI 值 false 和 ContentParameter 有值矛盾了");
                     }
                 }
 
@@ -1264,13 +1272,19 @@ namespace DigitalPlatform.RFID
                     }
                 }
 
-                return new ParseGaoxiaoResult
+                var result = new ParseGaoxiaoResult
                 {
                     LogicChip = chip,   // 如果 chip 为 null，表示没有 User Bank
                     EpcInfo = epc_info,
                     UserElements = elements, // 如果 elements 为 null，是因为没有 User Bank
                     PC = pc,
                 };
+                if (warnings.Count > 0)
+                {
+                    result.ErrorInfo = StringUtil.MakePathList(warnings, "; ");
+                    result.ErrorCode = "warning";
+                }
+                return result;
             }
             catch (Exception ex)
             {

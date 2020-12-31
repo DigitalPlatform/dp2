@@ -398,6 +398,7 @@ EB00"
 
         // 
         // 不明格式尝试
+        // 厂家 02
         [TestMethod]
         public void display_epc_2()
         {
@@ -405,6 +406,27 @@ EB00"
             var result = UhfUtility.ParseTag(epc_bank,
                 null,
                 4);
+
+            Debug.WriteLine(result.ToString());
+        }
+
+        // 
+        // 不明格式尝试
+        // 厂家 03
+        /*
+RFU 0000000000000000
+EPC DAD53000170328087903000084560000
+TID E2003412013D03000BB5808103160108700D5FFBFFFFDC50
+USR 000879030000845600000C0228081004000100010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+         * */
+        [TestMethod]
+        public void display_epc_3()
+        {
+            var epc_bank = Element.FromHexString("DAD53000170328087903000084560000");
+            var user_bank = Element.FromHexString("000879030000845600000C0228081004000100010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+            var result = GaoxiaoUtility.ParseTag(epc_bank,
+                user_bank,
+                "dontCheckUMI");
 
             Debug.WriteLine(result.ToString());
         }
