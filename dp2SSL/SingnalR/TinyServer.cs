@@ -1061,6 +1061,7 @@ list history
 change history
 check book
 check patron
+check tag
 set lamp time
 sterilamp
 exit
@@ -1190,6 +1191,13 @@ update
             if (command.StartsWith("change history"))
             {
                 await ChangeHistoryAsync(command, groupName);
+                return;
+            }
+
+            // 检测 RFID 标签
+            if (command.StartsWith("check tag"))
+            {
+                await CheckTagAsync(command, groupName);
                 return;
             }
 
@@ -1626,6 +1634,70 @@ update
             if (template == null)
                 return "";
             return template.Title;
+        }
+
+        // 检测标签状态
+        static async Task CheckTagAsync(string command, string groupName)
+        {
+            // 子参数
+            string param = command.Substring("check tag".Length).Trim();
+
+            // 子参数为门名字列表，或者空。空表示所有的门
+            var doors = DoorItem.FindDoors(ShelfData.Doors, param);
+            if (doors.Count == 0)
+            {
+                await SendMessageAsync(new string[] { groupName }, "没有找到符合条件的柜门，无法进行检查");
+                return;
+            }
+
+            StringBuilder text = new StringBuilder();
+            foreach (var door in doors)
+            {
+                var test_result = await ShelfData.TestInventoryAsync(
+    door,
+    "getTagInfo");
+                text.AppendLine($"=== {door.Name} ({door.ReaderName}:{door.Antenna})===");
+                if (test_result.Value == -1)
+                    text.AppendLine($"　检测时出错: {test_result.ErrorInfo}");
+                else if (test_result.Datas == null
+                    || test_result.Datas.Count == 0)
+                {
+                    text.AppendLine($"　(没有探测到任何标签)");
+                }
+                else if (test_result.Datas != null)
+                {
+                    text.AppendLine($"　共探测到 {test_result.Datas.Count} 个标签:");
+                    int index = 0;
+                    foreach (var data in test_result.Datas)
+                    {
+                        text.AppendLine($"　{index + 1}) {data.OneTag?.UID}");
+                        if (string.IsNullOrEmpty(data.Error) == false)
+                            text.AppendLine($"　　错误信息: {data.Error}");
+                        var taginfo = data.OneTag?.TagInfo;
+                        if (taginfo != null)
+                        {
+                            try
+                            {
+                                var chip = LogicChip.From(taginfo.Bytes,
+                                    (int)taginfo.BlockSize);
+                                var pii = chip.FindElement(ElementOID.PII)?.Text;
+                                var oi = chip.FindElement(ElementOID.OI)?.Text;
+                                var tu = chip.FindElement(ElementOID.TU)?.Text;
+                                text.AppendLine($"　　PII='{pii}' TU='{tu}' OI='{oi}'");
+                            }
+                            catch(Exception ex)
+                            {
+                                text.AppendLine($"　　解析 TagInfo 时出错: {ex.Message}");
+                            }
+                        }
+
+                        index++;
+                    }
+                }
+            }
+
+            text.AppendLine("(结束)");
+            await SendMessageAsync(new string[] { groupName }, text.ToString());
         }
 
         // 检查册状态

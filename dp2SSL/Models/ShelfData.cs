@@ -1141,6 +1141,92 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             }
         }
 
+        public class TestInventoryResult : NormalResult
+        {
+            public DoorItem Door { get; set; }
+            public List<TagAndData> Datas { get; set; }
+        }
+
+        // 2020/12/31
+        // 单独对一个门关联的 RFID 标签进行一次验证性 inventory
+        public static async Task<TestInventoryResult> TestInventoryAsync(
+            DoorItem door,
+            string style)
+        {
+            // 获得和一个门相关的 readernamelist
+            var readername_list = GetReaderNameList(new List<DoorItem> { door }, null);
+            string list_style = $"dont_delay";   // 确保 inventory 并立即返回
+
+            bool getTagInfo = StringUtil.IsInList("getTagInfo", style);
+            using (var releaser = await _inventoryLimit.EnterAsync().ConfigureAwait(false))
+            {
+                // StringBuilder debugInfo = new StringBuilder();
+                var result = RfidManager.CallListTags(readername_list, list_style);
+                // WpfClientInfo.WriteErrorLog($"RefreshInventory() list={list}, style={style}, result={result.ToString()}");
+
+                try
+                {
+                    /*
+                    await RfidManager.TriggerListTagsEvent(list,
+                        result,
+                        "refresh",
+                        true);
+                    */
+                    // 对每个标签 GetTagInfo()
+                    var datas = new List<TagAndData>();
+                    if (result.Results != null)
+                    {
+                        foreach (var tag in result.Results)
+                        {
+                            var data = new TagAndData
+                            {
+                                OneTag = tag
+                            };
+                            datas.Add(data);
+
+                            if (getTagInfo)
+                            {
+                                var get_result = RfidManager.GetTagInfo(tag.ReaderName,
+                                    tag.UID,
+                                    tag.AntennaID);
+                                if (get_result.Value == -1)
+                                    data.Error = get_result.ErrorInfo;
+                                else
+                                    data.OneTag.TagInfo = get_result.TagInfo;
+                            }
+                        }
+                    }
+
+                    return new TestInventoryResult
+                    {
+                        Door = door,
+                        Datas = datas
+                    };
+                }
+                catch (TagInfoException ex)
+                {
+                    return new TestInventoryResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"对门 {door.Name} 内的全部标签进行盘点时，发现无法解析的标签(UID:{ex.TagInfo.UID})",
+                        ErrorCode = "tagParseError"
+                    };
+                }
+                catch (Exception ex)
+                {
+                    // WpfClientInfo.WriteErrorLog($"TestInventoryAsync() TriggerListTagsEvent() 异常:{ExceptionUtil.GetDebugText(ex)}\r\ndebugInfo={debugInfo.ToString()}");
+                    WpfClientInfo.WriteErrorLog($"TestInventoryAsync() TriggerListTagsEvent() list='{readername_list}' 异常:{ExceptionUtil.GetDebugText(ex)}");
+                    return new TestInventoryResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"TestInventoryAsync() 出现异常(门:{door.Name}): {ex.Message}",
+                        ErrorCode = ex.GetType().ToString()
+                    };
+                }
+            }
+        }
+
+
         static XmlDocument _shelfCfgDom = null;
 
         public static XmlDocument ShelfCfgDom

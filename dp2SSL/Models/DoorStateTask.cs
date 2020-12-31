@@ -105,7 +105,9 @@ TaskScheduler.Default);
                         DateTime start = DateTime.Now;
 
                         var result = await ShelfData.RefreshInventoryAsync(state.Door);
-
+                        if (result.Value == -1)
+                            WpfClientInfo.WriteErrorLog($"*** 针对门 {state.Door.Name} 执行 RefreshInventoryAsync() 时出错: {result.ErrorInfo}");
+                        
                         WpfClientInfo.WriteInfoLog($"针对门 {state.Door.Name} 执行 RefreshInventoryAsync() 耗时 {(DateTime.Now - start).TotalSeconds.ToString()}");
 
                         start = DateTime.Now;

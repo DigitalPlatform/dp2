@@ -671,6 +671,27 @@ namespace dp2SSL
                 index = 0;
         }
 
+        // 2020/12/31
+        // 用门名字列表获得 DoorItem 集合
+        public static List<DoorItem> FindDoors(
+            List<DoorItem> _doors,
+            string doorNameList)
+        {
+            if (string.IsNullOrEmpty(doorNameList))
+                return new List<DoorItem>(_doors);
+
+            var results = new List<DoorItem>();
+            List<string> names = StringUtil.SplitList(doorNameList);
+            foreach(string name in names)
+            {
+                var door = _doors.Find((o) => o.Name == name);
+                if (door != null)
+                    results.Add(door);
+            }
+
+            return results;
+        }
+
         public static List<DoorItem> FindDoors(
             List<DoorItem> _doors,
             string readerName,
