@@ -189,6 +189,7 @@ namespace dp2Circulation
                 }));
             });
 
+            FingerprintManager.SetError += PalmprintManager_SetError;
             RfidManager.SetError += RfidManager_SetError;
             Program.MainForm.TagChanged += MainForm_TagChanged;
             InitialSendKey();
@@ -223,6 +224,8 @@ namespace dp2Circulation
                 }));
             });
         }
+
+
 
         // 新 Tag 到来
         private void MainForm_TagChanged(object sender, TagChangedEventArgs e)
@@ -578,6 +581,11 @@ namespace dp2Circulation
             });
         }
 
+        private void PalmprintManager_SetError(object sender, SetErrorEventArgs e)
+        {
+            SetError("palm", e.Error);
+        }
+
         private void RfidManager_SetError(object sender, SetErrorEventArgs e)
         {
             SetError("rfid", e.Error);
@@ -762,6 +770,7 @@ namespace dp2Circulation
         {
             Program.MainForm.TagChanged -= MainForm_TagChanged;
             RfidManager.SetError -= RfidManager_SetError;
+            FingerprintManager.SetError -= PalmprintManager_SetError;
 
             //OpenRfidCapture(false);
             //ReleaseRfidChannel();
