@@ -1,21 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Remoting;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-using DigitalPlatform;
-using DigitalPlatform.Core;
 using DigitalPlatform.Interfaces;
-using DigitalPlatform.IO;
-using DigitalPlatform.LibraryClient;
-using DigitalPlatform.RFID;
 
-namespace dp2SSL
+namespace DigitalPlatform.IO
 {
-#if REMOVED
     /// <summary>
     /// 指纹通道集中管理
     /// </summary>
@@ -275,6 +268,4 @@ TouchedEventArgs e);
 
         public GetMessageResult Result { get; set; }
     }
-
-#endif
 }
