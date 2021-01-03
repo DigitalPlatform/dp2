@@ -1625,6 +1625,16 @@ Stack:
                     StartOrStopRfidManager();
                 });
             }
+
+            // 2020/1/3
+            if (e.Section == "palmprint"
+    && e.Entry == "palmPrintReaderUrl")
+            {
+                _ = Task.Run(() =>
+                {
+                    StartOrStopPalmManager();
+                });
+            }
         }
 
         public bool PrintLabelMode

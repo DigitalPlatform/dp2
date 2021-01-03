@@ -1654,6 +1654,9 @@ MessageBoxDefaultButton.Button1);
 
             StartOrStopRfidManager();
 
+            // 2020/1/3
+            StartOrStopPalmManager();
+
             // 2019/9/13
             StartProcessManager();
         }
@@ -1739,6 +1742,51 @@ MessageBoxDefaultButton.Button1);
 
         #endregion
 
+
+        #region 掌纹 FingerprintManager
+
+        CancellationTokenSource _cancelPalmManager = new CancellationTokenSource();
+
+        public void StartOrStopPalmManager()
+        {
+            if (string.IsNullOrEmpty(this.PalmprintReaderUrl) == false)
+            {
+                _cancelPalmManager?.Cancel();
+
+                _cancelPalmManager = new CancellationTokenSource();
+                FingerprintManager.Base.Name = "掌纹中心";
+                FingerprintManager.Url = this.PalmprintReaderUrl;
+                FingerprintManager.SetError += FingerprintManager_SetError;
+                FingerprintManager.Touched += PalmprintManager_Touched; ;
+                FingerprintManager.Start(_cancelPalmManager.Token);
+            }
+            else
+            {
+                _cancelPalmManager?.Cancel();
+                FingerprintManager.Url = "";
+                FingerprintManager.Touched -= PalmprintManager_Touched; ;
+                FingerprintManager.SetError -= FingerprintManager_SetError;
+            }
+        }
+
+        private void FingerprintManager_SetError(object sender, SetErrorEventArgs e)
+        {
+            // TODO: 如何显示报错信息？
+            this.Invoke((Action)(() =>
+            {
+                this.StatusBarMessage = e.Error;
+            }));
+        }
+
+        private void PalmprintManager_Touched(object sender, TouchedEventArgs e)
+        {
+            this.Invoke((Action)(() =>
+            {
+                SendKeys.Send(e.Message + "\r");
+            }));
+        }
+
+        #endregion
 
         #region ProcessManager
 
