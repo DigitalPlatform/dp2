@@ -59,7 +59,7 @@ namespace DigitalPlatform.IO
             {
                 var result = channel.Object.GetState("");
                 if (result.Value == -1)
-                    throw new Exception($"指纹中心当前处于 {result.ErrorCode} 状态({result.ErrorInfo})");
+                    throw new Exception($"{Name}当前处于 {result.ErrorCode} 状态({result.ErrorInfo})");
                 channel.Started = true;
 
                 channel.Object.EnableSendKey(false);
@@ -148,10 +148,21 @@ token);
                     new SetErrorEventArgs
                     {
                         Error = NotResponseException.IsNotResponse(ex)
-                        ? $"指纹中心({Base.Url})没有响应"
-                        : $"指纹中心出现异常: {ExceptionUtil.GetAutoText(ex)}"
+                        ? $"{Name}({Base.Url})没有响应"
+                        : $"{Name}出现异常: {ExceptionUtil.GetAutoText(ex)}"
                     });
                 return new NormalResult { Value = -1, ErrorInfo = ex.Message };
+            }
+        }
+
+        static string Name
+        {
+            get
+            {
+                string result = Base.Name;
+                if (string.IsNullOrEmpty(result))
+                    return "指纹中心";
+                return result;
             }
         }
 
@@ -186,7 +197,7 @@ token);
                 Base.TriggerSetError(ex,
                     new SetErrorEventArgs
                     {
-                        Error = $"指纹中心出现异常: {ExceptionUtil.GetAutoText(ex)}"
+                        Error = $"{Name}出现异常: {ExceptionUtil.GetAutoText(ex)}"
                     });
                 return new NormalResult
                 {
@@ -241,9 +252,57 @@ token);
                 Base.TriggerSetError(ex,
                     new SetErrorEventArgs
                     {
-                        Error = $"指纹中心出现异常: {ExceptionUtil.GetAutoText(ex)}"
+                        Error = $"{Name}出现异常: {ExceptionUtil.GetAutoText(ex)}"
                     });
                 return new GetVersionResult
+                {
+                    Value = -1,
+                    ErrorInfo = ex.Message,
+                    ErrorCode = NotResponseException.GetErrorCode(ex)
+                };
+            }
+        }
+
+        // 清除以前积累未读的全部消息
+        public static GetMessageResult ClearMessage()
+        {
+            return GetMessage("clear");
+        }
+
+        public static GetMessageResult GetMessage(string style)
+        {
+            try
+            {
+                // 因为 GetMessage 是可有可无的请求，如果 Url 为空就算了
+                if (string.IsNullOrEmpty(Base.Url))
+                    return new GetMessageResult();
+
+                BaseChannel<IFingerprint> channel = Base.GetChannel();
+                try
+                {
+                    var result = channel.Object.GetMessage(style);
+                    if (result.Value == -1)
+                        Base.TriggerSetError(result,
+                            new SetErrorEventArgs { Error = result.ErrorInfo });
+                    else
+                        Base.TriggerSetError(result,
+                            new SetErrorEventArgs { Error = null }); // 清除以前的报错
+
+                    return result;
+                }
+                finally
+                {
+                    Base.ReturnChannel(channel);
+                }
+            }
+            catch (Exception ex)
+            {
+                Base.TriggerSetError(ex,
+                    new SetErrorEventArgs
+                    {
+                        Error = $"{Name}出现异常: {ExceptionUtil.GetAutoText(ex)}"
+                    });
+                return new GetMessageResult
                 {
                     Value = -1,
                     ErrorInfo = ex.Message,
