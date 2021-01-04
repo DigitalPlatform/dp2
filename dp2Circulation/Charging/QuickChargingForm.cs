@@ -189,7 +189,13 @@ namespace dp2Circulation
                 }));
             });
 
-            FingerprintManager.SetError += PalmprintManager_SetError;
+            {
+                // 清除以前残留的未读出的消息
+                FingerprintManager.ClearMessage();
+
+                FingerprintManager.SetError += PalmprintManager_SetError;
+            }
+
             RfidManager.SetError += RfidManager_SetError;
             Program.MainForm.TagChanged += MainForm_TagChanged;
             InitialSendKey();
