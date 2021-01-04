@@ -36,6 +36,25 @@ namespace FingerprintCenter
         /// </summary>
         public static event MessagePromptEventHandler Prompt = null;
 #endif
+
+        public override string DriverName
+        {
+            get
+            {
+                return "zk";
+            }
+        }
+
+        // 算法版本号
+        public override string AlgorithmVersion
+        {
+            get
+            {
+                return "10";
+            }
+        }
+
+
         int _idSeed = 10;
 
         Hashtable _id_barcode_table = new Hashtable();  // id --> barcode

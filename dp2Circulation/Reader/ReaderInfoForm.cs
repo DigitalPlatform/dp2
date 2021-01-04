@@ -6928,15 +6928,18 @@ MessageBoxDefaultButton.Button1);
         // 登记掌纹
         private async void toolStripSplitButton_registerPalmprint_ButtonClick(object sender, EventArgs e)
         {
-            await registerPalmprint(false);
+            await registerPalmprintAsync(false);
         }
 
-        async Task registerPalmprint(bool bPractice)
+        async Task registerPalmprintAsync(bool bPractice)
         {
             string strError = "";
 
+            FingerprintManager.Touched += PalmprintManager_Touched;
+
             this.ShowMessage("等待扫描掌纹 ...");
             this.EnableControls(false);
+
             try
             {
                 NormalResult getstate_result = await FingerprintGetState(Program.MainForm.PalmprintReaderUrl, "");
@@ -6998,6 +7001,8 @@ MessageBoxDefaultButton.Button1);
             {
                 this.EnableControls(true);
                 this.ClearMessage();
+
+                FingerprintManager.Touched -= PalmprintManager_Touched;
             }
 
             Program.MainForm.StatusBarMessage = "掌纹信息获取成功";
@@ -7005,6 +7010,12 @@ MessageBoxDefaultButton.Button1);
         ERROR1:
             Program.MainForm.StatusBarMessage = strError;
             this.ShowMessage(strError, "red", true);
+        }
+
+        // 显示获取掌纹中途的信息
+        private void PalmprintManager_Touched(object sender, TouchedEventArgs e)
+        {
+            this.ShowMessage(e.Message);
         }
 
         private void toolStripMenuItem_clearPalmprint_Click(object sender, EventArgs e)

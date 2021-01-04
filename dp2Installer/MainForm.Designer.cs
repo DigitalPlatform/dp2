@@ -43,7 +43,7 @@
             this.MenuItem_exit = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_dp2Kernel = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_dp2kernel_install = new System.Windows.Forms.ToolStripMenuItem();
-            this.MenuItem_dp2kernel_upgrade = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_dp2kernel_update = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_dp2kernel_openDataDir = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_dp2kernel_openAppDir = new System.Windows.Forms.ToolStripMenuItem();
@@ -60,7 +60,7 @@
             this.MenuItem_dp2kernel_uninstall = new System.Windows.Forms.ToolStripMenuItem();
             this.dp2LibraryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_dp2library_install = new System.Windows.Forms.ToolStripMenuItem();
-            this.MenuItem_dp2library_upgrade = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_dp2library_update = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_dp2library_openDataDir = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_dp2library_openAppDir = new System.Windows.Forms.ToolStripMenuItem();
@@ -110,7 +110,7 @@
             this.MenuItem_dp2Commander_uninstall = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_dp2zserver = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_dp2ZServer_install = new System.Windows.Forms.ToolStripMenuItem();
-            this.MenuItem_dp2ZServer_upgrade = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_dp2ZServer_update = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator19 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_dp2ZServer_openDataDir = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_dp2ZServer_openAppDir = new System.Windows.Forms.ToolStripMenuItem();
@@ -162,6 +162,7 @@
             this.toolStripDropDownButton_stopAll = new System.Windows.Forms.ToolStripDropDownButton();
             this.ToolStripMenuItem_stopAll = new System.Windows.Forms.ToolStripMenuItem();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
+            this.MenuItem_palmCenter_openDataDir = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.statusStrip_main.SuspendLayout();
             this.toolStrip1.SuspendLayout();
@@ -184,7 +185,7 @@
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Padding = new System.Windows.Forms.Padding(11, 3, 0, 3);
-            this.menuStrip1.Size = new System.Drawing.Size(667, 103);
+            this.menuStrip1.Size = new System.Drawing.Size(794, 71);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -206,7 +207,7 @@
             this.MenuItem_autoUpgrade.Name = "MenuItem_autoUpgrade";
             this.MenuItem_autoUpgrade.Size = new System.Drawing.Size(421, 40);
             this.MenuItem_autoUpgrade.Text = "自动升级全部产品(&A)";
-            this.MenuItem_autoUpgrade.Click += new System.EventHandler(this.MenuItem_autoUpgrade_Click);
+            this.MenuItem_autoUpgrade.Click += new System.EventHandler(this.MenuItem_autoUpdate_Click);
             // 
             // toolStripSeparator4
             // 
@@ -243,7 +244,7 @@
             // 
             this.MenuItem_dp2Kernel.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.MenuItem_dp2kernel_install,
-            this.MenuItem_dp2kernel_upgrade,
+            this.MenuItem_dp2kernel_update,
             this.toolStripSeparator6,
             this.MenuItem_dp2kernel_openDataDir,
             this.MenuItem_dp2kernel_openAppDir,
@@ -264,10 +265,10 @@
             // 
             // MenuItem_dp2kernel_upgrade
             // 
-            this.MenuItem_dp2kernel_upgrade.Name = "MenuItem_dp2kernel_upgrade";
-            this.MenuItem_dp2kernel_upgrade.Size = new System.Drawing.Size(279, 40);
-            this.MenuItem_dp2kernel_upgrade.Text = "升级 dp2Kernel";
-            this.MenuItem_dp2kernel_upgrade.Click += new System.EventHandler(this.MenuItem_dp2kernel_upgrade_Click);
+            this.MenuItem_dp2kernel_update.Name = "MenuItem_dp2kernel_upgrade";
+            this.MenuItem_dp2kernel_update.Size = new System.Drawing.Size(315, 40);
+            this.MenuItem_dp2kernel_update.Text = "更新 dp2Kernel";
+            this.MenuItem_dp2kernel_update.Click += new System.EventHandler(this.MenuItem_dp2kernel_update_Click);
             // 
             // toolStripSeparator6
             // 
@@ -367,7 +368,7 @@
             // 
             this.dp2LibraryToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.MenuItem_dp2library_install,
-            this.MenuItem_dp2library_upgrade,
+            this.MenuItem_dp2library_update,
             this.toolStripSeparator5,
             this.MenuItem_dp2library_openDataDir,
             this.MenuItem_dp2library_openAppDir,
@@ -391,10 +392,10 @@
             // 
             // MenuItem_dp2library_upgrade
             // 
-            this.MenuItem_dp2library_upgrade.Name = "MenuItem_dp2library_upgrade";
-            this.MenuItem_dp2library_upgrade.Size = new System.Drawing.Size(360, 40);
-            this.MenuItem_dp2library_upgrade.Text = "升级 dp2Library";
-            this.MenuItem_dp2library_upgrade.Click += new System.EventHandler(this.MenuItem_dp2library_upgrade_Click);
+            this.MenuItem_dp2library_update.Name = "MenuItem_dp2library_upgrade";
+            this.MenuItem_dp2library_update.Size = new System.Drawing.Size(360, 40);
+            this.MenuItem_dp2library_update.Text = "更新 dp2Library";
+            this.MenuItem_dp2library_update.Click += new System.EventHandler(this.MenuItem_dp2library_update_Click);
             // 
             // toolStripSeparator5
             // 
@@ -436,7 +437,7 @@
             this.MenuItem_dp2library_upgradeCfgs.Name = "MenuItem_dp2library_upgradeCfgs";
             this.MenuItem_dp2library_upgradeCfgs.Size = new System.Drawing.Size(360, 40);
             this.MenuItem_dp2library_upgradeCfgs.Text = "更新数据目录的配置文件";
-            this.MenuItem_dp2library_upgradeCfgs.Click += new System.EventHandler(this.MenuItem_dp2library_upgradeCfgs_Click);
+            this.MenuItem_dp2library_upgradeCfgs.Click += new System.EventHandler(this.MenuItem_dp2library_updateCfgs_Click);
             // 
             // MenuItem_dp2library_verifySerialNumbers
             // 
@@ -561,9 +562,9 @@
             // MenuItem_dp2opac_upgrade
             // 
             this.MenuItem_dp2opac_upgrade.Name = "MenuItem_dp2opac_upgrade";
-            this.MenuItem_dp2opac_upgrade.Size = new System.Drawing.Size(276, 40);
-            this.MenuItem_dp2opac_upgrade.Text = "升级 dp2OPAC";
-            this.MenuItem_dp2opac_upgrade.Click += new System.EventHandler(this.MenuItem_dp2opac_upgrade_Click);
+            this.MenuItem_dp2opac_upgrade.Size = new System.Drawing.Size(315, 40);
+            this.MenuItem_dp2opac_upgrade.Text = "更新 dp2OPAC";
+            this.MenuItem_dp2opac_upgrade.Click += new System.EventHandler(this.MenuItem_dp2opac_update_Click);
             // 
             // toolStripSeparator7
             // 
@@ -630,7 +631,7 @@
             // 
             this.MenuItem_dp2Commander_upgrade.Name = "MenuItem_dp2Commander_upgrade";
             this.MenuItem_dp2Commander_upgrade.Size = new System.Drawing.Size(340, 40);
-            this.MenuItem_dp2Commander_upgrade.Text = "升级 dp2Commander";
+            this.MenuItem_dp2Commander_upgrade.Text = "更新 dp2Commander";
             // 
             // toolStripSeparator27
             // 
@@ -724,7 +725,7 @@
             // 
             this.MenuItem_dp2zserver.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.MenuItem_dp2ZServer_install,
-            this.MenuItem_dp2ZServer_upgrade,
+            this.MenuItem_dp2ZServer_update,
             this.toolStripSeparator19,
             this.MenuItem_dp2ZServer_openDataDir,
             this.MenuItem_dp2ZServer_openAppDir,
@@ -749,10 +750,10 @@
             // 
             // MenuItem_dp2ZServer_upgrade
             // 
-            this.MenuItem_dp2ZServer_upgrade.Name = "MenuItem_dp2ZServer_upgrade";
-            this.MenuItem_dp2ZServer_upgrade.Size = new System.Drawing.Size(360, 40);
-            this.MenuItem_dp2ZServer_upgrade.Text = "升级 dp2ZServer";
-            this.MenuItem_dp2ZServer_upgrade.Click += new System.EventHandler(this.MenuItem_dp2ZServer_upgrade_Click);
+            this.MenuItem_dp2ZServer_update.Name = "MenuItem_dp2ZServer_upgrade";
+            this.MenuItem_dp2ZServer_update.Size = new System.Drawing.Size(360, 40);
+            this.MenuItem_dp2ZServer_update.Text = "更新 dp2ZServer";
+            this.MenuItem_dp2ZServer_update.Click += new System.EventHandler(this.MenuItem_dp2ZServer_update_Click);
             // 
             // toolStripSeparator19
             // 
@@ -875,6 +876,7 @@
             this.MenuItem_palmCenter_install,
             this.MenuItem_palmCenter_update,
             this.toolStripSeparator33,
+            this.MenuItem_palmCenter_openDataDir,
             this.MenuItem_palmCenter_openProgramFolder,
             this.toolStripSeparator34,
             this.MenuItem_palmCenter_config,
@@ -895,7 +897,7 @@
             // 
             this.MenuItem_palmCenter_update.Name = "MenuItem_palmCenter_update";
             this.MenuItem_palmCenter_update.Size = new System.Drawing.Size(315, 40);
-            this.MenuItem_palmCenter_update.Text = "升级 palmCenter";
+            this.MenuItem_palmCenter_update.Text = "更新 palmCenter";
             this.MenuItem_palmCenter_update.Click += new System.EventHandler(this.MenuItem_palmCenter_update_Click);
             // 
             // toolStripSeparator33
@@ -1072,14 +1074,14 @@
             this.statusStrip_main.Name = "statusStrip_main";
             this.statusStrip_main.Padding = new System.Windows.Forms.Padding(2, 0, 26, 0);
             this.statusStrip_main.RenderMode = System.Windows.Forms.ToolStripRenderMode.ManagerRenderMode;
-            this.statusStrip_main.Size = new System.Drawing.Size(667, 33);
+            this.statusStrip_main.Size = new System.Drawing.Size(794, 33);
             this.statusStrip_main.TabIndex = 3;
             this.statusStrip_main.Text = "statusStrip1";
             // 
             // toolStripStatusLabel_main
             // 
             this.toolStripStatusLabel_main.Name = "toolStripStatusLabel_main";
-            this.toolStripStatusLabel_main.Size = new System.Drawing.Size(452, 24);
+            this.toolStripStatusLabel_main.Size = new System.Drawing.Size(579, 24);
             this.toolStripStatusLabel_main.Spring = true;
             // 
             // toolStripProgressBar_main
@@ -1096,9 +1098,9 @@
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolButton_stop,
             this.toolStripDropDownButton_stopAll});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 103);
+            this.toolStrip1.Location = new System.Drawing.Point(0, 71);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(667, 34);
+            this.toolStrip1.Size = new System.Drawing.Size(794, 34);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -1132,19 +1134,26 @@
             // webBrowser1
             // 
             this.webBrowser1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.webBrowser1.Location = new System.Drawing.Point(0, 137);
+            this.webBrowser1.Location = new System.Drawing.Point(0, 105);
             this.webBrowser1.Margin = new System.Windows.Forms.Padding(5);
             this.webBrowser1.MinimumSize = new System.Drawing.Size(37, 35);
             this.webBrowser1.Name = "webBrowser1";
-            this.webBrowser1.Size = new System.Drawing.Size(667, 465);
+            this.webBrowser1.Size = new System.Drawing.Size(794, 497);
             this.webBrowser1.TabIndex = 4;
+            // 
+            // MenuItem_palmCenter_openDataDir
+            // 
+            this.MenuItem_palmCenter_openDataDir.Name = "MenuItem_palmCenter_openDataDir";
+            this.MenuItem_palmCenter_openDataDir.Size = new System.Drawing.Size(315, 40);
+            this.MenuItem_palmCenter_openDataDir.Text = "打开数据文件夹";
+            this.MenuItem_palmCenter_openDataDir.Click += new System.EventHandler(this.MenuItem_palmCenter_openDataDir_Click);
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Control;
-            this.ClientSize = new System.Drawing.Size(667, 635);
+            this.ClientSize = new System.Drawing.Size(794, 635);
             this.Controls.Add(this.webBrowser1);
             this.Controls.Add(this.toolStrip1);
             this.Controls.Add(this.statusStrip_main);
@@ -1174,7 +1183,7 @@
         private System.Windows.Forms.ToolStripMenuItem MenuItem_exit;
         private System.Windows.Forms.ToolStripMenuItem dp2LibraryToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_dp2library_instanceManagement;
-        private System.Windows.Forms.ToolStripMenuItem MenuItem_dp2library_upgrade;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_dp2library_update;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_dp2library_upgradeCfgs;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_help;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_openUserFolder;
@@ -1186,7 +1195,7 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_dp2Kernel;
-        private System.Windows.Forms.ToolStripMenuItem MenuItem_dp2kernel_upgrade;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_dp2kernel_update;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_dp2OPAC;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_dp2opac_upgrade;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_autoUpgrade;
@@ -1243,7 +1252,7 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator18;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_dp2zserver;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_dp2ZServer_install;
-        private System.Windows.Forms.ToolStripMenuItem MenuItem_dp2ZServer_upgrade;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_dp2ZServer_update;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator19;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_dp2ZServer_openDataDir;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_dp2ZServer_openAppDir;
@@ -1298,6 +1307,7 @@
         private System.Windows.Forms.ToolStripMenuItem MenuItem_palmCenter_uninstallService;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator37;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_palmCenter_uninstall;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_palmCenter_openDataDir;
     }
 }
 

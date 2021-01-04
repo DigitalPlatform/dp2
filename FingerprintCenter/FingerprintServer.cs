@@ -536,6 +536,14 @@ Exception rethrown at [0]:
 
         public NormalResult GetState(string style)
         {
+            // 2020/1/4
+            if (style == "featureVersion")
+                return new NormalResult
+                {
+                    Value = 0,
+                    ErrorCode = Program.FingerPrint.DriverName + "-" + Program.FingerPrint.AlgorithmVersion
+                };
+
             if (style == "restart")
             {
                 Program.MainForm.Restart();

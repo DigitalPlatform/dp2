@@ -28,6 +28,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
+using PalmCenter.Install;
 
 namespace dp2Installer
 {
@@ -189,8 +190,9 @@ FormWindowState.Normal);
             Refresh_dp2kernel_MenuItems();
             Refresh_dp2library_MenuItems();
             Refresh_dp2ZServer_MenuItems();
+            Refresh_palmCenter_MenuItems();
 
-            this.BeginInvoke(new Action<object, EventArgs>(MenuItem_autoUpgrade_Click), this, new EventArgs());
+            this.BeginInvoke(new Action<object, EventArgs>(MenuItem_autoUpdate_Click), this, new EventArgs());
 
 #if REMOVED
             // 2019/2/15
@@ -452,27 +454,27 @@ FormWindowState.Normal);
         }
 #endif
 
-        private async void MenuItem_dp2library_upgrade_Click(object sender, EventArgs e)
+        private async void MenuItem_dp2library_update_Click(object sender, EventArgs e)
         {
-            await upgrade_dp2library();
+            await update_dp2library();
         }
 
-        private async Task upgrade_dp2library()
+        private async Task update_dp2library()
         {
             string strError = "";
             int nRet = 0;
 
             if (this.locking_instances.Count > 0)
             {
-                strError = "目前有下列 dp2library 实例(" + StringUtil.MakePathList(this.locking_instances) + ")处于锁定状态，不允许此时升级 dp2library";
+                strError = "目前有下列 dp2library 实例(" + StringUtil.MakePathList(this.locking_instances) + ")处于锁定状态，不允许此时更新 dp2library";
                 goto ERROR1;
             }
 
-            this._floatingMessage.Text = "正在升级 dp2library - 图书馆应用服务器 ...";
+            this._floatingMessage.Text = "正在更新 dp2library - 图书馆应用服务器 ...";
 
             try
             {
-                AppendSectionTitle("升级 dp2library 开始");
+                AppendSectionTitle("更新 dp2library 开始");
 
                 AppendString("正在获得可执行文件目录 ...\r\n");
 
@@ -538,7 +540,7 @@ FormWindowState.Normal);
                     goto ERROR1;
                 AppendString("dp2library 服务启动成功\r\n");
 
-                AppendSectionTitle("升级 dp2library 结束");
+                AppendSectionTitle("更新 dp2library 结束");
             }
             finally
             {
@@ -1302,7 +1304,7 @@ MessageBoxDefaultButton.Button2);
         }
 
         // 更新 dp2library 全部数据目录中的配置文件
-        private void MenuItem_dp2library_upgradeCfgs_Click(object sender, EventArgs e)
+        private void MenuItem_dp2library_updateCfgs_Click(object sender, EventArgs e)
         {
             string strError = "";
             int nRet = 0;
@@ -1493,22 +1495,22 @@ MessageBoxDefaultButton.Button2);
             MessageBox.Show(this, strError);
         }
 
-        private async void MenuItem_dp2kernel_upgrade_Click(object sender, EventArgs e)
+        private async void MenuItem_dp2kernel_update_Click(object sender, EventArgs e)
         {
-            await upgrade_dp2kernel();
+            await update_dp2kernel();
         }
 
         // 升级 dp2kernel
-        private async Task upgrade_dp2kernel()
+        private async Task update_dp2kernel()
         {
             string strError = "";
             int nRet = 0;
 
-            this._floatingMessage.Text = "正在升级 dp2kernel - 数据库内核 ...";
+            this._floatingMessage.Text = "正在更新 dp2kernel - 数据库内核 ...";
 
             try
             {
-                AppendSectionTitle("升级 dp2kernel 开始");
+                AppendSectionTitle("更新 dp2kernel 开始");
 
                 AppendString("正在获得可执行文件目录 ...\r\n");
 
@@ -1562,7 +1564,7 @@ MessageBoxDefaultButton.Button2);
                     goto ERROR1;
                 AppendString("dp2kernel 服务启动成功\r\n");
 
-                AppendSectionTitle("升级 dp2kernel 结束");
+                AppendSectionTitle("更新 dp2kernel 结束");
             }
             finally
             {
@@ -1574,11 +1576,11 @@ MessageBoxDefaultButton.Button2);
 
         }
 
-        private void MenuItem_dp2opac_upgrade_Click(object sender, EventArgs e)
+        private void MenuItem_dp2opac_update_Click(object sender, EventArgs e)
         {
             string strError = "";
 
-            this._floatingMessage.Text = "正在升级 dp2OPAC - 读者公共查询 ...";
+            this._floatingMessage.Text = "正在更新 dp2OPAC - 读者公共查询 ...";
 
             try
             {
@@ -1600,7 +1602,7 @@ MessageBoxDefaultButton.Button2);
                     goto ERROR1;
                 }
 
-                AppendSectionTitle("升级 dp2OPAC 开始");
+                AppendSectionTitle("更新 dp2OPAC 开始");
 
                 foreach (OpacAppInfo info in infos)
                 {
@@ -1640,7 +1642,7 @@ MessageBoxDefaultButton.Button2);
                 if (nRet == -1)
                     goto ERROR1;
 
-                AppendSectionTitle("升级 dp2OPAC 结束");
+                AppendSectionTitle("更新 dp2OPAC 结束");
             }
             finally
             {
@@ -1652,8 +1654,8 @@ MessageBoxDefaultButton.Button2);
             MessageBox.Show(this, strError);
         }
 
-        // 自动升级
-        private async void MenuItem_autoUpgrade_Click(object sender, EventArgs e)
+        // 自动更新
+        private async void MenuItem_autoUpdate_Click(object sender, EventArgs e)
         {
             string strError = "";
             List<string> names = new List<string>();
@@ -1712,10 +1714,34 @@ MessageBoxDefaultButton.Button2);
                     names.Add("dp2ZServer");
             }
 
+            // 2021/1/4
+            // ---
+            {
+                string strProgramDir = GetProductDirectory("palmcenter");
+                strExePath = Path.Combine(strProgramDir, "palmcenter.exe");
+
+                if (File.Exists(strExePath) == true)
+                {
+                    // (ClickOnce 安装时)确保文件已经下载到本地
+                    var ret = await PrepareFileGroup("palmcenter");
+                    if (ret == true)
+                    {
+                        strZipFileName = Path.Combine(this.DataDir, "palm_app.zip");
+
+                        if (DetectChange(strZipFileName) == true)
+                            names.Add("palmCenter");
+                    }
+                    else
+                    {
+                        AppendString("*** 出错: 准备 palm_app.zip 文件失败\r\n");
+                    }
+                }
+            }
+
             if (names.Count > 0)
             {
                 DialogResult result = MessageBox.Show(this,
-"下列模块有新版本：\r\n" + StringUtil.MakePathList(names, "\r\n") + "\r\n\r\n是否升级？",
+"下列模块有新版本：\r\n" + StringUtil.MakePathList(names, "\r\n") + "\r\n\r\n是否更新？",
 "dp2Installer",
 MessageBoxButtons.YesNo,
 MessageBoxIcon.Question,
@@ -1725,18 +1751,20 @@ MessageBoxDefaultButton.Button1);
                 foreach (string name in names)
                 {
                     if (name == "dp2Kernel")
-                        await upgrade_dp2kernel();
+                        await update_dp2kernel();
                     else if (name == "dp2Library")
-                        await upgrade_dp2library();
+                        await update_dp2library();
                     else if (name == "dp2OPAC")
-                        MenuItem_dp2opac_upgrade_Click(this, new EventArgs());
+                        MenuItem_dp2opac_update_Click(this, new EventArgs());
                     else if (name == "dp2ZServer")
-                        MenuItem_dp2ZServer_upgrade_Click(this, new EventArgs());
+                        MenuItem_dp2ZServer_update_Click(this, new EventArgs());
+                    else if (name == "palmCenter")
+                        MenuItem_palmCenter_update_Click(this, new EventArgs());
                 }
             }
             else
             {
-                AppendSectionTitle("目前没有任何新版本需要升级");
+                AppendSectionTitle("目前没有任何新版本需要更新");
             }
         }
 
@@ -3018,12 +3046,12 @@ MessageBoxDefaultButton.Button1);
             if (string.IsNullOrEmpty(strExePath) == true)
             {
                 this.MenuItem_dp2kernel_install.Enabled = true;
-                this.MenuItem_dp2kernel_upgrade.Enabled = false;
+                this.MenuItem_dp2kernel_update.Enabled = false;
             }
             else
             {
                 this.MenuItem_dp2kernel_install.Enabled = false;
-                this.MenuItem_dp2kernel_upgrade.Enabled = true;
+                this.MenuItem_dp2kernel_update.Enabled = true;
             }
 
             this.MenuItem_dp2kernel_openDataDir.DropDownItems.Clear();
@@ -3037,12 +3065,12 @@ MessageBoxDefaultButton.Button1);
             if (string.IsNullOrEmpty(strExePath) == true)
             {
                 this.MenuItem_dp2library_install.Enabled = true;
-                this.MenuItem_dp2library_upgrade.Enabled = false;
+                this.MenuItem_dp2library_update.Enabled = false;
             }
             else
             {
                 this.MenuItem_dp2library_install.Enabled = false;
-                this.MenuItem_dp2library_upgrade.Enabled = true;
+                this.MenuItem_dp2library_update.Enabled = true;
             }
 
             this.MenuItem_dp2library_openDataDir.DropDownItems.Clear();
@@ -3056,12 +3084,12 @@ MessageBoxDefaultButton.Button1);
             if (string.IsNullOrEmpty(strExePath) == true)
             {
                 this.MenuItem_dp2ZServer_install.Enabled = true;
-                this.MenuItem_dp2ZServer_upgrade.Enabled = false;
+                this.MenuItem_dp2ZServer_update.Enabled = false;
             }
             else
             {
                 this.MenuItem_dp2ZServer_install.Enabled = false;
-                this.MenuItem_dp2ZServer_upgrade.Enabled = true;
+                this.MenuItem_dp2ZServer_update.Enabled = true;
             }
 
             this.MenuItem_dp2ZServer_openDataDir.DropDownItems.Clear();
@@ -3848,7 +3876,7 @@ out string strError)
 #if NO
             DialogResult result = MessageBox.Show(this,
 "确实要卸载 dp2Kernel? ",
-"dp2Install",
+"dp2Installer",
 MessageBoxButtons.YesNo,
 MessageBoxIcon.Question,
 MessageBoxDefaultButton.Button2);
@@ -5203,7 +5231,7 @@ C:\WINDOWS\SysNative\dism.exe /NoRestart /Online /Enable-Feature /FeatureName:MS
 
             DialogResult result = MessageBox.Show(this,
 "确实要卸载 dp2ZServer?\r\n\r\n注意: 卸载后程序文件和配置文件将被删除，且不可恢复",
-"dp2Install",
+"dp2Installer",
 MessageBoxButtons.YesNo,
 MessageBoxIcon.Question,
 MessageBoxDefaultButton.Button2);
@@ -5282,16 +5310,16 @@ MessageBoxDefaultButton.Button2);
             MessageBox.Show(this, strError);
         }
 
-        private void MenuItem_dp2ZServer_upgrade_Click(object sender, EventArgs e)
+        private void MenuItem_dp2ZServer_update_Click(object sender, EventArgs e)
         {
             string strError = "";
             int nRet = 0;
 
-            this._floatingMessage.Text = "正在升级 dp2ZServer - Z39.50 服务器 ...";
+            this._floatingMessage.Text = "正在更新 dp2ZServer - Z39.50 服务器 ...";
 
             try
             {
-                AppendSectionTitle("升级 dp2ZServer 开始");
+                AppendSectionTitle("更新 dp2ZServer 开始");
 
                 AppendString("正在获得可执行文件目录 ...\r\n");
 
@@ -5337,7 +5365,7 @@ MessageBoxDefaultButton.Button2);
                     goto ERROR1;
                 AppendString("dp2ZServer 服务启动成功\r\n");
 
-                AppendSectionTitle("升级 dp2ZServer 结束");
+                AppendSectionTitle("更新 dp2ZServer 结束");
             }
             finally
             {
@@ -5839,53 +5867,503 @@ MessageBoxDefaultButton.Button2);
             MessageBox.Show(this, strError);
         }
 
-        private void MenuItem_palmCenter_install_Click(object sender, EventArgs e)
+        // 首次安装 palmCenter
+        private async void MenuItem_palmCenter_install_Click(object sender, EventArgs e)
         {
-
+            await installPalmCenter();
         }
 
-        private void MenuItem_palmCenter_update_Click(object sender, EventArgs e)
+        // 更新 palmCenter
+        private async void MenuItem_palmCenter_update_Click(object sender, EventArgs e)
         {
-
+            await installPalmCenter("update");
         }
 
+        private async Task installPalmCenter(string style = "")
+        {
+            string strError = "";
+            int nRet = 0;
+
+            bool update = StringUtil.IsInList("update", style);
+            string actionName = "安装";
+            if (update)
+                actionName = "更新";
+            
+
+            this._floatingMessage.Text = $"正在{actionName} palmCenter - 掌纹中心 ...";
+
+            try
+            {
+                AppendSectionTitle($"{actionName} palmCenter 开始");
+
+                AppendString("正在获得可执行文件目录 ...\r\n");
+
+                Application.DoEvents();
+
+                string strProgramDir = GetProductDirectory("palmcenter");
+                string strExePath = Path.Combine(strProgramDir, "palmcenter.exe");
+                if (update == false && File.Exists(strExePath) == true)
+                {
+                    strError = "palmCenter 已经安装过了，不能重复安装";
+                    goto ERROR1;
+                }
+
+                PathUtil.TryCreateDir(strProgramDir);
+
+                if (update)
+                {
+                    // 停止 service
+                    AppendString("正在停止 palmcenter 服务 ...\r\n");
+                    Application.DoEvents();
+
+                    nRet = InstallHelper.StopService("palmCenterService",
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    AppendString("palmcenter 服务已经停止\r\n");
+                }
+
+                // (ClickOnce 安装时)确保文件已经下载到本地
+                var ret = await PrepareFileGroup("palmcenter");
+                if (ret == false)
+                {
+                    strError = "准备 palm_app.zip 文件失败";
+                    goto ERROR1;
+                }
+
+                string strZipFileName = Path.Combine(this.DataDir, "palm_app.zip");
+
+                AppendString($"{actionName}可执行文件 ...\r\n");
+
+                // 更新可执行目录
+                // return:
+                //      -1  出错
+                //      0   没有必要刷新
+                //      1   已经刷新
+                nRet = RefreshBinFiles(
+                    false,
+                    strZipFileName,
+                    strProgramDir,
+                    null,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                if (update == false)
+                {
+                    // 配置参数
+                    AppendString("配置参数 ...\r\n");
+
+                    try
+                    {
+                        using (var dlg = new PalmCenter.Install.SettingDialog())
+                        {
+                            GuiUtil.AutoSetDefaultFont(dlg);
+                            var dlg_result = dlg.ShowDialog(this);
+                            if (dlg_result == DialogResult.Cancel)
+                            {
+                                // TODO: 注意清理干净可执行文件，以便后面可以重新安装
+                                strError = "放弃配置";
+                                goto ERROR1;
+                            }
+                        }
+                    }
+                    finally
+                    {
+                        AppendString("配置参数结束 ...\r\n");
+                    }
+
+
+                    // 注册为 Windows Service
+                    strExePath = Path.Combine(strProgramDir, "dp2kernel.exe");
+
+                    AppendString("注册 Windows Service ...\r\n");
+
+                    nRet = installPalmService("install start",
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                }
+                else
+                {
+                    // 启动 service
+                    AppendString("正在启动 palmcenter 服务 ...\r\n");
+                    Application.DoEvents();
+
+                    nRet = InstallHelper.StartService("palmCenterService",
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+
+                    AppendString("palmcenter 服务成功启动\r\n");
+                }
+
+                AppendSectionTitle($"{actionName} palmCenter 结束");
+                Refresh_palmCenter_MenuItems();
+            }
+            finally
+            {
+                this._floatingMessage.Text = "";
+            }
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        // 打开数据文件夹
+        private void MenuItem_palmCenter_openDataDir_Click(object sender, EventArgs e)
+        {
+            string dir = Utility.GetServiceUserDirectory("palmCenter");
+            if (Directory.Exists(dir) == false)
+            {
+                MessageBox.Show(this, $"文件夹 {dir} 不存在");
+                return;
+            }
+            try
+            {
+                System.Diagnostics.Process.Start(dir);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
+            }
+        }
+
+        // 打开程序文件夹
         private void MenuItem_palmCenter_openProgramFolder_Click(object sender, EventArgs e)
         {
-
+            string strProgramDir = GetProductDirectory("palmcenter");
+            if (Directory.Exists(strProgramDir) == false)
+            {
+                MessageBox.Show(this, $"文件夹 {strProgramDir} 不存在");
+                return;
+            }
+            try
+            {
+                System.Diagnostics.Process.Start(strProgramDir);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
+            }
         }
 
         // 配置 掌纹中心
         private void MenuItem_palmCenter_config_Click(object sender, EventArgs e)
         {
+            string strError = "";
+
+            AppendString("正在获得可执行文件目录 ...\r\n");
+
+            Application.DoEvents();
+
+            string strProgramDir = GetProductDirectory("palmcenter");
+            string strExePath = Path.Combine(strProgramDir, "palmcenter.exe");
+            if (File.Exists(strExePath) == false)
+            {
+                strError = "palmcenter 未曾安装过";
+                goto ERROR1;
+            }
+
+            // 停止服务
+            AppendString("正在停止 palmcenter 服务 ...\r\n");
+            Application.DoEvents();
+
+            int nRet = InstallHelper.StopService("palmCenterService",
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+            AppendString("palmcenter 服务已经停止\r\n");
+
+            AppendString("正在配置 palmcenter 参数 ...\r\n");
+
             using (var dlg = new PalmCenter.Install.SettingDialog())
             {
                 dlg.ShowDialog(this);
             }
+
+            AppendString("配置 palmcenter 参数完成\r\n");
+
+
+            // 启动服务
+            AppendString("正在启动 palmcenter 服务 ...\r\n");
+            Application.DoEvents();
+
+            nRet = InstallHelper.StartService("palmCenterService",
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            AppendString("palmcenter 服务成功启动\r\n");
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
         }
 
         private void MenuItem_palmCenter_startService_Click(object sender, EventArgs e)
         {
+            string strError = "";
+            int nRet = 0;
 
+            AppendString("正在获得可执行文件目录 ...\r\n");
+
+            Application.DoEvents();
+
+            string strProgramDir = GetProductDirectory("palmcenter");
+            string strExePath = Path.Combine(strProgramDir, "palmcenter.exe");
+            if (File.Exists(strExePath) == false)
+            {
+                strError = "palmcenter 未曾安装过";
+                goto ERROR1;
+            }
+            // strExePath = StringUtil.Unquote(strExePath, "\"\"");
+
+            AppendString("正在启动 palmcenter 服务 ...\r\n");
+            Application.DoEvents();
+
+            nRet = InstallHelper.StartService("palmCenterService",
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+            AppendString("palmcenter 服务成功启动\r\n");
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
         }
 
         private void MenuItem_palmCenter_stopService_Click(object sender, EventArgs e)
         {
+            string strError = "";
+            int nRet = 0;
 
+            AppendString("正在获得可执行文件目录 ...\r\n");
+
+            Application.DoEvents();
+
+            string strProgramDir = GetProductDirectory("palmcenter");
+            string strExePath = Path.Combine(strProgramDir, "palmcenter.exe");
+            if (File.Exists(strExePath) == false)
+            {
+                strError = "palmcenter 未曾安装过";
+                goto ERROR1;
+            }
+            // strExePath = StringUtil.Unquote(strExePath, "\"\"");
+
+            AppendString("正在停止 palmcenter 服务 ...\r\n");
+            Application.DoEvents();
+
+            nRet = InstallHelper.StopService("palmCenterService",
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+            AppendString("palmcenter 服务已经停止\r\n");
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
         }
 
         private void MenuItem_palmCenter_installService_Click(object sender, EventArgs e)
         {
-
+            string strError = "";
+            int nRet = installPalmService("install", out strError);
+            if (nRet == -1)
+                goto ERROR1;
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
         }
 
         private void MenuItem_palmCenter_uninstallService_Click(object sender, EventArgs e)
         {
-
+            string strError = "";
+            int nRet = installPalmService("uninstall", out strError);
+            if (nRet == -1)
+                goto ERROR1;
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
         }
 
+        int installPalmService(string action,
+            out string strError)
+        {
+            strError = "";
+
+            string strProgramDir = GetProductDirectory("palmcenter");
+            string strExePath = Path.Combine(strProgramDir, "palmcenter.exe");
+            if (File.Exists(strExePath) == false)
+            {
+                strError = "palmcenter 未曾安装过";
+                return 0;
+            }
+
+            try
+            {
+                string arguments = action;
+                var process = System.Diagnostics.Process.Start(strExePath, arguments);
+                process.WaitForExit();
+                var code = process.ExitCode;
+            }
+            catch (Exception ex)
+            {
+                strError = ExceptionUtil.GetAutoText(ex);
+                return -1;
+            }
+
+            AppendString($"palmcenter 服务{(action.StartsWith("install") ? "注册" : "注销")}成功\r\n");
+            return 1;
+        }
+
+        // 卸载 palmCenter
         private void MenuItem_palmCenter_uninstall_Click(object sender, EventArgs e)
         {
+            string strError = "";
 
+            DialogResult result = MessageBox.Show(this,
+"确实要卸载 palmCenter?\r\n\r\n注意: 卸载后程序文件将被删除",
+"dp2Installer",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+            if (result != DialogResult.Yes)
+                return;   // cancelled
+
+            string strProgramDir = GetProductDirectory("palmcenter");
+            string strExePath = Path.Combine(strProgramDir, "palmcenter.exe");
+
+            // 注销
+            int nRet = installPalmService("uninstall", out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            // 等待结束
+
+            // 删除程序目录
+            REDO_DELETE_PROGRAMDIR:
+            try
+            {
+                PathUtil.DeleteDirectory(strProgramDir);
+            }
+            catch (Exception ex)
+            {
+                DialogResult temp_result = MessageBox.Show(this,
+"删除程序目录 '" + strProgramDir + "' 出错：" + ex.Message + "\r\n\r\n是否重试?\r\n\r\n(Retry: 重试; Cancel: 不重试，继续后续卸载过程)",
+"卸载 palmCenter",
+MessageBoxButtons.RetryCancel,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button1);
+                if (temp_result == DialogResult.Retry)
+                    goto REDO_DELETE_PROGRAMDIR;
+            }
+
+            AppendSectionTitle("卸载 palmCenter 结束");
+            this.Refresh_palmCenter_MenuItems();
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
         }
+
+        void Refresh_palmCenter_MenuItems()
+        {
+            string strProgramDir = GetProductDirectory("palmcenter");
+            string strExePath = Path.Combine(strProgramDir, "palmcenter.exe");
+
+            if (File.Exists(strExePath) == false)
+            {
+                this.MenuItem_palmCenter_install.Enabled = true;
+                this.MenuItem_palmCenter_update.Enabled = false;
+                this.MenuItem_palmCenter_uninstall.Enabled = false;
+            }
+            else
+            {
+                this.MenuItem_palmCenter_install.Enabled = false;
+                this.MenuItem_palmCenter_update.Enabled = true;
+                this.MenuItem_palmCenter_uninstall.Enabled = true;
+            }
+
+            // this.MenuItem_palmCenter_openDataDir.DropDownItems.Clear();
+            // AddMenuItem(MenuItem_palmCenter_openDataDir, "palmCenter");
+        }
+
+        async Task<bool> PrepareFileGroup(string groupName)
+        {
+            var bret = await Task<bool>.Run(() =>
+            {
+                return DownloadFileGroupAsync(groupName,
+                    _cancel.Token);
+            });
+            return bret;
+        }
+
+        private bool DownloadFileGroupAsync(string fileGroup,
+    CancellationToken token)
+        {
+            if (ApplicationDeployment.IsNetworkDeployed == false)
+                return true;
+
+            string strError = "";
+            bool _downloadCompleted = false;
+            DownloadFileGroupCompletedEventArgs e1 = null;
+
+            ApplicationDeployment deployment = ApplicationDeployment.CurrentDeployment;
+
+            try
+            {
+                if (deployment.IsFileGroupDownloaded(fileGroup))
+                {
+                    return true;
+                }
+
+                deployment.DownloadFileGroupProgressChanged += (s, e) =>
+                {
+                    string text = String.Format("正在下载文件 {0:D}%", e.ProgressPercentage);
+                    // string text = String.Format("正在下载算法文件 {0}; {1:D}K of {2:D}K completed.", e.Group, e.BytesCompleted / 1024, e.BytesTotal / 1024);
+                    // this.ShowMessage(text);
+                };
+                deployment.DownloadFileGroupCompleted += (s, e) =>
+                {
+                    e1 = e;
+                    _downloadCompleted = true;
+                };
+
+                deployment.DownloadFileGroupAsync(fileGroup);
+            }
+            catch (InvalidOperationException ioe)
+            {
+                strError = "This application is not a ClickOnce application. Error: " + ioe.Message;
+                goto ERROR1;
+            }
+
+            // 等待结束
+            while (_downloadCompleted == false)
+            {
+                Thread.Sleep(1000);
+                if (token.IsCancellationRequested)
+                {
+                    deployment.DownloadFileGroupAsyncCancel(fileGroup);
+                    return false;
+                }
+            }
+
+            if (e1.Error != null)
+            {
+                strError = $"下载过程发生异常: {e1.Error.Message}";
+                goto ERROR1;
+            }
+            else if (e1.Cancelled)
+            {
+                strError = $"下载过程被取消";
+                goto ERROR1;
+            }
+
+            AppendString($"下载 {fileGroup} 文件完成\r\n");
+            return true;
+        ERROR1:
+            // this.ShowMessage(strError, "red", true);
+            AppendString($"下载 {fileGroup} 文件出错: {strError}\r\n");
+            return false;
+        }
+
+
     }
 }
