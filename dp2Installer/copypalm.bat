@@ -18,3 +18,5 @@ xcopy ..\..\palmcenter\bin\debug\x64 x64 /s /Y
 cd ..
 
 ..\ziputil palm_app palm_app.zip -t
+
+xcopy palm_app.zip c:\publish\dp2installer\v3 /Y

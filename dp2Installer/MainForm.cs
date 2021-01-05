@@ -11,11 +11,13 @@ using System.Deployment.Application;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Reflection;
 
 using Microsoft.Win32;
 using Ionic.Zip;
 
 using dp2ZServer.Install;
+using PalmCenter.Install;
 
 using DigitalPlatform;
 using DigitalPlatform.IO;
@@ -28,7 +30,6 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
-using PalmCenter.Install;
 
 namespace dp2Installer
 {
@@ -66,6 +67,14 @@ namespace dp2Installer
 
         public string UserLogDir = ""; // 2015/8/8
 
+        public string BinDir
+        {
+            get
+            {
+                return Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            }
+        }
+
         /// <summary>
         /// 配置存储
         /// </summary>
@@ -84,6 +93,8 @@ namespace dp2Installer
                 _floatingMessage.Show(this);
             }
         }
+
+        static bool _networkDeployment = false;
 
         private void MainForm_Load(object sender, EventArgs e)
         {
@@ -129,6 +140,7 @@ FormWindowState.Normal);
 #if LOG
                         WriteLibraryEventLog("从命令行参数得到, this.DataDir=" + this.DataDir, EventLogEntryType.Information);
 #endif
+                        _networkDeployment = true;
                     }
                     else if (StringUtil.HasHead(strArg, "userdir=") == true)
                     {
@@ -136,6 +148,7 @@ FormWindowState.Normal);
 #if LOG
                         WriteLibraryEventLog("从命令行参数得到, this.UserDir=" + this.UserDir, EventLogEntryType.Information);
 #endif
+                        _networkDeployment = true;
                     }
                 }
             }
@@ -1723,17 +1736,17 @@ MessageBoxDefaultButton.Button2);
                 if (File.Exists(strExePath) == true)
                 {
                     // (ClickOnce 安装时)确保文件已经下载到本地
-                    var ret = await PrepareFileGroup("palmcenter");
-                    if (ret == true)
+                    var ret = await PrepareDataFile("palm_app.zip");
+                    if (ret.Value == -1)
+                    {
+                        AppendString($"*** 出错: 准备 palm_app.zip 文件失败: {ret.ErrorInfo}\r\n");
+                    }
+                    else
                     {
                         strZipFileName = Path.Combine(this.DataDir, "palm_app.zip");
 
                         if (DetectChange(strZipFileName) == true)
                             names.Add("palmCenter");
-                    }
-                    else
-                    {
-                        AppendString("*** 出错: 准备 palm_app.zip 文件失败\r\n");
                     }
                 }
             }
@@ -5888,7 +5901,8 @@ MessageBoxDefaultButton.Button2);
             string actionName = "安装";
             if (update)
                 actionName = "更新";
-            
+
+            string strProgramDir = "";
 
             this._floatingMessage.Text = $"正在{actionName} palmCenter - 掌纹中心 ...";
 
@@ -5900,7 +5914,7 @@ MessageBoxDefaultButton.Button2);
 
                 Application.DoEvents();
 
-                string strProgramDir = GetProductDirectory("palmcenter");
+                strProgramDir = GetProductDirectory("palmcenter");
                 string strExePath = Path.Combine(strProgramDir, "palmcenter.exe");
                 if (update == false && File.Exists(strExePath) == true)
                 {
@@ -5924,10 +5938,10 @@ MessageBoxDefaultButton.Button2);
                 }
 
                 // (ClickOnce 安装时)确保文件已经下载到本地
-                var ret = await PrepareFileGroup("palmcenter");
-                if (ret == false)
+                var ret = await PrepareDataFile("palm_app.zip");
+                if (ret.Value == -1)
                 {
-                    strError = "准备 palm_app.zip 文件失败";
+                    strError = $"准备 palm_app.zip 文件失败: {ret.ErrorInfo}";
                     goto ERROR1;
                 }
 
@@ -5973,7 +5987,6 @@ MessageBoxDefaultButton.Button2);
                         AppendString("配置参数结束 ...\r\n");
                     }
 
-
                     // 注册为 Windows Service
                     strExePath = Path.Combine(strProgramDir, "dp2kernel.exe");
 
@@ -5997,6 +6010,8 @@ MessageBoxDefaultButton.Button2);
 
                     AppendString("palmcenter 服务成功启动\r\n");
                 }
+                // 此后不再删除程序目录
+                strProgramDir = "";
 
                 AppendSectionTitle($"{actionName} palmCenter 结束");
                 Refresh_palmCenter_MenuItems();
@@ -6007,6 +6022,9 @@ MessageBoxDefaultButton.Button2);
             }
             return;
         ERROR1:
+            if (string.IsNullOrEmpty(strProgramDir) == false)
+                DeleteProgramDir(strProgramDir);
+
             MessageBox.Show(this, strError);
         }
 
@@ -6239,6 +6257,7 @@ MessageBoxDefaultButton.Button2);
             // 等待结束
 
             // 删除程序目录
+            /*
             REDO_DELETE_PROGRAMDIR:
             try
             {
@@ -6255,12 +6274,37 @@ MessageBoxDefaultButton.Button1);
                 if (temp_result == DialogResult.Retry)
                     goto REDO_DELETE_PROGRAMDIR;
             }
+            */
+            DeleteProgramDir(strProgramDir);
 
             AppendSectionTitle("卸载 palmCenter 结束");
             this.Refresh_palmCenter_MenuItems();
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+        bool DeleteProgramDir(string strProgramDir)
+        {
+        // 删除程序目录
+        REDO_DELETE_PROGRAMDIR:
+            try
+            {
+                PathUtil.DeleteDirectory(strProgramDir);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                DialogResult temp_result = MessageBox.Show(this,
+"删除程序目录 '" + strProgramDir + "' 出错：" + ex.Message + "\r\n\r\n是否重试?\r\n\r\n(Retry: 重试; Cancel: 不重试，继续后续卸载过程)",
+"卸载 palmCenter",
+MessageBoxButtons.RetryCancel,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button1);
+                if (temp_result == DialogResult.Retry)
+                    goto REDO_DELETE_PROGRAMDIR;
+                return false;
+            }
         }
 
         void Refresh_palmCenter_MenuItems()
@@ -6285,85 +6329,110 @@ MessageBoxDefaultButton.Button1);
             // AddMenuItem(MenuItem_palmCenter_openDataDir, "palmCenter");
         }
 
-        async Task<bool> PrepareFileGroup(string groupName)
+        class PrepareResult : NormalResult
         {
-            var bret = await Task<bool>.Run(() =>
-            {
-                return DownloadFileGroupAsync(groupName,
-                    _cancel.Token);
-            });
-            return bret;
+            public string LocalFileName { get; set; }
         }
 
-        private bool DownloadFileGroupAsync(string fileGroup,
-    CancellationToken token)
+        async Task<PrepareResult> PrepareDataFile(string filename,
+            string style = "")
         {
-            if (ApplicationDeployment.IsNetworkDeployed == false)
-                return true;
+            string localFileName = Path.Combine(this.DataDir, filename);
+            if (_networkDeployment == false
+                && File.Exists(localFileName)
+                && StringUtil.IsInList("network", style) == false)
+                return new PrepareResult { LocalFileName = localFileName };
 
+            string url = "http://dp2003.com/dp2installer/v3/" + filename;
+            if (File.Exists(localFileName))
+            {
+                var fi = new FileInfo(localFileName);
+                // 探测差异
+                var get_result = await DownloadUtility.GetServerFileInfo(
+                    url,
+                    fi.LastWriteTimeUtc,
+                    fi.Length);
+                if (get_result.Value == -1)
+                    return new PrepareResult
+                    {
+                        Value = -1,
+                        ErrorInfo = get_result.ErrorInfo,
+                        ErrorCode = get_result.ErrorCode,
+                        LocalFileName = localFileName
+                    };
+                if (get_result.Value == 0)
+                    return new PrepareResult
+                    {
+                        LocalFileName = localFileName
+                    };
+            }
+
+            // TODO: 最好出现一个下载进度对话框，并且允许中断
+            AppendString($"正在下载文件 {url} ...\r\n");
+
+            using (var cancel = CancellationTokenSource.CreateLinkedTokenSource(_cancel.Token))
+            using (FileDownloadDialog dlg = new FileDownloadDialog())
+            {
+                dlg.FormClosed += (s, e) =>
+                {
+                    cancel.Cancel();
+                };
+                this.Invoke((Action)(() =>
+                {
+                    dlg.Show(this);
+                }));
+
+                // 下载文件
+                var download_result = await DownloadUtility.DownloadFileAsync(
+                    url,
+                    localFileName,
+                    cancel.Token,
+                    (sender, e1) =>
+                    {
+                        dlg.SetProgress($"正在下载文件 {url}",
+                            e1.BytesReceived,
+                            e1.TotalBytesToReceive);
+                    },
+                    () =>
+                    {
+                        /*
+                        this.Invoke((Action)(() =>
+                        {
+                            dlg.Close();
+                        }));
+                        */
+                    });
+                if (download_result.Value == -1)
+                {
+                    AppendString($"下载文件 {url} 出错: {download_result.ErrorInfo}\r\n");
+
+                    return new PrepareResult
+                    {
+                        Value = -1,
+                        ErrorInfo = download_result.ErrorInfo,
+                        ErrorCode = download_result.ErrorCode,
+                        LocalFileName = localFileName
+                    };
+                }
+            }
+
+            AppendString($"下载文件 {url} 完成\r\n");
+            return new PrepareResult { LocalFileName = localFileName };
+        }
+
+        private async void MenuItem_palmCenter_installDriver_Click(object sender, EventArgs e)
+        {
             string strError = "";
-            bool _downloadCompleted = false;
-            DownloadFileGroupCompletedEventArgs e1 = null;
-
-            ApplicationDeployment deployment = ApplicationDeployment.CurrentDeployment;
-
-            try
+            var download_result = await PrepareDataFile("palm_driver_setup.exe", "network");
+            if (download_result.Value == -1)
             {
-                if (deployment.IsFileGroupDownloaded(fileGroup))
-                {
-                    return true;
-                }
-
-                deployment.DownloadFileGroupProgressChanged += (s, e) =>
-                {
-                    string text = String.Format("正在下载文件 {0:D}%", e.ProgressPercentage);
-                    // string text = String.Format("正在下载算法文件 {0}; {1:D}K of {2:D}K completed.", e.Group, e.BytesCompleted / 1024, e.BytesTotal / 1024);
-                    // this.ShowMessage(text);
-                };
-                deployment.DownloadFileGroupCompleted += (s, e) =>
-                {
-                    e1 = e;
-                    _downloadCompleted = true;
-                };
-
-                deployment.DownloadFileGroupAsync(fileGroup);
-            }
-            catch (InvalidOperationException ioe)
-            {
-                strError = "This application is not a ClickOnce application. Error: " + ioe.Message;
+                strError = download_result.ErrorInfo;
                 goto ERROR1;
             }
-
-            // 等待结束
-            while (_downloadCompleted == false)
-            {
-                Thread.Sleep(1000);
-                if (token.IsCancellationRequested)
-                {
-                    deployment.DownloadFileGroupAsyncCancel(fileGroup);
-                    return false;
-                }
-            }
-
-            if (e1.Error != null)
-            {
-                strError = $"下载过程发生异常: {e1.Error.Message}";
-                goto ERROR1;
-            }
-            else if (e1.Cancelled)
-            {
-                strError = $"下载过程被取消";
-                goto ERROR1;
-            }
-
-            AppendString($"下载 {fileGroup} 文件完成\r\n");
-            return true;
+            Process.Start(download_result.LocalFileName);
+            return;
         ERROR1:
-            // this.ShowMessage(strError, "red", true);
-            AppendString($"下载 {fileGroup} 文件出错: {strError}\r\n");
-            return false;
+            MessageBox.Show(this, strError);
         }
-
-
     }
 }

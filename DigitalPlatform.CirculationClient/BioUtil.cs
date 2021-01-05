@@ -126,7 +126,7 @@ namespace DigitalPlatform.CirculationClient
 
         public virtual void CancelRegisterString()
         {
-            _cancelOfRegister.Cancel();
+            _cancelOfRegister?.Cancel();
         }
 
         public void TriggerGetImage(GetImageEventArgs e)
@@ -951,8 +951,11 @@ namespace DigitalPlatform.CirculationClient
 out string strTimestamp,
 out string strBarcode,
 out string strFingerprint);
-                    // TODO: 注意读者证条码号为空的，不要发送出去
 
+                    // 2021/1/5
+                    // 注意读者证条码号为空的，不要发送出去
+                    if (string.IsNullOrEmpty(strBarcode))
+                        continue;
 
                     FingerprintItem item = new FingerprintItem
                     {
