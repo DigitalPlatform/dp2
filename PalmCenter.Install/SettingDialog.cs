@@ -41,6 +41,9 @@ namespace PalmCenter.Install
 
         private async void button_OK_Click(object sender, EventArgs e)
         {
+            // 按住 Control 键可以越过 dp2library 账户检查
+            var control = (Control.ModifierKeys & Keys.Control) == Keys.Control;
+
             List<string> errors = new List<string>();
 
             if (string.IsNullOrEmpty(this.textBox_cfg_dp2LibraryServerUrl.Text))
@@ -48,8 +51,9 @@ namespace PalmCenter.Install
             if (string.IsNullOrEmpty(this.textBox_cfg_userName.Text))
                 errors.Add("尚未指定 dp2library 服务器的用户名");
 
-            // TODO: 验证登录 dp2library 账户
-            if (string.IsNullOrEmpty(this.textBox_cfg_dp2LibraryServerUrl.Text) == false
+            // 验证登录 dp2library 账户
+            if (control == false
+                && string.IsNullOrEmpty(this.textBox_cfg_dp2LibraryServerUrl.Text) == false
                 && string.IsNullOrEmpty(this.textBox_cfg_userName.Text) == false)
             {
                 // TODO: 显示“正在验证 dp2library 账户”
@@ -65,18 +69,18 @@ namespace PalmCenter.Install
                     await Task.Run(() =>
                     {
 
-                    // 进行验证性登录
-                    // return:
-                    //      -1  error
-                    //      0   登录未成功
-                    //      1   登录成功
-                    nRet = LibraryChannel.VerifyLogin(
-                            url,
-                            userName,
-                            password,
-                            location,
-                            "palmCenter|0.01",
-                            out string temp);
+                        // 进行验证性登录
+                        // return:
+                        //      -1  error
+                        //      0   登录未成功
+                        //      1   登录成功
+                        nRet = LibraryChannel.VerifyLogin(
+                                url,
+                                userName,
+                                password,
+                                location,
+                                "palmCenter|0.01",
+                                out string temp);
                         strError = temp;
                     });
                     if (nRet != 1)

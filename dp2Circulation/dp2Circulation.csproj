@@ -52,7 +52,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>73</ApplicationRevision>
+    <ApplicationRevision>75</ApplicationRevision>
     <ApplicationVersion>3.8.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -904,6 +904,12 @@
     </Compile>
     <Compile Include="Reader\PrintReaderSheetDialog.Designer.cs">
       <DependentUpon>PrintReaderSheetDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Reader\RegisterPalmprintDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Reader\RegisterPalmprintDialog.Designer.cs">
+      <DependentUpon>RegisterPalmprintDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="Reader\RfidPatronCardDialog.cs">
       <SubType>Form</SubType>
@@ -2034,6 +2040,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Reader\PrintReaderSheetDialog.resx">
       <DependentUpon>PrintReaderSheetDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Reader\RegisterPalmprintDialog.resx">
+      <DependentUpon>RegisterPalmprintDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Reader\RfidPatronCardDialog.resx">
       <DependentUpon>RfidPatronCardDialog.cs</DependentUpon>

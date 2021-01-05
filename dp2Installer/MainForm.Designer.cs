@@ -132,6 +132,7 @@
             this.MenuItem_palmCenter_install = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_palmCenter_update = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator33 = new System.Windows.Forms.ToolStripSeparator();
+            this.MenuItem_palmCenter_openDataDir = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_palmCenter_openProgramFolder = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator34 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_palmCenter_config = new System.Windows.Forms.ToolStripMenuItem();
@@ -162,7 +163,8 @@
             this.toolStripDropDownButton_stopAll = new System.Windows.Forms.ToolStripDropDownButton();
             this.ToolStripMenuItem_stopAll = new System.Windows.Forms.ToolStripMenuItem();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
-            this.MenuItem_palmCenter_openDataDir = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_palmCenter_installDriver = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator38 = new System.Windows.Forms.ToolStripSeparator();
             this.menuStrip1.SuspendLayout();
             this.statusStrip_main.SuspendLayout();
             this.toolStrip1.SuspendLayout();
@@ -263,10 +265,10 @@
             this.MenuItem_dp2kernel_install.Text = "安装 dp2Kernel";
             this.MenuItem_dp2kernel_install.Click += new System.EventHandler(this.MenuItem_dp2kernel_install_Click);
             // 
-            // MenuItem_dp2kernel_upgrade
+            // MenuItem_dp2kernel_update
             // 
-            this.MenuItem_dp2kernel_update.Name = "MenuItem_dp2kernel_upgrade";
-            this.MenuItem_dp2kernel_update.Size = new System.Drawing.Size(315, 40);
+            this.MenuItem_dp2kernel_update.Name = "MenuItem_dp2kernel_update";
+            this.MenuItem_dp2kernel_update.Size = new System.Drawing.Size(279, 40);
             this.MenuItem_dp2kernel_update.Text = "更新 dp2Kernel";
             this.MenuItem_dp2kernel_update.Click += new System.EventHandler(this.MenuItem_dp2kernel_update_Click);
             // 
@@ -390,9 +392,9 @@
             this.MenuItem_dp2library_install.Text = "安装 dp2Library";
             this.MenuItem_dp2library_install.Click += new System.EventHandler(this.MenuItem_dp2library_install_Click);
             // 
-            // MenuItem_dp2library_upgrade
+            // MenuItem_dp2library_update
             // 
-            this.MenuItem_dp2library_update.Name = "MenuItem_dp2library_upgrade";
+            this.MenuItem_dp2library_update.Name = "MenuItem_dp2library_update";
             this.MenuItem_dp2library_update.Size = new System.Drawing.Size(360, 40);
             this.MenuItem_dp2library_update.Text = "更新 dp2Library";
             this.MenuItem_dp2library_update.Click += new System.EventHandler(this.MenuItem_dp2library_update_Click);
@@ -562,7 +564,7 @@
             // MenuItem_dp2opac_upgrade
             // 
             this.MenuItem_dp2opac_upgrade.Name = "MenuItem_dp2opac_upgrade";
-            this.MenuItem_dp2opac_upgrade.Size = new System.Drawing.Size(315, 40);
+            this.MenuItem_dp2opac_upgrade.Size = new System.Drawing.Size(276, 40);
             this.MenuItem_dp2opac_upgrade.Text = "更新 dp2OPAC";
             this.MenuItem_dp2opac_upgrade.Click += new System.EventHandler(this.MenuItem_dp2opac_update_Click);
             // 
@@ -748,9 +750,9 @@
             this.MenuItem_dp2ZServer_install.Text = "安装 dp2ZServer";
             this.MenuItem_dp2ZServer_install.Click += new System.EventHandler(this.MenuItem_dp2ZServer_install_Click);
             // 
-            // MenuItem_dp2ZServer_upgrade
+            // MenuItem_dp2ZServer_update
             // 
-            this.MenuItem_dp2ZServer_update.Name = "MenuItem_dp2ZServer_upgrade";
+            this.MenuItem_dp2ZServer_update.Name = "MenuItem_dp2ZServer_update";
             this.MenuItem_dp2ZServer_update.Size = new System.Drawing.Size(360, 40);
             this.MenuItem_dp2ZServer_update.Text = "更新 dp2ZServer";
             this.MenuItem_dp2ZServer_update.Click += new System.EventHandler(this.MenuItem_dp2ZServer_update_Click);
@@ -905,6 +907,13 @@
             this.toolStripSeparator33.Name = "toolStripSeparator33";
             this.toolStripSeparator33.Size = new System.Drawing.Size(312, 6);
             // 
+            // MenuItem_palmCenter_openDataDir
+            // 
+            this.MenuItem_palmCenter_openDataDir.Name = "MenuItem_palmCenter_openDataDir";
+            this.MenuItem_palmCenter_openDataDir.Size = new System.Drawing.Size(315, 40);
+            this.MenuItem_palmCenter_openDataDir.Text = "打开数据文件夹";
+            this.MenuItem_palmCenter_openDataDir.Click += new System.EventHandler(this.MenuItem_palmCenter_openDataDir_Click);
+            // 
             // MenuItem_palmCenter_openProgramFolder
             // 
             this.MenuItem_palmCenter_openProgramFolder.Name = "MenuItem_palmCenter_openProgramFolder";
@@ -939,7 +948,9 @@
             this.MenuItem_palmCenter_installService,
             this.MenuItem_palmCenter_uninstallService,
             this.toolStripSeparator37,
-            this.MenuItem_palmCenter_uninstall});
+            this.MenuItem_palmCenter_uninstall,
+            this.toolStripSeparator38,
+            this.MenuItem_palmCenter_installDriver});
             this.MenuItem_palmCenter_tool.Name = "MenuItem_palmCenter_tool";
             this.MenuItem_palmCenter_tool.Size = new System.Drawing.Size(315, 40);
             this.MenuItem_palmCenter_tool.Text = "工具";
@@ -1141,12 +1152,17 @@
             this.webBrowser1.Size = new System.Drawing.Size(794, 497);
             this.webBrowser1.TabIndex = 4;
             // 
-            // MenuItem_palmCenter_openDataDir
+            // MenuItem_palmCenter_installDriver
             // 
-            this.MenuItem_palmCenter_openDataDir.Name = "MenuItem_palmCenter_openDataDir";
-            this.MenuItem_palmCenter_openDataDir.Size = new System.Drawing.Size(315, 40);
-            this.MenuItem_palmCenter_openDataDir.Text = "打开数据文件夹";
-            this.MenuItem_palmCenter_openDataDir.Click += new System.EventHandler(this.MenuItem_palmCenter_openDataDir_Click);
+            this.MenuItem_palmCenter_installDriver.Name = "MenuItem_palmCenter_installDriver";
+            this.MenuItem_palmCenter_installDriver.Size = new System.Drawing.Size(348, 40);
+            this.MenuItem_palmCenter_installDriver.Text = "安装掌纹设备厂家驱动";
+            this.MenuItem_palmCenter_installDriver.Click += new System.EventHandler(this.MenuItem_palmCenter_installDriver_Click);
+            // 
+            // toolStripSeparator38
+            // 
+            this.toolStripSeparator38.Name = "toolStripSeparator38";
+            this.toolStripSeparator38.Size = new System.Drawing.Size(345, 6);
             // 
             // MainForm
             // 
@@ -1308,6 +1324,8 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator37;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_palmCenter_uninstall;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_palmCenter_openDataDir;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator38;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_palmCenter_installDriver;
     }
 }
 

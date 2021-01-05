@@ -645,9 +645,9 @@ MessageBoxDefaultButton.Button2);
 
 
                     // if (results == null || results.Length < 2)
-                        if (results == null || results.Length < 1)
-                        {
-                            strError = "返回的results不正常。";
+                    if (results == null || results.Length < 1)
+                    {
+                        strError = "返回的results不正常。";
                         goto ERROR1;
                     }
 
@@ -6935,6 +6935,18 @@ MessageBoxDefaultButton.Button1);
         {
             string strError = "";
 
+            RegisterPalmprintDialog dlg = new RegisterPalmprintDialog();
+            dlg.FormClosed += (s, e) =>
+            {
+                _ = Task.Run(async () =>
+                {
+                    await CancelReadPalmprintString();
+                });
+            };
+            dlg.StartPosition = FormStartPosition.CenterScreen;
+            dlg.Show(this);
+            dlg.Message = "等待扫入掌纹 ...";
+
             FingerprintManager.Touched += PalmprintManager_Touched;
 
             this.ShowMessage("等待扫描掌纹 ...");
@@ -6967,6 +6979,7 @@ MessageBoxDefaultButton.Button1);
             REDO:
                 GetFingerprintStringResult result = await ReadPalmprintString(
                     bPractice == true ? "!practice" : this.readerEditControl1.Barcode);
+                /*
                 if (result.Value == -1)
                 {
                     DialogResult temp_result = MessageBox.Show(this,
@@ -6978,6 +6991,7 @@ MessageBoxDefaultButton.Button1);
                     if (temp_result == DialogResult.Retry)
                         goto REDO;
                 }
+                */
 
                 if (result.Value == -1 || result.Value == 0)
                 {
@@ -7003,6 +7017,18 @@ MessageBoxDefaultButton.Button1);
                 this.ClearMessage();
 
                 FingerprintManager.Touched -= PalmprintManager_Touched;
+
+                dlg.Close();
+            }
+
+            // 显示获取掌纹中途的信息
+            void PalmprintManager_Touched(object sender, TouchedEventArgs e)
+            {
+                // this.ShowMessage(e.Message);
+                dlg.Invoke((Action)(() =>
+                {
+                    dlg.Message = e.Message;
+                }));
             }
 
             Program.MainForm.StatusBarMessage = "掌纹信息获取成功";
@@ -7010,12 +7036,6 @@ MessageBoxDefaultButton.Button1);
         ERROR1:
             Program.MainForm.StatusBarMessage = strError;
             this.ShowMessage(strError, "red", true);
-        }
-
-        // 显示获取掌纹中途的信息
-        private void PalmprintManager_Touched(object sender, TouchedEventArgs e)
-        {
-            this.ShowMessage(e.Message);
         }
 
         private void toolStripMenuItem_clearPalmprint_Click(object sender, EventArgs e)

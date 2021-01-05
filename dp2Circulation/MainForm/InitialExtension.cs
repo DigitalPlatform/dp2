@@ -1772,6 +1772,10 @@ MessageBoxDefaultButton.Button1);
             if (e.Quality == -1)
                 return;
 
+            // 2021/1/5
+            if (string.IsNullOrEmpty(e.Message))
+                return;
+
             this.Invoke((Action)(() =>
             {
                 SendKeys.Send(e.Message + "\r");
