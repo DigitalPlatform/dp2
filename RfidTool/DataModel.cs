@@ -261,6 +261,19 @@ namespace RfidTool
             return result;
         }
 
+        public static NormalResult SetEAS(string reader_name,
+    string uid,
+    uint antenna_id,
+    bool enable,
+    string style)
+        {
+            return _driver.SetEAS(reader_name,
+                uid,
+                antenna_id,
+                enable,
+                style);
+        }
+
         /*
         public static void StartRfidManager(string url)
         {

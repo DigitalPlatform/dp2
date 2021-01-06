@@ -73,6 +73,7 @@ namespace DigitalPlatform.CirculationClient
         //      strStyle    风格
         //                  reinput    如果序列号不满足要求，是否直接出现对话框让用户重新输入序列号
         //                  reset   执行重设序列号任务。意思就是无论当前序列号是否可用，都直接出现序列号对话框
+        //                  skipVerify  不验证序列号合法性，只关注 function list 是否符合要求
         // return:
         //      -1  出错
         //      0   正确
@@ -87,6 +88,7 @@ namespace DigitalPlatform.CirculationClient
 
             bool bReinput = StringUtil.IsInList("reinput", strStyle);
             bool bReset = StringUtil.IsInList("reset", strStyle);
+            bool bSkipVerify = StringUtil.IsInList("skipVerify", strStyle);
 
             string strFirstMac = "";
             List<string> macs = SerialCodeForm.GetMacAddress();
@@ -117,7 +119,7 @@ namespace DigitalPlatform.CirculationClient
 
             if (bReset == true
                 || CheckFunction(GetEnvironmentString(""), strRequirFuncList) == false
-                || MatchLocalString(strSerialCode) == false
+                || (bSkipVerify == false && MatchLocalString(strSerialCode) == false)
                 || String.IsNullOrEmpty(strSerialCode) == true)
             {
                 if (bReinput == false && bReset == false)
