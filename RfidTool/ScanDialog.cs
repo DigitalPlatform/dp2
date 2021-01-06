@@ -401,8 +401,10 @@ namespace RfidTool
         // 寻找一个可用于写入的空白标签，或者相同 PII 的标签
         FindTagResult FindBlankTag(string pii)
         {
-            FindTagResult blank_result = null;
-            FindTagResult pii_result = null;
+            List<FindTagResult> blank_results = new List<FindTagResult>();
+            List<FindTagResult> pii_results = new List<FindTagResult>();
+            //FindTagResult blank_result = null;
+            //FindTagResult pii_result = null;
 
             foreach (ListViewItem item in this.listView_tags.Items)
             {
@@ -420,34 +422,50 @@ namespace RfidTool
                 string current_pii = ListViewUtil.GetItemText(item, COLUMN_PII);
                 if (current_pii == pii)
                 {
-                    pii_result = new FindTagResult
+                    pii_results.Add(new FindTagResult
                     {
                         Value = 1,
                         Item = item,
                         Tag = info.TagData.OneTag,
-                    };
+                    });
                 }
                 else if ((string.IsNullOrEmpty(current_pii) == true || current_pii == "(空)")
                     && info.TagData.OneTag.TagInfo != null)
                 {
-                    blank_result = new FindTagResult
+                    blank_results.Add(new FindTagResult
                     {
                         Value = 1,
                         Item = item,
                         Tag = info.TagData.OneTag,
-                    };
+                    });
                 }
             }
 
-            // 优先返回 PII 匹配的行
-            if (pii_result != null)
-                return pii_result;
-            // 次优先返回 PII 为空的行
-            if (blank_result != null)
-                return blank_result;
+            if (pii_results.Count + blank_results.Count == 1)
+            {
+                // 优先返回 PII 匹配的行
+                if (pii_results.Count == 1)
+                    return pii_results[0];
+                // 次优先返回 PII 为空的行
+                if (blank_results.Count == 1)
+                    return blank_results[0];
+            }
+
+            // 返回无法满足条件的具体原因
+            List<string> reasons = new List<string>();
+            if (pii_results.Count > 1)
+                reasons.Add($"PII '{pii}' 匹配标签不唯一 ({pii_results.Count})");
+            if (blank_results.Count > 1)
+                reasons.Add($"空白标签不唯一 ({blank_results.Count})");
+            if (pii_results.Count > 0 && blank_results.Count > 0)
+                reasons.Add($"出现了 PII 匹配，同时还有空白标签的情况");
 
             // 没有找到
-            return new FindTagResult { Value = 0 };
+            return new FindTagResult
+            {
+                Value = 0,
+                ErrorInfo = StringUtil.MakePathList(reasons, ";")
+            };
         }
 
         int _inProcessing = 0;
@@ -894,7 +912,7 @@ MessageBoxDefaultButton.Button2);
 
         void menu_clearTagsCache_Click(object sender, EventArgs e)
         {
-            TagList.ClearTagTable(null);
+            DataModel.TagList.ClearTagTable(null);
         }
 
 #if REMOVED

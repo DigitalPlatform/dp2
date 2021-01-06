@@ -657,20 +657,6 @@ _cancel.Token);
             Storeage.SaveItems(items);
         }
 
-        private void MenuItem_clearAllHistory_Click(object sender, EventArgs e)
-        {
-            DialogResult result = MessageBox.Show(this,
-$"确实要清除全部 {this.listView_writeHistory.Items.Count} 个历史事项?",
-"RfidTool",
-MessageBoxButtons.YesNo,
-MessageBoxIcon.Question,
-MessageBoxDefaultButton.Button2);
-            if (result != DialogResult.Yes)
-                return;
-            this.listView_writeHistory.Items.Clear();
-            _historyChanged = true;
-        }
-
         private void MenuItem_userManual_Click(object sender, EventArgs e)
         {
             string url = "https://github.com/DigitalPlatform/dp2/issues/764";
@@ -693,6 +679,82 @@ MessageBoxDefaultButton.Button2);
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+        private void MenuItem_openUserFolder_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(ClientInfo.UserDir);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
+            }
+        }
+
+        private void MenuItem_openDataFolder_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(ClientInfo.DataDir);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
+            }
+        }
+
+        private void MenuItem_openProgramFolder_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(Environment.CurrentDirectory);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
+            }
+        }
+
+        private void MenuItem_clearHistory_all_Click(object sender, EventArgs e)
+        {
+            DialogResult result = MessageBox.Show(this,
+$"确实要清除全部 {this.listView_writeHistory.Items.Count} 个历史事项?",
+"RfidTool",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+            if (result != DialogResult.Yes)
+                return;
+            this.listView_writeHistory.Items.Clear();
+            _historyChanged = true;
+        }
+
+        private void MenuItem_clearHistory_selected_Click(object sender, EventArgs e)
+        {
+            DialogResult result = MessageBox.Show(this,
+$"确实要清除所选的 {this.listView_writeHistory.SelectedItems.Count} 个历史事项?",
+"RfidTool",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+            if (result != DialogResult.Yes)
+                return;
+            foreach(ListViewItem item in this.listView_writeHistory.SelectedItems)
+            {
+                this.listView_writeHistory.Items.Remove(item);
+            }
+            _historyChanged = true;
+        }
+
+        private void MenuItem_clearHistory_DropDownOpening(object sender, EventArgs e)
+        {
+            this.MenuItem_clearHistory_all.Text = $"清除全部 {this.listView_writeHistory.Items.Count} 个事项(&A)";
+            this.MenuItem_clearHistory_all.Enabled = this.listView_writeHistory.Items.Count > 0;
+
+            this.MenuItem_clearHistory_selected.Text = $"清除所选 {this.listView_writeHistory.SelectedItems.Count} 个事项(&S)";
+            this.MenuItem_clearHistory_selected.Enabled = this.listView_writeHistory.SelectedItems.Count > 0;
         }
     }
 
