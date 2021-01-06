@@ -25,7 +25,7 @@ namespace RfidTool
         static void Main()
         {
             ClientInfo.TypeOfProgram = typeof(Program);
-            ClientInfo.CopyrightKey = "rfidtool_sn_key";
+            FormClientInfo.CopyrightKey = "rfidtool_sn_key";
 
             string folderPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             string assemblyPath = Path.Combine(folderPath, IntPtr.Size == 8 ? "x64" : "x86");

@@ -477,7 +477,7 @@ namespace RfidTool
                 string error = VerifyOiSetting();
                 if (error != null)
                 {
-                    ClientInfo.Speak("O I (所属机构代码) 和 A O I (非标准所属机构代码) 尚未配置");
+                    FormClientInfo.Speak("O I (所属机构代码) 和 A O I (非标准所属机构代码) 尚未配置");
                     MessageBox.Show(this, error);
                     using (SettingDialog dlg = new SettingDialog())
                     {
@@ -496,7 +496,7 @@ namespace RfidTool
                     var find_result = FindBlankTag(barcode);
                     if (find_result.Value == 0)
                     {
-                        ClientInfo.Speak($"请在读写器上放好空白标签，或双击选择其他可用标签");
+                        FormClientInfo.Speak($"请在读写器上放好空白标签，或双击选择其他可用标签");
                         ShowMessage($"请在读写器上放好空白标签，或双击选择其他可用标签");
                         return;
                     }
@@ -573,14 +573,14 @@ namespace RfidTool
                 });
 
                 // 语音提示写入成功
-                ClientInfo.Speak($"{barcode} 写入成功");
+                FormClientInfo.Speak($"{barcode} 写入成功");
                 ShowMessage($"{barcode} 写入成功");
                 ClearBarcode();
             }
             catch (Exception ex)
             {
                 string error = $"写入失败: {ex.Message}";
-                ClientInfo.Speak(error);
+                FormClientInfo.Speak(error);
                 ShowMessage(error, "red");
                 ClientInfo.WriteErrorLog($"写入标签时出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 MessageBox.Show(this, error);
@@ -798,6 +798,13 @@ MessageBoxDefaultButton.Button2);
             ContextMenu contextMenu = new ContextMenu();
             MenuItem menuItem = null;
 
+            menuItem = new MenuItem("写入(&W)");
+            menuItem.DefaultItem = true;
+            menuItem.Click += new System.EventHandler(this.button_write_Click);
+            menuItem.Enabled = isWriteEnabled();
+            contextMenu.MenuItems.Add(menuItem);
+
+
             /*
             menuItem = new MenuItem("全选(&A)");
             menuItem.Click += new System.EventHandler(this.menu_selectAll_Click);
@@ -827,11 +834,23 @@ MessageBoxDefaultButton.Button2);
             contextMenu.MenuItems.Add(menuItem);
 
             menuItem = new MenuItem("修改标签 EAS [" + this.listView_tags.SelectedItems.Count.ToString() + "] (&E)");
-            menuItem.Click += new System.EventHandler(this.menu_changeSelectedTagEas_Click);
+            // menuItem.Click += new System.EventHandler(this.menu_changeSelectedTagEas_Click);
             if (this.listView_tags.SelectedItems.Count == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
+            {
+                MenuItem subMenuItem = new MenuItem("On");
+                subMenuItem.Tag = "on";
+                subMenuItem.Click += new System.EventHandler(this.menu_changeSelectedTagEas_Click);
+                menuItem.MenuItems.Add(subMenuItem);
+
+                subMenuItem = new MenuItem("Off");
+                subMenuItem.Tag = "off";
+                subMenuItem.Click += new System.EventHandler(this.menu_changeSelectedTagEas_Click);
+                menuItem.MenuItems.Add(subMenuItem);
+
+            }
             // ---
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
@@ -893,7 +912,46 @@ MessageBoxDefaultButton.Button2);
 
         void menu_changeSelectedTagEas_Click(object sender, EventArgs e)
         {
+            string style = (sender as MenuItem).Tag as string;
+            int nRet = SetEAS(style == "on",
+                out string strError);
+            if (nRet == -1)
+                goto ERROR1;
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
 
+        int SetEAS(bool enable,
+    out string strError)
+        {
+            strError = "";
+
+            foreach (ListViewItem item in this.listView_tags.SelectedItems)
+            {
+                var info = item.Tag as ItemInfo;
+                var tag = info.TagData?.OneTag?.TagInfo;
+                if (tag == null)
+                {
+                    strError = "info.TagData?.OneTag?.TagInfo == null";
+                    return -1;
+                }
+                var write_result = DataModel.SetEAS(tag.ReaderName,
+        tag.UID,
+        tag.AntennaID,
+        enable,
+        "");
+                if (write_result.Value == -1)
+                {
+                    strError = write_result.ErrorInfo;
+                    return -1;
+                }
+
+                // 清掉标签缓冲，迫使刷新列表显示
+                DataModel.TagList.ClearTagTable(tag.UID);
+            }
+
+            return 0;
         }
 
         void menu_clearSelectedTagContent_Click(object sender, EventArgs e)
@@ -982,10 +1040,13 @@ MessageBoxDefaultButton.Button2);
         // 判断序列号中的功能类型是否匹配
         bool HasLicense(string function_type)
         {
-            int nRet = ClientInfo.VerifySerialCode(
+            string style = "reinput";
+            if (StringUtil.IsDevelopMode())
+                style += ",skipVerify";
+            int nRet = FormClientInfo.VerifySerialCode(
     $"设置序列号({function_type})",
     function_type,
-    "reinput",
+    style,
     out string strError);
             if (nRet == 0)
                 return true;
@@ -1027,6 +1088,13 @@ MessageBoxDefaultButton.Button2);
 
         private void listView_tags_DoubleClick(object sender, EventArgs e)
         {
+            if (isWriteEnabled() == false)
+            {
+                FormClientInfo.Speak($"警告：无法写入");
+                MessageBox.Show(this, "当前没有待写入的条码号，无法写入");
+                return;
+            }
+
             if (this.listView_tags.SelectedItems.Count == 1)
             {
                 ProcessBarcode(this.listView_tags.SelectedItems[0]);
@@ -1037,7 +1105,20 @@ MessageBoxDefaultButton.Button2);
 
         private void listView_tags_SelectedIndexChanged(object sender, EventArgs e)
         {
-            this.button_write.Enabled = (this.listView_tags.SelectedItems.Count == 1);
+            SetWriteButtonState();
+        }
+
+        bool isWriteEnabled()
+        {
+            return (this.listView_tags.SelectedItems.Count == 1
+                && string.IsNullOrEmpty(this.textBox_processingBarcode.Text) == false);
+        }
+
+        void SetWriteButtonState()
+        {
+            this.button_write.Enabled = isWriteEnabled();
+
+
         }
 
         private void button_clearProcessingBarcode_Click(object sender, EventArgs e)
@@ -1048,6 +1129,7 @@ MessageBoxDefaultButton.Button2);
         private void textBox_processingBarcode_TextChanged(object sender, EventArgs e)
         {
             this.button_clearProcessingBarcode.Enabled = (this.textBox_processingBarcode.Text.Length > 0);
+            SetWriteButtonState();
         }
 
         void ShowMessage(string text, string color = "")

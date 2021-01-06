@@ -110,7 +110,7 @@ bool bClickClose = false)
         public MainForm()
         {
             ClientInfo.ProgramName = "rfidtool";
-            ClientInfo.MainForm = this;
+            FormClientInfo.MainForm = this;
 
             InitializeComponent();
 
@@ -683,7 +683,7 @@ MessageBoxDefaultButton.Button2);
             // return:
             //      -1  出错
             //      0   正确
-            int nRet = ClientInfo.VerifySerialCode(
+            int nRet = FormClientInfo.VerifySerialCode(
                 "", // strTitle,
                 "", // strRequirFuncList,
                 "reset",

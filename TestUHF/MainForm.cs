@@ -21,7 +21,7 @@ namespace TestUHF
         public MainForm()
         {
             ClientInfo.ProgramName = "testuhf";
-            ClientInfo.MainForm = this;
+            FormClientInfo.MainForm = this;
 
             InitializeComponent();
         }
