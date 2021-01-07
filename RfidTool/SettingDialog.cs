@@ -26,6 +26,8 @@ namespace RfidTool
             this.comboBox_uhfDataFormat.Text = DataModel.UhfWriteFormat;
             this.checkBox_writeUserBank.Checked = DataModel.WriteUhfUserBank;
             this.checkBox_warningWhenUhfFormatMismatch.Checked = DataModel.WarningWhenUhfFormatMismatch;
+
+            this.checkBox_enableTagCache.Checked = DataModel.EnableTagCache;
         }
 
         private void SettingDialog_FormClosing(object sender, FormClosingEventArgs e)
@@ -80,6 +82,8 @@ namespace RfidTool
             DataModel.UhfWriteFormat = this.comboBox_uhfDataFormat.Text;
             DataModel.WriteUhfUserBank = this.checkBox_writeUserBank.Checked;
             DataModel.WarningWhenUhfFormatMismatch = this.checkBox_warningWhenUhfFormatMismatch.Checked;
+
+            DataModel.EnableTagCache = this.checkBox_enableTagCache.Checked;
 
             this.DialogResult = DialogResult.OK;
             this.Close();

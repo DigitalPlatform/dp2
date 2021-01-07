@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -12,6 +13,7 @@ using System.Windows.Forms;
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.CommonControl;
+using DigitalPlatform.Core;
 using DigitalPlatform.GUI;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
@@ -39,6 +41,8 @@ namespace RfidTool
         // string _currentBarcode = "";
         public event WriteCompleteEventHandler WriteComplete = null;
 
+        ErrorTable _errorTable = null;
+
         public ScanDialog()
         {
             InitializeComponent();
@@ -49,6 +53,21 @@ namespace RfidTool
 
             DataModel.TagChanged += DataModel_TagChanged;
             DataModel.SetError += DataModel_SetError;
+
+            _errorTable = new ErrorTable((s) =>
+            {
+                try
+                {
+                    this.Invoke((Action)(() =>
+                    {
+
+                    }));
+                }
+                catch (ObjectDisposedException)
+                {
+
+                }
+            });
         }
 
         private void textBox_barcode_KeyPress(object sender, KeyPressEventArgs e)
@@ -210,12 +229,26 @@ namespace RfidTool
                 ListViewItem item = ListViewUtil.FindItem(this.listView_tags, tag.OneTag.UID, COLUMN_UID);
                 if (item == null)
                 {
+                    // 2021/1/7
+                    // tag.OneTag = DeepClone(tag.OneTag);
+
                     item = new ListViewItem();
                     item.Tag = new ItemInfo { TagData = tag };
+                    ListViewUtil.ChangeItemText(item, COLUMN_PII, "(尚未填充)");
                     this.listView_tags.Items.Add(item);
                 }
                 RefreshItem(item, tag);
             }
+
+            /*
+            OneTag DeepClone(OneTag t)
+            {
+                t = t.Clone();
+                if (t.TagInfo != null)
+                    t.TagInfo = t.TagInfo.Clone();
+                return t;
+            }
+            */
         }
 
         void RemoveTags(List<TagAndData> tags)
@@ -233,7 +266,7 @@ namespace RfidTool
         // 刷新一个 ListViewItem 的所有列显示
         void RefreshItem(ListViewItem item, TagAndData tag)
         {
-            string pii = "";
+            string pii = "(尚未填充)";
             string tou = "";
             string eas = "";
             string oi = "";
@@ -245,6 +278,8 @@ namespace RfidTool
             ListViewUtil.ChangeItemText(item, COLUMN_ANTENNA, tag.OneTag.AntennaID.ToString());
             ListViewUtil.ChangeItemText(item, COLUMN_READERNAME, tag.OneTag.ReaderName);
             ListViewUtil.ChangeItemText(item, COLUMN_PROTOCOL, tag.OneTag.Protocol);
+
+            ListViewUtil.ChangeItemText(item, COLUMN_PII, "(尚未填充)");
 
             try
             {
@@ -401,71 +436,77 @@ namespace RfidTool
         // 寻找一个可用于写入的空白标签，或者相同 PII 的标签
         FindTagResult FindBlankTag(string pii)
         {
-            List<FindTagResult> blank_results = new List<FindTagResult>();
-            List<FindTagResult> pii_results = new List<FindTagResult>();
-            //FindTagResult blank_result = null;
-            //FindTagResult pii_result = null;
-
-            foreach (ListViewItem item in this.listView_tags.Items)
+            lock (_syncRootFill)
             {
-                /*
-                if (item.Tag is not ItemInfo info)
-                    continue;
-                */
-                ItemInfo info = item.Tag as ItemInfo;
-                if (info == null)
-                    continue;
+                List<FindTagResult> blank_results = new List<FindTagResult>();
+                List<FindTagResult> pii_results = new List<FindTagResult>();
+                //FindTagResult blank_result = null;
+                //FindTagResult pii_result = null;
 
-                if (string.IsNullOrEmpty(info.TagData.Error) == false)
-                    continue;
-
-                string current_pii = ListViewUtil.GetItemText(item, COLUMN_PII);
-                if (current_pii == pii)
+                this.Invoke((Action)(() =>
                 {
-                    pii_results.Add(new FindTagResult
+                    foreach (ListViewItem item in this.listView_tags.Items)
                     {
-                        Value = 1,
-                        Item = item,
-                        Tag = info.TagData.OneTag,
-                    });
-                }
-                else if ((string.IsNullOrEmpty(current_pii) == true || current_pii == "(空)")
-                    && info.TagData.OneTag.TagInfo != null)
+                        /*
+                        if (item.Tag is not ItemInfo info)
+                            continue;
+                        */
+                        ItemInfo info = item.Tag as ItemInfo;
+                        if (info == null)
+                            continue;
+
+                        if (string.IsNullOrEmpty(info.TagData.Error) == false)
+                            continue;
+
+                        string current_pii = ListViewUtil.GetItemText(item, COLUMN_PII);
+                        if (current_pii == pii)
+                        {
+                            pii_results.Add(new FindTagResult
+                            {
+                                Value = 1,
+                                Item = item,
+                                Tag = info.TagData.OneTag,
+                            });
+                        }
+                        else if ((string.IsNullOrEmpty(current_pii) == true || current_pii == "(空)")
+                            && info.TagData.OneTag.TagInfo != null)
+                        {
+                            blank_results.Add(new FindTagResult
+                            {
+                                Value = 1,
+                                Item = item,
+                                Tag = info.TagData.OneTag,
+                            });
+                        }
+                    }
+                }));
+
+                if (pii_results.Count + blank_results.Count == 1)
                 {
-                    blank_results.Add(new FindTagResult
-                    {
-                        Value = 1,
-                        Item = item,
-                        Tag = info.TagData.OneTag,
-                    });
+                    // 优先返回 PII 匹配的行
+                    if (pii_results.Count == 1)
+                        return pii_results[0];
+                    // 次优先返回 PII 为空的行
+                    if (blank_results.Count == 1)
+                        return blank_results[0];
                 }
+
+                // 返回无法满足条件的具体原因
+                List<string> reasons = new List<string>();
+                if (pii_results.Count > 1)
+                    reasons.Add($"PII '{pii}' 匹配标签不唯一 ({pii_results.Count})");
+                if (blank_results.Count > 1)
+                    reasons.Add($"空白标签不唯一 ({blank_results.Count})");
+                if (pii_results.Count > 0 && blank_results.Count > 0)
+                    reasons.Add($"出现了 PII 匹配，同时还有空白标签的情况");
+
+                // 没有找到
+                return new FindTagResult
+                {
+                    Value = 0,
+                    ErrorInfo = StringUtil.MakePathList(reasons, ";")
+                };
             }
-
-            if (pii_results.Count + blank_results.Count == 1)
-            {
-                // 优先返回 PII 匹配的行
-                if (pii_results.Count == 1)
-                    return pii_results[0];
-                // 次优先返回 PII 为空的行
-                if (blank_results.Count == 1)
-                    return blank_results[0];
-            }
-
-            // 返回无法满足条件的具体原因
-            List<string> reasons = new List<string>();
-            if (pii_results.Count > 1)
-                reasons.Add($"PII '{pii}' 匹配标签不唯一 ({pii_results.Count})");
-            if (blank_results.Count > 1)
-                reasons.Add($"空白标签不唯一 ({blank_results.Count})");
-            if (pii_results.Count > 0 && blank_results.Count > 0)
-                reasons.Add($"出现了 PII 匹配，同时还有空白标签的情况");
-
-            // 没有找到
-            return new FindTagResult
-            {
-                Value = 0,
-                ErrorInfo = StringUtil.MakePathList(reasons, ";")
-            };
         }
 
         int _inProcessing = 0;
@@ -503,6 +544,8 @@ namespace RfidTool
                         ClientInfo.MemoryState(dlg, "settingDialog", "state");
 
                         dlg.ShowDialog(this);
+                        if (dlg.DialogResult == DialogResult.OK)
+                            DataModel.TagList.EnableTagCache = DataModel.EnableTagCache;
                     }
                     return;
                 }
@@ -521,12 +564,50 @@ namespace RfidTool
 
                     tag = find_result.Tag;
                     iteminfo = find_result.Item.Tag as ItemInfo;
+                    selectedItem = find_result.Item;
                 }
                 else
                 {
                     iteminfo = (selectedItem.Tag as ItemInfo);
                     tag = iteminfo.TagData.OneTag;
                 }
+
+                // 2021/1/7
+                // 克隆对象，避免后面因为标签快速拿走而被改变
+                if (tag != null)
+                {
+                    tag = DeepClone(tag);
+                }
+
+                OneTag DeepClone(OneTag t)
+                {
+                    t = t.Clone();
+                    if (t.TagInfo != null)
+                        t.TagInfo = t.TagInfo.Clone();
+                    return t;
+                }
+
+                if (tag.TagInfo == null)
+                {
+                    /*
+                    string pii = ListViewUtil.GetItemText(selectedItem, COLUMN_PII);
+                    throw new Exception("test");
+                    */
+                    string text = "标签信息尚未填充。请稍后重试写入";
+                    ShowMessage(text);
+                    ShowMessageBox("processBarcode", text);
+                    return;
+                }
+
+                /*
+                Debug.Assert(tag != null);
+                Debug.Assert(tag.TagInfo != null);
+
+                // testing
+                // DataModel.TagList.ClearTagTable(tag.UID);
+
+                Debug.Assert(tag.TagInfo != null);
+                */
 
                 string oi = DataModel.DefaultOiString;
                 string aoi = DataModel.DefaultAoiString;
@@ -580,7 +661,7 @@ namespace RfidTool
                 if (write_result.Value == -1)
                 {
                     ShowMessage(write_result.ErrorInfo);
-                    ShowMessageBox(write_result.ErrorInfo);
+                    ShowMessageBox("processBarcode", write_result.ErrorInfo);
                     return;
                 }
 
@@ -591,17 +672,18 @@ namespace RfidTool
                 });
 
                 // 语音提示写入成功
-                FormClientInfo.Speak($"{barcode} 写入成功");
+                FormClientInfo.Speak($"{barcode} 写入成功", false, true);
                 ShowMessage($"{barcode} 写入成功");
+                ShowMessageBox("processBarcode", null);
                 ClearBarcode();
             }
             catch (Exception ex)
             {
                 string error = $"写入失败: {ex.Message}";
-                FormClientInfo.Speak(error);
+                // FormClientInfo.Speak(error);
                 ShowMessage(error, "red");
                 ClientInfo.WriteErrorLog($"写入标签时出现异常: {ExceptionUtil.GetDebugText(ex)}");
-                MessageBox.Show(this, error);
+                ShowMessageBox("processBarcode", error);
             }
             finally
             {
@@ -664,15 +746,7 @@ namespace RfidTool
             }
         }
 
-        void ShowMessageBox(string text)
-        {
-            this.Invoke((Action)(() =>
-            {
-                MessageBox.Show(this, text);
-            }));
 
-            // TODO: 语音提示出错
-        }
 
         void ClearBarcode()
         {
@@ -1195,6 +1269,79 @@ MessageBoxDefaultButton.Button2);
                 GuiState.SetUiState(controls, value);
             }
         }
+
+        private void button_test_Click(object sender, EventArgs e)
+        {
+            this.textBox_barcode.Focus();
+            this.textBox_barcode.SelectAll();
+            SendKeys.Send("0000001\r");
+        }
+
+        FloatingErrorDialog _errorDialog = null;
+
+        void CreateScanDialog()
+        {
+            if (_errorDialog == null)
+            {
+                _errorDialog = new FloatingErrorDialog();
+
+                _errorDialog.FormClosing += _errorDialog_FormClosing;
+
+                /*
+                GuiUtil.SetControlFont(_errorDialog, this.Font);
+                ClientInfo.MemoryState(_errorDialog, "scanDialog", "state");
+                _errorDialog.UiState = ClientInfo.Config.Get("scanDialog", "uiState", null);
+                */
+            }
+        }
+        private void _errorDialog_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            var dialog = sender as Form;
+
+            // 将关闭改为隐藏
+            dialog.Visible = false;
+            if (e.CloseReason == CloseReason.UserClosing)
+                e.Cancel = true;
+        }
+
+        void ShowMessageBox(string type, string text)
+        {
+            // 语音提示出错
+            if (text != null)
+                FormClientInfo.Speak(text, false, false);
+
+            this.Invoke((Action)(() =>
+            {
+                CreateScanDialog();
+                if (text == null)
+                    _errorDialog.Hide();
+                else
+                {
+                    if (_errorDialog.Visible == false)
+                    {
+                        _errorDialog.Show(this);
+
+                        this.textBox_barcode.SelectAll();
+                        this.textBox_barcode.Focus();
+                    }
+                }
+
+                _errorTable.SetError(type, text);
+                _errorDialog.Message = _errorTable.GetError(false);
+            }));
+        }
+
+        /*
+        void ShowMessageBox(string text)
+        {
+            // 语音提示出错
+            FormClientInfo.Speak(text);
+            this.Invoke((Action)(() =>
+            {
+                MessageBox.Show(this, text);
+            }));
+        }
+        */
     }
 
     public class ItemInfo

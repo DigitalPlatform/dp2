@@ -466,6 +466,8 @@ _cancel.Token);
                 ClientInfo.MemoryState(dlg, "settingDialog", "state");
 
                 dlg.ShowDialog(this);
+                if (dlg.DialogResult == DialogResult.OK)
+                    DataModel.TagList.EnableTagCache = DataModel.EnableTagCache;
             }
         }
 

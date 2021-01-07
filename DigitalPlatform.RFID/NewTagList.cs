@@ -30,6 +30,23 @@ namespace DigitalPlatform.RFID
             }
         }
 
+        bool _enableTagCache = true;
+
+        // 是否启用标签内容缓存？
+        public bool EnableTagCache
+        {
+            get
+            {
+                return _enableTagCache;
+            }
+            set
+            {
+                _enableTagCache = value;
+                if (value == false)
+                    ClearTagTable(null, false);
+            }
+        }
+
         public void AssertTagInfo()
         {
             int i = 0;
@@ -495,6 +512,7 @@ namespace DigitalPlatform.RFID
             return false;
         }
 
+        // 缓存中的事项个数
         public int TagTableCount
         {
             get
@@ -513,16 +531,22 @@ namespace DigitalPlatform.RFID
             //if (channel.Started == false)
             //    return new GetTagInfoResult { Value = -1, ErrorInfo = "RFID 通道尚未启动" };
 
-            TagInfo info = (TagInfo)_tagTable[uid];
+            TagInfo info = null;
 
-            // 2020/10/17
-            // 检查 reader_name 和 antenna
-            if (info != null)
+            // 先从 cache 里面找
+            if (_enableTagCache)
             {
-                if (info.ReaderName != reader_name || info.AntennaID != antenna)
+                info = (TagInfo)_tagTable[uid];
+
+                // 2020/10/17
+                // 检查 reader_name 和 antenna
+                if (info != null)
                 {
-                    info = null;
-                    _tagTable.Remove(uid);
+                    if (info.ReaderName != reader_name || info.AntennaID != antenna)
+                    {
+                        info = null;
+                        _tagTable.Remove(uid);
+                    }
                 }
             }
 
@@ -532,7 +556,8 @@ namespace DigitalPlatform.RFID
                 if (result.Value == -1)
                     return result;
                 info = result.TagInfo;
-                if (info != null)
+                // 加入 cache
+                if (_enableTagCache && info != null)
                 {
                     if (_tagTable.Count > 1000)
                         _tagTable.Clear();
