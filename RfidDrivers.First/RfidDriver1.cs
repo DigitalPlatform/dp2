@@ -281,6 +281,9 @@ namespace RfidDrivers.First
             if (string.IsNullOrEmpty(cfgFileName) == false)
                 _readers.AddRange(OpenTcpReaders(name_table, cfgFileName, out error));
 
+            // 2021/1/7
+            _readers.AddRange(OpenBluetoothReaders(name_table, out error));
+
             return new NormalResult();
         }
 
@@ -596,6 +599,92 @@ namespace RfidDrivers.First
                     "",
                     debugInfo);
                 WriteInfoLog($"打开 TCP 读卡器 {reader.SerialNumber} 返回={result.ToString()}。调试信息={debugInfo.ToString()}");
+                reader.Result = result;
+                reader.ReaderHandle = result.ReaderHandle;
+
+                // 构造 Name
+                if (string.IsNullOrEmpty(reader.PreferName) == false)
+                {
+                    // 2020/9/12
+                    // *** readers.xml 中主动给出了名字
+                    reader.Name = reader.PreferName;
+                    if (name_table.ContainsKey(reader.Name) == true)
+                    {
+                        // 发生冲突，给一个随机后缀
+                        reader.Name = reader.PreferName + "_" + Guid.NewGuid().ToString();
+                    }
+                    name_table[reader.Name] = 0;
+                }
+                else
+                {
+                    // *** 软件自动给出名字
+                    // 重复的 ProductName 后面要加上序号
+                    int count = 0;
+                    if (name_table.ContainsKey(reader.ProductName) == true)
+                        count = (int)name_table[reader.ProductName];
+
+                    if (count == 0)
+                        reader.Name = reader.ProductName;
+                    else
+                        reader.Name = $"{reader.ProductName}({count + 1})";
+
+                    name_table[reader.ProductName] = ++count;
+                }
+            }
+
+            // 去掉填充信息阶段报错的那些 reader
+            foreach (Reader reader in removed)
+            {
+                readers.Remove(reader);
+            }
+
+            //_readers = readers;
+            //return new NormalResult();
+            return readers;
+        }
+
+
+        static List<Reader> OpenBluetoothReaders(
+    Hashtable name_table,
+    // string cfgFileName,
+    out NormalResult error)
+        {
+            error = null;
+
+            // 枚举所有的 TCP reader
+            List<Reader> readers = EnumBluetoothReader();
+
+            List<Reader> removed = new List<Reader>();
+
+            // name --> count
+            // Hashtable table = new Hashtable();
+
+            // 打开所有的 reader
+            foreach (Reader reader in readers)
+            {
+                var fill_result = FillReaderInfo(reader, "");
+                if (fill_result.Value == -1)
+                {
+#if NO
+                    if (reader.Type == "COM")
+                    {
+                        removed.Add(reader);
+                        continue;
+                    }
+                    return fill_result;
+#endif
+                    // TODO: 是否报错?
+                    error = fill_result;
+                    return new List<Reader>();
+                }
+
+                StringBuilder debugInfo = new StringBuilder();
+                OpenReaderResult result = OpenReader(reader.DriverName,
+                    reader.Type,
+                    reader.SerialNumber,
+                    "",
+                    debugInfo);
+                WriteInfoLog($"打开 Bluetooth 读卡器 {reader.SerialNumber} 返回={result.ToString()}。调试信息={debugInfo.ToString()}");
                 reader.Result = result;
                 reader.ReaderHandle = result.ReaderHandle;
 
@@ -975,6 +1064,49 @@ namespace RfidDrivers.First
                     {
                         Type = "COM",
                         SerialNumber = comName.ToString(),
+                    };
+                    readers.Add(reader);
+                }
+            }
+
+            return readers;
+        }
+
+        // 枚举所有 BLUETOOTH 读卡器
+        private static List<Reader> EnumBluetoothReader()
+        {
+            List<Reader> readers = new List<Reader>();
+
+            {
+                uint count = RFIDLIB.rfidlib_reader.Bluetooth_Enum();
+
+                WriteDebugLog($"Bluetooth_Enum() return [{count}]");
+
+                for (int i = 0; i < count; i++)
+                {
+                    StringBuilder comName = new StringBuilder();
+                    uint size = 256;
+                    comName.Append('\0', (int)size);
+                    RFIDLIB.rfidlib_reader.Bluetooth_GetEnumItem((uint)i,
+                        1,
+                        comName,
+                        ref size);
+
+                    StringBuilder addr = new StringBuilder();
+                    size = 256;
+                    addr.Append('\0', (int)size);
+
+                    RFIDLIB.rfidlib_reader.Bluetooth_GetEnumItem((uint)i,
+    2,
+    addr,
+    ref size);
+
+                    WriteDebugLog($"Bluetooth_GetEnumItem() {i}: name=[{comName.ToString()}], addr=[{addr.ToString()}]");
+
+                    Reader reader = new Reader
+                    {
+                        Type = "BLUETOOTH",
+                        SerialNumber = addr.ToString(),
                     };
                     readers.Add(reader);
                 }
@@ -2340,8 +2472,11 @@ namespace RfidDrivers.First
         {
             if (string.IsNullOrEmpty(readerDriverName))
             {
-                readerDriverName = "M201";  // "RL8000";
-                                            // readerDriverName = readerDriverInfoList[0].m_name;
+                if (comm_type == "BLUETOOTH")
+                    readerDriverName = "RPAN";
+                else
+                    readerDriverName = "M201";  // "RL8000";
+                                                // readerDriverName = readerDriverInfoList[0].m_name;
             }
 
             if (string.IsNullOrEmpty(comm_type))
@@ -2366,6 +2501,12 @@ namespace RfidDrivers.First
                 string ip = parts[0];
                 string port = parts[1];
                 return $"RDType={readerDriverName};CommType={comm_type};RemoteIP={ip};RemotePort={port};LocalIP=";
+            }
+            else if (comm_type == "BLUETOOTH")
+            {
+                // “RDType=RPAN;CommType=BLUETOOTH;Addr=00:0D:19:02:0C:DE”
+                return $"RDType={readerDriverName};CommType={comm_type};Addr={serial_number}";
+                // return $"RDType=RPAN;CommType={comm_type};Addr={serial_number}";
             }
             else
                 throw new ArgumentException($"未知的 comm_type [{comm_type}]");
