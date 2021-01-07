@@ -337,6 +337,7 @@ namespace RfidTool
                 inventory_result.ErrorCode = "test";
                 */
 
+                // TODO: 不要中断其他处理。可以设法警告或者报错
                 if (inventory_result.Value == -1)
                 {
                     /*
@@ -363,7 +364,14 @@ namespace RfidTool
                     }
                     */
 
-                    return new ListTagsResult { Value = -1, ErrorInfo = inventory_result.ErrorInfo, ErrorCode = inventory_result.ErrorCode };
+                    if (reader.Type == "BLUETOOTH")
+                        continue;
+                    return new ListTagsResult
+                    {
+                        Value = -1,
+                        ErrorInfo = inventory_result.ErrorInfo,
+                        ErrorCode = inventory_result.ErrorCode
+                    };
                 }
 
                 foreach (InventoryInfo info in inventory_result.Results)
