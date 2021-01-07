@@ -42,12 +42,13 @@ namespace RfidTool
             this.columnHeader_aoi = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_antenna = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_readerName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_protocol = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.button_write = new System.Windows.Forms.Button();
             this.textBox_processingBarcode = new System.Windows.Forms.TextBox();
             this.button_clearProcessingBarcode = new System.Windows.Forms.Button();
             this.label_message = new System.Windows.Forms.Label();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.columnHeader_protocol = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.button_test = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // label1
@@ -154,6 +155,11 @@ namespace RfidTool
             this.columnHeader_readerName.Text = "读写器";
             this.columnHeader_readerName.Width = 160;
             // 
+            // columnHeader_protocol
+            // 
+            this.columnHeader_protocol.Text = "协议";
+            this.columnHeader_protocol.Width = 200;
+            // 
             // button_write
             // 
             this.button_write.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
@@ -202,16 +208,22 @@ namespace RfidTool
             this.label_message.TabIndex = 7;
             this.label_message.Text = "请扫入条码号 ...";
             // 
-            // columnHeader_protocol
+            // button_test
             // 
-            this.columnHeader_protocol.Text = "协议";
-            this.columnHeader_protocol.Width = 200;
+            this.button_test.Location = new System.Drawing.Point(686, 76);
+            this.button_test.Name = "button_test";
+            this.button_test.Size = new System.Drawing.Size(74, 38);
+            this.button_test.TabIndex = 8;
+            this.button_test.Text = "测试";
+            this.button_test.UseVisualStyleBackColor = true;
+            this.button_test.Click += new System.EventHandler(this.button_test_Click);
             // 
             // ScanDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(866, 533);
+            this.Controls.Add(this.button_test);
             this.Controls.Add(this.label_message);
             this.Controls.Add(this.button_clearProcessingBarcode);
             this.Controls.Add(this.textBox_processingBarcode);
@@ -253,5 +265,6 @@ namespace RfidTool
         private System.Windows.Forms.ToolTip toolTip1;
         private System.Windows.Forms.ColumnHeader columnHeader_eas;
         private System.Windows.Forms.ColumnHeader columnHeader_protocol;
+        private System.Windows.Forms.Button button_test;
     }
 }

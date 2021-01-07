@@ -32,6 +32,7 @@ namespace RfidTool
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage_rfid = new System.Windows.Forms.TabPage();
             this.groupBox_uhf = new System.Windows.Forms.GroupBox();
+            this.checkBox_writeUserBank = new System.Windows.Forms.CheckBox();
             this.checkBox_warningWhenUhfFormatMismatch = new System.Windows.Forms.CheckBox();
             this.comboBox_uhfDataFormat = new System.Windows.Forms.ComboBox();
             this.label3 = new System.Windows.Forms.Label();
@@ -42,10 +43,12 @@ namespace RfidTool
             this.label1 = new System.Windows.Forms.Label();
             this.button_OK = new System.Windows.Forms.Button();
             this.button_Cancel = new System.Windows.Forms.Button();
-            this.checkBox_writeUserBank = new System.Windows.Forms.CheckBox();
+            this.tabPage_other = new System.Windows.Forms.TabPage();
+            this.checkBox_enableTagCache = new System.Windows.Forms.CheckBox();
             this.tabControl1.SuspendLayout();
             this.tabPage_rfid.SuspendLayout();
             this.groupBox_uhf.SuspendLayout();
+            this.tabPage_other.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl1
@@ -54,6 +57,7 @@ namespace RfidTool
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tabControl1.Controls.Add(this.tabPage_rfid);
+            this.tabControl1.Controls.Add(this.tabPage_other);
             this.tabControl1.Location = new System.Drawing.Point(11, 10);
             this.tabControl1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.tabControl1.Name = "tabControl1";
@@ -92,6 +96,16 @@ namespace RfidTool
             this.groupBox_uhf.TabIndex = 5;
             this.groupBox_uhf.TabStop = false;
             this.groupBox_uhf.Text = " UHF(超高频)标签 ";
+            // 
+            // checkBox_writeUserBank
+            // 
+            this.checkBox_writeUserBank.AutoSize = true;
+            this.checkBox_writeUserBank.Location = new System.Drawing.Point(20, 93);
+            this.checkBox_writeUserBank.Name = "checkBox_writeUserBank";
+            this.checkBox_writeUserBank.Size = new System.Drawing.Size(242, 25);
+            this.checkBox_writeUserBank.TabIndex = 2;
+            this.checkBox_writeUserBank.Text = "要写入 User Bank(&U)";
+            this.checkBox_writeUserBank.UseVisualStyleBackColor = true;
             // 
             // checkBox_warningWhenUhfFormatMismatch
             // 
@@ -196,15 +210,25 @@ namespace RfidTool
             this.button_Cancel.UseVisualStyleBackColor = true;
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
-            // checkBox_writeUserBank
+            // tabPage_other
             // 
-            this.checkBox_writeUserBank.AutoSize = true;
-            this.checkBox_writeUserBank.Location = new System.Drawing.Point(20, 93);
-            this.checkBox_writeUserBank.Name = "checkBox_writeUserBank";
-            this.checkBox_writeUserBank.Size = new System.Drawing.Size(242, 25);
-            this.checkBox_writeUserBank.TabIndex = 2;
-            this.checkBox_writeUserBank.Text = "要写入 User Bank(&U)";
-            this.checkBox_writeUserBank.UseVisualStyleBackColor = true;
+            this.tabPage_other.Controls.Add(this.checkBox_enableTagCache);
+            this.tabPage_other.Location = new System.Drawing.Point(4, 31);
+            this.tabPage_other.Name = "tabPage_other";
+            this.tabPage_other.Size = new System.Drawing.Size(711, 428);
+            this.tabPage_other.TabIndex = 1;
+            this.tabPage_other.Text = "其它";
+            this.tabPage_other.UseVisualStyleBackColor = true;
+            // 
+            // checkBox_enableTagCache
+            // 
+            this.checkBox_enableTagCache.AutoSize = true;
+            this.checkBox_enableTagCache.Location = new System.Drawing.Point(15, 30);
+            this.checkBox_enableTagCache.Name = "checkBox_enableTagCache";
+            this.checkBox_enableTagCache.Size = new System.Drawing.Size(237, 25);
+            this.checkBox_enableTagCache.TabIndex = 0;
+            this.checkBox_enableTagCache.Text = "启用标签信息缓存(&C)";
+            this.checkBox_enableTagCache.UseVisualStyleBackColor = true;
             // 
             // SettingDialog
             // 
@@ -229,6 +253,8 @@ namespace RfidTool
             this.tabPage_rfid.PerformLayout();
             this.groupBox_uhf.ResumeLayout(false);
             this.groupBox_uhf.PerformLayout();
+            this.tabPage_other.ResumeLayout(false);
+            this.tabPage_other.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -249,5 +275,7 @@ namespace RfidTool
         private System.Windows.Forms.ComboBox comboBox_uhfDataFormat;
         private System.Windows.Forms.CheckBox checkBox_warningWhenUhfFormatMismatch;
         private System.Windows.Forms.CheckBox checkBox_writeUserBank;
+        private System.Windows.Forms.TabPage tabPage_other;
+        private System.Windows.Forms.CheckBox checkBox_enableTagCache;
     }
 }

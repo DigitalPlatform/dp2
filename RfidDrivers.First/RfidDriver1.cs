@@ -3628,6 +3628,20 @@ out Reader reader);
                                  // string style
             )
         {
+            // 2021/1/7
+            if (old_tag_info == null)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = "参数 old_tag_info 不应为 null"
+                };
+            if (new_tag_info == null)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = "参数 new_tag_info 不应为 null"
+                };
+
             StringBuilder debugInfo = new StringBuilder();
             debugInfo.AppendLine($"WriteTagInfo() one_reader_name={one_reader_name}");
             debugInfo.AppendLine($"old_tag_info={old_tag_info.ToString()}");

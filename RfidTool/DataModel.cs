@@ -58,6 +58,9 @@ namespace RfidTool
             if (reset_hint_table || existing_hint_table == null)
                 SetHintTable(initial_result.HintTable);
 
+            // 首次设置是否启用缓存
+            TagList.EnableTagCache = EnableTagCache;
+
             _task = Task.Factory.StartNew(
                 () =>
                 {
@@ -241,6 +244,19 @@ namespace RfidTool
             set
             {
                 ClientInfo.Config.SetBoolean("rfid", "uhf_writeUserBank", value);
+            }
+        }
+
+        // 启用标签缓存
+        public static bool EnableTagCache
+        {
+            get
+            {
+                return ClientInfo.Config.GetBoolean("general", "enableTagCache", true);
+            }
+            set
+            {
+                ClientInfo.Config.SetBoolean("general", "enableTagCache", value);
             }
         }
 
