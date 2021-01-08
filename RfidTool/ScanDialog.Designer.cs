@@ -216,6 +216,7 @@ namespace RfidTool
             this.button_test.TabIndex = 8;
             this.button_test.Text = "测试";
             this.button_test.UseVisualStyleBackColor = true;
+            this.button_test.Visible = false;
             this.button_test.Click += new System.EventHandler(this.button_test_Click);
             // 
             // ScanDialog

@@ -68,6 +68,9 @@ namespace RfidTool
 
                 }
             });
+
+            if (StringUtil.IsDevelopMode() == true)
+                this.button_test.Visible = true;
         }
 
         private void textBox_barcode_KeyPress(object sender, KeyPressEventArgs e)
@@ -1342,6 +1345,21 @@ MessageBoxDefaultButton.Button2);
             }));
         }
         */
+
+        public void EnableControls(bool enable)
+        {
+            this.Invoke((Action)(() =>
+            {
+                this.listView_tags.Enabled = enable;
+                this.textBox_processingBarcode.Enabled = enable;
+                this.textBox_barcode.Enabled = enable;
+                if (enable == true)
+                {
+                    this.textBox_barcode.SelectAll();
+                    this.textBox_barcode.Focus();
+                }
+            }));
+        }
     }
 
     public class ItemInfo
