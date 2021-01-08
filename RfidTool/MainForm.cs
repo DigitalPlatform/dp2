@@ -19,6 +19,7 @@ using DigitalPlatform.GUI;
 using DigitalPlatform.IO;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
+using RfidDrivers.First;
 
 namespace RfidTool
 {
@@ -149,18 +150,20 @@ bool bClickClose = false)
                                 else
                                     this._showMessage(text);
 
-                            // ClientInfo.WriteErrorLog(text);
-                        }
+                                // ClientInfo.WriteErrorLog(text);
+                            }
                         }
                         else
                             this._clearMessage();
                     }));
                 }
-                catch(ObjectDisposedException)
+                catch (ObjectDisposedException)
                 {
 
                 }
             });
+
+            var token = _cancel.Token;
 
             UsbInfo.StartWatch((add_count, remove_count) =>
             {
@@ -169,9 +172,51 @@ bool bClickClose = false)
                 if (add_count > 0)
                     type = "connected";
 
-                BeginRefreshReaders(type, new CancellationToken());
+                BeginRefreshReaders(type, token);
             },
-_cancel.Token);
+            token);
+
+            BluetoothMonitor.StartWatch(null,
+                (number, infos) =>
+                {
+                    if (number > 0)
+                    {
+                        // * disconnect --> connect --> * disconnect --> remove
+                        var found = infos.Find(o => o.Name.StartsWith("R-PAN"));
+                        if (found != null && found.State == "disconnect")
+                        {
+                            /*
+                            this.Invoke((Action)(() =>
+                            {
+                                MessageBox.Show(this, $"number={number}\r\nfound:\r\n{found.ToString()}");
+                            }));
+                            */
+                            var action = found.OldState == "connect" ? "disconnected" : "connected";
+                            FormClientInfo.Speak(action == "connected" ? "连接蓝牙读写器" : "断开蓝牙读写器", false, false);
+                            BeginRefreshReaders(action,
+                                token);
+                        }
+
+                    }
+                    /*
+                    this.Invoke((Action)(() =>
+                    {
+                        MessageBox.Show(this, $"number={number}\r\ninfos:\r\n{BluetoothInfo.ToString(infos)}");
+                    }));
+                    */
+                },
+                token);
+        }
+
+        void ReopenBluetoothReaders()
+        {
+            var token = _cancel.Token;
+            _ = Task.Run(async () =>
+            {
+                await Task.Delay(TimeSpan.FromSeconds(2), token);
+                FormClientInfo.Speak("重新打开蓝牙读写器", false, false);
+                DataModel.ReopenBluetoothReaders();
+            });
         }
 
         int _refreshCount = 0;
@@ -513,6 +558,7 @@ _cancel.Token);
 
             _taskConnect = Task.Run(() =>
             {
+                _scanDialog?.EnableControls(false);
                 try
                 {
                 REDO:
@@ -576,6 +622,7 @@ _cancel.Token);
                 finally
                 {
                     _taskConnect = null;
+                    _scanDialog?.EnableControls(true);
                 }
             });
         }
@@ -743,7 +790,7 @@ MessageBoxIcon.Question,
 MessageBoxDefaultButton.Button2);
             if (result != DialogResult.Yes)
                 return;
-            foreach(ListViewItem item in this.listView_writeHistory.SelectedItems)
+            foreach (ListViewItem item in this.listView_writeHistory.SelectedItems)
             {
                 this.listView_writeHistory.Items.Remove(item);
             }

@@ -246,6 +246,39 @@ namespace RfidDrivers.First
             }
         }
 
+        // 2021/1/8
+        // 重新打开蓝牙读写器
+        public NormalResult ReopenBluetoothReaders()
+        {
+            Lock();
+            try
+            {
+                var removed_readers = new List<Reader>();
+                // 先移走已经打开的所有蓝牙读写器
+                foreach (var reader in _readers)
+                {
+                    if (reader.Type == "BLUETOOTH")
+                        removed_readers.Add(reader);
+                }
+
+                foreach (var reader in removed_readers)
+                {
+                    _readers.Remove(reader);
+                    CloseReader(reader.ReaderHandle);
+                }
+
+                // 重新打开
+                Hashtable name_table = new Hashtable();
+                _readers.AddRange(OpenBluetoothReaders(name_table, out NormalResult error));
+
+                return new NormalResult();
+            }
+            finally
+            {
+                Unlock();
+            }
+        }
+
         // 打开所有读卡器
         NormalResult OpenAllReaders(
             string cfgFileName,

@@ -142,6 +142,11 @@ namespace RfidTool
             ClientInfo.Config.Set("readers", "hint_table", value);
         }
 
+        public static void ReopenBluetoothReaders()
+        {
+            _driver.ReopenBluetoothReaders();
+        }
+
         public static List<string> GetReadNameList()
         {
             List<string> results = new List<string>();

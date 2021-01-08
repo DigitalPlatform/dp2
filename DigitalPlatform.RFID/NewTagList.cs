@@ -270,9 +270,12 @@ namespace DigitalPlatform.RFID
                 book = new TagAndData { OneTag = tag };
                 new_books.Add(book);
 
-                // 2020/4/19
-                // 对于新加入的标签，只清理缓存。防止以前残留的 cache 信息污染
-                _tagTable.Remove(tag.UID);
+                if (_enableTagCache == false)
+                {
+                    // 2020/4/19
+                    // 对于新加入的标签，只清理缓存。防止以前残留的 cache 信息污染
+                    _tagTable.Remove(tag.UID);
+                }
             }
 
             List<TagAndData> remove_books = new List<TagAndData>();
