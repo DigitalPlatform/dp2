@@ -289,14 +289,27 @@ namespace RfidDrivers.First
             _readers = new List<Reader>();
 
             Hashtable name_table = new Hashtable();
+
+            // 打开 USB 读写器
             List<Reader> readers = OpenUsbReaders(name_table, out NormalResult error);
             if (error != null)
                 return error;
+
+            // 2021/1/7
+            // 打开蓝牙读写器
+            readers.AddRange(OpenBluetoothReaders(name_table, out error));
+
+            // 打开 COM 读写器
             readers.AddRange(OpenComReaders(name_table, hint_table, out output_hint_table, out error));
 
             // 2020/9/15
             if (error != null)
                 return error;
+
+            // 2019/10/23
+            // 打开 TCP/IP 读写器
+            if (string.IsNullOrEmpty(cfgFileName) == false)
+                readers.AddRange(OpenTcpReaders(name_table, cfgFileName, out error));
 
             _readers = readers;
 
@@ -309,13 +322,6 @@ namespace RfidDrivers.First
                 if (error != null)
                     return error;
             }
-
-            // 2019/10/23
-            if (string.IsNullOrEmpty(cfgFileName) == false)
-                _readers.AddRange(OpenTcpReaders(name_table, cfgFileName, out error));
-
-            // 2021/1/7
-            _readers.AddRange(OpenBluetoothReaders(name_table, out error));
 
             return new NormalResult();
         }
@@ -2442,6 +2448,8 @@ namespace RfidDrivers.First
                 devInfor.Append('\0', 128);
                 UInt32 nSize;
                 nSize = (UInt32)devInfor.Capacity;
+                // 设备信息输出格式：“设备固件版本; 设备型号; 设备系列号”，三项信息用”;”分隔。
+
                 iret = RFIDLIB.rfidlib_reader.RDR_GetReaderInfor(result.ReaderHandle, 0, devInfor, ref nSize);
                 WriteDebugLog($"RDR_GetReaderInfor() return [{iret}]");
                 if (iret != 0)
@@ -2457,7 +2465,9 @@ namespace RfidDrivers.First
                     return new NormalResult { Value = -1, ErrorInfo = $"所得到的结果字符串 '{dev_info}' 格式不正确。应该为分号间隔的三段形态" };
                 }
 
+                string driver_version = parts[0];
                 string product_id = parts[1];
+                string device_sn = parts[2];
 
                 bool bRet = GetDriverName(product_id,
                     out string driver_name,
@@ -2481,6 +2491,8 @@ namespace RfidDrivers.First
                 reader.Protocols = protocols;
                 reader.AntennaCount = antenna_count;
                 reader.AntennaStart = min_antenna_id;
+                reader.DriverVersion = driver_version;
+                reader.DeviceSN = device_sn;
                 WriteDebugLog($"FillReaderInfo() 成功得到 Reader 信息。{reader.ToString()}");
                 return new NormalResult();
             }

@@ -83,7 +83,7 @@ namespace RfidTool
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Padding = new System.Windows.Forms.Padding(6, 3, 0, 3);
-            this.menuStrip1.Size = new System.Drawing.Size(1018, 38);
+            this.menuStrip1.Size = new System.Drawing.Size(1018, 39);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -103,7 +103,7 @@ namespace RfidTool
             this.toolStripSeparator2,
             this.MenuItem_exit});
             this.MenuItem_file.Name = "MenuItem_file";
-            this.MenuItem_file.Size = new System.Drawing.Size(97, 32);
+            this.MenuItem_file.Size = new System.Drawing.Size(97, 33);
             this.MenuItem_file.Text = "文件(&F)";
             // 
             // MenuItem_writeBookTags
@@ -152,14 +152,14 @@ namespace RfidTool
             // MenuItem_clearHistory_all
             // 
             this.MenuItem_clearHistory_all.Name = "MenuItem_clearHistory_all";
-            this.MenuItem_clearHistory_all.Size = new System.Drawing.Size(315, 40);
+            this.MenuItem_clearHistory_all.Size = new System.Drawing.Size(255, 40);
             this.MenuItem_clearHistory_all.Text = "清除全部事项";
             this.MenuItem_clearHistory_all.Click += new System.EventHandler(this.MenuItem_clearHistory_all_Click);
             // 
             // MenuItem_clearHistory_selected
             // 
             this.MenuItem_clearHistory_selected.Name = "MenuItem_clearHistory_selected";
-            this.MenuItem_clearHistory_selected.Size = new System.Drawing.Size(315, 40);
+            this.MenuItem_clearHistory_selected.Size = new System.Drawing.Size(255, 40);
             this.MenuItem_clearHistory_selected.Text = "清除所选事项";
             this.MenuItem_clearHistory_selected.Click += new System.EventHandler(this.MenuItem_clearHistory_selected_Click);
             // 
@@ -212,7 +212,7 @@ namespace RfidTool
             this.MenuItem_resetSerialCode,
             this.MenuItem_about});
             this.MenuItem_help.Name = "MenuItem_help";
-            this.MenuItem_help.Size = new System.Drawing.Size(102, 32);
+            this.MenuItem_help.Size = new System.Drawing.Size(102, 33);
             this.MenuItem_help.Text = "帮助(&H)";
             // 
             // MenuItem_openUserFolder
@@ -265,7 +265,7 @@ namespace RfidTool
             // toolStrip1
             // 
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(28, 28);
-            this.toolStrip1.Location = new System.Drawing.Point(0, 38);
+            this.toolStrip1.Location = new System.Drawing.Point(0, 39);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(1018, 25);
             this.toolStrip1.TabIndex = 1;
@@ -300,11 +300,11 @@ namespace RfidTool
             // 
             this.tabControl1.Controls.Add(this.tabPage_writeTag);
             this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tabControl1.Location = new System.Drawing.Point(0, 63);
+            this.tabControl1.Location = new System.Drawing.Point(0, 64);
             this.tabControl1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(1018, 494);
+            this.tabControl1.Size = new System.Drawing.Size(1018, 493);
             this.tabControl1.TabIndex = 3;
             // 
             // tabPage_writeTag
@@ -314,7 +314,7 @@ namespace RfidTool
             this.tabPage_writeTag.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabPage_writeTag.Name = "tabPage_writeTag";
             this.tabPage_writeTag.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.tabPage_writeTag.Size = new System.Drawing.Size(1010, 453);
+            this.tabPage_writeTag.Size = new System.Drawing.Size(1010, 452);
             this.tabPage_writeTag.TabIndex = 0;
             this.tabPage_writeTag.Text = "写入历史";
             this.tabPage_writeTag.UseVisualStyleBackColor = true;
@@ -334,7 +334,7 @@ namespace RfidTool
             this.listView_writeHistory.Location = new System.Drawing.Point(4, 3);
             this.listView_writeHistory.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.listView_writeHistory.Name = "listView_writeHistory";
-            this.listView_writeHistory.Size = new System.Drawing.Size(1002, 447);
+            this.listView_writeHistory.Size = new System.Drawing.Size(1002, 446);
             this.listView_writeHistory.TabIndex = 0;
             this.listView_writeHistory.UseCompatibleStateImageBehavior = false;
             this.listView_writeHistory.View = System.Windows.Forms.View.Details;

@@ -536,7 +536,7 @@ bool bClickClose = false)
         // 关于
         private void MenuItem_about_Click(object sender, EventArgs e)
         {
-            var text = $"RFID 工具 (版本号: {ClientInfo.ClientVersion})\r\n数字平台(北京)软件有限责任公司\r\nhttp://dp2003.com\r\n\r\n\r\n当前可用读写器:\r\n{StringUtil.MakePathList(DataModel.GetReadNameList(), "\r\n")}";
+            var text = $"RFID 工具 (版本号: {ClientInfo.ClientVersion})\r\n数字平台(北京)软件有限责任公司\r\nhttp://dp2003.com\r\n\r\n\r\n当前可用读写器:\r\n{StringUtil.MakePathList(DataModel.GetReadNameList("driverVersion,deviceSN,deviceType,commType"), "\r\n")}";
             MessageDlg.Show(this, text, "关于");
         }
 
@@ -603,7 +603,7 @@ bool bClickClose = false)
                     {
                         this.ShowMessage(null);
 
-                        var count = DataModel.GetReadNameList().Count;
+                        var count = DataModel.GetReadNameList("").Count;
                         this.Invoke((Action)(() =>
                         {
                             this.StatusReaderCount = $"读写器: {count}";
