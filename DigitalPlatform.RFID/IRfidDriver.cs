@@ -416,9 +416,12 @@ uint new_password);
 
         public string PreferName { get; set; }  // 推荐使用的名字 2020/9/12
 
+        public string DriverVersion { get; set; }   // 厂家 DLL 驱动版本
+        public string DeviceSN { get; set; }    // 厂家设备序列号。每台设备一个唯一的号
+
         public override string ToString()
         {
-            return $"Name={Name},SerialNumber={SerialNumber},DriverPath={DriverPath},Result={Result?.ToString()},DriverName={DriverName}, ProductName={ProductName}, Protocols={Protocols}, AntennaCount={AntennaCount}, AntennaStart={AntennaStart}";
+            return $"Name={Name},SerialNumber={SerialNumber},DriverPath={DriverPath},Result={Result?.ToString()},DriverName={DriverName}, ProductName={ProductName}, Protocols={Protocols}, AntennaCount={AntennaCount}, AntennaStart={AntennaStart}, DriverVersion={DriverVersion}, DeviceSN={DeviceSN}";
         }
 
         /*

@@ -147,12 +147,27 @@ namespace RfidTool
             _driver.ReopenBluetoothReaders();
         }
 
-        public static List<string> GetReadNameList()
+        public static List<string> GetReadNameList(string style)
         {
+            bool driver_version = StringUtil.IsInList("driverVersion", style);
+            bool device_sn = StringUtil.IsInList("deviceSN", style);
+            bool device_type = StringUtil.IsInList("deviceType", style);
+            bool comm_type = StringUtil.IsInList("commType", style);
+
             List<string> results = new List<string>();
             foreach (var reader in _driver.Readers)
             {
-                results.Add(reader.Name);
+                List<string> columns = new List<string>();
+                columns.Add(reader.Name);
+                if (driver_version)
+                    columns.Add("固件版本号: " + reader.DriverVersion);
+                if (device_sn)
+                    columns.Add("设备序列号: " + reader.DeviceSN);
+                if (device_type)
+                    columns.Add("设备类型: " + reader.DriverName);
+                if (comm_type)
+                    columns.Add("通讯方式: " + reader.Type);
+                results.Add(StringUtil.MakePathList(columns, ", "));
             }
             return results;
         }
