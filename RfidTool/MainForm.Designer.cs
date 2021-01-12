@@ -67,6 +67,7 @@ namespace RfidTool
             this.columnHeader_oi = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_aoi = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_writeTime = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.MenuItem_batchModifyTags = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
@@ -93,6 +94,7 @@ namespace RfidTool
             this.MenuItem_writeBookTags,
             this.MenuItem_writeShelfTags,
             this.MenuItem_writePatronTags,
+            this.MenuItem_batchModifyTags,
             this.toolStripSeparator3,
             this.MenuItem_saveToExcelFile,
             this.MenuItem_clearHistory,
@@ -373,6 +375,13 @@ namespace RfidTool
             this.columnHeader_writeTime.Text = "写入时间";
             this.columnHeader_writeTime.Width = 260;
             // 
+            // MenuItem_batchModifyTags
+            // 
+            this.MenuItem_batchModifyTags.Name = "MenuItem_batchModifyTags";
+            this.MenuItem_batchModifyTags.Size = new System.Drawing.Size(387, 40);
+            this.MenuItem_batchModifyTags.Text = "批修改标签(&B)...";
+            this.MenuItem_batchModifyTags.Click += new System.EventHandler(this.MenuItem_batchModifyTags_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(13F, 28F);
@@ -441,6 +450,7 @@ namespace RfidTool
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_clearHistory_all;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_clearHistory_selected;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_batchModifyTags;
     }
 }
 
