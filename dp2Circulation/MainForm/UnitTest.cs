@@ -1,11 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using System.Xml;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-using dp2Circulation;
-
-namespace UnitTestDp2circulation
+namespace dp2Circulation
 {
     [TestClass]
     public class UnitTestRfidExtension
@@ -52,8 +54,8 @@ namespace UnitTestDp2circulation
     "海淀分馆/阅览室",
     out string isil,
     out string alternative);
-            Assert.AreEqual("test",isil);
-            Assert.AreEqual("",alternative);
+            Assert.AreEqual("test", isil);
+            Assert.AreEqual("", alternative);
         }
 
         [TestMethod]
@@ -261,4 +263,5 @@ namespace UnitTestDp2circulation
             }
         }
     }
+
 }
