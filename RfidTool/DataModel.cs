@@ -69,7 +69,7 @@ namespace RfidTool
                         Thread.Sleep(100);
 
                         string readerNameList = "*";
-                        var result = _listTags(readerNameList, "");
+                        var result = ListTags(readerNameList, "");
                         if (result.Value == -1)
                             SetError?.Invoke(result,
                                 new SetErrorEventArgs { Error = result.ErrorInfo });
@@ -328,7 +328,7 @@ namespace RfidTool
         // parameters:
         //      reader_name_list    读卡器名字列表。形态为 "*" 或 "name1,name2" 或 "name1:1|2|3|4,name2"
         //      style   如果为 "getTagInfo"，表示要在结果中返回 TagInfo
-        static ListTagsResult _listTags(string reader_name_list, string style)
+        public static ListTagsResult ListTags(string reader_name_list, string style)
         {
             InventoryResult result = new InventoryResult();
 

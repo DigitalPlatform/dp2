@@ -127,6 +127,12 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BeginModifyDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BeginModifyDialog.Designer.cs">
+      <DependentUpon>BeginModifyDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="DataModel.cs" />
     <Compile Include="FloatingErrorDialog.cs">
       <SubType>Form</SubType>
@@ -139,6 +145,12 @@
     </Compile>
     <Compile Include="MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ModifyDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ModifyDialog.Designer.cs">
+      <DependentUpon>ModifyDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -155,11 +167,17 @@
       <DependentUpon>SettingDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="Storeage.cs" />
+    <EmbeddedResource Include="BeginModifyDialog.resx">
+      <DependentUpon>BeginModifyDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="FloatingErrorDialog.resx">
       <DependentUpon>FloatingErrorDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ModifyDialog.resx">
+      <DependentUpon>ModifyDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

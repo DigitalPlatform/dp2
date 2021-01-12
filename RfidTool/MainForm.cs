@@ -10,6 +10,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using RfidDrivers.First;
+
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.CommonControl;
@@ -19,13 +21,14 @@ using DigitalPlatform.GUI;
 using DigitalPlatform.IO;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
-using RfidDrivers.First;
 
 namespace RfidTool
 {
     public partial class MainForm : Form
     {
         ScanDialog _scanDialog = null;
+
+        ModifyDialog _modifyDialog = null;
 
         ErrorTable _errorTable = null;
 
@@ -311,6 +314,42 @@ bool bClickClose = false)
                 e.Cancel = true;
         }
 
+
+        void CreateModifyDialog()
+        {
+            if (_modifyDialog == null)
+            {
+                _modifyDialog = new ModifyDialog();
+
+                _modifyDialog.FormClosing += _modifyDialog_FormClosing;
+                _modifyDialog.WriteComplete += _modifyDialog_WriteComplete;
+
+                GuiUtil.SetControlFont(_modifyDialog, this.Font);
+                ClientInfo.MemoryState(_modifyDialog, "modifyDialog", "state");
+                _modifyDialog.UiState = ClientInfo.Config.Get("modifyDialog", "uiState", null);
+            }
+        }
+
+        private void _modifyDialog_WriteComplete(object sender, WriteCompleteventArgs e)
+        {
+            this.Invoke((Action)(() =>
+            {
+                AppendItem(e.Chip, e.TagInfo);
+                _historyChanged = true;
+            }));
+        }
+
+        private void _modifyDialog_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            var dialog = sender as Form;
+
+            // 将关闭改为隐藏
+            dialog.Visible = false;
+            if (e.CloseReason == CloseReason.UserClosing)
+                e.Cancel = true;
+        }
+
+
         private void MainForm_Load(object sender, EventArgs e)
         {
             FormClientInfo.SerialNumberMode = "must";
@@ -344,6 +383,14 @@ bool bClickClose = false)
                 _scanDialog?.Close();
                 _scanDialog?.Dispose();
                 _scanDialog = null;
+            }
+
+            {
+                if (_modifyDialog != null)
+                    ClientInfo.Config.Set("modifyDialog", "uiState", _modifyDialog.UiState);
+                _modifyDialog?.Close();
+                _modifyDialog?.Dispose();
+                _modifyDialog = null;
             }
 
             this.ShowMessage("正在退出 ...");
@@ -536,7 +583,7 @@ bool bClickClose = false)
         // 关于
         private void MenuItem_about_Click(object sender, EventArgs e)
         {
-            var text = $"RFID 工具 (版本号: {ClientInfo.ClientVersion})\r\n数字平台(北京)软件有限责任公司\r\nhttp://dp2003.com\r\n\r\n\r\n当前可用读写器:\r\n{StringUtil.MakePathList(DataModel.GetReadNameList("driverVersion,deviceSN,deviceType,commType"), "\r\n")}";
+            var text = $"RFID 工具箱 (版本号: {ClientInfo.ClientVersion})\r\n数字平台(北京)软件有限责任公司\r\nhttp://dp2003.com\r\n\r\n\r\n当前可用读写器:\r\n{StringUtil.MakePathList(DataModel.GetReadNameList("driverVersion,deviceSN,deviceType,commType"), "\r\n")}";
             MessageDlg.Show(this, text, "关于");
         }
 
@@ -804,6 +851,15 @@ MessageBoxDefaultButton.Button2);
 
             this.MenuItem_clearHistory_selected.Text = $"清除所选 {this.listView_writeHistory.SelectedItems.Count} 个事项(&S)";
             this.MenuItem_clearHistory_selected.Enabled = this.listView_writeHistory.SelectedItems.Count > 0;
+        }
+
+        private void MenuItem_batchModifyTags_Click(object sender, EventArgs e)
+        {
+            // 把修改对话框打开
+            CreateModifyDialog();
+
+            if (_modifyDialog.Visible == false)
+                _modifyDialog.Show(this);
         }
     }
 

@@ -1280,9 +1280,11 @@ MessageBoxDefaultButton.Button2);
             SendKeys.Send("0000001\r");
         }
 
+        #region Error Dialog
+
         FloatingErrorDialog _errorDialog = null;
 
-        void CreateScanDialog()
+        void CreateErrorDialog()
         {
             if (_errorDialog == null)
             {
@@ -1315,7 +1317,7 @@ MessageBoxDefaultButton.Button2);
 
             this.Invoke((Action)(() =>
             {
-                CreateScanDialog();
+                CreateErrorDialog();
                 if (text == null)
                     _errorDialog.Hide();
                 else
@@ -1333,6 +1335,8 @@ MessageBoxDefaultButton.Button2);
                 _errorDialog.Message = _errorTable.GetError(false);
             }));
         }
+
+        #endregion
 
         /*
         void ShowMessageBox(string text)
