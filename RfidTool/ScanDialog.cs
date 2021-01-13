@@ -422,8 +422,7 @@ namespace RfidTool
             return parts[1];
         }
 
-
-        static string GetPIICaption(string text)
+        public static string GetPIICaption(string text)
         {
             if (string.IsNullOrEmpty(text))
                 return "(空)";

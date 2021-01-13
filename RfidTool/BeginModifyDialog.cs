@@ -110,5 +110,13 @@ namespace RfidTool
                 return this.checkBox_uidPiiMap.Checked;
             }
         }
+
+        public string FilterTU
+        {
+            get
+            {
+                return this.comboBox_filter_tu.Text;
+            }
+        }
     }
 }

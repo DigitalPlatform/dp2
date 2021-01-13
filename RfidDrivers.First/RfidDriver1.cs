@@ -576,7 +576,6 @@ namespace RfidDrivers.First
             XmlNodeList nodes = dom.DocumentElement.SelectNodes("reader");
             foreach (XmlElement reader in nodes)
             {
-
                 string type = reader.GetAttribute("type");
                 if (type != "NET")
                     continue;

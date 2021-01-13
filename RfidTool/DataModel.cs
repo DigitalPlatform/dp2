@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.IO;
 
 using Newtonsoft.Json;
 
@@ -34,6 +35,9 @@ namespace RfidTool
         static int _prev_count = 0;
         */
 
+        // 用于控制暂停的事件
+        static ManualResetEvent _eventPause = new ManualResetEvent(true);
+
         static Task _task = null;
 
         public static InitializeDriverResult InitialDriver(
@@ -47,8 +51,9 @@ namespace RfidTool
             var existing_hint_table = GetHintTable();
 
             // _driver.ReleaseDriver();
+            string cfgFileName = Path.Combine(ClientInfo.UserDir, "readers.xml");
             var initial_result = _driver.InitializeDriver(
-                    null,   // cfgFileName,
+                    cfgFileName,
                     "", // style,
                     reset_hint_table ? null : existing_hint_table);
             if (initial_result.Value == -1)
@@ -62,11 +67,19 @@ namespace RfidTool
             TagList.EnableTagCache = EnableTagCache;
 
             _task = Task.Factory.StartNew(
-                () =>
+                async () =>
                 {
                     while (token.IsCancellationRequested == false)
                     {
-                        Thread.Sleep(100);
+                        await Task.Delay(TimeSpan.FromMilliseconds(100), token);
+
+                        int index = WaitHandle.WaitAny(new WaitHandle[] {
+                            _eventPause,
+                            token.WaitHandle,
+                            });
+
+                        if (index == 1)
+                            return;
 
                         string readerNameList = "*";
                         var result = ListTags(readerNameList, "");
@@ -123,9 +136,24 @@ namespace RfidTool
                                 });
 
                     }
-                }, token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+                },
+                token,
+                TaskCreationOptions.LongRunning, 
+                TaskScheduler.Default);
 
             return initial_result;
+        }
+
+        // 暂停循环
+        public static void PauseLoop()
+        {
+            _eventPause.Reset();
+        }
+
+        // 继续循环
+        public static void ContinueLoop()
+        {
+            _eventPause.Set();
         }
 
         static List<HintInfo> GetHintTable()
@@ -454,6 +482,14 @@ namespace RfidTool
             }
 
             return new ListTagsResult { Results = tags };
+        }
+
+        public static GetTagInfoResult GetTagInfo(
+            string one_reader_name,
+            InventoryInfo info,
+            string style)
+        {
+            return _driver.GetTagInfo(one_reader_name, info, style);
         }
 
         public static event SetErrorEventHandler SetError = null;
