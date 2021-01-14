@@ -66,9 +66,25 @@ namespace RfidTool
 
             if (this.checkBox_oi.Checked && this.checkBox_aoi.Checked)
             {
-                strError = "机构代码和非机构代码不允许同时修改。请重新选择";
+                strError = "机构代码和非标准机构代码不允许同时修改。请重新选择";
                 goto ERROR1;
             }
+
+            if (this.checkBox_oi.Checked && string.IsNullOrEmpty(this.textBox_rfid_oi.Text))
+            {
+                strError = "请输入机构代码";
+                goto ERROR1;
+            }
+
+            if (this.checkBox_aoi.Checked && string.IsNullOrEmpty(this.textBox_rfid_aoi.Text))
+            {
+                strError = "请输入非标准机构代码";
+                goto ERROR1;
+            }
+
+            strError = SettingDialog.VerifyOI(this.textBox_rfid_oi.Text);
+            if (strError != null)
+                goto ERROR1;
 
             this.DialogResult = DialogResult.OK;
             this.Close();

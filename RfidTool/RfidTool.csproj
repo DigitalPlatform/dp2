@@ -32,7 +32,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>20</ApplicationRevision>
+    <ApplicationRevision>25</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -166,6 +166,7 @@
     <Compile Include="SettingDialog.designer.cs">
       <DependentUpon>SettingDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="SoundMaker.cs" />
     <Compile Include="Storeage.cs" />
     <EmbeddedResource Include="BeginModifyDialog.resx">
       <DependentUpon>BeginModifyDialog.cs</DependentUpon>
@@ -242,6 +243,10 @@
     <ProjectReference Include="..\dp-library\DigitalPlatform.Core\DigitalPlatform.Core.csproj">
       <Project>{c5b517c1-7344-45a5-89dc-06a9b130ae36}</Project>
       <Name>DigitalPlatform.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\midi-dot-net\Midi\Midi.csproj">
+      <Project>{f60d8b7b-2d2e-4b94-a736-3783ffe1a25c}</Project>
+      <Name>Midi</Name>
     </ProjectReference>
     <ProjectReference Include="..\RfidDrivers.First\RfidDrivers.First.csproj">
       <Project>{dfadb438-ebff-47fb-acf6-586224cef771}</Project>

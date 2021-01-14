@@ -36,7 +36,11 @@ namespace RfidTool
         */
 
         // 用于控制暂停的事件
+#if EVENT_PAUSE
         static ManualResetEvent _eventPause = new ManualResetEvent(true);
+#else
+        static volatile bool _pause = false;
+#endif
 
         static Task _task = null;
 
@@ -73,6 +77,7 @@ namespace RfidTool
                     {
                         await Task.Delay(TimeSpan.FromMilliseconds(100), token);
 
+#if EVENT_PAUSE
                         int index = WaitHandle.WaitAny(new WaitHandle[] {
                             _eventPause,
                             token.WaitHandle,
@@ -80,6 +85,12 @@ namespace RfidTool
 
                         if (index == 1)
                             return;
+#else
+                        if (_pause == true)
+                            continue;
+#endif
+
+
 
                         string readerNameList = "*";
                         var result = ListTags(readerNameList, "");
@@ -118,7 +129,7 @@ namespace RfidTool
                                         UID = uid,
                                         AntennaID = antennaID
                                     };
-                                    return _driver.GetTagInfo(readerName, info);
+                                    return GetTagInfo(readerName, info, "");
                                 },
                                 (add_tags, update_tags, remove_tags) =>
                                 {
@@ -138,7 +149,7 @@ namespace RfidTool
                     }
                 },
                 token,
-                TaskCreationOptions.LongRunning, 
+                TaskCreationOptions.LongRunning,
                 TaskScheduler.Default);
 
             return initial_result;
@@ -147,13 +158,21 @@ namespace RfidTool
         // 暂停循环
         public static void PauseLoop()
         {
+#if EVENT_PAUSE
             _eventPause.Reset();
+#else
+            _pause = true;
+#endif
         }
 
         // 继续循环
         public static void ContinueLoop()
         {
+#if EVENT_PAUSE
             _eventPause.Set();
+#else
+            _pause = false;
+#endif
         }
 
         static List<HintInfo> GetHintTable()
@@ -313,16 +332,24 @@ namespace RfidTool
             TagInfo old_tag_info,
             TagInfo new_tag_info)
         {
-            var result = _driver.WriteTagInfo(one_reader_name, old_tag_info, new_tag_info);
+            _driver.IncApiCount();
+            try
+            {
+                var result = _driver.WriteTagInfo(one_reader_name, old_tag_info, new_tag_info);
 
-            // UHF 保存后 EPC 会发生变化，为了避免引起不必要的 GetTagInfo 动作，ClearTagTable() 时第二参数应该为 false
-            bool clearTagInfo = (old_tag_info.Protocol == InventoryInfo.ISO15693 ? true : false);
-            // 清除缓存
-            TagList.ClearTagTable(old_tag_info.UID, clearTagInfo);
-            if (old_tag_info.UID != new_tag_info.UID)
-                TagList.ClearTagTable(new_tag_info.UID, clearTagInfo);
+                // UHF 保存后 EPC 会发生变化，为了避免引起不必要的 GetTagInfo 动作，ClearTagTable() 时第二参数应该为 false
+                bool clearTagInfo = (old_tag_info.Protocol == InventoryInfo.ISO15693 ? true : false);
+                // 清除缓存
+                TagList.ClearTagTable(old_tag_info.UID, clearTagInfo);
+                if (old_tag_info.UID != new_tag_info.UID)
+                    TagList.ClearTagTable(new_tag_info.UID, clearTagInfo);
 
-            return result;
+                return result;
+            }
+            finally
+            {
+                _driver.DecApiCount();
+            }
         }
 
         public static NormalResult SetEAS(string reader_name,
@@ -331,11 +358,19 @@ namespace RfidTool
     bool enable,
     string style)
         {
-            return _driver.SetEAS(reader_name,
+            _driver.IncApiCount();
+            try
+            {
+                return _driver.SetEAS(reader_name,
                 uid,
                 antenna_id,
                 enable,
                 style);
+            }
+            finally
+            {
+                _driver.DecApiCount();
+            }
         }
 
         /*
@@ -358,130 +393,138 @@ namespace RfidTool
         //      style   如果为 "getTagInfo"，表示要在结果中返回 TagInfo
         public static ListTagsResult ListTags(string reader_name_list, string style)
         {
-            InventoryResult result = new InventoryResult();
-
-            List<OneTag> tags = new List<OneTag>();
-
-            // uid --> OneTag
-            Hashtable uid_table = new Hashtable();
-
-            foreach (Reader reader in _driver.Readers)
+            _driver.IncApiCount();
+            try
             {
-                // 顺便要从 reader_name_list 中解析出天线部分
-                if (Reader.MatchReaderName(reader_name_list, reader.Name, out string antenna_list) == false)
-                    continue;
+                InventoryResult result = new InventoryResult();
 
-                InventoryResult inventory_result = null;
+                List<OneTag> tags = new List<OneTag>();
 
-                inventory_result = _driver.Inventory(reader.Name,
-                antenna_list,
-                style   // ""
-                );
+                // uid --> OneTag
+                Hashtable uid_table = new Hashtable();
 
-                /*
-                // testing
-                inventory_result.Value = -1;
-                inventory_result.ErrorInfo = "模拟 inventory 出错";
-                inventory_result.ErrorCode = "test";
-                */
-
-                // TODO: 不要中断其他处理。可以设法警告或者报错
-                if (inventory_result.Value == -1)
+                foreach (Reader reader in _driver.Readers)
                 {
+                    // 顺便要从 reader_name_list 中解析出天线部分
+                    if (Reader.MatchReaderName(reader_name_list, reader.Name, out string antenna_list) == false)
+                        continue;
+
+                    InventoryResult inventory_result = null;
+
+                    inventory_result = _driver.Inventory(reader.Name,
+                    antenna_list,
+                    style   // ""
+                    );
+
                     /*
-                    // TODO: 统计单位时间内出错的总数，如果超过一定限度则重新初始化全部读卡器
-                    _ = _compactLog.Add("inventory 出错: {0}", new object[] { inventory_result.ErrorInfo });
-                    _inventoryErrorCount++;
-
-                    // 每隔一段时间写入日志一次
-                    if (DateTime.Now - _lastCompactTime > _compactLength)
-                    {
-                        _compactLog?.WriteToLog((text) =>
-                        {
-                            Log.Logger.Error(text);
-                            Program.MainForm.OutputHistory(text, 2);
-                        });
-                        _lastCompactTime = DateTime.Now;
-
-                        if (_inventoryErrorCount > 10)
-                        {
-                            // 发出信号，重启
-                            Program.MainForm.RestartRfidDriver($"因最近阶段内 inventory 出错次数为 {_inventoryErrorCount}");
-                            _inventoryErrorCount = 0;
-                        }
-                    }
+                    // testing
+                    inventory_result.Value = -1;
+                    inventory_result.ErrorInfo = "模拟 inventory 出错";
+                    inventory_result.ErrorCode = "test";
                     */
 
-                    if (reader.Type == "BLUETOOTH")
-                        continue;
-                    return new ListTagsResult
+                    // TODO: 不要中断其他处理。可以设法警告或者报错
+                    if (inventory_result.Value == -1)
                     {
-                        Value = -1,
-                        ErrorInfo = inventory_result.ErrorInfo,
-                        ErrorCode = inventory_result.ErrorCode
-                    };
-                }
-
-                foreach (InventoryInfo info in inventory_result.Results)
-                {
-                    OneTag tag = null;
-                    if (uid_table.ContainsKey(info.UID))
-                    {
-                        // 重复出现的，追加 读卡器名字
-                        tag = (OneTag)uid_table[info.UID];
-                        tag.ReaderName += "," + reader.Name;
-                    }
-                    else
-                    {
-                        // 首次出现
-                        tag = new OneTag
-                        {
-                            Protocol = info.Protocol,
-                            ReaderName = reader.Name,
-                            UID = info.UID,
-                            DSFID = info.DsfID,
-                            AntennaID = info.AntennaID, // 2019/9/25
-                            // InventoryInfo = info    // 有些冗余的字段
-                        };
-
                         /*
-                        // testing
-                        tag.AntennaID = _currenAntenna;
-                        if (DateTime.Now - _lastTime > TimeSpan.FromSeconds(5))
+                        // TODO: 统计单位时间内出错的总数，如果超过一定限度则重新初始化全部读卡器
+                        _ = _compactLog.Add("inventory 出错: {0}", new object[] { inventory_result.ErrorInfo });
+                        _inventoryErrorCount++;
+
+                        // 每隔一段时间写入日志一次
+                        if (DateTime.Now - _lastCompactTime > _compactLength)
                         {
-                            _currenAntenna++;
-                            if (_currenAntenna > 50)
-                                _currenAntenna = 1;
-                            _lastTime = DateTime.Now;
+                            _compactLog?.WriteToLog((text) =>
+                            {
+                                Log.Logger.Error(text);
+                                Program.MainForm.OutputHistory(text, 2);
+                            });
+                            _lastCompactTime = DateTime.Now;
+
+                            if (_inventoryErrorCount > 10)
+                            {
+                                // 发出信号，重启
+                                Program.MainForm.RestartRfidDriver($"因最近阶段内 inventory 出错次数为 {_inventoryErrorCount}");
+                                _inventoryErrorCount = 0;
+                            }
                         }
                         */
 
-                        uid_table[info.UID] = tag;
-                        tags.Add(tag);
+                        if (reader.Type == "BLUETOOTH")
+                            continue;
+                        return new ListTagsResult
+                        {
+                            Value = -1,
+                            ErrorInfo = inventory_result.ErrorInfo,
+                            ErrorCode = inventory_result.ErrorCode
+                        };
                     }
 
-                    if (StringUtil.IsInList("getTagInfo", style)
-                        && tag.TagInfo == null)
+                    foreach (InventoryInfo info in inventory_result.Results)
                     {
-                        // TODO: 这里要利用 Hashtable 缓存
-                        GetTagInfoResult result0 = null;
-
-                        result0 = _driver.GetTagInfo(reader.Name, info);
-                        if (result0.Value == -1)
+                        OneTag tag = null;
+                        if (uid_table.ContainsKey(info.UID))
                         {
-                            tag.TagInfo = null;
-                            // TODO: 如何报错？写入操作历史?
-                            // $"读取标签{info.UID}信息时出错:{result0.ToString()}"
+                            // 重复出现的，追加 读卡器名字
+                            tag = (OneTag)uid_table[info.UID];
+                            tag.ReaderName += "," + reader.Name;
                         }
                         else
                         {
-                            tag.TagInfo = result0.TagInfo;
+                            // 首次出现
+                            tag = new OneTag
+                            {
+                                Protocol = info.Protocol,
+                                ReaderName = reader.Name,
+                                UID = info.UID,
+                                DSFID = info.DsfID,
+                                AntennaID = info.AntennaID, // 2019/9/25
+                                                            // InventoryInfo = info    // 有些冗余的字段
+                            };
+
+                            /*
+                            // testing
+                            tag.AntennaID = _currenAntenna;
+                            if (DateTime.Now - _lastTime > TimeSpan.FromSeconds(5))
+                            {
+                                _currenAntenna++;
+                                if (_currenAntenna > 50)
+                                    _currenAntenna = 1;
+                                _lastTime = DateTime.Now;
+                            }
+                            */
+
+                            uid_table[info.UID] = tag;
+                            tags.Add(tag);
+                        }
+
+                        if (StringUtil.IsInList("getTagInfo", style)
+                            && tag.TagInfo == null)
+                        {
+                            // TODO: 这里要利用 Hashtable 缓存
+                            GetTagInfoResult result0 = null;
+
+                            result0 = _driver.GetTagInfo(reader.Name, info);
+                            if (result0.Value == -1)
+                            {
+                                tag.TagInfo = null;
+                                // TODO: 如何报错？写入操作历史?
+                                // $"读取标签{info.UID}信息时出错:{result0.ToString()}"
+                            }
+                            else
+                            {
+                                tag.TagInfo = result0.TagInfo;
+                            }
                         }
                     }
                 }
-            }
 
-            return new ListTagsResult { Results = tags };
+                return new ListTagsResult { Results = tags };
+            }
+            finally
+            {
+                _driver.DecApiCount();
+            }
         }
 
         public static GetTagInfoResult GetTagInfo(
@@ -489,7 +532,25 @@ namespace RfidTool
             InventoryInfo info,
             string style)
         {
-            return _driver.GetTagInfo(one_reader_name, info, style);
+            _driver.IncApiCount();
+            try
+            {
+                return _driver.GetTagInfo(one_reader_name, info, style);
+            }
+            finally
+            {
+                _driver.DecApiCount();
+            }
+        }
+
+        public static void IncApiCount()
+        {
+            _driver.IncApiCount();
+        }
+
+        public static void DecApiCount()
+        {
+            _driver.DecApiCount();
         }
 
         public static event SetErrorEventHandler SetError = null;

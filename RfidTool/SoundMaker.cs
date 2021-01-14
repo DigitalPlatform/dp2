@@ -2,12 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 
 using Midi;
 
-namespace dp2SSL
+namespace RfidTool
 {
     static class SoundMaker
     {
@@ -107,6 +106,15 @@ namespace dp2SSL
             _outputDevice.SendProgramChange(Channel.Channel2, Instrument.BirdTweet);
         }
 
+        static void InitialChannel3()
+        {
+            if (_outputDevice == null)
+            {
+                Open();
+            }
+            _outputDevice.SendProgramChange(Channel.Channel3, Instrument.ElectricPiano1);
+        }
+
         public static void StopCurrent()
         {
             try
@@ -162,6 +170,22 @@ namespace dp2SSL
         }
 
         // 表示出错的声音
+        public static void SucceedSound()
+        {
+            InitialChannel3();
+
+            // _outputDevice.SendControlChange(Channel.Channel2, Control.SustainPedal, 10);
+            _outputDevice.SendNoteOn(Channel.Channel3, Pitch.B4, 100);
+
+            _ = Task.Run(async () =>
+            {
+                await Task.Delay(500);
+                _outputDevice.SendNoteOff(Channel.Channel3, Pitch.B4, 100);
+            });
+        }
+
+
+        // 表示出错的声音
         public static void ErrorSound()
         {
             InitialChannel2();
@@ -182,56 +206,7 @@ namespace dp2SSL
             _outputDevice.SendNoteOn(Channel.Channel2, Pitch.G4, 127);
             _outputDevice.SendNoteOff(Channel.Channel2, Pitch.G4, 100);
 
-            /*
-            _ = Task.Run(async () =>
-            {
-                await Task.Delay(500);
-                _outputDevice.SendNoteOff(Channel.Channel2, Pitch.G4, 100);
-            });
-            */
         }
-#if NO
-
-        static int _tone = 1147;
-
-        static Task _task = null;
-
-        static CancellationTokenSource _cancel = new CancellationTokenSource();
-
-        public static void Start()
-        {
-            Stop();
-
-            _cancel = new CancellationTokenSource();
-            var token = _cancel.Token;
-            _task = Task.Factory.StartNew(async () =>
-            {
-                while (token.IsCancellationRequested == false)
-                {
-                    System.Console.Beep(_tone, 1000);
-                    await Task.Delay(1000);
-                }
-            },
-token,
-TaskCreationOptions.LongRunning,
-TaskScheduler.Current);
-        }
-
-        public static void Stop()
-        {
-            if (_cancel != null)
-            {
-                _cancel?.Cancel();
-                _cancel?.Dispose();
-                _cancel = null;
-            }
-        }
-
-        public static void SetTone(int tone)
-        {
-            _tone = tone;
-        }
-
-#endif
     }
+
 }
