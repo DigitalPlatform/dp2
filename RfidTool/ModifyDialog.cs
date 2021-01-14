@@ -175,8 +175,6 @@ namespace RfidTool
                     {
                         while (token.IsCancellationRequested == false)
                         {
-                            await Task.Delay(TimeSpan.FromSeconds(1), token);
-
                             // 语音提示倒计时开始盘点
                             await SpeakCounter(token);
 
@@ -189,11 +187,25 @@ namespace RfidTool
                                 ShowMessageBox("inventory", null);
                             }
 
+                            /*
+                            if (result.Results.Count == 0)
+                            {
+                                await FormClientInfo.Speaking($"没有发现",
+    false,
+    token);
+                                await Task.Delay(TimeSpan.FromSeconds(1), token);
+                                continue;
+                            }
+                            */
+
+                            int cross_count = 0;
                             this.Invoke((Action)(() =>
                             {
-                                FillTags(result.Results);
-                                // TODO: 语音念出交叉的事项个数
+                                var fill_result = FillTags(result.Results);
+                                cross_count = fill_result.CrossCount;
                             }));
+
+                            // TODO: 语音念出交叉的事项个数
 
                             // testing
                             // await SpeakPauseCounter(token);
@@ -204,6 +216,8 @@ namespace RfidTool
                                 EnableSkipButton(true, cancel);
                                 try
                                 {
+                                    // int test_count = 0;
+                                    Task task = null;
                                     while (current_token.IsCancellationRequested == false)
                                     {
                                         // result.Value:
@@ -217,17 +231,50 @@ namespace RfidTool
                                         if (current_token.IsCancellationRequested)
                                             break;
 
-                                        await SpeakAdjust($"有 {process_result.Value} 项出错。请调整天线位置", token/*注意这里不能用 current_token(用了会在“跳过”时停止全部循环)*/);
+                                        // await SpeakAdjust($"有 {process_result.Value} 项出错。请调整天线位置", token/*注意这里不能用 current_token(用了会在“跳过”时停止全部循环)*/);
+                                        // test_count++;
+
+                                        if (task == null)
+                                            task = Task.Run(async () =>
+                                            {
+                                                while (current_token.IsCancellationRequested == false)
+                                                {
+                                                    await FormClientInfo.Speaking($"有 {process_result.Value} 项出错。请调整天线位置",
+                                                        false,
+                                                        current_token);
+                                                    await Task.Delay(TimeSpan.FromSeconds(1), current_token);
+                                                }
+
+                                            });
                                     }
                                 }
                                 finally
                                 {
+                                    cancel?.Cancel();
+
                                     EnableSkipButton(false);
+
+                                    if (result.Results.Count == 0)
+                                        await FormClientInfo.Speaking($"没有发现",
+                                            true,
+                                            token);
+                                    else
+                                    {
+                                        int complete_count = result.Results.Count - cross_count;
+                                        string text = $"完成 {complete_count} 项  交叉 {cross_count} 项";
+                                        if (complete_count == 0)
+                                            text = $"交叉 {cross_count} 项";
+
+                                        await FormClientInfo.Speaking(text,
+                                            true,
+                                            token);
+                                    }
+
                                 }
                             }
 
                             // 语音或音乐提示正在处理，不要移动天线
-                            await Task.Delay(TimeSpan.FromSeconds(5), token);
+                            await Task.Delay(TimeSpan.FromSeconds(1), token);
                         }
                     }
                     catch (TaskCanceledException)
@@ -242,7 +289,7 @@ namespace RfidTool
                     finally
                     {
                         FormClientInfo.Speak("停止修改", false, false);
-                        
+
                         this.Invoke((Action)(() =>
                         {
                             // 把按钮状态复原到未启动状态
@@ -276,6 +323,7 @@ namespace RfidTool
                 FormClientInfo.Speak($"{i}", false, true);
                 await Task.Delay(TimeSpan.FromSeconds(1), token);
             }
+            Console.Beep();
             FormClientInfo.Speak($"开始扫描", false, true);
         }
 

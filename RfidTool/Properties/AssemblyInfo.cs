@@ -33,7 +33,7 @@ using System.Runtime.InteropServices;
 //通过使用 "*"，如下所示:
 // [assembly: AssemblyVersion("1.0.*")]
 
-[assembly: AssemblyVersion("1.0.6")]
+[assembly: AssemblyVersion("1.0.7")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
 
 // 1.0.1 (2020/12/10) 增加保存“写入历史”列表功能; 感知 USB 插拔、自动重新连接读写器;
@@ -44,3 +44,4 @@ using System.Runtime.InteropServices;
 // 1.0.4 (2020/12/14) 增加写入 UHF 高校联盟格式标签的功能(使用 M60 读写器)
 // 1.0.5 (2020/12/16) 增加写入 UHF 国标格式标签的功能(使用 M60 读写器)
 // 1.0.6 (2021/1/11) 对蓝牙读写器增加专用的打开方式，并能感知到蓝牙读写器打开和关闭电源、做出重新初始化设备的响应
+// 1.0.7 (2021/1/14) 增加批处理修改标签功能。增加 readers.xml 支持
