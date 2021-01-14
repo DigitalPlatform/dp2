@@ -30,7 +30,7 @@ namespace RfidTool
         private void InitializeComponent()
         {
             this.tabControl1 = new System.Windows.Forms.TabControl();
-            this.tabPage_rfid = new System.Windows.Forms.TabPage();
+            this.tabPage_writeTag = new System.Windows.Forms.TabPage();
             this.groupBox_uhf = new System.Windows.Forms.GroupBox();
             this.checkBox_writeUserBank = new System.Windows.Forms.CheckBox();
             this.checkBox_warningWhenUhfFormatMismatch = new System.Windows.Forms.CheckBox();
@@ -41,14 +41,19 @@ namespace RfidTool
             this.label2 = new System.Windows.Forms.Label();
             this.textBox_rfid_oi = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
-            this.button_OK = new System.Windows.Forms.Button();
-            this.button_Cancel = new System.Windows.Forms.Button();
             this.tabPage_other = new System.Windows.Forms.TabPage();
             this.checkBox_enableTagCache = new System.Windows.Forms.CheckBox();
+            this.button_OK = new System.Windows.Forms.Button();
+            this.button_Cancel = new System.Windows.Forms.Button();
+            this.tabPage_modifyTag = new System.Windows.Forms.TabPage();
+            this.label4 = new System.Windows.Forms.Label();
+            this.numericUpDown_seconds = new System.Windows.Forms.NumericUpDown();
             this.tabControl1.SuspendLayout();
-            this.tabPage_rfid.SuspendLayout();
+            this.tabPage_writeTag.SuspendLayout();
             this.groupBox_uhf.SuspendLayout();
             this.tabPage_other.SuspendLayout();
+            this.tabPage_modifyTag.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_seconds)).BeginInit();
             this.SuspendLayout();
             // 
             // tabControl1
@@ -56,7 +61,8 @@ namespace RfidTool
             this.tabControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.tabControl1.Controls.Add(this.tabPage_rfid);
+            this.tabControl1.Controls.Add(this.tabPage_writeTag);
+            this.tabControl1.Controls.Add(this.tabPage_modifyTag);
             this.tabControl1.Controls.Add(this.tabPage_other);
             this.tabControl1.Location = new System.Drawing.Point(11, 10);
             this.tabControl1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
@@ -65,22 +71,22 @@ namespace RfidTool
             this.tabControl1.Size = new System.Drawing.Size(719, 463);
             this.tabControl1.TabIndex = 0;
             // 
-            // tabPage_rfid
+            // tabPage_writeTag
             // 
-            this.tabPage_rfid.Controls.Add(this.groupBox_uhf);
-            this.tabPage_rfid.Controls.Add(this.linkLabel_oiHelp);
-            this.tabPage_rfid.Controls.Add(this.textBox_rfid_aoi);
-            this.tabPage_rfid.Controls.Add(this.label2);
-            this.tabPage_rfid.Controls.Add(this.textBox_rfid_oi);
-            this.tabPage_rfid.Controls.Add(this.label1);
-            this.tabPage_rfid.Location = new System.Drawing.Point(4, 31);
-            this.tabPage_rfid.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.tabPage_rfid.Name = "tabPage_rfid";
-            this.tabPage_rfid.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.tabPage_rfid.Size = new System.Drawing.Size(711, 428);
-            this.tabPage_rfid.TabIndex = 0;
-            this.tabPage_rfid.Text = "RFID";
-            this.tabPage_rfid.UseVisualStyleBackColor = true;
+            this.tabPage_writeTag.Controls.Add(this.groupBox_uhf);
+            this.tabPage_writeTag.Controls.Add(this.linkLabel_oiHelp);
+            this.tabPage_writeTag.Controls.Add(this.textBox_rfid_aoi);
+            this.tabPage_writeTag.Controls.Add(this.label2);
+            this.tabPage_writeTag.Controls.Add(this.textBox_rfid_oi);
+            this.tabPage_writeTag.Controls.Add(this.label1);
+            this.tabPage_writeTag.Location = new System.Drawing.Point(4, 31);
+            this.tabPage_writeTag.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.tabPage_writeTag.Name = "tabPage_writeTag";
+            this.tabPage_writeTag.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.tabPage_writeTag.Size = new System.Drawing.Size(711, 428);
+            this.tabPage_writeTag.TabIndex = 0;
+            this.tabPage_writeTag.Text = "写入标签";
+            this.tabPage_writeTag.UseVisualStyleBackColor = true;
             // 
             // groupBox_uhf
             // 
@@ -185,6 +191,26 @@ namespace RfidTool
             this.label1.TabIndex = 0;
             this.label1.Text = "机构代码(&O):";
             // 
+            // tabPage_other
+            // 
+            this.tabPage_other.Controls.Add(this.checkBox_enableTagCache);
+            this.tabPage_other.Location = new System.Drawing.Point(4, 31);
+            this.tabPage_other.Name = "tabPage_other";
+            this.tabPage_other.Size = new System.Drawing.Size(711, 428);
+            this.tabPage_other.TabIndex = 1;
+            this.tabPage_other.Text = "其它";
+            this.tabPage_other.UseVisualStyleBackColor = true;
+            // 
+            // checkBox_enableTagCache
+            // 
+            this.checkBox_enableTagCache.AutoSize = true;
+            this.checkBox_enableTagCache.Location = new System.Drawing.Point(15, 30);
+            this.checkBox_enableTagCache.Name = "checkBox_enableTagCache";
+            this.checkBox_enableTagCache.Size = new System.Drawing.Size(237, 25);
+            this.checkBox_enableTagCache.TabIndex = 0;
+            this.checkBox_enableTagCache.Text = "启用标签信息缓存(&C)";
+            this.checkBox_enableTagCache.UseVisualStyleBackColor = true;
+            // 
             // button_OK
             // 
             this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
@@ -210,25 +236,37 @@ namespace RfidTool
             this.button_Cancel.UseVisualStyleBackColor = true;
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
-            // tabPage_other
+            // tabPage_modifyTag
             // 
-            this.tabPage_other.Controls.Add(this.checkBox_enableTagCache);
-            this.tabPage_other.Location = new System.Drawing.Point(4, 31);
-            this.tabPage_other.Name = "tabPage_other";
-            this.tabPage_other.Size = new System.Drawing.Size(711, 428);
-            this.tabPage_other.TabIndex = 1;
-            this.tabPage_other.Text = "其它";
-            this.tabPage_other.UseVisualStyleBackColor = true;
+            this.tabPage_modifyTag.Controls.Add(this.numericUpDown_seconds);
+            this.tabPage_modifyTag.Controls.Add(this.label4);
+            this.tabPage_modifyTag.Location = new System.Drawing.Point(4, 31);
+            this.tabPage_modifyTag.Name = "tabPage_modifyTag";
+            this.tabPage_modifyTag.Size = new System.Drawing.Size(711, 428);
+            this.tabPage_modifyTag.TabIndex = 2;
+            this.tabPage_modifyTag.Text = "修改标签";
+            this.tabPage_modifyTag.UseVisualStyleBackColor = true;
             // 
-            // checkBox_enableTagCache
+            // label4
             // 
-            this.checkBox_enableTagCache.AutoSize = true;
-            this.checkBox_enableTagCache.Location = new System.Drawing.Point(15, 30);
-            this.checkBox_enableTagCache.Name = "checkBox_enableTagCache";
-            this.checkBox_enableTagCache.Size = new System.Drawing.Size(237, 25);
-            this.checkBox_enableTagCache.TabIndex = 0;
-            this.checkBox_enableTagCache.Text = "启用标签信息缓存(&C)";
-            this.checkBox_enableTagCache.UseVisualStyleBackColor = true;
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(13, 41);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(222, 21);
+            this.label4.TabIndex = 0;
+            this.label4.Text = "扫描前倒计时秒数(&S):";
+            // 
+            // numericUpDown_seconds
+            // 
+            this.numericUpDown_seconds.Location = new System.Drawing.Point(256, 39);
+            this.numericUpDown_seconds.Maximum = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+            this.numericUpDown_seconds.Name = "numericUpDown_seconds";
+            this.numericUpDown_seconds.Size = new System.Drawing.Size(120, 31);
+            this.numericUpDown_seconds.TabIndex = 1;
             // 
             // SettingDialog
             // 
@@ -249,12 +287,15 @@ namespace RfidTool
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.SettingDialog_FormClosed);
             this.Load += new System.EventHandler(this.SettingDialog_Load);
             this.tabControl1.ResumeLayout(false);
-            this.tabPage_rfid.ResumeLayout(false);
-            this.tabPage_rfid.PerformLayout();
+            this.tabPage_writeTag.ResumeLayout(false);
+            this.tabPage_writeTag.PerformLayout();
             this.groupBox_uhf.ResumeLayout(false);
             this.groupBox_uhf.PerformLayout();
             this.tabPage_other.ResumeLayout(false);
             this.tabPage_other.PerformLayout();
+            this.tabPage_modifyTag.ResumeLayout(false);
+            this.tabPage_modifyTag.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_seconds)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -262,7 +303,7 @@ namespace RfidTool
         #endregion
 
         private System.Windows.Forms.TabControl tabControl1;
-        private System.Windows.Forms.TabPage tabPage_rfid;
+        private System.Windows.Forms.TabPage tabPage_writeTag;
         private System.Windows.Forms.Button button_OK;
         private System.Windows.Forms.Button button_Cancel;
         private System.Windows.Forms.TextBox textBox_rfid_oi;
@@ -277,5 +318,8 @@ namespace RfidTool
         private System.Windows.Forms.CheckBox checkBox_writeUserBank;
         private System.Windows.Forms.TabPage tabPage_other;
         private System.Windows.Forms.CheckBox checkBox_enableTagCache;
+        private System.Windows.Forms.TabPage tabPage_modifyTag;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.NumericUpDown numericUpDown_seconds;
     }
 }

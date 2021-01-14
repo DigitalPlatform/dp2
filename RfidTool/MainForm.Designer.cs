@@ -35,6 +35,7 @@ namespace RfidTool
             this.MenuItem_writeBookTags = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_writeShelfTags = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_writePatronTags = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_batchModifyTags = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_saveToExcelFile = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_clearHistory = new System.Windows.Forms.ToolStripMenuItem();
@@ -67,7 +68,6 @@ namespace RfidTool
             this.columnHeader_oi = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_aoi = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_writeTime = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.MenuItem_batchModifyTags = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
@@ -128,6 +128,13 @@ namespace RfidTool
             this.MenuItem_writePatronTags.Size = new System.Drawing.Size(387, 40);
             this.MenuItem_writePatronTags.Text = "写入读者证(&P) ...";
             this.MenuItem_writePatronTags.Click += new System.EventHandler(this.MenuItem_writePatronTags_Click);
+            // 
+            // MenuItem_batchModifyTags
+            // 
+            this.MenuItem_batchModifyTags.Name = "MenuItem_batchModifyTags";
+            this.MenuItem_batchModifyTags.Size = new System.Drawing.Size(387, 40);
+            this.MenuItem_batchModifyTags.Text = "批修改标签(&B)...";
+            this.MenuItem_batchModifyTags.Click += new System.EventHandler(this.MenuItem_batchModifyTags_Click);
             // 
             // toolStripSeparator3
             // 
@@ -374,13 +381,6 @@ namespace RfidTool
             // 
             this.columnHeader_writeTime.Text = "写入时间";
             this.columnHeader_writeTime.Width = 260;
-            // 
-            // MenuItem_batchModifyTags
-            // 
-            this.MenuItem_batchModifyTags.Name = "MenuItem_batchModifyTags";
-            this.MenuItem_batchModifyTags.Size = new System.Drawing.Size(387, 40);
-            this.MenuItem_batchModifyTags.Text = "批修改标签(&B)...";
-            this.MenuItem_batchModifyTags.Click += new System.EventHandler(this.MenuItem_batchModifyTags_Click);
             // 
             // MainForm
             // 
