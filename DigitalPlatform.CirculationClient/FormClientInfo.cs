@@ -380,10 +380,86 @@ namespace DigitalPlatform.CirculationClient
                 }
                 catch (System.Runtime.InteropServices.COMException ex)
                 {
-                    WriteErrorLog($"ClientInfo::Speak() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                    WriteErrorLog($"FormClientInfo::Speak() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 }
             }));
         }
+
+        public static async Task<NormalResult> Speaking(string strText,
+            bool cancel_before,
+            CancellationToken token)
+        {
+            if (m_speech == null)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = "m_speech == null",
+                    ErrorCode = "internalError"
+                };
+
+            if (SpeakOn == false)
+                return new NormalResult
+                {
+                    Value = 0,
+                    ErrorCode = "speakOff"  // 当前用户关闭了语音
+                };
+
+            var prompt = new Prompt(strText);
+
+            ManualResetEvent eventFinish = new ManualResetEvent(false);
+            string error = null;
+            MainForm.BeginInvoke((Action)(() =>
+            {
+                try
+                {
+                    if (cancel_before)
+                        m_speech.SpeakAsyncCancelAll();
+                    m_speech.SpeakCompleted += speech_SpeakCompleted;
+                    m_speech.SpeakAsync(prompt);
+                }
+                catch (System.Runtime.InteropServices.COMException ex)
+                {
+                    error = $"FormClientInfo::Speaking() 出现异常: {ex.Message}";
+                    WriteErrorLog($"FormClientInfo::Speaking() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                    m_speech.SpeakCompleted -= speech_SpeakCompleted;
+                }
+            }));
+
+            int index = WaitHandle.WaitAny(new WaitHandle[] {
+                            eventFinish,
+                            token.WaitHandle,
+                            });
+            if (string.IsNullOrEmpty(error) == false)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = error
+                };
+            // cancelled
+            if (index == 1)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = "中断",
+                    ErrorCode = "cancelled"
+                };
+            // 正常返回
+            return new NormalResult();
+
+            void speech_SpeakCompleted(object sender, SpeakCompletedEventArgs e)
+            {
+                if (e.Prompt != prompt)
+                    return;
+                m_speech.SpeakCompleted -= speech_SpeakCompleted;
+                eventFinish.Set();
+            }
+        }
+
+        public static void CancelSpeaking()
+        {
+            m_speech.SpeakAsyncCancelAll();
+        }
+
 
         public static bool SpeakOn
         {
