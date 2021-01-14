@@ -1,5 +1,4 @@
-﻿using DigitalPlatform.Text;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -9,6 +8,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+
+using DigitalPlatform.Text;
 
 namespace RfidTool
 {
@@ -29,6 +30,8 @@ namespace RfidTool
             this.checkBox_warningWhenUhfFormatMismatch.Checked = DataModel.WarningWhenUhfFormatMismatch;
 
             this.checkBox_enableTagCache.Checked = DataModel.EnableTagCache;
+
+            this.numericUpDown_seconds.Value = DataModel.BeforeScanSeconds;
         }
 
         private void SettingDialog_FormClosing(object sender, FormClosingEventArgs e)
@@ -91,6 +94,8 @@ namespace RfidTool
             DataModel.WarningWhenUhfFormatMismatch = this.checkBox_warningWhenUhfFormatMismatch.Checked;
 
             DataModel.EnableTagCache = this.checkBox_enableTagCache.Checked;
+
+            DataModel.BeforeScanSeconds = (int)this.numericUpDown_seconds.Value;
 
             this.DialogResult = DialogResult.OK;
             this.Close();

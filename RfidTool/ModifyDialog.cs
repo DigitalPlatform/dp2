@@ -325,7 +325,7 @@ namespace RfidTool
         // 语音提示倒计时
         async Task SpeakCounter(CancellationToken token)
         {
-            for (int i = 5; i > 0; i--)
+            for (int i = DataModel.BeforeScanSeconds; i > 0; i--)
             {
                 FormClientInfo.Speak($"{i}", false, true);
                 await Task.Delay(TimeSpan.FromSeconds(1), token);

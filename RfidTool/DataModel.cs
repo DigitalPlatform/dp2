@@ -327,6 +327,19 @@ namespace RfidTool
             }
         }
 
+        // 扫描前倒计时秒数
+        public static int BeforeScanSeconds
+        {
+            get
+            {
+                return ClientInfo.Config.GetInt("writeTag", "beforeScanSeconds", 5);
+            }
+            set
+            {
+                ClientInfo.Config.SetInt("writeTag", "beforeScanSeconds", value);
+            }
+        }
+
         // 写入标签
         public static NormalResult WriteTagInfo(string one_reader_name,
             TagInfo old_tag_info,
