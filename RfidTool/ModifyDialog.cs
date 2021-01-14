@@ -12,11 +12,11 @@ using System.Diagnostics;
 using System.Collections;
 using System.IO;
 
+using DigitalPlatform;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Core;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.CirculationClient;
-using DigitalPlatform;
 using DigitalPlatform.RFID;
 
 namespace RfidTool
@@ -163,9 +163,12 @@ namespace RfidTool
 
         void BeginModify(CancellationToken token)
         {
+            this.listView_tags.Items.Clear();
             this.toolStripButton_begin.Enabled = false;
             this.toolStripButton_stop.Enabled = true;
             ClearUidTable();
+            ClearProcessedTable();
+            ClearCacheTagTable(null);
             _ = Task.Factory.StartNew(
                 async () =>
                 {
@@ -180,6 +183,8 @@ namespace RfidTool
 
                             string readerNameList = "*";
                             var result = DataModel.ListTags(readerNameList, "");
+                            if (result.Results == null)
+                                result.Results = new List<OneTag>();
                             if (result.Value == -1)
                                 ShowMessageBox("inventory", result.ErrorInfo);
                             else
@@ -233,19 +238,21 @@ namespace RfidTool
 
                                         // await SpeakAdjust($"有 {process_result.Value} 项出错。请调整天线位置", token/*注意这里不能用 current_token(用了会在“跳过”时停止全部循环)*/);
                                         // test_count++;
+                                        int error_count = process_result.Value;
 
                                         if (task == null)
                                             task = Task.Run(async () =>
                                             {
                                                 while (current_token.IsCancellationRequested == false)
                                                 {
-                                                    await FormClientInfo.Speaking($"有 {process_result.Value} 项出错。请调整天线位置",
+                                                    await FormClientInfo.Speaking($"有 {error_count} 项出错。请调整天线位置",
                                                         false,
                                                         current_token);
                                                     await Task.Delay(TimeSpan.FromSeconds(1), current_token);
                                                 }
 
                                             });
+                                        await Task.Delay(TimeSpan.FromMilliseconds(100), current_token);
                                     }
                                 }
                                 finally
@@ -324,7 +331,7 @@ namespace RfidTool
                 await Task.Delay(TimeSpan.FromSeconds(1), token);
             }
             Console.Beep();
-            FormClientInfo.Speak($"开始扫描", false, true);
+            // FormClientInfo.Speak($"开始扫描", false, true);
         }
 
         // 语音提示间隙时间，方便拿走从读写器上标签
@@ -381,7 +388,7 @@ namespace RfidTool
                 e.Cancel = true;
         }
 
-        void ShowMessageBox(string type, string text)
+        public void ShowMessageBox(string type, string text)
         {
             // 语音提示出错
             if (text != null)
@@ -461,7 +468,7 @@ namespace RfidTool
 
             // 是否被过滤掉
             // public bool Disabled { get; set; }
-            public string State { get; set; }   // disable/succeed
+            public string State { get; set; }   // disable/cross/succeed/error
 
             public string ErrorInfo { get; set; }
         }
@@ -476,7 +483,7 @@ namespace RfidTool
             if (IsProcessed(tag.UID))
             {
                 iteminfo.State = "cross";   // 表示以前处理过这个标签
-                ListViewUtil.ChangeItemText(item, COLUMN_ERRORINFO, "刚处理过");
+                ListViewUtil.ChangeItemText(item, COLUMN_ERRORINFO, "交叉");
                 SetItemColor(item, "cross");
             }
 
@@ -512,6 +519,14 @@ namespace RfidTool
             }
         }
 
+        void ClearProcessedTable()
+        {
+            lock (_processedTable.SyncRoot)
+            {
+                _processedTable.Clear();
+            }
+        }
+
         void AddToProcessed(string uid, ItemInfo iteminfo)
         {
             lock (_processedTable.SyncRoot)
@@ -531,95 +546,143 @@ namespace RfidTool
             if (tags == null)
                 return new ProcessResult();
 
-            int process_count = 0;
-            int error_count = 0;
-            int filtered_count = 0;
-            foreach (var tag in tags)
+            DataModel.IncApiCount();
+            try
             {
-                if (token.IsCancellationRequested)
-                    return new ProcessResult
-                    {
-                        Value = -1,
-                        ErrorInfo = "中断",
-                        ErrorCode = "cancel"
-                    };
-
-                if (tag.Protocol != InventoryInfo.ISO15693)
-                    continue;
-
-                ListViewItem item = (ListViewItem)this.Invoke((Func<ListViewItem>)(() =>
+                int process_count = 0;
+                int error_count = 0;
+                int filtered_count = 0;
+                foreach (var tag in tags)
                 {
-                    return ListViewUtil.FindItem(this.listView_tags, tag.UID, COLUMN_UID);
-                }));
+                    if (token.IsCancellationRequested)
+                        return new ProcessResult
+                        {
+                            Value = -1,
+                            ErrorInfo = "中断",
+                            ErrorCode = "cancel"
+                        };
 
-                Debug.Assert(item != null);
+                    if (tag.Protocol != InventoryInfo.ISO15693)
+                        continue;
 
-                var iteminfo = item.Tag as ItemInfo;
-
-                if (iteminfo.State == "disable")
-                {
-                    filtered_count++;
-                    continue;
-                }
-
-                // 跳过已经成功的项目
-                if (iteminfo.State == "succeed")
-                    continue;
-
-                if (iteminfo.TagInfo == null)
-                {
-                    // 第一步，获得标签详细信息
-                    InventoryInfo info = new InventoryInfo
+                    ListViewItem item = (ListViewItem)this.Invoke((Func<ListViewItem>)(() =>
                     {
-                        Protocol = tag.Protocol,
-                        UID = tag.UID,
-                        AntennaID = tag.AntennaID
-                    };
-                    var get_result = DataModel.GetTagInfo(tag.ReaderName, info, "");
-                    if (get_result.Value == -1)
+                        return ListViewUtil.FindItem(this.listView_tags, tag.UID, COLUMN_UID);
+                    }));
+
+                    Debug.Assert(item != null);
+
+                    var iteminfo = item.Tag as ItemInfo;
+
+                    if (iteminfo.State == "disable")
                     {
-                        SetErrorInfo(item, get_result.ErrorInfo);
-                        error_count++;
+                        filtered_count++;
                         continue;
                     }
 
-                    iteminfo.TagInfo = get_result.TagInfo;
+                    // 跳过已经成功的项目
+                    if (iteminfo.State == "succeed")
+                        continue;
+
+                    if (iteminfo.TagInfo == null)
+                    {
+                        // 第一步，获得标签详细信息
+                        InventoryInfo info = new InventoryInfo
+                        {
+                            Protocol = tag.Protocol,
+                            UID = tag.UID,
+                            AntennaID = tag.AntennaID
+                        };
+                        var get_result = GetTagInfo(tag.ReaderName, info, "");
+                        if (get_result.Value == -1)
+                        {
+                            SetErrorInfo(item, get_result.ErrorInfo);
+                            error_count++;
+                            // 间隔一定时间才鸣叫
+                            ErrorSound();
+                            continue;
+                        }
+
+                        iteminfo.TagInfo = get_result.TagInfo;
+
+                        // 第二步，刷新 PII 等栏目
+                        this.Invoke((Action)(() =>
+                        {
+                            // 2021/1/14
+                            // 清除残留的 error 状态
+                            if (iteminfo.State == "error")
+                            {
+                                ListViewUtil.ChangeItemText(item, COLUMN_ERRORINFO, "");
+                                SetItemColor(item, "normal");
+                                iteminfo.State = null;
+                                iteminfo.ErrorInfo = null;
+                            }
+
+                            RefreshItem(item);
+                        }));
+                    }
+
+                    if (iteminfo.State == "disable")
+                    {
+                        filtered_count++;
+                        continue;
+                    }
+
+                    if (iteminfo.State == "succeed")
+                        continue;
+
+                    // 跳过以前已经处理过的项目
+                    if (iteminfo.State == "cross")
+                        continue;
+
+                    // 第三步，执行修改动作
+                    var action_result = DoAction(item);
+                    if (action_result.Value == -1)
+                    {
+                        error_count++;
+                        // 间隔一定时间才鸣叫
+                        ErrorSound();
+                    }
+                    else
+                    {
+                        process_count++;
+                        SoundMaker.SucceedSound();
+                        /*
+                        // 2021/1/14
+                        if (iteminfo.State == "error")
+                        {
+                            error_count++;
+                            continue;
+                        }
+                        */
+                    }
                 }
 
-                // 第二步，刷新 PII 等栏目
-                this.Invoke((Action)(() =>
+                // 返回 0 表示全部完成，没有遇到出错的情况
+                return new ProcessResult
                 {
-                    RefreshItem(item);
-                }));
-
-                if (iteminfo.State == "disable")
-                {
-                    filtered_count++;
-                    continue;
-                }
-
-                if (iteminfo.State == "succeed")
-                    continue;
-
-                // 跳过以前已经处理过的项目
-                if (iteminfo.State == "cross")
-                    continue;
-
-                // 第三步，执行修改动作
-                var action_result = DoAction(item);
-                if (action_result.Value == -1)
-                    error_count++;
-
-                process_count++;
+                    Value = error_count,
+                    ErrorCount = error_count,
+                    ProcessCount = process_count
+                };
             }
-
-            // 返回 0 表示全部完成，没有遇到出错的情况
-            return new ProcessResult
+            finally
             {
-                Value = error_count,
-                ErrorCount = error_count,
-                ProcessCount = process_count
-            };
+                DataModel.DecApiCount();
+            }
+        }
+
+        DateTime _lastErrorSound;
+
+        void ErrorSound()
+        {
+            var now = DateTime.Now;
+            if (now - _lastErrorSound > TimeSpan.FromMilliseconds(1200))
+            {
+                // 间隔一定时间才鸣叫
+                SoundMaker.ErrorSound();
+                _lastErrorSound = now;
+            }
         }
 
         // 执行修改动作
@@ -705,7 +768,7 @@ namespace RfidTool
                     var tag = iteminfo.Tag;
                     var new_tag_info = GetTagInfo(taginfo, chip);
                     // 写入标签
-                    var write_result = DataModel.WriteTagInfo(tag.ReaderName,
+                    var write_result = WriteTagInfo(tag.ReaderName,
                         taginfo,
                         new_tag_info);
                     if (write_result.Value == -1)
@@ -719,13 +782,22 @@ namespace RfidTool
                         };
                     }
 
+                    iteminfo.TagInfo = new_tag_info;
                     iteminfo.State = "succeed";
                     this.Invoke((Action)(() =>
                     {
+                        RefreshItem(item);
+                        ListViewUtil.ChangeItemText(item, COLUMN_ERRORINFO, "修改成功");
                         SetItemColor(item, "changed");
                     }));
 
                     AddToProcessed(iteminfo.Tag.UID, iteminfo);
+
+                    WriteComplete?.Invoke(this, new WriteCompleteventArgs
+                    {
+                        Chip = chip,
+                        TagInfo = new_tag_info
+                    });
                 }
                 else
                 {
@@ -901,11 +973,16 @@ bool eas*/)
         {
             var iteminfo = item.Tag as ItemInfo;
             if (iteminfo != null)
+            {
                 iteminfo.ErrorInfo = error;
+                iteminfo.State = "error";
+            }
 
             this.Invoke((Action)(() =>
             {
-                ListViewUtil.ChangeItemText(item, COLUMN_ERRORINFO, error);
+                string old_value = ListViewUtil.GetItemText(item, COLUMN_ERRORINFO);
+                if (old_value != error)
+                    ListViewUtil.ChangeItemText(item, COLUMN_ERRORINFO, error);
                 SetItemColor(item, "error");
             }));
         }
@@ -940,8 +1017,11 @@ bool eas*/)
 
             if (state == "error")
             {
-                item.BackColor = Color.DarkRed;
-                item.ForeColor = Color.White;
+                // if 是为了避免(在重复刷新时)出现闪动
+                if (item.BackColor != Color.DarkRed)
+                    item.BackColor = Color.DarkRed;
+                if (item.ForeColor != Color.White)
+                    item.ForeColor = Color.White;
                 return;
             }
 
@@ -975,6 +1055,109 @@ bool eas*/)
             var cancel = button.Tag as CancellationTokenSource;
             cancel?.Cancel();
         }
+
+        public void EnableControls(bool enable)
+        {
+            this.Invoke((Action)(() =>
+            {
+                this.listView_tags.Enabled = enable;
+                this.toolStrip1.Enabled = enable;
+            }));
+        }
+
+        public string MessageText
+        {
+            get
+            {
+                return this.toolStripStatusLabel1.Text;
+            }
+            set
+            {
+                this.toolStripStatusLabel1.Text = value;
+            }
+        }
+
+        #region 标签缓存
+
+        public NormalResult WriteTagInfo(string one_reader_name,
+    TagInfo old_tag_info,
+    TagInfo new_tag_info)
+        {
+            /* // 第一种方法，清除对应的缓存事项
+            ClearCacheTagTable(new_tag_info.UID);
+            if (new_tag_info.UID != old_tag_info.UID)
+                ClearCacheTagTable(old_tag_info.UID);
+            */
+            var result = DataModel.WriteTagInfo(one_reader_name,
+    old_tag_info,
+    new_tag_info);
+            // 第二种方法，直接修改缓存中的内容为新内容
+            SetCacheTagInfo(new_tag_info.UID, new_tag_info);
+            return result;
+        }
+
+        public GetTagInfoResult GetTagInfo(
+    string one_reader_name,
+    InventoryInfo info,
+    string style)
+        {
+            // 先从 cache 里面找
+            var taginfo = GetCachedTagInfo(info.UID);
+            if (taginfo != null)
+                return new GetTagInfoResult { TagInfo = taginfo };
+
+            // 再真正从读写器读
+            var result = DataModel.GetTagInfo(one_reader_name,
+                info,
+                style);
+            if (result.Value != -1 && result.TagInfo != null)
+            {
+                // 存入 cache
+                SetCacheTagInfo(info.UID, result.TagInfo);
+            }
+
+            return result;
+        }
+
+        // 标签信息缓存
+        // uid --> TagInfo
+        Hashtable _tagTable = new Hashtable();
+
+        public TagInfo GetCachedTagInfo(string uid)
+        {
+            lock (_tagTable.SyncRoot)
+            {
+                return (TagInfo)_tagTable[uid];
+            }
+        }
+
+        public void SetCacheTagInfo(string uid, TagInfo taginfo)
+        {
+            lock (_tagTable.SyncRoot)
+            {
+                // 防止缓存规模失控
+                if (_tagTable.Count > 1000)
+                    _tagTable.Clear();
+                _tagTable[uid] = taginfo;
+            }
+        }
+
+        public void ClearCacheTagTable(string uid)
+        {
+            lock (_tagTable.SyncRoot)
+            {
+                if (string.IsNullOrEmpty(uid))
+                {
+                    _tagTable.Clear();
+                }
+                else
+                {
+                    _tagTable.Remove(uid);
+                }
+            }
+        }
+
+        #endregion
     }
 
     // 修改动作

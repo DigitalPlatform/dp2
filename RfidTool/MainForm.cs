@@ -606,6 +606,8 @@ bool bClickClose = false)
             _taskConnect = Task.Run(() =>
             {
                 _scanDialog?.EnableControls(false);
+                _modifyDialog?.EnableControls(false);
+                _modifyDialog?.ShowMessageBox("deviceInitial", "正在重新初始化读写器，请稍候 ...");
                 try
                 {
                 REDO:
@@ -670,6 +672,8 @@ bool bClickClose = false)
                 {
                     _taskConnect = null;
                     _scanDialog?.EnableControls(true);
+                    _modifyDialog?.EnableControls(true);
+                    _modifyDialog?.ShowMessageBox("deviceInitial", null);
                 }
             });
         }

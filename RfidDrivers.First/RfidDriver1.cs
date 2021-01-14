@@ -2637,7 +2637,7 @@ namespace RfidDrivers.First
             //Lock();
             try
             {
-                RFIDLIB.rfidlib_reader.RDR_CloseRFTransmitter((UIntPtr)reader_handle);
+                // RFIDLIB.rfidlib_reader.RDR_CloseRFTransmitter((UIntPtr)reader_handle);
                 var iret = RFIDLIB.rfidlib_reader.RDR_Close((UIntPtr)reader_handle);
                 if (iret != 0)
                     return new NormalResult
@@ -2781,6 +2781,7 @@ out Reader reader);
                     ai_type,
                     (byte)antennas.Length,    // 1,
                     antennas,   // new Byte[] { 1 },
+                    false,
                     ref nTagCount,
                     out List<InventoryInfo> results);
                 if (ret != 0)
@@ -3160,6 +3161,7 @@ out Reader reader);
                         ai_type,
                         (byte)antennas.Length,    // 1,
                         antennas,   // new Byte[] { 1 },
+                        false,
                         ref nTagCount,
                         out List<InventoryInfo> results);
                     if (ret != 0)
@@ -4705,6 +4707,7 @@ out Reader reader);
             Byte AIType,
             Byte AntennaSelCount,
             Byte[] AntennaSel,
+            bool closeRF,
             ref UInt32 nTagCount,
             out List<InventoryInfo> results)
         {
@@ -4762,7 +4765,8 @@ out Reader reader);
                     AntennaSelCount,
                     AntennaSel,
                     InvenParamSpecList);
-                RFIDLIB.rfidlib_reader.RDR_CloseRFTransmitter(hreader);
+                if (closeRF)
+                    RFIDLIB.rfidlib_reader.RDR_CloseRFTransmitter(hreader);
                 if (iret == 0 || iret == -21)
                 {
                     nTagCount += RFIDLIB.rfidlib_reader.RDR_GetTagDataReportCount(hreader);
