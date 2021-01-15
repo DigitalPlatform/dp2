@@ -33,15 +33,15 @@ namespace RfidTool
             this.button_OK = new System.Windows.Forms.Button();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage_action = new System.Windows.Forms.TabPage();
+            this.checkBox_uidPiiMap = new System.Windows.Forms.CheckBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.comboBox_filter_tu = new System.Windows.Forms.ComboBox();
+            this.checkBox_aoi = new System.Windows.Forms.CheckBox();
+            this.checkBox_oi = new System.Windows.Forms.CheckBox();
             this.linkLabel_oiHelp = new System.Windows.Forms.LinkLabel();
             this.textBox_rfid_aoi = new System.Windows.Forms.TextBox();
             this.textBox_rfid_oi = new System.Windows.Forms.TextBox();
             this.tabPage_other = new System.Windows.Forms.TabPage();
-            this.checkBox_oi = new System.Windows.Forms.CheckBox();
-            this.checkBox_aoi = new System.Windows.Forms.CheckBox();
-            this.comboBox_filter_tu = new System.Windows.Forms.ComboBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.checkBox_uidPiiMap = new System.Windows.Forms.CheckBox();
             this.tabControl1.SuspendLayout();
             this.tabPage_action.SuspendLayout();
             this.SuspendLayout();
@@ -104,64 +104,24 @@ namespace RfidTool
             this.tabPage_action.Text = "动作参数";
             this.tabPage_action.UseVisualStyleBackColor = true;
             // 
-            // linkLabel_oiHelp
+            // checkBox_uidPiiMap
             // 
-            this.linkLabel_oiHelp.AutoSize = true;
-            this.linkLabel_oiHelp.Location = new System.Drawing.Point(6, 219);
-            this.linkLabel_oiHelp.Name = "linkLabel_oiHelp";
-            this.linkLabel_oiHelp.Size = new System.Drawing.Size(262, 21);
-            this.linkLabel_oiHelp.TabIndex = 4;
-            this.linkLabel_oiHelp.TabStop = true;
-            this.linkLabel_oiHelp.Text = "帮助：如何设置机构代码？";
+            this.checkBox_uidPiiMap.AutoSize = true;
+            this.checkBox_uidPiiMap.Location = new System.Drawing.Point(10, 301);
+            this.checkBox_uidPiiMap.Name = "checkBox_uidPiiMap";
+            this.checkBox_uidPiiMap.Size = new System.Drawing.Size(294, 25);
+            this.checkBox_uidPiiMap.TabIndex = 9;
+            this.checkBox_uidPiiMap.Text = "建立 UID PII 对照关系(&M)";
+            this.checkBox_uidPiiMap.UseVisualStyleBackColor = true;
             // 
-            // textBox_rfid_aoi
+            // label1
             // 
-            this.textBox_rfid_aoi.Enabled = false;
-            this.textBox_rfid_aoi.Location = new System.Drawing.Point(244, 141);
-            this.textBox_rfid_aoi.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.textBox_rfid_aoi.Name = "textBox_rfid_aoi";
-            this.textBox_rfid_aoi.Size = new System.Drawing.Size(294, 31);
-            this.textBox_rfid_aoi.TabIndex = 3;
-            // 
-            // textBox_rfid_oi
-            // 
-            this.textBox_rfid_oi.Enabled = false;
-            this.textBox_rfid_oi.Location = new System.Drawing.Point(244, 97);
-            this.textBox_rfid_oi.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.textBox_rfid_oi.Name = "textBox_rfid_oi";
-            this.textBox_rfid_oi.Size = new System.Drawing.Size(294, 31);
-            this.textBox_rfid_oi.TabIndex = 1;
-            // 
-            // tabPage_other
-            // 
-            this.tabPage_other.Location = new System.Drawing.Point(4, 31);
-            this.tabPage_other.Name = "tabPage_other";
-            this.tabPage_other.Size = new System.Drawing.Size(768, 415);
-            this.tabPage_other.TabIndex = 1;
-            this.tabPage_other.Text = "其它";
-            this.tabPage_other.UseVisualStyleBackColor = true;
-            // 
-            // checkBox_oi
-            // 
-            this.checkBox_oi.AutoSize = true;
-            this.checkBox_oi.Location = new System.Drawing.Point(10, 99);
-            this.checkBox_oi.Name = "checkBox_oi";
-            this.checkBox_oi.Size = new System.Drawing.Size(153, 25);
-            this.checkBox_oi.TabIndex = 5;
-            this.checkBox_oi.Text = "机构代码(&O)";
-            this.checkBox_oi.UseVisualStyleBackColor = true;
-            this.checkBox_oi.CheckedChanged += new System.EventHandler(this.checkBox_oi_CheckedChanged);
-            // 
-            // checkBox_aoi
-            // 
-            this.checkBox_aoi.AutoSize = true;
-            this.checkBox_aoi.Location = new System.Drawing.Point(10, 143);
-            this.checkBox_aoi.Name = "checkBox_aoi";
-            this.checkBox_aoi.Size = new System.Drawing.Size(216, 25);
-            this.checkBox_aoi.TabIndex = 6;
-            this.checkBox_aoi.Text = "非标准机构代码(&A)";
-            this.checkBox_aoi.UseVisualStyleBackColor = true;
-            this.checkBox_aoi.CheckedChanged += new System.EventHandler(this.checkBox_aoi_CheckedChanged);
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(6, 31);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(180, 21);
+            this.label1.TabIndex = 8;
+            this.label1.Text = "筛选应用类别(&T):";
             // 
             // comboBox_filter_tu
             // 
@@ -176,24 +136,66 @@ namespace RfidTool
             this.comboBox_filter_tu.Size = new System.Drawing.Size(294, 29);
             this.comboBox_filter_tu.TabIndex = 7;
             // 
-            // label1
+            // checkBox_aoi
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(6, 31);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(180, 21);
-            this.label1.TabIndex = 8;
-            this.label1.Text = "筛选应用类别(&T):";
+            this.checkBox_aoi.AutoSize = true;
+            this.checkBox_aoi.Location = new System.Drawing.Point(10, 143);
+            this.checkBox_aoi.Name = "checkBox_aoi";
+            this.checkBox_aoi.Size = new System.Drawing.Size(216, 25);
+            this.checkBox_aoi.TabIndex = 6;
+            this.checkBox_aoi.Text = "非标准机构代码(&A)";
+            this.checkBox_aoi.UseVisualStyleBackColor = true;
+            this.checkBox_aoi.CheckedChanged += new System.EventHandler(this.checkBox_aoi_CheckedChanged);
             // 
-            // checkBox_uidPiiMap
+            // checkBox_oi
             // 
-            this.checkBox_uidPiiMap.AutoSize = true;
-            this.checkBox_uidPiiMap.Location = new System.Drawing.Point(10, 301);
-            this.checkBox_uidPiiMap.Name = "checkBox_uidPiiMap";
-            this.checkBox_uidPiiMap.Size = new System.Drawing.Size(294, 25);
-            this.checkBox_uidPiiMap.TabIndex = 9;
-            this.checkBox_uidPiiMap.Text = "建立 UID PII 对照关系(&M)";
-            this.checkBox_uidPiiMap.UseVisualStyleBackColor = true;
+            this.checkBox_oi.AutoSize = true;
+            this.checkBox_oi.Location = new System.Drawing.Point(10, 99);
+            this.checkBox_oi.Name = "checkBox_oi";
+            this.checkBox_oi.Size = new System.Drawing.Size(153, 25);
+            this.checkBox_oi.TabIndex = 5;
+            this.checkBox_oi.Text = "机构代码(&O)";
+            this.checkBox_oi.UseVisualStyleBackColor = true;
+            this.checkBox_oi.CheckedChanged += new System.EventHandler(this.checkBox_oi_CheckedChanged);
+            // 
+            // linkLabel_oiHelp
+            // 
+            this.linkLabel_oiHelp.AutoSize = true;
+            this.linkLabel_oiHelp.Location = new System.Drawing.Point(6, 219);
+            this.linkLabel_oiHelp.Name = "linkLabel_oiHelp";
+            this.linkLabel_oiHelp.Size = new System.Drawing.Size(262, 21);
+            this.linkLabel_oiHelp.TabIndex = 4;
+            this.linkLabel_oiHelp.TabStop = true;
+            this.linkLabel_oiHelp.Text = "帮助：如何设置机构代码？";
+            // 
+            // textBox_rfid_aoi
+            // 
+            this.textBox_rfid_aoi.Enabled = false;
+            this.textBox_rfid_aoi.ImeMode = System.Windows.Forms.ImeMode.Disable;
+            this.textBox_rfid_aoi.Location = new System.Drawing.Point(244, 141);
+            this.textBox_rfid_aoi.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.textBox_rfid_aoi.Name = "textBox_rfid_aoi";
+            this.textBox_rfid_aoi.Size = new System.Drawing.Size(294, 31);
+            this.textBox_rfid_aoi.TabIndex = 3;
+            // 
+            // textBox_rfid_oi
+            // 
+            this.textBox_rfid_oi.Enabled = false;
+            this.textBox_rfid_oi.ImeMode = System.Windows.Forms.ImeMode.Disable;
+            this.textBox_rfid_oi.Location = new System.Drawing.Point(244, 97);
+            this.textBox_rfid_oi.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.textBox_rfid_oi.Name = "textBox_rfid_oi";
+            this.textBox_rfid_oi.Size = new System.Drawing.Size(294, 31);
+            this.textBox_rfid_oi.TabIndex = 1;
+            // 
+            // tabPage_other
+            // 
+            this.tabPage_other.Location = new System.Drawing.Point(4, 31);
+            this.tabPage_other.Name = "tabPage_other";
+            this.tabPage_other.Size = new System.Drawing.Size(768, 415);
+            this.tabPage_other.TabIndex = 1;
+            this.tabPage_other.Text = "其它";
+            this.tabPage_other.UseVisualStyleBackColor = true;
             // 
             // BeginModifyDialog
             // 

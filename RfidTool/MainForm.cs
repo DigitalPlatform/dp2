@@ -873,6 +873,14 @@ MessageBoxDefaultButton.Button2);
             if (_modifyDialog.Visible == false)
                 _modifyDialog.Show(this);
         }
+
+        private void listView_writeHistory_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (this.listView_writeHistory.SelectedIndices.Count == 1)
+                this.toolStripStatusLabel_lineNo.Text = "行号: " + (this.listView_writeHistory.SelectedIndices[0] + 1).ToString();
+            else
+                this.toolStripStatusLabel_lineNo.Text = "选定 " + this.listView_writeHistory.SelectedIndices.Count.ToString() + " 行";
+        }
     }
 
     public delegate void WriteCompleteEventHandler(object sender,

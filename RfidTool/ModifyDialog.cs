@@ -227,6 +227,7 @@ namespace RfidTool
                             */
 
                             int cross_count = 0;
+                            int process_count = 0;
                             this.Invoke((Action)(() =>
                             {
                                 var fill_result = FillTags(result.Results);
@@ -259,6 +260,8 @@ namespace RfidTool
                                         //      0   表示全部完成，没有遇到出错的情况
                                         //      >0  表示处理过程中有事项出错。后继需要调主循环调用本函数
                                         var process_result = await ProcessTags(result.Results, current_token);
+                                        _error_count = process_result.Value;
+                                        process_count += process_result.ProcessCount;
                                         if (process_result.Value == 0 || process_result.Value == -1)
                                             break;
 
@@ -267,7 +270,6 @@ namespace RfidTool
 
                                         // await SpeakAdjust($"有 {process_result.Value} 项出错。请调整天线位置", token/*注意这里不能用 current_token(用了会在“跳过”时停止全部循环)*/);
                                         // test_count++;
-                                        _error_count = process_result.Value;
 
                                         if (task == null)
                                             task = Task.Run(async () =>
@@ -303,9 +305,9 @@ namespace RfidTool
                                             token);
                                     else
                                     {
-                                        int complete_count = result.Results.Count - cross_count;
-                                        string text = $"完成 {complete_count} 项  交叉 {cross_count} 项";
-                                        if (complete_count == 0)
+                                        // int complete_count = result.Results.Count - cross_count;
+                                        string text = $"完成 {process_count} 项  交叉 {cross_count} 项";
+                                        if (process_count == 0)
                                             text = $"交叉 {cross_count} 项";
 
                                         await FormClientInfo.Speaking(text,

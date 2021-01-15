@@ -48,6 +48,7 @@ namespace RfidTool
             this.tabPage_modifyTag = new System.Windows.Forms.TabPage();
             this.label4 = new System.Windows.Forms.Label();
             this.numericUpDown_seconds = new System.Windows.Forms.NumericUpDown();
+            this.checkBox_changeAOI = new System.Windows.Forms.CheckBox();
             this.tabControl1.SuspendLayout();
             this.tabPage_writeTag.SuspendLayout();
             this.groupBox_uhf.SuspendLayout();
@@ -73,6 +74,7 @@ namespace RfidTool
             // 
             // tabPage_writeTag
             // 
+            this.tabPage_writeTag.Controls.Add(this.checkBox_changeAOI);
             this.tabPage_writeTag.Controls.Add(this.groupBox_uhf);
             this.tabPage_writeTag.Controls.Add(this.linkLabel_oiHelp);
             this.tabPage_writeTag.Controls.Add(this.textBox_rfid_aoi);
@@ -159,6 +161,8 @@ namespace RfidTool
             // 
             // textBox_rfid_aoi
             // 
+            this.textBox_rfid_aoi.Enabled = false;
+            this.textBox_rfid_aoi.ImeMode = System.Windows.Forms.ImeMode.Disable;
             this.textBox_rfid_aoi.Location = new System.Drawing.Point(225, 62);
             this.textBox_rfid_aoi.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.textBox_rfid_aoi.Name = "textBox_rfid_aoi";
@@ -176,11 +180,13 @@ namespace RfidTool
             // 
             // textBox_rfid_oi
             // 
+            this.textBox_rfid_oi.ImeMode = System.Windows.Forms.ImeMode.Disable;
             this.textBox_rfid_oi.Location = new System.Drawing.Point(225, 18);
             this.textBox_rfid_oi.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.textBox_rfid_oi.Name = "textBox_rfid_oi";
             this.textBox_rfid_oi.Size = new System.Drawing.Size(294, 31);
             this.textBox_rfid_oi.TabIndex = 1;
+            this.textBox_rfid_oi.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBox_rfid_oi_KeyPress);
             // 
             // label1
             // 
@@ -268,6 +274,17 @@ namespace RfidTool
             this.numericUpDown_seconds.Size = new System.Drawing.Size(120, 31);
             this.numericUpDown_seconds.TabIndex = 1;
             // 
+            // checkBox_changeAOI
+            // 
+            this.checkBox_changeAOI.AutoSize = true;
+            this.checkBox_changeAOI.Location = new System.Drawing.Point(535, 65);
+            this.checkBox_changeAOI.Name = "checkBox_changeAOI";
+            this.checkBox_changeAOI.Size = new System.Drawing.Size(78, 25);
+            this.checkBox_changeAOI.TabIndex = 6;
+            this.checkBox_changeAOI.Text = "修改";
+            this.checkBox_changeAOI.UseVisualStyleBackColor = true;
+            this.checkBox_changeAOI.CheckedChanged += new System.EventHandler(this.checkBox_changeAOI_CheckedChanged);
+            // 
             // SettingDialog
             // 
             this.AcceptButton = this.button_OK;
@@ -321,5 +338,6 @@ namespace RfidTool
         private System.Windows.Forms.TabPage tabPage_modifyTag;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.NumericUpDown numericUpDown_seconds;
+        private System.Windows.Forms.CheckBox checkBox_changeAOI;
     }
 }

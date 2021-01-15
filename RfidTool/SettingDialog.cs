@@ -84,6 +84,22 @@ namespace RfidTool
                     strError = "尚未指定 UHF 标签写入格式";
                     goto ERROR1;
                 }
+
+                if (string.IsNullOrEmpty(this.textBox_rfid_aoi.Text) == false)
+                {
+                    // TODO: 当 textbox 内容发生过变化才警告
+                    this.tabControl1.SelectedTab = this.tabPage_writeTag;
+                    DialogResult result = MessageBox.Show(this,
+        @"警告：如无特殊原因，应尽量使用机构代码而非“非标准机构代码”。因“非标准机构代码”在馆际互借等场合可能会遇到重复冲突等问题。详情请咨询数字平台工程师。
+
+确实要使用“非标准机构代码”?",
+        "BeginModifyDialog",
+        MessageBoxButtons.YesNo,
+        MessageBoxIcon.Question,
+        MessageBoxDefaultButton.Button2);
+                    if (result != DialogResult.Yes)
+                        return;
+                }
             }
 
             DataModel.DefaultOiString = this.textBox_rfid_oi.Text;
@@ -171,6 +187,16 @@ OI的校验，总长度不超过16位。
             }
 
             return true;
+        }
+
+        private void checkBox_changeAOI_CheckedChanged(object sender, EventArgs e)
+        {
+            this.textBox_rfid_aoi.Enabled = this.checkBox_changeAOI.Checked;
+        }
+
+        private void textBox_rfid_oi_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            this.textBox_rfid_aoi.Text = "";
         }
     }
 }
