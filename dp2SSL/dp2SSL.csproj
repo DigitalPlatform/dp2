@@ -806,6 +806,7 @@
     <Content Include="photo_not_available.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Resource Include="sample_inventory.xml" />
     <Content Include="splash.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

@@ -32,7 +32,7 @@ namespace dp2SSL
             modelBuilder.Entity<BookItem>().ToTable("inventory");
             modelBuilder.Entity<BookItem>(entity =>
             {
-                entity.HasKey(e => e.UII);
+                entity.HasKey(e => e.Barcode);
                 // entity.HasIndex(e => e.PII);
             });
         }
@@ -42,7 +42,8 @@ namespace dp2SSL
     // (用于盘点的)册记录
     public class BookItem
     {
-        public string UII { get; set; }
+        public string Barcode { get; set; }
+        // public string UII { get; set; }
 
         public string RecPath { get; set; }
         public string Xml { get; set; }

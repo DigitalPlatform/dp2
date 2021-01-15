@@ -86,10 +86,15 @@ namespace dp2SSL
 
             _ = Task.Run(() =>
             {
-                // TODO: SIP2 协议模式下需要配置馆藏地列表
-
                 // 获得馆藏地列表
-                GetLocationListResult get_result = LibraryChannelUtil.GetLocationList();
+                GetLocationListResult get_result = null;
+                if (App.Protocol == "sip")
+                {
+                    // SIP2 协议模式下需要在 inventory.xml 中 root/library/@locationList 中配置馆藏地列表
+                    get_result = InventoryData.sip_GetLocationListFromLocal();
+                }
+                else
+                    get_result = LibraryChannelUtil.GetLocationList();
                 if (get_result.Value == -1)
                     App.SetError("inventory", $"获得馆藏地列表时出错: {get_result.ErrorInfo}");
 
@@ -138,8 +143,7 @@ namespace dp2SSL
 
                 ClearList();
 
-                if (dialog_result == true && slow_mode == false
-            && App.Protocol != "sip")
+                if (dialog_result == true && slow_mode == false)
                 {
                     CancellationTokenSource cancel = new CancellationTokenSource();
 
@@ -165,17 +169,29 @@ namespace dp2SSL
                     try
                     {
                         Hashtable uid_table = new Hashtable();
-                        var result = InventoryData.DownloadUidTable(
-                null,
-                uid_table,
-                (text) =>
-                {
-                    App.Invoke(new Action(() =>
+                        NormalResult result = null;
+                        if (App.Protocol == "sip")
+                            result = InventoryData.LoadUidTable(uid_table,
+                    (text) =>
                     {
-                        progress.MessageText = text;
-                    }));
-                },
-                cancel.Token);
+                        App.Invoke(new Action(() =>
+                        {
+                            progress.MessageText = text;
+                        }));
+                    },
+                    cancel.Token);
+                        else
+                            result = InventoryData.DownloadUidTable(
+                    null,
+                    uid_table,
+                    (text) =>
+                    {
+                        App.Invoke(new Action(() =>
+                        {
+                            progress.MessageText = text;
+                        }));
+                    },
+                    cancel.Token);
                         InventoryData.SetUidTable(uid_table);
                     }
                     catch (Exception ex)
