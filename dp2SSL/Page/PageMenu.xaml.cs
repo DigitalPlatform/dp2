@@ -10,7 +10,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Threading;
-
+using DigitalPlatform;
 using DigitalPlatform.RFID;
 using DigitalPlatform.WPF;
 
@@ -316,8 +316,18 @@ namespace dp2SSL
 
                 // 2020/9/17
                 var pos = WpfClientInfo.Config.Get("pageShelf", "splitterPosition", null);
-                if (pos != null)
-                    _pageShelf.SplitterPosition = pos;
+                if (string.IsNullOrEmpty(pos) == false)
+                {
+                    try
+                    {
+                        _pageShelf.SplitterPosition = pos;
+                    }
+                    catch(Exception ex)
+                    {
+                        // 2021/1/15
+                        WpfClientInfo.WriteErrorLog($"settings.xml 中 pageShelf/splitterPosition 值 '{pos}' 格式不正确({ExceptionUtil.GetDebugText(ex)})。已被忽略");
+                    }
+                }
             }
             else
                 _pageShelf.Mode = mode;
