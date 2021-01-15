@@ -86,6 +86,22 @@ namespace RfidTool
             if (strError != null)
                 goto ERROR1;
 
+            if (string.IsNullOrEmpty(this.textBox_rfid_aoi.Text) == false)
+            {
+                // TODO: 当 textbox 内容发生过变化才警告
+                this.tabControl1.SelectedTab = this.tabPage_action;
+                DialogResult result = MessageBox.Show(this,
+    @"警告：如无特殊原因，应尽量使用机构代码而非“非标准机构代码”。因“非标准机构代码”在馆际互借等场合可能会遇到重复冲突等问题。详情请咨询数字平台工程师。
+
+确实要使用“非标准机构代码”?",
+    "BeginModifyDialog",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button2);
+                if (result != DialogResult.Yes)
+                    return;
+            }
+
             this.DialogResult = DialogResult.OK;
             this.Close();
             return;
