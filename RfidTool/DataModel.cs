@@ -611,6 +611,57 @@ namespace RfidTool
             RfidManager.ListTags -= RfidManager_ListTags;
         }
         */
+
+        #region  UID-->PII 对照关系日志文件
+
+        // 去重用
+        static Hashtable _uidTable = new Hashtable();
+
+        static StreamWriter _uidWriter = null;
+
+        // 写入 UID-->PII 对照关系日志文件
+        public static void WriteToUidLogFile(string uid, string pii)
+        {
+            lock (_uidTable.SyncRoot)
+            {
+                if (_uidTable.ContainsKey(uid) == true)
+                {
+                    string old_pii = (string)_uidTable[uid];
+                    if (old_pii == pii)
+                        return; // 去重
+                }
+                // 防止占用内存太大
+                if (_uidTable.Count > 1000)
+                    _uidTable.Clear();
+                _uidTable[uid] = pii;
+            }
+
+            if (_uidWriter == null)
+            {
+                string fileName = Path.Combine(ClientInfo.UserDir, "uid.txt");
+                _uidWriter = new StreamWriter(fileName, true, Encoding.ASCII);
+            }
+
+            _uidWriter.WriteLine($"{uid}\t{pii}");
+        }
+
+        public static void CloseUidLogFile()
+        {
+            try
+            {
+                if (_uidWriter != null)
+                {
+                    _uidWriter.Close();
+                    _uidWriter = null;
+                }
+            }
+            catch(Exception ex)
+            {
+                ClientInfo.WriteErrorLog($"关闭 UID 对照文件时出现异常: {ExceptionUtil.GetDebugText(ex)}");
+            }
+        }
+
+        #endregion
     }
 
     public delegate void NewTagChangedEventHandler(object sender,

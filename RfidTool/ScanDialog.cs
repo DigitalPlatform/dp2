@@ -673,6 +673,10 @@ namespace RfidTool
                     TagInfo = new_tag_info
                 });
 
+                // 写入 UID-->PII 对照关系日志文件
+                if (tou == "10")
+                    DataModel.WriteToUidLogFile(uid, barcode);
+
                 // 语音提示写入成功
                 FormClientInfo.Speak($"{barcode} 写入成功", false, true);
                 ShowMessage($"{barcode} 写入成功");

@@ -403,6 +403,8 @@ bool bClickClose = false)
         {
             _cancel?.Dispose();
 
+            DataModel.CloseUidLogFile();
+
             SaveSettings();
 
             if (_historyChanged)
@@ -606,8 +608,11 @@ bool bClickClose = false)
             _taskConnect = Task.Run(() =>
             {
                 _scanDialog?.EnableControls(false);
-                _modifyDialog?.EnableControls(false);
-                _modifyDialog?.ShowMessageBox("deviceInitial", "正在重新初始化读写器，请稍候 ...");
+                {
+                    _modifyDialog?.EnableControls(false);
+                    _modifyDialog?.ShowMessageBox("deviceInitial", "正在重新初始化读写器，请稍候 ...");
+                    _modifyDialog?.PauseLoop();
+                }
                 try
                 {
                 REDO:
@@ -672,8 +677,11 @@ bool bClickClose = false)
                 {
                     _taskConnect = null;
                     _scanDialog?.EnableControls(true);
-                    _modifyDialog?.EnableControls(true);
-                    _modifyDialog?.ShowMessageBox("deviceInitial", null);
+                    {
+                        _modifyDialog?.EnableControls(true);
+                        _modifyDialog?.ShowMessageBox("deviceInitial", null);
+                        _modifyDialog?.ContinueLoop();
+                    }
                 }
             });
         }

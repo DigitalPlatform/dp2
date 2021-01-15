@@ -53,6 +53,7 @@ namespace RfidTool
         private void ModifyDialog_FormClosing(object sender, FormClosingEventArgs e)
         {
             _cancel?.Cancel();
+
         }
 
         private void ModifyDialog_FormClosed(object sender, FormClosedEventArgs e)
@@ -159,6 +160,22 @@ namespace RfidTool
             }
         }
 
+        volatile bool _pause = false;
+
+        // 暂停循环
+        public void PauseLoop()
+        {
+            _pause = true;
+        }
+
+        // 继续循环
+        public void ContinueLoop()
+        {
+            _pause = false;
+        }
+
+        static volatile int _error_count = 0;
+
         CancellationTokenSource _cancel = new CancellationTokenSource();
 
         void BeginModify(CancellationToken token)
@@ -178,6 +195,12 @@ namespace RfidTool
                     {
                         while (token.IsCancellationRequested == false)
                         {
+                            if (_pause)
+                            {
+                                await Task.Delay(TimeSpan.FromSeconds(1), token);
+                                continue;
+                            }
+
                             // 语音提示倒计时开始盘点
                             await SpeakCounter(token);
 
@@ -225,6 +248,12 @@ namespace RfidTool
                                     Task task = null;
                                     while (current_token.IsCancellationRequested == false)
                                     {
+                                        if (_pause)
+                                        {
+                                            await Task.Delay(TimeSpan.FromSeconds(1), current_token);
+                                            continue;
+                                        }
+
                                         // result.Value:
                                         //      -1  表示遇到了严重出错，要停止循环调用本函数
                                         //      0   表示全部完成，没有遇到出错的情况
@@ -238,17 +267,24 @@ namespace RfidTool
 
                                         // await SpeakAdjust($"有 {process_result.Value} 项出错。请调整天线位置", token/*注意这里不能用 current_token(用了会在“跳过”时停止全部循环)*/);
                                         // test_count++;
-                                        int error_count = process_result.Value;
+                                        _error_count = process_result.Value;
 
                                         if (task == null)
                                             task = Task.Run(async () =>
                                             {
                                                 while (current_token.IsCancellationRequested == false)
                                                 {
-                                                    await FormClientInfo.Speaking($"有 {error_count} 项出错。请调整天线位置",
+                                                    // 暂停循环，此时语音也停止播报
+                                                    if (_pause)
+                                                    {
+                                                        await Task.Delay(TimeSpan.FromSeconds(1), current_token);
+                                                        continue;
+                                                    }
+
+                                                    await FormClientInfo.Speaking($"有 {_error_count} 项出错。请调整天线位置",
                                                         false,
                                                         current_token);
-                                                    await Task.Delay(TimeSpan.FromSeconds(1), current_token);
+                                                    await Task.Delay(TimeSpan.FromSeconds(2), current_token);
                                                 }
 
                                             });
@@ -570,6 +606,15 @@ namespace RfidTool
                         return ListViewUtil.FindItem(this.listView_tags, tag.UID, COLUMN_UID);
                     }));
 
+                    if (item == null)
+                    {
+                        // 可能是因为用户在界面上把列表清空了
+                        return new ProcessResult
+                        {
+                            Value = -1,
+                            ErrorInfo = "item == null"
+                        };
+                    }
                     Debug.Assert(item != null);
 
                     var iteminfo = item.Tag as ItemInfo;
@@ -677,7 +722,7 @@ namespace RfidTool
         void ErrorSound()
         {
             var now = DateTime.Now;
-            if (now - _lastErrorSound > TimeSpan.FromMilliseconds(1200))
+            if (now - _lastErrorSound > TimeSpan.FromMilliseconds(2000))
             {
                 // 间隔一定时间才鸣叫
                 SoundMaker.ErrorSound();
@@ -761,6 +806,9 @@ namespace RfidTool
                 {
                     AddUidEntry(iteminfo.Tag.UID, pii);
                 }
+
+                if (string.IsNullOrEmpty(pii) == false)
+                    DataModel.WriteToUidLogFile(iteminfo.Tag.UID, pii);
 
                 // 写回标签
                 if (changed)
