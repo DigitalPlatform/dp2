@@ -17,6 +17,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.WPF;
 using DigitalPlatform.Xml;
 using static dp2SSL.LibraryChannelUtil;
+using System.IO;
 
 namespace dp2SSL
 {
@@ -928,15 +929,24 @@ TaskScheduler.Default);
                 if (StringUtil.IsInList("setUID", actionMode)
                     && string.IsNullOrEmpty(info.ItemXml) == false
                     && info.IsTaskCompleted("setUID") == false
-                    && App.Protocol != "sip")
+                    )
                 {
                     // TODO: SIP2 模式下，UID - PII 对照信息可以设置到 dp2ssl 本地数据库
-                    var request_result = RequestSetUID(entity.ItemRecPath,
-                        info.ItemXml,
-                        null,
-                        entity.UID,
-                        info.UserName,
-                        "");
+                    RequestSetUidResult request_result = null;
+                    if (App.Protocol == "sip")
+                        request_result = RequestSetUIDtoLocal(entity.ItemRecPath,
+    info.ItemXml,
+    null,
+    entity.UID,
+    info.UserName,
+    "");
+                    else
+                        request_result = RequestSetUID(entity.ItemRecPath,
+                            info.ItemXml,
+                            null,
+                            entity.UID,
+                            info.UserName,
+                            "");
                     info.SetTaskInfo("setUID", request_result);
                     if (request_result.Value == -1)
                     {
@@ -963,23 +973,38 @@ TaskScheduler.Default);
                 {
                     RequestInventoryResult request_result = null;
                     if (App.Protocol == "sip")
-                        request_result = await RequestInventory_sip2(entity.UID,
-    entity.PII,
-    StringUtil.IsInList("setCurrentLocation", actionMode) ? info.TargetCurrentLocation : null,
-    StringUtil.IsInList("setLocation", actionMode) ? info.TargetLocation : null,
-    StringUtil.IsInList("setLocation", actionMode) ? info.TargetShelfNo : null,
-    info.BatchNo,
-    info.UserName,
-    PageInventory.ActionMode);
+                    {
+                        bool isLocal = StringUtil.IsInList("inventory", SipLocalStore);
+                        if (isLocal)
+                            request_result = await RequestInventory_local(
+                                info.ItemXml,
+                                entity.UID,
+                                entity.PII,
+                                StringUtil.IsInList("setCurrentLocation", actionMode) ? info.TargetCurrentLocation : null,
+                                StringUtil.IsInList("setLocation", actionMode) ? info.TargetLocation : null,
+                                StringUtil.IsInList("setLocation", actionMode) ? info.TargetShelfNo : null,
+                                info.BatchNo,
+                                info.UserName,
+                                PageInventory.ActionMode);
+                        else
+                            request_result = await RequestInventory_sip2(entity.UID,
+                                entity.PII,
+                                StringUtil.IsInList("setCurrentLocation", actionMode) ? info.TargetCurrentLocation : null,
+                                StringUtil.IsInList("setLocation", actionMode) ? info.TargetLocation : null,
+                                StringUtil.IsInList("setLocation", actionMode) ? info.TargetShelfNo : null,
+                                info.BatchNo,
+                                info.UserName,
+                                PageInventory.ActionMode);
+                    }
                     else
                         request_result = RequestInventory(entity.UID,
-    entity.PII,
-    StringUtil.IsInList("setCurrentLocation", actionMode) ? info.TargetCurrentLocation : null,
-    StringUtil.IsInList("setLocation", actionMode) ? info.TargetLocation : null,
-    StringUtil.IsInList("setLocation", actionMode) ? info.TargetShelfNo : null,
-    info.BatchNo,
-    info.UserName,
-    PageInventory.ActionMode);
+                            entity.PII,
+                            StringUtil.IsInList("setCurrentLocation", actionMode) ? info.TargetCurrentLocation : null,
+                            StringUtil.IsInList("setLocation", actionMode) ? info.TargetLocation : null,
+                            StringUtil.IsInList("setLocation", actionMode) ? info.TargetShelfNo : null,
+                            info.BatchNo,
+                            info.UserName,
+                            PageInventory.ActionMode);
                     // 两个动作当作一个 setLocation 来识别
                     info.SetTaskInfo("setLocation", request_result);
                     if (request_result.Value == -1)
@@ -992,6 +1017,8 @@ TaskScheduler.Default);
                     {
                         if (string.IsNullOrEmpty(request_result.ItemXml) == false)
                             entity.SetData(entity.ItemRecPath, request_result.ItemXml);
+
+                        // TODO: info.ItemXml 是否需要被改变?
                     }
                 }
             }
@@ -1626,5 +1653,277 @@ TaskScheduler.Default);
             return title;
         }
 
+
+        #region SIP 特殊功能
+
+        public static XmlDocument GetInventoryDom()
+        {
+            string filename = Path.Combine(WpfClientInfo.UserDir, "inventory.xml");
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.Load(filename);
+                return dom;
+            }
+            catch (FileNotFoundException)
+            {
+                return null;
+            }
+        }
+
+        static string _sipLocalStore = null;
+
+        public static string SipLocalStore
+        {
+            get
+            {
+                if (_sipLocalStore == null)
+                    _sipLocalStore = GetSipLocalStoreDef();
+
+                return _sipLocalStore;
+            }
+        }
+
+        // 获得 inventory.xml 中 sip/@localStore 参数
+        public static string GetSipLocalStoreDef()
+        {
+            var dom = GetInventoryDom();
+            if (dom == null)
+                return "";
+            var attr = dom.DocumentElement.SelectSingleNode("sip/@localStore");
+            if (attr == null)
+                return "";
+            return attr.Value;
+        }
+
+        // 从 inventory.xml 获得馆藏地列表(不访问 dp2library 服务器)
+        // result.Value
+        //      -1  出错
+        //      0   文件或者列表定义没有找到
+        //      1   找到
+        public static GetLocationListResult sip_GetLocationListFromLocal()
+        {
+            var dom = GetInventoryDom();
+            if (dom == null)
+                return new GetLocationListResult
+                {
+                    Value = 0,
+                    ErrorCode = "fileNotFound",
+                    List = new List<string>()
+                };
+            var attr = dom.DocumentElement.SelectSingleNode("library/@locationList");
+            if (attr == null)
+                return new GetLocationListResult
+                {
+                    List = new List<string>()
+                };
+
+            return new GetLocationListResult
+            {
+                Value = 1,
+                List = StringUtil.SplitList(attr.Value)
+            };
+        }
+
+        // 从本地数据库中装载 uid 对照表
+        public static NormalResult LoadUidTable(Hashtable uid_table,
+            delegate_showText func_showProgress,
+            CancellationToken token)
+        {
+            try
+            {
+                using (var context = new ItemCacheContext())
+                {
+                    context.Database.EnsureCreated();
+                    var all = context.Items.Where(o => string.IsNullOrEmpty(o.Barcode) == false && string.IsNullOrEmpty(o.UID) == false);
+                    foreach (var item in all)
+                    {
+                        if (token.IsCancellationRequested)
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = "中断"
+                            };
+
+                        string uid = item.UID;
+                        string barcode = item.Barcode;
+
+                        func_showProgress?.Invoke($"{uid} --> {barcode} ...");
+
+                        uid_table[uid] = barcode;
+                    }
+
+                    return new NormalResult
+                    {
+                        Value = uid_table.Count,
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                WpfClientInfo.WriteErrorLog($"LoadUidTable() 出现异常：{ExceptionUtil.GetDebugText(ex)}");
+
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"LoadUidTable() 出现异常：{ex.Message}"
+                };
+            }
+        }
+
+        static BookItem FindBookItem(string barcode)
+        {
+            using (var context = new ItemCacheContext())
+            {
+                return context.Items.Where(o => o.Barcode == barcode).FirstOrDefault();
+            }
+        }
+
+        static NormalResult UpdateUid(string barcode, string uid)
+        {
+            using (var context = new ItemCacheContext())
+            {
+                var item = context.Items.Where(o => o.Barcode == barcode).FirstOrDefault();
+                if (item == null)
+                {
+                    item = new BookItem { Barcode = barcode, UID = uid };
+                    context.Items.Add(item);
+                    return new NormalResult();
+                }
+
+                item.UID = uid;
+                context.Items.Update(item);
+                return new NormalResult();
+            }
+        }
+
+        // 请求设置 UID 到本地数据库
+        public static RequestSetUidResult RequestSetUIDtoLocal(
+    string strRecPath,
+    string strOldXml,
+    byte[] old_timestamp,
+    string uid,
+    string strUserName,
+    string style)
+        {
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml(strOldXml);
+
+            string old_uid = DomUtil.GetElementText(dom.DocumentElement, "uid");
+            if (old_uid == uid)
+            {
+                return new RequestSetUidResult { Value = 0 };    // 没有必要修改
+            }
+            string barcode = DomUtil.GetElementText(dom.DocumentElement, "barcode");
+            DomUtil.SetElementText(dom.DocumentElement, "uid", uid);
+
+            UpdateUid(barcode, uid);
+
+            return new RequestSetUidResult
+            {
+                Value = 1,
+                NewItemXml = dom.DocumentElement.OuterXml,
+            };
+        }
+
+        // 将原本要向 SIP2 服务器发出盘点请求写入本地(映射)数据库
+        public static async Task<RequestInventoryResult> RequestInventory_local(
+            string item_xml,
+            string uid,
+            string pii,
+            string currentLocationString,
+            string location,
+            string shelfNo,
+            string batchNo,
+            string strUserName,
+            string style)
+        {
+            if (currentLocationString == null && location == null)
+                return new RequestInventoryResult { Value = 0 };    // 没有必要修改
+
+            string currentLocation = null;
+            string currentShelfNo = null;
+
+            if (currentLocationString != null)
+            {
+                // 分解 currentLocation 字符串
+                var parts = StringUtil.ParseTwoPart(currentLocationString, ":");
+                currentLocation = parts[0];
+                currentShelfNo = parts[1];
+            }
+
+            using (var context = new ItemCacheContext())
+            {
+                var item = context.Items.Where(o => o.Barcode == pii).FirstOrDefault();
+                if (item == null)
+                {
+                    item = new BookItem
+                    {
+                        Barcode = pii,
+                        UID = uid,
+                        CurrentLocation = currentLocation,
+                        CurrentShelfNo = currentShelfNo,
+                        Location = location,
+                        ShelfNo = shelfNo,
+                    };
+                    context.Items.Add(item);
+                }
+                else
+                {
+                    item.UID = uid;
+                    item.CurrentLocation = currentLocation;
+                    item.CurrentShelfNo = currentShelfNo;
+                    item.Location = location;
+                    item.ShelfNo = shelfNo;
+                    context.Items.Update(item);
+                }
+            }
+
+            // TODO: 修改 XML
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml(item_xml);
+
+            if (location != null)
+                DomUtil.SetElementText(dom.DocumentElement,
+                    "location",
+                    location);
+            if (shelfNo != null)
+                DomUtil.SetElementText(dom.DocumentElement,
+    "shelfNo",
+    shelfNo);
+
+            // currentLocation
+            // 取出以前的值，然后按照冒号左右分别按需替换
+            string oldCurrentLocationString = DomUtil.GetElementText(dom.DocumentElement, "currentLocation");
+            string newCurrentLocationString = ReplaceCurrentLocationString(oldCurrentLocationString, currentLocation, currentShelfNo);
+            DomUtil.GetElementText(dom.DocumentElement, "currentLocation");
+
+            return new RequestInventoryResult { ItemXml = dom.DocumentElement.OuterXml };
+        }
+
+        static string ReplaceCurrentLocationString(string currentLocationString,
+            string newCurrentLocation,
+            string newCurrentShelfNo)
+        {
+            string currentLocation = "";
+            string currentShelfNo = "";
+
+            if (currentLocationString != null)
+            {
+                // 分解 currentLocation 字符串
+                var parts = StringUtil.ParseTwoPart(currentLocationString, ":");
+                currentLocation = parts[0];
+                currentShelfNo = parts[1];
+            }
+
+            if (newCurrentLocation != null)
+                currentLocation = newCurrentLocation;
+            if (newCurrentShelfNo != null)
+                currentShelfNo = newCurrentShelfNo;
+
+            return currentLocation + ":" + currentShelfNo;
+        }
+
+        #endregion
     }
 }

@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<root>
+  <library locationList="馆藏地1,馆藏地2,馆藏地3">
+  </library>
+  <!-- sip/@localStore 属性里面的 uid 表示在本地库里面存储 UID 对照关系，inventory 表示在本地库存储盘点结果(从而也就不把盘点结果写回 SIP 服务器)-->
+  <sip localStore="uid,inventory"/>
+</root>
