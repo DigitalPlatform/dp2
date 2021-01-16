@@ -51,8 +51,8 @@ using System.Windows;
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 // 方法是按如下所示使用“*”: :
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.6.2")]    // 1.5.*
-[assembly: AssemblyFileVersion("1.6.0.0")]  // 1.5.0.0
+[assembly: AssemblyVersion("1.7.0")]    // 1.5.*
+[assembly: AssemblyFileVersion("1.7.0.0")]  // 1.5.0.0
 
 // 1.0 2019/2/21 第一个版本
 // 1.1 2019/2/26 可以显示版本号了
@@ -73,3 +73,5 @@ using System.Windows;
 //      1.6.0 (2020/12/8) 新版本
 //      1.6.1 (2020/12/9) (设置为身份读卡器竖放情况下)自助借还界面返回主菜单时会残留读者信息区的红色报错信息谓语清除。这个问题已经解决
 //      1.6.2 (2021/1/3) 远程控制命令增加 check tag 命令
+// 1.7 2021/1/16 盘点功能增加对 SIP2 协议的支持
+//      1.7.0 (2021/1/16) 增加 inventory.xml 配置文件。开始盘点对话框暂不支持“校验 EAS”功能

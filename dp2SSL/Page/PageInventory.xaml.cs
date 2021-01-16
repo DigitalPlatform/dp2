@@ -118,6 +118,10 @@ namespace dp2SSL
                         dialog.location.ItemsSource = get_result.List;  // result.List;
                         dialog.BatchNo = batchNo;
                         dialog.ActionMode = ActionMode;
+
+                        if (App.Protocol == "sip")
+                            dialog.ActionVerifyEasVisible = false;
+
                         dialog.ShowDialog();
                         if (dialog.DialogResult == false)
                             dialog_result = false;

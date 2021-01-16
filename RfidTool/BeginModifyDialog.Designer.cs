@@ -33,16 +33,17 @@ namespace RfidTool
             this.button_OK = new System.Windows.Forms.Button();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage_action = new System.Windows.Forms.TabPage();
+            this.checkBox_writeUidLog = new System.Windows.Forms.CheckBox();
+            this.checkBox_oi = new System.Windows.Forms.CheckBox();
+            this.textBox_rfid_oi = new System.Windows.Forms.TextBox();
             this.label_eas = new System.Windows.Forms.Label();
             this.comboBox_eas = new System.Windows.Forms.ComboBox();
             this.checkBox_uidPiiMap = new System.Windows.Forms.CheckBox();
             this.label1 = new System.Windows.Forms.Label();
             this.comboBox_filter_tu = new System.Windows.Forms.ComboBox();
             this.checkBox_aoi = new System.Windows.Forms.CheckBox();
-            this.checkBox_oi = new System.Windows.Forms.CheckBox();
             this.linkLabel_oiHelp = new System.Windows.Forms.LinkLabel();
             this.textBox_rfid_aoi = new System.Windows.Forms.TextBox();
-            this.textBox_rfid_oi = new System.Windows.Forms.TextBox();
             this.tabPage_other = new System.Windows.Forms.TabPage();
             this.tabControl1.SuspendLayout();
             this.tabPage_action.SuspendLayout();
@@ -89,6 +90,7 @@ namespace RfidTool
             // 
             // tabPage_action
             // 
+            this.tabPage_action.Controls.Add(this.checkBox_writeUidLog);
             this.tabPage_action.Controls.Add(this.checkBox_oi);
             this.tabPage_action.Controls.Add(this.textBox_rfid_oi);
             this.tabPage_action.Controls.Add(this.label_eas);
@@ -107,6 +109,40 @@ namespace RfidTool
             this.tabPage_action.TabIndex = 0;
             this.tabPage_action.Text = "动作参数";
             this.tabPage_action.UseVisualStyleBackColor = true;
+            // 
+            // checkBox_writeUidLog
+            // 
+            this.checkBox_writeUidLog.AutoSize = true;
+            this.checkBox_writeUidLog.Checked = true;
+            this.checkBox_writeUidLog.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBox_writeUidLog.Enabled = false;
+            this.checkBox_writeUidLog.Location = new System.Drawing.Point(10, 343);
+            this.checkBox_writeUidLog.Name = "checkBox_writeUidLog";
+            this.checkBox_writeUidLog.Size = new System.Drawing.Size(294, 25);
+            this.checkBox_writeUidLog.TabIndex = 12;
+            this.checkBox_writeUidLog.Text = "创建 UID PII 对照日志(&M)";
+            this.checkBox_writeUidLog.UseVisualStyleBackColor = true;
+            this.checkBox_writeUidLog.CheckedChanged += new System.EventHandler(this.checkBox_writeUidLog_CheckedChanged);
+            // 
+            // checkBox_oi
+            // 
+            this.checkBox_oi.Location = new System.Drawing.Point(10, 96);
+            this.checkBox_oi.Name = "checkBox_oi";
+            this.checkBox_oi.Size = new System.Drawing.Size(228, 25);
+            this.checkBox_oi.TabIndex = 5;
+            this.checkBox_oi.Text = "机构代码(&O)";
+            this.checkBox_oi.UseVisualStyleBackColor = true;
+            this.checkBox_oi.CheckedChanged += new System.EventHandler(this.checkBox_oi_CheckedChanged);
+            // 
+            // textBox_rfid_oi
+            // 
+            this.textBox_rfid_oi.Enabled = false;
+            this.textBox_rfid_oi.ImeMode = System.Windows.Forms.ImeMode.Disable;
+            this.textBox_rfid_oi.Location = new System.Drawing.Point(244, 94);
+            this.textBox_rfid_oi.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.textBox_rfid_oi.Name = "textBox_rfid_oi";
+            this.textBox_rfid_oi.Size = new System.Drawing.Size(294, 31);
+            this.textBox_rfid_oi.TabIndex = 1;
             // 
             // label_eas
             // 
@@ -132,7 +168,7 @@ namespace RfidTool
             // checkBox_uidPiiMap
             // 
             this.checkBox_uidPiiMap.AutoSize = true;
-            this.checkBox_uidPiiMap.Location = new System.Drawing.Point(10, 348);
+            this.checkBox_uidPiiMap.Location = new System.Drawing.Point(10, 385);
             this.checkBox_uidPiiMap.Name = "checkBox_uidPiiMap";
             this.checkBox_uidPiiMap.Size = new System.Drawing.Size(294, 25);
             this.checkBox_uidPiiMap.TabIndex = 9;
@@ -172,16 +208,6 @@ namespace RfidTool
             this.checkBox_aoi.UseVisualStyleBackColor = true;
             this.checkBox_aoi.CheckedChanged += new System.EventHandler(this.checkBox_aoi_CheckedChanged);
             // 
-            // checkBox_oi
-            // 
-            this.checkBox_oi.Location = new System.Drawing.Point(10, 96);
-            this.checkBox_oi.Name = "checkBox_oi";
-            this.checkBox_oi.Size = new System.Drawing.Size(228, 25);
-            this.checkBox_oi.TabIndex = 5;
-            this.checkBox_oi.Text = "机构代码(&O)";
-            this.checkBox_oi.UseVisualStyleBackColor = true;
-            this.checkBox_oi.CheckedChanged += new System.EventHandler(this.checkBox_oi_CheckedChanged);
-            // 
             // linkLabel_oiHelp
             // 
             this.linkLabel_oiHelp.AutoSize = true;
@@ -201,16 +227,6 @@ namespace RfidTool
             this.textBox_rfid_aoi.Name = "textBox_rfid_aoi";
             this.textBox_rfid_aoi.Size = new System.Drawing.Size(294, 31);
             this.textBox_rfid_aoi.TabIndex = 3;
-            // 
-            // textBox_rfid_oi
-            // 
-            this.textBox_rfid_oi.Enabled = false;
-            this.textBox_rfid_oi.ImeMode = System.Windows.Forms.ImeMode.Disable;
-            this.textBox_rfid_oi.Location = new System.Drawing.Point(244, 94);
-            this.textBox_rfid_oi.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.textBox_rfid_oi.Name = "textBox_rfid_oi";
-            this.textBox_rfid_oi.Size = new System.Drawing.Size(294, 31);
-            this.textBox_rfid_oi.TabIndex = 1;
             // 
             // tabPage_other
             // 
@@ -257,5 +273,6 @@ namespace RfidTool
         private System.Windows.Forms.CheckBox checkBox_uidPiiMap;
         private System.Windows.Forms.Label label_eas;
         private System.Windows.Forms.ComboBox comboBox_eas;
+        private System.Windows.Forms.CheckBox checkBox_writeUidLog;
     }
 }
