@@ -84,6 +84,7 @@ namespace RfidTool
                     OI = dlg.OiString,
                     AOI = dlg.AoiString,
                     LinkUID = dlg.LinkUID,
+                    ModifyEas = dlg.ModifyEas,
                 };
             }
 
@@ -459,9 +460,10 @@ namespace RfidTool
         const int COLUMN_OI = 4;
         const int COLUMN_AOI = 5;
         const int COLUMN_EAS = 6;
-        const int COLUMN_READERNAME = 7;
-        const int COLUMN_ANTENNA = 8;
-        const int COLUMN_PROTOCOL = 9;
+        const int COLUMN_AFI = 7;
+        const int COLUMN_READERNAME = 8;
+        const int COLUMN_ANTENNA = 9;
+        const int COLUMN_PROTOCOL = 10;
 
         class FillResult : NormalResult
         {
@@ -804,6 +806,22 @@ namespace RfidTool
                     chip?.SetElement(ElementOID.AOI, _action.AOI);
                     changed = true;
                 }
+
+                bool new_eas = taginfo.EAS;
+                if (string.IsNullOrEmpty(_action.ModifyEas) == true
+                    || _action.ModifyEas == "不修改")
+                {
+                    // 不修改
+                }
+                else
+                {
+                    new_eas = _action.ModifyEas.ToLower() == "on" ? true : false;
+                    if (taginfo.EAS != new_eas)
+                    {
+                        changed = true;
+                    }
+                }
+
                 if (_action.LinkUID)
                 {
                     AddUidEntry(iteminfo.Tag.UID, pii);
@@ -816,7 +834,7 @@ namespace RfidTool
                 if (changed)
                 {
                     var tag = iteminfo.Tag;
-                    var new_tag_info = GetTagInfo(taginfo, chip);
+                    var new_tag_info = GetTagInfo(taginfo, chip, new_eas);
                     // 写入标签
                     var write_result = WriteTagInfo(tag.ReaderName,
                         taginfo,
@@ -879,8 +897,8 @@ namespace RfidTool
         }
 
         public static TagInfo GetTagInfo(TagInfo existing,
-LogicChip chip/*,
-bool eas*/)
+LogicChip chip,
+bool eas)
         {
             if (existing.Protocol == InventoryInfo.ISO15693)
             {
@@ -894,7 +912,7 @@ bool eas*/)
 
                 // new_tag_info.DSFID = LogicChip.DefaultDSFID;  // 图书
 
-                // new_tag_info.SetEas(eas);
+                new_tag_info.SetEas(eas);
                 return new_tag_info;
             }
 
@@ -926,6 +944,7 @@ bool eas*/)
             string pii = "(尚未填充)";
             string tou = "";
             string eas = "";
+            string afi = "";
             string oi = "";
             string aoi = "";
 
@@ -958,6 +977,7 @@ bool eas*/)
 
                     tou = chip?.FindElement(ElementOID.TypeOfUsage)?.Text;
                     eas = taginfo.EAS ? "On" : "Off";
+                    afi = Element.GetHexString(taginfo.AFI);
 
                     if (string.IsNullOrEmpty(oi))
                     {
@@ -970,6 +990,7 @@ bool eas*/)
 
                 ListViewUtil.ChangeItemText(item, COLUMN_TU, tou);
                 ListViewUtil.ChangeItemText(item, COLUMN_EAS, eas);
+                ListViewUtil.ChangeItemText(item, COLUMN_AFI, afi);
                 ListViewUtil.ChangeItemText(item, COLUMN_OI, oi);
                 ListViewUtil.ChangeItemText(item, COLUMN_AOI, aoi);
 
@@ -1002,7 +1023,7 @@ bool eas*/)
 * */
         static bool FilterTU(string filter, string tu)
         {
-            if (filter == null || filter == "所有类别")
+            if (string.IsNullOrEmpty(filter) || filter == "所有类别")
                 return true;
 
             if (tu == filter)
@@ -1214,11 +1235,12 @@ bool eas*/)
     class ActionInfo
     {
         // Type of usage 过滤
-        public string FilterTU { get; set; }
-
+        public string FilterTU { get; set; }    // 图书/读者证/层架标/所有类别 (空=所有类型)
         public string OI { get; set; }
         public string AOI { get; set; }
 
         public bool LinkUID { get; set; }
+
+        public string ModifyEas { get; set; }   // 不修改/On/Off (空=不修改)
     }
 }

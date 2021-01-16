@@ -52,6 +52,7 @@ namespace RfidTool
             this.columnHeader_readerName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_antenna = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_protocol = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_afi = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.toolStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -69,7 +70,7 @@ namespace RfidTool
             this.toolStripButton_clearList});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(951, 44);
+            this.toolStrip1.Size = new System.Drawing.Size(951, 38);
             this.toolStrip1.TabIndex = 0;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -79,7 +80,7 @@ namespace RfidTool
             this.toolStripButton_begin.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_begin.Image")));
             this.toolStripButton_begin.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_begin.Name = "toolStripButton_begin";
-            this.toolStripButton_begin.Size = new System.Drawing.Size(58, 38);
+            this.toolStripButton_begin.Size = new System.Drawing.Size(58, 32);
             this.toolStripButton_begin.Text = "开始";
             this.toolStripButton_begin.ToolTipText = "开始修改";
             this.toolStripButton_begin.Click += new System.EventHandler(this.toolStripButton_begin_Click);
@@ -87,7 +88,7 @@ namespace RfidTool
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 44);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 38);
             // 
             // toolStripButton_exportUidPiiMap
             // 
@@ -96,8 +97,9 @@ namespace RfidTool
             this.toolStripButton_exportUidPiiMap.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_exportUidPiiMap.Image")));
             this.toolStripButton_exportUidPiiMap.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_exportUidPiiMap.Name = "toolStripButton_exportUidPiiMap";
-            this.toolStripButton_exportUidPiiMap.Size = new System.Drawing.Size(142, 38);
+            this.toolStripButton_exportUidPiiMap.Size = new System.Drawing.Size(142, 32);
             this.toolStripButton_exportUidPiiMap.Text = "导出对照关系";
+            this.toolStripButton_exportUidPiiMap.Visible = false;
             this.toolStripButton_exportUidPiiMap.Click += new System.EventHandler(this.toolStripButton_exportUidPiiMap_Click);
             // 
             // toolStripButton_stop
@@ -107,7 +109,7 @@ namespace RfidTool
             this.toolStripButton_stop.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_stop.Image")));
             this.toolStripButton_stop.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_stop.Name = "toolStripButton_stop";
-            this.toolStripButton_stop.Size = new System.Drawing.Size(58, 38);
+            this.toolStripButton_stop.Size = new System.Drawing.Size(58, 32);
             this.toolStripButton_stop.Text = "停止";
             this.toolStripButton_stop.ToolTipText = "停止修改";
             this.toolStripButton_stop.Click += new System.EventHandler(this.toolStripButton_stop_Click);
@@ -115,7 +117,7 @@ namespace RfidTool
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 44);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 38);
             // 
             // toolStripButton_nextScan
             // 
@@ -124,7 +126,7 @@ namespace RfidTool
             this.toolStripButton_nextScan.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_nextScan.Image")));
             this.toolStripButton_nextScan.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_nextScan.Name = "toolStripButton_nextScan";
-            this.toolStripButton_nextScan.Size = new System.Drawing.Size(58, 38);
+            this.toolStripButton_nextScan.Size = new System.Drawing.Size(58, 32);
             this.toolStripButton_nextScan.Text = "跳过";
             this.toolStripButton_nextScan.ToolTipText = "跳过本次扫描";
             this.toolStripButton_nextScan.Click += new System.EventHandler(this.toolStripButton_nextScan_Click);
@@ -135,7 +137,7 @@ namespace RfidTool
             this.toolStripButton_clearList.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_clearList.Image")));
             this.toolStripButton_clearList.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_clearList.Name = "toolStripButton_clearList";
-            this.toolStripButton_clearList.Size = new System.Drawing.Size(100, 38);
+            this.toolStripButton_clearList.Size = new System.Drawing.Size(100, 32);
             this.toolStripButton_clearList.Text = "清空列表";
             this.toolStripButton_clearList.Click += new System.EventHandler(this.toolStripButton_clearList_Click);
             // 
@@ -159,7 +161,7 @@ namespace RfidTool
             // toolStripStatusLabel1
             // 
             this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            this.toolStripStatusLabel1.Size = new System.Drawing.Size(778, 28);
+            this.toolStripStatusLabel1.Size = new System.Drawing.Size(832, 28);
             this.toolStripStatusLabel1.Spring = true;
             this.toolStripStatusLabel1.Text = "...";
             this.toolStripStatusLabel1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -174,15 +176,16 @@ namespace RfidTool
             this.columnHeader_oi,
             this.columnHeader_aoi,
             this.columnHeader_eas,
+            this.columnHeader_afi,
             this.columnHeader_readerName,
             this.columnHeader_antenna,
             this.columnHeader_protocol});
             this.listView_tags.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listView_tags.FullRowSelect = true;
             this.listView_tags.HideSelection = false;
-            this.listView_tags.Location = new System.Drawing.Point(0, 44);
+            this.listView_tags.Location = new System.Drawing.Point(0, 38);
             this.listView_tags.Name = "listView_tags";
-            this.listView_tags.Size = new System.Drawing.Size(951, 499);
+            this.listView_tags.Size = new System.Drawing.Size(951, 505);
             this.listView_tags.TabIndex = 2;
             this.listView_tags.UseCompatibleStateImageBehavior = false;
             this.listView_tags.View = System.Windows.Forms.View.Details;
@@ -237,6 +240,11 @@ namespace RfidTool
             this.columnHeader_protocol.Text = "协议";
             this.columnHeader_protocol.Width = 120;
             // 
+            // columnHeader_afi
+            // 
+            this.columnHeader_afi.Text = "AFI";
+            this.columnHeader_afi.Width = 100;
+            // 
             // ModifyDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
@@ -285,5 +293,6 @@ namespace RfidTool
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripButton toolStripButton_clearList;
         private System.Windows.Forms.ToolStripButton toolStripButton_nextScan;
+        private System.Windows.Forms.ColumnHeader columnHeader_afi;
     }
 }

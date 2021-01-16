@@ -474,7 +474,9 @@ bool bClickClose = false)
         const int COLUMN_TOU = 2;
         const int COLUMN_OI = 3;
         const int COLUMN_AOI = 4;
-        const int COLUMN_WRITETIME = 5;
+        const int COLUMN_EAS = 5;
+        const int COLUMN_AFI = 6;
+        const int COLUMN_WRITETIME = 7;
 
         public void AppendItem(LogicChip chip,
             TagInfo tagInfo)
@@ -487,6 +489,8 @@ bool bClickClose = false)
             ListViewUtil.ChangeItemText(item, COLUMN_TOU, chip.FindElement(ElementOID.TypeOfUsage)?.Text);
             ListViewUtil.ChangeItemText(item, COLUMN_OI, chip.FindElement(ElementOID.OI)?.Text);
             ListViewUtil.ChangeItemText(item, COLUMN_AOI, chip.FindElement(ElementOID.AOI)?.Text);
+            ListViewUtil.ChangeItemText(item, COLUMN_EAS, tagInfo.EAS ? "On" : "Off");
+            ListViewUtil.ChangeItemText(item, COLUMN_AFI, Element.GetHexString(tagInfo.AFI));
             ListViewUtil.ChangeItemText(item, COLUMN_WRITETIME, DateTime.Now.ToString());
         }
 
@@ -740,6 +744,8 @@ bool bClickClose = false)
                     ListViewUtil.ChangeItemText(item, COLUMN_TOU, history.TOU);
                     ListViewUtil.ChangeItemText(item, COLUMN_OI, history.OI);
                     ListViewUtil.ChangeItemText(item, COLUMN_AOI, history.AOI);
+                    ListViewUtil.ChangeItemText(item, COLUMN_EAS, history.EAS ? "On" : "Off");
+                    ListViewUtil.ChangeItemText(item, COLUMN_AFI, Element.GetHexString(history.AFI));
                     ListViewUtil.ChangeItemText(item, COLUMN_WRITETIME, history.WriteTime);
                 }
             }));
@@ -758,6 +764,10 @@ bool bClickClose = false)
                 history.TOU = ListViewUtil.GetItemText(item, COLUMN_TOU);
                 history.OI = ListViewUtil.GetItemText(item, COLUMN_OI);
                 history.AOI = ListViewUtil.GetItemText(item, COLUMN_AOI);
+                string eas = ListViewUtil.GetItemText(item, COLUMN_EAS);
+                history.EAS = eas.ToLower() == "on" ? true : false;
+                string afi = ListViewUtil.GetItemText(item, COLUMN_AFI);
+                history.AFI = Element.FromHexString(afi)[0];
                 history.WriteTime = ListViewUtil.GetItemText(item, COLUMN_WRITETIME);
                 items.Add(history);
             }

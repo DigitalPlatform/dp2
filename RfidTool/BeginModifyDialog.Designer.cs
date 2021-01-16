@@ -33,6 +33,8 @@ namespace RfidTool
             this.button_OK = new System.Windows.Forms.Button();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage_action = new System.Windows.Forms.TabPage();
+            this.label_eas = new System.Windows.Forms.Label();
+            this.comboBox_eas = new System.Windows.Forms.ComboBox();
             this.checkBox_uidPiiMap = new System.Windows.Forms.CheckBox();
             this.label1 = new System.Windows.Forms.Label();
             this.comboBox_filter_tu = new System.Windows.Forms.ComboBox();
@@ -87,14 +89,16 @@ namespace RfidTool
             // 
             // tabPage_action
             // 
+            this.tabPage_action.Controls.Add(this.checkBox_oi);
+            this.tabPage_action.Controls.Add(this.textBox_rfid_oi);
+            this.tabPage_action.Controls.Add(this.label_eas);
+            this.tabPage_action.Controls.Add(this.comboBox_eas);
             this.tabPage_action.Controls.Add(this.checkBox_uidPiiMap);
             this.tabPage_action.Controls.Add(this.label1);
             this.tabPage_action.Controls.Add(this.comboBox_filter_tu);
             this.tabPage_action.Controls.Add(this.checkBox_aoi);
-            this.tabPage_action.Controls.Add(this.checkBox_oi);
             this.tabPage_action.Controls.Add(this.linkLabel_oiHelp);
             this.tabPage_action.Controls.Add(this.textBox_rfid_aoi);
-            this.tabPage_action.Controls.Add(this.textBox_rfid_oi);
             this.tabPage_action.Location = new System.Drawing.Point(4, 31);
             this.tabPage_action.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.tabPage_action.Name = "tabPage_action";
@@ -104,15 +108,37 @@ namespace RfidTool
             this.tabPage_action.Text = "动作参数";
             this.tabPage_action.UseVisualStyleBackColor = true;
             // 
+            // label_eas
+            // 
+            this.label_eas.Location = new System.Drawing.Point(6, 264);
+            this.label_eas.Name = "label_eas";
+            this.label_eas.Size = new System.Drawing.Size(232, 21);
+            this.label_eas.TabIndex = 11;
+            this.label_eas.Text = "EAS(&E):";
+            // 
+            // comboBox_eas
+            // 
+            this.comboBox_eas.FormattingEnabled = true;
+            this.comboBox_eas.Items.AddRange(new object[] {
+            "不修改",
+            "On",
+            "Off"});
+            this.comboBox_eas.Location = new System.Drawing.Point(244, 261);
+            this.comboBox_eas.Name = "comboBox_eas";
+            this.comboBox_eas.Size = new System.Drawing.Size(294, 29);
+            this.comboBox_eas.TabIndex = 10;
+            this.comboBox_eas.TextChanged += new System.EventHandler(this.comboBox_eas_TextChanged);
+            // 
             // checkBox_uidPiiMap
             // 
             this.checkBox_uidPiiMap.AutoSize = true;
-            this.checkBox_uidPiiMap.Location = new System.Drawing.Point(10, 301);
+            this.checkBox_uidPiiMap.Location = new System.Drawing.Point(10, 348);
             this.checkBox_uidPiiMap.Name = "checkBox_uidPiiMap";
             this.checkBox_uidPiiMap.Size = new System.Drawing.Size(294, 25);
             this.checkBox_uidPiiMap.TabIndex = 9;
             this.checkBox_uidPiiMap.Text = "建立 UID PII 对照关系(&M)";
             this.checkBox_uidPiiMap.UseVisualStyleBackColor = true;
+            this.checkBox_uidPiiMap.Visible = false;
             // 
             // label1
             // 
@@ -138,10 +164,9 @@ namespace RfidTool
             // 
             // checkBox_aoi
             // 
-            this.checkBox_aoi.AutoSize = true;
             this.checkBox_aoi.Location = new System.Drawing.Point(10, 143);
             this.checkBox_aoi.Name = "checkBox_aoi";
-            this.checkBox_aoi.Size = new System.Drawing.Size(216, 25);
+            this.checkBox_aoi.Size = new System.Drawing.Size(228, 25);
             this.checkBox_aoi.TabIndex = 6;
             this.checkBox_aoi.Text = "非标准机构代码(&A)";
             this.checkBox_aoi.UseVisualStyleBackColor = true;
@@ -149,10 +174,9 @@ namespace RfidTool
             // 
             // checkBox_oi
             // 
-            this.checkBox_oi.AutoSize = true;
-            this.checkBox_oi.Location = new System.Drawing.Point(10, 99);
+            this.checkBox_oi.Location = new System.Drawing.Point(10, 96);
             this.checkBox_oi.Name = "checkBox_oi";
-            this.checkBox_oi.Size = new System.Drawing.Size(153, 25);
+            this.checkBox_oi.Size = new System.Drawing.Size(228, 25);
             this.checkBox_oi.TabIndex = 5;
             this.checkBox_oi.Text = "机构代码(&O)";
             this.checkBox_oi.UseVisualStyleBackColor = true;
@@ -161,7 +185,7 @@ namespace RfidTool
             // linkLabel_oiHelp
             // 
             this.linkLabel_oiHelp.AutoSize = true;
-            this.linkLabel_oiHelp.Location = new System.Drawing.Point(6, 219);
+            this.linkLabel_oiHelp.Location = new System.Drawing.Point(6, 193);
             this.linkLabel_oiHelp.Name = "linkLabel_oiHelp";
             this.linkLabel_oiHelp.Size = new System.Drawing.Size(262, 21);
             this.linkLabel_oiHelp.TabIndex = 4;
@@ -182,7 +206,7 @@ namespace RfidTool
             // 
             this.textBox_rfid_oi.Enabled = false;
             this.textBox_rfid_oi.ImeMode = System.Windows.Forms.ImeMode.Disable;
-            this.textBox_rfid_oi.Location = new System.Drawing.Point(244, 97);
+            this.textBox_rfid_oi.Location = new System.Drawing.Point(244, 94);
             this.textBox_rfid_oi.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.textBox_rfid_oi.Name = "textBox_rfid_oi";
             this.textBox_rfid_oi.Size = new System.Drawing.Size(294, 31);
@@ -231,5 +255,7 @@ namespace RfidTool
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.ComboBox comboBox_filter_tu;
         private System.Windows.Forms.CheckBox checkBox_uidPiiMap;
+        private System.Windows.Forms.Label label_eas;
+        private System.Windows.Forms.ComboBox comboBox_eas;
     }
 }

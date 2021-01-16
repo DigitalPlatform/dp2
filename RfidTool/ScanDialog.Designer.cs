@@ -49,6 +49,7 @@ namespace RfidTool
             this.label_message = new System.Windows.Forms.Label();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.button_test = new System.Windows.Forms.Button();
+            this.columnHeader_afi = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.SuspendLayout();
             // 
             // label1
@@ -90,6 +91,7 @@ namespace RfidTool
             this.columnHeader_pii,
             this.columnHeader_tou,
             this.columnHeader_eas,
+            this.columnHeader_afi,
             this.columnHeader_oi,
             this.columnHeader_aoi,
             this.columnHeader_antenna,
@@ -219,6 +221,11 @@ namespace RfidTool
             this.button_test.Visible = false;
             this.button_test.Click += new System.EventHandler(this.button_test_Click);
             // 
+            // columnHeader_afi
+            // 
+            this.columnHeader_afi.Text = "AFI";
+            this.columnHeader_afi.Width = 100;
+            // 
             // ScanDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
@@ -267,5 +274,6 @@ namespace RfidTool
         private System.Windows.Forms.ColumnHeader columnHeader_eas;
         private System.Windows.Forms.ColumnHeader columnHeader_protocol;
         private System.Windows.Forms.Button button_test;
+        private System.Windows.Forms.ColumnHeader columnHeader_afi;
     }
 }

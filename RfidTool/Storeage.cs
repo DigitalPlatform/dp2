@@ -60,6 +60,10 @@ namespace RfidTool
         public string TOU { get; set; }
         public string OI { get; set; }
         public string AOI { get; set; }
+
+        public bool EAS { get; set; }   // 2021/1/16 增加
+        public byte AFI { get; set; }   // 2021/1/16 增加
+
         public string WriteTime { get; set; }
     }
 }
