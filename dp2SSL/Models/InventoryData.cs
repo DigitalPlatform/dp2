@@ -1942,6 +1942,126 @@ TaskScheduler.Default);
             return currentLocation + ":" + currentShelfNo;
         }
 
+        // 导入 UID PII 对照表文件
+        public static ImportUidResult ImportUidPiiTable(
+            string filename,
+            CancellationToken token)
+        {
+            try
+            {
+                using (var reader = new StreamReader(filename, Encoding.ASCII))
+                {
+                    int line_count = 0;
+                    int new_count = 0;
+                    int change_count = 0;
+                    List<string> lines = new List<string>();
+                    while (token.IsCancellationRequested == false)
+                    {
+                        var line = reader.ReadLine();
+                        if (line == null)
+                            break;
+                        if (string.IsNullOrEmpty(line))
+                            continue;
+
+                        lines.Add(line);
+                        if (lines.Count > 100)
+                        {
+                            var result = SaveLines(lines, token);
+                            lines.Clear();
+
+                            line_count += result.LineCount;
+                            new_count += result.NewCount;
+                            change_count += result.ChangeCount;
+                        }
+                    }
+                    if (lines.Count > 0)
+                    {
+                        var result = SaveLines(lines, token);
+                        line_count += result.LineCount;
+                        new_count += result.NewCount;
+                        change_count += result.ChangeCount;
+                    }
+
+                    return new ImportUidResult
+                    {
+                        Value = line_count,
+                        LineCount = line_count,
+                        NewCount = new_count,
+                        ChangeCount = change_count,
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                WpfClientInfo.WriteErrorLog($"ImportUidPiiTable() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                return new ImportUidResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"ImportUidPiiTable() 出现异常: {ex.Message}"
+                };
+            }
+        }
+
+        public class ImportUidResult : NormalResult
+        {
+            public int LineCount { get; set; }
+            public int NewCount { get; set; }
+            public int ChangeCount { get; set; }
+        }
+
+        static ImportUidResult SaveLines(List<string> lines,
+            CancellationToken token)
+        {
+            int line_count = 0;
+            int new_count = 0;
+            int change_count = 0;
+            using (var context = new ItemCacheContext())
+            {
+                context.Database.EnsureCreated();
+
+                foreach (var line in lines)
+                {
+                    if (token.IsCancellationRequested)
+                        return new ImportUidResult
+                        {
+                            LineCount = line_count,
+                            NewCount = new_count,
+                            ChangeCount = change_count,
+                        };
+
+                    if (string.IsNullOrEmpty(line))
+                        continue;
+                    var parts = StringUtil.ParseTwoPart(line, "\t");
+                    string uid = parts[0];
+                    string barcode = parts[1];
+                    if (string.IsNullOrEmpty(uid) || string.IsNullOrEmpty(barcode))
+                        continue;
+
+                    var item = context.Items.Where(o => o.Barcode == barcode).FirstOrDefault();
+                    if (item == null)
+                    {
+                        item = new BookItem { Barcode = barcode, UID = uid };
+                        context.Items.Add(item);
+                        new_count++;
+                    }
+                    else if (item.UID != uid)
+                    {
+                        item.UID = uid;
+                        context.Items.Update(item);
+                        change_count++;
+                    }
+                    line_count++;
+                    context.SaveChanges();
+                }
+            }
+            return new ImportUidResult
+            {
+                LineCount = line_count,
+                NewCount = new_count,
+                ChangeCount = change_count,
+            };
+        }
+
         #endregion
     }
 }

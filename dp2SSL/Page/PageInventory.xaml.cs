@@ -23,6 +23,7 @@ using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
 using DigitalPlatform.WPF;
 using static dp2SSL.LibraryChannelUtil;
+using Microsoft.Win32;
 
 namespace dp2SSL
 {
@@ -815,6 +816,66 @@ namespace dp2SSL
             MenuItem menuItem = sender as MenuItem;
             menuItem.IsChecked = !menuItem.IsChecked;
             UpdateActionMode();
+        }
+
+        // 导入 UID-->PII 对照表
+        private async void importUidPiiTable_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Title = "导入 UID PII 对照表 - 请指定文件名";
+            openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);    // WpfClientInfo.UserDir;
+            openFileDialog.RestoreDirectory = true;
+            openFileDialog.Filter = "对照表文件(*.txt)|*.txt|所有文件(*.*)|*.*";
+            if (openFileDialog.ShowDialog() == false)
+                return;
+
+            using (var cancel = CancellationTokenSource.CreateLinkedTokenSource(App.CancelToken))
+            {
+                ProgressWindow progress = null;
+                App.Invoke(new Action(() =>
+                {
+                    progress = new ProgressWindow();
+                    progress.TitleText = "导入 UID PII 对照表文件";
+                    progress.MessageText = "正在导入 UID PII 对照表文件，请稍等 ...";
+                    progress.Owner = Application.Current.MainWindow;
+                    progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                    progress.Closed += (s1, e1) =>
+                    {
+                        cancel.Cancel();
+                    };
+                    progress.okButton.Content = "停止";
+                    progress.Background = new SolidColorBrush(Colors.DarkRed);
+                    App.SetSize(progress, "middle");
+                    progress.BackColor = "black";
+                    progress.Show();
+                }));
+                try
+                {
+                    await Task.Run(() =>
+                    {
+                        // 导入 UID PII 对照表文件
+                        var result = InventoryData.ImportUidPiiTable(
+                            openFileDialog.FileName,
+                            App.CancelToken);
+                        if (result.Value == -1)
+                            App.ErrorBox("导入 UID PII 对照表文件", $"导入过程出错: {result.ErrorInfo}");
+                        else
+                            App.ErrorBox("导入 UID PII 对照表文件", $"导入完成。\r\n\r\n共处理条目 {result.LineCount} 个；新创建本地库记录 {result.NewCount} 个；修改本地库记录 {result.ChangeCount} 个", "green");
+                    });
+                }
+                catch (Exception ex)
+                {
+                    WpfClientInfo.WriteErrorLog($"导入 UID 对照表过程出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                    App.ErrorBox("导入 UID PII 对照表文件", $"导入 UID 对照表过程出现异常: {ex.Message}");
+                }
+                finally
+                {
+                    App.Invoke(new Action(() =>
+                    {
+                        progress.Close();
+                    }));
+                }
+            }
         }
     }
 }

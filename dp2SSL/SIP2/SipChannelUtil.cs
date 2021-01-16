@@ -53,10 +53,13 @@ namespace dp2SSL
                     throw new Exception($"连接 SIP 服务器 {App.SipServerUrl} 时出错: {result.ErrorInfo}");
                 }
 
-                var login_result = await _channel.LoginAsync(App.SipUserName,
-                    App.SipPassword);
-                if (login_result.Value == -1)
-                    throw new Exception($"针对 SIP 服务器 {App.SipServerUrl} 登录出错: {login_result.ErrorInfo}");
+                if (string.IsNullOrEmpty(App.SipUserName) == false)
+                {
+                    var login_result = await _channel.LoginAsync(App.SipUserName,
+                        App.SipPassword);
+                    if (login_result.Value == -1)
+                        throw new Exception($"针对 SIP 服务器 {App.SipServerUrl} 登录出错: {login_result.ErrorInfo}");
+                }
 
                 // TODO: ScStatus()
 
