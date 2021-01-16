@@ -197,11 +197,12 @@ namespace RfidTool
         const int COLUMN_PII = 1;
         const int COLUMN_TOU = 2;
         const int COLUMN_EAS = 3;
-        const int COLUMN_OI = 4;
-        const int COLUMN_AOI = 5;
-        const int COLUMN_ANTENNA = 6;
-        const int COLUMN_READERNAME = 7;
-        const int COLUMN_PROTOCOL = 8;
+        const int COLUMN_AFI = 4;
+        const int COLUMN_OI = 5;
+        const int COLUMN_AOI = 6;
+        const int COLUMN_ANTENNA = 7;
+        const int COLUMN_READERNAME = 8;
+        const int COLUMN_PROTOCOL = 9;
 
         object _syncRootFill = new object();
 
@@ -272,6 +273,7 @@ namespace RfidTool
             string pii = "(尚未填充)";
             string tou = "";
             string eas = "";
+            string afi = "";
             string oi = "";
             string aoi = "";
 
@@ -349,6 +351,7 @@ namespace RfidTool
 
                     tou = chip?.FindElement(ElementOID.TypeOfUsage)?.Text;
                     eas = taginfo.EAS ? "On" : "Off";
+                    afi = Element.GetHexString(taginfo.AFI);
 
                     if (string.IsNullOrEmpty(oi))
                     {
@@ -378,6 +381,7 @@ namespace RfidTool
 
                 ListViewUtil.ChangeItemText(item, COLUMN_TOU, tou);
                 ListViewUtil.ChangeItemText(item, COLUMN_EAS, eas);
+                ListViewUtil.ChangeItemText(item, COLUMN_AFI, afi);
                 ListViewUtil.ChangeItemText(item, COLUMN_OI, oi);
                 ListViewUtil.ChangeItemText(item, COLUMN_AOI, aoi);
 

@@ -32,6 +32,7 @@ namespace RfidTool
                     this.checkBox_aoi,
                     this.textBox_rfid_aoi,
                     this.checkBox_uidPiiMap,
+                    this.comboBox_eas,
                 };
                 return GuiState.GetUiState(controls);
             }
@@ -45,6 +46,7 @@ namespace RfidTool
                     this.checkBox_aoi,
                     this.textBox_rfid_aoi,
                     this.checkBox_uidPiiMap,
+                    this.comboBox_eas,
                 };
                 GuiState.SetUiState(controls, value);
             }
@@ -53,11 +55,27 @@ namespace RfidTool
         private void checkBox_oi_CheckedChanged(object sender, EventArgs e)
         {
             this.textBox_rfid_oi.Enabled = this.checkBox_oi.Checked;
+            if (this.checkBox_oi.Checked)
+            {
+                this.checkBox_oi.BackColor = Color.LightGreen;
+            }
+            else
+            {
+                this.checkBox_oi.BackColor = Color.Transparent;
+            }
         }
 
         private void checkBox_aoi_CheckedChanged(object sender, EventArgs e)
         {
             this.textBox_rfid_aoi.Enabled = this.checkBox_aoi.Checked;
+            if (this.checkBox_aoi.Checked)
+            {
+                this.checkBox_aoi.BackColor = Color.LightGreen;
+            }
+            else
+            {
+                this.checkBox_aoi.BackColor = Color.Transparent;
+            }
         }
 
         private void button_OK_Click(object sender, EventArgs e)
@@ -86,7 +104,8 @@ namespace RfidTool
             if (strError != null)
                 goto ERROR1;
 
-            if (string.IsNullOrEmpty(this.textBox_rfid_aoi.Text) == false)
+            if (this.checkBox_aoi.Checked == true
+                && string.IsNullOrEmpty(this.textBox_rfid_aoi.Text) == false)
             {
                 // TODO: 当 textbox 内容发生过变化才警告
                 this.tabControl1.SelectedTab = this.tabPage_action;
@@ -100,6 +119,14 @@ namespace RfidTool
     MessageBoxDefaultButton.Button2);
                 if (result != DialogResult.Yes)
                     return;
+            }
+
+            if (this.checkBox_oi.Checked == false
+                && this.checkBox_aoi.Checked == false
+                && (this.comboBox_eas.Text == "不修改" || string.IsNullOrEmpty(this.comboBox_eas.Text) == true))
+            {
+                strError = "没有指定任何修改动作";
+                goto ERROR1;
             }
 
             this.DialogResult = DialogResult.OK;
@@ -143,11 +170,42 @@ namespace RfidTool
             }
         }
 
+        public string ModifyEas
+        {
+            get
+            {
+                return this.comboBox_eas.Text;
+            }
+            set
+            {
+                this.comboBox_eas.Text = value;
+            }
+        }
+
+        /*
+图书
+读者证
+层架标
+所有类别
+        * */
         public string FilterTU
         {
             get
             {
                 return this.comboBox_filter_tu.Text;
+            }
+        }
+
+        private void comboBox_eas_TextChanged(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(this.comboBox_eas.Text)
+                || this.comboBox_eas.Text == "不修改")
+            {
+                this.label_eas.BackColor = Color.Transparent;
+            }
+            else
+            {
+                this.label_eas.BackColor = Color.LightGreen;
             }
         }
     }

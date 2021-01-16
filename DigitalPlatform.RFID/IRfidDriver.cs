@@ -246,15 +246,18 @@ uint new_password);
         {
             TagInfo result = new TagInfo
             {
-                Protocol = this.Protocol,
+                ReaderName = this.ReaderName,   // 2021/1/16
                 UID = this.UID,
                 DSFID = this.DSFID,
                 AFI = this.AFI,
                 IcRef = this.IcRef,
                 BlockSize = this.BlockSize,
                 MaxBlockCount = this.MaxBlockCount,
-                LockStatus = this.LockStatus,
+                EAS = this.EAS, // 2021/1/16
                 AntennaID = this.AntennaID,
+                LockStatus = this.LockStatus,
+                Tag = this.Tag, // 2021/1/16
+                Protocol = this.Protocol,
                 Bytes = Clone(this.Bytes)
             };
 
