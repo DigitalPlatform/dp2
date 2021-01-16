@@ -1779,6 +1779,8 @@ TaskScheduler.Default);
             }
         }
 
+        // 更新本地库中的 UID --> PII 对照关系
+        // TODO: 其实只要检索 hashtable 中存在对应关系，就表明本地库中已经有了，就不必真的更新本地库了
         static NormalResult UpdateUid(string barcode, string uid)
         {
             using (var context = new ItemCacheContext())
@@ -1788,11 +1790,17 @@ TaskScheduler.Default);
                 {
                     item = new BookItem { Barcode = barcode, UID = uid };
                     context.Items.Add(item);
-                    return new NormalResult();
+                    context.SaveChanges();
+                    return new NormalResult { Value = 1 };
                 }
 
-                item.UID = uid;
-                context.Items.Update(item);
+                if (item.UID != uid)
+                {
+                    item.UID = uid;
+                    context.Items.Update(item);
+                    context.SaveChanges();
+                    return new NormalResult { Value = 1 };
+                }
                 return new NormalResult();
             }
         }
@@ -1870,13 +1878,20 @@ TaskScheduler.Default);
                 }
                 else
                 {
-                    item.UID = uid;
-                    item.CurrentLocation = currentLocation;
-                    item.CurrentShelfNo = currentShelfNo;
-                    item.Location = location;
-                    item.ShelfNo = shelfNo;
+                    if (string.IsNullOrEmpty(uid) == false)
+                        item.UID = uid;
+                    if (currentLocation != null)
+                        item.CurrentLocation = currentLocation;
+                    if (currentShelfNo != null)
+                        item.CurrentShelfNo = currentShelfNo;
+                    if (location != null)
+                        item.Location = location;
+                    if (shelfNo != null)
+                        item.ShelfNo = shelfNo;
+                    item.InventoryTime = DateTime.Now;
                     context.Items.Update(item);
                 }
+                context.SaveChanges();
             }
 
             // TODO: 修改 XML
@@ -1896,7 +1911,10 @@ TaskScheduler.Default);
             // 取出以前的值，然后按照冒号左右分别按需替换
             string oldCurrentLocationString = DomUtil.GetElementText(dom.DocumentElement, "currentLocation");
             string newCurrentLocationString = ReplaceCurrentLocationString(oldCurrentLocationString, currentLocation, currentShelfNo);
-            DomUtil.GetElementText(dom.DocumentElement, "currentLocation");
+            if (oldCurrentLocationString != newCurrentLocationString)
+                DomUtil.SetElementText(dom.DocumentElement,
+                    "currentLocation",
+                    newCurrentLocationString);
 
             return new RequestInventoryResult { ItemXml = dom.DocumentElement.OuterXml };
         }

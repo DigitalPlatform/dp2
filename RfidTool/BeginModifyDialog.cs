@@ -63,6 +63,10 @@ namespace RfidTool
             {
                 this.checkBox_oi.BackColor = Color.Transparent;
             }
+
+            // 互斥
+            if (this.checkBox_aoi.Checked == true && this.checkBox_oi.Checked == true)
+                this.checkBox_aoi.Checked = false;
         }
 
         private void checkBox_aoi_CheckedChanged(object sender, EventArgs e)
@@ -76,6 +80,10 @@ namespace RfidTool
             {
                 this.checkBox_aoi.BackColor = Color.Transparent;
             }
+
+            // 互斥
+            if (this.checkBox_aoi.Checked == true && this.checkBox_oi.Checked == true)
+                this.checkBox_oi.Checked = false;
         }
 
         private void button_OK_Click(object sender, EventArgs e)
@@ -123,9 +131,10 @@ namespace RfidTool
 
             if (this.checkBox_oi.Checked == false
                 && this.checkBox_aoi.Checked == false
+                && this.checkBox_writeUidLog.Checked == false
                 && (this.comboBox_eas.Text == "不修改" || string.IsNullOrEmpty(this.comboBox_eas.Text) == true))
             {
-                strError = "没有指定任何修改动作";
+                strError = "没有指定任何修改(或写日志)动作";
                 goto ERROR1;
             }
 
@@ -162,6 +171,7 @@ namespace RfidTool
             }
         }
 
+        /*
         public bool LinkUID
         {
             get
@@ -169,6 +179,7 @@ namespace RfidTool
                 return this.checkBox_uidPiiMap.Checked;
             }
         }
+        */
 
         public string ModifyEas
         {
@@ -196,6 +207,19 @@ namespace RfidTool
             }
         }
 
+        // 是否要写入对照关系日志
+        public bool WriteUidPiiLog
+        {
+            get
+            {
+                return this.checkBox_writeUidLog.Checked;
+            }
+            set
+            {
+                this.checkBox_writeUidLog.Checked = value;
+            }
+        }
+
         private void comboBox_eas_TextChanged(object sender, EventArgs e)
         {
             if (string.IsNullOrEmpty(this.comboBox_eas.Text)
@@ -206,6 +230,18 @@ namespace RfidTool
             else
             {
                 this.label_eas.BackColor = Color.LightGreen;
+            }
+        }
+
+        private void checkBox_writeUidLog_CheckedChanged(object sender, EventArgs e)
+        {
+            if (this.checkBox_writeUidLog.Checked)
+            {
+                this.checkBox_writeUidLog.BackColor = Color.LightGreen;
+            }
+            else
+            {
+                this.checkBox_writeUidLog.BackColor = Color.Transparent;
             }
         }
     }

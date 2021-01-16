@@ -36,6 +36,8 @@ namespace ShelfLockDriver.First
         private void _sp_ErrorReceived(object sender, SerialErrorReceivedEventArgs e)
         {
             // 
+            int i = 0;
+            i++;
         }
 
         public LockProperty LockProperty { get; set; }

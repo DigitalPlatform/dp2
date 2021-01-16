@@ -87,6 +87,19 @@ namespace dp2SSL
             }
         }
 
+        // 校验 EAS checkbox 是否可见
+        public bool ActionVerifyEasVisible
+        {
+            get
+            {
+                return this.actionVerifyEas.Visibility == Visibility.Visible;
+            }
+            set
+            {
+                this.actionVerifyEas.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
+            }
+        }
+
         // 动作模式
         /* setUID               设置 UID --> PII 对照关系。即，写入册记录的 UID 字段
          * setCurrentLocation   设置册记录的 currentLocation 字段内容为当前层架标编号

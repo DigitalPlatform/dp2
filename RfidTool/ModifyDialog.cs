@@ -83,8 +83,9 @@ namespace RfidTool
                     FilterTU = dlg.FilterTU,
                     OI = dlg.OiString,
                     AOI = dlg.AoiString,
-                    LinkUID = dlg.LinkUID,
+                    // LinkUID = dlg.LinkUID,
                     ModifyEas = dlg.ModifyEas,
+                    WriteUidPiiLog = dlg.WriteUidPiiLog,
                 };
             }
 
@@ -511,6 +512,9 @@ namespace RfidTool
             public string State { get; set; }   // disable/cross/succeed/error
 
             public string ErrorInfo { get; set; }
+
+            // UID --> PII 日志是否成功写入过了
+            public bool UidPiiLogWrited { get; set; }
         }
 
         // 刷新一个 ListViewItem 的所有列显示
@@ -822,13 +826,21 @@ namespace RfidTool
                     }
                 }
 
+                /*
                 if (_action.LinkUID)
                 {
                     AddUidEntry(iteminfo.Tag.UID, pii);
                 }
+                */
 
-                if (string.IsNullOrEmpty(pii) == false)
-                    DataModel.WriteToUidLogFile(iteminfo.Tag.UID, pii);
+                if (/*_action.WriteUidPiiLog &&*/ iteminfo.UidPiiLogWrited == false)
+                {
+                    if (string.IsNullOrEmpty(pii) == false)
+                    {
+                        DataModel.WriteToUidLogFile(iteminfo.Tag.UID, pii);
+                        iteminfo.UidPiiLogWrited = true;
+                    }
+                }
 
                 // 写回标签
                 if (changed)
@@ -893,7 +905,6 @@ namespace RfidTool
                     ErrorInfo = error
                 };
             }
-
         }
 
         public static TagInfo GetTagInfo(TagInfo existing,
@@ -1239,8 +1250,10 @@ bool eas)
         public string OI { get; set; }
         public string AOI { get; set; }
 
-        public bool LinkUID { get; set; }
+        // public bool LinkUID { get; set; }
 
         public string ModifyEas { get; set; }   // 不修改/On/Off (空=不修改)
+
+        public bool WriteUidPiiLog { get; set; }
     }
 }
