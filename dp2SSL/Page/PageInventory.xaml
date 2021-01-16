@@ -85,9 +85,7 @@
                     <MenuItem x:Name="addSound" Header="增加发声" HorizontalAlignment="Left" Width="Auto" Click="addSound_Click"/>
                 </MenuItem>
                 <MenuItem Header="_维护">
-                    <MenuItem x:Name="redoReplicatePatron" Header="重做全量同步读者记录" HorizontalAlignment="Left" Width="Auto" />
-                    <MenuItem x:Name="backupRequests" Header="备份本地动作库" HorizontalAlignment="Left" Width="Auto" />
-                    <MenuItem x:Name="restoreRequests" Header="恢复本地动作库" HorizontalAlignment="Left" Width="Auto" />
+                    <MenuItem x:Name="importUidPiiTable" Header="导入 UID-->PII 对照表" HorizontalAlignment="Left" Width="Auto" Click="importUidPiiTable_Click"/>
                 </MenuItem>
                 <MenuItem Header="_盘点动作">
                     <MenuItem x:Name="actionSetUID" Header="设置册记录 UID" HorizontalAlignment="Left" Width="Auto" Click="actionMenu_Click"/>
