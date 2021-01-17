@@ -85,7 +85,7 @@ namespace dp2SSL
 
             RefreshActionModeMenu();
 
-            _ = Task.Run(() =>
+            _ = Task.Run(async () =>
             {
                 // 获得馆藏地列表
                 GetLocationListResult get_result = null;
@@ -176,15 +176,15 @@ namespace dp2SSL
                         Hashtable uid_table = new Hashtable();
                         NormalResult result = null;
                         if (App.Protocol == "sip")
-                            result = InventoryData.LoadUidTable(uid_table,
-                    (text) =>
-                    {
-                        App.Invoke(new Action(() =>
-                        {
-                            progress.MessageText = text;
-                        }));
-                    },
-                    cancel.Token);
+                            result = await InventoryData.LoadUidTableAsync(uid_table,
+                                (text) =>
+                                {
+                                    App.Invoke(new Action(() =>
+                                    {
+                                        progress.MessageText = text;
+                                    }));
+                                },
+                                cancel.Token);
                         else
                             result = InventoryData.DownloadUidTable(
                     null,
@@ -851,10 +851,10 @@ namespace dp2SSL
                 }));
                 try
                 {
-                    await Task.Run(() =>
+                    await Task.Run(async () =>
                     {
                         // 导入 UID PII 对照表文件
-                        var result = InventoryData.ImportUidPiiTable(
+                        var result = await InventoryData.ImportUidPiiTableAsync(
                             openFileDialog.FileName,
                             App.CancelToken);
                         if (result.Value == -1)
@@ -876,6 +876,57 @@ namespace dp2SSL
                     }));
                 }
             }
+        }
+
+        // 清除本地 UID-->PII 缓存
+        private async void clearUidPiiCache_Click(object sender, RoutedEventArgs e)
+        {
+            using (var cancel = CancellationTokenSource.CreateLinkedTokenSource(App.CancelToken))
+            {
+                ProgressWindow progress = null;
+                App.Invoke(new Action(() =>
+                {
+                    progress = new ProgressWindow();
+                    progress.TitleText = "清除本地 UID-->PII 缓存";
+                    progress.MessageText = "清除本地 UID-->PII 缓存，请稍等 ...";
+                    progress.Owner = Application.Current.MainWindow;
+                    progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                    progress.Closed += (s1, e1) =>
+                    {
+                        cancel.Cancel();
+                    };
+                    progress.okButton.Content = "停止";
+                    progress.Background = new SolidColorBrush(Colors.DarkRed);
+                    App.SetSize(progress, "middle");
+                    progress.BackColor = "black";
+                    progress.Show();
+                }));
+                try
+                {
+                    await Task.Run(async () =>
+                    {
+                        var result = await InventoryData.ClearUidPiiLocalCacheAsync(
+                            App.CancelToken);
+                        if (result.Value == -1)
+                            App.ErrorBox("清除本地 UID-->PII 缓存", $"清除过程出错: {result.ErrorInfo}");
+                        else
+                            App.ErrorBox("清除本地 UID-->PII 缓存", $"清除完成。\r\n\r\n共清除条目 {result.Value} 个", "green");
+                    });
+                }
+                catch (Exception ex)
+                {
+                    WpfClientInfo.WriteErrorLog($"清除本地 UID-->PII 缓存过程出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                    App.ErrorBox("清除本地 UID-->PII 缓存", $"清除本地 UID-->PII 缓存过程出现异常: {ex.Message}");
+                }
+                finally
+                {
+                    App.Invoke(new Action(() =>
+                    {
+                        progress.Close();
+                    }));
+                }
+            }
+
         }
     }
 }

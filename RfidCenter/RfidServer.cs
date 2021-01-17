@@ -736,41 +736,49 @@ namespace RfidCenter
                     ErrorCode = $"state:{Program.MainForm.ErrorState}"
                 };
 
-            List<GetTagInfoResult> errors = new List<GetTagInfoResult>();
-            foreach (Reader reader in this.Readers)
+            Program.Rfid.IncApiCount();
+            try
             {
-                if (Reader.MatchReaderName(reader_name, reader.Name, out string antenna_list) == false)
-                    continue;
-
-                // result.Value
-                //      -1
-                //      0
-                GetTagInfoResult result0 = null;
-                if (Program.MainForm.InSimuReader)
-                    result0 = _simuReader.GetTagInfo(reader.Name, info);
-                else
-                    result0 = Program.Rfid.GetTagInfo(reader.Name, info);
-
-                // 继续尝试往后寻找
-                if (result0.Value == -1
-                    // && result0.ErrorCode == "errorFromReader=4"
-                    )
+                List<GetTagInfoResult> errors = new List<GetTagInfoResult>();
+                foreach (Reader reader in this.Readers)
                 {
-                    errors.Add(result0);
-                    continue;
+                    if (Reader.MatchReaderName(reader_name, reader.Name, out string antenna_list) == false)
+                        continue;
+
+                    // result.Value
+                    //      -1
+                    //      0
+                    GetTagInfoResult result0 = null;
+                    if (Program.MainForm.InSimuReader)
+                        result0 = _simuReader.GetTagInfo(reader.Name, info);
+                    else
+                        result0 = Program.Rfid.GetTagInfo(reader.Name, info);
+
+                    // 继续尝试往后寻找
+                    if (result0.Value == -1
+                        // && result0.ErrorCode == "errorFromReader=4"
+                        )
+                    {
+                        errors.Add(result0);
+                        continue;
+                    }
+
+                    if (result0.Value == -1)
+                        return result0;
+
+                    // found
+                    return result0;
                 }
 
-                if (result0.Value == -1)
-                    return result0;
+                if (errors.Count > 0)
+                    return errors[0];
 
-                // found
-                return result0;
+                return new GetTagInfoResult { ErrorCode = "notFoundReader" };
             }
-
-            if (errors.Count > 0)
-                return errors[0];
-
-            return new GetTagInfoResult { ErrorCode = "notFoundReader" };
+            finally
+            {
+                Program.Rfid.DecApiCount();
+            }
         }
 
         // TODO: 即将废除
@@ -790,9 +798,13 @@ namespace RfidCenter
                     ErrorCode = $"state:{Program.MainForm.ErrorState}"
                 };
 
-            List<GetTagInfoResult> errors = new List<GetTagInfoResult>();
-            foreach (Reader reader in this.Readers)
+            Program.Rfid.IncApiCount();
+            try
             {
+
+                List<GetTagInfoResult> errors = new List<GetTagInfoResult>();
+                foreach (Reader reader in this.Readers)
+                {
 #if NO
                 if (reader_name == "*" || reader.Name == reader_name)
                 {
@@ -801,50 +813,55 @@ namespace RfidCenter
                 else
                     continue;
 #endif
-                if (Reader.MatchReaderName(reader_name, reader.Name, out string antenna_list) == false)
-                    continue;
+                    if (Reader.MatchReaderName(reader_name, reader.Name, out string antenna_list) == false)
+                        continue;
 
-                string protocol = InventoryInfo.ISO15693;
-                if (StringUtil.IsInList(InventoryInfo.ISO18000P6C, reader.Protocols) == true)
-                    protocol = InventoryInfo.ISO18000P6C;
+                    string protocol = InventoryInfo.ISO15693;
+                    if (StringUtil.IsInList(InventoryInfo.ISO18000P6C, reader.Protocols) == true)
+                        protocol = InventoryInfo.ISO18000P6C;
 
-                InventoryInfo info = new InventoryInfo
-                {
-                    Protocol = protocol,
-                    UID = uid,
-                    AntennaID = antenna_id
-                };
+                    InventoryInfo info = new InventoryInfo
+                    {
+                        Protocol = protocol,
+                        UID = uid,
+                        AntennaID = antenna_id
+                    };
 
-                // result.Value
-                //      -1
-                //      0
-                GetTagInfoResult result0 = null;
-                if (Program.MainForm.InSimuReader)
-                    result0 = _simuReader.GetTagInfo(reader.Name, info);
-                else
-                    result0 = Program.Rfid.GetTagInfo(reader.Name, info);
+                    // result.Value
+                    //      -1
+                    //      0
+                    GetTagInfoResult result0 = null;
+                    if (Program.MainForm.InSimuReader)
+                        result0 = _simuReader.GetTagInfo(reader.Name, info);
+                    else
+                        result0 = Program.Rfid.GetTagInfo(reader.Name, info);
 
-                // 继续尝试往后寻找
-                if (result0.Value == -1
-                    // && result0.ErrorCode == "errorFromReader=4"
-                    )
-                {
-                    errors.Add(result0);
-                    continue;
+                    // 继续尝试往后寻找
+                    if (result0.Value == -1
+                        // && result0.ErrorCode == "errorFromReader=4"
+                        )
+                    {
+                        errors.Add(result0);
+                        continue;
+                    }
+
+                    if (result0.Value == -1)
+                        return result0;
+
+                    // found
+                    return result0;
                 }
 
-                if (result0.Value == -1)
-                    return result0;
+                // 2019/2/13
+                if (errors.Count > 0)
+                    return errors[0];
 
-                // found
-                return result0;
+                return new GetTagInfoResult { ErrorCode = "notFoundReader" };
             }
-
-            // 2019/2/13
-            if (errors.Count > 0)
-                return errors[0];
-
-            return new GetTagInfoResult { ErrorCode = "notFoundReader" };
+            finally
+            {
+                Program.Rfid.DecApiCount();
+            }
         }
 
         // 2020/10/10
@@ -877,58 +894,66 @@ namespace RfidCenter
                     ErrorCode = $"state:{Program.MainForm.ErrorState}"
                 };
 
-            List<GetTagInfoResult> errors = new List<GetTagInfoResult>();
-            foreach (Reader reader in this.Readers)
+            Program.Rfid.IncApiCount();
+            try
             {
-                if (Reader.MatchReaderName(reader_name, reader.Name, out string antenna_list) == false)
-                    continue;
-
-                string protocol = InventoryInfo.ISO15693;
-                if (string.IsNullOrEmpty(protocol_param))
+                List<GetTagInfoResult> errors = new List<GetTagInfoResult>();
+                foreach (Reader reader in this.Readers)
                 {
-                    if (StringUtil.IsInList(InventoryInfo.ISO18000P6C, reader.Protocols) == true)
-                        protocol = InventoryInfo.ISO18000P6C;
-                }
-                else
-                    protocol = protocol_param;
+                    if (Reader.MatchReaderName(reader_name, reader.Name, out string antenna_list) == false)
+                        continue;
 
-                InventoryInfo info = new InventoryInfo
-                {
-                    Protocol = protocol,
-                    UID = uid,
-                    AntennaID = antenna_id
-                };
+                    string protocol = InventoryInfo.ISO15693;
+                    if (string.IsNullOrEmpty(protocol_param))
+                    {
+                        if (StringUtil.IsInList(InventoryInfo.ISO18000P6C, reader.Protocols) == true)
+                            protocol = InventoryInfo.ISO18000P6C;
+                    }
+                    else
+                        protocol = protocol_param;
 
-                // result.Value
-                //      -1
-                //      0
-                GetTagInfoResult result0 = null;
-                if (Program.MainForm.InSimuReader)
-                    result0 = _simuReader.GetTagInfo(reader.Name, info, style);
-                else
-                    result0 = Program.Rfid.GetTagInfo(reader.Name, info, style);
+                    InventoryInfo info = new InventoryInfo
+                    {
+                        Protocol = protocol,
+                        UID = uid,
+                        AntennaID = antenna_id
+                    };
 
-                // 继续尝试往后寻找
-                if (result0.Value == -1
-                    // && result0.ErrorCode == "errorFromReader=4"
-                    )
-                {
-                    errors.Add(result0);
-                    continue;
-                }
+                    // result.Value
+                    //      -1
+                    //      0
+                    GetTagInfoResult result0 = null;
+                    if (Program.MainForm.InSimuReader)
+                        result0 = _simuReader.GetTagInfo(reader.Name, info, style);
+                    else
+                        result0 = Program.Rfid.GetTagInfo(reader.Name, info, style);
 
-                if (result0.Value == -1)
+                    // 继续尝试往后寻找
+                    if (result0.Value == -1
+                        // && result0.ErrorCode == "errorFromReader=4"
+                        )
+                    {
+                        errors.Add(result0);
+                        continue;
+                    }
+
+                    if (result0.Value == -1)
+                        return result0;
+
+                    // found
                     return result0;
+                }
 
-                // found
-                return result0;
+                // 2019/2/13
+                if (errors.Count > 0)
+                    return errors[0];
+
+                return new GetTagInfoResult { ErrorCode = "notFoundReader" };
             }
-
-            // 2019/2/13
-            if (errors.Count > 0)
-                return errors[0];
-
-            return new GetTagInfoResult { ErrorCode = "notFoundReader" };
+            finally
+            {
+                Program.Rfid.DecApiCount();
+            }
         }
 
         public NormalResult WriteTagInfo(
@@ -937,9 +962,11 @@ namespace RfidCenter
     TagInfo new_tag_info)
         {
             // TODO: 对 old_tag_info 和 new_tag_info 合法性进行一系列检查
-
-            foreach (Reader reader in this.Readers)
+            Program.Rfid.IncApiCount();
+            try
             {
+                foreach (Reader reader in this.Readers)
+                {
 #if NO
                 if (reader_name == "*" || reader.Name == reader_name)
                 {
@@ -949,46 +976,51 @@ namespace RfidCenter
                     continue;
 #endif
 
-                if (Reader.MatchReaderName(reader_name, reader.Name, out string antenna_list) == false)
-                    continue;
+                    if (Reader.MatchReaderName(reader_name, reader.Name, out string antenna_list) == false)
+                        continue;
 
 
-                InventoryInfo info = new InventoryInfo
-                {
-                    Protocol = old_tag_info.Protocol,
-                    UID = old_tag_info.UID,
-                    AntennaID = old_tag_info.AntennaID  // 2019/9/27
-                };
-                GetTagInfoResult result0 = null;
-                if (Program.MainForm.InSimuReader)
-                    result0 = _simuReader.GetTagInfo(reader.Name, info);
-                else
-                    result0 = Program.Rfid.GetTagInfo(reader.Name, info);
+                    InventoryInfo info = new InventoryInfo
+                    {
+                        Protocol = old_tag_info.Protocol,
+                        UID = old_tag_info.UID,
+                        AntennaID = old_tag_info.AntennaID  // 2019/9/27
+                    };
+                    GetTagInfoResult result0 = null;
+                    if (Program.MainForm.InSimuReader)
+                        result0 = _simuReader.GetTagInfo(reader.Name, info);
+                    else
+                        result0 = Program.Rfid.GetTagInfo(reader.Name, info);
 
-                if (result0.Value == -1 && result0.ErrorCode == "errorFromReader=4")
-                    continue;
+                    if (result0.Value == -1 && result0.ErrorCode == "errorFromReader=4")
+                        continue;
 
-                if (result0.Value == -1)
-                    return new NormalResult(result0);
+                    if (result0.Value == -1)
+                        return new NormalResult(result0);
 
-                // TODO: 是否对照检查 old_tag_info 和 result0.TagInfo ?
+                    // TODO: 是否对照检查 old_tag_info 和 result0.TagInfo ?
 
-                if (Program.MainForm.InSimuReader)
-                    return _simuReader.WriteTagInfo(reader.Name,
-                    old_tag_info,
-                    new_tag_info);
-                else
-                    return Program.Rfid.WriteTagInfo(reader.Name,
+                    if (Program.MainForm.InSimuReader)
+                        return _simuReader.WriteTagInfo(reader.Name,
                         old_tag_info,
                         new_tag_info);
-            }
+                    else
+                        return Program.Rfid.WriteTagInfo(reader.Name,
+                            old_tag_info,
+                            new_tag_info);
+                }
 
-            return new NormalResult
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"没有找到 UID 为 {old_tag_info.UID} 的标签",
+                    ErrorCode = "notFound"
+                };
+            }
+            finally
             {
-                Value = -1,
-                ErrorInfo = $"没有找到 UID 为 {old_tag_info.UID} 的标签",
-                ErrorCode = "notFound"
-            };
+                Program.Rfid.DecApiCount();
+            }
         }
 
         /*
@@ -1031,71 +1063,80 @@ uint antenna_id,
 bool enable,
 string style)
         {
-            string uid = "";
-            List<string> parts = StringUtil.ParseTwoPart(tag_name, ":");
-            if (parts[0] == "pii")
+            Program.Rfid.IncApiCount();
+            try
             {
-                // 2019/9/24
-                // 天线列表
-                // 1|2|3|4 这样的形态
-                FindTagResult result = null;
-                if (Program.MainForm.InSimuReader)
-                    result = _simuReader.FindTagByPII(
-reader_name,
-InventoryInfo.ISO15693, // 只有 ISO15693 才有 EAS (2019/8/28)
-antenna_id.ToString(),
-parts[1]);
-                else
-                    result = Program.Rfid.FindTagByPII(
-                        reader_name,
-                        InventoryInfo.ISO15693, // 只有 ISO15693 才有 EAS (2019/8/28)
-                        antenna_id.ToString(),
-                        parts[1]);
 
-                if (result.Value != 1)
+                string uid = "";
+                List<string> parts = StringUtil.ParseTwoPart(tag_name, ":");
+                if (parts[0] == "pii")
+                {
+                    // 2019/9/24
+                    // 天线列表
+                    // 1|2|3|4 这样的形态
+                    FindTagResult result = null;
+                    if (Program.MainForm.InSimuReader)
+                        result = _simuReader.FindTagByPII(
+    reader_name,
+    InventoryInfo.ISO15693, // 只有 ISO15693 才有 EAS (2019/8/28)
+    antenna_id.ToString(),
+    parts[1]);
+                    else
+                        result = Program.Rfid.FindTagByPII(
+                            reader_name,
+                            InventoryInfo.ISO15693, // 只有 ISO15693 才有 EAS (2019/8/28)
+                            antenna_id.ToString(),
+                            parts[1]);
+
+                    if (result.Value != 1)
+                        return new NormalResult
+                        {
+                            Value = result.Value,
+                            ErrorInfo = result.ErrorInfo,
+                            ErrorCode = result.ErrorCode
+                        };
+                    uid = result.UID;
+                    reader_name = result.ReaderName;    // 假如最初 reader_name 为 '*'，此处可以改为具体的读卡器名字，会加快后面设置的速度
+                }
+                else if (parts[0] == "uid" || string.IsNullOrEmpty(parts[0]))
+                    uid = parts[1];
+                else
                     return new NormalResult
                     {
-                        Value = result.Value,
-                        ErrorInfo = result.ErrorInfo,
-                        ErrorCode = result.ErrorCode
+                        Value = -1,
+                        ErrorInfo = $"未知的 tag_name 前缀 '{parts[0]}'",
+                        ErrorCode = "unknownPrefix"
                     };
-                uid = result.UID;
-                reader_name = result.ReaderName;    // 假如最初 reader_name 为 '*'，此处可以改为具体的读卡器名字，会加快后面设置的速度
-            }
-            else if (parts[0] == "uid" || string.IsNullOrEmpty(parts[0]))
-                uid = parts[1];
-            else
-                return new NormalResult
+
                 {
-                    Value = -1,
-                    ErrorInfo = $"未知的 tag_name 前缀 '{parts[0]}'",
-                    ErrorCode = "unknownPrefix"
-                };
+                    // TODO: 检查 uid 字符串内容是否合法。应为 hex 数字
 
-            {
-                // TODO: 检查 uid 字符串内容是否合法。应为 hex 数字
-
-                // return result.Value
-                //      -1  出错
-                //      0   成功
-                NormalResult result = null;
-                if (Program.MainForm.InSimuReader)
-                    result = _simuReader.SetEAS(
-reader_name,
-uid,
-antenna_id,
-enable,
-style);
-                else
-                    result = Program.Rfid.SetEAS(
+                    // return result.Value
+                    //      -1  出错
+                    //      0   成功
+                    NormalResult result = null;
+                    if (Program.MainForm.InSimuReader)
+                        result = _simuReader.SetEAS(
     reader_name,
     uid,
     antenna_id,
     enable,
     style);
-                if (result.Value == -1)
-                    return result;
-                return new NormalResult { Value = 1 };
+                    else
+                        result = Program.Rfid.SetEAS(
+        reader_name,
+        uid,
+        antenna_id,
+        enable,
+        style);
+                    if (result.Value == -1)
+                        return result;
+                    return new NormalResult { Value = 1 };
+                }
+            }
+            finally
+            {
+                Program.Rfid.DecApiCount();
             }
         }
 
@@ -1105,12 +1146,20 @@ style);
     uint old_password,
     uint new_password)
         {
-            return Program.Rfid.ChangePassword(
-reader_name,
-uid,
-type,
-old_password,
-new_password);
+            Program.Rfid.IncApiCount();
+            try
+            {
+                return Program.Rfid.ChangePassword(
+    reader_name,
+    uid,
+    type,
+    old_password,
+    new_password);
+            }
+            finally
+            {
+                Program.Rfid.DecApiCount();
+            }
         }
 
         // 和模拟标签有关的功能

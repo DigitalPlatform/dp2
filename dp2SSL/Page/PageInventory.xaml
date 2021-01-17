@@ -86,6 +86,7 @@
                 </MenuItem>
                 <MenuItem Header="_维护">
                     <MenuItem x:Name="importUidPiiTable" Header="导入 UID-->PII 对照表" HorizontalAlignment="Left" Width="Auto" Click="importUidPiiTable_Click"/>
+                    <MenuItem x:Name="clearUidPiiCache" Header="清除本地 UID-->PII 缓存" HorizontalAlignment="Left" Width="Auto" Click="clearUidPiiCache_Click"/>
                 </MenuItem>
                 <MenuItem Header="_盘点动作">
                     <MenuItem x:Name="actionSetUID" Header="设置册记录 UID" HorizontalAlignment="Left" Width="Auto" Click="actionMenu_Click"/>
@@ -171,6 +172,8 @@
                         <GridViewColumn Header="当前位置" Width="150" DisplayMemberBinding="{Binding CurrentLocation}"
                                         HeaderContainerStyle="{StaticResource myHeaderStyle}"/>
                         <GridViewColumn Header="永久馆藏地" Width="150" DisplayMemberBinding="{Binding Location}"
+                                        HeaderContainerStyle="{StaticResource myHeaderStyle}"/>
+                        <GridViewColumn Header="永久架号" Width="150" DisplayMemberBinding="{Binding ShelfNo}"
                                         HeaderContainerStyle="{StaticResource myHeaderStyle}"/>
 
                     </GridView>

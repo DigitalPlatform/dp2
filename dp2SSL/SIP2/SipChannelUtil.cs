@@ -302,6 +302,40 @@ namespace dp2SSL
                                     }
                                 }
 
+                                // 2021/1/17
+                                // 用本地数据记录修正盘点部分字段
+                                if (StringUtil.IsInList("localInventory", style))
+                                {
+                                    var book_item = await InventoryData.FindBookItemAsync(pii);
+                                    if (book_item != null)
+                                    {
+                                        if (book_item.Location != null)
+                                            DomUtil.SetElementText(itemdom.DocumentElement,
+                                                "location",
+                                                book_item.Location);
+                                        if (book_item.ShelfNo != null)
+                                            DomUtil.SetElementText(itemdom.DocumentElement,
+                                                "shelfNo",
+                                                book_item.ShelfNo);
+                                        
+                                        string old_currentLocation = DomUtil.GetElementText(itemdom.DocumentElement,
+                                            "currentLocation");
+                                        string oldLeft = null;
+                                        string oldRight = null;
+                                        if (string.IsNullOrEmpty(old_currentLocation) == false)
+                                        {
+                                            var parts = StringUtil.ParseTwoPart(old_currentLocation, ":");
+                                            oldLeft = parts[0];
+                                            oldRight = parts[1];
+                                        }
+                                        
+                                        DomUtil.SetElementText(itemdom.DocumentElement,
+                                            "currentLocation",
+                                            BuildCurrentLocation(book_item.CurrentLocation == null ? oldLeft : book_item.CurrentLocation,
+                                            book_item.CurrentShelfNo == null ? oldRight : book_item.CurrentShelfNo));
+                                    }
+                                }
+
                                 result = new GetEntityDataResult
                                 {
                                     Value = 1,
