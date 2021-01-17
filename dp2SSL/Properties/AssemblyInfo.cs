@@ -51,7 +51,7 @@ using System.Windows;
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 // 方法是按如下所示使用“*”: :
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.7.0")]    // 1.5.*
+[assembly: AssemblyVersion("1.7.1")]    // 1.5.*
 [assembly: AssemblyFileVersion("1.7.0.0")]  // 1.5.0.0
 
 // 1.0 2019/2/21 第一个版本
@@ -75,3 +75,4 @@ using System.Windows;
 //      1.6.2 (2021/1/3) 远程控制命令增加 check tag 命令
 // 1.7 2021/1/16 盘点功能增加对 SIP2 协议的支持
 //      1.7.0 (2021/1/16) 增加 inventory.xml 配置文件。开始盘点对话框暂不支持“校验 EAS”功能
+//      1.7.1 (2021/1/17) 增加导入 UID 对照表和清除本地 UID 缓存的功能

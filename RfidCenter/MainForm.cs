@@ -66,6 +66,8 @@ namespace RfidCenter
                 _floatingMessage.Show(this);
             }
 
+            var token = _cancel.Token;
+
             UsbInfo.StartWatch((add_count, remove_count) =>
             {
                 // this.OutputHistory($"add_count:{add_count}, remove_count:{remove_count}", 1);
@@ -73,9 +75,41 @@ namespace RfidCenter
                 if (add_count > 0)
                     type = "connected";
 
-                BeginRefreshReaders(type, new CancellationToken());
+                BeginRefreshReaders(type, token);
             },
-            _cancel.Token);
+            token);
+
+            BluetoothMonitor.StartWatch(null,
+                (number, infos) =>
+                {
+                    if (number > 0)
+                    {
+                        // * disconnect --> connect --> * disconnect --> remove
+                        var found = infos.Find(o => o.Name.StartsWith("R-PAN"));
+                        if (found != null && found.State == "disconnect")
+                        {
+                            /*
+                            this.Invoke((Action)(() =>
+                            {
+                                MessageBox.Show(this, $"number={number}\r\nfound:\r\n{found.ToString()}");
+                            }));
+                            */
+                            var action = found.OldState == "connect" ? "disconnected" : "connected";
+                            FormClientInfo.Speak(action == "connected" ? "连接蓝牙读写器" : "断开蓝牙读写器", false, false);
+                            BeginRefreshReaders(action,
+                                token);
+                        }
+
+                    }
+                    /*
+                    this.Invoke((Action)(() =>
+                    {
+                        MessageBox.Show(this, $"number={number}\r\ninfos:\r\n{BluetoothInfo.ToString(infos)}");
+                    }));
+                    */
+                },
+                token);
+
 
             // UsbNotification.RegisterUsbDeviceNotification(this.Handle);
             SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
@@ -1247,7 +1281,7 @@ bool bClickClose = false)
             }
         }
 
-#region remoting server
+        #region remoting server
 
 #if HTTP_CHANNEL
         HttpChannel m_serverChannel = null;
@@ -1295,9 +1329,9 @@ bool bClickClose = false)
             }
         }
 
-#endregion
+        #endregion
 
-#region ipc channel
+        #region ipc channel
 
         public static bool CallActivate(string strUrl)
         {
@@ -1371,7 +1405,7 @@ bool bClickClose = false)
             }
         }
 
-#endregion
+        #endregion
 
         private void ToolStripMenuItem_testRfidChannel_Click(object sender, EventArgs e)
         {
@@ -1379,7 +1413,7 @@ bool bClickClose = false)
             MessageBox.Show(this, result.ToString());
         }
 
-#region 浏览器控件
+        #region 浏览器控件
 
         public void ClearHtml()
         {
@@ -1532,7 +1566,7 @@ string strHtml)
             AppendHtml("<div class='debug " + strClass + "'>" + HttpUtility.HtmlEncode(strText).Replace("\r\n", "<br/>") + "</div>");
         }
 
-#endregion
+        #endregion
 
         private void MenuItem_openSendKey_Click(object sender, EventArgs e)
         {
@@ -2264,7 +2298,7 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
             if (result.Value == -1)
             {
                 string error = $"初始化锁控阶段出错: {result.ErrorInfo}";
-                OutputHistory(error , 2);
+                OutputHistory(error, 2);
                 SetErrorState("error", error);
                 this.ShowMessage(error, "red", true);
             }

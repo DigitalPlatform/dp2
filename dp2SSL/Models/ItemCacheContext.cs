@@ -18,6 +18,8 @@ namespace dp2SSL
     {
         // 册记录
         public DbSet<BookItem> Items { get; set; }
+        // 对照记录
+        public DbSet<UidEntry> Uids { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -33,10 +35,17 @@ namespace dp2SSL
             modelBuilder.Entity<BookItem>(entity =>
             {
                 entity.HasKey(e => e.Barcode);
-                // entity.HasIndex(e => e.PII);
+                // entity.HasIndex(e => e.UID);
+            });
+
+            // ***
+            modelBuilder.Entity<UidEntry>().ToTable("uid");
+            modelBuilder.Entity<UidEntry>(entity =>
+            {
+                entity.HasKey(e => e.PII);
+                entity.HasIndex(e => e.UID);
             });
         }
-
     }
 
     // (用于盘点的)册记录
@@ -55,9 +64,16 @@ namespace dp2SSL
         public string CurrentShelfNo { get; set; }
 
         // 高频或者超高频标签的 UID
-        public string UID { get; set; }
+        // public string UID { get; set; }
 
         // 最近一次盘点时间
         public DateTime InventoryTime { get; set; }
+    }
+
+    // UID 和 PII 的对照关系
+    public class UidEntry
+    {
+        public string UID { get; set; }
+        public string PII { get; set; }
     }
 }

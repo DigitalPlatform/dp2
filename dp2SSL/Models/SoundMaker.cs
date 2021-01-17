@@ -107,6 +107,16 @@ namespace dp2SSL
             _outputDevice.SendProgramChange(Channel.Channel2, Instrument.BirdTweet);
         }
 
+        // 单条成功的声音
+        static void InitialChannel3()
+        {
+            if (_outputDevice == null)
+            {
+                Open();
+            }
+            _outputDevice.SendProgramChange(Channel.Channel3, Instrument.ElectricPiano1);
+        }
+
         public static void StopCurrent()
         {
             try
@@ -173,6 +183,20 @@ namespace dp2SSL
             {
                 await Task.Delay(500);
                 _outputDevice.SendNoteOff(Channel.Channel2, Pitch.B4, 100);
+            });
+        }
+
+        // 表示成功的声音
+        public static void SucceedSound()
+        {
+            InitialChannel3();
+
+            _outputDevice.SendNoteOn(Channel.Channel3, Pitch.B4, 100);
+
+            _ = Task.Run(async () =>
+            {
+                await Task.Delay(500);
+                _outputDevice.SendNoteOff(Channel.Channel3, Pitch.B4, 100);
             });
         }
 

@@ -18,6 +18,7 @@ using DigitalPlatform.WPF;
 using DigitalPlatform.Xml;
 using static dp2SSL.LibraryChannelUtil;
 using System.IO;
+using Microsoft.EntityFrameworkCore;
 
 namespace dp2SSL
 {
@@ -591,7 +592,15 @@ TaskScheduler.Default);
                         //      1   找到
                         GetEntityDataResult result = null;
                         if (App.Protocol == "sip")
-                            result = await SipChannelUtil.GetEntityDataAsync(entity.PII, "network");
+                        {
+                            bool isLocal = StringUtil.IsInList("inventory", SipLocalStore);
+
+                            result = await SipChannelUtil.GetEntityDataAsync(entity.PII, isLocal ? "network,localInventory" : "network");
+                            if (result.Value != -1)
+                            {
+                                // 顺便保存到本地数据库
+                            }
+                        }
                         else
                             result = await LibraryChannelUtil.GetEntityDataAsync(entity.PII, "network");
 
@@ -834,6 +843,8 @@ TaskScheduler.Default);
                 // 是否校验 EAS。临时决定
                 bool need_verifyEas = false;
 
+                int succeed_count = 0;
+
                 // 还书
                 if (info != null
                     && (StringUtil.IsInList("setLocation", actionMode)
@@ -934,7 +945,7 @@ TaskScheduler.Default);
                     // TODO: SIP2 模式下，UID - PII 对照信息可以设置到 dp2ssl 本地数据库
                     RequestSetUidResult request_result = null;
                     if (App.Protocol == "sip")
-                        request_result = RequestSetUIDtoLocal(entity.ItemRecPath,
+                        request_result = await RequestSetUIDtoLocalAsync(entity.ItemRecPath,
     info.ItemXml,
     null,
     entity.UID,
@@ -958,6 +969,7 @@ TaskScheduler.Default);
                     {
                         if (string.IsNullOrEmpty(request_result.NewItemXml) == false)
                             info.ItemXml = request_result.NewItemXml;
+                        succeed_count++;
                     }
                 }
 
@@ -1019,8 +1031,14 @@ TaskScheduler.Default);
                             entity.SetData(entity.ItemRecPath, request_result.ItemXml);
 
                         // TODO: info.ItemXml 是否需要被改变?
+
+                        succeed_count++;
                     }
                 }
+
+                // SetUID 和 Inventory 至少成功过一次，则发出成功的响声
+                if (succeed_count > 0)
+                    SoundMaker.SucceedSound();
             }
         }
 
@@ -1266,6 +1284,7 @@ TaskScheduler.Default);
         }
 
         // 向 SIP2 服务器发出盘点请求
+        // 注意，不会考虑本地缓存的盘点信息
         public static async Task<RequestInventoryResult> RequestInventory_sip2(
             string uid,
             string pii,
@@ -1656,6 +1675,9 @@ TaskScheduler.Default);
 
         #region SIP 特殊功能
 
+        // 限制本地数据库操作，同一时刻只能一个函数进入
+        static AsyncSemaphore _cacheLimit = new AsyncSemaphore(1);
+
         public static XmlDocument GetInventoryDom()
         {
             string filename = Path.Combine(WpfClientInfo.UserDir, "inventory.xml");
@@ -1726,17 +1748,18 @@ TaskScheduler.Default);
         }
 
         // 从本地数据库中装载 uid 对照表
-        public static NormalResult LoadUidTable(Hashtable uid_table,
+        public static async Task<NormalResult> LoadUidTableAsync(Hashtable uid_table,
             delegate_showText func_showProgress,
             CancellationToken token)
         {
             try
             {
+                using (var releaser = await _cacheLimit.EnterAsync())
                 using (var context = new ItemCacheContext())
                 {
                     context.Database.EnsureCreated();
-                    var all = context.Items.Where(o => string.IsNullOrEmpty(o.Barcode) == false && string.IsNullOrEmpty(o.UID) == false);
-                    foreach (var item in all)
+                    // var all = context.Uids.Where(o => string.IsNullOrEmpty(o.PII) == false && string.IsNullOrEmpty(o.UID) == false);
+                    foreach (var item in context.Uids)
                     {
                         if (token.IsCancellationRequested)
                             return new NormalResult
@@ -1746,7 +1769,10 @@ TaskScheduler.Default);
                             };
 
                         string uid = item.UID;
-                        string barcode = item.Barcode;
+                        string barcode = item.PII;
+
+                        if (string.IsNullOrEmpty(uid) || string.IsNullOrEmpty(barcode))
+                            continue;
 
                         func_showProgress?.Invoke($"{uid} --> {barcode} ...");
 
@@ -1771,25 +1797,28 @@ TaskScheduler.Default);
             }
         }
 
-        static BookItem FindBookItem(string barcode)
+        public static async Task<BookItem> FindBookItemAsync(string barcode)
         {
+            using (var releaser = await _cacheLimit.EnterAsync())
             using (var context = new ItemCacheContext())
             {
                 return context.Items.Where(o => o.Barcode == barcode).FirstOrDefault();
             }
         }
 
+        /*
         // 更新本地库中的 UID --> PII 对照关系
         // TODO: 其实只要检索 hashtable 中存在对应关系，就表明本地库中已经有了，就不必真的更新本地库了
-        static NormalResult UpdateUid(string barcode, string uid)
+        static NormalResult UpdateUid(string barcode,
+            string uid)
         {
             using (var context = new ItemCacheContext())
             {
-                var item = context.Items.Where(o => o.Barcode == barcode).FirstOrDefault();
+                var item = context.Uids.Where(o => o.PII == barcode).FirstOrDefault();
                 if (item == null)
                 {
-                    item = new BookItem { Barcode = barcode, UID = uid };
-                    context.Items.Add(item);
+                    item = new UidEntry { PII = barcode, UID = uid };
+                    context.Uids.Add(item);
                     context.SaveChanges();
                     return new NormalResult { Value = 1 };
                 }
@@ -1797,16 +1826,17 @@ TaskScheduler.Default);
                 if (item.UID != uid)
                 {
                     item.UID = uid;
-                    context.Items.Update(item);
+                    context.Uids.Update(item);
                     context.SaveChanges();
                     return new NormalResult { Value = 1 };
                 }
                 return new NormalResult();
             }
         }
+        */
 
         // 请求设置 UID 到本地数据库
-        public static RequestSetUidResult RequestSetUIDtoLocal(
+        public static async Task<RequestSetUidResult> RequestSetUIDtoLocalAsync(
     string strRecPath,
     string strOldXml,
     byte[] old_timestamp,
@@ -1817,20 +1847,26 @@ TaskScheduler.Default);
             XmlDocument dom = new XmlDocument();
             dom.LoadXml(strOldXml);
 
+            /*
             string old_uid = DomUtil.GetElementText(dom.DocumentElement, "uid");
             if (old_uid == uid)
             {
                 return new RequestSetUidResult { Value = 0 };    // 没有必要修改
             }
-            string barcode = DomUtil.GetElementText(dom.DocumentElement, "barcode");
             DomUtil.SetElementText(dom.DocumentElement, "uid", uid);
+            */
+            string barcode = DomUtil.GetElementText(dom.DocumentElement, "barcode");
 
-            UpdateUid(barcode, uid);
+            using (var releaser = await _cacheLimit.EnterAsync())
+            using (var context = new ItemCacheContext())
+            {
+                UpdateUidEntry(context, barcode, uid);
+            }
 
             return new RequestSetUidResult
             {
                 Value = 1,
-                NewItemXml = dom.DocumentElement.OuterXml,
+                // NewItemXml = dom.DocumentElement.OuterXml,
             };
         }
 
@@ -1860,6 +1896,7 @@ TaskScheduler.Default);
                 currentShelfNo = parts[1];
             }
 
+            using (var releaser = await _cacheLimit.EnterAsync())
             using (var context = new ItemCacheContext())
             {
                 var item = context.Items.Where(o => o.Barcode == pii).FirstOrDefault();
@@ -1868,7 +1905,7 @@ TaskScheduler.Default);
                     item = new BookItem
                     {
                         Barcode = pii,
-                        UID = uid,
+                        // UID = uid,
                         CurrentLocation = currentLocation,
                         CurrentShelfNo = currentShelfNo,
                         Location = location,
@@ -1878,8 +1915,10 @@ TaskScheduler.Default);
                 }
                 else
                 {
+                    /*
                     if (string.IsNullOrEmpty(uid) == false)
                         item.UID = uid;
+                    */
                     if (currentLocation != null)
                         item.CurrentLocation = currentLocation;
                     if (currentShelfNo != null)
@@ -1943,7 +1982,7 @@ TaskScheduler.Default);
         }
 
         // 导入 UID PII 对照表文件
-        public static ImportUidResult ImportUidPiiTable(
+        public static async Task<ImportUidResult> ImportUidPiiTableAsync(
             string filename,
             CancellationToken token)
         {
@@ -1957,7 +1996,7 @@ TaskScheduler.Default);
                     List<string> lines = new List<string>();
                     while (token.IsCancellationRequested == false)
                     {
-                        var line = reader.ReadLine();
+                        var line = await reader.ReadLineAsync();
                         if (line == null)
                             break;
                         if (string.IsNullOrEmpty(line))
@@ -1966,7 +2005,7 @@ TaskScheduler.Default);
                         lines.Add(line);
                         if (lines.Count > 100)
                         {
-                            var result = SaveLines(lines, token);
+                            var result = await SaveLinesAsync(lines, token);
                             lines.Clear();
 
                             line_count += result.LineCount;
@@ -1976,7 +2015,7 @@ TaskScheduler.Default);
                     }
                     if (lines.Count > 0)
                     {
-                        var result = SaveLines(lines, token);
+                        var result = await SaveLinesAsync(lines, token);
                         line_count += result.LineCount;
                         new_count += result.NewCount;
                         change_count += result.ChangeCount;
@@ -2009,12 +2048,13 @@ TaskScheduler.Default);
             public int ChangeCount { get; set; }
         }
 
-        static ImportUidResult SaveLines(List<string> lines,
+        static async Task<ImportUidResult> SaveLinesAsync(List<string> lines,
             CancellationToken token)
         {
             int line_count = 0;
             int new_count = 0;
             int change_count = 0;
+            using (var releaser = await _cacheLimit.EnterAsync())
             using (var context = new ItemCacheContext())
             {
                 context.Database.EnsureCreated();
@@ -2037,19 +2077,10 @@ TaskScheduler.Default);
                     if (string.IsNullOrEmpty(uid) || string.IsNullOrEmpty(barcode))
                         continue;
 
-                    var item = context.Items.Where(o => o.Barcode == barcode).FirstOrDefault();
-                    if (item == null)
-                    {
-                        item = new BookItem { Barcode = barcode, UID = uid };
-                        context.Items.Add(item);
-                        new_count++;
-                    }
-                    else if (item.UID != uid)
-                    {
-                        item.UID = uid;
-                        context.Items.Update(item);
-                        change_count++;
-                    }
+                    var result = UpdateUidEntry(context, barcode, uid);
+                    new_count += result.NewCount;
+                    change_count += result.ChangeCount;
+
                     line_count++;
                     context.SaveChanges();
                 }
@@ -2060,6 +2091,172 @@ TaskScheduler.Default);
                 NewCount = new_count,
                 ChangeCount = change_count,
             };
+        }
+
+        static ImportUidResult UpdateUidEntry(ItemCacheContext context,
+            string barcode,
+            string uid)
+        {
+            int new_count = 0;
+            int change_count = 0;
+            int delete_count = 0;
+            {
+                // TODO:
+                var item = context.Uids.Where(o => o.PII == barcode).FirstOrDefault();
+                if (item == null)
+                {
+                    item = new UidEntry { PII = barcode, UID = uid };
+                    context.Uids.Add(item);
+                    new_count++;
+                }
+                else if (item.UID != uid)
+                {
+                    item.UID = uid;
+                    context.Uids.Update(item);
+                    change_count++;
+                }
+            }
+
+            // 删除其余用到这个 UID 的字段
+            {
+                var items = context.Uids.Where(o => o.UID == uid && o.PII != barcode).ToList();
+                foreach (var item in items)
+                {
+                    context.Uids.Remove(item);
+                    /*
+                    item.UID = null;
+                    context.Uids.Update(item);
+                    */
+                    delete_count++;
+                }
+            }
+
+            if (new_count > 0 || change_count > 0 || delete_count > 0)
+                context.SaveChanges();
+
+            return new ImportUidResult
+            {
+                NewCount = new_count,
+                ChangeCount = change_count
+            };
+        }
+
+        // 清除本地数据库中的 UID --> PII 对照关系
+        public static async Task<NormalResult> ClearUidPiiLocalCacheAsync(CancellationToken token)
+        {
+            int change_count = 0;
+            using (var releaser = await _cacheLimit.EnterAsync())
+            using (var context = new ItemCacheContext())
+            {
+                context.Database.EnsureCreated();
+
+                var list = context.Uids.ToList();
+                change_count += list.Count;
+                if (change_count > 0)
+                {
+                    context.Uids.RemoveRange(list);
+                    await context.SaveChangesAsync(token);
+                }
+
+#if NO
+                var all = context.Uids.Where(o => string.IsNullOrEmpty(o.UID) == false && string.IsNullOrEmpty(o.PII) == false).ToList();
+                List<BookItem> items = new List<BookItem>();
+                foreach (var item in all)
+                {
+                    if (token.IsCancellationRequested)
+                        return new NormalResult
+                        {
+                            Value = change_count,
+                        };
+
+                    {
+                        item.UID = null;
+                        items.Add(item);
+                        change_count++;
+                    }
+
+                    if (items.Count > 100)
+                    {
+                        Save(context, items);
+                        items.Clear();
+                    }
+
+                }
+
+                if (items.Count > 0)
+                {
+                    Save(context, items);
+                    items.Clear();
+                }
+#endif
+            }
+            return new NormalResult
+            {
+                Value = change_count,
+            };
+
+            /*
+            void Save(ItemCacheContext context,
+                List<BookItem> items)
+            {
+                context.Items.UpdateRange(items);
+                context.SaveChanges();
+                foreach (var item in items)
+                {
+                    context.Entry(item).State = EntityState.Detached;
+                }
+            }
+            */
+        }
+
+        // 把从 SIP2 服务器得到的信息保存到本地数据库
+        static async Task<NormalResult> SaveToLocal(string barcode,
+            string item_xml)
+        {
+            using (var releaser = await _cacheLimit.EnterAsync())
+            using (var context = new ItemCacheContext())
+            {
+                var item = context.Items.Where(o => o.Barcode == barcode).FirstOrDefault();
+                if (item == null)
+                {
+                    item = new BookItem { Barcode = barcode };
+
+                    FillBookItem(item, item_xml);
+                    context.Items.Add(item);
+                    context.SaveChanges();
+                }
+                else
+                {
+                    FillBookItem(item, item_xml);
+                    context.Items.Update(item);
+                    context.SaveChanges();
+                }
+                return new NormalResult();
+            }
+        }
+
+        static void FillBookItem(BookItem item, string item_xml)
+        {
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml(item_xml);
+
+            item.Barcode = DomUtil.GetElementText(dom.DocumentElement,
+                "barcode");
+            item.Xml = item_xml;
+            item.Location = DomUtil.GetElementText(dom.DocumentElement,
+                "location");
+            item.ShelfNo = DomUtil.GetElementText(dom.DocumentElement,
+                "shelfNo");
+
+            string currentLocationString = DomUtil.GetElementText(dom.DocumentElement,
+                "currentLocation");
+            item.CurrentLocation = "";  // 左侧
+            item.CurrentShelfNo = "";   // 右侧
+
+            /*
+            item.UID = DomUtil.GetElementText(dom.DocumentElement,
+                "uid");
+            */
         }
 
         #endregion
