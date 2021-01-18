@@ -9,12 +9,15 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using DigitalPlatform.LibraryServer.Common;
 using DigitalPlatform.Text;
 
 namespace RfidTool
 {
     public partial class SettingDialog : Form
     {
+        public string OpenStyle { get; set; }
+
         public SettingDialog()
         {
             InitializeComponent();
@@ -29,9 +32,18 @@ namespace RfidTool
             this.checkBox_writeUserBank.Checked = DataModel.WriteUhfUserBank;
             this.checkBox_warningWhenUhfFormatMismatch.Checked = DataModel.WarningWhenUhfFormatMismatch;
 
+            this.checkBox_writeTag_verifyPii.Checked = DataModel.VerifyPiiWhenWriteTag;
+
             this.checkBox_enableTagCache.Checked = DataModel.EnableTagCache;
 
             this.numericUpDown_seconds.Value = DataModel.BeforeScanSeconds;
+
+            this.textBox_verifyRule.Text = DataModel.PiiVerifyRule;
+
+            if (StringUtil.IsInList("activateVerifyRule", this.OpenStyle) == true)
+            {
+                this.tabControl1.SelectedTab = this.tabPage_other;
+            }
         }
 
         private void SettingDialog_FormClosing(object sender, FormClosingEventArgs e)
@@ -85,6 +97,20 @@ namespace RfidTool
                     goto ERROR1;
                 }
 
+                string rule = this.textBox_verifyRule.Text;
+                if (string.IsNullOrEmpty(rule) == false)
+                {
+                    try
+                    {
+                        BarcodeValidator validator = new BarcodeValidator(rule);
+                    }
+                    catch(Exception ex)
+                    {
+                        strError = $"条码校验规则不合法: {ex.Message}";
+                        goto ERROR1;
+                    }
+                }
+
                 if (string.IsNullOrEmpty(this.textBox_rfid_aoi.Text) == false)
                 {
                     // TODO: 当 textbox 内容发生过变化才警告
@@ -109,9 +135,13 @@ namespace RfidTool
             DataModel.WriteUhfUserBank = this.checkBox_writeUserBank.Checked;
             DataModel.WarningWhenUhfFormatMismatch = this.checkBox_warningWhenUhfFormatMismatch.Checked;
 
+            DataModel.VerifyPiiWhenWriteTag = this.checkBox_writeTag_verifyPii.Checked;
+
             DataModel.EnableTagCache = this.checkBox_enableTagCache.Checked;
 
             DataModel.BeforeScanSeconds = (int)this.numericUpDown_seconds.Value;
+
+            DataModel.PiiVerifyRule = this.textBox_verifyRule.Text;
 
             this.DialogResult = DialogResult.OK;
             this.Close();

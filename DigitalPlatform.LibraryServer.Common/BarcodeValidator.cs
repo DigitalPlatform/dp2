@@ -174,6 +174,66 @@ namespace DigitalPlatform.LibraryServer.Common
             };
         }
 
+        // 2021/1/18
+        /*
+           <validator>
+               <patron>
+                   <CMIS />
+                   <range value='P000001-P999999' />
+               </patron>
+               <entity>
+                   <range value='0000001-9999999'></range>
+               </entity>
+               <shelf>
+                   <range value='0101-0909'></range>
+               </shelf>
+           </validator>
+        * */
+        // 单独验证一种类型的号码
+        // type 为 "patron" "entity" "shelf" 之一
+        public ValidateResult ValidateByType(
+            string type,
+            string barcode)
+        {
+            XmlElement validator = _dom.DocumentElement;
+            /*
+            if (validator.GetAttributeNode("suppress") != null)
+            {
+                string comment = validator.GetAttribute("suppress");
+                if (string.IsNullOrEmpty(comment))
+                    comment = $"馆藏地 '{location}' 不打算定义验证规则";
+                return new ValidateResult
+                {
+                    OK = false,
+                    ErrorInfo = comment,
+                    ErrorCode = "suppressed"    // 不打算定义验证规则
+                };
+            }
+            */
+
+            XmlNodeList patron_or_entitys = validator.SelectNodes(type);
+            foreach (XmlElement patron_or_entity in patron_or_entitys)
+            {
+                var ret = ProcessEntry(patron_or_entity,
+                    barcode);
+                if (ret == true)
+                {
+                    return new ValidateResult
+                    {
+                        OK = true,
+                        Type = patron_or_entity.Name,
+                    };
+                }
+            }
+
+            return new ValidateResult
+            {
+                OK = false,
+                ErrorInfo = $"号码 '{barcode}' 不是合法的 {type} 类型号码",
+                ErrorCode = "notMatch"
+            };
+        }
+
         public TransformResult Transform(string location,
     string barcode)
         {
@@ -470,7 +530,7 @@ namespace DigitalPlatform.LibraryServer.Common
         // return:
         //      false   barcode 不在定义的范围内
         //      true    barcode 在定义的范围内
-        bool ProcessEntry(XmlElement container,
+        public static bool ProcessEntry(XmlElement container,
             string barcode)
         {
             XmlNodeList nodes = container.SelectNodes("*");

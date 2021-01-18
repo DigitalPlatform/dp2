@@ -45,6 +45,8 @@ namespace RfidTool
             this.linkLabel_oiHelp = new System.Windows.Forms.LinkLabel();
             this.textBox_rfid_aoi = new System.Windows.Forms.TextBox();
             this.tabPage_other = new System.Windows.Forms.TabPage();
+            this.checkBox_verifyPii = new System.Windows.Forms.CheckBox();
+            this.button_modifyVerifyRule = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabPage_action.SuspendLayout();
             this.SuspendLayout();
@@ -53,7 +55,7 @@ namespace RfidTool
             // 
             this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.button_Cancel.Location = new System.Drawing.Point(677, 465);
+            this.button_Cancel.Location = new System.Drawing.Point(677, 523);
             this.button_Cancel.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(111, 40);
@@ -65,7 +67,7 @@ namespace RfidTool
             // button_OK
             // 
             this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_OK.Location = new System.Drawing.Point(561, 465);
+            this.button_OK.Location = new System.Drawing.Point(561, 523);
             this.button_OK.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(111, 40);
@@ -85,11 +87,14 @@ namespace RfidTool
             this.tabControl1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(776, 450);
+            this.tabControl1.Size = new System.Drawing.Size(776, 508);
             this.tabControl1.TabIndex = 5;
             // 
             // tabPage_action
             // 
+            this.tabPage_action.AutoScroll = true;
+            this.tabPage_action.Controls.Add(this.button_modifyVerifyRule);
+            this.tabPage_action.Controls.Add(this.checkBox_verifyPii);
             this.tabPage_action.Controls.Add(this.checkBox_writeUidLog);
             this.tabPage_action.Controls.Add(this.checkBox_oi);
             this.tabPage_action.Controls.Add(this.textBox_rfid_oi);
@@ -105,7 +110,7 @@ namespace RfidTool
             this.tabPage_action.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.tabPage_action.Name = "tabPage_action";
             this.tabPage_action.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.tabPage_action.Size = new System.Drawing.Size(768, 415);
+            this.tabPage_action.Size = new System.Drawing.Size(768, 473);
             this.tabPage_action.TabIndex = 0;
             this.tabPage_action.Text = "动作参数";
             this.tabPage_action.UseVisualStyleBackColor = true;
@@ -168,7 +173,7 @@ namespace RfidTool
             // checkBox_uidPiiMap
             // 
             this.checkBox_uidPiiMap.AutoSize = true;
-            this.checkBox_uidPiiMap.Location = new System.Drawing.Point(10, 385);
+            this.checkBox_uidPiiMap.Location = new System.Drawing.Point(455, 343);
             this.checkBox_uidPiiMap.Name = "checkBox_uidPiiMap";
             this.checkBox_uidPiiMap.Size = new System.Drawing.Size(294, 25);
             this.checkBox_uidPiiMap.TabIndex = 9;
@@ -232,16 +237,36 @@ namespace RfidTool
             // 
             this.tabPage_other.Location = new System.Drawing.Point(4, 31);
             this.tabPage_other.Name = "tabPage_other";
-            this.tabPage_other.Size = new System.Drawing.Size(768, 415);
+            this.tabPage_other.Size = new System.Drawing.Size(768, 473);
             this.tabPage_other.TabIndex = 1;
             this.tabPage_other.Text = "其它";
             this.tabPage_other.UseVisualStyleBackColor = true;
+            // 
+            // checkBox_verifyPii
+            // 
+            this.checkBox_verifyPii.AutoSize = true;
+            this.checkBox_verifyPii.Location = new System.Drawing.Point(10, 392);
+            this.checkBox_verifyPii.Name = "checkBox_verifyPii";
+            this.checkBox_verifyPii.Size = new System.Drawing.Size(166, 25);
+            this.checkBox_verifyPii.TabIndex = 13;
+            this.checkBox_verifyPii.Text = "校验 PII (&V)";
+            this.checkBox_verifyPii.UseVisualStyleBackColor = true;
+            // 
+            // button_modifyVerifyRule
+            // 
+            this.button_modifyVerifyRule.Location = new System.Drawing.Point(244, 384);
+            this.button_modifyVerifyRule.Name = "button_modifyVerifyRule";
+            this.button_modifyVerifyRule.Size = new System.Drawing.Size(294, 39);
+            this.button_modifyVerifyRule.TabIndex = 14;
+            this.button_modifyVerifyRule.Text = "配置校验规则 ...";
+            this.button_modifyVerifyRule.UseVisualStyleBackColor = true;
+            this.button_modifyVerifyRule.Click += new System.EventHandler(this.button_modifyVerifyRule_Click);
             // 
             // BeginModifyDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 516);
+            this.ClientSize = new System.Drawing.Size(800, 574);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.button_Cancel);
             this.Controls.Add(this.button_OK);
@@ -249,6 +274,7 @@ namespace RfidTool
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
             this.Text = "开始修改";
+            this.Load += new System.EventHandler(this.BeginModifyDialog_Load);
             this.tabControl1.ResumeLayout(false);
             this.tabPage_action.ResumeLayout(false);
             this.tabPage_action.PerformLayout();
@@ -274,5 +300,7 @@ namespace RfidTool
         private System.Windows.Forms.Label label_eas;
         private System.Windows.Forms.ComboBox comboBox_eas;
         private System.Windows.Forms.CheckBox checkBox_writeUidLog;
+        private System.Windows.Forms.CheckBox checkBox_verifyPii;
+        private System.Windows.Forms.Button button_modifyVerifyRule;
     }
 }

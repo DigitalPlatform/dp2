@@ -15,6 +15,7 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Core;
 using DigitalPlatform.GUI;
+using DigitalPlatform.LibraryServer.Common;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
 
@@ -78,7 +79,37 @@ namespace RfidTool
             if (e.KeyChar == '\r' || e.KeyChar == '\n')
             {
                 // MessageBox.Show(this, $"输入 '{this.textBox_barcode.Text}'");
-                this.ProcessingBarcode = this.textBox_barcode.Text.Trim(new char[] { ' ', '\r', '\n' });
+                string barcode = this.textBox_barcode.Text.Trim(new char[] { ' ', '\r', '\n' });
+
+                var verifyBarcode = DataModel.VerifyPiiWhenWriteTag;
+                // 校验条码号
+                if (verifyBarcode == true)
+                {
+                    if (string.IsNullOrEmpty(barcode) == true)
+                    {
+                        string text = "条码号不应为空";
+                        FormClientInfo.Speak(text);
+                        ShowMessageBox("input", text);
+                        this.textBox_barcode.SelectAll();
+                        this.textBox_barcode.Focus();
+                        return;
+                    }
+
+                    var verify_result = VerifyBarcode(ModifyDialog.GetVerifyType(TypeOfUsage), barcode);
+                    if (verify_result.OK == false)
+                    {
+                        string text = $"条码号 {barcode} 不合法";
+                        FormClientInfo.Speak(text);
+                        ShowMessageBox("input", text);
+                        this.textBox_barcode.SelectAll();
+                        this.textBox_barcode.Focus();
+                        return;
+                    }
+                }
+
+                ShowMessageBox("input", null);
+
+                this.ProcessingBarcode = barcode;
                 // this.textBox_barcode.SelectAll();
                 this.textBox_barcode.Clear();
                 e.Handled = true;
@@ -539,6 +570,14 @@ namespace RfidTool
                 if (string.IsNullOrEmpty(barcode))
                     return;
 
+                if (string.IsNullOrEmpty(barcode) == true)
+                {
+                    string text = "条码号不应为空";
+                    FormClientInfo.Speak(text);
+                    ShowMessageBox("processBarcode", text);
+                    return;
+                }
+
                 string error = VerifyOiSetting();
                 if (error != null)
                 {
@@ -699,6 +738,23 @@ namespace RfidTool
             {
                 _inProcessing--;
             }
+        }
+
+        BarcodeValidator _validator = null;
+
+        public ValidateResult VerifyBarcode(string type,
+            string barcode)
+        {
+            string rule = DataModel.PiiVerifyRule;
+            if (string.IsNullOrEmpty(rule))
+                throw new ArgumentException("尚未设置 PiiVerifyRule");
+
+            if (_validator == null)
+                _validator = new BarcodeValidator(rule);
+
+            return _validator.ValidateByType(
+                type,
+                barcode);
         }
 
         // 设置 TU 字段。注意 国标和高校联盟的取值表完全不同

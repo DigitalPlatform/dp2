@@ -83,6 +83,25 @@ namespace dp2SSL
             }
         }
 
+        [Display(
+Order = 4,
+Name = "编码方式",
+Description = "SIP2 通讯所用的字符集编码方式"
+)]
+        [ItemsSource(typeof(EncodingItemsSource))]
+        [Category("SIP2 服务器")]
+        public string SipEncoding
+        {
+            get
+            {
+                return _config.Get("global", "sipEncoding", "utf-8");
+            }
+            set
+            {
+                _config.Set("global", "sipEncoding", value);
+            }
+        }
+
         #endregion
 
         #region dp2 服务器

@@ -35,6 +35,8 @@ namespace dp2SSL
         {
             if (_channel.Connected == false)
             {
+                // 2021/1/19
+                _channel.Encoding = Encoding.GetEncoding(App.SipEncoding);
                 /*
                 var parts = StringUtil.ParseTwoPart(App.SipServerUrl, ":");
                 string address = parts[0];

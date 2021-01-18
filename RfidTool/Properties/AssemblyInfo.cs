@@ -33,7 +33,7 @@ using System.Runtime.InteropServices;
 //通过使用 "*"，如下所示:
 // [assembly: AssemblyVersion("1.0.*")]
 
-[assembly: AssemblyVersion("1.0.10")]
+[assembly: AssemblyVersion("1.0.11")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
 
 // 1.0.1 (2020/12/10) 增加保存“写入历史”列表功能; 感知 USB 插拔、自动重新连接读写器;
@@ -48,3 +48,4 @@ using System.Runtime.InteropServices;
 // 1.0.8 (2021/1/15)
 // 1.0.9 (2021/1/16)
 // 1.0.10 (2021/1/16) 修改标签对话框的开始对话框增加了“写入 UID PII 对照日志”这个事项。可以只选择这个动作进行批处理修改
+// 1.0.11 (2021/1/18) 设置对话框增加校验条码号规则文本框；写入标签和修改标签功能均加入了可选的校验条码功能

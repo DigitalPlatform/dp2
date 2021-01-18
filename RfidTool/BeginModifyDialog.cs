@@ -33,6 +33,8 @@ namespace RfidTool
                     this.textBox_rfid_aoi,
                     this.checkBox_uidPiiMap,
                     this.comboBox_eas,
+                    this.checkBox_verifyPii,
+                    // this.textBox_verifyRule,
                 };
                 return GuiState.GetUiState(controls);
             }
@@ -47,6 +49,8 @@ namespace RfidTool
                     this.textBox_rfid_aoi,
                     this.checkBox_uidPiiMap,
                     this.comboBox_eas,
+                    this.checkBox_verifyPii,
+                    // this.textBox_verifyRule,
                 };
                 GuiState.SetUiState(controls, value);
             }
@@ -220,6 +224,38 @@ namespace RfidTool
             }
         }
 
+        // 是否校验 PII
+        public bool VerifyPii
+        {
+            get
+            {
+                return this.checkBox_verifyPii.Checked;
+            }
+            set
+            {
+                this.checkBox_verifyPii.Checked = value;
+            }
+        }
+
+        // 校验规则 XML 代码
+        public string PiiVerifyRule
+        {
+            /*
+            get
+            {
+                return this.textBox_verifyRule.Text;
+            }
+            set
+            {
+                this.textBox_verifyRule.Text = value;
+            }
+            */
+            get
+            {
+                return DataModel.PiiVerifyRule;
+            }
+        }
+
         private void comboBox_eas_TextChanged(object sender, EventArgs e)
         {
             if (string.IsNullOrEmpty(this.comboBox_eas.Text)
@@ -243,6 +279,16 @@ namespace RfidTool
             {
                 this.checkBox_writeUidLog.BackColor = Color.Transparent;
             }
+        }
+
+        private void BeginModifyDialog_Load(object sender, EventArgs e)
+        {
+            // this.textBox_verifyRule.Text = DataModel.PiiVerifyRule;
+        }
+
+        private void button_modifyVerifyRule_Click(object sender, EventArgs e)
+        {
+            MainForm.OpenSettingDialog(this, "activateVerifyRule");
         }
     }
 }

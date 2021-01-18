@@ -19,6 +19,9 @@ using DigitalPlatform.Xml;
 using static dp2SSL.LibraryChannelUtil;
 using System.IO;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Win32;
+using ClosedXML.Excel;
+using System.Diagnostics;
 
 namespace dp2SSL
 {
@@ -611,7 +614,10 @@ TaskScheduler.Default);
                         */
                         info.SetTaskInfo("getItemXml", result);
                         if (result.Value == -1)
+                        {
+                            // TODO: 语音报错，另外错误信息不要越积越长
                             entity.AppendError(result.ErrorInfo, "red", result.ErrorCode);
+                        }
                         else
                         {
                             if (string.IsNullOrEmpty(result.Title) == false)
@@ -1706,6 +1712,21 @@ TaskScheduler.Default);
             }
         }
 
+        /*
+        static string _sipEncoding = "utf-8";
+
+        public static string SipEncoding
+        {
+            get
+            {
+                if (_sipEncoding == null)
+                    _sipEncoding = GetSipEncoding();
+
+                return _sipEncoding;
+            }
+        }
+        */
+
         // 获得 inventory.xml 中 sip/@localStore 参数
         public static string GetSipLocalStoreDef()
         {
@@ -1717,6 +1738,20 @@ TaskScheduler.Default);
                 return "";
             return attr.Value;
         }
+
+        /*
+        // 获得 inventory.xml 中 sip/@encoding 参数
+        public static string GetSipEncoding()
+        {
+            var dom = GetInventoryDom();
+            if (dom == null)
+                return "utf-8";
+            var attr = dom.DocumentElement.SelectSingleNode("sip/@encoding");
+            if (attr == null)
+                return "utf-8";
+            return attr.Value;
+        }
+        */
 
         // 从 inventory.xml 获得馆藏地列表(不访问 dp2library 服务器)
         // result.Value
@@ -2257,6 +2292,225 @@ TaskScheduler.Default);
             item.UID = DomUtil.GetElementText(dom.DocumentElement,
                 "uid");
             */
+        }
+
+        public static NormalResult ExportToExcel(
+            List<InventoryColumn> columns,
+            List<Entity> items,
+            CancellationToken token)
+        {
+            if (items == null || items.Count == 0)
+            {
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = "items == null || items.Count == 0"
+                };
+            }
+
+            // 询问文件名
+            SaveFileDialog dlg = new SaveFileDialog
+            {
+                Title = "请指定要输出的 Excel 文件名",
+                CreatePrompt = false,
+                OverwritePrompt = true,
+                // dlg.FileName = this.ExportExcelFilename;
+                // dlg.InitialDirectory = Environment.CurrentDirectory;
+                Filter = "Excel 文件 (*.xlsx)|*.xlsx|All files (*.*)|*.*",
+
+                RestoreDirectory = true
+            };
+
+            if (dlg.ShowDialog() == false)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = "放弃",
+                    ErrorCode = "cancel"
+                };
+
+            XLWorkbook doc = null;
+
+            try
+            {
+                doc = new XLWorkbook(XLEventTracking.Disabled);
+                File.Delete(dlg.FileName);
+            }
+            catch (Exception ex)
+            {
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"创建 Excel 文件时出现异常:{ex.Message}"
+                };
+            }
+
+            IXLWorksheet sheet = null;
+            sheet = doc.Worksheets.Add("表格");
+            // sheet.Style.Font.FontName = this.Font.Name;
+
+            // 每个列的最大字符数
+            List<int> column_max_chars = new List<int>();
+
+            List<XLAlignmentHorizontalValues> alignments = new List<XLAlignmentHorizontalValues>();
+            foreach (var header in columns)
+            {
+                if (header.TextAlign == "center")
+                    alignments.Add(XLAlignmentHorizontalValues.Center);
+                else if (header.TextAlign == "right")
+                    alignments.Add(XLAlignmentHorizontalValues.Right);
+                else
+                    alignments.Add(XLAlignmentHorizontalValues.Left);
+
+                column_max_chars.Add(0);
+            }
+
+            Debug.Assert(alignments.Count == columns.Count, "");
+
+            // string strFontName = list.Font.FontFamily.Name;
+
+            int nRowIndex = 1;
+            int nColIndex = 1;
+            foreach (var header in columns)
+            {
+                IXLCell cell = sheet.Cell(nRowIndex, nColIndex).SetValue(DomUtil.ReplaceControlCharsButCrLf(header.Caption, '*'));
+                cell.Style.Alignment.WrapText = true;
+                cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                cell.Style.Font.Bold = true;
+                // cell.Style.Font.FontName = strFontName;
+                cell.Style.Alignment.Horizontal = alignments[nColIndex - 1];
+                nColIndex++;
+            }
+            nRowIndex++;
+
+            foreach (var item in items)
+            {
+                if (token.IsCancellationRequested)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = "中断",
+                        ErrorCode = "cancel"
+                    };
+
+                nColIndex = 1;
+                foreach (var column in columns)
+                {
+                    string value = GetPropertyOrField(item, column.Property);
+
+                    // 统计最大字符数
+                    // int nChars = column_max_chars[nColIndex - 1];
+                    if (value != null)
+                    {
+                        SetMaxChars(/*ref*/ column_max_chars, nColIndex - 1, value.Length);
+                    }
+                    IXLCell cell = sheet.Cell(nRowIndex, nColIndex).SetValue(DomUtil.ReplaceControlCharsButCrLf(value, '*'));
+                    cell.Style.Alignment.WrapText = true;
+                    cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                    // cell.Style.Font.FontName = strFontName;
+                    // 2020/1/6 增加保护代码
+                    if (nColIndex - 1 < alignments.Count)
+                        cell.Style.Alignment.Horizontal = alignments[nColIndex - 1];
+                    else
+                        cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Left;
+                    nColIndex++;
+                }
+
+                nRowIndex++;
+            }
+
+            /*
+            double char_width = GetAverageCharPixelWidth(list);
+
+            // 字符数太多的列不要做 width auto adjust
+            const int MAX_CHARS = 30;   // 60
+            int i = 0;
+            foreach (IXLColumn column in sheet.Columns())
+            {
+                // int nChars = column_max_chars[i];
+                int nChars = GetMaxChars(column_max_chars, i);
+
+                if (nChars < MAX_CHARS)
+                    column.AdjustToContents();
+                else
+                {
+                    int nColumnWidth = 100;
+                    // 2020/1/6 增加保护判断
+                    if (i >= 0 && i < list.Columns.Count)
+                        nColumnWidth = list.Columns[i].Width;
+                    column.Width = (double)nColumnWidth / char_width;  // Math.Min(MAX_CHARS, nChars);
+                }
+                i++;
+            }
+            */
+
+            sheet.Columns().AdjustToContents();
+
+            // sheet.Rows().AdjustToContents();
+
+            doc.SaveAs(dlg.FileName);
+            doc.Dispose();
+
+            try
+            {
+                System.Diagnostics.Process.Start(dlg.FileName);
+            }
+            catch
+            {
+            }
+
+            return new NormalResult();
+        }
+
+        static string GetPropertyOrField(object obj, string name)
+        {
+            var pi = obj.GetType().GetProperty(name);
+            if (pi != null)
+                return (string)pi.GetValue(obj);
+
+            var fi = obj.GetType().GetField(name);
+            if (fi == null)
+                return null;
+            return (string)fi.GetValue(obj);
+        }
+
+        public static int GetMaxChars(List<int> column_max_chars, int index)
+        {
+            if (index < 0)
+                throw new ArgumentException($"index 参数必须大于等于零 (而现在是 {index})");
+
+            if (index >= column_max_chars.Count)
+                return 0;
+            return column_max_chars[index];
+        }
+
+        public static void SetMaxChars(/*ref*/ List<int> column_max_chars, int index, int chars)
+        {
+            // 确保空间足够
+            while (column_max_chars.Count < index + 1)
+            {
+                column_max_chars.Add(0);
+            }
+
+            // 统计最大字符数
+            int nOldChars = column_max_chars[index];
+            if (chars > nOldChars)
+            {
+                column_max_chars[index] = chars;
+            }
+        }
+
+
+        public class InventoryColumn
+        {
+            // 列名
+            public string Caption { get; set; }
+
+            // 要导出的数据成员名
+            public string Property { get; set; }
+
+            // 文字对齐方向
+            public string TextAlign { get; set; }   // left/right/center。 默认 left
         }
 
         #endregion
