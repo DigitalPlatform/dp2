@@ -388,11 +388,13 @@ namespace RfidDrivers.First
 
             string[] rates = new string[] {
                 "38400",    // 最常见的放在最前面
+                /*
                 "19200",
                 "9600",
                 "57600",
                 "115200",
                 "230400",
+                */
             };
 
             // 打开所有的 reader

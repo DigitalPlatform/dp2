@@ -67,4 +67,15 @@ namespace dp2SSL
             return sizes;
         }
     }
+
+    public class EncodingItemsSource : IItemsSource
+    {
+        public ItemCollection GetValues()
+        {
+            ItemCollection sizes = new ItemCollection();
+            sizes.Add("utf-8");
+            sizes.Add("gb2312");
+            return sizes;
+        }
+    }
 }

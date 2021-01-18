@@ -1065,6 +1065,14 @@ namespace dp2SSL
             }
         }
 
+        public static string SipEncoding
+        {
+            get
+            {
+                return WpfClientInfo.Config.Get("global", "sipEncoding", "utf-8");
+            }
+        }
+
         #endregion
 
         #region 消息服务器相关参数

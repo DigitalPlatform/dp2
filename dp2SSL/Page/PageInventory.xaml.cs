@@ -928,5 +928,83 @@ namespace dp2SSL
             }
 
         }
+
+        // 导出 Excel 报表
+        private async void exportExcelReport_Click(object sender, RoutedEventArgs e)
+        {
+            List<Entity> entities = new List<Entity>();
+            foreach (var entity in _entities)
+            {
+                entities.Add(entity);
+            }
+
+            List<InventoryColumn> columns = new List<InventoryColumn>()
+            {
+                new InventoryColumn{ Caption = "UID", Property = "UID"},
+                new InventoryColumn{ Caption = "PII", Property = "PII"},
+                new InventoryColumn{ Caption = "书名", Property = "Title"},
+                new InventoryColumn{ Caption = "当前架位", Property = "CurrentLocation"},
+                new InventoryColumn{ Caption = "永久馆藏地", Property = "Location"},
+                new InventoryColumn{ Caption = "永久架号", Property = "ShelfNo"},
+                new InventoryColumn{ Caption = "错误信息", Property = "Error"},
+            };
+
+            using (var cancel = CancellationTokenSource.CreateLinkedTokenSource(App.CancelToken))
+            {
+                ProgressWindow progress = null;
+                App.Invoke(new Action(() =>
+                {
+                    progress = new ProgressWindow();
+                    progress.TitleText = "导出 Excel 报表";
+                    progress.MessageText = "导出 Excel 报表，请稍等 ...";
+                    progress.Owner = Application.Current.MainWindow;
+                    progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                    progress.Closed += (s1, e1) =>
+                    {
+                        cancel.Cancel();
+                    };
+                    progress.okButton.Content = "停止";
+                    progress.Background = new SolidColorBrush(Colors.DarkRed);
+                    App.SetSize(progress, "middle");
+                    progress.BackColor = "black";
+                    progress.Show();
+                }));
+                try
+                {
+                    await Task.Run(() =>
+                    {
+                        var result = ExportToExcel(
+                            columns,
+                            entities,
+                            cancel.Token);
+                        if (result.Value == -1)
+                            App.ErrorBox("导出 Excel 报表", $"导出 Excel 报表过程出错: {result.ErrorInfo}");
+                        else
+                            App.ErrorBox("导出 Excel 报表", $"导出 Excel 报表完成", "green");
+                    });
+                }
+                catch (Exception ex)
+                {
+                    WpfClientInfo.WriteErrorLog($"导出 Excel 报表过程出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                    App.ErrorBox("导出 Excel 报表", $"导出 Excel 报表过程出现异常: {ex.Message}");
+                }
+                finally
+                {
+                    App.Invoke(new Action(() =>
+                    {
+                        progress.Close();
+                    }));
+                }
+            }
+
+
+
+        }
+
+        // 开始盘点
+        private void beginInventory_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

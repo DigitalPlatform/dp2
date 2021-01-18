@@ -558,12 +558,18 @@ bool bClickClose = false)
         // 设置
         private void MenuItem_settings_Click(object sender, EventArgs e)
         {
+            OpenSettingDialog(this);
+        }
+
+        public static void OpenSettingDialog(Form parent,
+            string style = "")
+        {
             using (SettingDialog dlg = new SettingDialog())
             {
-                GuiUtil.SetControlFont(dlg, this.Font);
+                GuiUtil.SetControlFont(dlg, parent.Font);
                 ClientInfo.MemoryState(dlg, "settingDialog", "state");
-
-                dlg.ShowDialog(this);
+                dlg.OpenStyle = style;
+                dlg.ShowDialog(parent);
                 if (dlg.DialogResult == DialogResult.OK)
                     DataModel.TagList.EnableTagCache = DataModel.EnableTagCache;
             }

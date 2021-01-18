@@ -18,6 +18,7 @@ using DigitalPlatform.Core;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.RFID;
+using DigitalPlatform.LibraryServer.Common;
 
 namespace RfidTool
 {
@@ -86,6 +87,8 @@ namespace RfidTool
                     // LinkUID = dlg.LinkUID,
                     ModifyEas = dlg.ModifyEas,
                     WriteUidPiiLog = dlg.WriteUidPiiLog,
+                    VerifyPii = dlg.VerifyPii,
+                    PiiVerifyRule = dlg.PiiVerifyRule,
                 };
             }
 
@@ -177,6 +180,7 @@ namespace RfidTool
         }
 
         static volatile int _error_count = 0;
+        static volatile int _verify_error_count = 0;
 
         CancellationTokenSource _cancel = new CancellationTokenSource();
 
@@ -263,6 +267,7 @@ namespace RfidTool
                                         //      >0  表示处理过程中有事项出错。后继需要调主循环调用本函数
                                         var process_result = await ProcessTags(result.Results, current_token);
                                         _error_count = process_result.Value;
+                                        _verify_error_count = process_result.VerifyErrorCount;
                                         process_count += process_result.ProcessCount;
                                         if (process_result.Value == 0 || process_result.Value == -1)
                                             break;
@@ -285,15 +290,33 @@ namespace RfidTool
                                                         continue;
                                                     }
 
-                                                    await FormClientInfo.Speaking($"有 {_error_count} 项出错。请调整天线位置",
-                                                        false,
-                                                        current_token);
+                                                    if (_verify_error_count > 0)
+                                                        await FormClientInfo.Speaking($"有 {_verify_error_count} 项 PII 校验问题。请注意记载和解决",
+    false,
+    current_token);
+
+                                                    if (_error_count - _verify_error_count > 0)
+                                                        await FormClientInfo.Speaking($"有 {(_error_count - _verify_error_count)} 项出错。请调整天线位置",
+                                                            false,
+                                                            current_token);
+
                                                     await Task.Delay(TimeSpan.FromSeconds(2), current_token);
                                                 }
 
                                             });
                                         await Task.Delay(TimeSpan.FromMilliseconds(100), current_token);
                                     }
+                                }
+                                catch (TaskCanceledException)
+                                {
+                                    if (token.IsCancellationRequested)
+                                        throw;
+                                    // “跳过”被触发
+                                    await FormClientInfo.Speaking("跳过",
+    true,
+    token);
+                                    // 清除相关标签的缓存，以便后续循环的时候从标签重新获取内容信息
+                                    ClearCache(result.Results);
                                 }
                                 finally
                                 {
@@ -351,6 +374,14 @@ namespace RfidTool
                 token,
                 TaskCreationOptions.LongRunning,
                 TaskScheduler.Default);
+
+            void ClearCache(List<OneTag> tags)
+            {
+                foreach (var tag in tags)
+                {
+                    ClearCacheTagTable(tag.UID);
+                }
+            }
         }
 
         void EnableSkipButton(bool enable, CancellationTokenSource cancel = null)
@@ -547,6 +578,9 @@ namespace RfidTool
             public int ProcessCount { get; set; }
             // 被过滤掉(不符合 TU)的个数
             public int FilteredCount { get; set; }
+
+            // 校验出错的个数。包含在 ErrorCount 内
+            public int VerifyErrorCount { get; set; }
         }
 
         // 之前处理过的事项的集合。用于计算本次和以前处理过的交叉部分
@@ -596,6 +630,7 @@ namespace RfidTool
                 int process_count = 0;
                 int error_count = 0;
                 int filtered_count = 0;
+                int verify_error_count = 0;
                 foreach (var tag in tags)
                 {
                     if (token.IsCancellationRequested)
@@ -693,8 +728,17 @@ namespace RfidTool
                     if (action_result.Value == -1)
                     {
                         error_count++;
-                        // 间隔一定时间才鸣叫
-                        ErrorSound();
+                        if (action_result.ErrorCode == "piiVerifyError")
+                        {
+                            verify_error_count++;
+
+                            // TODO: 发出特定的声音，表示这是校验问题
+                        }
+                        else
+                        {
+                            // 间隔一定时间才鸣叫
+                            ErrorSound();
+                        }
                     }
                     else
                     {
@@ -716,7 +760,8 @@ namespace RfidTool
                 {
                     Value = error_count,
                     ErrorCount = error_count,
-                    ProcessCount = process_count
+                    ProcessCount = process_count,
+                    VerifyErrorCount = verify_error_count,
                 };
             }
             finally
@@ -776,7 +821,7 @@ namespace RfidTool
                         chip = LogicChip.From(taginfo.Bytes,
             (int)taginfo.BlockSize,
             "");
-                        pii = ScanDialog.GetPIICaption(chip.FindElement(ElementOID.PII)?.Text);
+                        pii = chip.FindElement(ElementOID.PII)?.Text;
                     }
                     else
                     {
@@ -797,6 +842,47 @@ namespace RfidTool
                 }
 
                 bool changed = false;
+
+                // 校验 PII
+                if (_action.VerifyPii)
+                {
+                    if (string.IsNullOrEmpty(pii))
+                    {
+                        string error = $"校验 PII 发现问题: PII 为空";
+                        SetErrorInfo(item, error);
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = error,
+                            ErrorCode = "piiVerifyError"
+                        };
+                    }
+
+                    if (string.IsNullOrEmpty(_action.PiiVerifyRule) == false)
+                    {
+                        var type = GetVerifyType(tou);
+                        if (type == null)
+                        {
+                            // 不可知的类型，因而无法进行号码校验
+                            // TODO: 此情况写入操作日志
+                        }
+                        else
+                        {
+                            var verify_result = _action.VerifyBarcode(type, pii);
+                            if (verify_result.OK == false)
+                            {
+                                string error = $"校验 PII 发现问题: {verify_result.ErrorInfo}";
+                                SetErrorInfo(item, error);
+                                return new NormalResult
+                                {
+                                    Value = -1,
+                                    ErrorInfo = error,
+                                    ErrorCode = "piiVerifyError"
+                                };
+                            }
+                        }
+                    }
+                }
 
                 if (_action.OI != null && oi != _action.OI)
                 {
@@ -905,6 +991,19 @@ namespace RfidTool
                     ErrorInfo = error
                 };
             }
+        }
+
+
+        public static string GetVerifyType(string tu)
+        {
+            // 10 图书; 80 读者证; 30 层架标
+            if (tu == "10")
+                return "entity";
+            if (tu == "80")
+                return "patron";
+            if (tu.StartsWith("3"))
+                return "shelf";
+            return null;    // 无法识别的 tou
         }
 
         public static TagInfo GetTagInfo(TagInfo existing,
@@ -1255,5 +1354,37 @@ bool eas)
         public string ModifyEas { get; set; }   // 不修改/On/Off (空=不修改)
 
         public bool WriteUidPiiLog { get; set; }
+
+        public bool VerifyPii { get; set; }
+
+        string _piiVerifyRule = null;
+        public string PiiVerifyRule
+        {
+            get
+            {
+                return _piiVerifyRule;
+            }
+            set
+            {
+                _piiVerifyRule = value;
+                _validator = null;
+            }
+        }
+
+        BarcodeValidator _validator = null;
+
+        public ValidateResult VerifyBarcode(string type,
+            string barcode)
+        {
+            if (string.IsNullOrEmpty(_piiVerifyRule))
+                throw new ArgumentException("尚未设置 PiiVerifyRule");
+
+            if (_validator == null)
+                _validator = new BarcodeValidator(_piiVerifyRule);
+
+            return _validator.ValidateByType(
+                type,
+                barcode);
+        }
     }
 }

@@ -52,7 +52,7 @@
     </Page.Resources>
     <Grid Name="mainGrid">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="60" />
+            <ColumnDefinition Width="100" />
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="0" />
         </Grid.ColumnDefinitions>
@@ -94,6 +94,9 @@
                     <MenuItem x:Name="actionSetLocation" Header="更新永久馆藏地" HorizontalAlignment="Left" Width="Auto" Click="actionMenu_Click"/>
                     <MenuItem x:Name="actionVerifyEas" Header="校验 EAS" HorizontalAlignment="Left" Width="Auto" Click="actionMenu_Click"/>
                 </MenuItem>
+                <MenuItem x:Name="beginInventory" Header="开始盘点" HorizontalAlignment="Left" Width="Auto" Click="beginInventory_Click" FontSize="20"/>
+                <MenuItem x:Name="exportExcelReport" Header="导出报表" HorizontalAlignment="Left" Width="Auto" Click="exportExcelReport_Click" FontSize="20"/>
+
             </Menu>
         </StackPanel>
         <Button Grid.Row="1" Grid.Column="2">Right</Button>

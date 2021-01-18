@@ -340,6 +340,33 @@ namespace RfidTool
             }
         }
 
+        // PII 号码校验规则
+        public static string PiiVerifyRule
+        {
+            get
+            {
+                return ClientInfo.Config.Get("general", "pii_verify_rule", null);
+            }
+            set
+            {
+                ClientInfo.Config.Set("general", "pii_verify_rule", value);
+            }
+        }
+
+        // 当写入标签的时候是否校验条码号
+        public static bool VerifyPiiWhenWriteTag
+        {
+            get
+            {
+                return ClientInfo.Config.GetBoolean("writeTag", "verifyBarcode", false);
+            }
+            set
+            {
+                ClientInfo.Config.SetBoolean("writeTag", "verifyBarcode", value);
+            }
+
+        }
+
         // 写入标签
         public static NormalResult WriteTagInfo(string one_reader_name,
             TagInfo old_tag_info,

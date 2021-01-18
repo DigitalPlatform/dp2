@@ -32,7 +32,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>38</ApplicationRevision>
+    <ApplicationRevision>39</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -227,6 +227,10 @@
     <ProjectReference Include="..\DigitalPlatform.IO\DigitalPlatform.IO.csproj">
       <Project>{441cb814-af78-4503-91ef-dce5f3269502}</Project>
       <Name>DigitalPlatform.IO</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.LibraryServer.Common\DigitalPlatform.LibraryServer.Common.csproj">
+      <Project>{2f085431-027a-4ddf-9b3d-83219e629fa1}</Project>
+      <Name>DigitalPlatform.LibraryServer.Common</Name>
     </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.RFID\DigitalPlatform.RFID.csproj">
       <Project>{9d26d2ad-eabb-4c32-8706-fb9e323faf01}</Project>

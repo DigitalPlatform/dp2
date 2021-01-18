@@ -9,7 +9,10 @@
   <col title="馆藏地点">
     <xpath>*/location</xpath>
   </col>
-  <col title="当前馆藏地点" type="current_location">
+  <col title="架号" type="shelf_number">
+    <xpath>*/shelfNo</xpath>
+  </col>
+  <col title="当前位置" type="current_location">
     <xpath>*/currentLocation</xpath>
   </col>
   <col title="出版时间">
@@ -23,9 +26,6 @@
   </col>
   <col title="索取号" type="call_number">
     <xpath>*/accessNo</xpath>
-  </col>
-  <col title="架号" type="shelf_number">
-    <xpath>*/shelfNo</xpath>
   </col>
   <col title="价格" type="price">
     <xpath>*/price</xpath>
@@ -54,7 +54,7 @@
   <col title="参考ID" type="item_refid">
     <xpath>*/refID</xpath>
   </col>
-  <col title="RFID ID" type="item_uid">
+  <col title="RFID UID" type="item_uid">
     <xpath>*/uid</xpath>
   </col>
   <col title="流通次数">
