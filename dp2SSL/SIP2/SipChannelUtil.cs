@@ -75,6 +75,11 @@ namespace dp2SSL
 
         }
 
+        public static void CloseChannel()
+        {
+            _channel.Close();
+        }
+
         static async Task<NormalResult> ConnectAsync()
         {
             var parts = StringUtil.ParseTwoPart(App.SipServerUrl, ":");

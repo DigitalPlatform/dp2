@@ -110,14 +110,17 @@ out type,
 out chip);
                     if (tagInfo != null)
                         entity.PII = pii;
+
+                    entity.BuildError("parseTag", null, null);
                 }
                 catch (Exception ex)
                 {
                     App.CurrentApp.SpeakSequence("警告: 标签解析出错");
                     if (throw_exception == false)
                     {
-                        entity.AppendError($"RFID 标签格式错误: {ex.Message}",
-                            "red",
+                        entity.BuildError(
+                            "parseTag",
+                            $"RFID 标签格式错误: {ex.Message}",
                             "parseTagError");
                     }
                     else
@@ -130,8 +133,10 @@ out chip);
             {
                 // 避免被当作图书同步到 dp2library
                 entity.PII = "(读者卡)" + entity.PII;
-                entity.AppendError("读者卡误放入书柜", "red", "patronCard");
+                entity.BuildError("checkTag", "读者卡误放入书柜", "patronCard");
             }
+            else
+                entity.BuildError("checkTag", null, null);
 
             if (type == "location")
             {
@@ -154,7 +159,7 @@ out chip);
 
                 if (chip.IsBlank())
                 {
-                    entity.AppendError("空白标签", "red", "blankTag");
+                    entity.BuildError("checkTag", "空白标签", "blankTag");
                 }
                 else
                 {
@@ -167,9 +172,13 @@ out chip);
                     // 2020/8/27
                     // 严格要求必须有 OI(AOI) 字段
                     if (string.IsNullOrEmpty(oi) && string.IsNullOrEmpty(aoi))
-                        entity.AppendError("没有 OI 或 AOI 字段", "red", "missingOI");
+                        entity.BuildError("checkTag", "没有 OI 或 AOI 字段", "missingOI");
+                    else
+                        entity.BuildError("checkTag", null, null);
                 }
             }
+            else
+                entity.BuildError("checkTag", null, null);
         }
 
         // 解析标签内容，返回 PII 和 typeOfUsage。注：typeOfUsage ‘30’ 表示层架标
@@ -231,14 +240,17 @@ out chip);
                     SetTagType(tag, out string pii, out chip);
                     if (tag.OneTag.TagInfo != null)
                         result.PII = pii;
+
+                    result.BuildError("parseTag", null, null);
                 }
                 catch (Exception ex)
                 {
                     App.CurrentApp.SpeakSequence("警告: 标签解析出错");
                     if (throw_exception == false)
                     {
-                        result.AppendError($"RFID 标签格式错误: {ex.Message}",
-                            "red",
+                        result.BuildError(
+                            "parseTag",
+                            $"RFID 标签格式错误: {ex.Message}",
                             "parseTagError");
                     }
                     else
@@ -257,8 +269,10 @@ out chip);
             {
                 // 避免被当作图书同步到 dp2library
                 result.PII = "(读者卡)" + result.PII;
-                result.AppendError("读者卡误放入书柜", "red", "patronCard");
+                result.BuildError("checkTag", "读者卡误放入书柜", "patronCard");
             }
+            else
+                result.BuildError("checkTag", null, null);
 
             // 2020/7/15
             // 获得图书 RFID 标签的 OI 和 AOI 字段
@@ -276,7 +290,7 @@ out chip);
 
                 if (chip.IsBlank())
                 {
-                    entity.AppendError("空白标签", "red", "blankTag");
+                    entity.BuildError("checkTag", "空白标签", "blankTag");
                 }
                 else
                 {
@@ -289,9 +303,14 @@ out chip);
                     // 2020/8/27
                     // 严格要求必须有 OI(AOI) 字段
                     if (string.IsNullOrEmpty(oi) && string.IsNullOrEmpty(aoi))
-                        result.AppendError("没有 OI 或 AOI 字段", "red", "missingOI");
+                        result.BuildError("checkTag", "没有 OI 或 AOI 字段", "missingOI");
+                    else
+                        result.BuildError("checkTag", null, null);
                 }
             }
+            else
+                result.BuildError("checkTag", null, null);
+
             return result;
         }
 
@@ -615,11 +634,15 @@ TaskScheduler.Default);
                         info.SetTaskInfo("getItemXml", result);
                         if (result.Value == -1)
                         {
-                            // TODO: 语音报错，另外错误信息不要越积越长
-                            entity.AppendError(result.ErrorInfo, "red", result.ErrorCode);
+                            // 2021/1/19
+                            App.CurrentApp.SpeakSequence($"{entity.PII} 无法获得册信息");
+                            
+                            entity.BuildError("getItemXml", result.ErrorInfo, result.ErrorCode);
                         }
                         else
                         {
+                            entity.BuildError("getItemXml", null, null);
+
                             if (string.IsNullOrEmpty(result.Title) == false)
                                 entity.Title = PageBorrow.GetCaption(result.Title);
                             if (string.IsNullOrEmpty(result.ItemXml) == false)
@@ -870,10 +893,12 @@ TaskScheduler.Default);
                     if (request_result.Value == -1)
                     {
                         App.CurrentApp.SpeakSequence($"{entity.PII} 还书请求出错");
-                        entity.AppendError(request_result.ErrorInfo, "red", request_result.ErrorCode);
+                        entity.BuildError("return", request_result.ErrorInfo, request_result.ErrorCode);
                     }
                     else
                     {
+                        entity.BuildError("return", null, null);
+
                         // 提醒操作者发生了还书操作
                         App.CurrentApp.SpeakSequence($"还书成功 {entity.PII}");
 
@@ -969,12 +994,14 @@ TaskScheduler.Default);
                     {
                         App.CurrentApp.SpeakSequence($"{entity.UID} 设置 UID 请求出错");
                         // TODO: NotChanged 处理
-                        entity.AppendError(request_result.ErrorInfo, "red", request_result.ErrorCode);
+                        entity.BuildError("setUID", request_result.ErrorInfo, request_result.ErrorCode);
                     }
                     else
                     {
                         if (string.IsNullOrEmpty(request_result.NewItemXml) == false)
                             info.ItemXml = request_result.NewItemXml;
+
+                        entity.BuildError("setUID", null, null);
                         succeed_count++;
                     }
                 }
@@ -1029,7 +1056,7 @@ TaskScheduler.Default);
                     {
                         App.CurrentApp.SpeakSequence($"{entity.PII} 盘点请求出错");
                         // TODO: NotChanged 处理
-                        entity.AppendError(request_result.ErrorInfo, "red", request_result.ErrorCode);
+                        entity.BuildError("setLocation", request_result.ErrorInfo, request_result.ErrorCode);
                     }
                     else
                     {
@@ -1037,7 +1064,7 @@ TaskScheduler.Default);
                             entity.SetData(entity.ItemRecPath, request_result.ItemXml);
 
                         // TODO: info.ItemXml 是否需要被改变?
-
+                        entity.BuildError("setLocation", null, null);
                         succeed_count++;
                     }
                 }

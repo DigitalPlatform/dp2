@@ -513,6 +513,9 @@ string color = "red")
                     App.CurrentApp.StartProcessManager();
 
                     _ = App.ConnectMessageServerAsync();
+
+                    // 切断 SIP2 通道。因为可能刚才在配置参数中修改了 SIP2 通道的编码方式
+                    SipChannelUtil.CloseChannel();
                 }
                 finally
                 {
