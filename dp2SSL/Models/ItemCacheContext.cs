@@ -20,6 +20,8 @@ namespace dp2SSL
         public DbSet<BookItem> Items { get; set; }
         // 对照记录
         public DbSet<UidEntry> Uids { get; set; }
+        // 日志记录
+        public DbSet<InventoryLogItem> Logs { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -45,12 +47,21 @@ namespace dp2SSL
                 entity.HasKey(e => e.PII);
                 entity.HasIndex(e => e.UID);
             });
+
+            // ***
+            modelBuilder.Entity<InventoryLogItem>().ToTable("log");
+            modelBuilder.Entity<InventoryLogItem>(entity =>
+            {
+                entity.HasNoKey();
+            });
         }
     }
 
     // (用于盘点的)册记录
     public class BookItem
     {
+        public string Title { get; set; }
+
         public string Barcode { get; set; }
         // public string UII { get; set; }
 
@@ -75,5 +86,17 @@ namespace dp2SSL
     {
         public string UID { get; set; }
         public string PII { get; set; }
+    }
+
+    public class InventoryLogItem
+    {
+        public string Title { get; set; }
+        public string Barcode { get; set; }
+        public string Location { get; set; }
+        public string ShelfNo { get; set; }
+        public string CurrentLocation { get; set; }
+        public string CurrentShelfNo { get; set; }
+
+        public DateTime WriteTime { get; set; }
     }
 }

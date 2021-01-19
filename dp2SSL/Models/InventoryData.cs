@@ -636,7 +636,7 @@ TaskScheduler.Default);
                         {
                             // 2021/1/19
                             App.CurrentApp.SpeakSequence($"{entity.PII} 无法获得册信息");
-                            
+
                             entity.BuildError("getItemXml", result.ErrorInfo, result.ErrorCode);
                         }
                         else
@@ -659,22 +659,6 @@ TaskScheduler.Default);
                         && info != null && info.IsLocation == false)
                     {
                         _ = BeginInventoryAsync(entity, PageInventory.ActionMode);
-                        /*
-                        var info = entity.Tag as ProcessInfo;
-
-                        var request_result = RequestInventory(entity.UID,
-        entity.PII,
-        info.TargetCurrentLocation,
-        info.TargetLocation,
-        info.BatchNo,
-        info.UserName,
-        PageInventory.ActionMode);
-                        if (request_result.Value == -1)
-                        {
-                            // TODO: 语音提示引起操作者注意
-                            entity.AppendError(request_result.ErrorInfo, "red", request_result.ErrorCode);
-                        }
-                        */
                     }
 
                     App.SetError("processing", null);
@@ -1958,6 +1942,11 @@ TaskScheduler.Default);
                 currentShelfNo = parts[1];
             }
 
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml(item_xml);
+            string title = DomUtil.GetElementText(dom.DocumentElement, "title");
+
+            // 保存册记录和日志到本地数据库
             using (var releaser = await _cacheLimit.EnterAsync())
             using (var context = new ItemCacheContext())
             {
@@ -1966,6 +1955,7 @@ TaskScheduler.Default);
                 {
                     item = new BookItem
                     {
+                        Title = title,
                         Barcode = pii,
                         // UID = uid,
                         CurrentLocation = currentLocation,
@@ -1993,11 +1983,24 @@ TaskScheduler.Default);
                     context.Items.Update(item);
                 }
                 context.SaveChanges();
+
+                // 2021/1/19
+                // 写入本地操作日志库
+                context.Logs.Add(new InventoryLogItem
+                {
+                    Title = title,
+                    Barcode = pii,
+                    Location = location,
+                    ShelfNo = shelfNo,
+                    CurrentLocation = currentLocation,
+                    CurrentShelfNo = currentShelfNo,
+                    WriteTime = DateTime.Now,
+                });
+                context.SaveChanges();
             }
 
+
             // TODO: 修改 XML
-            XmlDocument dom = new XmlDocument();
-            dom.LoadXml(item_xml);
 
             if (location != null)
                 DomUtil.SetElementText(dom.DocumentElement,

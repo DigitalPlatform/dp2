@@ -309,6 +309,12 @@ namespace dp2SSL
                                     }
                                 }
 
+                                // 2020/1/19
+                                // 题名也放入 ItemXml 中
+                                DomUtil.SetElementText(itemdom.DocumentElement,
+                                    "title",
+                                    get_result.Result.AJ_TitleIdentifier_r);
+
                                 // 2021/1/17
                                 // 用本地数据记录修正盘点部分字段
                                 if (StringUtil.IsInList("localInventory", style))
