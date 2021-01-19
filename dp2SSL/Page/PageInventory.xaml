@@ -94,8 +94,12 @@
                     <MenuItem x:Name="actionSetLocation" Header="更新永久馆藏地" HorizontalAlignment="Left" Width="Auto" Click="actionMenu_Click"/>
                     <MenuItem x:Name="actionVerifyEas" Header="校验 EAS" HorizontalAlignment="Left" Width="Auto" Click="actionMenu_Click"/>
                 </MenuItem>
-                <MenuItem x:Name="beginInventory" Header="开始盘点" HorizontalAlignment="Left" Width="Auto" Click="beginInventory_Click" FontSize="20"/>
-                <MenuItem x:Name="exportExcelReport" Header="导出报表" HorizontalAlignment="Left" Width="Auto" Click="exportExcelReport_Click" FontSize="20"/>
+                <MenuItem x:Name="beginInventory" Header="开始盘点" HorizontalAlignment="Left" Width="Auto" Click="beginInventory_Click"
+                          FontSize="20"/>
+                <MenuItem x:Name="stopInventory" Header="停止盘点" HorizontalAlignment="Left" Width="Auto" Click="stopInventory_Click"
+                          FontSize="20" IsEnabled="False"/>
+                <MenuItem x:Name="exportExcelReport" Header="导出报表" HorizontalAlignment="Left" Width="Auto" Click="exportExcelReport_Click"
+                          FontSize="16"/>
 
             </Menu>
         </StackPanel>

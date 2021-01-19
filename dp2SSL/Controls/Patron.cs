@@ -6,12 +6,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+
 using DigitalPlatform;
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
-using Microsoft.EntityFrameworkCore.ValueGeneration.Internal;
 
 namespace dp2SSL
 {

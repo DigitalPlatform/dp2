@@ -15,6 +15,7 @@ using DigitalPlatform.RFID;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform;
+using DigitalPlatform.Core;
 
 namespace dp2SSL
 {
@@ -230,6 +231,7 @@ namespace dp2SSL
             SetPII(entity);
             // 如何触发下一步的获取和显示?
 
+            // entity.BuildError("data", data.Error, null);
             entity.AppendError(data.Error);
             return entity;
         }
@@ -724,7 +726,103 @@ Stack:
             return true;
         }
 
+        #region 分类错误处理机制
 
+        List<ErrorItem> _errorItems = null;
+
+        // 构造错误信息
+        public string BuildError(string type, 
+            string error,
+            string code)
+        {
+            var text = ErrorItem.BuildError(ref _errorItems, 
+                type, error, code);
+            this.Error = text;
+            return text;
+        }
+
+        // 清除所有错误信息
+        public void ClearAllError()
+        {
+            _errorItems = null;
+        }
+
+        #endregion
     }
 
+
+    public class ErrorItem
+    {
+        public string Type { get; set; }
+        public string Error { get; set; }
+        public string Code { get; set; }
+
+        // 在既有的错误集合中添加一个新的错误，并整理输出为纯文本
+        public static string BuildError(
+            ref List<ErrorItem> errors,
+            string type, 
+            string error,
+            string code)
+        {
+            SetError(ref errors, type, error, code);
+
+            return ToString(errors);
+        }
+
+        // 设置错误信息
+        static void SetError(ref List<ErrorItem> errors,
+            string type,
+            string error,
+            string code)
+        {
+            // 正好，不用添加了
+            if (error == null && errors == null)
+                return;
+            if (errors == null)
+                errors = new List<ErrorItem>();
+
+            Debug.Assert(errors != null);
+
+            var item = errors.Find(o => o.Type == type);
+            // 正好不用添加了
+            if (item == null && error == null)
+                return;
+            if (item == null)   // 没有事项就添加
+                errors.Add(new ErrorItem
+                {
+                    Type = type,
+                    Error = error,
+                    Code = code,
+                });
+            else if (error == null) // 去掉事项
+            {
+                Debug.Assert(item != null);
+                errors.Remove(item);
+            }
+            else // 修改现有事项
+            {
+                Debug.Assert(item != null);
+                item.Error = error;
+                item.Code = code;
+            }
+        }
+
+        // 构造为方便显示的纯文本
+        static string ToString(List<ErrorItem> errors,
+            string style = "")
+        {
+            if (errors == null || errors.Count == 0)
+                return null;
+            var include_type = StringUtil.IsInList("includeType", style);
+            List<string> lines = new List<string>();
+            foreach(var item in errors)
+            {
+                if (include_type)
+                    lines.Add($"{item.Type}:{item.Error}");
+                else
+                    lines.Add(item.Error);
+            }
+            return StringUtil.MakePathList(lines, ";");
+        }
+    }
 }

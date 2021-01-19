@@ -76,6 +76,8 @@ namespace dp2SSL
         {
             App.IsPageInventoryActive = false;
             App.BookTagChanged -= CurrentApp_NewTagChanged;
+
+            this.Pause();
         }
 
         private void PageInventory_Loaded(object sender, RoutedEventArgs e)
@@ -85,133 +87,6 @@ namespace dp2SSL
 
             RefreshActionModeMenu();
 
-            _ = Task.Run(async () =>
-            {
-                // 获得馆藏地列表
-                GetLocationListResult get_result = null;
-                if (App.Protocol == "sip")
-                {
-                    // SIP2 协议模式下需要在 inventory.xml 中 root/library/@locationList 中配置馆藏地列表
-                    get_result = InventoryData.sip_GetLocationListFromLocal();
-                }
-                else
-                    get_result = LibraryChannelUtil.GetLocationList();
-                if (get_result.Value == -1)
-                    App.SetError("inventory", $"获得馆藏地列表时出错: {get_result.ErrorInfo}");
-
-                string batchNo = "inventory_" + DateTime.Now.ToShortDateString();
-
-                bool slow_mode = false;
-                bool dialog_result = false;
-                // “开始盘点”对话框
-                App.Invoke(new Action(() =>
-                {
-                    App.PauseBarcodeScan();
-                    try
-                    {
-                        BeginInventoryWindow dialog = new BeginInventoryWindow();
-                        dialog.TitleText = $"开始盘点";
-                        // dialog.Text = $"如何处理以上放入 {door_names} 的 {collection.Count} 册图书？";
-                        dialog.Owner = App.CurrentApp.MainWindow;
-                        // dialog.BatchNo = batchNo;
-                        dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-                        App.SetSize(dialog, "tall");
-                        dialog.location.ItemsSource = get_result.List;  // result.List;
-                        dialog.BatchNo = batchNo;
-                        dialog.ActionMode = ActionMode;
-
-                        if (App.Protocol == "sip")
-                            dialog.ActionVerifyEasVisible = false;
-
-                        dialog.ShowDialog();
-                        if (dialog.DialogResult == false)
-                            dialog_result = false;
-                        else
-                        {
-                            dialog_result = true;
-
-                            {
-                                _actionMode = dialog.ActionMode;
-                                RefreshActionModeMenu();
-                            }
-
-                            CurrentLocation = dialog.Location;
-                            CurrentBatchNo = dialog.BatchNo;
-                            slow_mode = dialog.SlowMode;
-                        }
-                    }
-                    finally
-                    {
-                        App.ContinueBarcodeScan();
-                    }
-                }));
-
-                ClearList();
-
-                if (dialog_result == true && slow_mode == false)
-                {
-                    CancellationTokenSource cancel = new CancellationTokenSource();
-
-                    ProgressWindow progress = null;
-                    App.Invoke(new Action(() =>
-                    {
-                        progress = new ProgressWindow();
-                        progress.TitleText = "dp2SSL -- 盘点";
-                        progress.MessageText = "正在获取 UID 对照信息，请稍候 ...";
-                        progress.Owner = Application.Current.MainWindow;
-                        progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-                        progress.Closed += (s, e1) =>
-                        {
-                            cancel.Cancel();
-                        };
-                        progress.okButton.Visibility = Visibility.Collapsed;
-                        // progress.okButton.Content = "停止";
-                        App.SetSize(progress, "middle");
-                        progress.BackColor = "green";
-                        progress.Show();
-                    }));
-
-                    try
-                    {
-                        Hashtable uid_table = new Hashtable();
-                        NormalResult result = null;
-                        if (App.Protocol == "sip")
-                            result = await InventoryData.LoadUidTableAsync(uid_table,
-                                (text) =>
-                                {
-                                    App.Invoke(new Action(() =>
-                                    {
-                                        progress.MessageText = text;
-                                    }));
-                                },
-                                cancel.Token);
-                        else
-                            result = InventoryData.DownloadUidTable(
-                    null,
-                    uid_table,
-                    (text) =>
-                    {
-                        App.Invoke(new Action(() =>
-                        {
-                            progress.MessageText = text;
-                        }));
-                    },
-                    cancel.Token);
-                        InventoryData.SetUidTable(uid_table);
-                    }
-                    catch (Exception ex)
-                    {
-                        WpfClientInfo.WriteErrorLog($"准备册记录过程出现异常: {ExceptionUtil.GetDebugText(ex)}");
-                    }
-                    finally
-                    {
-                        App.Invoke(new Action(() =>
-                        {
-                            progress.Close();
-                        }));
-                    }
-                }
-            });
 
         }
 
@@ -265,6 +140,28 @@ namespace dp2SSL
         }
 #endif
 
+        volatile bool _pause = true;
+
+        void Pause()
+        {
+            _pause = true;
+            App.Invoke(new Action(() =>
+            {
+                this.beginInventory.IsEnabled = true;
+                this.stopInventory.IsEnabled = false;
+            }));
+        }
+
+        void Continue()
+        {
+            _pause = false;
+            App.Invoke(new Action(() =>
+            {
+                this.beginInventory.IsEnabled = false;
+                this.stopInventory.IsEnabled = true;
+            }));
+        }
+
         // 新版本的事件
 #pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
         private async void CurrentApp_NewTagChanged(object sender, NewTagChangedEventArgs e)
@@ -273,6 +170,9 @@ namespace dp2SSL
             try
             {
                 // throw new Exception("testing");
+
+                if (_pause)
+                    return;
 
                 var channel = (BaseChannel<IRfid>)sender;
                 // TODO: 对离开的 tag 变化为灰色颜色
@@ -1004,7 +904,146 @@ namespace dp2SSL
         // 开始盘点
         private void beginInventory_Click(object sender, RoutedEventArgs e)
         {
+            _ = Task.Run(async () =>
+            {
+                // 获得馆藏地列表
+                GetLocationListResult get_result = null;
+                if (App.Protocol == "sip")
+                {
+                    // SIP2 协议模式下需要在 inventory.xml 中 root/library/@locationList 中配置馆藏地列表
+                    get_result = InventoryData.sip_GetLocationListFromLocal();
+                }
+                else
+                    get_result = LibraryChannelUtil.GetLocationList();
+                if (get_result.Value == -1)
+                    App.SetError("inventory", $"获得馆藏地列表时出错: {get_result.ErrorInfo}");
 
+                string batchNo = "inventory_" + DateTime.Now.ToShortDateString();
+
+                bool slow_mode = false;
+                bool dialog_result = false;
+                // “开始盘点”对话框
+                App.Invoke(new Action(() =>
+                {
+                    App.PauseBarcodeScan();
+                    try
+                    {
+                        BeginInventoryWindow dialog = new BeginInventoryWindow();
+                        dialog.TitleText = $"开始盘点";
+                        // dialog.Text = $"如何处理以上放入 {door_names} 的 {collection.Count} 册图书？";
+                        dialog.Owner = App.CurrentApp.MainWindow;
+                        // dialog.BatchNo = batchNo;
+                        dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                        App.SetSize(dialog, "tall");
+                        dialog.location.ItemsSource = get_result.List;  // result.List;
+                        dialog.BatchNo = batchNo;
+                        dialog.ActionMode = ActionMode;
+
+                        if (App.Protocol == "sip")
+                            dialog.ActionVerifyEasVisible = false;
+
+                        dialog.ShowDialog();
+                        if (dialog.DialogResult == false)
+                            dialog_result = false;
+                        else
+                        {
+                            dialog_result = true;
+
+                            {
+                                _actionMode = dialog.ActionMode;
+                                RefreshActionModeMenu();
+                            }
+
+                            CurrentLocation = dialog.Location;
+                            CurrentBatchNo = dialog.BatchNo;
+                            slow_mode = dialog.SlowMode;
+                        }
+                    }
+                    finally
+                    {
+                        App.ContinueBarcodeScan();
+                    }
+                }));
+
+                ClearList();
+
+                if (dialog_result == true && slow_mode == false)
+                {
+                    CancellationTokenSource cancel = new CancellationTokenSource();
+
+                    ProgressWindow progress = null;
+                    App.Invoke(new Action(() =>
+                    {
+                        progress = new ProgressWindow();
+                        progress.TitleText = "dp2SSL -- 盘点";
+                        progress.MessageText = "正在获取 UID 对照信息，请稍候 ...";
+                        progress.Owner = Application.Current.MainWindow;
+                        progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                        progress.Closed += (s, e1) =>
+                        {
+                            cancel.Cancel();
+                        };
+                        progress.okButton.Visibility = Visibility.Collapsed;
+                        // progress.okButton.Content = "停止";
+                        App.SetSize(progress, "middle");
+                        progress.BackColor = "green";
+                        progress.Show();
+                    }));
+
+                    try
+                    {
+                        Hashtable uid_table = new Hashtable();
+                        NormalResult result = null;
+                        if (App.Protocol == "sip")
+                            result = await InventoryData.LoadUidTableAsync(uid_table,
+                                (text) =>
+                                {
+                                    App.Invoke(new Action(() =>
+                                    {
+                                        progress.MessageText = text;
+                                    }));
+                                },
+                                cancel.Token);
+                        else
+                            result = InventoryData.DownloadUidTable(
+                                null,
+                                uid_table,
+                                (text) =>
+                                {
+                                    App.Invoke(new Action(() =>
+                                    {
+                                        progress.MessageText = text;
+                                    }));
+                                },
+                                cancel.Token);
+                        InventoryData.SetUidTable(uid_table);
+
+                        this.Continue();
+
+                        App.Invoke(new Action(() =>
+                        {
+                            this.beginInventory.IsEnabled = false;
+                            this.stopInventory.IsEnabled = true;
+                        }));
+                    }
+                    catch (Exception ex)
+                    {
+                        WpfClientInfo.WriteErrorLog($"准备册记录过程出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                    }
+                    finally
+                    {
+                        App.Invoke(new Action(() =>
+                        {
+                            progress.Close();
+                        }));
+                    }
+                }
+            });
+        }
+
+        private void stopInventory_Click(object sender, RoutedEventArgs e)
+        {
+            this.Pause();
         }
     }
 }
