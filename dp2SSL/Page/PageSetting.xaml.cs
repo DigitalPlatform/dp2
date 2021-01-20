@@ -932,7 +932,7 @@ string color = "red")
         // 紫外线杀菌
         private void sterilamp_Click(object sender, RoutedEventArgs e)
         {
-            _ = App.CurrentApp.SterilampAsync();
+            App.CurrentApp.BeginSterilamp();
         }
 
         private void redoReplicatePatron_Click(object sender, RoutedEventArgs e)
