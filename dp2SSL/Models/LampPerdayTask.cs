@@ -13,7 +13,10 @@ using DigitalPlatform.WPF;
 
 namespace dp2SSL
 {
-    public class PerdayTask
+    /// <summary>
+    /// 每日亮灯任务
+    /// </summary>
+    public class LampPerdayTask
     {
         public struct PerdayTime
         {
@@ -26,12 +29,12 @@ namespace dp2SSL
             }
         }
 
-        class ParseTimeResult : DigitalPlatform.NormalResult
+        public class ParseTimeResult : DigitalPlatform.NormalResult
         {
             public PerdayTime Time { get; set; }
         }
 
-        static ParseTimeResult ParseTime(string strStartTime)
+        public static ParseTimeResult ParseTime(string strStartTime)
         {
             string strHour = "";
             string strMinute = "";
@@ -196,7 +199,7 @@ namespace dp2SSL
         Saturday = 6
         * */
         // 将周内日期定义转换为一个描述应包含日期的集合
-        static List<DayOfWeek> ParseDayOfWeekDef(string weekdays)
+        public static List<DayOfWeek> ParseDayOfWeekDef(string weekdays)
         {
             List<DayOfWeek> results = new List<DayOfWeek>();
             List<string> parts = StringUtil.SplitList(weekdays, ',');
@@ -247,26 +250,31 @@ namespace dp2SSL
             return results;
         }
 
-        // 启动每日定时亮灯过程
-        public static NormalResult StartPerdayTask()
+        public static void TryInitialize()
         {
             // 初始化任务调度器
             if (_initialized == false)
             {
                 JobManager.Initialize();
                 _initialized = true;
-                WpfClientInfo.WriteInfoLog($"初始化 JobManager");
+                WpfClientInfo.WriteInfoLog($"lamp 初始化 JobManager");
             }
+        }
+
+        // 启动每日定时亮灯过程
+        public static NormalResult StartPerdayTask()
+        {
+            TryInitialize();
 
             TurnBackLampOff();
-            WpfClientInfo.WriteInfoLog($"先关掉书柜灯");
+            WpfClientInfo.WriteInfoLog($"lamp 先关掉书柜灯");
 
             // 每日亮灯时段
             string time_range = WpfClientInfo.Config.Get("tasks", "lamp", null);
             string weekday = WpfClientInfo.Config.Get("tasks", "lamp_weekday", null);
 
-            WpfClientInfo.WriteInfoLog($"time_range={time_range}");
-            WpfClientInfo.WriteInfoLog($"weekday={weekday}");
+            WpfClientInfo.WriteInfoLog($"lamp time_range={time_range}");
+            WpfClientInfo.WriteInfoLog($"lamp weekday={weekday}");
 
             /*
             // testing
@@ -274,9 +282,24 @@ namespace dp2SSL
             string weekday = "*,-0,-6"; // +1,+2,+3,+4,+5
             */
 
+            // 移除以前的全部同类任务
+            {
+                List<string> names = new List<string>();
+                foreach (var s in JobManager.AllSchedules)
+                {
+                    if (s.Name != null && s.Name.StartsWith("lamp_"))
+                        names.Add(s.Name);
+                }
+
+                foreach (var name in names)
+                {
+                    JobManager.RemoveJob(name);
+                }
+            }
+
             if (string.IsNullOrEmpty(time_range))
             {
-                WpfClientInfo.WriteInfoLog($"time_range 为空, 结束 StartPerdayTask()");
+                WpfClientInfo.WriteInfoLog($"lamp time_range 为空, 结束 StartPerdayTask()");
                 return new NormalResult();
             }
 
@@ -286,7 +309,7 @@ namespace dp2SSL
                 var start = times[0];
                 var end = times[1];
 
-                WpfClientInfo.WriteInfoLog($"time_range '{time_range}' 解析后得到 start='{start.ToString()}' end='{end.ToString()}'");
+                WpfClientInfo.WriteInfoLog($"lamp time_range '{time_range}' 解析后得到 start='{start.ToString()}' end='{end.ToString()}'");
 
                 // 专门检查是否在亮灯时间范围内
                 DateTime now = DateTime.Now;
@@ -294,15 +317,15 @@ namespace dp2SSL
                 DateTime current_end = GetTodayTime(end);
                 if (now >= current_start && now <= current_end)
                 {
-                    WpfClientInfo.WriteInfoLog($"当前时间 '{now.ToString()}' 处在 current_start '{current_start.ToString()}' 和 current_end '{current_end.ToString()}' 之间，下面进一步判断 weekday");
+                    WpfClientInfo.WriteInfoLog($"lamp 当前时间 '{now.ToString()}' 处在 current_start '{current_start.ToString()}' 和 current_end '{current_end.ToString()}' 之间，下面进一步判断 weekday");
                     if (InWeekday() == true)
                     {
                         TurnBackLampOn();
-                        WpfClientInfo.WriteInfoLog("当前时间在 weekday 范围内，因此开灯");
+                        WpfClientInfo.WriteInfoLog("lamp 当前时间在 weekday 范围内，因此开灯");
                     }
                     else
                     {
-                        WpfClientInfo.WriteInfoLog("当前时间不在 weekday 范围内，因此未开灯");
+                        WpfClientInfo.WriteInfoLog("lamp 当前时间不在 weekday 范围内，因此未开灯");
                     }
                 }
 
@@ -314,12 +337,12 @@ namespace dp2SSL
                         if (InWeekday() == true)
                         {
                             TurnBackLampOn();
-                            WpfClientInfo.WriteInfoLog("job head 触发开灯");
+                            WpfClientInfo.WriteInfoLog("lamp job head 触发开灯");
                         }
                         else
-                            WpfClientInfo.WriteInfoLog("job head 触发，但因为当前时间不在 weekday 范围，未开灯");
+                            WpfClientInfo.WriteInfoLog("lamp job head 触发，但因为当前时间不在 weekday 范围，未开灯");
                     },
-                    s => s.ToRunEvery(1).Days().At(start.Hour, start.Minute)
+                    s => s.WithName("lamp_on").ToRunEvery(1).Days().At(start.Hour, start.Minute)
                 );
                 // 关灯
                 JobManager.AddJob(
@@ -328,13 +351,13 @@ namespace dp2SSL
                         if (InWeekday() == true)
                         {
                             TurnBackLampOff();
-                            WpfClientInfo.WriteInfoLog("job tail 触发关灯");
+                            WpfClientInfo.WriteInfoLog("lamp job tail 触发关灯");
                         }
                         else
-                            WpfClientInfo.WriteInfoLog("job tail 触发，但因为当前时间不在 weekday 范围，未关灯");
+                            WpfClientInfo.WriteInfoLog("lamp job tail 触发，但因为当前时间不在 weekday 范围，未关灯");
 
                     },
-                    s => s.ToRunEvery(1).Days().At(end.Hour, end.Minute)
+                    s => s.WithName("lamp_off").ToRunEvery(1).Days().At(end.Hour, end.Minute)
                 );
 
                 /*
@@ -345,11 +368,11 @@ namespace dp2SSL
             }
             catch (Exception ex)
             {
-                WpfClientInfo.WriteErrorLog($"解析每日亮灯时间范围字符串时发现错误: {ExceptionUtil.GetDebugText(ex)}");
+                WpfClientInfo.WriteErrorLog($"lamp 解析每日亮灯时间范围字符串时发现错误: {ExceptionUtil.GetDebugText(ex)}");
                 return new NormalResult
                 {
                     Value = -1,
-                    ErrorInfo = $"解析每日亮灯时间范围字符串时发现错误: { ex.Message}"
+                    ErrorInfo = $"lamp 解析每日亮灯时间范围字符串时发现错误: { ex.Message}"
                 };
             }
 

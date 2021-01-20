@@ -2115,13 +2115,35 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             }
         }
 
+        Task _sterilampTask = null;
+        CancellationTokenSource _cancelSterilamp = new CancellationTokenSource();
+
+        // 开启紫外线灯
+        public bool BeginSterilamp()
+        {
+            if (_sterilampTask != null)
+                return false;
+
+            _cancelSterilamp?.Cancel();
+            _cancelSterilamp?.Dispose();
+
+            _cancelSterilamp = new CancellationTokenSource();
+            _sterilampTask = App.CurrentApp.SterilampAsync(_cancelSterilamp.Token);
+            return true;
+        }
+
+        // 取消正在进行的紫外线灯
+        public void CancelSterilamp()
+        {
+            _cancelSterilamp?.Cancel();
+        }
 
         // 紫外杀菌
-        public async Task SterilampAsync()
+        async Task SterilampAsync(CancellationToken token)
         {
             ProgressWindow progress = null;
 
-            using (var cancel = CancellationTokenSource.CreateLinkedTokenSource(_cancelApp.Token))
+            using (var cancel = CancellationTokenSource.CreateLinkedTokenSource(_cancelApp.Token, token))
             {
                 App.Invoke(new Action(() =>
                 {
@@ -2145,6 +2167,14 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
 
                 try
                 {
+                    // 若当前为书柜界面，则需要检查是否有打开的门
+                    if (ShelfData.OpeningDoorCount > 0)
+                    {
+                        var text = $"当前有 {ShelfData.OpeningDoorCount} 个柜门处于打开状态，暂时无法打开紫外灯";
+                        App.CurrentApp.Speak(text);
+                        return;
+                    }
+
                     // 首先倒计时警告远离
                     App.CurrentApp.Speak("即将开始紫外线消毒，请马上远离书柜");
                     for (int i = 20; i > 0; i--)
@@ -2198,6 +2228,8 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                     }));
 
                     PageShelf.TrySetMessage(null, "紫外线消毒结束");
+
+                    _sterilampTask = null;
                 }
             }
         }

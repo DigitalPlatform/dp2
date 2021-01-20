@@ -1130,12 +1130,26 @@ update
             if (command.StartsWith("set lamp time"))
             {
                 string param = command.Substring("set lamp time".Length).Trim();
-                string old_param = PerdayTask.GetPerdayTask();
-                var result = PerdayTask.ChangePerdayTask(param);
+                string old_param = LampPerdayTask.GetPerdayTask();
+                var result = LampPerdayTask.ChangePerdayTask(param);
                 if (result.Value == -1)
                     await SendMessageAsync(new string[] { groupName }, $"设置每日亮灯时间范围时出错: {result.ErrorInfo}");
                 else
                     await SendMessageAsync(new string[] { groupName }, $"已设置每日亮灯时间范围 {param}。(上次的时间范围是 {old_param})");
+                return;
+            }
+
+            // 2021/1/20
+            // 设置每日紫外灯时间点
+            if (command.StartsWith("set sterilamp time"))
+            {
+                string param = command.Substring("set sterilamp time".Length).Trim();
+                string old_param = SterilampTask.GetPerdayTask();
+                var result = SterilampTask.ChangePerdayTask(param);
+                if (result.Value == -1)
+                    await SendMessageAsync(new string[] { groupName }, $"设置紫外灯时间时出错: {result.ErrorInfo}");
+                else
+                    await SendMessageAsync(new string[] { groupName }, $"已设置紫外灯时间 {param}。(上次的时间是 {old_param})");
                 return;
             }
 
@@ -1149,16 +1163,16 @@ update
                 string param = command.Substring("lamp".Length).Trim();
                 if (string.IsNullOrEmpty(param))
                 {
-                    var state = PerdayTask.GetBackLampState();
+                    var state = LampPerdayTask.GetBackLampState();
                     await SendMessageAsync(new string[] { groupName }, $"当前灯状态为 {(state ? "亮" : "灭")}");
                     return;
                 }
 
                 param = param.ToLower();
                 if (param == "on")
-                    PerdayTask.TurnBackLampOn();
+                    LampPerdayTask.TurnBackLampOn();
                 else
-                    PerdayTask.TurnBackLampOff();
+                    LampPerdayTask.TurnBackLampOff();
                 await SendMessageAsync(new string[] { groupName }, param == "on" ? "已开灯" : "已关灯");
                 return;
             }
@@ -1218,7 +1232,14 @@ update
             // 开启紫外线杀菌
             if (command.StartsWith("sterilamp"))
             {
-                _ = App.CurrentApp.SterilampAsync();
+                // 若当前为书柜界面，则需要检查是否有打开的门
+                if (IsInShelfPage() && ShelfData.OpeningDoorCount > 0)
+                {
+                    await SendMessageAsync(new string[] { groupName }, $"当前有 {ShelfData.OpeningDoorCount} 个柜门处于打开状态，因此拒绝执行 sterilamp 命令");
+                    return;
+                }
+
+                App.CurrentApp.BeginSterilamp();
                 return;
             }
 
