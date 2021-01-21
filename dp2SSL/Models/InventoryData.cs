@@ -658,7 +658,7 @@ TaskScheduler.Default);
                     if (string.IsNullOrEmpty(entity.PII) == false
                         && info != null && info.IsLocation == false)
                     {
-                        _ = BeginInventoryAsync(entity, PageInventory.ActionMode);
+                        await BeginInventoryAsync(entity, PageInventory.ActionMode);
                     }
 
                     App.SetError("processing", null);
@@ -676,6 +676,8 @@ TaskScheduler.Default);
 
             // 把处理过的 entity 从 list 中移走
             RemoveList(list);
+
+            PageInventory.BeginUpdateStatis();
         }
 
         #endregion
@@ -1962,8 +1964,9 @@ TaskScheduler.Default);
                         CurrentShelfNo = currentShelfNo,
                         Location = location,
                         ShelfNo = shelfNo,
+                        InventoryTime = DateTime.Now,
                     };
-                    context.Items.Add(item);
+                    await context.Items.AddAsync(item);
                 }
                 else
                 {
@@ -1982,11 +1985,11 @@ TaskScheduler.Default);
                     item.InventoryTime = DateTime.Now;
                     context.Items.Update(item);
                 }
-                context.SaveChanges();
+                // await context.SaveChangesAsync();
 
                 // 2021/1/19
                 // 写入本地操作日志库
-                context.Logs.Add(new InventoryLogItem
+                await context.Logs.AddAsync(new InventoryLogItem
                 {
                     Title = title,
                     Barcode = pii,
@@ -1996,7 +1999,7 @@ TaskScheduler.Default);
                     CurrentShelfNo = currentShelfNo,
                     WriteTime = DateTime.Now,
                 });
-                context.SaveChanges();
+                await context.SaveChangesAsync();
             }
 
 
@@ -2058,6 +2061,7 @@ TaskScheduler.Default);
                     int line_count = 0;
                     int new_count = 0;
                     int change_count = 0;
+                    int delete_count = 0;
                     List<string> lines = new List<string>();
                     while (token.IsCancellationRequested == false)
                     {
@@ -2076,6 +2080,7 @@ TaskScheduler.Default);
                             line_count += result.LineCount;
                             new_count += result.NewCount;
                             change_count += result.ChangeCount;
+                            delete_count += result.DeleteCount;
                         }
                     }
                     if (lines.Count > 0)
@@ -2084,6 +2089,7 @@ TaskScheduler.Default);
                         line_count += result.LineCount;
                         new_count += result.NewCount;
                         change_count += result.ChangeCount;
+                        delete_count += result.DeleteCount;
                     }
 
                     return new ImportUidResult
@@ -2092,6 +2098,7 @@ TaskScheduler.Default);
                         LineCount = line_count,
                         NewCount = new_count,
                         ChangeCount = change_count,
+                        DeleteCount = delete_count,
                     };
                 }
             }
@@ -2111,6 +2118,7 @@ TaskScheduler.Default);
             public int LineCount { get; set; }
             public int NewCount { get; set; }
             public int ChangeCount { get; set; }
+            public int DeleteCount { get; set; }
         }
 
         static async Task<ImportUidResult> SaveLinesAsync(List<string> lines,
@@ -2119,6 +2127,7 @@ TaskScheduler.Default);
             int line_count = 0;
             int new_count = 0;
             int change_count = 0;
+            int delete_count = 0;
             using (var releaser = await _cacheLimit.EnterAsync())
             using (var context = new ItemCacheContext())
             {
@@ -2132,6 +2141,7 @@ TaskScheduler.Default);
                             LineCount = line_count,
                             NewCount = new_count,
                             ChangeCount = change_count,
+                            DeleteCount = delete_count,
                         };
 
                     if (string.IsNullOrEmpty(line))
@@ -2145,9 +2155,10 @@ TaskScheduler.Default);
                     var result = UpdateUidEntry(context, barcode, uid);
                     new_count += result.NewCount;
                     change_count += result.ChangeCount;
+                    delete_count += result.DeleteCount;
 
                     line_count++;
-                    context.SaveChanges();
+                    await context.SaveChangesAsync();
                 }
             }
             return new ImportUidResult
@@ -2155,6 +2166,7 @@ TaskScheduler.Default);
                 LineCount = line_count,
                 NewCount = new_count,
                 ChangeCount = change_count,
+                DeleteCount = delete_count,
             };
         }
 
@@ -2202,7 +2214,8 @@ TaskScheduler.Default);
             return new ImportUidResult
             {
                 NewCount = new_count,
-                ChangeCount = change_count
+                ChangeCount = change_count,
+                DeleteCount = delete_count,
             };
         }
 
@@ -2288,13 +2301,13 @@ TaskScheduler.Default);
 
                     FillBookItem(item, item_xml);
                     context.Items.Add(item);
-                    context.SaveChanges();
+                    await context.SaveChangesAsync();
                 }
                 else
                 {
                     FillBookItem(item, item_xml);
                     context.Items.Update(item);
-                    context.SaveChanges();
+                    await context.SaveChangesAsync();
                 }
                 return new NormalResult();
             }
@@ -2338,170 +2351,179 @@ TaskScheduler.Default);
                 };
             }
 
-            // 询问文件名
-            SaveFileDialog dlg = new SaveFileDialog
-            {
-                Title = "请指定要输出的 Excel 文件名",
-                CreatePrompt = false,
-                OverwritePrompt = true,
-                // dlg.FileName = this.ExportExcelFilename;
-                // dlg.InitialDirectory = Environment.CurrentDirectory;
-                Filter = "Excel 文件 (*.xlsx)|*.xlsx|All files (*.*)|*.*",
-
-                RestoreDirectory = true
-            };
-
-            if (dlg.ShowDialog() == false)
-                return new NormalResult
-                {
-                    Value = -1,
-                    ErrorInfo = "放弃",
-                    ErrorCode = "cancel"
-                };
-
-            XLWorkbook doc = null;
-
+            App.PauseBarcodeScan();
             try
             {
-                doc = new XLWorkbook(XLEventTracking.Disabled);
-                File.Delete(dlg.FileName);
-            }
-            catch (Exception ex)
-            {
-                return new NormalResult
+
+                // 询问文件名
+                SaveFileDialog dlg = new SaveFileDialog
                 {
-                    Value = -1,
-                    ErrorInfo = $"创建 Excel 文件时出现异常:{ex.Message}"
+                    Title = "请指定要输出的 Excel 文件名",
+                    CreatePrompt = false,
+                    OverwritePrompt = true,
+                    // dlg.FileName = this.ExportExcelFilename;
+                    // dlg.InitialDirectory = Environment.CurrentDirectory;
+                    Filter = "Excel 文件 (*.xlsx)|*.xlsx|All files (*.*)|*.*",
+
+                    RestoreDirectory = true
                 };
-            }
 
-            IXLWorksheet sheet = null;
-            sheet = doc.Worksheets.Add("表格");
-            // sheet.Style.Font.FontName = this.Font.Name;
-
-            // 每个列的最大字符数
-            List<int> column_max_chars = new List<int>();
-
-            List<XLAlignmentHorizontalValues> alignments = new List<XLAlignmentHorizontalValues>();
-            foreach (var header in columns)
-            {
-                if (header.TextAlign == "center")
-                    alignments.Add(XLAlignmentHorizontalValues.Center);
-                else if (header.TextAlign == "right")
-                    alignments.Add(XLAlignmentHorizontalValues.Right);
-                else
-                    alignments.Add(XLAlignmentHorizontalValues.Left);
-
-                column_max_chars.Add(0);
-            }
-
-            Debug.Assert(alignments.Count == columns.Count, "");
-
-            // string strFontName = list.Font.FontFamily.Name;
-
-            int nRowIndex = 1;
-            int nColIndex = 1;
-            foreach (var header in columns)
-            {
-                IXLCell cell = sheet.Cell(nRowIndex, nColIndex).SetValue(DomUtil.ReplaceControlCharsButCrLf(header.Caption, '*'));
-                cell.Style.Alignment.WrapText = true;
-                cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
-                cell.Style.Font.Bold = true;
-                // cell.Style.Font.FontName = strFontName;
-                cell.Style.Alignment.Horizontal = alignments[nColIndex - 1];
-                nColIndex++;
-            }
-            nRowIndex++;
-
-            foreach (var item in items)
-            {
-                if (token.IsCancellationRequested)
+                if (dlg.ShowDialog() == false)
                     return new NormalResult
                     {
                         Value = -1,
-                        ErrorInfo = "中断",
+                        ErrorInfo = "放弃",
                         ErrorCode = "cancel"
                     };
 
-                nColIndex = 1;
-                foreach (var column in columns)
-                {
-                    string value = GetPropertyOrField(item, column.Property);
+                XLWorkbook doc = null;
 
-                    // 统计最大字符数
-                    // int nChars = column_max_chars[nColIndex - 1];
-                    if (value != null)
+                try
+                {
+                    doc = new XLWorkbook(XLEventTracking.Disabled);
+                    File.Delete(dlg.FileName);
+                }
+                catch (Exception ex)
+                {
+                    return new NormalResult
                     {
-                        SetMaxChars(/*ref*/ column_max_chars, nColIndex - 1, value.Length);
-                    }
-                    IXLCell cell = sheet.Cell(nRowIndex, nColIndex).SetValue(DomUtil.ReplaceControlCharsButCrLf(value, '*'));
+                        Value = -1,
+                        ErrorInfo = $"创建 Excel 文件时出现异常:{ex.Message}"
+                    };
+                }
+
+                IXLWorksheet sheet = null;
+                sheet = doc.Worksheets.Add("表格");
+                // sheet.Style.Font.FontName = this.Font.Name;
+
+                // 每个列的最大字符数
+                List<int> column_max_chars = new List<int>();
+
+                List<XLAlignmentHorizontalValues> alignments = new List<XLAlignmentHorizontalValues>();
+                foreach (var header in columns)
+                {
+                    if (header.TextAlign == "center")
+                        alignments.Add(XLAlignmentHorizontalValues.Center);
+                    else if (header.TextAlign == "right")
+                        alignments.Add(XLAlignmentHorizontalValues.Right);
+                    else
+                        alignments.Add(XLAlignmentHorizontalValues.Left);
+
+                    column_max_chars.Add(0);
+                }
+
+                Debug.Assert(alignments.Count == columns.Count, "");
+
+                // string strFontName = list.Font.FontFamily.Name;
+
+                int nRowIndex = 1;
+                int nColIndex = 1;
+                foreach (var header in columns)
+                {
+                    IXLCell cell = sheet.Cell(nRowIndex, nColIndex).SetValue(DomUtil.ReplaceControlCharsButCrLf(header.Caption, '*'));
                     cell.Style.Alignment.WrapText = true;
                     cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                    cell.Style.Font.Bold = true;
                     // cell.Style.Font.FontName = strFontName;
-                    // 2020/1/6 增加保护代码
-                    if (nColIndex - 1 < alignments.Count)
-                        cell.Style.Alignment.Horizontal = alignments[nColIndex - 1];
-                    else
-                        cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Left;
+                    cell.Style.Alignment.Horizontal = alignments[nColIndex - 1];
                     nColIndex++;
                 }
-
                 nRowIndex++;
-            }
 
-            /*
-            double char_width = GetAverageCharPixelWidth(list);
-
-            // 字符数太多的列不要做 width auto adjust
-            const int MAX_CHARS = 30;   // 60
-            int i = 0;
-            foreach (IXLColumn column in sheet.Columns())
-            {
-                // int nChars = column_max_chars[i];
-                int nChars = GetMaxChars(column_max_chars, i);
-
-                if (nChars < MAX_CHARS)
-                    column.AdjustToContents();
-                else
+                foreach (var item in items)
                 {
-                    int nColumnWidth = 100;
-                    // 2020/1/6 增加保护判断
-                    if (i >= 0 && i < list.Columns.Count)
-                        nColumnWidth = list.Columns[i].Width;
-                    column.Width = (double)nColumnWidth / char_width;  // Math.Min(MAX_CHARS, nChars);
+                    if (token.IsCancellationRequested)
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = "中断",
+                            ErrorCode = "cancel"
+                        };
+
+                    nColIndex = 1;
+                    foreach (var column in columns)
+                    {
+                        string value = GetPropertyOrField(item, column.Property);
+
+                        // 统计最大字符数
+                        // int nChars = column_max_chars[nColIndex - 1];
+                        if (value != null)
+                        {
+                            SetMaxChars(/*ref*/ column_max_chars, nColIndex - 1, value.Length);
+                        }
+                        IXLCell cell = sheet.Cell(nRowIndex, nColIndex).SetValue(DomUtil.ReplaceControlCharsButCrLf(value, '*'));
+                        cell.Style.Alignment.WrapText = true;
+                        cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                        // cell.Style.Font.FontName = strFontName;
+                        // 2020/1/6 增加保护代码
+                        if (nColIndex - 1 < alignments.Count)
+                            cell.Style.Alignment.Horizontal = alignments[nColIndex - 1];
+                        else
+                            cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Left;
+                        nColIndex++;
+                    }
+
+                    nRowIndex++;
                 }
-                i++;
+
+                /*
+                double char_width = GetAverageCharPixelWidth(list);
+
+                // 字符数太多的列不要做 width auto adjust
+                const int MAX_CHARS = 30;   // 60
+                int i = 0;
+                foreach (IXLColumn column in sheet.Columns())
+                {
+                    // int nChars = column_max_chars[i];
+                    int nChars = GetMaxChars(column_max_chars, i);
+
+                    if (nChars < MAX_CHARS)
+                        column.AdjustToContents();
+                    else
+                    {
+                        int nColumnWidth = 100;
+                        // 2020/1/6 增加保护判断
+                        if (i >= 0 && i < list.Columns.Count)
+                            nColumnWidth = list.Columns[i].Width;
+                        column.Width = (double)nColumnWidth / char_width;  // Math.Min(MAX_CHARS, nChars);
+                    }
+                    i++;
+                }
+                */
+
+                sheet.Columns().AdjustToContents();
+
+                // sheet.Rows().AdjustToContents();
+
+                doc.SaveAs(dlg.FileName);
+                doc.Dispose();
+
+                try
+                {
+                    System.Diagnostics.Process.Start(dlg.FileName);
+                }
+                catch
+                {
+                }
+
+                return new NormalResult();
             }
-            */
-
-            sheet.Columns().AdjustToContents();
-
-            // sheet.Rows().AdjustToContents();
-
-            doc.SaveAs(dlg.FileName);
-            doc.Dispose();
-
-            try
+            finally
             {
-                System.Diagnostics.Process.Start(dlg.FileName);
+                App.ContinueBarcodeScan();
             }
-            catch
-            {
-            }
-
-            return new NormalResult();
         }
 
         static string GetPropertyOrField(object obj, string name)
         {
             var pi = obj.GetType().GetProperty(name);
             if (pi != null)
-                return (string)pi.GetValue(obj);
+                return pi.GetValue(obj)?.ToString();
 
             var fi = obj.GetType().GetField(name);
             if (fi == null)
                 return null;
-            return (string)fi.GetValue(obj);
+            return fi.GetValue(obj)?.ToString();
         }
 
         public static int GetMaxChars(List<int> column_max_chars, int index)
@@ -2541,6 +2563,161 @@ TaskScheduler.Default);
 
             // 文字对齐方向
             public string TextAlign { get; set; }   // left/right/center。 默认 left
+        }
+
+        // 导出所有的本地册记录到 Excel 文件
+        public static async Task<NormalResult> ExportAllItemToExcelAsync(
+            List<InventoryColumn> columns,
+            CancellationToken token)
+        {
+            App.PauseBarcodeScan();
+            try
+            {
+                // 询问文件名
+                SaveFileDialog dlg = new SaveFileDialog
+                {
+                    Title = "请指定要输出的 Excel 文件名",
+                    CreatePrompt = false,
+                    OverwritePrompt = true,
+                    // dlg.FileName = this.ExportExcelFilename;
+                    // dlg.InitialDirectory = Environment.CurrentDirectory;
+                    Filter = "Excel 文件 (*.xlsx)|*.xlsx|All files (*.*)|*.*",
+
+                    RestoreDirectory = true
+                };
+
+                if (dlg.ShowDialog() == false)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = "放弃",
+                        ErrorCode = "cancel"
+                    };
+
+                XLWorkbook doc = null;
+
+                try
+                {
+                    doc = new XLWorkbook(XLEventTracking.Disabled);
+                    File.Delete(dlg.FileName);
+                }
+                catch (Exception ex)
+                {
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"创建 Excel 文件时出现异常:{ex.Message}"
+                    };
+                }
+
+                IXLWorksheet sheet = null;
+                sheet = doc.Worksheets.Add("表格");
+
+                // 每个列的最大字符数
+                List<int> column_max_chars = new List<int>();
+
+                List<XLAlignmentHorizontalValues> alignments = new List<XLAlignmentHorizontalValues>();
+                foreach (var header in columns)
+                {
+                    if (header.TextAlign == "center")
+                        alignments.Add(XLAlignmentHorizontalValues.Center);
+                    else if (header.TextAlign == "right")
+                        alignments.Add(XLAlignmentHorizontalValues.Right);
+                    else
+                        alignments.Add(XLAlignmentHorizontalValues.Left);
+
+                    column_max_chars.Add(0);
+                }
+
+                Debug.Assert(alignments.Count == columns.Count, "");
+
+                // string strFontName = list.Font.FontFamily.Name;
+
+                int nRowIndex = 1;
+                int nColIndex = 1;
+                foreach (var header in columns)
+                {
+                    IXLCell cell = sheet.Cell(nRowIndex, nColIndex).SetValue(DomUtil.ReplaceControlCharsButCrLf(header.Caption, '*'));
+                    cell.Style.Alignment.WrapText = true;
+                    cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                    cell.Style.Font.Bold = true;
+                    // cell.Style.Font.FontName = strFontName;
+                    cell.Style.Alignment.Horizontal = alignments[nColIndex - 1];
+                    nColIndex++;
+                }
+                nRowIndex++;
+
+                using (var releaser = await _cacheLimit.EnterAsync())
+                using (var context = new ItemCacheContext())
+                {
+                    foreach (var item in context.Items)
+                    {
+                        if (token.IsCancellationRequested)
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = "中断",
+                                ErrorCode = "cancel"
+                            };
+
+                        if (string.IsNullOrEmpty(item.Barcode))
+                            continue;
+
+                        // 检查册记录是否存在
+                        var result = await SipChannelUtil.GetEntityDataAsync(item.Barcode, "network");
+                        if (result.Value == -1)
+                        {
+                            if (result.ErrorCode == "itemNotFound")
+                                continue;
+                            return result;
+                        }
+
+                        nColIndex = 1;
+                        foreach (var column in columns)
+                        {
+                            string value = GetPropertyOrField(item, column.Property);
+
+                            // 统计最大字符数
+                            // int nChars = column_max_chars[nColIndex - 1];
+                            if (value != null)
+                            {
+                                SetMaxChars(/*ref*/ column_max_chars, nColIndex - 1, value.Length);
+                            }
+                            IXLCell cell = sheet.Cell(nRowIndex, nColIndex).SetValue(DomUtil.ReplaceControlCharsButCrLf(value, '*'));
+                            cell.Style.Alignment.WrapText = true;
+                            cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                            // cell.Style.Font.FontName = strFontName;
+                            // 2020/1/6 增加保护代码
+                            if (nColIndex - 1 < alignments.Count)
+                                cell.Style.Alignment.Horizontal = alignments[nColIndex - 1];
+                            else
+                                cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Left;
+                            nColIndex++;
+                        }
+
+                        nRowIndex++;
+                    }
+                }
+
+                sheet.Columns().AdjustToContents();
+
+                doc.SaveAs(dlg.FileName);
+                doc.Dispose();
+
+                try
+                {
+                    System.Diagnostics.Process.Start(dlg.FileName);
+                }
+                catch
+                {
+                }
+
+                return new NormalResult();
+            }
+            finally
+            {
+                App.ContinueBarcodeScan();
+            }
         }
 
         #endregion

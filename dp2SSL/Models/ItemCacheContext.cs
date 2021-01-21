@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
 using DigitalPlatform.WPF;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace dp2SSL
 {
@@ -52,7 +53,7 @@ namespace dp2SSL
             modelBuilder.Entity<InventoryLogItem>().ToTable("log");
             modelBuilder.Entity<InventoryLogItem>(entity =>
             {
-                entity.HasNoKey();
+                entity.HasKey(e => e.ID);
             });
         }
     }
@@ -90,6 +91,9 @@ namespace dp2SSL
 
     public class InventoryLogItem
     {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int ID { get; set; }
+
         public string Title { get; set; }
         public string Barcode { get; set; }
         public string Location { get; set; }

@@ -209,7 +209,8 @@ namespace dp2SSL
                                     ErrorCode = get_result.Result.CirculationStatus_2
                                 });
                             }
-                            else if (get_result.Result.CirculationStatus_2 == "13")
+                            else if (get_result.Result.CirculationStatus_2 == "13"
+                                || string.IsNullOrEmpty(get_result.Result.AB_ItemIdentifier_r))
                             {
                                 errors.Add(new NormalResult
                                 {
@@ -238,6 +239,7 @@ namespace dp2SSL
                                 DomUtil.SetElementText(itemdom.DocumentElement,
                                     "barcode",
                                     get_result.Result.AB_ItemIdentifier_r);
+
                                 // 永久馆藏地
                                 DomUtil.SetElementText(itemdom.DocumentElement,
                                     "location",

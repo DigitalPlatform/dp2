@@ -33,7 +33,7 @@ namespace dp2SSL
     /// </summary>
     public partial class PageInventory : MyPage, INotifyPropertyChanged
     {
-        EntityCollection _entities = new EntityCollection();
+        static EntityCollection _entities = new EntityCollection();
 
         public PageInventory()
         {
@@ -78,6 +78,8 @@ namespace dp2SSL
             App.BookTagChanged -= CurrentApp_NewTagChanged;
 
             this.Pause();
+
+            CloseCountWindow();
         }
 
         private void PageInventory_Loaded(object sender, RoutedEventArgs e)
@@ -87,7 +89,7 @@ namespace dp2SSL
 
             RefreshActionModeMenu();
 
-
+            ShowCountWindow();
         }
 
         private void CurrentApp_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -160,6 +162,8 @@ namespace dp2SSL
                 this.beginInventory.IsEnabled = false;
                 this.stopInventory.IsEnabled = true;
             }));
+
+            BeginUpdateStatis();
         }
 
         // 新版本的事件
@@ -172,7 +176,10 @@ namespace dp2SSL
                 // throw new Exception("testing");
 
                 if (_pause)
+                {
+                    // TODO: 可以语音提示尚未开始
                     return;
+                }
 
                 var channel = (BaseChannel<IRfid>)sender;
                 // TODO: 对离开的 tag 变化为灰色颜色
@@ -194,7 +201,7 @@ namespace dp2SSL
                 }
 
                 // 筛选出需要 GetTagInfo() 的那些标签
-                await FilterTags(channel, e.AddTags);
+                await FilterTagsAsync(channel, e.AddTags);
 
 #if NO
             SoundMaker.InitialSequence(e.AddTags.Count);
@@ -225,7 +232,7 @@ namespace dp2SSL
         }
 
         // 筛选出需要 GetTagInfo() 的那些标签
-        async Task FilterTags(BaseChannel<IRfid> channel, List<TagAndData> tags)
+        async Task FilterTagsAsync(BaseChannel<IRfid> channel, List<TagAndData> tags)
         {
             // PII 尚为空的那些 entities
             List<Entity> empty_piis = new List<Entity>();
@@ -385,6 +392,8 @@ namespace dp2SSL
                     }
                 }
             }
+
+            BeginUpdateStatis();
         }
 
 #if NO
@@ -659,6 +668,7 @@ namespace dp2SSL
             }));
             InventoryData.Clear();
             InventoryData.CurrentShelfNo = null;
+            BeginUpdateStatis();
         }
 
         private void beginSound_Click(object sender, RoutedEventArgs e)
@@ -721,60 +731,68 @@ namespace dp2SSL
         // 导入 UID-->PII 对照表
         private async void importUidPiiTable_Click(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Title = "导入 UID PII 对照表 - 请指定文件名";
-            openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);    // WpfClientInfo.UserDir;
-            openFileDialog.RestoreDirectory = true;
-            openFileDialog.Filter = "对照表文件(*.txt)|*.txt|所有文件(*.*)|*.*";
-            if (openFileDialog.ShowDialog() == false)
-                return;
-
-            using (var cancel = CancellationTokenSource.CreateLinkedTokenSource(App.CancelToken))
+            App.PauseBarcodeScan();
+            try
             {
-                ProgressWindow progress = null;
-                App.Invoke(new Action(() =>
+                OpenFileDialog openFileDialog = new OpenFileDialog();
+                openFileDialog.Title = "导入 UID PII 对照表 - 请指定文件名";
+                openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);    // WpfClientInfo.UserDir;
+                openFileDialog.RestoreDirectory = true;
+                openFileDialog.Filter = "对照表文件(*.txt)|*.txt|所有文件(*.*)|*.*";
+                if (openFileDialog.ShowDialog() == false)
+                    return;
+
+                using (var cancel = CancellationTokenSource.CreateLinkedTokenSource(App.CancelToken))
                 {
-                    progress = new ProgressWindow();
-                    progress.TitleText = "导入 UID PII 对照表文件";
-                    progress.MessageText = "正在导入 UID PII 对照表文件，请稍等 ...";
-                    progress.Owner = Application.Current.MainWindow;
-                    progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-                    progress.Closed += (s1, e1) =>
-                    {
-                        cancel.Cancel();
-                    };
-                    progress.okButton.Content = "停止";
-                    progress.Background = new SolidColorBrush(Colors.DarkRed);
-                    App.SetSize(progress, "middle");
-                    progress.BackColor = "black";
-                    progress.Show();
-                }));
-                try
-                {
-                    await Task.Run(async () =>
-                    {
-                        // 导入 UID PII 对照表文件
-                        var result = await InventoryData.ImportUidPiiTableAsync(
-                            openFileDialog.FileName,
-                            App.CancelToken);
-                        if (result.Value == -1)
-                            App.ErrorBox("导入 UID PII 对照表文件", $"导入过程出错: {result.ErrorInfo}");
-                        else
-                            App.ErrorBox("导入 UID PII 对照表文件", $"导入完成。\r\n\r\n共处理条目 {result.LineCount} 个；新创建本地库记录 {result.NewCount} 个；修改本地库记录 {result.ChangeCount} 个", "green");
-                    });
-                }
-                catch (Exception ex)
-                {
-                    WpfClientInfo.WriteErrorLog($"导入 UID 对照表过程出现异常: {ExceptionUtil.GetDebugText(ex)}");
-                    App.ErrorBox("导入 UID PII 对照表文件", $"导入 UID 对照表过程出现异常: {ex.Message}");
-                }
-                finally
-                {
+                    ProgressWindow progress = null;
                     App.Invoke(new Action(() =>
                     {
-                        progress.Close();
+                        progress = new ProgressWindow();
+                        progress.TitleText = "导入 UID PII 对照表文件";
+                        progress.MessageText = "正在导入 UID PII 对照表文件，请稍等 ...";
+                        progress.Owner = Application.Current.MainWindow;
+                        progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                        progress.Closed += (s1, e1) =>
+                        {
+                            cancel.Cancel();
+                        };
+                        progress.okButton.Content = "停止";
+                        progress.Background = new SolidColorBrush(Colors.DarkRed);
+                        App.SetSize(progress, "middle");
+                        progress.BackColor = "black";
+                        progress.Show();
                     }));
+                    try
+                    {
+                        await Task.Run(async () =>
+                        {
+                        // 导入 UID PII 对照表文件
+                        var result = await InventoryData.ImportUidPiiTableAsync(
+                                openFileDialog.FileName,
+                                App.CancelToken);
+                            if (result.Value == -1)
+                                App.ErrorBox("导入 UID PII 对照表文件", $"导入过程出错: {result.ErrorInfo}");
+                            else
+                                App.ErrorBox("导入 UID PII 对照表文件", $"导入完成。\r\n\r\n共处理条目 {result.LineCount} 个; 新创建本地库记录 {result.NewCount} 个; 修改本地库记录 {result.ChangeCount} 个; 删除本地库记录 {result.DeleteCount}", "green");
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        WpfClientInfo.WriteErrorLog($"导入 UID 对照表过程出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                        App.ErrorBox("导入 UID PII 对照表文件", $"导入 UID 对照表过程出现异常: {ex.Message}");
+                    }
+                    finally
+                    {
+                        App.Invoke(new Action(() =>
+                        {
+                            progress.Close();
+                        }));
+                    }
                 }
+            }
+            finally
+            {
+                App.ContinueBarcodeScan();
             }
         }
 
@@ -1044,6 +1062,157 @@ namespace dp2SSL
         private void stopInventory_Click(object sender, RoutedEventArgs e)
         {
             this.Pause();
+        }
+
+        static InventoryInfoWindow _infoWindow = null;
+
+        static void ShowCountWindow()
+        {
+            App.Invoke(new Action(() =>
+            {
+                if (_infoWindow == null)
+                {
+                    _infoWindow = new InventoryInfoWindow();
+                    _infoWindow.Owner = Application.Current.MainWindow;
+                    _infoWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                    // App.SetSize(bookInfoWindow, "wide");
+                    _infoWindow.Closed += (o, e) =>
+                    {
+
+                    };
+                }
+                _infoWindow.ShowInTaskbar = false;
+                _infoWindow.Show();
+            }));
+        }
+
+        static void CloseCountWindow()
+        {
+            _infoWindow?.Hide();
+        }
+
+        static Task _updateTask = null;
+
+        public static bool BeginUpdateStatis()
+        {
+            if (_updateTask != null)
+                return false;
+
+            _updateTask = Task.Run(() =>
+            {
+                UpdateStatis();
+                _updateTask = null;
+            });
+            return true;
+        }
+
+        static void UpdateStatis()
+        {
+            if (_infoWindow == null)
+                return;
+
+            int error_count = 0;
+            int shelf_count = 0;
+            int succeed_count = 0;
+            foreach (var entity in _entities)
+            {
+                var info = entity.Tag as ProcessInfo;
+                if (info == null)
+                {
+                    error_count++;
+                    continue;
+                }
+                if (info.IsLocation)
+                {
+                    shelf_count++;
+                    continue;
+                }
+                if (entity.Error != null)
+                    error_count++;
+                else
+                    succeed_count++;
+            }
+
+            int total_count = _entities.Count - shelf_count;
+
+            App.Invoke(new Action(() =>
+            {
+                string totalCountText = total_count.ToString();
+                if (_infoWindow.TotalCount != totalCountText)
+                    _infoWindow.TotalCount = totalCountText;
+
+                string errorCountText = error_count.ToString();
+                if (_infoWindow.ErrorCount != errorCountText)
+                    _infoWindow.ErrorCount = errorCountText;
+
+                string shelfCountText = shelf_count.ToString();
+                if (_infoWindow.ShelfCount != shelfCountText)
+                    _infoWindow.ShelfCount = shelfCountText;
+
+                string succeedCountText = succeed_count.ToString();
+                if (_infoWindow.SucceedCount != succeedCountText)
+                    _infoWindow.SucceedCount = succeedCountText;
+            }));
+        }
+
+        private async void exportAllItemToExcel_Click(object sender, RoutedEventArgs e)
+        {
+            List<InventoryColumn> columns = new List<InventoryColumn>()
+            {
+                // new InventoryColumn{ Caption = "UID", Property = "UID"},
+                new InventoryColumn{ Caption = "PII", Property = "Barcode"},
+                new InventoryColumn{ Caption = "书名", Property = "Title"},
+                new InventoryColumn{ Caption = "当前位置", Property = "CurrentLocation"},
+                new InventoryColumn{ Caption = "当前架号", Property = "CurrentShelfNo"},
+                new InventoryColumn{ Caption = "永久馆藏地", Property = "Location"},
+                new InventoryColumn{ Caption = "永久架号", Property = "ShelfNo"},
+                new InventoryColumn{ Caption = "盘点日期", Property = "InventoryTime"},
+            };
+
+            using (var cancel = CancellationTokenSource.CreateLinkedTokenSource(App.CancelToken))
+            {
+                ProgressWindow progress = null;
+                App.Invoke(new Action(() =>
+                {
+                    progress = new ProgressWindow();
+                    progress.TitleText = "导出册记录到 Excel 文件";
+                    progress.MessageText = "导出册记录到 Excel 文件，请稍等 ...";
+                    progress.Owner = Application.Current.MainWindow;
+                    progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                    progress.Closed += (s1, e1) =>
+                    {
+                        cancel.Cancel();
+                    };
+                    progress.okButton.Content = "停止";
+                    progress.Background = new SolidColorBrush(Colors.DarkRed);
+                    App.SetSize(progress, "middle");
+                    progress.BackColor = "black";
+                    progress.Show();
+                }));
+                try
+                {
+                    // 导出所有的本地册记录到 Excel 文件
+                    var result = await ExportAllItemToExcelAsync(
+                        columns,
+                        cancel.Token);
+                    if (result.Value == -1)
+                        App.ErrorBox("导出册记录到 Excel 文件", $"导出册记录到 Excel 文件过程出错: {result.ErrorInfo}");
+                    else
+                        App.ErrorBox("导出册记录到 Excel 文件", $"导出册记录到 Excel 文件完成", "green");
+                }
+                catch (Exception ex)
+                {
+                    WpfClientInfo.WriteErrorLog($"导出册记录到 Excel 文件过程出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                    App.ErrorBox("导出册记录到 Excel 文件", $"导出册记录到 Excel 文件过程出现异常: {ex.Message}");
+                }
+                finally
+                {
+                    App.Invoke(new Action(() =>
+                    {
+                        progress.Close();
+                    }));
+                }
+            }
         }
     }
 }
