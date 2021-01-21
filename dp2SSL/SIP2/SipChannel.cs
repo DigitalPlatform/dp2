@@ -89,6 +89,7 @@ namespace dp2SSL
             if (connect_result.Value == -1)
                 return connect_result;
 
+            /*
             if (userName == null && _userName == null)
             {
                 return new NormalResult
@@ -97,6 +98,13 @@ namespace dp2SSL
                     ErrorInfo = "以前没有登录过，无法进行自动登录"
                 };
             }
+            */
+
+            // 2021/1/21
+            // _userName == null 有可能是设置对话框中 userName 本来就是空，表示 SIP2 服务器无需登录即可使用
+            if (userName == null && _userName == null)
+                return new NormalResult();
+
             var login_result = await LoginAsync(userName, password);
             if (login_result.Value == -1)
                 return login_result;
