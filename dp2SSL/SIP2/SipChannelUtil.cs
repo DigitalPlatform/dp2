@@ -170,6 +170,7 @@ namespace dp2SSL
         // 获得册记录信息和书目摘要信息
         // parameters:
         //      style   风格。network 表示只从网络获取册记录；否则优先从本地获取，本地没有再从网络获取册记录。无论如何，书目摘要都是尽量从本地获取
+        //              updateItemTitle 表示用从 SIP 服务器获得的题名刷新(从本地数据库中获得的) BookItem 中的 Title 成员
         // .Value
         //      0   没有找到
         //      1   找到
@@ -177,6 +178,7 @@ namespace dp2SSL
             string style)
         {
             bool network = StringUtil.IsInList("network", style);
+            bool updateItemTitle = StringUtil.IsInList("updateItemTitle", style);
             try
             {
                 using (var releaser = await _channelLimit.EnterAsync())
@@ -355,6 +357,9 @@ namespace dp2SSL
                                             "currentLocation",
                                             BuildCurrentLocation(book_item.CurrentLocation == null ? oldLeft : book_item.CurrentLocation,
                                             book_item.CurrentShelfNo == null ? oldRight : book_item.CurrentShelfNo));
+
+                                        if (updateItemTitle)
+                                            book_item.Title = get_result.Result.AJ_TitleIdentifier_r;
                                     }
                                 }
 

@@ -159,11 +159,21 @@ namespace dp2SSL
 
         void DisplayVideo(VideoWindow window, TimeSpan timeout)
         {
+            DateTime lastResetTime = DateTime.Now;
             DateTime start = DateTime.Now;
             while (_stopVideo == false)
             {
                 if (DateTime.Now - start > timeout)
                     break;
+
+                if (DateTime.Now - lastResetTime > TimeSpan.FromSeconds(2))
+                {
+                    // 2021/1/23
+                    // 重置活跃时钟，避免中途自动返回菜单页面
+                    PageMenu.MenuPage.ResetActivityTimer();
+                    lastResetTime = DateTime.Now;
+                }
+
                 var result = FaceManager.GetImage("");
                 if (result.ImageData == null)
                 {
@@ -496,7 +506,7 @@ namespace dp2SSL
                     CloseDialogs();
 
                     // 自动返回菜单页面
-                    if (App.AutoBackMenuPage 
+                    if (App.AutoBackMenuPage
                         && (IsVerticalCard()/*_patron.IsFingerprintSource || App.PatronReaderVertical == true*/ || TagList.Patrons.Count == 0))
                         TryBackMenuPage();
                 }
@@ -1715,7 +1725,7 @@ out string strError);
 
 
 
-#region 属性
+        #region 属性
 
 #if NO
         private void Entities_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -1797,7 +1807,7 @@ out string strError);
         }
 
 
-#endregion
+        #endregion
 
         // 借书
         private void BorrowButton_Click(object sender, RoutedEventArgs e)
@@ -2559,7 +2569,8 @@ out string strError);
 
         void TryBackMenuPage()
         {
-            _ = Task.Run(async ()=> {
+            _ = Task.Run(async () =>
+            {
                 try
                 {
                     await Task.Delay(TimeSpan.FromSeconds(2));
@@ -2575,7 +2586,7 @@ out string strError);
             });
         }
 
-#region patron 分类报错机制
+        #region patron 分类报错机制
 
         // 错误类别 --> 错误字符串
         // 错误类别有：rfid fingerprint getreaderinfo
@@ -2584,7 +2595,7 @@ out string strError);
         // 设置读者区域错误字符串
         void SetPatronError(string type, string error)
         {
-            _patronErrorTable.SetError(type, 
+            _patronErrorTable.SetError(type,
                 error,
                 true);
             // 如果有错误信息，则主动把“清除读者信息”按钮设为可用，以便读者可以随时清除错误信息
@@ -2626,9 +2637,9 @@ out string strError);
         }
 #endif
 
-#endregion
+        #endregion
 
-#region global 分类报错机制
+        #region global 分类报错机制
 
         // 错误类别 --> 错误字符串
         // 错误类别有：rfid fingerprint
@@ -2677,7 +2688,7 @@ out string strError);
         }
 #endif
 
-#endregion
+        #endregion
 
 #pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
         private async void RegisterFace_Click(object sender, RoutedEventArgs e)
@@ -3226,7 +3237,7 @@ string color = "red")
 
 #endif
 
-#region 下级函数
+        #region 下级函数
 
 #if OLDVERSION
         // return:
@@ -3526,7 +3537,7 @@ out strError);
         }
 
 #endif
-#endregion
+        #endregion
 
 #if OLDVERSION
 
@@ -3732,7 +3743,7 @@ string usage)
             PatronClear();
         }
 
-#region 提醒拿走读者卡
+        #region 提醒拿走读者卡
 
         static DelayAction _delayNotifyCard = null;
 
@@ -3776,9 +3787,9 @@ string usage)
                 });
         }
 
-#endregion
+        #endregion
 
-#region 延迟清除读者信息
+        #region 延迟清除读者信息
 
         DelayAction _delayClearPatronTask = null;
 
@@ -3950,7 +3961,7 @@ string usage)
             }
         }
 
-#endregion
+        #endregion
 
 #pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
         private async void bindPatronCard_Click(object sender, RoutedEventArgs e)
@@ -4115,7 +4126,7 @@ string usage)
                     {
                         App.Invoke(new Action(() =>
                         {
-                            progress.MessageText = "读卡器只应放一张副卡。请拿走多余的副卡";
+                            progress.MessageText = "请拿走主卡，并放上要绑定的副卡";  // "读卡器只应放一张副卡。请拿走多余的副卡";
                         }));
                     }
 
