@@ -161,13 +161,19 @@ namespace dp2SSL
             }
         }
 
+        public class GetLocalEntityDataResult : GetEntityDataResult
+        {
+            // 返回本地数据库记录对象
+            public BookItem BookItem { get; set; }
+        }
+
         // 获得册记录信息和书目摘要信息
         // parameters:
         //      style   风格。network 表示只从网络获取册记录；否则优先从本地获取，本地没有再从网络获取册记录。无论如何，书目摘要都是尽量从本地获取
         // .Value
         //      0   没有找到
         //      1   找到
-        public static async Task<GetEntityDataResult> GetEntityDataAsync(string pii,
+        public static async Task<GetLocalEntityDataResult> GetEntityDataAsync(string pii,
             string style)
         {
             bool network = StringUtil.IsInList("network", style);
@@ -179,7 +185,8 @@ namespace dp2SSL
                     SipChannel channel = await GetChannelAsync();
                     try
                     {
-                        GetEntityDataResult result = null;
+                        BookItem book_item = null;
+                        GetLocalEntityDataResult result = null;
                         List<NormalResult> errors = new List<NormalResult>();
 
                         EntityItem entity_record = null;
@@ -321,7 +328,7 @@ namespace dp2SSL
                                 // 用本地数据记录修正盘点部分字段
                                 if (StringUtil.IsInList("localInventory", style))
                                 {
-                                    var book_item = await InventoryData.FindBookItemAsync(pii);
+                                    book_item = await InventoryData.FindBookItemAsync(pii);
                                     if (book_item != null)
                                     {
                                         if (book_item.Location != null)
@@ -351,12 +358,13 @@ namespace dp2SSL
                                     }
                                 }
 
-                                result = new GetEntityDataResult
+                                result = new GetLocalEntityDataResult
                                 {
                                     Value = 1,
                                     ItemXml = itemdom.OuterXml,
                                     ItemRecPath = get_result.Result.AB_ItemIdentifier_r,
                                     Title = get_result.Result.AJ_TitleIdentifier_r,
+                                    BookItem = book_item,
                                 };
 
                                 /*
@@ -379,7 +387,7 @@ namespace dp2SSL
                         if (result != null && errors.Count == 0)
                             return result;
                         if (result == null)
-                            return new GetEntityDataResult
+                            return new GetLocalEntityDataResult
                             {
                                 Value = errors[0].Value,
                                 ErrorInfo = errors[0].ErrorInfo,
@@ -399,7 +407,7 @@ namespace dp2SSL
             {
                 WpfClientInfo.WriteErrorLog($"GetEntityDataAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
 
-                return new GetEntityDataResult
+                return new GetLocalEntityDataResult
                 {
                     Value = -1,
                     ErrorInfo = $"GetEntityDataAsync() 出现异常: {ex.Message}",

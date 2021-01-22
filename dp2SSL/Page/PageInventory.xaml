@@ -97,6 +97,8 @@
                 </MenuItem>
                 <MenuItem x:Name="beginInventory" Header="开始盘点" HorizontalAlignment="Left" Width="Auto" Click="beginInventory_Click"
                           FontSize="20"/>
+                <MenuItem x:Name="continueInventory" Header="继续盘点" HorizontalAlignment="Left" Width="Auto" Click="continueInventory_Click"
+                          FontSize="20"/>
                 <MenuItem x:Name="stopInventory" Header="停止盘点" HorizontalAlignment="Left" Width="Auto" Click="stopInventory_Click"
                           FontSize="20" IsEnabled="False"/>
                 <MenuItem x:Name="exportExcelReport" Header="导出报表" HorizontalAlignment="Left" Width="Auto" Click="exportExcelReport_Click"
@@ -126,7 +128,7 @@
             <ListView Margin="10" Name="list" Grid.Row="1" Background="Transparent" Foreground="LightGray" FontSize="20">
                 <ListView.View>
                     <GridView>
-                        <GridViewColumn Header="状态" Width="150"
+                        <GridViewColumn Header="错误信息" Width="150"
                                         HeaderContainerStyle="{StaticResource myHeaderStyle}">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
@@ -182,6 +184,8 @@
                         <GridViewColumn Header="永久馆藏地" Width="150" DisplayMemberBinding="{Binding Location}"
                                         HeaderContainerStyle="{StaticResource myHeaderStyle}"/>
                         <GridViewColumn Header="永久架号" Width="150" DisplayMemberBinding="{Binding ShelfNo}"
+                                        HeaderContainerStyle="{StaticResource myHeaderStyle}"/>
+                        <GridViewColumn Header="状态" Width="150" DisplayMemberBinding="{Binding State}"
                                         HeaderContainerStyle="{StaticResource myHeaderStyle}"/>
 
                     </GridView>
