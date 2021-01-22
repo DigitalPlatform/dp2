@@ -150,6 +150,7 @@ namespace dp2SSL
             App.Invoke(new Action(() =>
             {
                 this.beginInventory.IsEnabled = true;
+                this.continueInventory.IsEnabled = true;
                 this.stopInventory.IsEnabled = false;
             }));
         }
@@ -160,6 +161,7 @@ namespace dp2SSL
             App.Invoke(new Action(() =>
             {
                 this.beginInventory.IsEnabled = false;
+                this.continueInventory.IsEnabled = false;
                 this.stopInventory.IsEnabled = true;
             }));
 
@@ -178,6 +180,7 @@ namespace dp2SSL
                 if (_pause)
                 {
                     // TODO: 可以语音提示尚未开始
+                    App.CurrentApp.Speak("请注意，当前处于停止盘点状态");
                     return;
                 }
 
@@ -560,7 +563,7 @@ namespace dp2SSL
 
             if (string.IsNullOrEmpty(CurrentShelfNo) == true)
             {
-                if (StringUtil.IsInList("setCurrentLocation", ActionMode) == false)
+                if (StringUtil.IsInList("setCurrentLocation,setLocation", ActionMode) == false)
                     return new NormalResult();
 
                 App.CurrentApp.Speak("请先扫层架标，再扫图书");
@@ -766,10 +769,10 @@ namespace dp2SSL
                     {
                         await Task.Run(async () =>
                         {
-                        // 导入 UID PII 对照表文件
-                        var result = await InventoryData.ImportUidPiiTableAsync(
-                                openFileDialog.FileName,
-                                App.CancelToken);
+                            // 导入 UID PII 对照表文件
+                            var result = await InventoryData.ImportUidPiiTableAsync(
+                                    openFileDialog.FileName,
+                                    App.CancelToken);
                             if (result.Value == -1)
                                 App.ErrorBox("导入 UID PII 对照表文件", $"导入过程出错: {result.ErrorInfo}");
                             else
@@ -914,14 +917,23 @@ namespace dp2SSL
                     }));
                 }
             }
-
-
-
         }
 
         // 开始盘点
         private void beginInventory_Click(object sender, RoutedEventArgs e)
         {
+            if (_entities.Count > 0)
+            {
+                var result = MessageBox.Show("若开始盘点，当前列表内容会被清除。\r\n\r\n确实要开始盘点？\r\n\r\n(注：若不想清除当前列表而继续进行盘点，可点左侧“继续盘点”按钮)",
+        "开始盘点",
+        MessageBoxButton.YesNo,
+        MessageBoxImage.Question,
+        MessageBoxResult.No,
+        MessageBoxOptions.DefaultDesktopOnly);
+                if (result == MessageBoxResult.No)
+                    return;
+            }
+
             _ = Task.Run(async () =>
             {
                 // 获得馆藏地列表
@@ -1037,12 +1049,14 @@ namespace dp2SSL
                         InventoryData.SetUidTable(uid_table);
 
                         this.Continue();
-
+                        /*
                         App.Invoke(new Action(() =>
                         {
                             this.beginInventory.IsEnabled = false;
+                            this.continueInventory.IsEnabled = false;
                             this.stopInventory.IsEnabled = true;
                         }));
+                        */
                     }
                     catch (Exception ex)
                     {
@@ -1057,6 +1071,11 @@ namespace dp2SSL
                     }
                 }
             });
+        }
+
+        private void continueInventory_Click(object sender, RoutedEventArgs e)
+        {
+            this.Continue();
         }
 
         private void stopInventory_Click(object sender, RoutedEventArgs e)
@@ -1161,6 +1180,7 @@ namespace dp2SSL
             {
                 // new InventoryColumn{ Caption = "UID", Property = "UID"},
                 new InventoryColumn{ Caption = "PII", Property = "Barcode"},
+                new InventoryColumn{ Caption = "状态", Property = "State"},
                 new InventoryColumn{ Caption = "书名", Property = "Title"},
                 new InventoryColumn{ Caption = "当前位置", Property = "CurrentLocation"},
                 new InventoryColumn{ Caption = "当前架号", Property = "CurrentShelfNo"},
@@ -1194,6 +1214,13 @@ namespace dp2SSL
                     // 导出所有的本地册记录到 Excel 文件
                     var result = await ExportAllItemToExcelAsync(
                         columns,
+                        (text) =>
+                        {
+                            App.Invoke(new Action(() =>
+                            {
+                                progress.MessageText = text;
+                            }));
+                        },
                         cancel.Token);
                     if (result.Value == -1)
                         App.ErrorBox("导出册记录到 Excel 文件", $"导出册记录到 Excel 文件过程出错: {result.ErrorInfo}");
@@ -1214,5 +1241,7 @@ namespace dp2SSL
                 }
             }
         }
+
+
     }
 }

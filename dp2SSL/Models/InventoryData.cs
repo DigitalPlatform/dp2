@@ -953,21 +953,23 @@ TaskScheduler.Default);
                 }
                 */
 
+                bool isSipLocal = false;
+                if (App.Protocol == "sip")
+                    isSipLocal = StringUtil.IsInList("inventory", SipLocalStore);
+
                 // 设置 UID
                 if (StringUtil.IsInList("setUID", actionMode)
-                    && string.IsNullOrEmpty(info.ItemXml) == false
+                    && (string.IsNullOrEmpty(info.ItemXml) == false || isSipLocal == true)
                     && info.IsTaskCompleted("setUID") == false
                     )
                 {
                     // TODO: SIP2 模式下，UID - PII 对照信息可以设置到 dp2ssl 本地数据库
                     RequestSetUidResult request_result = null;
                     if (App.Protocol == "sip")
-                        request_result = await RequestSetUIDtoLocalAsync(entity.ItemRecPath,
-    info.ItemXml,
-    null,
-    entity.UID,
-    info.UserName,
-    "");
+                        request_result = await RequestSetUIDtoLocalAsync(
+                            entity.UID,
+                            entity.PII,
+                            "");
                     else
                         request_result = RequestSetUID(entity.ItemRecPath,
                             info.ItemXml,
@@ -1000,13 +1002,14 @@ TaskScheduler.Default);
                  * */
 
                 // 修改 currentLocation 和 location
-                if (info.IsTaskCompleted("setLocation") == false)
+                if (info.IsTaskCompleted("setLocation") == false
+                    && string.IsNullOrEmpty(info.ItemXml) == false)
                 {
                     RequestInventoryResult request_result = null;
                     if (App.Protocol == "sip")
                     {
-                        bool isLocal = StringUtil.IsInList("inventory", SipLocalStore);
-                        if (isLocal)
+                        // bool isLocal = StringUtil.IsInList("inventory", SipLocalStore);
+                        if (isSipLocal)
                             request_result = await RequestInventory_local(
                                 info.ItemXml,
                                 entity.UID,
@@ -1885,36 +1888,21 @@ TaskScheduler.Default);
 
         // 请求设置 UID 到本地数据库
         public static async Task<RequestSetUidResult> RequestSetUIDtoLocalAsync(
-    string strRecPath,
-    string strOldXml,
-    byte[] old_timestamp,
     string uid,
-    string strUserName,
+    string pii,
     string style)
         {
-            XmlDocument dom = new XmlDocument();
-            dom.LoadXml(strOldXml);
-
-            /*
-            string old_uid = DomUtil.GetElementText(dom.DocumentElement, "uid");
-            if (old_uid == uid)
-            {
-                return new RequestSetUidResult { Value = 0 };    // 没有必要修改
-            }
-            DomUtil.SetElementText(dom.DocumentElement, "uid", uid);
-            */
-            string barcode = DomUtil.GetElementText(dom.DocumentElement, "barcode");
+            // TODO: 可以先检查 hashtable 中是否有了，有了则表示不用加入本地数据库了，这样可以优化速度
 
             using (var releaser = await _cacheLimit.EnterAsync())
             using (var context = new ItemCacheContext())
             {
-                UpdateUidEntry(context, barcode, uid);
+                UpdateUidEntry(context, pii, uid);
             }
 
             return new RequestSetUidResult
             {
                 Value = 1,
-                // NewItemXml = dom.DocumentElement.OuterXml,
             };
         }
 
@@ -1933,6 +1921,13 @@ TaskScheduler.Default);
             if (currentLocationString == null && location == null)
                 return new RequestInventoryResult { Value = 0 };    // 没有必要修改
 
+            if (string.IsNullOrEmpty(item_xml))
+                return new RequestInventoryResult
+                {
+                    Value = -1,
+                    ErrorInfo = "未提供册记录 XML，无法进行盘点写入操作"
+                };
+
             string currentLocation = null;
             string currentShelfNo = null;
 
@@ -1945,7 +1940,19 @@ TaskScheduler.Default);
             }
 
             XmlDocument dom = new XmlDocument();
-            dom.LoadXml(item_xml);
+            try
+            {
+                dom.LoadXml(item_xml);
+            }
+            catch (Exception ex)
+            {
+                return new RequestInventoryResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"册记录 XML 解析异常: {ex.Message}"
+                };
+            }
+
             string title = DomUtil.GetElementText(dom.DocumentElement, "title");
 
             // 保存册记录和日志到本地数据库
@@ -1998,10 +2005,10 @@ TaskScheduler.Default);
                     CurrentLocation = currentLocation,
                     CurrentShelfNo = currentShelfNo,
                     WriteTime = DateTime.Now,
+                    BatchNo = batchNo,
                 });
                 await context.SaveChangesAsync();
             }
-
 
             // TODO: 修改 XML
 
@@ -2568,6 +2575,7 @@ TaskScheduler.Default);
         // 导出所有的本地册记录到 Excel 文件
         public static async Task<NormalResult> ExportAllItemToExcelAsync(
             List<InventoryColumn> columns,
+            delegate_showText func_showProgress,
             CancellationToken token)
         {
             App.PauseBarcodeScan();
@@ -2647,56 +2655,91 @@ TaskScheduler.Default);
                 }
                 nRowIndex++;
 
+                List<string> barcodes = null;
                 using (var releaser = await _cacheLimit.EnterAsync())
                 using (var context = new ItemCacheContext())
                 {
-                    foreach (var item in context.Items)
+                    barcodes = context.Items.Select(o => o.Barcode).ToList();
+                }
+
+                foreach (var barcode in barcodes)
+                {
+                    if (token.IsCancellationRequested)
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = "中断",
+                            ErrorCode = "cancel"
+                        };
+
+                    if (string.IsNullOrEmpty(barcode))
+                        continue;
+
+                    func_showProgress?.Invoke($"正在导出 {barcode} ...");
+
+                    // 检查册记录是否存在
+                    var result = await SipChannelUtil.GetEntityDataAsync(barcode, "network,localInventory");
+                    if (result.Value == -1)
                     {
-                        if (token.IsCancellationRequested)
-                            return new NormalResult
-                            {
-                                Value = -1,
-                                ErrorInfo = "中断",
-                                ErrorCode = "cancel"
-                            };
-
-                        if (string.IsNullOrEmpty(item.Barcode))
+                        if (result.ErrorCode == "itemNotFound")
                             continue;
-
-                        // 检查册记录是否存在
-                        var result = await SipChannelUtil.GetEntityDataAsync(item.Barcode, "network");
-                        if (result.Value == -1)
-                        {
-                            if (result.ErrorCode == "itemNotFound")
-                                continue;
-                            return result;
-                        }
-
-                        nColIndex = 1;
-                        foreach (var column in columns)
-                        {
-                            string value = GetPropertyOrField(item, column.Property);
-
-                            // 统计最大字符数
-                            // int nChars = column_max_chars[nColIndex - 1];
-                            if (value != null)
-                            {
-                                SetMaxChars(/*ref*/ column_max_chars, nColIndex - 1, value.Length);
-                            }
-                            IXLCell cell = sheet.Cell(nRowIndex, nColIndex).SetValue(DomUtil.ReplaceControlCharsButCrLf(value, '*'));
-                            cell.Style.Alignment.WrapText = true;
-                            cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
-                            // cell.Style.Font.FontName = strFontName;
-                            // 2020/1/6 增加保护代码
-                            if (nColIndex - 1 < alignments.Count)
-                                cell.Style.Alignment.Horizontal = alignments[nColIndex - 1];
-                            else
-                                cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Left;
-                            nColIndex++;
-                        }
-
-                        nRowIndex++;
+                        return result;
                     }
+
+                    var item = result.BookItem;
+                    if (item == null)
+                        continue;
+
+                    if (string.IsNullOrEmpty(result.ItemXml))
+                        continue;
+                    XmlDocument itemdom = new XmlDocument();
+                    try
+                    {
+                        itemdom.LoadXml(result.ItemXml);
+                    }
+                    catch
+                    {
+                        continue;
+                    }
+
+                    // 把 currentLocation 调整为 currentLocation 和 currentShelfNo
+                    {
+                        string currentLocationString = DomUtil.GetElementText(itemdom.DocumentElement, "currentLocation");
+                        var parts = StringUtil.ParseTwoPart(currentLocationString, ":");
+                        DomUtil.SetElementText(itemdom.DocumentElement, "currentLocation", parts[0]);
+                        DomUtil.SetElementText(itemdom.DocumentElement, "currentShelfNo", parts[1]);
+                    }
+
+                    nColIndex = 1;
+                    foreach (var column in columns)
+                    {
+                        string value = GetPropertyOrField(item, column.Property);
+                        if (value == null)
+                        {
+                            value = DomUtil.GetElementText(itemdom.DocumentElement, camel(column.Property));
+                            if (string.IsNullOrEmpty(value) == false)
+                                value = $"({value})";
+                        }
+
+                        // 统计最大字符数
+                        // int nChars = column_max_chars[nColIndex - 1];
+                        if (value != null)
+                        {
+                            SetMaxChars(/*ref*/ column_max_chars, nColIndex - 1, value.Length);
+                        }
+                        IXLCell cell = sheet.Cell(nRowIndex, nColIndex).SetValue(DomUtil.ReplaceControlCharsButCrLf(value, '*'));
+                        cell.Style.Alignment.WrapText = true;
+                        cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                        // cell.Style.Font.FontName = strFontName;
+                        // 2020/1/6 增加保护代码
+                        if (nColIndex - 1 < alignments.Count)
+                            cell.Style.Alignment.Horizontal = alignments[nColIndex - 1];
+                        else
+                            cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Left;
+                        nColIndex++;
+                    }
+
+                    nRowIndex++;
                 }
 
                 sheet.Columns().AdjustToContents();
@@ -2717,6 +2760,13 @@ TaskScheduler.Default);
             finally
             {
                 App.ContinueBarcodeScan();
+            }
+
+            string camel(string text)
+            {
+                if (string.IsNullOrEmpty(text))
+                    return text;
+                return char.ToLower(text[0]) + text.Substring(1);
             }
         }
 

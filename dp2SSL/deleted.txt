@@ -3144,3 +3144,41 @@ new SetErrorEventArgs
                 }
             }
         }
+
+
+        ~~~~~~~~
+
+                // 请求设置 UID 到本地数据库
+        public static async Task<RequestSetUidResult> RequestSetUIDtoLocalAsync(
+    string strRecPath,
+    string strOldXml,
+    byte[] old_timestamp,
+    string uid,
+    string strUserName,
+    string style)
+        {
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml(strOldXml);
+
+            /*
+            string old_uid = DomUtil.GetElementText(dom.DocumentElement, "uid");
+            if (old_uid == uid)
+            {
+                return new RequestSetUidResult { Value = 0 };    // 没有必要修改
+            }
+            DomUtil.SetElementText(dom.DocumentElement, "uid", uid);
+            */
+            string barcode = DomUtil.GetElementText(dom.DocumentElement, "barcode");
+
+            using (var releaser = await _cacheLimit.EnterAsync())
+            using (var context = new ItemCacheContext())
+            {
+                UpdateUidEntry(context, barcode, uid);
+            }
+
+            return new RequestSetUidResult
+            {
+                Value = 1,
+                // NewItemXml = dom.DocumentElement.OuterXml,
+            };
+        }

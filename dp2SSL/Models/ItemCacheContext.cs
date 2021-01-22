@@ -89,6 +89,7 @@ namespace dp2SSL
         public string PII { get; set; }
     }
 
+    // 盘点日志事项
     public class InventoryLogItem
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -102,5 +103,7 @@ namespace dp2SSL
         public string CurrentShelfNo { get; set; }
 
         public DateTime WriteTime { get; set; }
+
+        public string BatchNo { get; set; }
     }
 }
