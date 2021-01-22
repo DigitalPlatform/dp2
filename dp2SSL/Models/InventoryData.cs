@@ -2678,7 +2678,7 @@ TaskScheduler.Default);
                     func_showProgress?.Invoke($"正在导出 {barcode} ...");
 
                     // 检查册记录是否存在
-                    var result = await SipChannelUtil.GetEntityDataAsync(barcode, "network,localInventory");
+                    var result = await SipChannelUtil.GetEntityDataAsync(barcode, "network,localInventory,updateItemTitle");
                     if (result.Value == -1)
                     {
                         if (result.ErrorCode == "itemNotFound")
@@ -2708,6 +2708,13 @@ TaskScheduler.Default);
                         var parts = StringUtil.ParseTwoPart(currentLocationString, ":");
                         DomUtil.SetElementText(itemdom.DocumentElement, "currentLocation", parts[0]);
                         DomUtil.SetElementText(itemdom.DocumentElement, "currentShelfNo", parts[1]);
+                    }
+
+                    {
+                        // XML 记录中的 state 元素要转化为界面显示的状态值，然后用于导出 
+                        Entity entity = new Entity();
+                        entity.SetData(null, result.ItemXml);
+                        DomUtil.SetElementText(itemdom.DocumentElement, "state", entity.State);
                     }
 
                     nColIndex = 1;

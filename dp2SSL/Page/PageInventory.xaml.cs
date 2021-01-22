@@ -88,8 +88,6 @@ namespace dp2SSL
             App.IsPageInventoryActive = true;
 
             RefreshActionModeMenu();
-
-            ShowCountWindow();
         }
 
         private void CurrentApp_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -164,6 +162,8 @@ namespace dp2SSL
                 this.continueInventory.IsEnabled = false;
                 this.stopInventory.IsEnabled = true;
             }));
+
+            ShowCounterWindow();
 
             BeginUpdateStatis();
         }
@@ -863,6 +863,7 @@ namespace dp2SSL
             {
                 new InventoryColumn{ Caption = "UID", Property = "UID"},
                 new InventoryColumn{ Caption = "PII", Property = "PII"},
+                new InventoryColumn{ Caption = "状态", Property = "State"},
                 new InventoryColumn{ Caption = "书名", Property = "Title"},
                 new InventoryColumn{ Caption = "当前架位", Property = "CurrentLocation"},
                 new InventoryColumn{ Caption = "永久馆藏地", Property = "Location"},
@@ -1085,7 +1086,7 @@ namespace dp2SSL
 
         static InventoryInfoWindow _infoWindow = null;
 
-        static void ShowCountWindow()
+        static void ShowCounterWindow()
         {
             App.Invoke(new Action(() =>
             {
