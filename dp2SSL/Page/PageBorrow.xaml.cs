@@ -81,7 +81,7 @@ namespace dp2SSL
             }
         }
 
-        bool _stopVideo = false;
+        volatile bool _stopVideo = false;
 
 #pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
         private async void PatronControl_InputFace(object sender, EventArgs e)
@@ -3918,6 +3918,9 @@ string usage)
         // 开始启动延时自动清除读者信息的过程。如果中途放上去图书，则延时过程被取消(也就是说读者信息不再会被自动清除)
         void Welcome(bool errorOccur)
         {
+            // 关闭残留的人脸识视频对话框
+            _stopVideo = true;
+
             // 2020/12/8
             SetFixVisible();
 
@@ -4122,17 +4125,22 @@ string usage)
                             progress.MessageDocument = doc; //$"请扫要{action_caption}的读者卡 ...\r\n{text}";
                         }));
                     }
-                    if (TagList.Patrons.Count > 1)
+
+                    var results = TagList.Patrons.FindAll(o => o.OneTag.Protocol == InventoryInfo.ISO14443A);
+                    if (results.Count != 1)
                     {
+                        string text = $"请拿走主卡，并放上要{action_caption}的副卡";  // "读卡器只应放一张副卡。请拿走多余的副卡";
+                        if (App.PatronReaderVertical)
+                            text = $"请扫要{action_caption}的副卡";
                         App.Invoke(new Action(() =>
                         {
-                            progress.MessageText = "请拿走主卡，并放上要绑定的副卡";  // "读卡器只应放一张副卡。请拿走多余的副卡";
+                            progress.MessageText = text;
                         }));
                     }
 
-                    if (TagList.Patrons.Count == 1)
+                    if (results.Count == 1)
                     {
-                        var tag = TagList.Patrons[0].OneTag;
+                        var tag = results[0].OneTag;
                         if (tag.Protocol == InventoryInfo.ISO14443A)
                         {
                             return new NormalResult
