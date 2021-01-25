@@ -654,6 +654,14 @@ Stack:
             else
                 this.State = "borrowed";
 
+            // 2021/1/25
+            // XML 册记录中的原始 state 值
+            {
+                string state = DomUtil.GetElementText(dom.DocumentElement, "state");
+                if (string.IsNullOrEmpty(state) == false)
+                    this.State += "," + state;
+            }
+
             // 设置借书日期、期限、应还日期等
             string location = DomUtil.GetElementText(dom.DocumentElement, "location");
             location = StringUtil.GetPureLocation(location);

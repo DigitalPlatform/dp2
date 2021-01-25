@@ -6,8 +6,14 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
+using System.IO;
+using System.Diagnostics;
 
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Win32;
 using Microsoft.VisualStudio.Threading;
+
+using ClosedXML.Excel;
 
 using DigitalPlatform;
 using DigitalPlatform.LibraryClient;
@@ -17,11 +23,6 @@ using DigitalPlatform.Text;
 using DigitalPlatform.WPF;
 using DigitalPlatform.Xml;
 using static dp2SSL.LibraryChannelUtil;
-using System.IO;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Win32;
-using ClosedXML.Excel;
-using System.Diagnostics;
 
 namespace dp2SSL
 {

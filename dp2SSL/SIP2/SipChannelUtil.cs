@@ -209,6 +209,7 @@ namespace dp2SSL
                                     ErrorInfo = get_result.ErrorInfo,
                                     ErrorCode = get_result.ErrorCode
                                 });
+#if NO
                             else if (get_result.Result.CirculationStatus_2 == "01")
                             {
                                 errors.Add(new NormalResult
@@ -228,16 +229,22 @@ namespace dp2SSL
                                     ErrorCode = "itemNotFound"
                                 });
                             }
+#endif
+                            else if (string.IsNullOrEmpty(get_result.Result.AB_ItemIdentifier_r))
+                            {
+                                errors.Add(new NormalResult
+                                {
+                                    Value = -1,
+                                    ErrorInfo = get_result.Result.AF_ScreenMessage_o,
+                                    ErrorCode = "itemNotFound"
+                                });
+                            }
                             else
                             {
-
-
                                 XmlDocument itemdom = new XmlDocument();
                                 itemdom.LoadXml("<root />");
 
-                                string state = "";
-                                if (get_result.Result.CirculationStatus_2 == "12")
-                                    state = "丢失";
+                                string state = ConvertItemState(get_result.Result.CirculationStatus_2, get_result.Result.AF_ScreenMessage_o);
 
                                 // 册状态
                                 DomUtil.SetElementText(itemdom.DocumentElement,
@@ -419,6 +426,47 @@ namespace dp2SSL
                     ErrorCode = ex.GetType().ToString()
                 };
             }
+        }
+
+        // 讲 SIP2 的 GetItemInfo 的册状态翻译为 dp2 册记录的 state 值
+        static string ConvertItemState(string circulationStatus,
+            string message)
+        {
+            switch(circulationStatus)
+            {
+                case "01":
+                    if (string.IsNullOrEmpty(message) == false)
+                        return $"其它({message})";
+                    return "其它";
+                case "02":
+                    return "订购中";
+                case "03":
+                    return "";  // 在架、可借
+                case "04":
+                    // https://goldenwestcollege.libguides.com/english100
+                    // Charged (also Not Charged) – In the catalog, charged books are not available. Not Charged means they are available.
+                    return "不可供";
+                case "05":
+                    return "不可供";  // charged; not to be recalled until earliest recall date
+                case "06":
+                    return "加工中";
+                case "07":
+                    return "recalled";
+                case "08":
+                    return "等待放到预约架";
+                case "09":
+                    return "等待重新上架";
+                case "10":
+                    return "在图书馆馆藏地之间运输中";
+                case "11":
+                    return "声明退货";
+                case "12":
+                    return "丢失";
+                case "13":
+                    return "声明丢失";
+            }
+
+            return "sip2_" + circulationStatus;
         }
 
         // 根据馆藏地和架号字符串构造册记录 currentLocation 元素值
@@ -739,7 +787,7 @@ get_result.Result.AE_PersonalName_r);
         }
 
 
-        #region 监控
+#region 监控
 
         // 可以适当降低探测的频率。比如每五分钟探测一次
         // 两次检测网络之间的间隔
@@ -859,6 +907,6 @@ TaskCreationOptions.LongRunning,
 TaskScheduler.Default);
         }
 
-        #endregion
+#endregion
     }
 }

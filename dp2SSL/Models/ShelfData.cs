@@ -5260,14 +5260,15 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                     }
                     else
                     {
-                        result = await GetEntityDataAsync(entity.GetOiPii(true), "");
+                        string uii = entity.GetOiPii(true);
+                        result = await GetEntityDataAsync(uii, "");
                         if (result.Value == -1 || result.Value == 0)
                         {
                             // TODO: 条码号没有找到的错误码要单独记下来
                             // 报错
-                            string error = $"警告：PII 为 {entity.PII} 的标签出错: {result.ErrorInfo}";
+                            string error = $"警告：UII 为 {uii} 的标签出错: {result.ErrorInfo}";
                             if (result.ErrorCode == "NotFound")
-                                error = $"警告：PII 为 {entity.PII} 的图书没有找到记录";
+                                error = $"警告：UII 为 '{uii}' 的图书没有找到记录";
 
                             // 2020/3/5
                             WpfClientInfo.WriteErrorLog($"GetEntityData() error: {error}");
