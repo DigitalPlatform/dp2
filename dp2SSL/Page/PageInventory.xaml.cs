@@ -301,7 +301,7 @@ namespace dp2SSL
 
                 SoundMaker.NextSound();
 
-                FillEntity(channel, entity,
+                var fill_result = FillEntity(channel, entity,
                     (e) =>
                     {
                         // 说过一次便不再说
@@ -312,8 +312,9 @@ namespace dp2SSL
                     });
 
                 // 进入后台队列
-                if (string.IsNullOrEmpty(entity.PII) == false
-    && info.IsLocation == false)
+                if (fill_result.ErrorCode != "removed"
+                    && string.IsNullOrEmpty(entity.PII) == false
+                    && info.IsLocation == false)
                 {
                     InventoryData.AppendList(entity);
                     InventoryData.ActivateInventory();
@@ -434,7 +435,7 @@ namespace dp2SSL
 
         delegate bool delegate_speakLocation(Entity entity);
 
-        void FillEntity(BaseChannel<IRfid> channel,
+        NormalResult FillEntity(BaseChannel<IRfid> channel,
             Entity entity,
             delegate_speakLocation func_speakLocation)
         {
@@ -461,6 +462,12 @@ namespace dp2SSL
                     {
                         // 删除这个事项，以便后面可以重新处理
                         RemoveEntity(entity);
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = "",
+                            ErrorCode = "removed"
+                        };
                     }
                 }
                 else
@@ -527,6 +534,12 @@ namespace dp2SSL
                                 {
                                     // 删除这个事项，以便后面可以重新处理
                                     RemoveEntity(entity);
+                                    return new NormalResult
+                                    {
+                                        Value = -1,
+                                        ErrorInfo = "",
+                                        ErrorCode = "removed"
+                                    };
                                 }
                             }
 
@@ -541,6 +554,8 @@ namespace dp2SSL
                     }
                 }
             }
+
+            return new NormalResult();
         }
 
         // 切换当前层架标
