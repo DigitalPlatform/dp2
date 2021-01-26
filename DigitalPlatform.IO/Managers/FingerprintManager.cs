@@ -49,6 +49,20 @@ namespace DigitalPlatform.IO
             }
         }
 
+        static bool _pause = false;
+
+        public static bool Pause
+        {
+            get
+            {
+                return _pause;
+            }
+            set
+            {
+                _pause = value;
+            }
+        }
+
         // 启动后台任务。
         // 后台任务负责监视 指纹中心 里面新到的 message
         public static void Start(
@@ -65,7 +79,30 @@ namespace DigitalPlatform.IO
                 channel.Object.EnableSendKey(false);
                 //return null;
             },
-            null,
+            () =>
+            {
+                if (_pause == true)
+                {
+                    Base.TriggerSetError(null,
+new SetErrorEventArgs
+{
+    Error = "指纹功能已暂停"
+});
+                    return true;
+                }
+                /*
+                if (string.IsNullOrEmpty(Base.Url))
+                {
+                    Base.TriggerSetError(null,
+                        new SetErrorEventArgs
+                        {
+                            Error = "RFID 中心 URL 尚未配置(因此无法从 RFID 读卡器读取信息)"
+                        });
+                    return true;
+                }
+                */
+                return false;
+            },
             (channel) =>
             {
                 var result = channel.Object.GetMessage("");

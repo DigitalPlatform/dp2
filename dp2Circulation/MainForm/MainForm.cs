@@ -8773,8 +8773,12 @@ Keys keyData)
 
         }
 
+        volatile bool _isActivated = false;
+
         private void MainForm_Activated(object sender, EventArgs e)
         {
+            _isActivated = true;
+
             // fingerprint enableSendkey
             // this.Speak("activated");
             EnableFingerprintSendKey(true);
@@ -8802,6 +8806,7 @@ Keys keyData)
 
         private void MainForm_Deactivate(object sender, EventArgs e)
         {
+            _isActivated = false;
             // 休眠 RfidManager
             // SetRfidManagerPause(true);
 

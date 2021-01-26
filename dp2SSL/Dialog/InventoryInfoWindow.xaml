@@ -12,10 +12,11 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="25*"/>
-            <ColumnDefinition Width="25*"/>
-            <ColumnDefinition Width="25*"/>
-            <ColumnDefinition Width="25*"/>
+            <ColumnDefinition Width="24*"/>
+            <ColumnDefinition Width="24*"/>
+            <ColumnDefinition Width="24*"/>
+            <ColumnDefinition Width="4*"/>
+            <ColumnDefinition Width="24*"/>
 
         </Grid.ColumnDefinitions>
         <Border Grid.Row="0" Grid.Column="0"
@@ -47,12 +48,12 @@
                    HorizontalAlignment="Center" VerticalAlignment="Center"
                    FontSize="40" Foreground="Red">0</TextBlock>
 
-        <Border Grid.Row="0" Grid.Column="3"
+        <Border Grid.Row="0" Grid.Column="4"
                 Background="DarkBlue" Padding="10">
             <TextBlock 
                    HorizontalAlignment="Center" FontSize="20" Foreground="LightGray">层架</TextBlock>
         </Border>
-        <TextBlock x:Name="shelfCount" Grid.Row="1" Grid.Column="3"
+        <TextBlock x:Name="shelfCount" Grid.Row="1" Grid.Column="4"
                    HorizontalAlignment="Center" VerticalAlignment="Center"
                    FontSize="40" Foreground="Blue">0</TextBlock>
 

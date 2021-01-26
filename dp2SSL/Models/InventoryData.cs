@@ -129,16 +129,6 @@ out chip);
                 }
             }
 
-            // 2020/4/9
-            if (type == "patron")
-            {
-                // 避免被当作图书同步到 dp2library
-                entity.PII = "(读者卡)" + entity.PII;
-                entity.BuildError("checkTag", "读者卡误放入书柜", "patronCard");
-            }
-            else
-                entity.BuildError("checkTag", null, null);
-
             if (type == "location")
             {
                 entity.Title = $"(层架标) {entity.PII}";
@@ -177,6 +167,13 @@ out chip);
                     else
                         entity.BuildError("checkTag", null, null);
                 }
+            }
+            else if (type == "patron")
+            {
+                // 避免被当作图书同步到 dp2library
+                entity.PII = "(读者卡)" + entity.PII;
+                entity.BuildError("checkTag", "读者卡误放入书架", "patronCard");
+                App.CurrentApp.SpeakSequence("读者卡误放入书架");
             }
             else
                 entity.BuildError("checkTag", null, null);
@@ -241,6 +238,8 @@ out chip);
                     SetTagType(tag, out string pii, out chip);
                     if (tag.OneTag.TagInfo != null)
                         result.PII = pii;
+                    else
+                        result.PII = null;  // 2021/1/26
 
                     result.BuildError("parseTag", null, null);
                 }
@@ -264,16 +263,6 @@ out chip);
             //      可能会抛出异常 ArgumentException 
             EntityCollection.SetPII(result, pii);
 #endif
-
-            // 2020/4/9
-            if (tag.Type == "patron")
-            {
-                // 避免被当作图书同步到 dp2library
-                result.PII = "(读者卡)" + result.PII;
-                result.BuildError("checkTag", "读者卡误放入书柜", "patronCard");
-            }
-            else
-                result.BuildError("checkTag", null, null);
 
             // 2020/7/15
             // 获得图书 RFID 标签的 OI 和 AOI 字段
@@ -308,6 +297,13 @@ out chip);
                     else
                         result.BuildError("checkTag", null, null);
                 }
+            }
+            else if (tag.Type == "patron")
+            {
+                // 避免被当作图书同步到 dp2library
+                result.PII = "(读者卡)" + result.PII;
+                result.BuildError("checkTag", "读者卡误放入书架", "patronCard");
+                App.CurrentApp.SpeakSequence("读者卡误放入书架");
             }
             else
                 result.BuildError("checkTag", null, null);
@@ -372,6 +368,9 @@ out chip);
             // 是否为层架标？
             public bool IsLocation { get; set; }
 
+            // 是否为读者卡？
+            public bool IsPatron { get; set; }
+
             public string ItemXml { get; set; }
 
             public string GetTagInfoError { get; set; }
@@ -434,7 +433,7 @@ out chip);
                 var info = Tasks.Find((t) => t.Name == name);
                 if (info == null)
                     return false;
-                return info.Result.Value == 0;
+                return info.Result.Value != -1;
             }
 
             // 探测是否包含指定名字的任务信息
@@ -1004,6 +1003,7 @@ TaskScheduler.Default);
 
                 // 修改 currentLocation 和 location
                 if (info.IsTaskCompleted("setLocation") == false
+                    && info.IsTaskCompleted("getItemXml") == true   // 2021/1/26
                     && string.IsNullOrEmpty(info.ItemXml) == false)
                 {
                     RequestInventoryResult request_result = null;
@@ -2702,6 +2702,12 @@ TaskScheduler.Default);
                     {
                         continue;
                     }
+
+                    /*
+                    string item_barcode = DomUtil.GetElementText(itemdom.DocumentElement, "barcode");
+                    if (string.IsNullOrEmpty(item_barcode))
+                        continue;
+                    */
 
                     // 把 currentLocation 调整为 currentLocation 和 currentShelfNo
                     {
