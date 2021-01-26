@@ -1620,6 +1620,8 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             _appActivated = true;
             UpdateHandled();
 
+            FingerprintManager.Pause = false;
+
             // 单独线程执行，避免阻塞 OnActivated() 返回
             _ = Task.Run(() =>
             {
@@ -1642,6 +1644,8 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             // PauseBarcodeScan();
             _appActivated = false;
             UpdateHandled();
+
+            FingerprintManager.Pause = true;
 
             // Speak("DeActivated");
             base.OnDeactivated(e);

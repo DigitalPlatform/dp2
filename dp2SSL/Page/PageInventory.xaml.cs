@@ -16,6 +16,8 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Collections;
 
+using Microsoft.Win32;
+
 using static dp2SSL.InventoryData;
 
 using DigitalPlatform;
@@ -23,7 +25,6 @@ using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
 using DigitalPlatform.WPF;
 using static dp2SSL.LibraryChannelUtil;
-using Microsoft.Win32;
 
 namespace dp2SSL
 {
@@ -70,6 +71,12 @@ namespace dp2SSL
                 }
             });
             */
+            _entities.CollectionChanged += _entities_CollectionChanged;
+        }
+
+        private void _entities_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            BeginUpdateStatis();
         }
 
         private void PageInventory_Unloaded(object sender, RoutedEventArgs e)
@@ -314,6 +321,7 @@ namespace dp2SSL
                 // 进入后台队列
                 if (fill_result.ErrorCode != "removed"
                     && string.IsNullOrEmpty(entity.PII) == false
+                    && fill_result.ErrorCode != "patronTag"
                     && info.IsLocation == false)
                 {
                     InventoryData.AppendList(entity);
@@ -353,7 +361,8 @@ namespace dp2SSL
                 }
 
                 if (string.IsNullOrEmpty(entity.PII) == false
-                    && info.IsLocation == false)
+                    && info.IsLocation == false
+                    && info.IsPatron == false)
                 {
                     InventoryData.AppendList(entity);
                     InventoryData.ActivateInventory();
@@ -397,7 +406,6 @@ namespace dp2SSL
                 }
             }
 
-            BeginUpdateStatis();
         }
 
 #if NO
@@ -520,12 +528,23 @@ namespace dp2SSL
                             // 层架标
                             if (type == "location")
                             {
+                                // TODO: 验证层架标号码
                                 info.IsLocation = true;
                                 if (string.IsNullOrEmpty(entity.PII) == false)
                                 {
                                     // 设置当前层架标
                                     SwitchCurrentShelfNo(entity);
                                 }
+                            }
+                            else if (type == "patron")
+                            {
+                                info.IsPatron = true;
+                                return new NormalResult
+                                {
+                                    Value = -1,
+                                    ErrorInfo = "读者卡误放入书架",
+                                    ErrorCode = "patronTag"
+                                };
                             }
                             else
                             {
@@ -686,7 +705,7 @@ namespace dp2SSL
             }));
             InventoryData.Clear();
             InventoryData.CurrentShelfNo = null;
-            BeginUpdateStatis();
+            // BeginUpdateStatis();
         }
 
         private void beginSound_Click(object sender, RoutedEventArgs e)
@@ -817,6 +836,17 @@ namespace dp2SSL
         // 清除本地 UID-->PII 缓存
         private async void clearUidPiiCache_Click(object sender, RoutedEventArgs e)
         {
+            {
+                var result = MessageBox.Show("若清除了本地 UID --> PII 缓存，后继第一次盘点时会速度较慢(但缓存会自动重新建立，速度会恢复)。\r\n\r\n确实要清除缓存？",
+    "清除本地 UID --> PII 缓存",
+    MessageBoxButton.YesNo,
+    MessageBoxImage.Question,
+    MessageBoxResult.No,
+    MessageBoxOptions.DefaultDesktopOnly);
+                if (result == MessageBoxResult.No)
+                    return;
+            }
+
             using (var cancel = CancellationTokenSource.CreateLinkedTokenSource(App.CancelToken))
             {
                 ProgressWindow progress = null;
@@ -1135,8 +1165,18 @@ namespace dp2SSL
 
             _updateTask = Task.Run(() =>
             {
-                UpdateStatis();
-                _updateTask = null;
+                try
+                {
+                    UpdateStatis();
+                }
+                catch (Exception ex)
+                {
+                    WpfClientInfo.WriteErrorLog($"UpdateStatis() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                }
+                finally
+                {
+                    _updateTask = null;
+                }
             });
             return true;
         }
@@ -1149,7 +1189,14 @@ namespace dp2SSL
             int error_count = 0;
             int shelf_count = 0;
             int succeed_count = 0;
-            foreach (var entity in _entities)
+
+            List<Entity> entities = new List<Entity>();
+            App.Invoke(new Action(() =>
+            {
+                entities.AddRange(_entities);
+            }));
+
+            foreach (var entity in entities)
             {
                 var info = entity.Tag as ProcessInfo;
                 if (info == null)
@@ -1168,7 +1215,7 @@ namespace dp2SSL
                     succeed_count++;
             }
 
-            int total_count = _entities.Count - shelf_count;
+            int total_count = entities.Count - shelf_count;
 
             App.Invoke(new Action(() =>
             {

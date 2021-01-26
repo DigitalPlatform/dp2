@@ -1769,6 +1769,10 @@ MessageBoxDefaultButton.Button1);
 
         private void PalmprintManager_Touched(object sender, TouchedEventArgs e)
         {
+            // dp2circulation 自己不是在最前面的时候，不进行掌纹 SendKey。这样避免和同时运行的 dp2SSL 冲突(dp2ssl 自己可以轮询掌纹 message)
+            if (_isActivated == false)
+                return;
+
             if (e.Quality == -1)
                 return;
 
