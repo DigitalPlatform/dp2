@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using System.Text.RegularExpressions;
 
 using Jint;
 using Jint.Native;
 
 using DigitalPlatform.Text;
-using System.Text.RegularExpressions;
 
 namespace DigitalPlatform.LibraryServer.Common
 {
@@ -23,6 +23,21 @@ namespace DigitalPlatform.LibraryServer.Common
         public BarcodeValidator(string definition)
         {
             _dom.LoadXml(definition);
+        }
+
+        public BarcodeValidator()
+        {
+            _dom.LoadXml("<empty />");
+        }
+
+        // 2021/1/27
+        public bool IsEmpty()
+        {
+            if (_dom == null || _dom.DocumentElement == null)
+                return true;
+            if (_dom.DocumentElement.Name == "empty")
+                return true;
+            return false;
         }
 
         // 选择 根下 的 validator 元素，符合 location 的那些
@@ -195,6 +210,15 @@ namespace DigitalPlatform.LibraryServer.Common
             string type,
             string barcode)
         {
+            // 无论如何，先检查是否为空
+            if (string.IsNullOrEmpty(barcode))
+                return new ValidateResult
+                {
+                    OK = false,
+                    ErrorInfo = "条码号不应为空",
+                    ErrorCode = "emptyBarcode"
+                };
+
             XmlElement validator = _dom.DocumentElement;
             /*
             if (validator.GetAttributeNode("suppress") != null)

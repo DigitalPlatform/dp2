@@ -120,7 +120,7 @@ TaskScheduler.Default);
                         start = DateTime.Now;
 
                         actions = ShelfData.PullActions();
-                        WpfClientInfo.WriteInfoLog($"针对门 {state.Door.Name} 执行 PullActions() 耗时 {(DateTime.Now - start).TotalSeconds.ToString()}");
+                        WpfClientInfo.WriteInfoLog($"针对门 {state.Door.Name} 执行 PullActions() 耗时 {(DateTime.Now - start).TotalSeconds.ToString()} actions.Count={actions.Count}");
                     }
                     finally
                     {

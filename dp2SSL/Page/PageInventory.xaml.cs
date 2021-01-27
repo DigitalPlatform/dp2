@@ -95,6 +95,7 @@ namespace dp2SSL
             App.IsPageInventoryActive = true;
 
             RefreshActionModeMenu();
+            RefreshMenu();
         }
 
         private void CurrentApp_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -528,9 +529,16 @@ namespace dp2SSL
                             // 层架标
                             if (type == "location")
                             {
-                                // TODO: 验证层架标号码
                                 info.IsLocation = true;
-                                if (string.IsNullOrEmpty(entity.PII) == false)
+                                // 验证层架标号码
+                                var validate_result = InventoryData.ValidateBarcode("shelf", entity.PII);
+                                if (validate_result.OK == false)
+                                {
+                                    SetEntityError(entity, validate_result.ErrorInfo, "shelfLocationStringError");
+                                    CurrentShelfNo = null;
+                                    // 从此以后每当扫入图书标签就报错，直到重扫正确的层架标为止
+                                }
+                                else if (string.IsNullOrEmpty(entity.PII) == false)
                                 {
                                     // 设置当前层架标
                                     SwitchCurrentShelfNo(entity);
@@ -575,6 +583,20 @@ namespace dp2SSL
             }
 
             return new NormalResult();
+        }
+
+        static void SetEntityError(Entity entity,
+            string error,
+            string errorCode)
+        {
+            var info = entity.Tag as ProcessInfo;
+
+            info.GetTagInfoError = errorCode;
+            info.ErrorCount++;
+
+            entity.Error = error;
+
+            App.CurrentApp.Speak(error);
         }
 
         // 切换当前层架标
@@ -692,13 +714,26 @@ namespace dp2SSL
 #endif
 
 
-        private void clearList_Click(object sender, RoutedEventArgs e)
+        private async void clearList_Click(object sender, RoutedEventArgs e)
         {
-            ClearList();
+            await ClearListAsync();
         }
 
-        void ClearList()
+        public async Task SaveOnExitAsync()
         {
+            if (_entities.Count > 0)
+            {
+                await _exportExcelReport(GetDefaultBackupFileName(), "exit");
+            }
+        }
+
+        public async Task ClearListAsync(bool progress = true)
+        {
+            if (_entities.Count > 0)
+            {
+                await _exportExcelReport(GetDefaultBackupFileName(), progress ? "progress" : "");
+            }
+
             App.Invoke(new Action(() =>
             {
                 _entities.Clear();
@@ -706,6 +741,14 @@ namespace dp2SSL
             InventoryData.Clear();
             InventoryData.CurrentShelfNo = null;
             // BeginUpdateStatis();
+        }
+
+        static string GetDefaultBackupFileName()
+        {
+            string dir = System.IO.Path.Combine(WpfClientInfo.UserDir, "reports");
+            DigitalPlatform.IO.PathUtil.CreateDirIfNeed(dir);
+            string name = DateTime.Now.ToString("u").Replace(":", "_").Replace(" ", "_").Replace("Z", "") + ".xlsx";
+            return System.IO.Path.Combine(dir, name);
         }
 
         private void beginSound_Click(object sender, RoutedEventArgs e)
@@ -763,6 +806,45 @@ namespace dp2SSL
             MenuItem menuItem = sender as MenuItem;
             menuItem.IsChecked = !menuItem.IsChecked;
             UpdateActionMode();
+        }
+
+        void RefreshMenu()
+        {
+            bool isSipLocal = false;
+            if (App.Protocol == "sip")
+                isSipLocal = StringUtil.IsInList("inventory", SipLocalStore);
+
+            if (isSipLocal)
+            {
+                this.exportAllItemToExcel.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                this.exportAllItemToExcel.Visibility = Visibility.Collapsed;
+            }
+
+            bool sip = App.Protocol == "sip";
+            if (sip)
+            {
+                this.importUidPiiTable.Visibility = Visibility.Visible;
+                this.clearUidPiiCache.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                this.importUidPiiTable.Visibility = Visibility.Collapsed;
+                this.clearUidPiiCache.Visibility = Visibility.Collapsed;
+            }
+
+            if (StringUtil.IsDevelopMode())
+            {
+                this.actionMenu.Visibility = Visibility.Visible;
+                this.testMenu.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                this.actionMenu.Visibility = Visibility.Collapsed;
+                this.testMenu.Visibility = Visibility.Collapsed;
+            }
         }
 
         // 导入 UID-->PII 对照表
@@ -898,11 +980,29 @@ namespace dp2SSL
         // 导出 Excel 报表
         private async void exportExcelReport_Click(object sender, RoutedEventArgs e)
         {
+            await _exportExcelReport(null, "progress,launch");
+        }
+
+        // 导出 Excel 报表
+        async Task _exportExcelReport(string filename,
+            string style)
+        {
+            bool exit = StringUtil.IsInList("exit", style);
+
+            bool show_progress = StringUtil.IsInList("progress", style);
+            bool launch = StringUtil.IsInList("launch", style);
+
             List<Entity> entities = new List<Entity>();
-            foreach (var entity in _entities)
+            App.Invoke(new Action(() =>
+            {
+                entities.AddRange(_entities);
+            }));
+            /*
+                foreach (var entity in _entities)
             {
                 entities.Add(entity);
             }
+            */
 
             List<InventoryColumn> columns = new List<InventoryColumn>()
             {
@@ -919,48 +1019,68 @@ namespace dp2SSL
             using (var cancel = CancellationTokenSource.CreateLinkedTokenSource(App.CancelToken))
             {
                 ProgressWindow progress = null;
-                App.Invoke(new Action(() =>
+                if (show_progress)
                 {
-                    progress = new ProgressWindow();
-                    progress.TitleText = "导出 Excel 报表";
-                    progress.MessageText = "导出 Excel 报表，请稍等 ...";
-                    progress.Owner = Application.Current.MainWindow;
-                    progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-                    progress.Closed += (s1, e1) =>
+                    App.Invoke(new Action(() =>
                     {
-                        cancel.Cancel();
-                    };
-                    progress.okButton.Content = "停止";
-                    progress.Background = new SolidColorBrush(Colors.DarkRed);
-                    App.SetSize(progress, "middle");
-                    progress.BackColor = "black";
-                    progress.Show();
-                }));
+                        progress = new ProgressWindow();
+                        progress.TitleText = "导出 Excel 报表";
+                        progress.MessageText = "导出 Excel 报表，请稍等 ...";
+                        progress.Owner = Application.Current.MainWindow;
+                        progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                        progress.Closed += (s1, e1) =>
+                        {
+                            cancel.Cancel();
+                        };
+                        progress.okButton.Content = "停止";
+                        progress.Background = new SolidColorBrush(Colors.DarkRed);
+                        App.SetSize(progress, "middle");
+                        progress.BackColor = "black";
+                        progress.Show();
+                    }));
+                }
                 try
                 {
-                    await Task.Run(() =>
-                    {
-                        var result = ExportToExcel(
-                            columns,
-                            entities,
-                            cancel.Token);
-                        if (result.Value == -1)
-                            App.ErrorBox("导出 Excel 报表", $"导出 Excel 报表过程出错: {result.ErrorInfo}");
-                        else
-                            App.ErrorBox("导出 Excel 报表", $"导出 Excel 报表完成", "green");
-                    });
+                    if (exit)
+                        ExportToExcel(
+    columns,
+    entities,
+    filename,
+    launch,
+    cancel.Token);
+                    else
+                        await Task.Run(() =>
+                        {
+                            var result = ExportToExcel(
+                                columns,
+                                entities,
+                                filename,
+                                launch,
+                                cancel.Token);
+                            if (result.Value == -1)
+                                App.ErrorBox("导出 Excel 报表", $"导出 Excel 报表过程出错: {result.ErrorInfo}");
+                            else
+                            {
+                                if (launch)
+                                    App.ErrorBox("导出 Excel 报表", $"导出 Excel 报表完成", "green");
+                            }
+                        });
                 }
                 catch (Exception ex)
                 {
                     WpfClientInfo.WriteErrorLog($"导出 Excel 报表过程出现异常: {ExceptionUtil.GetDebugText(ex)}");
-                    App.ErrorBox("导出 Excel 报表", $"导出 Excel 报表过程出现异常: {ex.Message}");
+                    if (exit == false)
+                        App.ErrorBox("导出 Excel 报表", $"导出 Excel 报表过程出现异常: {ex.Message}");
                 }
                 finally
                 {
-                    App.Invoke(new Action(() =>
+                    if (progress != null)
                     {
-                        progress.Close();
-                    }));
+                        App.Invoke(new Action(() =>
+                        {
+                            progress.Close();
+                        }));
+                    }
                 }
             }
         }
@@ -1041,7 +1161,7 @@ namespace dp2SSL
                     }
                 }));
 
-                ClearList();
+                await ClearListAsync();
 
                 if (dialog_result == true && slow_mode == false)
                 {
@@ -1156,12 +1276,15 @@ namespace dp2SSL
             _infoWindow?.Hide();
         }
 
-        static Task _updateTask = null;
+        volatile static Task _updateTask = null;
 
         public static bool BeginUpdateStatis()
         {
             if (_updateTask != null)
+            {
+                WpfClientInfo.WriteInfoLog("_updateTask != null，放弃更新统计数字");
                 return false;
+            }
 
             _updateTask = Task.Run(() =>
             {
@@ -1175,6 +1298,7 @@ namespace dp2SSL
                 }
                 finally
                 {
+                    WpfClientInfo.WriteInfoLog("_updateTask 清空，更新统计数字任务完成");
                     _updateTask = null;
                 }
             });
@@ -1183,8 +1307,13 @@ namespace dp2SSL
 
         static void UpdateStatis()
         {
+            WpfClientInfo.WriteInfoLog("UpdateStatis() 开始");
+
             if (_infoWindow == null)
+            {
+                WpfClientInfo.WriteInfoLog("UpdateStatis(): _infoWindow == null");
                 return;
+            }
 
             int error_count = 0;
             int shelf_count = 0;
@@ -1195,6 +1324,8 @@ namespace dp2SSL
             {
                 entities.AddRange(_entities);
             }));
+
+            WpfClientInfo.WriteInfoLog($"UpdateStatis(): 处理事项数 {entities.Count}");
 
             foreach (var entity in entities)
             {
@@ -1215,7 +1346,11 @@ namespace dp2SSL
                     succeed_count++;
             }
 
+            WpfClientInfo.WriteInfoLog($"UpdateStatis(): 循环结束 error_count={error_count} suceed_count={succeed_count} shelf_count:{shelf_count}");
+
             int total_count = entities.Count - shelf_count;
+
+            WpfClientInfo.WriteInfoLog($"UpdateStatis(): total_count:{total_count}");
 
             App.Invoke(new Action(() =>
             {
@@ -1235,6 +1370,8 @@ namespace dp2SSL
                 if (_infoWindow.SucceedCount != succeedCountText)
                     _infoWindow.SucceedCount = succeedCountText;
             }));
+
+            WpfClientInfo.WriteInfoLog($"UpdateStatis(): _infoWindow 视觉更新结束");
         }
 
         private async void exportAllItemToExcel_Click(object sender, RoutedEventArgs e)

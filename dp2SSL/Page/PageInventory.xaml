@@ -78,7 +78,7 @@
             </Button>
             <Grid Height="20" />
             <Menu x:Name="menu"  Width="Auto" Height="Auto">
-                <MenuItem Header="_测试">
+                <MenuItem Header="_测试" x:Name="testMenu">
                     <MenuItem x:Name="clearList" Header="清除列表" HorizontalAlignment="Left" Width="Auto" Click="clearList_Click"/>
                     <MenuItem x:Name="beginSound" Header="开始发声" HorizontalAlignment="Left" Width="Auto" Click="beginSound_Click"/>
                     <MenuItem x:Name="stopSound" Header="结束发声" HorizontalAlignment="Left" Width="Auto" Click="stopSound_Click"/>
@@ -89,7 +89,7 @@
                     <MenuItem x:Name="clearUidPiiCache" Header="清除本地 UID-->PII 缓存" HorizontalAlignment="Left" Width="Auto" Click="clearUidPiiCache_Click"/>
                     <MenuItem x:Name="exportAllItemToExcel" Header="导出所有本地册记录到 Excel 文件" HorizontalAlignment="Left" Width="Auto" Click="exportAllItemToExcel_Click"/>
                 </MenuItem>
-                <MenuItem Header="_盘点动作">
+                <MenuItem Header="_盘点动作" x:Name="actionMenu">
                     <MenuItem x:Name="actionSetUID" Header="设置册记录 UID" HorizontalAlignment="Left" Width="Auto" Click="actionMenu_Click"/>
                     <MenuItem x:Name="actionSetCurrentLocation" Header="更新当前位置" HorizontalAlignment="Left" Width="Auto" Click="actionMenu_Click"/>
                     <MenuItem x:Name="actionSetLocation" Header="更新永久馆藏地" HorizontalAlignment="Left" Width="Auto" Click="actionMenu_Click"/>

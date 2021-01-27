@@ -51,7 +51,7 @@ using System.Windows;
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 // 方法是按如下所示使用“*”: :
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.7.4")]    // 1.5.*
+[assembly: AssemblyVersion("1.7.5")]    // 1.5.*
 [assembly: AssemblyFileVersion("1.7.0.0")]  // 1.5.0.0
 
 // 1.0 2019/2/21 第一个版本
@@ -79,3 +79,4 @@ using System.Windows;
 //      1.7.2 (2021/1/21) 书柜增加 set sterilamp time 6:00,22:40 命令
 //      1.7.3 (2021/1/22)
 //      1.7.4 (2021/1/25)
+//      1.7.5 (2021/1/27)
