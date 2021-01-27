@@ -23,6 +23,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.WPF;
 using DigitalPlatform.Xml;
 using static dp2SSL.LibraryChannelUtil;
+using DigitalPlatform.LibraryServer.Common;
 
 namespace dp2SSL
 {
@@ -238,7 +239,7 @@ out chip);
                     SetTagType(tag, out string pii, out chip);
                     if (tag.OneTag.TagInfo != null)
                         result.PII = pii;
-                    else
+                    else if (result.PII != null && result.PII.StartsWith("(读者卡)"))
                         result.PII = null;  // 2021/1/26
 
                     result.BuildError("parseTag", null, null);
@@ -1756,6 +1757,46 @@ TaskScheduler.Default);
             return attr.Value;
         }
 
+        // 获得 inventory.xml 中的 barcodeValidation/validator (OuterXml)定义
+        public static string GetBarcodeValidatorDef()
+        {
+            var dom = GetInventoryDom();
+            if (dom == null)
+                return "";
+            var validator = dom.DocumentElement.SelectSingleNode("barcodeValidation/validator") as XmlElement;
+            if (validator == null)
+                return "";
+            return validator.OuterXml;
+        }
+
+        static BarcodeValidator _validator = null;
+
+        public static ValidateResult ValidateBarcode(string type, string barcode)
+        {
+            // 无论如何，先检查是否为空
+            if (string.IsNullOrEmpty(barcode))
+                return new ValidateResult
+                {
+                    OK = false,
+                    ErrorInfo = "条码号不应为空"
+                };
+
+            if (_validator == null)
+            {
+                var def = GetBarcodeValidatorDef();
+                if (string.IsNullOrEmpty(def))
+                    _validator = new BarcodeValidator();
+                else
+                    _validator = new BarcodeValidator(def);
+            }
+            if (_validator.IsEmpty() == true)
+            {
+                return new ValidateResult { OK = true };
+            }
+
+            return _validator.ValidateByType(type, barcode);
+        }
+
         /*
         // 获得 inventory.xml 中 sip/@encoding 参数
         public static string GetSipEncoding()
@@ -2348,6 +2389,8 @@ TaskScheduler.Default);
         public static NormalResult ExportToExcel(
             List<InventoryColumn> columns,
             List<Entity> items,
+            string fileName,
+            bool launch,
             CancellationToken token)
         {
             if (items == null || items.Count == 0)
@@ -2359,37 +2402,45 @@ TaskScheduler.Default);
                 };
             }
 
-            App.PauseBarcodeScan();
+            bool pauseBarcodeScan = false;
+            if (string.IsNullOrEmpty(fileName) == true)
+            {
+                App.PauseBarcodeScan();
+                pauseBarcodeScan = true;
+            }
             try
             {
-
-                // 询问文件名
-                SaveFileDialog dlg = new SaveFileDialog
+                if (string.IsNullOrEmpty(fileName))
                 {
-                    Title = "请指定要输出的 Excel 文件名",
-                    CreatePrompt = false,
-                    OverwritePrompt = true,
-                    // dlg.FileName = this.ExportExcelFilename;
-                    // dlg.InitialDirectory = Environment.CurrentDirectory;
-                    Filter = "Excel 文件 (*.xlsx)|*.xlsx|All files (*.*)|*.*",
-
-                    RestoreDirectory = true
-                };
-
-                if (dlg.ShowDialog() == false)
-                    return new NormalResult
+                    // 询问文件名
+                    SaveFileDialog dlg = new SaveFileDialog
                     {
-                        Value = -1,
-                        ErrorInfo = "放弃",
-                        ErrorCode = "cancel"
+                        Title = "请指定要输出的 Excel 文件名",
+                        CreatePrompt = false,
+                        OverwritePrompt = true,
+                        // dlg.FileName = this.ExportExcelFilename;
+                        // dlg.InitialDirectory = Environment.CurrentDirectory;
+                        Filter = "Excel 文件 (*.xlsx)|*.xlsx|All files (*.*)|*.*",
+
+                        RestoreDirectory = true
                     };
+
+                    if (dlg.ShowDialog() == false)
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = "放弃",
+                            ErrorCode = "cancel"
+                        };
+                    fileName = dlg.FileName;
+                }
 
                 XLWorkbook doc = null;
 
                 try
                 {
                     doc = new XLWorkbook(XLEventTracking.Disabled);
-                    File.Delete(dlg.FileName);
+                    File.Delete(fileName);
                 }
                 catch (Exception ex)
                 {
@@ -2503,22 +2554,26 @@ TaskScheduler.Default);
 
                 // sheet.Rows().AdjustToContents();
 
-                doc.SaveAs(dlg.FileName);
+                doc.SaveAs(fileName);
                 doc.Dispose();
 
-                try
+                if (launch)
                 {
-                    System.Diagnostics.Process.Start(dlg.FileName);
-                }
-                catch
-                {
+                    try
+                    {
+                        System.Diagnostics.Process.Start(fileName);
+                    }
+                    catch
+                    {
+                    }
                 }
 
                 return new NormalResult();
             }
             finally
             {
-                App.ContinueBarcodeScan();
+                if (pauseBarcodeScan)
+                    App.ContinueBarcodeScan();
             }
         }
 

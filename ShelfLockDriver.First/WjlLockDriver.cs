@@ -156,7 +156,7 @@ namespace ShelfLockDriver.First
                     _sp.Close();
                 return new NormalResult();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return new NormalResult
                 {
@@ -191,88 +191,100 @@ namespace ShelfLockDriver.First
             return new NormalResult { Value = parse_result.Value };
         }
 
+        // 防止开门动作和探测门状态之间冲突
+        private object _syncAPI = new object();
+
         public NormalResult OpenShelfLock(string lockNameList, string style)
         {
-            var open_and_close = StringUtil.IsInList("open+close", style);
-
-            string[] list = lockNameList.Split(new char[] { ',' });
-            int count = 0;
-            foreach (var one in list)
+            lock (_syncAPI)
             {
-                var path = LockPath.Parse(one, null, _default_numbers);
+                var open_and_close = StringUtil.IsInList("open+close", style);
 
-                if (path.LockName == "*" || this.Name == path.LockName)
+                string[] list = lockNameList.Split(new char[] { ',' });
+                int count = 0;
+                foreach (var one in list)
                 {
+                    var path = LockPath.Parse(one, null, _default_numbers);
 
-                }
-                else
-                    continue;
-
-                foreach (var card in path.CardNameList)
-                {
-                    foreach (var number in path.NumberList)
+                    if (path.LockName == "*" || this.Name == path.LockName)
                     {
-                        int addr = 1;
-                        int index = 1;
-                        if (string.IsNullOrEmpty(card) == false)
-                        {
-                            if (Int32.TryParse(card, out addr) == false)
-                                return new NormalResult
-                                {
-                                    Value = -1,
-                                    ErrorInfo = $"锁控板编号 '{card}' 不合法"
-                                };
-                        }
-                        if (string.IsNullOrEmpty(number) == false)
-                        {
-                            if (Int32.TryParse(number, out index) == false)
-                                return new NormalResult
-                                {
-                                    Value = -1,
-                                    ErrorInfo = $"锁编号 '{number}' 不合法"
-                                };
-                        }
 
-                        var current_path = $"{this.Name}.{addr}.{index}";
+                    }
+                    else
+                        continue;
 
-                        if (open_and_close)
+                    foreach (var card in path.CardNameList)
+                    {
+                        foreach (var number in path.NumberList)
                         {
-                            // 为了模拟开门后立即关门，这里加入开过门的痕迹，但并不真正开门
+                            int addr = 1;
+                            int index = 1;
+                            if (string.IsNullOrEmpty(card) == false)
+                            {
+                                if (Int32.TryParse(card, out addr) == false)
+                                    return new NormalResult
+                                    {
+                                        Value = -1,
+                                        ErrorInfo = $"锁控板编号 '{card}' 不合法"
+                                    };
+                            }
+                            if (string.IsNullOrEmpty(number) == false)
+                            {
+                                if (Int32.TryParse(number, out index) == false)
+                                    return new NormalResult
+                                    {
+                                        Value = -1,
+                                        ErrorInfo = $"锁编号 '{number}' 不合法"
+                                    };
+                            }
+
+                            var current_path = $"{this.Name}.{addr}.{index}";
+
+                            if (open_and_close)
+                            {
+                                // 为了模拟开门后立即关门，这里加入开过门的痕迹，但并不真正开门
+                                _lockMemory.MemoryOpen(current_path);
+                                count++;
+                                continue;
+                            }
+
+                            // 构造请求消息
+                            var message = BuildOpenLockMessage((byte)addr, (byte)index);
+
+                            /*
+                            // 发送消息
+                            _sp.Write(message, 0, message.Length);
+
+                            byte[] buffer = new byte[5];
+
+                            var read_result = Read(buffer, 5, TimeSpan.FromSeconds(2));
+                            */
+                            var read_result = WriteAndRead(message, 5, false);
+                            if (read_result.Value == -1)
+                                return read_result;
+
+                            var parse_result = ParseOpenLockResultMessage(read_result.Result);
+                            if (parse_result.Value == -1)
+                                return parse_result;
+
+                            // 加入一个表示发生过开门的状态，让后继获得状态的 API 至少能返回一次打开状态
                             _lockMemory.MemoryOpen(current_path);
+
+                            _lockMemory.Set(current_path, "open");
                             count++;
-                            continue;
                         }
-
-                        // 构造请求消息
-                        var message = BuildOpenLockMessage((byte)addr, (byte)index);
-
-                        /*
-                        // 发送消息
-                        _sp.Write(message, 0, message.Length);
-
-                        byte[] buffer = new byte[5];
-
-                        var read_result = Read(buffer, 5, TimeSpan.FromSeconds(2));
-                        */
-                        var read_result = WriteAndRead(message, 5, false);
-                        if (read_result.Value == -1)
-                            return read_result;
-
-                        var parse_result = ParseOpenLockResultMessage(read_result.Result);
-                        if (parse_result.Value == -1)
-                            return parse_result;
-
-                        // 加入一个表示发生过开门的状态，让后继获得状态的 API 至少能返回一次打开状态
-                        _lockMemory.MemoryOpen(current_path);
-
-                        _lockMemory.Set(current_path, "open");
-                        count++;
                     }
                 }
-            }
 
-            return new NormalResult { Value = count };
+                // 2021/1/27
+                // 延时一秒钟，以确保后面获得状态时门锁已经打开
+                // Thread.Sleep(1000);
+
+                return new NormalResult { Value = count };
+            }
         }
+
+        // static int _testCount = 1;
 
         // parameters:
         //      style   如果包含 "compact"，表示只在 result.StateBytes 中返回密集形态的锁状态值。
@@ -285,172 +297,211 @@ namespace ShelfLockDriver.First
         public GetLockStateResult GetShelfLockState(string lockNameList,
             string style)
         {
-            List<LockState> states = new List<LockState>();
-            // LockPath 集合
-            List<LockPath> paths = new List<LockPath>();
-            // 板子名集合
-            List<string> cards = new List<string>();
-
-            bool compact = StringUtil.IsInList("compact", style);
-            List<byte> result_bytes = new List<byte>();
-
-            string[] list = lockNameList.Split(new char[] { ',' });
-            foreach (var one in list)
+            lock (_syncAPI)
             {
-                var path = LockPath.Parse(one, null, _default_numbers);
+                List<LockState> states = new List<LockState>();
+                // LockPath 集合
+                List<LockPath> paths = new List<LockPath>();
+                // 板子名集合
+                List<string> cards = new List<string>();
 
-                if (path.LockName == "*" || this.Name == path.LockName)
+                bool compact = StringUtil.IsInList("compact", style);
+                List<byte> result_bytes = new List<byte>();
+
+                string[] list = lockNameList.Split(new char[] { ',' });
+                foreach (var one in list)
                 {
+                    var path = LockPath.Parse(one, null, _default_numbers);
 
+                    if (path.LockName == "*" || this.Name == path.LockName)
+                    {
+
+                    }
+                    else
+                        continue;   // 跳过不匹配本驱动名字的片段
+
+                    paths.Add(path);
+
+                    // 搜集板子编号
+                    cards.AddRange(path.CardNameList);
                 }
-                else
-                    continue;   // 跳过不匹配本驱动名字的片段
 
-                paths.Add(path);
+                StringUtil.RemoveDup(ref cards, false);
 
-                // 搜集板子编号
-                cards.AddRange(path.CardNameList);
-            }
+                // path string --> LockState
+                Hashtable table = new Hashtable();
 
-            StringUtil.RemoveDup(ref cards, false);
-
-            // path string --> LockState
-            Hashtable table = new Hashtable();
-
-            // 按照每个板子来获取状态
-            foreach (var card in cards)
-            {
-                int addr = 1;
-                if (string.IsNullOrEmpty(card) == false)
+                // 按照每个板子来获取状态
+                foreach (var card in cards)
                 {
-                    if (Int32.TryParse(card, out addr) == false)
+                    int addr = 1;
+                    if (string.IsNullOrEmpty(card) == false)
+                    {
+                        if (Int32.TryParse(card, out addr) == false)
+                            return new GetLockStateResult
+                            {
+                                Value = -1,
+                                ErrorInfo = $"锁控板编号 '{card}' 不合法"
+                            };
+                    }
+
+                    string board_path = $"{this.Name}.{addr}.";
+
+                    // 如果门全部关闭，则不需要具体探测状态
+                    // 即：只有打开状态的门才有必要探测状态，看看它们是否被手动关闭了
+                    if (_lockMemory.GetOpenedCount() == 0   // 只有当无存疑的状态事项时，才进行优化
+                        && _lockMemory.GetBoardState(board_path) == "all_close")
+                    {
+                        result_bytes.AddRange(GetAllCloseBytes());
+                        continue;
+                    }
+
+                    /*
+                    if (addr <= 0 || addr > _cardAmount)
+                    {
                         return new GetLockStateResult
                         {
                             Value = -1,
-                            ErrorInfo = $"锁控板编号 '{card}' 不合法"
+                            ErrorInfo = $"锁控板编号 '{addr}' 超过当前可用值范围 1-{_cardAmount}"
                         };
+                    }*/
+
+                    // 构造请求消息
+                    var message = BuildGetLockStateMessage((byte)addr);
+
+                    var read_result = WriteAndRead(message, 8, true);
+                    if (read_result.Value == -1)
+                        return new GetLockStateResult
+                        {
+                            Value = -1,
+                            ErrorInfo = read_result.ErrorInfo,
+                            ErrorCode = read_result.ErrorCode,
+                        };
+
+                    var parse_result = ParseGetLockStateResultMessage(read_result.Result, false);
+                    if (parse_result.Value == -1)
+                        return new GetLockStateResult
+                        {
+                            Value = -1,
+                            ErrorInfo = parse_result.ErrorInfo,
+                            ErrorCode = "parseResultError"
+                        };
+
+                    if (compact)
+                    {
+                        result_bytes.AddRange(parse_result.States);
+                        continue;
+                    }
+
+                    // TODO: 根据实际情况只返回部分 index 的
+                    int byte_offset = 0;
+                    foreach (var b in parse_result.States)
+                    {
+                        for (int i = 0; i < 8; i++)
+                        {
+                            // 优化为 close 状态的对象不加入 states 集合
+                            if (((b >> i) & 0x01) == 0)
+                            {
+                                LockState state = new LockState();
+                                state.State = "open";
+                                int index = (byte_offset * 8) + i + 1;
+                                state.Lock = this.Name;
+                                state.Path = $"{this.Name}.{(card)}.{index}";
+                                state.Board = addr;
+                                state.Index = index;
+                                // state.State = ((b >> i) & 0x01) != 0 ? "close" : "open";
+                                // states.Add(state);
+                                table[state.Path] = state;
+                            }
+                        }
+
+                        byte_offset++;
+                    }
                 }
-
-                string board_path = $"{this.Name}.{addr}.";
-                // 如果门全部关闭，则不需要具体探测状态
-                // 即：只有打开状态的门才有必要探测状态，看看它们是否被手动关闭了
-                if (_lockMemory.GetBoardState(board_path) == "all_close")
-                {
-                    result_bytes.AddRange(GetAllCloseBytes());
-                    continue;
-                }
-
-                /*
-                if (addr <= 0 || addr > _cardAmount)
-                {
-                    return new GetLockStateResult
-                    {
-                        Value = -1,
-                        ErrorInfo = $"锁控板编号 '{addr}' 超过当前可用值范围 1-{_cardAmount}"
-                    };
-                }*/
-
-                // 构造请求消息
-                var message = BuildGetLockStateMessage((byte)addr);
-
-                var read_result = WriteAndRead(message, 8, true);
-                if (read_result.Value == -1)
-                    return new GetLockStateResult
-                    {
-                        Value = -1,
-                        ErrorInfo = read_result.ErrorInfo,
-                        ErrorCode = read_result.ErrorCode,
-                    };
-
-                var parse_result = ParseGetLockStateResultMessage(read_result.Result, false);
-                if (parse_result.Value == -1)
-                    return new GetLockStateResult
-                    {
-                        Value = -1,
-                        ErrorInfo = parse_result.ErrorInfo,
-                        ErrorCode = "parseResultError"
-                    };
 
                 if (compact)
-                {
-                    result_bytes.AddRange(parse_result.States);
-                    continue;
-                }
+                    return new GetLockStateResult { StateBytes = result_bytes };
 
-                // TODO: 根据实际情况只返回部分 index 的
-                int byte_offset = 0;
-                foreach (var b in parse_result.States)
+                // 分配状态
+                foreach (var path in paths)
                 {
-                    for (int i = 0; i < 8; i++)
+                    foreach (string card in path.CardNameList)
                     {
-                        // 优化为 close 状态的对象不加入 states 集合
-                        if (((b >> i) & 0x01) == 0)
+                        var numberList = path.NumberList;
+                        if (numberList[0] == "*")
+                            numberList = _default_numbers;
+                        foreach (string number in numberList)
                         {
-                            LockState state = new LockState();
-                            state.State = "open";
-                            int index = (byte_offset * 8) + i + 1;
-                            state.Lock = this.Name;
-                            state.Path = $"{this.Name}.{(card)}.{index}";
-                            state.Board = addr;
-                            state.Index = index;
-                            // state.State = ((b >> i) & 0x01) != 0 ? "close" : "open";
-                            // states.Add(state);
-                            table[state.Path] = state;
+                            string path_string = $"{this.Name}.{card}.{number}";
+
+                            LockState state = table[path_string] as LockState;
+                            if (state == null)
+                            {
+                                state = new LockState();
+                                state.State = "close";
+                                state.Lock = this.Name;
+                                state.Path = path_string;
+                                state.Board = Convert.ToInt32(card);
+                                state.Index = Convert.ToInt32(number);
+                            }
+                            else
+                            {
+                                /*
+                                // testing !!!
+                                if (state.State == "open"
+                                    && _testCount > 0)
+                                {
+                                    state.State = "close";
+                                    _testCount--;
+                                }
+                                */
+                            }
+
+                            states.Add(state);
+
+                            // 记忆开闭状态
+                            _lockMemory.Set(path_string, state.State);
+
+                            // 观察这个锁是否曾经打开过而没有来得及获取至少一次状态？
+                            var opened = _lockMemory.IsOpened(path_string,
+                                false,
+                                out DateTime memo_time);
+                            if (opened)
+                            {
+                                // 正常情况：发出指令后立即就探测到门是开的状态
+                                if (state.State == "open")
+                                    _lockMemory.ClearOpen(path_string);
+
+                                // 异常情况：发出指令后，探测到门还是关闭状态。
+                                if (state.State == "close")
+                                {
+                                    // 需要等待一段时间，补一个 "open,close" 状态
+                                    if (DateTime.Now - memo_time > _waitPeriod)
+                                    {
+                                        _lockMemory.ClearOpen(path_string);
+                                        state.State = "open,close";
+                                    }
+                                }
+
+                            }
+                            else
+                                _lockMemory.ClearOpen(path_string);
                         }
                     }
-
-                    byte_offset++;
                 }
-            }
 
-            if (compact)
-                return new GetLockStateResult { StateBytes = result_bytes };
+                return new GetLockStateResult { States = states };
 
-            // 分配状态
-            foreach (var path in paths)
-            {
-                foreach (string card in path.CardNameList)
+                // 构造表示全 Close 的一组状态 bytes
+                List<byte> GetAllCloseBytes()
                 {
-                    var numberList = path.NumberList;
-                    if (numberList[0] == "*")
-                        numberList = _default_numbers;
-                    foreach (string number in numberList)
-                    {
-                        string path_string = $"{this.Name}.{card}.{number}";
-
-                        LockState state = table[path_string] as LockState;
-                        if (state == null)
-                        {
-                            state = new LockState();
-                            state.State = "close";
-                            state.Lock = this.Name;
-                            state.Path = path_string;
-                            state.Board = Convert.ToInt32(card);
-                            state.Index = Convert.ToInt32(number);
-                        }
-                        states.Add(state);
-
-                        // 记忆开闭状态
-                        _lockMemory.Set(path_string, state.State);
-
-                        // 观察这个锁是否曾经打开过而没有来得及获取至少一次状态？
-                        var opened = _lockMemory.IsOpened(path_string);
-                        if (opened && state.State == "close")
-                        {
-                            state.State = "open,close";
-                        };
-                    }
+                    return new List<byte> { 0xff, 0xff, 0xff, 0xff };
                 }
-            }
-
-            return new GetLockStateResult { States = states };
-
-            // 构造表示全 Close 的一组状态 bytes
-            List<byte> GetAllCloseBytes()
-            {
-                return new List<byte> { 0xff, 0xff, 0xff, 0xff };
             }
         }
+
+        // 判断"open,close"情形的延迟时间长度
+        static TimeSpan _waitPeriod = TimeSpan.FromSeconds(6);
 
         class ReadResult : NormalResult
         {
@@ -464,7 +515,7 @@ namespace ShelfLockDriver.First
             Debug.Assert(cards.Count == bytes.Count / 4);
             if (cards.Count != (bytes.Count / 4))
                 throw new ArgumentException($"cards({cards.Count}) 与 bytes({bytes.Count}) 数量关系不正确");
-            
+
             List<LockState> results = new List<LockState>();
             foreach (var card in cards)
             {

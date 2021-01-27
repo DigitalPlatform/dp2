@@ -335,6 +335,13 @@ namespace dp2SSL
             this.NavigationService.Navigate(_pageShelf);
         }
 
+        public static PageInventory PageInventory
+        {
+            get
+            {
+                return _pageInventory;
+            }
+        }
         static PageInventory _pageInventory = null;
 
         void NavigatePageInventory()

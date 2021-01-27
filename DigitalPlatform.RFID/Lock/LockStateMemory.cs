@@ -46,15 +46,46 @@ namespace DigitalPlatform.RFID
             }
         }
 
-        // 是否刚才打开过？(虽然判断的当时锁未必是打开状态，但曾经打开过，并且没有被查询过状态)
-        public bool IsOpened(string path)
+        // 清除记忆
+        public bool ClearOpen(string path)
         {
             lock (_openedTable.SyncRoot)
             {
                 bool opened = _openedTable.ContainsKey(path);
                 if (opened)
+                {
                     _openedTable.Remove(path);
+                }
                 return opened;
+            }
+        }
+
+        // 是否刚才打开过？(虽然判断的当时锁未必是打开状态，但曾经打开过，并且没有被查询过状态)
+        // parameters:
+        //      start   返回记忆的时刻
+        public bool IsOpened(string path,
+            bool auto_clear,
+            out DateTime start)
+        {
+            start = DateTime.MinValue;
+            lock (_openedTable.SyncRoot)
+            {
+                bool opened = _openedTable.ContainsKey(path);
+                if (opened)
+                {
+                    start = (DateTime)_openedTable[path];
+                    if (auto_clear)
+                        _openedTable.Remove(path);
+                }
+                return opened;
+            }
+        }
+
+        public int GetOpenedCount()
+        {
+            lock (_openedTable.SyncRoot)
+            {
+                return _openedTable.Count;
             }
         }
 

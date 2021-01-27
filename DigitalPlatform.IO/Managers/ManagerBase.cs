@@ -149,6 +149,17 @@ namespace DigitalPlatform.IO
                     }
                     else
                     {
+                        // 2021/1/27
+                        if (string.IsNullOrEmpty(this.Url))
+                        {
+                            SetError?.Invoke(null,
+                                new SetErrorEventArgs
+                                {
+                                    Error = null
+                                });
+                            continue;
+                        }
+
                         if (skip_func?.Invoke() == true)
                             continue;
                     }

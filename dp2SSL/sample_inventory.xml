@@ -4,4 +4,18 @@
   </library>
   <!-- sip/@localStore 属性里面的 uid 表示在本地库里面存储 UID 对照关系，inventory 表示在本地库存储盘点结果(从而也就不把盘点结果写回 SIP 服务器)-->
   <sip localStore="uid,inventory" />
+  <barcodeValidation>
+    <validator >
+      <patron>
+        <CMIS />
+        <range value='P000001-P999999' />
+      </patron>
+      <entity>
+        <range value='0000001-9999999'></range>
+      </entity>
+      <shelf>
+        <range value='0101-0909'></range>
+      </shelf>
+    </validator>
+  </barcodeValidation>
 </root>

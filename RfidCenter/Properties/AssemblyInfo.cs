@@ -32,7 +32,7 @@ using System.Runtime.InteropServices;
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 // 方法是按如下所示使用“*”: :
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.14.1")]   // 1.11.*
+[assembly: AssemblyVersion("1.14.2")]   // 1.11.*
 [assembly: AssemblyFileVersion("1.14.0.0")]
 
 // V1.1 2019/2/21 支持 32-bit Windows 环境
@@ -58,3 +58,4 @@ using System.Runtime.InteropServices;
 //      1.13.2 (2020/12/17) SetEAS() API 增加对 UHF 的支持
 // V1.14 2021/1/18
 //      1.14.1 (2021/1/18) 用蓝牙方式打开盘点读写器(原先是用串口方式)。可自动感知蓝牙变化，重新初始化读写器
+//      1.14.2 (2021/1/27) 改进锁控板开门和探测的可靠性

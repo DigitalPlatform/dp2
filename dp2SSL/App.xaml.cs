@@ -936,9 +936,21 @@ namespace dp2SSL
                     WpfClientInfo.Config?.Set("pageShelf", "splitterPosition", PageMenu.PageShelf?.SplitterPosition);
                 }
             }
-            catch (NullReferenceException)
+            catch (Exception ex)
             {
+                WpfClientInfo.WriteErrorLog($"PageShelf.SubmitAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+            }
 
+            try
+            {
+                if (PageMenu.PageInventory != null)
+                {
+                    await PageMenu.PageInventory?.SaveOnExitAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                WpfClientInfo.WriteErrorLog($"PageInventory.ClearList() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
             }
 
             WpfClientInfo.WriteDebugLog("OnExit() called");
