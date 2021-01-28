@@ -192,12 +192,12 @@ namespace ShelfLockDriver.First
         }
 
         // 防止开门动作和探测门状态之间冲突
-        private object _syncAPI = new object();
+        // private object _syncAPI = new object();
 
         public NormalResult OpenShelfLock(string lockNameList, string style)
         {
-            lock (_syncAPI)
-            {
+            //lock (_syncAPI)
+            //{
                 var open_and_close = StringUtil.IsInList("open+close", style);
 
                 string[] list = lockNameList.Split(new char[] { ',' });
@@ -281,7 +281,7 @@ namespace ShelfLockDriver.First
                 // Thread.Sleep(1000);
 
                 return new NormalResult { Value = count };
-            }
+            //}
         }
 
         // static int _testCount = 1;
@@ -297,8 +297,8 @@ namespace ShelfLockDriver.First
         public GetLockStateResult GetShelfLockState(string lockNameList,
             string style)
         {
-            lock (_syncAPI)
-            {
+            //lock (_syncAPI)
+            //{
                 List<LockState> states = new List<LockState>();
                 // LockPath 集合
                 List<LockPath> paths = new List<LockPath>();
@@ -497,7 +497,7 @@ namespace ShelfLockDriver.First
                 {
                     return new List<byte> { 0xff, 0xff, 0xff, 0xff };
                 }
-            }
+            //}
         }
 
         // 判断"open,close"情形的延迟时间长度
