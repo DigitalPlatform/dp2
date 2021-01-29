@@ -79,12 +79,12 @@
             <Grid Height="20" />
             <Menu x:Name="menu"  Width="Auto" Height="Auto">
                 <MenuItem Header="_测试" x:Name="testMenu">
-                    <MenuItem x:Name="clearList" Header="清除列表" HorizontalAlignment="Left" Width="Auto" Click="clearList_Click"/>
                     <MenuItem x:Name="beginSound" Header="开始发声" HorizontalAlignment="Left" Width="Auto" Click="beginSound_Click"/>
                     <MenuItem x:Name="stopSound" Header="结束发声" HorizontalAlignment="Left" Width="Auto" Click="stopSound_Click"/>
                     <MenuItem x:Name="addSound" Header="增加发声" HorizontalAlignment="Left" Width="Auto" Click="addSound_Click"/>
                 </MenuItem>
                 <MenuItem Header="_维护">
+                    <MenuItem x:Name="clearList" Header="清除列表" HorizontalAlignment="Left" Width="Auto" Click="clearList_Click"/>
                     <MenuItem x:Name="importUidPiiTable" Header="导入 UID-->PII 对照表" HorizontalAlignment="Left" Width="Auto" Click="importUidPiiTable_Click"/>
                     <MenuItem x:Name="clearUidPiiCache" Header="清除本地 UID-->PII 缓存" HorizontalAlignment="Left" Width="Auto" Click="clearUidPiiCache_Click"/>
                     <MenuItem x:Name="exportAllItemToExcel" Header="导出所有本地册记录到 Excel 文件" HorizontalAlignment="Left" Width="Auto" Click="exportAllItemToExcel_Click"/>

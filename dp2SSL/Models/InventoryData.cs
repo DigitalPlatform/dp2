@@ -633,7 +633,9 @@ TaskScheduler.Default);
                         result.ErrorInfo = "获得册信息出错";
                         */
                         info.SetTaskInfo("getItemXml", result);
-                        if (result.Value == -1)
+                        if (result.Value == -1 
+                            || result.Value == 0
+                            || result.ErrorCode == "NotFound")
                         {
                             // 2021/1/19
                             App.CurrentApp.SpeakSequence($"{entity.PII} 无法获得册信息");
@@ -890,7 +892,11 @@ TaskScheduler.Default);
                         App.CurrentApp.SpeakSequence($"还书成功 {entity.PII}");
 
                         if (string.IsNullOrEmpty(request_result.ItemXml) == false)
+                        {
                             info.ItemXml = request_result.ItemXml;
+                            // 2021/1/29
+                            entity.SetData(entity.ItemRecPath, request_result.ItemXml);
+                        }
 
                         // 标记，即将 VerifyEas
                         need_verifyEas = true;
@@ -1280,9 +1286,19 @@ TaskScheduler.Default);
 
             var afi = entity.TagInfo.AFI;
             if (afi == 0x07)
+            {
+                // 2021/1/29
+                if (entity.TagInfo.EAS == false)
+                    return -1;
                 return 1;
+            }
             if (afi == 0xc2)
+            {
+                // 2021/1/29
+                if (entity.TagInfo.EAS == true)
+                    return -1;
                 return 0;
+            }
             return -1;   // -1 表示不合法的值
         }
 
