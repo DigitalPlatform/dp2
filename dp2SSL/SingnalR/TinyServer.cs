@@ -1139,20 +1139,6 @@ update
                 return;
             }
 
-            // 2021/1/20
-            // 设置每日紫外灯时间点
-            if (command.StartsWith("set sterilamp time"))
-            {
-                string param = command.Substring("set sterilamp time".Length).Trim();
-                string old_param = SterilampTask.GetPerdayTask();
-                var result = SterilampTask.ChangePerdayTask(param);
-                if (result.Value == -1)
-                    await SendMessageAsync(new string[] { groupName }, $"设置紫外灯时间时出错: {result.ErrorInfo}");
-                else
-                    await SendMessageAsync(new string[] { groupName }, $"已设置紫外灯时间 {param}。(上次的时间是 {old_param})");
-                return;
-            }
-
             // 开灯、关灯
             // lamp 获得灯状态
             // lamp on 开灯
@@ -1229,9 +1215,25 @@ update
                 return;
             }
 
+            // 2021/1/20
+            // 设置每日紫外灯时间点
+            if (command.StartsWith("set sterilamp time"))
+            {
+                string param = command.Substring("set sterilamp time".Length).Trim();
+                string old_param = SterilampTask.GetPerdayTask();
+                var result = SterilampTask.ChangePerdayTask(param);
+                if (result.Value == -1)
+                    await SendMessageAsync(new string[] { groupName }, $"设置紫外灯时间时出错: {result.ErrorInfo}");
+                else
+                    await SendMessageAsync(new string[] { groupName }, $"已设置紫外灯时间 {param}。(上次的时间是 {old_param})");
+                return;
+            }
+
             // 开启紫外线杀菌
             if (command.StartsWith("sterilamp"))
             {
+                string param = command.Substring("sterilamp".Length).Trim();
+
                 // 若当前为书柜界面，则需要检查是否有打开的门
                 if (IsInShelfPage() && ShelfData.OpeningDoorCount > 0)
                 {
@@ -1239,7 +1241,23 @@ update
                     return;
                 }
 
-                App.CurrentApp.BeginSterilamp();
+                if (param != null)
+                    param = param.ToLower();
+
+                if (string.IsNullOrEmpty(param)
+                    || param == "on" || param == "begin" || param == "turnon")
+                {
+                    App.CurrentApp.BeginSterilamp();
+                    return;
+                }
+
+                if (param == "off" || param == "end" || param == "stop" || param == "turnoff")
+                {
+                    App.CurrentApp.CancelSterilamp();
+                    return;
+                }
+
+                await SendMessageAsync(new string[] { groupName }, $"sterilamp 命令无法执行：未知的参数 '{param}'");
                 return;
             }
 
@@ -1706,7 +1724,7 @@ update
                                 var tu = chip.FindElement(ElementOID.TU)?.Text;
                                 text.AppendLine($"　　PII='{pii}' TU='{tu}' OI='{oi}'");
                             }
-                            catch(Exception ex)
+                            catch (Exception ex)
                             {
                                 text.AppendLine($"　　解析 TagInfo 时出错: {ex.Message}");
                             }

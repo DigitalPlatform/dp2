@@ -287,13 +287,25 @@ namespace dp2SSL
                 // 如果发现 PII 不为空的层架标，要用于切换当前 CurrentShelfNo
                 if (info != null && info.IsLocation == true)
                 {
-                    SwitchCurrentShelfNo(entity);
-                    if (isNewly == false)
+                    // 2021/1/29
+                    // 验证层架标号码
+                    var validate_result = InventoryData.ValidateBarcode("shelf", entity.PII);
+                    if (validate_result.OK == false)
                     {
-                        App.Invoke(new Action(() =>
+                        SetEntityError(entity, validate_result.ErrorInfo, "shelfLocationStringError");
+                        CurrentShelfNo = null;
+                        // 从此以后每当扫入图书标签就报错，直到重扫正确的层架标为止
+                    }
+                    else
+                    {
+                        SwitchCurrentShelfNo(entity);
+                        if (isNewly == false)
                         {
-                            _entities.MoveToTail(entity);
-                        }));
+                            App.Invoke(new Action(() =>
+                            {
+                                _entities.MoveToTail(entity);
+                            }));
+                        }
                     }
                 }
             }
@@ -1441,7 +1453,6 @@ namespace dp2SSL
                 }
             }
         }
-
 
     }
 }
