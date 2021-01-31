@@ -923,7 +923,8 @@ namespace RfidTool
                 {
                     if (string.IsNullOrEmpty(pii) == false)
                     {
-                        DataModel.WriteToUidLogFile(iteminfo.Tag.UID, pii);
+                        DataModel.WriteToUidLogFile(iteminfo.Tag.UID, 
+                            MakeOiPii(pii, oi, aoi));
                         iteminfo.UidPiiLogWrited = true;
                     }
                 }
@@ -991,6 +992,17 @@ namespace RfidTool
                     ErrorInfo = error
                 };
             }
+        }
+
+        public static string MakeOiPii(string pii, string oi, string aoi)
+        {
+            if (string.IsNullOrEmpty(pii))
+                return ".";
+            if (string.IsNullOrEmpty(oi) == false)
+                return oi + "." + pii;
+            if (string.IsNullOrEmpty(aoi) == false)
+                return aoi + "." + pii;
+            return "." + pii;
         }
 
 

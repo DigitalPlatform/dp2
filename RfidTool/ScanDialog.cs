@@ -718,7 +718,8 @@ namespace RfidTool
 
                 // 写入 UID-->PII 对照关系日志文件
                 if (tou == "10")
-                    DataModel.WriteToUidLogFile(uid, barcode);
+                    DataModel.WriteToUidLogFile(uid, 
+                        ModifyDialog.MakeOiPii(barcode, oi, aoi));
 
                 // 语音提示写入成功
                 FormClientInfo.Speak($"{barcode} 写入成功", false, true);

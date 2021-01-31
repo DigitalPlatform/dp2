@@ -41,11 +41,11 @@ namespace dp2SSL
             _uidTable = table;
         }
 
-        // 检查是否存在 UID --> PII 事项
-        public static bool UidExsits(string uid, out string pii)
+        // 检查是否存在 UID --> UII(OI.PII) 事项
+        public static bool UidExsits(string uid, out string uii)
         {
-            pii = (string)_uidTable[uid];
-            if (string.IsNullOrEmpty(pii) == false)
+            uii = (string)_uidTable[uid];
+            if (string.IsNullOrEmpty(uii) == false)
             {
                 return true;
             }
@@ -618,14 +618,16 @@ TaskScheduler.Default);
                         {
                             bool isLocal = StringUtil.IsInList("inventory", SipLocalStore);
 
-                            result = await SipChannelUtil.GetEntityDataAsync(entity.PII, isLocal ? "network,localInventory" : "network");
+                            result = await SipChannelUtil.GetEntityDataAsync(entity.PII,
+                                entity.GetOiOrAoi(),
+                                isLocal ? "network,localInventory" : "network");
                             if (result.Value != -1)
                             {
                                 // 顺便保存到本地数据库
                             }
                         }
                         else
-                            result = await LibraryChannelUtil.GetEntityDataAsync(entity.PII, "network");
+                            result = await LibraryChannelUtil.GetEntityDataAsync(entity.GetOiPii(true)/*entity.PII*/, "network");
 
                         /*
                         // testing
@@ -633,7 +635,7 @@ TaskScheduler.Default);
                         result.ErrorInfo = "获得册信息出错";
                         */
                         info.SetTaskInfo("getItemXml", result);
-                        if (result.Value == -1 
+                        if (result.Value == -1
                             || result.Value == 0
                             || result.ErrorCode == "NotFound")
                         {
@@ -808,12 +810,29 @@ TaskScheduler.Default);
                                 string location = "";
                                 if (record.Cols.Length > 1)
                                     location = record.Cols[1];
+
+                                // 2021/1/31
+                                // 推算出 OI
+                                string oi = "";
+                                {
+                                    location = StringUtil.GetPureLocation(location);
+                                    var ret = ShelfData.GetOwnerInstitution(location, out string isil, out string alternative);
+                                    if (ret == true)
+                                    {
+                                        if (string.IsNullOrEmpty(isil) == false)
+                                            oi = isil;
+                                        else if (string.IsNullOrEmpty(alternative) == false)
+                                            oi = alternative;
+                                    }
+                                }
+
+
                                 string uid = "";
                                 if (record.Cols.Length > 2)
                                     uid = record.Cols[2];
                                 if (string.IsNullOrEmpty(barcode) == false
                                     && string.IsNullOrEmpty(uid) == false)
-                                    uid_table[uid] = barcode;
+                                    uid_table[uid] = oi + "." + barcode;
                             }
 
                             i++;
@@ -976,6 +995,7 @@ TaskScheduler.Default);
                         request_result = await RequestSetUIDtoLocalAsync(
                             entity.UID,
                             entity.PII,
+                            entity.GetOiOrAoi(),
                             "");
                     else
                         request_result = RequestSetUID(entity.ItemRecPath,
@@ -1021,7 +1041,7 @@ TaskScheduler.Default);
                             request_result = await RequestInventory_local(
                                 info.ItemXml,
                                 entity.UID,
-                                entity.PII,
+                                entity.GetOiPii(),
                                 StringUtil.IsInList("setCurrentLocation", actionMode) ? info.TargetCurrentLocation : null,
                                 StringUtil.IsInList("setLocation", actionMode) ? info.TargetLocation : null,
                                 StringUtil.IsInList("setLocation", actionMode) ? info.TargetShelfNo : null,
@@ -1031,6 +1051,7 @@ TaskScheduler.Default);
                         else
                             request_result = await RequestInventory_sip2(entity.UID,
                                 entity.PII,
+                                entity.GetOiOrAoi(),
                                 StringUtil.IsInList("setCurrentLocation", actionMode) ? info.TargetCurrentLocation : null,
                                 StringUtil.IsInList("setLocation", actionMode) ? info.TargetLocation : null,
                                 StringUtil.IsInList("setLocation", actionMode) ? info.TargetShelfNo : null,
@@ -1328,6 +1349,7 @@ TaskScheduler.Default);
         public static async Task<RequestInventoryResult> RequestInventory_sip2(
             string uid,
             string pii,
+            string oi,
             string currentLocationString,
             string location,
             string shelfNo,
@@ -1349,7 +1371,7 @@ TaskScheduler.Default);
                 currentShelfNo = parts[1];
             }
             var update_result = await SipChannelUtil.UpdateItemStatusAsync(
-    "", // oi,
+    oi,
     pii,
     location,
     currentLocation,
@@ -1364,7 +1386,9 @@ TaskScheduler.Default);
                 };
 
             // 重新获得册记录 XML
-            var get_result = await SipChannelUtil.GetEntityDataAsync(pii, "network");
+            var get_result = await SipChannelUtil.GetEntityDataAsync(pii,
+                oi,
+                "network");
             if (get_result.Value == -1)
             {
                 // TODO: 如何报错？
@@ -1883,6 +1907,12 @@ TaskScheduler.Default);
                         if (string.IsNullOrEmpty(uid) || string.IsNullOrEmpty(barcode))
                             continue;
 
+                        // 2021/1/31
+                        // 跳过那些没有 OI 的
+                        ParseOiPii(barcode, out string pii, out string oi);
+                        if (string.IsNullOrEmpty(oi))
+                            continue;
+
                         func_showProgress?.Invoke($"{uid} --> {barcode} ...");
 
                         uid_table[uid] = barcode;
@@ -1948,6 +1978,7 @@ TaskScheduler.Default);
         public static async Task<RequestSetUidResult> RequestSetUIDtoLocalAsync(
     string uid,
     string pii,
+    string oi,
     string style)
         {
             // TODO: 可以先检查 hashtable 中是否有了，有了则表示不用加入本地数据库了，这样可以优化速度
@@ -1955,7 +1986,7 @@ TaskScheduler.Default);
             using (var releaser = await _cacheLimit.EnterAsync())
             using (var context = new ItemCacheContext())
             {
-                UpdateUidEntry(context, pii, uid);
+                UpdateUidEntry(context, MakeOiPii(pii, oi), uid);
             }
 
             return new RequestSetUidResult
@@ -1964,11 +1995,40 @@ TaskScheduler.Default);
             };
         }
 
+        public static void ParseOiPii(string text,
+            out string pii,
+            out string oi)
+        {
+            pii = "";
+            oi = "";
+
+            if (string.IsNullOrEmpty(text))
+                return;
+
+            if (text.Contains(".") == false)
+            {
+                pii = text;
+                oi = "";
+                return;
+            }
+
+            var parts = StringUtil.ParseTwoPart(text, ".");
+            oi = parts[0];
+            pii = parts[1];
+        }
+
+        public static string MakeOiPii(string pii, string oi)
+        {
+            if (string.IsNullOrEmpty(oi))
+                return pii;
+            return oi + "." + pii;
+        }
+
         // 将原本要向 SIP2 服务器发出盘点请求写入本地(映射)数据库
         public static async Task<RequestInventoryResult> RequestInventory_local(
             string item_xml,
             string uid,
-            string pii,
+            string oi_pii,
             string currentLocationString,
             string location,
             string shelfNo,
@@ -2017,13 +2077,13 @@ TaskScheduler.Default);
             using (var releaser = await _cacheLimit.EnterAsync())
             using (var context = new ItemCacheContext())
             {
-                var item = context.Items.Where(o => o.Barcode == pii).FirstOrDefault();
+                var item = context.Items.Where(o => o.Barcode == oi_pii).FirstOrDefault();
                 if (item == null)
                 {
                     item = new BookItem
                     {
                         Title = title,
-                        Barcode = pii,
+                        Barcode = oi_pii,
                         // UID = uid,
                         CurrentLocation = currentLocation,
                         CurrentShelfNo = currentShelfNo,
@@ -2057,7 +2117,7 @@ TaskScheduler.Default);
                 await context.Logs.AddAsync(new InventoryLogItem
                 {
                     Title = title,
-                    Barcode = pii,
+                    Barcode = oi_pii,
                     Location = location,
                     ShelfNo = shelfNo,
                     CurrentLocation = currentLocation,
@@ -2135,6 +2195,15 @@ TaskScheduler.Default);
                             break;
                         if (string.IsNullOrEmpty(line))
                             continue;
+
+                        // 2021/1/31
+                        ParseOiPii(line, out string pii, out string oi);
+                        if (string.IsNullOrEmpty(oi))
+                            return new ImportUidResult
+                            {
+                                ErrorInfo = $"出现了没有 OI 的行 '{line}'，导入过程出错",
+                                Value = -1,
+                            };
 
                         lines.Add(line);
                         if (lines.Count > 100)
@@ -2300,38 +2369,6 @@ TaskScheduler.Default);
                     context.Uids.RemoveRange(list);
                     await context.SaveChangesAsync(token);
                 }
-
-#if NO
-                var all = context.Uids.Where(o => string.IsNullOrEmpty(o.UID) == false && string.IsNullOrEmpty(o.PII) == false).ToList();
-                List<BookItem> items = new List<BookItem>();
-                foreach (var item in all)
-                {
-                    if (token.IsCancellationRequested)
-                        return new NormalResult
-                        {
-                            Value = change_count,
-                        };
-
-                    {
-                        item.UID = null;
-                        items.Add(item);
-                        change_count++;
-                    }
-
-                    if (items.Count > 100)
-                    {
-                        Save(context, items);
-                        items.Clear();
-                    }
-
-                }
-
-                if (items.Count > 0)
-                {
-                    Save(context, items);
-                    items.Clear();
-                }
-#endif
             }
             return new NormalResult
             {
@@ -2352,6 +2389,7 @@ TaskScheduler.Default);
             */
         }
 
+#if NO
         // 把从 SIP2 服务器得到的信息保存到本地数据库
         static async Task<NormalResult> SaveToLocal(string barcode,
             string item_xml)
@@ -2377,6 +2415,7 @@ TaskScheduler.Default);
                 return new NormalResult();
             }
         }
+#endif
 
         static void FillBookItem(BookItem item, string item_xml)
         {
@@ -2749,8 +2788,12 @@ TaskScheduler.Default);
 
                     func_showProgress?.Invoke($"正在导出 {barcode} ...");
 
+                    ParseOiPii(barcode, out string pii, out string oi);
+
                     // 检查册记录是否存在
-                    var result = await SipChannelUtil.GetEntityDataAsync(barcode, "network,localInventory,updateItemTitle");
+                    var result = await SipChannelUtil.GetEntityDataAsync(pii,
+                        oi,
+                        "network,localInventory,updateItemTitle");
                     if (result.Value == -1)
                     {
                         if (result.ErrorCode == "itemNotFound")

@@ -174,9 +174,23 @@ namespace dp2SSL
         // .Value
         //      0   没有找到
         //      1   找到
-        public static async Task<GetLocalEntityDataResult> GetEntityDataAsync(string pii,
+        public static async Task<GetLocalEntityDataResult> GetEntityDataAsync(
+            string pii,
+            string oi,
             string style)
         {
+            string filter_oi = App.SipInstitution;
+            if (string.IsNullOrEmpty(filter_oi) == false)
+            {
+                if (oi != filter_oi)
+                    return new GetLocalEntityDataResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"标签的 OI '{oi}' 不符合定义 '{filter_oi}'，获取册记录失败",
+                        ErrorCode = "oiNotMatch"
+                    };
+            }
+
             bool network = StringUtil.IsInList("network", style);
             bool updateItemTitle = StringUtil.IsInList("updateItemTitle", style);
             try
@@ -201,7 +215,7 @@ namespace dp2SSL
                             // TODO: ItemXml 和 BiblioSummary 可以考虑在本地缓存一段时间
                             int nRedoCount = 0;
                         REDO_GETITEMINFO:
-                            var get_result = await _channel.GetItemInfoAsync("", pii);
+                            var get_result = await _channel.GetItemInfoAsync(oi, pii);
                             if (get_result.Value == -1)
                                 errors.Add(new NormalResult
                                 {
@@ -255,6 +269,13 @@ namespace dp2SSL
                                 DomUtil.SetElementText(itemdom.DocumentElement,
                                     "barcode",
                                     get_result.Result.AB_ItemIdentifier_r);
+
+                                // 2021/1/31
+                                // OI
+                                if (string.IsNullOrEmpty(oi) == false)
+                                    DomUtil.SetElementText(itemdom.DocumentElement,
+    "oi",
+    oi);
 
                                 // 永久馆藏地
                                 DomUtil.SetElementText(itemdom.DocumentElement,
@@ -337,7 +358,7 @@ namespace dp2SSL
                                 // 用本地数据记录修正盘点部分字段
                                 if (StringUtil.IsInList("localInventory", style))
                                 {
-                                    book_item = await InventoryData.FindBookItemAsync(pii);
+                                    book_item = await InventoryData.FindBookItemAsync(InventoryData.MakeOiPii(pii, oi));
                                     if (book_item != null)
                                     {
                                         if (book_item.Location != null)

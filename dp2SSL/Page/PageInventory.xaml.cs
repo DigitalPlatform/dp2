@@ -474,10 +474,16 @@ namespace dp2SSL
                 || force)
             {
 
-                if (InventoryData.UidExsits(entity.UID, out string pii)
+                if (InventoryData.UidExsits(entity.UID, out string uii)
                     && force == false)
                 {
+                    // 2021/1/31
+                    // 注意这里 pii 可能为 oi.pii 形态，需要拆分
+                    InventoryData.ParseOiPii(uii, out string pii, out string oi);
+
                     entity.PII = pii;
+                    entity.OI = oi;
+
                     var set_result = SetTargetCurrentLocation(info);
                     if (set_result.Value == -1 && set_result.ErrorCode == "noCurrentShelfNo")
                     {
@@ -536,6 +542,13 @@ namespace dp2SSL
                             InventoryData.UpdateEntity(entity,
                                 get_result.TagInfo,
                                 out string type);
+
+                            /*
+                            string error1 = entity.GetError("parseTag,checkTag");
+                            if (string.IsNullOrEmpty(error1) == false)
+                                SetEntityError(entity, error1, "parseTagError");
+                            */
+
                             info.GetTagInfoError = "";
 
                             // 层架标
@@ -1247,6 +1260,10 @@ namespace dp2SSL
                             progress.Close();
                         }));
                     }
+                }
+                else if (dialog_result == true && slow_mode == true)
+                {
+                    this.Continue();
                 }
             });
         }
