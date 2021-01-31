@@ -646,21 +646,22 @@ namespace RfidTool
 
         static StreamWriter _uidWriter = null;
 
-        // 写入 UID-->PII 对照关系日志文件
-        public static void WriteToUidLogFile(string uid, string pii)
+        // 写入 UID-->UII(OI.PII) 对照关系日志文件
+        public static void WriteToUidLogFile(string uid,
+            string uii)
         {
             lock (_uidTable.SyncRoot)
             {
                 if (_uidTable.ContainsKey(uid) == true)
                 {
                     string old_pii = (string)_uidTable[uid];
-                    if (old_pii == pii)
+                    if (old_pii == uii)
                         return; // 去重
                 }
                 // 防止占用内存太大
                 if (_uidTable.Count > 1000)
                     _uidTable.Clear();
-                _uidTable[uid] = pii;
+                _uidTable[uid] = uii;
             }
 
             if (_uidWriter == null)
@@ -669,7 +670,7 @@ namespace RfidTool
                 _uidWriter = new StreamWriter(fileName, true, Encoding.ASCII);
             }
 
-            _uidWriter.WriteLine($"{uid}\t{pii}");
+            _uidWriter.WriteLine($"{uid}\t{uii}");
         }
 
         public static void CloseUidLogFile()

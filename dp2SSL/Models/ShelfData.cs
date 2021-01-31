@@ -816,9 +816,19 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             isil = "";
             alternative = "";
 
+        REDO:
             var cfg_dom = _rfidCfgDom;
 
             if (cfg_dom == null)
+            {
+                var prepare_result = PrepareConfigDom();
+                if (prepare_result.Value == -1)
+                    throw new Exception(prepare_result.ErrorInfo);
+                goto REDO;
+                // return false;
+            }
+
+            if (cfg_dom.DocumentElement == null)
                 return false;
 
             // 分析 strLocation 是否属于总馆形态，比如“阅览室”
@@ -861,6 +871,38 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
         {
             public XmlElement Element { get; set; }
             public string Map { get; set; }
+        }
+
+        static NormalResult PrepareConfigDom()
+        {
+            _rfidCfgDom = new XmlDocument();
+
+            // 获得 RFID 配置信息
+            var result = LibraryChannelUtil.GetRfidCfg();
+
+            if (result.Value == -1)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"从 dp2library 服务器获得 RFID 配置信息时出错: {result.ErrorInfo}"
+                };
+            else
+            {
+                if (string.IsNullOrEmpty(result.Xml))
+                {
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"从 dp2library 服务器获得 RFID 配置信息时出错: library.xml 中没有定义 rfid 元素"
+                    };
+                }
+                _rfidCfgDom = new XmlDocument();
+                _rfidCfgDom.LoadXml(result.Xml);
+
+                _libraryName = result.LibraryName;
+
+                return new NormalResult();
+            }
         }
 
         // 从 shelf.xml 配置文件中获得读者证读卡器名

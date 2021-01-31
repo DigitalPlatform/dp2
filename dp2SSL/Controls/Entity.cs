@@ -739,11 +739,11 @@ Stack:
         List<ErrorItem> _errorItems = null;
 
         // 构造错误信息
-        public string BuildError(string type, 
+        public string BuildError(string type,
             string error,
             string code)
         {
-            var text = ErrorItem.BuildError(ref _errorItems, 
+            var text = ErrorItem.BuildError(ref _errorItems,
                 type, error, code);
             this.Error = text;
             return text;
@@ -753,6 +753,13 @@ Stack:
         public void ClearAllError()
         {
             _errorItems = null;
+        }
+
+        public string GetError(string typeList)
+        {
+            if (_errorItems == null)
+                return null;
+            return ErrorItem.ToString(typeList, _errorItems);
         }
 
         #endregion
@@ -768,7 +775,7 @@ Stack:
         // 在既有的错误集合中添加一个新的错误，并整理输出为纯文本
         public static string BuildError(
             ref List<ErrorItem> errors,
-            string type, 
+            string type,
             string error,
             string code)
         {
@@ -816,15 +823,38 @@ Stack:
         }
 
         // 构造为方便显示的纯文本
-        static string ToString(List<ErrorItem> errors,
+        public static string ToString(List<ErrorItem> errors,
             string style = "")
         {
             if (errors == null || errors.Count == 0)
                 return null;
             var include_type = StringUtil.IsInList("includeType", style);
             List<string> lines = new List<string>();
-            foreach(var item in errors)
+            foreach (var item in errors)
             {
+                if (include_type)
+                    lines.Add($"{item.Type}:{item.Error}");
+                else
+                    lines.Add(item.Error);
+            }
+            return StringUtil.MakePathList(lines, ";");
+        }
+
+        // 获得特定类型的错误信息(显示形态)
+        public static string ToString(
+            string typeList,
+            List<ErrorItem> errors,
+            string style = "")
+        {
+            if (errors == null || errors.Count == 0)
+                return null;
+            var include_type = StringUtil.IsInList("includeType", style);
+            List<string> lines = new List<string>();
+            foreach (var item in errors)
+            {
+                if (StringUtil.IsInList(item.Type, typeList) == false)
+                    continue;
+
                 if (include_type)
                     lines.Add($"{item.Type}:{item.Error}");
                 else

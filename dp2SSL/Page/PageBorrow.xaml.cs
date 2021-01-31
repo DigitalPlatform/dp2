@@ -1672,7 +1672,9 @@ out string strError);
                         {
                             GetEntityDataResult result = null;
                             if (App.Protocol == "sip")
-                                result = await SipChannelUtil.GetEntityDataAsync(entity.PII, "network");
+                                result = await SipChannelUtil.GetEntityDataAsync(entity.PII,
+                                    entity.GetOiOrAoi(),
+                                    "network");
                             else
                                 result = await LibraryChannelUtil.GetEntityDataAsync(entity.GetOiPii(), "network");
 
@@ -2344,7 +2346,9 @@ out string strError);
             if (App.Protocol != "sip")
                 return;
 
-            GetEntityDataResult result = await SipChannelUtil.GetEntityDataAsync(entity.PII, "network");
+            GetEntityDataResult result = await SipChannelUtil.GetEntityDataAsync(entity.PII,
+                entity.GetOiOrAoi(),
+                "network");
             if (result.Value == -1)
             {
                 entity.AppendError(result.ErrorInfo);

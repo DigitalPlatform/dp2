@@ -1085,6 +1085,14 @@ namespace dp2SSL
             }
         }
 
+        public static string SipInstitution
+        {
+            get
+            {
+                return WpfClientInfo.Config.Get("global", "sipInstitution", "");
+            }
+        }
+
         #endregion
 
         #region 消息服务器相关参数

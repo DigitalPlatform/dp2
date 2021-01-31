@@ -102,6 +102,25 @@ Description = "SIP2 通讯所用的字符集编码方式"
             }
         }
 
+        // 2021/1/31
+        [Display(
+Order = 5,
+Name = "机构代码",
+Description = "用于 SIP2 服务器的 RFID 标签机构代码"
+)]
+        [Category("SIP2 服务器")]
+        public string SipInstitution
+        {
+            get
+            {
+                return _config.Get("global", "sipInstitution", "");
+            }
+            set
+            {
+                _config.Set("global", "sipInstitution", value);
+            }
+        }
+
         #endregion
 
         #region dp2 服务器

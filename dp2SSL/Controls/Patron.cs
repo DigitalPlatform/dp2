@@ -285,6 +285,16 @@ namespace dp2SSL
 
             return pii;
         }
+
+
+        public string GetOiOrAoi()
+        {
+            if (string.IsNullOrEmpty(this.OI) == false)
+                return this.OI;
+
+            return this.AOI;
+        }
+
     }
 
     // 读者信息
@@ -703,7 +713,7 @@ readerType);
             Timestamp = timestamp;
 
             this.Barcode = DomUtil.GetElementText(dom.DocumentElement, "barcode");
-            
+
             // 2020/9/8
             // 暂时无法区分 OI 和 AOI，都放到 OI 里面
             this.OI = DomUtil.GetElementText(dom.DocumentElement, "oi");
