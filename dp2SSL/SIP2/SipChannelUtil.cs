@@ -110,6 +110,18 @@ namespace dp2SSL
             string shelfNo,
             string currentShelfNo)
         {
+            string filter_oi = App.SipInstitution;
+            if (string.IsNullOrEmpty(filter_oi) == false)
+            {
+                if (oi != filter_oi)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"标签的 OI '{oi}' 不符合定义 '{filter_oi}'，修改册记录状态被(dp2ssl)拒绝",
+                        ErrorCode = "oiMismatch"
+                    };
+            }
+
             try
             {
                 using (var releaser = await _channelLimit.EnterAsync())
@@ -186,8 +198,8 @@ namespace dp2SSL
                     return new GetLocalEntityDataResult
                     {
                         Value = -1,
-                        ErrorInfo = $"标签的 OI '{oi}' 不符合定义 '{filter_oi}'，获取册记录失败",
-                        ErrorCode = "oiNotMatch"
+                        ErrorInfo = $"标签的 OI '{oi}' 不符合定义 '{filter_oi}'，获取册记录被(dp2ssl)拒绝",
+                        ErrorCode = "oiMismatch"
                     };
             }
 

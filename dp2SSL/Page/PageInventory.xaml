@@ -187,6 +187,10 @@
                                         HeaderContainerStyle="{StaticResource myHeaderStyle}"/>
                         <GridViewColumn Header="状态" Width="150" DisplayMemberBinding="{Binding State}"
                                         HeaderContainerStyle="{StaticResource myHeaderStyle}"/>
+                        <GridViewColumn Header="OI" Width="200" DisplayMemberBinding="{Binding OI}"
+                                        HeaderContainerStyle="{StaticResource myHeaderStyle}"/>
+                        <GridViewColumn Header="AOI" Width="200" DisplayMemberBinding="{Binding AOI}"
+                                        HeaderContainerStyle="{StaticResource myHeaderStyle}"/>
 
                     </GridView>
                 </ListView.View>

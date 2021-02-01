@@ -989,7 +989,7 @@
             // 
             this.MenuItem_clearDatabaseInfoCatch.Name = "MenuItem_clearDatabaseInfoCatch";
             this.MenuItem_clearDatabaseInfoCatch.Size = new System.Drawing.Size(302, 30);
-            this.MenuItem_clearDatabaseInfoCatch.Text = "刷新数据库信息缓存(&D)";
+            this.MenuItem_clearDatabaseInfoCatch.Text = "刷新系统配置和数据库信息缓存(&D)";
             this.MenuItem_clearDatabaseInfoCatch.Click += new System.EventHandler(this.MenuItem_clearDatabaseInfoCatch_Click);
             // 
             // MenuItem_reLogin

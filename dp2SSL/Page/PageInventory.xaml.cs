@@ -1039,6 +1039,8 @@ namespace dp2SSL
                 new InventoryColumn{ Caption = "永久馆藏地", Property = "Location"},
                 new InventoryColumn{ Caption = "永久架号", Property = "ShelfNo"},
                 new InventoryColumn{ Caption = "错误信息", Property = "Error"},
+                new InventoryColumn{ Caption = "OI", Property = "OI"},
+                new InventoryColumn{ Caption = "AOI", Property = "AOI"},
             };
 
             using (var cancel = CancellationTokenSource.CreateLinkedTokenSource(App.CancelToken))

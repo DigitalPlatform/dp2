@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.12.*")]
-[assembly: AssemblyFileVersion("3.12.0.0")]
+[assembly: AssemblyVersion("3.13.*")]
+[assembly: AssemblyFileVersion("3.13.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -73,3 +73,4 @@ using System.Runtime.InteropServices;
 // 3.10 2020/4/28 快捷出纳窗的 Return() API 会携带当前时间的 operTime 子参数。这样，当遇到“没有被借出”报错时候，工作人员应当收下这一册图书(如果读者坚持要拿走，则需要重新办理一次借出操作)
 // 3.11 2020/9/13 种册窗“采购”属性页的上下文菜单增加“为新验收的册设置‘加工中’状态”命令。和种册窗“期”属性页的同名命令效果相同，并且关联同一个系统参数。订购窗里面的同名 checkbox 也关联同一个系统参数。相比以前版本，减少了记忆和理解维护的难度
 // 3.12 2021/1/5 增加掌纹识别功能
+// 3.13 2021/2/1 种册窗的册登记对话框，如果册记录的馆藏地没有在 library.xml 中定义对应的机构代码，则会报错无法创建 RFID 标签。批修改册窗也会在册记录没有定义机构代码的情况下报错。
