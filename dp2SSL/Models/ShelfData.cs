@@ -862,8 +862,16 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             if (results.Count > 0)
                 results.Sort((a, b) => { return b.Map.Length - a.Map.Length; });
 
-            isil = results[0].Element.GetAttribute("isil");
-            alternative = results[0].Element.GetAttribute("alternative");
+            var element = results[0].Element;
+            isil = element.GetAttribute("isil");
+            alternative = element.GetAttribute("alternative");
+
+            // 2021/2/1
+            if (string.IsNullOrEmpty(isil) && string.IsNullOrEmpty(alternative))
+            {
+                throw new Exception($"map 元素不合法，isil 和 alternative 属性均为空");
+            }
+
             return true;
         }
 

@@ -868,11 +868,12 @@ namespace dp2Circulation
             // barcode --> PII
             result.NewElement(ElementOID.PII, book_item.Barcode);
 
+            string pure_location = StringUtil.GetPureLocation(book_item.Location);
             // location --> OwnerInstitution 要配置映射关系
             // 定义一系列前缀对应的 ISIL 编码。如果 location 和前缀前方一致比对成功，则得到 ISIL 编码
             MainForm.GetOwnerInstitution(
                 Program.MainForm.RfidCfgDom,
-                StringUtil.GetPureLocation(book_item.Location),
+                pure_location,
                 out string isil,
                 out string alternative);
             if (string.IsNullOrEmpty(isil) == false)
@@ -882,6 +883,12 @@ namespace dp2Circulation
             else if (string.IsNullOrEmpty(alternative) == false)
             {
                 result.NewElement(ElementOID.AlternativeOwnerInstitution, alternative);
+            }
+            else
+            {
+                // 2021/2/1
+                // 当前册记录没有找到对应的机构代码。不适合创建 RFID 标签
+                throw new Exception($"馆藏地 '{pure_location}' 没有定义机构代码，无法创建 RFID 标签");
             }
 
             // SetInformation？

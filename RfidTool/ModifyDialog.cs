@@ -923,8 +923,12 @@ namespace RfidTool
                 {
                     if (string.IsNullOrEmpty(pii) == false)
                     {
+                        string new_oi = chip?.FindElement(ElementOID.OI)?.Text;
+                        string new_aoi = chip?.FindElement(ElementOID.AOI)?.Text;
+                        
                         DataModel.WriteToUidLogFile(iteminfo.Tag.UID, 
-                            MakeOiPii(pii, oi, aoi));
+                            MakeOiPii(pii, new_oi, new_aoi));
+                        
                         iteminfo.UidPiiLogWrited = true;
                     }
                 }

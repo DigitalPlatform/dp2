@@ -462,8 +462,6 @@ false);
             if (need == false)
                 return 0;
 
-
-
             string strError = "";
             this.ShowMessage("正在写入 RFID 标签");
             try
@@ -498,8 +496,17 @@ false);
                     RecordDom = dom
                 };
 
-                LogicChipItem chip = EntityEditForm.BuildChip(item);
-                _right = chip;
+                try
+                {
+                    LogicChipItem chip = EntityEditForm.BuildChip(item);
+                    _right = chip;
+                }
+                catch(Exception ex)
+                {
+                    // 2021/2/1
+                    strError = "创建 RFID 标签时出现异常: " + ex.Message;
+                    goto ERROR1;
+                }
 
                 string pii = EntityEditForm.GetPII(strXml);   // 从修改前的册记录中获得册条码号
 
@@ -543,7 +550,8 @@ false);
             CANCEL0:
             MessageBox.Show(this, strError);
             return 0;
-            ERROR1:
+        ERROR1:
+            Program.MainForm.Speak(strError);
             this.ShowMessage(strError, "red", true);
             return -1;
         }

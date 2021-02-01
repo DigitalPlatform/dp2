@@ -6456,6 +6456,8 @@ out strError);
         /// </summary>
         public bool ForceUseLocalPinyinFunc = false;    // 是否要临时改用本地拼音。此状态退出时不会被记忆
 
+        // 刷新系统配置和数据库信息缓存
+        // 比如包括刷新 library.xml 中 rfid 配置参数在内务前端的缓存
         private void MenuItem_clearDatabaseInfoCatch_Click(object sender, EventArgs e)
         {
             bool bEnabled = this.MenuItem_clearDatabaseInfoCatch.Enabled;

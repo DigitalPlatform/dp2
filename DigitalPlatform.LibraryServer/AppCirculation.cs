@@ -3306,35 +3306,43 @@ start_time_1,
                 return 0;
             }
 
-            // return:
-            //      true    找到。信息在 isil 和 alternative 参数里面返回
-            //      false   没有找到
-            var ret = GetOwnerInstitution(
-                rfid,
-                strLibraryCode + "/",
-                out string isil,
-                out string alternative);
-            if (ret == false)
+            try
             {
-                strError = $"library.xml 的 rfid 配置参数中没有找到和馆代码 '{strLibraryCode}' 关联的所属机构代码";
-                return 0;
+                // return:
+                //      true    找到。信息在 isil 和 alternative 参数里面返回
+                //      false   没有找到
+                var ret = GetOwnerInstitution(
+                    rfid,
+                    strLibraryCode + "/",
+                    out string isil,
+                    out string alternative);
+                if (ret == false)
+                {
+                    strError = $"library.xml 的 rfid 配置参数中没有找到和馆代码 '{strLibraryCode}' 关联的所属机构代码";
+                    return 0;
+                }
+
+                int matched = 0;
+                if (string.IsNullOrEmpty(isil) == false && strOwnerInstitution == isil)
+                    matched++;
+                if (string.IsNullOrEmpty(alternative) == false && strOwnerInstitution == alternative)
+                    matched++;
+
+                if (matched == 0)
+                {
+                    //string oi = string.IsNullOrEmpty(isil) ? alternative : isil;
+                    strError = $"当前读者卡来自馆外机构 '{strOwnerInstitution}' (1)";
+                    // strError = $"请求的所属机构 '{strOwnerInstitution}' 和册记录 {strOutputItemRecPath} 的所属机构代码 '{isil}' 和 '{alternative}' 不吻合";
+                    return 0;
+                }
+
+                return 1;
             }
-
-            int matched = 0;
-            if (string.IsNullOrEmpty(isil) == false && strOwnerInstitution == isil)
-                matched++;
-            if (string.IsNullOrEmpty(alternative) == false && strOwnerInstitution == alternative)
-                matched++;
-
-            if (matched == 0)
+            catch (Exception ex)
             {
-                //string oi = string.IsNullOrEmpty(isil) ? alternative : isil;
-                strError = $"当前读者卡来自馆外机构 '{strOwnerInstitution}' (1)";
-                // strError = $"请求的所属机构 '{strOwnerInstitution}' 和册记录 {strOutputItemRecPath} 的所属机构代码 '{isil}' 和 '{alternative}' 不吻合";
-                return 0;
+                strError = $"获取机构代码过程出现异常: {ex.Message}";
+                return -1;
             }
-
-            return 1;
         }
 
         // return:
@@ -3383,35 +3391,43 @@ start_time_1,
             string strLocation = DomUtil.GetElementText(itemdom.DocumentElement, "location");
             strLocation = StringUtil.GetPureLocation(strLocation);
 
-            // return:
-            //      true    找到。信息在 isil 和 alternative 参数里面返回
-            //      false   没有找到
-            var ret = GetOwnerInstitution(
-                rfid,
-                strLocation,
-                out string isil,
-                out string alternative);
-            if (ret == false)
+            try
             {
-                strError = $"library.xml 的 rfid 配置参数中没有找到和馆藏地 '{strLocation}' 关联的所属机构代码";
-                return 0;
+                // return:
+                //      true    找到。信息在 isil 和 alternative 参数里面返回
+                //      false   没有找到
+                var ret = GetOwnerInstitution(
+                    rfid,
+                    strLocation,
+                    out string isil,
+                    out string alternative);
+                if (ret == false)
+                {
+                    strError = $"library.xml 的 rfid 配置参数中没有找到和馆藏地 '{strLocation}' 关联的所属机构代码";
+                    return 0;
+                }
+
+                int matched = 0;
+                if (string.IsNullOrEmpty(isil) == false && strOwnerInstitution == isil)
+                    matched++;
+                if (string.IsNullOrEmpty(alternative) == false && strOwnerInstitution == alternative)
+                    matched++;
+
+                if (matched == 0)
+                {
+                    //string oi = string.IsNullOrEmpty(isil) ? alternative : isil;
+                    strError = $"当前册来自馆外机构 '{strOwnerInstitution}'";
+                    // strError = $"请求的所属机构 '{strOwnerInstitution}' 和册记录 {strOutputItemRecPath} 的所属机构代码 '{isil}' 和 '{alternative}' 不吻合";
+                    return 0;
+                }
+
+                return 1;
             }
-
-            int matched = 0;
-            if (string.IsNullOrEmpty(isil) == false && strOwnerInstitution == isil)
-                matched++;
-            if (string.IsNullOrEmpty(alternative) == false && strOwnerInstitution == alternative)
-                matched++;
-
-            if (matched == 0)
+            catch (Exception ex)
             {
-                //string oi = string.IsNullOrEmpty(isil) ? alternative : isil;
-                strError = $"当前册来自馆外机构 '{strOwnerInstitution}'";
-                // strError = $"请求的所属机构 '{strOwnerInstitution}' 和册记录 {strOutputItemRecPath} 的所属机构代码 '{isil}' 和 '{alternative}' 不吻合";
-                return 0;
+                strError = $"获取机构代码过程出现异常: {ex.Message}";
+                return -1;
             }
-
-            return 1;
         }
 
         // 2020/9/8
@@ -3426,26 +3442,36 @@ start_time_1,
                 return;
             }
 
-            // return:
-            //      true    找到。信息在 isil 和 alternative 参数里面返回
-            //      false   没有找到
-            var ret = GetOwnerInstitution(
-                rfid,
-                libraryCode + "/",
-                out string isil,
-                out string alternative);
-            if (ret == false)
+            try
             {
-                string error = $"library.xml 的 rfid 配置参数中没有找到和馆藏地 '{libraryCode + "/"}' 关联的所属机构代码";
+                // return:
+                //      true    找到。信息在 isil 和 alternative 参数里面返回
+                //      false   没有找到
+                var ret = GetOwnerInstitution(
+                    rfid,
+                    libraryCode + "/",
+                    out string isil,
+                    out string alternative);
+                if (ret == false)
+                {
+                    string error = $"library.xml 的 rfid 配置参数中没有找到和馆藏地 '{libraryCode + "/"}' 关联的所属机构代码";
+                    var element = DomUtil.SetElementText(patrondom.DocumentElement, "oi", "");
+                    element.SetAttribute("error", error);
+                    return;
+                }
+
+                if (string.IsNullOrEmpty(isil) == false)
+                    DomUtil.SetElementText(patrondom.DocumentElement, "oi", isil);
+                else if (string.IsNullOrEmpty(alternative) == false)
+                    DomUtil.SetElementText(patrondom.DocumentElement, "oi", alternative);
+            }
+            catch (Exception ex)
+            {
+                string error = $"获取机构代码过程出现异常: {ex.Message}";
                 var element = DomUtil.SetElementText(patrondom.DocumentElement, "oi", "");
                 element.SetAttribute("error", error);
                 return;
             }
-
-            if (string.IsNullOrEmpty(isil) == false)
-                DomUtil.SetElementText(patrondom.DocumentElement, "oi", isil);
-            else if (string.IsNullOrEmpty(alternative) == false)
-                DomUtil.SetElementText(patrondom.DocumentElement, "oi", alternative);
         }
 
         // 2020/8/27
@@ -3463,26 +3489,37 @@ start_time_1,
             string strLocation = DomUtil.GetElementText(itemdom.DocumentElement, "location");
             strLocation = StringUtil.GetPureLocation(strLocation);
 
-            // return:
-            //      true    找到。信息在 isil 和 alternative 参数里面返回
-            //      false   没有找到
-            var ret = GetOwnerInstitution(
-                rfid,
-                strLocation,
-                out string isil,
-                out string alternative);
-            if (ret == false)
+            try
             {
-                string error = $"library.xml 的 rfid 配置参数中没有找到和馆藏地 '{strLocation}' 关联的所属机构代码";
+                // return:
+                //      true    找到。信息在 isil 和 alternative 参数里面返回
+                //      false   没有找到
+                var ret = GetOwnerInstitution(
+                    rfid,
+                    strLocation,
+                    out string isil,
+                    out string alternative);
+                if (ret == false)
+                {
+                    string error = $"library.xml 的 rfid 配置参数中没有找到和馆藏地 '{strLocation}' 关联的所属机构代码";
+                    var element = DomUtil.SetElementText(itemdom.DocumentElement, "oi", "");
+                    element.SetAttribute("error", error);
+                    return;
+                }
+
+
+                if (string.IsNullOrEmpty(isil) == false)
+                    DomUtil.SetElementText(itemdom.DocumentElement, "oi", isil);
+                else if (string.IsNullOrEmpty(alternative) == false)
+                    DomUtil.SetElementText(itemdom.DocumentElement, "oi", alternative);
+            }
+            catch (Exception ex)
+            {
+                string error = $"获取机构代码过程出现异常: {ex.Message}";
                 var element = DomUtil.SetElementText(itemdom.DocumentElement, "oi", "");
                 element.SetAttribute("error", error);
                 return;
             }
-
-            if (string.IsNullOrEmpty(isil) == false)
-                DomUtil.SetElementText(itemdom.DocumentElement, "oi", isil);
-            else if (string.IsNullOrEmpty(alternative) == false)
-                DomUtil.SetElementText(itemdom.DocumentElement, "oi", alternative);
         }
 
 #if REMOVED
@@ -3612,8 +3649,15 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             if (results.Count > 0)
                 results.Sort((a, b) => { return b.Map.Length - a.Map.Length; });
 
-            isil = results[0].Element.GetAttribute("isil");
-            alternative = results[0].Element.GetAttribute("alternative");
+            var element = results[0].Element;
+            isil = element.GetAttribute("isil");
+            alternative = element.GetAttribute("alternative");
+
+            // 2021/2/1
+            if (string.IsNullOrEmpty(isil) && string.IsNullOrEmpty(alternative))
+            {
+                throw new Exception($"map 元素不合法，isil 和 alternative 属性均为空");
+            }
             return true;
         }
 

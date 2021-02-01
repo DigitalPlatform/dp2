@@ -5025,8 +5025,9 @@ namespace dp2Library
                         app.AddItemOI(itemdom);
                         strResult = itemdom.DocumentElement.OuterXml;
                     }
-                    catch
+                    catch(Exception ex)
                     {
+                        app.WriteErrorLog($"(GetItemInfo())为册记录添加 oi 元素时出现异常: \r\n{ExceptionUtil.GetDebugText(ex)}\r\n\r\n册记录 XML:'{strXml}'");
                         strResult = strXml;
                     }
                 }
