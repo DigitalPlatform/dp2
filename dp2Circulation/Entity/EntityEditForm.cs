@@ -492,9 +492,13 @@ namespace dp2Circulation
                     BookItem item = this.Item.Clone();
                     item.RecordDom = this._editing.DataDom;
                     this.chipEditor_editing.LogicChipItem = BuildChip(item);
+                    this.toolStripButton_saveRfid.Enabled = true;
                 }
                 catch (Exception ex)
                 {
+                    // 2021/2/2
+                    this.toolStripButton_saveRfid.Enabled = false;
+
                     SetMessage(ex.Message);
                 }
 #if NO
@@ -1272,6 +1276,12 @@ out strError);
                 Debug.WriteLine("333 " + (_tagExisting.TagInfo != null ? "!=null" : "==null"));
 
                 Debug.Assert(_tagExisting.TagInfo != null, "");
+
+                if (this.chipEditor_editing.LogicChipItem == null)
+                {
+                    strError = "this.chipEditor_editing.LogicChipItem == null";
+                    return -1;
+                }
 
                 // 2020/10/27
                 // 检查 PII 是否为空
