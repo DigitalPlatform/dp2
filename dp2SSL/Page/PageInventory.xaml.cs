@@ -1307,14 +1307,27 @@ namespace dp2SSL
             _infoWindow?.Hide();
         }
 
-        volatile static Task _updateTask = null;
+        static Task _updateTask = null;
 
         public static bool BeginUpdateStatis()
         {
             if (_updateTask != null)
             {
-                WpfClientInfo.WriteInfoLog("_updateTask != null，放弃更新统计数字");
-                return false;
+                try
+                {
+                    if (_updateTask?.Status != TaskStatus.Running)
+                        _updateTask = null;
+                    else
+                    {
+                        WpfClientInfo.WriteInfoLog("_updateTask != null，放弃更新统计数字");
+                        return false;
+                    }
+                }
+                catch(Exception ex)
+                {
+                    _updateTask = null;
+                    WpfClientInfo.WriteInfoLog($"BeginUpdateStatis() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                }
             }
 
             _updateTask = Task.Run(() =>

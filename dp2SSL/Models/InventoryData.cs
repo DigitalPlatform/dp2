@@ -627,7 +627,20 @@ TaskScheduler.Default);
                             }
                         }
                         else
-                            result = await LibraryChannelUtil.GetEntityDataAsync(entity.GetOiPii(true)/*entity.PII*/, "network");
+                        {
+                            // 这里预先检查，不让 OI 为空的请求发给 dp2library 服务器(实际上发出请求是有可能成功响应的)
+                            if (string.IsNullOrEmpty(entity.GetOiOrAoi()))
+                            {
+                                result = new GetEntityDataResult
+                                {
+                                    Value = -1,
+                                    ErrorInfo = "RFID 标签中机构代码不允许为空",
+                                    ErrorCode = "NotFound"
+                                };
+                            }
+                            else
+                                result = await LibraryChannelUtil.GetEntityDataAsync(entity.GetOiPii(true)/*entity.PII*/, "network");
+                        }
 
                         /*
                         // testing

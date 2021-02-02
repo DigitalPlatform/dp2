@@ -117,7 +117,6 @@ namespace DigitalPlatform.OPAC.Web
                     if (page.Request.UserHostAddress == "localhost"
                         || page.Request.UserHostAddress == "::1")
                     {
-
                         page.Response.Write("\r\n\r\n");
                         // 输出当天日志文件内容
                         app.DumpErrorLog(page);
