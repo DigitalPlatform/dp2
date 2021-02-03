@@ -706,7 +706,7 @@ namespace dp2Library
                             goto ERROR1;
                         }
 
-                        SimulateLoginInfo info = ParseMenagerUserNamePassword(strPassword);
+                        SimulateLoginInfo info = ParseManagerUserNamePassword(strPassword);
                         if (info.ManagerPassword == null)
                             info.ManagerPassword = "";  // 保护好
 
@@ -838,7 +838,7 @@ namespace dp2Library
                         }
 #endif
 
-                        SimulateLoginInfo info = ParseMenagerUserNamePassword(strPassword);
+                        SimulateLoginInfo info = ParseManagerUserNamePassword(strPassword);
                         if (info.ManagerPassword == null)
                             info.ManagerPassword = "";  // 保护好
 
@@ -1280,7 +1280,7 @@ namespace dp2Library
         }
 
         // 解析出 xxxx,xxxx 两个部分
-        static SimulateLoginInfo ParseMenagerUserNamePassword(string strText)
+        static SimulateLoginInfo ParseManagerUserNamePassword(string strText)
         {
             SimulateLoginInfo info = new SimulateLoginInfo();
 

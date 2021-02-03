@@ -2650,7 +2650,7 @@ false);
                 }
 
                 goto CONTINUE;
-                FOUND:
+            FOUND:
 
                 if (child.GetType().Equals(type) == true)
                 {
@@ -2662,7 +2662,7 @@ false);
                     return child;
                 }
 
-                CONTINUE:
+            CONTINUE:
                 hwnd = API.GetWindow(hwnd, API.GW_HWNDNEXT);
             }
 
@@ -2883,6 +2883,9 @@ false);
                 if (string.IsNullOrEmpty(strExpire) == false)
                     e.Parameters += ",expire=" + strExpire;
 #endif
+
+                // 2021/2/3
+                e.Parameters += ",gettoken=day";
 
                 // 2014/10/23
                 if (this.TestMode == true)
@@ -3197,7 +3200,7 @@ false);
                 // EndSearch();
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3288,7 +3291,7 @@ false);
             }
 
             return 1;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -3957,7 +3960,7 @@ Stack:
             }
 
             return 0;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -4588,7 +4591,7 @@ Stack:
             if (nRet == 2)
                 LoadItemBarcode();
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -4743,7 +4746,7 @@ Stack:
                 this.ReturnChannel(channel);
                 // EndSearch();
             }
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -4852,7 +4855,7 @@ Stack:
                 // this.ReturnChannel(channel);
                 // EndSearch();
             }
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -6120,7 +6123,7 @@ out strError);
 
             string strFileName = Path.Combine(this.DataDir, "rangemessage.xml");
 
-            REDO:
+        REDO:
 
             try
             {
@@ -6627,7 +6630,7 @@ out strError);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -7581,7 +7584,7 @@ out strError);
                 goto ERROR1;
             form.Close();
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
             form.Close();
         }
@@ -8098,7 +8101,7 @@ Keys keyData)
             {
             }
 
-            REDO_VERIFY:
+        REDO_VERIFY:
 
             if (strSerialCode == "test")
             {
@@ -8279,7 +8282,7 @@ Keys keyData)
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.OriginCode = strOriginCode;
 
-            REDO:
+        REDO:
             dlg.ShowDialog(this);
             if (dlg.DialogResult != DialogResult.OK)
                 return 0;
@@ -8332,7 +8335,7 @@ Keys keyData)
             string strRequirFuncList = "";  // 因为这里是设置通用的序列号，不具体针对哪个功能，所以对设置后，序列号的功能不做检查。只有等到用到具体功能的时候，才能发现序列号是否包含具体功能的 function = ... 参数
 
             string strSerialCode = "";
-            REDO_VERIFY:
+        REDO_VERIFY:
 
             if (strSerialCode == "test")
             {
@@ -8394,7 +8397,7 @@ Keys keyData)
                 goto REDO_VERIFY;
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
 #endif
         }
@@ -8743,6 +8746,24 @@ Keys keyData)
             return this._currentUserRights;
         }
 
+        // 2021/2/3
+        // 获得当前登录账户的 token 字符串
+        public string GetCurrentAccountToken()
+        {
+            if (this._currentUserRights == null)
+                return null;
+            string[] parts = this._currentUserRights.Split(new char[] { ',' });
+            foreach(string part in parts)
+            {
+                if (part.StartsWith("token:"))
+                {
+                    return part.Substring("token:".Length);
+                }
+            }
+
+            return null;
+        }
+
         #endregion // servers.xml
 
         void EnableFingerprintSendKey(bool enable)
@@ -9051,7 +9072,7 @@ Keys keyData)
                 }
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
