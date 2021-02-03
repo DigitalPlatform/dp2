@@ -891,6 +891,9 @@ true);
   <field element='operations:innerXml' width='150'>
     <caption lang='zh'>操作</caption>
   </field>
+  <field element='uid' width='200'>
+    <caption lang='zh'>RFID 标签 UID</caption>
+  </field>
   <field element='RecPath:this' width='200'>
     <caption lang='zh'>册记录路径</caption>
   </field>
