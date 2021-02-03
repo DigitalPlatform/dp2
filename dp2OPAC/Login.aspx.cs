@@ -229,7 +229,7 @@ ref this.sessioninfo) == false)
                 string strDomain = "";
                 bool bRet = ParseUserName(sessioninfo.UserID,
         out strPureUserName,
-        out  strDomain);
+        out strDomain);
                 // 如果是sso登录方式，需要转到相应domain的login.aspx，再做一次logout
                 if (bRet == true
                     && HasConfigDp2Sso() == true)
@@ -272,6 +272,14 @@ ref this.sessioninfo) == false)
 
                 this.Redirect("login.aspx");
                 this.Response.End();
+                return;
+            }
+
+            // 2021/2/3
+            if (this.Request["action"] == "tokenlogin")
+            {
+                DoTokenLogin();
+                Response.End();
                 return;
             }
 
@@ -440,6 +448,42 @@ ref this.sessioninfo) == false)
         Response.Write(HttpUtility.HtmlEncode(strError));
         this.Response.End();
     }
+
+    public void DoTokenLogin()
+    {
+        var id = this.Request["id"];
+        var token = this.Request["token"];
+        sessioninfo.IsReader = true;
+
+        sessioninfo.UserID = id;
+        sessioninfo.Password = "token:" + token;
+
+        if (sessioninfo.LoginCallStack.Count != 0)
+        {
+            string strUrl = (string)sessioninfo.LoginCallStack.Pop();
+            Redirect(strUrl);
+        }
+        else
+        {
+            string strRedirect = Request.QueryString["redirect"];
+            if (string.IsNullOrEmpty(strRedirect))
+            {
+                LoginState loginstate = GlobalUtil.GetLoginState(this.Page);
+
+                if (loginstate == LoginState.Public)
+                    Redirect("searchbiblio.aspx");
+                else if (loginstate == LoginState.Reader)
+                    Redirect("borrowinfo.aspx");	// 实在没有办法，就到主页面
+                else if (loginstate == LoginState.Librarian)
+                    Redirect("searchbiblio.aspx");
+                else
+                    Redirect("searchbiblio.aspx");
+            }
+            else
+                Redirect(strRedirect);
+        }
+    }
+
 
     // return:
     //      false   不是SSO形态的usernname
