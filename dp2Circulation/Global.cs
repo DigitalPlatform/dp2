@@ -2696,6 +2696,10 @@ namespace dp2Circulation
         {
             StopWebBrowser(webBrowser);
 
+            // 2021/2/4
+            if (strHtml == null)
+                strHtml = "";
+
             strHtml = strHtml.Replace("%datadir%", strDataDir);
             strHtml = strHtml.Replace("%mappeddir%", PathUtil.MergePath(strDataDir, "servermapped"));
 

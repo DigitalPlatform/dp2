@@ -10,6 +10,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Threading;
+
 using DigitalPlatform;
 using DigitalPlatform.RFID;
 using DigitalPlatform.WPF;
@@ -37,14 +38,24 @@ namespace dp2SSL
 
             MenuPage = this;
 
+            SetIdleEvents();
+        }
+
+        public void SetIdleEvents()
+        {
+            InputManager.Current.PreProcessInput -= OnActivity;
+            if (_activityTimer != null)
+                _activityTimer.Tick -= OnInactivity;
+
+            var seconds = App.AutoBackMainMenuSeconds;
+            if (seconds > 0)
             {
                 // https://stackoverflow.com/questions/4963135/wpf-inactivity-and-activity
                 InputManager.Current.PreProcessInput += OnActivity;
-                _activityTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(30), IsEnabled = true };
+                _activityTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(seconds), IsEnabled = true };
                 _activityTimer.Tick += OnInactivity;
             }
         }
-
 
         ~PageMenu()
         {
@@ -322,7 +333,7 @@ namespace dp2SSL
                     {
                         _pageShelf.SplitterPosition = pos;
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         // 2021/1/15
                         WpfClientInfo.WriteErrorLog($"settings.xml 中 pageShelf/splitterPosition 值 '{pos}' 格式不正确({ExceptionUtil.GetDebugText(ex)})。已被忽略");
@@ -493,7 +504,7 @@ namespace dp2SSL
 
         #region 不活跃探测
 
-        private readonly DispatcherTimer _activityTimer;
+        private DispatcherTimer _activityTimer;
         private Point _inactiveMousePosition = new Point(0, 0);
 
         void OnInactivity(object sender, EventArgs e)
@@ -509,6 +520,7 @@ namespace dp2SSL
 
             var nav = (NavigationWindow)App.Current.MainWindow;
             if ((nav.Content == PageMenu.PageBorrow && PageMenu.PageBorrow.IsEmpty())
+                || (nav.Content == PageMenu.PageShelf && ShelfData.OpeningDoorCount == 0)
                 || nav.Content == PageMenu._pageSetting
                 || nav.Content.GetType() == typeof(PageError))
             {

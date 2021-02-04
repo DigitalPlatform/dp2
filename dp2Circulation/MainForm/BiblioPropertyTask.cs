@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Web;
-
+using System.Xml;
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
+using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.Text;
+using DigitalPlatform.Xml;
 
 namespace dp2Circulation
 {
@@ -30,6 +34,12 @@ namespace dp2Circulation
             set;
         }
 
+        public string Subrecords
+        {
+            get;
+            set;
+        }
+
         // 打开对话框
         // return:
         //      false   无法打开对话框
@@ -48,6 +58,7 @@ namespace dp2Circulation
             string strError = "";
             int nRet = 0;
 
+            string strSubRecords = "";
             BiblioInfo info = this.BiblioInfo;
             if (info == null)
                 return true;
@@ -72,7 +83,7 @@ namespace dp2Circulation
                         Stop,
                         strRecPath,
                         "",
-                        new string[] { "xml" },   // formats
+                        new string[] { "xml", "subrecords:item" },   // formats
                         out string[] results,
                         out byte[] baTimestamp,
                         out strError);
@@ -94,11 +105,17 @@ namespace dp2Circulation
                             throw new Exception(strError);
                         }
 
+                        if (results != null && results.Length >= 2)
+                            strSubRecords = results[1];
+
                         // TODO: 对 BiblioInfo 的成员进行操作的时候，是否要 lock 一下对象?
                         string strXml = results[0];
                         info.OldXml = strXml;
                         info.Timestamp = baTimestamp;
                         info.RecPath = strRecPath;
+
+                        // 2021/2/4
+                        info.Subrecords = strSubRecords;
                     }
                 }
                 finally
@@ -139,8 +156,119 @@ namespace dp2Circulation
     "</body></html>";
 
             this.XML = BiblioSearchForm.MergeXml(strXml1, strXml2);
+
+            // 2021/2/4
+            this.Subrecords = BuildSubrecordsHtml(info.Subrecords);
+
             return true;
         }
+
+        static string BuildSubrecordsHtml(string strSubRecords)
+        {
+            if (string.IsNullOrEmpty(strSubRecords))
+                return "";
+
+            if (strSubRecords.StartsWith("error:"))
+                return strSubRecords.Substring("error:".Length);
+
+            StringBuilder text = new StringBuilder();
+            XmlDocument collection_dom = new XmlDocument();
+            try
+            {
+                text.AppendLine("<html>"+ Program.MainForm.GetSubrecordsHtmlHeadString() + "<body>");
+
+                collection_dom.LoadXml(strSubRecords);
+
+                string itemTotalCount = collection_dom.DocumentElement.GetAttribute("itemTotalCount");
+
+                text.AppendLine("<table>");
+                text.AppendLine($"<tr><td colspan='10'>册记录数: {itemTotalCount}</td></tr>");
+                text.AppendLine("<tr class='columntitle'>");
+                text.AppendLine("<td class='no'>序号</td>");
+                text.AppendLine("<td class='location'>馆藏地</td>");
+                text.AppendLine("<td class='price'>价格</td>");
+                text.AppendLine("<td class='seller'>订购渠道</td>");
+                text.AppendLine("<td class='source'>经费来源</td>");
+                text.AppendLine("<td class='recpath'>记录路径</td>");
+                text.AppendLine("</tr>");
+
+                XmlNodeList nodes = collection_dom.DocumentElement.SelectNodes("item");
+                int i = 0;
+                foreach (XmlElement item in nodes)
+                {
+                    string rec_path = item.GetAttribute("recPath");
+                    string location = DomUtil.GetElementText(item, "location");
+                    string price = DomUtil.GetElementText(item, "price");
+                    string seller = DomUtil.GetElementText(item, "seller");
+                    string source = DomUtil.GetElementText(item, "source");
+
+                    text.AppendLine("<tr class='content'>");
+                    text.AppendLine($"<td class='no'>{(i+1)}</td>");
+                    text.AppendLine($"<td class='location'>{HttpUtility.HtmlEncode(location)}</td>");
+                    text.AppendLine($"<td class='price'>{HttpUtility.HtmlEncode(price)}</td>");
+                    text.AppendLine($"<td class='seller'>{HttpUtility.HtmlEncode(seller)}</td>");
+                    text.AppendLine($"<td class='source'>{HttpUtility.HtmlEncode(source)}</td>");
+                    text.AppendLine($"<td class='recpath'>{HttpUtility.HtmlEncode(rec_path)}</td>");
+                    text.AppendLine("</tr>");
+
+                    i++;
+                }
+
+                Int32.TryParse(itemTotalCount, out int value);
+                if (i < value)
+                {
+                    text.AppendLine($"<tr><td colspan='10'>... 有 {value - i} 项被略去 ...</td></tr>");
+                }
+
+                text.AppendLine("</table>");
+                text.AppendLine("</body></html>");
+                return text.ToString();
+            }
+            catch (Exception ex)
+            {
+                return "strSubRecords 装入 XMLDOM 时出现异常: "
+                    + ex.Message
+                    + "。(strSubRecords='" + StringUtil.CutString(strSubRecords, 300) + "')";
+            }
+        }
+
+        // 从 collection 下级元素中获得指定元素名的部分
+        static EntityInfo[] GetItems(XmlDocument collection_dom,
+            string strElementName)
+        {
+            if (collection_dom.DocumentElement == null)
+                return null;
+            string strTotalCount = collection_dom.DocumentElement.GetAttribute(strElementName + "TotalCount");
+            if (string.IsNullOrEmpty(strTotalCount))
+                return null;
+            int nTotalCount = 0;
+            if (Int32.TryParse(strTotalCount, out nTotalCount) == false)
+                return null;    // 2020/12/18
+            XmlNodeList nodes = collection_dom.DocumentElement.SelectNodes(strElementName);
+            if (nodes.Count < nTotalCount)
+                return null;    // 迫使后面重新获取
+
+            List<EntityInfo> results = new List<EntityInfo>();
+            foreach (XmlElement node in nodes)
+            {
+                XmlDocument item_dom = new XmlDocument();
+                item_dom.LoadXml(node.OuterXml);
+
+                EntityInfo info = new EntityInfo();
+
+                info.OldRecPath = node.GetAttribute("recPath");
+                node.RemoveAttribute("recPath");
+
+                info.OldTimestamp = ByteArray.GetTimeStampByteArray(node.GetAttribute("timestamp"));
+                node.RemoveAttribute("timestamp");
+
+                info.OldRecord = node.OuterXml;
+                results.Add(info);
+            }
+
+            return results.ToArray();
+        }
+
 
         public override bool ShowData()
         {
@@ -158,6 +286,7 @@ namespace dp2Circulation
                 Program.MainForm.m_commentViewer.Text = "MARC内容 '" + this.BiblioInfo?.RecPath + "'";
                 Program.MainForm.m_commentViewer.HtmlString = string.IsNullOrEmpty(this.HTML) ? "<html><body></body></html>" : this.HTML;
                 Program.MainForm.m_commentViewer.XmlString = this.XML;
+                Program.MainForm.m_commentViewer.SubrecordsString = this.Subrecords;
                 return true;
             }
             return false;

@@ -402,6 +402,8 @@ string color = "red")
         private void Config_Click(object sender, RoutedEventArgs e)
         {
             //FingerprintManager.Base.State = "pause";
+            var old_seconds = App.AutoBackMainMenuSeconds;
+
             App.PauseBarcodeScan();
             try
             {
@@ -419,6 +421,9 @@ string color = "red")
                 //FingerprintManager.Base.State = "";
                 App.ContinueBarcodeScan();
             }
+
+            if (old_seconds != App.AutoBackMainMenuSeconds)
+                PageMenu.MenuPage.SetIdleEvents();
 
             using (var cancel = CancellationTokenSource.CreateLinkedTokenSource(App.CancelToken))
             {
@@ -626,18 +631,22 @@ string color = "red")
                 }
                 else
                 {
-                    if (version_result.Value == -1 || version_result.ErrorCode == null)
-                        errors.Add("所连接的 RFID 中心版本太低。请升级到最新版本");
+                    if (version_result.Value == -1 && version_result.ErrorCode == "System.Exception")
+                    {
+                        errors.Add(version_result.ErrorInfo);
+                    }
+                    else if (version_result.Value == -1 || version_result.ErrorCode == null)
+                        errors.Add("所连接的人脸中心版本太低。请升级到最新版本");
                     else
                     {
                         try
                         {
                             if (StringUtil.CompareVersion(version_result.ErrorCode, facecenter_base_version) < 0)
-                                errors.Add($"所连接的 人脸中心版本太低(为 {version_result.ErrorCode} 版)。请升级到 {rfidcenter_base_version} 以上版本");
+                                errors.Add($"所连接的人脸中心版本太低(为 {version_result.ErrorCode} 版)。请升级到 {rfidcenter_base_version} 以上版本");
                         }
                         catch (Exception ex)
                         {
-                            errors.Add($"所连接的 人脸中心版本太低。请升级到最新版本。({ex.Message})");
+                            errors.Add($"所连接的人脸中心版本太低。请升级到最新版本。({ex.Message})");
                         }
                     }
 

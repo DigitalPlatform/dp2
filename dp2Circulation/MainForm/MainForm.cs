@@ -9209,6 +9209,16 @@ Keys keyData)
     "</head>";
         }
 
+        public string GetSubrecordsHtmlHeadString()
+        {
+            string strCssFilePath = PathUtil.MergePath(this.DataDir, "subrecords.css");
+
+            return
+    "<head>" +
+    "<LINK href='" + strCssFilePath + "' type='text/css' rel='stylesheet'>" +
+    "</head>";
+        }
+
         // 打开 CommentViewer 窗口
         public void OpenCommentViewer(bool bOpenWindow)
         {
