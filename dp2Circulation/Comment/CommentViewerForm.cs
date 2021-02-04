@@ -106,6 +106,33 @@ namespace dp2Circulation
             }
         }
 
+
+        string m_strSubrecordsString = "";
+
+        /// <summary>
+        /// 子记录字符串
+        /// </summary>
+        public string SubrecordsString
+        {
+            get
+            {
+                return m_strSubrecordsString;
+            }
+            set
+            {
+                lock (this)
+                {
+                    m_strSubrecordsString = value;
+                    Debug.Assert(Program.MainForm != null, "");
+
+                    Global.SetHtmlString(this.webBrowser_subrecords,
+    value,
+    Program.MainForm.DataDir,
+    "comment_viewer_subrecords");
+                }
+            }
+        }
+
         /// <summary>
         /// 构造函数
         /// </summary>
@@ -203,6 +230,14 @@ namespace dp2Circulation
             }
         }
 
+        public WebBrowser SubrecordsBrowserControl
+        {
+            get
+            {
+                return this.webBrowser_subrecords;
+            }
+        }
+
         List<Control> _freeControls = new List<Control>();
 
         /// <summary>
@@ -247,6 +282,8 @@ namespace dp2Circulation
                 Program.MainForm != null ? Program.MainForm.DataDir : null);
             Global.ClearHtmlPage(this.webBrowser_xml,
                 Program.MainForm != null ? Program.MainForm.DataDir : null);
+            Global.ClearHtmlPage(this.webBrowser_subrecords,
+                Program.MainForm != null ? Program.MainForm.DataDir : null);
         }
 
         /// <summary>
@@ -264,6 +301,12 @@ Program.MainForm != null ? Program.MainForm.DataDir : null);
         public void ClearXml()
         {
             Global.ClearHtmlPage(this.webBrowser_xml,
+Program.MainForm != null ? Program.MainForm.DataDir : null);
+        }
+
+        public void ClearSubrecords()
+        {
+            Global.ClearHtmlPage(this.webBrowser_subrecords,
 Program.MainForm != null ? Program.MainForm.DataDir : null);
         }
 
@@ -308,5 +351,9 @@ Program.MainForm != null ? Program.MainForm.DataDir : null);
             ControlExtention.DisposeFreeControls(_freeControls);
         }
 
+        private void webBrowser_subrecords_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
+        {
+            ((WebBrowser)sender).Document.Window.Error += new HtmlElementErrorEventHandler(Window_Error);
+        }
     }
 }

@@ -689,6 +689,9 @@ namespace dp2SSL
                         return;
                     }
 
+                    // 重置活跃时钟
+                    PageMenu.MenuPage.ResetActivityTimer();
+
                     _lastBarcode = new LastBarcode { Barcode = line, Time = DateTime.Now };
                     // 触发一次输入
                     LineFeed?.Invoke(this, new LineFeedEventArgs { Text = line });
@@ -1276,6 +1279,18 @@ namespace dp2SSL
             get
             {
                 return WpfClientInfo.Config?.Get("global", "memory_worker_password", "无");
+            }
+        }
+
+        public static int AutoBackMainMenuSeconds
+        {
+            get
+            {
+                if (WpfClientInfo.Config == null)
+                    return -1;
+                return WpfClientInfo.Config.GetInt("global",
+                    "autoback_mainmenu_seconds",
+                    -1);
             }
         }
 

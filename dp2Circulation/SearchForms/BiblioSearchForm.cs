@@ -12543,6 +12543,9 @@ message,
         /// </summary>
         public byte[] Timestamp = null;
 
+        // 2021/2/4
+        public string Subrecords = "";
+
         public BiblioInfo()
         {
         }

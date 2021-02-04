@@ -1952,6 +1952,9 @@ namespace dp2SSL
             }
 #endif
 
+            // 重置活跃时钟
+            PageMenu.MenuPage.ResetActivityTimer();
+
             {
                 // "initial" 模式下，在读者证读卡器上扫 ISO15693 的标签可以查看图书内容
                 if (this.Mode == "initial"
@@ -1995,7 +1998,8 @@ namespace dp2SSL
             });
             */
 
-
+            // 重置活跃时钟
+            PageMenu.MenuPage.ResetActivityTimer();
 
             // 2020/9/25
             // using (var releaser = await ShelfData._actionsLimit.EnterAsync())

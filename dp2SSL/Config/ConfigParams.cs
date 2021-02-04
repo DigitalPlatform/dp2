@@ -481,6 +481,26 @@ Description = "工作人员刷卡成功登录后，多少时间内再刷卡不�
             }
         }
 
+
+        // 默认值 -1。-1 表示永远不返回
+        [Display(
+Order = 12,
+Name = "休眠返回主菜单秒数",
+Description = "当没有操作多少秒以后，自动返回主菜单页面"
+)]
+        [Category("全局")]
+        public int AutoBackMainMenuSeconds
+        {
+            get
+            {
+                return _config.GetInt("global", "autoback_mainmenu_seconds", -1);
+            }
+            set
+            {
+                _config.SetInt("global", "autoback_mainmenu_seconds", value);
+            }
+        }
+
         /*
         // 默认值 空
         [Display(
