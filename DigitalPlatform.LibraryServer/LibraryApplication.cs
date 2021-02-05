@@ -9608,9 +9608,9 @@ out strError);
                 if (lRet == -1)
                     goto ERROR1;
 
+                XmlDocument readerdom = null;
                 if (strPassword != null)
                 {
-                    XmlDocument readerdom = null;
                     nRet = LibraryApplication.LoadToDom(strXml,
                         out readerdom,
                         out strError);
@@ -9644,18 +9644,32 @@ out strError);
                         if (nRet == 0)
                             continue;
 
-                        if (string.IsNullOrEmpty(strGetToken) == false)
+                        // 原来在这里
+                    }
+                }
+
+                if (string.IsNullOrEmpty(strGetToken) == false)
+                {
+                    if (readerdom == null)
+                    {
+                        nRet = LibraryApplication.LoadToDom(strXml,
+                            out readerdom,
+                            out strError);
+                        if (nRet == -1)
                         {
-                            string strHashedPassword = DomUtil.GetElementInnerText(readerdom.DocumentElement, "password");
-                            nRet = MakeToken(strClientIP,
-                                GetTimeRangeByStyle(strGetToken),
-                                strHashedPassword,
-                                out strToken,
-                                out strError);
-                            if (nRet == -1)
-                                return -1;
+                            strError = "装载读者记录 '" + aPath[i] + "' 进入XML DOM时发生错误: " + strError;
+                            return -1;
                         }
                     }
+
+                    string strHashedPassword = DomUtil.GetElementInnerText(readerdom.DocumentElement, "password");
+                    nRet = MakeToken(strClientIP,
+                        GetTimeRangeByStyle(strGetToken),
+                        strHashedPassword,
+                        out strToken,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
                 }
 
                 aPathNew.Add(aPath[i]);
@@ -10779,9 +10793,17 @@ out strError);
                 account.Rights = strTemp;
             }
 
+            /*
+            // 中途添加的一些权限内容
+            List<string> adds = new List<string>();
+            */
+
             // 2015/1/15
             if (string.IsNullOrEmpty(strToken) == false)
+            {
                 account.Rights += ",token:" + strToken;  // 如果保存在缓存中，如何决定何时失效?
+                // adds.Add($"token:{strToken}");
+            }
 
             // 追加读者记录中定义的存取定义
             string strAddAccess = DomUtil.GetElementText(readerdom.DocumentElement, "access");
@@ -10846,7 +10868,11 @@ out strError);
 
             sessioninfo.Account = account;
 
-            strRights = account.RightsOrigin;   //  sessioninfo.RightsOrigin;
+            strRights = account.RightsOrigin;   // 这里似乎可用 .Rights。原先这里用 .RightOrigin 的原因是不想带进去读者记录中添加的附加权限?
+            /*
+            if (adds.Count > 0)
+                strRights += "," + StringUtil.MakePathList(adds, ",");
+            */
 
             strOutputUserName = account.UserID; // 2011/7/29 读者证条码号
 

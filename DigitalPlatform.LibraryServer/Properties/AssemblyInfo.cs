@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.43.*")]
-[assembly: AssemblyFileVersion("3.43.0.0")]
+[assembly: AssemblyVersion("3.44.*")]
+[assembly: AssemblyFileVersion("3.44.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -225,3 +225,4 @@ ItemCanReturn()
 //		3.41 (2020/12/21) SetEntities() API 的 delete action 功能，style 可以包含使用 "force_clear_keys"，用于删除 XML 结构已经被破坏的册记录，作用是提醒 dp2kernel 层(根据记录 id)强制删除册记录的检索点 key
 //		3.42 (2020/12/23) 进一步巩固检索和删除册记录过程中遇到的 XML 部分被破坏(对象文件删除)场景下的功能完整性
 //		3.43 (2020/12/29) GetReaderInfo() SetReaderInfo() 等环节支持读者记录中的 palmprint 元素
+//		3.44 (2021/2/5) GetBiblioInfos() 获得下级记录功能("subrecords:item")消除一个关于 ErrorCode 的 bug

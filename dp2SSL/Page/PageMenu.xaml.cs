@@ -520,8 +520,8 @@ namespace dp2SSL
 
             var nav = (NavigationWindow)App.Current.MainWindow;
             if ((nav.Content == PageMenu.PageBorrow && PageMenu.PageBorrow.IsEmpty())
-                || (nav.Content == PageMenu.PageShelf && ShelfData.OpeningDoorCount == 0)
-                || nav.Content == PageMenu._pageSetting
+                || (nav.Content == PageMenu.PageShelf && PageMenu.PageShelf.IsPatronEmpty() == true && ShelfData.OpeningDoorCount == 0 && DoorStateTask.CopyList().Count == 0)
+                || (nav.Content == PageMenu._pageSetting && PageMenu._pageSetting.GetDialogCount() == 0)
                 || nav.Content.GetType() == typeof(PageError))
             {
                 nav.Navigate(PageMenu.MenuPage);

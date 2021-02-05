@@ -117,11 +117,13 @@ namespace dp2SSL
                 {
                     // 2020/9/10
                     if (videoRecognition != null)
+                    {
                         App.Invoke(new Action(() =>
                         {
                             videoRecognition.Close();
                         }));
-                    App.CurrentApp.SpeakSequence($"放弃人脸识别");
+                        App.CurrentApp.SpeakSequence($"放弃人脸识别");
+                    }
                 }
             });
             try
@@ -143,6 +145,7 @@ namespace dp2SSL
                     App.Invoke(new Action(() =>
                     {
                         videoRecognition.Close();
+                        videoRecognition = null;
                     }));
             }
 

@@ -857,6 +857,8 @@ namespace dp2SSL
 
                 App.Invoke(new Action(() =>
                 {
+                    CloseAllBookInfoWindow();
+
                     bookInfoWindow = new BookInfoWindow();
                     bookInfoWindow.TitleText = $"{e.Door.Name} {GetPartialName(e.ButtonName)}";
                     bookInfoWindow.Owner = Application.Current.MainWindow;
@@ -868,12 +870,14 @@ namespace dp2SSL
                     bookInfoWindow.SetBooks(collection);
                     bookInfoWindow.Show();
                     AddLayer();
+                    _bookInfoWindows.Add(bookInfoWindow);
                 }));
             }
         }
 
         private void BookInfoWindow_Closed(object sender, EventArgs e)
         {
+            _bookInfoWindows.Remove(sender as BookInfoWindow);
             RemoveLayer();
         }
 
@@ -1554,6 +1558,7 @@ namespace dp2SSL
                 _progressWindow.Close();
             // 确保 page 关闭时对话框能自动关闭
             CloseDialogs();
+            CloseAllBookInfoWindow();
             PatronClear();
         }
 
@@ -3823,6 +3828,14 @@ namespace dp2SSL
                 return;
             }
 
+            // 2021/2/5
+            var task_count = DoorStateTask.CopyList().Count;
+            if (task_count > 0)
+            {
+                ErrorBox("", $"当前尚有 {task_count} 个后台任务正在处理。\r\n\r\n请等待后台事务全部完成，才能返回主菜单页面", "yellow", "button_ok");
+                return;
+            }
+
             /*
             if (ShelfData.OpeningDoorCount > 0)
             {
@@ -4622,6 +4635,11 @@ namespace dp2SSL
             TrySetMessage(null, $"{name} 刷{style}");
         }
 
+        public bool IsPatronEmpty()
+        {
+            return !_patron.NotEmpty;
+        }
+
         void DisplayError(ref VideoWindow videoRegister,
         string message,
         string color = "red")
@@ -4651,11 +4669,21 @@ namespace dp2SSL
 
         void DisplayVideo(VideoWindow window, TimeSpan timeout)
         {
+            DateTime lastResetTime = DateTime.Now;
             DateTime start = DateTime.Now;
             while (_stopVideo == false)
             {
                 if (DateTime.Now - start > timeout)
                     break;
+
+                if (DateTime.Now - lastResetTime > TimeSpan.FromSeconds(2))
+                {
+                    // 2021/2/5
+                    // 重置活跃时钟，避免中途自动返回菜单页面
+                    PageMenu.MenuPage.ResetActivityTimer();
+                    lastResetTime = DateTime.Now;
+                }
+
                 var result = FaceManager.GetImage("");
                 if (result.ImageData == null)
                 {

@@ -1524,8 +1524,11 @@ namespace DigitalPlatform.LibraryServer
 
             // itemTotalCount=-1 表示 AccessDenied
             dom.DocumentElement.SetAttribute(strItemElementName + "TotalCount", lHitCount.ToString());
-            dom.DocumentElement.SetAttribute(strItemElementName + "ErrorInfo", $"权限不足，无法获取 {strItemElementName}记录");
-            dom.DocumentElement.SetAttribute(strItemElementName + "ErrorCode", "AccessDenied");
+            if (lHitCount == -1)
+            {
+                dom.DocumentElement.SetAttribute(strItemElementName + "ErrorInfo", $"权限不足，无法获取 {strItemElementName}记录");
+                dom.DocumentElement.SetAttribute(strItemElementName + "ErrorCode", "AccessDenied");
+            }
         }
 
 #if NO
