@@ -262,6 +262,22 @@ namespace dp2Circulation
             this.Visible = false;
         }
 
+        public void HideSubrecords()
+        {
+            this.tabControl_main.TabPages.Remove(this.tabPage_subrecords);
+            // 防止内存泄漏
+            ControlExtention.AddFreeControl(_freeControls, this.tabPage_subrecords);
+        }
+
+        public void ShowSubrecords()
+        {
+            if (this.tabControl_main.TabPages.IndexOf(this.tabPage_subrecords) == -1)
+            {
+                this.tabControl_main.TabPages.Add(this.tabPage_subrecords);
+                ControlExtention.RemoveFreeControl(_freeControls, this.tabPage_subrecords);
+            }
+        }
+
         /// <summary>
         /// TabControl
         /// </summary>

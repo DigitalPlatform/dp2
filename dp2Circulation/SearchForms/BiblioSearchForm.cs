@@ -293,7 +293,13 @@ namespace dp2Circulation
     "<不筛选>");
             }
 
-
+            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.44") >= 0)
+                toolStripMenuItem_subrecords.Checked = DisplaySubrecords;
+            else
+            {
+                toolStripMenuItem_subrecords.Enabled = false;
+                DisplaySubrecords = false;
+            }
         }
 
         // TabComboBox版本
@@ -589,6 +595,25 @@ this.comboBox_location.Text);
                     "biblio_search_form",
                     "multiline_max_result_count",
                     10);
+            }
+        }
+
+        // 是否要在固定面板区“属性”属性页显示(书目记录的)子记录
+        public static bool DisplaySubrecords
+        {
+            get
+            {
+                return Program.MainForm.AppInfo.GetBoolean(
+                    "biblio_search_form",
+                    "display_subrecords",
+                    false);
+            }
+            set
+            {
+                Program.MainForm.AppInfo.SetBoolean(
+                    "biblio_search_form",
+                    "display_subrecords",
+                    value);
             }
         }
 
@@ -11905,6 +11930,7 @@ message,
             BiblioPropertyTask task = new BiblioPropertyTask();
             task.BiblioInfo = info;
             task.Stop = this.stop;
+            task.DisplaySubrecords = DisplaySubrecords;
 
             Program.MainForm.PropertyTaskList.AddTask(task, true);
         }
@@ -12510,6 +12536,11 @@ message,
                     this.textBox_queryWord.ScrollBars = ScrollBars.None;
                 }
             }
+        }
+
+        private void toolStripMenuItem_subrecords_CheckedChanged(object sender, EventArgs e)
+        {
+            DisplaySubrecords = toolStripMenuItem_subrecords.Checked;
         }
     }
 

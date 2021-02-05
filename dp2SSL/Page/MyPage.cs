@@ -14,6 +14,11 @@ namespace dp2SSL
     {
         List<Window> _dialogs = new List<Window>();
 
+        public int GetDialogCount()
+        {
+            return _dialogs.Count;
+        }
+
         internal void CloseDialogs()
         {
             // 确保 page 关闭时对话框能自动关闭

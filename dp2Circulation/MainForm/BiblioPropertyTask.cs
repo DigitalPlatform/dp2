@@ -5,18 +5,20 @@ using System.Linq;
 using System.Text;
 using System.Web;
 using System.Xml;
+
 using DigitalPlatform;
-using DigitalPlatform.CirculationClient;
-using DigitalPlatform.LibraryClient;
-using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.LibraryClient.localhost;
 
 namespace dp2Circulation
 {
     public class BiblioPropertyTask : PropertyTask
     {
         // public BiblioSearchForm BiblioSearchForm = null;
+
+        public bool DisplaySubrecords { get; set; }
 
         public BiblioInfo BiblioInfo = null;
 
@@ -64,7 +66,8 @@ namespace dp2Circulation
                 return true;
             string strRecPath = this.BiblioInfo.RecPath;
 
-            if (string.IsNullOrEmpty(info.OldXml) == true)
+            if (string.IsNullOrEmpty(info.OldXml) == true
+                || (DisplaySubrecords && this.Subrecords == null))
             {
                 lock (syncRoot)
                 {
@@ -83,7 +86,9 @@ namespace dp2Circulation
                         Stop,
                         strRecPath,
                         "",
-                        new string[] { "xml", "subrecords:item" },   // formats
+                        DisplaySubrecords ?
+                        new string[] { "xml", "subrecords:item" }
+                        : new string[] { "xml" },   // formats
                         out string[] results,
                         out byte[] baTimestamp,
                         out strError);
@@ -105,7 +110,7 @@ namespace dp2Circulation
                             throw new Exception(strError);
                         }
 
-                        if (results != null && results.Length >= 2)
+                        if (DisplaySubrecords && results != null && results.Length >= 2)
                             strSubRecords = results[1];
 
                         // TODO: 对 BiblioInfo 的成员进行操作的时候，是否要 lock 一下对象?
@@ -158,7 +163,8 @@ namespace dp2Circulation
             this.XML = BiblioSearchForm.MergeXml(strXml1, strXml2);
 
             // 2021/2/4
-            this.Subrecords = BuildSubrecordsHtml(info.Subrecords);
+            if (DisplaySubrecords)
+                this.Subrecords = BuildSubrecordsHtml(info.Subrecords);
 
             return true;
         }
@@ -175,14 +181,21 @@ namespace dp2Circulation
             XmlDocument collection_dom = new XmlDocument();
             try
             {
-                text.AppendLine("<html>"+ Program.MainForm.GetSubrecordsHtmlHeadString() + "<body>");
+                text.AppendLine("<html>" + Program.MainForm.GetSubrecordsHtmlHeadString() + "<body>");
 
                 collection_dom.LoadXml(strSubRecords);
 
+                string errorInfo = "";
                 string itemTotalCount = collection_dom.DocumentElement.GetAttribute("itemTotalCount");
+                if (itemTotalCount == "-1")
+                {
+                    string itemErrorCode = collection_dom.DocumentElement.GetAttribute("itemErrorCode");
+                    string itemErrorInfo = collection_dom.DocumentElement.GetAttribute("itemErrorInfo");
+                    errorInfo = $"{itemErrorCode}:{itemErrorInfo}";
+                }
 
                 text.AppendLine("<table>");
-                text.AppendLine($"<tr><td colspan='10'>册记录数: {itemTotalCount}</td></tr>");
+                text.AppendLine($"<tr><td colspan='10'>册记录数: {itemTotalCount} {errorInfo}</td></tr>");
                 text.AppendLine("<tr class='columntitle'>");
                 text.AppendLine("<td class='no'>序号</td>");
                 text.AppendLine("<td class='location'>馆藏地</td>");
@@ -203,7 +216,7 @@ namespace dp2Circulation
                     string source = DomUtil.GetElementText(item, "source");
 
                     text.AppendLine("<tr class='content'>");
-                    text.AppendLine($"<td class='no'>{(i+1)}</td>");
+                    text.AppendLine($"<td class='no'>{(i + 1)}</td>");
                     text.AppendLine($"<td class='location'>{HttpUtility.HtmlEncode(location)}</td>");
                     text.AppendLine($"<td class='price'>{HttpUtility.HtmlEncode(price)}</td>");
                     text.AppendLine($"<td class='seller'>{HttpUtility.HtmlEncode(seller)}</td>");
@@ -286,7 +299,14 @@ namespace dp2Circulation
                 Program.MainForm.m_commentViewer.Text = "MARC内容 '" + this.BiblioInfo?.RecPath + "'";
                 Program.MainForm.m_commentViewer.HtmlString = string.IsNullOrEmpty(this.HTML) ? "<html><body></body></html>" : this.HTML;
                 Program.MainForm.m_commentViewer.XmlString = this.XML;
-                Program.MainForm.m_commentViewer.SubrecordsString = this.Subrecords;
+                if (DisplaySubrecords)
+                {
+                    Program.MainForm.m_commentViewer.ShowSubrecords();
+                    Program.MainForm.m_commentViewer.SubrecordsString = this.Subrecords;
+                }
+                else
+                    Program.MainForm.m_commentViewer.HideSubrecords();
+
                 return true;
             }
             return false;

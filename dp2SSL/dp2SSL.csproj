@@ -37,7 +37,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>109</ApplicationRevision>
+    <ApplicationRevision>115</ApplicationRevision>
     <ApplicationVersion>1.5.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -828,6 +828,7 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Models\盘点算法.txt" />
+    <Resource Include="design.txt" />
     <Content Include="photo_not_available.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

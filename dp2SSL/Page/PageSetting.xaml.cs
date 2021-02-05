@@ -444,6 +444,8 @@ string color = "red")
                     App.SetSize(progress, "middle");
                     progress.BackColor = "black";
                     progress.Show();
+
+                    MemoryDialog(progress);
                 }));
                 try
                 {
@@ -527,6 +529,7 @@ string color = "red")
                     App.Invoke(new Action(() =>
                     {
                         progress.Close();
+                        ForgetDialog(progress);
                     }));
                 }
             }
