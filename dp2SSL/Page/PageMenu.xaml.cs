@@ -560,15 +560,15 @@ namespace dp2SSL
                 rectangle.Visibility = Visibility.Visible;
                 */
 
-                _activityTimer.Stop();
-                _activityTimer.Start();
+                _activityTimer?.Stop();
+                _activityTimer?.Start();
             }
         }
 
         public void ResetActivityTimer()
         {
-            _activityTimer.Stop();
-            _activityTimer.Start();
+            _activityTimer?.Stop();
+            _activityTimer?.Start();
         }
 
         #endregion

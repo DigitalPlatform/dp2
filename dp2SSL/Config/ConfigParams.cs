@@ -444,6 +444,26 @@ Description = "读者证条码的输入方式"
         // 默认值 空
         [Display(
 Order = 11,
+Name = "工作人员条码输入方式",
+Description = "工作人员条码的输入方式"
+)]
+        [ItemsSource(typeof(PatronBarcodeStyleSource))]
+        [Category("全局")]
+        public string WorkerBarcodeStyle
+        {
+            get
+            {
+                return _config.Get("global", "worker_barcode_style", "禁用");
+            }
+            set
+            {
+                _config.Set("global", "worker_barcode_style", value);
+            }
+        }
+
+        // 默认值 空
+        [Display(
+Order = 12,
 Name = "凭条打印方式",
 Description = "凭条(小票)打印方式"
 )]
@@ -463,7 +483,7 @@ Description = "凭条(小票)打印方式"
 
         // 默认值 false
         [Display(
-Order = 12,
+Order = 13,
 Name = "工作人员刷卡免密码时长",
 Description = "工作人员刷卡成功登录后，多少时间内再刷卡不用输入密码"
 )]
@@ -484,7 +504,7 @@ Description = "工作人员刷卡成功登录后，多少时间内再刷卡不�
 
         // 默认值 -1。-1 表示永远不返回
         [Display(
-Order = 12,
+Order = 14,
 Name = "休眠返回主菜单秒数",
 Description = "当没有操作多少秒以后，自动返回主菜单页面"
 )]
