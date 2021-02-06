@@ -640,7 +640,8 @@ namespace dp2SSL
         private async void App_LineFeed(object sender, LineFeedEventArgs e)
 #pragma warning restore VSTHRD100 // 避免使用 Async Void 方法
         {
-            if (string.IsNullOrEmpty(App.PatronBarcodeStyle) || App.PatronBarcodeStyle == "禁用")
+            if ((string.IsNullOrEmpty(App.PatronBarcodeStyle) || App.PatronBarcodeStyle == "禁用")
+                && (string.IsNullOrEmpty(App.WorkerBarcodeStyle) || App.WorkerBarcodeStyle == "禁用"))
             {
                 SetGlobalError("scan_barcode", "当前设置参数不接受扫入条码");
                 App.CurrentApp.Speak("不允许扫入各种条码");
@@ -648,11 +649,35 @@ namespace dp2SSL
             }
 
             // 扫入一个条码
-            string barcode = e.Text.ToUpper();
-            // 检查防范空字符串，和使用工作人员方式(~开头)的字符串
-            if (string.IsNullOrEmpty(barcode) || barcode.StartsWith("~"))
+            string barcode = e.Text;    // .ToUpper();
+            // 检查防范空字符串
+            if (string.IsNullOrEmpty(barcode))
             {
                 App.CurrentApp.Speak("条码不合法");
+                return;
+            }
+
+            // 使用工作人员方式(~开头)的字符串
+            if (barcode.StartsWith("~"))
+            {
+                if (string.IsNullOrEmpty(App.WorkerBarcodeStyle) || App.WorkerBarcodeStyle == "禁用")
+                {
+                    App.CurrentApp.Speak("禁用工作人员条码");
+                    return;
+                }
+
+                // 处理工作人员条码
+                goto PROCESS;
+            }
+
+            // 读者证条码号应该都是大写的
+            barcode = barcode.ToUpper();
+
+            // 以下开始处理读者条码
+            if (string.IsNullOrEmpty(App.PatronBarcodeStyle) || App.PatronBarcodeStyle == "禁用")
+            {
+                SetGlobalError("scan_barcode", "当前设置参数不接受扫入(读者)条码");
+                App.CurrentApp.Speak("不允许扫入读者条码");
                 return;
             }
 
@@ -677,6 +702,7 @@ namespace dp2SSL
                 }
             }
 
+            PROCESS:
             SetGlobalError("scan_barcode", null);
 
             // return:
@@ -3703,7 +3729,7 @@ namespace dp2SSL
         // 设置读者区域错误字符串
         void SetPatronError(string type, string error)
         {
-            _patronErrorTable.SetError(type, 
+            _patronErrorTable.SetError(type,
                 error,
                 true);
             // 如果有错误信息，则主动把“清除读者信息”按钮设为可用，以便读者可以随时清除错误信息

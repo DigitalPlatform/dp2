@@ -1262,6 +1262,20 @@ namespace dp2SSL
         }
 
         /*
+    sizes.Add("禁用");
+    sizes.Add("一维码+二维码");
+    sizes.Add("一维码");
+    sizes.Add("二维码");
+* */
+        public static string WorkerBarcodeStyle
+        {
+            get
+            {
+                return WpfClientInfo.Config?.Get("global", "worker_barcode_style", "禁用");
+            }
+        }
+
+        /*
             sizes.Add("不打印");
             sizes.Add("借书");
             sizes.Add("借书+还书");
