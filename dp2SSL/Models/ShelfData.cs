@@ -997,6 +997,22 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             return results;
         }
 
+        // 超额时语音播报次数
+        public static int GetOverdueSpeakCount()
+        {
+            if (ShelfCfgDom == null)
+                return 1;
+            var value = ShelfCfgDom.DocumentElement.SelectSingleNode("settings/key[@name='超额时语音播报次数']/@value")?.Value;
+            if (string.IsNullOrEmpty(value))
+                value = "1";
+            if (Int32.TryParse(value, out int count) == false)
+            {
+                WpfClientInfo.WriteErrorLog($"shelf.xml 中 超额时语音播报次数 配置参数值 '{value} 格式不正确。应为一个数字'");
+                return 1;
+            }
+
+            return count;
+        }
 
         // 从 shelf.xml 配置文件中归纳出所有的读卡器名，包括天线编号部分
         // parameters:
@@ -2862,6 +2878,13 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                             App.PauseBarcodeScan();
                             try
                             {
+                                // 下架时，要从列表中排除当前书柜所在的 location
+                                List<string> locations = new List<string>(_locationList);
+                                foreach(var location in GetLocation(transferouts)) // 所涉及的图书的馆藏地汇总
+                                {
+                                    locations.Remove(location);
+                                }
+
                                 var door_names = StringUtil.MakePathList(GetDoorName(transferouts), ",");
                                 AskTransferWindow dialog = new AskTransferWindow();
                                 dialog.TitleText = $"下架({door_names})";
@@ -2870,7 +2893,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                                 dialog.Mode = "out";
                                 dialog.SetBooks(collection);
                                 dialog.Text = $"如何处理以上从 {door_names} 取走的 {collection.Count} 册图书？";
-                                dialog.target.ItemsSource = _locationList;  // result.List;
+                                dialog.target.ItemsSource = locations;  // _locationList;
                                 dialog.BatchNo = batchNo;
                                 dialog.Owner = App.CurrentApp.MainWindow;
                                 dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
@@ -2924,6 +2947,35 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             }
 
             return bAsked;
+        }
+
+        // 概括门名字
+        public static List<string> GetLocation(List<ActionInfo> actions_param)
+        {
+            List<DoorItem> results = new List<DoorItem>();
+            foreach (var action in actions_param)
+            {
+                var doors = DoorItem.FindDoors(ShelfData.Doors, action.Entity.ReaderName, action.Entity.Antenna);
+                Add(results, doors);
+            }
+
+            List<string> names = new List<string>();
+            foreach (var door in results)
+            {
+                names.Add(GetLocationPart(door.ShelfNo));
+            }
+
+            StringUtil.RemoveDupNoSort(ref names);
+            return names;
+
+            void Add(List<DoorItem> target, List<DoorItem> doors)
+            {
+                foreach (var door in doors)
+                {
+                    if (target.IndexOf(door) == -1)
+                        target.Add(door);
+                }
+            }
         }
 
         // 概括门名字

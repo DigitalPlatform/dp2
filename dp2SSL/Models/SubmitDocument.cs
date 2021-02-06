@@ -120,7 +120,13 @@ namespace dp2SSL
                     // 语音提醒
                     // 针对同一个人，短时间内密集提醒要注意避免
                     if (HasOverflowSpeaked(StringUtil.MakePathList(names), TimeSpan.FromSeconds(30)) == false)
-                        App.CurrentApp.SpeakSequence("警告：借书超额");
+                    {
+                        var speak_count = ShelfData.GetOverdueSpeakCount();
+                        for (int i = 0; i < speak_count; i++)
+                        {
+                            App.CurrentApp.SpeakSequence("警告：借书超额");
+                        }
+                    }
                 }
             }
 
@@ -399,7 +405,11 @@ namespace dp2SSL
                 doc.Blocks.Add(p);
 
                 // 语音提醒
-                App.CurrentApp.SpeakSequence("警告：借书超额");
+                var speak_count = ShelfData.GetOverdueSpeakCount();
+                for (int i = 0; i < speak_count; i++)
+                {
+                    App.CurrentApp.SpeakSequence("警告：借书超额");
+                }
             }
             else
             {

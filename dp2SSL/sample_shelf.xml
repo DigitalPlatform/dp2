@@ -1,5 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <root>
+  <settings>
+    <key name="超额时语音播报次数" value="1"/>
+  </settings>
   <shelf>
     <door name="第一排" lock="*:0" antenna="*:1"/>
     <door name="第二排" lock="*:1" antenna="RL1700:0"/>
