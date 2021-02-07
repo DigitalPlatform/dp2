@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Windows;
@@ -554,6 +555,8 @@ namespace dp2SSL
                         _inactiveMousePosition == mouseEventArgs.GetPosition(this))
                         return;
                 }
+
+                // Debug.WriteLine(inputEventArgs.ToString());
 
                 /*
                 // set UI on activity
