@@ -408,7 +408,7 @@ namespace dp2SSL
                 var speak_count = ShelfData.GetOverdueSpeakCount();
                 for (int i = 0; i < speak_count; i++)
                 {
-                    App.CurrentApp.SpeakSequence("警告：借书超额");
+                    App.CurrentApp.SpeakSequence($"警告：借书超额 {overflow_titles.Count} 册");
                 }
             }
             else

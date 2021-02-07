@@ -449,8 +449,9 @@ ref this.sessioninfo) == false)
         this.Response.End();
     }
 
-    public void DoTokenLogin()
+    public int DoTokenLogin()
     {
+        /*
         var id = this.Request["id"];
         var token = this.Request["token"];
         sessioninfo.IsReader = true;
@@ -482,6 +483,97 @@ ref this.sessioninfo) == false)
             else
                 Redirect(strRedirect);
         }
+        */
+        // 触发清除读者记录缓存
+        if (sessioninfo != null)
+            sessioninfo.Clear();
+
+        var strSsoPageUrl = this.Request["centerurl"];
+        var id = this.Request["id"];
+        var token = this.Request["token"];
+
+        string strParameters = "location=#opac_token@" + sessioninfo.ClientIP + ",index=-1,type=reader,simulate=yes,client=dp2OPAC|" + OpacApplication.ClientVersion;
+        string strPassword = app.ManagerUserName + "," + app.ManagerPassword + "|||token:" + token;
+        // 读者身份登录
+        // return:
+        //      -1  error
+        //      0   登录未成功
+        //      1   登录成功
+        //      >1  有多个账户符合条件。
+        long lRet = sessioninfo.Login(
+                    id,
+                    strPassword,
+                    strParameters,
+                    "",
+                    out string strError);
+        if (lRet == -1 || lRet == 0)
+        {
+            strError = "对图书馆读者帐户 '" + id + "' 进行登录时出错：" + strError;
+            goto ERROR1;
+        }
+        if (lRet > 1)
+        {
+            strError = "登录中发现有 " + lRet.ToString() + " 个账户符合条件，登录失败";
+            goto ERROR1;
+        }
+
+        this.ClearCookiesLogin("all");
+        /*
+        // 在 Cookies 里面清除痕迹
+        if (this.Page is MyWebPage)
+        {
+            //MyWebPage page = this.Page as MyWebPage;
+            this.ClearCookiesLogin("all");
+            //page.SetCookiesLogin(null, null, 0, -1);    // cookies offline
+        }
+        */
+
+        // 表示 SSO 登录成功
+        this.Session["sso_mainpage_url"] = strSsoPageUrl;
+
+        if (sessioninfo.LoginCallStack.Count != 0)
+        {
+            string strUrl = (string)sessioninfo.LoginCallStack.Pop();
+            Redirect(strUrl);
+            return 1;
+        }
+        else
+        {
+            string strRedirect = Request.QueryString["redirect"];
+            if (strRedirect == null || strRedirect == "")
+            {
+                LoginState loginstate = GlobalUtil.GetLoginState(this.Page);
+
+                if (loginstate == LoginState.Public)
+                    Redirect("searchbiblio.aspx");
+                else if (loginstate == LoginState.Reader)
+                    Redirect("borrowinfo.aspx");	// 实在没有办法，就到主页面
+                else if (loginstate == LoginState.Librarian)
+                    Redirect("searchbiblio.aspx");
+                else
+                    Redirect("searchbiblio.aspx");
+            }
+            else
+                Redirect(strRedirect);
+            return 1;
+        }
+
+    ERROR1:
+        if (string.IsNullOrEmpty(strSsoPageUrl) == true)
+        {
+            Response.Write("<html><body><p>" + HttpUtility.HtmlEncode(strError) + "</p>"
+                + "</body></html>");
+            Response.End();
+        }
+        else
+        {
+            Response.Write("<html><body><p>" + HttpUtility.HtmlEncode(strError) + "</p>"
+                + "<p><a href=" + strSsoPageUrl + " >回到统一认证登录页面</a></p>"
+                + "</body></html>");
+            Response.End();
+        }
+        return -1;
+
     }
 
 
