@@ -534,7 +534,7 @@ namespace dp2SSL
         {
             if (_delayTurnOffTask != null)
             {
-                _delayTurnOffTask.Cancel.Cancel();
+                _delayTurnOffTask.Stop();
                 _delayTurnOffTask = null;
             }
         }

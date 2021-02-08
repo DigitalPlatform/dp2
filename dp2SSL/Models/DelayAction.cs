@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 
 namespace dp2SSL
 {
-    public class DelayAction
+    public class DelayAction : IDisposable
     {
-        public Task Task { get; set; }
-        public CancellationTokenSource Cancel { get; set; }
+        Task Task { get; set; }
+        CancellationTokenSource Cancel { get; set; }
 
         public delegate void Delegate_clear();
         public delegate void Delegate_heartBeat(int leftSeconds);
@@ -47,6 +47,18 @@ namespace dp2SSL
                 }
             });
             return result;
+        }
+
+        public void Stop()
+        {
+            this.Cancel.Cancel();
+            this.Cancel.Dispose();
+            this.Cancel = null;
+        }
+
+        void IDisposable.Dispose()
+        {
+            Cancel?.Dispose();
         }
     }
 

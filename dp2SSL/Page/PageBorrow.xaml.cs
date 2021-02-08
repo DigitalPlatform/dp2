@@ -3758,7 +3758,7 @@ string usage)
         {
             if (_delayNotifyCard != null)
             {
-                _delayNotifyCard.Cancel.Cancel();
+                _delayNotifyCard.Stop();
                 _delayNotifyCard = null;
             }
         }
@@ -3804,7 +3804,7 @@ string usage)
         {
             if (_delayClearPatronTask != null)
             {
-                _delayClearPatronTask.Cancel.Cancel();
+                _delayClearPatronTask.Stop();
                 _delayClearPatronTask = null;
             }
         }
