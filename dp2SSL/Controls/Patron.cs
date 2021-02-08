@@ -697,6 +697,21 @@ readerType);
             item.SetAttribute("value", value);
         }
 
+        // 读者信息添入的时刻。如果为 DateTime.MinValue 则表示当前没有读者信息(或者被清除)
+        DateTime _fillTime = DateTime.MinValue;
+
+        public DateTime FillTime
+        {
+            get
+            {
+                return _fillTime;
+            }
+            set
+            {
+                _fillTime = value;
+            }
+        }
+
         public void SetPatronXml(string recpath, string xml, byte[] timestamp)
         {
             if (string.IsNullOrEmpty(xml))
@@ -720,6 +735,7 @@ readerType);
 
             this.PatronName = DomUtil.GetElementText(dom.DocumentElement, "name");
             this.Department = DomUtil.GetElementText(dom.DocumentElement, "department");
+            this._fillTime = DateTime.Now;
 
             if (App.Protocol == "dp2library")
             {
@@ -929,6 +945,9 @@ readerType);
             this.Protocol = null;
 
             this.SetNotEmpty();
+
+            // 2021/2/8
+            this._fillTime = DateTime.MinValue;
         }
 
         public void SetNotEmpty()
