@@ -264,6 +264,24 @@ namespace dp2SSL
                     overflow_titles.Add($"{ShortTitle(item.Entity.Title)} [{item.Entity.PII}]");
             });
             */
+            // 提醒断网模式
+            if (App.StartNetworkMode == "local")
+            {
+                var p = new Paragraph();
+                p.FontFamily = new FontFamily("微软雅黑");
+                p.FontSize = baseFontSize;
+                p.TextAlignment = TextAlignment.Center;
+                // p.TextIndent = -20;
+                p.Margin = new Thickness(0, 0, 0, baseFontSize/*18*/);
+                doc.Blocks.Add(p);
+
+                p.Inlines.Add(new Run
+                {
+                    Text = "温馨提示: 当前设备处于断网模式，读者通知消息暂时无法发送。待网络恢复后会自动补发",
+                    Foreground = Brushes.Yellow,
+                });
+            }
+
 
             {
                 var p = new Paragraph();
