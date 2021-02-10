@@ -3245,6 +3245,10 @@ namespace dp2SSL
                         PatronClear();
                         return login_result;
                     }
+
+                    // 从此启用固定时间太长自动清除的功能
+                    _patron.FillTime = DateTime.Now;
+
                     // 成功时调用 Welcome
                     func_welcome?.Invoke();
                     return new NormalResult { Value = 1 };
@@ -4927,99 +4931,6 @@ namespace dp2SSL
             }
         }
 
-        #region 确认读者是否还在机器前面
-
-        Task _confirmTask = null;
-        CancellationTokenSource _cancelConfirm = new CancellationTokenSource();
-
-        // 开始确认过程
-        public bool BeginConfirm()
-        {
-            if (_confirmTask != null)
-                return false;
-
-            _cancelConfirm?.Cancel();
-            _cancelConfirm?.Dispose();
-
-            _cancelConfirm = new CancellationTokenSource();
-            _confirmTask = ConfirmAsync(_cancelConfirm.Token);
-            return true;
-        }
-
-        public void CancelConfirm()
-        {
-            _cancelConfirm?.Cancel();
-        }
-
-        public async Task<bool> ConfirmAsync(CancellationToken token)
-        {
-            ProgressWindow progress = null;
-
-            using (var cancel = CancellationTokenSource.CreateLinkedTokenSource(App.CancelToken, token))
-            {
-                App.Invoke(new Action(() =>
-                {
-                    progress = new ProgressWindow();
-                    progress.TitleText = "固定读者信息时间太长了，确认您还在么?";
-                    progress.MessageText = "如果您不希望软件自动清除面板上固定的读者信息，请点“确定”按钮";
-                    progress.Owner = Application.Current.MainWindow;
-                    progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-                    progress.Closed += (s, e) =>
-                    {
-                        cancel.Cancel();
-                    };
-                    progress.okButton.Content = "放弃";
-                    progress.Background = new SolidColorBrush(Colors.DarkRed);
-                    App.SetSize(progress, "middle");
-                    progress.BackColor = "yellow";
-                    progress.Show();
-                }));
-
-                try
-                {
-                    if (ShelfData.OpeningDoorCount > 0)
-                    {
-                        return true;
-                    }
-
-                    // 倒计时警告
-                    App.CurrentApp.Speak("即将清除面板上的读者信息。点“放弃”按钮可阻止清除");
-                    for (int i = 20; i > 0; i--)
-                    {
-                        if (cancel.Token.IsCancellationRequested)
-                        {
-                            App.CurrentApp.Speak("放弃清除");
-                            return true;
-                        }
-                        string text = $"({i}) 即将清除面板上的读者信息\r\n\r\n点“放弃”按钮可阻止清除";
-                        App.Invoke(new Action(() =>
-                        {
-                            progress.MessageText = text;
-                        }));
-                        await Task.Delay(TimeSpan.FromSeconds(1), cancel.Token);
-                    }
-
-                    App.CurrentApp.Speak("读者信息已经清除");
-                    return false;
-                }
-                catch
-                {
-                    App.CurrentApp.Speak("放弃清除");
-                    return true;
-                }
-                finally
-                {
-                    App.Invoke(new Action(() =>
-                    {
-                        progress.Close();
-                    }));
-
-                    _confirmTask = null;
-                }
-            }
-        }
-
-        #endregion
 
 #if REMOVED
 

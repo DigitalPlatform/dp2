@@ -503,6 +503,7 @@ namespace ShelfLockDriver.First
         // 判断"open,close"情形的延迟时间长度
         static TimeSpan _waitPeriod = TimeSpan.FromSeconds(6);
 
+        [Serializable()]
         class ReadResult : NormalResult
         {
             public byte[] Result { get; set; }
@@ -593,10 +594,18 @@ namespace ShelfLockDriver.First
                     }
                     finally
                     {
+                        // 在没有成功的情况下，清理两个 buffer
                         if (suceed == false)
                         {
-                            _sp.DiscardOutBuffer();
-                            _sp.DiscardInBuffer();
+                            try
+                            {
+                                _sp.DiscardOutBuffer();
+                                _sp.DiscardInBuffer();
+                            }
+                            catch
+                            {
+
+                            }
                         }
                     }
                 }

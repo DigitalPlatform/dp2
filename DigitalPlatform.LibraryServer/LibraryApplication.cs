@@ -9552,6 +9552,7 @@ out strError);
             // not found
             if (lRet == 0)
             {
+                // WriteErrorLog($"检索读者记录没有找到(strError='{strError}')。检索式='{strQueryXml}'");
                 strError = "没有找到";
                 return 0;
             }
@@ -9627,6 +9628,7 @@ out strError);
 
                     if (strPassword != null)    // 2009/9/22 
                     {
+                        StringBuilder debugInfo = null; // new StringBuilder();
                         // 验证读者密码
                         // return:
                         //      -1  error
@@ -9637,12 +9639,16 @@ out strError);
                             readerdom,
                             strPassword,
                             this.Clock.Now,
+                            debugInfo,
                             out bTempPassword,
                             out strError);
                         if (nRet == -1)
                             return -1;
                         if (nRet == 0)
+                        {
+                            // WriteErrorLog($"VerifyReaderPassword() return 0. (strError='{strError}')。strPassword='{strPassword}', strDebugInfo='{debugInfo?.ToString()}'");
                             continue;
+                        }
 
                         // 原来在这里
                     }
@@ -9662,14 +9668,17 @@ out strError);
                         }
                     }
 
+                    StringBuilder debugInfo = null; // new StringBuilder();
                     string strHashedPassword = DomUtil.GetElementInnerText(readerdom.DocumentElement, "password");
                     nRet = MakeToken(strClientIP,
                         GetTimeRangeByStyle(strGetToken),
                         strHashedPassword,
+                        debugInfo,
                         out strToken,
                         out strError);
                     if (nRet == -1)
                         return -1;
+                    // WriteErrorLog($"MakeToken() return {nRet}, strDebugInfo='{debugInfo?.ToString()}'");
                 }
 
                 aPathNew.Add(aPath[i]);
@@ -9681,12 +9690,7 @@ out strError);
             // 过滤后，却又发现一个都没有了。凑合着给过滤前的第一个?
             if (aPathNew.Count == 0)
             {
-                /*
-                aPathNew.Add(aPath[0]);
-                aPath = aPathNew;
-                lHitCount = 1;
-                goto LOADONE;
-                 * */
+                // WriteErrorLog($"aPathNew.Count == 0. strQueryWord='{strQueryWord}'");
                 return 0;
             }
 
@@ -9705,6 +9709,8 @@ out strError);
                 strOutputPath = aOutputPath[nIndex];
                 output_timestamp = aTimestamp[nIndex];
             }
+
+            // WriteErrorLog($"return. aPathNew.Count={aPathNew.Count}");
             return aPathNew.Count;
         ERROR1:
             return -1;
@@ -10415,24 +10421,34 @@ out strError);
             return DateTimeUtil.DateTimeToString8(DateTime.Now);
         }
 
+        // TODO: 要解决 localhost 和 127.0.0.1 和 ::1 和具体四段 IP 地址之间的等同关系判断问题
         // 创建 token
         public static int MakeToken(string strClientIP,
             string strTimeRange,
             string strHashedPassword,
+            StringBuilder debugInfo,
             out string strToken,
             out string strError)
         {
             strError = "";
             strToken = "";
 
+            debugInfo?.AppendLine($"enter MakeToken() strClientIP={strClientIP},strTimeRange={strTimeRange}, strHashedPassword={strHashedPassword}");
+
             if (string.IsNullOrEmpty(strTimeRange) == true)
                 strTimeRange = GetTimeRangeByStyle(null);
+
+            debugInfo?.AppendLine($"strTimeRange={strTimeRange}");
 
             string strHashed = "";
             string strPlainText = strClientIP + strHashedPassword + strTimeRange;
             try
             {
+                debugInfo?.AppendLine($"strPlainText={strPlainText}");
+
                 strHashed = Cryptography.GetSHA1(strPlainText);
+
+                debugInfo?.AppendLine($"strHashed={strHashed}");
             }
             catch
             {
@@ -10441,6 +10457,7 @@ out strError);
             }
 
             strToken = strHashed.Replace(",", "").Replace("=", "") + "|||" + strTimeRange;
+            debugInfo?.AppendLine($"加工后的 strToken={strHashed}");
             return 0;
         }
 
@@ -10472,6 +10489,7 @@ out strError);
             }
         }
 
+        // TODO: 要解决 localhost 和 127.0.0.1 和 ::1 和具体四段 IP 地址之间的等同关系判断问题
         // 验证 TOKEN
         // Token 的发生规则为： client ip + hashed password + time range 然后 Hash。 Hash 完以后， time range 字符串再放在外面一份
         // return:
@@ -10482,17 +10500,24 @@ out strError);
             string strClientIP,
             string strToken,
             string strHashedPassword,
+            StringBuilder debugInfo,
             out string strError)
         {
             strError = "";
+
+            debugInfo?.AppendLine($"enter VerifyToken() strClientIP={strClientIP},strToken={strToken}, strHashedPassword={strHashedPassword}");
+
             string strTimeRange = GetTimeRangeFromToken(strToken);
             if (string.IsNullOrEmpty(strTimeRange) == true)
                 strTimeRange = GetTimeRangeByStyle(null);
+
+            debugInfo?.AppendLine($"strTimeRange={strTimeRange}");
 
             // 看看时间是否失效
             if (IsInTimeRange(DateTime.Now, strTimeRange) == false)
             {
                 strError = "token 已经失效";
+                debugInfo?.AppendLine($"IsInTimeRange() return false");
                 return 0;
             }
 
@@ -10500,7 +10525,11 @@ out strError);
             string strPlainText = strClientIP + strHashedPassword + strTimeRange;
             try
             {
+                debugInfo?.AppendLine($"strPlainText={strPlainText}");
+
                 strHashed = Cryptography.GetSHA1(strPlainText);
+
+                debugInfo?.AppendLine($"strHashed={strHashed}");
             }
             catch
             {
@@ -10509,9 +10538,16 @@ out strError);
             }
             strHashed = strHashed.Replace(",", "").Replace("=", "");
             strHashed += "|||" + strTimeRange;
-            if (strHashed == strToken)
-                return 1;   // 匹配
 
+            debugInfo?.AppendLine($"加工后的 strHashed={strHashed}");
+
+            if (strHashed == strToken)
+            {
+                debugInfo?.AppendLine($"匹配");
+                return 1;   // 匹配
+            }
+
+            debugInfo?.AppendLine($"strHashed 和 strToken={strToken} 不匹配");
             return 0;   // 不匹配
         }
 
@@ -10580,7 +10616,7 @@ out strError);
                             if (bIsToken1 == bIsToken2)
                             {
                                 // text-level: 用户提示
-                                strError = this.GetString("帐户不存在或密码不正确");    // "帐户不存在或密码不正确"
+                                strError = this.GetString("帐户不存在或密码不正确") + " app 1";    // "帐户不存在或密码不正确"
                                 return -1;
                             }
                             else
@@ -10655,7 +10691,7 @@ out strError);
             if (nRet == 0)
             {
                 // text-level: 用户提示
-                strError = this.GetString("帐户不存在或密码不正确");    // "帐户不存在或密码不正确"
+                strError = this.GetString("帐户不存在或密码不正确") + " app 2";    // "帐户不存在或密码不正确"
                 return 0;   // 2015/12/4 注：这里不应返回 -1。因为返回 -1，会导致调主不去判断探测密码攻击
             }
 
@@ -11500,6 +11536,7 @@ out strError);
             XmlDocument readerdom,
             string strPassword,
             DateTime now,
+            StringBuilder debugInfo,
             out bool bTempPassword,
             out string strError)
         {
@@ -11508,6 +11545,7 @@ out strError);
                 strClientIP,
                 readerdom,
                 strPassword,
+                debugInfo,
                 out strError);
             if (nRet == -1)
                 return -1;
@@ -11532,12 +11570,14 @@ out strError);
             XmlDocument readerdom,
             string strPassword,
             DateTime now,
+            StringBuilder debugInfo,
             out string strError)
         {
             int nRet = VerifyReaderNormalPassword(
                 strClientIP,
                 readerdom,
                 strPassword,
+                debugInfo,
                 out strError);
             if (nRet == -1)
                 return -1;
@@ -11558,10 +11598,13 @@ out strError);
             string strClientIP,
             XmlDocument readerdom,
             string strPassword,
+            StringBuilder debugInfo,
             out string strError)
         {
             strError = "";
             // int nRet = 0;
+
+            debugInfo?.AppendLine($"enter VerifyReaderNormalPassword() strPassword={strPassword}");
 
             if (strPassword == null)
             {
@@ -11576,10 +11619,12 @@ out strError);
             if (StringUtil.HasHead(strPassword, "token:") == true)
             {
                 string strToken = strPassword.Substring("token:".Length);
+                debugInfo?.AppendLine($"token={strToken}");
                 return VerifyToken(
                     strClientIP,
                     strToken,
                     strSha1Text,
+                    debugInfo,
                     out strError);
             }
 
@@ -12581,6 +12626,7 @@ out strError);
                         readerdom,
                         strReaderOldPassword,
                         this.Clock.Now,
+                        null,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;

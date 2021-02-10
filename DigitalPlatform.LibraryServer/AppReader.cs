@@ -5657,7 +5657,7 @@ out strError);
                         }
                         if (nRet == 0)
                         {
-                            strError = this.GetString("帐户不存在或密码不正确");
+                            strError = this.GetString("帐户不存在或密码不正确") + " reader 1";
                             return -1;
                         }
                     }

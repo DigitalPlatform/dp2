@@ -3690,7 +3690,7 @@ string usage)
             await RegisterFaceAsync("deleteFace");
         }
 
-        void PatronClear(bool check_card_existance = false)
+        public void PatronClear(bool check_card_existance = false)
         {
             // 清除以前检查一下身份读卡器上是否有读者卡
             if (check_card_existance && TagList.Patrons.Count >= 1)
@@ -4506,7 +4506,7 @@ bind_uid);
 
         // 是否是竖向的卡，或者人脸、指纹、一维码、二维码方式？
         // (这种方式下需要固定读者信息一段时间)
-        bool IsVerticalCard()
+        public bool IsVerticalCard()
         {
             return (App.PatronReaderVertical || _patron.IsFingerprintSource);
         }
@@ -4524,6 +4524,16 @@ bind_uid);
                 else
                     fixAndClear.Visibility = Visibility.Collapsed;
             }));
+        }
+
+        public DateTime GetFillTime()
+        {
+            return _patron.FillTime;
+        }
+
+        public void ResetFillTime()
+        {
+            _patron.FillTime = DateTime.Now;
         }
     }
 }

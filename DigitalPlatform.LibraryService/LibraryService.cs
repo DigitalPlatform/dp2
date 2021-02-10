@@ -850,6 +850,7 @@ namespace dp2Library
                             strPassword = null;
                         }
 
+                        // TODO: 是否限定当代理账户密码为空时，前端必须和服务器同一台机器？另外一个方法是规定这种特殊账户必须在账户特性里面限定前端的 IP 地址
                         // 第一阶段：先用manager用户名和密码验证
                         try
                         {
@@ -1596,6 +1597,7 @@ namespace dp2Library
                     readerdom,
                     strReaderPassword,
                     app.Clock.Now,
+                    (StringBuilder)null,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
