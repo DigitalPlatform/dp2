@@ -357,7 +357,7 @@ namespace DigitalPlatform.LibraryServer
             if (nRet == 0)
             {
                 if (bPublicError == true)
-                    strError = this.App.GetString("帐户不存在或密码不正确");
+                    strError = this.App.GetString("帐户不存在或密码不正确") + " session 1";
                 return 0;
             }
 
@@ -437,6 +437,7 @@ namespace DigitalPlatform.LibraryServer
                         strClientIP,
                         strToken,
                         strHashedPassword,
+                        (StringBuilder)null,
                         out strError);
                     if (nRet != 1)
                         return nRet;
@@ -463,7 +464,7 @@ namespace DigitalPlatform.LibraryServer
                     if (nRet == 0)
                     {
                         if (bPublicError == true)
-                            strError = this.App.GetString("帐户不存在或密码不正确");
+                            strError = this.App.GetString("帐户不存在或密码不正确") + " session 2";
                         else
                             strError = this.App.GetString("密码不正确");
                         return 0;
@@ -503,13 +504,16 @@ namespace DigitalPlatform.LibraryServer
                     return -1;
                 }
                 string strToken = "";
+                StringBuilder debugInfo = new StringBuilder();
                 nRet = LibraryApplication.MakeToken(strClientIP,
                     LibraryApplication.GetTimeRangeByStyle(strGetToken),
                     strHashedPassword,
+                    debugInfo,
                     out strToken,
                     out strError);
                 if (nRet == -1)
                     return -1;
+                this.App.WriteErrorLog($"(sessioninfo) MakeToken() return {nRet}, debugInfo='{debugInfo?.ToString()}'");
                 if (string.IsNullOrEmpty(strToken) == false)
                     strRights += ",token:" + strToken;
             }

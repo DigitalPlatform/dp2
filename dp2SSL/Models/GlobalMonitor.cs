@@ -80,6 +80,9 @@ namespace dp2SSL.Models
                         else
                             App.SetError("printer", null);
 
+                        // 检查读者信息区是否固定时间太长？
+                        await WarningFixedPatronInfoAsync();
+
                         // 检查升级绿色 dp2ssl
                         if (_needReboot == false
                         && StringUtil.IsDevelopMode() == false
@@ -280,5 +283,55 @@ TaskScheduler.Default);
             }
             return result;
         }
+
+        #region 警告固定读者信息太长时间
+
+        static TimeSpan _warningFixedLength = TimeSpan.FromMinutes(10);   // TimeSpan.FromSeconds(25);
+
+        // 警告固定读者信息太长时间
+        static async Task WarningFixedPatronInfoAsync()
+        {
+            bool isShelf = App.IsPageShelfActive;
+            bool isBorrow = App.IsPageBorrowActive;
+            // bool isInventory = App.IsPageInventoryActive;
+
+            if (isShelf && PageMenu.PageShelf != null)
+            {
+                if (ShelfData.OpeningDoorCount > 0)
+                    return;
+                var fill_time = PageMenu.PageShelf.GetFillTime();
+                if (fill_time == DateTime.MinValue)
+                    return;
+                if (DateTime.Now - fill_time > _warningFixedLength)
+                {
+                    var result = await App.ConfirmAsync(new CancellationToken());
+                    if (result == false)
+                        PageMenu.PageShelf.PatronClear();
+                    else
+                        PageMenu.PageShelf.ResetFillTime();
+                }
+                //    App.CurrentApp.Speak("不要忘记清除读者信息");
+            }
+
+            if (isBorrow 
+                && PageMenu.PageBorrow != null
+                && PageMenu.PageBorrow.IsVerticalCard())
+            {
+                var fill_time = PageMenu.PageBorrow.GetFillTime();
+                if (fill_time == DateTime.MinValue)
+                    return;
+                if (DateTime.Now - fill_time > _warningFixedLength)
+                {
+                    var result = await App.ConfirmAsync(new CancellationToken());
+                    if (result == false)
+                        PageMenu.PageBorrow.PatronClear(false);
+                    else
+                        PageMenu.PageBorrow.ResetFillTime();
+                }
+
+            }
+        }
+
+        #endregion
     }
 }

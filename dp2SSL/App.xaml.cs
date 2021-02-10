@@ -150,6 +150,10 @@ namespace dp2SSL
                 return;
             }
 
+            // 检查当前运行的(绿色还是 ClickOnce)类型
+            if (CheckRunType() == false)
+                return;
+
             if (DetectVirus.DetectXXX() || DetectVirus.DetectGuanjia())
             {
                 StartErrorBox("dp2SSL 被木马软件干扰，无法启动");
@@ -2708,6 +2712,128 @@ AllowEdgeSwipe DWORD
         }
 
         #endregion
+
+        #region 确认读者是否还在机器前面
+
+        static Task _confirmTask = null;
+        static CancellationTokenSource _cancelConfirm = new CancellationTokenSource();
+
+        // 开始确认过程
+        public static bool BeginConfirm()
+        {
+            if (_confirmTask != null)
+                return false;
+
+            _cancelConfirm?.Cancel();
+            _cancelConfirm?.Dispose();
+
+            _cancelConfirm = new CancellationTokenSource();
+            _confirmTask = ConfirmAsync(_cancelConfirm.Token);
+            return true;
+        }
+
+        public static void CancelConfirm()
+        {
+            _cancelConfirm?.Cancel();
+        }
+
+        public static async Task<bool> ConfirmAsync(CancellationToken token)
+        {
+            ProgressWindow progress = null;
+
+            using (var cancel = CancellationTokenSource.CreateLinkedTokenSource(App.CancelToken, token))
+            {
+                App.Invoke(new Action(() =>
+                {
+                    progress = new ProgressWindow();
+                    progress.TitleText = "固定读者信息时间太长了，确认您还在么?";
+                    progress.MessageText = "如果您不希望软件自动清除面板上固定的读者信息，请点“确定”按钮";
+                    progress.Owner = Application.Current.MainWindow;
+                    progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                    progress.Closed += (s, e) =>
+                    {
+                        cancel.Cancel();
+                    };
+                    progress.okButton.Content = "放弃";
+                    progress.Background = new SolidColorBrush(Colors.DarkRed);
+                    App.SetSize(progress, "middle");
+                    progress.BackColor = "yellow";
+                    progress.Show();
+                }));
+
+                try
+                {
+                    if (ShelfData.OpeningDoorCount > 0)
+                    {
+                        return true;
+                    }
+
+                    // 倒计时警告
+                    App.CurrentApp.Speak("即将清除面板上的读者信息。点“放弃”按钮可阻止清除");
+                    for (int i = 20; i > 0; i--)
+                    {
+                        if (cancel.Token.IsCancellationRequested)
+                        {
+                            App.CurrentApp.Speak("放弃清除");
+                            return true;
+                        }
+                        string text = $"({i}) 即将清除面板上的读者信息\r\n\r\n点“放弃”按钮可阻止清除";
+                        App.Invoke(new Action(() =>
+                        {
+                            progress.MessageText = text;
+                        }));
+                        await Task.Delay(TimeSpan.FromSeconds(1), cancel.Token);
+                    }
+
+                    App.CurrentApp.Speak("读者信息已经清除");
+                    return false;
+                }
+                catch
+                {
+                    App.CurrentApp.Speak("放弃清除");
+                    return true;
+                }
+                finally
+                {
+                    App.Invoke(new Action(() =>
+                    {
+                        progress.Close();
+                    }));
+
+                    _confirmTask = null;
+                }
+            }
+        }
+
+        #endregion
+
+        bool CheckRunType()
+        {
+            if (ApplicationDeployment.IsNetworkDeployed)
+            {
+                // 如果是 ClickOnce 运行方式，则检查本机是否还安装有绿色版本，如果有则拒绝运行
+                string exe_path = "c:\\dp2ssl\\dp2ssl.exe";
+                if (File.Exists(exe_path))
+                {
+                    StartErrorBox("当前 dp2SSL 是 ClickOnce 安装方式，但探测到本机 c:\\dp2ssl 目录还安装了绿色版本，请先卸载绿色版本");
+                    App.Current.Shutdown();
+                    return false;
+                }
+            }
+            else
+            {
+                // 如果是绿色运行方式，则检查本机是否还安装有 ClickOnce 版本，如果有则拒绝运行
+                string strShortcutFilePath = PathUtil.GetShortcutFilePath("DigitalPlatform/dp2 V3/dp2SSL-自助借还");
+                if (File.Exists(strShortcutFilePath) == true)
+                {
+                    StartErrorBox("当前 dp2SSL 是绿色安装方式，但探测到本机还安装了 ClickOnce 版本(在程序组位置“DigitalPlatform/dp2 V3/dp2SSL-自助借还”)，请先卸载 ClickOnce 版本");
+                    App.Current.Shutdown();
+                    return false;
+                }
+            }
+
+            return true;
+        }
     }
 
     public delegate void NewTagChangedEventHandler(object sender,

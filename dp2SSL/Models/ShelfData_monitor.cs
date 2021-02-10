@@ -130,9 +130,6 @@ namespace dp2SSL
                         // 提醒关门
                         WarningCloseDoor();
 
-                        // 提醒清除固定的读者信息
-                        await WarningFixedPatronInfoAsync();
-
                         // 下载或同步读者信息
                         string startDate = LoadStartDate();
                         if (/*download_complete == false || */
@@ -270,27 +267,6 @@ TaskScheduler.Default);
                 _libraryNetworkCondition = "Bad";
                 PageMenu.PageShelf?.SetBackColor(Brushes.DarkBlue);
             }
-        }
-
-        static TimeSpan _warningFixedLength = TimeSpan.FromMinutes(10);   // TimeSpan.FromSeconds(25);
-
-        // 警告固定读者信息太长时间
-        static async Task WarningFixedPatronInfoAsync()
-        {
-            if (ShelfData.OpeningDoorCount > 0)
-                return;
-            var fill_time = PageMenu.PageShelf.GetFillTime();
-            if (fill_time == DateTime.MinValue)
-                return;
-            if (DateTime.Now - fill_time > _warningFixedLength)
-            {
-                var result = await PageMenu.PageShelf.ConfirmAsync(new CancellationToken());
-                if (result == false)
-                    PageMenu.PageShelf.PatronClear();
-                else
-                    PageMenu.PageShelf.ResetFillTime();
-            }
-            //    App.CurrentApp.Speak("不要忘记清除读者信息");
         }
 
         // 从打开门开始多少时间开始警告关门
