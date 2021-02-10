@@ -15,7 +15,7 @@
 
 如果用户自己安装了 dp2library 服务器软件，此 URL 则为用户自己的 dp2library 服务器的实际 URL。(注：dp2library 服务器若要支持著者号取号功能，需要增配著者号码数据库等附加资源，详情可联系数字平台)
 
-要了解自己安装的 dp2library 服务器的可用 URL，方法是：再 dp2library 所在服务器机器上启动 dp2Installer，然后打开 dp2library 实例管理对话框，可以看到它当前绑定的协议 URL。
+要了解自己安装的 dp2library 服务器的可用 URL，方法是：在 dp2library 所在服务器机器上启动 dp2Installer，然后打开 dp2library 实例管理对话框，可以看到它当前绑定的协议 URL。
 
 当用于 GcatLite 的时候，只能使用其中的以 rest.http 开头的一个 URL ，并且注意输入 GcatLite 界面的时候这个 URL 字符串开头的 `rest.` 部分要去掉(如果发现当前 dp2library 没有绑定 rest.http 协议，要添加一个绑定)。
 
