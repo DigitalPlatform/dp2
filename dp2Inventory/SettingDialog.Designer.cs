@@ -33,11 +33,12 @@ namespace dp2Inventory
             this.button_OK = new System.Windows.Forms.Button();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage_rfid = new System.Windows.Forms.TabPage();
-            this.tabPage_dp2library = new System.Windows.Forms.TabPage();
-            this.tabPage_sip2 = new System.Windows.Forms.TabPage();
+            this.numericUpDown_seconds = new System.Windows.Forms.NumericUpDown();
+            this.label10 = new System.Windows.Forms.Label();
             this.groupBox11 = new System.Windows.Forms.GroupBox();
-            this.button_cardReader_setRfidUrlDefaultValue = new System.Windows.Forms.Button();
-            this.textBox_cardReader_rfidCenterUrl = new System.Windows.Forms.TextBox();
+            this.button_rfid_setRfidUrlDefaultValue = new System.Windows.Forms.Button();
+            this.textBox_rfid_rfidCenterUrl = new System.Windows.Forms.TextBox();
+            this.tabPage_dp2library = new System.Windows.Forms.TabPage();
             this.textBox_dp2library_location = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
             this.textBox_dp2library_password = new System.Windows.Forms.TextBox();
@@ -50,6 +51,9 @@ namespace dp2Inventory
             this.toolStripButton_cfg_setXeServer = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButton_cfg_setHongnibaServer = new System.Windows.Forms.ToolStripButton();
+            this.tabPage_sip2 = new System.Windows.Forms.TabPage();
+            this.textBox_sip_port = new System.Windows.Forms.TextBox();
+            this.label9 = new System.Windows.Forms.Label();
             this.textBox_sip_encoding = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
             this.textBox_sip_password = new System.Windows.Forms.TextBox();
@@ -58,14 +62,15 @@ namespace dp2Inventory
             this.label7 = new System.Windows.Forms.Label();
             this.textBox_sip_serverAddr = new System.Windows.Forms.TextBox();
             this.label8 = new System.Windows.Forms.Label();
-            this.textBox_sip_port = new System.Windows.Forms.TextBox();
-            this.label9 = new System.Windows.Forms.Label();
+            this.textBox_sip_institution = new System.Windows.Forms.TextBox();
+            this.label11 = new System.Windows.Forms.Label();
             this.tabControl1.SuspendLayout();
             this.tabPage_rfid.SuspendLayout();
-            this.tabPage_dp2library.SuspendLayout();
-            this.tabPage_sip2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_seconds)).BeginInit();
             this.groupBox11.SuspendLayout();
+            this.tabPage_dp2library.SuspendLayout();
             this.toolStrip_server.SuspendLayout();
+            this.tabPage_sip2.SuspendLayout();
             this.SuspendLayout();
             // 
             // button_Cancel
@@ -79,6 +84,7 @@ namespace dp2Inventory
             this.button_Cancel.TabIndex = 5;
             this.button_Cancel.Text = "取消";
             this.button_Cancel.UseVisualStyleBackColor = true;
+            this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
             // button_OK
             // 
@@ -90,6 +96,7 @@ namespace dp2Inventory
             this.button_OK.TabIndex = 4;
             this.button_OK.Text = "确定";
             this.button_OK.UseVisualStyleBackColor = true;
+            this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
             // 
             // tabControl1
             // 
@@ -108,6 +115,8 @@ namespace dp2Inventory
             // 
             // tabPage_rfid
             // 
+            this.tabPage_rfid.Controls.Add(this.numericUpDown_seconds);
+            this.tabPage_rfid.Controls.Add(this.label10);
             this.tabPage_rfid.Controls.Add(this.groupBox11);
             this.tabPage_rfid.Location = new System.Drawing.Point(4, 31);
             this.tabPage_rfid.Name = "tabPage_rfid";
@@ -115,6 +124,64 @@ namespace dp2Inventory
             this.tabPage_rfid.TabIndex = 0;
             this.tabPage_rfid.Text = "RFID";
             this.tabPage_rfid.UseVisualStyleBackColor = true;
+            // 
+            // numericUpDown_seconds
+            // 
+            this.numericUpDown_seconds.Location = new System.Drawing.Point(267, 226);
+            this.numericUpDown_seconds.Maximum = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+            this.numericUpDown_seconds.Name = "numericUpDown_seconds";
+            this.numericUpDown_seconds.Size = new System.Drawing.Size(120, 31);
+            this.numericUpDown_seconds.TabIndex = 4;
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(24, 228);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(222, 21);
+            this.label10.TabIndex = 3;
+            this.label10.Text = "扫描前倒计时秒数(&S):";
+            // 
+            // groupBox11
+            // 
+            this.groupBox11.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox11.Controls.Add(this.button_rfid_setRfidUrlDefaultValue);
+            this.groupBox11.Controls.Add(this.textBox_rfid_rfidCenterUrl);
+            this.groupBox11.Location = new System.Drawing.Point(17, 19);
+            this.groupBox11.Margin = new System.Windows.Forms.Padding(5);
+            this.groupBox11.Name = "groupBox11";
+            this.groupBox11.Padding = new System.Windows.Forms.Padding(5);
+            this.groupBox11.Size = new System.Drawing.Size(727, 163);
+            this.groupBox11.TabIndex = 2;
+            this.groupBox11.TabStop = false;
+            this.groupBox11.Text = " RFID 读卡器接口 URL ";
+            // 
+            // button_rfid_setRfidUrlDefaultValue
+            // 
+            this.button_rfid_setRfidUrlDefaultValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_rfid_setRfidUrlDefaultValue.Location = new System.Drawing.Point(523, 82);
+            this.button_rfid_setRfidUrlDefaultValue.Margin = new System.Windows.Forms.Padding(5);
+            this.button_rfid_setRfidUrlDefaultValue.Name = "button_rfid_setRfidUrlDefaultValue";
+            this.button_rfid_setRfidUrlDefaultValue.Size = new System.Drawing.Size(193, 40);
+            this.button_rfid_setRfidUrlDefaultValue.TabIndex = 1;
+            this.button_rfid_setRfidUrlDefaultValue.Text = "设为常用值";
+            this.button_rfid_setRfidUrlDefaultValue.UseVisualStyleBackColor = true;
+            this.button_rfid_setRfidUrlDefaultValue.Click += new System.EventHandler(this.button_rfid_setRfidUrlDefaultValue_Click);
+            // 
+            // textBox_rfid_rfidCenterUrl
+            // 
+            this.textBox_rfid_rfidCenterUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_rfid_rfidCenterUrl.Location = new System.Drawing.Point(11, 35);
+            this.textBox_rfid_rfidCenterUrl.Margin = new System.Windows.Forms.Padding(5);
+            this.textBox_rfid_rfidCenterUrl.Name = "textBox_rfid_rfidCenterUrl";
+            this.textBox_rfid_rfidCenterUrl.Size = new System.Drawing.Size(702, 31);
+            this.textBox_rfid_rfidCenterUrl.TabIndex = 0;
             // 
             // tabPage_dp2library
             // 
@@ -133,61 +200,6 @@ namespace dp2Inventory
             this.tabPage_dp2library.TabIndex = 1;
             this.tabPage_dp2library.Text = "dp2library";
             this.tabPage_dp2library.UseVisualStyleBackColor = true;
-            // 
-            // tabPage_sip2
-            // 
-            this.tabPage_sip2.Controls.Add(this.textBox_sip_port);
-            this.tabPage_sip2.Controls.Add(this.label9);
-            this.tabPage_sip2.Controls.Add(this.textBox_sip_encoding);
-            this.tabPage_sip2.Controls.Add(this.label5);
-            this.tabPage_sip2.Controls.Add(this.textBox_sip_password);
-            this.tabPage_sip2.Controls.Add(this.textBox_sip_userName);
-            this.tabPage_sip2.Controls.Add(this.label6);
-            this.tabPage_sip2.Controls.Add(this.label7);
-            this.tabPage_sip2.Controls.Add(this.textBox_sip_serverAddr);
-            this.tabPage_sip2.Controls.Add(this.label8);
-            this.tabPage_sip2.Location = new System.Drawing.Point(4, 31);
-            this.tabPage_sip2.Name = "tabPage_sip2";
-            this.tabPage_sip2.Size = new System.Drawing.Size(768, 448);
-            this.tabPage_sip2.TabIndex = 2;
-            this.tabPage_sip2.Text = "SIP2";
-            this.tabPage_sip2.UseVisualStyleBackColor = true;
-            // 
-            // groupBox11
-            // 
-            this.groupBox11.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.groupBox11.Controls.Add(this.button_cardReader_setRfidUrlDefaultValue);
-            this.groupBox11.Controls.Add(this.textBox_cardReader_rfidCenterUrl);
-            this.groupBox11.Location = new System.Drawing.Point(17, 19);
-            this.groupBox11.Margin = new System.Windows.Forms.Padding(5);
-            this.groupBox11.Name = "groupBox11";
-            this.groupBox11.Padding = new System.Windows.Forms.Padding(5);
-            this.groupBox11.Size = new System.Drawing.Size(727, 163);
-            this.groupBox11.TabIndex = 2;
-            this.groupBox11.TabStop = false;
-            this.groupBox11.Text = " RFID 读卡器接口 URL ";
-            // 
-            // button_cardReader_setRfidUrlDefaultValue
-            // 
-            this.button_cardReader_setRfidUrlDefaultValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_cardReader_setRfidUrlDefaultValue.Location = new System.Drawing.Point(523, 82);
-            this.button_cardReader_setRfidUrlDefaultValue.Margin = new System.Windows.Forms.Padding(5);
-            this.button_cardReader_setRfidUrlDefaultValue.Name = "button_cardReader_setRfidUrlDefaultValue";
-            this.button_cardReader_setRfidUrlDefaultValue.Size = new System.Drawing.Size(193, 40);
-            this.button_cardReader_setRfidUrlDefaultValue.TabIndex = 1;
-            this.button_cardReader_setRfidUrlDefaultValue.Text = "设为常用值";
-            this.button_cardReader_setRfidUrlDefaultValue.UseVisualStyleBackColor = true;
-            // 
-            // textBox_cardReader_rfidCenterUrl
-            // 
-            this.textBox_cardReader_rfidCenterUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_cardReader_rfidCenterUrl.Location = new System.Drawing.Point(11, 35);
-            this.textBox_cardReader_rfidCenterUrl.Margin = new System.Windows.Forms.Padding(5);
-            this.textBox_cardReader_rfidCenterUrl.Name = "textBox_cardReader_rfidCenterUrl";
-            this.textBox_cardReader_rfidCenterUrl.Size = new System.Drawing.Size(702, 31);
-            this.textBox_cardReader_rfidCenterUrl.TabIndex = 0;
             // 
             // textBox_dp2library_location
             // 
@@ -294,6 +306,7 @@ namespace dp2Inventory
             this.toolStripButton_cfg_setXeServer.Size = new System.Drawing.Size(142, 45);
             this.toolStripButton_cfg_setXeServer.Text = "单机版服务器";
             this.toolStripButton_cfg_setXeServer.ToolTipText = "设为单机版服务器";
+            this.toolStripButton_cfg_setXeServer.Click += new System.EventHandler(this.toolStripButton_cfg_setXeServer_Click);
             // 
             // toolStripSeparator1
             // 
@@ -310,6 +323,47 @@ namespace dp2Inventory
             this.toolStripButton_cfg_setHongnibaServer.Size = new System.Drawing.Size(231, 45);
             this.toolStripButton_cfg_setHongnibaServer.Text = "红泥巴.数字平台服务器";
             this.toolStripButton_cfg_setHongnibaServer.ToolTipText = "设为红泥巴.数字平台服务器";
+            this.toolStripButton_cfg_setHongnibaServer.Click += new System.EventHandler(this.toolStripButton_cfg_setHongnibaServer_Click);
+            // 
+            // tabPage_sip2
+            // 
+            this.tabPage_sip2.Controls.Add(this.textBox_sip_institution);
+            this.tabPage_sip2.Controls.Add(this.label11);
+            this.tabPage_sip2.Controls.Add(this.textBox_sip_port);
+            this.tabPage_sip2.Controls.Add(this.label9);
+            this.tabPage_sip2.Controls.Add(this.textBox_sip_encoding);
+            this.tabPage_sip2.Controls.Add(this.label5);
+            this.tabPage_sip2.Controls.Add(this.textBox_sip_password);
+            this.tabPage_sip2.Controls.Add(this.textBox_sip_userName);
+            this.tabPage_sip2.Controls.Add(this.label6);
+            this.tabPage_sip2.Controls.Add(this.label7);
+            this.tabPage_sip2.Controls.Add(this.textBox_sip_serverAddr);
+            this.tabPage_sip2.Controls.Add(this.label8);
+            this.tabPage_sip2.Location = new System.Drawing.Point(4, 31);
+            this.tabPage_sip2.Name = "tabPage_sip2";
+            this.tabPage_sip2.Size = new System.Drawing.Size(768, 448);
+            this.tabPage_sip2.TabIndex = 2;
+            this.tabPage_sip2.Text = "SIP2";
+            this.tabPage_sip2.UseVisualStyleBackColor = true;
+            // 
+            // textBox_sip_port
+            // 
+            this.textBox_sip_port.ImeMode = System.Windows.Forms.ImeMode.Off;
+            this.textBox_sip_port.Location = new System.Drawing.Point(218, 89);
+            this.textBox_sip_port.Margin = new System.Windows.Forms.Padding(5);
+            this.textBox_sip_port.Name = "textBox_sip_port";
+            this.textBox_sip_port.Size = new System.Drawing.Size(139, 31);
+            this.textBox_sip_port.TabIndex = 28;
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(15, 92);
+            this.label9.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(127, 21);
+            this.label9.TabIndex = 27;
+            this.label9.Text = "端口号(&P)：";
             // 
             // textBox_sip_encoding
             // 
@@ -389,24 +443,24 @@ namespace dp2Inventory
             this.label8.TabIndex = 19;
             this.label8.Text = "SIP2 服务器地址:";
             // 
-            // textBox_sip_port
+            // textBox_sip_institution
             // 
-            this.textBox_sip_port.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.textBox_sip_port.Location = new System.Drawing.Point(218, 89);
-            this.textBox_sip_port.Margin = new System.Windows.Forms.Padding(5);
-            this.textBox_sip_port.Name = "textBox_sip_port";
-            this.textBox_sip_port.Size = new System.Drawing.Size(139, 31);
-            this.textBox_sip_port.TabIndex = 28;
+            this.textBox_sip_institution.ImeMode = System.Windows.Forms.ImeMode.Off;
+            this.textBox_sip_institution.Location = new System.Drawing.Point(218, 315);
+            this.textBox_sip_institution.Margin = new System.Windows.Forms.Padding(5);
+            this.textBox_sip_institution.Name = "textBox_sip_institution";
+            this.textBox_sip_institution.Size = new System.Drawing.Size(242, 31);
+            this.textBox_sip_institution.TabIndex = 30;
             // 
-            // label9
+            // label11
             // 
-            this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(15, 92);
-            this.label9.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
-            this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(127, 21);
-            this.label9.TabIndex = 27;
-            this.label9.Text = "端口号(&P)：";
+            this.label11.AutoSize = true;
+            this.label11.Location = new System.Drawing.Point(15, 318);
+            this.label11.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(148, 21);
+            this.label11.TabIndex = 29;
+            this.label11.Text = "机构代码(&I)：";
             // 
             // SettingDialog
             // 
@@ -418,20 +472,26 @@ namespace dp2Inventory
             this.Controls.Add(this.button_Cancel);
             this.Controls.Add(this.button_OK);
             this.Controls.Add(this.tabControl1);
+            this.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.Name = "SettingDialog";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
             this.Text = "设置";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.SettingDialog_FormClosing);
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.SettingDialog_FormClosed);
+            this.Load += new System.EventHandler(this.SettingDialog_Load);
             this.tabControl1.ResumeLayout(false);
             this.tabPage_rfid.ResumeLayout(false);
-            this.tabPage_dp2library.ResumeLayout(false);
-            this.tabPage_dp2library.PerformLayout();
-            this.tabPage_sip2.ResumeLayout(false);
-            this.tabPage_sip2.PerformLayout();
+            this.tabPage_rfid.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_seconds)).EndInit();
             this.groupBox11.ResumeLayout(false);
             this.groupBox11.PerformLayout();
+            this.tabPage_dp2library.ResumeLayout(false);
+            this.tabPage_dp2library.PerformLayout();
             this.toolStrip_server.ResumeLayout(false);
             this.toolStrip_server.PerformLayout();
+            this.tabPage_sip2.ResumeLayout(false);
+            this.tabPage_sip2.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -445,8 +505,8 @@ namespace dp2Inventory
         private System.Windows.Forms.TabPage tabPage_dp2library;
         private System.Windows.Forms.TabPage tabPage_sip2;
         private System.Windows.Forms.GroupBox groupBox11;
-        private System.Windows.Forms.Button button_cardReader_setRfidUrlDefaultValue;
-        private System.Windows.Forms.TextBox textBox_cardReader_rfidCenterUrl;
+        private System.Windows.Forms.Button button_rfid_setRfidUrlDefaultValue;
+        private System.Windows.Forms.TextBox textBox_rfid_rfidCenterUrl;
         public System.Windows.Forms.TextBox textBox_dp2library_location;
         private System.Windows.Forms.Label label4;
         public System.Windows.Forms.TextBox textBox_dp2library_password;
@@ -469,5 +529,9 @@ namespace dp2Inventory
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.TextBox textBox_sip_serverAddr;
         private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.NumericUpDown numericUpDown_seconds;
+        private System.Windows.Forms.Label label10;
+        public System.Windows.Forms.TextBox textBox_sip_institution;
+        private System.Windows.Forms.Label label11;
     }
 }

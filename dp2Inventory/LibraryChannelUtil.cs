@@ -8,25 +8,737 @@ using System.Runtime.Remoting.Activation;
 using System.Threading;
 
 using Microsoft.VisualStudio.Threading;
-using Microsoft.Data.Sqlite;
-
-using Newtonsoft.Json;
 
 using DigitalPlatform;
-using DigitalPlatform.WPF;
 using DigitalPlatform.Xml;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
+using DigitalPlatform.CirculationClient;
+using Newtonsoft.Json;
+using System.Collections;
 
-namespace dp2SSL
+namespace dp2Inventory
 {
     /// <summary>
     /// 和 dp2library 通道有关的功能
     /// </summary>
     public static class LibraryChannelUtil
     {
+
+        #region LibraryChannel
+
+        // 主要的通道池，用于当前服务器
+        public static LibraryChannelPool _channelPool = new LibraryChannelPool();
+
+        public static NormalResult Initial()
+        {
+            Free();
+
+            _channelPool.BeforeLogin += new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
+            _channelPool.AfterLogin += new AfterLoginEventHandle(Channel_AfterLogin);
+
+            var result = PrepareConfigDom();
+            if (result.Value == -1)
+                return result;
+
+            return new NormalResult();
+        }
+
+        public static void Free()
+        {
+            _channelPool.BeforeLogin -= new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
+            _channelPool.AfterLogin -= new AfterLoginEventHandle(Channel_AfterLogin);
+        }
+
+        public class Account
+        {
+            public string UserName { get; set; }
+            public string Password { get; set; }
+            public string LibraryCodeList { get; set; } // 馆代码列表
+
+            public static bool IsGlobalUser(string strLibraryCodeList)
+            {
+                if (strLibraryCodeList == "*" || string.IsNullOrEmpty(strLibraryCodeList) == true)
+                    return true;
+                return false;
+            }
+
+            public static bool MatchLibraryCode(string strLibraryCode, string strLocationLibraryCode)
+            {
+                if (IsGlobalUser(strLibraryCode) == true)
+                    return true;
+                if (strLibraryCode == strLocationLibraryCode)
+                    return true;
+                return false;
+            }
+        }
+
+        static Dictionary<string, Account> _accounts = new Dictionary<string, Account>();
+
+        public static Account FindAccount(string userName)
+        {
+            if (_accounts.ContainsKey(userName) == false)
+                return null;
+            return _accounts[userName];
+        }
+
+        public static void SetAccount(string userName, string password, string libraryCode)
+        {
+            Account account = null;
+            if (_accounts.ContainsKey(userName) == false)
+            {
+                account = new Account
+                {
+                    UserName = userName,
+                    Password = password,
+                    LibraryCodeList = libraryCode,
+                };
+                _accounts[userName] = account;
+            }
+            else
+            {
+                account = _accounts[userName];
+                account.Password = password;
+            }
+        }
+
+        public static void RemoveAccount(string userName)
+        {
+            if (_accounts.ContainsKey(userName))
+                _accounts.Remove(userName);
+        }
+
+        internal static void Channel_BeforeLogin(object sender,
+DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
+        {
+            LibraryChannel channel = sender as LibraryChannel;
+            if (e.FirstTry == true)
+            {
+                // TODO: 从工作人员用户名密码记载里面检查，如果是工作人员账户，则 ...
+                Account account = FindAccount(channel.UserName);
+                if (account != null)
+                {
+                    e.UserName = account.UserName;
+                    e.Password = account.Password;
+                }
+                else
+                {
+                    e.UserName = DataModel.dp2libraryUserName;
+
+                    e.Password = DataModel.dp2libraryPassword;
+
+                    bool bIsReader = false;
+
+                    e.Parameters = "location=" + DataModel.dp2libraryLocation;
+                    if (bIsReader == true)
+                        e.Parameters += ",type=reader";
+                }
+
+                e.Parameters += ",client=dp2Inventory|" + ClientInfo.ClientVersion;
+
+                if (String.IsNullOrEmpty(e.UserName) == false)
+                    return; // 立即返回, 以便作第一次 不出现 对话框的自动登录
+                else
+                {
+                    e.ErrorInfo = "尚未配置 dp2library 服务器用户名";
+                    e.Cancel = true;
+                }
+            }
+
+            // e.ErrorInfo = "尚未配置 dp2library 服务器用户名";
+            e.Cancel = true;
+        }
+
+        static string _baseRights = "getsystemparameter,getbiblioinfo,getbibliosummary,getiteminfo,getoperlog,getreaderinfo,getres,searchbiblio,searchitem,searchreader,borrow,renew,return,setreaderinfo,writeobject,setiteminfo";
+
+        static void VerifyRights(string rights)
+        {
+            List<string> missing_rights = new List<string>();
+            var base_rights = StringUtil.SplitList(_baseRights);
+            foreach (var right in base_rights)
+            {
+                if (StringUtil.IsInList(right, rights) == false)
+                    missing_rights.Add(right);
+            }
+
+            if (missing_rights.Count > 0)
+                throw new Exception($"账户 {_currentUserName} 缺乏必备的权限 {StringUtil.MakePathList(missing_rights)}");
+        }
+
+        static string _currentUserName = "";
+
+        // public static string ServerUID = "";
+
+        internal static void Channel_AfterLogin(object sender, AfterLoginEventArgs e)
+        {
+            LibraryChannel channel = sender as LibraryChannel;
+            _currentUserName = channel.UserName;
+
+            // 2020/9/18
+            // 检查 rights
+            VerifyRights(channel.Rights);
+
+            //_currentUserRights = channel.Rights;
+            //_currentLibraryCodeList = channel.LibraryCodeList;
+        }
+
+        static object _syncRoot_channelList = new object();
+        static List<LibraryChannel> _channelList = new List<LibraryChannel>();
+
+        public static void AbortAllChannel()
+        {
+            lock (_syncRoot_channelList)
+            {
+                foreach (LibraryChannel channel in _channelList)
+                {
+                    if (channel != null)
+                        channel.Abort();
+                }
+            }
+        }
+
+        // parameters:
+        //      style    风格。如果为 GUI，表示会自动添加 Idle 事件，并在其中执行 Application.DoEvents
+        public static LibraryChannel GetChannel(string strUserName = "")
+        {
+            string strServerUrl = DataModel.dp2libraryServerUrl;
+
+            if (string.IsNullOrEmpty(strUserName))
+                strUserName = DataModel.dp2libraryUserName;
+
+            LibraryChannel channel = _channelPool.GetChannel(strServerUrl, strUserName);
+            lock (_syncRoot_channelList)
+            {
+                _channelList.Add(channel);
+            }
+            // TODO: 检查数组是否溢出
+            return channel;
+        }
+
+        public static void ReturnChannel(LibraryChannel channel)
+        {
+            _channelPool.ReturnChannel(channel);
+            lock (_syncRoot_channelList)
+            {
+                _channelList.Remove(channel);
+            }
+        }
+
+        #endregion
+
+        #region dp2library 服务器配置
+
+        // 图书馆名字
+        static string _libraryName = null;
+
+        static internal List<string> _locationList = null;
+
+        // 2020/7/15
+        // 从 dp2library library.xml 中获取的 RFID 配置信息
+        static XmlDocument _rfidCfgDom = null;
+
+        // 获得 dp2library 服务器一端的配置信息
+        // exception:
+        //      可能会抛出异常
+        public static NormalResult PrepareConfigDom()
+        {
+
+            {
+                // 获得馆藏地列表
+                GetLocationListResult result = null;
+
+                result = LibraryChannelUtil.GetLocationList();
+
+                if (result.Value == -1)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"获得馆藏地列表时出错: {result.ErrorInfo}"
+                    };
+                else
+                    _locationList = result.List;
+            }
+
+            {
+                _rfidCfgDom = new XmlDocument();
+
+                // 获得 RFID 配置信息
+                GetRfidCfgResult result = null;
+                result = LibraryChannelUtil.GetRfidCfg();
+
+                if (result.Value == -1)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"从 dp2library 服务器获得 RFID 配置信息时出错: {result.ErrorInfo}"
+                    };
+                else
+                {
+                    if (string.IsNullOrEmpty(result.Xml))
+                    {
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"从 dp2library 服务器获得 RFID 配置信息时出错: library.xml 中没有定义 rfid 元素"
+                        };
+                    }
+                    _rfidCfgDom = new XmlDocument();
+                    _rfidCfgDom.LoadXml(result.Xml);
+
+                    _libraryName = result.LibraryName;
+                }
+            }
+            return new NormalResult();
+        }
+
+        /*
+<rfid>
+<ownerInstitution>
+<item map="海淀分馆/" isil="test" />
+<item map="西城/" alternative="xc" />
+</ownerInstitution>
+</rfid>
+map 为 "/" 或者 "/阅览室" 可以匹配 "图书总库" "阅览室" 这样的 strLocation
+map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" 这样的 strLocation
+最好单元测试一下这个函数
+* */
+        // parameters:
+        //      cfg_dom 根元素是 rfid
+        //      strLocation 纯净的 location 元素内容。
+        //      isil    [out] 返回 ISIL 形态的代码
+        //      alternative [out] 返回其他形态的代码
+        // return:
+        //      true    找到。信息在 isil 和 alternative 参数里面返回
+        //      false   没有找到
+        public static bool GetOwnerInstitution(
+            // XmlDocument cfg_dom,
+            string strLocation,
+            out string isil,
+            out string alternative)
+        {
+            isil = "";
+            alternative = "";
+
+        REDO:
+            var cfg_dom = _rfidCfgDom;
+
+            if (cfg_dom == null)
+            {
+                var prepare_result = PrepareConfigDom();
+                if (prepare_result.Value == -1)
+                    throw new Exception(prepare_result.ErrorInfo);
+                goto REDO;
+                // return false;
+            }
+
+            if (cfg_dom.DocumentElement == null)
+                return false;
+
+            // 分析 strLocation 是否属于总馆形态，比如“阅览室”
+            // 如果是总馆形态，则要在前部增加一个 / 字符，以保证可以正确匹配 map 值
+            // ‘/’字符可以理解为在馆代码和阅览室名字之间插入的一个必要的符号。这是为了弥补早期做法的兼容性问题
+            dp2StringUtil.ParseCalendarName(strLocation,
+        out string strLibraryCode,
+        out string strRoom);
+            if (string.IsNullOrEmpty(strLibraryCode))
+                strLocation = "/" + strRoom;
+
+            XmlNodeList items = cfg_dom.DocumentElement.SelectNodes(
+                "ownerInstitution/item");
+            List<HitItem> results = new List<HitItem>();
+            foreach (XmlElement item in items)
+            {
+                string map = item.GetAttribute("map");
+                if (strLocation.StartsWith(map))
+                {
+                    HitItem hit = new HitItem { Map = map, Element = item };
+                    results.Add(hit);
+                }
+            }
+
+            if (results.Count == 0)
+                return false;
+
+            // 如果命中多个，要选出 map 最长的那一个返回
+
+            // 排序，大在前
+            if (results.Count > 0)
+                results.Sort((a, b) => { return b.Map.Length - a.Map.Length; });
+
+            var element = results[0].Element;
+            isil = element.GetAttribute("isil");
+            alternative = element.GetAttribute("alternative");
+
+            // 2021/2/1
+            if (string.IsNullOrEmpty(isil) && string.IsNullOrEmpty(alternative))
+            {
+                throw new Exception($"map 元素不合法，isil 和 alternative 属性均为空");
+            }
+
+            return true;
+        }
+
+        class HitItem
+        {
+            public XmlElement Element { get; set; }
+            public string Map { get; set; }
+        }
+
+
+        public class GetLocationListResult : NormalResult
+        {
+            public List<string> List { get; set; }
+        }
+
+        // 获得馆藏地列表
+        public static GetLocationListResult GetLocationList()
+        {
+            string strOutputInfo = "";
+            LibraryChannel channel = GetChannel();
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromSeconds(30); // dp2library 刚启动后，第一次响应 GetSystemParameter() API 可能比较慢
+
+            try
+            {
+                int nRedoCount = 0;
+            REDO:
+                long lRet = channel.GetSystemParameter(
+null,
+"circulation",
+"locationTypes",
+out strOutputInfo,
+out string strError);
+                if (lRet == -1)
+                {
+                    if ((channel.ErrorCode == ErrorCode.RequestTimeOut
+                        || channel.ErrorCode == ErrorCode.ServerTimeout)
+                        && nRedoCount < 3)
+                    {
+                        nRedoCount++;
+                        goto REDO;
+                    }
+
+                    return new GetLocationListResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError,
+                        ErrorCode = channel.ErrorCode.ToString()
+                    };
+                }
+            }
+            finally
+            {
+                channel.Timeout = old_timeout;
+                ReturnChannel(channel);
+            }
+
+            // 
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml("<root />");
+
+            XmlDocumentFragment fragment = dom.CreateDocumentFragment();
+            try
+            {
+                fragment.InnerXml = strOutputInfo;
+            }
+            catch (Exception ex)
+            {
+                return new GetLocationListResult
+                {
+                    Value = -1,
+                    ErrorInfo = "fragment XML装入XmlDocumentFragment时出错: " + ex.Message
+                };
+            }
+
+            dom.DocumentElement.AppendChild(fragment);
+
+            /*
+<locationTypes>
+    <item canborrow="yes" itembarcodeNullable="yes">流通库</item>
+    <item>阅览室</item>
+    <library code="分馆1">
+        <item canborrow="yes">流通库</item>
+        <item>阅览室</item>
+    </library>
+</locationTypes>
+*/
+
+            List<string> results = new List<string>();
+            XmlNodeList nodes = dom.DocumentElement.SelectNodes("//item");
+            foreach (XmlElement node in nodes)
+            {
+                string strText = node.InnerText;
+
+                // 
+                string strLibraryCode = "";
+                XmlElement parent = node.ParentNode as XmlElement;
+                if (parent.Name == "library")
+                {
+                    strLibraryCode = parent.GetAttribute("code");
+                }
+
+                results.Add(string.IsNullOrEmpty(strLibraryCode) ? strText : strLibraryCode + "/" + strText);
+            }
+
+            return new GetLocationListResult
+            {
+                Value = 1,
+                List = results
+            };
+        }
+
+        #region GetRfidCfg
+
+        public class GetRfidCfgResult : NormalResult
+        {
+            public string Xml { get; set; }
+            public string LibraryName { get; set; }
+
+            public override string ToString()
+            {
+                return $"Xml='{Xml}',LibraryName='{LibraryName}'," + base.ToString();
+            }
+        }
+
+        // 获得 RFID 配置信息
+        public static GetRfidCfgResult GetRfidCfg()
+        {
+            string strOutputInfo = "";
+            string libraryName = "";
+
+            LibraryChannel channel = GetChannel();
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromSeconds(10);
+
+            try
+            {
+                long lRet = channel.GetSystemParameter(
+                    null,
+                    "system",
+                    "rfid",
+                    out strOutputInfo,
+                    out string strError);
+                if (lRet == -1)
+                    return new GetRfidCfgResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError,
+                        ErrorCode = channel.ErrorCode.ToString()
+                    };
+
+                lRet = channel.GetSystemParameter(
+                    null,
+                    "library",
+                    "name",
+                    out libraryName,
+                    out strError);
+            }
+            finally
+            {
+                channel.Timeout = old_timeout;
+                ReturnChannel(channel);
+            }
+
+            return new GetRfidCfgResult
+            {
+                Value = 1,
+                Xml = strOutputInfo,
+                LibraryName = libraryName,
+            };
+        }
+
+        #endregion
+
+        #endregion
+
+        #region UID --> UII 对照
+
+        public delegate void delegate_showText(string text);
+
+        // parameters:
+        //      uid_table   返回 UID --> PII 对照表
+        public static NormalResult DownloadUidTable(
+            List<string> item_dbnames,
+            Hashtable uid_table,
+            delegate_showText func_showProgress,
+            // Delegate_writeLog writeLog,
+            CancellationToken token)
+        {
+            ClientInfo.WriteInfoLog($"开始下载全部册记录到本地缓存");
+            LibraryChannel channel = GetChannel();
+            var old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromMinutes(5);  // 设置 5 分钟。因为册记录检索需要一定时间
+            try
+            {
+                if (item_dbnames == null)
+                {
+                    long lRet = channel.GetSystemParameter(
+    null,
+    "item",
+    "dbnames",
+    out string strValue,
+    out string strError);
+                    if (lRet == -1)
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError,
+                            ErrorCode = channel.ErrorCode.ToString()
+                        };
+                    item_dbnames = StringUtil.SplitList(strValue);
+                    StringUtil.RemoveBlank(ref item_dbnames);
+                }
+
+                foreach (string dbName in item_dbnames)
+                {
+                    func_showProgress?.Invoke($"正在从 {dbName} 获取信息 ...");
+
+                    int nRedoCount = 0;
+                REDO:
+                    if (token.IsCancellationRequested)
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = "用户中断"
+                        };
+                    // 检索全部读者库记录
+                    long lRet = channel.SearchItem(null,
+    dbName, // "<all>",
+    "",
+    -1,
+    "__id",
+    "left",
+    "zh",
+    null,   // strResultSetName
+    "", // strSearchStyle
+    "", // strOutputStyle
+    out string strError);
+                    if (lRet == -1)
+                    {
+                        ClientInfo.WriteErrorLog($"SearchItem() 出错, strError={strError}, channel.ErrorCode={channel.ErrorCode}");
+
+                        // 一次重试机会
+                        if (lRet == -1
+                            && (channel.ErrorCode == ErrorCode.RequestCanceled || channel.ErrorCode == ErrorCode.RequestError)
+                            && nRedoCount < 2)
+                        {
+                            nRedoCount++;
+                            goto REDO;
+                        }
+
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError,
+                            ErrorCode = channel.ErrorCode.ToString()
+                        };
+                    }
+
+                    long hitcount = lRet;
+
+                    ClientInfo.WriteInfoLog($"{dbName} 共检索命中册记录 {hitcount} 条");
+
+                    // 把超时时间改短一点
+                    channel.Timeout = TimeSpan.FromSeconds(20);
+
+                    DateTime search_time = DateTime.Now;
+
+                    int skip_count = 0;
+                    int error_count = 0;
+
+                    if (hitcount > 0)
+                    {
+                        string strStyle = "id,cols,format:@coldef:*/barcode|*/location|*/uid";
+
+                        // 获取和存储记录
+                        ResultSetLoader loader = new ResultSetLoader(channel,
+            null,
+            null,
+            strStyle,   // $"id,xml,timestamp",
+            "zh");
+
+                        // loader.Prompt += this.Loader_Prompt;
+                        int i = 0;
+                        foreach (DigitalPlatform.LibraryClient.localhost.Record record in loader)
+                        {
+                            if (token.IsCancellationRequested)
+                                return new NormalResult
+                                {
+                                    Value = -1,
+                                    ErrorInfo = "用户中断"
+                                };
+
+                            if (record.Cols != null)
+                            {
+                                string barcode = "";
+                                if (record.Cols.Length > 0)
+                                    barcode = record.Cols[0];
+                                string location = "";
+                                if (record.Cols.Length > 1)
+                                    location = record.Cols[1];
+
+                                // 2021/1/31
+                                // 推算出 OI
+                                string oi = "";
+                                {
+                                    location = StringUtil.GetPureLocation(location);
+                                    var ret = GetOwnerInstitution(location, out string isil, out string alternative);
+                                    if (ret == true)
+                                    {
+                                        if (string.IsNullOrEmpty(isil) == false)
+                                            oi = isil;
+                                        else if (string.IsNullOrEmpty(alternative) == false)
+                                            oi = alternative;
+                                    }
+                                }
+
+
+                                string uid = "";
+                                if (record.Cols.Length > 2)
+                                    uid = record.Cols[2];
+                                if (string.IsNullOrEmpty(barcode) == false
+                                    && string.IsNullOrEmpty(uid) == false)
+                                    uid_table[uid] = oi + "." + barcode;
+                            }
+
+                            i++;
+                        }
+
+                    }
+
+                    ClientInfo.WriteInfoLog($"dbName='{dbName}'。skip_count={skip_count}, error_count={error_count}");
+
+                }
+                return new NormalResult
+                {
+                    Value = uid_table.Count,
+                };
+            }
+            catch (Exception ex)
+            {
+                ClientInfo.WriteErrorLog($"DownloadItemRecordAsync() 出现异常：{ExceptionUtil.GetDebugText(ex)}");
+
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"DownloadItemRecordAsync() 出现异常：{ex.Message}"
+                };
+            }
+            finally
+            {
+                channel.Timeout = old_timeout;
+                ReturnChannel(channel);
+
+                ClientInfo.WriteInfoLog($"结束下载全部册记录到本地缓存");
+            }
+        }
+
+
+        #endregion
+
+
         public class GetEntityDataResult : NormalResult
         {
             public string Title { get; set; }
@@ -34,9 +746,12 @@ namespace dp2SSL
             public string ItemRecPath { get; set; }
         }
 
-        static bool _cacheDbCreated = false;
+        // static bool _cacheDbCreated = false;
 
         static AsyncSemaphore _channelLimit = new AsyncSemaphore(2);
+
+
+#if NO
 
         // 获得册记录信息和书目摘要信息
         // parameters:
@@ -866,35 +1581,6 @@ namespace dp2SSL
         }
 
 
-#if REMOVED
-        // 获得读者的 PII。注意包含了 OI 部分
-        static string GetPatronPii(XmlDocument dom)
-        {
-            string pii = DomUtil.GetElementText(dom.DocumentElement, "barcode");
-            if (string.IsNullOrEmpty(pii))
-            {
-                pii = "@refID:" + DomUtil.GetElementText(dom.DocumentElement, "refID");
-                return pii;
-            }
-
-            // 2020/7/17
-            // 加上 OI 部分
-            string libraryCode = DomUtil.GetElementText(dom.DocumentElement, "libraryCode");
-            var ret = ShelfData.GetOwnerInstitution(libraryCode + "/", out string isil, out string alternative);
-            if (ret == true)
-            {
-                // 应该是 xxx.xxx 形态
-                if (string.IsNullOrEmpty(isil) == false)
-                    pii = isil + "." + pii;
-                else if (string.IsNullOrEmpty(alternative) == false)
-                    pii = alternative + "." + pii;
-            }
-
-            return pii;
-        }
-
-#endif
-
         // 获得 oi.pii 的 oi 部分
         public static string GetOiPart(string oi_pii, bool return_null)
         {
@@ -1312,224 +1998,7 @@ namespace dp2SSL
             }
         }
 
-        #region GetRfidCfg
 
-        public class GetRfidCfgResult : NormalResult
-        {
-            public string Xml { get; set; }
-            public string LibraryName { get; set; }
-
-            public override string ToString()
-            {
-                return $"Xml='{Xml}',LibraryName='{LibraryName}'," + base.ToString();
-            }
-        }
-
-        // 获得 RFID 配置信息
-        public static GetRfidCfgResult GetRfidCfg()
-        {
-            string strOutputInfo = "";
-            string libraryName = "";
-
-            LibraryChannel channel = App.CurrentApp.GetChannel();
-            TimeSpan old_timeout = channel.Timeout;
-            channel.Timeout = TimeSpan.FromSeconds(10);
-
-            try
-            {
-                long lRet = channel.GetSystemParameter(
-                    null,
-                    "system",
-                    "rfid",
-                    out strOutputInfo,
-                    out string strError);
-                if (lRet == -1)
-                    return new GetRfidCfgResult
-                    {
-                        Value = -1,
-                        ErrorInfo = strError,
-                        ErrorCode = channel.ErrorCode.ToString()
-                    };
-
-                lRet = channel.GetSystemParameter(
-                    null,
-                    "library",
-                    "name",
-                    out libraryName,
-                    out strError);
-            }
-            finally
-            {
-                channel.Timeout = old_timeout;
-                App.CurrentApp.ReturnChannel(channel);
-            }
-
-            // 
-            /*
-            XmlDocument dom = new XmlDocument();
-            dom.LoadXml("<root />");
-
-            XmlDocumentFragment fragment = dom.CreateDocumentFragment();
-            try
-            {
-                fragment.InnerXml = strOutputInfo;
-            }
-            catch (Exception ex)
-            {
-                return new GetLocationListResult
-                {
-                    Value = -1,
-                    ErrorInfo = "fragment XML装入XmlDocumentFragment时出错: " + ex.Message
-                };
-            }
-
-            dom.DocumentElement.AppendChild(fragment);
-            */
-
-            // 顺便保存到本地
-            WpfClientInfo.Config.Set("cache",
-                "rfidCfg",
-                strOutputInfo);
-
-            WpfClientInfo.Config.Set("cache",
-    "libraryName",
-    libraryName);
-
-            return new GetRfidCfgResult
-            {
-                Value = 1,
-                Xml = strOutputInfo,
-                LibraryName = libraryName,
-            };
-        }
-
-        // 从本地获得 RFID 配置信息(不访问 dp2library 服务器)
-        public static GetRfidCfgResult GetRfidCfgFromLocal()
-        {
-            string value = WpfClientInfo.Config.Get("cache",
-    "rfidCfg",
-    null);
-            if (value == null)
-                return new GetRfidCfgResult();
-
-            return new GetRfidCfgResult
-            {
-                Value = 1,
-                Xml = value,
-                LibraryName = WpfClientInfo.Config.Get("cache",
-    "libraryName",
-    null)
-            };
-        }
-
-        #endregion
-
-        public class GetLocationListResult : NormalResult
-        {
-            public List<string> List { get; set; }
-        }
-
-        // 获得馆藏地列表
-        public static GetLocationListResult GetLocationList()
-        {
-            string strOutputInfo = "";
-            LibraryChannel channel = App.CurrentApp.GetChannel();
-            TimeSpan old_timeout = channel.Timeout;
-            channel.Timeout = TimeSpan.FromSeconds(30); // dp2library 刚启动后，第一次响应 GetSystemParameter() API 可能比较慢
-
-            try
-            {
-                int nRedoCount = 0;
-            REDO:
-                long lRet = channel.GetSystemParameter(
-null,
-"circulation",
-"locationTypes",
-out strOutputInfo,
-out string strError);
-                if (lRet == -1)
-                {
-                    if ((channel.ErrorCode == ErrorCode.RequestTimeOut
-                        || channel.ErrorCode == ErrorCode.ServerTimeout)
-                        && nRedoCount < 3)
-                    {
-                        nRedoCount++;
-                        goto REDO;
-                    }
-
-                    return new GetLocationListResult
-                    {
-                        Value = -1,
-                        ErrorInfo = strError,
-                        ErrorCode = channel.ErrorCode.ToString()
-                    };
-                }
-            }
-            finally
-            {
-                channel.Timeout = old_timeout;
-                App.CurrentApp.ReturnChannel(channel);
-            }
-
-            // 
-            XmlDocument dom = new XmlDocument();
-            dom.LoadXml("<root />");
-
-            XmlDocumentFragment fragment = dom.CreateDocumentFragment();
-            try
-            {
-                fragment.InnerXml = strOutputInfo;
-            }
-            catch (Exception ex)
-            {
-                return new GetLocationListResult
-                {
-                    Value = -1,
-                    ErrorInfo = "fragment XML装入XmlDocumentFragment时出错: " + ex.Message
-                };
-            }
-
-            dom.DocumentElement.AppendChild(fragment);
-
-            /*
-<locationTypes>
-    <item canborrow="yes" itembarcodeNullable="yes">流通库</item>
-    <item>阅览室</item>
-    <library code="分馆1">
-        <item canborrow="yes">流通库</item>
-        <item>阅览室</item>
-    </library>
-</locationTypes>
-*/
-
-            List<string> results = new List<string>();
-            XmlNodeList nodes = dom.DocumentElement.SelectNodes("//item");
-            foreach (XmlElement node in nodes)
-            {
-                string strText = node.InnerText;
-
-                // 
-                string strLibraryCode = "";
-                XmlElement parent = node.ParentNode as XmlElement;
-                if (parent.Name == "library")
-                {
-                    strLibraryCode = parent.GetAttribute("code");
-                }
-
-                results.Add(string.IsNullOrEmpty(strLibraryCode) ? strText : strLibraryCode + "/" + strText);
-            }
-
-            // 顺便保存到本地
-            WpfClientInfo.Config.Set("cache",
-                "locationList",
-                JsonConvert.SerializeObject(results));
-
-            return new GetLocationListResult
-            {
-                Value = 1,
-                List = results
-            };
-        }
 
         // 从本地获得馆藏地列表(不访问 dp2library 服务器)
         public static GetLocationListResult GetLocationListFromLocal()
@@ -1793,5 +2262,7 @@ out string strError);
             }
         }
 
+
+#endif
     }
 }

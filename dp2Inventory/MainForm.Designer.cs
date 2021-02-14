@@ -75,21 +75,21 @@ namespace dp2Inventory
             // 
             this.tabControl1.Controls.Add(this.tabPage_writeTag);
             this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tabControl1.Location = new System.Drawing.Point(0, 64);
-            this.tabControl1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.tabControl1.Location = new System.Drawing.Point(0, 66);
+            this.tabControl1.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(887, 495);
+            this.tabControl1.Size = new System.Drawing.Size(1048, 692);
             this.tabControl1.TabIndex = 7;
             // 
             // tabPage_writeTag
             // 
             this.tabPage_writeTag.Controls.Add(this.listView_writeHistory);
-            this.tabPage_writeTag.Location = new System.Drawing.Point(4, 31);
-            this.tabPage_writeTag.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.tabPage_writeTag.Location = new System.Drawing.Point(4, 37);
+            this.tabPage_writeTag.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
             this.tabPage_writeTag.Name = "tabPage_writeTag";
-            this.tabPage_writeTag.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.tabPage_writeTag.Size = new System.Drawing.Size(879, 460);
+            this.tabPage_writeTag.Padding = new System.Windows.Forms.Padding(5, 4, 5, 4);
+            this.tabPage_writeTag.Size = new System.Drawing.Size(1040, 651);
             this.tabPage_writeTag.TabIndex = 0;
             this.tabPage_writeTag.Text = "写入历史";
             this.tabPage_writeTag.UseVisualStyleBackColor = true;
@@ -108,10 +108,10 @@ namespace dp2Inventory
             this.listView_writeHistory.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listView_writeHistory.FullRowSelect = true;
             this.listView_writeHistory.HideSelection = false;
-            this.listView_writeHistory.Location = new System.Drawing.Point(4, 3);
-            this.listView_writeHistory.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.listView_writeHistory.Location = new System.Drawing.Point(5, 4);
+            this.listView_writeHistory.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
             this.listView_writeHistory.Name = "listView_writeHistory";
-            this.listView_writeHistory.Size = new System.Drawing.Size(871, 454);
+            this.listView_writeHistory.Size = new System.Drawing.Size(1030, 643);
             this.listView_writeHistory.TabIndex = 0;
             this.listView_writeHistory.UseCompatibleStateImageBehavior = false;
             this.listView_writeHistory.View = System.Windows.Forms.View.Details;
@@ -167,16 +167,17 @@ namespace dp2Inventory
             this.toolStripStatusLabel_message,
             this.toolStripStatusLabel_lineNo,
             this.toolStripStatusLabel_readerCount});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 559);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 758);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(887, 37);
+            this.statusStrip1.Padding = new System.Windows.Forms.Padding(1, 0, 17, 0);
+            this.statusStrip1.Size = new System.Drawing.Size(1048, 37);
             this.statusStrip1.TabIndex = 6;
             this.statusStrip1.Text = "statusStrip1";
             // 
             // toolStripStatusLabel_message
             // 
             this.toolStripStatusLabel_message.Name = "toolStripStatusLabel_message";
-            this.toolStripStatusLabel_message.Size = new System.Drawing.Size(838, 28);
+            this.toolStripStatusLabel_message.Size = new System.Drawing.Size(996, 28);
             this.toolStripStatusLabel_message.Spring = true;
             this.toolStripStatusLabel_message.Text = "...";
             // 
@@ -195,9 +196,9 @@ namespace dp2Inventory
             // toolStrip1
             // 
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(28, 28);
-            this.toolStrip1.Location = new System.Drawing.Point(0, 39);
+            this.toolStrip1.Location = new System.Drawing.Point(0, 41);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(887, 25);
+            this.toolStrip1.Size = new System.Drawing.Size(1048, 25);
             this.toolStrip1.TabIndex = 5;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -210,8 +211,8 @@ namespace dp2Inventory
             this.MenuItem_help});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Padding = new System.Windows.Forms.Padding(6, 3, 0, 3);
-            this.menuStrip1.Size = new System.Drawing.Size(887, 39);
+            this.menuStrip1.Padding = new System.Windows.Forms.Padding(7, 4, 0, 4);
+            this.menuStrip1.Size = new System.Drawing.Size(1048, 41);
             this.menuStrip1.TabIndex = 4;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -235,6 +236,7 @@ namespace dp2Inventory
             this.MenuItem_inventory.Name = "MenuItem_inventory";
             this.MenuItem_inventory.Size = new System.Drawing.Size(387, 40);
             this.MenuItem_inventory.Text = "盘点(&I)...";
+            this.MenuItem_inventory.Click += new System.EventHandler(this.MenuItem_inventory_Click);
             // 
             // toolStripSeparator3
             // 
@@ -349,13 +351,15 @@ namespace dp2Inventory
             // 
             // MainForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(13F, 28F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(887, 596);
+            this.ClientSize = new System.Drawing.Size(1048, 795);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.toolStrip1);
             this.Controls.Add(this.menuStrip1);
+            this.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "MainForm";
             this.Text = "dp2Inventory -- 盘点";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
