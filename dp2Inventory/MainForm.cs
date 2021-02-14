@@ -272,5 +272,54 @@ bool bClickClose = false)
         {
             this.Close();
         }
+
+        // 盘点
+        private void MenuItem_inventory_Click(object sender, EventArgs e)
+        {
+            // 把盘点对话框打开
+            CreateModifyDialog();
+
+            if (_modifyDialog.Visible == false)
+                _modifyDialog.Show(this);
+        }
+
+        InventoryDialog _modifyDialog = null;
+
+        void CreateModifyDialog()
+        {
+            if (_modifyDialog == null)
+            {
+                _modifyDialog = new InventoryDialog();
+
+                _modifyDialog.FormClosing += _modifyDialog_FormClosing;
+                // _modifyDialog.WriteComplete += _modifyDialog_WriteComplete;
+
+                GuiUtil.SetControlFont(_modifyDialog, this.Font);
+                ClientInfo.MemoryState(_modifyDialog, "modifyDialog", "state");
+                _modifyDialog.UiState = ClientInfo.Config.Get("modifyDialog", "uiState", null);
+            }
+        }
+
+        /*
+        private void _modifyDialog_WriteComplete(object sender, WriteCompleteventArgs e)
+        {
+            this.Invoke((Action)(() =>
+            {
+                AppendItem(e.Chip, e.TagInfo);
+                _historyChanged = true;
+            }));
+        }
+        */
+
+        private void _modifyDialog_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            var dialog = sender as Form;
+
+            // 将关闭改为隐藏
+            dialog.Visible = false;
+            if (e.CloseReason == CloseReason.UserClosing)
+                e.Cancel = true;
+        }
+
     }
 }
