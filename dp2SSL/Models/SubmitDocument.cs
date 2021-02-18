@@ -265,7 +265,7 @@ namespace dp2SSL
             });
             */
             // 提醒断网模式
-            if (App.StartNetworkMode == "local")
+            if (ShelfData.LibraryNetworkCondition == "Bad")
             {
                 var p = new Paragraph();
                 p.FontFamily = new FontFamily("微软雅黑");

@@ -41,6 +41,7 @@ namespace dp2SSL
 
         static Task _monitorTask = null;
 
+        // OK/Bad
         public static string LibraryNetworkCondition
         {
             get

@@ -2,6 +2,7 @@
 <root>
   <settings>
     <key name="超额时语音播报次数" value="1"/>
+    <key name="菜单页面显示图书馆名" value="true"/>
   </settings>
   <shelf>
     <door name="第一排" lock="*:0" antenna="*:1"/>

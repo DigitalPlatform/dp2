@@ -241,12 +241,14 @@ namespace dp2SSL
             this.Waiting = false;
         }
 
+        /*
         public RfidItem Clone()
         {
-            Patron dup = new Patron();
+            RfidItem dup = new RfidItem();
             CopyTo(dup);
             return dup;
         }
+        */
 
         public void CopyTo(RfidItem dup)
         {

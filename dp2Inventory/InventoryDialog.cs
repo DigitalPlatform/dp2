@@ -881,6 +881,7 @@ namespace dp2Inventory
 
         static async Task ProcessAsync(ProcessInfo info)
         {
+            var entity = info.Entity;
             info.State = "processing";
             try
             {
@@ -933,7 +934,7 @@ namespace dp2Inventory
                         || result.ErrorCode == "NotFound")
                     {
                         // 2021/1/19
-                        App.CurrentApp.SpeakSequence($"{entity.PII} 无法获得册信息");
+                        FormClientInfo.Speak($"{entity.PII} 无法获得册信息", false, false);
 
                         entity.BuildError("getItemXml", result.ErrorInfo, result.ErrorCode);
                     }
@@ -942,7 +943,7 @@ namespace dp2Inventory
                         entity.BuildError("getItemXml", null, null);
 
                         if (string.IsNullOrEmpty(result.Title) == false)
-                            entity.Title = PageBorrow.GetCaption(result.Title);
+                            entity.Title = GetCaption(result.Title);
                         if (string.IsNullOrEmpty(result.ItemXml) == false)
                         {
                             if (info != null)
@@ -952,25 +953,35 @@ namespace dp2Inventory
                     }
                 }
 
+                /*
                 // 请求 dp2library Inventory()
                 if (string.IsNullOrEmpty(entity.PII) == false
                     && info != null && info.IsLocation == false)
                 {
                     await BeginInventoryAsync(entity, PageInventory.ActionMode);
                 }
+                */
 
-                App.SetError("processing", null);
+                // App.SetError("processing", null);
             }
             catch (Exception ex)
             {
-                WpfClientInfo.WriteErrorLog($"ProcessingAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
-                App.SetError("processing", $"ProcessingAsync() 出现异常: {ex.Message}");
+                ClientInfo.WriteErrorLog($"ProcessingAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                // App.SetError("processing", $"ProcessingAsync() 出现异常: {ex.Message}");
             }
             finally
             {
                 info.State = "";
             }
 
+        }
+
+        public static string GetCaption(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+                return "(空)";
+
+            return text;
         }
 
         DateTime _lastErrorSound;

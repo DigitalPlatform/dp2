@@ -1993,6 +1993,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             }
         }
 
+        // 启动时的网络模式。注意断网模式是用 ShelfData.LibraryNetworkCondition 来表示的
         public static string StartNetworkMode = ""; // 空/local
 
         static void SelectMode()

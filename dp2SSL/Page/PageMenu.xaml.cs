@@ -77,7 +77,9 @@ namespace dp2SSL
                 // 初始化智能书柜
                 // 过程中需要检查门锁是否关上，如果没有关上要警告，只有关上了才能进入正常的菜单画面
                 if (App.Function == "智能书柜")
+                {
                     NavigatePageShelf("initial");
+                }
             }
 
             // 如果有读者卡，要延时提醒不要忘了拿走读者卡
@@ -99,6 +101,14 @@ namespace dp2SSL
                 this.SetSystemName("盘点系统");
 
             SetCompanyName();
+
+            // 设置图书馆名字的显示状态
+            if (ShelfData.ShelfCfgDom != null)
+            {
+                // 2021/2/18
+                var visible = ShelfData.GetLibraryNameVisibility();
+                this.libraryName.Visibility = visible == "true" ? Visibility.Visible : Visibility.Hidden;
+            }
         }
 
         void SetCompanyName()

@@ -181,6 +181,7 @@
       <DependentUpon>BeginInventoryDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="DataModel.cs" />
+    <Compile Include="Entity.cs" />
     <Compile Include="FloatingErrorDialog.cs">
       <SubType>Form</SubType>
     </Compile>
