@@ -504,7 +504,7 @@ namespace DigitalPlatform.LibraryServer
                     return -1;
                 }
                 string strToken = "";
-                StringBuilder debugInfo = new StringBuilder();
+                StringBuilder debugInfo = null; // new StringBuilder();
                 nRet = LibraryApplication.MakeToken(strClientIP,
                     LibraryApplication.GetTimeRangeByStyle(strGetToken),
                     strHashedPassword,
@@ -513,7 +513,7 @@ namespace DigitalPlatform.LibraryServer
                     out strError);
                 if (nRet == -1)
                     return -1;
-                this.App.WriteErrorLog($"(sessioninfo) MakeToken() return {nRet}, debugInfo='{debugInfo?.ToString()}'");
+                // this.App.WriteErrorLog($"(sessioninfo) MakeToken() return {nRet}, debugInfo='{debugInfo?.ToString()}'");
                 if (string.IsNullOrEmpty(strToken) == false)
                     strRights += ",token:" + strToken;
             }

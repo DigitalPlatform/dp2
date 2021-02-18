@@ -396,6 +396,8 @@ namespace dp2Inventory
     // Entity 附加的处理信息
     public class ProcessInfo
     {
+        public Entity Entity { get; set; }
+
         // 状态
         public string State { get; set; }
 

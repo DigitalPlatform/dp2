@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 
 namespace dp2SSL
 {
+#if NO
+
     // 盘点主循环
     public static class InventoryLoop
     {
@@ -139,4 +141,7 @@ namespace dp2SSL
             await Task.Delay(TimeSpan.FromSeconds(4), token);
         }
     }
+
+#endif
+
 }

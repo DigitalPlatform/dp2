@@ -751,7 +751,6 @@ out string strError);
         static AsyncSemaphore _channelLimit = new AsyncSemaphore(2);
 
 
-#if NO
 
         // 获得册记录信息和书目摘要信息
         // parameters:
@@ -767,15 +766,9 @@ out string strError);
             try
             {
                 using (var releaser = await _channelLimit.EnterAsync())
-                using (BiblioCacheContext context = new BiblioCacheContext())
+                // using (BiblioCacheContext context = new BiblioCacheContext())
                 {
-                    if (_cacheDbCreated == false)
-                    {
-                        context.Database.EnsureCreated();
-                        _cacheDbCreated = true;
-                    }
-
-                    LibraryChannel channel = App.CurrentApp.GetChannel();
+                    LibraryChannel channel = GetChannel();
                     TimeSpan old_timeout = channel.Timeout;
                     channel.Timeout = TimeSpan.FromSeconds(10);
                     try
@@ -783,43 +776,12 @@ out string strError);
                         GetEntityDataResult result = null;
                         List<NormalResult> errors = new List<NormalResult>();
 
-                        EntityItem entity_record = null;
-
                         // ***
                         // 第一步：获取册记录
 
-                        if (network == false)
-                        {
-                            // 先尝试从本地实体库中获得记录
-                            entity_record = context.Entities.Where(o => o.PII == pii).FirstOrDefault();
-                            // 2020/8/27
-                            if (entity_record == null && pii.Contains(".") == false)
-                            {
-                                // 如果 pii 是不含有点的，则尝试后方一致匹配数据库
-                                entity_record = context.Entities.Where(o => o.PII.EndsWith("." + pii)).FirstOrDefault();
-                            }
-                            else if (entity_record == null && pii.Contains(".") == true)
-                            {
-                                // 如果 pii 是含有点的，则改为用纯净 PII 部分进行匹配
-                                string pure_pii = GetPurePII(pii);
-                                entity_record = context.Entities.Where(o => o.PII == pure_pii).FirstOrDefault();
-                            }
 
-                            // EntityItem entity_record = null;   // testing
-                        }
-
-                        if (entity_record != null)
-                            result = new GetEntityDataResult
-                            {
-                                Value = 1,
-                                ItemXml = entity_record.Xml,
-                                ItemRecPath = entity_record.RecPath,
-                                Title = "",
-                            };
-                        else
                         {
-                            // 再尝试从 dp2library 服务器获取
-                            // TODO: ItemXml 和 BiblioSummary 可以考虑在本地缓存一段时间
+                            // 尝试从 dp2library 服务器获取
                             int nRedoCount = 0;
                         REDO_GETITEMINFO:
                             long lRet = channel.GetItemInfo(null,
@@ -850,14 +812,6 @@ out string strError);
                                     ErrorInfo = strError,
                                     ErrorCode = channel.ErrorCode.ToString()
                                 });
-                                /*
-                                return new GetEntityDataResult
-                                {
-                                    Value = -1,
-                                    ErrorInfo = strError,
-                                    ErrorCode = channel.ErrorCode.ToString()
-                                };
-                                */
                             }
                             else if (lRet == 0)
                                 errors.Add(new NormalResult
@@ -876,57 +830,12 @@ out string strError);
                                     Title = "",
                                 };
 
-                                // TODO: item_xml 里面最好包含 OI 字符串，便于建立本地缓存
-                                // TODO: 如何做到尽量保存 xxx.xxx 形态的 PII 作为 key?
-                                // 保存到本地数据库
-                                await AddOrUpdateAsync(context, new EntityItem
-                                {
-                                    PII = pii,
-                                    Xml = item_xml,
-                                    RecPath = item_recpath,
-                                    Timestamp = timestamp,
-                                });
-#if NO
-                                context.Entities.Add(new EntityItem
-                                {
-                                    PII = pii,
-                                    Xml = item_xml,
-                                    RecPath = item_recpath,
-                                    Timestamp = timestamp,
-                                });
-                                try
-                                {
-                                    await context.SaveChangesAsync();
-                                }
-                                catch (Exception ex)
-                                {
-                                    SqliteException sqlite_exception = ex.InnerException as SqliteException;
-                                    if (sqlite_exception != null && sqlite_exception.SqliteErrorCode == 19)
-                                    {
-                                        // PII 发生重复了
-                                    }
-                                    else
-                                        throw ex;
-                                }
-#endif
                             }
                         }
 
                         // ***
                         /// 第二步：获取书目摘要
 
-                        // 先尝试从本地书目库中获取书目摘要
-
-                        var item = context.BiblioSummaries.Where(o => o.PII == pii).FirstOrDefault();
-                        if (item != null
-                            && string.IsNullOrEmpty(item.BiblioSummary) == false)
-                        {
-                            if (result == null)
-                                result = new GetEntityDataResult();
-
-                            result.Title = item.BiblioSummary;
-                        }
-                        else
                         {
                             // 从 dp2library 服务器获取书目摘要
                             int nRedoCount = 0;
@@ -972,56 +881,7 @@ out string strError);
                                     result = new GetEntityDataResult();
 
                                 result.Title = strSummary;
-
-                                // 存入数据库备用
-                                if (lRet == 1 && string.IsNullOrEmpty(strSummary) == false)
-                                {
-                                    try
-                                    {
-                                        /*
-                                        var exist_item = context.BiblioSummaries.Where(o => o.PII == pii).FirstOrDefault();
-
-                                        if (exist_item != null)
-                                        {
-                                            if (exist_item.BiblioSummary != strSummary)
-                                            {
-                                                exist_item.BiblioSummary = strSummary;
-                                                context.BiblioSummaries.Update(exist_item);
-                                            }
-                                        }
-                                        else
-                                            context.BiblioSummaries.Add(new BiblioSummaryItem
-                                            {
-                                                PII = pii,
-                                                BiblioSummary = strSummary
-                                            });
-                                        await context.SaveChangesAsync();
-                                        */
-                                        // 2020/9/23
-                                        await AddOrUpdateAsync(context, new BiblioSummaryItem
-                                        {
-                                            PII = pii,
-                                            BiblioSummary = strSummary
-                                        });
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        WpfClientInfo.WriteErrorLog($"GetEntityDataAsync() 中保存 summary 时(PII 为 '{pii}')出现异常:{ExceptionUtil.GetDebugText(ex)}");
-                                    }
-                                }
                             }
-
-                            /*
-                            return new GetEntityDataResult
-                            {
-                                Value = (int)lRet,
-                                ItemXml = item_xml,
-                                ItemRecPath = item_recpath,
-                                Title = strSummary,
-                                ErrorInfo = strError,
-                                ErrorCode = channel.ErrorCode.ToString()
-                            };
-                            */
                         }
 
                         // 完全成功
@@ -1041,13 +901,13 @@ out string strError);
                     finally
                     {
                         channel.Timeout = old_timeout;
-                        App.CurrentApp.ReturnChannel(channel);
+                        ReturnChannel(channel);
                     }
                 }
             }
             catch (Exception ex)
             {
-                WpfClientInfo.WriteErrorLog($"GetEntityDataAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                ClientInfo.WriteErrorLog($"GetEntityDataAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
 
                 return new GetEntityDataResult
                 {
@@ -1057,6 +917,8 @@ out string strError);
                 };
             }
         }
+
+#if NO
 
         static async Task AddOrUpdateAsync(BiblioCacheContext context,
     BiblioSummaryItem item)

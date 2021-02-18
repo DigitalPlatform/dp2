@@ -5,13 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 
 using DigitalPlatform;
 using DigitalPlatform.WPF;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient.localhost;
-using System.Text.RegularExpressions;
 
 namespace dp2SSL.Models
 {
