@@ -462,6 +462,7 @@ namespace DigitalPlatform.rms
             bool bTimestamp = StringUtil.IsInList("timestamp", strStyle, true);
             bool bMetadata = StringUtil.IsInList("metadata", strStyle, true);
 
+            // 有可能返回 null
             string strFormat = StringUtil.GetStyleParam(strStyle, "format");
 
             List<Record> results = new List<Record>(100);

@@ -1744,9 +1744,9 @@
             // tabPage_property
             // 
             this.tabPage_property.Location = new System.Drawing.Point(4, 40);
-            this.tabPage_property.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.tabPage_property.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_property.Name = "tabPage_property";
-            this.tabPage_property.Size = new System.Drawing.Size(354, 462);
+            this.tabPage_property.Size = new System.Drawing.Size(354, 455);
             this.tabPage_property.TabIndex = 1;
             this.tabPage_property.Text = "属性";
             this.tabPage_property.UseVisualStyleBackColor = true;
@@ -1754,9 +1754,9 @@
             // tabPage_verifyResult
             // 
             this.tabPage_verifyResult.Location = new System.Drawing.Point(4, 40);
-            this.tabPage_verifyResult.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.tabPage_verifyResult.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_verifyResult.Name = "tabPage_verifyResult";
-            this.tabPage_verifyResult.Size = new System.Drawing.Size(354, 462);
+            this.tabPage_verifyResult.Size = new System.Drawing.Size(354, 455);
             this.tabPage_verifyResult.TabIndex = 2;
             this.tabPage_verifyResult.Text = "校验结果";
             this.tabPage_verifyResult.UseVisualStyleBackColor = true;
@@ -1764,9 +1764,9 @@
             // tabPage_generateData
             // 
             this.tabPage_generateData.Location = new System.Drawing.Point(4, 40);
-            this.tabPage_generateData.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.tabPage_generateData.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_generateData.Name = "tabPage_generateData";
-            this.tabPage_generateData.Size = new System.Drawing.Size(354, 462);
+            this.tabPage_generateData.Size = new System.Drawing.Size(354, 455);
             this.tabPage_generateData.TabIndex = 3;
             this.tabPage_generateData.Text = "创建数据";
             this.tabPage_generateData.UseVisualStyleBackColor = true;
@@ -1774,9 +1774,9 @@
             // tabPage_camera
             // 
             this.tabPage_camera.Location = new System.Drawing.Point(4, 40);
-            this.tabPage_camera.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.tabPage_camera.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_camera.Name = "tabPage_camera";
-            this.tabPage_camera.Size = new System.Drawing.Size(354, 462);
+            this.tabPage_camera.Size = new System.Drawing.Size(354, 455);
             this.tabPage_camera.TabIndex = 4;
             this.tabPage_camera.Text = "QR 识别";
             this.tabPage_camera.UseVisualStyleBackColor = true;
@@ -1784,9 +1784,9 @@
             // tabPage_accept
             // 
             this.tabPage_accept.Location = new System.Drawing.Point(4, 40);
-            this.tabPage_accept.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.tabPage_accept.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_accept.Name = "tabPage_accept";
-            this.tabPage_accept.Size = new System.Drawing.Size(354, 462);
+            this.tabPage_accept.Size = new System.Drawing.Size(354, 455);
             this.tabPage_accept.TabIndex = 5;
             this.tabPage_accept.Text = "验收";
             this.tabPage_accept.UseVisualStyleBackColor = true;
@@ -1798,7 +1798,7 @@
             this.tabPage_share.Controls.Add(this.tableLayoutPanel_messageHub);
             this.tabPage_share.Location = new System.Drawing.Point(4, 40);
             this.tabPage_share.Name = "tabPage_share";
-            this.tabPage_share.Size = new System.Drawing.Size(354, 462);
+            this.tabPage_share.Size = new System.Drawing.Size(354, 455);
             this.tabPage_share.TabIndex = 6;
             this.tabPage_share.Text = "分享";
             this.tabPage_share.UseVisualStyleBackColor = true;
@@ -1811,23 +1811,23 @@
             this.tableLayoutPanel_messageHub.Controls.Add(this.toolStrip_messageHub, 0, 1);
             this.tableLayoutPanel_messageHub.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel_messageHub.Location = new System.Drawing.Point(0, 0);
-            this.tableLayoutPanel_messageHub.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.tableLayoutPanel_messageHub.Margin = new System.Windows.Forms.Padding(5);
             this.tableLayoutPanel_messageHub.Name = "tableLayoutPanel_messageHub";
             this.tableLayoutPanel_messageHub.RowCount = 3;
             this.tableLayoutPanel_messageHub.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel_messageHub.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_messageHub.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 0F));
-            this.tableLayoutPanel_messageHub.Size = new System.Drawing.Size(354, 462);
+            this.tableLayoutPanel_messageHub.Size = new System.Drawing.Size(354, 455);
             this.tableLayoutPanel_messageHub.TabIndex = 2;
             // 
             // webBrowser_messageHub
             // 
             this.webBrowser_messageHub.Dock = System.Windows.Forms.DockStyle.Fill;
             this.webBrowser_messageHub.Location = new System.Drawing.Point(5, 5);
-            this.webBrowser_messageHub.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.webBrowser_messageHub.Margin = new System.Windows.Forms.Padding(5);
             this.webBrowser_messageHub.MinimumSize = new System.Drawing.Size(35, 35);
             this.webBrowser_messageHub.Name = "webBrowser_messageHub";
-            this.webBrowser_messageHub.Size = new System.Drawing.Size(344, 414);
+            this.webBrowser_messageHub.Size = new System.Drawing.Size(344, 407);
             this.webBrowser_messageHub.TabIndex = 0;
             // 
             // toolStrip_messageHub
@@ -1837,7 +1837,7 @@
             this.toolStrip_messageHub.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButton_messageHub_userManage,
             this.toolStripButton_messageHub_relogin});
-            this.toolStrip_messageHub.Location = new System.Drawing.Point(0, 424);
+            this.toolStrip_messageHub.Location = new System.Drawing.Point(0, 417);
             this.toolStrip_messageHub.Name = "toolStrip_messageHub";
             this.toolStrip_messageHub.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
             this.toolStrip_messageHub.Size = new System.Drawing.Size(354, 38);
@@ -1867,9 +1867,9 @@
             // tabPage_browse
             // 
             this.tabPage_browse.Location = new System.Drawing.Point(4, 40);
-            this.tabPage_browse.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.tabPage_browse.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_browse.Name = "tabPage_browse";
-            this.tabPage_browse.Size = new System.Drawing.Size(354, 462);
+            this.tabPage_browse.Size = new System.Drawing.Size(354, 455);
             this.tabPage_browse.TabIndex = 7;
             this.tabPage_browse.Text = "浏览";
             this.tabPage_browse.UseVisualStyleBackColor = true;
@@ -1922,7 +1922,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.IsMdiContainer = true;
             this.MainMenuStrip = this.menuStrip_main;
-            this.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.Margin = new System.Windows.Forms.Padding(5);
             this.Name = "MainForm";
             this.Text = "dp2circulation V3 -- 内务";
             this.Activated += new System.EventHandler(this.MainForm_Activated);
