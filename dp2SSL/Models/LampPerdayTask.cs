@@ -27,6 +27,18 @@ namespace dp2SSL
             {
                 return $"{Hour}:{Minute}";
             }
+
+            // 2021/3/1
+            public static string ToString(List<PerdayTime> times)
+            {
+                List<string> results = new List<string>();
+                foreach(var time in times)
+                {
+                    results.Add(time.ToString());
+                }
+
+                return StringUtil.MakePathList(results, ",");
+            }
         }
 
         public class ParseTimeResult : DigitalPlatform.NormalResult
@@ -334,6 +346,8 @@ namespace dp2SSL
                 JobManager.AddJob(
                     () =>
                     {
+                        WpfClientInfo.WriteInfoLog($"lamp time_range='{time_range}' weekday='{weekday}'");
+
                         if (InWeekday() == true)
                         {
                             TurnBackLampOn();
@@ -348,6 +362,8 @@ namespace dp2SSL
                 JobManager.AddJob(
                     () =>
                     {
+                        WpfClientInfo.WriteInfoLog($"lamp time_range='{time_range}' weekday='{weekday}'");
+
                         if (InWeekday() == true)
                         {
                             TurnBackLampOff();

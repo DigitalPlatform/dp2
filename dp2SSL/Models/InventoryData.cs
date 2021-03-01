@@ -736,6 +736,9 @@ TaskScheduler.Default);
                     StringUtil.RemoveBlank(ref item_dbnames);
                 }
 
+                // location --> oi
+                Hashtable oi_table = new Hashtable();
+
                 foreach (string dbName in item_dbnames)
                 {
                     func_showProgress?.Invoke($"正在从 {dbName} 获取信息 ...");
@@ -826,6 +829,7 @@ TaskScheduler.Default);
 
                                 // 2021/1/31
                                 // 推算出 OI
+                                /*
                                 string oi = "";
                                 {
                                     location = StringUtil.GetPureLocation(location);
@@ -838,7 +842,16 @@ TaskScheduler.Default);
                                             oi = alternative;
                                     }
                                 }
-
+                                */
+                                location = StringUtil.GetPureLocation(location);
+                                string oi = "";
+                                if (oi_table.ContainsKey(location))
+                                    oi = (string)oi_table[location];
+                                else
+                                {
+                                    oi = GetInstitution(location);
+                                    oi_table[location] = oi;
+                                }
 
                                 string uid = "";
                                 if (record.Cols.Length > 2)
@@ -849,6 +862,11 @@ TaskScheduler.Default);
                             }
 
                             i++;
+
+                            if ((i % 100) == 0)
+                            {
+                                func_showProgress?.Invoke($"正在从 {dbName} 获取信息 ({i.ToString()}) {record.Path} ...");
+                            }
                         }
 
                     }
@@ -878,6 +896,24 @@ TaskScheduler.Default);
 
                 WpfClientInfo.WriteInfoLog($"结束下载全部册记录到本地缓存");
             }
+        }
+
+        static string GetInstitution(string location)
+        {
+            string oi = "";
+            {
+                location = StringUtil.GetPureLocation(location);
+                var ret = ShelfData.GetOwnerInstitution(location, out string isil, out string alternative);
+                if (ret == true)
+                {
+                    if (string.IsNullOrEmpty(isil) == false)
+                        oi = isil;
+                    else if (string.IsNullOrEmpty(alternative) == false)
+                        oi = alternative;
+                }
+            }
+
+            return oi;
         }
 
         // 显示对书柜门的 Iventory 操作，同一时刻只能一个函数进入

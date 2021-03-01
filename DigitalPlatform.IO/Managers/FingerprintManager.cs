@@ -86,7 +86,7 @@ namespace DigitalPlatform.IO
                     Base.TriggerSetError(null,
 new SetErrorEventArgs
 {
-    Error = "指纹功能已暂停"
+    Error = $"{Name}功能已暂停"
 });
                     return true;
                 }
@@ -149,7 +149,7 @@ new SetErrorEventArgs
                 }
                 //return null;
             },
-token);
+            token);
         }
 
         public static NormalResult EnableSendkey(bool enable)

@@ -18,7 +18,9 @@ TABLE {
     border-width: 0px;
     border-style: solid;
     border-collapse: collapse;
+    width: 400pt;
 }
+
 
     /* TD padding */
     TABLE TD {
@@ -43,45 +45,78 @@ TABLE {
             border-style: solid;
         }
 
-        TABLE TR.content TD.name {
-            text-align: right;
-            /* background-color: #eeeeee; */
-            color: #777777;
-            width: 10%;
-            border: 0px;
-            border-right: 1px;
-            border-color: #999999;
-            border-style: solid;
-            text-align: right;
-            vertical-align: top;
-            white-space: nowrap;
-        }
+            TABLE TR.content TD.name {
+                text-align: right;
+                /* background-color: #eeeeee; */
+                color: #777777;
+                width: 10%;
+                border: 0px;
+                border-right: 1px;
+                border-color: #999999;
+                border-style: solid;
+                text-align: right;
+                vertical-align: top;
+                white-space: nowrap;
+            }
 
             TABLE TR.content TD.no {
                 width: 30pt;
             }
 
 
-        TABLE TR.content TD.location {
-            width: 120pt;
-        }
+    TABLE.item TR.content TD.location {
+        width: 120pt;
+    }
 
-        TABLE TR.content TD.price {
-            width: 60pt;
-        }
+    TABLE.item TR.content TD.price {
+        width: 60pt;
+    }
 
-            TABLE TR.content TD.seller {
-                width: 100pt;
-            }
+    TABLE.item TR.content TD.seller {
+        width: 100pt;
+    }
 
-            TABLE TR.content TD.source {
-                width: 100pt;
-            }
+    TABLE.item TR.content TD.source {
+        width: 100pt;
+    }
 
-        TABLE TR.content TD.recpath {
-            width: 120pt;
-        }
+    TABLE.item TR.content TD.recpath {
+        width: 120pt;
+    }
 
     TABLE TR.bottomcmd {
         font-size: 9pt;
+    }
+
+
+    table.order {
+        width: 600pt;
+    }
+
+        TABLE.order TR.content TD.state {
+            width: 40pt;
+        }
+
+        TABLE.order TR.content TD.distribute {
+            width: 120pt;
+        }
+
+        TABLE.order TR.content TD.price {
+            width: 40pt;
+        }
+
+        TABLE.order TR.content TD.copy {
+            width: 40pt;
+        }
+
+        TABLE.order TR.content TD.seller {
+            width: 70pt;
+        }
+
+        TABLE.order TR.content TD.source {
+            width: 70pt;
+        }
+
+    TABLE.item TR.content TD.recpath {
+        width: 90pt;
     }

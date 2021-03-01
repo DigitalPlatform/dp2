@@ -99,7 +99,7 @@ namespace dp2SSL
             {
                 var times = ParseTimeList(time_range);
 
-                WpfClientInfo.WriteInfoLog($"sterilamp time_list '{time_range}' 解析后得到 '{times.ToList()}'");
+                WpfClientInfo.WriteInfoLog($"sterilamp time_list '{time_range}' 解析后得到 '{PerdayTime.ToString(times)}'");
 
                 // 移除以前的全部同类任务
                 {
@@ -129,6 +129,8 @@ namespace dp2SSL
                     JobManager.AddJob(
                         () =>
                         {
+                            WpfClientInfo.WriteInfoLog($"sterilamp time_range='{time_range}' weekday='{weekday}'");
+
                             if (InWeekday() == true)
                             {
                                 _ = App.CurrentApp.BeginSterilamp();
@@ -181,7 +183,8 @@ namespace dp2SSL
             return results;
         }
 
-        static string ToString(List<PerdayTime> times)
+        /* // 见 PerdayTime.ToString(times)
+        public static string ToString(List<PerdayTime> times)
         {
             List<string> results = new List<string>();
             foreach (var time in times)
@@ -190,5 +193,6 @@ namespace dp2SSL
             }
             return StringUtil.MakePathList(results, ",");
         }
+        */
     }
 }

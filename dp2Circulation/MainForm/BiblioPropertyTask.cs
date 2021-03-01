@@ -87,7 +87,7 @@ namespace dp2Circulation
                         strRecPath,
                         "",
                         DisplaySubrecords ?
-                        new string[] { "xml", "subrecords:item" }
+                        new string[] { "xml", "subrecords:item|order" }
                         : new string[] { "xml" },   // formats
                         out string[] results,
                         out byte[] baTimestamp,
@@ -185,55 +185,60 @@ namespace dp2Circulation
 
                 collection_dom.LoadXml(strSubRecords);
 
-                string errorInfo = "";
-                string itemTotalCount = collection_dom.DocumentElement.GetAttribute("itemTotalCount");
-                if (itemTotalCount == "-1")
                 {
-                    string itemErrorCode = collection_dom.DocumentElement.GetAttribute("itemErrorCode");
-                    string itemErrorInfo = collection_dom.DocumentElement.GetAttribute("itemErrorInfo");
-                    errorInfo = $"{itemErrorCode}:{itemErrorInfo}";
-                }
+                    string errorInfo = "";
+                    string itemTotalCount = collection_dom.DocumentElement.GetAttribute("itemTotalCount");
+                    if (itemTotalCount == "-1")
+                    {
+                        string itemErrorCode = collection_dom.DocumentElement.GetAttribute("itemErrorCode");
+                        string itemErrorInfo = collection_dom.DocumentElement.GetAttribute("itemErrorInfo");
+                        errorInfo = $"{itemErrorCode}:{itemErrorInfo}";
+                    }
 
-                text.AppendLine("<table>");
-                text.AppendLine($"<tr><td colspan='10'>册记录数: {itemTotalCount} {errorInfo}</td></tr>");
-                text.AppendLine("<tr class='columntitle'>");
-                text.AppendLine("<td class='no'>序号</td>");
-                text.AppendLine("<td class='location'>馆藏地</td>");
-                text.AppendLine("<td class='price'>价格</td>");
-                text.AppendLine("<td class='seller'>订购渠道</td>");
-                text.AppendLine("<td class='source'>经费来源</td>");
-                text.AppendLine("<td class='recpath'>记录路径</td>");
-                text.AppendLine("</tr>");
-
-                XmlNodeList nodes = collection_dom.DocumentElement.SelectNodes("item");
-                int i = 0;
-                foreach (XmlElement item in nodes)
-                {
-                    string rec_path = item.GetAttribute("recPath");
-                    string location = DomUtil.GetElementText(item, "location");
-                    string price = DomUtil.GetElementText(item, "price");
-                    string seller = DomUtil.GetElementText(item, "seller");
-                    string source = DomUtil.GetElementText(item, "source");
-
-                    text.AppendLine("<tr class='content'>");
-                    text.AppendLine($"<td class='no'>{(i + 1)}</td>");
-                    text.AppendLine($"<td class='location'>{HttpUtility.HtmlEncode(location)}</td>");
-                    text.AppendLine($"<td class='price'>{HttpUtility.HtmlEncode(price)}</td>");
-                    text.AppendLine($"<td class='seller'>{HttpUtility.HtmlEncode(seller)}</td>");
-                    text.AppendLine($"<td class='source'>{HttpUtility.HtmlEncode(source)}</td>");
-                    text.AppendLine($"<td class='recpath'>{HttpUtility.HtmlEncode(rec_path)}</td>");
+                    text.AppendLine("<table class='item'>");
+                    text.AppendLine($"<tr><td colspan='10'>册记录数: {itemTotalCount} {errorInfo}</td></tr>");
+                    text.AppendLine("<tr class='columntitle'>");
+                    text.AppendLine("<td class='no'>序号</td>");
+                    text.AppendLine("<td class='location'>馆藏地</td>");
+                    text.AppendLine("<td class='price'>价格</td>");
+                    text.AppendLine("<td class='seller'>订购渠道</td>");
+                    text.AppendLine("<td class='source'>经费来源</td>");
+                    text.AppendLine("<td class='recpath'>记录路径</td>");
                     text.AppendLine("</tr>");
 
-                    i++;
+                    XmlNodeList nodes = collection_dom.DocumentElement.SelectNodes("item");
+                    int i = 0;
+                    foreach (XmlElement item in nodes)
+                    {
+                        string rec_path = item.GetAttribute("recPath");
+                        string location = DomUtil.GetElementText(item, "location");
+                        string price = DomUtil.GetElementText(item, "price");
+                        string seller = DomUtil.GetElementText(item, "seller");
+                        string source = DomUtil.GetElementText(item, "source");
+
+                        text.AppendLine("<tr class='content'>");
+                        text.AppendLine($"<td class='no'>{(i + 1)}</td>");
+                        text.AppendLine($"<td class='location'>{HttpUtility.HtmlEncode(location)}</td>");
+                        text.AppendLine($"<td class='price'>{HttpUtility.HtmlEncode(price)}</td>");
+                        text.AppendLine($"<td class='seller'>{HttpUtility.HtmlEncode(seller)}</td>");
+                        text.AppendLine($"<td class='source'>{HttpUtility.HtmlEncode(source)}</td>");
+                        text.AppendLine($"<td class='recpath'>{HttpUtility.HtmlEncode(rec_path)}</td>");
+                        text.AppendLine("</tr>");
+
+                        i++;
+                    }
+
+                    Int32.TryParse(itemTotalCount, out int value);
+                    if (i < value)
+                    {
+                        text.AppendLine($"<tr><td colspan='10'>... 有 {value - i} 项被略去 ...</td></tr>");
+                    }
+
+                    text.AppendLine("</table>");
                 }
 
-                Int32.TryParse(itemTotalCount, out int value);
-                if (i < value)
-                {
-                    text.AppendLine($"<tr><td colspan='10'>... 有 {value - i} 项被略去 ...</td></tr>");
-                }
+                BuildOrderHtml(collection_dom.DocumentElement, text);
 
-                text.AppendLine("</table>");
                 text.AppendLine("</body></html>");
                 return text.ToString();
             }
@@ -243,6 +248,66 @@ namespace dp2Circulation
                     + ex.Message
                     + "。(strSubRecords='" + StringUtil.CutString(strSubRecords, 300) + "')";
             }
+        }
+
+        static void BuildOrderHtml(XmlElement root,
+            StringBuilder text)
+        {
+            string errorInfo = "";
+            string itemTotalCount = root.GetAttribute("orderTotalCount");
+            if (itemTotalCount == "-1")
+            {
+                string itemErrorCode = root.GetAttribute("orderErrorCode");
+                string itemErrorInfo = root.GetAttribute("orderErrorInfo");
+                errorInfo = $"{itemErrorCode}:{itemErrorInfo}";
+            }
+
+            text.AppendLine("<p></p><table class='order'>");
+            text.AppendLine($"<tr><td colspan='10'>订购记录数: {itemTotalCount} {errorInfo}</td></tr>");
+            text.AppendLine("<tr class='columntitle'>");
+            text.AppendLine("<td class='no'>序号</td>");
+            text.AppendLine("<td class='state'>状态</td>");
+            text.AppendLine("<td class='distribute'>去向</td>");
+            text.AppendLine("<td class='price'>价格</td>");
+            text.AppendLine("<td class='copy'>复本数</td>");
+            text.AppendLine("<td class='seller'>订购渠道</td>");
+            text.AppendLine("<td class='source'>经费来源</td>");
+            text.AppendLine("<td class='recpath'>记录路径</td>");
+            text.AppendLine("</tr>");
+
+            XmlNodeList nodes = root.SelectNodes("order");
+            int i = 0;
+            foreach (XmlElement item in nodes)
+            {
+                string rec_path = item.GetAttribute("recPath");
+                string distribute = DomUtil.GetElementText(item, "distribute");
+                string price = DomUtil.GetElementText(item, "price");
+                string seller = DomUtil.GetElementText(item, "seller");
+                string source = DomUtil.GetElementText(item, "source");
+                string copy = DomUtil.GetElementText(item, "copy");
+                string state = DomUtil.GetElementText(item, "state");
+
+                text.AppendLine("<tr class='content'>");
+                text.AppendLine($"<td class='no'>{(i + 1)}</td>");
+                text.AppendLine($"<td class='state'>{HttpUtility.HtmlEncode(state)}</td>");
+                text.AppendLine($"<td class='distribute'>{HttpUtility.HtmlEncode(distribute)}</td>");
+                text.AppendLine($"<td class='price'>{HttpUtility.HtmlEncode(price)}</td>");
+                text.AppendLine($"<td class='copy'>{HttpUtility.HtmlEncode(copy)}</td>");
+                text.AppendLine($"<td class='seller'>{HttpUtility.HtmlEncode(seller)}</td>");
+                text.AppendLine($"<td class='source'>{HttpUtility.HtmlEncode(source)}</td>");
+                text.AppendLine($"<td class='recpath'>{HttpUtility.HtmlEncode(rec_path)}</td>");
+                text.AppendLine("</tr>");
+
+                i++;
+            }
+
+            Int32.TryParse(itemTotalCount, out int value);
+            if (i < value)
+            {
+                text.AppendLine($"<tr><td colspan='10'>... 有 {value - i} 项被略去 ...</td></tr>");
+            }
+
+            text.AppendLine("</table>");
         }
 
         // 从 collection 下级元素中获得指定元素名的部分
