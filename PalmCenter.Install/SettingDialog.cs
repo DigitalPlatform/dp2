@@ -180,7 +180,8 @@ namespace PalmCenter.Install
         "replicationStart",
         this.textBox_replicationStart.Text);
 
-            _config.Save();
+            // if (_config.Changed)
+                _config.Save();
         }
 
         public static string HnbUrl = "rest.http://58.87.101.80/hnb/rest";   // "http://hnbclub.cn/dp2library";
