@@ -370,7 +370,7 @@ public class MyKeysHost : KeysHost
 
  
 
-            if (head == "978")
+            if (head == "978" || head == "979")
 
             {
 

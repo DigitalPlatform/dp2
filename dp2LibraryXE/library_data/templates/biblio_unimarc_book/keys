@@ -430,7 +430,7 @@ public class MyKeysHost : KeysHost
 
             string head = isbn.Substring(0, 3);       //获得新旧ISBN号的判断依据
 
-            if (head == "978")
+            if (head == "978" || head == "979")
             {
                 isbn = isbn.Substring(3, isbn.Length - 3);
  

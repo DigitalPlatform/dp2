@@ -626,7 +626,9 @@ namespace dp2Circulation
                 string strTemp = ListViewUtil.GetItemText(item, x);
                 if (String.IsNullOrEmpty(strTemp) == false)
                 {
+                    // TODO: 对有些列要限制不让改动，比如记录路径列
                     bookitem.SetColumnText(x, "");
+                    
                     bookitem.RefreshListView();
                     bChanged = true;
                 }
@@ -759,8 +761,9 @@ namespace dp2Circulation
                 string strTemp = ListViewUtil.GetItemText(item, x);
                 if (String.IsNullOrEmpty(strTemp) == true)
                 {
+                    // TODO: 对有些列要限制不让改动，比如记录路径列
                     bookitem.SetColumnText(x, strFirstText);
-                    // ListViewUtil.ChangeItemText(item, x, strFirstText);
+
                     bookitem.RefreshListView();
                     bChanged = true;
                 }
