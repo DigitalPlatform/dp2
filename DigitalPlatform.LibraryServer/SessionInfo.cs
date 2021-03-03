@@ -63,7 +63,7 @@ namespace DigitalPlatform.LibraryServer
 
         // 刚才做过的最近一次Amerce的ID列表
         public List<string> AmerceIds = null;
-        public string AmerceReaderBarcode = "";
+        public string AmerceReaderBarcode = ""; // 注：可能包含机构代码部分
 
         // TODO: 所创建的临时文件要在规定的目录中
         // TODO: 观察它是否释放

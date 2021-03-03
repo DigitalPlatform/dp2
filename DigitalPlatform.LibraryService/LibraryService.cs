@@ -1435,12 +1435,15 @@ namespace dp2Library
         // 权限: 
         //		工作人员或者读者，必须有verifyreaderpassword权限
         //		如果为读者, 附加限制还只能验证属于自己的密码
-        public LibraryServerResult VerifyReaderPassword(string strReaderBarcode,
+        public LibraryServerResult VerifyReaderPassword(
+            string strReaderBarcodeParam,
             string strReaderPassword)
         {
             LibraryServerResult result = this.PrepareEnvironment("VerifyReaderPassword", true, true);
             if (result.Value == -1)
                 return result;
+
+            LibraryApplication.ParseOI(strReaderBarcodeParam, out string strReaderBarcode, out string strOwnerInstitution);
 
             string strCommand = "";
             if (string.IsNullOrEmpty(strReaderBarcode) == false
@@ -1559,14 +1562,53 @@ namespace dp2Library
                     goto ERROR1;
                 }
 
+                // 所操作的读者库的馆代码
+                string strLibraryCode = "";
+
                 // 看看读者记录所从属的读者库的馆代码，是否被当前用户管辖
                 if (String.IsNullOrEmpty(strOutputPath) == false)
                 {
+                    // 2021/3/3
+                    // 获得读者库的馆代码
+                    // return:
+                    //      -1  出错
+                    //      0   成功
+                    nRet = app.GetLibraryCode(
+            strOutputPath,
+            out strLibraryCode,
+            out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+
                     if (app.IsCurrentChangeableReaderPath(strOutputPath,
             sessioninfo.LibraryCodeList) == false)
                     {
                         strError = "读者记录路径 '" + strOutputPath + "' 从属的读者库不在当前用户管辖范围内";
                         goto ERROR1;
+                    }
+                }
+
+                // 2021/3/3
+                // 补充判断机构代码
+                if (strOwnerInstitution != null)
+                {
+                    // return:
+                    //      -1  出错
+                    //      0   没有通过较验
+                    //      1   通过了较验
+                    nRet = app.VerifyPatronOI(
+                        strOutputPath,
+                        strLibraryCode,
+                        strOwnerInstitution,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    if (nRet == 0)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = strError;
+                        result.ErrorCode = ErrorCode.ReaderBarcodeNotFound;
+                        return result;
                     }
                 }
 
