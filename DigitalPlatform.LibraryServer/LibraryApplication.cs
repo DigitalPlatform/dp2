@@ -5699,10 +5699,10 @@ namespace DigitalPlatform.LibraryServer
         public int GetReaderRecXml(
             // RmsChannelCollection channels,
             RmsChannel channel,
-    string strBarcode,
-    out string strXml,
-    out string strOutputPath,
-    out string strError)
+            string strBarcode,
+            out string strXml,
+            out string strOutputPath,
+            out string strError)
         {
             byte[] timestamp = null;
 
@@ -6037,10 +6037,10 @@ out strError);
         public int GetReaderRecXml(
             // RmsChannelCollection channels,
             RmsChannel channel,
-    string strBarcode,
-    out string strXml,
-    out string strOutputPath,
-    out byte[] timestamp,
+            string strBarcode,
+            out string strXml,
+            out string strOutputPath,
+            out byte[] timestamp,
     out string strError)
         {
             strOutputPath = "";

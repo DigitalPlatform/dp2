@@ -12051,14 +12051,18 @@ start_time_1,
         }
 
         // Undo一个已交费记录
+        // parameters:
+        //      strReaderBarcodeParam 证条码号。可能包含机构代码
         int UndoOneAmerce(SessionInfo sessioninfo,
-            string strReaderBarcode,
+            string strReaderBarcodeParam,
             string strAmercedItemId,
             out string strReaderXml,
             out string strError)
         {
             strError = "";
             strReaderXml = "";
+
+            ParseOI(strReaderBarcodeParam, out string strReaderBarcode, out string strOwnerInstitution);
 
             RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
             if (channel == null)
@@ -12215,6 +12219,32 @@ start_time_1,
                         goto ERROR1;
                     }
                 }
+
+                // 2021/3/3
+                if (strOwnerInstitution != null)
+                {
+                    // return:
+                    //      -1  出错
+                    //      0   没有通过较验
+                    //      1   通过了较验
+                    nRet = VerifyPatronOI(
+                        strOutputReaderRecPath,
+                        strLibraryCode,
+                        strOwnerInstitution,
+                        out strError);
+                    if (nRet == -1 || nRet == 0)
+                        goto ERROR1;
+                    /*
+                    if (nRet == 0)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = strError;
+                        result.ErrorCode = ErrorCode.ReaderBarcodeNotFound;
+                        return result;
+                    }
+                    */
+                }
+
 
                 XmlDocument readerdom = null;
                 nRet = LibraryApplication.LoadToDom(strReaderXml,
@@ -12440,6 +12470,8 @@ start_time_1,
         }
 
         // UNDO违约金交纳
+        // parameters:
+        //      strReaderBarcode    证条码号。可能包含机构代码
         // return:
         //      -1  error
         //      0   succeed
@@ -12474,6 +12506,8 @@ start_time_1,
 
                 string strTempError = "";
 
+                // parameters:
+                //      strReaderBarcodeParam 证条码号。可能包含机构代码
                 int nRet = UndoOneAmerce(sessioninfo,
                     strReaderBarcode,
                     item.ID,
@@ -12519,13 +12553,15 @@ start_time_1,
         public LibraryServerResult Amerce(
             SessionInfo sessioninfo,
             string strFunction,
-            string strReaderBarcode,
+            string strReaderBarcodeParam,
             AmerceItem[] amerce_items,
             out AmerceItem[] failed_items,
             out string strReaderXml)
         {
             strReaderXml = "";
             failed_items = null;
+
+            ParseOI(strReaderBarcodeParam, out string strReaderBarcode, out string strOwnerInstitution);
 
             LibraryServerResult result = new LibraryServerResult();
 
@@ -12683,13 +12719,15 @@ start_time_1,
             if (String.Compare(strFunction, "undo", true) == 0)
             {
                 // UNDO违约金交纳
+                // parameters:
+                //      strReaderBarcode    证条码号。可能包含机构代码
                 // return:
                 //      -1  error
                 //      0   succeed
                 //      1   部分成功。strError中有报错信息
                 nRet = UndoAmerces(
                     sessioninfo,
-                    strReaderBarcode,
+                    strReaderBarcodeParam,
                     amerce_items,
                     out failed_items,
                     out strReaderXml,
@@ -12722,9 +12760,9 @@ start_time_1,
                 }
 
                 // strReaderBarcode参数值一般为空即可。如果有值，则要求和SessionInfo对象中储存的最近一次的Amerce操作读者证条码号一致
-                if (String.IsNullOrEmpty(strReaderBarcode) == false)
+                if (String.IsNullOrEmpty(strReaderBarcodeParam) == false)
                 {
-                    if (sessioninfo.AmerceReaderBarcode != strReaderBarcode)
+                    if (sessioninfo.AmerceReaderBarcode != strReaderBarcodeParam)
                     {
                         strError = "调用rollback功能时strReaderBarcode参数和最近一次Amerce操作的读者证条码号不一致";
                         goto ERROR1;
@@ -12742,6 +12780,8 @@ start_time_1,
                 }
 
                 // UNDO违约金交纳
+                // parameters:
+                //      strReaderBarcode    证条码号。可能包含机构代码
                 // return:
                 //      -1  error
                 //      0   succeed
@@ -12797,7 +12837,7 @@ start_time_1,
                     goto ERROR1;
                 }
 
-                // 所操作的读者库德馆代码
+                // 所操作的读者库的馆代码
                 string strLibraryCode = "";
 
                 // 看看读者记录所从属的读者库的馆代码，是否被当前用户管辖
@@ -12821,6 +12861,30 @@ start_time_1,
                     {
                         strError = "读者记录路径 '" + strOutputReaderRecPath + "' 从属的读者库不在当前用户管辖范围内";
                         goto ERROR1;
+                    }
+                }
+
+                // 2021/3/3
+                // 补充判断机构代码
+                if (strOwnerInstitution != null)
+                {
+                    // return:
+                    //      -1  出错
+                    //      0   没有通过较验
+                    //      1   通过了较验
+                    nRet = VerifyPatronOI(
+                        strOutputReaderRecPath,
+                        strLibraryCode,
+                        strOwnerInstitution,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    if (nRet == 0)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = strError;
+                        result.ErrorCode = ErrorCode.ReaderBarcodeNotFound;
+                        return result;
                     }
                 }
 
@@ -13139,7 +13203,7 @@ start_time_1,
                     && Ids != null
                     && Ids.Count != 0)
                 {
-                    sessioninfo.AmerceReaderBarcode = strReaderBarcode;
+                    sessioninfo.AmerceReaderBarcode = strReaderBarcodeParam;
                     sessioninfo.AmerceIds = Ids;
                 }
             }
