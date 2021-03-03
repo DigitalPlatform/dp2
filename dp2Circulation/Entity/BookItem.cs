@@ -145,6 +145,34 @@ namespace dp2Circulation
         /// <param name="strText">要设置的文字</param>
         public void SetColumnText(int nCol, string strText)
         {
+            var defs = FindColumnDefs(this.ListViewItem.ListView);
+
+            if (defs != null)
+            {
+                if (this.RecordDom.DocumentElement != null)
+                {
+                    // var defs = GetItemColumnInfo(-1);
+                    foreach (var def in defs)
+                    {
+                        if (nCol == def.Index)
+                        {
+                            SetData(def.DataElement, strText);
+                            return;
+                        }
+
+
+                        /*
+                            string value = GetData(def.DataElement);
+                            ListViewUtil.ChangeItemText(item,
+                    def.Index,
+                    value);
+                        */
+                    }
+                }
+                return;
+            }
+
+            // 以下是原来的代码
             if (nCol == COLUMN_BARCODE)
                 this.Barcode = strText;
             else if (nCol == COLUMN_ERRORINFO)
@@ -200,7 +228,6 @@ namespace dp2Circulation
                 this.RefID = strText;
             else
                 throw new Exception("未知的列号 " + nCol.ToString());
-
         }
 
         #region 数据成员
@@ -691,6 +718,52 @@ namespace dp2Circulation
             return new List<ColumnInfo> { result };
         }
 #endif
+
+        // 2021/3/3
+        // 给数据成员设置数据
+        public void SetData(string dataElement, string value)
+        {
+            // 一般 XML 元素 content
+            if (dataElement.IndexOf(":") == -1)
+            {
+                DomUtil.SetElementText(this.RecordDom.DocumentElement, dataElement, value);
+                this.Changed = true;
+                return;
+            }
+
+            var parts = StringUtil.ParseTwoPart(dataElement, ":");
+            string name = parts[0];
+            string type = parts[1];
+            if (type == "innerXml")
+            {
+                DomUtil.SetElementInnerXml(this.RecordDom.DocumentElement, name, value);
+                this.Changed = true;
+                return;
+            }
+            if (type == "this")
+            {
+                {
+                    var info = this.GetType().GetProperty(name);
+                    if (info != null)
+                    {
+                        info.SetValue(this, value);
+                        this.Changed = true;
+                        return;
+                    }
+                }
+                {
+                    var info = this.GetType().GetField(name);
+                    if (info == null)
+                        throw new Exception($"BookItem 对象中没有 {name} 成员");
+                    info.SetValue(this, value);
+                    this.Changed = true;
+                }
+
+                return;
+            }
+
+            throw new Exception($"未知的类型 '{type}'");
+        }
 
         // 可能会抛出异常
         public string GetData(string dataElement)

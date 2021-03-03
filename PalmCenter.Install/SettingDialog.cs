@@ -23,6 +23,9 @@ namespace PalmCenter.Install
         public SettingDialog()
         {
             InitializeComponent();
+
+            this.tabControl1.TabPages.Remove(this.tabPage_palm);
+            this.tabPage_palm.Dispose();
         }
 
         private void SettingDialog_Load(object sender, EventArgs e)
@@ -180,7 +183,7 @@ namespace PalmCenter.Install
         "replicationStart",
         this.textBox_replicationStart.Text);
 
-            // if (_config.Changed)
+            if (_config.Changed)
                 _config.Save();
         }
 

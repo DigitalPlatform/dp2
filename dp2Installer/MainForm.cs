@@ -6083,6 +6083,7 @@ MessageBoxDefaultButton.Button2);
                 goto ERROR1;
             }
 
+            /*
             // 停止服务
             AppendString("正在停止 palmcenter 服务 ...\r\n");
             Application.DoEvents();
@@ -6092,6 +6093,7 @@ MessageBoxDefaultButton.Button2);
             if (nRet == -1)
                 goto ERROR1;
             AppendString("palmcenter 服务已经停止\r\n");
+            */
 
             AppendString("正在配置 palmcenter 参数 ...\r\n");
 
@@ -6102,7 +6104,7 @@ MessageBoxDefaultButton.Button2);
 
             AppendString("配置 palmcenter 参数完成\r\n");
 
-
+            /*
             // 启动服务
             AppendString("正在启动 palmcenter 服务 ...\r\n");
             Application.DoEvents();
@@ -6113,6 +6115,7 @@ MessageBoxDefaultButton.Button2);
                 goto ERROR1;
 
             AppendString("palmcenter 服务成功启动\r\n");
+            */
             return;
         ERROR1:
             MessageBox.Show(this, strError);

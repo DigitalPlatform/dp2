@@ -33,7 +33,6 @@ namespace PalmCenter.Install
             this.button_OK = new System.Windows.Forms.Button();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage_replication = new System.Windows.Forms.TabPage();
-            this.tabPage_palm = new System.Windows.Forms.TabPage();
             this.textBox_replicationStart = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
             this.checkBox_cfg_savePasswordLong = new System.Windows.Forms.CheckBox();
@@ -49,6 +48,7 @@ namespace PalmCenter.Install
             this.toolStripButton_cfg_setXeServer = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButton_cfg_setHongnibaServer = new System.Windows.Forms.ToolStripButton();
+            this.tabPage_palm = new System.Windows.Forms.TabPage();
             this.checkBox_allow_changeRecognitionQuality = new System.Windows.Forms.CheckBox();
             this.checkBox_allow_changeRegisterQuality = new System.Windows.Forms.CheckBox();
             this.checkBox_allow_changeThreshold = new System.Windows.Forms.CheckBox();
@@ -67,8 +67,8 @@ namespace PalmCenter.Install
             this.checkBox_beep = new System.Windows.Forms.CheckBox();
             this.tabControl1.SuspendLayout();
             this.tabPage_replication.SuspendLayout();
-            this.tabPage_palm.SuspendLayout();
             this.toolStrip_server.SuspendLayout();
+            this.tabPage_palm.SuspendLayout();
             this.SuspendLayout();
             // 
             // button_Cancel
@@ -132,33 +132,6 @@ namespace PalmCenter.Install
             this.tabPage_replication.Text = "同步";
             this.tabPage_replication.UseVisualStyleBackColor = true;
             // 
-            // tabPage_palm
-            // 
-            this.tabPage_palm.AutoScroll = true;
-            this.tabPage_palm.Controls.Add(this.checkBox_allow_changeRecognitionQuality);
-            this.tabPage_palm.Controls.Add(this.checkBox_allow_changeRegisterQuality);
-            this.tabPage_palm.Controls.Add(this.checkBox_allow_changeThreshold);
-            this.tabPage_palm.Controls.Add(this.button_setDefaultRecognitionQuality);
-            this.tabPage_palm.Controls.Add(this.textBox_cfg_recognitionQualityThreshold);
-            this.tabPage_palm.Controls.Add(this.label9);
-            this.tabPage_palm.Controls.Add(this.button_setDefaultRegisterQuality);
-            this.tabPage_palm.Controls.Add(this.textBox_cfg_registerQualityThreshold);
-            this.tabPage_palm.Controls.Add(this.label8);
-            this.tabPage_palm.Controls.Add(this.button_setDefaultThreshold);
-            this.tabPage_palm.Controls.Add(this.textBox_cfg_shreshold);
-            this.tabPage_palm.Controls.Add(this.label7);
-            this.tabPage_palm.Controls.Add(this.comboBox_deviceList);
-            this.tabPage_palm.Controls.Add(this.label6);
-            this.tabPage_palm.Controls.Add(this.checkBox_speak);
-            this.tabPage_palm.Controls.Add(this.checkBox_beep);
-            this.tabPage_palm.Location = new System.Drawing.Point(4, 31);
-            this.tabPage_palm.Name = "tabPage_palm";
-            this.tabPage_palm.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage_palm.Size = new System.Drawing.Size(882, 383);
-            this.tabPage_palm.TabIndex = 1;
-            this.tabPage_palm.Text = "掌纹";
-            this.tabPage_palm.UseVisualStyleBackColor = true;
-            // 
             // textBox_replicationStart
             // 
             this.textBox_replicationStart.ImeMode = System.Windows.Forms.ImeMode.Off;
@@ -167,6 +140,7 @@ namespace PalmCenter.Install
             this.textBox_replicationStart.Name = "textBox_replicationStart";
             this.textBox_replicationStart.Size = new System.Drawing.Size(283, 31);
             this.textBox_replicationStart.TabIndex = 46;
+            this.textBox_replicationStart.Visible = false;
             // 
             // label5
             // 
@@ -177,6 +151,7 @@ namespace PalmCenter.Install
             this.label5.Size = new System.Drawing.Size(180, 21);
             this.label5.TabIndex = 45;
             this.label5.Text = "日志同步起点(&R):";
+            this.label5.Visible = false;
             // 
             // checkBox_cfg_savePasswordLong
             // 
@@ -314,6 +289,33 @@ namespace PalmCenter.Install
             this.toolStripButton_cfg_setHongnibaServer.Text = "红泥巴.数字平台服务器";
             this.toolStripButton_cfg_setHongnibaServer.ToolTipText = "设为红泥巴.数字平台服务器";
             this.toolStripButton_cfg_setHongnibaServer.Click += new System.EventHandler(this.toolStripButton_cfg_setHongnibaServer_Click);
+            // 
+            // tabPage_palm
+            // 
+            this.tabPage_palm.AutoScroll = true;
+            this.tabPage_palm.Controls.Add(this.checkBox_allow_changeRecognitionQuality);
+            this.tabPage_palm.Controls.Add(this.checkBox_allow_changeRegisterQuality);
+            this.tabPage_palm.Controls.Add(this.checkBox_allow_changeThreshold);
+            this.tabPage_palm.Controls.Add(this.button_setDefaultRecognitionQuality);
+            this.tabPage_palm.Controls.Add(this.textBox_cfg_recognitionQualityThreshold);
+            this.tabPage_palm.Controls.Add(this.label9);
+            this.tabPage_palm.Controls.Add(this.button_setDefaultRegisterQuality);
+            this.tabPage_palm.Controls.Add(this.textBox_cfg_registerQualityThreshold);
+            this.tabPage_palm.Controls.Add(this.label8);
+            this.tabPage_palm.Controls.Add(this.button_setDefaultThreshold);
+            this.tabPage_palm.Controls.Add(this.textBox_cfg_shreshold);
+            this.tabPage_palm.Controls.Add(this.label7);
+            this.tabPage_palm.Controls.Add(this.comboBox_deviceList);
+            this.tabPage_palm.Controls.Add(this.label6);
+            this.tabPage_palm.Controls.Add(this.checkBox_speak);
+            this.tabPage_palm.Controls.Add(this.checkBox_beep);
+            this.tabPage_palm.Location = new System.Drawing.Point(4, 31);
+            this.tabPage_palm.Name = "tabPage_palm";
+            this.tabPage_palm.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage_palm.Size = new System.Drawing.Size(882, 447);
+            this.tabPage_palm.TabIndex = 1;
+            this.tabPage_palm.Text = "掌纹";
+            this.tabPage_palm.UseVisualStyleBackColor = true;
             // 
             // checkBox_allow_changeRecognitionQuality
             // 
@@ -481,10 +483,10 @@ namespace PalmCenter.Install
             this.tabControl1.ResumeLayout(false);
             this.tabPage_replication.ResumeLayout(false);
             this.tabPage_replication.PerformLayout();
-            this.tabPage_palm.ResumeLayout(false);
-            this.tabPage_palm.PerformLayout();
             this.toolStrip_server.ResumeLayout(false);
             this.toolStrip_server.PerformLayout();
+            this.tabPage_palm.ResumeLayout(false);
+            this.tabPage_palm.PerformLayout();
             this.ResumeLayout(false);
 
         }

@@ -134,6 +134,9 @@ namespace DigitalPlatform.CirculationClient
 
         // parameters:
         //      product_name    例如 "fingerprintcenter"
+        //      style           service 表示用户文件夹使用 service 位置
+        //                      watcher 表示监控配置文件变化，一旦发生变化自动重装进入内存
+        //                      logReload 表示要在日志文件中记载配置文件变化后的内容。须和 wathcer 配套使用
         // return:
         //      true    初始化成功
         //      false   初始化失败，应立刻退出应用程序
@@ -172,7 +175,7 @@ namespace DigitalPlatform.CirculationClient
             UserLogDir = Path.Combine(UserDir, "log");
             PathUtil.TryCreateDir(UserLogDir);
 
-            InitialConfig();
+            InitialConfig(style);
 
             Log.Logger = new LoggerConfiguration()
 // .MinimumLevel.Information()
@@ -190,6 +193,9 @@ namespace DigitalPlatform.CirculationClient
         public static void Finish()
         {
             SaveConfig();
+
+            // 2021/3/3
+            EndWather();
         }
 
         // 获得一个 Service 产品的用户目录
@@ -290,7 +296,9 @@ namespace DigitalPlatform.CirculationClient
             }
         }
 
-        public static void InitialConfig()
+        // parameters:
+        //      style   风格。如果包含 watcher，表示会启用文件变化监视功能，每当物理文件变化的时候，会自动重装进入 ConfigSetting 内存
+        public static void InitialConfig(string style)
         {
             if (string.IsNullOrEmpty(UserDir))
                 throw new ArgumentException("UserDir 尚未初始化");
@@ -309,6 +317,11 @@ namespace DigitalPlatform.CirculationClient
                 _config = ConfigSetting.Create(filename);
             }
 #endif
+            if (StringUtil.IsInList("watcher", style))
+            {
+                EndWather();
+                BeginWatcher(style);
+            }
         }
 
         // 可反复调用
@@ -326,6 +339,84 @@ namespace DigitalPlatform.CirculationClient
             if (_config != null && _config.Changed == true)
                 _config.Save();
         }
+
+        #region 物理文件变化监控
+
+        static FileSystemWatcher _watcher = null;
+        static string _wacherStyle = "";
+
+        // 监视文件变化
+        // parameters:
+        //      wacherStyle logReload 表示会在日志文件中记载新装入的配置文件内容
+        static void BeginWatcher(string wacherStyle = "")
+        {
+            _wacherStyle = wacherStyle;
+
+            _watcher = new FileSystemWatcher();
+            _watcher.Path = Path.GetDirectoryName(_config.FileName);
+
+            /* Watch for changes in LastAccess and LastWrite times, and 
+               the renaming of files or directories. */
+            _watcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Size | NotifyFilters.Attributes | NotifyFilters.FileName | NotifyFilters.CreationTime;
+
+            _watcher.Filter = Path.GetFileName(_config.FileName);
+            _watcher.IncludeSubdirectories = false;
+
+            // Add event handlers.
+            _watcher.Changed -= Watcher_Changed;
+            _watcher.Changed += Watcher_Changed;
+
+            // Begin watching.
+            _watcher.EnableRaisingEvents = true;
+        }
+
+        private static void Watcher_Changed(object sender, FileSystemEventArgs e)
+        {
+            if ((e.ChangeType & WatcherChangeTypes.Changed) != WatcherChangeTypes.Changed)
+                return;
+
+            string filename = _config.FileName;
+            if (PathUtil.IsEqual(filename, e.FullPath) == true)
+            {
+                for (int i = 0; i < 2; i++)
+                {
+                    // 稍微延时一下，避免很快地重装、正好和 尚在改写文件的的进程发生冲突
+                    Thread.Sleep(500);
+
+                    try
+                    {
+                        _config = ConfigSetting.Open(filename, true);
+
+                        string logContent = "";
+                        if (StringUtil.IsInList("logReload", _wacherStyle))
+                            logContent = " 新内容:\r\n" + File.ReadAllText(filename);
+
+                        if (i > 0)
+                            WriteInfoLog($"配置文件 {filename} 重试(监控)重装成功{logContent}");
+                        else
+                            WriteInfoLog($"配置文件 {filename} (监控)重装成功{logContent}");
+                        break;
+                    }
+                    catch (Exception ex)
+                    {
+                        WriteErrorLog($"配置文件 {filename} 在(监控)重装阶段出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                    }
+                }
+            }
+        }
+
+        static void EndWather()
+        {
+            if (_watcher != null)
+            {
+                _watcher.EnableRaisingEvents = false;
+                _watcher.Changed -= Watcher_Changed;
+                _watcher.Dispose();
+                _watcher = null;
+            }
+        }
+
+        #endregion
 
         public static void AddShortcutToStartupGroup(string strProductName)
         {

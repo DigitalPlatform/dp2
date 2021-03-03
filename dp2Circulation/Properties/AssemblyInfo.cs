@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.14.*")]
-[assembly: AssemblyFileVersion("3.14.0.0")]
+[assembly: AssemblyVersion("3.15.*")]
+[assembly: AssemblyFileVersion("3.15.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -75,3 +75,4 @@ using System.Runtime.InteropServices;
 // 3.12 2021/1/5 增加掌纹识别功能
 // 3.13 2021/2/1 种册窗的册登记对话框，如果册记录的馆藏地没有在 library.xml 中定义对应的机构代码，则会报错无法创建 RFID 标签。批修改册窗也会在册记录没有定义机构代码的情况下报错。
 // 3.14 2021/2/5 书目查询窗固定面板区“属性”属性页可以显示书目记录的子记录。要求配套 dp2library 3.44 使用
+// 3.15 2021/3/3 修正 种册窗的册属性页中 复制列 和 删除列功能的错位的 bug

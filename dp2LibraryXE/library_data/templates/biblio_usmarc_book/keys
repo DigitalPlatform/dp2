@@ -370,46 +370,26 @@ public class MyKeysHost : KeysHost
 
  
 
-            if (head == "978")
-
+            if (head == "978" || head == "979")
             {
-
                 isbn = isbn.Substring(3, isbn.Length - 3);
 
- 
-
                 if (isbn.Length >= 10)
-
                 {
-
                     isbn = isbn.Substring(0, 9);
-
                 }
-
             }
-
            else
-
            {
-
                 if (isbn.Length >= 10)
-
                 {
-
-                           isbn = isbn.Substring(0, 9);                        
-
+                    isbn = isbn.Substring(0, 9);                        
                 }
-
            }
-
     
 
        this.ResultString = isbn;
-
 //     this.ResultStrings.Add(isbn);        //如果同时构造出多索引，采用添加函数
-
- 
-
   }
 
 }
