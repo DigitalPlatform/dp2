@@ -3317,6 +3317,8 @@ start_time_1,
                 // return:
                 //      true    找到。信息在 isil 和 alternative 参数里面返回
                 //      false   没有找到
+                // exception:
+                //      可能会抛出异常 Exception
                 var ret = GetOwnerInstitution(
                     rfid,
                     strLibraryCode + "/",
@@ -3402,6 +3404,8 @@ start_time_1,
                 // return:
                 //      true    找到。信息在 isil 和 alternative 参数里面返回
                 //      false   没有找到
+                // exception:
+                //      可能会抛出异常 Exception
                 var ret = GetOwnerInstitution(
                     rfid,
                     strLocation,
@@ -3448,6 +3452,8 @@ start_time_1,
                 // return:
                 //      true    找到。信息在 isil 和 alternative 参数里面返回
                 //      false   没有找到
+                // exception:
+                //      可能会抛出异常 Exception
                 var ret = GetOwnerInstitution(
                     rfid,
                     libraryCode + "/",
@@ -3489,6 +3495,8 @@ start_time_1,
                 // return:
                 //      true    找到。信息在 isil 和 alternative 参数里面返回
                 //      false   没有找到
+                // exception:
+                //      可能会抛出异常 Exception
                 var ret = GetOwnerInstitution(
                     rfid,
                     libraryCode + "/",
@@ -3552,6 +3560,8 @@ start_time_1,
                 // return:
                 //      true    找到。信息在 isil 和 alternative 参数里面返回
                 //      false   没有找到
+                // exception:
+                //      可能会抛出异常 Exception
                 var ret = GetOwnerInstitution(
                     rfid,
                     strLocation,
@@ -3608,6 +3618,8 @@ start_time_1,
                 // return:
                 //      true    找到。信息在 isil 和 alternative 参数里面返回
                 //      false   没有找到
+                // exception:
+                //      可能会抛出异常 Exception
                 var ret = GetOwnerInstitution(
                     rfid,
                     strLocation,
@@ -3720,6 +3732,8 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
         // return:
         //      true    找到。信息在 isil 和 alternative 参数里面返回
         //      false   没有找到
+        // exception:
+        //      可能会抛出异常 Exception
         public static bool GetOwnerInstitution(
             XmlElement rfid,
             string strLocation,

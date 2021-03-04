@@ -366,27 +366,37 @@ namespace DigitalPlatform.LibraryServer
                         goto END1;
                     }
 
-                    // strName 是纯净的 location
-                    // return:
-                    //      true    找到。信息在 isil 和 alternative 参数里面返回
-                    //      false   没有找到
-                    var ret = GetOwnerInstitution(rfid, 
-                        strName, 
-                        out string isil, 
-                        out string alternative);
-                    if (ret == false)
+                    try
                     {
-                        strValue = "";
-                        nRet = 0;
-                    }
-                    else
-                    {
-                        strValue = isil + "|" + alternative;
-                        nRet = 1;
-                    }
+                        // strName 是纯净的 location
+                        // return:
+                        //      true    找到。信息在 isil 和 alternative 参数里面返回
+                        //      false   没有找到
+                        // exception:
+                        //      可能会抛出异常 Exception
+                        var ret = GetOwnerInstitution(rfid,
+                            strName,
+                            out string isil,
+                            out string alternative);
+                        if (ret == false)
+                        {
+                            strValue = "";
+                            nRet = 0;
+                        }
+                        else
+                        {
+                            strValue = isil + "|" + alternative;
+                            nRet = 1;
+                        }
 
-                    strError = "category '" + strCategory + "' 中未知的 name '" + strName + "'";
-                    goto NOTFOUND;
+                        strError = "category '" + strCategory + "' 中未知的 name '" + strName + "'";
+                        goto NOTFOUND;
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = ex.Message;
+                        goto ERROR1;
+                    }
                 }
 
 #if REMOVED
