@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.44.*")]
-[assembly: AssemblyFileVersion("3.44.0.0")]
+[assembly: AssemblyVersion("3.46.*")]
+[assembly: AssemblyFileVersion("3.46.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -226,3 +226,5 @@ ItemCanReturn()
 //		3.42 (2020/12/23) 进一步巩固检索和删除册记录过程中遇到的 XML 部分被破坏(对象文件删除)场景下的功能完整性
 //		3.43 (2020/12/29) GetReaderInfo() SetReaderInfo() 等环节支持读者记录中的 palmprint 元素
 //		3.44 (2021/2/5) GetBiblioInfos() 获得下级记录功能("subrecords:item")消除一个关于 ErrorCode 的 bug
+//		3.45 (2021/3/4) Amerce() VerifyReaderPassword() API 增加了对 OI.barcode 类型条码号的支持
+//		3.46 (2021/3/4) Borrow() 和 Return() API 中返回册记录和读者记录的时候，增加了一种格式 oi，可以返回记录的机构代码。另外 xml 格式返回的内容中也确保增加了 oi 元素

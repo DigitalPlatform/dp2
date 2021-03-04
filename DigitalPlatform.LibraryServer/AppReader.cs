@@ -4787,8 +4787,9 @@ out strError);
                 {
                     // results[i] = strXml;
                     string strResultXml = "";
-                    nRet = GetItemXml(strXml,
+                    nRet = GetPatronXml(strXml,
         strResultType,
+        strLibraryCode,
         out strResultXml,
         out strError);
                     if (nRet == -1)
@@ -4796,6 +4797,7 @@ out strError);
                         strError = "获取 " + strResultType + " 格式的 XML 字符串时出错: " + strError;
                         goto ERROR1;
                     }
+
                     // results[i] = strResultXml;
                     SetResult(results_list, i, strResultXml);
                 }
@@ -4818,6 +4820,12 @@ out strError);
                         // results[i] = strOutputPath;
                         SetResult(results_list, i, strOutputPath);
                     }
+                }
+                else if (String.Compare(strResultType, "oi", true) == 0)
+                {
+                    // oi 第一字符如果是 ! 表示这是出错信息
+                    var oi = GetPatronOI(strLibraryCode);
+                    SetResult(results_list, i, oi);
                 }
                 else if (String.Compare(strResultType, "advancexml_borrow_bibliosummary", true) == 0
                     || String.Compare(strResultType, "advancexml_overdue_bibliosummary", true) == 0

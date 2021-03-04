@@ -365,6 +365,7 @@ namespace DigitalPlatform.LibraryServer
                         nRet = 0;
                         goto END1;
                     }
+
                     // strName 是纯净的 location
                     // return:
                     //      true    找到。信息在 isil 和 alternative 参数里面返回
