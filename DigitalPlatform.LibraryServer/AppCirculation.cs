@@ -2207,7 +2207,13 @@ namespace DigitalPlatform.LibraryServer
                                 strError);
                             goto ERROR1;
                         }
+
                         item_records[i] = strResultXml;
+                    }
+                    else if (IsResultType(strItemFormat, "oi") == true)
+                    {
+                        // 2021/3/4
+                        item_records[i] = GetItemOI(strOutputItemXml);
                     }
                     else
                     {
@@ -3430,6 +3436,42 @@ start_time_1,
             }
         }
 
+        // 2021/3/4
+        public string GetPatronOI(string libraryCode)
+        {
+            var rfid = this.LibraryCfgDom.DocumentElement.SelectSingleNode("rfid") as XmlElement;
+            if (rfid == null)
+                return null;
+
+            try
+            {
+                // return:
+                //      true    找到。信息在 isil 和 alternative 参数里面返回
+                //      false   没有找到
+                var ret = GetOwnerInstitution(
+                    rfid,
+                    libraryCode + "/",
+                    out string isil,
+                    out string alternative);
+                if (ret == false)
+                {
+                    string error = $"!library.xml 的 rfid 配置参数中没有找到和馆藏地 '{libraryCode + "/"}' 关联的所属机构代码";
+                    return error;
+                }
+
+                if (string.IsNullOrEmpty(isil) == false)
+                    return isil;
+                else if (string.IsNullOrEmpty(alternative) == false)
+                    return alternative;
+                return null;
+            }
+            catch (Exception ex)
+            {
+                string error = $"!获取机构代码过程出现异常: {ex.Message}";
+                return error;
+            }
+        }
+
         // 2020/9/8
         // 给读者记录 XML 中添加 oi 元素
         public void AddPatronOI(XmlDocument patrondom,
@@ -3471,6 +3513,78 @@ start_time_1,
                 var element = DomUtil.SetElementText(patrondom.DocumentElement, "oi", "");
                 element.SetAttribute("error", error);
                 return;
+            }
+        }
+
+        // 2021/3/4
+        public string GetItemOI(string item_xml)
+        {
+            if (string.IsNullOrEmpty(item_xml))
+                return null;
+            XmlDocument itemdom = new XmlDocument();
+            try
+            {
+                itemdom.LoadXml(item_xml);
+            }
+            catch (Exception ex)
+            {
+                return $"!装载册记录 XML 到 DOM 出现异常: {ex.Message}";
+            }
+            return GetItemOI(itemdom);
+        }
+
+        // 2021/3/4
+        public string GetItemOI(XmlDocument itemdom)
+        {
+            var rfid = this.LibraryCfgDom.DocumentElement.SelectSingleNode("rfid") as XmlElement;
+            if (rfid == null)
+            {
+                DomUtil.DeleteElement(itemdom.DocumentElement, "oi");
+                return null;
+            }
+
+
+            string strLocation = DomUtil.GetElementText(itemdom.DocumentElement, "location");
+            strLocation = StringUtil.GetPureLocation(strLocation);
+
+            try
+            {
+                // return:
+                //      true    找到。信息在 isil 和 alternative 参数里面返回
+                //      false   没有找到
+                var ret = GetOwnerInstitution(
+                    rfid,
+                    strLocation,
+                    out string isil,
+                    out string alternative);
+                if (ret == false)
+                {
+                    string error = $"library.xml 的 rfid 配置参数中没有找到和馆藏地 '{strLocation}' 关联的所属机构代码";
+                    var element = DomUtil.SetElementText(itemdom.DocumentElement, "oi", "");
+                    element.SetAttribute("error", error);
+                    return error;
+                }
+
+
+                if (string.IsNullOrEmpty(isil) == false)
+                {
+                    DomUtil.SetElementText(itemdom.DocumentElement, "oi", isil);
+                    return isil;
+                }
+                else if (string.IsNullOrEmpty(alternative) == false)
+                {
+                    DomUtil.SetElementText(itemdom.DocumentElement, "oi", alternative);
+                    return alternative;
+                }
+
+                return null;
+            }
+            catch (Exception ex)
+            {
+                string error = $"获取机构代码过程出现异常: {ex.Message}";
+                var element = DomUtil.SetElementText(itemdom.DocumentElement, "oi", "");
+                element.SetAttribute("error", error);
+                return error;
             }
         }
 
@@ -4155,6 +4269,63 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             + "$";
         }
 
+        int GetPatronXml(string strItemXml,
+    string strFormat,
+    string libraryCode,
+    out string strResultXml,
+    out string strError)
+        {
+            strError = "";
+            strResultXml = "";
+            // int nRet = 0;
+
+            if (string.IsNullOrEmpty(strItemXml) == true)
+                return 0;
+
+            string strSubType = "";
+            string strType = "";
+            StringUtil.ParseTwoPart(strFormat,
+                ":",
+                out strType,
+                out strSubType);
+
+            if (string.IsNullOrEmpty(strSubType) == true)
+            {
+                strResultXml = strItemXml;
+                return 0;
+            }
+
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.LoadXml(strItemXml);
+            }
+            catch (Exception ex)
+            {
+                strError = "XML 装入 DOM 时出错: " + ex.Message;
+                return -1;
+            }
+
+            if (dom.DocumentElement == null)
+            {
+                strResultXml = strItemXml;
+                return 0;
+            }
+
+            // 去掉 <borrowHistory> 的下级元素
+            XmlNodeList nodes = dom.DocumentElement.SelectNodes("borrowHistory/*");
+            foreach (XmlNode node in nodes)
+            {
+                node.ParentNode.RemoveChild(node);
+            }
+
+            // 2021/3/4
+            AddPatronOI(dom, libraryCode);
+
+            strResultXml = dom.OuterXml;
+            return 0;
+        }
+
         int GetItemXml(string strItemXml,
             string strFormat,
             out string strResultXml,
@@ -4203,6 +4374,9 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             {
                 node.ParentNode.RemoveChild(node);
             }
+
+            // 2021/3/4
+            AddItemOI(dom);
 
             strResultXml = dom.OuterXml;
             return 0;
@@ -8105,6 +8279,11 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                             goto ERROR1;
                         }
                         item_records[i] = strResultXml;
+                    }
+                    else if (IsResultType(strItemFormat, "oi") == true)
+                    {
+                        // 2021/3/4
+                        item_records[i] = GetItemOI(strOutputItemXml);
                     }
                     else
                     {
