@@ -883,8 +883,6 @@ namespace dp2SSL
         protected override void OnSessionEnding(SessionEndingCancelEventArgs e)
         {
             WpfClientInfo.WriteDebugLog("OnSessionEnding() called");
-            WpfClientInfo.Finish(GrantAccess);
-            WpfClientInfo.WriteDebugLog("End WpfClientInfo.Finish()");
 
             // ShelfData.SaveRetryActions();
 
@@ -910,6 +908,10 @@ namespace dp2SSL
 
             }
 
+            WaitAllTaskFinish();
+            WpfClientInfo.Finish(GrantAccess);
+            WpfClientInfo.WriteDebugLog("End WpfClientInfo.Finish()");
+
             PageShelf.TrySetMessage(null, $"我这台智能书柜停止了哟！({e.ReasonSessionEnding})");
 
             try
@@ -929,6 +931,8 @@ namespace dp2SSL
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:避免使用 Async Void 方法", Justification = "<挂起>")]
         protected async override void OnExit(ExitEventArgs e)
         {
+            WpfClientInfo.WriteDebugLog("OnExit() called");
+
             _barcodeCapture.Stop();
             _barcodeCapture.InputLine -= _barcodeCapture_inputLine;
             //_barcodeCapture.InputChar -= _barcodeCapture_InputChar;
@@ -960,10 +964,6 @@ namespace dp2SSL
                 WpfClientInfo.WriteErrorLog($"PageInventory.ClearList() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
             }
 
-            WpfClientInfo.WriteDebugLog("OnExit() called");
-            WpfClientInfo.Finish(GrantAccess);
-            WpfClientInfo.WriteDebugLog("End WpfClientInfo.Finish()");
-
             // ShelfData.SaveRetryActions();
 
             try
@@ -991,6 +991,11 @@ namespace dp2SSL
             _cancelRfid?.Cancel();
             ShelfData.CancelAll();
 
+            WaitAllTaskFinish();
+
+            WpfClientInfo.Finish(GrantAccess);
+            WpfClientInfo.WriteDebugLog("End WpfClientInfo.Finish()");
+
             // EndFingerprint();
 
             this._channelPool.BeforeLogin -= new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
@@ -1002,6 +1007,11 @@ namespace dp2SSL
             WpfClientInfo.WriteInfoLog("物理关灯 OnExit()");
 
             base.OnExit(e);
+        }
+
+        void WaitAllTaskFinish()
+        {
+            ShelfData.Task?.Wait();
         }
 
         public static App CurrentApp
@@ -1322,6 +1332,25 @@ namespace dp2SSL
                 return (bool)WpfClientInfo.Config?.GetBoolean("global",
                     "process_monitor",
                     true);
+            }
+        }
+
+        public static bool ReplicateEntities
+        {
+            get
+            {
+                if (WpfClientInfo.Config == null)
+                    return false;
+
+                return (bool)WpfClientInfo.Config?.GetBoolean("shelf",
+                    "replicateEntities",
+                    false);
+            }
+            set
+            {
+                WpfClientInfo.Config?.SetBoolean("shelf",
+                    "replicateEntities",
+                    value);
             }
         }
 

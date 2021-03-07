@@ -379,6 +379,25 @@ Description = "自动监控和重启 人脸中心 RFID中心 指纹中心等模�
             }
         }
 
+        // 默认值 false
+        [Display(
+Order = 9,
+Name = "同步册记录",
+Description = "(智能书柜)自动同步全部册记录和书目摘要到本地"
+)]
+        [Category("维护")]
+        public bool ReplicateEntities
+        {
+            get
+            {
+                return _config.GetBoolean("shelf", "replicateEntities", false);
+            }
+            set
+            {
+                _config.SetBoolean("shelf", "replicateEntities", value);
+            }
+        }
+
         /*
         // 默认值 空
         [Display(

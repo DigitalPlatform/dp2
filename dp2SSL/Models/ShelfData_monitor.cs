@@ -41,6 +41,14 @@ namespace dp2SSL
 
         static Task _monitorTask = null;
 
+        public static Task Task
+        {
+            get
+            {
+                return _monitorTask;
+            }
+        }
+
         // OK/Bad
         public static string LibraryNetworkCondition
         {
@@ -65,6 +73,8 @@ namespace dp2SSL
         static AutoResetEvent _eventMonitor = new AutoResetEvent(false);
 
         static int _replicatePatronError = 0;
+
+        static int _replicateEntityError = 0;
 
         // 激活 Monitor 任务
         public static void ActivateMonitor()
@@ -202,6 +212,44 @@ namespace dp2SSL
                                 }
                             }
                         }
+
+                        // 下载册记录和书目摘要到本地缓存
+                        bool downloaded = WpfClientInfo.Config.GetBoolean("entityReplication", "downloaded", false);
+                        // testing 
+                        // downloaded = false;
+
+                        if (App.ReplicateEntities == true
+                        && downloaded == false
+                        && _replicateEntityError == 0)
+                        {
+                            List<string> unprocessed = new List<string>();
+                            string unprocessed_list = WpfClientInfo.Config.Get("entityReplication", "unprocessed", null);
+                            List<string> input_dbnames = null;
+                            if (string.IsNullOrEmpty(unprocessed_list) == false)
+                                input_dbnames = StringUtil.SplitList(unprocessed_list);
+
+                            var repl_result = await EntityReplication.DownloadAllEntityRecordAsync(
+                                input_dbnames,
+                                unprocessed,
+                                (text) =>
+                                {
+                                    WpfClientInfo.WriteInfoLog(text);
+                                    PageShelf.TrySetMessage(null, text);
+                                },
+                                token);
+                            if (repl_result.Value == -1)
+                            {
+                                // TODO: 判断通讯出错的错误码。如果是通讯出错，则稍后需要重试下载
+                                _replicateEntityError++;
+                                WpfClientInfo.Config.Set("entityReplication", "unprocessed", StringUtil.MakePathList(unprocessed));
+                            }
+                            else
+                            {
+                                WpfClientInfo.Config.SetBoolean("entityReplication", "downloaded", true);
+                                WpfClientInfo.Config.Set("entityReplication", "unprocessed", null);
+                            }
+                        }
+
                     }
                     _monitorTask = null;
 
@@ -222,7 +270,14 @@ namespace dp2SSL
             },
 token,
 TaskCreationOptions.LongRunning,
-TaskScheduler.Default);
+TaskScheduler.Default).Unwrap();
+        }
+
+        public static void RestartReplicateEntities()
+        {
+            WpfClientInfo.Config.SetBoolean("entityReplication", "downloaded", false);
+            WpfClientInfo.Config.Set("entityReplication", "unprocessed", null);
+            App.ReplicateEntities = true;
         }
 
         // 初始化阶段探测本地读者缓存数据是否存在，如果不存在则设法启动首次读者同步

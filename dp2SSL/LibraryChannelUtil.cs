@@ -13,12 +13,12 @@ using Microsoft.Data.Sqlite;
 using Newtonsoft.Json;
 
 using DigitalPlatform;
+using DigitalPlatform.IO;
 using DigitalPlatform.WPF;
 using DigitalPlatform.Xml;
+using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
-using DigitalPlatform.IO;
-using DigitalPlatform.Text;
 
 namespace dp2SSL
 {
@@ -343,7 +343,7 @@ namespace dp2SSL
             }
         }
 
-        static async Task AddOrUpdateAsync(BiblioCacheContext context,
+        public static async Task AddOrUpdateAsync(BiblioCacheContext context,
     BiblioSummaryItem item)
         {
             try
@@ -478,7 +478,7 @@ namespace dp2SSL
             }
         }
 
-        static async Task AddOrUpdateAsync(BiblioCacheContext context,
+        public static async Task AddOrUpdateAsync(BiblioCacheContext context,
             EntityItem item)
         {
             // 调整 PII 字段，尽量规整为 OI.PII 形态
@@ -1790,6 +1790,37 @@ out string strError);
                 App.CurrentApp.ReturnChannel(channel);
 
                 WpfClientInfo.WriteInfoLog($"结束 DownloadTagsInfo()");
+            }
+        }
+
+        // 清除前端缓存的所有册记录
+        public static void ClearCachedEntities()
+        {
+            using (BiblioCacheContext context = new BiblioCacheContext())
+            {
+                if (_cacheDbCreated == false)
+                {
+                    context.Database.EnsureCreated();
+                    _cacheDbCreated = true;
+                }
+
+                {
+                    var list = context.Entities.ToList();
+                    if (list.Count > 0)
+                    {
+                        context.Entities.RemoveRange(list);
+                        context.SaveChanges();
+                    }
+                }
+
+                {
+                    var list = context.BiblioSummaries.ToList();
+                    if (list.Count > 0)
+                    {
+                        context.BiblioSummaries.RemoveRange(list);
+                        context.SaveChanges();
+                    }
+                }
             }
         }
 

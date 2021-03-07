@@ -36,7 +36,7 @@ namespace dp2SSL.Models
 
         // 整体获得全部读者记录以前，预备获得同步计划信息
         // 也就是第一次同步开始的位置信息
-        static ReplicationPlan GetReplicationPlan(LibraryChannel channel)
+        public static ReplicationPlan GetReplicationPlan(LibraryChannel channel)
         {
             // 开始处理时的日期
             string strEndDate = DateTimeUtil.DateTimeToString8(DateTime.Now);
@@ -450,7 +450,7 @@ out string strError);
                         AutoCache = false,
                         CacheDir = "",
                         LogType = logType,
-                        Filter = "setReaderInfo,borrow,return,setSystemParameter,writeRes", // 借书还书时候都会修改读者记录
+                        Filter = "setReaderInfo,borrow,return,setSystemParameter,writeRes,setEntity", // 借书还书时候都会修改读者记录
                         // ServerVersion = serverVersion
                     };
 
@@ -538,6 +538,15 @@ out string strError);
                             else if (strOperation == "writeRes")
                             {
                                 var trace_result = TraceWriteRes(
+                                    dom,
+                                    info);
+                                if (trace_result.Value == -1)
+                                    WpfClientInfo.WriteErrorLog("同步 " + item.Date + " " + item.Index.ToString() + " 时出错: " + trace_result.ErrorInfo);
+                            }
+                            else if (strOperation == "setEntity"
+                                && App.ReplicateEntities)
+                            {
+                                var trace_result = await EntityReplication.TraceSetEntity(
                                     dom,
                                     info);
                                 if (trace_result.Value == -1)
@@ -1033,5 +1042,7 @@ ProcessInfo info)
                 };
             }
         }
+
+
     }
 }
