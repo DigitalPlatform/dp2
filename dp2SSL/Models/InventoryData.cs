@@ -898,7 +898,7 @@ TaskScheduler.Default);
             }
         }
 
-        static string GetInstitution(string location)
+        public static string GetInstitution(string location)
         {
             string oi = "";
             {

@@ -41,10 +41,12 @@
             <Menu x:Name="menu"  Width="Auto" Height="Auto" FontSize="14">
                 <MenuItem Header="_工具">
                     <MenuItem x:Name="openTouchKeyboard" Header="打开触摸键盘" HorizontalAlignment="Left" Width="Auto" Click="openTouchKeyboard_Click"/>
+                    <MenuItem x:Name="clearCachedEntities" Header="清除本地缓存的全部册记录" HorizontalAlignment="Left" Width="Auto" Click="clearCachedEntities_Click"/>
                 </MenuItem>
                 <MenuItem Header="_维护">
                     <MenuItem x:Name="clearTagCache" Header="清除 RFID 标签缓存" HorizontalAlignment="Left" Width="Auto" Click="clearTagCache_Click"/>
                     <MenuItem x:Name="redoReplicatePatron" Header="重做全量同步读者记录" HorizontalAlignment="Left" Width="Auto" Click="redoReplicatePatron_Click"/>
+                    <MenuItem x:Name="redoReplicateEntity" Header="重做全量同步册记录和书目摘要" HorizontalAlignment="Left" Width="Auto" Click="redoReplicateEntity_Click"/>
                     <MenuItem x:Name="backupRequests" Header="备份本地动作库" HorizontalAlignment="Left" Width="Auto" Click="backupRequests_Click"/>
                     <MenuItem x:Name="restoreRequests" Header="恢复本地动作库" HorizontalAlignment="Left" Width="Auto" Click="restoreRequests_Click"/>
                 </MenuItem>

@@ -525,6 +525,7 @@
     <Compile Include="LibraryChannelUtil.cs" />
     <Compile Include="ManagerBase.cs" />
     <Compile Include="Models\BiblioCacheContext.cs" />
+    <Compile Include="Models\EntityReplication.cs" />
     <Compile Include="Models\GlobalMonitor.cs" />
     <Compile Include="Models\InventoryData.cs" />
     <Compile Include="Models\InventoryLoop.cs" />

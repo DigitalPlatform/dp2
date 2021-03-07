@@ -1162,5 +1162,17 @@ string color = "red")
             ShelfData.BookTagList.ClearTagTable(null);
             ShelfData.PatronTagList.ClearTagTable(null);
         }
+
+        private void clearCachedEntities_Click(object sender, RoutedEventArgs e)
+        {
+            LibraryChannelUtil.ClearCachedEntities();
+            App.ErrorBox("删除本地缓存的册记录", "完成", "green");
+        }
+
+        // 重做全量同步册记录和书目摘要
+        private void redoReplicateEntity_Click(object sender, RoutedEventArgs e)
+        {
+            ShelfData.RestartReplicateEntities();
+        }
     }
 }
