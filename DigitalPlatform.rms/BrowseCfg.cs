@@ -118,7 +118,7 @@ namespace DigitalPlatform.rms
                 // XmlNodeList nodeListXpath = this._dom.SelectNodes(@"//xpath");
                 XmlNodeList nodeListCol = this._dom.DocumentElement.SelectNodes("col");
 
-                CREATE_CACHE:
+            CREATE_CACHE:
                 // 创建Cache
                 if (m_exprCache.Count == 0 && nodeListCol.Count > 0)
                 {
@@ -150,12 +150,18 @@ namespace DigitalPlatform.rms
                             }
 #endif
 
+                            try
+                            {
+                                XPathExpression expr = nav.Compile(strXpath);
+                                if (nsmgr != null)
+                                    expr.SetContext(nsmgr);
 
-                            XPathExpression expr = nav.Compile(strXpath);
-                            if (nsmgr != null)
-                                expr.SetContext(nsmgr);
-
-                            cache_item.expr = expr;
+                                cache_item.expr = expr;
+                            }
+                            catch (Exception ex)
+                            {
+                                throw new Exception($"{ex.Message}。XPath='{strXpath}'", ex);
+                            }
                         }
 
                         // 把 convert 参数也缓存起来

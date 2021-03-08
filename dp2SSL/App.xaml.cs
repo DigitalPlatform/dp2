@@ -599,7 +599,12 @@ namespace dp2SSL
             {
                 var result = await TinyServer.ConnectAsync(messageServerUrl, messageUserName, messagePassword, "");
                 if (result.Value == -1)
-                    WpfClientInfo.WriteErrorLog($"连接消息服务器失败: {result.ErrorInfo}。url={messageServerUrl},userName={messageUserName},errorCode={result.ErrorCode}");
+                {
+                    _ = GlobalMonitor.CompactLog.Add("连接消息服务器失败: {0}。url={1},userName={2},errorCode={3}",
+                        new object[] { result.ErrorInfo, messageServerUrl, messageUserName, result.ErrorCode });
+
+                    // WpfClientInfo.WriteErrorLog($"连接消息服务器失败: {result.ErrorInfo}。url={messageServerUrl},userName={messageUserName},errorCode={result.ErrorCode}");
+                }
                 else
                 {
                     /*

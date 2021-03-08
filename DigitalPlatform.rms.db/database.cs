@@ -2027,13 +2027,20 @@ namespace DigitalPlatform.rms
                 if (expr == null)
                 {
                     // 创建Cache
-                    expr = nav.Compile(info.XPath);
-                    if (nsmgr != null)
-                        expr.SetContext(nsmgr);
-
-                    lock (xpath_table)
+                    try
                     {
-                        xpath_table[info.XPath] = expr;
+                        expr = nav.Compile(info.XPath);
+                        if (nsmgr != null)
+                            expr.SetContext(nsmgr);
+
+                        lock (xpath_table)
+                        {
+                            xpath_table[info.XPath] = expr;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new Exception($"{ex.Message}。XPath='{info.XPath}'", ex);
                     }
                 }
 
