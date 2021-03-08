@@ -12,6 +12,7 @@ using DigitalPlatform.WPF;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.Core;
 
 namespace dp2SSL.Models
 {
@@ -165,6 +166,12 @@ namespace dp2SSL.Models
 
                             _lastUpdateTime = DateTime.Now;
                         }
+
+                        // 每隔一段时间写入紧凑日志一次
+                        if (DateTime.Now - _lastCompactTime > _compactLength)
+                        {
+                            FlushCompactLog();
+                        }
                     }
                     _monitorTask = null;
                 }
@@ -179,6 +186,7 @@ namespace dp2SSL.Models
                 }
                 finally
                 {
+                    FlushCompactLog();
                     WpfClientInfo.WriteInfoLog("全局监控专用线程结束");
                 }
             },
@@ -186,6 +194,28 @@ token,
 TaskCreationOptions.LongRunning,
 TaskScheduler.Default);
         }
+
+        static void FlushCompactLog()
+        {
+            _compactLog?.WriteToLog((text) =>
+            {
+                WpfClientInfo.WriteErrorLog(text);
+            });
+            _lastCompactTime = DateTime.Now;
+        }
+
+        // 紧凑日志
+        static CompactLog _compactLog = new CompactLog();
+        public static CompactLog CompactLog
+        {
+            get
+            {
+                return _compactLog;
+            }
+        }
+
+        static DateTime _lastCompactTime;
+        static TimeSpan _compactLength = TimeSpan.FromHours(8);
 
         // https://mattyrowan.com/2008/01/01/parse-timespan-string/
         public static TimeSpan ParseTimeSpan(string s)
@@ -313,7 +343,7 @@ TaskScheduler.Default);
                 //    App.CurrentApp.Speak("不要忘记清除读者信息");
             }
 
-            if (isBorrow 
+            if (isBorrow
                 && PageMenu.PageBorrow != null
                 && PageMenu.PageBorrow.IsVerticalCard())
             {

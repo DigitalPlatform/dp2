@@ -27,6 +27,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.MessageClient;
 using DigitalPlatform.SimpleMessageQueue;
 using DigitalPlatform.RFID;
+using dp2SSL.Models;
 
 namespace dp2SSL
 {
@@ -131,8 +132,9 @@ namespace dp2SSL
                             }
                             catch (Exception ex)
                             {
-                                // TODO: 要避免错误日志太多把错误日志文件塞满
-                                WpfClientInfo.WriteErrorLog($"发送消息过程中出现异常(不会终止循环): {ExceptionUtil.GetDebugText(ex)}");
+                                // WpfClientInfo.WriteErrorLog($"发送消息过程中出现异常(不会终止循环): {ExceptionUtil.GetDebugText(ex)}");
+                                // 避免错误日志太多把错误日志文件塞满
+                                _ = GlobalMonitor.CompactLog.Add("发送消息过程中出现异常(不会终止循环): {0}", new object[] { ExceptionUtil.GetDebugText(ex) });
                                 break;
                             }
                         }

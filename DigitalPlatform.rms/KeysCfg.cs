@@ -634,11 +634,18 @@ namespace DigitalPlatform.rms
                     }
 #endif
 
-                    XPathExpression expr = nav.Compile(strXPath);
-                    if (nsmgr != null)
-                        expr.SetContext(nsmgr);
+                    try
+                    {
+                        XPathExpression expr = nav.Compile(strXPath);
+                        if (nsmgr != null)
+                            expr.SetContext(nsmgr);
 
-                    m_exprCache[nodeXPath] = expr;
+                        m_exprCache[nodeXPath] = expr;
+                    }
+                    catch(Exception ex)
+                    {
+                        throw new Exception($"{ex.Message}。XPath='{strXPath}'", ex);
+                    }
                 }
             }
 

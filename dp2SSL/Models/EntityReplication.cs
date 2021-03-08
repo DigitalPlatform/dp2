@@ -756,6 +756,7 @@ PatronReplication.ProcessInfo info)
 strRecPath,
 strOldRecord);
                 }
+                /*
                 else
                 {
                     return new NormalResult
@@ -763,7 +764,8 @@ strOldRecord);
                         Value = -1,
                         ErrorInfo = "无法识别的<action>内容 '" + strAction + "'"
                     };
-                }
+                }*/
+                return new NormalResult();
             }
             catch (Exception ex)
             {
