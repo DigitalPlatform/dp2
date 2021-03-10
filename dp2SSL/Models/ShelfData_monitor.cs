@@ -141,6 +141,7 @@ namespace dp2SSL
                         // 提醒关门
                         WarningCloseDoor();
 
+                        // TODO: 断网模式下是否需要语音警告，有全量同步操作被延迟
                         if (ShelfData.LibraryNetworkCondition == "OK")
                         {
 
@@ -155,6 +156,7 @@ namespace dp2SSL
                                 {
                                     // SaveStartDate("");
 
+                                    App.CurrentApp.SpeakSequence("开始下载全部读者记录到本地缓存");
                                     var repl_result = await PatronReplication.DownloadAllPatronRecordAsync(
                                         (text) =>
                                         {
@@ -166,9 +168,15 @@ namespace dp2SSL
                                     {
                                         // TODO: 判断通讯出错的错误码。如果是通讯出错，则稍后需要重试下载
                                         _replicatePatronError++;
+
+                                        App.CurrentApp.SpeakSequence($"下载全部读者记录到本地缓存出错: {repl_result.ErrorInfo}");
                                     }
                                     else
+                                    {
                                         SaveStartDate(repl_result.StartDate);
+
+                                        App.CurrentApp.SpeakSequence("下载全部读者记录到本地缓存完成");
+                                    }
 
                                     // 立刻允许接着做一次零星同步
                                     ActivateMonitor();
@@ -231,6 +239,7 @@ namespace dp2SSL
                                 if (string.IsNullOrEmpty(unprocessed_list) == false)
                                     input_dbnames = StringUtil.SplitList(unprocessed_list);
 
+                                App.CurrentApp.SpeakSequence("开始下载全部册记录到本地缓存");
                                 var repl_result = await EntityReplication.DownloadAllEntityRecordAsync(
                                     input_dbnames,
                                     unprocessed,
@@ -238,6 +247,7 @@ namespace dp2SSL
                                     {
                                         WpfClientInfo.WriteInfoLog(text);
                                         PageShelf.TrySetMessage(null, text);
+                                        App.CurrentApp.SpeakSequence(text);
                                     },
                                     token);
                                 if (repl_result.Value == -1)
@@ -245,11 +255,15 @@ namespace dp2SSL
                                     // TODO: 判断通讯出错的错误码。如果是通讯出错，则稍后需要重试下载
                                     _replicateEntityError++;
                                     WpfClientInfo.Config.Set("entityReplication", "unprocessed", StringUtil.MakePathList(unprocessed));
+                                    
+                                    App.CurrentApp.SpeakSequence($"下载全部册记录到本地缓存出错: {repl_result.ErrorInfo}");
                                 }
                                 else
                                 {
                                     WpfClientInfo.Config.SetBoolean("entityReplication", "downloaded", true);
                                     WpfClientInfo.Config.Set("entityReplication", "unprocessed", null);
+                                    
+                                    App.CurrentApp.SpeakSequence("下载全部册记录到本地缓存完成");
                                 }
                             }
                         }

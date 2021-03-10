@@ -99,6 +99,21 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
+        /*
+        static bool IsManaged(
+            string strLibraryCode,
+            string strAccountLibraryCodeList)
+        {
+            if (SessionInfo.IsGlobalUser(strAccountLibraryCodeList) == true)
+                return true;
+
+            if (StringUtil.IsInList(strLibraryCode, strAccountLibraryCodeList) == true)
+                return true;
+
+            return false;
+        }
+        */
+
         // return:
         //      -1  出错
         //      0   没有找到指定的参数

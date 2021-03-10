@@ -1190,11 +1190,16 @@ namespace dp2SSL
             {
                 XmlDocument readerdom = new XmlDocument();
                 readerdom.LoadXml(current_patron.Xml);
+
+                bool check_overdue = true;
+                if (ShelfData.LibraryNetworkCondition != "OK")
+                    check_overdue = ShelfData.OfflineCheckOverdue() == "true";
                 // return:
                 //      -1  检查过程出错
                 //      0   状态不正常
                 //      1   状态正常
                 int nRet = LibraryServerUtil.CheckPatronState(readerdom,
+                    check_overdue ? "" : "skip_check_overdue",
                     out string strError);
                 if (nRet != 1)
                 {

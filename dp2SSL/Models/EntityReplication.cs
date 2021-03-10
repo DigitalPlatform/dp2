@@ -24,246 +24,9 @@ namespace dp2SSL.Models
     {
         public delegate void Delegate_writeLog(string text);
 
-        static int _inDownloadingPatron = 0;
+        // static int _inDownloadingPatron = 0;
 
-#if NO
-        // 第一阶段：获得全部册记录，进入本地数据库
-        // result.Value
-        //      -1  出错
-        //      >=0 实际获得的读者记录条数
-        public static async Task<ReplicationPlan> DownloadAllEntityRecordAsync(
-            Delegate_writeLog writeLog,
-            CancellationToken token)
-        {
-            _inDownloadingPatron++;
-
-            if (_inDownloadingPatron > 1)
-            {
-                _inDownloadingPatron--;
-                return new ReplicationPlan
-                {
-                    Value = -1,
-                    ErrorCode = "running",
-                    ErrorInfo = "前一次的“下载全部册记录到本地缓存”过程还在进行中，本次触发被放弃"
-                };
-            }
-
-            writeLog?.Invoke($"开始下载全部册记录到本地缓存");
-            LibraryChannel channel = App.CurrentApp.GetChannel();
-            var old_timeout = channel.Timeout;
-            channel.Timeout = TimeSpan.FromMinutes(5);  // 设置 5 分钟。因为读者记录检索需要一定时间
-            try
-            {
-
-                ReplicationPlan plan = PatronReplication.GetReplicationPlan(channel);
-
-                writeLog?.Invoke($"GetReplicationPlan() return {plan.ToString()}");
-
-                if (plan.Value == -1)
-                    return plan;
-
-                int nRedoCount = 0;
-            REDO:
-                if (token.IsCancellationRequested)
-                    return new ReplicationPlan
-                    {
-                        Value = -1,
-                        ErrorInfo = "用户中断"
-                    };
-                // 检索全部实体库记录
-                long lRet = channel.SearchItem(null,  // stop,
-"<all>",
-"",
--1,
-"__id",
-"left",
-"zh",
-null,   // strResultSetName
-"",     // strSearchStyle
-"", // strOutputStyle
-out string strError);
-                if (lRet == -1)
-                {
-                    writeLog?.Invoke($"SearchItem() 出错, strError={strError}, channel.ErrorCode={channel.ErrorCode}");
-
-                    // 一次重试机会
-                    if (lRet == -1
-                        && (channel.ErrorCode == ErrorCode.RequestCanceled || channel.ErrorCode == ErrorCode.RequestError)
-                        && nRedoCount < 2)
-                    {
-                        nRedoCount++;
-                        goto REDO;
-                    }
-
-                    return new ReplicationPlan
-                    {
-                        Value = -1,
-                        ErrorInfo = strError,
-                        ErrorCode = channel.ErrorCode.ToString()
-                    };
-                }
-
-                long hitcount = lRet;
-
-                writeLog?.Invoke($"共检索命中册记录 {hitcount} 条");
-
-                // 把超时时间改短一点
-                channel.Timeout = TimeSpan.FromSeconds(20);
-
-                DateTime search_time = DateTime.Now;
-
-                Hashtable pii_table = new Hashtable();
-                int skip_count = 0;
-                int error_count = 0;
-
-                string strStyle = "id,cols,format:@coldef:*/barcode|*/location|*/uid";
-
-                // 获取和存储记录
-                ResultSetLoader loader = new ResultSetLoader(channel,
-    null,
-    null,
-    strStyle,   // $"id,xml,timestamp",
-    "zh");
-                using (BiblioCacheContext context = new BiblioCacheContext())
-                {
-                    context.Database.EnsureCreated();
-
-                    // 删除 Entities 里面的已有记录
-                    context.Entities.RemoveRange(context.Entities.ToList());
-                    await context.SaveChangesAsync(token);
-
-                    // loader.Prompt += this.Loader_Prompt;
-                    if (hitcount > 0)
-                    {
-                        int i = 0;
-                        foreach (DigitalPlatform.LibraryClient.localhost.Record record in loader)
-                        {
-                            if (token.IsCancellationRequested)
-                                return new ReplicationPlan
-                                {
-                                    Value = -1,
-                                    ErrorInfo = "用户中断"
-                                };
-
-                            if (record.Cols != null)
-                            {
-                                string barcode = "";
-                                if (record.Cols.Length > 0)
-                                    barcode = record.Cols[0];
-                                string location = "";
-                                if (record.Cols.Length > 1)
-                                    location = record.Cols[1];
-
-                                // 2021/1/31
-                                // 推算出 OI
-                                /*
-                                string oi = "";
-                                {
-                                    location = StringUtil.GetPureLocation(location);
-                                    var ret = ShelfData.GetOwnerInstitution(location, out string isil, out string alternative);
-                                    if (ret == true)
-                                    {
-                                        if (string.IsNullOrEmpty(isil) == false)
-                                            oi = isil;
-                                        else if (string.IsNullOrEmpty(alternative) == false)
-                                            oi = alternative;
-                                    }
-                                }
-                                */
-                                location = StringUtil.GetPureLocation(location);
-                                string oi = "";
-                                if (oi_table.ContainsKey(location))
-                                    oi = (string)oi_table[location];
-                                else
-                                {
-                                    oi = GetInstitution(location);
-                                    oi_table[location] = oi;
-                                }
-
-                                string uid = "";
-                                if (record.Cols.Length > 2)
-                                    uid = record.Cols[2];
-                                if (string.IsNullOrEmpty(barcode) == false
-                                    && string.IsNullOrEmpty(uid) == false)
-                                    uid_table[uid] = oi + "." + barcode;
-                            }
-
-
-                            PatronItem item = new PatronItem();
-
-                            // result.Value:
-                            //      -1  出错
-                            //      0   需要跳过这条读者记录
-                            //      1   成功
-                            var result = Set(item, record, search_time);
-                            if (result.Value == -1 || result.Value == 0)
-                            {
-                                // TODO: 是否汇总报错信息？
-
-                                if (result.Value == -1)
-                                {
-                                    writeLog?.Invoke($"Set() ({item.RecPath}) 出错: {result.ErrorInfo}");
-                                    error_count++;
-                                }
-                                if (result.Value == 0)
-                                    skip_count++;
-                                continue;
-                            }
-
-                            // 
-                            if (pii_table.ContainsKey(result.PII))
-                            {
-                                string recpath = (string)pii_table[result.PII];
-                                writeLog?.Invoke($"发现读者记录 {item.RecPath} 的 PII '{result.PII}' 和 {recpath} 的 PII 重复了。跳过它");
-                                continue;
-                            }
-
-                            pii_table[result.PII] = item.RecPath;
-
-                            // TODO: PII 应该是包含 OI 的严格形态
-                            context.Patrons.Add(item);
-
-                            if ((i % 10) == 0)
-                                await context.SaveChangesAsync(token);
-
-                            i++;
-                        }
-
-                        await context.SaveChangesAsync(token);
-                    }
-                }
-
-                writeLog?.Invoke($"plan.StartDate='{plan.StartDate}'。skip_count={skip_count}, error_count={error_count}。返回");
-
-                return new ReplicationPlan
-                {
-                    Value = (int)hitcount,
-                    StartDate = plan.StartDate
-                };
-            }
-            catch (Exception ex)
-            {
-                // 2020/9/26
-                writeLog?.Invoke($"DownloadAllPatronRecord() 出现异常：{ExceptionUtil.GetDebugText(ex)}");
-
-                return new ReplicationPlan
-                {
-                    Value = -1,
-                    ErrorInfo = $"DownloadAllPatronRecord() 出现异常：{ex.Message}"
-                };
-            }
-            finally
-            {
-                channel.Timeout = old_timeout;
-                App.CurrentApp.ReturnChannel(channel);
-
-                writeLog?.Invoke($"结束下载全部读者记录到本地缓存");
-
-                _inDownloadingPatron--;
-            }
-        }
-#endif
-
+        // TODO: 可以考虑每隔一定时间间隔语音提示一下进度
         public static async Task<NormalResult> DownloadAllEntityRecordAsync(
     List<string> item_dbnames,
     List<string> unprocessed_dbnames,
@@ -288,12 +51,15 @@ out string strError);
     out string strValue,
     out string strError);
                     if (lRet == -1)
+                    {
+                        writeLog?.Invoke($"下载全部册记录到本地缓存出错: {strError}");
                         return new NormalResult
                         {
                             Value = -1,
                             ErrorInfo = strError,
                             ErrorCode = channel.ErrorCode.ToString()
                         };
+                    }
                     item_dbnames = StringUtil.SplitList(strValue);
                     StringUtil.RemoveBlank(ref item_dbnames);
                 }
@@ -334,22 +100,30 @@ out string strError);
                             if (string.IsNullOrEmpty(offset) == false)
                             {
                                 if (long.TryParse(offset, out start) == false)
+                                {
+                                    string error = $"条目 '{name}' 格式不正确。应为 数据库名:偏移量 形态";
+                                    writeLog?.Invoke($"下载全部册记录到本地缓存出错: {error}");
                                     return new NormalResult
                                     {
                                         Value = -1,
-                                        ErrorInfo = $"条目 '{name}' 格式不正确。应为 数据库名:偏移量 形态"
+                                        ErrorInfo = error
                                     };
+                                }
                             }
                         }
 
                         int nRedoCount = 0;
                     REDO:
                         if (token.IsCancellationRequested)
+                        {
+                            string error = "用户中断";
+                            writeLog?.Invoke($"下载全部册记录到本地缓存出错: {error}");
                             return new NormalResult
                             {
                                 Value = -1,
-                                ErrorInfo = "用户中断"
+                                ErrorInfo = error
                             };
+                        }
                         // 检索全部读者库记录
                         long lRet = channel.SearchItem(null,
         dbName, // "<all>",
@@ -375,6 +149,7 @@ out string strError);
                                 goto REDO;
                             }
 
+                            writeLog?.Invoke($"下载全部册记录到本地缓存出错: {strError}");
                             return new NormalResult
                             {
                                 Value = -1,
@@ -394,6 +169,7 @@ out string strError);
 
                         int skip_count = 0;
                         int error_count = 0;
+                        int succeed_count = 0;
 
                         if (hitcount > 0)
                         {
@@ -420,10 +196,12 @@ out string strError);
                                         unprocessed_dbnames.Insert(index, dbName + ":" + i);
                                     }
 
+                                    string error = "用户中断";
+                                    writeLog?.Invoke($"下载全部册记录到本地缓存出错: {error}");
                                     return new NormalResult
                                     {
                                         Value = -1,
-                                        ErrorInfo = "用户中断"
+                                        ErrorInfo = error
                                     };
                                 }
 
@@ -438,17 +216,32 @@ out string strError);
                                 }
                                 catch (Exception ex)
                                 {
-                                    writeLog?.Invoke($"册记录 {item_recpath} 的 XML 装入 DOM 时出错: {ex.Message}");
+                                    error_count++;
+                                    writeLog?.Invoke($"警告: 册记录 {item_recpath} 的 XML 装入 DOM 时出错: {ex.Message}");
                                     continue;
                                 }
 
                                 string barcode = DomUtil.GetElementText(itemdom.DocumentElement, "barcode");
                                 if (string.IsNullOrEmpty(barcode))
+                                {
+                                    skip_count++;
                                     continue;
+                                }
 
                                 string location = DomUtil.GetElementText(itemdom.DocumentElement, "location");
 
                                 location = StringUtil.GetPureLocation(location);
+
+                                // 2021/3/10
+                                // 用馆藏地筛选一下，只下载当前用户可以管辖的分馆的记录
+                                string currentLibraryCodeList = channel.LibraryCodeList;    // App.CurrentUserLibraryCodeList;
+                                string libraryCode = dp2StringUtil.GetLibraryCode(location);
+                                if (IsManaged(libraryCode, currentLibraryCodeList) == false)
+                                {
+                                    skip_count++;
+                                    continue;
+                                }
+
                                 string oi = "";
                                 if (oi_table.ContainsKey(location))
                                     oi = (string)oi_table[location];
@@ -481,7 +274,7 @@ out string strError);
     item_recpath);
 
                                 i++;
-
+                                succeed_count++;
                                 /*
                                 if ((i % 100) == 0)
                                 {
@@ -491,7 +284,8 @@ out string strError);
                             }
                         }
 
-                        writeLog?.Invoke($"dbName='{dbName}'。skip_count={skip_count}, error_count={error_count}");
+                        // writeLog?.Invoke($"dbName='{dbName}'。skip_count={skip_count}, error_count={error_count}");
+                        writeLog?.Invoke($"实体库 '{dbName}' 下载完成 {succeed_count} 条记录");
 
                         {
                             int index = IndexOf(unprocessed_dbnames, dbName);
@@ -538,6 +332,26 @@ out string strError);
 
                 return -1;
             }
+        }
+
+        static bool IsManaged(
+    string strLibraryCode,
+    string strAccountLibraryCodeList)
+        {
+            if (IsGlobalUser(strAccountLibraryCodeList) == true)
+                return true;
+
+            if (StringUtil.IsInList(strLibraryCode, strAccountLibraryCodeList) == true)
+                return true;
+
+            return false;
+        }
+
+        public static bool IsGlobalUser(string strLibraryCodeList)
+        {
+            if (strLibraryCodeList == "*" || string.IsNullOrEmpty(strLibraryCodeList) == true)
+                return true;
+            return false;
         }
 
         // 从 dp2library 服务器获取书目摘要
@@ -802,6 +616,15 @@ strOldRecord);
             string location = DomUtil.GetElementText(itemdom.DocumentElement, "location");
 
             location = StringUtil.GetPureLocation(location);
+
+            // 2021/3/10
+            // 用馆藏地筛选一下，只下载当前用户可以管辖的分馆的记录
+            string currentLibraryCodeList = App.CurrentUserLibraryCodeList;
+            string libraryCode = dp2StringUtil.GetLibraryCode(location);
+            if (IsManaged(libraryCode, currentLibraryCodeList) == false)
+                return new NormalResult();
+
+
             string oi = InventoryData.GetInstitution(location);
 
             var item = new EntityItem

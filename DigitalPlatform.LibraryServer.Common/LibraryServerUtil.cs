@@ -16,11 +16,14 @@ namespace DigitalPlatform.LibraryServer
         // 本地文件目录的虚拟前缀字符串
         public static string LOCAL_PREFIX = "!";
 
+        // parameters:
+        //      strStyle    skip_check_overdue 跳过检查超期
         // return:
         //      -1  检查过程出错
         //      0   状态不正常
         //      1   状态正常
         public static int CheckPatronState(XmlDocument readerdom,
+            string strStyle,
             out string strError)
         {
             // 检查借阅证是否超期，是否有挂失等状态
@@ -36,30 +39,33 @@ namespace DigitalPlatform.LibraryServer
             if (nRet != 0)
                 return 0;
 
-            // TODO: 长期断网运行，是否需要跳过检查 overdue 元素？
-            // 检查是否已经有记载了的<overdue>字段
-            XmlNodeList nodes = readerdom.DocumentElement.SelectNodes("overdues/overdue");
-            if (nodes.Count > 0)
+            // 注: 长期断网运行，要跳过检查 overdue 元素
+            if (StringUtil.IsInList("skip_check_overdue", strStyle) == false)
             {
-                // text-level: 用户提示
-                strError = $"该读者当前有 {nodes.Count} 个违约记录尚未处理";
-                return 0;
-            }
-
-            {
-                // 检查当前是否有潜在的超期册
-                // return:
-                //      -1  error
-                //      0   没有超期册
-                //      1   有超期册
-                nRet = CheckOverdue(
-                    readerdom,
-                    out List<string> overdue_infos,
-                    out strError);
-                if (nRet == -1)
-                    return -1;
-                if (nRet == 1)
+                // 检查是否已经有记载了的<overdue>字段
+                XmlNodeList nodes = readerdom.DocumentElement.SelectNodes("overdues/overdue");
+                if (nodes.Count > 0)
+                {
+                    // text-level: 用户提示
+                    strError = $"该读者当前有 {nodes.Count} 个违约记录尚未处理";
                     return 0;
+                }
+
+                {
+                    // 检查当前是否有潜在的超期册
+                    // return:
+                    //      -1  error
+                    //      0   没有超期册
+                    //      1   有超期册
+                    nRet = CheckOverdue(
+                        readerdom,
+                        out List<string> overdue_infos,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+                    if (nRet == 1)
+                        return 0;
+                }
             }
 
             return 1;

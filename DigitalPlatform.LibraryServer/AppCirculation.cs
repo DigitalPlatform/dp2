@@ -641,7 +641,7 @@ namespace DigitalPlatform.LibraryServer
         public LibraryServerResult Borrow(
             SessionInfo sessioninfo,
             bool bRenew,
-            string strReaderBarcode,
+            string strReaderBarcodeParam,
             string strItemBarcodeParam,
             string strConfirmItemRecPath,
             bool bForce,
@@ -685,6 +685,8 @@ namespace DigitalPlatform.LibraryServer
             }
             */
             ParseOI(strItemBarcodeParam, out string strItemBarcode, out string strOwnerInstitution);
+            // 2021/3/9
+            ParseOI(strReaderBarcodeParam, out string strReaderBarcode, out string strPatronOI);
 
             List<string> time_lines = new List<string>();
             DateTime start_time = DateTime.Now;
@@ -874,6 +876,7 @@ namespace DigitalPlatform.LibraryServer
                 time_lines,
                 true,
                 ref strReaderBarcode,
+                strPatronOI,
                 ref strIdcardNumber,
                 ref strLibraryCode,
                 out bReaderDbInCirculation,
@@ -3326,7 +3329,7 @@ start_time_1,
                     out string alternative);
                 if (ret == false)
                 {
-                    strError = $"library.xml 的 rfid 配置参数中没有找到和馆代码 '{strLibraryCode}' 关联的所属机构代码";
+                    strError = $"(notfound)library.xml 的 rfid 配置参数中没有找到和馆代码 '{strLibraryCode}' 关联的所属机构代码";
                     return 0;
                 }
 
@@ -3413,7 +3416,7 @@ start_time_1,
                     out string alternative);
                 if (ret == false)
                 {
-                    strError = $"library.xml 的 rfid 配置参数中没有找到和馆藏地 '{strLocation}' 关联的所属机构代码";
+                    strError = $"(notfound)library.xml 的 rfid 配置参数中没有找到和馆藏地 '{strLocation}' 关联的所属机构代码";
                     return 0;
                 }
 
@@ -3441,6 +3444,8 @@ start_time_1,
         }
 
         // 2021/3/4
+        // return:
+        //      如果返回 null 表示 libraryCode 相关的馆藏地没有在 library.xml 中配置对应的机构代码
         public string GetPatronOI(string libraryCode)
         {
             var rfid = this.LibraryCfgDom.DocumentElement.SelectSingleNode("rfid") as XmlElement;
@@ -3461,8 +3466,11 @@ start_time_1,
                     out string alternative);
                 if (ret == false)
                 {
+                    /*
                     string error = $"!library.xml 的 rfid 配置参数中没有找到和馆藏地 '{libraryCode + "/"}' 关联的所属机构代码";
                     return error;
+                    */
+                    return null;
                 }
 
                 if (string.IsNullOrEmpty(isil) == false)
@@ -3483,6 +3491,10 @@ start_time_1,
         public void AddPatronOI(XmlDocument patrondom,
             string libraryCode)
         {
+            // 2021/3/9
+            // 删除以前残留的 oi 元素。因为里面可能残留了 oi/@error 属性
+            DomUtil.DeleteElement(patrondom.DocumentElement, "oi");
+
             var rfid = this.LibraryCfgDom.DocumentElement.SelectSingleNode("rfid") as XmlElement;
             if (rfid == null)
             {
@@ -3504,7 +3516,7 @@ start_time_1,
                     out string alternative);
                 if (ret == false)
                 {
-                    string error = $"library.xml 的 rfid 配置参数中没有找到和馆藏地 '{libraryCode + "/"}' 关联的所属机构代码";
+                    string error = $"(notfound)library.xml 的 rfid 配置参数中没有找到和馆藏地 '{libraryCode + "/"}' 关联的所属机构代码";
                     var element = DomUtil.SetElementText(patrondom.DocumentElement, "oi", "");
                     element.SetAttribute("error", error);
                     return;
@@ -3544,6 +3556,10 @@ start_time_1,
         // 2021/3/4
         public string GetItemOI(XmlDocument itemdom)
         {
+            // 2021/3/9
+            // 删除以前残留的 oi 元素。因为里面可能残留了 oi/@error 属性
+            DomUtil.DeleteElement(itemdom.DocumentElement, "oi");
+
             var rfid = this.LibraryCfgDom.DocumentElement.SelectSingleNode("rfid") as XmlElement;
             if (rfid == null)
             {
@@ -3569,12 +3585,11 @@ start_time_1,
                     out string alternative);
                 if (ret == false)
                 {
-                    string error = $"library.xml 的 rfid 配置参数中没有找到和馆藏地 '{strLocation}' 关联的所属机构代码";
+                    string error = $"(notfound)library.xml 的 rfid 配置参数中没有找到和馆藏地 '{strLocation}' 关联的所属机构代码";
                     var element = DomUtil.SetElementText(itemdom.DocumentElement, "oi", "");
                     element.SetAttribute("error", error);
                     return error;
                 }
-
 
                 if (string.IsNullOrEmpty(isil) == false)
                 {
@@ -3602,6 +3617,10 @@ start_time_1,
         // 给册记录 XML 中添加 oi 元素
         public void AddItemOI(XmlDocument itemdom)
         {
+            // 2021/3/9
+            // 删除以前残留的 oi 元素。因为里面可能残留了 oi/@error 属性
+            DomUtil.DeleteElement(itemdom.DocumentElement, "oi");
+
             var rfid = this.LibraryCfgDom.DocumentElement.SelectSingleNode("rfid") as XmlElement;
             if (rfid == null)
             {
@@ -3627,12 +3646,11 @@ start_time_1,
                     out string alternative);
                 if (ret == false)
                 {
-                    string error = $"library.xml 的 rfid 配置参数中没有找到和馆藏地 '{strLocation}' 关联的所属机构代码";
+                    string error = $"(notfound)library.xml 的 rfid 配置参数中没有找到和馆藏地 '{strLocation}' 关联的所属机构代码";
                     var element = DomUtil.SetElementText(itemdom.DocumentElement, "oi", "");
                     element.SetAttribute("error", error);
                     return;
                 }
-
 
                 if (string.IsNullOrEmpty(isil) == false)
                     DomUtil.SetElementText(itemdom.DocumentElement, "oi", isil);
@@ -3795,12 +3813,15 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             public string Map { get; set; }
         }
 
+        // parameters:
+        //      strOwnerInstitution 所属机构。如果为 null 表示不使用这个参数。它可能为 RFID 的 OI 或者 AOI 字段
         LibraryServerResult GetReaderRecord(
             SessionInfo sessioninfo,
             string strActionName,
             List<string> time_lines,
             bool bVerifyReaderRecPath,
             ref string strReaderBarcode,    // 2015/1/4 加上 ref
+            string strOwnerInstitution,
             ref string strIdcardNumber,
             ref string strLibraryCode,
             out bool bReaderDbInCirculation,
@@ -4008,6 +4029,30 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                 {
                     strError = "读者记录路径 '" + strOutputReaderRecPath + "' 的读者库不在当前用户管辖范围内";
                     goto ERROR1;
+                }
+            }
+
+            // 检查机构代码
+            // 2021/3/9
+            if (strOwnerInstitution != null)
+            {
+                // return:
+                //      -1  出错
+                //      0   没有通过较验
+                //      1   通过了较验
+                nRet = VerifyPatronOI(
+                    strOutputReaderRecPath,
+                    strLibraryCode,
+                    strOwnerInstitution,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+                if (nRet == 0)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = strError;
+                    result.ErrorCode = ErrorCode.ReaderBarcodeNotFound;
+                    return result;
                 }
             }
 
@@ -5880,7 +5925,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
         public LibraryServerResult Return(
             SessionInfo sessioninfo,
             string strAction,
-            string strReaderBarcodeParam,
+            string strReaderBarcodeParam0,
             string strItemBarcodeParam,
             string strConfirmItemRecPath,
             bool bForce,
@@ -5923,6 +5968,8 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             }
             */
             ParseOI(strItemBarcodeParam, out string strItemBarcode, out string strOwnerInstitution);
+            // 2021/3/9
+            ParseOI(strReaderBarcodeParam0, out string strPureReaderBarcode, out string strPatronOI);
 
             string strError = "";
 
@@ -6046,7 +6093,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             string strReservationReaderBarcode = "";
             string strNotifyID = "";
 
-            string strReaderBarcode = strReaderBarcodeParam;
+            string strReaderBarcode = strPureReaderBarcode;
 
             if (strAction == "read" && string.IsNullOrEmpty(strReaderBarcode))
             {
@@ -6057,8 +6104,8 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             string strBatchNo = "";
             if (strAction == "inventory" || strAction == "transfer")
             {
-                strBatchNo = strReaderBarcodeParam; // 为避免判断发生混乱，后面统一用 strBatchNo 存储批次号
-                strReaderBarcodeParam = "";
+                strBatchNo = strPureReaderBarcode; // 为避免判断发生混乱，后面统一用 strBatchNo 存储批次号
+                strPureReaderBarcode = "";
                 strReaderBarcode = "";
             }
 
@@ -6110,14 +6157,14 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             bool bReaderLocked = false;
             bool bEntityLocked = false;
 
-            if (String.IsNullOrEmpty(strReaderBarcodeParam) == false)
+            if (String.IsNullOrEmpty(strPureReaderBarcode) == false)
             {
                 // 加读者记录锁
-                strLockReaderBarcode = strReaderBarcodeParam;
+                strLockReaderBarcode = strPureReaderBarcode;
 #if DEBUG_LOCK_READER
                 this.WriteErrorLog("Return 开始为读者加写锁 1 '" + strReaderBarcodeParam + "'");
 #endif
-                this.ReaderLocks.LockForWrite(strReaderBarcodeParam);
+                this.ReaderLocks.LockForWrite(strPureReaderBarcode);
                 bReaderLocked = true;
                 strOutputReaderBarcodeParam = strReaderBarcode;
             }
@@ -6147,6 +6194,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                 time_lines,
                 strAction != "inventory" && strAction != "transfer",
                 ref strReaderBarcode,
+                strPatronOI,
                 ref strIdcardNumber,
                 ref strLibraryCode,
                 out bReaderDbInCirculation,
@@ -6443,7 +6491,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                         List<byte[]> aTimestamp = null;
                         List<string> aItemXml = null;
 
-                        if (String.IsNullOrEmpty(strReaderBarcodeParam) == true)
+                        if (String.IsNullOrEmpty(strPureReaderBarcode) == true)
                         {
                             if (this.Statis != null)
                                 this.Statis.IncreaseEntryValue(
@@ -6788,9 +6836,9 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                         }
 
                         // 如果提供了读者证条码号，则需要核实
-                        if (String.IsNullOrEmpty(strReaderBarcodeParam) == false)
+                        if (String.IsNullOrEmpty(strPureReaderBarcode) == false)
                         {
-                            if (strOutputReaderBarcode != strReaderBarcodeParam)
+                            if (strOutputReaderBarcode != strPureReaderBarcode)
                             {
 #if NO
                             if (StringUtil.IsIdcardNumber(strReaderBarcodeParam) == true)
@@ -6808,7 +6856,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                                 // 暂时不报错，滞后验证
                                 bDelayVerifyReaderBarcode = true;
                                 // TODO: 此句有疑问
-                                strIdcardNumber = strReaderBarcodeParam;
+                                strIdcardNumber = strPureReaderBarcode;
                             }
                         }
 
@@ -6919,6 +6967,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                     time_lines,
                     strAction != "inventory" && strAction != "transfer",
                     ref strReaderBarcode,
+                    strPatronOI,
                     ref strIdcardNumber,
                     ref strLibraryCode,
                     out bReaderDbInCirculation,
@@ -7307,7 +7356,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                         {
                             if (strOutputReaderBarcode != strReaderBarcode)
                             {
-                                strError = "册记录表明，册 " + strItemBarcode + " 实际被读者 " + strOutputReaderBarcode + " 所借阅，而不是您当前指定的读者(证条码号) " + strReaderBarcodeParam + "。还书操作被放弃。";
+                                strError = "册记录表明，册 " + strItemBarcode + " 实际被读者 " + strOutputReaderBarcode + " 所借阅，而不是您当前指定的读者(证条码号) " + strPureReaderBarcode + "。还书操作被放弃。";
                                 goto ERROR1;
                             }
                         }
