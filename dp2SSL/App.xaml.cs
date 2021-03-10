@@ -1599,6 +1599,15 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
         }
 
         static string _currentUserName = "";
+        static string _currentUserLibraryCodeList = "";
+
+        public static string CurrentUserLibraryCodeList
+        {
+            get
+            {
+                return _currentUserLibraryCodeList;
+            }
+        }
 
         // public static string ServerUID = "";
 
@@ -1606,7 +1615,8 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
         {
             LibraryChannel channel = sender as LibraryChannel;
             _currentUserName = channel.UserName;
-
+            _currentUserLibraryCodeList = channel.LibraryCodeList;
+            
             // 2020/9/18
             // 检查 rights
             VerifyRights(channel.Rights);

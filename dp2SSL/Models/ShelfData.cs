@@ -997,6 +997,18 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             return results;
         }
 
+        // 断网模式下开门前检查读者是否超期
+        public static string OfflineCheckOverdue()
+        {
+            if (ShelfCfgDom == null)
+                return "true";
+            var value = ShelfCfgDom.DocumentElement.SelectSingleNode("settings/key[@name='断网模式下开门前检查读者是否超期']/@value")?.Value;
+            if (string.IsNullOrEmpty(value))
+                value = "true";
+
+            return value;
+        }
+
         // 菜单页面显示图书馆名
         public static string GetLibraryNameVisibility()
         {

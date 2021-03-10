@@ -1422,11 +1422,16 @@ Keys keyData)
                 {
                     query_words = StringUtil.SplitList(this.textBox_queryWord.Text.Replace("\r\n", "\r"), '\r');
                     StringUtil.RemoveBlank(ref query_words);
-                    if (query_words.Count == 0 && multiline == false)
+                    if (query_words.Count == 0 /*&& multiline == false*/)
                         query_words.Add("");
+                    if (multiline == false)
+                    {
+                        if (query_words.Count > 1)
+                            query_words.RemoveRange(1, query_words.Count - 1);
+                    }
                 }
 
-                if (query_words.Count > 1)
+                if (multiline/*query_words.Count > 1*/)
                 {
                     stop.SetProgressRange(0, query_words.Count);
                 }
@@ -1445,7 +1450,7 @@ Keys keyData)
                         return;
                     }
 
-                    if (query_words.Count > 1)
+                    if (multiline/*query_words.Count > 1*/)
                     {
                         stop?.SetProgressValue(word_index);
                         stop?.SetMessage($"正在检索 '{ query_word }' ({word_index + 1}/{query_words.Count})...");
@@ -1527,14 +1532,14 @@ Keys keyData)
 
                     this.m_lHitCount = lHitCount;
 
-                    if (query_words.Count <= 1)
+                    if (multiline == false/*query_words.Count <= 1*/)
                         this.label_message.Text = "检索共命中 " + lHitCount.ToString() + " 条书目记录";
                     else
                         this.label_message.Text = "检索已累积命中 " + lTotalHitCount.ToString() + " 条书目记录";
 
                     Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode($"'{query_word}' 命中 {lHitCount} 条") + "</div>");
 
-                    if (query_words.Count <= 1)
+                    if (multiline == false/*query_words.Count <= 1*/)
                     {
                         stop.SetProgressRange(0, lHitCount);
                         stop.Style = StopStyle.EnableHalfStop;
@@ -1570,7 +1575,7 @@ Keys keyData)
                             this.listView_records.EndUpdate();
                             this.m_lLoaded = e1.Start;
 
-                            if (query_words.Count <= 1)
+                            if (multiline == false/*query_words.Count <= 1*/)
                             {
                                 stop.SetMessage("正在装入浏览信息 " + (e1.Start + 1).ToString() + " - " + (e1.Start + e1.PerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
                                 stop.SetProgressValue(e1.Start);
@@ -1884,8 +1889,14 @@ Keys keyData)
                         this.ShowMessage("等待 Z39.50 检索响应 ...");
 
                         {
-                            if (query_words.Count > 1)
+                            if (multiline)
+                            {
                                 _zsearcher.PresentBatchSize = max_count;
+                                // 2021/3/9
+                                _zsearcher.ClearChannelsFetched();
+                            }
+                            else
+                                _zsearcher.PresentBatchSize = 10;   // 单行检索还是 10
 
                             NormalResult result = await _zsearcher.SearchAsync(
             Program.MainForm.UseList,   // UseCollection useList,
@@ -1965,12 +1976,20 @@ Keys keyData)
 
                 if (lTotalHitCount == 0)
                 {
-                    this.ShowMessage("未命中", "yellow", true);
+                    if (query_words.Count == 0)
+                        this.ShowMessage("没有检索词参与检索", "yellow", true);
+                    else
+                        this.ShowMessage("未命中", "yellow", true);
                     bDisplayClickableError = true;
                 }
 
                 if (lTotalHitCount == 0)
-                    this.label_message.Text = "未命中";
+                {
+                    if (query_words.Count == 0)
+                        this.label_message.Text = "没有检索词参与检索";
+                    else
+                        this.label_message.Text = "未命中";
+                }
                 else
                     this.label_message.Text = "检索共命中 " + lTotalHitCount.ToString() + " 条书目记录，已全部装入";
             }
@@ -3185,9 +3204,9 @@ Keys keyData)
             item.BackColor = Color.Yellow;
             ListViewUtil.ChangeItemText(item, 0, $"Z39.50:{c.ServerName}");
             if (r.Value == -1 || r.Value == 0)
-                ListViewUtil.ChangeItemText(item, 1, $"检索出错 {r.ErrorInfo}");
+                ListViewUtil.ChangeItemText(item, 1, $"{r.Query} 检索出错 {r.ErrorInfo}");
             else
-                ListViewUtil.ChangeItemText(item, 1, $"检索命中 {r.ResultCount} 条");
+                ListViewUtil.ChangeItemText(item, 1, $"{r.Query} 检索命中 {r.ResultCount} 条");
         }
 
         public static void UpdateCommandLine(ListViewItem item,
@@ -3195,9 +3214,9 @@ Keys keyData)
             DigitalPlatform.Z3950.ZClient.PresentResult r)
         {
             if (r.Value == -1)
-                ListViewUtil.ChangeItemText(item, 1, $"Present 出错 {r.ErrorInfo}");
+                ListViewUtil.ChangeItemText(item, 1, $"{c._query} Present 出错 {r.ErrorInfo}");
             else
-                ListViewUtil.ChangeItemText(item, 1, $"检索命中 {c._resultCount} 条，已装入 {c._fetched + r.Records.Count}");
+                ListViewUtil.ChangeItemText(item, 1, $"{c._query} 检索命中 {c._resultCount} 条，已装入 {c._fetched + r.Records.Count}");
         }
 
         async void menu_loadRestAllBatch_Click(object sender, EventArgs e)
@@ -12534,6 +12553,12 @@ message,
                     this.textBox_queryWord.Height = old_height / 3;
                     this.textBox_queryWord.AcceptsReturn = false;
                     this.textBox_queryWord.ScrollBars = ScrollBars.None;
+
+                    // 2021/3/9
+                    // 如果原先内容是多行，只保留第一行
+                    int index = this.textBox_queryWord.Text.IndexOfAny(new char[] { '\r', '\n' });
+                    if (index != -1)
+                        this.textBox_queryWord.Text = this.textBox_queryWord.Text.Substring(0, index);
                 }
             }
         }

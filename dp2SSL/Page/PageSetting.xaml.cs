@@ -950,6 +950,7 @@ string color = "red")
         private void redoReplicatePatron_Click(object sender, RoutedEventArgs e)
         {
             ShelfData.RedoReplicatePatron();
+            App.ErrorBox("全量同步读者记录", "全量同步读者记录的操作已安排", "green");
         }
 
         private async void backupRequests_Click(object sender, RoutedEventArgs e)
@@ -1173,6 +1174,7 @@ string color = "red")
         private void redoReplicateEntity_Click(object sender, RoutedEventArgs e)
         {
             ShelfData.RestartReplicateEntities();
+            App.ErrorBox("全量同步册记录和书目摘要", "全量同步册记录和书目摘要的操作已安排", "green");
         }
     }
 }

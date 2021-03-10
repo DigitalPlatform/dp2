@@ -111,6 +111,14 @@ namespace dp2Circulation
             }
         }
 
+        public void ClearChannelsFetched()
+        {
+            foreach (ZClientChannel channel in _channels)
+            {
+                channel._fetched = 0;
+            }
+        }
+
         public delegate void delegate_searchCompleted(ZClientChannel channel, SearchResult result);
         public delegate void delegate_presentCompleted(ZClientChannel channel, PresentResult result);
 
@@ -376,7 +384,7 @@ namespace dp2Circulation
                         out strQueryString);
                     if (result.Value == -1)
                     {
-                        searchCompleted?.Invoke(channel, new SearchResult(result));
+                        searchCompleted?.Invoke(channel, new SearchResult(strQueryString, result));
                         var final_result = new NormalResult { Value = result.Value, ErrorInfo = result.ErrorInfo };
                         if (result.ErrorCode == "notFound")
                             final_result.ErrorCode = "useNotFound";
@@ -395,7 +403,7 @@ namespace dp2Circulation
                     InitialResult result = await channel.ZClient.TryInitialize(_targetInfo);
                     if (result.Value == -1)
                     {
-                        searchCompleted?.Invoke(channel, new SearchResult(result));
+                        searchCompleted?.Invoke(channel, new SearchResult(strQueryString, result));
                         // TODO: 是否继续向后检索其他 Z39.50 服务器?
                         return new NormalResult { Value = -1, ErrorInfo = "Initialize error: " + result.ErrorInfo };
                     }
@@ -423,6 +431,7 @@ namespace dp2Circulation
                 }
 
                 searchCompleted?.Invoke(channel, search_result);
+                channel._query = search_result.Query;
                 channel._resultCount = search_result.ResultCount;
 
                 if (search_result.Value == -1
@@ -535,6 +544,7 @@ namespace dp2Circulation
         // 服务器是否启用了
         public bool Enabled { get; set; }
 
+        internal string _query = "";    // 检索式
         internal long _resultCount = 0;   // 检索命中条数
         internal int _fetched = 0;   // 已经 Present 获取的条数
 
