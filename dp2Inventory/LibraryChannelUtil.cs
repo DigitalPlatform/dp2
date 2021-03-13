@@ -18,6 +18,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.CirculationClient;
 using Newtonsoft.Json;
 using System.Collections;
+using DigitalPlatform.LibraryServer;
 
 namespace dp2Inventory
 {
@@ -336,56 +337,12 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             if (cfg_dom.DocumentElement == null)
                 return false;
 
-            // 分析 strLocation 是否属于总馆形态，比如“阅览室”
-            // 如果是总馆形态，则要在前部增加一个 / 字符，以保证可以正确匹配 map 值
-            // ‘/’字符可以理解为在馆代码和阅览室名字之间插入的一个必要的符号。这是为了弥补早期做法的兼容性问题
-            dp2StringUtil.ParseCalendarName(strLocation,
-        out string strLibraryCode,
-        out string strRoom);
-            if (string.IsNullOrEmpty(strLibraryCode))
-                strLocation = "/" + strRoom;
-
-            XmlNodeList items = cfg_dom.DocumentElement.SelectNodes(
-                "ownerInstitution/item");
-            List<HitItem> results = new List<HitItem>();
-            foreach (XmlElement item in items)
-            {
-                string map = item.GetAttribute("map");
-                if (strLocation.StartsWith(map))
-                {
-                    HitItem hit = new HitItem { Map = map, Element = item };
-                    results.Add(hit);
-                }
-            }
-
-            if (results.Count == 0)
-                return false;
-
-            // 如果命中多个，要选出 map 最长的那一个返回
-
-            // 排序，大在前
-            if (results.Count > 0)
-                results.Sort((a, b) => { return b.Map.Length - a.Map.Length; });
-
-            var element = results[0].Element;
-            isil = element.GetAttribute("isil");
-            alternative = element.GetAttribute("alternative");
-
-            // 2021/2/1
-            if (string.IsNullOrEmpty(isil) && string.IsNullOrEmpty(alternative))
-            {
-                throw new Exception($"map 元素不合法，isil 和 alternative 属性均为空");
-            }
-
-            return true;
+            return LibraryServerUtil.GetOwnerInstitution(
+                cfg_dom.DocumentElement,
+                strLocation,
+                out isil,
+                out alternative);
         }
-
-        class HitItem
-        {
-            public XmlElement Element { get; set; }
-            public string Map { get; set; }
-        }
-
 
         public class GetLocationListResult : NormalResult
         {

@@ -1,10 +1,13 @@
-﻿using DigitalPlatform.Text;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
+
+using DigitalPlatform.LibraryServer;
+using DigitalPlatform.Text;
 
 namespace dp2Circulation
 {
@@ -13,6 +16,26 @@ namespace dp2Circulation
     /// </summary>
     public partial class MainForm
     {
+        public static bool GetOwnerInstitution(
+    XmlDocument cfg_dom,
+    string strLocation,
+    out string isil,
+    out string alternative)
+        {
+            isil = "";
+            alternative = "";
+
+            if (cfg_dom == null)
+                return false;
+
+            return LibraryServerUtil.GetOwnerInstitution(
+                cfg_dom.DocumentElement,
+                strLocation,
+                out isil,
+                out alternative);
+        }
+
+#if REMOVED
         /*
 <rfid>
 	<ownerInstitution>
@@ -44,6 +67,10 @@ namespace dp2Circulation
             if (cfg_dom == null)
                 return false;
 
+            if (strLocation != null 
+                && strLocation.IndexOfAny(new char[] { '*', '?' }) != -1)
+                throw new ArgumentException($"参数 {nameof(strLocation)} 值({strLocation})中不应包含字符 '*' '?'", nameof(strLocation));
+
             // 分析 strLocation 是否属于总馆形态，比如“阅览室”
             // 如果是总馆形态，则要在前部增加一个 / 字符，以保证可以正确匹配 map 值
             // ‘/’字符可以理解为在馆代码和阅览室名字之间插入的一个必要的符号。这是为了弥补早期做法的兼容性问题
@@ -59,7 +86,9 @@ namespace dp2Circulation
             foreach (XmlElement item in items)
             {
                 string map = item.GetAttribute("map");
-                if (strLocation.StartsWith(map))
+
+                if (StringUtil.RegexCompare(GetRegex(map), strLocation))
+                // if (strLocation.StartsWith(map))
                 {
                     HitItem hit = new HitItem { Map = map, Element = item };
                     results.Add(hit);
@@ -106,6 +135,20 @@ namespace dp2Circulation
             public XmlElement Element { get; set; }
             public string Map { get; set; }
         }
+
+        static string GetRegex(string pattern)
+        {
+            if (pattern == null)
+                pattern = "";
+            if (pattern.Length > 0 && pattern[pattern.Length - 1] != '*')
+                pattern += "*";
+            return "^" + Regex.Escape(pattern)
+            .Replace(@"\*", ".*")
+            .Replace(@"\?", ".")
+            + "$";
+        }
+
+#endif
 
         // 从册记录的卷册信息字符串中，获得符合 RFID 标准的 SetInformation 信息
         public static string GetSetInformation(string strVolume)

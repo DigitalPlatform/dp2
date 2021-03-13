@@ -788,6 +788,45 @@ namespace dp2SSL
             return new NormalResult();
         }
 
+        // parameters:
+        //      cfg_dom 根元素是 rfid
+        //      strLocation 纯净的 location 元素内容。
+        //      isil    [out] 返回 ISIL 形态的代码
+        //      alternative [out] 返回其他形态的代码
+        // return:
+        //      true    找到。信息在 isil 和 alternative 参数里面返回
+        //      false   没有找到
+        public static bool GetOwnerInstitution(
+            // XmlDocument cfg_dom,
+            string strLocation,
+            out string isil,
+            out string alternative)
+        {
+            isil = "";
+            alternative = "";
+
+        REDO:
+            var cfg_dom = _rfidCfgDom;
+
+            if (cfg_dom == null)
+            {
+                var prepare_result = PrepareConfigDom();
+                if (prepare_result.Value == -1)
+                    throw new Exception(prepare_result.ErrorInfo);
+                goto REDO;
+                // return false;
+            }
+
+            if (cfg_dom.DocumentElement == null)
+                return false;
+
+            return LibraryServerUtil.GetOwnerInstitution(cfg_dom.DocumentElement,
+                strLocation,
+                out isil,
+                out alternative);
+        }
+
+#if REMOVED
         /*
 <rfid>
 <ownerInstitution>
@@ -881,7 +920,9 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             public string Map { get; set; }
         }
 
-        static NormalResult PrepareConfigDom()
+#endif
+
+            static NormalResult PrepareConfigDom()
         {
             _rfidCfgDom = new XmlDocument();
 
