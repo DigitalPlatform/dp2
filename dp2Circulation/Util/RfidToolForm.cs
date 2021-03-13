@@ -372,6 +372,7 @@ this.toolStripButton_autoFixEas.Checked);
                                         // 既然是在非界面线程中运行，就安心等待运行完
                                         FillTagInfo(item);
                                     }
+                                    changed = true;
                                 }
 
                                 string old_antenna = ListViewUtil.GetItemText(item, COLUMN_ANTENNA);
@@ -381,11 +382,13 @@ this.toolStripButton_autoFixEas.Checked);
                                     if (info != null && info.OneTag != null)
                                         info.OneTag.AntennaID = tag.AntennaID;
                                     ListViewUtil.ChangeItemText(item, COLUMN_ANTENNA, tag.AntennaID.ToString());
+                                    changed = true;
                                 }
                             }
 
                             if (item != null)
                                 items.Add(item);
+
                             changed = true;
                         }
 
@@ -479,11 +482,12 @@ this.toolStripButton_autoFixEas.Checked);
                     }
                     else
                     {
-                        if (this.AskTag != null)
+                        if (_asked == false && this.AskTag != null)
                         {
                             AskTagEventArgs e = new AskTagEventArgs();
                             this.AskTag(this, e);
                             this.ShowMessage(e.Text, "green", true);
+                            _asked = true;
                         }
                     }
                     return true;
@@ -521,6 +525,8 @@ this.toolStripButton_autoFixEas.Checked);
                 Interlocked.Decrement(ref _inUpdate);
             }
         }
+
+        bool _asked = false;
 
         static void SetItemColor(ListViewItem item, string state)
         {
@@ -652,11 +658,12 @@ this.toolStripButton_autoFixEas.Checked);
             }
 
             // 触发提示
-            if (this.AskTag != null)
+            if (_asked == false && this.AskTag != null)
             {
                 AskTagEventArgs e = new AskTagEventArgs();
                 this.AskTag(this, e);
                 this.ShowMessage(e.Text, "green", true);
+                _asked = true;
             }
 
             return false;

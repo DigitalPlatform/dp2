@@ -367,11 +367,10 @@ namespace dp2Circulation
                     // 在装入并自动修改的状态下，不必询问，直接保存后装入
                 }
 
-
                 nRet = DoSave(true, out strError);
                 if (nRet == -1)
                 {
-                    MessageBox.Show(this, strError);
+                    MessageBoxAndSpeak(strError);
                     return;
                 }
             }
@@ -381,7 +380,7 @@ namespace dp2Circulation
                 out strError);
             if (nRet != 1)
             {
-                MessageBox.Show(this, strError);
+                MessageBoxAndSpeak(strError);
                 goto SETFOCUS;
             }
 
@@ -389,7 +388,12 @@ namespace dp2Circulation
             {
                 // 自动修改
                 AutoChangeData();
-                TryWriteToRfidTag();
+                nRet = TryWriteToRfidTag();
+                if (nRet == 1)
+                {
+                    Console.Beep();
+                    Program.MainForm.Speak($"标签 {this.textBox_barcode.Text} 写入成功");
+                }
             }
 
             this.textBox_outputBarcodes.Text += this.textBox_barcode.Text + "\r\n";
@@ -400,8 +404,6 @@ namespace dp2Circulation
 "change_param",
 "focusAction",
 "册条码号，并全选");
-
-
             if (strFocusAction == "册条码号，并全选")
             {
                 BeginSwitchFocus("load_barcode", true);
@@ -426,7 +428,12 @@ namespace dp2Circulation
             {
                 BeginSwitchFocus("registerNo", true);
             }
+        }
 
+        void MessageBoxAndSpeak(string text)
+        {
+            Program.MainForm.Speak(text);
+            MessageBox.Show(this, text);
         }
 
         void BeginSwitchFocus(string name, bool bSelectAll)
@@ -548,7 +555,7 @@ false);
                 this.ClearMessage();
             }
             CANCEL0:
-            MessageBox.Show(this, strError);
+            MessageBoxAndSpeak(strError);
             return 0;
         ERROR1:
             Program.MainForm.Speak(strError);
@@ -658,6 +665,7 @@ false);
 
         private void Dialog_AskTag(object sender, AskTagEventArgs e)
         {
+            Program.MainForm.Speak("请放空白标签");
             e.Text = "准备写入 RFID 标签，请在读写器上放置贴有标签的图书 ...";
         }
 
@@ -934,7 +942,6 @@ out strError);
                     bChanged = true;
                 }
             }
-
 
             string strBookType = Program.MainForm.AppInfo.GetString(
                 "change_param",
