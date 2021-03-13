@@ -389,7 +389,7 @@ namespace DigitalPlatform.LibraryServer
                         //      false   没有找到
                         // exception:
                         //      可能会抛出异常 Exception
-                        var ret = GetOwnerInstitution(rfid,
+                        var ret = LibraryServerUtil.GetOwnerInstitution(rfid,
                             strName,
                             out string isil,
                             out string alternative);
