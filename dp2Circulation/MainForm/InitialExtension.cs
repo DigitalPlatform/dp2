@@ -1659,6 +1659,10 @@ MessageBoxDefaultButton.Button1);
 
             // 2019/9/13
             StartProcessManager();
+
+            // 2021/3/13
+            // 启动后台日志统计线程
+            StartStatisLogWorker(_cancel.Token);
         }
 
         #region RFID

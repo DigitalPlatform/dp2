@@ -16,6 +16,7 @@ using DigitalPlatform.RFID;
 using DigitalPlatform.Xml;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.CommonControl;
+using static dp2Circulation.MainForm;
 
 namespace dp2Circulation
 {
@@ -94,6 +95,7 @@ namespace dp2Circulation
 
             BeginSwitchFocus("load_barcode", true);
 
+#if REMOVED
             bool _hide_dialog = false;
             int _hide_dialog_count = 0;
 
@@ -133,6 +135,8 @@ namespace dp2Circulation
                     }
                     );
             });
+
+#endif
         }
 
         CancellationTokenSource _cancel = new CancellationTokenSource();
@@ -726,148 +730,6 @@ out strError);
 
         #endregion
 
-        #region 独立线程写入统计日志
-
-        class StatisLog
-        {
-            public BookItem BookItem { get; set; }
-            public string ReaderName { get; set; }
-            public TagInfo NewTagInfo { get; set; }
-            public string Xml { get; set; }
-
-            // 写入出错次数
-            public int ErrorCount { get; set; }
-        }
-
-        object _lockStatis = new object();
-
-        List<StatisLog> _statisLogs = new List<StatisLog>();
-
-        // 循环写入统计日志的过程
-        void WriteStatisLogs(CancellationToken token,
-            LibraryChannelExtension.delegate_prompt prompt)
-        {
-            // TODO: 需要捕获异常，写入错误日志
-            try
-            {
-                while (token.IsCancellationRequested == false)
-                {
-                    List<StatisLog> error_items = new List<StatisLog>();
-                    // 循环过程不怕 _statisLogs 数组后面被追加新内容
-                    int count = _statisLogs.Count;
-                    for (int i = 0; i < count; i++)
-                    {
-                        var log = _statisLogs[i];
-                        Program.MainForm.OperHistory.AppendHtml($"<div class='debug recpath'>写册 '{HttpUtility.HtmlEncode(log.BookItem.Barcode)}' 的 RFID 标签，记入统计日志</div>");
-                        // parameters:
-                        //      prompt_action   [out] 重试/中断
-                        // return:
-                        //      -2  UID 已经存在
-                        //      -1  出错。注意 prompt_action 中有返回值，表明已经提示和得到了用户反馈
-                        //      其他  成功
-                        int nRet = WriteStatisLog("sender",
-                            "subject",
-                            log.Xml,
-                            prompt,
-                            out string prompt_action,
-                            out string strError);
-                        if (nRet == -2)
-                        {
-                            // 如果 UID 重复了，跳过这一条
-                            _statisLogs.RemoveAt(i);
-                            i--;
-                            Program.MainForm.OperHistory.AppendHtml($"<div class='debug error'>{HttpUtility.HtmlEncode(strError)}</div>");
-                            continue;
-                        }
-                        else if (nRet == -1)
-                        {
-                            if (prompt_action == "skip" || prompt_action == "取消")
-                            {
-                                // 跳过这一条
-                                _statisLogs.RemoveAt(i);
-                                i--;
-                                Program.MainForm.OperHistory.AppendHtml($"<div class='debug error'>遇到错误 {HttpUtility.HtmlEncode(strError)} 后用户选择跳过</div>");
-                                continue;
-                            }
-
-                            log.ErrorCount++;
-                            error_items.Add(log);
-                            this.ShowMessage(strError, "red", true);
-                            // TODO: 输出到操作历史
-                            Program.MainForm.OperHistory.AppendHtml($"<div class='debug error'>{HttpUtility.HtmlEncode(strError)}</div>");
-                        }
-                        else
-                            Program.MainForm.OperHistory.AppendHtml($"<div class='debug green'>写入成功</div>");
-                    }
-
-                    lock (_lockStatis)
-                    {
-                        _statisLogs.RemoveRange(0, count);
-                        _statisLogs.AddRange(error_items);  // 准备重做
-                    }
-
-                    if (error_items.Count > 0)
-                        Task.Delay(TimeSpan.FromMinutes(1), token).Wait();
-                    else
-                        Task.Delay(500, token).Wait();
-                }
-            }
-            catch (Exception ex)
-            {
-                this.ShowMessage($"后台线程出现异常: {ex.Message}", "red", true);
-                this.Invoke((Action)(() =>
-                {
-                    this.Enabled = false;   // 禁用界面，迫使操作者关闭窗口重新打开
-                }));
-            }
-        }
-
-        void AddWritingLog(StatisLog log)
-        {
-            XmlDocument dom = new XmlDocument();
-            dom.LoadXml("<root />");
-            DomUtil.SetElementText(dom.DocumentElement,
-                "action", "writeRfidTag");
-
-            DomUtil.SetElementText(dom.DocumentElement,
-    "uid", Guid.NewGuid().ToString());
-
-            DomUtil.SetElementText(dom.DocumentElement,
-    "type", "item");
-
-            DomUtil.SetElementText(dom.DocumentElement,
-                "itemBarcode", log.BookItem.Barcode);
-            DomUtil.SetElementText(dom.DocumentElement,
-                "itemLocation", log.BookItem.Location);
-            // 2019/6/28
-            DomUtil.SetElementText(dom.DocumentElement,
-    "itemRefID", log.BookItem.RefID);
-
-            DomUtil.SetElementText(dom.DocumentElement,
-"tagProtocol", "ISO15693");
-            DomUtil.SetElementText(dom.DocumentElement,
-"tagReaderName", log.ReaderName);
-            DomUtil.SetElementText(dom.DocumentElement,
-    "tagAFI", Element.GetHexString(log.NewTagInfo.AFI));
-            DomUtil.SetElementText(dom.DocumentElement,
-    "tagBlockSize", log.NewTagInfo.BlockSize.ToString());
-            DomUtil.SetElementText(dom.DocumentElement,
-"tagMaxBlockCount", log.NewTagInfo.MaxBlockCount.ToString());
-            DomUtil.SetElementText(dom.DocumentElement,
-    "tagDSFID", Element.GetHexString(log.NewTagInfo.DSFID));
-            DomUtil.SetElementText(dom.DocumentElement,
-    "tagUID", log.NewTagInfo.UID);
-            DomUtil.SetElementText(dom.DocumentElement,
-    "tagBytes", Convert.ToBase64String(log.NewTagInfo.Bytes));
-
-            log.Xml = dom.OuterXml;
-            lock (_lockStatis)
-            {
-                _statisLogs.Add(log);
-            }
-        }
-
-        #endregion
 
         // return:
         //      0   没有实质性改变

@@ -3,11 +3,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
+using System.Windows.Forms;
 using System.Xml;
-
+using DigitalPlatform;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.CommonControl;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryServer;
+using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
+using DigitalPlatform.Xml;
 
 namespace dp2Circulation
 {
@@ -190,5 +199,272 @@ namespace dp2Circulation
                 return null;
             return left.PadLeft(max_length, '0') + right.PadLeft(max_length, '0');
         }
+
+
+        #region 独立线程写入统计日志
+
+        public class StatisLog
+        {
+            public BookItem BookItem { get; set; }
+            public string ReaderName { get; set; }
+            public TagInfo NewTagInfo { get; set; }
+            public string Xml { get; set; }
+
+            // 写入出错次数
+            public int ErrorCount { get; set; }
+        }
+
+        static object _lockStatis = new object();
+
+        static List<StatisLog> _statisLogs = new List<StatisLog>();
+
+        void StartStatisLogWorker(CancellationToken token)
+        {
+            bool _hide_dialog = false;
+            int _hide_dialog_count = 0;
+
+            _ = Task.Factory.StartNew(async () =>
+            {
+                await WriteStatisLogsAsync(token,
+                    (c, m, buttons, sec) =>
+                    {
+                        DialogResult result = DialogResult.Yes;
+                        if (_hide_dialog == false)
+                        {
+                            this.Invoke((Action)(() =>
+                            {
+                                result = MessageDialog.Show(this,
+                            m,
+                            MessageBoxButtons.YesNoCancel,
+                            MessageBoxDefaultButton.Button1,
+                            "此后不再出现本对话框",
+                            ref _hide_dialog,
+                            buttons,
+                            sec);
+                            }));
+                            _hide_dialog_count = 0;
+                        }
+                        else
+                        {
+                            _hide_dialog_count++;
+                            if (_hide_dialog_count > 10)
+                                _hide_dialog = false;
+                        }
+
+                        if (result == DialogResult.Yes)
+                            return buttons[0];
+                        else if (result == DialogResult.No)
+                            return buttons[1];
+                        return buttons[2];
+                    }
+                    );
+            },
+            token,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+        }
+
+        // TODO: 退出 MainForm 的时候，如果发现有没有来得及写入的事项，要写入临时文件，等下载启动时候重新装入队列
+        // 循环写入统计日志的过程
+        async Task WriteStatisLogsAsync(CancellationToken token,
+            LibraryChannelExtension.delegate_prompt prompt)
+        {
+            // TODO: 需要捕获异常，写入错误日志
+            try
+            {
+                while (token.IsCancellationRequested == false)
+                {
+                    List<StatisLog> error_items = new List<StatisLog>();
+                    // 循环过程不怕 _statisLogs 数组后面被追加新内容
+                    int count = _statisLogs.Count;
+                    for (int i = 0; i < count; i++)
+                    {
+                        var log = _statisLogs[i];
+                        Program.MainForm.OperHistory.AppendHtml($"<div class='debug recpath'>写册 '{HttpUtility.HtmlEncode(log.BookItem.Barcode)}' 的 RFID 标签，记入统计日志</div>");
+                        // parameters:
+                        //      prompt_action   [out] 重试/中断
+                        // return:
+                        //      -2  UID 已经存在
+                        //      -1  出错。注意 prompt_action 中有返回值，表明已经提示和得到了用户反馈
+                        //      其他  成功
+                        int nRet = WriteStatisLog("sender",
+                            "subject",
+                            log.Xml,
+                            prompt,
+                            out string prompt_action,
+                            out string strError);
+                        if (nRet == -2)
+                        {
+                            // 如果 UID 重复了，跳过这一条
+                            _statisLogs.RemoveAt(i);
+                            i--;
+                            Program.MainForm.OperHistory.AppendHtml($"<div class='debug error'>{HttpUtility.HtmlEncode(strError)}</div>");
+                            continue;
+                        }
+                        else if (nRet == -1)
+                        {
+                            if (prompt_action == "skip" || prompt_action == "取消")
+                            {
+                                // 跳过这一条
+                                _statisLogs.RemoveAt(i);
+                                i--;
+                                Program.MainForm.OperHistory.AppendHtml($"<div class='debug error'>遇到错误 {HttpUtility.HtmlEncode(strError)} 后用户选择跳过</div>");
+                                continue;
+                            }
+
+                            log.ErrorCount++;
+                            error_items.Add(log);
+                            // this.ShowMessage(strError, "red", true);
+                            // TODO: 输出到操作历史
+                            Program.MainForm.OperHistory.AppendHtml($"<div class='debug error'>{HttpUtility.HtmlEncode(strError)}</div>");
+                        }
+                        else
+                            Program.MainForm.OperHistory.AppendHtml($"<div class='debug green'>写入成功</div>");
+                    }
+
+                    lock (_lockStatis)
+                    {
+                        _statisLogs.RemoveRange(0, count);
+                        _statisLogs.AddRange(error_items);  // 准备重做
+                    }
+
+                    if (error_items.Count > 0)
+                        await Task.Delay(TimeSpan.FromMinutes(1), token);
+                    else
+                        await Task.Delay(500, token);
+                }
+            }
+            catch (Exception ex)
+            {
+                // this.ShowMessage($"后台线程出现异常: {ex.Message}", "red", true);
+                Program.MainForm.OperHistory.AppendHtml($"<div class='debug error'>{HttpUtility.HtmlEncode($"统计日志后台线程出现异常: {ex.Message}")}</div>");
+                WriteErrorLog($"统计日志后台线程出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                /*
+                this.Invoke((Action)(() =>
+                {
+                    this.Enabled = false;   // 禁用界面，迫使操作者关闭窗口重新打开
+                }));
+                */
+            }
+        }
+
+        public static void AddWritingLog(StatisLog log)
+        {
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml("<root />");
+            DomUtil.SetElementText(dom.DocumentElement,
+                "action", "writeRfidTag");
+
+            DomUtil.SetElementText(dom.DocumentElement,
+    "uid", Guid.NewGuid().ToString());
+
+            DomUtil.SetElementText(dom.DocumentElement,
+    "type", "item");
+
+            DomUtil.SetElementText(dom.DocumentElement,
+                "itemBarcode", log.BookItem.Barcode);
+            DomUtil.SetElementText(dom.DocumentElement,
+                "itemLocation", log.BookItem.Location);
+            // 2019/6/28
+            DomUtil.SetElementText(dom.DocumentElement,
+    "itemRefID", log.BookItem.RefID);
+
+            DomUtil.SetElementText(dom.DocumentElement,
+"tagProtocol", "ISO15693");
+            DomUtil.SetElementText(dom.DocumentElement,
+"tagReaderName", log.ReaderName);
+            DomUtil.SetElementText(dom.DocumentElement,
+    "tagAFI", Element.GetHexString(log.NewTagInfo.AFI));
+            DomUtil.SetElementText(dom.DocumentElement,
+    "tagBlockSize", log.NewTagInfo.BlockSize.ToString());
+            DomUtil.SetElementText(dom.DocumentElement,
+"tagMaxBlockCount", log.NewTagInfo.MaxBlockCount.ToString());
+            DomUtil.SetElementText(dom.DocumentElement,
+    "tagDSFID", Element.GetHexString(log.NewTagInfo.DSFID));
+            DomUtil.SetElementText(dom.DocumentElement,
+    "tagUID", log.NewTagInfo.UID);
+            DomUtil.SetElementText(dom.DocumentElement,
+    "tagBytes", Convert.ToBase64String(log.NewTagInfo.Bytes));
+
+            log.Xml = dom.OuterXml;
+            lock (_lockStatis)
+            {
+                _statisLogs.Add(log);
+            }
+        }
+
+        // 写入统计日志
+        // parameters:
+        //      prompt_action   [out] 重试/取消
+        // return:
+        //      -2  UID 已经存在
+        //      -1  出错。注意 prompt_action 中有返回值，表明已经提示和得到了用户反馈
+        //      其他  成功
+        public int WriteStatisLog(
+            string strSender,
+            string strSubject,
+            string strXml,
+            LibraryChannelExtension.delegate_prompt prompt,
+            out string prompt_action,
+            out string strError)
+        {
+            prompt_action = "";
+            strError = "";
+
+            LibraryChannel channel = this.GetChannel();
+            try
+            {
+                var message = new MessageData
+                {
+                    strRecipient = "!statis",
+                    strSender = strSender,
+                    strSubject = strSubject,
+                    strMime = "text/xml",
+                    strBody = strXml
+                };
+                MessageData[] messages = new MessageData[]
+                {
+                    message
+                };
+
+            REDO:
+                long lRet = channel.SetMessage(
+                    "send",
+                    "",
+                    messages,
+                    out MessageData[] output_messages,
+                    out strError);
+                if (lRet == -1)
+                {
+                    // 不使用 prompt
+                    if (channel.ErrorCode == ErrorCode.AlreadyExist)
+                        return -2;
+                    if (prompt == null)
+                        return -1;
+                    // TODO: 遇到出错，提示人工介入处理
+                    if (prompt != null)
+                    {
+                        var result = prompt(channel,
+                            strError + "\r\n\r\n(重试) 重试写入; (取消) 取消写入",
+                            new string[] { "重试", "取消" },
+                            10);
+                        if (result == "重试")
+                            goto REDO;
+                        prompt_action = result;
+                        return -1;
+                    }
+                }
+
+                return (int)lRet;
+            }
+            finally
+            {
+                this.ReturnChannel(channel);
+            }
+        }
+
+
+        #endregion
+
     }
 }

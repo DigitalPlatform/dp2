@@ -15,6 +15,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.LibraryClient;
 using System.IO;
 using DigitalPlatform.CommonControl;
+using static dp2Circulation.MainForm;
 
 namespace dp2Circulation
 {
@@ -937,8 +938,8 @@ namespace dp2Circulation
         {
             string strError = "";
 
-            {
                 BookItem item = this.Item.Clone();
+            {
                 item.RecordDom = this._editing.DataDom;
                 // 确保自动创建索取号
                 EnsureCreateAccessNo(item);
@@ -980,13 +981,13 @@ namespace dp2Circulation
 
             // 然后保存
             {
-                int nRet = SaveNewChip(out strError);
+                int nRet = SaveNewChip(item, out strError);
                 if (nRet == -1)
                     goto ERROR1;
             }
 
             // TODO: 改成类似 ShowMessage() 效果
-            MessageBox.Show(this, "保存成功");
+            MessageBox.Show(this, "RFID 标签保存成功");
 
             // 刷新左侧显示
             {
@@ -1245,7 +1246,9 @@ namespace dp2Circulation
             return 0;
         }
 
-        int SaveNewChip(out string strError)
+        // parameters:
+        //      item    只用于写入统计日志
+        int SaveNewChip(BookItem item, out string strError)
         {
             strError = "";
 
@@ -1319,6 +1322,18 @@ out strError);
                 {
                     strError = result.ErrorInfo;
                     return -1;
+                }
+
+                // 写入统计日志
+                if (item != null)
+                {
+                    StatisLog log = new StatisLog
+                    {
+                        BookItem = item,
+                        ReaderName = _tagExisting.ReaderName,
+                        NewTagInfo = new_tag_info
+                    };
+                    AddWritingLog(log);
                 }
 
                 return 0;

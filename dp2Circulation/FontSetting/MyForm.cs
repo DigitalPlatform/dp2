@@ -2830,12 +2830,12 @@ Keys keyData)
         //      -1  出错。注意 prompt_action 中有返回值，表明已经提示和得到了用户反馈
         //      其他  成功
         public int WriteStatisLog(
-    string strSender,
-    string strSubject,
-    string strXml,
+            string strSender,
+            string strSubject,
+            string strXml,
             LibraryChannelExtension.delegate_prompt prompt,
             out string prompt_action,
-    out string strError)
+            out string strError)
         {
             prompt_action = "";
             strError = "";

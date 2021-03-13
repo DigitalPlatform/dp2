@@ -735,8 +735,12 @@ Stack:
             Program.ClearPromptStringLines();   // 防止以后再次重复发送
         }
 
+        CancellationTokenSource _cancel = new CancellationTokenSource();
+
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
+            _cancel?.Cancel();
+
             if (StringUtil.IsDevelopMode() == false
                 && StringUtil.IsNewInstance() == false)
             {
