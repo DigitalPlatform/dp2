@@ -73,6 +73,7 @@ namespace dp2SSL.Models
                 using (BiblioCacheContext context = new BiblioCacheContext())
                 {
                     context.Database.EnsureCreated();
+                    /*
                     if (first_round)
                     {
                         // 删除 Entities 里面的已有记录
@@ -82,6 +83,7 @@ namespace dp2SSL.Models
                         context.BiblioSummaries.RemoveRange(context.BiblioSummaries.ToList());
                         await context.SaveChangesAsync(token);
                     }
+                    */
                 }
 
                 using (BiblioCacheContext context = new BiblioCacheContext())

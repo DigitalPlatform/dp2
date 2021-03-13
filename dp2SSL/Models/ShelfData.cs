@@ -1009,6 +1009,19 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             return value;
         }
 
+        // 缓存工作人员账户到本地
+        public static string CacheWorkerAccount()
+        {
+            if (ShelfCfgDom == null)
+                return "false";
+            var value = ShelfCfgDom.DocumentElement.SelectSingleNode("settings/key[@name='缓存工作人员账户到本地']/@value")?.Value;
+            if (string.IsNullOrEmpty(value))
+                value = "false";
+
+            return value;
+        }
+
+
         // 菜单页面显示图书馆名
         public static string GetLibraryNameVisibility()
         {
