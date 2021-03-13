@@ -23,6 +23,7 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.Message;
 using DigitalPlatform.rms.Client.rmsws_localhost;
 using DigitalPlatform.Core;
+using Newtonsoft.Json;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -3066,7 +3067,7 @@ root, strLibraryCode);
                         out strSummary);
                     if (result.Value == -1)
                     {
-                        // strSummary = result.ErrorInfo;
+                        strSummary = "error:" + result.ErrorInfo;
                     }
                     else
                     {
@@ -3201,6 +3202,11 @@ root, strLibraryCode);
                         null,
                         out strBiblioRecPath,
                         out strSummary);
+                    // 2021/3/11
+                    if (result.Value == -1)
+                    {
+                        strSummary = "error:" + result.ErrorInfo;
+                    }
                     borrow.SetAttribute("summary", strSummary);
                 }
             }
@@ -3231,6 +3237,7 @@ root, strLibraryCode);
                         if (result.Value == -1)
                         {
                             // strSummary = result.ErrorInfo;
+                            strSummary = "error:" + result.ErrorInfo;
                         }
 
                         DomUtil.SetAttr(node, "summary", strSummary);
@@ -4783,9 +4790,9 @@ out strError);
                     SetResult(results_list, i, strCalendarName);
                 }
                 // else if (String.Compare(strResultType, "xml", true) == 0)
-                else if (IsResultType(strResultType, "xml") == true)
+                else if (IsResultType(strResultType, "xml") == true
+                    || IsResultType(strResultType, "json") == true)
                 {
-                    // results[i] = strXml;
                     string strResultXml = "";
                     nRet = GetPatronXml(strXml,
         strResultType,
@@ -4798,7 +4805,12 @@ out strError);
                         goto ERROR1;
                     }
 
-                    // results[i] = strResultXml;
+                    if (IsResultType(strResultType, "json") == true)
+                    {
+                        XmlDocument dom = new XmlDocument();
+                        dom.LoadXml(strResultXml);
+                        strResultXml = JsonConvert.SerializeXmlNode(dom, Newtonsoft.Json.Formatting.Indented, true);
+                    }
                     SetResult(results_list, i, strResultXml);
                 }
                 else if (String.Compare(strResultType, "timestamp", true) == 0)
@@ -4871,7 +4883,8 @@ out strError);
                     SetResult(results_list, i, strSummary);
                 }
                 // else if (String.Compare(strResultType, "advancexml", true) == 0)
-                else if (IsResultType(strResultType, "advancexml") == true)
+                else if (IsResultType(strResultType, "advancexml") == true
+                    || IsResultType(strResultType, "advancejson") == true)
                 {
                     // 2008/4/3 
                     string strOutputXml = "";
@@ -4887,7 +4900,14 @@ out strError);
                         strError = "GetAdvanceReaderXml()出错: " + strError;
                         goto ERROR1;
                     }
-                    // results[i] = strOutputXml;
+
+                    if (IsResultType(strResultType, "advancejson") == true)
+                    {
+                        XmlDocument dom = new XmlDocument();
+                        dom.LoadXml(strOutputXml);
+                        strOutputXml = JsonConvert.SerializeXmlNode(dom, Newtonsoft.Json.Formatting.Indented, true);
+                    }
+
                     SetResult(results_list, i, strOutputXml);
                 }
                 // else if (String.Compare(strResultType, "html", true) == 0)
@@ -5627,7 +5647,7 @@ out strError);
 
                 string strUserName = strQueryWord.Substring("UN:".Length);
 
-                if (strUserName == "public" || strUserName == "reader" || strUserName == "opac")
+                if (strUserName == "public" || strUserName == "reader" || strUserName == "opac" || strUserName == "图书馆")
                 {
                     strError = "不允许绑定到系统保留的代理账户";
                     return -1;

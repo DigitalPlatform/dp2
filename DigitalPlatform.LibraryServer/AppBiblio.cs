@@ -1811,7 +1811,7 @@ namespace DigitalPlatform.LibraryServer
             if (string.IsNullOrEmpty(strItemBarcode) == true
                 && string.IsNullOrEmpty(strConfirmItemRecPath) == true)
             {
-                strError = "strItemBarcode和strConfirmItemRecPath参数值不能同时为空";
+                strError = "strItemBarcode 和 strConfirmItemRecPath 参数值不应同时为空";
                 goto ERROR1;
             }
 

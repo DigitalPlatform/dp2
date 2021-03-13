@@ -1252,6 +1252,11 @@ namespace dp2SSL
             }
         }
 
+        static bool _localAccountsCleared = false;
+        // 禁止用本地缓存账户信息登录直到 ... 时间
+        static DateTime _denyLocalLoginUntil = DateTime.MinValue;
+        static string[] special_usernames = new string[] { "public", "reader", "opac", "图书馆" };
+
         public class LoginResult : NormalResult
         {
             public string OutputUserName { get; set; }
@@ -1259,11 +1264,15 @@ namespace dp2SSL
             public string LibraryCode { get; set; }
         }
 
+        // parameters:
+        //      style   风格。local,network
         // result.Value
         //      -1:   出错
         //      0:    登录未成功
         //      1:    登录成功
-        public static LoginResult WorkerLogin(string userName, string password)
+        public static LoginResult WorkerLogin(string userName,
+            string password,
+            string style)
         {
             if (string.IsNullOrEmpty(App.dp2ServerUrl) == true)
                 return new LoginResult
@@ -1271,31 +1280,132 @@ namespace dp2SSL
                     Value = -1,
                     ErrorInfo = "dp2library 服务器 URL 尚未配置，无法进行工作人员登录"
                 };
+
+            // 如果当前参数是不缓存账户，则要主动清除以前缓存的全部账户记录
+            if (ShelfData.CacheWorkerAccount() == "false"
+                && _localAccountsCleared == false)
+            {
+                ClearLocalAccounts();
+                _localAccountsCleared = true;
+            }
+
+            if (Array.IndexOf(special_usernames, userName) != -1)
+            {
+                return new LoginResult
+                {
+                    Value = -1,
+                    ErrorInfo = "不允许使用特殊账户登录"
+                };
+            }
+
+            bool local = StringUtil.IsInList("local", style);
+            bool network = StringUtil.IsInList("network", style);
+
+            if (local == false && network == false)
+                return new LoginResult
+                {
+                    Value = -1,
+                    ErrorInfo = "style 参数至少要包含 local 和 network 中的一个值"
+                };
+
             LibraryChannel channel = App.CurrentApp.GetChannel(userName);
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = TimeSpan.FromSeconds(10);
 
             try
             {
-                // -1:   出错
-                // 0:    登录未成功
-                // 1:    登录成功
-                long lRet = channel.Login(userName,
-                    password,
-                    "type=worker,client=dp2ssl|" + WpfClientInfo.ClientVersion,
-                    out string strOutputUserName,
-                    out string strRights,
-                    out string strLibraryCode,
-                    out string strError);
-                if (lRet == -1 || lRet == 0)
+                string strOutputUserName = "";
+                string strRights = "";
+                string strLibraryCode = "";
+                string strError = "";
+
+                bool local_succeed = false;
+                if (network)
+                {
+                    // -1:   出错
+                    // 0:    登录未成功
+                    // 1:    登录成功
+                    long lRet = channel.Login(userName,
+                        password,
+                        "type=worker,client=dp2ssl|" + WpfClientInfo.ClientVersion,
+                        out strOutputUserName,
+                        out strRights,
+                        out strLibraryCode,
+                        out strError);
+                    if (lRet == -1 || lRet == 0)
+                        return new LoginResult
+                        {
+                            Value = (int)lRet,
+                            ErrorInfo = strError,
+                        };
+                }
+                else if (local)
+                {
+                    // TODO: 登录失败则把失败的账户名记住，后面禁止登录操作一段时间
+                    if (DateTime.Now < _denyLocalLoginUntil)
+                        return new LoginResult
+                        {
+                            Value = -1,
+                            ErrorInfo = "工作人员登录被暂时禁用"
+                        };
+
+
+                    // 尝试用本地缓存的读者记录登录
+                    using (var context = new AccountCacheContext())
+                    {
+                        context.Database.EnsureCreated();
+
+                        var account = context.Accounts.Where(o => o.UserName == userName).FirstOrDefault();
+                        if (account == null)
+                            return new LoginResult
+                            {
+                                Value = 0,
+                                ErrorInfo = $"账户 {userName} 不存在"
+                            };
+                        if (account.HashedPassword != Cryptography.GetSHA1(password))
+                        {
+                            _denyLocalLoginUntil = DateTime.Now + TimeSpan.FromMinutes(5);
+                            return new LoginResult
+                            {
+                                Value = 0,
+                                ErrorInfo = $"账户 {userName} 密码不正确"
+                            };
+                        }
+
+                        strOutputUserName = account.UserName;
+                        strRights = account.Rights;
+                        strLibraryCode = account.LibraryCodeList;
+                    }
+
+                    local_succeed = true;
+                }
+
+                if (StringUtil.IsInList("manageshelf", strRights) == false)
                     return new LoginResult
                     {
-                        Value = (int)lRet,
-                        ErrorInfo = strError,
+                        Value = -1,
+                        ErrorInfo = $"工作人员账户 '{strOutputUserName}' 不具备 manageshelf 权限",
+                        ErrorCode = "AccessDenied"
                     };
 
                 // testing
                 // channel.Logout(out strError);
+                // 顺便保存到本地
+                if (local_succeed == false
+                    && ShelfData.CacheWorkerAccount() == "true")
+                {
+                    AccountItem account = new AccountItem();
+                    account.UserName = strOutputUserName;
+                    account.HashedPassword = Cryptography.GetSHA1(password);
+                    account.Rights = strRights;
+                    account.LibraryCodeList = strLibraryCode;
+                    using (var context = new AccountCacheContext())
+                    {
+                        context.Database.EnsureCreated();
+
+                        AddOrUpdate(context, account);
+                    }
+                }
 
                 return new LoginResult
                 {
@@ -1305,12 +1415,63 @@ namespace dp2SSL
                     LibraryCode = strLibraryCode,
                 };
             }
+            catch (Exception ex)
+            {
+                WpfClientInfo.WriteErrorLog($"WorkerLogin() 出现异常：{ExceptionUtil.GetDebugText(ex)}");
+
+                return new LoginResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"WorkerLogin() 出现异常：{ex.Message}"
+                };
+            }
             finally
             {
                 channel.Timeout = old_timeout;
                 App.CurrentApp.ReturnChannel(channel);
             }
         }
+
+        // 清除本地缓存的所有账户
+        public static void ClearLocalAccounts()
+        {
+            using (var context = new AccountCacheContext())
+            {
+                context.Database.EnsureCreated();
+
+                var list = context.Accounts.ToList();
+                context.Accounts.RemoveRange(list);
+                context.SaveChanges();
+            }
+        }
+
+        public static void AddOrUpdate(AccountCacheContext context,
+AccountItem item)
+        {
+            try
+            {
+                // 保存到本地数据库
+                context.Accounts.Add(item);
+                context.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                SqliteException sqlite_exception = ex.InnerException as SqliteException;
+                if (sqlite_exception != null && sqlite_exception.SqliteErrorCode == 19)
+                {
+                    // PII 发生重复了
+                    goto UPDATE;
+                }
+                else
+                    throw ex;
+            }
+
+        UPDATE:
+            // 更新到本地数据库
+            context.Accounts.Update(item);
+            context.SaveChanges();
+        }
+
 
         #region GetRfidCfg
 
@@ -1793,7 +1954,7 @@ out string strError);
             }
         }
 
-        // 清除前端缓存的所有册记录
+        // 清除前端缓存的所有册记录和书目摘要
         public static void ClearCachedEntities()
         {
             using (BiblioCacheContext context = new BiblioCacheContext())

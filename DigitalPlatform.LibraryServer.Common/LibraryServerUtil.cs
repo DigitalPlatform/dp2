@@ -39,16 +39,20 @@ namespace DigitalPlatform.LibraryServer
             if (nRet != 0)
                 return 0;
 
+            strError = "";
+
+            bool skip_check = StringUtil.IsInList("skip_check_overdue", strStyle);
+
             // 注: 长期断网运行，要跳过检查 overdue 元素
-            if (StringUtil.IsInList("skip_check_overdue", strStyle) == false)
             {
+                List<string> errors = new List<string>();
                 // 检查是否已经有记载了的<overdue>字段
                 XmlNodeList nodes = readerdom.DocumentElement.SelectNodes("overdues/overdue");
                 if (nodes.Count > 0)
                 {
                     // text-level: 用户提示
-                    strError = $"该读者当前有 {nodes.Count} 个违约记录尚未处理";
-                    return 0;
+                    strError = $"您当前有 {nodes.Count} 个违约记录尚未处理";
+                    errors.Add(strError);
                 }
 
                 {
@@ -64,8 +68,19 @@ namespace DigitalPlatform.LibraryServer
                     if (nRet == -1)
                         return -1;
                     if (nRet == 1)
+                    {
+                        errors.Add(strError);
+                    }
+                }
+
+                if (errors.Count > 0)
+                {
+                    strError = StringUtil.MakePathList(errors, "; ");
+                    if (skip_check == false)
                         return 0;
                 }
+                else
+                    strError = "";
             }
 
             return 1;

@@ -702,7 +702,7 @@ namespace dp2SSL
                 }
             }
 
-            PROCESS:
+        PROCESS:
             SetGlobalError("scan_barcode", null);
 
             // return:
@@ -1205,6 +1205,13 @@ namespace dp2SSL
                 {
                     ErrorBox("无法开门", strError);
                     return;
+                }
+
+                if (ShelfData.LibraryNetworkCondition != "OK"
+                    && string.IsNullOrEmpty(strError) == false)
+                {
+                    // 断网情况下还要语音播报
+                    App.CurrentApp.SpeakSequence(strError);
                 }
 
                 // 检查读者所在分馆是否和打算打开的门的 shelfNo 参数矛盾
@@ -3627,7 +3634,11 @@ namespace dp2SSL
                     "正在登录 ...",
                     (progress) =>
                     {
-                        result = LibraryChannelUtil.WorkerLogin(userName, password);
+                        string style = "network";
+                        if (ShelfData.LibraryNetworkCondition != "OK")
+                            style = "local";
+
+                        result = LibraryChannelUtil.WorkerLogin(userName, password, style);
                         if (result.Value != 1)
                             return result.ErrorInfo;
                         return null;
