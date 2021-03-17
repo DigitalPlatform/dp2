@@ -5069,10 +5069,31 @@ namespace dp2Library
                         app.AddItemOI(itemdom);
                         strResult = itemdom.DocumentElement.OuterXml;
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         app.WriteErrorLog($"(GetItemInfo())为册记录添加 oi 元素时出现异常: \r\n{ExceptionUtil.GetDebugText(ex)}\r\n\r\n册记录 XML:'{strXml}'");
                         strResult = strXml;
+                    }
+                }
+                else if (String.Compare(strResultType, "uii", true) == 0)
+                {
+                    try
+                    {
+                        XmlDocument itemdom = new XmlDocument();
+                        itemdom.LoadXml(strXml);
+                        // 加上 oi 元素
+                        app.AddItemOI(itemdom);
+                        string oi = DomUtil.GetElementText(itemdom.DocumentElement, "oi");
+                        string barcode = DomUtil.GetElementText(itemdom.DocumentElement, "barcode");
+                        strResult = oi + "." + barcode;
+                        if (string.IsNullOrEmpty(oi))
+                            strResult = barcode;
+                    }
+                    catch (Exception ex)
+                    {
+                        app.WriteErrorLog($"(GetItemInfo())为册记录添加 oi 元素时出现异常: \r\n{ExceptionUtil.GetDebugText(ex)}\r\n\r\n册记录 XML:'{strXml}'");
+                        strError = $"(GetItemInfo())为册记录添加 oi 元素时出现异常: {ex.Message}";
+                        goto ERROR1;
                     }
                 }
                 else if (String.Compare(strResultType, "html", true) == 0)

@@ -133,9 +133,16 @@ namespace DigitalPlatform.LibraryServer
                 }
 
                 this.App.WriteErrorLog((bPerDayStart == true ? "(定时)" : "(不定时)") + strMonitorName + " 启动。");
+                // 2021/3/16
+                // 在错误日志中记一笔是否开启了以停代金功能
+                if (StringUtil.IsInList("pauseBorrowing", this.App.OverdueStyle) == true)
+                    this.App.WriteErrorLog("以停代金功能已经开启");
+                else
+                    this.App.WriteErrorLog("以停代金功能*尚未*开启");
             }
 
             this.AppendResultText("开始新一轮循环\r\n");
+
 
             recpath_table.Clear();
 
@@ -307,7 +314,7 @@ namespace DigitalPlatform.LibraryServer
                     strID = ResPath.GetRecordId(strOutputPath);
 
                     int nRedoCount = 0;
-                    REDO:
+                REDO:
                     // 处理
                     // parameters:
                     //      bChanged    [out] strReaderXml 是否发生过改变
@@ -428,7 +435,7 @@ namespace DigitalPlatform.LibraryServer
             RmsChannel channel = this.RmsChannels.GetChannel(this.App.WsUrl);
             // int nRedoCount = 0;
 
-        //REDO:
+            //REDO:
             //byte[] output_timestamp = null;
 
             XmlDocument readerdom = new XmlDocument();
@@ -969,8 +976,8 @@ namespace DigitalPlatform.LibraryServer
         int SavePatronRecord(RmsChannel channel,
             string strPath,
             ref string strReaderXml,
-            byte [] baTimeStamp,
-            out byte [] output_timestamp,
+            byte[] baTimeStamp,
+            out byte[] output_timestamp,
             out string strError)
         {
             long lRet = channel.DoSaveTextRes(strPath,

@@ -1252,6 +1252,15 @@ namespace dp2Circulation
         {
             strError = "";
 
+#if SN
+            int nRet = Program.MainForm.VerifySerialCode("rfid", false, out strError);
+            if (nRet == -1 && DateTime.Now > new DateTime(2021, 5, 1))
+            {
+                strError = "写入 RFID 标签功能尚未被许可";
+                return -1;
+            }
+#endif
+
 #if OLD_CODE
             RfidChannel channel = StartRfidChannel(
 Program.MainForm.RfidCenterUrl,

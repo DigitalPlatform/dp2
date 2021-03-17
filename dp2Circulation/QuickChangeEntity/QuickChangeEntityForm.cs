@@ -474,6 +474,18 @@ false);
                 return 0;
 
             string strError = "";
+
+#if SN
+            {
+                int nRet = Program.MainForm.VerifySerialCode("rfid", false, out strError);
+                if (nRet == -1 && DateTime.Now > new DateTime(2021, 5, 1))
+                {
+                    strError = "写入 RFID 标签功能尚未被许可";
+                    goto ERROR1;
+                }
+            }
+#endif
+
             this.ShowMessage("正在写入 RFID 标签");
             try
             {

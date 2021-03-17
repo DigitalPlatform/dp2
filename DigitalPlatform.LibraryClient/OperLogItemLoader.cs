@@ -8,6 +8,7 @@ using System.Diagnostics;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Core;
 using DigitalPlatform.Text;
+using DigitalPlatform.IO;
 
 namespace DigitalPlatform.LibraryClient
 {
@@ -581,7 +582,10 @@ FileShare.ReadWrite);
             byte[] attachment_data = null;
 
             long lFileSize = 0;
-            if (lServerFileSize == -1)
+            // 2021/3/17
+            // 如果是当天的日志文件，尺寸易变，要每次都探测一下
+            if (lServerFileSize == -1
+                || IsToday(this.Date))
             {
                 long _lServerFileSize = 0;
 
@@ -943,6 +947,11 @@ FileShare.ReadWrite);
             }
 
             lProgressValue += lFileSize;
+        }
+
+        static bool IsToday(string date)
+        {
+            return date == DateTimeUtil.DateTimeToString8(DateTime.Now);
         }
     }
 }
