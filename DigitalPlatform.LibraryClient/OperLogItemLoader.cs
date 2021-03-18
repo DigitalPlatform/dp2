@@ -596,7 +596,7 @@ FileShare.ReadWrite);
                 // 获得服务器端日志文件尺寸
                 lRet = this.Channel.GetOperLog(
                     this.Stop,
-                    this.Date,
+                    this.Date + ".log", // 2021/3/18 增加 ".log"
                     -1,    // lIndex,
                     -1, // lHint,
                     strStyle,

@@ -227,7 +227,6 @@ namespace DigitalPlatform.CirculationClient
                     dates[0] = dates[0] + ":" + strRight;
                 }
 
-
                 // using (SQLiteConnection connection = new SQLiteConnection(this._connectionString))
                 {
                     ProgressEstimate estimate = new ProgressEstimate();

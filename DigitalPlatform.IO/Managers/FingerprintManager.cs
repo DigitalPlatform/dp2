@@ -363,5 +363,10 @@ TouchedEventArgs e);
         public bool ErrorOccur { get; set; }
 
         public GetMessageResult Result { get; set; }
+
+        public override string ToString()
+        {
+            return $"Message={Message},Quality={Quality},ErrorOccur={ErrorOccur},Result={Result.ToString()}";
+        }
     }
 }

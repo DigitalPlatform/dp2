@@ -92,9 +92,12 @@ namespace DigitalPlatform.Interfaces
         // 本次扫入的指纹图象的质量。100 分为满分
         public int Quality { get; set; }
 
+        // 用于识别消息的 ID
+        public string MessageID { get; set; }
+
         public override string ToString()
         {
-            return $"{base.ToString()},Message={Message},Quality={Quality}";
+            return $"{base.ToString()},Message={Message},Quality={Quality},MessageID={MessageID}";
         }
     }
 
@@ -105,6 +108,16 @@ namespace DigitalPlatform.Interfaces
         public string FingerprintString = "";
         // 读者证条码号
         public string ReaderBarcode = "";
+
+        public override string ToString()
+        {
+            return $"ReaderBarcode={ReaderBarcode},FingerprintString={FingerprintString}";
+        }
+
+        public string ToShortString()
+        {
+            return $"ReaderBarcode={ReaderBarcode},FingerprintString(length)={FingerprintString?.Length}";
+        }
     }
 
     public delegate void MessageHandler(object sender,

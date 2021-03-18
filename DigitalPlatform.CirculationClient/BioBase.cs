@@ -107,6 +107,9 @@ namespace DigitalPlatform.CirculationClient
         public string ErrorInfo { get; set; }
 
         public int Quality { get; set; }    // 指纹图象质量
+
+        // 用于识别消息的 ID
+        public string MessageID { get; set; }
     }
 
     public delegate void ImageReadyEventHandler(object sender,

@@ -1760,7 +1760,7 @@ MessageBoxDefaultButton.Button1);
                 _cancelPalmManager = new CancellationTokenSource();
                 FingerprintManager.Base.Name = "掌纹中心";
                 FingerprintManager.Url = this.PalmprintReaderUrl;
-                FingerprintManager.Touched += PalmprintManager_Touched; ;
+                FingerprintManager.Touched += PalmprintManager_Touched;
                 FingerprintManager.Start(_cancelPalmManager.Token);
             }
             else
@@ -1773,16 +1773,34 @@ MessageBoxDefaultButton.Button1);
 
         private void PalmprintManager_Touched(object sender, TouchedEventArgs e)
         {
-            // dp2circulation 自己不是在最前面的时候，不进行掌纹 SendKey。这样避免和同时运行的 dp2SSL 冲突(dp2ssl 自己可以轮询掌纹 message)
-            if (_isActivated == false)
-                return;
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode($"掌纹消息 {e.ToString()}") + "</div>");
 
             if (e.Quality == -1)
+            {
+                string error = "palmTouched e.Quality == -1";
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(error) + "</div>");
                 return;
+            }
+
+            // dp2circulation 自己不是在最前面的时候，不进行掌纹 SendKey。这样避免和同时运行的 dp2SSL 冲突(dp2ssl 自己可以轮询掌纹 message)
+            if (_isActivated == false)
+            {
+                string error = "注意此时内务窗口不在最前面，textbox 无法捕获掌纹输入";
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(error) + "</div>");
+                /*
+                // 2021/3/18
+                Program.MainForm.Speak(error);
+                */
+                return;
+            }
 
             // 2021/1/5
             if (string.IsNullOrEmpty(e.Message))
+            {
+                string error = "palmTouched e.Message 为空";
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(error) + "</div>");
                 return;
+            }
 
             this.Invoke((Action)(() =>
             {
