@@ -7031,6 +7031,7 @@ MessageBoxDefaultButton.Button1);
                 }));
             }
 
+            // Program.MainForm.Speak("掌纹信息获取成功");
             Program.MainForm.StatusBarMessage = "掌纹信息获取成功";
             return;
         ERROR1:

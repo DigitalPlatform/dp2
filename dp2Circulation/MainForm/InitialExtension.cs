@@ -1671,6 +1671,10 @@ MessageBoxDefaultButton.Button1);
 
         public void StartOrStopRfidManager()
         {
+            // 2021/3/19
+            // 保护。防止重复 +=
+            RfidManager.ListTags -= RfidManager_ListTags;
+
             if (string.IsNullOrEmpty(this.RfidCenterUrl) == false)
             {
                 _cancelRfidManager?.Cancel();
@@ -1753,32 +1757,81 @@ MessageBoxDefaultButton.Button1);
 
         public void StartOrStopPalmManager()
         {
+            // 2021/3/19
+            // 保护。防止重复 +=
+            FingerprintManager.Touched -= PalmprintManager_Touched; ;
+
             if (string.IsNullOrEmpty(this.PalmprintReaderUrl) == false)
             {
+                string session_id = $"内务 {DateTime.Now.ToShortTimeString()}";
+                // Program.MainForm.OperHistory.AppendHtml($"<div class='debug green'>{ HttpUtility.HtmlEncode($"掌纹监控任务启动") }</div>");
+                WriteInfoLog($"掌纹监控任务启动。session_id={session_id}");
+
                 _cancelPalmManager?.Cancel();
 
                 _cancelPalmManager = new CancellationTokenSource();
                 FingerprintManager.Base.Name = "掌纹中心";
+                FingerprintManager.SessionID = session_id;
                 FingerprintManager.Url = this.PalmprintReaderUrl;
                 FingerprintManager.Touched += PalmprintManager_Touched;
+                // FingerprintManager.GetMessage($"clear,session:{session_id}");
+                ClearPalmMessage();
+                CheckPalmCenterVersion();
                 FingerprintManager.Start(_cancelPalmManager.Token);
             }
             else
             {
+                // Program.MainForm.OperHistory.AppendHtml($"<div class='debug error'>{ HttpUtility.HtmlEncode($"掌纹监控任务停止") }</div>");
+                WriteInfoLog($"掌纹监控任务停止。session_id={FingerprintManager.SessionID}");
+
                 _cancelPalmManager?.Cancel();
                 FingerprintManager.Url = "";
-                FingerprintManager.Touched -= PalmprintManager_Touched; ;
+                FingerprintManager.Touched -= PalmprintManager_Touched;
+            }
+        }
+
+        // 清除此前累积在 palmcenter 中未取的所有消息
+        public void ClearPalmMessage()
+        {
+            if (string.IsNullOrEmpty(FingerprintManager.Url) == false)
+            {
+                FingerprintManager.GetMessage($"clear,session:{FingerprintManager.SessionID}");
+                Program.MainForm?.OperHistory?.AppendHtml($"<div class='debug green'>{ HttpUtility.HtmlEncode($"清除此前未取的全部掌纹消息") }</div>");
+            }
+        }
+
+        const string pamcenter_base_version = "1.0.7";
+        public void CheckPalmCenterVersion()
+        {
+            if (string.IsNullOrEmpty(FingerprintManager.Url) == false)
+            {
+                var result = FingerprintManager.GetVersion();
+                if (result.Value == -1)
+                    Program.MainForm?.OperHistory?.AppendHtml($"<div class='debug error'>{ HttpUtility.HtmlEncode($"获得掌纹中心版本号时出错: {result.ErrorInfo}") }</div>");
+                else
+                {
+                    if (StringUtil.CompareVersion(result.Version, pamcenter_base_version) < 0)
+                    {
+                        string error = $"当前连接的掌纹中心版本号太低(为 {result.Version})，请升级到 {pamcenter_base_version} 或以上版本";
+                        Program.MainForm?.OperHistory?.AppendHtml($"<div class='debug error'>{ HttpUtility.HtmlEncode(error) }</div>");
+                        _ = Task.Run(() => {
+                            this.BeginInvoke((Action)(() =>
+                            {
+                                MessageBox.Show(this, error);
+                            }));
+                        });
+                    }
+                }
             }
         }
 
         private void PalmprintManager_Touched(object sender, TouchedEventArgs e)
         {
-            Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode($"掌纹消息 {e.ToString()}") + "</div>");
-
+            Program.MainForm.OperHistory.AppendHtml($"<div class='debug recpath'>{ HttpUtility.HtmlEncode($"掌纹消息 {e.ToString()}") }</div>");
             if (e.Quality == -1)
             {
-                string error = "palmTouched e.Quality == -1";
-                Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(error) + "</div>");
+                string error = "palmTouched 提示文字 (e.Quality == -1)";
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug green'>" + HttpUtility.HtmlEncode(error) + "</div>");
                 return;
             }
 

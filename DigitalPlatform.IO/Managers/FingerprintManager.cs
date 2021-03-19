@@ -63,6 +63,8 @@ namespace DigitalPlatform.IO
             }
         }
 
+        public static string SessionID { get; set; }
+
         // 启动后台任务。
         // 后台任务负责监视 指纹中心 里面新到的 message
         public static void Start(
@@ -105,7 +107,10 @@ new SetErrorEventArgs
             },
             (channel) =>
             {
-                var result = channel.Object.GetMessage("");
+                string style = "";
+                if (string.IsNullOrEmpty(SessionID) == false)
+                    style = $"session:{SessionID}";
+                var result = channel.Object.GetMessage(style);
                 if (result.Value == -1)
                     Base.TriggerSetError(result,
                         new SetErrorEventArgs { Error = result.ErrorInfo });

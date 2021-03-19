@@ -1003,6 +1003,7 @@ Stack:
         {
             // Console.WriteLine("Activate {0}", activate);
             SetRfidManagerPause(!activate);
+            SetPalmManagerPause(!activate);
         }
 
         private void ShowMe()
@@ -8823,12 +8824,23 @@ Keys keyData)
             // 激活 RfidManager
             // 注意这是对 Application Activate 的补充。怕后者有小概率不可靠
             SetRfidManagerPause(false);
+
+            SetPalmManagerPause(false);
         }
 
         void SetRfidManagerPause(bool pause)
         {
             RfidManager.Pause = pause;
-            this.toolStripStatusLabel_rfid.Text = pause ? "" : "RFID";
+            this.toolStripStatusLabel_rfid.Text = pause || string.IsNullOrEmpty(RfidManager.Url) ? "" : "RFID";
+        }
+
+        void SetPalmManagerPause(bool pause)
+        {
+            if (pause == false)
+                ClearPalmMessage();
+
+            FingerprintManager.Pause = pause;
+            this.toolStripStatusLabel_palm.Text = pause || string.IsNullOrEmpty(FingerprintManager.Url) ? "" : "掌纹";
         }
 
         private void MainForm_Deactivate(object sender, EventArgs e)

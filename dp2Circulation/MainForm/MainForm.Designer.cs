@@ -246,6 +246,7 @@
             this.toolStripButton_close = new System.Windows.Forms.ToolStripButton();
             this.splitter_fixed = new System.Windows.Forms.Splitter();
             this.timer_operHistory = new System.Windows.Forms.Timer(this.components);
+            this.toolStripStatusLabel_palm = new System.Windows.Forms.ToolStripStatusLabel();
             this.menuStrip_main.SuspendLayout();
             this.statusStrip_main.SuspendLayout();
             this.toolStrip_main.SuspendLayout();
@@ -1388,7 +1389,8 @@
             this.statusStrip_main.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripProgressBar_main,
             this.toolStripStatusLabel_main,
-            this.toolStripStatusLabel_rfid});
+            this.toolStripStatusLabel_rfid,
+            this.toolStripStatusLabel_palm});
             this.statusStrip_main.Location = new System.Drawing.Point(0, 610);
             this.statusStrip_main.Name = "statusStrip_main";
             this.statusStrip_main.Padding = new System.Windows.Forms.Padding(2, 0, 24, 0);
@@ -1407,7 +1409,7 @@
             // toolStripStatusLabel_main
             // 
             this.toolStripStatusLabel_main.Name = "toolStripStatusLabel_main";
-            this.toolStripStatusLabel_main.Size = new System.Drawing.Size(895, 28);
+            this.toolStripStatusLabel_main.Size = new System.Drawing.Size(682, 28);
             this.toolStripStatusLabel_main.Spring = true;
             this.toolStripStatusLabel_main.Text = "欢迎使用 dp2Circulation ...";
             this.toolStripStatusLabel_main.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -1695,12 +1697,12 @@
             this.tabControl_panelFixed.Controls.Add(this.tabPage_share);
             this.tabControl_panelFixed.Controls.Add(this.tabPage_browse);
             this.tabControl_panelFixed.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tabControl_panelFixed.Location = new System.Drawing.Point(0, 44);
+            this.tabControl_panelFixed.Location = new System.Drawing.Point(0, 25);
             this.tabControl_panelFixed.Margin = new System.Windows.Forms.Padding(0);
             this.tabControl_panelFixed.Name = "tabControl_panelFixed";
             this.tabControl_panelFixed.Padding = new System.Drawing.Point(0, 0);
             this.tabControl_panelFixed.SelectedIndex = 0;
-            this.tabControl_panelFixed.Size = new System.Drawing.Size(362, 480);
+            this.tabControl_panelFixed.Size = new System.Drawing.Size(362, 499);
             this.tabControl_panelFixed.TabIndex = 1;
             this.tabControl_panelFixed.SelectedIndexChanged += new System.EventHandler(this.tabControl_panelFixed_SelectedIndexChanged);
             this.tabControl_panelFixed.SizeChanged += new System.EventHandler(this.tabControl_panelFixed_SizeChanged);
@@ -1727,7 +1729,7 @@
             this.tabPage_history.Location = new System.Drawing.Point(4, 40);
             this.tabPage_history.Margin = new System.Windows.Forms.Padding(0);
             this.tabPage_history.Name = "tabPage_history";
-            this.tabPage_history.Size = new System.Drawing.Size(354, 436);
+            this.tabPage_history.Size = new System.Drawing.Size(354, 455);
             this.tabPage_history.TabIndex = 0;
             this.tabPage_history.Text = "操作历史";
             this.tabPage_history.UseVisualStyleBackColor = true;
@@ -1738,7 +1740,7 @@
             this.webBrowser_history.Location = new System.Drawing.Point(0, 0);
             this.webBrowser_history.MinimumSize = new System.Drawing.Size(26, 28);
             this.webBrowser_history.Name = "webBrowser_history";
-            this.webBrowser_history.Size = new System.Drawing.Size(354, 436);
+            this.webBrowser_history.Size = new System.Drawing.Size(354, 455);
             this.webBrowser_history.TabIndex = 0;
             // 
             // tabPage_property
@@ -1883,7 +1885,7 @@
             this.toolStripButton_close});
             this.toolStrip_panelFixed.Location = new System.Drawing.Point(0, 0);
             this.toolStrip_panelFixed.Name = "toolStrip_panelFixed";
-            this.toolStrip_panelFixed.Size = new System.Drawing.Size(362, 44);
+            this.toolStrip_panelFixed.Size = new System.Drawing.Size(362, 25);
             this.toolStrip_panelFixed.TabIndex = 3;
             this.toolStrip_panelFixed.Text = "toolStrip1";
             // 
@@ -1895,7 +1897,7 @@
             this.toolStripButton_close.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.toolStripButton_close.ImageTransparentColor = System.Drawing.Color.White;
             this.toolStripButton_close.Name = "toolStripButton_close";
-            this.toolStripButton_close.Size = new System.Drawing.Size(40, 38);
+            this.toolStripButton_close.Size = new System.Drawing.Size(40, 19);
             this.toolStripButton_close.Text = "隐藏面板";
             this.toolStripButton_close.Click += new System.EventHandler(this.toolStripButton_close_Click);
             // 
@@ -1907,6 +1909,11 @@
             this.splitter_fixed.Size = new System.Drawing.Size(3, 524);
             this.splitter_fixed.TabIndex = 6;
             this.splitter_fixed.TabStop = false;
+            // 
+            // toolStripStatusLabel_palm
+            // 
+            this.toolStripStatusLabel_palm.Name = "toolStripStatusLabel_palm";
+            this.toolStripStatusLabel_palm.Size = new System.Drawing.Size(0, 28);
             // 
             // MainForm
             // 
@@ -2149,6 +2156,7 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator32;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_openRfidToolForm;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel_rfid;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel_palm;
     }
 }
 

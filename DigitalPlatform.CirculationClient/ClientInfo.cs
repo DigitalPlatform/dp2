@@ -233,12 +233,14 @@ namespace DigitalPlatform.CirculationClient
 
         public static void WriteDebugLog(string strText)
         {
-            Log.Debug(strText);
+            WriteLog("debug", strText);
+
+            // Log.Debug(strText);
         }
 
         // 写入错误日志文件
         // parameters:
-        //      level   info/error
+        //      level   info/error/debug
         // Exception:
         //      可能会抛出异常
         public static void WriteLog(string level, string strText)
@@ -257,6 +259,8 @@ namespace DigitalPlatform.CirculationClient
 #endif
             if (level == "info")
                 Log.Information(strText);
+            else if (level == "debug")
+                Log.Debug(strText);
             else
                 Log.Error(strText);
         }
