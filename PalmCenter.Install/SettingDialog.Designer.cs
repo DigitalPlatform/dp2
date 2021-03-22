@@ -65,6 +65,8 @@ namespace PalmCenter.Install
             this.label6 = new System.Windows.Forms.Label();
             this.checkBox_speak = new System.Windows.Forms.CheckBox();
             this.checkBox_beep = new System.Windows.Forms.CheckBox();
+            this.label10 = new System.Windows.Forms.Label();
+            this.textBox_palm_registerScans = new System.Windows.Forms.TextBox();
             this.tabControl1.SuspendLayout();
             this.tabPage_replication.SuspendLayout();
             this.toolStrip_server.SuspendLayout();
@@ -293,6 +295,8 @@ namespace PalmCenter.Install
             // tabPage_palm
             // 
             this.tabPage_palm.AutoScroll = true;
+            this.tabPage_palm.Controls.Add(this.textBox_palm_registerScans);
+            this.tabPage_palm.Controls.Add(this.label10);
             this.tabPage_palm.Controls.Add(this.checkBox_allow_changeRecognitionQuality);
             this.tabPage_palm.Controls.Add(this.checkBox_allow_changeRegisterQuality);
             this.tabPage_palm.Controls.Add(this.checkBox_allow_changeThreshold);
@@ -320,115 +324,127 @@ namespace PalmCenter.Install
             // checkBox_allow_changeRecognitionQuality
             // 
             this.checkBox_allow_changeRecognitionQuality.AutoSize = true;
-            this.checkBox_allow_changeRecognitionQuality.Location = new System.Drawing.Point(485, 174);
+            this.checkBox_allow_changeRecognitionQuality.Location = new System.Drawing.Point(485, 273);
             this.checkBox_allow_changeRecognitionQuality.Name = "checkBox_allow_changeRecognitionQuality";
             this.checkBox_allow_changeRecognitionQuality.Size = new System.Drawing.Size(120, 25);
             this.checkBox_allow_changeRecognitionQuality.TabIndex = 71;
             this.checkBox_allow_changeRecognitionQuality.Text = "允许修改";
             this.checkBox_allow_changeRecognitionQuality.UseVisualStyleBackColor = true;
+            this.checkBox_allow_changeRecognitionQuality.Visible = false;
             // 
             // checkBox_allow_changeRegisterQuality
             // 
             this.checkBox_allow_changeRegisterQuality.AutoSize = true;
-            this.checkBox_allow_changeRegisterQuality.Location = new System.Drawing.Point(485, 124);
+            this.checkBox_allow_changeRegisterQuality.Location = new System.Drawing.Point(485, 223);
             this.checkBox_allow_changeRegisterQuality.Name = "checkBox_allow_changeRegisterQuality";
             this.checkBox_allow_changeRegisterQuality.Size = new System.Drawing.Size(120, 25);
             this.checkBox_allow_changeRegisterQuality.TabIndex = 70;
             this.checkBox_allow_changeRegisterQuality.Text = "允许修改";
             this.checkBox_allow_changeRegisterQuality.UseVisualStyleBackColor = true;
+            this.checkBox_allow_changeRegisterQuality.Visible = false;
             // 
             // checkBox_allow_changeThreshold
             // 
             this.checkBox_allow_changeThreshold.AutoSize = true;
-            this.checkBox_allow_changeThreshold.Location = new System.Drawing.Point(485, 68);
+            this.checkBox_allow_changeThreshold.Location = new System.Drawing.Point(485, 167);
             this.checkBox_allow_changeThreshold.Name = "checkBox_allow_changeThreshold";
             this.checkBox_allow_changeThreshold.Size = new System.Drawing.Size(120, 25);
             this.checkBox_allow_changeThreshold.TabIndex = 69;
             this.checkBox_allow_changeThreshold.Text = "允许修改";
             this.checkBox_allow_changeThreshold.UseVisualStyleBackColor = true;
+            this.checkBox_allow_changeThreshold.Visible = false;
             // 
             // button_setDefaultRecognitionQuality
             // 
-            this.button_setDefaultRecognitionQuality.Location = new System.Drawing.Point(302, 166);
+            this.button_setDefaultRecognitionQuality.Location = new System.Drawing.Point(302, 265);
             this.button_setDefaultRecognitionQuality.Name = "button_setDefaultRecognitionQuality";
             this.button_setDefaultRecognitionQuality.Size = new System.Drawing.Size(177, 47);
             this.button_setDefaultRecognitionQuality.TabIndex = 68;
             this.button_setDefaultRecognitionQuality.Text = "恢复默认值";
             this.button_setDefaultRecognitionQuality.UseVisualStyleBackColor = true;
+            this.button_setDefaultRecognitionQuality.Visible = false;
             // 
             // textBox_cfg_recognitionQualityThreshold
             // 
-            this.textBox_cfg_recognitionQualityThreshold.Location = new System.Drawing.Point(196, 174);
+            this.textBox_cfg_recognitionQualityThreshold.Location = new System.Drawing.Point(196, 273);
             this.textBox_cfg_recognitionQualityThreshold.Name = "textBox_cfg_recognitionQualityThreshold";
             this.textBox_cfg_recognitionQualityThreshold.ReadOnly = true;
             this.textBox_cfg_recognitionQualityThreshold.Size = new System.Drawing.Size(100, 31);
             this.textBox_cfg_recognitionQualityThreshold.TabIndex = 67;
+            this.textBox_cfg_recognitionQualityThreshold.Visible = false;
             // 
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(17, 177);
+            this.label9.Location = new System.Drawing.Point(16, 276);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(180, 21);
             this.label9.TabIndex = 66;
             this.label9.Text = "识别质量阈值(&R):";
+            this.label9.Visible = false;
             // 
             // button_setDefaultRegisterQuality
             // 
-            this.button_setDefaultRegisterQuality.Location = new System.Drawing.Point(303, 113);
+            this.button_setDefaultRegisterQuality.Location = new System.Drawing.Point(303, 212);
             this.button_setDefaultRegisterQuality.Name = "button_setDefaultRegisterQuality";
             this.button_setDefaultRegisterQuality.Size = new System.Drawing.Size(177, 47);
             this.button_setDefaultRegisterQuality.TabIndex = 65;
             this.button_setDefaultRegisterQuality.Text = "恢复默认值";
             this.button_setDefaultRegisterQuality.UseVisualStyleBackColor = true;
+            this.button_setDefaultRegisterQuality.Visible = false;
             // 
             // textBox_cfg_registerQualityThreshold
             // 
-            this.textBox_cfg_registerQualityThreshold.Location = new System.Drawing.Point(197, 121);
+            this.textBox_cfg_registerQualityThreshold.Location = new System.Drawing.Point(197, 220);
             this.textBox_cfg_registerQualityThreshold.Name = "textBox_cfg_registerQualityThreshold";
             this.textBox_cfg_registerQualityThreshold.ReadOnly = true;
             this.textBox_cfg_registerQualityThreshold.Size = new System.Drawing.Size(100, 31);
             this.textBox_cfg_registerQualityThreshold.TabIndex = 64;
+            this.textBox_cfg_registerQualityThreshold.Visible = false;
             // 
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(18, 124);
+            this.label8.Location = new System.Drawing.Point(16, 223);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(180, 21);
             this.label8.TabIndex = 63;
             this.label8.Text = "登记质量阈值(&R):";
+            this.label8.Visible = false;
             // 
             // button_setDefaultThreshold
             // 
-            this.button_setDefaultThreshold.Location = new System.Drawing.Point(302, 57);
+            this.button_setDefaultThreshold.Location = new System.Drawing.Point(302, 156);
             this.button_setDefaultThreshold.Name = "button_setDefaultThreshold";
             this.button_setDefaultThreshold.Size = new System.Drawing.Size(177, 47);
             this.button_setDefaultThreshold.TabIndex = 60;
             this.button_setDefaultThreshold.Text = "恢复默认值";
             this.button_setDefaultThreshold.UseVisualStyleBackColor = true;
+            this.button_setDefaultThreshold.Visible = false;
             // 
             // textBox_cfg_shreshold
             // 
-            this.textBox_cfg_shreshold.Location = new System.Drawing.Point(196, 65);
+            this.textBox_cfg_shreshold.Location = new System.Drawing.Point(196, 164);
             this.textBox_cfg_shreshold.Name = "textBox_cfg_shreshold";
             this.textBox_cfg_shreshold.ReadOnly = true;
             this.textBox_cfg_shreshold.Size = new System.Drawing.Size(100, 31);
             this.textBox_cfg_shreshold.TabIndex = 59;
+            this.textBox_cfg_shreshold.Visible = false;
             // 
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(17, 68);
+            this.label7.Location = new System.Drawing.Point(16, 167);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(180, 21);
             this.label7.TabIndex = 58;
             this.label7.Text = "掌纹比对阈值(&T):";
+            this.label7.Visible = false;
             // 
             // comboBox_deviceList
             // 
             this.comboBox_deviceList.FormattingEnabled = true;
-            this.comboBox_deviceList.Location = new System.Drawing.Point(196, 16);
+            this.comboBox_deviceList.Location = new System.Drawing.Point(223, 16);
             this.comboBox_deviceList.Name = "comboBox_deviceList";
             this.comboBox_deviceList.Size = new System.Drawing.Size(283, 29);
             this.comboBox_deviceList.TabIndex = 57;
@@ -445,24 +461,42 @@ namespace PalmCenter.Install
             // checkBox_speak
             // 
             this.checkBox_speak.AutoSize = true;
-            this.checkBox_speak.Location = new System.Drawing.Point(141, 229);
+            this.checkBox_speak.Location = new System.Drawing.Point(141, 328);
             this.checkBox_speak.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
             this.checkBox_speak.Name = "checkBox_speak";
             this.checkBox_speak.Size = new System.Drawing.Size(153, 25);
             this.checkBox_speak.TabIndex = 62;
             this.checkBox_speak.Text = "语音提示(&S)";
             this.checkBox_speak.UseVisualStyleBackColor = true;
+            this.checkBox_speak.Visible = false;
             // 
             // checkBox_beep
             // 
             this.checkBox_beep.AutoSize = true;
-            this.checkBox_beep.Location = new System.Drawing.Point(21, 229);
+            this.checkBox_beep.Location = new System.Drawing.Point(20, 328);
             this.checkBox_beep.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
             this.checkBox_beep.Name = "checkBox_beep";
             this.checkBox_beep.Size = new System.Drawing.Size(111, 25);
             this.checkBox_beep.TabIndex = 61;
             this.checkBox_beep.Text = "蜂鸣(&B)";
             this.checkBox_beep.UseVisualStyleBackColor = true;
+            this.checkBox_beep.Visible = false;
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(16, 76);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(201, 21);
+            this.label10.TabIndex = 72;
+            this.label10.Text = "登记时扫描次数(&R):";
+            // 
+            // textBox_palm_registerScans
+            // 
+            this.textBox_palm_registerScans.Location = new System.Drawing.Point(223, 73);
+            this.textBox_palm_registerScans.Name = "textBox_palm_registerScans";
+            this.textBox_palm_registerScans.Size = new System.Drawing.Size(161, 31);
+            this.textBox_palm_registerScans.TabIndex = 73;
             // 
             // SettingDialog
             // 
@@ -529,5 +563,7 @@ namespace PalmCenter.Install
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.CheckBox checkBox_speak;
         private System.Windows.Forms.CheckBox checkBox_beep;
+        private System.Windows.Forms.TextBox textBox_palm_registerScans;
+        private System.Windows.Forms.Label label10;
     }
 }

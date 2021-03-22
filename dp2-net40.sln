@@ -282,6 +282,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTestGeneral", "UnitTest
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dp2Inventory", "dp2Inventory\dp2Inventory.csproj", "{37202531-E7D6-48CF-B2D3-BAB8FFC6713C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestPalmprint", "TestPalmprint\TestPalmprint.csproj", "{754B261F-227A-42F5-A7CE-FA7E01D53EEF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -2380,6 +2382,24 @@ Global
 		{37202531-E7D6-48CF-B2D3-BAB8FFC6713C}.Test|Mixed Platforms.Build.0 = Debug|Any CPU
 		{37202531-E7D6-48CF-B2D3-BAB8FFC6713C}.Test|x86.ActiveCfg = Debug|Any CPU
 		{37202531-E7D6-48CF-B2D3-BAB8FFC6713C}.Test|x86.Build.0 = Debug|Any CPU
+		{754B261F-227A-42F5-A7CE-FA7E01D53EEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{754B261F-227A-42F5-A7CE-FA7E01D53EEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{754B261F-227A-42F5-A7CE-FA7E01D53EEF}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{754B261F-227A-42F5-A7CE-FA7E01D53EEF}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{754B261F-227A-42F5-A7CE-FA7E01D53EEF}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{754B261F-227A-42F5-A7CE-FA7E01D53EEF}.Debug|x86.Build.0 = Debug|Any CPU
+		{754B261F-227A-42F5-A7CE-FA7E01D53EEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{754B261F-227A-42F5-A7CE-FA7E01D53EEF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{754B261F-227A-42F5-A7CE-FA7E01D53EEF}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{754B261F-227A-42F5-A7CE-FA7E01D53EEF}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{754B261F-227A-42F5-A7CE-FA7E01D53EEF}.Release|x86.ActiveCfg = Release|Any CPU
+		{754B261F-227A-42F5-A7CE-FA7E01D53EEF}.Release|x86.Build.0 = Release|Any CPU
+		{754B261F-227A-42F5-A7CE-FA7E01D53EEF}.Test|Any CPU.ActiveCfg = Debug|Any CPU
+		{754B261F-227A-42F5-A7CE-FA7E01D53EEF}.Test|Any CPU.Build.0 = Debug|Any CPU
+		{754B261F-227A-42F5-A7CE-FA7E01D53EEF}.Test|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{754B261F-227A-42F5-A7CE-FA7E01D53EEF}.Test|Mixed Platforms.Build.0 = Debug|Any CPU
+		{754B261F-227A-42F5-A7CE-FA7E01D53EEF}.Test|x86.ActiveCfg = Debug|Any CPU
+		{754B261F-227A-42F5-A7CE-FA7E01D53EEF}.Test|x86.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

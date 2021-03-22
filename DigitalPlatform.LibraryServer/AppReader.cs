@@ -4348,15 +4348,6 @@ out strError);
                     return result;
                 }
 
-                // 观察一个读者记录路径，看看是不是在当前用户管辖的读者库范围内?
-                if (IsTestReaderBarcode(strBarcode) == false
-                    && this.IsCurrentChangeableReaderPath(strOutputPath,
-                    sessioninfo.LibraryCodeList) == false)
-                {
-                    strError = "读者记录路径 '" + strOutputPath + "' 的读者库不在当前用户管辖范围内";
-                    goto ERROR1;
-                }
-
                 /*
                  * 不必明显报错，前端从返回值已经可以看出有重
                 if (nRet > 1)
@@ -4370,6 +4361,16 @@ out strError);
 
                 if (nRet == -1)
                     goto ERROR1;
+
+                // 2021/3/20 移动到这里
+                // 观察一个读者记录路径，看看是不是在当前用户管辖的读者库范围内?
+                if (IsTestReaderBarcode(strBarcode) == false
+                    && this.IsCurrentChangeableReaderPath(strOutputPath,
+                    sessioninfo.LibraryCodeList) == false)
+                {
+                    strError = "读者记录路径 '" + strOutputPath + "' 的读者库不在当前用户管辖范围内";
+                    goto ERROR1;
+                }
 
                 result.ErrorInfo = strError;
                 result.Value = nRet;

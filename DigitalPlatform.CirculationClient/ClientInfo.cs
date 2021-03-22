@@ -30,6 +30,9 @@ namespace DigitalPlatform.CirculationClient
     /// </summary>
     public static class ClientInfo
     {
+        // 配置文件发生了重新装载(在监控模式下)
+        public static event EventHandler ConfigReloaded;
+
         public static string ProgramName { get; set; }
 
         /// <summary>
@@ -399,6 +402,8 @@ namespace DigitalPlatform.CirculationClient
                             WriteInfoLog($"配置文件 {filename} 重试(监控)重装成功{logContent}");
                         else
                             WriteInfoLog($"配置文件 {filename} (监控)重装成功{logContent}");
+
+                        ConfigReloaded?.Invoke(_config, new EventArgs());
                         break;
                     }
                     catch (Exception ex)

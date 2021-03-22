@@ -24,8 +24,10 @@ namespace PalmCenter.Install
         {
             InitializeComponent();
 
+            /*
             this.tabControl1.TabPages.Remove(this.tabPage_palm);
             this.tabPage_palm.Dispose();
+            */
         }
 
         private void SettingDialog_Load(object sender, EventArgs e)
@@ -153,6 +155,12 @@ namespace PalmCenter.Install
             this.textBox_replicationStart.Text = _config.Get(
                     "libraryServer",
                     "replicationStart");
+
+            this.textBox_palm_registerScans.Text = _config.Get(
+"palm",
+"registerScans",
+"5");
+
         }
 
         void SaveConfig()
@@ -182,6 +190,12 @@ namespace PalmCenter.Install
         "libraryServer",
         "replicationStart",
         this.textBox_replicationStart.Text);
+
+            _config.Set(
+"palm",
+"registerScans",
+this.textBox_palm_registerScans.Text);
+
 
             if (_config.Changed)
                 _config.Save();

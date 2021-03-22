@@ -4464,10 +4464,13 @@ select readerbarcode, name, department from reader  WHERE librarycode = '合肥�
 
             string strLibraryCode = Global.GetLibraryCode(strLocation);
             // string strLocationLike = " operlogcircu.librarycode like '%," + strLibraryCode + ",%' "; // 不知何时用的这种方法。这种方法的问题是，如果一些图书中途被划拨给某个其他分馆，用这种方式就会导致 [全部] 的几个表统计出来的数量偏少。而用 item.location 判断就没有这个问题 
+            
+            // 这是压制 [全部] 的做法
             string strLocationLike = " item.location like '" + strLocation + "%' "; // 2017/6/21 改回用这种方式。因为要统计洞庭湖校区的 2017 2 到 6 月的数据
-            if (string.IsNullOrEmpty(Global.GetLocationRoom(strLocation)) == false)
+            
+            // if (string.IsNullOrEmpty(Global.GetLocationRoom(strLocation)) == false)
             {
-                // 改为沿用以前的方法
+                // 改为沿用以前的方法。会出现 [全部]
                 strLocationLike = " item.location like '" + strLocation + "%' ";
                 if (string.IsNullOrEmpty(strLocation) == true)
                     strLocationLike = " item.location = '' ";   // 2014/5/28
@@ -4954,6 +4957,8 @@ out strError);
 
             if (bRoot == true)
             {
+                // 一般分馆是 "海淀分馆/"。
+                // 如果遇到 dp2LibraryCode 为 ""，代表 [全局]，这样最后加入的条目就是 "/"。记住这个代表希望列出全局的所有馆藏地，即，所有不带 / 的馆藏地名字
                 string strRoot = strLibraryCode + "/";
                 if (results.IndexOf(strRoot) == -1)
                     results.Insert(0, strRoot);

@@ -26,6 +26,10 @@ namespace DigitalPlatform.CirculationClient
     /// </summary>
     public class BioUtil : BioBase, IDisposable
     {
+        // 2021/3/22
+        // 配置参数表
+        public IDictionary<string, string> ConfigTable = new Dictionary<string, string>();
+
         public event GetImageEventHandler GetImage = null;
 
         public virtual string BioTypeName

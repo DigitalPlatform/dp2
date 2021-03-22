@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
@@ -18,22 +18,22 @@ using DigitalPlatform.Text;
 namespace DigitalPlatform.Message
 {
     /// <summary>
-    /// ÏûÏ¢ÊÕ·¢¹ÜÀíÖĞĞÄ
-    /// Õâ¸öÀà´ú±íÁËÒ»¸öÏûÏ¢Ó¦ÓÃ¡£Í¨¹ı¼ÓËøµÈ·½Ê½¶Ôµ×²ãÊı¾İ¿â²Ù×÷ÊµĞĞÑÏÃÜ°²È«µÄ¹ÜÀí
+    /// æ¶ˆæ¯æ”¶å‘ç®¡ç†ä¸­å¿ƒ
+    /// è¿™ä¸ªç±»ä»£è¡¨äº†ä¸€ä¸ªæ¶ˆæ¯åº”ç”¨ã€‚é€šè¿‡åŠ é”ç­‰æ–¹å¼å¯¹åº•å±‚æ•°æ®åº“æ“ä½œå®è¡Œä¸¥å¯†å®‰å…¨çš„ç®¡ç†
     /// </summary>
     public class MessageCenter
     {
         public VerifyAccountEventHandler VerifyAccount;
 
-        public string ServerUrl = "";   // ·şÎñÆ÷URL
-        public string MessageDbName = "";   // ÏûÏ¢Êı¾İ¿âÃû
+        public string ServerUrl = "";   // æœåŠ¡å™¨URL
+        public string MessageDbName = "";   // æ¶ˆæ¯æ•°æ®åº“å
         public List<Box> Boxes = null;
 
-        // ĞÅÏäÀàĞÍÃû
-        public const string INBOX = "ÊÕ¼şÏä";
-        public const string TEMP = "²İ¸å";
-        public const string OUTBOX = "ÒÑ·¢ËÍ";
-        public const string RECYCLEBIN = "·Ï¼şÏä";
+        // ä¿¡ç®±ç±»å‹å
+        public const string INBOX = "æ”¶ä»¶ç®±";
+        public const string TEMP = "è‰ç¨¿";
+        public const string OUTBOX = "å·²å‘é€";
+        public const string RECYCLEBIN = "åºŸä»¶ç®±";
 
         public MessageCenter()
         {
@@ -66,7 +66,7 @@ namespace DigitalPlatform.Message
         {
             CultureInfo ci = new CultureInfo(Thread.CurrentThread.CurrentUICulture.Name);
 
-            // TODO: Èç¹ûÅ×³öÒì³££¬ÔòÒªÊÔ×ÅÈ¡zh-cnµÄ×Ö·û´®£¬»òÕß·µ»ØÒ»¸ö±¨´íµÄ×Ö·û´®
+            // TODO: å¦‚æœæŠ›å‡ºå¼‚å¸¸ï¼Œåˆ™è¦è¯•ç€å–zh-cnçš„å­—ç¬¦ä¸²ï¼Œæˆ–è€…è¿”å›ä¸€ä¸ªæŠ¥é”™çš„å­—ç¬¦ä¸²
             try
             {
 
@@ -77,43 +77,43 @@ namespace DigitalPlatform.Message
             }
             catch // (Exception ex)
             {
-                return strID + " ÔÚ " + Thread.CurrentThread.CurrentUICulture.Name + " ÖĞÃ»ÓĞÕÒµ½¶ÔÓ¦µÄ×ÊÔ´¡£";
+                return strID + " åœ¨ " + Thread.CurrentThread.CurrentUICulture.Name + " ä¸­æ²¡æœ‰æ‰¾åˆ°å¯¹åº”çš„èµ„æºã€‚";
             }
         }
 
-        // ³õÊ¼»¯±ê×¼µÄ¼¸¸öĞÅÏä
+        // åˆå§‹åŒ–æ ‡å‡†çš„å‡ ä¸ªä¿¡ç®±
         public void InitialStandardBoxes()
         {
             this.Boxes = new List<Box>();
 
             Box box = null;
 
-            // ÊÕ¼şÏä inbox
+            // æ”¶ä»¶ç®± inbox
             box = new Box();
-            box.Name = this.GetString("ÊÕ¼şÏä");
+            box.Name = this.GetString("æ”¶ä»¶ç®±");
             box.Type = INBOX;
             this.Boxes.Add(box);
 
-            // ²İ¸å temp
+            // è‰ç¨¿ temp
             box = new Box();
-            box.Name = this.GetString("²İ¸å");
+            box.Name = this.GetString("è‰ç¨¿");
             box.Type = TEMP;
             this.Boxes.Add(box);
 
-            // ÒÑ·¢ËÍ outbox
+            // å·²å‘é€ outbox
             box = new Box();
-            box.Name = this.GetString("ÒÑ·¢ËÍ");
+            box.Name = this.GetString("å·²å‘é€");
             box.Type = OUTBOX;
             this.Boxes.Add(box);
 
-            // ·Ï¼şÏä recyclebin
+            // åºŸä»¶ç®± recyclebin
             box = new Box();
-            box.Name = this.GetString("·Ï¼şÏä");
+            box.Name = this.GetString("åºŸä»¶ç®±");
             box.Type = RECYCLEBIN;
             this.Boxes.Add(box);
         }
 
-        // ½«ĞÅÏäÃû×Ö×ª»»ÎªboxtypeÖµ
+        // å°†ä¿¡ç®±åå­—è½¬æ¢ä¸ºboxtypeå€¼
         // 2009/7/6
         public string GetBoxType(string strName)
         {
@@ -130,37 +130,37 @@ namespace DigitalPlatform.Message
 
         public static bool IsInBox(string strBoxType)
         {
-            if (strBoxType == INBOX/*"ÊÕ¼şÏä"*/)
+            if (strBoxType == INBOX/*"æ”¶ä»¶ç®±"*/)
                 return true;
             return false;
         }
 
         public static bool IsTemp(string strBoxType)
         {
-            if (strBoxType == TEMP/*"²İ¸å"*/)
+            if (strBoxType == TEMP/*"è‰ç¨¿"*/)
                 return true;
             return false;
         }
 
         public static bool IsOutbox(string strBoxType)
         {
-            if (strBoxType == OUTBOX/*"ÒÑ·¢ËÍ"*/)
+            if (strBoxType == OUTBOX/*"å·²å‘é€"*/)
                 return true;
             return false;
         }
 
         public static bool IsRecycleBin(string strBoxType)
         {
-            if (strBoxType == RECYCLEBIN/*"·Ï¼şÏä"*/)
+            if (strBoxType == RECYCLEBIN/*"åºŸä»¶ç®±"*/)
                 return true;
             return false;
         }
 
-        // ¹¹Ôì¼ìË÷Ê½
+        // æ„é€ æ£€ç´¢å¼
         // parameters:
-        //      strStyle    ¿Õ×Ö·û´®, ±íÊ¾¹¹ÔìÓÃÓÚ¼ìË÷Ò»¸öĞÅÏäÄÚËùÓĞÏûÏ¢µÄ¼ìË÷Ê½;
-        //                  "untouched", ±íÊ¾¹¹ÔìÓÃÓÚ¼ìË÷Ò»¸öĞÅÏäÄÚÎ´¶ÁÏûÏ¢µÄ¼ìË÷Ê½;
-        //                  "touched", ±íÊ¾¹¹ÔìÓÃÓÚ¼ìË÷Ò»¸öĞÅÏäÄÚÒÑ¶ÁÏûÏ¢µÄ¼ìË÷Ê½;
+        //      strStyle    ç©ºå­—ç¬¦ä¸², è¡¨ç¤ºæ„é€ ç”¨äºæ£€ç´¢ä¸€ä¸ªä¿¡ç®±å†…æ‰€æœ‰æ¶ˆæ¯çš„æ£€ç´¢å¼;
+        //                  "untouched", è¡¨ç¤ºæ„é€ ç”¨äºæ£€ç´¢ä¸€ä¸ªä¿¡ç®±å†…æœªè¯»æ¶ˆæ¯çš„æ£€ç´¢å¼;
+        //                  "touched", è¡¨ç¤ºæ„é€ ç”¨äºæ£€ç´¢ä¸€ä¸ªä¿¡ç®±å†…å·²è¯»æ¶ˆæ¯çš„æ£€ç´¢å¼;
         public int MakeSearchQuery(
             string strUserID,
             string strBox,
@@ -173,26 +173,26 @@ namespace DigitalPlatform.Message
 
             if (String.IsNullOrEmpty(strUserID) == true)
             {
-                // text-level: ÄÚ²¿´íÎó
-                strError = "strUserID²ÎÊı²»ÄÜÎª¿Õ";
+                // text-level: å†…éƒ¨é”™è¯¯
+                strError = "strUserIDå‚æ•°ä¸èƒ½ä¸ºç©º";
                 return -1;
             }
 
             if (String.IsNullOrEmpty(strBox) == true)
             {
-                // text-level: ÄÚ²¿´íÎó
-                strError = "strBox²ÎÊı²»ÄÜÎª¿Õ";
+                // text-level: å†…éƒ¨é”™è¯¯
+                strError = "strBoxå‚æ•°ä¸èƒ½ä¸ºç©º";
                 return -1;
             }
 
-            // ĞèÒª×¢Òâ¼ì²éÒ»ÏÂboxÃû×ÖÊÇ·ñºÏ·¨
+            // éœ€è¦æ³¨æ„æ£€æŸ¥ä¸€ä¸‹boxåå­—æ˜¯å¦åˆæ³•
 
             if (String.IsNullOrEmpty(strStyle) == true)
             {
-                // 2007/4/5 ¸ÄÔì ¼ÓÉÏÁË GetXmlStringSimple()
+                // 2007/4/5 æ”¹é€  åŠ ä¸Šäº† GetXmlStringSimple()
                 strQueryXml = "<target list='"
                     + StringUtil.GetXmlStringSimple(this.MessageDbName)       // 2007/9/14
-                    + ":ÓÃ»§ÃûĞÅÏä'><item><order>DESC</order><word>"
+                    + ":ç”¨æˆ·åä¿¡ç®±'><item><order>DESC</order><word>"
         + StringUtil.GetXmlStringSimple(strUserID + "|" + strBox + "|")
         + "</word><match>left</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item>"
         + "<lang>zh</lang></target>";
@@ -200,10 +200,10 @@ namespace DigitalPlatform.Message
 
             else if (String.Compare(strStyle, "untouched") == 0)
             {
-                // 2007/4/5 ¸ÄÔì ¼ÓÉÏÁË GetXmlStringSimple()
+                // 2007/4/5 æ”¹é€  åŠ ä¸Šäº† GetXmlStringSimple()
                 strQueryXml = "<target list='"
                     + StringUtil.GetXmlStringSimple(this.MessageDbName)       // 2007/9/14
-                    + ":ÓÃ»§ÃûĞÅÏä'><item><order>DESC</order><word>"
+                    + ":ç”¨æˆ·åä¿¡ç®±'><item><order>DESC</order><word>"
         + StringUtil.GetXmlStringSimple(strUserID + "|" + strBox + "|0")
         + "</word><match>left</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item>"
         + "<lang>zh</lang></target>";
@@ -211,26 +211,26 @@ namespace DigitalPlatform.Message
 
             else if (String.Compare(strStyle, "touched") == 0)
             {
-                // 2007/4/5 ¸ÄÔì ¼ÓÉÏÁË GetXmlStringSimple()
+                // 2007/4/5 æ”¹é€  åŠ ä¸Šäº† GetXmlStringSimple()
                 strQueryXml = "<target list='"
                     + StringUtil.GetXmlStringSimple(this.MessageDbName)       // 2007/9/14
-                    + ":ÓÃ»§ÃûĞÅÏä'><item><order>DESC</order><word>"
+                    + ":ç”¨æˆ·åä¿¡ç®±'><item><order>DESC</order><word>"
         + StringUtil.GetXmlStringSimple(strUserID + "|" + strBox + "|1")
         + "</word><match>left</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item>"
         + "<lang>zh</lang></target>";
             }
             else
             {
-                // text-level: ÄÚ²¿´íÎó
-                strError = "Î´ÖªµÄstrStyleÀàĞÍ '" + strStyle + "'";
+                // text-level: å†…éƒ¨é”™è¯¯
+                strError = "æœªçŸ¥çš„strStyleç±»å‹ '" + strStyle + "'";
                 return -1;
             }
 
             return 0;
         }
 
-        // TODO: ĞèÒªÔö¼ÓÒ»¸ö¹¦ÄÜ£¬°ÑÏÔÊ¾Ãû×ª»¯ÎªÌõÂëºÅ
-        // Ğ£ÑéÊÕ¼şÈËÊÇ·ñ´æÔÚ
+        // TODO: éœ€è¦å¢åŠ ä¸€ä¸ªåŠŸèƒ½ï¼ŒæŠŠæ˜¾ç¤ºåè½¬åŒ–ä¸ºæ¡ç å·
+        // æ ¡éªŒæ”¶ä»¶äººæ˜¯å¦å­˜åœ¨
         // parameters:
         // return:
         //      -1  error
@@ -245,8 +245,8 @@ namespace DigitalPlatform.Message
 
             if (this.VerifyAccount == null)
             {
-                // text-level: ÄÚ²¿´íÎó
-                strError = "MessageCenter ÉĞÎ´¹Ò½Ó VerifyRecipient ÊÂ¼ş£¬ÎŞ·¨Ğ£ÑéÊÕ¼şÈËµÄ´æÔÚÓë·ñ¡£";
+                // text-level: å†…éƒ¨é”™è¯¯
+                strError = "MessageCenter å°šæœªæŒ‚æ¥ VerifyRecipient äº‹ä»¶ï¼Œæ— æ³•æ ¡éªŒæ”¶ä»¶äººçš„å­˜åœ¨ä¸å¦ã€‚";
                 return -1;
             }
 
@@ -263,10 +263,10 @@ namespace DigitalPlatform.Message
             {
                 if (String.IsNullOrEmpty(e.ErrorInfo) == true)
                 {
-                    // text-level: ÓÃ»§ÌáÊ¾
-                    strError = string.Format(this.GetString("ÊÕ¼şÈËs²»´æÔÚ"),   // "ÊÕ¼şÈË '{0}' ²»´æÔÚ¡£"
+                    // text-level: ç”¨æˆ·æç¤º
+                    strError = string.Format(this.GetString("æ”¶ä»¶äººsä¸å­˜åœ¨"),   // "æ”¶ä»¶äºº '{0}' ä¸å­˜åœ¨ã€‚"
                         strRecipient);
-                        // "ÊÕ¼şÈË '" + strRecipient + "' ²»´æÔÚ¡£";
+                        // "æ”¶ä»¶äºº '" + strRecipient + "' ä¸å­˜åœ¨ã€‚";
                     return 0;
                 }
 
@@ -279,13 +279,13 @@ namespace DigitalPlatform.Message
 
         const string EncryptKey = "dp2circulationpassword";
 
-        // ¼ÓÃÜÃ÷ÎÄ
+        // åŠ å¯†æ˜æ–‡
         public static string EncryptPassword(string PlainText)
         {
             return Cryptography.Encrypt(PlainText, EncryptKey);
         }
 
-        // ½âÃÜ¼ÓÃÜ¹ıµÄÎÄ×Ö
+        // è§£å¯†åŠ å¯†è¿‡çš„æ–‡å­—
         public static string DecryptPassword(string EncryptText)
         {
             return Cryptography.Decrypt(EncryptText, EncryptKey);
@@ -357,15 +357,15 @@ namespace DigitalPlatform.Message
                         strLeft = DecryptPassword(strValue);
                     else
                     {
-                        strError = "ÎŞ·¨Ê¶±ğµÄ²¿¼şÃû³Æ '"+strName+"'";
+                        strError = "æ— æ³•è¯†åˆ«çš„éƒ¨ä»¶åç§° '"+strName+"'";
                         return -1;
                     }
 
                 }
                 else if (strLeft.IndexOf("[") != -1)
                 {
-                    // µ¥¶ÀÒ»¸ö ÏÔÊ¾Ãû
-                    // TODO: ĞèÒª·­ÒëÎªÌõÂëºÅ?
+                    // å•ç‹¬ä¸€ä¸ª æ˜¾ç¤ºå
+                    // TODO: éœ€è¦ç¿»è¯‘ä¸ºæ¡ç å·?
 
                 }
 
@@ -376,12 +376,12 @@ namespace DigitalPlatform.Message
             return 0;
         }
 
-        // ·¢ËÍÏûÏ¢
+        // å‘é€æ¶ˆæ¯
         // parameters:
-        //      bVerifyRecipient    ÊÇ·ñÑéÖ¤ÊÕ¼şÈËµØÖ·
+        //      bVerifyRecipient    æ˜¯å¦éªŒè¯æ”¶ä»¶äººåœ°å€
         // return:
-        //      -1  ³ö´í
-        //      0   ³É¹¦
+        //      -1  å‡ºé”™
+        //      0   æˆåŠŸ
         public int SendMessage(
             RmsChannelCollection Channels,
             string strRecipient,
@@ -397,8 +397,8 @@ namespace DigitalPlatform.Message
 
             if (String.IsNullOrEmpty(strRecipient) == true)
             {
-                // text-level: ÓÃ»§ÌáÊ¾
-                strError = this.GetString("ÊÕ¼şÈË²»ÄÜÎª¿Õ");    // "ÊÕ¼şÈË²»ÄÜÎª¿Õ"
+                // text-level: ç”¨æˆ·æç¤º
+                strError = this.GetString("æ”¶ä»¶äººä¸èƒ½ä¸ºç©º");    // "æ”¶ä»¶äººä¸èƒ½ä¸ºç©º"
                 return -1;
             }
 
@@ -410,7 +410,7 @@ namespace DigitalPlatform.Message
             out strError);
             if (nRet == -1)
             {
-                strError = "ÊÕ¼şÈËµØÖ·¸ñÊ½²»ÕıÈ·: " + strError;
+                strError = "æ”¶ä»¶äººåœ°å€æ ¼å¼ä¸æ­£ç¡®: " + strError;
                 return -1;
             }
 
@@ -421,7 +421,7 @@ namespace DigitalPlatform.Message
 
                 if (bVerifyRecipient == true)
                 {
-                    // Ğ£ÑéÊÕ¼şÈËÊÇ·ñ´æÔÚ
+                    // æ ¡éªŒæ”¶ä»¶äººæ˜¯å¦å­˜åœ¨
                     // parameters:
                     // return:
                     //      -1  error
@@ -465,7 +465,7 @@ namespace DigitalPlatform.Message
                 byte[] output_timestamp = null;
                 string strOutputPath = "";
 
-                // Ğ´ÈëÊÕ¼şÏä
+                // å†™å…¥æ”¶ä»¶ç®±
                 long lRet = channel.DoSaveTextRes(this.MessageDbName + "/?",
                     dom.OuterXml,
                     false,
@@ -476,8 +476,8 @@ namespace DigitalPlatform.Message
                     out strError);
                 if (lRet == -1)
                 {
-                    // text-level: ÄÚ²¿´íÎó
-                    strError = "Ğ´ÈëÊÕ¼şÏäÊ±³ö´í: " + strError;
+                    // text-level: å†…éƒ¨é”™è¯¯
+                    strError = "å†™å…¥æ”¶ä»¶ç®±æ—¶å‡ºé”™: " + strError;
                     return -1;
                 }
 
@@ -487,7 +487,7 @@ namespace DigitalPlatform.Message
                     "box", MessageCenter.OUTBOX);
 
 
-                // Ğ´ÈëÒÑ·¢ËÍĞÅÏä
+                // å†™å…¥å·²å‘é€ä¿¡ç®±
                 lRet = channel.DoSaveTextRes(this.MessageDbName + "/?",
         dom.OuterXml,
         false,
@@ -498,8 +498,8 @@ namespace DigitalPlatform.Message
         out strError);
                 if (lRet == -1)
                 {
-                    // text-level: ÄÚ²¿´íÎó
-                    strError = "Ğ´ÈëÒÑ·¢ËÍĞÅÏäÊ±³ö´í: " + strError;
+                    // text-level: å†…éƒ¨é”™è¯¯
+                    strError = "å†™å…¥å·²å‘é€ä¿¡ç®±æ—¶å‡ºé”™: " + strError;
                     return -1;
                 }
             }
@@ -507,9 +507,9 @@ namespace DigitalPlatform.Message
             return 0;
         }
 
-        // ·¢ËÍ²İ¸åÏäÖĞµÄÒ»ÌõÏûÏ¢
+        // å‘é€è‰ç¨¿ç®±ä¸­çš„ä¸€æ¡æ¶ˆæ¯
         // parameters:
-        //      bVerifyRecipient    ÊÇ·ñÑéÖ¤ÊÕ¼şÈËµØÖ·
+        //      bVerifyRecipient    æ˜¯å¦éªŒè¯æ”¶ä»¶äººåœ°å€
         public int SendMessage(
             string strMessageID,
             string strRecipient,
@@ -521,9 +521,9 @@ namespace DigitalPlatform.Message
             return 0;
         }
 
-        // ±£´æÏûÏ¢µ½"²İ¸å"Ïä
+        // ä¿å­˜æ¶ˆæ¯åˆ°"è‰ç¨¿"ç®±
         // parameters:
-        //      strOldRecordID  Ô­À´ÔÚ²İ¸åÏäÖĞµÄ¼ÇÂ¼id¡£Èç¹ûÓĞ´Ëid£¬ÓÃ¸²¸Ç·½Ê½Ğ´Èë£¬·ñÔòÓÃ×·¼Ó·½Ê½Ğ´Èë
+        //      strOldRecordID  åŸæ¥åœ¨è‰ç¨¿ç®±ä¸­çš„è®°å½•idã€‚å¦‚æœæœ‰æ­¤idï¼Œç”¨è¦†ç›–æ–¹å¼å†™å…¥ï¼Œå¦åˆ™ç”¨è¿½åŠ æ–¹å¼å†™å…¥
         public int SaveMessage(
             RmsChannelCollection Channels,
             string strRecipient,
@@ -582,7 +582,7 @@ namespace DigitalPlatform.Message
                 strPath = this.MessageDbName + "/" + strOldRecordID;
             }
 
-            // Ğ´»Ø²á¼ÇÂ¼
+            // å†™å›å†Œè®°å½•
             long lRet = channel.DoSaveTextRes(strPath,
                 dom.OuterXml,
                 false,
@@ -601,7 +601,7 @@ namespace DigitalPlatform.Message
             return 0;
         }
 
-        // ¹Û²ìÊÕ¼şÏä×´Ì¬
+        // è§‚å¯Ÿæ”¶ä»¶ç®±çŠ¶æ€
         public int CheckInbox(string strUserName,
             out int nMessageCount,
             out string strError)
@@ -612,9 +612,9 @@ namespace DigitalPlatform.Message
             return 0;
         }
 
-        // Ò»´ÎĞÔ»ñµÃĞí¶àÏûÏ¢
+        // ä¸€æ¬¡æ€§è·å¾—è®¸å¤šæ¶ˆæ¯
         // parameters:
-        //      message_ids ÏûÏ¢IDµÄÊı×é¡£Èç¹û×Ö·û´®ÖĞ°üº¬'/'£¬ÔòÊÇÂ·¾¶£¬·ñÔò¾ÍÊÇid
+        //      message_ids æ¶ˆæ¯IDçš„æ•°ç»„ã€‚å¦‚æœå­—ç¬¦ä¸²ä¸­åŒ…å«'/'ï¼Œåˆ™æ˜¯è·¯å¾„ï¼Œå¦åˆ™å°±æ˜¯id
         public int GetMessage(
     RmsChannelCollection Channels,
     string strUserID,
@@ -655,10 +655,10 @@ namespace DigitalPlatform.Message
 
                 if (strUserID != null && message.strUserName != strUserID)
                 {
-                    // text-level: ÓÃ»§ÌáÊ¾
-                    strError = string.Format(this.GetString("´ËÌõÏûÏ¢²»ÊôÓÚÓÃ»§s, ²»ÔÊĞí²ì¿´"),  // "´ËÌõÏûÏ¢²»ÊôÓÚÓÃ»§ '{0}', ²»ÔÊĞí²ì¿´¡£"
+                    // text-level: ç”¨æˆ·æç¤º
+                    strError = string.Format(this.GetString("æ­¤æ¡æ¶ˆæ¯ä¸å±äºç”¨æˆ·s, ä¸å…è®¸å¯Ÿçœ‹"),  // "æ­¤æ¡æ¶ˆæ¯ä¸å±äºç”¨æˆ· '{0}', ä¸å…è®¸å¯Ÿçœ‹ã€‚"
                         strUserID);
-                    // "´ËÌõÏûÏ¢²»ÊôÓÚÓÃ»§ '" +strUserID+ "', ²»ÔÊĞí²ì¿´¡£";
+                    // "æ­¤æ¡æ¶ˆæ¯ä¸å±äºç”¨æˆ· '" +strUserID+ "', ä¸å…è®¸å¯Ÿçœ‹ã€‚";
                     return -1;
                 }
 
@@ -668,10 +668,10 @@ namespace DigitalPlatform.Message
             return 1;
         }
 
-        // ¸ù¾İÏûÏ¢¼ÇÂ¼id»ñµÃÏûÏ¢ÏêÏ¸ÄÚÈİ
-        // ±¾º¯Êı»¹½«¼ì²éÏûÏ¢ÊÇ·ñÊôÓÚstrUserIDÖ¸Ã÷µÄÓÃ»§
+        // æ ¹æ®æ¶ˆæ¯è®°å½•idè·å¾—æ¶ˆæ¯è¯¦ç»†å†…å®¹
+        // æœ¬å‡½æ•°è¿˜å°†æ£€æŸ¥æ¶ˆæ¯æ˜¯å¦å±äºstrUserIDæŒ‡æ˜çš„ç”¨æˆ·
         // parameters:
-        //      strUserID   Èç¹û==null£¬±íÊ¾²»¼ì²éÏûÏ¢ÊôÓÚºÎÓÃ»§
+        //      strUserID   å¦‚æœ==nullï¼Œè¡¨ç¤ºä¸æ£€æŸ¥æ¶ˆæ¯å±äºä½•ç”¨æˆ·
         public int GetMessage(
             RmsChannelCollection Channels,
             string strUserID,
@@ -705,18 +705,18 @@ namespace DigitalPlatform.Message
 
             if (strUserID != null && message.strUserName != strUserID)
             {
-                // text-level: ÓÃ»§ÌáÊ¾
-                strError = string.Format(this.GetString("´ËÌõÏûÏ¢²»ÊôÓÚÓÃ»§s, ²»ÔÊĞí²ì¿´"),  // "´ËÌõÏûÏ¢²»ÊôÓÚÓÃ»§ '{0}', ²»ÔÊĞí²ì¿´¡£"
+                // text-level: ç”¨æˆ·æç¤º
+                strError = string.Format(this.GetString("æ­¤æ¡æ¶ˆæ¯ä¸å±äºç”¨æˆ·s, ä¸å…è®¸å¯Ÿçœ‹"),  // "æ­¤æ¡æ¶ˆæ¯ä¸å±äºç”¨æˆ· '{0}', ä¸å…è®¸å¯Ÿçœ‹ã€‚"
                     strUserID);
-                    // "´ËÌõÏûÏ¢²»ÊôÓÚÓÃ»§ '" +strUserID+ "', ²»ÔÊĞí²ì¿´¡£";
+                    // "æ­¤æ¡æ¶ˆæ¯ä¸å±äºç”¨æˆ· '" +strUserID+ "', ä¸å…è®¸å¯Ÿçœ‹ã€‚";
                 return -1;
             }
 
             return 1;
         }
 
-        // ¸ù¾İÏûÏ¢¼ÇÂ¼Â·¾¶»ñµÃÏûÏ¢
-        // ²»¼ì²éÏûÏ¢ÊÇ·ñÊôÓÚÌØ¶¨ÓÃ»§
+        // æ ¹æ®æ¶ˆæ¯è®°å½•è·¯å¾„è·å¾—æ¶ˆæ¯
+        // ä¸æ£€æŸ¥æ¶ˆæ¯æ˜¯å¦å±äºç‰¹å®šç”¨æˆ·
         int GetMessageByPath(
             RmsChannel channel,
             string strPath,
@@ -739,8 +739,8 @@ namespace DigitalPlatform.Message
                 out strError);
             if (lRet == -1)
             {
-                // text-level: ÄÚ²¿´íÎó
-                strError = "»ñµÃÏûÏ¢¼ÇÂ¼ '" + strPath + "' Ê±³ö´í: " + strError;
+                // text-level: å†…éƒ¨é”™è¯¯
+                strError = "è·å¾—æ¶ˆæ¯è®°å½• '" + strPath + "' æ—¶å‡ºé”™: " + strError;
                 return -1;
             }
 
@@ -751,8 +751,8 @@ namespace DigitalPlatform.Message
             }
             catch (Exception ex)
             {
-                // text-level: ÄÚ²¿´íÎó
-                strError = "×°ÔØXML¼ÇÂ¼½øÈëDOMÊ±³ö´í: " + ex.Message;
+                // text-level: å†…éƒ¨é”™è¯¯
+                strError = "è£…è½½XMLè®°å½•è¿›å…¥DOMæ—¶å‡ºé”™: " + ex.Message;
                 return -1;
             }
 
@@ -789,13 +789,13 @@ namespace DigitalPlatform.Message
             data.strUserName = DomUtil.GetElementText(dom.DocumentElement,
                 "username");
 
-            // ºã¶¨ÎªÖĞÎÄÃû³Æ
+            // æ’å®šä¸ºä¸­æ–‡åç§°
             data.strBoxType = DomUtil.GetElementText(dom.DocumentElement,
                 "box");
 
             data.TimeStamp = timestamp;
 
-            // ĞŞ¸ÄtouchedÔªËØÖµ
+            // ä¿®æ”¹touchedå…ƒç´ å€¼
             if (messagelevel == MessageLevel.Full
                 && data.Touched == false)
             {
@@ -815,8 +815,8 @@ namespace DigitalPlatform.Message
                     out strError);
                 if (lRet == -1)
                 {
-                    // text-level: ÄÚ²¿´íÎó
-                    strError = "Ğ´»Ø¼ÇÂ¼ '"+strPath+"' Ê±³ö´í: " + strError;
+                    // text-level: å†…éƒ¨é”™è¯¯
+                    strError = "å†™å›è®°å½• '"+strPath+"' æ—¶å‡ºé”™: " + strError;
                     return -1;
                 }
                 data.Touched = true;
@@ -828,7 +828,7 @@ namespace DigitalPlatform.Message
         }
 
 
-        // »ñµÃÎ´¶ÁÏûÏ¢Êı
+        // è·å¾—æœªè¯»æ¶ˆæ¯æ•°
         public int GetUntouchedMessageCount(
             RmsChannelCollection Channels,
             string strUserID,
@@ -844,17 +844,17 @@ namespace DigitalPlatform.Message
 
             string strQueryXml = "";
 
-            // ¹¹Ôì¼ìË÷Ê½
+            // æ„é€ æ£€ç´¢å¼
             int nRet = MakeSearchQuery(
                 strUserID,
                 strBoxType,
-                "untouched",   // ĞÅÏäÄÚÈ«²¿ÓÊ¼ş
+                "untouched",   // ä¿¡ç®±å†…å…¨éƒ¨é‚®ä»¶
                 out strQueryXml,
                 out strError);
             if (nRet == -1)
             {
-                // text-level: ÄÚ²¿´íÎó
-                strError = "¹¹Ôì¼ìË÷Ê½³ö´í: " + strError;
+                // text-level: å†…éƒ¨é”™è¯¯
+                strError = "æ„é€ æ£€ç´¢å¼å‡ºé”™: " + strError;
                 return -1;
             }
 
@@ -865,8 +865,8 @@ namespace DigitalPlatform.Message
                 out strError);
             if (lRet == -1)
             {
-                // text-level: ÄÚ²¿´íÎó
-                strError = "¼ìË÷Ê§°Ü: " + strError;
+                // text-level: å†…éƒ¨é”™è¯¯
+                strError = "æ£€ç´¢å¤±è´¥: " + strError;
                 return -1;
             }
 
@@ -874,11 +874,11 @@ namespace DigitalPlatform.Message
         }
 
 
-        // ¼ìË÷»ñµÃÏûÏ¢, »òÕß´Ó½á¹û¼¯ÖĞ»ñµÃÏûÏ¢
+        // æ£€ç´¢è·å¾—æ¶ˆæ¯, æˆ–è€…ä»ç»“æœé›†ä¸­è·å¾—æ¶ˆæ¯
         // parameters:
         //      strStyle    search / untouched / touched
-        //                  ÓĞsearch±íÊ¾½øĞĞ¼ìË÷ºÍ»ñÈ¡£¬Ã»ÓĞsearch¾Í±íÊ¾²»¼ìË÷¶ø»ñÈ¡ÏÈÇ°¼ìË÷µÄ½á¹û¼¯¡£
-        //                  untochedºÍtouchedÓ¦µ±ºÍsearchÁªÓÃ¡£·ñÔòÖ»ÄÜ»ñÈ¡ÏÈÇ°µÄ½á¹ûÊı
+        //                  æœ‰searchè¡¨ç¤ºè¿›è¡Œæ£€ç´¢å’Œè·å–ï¼Œæ²¡æœ‰searchå°±è¡¨ç¤ºä¸æ£€ç´¢è€Œè·å–å…ˆå‰æ£€ç´¢çš„ç»“æœé›†ã€‚
+        //                  untochedå’Œtouchedåº”å½“å’Œsearchè”ç”¨ã€‚å¦åˆ™åªèƒ½è·å–å…ˆå‰çš„ç»“æœæ•°
         public int GetMessage(
             RmsChannelCollection Channels,
             string strResultsetName,
@@ -898,7 +898,7 @@ namespace DigitalPlatform.Message
 
             if (String.IsNullOrEmpty(this.MessageDbName) == true)
             {
-                strError = "ÏûÏ¢¿âÉĞÎ´¶¨Òå";
+                strError = "æ¶ˆæ¯åº“å°šæœªå®šä¹‰";
                 return -1;
             }
 
@@ -933,13 +933,13 @@ namespace DigitalPlatform.Message
             else if (StringUtil.IsInList("untouched", strStyle) == true)
                 strQueryStyle = "untouched";
 
-            // ¼ìË÷
+            // æ£€ç´¢
             if (bSearch == true)
             {
 
                 string strQueryXml = "";
 
-                // ¹¹Ôì¼ìË÷Ê½
+                // æ„é€ æ£€ç´¢å¼
                 nRet = MakeSearchQuery(
                     strUserID,
                     strBoxType,
@@ -948,8 +948,8 @@ namespace DigitalPlatform.Message
                     out strError);
                 if (nRet == -1)
                 {
-                    // text-level: ÄÚ²¿´íÎó
-                    strError = "¹¹Ôì¼ìË÷Ê½³ö´í: " + strError;
+                    // text-level: å†…éƒ¨é”™è¯¯
+                    strError = "æ„é€ æ£€ç´¢å¼å‡ºé”™: " + strError;
                     return -1;
                 }
 
@@ -960,16 +960,16 @@ namespace DigitalPlatform.Message
                     out strError);
                 if (lRet == -1)
                 {
-                    // text-level: ÄÚ²¿´íÎó
-                    strError = "¼ìË÷Ê§°Ü: " + strError;
+                    // text-level: å†…éƒ¨é”™è¯¯
+                    strError = "æ£€ç´¢å¤±è´¥: " + strError;
                     return -1;
                 }
 
                 // not found
                 if (lRet == 0)
                 {
-                    // text-level: ÓÃ»§ÌáÊ¾
-                    strError = this.GetString("Ã»ÓĞÈÎºÎÏûÏ¢");  // "Ã»ÓĞÈÎºÎÏûÏ¢"
+                    // text-level: ç”¨æˆ·æç¤º
+                    strError = this.GetString("æ²¡æœ‰ä»»ä½•æ¶ˆæ¯");  // "æ²¡æœ‰ä»»ä½•æ¶ˆæ¯"
                     return 0;
                 }
 
@@ -978,12 +978,12 @@ namespace DigitalPlatform.Message
 
 
             if (nCount == 0)
-                return nTotalCount;   // Èç¹û²»ĞèÒª»ñµÃ½á¹û¼¯
+                return nTotalCount;   // å¦‚æœä¸éœ€è¦è·å¾—ç»“æœé›†
 
             Debug.Assert(nStart >= 0, "");
 
 
-            // »ñµÃ½á¹û¼¯ÖĞÖ¸¶¨·¶Î§µÄ¼ÇÂ¼Â·¾¶
+            // è·å¾—ç»“æœé›†ä¸­æŒ‡å®šèŒƒå›´çš„è®°å½•è·¯å¾„
             ArrayList aLine = null;
             lRet = channel.DoGetSearchFullResult(
                 strResultsetName,
@@ -995,16 +995,16 @@ namespace DigitalPlatform.Message
                 out strError);
             if (lRet == -1)
             {
-                // ËäÈ»·µ»Ø-1,µ«ÊÇaLineÖĞÈÔÈ»ÓĞÄÚÈİÁË
+                // è™½ç„¶è¿”å›-1,ä½†æ˜¯aLineä¸­ä»ç„¶æœ‰å†…å®¹äº†
                 if (aLine == null)
                 {
-                    // text-level: ÄÚ²¿´íÎó
-                    strError = "»ñÈ¡ä¯ÀÀ¸ñÊ½Ê§°Ü: " + strError;
+                    // text-level: å†…éƒ¨é”™è¯¯
+                    strError = "è·å–æµè§ˆæ ¼å¼å¤±è´¥: " + strError;
                     return -1;
                 }
             }
 
-            // ·µ»ØÊı¾İ
+            // è¿”å›æ•°æ®
             for (int i = 0; i < aLine.Count; i++)
             {
                 string[] cols = null;
@@ -1015,7 +1015,7 @@ namespace DigitalPlatform.Message
 
                 MessageData data = null;
 
-                // TODO: level == none Ö»·µ»ØÂ·¾¶
+                // TODO: level == none åªè¿”å›è·¯å¾„
                 nRet = GetMessageByPath(
                     channel,
                     strPath,
@@ -1032,7 +1032,7 @@ namespace DigitalPlatform.Message
             return aLine.Count;
         }
 
-        // É¾³ıÒ»¸öboxÖĞµÄÈ«²¿ÏûÏ¢
+        // åˆ é™¤ä¸€ä¸ªboxä¸­çš„å…¨éƒ¨æ¶ˆæ¯
         public int DeleteMessage(
             RmsChannelCollection Channels,
             string strUserID,
@@ -1095,7 +1095,7 @@ namespace DigitalPlatform.Message
             return nTotalCount;
         }
 
-        // É¾³ıÏûÏ¢
+        // åˆ é™¤æ¶ˆæ¯
         public int DeleteMessage(
             bool bMoveToRecycleBin,
             RmsChannelCollection Channels,
@@ -1129,8 +1129,8 @@ namespace DigitalPlatform.Message
                     out strError);
                 if (nRet == -1)
                 {
-                    // text-level: ÄÚ²¿´íÎó
-                    strError1 += "É¾³ı¼ÇÂ¼ '" +strID+ "' Ê±·¢Éú´íÎó: "+ strError + ";";
+                    // text-level: å†…éƒ¨é”™è¯¯
+                    strError1 += "åˆ é™¤è®°å½• '" +strID+ "' æ—¶å‘ç”Ÿé”™è¯¯: "+ strError + ";";
                 }
 
             }
@@ -1144,7 +1144,7 @@ namespace DigitalPlatform.Message
             return 0;
         }
 
-        // É¾³ıÒ»ÌõÏûÏ¢
+        // åˆ é™¤ä¸€æ¡æ¶ˆæ¯
         public int DeleteMessage(
             bool bMoveToRecycleBin,
             RmsChannelCollection Channels,
@@ -1160,14 +1160,14 @@ namespace DigitalPlatform.Message
             byte[] output_timestamp = null;
 
 
-            // ÒªÒÆ¶¯µ½·Ï¼şÏä
+            // è¦ç§»åŠ¨åˆ°åºŸä»¶ç®±
             if (bMoveToRecycleBin == true)
             {
                 string strXml = "";
                 string strMetaData = "";
                 string strOutputPath = "";
 
-                // ¶Á³ö¼ÇÂ¼
+                // è¯»å‡ºè®°å½•
                 lRet = channel.GetRes(strPath,
                     out strXml,
                     out strMetaData,
@@ -1176,8 +1176,8 @@ namespace DigitalPlatform.Message
                     out strError);
                 if (lRet == -1)
                 {
-                    // text-level: ÄÚ²¿´íÎó
-                    strError = "¶Á³ö¼ÇÂ¼ '" + strPath + "' Ê±³ö´í: " + strError;
+                    // text-level: å†…éƒ¨é”™è¯¯
+                    strError = "è¯»å‡ºè®°å½• '" + strPath + "' æ—¶å‡ºé”™: " + strError;
                     return -1;
                 }
 
@@ -1188,17 +1188,17 @@ namespace DigitalPlatform.Message
                 }
                 catch (Exception ex)
                 {
-                    // text-level: ÄÚ²¿´íÎó
-                    strError = "×°ÔØXML¼ÇÂ¼½øÈëDOMÊ±³ö´í: " + ex.Message;
+                    // text-level: å†…éƒ¨é”™è¯¯
+                    strError = "è£…è½½XMLè®°å½•è¿›å…¥DOMæ—¶å‡ºé”™: " + ex.Message;
                     return -1;
                 }
 
-                // ĞŞ¸Äbox²ÎÊı
+                // ä¿®æ”¹boxå‚æ•°
                 DomUtil.SetElementText(dom.DocumentElement,
                     "box", MessageCenter.RECYCLEBIN);
 
                 timestamp = output_timestamp;
-                // Ğ´»Ø
+                // å†™å›
                 lRet = channel.DoSaveTextRes(strPath,
     dom.OuterXml,
     false,
@@ -1209,8 +1209,8 @@ namespace DigitalPlatform.Message
     out strError);
                 if (lRet == -1)
                 {
-                    // text-level: ÄÚ²¿´íÎó
-                    strError = "Ğ´»Ø¼ÇÂ¼ '" + strPath + "' Ê±³ö´í: " + strError;
+                    // text-level: å†…éƒ¨é”™è¯¯
+                    strError = "å†™å›è®°å½• '" + strPath + "' æ—¶å‡ºé”™: " + strError;
                     return -1;
                 }
 
@@ -1236,8 +1236,8 @@ namespace DigitalPlatform.Message
                     goto REDO;
                 }
 
-                // text-level: ÄÚ²¿´íÎó
-                strError = "É¾³ı¼ÇÂ¼ '" + strPath + "' Ê±·¢Éú´íÎó: " + strError;
+                // text-level: å†…éƒ¨é”™è¯¯
+                strError = "åˆ é™¤è®°å½• '" + strPath + "' æ—¶å‘ç”Ÿé”™è¯¯: " + strError;
                 return -1;
             }
 
@@ -1249,39 +1249,39 @@ namespace DigitalPlatform.Message
     public enum MessageLevel
     {
         [EnumMember]
-        ID = 0,    // Ö»·µ»ØID
+        ID = 0,    // åªè¿”å›ID
         [EnumMember]
-        Summary = 1,    // ÕªÒª¼¶£¬²»·µ»Øbody
+        Summary = 1,    // æ‘˜è¦çº§ï¼Œä¸è¿”å›body
         [EnumMember]
-        Full = 2,   // È«²¿¼¶£¬·µ»ØÈ«²¿ĞÅÏ¢
+        Full = 2,   // å…¨éƒ¨çº§ï¼Œè¿”å›å…¨éƒ¨ä¿¡æ¯
     }
 
     [DataContract(Namespace = "http://dp2003.com/dp2library/")]
     public class MessageData
     {
         [DataMember]
-        public string strUserName = ""; // ÏûÏ¢Ëù´ÓÊôµÄÓÃ»§ID
+        public string strUserName = ""; // æ¶ˆæ¯æ‰€ä»å±çš„ç”¨æˆ·ID
         [DataMember]
         public string strBoxType = "";
 
         [DataMember]
-        public string strSender = "";   // ·¢ËÍÕß
+        public string strSender = "";   // å‘é€è€…
         [DataMember]
-        public string strRecipient = "";    // ½ÓÊÕÕß
+        public string strRecipient = "";    // æ¥æ”¶è€…
         [DataMember]
-        public string strSubject = "";  // Ö÷Ìâ
+        public string strSubject = "";  // ä¸»é¢˜
         [DataMember]
-        public string strMime = ""; // Ã½ÌåÀàĞÍ
+        public string strMime = ""; // åª’ä½“ç±»å‹
         [DataMember]
         public string strBody = "";
         [DataMember]
-        public string strCreateTime = "";   // ÓÊ¼ş´´½¨(ÊÕµ½)Ê±¼ä
+        public string strCreateTime = "";   // é‚®ä»¶åˆ›å»º(æ”¶åˆ°)æ—¶é—´
         [DataMember]
-        public string strSize = "";     // ³ß´ç
+        public string strSize = "";     // å°ºå¯¸
         [DataMember]
-        public bool Touched = false;    // ÊÇ·ñÔÄ¶Á¹ı
+        public bool Touched = false;    // æ˜¯å¦é˜…è¯»è¿‡
         [DataMember]
-        public string strRecordID = ""; // ¼ÇÂ¼ID¡£ÓÃÓÚÎ¨Ò»¶¨Î»Ò»ÌõÏûÏ¢
+        public string strRecordID = ""; // è®°å½•IDã€‚ç”¨äºå”¯ä¸€å®šä½ä¸€æ¡æ¶ˆæ¯
 
         [DataMember]
         public byte[] TimeStamp = null;
@@ -1312,18 +1312,18 @@ namespace DigitalPlatform.Message
     public class Box
     {
         public string Name = "";
-        public string Type = "";    // ÀàĞÍ
+        public string Type = "";    // ç±»å‹
 
         /*
-        INBOX = "ÊÕ¼şÏä";
-        TEMP = "²İ¸å";
-        OUTBOX = "ÒÑ·¢ËÍ";
-        RECYCLEBIN = "·Ï¼şÏä";
+        INBOX = "æ”¶ä»¶ç®±";
+        TEMP = "è‰ç¨¿";
+        OUTBOX = "å·²å‘é€";
+        RECYCLEBIN = "åºŸä»¶ç®±";
          * */
 
     }
 
-    // Ğ£ÑéÒ»¸öÕÊ»§ÃûÊÇ·ñ´æÔÚ
+    // æ ¡éªŒä¸€ä¸ªå¸æˆ·åæ˜¯å¦å­˜åœ¨
     public delegate void VerifyAccountEventHandler(object sender,
     VerifyAccountEventArgs e);
 
@@ -1332,7 +1332,7 @@ namespace DigitalPlatform.Message
         public RmsChannelCollection Channels = null;
         public string Name = "";    // [in]
         public bool Exist = false;  // [out]
-        public bool Error = false;  // [out] Ö»ÓĞµ±Exist == falseµÄÊ±ºò£¬Error²ÅÄÜ == true
-        public string ErrorInfo = "";   // [out] µ±Exist==false£¬»òÕßError == trueµÄÊ±ºò£¬¶¼Ó¦µ±·µ»Ø³ö´íĞÅÏ¢¡£
+        public bool Error = false;  // [out] åªæœ‰å½“Exist == falseçš„æ—¶å€™ï¼ŒErroræ‰èƒ½ == true
+        public string ErrorInfo = "";   // [out] å½“Exist==falseï¼Œæˆ–è€…Error == trueçš„æ—¶å€™ï¼Œéƒ½åº”å½“è¿”å›å‡ºé”™ä¿¡æ¯ã€‚
     }
 }
