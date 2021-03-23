@@ -114,6 +114,20 @@ namespace PalmCenter.Install
                     errors.Add(error);
             }
 
+            // 验证识别图像质量阈值
+            {
+                string error = VerifyIdentityQualityThreshold(this.textBox_palm_identityQualityThreshold.Text);
+                if (string.IsNullOrEmpty(error) == false)
+                    errors.Add(error);
+            }
+
+            // 验证登记图像质量阈值
+            {
+                string error = VerifyRegisterQualityThreshold(this.textBox_palm_registerQualityThreshold.Text);
+                if (string.IsNullOrEmpty(error) == false)
+                    errors.Add(error);
+            }
+
             if (errors.Count > 0)
                 goto ERROR1;
 
@@ -131,6 +145,16 @@ namespace PalmCenter.Install
         public static int DefaultIdentifyThreshold = 576;
         // 掌纹识别的分数基数
         public static int IdentifyBase = 1000;
+
+        // (识别阶段)掌纹图像质量的阈值
+        public static int DefaultIdentityQualityThreshold = 100;
+        // (识别阶段)掌纹图像质量的理论最高值
+        public static int IdentityQualityBase = 300;
+
+        // (登记阶段)掌纹图像质量的阈值
+        public static int DefaultRegisterQualityThreshold = 200;
+        // (登记阶段)掌纹图像质量的理论最高值
+        public static int RegisterQualityBase = 300;
 
         static string VerifyRegisterScans(string count)
         {
@@ -156,6 +180,34 @@ namespace PalmCenter.Install
 
             if (!(value >= 0 && value <= IdentifyBase))
                 return ($"掌纹比对阈值 '{value}' 超出合法范围。应为 0~{IdentifyBase} 的数字");
+
+            return null;
+        }
+
+        static string VerifyIdentityQualityThreshold(string count)
+        {
+            if (string.IsNullOrEmpty(count))
+                return null;
+
+            if (Int32.TryParse(count, out int value) == false)
+                return ($"掌纹比对图像质量阈值 '{count}' 格式不正确。应为一个 0~{IdentityQualityBase} 数字");
+
+            if (!(value >= 0 && value <= IdentityQualityBase))
+                return ($"掌纹比对图像质量阈值 '{value}' 超出合法范围。应为 0~{IdentityQualityBase} 的数字");
+
+            return null;
+        }
+
+        static string VerifyRegisterQualityThreshold(string count)
+        {
+            if (string.IsNullOrEmpty(count))
+                return null;
+
+            if (Int32.TryParse(count, out int value) == false)
+                return ($"掌纹登记图像质量阈值 '{count}' 格式不正确。应为一个 0~{RegisterQualityBase} 数字");
+
+            if (!(value >= 0 && value <= RegisterQualityBase))
+                return ($"掌纹登记图像质量阈值 '{value}' 超出合法范围。应为 0~{RegisterQualityBase} 的数字");
 
             return null;
         }
@@ -215,6 +267,16 @@ DefaultRegisterScans.ToString());
 "identityThreshold",
 DefaultIdentifyThreshold.ToString());
 
+            this.textBox_palm_registerQualityThreshold.Text = _config.Get(
+"palm",
+"registerQualityThreshold",
+DefaultRegisterQualityThreshold.ToString());
+
+            this.textBox_palm_identityQualityThreshold.Text = _config.Get(
+"palm",
+"identityQualityThreshold",
+DefaultIdentityQualityThreshold.ToString());
+
         }
 
 
@@ -255,7 +317,16 @@ this.textBox_palm_registerScans.Text);
 "palm",
 "identityThreshold",
 this.textBox_palm_identityThreshold.Text);
-           
+
+            _config.Set(
+"palm",
+"registerQualityThreshold",
+this.textBox_palm_registerQualityThreshold.Text);
+
+            _config.Set(
+"palm",
+"identityQualityThreshold",
+this.textBox_palm_identityQualityThreshold.Text);
 
             if (_config.Changed)
                 _config.Save();
@@ -292,7 +363,27 @@ this.textBox_palm_identityThreshold.Text);
 
         private void button_palm_setDefaultIdentityThreshold_Click(object sender, EventArgs e)
         {
-            this.textBox_palm_identityThreshold.Text = "576";
+            this.textBox_palm_identityThreshold.Text = DefaultIdentifyThreshold.ToString();
+        }
+
+        private void checkBox_allow_changeRegisterQuality_CheckedChanged(object sender, EventArgs e)
+        {
+            this.textBox_palm_registerQualityThreshold.ReadOnly = !this.checkBox_allow_changeRegisterQuality.Checked;
+        }
+
+        private void button_palm_setDefaultRegisterQuality_Click(object sender, EventArgs e)
+        {
+            this.textBox_palm_registerQualityThreshold.Text = DefaultRegisterQualityThreshold.ToString();
+        }
+
+        private void checkBox_allow_changeIdentityQuality_CheckedChanged(object sender, EventArgs e)
+        {
+            this.textBox_palm_identityQualityThreshold.ReadOnly = !this.checkBox_allow_changeIdentityQuality.Checked;
+        }
+
+        private void button_palm_setDefaultIdentityQuality_Click(object sender, EventArgs e)
+        {
+            this.textBox_palm_identityQualityThreshold.Text = DefaultIdentityQualityThreshold.ToString();
         }
     }
 }
