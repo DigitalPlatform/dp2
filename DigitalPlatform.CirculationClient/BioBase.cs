@@ -110,6 +110,10 @@ namespace DigitalPlatform.CirculationClient
 
         // 用于识别消息的 ID
         public string MessageID { get; set; }
+
+        // 2021/3/23
+        // 捕获的时间
+        public DateTime CreateTime { get; set; }
     }
 
     public delegate void ImageReadyEventHandler(object sender,

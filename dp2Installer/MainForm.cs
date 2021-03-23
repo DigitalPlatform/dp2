@@ -2424,6 +2424,48 @@ MessageBoxDefaultButton.Button1);
                     }
                 }
 
+                // *** palmcenter
+                string strPalmDataDir = Utility.GetServiceUserDirectory("palmCenter");
+                if (Directory.Exists(strPalmDataDir))
+                {
+                    string strPalmTempDir = Path.Combine(strTempDir, "palmcenter");
+                    PathUtil.TryCreateDir(strPalmTempDir);
+
+                    // settings.xml 文件
+                    {
+                        string strFilePath = Path.Combine(strPalmDataDir, "settings.xml");
+                        string strTargetFilePath = Path.Combine(strPalmTempDir, "settings.xml");
+                        if (File.Exists(strFilePath) == true)
+                        {
+                            File.Copy(strFilePath,
+                                strTargetFilePath);
+                            filenames.Add(strTargetFilePath);
+                        }
+                    }
+
+                    foreach (string date in dates)
+                    {
+                        Application.DoEvents();
+
+                        if (stop != null && stop.State != 0)
+                        {
+                            strError = "用户中断";
+                            return -1;
+                        }
+
+                        string strFilePath = Path.Combine(strPalmDataDir, "log/log_" + date + ".txt");
+                        if (File.Exists(strFilePath) == false)
+                            continue;
+                        string strTargetFilePath = Path.Combine(strPalmTempDir, "log_" + date + ".txt");
+
+                        if (stop != null)
+                            stop.SetMessage("正在复制文件 " + strFilePath);
+
+                        File.Copy(strFilePath, strTargetFilePath);
+                        filenames.Add(strTargetFilePath);
+                    }
+                }
+
                 if (filenames.Count == 0)
                     return 0;
 
@@ -2503,10 +2545,11 @@ MessageBoxDefaultButton.Button1);
                         File.Delete(filename);
                     }
 
-                    // 删除三个子目录
+                    // 删除四个子目录
                     PathUtil.DeleteDirectory(Path.Combine(strTempDir, "dp2library"));
                     PathUtil.DeleteDirectory(Path.Combine(strTempDir, "dp2kernel"));
                     PathUtil.DeleteDirectory(Path.Combine(strTempDir, "dp2opac"));
+                    PathUtil.DeleteDirectory(Path.Combine(strTempDir, "palmcenter"));
                 }
             }
             finally

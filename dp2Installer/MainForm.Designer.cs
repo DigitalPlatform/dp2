@@ -145,6 +145,8 @@
             this.MenuItem_palmCenter_uninstallService = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator37 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_palmCenter_uninstall = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator38 = new System.Windows.Forms.ToolStripSeparator();
+            this.MenuItem_palmCenter_installDriver = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_help = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_openUserFolder = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_openDataFolder = new System.Windows.Forms.ToolStripMenuItem();
@@ -163,8 +165,6 @@
             this.toolStripDropDownButton_stopAll = new System.Windows.Forms.ToolStripDropDownButton();
             this.ToolStripMenuItem_stopAll = new System.Windows.Forms.ToolStripMenuItem();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
-            this.MenuItem_palmCenter_installDriver = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator38 = new System.Windows.Forms.ToolStripSeparator();
             this.menuStrip1.SuspendLayout();
             this.statusStrip_main.SuspendLayout();
             this.toolStrip1.SuspendLayout();
@@ -891,52 +891,52 @@
             // MenuItem_palmCenter_install
             // 
             this.MenuItem_palmCenter_install.Name = "MenuItem_palmCenter_install";
-            this.MenuItem_palmCenter_install.Size = new System.Drawing.Size(315, 40);
+            this.MenuItem_palmCenter_install.Size = new System.Drawing.Size(295, 40);
             this.MenuItem_palmCenter_install.Text = "安装 palmCenter";
             this.MenuItem_palmCenter_install.Click += new System.EventHandler(this.MenuItem_palmCenter_install_Click);
             // 
             // MenuItem_palmCenter_update
             // 
             this.MenuItem_palmCenter_update.Name = "MenuItem_palmCenter_update";
-            this.MenuItem_palmCenter_update.Size = new System.Drawing.Size(315, 40);
+            this.MenuItem_palmCenter_update.Size = new System.Drawing.Size(295, 40);
             this.MenuItem_palmCenter_update.Text = "更新 palmCenter";
             this.MenuItem_palmCenter_update.Click += new System.EventHandler(this.MenuItem_palmCenter_update_Click);
             // 
             // toolStripSeparator33
             // 
             this.toolStripSeparator33.Name = "toolStripSeparator33";
-            this.toolStripSeparator33.Size = new System.Drawing.Size(312, 6);
+            this.toolStripSeparator33.Size = new System.Drawing.Size(292, 6);
             // 
             // MenuItem_palmCenter_openDataDir
             // 
             this.MenuItem_palmCenter_openDataDir.Name = "MenuItem_palmCenter_openDataDir";
-            this.MenuItem_palmCenter_openDataDir.Size = new System.Drawing.Size(315, 40);
+            this.MenuItem_palmCenter_openDataDir.Size = new System.Drawing.Size(295, 40);
             this.MenuItem_palmCenter_openDataDir.Text = "打开数据文件夹";
             this.MenuItem_palmCenter_openDataDir.Click += new System.EventHandler(this.MenuItem_palmCenter_openDataDir_Click);
             // 
             // MenuItem_palmCenter_openProgramFolder
             // 
             this.MenuItem_palmCenter_openProgramFolder.Name = "MenuItem_palmCenter_openProgramFolder";
-            this.MenuItem_palmCenter_openProgramFolder.Size = new System.Drawing.Size(315, 40);
+            this.MenuItem_palmCenter_openProgramFolder.Size = new System.Drawing.Size(295, 40);
             this.MenuItem_palmCenter_openProgramFolder.Text = "打开程序文件夹";
             this.MenuItem_palmCenter_openProgramFolder.Click += new System.EventHandler(this.MenuItem_palmCenter_openProgramFolder_Click);
             // 
             // toolStripSeparator34
             // 
             this.toolStripSeparator34.Name = "toolStripSeparator34";
-            this.toolStripSeparator34.Size = new System.Drawing.Size(312, 6);
+            this.toolStripSeparator34.Size = new System.Drawing.Size(292, 6);
             // 
             // MenuItem_palmCenter_config
             // 
             this.MenuItem_palmCenter_config.Name = "MenuItem_palmCenter_config";
-            this.MenuItem_palmCenter_config.Size = new System.Drawing.Size(315, 40);
+            this.MenuItem_palmCenter_config.Size = new System.Drawing.Size(295, 40);
             this.MenuItem_palmCenter_config.Text = "配置";
             this.MenuItem_palmCenter_config.Click += new System.EventHandler(this.MenuItem_palmCenter_config_Click);
             // 
             // toolStripSeparator35
             // 
             this.toolStripSeparator35.Name = "toolStripSeparator35";
-            this.toolStripSeparator35.Size = new System.Drawing.Size(312, 6);
+            this.toolStripSeparator35.Size = new System.Drawing.Size(292, 6);
             this.toolStripSeparator35.Visible = false;
             // 
             // MenuItem_palmCenter_tool
@@ -952,7 +952,7 @@
             this.toolStripSeparator38,
             this.MenuItem_palmCenter_installDriver});
             this.MenuItem_palmCenter_tool.Name = "MenuItem_palmCenter_tool";
-            this.MenuItem_palmCenter_tool.Size = new System.Drawing.Size(315, 40);
+            this.MenuItem_palmCenter_tool.Size = new System.Drawing.Size(295, 40);
             this.MenuItem_palmCenter_tool.Text = "工具";
             // 
             // MenuItem_palmCenter_startService
@@ -999,6 +999,18 @@
             this.MenuItem_palmCenter_uninstall.Size = new System.Drawing.Size(348, 40);
             this.MenuItem_palmCenter_uninstall.Text = "卸载 palmCenter";
             this.MenuItem_palmCenter_uninstall.Click += new System.EventHandler(this.MenuItem_palmCenter_uninstall_Click);
+            // 
+            // toolStripSeparator38
+            // 
+            this.toolStripSeparator38.Name = "toolStripSeparator38";
+            this.toolStripSeparator38.Size = new System.Drawing.Size(345, 6);
+            // 
+            // MenuItem_palmCenter_installDriver
+            // 
+            this.MenuItem_palmCenter_installDriver.Name = "MenuItem_palmCenter_installDriver";
+            this.MenuItem_palmCenter_installDriver.Size = new System.Drawing.Size(348, 40);
+            this.MenuItem_palmCenter_installDriver.Text = "安装掌纹设备厂家驱动";
+            this.MenuItem_palmCenter_installDriver.Click += new System.EventHandler(this.MenuItem_palmCenter_installDriver_Click);
             // 
             // MenuItem_help
             // 
@@ -1151,18 +1163,6 @@
             this.webBrowser1.Name = "webBrowser1";
             this.webBrowser1.Size = new System.Drawing.Size(794, 497);
             this.webBrowser1.TabIndex = 4;
-            // 
-            // MenuItem_palmCenter_installDriver
-            // 
-            this.MenuItem_palmCenter_installDriver.Name = "MenuItem_palmCenter_installDriver";
-            this.MenuItem_palmCenter_installDriver.Size = new System.Drawing.Size(348, 40);
-            this.MenuItem_palmCenter_installDriver.Text = "安装掌纹设备厂家驱动";
-            this.MenuItem_palmCenter_installDriver.Click += new System.EventHandler(this.MenuItem_palmCenter_installDriver_Click);
-            // 
-            // toolStripSeparator38
-            // 
-            this.toolStripSeparator38.Name = "toolStripSeparator38";
-            this.toolStripSeparator38.Size = new System.Drawing.Size(345, 6);
             // 
             // MainForm
             // 

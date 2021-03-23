@@ -95,9 +95,15 @@ namespace DigitalPlatform.Interfaces
         // 用于识别消息的 ID
         public string MessageID { get; set; }
 
+        // 2021/3/23
+        // 消息创建的时间
+        public DateTime CreateTime { get; set; }
+        // 匹配的分数
+        public int Score { get; set; }
+
         public override string ToString()
         {
-            return $"{base.ToString()},Message={Message},Quality={Quality},MessageID={MessageID}";
+            return $"{base.ToString()},Message={Message},Quality={Quality},Score={Score},MessageID={MessageID},CreateTime={CreateTime.ToString("yyyy-MM-dd HH:mm:ss.ffff")}";// 2021-03-23 13:30:48.222
         }
     }
 

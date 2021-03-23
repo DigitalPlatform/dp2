@@ -92,13 +92,26 @@ namespace PalmCenter.Install
                     {
                         // MessageBox.Show(this, $"账户登录失败: {strError}");
                         if ((Control.ModifierKeys & Keys.Control) != Keys.Control)
-                            errors.Add($"账户 {this.textBox_cfg_userName.Text} 登录失败，请检查配置");
+                            errors.Add($"账户 {this.textBox_cfg_userName.Text} 登录失败({strError})，请检查配置");
                     }
                 }
                 finally
                 {
                     EnableControls(true);
                 }
+            }
+
+            // 验证扫描次数
+            {
+                string error = VerifyRegisterScans(this.textBox_palm_registerScans.Text);
+                if (string.IsNullOrEmpty(error) == false)
+                    errors.Add(error);
+            }
+            // 验证识别阈值
+            {
+                string error = VerifyIdentityThreshold(this.textBox_palm_identityThreshold.Text);
+                if (string.IsNullOrEmpty(error) == false)
+                    errors.Add(error);
             }
 
             if (errors.Count > 0)
@@ -110,6 +123,41 @@ namespace PalmCenter.Install
             return;
         ERROR1:
             MessageBox.Show(this, StringUtil.MakePathList(errors, "\r\n"));
+        }
+
+        // 登记时默认的扫描次数
+        public static int DefaultRegisterScans = 5;
+        // 掌纹识别的默认阈值
+        public static int DefaultIdentifyThreshold = 576;
+        // 掌纹识别的分数基数
+        public static int IdentifyBase = 1000;
+
+        static string VerifyRegisterScans(string count)
+        {
+            if (string.IsNullOrEmpty(count))
+                return null;
+
+            if (Int32.TryParse(count, out int value) == false)
+                return ($"登记时扫描次数 '{count}' 格式不正确。应为一个数字");
+
+            if (!(value >= 1 && value <= DefaultRegisterScans))
+                return ($"登记时扫描次数 '{value}' 超出合法范围。应为 1~5 的数字");
+
+            return null;
+        }
+
+        static string VerifyIdentityThreshold(string count)
+        {
+            if (string.IsNullOrEmpty(count))
+                return null;
+
+            if (Int32.TryParse(count, out int value) == false)
+                return ($"掌纹比对阈值 '{count}' 格式不正确。应为一个 0~{IdentifyBase} 数字");
+
+            if (!(value >= 0 && value <= IdentifyBase))
+                return ($"掌纹比对阈值 '{value}' 超出合法范围。应为 0~{IdentifyBase} 的数字");
+
+            return null;
         }
 
         void EnableControls(bool enable)
@@ -159,9 +207,16 @@ namespace PalmCenter.Install
             this.textBox_palm_registerScans.Text = _config.Get(
 "palm",
 "registerScans",
-"5");
+DefaultRegisterScans.ToString());
+
+
+            this.textBox_palm_identityThreshold.Text = _config.Get(
+"palm",
+"identityThreshold",
+DefaultIdentifyThreshold.ToString());
 
         }
+
 
         void SaveConfig()
         {
@@ -196,6 +251,11 @@ namespace PalmCenter.Install
 "registerScans",
 this.textBox_palm_registerScans.Text);
 
+            _config.Set(
+"palm",
+"identityThreshold",
+this.textBox_palm_identityThreshold.Text);
+           
 
             if (_config.Changed)
                 _config.Save();
@@ -223,6 +283,16 @@ this.textBox_palm_registerScans.Text);
                 this.textBox_cfg_userName.Text = "supervisor";
                 this.textBox_cfg_password.Text = "";
             }
+        }
+
+        private void checkBox_allow_changeIdentityThreshold_CheckedChanged(object sender, EventArgs e)
+        {
+            this.textBox_palm_identityThreshold.ReadOnly = !this.checkBox_allow_changeThreshold.Checked;
+        }
+
+        private void button_palm_setDefaultIdentityThreshold_Click(object sender, EventArgs e)
+        {
+            this.textBox_palm_identityThreshold.Text = "576";
         }
     }
 }
