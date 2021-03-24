@@ -18,4 +18,5 @@
       </shelf>
     </validator>
   </barcodeValidation>
+  <uploadInterface protocol='' baseUrl='http://localhost:62022/'/>
 </root>

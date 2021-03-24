@@ -24,6 +24,8 @@ using DigitalPlatform.WPF;
 using DigitalPlatform.Xml;
 using static dp2SSL.LibraryChannelUtil;
 using DigitalPlatform.LibraryServer.Common;
+using System.Net.Http;
+using Newtonsoft.Json;
 
 namespace dp2SSL
 {
@@ -1134,6 +1136,22 @@ TaskScheduler.Default);
                         entity.BuildError("setLocation", null, null);
                         succeed_count++;
                     }
+
+                    // 2021/3/24
+                    // 上传
+                    var upload_result = await RequestInventoryUploadAsync(entity.UID,
+    entity.PII,
+    StringUtil.IsInList("setCurrentLocation", actionMode) ? info.TargetCurrentLocation : null,
+    StringUtil.IsInList("setLocation", actionMode) ? info.TargetLocation : null,
+    StringUtil.IsInList("setLocation", actionMode) ? info.TargetShelfNo : null,
+    info.BatchNo,
+    info.UserName,
+    PageInventory.ActionMode);
+                    if (upload_result.Value == -1)
+                    {
+                        App.CurrentApp.SpeakSequence($"{entity.PII} 上传请求出错");
+                        entity.BuildError("setLocation", upload_result.ErrorInfo, upload_result.ErrorCode);
+                    }
                 }
 
                 // SetUID 和 Inventory 至少成功过一次，则发出成功的响声
@@ -1551,6 +1569,115 @@ TaskScheduler.Default);
             }
         }
 
+        static UploadInterfaceInfo _uploadInterfaceInfo = null;
+
+        // 利用 uploadInterface 发出盘点请求
+        public static async Task<RequestInventoryResult> RequestInventoryUploadAsync(string uid,
+            string pii,
+            string currentLocationString,
+            string location,
+            string shelfNo,
+            string batchNo,
+            string strUserName,
+            string style)
+        {
+            if (currentLocationString == null && location == null)
+                return new RequestInventoryResult { Value = 0 };    // 没有必要修改
+
+            if (_uploadInterfaceInfo == null)
+            {
+                _uploadInterfaceInfo = GetUploadInterface();
+                if (_uploadInterfaceInfo == null)
+                {
+                    _uploadInterfaceInfo = new UploadInterfaceInfo { BaseUrl = null };
+                }
+            }
+
+            if (_uploadInterfaceInfo.BaseUrl == null)
+                return new RequestInventoryResult
+                {
+                    Value = 0,
+                    ErrorInfo = "没有定义 uploadInterface 接口"
+                };
+
+            // currentLocation 元素内容。格式为 馆藏地:架号
+            string currentLocation = null;
+            string currentShelfNo = null;
+
+            if (currentLocationString != null)
+            {
+                // 分解 currentLocation 字符串
+                var parts = StringUtil.ParseTwoPart(currentLocationString, ":");
+                currentLocation = parts[0];
+                currentShelfNo = parts[1];
+            }
+
+            UploadItem record = new UploadItem
+            {
+                barcode = pii,
+                batchNo = batchNo,
+                shelfNo = shelfNo,
+                currentShelfNo = currentShelfNo,
+                location = location,
+                currentLocation = currentLocation,
+                operatorPerson = strUserName,
+            };
+            string data = JsonConvert.SerializeObject(record, Newtonsoft.Json.Formatting.Indented);
+
+            var item = new Item
+            {
+                Action = "upload",
+                Format = "json",
+                Data = data,
+            };
+            var request = new SetItemsRequest { Items = new List<Item>() { item } };
+
+            try
+            {
+                using (var httpClient = new HttpClient())
+                {
+                    httpClient.BaseAddress = new Uri(_uploadInterfaceInfo.BaseUrl);
+                    var client = new InventoryAPIV1Client(httpClient);
+                    var result = await client.SetItemsAsync(request);
+                    if (result.Result == null)
+                        return new RequestInventoryResult
+                        {
+                            Value = -1,
+                            ErrorInfo = "upload error: result.Result == null"
+                        };
+                    if (result.Result.Value != 0)
+                        return new RequestInventoryResult
+                        {
+                            Value = (int)result.Result.Value,
+                            ErrorInfo = result.Result.ErrorInfo,
+                            ErrorCode = result.Result.ErrorCode
+                        };
+                    return new RequestInventoryResult { ItemXml = null };
+                }
+            }
+            catch (Exception ex)
+            {
+                WpfClientInfo.WriteErrorLog($"RequestInventoryUploadAsync() 出现异常：{ExceptionUtil.GetDebugText(ex)}");
+                return new RequestInventoryResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"RequestInventoryUploadAsync() 出现异常：{ex.Message}"
+                };
+            }
+        }
+
+        public class UploadItem
+        {
+            public string batchNo { get; set; }
+            public string barcode { get; set; }
+            public string location { get; set; }
+            public string shelfNo { get; set; }
+            public string currentLocation { get; set; }
+            public string currentShelfNo { get; set; }
+            public string operatorPerson { get; set; }
+            public string operatorTime { get; set; }
+        }
+
         // 当前层架标
         public static string CurrentShelfNo { get; set; }
 
@@ -1928,6 +2055,30 @@ TaskScheduler.Default);
                 List = StringUtil.SplitList(attr.Value)
             };
         }
+
+        public class UploadInterfaceInfo
+        {
+            public string BaseUrl { get; set; }
+            public string Protocol { get; set; }
+        }
+
+        // 获得 inventory.xml 中 uploadInterface 参数
+        public static UploadInterfaceInfo GetUploadInterface()
+        {
+            var dom = GetInventoryDom();
+            if (dom == null)
+                return null;
+            var uploadInterface = dom.DocumentElement.SelectSingleNode("uploadInterface") as XmlElement;
+            if (uploadInterface == null)
+                return null;
+            return new UploadInterfaceInfo
+            {
+                BaseUrl = uploadInterface.GetAttribute("baseUrl"),
+                Protocol = uploadInterface.GetAttribute("protocol")
+            };
+        }
+
+
 
         // 从本地数据库中装载 uid 对照表
         public static async Task<NormalResult> LoadUidTableAsync(Hashtable uid_table,
