@@ -206,6 +206,9 @@
             this.checkBox_global_autoSelPinyin = new System.Windows.Forms.CheckBox();
             this.checkBox_global_displayScriptErrorDialog = new System.Windows.Forms.CheckBox();
             this.tabPage_fingerprint = new System.Windows.Forms.TabPage();
+            this.groupBox12 = new System.Windows.Forms.GroupBox();
+            this.button_palmprint_setDefaulValue = new System.Windows.Forms.Button();
+            this.textBox_palmprint_readerUrl = new System.Windows.Forms.TextBox();
             this.groupBox10 = new System.Windows.Forms.GroupBox();
             this.button_face_setDefaultValue = new System.Windows.Forms.Button();
             this.textBox_face_readerUrl = new System.Windows.Forms.TextBox();
@@ -235,9 +238,6 @@
             this.button_z3950_servers = new System.Windows.Forms.Button();
             this.button_OK = new System.Windows.Forms.Button();
             this.button_Cancel = new System.Windows.Forms.Button();
-            this.groupBox12 = new System.Windows.Forms.GroupBox();
-            this.button_palmprint_setDefaulValue = new System.Windows.Forms.Button();
-            this.textBox_palmprint_readerUrl = new System.Windows.Forms.TextBox();
             this.tabControl_main.SuspendLayout();
             this.tabPage_server.SuspendLayout();
             this.toolStrip_server.SuspendLayout();
@@ -277,13 +277,13 @@
             this.tabPage_operLog.SuspendLayout();
             this.tabPage_global.SuspendLayout();
             this.tabPage_fingerprint.SuspendLayout();
+            this.groupBox12.SuspendLayout();
             this.groupBox10.SuspendLayout();
             this.groupBox9.SuspendLayout();
             this.groupBox7.SuspendLayout();
             this.tabPage_labelPrint.SuspendLayout();
             this.tabPage_message.SuspendLayout();
             this.tabPage_z3950.SuspendLayout();
-            this.groupBox12.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl_main
@@ -2451,6 +2451,43 @@
             this.tabPage_fingerprint.Text = "指纹和人脸";
             this.tabPage_fingerprint.UseVisualStyleBackColor = true;
             // 
+            // groupBox12
+            // 
+            this.groupBox12.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox12.Controls.Add(this.button_palmprint_setDefaulValue);
+            this.groupBox12.Controls.Add(this.textBox_palmprint_readerUrl);
+            this.groupBox12.Location = new System.Drawing.Point(5, 184);
+            this.groupBox12.Margin = new System.Windows.Forms.Padding(5);
+            this.groupBox12.Name = "groupBox12";
+            this.groupBox12.Padding = new System.Windows.Forms.Padding(5);
+            this.groupBox12.Size = new System.Drawing.Size(705, 147);
+            this.groupBox12.TabIndex = 4;
+            this.groupBox12.TabStop = false;
+            this.groupBox12.Text = "掌纹阅读器接口 URL ";
+            // 
+            // button_palmprint_setDefaulValue
+            // 
+            this.button_palmprint_setDefaulValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_palmprint_setDefaulValue.Location = new System.Drawing.Point(502, 82);
+            this.button_palmprint_setDefaulValue.Margin = new System.Windows.Forms.Padding(5);
+            this.button_palmprint_setDefaulValue.Name = "button_palmprint_setDefaulValue";
+            this.button_palmprint_setDefaulValue.Size = new System.Drawing.Size(193, 40);
+            this.button_palmprint_setDefaulValue.TabIndex = 1;
+            this.button_palmprint_setDefaulValue.Text = "设为常用值";
+            this.button_palmprint_setDefaulValue.UseVisualStyleBackColor = true;
+            this.button_palmprint_setDefaulValue.Click += new System.EventHandler(this.button_palmprint_setDefaulValue_Click);
+            // 
+            // textBox_palmprint_readerUrl
+            // 
+            this.textBox_palmprint_readerUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_palmprint_readerUrl.Location = new System.Drawing.Point(11, 35);
+            this.textBox_palmprint_readerUrl.Margin = new System.Windows.Forms.Padding(5);
+            this.textBox_palmprint_readerUrl.Name = "textBox_palmprint_readerUrl";
+            this.textBox_palmprint_readerUrl.Size = new System.Drawing.Size(680, 31);
+            this.textBox_palmprint_readerUrl.TabIndex = 0;
+            // 
             // groupBox10
             // 
             this.groupBox10.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
@@ -2461,7 +2498,7 @@
             this.groupBox10.Margin = new System.Windows.Forms.Padding(5);
             this.groupBox10.Name = "groupBox10";
             this.groupBox10.Padding = new System.Windows.Forms.Padding(5);
-            this.groupBox10.Size = new System.Drawing.Size(765, 147);
+            this.groupBox10.Size = new System.Drawing.Size(705, 147);
             this.groupBox10.TabIndex = 3;
             this.groupBox10.TabStop = false;
             this.groupBox10.Text = "人脸识别接口 URL ";
@@ -2469,7 +2506,7 @@
             // button_face_setDefaultValue
             // 
             this.button_face_setDefaultValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_face_setDefaultValue.Location = new System.Drawing.Point(562, 82);
+            this.button_face_setDefaultValue.Location = new System.Drawing.Point(502, 82);
             this.button_face_setDefaultValue.Margin = new System.Windows.Forms.Padding(5);
             this.button_face_setDefaultValue.Name = "button_face_setDefaultValue";
             this.button_face_setDefaultValue.Size = new System.Drawing.Size(193, 40);
@@ -2485,7 +2522,7 @@
             this.textBox_face_readerUrl.Location = new System.Drawing.Point(11, 35);
             this.textBox_face_readerUrl.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_face_readerUrl.Name = "textBox_face_readerUrl";
-            this.textBox_face_readerUrl.Size = new System.Drawing.Size(740, 31);
+            this.textBox_face_readerUrl.Size = new System.Drawing.Size(680, 31);
             this.textBox_face_readerUrl.TabIndex = 0;
             // 
             // groupBox9
@@ -2551,7 +2588,7 @@
             this.groupBox7.Margin = new System.Windows.Forms.Padding(5);
             this.groupBox7.Name = "groupBox7";
             this.groupBox7.Padding = new System.Windows.Forms.Padding(5);
-            this.groupBox7.Size = new System.Drawing.Size(765, 147);
+            this.groupBox7.Size = new System.Drawing.Size(705, 147);
             this.groupBox7.TabIndex = 0;
             this.groupBox7.TabStop = false;
             this.groupBox7.Text = " 指纹阅读器接口 URL ";
@@ -2559,7 +2596,7 @@
             // button_fingerprint_setDefaultValue
             // 
             this.button_fingerprint_setDefaultValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_fingerprint_setDefaultValue.Location = new System.Drawing.Point(562, 82);
+            this.button_fingerprint_setDefaultValue.Location = new System.Drawing.Point(502, 82);
             this.button_fingerprint_setDefaultValue.Margin = new System.Windows.Forms.Padding(5);
             this.button_fingerprint_setDefaultValue.Name = "button_fingerprint_setDefaultValue";
             this.button_fingerprint_setDefaultValue.Size = new System.Drawing.Size(193, 40);
@@ -2575,7 +2612,7 @@
             this.textBox_fingerprint_readerUrl.Location = new System.Drawing.Point(11, 35);
             this.textBox_fingerprint_readerUrl.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_fingerprint_readerUrl.Name = "textBox_fingerprint_readerUrl";
-            this.textBox_fingerprint_readerUrl.Size = new System.Drawing.Size(740, 31);
+            this.textBox_fingerprint_readerUrl.Size = new System.Drawing.Size(680, 31);
             this.textBox_fingerprint_readerUrl.TabIndex = 0;
             // 
             // button_fingerprint_clearLocalCacheFiles
@@ -2784,43 +2821,6 @@
             this.button_Cancel.UseVisualStyleBackColor = true;
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
-            // groupBox12
-            // 
-            this.groupBox12.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.groupBox12.Controls.Add(this.button_palmprint_setDefaulValue);
-            this.groupBox12.Controls.Add(this.textBox_palmprint_readerUrl);
-            this.groupBox12.Location = new System.Drawing.Point(5, 184);
-            this.groupBox12.Margin = new System.Windows.Forms.Padding(5);
-            this.groupBox12.Name = "groupBox12";
-            this.groupBox12.Padding = new System.Windows.Forms.Padding(5);
-            this.groupBox12.Size = new System.Drawing.Size(765, 147);
-            this.groupBox12.TabIndex = 4;
-            this.groupBox12.TabStop = false;
-            this.groupBox12.Text = "掌纹阅读器接口 URL ";
-            // 
-            // button_palmprint_setDefaulValue
-            // 
-            this.button_palmprint_setDefaulValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_palmprint_setDefaulValue.Location = new System.Drawing.Point(562, 82);
-            this.button_palmprint_setDefaulValue.Margin = new System.Windows.Forms.Padding(5);
-            this.button_palmprint_setDefaulValue.Name = "button_palmprint_setDefaulValue";
-            this.button_palmprint_setDefaulValue.Size = new System.Drawing.Size(193, 40);
-            this.button_palmprint_setDefaulValue.TabIndex = 1;
-            this.button_palmprint_setDefaulValue.Text = "设为常用值";
-            this.button_palmprint_setDefaulValue.UseVisualStyleBackColor = true;
-            this.button_palmprint_setDefaulValue.Click += new System.EventHandler(this.button_palmprint_setDefaulValue_Click);
-            // 
-            // textBox_palmprint_readerUrl
-            // 
-            this.textBox_palmprint_readerUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_palmprint_readerUrl.Location = new System.Drawing.Point(11, 35);
-            this.textBox_palmprint_readerUrl.Margin = new System.Windows.Forms.Padding(5);
-            this.textBox_palmprint_readerUrl.Name = "textBox_palmprint_readerUrl";
-            this.textBox_palmprint_readerUrl.Size = new System.Drawing.Size(740, 31);
-            this.textBox_palmprint_readerUrl.TabIndex = 0;
-            // 
             // CfgDlg
             // 
             this.AcceptButton = this.button_OK;
@@ -2905,6 +2905,8 @@
             this.tabPage_global.ResumeLayout(false);
             this.tabPage_global.PerformLayout();
             this.tabPage_fingerprint.ResumeLayout(false);
+            this.groupBox12.ResumeLayout(false);
+            this.groupBox12.PerformLayout();
             this.groupBox10.ResumeLayout(false);
             this.groupBox10.PerformLayout();
             this.groupBox9.ResumeLayout(false);
@@ -2916,8 +2918,6 @@
             this.tabPage_message.ResumeLayout(false);
             this.tabPage_message.PerformLayout();
             this.tabPage_z3950.ResumeLayout(false);
-            this.groupBox12.ResumeLayout(false);
-            this.groupBox12.PerformLayout();
             this.ResumeLayout(false);
 
         }

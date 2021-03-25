@@ -35,6 +35,7 @@ using DigitalPlatform.Drawing;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Core;
 using DigitalPlatform.RFID;
+using Microsoft.Win32;
 
 namespace dp2Circulation
 {
@@ -1760,6 +1761,7 @@ MessageBoxDefaultButton.Button1);
             // 2021/3/19
             // 保护。防止重复 +=
             FingerprintManager.Touched -= PalmprintManager_Touched; ;
+            SystemEvents.PowerModeChanged -= SystemEvents_PowerModeChanged;
 
             if (string.IsNullOrEmpty(this.PalmprintReaderUrl) == false)
             {
@@ -1778,6 +1780,8 @@ MessageBoxDefaultButton.Button1);
                 ClearPalmMessage();
                 CheckPalmCenterVersion();
                 FingerprintManager.Start(_cancelPalmManager.Token);
+
+                SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
             }
             else
             {
@@ -1787,6 +1791,34 @@ MessageBoxDefaultButton.Button1);
                 _cancelPalmManager?.Cancel();
                 FingerprintManager.Url = "";
                 FingerprintManager.Touched -= PalmprintManager_Touched;
+            }
+        }
+
+        private void SystemEvents_PowerModeChanged(object sender, PowerModeChangedEventArgs e)
+        {
+            switch (e.Mode)
+            {
+                case PowerModes.Resume:
+                    // 内务代为重启一次 palmcenter
+                    _ = Task.Run(async () =>
+                    {
+                        try
+                        {
+                            await Task.Delay(TimeSpan.FromSeconds(5));
+                            if (string.IsNullOrEmpty(FingerprintManager.Url) == false)
+                            {
+                                Program.MainForm.Speak("掌纹中心被唤醒");
+                                RestartPalmCenter();
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            ClientInfo.WriteErrorLog($"InitialExtension.SystemEvents_PowerModeChanged() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                        }
+                    });
+                    break;
+                case PowerModes.Suspend:
+                    break;
             }
         }
 
@@ -1800,7 +1832,20 @@ MessageBoxDefaultButton.Button1);
             }
         }
 
-        const string pamcenter_base_version = "1.0.9";
+        // 重启掌纹中心
+        public void RestartPalmCenter()
+        {
+            if (string.IsNullOrEmpty(FingerprintManager.Url) == false)
+            {
+                var result = FingerprintManager.GetState("restart");
+                if (result.Value == -1)
+                    Program.MainForm?.OperHistory?.AppendHtml($"<div class='debug error'>{ HttpUtility.HtmlEncode($"重启掌纹中心出错: {result.ErrorInfo}") }</div>");
+                else
+                    Program.MainForm?.OperHistory?.AppendHtml($"<div class='debug green'>{ HttpUtility.HtmlEncode($"重启掌纹中心成功") }</div>");
+            }
+        }
+
+        const string pamcenter_base_version = "1.0.11";
         public void CheckPalmCenterVersion()
         {
             if (string.IsNullOrEmpty(FingerprintManager.Url) == false)
@@ -1814,7 +1859,8 @@ MessageBoxDefaultButton.Button1);
                     {
                         string error = $"当前连接的掌纹中心版本号太低(为 {result.Version})，请升级到 {pamcenter_base_version} 或以上版本";
                         Program.MainForm?.OperHistory?.AppendHtml($"<div class='debug error'>{ HttpUtility.HtmlEncode(error) }</div>");
-                        _ = Task.Run(() => {
+                        _ = Task.Run(() =>
+                        {
                             this.BeginInvoke((Action)(() =>
                             {
                                 MessageBox.Show(this, error);

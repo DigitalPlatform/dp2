@@ -1139,8 +1139,10 @@ TaskScheduler.Default);
 
                     // 2021/3/24
                     // 上传
-                    var upload_result = await RequestInventoryUploadAsync(entity.UID,
-    entity.PII,
+                    var upload_result = await RequestInventoryUploadAsync(
+                        info.ItemXml,
+                        entity.UID,
+                        entity.GetOiPii(),
     StringUtil.IsInList("setCurrentLocation", actionMode) ? info.TargetCurrentLocation : null,
     StringUtil.IsInList("setLocation", actionMode) ? info.TargetLocation : null,
     StringUtil.IsInList("setLocation", actionMode) ? info.TargetShelfNo : null,
@@ -1572,8 +1574,10 @@ TaskScheduler.Default);
         static UploadInterfaceInfo _uploadInterfaceInfo = null;
 
         // 利用 uploadInterface 发出盘点请求
-        public static async Task<RequestInventoryResult> RequestInventoryUploadAsync(string uid,
-            string pii,
+        public static async Task<RequestInventoryResult> RequestInventoryUploadAsync(
+            string item_xml,
+            string uid,
+            string oi_pii,
             string currentLocationString,
             string location,
             string shelfNo,
@@ -1612,15 +1616,37 @@ TaskScheduler.Default);
                 currentShelfNo = parts[1];
             }
 
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                if (string.IsNullOrEmpty(item_xml) == false)
+                    dom.LoadXml(item_xml);
+                else
+                    dom.LoadXml("<root />");
+            }
+            catch (Exception ex)
+            {
+                return new RequestInventoryResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"册记录 XML 解析异常: {ex.Message}"
+                };
+            }
+
+            string title = DomUtil.GetElementText(dom.DocumentElement, "title");
+
             UploadItem record = new UploadItem
             {
-                barcode = pii,
+                title = title,
+                uii = oi_pii,
+                barcode = GetPiiPart(oi_pii),
                 batchNo = batchNo,
                 shelfNo = shelfNo,
                 currentShelfNo = currentShelfNo,
                 location = location,
                 currentLocation = currentLocation,
                 operatorPerson = strUserName,
+                operatorTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.ffff")
             };
             string data = JsonConvert.SerializeObject(record, Newtonsoft.Json.Formatting.Indented);
 
@@ -1645,7 +1671,8 @@ TaskScheduler.Default);
                             Value = -1,
                             ErrorInfo = "upload error: result.Result == null"
                         };
-                    if (result.Result.Value != 0)
+                    // 注: result.Value 如果 >=0，一定是完全成功。如果是部分成功，.Value 应该是 -1
+                    if (result.Result.Value < 0)
                         return new RequestInventoryResult
                         {
                             Value = (int)result.Result.Value,
@@ -1668,14 +1695,16 @@ TaskScheduler.Default);
 
         public class UploadItem
         {
+            public string title { get; set; }
             public string batchNo { get; set; }
-            public string barcode { get; set; }
+            public string uii { get; set; }     // 格式为 OI.PII
+            public string barcode { get; set; } // PII
             public string location { get; set; }
             public string shelfNo { get; set; }
             public string currentLocation { get; set; }
             public string currentShelfNo { get; set; }
             public string operatorPerson { get; set; }
-            public string operatorTime { get; set; }
+            public string operatorTime { get; set; }    // 时间格式为 "yyyy-MM-dd HH:mm:ss.ffff"
         }
 
         // 当前层架标

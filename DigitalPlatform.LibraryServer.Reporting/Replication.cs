@@ -2604,7 +2604,7 @@ LibraryChannel channel,
                             //      -1  出错
                             //      0   成功
                             nRet = BuildOpers(
-                                context,
+                                ref context,
                                 strOperation,
                                 dom,
                                 current_item.Date,
@@ -2717,10 +2717,12 @@ LibraryChannel channel,
                 }
                 catch (Exception ex)
                 {
+                    // DbUpdateException: key 重复了
+
                     // Rollback() 本身也可能再次抛异常
                     dbContextTransaction.Rollback(); //Required according to MSDN article 
                                                      // TODO: 写入错误日志
-                   throw ex;
+                    throw ex;
                 }
             }
 
@@ -2734,7 +2736,7 @@ LibraryChannel channel,
         //      -1  出错
         //      0   成功
         public int BuildOpers(
-            LibraryContext context,
+            ref LibraryContext context,
             string strOperation,
             XmlDocument dom,
             string strDate,
@@ -2743,56 +2745,98 @@ LibraryChannel channel,
             out string strError)
         {
             lines = new List<OperBase>();
-            DbSet<OperBase> set = null;
+            // DbSet<OperBase> set = null;
+            // dynamic set = null;
 
             OperBase line = null;
             if (strOperation == "borrow" || strOperation == "return")
             {
                 // line = context.CircuOpers.Find(line.GetKeys()) ?? new CircuOper();
                 line = new CircuOper();
-                set = context.Set<CircuOper>();
+                // set = context.CircuOpers;
+                // set = context.Set<CircuOper>();
             }
             else if (strOperation == "setReaderInfo")
             {
+                line = new PatronOper();
+                /*
                 line = context.PatronOpers.Find(line.GetKeys()) ?? new PatronOper();
+                set = context.PatronOpers;
+                */
             }
             else if (strOperation == "setBiblioInfo")
             {
+                line = new BiblioOper();
+                /*
                 line = context.BiblioOpers.Find(line.GetKeys()) ?? new BiblioOper();
+                set = context.BiblioOpers;
+                */
             }
             else if (strOperation == "setEntity")
             {
+                line = new ItemOper();
+
+                /*
                 line = context.ItemOpers.Find(line.GetKeys()) ?? new ItemOper();
+                set = context.ItemOpers;
+                */
             }
             else if (strOperation == "setOrder")
             {
+                line = new ItemOper();
+
+                /*
                 line = context.ItemOpers.Find(line.GetKeys()) ?? new ItemOper();
+                set = context.ItemOpers;
+                */
             }
             else if (strOperation == "setIssue")
             {
+                line = new ItemOper();
+
+                /*
                 line = context.ItemOpers.Find(line.GetKeys()) ?? new ItemOper();
+                set = context.ItemOpers;
+                */
             }
             else if (strOperation == "setComment")
             {
+                line = new ItemOper();
+                /*
                 line = context.ItemOpers.Find(line.GetKeys()) ?? new ItemOper();
+                set = context.ItemOpers;
+                */
             }
             else if (strOperation == "amerce")
             {
+                line = new AmerceOper();
+                /*
                 line = context.AmerceOpers.Find(line.GetKeys()) ?? new AmerceOper();
+                set = context.AmerceOpers;
+                */
             }
             else if (strOperation == "passgate")
             {
+                line = new PassGateOper();
+                /*
                 line = context.PassGateOpers.Find(line.GetKeys()) ?? new PassGateOper();
+                set = context.PatronOpers;
+                */
             }
             else if (strOperation == "getRes")
             {
+                line = new GetResOper();
+                /*
                 line = context.GetResOpers.Find(line.GetKeys()) ?? new GetResOper();
+                set = context.GetResOpers;
+                */
             }
             else
             {
                 strError = "不能识别的 strOperation '" + strOperation + "'";
                 return -2;
             }
+
             int nRet = line.SetData(dom,
     strDate,
     lIndex,
@@ -2800,13 +2844,28 @@ LibraryChannel channel,
     out strError);
             if (nRet == -1)
                 return -1;
+
+            // TODO: 找一下以前集合中是否有重复(keys)的记录。或者等抛出异常后再处理也行
+
             lines.Add(line);
             if (temp_lines != null && temp_lines.Count > 0)
                 lines.AddRange(temp_lines);
 
-            var type = Assembly.GetExecutingAssembly().GetTypes().FirstOrDefault(t => t.Name == "test");
+            // var type = Assembly.GetExecutingAssembly().GetTypes().FirstOrDefault(t => t.Name == "test");
 
-            var set = context.Set(type);
+            // var set = context.Set(type);
+            // set.AddRange(lines.ToArray());
+            /*
+            try
+            {
+                SaveOpers(ref context, lines);
+            }
+            catch
+            {
+                throw;
+                // 删除以前的记录，然后尝试重新插入
+            }
+            */
             return 0;
         }
 
@@ -4041,9 +4100,9 @@ out string strError)
         /// 书目库名
         /// </summary>
         public string DbName = "";  // 书目库名
-                                    /// <summary>
-                                    /// 格式语法
-                                    /// </summary>
+        /// <summary>
+        /// 格式语法
+        /// </summary>
         public string Syntax = "";  // 格式语法
 
         /// <summary>

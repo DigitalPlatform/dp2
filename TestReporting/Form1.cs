@@ -35,7 +35,7 @@ namespace TestReporting
         public Form1()
         {
             ClientInfo.ProgramName = "fingerprintcenter";
-            ClientInfo.MainForm = this;
+            FormClientInfo.MainForm = this;
 
             InitializeComponent();
 
@@ -790,6 +790,7 @@ dlg.UiState);
             });
         }
 
+        // 删掉以前的所有 database，然后创建空白的 database
         private void MenuItem_recreateBlankDatabase_Click(object sender, EventArgs e)
         {
             DatabaseConfig.ServerName = "localhost";

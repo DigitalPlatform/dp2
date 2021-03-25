@@ -19,7 +19,7 @@ namespace TestReporting
             ClientInfo.TypeOfProgram = typeof(Program);
 
             if (StringUtil.IsDevelopMode() == false)
-                ClientInfo.PrepareCatchException();
+                FormClientInfo.PrepareCatchException();
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);

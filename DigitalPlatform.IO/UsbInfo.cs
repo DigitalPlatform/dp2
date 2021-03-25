@@ -93,6 +93,21 @@ namespace DigitalPlatform.IO
                         await Task.Delay(TimeSpan.FromSeconds(2), token);
                         if (token.IsCancellationRequested)
                             break;
+
+                        // 2021/3/25
+                        // 用消息触发回调
+                        lock (_syncRoot_messages)
+                        {
+                            if (_messages.Count > 0)
+                            {
+                                foreach (var message in _messages)
+                                {
+                                    callback?.Invoke(message.add_count, message.remove_count);
+                                }
+                                _messages.Clear();
+                            }
+                        }
+
                         var result = GetUSBDevices();
                         if (token.IsCancellationRequested)
                             break;
@@ -123,6 +138,28 @@ namespace DigitalPlatform.IO
 token,
 TaskCreationOptions.LongRunning,
 TaskScheduler.Default);
+        }
+
+        static object _syncRoot_messages = new object();
+        static List<Message> _messages = new List<Message>();
+
+        class Message
+        {
+            public int add_count { get; set; }
+            public int remove_count { get; set; }
+        }
+
+        // 加入一个消息。消息可促使 UsbInfo 触发一次回调
+        public static void AddMessage(int add_count, int remove_count)
+        {
+            lock (_syncRoot_messages)
+            {
+                _messages.Add(new Message
+                {
+                    add_count = add_count,
+                    remove_count = remove_count
+                });
+            }
         }
 
         // 比较两个集合的变化

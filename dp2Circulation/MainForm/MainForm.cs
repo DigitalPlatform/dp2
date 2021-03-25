@@ -9751,6 +9751,10 @@ out strError);
             OpenWindow<RfidToolForm>();
         }
 
+        private void MenuItem_palmprint_restartPalmCenter_Click(object sender, EventArgs e)
+        {
+            RestartPalmCenter();
+        }
     }
 
     /// <summary>
