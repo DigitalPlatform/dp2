@@ -11,7 +11,7 @@
 #pragma warning disable 1591 // Disable "CS1591 Missing XML comment for publicly visible type or member ..."
 #pragma warning disable 8073 // Disable "CS8073 The result of the expression is always 'false' since a value of type 'T' is never equal to 'null' of type 'T?'"
 
-namespace dp2SSL
+namespace dp2SSL.OpenAPIs
 {
     using System = global::System;
     
@@ -72,7 +72,7 @@ namespace dp2SSL
                 throw new System.ArgumentNullException("body");
     
             var urlBuilder_ = new System.Text.StringBuilder();
-            urlBuilder_.Append("api/v1/SetItems");
+            urlBuilder_.Append("Inventory/v1/SetItems");
     
             var client_ = _httpClient;
             var disposeClient_ = false;

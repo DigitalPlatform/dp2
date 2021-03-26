@@ -8,12 +8,14 @@ using System.Threading.Tasks;
 using System.Xml;
 using System.IO;
 using System.Diagnostics;
+using System.Net.Http;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Win32;
 using Microsoft.VisualStudio.Threading;
 
 using ClosedXML.Excel;
+using Newtonsoft.Json;
 
 using DigitalPlatform;
 using DigitalPlatform.LibraryClient;
@@ -24,8 +26,7 @@ using DigitalPlatform.WPF;
 using DigitalPlatform.Xml;
 using static dp2SSL.LibraryChannelUtil;
 using DigitalPlatform.LibraryServer.Common;
-using System.Net.Http;
-using Newtonsoft.Json;
+using dp2SSL.OpenAPIs;
 
 namespace dp2SSL
 {

@@ -2,10 +2,10 @@
   "openapi": "3.0.1",
   "info": {
     "title": "Inventory API V1",
-    "description": "dp2 图书馆集成系统应用服务器 API",
+    "description": "dp2 鍥句功棣嗛泦鎴愮郴缁熺洏鐐?API",
     "contact": {
       "name": "renyh",
-      "url": "https://github.com/renyh/apidemo",
+      "url": "https://github.com/renyh/InventoryAPI",
       "email": "renyh@dp2003.com"
     },
     "license": {
@@ -15,7 +15,7 @@
     "version": "v1"
   },
   "paths": {
-    "/api/v1/SetItems": {
+    "/Inventory/v1/SetItems": {
       "post": {
         "tags": [
           "v1"
