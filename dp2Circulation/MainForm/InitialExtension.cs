@@ -1841,7 +1841,7 @@ MessageBoxDefaultButton.Button1);
                 if (result.Value == -1)
                     Program.MainForm?.OperHistory?.AppendHtml($"<div class='debug error'>{ HttpUtility.HtmlEncode($"重启掌纹中心出错: {result.ErrorInfo}") }</div>");
                 else
-                    Program.MainForm?.OperHistory?.AppendHtml($"<div class='debug green'>{ HttpUtility.HtmlEncode($"重启掌纹中心成功") }</div>");
+                    Program.MainForm?.OperHistory?.AppendHtml($"<div class='debug green'>{ HttpUtility.HtmlEncode($"重启掌纹中心成功。重启完成可能需要一定时间，请耐心等待") }</div>");
             }
         }
 

@@ -90,7 +90,9 @@ namespace DigitalPlatform.IO
 
                     while (token.IsCancellationRequested == false)
                     {
-                        await Task.Delay(TimeSpan.FromSeconds(2), token);
+                        // await Task.Delay(TimeSpan.FromSeconds(2), token);
+                        Delay(TimeSpan.FromSeconds(2), token);
+
                         if (token.IsCancellationRequested)
                             break;
 
@@ -132,12 +134,33 @@ namespace DigitalPlatform.IO
                 finally
                 {
                     _searcherUsb?.Dispose();
+                    _eventDelay?.Dispose();
                 }
 
             },
 token,
 TaskCreationOptions.LongRunning,
 TaskScheduler.Default);
+        }
+
+        public static void Activate()
+        {
+            _eventDelay.Set();
+        }
+
+        static AutoResetEvent _eventDelay = new AutoResetEvent(false);
+
+        static void Delay(
+            TimeSpan length,
+            CancellationToken token)
+        {
+            int index = WaitHandle.WaitAny(
+                new WaitHandle[]
+                {
+                    _eventDelay,
+                    token.WaitHandle,
+                },
+                length);
         }
 
         static object _syncRoot_messages = new object();
@@ -150,7 +173,11 @@ TaskScheduler.Default);
         }
 
         // 加入一个消息。消息可促使 UsbInfo 触发一次回调
-        public static void AddMessage(int add_count, int remove_count)
+        // parameters:
+        //      activate    是否立即唤醒等待？这样可以避免等两秒钟消息才发生作用
+        public static void AddMessage(int add_count,
+            int remove_count,
+            bool activate = true)
         {
             lock (_syncRoot_messages)
             {
@@ -160,6 +187,9 @@ TaskScheduler.Default);
                     remove_count = remove_count
                 });
             }
+
+            if (activate)
+                Activate();
         }
 
         // 比较两个集合的变化
