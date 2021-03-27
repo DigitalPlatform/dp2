@@ -145,7 +145,16 @@ namespace DigitalPlatform.SimpleMessageQueue
 
                     items.Add(first);
                     if (string.IsNullOrEmpty(first.GroupID))
+                    {
+                        // 删除涉及到的事项
+                        if (remove_items)
+                        {
+                            context.Items.RemoveRange(items);
+                            await context.SaveChangesAsync(token);
+                        }
                         return new Message { Content = first.Content };
+                    }
+
                     // 取出所有 GroupID 相同的事项，然后拼接起来
                     var group_id = first.GroupID;
                     List<byte> bytes = new List<byte>(first.Content);

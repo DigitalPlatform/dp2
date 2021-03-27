@@ -1845,7 +1845,7 @@ MessageBoxDefaultButton.Button1);
             }
         }
 
-        const string pamcenter_base_version = "1.0.11";
+        const string pamcenter_base_version = "1.0.12";
         public void CheckPalmCenterVersion()
         {
             if (string.IsNullOrEmpty(FingerprintManager.Url) == false)
@@ -1871,8 +1871,36 @@ MessageBoxDefaultButton.Button1);
             }
         }
 
+        // 紧凑日志
+        static CompactLog _compactLog = new CompactLog();
+        static DateTime _lastCompactTime = DateTime.MinValue;
+        static TimeSpan _compactLength = TimeSpan.FromMinutes(10);
+        static int _compactAppendCount = 0;
+
         private void PalmprintManager_Touched(object sender, TouchedEventArgs e)
         {
+            // 2021/3/27
+            // 注意当 palmcenter 出于不正常状态时，此处会被每秒一次反复到达，处理不当会造成操作历史窗内容爆满。所以这里用了压缩日志
+            if (e.Result?.Value == -1
+                && Program.MainForm.OperHistory != null)
+            {
+                _ = _compactLog.Add("从掌纹中心获取消息时出错: {0}", new object[] { e.Result?.ErrorInfo });
+                _compactAppendCount++;
+
+                // 每隔一段时间集中显示一次
+                if (_lastCompactTime == DateTime.MinValue
+                    || DateTime.Now - _lastCompactTime > _compactLength)
+                {
+                    _compactLog?.WriteToLog((text) =>
+                    {
+                        WriteErrorLog(text);
+                        Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(text).Replace("\r\n", "<br/>") + "</div>");
+                    });
+                    _lastCompactTime = DateTime.Now;
+                }
+                return;
+            }
+
             Program.MainForm.OperHistory.AppendHtml($"<div class='debug recpath'>{ HttpUtility.HtmlEncode($"掌纹消息 {e.ToString()}") }</div>");
             if (e.Quality == -1)
             {
