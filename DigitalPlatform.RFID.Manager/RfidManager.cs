@@ -165,7 +165,8 @@ namespace DigitalPlatform.RFID
             }
         }
 
-        static bool _checkState = true;
+        // 已经移动到 Base 中
+        // static bool _checkState = true;
 
         /*
         public static string LockName = null;   // "*";
@@ -244,10 +245,10 @@ namespace DigitalPlatform.RFID
         {
             Base2.ShortWaitTime = TimeSpan.FromMilliseconds(10);
             Base2.LongWaitTime = TimeSpan.FromMilliseconds(2000);
-            Base2.Start((channel) =>
+            Base2.Start((channel, style) =>
             {
-                // TODO: 看调用栈，如果是上层 GetState() 调用，就要免去检查 State 这一步
-                if (_checkState)
+                // 看调用栈，如果是上层 GetState() 调用，就要免去检查 State 这一步
+                if (StringUtil.IsInList("skip_check_state", style) == false)
                 {
                     var result = channel.Object.GetState("");
                     if (result.Value == -1)
@@ -283,7 +284,7 @@ new SetErrorEventArgs
 
                 return false;
             },
-            (channel) =>
+            (channel, loop_style) =>
             {
                 /*
                 if (string.IsNullOrEmpty(_antennaList) == false)
@@ -410,10 +411,10 @@ new SetErrorEventArgs
         {
             Base.ShortWaitTime = TimeSpan.FromMilliseconds(10);
             Base.LongWaitTime = TimeSpan.FromMilliseconds(2000);
-            Base.Start((channel) =>
+            Base.Start((channel, style) =>
             {
                 // TODO: 看调用栈，如果是上层 GetState() 调用，就要免去检查 State 这一步
-                if (_checkState)
+                if (StringUtil.IsInList("skip_check_state", style) == false)
                 {
                     var result = channel.Object.GetState("");
                     if (result.Value == -1)
@@ -449,7 +450,7 @@ new SetErrorEventArgs
 
                 return false;
             },
-            (channel) =>
+            (channel, loop_style) =>
             {
                 /*
                 if (string.IsNullOrEmpty(_antennaList) == false)
@@ -793,7 +794,7 @@ new SetErrorEventArgs
             }
         }
 
-        public static NormalResult SetEAS(string uid, 
+        public static NormalResult SetEAS(string uid,
             uint antenna_id,
             bool enable)
         {
@@ -877,16 +878,20 @@ new SetErrorEventArgs
                     return new NormalResult();
 
                 BaseChannel<IRfid> channel = null;
-                bool old_checkState = _checkState;
-                _checkState = false;
+                /*
+                bool old_checkState = Base.CheckState;
+                Base.CheckState = false;
                 try
                 {
                     channel = Base.GetChannel();
                 }
                 finally
                 {
-                    _checkState = old_checkState;
+                    Base.CheckState = old_checkState;
                 }
+                */
+
+                channel = Base.GetChannel("skip_check_state");
 
                 try
                 {

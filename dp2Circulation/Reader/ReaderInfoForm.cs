@@ -31,6 +31,7 @@ using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
+using System.Threading;
 
 namespace dp2Circulation
 {
@@ -6935,9 +6936,12 @@ MessageBoxDefaultButton.Button1);
         {
             string strError = "";
 
+            CancellationTokenSource _cancel = new CancellationTokenSource();
+
             RegisterPalmprintDialog dlg = new RegisterPalmprintDialog();
             dlg.FormClosed += (s, e) =>
             {
+                _cancel.Cancel();
                 _ = Task.Run(async () =>
                 {
                     await CancelReadPalmprintString();
@@ -7010,6 +7014,20 @@ MessageBoxDefaultButton.Button1);
                     this.readerEditControl1.PalmprintFeatureVersion = result.Version;    // strVersion;
                     this.readerEditControl1.Changed = true;
                 }
+
+                this.Invoke((Action)(() =>
+                {
+                    dlg.CancelButtonText = "关闭";
+                }));
+
+                try
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(5), _cancel.Token);
+                }
+                catch
+                {
+
+                }
             }
             finally
             {
@@ -7025,6 +7043,11 @@ MessageBoxDefaultButton.Button1);
             void PalmprintManager_Touched(object sender, TouchedEventArgs e)
             {
                 // this.ShowMessage(e.Message);
+
+                // 此处不接受除提示外的其他消息
+                if (e.Quality != -1)
+                    return;
+
                 dlg.Invoke((Action)(() =>
                 {
                     dlg.Message = e.Message;

@@ -1653,7 +1653,7 @@ TaskScheduler.Default);
 
             var item = new Item
             {
-                Action = "upload",
+                Action = "update",
                 Format = "json",
                 Data = data,
             };

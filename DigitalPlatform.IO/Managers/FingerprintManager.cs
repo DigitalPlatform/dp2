@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using DigitalPlatform.Interfaces;
+using DigitalPlatform.Text;
 
 namespace DigitalPlatform.IO
 {
@@ -71,11 +72,15 @@ namespace DigitalPlatform.IO
             CancellationToken token)
         {
             // App.CurrentApp.Speak("启动后台线程");
-            Base.Start((channel) =>
+            Base.Start((channel, style) =>
             {
-                var result = channel.Object.GetState("");
-                if (result.Value == -1)
-                    throw new Exception($"{Name}当前处于 {result.ErrorCode} 状态({result.ErrorInfo})");
+                if (StringUtil.IsInList("skip_check_state", style) == false)
+                {
+                    var result = channel.Object.GetState("");
+                    if (result.Value == -1)
+                        throw new Exception($"{Name}当前处于 {result.ErrorCode} 状态({result.ErrorInfo})");
+                }
+
                 channel.Started = true;
 
                 channel.Object.EnableSendKey(false);
@@ -105,7 +110,7 @@ new SetErrorEventArgs
                 */
                 return false;
             },
-            (channel) =>
+            (channel, loop_style) =>
             {
                 string style = "";
                 if (string.IsNullOrEmpty(SessionID) == false)
@@ -208,6 +213,7 @@ new SetErrorEventArgs
             }
         }
 
+
         public static NormalResult GetState(string style)
         {
             try
@@ -216,7 +222,7 @@ new SetErrorEventArgs
                 if (string.IsNullOrEmpty(Base.Url))
                     return new NormalResult();
 
-                BaseChannel<IFingerprint> channel = Base.GetChannel();
+                BaseChannel<IFingerprint> channel = Base.GetChannel("skip_check_state");
                 try
                 {
                     var result = channel.Object.GetState(style);

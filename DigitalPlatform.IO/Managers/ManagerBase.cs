@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 
 using DigitalPlatform;
 using DigitalPlatform.Core;
+using DigitalPlatform.Text;
 //using DigitalPlatform.LibraryClient;
 //using DigitalPlatform.RFID;
 
@@ -57,6 +58,22 @@ namespace DigitalPlatform.IO
         public string Url { get; set; }
 
         public string Name { get; set; }
+
+        /*
+        static bool _checkState = true;
+
+        public bool CheckState
+        {
+            get
+            {
+                return _checkState;
+            }
+            set
+            {
+                _checkState = value;
+            }
+        }
+        */
 
         public void Clear()
         {
@@ -179,7 +196,7 @@ namespace DigitalPlatform.IO
                             var channel = GetChannel();
                             try
                             {
-                                loop_action(channel);
+                                loop_action(channel, "");
                                 wait_time = this.ShortWaitTime;
                             }
                             finally
@@ -212,12 +229,14 @@ namespace DigitalPlatform.IO
             });
         }
 
-        public delegate /*Task*/void delegate_action(BaseChannel<T> channel);
+        public delegate /*Task*/void delegate_action(BaseChannel<T> channel, string style);
         public delegate bool delegate_skip();
 
+        // parameters:
+        //      style   (2021/3/29 增加)
         // Exception: 
         //      可能会抛出 Exception 异常
-        public BaseChannel<T> GetChannel()
+        public BaseChannel<T> GetChannel(string style = "")
         {
             // TODO: 这里需要一个特殊的异常类型
             if (string.IsNullOrEmpty(this.Url))
@@ -243,7 +262,7 @@ namespace DigitalPlatform.IO
 
                     channel.Object.EnableSendKey(false);
 #endif
-                    _new_action?.Invoke(channel);
+                    _new_action?.Invoke(channel, style);
                 }
                 catch (Exception ex)
                 {

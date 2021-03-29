@@ -1845,7 +1845,7 @@ MessageBoxDefaultButton.Button1);
             }
         }
 
-        const string pamcenter_base_version = "1.0.12";
+        const string pamcenter_base_version = "1.0.13";
         public void CheckPalmCenterVersion()
         {
             if (string.IsNullOrEmpty(FingerprintManager.Url) == false)
@@ -1896,6 +1896,8 @@ MessageBoxDefaultButton.Button1);
                         WriteErrorLog(text);
                         Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(text).Replace("\r\n", "<br/>") + "</div>");
                     });
+                    // 移走已经输出的全部条目
+                    _compactLog?.RemoveEntry();
                     _lastCompactTime = DateTime.Now;
                 }
                 return;
@@ -1904,7 +1906,7 @@ MessageBoxDefaultButton.Button1);
             Program.MainForm.OperHistory.AppendHtml($"<div class='debug recpath'>{ HttpUtility.HtmlEncode($"掌纹消息 {e.ToString()}") }</div>");
             if (e.Quality == -1)
             {
-                string error = "palmTouched 提示文字 (e.Quality == -1)";
+                string error = $"palmTouched 提示文字 (e.Quality == -1) {e.Message}";
                 Program.MainForm.OperHistory.AppendHtml("<div class='debug green'>" + HttpUtility.HtmlEncode(error) + "</div>");
                 return;
             }

@@ -910,7 +910,7 @@ string color = "red")
 
         private void RestartFingerprintCenter_Click(object sender, RoutedEventArgs e)
         {
-            FingerprintManager.GetState("restart");
+            FingerprintManager.GetStateRestart();
         }
 
         private void RestartFaceCenter_Click(object sender, RoutedEventArgs e)

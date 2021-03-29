@@ -34,5 +34,17 @@ namespace dp2Circulation
             this.DialogResult = DialogResult.Cancel;
             this.Close();
         }
+
+        public string CancelButtonText
+        {
+            get
+            {
+                return this.button_cancel.Text;
+            }
+            set
+            {
+                this.button_cancel.Text = value;
+            }
+        }
     }
 }
