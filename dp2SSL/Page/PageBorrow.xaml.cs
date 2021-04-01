@@ -1474,6 +1474,7 @@ namespace dp2SSL
                 string pii = _patron.PII;
                 if (string.IsNullOrEmpty(pii))
                     pii = _patron.UID;
+                string oi = string.IsNullOrEmpty(_patron.OI) ? _patron.AOI : _patron.OI;
 
                 if (string.IsNullOrEmpty(pii))
                     return new NormalResult();
@@ -1485,11 +1486,12 @@ namespace dp2SSL
                 //      1   成功
                 GetReaderInfoResult result = null;
                 if (App.Protocol == "sip")
-                    result = await SipChannelUtil.GetReaderInfoAsync(pii);
+                    result = await SipChannelUtil.GetReaderInfoAsync(oi, pii);
                 else
                     result = await
                         Task<GetReaderInfoResult>.Run(() =>
                         {
+                            // TODO: oi+pii
                             return LibraryChannelUtil.GetReaderInfo(pii);
                         });
 
@@ -1660,6 +1662,10 @@ out string strError);
 );
                         string pii = chip.FindElement(ElementOID.PII)?.Text;
                         entity.PII = GetCaption(pii);
+
+                        // 2021/4/2
+                        entity.OI = chip.FindElement(ElementOID.OI)?.Text;
+                        entity.AOI = chip.FindElement(ElementOID.AOI)?.Text;
                     }
 
                     bool clearError = true;
@@ -1986,7 +1992,7 @@ out string strError);
                     {
                         if (action == "borrow")
                         {
-                            var result = await SipChannelUtil.BorrowAsync(_patron.Barcode, entity.PII);
+                            var result = await SipChannelUtil.BorrowAsync(_patron.GetOiPii(), entity.GetOiPii());
                             if (result.Value == -1)
                             {
                                 lRet = -1;
@@ -1995,7 +2001,7 @@ out string strError);
                         }
                         else if (action == "renew")
                         {
-                            var result = await SipChannelUtil.RenewAsync(_patron.Barcode, entity.PII);
+                            var result = await SipChannelUtil.RenewAsync(_patron.GetOiPii(), entity.GetOiPii());
                             if (result.Value == -1)
                             {
                                 lRet = -1;
@@ -2004,7 +2010,7 @@ out string strError);
                         }
                         else if (action == "return")
                         {
-                            var result = await SipChannelUtil.ReturnAsync(entity.PII);
+                            var result = await SipChannelUtil.ReturnAsync(entity.GetOiPii());
                             if (result.Value == -1)
                             {
                                 lRet = -1;

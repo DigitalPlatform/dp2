@@ -287,6 +287,9 @@ namespace dp2SSL
         );
                     pii = chip.FindElement(ElementOID.PII)?.Text;
                     entity.PII = pii;
+                    // 2021/4/2
+                    entity.OI = chip.FindElement(ElementOID.OI)?.Text;
+                    entity.AOI = chip.FindElement(ElementOID.AOI)?.Text;
                 }
                 catch (TagInfoException ex)
                 {
@@ -303,6 +306,8 @@ namespace dp2SSL
                 && entity.TagInfo == null)
             {
                 entity.PII = null;  // 2019/7/2
+                entity.OI = null;
+                entity.AOI = null;
             }
         }
 
@@ -347,6 +352,8 @@ namespace dp2SSL
             foreach (OneTag tag in tags)
             {
                 string pii = "";
+                string oi = "";
+                string aoi = "";
                 if (tag.TagInfo != null)
                 {
                     // Exception:
@@ -356,6 +363,11 @@ namespace dp2SSL
         "" // tag.TagInfo.LockStatus
         );
                     pii = chip.FindElement(ElementOID.PII)?.Text;
+
+                    // 2021/4/2
+                    oi = chip.FindElement(ElementOID.OI)?.Text;
+                    aoi = chip.FindElement(ElementOID.AOI)?.Text;
+
                 }
                 else
                 {
@@ -367,6 +379,8 @@ namespace dp2SSL
                     TagInfo = tag.TagInfo,
                     UID = tag.UID,
                     PII = pii,
+                    OI = oi,
+                    AOI = aoi,
                     Container = this,
                 };
                 this.Add(entity);

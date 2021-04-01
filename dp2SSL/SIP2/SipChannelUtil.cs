@@ -167,7 +167,7 @@ namespace dp2SSL
                 return new NormalResult
                 {
                     Value = -1,
-                    ErrorInfo = $"GetEntityDataAsync() 出现异常: {ex.Message}",
+                    ErrorInfo = $"UpdateItemStatusAsync() 出现异常: {ex.Message}",
                     ErrorCode = ex.GetType().ToString()
                 };
             }
@@ -381,7 +381,7 @@ namespace dp2SSL
                                             DomUtil.SetElementText(itemdom.DocumentElement,
                                                 "shelfNo",
                                                 book_item.ShelfNo);
-                                        
+
                                         string old_currentLocation = DomUtil.GetElementText(itemdom.DocumentElement,
                                             "currentLocation");
                                         string oldLeft = null;
@@ -392,7 +392,7 @@ namespace dp2SSL
                                             oldLeft = parts[0];
                                             oldRight = parts[1];
                                         }
-                                        
+
                                         DomUtil.SetElementText(itemdom.DocumentElement,
                                             "currentLocation",
                                             BuildCurrentLocation(book_item.CurrentLocation == null ? oldLeft : book_item.CurrentLocation,
@@ -465,7 +465,7 @@ namespace dp2SSL
         static string ConvertItemState(string circulationStatus,
             string message)
         {
-            switch(circulationStatus)
+            switch (circulationStatus)
             {
                 case "01":
                     if (string.IsNullOrEmpty(message) == false)
@@ -514,8 +514,22 @@ namespace dp2SSL
         //      -1  出错
         //      0   读者记录没有找到
         //      1   成功
-        public static async Task<GetReaderInfoResult> GetReaderInfoAsync(string pii)
+        public static async Task<GetReaderInfoResult> GetReaderInfoAsync(
+            string oi,
+            string pii)
         {
+            string filter_oi = App.SipInstitution;
+            if (string.IsNullOrEmpty(filter_oi) == false)
+            {
+                if (oi != filter_oi)
+                    return new GetReaderInfoResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"读者证的 OI '{oi}' 不符合定义 '{filter_oi}'，获取读者记录被(dp2ssl)拒绝",
+                        ErrorCode = "oiMismatch"
+                    };
+            }
+
             try
             {
                 using (var releaser = await _channelLimit.EnterAsync())
@@ -527,7 +541,7 @@ namespace dp2SSL
 
                         int nRedoCount = 0;
                     REDO_GETITEMINFO:
-                        var get_result = await _channel.GetPatronInfoAsync(pii);
+                        var get_result = await _channel.GetPatronInfoAsync(oi, pii);
                         if (get_result.Value == -1)
                             return new GetReaderInfoResult
                             {
@@ -557,6 +571,14 @@ namespace dp2SSL
                         */
                         else
                         {
+                            if (string.IsNullOrEmpty(get_result.Result.AA_PatronIdentifier_r))
+                                return new GetReaderInfoResult
+                                {
+                                    Value = -1,
+                                    ErrorInfo = get_result.Result.AF_ScreenMessage_o,
+                                    ErrorCode = "patronInfoError"
+                                };
+
                             XmlDocument readerdom = new XmlDocument();
                             readerdom.LoadXml("<root />");
 
@@ -564,9 +586,23 @@ namespace dp2SSL
                             string state = "***";
                             if (get_result.Result.BL_ValidPatron_o == "Y")
                                 state = "";
+                            else
+                                return new GetReaderInfoResult
+                                {
+                                    Value = -1,
+                                    ErrorInfo = get_result.Result.AF_ScreenMessage_o,
+                                    ErrorCode = "patronInfoError"
+                                };
+
                             DomUtil.SetElementText(readerdom.DocumentElement,
                                 "state",
                                 state);
+
+                            // 2021/4/2
+                            if (string.IsNullOrEmpty(get_result.Result.AO_InstitutionId_r) == false)
+                                DomUtil.SetElementText(readerdom.DocumentElement,
+    "oi",
+    get_result.Result.AO_InstitutionId_r);
 
                             // 读者证条码号
                             DomUtil.SetElementText(readerdom.DocumentElement,
@@ -592,7 +628,11 @@ get_result.Result.AE_PersonalName_r);
                                     if (item.Value == null)
                                         continue;
                                     var borrow = root.AppendChild(readerdom.CreateElement("borrow")) as XmlElement;
-                                    borrow.SetAttribute("barcode", item.Value);
+                                    InventoryData.ParseOiPii(item.Value, out string current_pii, out string current_oi);
+
+                                    if (string.IsNullOrEmpty(current_oi) == false)
+                                        borrow.SetAttribute("oi", current_oi);
+                                    borrow.SetAttribute("barcode", current_pii);
                                 }
                             }
 
@@ -624,9 +664,31 @@ get_result.Result.AE_PersonalName_r);
             }
         }
 
-        public static async Task<NormalResult> BorrowAsync(string patronBarcode,
+        public static async Task<NormalResult> BorrowAsync(
+            string patronBarcode,
             string itemBarcode)
         {
+            string filter_oi = App.SipInstitution;
+            if (string.IsNullOrEmpty(filter_oi) == false)
+            {
+                InventoryData.ParseOiPii(patronBarcode, out string patron_pii, out string patron_oi);
+                InventoryData.ParseOiPii(itemBarcode, out string item_pii, out string item_oi);
+                if (patron_oi != filter_oi)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"读者证的 OI '{patron_oi}' 不符合定义 '{filter_oi}'，借书被(dp2ssl)拒绝",
+                        ErrorCode = "oiMismatch"
+                    };
+                if (item_oi != filter_oi)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"图书标签的 OI '{item_oi}' 不符合定义 '{filter_oi}'，借书被(dp2ssl)拒绝",
+                        ErrorCode = "oiMismatch"
+                    };
+            }
+
             try
             {
                 using (var releaser = await _channelLimit.EnterAsync())
@@ -635,7 +697,9 @@ get_result.Result.AE_PersonalName_r);
                     SipChannel channel = await GetChannelAsync();
                     try
                     {
-                        var result = await channel.CheckoutAsync(patronBarcode, itemBarcode);
+                        var result = await channel.CheckoutAsync(patronBarcode,
+                            itemBarcode,
+                            filter_oi);
                         if (result.Value == -1)
                             return new NormalResult
                             {
@@ -662,7 +726,7 @@ get_result.Result.AE_PersonalName_r);
             {
                 WpfClientInfo.WriteErrorLog($"BorrowAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
 
-                return new GetEntityDataResult
+                return new NormalResult
                 {
                     Value = -1,
                     ErrorInfo = $"BorrowAsync() 出现异常: {ex.Message}",
@@ -671,8 +735,21 @@ get_result.Result.AE_PersonalName_r);
             }
         }
 
-        public static async Task<NormalResult> ReturnAsync(string itemBarcode)
+        public static async Task<NormalResult> ReturnAsync(
+            string itemBarcode)
         {
+            string filter_oi = App.SipInstitution;
+            if (string.IsNullOrEmpty(filter_oi) == false)
+            {
+                InventoryData.ParseOiPii(itemBarcode, out string item_pii, out string item_oi);
+                if (item_oi != filter_oi)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"图书标签的 OI '{item_oi}' 不符合定义 '{filter_oi}'，还书被(dp2ssl)拒绝",
+                        ErrorCode = "oiMismatch"
+                    };
+            }
             try
             {
                 using (var releaser = await _channelLimit.EnterAsync())
@@ -681,7 +758,7 @@ get_result.Result.AE_PersonalName_r);
                     SipChannel channel = await GetChannelAsync();
                     try
                     {
-                        var result = await channel.CheckinAsync(itemBarcode);
+                        var result = await channel.CheckinAsync(itemBarcode, filter_oi);
                         if (result.Value == -1)
                             return new NormalResult
                             {
@@ -708,7 +785,7 @@ get_result.Result.AE_PersonalName_r);
             {
                 WpfClientInfo.WriteErrorLog($"ReturnAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
 
-                return new GetEntityDataResult
+                return new NormalResult
                 {
                     Value = -1,
                     ErrorInfo = $"ReturnAsync() 出现异常: {ex.Message}",
@@ -717,9 +794,31 @@ get_result.Result.AE_PersonalName_r);
             }
         }
 
-        public static async Task<NormalResult> RenewAsync(string patronBarcode,
-    string itemBarcode)
+        public static async Task<NormalResult> RenewAsync(
+            string patronBarcode,
+            string itemBarcode)
         {
+            string filter_oi = App.SipInstitution;
+            if (string.IsNullOrEmpty(filter_oi) == false)
+            {
+                InventoryData.ParseOiPii(patronBarcode, out string patron_pii, out string patron_oi);
+                InventoryData.ParseOiPii(itemBarcode, out string item_pii, out string item_oi);
+                if (patron_oi != filter_oi)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"读者证的 OI '{patron_oi}' 不符合定义 '{filter_oi}'，续借被(dp2ssl)拒绝",
+                        ErrorCode = "oiMismatch"
+                    };
+                if (item_oi != filter_oi)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"图书标签的 OI '{item_oi}' 不符合定义 '{filter_oi}'，续借被(dp2ssl)拒绝",
+                        ErrorCode = "oiMismatch"
+                    };
+            }
+
             try
             {
                 using (var releaser = await _channelLimit.EnterAsync())
@@ -728,7 +827,9 @@ get_result.Result.AE_PersonalName_r);
                     SipChannel channel = await GetChannelAsync();
                     try
                     {
-                        var result = await channel.RenewAsync(patronBarcode, itemBarcode);
+                        var result = await channel.RenewAsync(patronBarcode,
+                            itemBarcode,
+                            filter_oi);
                         if (result.Value == -1)
                             return new NormalResult
                             {
@@ -755,7 +856,7 @@ get_result.Result.AE_PersonalName_r);
             {
                 WpfClientInfo.WriteErrorLog($"RenewAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
 
-                return new GetEntityDataResult
+                return new NormalResult
                 {
                     Value = -1,
                     ErrorInfo = $"RenewAsync() 出现异常: {ex.Message}",
@@ -810,7 +911,7 @@ get_result.Result.AE_PersonalName_r);
             {
                 WpfClientInfo.WriteErrorLog($"DetectSipNetworkAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
 
-                return new GetEntityDataResult
+                return new NormalResult
                 {
                     Value = -1,
                     ErrorInfo = $"DetectSipNetworkAsync() 出现异常: {ex.Message}",
@@ -820,7 +921,7 @@ get_result.Result.AE_PersonalName_r);
         }
 
 
-#region 监控
+        #region 监控
 
         // 可以适当降低探测的频率。比如每五分钟探测一次
         // 两次检测网络之间的间隔
@@ -940,6 +1041,6 @@ TaskCreationOptions.LongRunning,
 TaskScheduler.Default);
         }
 
-#endregion
+        #endregion
     }
 }
