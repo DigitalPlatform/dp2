@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 using DigitalPlatform.Interfaces;
 using DigitalPlatform.IO;
+using DigitalPlatform.Text;
 
 namespace DigitalPlatform.Face
 {
@@ -59,11 +60,14 @@ namespace DigitalPlatform.Face
             Base.LongWaitTime = TimeSpan.FromSeconds(5);
 
             // App.CurrentApp.Speak("启动后台线程");
-            Base.Start((channel) =>
+            Base.Start((channel, style) =>
             {
-                var result = channel.Object.GetState("camera");
-                if (result.Value == -1)
-                    throw new Exception($"人脸中心当前处于 {result.ErrorCode} 状态({result.ErrorInfo})");
+                if (StringUtil.IsInList("skip_check_state", style) == false)
+                {
+                    var result = channel.Object.GetState("camera");
+                    if (result.Value == -1)
+                        throw new Exception($"人脸中心当前处于 {result.ErrorCode} 状态({result.ErrorInfo})");
+                }
 
                 channel.Started = true;
 
@@ -71,7 +75,7 @@ namespace DigitalPlatform.Face
                 //return null;
             },
             null,
-            (channel) =>
+            (channel, loop_style) =>
             {
                 var result = channel.Object.GetState("camera");
                 if (result.Value == -1)
@@ -133,7 +137,7 @@ namespace DigitalPlatform.Face
                 if (string.IsNullOrEmpty(Base.Url))
                     return new NormalResult();
 
-                BaseChannel<IBioRecognition> channel = Base.GetChannel();
+                BaseChannel<IBioRecognition> channel = Base.GetChannel("skip_check_state");
                 try
                 {
                     var result = channel.Object.GetState(style);

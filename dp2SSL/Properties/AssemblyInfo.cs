@@ -51,8 +51,8 @@ using System.Windows;
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 // 方法是按如下所示使用“*”: :
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.8.10")]    // 1.5.*
-[assembly: AssemblyFileVersion("1.8.10.0")]  // 1.5.0.0
+[assembly: AssemblyVersion("1.8.11")]    // 1.5.*
+[assembly: AssemblyFileVersion("1.8.11.0")]  // 1.5.0.0
 
 // 1.0 2019/2/21 第一个版本
 // 1.1 2019/2/26 可以显示版本号了
@@ -93,3 +93,4 @@ using System.Windows;
 //      1.8.8 (2021/3/8) 增加下载全部和自动同步册记录和书目摘要到本地缓存功能。断网情况下连接 dp2MServer 的错误日志条目改为紧凑日志形态
 //      1.8.9 (2021/3/9) 下载全部册记录功能和同步册记录功能做了改进，只下载和同步当前 dp2library 账户所管辖的馆代码内的馆藏地对应的册记录。shelf.xml 中增加配置参数 <key name="断网模式下开门前检查读者是否超期" value="true"/>
 //      1.8.10 (2021/3/10) 盘点功能增加上传外部接口。在 inventory.xml 中增配参数 <uploadInterface protocol='' baseUrl='http://localhost:62022/'/>
+//      1.8.11 (2021/4/1) 盘点功能增加导入 UID-->UII 对照表到 dp2library 实体库的功能。原先只能导入到 sip 方式下的本地对照库

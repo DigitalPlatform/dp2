@@ -115,6 +115,7 @@ namespace dp2Circulation
         {
             foreach (ZClientChannel channel in _channels)
             {
+                channel._total_fetched += channel._fetched;
                 channel._fetched = 0;
             }
         }
@@ -547,6 +548,7 @@ namespace dp2Circulation
         internal string _query = "";    // 检索式
         internal long _resultCount = 0;   // 检索命中条数
         internal int _fetched = 0;   // 已经 Present 获取的条数
+        internal int _total_fetched = 0;    // 多行检索总共 Present 获取的条数。每次当清除 _fetched 以前先把 _fetched 里面的值加到 _total_fetched 上面
 
         public void Dispose()
         {

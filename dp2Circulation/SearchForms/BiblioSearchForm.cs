@@ -1925,6 +1925,7 @@ Keys keyData)
                                     ListViewItem item = (ListViewItem)zchannelTable[c];
                                     if (r.Records != null)
                                         FillList(c.TargetInfo,
+                                            c._total_fetched,
                                             c._fetched,
                                             c.ZClient.ForcedRecordsEncoding == null ? c.TargetInfo.DefaultRecordsEncoding : c.ZClient.ForcedRecordsEncoding,
                                             c.ServerName,
@@ -2102,6 +2103,7 @@ Keys keyData)
         // (Z39.50)填入浏览记录
         void FillList(
             TargetInfo targetInfo,
+            int base_start,
             int start,
             Encoding encoding,
             string strLibraryName,
@@ -2110,7 +2112,16 @@ Keys keyData)
         {
             // int index = insert_pos.ListView.Items.IndexOf(insert_pos);
 
+            bool multiline = this.toolStripButton_multiLine.Checked;
+
             int i = 0;
+            if (multiline)
+            {
+                // 2021/4/1
+                // i 需要是一个全局的行索引
+                // i = insert_pos.ListView.Items.IndexOf(insert_pos);
+                i = base_start;
+            }
             foreach (var record in records)
             {
                 string strRecPath = $"{start + i + 1}@{strLibraryName}";
@@ -3158,6 +3169,7 @@ Keys keyData)
                     {
                         if (present_result.Records != null)
                             FillList(channel.TargetInfo,
+                                channel._total_fetched,
                                 channel._fetched,
                                 channel.ZClient.ForcedRecordsEncoding == null ? channel.TargetInfo.DefaultRecordsEncoding : channel.ZClient.ForcedRecordsEncoding,
                                 channel.ServerName,

@@ -1761,7 +1761,7 @@ MessageBoxDefaultButton.Button1);
             // 2021/3/19
             // 保护。防止重复 +=
             FingerprintManager.Touched -= PalmprintManager_Touched; ;
-            SystemEvents.PowerModeChanged -= SystemEvents_PowerModeChanged;
+            // SystemEvents.PowerModeChanged -= SystemEvents_PowerModeChanged;
 
             if (string.IsNullOrEmpty(this.PalmprintReaderUrl) == false)
             {
@@ -1781,7 +1781,7 @@ MessageBoxDefaultButton.Button1);
                 CheckPalmCenterVersion();
                 FingerprintManager.Start(_cancelPalmManager.Token);
 
-                SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
+                // SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
             }
             else
             {
@@ -1794,6 +1794,8 @@ MessageBoxDefaultButton.Button1);
             }
         }
 
+#if REMOVED
+        // palmceneter 自己可以感知 power resume 了，这个功能就废止了
         private void SystemEvents_PowerModeChanged(object sender, PowerModeChangedEventArgs e)
         {
             switch (e.Mode)
@@ -1821,6 +1823,7 @@ MessageBoxDefaultButton.Button1);
                     break;
             }
         }
+#endif
 
         // 清除此前累积在 palmcenter 中未取的所有消息
         public void ClearPalmMessage()
@@ -1845,7 +1848,7 @@ MessageBoxDefaultButton.Button1);
             }
         }
 
-        const string pamcenter_base_version = "1.0.13";
+        const string pamcenter_base_version = "1.0.14";
         public void CheckPalmCenterVersion()
         {
             if (string.IsNullOrEmpty(FingerprintManager.Url) == false)
@@ -1937,9 +1940,9 @@ MessageBoxDefaultButton.Button1);
             }));
         }
 
-        #endregion
+#endregion
 
-        #region ProcessManager
+#region ProcessManager
 
         CancellationTokenSource _cancelProcessMonitor = new CancellationTokenSource();
 
@@ -1991,7 +1994,7 @@ MessageBoxDefaultButton.Button1);
         }
 
 
-        #endregion
+#endregion
 
         // 将 dp2circulation.xml 文件中绿色安装目录或者 ClickOnce 安装的数据目录移动到用户目录
         int MoveDp2circulationXml(out string strError)
@@ -2159,7 +2162,7 @@ MessageBoxDefaultButton.Button1);
             MessageBox.Show(this, strText);
         }
 
-        #region Background Form
+#region Background Form
 
         void OpenBackgroundForm()
         {
@@ -2280,7 +2283,7 @@ MessageBoxDefaultButton.Button1);
             }
         }
 
-        #endregion
+#endregion
 
         // 判断两个文件的版本号是否一致
         static bool VersionChanged(string filename1, string filename2)

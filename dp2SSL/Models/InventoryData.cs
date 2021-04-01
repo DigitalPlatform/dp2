@@ -2404,11 +2404,13 @@ TaskScheduler.Default);
             return currentLocation + ":" + currentShelfNo;
         }
 
+        // TODO: 同时进入 hashtable
         // 导入 UID PII 对照表文件
         public static async Task<ImportUidResult> ImportUidPiiTableAsync(
             string filename,
             CancellationToken token)
         {
+            bool sip = App.Protocol == "sip";
             try
             {
                 using (var reader = new StreamReader(filename, Encoding.ASCII))
@@ -2426,14 +2428,60 @@ TaskScheduler.Default);
                         if (string.IsNullOrEmpty(line))
                             continue;
 
-                        // 2021/1/31
-                        ParseOiPii(line, out string pii, out string oi);
+                        var parts = StringUtil.ParseTwoPart(line, "\t");
+                        string uid = parts[0];
+                        string barcode = parts[1];
+                        if (string.IsNullOrEmpty(uid) || string.IsNullOrEmpty(barcode))
+                            continue;
+
+                        // 2021/4/1
+                        ParseOiPii(barcode, out string pii, out string oi);
                         if (string.IsNullOrEmpty(oi))
                             return new ImportUidResult
                             {
                                 ErrorInfo = $"出现了没有 OI 的行 '{line}'，导入过程出错",
                                 Value = -1,
                             };
+
+                        if (sip == false)
+                        {
+
+                            // .Value
+                            //      -1  出错
+                            //      0   没有找到
+                            //      1   找到
+                            var get_result = await LibraryChannelUtil.GetEntityDataAsync(barcode,
+                                "network,skip_biblio");
+                            if (get_result.Value == -1)
+                                return new ImportUidResult
+                                {
+                                    ErrorInfo = $"GetEntityDataAsync() error: {get_result.ErrorInfo}",
+                                    Value = -1,
+                                };
+                            if (get_result.Value == 0)
+                                return new ImportUidResult
+                                {
+                                    ErrorInfo = $"册记录 {uid} 没有找到: {get_result.ErrorInfo}",
+                                    Value = -1,
+                                };
+                            var set_result = RequestSetUID(
+    get_result.ItemRecPath,
+    get_result.ItemXml,
+    get_result.ItemTimestamp,
+    uid,
+    null,
+    "");
+                            if (set_result.Value == -1)
+                                return new ImportUidResult
+                                {
+                                    ErrorInfo = $"RequestSetUID() error: {set_result.ErrorInfo}",
+                                    Value = -1,
+                                };
+                            if (set_result.Value == 1)
+                                change_count++;
+                            line_count++;
+                            continue;
+                        }
 
                         lines.Add(line);
                         if (lines.Count > 100)

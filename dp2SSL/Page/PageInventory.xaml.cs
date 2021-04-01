@@ -851,12 +851,12 @@ namespace dp2SSL
             bool sip = App.Protocol == "sip";
             if (sip)
             {
-                this.importUidPiiTable.Visibility = Visibility.Visible;
+                //this.importUidPiiTable.Visibility = Visibility.Visible;
                 this.clearUidPiiCache.Visibility = Visibility.Visible;
             }
             else
             {
-                this.importUidPiiTable.Visibility = Visibility.Collapsed;
+                //this.importUidPiiTable.Visibility = Visibility.Collapsed;
                 this.clearUidPiiCache.Visibility = Visibility.Collapsed;
             }
 
@@ -910,6 +910,7 @@ namespace dp2SSL
                     {
                         await Task.Run(async () =>
                         {
+                            bool sip = App.Protocol == "sip";
                             // 导入 UID PII 对照表文件
                             var result = await InventoryData.ImportUidPiiTableAsync(
                                     openFileDialog.FileName,
@@ -917,7 +918,12 @@ namespace dp2SSL
                             if (result.Value == -1)
                                 App.ErrorBox("导入 UID PII 对照表文件", $"导入过程出错: {result.ErrorInfo}");
                             else
-                                App.ErrorBox("导入 UID PII 对照表文件", $"导入完成。\r\n\r\n共处理条目 {result.LineCount} 个; 新创建本地库记录 {result.NewCount} 个; 修改本地库记录 {result.ChangeCount} 个; 删除本地库记录 {result.DeleteCount}", "green");
+                            {
+                                if (sip)
+                                    App.ErrorBox("导入 UID PII 对照表文件", $"导入完成。\r\n\r\n共处理条目 {result.LineCount} 个; 新创建本地库记录 {result.NewCount} 个; 修改本地库记录 {result.ChangeCount} 个; 删除本地库记录 {result.DeleteCount}", "green");
+                                else
+                                    App.ErrorBox("导入 UID PII 对照表文件", $"导入完成。\r\n\r\n共处理条目 {result.LineCount} 个; 修改册记录 {result.ChangeCount} 个", "green");
+                            }
                         });
                     }
                     catch (Exception ex)
@@ -1323,7 +1329,7 @@ namespace dp2SSL
                         return false;
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     _updateTask = null;
                     WpfClientInfo.WriteInfoLog($"BeginUpdateStatis() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
