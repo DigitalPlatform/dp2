@@ -177,6 +177,15 @@ bool bClickClose = false)
                 LoadHistory();
             });
             */
+            _ = Task.Run(() =>
+            {
+                var initial_result = LibraryChannelUtil.Initial();
+                if (initial_result.Value == -1)
+                {
+                    this.ShowMessage( $"获得 dp2library 服务器配置失败: {initial_result.ErrorInfo}");
+                    return;
+                }
+            });
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)

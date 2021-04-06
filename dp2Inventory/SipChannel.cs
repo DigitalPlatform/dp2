@@ -1086,12 +1086,14 @@ namespace dp2Inventory
             public PatronInformationResponse_64 Result { get; set; }
         }
 
-        public async Task<GetPatronInfoResult> GetPatronInfoAsync(string patronBarcode)
+        public async Task<GetPatronInfoResult> GetPatronInfoAsync(
+            string patronBarcode,
+            string filter_oi)
         {
             PatronInformation_63 request = new PatronInformation_63()
             {
                 TransactionDate_18 = SIPUtility.NowDateTime,
-                AO_InstitutionId_r = SIPConst.AO_Value,
+                AO_InstitutionId_r = filter_oi,
                 AA_PatronIdentifier_r = patronBarcode,
             };
             request.SetDefaulValue();//设置其它默认值
@@ -1138,14 +1140,15 @@ namespace dp2Inventory
         //      0   请求失败
         //      1   请求成功
         public async Task<CheckoutResult> CheckoutAsync(string patronBarcode,
-            string itemBarcode)
+            string itemBarcode,
+            string filter_oi)
         {
             Checkout_11 request = new Checkout_11()
             {
                 TransactionDate_18 = SIPUtility.NowDateTime,
                 AA_PatronIdentifier_r = patronBarcode,
                 AB_ItemIdentifier_r = itemBarcode,
-                AO_InstitutionId_r = SIPConst.AO_Value,
+                AO_InstitutionId_r = filter_oi,
             };
             request.SetDefaulValue();//设置其它默认值
 
@@ -1191,14 +1194,16 @@ namespace dp2Inventory
         //      -1  出错
         //      0   请求失败
         //      1   请求成功
-        public async Task<CheckinResult> CheckinAsync(string itemBarcode)
+        public async Task<CheckinResult> CheckinAsync(
+            string itemBarcode,
+            string filter_oi)
         {
             Checkin_09 request = new Checkin_09()
             {
                 TransactionDate_18 = SIPUtility.NowDateTime,
                 ReturnDate_18 = SIPUtility.NowDateTime,
                 AB_ItemIdentifier_r = itemBarcode,
-                AO_InstitutionId_r = SIPConst.AO_Value,
+                AO_InstitutionId_r = filter_oi,
             };
             request.SetDefaulValue();//设置其它默认值
 
@@ -1245,12 +1250,13 @@ namespace dp2Inventory
         //      0   请求失败
         //      1   请求成功
         public async Task<RenewResult> RenewAsync(string patronBarcode,
-            string itemBarcode)
+            string itemBarcode,
+            string filter_oi)
         {
             Renew_29 request = new Renew_29()
             {
                 TransactionDate_18 = SIPUtility.NowDateTime,
-                AO_InstitutionId_r = SIPConst.AO_Value,
+                AO_InstitutionId_r = filter_oi,
                 AA_PatronIdentifier_r = patronBarcode,
                 AB_ItemIdentifier_o = itemBarcode,
             };

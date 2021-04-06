@@ -3570,6 +3570,27 @@ out strError);
                                 }
                             }
 
+                            // 2021/4/6
+                            // 检查 uid 重复
+                            {
+                                XmlDocument domTemp = new XmlDocument();
+                                domTemp.LoadXml(strNewXml);
+                                string new_uid = DomUtil.GetElementText(domTemp.DocumentElement, "uid");
+                                if (string.IsNullOrEmpty(new_uid) == false)
+                                {
+                                    // 删除其他册记录中重复的 UID
+                                    // return:
+                                    //      -1  出错
+                                    //      其他  删除 UID 字段的册记录条数
+                                    nRet = RemoveDupUid(channel,
+                                        "",
+                                        new_uid,
+                                        out strError);
+                                    if (nRet == -1)
+                                        goto ERROR1;
+                                }
+                            }
+
                             lRet = channel.DoSaveTextRes(info.NewRecPath,
                                 strNewXml,
                                 false,   // include preamble?
@@ -4957,6 +4978,40 @@ out strError);
                         strError = "即将被修改的册记录 '" + info.NewRecPath + "' 其馆藏地点不符合要求: " + strError;
                         goto ERROR1;
                     }
+                }
+            }
+
+            // 2021/4/6
+            if (bExist == true)
+            {
+                // 比较新旧记录的 uid 是否有改变
+                // return:
+                //      -1  出错
+                //      0   相等
+                //      1   不相等
+                nRet = CompareTwoField(
+                    "uid",
+                    domExist,
+                    domNew,
+                    out string old_uid,
+                    out string new_uid,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                if (nRet == 1  // 有改变
+                    && string.IsNullOrEmpty(new_uid) == false)
+                {
+                    // 删除其他册记录中重复的 UID
+                    // return:
+                    //      -1  出错
+                    //      其他  删除 UID 字段的册记录条数
+                    nRet = RemoveDupUid(channel,
+                        strOutputPath,
+                        new_uid,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
                 }
             }
 
@@ -6579,6 +6634,126 @@ out strError);
             return nDeletedCount;
         ERROR1:
             return -1;
+        }
+
+        // 2021/4/6
+        // 删除其他册记录中重复的 UID
+        // return:
+        //      -1  出错
+        //      其他  删除 UID 字段的册记录条数
+        int RemoveDupUid(RmsChannel channel,
+            string strRecPath,
+            string uid,
+            out string strError)
+        {
+            strError = "";
+
+            if (string.IsNullOrEmpty(uid))
+            {
+                strError = "uid 参数值不允许为空";
+                return -1;
+            }
+
+            // return:
+            //      -1  error
+            //      其他    命中记录条数(不超过nMax规定的极限)
+            int nRet = SearchItemRecDup(
+                channel,
+                uid,
+                "RFID UID",
+                1000,
+                out List<string> aPath,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            if (aPath == null || aPath.Count == 0)
+                return 0;
+
+            bool too_many = (aPath.Count >= 1000);
+
+            // 去除自己
+            aPath.Remove(strRecPath);
+            if (aPath.Count == 0)
+                return 0;
+
+            foreach (string recpath in aPath)
+            {
+                // 删除册记录中的 UID 字段
+                nRet = DeleteUidField(
+                    channel,
+                    recpath,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+            }
+
+            if (too_many)
+            {
+                strError = $"UID '{uid}' 命中的记录太多(超过 1000 条)，本次只删除了其中一部分(1000 条)的 uid 字段，请重试操作以便继续删除其余部分";
+                return -1;
+            }
+            return 0;
+        }
+
+        // 删除册记录中的 UID 字段
+        int DeleteUidField(
+            RmsChannel channel,
+            string strRecPath,
+            out string strError)
+        {
+            strError = "";
+
+            int nRedoCount = 0;
+        REDO:
+            long lRet = channel.GetRes(strRecPath,
+    out string strExistXml,
+    out _,
+    out byte[] exist_timestamp,
+    out string strOutputPath,
+    out strError);
+            if (lRet == -1)
+            {
+                if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                    return 0;
+                return -1;
+            }
+
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.LoadXml(strExistXml);
+            }
+            catch (Exception ex)
+            {
+                strError = $"册记录 {strRecPath} 装入 XMLDOM 时出错: {ex.Message}";
+                return -1;
+            }
+
+            string old_uid = DomUtil.GetElementText(dom.DocumentElement, "uid");
+            if (string.IsNullOrEmpty(old_uid))
+                return 0;
+            DomUtil.DeleteElement(dom.DocumentElement, "uid");
+
+            lRet = channel.DoSaveTextRes(strRecPath,
+    dom.OuterXml,
+    false,
+    "content", // ,ignorechecktimestamp
+    exist_timestamp,
+    out byte[] baOutputTimestamp,
+    out string strOutputRecPath,
+    out strError);
+            if (lRet == -1)
+            {
+                if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch
+                    && nRedoCount < 2)
+                {
+                    nRedoCount++;
+                    goto REDO;
+                }
+                return -1;
+            }
+            return 1;
         }
     }
 

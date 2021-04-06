@@ -701,6 +701,9 @@ out string strError);
             public string Title { get; set; }
             public string ItemXml { get; set; }
             public string ItemRecPath { get; set; }
+
+            // 2021/4/1
+            public byte[] ItemTimestamp { get; set; }
         }
 
         // static bool _cacheDbCreated = false;
@@ -784,6 +787,7 @@ out string strError);
                                     Value = 1,
                                     ItemXml = item_xml,
                                     ItemRecPath = item_recpath,
+                                    ItemTimestamp = timestamp,
                                     Title = "",
                                 };
 
@@ -874,6 +878,324 @@ out string strError);
                 };
             }
         }
+
+        public class RequestInventoryResult : NormalResult
+        {
+            public string ItemXml { get; set; }
+        }
+
+        // 向 dp2library 服务器发出还书请求
+        public static RequestInventoryResult RequestReturn(
+            string pii,
+            string itemRecPath,
+            string batchNo,
+            string strUserName,
+            string style)
+        {
+            // TODO: 是否要用特定的工作人员身份进行还书?
+            LibraryChannel channel = GetChannel(strUserName);
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromSeconds(10);
+
+            try
+            {
+                string strStyle = "item";
+                string operTimeStyle = "";
+
+                int nRedoCount = 0;
+            REDO:
+                long lRet = channel.Return(null,
+                    "return",
+                    "", // _patron.Barcode,
+                    pii,    // entity.PII,
+                    itemRecPath,
+                    false,
+                    strStyle + operTimeStyle, // style,
+                    "xml", // item_format_list
+                    out string[] item_records,
+                    "xml",
+                    out string[] reader_records,
+                    "summary",
+                    out string[] biblio_records,
+                    out string[] dup_path,
+                    out string output_reader_barcode,
+                    out ReturnInfo return_info,
+                    out string strError);
+                if (lRet == -1 && channel.ErrorCode != ErrorCode.NotBorrowed)
+                {
+                    if ((channel.ErrorCode == ErrorCode.RequestError
+        || channel.ErrorCode == ErrorCode.RequestTimeOut))
+                    {
+                        nRedoCount++;
+
+                        if (nRedoCount < 2)
+                            goto REDO;
+                        else
+                        {
+                            return new RequestInventoryResult
+                            {
+                                Value = -1,
+                                ErrorInfo = "因网络出现问题，请求 dp2library 服务器失败",
+                                ErrorCode = "requestError"
+                            };
+                        }
+                    }
+
+                    return new RequestInventoryResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError,
+                        ErrorCode = channel.ErrorCode.ToString()
+                    };
+                }
+
+                // 更新册记录
+                string entity_xml = null;
+                if (item_records?.Length > 0)
+                    entity_xml = item_records[0];
+                return new RequestInventoryResult { ItemXml = entity_xml };
+            }
+            finally
+            {
+                channel.Timeout = old_timeout;
+                ReturnChannel(channel);
+            }
+        }
+
+        public class RequestSetUidResult : NormalResult
+        {
+            public string NewItemXml { get; set; }
+            public byte[] NewTimestamp { get; set; }
+        }
+
+        // 向 dp2library 服务器发出设置册记录 UID 的请求
+        public static RequestSetUidResult RequestSetUID(
+            string strRecPath,
+            string strOldXml,
+            byte[] old_timestamp,
+            string uid,
+            // string batchNo,
+            string strUserName,
+            string style)
+        {
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml(strOldXml);
+
+            string old_uid = DomUtil.GetElementText(dom.DocumentElement, "uid");
+            if (old_uid == uid)
+            {
+                return new RequestSetUidResult { Value = 0 };    // 没有必要修改
+            }
+            DomUtil.SetElementText(dom.DocumentElement, "uid", uid);
+
+
+            List<EntityInfo> entityArray = new List<EntityInfo>();
+
+            {
+                EntityInfo item_info = new EntityInfo();
+
+                item_info.OldRecPath = strRecPath;
+                item_info.Action = "setuid";
+                item_info.NewRecPath = strRecPath;
+
+                item_info.NewRecord = dom.OuterXml;
+                item_info.NewTimestamp = null;
+
+                item_info.OldRecord = strOldXml;
+                item_info.OldTimestamp = old_timestamp;
+
+                entityArray.Add(item_info);
+            }
+
+            // TODO: 是否要用特定的工作人员身份进行盘点?
+            LibraryChannel channel = GetChannel(strUserName);
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromSeconds(10);
+
+            try
+            {
+                int nRedoCount = 0;
+            REDO:
+                long lRet = channel.SetEntities(
+                 null,
+                 "",
+                 entityArray.ToArray(),
+                 out EntityInfo[] errorinfos,
+                 out string strError);
+                if (lRet == -1)
+                {
+                    if ((channel.ErrorCode == ErrorCode.RequestError
+        || channel.ErrorCode == ErrorCode.RequestTimeOut))
+                    {
+                        nRedoCount++;
+
+                        if (nRedoCount < 2)
+                            goto REDO;
+                        else
+                        {
+                            return new RequestSetUidResult
+                            {
+                                Value = -1,
+                                ErrorInfo = "因网络出现问题，请求 dp2library 服务器失败",
+                                ErrorCode = "requestError"
+                            };
+                        }
+                    }
+
+                    return new RequestSetUidResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError,
+                        ErrorCode = channel.ErrorCode.ToString()
+                    };
+                }
+
+                if (errorinfos == null)
+                    return new RequestSetUidResult { };
+
+                List<string> errors = new List<string>();
+                string strNewXml = "";
+                byte[] baNewTimestamp = null;
+                for (int i = 0; i < errorinfos.Length; i++)
+                {
+                    var info = errorinfos[i];
+
+                    if (i == 0)
+                    {
+                        baNewTimestamp = info.NewTimestamp;
+                        strNewXml = info.NewRecord;
+                    }
+
+                    // 正常信息处理
+                    if (info.ErrorCode == ErrorCodeValue.NoError)
+                        continue;
+
+                    errors.Add(info.RefID + " 在提交保存过程中发生错误 -- " + info.ErrorInfo);
+                }
+
+                if (errors.Count > 0)
+                    return new RequestSetUidResult
+                    {
+                        Value = -1,
+                        ErrorInfo = StringUtil.MakePathList(errors, ";")
+                    };
+
+                return new RequestSetUidResult
+                {
+                    Value = 1,
+                    NewItemXml = strNewXml,
+                    NewTimestamp = baNewTimestamp
+                };
+            }
+            finally
+            {
+                channel.Timeout = old_timeout;
+                ReturnChannel(channel);
+            }
+        }
+
+        // 向 dp2library 服务器发出盘点请求
+        public static RequestInventoryResult RequestInventory(string uid,
+            string pii,
+            string currentLocation,
+            string location,
+            string shelfNo,
+            string batchNo,
+            string strUserName,
+            string style)
+        {
+            if (currentLocation == null && location == null)
+                return new RequestInventoryResult { Value = 0 };    // 没有必要修改
+
+            // TODO: 是否要用特定的工作人员身份进行盘点?
+            LibraryChannel channel = GetChannel(strUserName);
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromSeconds(10);
+
+            try
+            {
+                // currentLocation 元素内容。格式为 馆藏地:架号
+                // 注意馆藏地和架号字符串里面不应包含逗号和冒号
+                List<string> commands = new List<string>();
+                if (string.IsNullOrEmpty(currentLocation) == false)
+                    commands.Add($"currentLocation:{StringUtil.EscapeString(currentLocation, ":,")}");
+                if (string.IsNullOrEmpty(location) == false)
+                    commands.Add($"location:{StringUtil.EscapeString(location, ":,")}");
+                if (string.IsNullOrEmpty(shelfNo) == false)
+                    commands.Add($"shelfNo:{StringUtil.EscapeString(shelfNo, ":,")}");
+                if (string.IsNullOrEmpty(batchNo) == false)
+                {
+                    commands.Add($"batchNo:{StringUtil.EscapeString(batchNo, ":,")}");
+
+                    /*
+                    // 即便册记录没有发生修改，也要产生 transfer 操作日志记录。这样便于进行典藏移交清单统计打印
+                    commands.Add("forceLog");
+                    */
+                }
+
+                string strStyle = "item";
+
+                int nRedoCount = 0;
+            REDO:
+                long lRet = channel.Return(null,
+                    "transfer",
+                    "", // _patron.Barcode,
+                    pii,    // entity.PII,
+                    null,   // entity.ItemRecPath,
+                    false,
+                    $"{strStyle},{StringUtil.MakePathList(commands, ",")}", // style,
+                    "xml", // item_format_list
+                    out string[] item_records,
+                    "xml",
+                    out string[] reader_records,
+                    "summary",
+                    out string[] biblio_records,
+                    out string[] dup_path,
+                    out string output_reader_barcode,
+                    out ReturnInfo return_info,
+                    out string strError);
+                if (lRet == -1 && channel.ErrorCode != ErrorCode.NotChanged)
+                {
+                    if ((channel.ErrorCode == ErrorCode.RequestError
+        || channel.ErrorCode == ErrorCode.RequestTimeOut))
+                    {
+                        nRedoCount++;
+
+                        if (nRedoCount < 2)
+                            goto REDO;
+                        else
+                        {
+                            return new RequestInventoryResult
+                            {
+                                Value = -1,
+                                ErrorInfo = "因网络出现问题，请求 dp2library 服务器失败",
+                                ErrorCode = "requestError"
+                            };
+                        }
+                    }
+
+                    return new RequestInventoryResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError,
+                        ErrorCode = channel.ErrorCode.ToString()
+                    };
+                }
+
+                // 更新册记录
+                string entity_xml = null;
+                if (item_records?.Length > 0)
+                    entity_xml = item_records[0];
+                return new RequestInventoryResult { ItemXml = entity_xml };
+            }
+            finally
+            {
+                channel.Timeout = old_timeout;
+                ReturnChannel(channel);
+            }
+        }
+
+
 
 #if NO
 

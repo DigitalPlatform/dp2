@@ -2217,19 +2217,39 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                     {
                         // TODO: 语音提示
                         // TODO: 红色对话框
-                        MessageBox.Show(this, strError);
-                        this.textBox_input.SelectAll();
-                        this.textBox_input.Focus();
-                        return;
+                        var result = MessageBox.Show(this,
+                            strError + "\r\n\r\n是否停止操作?",
+                            "QuickChargingForm",
+                            MessageBoxButtons.YesNo,
+                            MessageBoxIcon.Question,
+                            MessageBoxDefaultButton.Button1);
+                        if (result == DialogResult.Yes)
+                        {
+                            this.textBox_input.SelectAll();
+                            this.textBox_input.Focus();
+                            return;
+                        }
+                        else
+                            goto FREE;
                     }
                     if (nRet == 0)
                     {
                         // TODO: 语音提示
                         // TODO: 红色对话框
-                        MessageBox.Show(this, $"'{strText}' (馆藏地属于 '{Program.MainForm.FocusLibraryCode}')不是合法的条码号: {strError}");
-                        this.textBox_input.SelectAll();
-                        this.textBox_input.Focus();
-                        return;
+                        var result = MessageBox.Show(this,
+                            $"'{strText}' (当前操作员位于 '{Program.MainForm.FocusLibraryCode}')不是合法的条码号: {strError}\r\n\r\n是否停止操作?",
+                            "QuickChargingForm",
+                            MessageBoxButtons.YesNo,
+                            MessageBoxIcon.Question,
+                            MessageBoxDefaultButton.Button1);
+                        if (result == DialogResult.Yes)
+                        {
+                            this.textBox_input.SelectAll();
+                            this.textBox_input.Focus();
+                            return;
+                        }
+                        else
+                            goto FREE;
                     }
                     // 有可能 验证条码号的时候因为 EnableControls 丢失了焦点
                     this.textBox_input.Focus();
@@ -2250,6 +2270,8 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                     }
                 }
             }
+
+            FREE:
 
             if (WillLoadReaderInfo == true)
             {

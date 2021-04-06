@@ -2434,6 +2434,13 @@ out strError);
                 REDOLOGIN:
                 this.BeforeLogin(this, ea);
 
+                // 2021/4/3
+                if (string.IsNullOrEmpty(ea.UserName))
+                {
+                    strError = "(this.BeforeLogin()) 用户名不应为空";
+                    return -1;
+                }
+
                 if (ea.Cancel == true)
                 {
                     if (String.IsNullOrEmpty(ea.ErrorInfo) == true)

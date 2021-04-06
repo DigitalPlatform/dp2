@@ -1491,8 +1491,9 @@ namespace dp2SSL
                     result = await
                         Task<GetReaderInfoResult>.Run(() =>
                         {
-                            // TODO: oi+pii
-                            return LibraryChannelUtil.GetReaderInfo(pii);
+                            // 2021/4/2 改为用 oi+pii
+                            string oi_pii = _patron.GetOiPii(true); // 严格模式，必须有 OI
+                            return LibraryChannelUtil.GetReaderInfo(string.IsNullOrEmpty(oi_pii) ? pii : oi_pii); 
                         });
 
                 if (result.Value != 1)
@@ -1685,7 +1686,7 @@ out string strError);
                                     entity.GetOiOrAoi(),
                                     "network");
                             else
-                                result = await LibraryChannelUtil.GetEntityDataAsync(entity.GetOiPii(), "network");
+                                result = await LibraryChannelUtil.GetEntityDataAsync(entity.GetOiPii(true), "network"); // 2021/4/2 改为严格模式 OI_PII
 
                             if (result.Value == -1)
                             {
@@ -2025,6 +2026,9 @@ out string strError);
                     }
                     else if (App.Protocol == "dp2library")
                     {
+                        string patron_barcode_or_uii = _patron.GetOiPii();
+                        if (string.IsNullOrEmpty(patron_barcode_or_uii))
+                            patron_barcode_or_uii = _patron.Barcode;
 
                         if (action == "borrow" || action == "renew")
                         {
@@ -2043,11 +2047,12 @@ out string strError);
                             }
                             */
 
+
                             //entity.Waiting = true;
                             lRet = channel.Borrow(null,
                                 action == "renew",
-                                _patron.Barcode,
-                                entity.PII,
+                                patron_barcode_or_uii, // _patron.Barcode,
+                                entity.GetOiPii(true),  // entity.PII,
                                 entity.ItemRecPath,
                                 false,
                                 null,
@@ -2096,8 +2101,8 @@ out string strError);
                             //entity.Waiting = true;
                             lRet = channel.Return(null,
                                 "return",
-                                _patron.Barcode,
-                                entity.PII,
+                                patron_barcode_or_uii, // _patron.Barcode,
+                                entity.GetOiPii(true),  // entity.PII,
                                 entity.ItemRecPath,
                                 false,
                                 "item,reader", // style,

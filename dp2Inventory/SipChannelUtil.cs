@@ -504,7 +504,7 @@ namespace dp2Inventory
                     SipChannel channel = await GetChannelAsync();
                     try
                     {
-                        var result = await channel.CheckoutAsync(patronBarcode, itemBarcode);
+                        var result = await channel.CheckoutAsync(patronBarcode, itemBarcode, null);
                         if (result.Value == -1)
                             return new NormalResult
                             {
@@ -550,7 +550,7 @@ namespace dp2Inventory
                     SipChannel channel = await GetChannelAsync();
                     try
                     {
-                        var result = await channel.CheckinAsync(itemBarcode);
+                        var result = await channel.CheckinAsync(itemBarcode, null);
                         if (result.Value == -1)
                             return new NormalResult
                             {
@@ -597,7 +597,7 @@ namespace dp2Inventory
                     SipChannel channel = await GetChannelAsync();
                     try
                     {
-                        var result = await channel.RenewAsync(patronBarcode, itemBarcode);
+                        var result = await channel.RenewAsync(patronBarcode, itemBarcode, null);
                         if (result.Value == -1)
                             return new NormalResult
                             {

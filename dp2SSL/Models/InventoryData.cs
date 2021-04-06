@@ -919,7 +919,7 @@ TaskScheduler.Default);
             return oi;
         }
 
-        // 显示对书柜门的 Iventory 操作，同一时刻只能一个函数进入
+        // 显示对书柜门的 Inventory 操作，同一时刻只能一个函数进入
         static AsyncSemaphore _requestLimit = new AsyncSemaphore(1);
 
         public static async Task BeginInventoryAsync(Entity entity,
@@ -2445,7 +2445,6 @@ TaskScheduler.Default);
 
                         if (sip == false)
                         {
-
                             // .Value
                             //      -1  出错
                             //      0   没有找到

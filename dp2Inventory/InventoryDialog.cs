@@ -83,6 +83,12 @@ namespace dp2Inventory
                 if (dlg.DialogResult == DialogResult.Cancel)
                     return;
 
+                _actionMode = dlg.ActionMode;
+
+                CurrentLocation = dlg.LocationString;
+                CurrentBatchNo = dlg.BatchNo;
+                // slow_mode = dlg.SlowMode;
+
                 /*
                 _action = new ActionInfo
                 {
@@ -109,6 +115,7 @@ namespace dp2Inventory
                 }));
                 try
                 {
+                    /*
                     progress.SetMessage("正在获取 dp2library 服务器配置");
                     var initial_result = LibraryChannelUtil.Initial();
                     if (initial_result.Value == -1)
@@ -116,6 +123,7 @@ namespace dp2Inventory
                         strError = $"获得 dp2library 服务器配置失败: {initial_result.ErrorInfo}";
                         return;
                     }
+                    */
 
                     progress.SetMessage("正在获取 UID --> UII 对照关系");
 
@@ -698,7 +706,7 @@ namespace dp2Inventory
             }
         }
 
-        // 处理每一个标签的修改动作
+        // 处理每一个标签的盘点动作
         // result.Value:
         //      -1  表示遇到了严重出错，要停止循环调用本函数
         //      0   表示全部完成，没有遇到出错的情况
@@ -802,6 +810,8 @@ namespace dp2Inventory
 
                         iteminfo.TagInfo = get_result.TagInfo;
 
+                        tag.TagInfo = get_result.TagInfo;
+
                         // 第二步，刷新 PII 等栏目
                         this.Invoke((Action)(() =>
                         {
@@ -832,6 +842,24 @@ namespace dp2Inventory
                     if (iteminfo.State == "cross")
                         continue;
 
+                    // 第三步，进行处理
+                    Entity entity = InventoryData.NewEntity(tag,
+    null,
+    out string tou,
+    true);
+                    // 判断层架标
+                    // 10 图书; 80 读者证; 30 层架标
+                    if (tou != null && tou.StartsWith("3"))
+                    {
+                        SwitchCurrentShelfNo(entity);
+                    }
+                    else
+                    {
+
+                        ProcessInfo process_info = new ProcessInfo { Entity = entity };
+                        await ProcessAsync(process_info);
+                    }
+#if REMOVED
                     // 第三步，执行修改动作
                     var action_result = DoAction(item);
                     if (action_result.Value == -1)
@@ -862,6 +890,7 @@ namespace dp2Inventory
                         }
                         */
                     }
+#endif
                 }
 
                 // 返回 0 表示全部完成，没有遇到出错的情况
@@ -953,14 +982,12 @@ namespace dp2Inventory
                     }
                 }
 
-                /*
                 // 请求 dp2library Inventory()
                 if (string.IsNullOrEmpty(entity.PII) == false
                     && info != null && info.IsLocation == false)
                 {
-                    await BeginInventoryAsync(entity, PageInventory.ActionMode);
+                    await InventoryData.BeginInventoryAsync(info, ActionMode);
                 }
-                */
 
                 // App.SetError("processing", null);
             }
@@ -1652,6 +1679,65 @@ bool eas)
             if (string.IsNullOrEmpty(text))
                 return "(空)";
             return text;
+        }
+
+        // 动作模式
+        /* setUID               设置 UID --> PII 对照关系。即，写入册记录的 UID 字段
+         * setCurrentLocation   设置册记录的 currentLocation 字段内容为当前层架标编号
+         * setLocation          设置册记录的 location 字段为当前阅览室/书库位置。即调拨图书
+         * verifyEAS            校验 RFID 标签的 EAS 状态是否正确。过程中需要检查册记录的外借状态
+         * */
+        static string _actionMode = "setUID";    // 空/setUID/setCurrentLocation/setLocation/verifyEAS 中之一或者组合
+
+        public static string ActionMode
+        {
+            get
+            {
+                return _actionMode;
+            }
+        }
+
+        // 当前层架标
+        public static string CurrentShelfNo { get; set; }
+
+        // 当前馆藏地。例如 “海淀分馆/阅览室”
+        public static string CurrentLocation { get; set; }
+
+        // 当前批次号
+        public static string CurrentBatchNo { get; set; }
+
+        // 切换当前层架标
+        void SwitchCurrentShelfNo(Entity entity)
+        {
+            if (string.IsNullOrEmpty(entity.PII) == false)
+            {
+                CurrentShelfNo = entity.PII;
+                InventoryData.SpeakSequence($"切换层架标 {entity.PII}");
+            }
+        }
+
+        // 给册事项里面添加 目标当前架位 参数。
+        // 注意，如果 actionMode 里面不包含 setCurrentLocation，则没有必要做这一步
+        NormalResult SetTargetCurrentLocation(ProcessInfo info)
+        {
+            info.TargetLocation = CurrentLocation;
+            info.TargetShelfNo = CurrentShelfNo;
+            info.BatchNo = CurrentBatchNo;
+
+            if (string.IsNullOrEmpty(CurrentShelfNo) == true)
+            {
+                if (StringUtil.IsInList("setCurrentLocation,setLocation", ActionMode) == false)
+                    return new NormalResult();
+
+                InventoryData.Speak("请先扫层架标，再扫图书");
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorCode = "noCurrentShelfNo"
+                };
+            }
+            info.TargetCurrentLocation = CurrentLocation + ":" + CurrentShelfNo;
+            return new NormalResult();
         }
 
     }

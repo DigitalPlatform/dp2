@@ -29,7 +29,7 @@
                         <GradientStop Color="#FF363636" Offset="1"/>
                     </LinearGradientBrush>
                 </Border.Background>
-                <Grid Width="240" MaxHeight="660" Margin="20" 
+                <Grid Width="240" MaxHeight="860" Margin="20" 
                       Opacity="{Binding Path=ShelfState, Converter={StaticResource StringToOpacity}}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>

@@ -272,6 +272,11 @@ namespace dp2SSL
         {
             if (strict == true)
             {
+                // 2021/4/2
+                // 读卡器上没有放读者卡的情形
+                if (string.IsNullOrEmpty(this.PII))
+                    return this.PII;
+
                 if (string.IsNullOrEmpty(this.OI) == false)
                     return this.OI + "." + this.PII;
                 else if (string.IsNullOrEmpty(this.AOI) == false)
@@ -280,6 +285,12 @@ namespace dp2SSL
             }
             // 包含 OI 的 PII
             string pii = this.PII;
+
+            // 2021/4/2
+            // 读卡器上没有放读者卡的情形
+            if (string.IsNullOrEmpty(pii))
+                return pii;
+
             if (string.IsNullOrEmpty(this.OI) == false)
                 pii = this.OI + "." + this.PII;
             else if (string.IsNullOrEmpty(this.AOI) == false)

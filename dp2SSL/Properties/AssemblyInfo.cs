@@ -51,8 +51,8 @@ using System.Windows;
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 // 方法是按如下所示使用“*”: :
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.8.11")]    // 1.5.*
-[assembly: AssemblyFileVersion("1.8.11.0")]  // 1.5.0.0
+[assembly: AssemblyVersion("1.8.12")]    // 1.5.*
+[assembly: AssemblyFileVersion("1.8.12.0")]  // 1.5.0.0
 
 // 1.0 2019/2/21 第一个版本
 // 1.1 2019/2/26 可以显示版本号了
@@ -94,3 +94,5 @@ using System.Windows;
 //      1.8.9 (2021/3/9) 下载全部册记录功能和同步册记录功能做了改进，只下载和同步当前 dp2library 账户所管辖的馆代码内的馆藏地对应的册记录。shelf.xml 中增加配置参数 <key name="断网模式下开门前检查读者是否超期" value="true"/>
 //      1.8.10 (2021/3/10) 盘点功能增加上传外部接口。在 inventory.xml 中增配参数 <uploadInterface protocol='' baseUrl='http://localhost:62022/'/>
 //      1.8.11 (2021/4/1) 盘点功能增加导入 UID-->UII 对照表到 dp2library 实体库的功能。原先只能导入到 sip 方式下的本地对照库
+//                          自助借还功能的 SIP 模式根据最新版 dp2capo 做了修改，能按照 dp2capo 要求在请求中包含正确的 AO 字段
+//      1.8.12 (2021/4/2) 自助借还功能中，ISO15693 读者证严格要求具备 OI 字段，图书标签也严格要求具备 OI 字段
