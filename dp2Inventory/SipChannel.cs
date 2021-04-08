@@ -864,10 +864,12 @@ namespace dp2Inventory
 
             Login_93 request = new Login_93()
             {
+                UIDAlgorithm_1 = "0",
+                PWDAlgorithm_1 = "0",
                 CN_LoginUserId_r = _userName,
                 CO_LoginPassword_r = _password,
             };
-            request.SetDefaulValue();
+            // request.SetDefaulValue();
 
             // 发送和接收消息
             string requestText = request.ToText();

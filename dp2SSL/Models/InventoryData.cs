@@ -2419,6 +2419,7 @@ TaskScheduler.Default);
                     int new_count = 0;
                     int change_count = 0;
                     int delete_count = 0;
+                    int error_count = 0;
                     List<string> lines = new List<string>();
                     while (token.IsCancellationRequested == false)
                     {
@@ -2458,11 +2459,18 @@ TaskScheduler.Default);
                                     Value = -1,
                                 };
                             if (get_result.Value == 0)
+                            {
+                                WpfClientInfo.WriteErrorLog($"ImportUidPiiTableAsync() dp2library 服务器中册记录 '{barcode}' 没有找到: {get_result.ErrorInfo}");
+                                error_count++;
+                                continue;
+                                /*
                                 return new ImportUidResult
                                 {
-                                    ErrorInfo = $"册记录 {uid} 没有找到: {get_result.ErrorInfo}",
+                                    ErrorInfo = $"册记录 {barcode} 没有找到: {get_result.ErrorInfo}",
                                     Value = -1,
                                 };
+                                */
+                            }
                             var set_result = RequestSetUID(
     get_result.ItemRecPath,
     get_result.ItemXml,
@@ -2471,11 +2479,18 @@ TaskScheduler.Default);
     null,
     "");
                             if (set_result.Value == -1)
+                            {
+                                WpfClientInfo.WriteErrorLog($"ImportUidPiiTableAsync() 中 RequestSetUID(itemRecPath={get_result.ItemRecPath},barcode={barcode},uid={uid}) error: {set_result.ErrorInfo}");
+                                error_count++;
+                                continue;
+                                /*
                                 return new ImportUidResult
                                 {
                                     ErrorInfo = $"RequestSetUID() error: {set_result.ErrorInfo}",
                                     Value = -1,
                                 };
+                                */
+                            }
                             if (set_result.Value == 1)
                                 change_count++;
                             line_count++;
@@ -2510,6 +2525,7 @@ TaskScheduler.Default);
                         NewCount = new_count,
                         ChangeCount = change_count,
                         DeleteCount = delete_count,
+                        ErrorCount = error_count,
                     };
                 }
             }
@@ -2530,6 +2546,7 @@ TaskScheduler.Default);
             public int NewCount { get; set; }
             public int ChangeCount { get; set; }
             public int DeleteCount { get; set; }
+            public int ErrorCount { get; set; }
         }
 
         static async Task<ImportUidResult> SaveLinesAsync(List<string> lines,

@@ -922,7 +922,12 @@ namespace dp2SSL
                                 if (sip)
                                     App.ErrorBox("导入 UID PII 对照表文件", $"导入完成。\r\n\r\n共处理条目 {result.LineCount} 个; 新创建本地库记录 {result.NewCount} 个; 修改本地库记录 {result.ChangeCount} 个; 删除本地库记录 {result.DeleteCount}", "green");
                                 else
-                                    App.ErrorBox("导入 UID PII 对照表文件", $"导入完成。\r\n\r\n共处理条目 {result.LineCount} 个; 修改册记录 {result.ChangeCount} 个", "green");
+                                {
+                                    if (result.ErrorCount > 0)
+                                        App.ErrorBox("导入 UID PII 对照表文件", $"导入完成。\r\n\r\n共处理条目 {result.LineCount} 个; 修改册记录 {result.ChangeCount} 个; 出错 {result.ErrorCount} 次(已写入错误日志文件)", "green");
+                                    else
+                                        App.ErrorBox("导入 UID PII 对照表文件", $"导入完成。\r\n\r\n共处理条目 {result.LineCount} 个; 修改册记录 {result.ChangeCount} 个", "green");
+                                }
                             }
                         });
                     }

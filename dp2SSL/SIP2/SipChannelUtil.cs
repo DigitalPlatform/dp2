@@ -57,9 +57,12 @@ namespace dp2SSL
 
                 if (string.IsNullOrEmpty(App.SipUserName) == false)
                 {
+                    // 1 登录成功
+                    // 0 登录失败
+                    // -1 出错
                     var login_result = await _channel.LoginAsync(App.SipUserName,
                         App.SipPassword);
-                    if (login_result.Value == -1)
+                    if (login_result.Value != 1)
                         throw new Exception($"针对 SIP 服务器 {App.SipServerUrl} 登录出错: {login_result.ErrorInfo}");
                 }
 
