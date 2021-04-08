@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.15.*")]
-[assembly: AssemblyFileVersion("3.15.0.0")]
+[assembly: AssemblyVersion("3.16.*")]
+[assembly: AssemblyFileVersion("3.16.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -76,3 +76,4 @@ using System.Runtime.InteropServices;
 // 3.13 2021/2/1 种册窗的册登记对话框，如果册记录的馆藏地没有在 library.xml 中定义对应的机构代码，则会报错无法创建 RFID 标签。批修改册窗也会在册记录没有定义机构代码的情况下报错。
 // 3.14 2021/2/5 书目查询窗固定面板区“属性”属性页可以显示书目记录的子记录。要求配套 dp2library 3.44 使用
 // 3.15 2021/3/3 修正 种册窗的册属性页中 复制列 和 删除列功能的错位的 bug
+// 3.16 2021/4/8 书目查询窗和实体查询窗导出到 MARC 文件功能增加“添加-01字段”功能；“批处理/从MARC文件导入”窗增加按照 -01 覆盖书目库记录的功能

@@ -52,7 +52,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>105</ApplicationRevision>
+    <ApplicationRevision>107</ApplicationRevision>
     <ApplicationVersion>3.8.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -594,6 +594,12 @@
     </Compile>
     <Compile Include="ISO2709Statis\ImportMarcForm.Designer.cs">
       <DependentUpon>ImportMarcForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ISO2709Statis\OverwriteBiblioDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ISO2709Statis\OverwriteBiblioDialog.Designer.cs">
+      <DependentUpon>OverwriteBiblioDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="ItemHandOver\ScanBarcodeForm.cs">
       <SubType>Form</SubType>
@@ -1913,6 +1919,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="ISO2709Statis\ImportMarcForm.resx">
       <DependentUpon>ImportMarcForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ISO2709Statis\OverwriteBiblioDialog.resx">
+      <DependentUpon>OverwriteBiblioDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ItemHandOver\ScanBarcodeForm.resx">
       <DependentUpon>ScanBarcodeForm.cs</DependentUpon>

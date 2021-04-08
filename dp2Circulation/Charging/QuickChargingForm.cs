@@ -4463,11 +4463,13 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
                 dlg.Text = "请选择调拨目标馆藏地";
                 dlg.SelectedLocation = this._targetLocation;
                 dlg.StartPosition = FormStartPosition.CenterParent;
+                dlg.BatchNo = this.BatchNo;
                 dlg.ShowDialog(this);
                 if (dlg.DialogResult == DialogResult.Cancel)
                     return;
 
                 this._targetLocation = dlg.SelectedLocation;
+                this.BatchNo = dlg.BatchNo;
 
                 this.textBox_input.SelectAll();
                 this.textBox_input.Focus();

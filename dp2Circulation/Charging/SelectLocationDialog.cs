@@ -33,9 +33,12 @@ namespace dp2Circulation
 
         private void SelectLocationDialog_Load(object sender, EventArgs e)
         {
-            Task.Run(() =>
+            _ = Task.Run(() =>
             {
-                FillList();
+                this.Invoke((Action)(() =>
+                {
+                    FillList();
+                }));
             });
         }
 
@@ -95,6 +98,18 @@ namespace dp2Circulation
         private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
             this.textBox_selectedLocation.Text = this.listBox1.SelectedItem as string;
+        }
+
+        public string BatchNo
+        {
+            get
+            {
+                return this.textBox_batchNo.Text;
+            }
+            set
+            {
+                this.textBox_batchNo.Text = value;
+            }
         }
     }
 }

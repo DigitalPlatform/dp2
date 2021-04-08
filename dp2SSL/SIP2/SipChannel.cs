@@ -900,7 +900,7 @@ namespace dp2SSL
                 return new LoginResult
                 {
                     Value = 0,
-                    ErrorInfo = "登录失败",
+                    ErrorInfo = response94.AF_ScreenMessage_o == null ? "登录失败" : $"登录失败 {response94.AF_ScreenMessage_o}",
                     Result = response94
                 };
             }

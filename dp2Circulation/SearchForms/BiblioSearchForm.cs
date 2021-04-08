@@ -10419,7 +10419,7 @@ message,
             OpenMarcFileDlg dlg = new OpenMarcFileDlg();
             MainForm.SetControlFont(dlg, this.Font);
             dlg.IsOutput = true;
-            dlg.AddG01Visible = false;
+            dlg.AddG01Visible = true;
             dlg.RuleVisible = true;
             dlg.Rule = this.LastCatalogingRule;
             dlg.FileName = this.LastIso2709FileName;
@@ -10651,6 +10651,15 @@ message,
                         strMARC = record.Text;
                     }
 
+                    // 2021/4/8
+                    if (dlg.AddG01 == true)
+                    {
+                        string verify = BuildVerifyString(); // 用于防止小语种字符被修改的验证字符串
+                        MarcRecord record = new MarcRecord(strMARC);
+                        record.Fields.insertSequence(new MarcField($"-01{item.BiblioInfo.RecPath},verify:{verify}"));
+                        strMARC = record.Text;
+                    }
+
                     // 2019/5/22
                     // 是否为本地系统路径
                     bool isLocal = info.RecPath.IndexOf("@") == -1 && IsCmdLine(info.RecPath) == false;
@@ -10744,6 +10753,24 @@ message,
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+        // 构造校验字符串
+        public static string BuildVerifyString()
+        {
+            string source = "väter";
+            var bytes = Encoding.UTF8.GetBytes(source);
+            return source + "=" + ByteArray.GetHexTimeStampString(bytes);
+        }
+
+        // 验证校验字符串是否完好
+        public static bool VerifyString(string text)
+        {
+            var parts = StringUtil.ParseTwoPart(text, "=");
+            string source = parts[0];
+            string encoded = parts[1];
+            var bytes = Encoding.UTF8.GetBytes(source);
+            return ByteArray.Compare(bytes, ByteArray.GetTimeStampByteArray(encoded)) == 0;
         }
 
         public int OutputEntities(

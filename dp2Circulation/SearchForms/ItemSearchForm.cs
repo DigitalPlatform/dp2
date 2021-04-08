@@ -10297,7 +10297,7 @@ dlg.UiState);
             MainForm.SetControlFont(dlg, this.Font);
 
             dlg.IsOutput = true;
-            dlg.AddG01Visible = false;
+            dlg.AddG01Visible = true;
             if (bTableExists == false)
             {
                 dlg.RuleVisible = true;
@@ -10527,6 +10527,13 @@ dlg.UiState);
                         if (dlg.Mode880 == true && strMarcSyntax == "usmarc")
                         {
                             MarcQuery.To880(record);
+                        }
+
+                        // 2021/4/8
+                        if (dlg.AddG01 == true)
+                        {
+                            string verify = BiblioSearchForm.BuildVerifyString(); // 用于防止小语种字符被修改的验证字符串
+                            record.Fields.insertSequence(new MarcField($"-01{biblio_info.RecPath},verify:{verify}"));
                         }
 
                         sub_items.Clear();

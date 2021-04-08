@@ -66,6 +66,11 @@ namespace dp2Circulation
                 StringUtil.ParseTwoPart(value, "-", out strPart1, out strPart2);
                 this.comboBox_libraryCode.Text = strPart1;
                 this.textBox_number.Text = strPart2;
+
+                // 2021/4/8
+                // 如果设定到第一部分的值无效，则转为都设定到第二部分
+                if (this.comboBox_libraryCode.Text != strPart1)
+                    this.textBox_number.Text = value;
             }
         }
 
