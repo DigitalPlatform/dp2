@@ -1474,7 +1474,6 @@ namespace dp2SSL
                 string pii = _patron.PII;
                 if (string.IsNullOrEmpty(pii))
                     pii = _patron.UID;
-                string oi = string.IsNullOrEmpty(_patron.OI) ? _patron.AOI : _patron.OI;
 
                 if (string.IsNullOrEmpty(pii))
                     return new NormalResult();
@@ -1486,14 +1485,23 @@ namespace dp2SSL
                 //      1   成功
                 GetReaderInfoResult result = null;
                 if (App.Protocol == "sip")
+                {
+                    string oi = string.IsNullOrEmpty(_patron.OI) ? _patron.AOI : _patron.OI;
+
+                    // 对指纹、掌纹来源的做特殊处理，保证 SIP 请求中含有 AO 字段
+                    if (oi == null && _patron.IsFingerprintSource)
+                        oi = "";
+
                     result = await SipChannelUtil.GetReaderInfoAsync(oi, pii);
+                }
                 else
                     result = await
                         Task<GetReaderInfoResult>.Run(() =>
                         {
                             // 2021/4/2 改为用 oi+pii
-                            string oi_pii = _patron.GetOiPii(true); // 严格模式，必须有 OI
-                            return LibraryChannelUtil.GetReaderInfo(string.IsNullOrEmpty(oi_pii) ? pii : oi_pii); 
+                            bool strict = !_patron.IsFingerprintSource;
+                            string oi_pii = _patron.GetOiPii(strict); // 严格模式，必须有 OI
+                            return LibraryChannelUtil.GetReaderInfo(string.IsNullOrEmpty(oi_pii) ? pii : oi_pii);
                         });
 
                 if (result.Value != 1)

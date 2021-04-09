@@ -536,6 +536,12 @@ bool bClickClose = false)
         // 写入层架标
         private void MenuItem_writeShelfTags_Click(object sender, EventArgs e)
         {
+            if (ScanDialog.HasLicense("shelf_scan") == false)
+            {
+                MessageBox.Show(this, "尚未许可 shelf_scan 功能");
+                return;
+            }
+
             // 把扫描对话框打开
             CreateScanDialog();
 
@@ -547,6 +553,12 @@ bool bClickClose = false)
         // 开始(扫描并)写入图书标签
         private void MenuItem_writeBookTags_Click(object sender, EventArgs e)
         {
+            if (ScanDialog.HasLicense("book_scan") == false)
+            {
+                MessageBox.Show(this, "尚未许可 book_scan 功能");
+                return;
+            }
+
             // 把扫描对话框打开
             CreateScanDialog();
 
@@ -584,6 +596,12 @@ bool bClickClose = false)
         // 写入读者证件
         private void MenuItem_writePatronTags_Click(object sender, EventArgs e)
         {
+            if (ScanDialog.HasLicense("patron_scan") == false)
+            {
+                MessageBox.Show(this, "尚未许可 patron_scan 功能");
+                return;
+            }
+
             // 把扫描对话框打开
             CreateScanDialog();
 
@@ -883,6 +901,12 @@ MessageBoxDefaultButton.Button2);
 
         private void MenuItem_batchModifyTags_Click(object sender, EventArgs e)
         {
+            if (ScanDialog.HasLicense("batch_modify") == false)
+            {
+                MessageBox.Show(this, "尚未许可 batch_modify 功能");
+                return;
+            }
+
             // 把修改对话框打开
             CreateModifyDialog();
 

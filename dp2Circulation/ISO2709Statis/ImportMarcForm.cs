@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 using System.Windows.Forms;
 using System.Xml;
 
@@ -258,12 +259,18 @@ this.checkBox_overwriteByG01.Checked);
                 this.progressBar_records.Value = 0;
             }));
 
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
++ $" 开始导入 MARC 文件 {strInputFileName}</div>");
+
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在获取ISO2709记录 ...");
             stop.BeginLoop();
 
-            bool dont_display_dialog = false;
-            bool dont_ask = false;
+            bool dont_display_retry_dialog = false;   //  不再出现重试对话框
+            bool dont_display_compare_dialog = false;  // 不再出现两条书目记录对比的对话框
+            int overwrite_count = 0;
+            int append_count = 0;
+            int skip_count = 0;
 
             LibraryChannel channel = this.GetChannel();
 
@@ -271,7 +278,8 @@ this.checkBox_overwriteByG01.Checked);
 
             try
             {
-                int nCount = 0;
+                // 读入 ISO2709 记录的索引
+                int nIndex = 0;
 
                 DialogResult retry_result = DialogResult.Yes;
 
@@ -316,7 +324,7 @@ this.checkBox_overwriteByG01.Checked);
                     if (nRet == -2 || nRet == -1)
                     {
                         DialogResult result = MessageBox.Show(this,
-                            "读入MARC记录(" + nCount.ToString() + ")出错: " + strError + "\r\n\r\n确实要中断当前批处理操作?",
+                            "读入MARC记录(" + nIndex.ToString() + ")出错: " + strError + "\r\n\r\n确实要中断当前批处理操作?",
                             "ImportMarcForm",
                             MessageBoxButtons.YesNo,
                             MessageBoxIcon.Question,
@@ -327,7 +335,8 @@ this.checkBox_overwriteByG01.Checked);
                         }
                         else
                         {
-                            strError = "读入MARC记录(" + nCount.ToString() + ")出错: " + strError;
+                            strError = "读入MARC记录(" + nIndex.ToString() + ")出错: " + strError;
+                            Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(strError) + "</div>");
                             GetErrorInfoForm().WriteHtml(strError + "\r\n");
                             continue;
                         }
@@ -364,7 +373,6 @@ this.checkBox_overwriteByG01.Checked);
 
                     // 处理
                     string strBiblioRecPath = strTargetDbName + "/?";
-
 
                 REDO:
                     string existing_xml = "";
@@ -430,7 +438,7 @@ out strError);
 
                         // 左右窗格显示书目记录，等待按下“保存”按钮
                         string action = "";
-                        if (dont_ask == true
+                        if (dont_display_compare_dialog == true
                             && IsDifferent(existing_xml, new_xml) == false)
                             action = "overwrite";
                         else
@@ -448,7 +456,7 @@ out strError);
                                     action = dlg.Action;
 
                                     if (dlg.DontAsk == true)
-                                        dont_ask = true;
+                                        dont_display_compare_dialog = true;
                                 }
                             }));
 
@@ -458,7 +466,13 @@ out strError);
                             goto ERROR1;
                         }
                         if (action != "overwrite")
+                        {
+                            skip_count++;
+                            string error = $"已跳过覆盖记录 {strBiblioRecPath}";
+                            Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(error) + "</div>");
+                            GetErrorInfoForm().WriteHtml(error + "\r\n");
                             continue;
+                        }
 
                         Debug.Assert(action == "overwrite");
                     }
@@ -485,13 +499,16 @@ out strError);
                         out strError);
                     if (lRet == -1)
                     {
+                        Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(strError) + "</div>");
+                        GetErrorInfoForm().WriteHtml(strError + "\r\n");
+
 #if NO
                         strError = "创建书目记录 '" + strBiblioRecPath + "' 时出错: " + strError + "\r\n";
                         goto ERROR1;
 #endif
 
                         // string strText = strError;
-                        if (dont_display_dialog == false)
+                        if (dont_display_retry_dialog == false)
                         {
                             retry_result = (DialogResult)this.Invoke((Func<DialogResult>)(() =>
                             {
@@ -501,7 +518,7 @@ out strError);
         "ImportMarcForm",
         MessageBoxButtons.YesNoCancel,
         MessageBoxDefaultButton.Button1,
-        ref dont_display_dialog,
+        ref dont_display_retry_dialog,
         new string[] { "重试", "跳过", "中断" },
         "后面不再出现此对话框，按本次选择自动处理");
                             }));
@@ -515,11 +532,48 @@ out strError);
                         // 在操作历史中显示出错信息
 
                     }
+                    else
+                    {
+                        string html = "";
+                        /*
+                        nRet = MarcUtil.Xml2Marc(new_xml, false, null, out _, out string marc, out strError);
+                        if (nRet != -1)
+                            html = MarcUtil.GetHtmlOfMarc(marc,
+        "", // strNewFragmentXml,
+        "",
+        false);
+                        */
 
-                    nCount++;
+                        if (overwrite)
+                        {
+                            // 因为覆盖操作比较重要，建议写入 dp2circulation 错误日志文件，包括被覆盖的记录和新记录详细内容
+                            //MarcUtil.CvtJineiToWorksheet();
+                            //MainForm.WriteErrorLog($"覆盖操作");
+
+                            Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode($"覆盖书目记录 {strBiblioRecPath}") + "</div>" + html);
+                            overwrite_count++;
+                        }
+                        else
+                        {
+                            Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode($"追加书目记录 {strBiblioRecPath}") + "</div>" + html);
+                            append_count++;
+                        }
+                    }
+
+                    nIndex++;
                 }
 
-                return new NormalResult();
+                string message = "";
+                if (overwrite)
+                    message = $"导入完成。覆盖记录 {overwrite} 条; 跳过记录 {skip_count} 条";
+                else
+                    message = $"导入完成。共追加记录 {append_count} 条；跳过记录 {skip_count} 条";
+
+                return new NormalResult
+                {
+                    Value = 0,
+                    ErrorInfo = message
+                };
             }
             finally
             {
@@ -531,10 +585,15 @@ out strError);
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
 
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
++ $" 结束导入 MARC 文件 {strInputFileName}</div>");
+
                 if (file != null)
                     file.Close();
             }
         ERROR1:
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(strError) + "</div>");
+            GetErrorInfoForm().WriteHtml(strError + "\r\n");
             return new NormalResult(-1, strError);
         }
 
@@ -542,7 +601,7 @@ out strError);
         static bool IsDifferent(string xml1,
             string xml2)
         {
-            int nRet = MarcUtil.Xml2Marc(xml1, 
+            int nRet = MarcUtil.Xml2Marc(xml1,
                 false,
                 "",
                 out string syntax1,
@@ -689,15 +748,15 @@ out strError);
                         strError = result.ErrorInfo;
                         goto ERROR1;
                     }
+
+                    this.tabControl_main.SelectedTab = this.tabPage_runImport;
+                    this.ShowMessageBox(string.IsNullOrEmpty(result.ErrorInfo) ? "导入完成。" : result.ErrorInfo);
+                    return;
                 }
                 finally
                 {
                     this.Running = false;
                 }
-
-                this.tabControl_main.SelectedTab = this.tabPage_runImport;
-                this.ShowMessageBox("导入完成。");
-                return;
             }
 
             if (this.tabControl_main.SelectedTab == this.tabPage_runImport)

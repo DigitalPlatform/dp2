@@ -1197,7 +1197,7 @@ MessageBoxDefaultButton.Button2);
         }
 
         // 判断序列号中的功能类型是否匹配
-        bool HasLicense(string function_type)
+        public static bool HasLicense(string function_type)
         {
             string style = "reinput";
             if (StringUtil.IsDevelopMode())

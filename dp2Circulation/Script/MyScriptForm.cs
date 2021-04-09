@@ -265,20 +265,22 @@ namespace dp2Circulation
         // 获得错误信息窗
         internal HtmlViewerForm GetErrorInfoForm()
         {
-            if (this.ErrorInfoForm == null
+            this.Invoke((Action)(() =>
+            {
+                if (this.ErrorInfoForm == null
                 || this.ErrorInfoForm.IsDisposed == true
                 || this.ErrorInfoForm.IsHandleCreated == false)
-            {
-                this.ErrorInfoForm = new HtmlViewerForm();
-                this.ErrorInfoForm.ShowInTaskbar = false;
-                this.ErrorInfoForm.Text = "错误信息";
-                this.ErrorInfoForm.Show(this);
-                this.ErrorInfoForm.WriteHtml("<pre>");  // 准备文本输出
-            }
+                {
+                    this.ErrorInfoForm = new HtmlViewerForm();
+                    this.ErrorInfoForm.ShowInTaskbar = false;
+                    this.ErrorInfoForm.Text = "错误信息";
+                    this.ErrorInfoForm.Show(this);
+                    this.ErrorInfoForm.WriteHtml("<pre>");  // 准备文本输出
+                }
+            }));
 
             return this.ErrorInfoForm;
         }
-
 
         // 清除错误信息窗口中残余的内容
         internal void ClearErrorInfoForm()

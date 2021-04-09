@@ -130,10 +130,18 @@ namespace DigitalPlatform.CirculationClient
 
                 if (bReset == false)
                 {
+                    if (String.IsNullOrEmpty(strSerialCode) == false
+                        && MatchLocalString(strSerialCode) == false)
+                        MessageBox.Show(MainForm, "序列号无效。请重新输入");
+                    else if (CheckFunction(GetEnvironmentString(""), strRequirFuncList) == false)
+                        MessageBox.Show(MainForm, $"序列号中尚未许可功能 {strRequirFuncList}。请重新输入");
+
+                    /*
                     if (String.IsNullOrEmpty(strSerialCode) == false)
                         MessageBox.Show(MainForm, "序列号无效。请重新输入");
                     else if (CheckFunction(GetEnvironmentString(""), strRequirFuncList) == false)
                         MessageBox.Show(MainForm, "序列号中 function 参数无效。请重新输入");
+                */
                 }
 
                 // 出现设置序列号对话框

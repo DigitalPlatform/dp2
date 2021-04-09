@@ -460,6 +460,19 @@ namespace dp2Inventory
             }
         }
 
+        public bool IsAllTaskCompleted()
+        {
+            if (Tasks == null)
+                return true;
+            foreach(var task in Tasks)
+            {
+                if (task.Result.Value == -1)
+                    return false;
+            }
+
+            return true;
+        }
+
         // 检测一个任务是否已经完成
         public bool IsTaskCompleted(string name)
         {

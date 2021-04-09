@@ -424,7 +424,7 @@ namespace dp2Inventory
                                             text = $"交叉 {cross_count} 项";
 
                                         await FormClientInfo.Speaking(text,
-                                            true,
+                                            false,  // true,
                                             token);
                                     }
 
@@ -852,12 +852,47 @@ namespace dp2Inventory
                     if (tou != null && tou.StartsWith("3"))
                     {
                         SwitchCurrentShelfNo(entity);
+
+                        {
+                            iteminfo.State = "succeed";
+                            this.Invoke((Action)(() =>
+                            {
+                                RefreshItem(item);
+                                ListViewUtil.ChangeItemText(item, COLUMN_ERRORINFO, "切换层架标成功");
+                                SetItemColor(item, "changed");
+                            }));
+                        }
                     }
                     else
                     {
 
                         ProcessInfo process_info = new ProcessInfo { Entity = entity };
+                        var set_result = SetTargetCurrentLocation(process_info);
+                        if (set_result.Value == -1
+                            && set_result.ErrorCode == "noCurrentShelfNo")
+                        {
+                            SetErrorInfo(item, "请先扫层架标");
+                            continue;
+                        }
+
                         await ProcessAsync(process_info);
+
+                        if (process_info.IsAllTaskCompleted())
+                        {
+                            iteminfo.State = "succeed";
+                            this.Invoke((Action)(() =>
+                            {
+                                RefreshItem(item);
+                                ListViewUtil.ChangeItemText(item, COLUMN_ERRORINFO, "盘点成功");
+                                SetItemColor(item, "changed");
+                            }));
+
+                            AddToProcessed(iteminfo.Tag.UID, iteminfo);
+                        }
+                        else
+                        {
+                            SetErrorInfo(item, entity.Error);
+                        }
                     }
 #if REMOVED
                     // 第三步，执行修改动作
@@ -907,6 +942,19 @@ namespace dp2Inventory
                 // DataModel.DecApiCount();
             }
         }
+
+        /*
+        static bool IsAllComplete(ProcessInfo info)
+        {
+            if (info.IsTaskCompleted("getItemXml") == false)
+                return false;
+            if (info.IsTaskCompleted("setUID") == false)
+                return false;
+            if (info.IsTaskCompleted("setLocation") == false)
+                return false;
+            return true;
+        }
+        */
 
         static async Task ProcessAsync(ProcessInfo info)
         {

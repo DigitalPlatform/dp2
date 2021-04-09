@@ -937,6 +937,11 @@ readerType);
             this.Department = null;
             this.UID = null;
             this.PII = null;
+
+            // 2021/4/9
+            this.OI = null;
+            this.AOI = null;
+
             this.PhotoPath = "";
 
             this.MaxBorrowItems = 0;

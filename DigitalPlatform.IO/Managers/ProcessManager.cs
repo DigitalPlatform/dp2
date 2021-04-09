@@ -76,6 +76,15 @@ namespace DigitalPlatform.IO
             }
         }
 
+        // 2021/4/9
+        // 是否为指纹 Url。主要用来区分掌纹和指纹
+        public static bool IsFingerprintUrl(string url)
+        {
+            if (string.IsNullOrEmpty(url))
+                return false;
+            return url.ToLower().Contains("fingerprint");
+        }
+
         public static bool HasModuleStarted(string mutex_name)
         {
             bool createdNew = true;

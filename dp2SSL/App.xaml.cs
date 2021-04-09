@@ -803,7 +803,8 @@ namespace dp2SSL
                         MutexName = "{CF1B7B4A-C7ED-4DB8-B5CC-59A067880F92}"
                     });
                 if (string.IsNullOrEmpty(App.FingerprintUrl) == false
-                    && ProcessManager.IsIpcUrl(App.FingerprintUrl))
+                    && ProcessManager.IsIpcUrl(App.FingerprintUrl)
+                    && ProcessManager.IsFingerprintUrl(App.FingerprintUrl))
                     infos.Add(new ProcessInfo
                     {
                         Name = "指纹中心",
