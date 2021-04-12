@@ -2203,12 +2203,17 @@ out string strError);
 
         public delegate void delegate_showText(string text);
 
+#endif
+
         public class SimuTagInfo
         {
             public string PII { get; set; }
             public string OI { get; set; }
             public string UID { get; set; }
             public string AccessNo { get; set; }
+
+            public string ReaderName { get; set; }
+            public uint AntennaID { get; set; }
         }
 
         public class TagsInfoResult : NormalResult
@@ -2225,8 +2230,8 @@ out string strError);
             delegate_showText func_showProgress,
             CancellationToken token)
         {
-            WpfClientInfo.WriteInfoLog($"开始 DownloadTagsInfo()");
-            LibraryChannel channel = App.CurrentApp.GetChannel();
+            ClientInfo.WriteInfoLog($"开始 DownloadTagsInfo()");
+            LibraryChannel channel = GetChannel();
             var old_timeout = channel.Timeout;
             channel.Timeout = TimeSpan.FromMinutes(5);  // 设置 5 分钟。因为册记录检索需要一定时间
             try
@@ -2278,7 +2283,7 @@ out string strError);
     out string strError);
                     if (lRet == -1)
                     {
-                        WpfClientInfo.WriteErrorLog($"SearchItem() 出错, strError={strError}, channel.ErrorCode={channel.ErrorCode}");
+                        ClientInfo.WriteErrorLog($"SearchItem() 出错, strError={strError}, channel.ErrorCode={channel.ErrorCode}");
 
                         // 一次重试机会
                         if (lRet == -1
@@ -2299,7 +2304,7 @@ out string strError);
 
                     long hitcount = lRet;
 
-                    WpfClientInfo.WriteInfoLog($"{dbName} 共检索命中册记录 {hitcount} 条");
+                    ClientInfo.WriteInfoLog($"{dbName} 共检索命中册记录 {hitcount} 条");
 
                     // 把超时时间改短一点
                     channel.Timeout = TimeSpan.FromSeconds(20);
@@ -2349,7 +2354,7 @@ out string strError);
                                 string oi = "";
                                 string location = DomUtil.GetElementText(dom.DocumentElement, "location");
                                 location = StringUtil.GetPureLocation(location);
-                                var ret = ShelfData.GetOwnerInstitution(location, out string isil, out string alternative);
+                                var ret = GetOwnerInstitution(location, out string isil, out string alternative);
                                 if (ret == true)
                                 {
                                     if (string.IsNullOrEmpty(isil) == false)
@@ -2376,7 +2381,7 @@ out string strError);
 
                     }
 
-                    WpfClientInfo.WriteInfoLog($"dbName='{dbName}'。skip_count={skip_count}, error_count={error_count}");
+                    ClientInfo.WriteInfoLog($"dbName='{dbName}'。skip_count={skip_count}, error_count={error_count}");
 
                 }
                 return new TagsInfoResult
@@ -2386,7 +2391,7 @@ out string strError);
             }
             catch (Exception ex)
             {
-                WpfClientInfo.WriteErrorLog($"DownloadTagsInfo() 出现异常：{ExceptionUtil.GetDebugText(ex)}");
+                ClientInfo.WriteErrorLog($"DownloadTagsInfo() 出现异常：{ExceptionUtil.GetDebugText(ex)}");
 
                 return new TagsInfoResult
                 {
@@ -2397,13 +2402,12 @@ out string strError);
             finally
             {
                 channel.Timeout = old_timeout;
-                App.CurrentApp.ReturnChannel(channel);
+                ReturnChannel(channel);
 
-                WpfClientInfo.WriteInfoLog($"结束 DownloadTagsInfo()");
+                ClientInfo.WriteInfoLog($"结束 DownloadTagsInfo()");
             }
         }
 
 
-#endif
     }
 }

@@ -414,6 +414,15 @@ namespace DigitalPlatform.Marc
             }
 
             strHeader = strMARC.Substring(0, 24);
+
+            // 2021/4/12
+            // 将两个地址部分替换为问号
+            MarcHeader header = new MarcHeader();
+            header[0, 24] = strHeader;
+            header.reclen = "?????";
+            header.baseaddr = "?????";
+            strHeader = header.ToString();
+
             strBody = strMARC.Substring(24);
         }
 

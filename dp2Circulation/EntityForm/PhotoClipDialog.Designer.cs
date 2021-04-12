@@ -1,6 +1,8 @@
-﻿namespace DigitalPlatform.Drawing
+﻿using DigitalPlatform.Drawing;
+
+namespace dp2Circulation
 {
-    partial class CameraClipDialog
+    partial class PhotoClipDialog
     {
         /// <summary>
         /// Required designer variable.
@@ -18,9 +20,10 @@
                 components.Dispose();
             }
 
+            /*
             if (this.qrRecognitionControl1 != null)
                 this.qrRecognitionControl1.Dispose();
-
+            */
             base.Dispose(disposing);
         }
 
@@ -32,7 +35,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CameraClipDialog));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PhotoClipDialog));
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripLabel_null = new System.Windows.Forms.ToolStripLabel();
             this.toolStripButton_cancel = new System.Windows.Forms.ToolStripButton();
@@ -55,13 +58,16 @@
             this.pictureBox_clip = new DigitalPlatform.Drawing.ClipControl();
             this.tabPage_result = new System.Windows.Forms.TabPage();
             this.pictureBox_result = new System.Windows.Forms.PictureBox();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.toolStrip1.SuspendLayout();
             this.tabControl_main.SuspendLayout();
             this.tabPage_preview.SuspendLayout();
+            this.panel1.SuspendLayout();
             this.tabPage_clip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_clip)).BeginInit();
             this.tabPage_result.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_result)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // toolStrip1
@@ -229,7 +235,7 @@
             this.tabControl_main.Controls.Add(this.tabPage_result);
             this.tabControl_main.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl_main.Location = new System.Drawing.Point(0, 0);
-            this.tabControl_main.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.tabControl_main.Margin = new System.Windows.Forms.Padding(5);
             this.tabControl_main.Name = "tabControl_main";
             this.tabControl_main.SelectedIndex = 0;
             this.tabControl_main.Size = new System.Drawing.Size(905, 537);
@@ -240,9 +246,9 @@
             // 
             this.tabPage_preview.Controls.Add(this.panel1);
             this.tabPage_preview.Location = new System.Drawing.Point(4, 31);
-            this.tabPage_preview.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.tabPage_preview.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_preview.Name = "tabPage_preview";
-            this.tabPage_preview.Padding = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.tabPage_preview.Padding = new System.Windows.Forms.Padding(5);
             this.tabPage_preview.Size = new System.Drawing.Size(897, 502);
             this.tabPage_preview.TabIndex = 0;
             this.tabPage_preview.Text = "预览";
@@ -251,9 +257,10 @@
             // panel1
             // 
             this.panel1.BackColor = System.Drawing.SystemColors.Control;
+            this.panel1.Controls.Add(this.pictureBox1);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel1.Location = new System.Drawing.Point(5, 5);
-            this.panel1.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.panel1.Margin = new System.Windows.Forms.Padding(5);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(887, 492);
             this.panel1.TabIndex = 1;
@@ -263,9 +270,9 @@
             // 
             this.tabPage_clip.Controls.Add(this.pictureBox_clip);
             this.tabPage_clip.Location = new System.Drawing.Point(4, 31);
-            this.tabPage_clip.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.tabPage_clip.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_clip.Name = "tabPage_clip";
-            this.tabPage_clip.Padding = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.tabPage_clip.Padding = new System.Windows.Forms.Padding(5);
             this.tabPage_clip.Size = new System.Drawing.Size(897, 502);
             this.tabPage_clip.TabIndex = 1;
             this.tabPage_clip.Text = "裁切";
@@ -275,7 +282,7 @@
             // 
             this.pictureBox_clip.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pictureBox_clip.Location = new System.Drawing.Point(5, 5);
-            this.pictureBox_clip.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.pictureBox_clip.Margin = new System.Windows.Forms.Padding(5);
             this.pictureBox_clip.Name = "pictureBox_clip";
             this.pictureBox_clip.Size = new System.Drawing.Size(887, 492);
             this.pictureBox_clip.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
@@ -286,7 +293,7 @@
             // 
             this.tabPage_result.Controls.Add(this.pictureBox_result);
             this.tabPage_result.Location = new System.Drawing.Point(4, 31);
-            this.tabPage_result.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.tabPage_result.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_result.Name = "tabPage_result";
             this.tabPage_result.Size = new System.Drawing.Size(897, 502);
             this.tabPage_result.TabIndex = 2;
@@ -297,22 +304,33 @@
             // 
             this.pictureBox_result.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pictureBox_result.Location = new System.Drawing.Point(0, 0);
-            this.pictureBox_result.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.pictureBox_result.Margin = new System.Windows.Forms.Padding(5);
             this.pictureBox_result.Name = "pictureBox_result";
             this.pictureBox_result.Size = new System.Drawing.Size(897, 502);
             this.pictureBox_result.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox_result.TabIndex = 1;
             this.pictureBox_result.TabStop = false;
             // 
-            // CameraClipDialog
+            // pictureBox1
+            // 
+            this.pictureBox1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pictureBox1.Location = new System.Drawing.Point(0, 0);
+            this.pictureBox1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(887, 492);
+            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pictureBox1.TabIndex = 3;
+            this.pictureBox1.TabStop = false;
+            // 
+            // PhotoClipDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1007, 537);
             this.Controls.Add(this.tabControl_main);
             this.Controls.Add(this.toolStrip1);
-            this.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
-            this.Name = "CameraClipDialog";
+            this.Margin = new System.Windows.Forms.Padding(5);
+            this.Name = "PhotoClipDialog";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
             this.Text = "从摄像头获取图像";
@@ -323,10 +341,12 @@
             this.toolStrip1.PerformLayout();
             this.tabControl_main.ResumeLayout(false);
             this.tabPage_preview.ResumeLayout(false);
+            this.panel1.ResumeLayout(false);
             this.tabPage_clip.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_clip)).EndInit();
             this.tabPage_result.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_result)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -356,5 +376,6 @@
         private System.Windows.Forms.ToolStripButton toolStripButton_selectAll;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.ToolStripButton toolStripButton_autoDetectEdge;
+        private System.Windows.Forms.PictureBox pictureBox1;
     }
 }

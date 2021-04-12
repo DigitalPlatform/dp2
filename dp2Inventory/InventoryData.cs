@@ -71,6 +71,24 @@ namespace dp2Inventory
 
         #region Entity
 
+        // 根据 UID 和 UII 创建 Entity 对象
+        public static Entity NewEntity(OneTag tag,
+            string uii)
+        {
+            Entity result = new Entity
+            {
+                UID = tag.UID,
+                ReaderName = tag.ReaderName,
+                Antenna = tag.AntennaID.ToString(),
+                TagInfo = null,
+            };
+
+            ParseOiPii(uii, out string pii, out string oi);
+            result.OI = oi;
+            result.PII = pii;
+            return result;
+        }
+
         // 注：所创建的 Entity 对象其 Error 成员可能有值，表示有出错信息
         // Exception:
         //      可能会抛出异常 ArgumentException
@@ -285,7 +303,7 @@ namespace dp2Inventory
                     && (need_verifyEas == true || StringUtil.IsInList("verifyEAS", actionMode))
                     && DataModel.Protocol != "sip")
                 {
-                    await VerifyEasAsync(entity);
+                    await VerifyEasAsync(info);
                 }
 
                 /*
@@ -436,10 +454,12 @@ namespace dp2Inventory
         // 注：通过 AFI 进行判断。0x07 为 on；0xc2 为 off
         // return:
         //      1 为 on; 0 为 off; -1 表示不合法的值; -2 表示 TagInfo 为 null 无法获得 AFI
-        static int GetEas(Entity entity)
+        static int GetEas(ProcessInfo info)
         {
+            Entity entity = info.Entity;
+            Debug.Assert(entity != null);
             // tagInfo.AFI = enable ? (byte)0x07 : (byte)0xc2;
-            var info = entity.Tag as ProcessInfo;
+            // var info = entity.Tag as ProcessInfo;
 
             // TagInfo 为 null ?
             if (entity.TagInfo == null)
@@ -510,9 +530,11 @@ namespace dp2Inventory
         //      -1  出错
         //      0   没有进行验证(已经加入后台验证任务)
         //      1   已经成功进行验证
-        public static async Task<NormalResult> VerifyEasAsync(Entity entity)
+        public static async Task<NormalResult> VerifyEasAsync(
+            ProcessInfo info)
         {
-            var info = entity.Tag as ProcessInfo;
+            Entity entity = info.Entity;
+            Debug.Assert(entity != null);
             if (string.IsNullOrEmpty(info.ItemXml))
             {
                 return new NormalResult
@@ -523,7 +545,7 @@ namespace dp2Inventory
             }
 
             var borrowed = HasBorrowed(info.ItemXml);
-            var ret = GetEas(entity);
+            var ret = GetEas(info);
             if (ret == -2)
             {
                 // 当前无法判断，需要等 GetTagInfo() 以后再重试
@@ -549,7 +571,7 @@ namespace dp2Inventory
                 //      -1  出错
                 //      0   标签不在读卡器上所有没有执行
                 //      1   成功执行修改
-                var result = await TryChangeEasAsync(entity, !borrowed);
+                var result = await TryChangeEasAsync(info, !borrowed);
 
                 // TODO: 语音提醒，有等待处理的 EAS
                 if (result.Value != 1)
@@ -571,11 +593,16 @@ namespace dp2Inventory
         //      -1  出错
         //      0   标签不在读卡器上所有没有执行
         //      1   成功执行修改
-        public static async Task<NormalResult> TryChangeEasAsync(Entity entity, bool enable)
+        public static async Task<NormalResult> TryChangeEasAsync(
+            ProcessInfo info,
+            bool enable)
         {
+            Entity entity = info.Entity;
+            Debug.Assert(entity != null);
+
             using (var releaser = await _easLimit.EnterAsync().ConfigureAwait(false))
             {
-                var info = entity.Tag as ProcessInfo;
+                // var info = entity.Tag as ProcessInfo;
 
                 if (entity.TagInfo == null)
                 {

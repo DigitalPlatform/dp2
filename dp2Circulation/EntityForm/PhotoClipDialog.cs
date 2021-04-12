@@ -1,23 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace DigitalPlatform.Drawing
+using DigitalPlatform;
+using DigitalPlatform.Drawing;
+
+namespace dp2Circulation
 {
-    public interface ICameraClip : IDisposable
+    /// <summary>
+    /// 使用 FaceCenter 摄像头的图片获取和剪裁对话框
+    /// </summary>
+    public partial class PhotoClipDialog : Form, ICameraClip
     {
-        Font Font { get; set; }
-        DialogResult ShowDialog(IWin32Window owner);
-        DialogResult DialogResult { get; set; }
-        ImageInfo ImageInfo { get; }
+        public string CurrentCamera { get; set; }
 
-        string CurrentCamera { get; set; }
-    }
-
-    public partial class CameraClipDialog : Form, ICameraClip
-    {
+        /*
         string m_strCurrentCamera = "";
 
         public string CurrentCamera
@@ -31,15 +33,20 @@ namespace DigitalPlatform.Drawing
                 m_strCurrentCamera = value;
             }
         }
+        */
 
-        private DigitalPlatform.Drawing.QrRecognitionControl qrRecognitionControl1;
+        // private DigitalPlatform.Drawing.QrRecognitionControl qrRecognitionControl1;
 
-        public CameraClipDialog()
+        public PhotoClipDialog()
         {
             InitializeComponent();
 
-            this.tabControl_main.Enabled = false;   // 刚开始的时候冻结
+            // this.tabControl_main.Enabled = false;   // 刚开始的时候冻结
 
+            this.toolStrip1.Enabled = true;
+            this.tabControl_main.Enabled = true;
+
+            /*
             this.qrRecognitionControl1 = new DigitalPlatform.Drawing.QrRecognitionControl();
             this.qrRecognitionControl1.PhotoMode = true;
 
@@ -58,8 +65,10 @@ namespace DigitalPlatform.Drawing
             this.qrRecognitionControl1.BackColor = Color.DarkGray; //System.Drawing.SystemColors.Window;
 
             this.qrRecognitionControl1.FirstImageFilled += new FirstImageFilledEventHandler(qrRecognitionControl1_FirstImageFilled);
+            */
         }
 
+        /*
         void qrRecognitionControl1_FirstImageFilled(object sender, FirstImageFilledEventArgs e)
         {
             // this.toolStripButton_getAndClose.Enabled = true;
@@ -70,6 +79,7 @@ namespace DigitalPlatform.Drawing
             if (e.Error)
                 this.qrRecognitionControl1.Image = null;
         }
+        */
 
         static Bitmap BuildTextImage(string strText,
             Color color,
@@ -98,6 +108,7 @@ namespace DigitalPlatform.Drawing
                 64,
                 2000);
 #endif
+            /*
             {
                 // 2018/10/23
                 if (this.qrRecognitionControl1.Image != null)
@@ -106,19 +117,30 @@ namespace DigitalPlatform.Drawing
                 this.qrRecognitionControl1.Image = BuildTextImage("正在初始化摄像头，请稍候 ...",
                     Color.Gray,
                     64,
-                    2000); ;
+                    2000);
             }
+            */
 
-            this.qrRecognitionControl1.CurrentCamera = m_strCurrentCamera;
+            this.pictureBox1.Image = BuildTextImage("正在初始化摄像头，请稍候 ...",
+    Color.Gray,
+    64,
+    2000);
+
+            // this.qrRecognitionControl1.CurrentCamera = m_strCurrentCamera;
 
             tabControl_main_SelectedIndexChanged(this, e);
+
+            BeginDisplayVideo();
+
         }
 
         private void CameraClipDialog_FormClosing(object sender, FormClosingEventArgs e)
         {
-            m_strCurrentCamera = this.qrRecognitionControl1.CurrentCamera;
+            // m_strCurrentCamera = this.qrRecognitionControl1.CurrentCamera;
 
-            this.qrRecognitionControl1.EndCatch();
+            // this.qrRecognitionControl1.EndCatch();
+
+            CancelDisplayVideo();
         }
 
         private void CameraClipDialog_FormClosed(object sender, FormClosedEventArgs e)
@@ -126,6 +148,7 @@ namespace DigitalPlatform.Drawing
 
         }
 
+        /*
         delegate void Delegate_EndCatch();
         internal void EndCatch()
         {
@@ -137,34 +160,46 @@ namespace DigitalPlatform.Drawing
         {
             this.qrRecognitionControl1.EndCatch();
         }
+        */
 
         private void panel1_SizeChanged(object sender, EventArgs e)
         {
+            /*
             if (qrRecognitionControl1 != null)  // 可能控件还没有创建 2014/10/14
                 qrRecognitionControl1.PerformAutoScale();
+            */
         }
 
         private void toolStripButton_shoot_Click(object sender, EventArgs e)
         {
             // 2017/12/26
-            if (this.qrRecognitionControl1.Image == null)
+            if (this.pictureBox1.Image == null)
             {
-                MessageBox.Show(this, "this.qrRecognitionControl1.Image == null");
+                MessageBox.Show(this, "this.pictureBox1.Image == null");
                 return;
             }
 
-            this.qrRecognitionControl1.DisplayText("正在探测边沿 ...");
+            // this.qrRecognitionControl1.DisplayText("正在探测边沿 ...");
             Shoot();
             if (this.toolStripButton_autoDetectEdge.Checked)
                 DetectEdge();
-            this.qrRecognitionControl1.DisplayImage(true);
+            this.DisplayImage(true);
+        }
+
+        /// <summary>
+        /// 显示或隐藏图像
+        /// </summary>
+        /// <param name="bDisplay">显示或隐藏图像。如果为 true 表示显示图像，隐藏文字显示；否则隐藏图像，显示文字</param>
+        public void DisplayImage(bool bDisplay = true)
+        {
+            this.pictureBox1.Visible = bDisplay;
         }
 
         bool _pointsInitialized = false;
 
         void Shoot()
         {
-            Image temp = this.qrRecognitionControl1.Image;  // 注意，此处 temp 可能为 null，会导致下一句抛出异常
+            Image temp = this.pictureBox1.Image;  // 注意，此处 temp 可能为 null，会导致下一句抛出异常
 
             // this.pictureBox_clip.Image = new Bitmap(temp);
             ImageUtil.SetImage(this.pictureBox_clip, new Bitmap(temp)); // 2012/12/28
@@ -247,7 +282,7 @@ namespace DigitalPlatform.Drawing
         {
             if (this.tabControl_main.SelectedTab == this.tabPage_preview)
             {
-                this.Image = this.qrRecognitionControl1.Image;
+                this.Image = this.pictureBox1.Image;
             }
             else if (this.tabControl_main.SelectedTab == this.tabPage_clip)
             {
@@ -387,12 +422,12 @@ namespace DigitalPlatform.Drawing
             string strError = "";
             if (this.tabControl_main.SelectedTab == this.tabPage_preview)
             {
-                if (this.qrRecognitionControl1.Image == null)
+                if (this.pictureBox1.Image == null)
                 {
                     strError = "图像为空，无法复制";
                     goto ERROR1;
                 }
-                Clipboard.SetImage(this.qrRecognitionControl1.Image);
+                Clipboard.SetImage(this.pictureBox1.Image);
             }
             if (this.tabControl_main.SelectedTab == this.tabPage_clip)
             {
@@ -429,33 +464,6 @@ namespace DigitalPlatform.Drawing
                 goto ERROR1;
             }
             Image image = images[0];
-#if NO
-            Image image = null;
-            IDataObject obj1 = Clipboard.GetDataObject();
-            if (obj1.GetDataPresent(typeof(Bitmap)))
-            {
-                image = (Image)obj1.GetData(typeof(Bitmap));
-            }
-            else if (obj1.GetDataPresent(DataFormats.FileDrop))
-            {
-                string[] files = (string[])obj1.GetData(DataFormats.FileDrop);
-
-                try
-                {
-                    image = Image.FromFile(files[0]);
-                }
-                catch (OutOfMemoryException)
-                {
-                    strError = "当前 Windows 剪贴板中的第一个文件不是图像文件。无法进行粘贴";
-                    goto ERROR1;
-                }
-            }
-            else
-            {
-                strError = "当前 Windows 剪贴板中没有图形对象。无法进行粘贴";
-                goto ERROR1;
-            }
-#endif
 
             if (this.tabControl_main.SelectedTab == this.tabPage_clip)
             {
@@ -484,6 +492,91 @@ namespace DigitalPlatform.Drawing
                 this.pictureBox_clip.SelectAll();
             }
         }
+
+
+        CancellationTokenSource _cancel = new CancellationTokenSource();
+
+        Task _taskDisplayVideo = null;
+
+        void CancelDisplayVideo()
+        {
+            if (_cancel != null)
+            {
+                _cancel.Cancel();
+                _cancel.Dispose();
+                _cancel = null;
+            }
+        }
+
+        void BeginDisplayVideo()
+        {
+            CancelDisplayVideo();
+
+            _cancel = new CancellationTokenSource();
+            _taskDisplayVideo = Task.Run(() => {
+                try
+                {
+                    var result = DisplayVideo(Program.MainForm.FaceReaderUrl, _cancel.Token);
+                    if (_cancel != null && _cancel.IsCancellationRequested == false)
+                        ShowMessageBox(result.ToString());
+                }
+                catch(Exception ex)
+                {
+                    ShowMessageBox(ex.Message);
+                }
+            });
+        }
+
+        void ShowMessageBox(string text)
+        {
+            this.Invoke((Action)(() =>
+            {
+                MessageBox.Show(this, text);
+            }));
+        }
+
+        NormalResult DisplayVideo(string url, CancellationToken token)
+        {
+            MyForm.FaceChannel channel = MyForm.StartFaceChannel(
+    Program.MainForm.FaceReaderUrl,
+    out string strError);
+            if (channel == null)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = strError
+                };
+
+            try
+            {
+                while (token.IsCancellationRequested == false)
+                {
+                    var result = channel.Object.GetImage("");
+                    if (result.Value == -1)
+                        return result;
+                    using (MemoryStream stream = new MemoryStream(result.ImageData))
+                    {
+                        this.pictureBox1.Image = Image.FromStream(stream);
+                    }
+                }
+
+                return new NormalResult();
+            }
+            catch (Exception ex)
+            {
+                strError = $"针对 {url} 的 GetImage() 请求失败: { ex.Message}";
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = strError
+                };
+            }
+            finally
+            {
+                MyForm.EndFaceChannel(channel);
+            }
+        }
+
 
     }
 }

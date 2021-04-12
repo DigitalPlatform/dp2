@@ -9309,7 +9309,12 @@ MessageBoxDefaultButton.Button2);
                         // TODO: 为对话框增加关于即将扫描的期，期号的说明提示
 
                         // 注： new CameraClipDialog() 可能会抛出异常
-                        using (CameraClipDialog dlg = new CameraClipDialog())
+                        ICameraClip dlg = null;
+                        if (string.IsNullOrEmpty(Program.MainForm.FaceReaderUrl))
+                            dlg = new CameraClipDialog();
+                        else
+                            dlg = new PhotoClipDialog();
+                        using (dlg)
                         {
                             dlg.Font = this.Font;
 
@@ -9318,9 +9323,9 @@ MessageBoxDefaultButton.Button2);
                                 "current_camera",
                                 "");
 
-                            Program.MainForm.AppInfo.LinkFormState(dlg, "CameraClipDialog_state");
+                            Program.MainForm.AppInfo.LinkFormState((Form)dlg, "CameraClipDialog_state");
                             dlg.ShowDialog(this);
-                            Program.MainForm.AppInfo.UnlinkFormState(dlg);
+                            Program.MainForm.AppInfo.UnlinkFormState((Form)dlg);
 
                             Program.MainForm.AppInfo.SetString(
                                 "bindingControl",

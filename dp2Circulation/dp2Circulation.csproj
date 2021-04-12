@@ -52,7 +52,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>107</ApplicationRevision>
+    <ApplicationRevision>108</ApplicationRevision>
     <ApplicationVersion>3.8.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -99,6 +99,7 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AForge, Version=2.2.5.0, Culture=neutral, PublicKeyToken=c1db6ff4eaa06aeb" />
     <Reference Include="AsyncFriendlyStackTrace, Version=1.6.0.0, Culture=neutral, PublicKeyToken=f5fdf019656607c4, processorArchitecture=MSIL">
       <HintPath>..\packages\AsyncFriendlyStackTrace.1.6.0\lib\net45\AsyncFriendlyStackTrace.dll</HintPath>
     </Reference>
@@ -438,6 +439,12 @@
     </Compile>
     <Compile Include="EntityForm\AuthorityForm.cs">
       <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="EntityForm\PhotoClipDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="EntityForm\PhotoClipDialog.Designer.cs">
+      <DependentUpon>PhotoClipDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="EntityForm\GetMergeStyleDialog.cs">
       <SubType>Form</SubType>
@@ -1840,6 +1847,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Dictionary\SelectDictionaryItemDialog.resx">
       <DependentUpon>SelectDictionaryItemDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EntityForm\PhotoClipDialog.resx">
+      <DependentUpon>PhotoClipDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="EntityForm\GetMergeStyleDialog.resx">
       <DependentUpon>GetMergeStyleDialog.cs</DependentUpon>

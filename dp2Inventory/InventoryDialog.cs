@@ -21,6 +21,7 @@ using DigitalPlatform.LibraryServer.Common;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
 using static dp2Inventory.LibraryChannelUtil;
+using static DigitalPlatform.RFID.LogicChip;
 
 namespace dp2Inventory
 {
@@ -174,6 +175,48 @@ namespace dp2Inventory
             MessageBox.Show(this, strError);
         }
 
+#if AUTO_TEST
+        List<SimuTagInfo> _simuTagInfos = null;
+
+        // 初始化自动测试
+        NormalResult InitialAutoTest(CancellationToken token)
+        {
+            List<string> names = new List<string> { "RL8600" };
+            {
+                var result = RfidManager.SimuTagInfo(
+                    "switchToSimuMode",
+                    null,
+                    $"readerNameList:{StringUtil.MakePathList(names, "|")}");
+                if (result.Value == -1)
+                {
+                    this.ShowMessageBox("simuReader", result.ErrorInfo);
+                    return result;
+                }
+            }
+
+            {
+                var result = LibraryChannelUtil.DownloadTagsInfo(null,
+                    100,
+                    null,
+                    token);
+                if (result.Value == -1)
+                {
+                    this.ShowMessageBox("simuReader", result.ErrorInfo);
+                    return result;
+                }
+                _simuTagInfos = result.TagInfos;
+
+                foreach (var info in _simuTagInfos)
+                {
+                    info.ReaderName = names[0];
+                    info.AntennaID = 1;
+                }
+            }
+
+            return new NormalResult();
+        }
+#endif 
+
         private void toolStripButton_stop_Click(object sender, EventArgs e)
         {
             _cancel?.Cancel();
@@ -286,6 +329,10 @@ namespace dp2Inventory
                     //DataModel.PauseLoop();
                     try
                     {
+#if AUTO_TEST
+                        InitialAutoTest(token);
+#endif
+
                         while (token.IsCancellationRequested == false)
                         {
                             if (_pause)
@@ -293,6 +340,14 @@ namespace dp2Inventory
                                 await Task.Delay(TimeSpan.FromSeconds(1), token);
                                 continue;
                             }
+
+#if AUTO_TEST
+                            {
+                                var test_result = PrepareRfidTag();
+                                if (test_result.Value == -1)
+                                    throw new Exception(test_result.ErrorInfo);
+                            }
+#endif
 
                             // 语音提示倒计时开始盘点
                             await SpeakCounter(token);
@@ -471,6 +526,67 @@ namespace dp2Inventory
                 }
             }
         }
+
+#if AUTO_TEST
+        // 模拟标签的轮次
+        static int _simuTagIndex = 0;
+
+        // 准备模拟 RFID 标签
+        NormalResult PrepareRfidTag()
+        {
+            List<TagInfo> tags = new List<TagInfo>();
+            // 对当前每个柜门，都给填充一定数量的标签
+            int index = 0;
+
+            for (int i = 0; i < 10/*_simuTagInfos.Count*/; i++)
+            {
+                LogicChip chip = new LogicChip();
+                SimuTagInfo info = null;
+                if (index < _simuTagInfos.Count)
+                    info = _simuTagInfos[index];
+                else
+                    info = new SimuTagInfo
+                    {
+                        PII = $"B{(index + 1).ToString().PadLeft(8, '0')}",
+                        AccessNo = "?",
+                        OI = "testoi"
+                    };
+                chip.NewElement(ElementOID.PII, $"{info.PII}");
+                chip.NewElement(ElementOID.ShelfLocation, info.AccessNo);
+                chip.NewElement(ElementOID.OwnerInstitution, info.OI).WillLock = true;
+
+                var bytes = chip.GetBytes(4 * 20,
+4,
+GetBytesStyle.None,
+out string block_map);
+
+                var tag = new TagInfo
+                {
+                    ReaderName = info.ReaderName,
+                    AntennaID = info.AntennaID,
+                    BlockSize = 4,
+                    MaxBlockCount = 28,
+                    Bytes = bytes
+                };
+
+                tags.Add(tag);
+                index++;
+            }
+
+            {
+                var result = RfidManager.SimuTagInfo("setTag", tags, "");
+                if (result.Value == -1)
+                {
+                    this.ShowMessageBox("simuReader", result.ErrorInfo);
+                    return result;
+                }
+            }
+
+
+            _simuTagIndex++;
+            return new NormalResult();
+        }
+#endif
 
         void EnableSkipButton(bool enable, CancellationTokenSource cancel = null)
         {
@@ -789,7 +905,9 @@ namespace dp2Inventory
                     }
 
                     // TODO: 根据动作判断哪些情况必须获得 tagInfo
-                    if (iteminfo.TagInfo == null)
+                    if (iteminfo.TagInfo == null
+                        && (iteminfo.UII == null || StringUtil.IsInList("verifyEAS", _actionMode))
+                        )
                     {
                         // 第一步，获得标签详细信息
                         InventoryInfo info = new InventoryInfo
@@ -843,10 +961,24 @@ namespace dp2Inventory
                         continue;
 
                     // 第三步，进行处理
-                    Entity entity = InventoryData.NewEntity(tag,
-    null,
-    out string tou,
-    true);
+                    Entity entity = null;
+                    string tou = "";
+                    if (tag.TagInfo != null)
+                    {
+                        // 根据 TagInfo 创建
+                        entity = InventoryData.NewEntity(tag,
+        null,
+        out tou,
+        true);
+                    }
+                    else
+                    {
+                        // 根据 UII 创建
+                        entity = InventoryData.NewEntity(tag,
+                            iteminfo.UII);
+                        tou = "10"; // 图书
+                    }
+
                     // 判断层架标
                     // 10 图书; 80 读者证; 30 层架标
                     if (tou != null && tou.StartsWith("3"))
@@ -865,7 +997,6 @@ namespace dp2Inventory
                     }
                     else
                     {
-
                         ProcessInfo process_info = new ProcessInfo { Entity = entity };
                         var set_result = SetTargetCurrentLocation(process_info);
                         if (set_result.Value == -1
@@ -888,10 +1019,12 @@ namespace dp2Inventory
                             }));
 
                             AddToProcessed(iteminfo.Tag.UID, iteminfo);
+                            process_count++;
                         }
                         else
                         {
                             SetErrorInfo(item, entity.Error);
+                            error_count++;
                         }
                     }
 #if REMOVED
