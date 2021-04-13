@@ -6,9 +6,12 @@ using System.Linq;
 using System.Text;
 using System.Drawing.Drawing2D;
 
-using AForge;
-using AForge.Imaging;
-using AForge.Imaging.Filters;
+//using AForge;
+//using AForge.Imaging;
+//using AForge.Imaging.Filters;
+using Accord;
+using Accord.Imaging;
+using Accord.Imaging.Filters;
 
 namespace DigitalPlatform.Drawing
 {

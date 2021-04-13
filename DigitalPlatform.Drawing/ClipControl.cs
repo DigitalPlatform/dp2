@@ -50,20 +50,20 @@ namespace DigitalPlatform.Drawing
             this.Invalidate();
         }
 
-        public List<AForge.IntPoint> GetCorners()
+        public List<Accord.IntPoint> GetCorners()
         {
-            List<AForge.IntPoint> results = new List<AForge.IntPoint>();
+            List<Accord.IntPoint> results = new List<Accord.IntPoint>();
             Point p = _points[0];
-            results.Add(new AForge.IntPoint(p.X, p.Y));
+            results.Add(new Accord.IntPoint(p.X, p.Y));
 
             p = _points[1];
-            results.Add(new AForge.IntPoint(p.X, p.Y));
+            results.Add(new Accord.IntPoint(p.X, p.Y));
 
             p = _points[2];
-            results.Add(new AForge.IntPoint(p.X, p.Y));
+            results.Add(new Accord.IntPoint(p.X, p.Y));
 
             p = _points[3];
-            results.Add(new AForge.IntPoint(p.X, p.Y));
+            results.Add(new Accord.IntPoint(p.X, p.Y));
 
             return results;
         }

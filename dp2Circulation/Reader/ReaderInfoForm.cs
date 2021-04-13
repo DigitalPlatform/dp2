@@ -12,6 +12,7 @@ using System.Runtime.Remoting.Channels.Ipc;
 using System.Web;
 using System.Threading.Tasks;
 using System.Drawing.Imaging;
+using System.Threading;
 
 using ZXing;
 using ZXing.QrCode;
@@ -31,7 +32,6 @@ using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
-using System.Threading;
 
 namespace dp2Circulation
 {

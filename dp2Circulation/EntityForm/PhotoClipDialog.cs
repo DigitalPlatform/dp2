@@ -41,10 +41,12 @@ namespace dp2Circulation
         {
             InitializeComponent();
 
-            // this.tabControl_main.Enabled = false;   // 刚开始的时候冻结
+            this.tabControl_main.Enabled = false;   // 刚开始的时候冻结
 
+            /*
             this.toolStrip1.Enabled = true;
             this.tabControl_main.Enabled = true;
+            */
 
             /*
             this.qrRecognitionControl1 = new DigitalPlatform.Drawing.QrRecognitionControl();
@@ -121,10 +123,7 @@ namespace dp2Circulation
             }
             */
 
-            this.pictureBox1.Image = BuildTextImage("正在初始化摄像头，请稍候 ...",
-    Color.Gray,
-    64,
-    2000);
+            ShowPictureMessage("正在初始化摄像头，请稍候 ...");
 
             // this.qrRecognitionControl1.CurrentCamera = m_strCurrentCamera;
 
@@ -448,7 +447,7 @@ namespace dp2Circulation
                 Clipboard.SetImage(this.pictureBox_result.Image);
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -480,7 +479,7 @@ namespace dp2Circulation
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -513,18 +512,39 @@ namespace dp2Circulation
             CancelDisplayVideo();
 
             _cancel = new CancellationTokenSource();
-            _taskDisplayVideo = Task.Run(() => {
+            _taskDisplayVideo = Task.Run(() =>
+            {
                 try
                 {
-                    var result = DisplayVideo(Program.MainForm.FaceReaderUrl, _cancel.Token);
+                    var result = DisplayVideo(Program.MainForm.FaceReaderUrl,
+                        () =>
+                        {
+                            this.Invoke((Action)(() =>
+                            {
+                                this.toolStrip1.Enabled = true;
+                                this.tabControl_main.Enabled = true;
+                            }));
+                        },
+                        _cancel.Token);
                     if (_cancel != null && _cancel.IsCancellationRequested == false)
-                        ShowMessageBox(result.ToString());
+                        ShowPictureMessage(result.ToString());
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
-                    ShowMessageBox(ex.Message);
+                    ShowPictureMessage(ex.Message);
                 }
             });
+        }
+
+        void ShowPictureMessage(string text)
+        {
+            this.Invoke((Action)(() =>
+            {
+                this.pictureBox1.Image = BuildTextImage(text,
+    Color.Gray,
+    64,
+    2000);
+            }));
         }
 
         void ShowMessageBox(string text)
@@ -535,7 +555,11 @@ namespace dp2Circulation
             }));
         }
 
-        NormalResult DisplayVideo(string url, CancellationToken token)
+        delegate void delegate_firstFrameDisplayed();
+
+        NormalResult DisplayVideo(string url,
+            delegate_firstFrameDisplayed displayed,
+            CancellationToken token)
         {
             MyForm.FaceChannel channel = MyForm.StartFaceChannel(
     Program.MainForm.FaceReaderUrl,
@@ -549,6 +573,7 @@ namespace dp2Circulation
 
             try
             {
+                int i = 0;
                 while (token.IsCancellationRequested == false)
                 {
                     var result = channel.Object.GetImage("");
@@ -558,6 +583,12 @@ namespace dp2Circulation
                     {
                         this.pictureBox1.Image = Image.FromStream(stream);
                     }
+
+                    // 第一帧显示成功
+                    if (i == 0)
+                        displayed?.Invoke();
+
+                    i++;
                 }
 
                 return new NormalResult();

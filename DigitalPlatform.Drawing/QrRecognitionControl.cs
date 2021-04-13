@@ -5,8 +5,10 @@ using System.Windows.Forms;
 using System.Threading;
 using System.Diagnostics;
 
-using AForge.Video;
+// using AForge.Video;
+using Accord.Video;
 using ZXing;
+using Accord.Vision.Motion;
 
 namespace DigitalPlatform.Drawing
 {
@@ -33,7 +35,7 @@ namespace DigitalPlatform.Drawing
         private Result currentResult;
         private readonly Pen resultRectPen;
 
-        AForge.Vision.Motion.MotionDetector motionDetector = null;
+        MotionDetector motionDetector = null;
 
         public QrRecognitionControl()
         {
@@ -685,13 +687,13 @@ namespace DigitalPlatform.Drawing
         }
 
         // Play around with this function to tweak results.
-        public static AForge.Vision.Motion.MotionDetector GetDefaultMotionDetector()
+        public static MotionDetector GetDefaultMotionDetector()
         {
-            AForge.Vision.Motion.IMotionDetector detector = null;
+            IMotionDetector detector = null;
             // AForge.Vision.Motion.IMotionProcessing processor = null;
-            AForge.Vision.Motion.MotionDetector motionDetector = null;
+            MotionDetector motionDetector = null;
 
-            detector = new AForge.Vision.Motion.TwoFramesDifferenceDetector()
+            detector = new TwoFramesDifferenceDetector()
             {
                 DifferenceThreshold = 15,
                 SuppressNoise = true
@@ -720,7 +722,7 @@ namespace DigitalPlatform.Drawing
             };
              * */
 
-            motionDetector = new AForge.Vision.Motion.MotionDetector(detector);
+            motionDetector = new MotionDetector(detector);
             return (motionDetector);
         }
 #if NO

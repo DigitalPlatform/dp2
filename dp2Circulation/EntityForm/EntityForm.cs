@@ -13949,9 +13949,11 @@ out strError);
                 Program.MainForm.DisableCamera();
                 try
                 {
+                    bool control = (Control.ModifierKeys & Keys.Control) == Keys.Control;
                     // 注： new CameraClipDialog() 可能会抛出异常
                     ICameraClip dlg = null;
-                    if (string.IsNullOrEmpty(Program.MainForm.FaceReaderUrl))
+                    if (string.IsNullOrEmpty(Program.MainForm.FaceReaderUrl)
+                        || control)
                         dlg = new CameraClipDialog();
                     else
                         dlg = new PhotoClipDialog();

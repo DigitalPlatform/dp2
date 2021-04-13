@@ -9308,9 +9308,12 @@ MessageBoxDefaultButton.Button2);
                     {
                         // TODO: 为对话框增加关于即将扫描的期，期号的说明提示
 
+                        bool control = (Control.ModifierKeys & Keys.Control) == Keys.Control;
+
                         // 注： new CameraClipDialog() 可能会抛出异常
                         ICameraClip dlg = null;
-                        if (string.IsNullOrEmpty(Program.MainForm.FaceReaderUrl))
+                        if (string.IsNullOrEmpty(Program.MainForm.FaceReaderUrl)
+                            || control)
                             dlg = new CameraClipDialog();
                         else
                             dlg = new PhotoClipDialog();
