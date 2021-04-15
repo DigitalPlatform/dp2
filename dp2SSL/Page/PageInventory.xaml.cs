@@ -25,6 +25,7 @@ using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
 using DigitalPlatform.WPF;
 using static dp2SSL.LibraryChannelUtil;
+using System.Diagnostics;
 
 namespace dp2SSL
 {
@@ -254,6 +255,9 @@ namespace dp2SSL
             foreach (var tag in tags)
             {
                 var entity = InventoryData.AddEntity(tag, out bool isNewly);
+
+                Debug.Assert(entity.Antenna == tag.OneTag.AntennaID.ToString());
+                
                 var info = entity.Tag as ProcessInfo;
                 if (info == null)
                 {
@@ -287,6 +291,16 @@ namespace dp2SSL
                 // 如果发现 PII 不为空的层架标，要用于切换当前 CurrentShelfNo
                 if (info != null && info.IsLocation == true)
                 {
+                    // 2021/4/15
+                    // 检查 RPAN 天线号，也就是标签类型
+                    if (InventoryData.GetRPanTagTypeSwitch() == true
+                        && entity.ReaderName.StartsWith("R-PAN")
+                        && entity.Antenna != "2")
+                    {
+                        // TODO: 发出响声，表示有标签被忽略
+                        continue;
+                    }
+
                     // 2021/1/29
                     // 验证层架标号码
                     var validate_result = InventoryData.ValidateBarcode("shelf", entity.PII);
@@ -460,6 +474,9 @@ namespace dp2SSL
             Entity entity,
             delegate_speakLocation func_speakLocation)
         {
+            // 当图书标签/层架标类型切换时发出语音提示
+            OnTagTypeChangeSpeak(entity);
+
             var info = entity.Tag as ProcessInfo;
 
             // 是否强迫获取标签内容
@@ -477,6 +494,22 @@ namespace dp2SSL
                 if (InventoryData.UidExsits(entity.UID, out string uii)
                     && force == false)
                 {
+                    // 2021/4/15
+                    // 检查 RPAN 天线号，也就是标签类型
+                    if (InventoryData.GetRPanTagTypeSwitch() == true
+                        && entity.ReaderName.StartsWith("R-PAN")
+                        && entity.Antenna != "1")
+                    {
+                        RemoveEntity(entity);
+                        // TODO: 发出响声，表示有标签被忽略
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = "",
+                            ErrorCode = "removed"
+                        };
+                    }
+
                     // 2021/1/31
                     // 注意这里 pii 可能为 oi.pii 形态，需要拆分
                     InventoryData.ParseOiPii(uii, out string pii, out string oi);
@@ -554,6 +587,22 @@ namespace dp2SSL
                             // 层架标
                             if (type == "location")
                             {
+                                // 2021/4/15
+                                // 检查 RPAN 天线号，也就是标签类型
+                                if (InventoryData.GetRPanTagTypeSwitch() == true
+                                    && entity.ReaderName.StartsWith("R-PAN")
+                                    && entity.Antenna != "2")
+                                {
+                                    RemoveEntity(entity);
+                                    // TODO: 发出响声，表示有标签被忽略
+                                    return new NormalResult
+                                    {
+                                        Value = -1,
+                                        ErrorInfo = "",
+                                        ErrorCode = "removed"
+                                    };
+                                }
+
                                 info.IsLocation = true;
                                 // 验证层架标号码
                                 var validate_result = InventoryData.ValidateBarcode("shelf", entity.PII);
@@ -608,6 +657,22 @@ namespace dp2SSL
             }
 
             return new NormalResult();
+        }
+
+        static string _prevAntenna = "";
+
+        // 当图书标签/层架标类型切换时发出语音提示
+        static void OnTagTypeChangeSpeak(Entity entity)
+        {
+            if (InventoryData.GetRPanTagTypeSwitch() == false
+                || entity.ReaderName.StartsWith("R-PAN") == false)
+                return;
+
+            if (entity.Antenna != _prevAntenna)
+            {
+                _prevAntenna = entity.Antenna;
+                App.CurrentApp.SpeakSequence("开始 " + (entity.Antenna == "1" ? "图书模式" : "层架标模式"));
+            }
         }
 
         static void SetEntityError(Entity entity,
@@ -914,6 +979,13 @@ namespace dp2SSL
                             // 导入 UID PII 对照表文件
                             var result = await InventoryData.ImportUidPiiTableAsync(
                                     openFileDialog.FileName,
+                                    (text) =>
+                                    {
+                                        App.Invoke(new Action(() =>
+                                        {
+                                            progress.MessageText = text;
+                                        }));
+                                    },
                                     App.CancelToken);
                             if (result.Value == -1)
                                 App.ErrorBox("导入 UID PII 对照表文件", $"导入过程出错: {result.ErrorInfo}");

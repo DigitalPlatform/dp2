@@ -51,8 +51,8 @@ using System.Windows;
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 // 方法是按如下所示使用“*”: :
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.8.13")]    // 1.5.*
-[assembly: AssemblyFileVersion("1.8.13.0")]  // 1.5.0.0
+[assembly: AssemblyVersion("1.8.17")]    // 1.5.*
+[assembly: AssemblyFileVersion("1.8.17.0")]  // 1.5.0.0
 
 // 1.0 2019/2/21 第一个版本
 // 1.1 2019/2/26 可以显示版本号了
@@ -97,3 +97,7 @@ using System.Windows;
 //                          自助借还功能的 SIP 模式根据最新版 dp2capo 做了修改，能按照 dp2capo 要求在请求中包含正确的 AO 字段
 //      1.8.12 (2021/4/2) 自助借还功能中，ISO15693 读者证严格要求具备 OI 字段，图书标签也严格要求具备 OI 字段
 //      1.8.13 (2021/4/8) 自助借还 SIP Login() 消除了一处 bug (返回 -1 和 0 都不是登录成功，1 才是登录成功)
+//      1.8.14 (2021/4/14) 发布正式版
+//      1.8.15 (2021/4/15) 增加 charging.xml，提供配置事项 <key name="图书标签严格要求机构代码" value="true"/>，用于定义自助借还功能是否严格要求图书标签具备机构代码
+//      1.8.16 (2021/4/15) charging.xml 中增加了 verify 属性
+//      1.8.17 (2021/4/15) inventory.xml 中增加 <key name="RPAN图书标签和层架标状态切换" value="true"/> 参数，启用了新版 R-PAN 手柄切换两类标签状态功能

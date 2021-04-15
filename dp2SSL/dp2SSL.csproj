@@ -37,7 +37,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>144</ApplicationRevision>
+    <ApplicationRevision>151</ApplicationRevision>
     <ApplicationVersion>1.5.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -456,6 +456,7 @@
     </ApplicationDefinition>
     <Compile Include="Centers\FaceManager.cs" />
     <Compile Include="Centers\ProcessManager.cs" />
+    <Compile Include="Models\ChargingData.cs" />
     <Compile Include="ConfigWindow.xaml.cs">
       <DependentUpon>ConfigWindow.xaml</DependentUpon>
     </Compile>
@@ -846,6 +847,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Resource Include="sample_inventory.xml" />
+    <Resource Include="sample_charging.xml" />
     <Content Include="splash.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

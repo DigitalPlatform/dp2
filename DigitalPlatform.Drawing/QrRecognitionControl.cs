@@ -72,6 +72,7 @@ namespace DigitalPlatform.Drawing
                         camDevices.Current.SignalToStop();
                     }
                     camDevices.Current.NewFrame -= Current_NewFrame;
+                    camDevices.Current.VideoSourceError -= Current_VideoSourceError;
                 }
             }
         }
@@ -251,6 +252,7 @@ namespace DigitalPlatform.Drawing
                     camDevices.Current.SignalToStop();
                 }
                 camDevices.Current.NewFrame -= Current_NewFrame;
+                camDevices.Current.VideoSourceError -= Current_VideoSourceError;
 
 #if NO
                 DateTime start = DateTime.Now;
@@ -284,6 +286,7 @@ namespace DigitalPlatform.Drawing
 
             // camDevices.SelectCamera(((Device)(cmbDevice.SelectedItem)).Index);
             camDevices.Current.NewFrame += Current_NewFrame;
+            camDevices.Current.VideoSourceError += Current_VideoSourceError;
             // testing
             // camDevices.Current.VideoResolution = camDevices.Current.VideoCapabilities[camDevices.Current.VideoCapabilities.Length - 1];
             camDevices.Current.Start();
@@ -292,6 +295,11 @@ namespace DigitalPlatform.Drawing
             this.pictureBox1.Visible = true;
             this.progressBar1.Visible = true;
             return true;
+        }
+
+        private void Current_VideoSourceError(object sender, VideoSourceErrorEventArgs eventArgs)
+        {
+            string error = eventArgs.Description;
         }
 
         /// <summary>
@@ -378,6 +386,7 @@ namespace DigitalPlatform.Drawing
                     camDevices.Current.SignalToStop();
                 }
                 camDevices.Current.NewFrame -= Current_NewFrame;
+                camDevices.Current.VideoSourceError -= Current_VideoSourceError;
 
                 // 2014/2/28
                 WaitForStop();

@@ -1592,7 +1592,7 @@ MessageBoxDefaultButton.Button2);
 
                 this.EnableControls(true);
             }
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1693,7 +1693,7 @@ MessageBoxDefaultButton.Button2);
                         string result = BindCardNumberDialog.DecimalToHex(strLine);
                         result2.AppendLine(result);
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         result2.AppendLine($"!!! 字符串 '{strLine}' 格式不正确: {ex.Message}");
                     }
@@ -1765,6 +1765,109 @@ MessageBoxDefaultButton.Button2);
         {
             this.tabControl_main.SelectedTab = this.tabPage_health;
             button_health_tryLogin_Click(this, new EventArgs());
+        }
+
+        private void button_addCrLf_getSourceFileName_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog dlg = new OpenFileDialog();
+
+            dlg.Title = "请指定即将被转换的 ISO2709 文件名";
+            dlg.FileName = this.textBox_addCrLf_sourceFilename.Text;
+
+            dlg.Filter = "ISO2709 文件 (*.iso;*.mrc)|*.iso;*.mrc|All files (*.*)|*.*";
+            dlg.RestoreDirectory = true;
+
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return;
+
+            this.textBox_addCrLf_sourceFilename.Text = dlg.FileName;
+            this.textBox_addCrLf_targetFilename.Text = Path.Combine(Path.GetDirectoryName(dlg.FileName), Path.GetFileNameWithoutExtension(dlg.FileName) + "_crlf" + Path.GetExtension(dlg.FileName));
+        }
+
+        private void button_addCrLf_getTargetFileName_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog dlg = new SaveFileDialog();
+
+            dlg.Title = "请指定即将创建的 ISO2709 文件名";
+            dlg.CreatePrompt = false;
+            dlg.OverwritePrompt = true;
+            dlg.FileName = this.textBox_addCrLf_targetFilename.Text;
+
+            dlg.Filter = "ISO2709 文件 (*.iso;*.mrc)|*.iso;*.mrc|All files (*.*)|*.*";
+            dlg.RestoreDirectory = true;
+
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return;
+
+            this.textBox_addCrLf_targetFilename.Text = dlg.FileName;
+        }
+
+        private void button_addCrLf_begin_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            this.button_addCrLf_begin.Enabled = false;
+            try
+            {
+                var source_filename = this.textBox_addCrLf_sourceFilename.Text;
+                var target_filename = this.textBox_addCrLf_targetFilename.Text;
+
+                if (source_filename == target_filename)
+                {
+                    strError = "源文件和目标文件不能是同一个文件";
+                    goto ERROR1;
+                }
+
+                // 先检查源文件中是否已经有了回车换行符号
+                using (var stream_in = File.OpenRead(source_filename))
+                {
+                    while (true)
+                    {
+                        int nRet = stream_in.ReadByte();
+                        if (nRet == -1)
+                            break;
+                        if ((char)nRet == '\r' || (char)nRet == '\n')
+                        {
+                            strError = $"源文件 {source_filename} 中已经有回车换行符号了，不能重复添加。放弃处理";
+                            goto ERROR1;
+                        }
+                    }
+                }
+
+                using (var stream_in = File.OpenRead(source_filename))
+                using (var stream_out = File.OpenWrite(target_filename))
+                {
+                    stream_out.SetLength(0);
+                    while (true)
+                    {
+                        int nRet = stream_in.ReadByte();
+                        if (nRet == -1)
+                            break;
+                        if ((char)nRet == 29)
+                        {
+                            stream_out.WriteByte((byte)nRet);
+                            stream_out.WriteByte((byte)'\r');
+                            stream_out.WriteByte((byte)'\n');
+                        }
+                        else
+                            stream_out.WriteByte((byte)nRet);
+                    }
+                }
+
+                MessageBox.Show(this, $"转换完成。目标文件 {target_filename} 中已经被添加了回车换行符号");
+                return;
+            }
+            catch (Exception ex)
+            {
+                strError = $"转换出现异常: {ex.Message}";
+                goto ERROR1;
+            }
+            finally
+            {
+                this.button_addCrLf_begin.Enabled = true;
+            }
+        ERROR1:
+            MessageBox.Show(this, strError);
         }
     }
 }

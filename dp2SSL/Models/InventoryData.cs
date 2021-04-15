@@ -83,6 +83,8 @@ namespace dp2SSL
                 isNewly = false;
                 Entity result = _entityTable[tag.OneTag.UID] as Entity;
                 InventoryData.NewEntity(tag, result, false);
+
+                Debug.Assert(result.Antenna == tag.OneTag.AntennaID.ToString());
                 return result;
             }
 
@@ -230,6 +232,14 @@ out chip);
                     Antenna = tag.OneTag.AntennaID.ToString(),
                     TagInfo = tag.OneTag.TagInfo,
                 };
+            }
+            else
+            {
+                // 2021/4/15 
+                // 刷新天线编号等
+                result.UID = tag.OneTag.UID;
+                result.ReaderName = tag.OneTag.ReaderName;
+                result.Antenna = tag.OneTag.AntennaID.ToString();
             }
 
             LogicChip chip = null;
@@ -754,12 +764,12 @@ TaskScheduler.Default);
                             Value = -1,
                             ErrorInfo = "用户中断"
                         };
-                    // 检索全部读者库记录
+                    // 检索实体库
                     long lRet = channel.SearchItem(null,
     dbName, // "<all>",
     "",
     -1,
-    "__id",
+    "RFID UID", // "__id",
     "left",
     "zh",
     null,   // strResultSetName
@@ -868,7 +878,7 @@ TaskScheduler.Default);
 
                             if ((i % 100) == 0)
                             {
-                                func_showProgress?.Invoke($"正在从 {dbName} 获取信息 ({i.ToString()}) {record.Path} ...");
+                                func_showProgress?.Invoke($"正在从 {dbName} 获取信息 ({i.ToString()}/{hitcount}) {record.Path} ...");
                             }
                         }
 
@@ -2003,6 +2013,20 @@ TaskScheduler.Default);
             return attr.Value;
         }
 
+        // 2021/4/15
+        // 获得 inventory.xml 中 settings/key[@key="RPAN图书标签和层架标状态切换"] 参数
+        public static bool GetRPanTagTypeSwitch()
+        {
+            var dom = GetInventoryDom();
+            if (dom == null)
+                return true;
+            var value = dom.DocumentElement.SelectSingleNode("settings/key[@name='RPAN图书标签和层架标状态切换']/@value")?.Value;
+            if (string.IsNullOrEmpty(value))
+                value = "true";
+
+            return value == "true";
+        }
+
         // 获得 inventory.xml 中的 barcodeValidation/validator (OuterXml)定义
         public static string GetBarcodeValidatorDef()
         {
@@ -2122,6 +2146,11 @@ TaskScheduler.Default);
                 {
                     context.Database.EnsureCreated();
                     // var all = context.Uids.Where(o => string.IsNullOrEmpty(o.PII) == false && string.IsNullOrEmpty(o.UID) == false);
+                    long i = 0;
+
+                    func_showProgress?.Invoke("正在统计总数 ...");
+
+                    long total_count = context.Uids.LongCount();
                     foreach (var item in context.Uids)
                     {
                         if (token.IsCancellationRequested)
@@ -2143,9 +2172,12 @@ TaskScheduler.Default);
                         if (string.IsNullOrEmpty(oi))
                             continue;
 
-                        func_showProgress?.Invoke($"{uid} --> {barcode} ...");
+                        if ((i % 10) == 0)
+                            func_showProgress?.Invoke($"{i}/{total_count}) {uid} --> {barcode} ...");
 
                         uid_table[uid] = barcode;
+
+                        i++;
                     }
 
                     return new NormalResult
@@ -2408,11 +2440,25 @@ TaskScheduler.Default);
         // 导入 UID PII 对照表文件
         public static async Task<ImportUidResult> ImportUidPiiTableAsync(
             string filename,
+            delegate_showText func_showProgress,
             CancellationToken token)
         {
             bool sip = App.Protocol == "sip";
             try
             {
+                long total_linecount = 0;
+                // 先统计总行数
+                using (var reader = new StreamReader(filename, Encoding.ASCII))
+                {
+                    while (token.IsCancellationRequested == false)
+                    {
+                        var line = await reader.ReadLineAsync();
+                        if (line == null)
+                            break;
+                        total_linecount++;
+                    }
+                }
+
                 using (var reader = new StreamReader(filename, Encoding.ASCII))
                 {
                     int line_count = 0;
@@ -2421,13 +2467,20 @@ TaskScheduler.Default);
                     int delete_count = 0;
                     int error_count = 0;
                     List<string> lines = new List<string>();
+                    int i = 0;
+                    string processed_line = "";
                     while (token.IsCancellationRequested == false)
                     {
+                        if (total_linecount > 0)
+                            func_showProgress?.Invoke($"正在导入 {i}/{total_linecount} {processed_line}");
+                        i++;
                         var line = await reader.ReadLineAsync();
                         if (line == null)
                             break;
                         if (string.IsNullOrEmpty(line))
                             continue;
+
+                        processed_line = line;  // .TrimEnd(new char[] { '\r', '\n' });
 
                         var parts = StringUtil.ParseTwoPart(line, "\t");
                         string uid = parts[0];

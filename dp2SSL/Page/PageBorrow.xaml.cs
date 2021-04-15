@@ -1500,6 +1500,9 @@ namespace dp2SSL
                         {
                             // 2021/4/2 改为用 oi+pii
                             bool strict = !_patron.IsFingerprintSource;
+                            // 2021/4/15
+                            if (ChargingData.GetBookInstitutionStrict() == false)
+                                strict = false;
                             string oi_pii = _patron.GetOiPii(strict); // 严格模式，必须有 OI
                             return LibraryChannelUtil.GetReaderInfo(string.IsNullOrEmpty(oi_pii) ? pii : oi_pii);
                         });
@@ -1694,7 +1697,12 @@ out string strError);
                                     entity.GetOiOrAoi(),
                                     "network");
                             else
-                                result = await LibraryChannelUtil.GetEntityDataAsync(entity.GetOiPii(true), "network"); // 2021/4/2 改为严格模式 OI_PII
+                            {
+                                // 2021/4/15
+                                var strict = ChargingData.GetBookInstitutionStrict();
+
+                                result = await LibraryChannelUtil.GetEntityDataAsync(entity.GetOiPii(strict), "network"); // 2021/4/2 改为严格模式 OI_PII
+                            }
 
                             if (result.Value == -1)
                             {
@@ -2038,6 +2046,9 @@ out string strError);
                         if (string.IsNullOrEmpty(patron_barcode_or_uii))
                             patron_barcode_or_uii = _patron.Barcode;
 
+                        // 2021/4/15
+                        var strict = ChargingData.GetBookInstitutionStrict();
+
                         if (action == "borrow" || action == "renew")
                         {
                             /*
@@ -2055,12 +2066,11 @@ out string strError);
                             }
                             */
 
-
                             //entity.Waiting = true;
                             lRet = channel.Borrow(null,
                                 action == "renew",
                                 patron_barcode_or_uii, // _patron.Barcode,
-                                entity.GetOiPii(true),  // entity.PII,
+                                entity.GetOiPii(strict),  // entity.PII,
                                 entity.ItemRecPath,
                                 false,
                                 null,
@@ -2110,7 +2120,7 @@ out string strError);
                             lRet = channel.Return(null,
                                 "return",
                                 patron_barcode_or_uii, // _patron.Barcode,
-                                entity.GetOiPii(true),  // entity.PII,
+                                entity.GetOiPii(strict),  // entity.PII,
                                 entity.ItemRecPath,
                                 false,
                                 "item,reader", // style,

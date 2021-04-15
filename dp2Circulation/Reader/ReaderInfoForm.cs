@@ -4011,7 +4011,10 @@ MessageBoxDefaultButton.Button2);
             string strError = "";
             string strShrinkComment = "";
 
-            if (string.IsNullOrEmpty(Program.MainForm.FaceReaderUrl))
+            bool control = (Control.ModifierKeys == Keys.Control);
+
+            if (string.IsNullOrEmpty(Program.MainForm.FaceReaderUrl)
+                || control)
             {
                 Program.MainForm.DisableCamera();
                 try
