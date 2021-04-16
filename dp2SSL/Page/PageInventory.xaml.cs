@@ -197,12 +197,13 @@ namespace dp2SSL
                 // TODO: 对离开的 tag 变化为灰色颜色
 
                 bool speaked = false;
+                List<Entity> remove_error_entities = new List<Entity>();
                 // 2020/10/10
                 // TODO: 发出什么响声表示?
                 // 把以前遗留的出错 entity 尝试重新 GetTagInfo()
                 foreach (var entity in InventoryData.ErrorEntities)
                 {
-                    FillEntity(channel, entity, (e1) =>
+                    var fill_result = FillEntity(channel, entity, (e1) =>
                     {
                         // 说过一次便不再说
                         if (speaked == true)
@@ -210,6 +211,15 @@ namespace dp2SSL
                         speaked = SpeakLocation(e1);
                         return speaked;
                     });
+
+                    if (fill_result.ErrorCode == "removed")
+                        remove_error_entities.Add(entity);
+                }
+
+                // 2021/4/16
+                foreach (var entity in remove_error_entities)
+                {
+                    InventoryData.RemoveErrorEntity(entity, out _);
                 }
 
                 // 筛选出需要 GetTagInfo() 的那些标签
@@ -254,10 +264,11 @@ namespace dp2SSL
 
             foreach (var tag in tags)
             {
-                var entity = InventoryData.AddEntity(tag, out bool isNewly);
+                var entity = InventoryData.AddEntity(tag,
+                    out bool isNewly);
 
                 Debug.Assert(entity.Antenna == tag.OneTag.AntennaID.ToString());
-                
+
                 var info = entity.Tag as ProcessInfo;
                 if (info == null)
                 {
@@ -335,6 +346,9 @@ namespace dp2SSL
 
                 SoundMaker.NextSound();
 
+                // 当图书标签/层架标类型切换时发出语音提示
+                OnTagTypeChangeSpeak(entity);
+
                 var fill_result = FillEntity(channel, entity,
                     (e) =>
                     {
@@ -365,6 +379,17 @@ namespace dp2SSL
                 var info = entity.Tag as ProcessInfo;
                 if (info.IsLocation == true)
                     continue;
+
+                // 2021/4/15
+                // 检查 RPAN 天线号，也就是标签类型
+                if (InventoryData.GetRPanTagTypeSwitch() == true
+                    && entity.ReaderName.StartsWith("R-PAN")
+                    && entity.Antenna != "1")
+                {
+                    // TODO: 发出响声，表示有标签被忽略
+                    continue;
+                }
+
 
                 // 尝试重新赋予目标 location 和 currentLocation，观察参数是否发生变化、重做后台任务
                 var old_targetLocation = info.TargetLocation;
@@ -401,6 +426,16 @@ namespace dp2SSL
             foreach (var entity in rests)
             {
                 var info = entity.Tag as ProcessInfo;
+
+                // 2021/4/15
+                // 检查 RPAN 天线号，也就是标签类型
+                if (InventoryData.GetRPanTagTypeSwitch() == true
+                    && entity.ReaderName.StartsWith("R-PAN")
+                    && entity.Antenna != "1")
+                {
+                    // TODO: 发出响声，表示有标签被忽略
+                    continue;
+                }
 
                 // 如果有以前尚未执行成功的修改 EAS 的任务，则尝试再执行一次
                 if (info != null
@@ -474,9 +509,6 @@ namespace dp2SSL
             Entity entity,
             delegate_speakLocation func_speakLocation)
         {
-            // 当图书标签/层架标类型切换时发出语音提示
-            OnTagTypeChangeSpeak(entity);
-
             var info = entity.Tag as ProcessInfo;
 
             // 是否强迫获取标签内容
@@ -630,6 +662,24 @@ namespace dp2SSL
                             }
                             else
                             {
+                                // 图书
+
+                                // 2021/4/15
+                                // 检查 RPAN 天线号，也就是标签类型
+                                if (InventoryData.GetRPanTagTypeSwitch() == true
+                                    && entity.ReaderName.StartsWith("R-PAN")
+                                    && entity.Antenna != "1")
+                                {
+                                    RemoveEntity(entity);
+                                    // TODO: 发出响声，表示有标签被忽略
+                                    return new NormalResult
+                                    {
+                                        Value = -1,
+                                        ErrorInfo = "",
+                                        ErrorCode = "removed"
+                                    };
+                                }
+
                                 var set_result = SetTargetCurrentLocation(info);
                                 if (set_result.Value == -1 && set_result.ErrorCode == "noCurrentShelfNo")
                                 {
@@ -671,6 +721,12 @@ namespace dp2SSL
             if (entity.Antenna != _prevAntenna)
             {
                 _prevAntenna = entity.Antenna;
+
+                if (entity.Antenna == "2")
+                {
+                    int i = 0;
+                    i++;
+                }
                 App.CurrentApp.SpeakSequence("开始 " + (entity.Antenna == "1" ? "图书模式" : "层架标模式"));
             }
         }
