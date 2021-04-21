@@ -353,6 +353,12 @@ namespace dp2Inventory
                 // 更新状态行显示
                 SetCurrentShelfNoLabel(CurrentShelfNo);
             }
+
+            this.Invoke((Action)(() =>
+            {
+                toolStripStatusLabel_rpanMode.Text = "";
+            }));
+
             _ = Task.Factory.StartNew(
                 async () =>
                 {
@@ -1066,10 +1072,26 @@ out string block_map);
                         tou = "10"; // 图书
                     }
 
+                    // 语音播报标签(天线)类型切换
+                    await SpeakingTagTypeChangeAsync(entity, token);
+
                     // 判断层架标
                     // 10 图书; 80 读者证; 30 层架标
                     if (tou != null && tou.StartsWith("3"))
                     {
+                        // 按照天线状态滤除
+                        if (FilterLocationTag(entity) == false)
+                        {
+                            this.Invoke((Action)(() =>
+                            {
+                                iteminfo.State = "disable";
+                                ListViewUtil.ChangeItemText(item, COLUMN_ERRORINFO, "滤除");
+                                SetItemColor(item, "disable");
+                            }));
+                            filtered_count++;
+                            continue;
+                        }
+
                         {
                             iteminfo.State = "succeed";
                             this.Invoke((Action)(() =>
@@ -1084,6 +1106,19 @@ out string block_map);
                     }
                     else
                     {
+                        // 按照天线状态滤除
+                        if (FilterBookTag(entity) == false)
+                        {
+                            this.Invoke((Action)(() =>
+                            {
+                                iteminfo.State = "disable";
+                                ListViewUtil.ChangeItemText(item, COLUMN_ERRORINFO, "滤除");
+                                SetItemColor(item, "disable");
+                            }));
+                            filtered_count++;
+                            continue;
+                        }
+
                         ProcessInfo process_info = new ProcessInfo { Entity = entity };
                         var set_result = SetTargetCurrentLocation(process_info);
                         if (set_result.Value == -1
@@ -1194,6 +1229,70 @@ out string block_map);
                 // DataModel.DecApiCount();
             }
         }
+
+        // 过滤层架标(按照天线状态)
+        // return:
+        //      false   应被滤除
+        //      true    应被保留
+        static bool FilterLocationTag(Entity entity)
+        {
+            // 2021/4/22
+            // 检查 RPAN 天线号，也就是标签类型
+            if (InventoryData.GetRPanTagTypeSwitch() == true
+                && entity.ReaderName.StartsWith("R-PAN")
+                && entity.Antenna != "2")
+            {
+                // TODO: 发出响声，表示有标签被忽略
+                return false;
+            }
+
+            return true;
+        }
+
+        // 过滤图书(按照天线状态)
+        // return:
+        //      false   应被滤除
+        //      true    应被保留
+        static bool FilterBookTag(Entity entity)
+        {
+            // 2021/4/22
+            // 检查 RPAN 天线号，也就是标签类型
+            if (InventoryData.GetRPanTagTypeSwitch() == true
+                && entity.ReaderName.StartsWith("R-PAN")
+                && entity.Antenna != "1")
+            {
+                // TODO: 发出响声，表示有标签被忽略
+                return false;
+            }
+
+            return true;
+        }
+
+        static string _prevAntenna = "";
+
+        // 当图书标签/层架标类型切换时发出语音提示
+        async Task SpeakingTagTypeChangeAsync(
+            Entity entity,
+            CancellationToken token)
+        {
+            if (InventoryData.GetRPanTagTypeSwitch() == false
+                || entity.ReaderName.StartsWith("R-PAN") == false)
+                return;
+
+            if (entity.Antenna != _prevAntenna)
+            {
+                _prevAntenna = entity.Antenna;
+
+                string mode = (entity.Antenna == "1" ? "图书模式" : "层架标模式");
+                this.Invoke((Action)(() =>
+                {
+                    toolStripStatusLabel_rpanMode.Text = mode;
+                }));
+
+                await FormClientInfo.Speaking($"开始 {mode}", false, token);
+            }
+        }
+
 
         // 根据当前的错误事项判断，是否需要重试操作
         // 一般来说请求 dp2library 服务器的失败，不需要重试；
@@ -2053,7 +2152,7 @@ bool eas)
         public static string CurrentBatchNo { get; set; }
 
         // 切换当前层架标
-        async Task SwitchCurrentShelfNoAsync(Entity entity, 
+        async Task SwitchCurrentShelfNoAsync(Entity entity,
             CancellationToken token)
         {
             if (string.IsNullOrEmpty(entity.PII) == false)

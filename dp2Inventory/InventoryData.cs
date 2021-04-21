@@ -799,6 +799,21 @@ namespace dp2Inventory
             return attr.Value;
         }
 
+        // 2021/4/22
+        // 获得 inventory.xml 中 settings/key[@key="RPAN图书标签和层架标状态切换"] 参数
+        public static bool GetRPanTagTypeSwitch()
+        {
+            var dom = GetInventoryDom();
+            if (dom == null)
+                return true;
+            var value = dom.DocumentElement.SelectSingleNode("settings/key[@name='RPAN图书标签和层架标状态切换']/@value")?.Value;
+            if (string.IsNullOrEmpty(value))
+                value = "true";
+
+            return value == "true";
+        }
+
+
         // 获得 inventory.xml 中的 barcodeValidation/validator (OuterXml)定义
         public static string GetBarcodeValidatorDef()
         {

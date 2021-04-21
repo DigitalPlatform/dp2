@@ -43,6 +43,8 @@ namespace dp2Inventory
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel_currentShelfNo = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripStatusLabel_rpanMode = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripStatusLabel3 = new System.Windows.Forms.ToolStripStatusLabel();
             this.listView_tags = new System.Windows.Forms.ListView();
             this.columnHeader_uid = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_errorInfo = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -59,13 +61,13 @@ namespace dp2Inventory
             this.columnHeader_readerName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_antenna = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_protocol = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // toolStrip1
             // 
+            this.toolStrip1.Font = new System.Drawing.Font("Microsoft YaHei UI", 14.14286F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(28, 28);
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButton_begin,
@@ -79,7 +81,7 @@ namespace dp2Inventory
             this.toolStripButton_cancelSpeaking});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(951, 44);
+            this.toolStrip1.Size = new System.Drawing.Size(1124, 55);
             this.toolStrip1.TabIndex = 0;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -89,7 +91,7 @@ namespace dp2Inventory
             this.toolStripButton_begin.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_begin.Image")));
             this.toolStripButton_begin.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_begin.Name = "toolStripButton_begin";
-            this.toolStripButton_begin.Size = new System.Drawing.Size(58, 38);
+            this.toolStripButton_begin.Size = new System.Drawing.Size(92, 49);
             this.toolStripButton_begin.Text = "开始";
             this.toolStripButton_begin.ToolTipText = "开始修改";
             this.toolStripButton_begin.Click += new System.EventHandler(this.toolStripButton_begin_Click);
@@ -97,7 +99,7 @@ namespace dp2Inventory
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 44);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 55);
             // 
             // toolStripButton_exportUidPiiMap
             // 
@@ -106,7 +108,7 @@ namespace dp2Inventory
             this.toolStripButton_exportUidPiiMap.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_exportUidPiiMap.Image")));
             this.toolStripButton_exportUidPiiMap.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_exportUidPiiMap.Name = "toolStripButton_exportUidPiiMap";
-            this.toolStripButton_exportUidPiiMap.Size = new System.Drawing.Size(142, 32);
+            this.toolStripButton_exportUidPiiMap.Size = new System.Drawing.Size(228, 49);
             this.toolStripButton_exportUidPiiMap.Text = "导出对照关系";
             this.toolStripButton_exportUidPiiMap.Visible = false;
             this.toolStripButton_exportUidPiiMap.Click += new System.EventHandler(this.toolStripButton_exportUidPiiMap_Click);
@@ -118,7 +120,7 @@ namespace dp2Inventory
             this.toolStripButton_stop.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_stop.Image")));
             this.toolStripButton_stop.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_stop.Name = "toolStripButton_stop";
-            this.toolStripButton_stop.Size = new System.Drawing.Size(58, 38);
+            this.toolStripButton_stop.Size = new System.Drawing.Size(92, 49);
             this.toolStripButton_stop.Text = "停止";
             this.toolStripButton_stop.ToolTipText = "停止修改";
             this.toolStripButton_stop.Click += new System.EventHandler(this.toolStripButton_stop_Click);
@@ -126,7 +128,7 @@ namespace dp2Inventory
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 44);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 55);
             // 
             // toolStripButton_nextScan
             // 
@@ -135,7 +137,7 @@ namespace dp2Inventory
             this.toolStripButton_nextScan.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_nextScan.Image")));
             this.toolStripButton_nextScan.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_nextScan.Name = "toolStripButton_nextScan";
-            this.toolStripButton_nextScan.Size = new System.Drawing.Size(58, 38);
+            this.toolStripButton_nextScan.Size = new System.Drawing.Size(92, 49);
             this.toolStripButton_nextScan.Text = "跳过";
             this.toolStripButton_nextScan.ToolTipText = "跳过本次扫描";
             this.toolStripButton_nextScan.Click += new System.EventHandler(this.toolStripButton_nextScan_Click);
@@ -146,7 +148,7 @@ namespace dp2Inventory
             this.toolStripButton_clearList.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_clearList.Image")));
             this.toolStripButton_clearList.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_clearList.Name = "toolStripButton_clearList";
-            this.toolStripButton_clearList.Size = new System.Drawing.Size(100, 38);
+            this.toolStripButton_clearList.Size = new System.Drawing.Size(160, 49);
             this.toolStripButton_clearList.Text = "清空列表";
             this.toolStripButton_clearList.Click += new System.EventHandler(this.toolStripButton_clearList_Click);
             // 
@@ -156,7 +158,7 @@ namespace dp2Inventory
             this.toolStripButton_test_nextTags.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_test_nextTags.Image")));
             this.toolStripButton_test_nextTags.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_test_nextTags.Name = "toolStripButton_test_nextTags";
-            this.toolStripButton_test_nextTags.Size = new System.Drawing.Size(177, 32);
+            this.toolStripButton_test_nextTags.Size = new System.Drawing.Size(284, 49);
             this.toolStripButton_test_nextTags.Text = "(测试)下一组标签";
             this.toolStripButton_test_nextTags.Visible = false;
             this.toolStripButton_test_nextTags.Click += new System.EventHandler(this.toolStripButton_test_nextTags_Click);
@@ -167,27 +169,30 @@ namespace dp2Inventory
             this.toolStripButton_cancelSpeaking.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_cancelSpeaking.Image")));
             this.toolStripButton_cancelSpeaking.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_cancelSpeaking.Name = "toolStripButton_cancelSpeaking";
-            this.toolStripButton_cancelSpeaking.Size = new System.Drawing.Size(100, 38);
+            this.toolStripButton_cancelSpeaking.Size = new System.Drawing.Size(160, 49);
             this.toolStripButton_cancelSpeaking.Text = "中断语音";
             this.toolStripButton_cancelSpeaking.Click += new System.EventHandler(this.toolStripButton_cancelSpeaking_Click);
             // 
             // statusStrip1
             // 
+            this.statusStrip1.Font = new System.Drawing.Font("Microsoft YaHei UI", 10.71429F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.statusStrip1.ImageScalingSize = new System.Drawing.Size(28, 28);
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatusLabel1,
             this.toolStripStatusLabel_currentShelfNo,
-            this.toolStripStatusLabel2});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 539);
+            this.toolStripStatusLabel_rpanMode,
+            this.toolStripStatusLabel3});
+            this.statusStrip1.Location = new System.Drawing.Point(0, 642);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(951, 41);
+            this.statusStrip1.Padding = new System.Windows.Forms.Padding(1, 0, 17, 0);
+            this.statusStrip1.Size = new System.Drawing.Size(1124, 48);
             this.statusStrip1.TabIndex = 1;
             this.statusStrip1.Text = "statusStrip1";
             // 
             // toolStripStatusLabel1
             // 
             this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            this.toolStripStatusLabel1.Size = new System.Drawing.Size(706, 28);
+            this.toolStripStatusLabel1.Size = new System.Drawing.Size(881, 32);
             this.toolStripStatusLabel1.Spring = true;
             this.toolStripStatusLabel1.Text = "...";
             this.toolStripStatusLabel1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -201,6 +206,20 @@ namespace dp2Inventory
             this.toolStripStatusLabel_currentShelfNo.Overflow = System.Windows.Forms.ToolStripItemOverflow.Never;
             this.toolStripStatusLabel_currentShelfNo.Size = new System.Drawing.Size(21, 32);
             this.toolStripStatusLabel_currentShelfNo.Text = ".";
+            this.toolStripStatusLabel_currentShelfNo.ToolTipText = "当前层架标";
+            // 
+            // toolStripStatusLabel_rpanMode
+            // 
+            this.toolStripStatusLabel_rpanMode.Name = "toolStripStatusLabel_rpanMode";
+            this.toolStripStatusLabel_rpanMode.Size = new System.Drawing.Size(17, 32);
+            this.toolStripStatusLabel_rpanMode.Text = ".";
+            this.toolStripStatusLabel_rpanMode.ToolTipText = "天线类型";
+            // 
+            // toolStripStatusLabel3
+            // 
+            this.toolStripStatusLabel3.Name = "toolStripStatusLabel3";
+            this.toolStripStatusLabel3.Size = new System.Drawing.Size(17, 32);
+            this.toolStripStatusLabel3.Text = ".";
             // 
             // listView_tags
             // 
@@ -221,11 +240,13 @@ namespace dp2Inventory
             this.columnHeader_antenna,
             this.columnHeader_protocol});
             this.listView_tags.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.listView_tags.Font = new System.Drawing.Font("微软雅黑", 10.71429F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.listView_tags.FullRowSelect = true;
             this.listView_tags.HideSelection = false;
-            this.listView_tags.Location = new System.Drawing.Point(0, 44);
+            this.listView_tags.Location = new System.Drawing.Point(0, 55);
+            this.listView_tags.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.listView_tags.Name = "listView_tags";
-            this.listView_tags.Size = new System.Drawing.Size(951, 495);
+            this.listView_tags.Size = new System.Drawing.Size(1124, 587);
             this.listView_tags.TabIndex = 2;
             this.listView_tags.UseCompatibleStateImageBehavior = false;
             this.listView_tags.View = System.Windows.Forms.View.Details;
@@ -305,24 +326,20 @@ namespace dp2Inventory
             this.columnHeader_protocol.Text = "协议";
             this.columnHeader_protocol.Width = 120;
             // 
-            // toolStripStatusLabel2
-            // 
-            this.toolStripStatusLabel2.Name = "toolStripStatusLabel2";
-            this.toolStripStatusLabel2.Size = new System.Drawing.Size(17, 32);
-            this.toolStripStatusLabel2.Text = ".";
-            // 
             // InventoryDialog
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(13F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(951, 580);
+            this.ClientSize = new System.Drawing.Size(1124, 690);
             this.Controls.Add(this.listView_tags);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.toolStrip1);
+            this.Font = new System.Drawing.Font("宋体", 10.71429F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "InventoryDialog";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
-            this.Text = "修改标签";
+            this.Text = "盘点";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.InventoryDialog_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.InventoryDialog_FormClosed);
             this.Load += new System.EventHandler(this.InventoryDialog_Load);
@@ -366,6 +383,7 @@ namespace dp2Inventory
         private System.Windows.Forms.ColumnHeader columnHeader_currentLocation;
         private System.Windows.Forms.ColumnHeader columnHeader_location;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel_currentShelfNo;
-        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel2;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel_rpanMode;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel3;
     }
 }

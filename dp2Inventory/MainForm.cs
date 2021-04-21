@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -13,6 +14,7 @@ using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Core;
+using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Text;
 
@@ -168,15 +170,13 @@ bool bClickClose = false)
 
             LoadSettings();
 
-            /*
             Storeage.Initialize();
-
 
             _ = Task.Run(() =>
             {
                 LoadHistory();
             });
-            */
+
             _ = Task.Run(() =>
             {
                 var initial_result = LibraryChannelUtil.Initial();
@@ -199,6 +199,10 @@ bool bClickClose = false)
             _cancel?.Dispose();
 
             SaveSettings();
+
+            if (_historyChanged)
+                SaveHistory();
+            Storeage.Finish();
         }
 
         void LoadSettings()
@@ -334,7 +338,7 @@ bool bClickClose = false)
 
         const int COLUMN_UID = 0;
         const int COLUMN_PII = 1;
-        const int COLUMN_TILTE = 2;
+        const int COLUMN_TITLE = 2;
         const int COLUMN_CURRENTLOCATION = 3;
         const int COLUMN_LOCATION = 4;
         const int COLUMN_STATE = 5;
@@ -369,7 +373,7 @@ bool bClickClose = false)
             var entity = info.Entity;
             ListViewUtil.ChangeItemText(item, COLUMN_UID, entity.UID);
             ListViewUtil.ChangeItemText(item, COLUMN_PII, entity.PII);
-            ListViewUtil.ChangeItemText(item, COLUMN_TILTE, entity.Title);
+            ListViewUtil.ChangeItemText(item, COLUMN_TITLE, entity.Title);
             ListViewUtil.ChangeItemText(item, COLUMN_CURRENTLOCATION, entity.CurrentLocation);
             ListViewUtil.ChangeItemText(item, COLUMN_LOCATION, entity.Location + ":" + entity.ShelfNo);
             ListViewUtil.ChangeItemText(item, COLUMN_STATE, entity.State);
@@ -379,6 +383,194 @@ bool bClickClose = false)
         }
 
         #endregion
+
+        private void MenuItem_openUserFolder_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(ClientInfo.UserDir);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
+            }
+        }
+
+        private void MenuItem_openDataFolder_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(ClientInfo.DataDir);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
+            }
+        }
+
+        private void MenuItem_openProgramFolder_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(Environment.CurrentDirectory);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
+            }
+        }
+
+        private void MenuItem_userManual_Click(object sender, EventArgs e)
+        {
+            /*
+            string url = "https://github.com/DigitalPlatform/dp2/issues/764";
+
+            Process.Start(url);
+            */
+        }
+
+        private void MenuItem_resetSerialCode_Click(object sender, EventArgs e)
+        {
+            /*
+            // return:
+            //      -1  出错
+            //      0   正确
+            int nRet = FormClientInfo.VerifySerialCode(
+                "", // strTitle,
+                "", // strRequirFuncList,
+                "reset",
+                out string strError);
+            if (nRet == -1)
+                goto ERROR1;
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+            */
+        }
+
+        private void MenuItem_about_Click(object sender, EventArgs e)
+        {
+            var text = $"dp2Inventory 盘点 (版本号: {ClientInfo.ClientVersion})\r\n数字平台(北京)软件有限责任公司\r\nhttp://dp2003.com\r\n\r\n\r\n";
+            MessageDlg.Show(this, text, "关于");
+        }
+
+        private void MenuItem_saveToExcelFile_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            List<ListViewItem> items = new List<ListViewItem>();
+            foreach (ListViewItem item in this.listView_writeHistory.Items)
+            {
+                items.Add(item);
+            }
+
+            this.ShowMessage("正在导出选定的事项到 Excel 文件 ...");
+
+            this.EnableControls(false);
+            try
+            {
+                int nRet = ClosedXmlUtil.ExportToExcel(
+                    null,
+                    items,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+            }
+            finally
+            {
+                this.EnableControls(true);
+                this.ShowMessage(null);
+            }
+
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        void EnableControls(bool enable)
+        {
+            this.listView_writeHistory.Enabled = enable;
+        }
+
+        private void MenuItem_clearHistory_all_Click(object sender, EventArgs e)
+        {
+            DialogResult result = MessageBox.Show(this,
+$"确实要清除全部 {this.listView_writeHistory.Items.Count} 个历史事项?",
+"dp2Inventory",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+            if (result != DialogResult.Yes)
+                return;
+            this.listView_writeHistory.Items.Clear();
+            _historyChanged = true;
+        }
+
+        private void MenuItem_clearHistory_selected_Click(object sender, EventArgs e)
+        {
+            DialogResult result = MessageBox.Show(this,
+$"确实要清除所选的 {this.listView_writeHistory.SelectedItems.Count} 个历史事项?",
+"dp2Inventory",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+            if (result != DialogResult.Yes)
+                return;
+            foreach (ListViewItem item in this.listView_writeHistory.SelectedItems)
+            {
+                this.listView_writeHistory.Items.Remove(item);
+            }
+            _historyChanged = true;
+        }
+
+        void LoadHistory()
+        {
+            var items = Storeage.LoadItems();
+            this.Invoke((Action)(() =>
+            {
+                foreach (var history in items)
+                {
+                    ListViewItem item = new ListViewItem();
+                    this.listView_writeHistory.Items.Add(item);
+                    item.EnsureVisible();
+                    ListViewUtil.ChangeItemText(item, COLUMN_UID, history.UID);
+                    ListViewUtil.ChangeItemText(item, COLUMN_PII, history.PII);
+                    ListViewUtil.ChangeItemText(item, COLUMN_TITLE, history.Title);
+                    ListViewUtil.ChangeItemText(item, COLUMN_CURRENTLOCATION, history.CurrentLocation);
+                    ListViewUtil.ChangeItemText(item, COLUMN_LOCATION, history.Location);
+                    ListViewUtil.ChangeItemText(item, COLUMN_STATE, history.State);
+
+
+                    ListViewUtil.ChangeItemText(item, COLUMN_TOU, history.TOU);
+                    ListViewUtil.ChangeItemText(item, COLUMN_OI, history.OI);
+                    ListViewUtil.ChangeItemText(item, COLUMN_WRITETIME, history.WriteTime);
+                }
+            }));
+        }
+
+        void SaveHistory()
+        {
+            List<HistoryItem> items = new List<HistoryItem>();
+            int i = 0;
+            foreach (ListViewItem item in this.listView_writeHistory.Items)
+            {
+                HistoryItem history = new HistoryItem();
+                history.Id = i + 1;
+                history.UID = ListViewUtil.GetItemText(item, COLUMN_UID);
+                history.PII = ListViewUtil.GetItemText(item, COLUMN_PII);
+                history.Title = ListViewUtil.GetItemText(item, COLUMN_TITLE);
+                history.CurrentLocation = ListViewUtil.GetItemText(item, COLUMN_CURRENTLOCATION);
+                history.Location = ListViewUtil.GetItemText(item, COLUMN_LOCATION);
+                history.State = ListViewUtil.GetItemText(item, COLUMN_STATE);
+                history.TOU = ListViewUtil.GetItemText(item, COLUMN_TOU);
+                history.OI = ListViewUtil.GetItemText(item, COLUMN_OI);
+                history.WriteTime = ListViewUtil.GetItemText(item, COLUMN_WRITETIME);
+                items.Add(history);
+            }
+
+            Storeage.SaveItems(items);
+        }
+
     }
 
     public delegate void WriteCompleteEventHandler(object sender,
