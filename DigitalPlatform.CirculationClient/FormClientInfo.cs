@@ -463,11 +463,29 @@ namespace DigitalPlatform.CirculationClient
             }
         }
 
+        /*
         public static void CancelSpeaking()
         {
             m_speech.SpeakAsyncCancelAll();
         }
+        */
 
+        // 2021/4/21
+        // 中断正在播报的语音
+        public static void CancelSpeaking()
+        {
+            MainForm.BeginInvoke((Action)(() =>
+            {
+                try
+                {
+                    m_speech.SpeakAsyncCancelAll();
+                }
+                catch (System.Runtime.InteropServices.COMException ex)
+                {
+                    WriteErrorLog($"FormClientInfo::CancelSpeaking() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                }
+            }));
+        }
 
         public static bool SpeakOn
         {

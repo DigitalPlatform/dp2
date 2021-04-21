@@ -21,6 +21,9 @@ using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using static dp2Inventory.LibraryChannelUtil;
+using Newtonsoft.Json;
+using System.Net.Http;
+using dp2Inventory.InventoryAPI;
 
 namespace dp2Inventory
 {
@@ -366,7 +369,8 @@ namespace dp2Inventory
                  * */
 
                 // 修改 currentLocation 和 location
-                if (info.IsTaskCompleted("setLocation") == false
+                if (StringUtil.IsInList("setLocation,setCurrentLocation", actionMode)
+                    && info.IsTaskCompleted("setLocation") == false
                     && info.IsTaskCompleted("getItemXml") == true   // 2021/1/26
                     && string.IsNullOrEmpty(info.ItemXml) == false)
                 {
@@ -405,6 +409,14 @@ namespace dp2Inventory
                             info.BatchNo,
                             info.UserName,
                             InventoryDialog.ActionMode);
+
+                    /*
+#if AUTO_TEST
+                    request_result.Value = -1;
+                    request_result.ErrorInfo = "测试 setLocation 请求错误";
+#endif
+                    */
+
                     // 两个动作当作一个 setLocation 来识别
                     info.SetTaskInfo("setLocation", request_result);
                     if (request_result.Value == -1)
@@ -421,27 +433,37 @@ namespace dp2Inventory
                         // TODO: info.ItemXml 是否需要被改变?
                         entity.BuildError("setLocation", null, null);
                         succeed_count++;
+
+                        // 立即刷新当前架位和永久架位的显示
+                        InventoryDialog.RefreshLocations(info);
                     }
 
-#if NO
                     // 2021/3/24
                     // 上传
-                    var upload_result = await RequestInventoryUploadAsync(
-                        info.ItemXml,
-                        entity.UID,
-                        entity.GetOiPii(),
-    StringUtil.IsInList("setCurrentLocation", actionMode) ? info.TargetCurrentLocation : null,
-    StringUtil.IsInList("setLocation", actionMode) ? info.TargetLocation : null,
-    StringUtil.IsInList("setLocation", actionMode) ? info.TargetShelfNo : null,
-    info.BatchNo,
-    info.UserName,
-    PageInventory.ActionMode);
-                    if (upload_result.Value == -1)
+                    if (StringUtil.IsInList("setLocation,setCurrentLocation", actionMode)
+                        && info.IsTaskCompleted("setLocation"))
                     {
-                        App.CurrentApp.SpeakSequence($"{entity.PII} 上传请求出错");
-                        entity.BuildError("setLocation", upload_result.ErrorInfo, upload_result.ErrorCode);
+                        var upload_result = await RequestInventoryUploadAsync(
+                            info.ItemXml,
+                            entity.UID,
+                            entity.GetOiPii(),
+        StringUtil.IsInList("setCurrentLocation", actionMode) ? info.TargetCurrentLocation : null,
+        StringUtil.IsInList("setLocation", actionMode) ? info.TargetLocation : null,
+        StringUtil.IsInList("setLocation", actionMode) ? info.TargetShelfNo : null,
+        info.BatchNo,
+        info.UserName,
+        InventoryDialog.ActionMode);
+                        if (upload_result.Value == -1)
+                        {
+                            SpeakSequence($"{entity.PII} 上传请求出错");
+                            entity.BuildError("upload", upload_result.ErrorInfo, upload_result.ErrorCode);
+                        }
+                        else
+                        {
+                            entity.BuildError("upload", null, null);
+                            succeed_count++;
+                        }
                     }
-#endif
                 }
 
                 // SetUID 和 Inventory 至少成功过一次，则发出成功的响声
@@ -692,6 +714,7 @@ namespace dp2Inventory
                 if (result.Value != -1)
                 {
                     // NewTagList2.SetEasData(uid, enable);
+                    InventoryDialog.ClearCacheTagTable(uid);
                 }
                 return result;
             }
@@ -858,30 +881,6 @@ namespace dp2Inventory
                 List = StringUtil.SplitList(attr.Value)
             };
         }
-
-        public class UploadInterfaceInfo
-        {
-            public string BaseUrl { get; set; }
-            public string Protocol { get; set; }
-        }
-
-        // 获得 inventory.xml 中 uploadInterface 参数
-        public static UploadInterfaceInfo GetUploadInterface()
-        {
-            var dom = GetInventoryDom();
-            if (dom == null)
-                return null;
-            var uploadInterface = dom.DocumentElement.SelectSingleNode("uploadInterface") as XmlElement;
-            if (uploadInterface == null)
-                return null;
-            return new UploadInterfaceInfo
-            {
-                BaseUrl = uploadInterface.GetAttribute("baseUrl"),
-                Protocol = uploadInterface.GetAttribute("protocol")
-            };
-        }
-
-
 
         // 从本地数据库中装载 uid 对照表
         public static async Task<NormalResult> LoadUidTableAsync(Hashtable uid_table,
@@ -1939,6 +1938,166 @@ namespace dp2Inventory
             return new RequestInventoryResult { ItemXml = get_result.ItemXml };
         }
 
+        #region 上传接口
 
+        public class UploadInterfaceInfo
+        {
+            public string BaseUrl { get; set; }
+            public string Protocol { get; set; }
+        }
+
+        // 获得 inventory.xml 中 uploadInterface 参数
+        public static UploadInterfaceInfo GetUploadInterface()
+        {
+            var dom = GetInventoryDom();
+            if (dom == null)
+                return null;
+            var uploadInterface = dom.DocumentElement.SelectSingleNode("uploadInterface") as XmlElement;
+            if (uploadInterface == null)
+                return null;
+            return new UploadInterfaceInfo
+            {
+                BaseUrl = uploadInterface.GetAttribute("baseUrl"),
+                Protocol = uploadInterface.GetAttribute("protocol")
+            };
+        }
+
+        static UploadInterfaceInfo _uploadInterfaceInfo = null;
+
+        // 利用 uploadInterface 发出盘点请求
+        public static async Task<RequestInventoryResult> RequestInventoryUploadAsync(
+            string item_xml,
+            string uid,
+            string oi_pii,
+            string currentLocationString,
+            string location,
+            string shelfNo,
+            string batchNo,
+            string strUserName,
+            string style)
+        {
+            if (currentLocationString == null && location == null)
+                return new RequestInventoryResult { Value = 0 };    // 没有必要修改
+
+            if (_uploadInterfaceInfo == null)
+            {
+                _uploadInterfaceInfo = GetUploadInterface();
+                if (_uploadInterfaceInfo == null)
+                {
+                    _uploadInterfaceInfo = new UploadInterfaceInfo { BaseUrl = null };
+                }
+            }
+
+            if (_uploadInterfaceInfo.BaseUrl == null)
+                return new RequestInventoryResult
+                {
+                    Value = 0,
+                    ErrorInfo = "没有定义 uploadInterface 接口"
+                };
+
+            // currentLocation 元素内容。格式为 馆藏地:架号
+            string currentLocation = null;
+            string currentShelfNo = null;
+
+            if (currentLocationString != null)
+            {
+                // 分解 currentLocation 字符串
+                var parts = StringUtil.ParseTwoPart(currentLocationString, ":");
+                currentLocation = parts[0];
+                currentShelfNo = parts[1];
+            }
+
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                if (string.IsNullOrEmpty(item_xml) == false)
+                    dom.LoadXml(item_xml);
+                else
+                    dom.LoadXml("<root />");
+            }
+            catch (Exception ex)
+            {
+                return new RequestInventoryResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"册记录 XML 解析异常: {ex.Message}"
+                };
+            }
+
+            string title = DomUtil.GetElementText(dom.DocumentElement, "title");
+
+            UploadItem record = new UploadItem
+            {
+                title = title,
+                uii = oi_pii,
+                barcode = InventoryDialog.GetPiiPart(oi_pii),
+                batchNo = batchNo,
+                shelfNo = shelfNo,
+                currentShelfNo = currentShelfNo,
+                location = location,
+                currentLocation = currentLocation,
+                operatorPerson = strUserName,
+                operatorTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.ffff")
+            };
+            string data = JsonConvert.SerializeObject(record, Newtonsoft.Json.Formatting.Indented);
+
+            var item = new Item
+            {
+                Action = "update",
+                Format = "json",
+                Data = data,
+            };
+            var request = new SetItemsRequest { Items = new List<Item>() { item } };
+
+            try
+            {
+                using (var httpClient = new HttpClient())
+                {
+                    httpClient.BaseAddress = new Uri(_uploadInterfaceInfo.BaseUrl);
+                    var client = new InventoryAPIV1Client(httpClient);
+                    var result = await client.SetItemsAsync(request);
+                    if (result.Result == null)
+                        return new RequestInventoryResult
+                        {
+                            Value = -1,
+                            ErrorInfo = "upload error: result.Result == null"
+                        };
+                    // 注: result.Value 如果 >=0，一定是完全成功。如果是部分成功，.Value 应该是 -1
+                    if (result.Result.Value < 0)
+                        return new RequestInventoryResult
+                        {
+                            Value = (int)result.Result.Value,
+                            ErrorInfo = result.Result.ErrorInfo,
+                            ErrorCode = result.Result.ErrorCode
+                        };
+                    return new RequestInventoryResult { ItemXml = null };
+                }
+            }
+            catch (Exception ex)
+            {
+                ClientInfo.WriteErrorLog($"RequestInventoryUploadAsync() 出现异常：{ExceptionUtil.GetDebugText(ex)}");
+                return new RequestInventoryResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"RequestInventoryUploadAsync() 出现异常：{ex.Message}"
+                };
+            }
+        }
+
+        public class UploadItem
+        {
+            public string title { get; set; }
+            public string batchNo { get; set; }
+            public string uii { get; set; }     // 格式为 OI.PII
+            public string barcode { get; set; } // PII
+            public string location { get; set; }
+            public string shelfNo { get; set; }
+            public string currentLocation { get; set; }
+            public string currentShelfNo { get; set; }
+            public string operatorPerson { get; set; }
+            public string operatorTime { get; set; }    // 时间格式为 "yyyy-MM-dd HH:mm:ss.ffff"
+        }
+
+        #endregion
     }
 }

@@ -1059,6 +1059,27 @@ namespace DigitalPlatform.LibraryServer
 || strAction == "changereaderbarcode"
 || strAction == "move")
                 {
+                    // 2021/4/17
+                    // 如果前端发来的是一个空的记录路径，则自动映射为当前用户管辖的第一个读者库名
+                    if (strAction == "new"
+                        && string.IsNullOrEmpty(strRecPath))
+                    {
+                        // 当路径整个为空的时候，自动选用第一个读者库
+                        // parameters:
+                        //      libraryCodeList 当前用户管辖的一个或者多个馆代码
+                        nRet = GetFirstReaderDbName(
+                            app,
+                            sessioninfo.LibraryCodeList,
+                            out string first_dbname,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            strError = $"{strError}， 因此无法新创建读者记录";
+                            goto ERROR1;
+                        }
+                        strRecPath = first_dbname + "/?";
+                    }
+
                     // 注：要在 strRecPath 决定后再进行此调用
                     // return:
                     //      -3  条码号错误
@@ -1248,6 +1269,7 @@ namespace DigitalPlatform.LibraryServer
                         // 当路径整个为空的时候，自动选用第一个读者库
                         if (String.IsNullOrEmpty(strReaderDbName) == true)
                         {
+#if NO
                             if (app.ReaderDbs.Count == 0)
                             {
                                 strError = "dp2Library尚未定义读者库， 因此无法新创建读者记录。";
@@ -1264,6 +1286,20 @@ namespace DigitalPlatform.LibraryServer
                                 strReaderDbName = "";
 
                                 strError = "当前用户没有管辖任何读者库， 因此无法新创建读者记录。";
+                                goto ERROR1;
+                            }
+#endif
+                            // 当路径整个为空的时候，自动选用第一个读者库
+                            // parameters:
+                            //      libraryCodeList 当前用户管辖的一个或者多个馆代码
+                            nRet = GetFirstReaderDbName(
+                                app,
+                                sessioninfo.LibraryCodeList,
+                                out strReaderDbName,
+                                out strError);
+                            if (nRet == -1)
+                            {
+                                strError = $"{strError}， 因此无法新创建读者记录";
                                 goto ERROR1;
                             }
                         }
@@ -1564,7 +1600,41 @@ strLibraryCode);    // 读者所在的馆代码
             return result;
         }
 
-        #region SetReaderInfo() 下级函数
+#region SetReaderInfo() 下级函数
+
+        // 当路径整个为空的时候，自动选用第一个读者库
+        // parameters:
+        //      libraryCodeList 当前用户管辖的一个或者多个馆代码
+        static int GetFirstReaderDbName(
+            LibraryApplication app,
+            string libraryCodeList,
+            out string strReaderDbName,
+            out string strError)
+        {
+            strReaderDbName = "";
+            strError = "";
+
+            if (app.ReaderDbs.Count == 0)
+            {
+                strError = "dp2Library尚未定义读者库";
+                return -1;
+            }
+
+            // 选用当前用户能管辖的第一个读者库
+            // strReaderDbName = app.ReaderDbs[0].DbName;
+            List<string> dbnames = app.GetCurrentReaderDbNameList(libraryCodeList);
+            if (dbnames.Count > 0)
+                strReaderDbName = dbnames[0];
+            else
+            {
+                strReaderDbName = "";
+
+                strError = "当前用户没有管辖任何读者库";
+                return -1;
+            }
+
+            return 0;
+        }
 
         // 检查一个读者记录的读者类型是否符合值列表要求
         // parameters:
@@ -2920,7 +2990,7 @@ root, strLibraryCode);
         }
 
 
-        #endregion
+#endregion
 
 
         // 为读者XML添加附加信息

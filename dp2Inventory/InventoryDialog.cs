@@ -27,7 +27,7 @@ namespace dp2Inventory
 {
     public partial class InventoryDialog : Form
     {
-        // public event WriteCompleteEventHandler WriteComplete = null;
+        public event WriteCompleteEventHandler WriteComplete = null;
 
         public InventoryDialog()
         {
@@ -47,25 +47,33 @@ namespace dp2Inventory
 
                 }
             });
+
+#if AUTO_TEST
+            toolStripButton_test_nextTags.Visible = true;
+#endif
         }
 
-        private void ModifyDialog_Load(object sender, EventArgs e)
+        private void InventoryDialog_Load(object sender, EventArgs e)
         {
 
         }
 
-        private void ModifyDialog_FormClosing(object sender, FormClosingEventArgs e)
+        private void InventoryDialog_FormClosing(object sender, FormClosingEventArgs e)
         {
             _cancel?.Cancel();
 
         }
 
-        private void ModifyDialog_FormClosed(object sender, FormClosedEventArgs e)
+        private void InventoryDialog_FormClosed(object sender, FormClosedEventArgs e)
         {
-
+#if AUTO_TEST
+            FinishAutoTest();
+#endif
         }
 
         ActionInfo _action = null;
+
+        bool _slowMode = false;
 
         // 开始修改
         private async void toolStripButton_begin_Click(object sender, EventArgs e)
@@ -88,7 +96,7 @@ namespace dp2Inventory
 
                 CurrentLocation = dlg.LocationString;
                 CurrentBatchNo = dlg.BatchNo;
-                // slow_mode = dlg.SlowMode;
+                _slowMode = dlg.SlowMode;
 
                 /*
                 _action = new ActionInfo
@@ -106,65 +114,71 @@ namespace dp2Inventory
             }
 
             // 装入 UID --> UII 对照关系
-            await Task.Run(async () =>
+            if (_slowMode == false)
             {
-                FileDownloadDialog progress = null;
-                this.Invoke(new Action(() =>
-                {
-                    progress = new FileDownloadDialog();
-                    progress.Show(this);
-                }));
-                try
-                {
-                    /*
-                    progress.SetMessage("正在获取 dp2library 服务器配置");
-                    var initial_result = LibraryChannelUtil.Initial();
-                    if (initial_result.Value == -1)
-                    {
-                        strError = $"获得 dp2library 服务器配置失败: {initial_result.ErrorInfo}";
-                        return;
-                    }
-                    */
+                strError = "";
 
-                    progress.SetMessage("正在获取 UID --> UII 对照关系");
-
-                    Hashtable uid_table = new Hashtable();
-                    NormalResult result = null;
-                    if (DataModel.Protocol == "sip")
-                        result = await DataModel.LoadUidTableAsync(uid_table,
-                            (text) =>
-                            {
-                                progress.SetMessage(text);
-                            },
-                            _cancel.Token);
-                    else
-                        result = LibraryChannelUtil.DownloadUidTable(
-                            null,
-                            uid_table,
-                            (text) =>
-                            {
-                                progress.SetMessage(text);
-                            },
-                            _cancel.Token);
-                    DataModel.SetUidTable(uid_table);
-                }
-                catch (Exception ex)
+                await Task.Run(async () =>
                 {
-                    ClientInfo.WriteErrorLog($"准备册记录过程出现异常: {ExceptionUtil.GetDebugText(ex)}");
-                    strError = ex.Message;
-                    return;
-                }
-                finally
-                {
+                    FileDownloadDialog progress = null;
                     this.Invoke(new Action(() =>
                     {
-                        progress.Close();
+                        progress = new FileDownloadDialog();
+                        progress.Font = this.Font;
+                        progress.Text = "正在获取 UID --> UII 对照关系";
+                        progress.Show(this);
                     }));
-                }
-            });
+                    try
+                    {
+                        /*
+                        progress.SetMessage("正在获取 dp2library 服务器配置");
+                        var initial_result = LibraryChannelUtil.Initial();
+                        if (initial_result.Value == -1)
+                        {
+                            strError = $"获得 dp2library 服务器配置失败: {initial_result.ErrorInfo}";
+                            return;
+                        }
+                        */
 
-            if (string.IsNullOrEmpty(strError) == false)
-                goto ERROR1;
+                        progress.SetMessage("正在获取 UID --> UII 对照关系");
+
+                        Hashtable uid_table = new Hashtable();
+                        NormalResult result = null;
+                        if (DataModel.Protocol == "sip")
+                            result = await DataModel.LoadUidTableAsync(uid_table,
+                                (text) =>
+                                {
+                                    progress.SetMessage(text);
+                                },
+                                _cancel.Token);
+                        else
+                            result = LibraryChannelUtil.DownloadUidTable(
+                                null,
+                                uid_table,
+                                (text) =>
+                                {
+                                    progress.SetMessage(text);
+                                },
+                                _cancel.Token);
+                        DataModel.SetUidTable(uid_table);
+                    }
+                    catch (Exception ex)
+                    {
+                        ClientInfo.WriteErrorLog($"准备册记录过程出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                        strError = ex.Message;
+                        return;
+                    }
+                    finally
+                    {
+                        this.Invoke(new Action(() =>
+                        {
+                            progress.Close();
+                        }));
+                    }
+                });
+                if (string.IsNullOrEmpty(strError) == false)
+                    goto ERROR1;
+            }
 
             // TODO: 开始前用一个概要对话框显示确认一下本次批处理要进行的修改操作
             _cancel?.Dispose();
@@ -176,7 +190,7 @@ namespace dp2Inventory
         }
 
 #if AUTO_TEST
-        List<SimuTagInfo> _simuTagInfos = null;
+        List<SimuTagInfo> _simuTagInfos = new List<SimuTagInfo>();
 
         // 初始化自动测试
         NormalResult InitialAutoTest(CancellationToken token)
@@ -213,12 +227,22 @@ namespace dp2Inventory
                 }
             }
 
+            // 首次初始化标签
+            _simuTagIndex = 0;
+            PrepareSimuRfidTag();
+
             return new NormalResult();
         }
 #endif 
 
         private void toolStripButton_stop_Click(object sender, EventArgs e)
         {
+            {
+                var button = sender as ToolStripButton;
+                var cancel = button.Tag as CancellationTokenSource;
+                cancel?.Cancel();
+            }
+
             _cancel?.Cancel();
         }
 
@@ -322,6 +346,13 @@ namespace dp2Inventory
             ClearProcessedTable();
             ClearCacheTagTable(null);
             InitialRfidManager(DataModel.RfidCenterUrl);
+
+            {
+                // 清除当前层架标位置
+                CurrentShelfNo = null;
+                // 更新状态行显示
+                SetCurrentShelfNoLabel(CurrentShelfNo);
+            }
             _ = Task.Factory.StartNew(
                 async () =>
                 {
@@ -341,13 +372,15 @@ namespace dp2Inventory
                                 continue;
                             }
 
+                            /*
 #if AUTO_TEST
                             {
-                                var test_result = PrepareRfidTag();
+                                var test_result = PrepareSimuRfidTag();
                                 if (test_result.Value == -1)
                                     throw new Exception(test_result.ErrorInfo);
                             }
 #endif
+                            */
 
                             // 语音提示倒计时开始盘点
                             await SpeakCounter(token);
@@ -465,6 +498,7 @@ namespace dp2Inventory
                                 {
                                     cancel?.Cancel();
 
+                                    FormClientInfo.CancelSpeaking();
                                     EnableSkipButton(false);
 
                                     if (result.Results.Count == 0)
@@ -532,22 +566,61 @@ namespace dp2Inventory
         static int _simuTagIndex = 0;
 
         // 准备模拟 RFID 标签
-        NormalResult PrepareRfidTag()
+        NormalResult PrepareSimuRfidTag()
         {
-            List<TagInfo> tags = new List<TagInfo>();
-            // 对当前每个柜门，都给填充一定数量的标签
-            int index = 0;
+            // 清除全部标签
+            {
+                var result = RfidManager.SimuTagInfo("removeTag", null, "");
+                if (result.Value == -1)
+                {
+                    this.ShowMessageBox("simuReader", result.ErrorInfo);
+                    return result;
+                }
+            }
 
-            for (int i = 0; i < 10/*_simuTagInfos.Count*/; i++)
+            int index = _simuTagIndex;
+
+            List<TagInfo> tags = new List<TagInfo>();
+
+            // 插入一个层架标
+            if (index == 1)
+            {
+                LogicChip chip = new LogicChip();
+                chip.NewElement(ElementOID.PII, "0909");
+                chip.NewElement(ElementOID.TU, "30");
+                chip.NewElement(ElementOID.OwnerInstitution, "testoi").WillLock = true;
+
+                var bytes = chip.GetBytes(4 * 20,
+4,
+GetBytesStyle.None,
+out string block_map);
+
+                var tag = new TagInfo
+                {
+                    ReaderName = "RL8600",
+                    AntennaID = 1,
+
+                    BlockSize = 4,
+                    MaxBlockCount = 28,
+                    Bytes = bytes
+                };
+
+                tags.Add(tag);
+            }
+
+            // 对当前每个柜门，都给填充一定数量的标签
+            // int index = 0;
+            int offset = _simuTagIndex * 10;
+            for (int i = offset; i < offset + 10/*_simuTagInfos.Count*/; i++)
             {
                 LogicChip chip = new LogicChip();
                 SimuTagInfo info = null;
-                if (index < _simuTagInfos.Count)
-                    info = _simuTagInfos[index];
+                if (i < _simuTagInfos.Count)
+                    info = _simuTagInfos[i];
                 else
                     info = new SimuTagInfo
                     {
-                        PII = $"B{(index + 1).ToString().PadLeft(8, '0')}",
+                        PII = $"B{(i + 1).ToString().PadLeft(8, '0')}",
                         AccessNo = "?",
                         OI = "testoi"
                     };
@@ -570,7 +643,6 @@ out string block_map);
                 };
 
                 tags.Add(tag);
-                index++;
             }
 
             {
@@ -582,9 +654,14 @@ out string block_map);
                 }
             }
 
-
             _simuTagIndex++;
             return new NormalResult();
+        }
+
+        // 清除全部标签
+        NormalResult FinishAutoTest()
+        {
+            return RfidManager.SimuTagInfo("removeTag", null, "");
         }
 #endif
 
@@ -594,6 +671,9 @@ out string block_map);
             {
                 this.toolStripButton_nextScan.Tag = cancel;
                 this.toolStripButton_nextScan.Enabled = enable;
+
+                // 2021/4/21
+                this.toolStripButton_stop.Tag = cancel;
             }));
         }
 
@@ -661,6 +741,7 @@ out string block_map);
             dialog.Visible = false;
             if (e.CloseReason == CloseReason.UserClosing)
                 e.Cancel = true;
+
         }
 
         public void ShowMessageBox(string type, string text)
@@ -692,14 +773,18 @@ out string block_map);
         const int COLUMN_UID = 0;
         const int COLUMN_ERRORINFO = 1;
         const int COLUMN_PII = 2;
-        const int COLUMN_TU = 3;
-        const int COLUMN_OI = 4;
-        const int COLUMN_AOI = 5;
-        const int COLUMN_EAS = 6;
-        const int COLUMN_AFI = 7;
-        const int COLUMN_READERNAME = 8;
-        const int COLUMN_ANTENNA = 9;
-        const int COLUMN_PROTOCOL = 10;
+        const int COLUMN_TITLE = 3;
+        const int COLUMN_CURRENTLOCATION = 4;
+        const int COLUMN_LOCATION = 5;
+        const int COLUMN_STATE = 6;
+        const int COLUMN_TU = 7;
+        const int COLUMN_OI = 8;
+        const int COLUMN_AOI = 9;
+        const int COLUMN_EAS = 10;
+        const int COLUMN_AFI = 11;
+        const int COLUMN_READERNAME = 12;
+        const int COLUMN_ANTENNA = 13;
+        const int COLUMN_PROTOCOL = 14;
 
         class FillResult : NormalResult
         {
@@ -836,6 +921,8 @@ out string block_map);
             // DataModel.IncApiCount();
             try
             {
+                bool noCurrentShelfNoSpeaked = false;
+
                 int process_count = 0;
                 int error_count = 0;
                 int filtered_count = 0;
@@ -983,8 +1070,6 @@ out string block_map);
                     // 10 图书; 80 读者证; 30 层架标
                     if (tou != null && tou.StartsWith("3"))
                     {
-                        SwitchCurrentShelfNo(entity);
-
                         {
                             iteminfo.State = "succeed";
                             this.Invoke((Action)(() =>
@@ -994,6 +1079,8 @@ out string block_map);
                                 SetItemColor(item, "changed");
                             }));
                         }
+
+                        await SwitchCurrentShelfNoAsync(entity, token);
                     }
                     else
                     {
@@ -1003,10 +1090,37 @@ out string block_map);
                             && set_result.ErrorCode == "noCurrentShelfNo")
                         {
                             SetErrorInfo(item, "请先扫层架标");
+                            if (noCurrentShelfNoSpeaked == false)
+                            {
+                                await FormClientInfo.Speaking("请先扫层架标，再扫图书", false, token);
+                                noCurrentShelfNoSpeaked = true;
+                            }
+
+                            /*
+                            // 作为致命错误返回
+                            return new ProcessResult
+                            {
+                                Value = -1,
+                                ErrorInfo = "请先扫层架标。处理中断",
+                                ErrorCode = "noCurrentShelfNo"
+                            };
+                            */
                             continue;
                         }
 
+                        // string old_title = process_info.Entity?.Title;
+                        process_info.ListViewItem = item;
+
                         await ProcessAsync(process_info);
+
+                        /*
+                        // 更新题名显示
+                        if (old_title != process_info.Entity?.Title)
+                            this.Invoke((Action)(() =>
+                            {
+                                ListViewUtil.ChangeItemText(item, COLUMN_TITLE, process_info.Entity?.Title);
+                            }));
+                        */
 
                         if (process_info.IsAllTaskCompleted())
                         {
@@ -1020,11 +1134,16 @@ out string block_map);
 
                             AddToProcessed(iteminfo.Tag.UID, iteminfo);
                             process_count++;
+
+                            // 加入操作历史
+                            WriteComplete?.Invoke(this, new WriteCompleteventArgs { Info = process_info });
                         }
                         else
                         {
+
                             SetErrorInfo(item, entity.Error);
-                            error_count++;
+                            if (NeedRetry(entity.ErrorItems))
+                                error_count++;
                         }
                     }
 #if REMOVED
@@ -1074,6 +1193,14 @@ out string block_map);
             {
                 // DataModel.DecApiCount();
             }
+        }
+
+        // 根据当前的错误事项判断，是否需要重试操作
+        // 一般来说请求 dp2library 服务器的失败，不需要重试；
+        // 读写标签过程中的出错需要重试(重试前操作者会调整天线位置)
+        static bool NeedRetry(List<ErrorItem> error_items)
+        {
+            return true;
         }
 
         /*
@@ -1138,11 +1265,13 @@ out string block_map);
                     result.Value = -1;
                     result.ErrorInfo = "获得册信息出错";
                     */
-                    info.SetTaskInfo("getItemXml", result);
                     if (result.Value == -1
                         || result.Value == 0
                         || result.ErrorCode == "NotFound")
                     {
+                        result.Value = -1;  // 注意 TaskCompleted 是按照 .Value != -1 来计算的，所以 == 0 要变为 -1 才行
+                        info.SetTaskInfo("getItemXml", result);
+
                         // 2021/1/19
                         FormClientInfo.Speak($"{entity.PII} 无法获得册信息", false, false);
 
@@ -1150,10 +1279,25 @@ out string block_map);
                     }
                     else
                     {
+                        info.SetTaskInfo("getItemXml", result);
+
                         entity.BuildError("getItemXml", null, null);
 
                         if (string.IsNullOrEmpty(result.Title) == false)
+                        {
                             entity.Title = GetCaption(result.Title);
+                        }
+
+                        // 立即刷新 ListViewItem 显示
+                        info.ListViewItem.ListView.Invoke((Action)(() =>
+                        {
+                            ListViewUtil.ChangeItemText(info.ListViewItem, COLUMN_TITLE, entity.Title);
+                            ListViewUtil.ChangeItemText(info.ListViewItem, COLUMN_STATE, entity.State);
+                        }));
+
+                        // 立即刷新当前架位和永久架位的显示
+                        InventoryDialog.RefreshLocations(info);
+
                         if (string.IsNullOrEmpty(result.ItemXml) == false)
                         {
                             if (info != null)
@@ -1182,6 +1326,18 @@ out string block_map);
                 info.State = "";
             }
 
+        }
+
+        public static void RefreshLocations(ProcessInfo info)
+        {
+            var entity = info.Entity;
+
+            // 立即刷新 ListViewItem 显示
+            info.ListViewItem.ListView.Invoke((Action)(() =>
+            {
+                ListViewUtil.ChangeItemText(info.ListViewItem, COLUMN_CURRENTLOCATION, entity.CurrentLocation);
+                ListViewUtil.ChangeItemText(info.ListViewItem, COLUMN_LOCATION, entity.Location + ":" + entity.ShelfNo);
+            }));
         }
 
         public static string GetCaption(string text)
@@ -1795,9 +1951,9 @@ bool eas)
 
         // 标签信息缓存
         // uid --> TagInfo
-        Hashtable _tagTable = new Hashtable();
+        static Hashtable _tagTable = new Hashtable();
 
-        public TagInfo GetCachedTagInfo(string uid)
+        public static TagInfo GetCachedTagInfo(string uid)
         {
             lock (_tagTable.SyncRoot)
             {
@@ -1805,7 +1961,7 @@ bool eas)
             }
         }
 
-        public void SetCacheTagInfo(string uid, TagInfo taginfo)
+        public static void SetCacheTagInfo(string uid, TagInfo taginfo)
         {
             lock (_tagTable.SyncRoot)
             {
@@ -1816,7 +1972,7 @@ bool eas)
             }
         }
 
-        public void ClearCacheTagTable(string uid)
+        public static void ClearCacheTagTable(string uid)
         {
             lock (_tagTable.SyncRoot)
             {
@@ -1881,6 +2037,15 @@ bool eas)
         // 当前层架标
         public static string CurrentShelfNo { get; set; }
 
+        // 状态行显示
+        void SetCurrentShelfNoLabel(string text)
+        {
+            this.Invoke(new Action(() =>
+            {
+                toolStripStatusLabel_currentShelfNo.Text = "当前层架 " + text;
+            }));
+        }
+
         // 当前馆藏地。例如 “海淀分馆/阅览室”
         public static string CurrentLocation { get; set; }
 
@@ -1888,12 +2053,15 @@ bool eas)
         public static string CurrentBatchNo { get; set; }
 
         // 切换当前层架标
-        void SwitchCurrentShelfNo(Entity entity)
+        async Task SwitchCurrentShelfNoAsync(Entity entity, 
+            CancellationToken token)
         {
             if (string.IsNullOrEmpty(entity.PII) == false)
             {
                 CurrentShelfNo = entity.PII;
-                InventoryData.SpeakSequence($"切换层架标 {entity.PII}");
+                // 更新状态行显示
+                SetCurrentShelfNoLabel(CurrentShelfNo);
+                await FormClientInfo.Speaking($"切换层架标 {entity.PII}", false, token);
             }
         }
 
@@ -1910,7 +2078,6 @@ bool eas)
                 if (StringUtil.IsInList("setCurrentLocation,setLocation", ActionMode) == false)
                     return new NormalResult();
 
-                InventoryData.Speak("请先扫层架标，再扫图书");
                 return new NormalResult
                 {
                     Value = -1,
@@ -1921,6 +2088,17 @@ bool eas)
             return new NormalResult();
         }
 
+        private void toolStripButton_test_nextTags_Click(object sender, EventArgs e)
+        {
+#if AUTO_TEST
+            PrepareSimuRfidTag();
+#endif
+        }
+
+        private void toolStripButton_cancelSpeaking_Click(object sender, EventArgs e)
+        {
+            FormClientInfo.CancelSpeaking();
+        }
     }
 
     // 修改动作

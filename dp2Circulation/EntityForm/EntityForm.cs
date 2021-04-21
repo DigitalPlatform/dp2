@@ -927,7 +927,6 @@ true);
         {
             if (bInitial)
             {
-
                 // 初始化册控件
                 this.entityControl1.GetMacroValue += new GetMacroValueHandler(issueControl1_GetMacroValue);
 

@@ -13,6 +13,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.CirculationClient;
 using System.Xml;
 using System.IO;
+using System.Windows.Forms;
 
 namespace dp2Inventory
 {
@@ -396,6 +397,8 @@ namespace dp2Inventory
     // Entity 附加的处理信息
     public class ProcessInfo
     {
+        public ListViewItem ListViewItem { get; set; }
+
         public Entity Entity { get; set; }
 
         // 状态

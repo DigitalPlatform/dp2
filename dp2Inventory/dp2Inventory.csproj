@@ -22,7 +22,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;AUTO_TEST</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;AUTO_TEST1</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -170,6 +170,7 @@
       <Private>True</Private>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Security.AccessControl, Version=4.1.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Security.AccessControl.4.7.0\lib\net461\System.Security.AccessControl.dll</HintPath>
     </Reference>
@@ -204,6 +205,11 @@
     </Compile>
     <Compile Include="FloatingErrorDialog.Designer.cs">
       <DependentUpon>FloatingErrorDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="InventoryAPI\UploadAPI.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>UploadAPI.json</DependentUpon>
     </Compile>
     <Compile Include="InventoryData.cs" />
     <Compile Include="ItemCacheContext.cs" />
@@ -255,6 +261,10 @@
     <EmbeddedResource Include="SettingDialog.resx">
       <DependentUpon>SettingDialog.cs</DependentUpon>
     </EmbeddedResource>
+    <None Include="InventoryAPI\UploadAPI.json">
+      <Generator>NSwagCodeGenerator</Generator>
+      <LastGenOutput>UploadAPI.cs</LastGenOutput>
+    </None>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -330,6 +340,9 @@
     <Analyzer Include="..\packages\Microsoft.VisualStudio.Threading.Analyzers.16.8.55\analyzers\vb\Microsoft.VisualStudio.Threading.Analyzers.CodeFixes.dll" />
     <Analyzer Include="..\packages\Microsoft.VisualStudio.Threading.Analyzers.16.8.55\analyzers\vb\Microsoft.VisualStudio.Threading.Analyzers.dll" />
     <Analyzer Include="..\packages\Microsoft.VisualStudio.Threading.Analyzers.16.8.55\analyzers\vb\Microsoft.VisualStudio.Threading.Analyzers.VisualBasic.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="sample_inventory.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Microsoft.VisualStudio.Threading.Analyzers.16.8.55\build\Microsoft.VisualStudio.Threading.Analyzers.targets" Condition="Exists('..\packages\Microsoft.VisualStudio.Threading.Analyzers.16.8.55\build\Microsoft.VisualStudio.Threading.Analyzers.targets')" />

@@ -62,6 +62,11 @@ namespace dp2Circulation
         {
             get
             {
+                // 2021/4/17
+                if (string.IsNullOrEmpty(this.comboBox_readerDbName.Text)
+                    && (string.IsNullOrEmpty(this.textBox_recordID.Text) || this.textBox_recordID.Text == "?"))
+                    return "";
+
                 return this.comboBox_readerDbName.Text + "/" + this.textBox_recordID.Text;
             }
             set
@@ -132,15 +137,21 @@ namespace dp2Circulation
 
         private void button_OK_Click(object sender, EventArgs e)
         {
-            if (String.IsNullOrEmpty(this.comboBox_readerDbName.Text) == true)
-            {
-                MessageBox.Show(this, "尚未指定读者库名");
-                return;
-            }
+            // 按住 Ctrl 键可以允许路径为空进行保存
+            bool ctrl = (Control.ModifierKeys & Keys.Control) == Keys.Control;
 
-            if (String.IsNullOrEmpty(this.textBox_recordID.Text) == true)
+            if (ctrl == false)
             {
-                MessageBox.Show(this, "尚未指定记录ID");
+                if (String.IsNullOrEmpty(this.comboBox_readerDbName.Text) == true)
+                {
+                    MessageBox.Show(this, "尚未指定读者库名");
+                    return;
+                }
+
+                if (String.IsNullOrEmpty(this.textBox_recordID.Text) == true)
+                {
+                    MessageBox.Show(this, "尚未指定记录ID");
+                }
             }
 
             this.DialogResult = DialogResult.OK;

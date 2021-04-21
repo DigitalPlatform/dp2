@@ -301,7 +301,7 @@ bool bClickClose = false)
                 _modifyDialog = new InventoryDialog();
 
                 _modifyDialog.FormClosing += _modifyDialog_FormClosing;
-                // _modifyDialog.WriteComplete += _modifyDialog_WriteComplete;
+                _modifyDialog.WriteComplete += _modifyDialog_WriteComplete;
 
                 GuiUtil.SetControlFont(_modifyDialog, this.Font);
                 ClientInfo.MemoryState(_modifyDialog, "modifyDialog", "state");
@@ -309,16 +309,16 @@ bool bClickClose = false)
             }
         }
 
-        /*
+        bool _historyChanged = false;
+
         private void _modifyDialog_WriteComplete(object sender, WriteCompleteventArgs e)
         {
             this.Invoke((Action)(() =>
             {
-                AppendItem(e.Chip, e.TagInfo);
+                AppendItem(e.Info);
                 _historyChanged = true;
             }));
         }
-        */
 
         private void _modifyDialog_FormClosing(object sender, FormClosingEventArgs e)
         {
@@ -330,5 +330,65 @@ bool bClickClose = false)
                 e.Cancel = true;
         }
 
+        #region 操作历史
+
+        const int COLUMN_UID = 0;
+        const int COLUMN_PII = 1;
+        const int COLUMN_TILTE = 2;
+        const int COLUMN_CURRENTLOCATION = 3;
+        const int COLUMN_LOCATION = 4;
+        const int COLUMN_STATE = 5;
+        const int COLUMN_TOU = 6;
+        const int COLUMN_OI = 7;
+        const int COLUMN_WRITETIME = 8;
+
+        /*
+        const int COLUMN_UID = 0;
+        const int COLUMN_ERRORINFO = 1;
+        const int COLUMN_PII = 2;
+        const int COLUMN_TITLE = 3;
+        const int COLUMN_CURRENTLOCATION = 4;
+        const int COLUMN_LOCATION = 5;
+        const int COLUMN_STATE = 6;
+        const int COLUMN_TU = 7;
+        const int COLUMN_OI = 8;
+        const int COLUMN_AOI = 9;
+        const int COLUMN_EAS = 10;
+        const int COLUMN_AFI = 11;
+        const int COLUMN_READERNAME = 12;
+        const int COLUMN_ANTENNA = 13;
+        const int COLUMN_PROTOCOL = 14;
+         * */
+
+        public void AppendItem(ProcessInfo info)
+        {
+            ListViewItem item = new ListViewItem();
+            this.listView_writeHistory.Items.Add(item);
+            item.EnsureVisible();
+
+            var entity = info.Entity;
+            ListViewUtil.ChangeItemText(item, COLUMN_UID, entity.UID);
+            ListViewUtil.ChangeItemText(item, COLUMN_PII, entity.PII);
+            ListViewUtil.ChangeItemText(item, COLUMN_TILTE, entity.Title);
+            ListViewUtil.ChangeItemText(item, COLUMN_CURRENTLOCATION, entity.CurrentLocation);
+            ListViewUtil.ChangeItemText(item, COLUMN_LOCATION, entity.Location + ":" + entity.ShelfNo);
+            ListViewUtil.ChangeItemText(item, COLUMN_STATE, entity.State);
+            ListViewUtil.ChangeItemText(item, COLUMN_TOU, info.IsLocation ? "层架标" : "图书");
+            ListViewUtil.ChangeItemText(item, COLUMN_OI, entity.GetOiOrAoi());
+            ListViewUtil.ChangeItemText(item, COLUMN_WRITETIME, DateTime.Now.ToString());
+        }
+
+        #endregion
+    }
+
+    public delegate void WriteCompleteEventHandler(object sender,
+WriteCompleteventArgs e);
+
+    /// <summary>
+    /// 写入成功事件的参数
+    /// </summary>
+    public class WriteCompleteventArgs : EventArgs
+    {
+        public ProcessInfo Info { get; set; }
     }
 }

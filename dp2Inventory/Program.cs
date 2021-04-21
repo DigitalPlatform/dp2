@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using DigitalPlatform.CirculationClient;
+using DigitalPlatform.Core;
 
 namespace dp2Inventory
 {
@@ -18,6 +19,8 @@ namespace dp2Inventory
         {
             ClientInfo.TypeOfProgram = typeof(Program);
             FormClientInfo.CopyrightKey = "dp2inventory_sn_key";
+
+            ProgramUtil.SetDpiAwareness();
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);

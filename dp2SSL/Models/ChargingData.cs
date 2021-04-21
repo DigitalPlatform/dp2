@@ -75,5 +75,16 @@ namespace dp2SSL
             return value == "true";
         }
 
+        // 从 charging.xml 配置文件中获得 启用小票打印机即将缺纸警告 参数
+        public static bool GetPosPrintPaperWillOut()
+        {
+            if (ChargingCfgDom == null)
+                return true;
+            var value = ChargingCfgDom.DocumentElement.SelectSingleNode("settings/key[@name='启用小票打印机即将缺纸警告']/@value")?.Value;
+            if (string.IsNullOrEmpty(value))
+                value = "true";
+
+            return value == "true";
+        }
     }
 }

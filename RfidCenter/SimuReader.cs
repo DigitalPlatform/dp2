@@ -811,12 +811,20 @@ out Reader reader);
             // 移走标签
             if (action == "removeTag")
             {
-                foreach (var tag in tags)
+                // 清除全部标签
+                if (tags == null)
                 {
-                    var found = FindTag(tag.UID, null); // 无所谓在哪个读卡器上
-                    if (found != null)
+                    _tags.Clear();
+                }
+                else
+                {
+                    foreach (var tag in tags)
                     {
-                        _tags.Remove(found);
+                        var found = FindTag(tag.UID, null); // 无所谓在哪个读卡器上
+                        if (found != null)
+                        {
+                            _tags.Remove(found);
+                        }
                     }
                 }
             }

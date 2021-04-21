@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<root>
+  <settings>
+    <key name="RPAN图书标签和层架标状态切换" value="true"/>
+  </settings>
+  <library locationList="馆藏地1,馆藏地2,馆藏地3">
+  </library>
+  <!-- sip/@localStore 属性里面的 uid 表示在本地库里面存储 UID 对照关系，inventory 表示在本地库存储盘点结果(从而也就不把盘点结果写回 SIP 服务器)-->
+  <sip localStore="uid,inventory" />
+  <barcodeValidation>
+    <validator >
+      <patron>
+        <CMIS />
+        <range value='P000001-P999999' />
+      </patron>
+      <entity>
+        <range value='0000001-9999999'></range>
+      </entity>
+      <shelf>
+        <range value='0101-0909'></range>
+      </shelf>
+    </validator>
+  </barcodeValidation>
+  <uploadInterface protocol='' baseUrl='http://localhost:62022/'/>
+</root>

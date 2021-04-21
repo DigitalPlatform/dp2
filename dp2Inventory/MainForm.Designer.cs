@@ -34,11 +34,11 @@ namespace dp2Inventory
             this.listView_writeHistory = new System.Windows.Forms.ListView();
             this.columnHeader_uid = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_pii = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_currentLocation = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_location = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_state = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_tou = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_oi = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader_aoi = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader_eas = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader_afi = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_writeTime = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel_message = new System.Windows.Forms.ToolStripStatusLabel();
@@ -65,6 +65,7 @@ namespace dp2Inventory
             this.MenuItem_userManual = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_resetSerialCode = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_about = new System.Windows.Forms.ToolStripMenuItem();
+            this.columnHeader_title = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.tabControl1.SuspendLayout();
             this.tabPage_writeTag.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -75,11 +76,11 @@ namespace dp2Inventory
             // 
             this.tabControl1.Controls.Add(this.tabPage_writeTag);
             this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tabControl1.Location = new System.Drawing.Point(0, 66);
+            this.tabControl1.Location = new System.Drawing.Point(0, 65);
             this.tabControl1.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(1048, 692);
+            this.tabControl1.Size = new System.Drawing.Size(1048, 693);
             this.tabControl1.TabIndex = 7;
             // 
             // tabPage_writeTag
@@ -89,9 +90,9 @@ namespace dp2Inventory
             this.tabPage_writeTag.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
             this.tabPage_writeTag.Name = "tabPage_writeTag";
             this.tabPage_writeTag.Padding = new System.Windows.Forms.Padding(5, 4, 5, 4);
-            this.tabPage_writeTag.Size = new System.Drawing.Size(1040, 651);
+            this.tabPage_writeTag.Size = new System.Drawing.Size(1040, 652);
             this.tabPage_writeTag.TabIndex = 0;
-            this.tabPage_writeTag.Text = "写入历史";
+            this.tabPage_writeTag.Text = "盘点历史";
             this.tabPage_writeTag.UseVisualStyleBackColor = true;
             // 
             // listView_writeHistory
@@ -99,11 +100,12 @@ namespace dp2Inventory
             this.listView_writeHistory.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader_uid,
             this.columnHeader_pii,
+            this.columnHeader_title,
+            this.columnHeader_currentLocation,
+            this.columnHeader_location,
+            this.columnHeader_state,
             this.columnHeader_tou,
             this.columnHeader_oi,
-            this.columnHeader_aoi,
-            this.columnHeader_eas,
-            this.columnHeader_afi,
             this.columnHeader_writeTime});
             this.listView_writeHistory.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listView_writeHistory.FullRowSelect = true;
@@ -111,7 +113,7 @@ namespace dp2Inventory
             this.listView_writeHistory.Location = new System.Drawing.Point(5, 4);
             this.listView_writeHistory.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
             this.listView_writeHistory.Name = "listView_writeHistory";
-            this.listView_writeHistory.Size = new System.Drawing.Size(1030, 643);
+            this.listView_writeHistory.Size = new System.Drawing.Size(1030, 644);
             this.listView_writeHistory.TabIndex = 0;
             this.listView_writeHistory.UseCompatibleStateImageBehavior = false;
             this.listView_writeHistory.View = System.Windows.Forms.View.Details;
@@ -128,6 +130,21 @@ namespace dp2Inventory
             this.columnHeader_pii.Text = "PII(条码号)";
             this.columnHeader_pii.Width = 160;
             // 
+            // columnHeader_currentLocation
+            // 
+            this.columnHeader_currentLocation.Text = "当前位置";
+            this.columnHeader_currentLocation.Width = 200;
+            // 
+            // columnHeader_location
+            // 
+            this.columnHeader_location.Text = "永久位置";
+            this.columnHeader_location.Width = 200;
+            // 
+            // columnHeader_state
+            // 
+            this.columnHeader_state.Text = "状态";
+            this.columnHeader_state.Width = 160;
+            // 
             // columnHeader_tou
             // 
             this.columnHeader_tou.Name = "columnHeader_tou";
@@ -139,21 +156,6 @@ namespace dp2Inventory
             this.columnHeader_oi.Name = "columnHeader_oi";
             this.columnHeader_oi.Text = "OI(所属机构)";
             this.columnHeader_oi.Width = 260;
-            // 
-            // columnHeader_aoi
-            // 
-            this.columnHeader_aoi.Text = "AOI(非标准所属机构)";
-            this.columnHeader_aoi.Width = 222;
-            // 
-            // columnHeader_eas
-            // 
-            this.columnHeader_eas.Text = "EAS";
-            this.columnHeader_eas.Width = 100;
-            // 
-            // columnHeader_afi
-            // 
-            this.columnHeader_afi.Text = "AFI";
-            this.columnHeader_afi.Width = 100;
             // 
             // columnHeader_writeTime
             // 
@@ -196,7 +198,7 @@ namespace dp2Inventory
             // toolStrip1
             // 
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(28, 28);
-            this.toolStrip1.Location = new System.Drawing.Point(0, 41);
+            this.toolStrip1.Location = new System.Drawing.Point(0, 40);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(1048, 25);
             this.toolStrip1.TabIndex = 5;
@@ -212,7 +214,7 @@ namespace dp2Inventory
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Padding = new System.Windows.Forms.Padding(7, 4, 0, 4);
-            this.menuStrip1.Size = new System.Drawing.Size(1048, 41);
+            this.menuStrip1.Size = new System.Drawing.Size(1048, 40);
             this.menuStrip1.TabIndex = 4;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -228,7 +230,7 @@ namespace dp2Inventory
             this.toolStripSeparator2,
             this.MenuItem_exit});
             this.MenuItem_file.Name = "MenuItem_file";
-            this.MenuItem_file.Size = new System.Drawing.Size(97, 33);
+            this.MenuItem_file.Size = new System.Drawing.Size(97, 32);
             this.MenuItem_file.Text = "文件(&F)";
             // 
             // MenuItem_inventory
@@ -305,7 +307,7 @@ namespace dp2Inventory
             this.MenuItem_resetSerialCode,
             this.MenuItem_about});
             this.MenuItem_help.Name = "MenuItem_help";
-            this.MenuItem_help.Size = new System.Drawing.Size(102, 33);
+            this.MenuItem_help.Size = new System.Drawing.Size(102, 32);
             this.MenuItem_help.Text = "帮助(&H)";
             // 
             // MenuItem_openUserFolder
@@ -349,6 +351,11 @@ namespace dp2Inventory
             this.MenuItem_about.Size = new System.Drawing.Size(403, 40);
             this.MenuItem_about.Text = "关于(&A)...";
             // 
+            // columnHeader_title
+            // 
+            this.columnHeader_title.Text = "题名";
+            this.columnHeader_title.Width = 200;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(13F, 28F);
@@ -385,9 +392,6 @@ namespace dp2Inventory
         private System.Windows.Forms.ColumnHeader columnHeader_pii;
         private System.Windows.Forms.ColumnHeader columnHeader_tou;
         private System.Windows.Forms.ColumnHeader columnHeader_oi;
-        private System.Windows.Forms.ColumnHeader columnHeader_aoi;
-        private System.Windows.Forms.ColumnHeader columnHeader_eas;
-        private System.Windows.Forms.ColumnHeader columnHeader_afi;
         private System.Windows.Forms.ColumnHeader columnHeader_writeTime;
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel_message;
@@ -414,6 +418,10 @@ namespace dp2Inventory
         private System.Windows.Forms.ToolStripMenuItem MenuItem_userManual;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_resetSerialCode;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_about;
+        private System.Windows.Forms.ColumnHeader columnHeader_currentLocation;
+        private System.Windows.Forms.ColumnHeader columnHeader_location;
+        private System.Windows.Forms.ColumnHeader columnHeader_state;
+        private System.Windows.Forms.ColumnHeader columnHeader_title;
     }
 }
 

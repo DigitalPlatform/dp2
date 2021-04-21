@@ -361,6 +361,18 @@ Stack:
 
         List<ErrorItem> _errorItems = null;
 
+        // 错误事项的集合
+        public List<ErrorItem> ErrorItems
+        {
+            get
+            {
+                if (_errorItems == null)
+                    return new List<ErrorItem>();
+
+                return new List<ErrorItem>(_errorItems);
+            }
+        }
+
         // 构造错误信息
         public string BuildError(string type,
             string error,

@@ -565,7 +565,7 @@ out string strError);
     dbName, // "<all>",
     "",
     -1,
-    "__id",
+    "RFID UID", // "__id",
     "left",
     "zh",
     null,   // strResultSetName
@@ -661,12 +661,15 @@ out string strError);
                             }
 
                             i++;
-                        }
 
+                            if ((i % 100) == 0)
+                            {
+                                func_showProgress?.Invoke($"正在从 {dbName} 获取信息 ({i.ToString()}/{hitcount}) {record.Path} ...");
+                            }
+                        }
                     }
 
                     ClientInfo.WriteInfoLog($"dbName='{dbName}'。skip_count={skip_count}, error_count={error_count}");
-
                 }
                 return new NormalResult
                 {
