@@ -242,12 +242,15 @@ namespace dp2Inventory
 
         #endregion
 
+        public delegate void delegate_writeHistory(ProcessInfo info, string action);
+
         // Inventory 操作，同一时刻只能一个函数进入
         static AsyncSemaphore _requestLimit = new AsyncSemaphore(1);
 
         public static async Task BeginInventoryAsync(
             ProcessInfo info,
-            string actionMode)
+            string actionMode,
+            delegate_writeHistory writeHistory)
         {
             Debug.Assert(info != null);
             Entity entity = info.Entity;
@@ -285,8 +288,10 @@ namespace dp2Inventory
                     {
                         entity.BuildError("return", null, null);
 
+                        writeHistory?.Invoke(info, "还书");
+
                         // 提醒操作者发生了还书操作
-                        SpeakSequence($"还书成功 {entity.PII}");
+                        await FormClientInfo.Speaking($"还书成功 {entity.PII}", false, default);
 
                         if (string.IsNullOrEmpty(request_result.ItemXml) == false)
                         {
@@ -306,7 +311,7 @@ namespace dp2Inventory
                     && (need_verifyEas == true || StringUtil.IsInList("verifyEAS", actionMode))
                     && DataModel.Protocol != "sip")
                 {
-                    await VerifyEasAsync(info);
+                    await VerifyEasAsync(info, writeHistory);
                 }
 
                 /*
@@ -374,6 +379,12 @@ namespace dp2Inventory
                     && info.IsTaskCompleted("getItemXml") == true   // 2021/1/26
                     && string.IsNullOrEmpty(info.ItemXml) == false)
                 {
+                    List<string> actions = new List<string>();
+                    if (StringUtil.IsInList("setCurrentLocation", actionMode))
+                        actions.Add("修改当前位置为 " + info.TargetCurrentLocation);
+                    if (StringUtil.IsInList("setLocation", actionMode))
+                        actions.Add("修改永久位置为 " + info.TargetLocation + ":" + info.TargetShelfNo);
+
                     RequestInventoryResult request_result = null;
                     if (DataModel.Protocol == "sip")
                     {
@@ -436,6 +447,9 @@ namespace dp2Inventory
 
                         // 立即刷新当前架位和永久架位的显示
                         InventoryDialog.RefreshLocations(info);
+
+                        if (actions.Count > 0)
+                            writeHistory?.Invoke(info, StringUtil.MakePathList(actions, "; "));
                     }
 
                     // 2021/3/24
@@ -553,7 +567,8 @@ namespace dp2Inventory
         //      0   没有进行验证(已经加入后台验证任务)
         //      1   已经成功进行验证
         public static async Task<NormalResult> VerifyEasAsync(
-            ProcessInfo info)
+            ProcessInfo info,
+            delegate_writeHistory writeHistory)
         {
             Entity entity = info.Entity;
             Debug.Assert(entity != null);
@@ -600,6 +615,10 @@ namespace dp2Inventory
                 {
                     SpeakSequence($"等待修改 EAS : {CutTitle(entity.Title)} ");
                     return new NormalResult();
+                }
+                else
+                {
+                    writeHistory?.Invoke(info, "修改 EAS");
                 }
 
                 return new NormalResult { Value = 1 };
@@ -930,7 +949,7 @@ namespace dp2Inventory
                         if (string.IsNullOrEmpty(oi))
                             continue;
 
-                        func_showProgress?.Invoke($"{uid} --> {barcode} ...");
+                        func_showProgress?.Invoke($"{uid} --> {barcode} ...", -1, -1);
 
                         uid_table[uid] = barcode;
                     }
@@ -1166,6 +1185,159 @@ namespace dp2Inventory
         // 导入 UID PII 对照表文件
         public static async Task<ImportUidResult> ImportUidPiiTableAsync(
             string filename,
+            delegate_showText func_showProgress,
+            CancellationToken token)
+        {
+            bool sip = DataModel.Protocol == "sip";
+            try
+            {
+                long total_linecount = 0;
+                // 先统计总行数
+                using (var reader = new StreamReader(filename, Encoding.ASCII))
+                {
+                    while (token.IsCancellationRequested == false)
+                    {
+                        var line = await reader.ReadLineAsync();
+                        if (line == null)
+                            break;
+                        total_linecount++;
+                    }
+                }
+
+                using (var reader = new StreamReader(filename, Encoding.ASCII))
+                {
+                    int line_count = 0;
+                    int new_count = 0;
+                    int change_count = 0;
+                    int delete_count = 0;
+                    int error_count = 0;
+                    List<string> lines = new List<string>();
+                    int i = 0;
+                    string processed_line = "";
+                    while (token.IsCancellationRequested == false)
+                    {
+                        if (total_linecount > 0)
+                            func_showProgress?.Invoke($"正在导入 {i}/{total_linecount} {processed_line.Replace("\t","-->")}", i, total_linecount);
+                        i++;
+                        var line = await reader.ReadLineAsync();
+                        if (line == null)
+                            break;
+                        if (string.IsNullOrEmpty(line))
+                            continue;
+
+                        processed_line = line;  // .TrimEnd(new char[] { '\r', '\n' });
+
+                        var parts = StringUtil.ParseTwoPart(line, "\t");
+                        string uid = parts[0];
+                        string barcode = parts[1];
+                        if (string.IsNullOrEmpty(uid) || string.IsNullOrEmpty(barcode))
+                            continue;
+
+                        // 2021/4/1
+                        ParseOiPii(barcode, out string pii, out string oi);
+                        if (string.IsNullOrEmpty(oi))
+                            return new ImportUidResult
+                            {
+                                ErrorInfo = $"出现了没有 OI 的行 '{line}'，导入过程出错",
+                                Value = -1,
+                            };
+
+                        if (sip == false)
+                        {
+                            // .Value
+                            //      -1  出错
+                            //      0   没有找到
+                            //      1   找到
+                            var get_result = await LibraryChannelUtil.GetEntityDataAsync(barcode,
+                                "network,skip_biblio");
+                            if (get_result.Value == -1)
+                                return new ImportUidResult
+                                {
+                                    ErrorInfo = $"GetEntityDataAsync() error: {get_result.ErrorInfo}",
+                                    Value = -1,
+                                };
+                            if (get_result.Value == 0)
+                            {
+                                ClientInfo.WriteErrorLog($"ImportUidPiiTableAsync() dp2library 服务器中册记录 '{barcode}' 没有找到: {get_result.ErrorInfo}");
+                                error_count++;
+                                continue;
+                            }
+                            var set_result = RequestSetUID(
+    get_result.ItemRecPath,
+    get_result.ItemXml,
+    get_result.ItemTimestamp,
+    uid,
+    null,
+    "");
+                            if (set_result.Value == -1)
+                            {
+                                ClientInfo.WriteErrorLog($"ImportUidPiiTableAsync() 中 RequestSetUID(itemRecPath={get_result.ItemRecPath},barcode={barcode},uid={uid}) error: {set_result.ErrorInfo}");
+                                error_count++;
+                                continue;
+                            }
+                            if (set_result.Value == 1)
+                                change_count++;
+                            line_count++;
+                            continue;
+                        }
+
+                        lines.Add(line);
+                        if (lines.Count > 100)
+                        {
+                            var result = await SaveLinesAsync(lines, token);
+                            lines.Clear();
+
+                            line_count += result.LineCount;
+                            new_count += result.NewCount;
+                            change_count += result.ChangeCount;
+                            delete_count += result.DeleteCount;
+                        }
+                    }
+                    if (lines.Count > 0)
+                    {
+                        var result = await SaveLinesAsync(lines, token);
+                        line_count += result.LineCount;
+                        new_count += result.NewCount;
+                        change_count += result.ChangeCount;
+                        delete_count += result.DeleteCount;
+                    }
+
+                    return new ImportUidResult
+                    {
+                        Value = line_count,
+                        LineCount = line_count,
+                        NewCount = new_count,
+                        ChangeCount = change_count,
+                        DeleteCount = delete_count,
+                        ErrorCount = error_count,
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                ClientInfo.WriteErrorLog($"ImportUidPiiTable() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                return new ImportUidResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"ImportUidPiiTable() 出现异常: {ex.Message}"
+                };
+            }
+        }
+
+        public class ImportUidResult : NormalResult
+        {
+            public int LineCount { get; set; }
+            public int NewCount { get; set; }
+            public int ChangeCount { get; set; }
+            public int DeleteCount { get; set; }
+            public int ErrorCount { get; set; }
+        }
+
+#if REMOVED
+        // TODO: 同时进入 hashtable
+        // 导入 UID PII 对照表文件
+        public static async Task<ImportUidResult> ImportUidPiiTableAsync(
+            string filename,
             CancellationToken token)
         {
             bool sip = DataModel.Protocol == "sip";
@@ -1289,6 +1461,8 @@ namespace dp2Inventory
             public int ChangeCount { get; set; }
             public int DeleteCount { get; set; }
         }
+
+#endif
 
         static async Task<ImportUidResult> SaveLinesAsync(List<string> lines,
             CancellationToken token)
@@ -1687,6 +1861,9 @@ namespace dp2Inventory
         }
 
         // 导出所有的本地册记录到 Excel 文件
+        // result.Value
+        //      -1  出错
+        //      >=0  共导出多少行
         public static async Task<NormalResult> ExportAllItemToExcelAsync(
             List<InventoryColumn> columns,
             delegate_showText func_showProgress,
@@ -1772,9 +1949,12 @@ namespace dp2Inventory
                 using (var releaser = await _cacheLimit.EnterAsync())
                 using (var context = new ItemCacheContext())
                 {
+                    context.Database.EnsureCreated();
+
                     barcodes = context.Items.Select(o => o.Barcode).ToList();
                 }
 
+                int count = 0;
                 foreach (var barcode in barcodes)
                 {
                     if (token.IsCancellationRequested)
@@ -1788,7 +1968,7 @@ namespace dp2Inventory
                     if (string.IsNullOrEmpty(barcode))
                         continue;
 
-                    func_showProgress?.Invoke($"正在导出 {barcode} ...");
+                    func_showProgress?.Invoke($"正在导出 {barcode} ...", -1, -1);
 
                     ParseOiPii(barcode, out string pii, out string oi);
 
@@ -1870,6 +2050,7 @@ namespace dp2Inventory
                     }
 
                     nRowIndex++;
+                    count++;
                 }
 
                 sheet.Columns().AdjustToContents();
@@ -1885,7 +2066,7 @@ namespace dp2Inventory
                 {
                 }
 
-                return new NormalResult();
+                return new NormalResult { Value = count };
             }
             finally
             {

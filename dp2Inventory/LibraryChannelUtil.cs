@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Xml;
 using System.Runtime.Remoting.Activation;
 using System.Threading;
+using System.Collections;
 
 using Microsoft.VisualStudio.Threading;
 
@@ -17,7 +18,6 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.CirculationClient;
 using Newtonsoft.Json;
-using System.Collections;
 using DigitalPlatform.LibraryServer;
 
 namespace dp2Inventory
@@ -37,6 +37,9 @@ namespace dp2Inventory
         {
             Free();
 
+            if (string.IsNullOrEmpty(DataModel.dp2libraryServerUrl))
+                return new NormalResult { Value = 0 };
+
             _channelPool.BeforeLogin += new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
             _channelPool.AfterLogin += new AfterLoginEventHandle(Channel_AfterLogin);
 
@@ -44,7 +47,7 @@ namespace dp2Inventory
             if (result.Value == -1)
                 return result;
 
-            return new NormalResult();
+            return new NormalResult { Value = 1 };
         }
 
         public static void Free()
@@ -225,6 +228,11 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             {
                 _channelList.Remove(channel);
             }
+        }
+
+        public static void Clear()
+        {
+            _channelPool.Clear();
         }
 
         #endregion
@@ -512,7 +520,7 @@ out string strError);
 
         #region UID --> UII 对照
 
-        public delegate void delegate_showText(string text);
+        public delegate void delegate_showText(string text, long bytes, long total);
 
         // parameters:
         //      uid_table   返回 UID --> PII 对照表
@@ -550,7 +558,7 @@ out string strError);
 
                 foreach (string dbName in item_dbnames)
                 {
-                    func_showProgress?.Invoke($"正在从 {dbName} 获取信息 ...");
+                    func_showProgress?.Invoke($"正在从 {dbName} 获取信息 ...", -1, -1);
 
                     int nRedoCount = 0;
                 REDO:
@@ -664,7 +672,7 @@ out string strError);
 
                             if ((i % 100) == 0)
                             {
-                                func_showProgress?.Invoke($"正在从 {dbName} 获取信息 ({i.ToString()}/{hitcount}) {record.Path} ...");
+                                func_showProgress?.Invoke($"正在从 {dbName} 获取信息 ({i.ToString()}/{hitcount}) {record.Path} ...", i, hitcount);
                             }
                         }
                     }
@@ -2262,7 +2270,7 @@ out string strError);
 
                 foreach (string dbName in item_dbnames)
                 {
-                    func_showProgress?.Invoke($"正在从 {dbName} 获取信息 ...");
+                    func_showProgress?.Invoke($"正在从 {dbName} 获取信息 ...", -1, -1);
 
                     int nRedoCount = 0;
                 REDO:

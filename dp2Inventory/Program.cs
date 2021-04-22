@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Core;
 
@@ -32,11 +35,46 @@ namespace dp2Inventory
 
             SetDllDirectory(assemblyPath);
 
+            // http://stackoverflow.com/questions/184084/how-to-force-c-sharp-net-app-to-run-only-one-instance-in-windows
+            bool createdNew = true;
+            // mutex name need contains windows account name. or us programes file path, hashed
+            using (Mutex mutex = new Mutex(true, "dp2Inventory V1", out createdNew))
+            {
+                if (createdNew)
+                {
+                    /*
+                    if (StringUtil.IsDevelopMode() == false)
+                        PrepareCatchException();
+                    */
+
+                    ProgramUtil.SetDpiAwareness();
+
+                    // Application.SetHighDpiMode(HighDpiMode.SystemAware);
+                    Application.EnableVisualStyles();
+                    Application.SetCompatibleTextRenderingDefault(false);
+                    Application.Run(new MainForm());
+                }
+                else
+                {
+                    Process current = Process.GetCurrentProcess();
+                    foreach (Process process in Process.GetProcessesByName(current.ProcessName))
+                    {
+                        if (process.Id != current.Id)
+                        {
+                            API.SetForegroundWindow(process.MainWindowHandle);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            /*
             ProgramUtil.SetDpiAwareness();
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new MainForm());
+            */
         }
     }
 }

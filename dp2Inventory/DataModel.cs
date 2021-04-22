@@ -5,15 +5,16 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Collections;
 using System.Threading;
+using System.Xml;
+using System.IO;
+using System.Windows.Forms;
 
 using Microsoft.VisualStudio.Threading;
 
 using DigitalPlatform;
 using DigitalPlatform.Text;
 using DigitalPlatform.CirculationClient;
-using System.Xml;
-using System.IO;
-using System.Windows.Forms;
+using static dp2Inventory.LibraryChannelUtil;
 
 namespace dp2Inventory
 {
@@ -239,7 +240,7 @@ namespace dp2Inventory
         // 限制本地数据库操作，同一时刻只能一个函数进入
         static AsyncSemaphore _cacheLimit = new AsyncSemaphore(1);
 
-        public delegate void delegate_showText(string text);
+        // public delegate void delegate_showText(string text);
 
         // 从本地数据库中装载 uid 对照表
         public static async Task<NormalResult> LoadUidTableAsync(Hashtable uid_table,
@@ -252,6 +253,10 @@ namespace dp2Inventory
                 using (var context = new ItemCacheContext())
                 {
                     context.Database.EnsureCreated();
+
+                    long total_count = context.Uids.LongCount();
+
+                    long i = 0;
                     // var all = context.Uids.Where(o => string.IsNullOrEmpty(o.PII) == false && string.IsNullOrEmpty(o.UID) == false);
                     foreach (var item in context.Uids)
                     {
@@ -272,11 +277,17 @@ namespace dp2Inventory
                         // 跳过那些没有 OI 的
                         ParseOiPii(barcode, out string pii, out string oi);
                         if (string.IsNullOrEmpty(oi))
+                        {
+                            i++;
                             continue;
+                        }
 
-                        func_showProgress?.Invoke($"{uid} --> {barcode} ...");
+                        if ((i % 100) == 0)
+                            func_showProgress?.Invoke($"{uid} --> {barcode} ({i}/{total_count})...", i, total_count);
 
                         uid_table[uid] = barcode;
+
+                        i++;
                     }
 
                     return new NormalResult
@@ -467,7 +478,7 @@ namespace dp2Inventory
         {
             if (Tasks == null)
                 return true;
-            foreach(var task in Tasks)
+            foreach (var task in Tasks)
             {
                 if (task.Result.Value == -1)
                     return false;

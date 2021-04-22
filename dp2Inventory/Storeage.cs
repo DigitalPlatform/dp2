@@ -65,5 +65,9 @@ namespace dp2Inventory
         public string OI { get; set; }
 
         public string WriteTime { get; set; }
+
+        public string Action { get; set; }
+
+        public string BatchNo { get; set; }
     }
 }

@@ -1295,7 +1295,12 @@ new SetErrorEventArgs
                     {
                         Error = $"RFID 中心出现异常: {ExceptionUtil.GetAutoText(ex)}"
                     });
-                return new ListTagsResult { Value = -1, ErrorInfo = ex.Message };
+                return new ListTagsResult
+                {
+                    Value = -1,
+                    ErrorInfo = ex.Message,
+                    ErrorCode = ex.GetType().ToString()
+                };
             }
         }
 

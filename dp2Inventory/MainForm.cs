@@ -17,6 +17,7 @@ using DigitalPlatform.Core;
 using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Text;
+using static dp2Inventory.InventoryData;
 
 namespace dp2Inventory
 {
@@ -182,7 +183,7 @@ bool bClickClose = false)
                 var initial_result = LibraryChannelUtil.Initial();
                 if (initial_result.Value == -1)
                 {
-                    this.ShowMessage( $"获得 dp2library 服务器配置失败: {initial_result.ErrorInfo}");
+                    this.ShowMessage($"获得 dp2library 服务器配置失败: {initial_result.ErrorInfo}");
                     return;
                 }
             });
@@ -276,8 +277,14 @@ bool bClickClose = false)
                 ClientInfo.MemoryState(dlg, "settingDialog", "state");
                 //dlg.OpenStyle = style;
                 dlg.ShowDialog(parent);
-                //if (dlg.DialogResult == DialogResult.OK)
-                //    DataModel.TagList.EnableTagCache = DataModel.EnableTagCache;
+                if (dlg.DialogResult == DialogResult.OK)
+                {
+                    // TODO: 释放所有 libraryChannel 和 sipChannel 通道
+                    LibraryChannelUtil.Clear();
+                    SipChannelUtil.CloseChannel();
+
+                    //    DataModel.TagList.EnableTagCache = DataModel.EnableTagCache;
+                }
             }
         }
 
@@ -319,7 +326,7 @@ bool bClickClose = false)
         {
             this.Invoke((Action)(() =>
             {
-                AppendItem(e.Info);
+                AppendItem(e.Info, e.Action);
                 _historyChanged = true;
             }));
         }
@@ -345,6 +352,8 @@ bool bClickClose = false)
         const int COLUMN_TOU = 6;
         const int COLUMN_OI = 7;
         const int COLUMN_WRITETIME = 8;
+        const int COLUMN_ACTION = 9;
+        const int COLUMN_BATCHNO = 10;
 
         /*
         const int COLUMN_UID = 0;
@@ -364,10 +373,11 @@ bool bClickClose = false)
         const int COLUMN_PROTOCOL = 14;
          * */
 
-        public void AppendItem(ProcessInfo info)
+        public void AppendItem(ProcessInfo info,
+            string action)
         {
             ListViewItem item = new ListViewItem();
-            this.listView_writeHistory.Items.Add(item);
+            this.listView_writeHistory.Items.Insert(0, item);
             item.EnsureVisible();
 
             var entity = info.Entity;
@@ -380,6 +390,8 @@ bool bClickClose = false)
             ListViewUtil.ChangeItemText(item, COLUMN_TOU, info.IsLocation ? "层架标" : "图书");
             ListViewUtil.ChangeItemText(item, COLUMN_OI, entity.GetOiOrAoi());
             ListViewUtil.ChangeItemText(item, COLUMN_WRITETIME, DateTime.Now.ToString());
+            ListViewUtil.ChangeItemText(item, COLUMN_ACTION, action);
+            ListViewUtil.ChangeItemText(item, COLUMN_ACTION, info.BatchNo);
         }
 
         #endregion
@@ -454,7 +466,7 @@ bool bClickClose = false)
             MessageDlg.Show(this, text, "关于");
         }
 
-        private void MenuItem_saveToExcelFile_Click(object sender, EventArgs e)
+        private void MenuItem_saveHistoryToExcelFile_Click(object sender, EventArgs e)
         {
             string strError = "";
 
@@ -464,7 +476,7 @@ bool bClickClose = false)
                 items.Add(item);
             }
 
-            this.ShowMessage("正在导出选定的事项到 Excel 文件 ...");
+            this.ShowMessage("正在导出全部操作历史事项到 Excel 文件 ...");
 
             this.EnableControls(false);
             try
@@ -528,6 +540,7 @@ MessageBoxDefaultButton.Button2);
             var items = Storeage.LoadItems();
             this.Invoke((Action)(() =>
             {
+                this.listView_writeHistory.BeginUpdate();
                 foreach (var history in items)
                 {
                     ListViewItem item = new ListViewItem();
@@ -540,11 +553,13 @@ MessageBoxDefaultButton.Button2);
                     ListViewUtil.ChangeItemText(item, COLUMN_LOCATION, history.Location);
                     ListViewUtil.ChangeItemText(item, COLUMN_STATE, history.State);
 
-
                     ListViewUtil.ChangeItemText(item, COLUMN_TOU, history.TOU);
                     ListViewUtil.ChangeItemText(item, COLUMN_OI, history.OI);
                     ListViewUtil.ChangeItemText(item, COLUMN_WRITETIME, history.WriteTime);
+                    ListViewUtil.ChangeItemText(item, COLUMN_ACTION, history.Action);
+                    ListViewUtil.ChangeItemText(item, COLUMN_BATCHNO, history.BatchNo);
                 }
+                this.listView_writeHistory.EndUpdate();
             }));
         }
 
@@ -565,12 +580,184 @@ MessageBoxDefaultButton.Button2);
                 history.TOU = ListViewUtil.GetItemText(item, COLUMN_TOU);
                 history.OI = ListViewUtil.GetItemText(item, COLUMN_OI);
                 history.WriteTime = ListViewUtil.GetItemText(item, COLUMN_WRITETIME);
+                history.Action = ListViewUtil.GetItemText(item, COLUMN_ACTION);
+                history.BatchNo = ListViewUtil.GetItemText(item, COLUMN_BATCHNO);
                 items.Add(history);
             }
 
             Storeage.SaveItems(items);
         }
 
+        private async void MenuItem_exportLocalItemsToExcel_Click(object sender, EventArgs e)
+        {
+            List<InventoryColumn> columns = new List<InventoryColumn>()
+            {
+                // new InventoryColumn{ Caption = "UID", Property = "UID"},
+                new InventoryColumn{ Caption = "PII", Property = "Barcode"},
+                new InventoryColumn{ Caption = "状态", Property = "State"},
+                new InventoryColumn{ Caption = "书名", Property = "Title"},
+                new InventoryColumn{ Caption = "当前位置", Property = "CurrentLocation"},
+                new InventoryColumn{ Caption = "当前架号", Property = "CurrentShelfNo"},
+                new InventoryColumn{ Caption = "永久馆藏地", Property = "Location"},
+                new InventoryColumn{ Caption = "永久架号", Property = "ShelfNo"},
+                new InventoryColumn{ Caption = "盘点日期", Property = "InventoryTime"},
+            };
+
+            using (var cancel = CancellationTokenSource.CreateLinkedTokenSource(this._cancel.Token))
+            {
+                FileDownloadDialog progress = null;
+                this.Invoke(new Action(() =>
+                {
+                    progress = new FileDownloadDialog();
+                    progress.Font = this.Font;
+                    progress.Text = "正在导出本地册记录到 Excel 文件";
+                    // progress.Show(this);
+                }));
+
+                try
+                {
+                    // 导出所有的本地册记录到 Excel 文件
+                    var result = await ExportAllItemToExcelAsync(
+                        columns,
+                        (text, bytes, total) =>
+                        {
+                            this.Invoke(new Action(() =>
+                            {
+                                // 延迟显示进度对话框
+                                if (progress.Visible == false)
+                                    progress.Show(this);
+
+                                progress.SetProgress(text, bytes, total);
+                                // progress.SetMessage(text);
+                            }));
+                        },
+                        cancel.Token);
+
+                    // 隐藏对话框
+                    this.Invoke(new Action(() =>
+                    {
+                        progress.Hide();
+                    }));
+
+                    if (result.Value == -1)
+                        MessageDlg.Show(this,
+                            $"导出册记录到 Excel 文件过程出错: {result.ErrorInfo}",
+                            "导出册记录到 Excel 文件");
+                    else
+                        MessageDlg.Show(this,
+                            $"导出册记录到 Excel 文件完成，共导出 {result.Value} 行",
+                            "导出册记录到 Excel 文件");
+                }
+                catch (Exception ex)
+                {
+                    ClientInfo.WriteErrorLog($"导出册记录到 Excel 文件过程出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                    MessageDlg.Show(this,
+                        $"导出册记录到 Excel 文件过程出现异常: {ex.Message}",
+                        "导出册记录到 Excel 文件");
+                }
+                finally
+                {
+                    this.Invoke(new Action(() =>
+                    {
+                        progress.Close();
+                    }));
+                }
+            }
+        }
+
+        // 导入 UID-->UII 对照关系
+        private async void MenuItem_importUidUiiTable_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Title = "导入 UID PII 对照表 - 请指定文件名";
+            openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);    // WpfClientInfo.UserDir;
+            openFileDialog.RestoreDirectory = true;
+            openFileDialog.Filter = "对照表文件(*.txt)|*.txt|所有文件(*.*)|*.*";
+            if (openFileDialog.ShowDialog() != DialogResult.OK)
+                return;
+
+            using (var cancel = CancellationTokenSource.CreateLinkedTokenSource(this._cancel.Token))
+            {
+                FileDownloadDialog progress = null;
+                this.Invoke(new Action(() =>
+                {
+                    progress = new FileDownloadDialog();
+                    progress.Font = this.Font;
+                    progress.Text = "正在导入 UID PII 对照表";
+                    // progress.Show(this);
+                }));
+                progress.FormClosed += (o1, e1) => {
+                    cancel.Cancel();
+                };
+                try
+                {
+                    await Task.Run(async () =>
+                    {
+                        bool sip = DataModel.Protocol == "sip";
+                        // 导入 UID PII 对照表文件
+                        var result = await InventoryData.ImportUidPiiTableAsync(
+                            openFileDialog.FileName,
+                            (text, bytes, total) =>
+                            {
+                                this.Invoke(new Action(() =>
+                                {
+                                    if (progress.IsDisposed)
+                                        return;
+
+                                    // 延迟显示进度对话框
+                                    if (progress.Visible == false)
+                                        progress.Show(this);
+
+                                    progress.SetProgress(text, bytes, total);
+                                }));
+                            },
+                            this._cancel.Token);
+
+                        // 隐藏对话框
+                        this.Invoke(new Action(() =>
+                        {
+                            progress.Hide();
+                        }));
+
+                        if (result.Value == -1)
+                            this.ErrorBox("导入 UID PII 对照表文件", $"导入过程出错: {result.ErrorInfo}");
+                        else
+                        {
+                            if (sip)
+                                this.ErrorBox("导入 UID PII 对照表文件", $"导入完成。\r\n\r\n共处理条目 {result.LineCount} 个; 新创建本地库记录 {result.NewCount} 个; 修改本地库记录 {result.ChangeCount} 个; 删除本地库记录 {result.DeleteCount}", "green");
+                            else
+                            {
+                                if (result.ErrorCount > 0)
+                                    this.ErrorBox("导入 UID PII 对照表文件", $"导入完成。\r\n\r\n共处理条目 {result.LineCount} 个; 修改册记录 {result.ChangeCount} 个; 出错 {result.ErrorCount} 次(已写入错误日志文件)", "green");
+                                else
+                                    this.ErrorBox("导入 UID PII 对照表文件", $"导入完成。\r\n\r\n共处理条目 {result.LineCount} 个; 修改册记录 {result.ChangeCount} 个", "green");
+                            }
+                        }
+                    });
+                }
+                catch (Exception ex)
+                {
+                    ClientInfo.WriteErrorLog($"导入 UID 对照表过程出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                    this.ErrorBox("导入 UID PII 对照表文件", $"导入 UID 对照表过程出现异常: {ex.Message}");
+                }
+                finally
+                {
+                    this.Invoke(new Action(() =>
+                    {
+                        progress.Close();
+                    }));
+                }
+            }
+        }
+
+        void ErrorBox(string title,
+            string text,
+            string color = "red")
+        {
+            MessageDlg.Show(this,
+    text,
+    title);
+        }
     }
 
     public delegate void WriteCompleteEventHandler(object sender,
@@ -582,5 +769,7 @@ WriteCompleteventArgs e);
     public class WriteCompleteventArgs : EventArgs
     {
         public ProcessInfo Info { get; set; }
+        // 盘点动作
+        public string Action { get; set; }
     }
 }

@@ -41,6 +41,8 @@ namespace dp2Inventory
             this.columnHeader_tou = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_oi = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_writeTime = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_action = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_batchNo = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel_message = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel_lineNo = new System.Windows.Forms.ToolStripStatusLabel();
@@ -49,8 +51,10 @@ namespace dp2Inventory
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.MenuItem_file = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_inventory = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
+            this.MenuItem_exportLocalItemsToExcel = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
-            this.MenuItem_saveToExcelFile = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_saveHistoryToExcelFile = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_clearHistory = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_clearHistory_all = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_clearHistory_selected = new System.Windows.Forms.ToolStripMenuItem();
@@ -66,6 +70,7 @@ namespace dp2Inventory
             this.MenuItem_userManual = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_resetSerialCode = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_about = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_importUidUiiTable = new System.Windows.Forms.ToolStripMenuItem();
             this.tabControl1.SuspendLayout();
             this.tabPage_writeTag.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -76,11 +81,11 @@ namespace dp2Inventory
             // 
             this.tabControl1.Controls.Add(this.tabPage_writeTag);
             this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tabControl1.Location = new System.Drawing.Point(0, 93);
+            this.tabControl1.Location = new System.Drawing.Point(0, 74);
             this.tabControl1.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(1209, 779);
+            this.tabControl1.Size = new System.Drawing.Size(1209, 798);
             this.tabControl1.TabIndex = 7;
             // 
             // tabPage_writeTag
@@ -90,7 +95,7 @@ namespace dp2Inventory
             this.tabPage_writeTag.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.tabPage_writeTag.Name = "tabPage_writeTag";
             this.tabPage_writeTag.Padding = new System.Windows.Forms.Padding(6, 5, 6, 5);
-            this.tabPage_writeTag.Size = new System.Drawing.Size(1201, 734);
+            this.tabPage_writeTag.Size = new System.Drawing.Size(1201, 753);
             this.tabPage_writeTag.TabIndex = 0;
             this.tabPage_writeTag.Text = "盘点历史";
             this.tabPage_writeTag.UseVisualStyleBackColor = true;
@@ -106,7 +111,9 @@ namespace dp2Inventory
             this.columnHeader_state,
             this.columnHeader_tou,
             this.columnHeader_oi,
-            this.columnHeader_writeTime});
+            this.columnHeader_writeTime,
+            this.columnHeader_action,
+            this.columnHeader_batchNo});
             this.listView_writeHistory.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listView_writeHistory.Font = new System.Drawing.Font("微软雅黑", 10.71429F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.listView_writeHistory.FullRowSelect = true;
@@ -114,7 +121,8 @@ namespace dp2Inventory
             this.listView_writeHistory.Location = new System.Drawing.Point(6, 5);
             this.listView_writeHistory.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.listView_writeHistory.Name = "listView_writeHistory";
-            this.listView_writeHistory.Size = new System.Drawing.Size(1189, 724);
+            this.listView_writeHistory.ShowItemToolTips = true;
+            this.listView_writeHistory.Size = new System.Drawing.Size(1189, 743);
             this.listView_writeHistory.TabIndex = 0;
             this.listView_writeHistory.UseCompatibleStateImageBehavior = false;
             this.listView_writeHistory.View = System.Windows.Forms.View.Details;
@@ -168,6 +176,16 @@ namespace dp2Inventory
             this.columnHeader_writeTime.Text = "写入时间";
             this.columnHeader_writeTime.Width = 260;
             // 
+            // columnHeader_action
+            // 
+            this.columnHeader_action.Text = "动作";
+            this.columnHeader_action.Width = 200;
+            // 
+            // columnHeader_batchNo
+            // 
+            this.columnHeader_batchNo.Text = "批次号";
+            this.columnHeader_batchNo.Width = 200;
+            // 
             // statusStrip1
             // 
             this.statusStrip1.ImageScalingSize = new System.Drawing.Size(28, 28);
@@ -185,7 +203,7 @@ namespace dp2Inventory
             // toolStripStatusLabel_message
             // 
             this.toolStripStatusLabel_message.Name = "toolStripStatusLabel_message";
-            this.toolStripStatusLabel_message.Size = new System.Drawing.Size(996, 28);
+            this.toolStripStatusLabel_message.Size = new System.Drawing.Size(1154, 28);
             this.toolStripStatusLabel_message.Spring = true;
             this.toolStripStatusLabel_message.Text = "...";
             // 
@@ -206,7 +224,7 @@ namespace dp2Inventory
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(28, 28);
             this.toolStrip1.Location = new System.Drawing.Point(0, 49);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(1209, 44);
+            this.toolStrip1.Size = new System.Drawing.Size(1209, 25);
             this.toolStrip1.TabIndex = 5;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -229,35 +247,50 @@ namespace dp2Inventory
             // 
             this.MenuItem_file.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.MenuItem_inventory,
+            this.toolStripSeparator5,
+            this.MenuItem_importUidUiiTable,
+            this.MenuItem_exportLocalItemsToExcel,
             this.toolStripSeparator3,
-            this.MenuItem_saveToExcelFile,
+            this.MenuItem_saveHistoryToExcelFile,
             this.MenuItem_clearHistory,
             this.toolStripSeparator1,
             this.MenuItem_settings,
             this.toolStripSeparator2,
             this.MenuItem_exit});
             this.MenuItem_file.Name = "MenuItem_file";
-            this.MenuItem_file.Size = new System.Drawing.Size(97, 33);
+            this.MenuItem_file.Size = new System.Drawing.Size(117, 39);
             this.MenuItem_file.Text = "文件(&F)";
             // 
             // MenuItem_inventory
             // 
             this.MenuItem_inventory.Name = "MenuItem_inventory";
-            this.MenuItem_inventory.Size = new System.Drawing.Size(387, 40);
+            this.MenuItem_inventory.Size = new System.Drawing.Size(530, 44);
             this.MenuItem_inventory.Text = "盘点(&I)...";
             this.MenuItem_inventory.Click += new System.EventHandler(this.MenuItem_inventory_Click);
+            // 
+            // toolStripSeparator5
+            // 
+            this.toolStripSeparator5.Name = "toolStripSeparator5";
+            this.toolStripSeparator5.Size = new System.Drawing.Size(527, 6);
+            // 
+            // MenuItem_exportLocalItemsToExcel
+            // 
+            this.MenuItem_exportLocalItemsToExcel.Name = "MenuItem_exportLocalItemsToExcel";
+            this.MenuItem_exportLocalItemsToExcel.Size = new System.Drawing.Size(530, 44);
+            this.MenuItem_exportLocalItemsToExcel.Text = "导出本地册记录到 Excel 文件(&L) ...";
+            this.MenuItem_exportLocalItemsToExcel.Click += new System.EventHandler(this.MenuItem_exportLocalItemsToExcel_Click);
             // 
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(384, 6);
+            this.toolStripSeparator3.Size = new System.Drawing.Size(527, 6);
             // 
-            // MenuItem_saveToExcelFile
+            // MenuItem_saveHistoryToExcelFile
             // 
-            this.MenuItem_saveToExcelFile.Name = "MenuItem_saveToExcelFile";
-            this.MenuItem_saveToExcelFile.Size = new System.Drawing.Size(387, 40);
-            this.MenuItem_saveToExcelFile.Text = "保存列表到 Excel 文件(&S) ...";
-            this.MenuItem_saveToExcelFile.Click += new System.EventHandler(this.MenuItem_saveToExcelFile_Click);
+            this.MenuItem_saveHistoryToExcelFile.Name = "MenuItem_saveHistoryToExcelFile";
+            this.MenuItem_saveHistoryToExcelFile.Size = new System.Drawing.Size(530, 44);
+            this.MenuItem_saveHistoryToExcelFile.Text = "保存操作历史到 Excel 文件(&S) ...";
+            this.MenuItem_saveHistoryToExcelFile.Click += new System.EventHandler(this.MenuItem_saveHistoryToExcelFile_Click);
             // 
             // MenuItem_clearHistory
             // 
@@ -265,44 +298,44 @@ namespace dp2Inventory
             this.MenuItem_clearHistory_all,
             this.MenuItem_clearHistory_selected});
             this.MenuItem_clearHistory.Name = "MenuItem_clearHistory";
-            this.MenuItem_clearHistory.Size = new System.Drawing.Size(387, 40);
-            this.MenuItem_clearHistory.Text = "清除“写入历史”列表(&C)";
+            this.MenuItem_clearHistory.Size = new System.Drawing.Size(530, 44);
+            this.MenuItem_clearHistory.Text = "清除“盘点历史”列表(&C)";
             // 
             // MenuItem_clearHistory_all
             // 
             this.MenuItem_clearHistory_all.Name = "MenuItem_clearHistory_all";
-            this.MenuItem_clearHistory_all.Size = new System.Drawing.Size(315, 40);
+            this.MenuItem_clearHistory_all.Size = new System.Drawing.Size(291, 44);
             this.MenuItem_clearHistory_all.Text = "清除全部事项";
             this.MenuItem_clearHistory_all.Click += new System.EventHandler(this.MenuItem_clearHistory_all_Click);
             // 
             // MenuItem_clearHistory_selected
             // 
             this.MenuItem_clearHistory_selected.Name = "MenuItem_clearHistory_selected";
-            this.MenuItem_clearHistory_selected.Size = new System.Drawing.Size(315, 40);
+            this.MenuItem_clearHistory_selected.Size = new System.Drawing.Size(291, 44);
             this.MenuItem_clearHistory_selected.Text = "清除所选事项";
             this.MenuItem_clearHistory_selected.Click += new System.EventHandler(this.MenuItem_clearHistory_selected_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(384, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(527, 6);
             // 
             // MenuItem_settings
             // 
             this.MenuItem_settings.Name = "MenuItem_settings";
-            this.MenuItem_settings.Size = new System.Drawing.Size(387, 40);
+            this.MenuItem_settings.Size = new System.Drawing.Size(530, 44);
             this.MenuItem_settings.Text = "设置(&S) ...";
             this.MenuItem_settings.Click += new System.EventHandler(this.MenuItem_settings_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(384, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(527, 6);
             // 
             // MenuItem_exit
             // 
             this.MenuItem_exit.Name = "MenuItem_exit";
-            this.MenuItem_exit.Size = new System.Drawing.Size(387, 40);
+            this.MenuItem_exit.Size = new System.Drawing.Size(530, 44);
             this.MenuItem_exit.Text = "退出(&X)";
             this.MenuItem_exit.Click += new System.EventHandler(this.MenuItem_exit_Click);
             // 
@@ -317,55 +350,62 @@ namespace dp2Inventory
             this.MenuItem_resetSerialCode,
             this.MenuItem_about});
             this.MenuItem_help.Name = "MenuItem_help";
-            this.MenuItem_help.Size = new System.Drawing.Size(102, 33);
+            this.MenuItem_help.Size = new System.Drawing.Size(123, 39);
             this.MenuItem_help.Text = "帮助(&H)";
             // 
             // MenuItem_openUserFolder
             // 
             this.MenuItem_openUserFolder.Name = "MenuItem_openUserFolder";
-            this.MenuItem_openUserFolder.Size = new System.Drawing.Size(403, 40);
+            this.MenuItem_openUserFolder.Size = new System.Drawing.Size(479, 44);
             this.MenuItem_openUserFolder.Text = "打开用户文件夹(&U)";
             this.MenuItem_openUserFolder.Click += new System.EventHandler(this.MenuItem_openUserFolder_Click);
             // 
             // MenuItem_openDataFolder
             // 
             this.MenuItem_openDataFolder.Name = "MenuItem_openDataFolder";
-            this.MenuItem_openDataFolder.Size = new System.Drawing.Size(403, 40);
+            this.MenuItem_openDataFolder.Size = new System.Drawing.Size(479, 44);
             this.MenuItem_openDataFolder.Text = "打开数据文件夹(&D)";
             this.MenuItem_openDataFolder.Click += new System.EventHandler(this.MenuItem_openDataFolder_Click);
             // 
             // MenuItem_openProgramFolder
             // 
             this.MenuItem_openProgramFolder.Name = "MenuItem_openProgramFolder";
-            this.MenuItem_openProgramFolder.Size = new System.Drawing.Size(403, 40);
+            this.MenuItem_openProgramFolder.Size = new System.Drawing.Size(479, 44);
             this.MenuItem_openProgramFolder.Text = "打开程序文件夹(&P)";
             this.MenuItem_openProgramFolder.Click += new System.EventHandler(this.MenuItem_openProgramFolder_Click);
             // 
             // toolStripSeparator4
             // 
             this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(400, 6);
+            this.toolStripSeparator4.Size = new System.Drawing.Size(476, 6);
             // 
             // MenuItem_userManual
             // 
             this.MenuItem_userManual.Name = "MenuItem_userManual";
-            this.MenuItem_userManual.Size = new System.Drawing.Size(403, 40);
+            this.MenuItem_userManual.Size = new System.Drawing.Size(479, 44);
             this.MenuItem_userManual.Text = "dp2Inventory 使用指南(&U) ...";
             this.MenuItem_userManual.Click += new System.EventHandler(this.MenuItem_userManual_Click);
             // 
             // MenuItem_resetSerialCode
             // 
             this.MenuItem_resetSerialCode.Name = "MenuItem_resetSerialCode";
-            this.MenuItem_resetSerialCode.Size = new System.Drawing.Size(403, 40);
+            this.MenuItem_resetSerialCode.Size = new System.Drawing.Size(479, 44);
             this.MenuItem_resetSerialCode.Text = "设置序列号(&R) ...";
             this.MenuItem_resetSerialCode.Click += new System.EventHandler(this.MenuItem_resetSerialCode_Click);
             // 
             // MenuItem_about
             // 
             this.MenuItem_about.Name = "MenuItem_about";
-            this.MenuItem_about.Size = new System.Drawing.Size(403, 40);
+            this.MenuItem_about.Size = new System.Drawing.Size(479, 44);
             this.MenuItem_about.Text = "关于(&A)...";
             this.MenuItem_about.Click += new System.EventHandler(this.MenuItem_about_Click);
+            // 
+            // MenuItem_importUidUiiTable
+            // 
+            this.MenuItem_importUidUiiTable.Name = "MenuItem_importUidUiiTable";
+            this.MenuItem_importUidUiiTable.Size = new System.Drawing.Size(530, 44);
+            this.MenuItem_importUidUiiTable.Text = "导入 UID-->UII 对照关系(&I) ...";
+            this.MenuItem_importUidUiiTable.Click += new System.EventHandler(this.MenuItem_importUidUiiTable_Click);
             // 
             // MainForm
             // 
@@ -377,7 +417,7 @@ namespace dp2Inventory
             this.Controls.Add(this.toolStrip1);
             this.Controls.Add(this.menuStrip1);
             this.Font = new System.Drawing.Font("微软雅黑", 10.71429F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.Margin = new System.Windows.Forms.Padding(5);
             this.Name = "MainForm";
             this.ShowIcon = false;
             this.Text = "dp2Inventory -- 盘点";
@@ -414,7 +454,7 @@ namespace dp2Inventory
         private System.Windows.Forms.ToolStripMenuItem MenuItem_file;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_inventory;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
-        private System.Windows.Forms.ToolStripMenuItem MenuItem_saveToExcelFile;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_saveHistoryToExcelFile;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_clearHistory;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_clearHistory_all;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_clearHistory_selected;
@@ -434,6 +474,11 @@ namespace dp2Inventory
         private System.Windows.Forms.ColumnHeader columnHeader_location;
         private System.Windows.Forms.ColumnHeader columnHeader_state;
         private System.Windows.Forms.ColumnHeader columnHeader_title;
+        private System.Windows.Forms.ColumnHeader columnHeader_action;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_exportLocalItemsToExcel;
+        private System.Windows.Forms.ColumnHeader columnHeader_batchNo;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_importUidUiiTable;
     }
 }
 

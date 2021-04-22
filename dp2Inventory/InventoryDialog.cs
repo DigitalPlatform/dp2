@@ -22,6 +22,7 @@ using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
 using static dp2Inventory.LibraryChannelUtil;
 using static DigitalPlatform.RFID.LogicChip;
+using static dp2Inventory.InventoryData;
 
 namespace dp2Inventory
 {
@@ -71,7 +72,7 @@ namespace dp2Inventory
 #endif
         }
 
-        ActionInfo _action = null;
+        // ActionInfo _action = null;
 
         bool _slowMode = false;
 
@@ -125,7 +126,7 @@ namespace dp2Inventory
                     {
                         progress = new FileDownloadDialog();
                         progress.Font = this.Font;
-                        progress.Text = "正在获取 UID --> UII 对照关系";
+                        progress.Text = "正在将 UID --> UII 对照关系装入内存";
                         progress.Show(this);
                     }));
                     try
@@ -140,24 +141,24 @@ namespace dp2Inventory
                         }
                         */
 
-                        progress.SetMessage("正在获取 UID --> UII 对照关系");
+                        progress.SetMessage("正在将 UID --> UII 对照关系装入内存");
 
                         Hashtable uid_table = new Hashtable();
                         NormalResult result = null;
                         if (DataModel.Protocol == "sip")
                             result = await DataModel.LoadUidTableAsync(uid_table,
-                                (text) =>
+                                (text, bytes, total) =>
                                 {
-                                    progress.SetMessage(text);
+                                    progress.SetProgress(text, bytes, total);
                                 },
                                 _cancel.Token);
                         else
                             result = LibraryChannelUtil.DownloadUidTable(
                                 null,
                                 uid_table,
-                                (text) =>
+                                (text, bytes, total) =>
                                 {
-                                    progress.SetMessage(text);
+                                    progress.SetProgress(text, bytes, total);
                                 },
                                 _cancel.Token);
                         DataModel.SetUidTable(uid_table);
@@ -397,7 +398,10 @@ namespace dp2Inventory
                             if (result.Results == null)
                                 result.Results = new List<OneTag>();
                             if (result.Value == -1)
-                                ShowMessageBox("inventory", result.ErrorInfo);
+                            {
+                                ShowMessageBox("inventory", $"列出标签失败: {result.ErrorInfo}");
+                                break;
+                            }
                             else
                             {
                                 ShowMessageBox("inventory", null);
@@ -536,12 +540,12 @@ namespace dp2Inventory
                     }
                     catch (Exception ex)
                     {
-                        ClientInfo.WriteErrorLog($"修改循环出现异常: {ExceptionUtil.GetDebugText(ex)}");
-                        ShowMessageBox("inventory", $"修改循环因为异常已终止: {ex.Message}");
+                        ClientInfo.WriteErrorLog($"盘点循环出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                        ShowMessageBox("inventory", $"盘点循环因为异常已终止: {ex.Message}");
                     }
                     finally
                     {
-                        FormClientInfo.Speak("停止修改", false, false);
+                        FormClientInfo.Speak("停止盘点", false, false);
 
                         this.Invoke((Action)(() =>
                         {
@@ -817,6 +821,7 @@ out string block_map);
                         ListViewUtil.ChangeItemText(item, COLUMN_PII, "(尚未填充)");
                         this.listView_tags.Items.Add(item);
                     }
+                    // 可能会标记 "cross"
                     RefreshItem(item, tag);
 
                     var iteminfo = item.Tag as ItemInfo;
@@ -830,6 +835,9 @@ out string block_map);
 
         public class ItemInfo
         {
+            // 处理时用过的层架位置。用于后来 cross 比较
+            public string ProcessedShelfNo { get; set; }
+
             public OneTag Tag { get; set; }
             public TagInfo TagInfo { get; set; }
 
@@ -855,7 +863,7 @@ out string block_map);
             if (iteminfo == null)
                 item.Tag = new ItemInfo { Tag = tag };
 
-            if (IsProcessed(tag.UID))
+            if (IsProcessed(tag.UID, CurrentShelfNo))
             {
                 iteminfo.State = "cross";   // 表示以前处理过这个标签
                 ListViewUtil.ChangeItemText(item, COLUMN_ERRORINFO, "交叉");
@@ -889,11 +897,22 @@ out string block_map);
         Hashtable _processedTable = new Hashtable();
 
         // 先前是否已经处理过？
-        bool IsProcessed(string uid)
+        // parameters:
+        //      current_shelfno 当前层架标位置。用于和先前处理时的层架标位置进行比较，如果不同，则不算做交叉(意思是需要重新处理)
+        bool IsProcessed(string uid, 
+            string current_shelfno)
         {
             lock (_processedTable.SyncRoot)
             {
-                return _processedTable.ContainsKey(uid);
+                var exist = _processedTable.ContainsKey(uid);
+                if (exist == false)
+                    return false;
+                ItemInfo iteminfo = (ItemInfo)_processedTable[uid];
+                if (iteminfo == null)
+                    return false;
+                if (iteminfo.ProcessedShelfNo == current_shelfno)
+                    return true;
+                return false;
             }
         }
 
@@ -905,7 +924,8 @@ out string block_map);
             }
         }
 
-        void AddToProcessed(string uid, ItemInfo iteminfo)
+        void AddToProcessed(string uid, 
+            ItemInfo iteminfo)
         {
             lock (_processedTable.SyncRoot)
             {
@@ -1119,6 +1139,9 @@ out string block_map);
                             continue;
                         }
 
+                        // 记忆处理时的层架位置
+                        iteminfo.ProcessedShelfNo = CurrentShelfNo;
+
                         ProcessInfo process_info = new ProcessInfo { Entity = entity };
                         var set_result = SetTargetCurrentLocation(process_info);
                         if (set_result.Value == -1
@@ -1146,7 +1169,11 @@ out string block_map);
                         // string old_title = process_info.Entity?.Title;
                         process_info.ListViewItem = item;
 
-                        await ProcessAsync(process_info);
+                        await ProcessAsync(process_info,
+                            (i, a)=> {
+                                // 加入操作历史
+                                WriteComplete?.Invoke(this, new WriteCompleteventArgs { Info = i, Action = a });
+                            });
 
                         /*
                         // 更新题名显示
@@ -1170,8 +1197,6 @@ out string block_map);
                             AddToProcessed(iteminfo.Tag.UID, iteminfo);
                             process_count++;
 
-                            // 加入操作历史
-                            WriteComplete?.Invoke(this, new WriteCompleteventArgs { Info = process_info });
                         }
                         else
                         {
@@ -1315,7 +1340,8 @@ out string block_map);
         }
         */
 
-        static async Task ProcessAsync(ProcessInfo info)
+        static async Task ProcessAsync(ProcessInfo info,
+            delegate_writeHistory writeHistory)
         {
             var entity = info.Entity;
             info.State = "processing";
@@ -1410,7 +1436,10 @@ out string block_map);
                 if (string.IsNullOrEmpty(entity.PII) == false
                     && info != null && info.IsLocation == false)
                 {
-                    await InventoryData.BeginInventoryAsync(info, ActionMode);
+                    await InventoryData.BeginInventoryAsync(
+                        info,
+                        ActionMode,
+                        writeHistory);
                 }
 
                 // App.SetError("processing", null);
@@ -1460,6 +1489,7 @@ out string block_map);
             }
         }
 
+#if REMOVED
         // 执行修改动作
         NormalResult DoAction(ListViewItem item)
         {
@@ -1681,6 +1711,8 @@ out string block_map);
                 };
             }
         }
+
+#endif
 
         public static string MakeOiPii(string pii, string oi, string aoi)
         {
@@ -2200,6 +2232,7 @@ bool eas)
         }
     }
 
+#if REMOVED
     // 修改动作
     class ActionInfo
     {
@@ -2256,4 +2289,6 @@ bool eas)
                 barcode);
         }
     }
+
+#endif
 }
