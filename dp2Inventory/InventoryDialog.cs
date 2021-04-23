@@ -323,6 +323,17 @@ namespace dp2Inventory
             _pause = false;
         }
 
+        void SetPauseText()
+        {
+            this.Invoke((Action)(() =>
+            {
+                if (_pause)
+                    this.toolStripButton_pause.Text = "继续";
+                else
+                    this.toolStripButton_pause.Text = "暂停";
+            }));
+        }
+
         void InitialRfidManager(string url)
         {
             RfidManager.Base.Name = "RFID 中心";
@@ -343,6 +354,8 @@ namespace dp2Inventory
             this.listView_tags.Items.Clear();
             this.toolStripButton_begin.Enabled = false;
             this.toolStripButton_stop.Enabled = true;
+            this.toolStripButton_pause.Enabled = true;
+            SetPauseText();
             ClearUidTable();
             ClearProcessedTable();
             ClearCacheTagTable(null);
@@ -392,6 +405,9 @@ namespace dp2Inventory
                             // 语音提示倒计时开始盘点
                             await SpeakCounter(token);
 
+                            if (_pause)
+                                continue;
+
                             string readerNameList = "*";
                             var result = RfidManager.CallListTags(readerNameList, "");
                             // var result = DataModel.ListTags(readerNameList, "");
@@ -406,6 +422,9 @@ namespace dp2Inventory
                             {
                                 ShowMessageBox("inventory", null);
                             }
+
+                            if (_pause)
+                                continue;
 
                             /*
                             if (result.Results.Count == 0)
@@ -552,6 +571,9 @@ namespace dp2Inventory
                             // 把按钮状态复原到未启动状态
                             this.toolStripButton_begin.Enabled = true;
                             this.toolStripButton_stop.Enabled = false;
+                            this.toolStripButton_pause.Enabled = false;
+                            ContinueLoop();
+                            SetPauseText();
                         }));
 
                         // 恢复基本循环
@@ -899,7 +921,7 @@ out string block_map);
         // 先前是否已经处理过？
         // parameters:
         //      current_shelfno 当前层架标位置。用于和先前处理时的层架标位置进行比较，如果不同，则不算做交叉(意思是需要重新处理)
-        bool IsProcessed(string uid, 
+        bool IsProcessed(string uid,
             string current_shelfno)
         {
             lock (_processedTable.SyncRoot)
@@ -924,7 +946,7 @@ out string block_map);
             }
         }
 
-        void AddToProcessed(string uid, 
+        void AddToProcessed(string uid,
             ItemInfo iteminfo)
         {
             lock (_processedTable.SyncRoot)
@@ -1170,7 +1192,8 @@ out string block_map);
                         process_info.ListViewItem = item;
 
                         await ProcessAsync(process_info,
-                            (i, a)=> {
+                            (i, a) =>
+                            {
                                 // 加入操作历史
                                 WriteComplete?.Invoke(this, new WriteCompleteventArgs { Info = i, Action = a });
                             });
@@ -2229,6 +2252,20 @@ bool eas)
         private void toolStripButton_cancelSpeaking_Click(object sender, EventArgs e)
         {
             FormClientInfo.CancelSpeaking();
+        }
+
+        private void toolStripButton_pause_Click(object sender, EventArgs e)
+        {
+            if (_pause == false)
+            {
+                PauseLoop();
+            }
+            else
+            {
+                ContinueLoop();
+            }
+
+            SetPauseText();
         }
     }
 

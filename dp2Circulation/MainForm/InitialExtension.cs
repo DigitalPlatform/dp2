@@ -1940,9 +1940,9 @@ MessageBoxDefaultButton.Button1);
             }));
         }
 
-#endregion
+        #endregion
 
-#region ProcessManager
+        #region ProcessManager
 
         CancellationTokenSource _cancelProcessMonitor = new CancellationTokenSource();
 
@@ -1994,7 +1994,7 @@ MessageBoxDefaultButton.Button1);
         }
 
 
-#endregion
+        #endregion
 
         // 将 dp2circulation.xml 文件中绿色安装目录或者 ClickOnce 安装的数据目录移动到用户目录
         int MoveDp2circulationXml(out string strError)
@@ -2162,7 +2162,7 @@ MessageBoxDefaultButton.Button1);
             MessageBox.Show(this, strText);
         }
 
-#region Background Form
+        #region Background Form
 
         void OpenBackgroundForm()
         {
@@ -2283,7 +2283,7 @@ MessageBoxDefaultButton.Button1);
             }
         }
 
-#endregion
+        #endregion
 
         // 判断两个文件的版本号是否一致
         static bool VersionChanged(string filename1, string filename2)

@@ -72,7 +72,15 @@ namespace dp2Inventory
         {
             // this.textBox_verifyRule.Text = DataModel.PiiVerifyRule;
 
-            LoadData();
+            try
+            {
+                LoadData();
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(this, $"BeginModifyDialog_Load() 装载数据出错: {ex.Message}");
+                this.Close();
+            }
         }
 
         public bool ActionSetUID
@@ -97,7 +105,13 @@ namespace dp2Inventory
                 get_result = InventoryData.sip_GetLocationListFromLocal();
             }
             else
+            {
+                if (string.IsNullOrEmpty(DataModel.dp2libraryServerUrl))
+                    throw new Exception("尚未配置 dp2library 服务器 URL");
+
                 get_result = LibraryChannelUtil.GetLocationList();
+            }
+
             if (get_result.Value == -1)
                 throw new Exception($"获得馆藏地列表时出错: {get_result.ErrorInfo}");
 

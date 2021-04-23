@@ -53,9 +53,12 @@ namespace dp2Inventory
         {
             string strError = "";
 
+            bool control = (Control.ModifierKeys & Keys.Control) == Keys.Control;
+
             List<string> errors = new List<string>();
 
-            if (string.IsNullOrEmpty(this.textBox_rfid_rfidCenterUrl.Text))
+            if (control == false
+                && string.IsNullOrEmpty(this.textBox_rfid_rfidCenterUrl.Text))
                 errors.Add("尚未设置 RFID 读卡器接口 URL");
 
             if (Int32.TryParse(this.textBox_sip_port.Text, out int port) == false)
@@ -82,6 +85,40 @@ namespace dp2Inventory
             DataModel.sipPassword = this.textBox_sip_password.Text;
             DataModel.sipEncoding = this.textBox_sip_encoding.Text;
             DataModel.sipInstitution = this.textBox_sip_institution.Text;
+
+            // 释放所有 libraryChannel 和 sipChannel 通道
+            LibraryChannelUtil.Clear();
+            SipChannelUtil.CloseChannel();
+
+            // 检查两个服务器 URL 必须至少配置其中一个
+            if (control == false
+                && string.IsNullOrEmpty(DataModel.dp2libraryServerUrl)
+                && string.IsNullOrEmpty(DataModel.sipServerAddr))
+            {
+                strError = "dp2library 服务器 URL 和 SIP 服务器地址两者必须配置其中一个";
+                goto ERROR1;
+            }
+
+            // 2021/4/23
+            // 重新初始化 dp2library 相关环境
+            if (string.IsNullOrEmpty(DataModel.dp2libraryServerUrl) == false)
+            {
+                this.Enabled = false;
+                try
+                {
+                    var initial_result = LibraryChannelUtil.Initial();
+                    if (initial_result.Value == -1
+                        && control == false)
+                    {
+                        strError = $"获得 dp2library 服务器配置失败: {initial_result.ErrorInfo}";
+                        goto ERROR1;
+                    }
+                }
+                finally
+                {
+                    this.Enabled = true;
+                }
+            }
 
             this.DialogResult = DialogResult.OK;
             this.Close();

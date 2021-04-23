@@ -531,7 +531,7 @@ out string strError);
             // Delegate_writeLog writeLog,
             CancellationToken token)
         {
-            ClientInfo.WriteInfoLog($"开始下载全部册记录到本地缓存");
+            ClientInfo.WriteInfoLog($"开始下载 UID-->UII 对照关系");
             LibraryChannel channel = GetChannel();
             var old_timeout = channel.Timeout;
             channel.Timeout = TimeSpan.FromMinutes(5);  // 设置 5 分钟。因为册记录检索需要一定时间
@@ -686,12 +686,12 @@ out string strError);
             }
             catch (Exception ex)
             {
-                ClientInfo.WriteErrorLog($"DownloadItemRecordAsync() 出现异常：{ExceptionUtil.GetDebugText(ex)}");
+                ClientInfo.WriteErrorLog($"DownloadUidTable() 出现异常：{ExceptionUtil.GetDebugText(ex)}");
 
                 return new NormalResult
                 {
                     Value = -1,
-                    ErrorInfo = $"DownloadItemRecordAsync() 出现异常：{ex.Message}"
+                    ErrorInfo = $"DownloadUidTable() 出现异常：{ex.Message}"
                 };
             }
             finally
@@ -699,7 +699,7 @@ out string strError);
                 channel.Timeout = old_timeout;
                 ReturnChannel(channel);
 
-                ClientInfo.WriteInfoLog($"结束下载全部册记录到本地缓存");
+                ClientInfo.WriteInfoLog($"结束下载 UID-->UII 对照关系");
             }
         }
 

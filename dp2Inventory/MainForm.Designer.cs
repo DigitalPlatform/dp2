@@ -62,6 +62,8 @@ namespace dp2Inventory
             this.MenuItem_settings = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_exit = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_maintenance = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_importUidUiiTable = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_help = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_openUserFolder = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_openDataFolder = new System.Windows.Forms.ToolStripMenuItem();
@@ -70,7 +72,7 @@ namespace dp2Inventory
             this.MenuItem_userManual = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_resetSerialCode = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_about = new System.Windows.Forms.ToolStripMenuItem();
-            this.MenuItem_importUidUiiTable = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_clearUidUiiTable = new System.Windows.Forms.ToolStripMenuItem();
             this.tabControl1.SuspendLayout();
             this.tabPage_writeTag.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -235,6 +237,7 @@ namespace dp2Inventory
             this.menuStrip1.ImageScalingSize = new System.Drawing.Size(28, 28);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.MenuItem_file,
+            this.MenuItem_maintenance,
             this.MenuItem_help});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
@@ -248,7 +251,6 @@ namespace dp2Inventory
             this.MenuItem_file.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.MenuItem_inventory,
             this.toolStripSeparator5,
-            this.MenuItem_importUidUiiTable,
             this.MenuItem_exportLocalItemsToExcel,
             this.toolStripSeparator3,
             this.MenuItem_saveHistoryToExcelFile,
@@ -339,6 +341,22 @@ namespace dp2Inventory
             this.MenuItem_exit.Text = "退出(&X)";
             this.MenuItem_exit.Click += new System.EventHandler(this.MenuItem_exit_Click);
             // 
+            // MenuItem_maintenance
+            // 
+            this.MenuItem_maintenance.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.MenuItem_importUidUiiTable,
+            this.MenuItem_clearUidUiiTable});
+            this.MenuItem_maintenance.Name = "MenuItem_maintenance";
+            this.MenuItem_maintenance.Size = new System.Drawing.Size(128, 39);
+            this.MenuItem_maintenance.Text = "维护(&M)";
+            // 
+            // MenuItem_importUidUiiTable
+            // 
+            this.MenuItem_importUidUiiTable.Name = "MenuItem_importUidUiiTable";
+            this.MenuItem_importUidUiiTable.Size = new System.Drawing.Size(482, 44);
+            this.MenuItem_importUidUiiTable.Text = "导入 UID-->UII 对照关系(&I) ...";
+            this.MenuItem_importUidUiiTable.Click += new System.EventHandler(this.MenuItem_importUidUiiTable_Click);
+            // 
             // MenuItem_help
             // 
             this.MenuItem_help.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -400,12 +418,12 @@ namespace dp2Inventory
             this.MenuItem_about.Text = "关于(&A)...";
             this.MenuItem_about.Click += new System.EventHandler(this.MenuItem_about_Click);
             // 
-            // MenuItem_importUidUiiTable
+            // MenuItem_clearUidUiiTable
             // 
-            this.MenuItem_importUidUiiTable.Name = "MenuItem_importUidUiiTable";
-            this.MenuItem_importUidUiiTable.Size = new System.Drawing.Size(530, 44);
-            this.MenuItem_importUidUiiTable.Text = "导入 UID-->UII 对照关系(&I) ...";
-            this.MenuItem_importUidUiiTable.Click += new System.EventHandler(this.MenuItem_importUidUiiTable_Click);
+            this.MenuItem_clearUidUiiTable.Name = "MenuItem_clearUidUiiTable";
+            this.MenuItem_clearUidUiiTable.Size = new System.Drawing.Size(482, 44);
+            this.MenuItem_clearUidUiiTable.Text = "清除 UID-->UII 对照关系(&C)";
+            this.MenuItem_clearUidUiiTable.Click += new System.EventHandler(this.MenuItem_clearUidUiiTable_Click);
             // 
             // MainForm
             // 
@@ -478,7 +496,9 @@ namespace dp2Inventory
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_exportLocalItemsToExcel;
         private System.Windows.Forms.ColumnHeader columnHeader_batchNo;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_maintenance;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_importUidUiiTable;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_clearUidUiiTable;
     }
 }
 

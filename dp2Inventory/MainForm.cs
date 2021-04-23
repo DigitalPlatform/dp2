@@ -16,6 +16,7 @@ using DigitalPlatform.CommonControl;
 using DigitalPlatform.Core;
 using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.GUI;
+using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using static dp2Inventory.InventoryData;
 
@@ -158,7 +159,7 @@ bool bClickClose = false)
             });
         }
 
-        private void MainForm_Load(object sender, EventArgs e)
+        private async void MainForm_Load(object sender, EventArgs e)
         {
             // FormClientInfo.SerialNumberMode = "must";
             var ret = FormClientInfo.Initial("dp2inventory",
@@ -171,22 +172,47 @@ bool bClickClose = false)
 
             LoadSettings();
 
+            RefreshMenuState();
+
             Storeage.Initialize();
 
             _ = Task.Run(() =>
             {
-                LoadHistory();
+                StartProcessManager();
             });
 
-            _ = Task.Run(() =>
+            List<string> errors = new List<string>();
+            this._showMessage("正在初始化窗口内容，请稍候 ...");
+            this.EnableControls(false);
+            try
             {
-                var initial_result = LibraryChannelUtil.Initial();
-                if (initial_result.Value == -1)
+                var task1 = Task.Run(() =>
                 {
-                    this.ShowMessage($"获得 dp2library 服务器配置失败: {initial_result.ErrorInfo}");
-                    return;
-                }
-            });
+                    LoadHistory();
+                    // await Task.Delay(TimeSpan.FromSeconds(5));
+                });
+
+                var task2 = Task.Run(() =>
+                {
+                    var initial_result = LibraryChannelUtil.Initial();
+                    if (initial_result.Value == -1)
+                    {
+                        errors.Add($"获得 dp2library 服务器配置失败: {initial_result.ErrorInfo}");
+                        return;
+                    }
+                });
+
+                await Task.WhenAll(new Task[] { task1, task2 });
+            }
+            finally
+            {
+                this.EnableControls(true);
+                if (errors.Count > 0)
+                    this.ShowMessage(StringUtil.MakePathList(errors, "\r\n"));
+                else
+                    this._clearMessage();
+            }
+
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -268,23 +294,40 @@ bool bClickClose = false)
             OpenSettingDialog(this);
         }
 
-        public static void OpenSettingDialog(Form parent,
+        public void OpenSettingDialog(Form parent,
     string style = "")
         {
             using (SettingDialog dlg = new SettingDialog())
             {
+                var oldUrl = DataModel.RfidCenterUrl;
+
                 GuiUtil.SetControlFont(dlg, parent.Font);
                 ClientInfo.MemoryState(dlg, "settingDialog", "state");
                 //dlg.OpenStyle = style;
                 dlg.ShowDialog(parent);
                 if (dlg.DialogResult == DialogResult.OK)
                 {
-                    // TODO: 释放所有 libraryChannel 和 sipChannel 通道
-                    LibraryChannelUtil.Clear();
-                    SipChannelUtil.CloseChannel();
+                    // 更新菜单状态
+                    RefreshMenuState();
+
+                    if (oldUrl != DataModel.RfidCenterUrl)
+                        StartProcessManager();
 
                     //    DataModel.TagList.EnableTagCache = DataModel.EnableTagCache;
                 }
+            }
+        }
+
+        // 刷新菜单状态
+        void RefreshMenuState()
+        {
+            if (DataModel.Protocol == "sip")
+            {
+                MenuItem_clearUidUiiTable.Enabled = true;
+            }
+            else
+            {
+                MenuItem_clearUidUiiTable.Enabled = false;
             }
         }
 
@@ -502,6 +545,8 @@ bool bClickClose = false)
         void EnableControls(bool enable)
         {
             this.listView_writeHistory.Enabled = enable;
+            this.menuStrip1.Enabled = enable;
+            this.toolStrip1.Enabled = enable;
         }
 
         private void MenuItem_clearHistory_all_Click(object sender, EventArgs e)
@@ -686,7 +731,8 @@ MessageBoxDefaultButton.Button2);
                     progress.Text = "正在导入 UID PII 对照表";
                     // progress.Show(this);
                 }));
-                progress.FormClosed += (o1, e1) => {
+                progress.FormClosed += (o1, e1) =>
+                {
                     cancel.Cancel();
                 };
                 try
@@ -754,10 +800,90 @@ MessageBoxDefaultButton.Button2);
             string text,
             string color = "red")
         {
-            MessageDlg.Show(this,
+            this.Invoke((Action)(() =>
+            {
+                MessageDlg.Show(this,
     text,
     title);
+            }));
         }
+
+        private async void MenuItem_clearUidUiiTable_Click(object sender, EventArgs e)
+        {
+            {
+                var result = MessageBox.Show("若清除了本地 UID --> PII 缓存，后继第一次盘点时会速度较慢(但缓存会自动重新建立，速度会恢复)。\r\n\r\n确实要清除缓存？",
+    "清除 UID-->UII 对照关系",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button2);
+                if (result == DialogResult.No)
+                    return;
+            }
+
+            using (var cancel = CancellationTokenSource.CreateLinkedTokenSource(this._cancel.Token))
+            {
+                try
+                {
+                    await Task.Run(async () =>
+                    {
+                        var result = await InventoryData.ClearUidPiiLocalCacheAsync(
+                            this._cancel.Token);
+                        if (result.Value == -1)
+                            this.ErrorBox("清除 UID-->UII 对照关系", $"清除过程出错: {result.ErrorInfo}");
+                        else
+                            this.ErrorBox("清除 UID-->UII 对照关系", $"清除完成。\r\n\r\n共清除条目 {result.Value} 个", "green");
+                    });
+                }
+                catch (Exception ex)
+                {
+                    ClientInfo.WriteErrorLog($"清除 UID-->UII 对照关系过程出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                    this.ErrorBox("清除 UID-->UII 对照关系", $"清除 UID-->UII 对照关系过程出现异常: {ex.Message}");
+                }
+                finally
+                {
+                }
+            }
+        }
+
+
+        #region ProcessManager
+
+        CancellationTokenSource _cancelProcessMonitor = new CancellationTokenSource();
+
+        public void StartProcessManager()
+        {
+            // 停止前一次的 monitor
+            if (_cancelProcessMonitor != null)
+            {
+                _cancelProcessMonitor.Cancel();
+                _cancelProcessMonitor.Dispose();
+
+                _cancelProcessMonitor = new CancellationTokenSource();
+            }
+
+            // if (ProcessMonitor == true)
+            {
+                List<DigitalPlatform.IO.ProcessInfo> infos = new List<DigitalPlatform.IO.ProcessInfo>();
+
+                if (string.IsNullOrEmpty(DataModel.RfidCenterUrl) == false
+                    && ProcessManager.IsIpcUrl(DataModel.RfidCenterUrl))
+                    infos.Add(new DigitalPlatform.IO.ProcessInfo
+                    {
+                        Name = "RFID中心",
+                        ShortcutPath = "DigitalPlatform/dp2 V3/dp2-RFID中心",
+                        MutexName = "{CF1B7B4A-C7ED-4DB8-B5CC-59A067880F92}"
+                    });
+
+                ProcessManager.Start(infos,
+                    (info, text) =>
+                    {
+                        ClientInfo.WriteErrorLog($"{info.Name} {text}");
+                    },
+                    _cancelProcessMonitor.Token);
+            }
+        }
+
+        #endregion
     }
 
     public delegate void WriteCompleteEventHandler(object sender,

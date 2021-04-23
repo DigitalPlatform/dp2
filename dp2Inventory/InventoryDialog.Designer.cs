@@ -61,6 +61,7 @@ namespace dp2Inventory
             this.columnHeader_readerName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_antenna = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_protocol = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.toolStripButton_pause = new System.Windows.Forms.ToolStripButton();
             this.toolStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -73,6 +74,7 @@ namespace dp2Inventory
             this.toolStripButton_begin,
             this.toolStripSeparator1,
             this.toolStripButton_exportUidPiiMap,
+            this.toolStripButton_pause,
             this.toolStripButton_stop,
             this.toolStripSeparator2,
             this.toolStripButton_nextScan,
@@ -327,6 +329,17 @@ namespace dp2Inventory
             this.columnHeader_protocol.Text = "协议";
             this.columnHeader_protocol.Width = 120;
             // 
+            // toolStripButton_pause
+            // 
+            this.toolStripButton_pause.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_pause.Enabled = false;
+            this.toolStripButton_pause.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_pause.Image")));
+            this.toolStripButton_pause.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_pause.Name = "toolStripButton_pause";
+            this.toolStripButton_pause.Size = new System.Drawing.Size(92, 49);
+            this.toolStripButton_pause.Text = "暂停";
+            this.toolStripButton_pause.Click += new System.EventHandler(this.toolStripButton_pause_Click);
+            // 
             // InventoryDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(13F, 25F);
@@ -386,5 +399,6 @@ namespace dp2Inventory
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel_currentShelfNo;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel_rpanMode;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel3;
+        private System.Windows.Forms.ToolStripButton toolStripButton_pause;
     }
 }

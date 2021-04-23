@@ -1599,7 +1599,7 @@ Stack:
             }
 
             string strUrl = this.FaceReaderUrl + "|" + this.RfidCenterUrl + "|" + this.FingerprintReaderUrl;
-            if (strOldDp2MserverUrl != strUrl)
+            if (oldUrl != strUrl)
                 StartProcessManager();
         }
 
