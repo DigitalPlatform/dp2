@@ -79,6 +79,9 @@ namespace dp2Inventory
         //      port        服务器端口号
         //      userName    用户名。如果为 null，表示用上次登录过的用户名连同密码进行登录
         //      password    密码
+        // return.Value
+        //      -1  出错
+        //      0   登录成功(注意这里不是1)
         public async Task<NormalResult> ConnectAndLoginAsync(string serverAddr,
     int port,
     string userName,
@@ -105,9 +108,17 @@ namespace dp2Inventory
             if (userName == null && _userName == null)
                 return new NormalResult();
 
+            // return.Value
+            //      -1  出错
+            //      0   登录失败
+            //      1   登录成功
             var login_result = await LoginAsync(userName, password);
-            if (login_result.Value == -1)
-                return login_result;
+            if (login_result.Value != 1)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = login_result.ErrorInfo
+                };
 
             return new NormalResult();
         }
@@ -707,6 +718,9 @@ namespace dp2Inventory
                     && String.IsNullOrEmpty(this.SIPServerAddr) == false
                     && redo_count < 2)
                 {
+                    // return.Value
+                    //      -1  出错
+                    //      0   登录成功(注意这里不是1)
                     var connect_result = await ConnectAndLoginAsync(null, -1, null, null);
                     if (connect_result.Value != -1)
                     {
@@ -728,6 +742,9 @@ namespace dp2Inventory
                     && String.IsNullOrEmpty(this.SIPServerAddr) == false
                     && redo_count < 2)
                 {
+                    // return.Value
+                    //      -1  出错
+                    //      0   登录成功(注意这里不是1)
                     var connect_result = await ConnectAndLoginAsync(null, -1, null, null);
                     if (connect_result.Value != -1)
                     {
@@ -897,10 +914,14 @@ namespace dp2Inventory
 
             if (response94.Ok_1 == "0")
             {
+                string error = "登录失败 ";
+                if (string.IsNullOrEmpty(response94.AF_ScreenMessage_o) == false)
+                    error = "登录失败 " + response94.AF_ScreenMessage_o;
+
                 return new LoginResult
                 {
                     Value = 0,
-                    ErrorInfo = "登录失败",
+                    ErrorInfo = error,
                     Result = response94
                 };
             }

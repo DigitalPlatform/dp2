@@ -352,6 +352,17 @@ bool bClickClose = false)
 
         private void MainForm_Load(object sender, EventArgs e)
         {
+            // 2021/4/25
+            ClientInfo.BeginUpdate(
+TimeSpan.FromMinutes(2),
+TimeSpan.FromMinutes(60),
+_cancel.Token,
+(text, level) =>
+{
+        //      warning_level   警告级别。0 正常文本(白色背景) 1 警告文本(黄色背景) >=2 错误文本(红色背景)
+        ShowStatusText(text);
+});
+
             FormClientInfo.SerialNumberMode = "must";
             var ret = FormClientInfo.Initial("rfidtool",
                 () => StringUtil.IsDevelopMode());
@@ -371,6 +382,14 @@ bool bClickClose = false)
             {
                 LoadHistory();
             });
+        }
+
+        void ShowStatusText(string text)
+        {
+            this.Invoke((Action)(() =>
+            {
+                toolStripStatusLabel_message.Text = text;
+            }));
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)

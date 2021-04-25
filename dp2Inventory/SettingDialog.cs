@@ -23,8 +23,9 @@ namespace dp2Inventory
         private void SettingDialog_Load(object sender, EventArgs e)
         {
             this.textBox_rfid_rfidCenterUrl.Text = DataModel.RfidCenterUrl;
-
             this.numericUpDown_seconds.Value = DataModel.BeforeScanSeconds;
+            this.checkBox_rfid_rpanTypeSwitch.Checked = DataModel.RfidRpanTypeSwitch;
+            this.textBox_rfid_uploadInterfaceUrl.Text = DataModel.uploadInterfaceUrl;
 
             this.textBox_dp2library_serverUrl.Text = DataModel.dp2libraryServerUrl;
             this.textBox_dp2library_userName.Text = DataModel.dp2libraryUserName;
@@ -37,6 +38,12 @@ namespace dp2Inventory
             this.textBox_sip_password.Text = DataModel.sipPassword;
             this.textBox_sip_encoding.Text = DataModel.sipEncoding;
             this.textBox_sip_institution.Text = DataModel.sipInstitution;
+            this.textBox_sip_locationList.Text = DataModel.sipLocationList?.Replace(",", "\r\n");
+            this.checkBox_sip_localStore.Checked = DataModel.sipLocalStore;
+
+            this.checkBox_enableTagCache.Checked = DataModel.EnableTagCache;
+            this.textBox_verifyRule.Text = DataModel.PiiVerifyRule;
+
         }
 
         private void SettingDialog_FormClosing(object sender, FormClosingEventArgs e)
@@ -49,7 +56,17 @@ namespace dp2Inventory
 
         }
 
-        private void button_OK_Click(object sender, EventArgs e)
+        /*
+        // 获得 SIP 服务器组合参数字符串
+        static string GetSipServerString()
+        {
+            if (string.IsNullOrEmpty(DataModel.sipServerAddr))
+                return "";
+            return DataModel.sipServerAddr + ":" + DataModel.sipServerPort + "|" + DataModel.sipUserName + "|" + DataModel.sipPassword;
+        }
+        */
+
+        private async void button_OK_Click(object sender, EventArgs e)
         {
             string strError = "";
 
@@ -64,14 +81,21 @@ namespace dp2Inventory
             if (Int32.TryParse(this.textBox_sip_port.Text, out int port) == false)
                 errors.Add("SIP 服务器端口号必须为数字");
 
+            if (this.textBox_sip_locationList.Text.IndexOf(",") != -1)
+                errors.Add("SIP 馆藏地中不允许出现逗号(应为每行一个馆藏地)");
+
             if (errors.Count > 0)
             {
                 strError = StringUtil.MakePathList(errors, "\r\n");
                 goto ERROR1;
             }
 
+            // string oldSipAddress = GetSipServerString();
+
             DataModel.RfidCenterUrl = this.textBox_rfid_rfidCenterUrl.Text;
             DataModel.BeforeScanSeconds = (int)this.numericUpDown_seconds.Value;
+            DataModel.RfidRpanTypeSwitch = this.checkBox_rfid_rpanTypeSwitch.Checked;
+            DataModel.uploadInterfaceUrl = this.textBox_rfid_uploadInterfaceUrl.Text;
 
             DataModel.dp2libraryServerUrl = this.textBox_dp2library_serverUrl.Text;
             DataModel.dp2libraryUserName = this.textBox_dp2library_userName.Text;
@@ -85,6 +109,11 @@ namespace dp2Inventory
             DataModel.sipPassword = this.textBox_sip_password.Text;
             DataModel.sipEncoding = this.textBox_sip_encoding.Text;
             DataModel.sipInstitution = this.textBox_sip_institution.Text;
+            DataModel.sipLocationList = this.textBox_sip_locationList.Text.Replace("\r\n", ",");
+            DataModel.sipLocalStore = this.checkBox_sip_localStore.Checked;
+
+            DataModel.EnableTagCache = this.checkBox_enableTagCache.Checked;
+            DataModel.PiiVerifyRule = this.textBox_verifyRule.Text;
 
             // 释放所有 libraryChannel 和 sipChannel 通道
             LibraryChannelUtil.Clear();
@@ -97,6 +126,28 @@ namespace dp2Inventory
             {
                 strError = "dp2library 服务器 URL 和 SIP 服务器地址两者必须配置其中一个";
                 goto ERROR1;
+            }
+
+            // string sipAddress = GetSipServerString();
+
+            if (control == false
+                && string.IsNullOrEmpty(DataModel.sipServerAddr) == false)
+            {
+                this.Enabled = false;
+                try
+                {
+                    // -1出错，0不在线，1正常
+                    var result = await SipChannelUtil.DetectSipNetworkAsync();
+                    if (result.Value != 1)
+                    {
+                        strError = $"SIP 服务器地址或相关参数不正确: {result.ErrorInfo}";
+                        goto ERROR1;
+                    }
+                }
+                finally
+                {
+                    this.Enabled = true;
+                }
             }
 
             // 2021/4/23

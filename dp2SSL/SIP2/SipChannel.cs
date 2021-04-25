@@ -79,6 +79,9 @@ namespace dp2SSL
         //      port        服务器端口号
         //      userName    用户名。如果为 null，表示用上次登录过的用户名连同密码进行登录
         //      password    密码
+        // return.Value
+        //      -1  出错
+        //      0   登录成功(注意这里不是1)
         public async Task<NormalResult> ConnectAndLoginAsync(string serverAddr,
     int port,
     string userName,
@@ -105,9 +108,21 @@ namespace dp2SSL
             if (userName == null && _userName == null)
                 return new NormalResult();
 
+            // return.Value
+            //      -1  出错
+            //      0   登录失败
+            //      1   登录成功
             var login_result = await LoginAsync(userName, password);
-            if (login_result.Value == -1)
+            if (login_result.Value != 1)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = login_result.ErrorInfo
+                };
+            /*
+            if (login_result.Value == -1)   // TODO: 应该是 != 1, return -1
                 return login_result;
+            */
 
             return new NormalResult();
         }

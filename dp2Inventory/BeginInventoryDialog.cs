@@ -76,7 +76,7 @@ namespace dp2Inventory
             {
                 LoadData();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 MessageBox.Show(this, $"BeginModifyDialog_Load() 装载数据出错: {ex.Message}");
                 this.Close();
@@ -102,7 +102,12 @@ namespace dp2Inventory
             if (DataModel.Protocol == "sip")
             {
                 // SIP2 协议模式下需要在 inventory.xml 中 root/library/@locationList 中配置馆藏地列表
-                get_result = InventoryData.sip_GetLocationListFromLocal();
+                // get_result = InventoryData.sip_GetLocationListFromLocal();
+                get_result = new GetLocationListResult
+                {
+                    List =
+                    DataModel.GetSipLocationList()
+                };
             }
             else
             {

@@ -161,6 +161,17 @@ bool bClickClose = false)
 
         private async void MainForm_Load(object sender, EventArgs e)
         {
+            // 2021/4/25
+            ClientInfo.BeginUpdate(
+    TimeSpan.FromMinutes(2),
+    TimeSpan.FromMinutes(60),
+    _cancel.Token,
+    (text, level) =>
+    {
+        //      warning_level   警告级别。0 正常文本(白色背景) 1 警告文本(黄色背景) >=2 错误文本(红色背景)
+        ShowStatusText(text);
+    });
+
             // FormClientInfo.SerialNumberMode = "must";
             var ret = FormClientInfo.Initial("dp2inventory",
                 () => StringUtil.IsDevelopMode());
@@ -213,6 +224,14 @@ bool bClickClose = false)
                     this._clearMessage();
             }
 
+        }
+
+        void ShowStatusText(string text)
+        {
+            this.Invoke((Action)(() =>
+            {
+                toolStripStatusLabel_message.Text = text;
+            }));
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -313,6 +332,8 @@ bool bClickClose = false)
                     if (oldUrl != DataModel.RfidCenterUrl)
                         StartProcessManager();
 
+                    InventoryData.ClearVarcodeValidator();
+
                     //    DataModel.TagList.EnableTagCache = DataModel.EnableTagCache;
                 }
             }
@@ -324,10 +345,12 @@ bool bClickClose = false)
             if (DataModel.Protocol == "sip")
             {
                 MenuItem_clearUidUiiTable.Enabled = true;
+                MenuItem_exportLocalItemsToExcel.Enabled = DataModel.sipLocalStore;
             }
             else
             {
                 MenuItem_clearUidUiiTable.Enabled = false;
+                MenuItem_exportLocalItemsToExcel.Enabled = false;
             }
         }
 
@@ -519,7 +542,13 @@ bool bClickClose = false)
                 items.Add(item);
             }
 
-            this.ShowMessage("正在导出全部操作历史事项到 Excel 文件 ...");
+            if (items.Count == 0)
+            {
+                strError = "没有可供保存的盘点历史事项";
+                goto ERROR1;
+            }
+
+            this.ShowMessage("正在导出全部盘点历史事项到 Excel 文件 ...");
 
             this.EnableControls(false);
             try

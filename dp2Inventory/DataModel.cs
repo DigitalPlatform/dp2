@@ -60,6 +60,19 @@ namespace dp2Inventory
             }
         }
 
+        // 启用 R-PAN 标签类型切换
+        public static bool RfidRpanTypeSwitch
+        {
+            get
+            {
+                return ClientInfo.Config.GetBoolean("rfid", "rpanTypeSwitch", true);
+            }
+            set
+            {
+                ClientInfo.Config.SetBoolean("rfid", "rpanTypeSwitch", value);
+            }
+        }
+
         public static string dp2libraryServerUrl
         {
             get
@@ -184,6 +197,78 @@ namespace dp2Inventory
             }
         }
 
+        // SIP 馆藏地列表。逗号分隔的字符串
+        public static string sipLocationList
+        {
+            get
+            {
+                return ClientInfo.Config.Get("sip", "locationList", null);
+            }
+            set
+            {
+                ClientInfo.Config.Set("sip", "locationList", value);
+            }
+        }
+
+        // 变换为 List<string> 并去掉中间的空字符串事项
+        public static List<string> GetSipLocationList()
+        {
+            var lines = StringUtil.SplitList(sipLocationList, ",");
+            StringUtil.RemoveBlank(ref lines);
+            return lines;
+        }
+
+        // 启用 SIP 本地存储
+        public static bool sipLocalStore
+        {
+            get
+            {
+                return ClientInfo.Config.GetBoolean("sip", "localStore", false);
+            }
+            set
+            {
+                ClientInfo.Config.SetBoolean("sip", "localStore", value);
+            }
+        }
+
+        // 上传接口 URL
+        public static string uploadInterfaceUrl
+        {
+            get
+            {
+                return ClientInfo.Config.Get("uploadInterface", "url", null);
+            }
+            set
+            {
+                ClientInfo.Config.Set("uploadInterface", "url", value);
+            }
+        }
+
+        // 启用标签缓存
+        public static bool EnableTagCache
+        {
+            get
+            {
+                return ClientInfo.Config.GetBoolean("general", "enableTagCache", true);
+            }
+            set
+            {
+                ClientInfo.Config.SetBoolean("general", "enableTagCache", value);
+            }
+        }
+
+        // PII 号码校验规则
+        public static string PiiVerifyRule
+        {
+            get
+            {
+                return ClientInfo.Config.Get("general", "pii_verify_rule", null);
+            }
+            set
+            {
+                ClientInfo.Config.Set("general", "pii_verify_rule", value);
+            }
+        }
 
         static string EncryptKey = "dp2inventory_key";
 
@@ -357,6 +442,7 @@ namespace dp2Inventory
             }
         }
 
+#if REMOVED
         static string _sipLocalStore = null;
 
         public static string SipLocalStore
@@ -381,8 +467,7 @@ namespace dp2Inventory
                 return "";
             return attr.Value;
         }
-
-
+#endif
 
         public static async Task<BookItem> FindBookItemAsync(string barcode)
         {
@@ -393,7 +478,7 @@ namespace dp2Inventory
             }
         }
 
-        #endregion
+#endregion
     }
 
     // 任务完成情况

@@ -415,12 +415,12 @@ namespace dp2Inventory
                                 result.Results = new List<OneTag>();
                             if (result.Value == -1)
                             {
-                                ShowMessageBox("inventory", $"列出标签失败: {result.ErrorInfo}");
+                                await ShowMessageBox("inventory", $"列出标签失败: {result.ErrorInfo}", token);
                                 break;
                             }
                             else
                             {
-                                ShowMessageBox("inventory", null);
+                                await ShowMessageBox("inventory", null, token);
                             }
 
                             if (_pause)
@@ -475,7 +475,16 @@ namespace dp2Inventory
                                         _verify_error_count = process_result.VerifyErrorCount;
                                         process_count += process_result.ProcessCount;
                                         if (process_result.Value == 0 || process_result.Value == -1)
+                                        {
+                                            if (process_result.ErrorCode == "interrupt")
+                                            {
+                                                cancel?.Cancel();
+                                                PauseLoop();    // 暂停循环
+                                                SetPauseText();
+                                                await ShowMessageBox("interrupt", process_result.ErrorInfo, token);
+                                            }
                                             break;
+                                        }
 
                                         if (current_token.IsCancellationRequested)
                                             break;
@@ -560,7 +569,7 @@ namespace dp2Inventory
                     catch (Exception ex)
                     {
                         ClientInfo.WriteErrorLog($"盘点循环出现异常: {ExceptionUtil.GetDebugText(ex)}");
-                        ShowMessageBox("inventory", $"盘点循环因为异常已终止: {ex.Message}");
+                        await ShowMessageBox("inventory", $"盘点循环因为异常已终止: {ex.Message}", token);
                     }
                     finally
                     {
@@ -776,11 +785,19 @@ out string block_map);
 
         }
 
-        public void ShowMessageBox(string type, string text)
+        public async Task ShowMessageBox(string type,
+            string text,
+            CancellationToken token)
         {
             // 语音提示出错
+            Task task = null;
             if (text != null)
-                FormClientInfo.Speak(text, false, false);
+            {
+                task = Task.Run(async () =>
+                {
+                    await FormClientInfo.Speaking(text, false, token);
+                });
+            }
 
             this.Invoke((Action)(() =>
             {
@@ -798,6 +815,9 @@ out string block_map);
                 _errorTable.SetError(type, text);
                 _errorDialog.Message = _errorTable.GetError(false);
             }));
+
+            if (task != null)
+                await task;
         }
 
         #endregion
@@ -1134,6 +1154,15 @@ out string block_map);
                             continue;
                         }
 
+                        // 校验层架标号码合法性
+                        var validate_result = InventoryData.ValidateBarcode("shelf", entity.PII);
+                        if (validate_result.OK == false)
+                        {
+                            SetErrorInfo(item, validate_result.ErrorInfo);
+                            error_count++;
+                            continue;
+                        }
+
                         {
                             iteminfo.State = "succeed";
                             this.Invoke((Action)(() =>
@@ -1158,6 +1187,15 @@ out string block_map);
                                 SetItemColor(item, "disable");
                             }));
                             filtered_count++;
+                            continue;
+                        }
+
+                        // 校验图书 PII 号码合法性
+                        var validate_result = InventoryData.ValidateBarcode("entity", entity.PII);
+                        if (validate_result.OK == false)
+                        {
+                            SetErrorInfo(item, validate_result.ErrorInfo);
+                            error_count++;
                             continue;
                         }
 
@@ -1197,6 +1235,17 @@ out string block_map);
                                 // 加入操作历史
                                 WriteComplete?.Invoke(this, new WriteCompleteventArgs { Info = i, Action = a });
                             });
+                        if (process_info.State == "interrupt")
+                        {
+                            SetErrorInfo(item, entity.Error);
+                            // 作为致命错误返回
+                            return new ProcessResult
+                            {
+                                Value = -1,
+                                ErrorInfo = entity.Error,
+                                ErrorCode = "interrupt"
+                            };
+                        }
 
                         /*
                         // 更新题名显示
@@ -1286,7 +1335,7 @@ out string block_map);
         {
             // 2021/4/22
             // 检查 RPAN 天线号，也就是标签类型
-            if (InventoryData.GetRPanTagTypeSwitch() == true
+            if (DataModel.RfidRpanTypeSwitch == true
                 && entity.ReaderName.StartsWith("R-PAN")
                 && entity.Antenna != "2")
             {
@@ -1305,7 +1354,7 @@ out string block_map);
         {
             // 2021/4/22
             // 检查 RPAN 天线号，也就是标签类型
-            if (InventoryData.GetRPanTagTypeSwitch() == true
+            if (DataModel.RfidRpanTypeSwitch == true
                 && entity.ReaderName.StartsWith("R-PAN")
                 && entity.Antenna != "1")
             {
@@ -1323,7 +1372,7 @@ out string block_map);
             Entity entity,
             CancellationToken token)
         {
-            if (InventoryData.GetRPanTagTypeSwitch() == false
+            if (DataModel.RfidRpanTypeSwitch == false
                 || entity.ReaderName.StartsWith("R-PAN") == false)
                 return;
 
@@ -1382,7 +1431,8 @@ out string block_map);
                     GetEntityDataResult result = null;
                     if (DataModel.Protocol == "sip")
                     {
-                        bool isLocal = StringUtil.IsInList("inventory", DataModel.SipLocalStore);
+                        // bool isLocal = StringUtil.IsInList("inventory", DataModel.SipLocalStore);
+                        bool isLocal = DataModel.sipLocalStore;
 
                         result = await SipChannelUtil.GetEntityDataAsync(entity.PII,
                             entity.GetOiOrAoi(),
@@ -1424,6 +1474,13 @@ out string block_map);
                         FormClientInfo.Speak($"{entity.PII} 无法获得册信息", false, false);
 
                         entity.BuildError("getItemXml", result.ErrorInfo, result.ErrorCode);
+                        if (result.ErrorCode == "getChannelError")
+                        {
+                            // 严重错误，后面不要再重试
+                            // throw new InterruptException(result.ErrorInfo);
+                            info.State = "interrupt";
+                            return;
+                        }
                     }
                     else
                     {
@@ -1474,9 +1531,9 @@ out string block_map);
             }
             finally
             {
-                info.State = "";
+                if (info.State != "interrupt")
+                    info.State = "";
             }
-
         }
 
         public static void RefreshLocations(ProcessInfo info)
@@ -2081,9 +2138,12 @@ bool eas)
     string style)
         {
             // 先从 cache 里面找
-            var taginfo = GetCachedTagInfo(info.UID);
-            if (taginfo != null)
-                return new GetTagInfoResult { TagInfo = taginfo };
+            if (DataModel.EnableTagCache)
+            {
+                var taginfo = GetCachedTagInfo(info.UID);
+                if (taginfo != null)
+                    return new GetTagInfoResult { TagInfo = taginfo };
+            }
 
             // 再真正从读写器读
             var result = RfidManager.GetTagInfo(one_reader_name,

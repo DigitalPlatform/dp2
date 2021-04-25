@@ -33,16 +33,16 @@ namespace dp2Inventory
             this.button_OK = new System.Windows.Forms.Button();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage_action = new System.Windows.Forms.TabPage();
-            this.tabPage_other = new System.Windows.Forms.TabPage();
-            this.checkBox_action_setUID = new System.Windows.Forms.CheckBox();
-            this.checkBox_action_setCurrentLocation = new System.Windows.Forms.CheckBox();
-            this.checkBox_action_setLocation = new System.Windows.Forms.CheckBox();
-            this.checkBox_action_verifyEas = new System.Windows.Forms.CheckBox();
-            this.comboBox_action_location = new System.Windows.Forms.ComboBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
-            this.textBox_action_batchNo = new System.Windows.Forms.TextBox();
             this.checkBox_action_slowMode = new System.Windows.Forms.CheckBox();
+            this.textBox_action_batchNo = new System.Windows.Forms.TextBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
+            this.comboBox_action_location = new System.Windows.Forms.ComboBox();
+            this.checkBox_action_verifyEas = new System.Windows.Forms.CheckBox();
+            this.checkBox_action_setLocation = new System.Windows.Forms.CheckBox();
+            this.checkBox_action_setCurrentLocation = new System.Windows.Forms.CheckBox();
+            this.checkBox_action_setUID = new System.Windows.Forms.CheckBox();
+            this.tabPage_other = new System.Windows.Forms.TabPage();
             this.tabControl1.SuspendLayout();
             this.tabPage_action.SuspendLayout();
             this.SuspendLayout();
@@ -107,44 +107,48 @@ namespace dp2Inventory
             this.tabPage_action.Text = "动作参数";
             this.tabPage_action.UseVisualStyleBackColor = true;
             // 
-            // tabPage_other
+            // checkBox_action_slowMode
             // 
-            this.tabPage_other.Location = new System.Drawing.Point(4, 31);
-            this.tabPage_other.Name = "tabPage_other";
-            this.tabPage_other.Size = new System.Drawing.Size(768, 473);
-            this.tabPage_other.TabIndex = 1;
-            this.tabPage_other.Text = "其它";
-            this.tabPage_other.UseVisualStyleBackColor = true;
+            this.checkBox_action_slowMode.AutoSize = true;
+            this.checkBox_action_slowMode.Location = new System.Drawing.Point(17, 351);
+            this.checkBox_action_slowMode.Name = "checkBox_action_slowMode";
+            this.checkBox_action_slowMode.Size = new System.Drawing.Size(153, 25);
+            this.checkBox_action_slowMode.TabIndex = 8;
+            this.checkBox_action_slowMode.Text = "慢速模式(&S)";
+            this.checkBox_action_slowMode.UseVisualStyleBackColor = true;
             // 
-            // checkBox_action_setUID
+            // textBox_action_batchNo
             // 
-            this.checkBox_action_setUID.AutoSize = true;
-            this.checkBox_action_setUID.Location = new System.Drawing.Point(17, 50);
-            this.checkBox_action_setUID.Name = "checkBox_action_setUID";
-            this.checkBox_action_setUID.Size = new System.Drawing.Size(218, 25);
-            this.checkBox_action_setUID.TabIndex = 0;
-            this.checkBox_action_setUID.Text = "设置册记录 UID(&U)";
-            this.checkBox_action_setUID.UseVisualStyleBackColor = true;
+            this.textBox_action_batchNo.Location = new System.Drawing.Point(265, 266);
+            this.textBox_action_batchNo.Name = "textBox_action_batchNo";
+            this.textBox_action_batchNo.Size = new System.Drawing.Size(341, 31);
+            this.textBox_action_batchNo.TabIndex = 7;
             // 
-            // checkBox_action_setCurrentLocation
+            // label2
             // 
-            this.checkBox_action_setCurrentLocation.AutoSize = true;
-            this.checkBox_action_setCurrentLocation.Location = new System.Drawing.Point(17, 81);
-            this.checkBox_action_setCurrentLocation.Name = "checkBox_action_setCurrentLocation";
-            this.checkBox_action_setCurrentLocation.Size = new System.Drawing.Size(195, 25);
-            this.checkBox_action_setCurrentLocation.TabIndex = 1;
-            this.checkBox_action_setCurrentLocation.Text = "更新当前位置(&C)";
-            this.checkBox_action_setCurrentLocation.UseVisualStyleBackColor = true;
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(13, 269);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(117, 21);
+            this.label2.TabIndex = 6;
+            this.label2.Text = "批次号(&B):";
             // 
-            // checkBox_action_setLocation
+            // label1
             // 
-            this.checkBox_action_setLocation.AutoSize = true;
-            this.checkBox_action_setLocation.Location = new System.Drawing.Point(17, 112);
-            this.checkBox_action_setLocation.Name = "checkBox_action_setLocation";
-            this.checkBox_action_setLocation.Size = new System.Drawing.Size(195, 25);
-            this.checkBox_action_setLocation.TabIndex = 2;
-            this.checkBox_action_setLocation.Text = "更新永久位置(&L)";
-            this.checkBox_action_setLocation.UseVisualStyleBackColor = true;
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(13, 233);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(117, 21);
+            this.label1.TabIndex = 5;
+            this.label1.Text = "馆藏地(&O):";
+            // 
+            // comboBox_action_location
+            // 
+            this.comboBox_action_location.FormattingEnabled = true;
+            this.comboBox_action_location.Location = new System.Drawing.Point(265, 230);
+            this.comboBox_action_location.Name = "comboBox_action_location";
+            this.comboBox_action_location.Size = new System.Drawing.Size(341, 29);
+            this.comboBox_action_location.TabIndex = 4;
             // 
             // checkBox_action_verifyEas
             // 
@@ -156,48 +160,44 @@ namespace dp2Inventory
             this.checkBox_action_verifyEas.Text = "校验 EAS(&E)";
             this.checkBox_action_verifyEas.UseVisualStyleBackColor = true;
             // 
-            // comboBox_action_location
+            // checkBox_action_setLocation
             // 
-            this.comboBox_action_location.FormattingEnabled = true;
-            this.comboBox_action_location.Location = new System.Drawing.Point(265, 230);
-            this.comboBox_action_location.Name = "comboBox_action_location";
-            this.comboBox_action_location.Size = new System.Drawing.Size(341, 29);
-            this.comboBox_action_location.TabIndex = 4;
+            this.checkBox_action_setLocation.AutoSize = true;
+            this.checkBox_action_setLocation.Location = new System.Drawing.Point(17, 112);
+            this.checkBox_action_setLocation.Name = "checkBox_action_setLocation";
+            this.checkBox_action_setLocation.Size = new System.Drawing.Size(195, 25);
+            this.checkBox_action_setLocation.TabIndex = 2;
+            this.checkBox_action_setLocation.Text = "更新永久位置(&L)";
+            this.checkBox_action_setLocation.UseVisualStyleBackColor = true;
             // 
-            // label1
+            // checkBox_action_setCurrentLocation
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(13, 233);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(117, 21);
-            this.label1.TabIndex = 5;
-            this.label1.Text = "馆藏地(&O):";
+            this.checkBox_action_setCurrentLocation.AutoSize = true;
+            this.checkBox_action_setCurrentLocation.Location = new System.Drawing.Point(17, 81);
+            this.checkBox_action_setCurrentLocation.Name = "checkBox_action_setCurrentLocation";
+            this.checkBox_action_setCurrentLocation.Size = new System.Drawing.Size(195, 25);
+            this.checkBox_action_setCurrentLocation.TabIndex = 1;
+            this.checkBox_action_setCurrentLocation.Text = "更新当前位置(&C)";
+            this.checkBox_action_setCurrentLocation.UseVisualStyleBackColor = true;
             // 
-            // label2
+            // checkBox_action_setUID
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(13, 269);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(117, 21);
-            this.label2.TabIndex = 6;
-            this.label2.Text = "批次号(&B):";
+            this.checkBox_action_setUID.AutoSize = true;
+            this.checkBox_action_setUID.Location = new System.Drawing.Point(17, 50);
+            this.checkBox_action_setUID.Name = "checkBox_action_setUID";
+            this.checkBox_action_setUID.Size = new System.Drawing.Size(218, 25);
+            this.checkBox_action_setUID.TabIndex = 0;
+            this.checkBox_action_setUID.Text = "设置册记录 UID(&U)";
+            this.checkBox_action_setUID.UseVisualStyleBackColor = true;
             // 
-            // textBox_action_batchNo
+            // tabPage_other
             // 
-            this.textBox_action_batchNo.Location = new System.Drawing.Point(265, 266);
-            this.textBox_action_batchNo.Name = "textBox_action_batchNo";
-            this.textBox_action_batchNo.Size = new System.Drawing.Size(341, 31);
-            this.textBox_action_batchNo.TabIndex = 7;
-            // 
-            // checkBox_action_slowMode
-            // 
-            this.checkBox_action_slowMode.AutoSize = true;
-            this.checkBox_action_slowMode.Location = new System.Drawing.Point(17, 351);
-            this.checkBox_action_slowMode.Name = "checkBox_action_slowMode";
-            this.checkBox_action_slowMode.Size = new System.Drawing.Size(153, 25);
-            this.checkBox_action_slowMode.TabIndex = 8;
-            this.checkBox_action_slowMode.Text = "慢速模式(&S)";
-            this.checkBox_action_slowMode.UseVisualStyleBackColor = true;
+            this.tabPage_other.Location = new System.Drawing.Point(4, 31);
+            this.tabPage_other.Name = "tabPage_other";
+            this.tabPage_other.Size = new System.Drawing.Size(768, 473);
+            this.tabPage_other.TabIndex = 1;
+            this.tabPage_other.Text = "其它";
+            this.tabPage_other.UseVisualStyleBackColor = true;
             // 
             // BeginInventoryDialog
             // 
@@ -210,7 +210,7 @@ namespace dp2Inventory
             this.Name = "BeginInventoryDialog";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
-            this.Text = "开始修改";
+            this.Text = "开始盘点";
             this.Load += new System.EventHandler(this.BeginModifyDialog_Load);
             this.tabControl1.ResumeLayout(false);
             this.tabPage_action.ResumeLayout(false);

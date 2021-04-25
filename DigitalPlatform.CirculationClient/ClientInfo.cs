@@ -476,6 +476,8 @@ namespace DigitalPlatform.CirculationClient
             }
         }
 
+        // parameters:
+        //      warning_level   警告级别。0 正常文本(白色背景) 1 警告文本(黄色背景) >=2 错误文本(红色背景)
         public delegate void delegate_showText(string text, int warning_level);
 
         // 2020/9/17

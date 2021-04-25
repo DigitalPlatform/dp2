@@ -64,6 +64,7 @@ namespace dp2Inventory
             this.MenuItem_exit = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_maintenance = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_importUidUiiTable = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_clearUidUiiTable = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_help = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_openUserFolder = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_openDataFolder = new System.Windows.Forms.ToolStripMenuItem();
@@ -72,7 +73,6 @@ namespace dp2Inventory
             this.MenuItem_userManual = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_resetSerialCode = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_about = new System.Windows.Forms.ToolStripMenuItem();
-            this.MenuItem_clearUidUiiTable = new System.Windows.Forms.ToolStripMenuItem();
             this.tabControl1.SuspendLayout();
             this.tabPage_writeTag.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -291,7 +291,7 @@ namespace dp2Inventory
             // 
             this.MenuItem_saveHistoryToExcelFile.Name = "MenuItem_saveHistoryToExcelFile";
             this.MenuItem_saveHistoryToExcelFile.Size = new System.Drawing.Size(530, 44);
-            this.MenuItem_saveHistoryToExcelFile.Text = "保存操作历史到 Excel 文件(&S) ...";
+            this.MenuItem_saveHistoryToExcelFile.Text = "保存盘点历史到 Excel 文件(&S) ...";
             this.MenuItem_saveHistoryToExcelFile.Click += new System.EventHandler(this.MenuItem_saveHistoryToExcelFile_Click);
             // 
             // MenuItem_clearHistory
@@ -306,14 +306,14 @@ namespace dp2Inventory
             // MenuItem_clearHistory_all
             // 
             this.MenuItem_clearHistory_all.Name = "MenuItem_clearHistory_all";
-            this.MenuItem_clearHistory_all.Size = new System.Drawing.Size(291, 44);
+            this.MenuItem_clearHistory_all.Size = new System.Drawing.Size(315, 44);
             this.MenuItem_clearHistory_all.Text = "清除全部事项";
             this.MenuItem_clearHistory_all.Click += new System.EventHandler(this.MenuItem_clearHistory_all_Click);
             // 
             // MenuItem_clearHistory_selected
             // 
             this.MenuItem_clearHistory_selected.Name = "MenuItem_clearHistory_selected";
-            this.MenuItem_clearHistory_selected.Size = new System.Drawing.Size(291, 44);
+            this.MenuItem_clearHistory_selected.Size = new System.Drawing.Size(315, 44);
             this.MenuItem_clearHistory_selected.Text = "清除所选事项";
             this.MenuItem_clearHistory_selected.Click += new System.EventHandler(this.MenuItem_clearHistory_selected_Click);
             // 
@@ -356,6 +356,13 @@ namespace dp2Inventory
             this.MenuItem_importUidUiiTable.Size = new System.Drawing.Size(482, 44);
             this.MenuItem_importUidUiiTable.Text = "导入 UID-->UII 对照关系(&I) ...";
             this.MenuItem_importUidUiiTable.Click += new System.EventHandler(this.MenuItem_importUidUiiTable_Click);
+            // 
+            // MenuItem_clearUidUiiTable
+            // 
+            this.MenuItem_clearUidUiiTable.Name = "MenuItem_clearUidUiiTable";
+            this.MenuItem_clearUidUiiTable.Size = new System.Drawing.Size(482, 44);
+            this.MenuItem_clearUidUiiTable.Text = "清除 UID-->UII 对照关系(&C)";
+            this.MenuItem_clearUidUiiTable.Click += new System.EventHandler(this.MenuItem_clearUidUiiTable_Click);
             // 
             // MenuItem_help
             // 
@@ -417,13 +424,6 @@ namespace dp2Inventory
             this.MenuItem_about.Size = new System.Drawing.Size(479, 44);
             this.MenuItem_about.Text = "关于(&A)...";
             this.MenuItem_about.Click += new System.EventHandler(this.MenuItem_about_Click);
-            // 
-            // MenuItem_clearUidUiiTable
-            // 
-            this.MenuItem_clearUidUiiTable.Name = "MenuItem_clearUidUiiTable";
-            this.MenuItem_clearUidUiiTable.Size = new System.Drawing.Size(482, 44);
-            this.MenuItem_clearUidUiiTable.Text = "清除 UID-->UII 对照关系(&C)";
-            this.MenuItem_clearUidUiiTable.Click += new System.EventHandler(this.MenuItem_clearUidUiiTable_Click);
             // 
             // MainForm
             // 

@@ -28,6 +28,9 @@ namespace dp2Inventory
     public static class SipChannelUtil
     {
         static SipChannel _channel = new SipChannel(Encoding.UTF8);
+        
+        // 2021/4/25
+        static bool _loginSucceed = false;
 
         public static string DateFormat = "yyyy-MM-dd";
 
@@ -35,25 +38,34 @@ namespace dp2Inventory
         {
             if (_channel.Connected == false)
             {
+                _loginSucceed = false;
+
                 _channel.Encoding = Encoding.GetEncoding(DataModel.sipEncoding);
 
                 var result = await ConnectAsync();
                 if (result.Value == -1) // 出错
                 {
                     // TryDetectSipNetwork();
-                    throw new Exception($"连接 SIP 服务器 {DataModel.sipServerAddr}:{DataModel.sipServerPort} 时出错: {result.ErrorInfo}");
+                    throw new GetChannelException($"连接 SIP 服务器 {DataModel.sipServerAddr}:{DataModel.sipServerPort} 时出错: {result.ErrorInfo}");
                 }
 
-                if (string.IsNullOrEmpty(DataModel.sipUserName) == false)
-                {
-                    var login_result = await _channel.LoginAsync(DataModel.sipUserName,
-                        DataModel.sipPassword);
-                    if (login_result.Value == -1)
-                        throw new Exception($"针对 SIP 服务器 {DataModel.sipServerAddr}:{DataModel.sipServerPort} 登录出错: {login_result.ErrorInfo}");
-                }
+
 
                 // TODO: ScStatus()
 
+            }
+
+            if (_loginSucceed == false
+                && string.IsNullOrEmpty(DataModel.sipUserName) == false)
+            {
+                // 1 登录成功
+                // 0 登录失败
+                // -1 出错
+                var login_result = await _channel.LoginAsync(DataModel.sipUserName,
+                    DataModel.sipPassword);
+                if (login_result.Value != 1)
+                    throw new GetChannelException($"针对 SIP 服务器 {DataModel.sipServerAddr}:{DataModel.sipServerPort} 登录出错: {login_result.ErrorInfo}");
+                _loginSucceed = true;
             }
 
             return _channel;
@@ -66,6 +78,7 @@ namespace dp2Inventory
 
         public static void CloseChannel()
         {
+            _loginSucceed = false;
             _channel.Close();
         }
 
@@ -152,7 +165,7 @@ namespace dp2Inventory
                 return new NormalResult
                 {
                     Value = -1,
-                    ErrorInfo = $"GetEntityDataAsync() 出现异常: {ex.Message}",
+                    ErrorInfo = $"UpdateItemStatusAsync() 出现异常: {ex.Message}",
                     ErrorCode = ex.GetType().ToString()
                 };
             }
@@ -194,7 +207,6 @@ namespace dp2Inventory
             {
                 using (var releaser = await _channelLimit.EnterAsync())
                 {
-
                     SipChannel channel = await GetChannelAsync();
                     try
                     {
@@ -431,6 +443,16 @@ namespace dp2Inventory
                     }
                 }
             }
+            catch(GetChannelException ex)
+            {
+                // 2021/4/25
+                return new GetLocalEntityDataResult
+                {
+                    Value = -1,
+                    ErrorInfo = ex.Message,
+                    ErrorCode = "getChannelError"
+                };
+            }
             catch (Exception ex)
             {
                 ClientInfo.WriteErrorLog($"GetEntityDataAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
@@ -633,7 +655,8 @@ namespace dp2Inventory
             }
         }
 
-        static async Task<NormalResult> DetectSipNetworkAsync()
+        // -1出错，0不在线，1正常
+        public static async Task<NormalResult> DetectSipNetworkAsync()
         {
             /*
             // testing
@@ -813,5 +836,18 @@ TaskScheduler.Default);
 
 #endif
 
+    }
+
+    public class GetChannelException : Exception
+    {
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        /// <param name="error"></param>
+        /// <param name="strText"></param>
+        public GetChannelException(string strText)
+            : base(strText)
+        {
+        }
     }
 }

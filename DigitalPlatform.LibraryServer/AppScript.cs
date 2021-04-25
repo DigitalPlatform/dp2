@@ -2212,127 +2212,105 @@ namespace DigitalPlatform.LibraryServer
 
             string strNewBarcode = DomUtil.GetElementText(itemdom.DocumentElement, "barcode");
 
-            string strLocation = DomUtil.GetElementText(itemdom.DocumentElement, "location");
-            strLocation = StringUtil.GetPureLocationString(strLocation);
-            // 解析
-            LibraryApplication.ParseCalendarName(strLocation,
-        out string strLibraryCode,
-        out string strRoom);
-
-            // 检查来自 location 元素中的馆代码部分
             {
+                string strLocation = DomUtil.GetElementText(itemdom.DocumentElement, "location");
+                strLocation = StringUtil.GetPureLocationString(strLocation);
+                // 解析
+                LibraryApplication.ParseCalendarName(strLocation,
+            out string strLibraryCode,
+            out string strRoom);
 
-            }
-
-            // 去除 strRoom 内容中横杠或者冒号以后的部分。例如 “现刊阅览室-综合355”
-            // 注：横杠以后的部分表示架号，统计时会忽略；冒号后面的部分表示班级书架名称，统计时不会被忽略
-            {
-                List<string> parts = StringUtil.ParseTwoPart(strRoom, new string[] { "-", ":" });
-                strRoom = parts[0];
-            }
-
-            bool isPersonalLibrary = false;
-            if (strRoom.StartsWith("~"))
-            {
-                isPersonalLibrary = true;
-            }
-            XmlElement item = this.App.GetLocationItemElement(
-    strLibraryCode,
-    strRoom);
-
-            // 检查馆藏地点字符串
-            if (strAction == "new"
-|| strAction == "change"
-|| strAction == "transfer"
-|| strAction == "move")
-            {
-                if (item == null && isPersonalLibrary == false)
+                // 检查来自 location 元素中的馆代码部分
                 {
-                    strError = "馆代码 '" + strLibraryCode + "' 没有定义馆藏地点 '" + strRoom + "'(根据 <locationTypes> 定义)";
-                    // return 1;
-                    errors.Add(strError);
-                }
-            }
 
-            // 2014/1/10
-            // 检查空条码号
-            if ((strAction == "new"
-|| strAction == "change"
-|| strAction == "move")       // delete操作不检查
-&& String.IsNullOrEmpty(strNewBarcode) == true)
-            {
+                }
+
+                // 去除 strRoom 内容中横杠或者冒号以后的部分。例如 “现刊阅览室-综合355”
+                // 注：横杠以后的部分表示架号，统计时会忽略；冒号后面的部分表示班级书架名称，统计时不会被忽略
+                {
+                    List<string> parts = StringUtil.ParseTwoPart(strRoom, new string[] { "-", ":" });
+                    strRoom = parts[0];
+                }
+
+                bool isPersonalLibrary = false;
+                if (strRoom.StartsWith("~"))
+                {
+                    isPersonalLibrary = true;
+                }
+                XmlElement item = this.App.GetLocationItemElement(
+        strLibraryCode,
+        strRoom);
+
+                // 检查馆藏地点字符串
+                if (strAction == "new"
+    || strAction == "change"
+    || strAction == "transfer"
+    || strAction == "move")
+                {
+                    if (item == null && isPersonalLibrary == false)
+                    {
+                        strError = "馆代码 '" + strLibraryCode + "' 没有定义馆藏地点 '" + strRoom + "'(根据 <locationTypes> 定义)";
+                        // return 1;
+                        errors.Add(strError);
+                    }
+                }
+
+                // 2014/1/10
+                // 检查空条码号
+                if ((strAction == "new"
+    || strAction == "change"
+    || strAction == "move")       // delete操作不检查
+    && String.IsNullOrEmpty(strNewBarcode) == true)
+                {
 #if NO
                 XmlElement item = this.App.GetLocationItemElement(
                     strLibraryCode,
                     strRoom);
 #endif
-                if (item != null)
-                {
-                    bool bNullable = DomUtil.GetBooleanParam(item, "itemBarcodeNullable", true);
-                    if (bNullable == false)
+                    if (item != null)
                     {
-                        strError = "册条码号不允许为空(根据馆藏地 '" + strLocation + "' 的 <locationTypes> 定义)";
-                        // return 1;
-                        errors.Add(strError);
+                        bool bNullable = DomUtil.GetBooleanParam(item, "itemBarcodeNullable", true);
+                        if (bNullable == false)
+                        {
+                            strError = "册条码号不允许为空(根据馆藏地 '" + strLocation + "' 的 <locationTypes> 定义)";
+                            // return 1;
+                            errors.Add(strError);
+                        }
                     }
-                }
-                else
-                {
-                    if (this.App.AcceptBlankItemBarcode == false && isPersonalLibrary == false)
+                    else
                     {
-                        strError = "册条码号不能为空(根据 AcceptBlankItemBarcode 定义)";
-                        // return 1;
-                        errors.Add(strError);
-                    }
-                }
-            }
-
-            if (string.IsNullOrEmpty(strNewBarcode) == false)
-            {
-                // 2017/5/4
-                if (this.App.UpperCaseItemBarcode)
-                {
-                    if (strNewBarcode.ToUpper() != strNewBarcode)
-                    {
-                        strError = "册条码号 '" + strNewBarcode + "' 中的字母应为大写";
-                        // return 1;
-                        errors.Add(strError);
+                        if (this.App.AcceptBlankItemBarcode == false && isPersonalLibrary == false)
+                        {
+                            strError = "册条码号不能为空(根据 AcceptBlankItemBarcode 定义)";
+                            // return 1;
+                            errors.Add(strError);
+                        }
                     }
                 }
 
-                // return:
-                //      -2  校验函数不打算对这个分馆的号码进行校验
-                //      -1  调用出错
-                //      0   校验正确
-                //      1   校验发现错误
-                nRet = VerifyItemBarcode(
-                    App.BarcodeValidation ? strLocation : strLibraryCode,
-                    strNewBarcode,
-                    out strError);
-                if (nRet != 0 && nRet != -2)
+                if (string.IsNullOrEmpty(strNewBarcode) == false)
                 {
-                    // return nRet;
-                    if (nRet == -1)
-                        return -1;
-                    errors.Add(strError);
-                }
-            }
+                    // 2017/5/4
+                    if (this.App.UpperCaseItemBarcode)
+                    {
+                        if (strNewBarcode.ToUpper() != strNewBarcode)
+                        {
+                            strError = "册条码号 '" + strNewBarcode + "' 中的字母应为大写";
+                            // return 1;
+                            errors.Add(strError);
+                        }
+                    }
 
-            // 检查价格字符串
-            if (strAction == "new"
-|| strAction == "change"
-|| strAction == "move")
-            {
-                // 2014/11/28
-                string strPrice = DomUtil.GetElementText(itemdom.DocumentElement, "price");
-                if (string.IsNullOrEmpty(strPrice) == false)
-                {
                     // return:
+                    //      -2  校验函数不打算对这个分馆的号码进行校验
                     //      -1  调用出错
                     //      0   校验正确
                     //      1   校验发现错误
-                    nRet = VerifyItemPrice(strLibraryCode, strPrice, out strError);
-                    if (nRet != 0)
+                    nRet = VerifyItemBarcode(
+                        App.BarcodeValidation ? strLocation : strLibraryCode,
+                        strNewBarcode,
+                        out strError);
+                    if (nRet != 0 && nRet != -2)
                     {
                         // return nRet;
                         if (nRet == -1)
@@ -2340,25 +2318,84 @@ namespace DigitalPlatform.LibraryServer
                         errors.Add(strError);
                     }
                 }
-            }
 
-            // 2015/7/10
-            // 检查索取号字符串
-            if (strAction == "new"
-|| strAction == "change"
-|| strAction == "move")
-            {
-                string strAccessNo = DomUtil.GetElementText(itemdom.DocumentElement, "accessNo");
-                if (string.IsNullOrEmpty(strAccessNo) == false)
+                // 检查价格字符串
+                if (strAction == "new"
+    || strAction == "change"
+    || strAction == "move")
                 {
-                    if (StringUtil.HasHead(strAccessNo, "@accessNo") == true)
+                    // 2014/11/28
+                    string strPrice = DomUtil.GetElementText(itemdom.DocumentElement, "price");
+                    if (string.IsNullOrEmpty(strPrice) == false)
                     {
-                        strError = "索取号字符串中的宏尚未兑现";
-                        // return 1;
-                        errors.Add(strError);
+                        // return:
+                        //      -1  调用出错
+                        //      0   校验正确
+                        //      1   校验发现错误
+                        nRet = VerifyItemPrice(strLibraryCode, strPrice, out strError);
+                        if (nRet != 0)
+                        {
+                            // return nRet;
+                            if (nRet == -1)
+                                return -1;
+                            errors.Add(strError);
+                        }
+                    }
+                }
+
+                // 2015/7/10
+                // 检查索取号字符串
+                if (strAction == "new"
+    || strAction == "change"
+    || strAction == "move")
+                {
+                    string strAccessNo = DomUtil.GetElementText(itemdom.DocumentElement, "accessNo");
+                    if (string.IsNullOrEmpty(strAccessNo) == false)
+                    {
+                        if (StringUtil.HasHead(strAccessNo, "@accessNo") == true)
+                        {
+                            strError = "索取号字符串中的宏尚未兑现";
+                            // return 1;
+                            errors.Add(strError);
+                        }
                     }
                 }
             }
+
+            // 2021/4/25
+            // 检查 currentLocation 字段中的馆藏地
+            if (strAction == "new"
+|| strAction == "change"
+|| strAction == "transfer"
+|| strAction == "move")
+            {
+                string strCurrentLocation = DomUtil.GetElementText(itemdom.DocumentElement, "currentLocation");
+                if (string.IsNullOrEmpty(strCurrentLocation) == false)
+                {
+                    var parts = StringUtil.ParseTwoPart(strCurrentLocation, ":");
+                    strCurrentLocation = parts[0];
+                    if (string.IsNullOrEmpty(strCurrentLocation) == false)
+                    {
+                        // 将馆藏地点字符串分解为 馆代码+地点名 两个部分
+                        LibraryApplication.ParseCalendarName(strCurrentLocation,
+                    out string strLibraryCode1,
+                    out string strRoom1);
+                        if (App.IsValidLibraryCode(strLibraryCode1) == true)
+                        {
+                            // 只检查当前图书馆的馆藏地。别的图书馆的馆藏地不检查
+                            XmlElement item1 = this.App.GetLocationItemElement(
+strLibraryCode1,
+strRoom1);
+                            if (item1 == null)
+                            {
+                                strError = $"当前位置字段中的馆藏地 '{strCurrentLocation}' 不合法: 馆代码 '{ strLibraryCode1 }' 没有定义馆藏地点 '{ strRoom1 }'(根据 <locationTypes> 定义)";
+                                errors.Add(strError);
+                            }
+                        }
+                    }
+                }
+            }
+
 
             if (errors.Count > 0)
             {

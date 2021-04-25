@@ -198,6 +198,22 @@
         <caption lang="zh-CN">出版发行者</caption>
         <caption lang="en">Publisher</caption>
     </table>
+
+  <key>
+    <xpath nstable="usmarc">//marc:record/marc:datafield[@tag='260']/marc:subfield[@code='c']</xpath>
+    <from>publishtime</from>
+    <table ref="publishtime" />
+  </key>
+  <table name="publishtime" id="9" type="publishtime">
+    <convert>
+      <number style="freetime" />
+    </convert>
+    <convertquery>
+      <number style="freetime"/>
+    </convertquery>
+    <caption lang="zh-CN">出版时间</caption>
+    <caption lang="en">Publish Time</caption>
+  </table>
   
   <!--
     <key>

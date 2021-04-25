@@ -326,7 +326,10 @@ namespace dp2Inventory
 
                 bool isSipLocal = false;
                 if (DataModel.Protocol == "sip")
-                    isSipLocal = StringUtil.IsInList("inventory", SipLocalStore);
+                {
+                    // isSipLocal = StringUtil.IsInList("inventory", SipLocalStore);
+                    isSipLocal = DataModel.sipLocalStore;
+                }
 
                 // 设置 UID
                 if (StringUtil.IsInList("setUID", actionMode)
@@ -763,6 +766,7 @@ namespace dp2Inventory
         // 限制本地数据库操作，同一时刻只能一个函数进入
         static AsyncSemaphore _cacheLimit = new AsyncSemaphore(1);
 
+#if REMOVED
         public static XmlDocument GetInventoryDom()
         {
             string filename = Path.Combine(ClientInfo.UserDir, "inventory.xml");
@@ -777,7 +781,9 @@ namespace dp2Inventory
                 return null;
             }
         }
+#endif
 
+#if REMOVED
         static string _sipLocalStore = null;
 
         public static string SipLocalStore
@@ -790,6 +796,7 @@ namespace dp2Inventory
                 return _sipLocalStore;
             }
         }
+#endif
 
         /*
         static string _sipEncoding = "utf-8";
@@ -806,6 +813,7 @@ namespace dp2Inventory
         }
         */
 
+#if REMOVED
         // 获得 inventory.xml 中 sip/@localStore 参数
         public static string GetSipLocalStoreDef()
         {
@@ -818,6 +826,9 @@ namespace dp2Inventory
             return attr.Value;
         }
 
+#endif
+
+#if REMOVED
         // 2021/4/22
         // 获得 inventory.xml 中 settings/key[@key="RPAN图书标签和层架标状态切换"] 参数
         public static bool GetRPanTagTypeSwitch()
@@ -831,11 +842,12 @@ namespace dp2Inventory
 
             return value == "true";
         }
-
+#endif
 
         // 获得 inventory.xml 中的 barcodeValidation/validator (OuterXml)定义
         public static string GetBarcodeValidatorDef()
         {
+            /*
             var dom = GetInventoryDom();
             if (dom == null)
                 return "";
@@ -843,6 +855,13 @@ namespace dp2Inventory
             if (validator == null)
                 return "";
             return validator.OuterXml;
+            */
+            return DataModel.PiiVerifyRule.Trim(new char[] { '\r', '\n', ' ', '\t'});
+        }
+
+        public static void ClearVarcodeValidator()
+        {
+            _validator = null;
         }
 
         static BarcodeValidator _validator = null;
@@ -863,14 +882,26 @@ namespace dp2Inventory
                 if (string.IsNullOrEmpty(def))
                     _validator = new BarcodeValidator();
                 else
-                    _validator = new BarcodeValidator(def);
+                {
+                    try
+                    {
+                        _validator = new BarcodeValidator(def);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new Exception($"dp2Inventory 前端校验条码号规则 XML 定义不合法: {ex.Message}", ex);
+                    }
+                }
             }
             if (_validator.IsEmpty() == true)
             {
                 return new ValidateResult { OK = true };
             }
 
-            return _validator.ValidateByType(type, barcode);
+            var result = _validator.ValidateByType(type, barcode);
+            if (result.OK == false)
+                result.ErrorInfo = $"{result.ErrorInfo} (dp2Inventory 前端校验)";
+            return result;
         }
 
         /*
@@ -887,6 +918,7 @@ namespace dp2Inventory
         }
         */
 
+#if REMOVED
         // 从 inventory.xml 获得馆藏地列表(不访问 dp2library 服务器)
         // result.Value
         //      -1  出错
@@ -915,6 +947,7 @@ namespace dp2Inventory
                 List = StringUtil.SplitList(attr.Value)
             };
         }
+#endif
 
         // 从本地数据库中装载 uid 对照表
         public static async Task<NormalResult> LoadUidTableAsync(Hashtable uid_table,
@@ -1217,7 +1250,7 @@ namespace dp2Inventory
                     while (token.IsCancellationRequested == false)
                     {
                         if (total_linecount > 0)
-                            func_showProgress?.Invoke($"正在导入 {i}/{total_linecount} {processed_line.Replace("\t","-->")}", i, total_linecount);
+                            func_showProgress?.Invoke($"正在导入 {i}/{total_linecount} {processed_line.Replace("\t", "-->")}", i, total_linecount);
                         i++;
                         var line = await reader.ReadLineAsync();
                         if (line == null)
@@ -2142,6 +2175,19 @@ namespace dp2Inventory
             public string Protocol { get; set; }
         }
 
+        public static UploadInterfaceInfo GetUploadInterface()
+        {
+            var url = DataModel.uploadInterfaceUrl;
+            if (string.IsNullOrEmpty(url))
+                return null;
+            return new UploadInterfaceInfo
+            {
+                BaseUrl = url,
+                Protocol = "",
+            };
+        }
+
+#if REMOVED
         // 获得 inventory.xml 中 uploadInterface 参数
         public static UploadInterfaceInfo GetUploadInterface()
         {
@@ -2159,6 +2205,7 @@ namespace dp2Inventory
         }
 
         static UploadInterfaceInfo _uploadInterfaceInfo = null;
+#endif
 
         // 利用 uploadInterface 发出盘点请求
         public static async Task<RequestInventoryResult> RequestInventoryUploadAsync(
@@ -2175,6 +2222,8 @@ namespace dp2Inventory
             if (currentLocationString == null && location == null)
                 return new RequestInventoryResult { Value = 0 };    // 没有必要修改
 
+            var _uploadInterfaceInfo = GetUploadInterface();
+            /*
             if (_uploadInterfaceInfo == null)
             {
                 _uploadInterfaceInfo = GetUploadInterface();
@@ -2183,6 +2232,7 @@ namespace dp2Inventory
                     _uploadInterfaceInfo = new UploadInterfaceInfo { BaseUrl = null };
                 }
             }
+            */
 
             if (_uploadInterfaceInfo.BaseUrl == null)
                 return new RequestInventoryResult

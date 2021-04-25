@@ -33,6 +33,9 @@ namespace dp2Inventory
             this.button_OK = new System.Windows.Forms.Button();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage_rfid = new System.Windows.Forms.TabPage();
+            this.textBox_rfid_uploadInterfaceUrl = new System.Windows.Forms.TextBox();
+            this.label13 = new System.Windows.Forms.Label();
+            this.checkBox_rfid_rpanTypeSwitch = new System.Windows.Forms.CheckBox();
             this.numericUpDown_seconds = new System.Windows.Forms.NumericUpDown();
             this.label10 = new System.Windows.Forms.Label();
             this.groupBox11 = new System.Windows.Forms.GroupBox();
@@ -52,6 +55,11 @@ namespace dp2Inventory
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButton_cfg_setHongnibaServer = new System.Windows.Forms.ToolStripButton();
             this.tabPage_sip2 = new System.Windows.Forms.TabPage();
+            this.checkBox_sip_localStore = new System.Windows.Forms.CheckBox();
+            this.textBox_sip_locationList = new System.Windows.Forms.TextBox();
+            this.label12 = new System.Windows.Forms.Label();
+            this.textBox_sip_institution = new System.Windows.Forms.TextBox();
+            this.label11 = new System.Windows.Forms.Label();
             this.textBox_sip_port = new System.Windows.Forms.TextBox();
             this.label9 = new System.Windows.Forms.Label();
             this.textBox_sip_encoding = new System.Windows.Forms.TextBox();
@@ -62,8 +70,10 @@ namespace dp2Inventory
             this.label7 = new System.Windows.Forms.Label();
             this.textBox_sip_serverAddr = new System.Windows.Forms.TextBox();
             this.label8 = new System.Windows.Forms.Label();
-            this.textBox_sip_institution = new System.Windows.Forms.TextBox();
-            this.label11 = new System.Windows.Forms.Label();
+            this.tabPage_other = new System.Windows.Forms.TabPage();
+            this.checkBox_enableTagCache = new System.Windows.Forms.CheckBox();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.textBox_verifyRule = new System.Windows.Forms.TextBox();
             this.tabControl1.SuspendLayout();
             this.tabPage_rfid.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_seconds)).BeginInit();
@@ -71,13 +81,15 @@ namespace dp2Inventory
             this.tabPage_dp2library.SuspendLayout();
             this.toolStrip_server.SuspendLayout();
             this.tabPage_sip2.SuspendLayout();
+            this.tabPage_other.SuspendLayout();
+            this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
             // button_Cancel
             // 
             this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.button_Cancel.Location = new System.Drawing.Point(677, 498);
+            this.button_Cancel.Location = new System.Drawing.Point(698, 646);
             this.button_Cancel.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(111, 40);
@@ -89,7 +101,7 @@ namespace dp2Inventory
             // button_OK
             // 
             this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_OK.Location = new System.Drawing.Point(560, 498);
+            this.button_OK.Location = new System.Drawing.Point(581, 646);
             this.button_OK.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(111, 40);
@@ -106,24 +118,57 @@ namespace dp2Inventory
             this.tabControl1.Controls.Add(this.tabPage_rfid);
             this.tabControl1.Controls.Add(this.tabPage_dp2library);
             this.tabControl1.Controls.Add(this.tabPage_sip2);
+            this.tabControl1.Controls.Add(this.tabPage_other);
             this.tabControl1.Location = new System.Drawing.Point(12, 11);
             this.tabControl1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(776, 483);
+            this.tabControl1.Size = new System.Drawing.Size(797, 631);
             this.tabControl1.TabIndex = 3;
             // 
             // tabPage_rfid
             // 
+            this.tabPage_rfid.AutoScroll = true;
+            this.tabPage_rfid.Controls.Add(this.textBox_rfid_uploadInterfaceUrl);
+            this.tabPage_rfid.Controls.Add(this.label13);
+            this.tabPage_rfid.Controls.Add(this.checkBox_rfid_rpanTypeSwitch);
             this.tabPage_rfid.Controls.Add(this.numericUpDown_seconds);
             this.tabPage_rfid.Controls.Add(this.label10);
             this.tabPage_rfid.Controls.Add(this.groupBox11);
             this.tabPage_rfid.Location = new System.Drawing.Point(4, 31);
             this.tabPage_rfid.Name = "tabPage_rfid";
-            this.tabPage_rfid.Size = new System.Drawing.Size(768, 448);
+            this.tabPage_rfid.Size = new System.Drawing.Size(789, 596);
             this.tabPage_rfid.TabIndex = 0;
             this.tabPage_rfid.Text = "RFID";
             this.tabPage_rfid.UseVisualStyleBackColor = true;
+            // 
+            // textBox_rfid_uploadInterfaceUrl
+            // 
+            this.textBox_rfid_uploadInterfaceUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_rfid_uploadInterfaceUrl.Location = new System.Drawing.Point(28, 389);
+            this.textBox_rfid_uploadInterfaceUrl.Name = "textBox_rfid_uploadInterfaceUrl";
+            this.textBox_rfid_uploadInterfaceUrl.Size = new System.Drawing.Size(723, 31);
+            this.textBox_rfid_uploadInterfaceUrl.TabIndex = 7;
+            // 
+            // label13
+            // 
+            this.label13.AutoSize = true;
+            this.label13.Location = new System.Drawing.Point(24, 365);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(182, 21);
+            this.label13.TabIndex = 6;
+            this.label13.Text = "上传接口 URL(&U):";
+            // 
+            // checkBox_rfid_rpanTypeSwitch
+            // 
+            this.checkBox_rfid_rpanTypeSwitch.AutoSize = true;
+            this.checkBox_rfid_rpanTypeSwitch.Location = new System.Drawing.Point(28, 297);
+            this.checkBox_rfid_rpanTypeSwitch.Name = "checkBox_rfid_rpanTypeSwitch";
+            this.checkBox_rfid_rpanTypeSwitch.Size = new System.Drawing.Size(314, 25);
+            this.checkBox_rfid_rpanTypeSwitch.TabIndex = 5;
+            this.checkBox_rfid_rpanTypeSwitch.Text = "启用 R-PAN 标签类型切换(&R)";
+            this.checkBox_rfid_rpanTypeSwitch.UseVisualStyleBackColor = true;
             // 
             // numericUpDown_seconds
             // 
@@ -156,7 +201,7 @@ namespace dp2Inventory
             this.groupBox11.Margin = new System.Windows.Forms.Padding(5);
             this.groupBox11.Name = "groupBox11";
             this.groupBox11.Padding = new System.Windows.Forms.Padding(5);
-            this.groupBox11.Size = new System.Drawing.Size(727, 163);
+            this.groupBox11.Size = new System.Drawing.Size(748, 163);
             this.groupBox11.TabIndex = 2;
             this.groupBox11.TabStop = false;
             this.groupBox11.Text = " RFID 读卡器接口 URL ";
@@ -164,7 +209,7 @@ namespace dp2Inventory
             // button_rfid_setRfidUrlDefaultValue
             // 
             this.button_rfid_setRfidUrlDefaultValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_rfid_setRfidUrlDefaultValue.Location = new System.Drawing.Point(523, 82);
+            this.button_rfid_setRfidUrlDefaultValue.Location = new System.Drawing.Point(544, 82);
             this.button_rfid_setRfidUrlDefaultValue.Margin = new System.Windows.Forms.Padding(5);
             this.button_rfid_setRfidUrlDefaultValue.Name = "button_rfid_setRfidUrlDefaultValue";
             this.button_rfid_setRfidUrlDefaultValue.Size = new System.Drawing.Size(193, 40);
@@ -180,11 +225,12 @@ namespace dp2Inventory
             this.textBox_rfid_rfidCenterUrl.Location = new System.Drawing.Point(11, 35);
             this.textBox_rfid_rfidCenterUrl.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_rfid_rfidCenterUrl.Name = "textBox_rfid_rfidCenterUrl";
-            this.textBox_rfid_rfidCenterUrl.Size = new System.Drawing.Size(702, 31);
+            this.textBox_rfid_rfidCenterUrl.Size = new System.Drawing.Size(723, 31);
             this.textBox_rfid_rfidCenterUrl.TabIndex = 0;
             // 
             // tabPage_dp2library
             // 
+            this.tabPage_dp2library.AutoScroll = true;
             this.tabPage_dp2library.Controls.Add(this.textBox_dp2library_location);
             this.tabPage_dp2library.Controls.Add(this.label4);
             this.tabPage_dp2library.Controls.Add(this.textBox_dp2library_password);
@@ -196,7 +242,7 @@ namespace dp2Inventory
             this.tabPage_dp2library.Controls.Add(this.toolStrip_server);
             this.tabPage_dp2library.Location = new System.Drawing.Point(4, 31);
             this.tabPage_dp2library.Name = "tabPage_dp2library";
-            this.tabPage_dp2library.Size = new System.Drawing.Size(768, 448);
+            this.tabPage_dp2library.Size = new System.Drawing.Size(789, 596);
             this.tabPage_dp2library.TabIndex = 1;
             this.tabPage_dp2library.Text = "dp2library";
             this.tabPage_dp2library.UseVisualStyleBackColor = true;
@@ -266,7 +312,7 @@ namespace dp2Inventory
             this.textBox_dp2library_serverUrl.Location = new System.Drawing.Point(16, 52);
             this.textBox_dp2library_serverUrl.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_dp2library_serverUrl.Name = "textBox_dp2library_serverUrl";
-            this.textBox_dp2library_serverUrl.Size = new System.Drawing.Size(739, 31);
+            this.textBox_dp2library_serverUrl.Size = new System.Drawing.Size(760, 31);
             this.textBox_dp2library_serverUrl.TabIndex = 11;
             // 
             // label1
@@ -293,7 +339,7 @@ namespace dp2Inventory
             this.toolStripButton_cfg_setHongnibaServer});
             this.toolStrip_server.Location = new System.Drawing.Point(16, 92);
             this.toolStrip_server.Name = "toolStrip_server";
-            this.toolStrip_server.Size = new System.Drawing.Size(739, 51);
+            this.toolStrip_server.Size = new System.Drawing.Size(760, 51);
             this.toolStrip_server.TabIndex = 12;
             this.toolStrip_server.Text = "toolStrip1";
             // 
@@ -327,6 +373,10 @@ namespace dp2Inventory
             // 
             // tabPage_sip2
             // 
+            this.tabPage_sip2.AutoScroll = true;
+            this.tabPage_sip2.Controls.Add(this.checkBox_sip_localStore);
+            this.tabPage_sip2.Controls.Add(this.textBox_sip_locationList);
+            this.tabPage_sip2.Controls.Add(this.label12);
             this.tabPage_sip2.Controls.Add(this.textBox_sip_institution);
             this.tabPage_sip2.Controls.Add(this.label11);
             this.tabPage_sip2.Controls.Add(this.textBox_sip_port);
@@ -341,10 +391,61 @@ namespace dp2Inventory
             this.tabPage_sip2.Controls.Add(this.label8);
             this.tabPage_sip2.Location = new System.Drawing.Point(4, 31);
             this.tabPage_sip2.Name = "tabPage_sip2";
-            this.tabPage_sip2.Size = new System.Drawing.Size(768, 448);
+            this.tabPage_sip2.Size = new System.Drawing.Size(789, 596);
             this.tabPage_sip2.TabIndex = 2;
             this.tabPage_sip2.Text = "SIP2";
             this.tabPage_sip2.UseVisualStyleBackColor = true;
+            // 
+            // checkBox_sip_localStore
+            // 
+            this.checkBox_sip_localStore.AutoSize = true;
+            this.checkBox_sip_localStore.Location = new System.Drawing.Point(19, 440);
+            this.checkBox_sip_localStore.Name = "checkBox_sip_localStore";
+            this.checkBox_sip_localStore.Size = new System.Drawing.Size(195, 25);
+            this.checkBox_sip_localStore.TabIndex = 33;
+            this.checkBox_sip_localStore.Text = "启用本地存储(&S)";
+            this.checkBox_sip_localStore.UseVisualStyleBackColor = true;
+            // 
+            // textBox_sip_locationList
+            // 
+            this.textBox_sip_locationList.AcceptsReturn = true;
+            this.textBox_sip_locationList.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_sip_locationList.Location = new System.Drawing.Point(218, 321);
+            this.textBox_sip_locationList.Multiline = true;
+            this.textBox_sip_locationList.Name = "textBox_sip_locationList";
+            this.textBox_sip_locationList.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox_sip_locationList.Size = new System.Drawing.Size(561, 101);
+            this.textBox_sip_locationList.TabIndex = 32;
+            // 
+            // label12
+            // 
+            this.label12.AutoSize = true;
+            this.label12.Location = new System.Drawing.Point(15, 321);
+            this.label12.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(117, 42);
+            this.label12.TabIndex = 31;
+            this.label12.Text = "馆藏地(&L):\r\n[每行一个]";
+            // 
+            // textBox_sip_institution
+            // 
+            this.textBox_sip_institution.ImeMode = System.Windows.Forms.ImeMode.Off;
+            this.textBox_sip_institution.Location = new System.Drawing.Point(218, 263);
+            this.textBox_sip_institution.Margin = new System.Windows.Forms.Padding(5);
+            this.textBox_sip_institution.Name = "textBox_sip_institution";
+            this.textBox_sip_institution.Size = new System.Drawing.Size(242, 31);
+            this.textBox_sip_institution.TabIndex = 30;
+            // 
+            // label11
+            // 
+            this.label11.AutoSize = true;
+            this.label11.Location = new System.Drawing.Point(15, 266);
+            this.label11.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(148, 21);
+            this.label11.TabIndex = 29;
+            this.label11.Text = "机构代码(&I)：";
             // 
             // textBox_sip_port
             // 
@@ -368,7 +469,7 @@ namespace dp2Inventory
             // textBox_sip_encoding
             // 
             this.textBox_sip_encoding.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.textBox_sip_encoding.Location = new System.Drawing.Point(218, 264);
+            this.textBox_sip_encoding.Location = new System.Drawing.Point(218, 222);
             this.textBox_sip_encoding.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_sip_encoding.Name = "textBox_sip_encoding";
             this.textBox_sip_encoding.Size = new System.Drawing.Size(242, 31);
@@ -377,7 +478,7 @@ namespace dp2Inventory
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(15, 267);
+            this.label5.Location = new System.Drawing.Point(15, 225);
             this.label5.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(148, 21);
@@ -387,7 +488,7 @@ namespace dp2Inventory
             // textBox_sip_password
             // 
             this.textBox_sip_password.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.textBox_sip_password.Location = new System.Drawing.Point(218, 216);
+            this.textBox_sip_password.Location = new System.Drawing.Point(218, 181);
             this.textBox_sip_password.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_sip_password.Name = "textBox_sip_password";
             this.textBox_sip_password.PasswordChar = '*';
@@ -397,7 +498,7 @@ namespace dp2Inventory
             // textBox_sip_userName
             // 
             this.textBox_sip_userName.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.textBox_sip_userName.Location = new System.Drawing.Point(218, 168);
+            this.textBox_sip_userName.Location = new System.Drawing.Point(218, 140);
             this.textBox_sip_userName.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_sip_userName.Name = "textBox_sip_userName";
             this.textBox_sip_userName.Size = new System.Drawing.Size(242, 31);
@@ -406,7 +507,7 @@ namespace dp2Inventory
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(15, 219);
+            this.label6.Location = new System.Drawing.Point(15, 184);
             this.label6.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(106, 21);
@@ -416,7 +517,7 @@ namespace dp2Inventory
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(15, 171);
+            this.label7.Location = new System.Drawing.Point(15, 143);
             this.label7.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(127, 21);
@@ -430,7 +531,7 @@ namespace dp2Inventory
             this.textBox_sip_serverAddr.Location = new System.Drawing.Point(218, 48);
             this.textBox_sip_serverAddr.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_sip_serverAddr.Name = "textBox_sip_serverAddr";
-            this.textBox_sip_serverAddr.Size = new System.Drawing.Size(540, 31);
+            this.textBox_sip_serverAddr.Size = new System.Drawing.Size(561, 31);
             this.textBox_sip_serverAddr.TabIndex = 20;
             // 
             // label8
@@ -443,24 +544,52 @@ namespace dp2Inventory
             this.label8.TabIndex = 19;
             this.label8.Text = "SIP2 服务器地址:";
             // 
-            // textBox_sip_institution
+            // tabPage_other
             // 
-            this.textBox_sip_institution.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.textBox_sip_institution.Location = new System.Drawing.Point(218, 315);
-            this.textBox_sip_institution.Margin = new System.Windows.Forms.Padding(5);
-            this.textBox_sip_institution.Name = "textBox_sip_institution";
-            this.textBox_sip_institution.Size = new System.Drawing.Size(242, 31);
-            this.textBox_sip_institution.TabIndex = 30;
+            this.tabPage_other.Controls.Add(this.checkBox_enableTagCache);
+            this.tabPage_other.Controls.Add(this.groupBox1);
+            this.tabPage_other.Location = new System.Drawing.Point(4, 31);
+            this.tabPage_other.Name = "tabPage_other";
+            this.tabPage_other.Size = new System.Drawing.Size(789, 596);
+            this.tabPage_other.TabIndex = 3;
+            this.tabPage_other.Text = "其它";
+            this.tabPage_other.UseVisualStyleBackColor = true;
             // 
-            // label11
+            // checkBox_enableTagCache
             // 
-            this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(15, 318);
-            this.label11.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
-            this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(148, 21);
-            this.label11.TabIndex = 29;
-            this.label11.Text = "机构代码(&I)：";
+            this.checkBox_enableTagCache.AutoSize = true;
+            this.checkBox_enableTagCache.Location = new System.Drawing.Point(23, 30);
+            this.checkBox_enableTagCache.Name = "checkBox_enableTagCache";
+            this.checkBox_enableTagCache.Size = new System.Drawing.Size(237, 25);
+            this.checkBox_enableTagCache.TabIndex = 6;
+            this.checkBox_enableTagCache.Text = "启用标签信息缓存(&C)";
+            this.checkBox_enableTagCache.UseVisualStyleBackColor = true;
+            // 
+            // groupBox1
+            // 
+            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox1.Controls.Add(this.textBox_verifyRule);
+            this.groupBox1.Location = new System.Drawing.Point(3, 89);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Padding = new System.Windows.Forms.Padding(12);
+            this.groupBox1.Size = new System.Drawing.Size(783, 504);
+            this.groupBox1.TabIndex = 5;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = " 条码号校验规则 ";
+            // 
+            // textBox_verifyRule
+            // 
+            this.textBox_verifyRule.AcceptsReturn = true;
+            this.textBox_verifyRule.AcceptsTab = true;
+            this.textBox_verifyRule.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBox_verifyRule.Location = new System.Drawing.Point(12, 36);
+            this.textBox_verifyRule.Multiline = true;
+            this.textBox_verifyRule.Name = "textBox_verifyRule";
+            this.textBox_verifyRule.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox_verifyRule.Size = new System.Drawing.Size(759, 456);
+            this.textBox_verifyRule.TabIndex = 2;
             // 
             // SettingDialog
             // 
@@ -468,7 +597,7 @@ namespace dp2Inventory
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.button_Cancel;
-            this.ClientSize = new System.Drawing.Size(800, 549);
+            this.ClientSize = new System.Drawing.Size(821, 697);
             this.Controls.Add(this.button_Cancel);
             this.Controls.Add(this.button_OK);
             this.Controls.Add(this.tabControl1);
@@ -492,6 +621,10 @@ namespace dp2Inventory
             this.toolStrip_server.PerformLayout();
             this.tabPage_sip2.ResumeLayout(false);
             this.tabPage_sip2.PerformLayout();
+            this.tabPage_other.ResumeLayout(false);
+            this.tabPage_other.PerformLayout();
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -533,5 +666,15 @@ namespace dp2Inventory
         private System.Windows.Forms.Label label10;
         public System.Windows.Forms.TextBox textBox_sip_institution;
         private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.TextBox textBox_sip_locationList;
+        private System.Windows.Forms.Label label12;
+        private System.Windows.Forms.CheckBox checkBox_sip_localStore;
+        private System.Windows.Forms.CheckBox checkBox_rfid_rpanTypeSwitch;
+        private System.Windows.Forms.Label label13;
+        private System.Windows.Forms.TextBox textBox_rfid_uploadInterfaceUrl;
+        private System.Windows.Forms.TabPage tabPage_other;
+        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.TextBox textBox_verifyRule;
+        private System.Windows.Forms.CheckBox checkBox_enableTagCache;
     }
 }

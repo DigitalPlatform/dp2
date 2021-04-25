@@ -33,8 +33,8 @@ using System.Runtime.InteropServices;
 //通过使用 "*"，如下所示:
 // [assembly: AssemblyVersion("1.0.*")]
 // [assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyVersion("0.0.4")]
-[assembly: AssemblyFileVersion("0.0.4.0")]
+[assembly: AssemblyVersion("0.0.8")]
+[assembly: AssemblyFileVersion("0.0.8.0")]
 
 // 0.0.1 (2021/4/22) 首个发布版本
 // 0.0.2 (2021/4/22)
@@ -48,3 +48,16 @@ using System.Runtime.InteropServices;
 // 0.0.4 (2021/4/23)
 //                      1) 主窗口启动时候会禁用一段直到初始化完成
 //                      2) 设置对话框中按下确定按钮时会自动检查 dp2library URL 正确性，并检查它和 SIP 服务器地址之中是否至少填入了一个
+// 0.0.5 (2021/4/25)
+//                      1) 原先在 inventory.xml 中的配置事项全部移到设置对话框配置
+//                      2) 改善 SIP 用户名和密码不正确时候的报错。会自动暂停盘点循环。等用户名和密码修改正确后可以继续盘点循环
+//                      3) dp2inventory.exe 启动时候会自动带起来 rfidcenter.exe
+// 0.0.6
+//                      4) 设置对话框确定关闭的时候，会自动检查 SIP 服务器(地址和用户名密码等)参数是否正确
+// 0.0.7
+//                      5) SIP 全功能状态时，如果开始盘点所选的馆藏地位置不合法，盘点时会报错。注意 dp2capo 服务器只检查合法的馆代码下属的馆藏地是否合法，而对于无法识别是否合法的馆代码，对其下属的馆藏地无法检查和报错，也就是说任意馆藏地字符串都会写入成功
+//                      6) SIP 半功能状态，不会检查开始盘点所选的馆藏地是否合法
+// 0.0.8
+//                      7) 设置对话框中增加 条码号校验规则 参数。对 dp2library 和 SIP2 模式都起作用
+//                      8) 设置对话框中增加 启用标签信息缓存 参数
+//                      9) 增加 ClickOnce 方式下后台自动更新的功能
