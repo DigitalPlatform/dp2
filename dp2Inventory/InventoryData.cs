@@ -9,20 +9,20 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
+using System.Net.Http;
+
 using Microsoft.VisualStudio.Threading;
 
 using ClosedXML.Excel;
+using Newtonsoft.Json;
 
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
-using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryServer.Common;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using static dp2Inventory.LibraryChannelUtil;
-using Newtonsoft.Json;
-using System.Net.Http;
 using dp2Inventory.InventoryAPI;
 
 namespace dp2Inventory
@@ -270,9 +270,46 @@ namespace dp2Inventory
                     || StringUtil.IsInList("verifyEAS", actionMode))
                     && HasBorrowed(info.ItemXml)
                     && info.IsTaskCompleted("return") == false
-                    && DataModel.Protocol != "sip")
+                    /*&& DataModel.Protocol != "sip"*/)
                 {
-                    var request_result = RequestReturn(
+                    RequestInventoryResult request_result = null;
+                    if (DataModel.Protocol == "sip")
+                    {
+                        var return_result = await SipChannelUtil.ReturnAsync(entity.PII);
+                        if (return_result.Value == -1)
+                            request_result = new RequestInventoryResult
+                            {
+                                Value = -1,
+                                ErrorInfo = return_result.ErrorInfo,
+                                ErrorCode = return_result.ErrorCode
+                            };
+                        else
+                        {
+                            // 重新获得 ItemXml
+                            var get_result = await SipChannelUtil.GetEntityDataAsync(entity.PII,
+    entity.GetOiOrAoi(),
+    DataModel.sipLocalStore ? "network,localInventory" : "network");
+                            if (get_result.Value == -1)
+                            {
+                                request_result = new RequestInventoryResult
+                                {
+                                    Value = -1,
+                                    ErrorInfo = "还书成功，但随后重新获取册记录时失败: " + get_result.ErrorInfo,
+                                    ErrorCode = get_result.ErrorCode
+                                };
+                            }
+                            else
+                            {
+                                request_result = new RequestInventoryResult
+                                {
+                                    Value = 0,
+                                    ItemXml = get_result.ItemXml,
+                                };
+                            }
+                        }
+                    }
+                    else
+                        request_result = RequestReturn(
     entity.PII,
     entity.ItemRecPath,
     info.BatchNo,
@@ -309,7 +346,7 @@ namespace dp2Inventory
                 if (
                     (info.ContainTask("return") == false || info.IsTaskCompleted("return") == true)
                     && (need_verifyEas == true || StringUtil.IsInList("verifyEAS", actionMode))
-                    && DataModel.Protocol != "sip")
+                    /*&& DataModel.Protocol != "sip"*/)
                 {
                     await VerifyEasAsync(info, writeHistory);
                 }
@@ -332,7 +369,8 @@ namespace dp2Inventory
                 }
 
                 // 设置 UID
-                if (StringUtil.IsInList("setUID", actionMode)
+                if (info.FoundUii == false
+                    && StringUtil.IsInList("setUID", actionMode)
                     && (string.IsNullOrEmpty(info.ItemXml) == false || isSipLocal == true)
                     && info.IsTaskCompleted("setUID") == false
                     )
@@ -346,12 +384,15 @@ namespace dp2Inventory
                             entity.GetOiOrAoi(),
                             "");
                     else
+                    {
+                        // TODO: 如果 entity 本身是从对照表得到的，就可以跳过 SetUID 这一步
                         request_result = RequestSetUID(entity.ItemRecPath,
                             info.ItemXml,
                             null,
                             entity.UID,
                             info.UserName,
                             "");
+                    }
                     info.SetTaskInfo("setUID", request_result);
                     if (request_result.Value == -1)
                     {
@@ -402,7 +443,7 @@ namespace dp2Inventory
                                 StringUtil.IsInList("setLocation", actionMode) ? info.TargetShelfNo : null,
                                 info.BatchNo,
                                 info.UserName,
-                                InventoryDialog.ActionMode);
+                                actionMode);
                         else
                             request_result = await RequestInventory_sip2(entity.UID,
                                 entity.PII,
@@ -412,7 +453,7 @@ namespace dp2Inventory
                                 StringUtil.IsInList("setLocation", actionMode) ? info.TargetShelfNo : null,
                                 info.BatchNo,
                                 info.UserName,
-                                InventoryDialog.ActionMode);
+                                actionMode);
                     }
                     else
                         request_result = RequestInventory(entity.UID,
@@ -422,7 +463,7 @@ namespace dp2Inventory
                             StringUtil.IsInList("setLocation", actionMode) ? info.TargetShelfNo : null,
                             info.BatchNo,
                             info.UserName,
-                            InventoryDialog.ActionMode);
+                            actionMode);
 
                     /*
 #if AUTO_TEST
@@ -464,12 +505,12 @@ namespace dp2Inventory
                             info.ItemXml,
                             entity.UID,
                             entity.GetOiPii(),
-        StringUtil.IsInList("setCurrentLocation", actionMode) ? info.TargetCurrentLocation : null,
-        StringUtil.IsInList("setLocation", actionMode) ? info.TargetLocation : null,
-        StringUtil.IsInList("setLocation", actionMode) ? info.TargetShelfNo : null,
-        info.BatchNo,
-        info.UserName,
-        InventoryDialog.ActionMode);
+                            StringUtil.IsInList("setCurrentLocation", actionMode) ? info.TargetCurrentLocation : null,
+                            StringUtil.IsInList("setLocation", actionMode) ? info.TargetLocation : null,
+                            StringUtil.IsInList("setLocation", actionMode) ? info.TargetShelfNo : null,
+                            info.BatchNo,
+                            info.UserName,
+                            actionMode);
                         if (upload_result.Value == -1)
                         {
                             SpeakSequence($"{entity.PII} 上传请求出错");
@@ -856,7 +897,7 @@ namespace dp2Inventory
                 return "";
             return validator.OuterXml;
             */
-            return DataModel.PiiVerifyRule.Trim(new char[] { '\r', '\n', ' ', '\t'});
+            return DataModel.PiiVerifyRule.Trim(new char[] { '\r', '\n', ' ', '\t' });
         }
 
         public static void ClearVarcodeValidator()

@@ -1061,7 +1061,7 @@ out string block_map);
 
                     // TODO: 根据动作判断哪些情况必须获得 tagInfo
                     if (iteminfo.TagInfo == null
-                        && (iteminfo.UII == null || StringUtil.IsInList("verifyEAS", _actionMode))
+                        && (iteminfo.UII == null || StringUtil.IsInList("verifyEAS", ActionMode))
                         )
                     {
                         // 第一步，获得标签详细信息
@@ -1116,6 +1116,7 @@ out string block_map);
                         continue;
 
                     // 第三步，进行处理
+                    // bool create_from_uii = false;   // 是否从 UII 直接创建
                     Entity entity = null;
                     string tou = "";
                     if (tag.TagInfo != null)
@@ -1132,6 +1133,7 @@ out string block_map);
                         entity = InventoryData.NewEntity(tag,
                             iteminfo.UII);
                         tou = "10"; // 图书
+                        // create_from_uii = true;
                     }
 
                     // 语音播报标签(天线)类型切换
@@ -1202,7 +1204,7 @@ out string block_map);
                         // 记忆处理时的层架位置
                         iteminfo.ProcessedShelfNo = CurrentShelfNo;
 
-                        ProcessInfo process_info = new ProcessInfo { Entity = entity };
+                        ProcessInfo process_info = new ProcessInfo { Entity = entity, FoundUii = iteminfo.UII != null };
                         var set_result = SetTargetCurrentLocation(process_info);
                         if (set_result.Value == -1
                             && set_result.ErrorCode == "noCurrentShelfNo")
@@ -1225,6 +1227,17 @@ out string block_map);
                             */
                             continue;
                         }
+                        else if (set_result.Value == -1)
+                        {
+                            SetErrorInfo(item, set_result.ErrorInfo);
+                            // 作为严重错误返回
+                            return new ProcessResult
+                            {
+                                Value = -1,
+                                ErrorInfo = set_result.ErrorInfo,
+                                ErrorCode = "interrupt"
+                            };
+                        }
 
                         // string old_title = process_info.Entity?.Title;
                         process_info.ListViewItem = item;
@@ -1238,7 +1251,7 @@ out string block_map);
                         if (process_info.State == "interrupt")
                         {
                             SetErrorInfo(item, entity.Error);
-                            // 作为致命错误返回
+                            // 作为严重错误返回
                             return new ProcessResult
                             {
                                 Value = -1,
@@ -2283,6 +2296,21 @@ bool eas)
         // 注意，如果 actionMode 里面不包含 setCurrentLocation，则没有必要做这一步
         NormalResult SetTargetCurrentLocation(ProcessInfo info)
         {
+            // 2021/4/26
+            // 检查 CurrentLocation 是否为空
+            if (StringUtil.IsInList("setCurrentLocation,setLocation", ActionMode))
+            {
+                if (string.IsNullOrEmpty(CurrentLocation))
+                {
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = "当前馆藏地点尚未设置。无法切换",
+                        ErrorCode = "noCurrentLocation"
+                    };
+                }
+            }
+
             info.TargetLocation = CurrentLocation;
             info.TargetShelfNo = CurrentShelfNo;
             info.BatchNo = CurrentBatchNo;
@@ -2295,6 +2323,7 @@ bool eas)
                 return new NormalResult
                 {
                     Value = -1,
+                    ErrorInfo = "当前尚未设置层架位置，无法切换。请先扫层架标",
                     ErrorCode = "noCurrentShelfNo"
                 };
             }

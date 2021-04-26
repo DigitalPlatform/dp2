@@ -295,6 +295,7 @@
     <None Include="app.config" />
     <None Include="log\ve-279.tmp" />
     <None Include="packages.config" />
+    <None Include="readme.md" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

@@ -562,17 +562,29 @@ namespace dp2Inventory
             }
         }
 
-        public static async Task<NormalResult> ReturnAsync(string itemBarcode)
+        public static async Task<NormalResult> ReturnAsync(
+            string itemBarcode)
         {
+            string filter_oi = DataModel.sipInstitution;
+            if (string.IsNullOrEmpty(filter_oi) == false)
+            {
+                InventoryData.ParseOiPii(itemBarcode, out string item_pii, out string item_oi);
+                if (item_oi != filter_oi)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"图书标签的 OI '{item_oi}' 不符合定义 '{filter_oi}'，还书被(dp2inventory)拒绝",
+                        ErrorCode = "oiMismatch"
+                    };
+            }
             try
             {
                 using (var releaser = await _channelLimit.EnterAsync())
                 {
-
                     SipChannel channel = await GetChannelAsync();
                     try
                     {
-                        var result = await channel.CheckinAsync(itemBarcode, null);
+                        var result = await channel.CheckinAsync(itemBarcode, filter_oi);
                         if (result.Value == -1)
                             return new NormalResult
                             {
@@ -599,7 +611,7 @@ namespace dp2Inventory
             {
                 ClientInfo.WriteErrorLog($"ReturnAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
 
-                return new GetEntityDataResult
+                return new NormalResult
                 {
                     Value = -1,
                     ErrorInfo = $"ReturnAsync() 出现异常: {ex.Message}",

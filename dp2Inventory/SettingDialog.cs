@@ -84,6 +84,12 @@ namespace dp2Inventory
             if (this.textBox_sip_locationList.Text.IndexOf(",") != -1)
                 errors.Add("SIP 馆藏地中不允许出现逗号(应为每行一个馆藏地)");
 
+            // 检查两个服务器 URL 必须至少配置其中一个
+            if (control == false
+                && string.IsNullOrEmpty(this.textBox_dp2library_serverUrl.Text)
+                && string.IsNullOrEmpty(this.textBox_sip_serverAddr.Text))
+                errors.Add("dp2library 服务器 URL 和 SIP 服务器地址两者必须至少配置其中一个");
+
             if (errors.Count > 0)
             {
                 strError = StringUtil.MakePathList(errors, "\r\n");
@@ -91,6 +97,8 @@ namespace dp2Inventory
             }
 
             // string oldSipAddress = GetSipServerString();
+
+            List<object> backup_data = Backup();
 
             DataModel.RfidCenterUrl = this.textBox_rfid_rfidCenterUrl.Text;
             DataModel.BeforeScanSeconds = (int)this.numericUpDown_seconds.Value;
@@ -119,56 +127,57 @@ namespace dp2Inventory
             LibraryChannelUtil.Clear();
             SipChannelUtil.CloseChannel();
 
-            // 检查两个服务器 URL 必须至少配置其中一个
-            if (control == false
-                && string.IsNullOrEmpty(DataModel.dp2libraryServerUrl)
-                && string.IsNullOrEmpty(DataModel.sipServerAddr))
-            {
-                strError = "dp2library 服务器 URL 和 SIP 服务器地址两者必须配置其中一个";
-                goto ERROR1;
-            }
-
             // string sipAddress = GetSipServerString();
-
-            if (control == false
-                && string.IsNullOrEmpty(DataModel.sipServerAddr) == false)
+            bool succeed = false;
+            try
             {
-                this.Enabled = false;
-                try
+                if (control == false
+                    && string.IsNullOrEmpty(DataModel.sipServerAddr) == false)
                 {
-                    // -1出错，0不在线，1正常
-                    var result = await SipChannelUtil.DetectSipNetworkAsync();
-                    if (result.Value != 1)
+                    this.Enabled = false;
+                    try
                     {
-                        strError = $"SIP 服务器地址或相关参数不正确: {result.ErrorInfo}";
-                        goto ERROR1;
+                        // -1出错，0不在线，1正常
+                        var result = await SipChannelUtil.DetectSipNetworkAsync();
+                        if (result.Value != 1)
+                        {
+                            strError = $"SIP 服务器地址或相关参数不正确: {result.ErrorInfo}";
+                            goto ERROR1;
+                        }
+                    }
+                    finally
+                    {
+                        this.Enabled = true;
                     }
                 }
-                finally
+
+                // 2021/4/23
+                // 重新初始化 dp2library 相关环境
+                if (string.IsNullOrEmpty(DataModel.dp2libraryServerUrl) == false)
                 {
-                    this.Enabled = true;
+                    this.Enabled = false;
+                    try
+                    {
+                        var initial_result = LibraryChannelUtil.Initial();
+                        if (initial_result.Value == -1
+                            && control == false)
+                        {
+                            strError = $"获得 dp2library 服务器配置失败: {initial_result.ErrorInfo}";
+                            goto ERROR1;
+                        }
+                    }
+                    finally
+                    {
+                        this.Enabled = true;
+                    }
                 }
+
+                succeed = true;
             }
-
-            // 2021/4/23
-            // 重新初始化 dp2library 相关环境
-            if (string.IsNullOrEmpty(DataModel.dp2libraryServerUrl) == false)
+            finally
             {
-                this.Enabled = false;
-                try
-                {
-                    var initial_result = LibraryChannelUtil.Initial();
-                    if (initial_result.Value == -1
-                        && control == false)
-                    {
-                        strError = $"获得 dp2library 服务器配置失败: {initial_result.ErrorInfo}";
-                        goto ERROR1;
-                    }
-                }
-                finally
-                {
-                    this.Enabled = true;
-                }
+                if (succeed == false)
+                    Restore(backup_data);
             }
 
             this.DialogResult = DialogResult.OK;
@@ -176,6 +185,63 @@ namespace dp2Inventory
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+        static List<object> Backup()
+        {
+            List<object> results = new List<object>();
+
+            results.Add(DataModel.RfidCenterUrl);
+            results.Add(DataModel.BeforeScanSeconds);
+            results.Add(DataModel.RfidRpanTypeSwitch);
+            results.Add(DataModel.uploadInterfaceUrl);
+
+            results.Add(DataModel.dp2libraryServerUrl);
+            results.Add(DataModel.dp2libraryUserName);
+
+            results.Add(DataModel.dp2libraryPassword);
+            results.Add(DataModel.dp2libraryLocation);
+
+            results.Add(DataModel.sipServerAddr);
+            results.Add(DataModel.sipServerPort);
+            results.Add(DataModel.sipUserName);
+            results.Add(DataModel.sipPassword);
+            results.Add(DataModel.sipEncoding);
+            results.Add(DataModel.sipInstitution);
+            results.Add(DataModel.sipLocationList);
+            results.Add(DataModel.sipLocalStore);
+
+            results.Add(DataModel.EnableTagCache);
+            results.Add(DataModel.PiiVerifyRule);
+
+            return results;
+        }
+
+        static void Restore(List<object> data)
+        {
+            int index = 0;
+            DataModel.RfidCenterUrl = (string)data[index++];
+            DataModel.BeforeScanSeconds = (int)data[index++];
+            DataModel.RfidRpanTypeSwitch = (bool)data[index++];
+            DataModel.uploadInterfaceUrl = (string)data[index++];
+
+            DataModel.dp2libraryServerUrl = (string)data[index++];
+            DataModel.dp2libraryUserName = (string)data[index++];
+
+            DataModel.dp2libraryPassword = (string)data[index++];
+            DataModel.dp2libraryLocation = (string)data[index++];
+
+            DataModel.sipServerAddr = (string)data[index++];
+            DataModel.sipServerPort = (int)data[index++];
+            DataModel.sipUserName = (string)data[index++];
+            DataModel.sipPassword = (string)data[index++];
+            DataModel.sipEncoding = (string)data[index++];
+            DataModel.sipInstitution = (string)data[index++];
+            DataModel.sipLocationList = (string)data[index++];
+            DataModel.sipLocalStore = (bool)data[index++];
+
+            DataModel.EnableTagCache = (bool)data[index++];
+            DataModel.PiiVerifyRule = (string)data[index++];
         }
 
         private void button_Cancel_Click(object sender, EventArgs e)

@@ -31,7 +31,7 @@ namespace dp2Inventory
                     this.checkBox_action_setCurrentLocation,
                     this.checkBox_action_setLocation,
                     this.checkBox_action_verifyEas,
-                    this.comboBox_action_location,
+                    new ComboBoxText(this.comboBox_action_location),
                     this.checkBox_action_slowMode,
                 };
                 return GuiState.GetUiState(controls);
@@ -44,7 +44,7 @@ namespace dp2Inventory
                     this.checkBox_action_setCurrentLocation,
                     this.checkBox_action_setLocation,
                     this.checkBox_action_verifyEas,
-                    this.comboBox_action_location,
+                    new ComboBoxText(this.comboBox_action_location),
                     this.checkBox_action_slowMode,
                 };
                 GuiState.SetUiState(controls, value);
@@ -54,6 +54,19 @@ namespace dp2Inventory
         private void button_OK_Click(object sender, EventArgs e)
         {
             string strError = "";
+
+            var control = (Control.ModifierKeys & Keys.Control) == Keys.Control;
+
+            if (control == false
+                && (this.checkBox_action_setCurrentLocation.Checked
+                || this.checkBox_action_setLocation.Checked))
+            {
+                if (string.IsNullOrEmpty(this.comboBox_action_location.Text))
+                {
+                    strError = "当更新当前和永久位置的时候，馆藏地不允许为空";
+                    goto ERROR1;
+                }
+            }
 
             this.DialogResult = DialogResult.OK;
             this.Close();
@@ -119,8 +132,10 @@ namespace dp2Inventory
 
             if (get_result.Value == -1)
                 throw new Exception($"获得馆藏地列表时出错: {get_result.ErrorInfo}");
-
+            
+            var old_value = this.comboBox_action_location.Text;
             this.comboBox_action_location.DataSource = get_result.List;
+            this.comboBox_action_location.Text = old_value;
 
             string batchNo = "inventory_" + DateTime.Now.ToShortDateString();
             this.textBox_action_batchNo.Text = batchNo;
@@ -193,6 +208,19 @@ namespace dp2Inventory
             set
             {
                 this.checkBox_action_slowMode.Checked = value;
+            }
+        }
+
+        private void checkBoxes_CheckedChanged(object sender, EventArgs e)
+        {
+            CheckBox control = sender as CheckBox;
+            if (control.Checked)
+            {
+                control.BackColor = Color.LightGreen;
+            }
+            else
+            {
+                control.BackColor = Color.Transparent;
             }
         }
     }

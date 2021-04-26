@@ -363,32 +363,32 @@ bool bClickClose = false)
         private void MenuItem_inventory_Click(object sender, EventArgs e)
         {
             // 把盘点对话框打开
-            CreateModifyDialog();
+            CreateInventoryDialog();
 
-            if (_modifyDialog.Visible == false)
-                _modifyDialog.Show(this);
+            if (_inventoryDialog.Visible == false)
+                _inventoryDialog.Show(this);
         }
 
-        InventoryDialog _modifyDialog = null;
+        InventoryDialog _inventoryDialog = null;
 
-        void CreateModifyDialog()
+        void CreateInventoryDialog()
         {
-            if (_modifyDialog == null)
+            if (_inventoryDialog == null)
             {
-                _modifyDialog = new InventoryDialog();
+                _inventoryDialog = new InventoryDialog();
 
-                _modifyDialog.FormClosing += _modifyDialog_FormClosing;
-                _modifyDialog.WriteComplete += _modifyDialog_WriteComplete;
+                _inventoryDialog.FormClosing += _inventoryDialog_FormClosing;
+                _inventoryDialog.WriteComplete += _inventoryDialog_WriteComplete;
 
-                GuiUtil.SetControlFont(_modifyDialog, this.Font);
-                ClientInfo.MemoryState(_modifyDialog, "modifyDialog", "state");
-                _modifyDialog.UiState = ClientInfo.Config.Get("modifyDialog", "uiState", null);
+                GuiUtil.SetControlFont(_inventoryDialog, this.Font);
+                ClientInfo.MemoryState(_inventoryDialog, "inventoryDialog", "state");
+                _inventoryDialog.UiState = ClientInfo.Config.Get("inventoryDialog", "uiState", null);
             }
         }
 
         bool _historyChanged = false;
 
-        private void _modifyDialog_WriteComplete(object sender, WriteCompleteventArgs e)
+        private void _inventoryDialog_WriteComplete(object sender, WriteCompleteventArgs e)
         {
             this.Invoke((Action)(() =>
             {
@@ -397,7 +397,7 @@ bool bClickClose = false)
             }));
         }
 
-        private void _modifyDialog_FormClosing(object sender, FormClosingEventArgs e)
+        private void _inventoryDialog_FormClosing(object sender, FormClosingEventArgs e)
         {
             var dialog = sender as Form;
 
@@ -457,7 +457,7 @@ bool bClickClose = false)
             ListViewUtil.ChangeItemText(item, COLUMN_OI, entity.GetOiOrAoi());
             ListViewUtil.ChangeItemText(item, COLUMN_WRITETIME, DateTime.Now.ToString());
             ListViewUtil.ChangeItemText(item, COLUMN_ACTION, action);
-            ListViewUtil.ChangeItemText(item, COLUMN_ACTION, info.BatchNo);
+            ListViewUtil.ChangeItemText(item, COLUMN_BATCHNO, info.BatchNo);
         }
 
         #endregion

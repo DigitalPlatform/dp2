@@ -33,8 +33,8 @@ using System.Runtime.InteropServices;
 //通过使用 "*"，如下所示:
 // [assembly: AssemblyVersion("1.0.*")]
 // [assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyVersion("0.0.8")]
-[assembly: AssemblyFileVersion("0.0.8.0")]
+[assembly: AssemblyVersion("0.0.10")]
+[assembly: AssemblyFileVersion("0.0.10.0")]
 
 // 0.0.1 (2021/4/22) 首个发布版本
 // 0.0.2 (2021/4/22)
@@ -61,3 +61,10 @@ using System.Runtime.InteropServices;
 //                      7) 设置对话框中增加 条码号校验规则 参数。对 dp2library 和 SIP2 模式都起作用
 //                      8) 设置对话框中增加 启用标签信息缓存 参数
 //                      9) 增加 ClickOnce 方式下后台自动更新的功能
+// 0.0.9 (2021/4/26)
+//                      1) 开始盘点对话框中的馆藏地可以记忆了
+//                      2) (当选择了更新当前位置和永久位置后)在开始盘点对话框确定关闭时，会检查馆藏地是否输入。但如果按住 Ctrl 键点确定按钮，则不做此检查
+//                      3) (当选择了更新当前位置和永久位置后)在盘点过程中，还会检查当前馆藏地(由开始盘点对话框设置)是否为空，如果为空则会报错
+// 0.0.10
+//                      4) 对于 SIP2 协议也支持自动还书和校验 EAS 了
+//                      5) 修正设置对话框点确定后报错，再点右上角关闭按钮，无法撤销在对话框打开期间对参数的变动，的 bug

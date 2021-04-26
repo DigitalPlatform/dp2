@@ -493,6 +493,9 @@ namespace dp2Inventory
     // Entity 附加的处理信息
     public class ProcessInfo
     {
+        // 是否已经存在 UID-->UII 对照事项
+        public bool FoundUii { get; set; }
+
         public ListViewItem ListViewItem { get; set; }
 
         public Entity Entity { get; set; }
