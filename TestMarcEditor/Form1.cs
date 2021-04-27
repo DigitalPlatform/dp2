@@ -17,6 +17,20 @@ namespace TestMarcEditor
         public Form1()
         {
             InitializeComponent();
+
+            marcEditor1.Click += MarcEditor1_Click;
+            marcEditor1.SelectedFieldChanged += MarcEditor1_SelectedFieldChanged;
+        }
+
+        private void MarcEditor1_SelectedFieldChanged(object sender, EventArgs e)
+        {
+            var index = marcEditor1.FocusedFieldIndex;
+            var field = marcEditor1.FocusedField;
+        }
+
+        private void MarcEditor1_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show(this, "click");
         }
 
         private void marcEditor1_GetConfigFile(object sender, DigitalPlatform.Marc.GetConfigFileEventArgs e)

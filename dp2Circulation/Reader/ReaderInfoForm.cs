@@ -6638,7 +6638,11 @@ MessageBoxDefaultButton.Button1);
                 GetFeatureStringResult result = await ReadFeatureString(
                     null,
                     this.readerEditControl1.Barcode,
-                    "ui,confirmPicture,returnImage");
+                    "ui,confirmPicture,returnImage,searchDup");
+
+                if (result.ErrorCode == "alreadyExist")
+                    result.ErrorInfo = $"登记人脸被拒绝: {result.ErrorInfo}";
+
                 if (result.Value == -1)
                 {
                     DialogResult temp_result = MessageBox.Show(this,

@@ -1071,6 +1071,12 @@ MessageBoxDefaultButton.Button2);
 
         void menu_changeSelectedTagEas_Click(object sender, EventArgs e)
         {
+            if (ScanDialog.HasLicense("modify_eas", false) == false)
+            {
+                MessageBox.Show(this, "尚未许可 modify_eas 功能");
+                return;
+            }
+
             string style = (sender as MenuItem).Tag as string;
             int nRet = SetEAS(style == "on",
                 out string strError);
@@ -1197,9 +1203,10 @@ MessageBoxDefaultButton.Button2);
         }
 
         // 判断序列号中的功能类型是否匹配
-        public static bool HasLicense(string function_type)
+        public static bool HasLicense(string function_type,
+            bool reinput = true)
         {
-            string style = "reinput";
+            string style = reinput ? "reinput" : "";
             if (StringUtil.IsDevelopMode())
                 style += ",skipVerify";
             int nRet = FormClientInfo.VerifySerialCode(

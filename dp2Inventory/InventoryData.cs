@@ -1285,6 +1285,7 @@ namespace dp2Inventory
                     int change_count = 0;
                     int delete_count = 0;
                     int error_count = 0;
+
                     List<string> lines = new List<string>();
                     int i = 0;
                     string processed_line = "";
@@ -1305,7 +1306,15 @@ namespace dp2Inventory
                         string uid = parts[0];
                         string barcode = parts[1];
                         if (string.IsNullOrEmpty(uid) || string.IsNullOrEmpty(barcode))
-                            continue;
+                        {
+                            // error_count++;
+                            // continue;
+                            return new ImportUidResult
+                            {
+                                ErrorInfo = $"出现了不合法的行 '{line}'，导入过程出错",
+                                Value = -1,
+                            };
+                        }
 
                         // 2021/4/1
                         ParseOiPii(barcode, out string pii, out string oi);

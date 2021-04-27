@@ -33,8 +33,8 @@ using System.Runtime.InteropServices;
 //通过使用 "*"，如下所示:
 // [assembly: AssemblyVersion("1.0.*")]
 // [assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyVersion("0.0.10")]
-[assembly: AssemblyFileVersion("0.0.10.0")]
+[assembly: AssemblyVersion("0.0.12")]
+[assembly: AssemblyFileVersion("0.0.12.0")]
 
 // 0.0.1 (2021/4/22) 首个发布版本
 // 0.0.2 (2021/4/22)
@@ -68,3 +68,7 @@ using System.Runtime.InteropServices;
 // 0.0.10
 //                      4) 对于 SIP2 协议也支持自动还书和校验 EAS 了
 //                      5) 修正设置对话框点确定后报错，再点右上角关闭按钮，无法撤销在对话框打开期间对参数的变动，的 bug
+// 0.0.11 (2021/4/27)
+//                      1) 扫到 ISO25693 读者证，会显示“读者证被滤除”
+// 0.0.12
+//                      2) 导入 UID-->UII 对照关系的时候，如果遇到源文件行格式不合法，会直接报错中断处理返回

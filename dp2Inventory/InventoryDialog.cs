@@ -1177,6 +1177,17 @@ out string block_map);
 
                         await SwitchCurrentShelfNoAsync(entity, token);
                     }
+                    else if (tou != null && tou.StartsWith("8"))
+                    {
+                        this.Invoke((Action)(() =>
+                        {
+                            iteminfo.State = "disable";
+                            ListViewUtil.ChangeItemText(item, COLUMN_ERRORINFO, "读者证被滤除");
+                            SetItemColor(item, "disable");
+                        }));
+                        filtered_count++;
+                        continue;
+                    }
                     else
                     {
                         // 按照天线状态滤除

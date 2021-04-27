@@ -766,6 +766,7 @@ MessageBoxDefaultButton.Button2);
                 };
                 try
                 {
+
                     await Task.Run(async () =>
                     {
                         bool sip = DataModel.Protocol == "sip";
