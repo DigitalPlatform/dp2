@@ -17577,12 +17577,12 @@ start_time_1,
             int nNo = 0;
 
             // 读者记录中的 borrow 元素
-            XmlNode nodeBorrow = null;
+            XmlElement nodeBorrow = null;
 
             if (bRenew == true)
             {
                 // 看看是否已经有先前已经借阅的册
-                nodeBorrow = readerdom.DocumentElement.SelectSingleNode("borrows/borrow[@barcode='" + strItemBarcode + "']");
+                nodeBorrow = readerdom.DocumentElement.SelectSingleNode("borrows/borrow[@barcode='" + strItemBarcode + "']") as XmlElement;
                 if (nodeBorrow == null)
                 {
                     // text-level: 用户提示
@@ -17615,6 +17615,10 @@ start_time_1,
                             nNo = 0;
                         }
                     }
+
+                    // 2021/4/28
+                    // 清除以前残留的 notifyHistory 属性。不然续借后的超期通知会被抑制发送
+                    nodeBorrow.RemoveAttribute("notifyHistory");
                 }
             }
             else // bRenew == false
@@ -17629,7 +17633,7 @@ start_time_1,
 
                 // 加入借阅册信息
                 nodeBorrow = readerdom.CreateElement("borrow");
-                nodeBorrow = DomUtil.InsertFirstChild(root, nodeBorrow); // 2006/12/24 changed，2015/1/12 增加等号左边的部分 
+                nodeBorrow = (XmlElement)DomUtil.InsertFirstChild(root, nodeBorrow); // 2006/12/24 changed，2015/1/12 增加等号左边的部分 
                                                                          // nodeBorrow = root.AppendChild(nodeBorrow);
             }
 

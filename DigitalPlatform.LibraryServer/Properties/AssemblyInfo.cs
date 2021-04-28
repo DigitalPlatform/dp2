@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.50.*")]
-[assembly: AssemblyFileVersion("3.50.0.0")]
+[assembly: AssemblyVersion("3.51.*")]
+[assembly: AssemblyFileVersion("3.51.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -233,3 +233,4 @@ ItemCanReturn()
 //					另外 GetReaderInfo() API 增加了 json 和 advancejson 两种格式，对应于 xml 和 advancexml。其他配套的 advancexml_xxx 不变
 //		3.49 (2021/3/16) GetItemInfo() API 的 strResultType 参数值增加了 uii 一种类型，可以返回册记录的 UII
 //		3.50 (2021/4/6) SetEntities() API 中修改和创建册记录的时候，会自动删除其他册记录中重复的 uid 字段。注意要确保所有实体库的 keys 中定义了 RFID UID 检索点
+//		3.51 (2021/4/28) Borrow() API 续借时会清除读者记录中的 borrow 元素下先前残留的 notifyHistory 属性，这样避免续借以后(ReadersMonitor)发出超期通知时被这个属性抑制
