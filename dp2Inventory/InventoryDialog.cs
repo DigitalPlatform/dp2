@@ -28,7 +28,11 @@ namespace dp2Inventory
 {
     public partial class InventoryDialog : Form
     {
+        // 加入操作历史
         public event WriteCompleteEventHandler WriteComplete = null;
+        
+        // 加入 ShelfDialog
+        public event AddBookEventHandler AddBook = null;
 
         public InventoryDialog()
         {
@@ -824,9 +828,9 @@ out string block_map);
 
         const int COLUMN_UID = 0;
         const int COLUMN_ERRORINFO = 1;
-        const int COLUMN_PII = 2;
+        public const int COLUMN_PII = 2;
         const int COLUMN_TITLE = 3;
-        const int COLUMN_CURRENTLOCATION = 4;
+        public const int COLUMN_CURRENTLOCATION = 4;
         const int COLUMN_LOCATION = 5;
         const int COLUMN_STATE = 6;
         const int COLUMN_TU = 7;
@@ -1169,7 +1173,7 @@ out string block_map);
                             iteminfo.State = "succeed";
                             this.Invoke((Action)(() =>
                             {
-                                RefreshItem(item);
+                                RefreshItem(item, iteminfo.UII);
                                 ListViewUtil.ChangeItemText(item, COLUMN_ERRORINFO, "切换层架标成功");
                                 SetItemColor(item, "changed");
                             }));
@@ -1285,7 +1289,7 @@ out string block_map);
                             iteminfo.State = "succeed";
                             this.Invoke((Action)(() =>
                             {
-                                RefreshItem(item);
+                                RefreshItem(item, iteminfo.UII);
                                 ListViewUtil.ChangeItemText(item, COLUMN_ERRORINFO, "盘点成功");
                                 SetItemColor(item, "changed");
                             }));
@@ -1293,6 +1297,12 @@ out string block_map);
                             AddToProcessed(iteminfo.Tag.UID, iteminfo);
                             process_count++;
 
+                            // 加入 ShelfDialog
+                            this.AddBook?.Invoke(this, new AddBookEventArgs
+                            {
+                                Item = item,
+                                Columns = this.listView_tags.Columns
+                            });
                         }
                         else
                         {
@@ -1517,22 +1527,30 @@ out string block_map);
                             entity.Title = GetCaption(result.Title);
                         }
 
-                        // 立即刷新 ListViewItem 显示
-                        info.ListViewItem.ListView.Invoke((Action)(() =>
-                        {
-                            ListViewUtil.ChangeItemText(info.ListViewItem, COLUMN_TITLE, entity.Title);
-                            ListViewUtil.ChangeItemText(info.ListViewItem, COLUMN_STATE, entity.State);
-                        }));
-
-                        // 立即刷新当前架位和永久架位的显示
-                        InventoryDialog.RefreshLocations(info);
-
+                        // 重新把 ItemXml 中的信息更新到 Entity
                         if (string.IsNullOrEmpty(result.ItemXml) == false)
                         {
                             if (info != null)
                                 info.ItemXml = result.ItemXml;
                             entity.SetData(result.ItemRecPath, result.ItemXml);
                         }
+
+                        // 立即刷新 ListViewItem 显示
+                        info.ListViewItem.ListView.Invoke((Action)(() =>
+                        {
+                            ListViewUtil.ChangeItemText(info.ListViewItem, COLUMN_TITLE, entity.Title);
+                            ListViewUtil.ChangeItemText(info.ListViewItem, COLUMN_STATE, entity.State);
+
+                            /*
+                            ListViewUtil.ChangeItemText(info.ListViewItem, COLUMN_CURRENTLOCATION, entity.CurrentLocation);
+                            ListViewUtil.ChangeItemText(info.ListViewItem, COLUMN_LOCATION, entity.Location + ":" + entity.ShelfNo);
+                            */
+                        }));
+
+                        // 立即刷新当前架位和永久架位的显示
+                        InventoryDialog.RefreshLocations(info);
+
+
                     }
                 }
 
@@ -1921,9 +1939,17 @@ bool eas)
 
 
         // 刷新一个 ListViewItem 的所有列显示
-        void RefreshItem(ListViewItem item)
+        // parameters:
+        //      display_uii 用于显示的 PII。如果 TagInfo == null 的时候会采用它来显示
+        void RefreshItem(ListViewItem item,
+            string display_uii = null)
         {
+            ParseOiPii(display_uii,
+                out string display_pii, out string display_oi);
             string pii = "(尚未填充)";
+            if (string.IsNullOrEmpty(display_pii) == false)
+                pii = display_pii;
+
             string tou = "";
             string eas = "";
             string afi = "";
@@ -1973,9 +1999,19 @@ bool eas)
                 ListViewUtil.ChangeItemText(item, COLUMN_TU, tou);
                 ListViewUtil.ChangeItemText(item, COLUMN_EAS, eas);
                 ListViewUtil.ChangeItemText(item, COLUMN_AFI, afi);
-                ListViewUtil.ChangeItemText(item, COLUMN_OI, oi);
-                ListViewUtil.ChangeItemText(item, COLUMN_AOI, aoi);
 
+                if (string.IsNullOrEmpty(oi)
+                    && string.IsNullOrEmpty(aoi)
+                    && string.IsNullOrEmpty(display_oi) == false)
+                {
+                    ListViewUtil.ChangeItemText(item, COLUMN_OI, display_oi);
+                    ListViewUtil.ChangeItemText(item, COLUMN_AOI, aoi);
+                }
+                else
+                {
+                    ListViewUtil.ChangeItemText(item, COLUMN_OI, oi);
+                    ListViewUtil.ChangeItemText(item, COLUMN_AOI, aoi);
+                }
 
                 /*
                 // 过滤 TU

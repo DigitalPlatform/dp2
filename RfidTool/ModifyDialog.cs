@@ -925,7 +925,7 @@ namespace RfidTool
                     {
                         string new_oi = chip?.FindElement(ElementOID.OI)?.Text;
                         string new_aoi = chip?.FindElement(ElementOID.AOI)?.Text;
-                        
+
                         DataModel.WriteToUidLogFile(iteminfo.Tag.UID, 
                             MakeOiPii(pii, new_oi, new_aoi));
                         
@@ -1000,6 +1000,28 @@ namespace RfidTool
 
         public static string MakeOiPii(string pii, string oi, string aoi)
         {
+            // 2021/4/29
+            if (pii != null && pii.Contains(" "))
+            {
+                string error = $"MakeOiPii() pii='{pii}' 出现了意外的空格字符";
+                ClientInfo.WriteErrorLog(error);
+                throw new Exception(error);
+            }
+
+            if (oi != null && oi.Contains(" "))
+            {
+                string error = $"MakeOiPii() oi='{oi}' 出现了意外的空格字符";
+                ClientInfo.WriteErrorLog(error);
+                throw new Exception(error);
+            }
+
+            if (aoi != null && aoi.Contains(" "))
+            {
+                string error = $"MakeOiPii() aoi='{aoi}' 出现了意外的空格字符";
+                ClientInfo.WriteErrorLog(error);
+                throw new Exception(error);
+            }
+
             if (string.IsNullOrEmpty(pii))
                 return ".";
             if (string.IsNullOrEmpty(oi) == false)

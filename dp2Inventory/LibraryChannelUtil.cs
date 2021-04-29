@@ -155,7 +155,10 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             e.Cancel = true;
         }
 
-        static string _baseRights = "getsystemparameter,getbiblioinfo,getbibliosummary,getiteminfo,getoperlog,getreaderinfo,getres,searchbiblio,searchitem,searchreader,borrow,renew,return,setreaderinfo,writeobject,setiteminfo";
+        // getbibliosummary 和 order 只要有一个就可以
+        // getsystemparameter,getiteminfo,setiteminfo,return
+        // static string _baseRights = "getsystemparameter,getbibliosummary,getiteminfo,setiteminfo,return";
+        static string _baseRights = "getsystemparameter,getiteminfo,setiteminfo,return";
 
         static void VerifyRights(string rights)
         {
@@ -745,7 +748,7 @@ out string strError);
                     try
                     {
                         GetEntityDataResult result = null;
-                        List<NormalResult> errors = new List<NormalResult>();
+                        List<GetEntityDataResult> errors = new List<GetEntityDataResult>();
 
                         // ***
                         // 第一步：获取册记录
@@ -777,7 +780,7 @@ out string strError);
                                     goto REDO_GETITEMINFO;
                                 }
                                 // TODO: 这里不着急返回，还需要尝试获得书目摘要
-                                errors.Add(new NormalResult
+                                errors.Add(new GetEntityDataResult
                                 {
                                     Value = -1,
                                     ErrorInfo = strError,
@@ -785,7 +788,7 @@ out string strError);
                                 });
                             }
                             else if (lRet == 0)
-                                errors.Add(new NormalResult
+                                errors.Add(new GetEntityDataResult
                                 {
                                     Value = 0,
                                     ErrorInfo = strError,
@@ -830,11 +833,14 @@ out string strError);
                                     goto REDO_GETBIBLIOSUMMARY;
                                 }
 
-                                errors.Add(new NormalResult
+                                strSummary = $"error:" + strError;
+
+                                errors.Add(new GetEntityDataResult
                                 {
                                     Value = -1,
                                     ErrorInfo = strError,
-                                    ErrorCode = channel.ErrorCode.ToString()
+                                    ErrorCode = channel.ErrorCode.ToString(),
+                                    Title = strSummary
                                 });
                                 /*
                                 return new GetEntityDataResult
@@ -868,6 +874,8 @@ out string strError);
                             };
                         result.ErrorInfo = errors[0].ErrorInfo;
                         result.ErrorCode = errors[0].ErrorCode;
+                        if (string.IsNullOrEmpty(result.Title))
+                            result.Title = errors[0].Title;
                         return result;
                     }
                     finally

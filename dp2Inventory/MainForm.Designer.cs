@@ -73,6 +73,8 @@ namespace dp2Inventory
             this.MenuItem_userManual = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_resetSerialCode = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_about = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_window = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_shelfWindow = new System.Windows.Forms.ToolStripMenuItem();
             this.tabControl1.SuspendLayout();
             this.tabPage_writeTag.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -238,6 +240,7 @@ namespace dp2Inventory
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.MenuItem_file,
             this.MenuItem_maintenance,
+            this.MenuItem_window,
             this.MenuItem_help});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
@@ -306,14 +309,14 @@ namespace dp2Inventory
             // MenuItem_clearHistory_all
             // 
             this.MenuItem_clearHistory_all.Name = "MenuItem_clearHistory_all";
-            this.MenuItem_clearHistory_all.Size = new System.Drawing.Size(315, 44);
+            this.MenuItem_clearHistory_all.Size = new System.Drawing.Size(291, 44);
             this.MenuItem_clearHistory_all.Text = "清除全部事项";
             this.MenuItem_clearHistory_all.Click += new System.EventHandler(this.MenuItem_clearHistory_all_Click);
             // 
             // MenuItem_clearHistory_selected
             // 
             this.MenuItem_clearHistory_selected.Name = "MenuItem_clearHistory_selected";
-            this.MenuItem_clearHistory_selected.Size = new System.Drawing.Size(315, 44);
+            this.MenuItem_clearHistory_selected.Size = new System.Drawing.Size(291, 44);
             this.MenuItem_clearHistory_selected.Text = "清除所选事项";
             this.MenuItem_clearHistory_selected.Click += new System.EventHandler(this.MenuItem_clearHistory_selected_Click);
             // 
@@ -425,6 +428,21 @@ namespace dp2Inventory
             this.MenuItem_about.Text = "关于(&A)...";
             this.MenuItem_about.Click += new System.EventHandler(this.MenuItem_about_Click);
             // 
+            // MenuItem_window
+            // 
+            this.MenuItem_window.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.MenuItem_shelfWindow});
+            this.MenuItem_window.Name = "MenuItem_window";
+            this.MenuItem_window.Size = new System.Drawing.Size(129, 39);
+            this.MenuItem_window.Text = "窗口(&W)";
+            // 
+            // MenuItem_shelfWindow
+            // 
+            this.MenuItem_shelfWindow.Name = "MenuItem_shelfWindow";
+            this.MenuItem_shelfWindow.Size = new System.Drawing.Size(315, 44);
+            this.MenuItem_shelfWindow.Text = "书架窗(&S)";
+            this.MenuItem_shelfWindow.Click += new System.EventHandler(this.MenuItem_shelfWindow_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(15F, 32F);
@@ -499,6 +517,8 @@ namespace dp2Inventory
         private System.Windows.Forms.ToolStripMenuItem MenuItem_maintenance;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_importUidUiiTable;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_clearUidUiiTable;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_window;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_shelfWindow;
     }
 }
 

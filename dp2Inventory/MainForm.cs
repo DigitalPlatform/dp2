@@ -367,6 +367,8 @@ bool bClickClose = false)
 
             if (_inventoryDialog.Visible == false)
                 _inventoryDialog.Show(this);
+            else if (_inventoryDialog.WindowState == FormWindowState.Minimized)
+                _inventoryDialog.WindowState = FormWindowState.Normal;
         }
 
         InventoryDialog _inventoryDialog = null;
@@ -379,11 +381,18 @@ bool bClickClose = false)
 
                 _inventoryDialog.FormClosing += _inventoryDialog_FormClosing;
                 _inventoryDialog.WriteComplete += _inventoryDialog_WriteComplete;
-
+                _inventoryDialog.AddBook += _inventoryDialog_AddBook;
+                
                 GuiUtil.SetControlFont(_inventoryDialog, this.Font);
                 ClientInfo.MemoryState(_inventoryDialog, "inventoryDialog", "state");
                 _inventoryDialog.UiState = ClientInfo.Config.Get("inventoryDialog", "uiState", null);
             }
+        }
+
+        private void _inventoryDialog_AddBook(object sender, AddBookEventArgs e)
+        {
+            // TODO: 如果窗口尚未创建，则可以先加入一个临时 list，等窗口创建后再集中初始化
+            _shelfDialog?.AddBook(e);
         }
 
         bool _historyChanged = false;
@@ -914,6 +923,40 @@ MessageBoxDefaultButton.Button2);
         }
 
         #endregion
+
+        ShelfDialog _shelfDialog = null;
+
+        void CreateShelfDialog()
+        {
+            if (_shelfDialog == null)
+            {
+                _shelfDialog = new ShelfDialog();
+
+                _shelfDialog.FormClosing += (sender, e) =>
+                {
+                    var dialog = sender as Form;
+
+                    // 将关闭改为隐藏
+                    dialog.Visible = false;
+                    if (e.CloseReason == CloseReason.UserClosing)
+                        e.Cancel = true;
+                };
+
+                GuiUtil.SetControlFont(_shelfDialog, this.Font);
+                ClientInfo.MemoryState(_shelfDialog, "shelfDialog", "state");
+                // _shelfDialog.UiState = ClientInfo.Config.Get("shelfDialog", "uiState", null);
+            }
+        }
+
+        private void MenuItem_shelfWindow_Click(object sender, EventArgs e)
+        {
+            CreateShelfDialog();
+
+            if (_shelfDialog.Visible == false)
+                _shelfDialog.Show(this);
+            else if (_shelfDialog.WindowState == FormWindowState.Minimized)
+                _shelfDialog.WindowState = FormWindowState.Normal;
+        }
     }
 
     public delegate void WriteCompleteEventHandler(object sender,
@@ -927,5 +970,18 @@ WriteCompleteventArgs e);
         public ProcessInfo Info { get; set; }
         // 盘点动作
         public string Action { get; set; }
+    }
+
+    public delegate void AddBookEventHandler(object sender,
+AddBookEventArgs e);
+
+    /// <summary>
+    /// 加入图书(到 ShelfDialog)事件的参数
+    /// </summary>
+    public class AddBookEventArgs : EventArgs
+    {
+        public ListViewItem Item { get; set; }
+
+        public ListView.ColumnHeaderCollection Columns { get; set; }
     }
 }

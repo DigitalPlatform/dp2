@@ -116,6 +116,13 @@ namespace RfidTool
             if (strError != null)
                 goto ERROR1;
 
+            // 2021/4/29
+            if (this.textBox_rfid_aoi.Text.Contains(" "))
+            {
+                strError = $"非标准机构代码 '{textBox_rfid_aoi.Text}' 不合法：出现了空格字符";
+                goto ERROR1;
+            }
+
             if (this.checkBox_aoi.Checked == true
                 && string.IsNullOrEmpty(this.textBox_rfid_aoi.Text) == false)
             {

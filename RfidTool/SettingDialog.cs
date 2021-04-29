@@ -91,6 +91,13 @@ namespace RfidTool
                     */
                 }
 
+                // 2021/4/29
+                if (this.textBox_rfid_aoi.Text.Contains(" "))
+                {
+                    strError = $"非标准机构代码 '{textBox_rfid_aoi.Text}' 不合法：出现了空格字符";
+                    goto ERROR1;
+                }
+
                 if (string.IsNullOrEmpty(this.comboBox_uhfDataFormat.Text))
                 {
                     strError = "尚未指定 UHF 标签写入格式";

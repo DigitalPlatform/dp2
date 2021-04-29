@@ -33,7 +33,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>18</ApplicationRevision>
+    <ApplicationRevision>21</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -289,6 +289,12 @@
     <Compile Include="SettingDialog.Designer.cs">
       <DependentUpon>SettingDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="ShelfDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ShelfDialog.Designer.cs">
+      <DependentUpon>ShelfDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="SipChannel.cs" />
     <Compile Include="SipChannelUtil.cs" />
     <Compile Include="SoundMaker.cs" />
@@ -316,6 +322,9 @@
     </Compile>
     <EmbeddedResource Include="SettingDialog.resx">
       <DependentUpon>SettingDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ShelfDialog.resx">
+      <DependentUpon>ShelfDialog.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="InventoryAPI\UploadAPI.json">
       <Generator>NSwagCodeGenerator</Generator>

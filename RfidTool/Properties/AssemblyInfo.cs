@@ -33,8 +33,8 @@ using System.Runtime.InteropServices;
 //通过使用 "*"，如下所示:
 // [assembly: AssemblyVersion("1.0.*")]
 
-[assembly: AssemblyVersion("1.0.13")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("1.0.14")]
+[assembly: AssemblyFileVersion("1.0.14.0")]
 
 // 1.0.1 (2020/12/10) 增加保存“写入历史”列表功能; 感知 USB 插拔、自动重新连接读写器;
 //                      读写器连接成功后，会在状态行显示可用读卡器数量;
@@ -51,3 +51,4 @@ using System.Runtime.InteropServices;
 // 1.0.11 (2021/1/18) 设置对话框增加校验条码号规则文本框；写入标签和修改标签功能均加入了可选的校验条码功能
 // 1.0.12 (2021/4/9) 扫入对话框和修改对话框增加序列号
 // 1.0.13 (2021/4/27) 扫入对话框内上下文菜单修改 EAS 的功能由序列号许可
+// 1.0.14 (2021/4/29) 加强了对 OI 和 AOI 中空格字符的检查

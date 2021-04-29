@@ -1303,8 +1303,8 @@ namespace dp2Inventory
                         processed_line = line;  // .TrimEnd(new char[] { '\r', '\n' });
 
                         var parts = StringUtil.ParseTwoPart(line, "\t");
-                        string uid = parts[0];
-                        string barcode = parts[1];
+                        string uid = parts[0].Trim(new char[] {' '});
+                        string barcode = parts[1].Trim(new char[] { ' ' });
                         if (string.IsNullOrEmpty(uid) || string.IsNullOrEmpty(barcode))
                         {
                             // error_count++;

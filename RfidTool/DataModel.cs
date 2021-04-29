@@ -650,6 +650,21 @@ namespace RfidTool
         public static void WriteToUidLogFile(string uid,
             string uii)
         {
+            // 2021/4/29
+            if (uid != null && uid.Contains(" "))
+            {
+                string error = $"WriteToUidLogFile() uid='{uid}' 出现了意外的空格字符";
+                ClientInfo.WriteErrorLog(error);
+                throw new Exception(error);
+            }
+
+            if (uii != null && uii.Contains(" "))
+            {
+                string error = $"WriteToUidLogFile() uii='{uii}' 出现了意外的空格字符";
+                ClientInfo.WriteErrorLog(error);
+                throw new Exception(error);
+            }
+
             lock (_uidTable.SyncRoot)
             {
                 if (_uidTable.ContainsKey(uid) == true)
