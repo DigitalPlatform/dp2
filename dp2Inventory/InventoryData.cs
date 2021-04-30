@@ -2284,7 +2284,8 @@ namespace dp2Inventory
             }
             */
 
-            if (_uploadInterfaceInfo.BaseUrl == null)
+            if (_uploadInterfaceInfo == null
+                || _uploadInterfaceInfo.BaseUrl == null)
                 return new RequestInventoryResult
                 {
                     Value = 0,

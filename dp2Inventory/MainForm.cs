@@ -382,7 +382,7 @@ bool bClickClose = false)
                 _inventoryDialog.FormClosing += _inventoryDialog_FormClosing;
                 _inventoryDialog.WriteComplete += _inventoryDialog_WriteComplete;
                 _inventoryDialog.AddBook += _inventoryDialog_AddBook;
-                
+
                 GuiUtil.SetControlFont(_inventoryDialog, this.Font);
                 ClientInfo.MemoryState(_inventoryDialog, "inventoryDialog", "state");
                 _inventoryDialog.UiState = ClientInfo.Config.Get("inventoryDialog", "uiState", null);
@@ -391,8 +391,15 @@ bool bClickClose = false)
 
         private void _inventoryDialog_AddBook(object sender, AddBookEventArgs e)
         {
-            // TODO: 如果窗口尚未创建，则可以先加入一个临时 list，等窗口创建后再集中初始化
-            _shelfDialog?.AddBook(e);
+            _ = Task.Run(() =>
+            {
+                ShelfDialog.AddBookEntry(e.BookInfo,
+                    (action, shelfNo, list)=> {
+                        _shelfDialog?.RefreshUI(action,
+                            shelfNo,
+                            list);
+                    });
+            });
         }
 
         bool _historyChanged = false;
@@ -953,7 +960,10 @@ MessageBoxDefaultButton.Button2);
             CreateShelfDialog();
 
             if (_shelfDialog.Visible == false)
+            {
                 _shelfDialog.Show(this);
+                _shelfDialog.DisplayContent();  // 首次显示
+            }
             else if (_shelfDialog.WindowState == FormWindowState.Minimized)
                 _shelfDialog.WindowState = FormWindowState.Normal;
         }
@@ -980,8 +990,11 @@ AddBookEventArgs e);
     /// </summary>
     public class AddBookEventArgs : EventArgs
     {
+        /*
         public ListViewItem Item { get; set; }
 
         public ListView.ColumnHeaderCollection Columns { get; set; }
+        */
+        public BookInfo BookInfo { get; set; }
     }
 }

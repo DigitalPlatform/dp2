@@ -1300,8 +1300,14 @@ out string block_map);
                             // 加入 ShelfDialog
                             this.AddBook?.Invoke(this, new AddBookEventArgs
                             {
-                                Item = item,
-                                Columns = this.listView_tags.Columns
+                                BookInfo = new BookInfo { 
+                                    UII = entity.GetOiPii(),
+                                    Title = entity.Title,
+                                    State = entity.State,
+                                    Location = entity.Location + ":" + entity.ShelfNo,
+                                    CurrentLocation = entity.CurrentLocation,
+                                    AccessNo = entity.AccessNo,
+                                },
                             });
                         }
                         else
@@ -1920,6 +1926,7 @@ bool eas)
                     eas = "?";  // 表示 EAS 状态不确定
                     afi = "?";
 
+                    Debug.Assert(iteminfo != null);
                     DataModel.ParseOiPii(iteminfo.UII, out pii, out oi);
                 }
 
@@ -1933,7 +1940,8 @@ bool eas)
             }
             catch (Exception ex)
             {
-                SetErrorInfo(item, "exception:" + ex.Message);
+                ClientInfo.WriteErrorLog($"RefreshItemByUII() exception: {ExceptionUtil.GetDebugText(ex)}");
+                SetErrorInfo(item, "exception1:" + ex.Message);
             }
         }
 
@@ -1960,6 +1968,7 @@ bool eas)
 
             try
             {
+                Debug.Assert(iteminfo != null);
                 var taginfo = iteminfo.TagInfo;
                 if (taginfo != null)
                 {
@@ -2031,7 +2040,8 @@ bool eas)
             }
             catch (Exception ex)
             {
-                SetErrorInfo(item, "exception:" + ex.Message);
+                ClientInfo.WriteErrorLog($"RefreshItem() exception: {ExceptionUtil.GetDebugText(ex)}");
+                SetErrorInfo(item, "exception2:" + ex.Message);
             }
         }
 

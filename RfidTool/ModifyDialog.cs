@@ -988,7 +988,8 @@ namespace RfidTool
             }
             catch (Exception ex)
             {
-                string error = "exception:" + ex.Message;
+                ClientInfo.WriteErrorLog($"DoAction() exception: {ExceptionUtil.GetDebugText(ex)}");
+                string error = "exception1:" + ex.Message;
                 SetErrorInfo(item, error);
                 return new NormalResult
                 {
@@ -1034,6 +1035,10 @@ namespace RfidTool
 
         public static string GetVerifyType(string tu)
         {
+            // 2021/4/30
+            if (tu == null)
+                return null;
+
             // 10 图书; 80 读者证; 30 层架标
             if (tu == "10")
                 return "entity";
@@ -1159,7 +1164,8 @@ bool eas)
             }
             catch (Exception ex)
             {
-                SetErrorInfo(item, "exception:" + ex.Message);
+                ClientInfo.WriteErrorLog($"RefreshItem() exception: {ExceptionUtil.GetDebugText(ex)}");
+                SetErrorInfo(item, "exception2:" + ex.Message);
             }
         }
 
@@ -1176,6 +1182,11 @@ bool eas)
 
             if (tu == filter)
                 return true;
+
+            // 2021/4/30
+            if (tu == null)
+                return false;
+
             // 10 图书; 80 读者证; 30 层架标
             if (tu.StartsWith("1") && filter == "图书")
                 return true;
