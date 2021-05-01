@@ -251,6 +251,7 @@ namespace dp2Inventory
             _cancel?.Cancel();
         }
 
+#if REMOVED
         // 导出 UID --> PII 对照关系
         private async void toolStripButton_exportUidPiiMap_Click(object sender, EventArgs e)
         {
@@ -292,6 +293,7 @@ namespace dp2Inventory
                 }
             });
         }
+#endif
 
         public string UiState
         {
@@ -757,7 +759,7 @@ out string block_map);
             await Task.Delay(TimeSpan.FromSeconds(4), token);
         }
 
-        #region Error Dialog
+#region Error Dialog
 
         ErrorTable _errorTable = null;
 
@@ -824,7 +826,7 @@ out string block_map);
                 await task;
         }
 
-        #endregion
+#endregion
 
         const int COLUMN_UID = 0;
         const int COLUMN_ERRORINFO = 1;
@@ -2178,7 +2180,7 @@ bool eas)
             }
         }
 
-        #region 标签缓存
+#region 标签缓存
 
         public NormalResult WriteTagInfo(string one_reader_name,
     TagInfo old_tag_info,
@@ -2271,7 +2273,7 @@ bool eas)
             }
         }
 
-        #endregion
+#endregion
 
         // 获得 oi.pii 的 oi 部分
         public static string GetOiPart(string oi_pii, bool return_null)
@@ -2412,6 +2414,30 @@ bool eas)
             }
 
             SetPauseText();
+        }
+
+        // 清除标签缓存信息
+        private void toolStripButton_clearTagCache_Click(object sender, EventArgs e)
+        {
+            // 按住 Ctrl 键清除，则清除缓存的全部标签信息。否则只清除本窗口涉及的标签缓存信息
+            bool control = (Control.ModifierKeys & Keys.Control) == Keys.Control;
+
+            List<string> uids = new List<string>();
+            foreach(ListViewItem item in this.listView_tags.Items)
+            {
+                var uid = ListViewUtil.GetItemText(item, COLUMN_UID);
+                uids.Add(uid);
+            }
+
+            if (control)
+                ClearCacheTagTable(null);
+            else
+            {
+                foreach (var uid in uids)
+                {
+                    ClearCacheTagTable(uid);
+                }
+            }
         }
     }
 

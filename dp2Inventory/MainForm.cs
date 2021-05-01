@@ -242,6 +242,9 @@ bool bClickClose = false)
 
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
+            _inventoryDialog?.Close();
+            _shelfDialog?.Close();
+
             _cancel?.Dispose();
 
             SaveSettings();
@@ -379,6 +382,9 @@ bool bClickClose = false)
             {
                 _inventoryDialog = new InventoryDialog();
 
+                _inventoryDialog.FormClosed += (s, e) => {
+                    ClientInfo.Config.Set("inventoryDialog", "uiState", _inventoryDialog.UiState);
+                };
                 _inventoryDialog.FormClosing += _inventoryDialog_FormClosing;
                 _inventoryDialog.WriteComplete += _inventoryDialog_WriteComplete;
                 _inventoryDialog.AddBook += _inventoryDialog_AddBook;
@@ -939,6 +945,9 @@ MessageBoxDefaultButton.Button2);
             {
                 _shelfDialog = new ShelfDialog();
 
+                _shelfDialog.FormClosed += (s, e) => {
+                    ClientInfo.Config.Set("shelfDialog", "uiState", _shelfDialog.UiState);
+                };
                 _shelfDialog.FormClosing += (sender, e) =>
                 {
                     var dialog = sender as Form;
@@ -951,7 +960,7 @@ MessageBoxDefaultButton.Button2);
 
                 GuiUtil.SetControlFont(_shelfDialog, this.Font);
                 ClientInfo.MemoryState(_shelfDialog, "shelfDialog", "state");
-                // _shelfDialog.UiState = ClientInfo.Config.Get("shelfDialog", "uiState", null);
+                _shelfDialog.UiState = ClientInfo.Config.Get("shelfDialog", "uiState", null);
             }
         }
 

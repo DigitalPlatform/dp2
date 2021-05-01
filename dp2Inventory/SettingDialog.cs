@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -286,6 +287,11 @@ namespace dp2Inventory
                 return;
 
             this.textBox_rfid_rfidCenterUrl.Text = strDefaultValue;
+        }
+
+        private void linkLabel_uploadApiRepo_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            Process.Start("https://github.com/renyh/InventoryAPI");
         }
     }
 }

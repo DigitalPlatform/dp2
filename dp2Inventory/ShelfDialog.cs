@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-
+using DigitalPlatform.CommonControl;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Text;
 
@@ -224,7 +224,7 @@ namespace dp2Inventory
             this.Invoke((Action)(() =>
             {
                 this.listView_shelfList.Items.Clear();
-                this.listView_books.Clear();
+                this.listView_books.Items.Clear();
 
                 this.listView_shelfList.BeginUpdate();
                 foreach (string shelfNo in _shelfTable.Keys)
@@ -363,6 +363,39 @@ namespace dp2Inventory
         {
             ClearTable();
             DisplayContent();
+        }
+
+        public string UiState
+        {
+            get
+            {
+                List<object> controls = new List<object>
+                {
+                    this.splitContainer1,
+                    this.listView_shelfList,
+                    this.listView_books
+                };
+                return GuiState.GetUiState(controls);
+            }
+            set
+            {
+                List<object> controls = new List<object>
+                {
+                    this.splitContainer1,
+                    this.listView_shelfList,
+                    this.listView_books
+                };
+                GuiState.SetUiState(controls, value);
+            }
+        }
+
+        // 切换分割布局方向
+        private void toolStripButton_toggleSplitter_Click(object sender, EventArgs e)
+        {
+            if (this.splitContainer1.Orientation == Orientation.Horizontal)
+                this.splitContainer1.Orientation = Orientation.Vertical;
+            else
+                this.splitContainer1.Orientation = Orientation.Horizontal;
         }
     }
 

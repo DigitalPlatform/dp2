@@ -74,6 +74,7 @@ namespace dp2Inventory
             this.checkBox_enableTagCache = new System.Windows.Forms.CheckBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.textBox_verifyRule = new System.Windows.Forms.TextBox();
+            this.linkLabel_uploadApiRepo = new System.Windows.Forms.LinkLabel();
             this.tabControl1.SuspendLayout();
             this.tabPage_rfid.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_seconds)).BeginInit();
@@ -129,6 +130,7 @@ namespace dp2Inventory
             // tabPage_rfid
             // 
             this.tabPage_rfid.AutoScroll = true;
+            this.tabPage_rfid.Controls.Add(this.linkLabel_uploadApiRepo);
             this.tabPage_rfid.Controls.Add(this.textBox_rfid_uploadInterfaceUrl);
             this.tabPage_rfid.Controls.Add(this.label13);
             this.tabPage_rfid.Controls.Add(this.checkBox_rfid_rpanTypeSwitch);
@@ -591,6 +593,19 @@ namespace dp2Inventory
             this.textBox_verifyRule.Size = new System.Drawing.Size(759, 456);
             this.textBox_verifyRule.TabIndex = 2;
             // 
+            // linkLabel_uploadApiRepo
+            // 
+            this.linkLabel_uploadApiRepo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.linkLabel_uploadApiRepo.AutoSize = true;
+            this.linkLabel_uploadApiRepo.Location = new System.Drawing.Point(581, 423);
+            this.linkLabel_uploadApiRepo.Name = "linkLabel_uploadApiRepo";
+            this.linkLabel_uploadApiRepo.Size = new System.Drawing.Size(222, 21);
+            this.linkLabel_uploadApiRepo.TabIndex = 8;
+            this.linkLabel_uploadApiRepo.TabStop = true;
+            this.linkLabel_uploadApiRepo.Text = "上传接口开源项目 ...";
+            this.linkLabel_uploadApiRepo.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.linkLabel_uploadApiRepo.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel_uploadApiRepo_LinkClicked);
+            // 
             // SettingDialog
             // 
             this.AcceptButton = this.button_OK;
@@ -676,5 +691,6 @@ namespace dp2Inventory
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.TextBox textBox_verifyRule;
         private System.Windows.Forms.CheckBox checkBox_enableTagCache;
+        private System.Windows.Forms.LinkLabel linkLabel_uploadApiRepo;
     }
 }

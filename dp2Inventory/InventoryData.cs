@@ -2272,20 +2272,20 @@ namespace dp2Inventory
             if (currentLocationString == null && location == null)
                 return new RequestInventoryResult { Value = 0 };    // 没有必要修改
 
-            var _uploadInterfaceInfo = GetUploadInterface();
+            var uploadInterfaceInfo = GetUploadInterface();
             /*
-            if (_uploadInterfaceInfo == null)
+            if (uploadInterfaceInfo == null)
             {
-                _uploadInterfaceInfo = GetUploadInterface();
-                if (_uploadInterfaceInfo == null)
+                uploadInterfaceInfo = GetUploadInterface();
+                if (uploadInterfaceInfo == null)
                 {
-                    _uploadInterfaceInfo = new UploadInterfaceInfo { BaseUrl = null };
+                    uploadInterfaceInfo = new UploadInterfaceInfo { BaseUrl = null };
                 }
             }
             */
 
-            if (_uploadInterfaceInfo == null
-                || _uploadInterfaceInfo.BaseUrl == null)
+            if (uploadInterfaceInfo == null
+                || uploadInterfaceInfo.BaseUrl == null)
                 return new RequestInventoryResult
                 {
                     Value = 0,
@@ -2350,7 +2350,7 @@ namespace dp2Inventory
             {
                 using (var httpClient = new HttpClient())
                 {
-                    httpClient.BaseAddress = new Uri(_uploadInterfaceInfo.BaseUrl);
+                    httpClient.BaseAddress = new Uri(uploadInterfaceInfo.BaseUrl);
                     var client = new InventoryAPIV1Client(httpClient);
                     var result = await client.SetItemsAsync(request);
                     if (result.Result == null)
