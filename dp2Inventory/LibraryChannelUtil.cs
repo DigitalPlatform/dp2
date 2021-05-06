@@ -14,10 +14,8 @@ using DigitalPlatform;
 using DigitalPlatform.Xml;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
-using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.CirculationClient;
-using Newtonsoft.Json;
 using DigitalPlatform.LibraryServer;
 
 namespace dp2Inventory
@@ -1145,11 +1143,13 @@ out string strError);
                 if (string.IsNullOrEmpty(batchNo) == false)
                 {
                     commands.Add($"batchNo:{StringUtil.EscapeString(batchNo, ":,")}");
+                }
 
-                    /*
+                // 2021/5/6
+                if (StringUtil.IsInList("forceLog", style))
+                {
                     // 即便册记录没有发生修改，也要产生 transfer 操作日志记录。这样便于进行典藏移交清单统计打印
                     commands.Add("forceLog");
-                    */
                 }
 
                 string strStyle = "item";

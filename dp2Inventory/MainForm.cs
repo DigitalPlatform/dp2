@@ -365,6 +365,13 @@ bool bClickClose = false)
         // 盘点
         private void MenuItem_inventory_Click(object sender, EventArgs e)
         {
+            EnsureInventoryDialog();
+        }
+
+        InventoryDialog _inventoryDialog = null;
+
+        void EnsureInventoryDialog()
+        {
             // 把盘点对话框打开
             CreateInventoryDialog();
 
@@ -372,9 +379,9 @@ bool bClickClose = false)
                 _inventoryDialog.Show(this);
             else if (_inventoryDialog.WindowState == FormWindowState.Minimized)
                 _inventoryDialog.WindowState = FormWindowState.Normal;
-        }
 
-        InventoryDialog _inventoryDialog = null;
+            _inventoryDialog.Activate();
+        }
 
         void CreateInventoryDialog()
         {
@@ -382,7 +389,8 @@ bool bClickClose = false)
             {
                 _inventoryDialog = new InventoryDialog();
 
-                _inventoryDialog.FormClosed += (s, e) => {
+                _inventoryDialog.FormClosed += (s, e) =>
+                {
                     ClientInfo.Config.Set("inventoryDialog", "uiState", _inventoryDialog.UiState);
                 };
                 _inventoryDialog.FormClosing += _inventoryDialog_FormClosing;
@@ -400,7 +408,8 @@ bool bClickClose = false)
             _ = Task.Run(() =>
             {
                 ShelfDialog.AddBookEntry(e.BookInfo,
-                    (action, shelfNo, list)=> {
+                    (action, shelfNo, list) =>
+                    {
                         _shelfDialog?.RefreshUI(action,
                             shelfNo,
                             list);
@@ -939,13 +948,29 @@ MessageBoxDefaultButton.Button2);
 
         ShelfDialog _shelfDialog = null;
 
+        void EnsureShelfDialog()
+        {
+            CreateShelfDialog();
+
+            if (_shelfDialog.Visible == false)
+            {
+                _shelfDialog.Show(this);
+                _shelfDialog.DisplayContent();  // 首次显示
+            }
+            else if (_shelfDialog.WindowState == FormWindowState.Minimized)
+                _shelfDialog.WindowState = FormWindowState.Normal;
+
+            _shelfDialog.Activate();
+        }
+
         void CreateShelfDialog()
         {
             if (_shelfDialog == null)
             {
                 _shelfDialog = new ShelfDialog();
 
-                _shelfDialog.FormClosed += (s, e) => {
+                _shelfDialog.FormClosed += (s, e) =>
+                {
                     ClientInfo.Config.Set("shelfDialog", "uiState", _shelfDialog.UiState);
                 };
                 _shelfDialog.FormClosing += (sender, e) =>
@@ -966,15 +991,78 @@ MessageBoxDefaultButton.Button2);
 
         private void MenuItem_shelfWindow_Click(object sender, EventArgs e)
         {
-            CreateShelfDialog();
+            EnsureShelfDialog();
+        }
 
-            if (_shelfDialog.Visible == false)
+        private void MenuItem_window_horzLayout_Click(object sender, EventArgs e)
+        {
+            EnsureInventoryDialog();
+            EnsureShelfDialog();
+
+            SetLayout("left_right");
+        }
+
+        private void MenuItem_window_vertLayout_Click(object sender, EventArgs e)
+        {
+            EnsureInventoryDialog();
+            EnsureShelfDialog();
+
+            SetLayout("up_down");
+        }
+
+        void SetLayout(string layout)
+        {
+            int delta_height = SystemInformation.CaptionHeight + this.menuStrip1.Size.Height + this.toolStrip1.Size.Height;
+
+            // Rectangle rect = Screen.GetWorkingArea(this);
+            Rectangle rect = new Rectangle(this.Location.X,
+                this.Location.Y + delta_height,
+                this.Size.Width,
+                this.Size.Height - delta_height);
+            if (layout == "left_right")
             {
-                _shelfDialog.Show(this);
-                _shelfDialog.DisplayContent();  // 首次显示
+                Rectangle left = new Rectangle
+                {
+                    X = rect.X,
+                    Y = rect.Y,
+                    Width = rect.Width / 2,
+                    Height = rect.Height
+                };
+                Rectangle right = new Rectangle
+                {
+                    X = rect.X + (rect.Width/2),
+                    Y = rect.Y,
+                    Width = rect.Width / 2,
+                    Height = rect.Height
+                };
+                _inventoryDialog.Location = new Point(left.X, left.Y);
+                _inventoryDialog.Size = left.Size;
+
+                _shelfDialog.Location = new Point(right.X, right.Y);
+                _shelfDialog.Size = right.Size;
             }
-            else if (_shelfDialog.WindowState == FormWindowState.Minimized)
-                _shelfDialog.WindowState = FormWindowState.Normal;
+            else if (layout == "up_down")
+            {
+                Rectangle left = new Rectangle
+                {
+                    X = rect.X,
+                    Y = rect.Y,
+                    Width = rect.Width,
+                    Height = rect.Height / 2
+                };
+                Rectangle right = new Rectangle
+                {
+                    X = rect.X,
+                    Y = rect.Y + (rect.Height / 2),
+                    Width = rect.Width,
+                    Height = rect.Height / 2
+                };
+                _inventoryDialog.Location = new Point(left.X, left.Y);
+                _inventoryDialog.Size = left.Size;
+
+                _shelfDialog.Location = new Point(right.X, right.Y);
+                _shelfDialog.Size = right.Size;
+            }
         }
     }
 

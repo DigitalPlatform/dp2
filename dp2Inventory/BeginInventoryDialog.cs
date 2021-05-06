@@ -31,6 +31,7 @@ namespace dp2Inventory
                     this.checkBox_action_setCurrentLocation,
                     this.checkBox_action_setLocation,
                     this.checkBox_action_verifyEas,
+                    this.checkBox_action_forceLog,
                     new ComboBoxText(this.comboBox_action_location),
                     this.checkBox_action_slowMode,
                 };
@@ -44,6 +45,7 @@ namespace dp2Inventory
                     this.checkBox_action_setCurrentLocation,
                     this.checkBox_action_setLocation,
                     this.checkBox_action_verifyEas,
+                    this.checkBox_action_forceLog,
                     new ComboBoxText(this.comboBox_action_location),
                     this.checkBox_action_slowMode,
                 };
@@ -147,6 +149,7 @@ namespace dp2Inventory
          * setCurrentLocation   设置册记录的 currentLocation 字段内容为当前层架标编号
          * setLocation          设置册记录的 location 字段为当前阅览室/书库位置。即调拨图书
          * verifyEAS            校验 RFID 标签的 EAS 状态是否正确。过程中需要检查册记录的外借状态
+         * forceLog             transfer 请求时，即便没有对册记录发生实质性修改，也会被 dp2library 记入操作日志
          * */
 
         public string ActionMode
@@ -163,6 +166,8 @@ namespace dp2Inventory
                     values.Add("setLocation");
                 if (this.checkBox_action_verifyEas.Checked == true)
                     values.Add("verifyEAS");
+                if (this.checkBox_action_forceLog.Checked == true)
+                    values.Add("forceLog");
 
                 return StringUtil.MakePathList(values);
             }
@@ -172,6 +177,7 @@ namespace dp2Inventory
                 this.checkBox_action_setCurrentLocation.Checked = (StringUtil.IsInList("setCurrentLocation", value));
                 this.checkBox_action_setLocation.Checked = (StringUtil.IsInList("setLocation", value));
                 this.checkBox_action_verifyEas.Checked = (StringUtil.IsInList("verifyEAS", value));
+                this.checkBox_action_forceLog.Checked = (StringUtil.IsInList("forceLog", value));
             }
         }
 
@@ -222,6 +228,18 @@ namespace dp2Inventory
             {
                 control.BackColor = Color.Transparent;
             }
+
+            // 只有当 设置当前位置 和 设置永久位置 启用的时候，forceLog 才会显示
+            SetForceLogVisible();
+        }
+
+        void SetForceLogVisible()
+        {
+            if (this.checkBox_action_setCurrentLocation.Checked
+                || this.checkBox_action_setLocation.Checked)
+                this.checkBox_action_forceLog.Visible = true;
+            else
+                this.checkBox_action_forceLog.Visible = false;
         }
     }
 }

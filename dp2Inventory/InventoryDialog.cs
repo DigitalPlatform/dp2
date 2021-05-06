@@ -2309,6 +2309,7 @@ bool eas)
          * setCurrentLocation   设置册记录的 currentLocation 字段内容为当前层架标编号
          * setLocation          设置册记录的 location 字段为当前阅览室/书库位置。即调拨图书
          * verifyEAS            校验 RFID 标签的 EAS 状态是否正确。过程中需要检查册记录的外借状态
+         * forceLog             transfer 请求时，即便没有对册记录发生实质性修改，也会被 dp2library 记入操作日志
          * */
         static string _actionMode = "setUID";    // 空/setUID/setCurrentLocation/setLocation/verifyEAS 中之一或者组合
 

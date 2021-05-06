@@ -102,13 +102,14 @@ namespace DigitalPlatform.RFID
             return result.ToArray();
         }
 
+        // TODO: 注意添加单元测试
         // 检查 PII 文本适合用那种方式编码？
         static int DetectEncodingType(string text)
         {
             string error = VerifyIpc96bitString(text);
             if (error == null)
                 return 0;
-            error = VerifyIpc96bitString(text);
+            error = VerifyIpc128bitString(text);
             if (error == null)
                 return 1;
             return 3;   // TODO：注意检查 text 字符数是否超过最大限制

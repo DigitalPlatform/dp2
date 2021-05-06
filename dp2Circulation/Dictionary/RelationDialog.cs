@@ -111,6 +111,7 @@ namespace dp2Circulation
         private void RelationDialog_Load(object sender, EventArgs e)
         {
             string strError = "";
+#if SN
             int nRet = Program.MainForm.VerifySerialCode("relationdialog",
                 false,
                 out strError);
@@ -120,6 +121,7 @@ namespace dp2Circulation
                 API.PostMessage(this.Handle, API.WM_CLOSE, 0, 0);
                 return;
             }
+#endif
 
             _stopManager.Initial(this.toolStripButton_stop,
 (object)this.toolStripLabel_message,

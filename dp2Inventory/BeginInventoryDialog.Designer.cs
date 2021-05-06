@@ -44,6 +44,7 @@ namespace dp2Inventory
             this.checkBox_action_setCurrentLocation = new System.Windows.Forms.CheckBox();
             this.checkBox_action_setUID = new System.Windows.Forms.CheckBox();
             this.tabPage_other = new System.Windows.Forms.TabPage();
+            this.checkBox_action_forceLog = new System.Windows.Forms.CheckBox();
             this.tabControl1.SuspendLayout();
             this.tabPage_action.SuspendLayout();
             this.SuspendLayout();
@@ -90,6 +91,7 @@ namespace dp2Inventory
             // tabPage_action
             // 
             this.tabPage_action.AutoScroll = true;
+            this.tabPage_action.Controls.Add(this.checkBox_action_forceLog);
             this.tabPage_action.Controls.Add(this.groupBox1);
             this.tabPage_action.Controls.Add(this.checkBox_action_slowMode);
             this.tabPage_action.Controls.Add(this.textBox_action_batchNo);
@@ -111,7 +113,7 @@ namespace dp2Inventory
             // 
             // groupBox1
             // 
-            this.groupBox1.Location = new System.Drawing.Point(409, 52);
+            this.groupBox1.Location = new System.Drawing.Point(304, 52);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(10, 153);
             this.groupBox1.TabIndex = 9;
@@ -182,7 +184,7 @@ namespace dp2Inventory
             // checkBox_action_setLocation
             // 
             this.checkBox_action_setLocation.AutoSize = true;
-            this.checkBox_action_setLocation.Location = new System.Drawing.Point(480, 67);
+            this.checkBox_action_setLocation.Location = new System.Drawing.Point(425, 67);
             this.checkBox_action_setLocation.Margin = new System.Windows.Forms.Padding(4);
             this.checkBox_action_setLocation.Name = "checkBox_action_setLocation";
             this.checkBox_action_setLocation.Size = new System.Drawing.Size(251, 32);
@@ -225,6 +227,18 @@ namespace dp2Inventory
             this.tabPage_other.Text = "其它";
             this.tabPage_other.UseVisualStyleBackColor = true;
             // 
+            // checkBox_action_forceLog
+            // 
+            this.checkBox_action_forceLog.AutoSize = true;
+            this.checkBox_action_forceLog.Location = new System.Drawing.Point(425, 147);
+            this.checkBox_action_forceLog.Margin = new System.Windows.Forms.Padding(4);
+            this.checkBox_action_forceLog.Name = "checkBox_action_forceLog";
+            this.checkBox_action_forceLog.Size = new System.Drawing.Size(237, 32);
+            this.checkBox_action_forceLog.TabIndex = 10;
+            this.checkBox_action_forceLog.Text = "总是写入操作日志(&O)";
+            this.checkBox_action_forceLog.UseVisualStyleBackColor = true;
+            this.checkBox_action_forceLog.CheckedChanged += new System.EventHandler(this.checkBoxes_CheckedChanged);
+            // 
             // BeginInventoryDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(13F, 28F);
@@ -264,5 +278,6 @@ namespace dp2Inventory
         private System.Windows.Forms.TextBox textBox_action_batchNo;
         private System.Windows.Forms.CheckBox checkBox_action_slowMode;
         private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.CheckBox checkBox_action_forceLog;
     }
 }

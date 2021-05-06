@@ -2994,6 +2994,7 @@ false);
 
             _currentLibraryCodeList = channel.LibraryCodeList;
 
+#if SN
             if (_verified == false && StringUtil.IsInList("serverlicensed", channel.Rights) == false)
             {
                 string strError = "";
@@ -3005,6 +3006,7 @@ false);
                     return;
                 }
             }
+#endif
             _verified = true;
 
             if (_virusScanned == false)

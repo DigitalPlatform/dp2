@@ -361,6 +361,15 @@ namespace dp2Inventory
         // 清除全部显示内容
         private void toolStripButton_clearAll_Click(object sender, EventArgs e)
         {
+            DialogResult result = MessageBox.Show(this,
+$"确实要清除全部 {this.listView_shelfList.Items.Count} 个书架事项的显示?",
+"dp2Inventory",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+            if (result != DialogResult.Yes)
+                return;
+
             ClearTable();
             DisplayContent();
         }
