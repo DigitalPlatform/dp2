@@ -134,7 +134,7 @@ namespace dp2Inventory
 
             if (get_result.Value == -1)
                 throw new Exception($"获得馆藏地列表时出错: {get_result.ErrorInfo}");
-            
+
             var old_value = this.comboBox_action_location.Text;
             this.comboBox_action_location.DataSource = get_result.List;
             this.comboBox_action_location.Text = old_value;
@@ -235,8 +235,9 @@ namespace dp2Inventory
 
         void SetForceLogVisible()
         {
-            if (this.checkBox_action_setCurrentLocation.Checked
-                || this.checkBox_action_setLocation.Checked)
+            if (DataModel.Protocol == "dp2library"
+                && (this.checkBox_action_setCurrentLocation.Checked
+                || this.checkBox_action_setLocation.Checked))
                 this.checkBox_action_forceLog.Visible = true;
             else
                 this.checkBox_action_forceLog.Visible = false;

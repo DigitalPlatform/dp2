@@ -11,17 +11,15 @@ using System.Collections;
 using System.Drawing;
 using System.Xml;
 using System.Threading.Tasks;
-using System.Speech.Synthesis;
 
 using Serilog;
 using Serilog.Core;
 
-// using DigitalPlatform;
 using DigitalPlatform.IO;
-using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Text;
 using DigitalPlatform.Core;
 using DigitalPlatform.Xml;
+using Newtonsoft.Json;
 
 namespace DigitalPlatform.CirculationClient
 {
@@ -424,6 +422,40 @@ namespace DigitalPlatform.CirculationClient
                 _watcher.Dispose();
                 _watcher = null;
             }
+        }
+
+        #endregion
+
+        #region 使用计数
+
+        class DailyCounter
+        {
+            public string Date { get; set; }
+            public long Value { get; set; }
+        }
+
+        // 增量每日使用次数计数器
+        // return:
+        //      false   在限制范围内
+        //      true    已经超出范围
+        public static bool IncDailyCounter(
+            string counter_name,
+            long limit_value)
+        {
+            string today = DateTimeUtil.DateTimeToString8(DateTime.Now);
+            
+            string value = Config.Get("dailyCounter", counter_name);
+            DailyCounter counter = JsonConvert.DeserializeObject<DailyCounter>(value);
+            if (counter == null || counter.Date != today)
+                counter = new DailyCounter { Date = DateTimeUtil.DateTimeToString8(DateTime.Now) };
+
+            counter.Value++;
+
+            value = JsonConvert.SerializeObject(counter);
+            Config.Set("dailyCounter", counter_name, value);
+            if (counter.Value > limit_value)
+                return true;
+            return false;
         }
 
         #endregion

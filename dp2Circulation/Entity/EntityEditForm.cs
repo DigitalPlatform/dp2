@@ -4,8 +4,8 @@ using System.Windows.Forms;
 using System.Diagnostics;
 using System.Xml;
 using System.Web;
+using System.IO;
 
-using static dp2Circulation.CallNumberForm;
 using DigitalPlatform;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryServer;
@@ -13,9 +13,11 @@ using DigitalPlatform.RFID.UI;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Xml;
 using DigitalPlatform.LibraryClient;
-using System.IO;
 using DigitalPlatform.CommonControl;
 using static dp2Circulation.MainForm;
+using static dp2Circulation.CallNumberForm;
+using DigitalPlatform.IO;
+using Newtonsoft.Json;
 
 namespace dp2Circulation
 {
@@ -938,7 +940,7 @@ namespace dp2Circulation
         {
             string strError = "";
 
-                BookItem item = this.Item.Clone();
+            BookItem item = this.Item.Clone();
             {
                 item.RecordDom = this._editing.DataDom;
                 // 确保自动创建索取号
@@ -1253,11 +1255,15 @@ namespace dp2Circulation
             strError = "";
 
 #if SN
-            int nRet = Program.MainForm.VerifySerialCode("rfid", false, out strError);
-            if (nRet == -1)
+            var exceed = IncDailyCounter("rfid", 10);
+            if (exceed == true)
             {
-                strError = "写入 RFID 标签功能尚未被许可";
-                return -1;
+                int nRet = Program.MainForm.VerifySerialCode("rfid", false, out strError);
+                if (nRet == -1)
+                {
+                    strError = "写入 RFID 标签功能尚未被许可";
+                    return -1;
+                }
             }
 #endif
 
@@ -1510,6 +1516,54 @@ out strError);
             }
         }
 
+        class DailyCounter
+        {
+            public string Date { get; set; }
+            public long Value { get; set; }
+        }
+
+        // 增量每日使用次数计数器
+        // return:
+        //      false   在限制范围内
+        //      true    已经超出范围
+        public static bool IncDailyCounter(
+            string counter_name,
+            long limit_value)
+        {
+            string today = DateTimeUtil.DateTimeToString8(DateTime.Now);
+            string filename = Path.Combine(Program.MainForm.UserDir, $"daily_counter_{counter_name}.txt");
+            FileInfo fi = new FileInfo(filename);
+            if (fi.Exists)
+                fi.Attributes &= ~FileAttributes.Hidden;
+            try
+            {
+                string value = null;
+                try
+                {
+                    value = File.ReadAllText(filename);
+                }
+                catch (FileNotFoundException)
+                {
+                    value = "";
+                }
+
+                DailyCounter counter = JsonConvert.DeserializeObject<DailyCounter>(value);
+                if (counter == null || counter.Date != today)
+                    counter = new DailyCounter { Date = DateTimeUtil.DateTimeToString8(DateTime.Now) };
+
+                counter.Value++;
+
+                value = JsonConvert.SerializeObject(counter);
+                File.WriteAllText(filename, value);
+                if (counter.Value > limit_value)
+                    return true;
+                return false;
+            }
+            finally
+            {
+                fi.Attributes |= FileAttributes.Hidden;
+            }
+        }
 
 #if NO
         // 装入以前的标签信息
