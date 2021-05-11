@@ -334,11 +334,15 @@ TaskScheduler.Default);
                         await Task.Delay(500, token);
                 }
             }
+            catch(TaskCanceledException)
+            {
+
+            }
             catch (Exception ex)
             {
                 // this.ShowMessage($"后台线程出现异常: {ex.Message}", "red", true);
-                Program.MainForm.OperHistory.AppendHtml($"<div class='debug error'>{HttpUtility.HtmlEncode($"统计日志后台线程出现异常: {ex.Message}")}</div>");
-                WriteErrorLog($"统计日志后台线程出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                Program.MainForm.OperHistory.AppendHtml($"<div class='debug error'>{HttpUtility.HtmlEncode($"RFID 统计日志后台线程出现异常: {ex.Message}")}</div>");
+                WriteErrorLog($"RFID 统计日志后台线程出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 /*
                 this.Invoke((Action)(() =>
                 {

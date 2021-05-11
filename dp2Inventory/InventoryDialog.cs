@@ -30,7 +30,7 @@ namespace dp2Inventory
     {
         // 加入操作历史
         public event WriteCompleteEventHandler WriteComplete = null;
-        
+
         // 加入 ShelfDialog
         public event AddBookEventHandler AddBook = null;
 
@@ -759,7 +759,7 @@ out string block_map);
             await Task.Delay(TimeSpan.FromSeconds(4), token);
         }
 
-#region Error Dialog
+        #region Error Dialog
 
         ErrorTable _errorTable = null;
 
@@ -826,7 +826,7 @@ out string block_map);
                 await task;
         }
 
-#endregion
+        #endregion
 
         const int COLUMN_UID = 0;
         const int COLUMN_ERRORINFO = 1;
@@ -1142,6 +1142,14 @@ out string block_map);
                         // create_from_uii = true;
                     }
 
+                    // 2021/5/10
+                    if (entity.Error != null)
+                    {
+                        SetErrorInfo(item, entity.Error);
+                        error_count++;
+                        continue;
+                    }
+
                     // 语音播报标签(天线)类型切换
                     await SpeakingTagTypeChangeAsync(entity, token);
 
@@ -1302,7 +1310,8 @@ out string block_map);
                             // 加入 ShelfDialog
                             this.AddBook?.Invoke(this, new AddBookEventArgs
                             {
-                                BookInfo = new BookInfo { 
+                                BookInfo = new BookInfo
+                                {
                                     UII = entity.GetOiPii(),
                                     Title = entity.Title,
                                     State = entity.State,
@@ -2180,7 +2189,7 @@ bool eas)
             }
         }
 
-#region 标签缓存
+        #region 标签缓存
 
         public NormalResult WriteTagInfo(string one_reader_name,
     TagInfo old_tag_info,
@@ -2273,7 +2282,7 @@ bool eas)
             }
         }
 
-#endregion
+        #endregion
 
         // 获得 oi.pii 的 oi 部分
         public static string GetOiPart(string oi_pii, bool return_null)
@@ -2424,7 +2433,7 @@ bool eas)
             bool control = (Control.ModifierKeys & Keys.Control) == Keys.Control;
 
             List<string> uids = new List<string>();
-            foreach(ListViewItem item in this.listView_tags.Items)
+            foreach (ListViewItem item in this.listView_tags.Items)
             {
                 var uid = ListViewUtil.GetItemText(item, COLUMN_UID);
                 uids.Add(uid);

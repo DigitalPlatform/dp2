@@ -1831,7 +1831,7 @@ out string strError);
 "Period":"31day"}
 * */
                         new_borrow.SetAttribute("returningDate", borrow_info.LatestReturnTime);
-                        new_borrow.SetAttribute("period", borrow_info.Period);
+                        new_borrow.SetAttribute("borrowPeriod", borrow_info.Period);
                         if (borrow_info.Overflows != null)
                             new_borrow.SetAttribute("overflow", string.Join("; ", borrow_info.Overflows));
                         new_borrow.SetAttribute("no", borrow_info.BorrowCount.ToString());

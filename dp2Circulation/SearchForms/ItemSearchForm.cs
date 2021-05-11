@@ -27,6 +27,7 @@ using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryServer;
+using Newtonsoft.Json;
 
 
 // 2013/3/16 添加 XML 注释
@@ -2943,6 +2944,13 @@ out strError);
                     if (nPathItemCount == 0 || bLooping == true)
                         subMenuItem.Enabled = false;
                     menuItemExport.MenuItems.Add(subMenuItem);
+
+                    subMenuItem = new MenuItem("脱机册信息文件 [" + (nPathItemCount == -1 ? "?" : nPathItemCount.ToString()) + "] (&O)...");
+                    subMenuItem.Click += new System.EventHandler(this.menu_exportOfflineFile_Click);
+                    if (nPathItemCount == 0 || bLooping == true)
+                        subMenuItem.Enabled = false;
+                    menuItemExport.MenuItems.Add(subMenuItem);
+
                 }
 
                 // ---
@@ -10129,7 +10137,7 @@ dlg.UiState);
                 using (XmlTextWriter w = new XmlTextWriter(
                     this.ExportBiblioDumpFilename, Encoding.UTF8))
                 {
-                    w.Formatting = Formatting.Indented;
+                    w.Formatting = System.Xml.Formatting.Indented;
                     w.Indentation = 4;
 
                     w.WriteStartDocument();
@@ -13671,6 +13679,186 @@ out strError);
             else
                 e.Effect = DragDropEffects.None;
         }
+
+        class OfflineItem
+        {
+            public string UII { get; set; }
+            public string RecPath { get; set; }
+            public string Xml { get; set; }
+            public byte[] Timestamp { get; set; }
+
+            public string Title { get; set; }
+        }
+
+        // 导出到脱机册信息文件。用于配套 dp2ssl 智能书柜功能
+        void menu_exportOfflineFile_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            if (this.DbType != "item")
+            {
+                strError = "当前 DbType 类型不匹配";
+                goto ERROR1;
+            }
+
+            // 询问文件名
+            SaveFileDialog dlg = new SaveFileDialog();
+
+            dlg.Title = "请指定要保存的脱机册信息文件名";
+            dlg.CreatePrompt = false;
+            dlg.OverwritePrompt = true;
+            dlg.FileName = this.ExportItemRecPathFilename;
+            dlg.Filter = "脱机册信息文件 (*.json)|*.json|All files (*.*)|*.*";
+
+            dlg.RestoreDirectory = true;
+
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return;
+
+            List<ListViewItem> items = new List<ListViewItem>();
+            foreach (ListViewItem item in this.listView_records.SelectedItems)
+            {
+                if (string.IsNullOrEmpty(item.Text) == false)
+                    items.Add(item);
+            }
+
+            if (stop.IsInLoop == true)
+            {
+                strError = "无法重复进入循环";
+                goto ERROR1;
+            }
+
+
+            stop.Style = StopStyle.EnableHalfStop;
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在导出脱机册信息 ...");
+            stop.BeginLoop();
+
+            LibraryChannel channel = this.GetChannel();
+
+            this.EnableControls(false);
+            this.listView_records.Enabled = false;
+            try
+            {
+                stop.SetProgressRange(0, items.Count);
+
+                // 注意，如果 m_biblioTable 里面没有命中记录，则 ListViewPatronLoader 获得的册记录会没有 oi 元素
+                this.m_biblioTable.Clear();
+
+                ListViewPatronLoader loader = new ListViewPatronLoader(channel,
+    stop,
+    items,
+    this.m_biblioTable);
+                loader.DbTypeCaption = this.DbTypeCaption;
+
+                loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
+                loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
+
+                using (var s = new StreamWriter(dlg.FileName))
+                using (JsonTextWriter writer = new JsonTextWriter(s))
+                {
+                    writer.Formatting = Newtonsoft.Json.Formatting.Indented;
+                    writer.Indentation = 4;
+
+                    writer.WriteStartArray();
+
+                    int i = 0;
+                    foreach (LoaderItem item in loader)
+                    {
+                        Application.DoEvents(); // 出让界面控制权
+
+                        if (stop != null && stop.State != 0)
+                        {
+                            strError = "用户中断";
+                            goto ERROR1;
+                        }
+
+                        stop.SetProgressValue(i);
+
+                        BiblioInfo info = item.BiblioInfo;
+
+                        Debug.Assert(item.ListViewItem == items[i], "");
+
+                        XmlDocument dom = new XmlDocument();
+                        try
+                        {
+                            dom.LoadXml(info.OldXml);
+                        }
+                        catch (Exception ex)
+                        {
+                            strError = "XML 装入 DOM 失败: " + ex.Message;
+                            goto ERROR1;
+                        }
+
+                        DomUtil.RemoveEmptyElements(dom.DocumentElement);
+                        DomUtil.DeleteElement(dom.DocumentElement, "borrowHistory");
+
+                        OfflineItem o = new OfflineItem();
+                        string pii = DomUtil.GetElementText(dom.DocumentElement, "barcode");
+                        string oi = DomUtil.GetElementText(dom.DocumentElement, "oi");
+                        if (string.IsNullOrEmpty(oi) == false)
+                            o.UII = oi + "." + pii;
+                        else
+                            o.UII = pii;
+                        o.Xml = dom.DocumentElement.OuterXml;
+                        o.RecPath = info.RecPath;
+                        o.Timestamp = info.Timestamp;
+
+                        int nRet = GetBiblioSummary(
+                            channel,
+                            pii,
+    info.RecPath,
+    null,
+    out string biblio_recpath,
+    out string summary,
+    out strError);
+                        if (nRet == -1)
+                        {
+                            strError = $"获得 {pii} 的书目摘要时出错:" + strError;
+                            goto ERROR1;
+                        }
+
+                        o.Title = summary;
+
+                        //writer.WriteStartObject();
+                        if (i > 0)
+                            writer.WriteRaw(",");
+                        writer.WriteRaw(JsonConvert.SerializeObject(o, Newtonsoft.Json.Formatting.Indented));
+                        
+                        //writer.WriteEndObject();
+
+                        stop.SetProgressValue(i);
+
+                        i++;
+                    }
+
+                    writer.WriteEndArray();
+                }
+            }
+            catch(Exception ex)
+            {
+                strError = ex.Message;
+                goto ERROR1;
+            }
+            finally
+            {
+                this.EnableControls(true);
+                this.listView_records.Enabled = true;
+
+                this.ReturnChannel(channel);
+
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+                stop.HideProgress();
+                stop.Style = StopStyle.None;
+            }
+
+            return;
+        ERROR1:
+            ShowMessageBox(strError);
+        }
+
     }
 
     /// <summary>

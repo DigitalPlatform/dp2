@@ -14,14 +14,18 @@ namespace dp2SSL
 {
     public class BiblioSummaryItem
     {
+        // UII，或者 PII
         public string PII { get; set; }
+
         public string BiblioSummary { get; set; }
     }
 
     // 册记录
     public class EntityItem
     {
+        // UII，或者 PII
         public string PII { get; set; }
+
         public string RecPath { get; set; }
         public string Xml { get; set; }
         public byte[] Timestamp { get; set; }

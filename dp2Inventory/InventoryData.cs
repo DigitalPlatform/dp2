@@ -161,7 +161,7 @@ namespace dp2Inventory
 
                 if (chip.IsBlank())
                 {
-                    entity.BuildError("checkTag", "空白标签", "blankTag");
+                    result.BuildError("checkTag", "空白标签", "blankTag");
                 }
                 else
                 {

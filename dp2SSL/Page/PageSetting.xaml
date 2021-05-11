@@ -47,6 +47,7 @@
                     <MenuItem x:Name="clearTagCache" Header="清除 RFID 标签缓存" HorizontalAlignment="Left" Width="Auto" Click="clearTagCache_Click"/>
                     <MenuItem x:Name="redoReplicatePatron" Header="重做全量同步读者记录" HorizontalAlignment="Left" Width="Auto" Click="redoReplicatePatron_Click"/>
                     <MenuItem x:Name="redoReplicateEntity" Header="重做全量同步册记录和书目摘要" HorizontalAlignment="Left" Width="Auto" Click="redoReplicateEntity_Click"/>
+                    <MenuItem x:Name="importOfflineEntity" Header="导入脱机册记录和书目摘要" HorizontalAlignment="Left" Width="Auto" Click="importOfflineEntity_Click"/>
                     <MenuItem x:Name="backupRequests" Header="备份本地动作库" HorizontalAlignment="Left" Width="Auto" Click="backupRequests_Click"/>
                     <MenuItem x:Name="restoreRequests" Header="恢复本地动作库" HorizontalAlignment="Left" Width="Auto" Click="restoreRequests_Click"/>
                 </MenuItem>

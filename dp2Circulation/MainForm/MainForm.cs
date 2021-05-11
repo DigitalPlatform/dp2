@@ -2916,16 +2916,16 @@ false);
 
             CirculationLoginDlg dlg = null;
             this.Invoke((Action)(() =>
-{
-    dlg = SetDefaultAccount(
-        e.LibraryServerUrl,
-        null,
-        e.ErrorInfo,
-        e.LoginFailCondition,
-        owner);
+            {
+                dlg = SetDefaultAccount(
+                    e.LibraryServerUrl,
+                    null,
+                    e.ErrorInfo,
+                    e.LoginFailCondition,
+                    owner);
 
-}
-));
+            }
+            ));
             if (dlg == null)
             {
                 e.Cancel = true;
@@ -8760,7 +8760,7 @@ Keys keyData)
             if (this._currentUserRights == null)
                 return null;
             string[] parts = this._currentUserRights.Split(new char[] { ',' });
-            foreach(string part in parts)
+            foreach (string part in parts)
             {
                 if (part.StartsWith("token:"))
                 {

@@ -3223,6 +3223,7 @@ namespace dp2Library
                     return result;
                 }
 
+#if REMOVED
                 if (searchresults != null)
                 {
                     // 如果当前身份是读者，或者没有getreaderinfo权限，则要过滤掉属于读者库的记录
@@ -3234,6 +3235,13 @@ namespace dp2Library
                         foreach (Record record in searchresults)
                         {
                             string strDbName = ResPath.GetDbName(record.Path);
+                            
+                            // 2021/5/10
+                            if (app.IsItemDbName(strDbName))
+                            {
+                                AddItemOI(app, record);
+                            }
+                            
                             bool bIsReaderRecord = app.IsReaderDbName(strDbName);
                             if ((bIsReader == true || bHasGetReaderInfoRight == false)
                                 && bIsReaderRecord == true)
@@ -3256,6 +3264,83 @@ namespace dp2Library
                         foreach (Record record in searchresults)
                         {
                             string strDbName = ResPath.GetDbName(record.Path);
+
+                            // 2021/5/10
+                            if (app.IsItemDbName(strDbName))
+                            {
+                                AddItemOI(app, record);
+                            }
+
+                            bool bChangeable = true;
+
+                            object o = table[strDbName];
+                            if (o == null)
+                            {
+                                string strLibraryCode = "";
+                                bool bReaderDbInCirculation = true;
+                                if (app.IsReaderDbName(strDbName,
+                                    out bReaderDbInCirculation,
+                                    out strLibraryCode) == true)
+                                {
+                                    // 检查当前操作者是否管辖这个读者库
+                                    // 观察一个读者记录路径，看看是不是在当前用户管辖的读者库范围内?
+                                    bChangeable = app.IsCurrentChangeableReaderPath(strDbName + "/?",
+                            sessioninfo.LibraryCodeList);
+                                }
+                                table[strDbName] = bChangeable; // 记忆
+                            }
+                            else
+                                bChangeable = (bool)o;
+
+                            if (bChangeable == false)
+                            {
+                                record.Path = "";
+                                record.Cols = null;
+                                record.RecordBody = null;
+                            }
+                        }
+                    }
+                }
+
+#endif
+
+                // 对 XML 记录进行过滤或者修改
+                if (searchresults != null)
+                {
+                    // 2012/9/15
+                    Hashtable table = new Hashtable();  // 加快运算速度
+
+                    foreach (Record record in searchresults)
+                    {
+                        string strDbName = ResPath.GetDbName(record.Path);
+
+                        // 2021/5/10
+                        if (app.IsItemDbName(strDbName))
+                        {
+                            AddItemOI(app, record);
+                        }
+
+                        // 如果当前身份是读者，或者没有getreaderinfo权限，则要过滤掉属于读者库的记录
+                        // TODO: 今后对书目库、各种功能库的访问也要加以限制
+                        bool bIsReader = sessioninfo.UserType == "reader";
+                        bool bHasGetReaderInfoRight = StringUtil.IsInList("getreaderinfo", sessioninfo.RightsOrigin);
+                        if (bIsReader == true || bHasGetReaderInfoRight == false)
+                        {
+                            bool bIsReaderRecord = app.IsReaderDbName(strDbName);
+                            if ((bIsReader == true || bHasGetReaderInfoRight == false)
+                                && bIsReaderRecord == true)
+                            {
+                                if (sessioninfo.Account == null
+                                    || StringUtil.IsEqualOrSubPath(sessioninfo.Account.ReaderDomPath, record.Path) == false)
+                                {
+                                    record.Path = "";
+                                    record.Cols = null;
+                                    record.RecordBody = null;
+                                }
+                            }
+                        }
+                        else if (sessioninfo.GlobalUser == false && bIsReader == false)
+                        {
                             bool bChangeable = true;
 
                             object o = table[strDbName];
@@ -3300,6 +3385,27 @@ namespace dp2Library
                 result.ErrorCode = ErrorCode.SystemError;
                 result.ErrorInfo = strErrorText;
                 return result;
+            }
+        }
+
+        // 给册记录 XML 加上 OI 元素
+        static void AddItemOI(LibraryApplication app,
+            Record record)
+        {
+            if (record == null
+                || record.RecordBody == null
+                || string.IsNullOrEmpty(record.RecordBody.Xml))
+                return;
+            try
+            {
+                XmlDocument itemdom = new XmlDocument();
+                itemdom.LoadXml(record.RecordBody.Xml);
+                app.AddItemOI(itemdom);
+                record.RecordBody.Xml = itemdom.DocumentElement?.OuterXml;
+            }
+            catch
+            {
+
             }
         }
 

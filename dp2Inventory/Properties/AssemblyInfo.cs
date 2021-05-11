@@ -33,8 +33,8 @@ using System.Runtime.InteropServices;
 //通过使用 "*"，如下所示:
 // [assembly: AssemblyVersion("1.0.*")]
 // [assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyVersion("0.0.14")]
-[assembly: AssemblyFileVersion("0.0.14.0")]
+[assembly: AssemblyVersion("0.0.15")]
+[assembly: AssemblyFileVersion("0.0.15.0")]
 
 // 0.0.1 (2021/4/22) 首个发布版本
 // 0.0.2 (2021/4/22)
@@ -73,6 +73,8 @@ using System.Runtime.InteropServices;
 // 0.0.12
 //                      2) 导入 UID-->UII 对照关系的时候，如果遇到源文件行格式不合法，会直接报错中断处理返回
 // 0.0.13 (2021/5/6)
-//                      1)增加书架窗，可以按照每个书架集中显示盘点过的最新册信息
+//                      1) 增加书架窗，可以按照每个书架集中显示盘点过的最新册信息
 // 0.0.14
 //                      2) 开始盘点对话框增加“总是写入操作日志”checkbox。用途是在册记录没有实质性修改的情况下也要写入 transfer 动作日志
+// 0.0.15 (2021/5/10)
+//                      1) 排除了盘点过程中遇到空白标签出现异常的 bug

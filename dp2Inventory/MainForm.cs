@@ -938,7 +938,7 @@ MessageBoxDefaultButton.Button2);
                 ProcessManager.Start(infos,
                     (info, text) =>
                     {
-                        ClientInfo.WriteErrorLog($"{info.Name} {text}");
+                        ClientInfo.WriteInfoLog($"{info.Name} {text}");
                     },
                     _cancelProcessMonitor.Token);
             }

@@ -1987,7 +1987,7 @@ MessageBoxDefaultButton.Button1);
                 ProcessManager.Start(infos,
                     (info, text) =>
                     {
-                        WriteErrorLog($"{info.Name} {text}");
+                        WriteInfoLog($"{info.Name} {text}");
                     },
                     _cancelProcessMonitor.Token);
             }

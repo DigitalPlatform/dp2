@@ -1530,38 +1530,56 @@ out strError);
             string counter_name,
             long limit_value)
         {
-            string today = DateTimeUtil.DateTimeToString8(DateTime.Now);
-            string filename = Path.Combine(Program.MainForm.UserDir, $"daily_counter_{counter_name}.txt");
-            FileInfo fi = new FileInfo(filename);
-            if (fi.Exists)
-                fi.Attributes &= ~FileAttributes.Hidden;
             try
             {
-                string value = null;
+                string today = DateTimeUtil.DateTimeToString8(DateTime.Now);
+                string filename = Path.Combine(Program.MainForm.UserDir, $"daily_counter_{counter_name}.txt");
+                if (File.Exists(filename))
+                {
+                    var attr = File.GetAttributes(filename);
+                    if (attr != FileAttributes.Normal)
+                    {
+                        File.SetAttributes(filename, FileAttributes.Normal);
+                    }
+                }
+                /*
+                FileInfo fi = new FileInfo(filename);
+                if (fi.Exists)
+                    fi.Attributes &= ~FileAttributes.Hidden;
+                */
                 try
                 {
-                    value = File.ReadAllText(filename);
+                    string value = null;
+                    try
+                    {
+                        value = File.ReadAllText(filename);
+                    }
+                    catch (FileNotFoundException)
+                    {
+                        value = "";
+                    }
+
+                    DailyCounter counter = JsonConvert.DeserializeObject<DailyCounter>(value);
+                    if (counter == null || counter.Date != today)
+                        counter = new DailyCounter { Date = DateTimeUtil.DateTimeToString8(DateTime.Now) };
+
+                    counter.Value++;
+
+                    value = JsonConvert.SerializeObject(counter);
+                    File.WriteAllText(filename, value);
+                    if (counter.Value > limit_value)
+                        return true;
+                    return false;
                 }
-                catch (FileNotFoundException)
+                finally
                 {
-                    value = "";
+                    // fi.Attributes |= FileAttributes.Hidden;
+                    File.SetAttributes(filename, FileAttributes.Hidden);
                 }
-
-                DailyCounter counter = JsonConvert.DeserializeObject<DailyCounter>(value);
-                if (counter == null || counter.Date != today)
-                    counter = new DailyCounter { Date = DateTimeUtil.DateTimeToString8(DateTime.Now) };
-
-                counter.Value++;
-
-                value = JsonConvert.SerializeObject(counter);
-                File.WriteAllText(filename, value);
-                if (counter.Value > limit_value)
-                    return true;
-                return false;
             }
-            finally
+            catch
             {
-                fi.Attributes |= FileAttributes.Hidden;
+                return true;
             }
         }
 

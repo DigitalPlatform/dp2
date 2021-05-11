@@ -29,6 +29,7 @@ using DigitalPlatform.LibraryServer;
 using DigitalPlatform.Xml;
 using static DigitalPlatform.RFID.LogicChip;
 using Microsoft.Extensions.DependencyModel.Resolution;
+using dp2SSL.Models;
 
 namespace dp2SSL
 {
@@ -922,7 +923,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
 
 #endif
 
-            static NormalResult PrepareConfigDom()
+        static NormalResult PrepareConfigDom()
         {
             _rfidCfgDom = new XmlDocument();
 
@@ -2958,7 +2959,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                             {
                                 // 下架时，要从列表中排除当前书柜所在的 location
                                 List<string> locations = new List<string>(_locationList);
-                                foreach(var location in GetLocation(transferouts)) // 所涉及的图书的馆藏地汇总
+                                foreach (var location in GetLocation(transferouts)) // 所涉及的图书的馆藏地汇总
                                 {
                                     locations.Remove(location);
                                 }
@@ -6254,7 +6255,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                     }
                     catch (Exception ex)
                     {
-                        WpfClientInfo.WriteErrorLog($"SubmitChechInOut() 中的 RefreshCount() 出现异常: {ExceptionUtil.GetDebugText(ex)}。为了避免破坏流程，这里截获了异常，让后续处理正常进行");
+                        WpfClientInfo.WriteErrorLog($"SubmitCheckInOutAsync() 中的 RefreshEntity() 出现异常: {ExceptionUtil.GetDebugText(ex)}。为了避免破坏流程，这里截获了异常，让后续处理正常进行");
                     }
                 }
 
@@ -6610,6 +6611,79 @@ out string block_map);
         */
 #endif
         #endregion
+
+        class OfflineItem
+        {
+            public string UII { get; set; }
+            public string RecPath { get; set; }
+            public string Xml { get; set; }
+            public byte[] Timestamp { get; set; }
+
+            public string Title { get; set; }
+        }
+
+        public static async Task<NormalResult> ImportOfflineEntityAsync(
+    string filename,
+    delegate_showText func_showProgress,
+    CancellationToken token)
+        {
+            try
+            {
+                int count = 0;
+                using (var s = new StreamReader(filename, Encoding.UTF8))
+                using (var reader = new JsonTextReader(s))
+                using (BiblioCacheContext context = new BiblioCacheContext())
+                {
+                    while (token.IsCancellationRequested == false)
+                    {
+                        // https://www.newtonsoft.com/json/help/html/ReadMultipleContentWithJsonReader.htm
+                        if (!reader.Read())
+                            break;
+
+                        if (reader.TokenType == JsonToken.StartArray
+                            || reader.TokenType == JsonToken.EndArray
+                            || reader.TokenType == JsonToken.Comment)
+                            continue;
+
+                        JsonSerializer serializer = new JsonSerializer();
+                        OfflineItem o = serializer.Deserialize<OfflineItem>(reader);
+
+                        func_showProgress?.Invoke($"正在导入 {o.UII} {o.Title} ...");
+
+                        // 保存册记录到本地数据库
+                        await EntityReplication.AddOrUpdateAsync(context,
+                            new EntityItem
+                            {
+                                RecPath = o.RecPath,
+                                PII = o.UII,
+                                Xml = o.Xml,
+                                Timestamp = o.Timestamp,
+                            });
+
+                        // 保存书目摘要
+                        await LibraryChannelUtil.AddOrUpdateAsync(context,
+                            new BiblioSummaryItem
+                            {
+                                PII = o.UII,
+                                BiblioSummary = o.Title
+                            });
+
+                        count++;
+                    }
+                }
+
+                return new NormalResult { Value = count };
+            }
+            catch (Exception ex)
+            {
+                WpfClientInfo.WriteErrorLog($"ImportOfflineEntityAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"ImportOfflineEntityAsync() 出现异常: {ex.Message}"
+                };
+            }
+        }
 
 
         /*

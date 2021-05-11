@@ -4287,6 +4287,8 @@ namespace dp2SSL
                         // 断网状态下特殊显示
                         if (ShelfData.LibraryNetworkCondition != "OK")
                         {
+                            List<Entity> updates = new List<Entity>();
+
                             foreach (var action in actions)
                             {
                                 action.State = "_local";
@@ -4312,10 +4314,38 @@ namespace dp2SSL
                                     }
                                 }
 
+                                // 2021/5/11
+                                // transfer 动作先修改本地缓存的册记录的 currentLocation 元素
+                                if (action.Action == "transfer")
+                                {
+                                    /*
+                                    if (string.IsNullOrEmpty(action.CurrentShelfNo) == false)
+                                        commands.Add($"currentLocation:{StringUtil.EscapeString(info.CurrentShelfNo, ":,")}");
+                                    if (string.IsNullOrEmpty(action.Location) == false)
+                                        commands.Add($"location:{StringUtil.EscapeString(info.Location, ":,")}");
+                                    */
+                                    var updated_entity = await UpdateLocalEntityAsync(action);
+                                    if (updated_entity != null)
+                                        updates.Add(updated_entity);
+                                }
+
                                 action.SyncErrorCode = "skipped";
                             }
-                        }
 
+                            if (updates.Count > 0)
+                            {
+                                // 2021/5/11
+                                // 重新装载读者信息和显示
+                                try
+                                {
+                                    DoorItem.RefreshEntity(updates, ShelfData.Doors);
+                                }
+                                catch (Exception ex)
+                                {
+                                    WpfClientInfo.WriteErrorLog($"RefreshEntity() 出现异常: {ExceptionUtil.GetDebugText(ex)}。为了避免破坏流程，这里截获了异常，让后续处理正常进行");
+                                }
+                            }
+                        }
 
                         Invoke(() =>
                         {
@@ -4423,6 +4453,67 @@ namespace dp2SSL
                     _progressWindow?.ShowContent();
                 }));
                 */
+            }
+        }
+
+        // return:
+        //      null    没有发生修改
+        //      其它      发生了修改的 Entity 对象
+        static async Task<Entity> UpdateLocalEntityAsync(ActionInfo action)
+        {
+            if (string.IsNullOrEmpty(action.CurrentShelfNo)
+                && string.IsNullOrEmpty(action.Location))
+                return null;
+
+            string uii = action.Entity.GetOiPii();
+            using (BiblioCacheContext context = new BiblioCacheContext())
+            {
+                // 先尝试从本地实体库中获得记录
+                var item = context.Entities.Where(o => o.PII == uii).FirstOrDefault();
+                if (item == null)
+                    return null;
+
+                XmlDocument itemdom = new XmlDocument();
+                try
+                {
+                    itemdom.LoadXml(item.Xml);
+                }
+                catch (Exception ex)
+                {
+                    WpfClientInfo.WriteErrorLog($"UpdateLocalEntityAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                    return null;
+                }
+
+                bool changed = false;
+
+                // 修改
+                if (string.IsNullOrEmpty(action.CurrentShelfNo) == false
+                    && DomUtil.GetElementText(itemdom.DocumentElement, "currentLocation") != action.CurrentShelfNo)
+                {
+                    DomUtil.SetElementText(itemdom.DocumentElement, "currentLocation", $"{action.CurrentShelfNo}");
+                    changed = true;
+                }
+
+                // commands.Add($"currentLocation:{StringUtil.EscapeString(info.CurrentShelfNo, ":,")}");
+                if (string.IsNullOrEmpty(action.Location) == false
+                    && DomUtil.GetElementText(itemdom.DocumentElement, "location") != action.Location)
+                {
+                    DomUtil.SetElementText(itemdom.DocumentElement, "location", $"{action.Location}");
+                    changed = true;
+                }
+
+                // commands.Add($"location:{StringUtil.EscapeString(info.Location, ":,")}");
+
+                // 保存册记录到本地数据库
+                if (changed)
+                {
+                    item.Xml = itemdom.DocumentElement.OuterXml;
+                    await AddOrUpdateAsync(context, item);
+                    action.Entity.SetData(item.RecPath, item.Xml);
+                    return action.Entity;
+                }
+
+                return null;
             }
         }
 

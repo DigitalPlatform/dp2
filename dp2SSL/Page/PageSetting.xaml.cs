@@ -1176,5 +1176,81 @@ string color = "red")
             ShelfData.RestartReplicateEntities();
             App.ErrorBox("全量同步册记录和书目摘要", "全量同步册记录和书目摘要的操作已安排", "green");
         }
+
+        // 导入脱机册记录和书目摘要
+        private async void importOfflineEntity_Click(object sender, RoutedEventArgs e)
+        {
+            App.PauseBarcodeScan();
+            try
+            {
+                OpenFileDialog openFileDialog = new OpenFileDialog();
+                openFileDialog.Title = "导入脱机册记录 - 请指定文件名";
+                openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);    // WpfClientInfo.UserDir;
+                openFileDialog.RestoreDirectory = true;
+                openFileDialog.Filter = "脱机册信息文件(*.json)|*.json|所有文件(*.*)|*.*";
+                if (openFileDialog.ShowDialog() == false)
+                    return;
+
+                using (var cancel = CancellationTokenSource.CreateLinkedTokenSource(App.CancelToken))
+                {
+                    ProgressWindow progress = null;
+                    App.Invoke(new Action(() =>
+                    {
+                        progress = new ProgressWindow();
+                        progress.TitleText = "导入脱机册记录";
+                        progress.MessageText = "导入脱机册记录，请稍等 ...";
+                        progress.Owner = Application.Current.MainWindow;
+                        progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                        progress.Closed += (s1, e1) =>
+                        {
+                            cancel.Cancel();
+                        };
+                        progress.okButton.Content = "停止";
+                        progress.Background = new SolidColorBrush(Colors.DarkRed);
+                        App.SetSize(progress, "middle");
+                        progress.BackColor = "black";
+                        progress.Show();
+                    }));
+                    try
+                    {
+                        await Task.Run(async () =>
+                        {
+                            var result = await ShelfData.ImportOfflineEntityAsync(
+                                    openFileDialog.FileName,
+                                    (text) =>
+                                    {
+                                        App.Invoke(new Action(() =>
+                                        {
+                                            progress.MessageText = text;
+                                        }));
+                                    },
+                                    App.CancelToken);
+                            if (result.Value == -1)
+                                App.ErrorBox("导入脱机册记录", $"导入过程出错: {result.ErrorInfo}");
+                            else
+                            {
+                                App.ErrorBox("导入脱机册记录", $"导入完成。\r\n\r\n共处理条目 {result.Value} 个", "green");
+                            }
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        WpfClientInfo.WriteErrorLog($"导入脱机册记录过程出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                        App.ErrorBox("导入脱机册记录", $"导入脱机册记录过程出现异常: {ex.Message}");
+                    }
+                    finally
+                    {
+                        App.Invoke(new Action(() =>
+                        {
+                            progress.Close();
+                        }));
+                    }
+                }
+            }
+            finally
+            {
+                App.ContinueBarcodeScan();
+            }
+        }
     }
 }
