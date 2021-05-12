@@ -118,7 +118,12 @@ namespace dp2Inventory
                 */
             }
 
+            // TODO: 开始前用一个概要对话框显示确认一下本次批处理要进行的修改操作
+            _cancel?.Dispose();
+            _cancel = new CancellationTokenSource();
+
             // 装入 UID --> UII 对照关系
+            DataModel.ClearUidTable();
             if (_slowMode == false)
             {
                 strError = "";
@@ -185,9 +190,6 @@ namespace dp2Inventory
                     goto ERROR1;
             }
 
-            // TODO: 开始前用一个概要对话框显示确认一下本次批处理要进行的修改操作
-            _cancel?.Dispose();
-            _cancel = new CancellationTokenSource();
             BeginModify(_cancel.Token);
             return;
         ERROR1:
@@ -362,7 +364,7 @@ namespace dp2Inventory
             this.toolStripButton_stop.Enabled = true;
             this.toolStripButton_pause.Enabled = true;
             SetPauseText();
-            ClearUidTable();
+            // ClearUidTable();
             ClearProcessedTable();
             ClearCacheTagTable(null);
             InitialRfidManager(DataModel.RfidCenterUrl);
@@ -1051,6 +1053,7 @@ out string block_map);
 
                             this.Invoke((Action)(() =>
                             {
+                                SetItemIcon(item, GetImageIndex(iteminfo));
                                 // 清除残留的 error 状态
                                 if (iteminfo.State == "error")
                                 {
@@ -1094,6 +1097,8 @@ out string block_map);
                         // 第二步，刷新 PII 等栏目
                         this.Invoke((Action)(() =>
                         {
+                            SetItemIcon(item, GetImageIndex(iteminfo));
+
                             // 2021/1/14
                             // 清除残留的 error 状态
                             if (iteminfo.State == "error")
@@ -1900,7 +1905,7 @@ bool eas)
             throw new ArgumentException($"目前暂不支持 {existing.Protocol} 协议标签的写入操作");
         }
 
-
+#if REMOVED
         Hashtable _uidTable = new Hashtable();
 
         void AddUidEntry(string uid, string pii)
@@ -1918,6 +1923,7 @@ bool eas)
                 _uidTable.Clear();
             }
         }
+#endif
 
         void RefreshItemByUII(ListViewItem item)
         {
@@ -2099,6 +2105,22 @@ bool eas)
             }));
         }
 
+        static int GetImageIndex(ItemInfo info)
+        {
+            if (info.TagInfo != null)
+                return 2;
+
+            if (string.IsNullOrEmpty(info.UII) == false)
+                return 3;
+
+            return 1;
+        }
+
+        static void SetItemIcon(ListViewItem item, int imageIndex)
+        {
+            item.ImageIndex = imageIndex;
+        }
+
         static void SetItemColor(ListViewItem item, string state)
         {
             if (state == "normal")
@@ -2189,7 +2211,7 @@ bool eas)
             }
         }
 
-        #region 标签缓存
+#region 标签缓存
 
         public NormalResult WriteTagInfo(string one_reader_name,
     TagInfo old_tag_info,
@@ -2282,7 +2304,7 @@ bool eas)
             }
         }
 
-        #endregion
+#endregion
 
         // 获得 oi.pii 的 oi 部分
         public static string GetOiPart(string oi_pii, bool return_null)

@@ -315,11 +315,12 @@ namespace RfidTool
         }
 
         // 启用标签缓存
+        // 缺省为 false (2021/5/12)
         public static bool EnableTagCache
         {
             get
             {
-                return ClientInfo.Config.GetBoolean("general", "enableTagCache", true);
+                return ClientInfo.Config.GetBoolean("general", "enableTagCache", false);
             }
             set
             {

@@ -659,9 +659,19 @@ TaskScheduler.Default);
                     context.Database.EnsureCreated();
                     foreach (var pii in piis)
                     {
-                        var items = context.Requests.Where(o => o.PII == pii && o.State != "sync").ToList();
+                        var items = context.Requests.Where(o => o.PII == pii && o.State != "sync" && o.State != "dontsync").ToList();
                         // context.Requests.RemoveRange(items);
-                        items.ForEach(o => o.State = "dontsync");
+                        items.ForEach(o =>
+                        {
+                            o.State = "dontsync";
+                            // 2012/5/12
+                            if (StringUtil.IsInList("removeRetry", o.SyncErrorCode) == false)
+                            {
+                                if (string.IsNullOrEmpty(o.SyncErrorCode) == false)
+                                    o.SyncErrorCode += ",";
+                                o.SyncErrorCode += "removeRetry";
+                            }
+                        });
                         context.SaveChanges();
                     }
                 }

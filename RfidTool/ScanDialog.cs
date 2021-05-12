@@ -95,6 +95,16 @@ namespace RfidTool
                         return;
                     }
 
+                    if (string.IsNullOrWhiteSpace(DataModel.PiiVerifyRule))
+                    {
+                        string text = $"尚未设置条码号校验规则";
+                        FormClientInfo.Speak(text);
+                        ShowMessageBox("input", text);
+                        this.textBox_barcode.SelectAll();
+                        this.textBox_barcode.Focus();
+                        return;
+
+                    }
                     var verify_result = VerifyBarcode(ModifyDialog.GetVerifyType(TypeOfUsage), barcode);
                     if (verify_result.OK == false)
                     {
@@ -747,7 +757,7 @@ namespace RfidTool
             string barcode)
         {
             string rule = DataModel.PiiVerifyRule;
-            if (string.IsNullOrEmpty(rule))
+            if (string.IsNullOrWhiteSpace(rule))
                 throw new ArgumentException("尚未设置 PiiVerifyRule");
 
             if (_validator == null)

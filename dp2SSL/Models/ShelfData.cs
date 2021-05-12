@@ -1076,6 +1076,24 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             return value;
         }
 
+        // 休眠关闭提交对话框秒数
+        public static int GetIdleCloseSubmitDialog()
+        {
+            if (ShelfCfgDom == null)
+                return 1;
+            var value = ShelfCfgDom.DocumentElement.SelectSingleNode("settings/key[@name='休眠关闭提交对话框秒数']/@value")?.Value;
+            if (string.IsNullOrEmpty(value))
+                value = "0";
+            if (Int32.TryParse(value, out int count) == false)
+            {
+                WpfClientInfo.WriteErrorLog($"shelf.xml 中 休眠关闭提交对话框秒数 配置参数值 '{value} 格式不正确。应为一个整数数字'");
+                return 1;
+            }
+
+            return count;
+        }
+
+
         // 超额时语音播报次数
         public static int GetOverdueSpeakCount()
         {
@@ -1086,7 +1104,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                 value = "1";
             if (Int32.TryParse(value, out int count) == false)
             {
-                WpfClientInfo.WriteErrorLog($"shelf.xml 中 超额时语音播报次数 配置参数值 '{value} 格式不正确。应为一个数字'");
+                WpfClientInfo.WriteErrorLog($"shelf.xml 中 超额时语音播报次数 配置参数值 '{value} 格式不正确。应为一个整数数字'");
                 return 1;
             }
 
@@ -7200,7 +7218,7 @@ TaskScheduler.Default);
 
         static string ToString(Entity entity)
         {
-            return $"PII:{entity.PII},UID:{entity.UID},Title:{entity.Title},ItemRecPath:{entity.ItemRecPath},ReaderName:{entity.ReaderName},Antenna:{entity.Antenna}";
+            return $"PII:{entity.PII},OI:{entity.OI},UID:{entity.UID},Title:{entity.Title},ItemRecPath:{entity.ItemRecPath},ReaderName:{entity.ReaderName},Antenna:{entity.Antenna},AOI:{entity.AOI}";
         }
 
         public static string ToString(List<ActionInfo> actions)

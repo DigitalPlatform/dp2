@@ -29,6 +29,7 @@ namespace dp2Inventory
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(InventoryDialog));
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripButton_begin = new System.Windows.Forms.ToolStripButton();
@@ -62,6 +63,7 @@ namespace dp2Inventory
             this.columnHeader_readerName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_antenna = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_protocol = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.imageList1 = new System.Windows.Forms.ImageList(this.components);
             this.toolStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -256,11 +258,13 @@ namespace dp2Inventory
             this.listView_tags.Font = new System.Drawing.Font("微软雅黑", 10.71429F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.listView_tags.FullRowSelect = true;
             this.listView_tags.HideSelection = false;
+            this.listView_tags.LargeImageList = this.imageList1;
             this.listView_tags.Location = new System.Drawing.Point(0, 55);
             this.listView_tags.Margin = new System.Windows.Forms.Padding(4);
             this.listView_tags.Name = "listView_tags";
             this.listView_tags.ShowItemToolTips = true;
             this.listView_tags.Size = new System.Drawing.Size(1124, 587);
+            this.listView_tags.SmallImageList = this.imageList1;
             this.listView_tags.TabIndex = 2;
             this.listView_tags.UseCompatibleStateImageBehavior = false;
             this.listView_tags.View = System.Windows.Forms.View.Details;
@@ -340,6 +344,15 @@ namespace dp2Inventory
             this.columnHeader_protocol.Text = "协议";
             this.columnHeader_protocol.Width = 120;
             // 
+            // imageList1
+            // 
+            this.imageList1.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList1.ImageStream")));
+            this.imageList1.TransparentColor = System.Drawing.Color.Transparent;
+            this.imageList1.Images.SetKeyName(0, "Document_16x.png");
+            this.imageList1.Images.SetKeyName(1, "HiddenFile_16x.png");
+            this.imageList1.Images.SetKeyName(2, "ProductionSnapshotPointOn_16x.png");
+            this.imageList1.Images.SetKeyName(3, "ProductionSnapshotPointOff_16x.png");
+            // 
             // InventoryDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(13F, 25F);
@@ -400,5 +413,6 @@ namespace dp2Inventory
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel_rpanMode;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel3;
         private System.Windows.Forms.ToolStripButton toolStripButton_pause;
+        private System.Windows.Forms.ImageList imageList1;
     }
 }

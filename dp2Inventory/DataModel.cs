@@ -245,11 +245,12 @@ namespace dp2Inventory
         }
 
         // 启用标签缓存
+        // 缺省为 false (2021/5/12)
         public static bool EnableTagCache
         {
             get
             {
-                return ClientInfo.Config.GetBoolean("general", "enableTagCache", true);
+                return ClientInfo.Config.GetBoolean("general", "enableTagCache", false);
             }
             set
             {
@@ -305,6 +306,12 @@ namespace dp2Inventory
         // 预先从全部实体记录中准备好 UID 到 PII 的对照关系。这一部分标签就不需要 GetTagData 了
         // UID --> PII
         static Hashtable _uidTable = new Hashtable();
+
+        // 2021/5/12
+        public static void ClearUidTable()
+        {
+            _uidTable.Clear();
+        }
 
         public static void SetUidTable(Hashtable table)
         {

@@ -63,7 +63,7 @@
                                              HorizontalAlignment="Left"/>
 
 
-                    <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding PII}" TextAlignment="Right" FontSize="12" FontWeight="Bold" Foreground="DarkOrange"/>
+                    <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding UII}" TextAlignment="Right" FontSize="12" FontWeight="Bold" Foreground="DarkOrange"/>
                     <TextBlock Grid.Row="2" Grid.ColumnSpan="2" Text="{Binding Title}" 
                                        FontSize="20" FontWeight="Bold" Foreground="LightGray"
                                        MaxWidth="240" TextWrapping="NoWrap"  TextTrimming="CharacterEllipsis"/>

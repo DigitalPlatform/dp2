@@ -32,7 +32,16 @@ namespace dp2SSL
 
                     _pii = value;
                     OnPropertyChanged("PII");
+                    OnPropertyChanged("UII");
                 }
+            }
+        }
+
+        public string UII
+        {
+            get
+            {
+                return GetOiPii();
             }
         }
 
@@ -47,6 +56,7 @@ namespace dp2SSL
                 {
                     _oi = value;
                     OnPropertyChanged("OI");
+                    OnPropertyChanged("UII");
                 }
             }
         }
@@ -62,6 +72,7 @@ namespace dp2SSL
                 {
                     _aoi = value;
                     OnPropertyChanged("AOI");
+                    OnPropertyChanged("UII");
                 }
             }
         }

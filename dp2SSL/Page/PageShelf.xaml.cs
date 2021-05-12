@@ -2695,6 +2695,43 @@ namespace dp2SSL
                     // *** 断网情况
                     // 将尚未同步的信息写入本地历史数据库
                     await ShelfData.SaveActionsToDatabaseAsync(all_actions);
+
+                    // 2021/5/12
+                    // 断网状态下特殊显示
+                    if (ShelfData.LibraryNetworkCondition != "OK")
+                    {
+                        List<Entity> updates = new List<Entity>();
+
+                        foreach (var action in all_actions)
+                        {
+                            action.State = "_local";
+
+                            // 2021/5/11
+                            // transfer 动作先修改本地缓存的册记录的 currentLocation 元素
+                            if (action.Action == "transfer")
+                            {
+                                var updated_entity = await UpdateLocalEntityAsync(action);
+                                if (updated_entity != null)
+                                    updates.Add(updated_entity);
+                            }
+
+                            action.SyncErrorCode = "skipped";
+                        }
+
+                        if (updates.Count > 0)
+                        {
+                            // 重新装载读者信息和显示
+                            try
+                            {
+                                DoorItem.RefreshEntity(updates, ShelfData.Doors);
+                            }
+                            catch (Exception ex)
+                            {
+                                WpfClientInfo.WriteErrorLog($"InitialShelfEntitiesAsync() RefreshEntity() 出现异常: {ExceptionUtil.GetDebugText(ex)}。为了避免破坏流程，这里截获了异常，让后续处理正常进行");
+                            }
+                        }
+                    }
+
                 }
                 else
                 {
@@ -3111,6 +3148,9 @@ namespace dp2SSL
                     }
                 }
                 SetGlobalError("patron", "");
+
+                // 2021/5/12
+                CloseProgressWindow();
             }
             catch (Exception ex)
             {
@@ -4121,6 +4161,20 @@ namespace dp2SSL
             }
         }
 
+        // 关闭“提交对话框”
+        public void CloseProgressWindow()
+        {
+            App.Invoke(new Action(() =>
+            {
+                if (_progressWindow != null
+                && _progressWindow.IsVisible)
+                {
+                    _progressWindow.Close();
+                }
+            }));
+        }
+
+        // 打开“提交对话框”
         public SubmitWindow OpenProgressWindow()
         {
             App.Invoke(new Action(() =>

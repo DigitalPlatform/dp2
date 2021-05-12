@@ -6,7 +6,10 @@ using System.Xml;
 using System.Web;
 using System.IO;
 
+using Newtonsoft.Json;
+
 using DigitalPlatform;
+using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.RFID.UI;
@@ -16,8 +19,6 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.CommonControl;
 using static dp2Circulation.MainForm;
 using static dp2Circulation.CallNumberForm;
-using DigitalPlatform.IO;
-using Newtonsoft.Json;
 
 namespace dp2Circulation
 {

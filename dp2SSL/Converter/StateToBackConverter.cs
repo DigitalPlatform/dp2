@@ -108,4 +108,27 @@ namespace dp2SSL
         }
     }
 
+#if REMOVED
+    public class EntityUiiConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            Entity entity = (Entity)value;
+
+            string pii = entity.PII;
+            string oi = entity.OI;
+            string aoi = entity.AOI;
+            if (string.IsNullOrEmpty(oi) == false)
+                return oi + "." + pii;
+            if (string.IsNullOrEmpty(aoi) == false)
+                return aoi + "." + pii;
+            return pii;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+#endif
 }

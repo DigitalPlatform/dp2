@@ -42,22 +42,6 @@ namespace dp2SSL
             SetIdleEvents();
         }
 
-        public void SetIdleEvents()
-        {
-            InputManager.Current.PreProcessInput -= OnActivity;
-            if (_activityTimer != null)
-                _activityTimer.Tick -= OnInactivity;
-
-            var seconds = App.AutoBackMainMenuSeconds;
-            if (seconds > 0)
-            {
-                // https://stackoverflow.com/questions/4963135/wpf-inactivity-and-activity
-                InputManager.Current.PreProcessInput += OnActivity;
-                _activityTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(seconds), IsEnabled = true };
-                _activityTimer.Tick += OnInactivity;
-            }
-        }
-
         ~PageMenu()
         {
             DeleteTempFiles();
@@ -518,6 +502,22 @@ namespace dp2SSL
         private DispatcherTimer _activityTimer;
         private Point _inactiveMousePosition = new Point(0, 0);
 
+        public void SetIdleEvents()
+        {
+            InputManager.Current.PreProcessInput -= OnActivity;
+            if (_activityTimer != null)
+                _activityTimer.Tick -= OnInactivity;
+
+            var seconds = App.AutoBackMainMenuSeconds;
+            if (seconds > 0)
+            {
+                // https://stackoverflow.com/questions/4963135/wpf-inactivity-and-activity
+                InputManager.Current.PreProcessInput += OnActivity;
+                _activityTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(seconds), IsEnabled = true };
+                _activityTimer.Tick += OnInactivity;
+            }
+        }
+
         void OnInactivity(object sender, EventArgs e)
         {
             // remember mouse position
@@ -573,8 +573,11 @@ namespace dp2SSL
                 rectangle.Visibility = Visibility.Visible;
                 */
 
+                /*
                 _activityTimer?.Stop();
                 _activityTimer?.Start();
+                */
+                ResetActivityTimer();
             }
         }
 

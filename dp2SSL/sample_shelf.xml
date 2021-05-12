@@ -5,6 +5,7 @@
     <key name="菜单页面显示图书馆名" value="true"/>
     <key name="断网模式下开门前检查读者是否超期" value="true"/>
     <key name="缓存工作人员账户到本地" value="false"/>
+    <key name="休眠关闭提交对话框秒数" value="0"/>
 
   </settings>
   <shelf>

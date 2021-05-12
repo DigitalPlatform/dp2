@@ -118,6 +118,14 @@ namespace RfidTool
                     }
                 }
 
+                // 2021/5/12
+                if (this.checkBox_writeTag_verifyPii.Checked
+                    && string.IsNullOrWhiteSpace(rule))
+                {
+                    strError = "您选择了“校验条码号”，但尚未设置条码号校验规则";
+                    goto ERROR1;
+                }
+
                 if (string.IsNullOrEmpty(this.textBox_rfid_aoi.Text) == false)
                 {
                     // TODO: 当 textbox 内容发生过变化才警告
