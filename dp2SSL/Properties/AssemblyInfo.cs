@@ -51,8 +51,8 @@ using System.Windows;
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 // 方法是按如下所示使用“*”: :
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.8.21")]    // 1.5.*
-[assembly: AssemblyFileVersion("1.8.21.0")]  // 1.5.0.0
+[assembly: AssemblyVersion("1.8.23")]    // 1.5.*
+[assembly: AssemblyFileVersion("1.8.23.0")]  // 1.5.0.0
 
 // 1.0 2019/2/21 第一个版本
 // 1.1 2019/2/26 可以显示版本号了
@@ -106,3 +106,5 @@ using System.Windows;
 //                          书柜在断网模式下借出以后，读者信息里面的在借册列表信息中期限显示为空。这一 bug 已经修正
 //      1.8.20 (2021/5/12) 书柜启动的时候，对书柜中现存的图书对应的、上次暂时没有来得及同步的 action 记录，会修改 State 为 "dontsync"，然后本次启动又会新增必要的 action 记录。最新版在修改 State 的同时，也会在 SyncErrorCode 字段中添加 removeRetry 值，表明原因
 //      1.8.21 (2021/5/13) shelf.xml 中增加 <key name="休眠关闭提交对话框秒数" value="0"/> 参数，可配置书柜借书还书时“提交对话框”休眠多少秒以后自动关闭。另外刷读者卡会自动关闭开着的“提交对话框”
+//      1.8.22 (2021/5/13) 取消 ShelfData.RemoveRetryActionsFromDatabaseAsync()。这样以前积累的尚未同步的动作无论如何后面都会尝试同步
+//      1.8.23 (2021/5/14) 当书柜启动的时候，原先版本在网络良好的情况下会直接向 dp2library 服务器提交 return 和 inventory 动作，如果先前还有断网或者网络不良阶段积累的未同步动作，后面就会造成同步顺序颠倒。新版本在这里，改为无论网络是否良好，都先把请求放入队列，等后台同步线程去处理同步

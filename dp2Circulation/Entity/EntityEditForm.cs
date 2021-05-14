@@ -1098,7 +1098,8 @@ namespace dp2Circulation
         // parameters:
         //      strStyle    操作方式
         //                  auto_close_dialog  是否要自动关闭选择对话框。条件是选中了 auto_select_pii 事项
-        //                  adjust_right    是否自动调整右侧元素。即，把左侧的锁定状态元素覆盖到右侧。调整前要询问。如果不同意调整，可以放弃，然后改为放一个空白标签并装载保存
+        //                  /*adjust_right    是否自动调整右侧元素。即，把左侧的锁定状态元素覆盖到右侧。调整前要询问。如果不同意调整，可以放弃，然后改为放一个空白标签并装载保存 */
+        //                  adjust_right 验证右侧正在编辑的内容是否会和标签上原有的锁定字段发生冲突(从而导致无法写入)
         //                  saving  是否为了保存而装载？如果是，有些提示要改变
         // return:
         //      -1  出错
@@ -1181,16 +1182,18 @@ namespace dp2Circulation
 
                     if (adjust_right)
                     {
-                        int nRet = Merge(this.chipEditor_existing.LogicChipItem,
+                        int nRet = VerifyLock(this.chipEditor_existing.LogicChipItem,
         this.chipEditor_editing.LogicChipItem,
         out strError);
                         if (nRet == -1)
                             return -1;
 
+                        /*
                         // 让右侧编辑器感受到 readonly 和 text 的变化
                         var save = this.chipEditor_editing.LogicChipItem;
                         this.chipEditor_editing.LogicChipItem = null;
                         this.chipEditor_editing.LogicChipItem = save;
+                        */
                     }
 
                     return 1;
@@ -1203,7 +1206,10 @@ namespace dp2Circulation
             }
         }
 
+#if REMOVED
         // 把新旧芯片内容合并。即，新芯片中不应修改旧芯片中已经锁定的元素
+        //      old_chip    标签上已经存在的内容
+        //      new_chip    正在编辑的内容
         public static int Merge(LogicChipItem old_chip,
             LogicChipItem new_chip,
             out string strError)
@@ -1212,15 +1218,15 @@ namespace dp2Circulation
 
             List<string> errors = new List<string>();
             // 检查一遍
-            foreach (Element element in old_chip.Elements)
+            foreach (Element old_element in old_chip.Elements)
             {
-                if (element.Locked == false)
+                if (old_element.Locked == false)
                     continue;
-                Element new_element = new_chip.FindElement(element.OID);
+                Element new_element = new_chip.FindElement(old_element.OID);
                 if (new_element != null)
                 {
-                    if (new_element.Text != element.Text)
-                        errors.Add($"当前标签中元素 {element.OID} 已经被锁定，无法进行内容合并(从 '{element.Text}' 修改为 '{new_element.Text}')。");
+                    if (new_element.Text != old_element.Text)
+                        errors.Add($"当前标签中元素 {old_element.OID} 已经被锁定，无法进行内容合并(从 '{old_element.Text}' 修改为 '{new_element.Text}')。");
                 }
             }
 
@@ -1231,21 +1237,83 @@ namespace dp2Circulation
                 return -1;
             }
 
-            foreach (Element element in old_chip.Elements)
+            /*
+            bool changed = false;
+            foreach (Element old_element in old_chip.Elements)
             {
-                if (element.Locked == false)
+                if (old_element.Locked == false)
                     continue;
-                Element new_element = new_chip.FindElement(element.OID);
+                Element new_element = new_chip.FindElement(old_element.OID);
                 if (new_element != null)
                 {
                     // 修改新元素
                     int index = new_chip.Elements.IndexOf(new_element);
                     Debug.Assert(index != -1);
                     new_chip.Elements.RemoveAt(index);
-                    new_chip.Elements.Insert(index, element.Clone());
+                    new_chip.Elements.Insert(index, old_element.Clone());
+                    changed = true;
                 }
             }
 
+            if (changed)
+                return 1;   // new_chip 发生改变，被标签中旧内容冲掉部分字段，无法进行修改
+            */
+            return 0;
+        }
+
+#endif
+
+        // 验证，新芯片中无法修改旧芯片中已经锁定的元素
+        //      old_chip    标签上已经存在的内容
+        //      new_chip    正在编辑的内容
+        public static int VerifyLock(LogicChipItem old_chip,
+            LogicChipItem new_chip,
+            out string strError)
+        {
+            strError = "";
+
+            List<string> errors = new List<string>();
+            // 检查一遍
+            foreach (Element old_element in old_chip.Elements)
+            {
+                if (old_element.Locked == false)
+                    continue;
+                Element new_element = new_chip.FindElement(old_element.OID);
+                if (new_element != null)
+                {
+                    if (new_element.Text != old_element.Text)
+                        errors.Add($"当前标签中元素 {old_element.OID} 已经被锁定，无法进行内容合并(从 '{old_element.Text}' 修改为 '{new_element.Text}')。");
+                }
+            }
+
+            if (errors.Count > 0)
+            {
+                strError = StringUtil.MakePathList(errors, ";");
+                strError += "\r\n\r\n强烈建议从图书上撕掉和废弃此标签，然后重新贴一个空白标签才能进行写入";
+                return -1;
+            }
+
+            /*
+            bool changed = false;
+            foreach (Element old_element in old_chip.Elements)
+            {
+                if (old_element.Locked == false)
+                    continue;
+                Element new_element = new_chip.FindElement(old_element.OID);
+                if (new_element != null)
+                {
+                    // 修改新元素
+                    int index = new_chip.Elements.IndexOf(new_element);
+                    Debug.Assert(index != -1);
+                    new_chip.Elements.RemoveAt(index);
+                    new_chip.Elements.Insert(index, old_element.Clone());
+                    changed = true;
+                }
+            }
+
+            if (changed)
+                return 1;   // new_chip 发生改变，被标签中旧内容冲掉部分字段，无法进行修改
+            */
             return 0;
         }
 

@@ -2525,6 +2525,7 @@ namespace dp2SSL
                             goto WAIT_RETRY;
                         }
 
+#if REMOVED
                         if (networkMode == "local" || silently)
                         {
                             // *** 断网情形
@@ -2604,6 +2605,17 @@ namespace dp2SSL
                                 break;
                             }
                         }
+#endif
+
+                        {
+                            // 2021/5/14
+                            // 注1：这里即便网络良好，也不应直接请求 dp2library 服务器同步，因为可能先前还有尚未同步的积压动作。
+                            // 注2: 如果为了让启动阶段可以亲眼观察到初始化的同步进行，可以考虑这里等待一下，同时显示一轮完整的同步过程，然后再继续往后走
+                            // 累计起来等待最后写入本地历史数据库
+                            all_actions.AddRange(part_actions);
+                            break;
+                        }
+
 
                     WAIT_RETRY:
                         {
@@ -2676,6 +2688,7 @@ namespace dp2SSL
 
                 await ShelfData.SelectAntennaAsync();
 
+#if REMOVED
                 // 将 操作历史库 里面的 PII 和 ShelfData.All 里面 PII 相同的事项的状态标记为“放弃同步”。因为刚才已经成功同步了它们
                 // ShelfData.RemoveFromRetryActions(new List<Entity>(ShelfData.All));
                 {
@@ -2688,6 +2701,7 @@ namespace dp2SSL
                     // TODO: 虽然状态被修改为 dontsync，但依然需要在 SyncErrorInfo 里面注解一下为何 dontsync(因为初始化盘点时候已经同步成功了)
                     await ShelfData.RemoveRetryActionsFromDatabaseAsync(piis);
                 }
+#endif
 
                 // 将刚才初始化涉及到的 action 操作写入本地数据库
                 if (networkMode == "local" || silently)
@@ -4036,6 +4050,9 @@ namespace dp2SSL
             return new NormalResult();
         }
 
+#if REMOVED
+        // 注：本函数被废止
+        // 注：这里即便网络良好，也不应直接请求 dp2library 服务器同步，因为可能先前还有尚未同步的积压动作。
         // TODO: 报错信息尝试用 FlowDocument 改造
         // 首次初始化时候对所有图书进行盘点操作。盘点的意思就是清点在书柜里面的图书
         // 注意观察和测试 PII 在 dp2library 中不存在的情况
@@ -4044,50 +4061,11 @@ namespace dp2SSL
         //      -1  出错
         //      0   没有必要处理
         //      1   已经处理
-        async Task<SubmitResult> InventoryBooksAsync(InventoryWindow progress,
-            // IReadOnlyCollection<Entity> entities
-            List<ActionInfo> actions
-            )
+        async Task<SubmitResult> InventoryBooksAsync(
+            InventoryWindow progress,
+            List<ActionInfo> actions)
         {
             DateTime now = DateTime.Now;
-
-#if NO
-            List<ActionInfo> actions = new List<ActionInfo>();
-            foreach (var entity in entities)
-            {
-                actions.Add(new ActionInfo
-                {
-                    Entity = entity.Clone(),
-                    Action = "return",
-                    Operator = GetOperator(entity, false),
-                    OperTime = now,
-                });
-                actions.Add(new ActionInfo
-                {
-                    Entity = entity.Clone(),
-                    Action = "transfer",
-                    CurrentShelfNo = ShelfData.GetShelfNo(entity),
-                    Operator = GetOperator(entity, false),
-                    OperTime = now,
-                });
-
-                // 2020/4/2
-                // 还书操作前先尝试修改 EAS
-                {
-                    var eas_result = ShelfData.SetEAS(entity.UID, entity.Antenna, false);
-                    if (eas_result.Value == -1)
-                    {
-                        return new SubmitResult
-                        {
-                            Value = -1,
-                            ErrorInfo = $"修改册 '{entity.PII}' 的 EAS 失败: {eas_result.ErrorInfo}",
-                            ErrorCode = "setEasError"
-                        };
-                    }
-                }
-            }
-
-#endif
 
             if (actions.Count == 0)
                 return new SubmitResult();  // 没有必要处理
@@ -4131,6 +4109,7 @@ namespace dp2SSL
 
             return result;
         }
+#endif
 
         // 将所有暂存信息构造为 Action，但并不立即提交
         async Task BuildAllActionsAsync()
@@ -4621,7 +4600,7 @@ namespace dp2SSL
             return text.ToString();
         }
 
-        #region 延迟清除读者信息
+#region 延迟清除读者信息
 
         DelayAction _delayClearPatronTask = null;
 
@@ -4682,9 +4661,9 @@ namespace dp2SSL
             }
         }
 
-        #endregion
+#endregion
 
-        #region 模拟柜门灯亮灭
+#region 模拟柜门灯亮灭
 
         public void SimulateLamp(bool on)
         {
@@ -4697,9 +4676,9 @@ namespace dp2SSL
             }));
         }
 
-        #endregion
+#endregion
 
-        #region 人脸识别功能
+#region 人脸识别功能
 
         bool _stopVideo = false;
 
@@ -4967,7 +4946,7 @@ namespace dp2SSL
             }
         }
 
-        #endregion
+#endregion
 
         private void ClearPatron_Click(object sender, RoutedEventArgs e)
         {
@@ -5095,7 +5074,7 @@ namespace dp2SSL
 
 #if REMOVED
 
-        #region 绑定和解绑读者功能
+#region 绑定和解绑读者功能
 
 #pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
         private async void bindPatronCard_Click(object sender, RoutedEventArgs e)
@@ -5306,7 +5285,7 @@ uid);
             return new NormalResult { Value = 0 };
         }
 
-        #endregion
+#endregion
 
 #endif
     }

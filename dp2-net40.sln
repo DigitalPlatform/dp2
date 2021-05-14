@@ -286,6 +286,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestPalmprint", "TestPalmpr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestOpenCvSharp", "TestOpenCvSharp\TestOpenCvSharp.csproj", "{C2D419A0-EAFD-4E27-9CDD-31684A1773D4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FaceDrivers.ArcSoft_v4", "FaceDrivers.ArcSoft_v4\FaceDrivers.ArcSoft_v4.csproj", "{5472FA52-D8B3-431D-BBE3-7499C0BF3D79}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -2420,6 +2422,24 @@ Global
 		{C2D419A0-EAFD-4E27-9CDD-31684A1773D4}.Test|Mixed Platforms.Build.0 = Debug|Any CPU
 		{C2D419A0-EAFD-4E27-9CDD-31684A1773D4}.Test|x86.ActiveCfg = Debug|Any CPU
 		{C2D419A0-EAFD-4E27-9CDD-31684A1773D4}.Test|x86.Build.0 = Debug|Any CPU
+		{5472FA52-D8B3-431D-BBE3-7499C0BF3D79}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5472FA52-D8B3-431D-BBE3-7499C0BF3D79}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5472FA52-D8B3-431D-BBE3-7499C0BF3D79}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{5472FA52-D8B3-431D-BBE3-7499C0BF3D79}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{5472FA52-D8B3-431D-BBE3-7499C0BF3D79}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{5472FA52-D8B3-431D-BBE3-7499C0BF3D79}.Debug|x86.Build.0 = Debug|Any CPU
+		{5472FA52-D8B3-431D-BBE3-7499C0BF3D79}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5472FA52-D8B3-431D-BBE3-7499C0BF3D79}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5472FA52-D8B3-431D-BBE3-7499C0BF3D79}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{5472FA52-D8B3-431D-BBE3-7499C0BF3D79}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{5472FA52-D8B3-431D-BBE3-7499C0BF3D79}.Release|x86.ActiveCfg = Release|Any CPU
+		{5472FA52-D8B3-431D-BBE3-7499C0BF3D79}.Release|x86.Build.0 = Release|Any CPU
+		{5472FA52-D8B3-431D-BBE3-7499C0BF3D79}.Test|Any CPU.ActiveCfg = Debug|Any CPU
+		{5472FA52-D8B3-431D-BBE3-7499C0BF3D79}.Test|Any CPU.Build.0 = Debug|Any CPU
+		{5472FA52-D8B3-431D-BBE3-7499C0BF3D79}.Test|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{5472FA52-D8B3-431D-BBE3-7499C0BF3D79}.Test|Mixed Platforms.Build.0 = Debug|Any CPU
+		{5472FA52-D8B3-431D-BBE3-7499C0BF3D79}.Test|x86.ActiveCfg = Debug|Any CPU
+		{5472FA52-D8B3-431D-BBE3-7499C0BF3D79}.Test|x86.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

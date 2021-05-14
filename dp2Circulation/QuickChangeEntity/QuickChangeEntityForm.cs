@@ -310,7 +310,7 @@ namespace dp2Circulation
             }
 
             return 1;
-            ERROR1:
+        ERROR1:
             strError = "装载册条码号为 " + strBarcode + "的记录发生错误: " + strError;
             // MessageBox.Show(this, strError);
             return -1;
@@ -378,7 +378,7 @@ namespace dp2Circulation
                     return;
                 }
             }
-            DOLOAD:
+        DOLOAD:
 
             nRet = LoadRecord(true, this.textBox_barcode.Text,
                 out strError);
@@ -402,7 +402,7 @@ namespace dp2Circulation
 
             this.textBox_outputBarcodes.Text += this.textBox_barcode.Text + "\r\n";
 
-            SETFOCUS:
+        SETFOCUS:
             // 焦点定位
             string strFocusAction = Program.MainForm.AppInfo.GetString(
 "change_param",
@@ -524,7 +524,7 @@ false);
                     LogicChipItem chip = EntityEditForm.BuildChip(item);
                     _right = chip;
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     // 2021/2/1
                     strError = "创建 RFID 标签时出现异常: " + ex.Message;
@@ -570,7 +570,7 @@ false);
             {
                 this.ClearMessage();
             }
-            CANCEL0:
+        CANCEL0:
             MessageBoxAndSpeak(strError);
             return 0;
         ERROR1:
@@ -583,6 +583,8 @@ false);
         LogicChipItem _right = null;
         OneTag _tagExisting = null;
 
+        // parameters:
+        //      strStyle    adjust_right 验证右侧正在编辑的内容是否会和标签上原有的锁定字段发生冲突(从而导致无法写入)
         // return:
         //      -1  出错
         //      0   放弃装载
@@ -600,7 +602,7 @@ false);
 
             try
             {
-                REDO:
+            REDO:
                 // 出现对话框让选择一个
                 // SelectTagDialog dialog = new SelectTagDialog();
                 using (RfidToolForm dialog = new RfidToolForm())
@@ -657,16 +659,18 @@ false);
 
                     if (adjust_right)
                     {
-                        int nRet = EntityEditForm.Merge(_left,
+                        int nRet = EntityEditForm.VerifyLock(_left,
         _right,
         out strError);
                         if (nRet == -1)
                             return -1;
 
+                        /*
                         // 让右侧编辑器感受到 readonly 和 text 的变化
                         //var save = this.chipEditor_editing.LogicChipItem;
                         //this.chipEditor_editing.LogicChipItem = null;
                         //this.chipEditor_editing.LogicChipItem = save;
+                        */
                     }
 
                     return 1;
@@ -957,7 +961,7 @@ out strError);
                 }
 
                 return 1;
-                ERROR1:
+            ERROR1:
                 strError = "保存条码为 " + this.entityEditControl1.Barcode + " 的册记录时出错: " + strError;
                 return -1;
             }
@@ -1053,7 +1057,7 @@ out strError);
             }
 
             return 1;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -1257,7 +1261,7 @@ out strError);
                 goto ERROR1;
 
             return nRet;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
             return -1;
         }
@@ -1296,7 +1300,7 @@ out strError);
                 goto ERROR1;
 
             return nRet;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
             return -1;
         }
@@ -1514,7 +1518,7 @@ out strError);
             MessageBox.Show(this, "处理完成。共处理记录 " + nRet.ToString() + " 条");
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1636,7 +1640,7 @@ out strError);
             MessageBox.Show(this, "处理完成。共处理记录 " + nRet.ToString() + " 条");
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
 
         }
@@ -1681,7 +1685,7 @@ out strError);
                 }
             }
 
-            END1:
+        END1:
             return base.ProcessDialogKey(keyData);
         }
 
