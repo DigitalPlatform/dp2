@@ -32,6 +32,9 @@ namespace DigitalPlatform.CirculationClient
 
         public event GetImageEventHandler GetImage = null;
 
+        // 2021/5/16
+        public event GetImageEventHandler GetIrImage = null;
+
         public virtual string BioTypeName
         {
             get
@@ -145,7 +148,32 @@ namespace DigitalPlatform.CirculationClient
             return e.Image;
         }
 
+        public void TriggerGetIrImage(GetImageEventArgs e)
+        {
+            this.GetIrImage?.Invoke(this, e);
+        }
+
+        public Image TryGetIrImage()
+        {
+            var e = new GetImageEventArgs();
+            this.TriggerGetIrImage(e);
+            return e.Image;
+        }
+
         public virtual TextResult GetRegisterString(Image image,
+            string strExcludeBarcodes)
+        {
+            return new TextResult
+            {
+                Value = -1,
+                ErrorInfo = "尚未重载 GetRegisterString() 函数"
+            };
+        }
+
+        // 2021/5/17
+        // 新版本，支持双目图像
+        public virtual TextResult GetRegisterString(Image image,
+            Image irImage,
             string strExcludeBarcodes)
         {
             return new TextResult
@@ -161,7 +189,8 @@ namespace DigitalPlatform.CirculationClient
         }
 
         public virtual RecognitionFaceResult RecongnitionFace(Image image,
-    CancellationToken token)
+            Image irImage,
+            CancellationToken token)
         {
             return new RecognitionFaceResult
             {
