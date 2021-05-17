@@ -1796,8 +1796,17 @@ namespace dp2SSL
                     if (string.IsNullOrEmpty(entity.Title)
                         && string.IsNullOrEmpty(entity.PII) == false && entity.PII != "(空)")
                     {
-                        GetEntityDataResult result = await GetEntityDataAsync(entity.GetOiPii(!loose_oi), "");
-                        if (result.Value == -1 || result.Value == 0)
+                        GetEntityDataResult result = await GetEntityDataAsync(entity.GetOiPii(!loose_oi),
+                            ShelfData.LibraryNetworkCondition == "OK" ? "" : "offline");
+                        // 2021/5/17
+                        if (result.Value == -1 
+                            && result.ErrorCode == "RequestError"
+                            && ShelfData.LibraryNetworkCondition != "OK")
+                        {
+                            entity.SetError("(暂时无法获得书名)");
+                            continue;
+                        }
+                        else if (result.Value == -1 || result.Value == 0)
                         {
                             entity.SetError(result.ErrorInfo);
                             continue;
@@ -2751,6 +2760,7 @@ namespace dp2SSL
                 {
                     // *** 联网情况
                     // 构造 inventory 类型的 action 写入本地历史数据库，状态为已经同步
+                    /*
                     DateTime now = DateTime.Now;
                     List<ActionInfo> actions = new List<ActionInfo>();
                     foreach (var entity in ShelfData.l_All)
@@ -2764,11 +2774,15 @@ namespace dp2SSL
                             CurrentShelfNo = ShelfData.GetShelfNo(entity),
                             Operator = GetOperator(entity, false),
                             OperTime = now,
-                            SyncOperTime = now
+                            SyncOperTime = now  // ?
                         });
                     }
                     DisplayMessage(progress, "正在将盘点动作写入本地数据库", "green");
                     await ShelfData.SaveActionsToDatabaseAsync(actions);
+                */
+                    DisplayMessage(progress, "正在将盘点动作写入本地数据库", "green");
+                    // 2021/5/17
+                    await ShelfData.SaveActionsToDatabaseAsync(all_actions);
                 }
 
                 // 启动重试任务。此任务长期在后台运行
@@ -4600,7 +4614,7 @@ namespace dp2SSL
             return text.ToString();
         }
 
-#region 延迟清除读者信息
+        #region 延迟清除读者信息
 
         DelayAction _delayClearPatronTask = null;
 
@@ -4661,9 +4675,9 @@ namespace dp2SSL
             }
         }
 
-#endregion
+        #endregion
 
-#region 模拟柜门灯亮灭
+        #region 模拟柜门灯亮灭
 
         public void SimulateLamp(bool on)
         {
@@ -4676,9 +4690,9 @@ namespace dp2SSL
             }));
         }
 
-#endregion
+        #endregion
 
-#region 人脸识别功能
+        #region 人脸识别功能
 
         bool _stopVideo = false;
 
@@ -4946,7 +4960,7 @@ namespace dp2SSL
             }
         }
 
-#endregion
+        #endregion
 
         private void ClearPatron_Click(object sender, RoutedEventArgs e)
         {
@@ -5074,7 +5088,7 @@ namespace dp2SSL
 
 #if REMOVED
 
-#region 绑定和解绑读者功能
+        #region 绑定和解绑读者功能
 
 #pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
         private async void bindPatronCard_Click(object sender, RoutedEventArgs e)
@@ -5285,7 +5299,7 @@ uid);
             return new NormalResult { Value = 0 };
         }
 
-#endregion
+        #endregion
 
 #endif
     }

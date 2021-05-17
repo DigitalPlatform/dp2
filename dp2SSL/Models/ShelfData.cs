@@ -5460,7 +5460,8 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                     else
                     {
                         string uii = entity.GetOiPii(true);
-                        result = await GetEntityDataAsync(uii, "");
+                        result = await GetEntityDataAsync(uii, 
+                            ShelfData.LibraryNetworkCondition == "OK" ? "" : "offline");
                         if (result.Value == -1 || result.Value == 0)
                         {
                             // TODO: 条码号没有找到的错误码要单独记下来

@@ -51,8 +51,8 @@ using System.Windows;
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 // 方法是按如下所示使用“*”: :
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.8.23")]    // 1.5.*
-[assembly: AssemblyFileVersion("1.8.23.0")]  // 1.5.0.0
+[assembly: AssemblyVersion("1.8.25")]    // 1.5.*
+[assembly: AssemblyFileVersion("1.8.25.0")]  // 1.5.0.0
 
 // 1.0 2019/2/21 第一个版本
 // 1.1 2019/2/26 可以显示版本号了
@@ -108,3 +108,5 @@ using System.Windows;
 //      1.8.21 (2021/5/13) shelf.xml 中增加 <key name="休眠关闭提交对话框秒数" value="0"/> 参数，可配置书柜借书还书时“提交对话框”休眠多少秒以后自动关闭。另外刷读者卡会自动关闭开着的“提交对话框”
 //      1.8.22 (2021/5/13) 取消 ShelfData.RemoveRetryActionsFromDatabaseAsync()。这样以前积累的尚未同步的动作无论如何后面都会尝试同步
 //      1.8.23 (2021/5/14) 当书柜启动的时候，原先版本在网络良好的情况下会直接向 dp2library 服务器提交 return 和 inventory 动作，如果先前还有断网或者网络不良阶段积累的未同步动作，后面就会造成同步顺序颠倒。新版本在这里，改为无论网络是否良好，都先把请求放入队列，等后台同步线程去处理同步
+//      1.8.24 (2021/5/17) 当书柜启动的时候，原先版本在网络良好的情况下会直接向 dp2library 服务器提交 return 和 inventory 动作，并直接修改本地 action 数据库记录中的 State 和 SyncOperTime 等字段。新版本去掉了这些修改动作，改为无修改地写入本地 action 库
+//      1.8.25 (2021/5/17) 断网模式下，新放入书柜的图书，详细信息不会再出现“通讯失败”的报错，而是会出现“本机没有此册信息”的报错

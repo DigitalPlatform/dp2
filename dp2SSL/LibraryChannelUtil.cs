@@ -43,7 +43,9 @@ namespace dp2SSL
 
         // 获得册记录信息和书目摘要信息
         // parameters:
-        //      style   风格。network 表示只从网络获取册记录；否则优先从本地获取，本地没有再从网络获取册记录。无论如何，书目摘要都是尽量从本地获取
+        //      style   风格。
+        //              network 表示只从网络获取册记录；否则优先从本地获取，本地没有再从网络获取册记录。无论如何，书目摘要都是尽量从本地获取
+        //              offline 表示指从本地获取册记录和书目记录
         // .Value
         //      -1  出错
         //      0   没有找到
@@ -52,6 +54,10 @@ namespace dp2SSL
             string style)
         {
             bool network = StringUtil.IsInList("network", style);
+            
+            // 2021/5/17
+            bool offline = StringUtil.IsInList("offline", style);
+            
             bool skip_biblio = StringUtil.IsInList("skip_biblio", style);
 
             try
@@ -106,7 +112,7 @@ namespace dp2SSL
                                 ItemRecPath = entity_record.RecPath,
                                 Title = "",
                             };
-                        else
+                        else if (offline == false)  //
                         {
                             // 再尝试从 dp2library 服务器获取
                             // TODO: ItemXml 和 BiblioSummary 可以考虑在本地缓存一段时间
@@ -219,7 +225,7 @@ namespace dp2SSL
 
                                 result.Title = item.BiblioSummary;
                             }
-                            else
+                            else if (offline == false)
                             {
                                 // 从 dp2library 服务器获取书目摘要
                                 int nRedoCount = 0;
@@ -322,6 +328,16 @@ namespace dp2SSL
                         // 完全成功
                         if (result != null && errors.Count == 0)
                             return result;
+
+                        // 2021/5/17
+                        if (errors.Count == 0)
+                            errors.Add(new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = offline ? "本机没有此册信息" : "册信息没有找到",
+                                ErrorCode = "NotFound"
+                            });
+
                         if (result == null)
                             return new GetEntityDataResult
                             {

@@ -772,17 +772,17 @@ TaskScheduler.Default);
         // 对 Actions 按照 PII 进行分组
         static List<List<ActionInfo>> GroupActions(List<ActionInfo> actions)
         {
-            // 按照 PII 分装
-            // PII --> List<ActionInfo>
+            // 按照 UII 分装
+            // UII --> List<ActionInfo>
             Hashtable table = new Hashtable();
             foreach (var action in actions)
             {
-                string pii = GetPiiString(action.Entity);
-                List<ActionInfo> list = table[pii] as List<ActionInfo>;
+                string uii = GetUiiString(action.Entity);
+                List<ActionInfo> list = table[uii] as List<ActionInfo>;
                 if (list == null)
                 {
                     list = new List<ActionInfo>();
-                    table[pii] = list;
+                    table[uii] = list;
                 }
                 list.Add(action);
             }
@@ -850,5 +850,33 @@ TaskScheduler.Default);
                 return $"UID:{entity.UID}";
             return entity.PII;
         }
+
+        // 2021/5/17
+        // 获得 UII 字符串。如果 PII 为空，会改取 UID 返回
+        public static string GetUiiString(Entity entity)
+        {
+            if (string.IsNullOrEmpty(entity.PII))
+                return $"UID:{entity.UID}";
+            return entity.GetOiPii();
+        }
+
+        // 2021/5/17
+        // 把指定 UII 图书有关的为 dontsync 或者出错状态的全部动作状态修改为“需要同步”
+        internal static async Task ResyncActionAsync(string uii)
+        {
+            using (var releaser = await _databaseLimit.EnterAsync())
+            {
+                using (var context = new RequestContext())
+                {
+                    var items = context.Requests.Where(o => o.PII == uii && o.State != "sync").ToList();
+                    foreach (var item in items)
+                    {
+                        item.State = null;
+                    }
+                    await context.SaveChangesAsync();
+                }
+            }
+        }
+
     }
 }
