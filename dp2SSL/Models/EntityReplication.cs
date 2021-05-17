@@ -548,6 +548,15 @@ PatronReplication.ProcessInfo info)
                     }
                     */
 
+                    // 2021/5/17
+                    // 把指定 UII 图书有关的、指定时间以后的全部动作状态修改为“需要同步”
+                    if (strAction == "new")
+                    {
+                        string uii = GetUii(strRecord);
+                        if (string.IsNullOrEmpty(uii) == false)
+                            await ShelfData.ResyncActionAsync(uii, operTime);
+                    }
+
                     return await UpdateLocalEntityRecordAsync(
             strNewRecPath,
             strRecord);
@@ -591,6 +600,35 @@ strOldRecord);
                     ErrorInfo = $"TraceSetEntity() 出现异常: {ex.Message}"
                 };
             }
+        }
+
+        // 获得册记录的 UII
+        static string GetUii(string strRecord)
+        {
+            XmlDocument itemdom = new XmlDocument();
+            try
+            {
+                itemdom.LoadXml(strRecord);
+            }
+            catch
+            {
+                return null;
+            }
+
+            string barcode = DomUtil.GetElementText(itemdom.DocumentElement, "barcode");
+            if (string.IsNullOrEmpty(barcode))
+                return null;
+
+            string location = DomUtil.GetElementText(itemdom.DocumentElement, "location");
+
+            location = StringUtil.GetPureLocation(location);
+
+            string libraryCode = dp2StringUtil.GetLibraryCode(location);
+
+            string oi = InventoryData.GetInstitution(location);
+            if (string.IsNullOrEmpty(oi))
+                return barcode;
+            return oi + "." + barcode;
         }
 
         static async Task<NormalResult> UpdateLocalEntityRecordAsync(

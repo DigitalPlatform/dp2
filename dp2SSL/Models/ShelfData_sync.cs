@@ -861,14 +861,15 @@ TaskScheduler.Default);
         }
 
         // 2021/5/17
-        // 把指定 UII 图书有关的为 dontsync 或者出错状态的全部动作状态修改为“需要同步”
-        internal static async Task ResyncActionAsync(string uii)
+        // 把指定 UII 图书有关的、指定时间以后的全部动作状态修改为“需要同步”
+        public static async Task ResyncActionAsync(string uii,
+            DateTime createTime)
         {
             using (var releaser = await _databaseLimit.EnterAsync())
             {
                 using (var context = new RequestContext())
                 {
-                    var items = context.Requests.Where(o => o.PII == uii && o.State != "sync").ToList();
+                    var items = context.Requests.Where(o => o.PII == uii && o.OperTime >= createTime).ToList();
                     foreach (var item in items)
                     {
                         item.State = null;
