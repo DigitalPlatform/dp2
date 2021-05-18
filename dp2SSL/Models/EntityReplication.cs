@@ -17,6 +17,7 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
+using DigitalPlatform.WPF;
 
 namespace dp2SSL.Models
 {
@@ -553,6 +554,9 @@ PatronReplication.ProcessInfo info)
                     if (strAction == "new")
                     {
                         string uii = GetUii(strRecord);
+
+                        WpfClientInfo.WriteInfoLog($"从服务器操作日志中发现 new 册记录的动作。\r\noperTime={operTime},strRecord={strRecord}。\r\n提取 UII='{uii}'\r\n\r\n");
+                        
                         if (string.IsNullOrEmpty(uii) == false)
                             await ShelfData.ResyncActionAsync(uii, operTime);
                     }

@@ -872,6 +872,7 @@ TaskScheduler.Default);
                     var items = context.Requests.Where(o => o.PII == uii && o.OperTime >= createTime).ToList();
                     foreach (var item in items)
                     {
+                        WpfClientInfo.WriteInfoLog($"ResyncActionAsync() 修改动作事项(修改前状态): {item.ToString()}\r\n\r\n");
                         item.State = null;
                     }
                     await context.SaveChangesAsync();

@@ -535,7 +535,7 @@ string color = "red")
             }
         }
 
-        const string dp2library_base_version = "3.37";
+        const string dp2library_base_version = "3.52";
         const string fingerprintcenter_base_version = "2.1";
         const string rfidcenter_base_version = "1.11";
         const string facecenter_base_version = "1.3";
@@ -599,6 +599,7 @@ string color = "red")
                     goto SKIP1;
                 }
 
+                // TODO: 这里要分别按照指纹和掌纹中心的不同最低版本来进行比较
                 if (StringUtil.CompareVersion(version_result.Version, fingerprintcenter_base_version) < 0)
                 {
                     // 版本太低，无法进行 UID 检查

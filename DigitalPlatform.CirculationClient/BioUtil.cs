@@ -99,6 +99,11 @@ namespace DigitalPlatform.CirculationClient
 
             // [out] 返回处理概述信息
             public ProcessInfo ProcessInfo { get; set; }
+
+            public override string ToString()
+            {
+                return $"LastDate={LastDate}, LastIndex={LastIndex}, ProcessInfo={ProcessInfo?.ToString()}";
+            }
         }
 
         public virtual int AddItems(
@@ -166,7 +171,7 @@ namespace DigitalPlatform.CirculationClient
             return new TextResult
             {
                 Value = -1,
-                ErrorInfo = "尚未重载 GetRegisterString() 函数"
+                ErrorInfo = "尚未重载 GetRegisterString(Image, string) 函数"
             };
         }
 
@@ -179,7 +184,7 @@ namespace DigitalPlatform.CirculationClient
             return new TextResult
             {
                 Value = -1,
-                ErrorInfo = "尚未重载 GetRegisterString() 函数"
+                ErrorInfo = "尚未重载 GetRegisterString(Image, Image, string) 函数"
             };
         }
 
@@ -1564,6 +1569,11 @@ out string strError);
         public int DeleteCount { get; set; }
         // 修改数量
         public int ChangeCount { get; set; }
+
+        public override string ToString()
+        {
+            return $"NewCount={NewCount},DeleteCount={DeleteCount},ChangeCount={ChangeCount}";
+        }
 
         /*
         public static ProcessInfo operator+(ProcessInfo info1, ProcessInfo info2)

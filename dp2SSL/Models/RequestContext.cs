@@ -54,6 +54,12 @@ namespace dp2SSL
         // 2020/4/27
         // 借阅信息
         public string ActionString { get; set; }
+
+        // 2021/5/18
+        public override string ToString()
+        {
+            return $"ID={ID},PII={PII},Action={Action},OperTime={OperTime},State={State},OperatorID={OperatorID},LinkID={LinkID},SyncOperTime={SyncOperTime},SyncErrorInfo={SyncErrorInfo},SyncErrorCode={SyncErrorCode},SyncCount={SyncCount},OperatorString={OperatorString},EntityString={EntityString},TransferDirection={TransferDirection},Location={Location},CurrentShelfNo={CurrentShelfNo},BatchNo={BatchNo},ActionString={ActionString}";
+        }
     }
 
 #if NO
