@@ -3333,9 +3333,12 @@ namespace dp2Library
                                 if (sessioninfo.Account == null
                                     || StringUtil.IsEqualOrSubPath(sessioninfo.Account.ReaderDomPath, record.Path) == false)
                                 {
+                                    ClearRecord(record, "不具备 getreaderinfo 权限");
+                                    /*
                                     record.Path = "";
                                     record.Cols = null;
                                     record.RecordBody = null;
+                                    */
                                 }
                             }
                         }
@@ -3364,9 +3367,12 @@ namespace dp2Library
 
                             if (bChangeable == false)
                             {
+                                ClearRecord(record, "不具备 getreaderinfo 权限");
+                                /*
                                 record.Path = "";
                                 record.Cols = null;
                                 record.RecordBody = null;
+                                */
                             }
                         }
                     }
@@ -3386,6 +3392,24 @@ namespace dp2Library
                 result.ErrorInfo = strErrorText;
                 return result;
             }
+        }
+
+        static void ClearRecord(Record record,
+            string errorInfo)
+        {
+            // record.Path = "";    // 2021.5.19 考虑不滤除 Path
+            record.Cols = null;
+            record.RecordBody = new RecordBody {
+                Path = null,
+                Xml = null,
+                Timestamp = null,
+                Metadata = null,
+                Result = new Result { 
+                    Value = -1,
+                    ErrorString = errorInfo,
+                    ErrorCode = ErrorCodeValue.AccessDenied
+                }
+            };
         }
 
         // 给册记录 XML 加上 OI 元素

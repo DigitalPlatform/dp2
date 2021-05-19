@@ -844,6 +844,7 @@ namespace DigitalPlatform.CirculationClient
         public NormalResult InitFingerprintCache(
             LibraryChannel channel,
             string strDir,
+            string style,
             CancellationToken token)
         {
             string strError = "";
@@ -907,6 +908,7 @@ namespace DigitalPlatform.CirculationClient
                         channel,
                         strDir,
                         strReaderDbName,
+                        style,
                         token,
                         out strError);
                     if (nRet == -1)
@@ -1120,11 +1122,14 @@ out string strFingerprint);
             LibraryChannel channel,
             string strDir,
             string strReaderDbName,
+            string style,
             CancellationToken token,
             out string strError)
         {
             strError = "";
             int nRet = 0;
+
+            bool force_update = StringUtil.IsInList("force_update", style);
 
             DpResultSet resultset = null;
             bool bCreate = false;
@@ -1361,8 +1366,10 @@ out strError);
                     }
 
                     // 时间戳发生变化，需要更新事项
-                    if (strNewTimestamp != strOldTimestamp
+                    if (force_update
+                        || (strNewTimestamp != strOldTimestamp
                         || strNewBarcode != strOldBarcode)
+                        )
                     {
                         // 如果证条码号为空，无法建立对照关系，要跳过
                         if (string.IsNullOrEmpty(strNewBarcode) == false)
@@ -1449,6 +1456,9 @@ out strError);
 
                 if (record.Cols == null || record.Cols.Length < 3)
                 {
+                    if (record.RecordBody?.Result?.ErrorCode == ErrorCodeValue.AccessDenied)
+                        throw new Exception($"获取读者记录时权限不足: {record.RecordBody?.Result?.ErrorString}");
+
                     continue;
                     /*
                     string strError = $"record.Cols error ... 有可能是因为读者库缺乏配置文件 cfgs/browse_{this.BrowseStyle}";

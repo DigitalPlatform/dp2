@@ -1073,6 +1073,7 @@ out strError);
                 //      >=0   成功。返回实际初始化的事项
                 var result = FingerPrint.InitFingerprintCache(channel,
                     strDir,
+                    "",
                     _cancel.Token);
                 if (result.Value == -1)
                     return result;

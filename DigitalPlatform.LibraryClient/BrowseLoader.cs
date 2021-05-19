@@ -113,9 +113,19 @@ namespace DigitalPlatform.LibraryClient
                     for (int i = 0; i < searchresults.Length; i++)
                     {
                         DigitalPlatform.LibraryClient.localhost.Record record = searchresults[i];
+                        
+                        /*
+                        // 2021/5/19
+                        if (record.RecordBody != null && record.RecordBody.Result != null
+                            && record.RecordBody.Result.ErrorCode == localhost.ErrorCodeValue.AccessDenied)
+                        {
+                            throw new Exception("(2)下标 " + i + " 的 batch 元素 '" + batch[i] + "' 访问被拒绝: " + record.RecordBody.Result.ErrorString);
+                        }
+                        */
+
                         if (batch[i] != record.Path)
                         {
-                            throw new Exception("下标 " + i + " 的 batch 元素 '" + batch[i] + "' 和返回的该下标位置 GetBrowseRecords() 结果路径 '" + record.Path + "' 不匹配");
+                            throw new Exception("(2)下标 " + i + " 的 batch 元素 '" + batch[i] + "' 和返回的该下标位置 GetBrowseRecords() 结果路径 '" + record.Path + "' 不匹配。有可能是账户权限不足");
                         }
                         Debug.Assert(batch[i] == record.Path, "");
                         yield return record;

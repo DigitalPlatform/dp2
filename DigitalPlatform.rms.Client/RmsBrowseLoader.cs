@@ -77,7 +77,7 @@ namespace DigitalPlatform.rms.Client
                         Record record = searchresults[i];
                         if (batch[i] != record.Path)
                         {
-                            throw new Exception("下标 " + i + " 的 batch 元素 '" + batch[i] + "' 和返回的该下标位置 GetBrowseRecords() 结果路径 '" + record.Path + "' 不匹配");
+                            throw new Exception("(1)下标 " + i + " 的 batch 元素 '" + batch[i] + "' 和返回的该下标位置 GetBrowseRecords() 结果路径 '" + record.Path + "' 不匹配");
                         }
                         Debug.Assert(batch[i] == record.Path, "");
                         yield return record;

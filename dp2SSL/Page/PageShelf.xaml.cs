@@ -3176,9 +3176,6 @@ namespace dp2SSL
                     }
                 }
                 SetGlobalError("patron", "");
-
-                // 2021/5/12
-                CloseProgressWindow();
             }
             catch (Exception ex)
             {
@@ -4793,6 +4790,9 @@ namespace dp2SSL
 
             App.CurrentApp.Speak($"欢迎您，{(string.IsNullOrEmpty(_patron.PatronName) ? _patron.Barcode : _patron.PatronName)}");
             BeginDelayClearTask();
+
+            // 2021/5/12
+            CloseProgressWindow();
 
             // TODO: 对同一个读者只需要提醒一次，不用反复提醒
             if (ShelfData.HasNotified(_patron.GetOiPii()) == false)
