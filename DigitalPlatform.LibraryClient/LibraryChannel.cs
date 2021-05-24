@@ -638,7 +638,7 @@ out strError);
                             factory.Endpoint.Behaviors.Add(behavior);
                         }
 
-
+                        // var client = factory.CreateChannel();
 #if BASIC_HTTP
                         this.m_ws = factory.CreateChannel();
                         // this.m_ws = new localhost.dp2libraryRESTClient(CreateRestBinding(), address);

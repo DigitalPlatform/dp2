@@ -56,7 +56,7 @@ namespace dp2SSL
         public static event CharFeedEventHandler CharFeed = null;
 
         // 主要的通道池，用于当前服务器
-        public LibraryChannelPool _channelPool = new LibraryChannelPool();
+        internal static LibraryChannelPool _channelPool = new LibraryChannelPool();
 
         // 控制 App 的终止信号
         static CancellationTokenSource _cancelApp = new CancellationTokenSource();
@@ -187,8 +187,8 @@ namespace dp2SSL
             }
             base.OnStartup(e);
 
-            this._channelPool.BeforeLogin += new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
-            this._channelPool.AfterLogin += new AfterLoginEventHandle(Channel_AfterLogin);
+            _channelPool.BeforeLogin += new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
+            _channelPool.AfterLogin += new AfterLoginEventHandle(Channel_AfterLogin);
 
             // InitialFingerPrint();
 
@@ -1004,9 +1004,9 @@ namespace dp2SSL
 
             // EndFingerprint();
 
-            this._channelPool.BeforeLogin -= new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
-            this._channelPool.AfterLogin -= new AfterLoginEventHandle(Channel_AfterLogin);
-            this._channelPool.Close();
+            _channelPool.BeforeLogin -= new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
+            _channelPool.AfterLogin -= new AfterLoginEventHandle(Channel_AfterLogin);
+            _channelPool.Close();
 
             // 最后关灯
             RfidManager.TurnShelfLamp("*", "turnOff");
@@ -1030,7 +1030,7 @@ namespace dp2SSL
 
         public void ClearChannelPool()
         {
-            this._channelPool.Clear();
+            _channelPool.Clear();
         }
 
         #region dp2library 服务器有关
@@ -1497,8 +1497,10 @@ namespace dp2SSL
             }
         }
 
+        // 运行时临时存储的工作人员账户信息
         Dictionary<string, Account> _accounts = new Dictionary<string, Account>();
 
+        // 查找一个临时存储的工作人员账户信息
         public Account FindAccount(string userName)
         {
             if (_accounts.ContainsKey(userName) == false)
@@ -1506,6 +1508,7 @@ namespace dp2SSL
             return _accounts[userName];
         }
 
+        // 临时存储一个工作人员账户信息
         public void SetAccount(string userName, string password, string libraryCode)
         {
             Account account = null;
@@ -1526,6 +1529,7 @@ namespace dp2SSL
             }
         }
 
+        // 删除一个临时存储的工作人员账户信息
         public void RemoveAccount(string userName)
         {
             if (_accounts.ContainsKey(userName))
@@ -1650,18 +1654,27 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             if (string.IsNullOrEmpty(strUserName))
                 strUserName = dp2UserName;
 
-            LibraryChannel channel = this._channelPool.GetChannel(strServerUrl, strUserName);
+            // 2021/5/24
+            // 控制通道数量规模
+            if (_channelPool.Count > 10)
+                _channelPool.CleanChannel();
+
+            LibraryChannel channel = _channelPool.GetChannel(strServerUrl, strUserName);
             lock (_syncRoot_channelList)
             {
                 _channelList.Add(channel);
             }
-            // TODO: 检查数组是否溢出
+
+            // 检查数组是否溢出
+            if (_channelList.Count > 100)
+                throw new Exception($"_channelList.Count={_channelList.Count} 超过极限 100 个");
+
             return channel;
         }
 
         public void ReturnChannel(LibraryChannel channel)
         {
-            this._channelPool.ReturnChannel(channel);
+            _channelPool.ReturnChannel(channel);
             lock (_syncRoot_channelList)
             {
                 _channelList.Remove(channel);

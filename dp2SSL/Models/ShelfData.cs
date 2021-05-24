@@ -5793,6 +5793,12 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
 
                     string strUserName = info.Operator?.GetWorkerAccountName();
 
+                    /*
+                    // testing
+                    if (info.Action == "transfer")
+                        strUserName = "supervisor1";
+                    */
+
                     // 包含 OI 的 PII
                     string pii = entity.GetOiPii(true);
                     /*
@@ -5806,11 +5812,14 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                     int nRedoCount = 0;
                 REDO:
                     entity.Waiting = true;
+                    //WpfClientInfo.WriteInfoLog($"SubmitCheckInOutAysnc() 中 strUserName='{strUserName}'");
                     LibraryChannel channel = App.CurrentApp.GetChannel(strUserName);
                     TimeSpan old_timeout = channel.Timeout;
                     channel.Timeout = TimeSpan.FromSeconds(10);
                     try
                     {
+                        //WpfClientInfo.WriteInfoLog($"SubmitCheckInOutAysnc() 中 GetChannel(strUserName) 得到的 channel.UserName='{channel.UserName}'");
+
                         string strStyle = "item";   //  "item,reader";
                         if (entity.Title == null)
                             strStyle += ",biblio";
@@ -5930,11 +5939,23 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                     }
                     finally
                     {
+                        //WpfClientInfo.WriteInfoLog($"SubmitCheckInOutAysnc() 中 ReturnChannel 前一刻的 channel.UserName='{channel.UserName}'");
+
+                        // 2021/5/24
+                        // 如果经过使用以后，UserName 和 GetChannel() 时不一样了，则立即清理闲置通道，避免发生通道溢出
+                        bool need_clean = false;
+                        if (channel.UserName != strUserName)
+                            need_clean = true;
+
                         channel.Timeout = old_timeout;
                         App.CurrentApp.ReturnChannel(channel);
                         entity.Waiting = false;
-                    }
 
+                        //WpfClientInfo.WriteInfoLog($"SubmitCheckInOutAysnc() 中 ReturnChannel 后一刻的 channel.UserName='{channel.UserName}'，App._channelPool.Count={App._channelPool.Count}");
+
+                        if (need_clean)
+                            App._channelPool.CleanChannel();
+                    }
 
                     // 2020/3/7
                     if ((error_code == ErrorCode.RequestError
