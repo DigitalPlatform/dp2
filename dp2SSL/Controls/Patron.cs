@@ -281,6 +281,13 @@ namespace dp2SSL
         //      strict  是否为严格方式。严格方式下，如果 OI 和 AOI 为空，会返回 ".xxxx" 形态
         public string GetOiPii(bool strict = false)
         {
+            // 2021/5/25
+            // 处理特殊 PII
+            if (this.PII != null 
+                && (this.PII.StartsWith("PQR:")
+                || this.PII.Contains("@")))
+                return this.PII;
+
             if (strict == true)
             {
                 // 2021/4/2

@@ -2301,6 +2301,12 @@ out string strError);
 
                 return; // new NormalResult { Value = success_count };
             }
+            catch(Exception ex)
+            {
+                WpfClientInfo.WriteErrorLog($"LoanAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                DisplayError(ref progress, $"LoanAsync() 出现异常: {ex.Message}");
+                return;
+            }
             finally
             {
                 if (App.Protocol == "dp2library")

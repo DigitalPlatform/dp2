@@ -20,7 +20,7 @@
     <TargetFrameworkProfile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
-    <PublishUrl>c:\publish\dp2SSL\v1_dev\</PublishUrl>
+    <PublishUrl>c:\publish\dp2SSL\v1\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Web</InstallFrom>
     <UpdateEnabled>true</UpdateEnabled>
@@ -30,14 +30,14 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <InstallUrl>http://dp2003.com/dp2ssl/v1_dev/</InstallUrl>
-    <UpdateUrl>http://dp2003.com/dp2ssl/v1_dev/</UpdateUrl>
+    <InstallUrl>http://dp2003.com/dp2ssl/v1/</InstallUrl>
+    <UpdateUrl>http://dp2003.com/dp2ssl/v1/</UpdateUrl>
     <ProductName>dp2SSL-自助借还</ProductName>
     <PublisherName>DigitalPlatform</PublisherName>
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>170</ApplicationRevision>
+    <ApplicationRevision>173</ApplicationRevision>
     <ApplicationVersion>1.5.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
