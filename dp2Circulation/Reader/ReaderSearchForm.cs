@@ -3753,6 +3753,7 @@ MessageBoxDefaultButton.Button1);
             string strError = "";
             int nRet = 0;
 
+            /*
             // 询问文件名
             SaveFileDialog dlg = new SaveFileDialog();
 
@@ -3770,6 +3771,41 @@ MessageBoxDefaultButton.Button1);
                 return;
                 //strError = "放弃操作";
                 //return 0;
+            }
+            */
+            var dlg = new OpenPatronXmlFileDialog();
+            MainForm.SetControlFont(dlg, this.Font);
+            dlg.CreateMode = true;
+
+            dlg.UiState = Program.MainForm.AppInfo.GetString(
+        "ReaderSearchForm",
+        "OpenPatronXmlFileDialog_uiState",
+        "");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "readersearchform_OpenPatronXmlFileDialog");
+            dlg.ShowDialog(this);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
+
+            Program.MainForm.AppInfo.SetString(
+        "ReaderSearchForm",
+        "OpenPatronXmlFileDialog_uiState",
+        dlg.UiState);
+            if (dlg.DialogResult != System.Windows.Forms.DialogResult.OK)
+                return;
+
+            // 观察对象目录中是否已经存在文件
+            if (dlg.IncludeObjectFile)
+            {
+                if (BiblioSearchForm.ExistFiles(dlg.ObjectDirectoryName) == true)
+                {
+                    DialogResult result = MessageBox.Show(this,
+        "您选定的对象文件夹 " + dlg.ObjectDirectoryName + " 内已经存在一些文件。若用它来保存对象文件，则新旧文件会混杂在一起。\r\n\r\n要继续处理么? (是：继续; 否: 放弃处理)",
+        "ReaderSearchForm",
+        MessageBoxButtons.YesNo,
+        MessageBoxIcon.Question,
+        MessageBoxDefaultButton.Button2);
+                    if (result == System.Windows.Forms.DialogResult.No)
+                        return;
+                }
             }
 
             string strOutputFileName = dlg.FileName;
@@ -3810,6 +3846,42 @@ MessageBoxDefaultButton.Button1);
 
                         dom.DocumentElement.WriteTo(writer);
 
+                        // 导出对象文件
+                        if (dlg.IncludeObjectFile)
+                        {
+                            List<string> extensionStyles = new List<string>(); ;
+                            if (dlg.MimeFileExtension)
+                                extensionStyles.Add("mimeFileExtension");
+                            if (dlg.UsageFileExtension)
+                                extensionStyles.Add("usageFileExtension");
+
+                        REDO_WRITEOBJECTS:
+                            // 将记录中的对象资源写入外部文件
+                            nRet = BiblioSearchForm.WriteObjectFiles(stop,
+                    channel,
+                    strRecPath,
+                    ref dom,
+                    dlg.ObjectDirectoryName,
+                    StringUtil.MakePathList(extensionStyles),
+                    out strError);
+                            if (nRet == -1)
+                            {
+                                if (stop != null && stop.State != 0)
+                                    return false;
+
+                                DialogResult temp_result = MessageBox.Show(this,
+                strError + "\r\n\r\n是否重试?\r\n\r\n(Yes: 重试; No: 放弃导出本记录的对象，但继续后面的处理; Cancel: 放弃全部处理)",
+                "BiblioSearchForm",
+                MessageBoxButtons.YesNoCancel,
+                MessageBoxIcon.Question,
+                MessageBoxDefaultButton.Button1);
+                                if (temp_result == System.Windows.Forms.DialogResult.Yes)
+                                    goto REDO_WRITEOBJECTS;
+                                if (temp_result == DialogResult.Cancel)
+                                    return false;
+                            }
+                        }
+
                         count++;
                         return true;
                     },
@@ -3819,7 +3891,6 @@ MessageBoxDefaultButton.Button1);
 
                     writer.WriteEndElement();
                     writer.WriteEndDocument();
-
                 }
             }
             catch (Exception ex)

@@ -33,8 +33,8 @@ using System.Runtime.InteropServices;
 //通过使用 "*"，如下所示:
 // [assembly: AssemblyVersion("1.0.*")]
 // [assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyVersion("0.0.15")]
-[assembly: AssemblyFileVersion("0.0.15.0")]
+[assembly: AssemblyVersion("0.0.16")]
+[assembly: AssemblyFileVersion("0.0.16.0")]
 
 // 0.0.1 (2021/4/22) 首个发布版本
 // 0.0.2 (2021/4/22)
@@ -78,3 +78,4 @@ using System.Runtime.InteropServices;
 //                      2) 开始盘点对话框增加“总是写入操作日志”checkbox。用途是在册记录没有实质性修改的情况下也要写入 transfer 动作日志
 // 0.0.15 (2021/5/10)
 //                      1) 排除了盘点过程中遇到空白标签出现异常的 bug
+// 0.0.16 (2021/6/2)    优化盘点时每轮中间的语音提示，增加了“滤除 xxx 项”的提示

@@ -8872,7 +8872,7 @@ message,
             }
         }
 
-        static bool ExistFiles(string strDirectoryName)
+        public static bool ExistFiles(string strDirectoryName)
         {
             if (Directory.Exists(strDirectoryName) == false)
                 return false;
@@ -9073,6 +9073,7 @@ message,
                 info.RecPath,
                 ref biblio_dom,
                 dlg.ObjectDirectoryName,
+                "", // dlg.MimeFileExtension ? "mimeFileExtension" : "",
                 out strError);
                         if (nRet == -1)
                         {
@@ -9230,17 +9231,26 @@ message,
         }
 
         // 将 XML 记录中的对象资源写入外部文件
+        // parameters:
+        //      style   风格。
+        //              mimeFileExtension   对象文件扩展名根据 MIME 类型决定
+        //              usageFileExtension  对象文件扩展名根据 usage 决定
         public static int WriteObjectFiles(Stop stop,
             LibraryChannel channel,
             string strRecPath,
             ref XmlDocument dom,
             string strOutputDir,
+            string style,
             out string strError)
         {
             strError = "";
 
+            bool mimeFileExtension = StringUtil.IsInList("mimeFileExtension", style);
+            bool usageFileExtension = StringUtil.IsInList("usageFileExtension", style);
+
             List<string> recpaths = new List<string>();
             List<string> errors = new List<string>();
+            Hashtable usage_table = new Hashtable();    // recpath --> usage
 
             XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
             nsmgr.AddNamespace("dprms", DpNs.dprms);
@@ -9256,6 +9266,8 @@ message,
                 string strResPath = strRecPath + "/object/" + strID;
                 strResPath = strResPath.Replace(":", "/");
                 recpaths.Add(strResPath);
+
+                usage_table[strResPath] = strUsage;
             }
 
             if (recpaths.Count == 0)
@@ -9306,7 +9318,33 @@ message,
                     if (File.Exists(strMetadataFileName))
                         strMetadataFileName = Path.Combine(strOutputDir, strName + "_" + strGUID + ".met");
 
-                    string strObjectFileName = Path.Combine(strOutputDir, strName + ".bin");
+                    string ext = ".bin";
+                    // 2021/6/4
+                    // 根据 MIME 得到文件扩展名
+                    if (mimeFileExtension || usageFileExtension)
+                    {
+                        var values = StringUtil.ParseMetaDataXml(strMetadataXml,
+    out strError);
+                        if (values != null)
+                        {
+                            if (mimeFileExtension)
+                            {
+                                string mime = (string)values["mimetype"];
+                                ext = PathUtil.GetExtensionByMime(mime);
+                                if (string.IsNullOrEmpty(ext))
+                                    ext = ".bin";
+                            }
+
+                            if (usageFileExtension)
+                            {
+                                string usage = (string)usage_table[record.Path];
+                                if (string.IsNullOrEmpty(usage) == false)
+                                    ext = "." + usage + ext;
+                            }
+                        }
+                    }
+
+                    string strObjectFileName = Path.Combine(strOutputDir, strName + ext);
                     if (File.Exists(strObjectFileName))
                         strObjectFileName = Path.Combine(strOutputDir, strName + "_" + strGUID + ".bin");
 
@@ -9482,6 +9520,7 @@ message,
             info.OldRecPath,
             ref item_dom,
             dlg.ObjectDirectoryName,
+            "", // dlg.MimeFileExtension ? "mimeFileExtension" : "",
             out strError);
                     if (nRet == -1)
                     {

@@ -13,6 +13,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using ClosedXML.Excel;
+using Newtonsoft.Json;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
@@ -27,7 +28,6 @@ using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryServer;
-using Newtonsoft.Json;
 
 
 // 2013/3/16 添加 XML 注释
@@ -1119,6 +1119,7 @@ bClearList);
                     bOutputKeyCount,
                     bOutputKeyID,
                     bQuickLoad,
+                    out long lSkipCount,
                     out strError);
                 if (nRet == 0)
                     return 0;
@@ -1126,7 +1127,7 @@ bClearList);
                     this.ShowMessage("填充浏览列时出错: " + strError, "red", true);
 
                 // this.label_message.Text = "检索共命中 " + lHitCount.ToString() + " 条，已全部装入";
-                this.LabelMessageText = "检索共命中 " + lHitCount.ToString() + " 条，已全部装入";
+                this.LabelMessageText = $"检索共命中 {lHitCount} 条(跳过 {lSkipCount} 条)，已全部装入";
             }
             finally
             {
@@ -1244,6 +1245,8 @@ bClearList);
 
         #endregion
 
+        // parameters:
+        //          lSkipCount  跳过的总条数
         // return:
         //      -1  出错
         //      0   用户中断或者未命中
@@ -1256,9 +1259,11 @@ bClearList);
             bool bOutputKeyCount,
             bool bOutputKeyID,
             bool bQuickLoad,
+            out long lSkipCount,
             out string strError)
         {
             strError = "";
+            lSkipCount = 0;
 
             bool bAccessBiblioSummaryDenied = false;
 
@@ -1398,7 +1403,8 @@ bClearList);
                         bOutputKeyID = bOutputKeyID,
                         bAccessBiblioSummaryDenied = bAccessBiblioSummaryDenied,
                         bTempQuickLoad = bTempQuickLoad,
-                        bPushFillingBrowse = bPushFillingBrowse
+                        bPushFillingBrowse = bPushFillingBrowse,
+                        bFilterLibraryCode = this.FilterLibraryCode,
                     };
 
                     // return:
@@ -1411,6 +1417,7 @@ bClearList);
                         {
                             stop.SetProgressValue(lStart + index);
                         },
+                        ref lSkipCount,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
@@ -1613,7 +1620,7 @@ bClearList);
                     lStart += searchresults.Length;
                     lCount -= searchresults.Length;
 
-                    stop.SetMessage("共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条");
+                    stop.SetMessage($"共命中 { lHitCount} 条，已处理 { lStart } 条，跳过 {lSkipCount} 条");
 
                     if (lStart >= lHitCount || lCount <= 0)
                         break;
@@ -1643,6 +1650,9 @@ bClearList);
             public bool bAccessBiblioSummaryDenied { get; set; }
             public bool bTempQuickLoad { get; set; }
             public bool bPushFillingBrowse { get; set; }
+
+            // 2021/5/27
+            public bool bFilterLibraryCode { get; set; }
         }
 
         delegate void Delegate_setProgress(int i);
@@ -1654,6 +1664,7 @@ bClearList);
         int FillLines(DigitalPlatform.LibraryClient.localhost.Record[] records,
             FillLineParameter param,
             Delegate_setProgress func_setProgress,
+            ref long skip_count,
             out string strError)
         {
             strError = "";
@@ -1667,12 +1678,19 @@ bClearList);
             {
                 List<ListViewItem> items = new List<ListViewItem>();
                 int i = 0;
+                long temp = skip_count;
                 // TODO: 如何让击键或者鼠标动作能得到立即反馈？
                 this.Invoke((Action)(() =>
                 {
                     foreach (var searchresult in records)
                     {
                         ListViewItem item = FillOneLine(searchresult, param);
+                        // 过滤馆藏地
+                        if (item == null)
+                        {
+                            temp++;
+                            continue;
+                        }
 
                         param.query.Items.Add(item);
                         items.Add(item);
@@ -1680,6 +1698,7 @@ bClearList);
                         func_setProgress?.Invoke(i++);
                     }
                 }));
+                skip_count = temp;
 
                 if (param.bOutputKeyCount == false
                     && param.bAccessBiblioSummaryDenied == false
@@ -1716,6 +1735,7 @@ bClearList);
             }
             catch (Exception ex)
             {
+                MainForm.WriteErrorLog($"FillLines() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 strError = ex.Message;
                 return -1;
             }
@@ -1745,6 +1765,7 @@ bClearList);
             return _biblioColumns;
         }
 
+        // 可能会抛出异常
         ListViewItem FillOneLine(DigitalPlatform.LibraryClient.localhost.Record searchresult,
             FillLineParameter param)
         {
@@ -1759,6 +1780,41 @@ bClearList);
                 error_string = searchresult.RecordBody.Result.ErrorString;
 
                 Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode("册记录 '" + searchresult.Path + "' 装入浏览信息时出错: " + error_string) + "</div>");
+            }
+
+            var libraryCodeList = Program.MainForm._currentLibraryCodeList;
+
+            // 过滤馆藏地
+            if (param.bFilterLibraryCode
+                && param.bOutputKeyCount == false
+                && string.IsNullOrEmpty(libraryCodeList) == false)
+            {
+                // return:
+                //      -2  没有找到列 type
+                //      -1  出错
+                //      >=0 列号
+                int nRet = GetColumnText(searchresult,
+"location",
+out string location,
+out string strError);
+                if (nRet < 0)
+                {
+                    string error = "册记录 '" + searchresult.Path + "' 装入浏览信息时出错: " + strError;
+                    Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(error) + "</div>");
+                    throw new Exception(error);
+                }
+                else
+                {
+                    location = StringUtil.GetPureLocationString(location);
+                    var code = dp2StringUtil.GetLibraryCode(location);
+                    if (string.IsNullOrEmpty(libraryCodeList)
+        || StringUtil.IsInList(code, libraryCodeList) == true)
+                    {
+
+                    }
+                    else
+                        return null;    // 表示被滤除了
+                }
             }
 
             if (param.bOutputKeyCount == false
@@ -4996,6 +5052,7 @@ dlg.UiState);
 
         void loader_Prompt(object sender, MessagePromptEventArgs e)
         {
+
 #if NO
             // TODO: 不再出现此对话框。不过重试有个次数限制，同一位置失败多次后总要出现对话框才好
             if (e.Actions == "yes,no,cancel")
@@ -5021,7 +5078,9 @@ dlg.UiState);
             if (e.Actions == "yes,no,cancel")
             {
                 bool bHideMessageBox = true;
-                DialogResult result = MessageDialog.Show(this,
+                DialogResult result = (DialogResult)this.Invoke((Func<DialogResult>)(() =>
+                {
+                    return MessageDialog.Show(this,
                     e.MessageText + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)",
     MessageBoxButtons.YesNoCancel,
     MessageBoxDefaultButton.Button1,
@@ -5029,6 +5088,8 @@ dlg.UiState);
     ref bHideMessageBox,
     new string[] { "重试", "跳过", "放弃" },
     20);
+                }));
+
                 if (result == DialogResult.Cancel)
                     e.ResultAction = "cancel";
                 else if (result == System.Windows.Forms.DialogResult.No)
@@ -9319,6 +9380,18 @@ MessageBoxDefaultButton.Button1);
         // 当前缺省的编码方式
         Encoding CurrentEncoding = Encoding.UTF8;
 
+        // 2021/5/27
+        public bool FilterLibraryCode
+        {
+            get
+            {
+                return Program.MainForm.AppInfo.GetBoolean(
+                    "item_search_form",
+                    "filter_library_code",
+                    false);
+            }
+        }
+
         // 为了保存ISO2709文件服务的几个变量
         /// <summary>
         /// 获取或设置配置参数：最近一次使用过的 ISO2709 文件名
@@ -13094,12 +13167,13 @@ Keys keyData)
                     bOutputKeyCount,
                     bOutputKeyID,
                     bQuickLoad,
+                    out long lSkipCount,
                     out strError);
                 if (nRet == 0)
                     return;
 
                 // MessageBox.Show(this, Convert.ToString(lRet) + " : " + strError);
-                this.LabelMessageText = "检索共命中 " + lHitCount.ToString() + " 条，已全部装入";
+                this.LabelMessageText = $"检索共命中 { lHitCount} 条(跳过 {lSkipCount} 条)，已全部装入";
             }
             finally
             {
@@ -13824,7 +13898,7 @@ out strError);
                         if (i > 0)
                             writer.WriteRaw(",");
                         writer.WriteRaw(JsonConvert.SerializeObject(o, Newtonsoft.Json.Formatting.Indented));
-                        
+
                         //writer.WriteEndObject();
 
                         stop.SetProgressValue(i);
@@ -13835,7 +13909,7 @@ out strError);
                     writer.WriteEndArray();
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 strError = ex.Message;
                 goto ERROR1;

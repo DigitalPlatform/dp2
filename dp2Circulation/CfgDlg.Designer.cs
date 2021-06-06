@@ -142,6 +142,7 @@
             this.numericUpDown_search_maxOrderResultCount = new System.Windows.Forms.NumericUpDown();
             this.checkBox_search_useExistDetailWindow = new System.Windows.Forms.CheckBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.checkBox_search_itemFilterLibraryCode = new System.Windows.Forms.CheckBox();
             this.checkBox_search_hideItemMatchStyleAndDbName = new System.Windows.Forms.CheckBox();
             this.checkBox_search_itemPushFilling = new System.Windows.Forms.CheckBox();
             this.label11 = new System.Windows.Forms.Label();
@@ -1457,7 +1458,7 @@
             this.groupBox6.Controls.Add(this.checkBox_search_commentPushFilling);
             this.groupBox6.Controls.Add(this.label19);
             this.groupBox6.Controls.Add(this.numericUpDown_search_maxCommentResultCount);
-            this.groupBox6.Location = new System.Drawing.Point(7, 1163);
+            this.groupBox6.Location = new System.Drawing.Point(7, 1231);
             this.groupBox6.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.groupBox6.Name = "groupBox6";
             this.groupBox6.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
@@ -1522,7 +1523,7 @@
             this.groupBox5.Controls.Add(this.checkBox_search_issuePushFilling);
             this.groupBox5.Controls.Add(this.label18);
             this.groupBox5.Controls.Add(this.numericUpDown_search_maxIssueResultCount);
-            this.groupBox5.Location = new System.Drawing.Point(7, 963);
+            this.groupBox5.Location = new System.Drawing.Point(7, 1020);
             this.groupBox5.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.groupBox5.Name = "groupBox5";
             this.groupBox5.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
@@ -1587,7 +1588,7 @@
             this.groupBox4.Controls.Add(this.checkBox_search_orderPushFilling);
             this.groupBox4.Controls.Add(this.label17);
             this.groupBox4.Controls.Add(this.numericUpDown_search_maxOrderResultCount);
-            this.groupBox4.Location = new System.Drawing.Point(7, 751);
+            this.groupBox4.Location = new System.Drawing.Point(7, 816);
             this.groupBox4.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.groupBox4.Name = "groupBox4";
             this.groupBox4.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
@@ -1659,18 +1660,30 @@
             // 
             // groupBox3
             // 
+            this.groupBox3.Controls.Add(this.checkBox_search_itemFilterLibraryCode);
             this.groupBox3.Controls.Add(this.checkBox_search_hideItemMatchStyleAndDbName);
             this.groupBox3.Controls.Add(this.checkBox_search_itemPushFilling);
             this.groupBox3.Controls.Add(this.label11);
             this.groupBox3.Controls.Add(this.numericUpDown_search_maxItemResultCount);
-            this.groupBox3.Location = new System.Drawing.Point(7, 541);
+            this.groupBox3.Location = new System.Drawing.Point(7, 567);
             this.groupBox3.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.groupBox3.Size = new System.Drawing.Size(579, 175);
+            this.groupBox3.Size = new System.Drawing.Size(579, 208);
             this.groupBox3.TabIndex = 3;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "实体查询窗 ";
+            // 
+            // checkBox_search_itemFilterLibraryCode
+            // 
+            this.checkBox_search_itemFilterLibraryCode.AutoSize = true;
+            this.checkBox_search_itemFilterLibraryCode.Location = new System.Drawing.Point(26, 153);
+            this.checkBox_search_itemFilterLibraryCode.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.checkBox_search_itemFilterLibraryCode.Name = "checkBox_search_itemFilterLibraryCode";
+            this.checkBox_search_itemFilterLibraryCode.Size = new System.Drawing.Size(532, 25);
+            this.checkBox_search_itemFilterLibraryCode.TabIndex = 4;
+            this.checkBox_search_itemFilterLibraryCode.Text = "只看本分馆册[根据当前账户的馆代码来进行过滤](&F)";
+            this.checkBox_search_itemFilterLibraryCode.UseVisualStyleBackColor = true;
             // 
             // checkBox_search_hideItemMatchStyleAndDbName
             // 
@@ -1728,7 +1741,7 @@
             this.groupBox2.Controls.Add(this.checkBox_search_readerPushFilling);
             this.groupBox2.Controls.Add(this.label10);
             this.groupBox2.Controls.Add(this.numericUpDown_search_maxReaderResultCount);
-            this.groupBox2.Location = new System.Drawing.Point(7, 372);
+            this.groupBox2.Location = new System.Drawing.Point(7, 376);
             this.groupBox2.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
@@ -2461,7 +2474,7 @@
             this.groupBox12.Margin = new System.Windows.Forms.Padding(5);
             this.groupBox12.Name = "groupBox12";
             this.groupBox12.Padding = new System.Windows.Forms.Padding(5);
-            this.groupBox12.Size = new System.Drawing.Size(705, 147);
+            this.groupBox12.Size = new System.Drawing.Size(645, 147);
             this.groupBox12.TabIndex = 4;
             this.groupBox12.TabStop = false;
             this.groupBox12.Text = "掌纹阅读器接口 URL ";
@@ -2469,7 +2482,7 @@
             // button_palmprint_setDefaulValue
             // 
             this.button_palmprint_setDefaulValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_palmprint_setDefaulValue.Location = new System.Drawing.Point(502, 82);
+            this.button_palmprint_setDefaulValue.Location = new System.Drawing.Point(442, 82);
             this.button_palmprint_setDefaulValue.Margin = new System.Windows.Forms.Padding(5);
             this.button_palmprint_setDefaulValue.Name = "button_palmprint_setDefaulValue";
             this.button_palmprint_setDefaulValue.Size = new System.Drawing.Size(193, 40);
@@ -2485,7 +2498,7 @@
             this.textBox_palmprint_readerUrl.Location = new System.Drawing.Point(11, 35);
             this.textBox_palmprint_readerUrl.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_palmprint_readerUrl.Name = "textBox_palmprint_readerUrl";
-            this.textBox_palmprint_readerUrl.Size = new System.Drawing.Size(680, 31);
+            this.textBox_palmprint_readerUrl.Size = new System.Drawing.Size(620, 31);
             this.textBox_palmprint_readerUrl.TabIndex = 0;
             // 
             // groupBox10
@@ -2498,7 +2511,7 @@
             this.groupBox10.Margin = new System.Windows.Forms.Padding(5);
             this.groupBox10.Name = "groupBox10";
             this.groupBox10.Padding = new System.Windows.Forms.Padding(5);
-            this.groupBox10.Size = new System.Drawing.Size(705, 147);
+            this.groupBox10.Size = new System.Drawing.Size(645, 147);
             this.groupBox10.TabIndex = 3;
             this.groupBox10.TabStop = false;
             this.groupBox10.Text = "人脸识别接口 URL ";
@@ -2506,7 +2519,7 @@
             // button_face_setDefaultValue
             // 
             this.button_face_setDefaultValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_face_setDefaultValue.Location = new System.Drawing.Point(502, 82);
+            this.button_face_setDefaultValue.Location = new System.Drawing.Point(442, 82);
             this.button_face_setDefaultValue.Margin = new System.Windows.Forms.Padding(5);
             this.button_face_setDefaultValue.Name = "button_face_setDefaultValue";
             this.button_face_setDefaultValue.Size = new System.Drawing.Size(193, 40);
@@ -2522,7 +2535,7 @@
             this.textBox_face_readerUrl.Location = new System.Drawing.Point(11, 35);
             this.textBox_face_readerUrl.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_face_readerUrl.Name = "textBox_face_readerUrl";
-            this.textBox_face_readerUrl.Size = new System.Drawing.Size(680, 31);
+            this.textBox_face_readerUrl.Size = new System.Drawing.Size(620, 31);
             this.textBox_face_readerUrl.TabIndex = 0;
             // 
             // groupBox9
@@ -2588,7 +2601,7 @@
             this.groupBox7.Margin = new System.Windows.Forms.Padding(5);
             this.groupBox7.Name = "groupBox7";
             this.groupBox7.Padding = new System.Windows.Forms.Padding(5);
-            this.groupBox7.Size = new System.Drawing.Size(705, 147);
+            this.groupBox7.Size = new System.Drawing.Size(645, 147);
             this.groupBox7.TabIndex = 0;
             this.groupBox7.TabStop = false;
             this.groupBox7.Text = " 指纹阅读器接口 URL ";
@@ -2596,7 +2609,7 @@
             // button_fingerprint_setDefaultValue
             // 
             this.button_fingerprint_setDefaultValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_fingerprint_setDefaultValue.Location = new System.Drawing.Point(502, 82);
+            this.button_fingerprint_setDefaultValue.Location = new System.Drawing.Point(442, 82);
             this.button_fingerprint_setDefaultValue.Margin = new System.Windows.Forms.Padding(5);
             this.button_fingerprint_setDefaultValue.Name = "button_fingerprint_setDefaultValue";
             this.button_fingerprint_setDefaultValue.Size = new System.Drawing.Size(193, 40);
@@ -2612,7 +2625,7 @@
             this.textBox_fingerprint_readerUrl.Location = new System.Drawing.Point(11, 35);
             this.textBox_fingerprint_readerUrl.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_fingerprint_readerUrl.Name = "textBox_fingerprint_readerUrl";
-            this.textBox_fingerprint_readerUrl.Size = new System.Drawing.Size(680, 31);
+            this.textBox_fingerprint_readerUrl.Size = new System.Drawing.Size(620, 31);
             this.textBox_fingerprint_readerUrl.TabIndex = 0;
             // 
             // button_fingerprint_clearLocalCacheFiles
@@ -3133,5 +3146,6 @@
         private System.Windows.Forms.GroupBox groupBox12;
         private System.Windows.Forms.Button button_palmprint_setDefaulValue;
         private System.Windows.Forms.TextBox textBox_palmprint_readerUrl;
+        private System.Windows.Forms.CheckBox checkBox_search_itemFilterLibraryCode;
     }
 }

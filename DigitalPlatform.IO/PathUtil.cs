@@ -316,9 +316,11 @@ namespace DigitalPlatform.IO
         {".jfif", "image/pjpeg"},
         {".jnlp", "application/x-java-jnlp-file"},
         {".jpb", "application/octet-stream"},
+
+        {".jpg", "image/jpeg"},
+
         {".jpe", "image/jpeg"},
         {".jpeg", "image/jpeg"},
-        {".jpg", "image/jpeg"},
         {".js", "application/x-javascript"},
         {".json", "application/json"},
         {".jsx", "text/jscript"},
@@ -699,6 +701,23 @@ namespace DigitalPlatform.IO
             string mime;
 
             return _mappings.TryGetValue(extension, out mime) ? mime : "application/octet-stream";
+        }
+
+        public static string GetExtensionByMime(string mime)
+        {
+            // 2021/6/4
+            // https://www.techsupportalert.com/content/how-stop-windows-10-saving-jpgs-jfifs.htm
+            if (mime == "image/pjpeg")
+                mime = "image/jpeg";
+
+            foreach (string key in _mappings.Keys)
+            {
+                string value = _mappings[key];
+                if (value == mime)
+                    return key;
+            }
+
+            return null;    // not found
         }
 
         // 去除路径第一字符的 '/'

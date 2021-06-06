@@ -193,7 +193,8 @@ namespace dp2Circulation
         // return:
         //      -1  该数据库 browse 配置文件中没有找到这个列 type 定义
         //      其他  返回列 index
-        int GetColumnIndex(string strItemDbName, string strColumnType)
+        int GetColumnIndex(string strItemDbName,
+            string strColumnType)
         {
             int nCol = -1;
 
@@ -235,6 +236,51 @@ namespace dp2Circulation
         // 列 type 到 列号 index 的对照表
         // key 格式为 数据库名:type，value 为 列 index
         Hashtable _columnIndexTable = new Hashtable();
+
+        // 2021/5/28
+        // 获得特定角色的列的值
+        // return:
+        //      -2  没有找到列 type
+        //      -1  出错
+        //      >=0 列号
+        public int GetColumnText(
+            Record record,
+            string strColumnType,
+            out string strText,
+            out string strError)
+        {
+            strError = "";
+            strText = "";
+
+            string strRecPath = record.Path;
+            // 根据记录路径获得浏览记录的数据库名。注意，不一定是实体库名
+            string strItemDbName = Global.GetDbName(strRecPath);
+
+            if (string.IsNullOrEmpty(strItemDbName) == true)
+            {
+                strError = "从(来自事项第一列的)记录路径 '" + strRecPath + "' 获得库名时出错";
+                return -1;
+            }
+
+            // return:
+            //      -1  该数据库 browse 配置文件中没有找到这个列 type 定义
+            //      其他  返回列 index
+            int nCol = GetColumnIndex(strItemDbName, strColumnType);
+            if (nCol == -1)
+            {
+                // 这个实体库没有在 browse 文件中 册条码号 列
+                strError = "数据库 '" + strItemDbName + "' 的 browse 配置文件中没有定义 type 为 " + strColumnType + " 的列。请注意刷新或修改此配置文件";
+                return -2;
+            }
+
+            Debug.Assert(nCol > 0, "");
+
+            int index = nCol - m_nBiblioSummaryColumn - 1;
+            if (index >= 0 && record.Cols != null && index < record.Cols.Length)
+                strText = record.Cols[index];
+            return nCol;
+        }
+
 
         // 2015/6/14
         // 获得特定角色的列的值

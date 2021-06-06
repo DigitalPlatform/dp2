@@ -77,6 +77,13 @@ ref sessioninfo) == false)
             goto ERROR1;
         }
 
+        // 2021/5/28
+        if (StringUtil.IsInList("manageopac", sessioninfo.RightsOrigin) == false)
+        {
+            strError = "只有 OPAC 管理员身份才能使用本模块";
+            goto ERROR1;
+        }
+
         string strAction = Request["action"];
 
         if (strAction == "geterrorlog")

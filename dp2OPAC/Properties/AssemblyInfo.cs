@@ -31,10 +31,11 @@ using System.Runtime.InteropServices;
 //
 // 您可以指定所有这些值，也可以使用“修订号”和“内部版本号”的默认值， 
 // 方法是按如下所示使用“*”:
-[assembly: AssemblyVersion("3.0.*")]
-[assembly: AssemblyFileVersion("3.0.0.0")]
+[assembly: AssemblyVersion("3.1.*")]
+[assembly: AssemblyFileVersion("3.1.0.0")]
 
 // 1.1 (2016/6/26） 增加 Session 计数器功能
 // 1.2 (2016/10/7) 对期刊，增加显示每期封面的功能
 // 1.3 (2017/12/12) 在 opac.xml 中 databaseFilter 元素内 hide 属性可以定义希望隐藏的普通库或者虚拟库名字列表
 // 3.0 (2018/6/23) 改用 .NET Framework 4.6.1 编译
+// 3.1 (2021/5/28) management.aspx 页面只有具备 manageopac 权限的用户才允许使用

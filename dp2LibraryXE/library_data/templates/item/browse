@@ -6,7 +6,7 @@
   <col title="状态">
     <xpath>*/state</xpath>
   </col>
-  <col title="馆藏地点">
+  <col title="馆藏地点" type="location">
     <xpath>*/location</xpath>
   </col>
   <col title="架号" type="shelf_number">

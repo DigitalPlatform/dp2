@@ -447,6 +447,8 @@ namespace dp2Inventory
 
                             int cross_count = 0;
                             int process_count = 0;
+                            int filtered_count = 0;
+                            int switch_count = 0;
                             this.Invoke((Action)(() =>
                             {
                                 var fill_result = FillTags(result.Results);
@@ -481,6 +483,8 @@ namespace dp2Inventory
                                         var process_result = await ProcessTags(result.Results, current_token);
                                         _error_count = process_result.Value;
                                         _verify_error_count = process_result.VerifyErrorCount;
+                                        filtered_count = process_result.FilteredCount;
+                                        switch_count = process_result.SwitchCount;
                                         process_count += process_result.ProcessCount;
                                         if (process_result.Value == 0 || process_result.Value == -1)
                                         {
@@ -554,13 +558,29 @@ namespace dp2Inventory
                                     else
                                     {
                                         // int complete_count = result.Results.Count - cross_count;
-                                        string text = $"完成 {process_count} 项  交叉 {cross_count} 项";
-                                        if (process_count == 0)
-                                            text = $"交叉 {cross_count} 项";
+                                        string text = $"完成 {process_count} 项";
+                                        if (switch_count == 0)
+                                        {
+                                            if (process_count == 0)
+                                                text = $"交叉 {cross_count} 项";
+                                            else
+                                                text += $"  交叉 {cross_count} 项";
+                                        }
+                                        else
+                                            text = "";
 
-                                        await FormClientInfo.Speaking(text,
-                                            false,  // true,
-                                            token);
+                                        // 仅在没有处理(任何一项)、没有发生过切换的时候语音提示滤除数
+                                        if (filtered_count != 0
+                                        && process_count == 0
+                                        && switch_count == 0)
+                                        {
+                                            text += $" 滤除 {filtered_count} 项";
+                                        }
+
+                                        if (string.IsNullOrEmpty(text) == false)
+                                            await FormClientInfo.Speaking(text,
+                                                false,  // true,
+                                                token);
                                     }
 
                                 }
@@ -936,6 +956,8 @@ out string block_map);
             public int ProcessCount { get; set; }
             // 被过滤掉(不符合 TU)的个数
             public int FilteredCount { get; set; }
+            // 发生层架标切换的次数
+            public int SwitchCount { get; set; }
 
             // 校验出错的个数。包含在 ErrorCount 内
             public int VerifyErrorCount { get; set; }
@@ -1003,6 +1025,7 @@ out string block_map);
                 int error_count = 0;
                 int filtered_count = 0;
                 int verify_error_count = 0;
+                int switch_count = 0;   // 切换层架标次数
                 foreach (var tag in tags)
                 {
                     if (token.IsCancellationRequested)
@@ -1175,7 +1198,7 @@ out string block_map);
                             continue;
                         }
 
-                        // 校验层架标号码合法性
+                        // 校验号码合法性
                         var validate_result = InventoryData.ValidateBarcode("shelf", entity.PII);
                         if (validate_result.OK == false)
                         {
@@ -1194,7 +1217,9 @@ out string block_map);
                             }));
                         }
 
-                        await SwitchCurrentShelfNoAsync(entity, token);
+                        var changed = await SwitchCurrentShelfNoAsync(entity, token);
+                        if (changed)
+                            switch_count++;
                     }
                     else if (tou != null && tou.StartsWith("8"))
                     {
@@ -1375,6 +1400,8 @@ out string block_map);
                     ErrorCount = error_count,
                     ProcessCount = process_count,
                     VerifyErrorCount = verify_error_count,
+                    FilteredCount = filtered_count,
+                    SwitchCount = switch_count,
                 };
             }
             finally
@@ -1436,13 +1463,13 @@ out string block_map);
             {
                 _prevAntenna = entity.Antenna;
 
-                string mode = (entity.Antenna == "1" ? "图书模式" : "层架标模式");
+                string mode = (entity.Antenna == "1" ? "B 模式" : "L 模式");
                 this.Invoke((Action)(() =>
                 {
                     toolStripStatusLabel_rpanMode.Text = mode;
                 }));
 
-                await FormClientInfo.Speaking($"开始 {mode}", false, token);
+                await FormClientInfo.Speaking($"{mode}", false, token);
             }
         }
 
@@ -2211,7 +2238,7 @@ bool eas)
             }
         }
 
-#region 标签缓存
+        #region 标签缓存
 
         public NormalResult WriteTagInfo(string one_reader_name,
     TagInfo old_tag_info,
@@ -2304,7 +2331,7 @@ bool eas)
             }
         }
 
-#endregion
+        #endregion
 
         // 获得 oi.pii 的 oi 部分
         public static string GetOiPart(string oi_pii, bool return_null)
@@ -2371,7 +2398,7 @@ bool eas)
         public static string CurrentBatchNo { get; set; }
 
         // 切换当前层架标
-        async Task SwitchCurrentShelfNoAsync(Entity entity,
+        async Task<bool> SwitchCurrentShelfNoAsync(Entity entity,
             CancellationToken token)
         {
             if (string.IsNullOrEmpty(entity.PII) == false)
@@ -2380,7 +2407,10 @@ bool eas)
                 // 更新状态行显示
                 SetCurrentShelfNoLabel(CurrentShelfNo);
                 await FormClientInfo.Speaking($"切换层架标 {entity.PII}", false, token);
+                return true;
             }
+
+            return false;
         }
 
         // 给册事项里面添加 目标当前架位 参数。

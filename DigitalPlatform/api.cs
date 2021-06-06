@@ -218,7 +218,11 @@ namespace DigitalPlatform
 				0);
 			if (ret == 0 && outPtr != IntPtr.Zero) 
 			{
-				return Marshal.PtrToStringUni(outPtr);
+				string value = Marshal.PtrToStringUni(outPtr);
+				// 2021/6/6
+				if (value == "image/pjpeg")
+					return "image/jpeg";
+				return value;
 			}
 			return mimeRet;
 		}

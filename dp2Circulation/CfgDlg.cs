@@ -450,6 +450,12 @@ false);
                 "push_filling_browse",
                 false);
 
+            // 2021/5/27
+            this.checkBox_search_itemFilterLibraryCode.Checked = ap.GetBoolean(
+                "item_search_form",
+                "filter_library_code",
+                false);
+
             // --- order
             this.numericUpDown_search_maxOrderResultCount.Value = ap.GetInt(
     "order_search_form",
@@ -1116,6 +1122,11 @@ false);
                     "push_filling_browse",
                     this.checkBox_search_itemPushFilling.Checked);
 
+                // 2021/5/27
+                ap.SetBoolean(
+                    "item_search_form",
+                    "filter_library_code",
+                    this.checkBox_search_itemFilterLibraryCode.Checked);
 
                 // --- order
                 ap.SetInt(
