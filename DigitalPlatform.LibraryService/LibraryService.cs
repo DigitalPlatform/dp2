@@ -2385,6 +2385,8 @@ namespace dp2Library
             }
         }
 
+        // parameters:
+        //      actions noResult 表示不返回 results，只返回 result.Value(totalCount)
         public LibraryServerResult SearchCharging(
             string patronBarcode,
             string timeRange,
@@ -2451,29 +2453,35 @@ namespace dp2Library
                     return result;
                 }
 
-                int MAXITEMS = 100;    // 每次最多返回的事项数
-                List<ChargingItemWrapper> infos = new List<ChargingItemWrapper>();
-                long i = 0;
-                foreach (ChargingOperItem item in collection)
+                // 2021/6/8
+                bool no_result = StringUtil.IsInList("noResult", actions);
+
+                if (no_result == false)
                 {
-                    if (i >= MAXITEMS)
-                        break;
-                    if (count != -1 && i >= count)
-                        break;
-                    ChargingItemWrapper wrapper = new ChargingItemWrapper();
-                    wrapper.Item = new ChargingItem(item);
-                    if (item.Operation == "return"
-                        && item.Action != "read")
+                    int MAXITEMS = 100;    // 每次最多返回的事项数
+                    List<ChargingItemWrapper> infos = new List<ChargingItemWrapper>();
+                    long i = 0;
+                    foreach (ChargingOperItem item in collection)
                     {
-                        ChargingOperItem rel = app.ChargingOperDatabase.FindRelativeBorrowItem(item);
-                        if (rel != null)
-                            wrapper.RelatedItem = new ChargingItem(rel);
+                        if (i >= MAXITEMS)
+                            break;
+                        if (count != -1 && i >= count)
+                            break;
+                        ChargingItemWrapper wrapper = new ChargingItemWrapper();
+                        wrapper.Item = new ChargingItem(item);
+                        if (item.Operation == "return"
+                            && item.Action != "read")
+                        {
+                            ChargingOperItem rel = app.ChargingOperDatabase.FindRelativeBorrowItem(item);
+                            if (rel != null)
+                                wrapper.RelatedItem = new ChargingItem(rel);
+                        }
+                        infos.Add(wrapper);
+                        i++;
                     }
-                    infos.Add(wrapper);
-                    i++;
+                    results = infos.ToArray();
                 }
 
-                results = infos.ToArray();
                 result.Value = totalCount;
                 return result;
 #if NO
@@ -3399,12 +3407,14 @@ namespace dp2Library
         {
             // record.Path = "";    // 2021.5.19 考虑不滤除 Path
             record.Cols = null;
-            record.RecordBody = new RecordBody {
+            record.RecordBody = new RecordBody
+            {
                 Path = null,
                 Xml = null,
                 Timestamp = null,
                 Metadata = null,
-                Result = new Result { 
+                Result = new Result
+                {
                     Value = -1,
                     ErrorString = errorInfo,
                     ErrorCode = ErrorCodeValue.AccessDenied

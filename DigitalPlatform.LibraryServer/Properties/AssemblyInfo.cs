@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.52.*")]
-[assembly: AssemblyFileVersion("3.52.0.0")]
+[assembly: AssemblyVersion("3.53.*")]
+[assembly: AssemblyFileVersion("3.53.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -235,3 +235,4 @@ ItemCanReturn()
 //		3.50 (2021/4/6) SetEntities() API 中修改和创建册记录的时候，会自动删除其他册记录中重复的 uid 字段。注意要确保所有实体库的 keys 中定义了 RFID UID 检索点
 //		3.51 (2021/4/28) Borrow() API 续借时会清除读者记录中的 borrow 元素下先前残留的 notifyHistory 属性，这样避免续借以后(ReadersMonitor)发出超期通知时被这个属性抑制
 //		3.52 (2021/5/11) GetBrowseRecords() API 对返回的册记录 XML 自动添加了 oi 元素
+//		3.53 (2021/6/8) SearchCharging() API actions 参数增加 noResult 表示不返回 results，只返回 result.Value(totalCount)。用于 dp2OPAC 的 BorrowHistoryControl 中单纯获取读者借阅历史的事项数(而不需要返回事项)

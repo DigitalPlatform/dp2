@@ -106,6 +106,7 @@ namespace DigitalPlatform.OPAC.Web
                 }
 
                 List<ChargingItemWrapper> results = null;
+                // TODO: 这里可能会因为事项太多而超时
                 // return:
                 //      -2  尚未登录
                 //      -1  出错
@@ -122,7 +123,7 @@ namespace DigitalPlatform.OPAC.Web
 
         // 获得历史信息
         // parameters:
-        //      nStart  开始位置。如果为 -1，表示仅获得事项总数
+        //      nItemsPerPage  每页事项数。如果为 -1，表示仅获得事项总数
         // return:
         //      -2  尚未登录
         //      -1  出错
@@ -156,6 +157,12 @@ namespace DigitalPlatform.OPAC.Web
             LibraryChannel channel = sessioninfo.GetChannel(true);
             try
             {
+                string style = "return,lost,read";
+
+                // 2021/6/8
+                if (nItemsPerPage == -1)
+                    style += ",noResult";
+
                 // 获得借阅历史
                 // parameters:
                 //      nPageNo 页号
@@ -167,7 +174,7 @@ namespace DigitalPlatform.OPAC.Web
                     channel.LoadChargingHistory(
                     null,
                     strReaderBarcode,
-                    "return,lost,read",
+                    style,
                     nPageNo,
                     nItemsPerPage,
                     out results,
