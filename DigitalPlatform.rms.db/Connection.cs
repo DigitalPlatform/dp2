@@ -8,8 +8,9 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using MySqlConnector;
 
-using MySql.Data.MySqlClient;
+//using MySql.Data.MySqlClient;
 using Oracle.ManagedDataAccess.Client;
 
 namespace DigitalPlatform.rms

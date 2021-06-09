@@ -1,8 +1,9 @@
-﻿using System;
+﻿using MySqlConnector;
+using System;
 using System.Windows.Forms;
 
-using MySql.Data;
-using MySql.Data.MySqlClient;
+//using MySql.Data;
+//using MySql.Data.MySqlClient;
 
 namespace DigitalPlatform.rms
 {
@@ -155,6 +156,12 @@ namespace DigitalPlatform.rms
             this.button_OK.Enabled = false;
             try
             {
+                /*
+                MySqlConnectionStringBuilder builder = new MySqlConnectionStringBuilder();
+                builder.PipeName = "MYSQL";
+                var s = builder.ToString();
+                */
+
                 nRet = VerifySqlServer(
                     this.SqlServerName,
                     this.textBox_loginName.Text,
@@ -199,6 +206,9 @@ namespace DigitalPlatform.rms
             this.Close();
         }
 
+        // const string SERVER_PREFIX = "Data Source=";
+        const string SERVER_PREFIX = "server=";
+
         public int VerifySqlServer(
     string strSqlServerName,
     string strSqlUserName,
@@ -215,7 +225,7 @@ namespace DigitalPlatform.rms
             string strConnection = @"Persist Security Info=False;"
                 + "User ID=" + strSqlUserName + ";"    //帐户和密码
                 + "Password=" + strSqlUserPassword + ";"
-                + "Data Source=" + strSqlServerName + ";"
+                + SERVER_PREFIX + strSqlServerName + ";"
                 + (string.IsNullOrEmpty(strSslMode) ? "" : "SslMode=" + strSslMode + ";") // 2018/9/22
                 + "Connect Timeout=30;";
             // "charset=utf8;";
@@ -225,7 +235,7 @@ namespace DigitalPlatform.rms
             {
                 strConnection = @"Persist Security Info=False;"
                     + "Integrated Security=SSPI; "      //信任连接
-                    + "Data Source=" + strSqlServerName + ";"
+                    + SERVER_PREFIX + strSqlServerName + ";"
                     + "Connect Timeout=30"; // 30秒
             }
 
@@ -241,7 +251,7 @@ namespace DigitalPlatform.rms
                     catch (MySqlException sqlEx)
                     {
                         strError = "连接 SQL 数据库出错： " + sqlEx.Message + "。";
-                        int nError = sqlEx.ErrorCode;
+                        int nError = (int)sqlEx.ErrorCode;
                         return -1;
                     }
                     catch (Exception ex)

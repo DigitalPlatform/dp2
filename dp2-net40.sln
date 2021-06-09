@@ -292,6 +292,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.LibraryClie
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenApiClientCodeGenerator", "OpenApiClientCodeGenerator\OpenApiClientCodeGenerator.csproj", "{1137B098-B8E8-49B4-A099-548086D3EDD4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestMySQL", "TestMySQL\TestMySQL.csproj", "{268C8735-E173-45C6-8642-C3ACFB3082B2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -2480,6 +2482,24 @@ Global
 		{1137B098-B8E8-49B4-A099-548086D3EDD4}.Test|Mixed Platforms.Build.0 = Debug|Any CPU
 		{1137B098-B8E8-49B4-A099-548086D3EDD4}.Test|x86.ActiveCfg = Debug|Any CPU
 		{1137B098-B8E8-49B4-A099-548086D3EDD4}.Test|x86.Build.0 = Debug|Any CPU
+		{268C8735-E173-45C6-8642-C3ACFB3082B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{268C8735-E173-45C6-8642-C3ACFB3082B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{268C8735-E173-45C6-8642-C3ACFB3082B2}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{268C8735-E173-45C6-8642-C3ACFB3082B2}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{268C8735-E173-45C6-8642-C3ACFB3082B2}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{268C8735-E173-45C6-8642-C3ACFB3082B2}.Debug|x86.Build.0 = Debug|Any CPU
+		{268C8735-E173-45C6-8642-C3ACFB3082B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{268C8735-E173-45C6-8642-C3ACFB3082B2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{268C8735-E173-45C6-8642-C3ACFB3082B2}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{268C8735-E173-45C6-8642-C3ACFB3082B2}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{268C8735-E173-45C6-8642-C3ACFB3082B2}.Release|x86.ActiveCfg = Release|Any CPU
+		{268C8735-E173-45C6-8642-C3ACFB3082B2}.Release|x86.Build.0 = Release|Any CPU
+		{268C8735-E173-45C6-8642-C3ACFB3082B2}.Test|Any CPU.ActiveCfg = Debug|Any CPU
+		{268C8735-E173-45C6-8642-C3ACFB3082B2}.Test|Any CPU.Build.0 = Debug|Any CPU
+		{268C8735-E173-45C6-8642-C3ACFB3082B2}.Test|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{268C8735-E173-45C6-8642-C3ACFB3082B2}.Test|Mixed Platforms.Build.0 = Debug|Any CPU
+		{268C8735-E173-45C6-8642-C3ACFB3082B2}.Test|x86.ActiveCfg = Debug|Any CPU
+		{268C8735-E173-45C6-8642-C3ACFB3082B2}.Test|x86.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -19,8 +19,8 @@ using System.Data.Common;
 using System.Data.SqlClient;
 using System.Data.SQLite;
 
-using MySql.Data;
-using MySql.Data.MySqlClient;
+//using MySql.Data;
+//using MySql.Data.MySqlClient;
 
 using Oracle.ManagedDataAccess.Client;
 using Oracle.ManagedDataAccess.Types;
@@ -32,6 +32,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Core;
+using MySqlConnector;
 
 namespace DigitalPlatform.rms
 {
@@ -11080,10 +11081,14 @@ handle.CancelTokenSource.Token).Result;
                 {
                     MySqlTransaction trans = null;
 
+                    // https://mysqlconnector.net/troubleshooting/transaction-usage/
                     trans = connection.MySqlConnection.BeginTransaction();
                     try
                     {
                         string strCommand = "";
+
+                        // 2021/6/9
+                        command.Transaction = trans;
 
                         List<WriteInfo> parts = new List<WriteInfo>();
                         int i = 0;
@@ -16553,9 +16558,13 @@ handle.CancelTokenSource.Token).Result;
                 {
                     MySqlTransaction trans = null;
 
+                    // https://mysqlconnector.net/troubleshooting/transaction-usage/
                     trans = connection.MySqlConnection.BeginTransaction();
                     try
                     {
+                        // 2021/6/9
+                        command.Transaction = trans;
+
                         string strInsertHead = "";
                         int nExecuted = 0;
                         lines.Add("");

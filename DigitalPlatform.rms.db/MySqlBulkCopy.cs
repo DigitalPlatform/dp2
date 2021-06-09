@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Data;
-
-using MySql.Data.MySqlClient;
 using System.Diagnostics;
+
+//using MySql.Data.MySqlClient;
 using DigitalPlatform.Text;
+using MySqlConnector;
 
 namespace DigitalPlatform.rms
 {

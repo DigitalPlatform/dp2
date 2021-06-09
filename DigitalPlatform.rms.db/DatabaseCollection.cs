@@ -16,8 +16,8 @@ using System.Threading.Tasks;
 using System.Data.SqlClient;
 using System.Data.SQLite;
 
-using MySql.Data;
-using MySql.Data.MySqlClient;
+//using MySql.Data;
+//using MySql.Data.MySqlClient;
 
 using Oracle.ManagedDataAccess.Client;
 using Oracle.ManagedDataAccess.Types;

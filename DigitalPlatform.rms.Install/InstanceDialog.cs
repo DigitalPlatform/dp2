@@ -15,7 +15,7 @@ using System.Runtime.Remoting.Channels;
 using System.Data.SqlClient;
 
 using Ionic.Zip;
-using MySql.Data.MySqlClient;
+//using MySql.Data.MySqlClient;
 using Oracle.ManagedDataAccess.Client;
 
 using DigitalPlatform.Install;
@@ -24,6 +24,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.Interfaces;
+using MySqlConnector;
 
 namespace DigitalPlatform.rms
 {
