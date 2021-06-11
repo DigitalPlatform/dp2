@@ -1492,6 +1492,10 @@ namespace dp2SSL
                     if (oi == null && _patron.IsFingerprintSource)
                         oi = "";
 
+                    // 2021/6/9
+                    if (Patron.IsPQR(pii))
+                        oi = "";
+
                     result = await SipChannelUtil.GetReaderInfoAsync(oi, pii);
                 }
                 else

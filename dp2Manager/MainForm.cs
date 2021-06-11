@@ -71,6 +71,9 @@ namespace dp2Manager
         private MenuItem menuItem_testAccessKey;
         private SplitContainer splitContainer1;
         private WebBrowser webBrowser1;
+        private MenuItem menuItem_help;
+        private MenuItem menuItem_openDataFolder;
+        private MenuItem menuItem_openProgramFolder;
         private System.ComponentModel.IContainer components;
 
         public MainForm()
@@ -136,8 +139,11 @@ namespace dp2Manager
             this.toolStripStatusLabel_main = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripProgressBar_main = new System.Windows.Forms.ToolStripProgressBar();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.webBrowser1 = new System.Windows.Forms.WebBrowser();
             this.treeView_res = new DigitalPlatform.rms.Client.ResTree();
+            this.webBrowser1 = new System.Windows.Forms.WebBrowser();
+            this.menuItem_help = new System.Windows.Forms.MenuItem();
+            this.menuItem_openDataFolder = new System.Windows.Forms.MenuItem();
+            this.menuItem_openProgramFolder = new System.Windows.Forms.MenuItem();
             this.statusStrip_main.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -149,7 +155,8 @@ namespace dp2Manager
             // 
             this.mainMenu1.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.menuItem2,
-            this.menuItem1});
+            this.menuItem1,
+            this.menuItem_help});
             // 
             // menuItem2
             // 
@@ -249,9 +256,10 @@ namespace dp2Manager
             this.toolBar1.DropDownArrows = true;
             this.toolBar1.ImageList = this.imageList_toolbar;
             this.toolBar1.Location = new System.Drawing.Point(0, 0);
+            this.toolBar1.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.toolBar1.Name = "toolBar1";
             this.toolBar1.ShowToolTips = true;
-            this.toolBar1.Size = new System.Drawing.Size(481, 34);
+            this.toolBar1.Size = new System.Drawing.Size(882, 34);
             this.toolBar1.TabIndex = 2;
             this.toolBar1.ButtonClick += new System.Windows.Forms.ToolBarButtonClickEventHandler(this.toolBar1_ButtonClick);
             // 
@@ -271,31 +279,34 @@ namespace dp2Manager
             // 
             // statusStrip_main
             // 
+            this.statusStrip_main.ImageScalingSize = new System.Drawing.Size(28, 28);
             this.statusStrip_main.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatusLabel_main,
             this.toolStripProgressBar_main});
-            this.statusStrip_main.Location = new System.Drawing.Point(0, 310);
+            this.statusStrip_main.Location = new System.Drawing.Point(0, 550);
             this.statusStrip_main.Name = "statusStrip_main";
+            this.statusStrip_main.Padding = new System.Windows.Forms.Padding(2, 0, 26, 0);
             this.statusStrip_main.RenderMode = System.Windows.Forms.ToolStripRenderMode.Professional;
-            this.statusStrip_main.Size = new System.Drawing.Size(481, 22);
+            this.statusStrip_main.Size = new System.Drawing.Size(882, 31);
             this.statusStrip_main.TabIndex = 5;
             this.statusStrip_main.Text = "statusStrip1";
             // 
             // toolStripStatusLabel_main
             // 
             this.toolStripStatusLabel_main.Name = "toolStripStatusLabel_main";
-            this.toolStripStatusLabel_main.Size = new System.Drawing.Size(292, 17);
+            this.toolStripStatusLabel_main.Size = new System.Drawing.Size(535, 22);
             this.toolStripStatusLabel_main.Spring = true;
             // 
             // toolStripProgressBar_main
             // 
             this.toolStripProgressBar_main.Name = "toolStripProgressBar_main";
-            this.toolStripProgressBar_main.Size = new System.Drawing.Size(172, 16);
+            this.toolStripProgressBar_main.Size = new System.Drawing.Size(315, 21);
             // 
             // splitContainer1
             // 
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer1.Location = new System.Drawing.Point(0, 34);
+            this.splitContainer1.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.splitContainer1.Name = "splitContainer1";
             // 
             // splitContainer1.Panel1
@@ -305,19 +316,10 @@ namespace dp2Manager
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.webBrowser1);
-            this.splitContainer1.Size = new System.Drawing.Size(481, 276);
-            this.splitContainer1.SplitterDistance = 279;
-            this.splitContainer1.SplitterWidth = 8;
+            this.splitContainer1.Size = new System.Drawing.Size(882, 516);
+            this.splitContainer1.SplitterDistance = 511;
+            this.splitContainer1.SplitterWidth = 15;
             this.splitContainer1.TabIndex = 6;
-            // 
-            // webBrowser1
-            // 
-            this.webBrowser1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.webBrowser1.Location = new System.Drawing.Point(0, 0);
-            this.webBrowser1.MinimumSize = new System.Drawing.Size(20, 20);
-            this.webBrowser1.Name = "webBrowser1";
-            this.webBrowser1.Size = new System.Drawing.Size(194, 276);
-            this.webBrowser1.TabIndex = 0;
             // 
             // treeView_res
             // 
@@ -326,22 +328,54 @@ namespace dp2Manager
             this.treeView_res.HideSelection = false;
             this.treeView_res.ImageIndex = 0;
             this.treeView_res.Location = new System.Drawing.Point(0, 0);
+            this.treeView_res.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.treeView_res.Name = "treeView_res";
             this.treeView_res.SelectedImageIndex = 0;
-            this.treeView_res.Size = new System.Drawing.Size(279, 276);
+            this.treeView_res.Size = new System.Drawing.Size(511, 516);
             this.treeView_res.TabIndex = 0;
             this.treeView_res.OnSetMenu += new DigitalPlatform.GUI.GuiAppendMenuEventHandle(this.treeView_res_OnSetMenu);
             this.treeView_res.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView_res_AfterSelect);
             // 
+            // webBrowser1
+            // 
+            this.webBrowser1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.webBrowser1.Location = new System.Drawing.Point(0, 0);
+            this.webBrowser1.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
+            this.webBrowser1.MinimumSize = new System.Drawing.Size(37, 35);
+            this.webBrowser1.Name = "webBrowser1";
+            this.webBrowser1.Size = new System.Drawing.Size(356, 516);
+            this.webBrowser1.TabIndex = 0;
+            // 
+            // menuItem_help
+            // 
+            this.menuItem_help.Index = 2;
+            this.menuItem_help.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+            this.menuItem_openDataFolder,
+            this.menuItem_openProgramFolder});
+            this.menuItem_help.Text = "帮助(&H)";
+            // 
+            // menuItem_openDataFolder
+            // 
+            this.menuItem_openDataFolder.Index = 0;
+            this.menuItem_openDataFolder.Text = "打开数据文件夹(&D)...";
+            this.menuItem_openDataFolder.Click += new System.EventHandler(this.menuItem_openDataFolder_Click);
+            // 
+            // menuItem_openProgramFolder
+            // 
+            this.menuItem_openProgramFolder.Index = 1;
+            this.menuItem_openProgramFolder.Text = "打开程序文件夹(&P)...";
+            this.menuItem_openProgramFolder.Click += new System.EventHandler(this.menuItem_openProgramFolder_Click);
+            // 
             // MainForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(481, 332);
+            this.ClientSize = new System.Drawing.Size(882, 581);
             this.Controls.Add(this.splitContainer1);
             this.Controls.Add(this.statusStrip_main);
             this.Controls.Add(this.toolBar1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.Menu = this.mainMenu1;
             this.Name = "MainForm";
             this.Text = "dp2manager V3 -- 内核管理";
@@ -1656,5 +1690,29 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
         }
 
         #endregion
+
+        private void menuItem_openDataFolder_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(this.DataDir);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ExceptionUtil.GetAutoText(ex));
+            }
+        }
+
+        private void menuItem_openProgramFolder_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(Environment.CurrentDirectory);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ExceptionUtil.GetAutoText(ex));
+            }
+        }
     }
 }

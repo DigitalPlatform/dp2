@@ -53,6 +53,10 @@ namespace DigitalPlatform.OPAC.Server
         }
 
         // 装载栏目存储
+        // return:
+        //      -1  出错
+        //      0   栏目存储文件没有找到
+        //      1   成功(文件已经 Attach)
         private int LoadCommentColumn(
             string strStorageFileName,
             out string strError)
@@ -82,12 +86,17 @@ namespace DigitalPlatform.OPAC.Server
                     this.CommentColumn.Attach(strStorageFileName,
                         strStorageFileName + ".index");
                 }
+                catch (FileNotFoundException ex)
+                {
+                    strError = "Attach 文件 " + strStorageFileName + " 和索引时，没有找到文件: " + ex.Message;
+                    return 0;
+                }
                 catch (Exception ex)
                 {
                     strError = "Attach 文件 " + strStorageFileName + " 和索引失败 :" + ex.Message;
                     return -1;
                 }
-                return 0;
+                return 1;
             }
             catch /*(System.ApplicationException ex)*/
             {
@@ -173,10 +182,14 @@ namespace DigitalPlatform.OPAC.Server
                 this.CloseCommentColumn();
 
                 // 重新装载
+                // return:
+                //      -1  出错
+                //      0   栏目存储文件没有找到
+                //      1   成功(文件已经 Attach)
                 nRet = LoadCommentColumn(
                     this.StorageFileName,
                     out strError);
-                if (nRet == -1)
+                if (nRet != 1)
                     return -1;
 
                 return 0;
@@ -215,6 +228,10 @@ namespace DigitalPlatform.OPAC.Server
                     continue;
                 dbnames.Add(strDbName);
             }
+
+            // 2021/6/11
+            if (dbnames.Count == 0)
+                return 0;
 
             DateTime now = DateTime.Now;
             DateTime oneyearbefore = now - new TimeSpan(365, 0, 0, 0);
@@ -267,7 +284,6 @@ namespace DigitalPlatform.OPAC.Server
                     page.Response.Write("search end. hitcount=" + nRet.ToString() + ", time=" + delta.ToString() + "<br/>");
                     page.Response.Flush();
                 }
-
 
                 if (nRet == 0)
                     return 0;	// not found

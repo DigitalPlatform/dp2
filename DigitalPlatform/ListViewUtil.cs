@@ -187,15 +187,26 @@ namespace DigitalPlatform.GUI
 
         public static void DeleteSelectedItems(ListView list)
         {
+            /*
             int[] indices = new int[list.SelectedItems.Count];
             list.SelectedIndices.CopyTo(indices, 0);
+            */
 
             list.BeginUpdate();
 
+            // 2021/6/11 新方法
+            var indices = list.SelectedIndices.Cast<int>().Reverse();
+            foreach (var index in indices)
+            {
+                list.Items.RemoveAt(index);
+            }
+
+            /*
             for (int i = indices.Length - 1; i >= 0; i--)
             {
                 list.Items.RemoveAt(indices[i]);
             }
+            */
 
             list.EndUpdate();
 
@@ -845,6 +856,34 @@ namespace DigitalPlatform.GUI
                 var item = list.Items[i];
                 item.Selected = true;
             }
+        }
+
+        // 查找并选中
+        public static int FindAndSelect(ListView list, string text)
+        {
+            int count = 0;
+            foreach(ListViewItem item in list.Items)
+            {
+                bool found = false;
+                foreach(ListViewItem.ListViewSubItem subitem in item.SubItems)
+                {
+                    if (subitem.Text.Contains(text))
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (found)
+                {
+                    item.Selected = true;
+                    count++;
+                }
+                else
+                    item.Selected = false;
+            }
+
+            return count;
         }
     }
 

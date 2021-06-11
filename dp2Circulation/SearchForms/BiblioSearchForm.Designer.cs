@@ -80,6 +80,7 @@
             this.listView_records = new DigitalPlatform.GUI.ListViewNF();
             this.columnHeader_path = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.toolStripMenuItem_findInList = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip_biblioDb.SuspendLayout();
             this.tableLayoutPanel_query.SuspendLayout();
             this.toolStrip_search.SuspendLayout();
@@ -114,7 +115,7 @@
             this.textBox_queryWord.Margin = new System.Windows.Forms.Padding(7);
             this.textBox_queryWord.MaxLength = 0;
             this.textBox_queryWord.Name = "textBox_queryWord";
-            this.textBox_queryWord.Size = new System.Drawing.Size(313, 31);
+            this.textBox_queryWord.Size = new System.Drawing.Size(253, 31);
             this.textBox_queryWord.TabIndex = 1;
             this.textBox_queryWord.TextChanged += new System.EventHandler(this.textBox_queryWord_TextChanged);
             this.textBox_queryWord.Enter += new System.EventHandler(this.textBox_queryWord_Enter);
@@ -218,7 +219,7 @@
             this.comboBox_from.Location = new System.Drawing.Point(159, 92);
             this.comboBox_from.Margin = new System.Windows.Forms.Padding(7);
             this.comboBox_from.Name = "comboBox_from";
-            this.comboBox_from.Size = new System.Drawing.Size(313, 32);
+            this.comboBox_from.Size = new System.Drawing.Size(253, 32);
             this.comboBox_from.TabIndex = 6;
             this.comboBox_from.SizeChanged += new System.EventHandler(this.comboBox_from_SizeChanged);
             // 
@@ -248,7 +249,7 @@
             this.comboBox_matchStyle.Location = new System.Drawing.Point(159, 138);
             this.comboBox_matchStyle.Margin = new System.Windows.Forms.Padding(7);
             this.comboBox_matchStyle.Name = "comboBox_matchStyle";
-            this.comboBox_matchStyle.Size = new System.Drawing.Size(313, 29);
+            this.comboBox_matchStyle.Size = new System.Drawing.Size(253, 29);
             this.comboBox_matchStyle.TabIndex = 8;
             this.comboBox_matchStyle.Text = "前方一致";
             this.comboBox_matchStyle.SizeChanged += new System.EventHandler(this.comboBox_matchStyle_SizeChanged);
@@ -264,7 +265,7 @@
             this.checkedComboBox_biblioDbNames.Name = "checkedComboBox_biblioDbNames";
             this.checkedComboBox_biblioDbNames.Padding = new System.Windows.Forms.Padding(4);
             this.checkedComboBox_biblioDbNames.ReadOnly = false;
-            this.checkedComboBox_biblioDbNames.Size = new System.Drawing.Size(319, 32);
+            this.checkedComboBox_biblioDbNames.Size = new System.Drawing.Size(259, 32);
             this.checkedComboBox_biblioDbNames.TabIndex = 9;
             this.checkedComboBox_biblioDbNames.DropDown += new System.EventHandler(this.checkedComboBox_biblioDbNames_DropDown);
             this.checkedComboBox_biblioDbNames.ItemChecked += new System.Windows.Forms.ItemCheckedEventHandler(this.checkedComboBox_biblioDbNames_ItemChecked);
@@ -285,10 +286,10 @@
             this.toolStripButton_prevQuery,
             this.toolStripButton_nextQuery,
             this.toolStripButton_multiLine});
-            this.toolStrip_search.Location = new System.Drawing.Point(479, 0);
+            this.toolStrip_search.Location = new System.Drawing.Point(419, 0);
             this.toolStrip_search.Name = "toolStrip_search";
             this.toolStrip_search.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
-            this.toolStrip_search.Size = new System.Drawing.Size(254, 45);
+            this.toolStrip_search.Size = new System.Drawing.Size(314, 45);
             this.toolStrip_search.TabIndex = 13;
             this.toolStrip_search.Text = "检索";
             // 
@@ -318,6 +319,7 @@
             this.ToolStripMenuItem_searchShareBiblio,
             this.toolStripMenuItem_searchZ3950,
             this.ToolStripMenuItem_filterRecords,
+            this.toolStripMenuItem_findInList,
             this.toolStripMenuItem_subrecords,
             this.toolStripSeparator5,
             this.ToolStripMenuItem_z3950ServerList});
@@ -488,7 +490,7 @@
             // 
             // button_search
             // 
-            this.button_search.Location = new System.Drawing.Point(484, 48);
+            this.button_search.Location = new System.Drawing.Point(424, 48);
             this.button_search.Margin = new System.Windows.Forms.Padding(5, 3, 5, 3);
             this.button_search.Name = "button_search";
             this.button_search.Size = new System.Drawing.Size(0, 0);
@@ -505,7 +507,7 @@
             this.comboBox_location.Location = new System.Drawing.Point(159, 181);
             this.comboBox_location.Margin = new System.Windows.Forms.Padding(7);
             this.comboBox_location.Name = "comboBox_location";
-            this.comboBox_location.Size = new System.Drawing.Size(313, 29);
+            this.comboBox_location.Size = new System.Drawing.Size(253, 29);
             this.comboBox_location.TabIndex = 16;
             // 
             // tableLayoutPanel_main
@@ -639,6 +641,13 @@
             this.columnHeader_1.Text = "1";
             this.columnHeader_1.Width = 300;
             // 
+            // toolStripMenuItem_findInList
+            // 
+            this.toolStripMenuItem_findInList.Name = "toolStripMenuItem_findInList";
+            this.toolStripMenuItem_findInList.Size = new System.Drawing.Size(327, 40);
+            this.toolStripMenuItem_findInList.Text = "在列表中查找...";
+            this.toolStripMenuItem_findInList.Click += new System.EventHandler(this.toolStripMenuItem_findInList_Click);
+            // 
             // BiblioSearchForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
@@ -723,5 +732,6 @@
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_z3950ServerList;
         private System.Windows.Forms.ToolStripButton toolStripButton_multiLine;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_subrecords;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_findInList;
     }
 }

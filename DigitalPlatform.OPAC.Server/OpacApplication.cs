@@ -714,14 +714,22 @@ namespace DigitalPlatform.OPAC.Server
                 {
                     string strColumnDir = Path.Combine(strDataDir, "column");
 
-                    PathUtil.TryCreateDir(strColumnDir);	// 确保目录创建
+                    PathUtil.TryCreateDir(strColumnDir);    // 确保目录创建
+
+                    // return:
+                    //      -1  出错
+                    //      0   栏目存储文件没有找到
+                    //      1   成功(文件已经 Attach)
                     nRet = LoadCommentColumn(
-                        Path.Combine(strColumnDir, "comment"),
-                        out strError);
+                                Path.Combine(strColumnDir, "comment"),
+                                out strError);
                     if (nRet == -1)
                     {
                         app.WriteErrorLog("装载栏目存储时出错: " + strError);
                     }
+                    else if (nRet == 0)
+                        app.WriteErrorLog("栏目存储尚未创建。请及时创建");
+
                 }
 
                 if (bReload == true)
@@ -753,7 +761,7 @@ namespace DigitalPlatform.OPAC.Server
             }
 
             return 0;
-            ERROR1:
+        ERROR1:
             if (bReload == false)
             {
                 if (this.watcher == null)
@@ -1292,7 +1300,7 @@ namespace DigitalPlatform.OPAC.Server
 
             this.m_fromTable[strKey] = infos;
             return 0;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -1622,7 +1630,7 @@ namespace DigitalPlatform.OPAC.Server
                 this.m_lock.ReleaseWriterLock();
             }
 
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -2171,7 +2179,7 @@ System.Text.Encoding.UTF8))
                 }
 
                 int nRedoCount = 0;
-                REDO:
+            REDO:
                 XmlDocument webuidom = new XmlDocument();
                 try
                 {
@@ -3796,14 +3804,14 @@ System.Text.Encoding.UTF8))
 
                 string strLocalPath = postedFile.FileName;
 
-                // page.Response.Write("<br/>正在保存" + strLocalPath);
+            // page.Response.Write("<br/>正在保存" + strLocalPath);
 
-                REDOWHOLESAVE:
+            REDOWHOLESAVE:
                 string strWarning = "";
 
                 for (int j = 0; j < ranges.Length; j++)
                 {
-                    REDOSINGLESAVE:
+                REDOSINGLESAVE:
 
                     // Application.DoEvents();	// 出让界面控制权
 
@@ -3883,7 +3891,7 @@ out strError);
 
 
                 return 1;   // 已经保存
-                ERROR1:
+            ERROR1:
                 return -1;
             }
             finally

@@ -1280,5 +1280,29 @@ namespace dp2rms
             {
             }
         }
+
+        private void MenuItem_openDataFolder_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(this.DataDir);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ExceptionUtil.GetAutoText(ex));
+            }
+        }
+
+        private void MenuItem_openProgramFolder_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(Environment.CurrentDirectory);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ExceptionUtil.GetAutoText(ex));
+            }
+        }
     }
 }

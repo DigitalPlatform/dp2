@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
@@ -8739,13 +8740,32 @@ message,
         {
             Cursor oldCursor = this.Cursor;
             this.Cursor = Cursors.WaitCursor;
-
-            for (int i = this.listView_records.SelectedIndices.Count - 1; i >= 0; i--)
+            this.listView_records.SelectedIndexChanged -= new System.EventHandler(this.listView_records_SelectedIndexChanged);
+            // this.listView_records.BeginUpdate();
+            try
             {
-                this.listView_records.Items.RemoveAt(this.listView_records.SelectedIndices[i]);
-            }
+                ListViewUtil.DeleteSelectedItems(this.listView_records);
+                /*
+                var indices = this.listView_records.SelectedIndices.Cast<int>().Reverse();
+                foreach(var index in indices)
+                {
+                    this.listView_records.Items.RemoveAt(index);
+                }
+                */
 
-            this.Cursor = oldCursor;
+                /*
+                for (int i = this.listView_records.SelectedIndices.Count - 1; i >= 0; i--)
+                {
+                    this.listView_records.Items.RemoveAt(this.listView_records.SelectedIndices[i]);
+                }
+                */
+            }
+            finally
+            {
+                // this.listView_records.EndUpdate();
+                this.listView_records.SelectedIndexChanged += new System.EventHandler(this.listView_records_SelectedIndexChanged);
+                this.Cursor = oldCursor;
+            }
         }
 
         /*
@@ -12543,41 +12563,91 @@ message,
             i++;
         }
 
+        // 根据输入到 textbox 中的用户态命令，构造 XPath
+        public static string BuildXPath(params string[] parameters)
+        {
+            if (parameters.Length == 1)
+            {
+                // 字段内容中包含一个指定的子串
+                return $"field[contains(@content, '{parameters[0]}')]";
+            }
+            else if (parameters.Length == 2)
+            {
+                string word = parameters[0];
+                string position = parameters[1];
+                if (position.Length == 3)
+                {
+                    // 字段内容中包含一个指定的子串
+                    return $"field[@name='{position}' and contains(@content, '{parameters[0]}')]";
+                }
+                else if (position.Length == 5)
+                {
+                    // 子段内容中包含一个指定的子串
+                    string field_name = position.Substring(0, 3);
+                    string subfield_name = position[4].ToString();
+                    return $"field[@name='{field_name}']/subfield[@name='{subfield_name}' and contains(@content, '{parameters[0]}')]";
+                }
+                else
+                    throw new Exception($"参数2 '{position}' 格式不正确，应为 3 或 5 字符");
+            }
+            else
+                throw new Exception($"不支持参数数量 {parameters.Length}");
+        }
+
         // 智能筛选
         private void ToolStripMenuItem_filterRecords_Click(object sender, EventArgs e)
         {
-            int nBiblioCount = 0;
+            string strError = "";
 
-            int nRet = ProcessBiblio((strBiblioRecPath, biblio_dom, biblio_timestamp, item) =>
+            try
             {
-                this.ShowMessage("正在过滤书目记录 " + strBiblioRecPath);
+                int nBiblioCount = 0;
+                string query_string = this.textBox_queryWord.Text;
+                var parameters = query_string.Split(new char[] { ' ' });
+                var xpath = BuildXPath(parameters);
 
-                // 将XML格式转换为MARC格式
-                // 自动从数据记录中获得MARC语法
-                nRet = MarcUtil.Xml2Marc(biblio_dom.OuterXml,
-                    true,
-                    null,
-                    out string strMarcSyntax,
-                    out string strMARC,
-                    out string strError1);
-                if (nRet == -1)
+                int nRet = ProcessBiblio((strBiblioRecPath, biblio_dom, biblio_timestamp, item) =>
+                {
+                    this.ShowMessage("正在过滤书目记录 " + strBiblioRecPath);
+
+                    // 将XML格式转换为MARC格式
+                    // 自动从数据记录中获得MARC语法
+                    nRet = MarcUtil.Xml2Marc(biblio_dom.OuterXml,
+                            true,
+                            null,
+                            out string strMarcSyntax,
+                            out string strMARC,
+                            out string strError1);
+                    if (nRet == -1)
+                        return true;
+
+                    MarcRecord record = new MarcRecord(strMARC);
+
+                    // field/subfield[contains(@content, '111')]
+                    // field[@name='200']/subfield[@name='a' and contains(@content, '111')]
+                    MarcNodeList nodes = record.select(xpath);
+                    if (nodes.count > 0)
+                        item.Selected = true;
+                    else
+                        item.Selected = false;
+
+                    nBiblioCount++;
                     return true;
+                }, out strError);
 
-                MarcRecord record = new MarcRecord(strMARC);
+                this.ClearMessage();
 
-                MarcNodeList nodes = record.select(this.textBox_queryWord.Text);
-                if (nodes.count > 0)
-                    item.Selected = true;
-                else
-                    item.Selected = false;
+                if (nRet == -1)
+                    goto ERROR1;
+                return;
+            }
+            catch (Exception ex)
+            {
+                strError = ex.Message;
+                goto ERROR1;
+            }
 
-                nBiblioCount++;
-                return true;
-            }, out string strError);
-
-            this.ClearMessage();
-
-            if (nRet == -1)
+        ERROR1:
             {
                 this.ShowMessage(strError, "red", true);
             }
@@ -12644,6 +12714,11 @@ message,
         private void toolStripMenuItem_subrecords_CheckedChanged(object sender, EventArgs e)
         {
             DisplaySubrecords = toolStripMenuItem_subrecords.Checked;
+        }
+
+        private void toolStripMenuItem_findInList_Click(object sender, EventArgs e)
+        {
+            ListViewUtil.FindAndSelect(this.listView_records, this.textBox_queryWord.Text);
         }
     }
 
