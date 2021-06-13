@@ -294,6 +294,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenApiClientCodeGenerator"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestMySQL", "TestMySQL\TestMySQL.csproj", "{268C8735-E173-45C6-8642-C3ACFB3082B2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestLucene", "TestLucene\TestLucene.csproj", "{10A964B8-DB83-48BE-838D-976F959FDF82}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -2500,6 +2502,24 @@ Global
 		{268C8735-E173-45C6-8642-C3ACFB3082B2}.Test|Mixed Platforms.Build.0 = Debug|Any CPU
 		{268C8735-E173-45C6-8642-C3ACFB3082B2}.Test|x86.ActiveCfg = Debug|Any CPU
 		{268C8735-E173-45C6-8642-C3ACFB3082B2}.Test|x86.Build.0 = Debug|Any CPU
+		{10A964B8-DB83-48BE-838D-976F959FDF82}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{10A964B8-DB83-48BE-838D-976F959FDF82}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{10A964B8-DB83-48BE-838D-976F959FDF82}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{10A964B8-DB83-48BE-838D-976F959FDF82}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{10A964B8-DB83-48BE-838D-976F959FDF82}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{10A964B8-DB83-48BE-838D-976F959FDF82}.Debug|x86.Build.0 = Debug|Any CPU
+		{10A964B8-DB83-48BE-838D-976F959FDF82}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{10A964B8-DB83-48BE-838D-976F959FDF82}.Release|Any CPU.Build.0 = Release|Any CPU
+		{10A964B8-DB83-48BE-838D-976F959FDF82}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{10A964B8-DB83-48BE-838D-976F959FDF82}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{10A964B8-DB83-48BE-838D-976F959FDF82}.Release|x86.ActiveCfg = Release|Any CPU
+		{10A964B8-DB83-48BE-838D-976F959FDF82}.Release|x86.Build.0 = Release|Any CPU
+		{10A964B8-DB83-48BE-838D-976F959FDF82}.Test|Any CPU.ActiveCfg = Debug|Any CPU
+		{10A964B8-DB83-48BE-838D-976F959FDF82}.Test|Any CPU.Build.0 = Debug|Any CPU
+		{10A964B8-DB83-48BE-838D-976F959FDF82}.Test|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{10A964B8-DB83-48BE-838D-976F959FDF82}.Test|Mixed Platforms.Build.0 = Debug|Any CPU
+		{10A964B8-DB83-48BE-838D-976F959FDF82}.Test|x86.ActiveCfg = Debug|Any CPU
+		{10A964B8-DB83-48BE-838D-976F959FDF82}.Test|x86.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
