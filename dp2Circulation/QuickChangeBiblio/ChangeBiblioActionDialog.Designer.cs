@@ -47,6 +47,15 @@ namespace dp2Circulation
             this.label_batchNo = new System.Windows.Forms.Label();
             this.checkBox_add102 = new System.Windows.Forms.CheckBox();
             this.checkBox_addPublisher = new System.Windows.Forms.CheckBox();
+            this.checkBox_addPinyin = new System.Windows.Forms.CheckBox();
+            this.tabControl1 = new System.Windows.Forms.TabControl();
+            this.tabPage_normal = new System.Windows.Forms.TabPage();
+            this.tabPage_pinyin = new System.Windows.Forms.TabPage();
+            this.label6 = new System.Windows.Forms.Label();
+            this.textBox_pinyinCfgs = new System.Windows.Forms.TextBox();
+            this.tabControl1.SuspendLayout();
+            this.tabPage_normal.SuspendLayout();
+            this.tabPage_pinyin.SuspendLayout();
             this.SuspendLayout();
             // 
             // comboBox_batchNo
@@ -57,10 +66,10 @@ namespace dp2Circulation
             this.comboBox_batchNo.FormattingEnabled = true;
             this.comboBox_batchNo.Items.AddRange(new object[] {
             "<不改变>"});
-            this.comboBox_batchNo.Location = new System.Drawing.Point(191, 313);
-            this.comboBox_batchNo.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.comboBox_batchNo.Location = new System.Drawing.Point(185, 321);
+            this.comboBox_batchNo.Margin = new System.Windows.Forms.Padding(4);
             this.comboBox_batchNo.Name = "comboBox_batchNo";
-            this.comboBox_batchNo.Size = new System.Drawing.Size(414, 29);
+            this.comboBox_batchNo.Size = new System.Drawing.Size(479, 29);
             this.comboBox_batchNo.TabIndex = 13;
             this.comboBox_batchNo.Text = "<不改变>";
             this.comboBox_batchNo.SizeChanged += new System.EventHandler(this.comboBox_batchNo_SizeChanged);
@@ -69,7 +78,7 @@ namespace dp2Circulation
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(17, 318);
+            this.label5.Location = new System.Drawing.Point(11, 326);
             this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(117, 21);
@@ -80,8 +89,8 @@ namespace dp2Circulation
             // 
             this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.button_Cancel.Location = new System.Drawing.Point(504, 507);
-            this.button_Cancel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_Cancel.Location = new System.Drawing.Point(588, 569);
+            this.button_Cancel.Margin = new System.Windows.Forms.Padding(4);
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(103, 38);
             this.button_Cancel.TabIndex = 15;
@@ -92,8 +101,8 @@ namespace dp2Circulation
             // button_OK
             // 
             this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_OK.Location = new System.Drawing.Point(392, 507);
-            this.button_OK.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_OK.Location = new System.Drawing.Point(476, 569);
+            this.button_OK.Margin = new System.Windows.Forms.Padding(4);
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(103, 38);
             this.button_OK.TabIndex = 14;
@@ -110,10 +119,10 @@ namespace dp2Circulation
             this.comboBox_state.Items.AddRange(new object[] {
             "<不改变>",
             "<增、减>"});
-            this.comboBox_state.Location = new System.Drawing.Point(191, 144);
-            this.comboBox_state.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.comboBox_state.Location = new System.Drawing.Point(185, 152);
+            this.comboBox_state.Margin = new System.Windows.Forms.Padding(4);
             this.comboBox_state.Name = "comboBox_state";
-            this.comboBox_state.Size = new System.Drawing.Size(414, 29);
+            this.comboBox_state.Size = new System.Drawing.Size(479, 29);
             this.comboBox_state.TabIndex = 6;
             this.comboBox_state.Text = "<不改变>";
             this.comboBox_state.SizeChanged += new System.EventHandler(this.comboBox_state_SizeChanged);
@@ -122,7 +131,7 @@ namespace dp2Circulation
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(17, 147);
+            this.label3.Location = new System.Drawing.Point(11, 155);
             this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(96, 21);
@@ -141,10 +150,10 @@ namespace dp2Circulation
             "<当前时间>",
             "<指定时间>",
             "<清除>"});
-            this.comboBox_opertime.Location = new System.Drawing.Point(191, 18);
-            this.comboBox_opertime.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.comboBox_opertime.Location = new System.Drawing.Point(185, 26);
+            this.comboBox_opertime.Margin = new System.Windows.Forms.Padding(4);
             this.comboBox_opertime.Name = "comboBox_opertime";
-            this.comboBox_opertime.Size = new System.Drawing.Size(414, 29);
+            this.comboBox_opertime.Size = new System.Drawing.Size(479, 29);
             this.comboBox_opertime.TabIndex = 2;
             this.comboBox_opertime.SizeChanged += new System.EventHandler(this.comboBox_opertime_SizeChanged);
             this.comboBox_opertime.TextChanged += new System.EventHandler(this.comboBox_opertime_TextChanged);
@@ -152,7 +161,7 @@ namespace dp2Circulation
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(17, 21);
+            this.label1.Location = new System.Drawing.Point(11, 29);
             this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(138, 21);
@@ -162,7 +171,7 @@ namespace dp2Circulation
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(185, 186);
+            this.label2.Location = new System.Drawing.Point(179, 194);
             this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(75, 21);
@@ -175,12 +184,12 @@ namespace dp2Circulation
             | System.Windows.Forms.AnchorStyles.Right)));
             this.checkedComboBox_stateAdd.BackColor = System.Drawing.SystemColors.Window;
             this.checkedComboBox_stateAdd.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.checkedComboBox_stateAdd.Location = new System.Drawing.Point(270, 186);
+            this.checkedComboBox_stateAdd.Location = new System.Drawing.Point(264, 194);
             this.checkedComboBox_stateAdd.Margin = new System.Windows.Forms.Padding(0);
             this.checkedComboBox_stateAdd.Name = "checkedComboBox_stateAdd";
             this.checkedComboBox_stateAdd.Padding = new System.Windows.Forms.Padding(4);
             this.checkedComboBox_stateAdd.ReadOnly = false;
-            this.checkedComboBox_stateAdd.Size = new System.Drawing.Size(337, 32);
+            this.checkedComboBox_stateAdd.Size = new System.Drawing.Size(402, 32);
             this.checkedComboBox_stateAdd.TabIndex = 8;
             this.checkedComboBox_stateAdd.DropDown += new System.EventHandler(this.checkedComboBox_stateAdd_DropDown);
             this.checkedComboBox_stateAdd.TextChanged += new System.EventHandler(this.checkedComboBox_stateAdd_TextChanged);
@@ -191,12 +200,12 @@ namespace dp2Circulation
             | System.Windows.Forms.AnchorStyles.Right)));
             this.checkedComboBox_stateRemove.BackColor = System.Drawing.SystemColors.Window;
             this.checkedComboBox_stateRemove.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.checkedComboBox_stateRemove.Location = new System.Drawing.Point(270, 224);
+            this.checkedComboBox_stateRemove.Location = new System.Drawing.Point(264, 232);
             this.checkedComboBox_stateRemove.Margin = new System.Windows.Forms.Padding(0);
             this.checkedComboBox_stateRemove.Name = "checkedComboBox_stateRemove";
             this.checkedComboBox_stateRemove.Padding = new System.Windows.Forms.Padding(4);
             this.checkedComboBox_stateRemove.ReadOnly = false;
-            this.checkedComboBox_stateRemove.Size = new System.Drawing.Size(337, 32);
+            this.checkedComboBox_stateRemove.Size = new System.Drawing.Size(402, 32);
             this.checkedComboBox_stateRemove.TabIndex = 10;
             this.checkedComboBox_stateRemove.DropDown += new System.EventHandler(this.checkedComboBox_stateRemove_DropDown);
             this.checkedComboBox_stateRemove.TextChanged += new System.EventHandler(this.checkedComboBox_stateRemove_TextChanged);
@@ -204,7 +213,7 @@ namespace dp2Circulation
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(185, 224);
+            this.label4.Location = new System.Drawing.Point(179, 232);
             this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(75, 21);
@@ -217,10 +226,10 @@ namespace dp2Circulation
             | System.Windows.Forms.AnchorStyles.Right)));
             this.dateTimePicker1.CustomFormat = "yyyy-MM-dd HH:mm:ss";
             this.dateTimePicker1.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
-            this.dateTimePicker1.Location = new System.Drawing.Point(191, 58);
+            this.dateTimePicker1.Location = new System.Drawing.Point(185, 66);
             this.dateTimePicker1.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.dateTimePicker1.Name = "dateTimePicker1";
-            this.dateTimePicker1.Size = new System.Drawing.Size(414, 31);
+            this.dateTimePicker1.Size = new System.Drawing.Size(479, 31);
             this.dateTimePicker1.TabIndex = 3;
             // 
             // label_operTime
@@ -250,7 +259,7 @@ namespace dp2Circulation
             // checkBox_add102
             // 
             this.checkBox_add102.AutoSize = true;
-            this.checkBox_add102.Location = new System.Drawing.Point(21, 389);
+            this.checkBox_add102.Location = new System.Drawing.Point(13, 432);
             this.checkBox_add102.Name = "checkBox_add102";
             this.checkBox_add102.Size = new System.Drawing.Size(208, 25);
             this.checkBox_add102.TabIndex = 16;
@@ -260,12 +269,96 @@ namespace dp2Circulation
             // checkBox_addPublisher
             // 
             this.checkBox_addPublisher.AutoSize = true;
-            this.checkBox_addPublisher.Location = new System.Drawing.Point(255, 389);
+            this.checkBox_addPublisher.Location = new System.Drawing.Point(247, 432);
             this.checkBox_addPublisher.Name = "checkBox_addPublisher";
             this.checkBox_addPublisher.Size = new System.Drawing.Size(237, 25);
             this.checkBox_addPublisher.TabIndex = 17;
             this.checkBox_addPublisher.Text = "添加出版社子字段(&P)";
             this.checkBox_addPublisher.UseVisualStyleBackColor = true;
+            // 
+            // checkBox_addPinyin
+            // 
+            this.checkBox_addPinyin.AutoSize = true;
+            this.checkBox_addPinyin.Location = new System.Drawing.Point(10, 38);
+            this.checkBox_addPinyin.Name = "checkBox_addPinyin";
+            this.checkBox_addPinyin.Size = new System.Drawing.Size(132, 25);
+            this.checkBox_addPinyin.TabIndex = 18;
+            this.checkBox_addPinyin.Text = "加拼音(&P)";
+            this.checkBox_addPinyin.UseVisualStyleBackColor = true;
+            // 
+            // tabControl1
+            // 
+            this.tabControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tabControl1.Controls.Add(this.tabPage_normal);
+            this.tabControl1.Controls.Add(this.tabPage_pinyin);
+            this.tabControl1.Location = new System.Drawing.Point(12, 18);
+            this.tabControl1.Name = "tabControl1";
+            this.tabControl1.SelectedIndex = 0;
+            this.tabControl1.Size = new System.Drawing.Size(683, 538);
+            this.tabControl1.TabIndex = 19;
+            // 
+            // tabPage_normal
+            // 
+            this.tabPage_normal.AutoScroll = true;
+            this.tabPage_normal.Controls.Add(this.checkBox_add102);
+            this.tabPage_normal.Controls.Add(this.checkBox_addPublisher);
+            this.tabPage_normal.Controls.Add(this.comboBox_opertime);
+            this.tabPage_normal.Controls.Add(this.dateTimePicker1);
+            this.tabPage_normal.Controls.Add(this.label1);
+            this.tabPage_normal.Controls.Add(this.checkedComboBox_stateRemove);
+            this.tabPage_normal.Controls.Add(this.label3);
+            this.tabPage_normal.Controls.Add(this.label4);
+            this.tabPage_normal.Controls.Add(this.comboBox_state);
+            this.tabPage_normal.Controls.Add(this.checkedComboBox_stateAdd);
+            this.tabPage_normal.Controls.Add(this.label5);
+            this.tabPage_normal.Controls.Add(this.label2);
+            this.tabPage_normal.Controls.Add(this.comboBox_batchNo);
+            this.tabPage_normal.Location = new System.Drawing.Point(4, 31);
+            this.tabPage_normal.Name = "tabPage_normal";
+            this.tabPage_normal.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage_normal.Size = new System.Drawing.Size(675, 503);
+            this.tabPage_normal.TabIndex = 0;
+            this.tabPage_normal.Text = "一般动作";
+            this.tabPage_normal.UseVisualStyleBackColor = true;
+            // 
+            // tabPage_pinyin
+            // 
+            this.tabPage_pinyin.AutoScroll = true;
+            this.tabPage_pinyin.Controls.Add(this.textBox_pinyinCfgs);
+            this.tabPage_pinyin.Controls.Add(this.label6);
+            this.tabPage_pinyin.Controls.Add(this.checkBox_addPinyin);
+            this.tabPage_pinyin.Location = new System.Drawing.Point(4, 31);
+            this.tabPage_pinyin.Name = "tabPage_pinyin";
+            this.tabPage_pinyin.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage_pinyin.Size = new System.Drawing.Size(675, 503);
+            this.tabPage_pinyin.TabIndex = 1;
+            this.tabPage_pinyin.Text = "加拼音";
+            this.tabPage_pinyin.UseVisualStyleBackColor = true;
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(3, 95);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(105, 21);
+            this.label6.TabIndex = 19;
+            this.label6.Text = "规则定义:";
+            // 
+            // textBox_pinyinCfgs
+            // 
+            this.textBox_pinyinCfgs.AcceptsReturn = true;
+            this.textBox_pinyinCfgs.AcceptsTab = true;
+            this.textBox_pinyinCfgs.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_pinyinCfgs.Location = new System.Drawing.Point(10, 122);
+            this.textBox_pinyinCfgs.Multiline = true;
+            this.textBox_pinyinCfgs.Name = "textBox_pinyinCfgs";
+            this.textBox_pinyinCfgs.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox_pinyinCfgs.Size = new System.Drawing.Size(659, 351);
+            this.textBox_pinyinCfgs.TabIndex = 20;
             // 
             // ChangeBiblioActionDialog
             // 
@@ -273,33 +366,25 @@ namespace dp2Circulation
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.button_Cancel;
-            this.ClientSize = new System.Drawing.Size(623, 565);
-            this.Controls.Add(this.checkBox_addPublisher);
-            this.Controls.Add(this.checkBox_add102);
+            this.ClientSize = new System.Drawing.Size(707, 627);
+            this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.label_batchNo);
             this.Controls.Add(this.label_state);
             this.Controls.Add(this.label_operTime);
-            this.Controls.Add(this.dateTimePicker1);
-            this.Controls.Add(this.checkedComboBox_stateRemove);
-            this.Controls.Add(this.label4);
-            this.Controls.Add(this.checkedComboBox_stateAdd);
-            this.Controls.Add(this.label2);
-            this.Controls.Add(this.comboBox_batchNo);
-            this.Controls.Add(this.label5);
             this.Controls.Add(this.button_Cancel);
             this.Controls.Add(this.button_OK);
-            this.Controls.Add(this.comboBox_state);
-            this.Controls.Add(this.label3);
-            this.Controls.Add(this.comboBox_opertime);
-            this.Controls.Add(this.label1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "ChangeBiblioActionDialog";
             this.ShowInTaskbar = false;
             this.Text = "动作参数";
             this.Load += new System.EventHandler(this.ChangeBiblioActionDialog_Load);
+            this.tabControl1.ResumeLayout(false);
+            this.tabPage_normal.ResumeLayout(false);
+            this.tabPage_normal.PerformLayout();
+            this.tabPage_pinyin.ResumeLayout(false);
+            this.tabPage_pinyin.PerformLayout();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
@@ -323,5 +408,11 @@ namespace dp2Circulation
         private System.Windows.Forms.Label label_batchNo;
         private System.Windows.Forms.CheckBox checkBox_add102;
         private System.Windows.Forms.CheckBox checkBox_addPublisher;
+        private System.Windows.Forms.CheckBox checkBox_addPinyin;
+        private System.Windows.Forms.TabControl tabControl1;
+        private System.Windows.Forms.TabPage tabPage_normal;
+        private System.Windows.Forms.TabPage tabPage_pinyin;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.TextBox textBox_pinyinCfgs;
     }
 }

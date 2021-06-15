@@ -80,6 +80,16 @@ false);
 "addPublisher",
 false);
 
+            this.checkBox_addPinyin.Checked = Program.MainForm.AppInfo.GetBoolean(
+                "change_biblio_param",
+"addPinyin",
+false);
+
+            this.textBox_pinyinCfgs.Text = Program.MainForm.AppInfo.GetString(
+                "change_biblio_param",
+"pinyinCfgs",
+"");
+
             comboBox_state_TextChanged(null, null);
             comboBox_opertime_TextChanged(null, null);
             comboBox_batchNo_TextChanged(null, null);
@@ -104,6 +114,28 @@ false);
                 "change_biblio_param",
 "addPublisher",
 false);
+            }
+        }
+
+        public static bool NeedAddPinyin
+        {
+            get
+            {
+                return Program.MainForm.AppInfo.GetBoolean(
+                "change_biblio_param",
+"addPinyin",
+false);
+            }
+        }
+
+        public static string PinyinCfgs
+        {
+            get
+            {
+                return Program.MainForm.AppInfo.GetString(
+                "change_biblio_param",
+"pinyinCfgs",
+"");
             }
         }
 
@@ -175,6 +207,16 @@ this.checkBox_add102.Checked);
 "addPublisher",
 this.checkBox_addPublisher.Checked);
 
+            Program.MainForm.AppInfo.SetBoolean(
+    "change_biblio_param",
+"addPinyin",
+this.checkBox_addPinyin.Checked);
+
+            Program.MainForm.AppInfo.SetString(
+    "change_biblio_param",
+"pinyinCfgs",
+this.textBox_pinyinCfgs.Text);
+
             this.DialogResult = DialogResult.OK;
             this.Close();
         }
@@ -183,7 +225,6 @@ this.checkBox_addPublisher.Checked);
         {
             this.DialogResult = DialogResult.Cancel;
             this.Close();
-
         }
 
         private void comboBox_state_TextChanged(object sender, EventArgs e)

@@ -18,6 +18,9 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.Text;
 
 using DigitalPlatform.LibraryClient.localhost;
+using System.Web;
+using DigitalPlatform.Script;
+using System.Collections;
 
 namespace dp2Circulation
 {
@@ -240,6 +243,8 @@ MessageBoxDefaultButton.Button1);
 
             stop.SetProgressRange(0, this.textBox_paths.Lines.Length);
 
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
++ " 开始批处理修改书目记录</div>");
             for (int i = 0; i < this.textBox_paths.Lines.Length; i++)
             {
                 Application.DoEvents();
@@ -272,9 +277,13 @@ MessageBoxDefaultButton.Button1);
                 stop.SetProgressValue(i + 1);
             }
 
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
++ " 结束批处理修改书目记录</div>");
+
             MessageBox.Show(this, "处理完毕。共处理记录 " + nCount.ToString() + " 条，实际发生修改 " + nChangedCount.ToString() + " 条");
             return 1;
         ERROR1:
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode($"修改书目记录出错: {strError}") + "</div>");
             MessageBox.Show(this, strError);
             return -1;
         }
@@ -327,6 +336,9 @@ MessageBoxDefaultButton.Button1);
 
                 stop.SetProgressRange(0, sr.BaseStream.Length);
 
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
++ " 开始批处理修改书目记录</div>");
+
                 for (; ; )
                 {
                     Application.DoEvents();
@@ -372,9 +384,13 @@ MessageBoxDefaultButton.Button1);
                 }
             }
 
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
++ " 结束批处理修改书目记录</div>");
+
             MessageBox.Show(this, "处理完毕。共处理记录 " + nCount.ToString() + " 条，实际发生修改 " + nChangedCount.ToString() + " 条");
             return;
         ERROR1:
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode($"修改书目记录出错: {strError}") + "</div>");
             MessageBox.Show(this, strError);
         }
 
@@ -404,6 +420,8 @@ MessageBoxDefaultButton.Button1);
             int nRet = 0;
 
             stop.SetMessage("正在处理 " + strBiblioRecPath + " ...");
+
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode($"=== {strBiblioRecPath} ===") + "</div>");
 
             string[] formats = new string[1];
             formats[0] = "xml";
@@ -445,14 +463,12 @@ MessageBoxDefaultButton.Button1);
 
 
             string strMARC = "";
-            string strMarcSyntax = "";
-            string strOutMarcSyntax = "";
             // 将XML格式转换为MARC格式
             // 自动从数据记录中获得MARC语法
             nRet = MarcUtil.Xml2Marc(strXml,
                 true,
-                strMarcSyntax,
-                out strOutMarcSyntax,
+                "", // strMarcSyntax,
+                out string strOutMarcSyntax,
                 out strMARC,
                 out strError);
             if (nRet == -1)
@@ -460,6 +476,8 @@ MessageBoxDefaultButton.Button1);
                 strError = "XML转换到MARC记录时出错: " + strError;
                 return -1;
             }
+
+            string strMarcSyntax = strOutMarcSyntax;
 
             bool changed = false;
             // 修改
@@ -481,22 +499,63 @@ MessageBoxDefaultButton.Button1);
 
             if (ChangeBiblioActionDialog.NeedAdd102)
             {
-                nRet = Add102(ref strMARC,
+                nRet = Add102(
+                    strMarcSyntax,
+                    ref strMARC,
                     out strError);
                 if (nRet == -1)
+                {
+                    strError = $"为书目记录 {strBiblioRecPath} 添加 102 字段时出错: {strError}";
                     return -1;
+                }
                 if (nRet == 1)
                     changed = true;
+                else if (string.IsNullOrEmpty(strError) == false)
+                {
+                    Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>&nbsp;" + HttpUtility.HtmlEncode($"{strError}") + "</div>");
+                }
             }
 
             if (ChangeBiblioActionDialog.NeedAddPublisher)
             {
-                nRet = AddPublisher(ref strMARC,
+                nRet = AddPublisher(
+                    strMarcSyntax,
+                    ref strMARC,
                     out strError);
                 if (nRet == -1)
+                {
+                    strError = $"为书目记录 {strBiblioRecPath} 添加出版者子字段时出错: {strError}";
                     return -1;
+                }
                 if (nRet == 1)
                     changed = true;
+                else if (string.IsNullOrEmpty(strError) == false)
+                {
+                    Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>&nbsp;" + HttpUtility.HtmlEncode($"{strError}") + "</div>");
+                }
+            }
+
+            if (ChangeBiblioActionDialog.NeedAddPinyin
+                && strMarcSyntax == "unimarc")
+            {
+                nRet = AddPinyin(
+                    ref strMARC,
+                    ChangeBiblioActionDialog.PinyinCfgs,
+                    PinyinStyle.Lower,
+                    "",
+                    false,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = $"为书目记录 {strBiblioRecPath} 添加拼音子字段时出错: {strError}";
+                    return -1;
+                }
+                if (nRet == 1)
+                    changed = true;
+                else if (string.IsNullOrEmpty(strError) == false)
+                {
+                    Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>&nbsp;" + HttpUtility.HtmlEncode($"{strError}") + "</div>");
+                }
             }
 
             if (changed == false)
@@ -647,20 +706,46 @@ MessageBoxDefaultButton.Button1);
                 nCount++;
             }
 
+            if (ChangeBiblioActionDialog.NeedAddPinyin)
+            {
+                strResult += "\r\n添加拼音子字段";
+                nCount++;
+            }
+
             return strResult;
         }
 
-        int Add102(ref string strMARC,
+        int Add102(
+            string strMarcSyntax,
+            ref string strMARC,
             out string strError)
         {
             strError = "";
 
+            if (strMarcSyntax == "usmarc")
+            {
+                strError = "暂不能处理 USMARC 格式记录";
+                return 0;   // 暂不能处理 USMARC 格式
+            }
+
             MarcRecord record = new MarcRecord(strMARC);
+
+            // 观察 102$a$b 子字段是否已经存在。如果已经存在，则放弃处理
+            var s_102a = record.select("field[@name='102']/subfield[@name='a']").FirstContent?.Trim();
+            var s_102b = record.select("field[@name='102']/subfield[@name='b']").FirstContent?.Trim();
+            if (string.IsNullOrEmpty(s_102a) == false
+                || string.IsNullOrEmpty(s_102b) == false)
+            {
+                // 102$a$b 子字段至少存在一个
+                strError = "记录中已经存在 102$a$b 子字段(至少一个), 因此放弃添加 102$a$b";
+                return 0;
+            }
+
             var isbn = record.select("field[@name='010']/subfield[@name='a']").FirstContent?.Trim();
             if (string.IsNullOrEmpty(isbn))
             {
                 // 010$a 不存在
-                strError = "记录中不存在 010$a 子字段,因此无法加 102$a$b";
+                strError = "记录中不存在 010$a 子字段, 因此无法加 102$a$b";
                 return 0;
             }
 
@@ -689,7 +774,10 @@ MessageBoxDefaultButton.Button1);
                     "国家代码[2位]:城市代码[6位]",
                     Program.MainForm.DefaultFont);
                 if (strValue == null)
+                {
+                    strError = "用户放弃处理";
                     return 0; // 放弃操作
+                }
 
                 nRet = this.Set102Info(strPublisherNumber,
                     strValue,
@@ -747,16 +835,37 @@ MessageBoxDefaultButton.Button1);
                 strMARC = record.Text;
                 return 1;
             }
+            strError = "没有发生修改";
             return 0;
         }
 
         // 加入出版地、出版者
-        int AddPublisher(ref string strMARC,
+        int AddPublisher(
+            string strMarcSyntax,
+            ref string strMARC,
             out string strError)
         {
             strError = "";
 
+            if (strMarcSyntax == "usmarc")
+            {
+                strError = "暂不能处理 USMARC 格式记录";
+                return 0;   // 暂不能处理 USMARC 格式
+            }
+
             MarcRecord record = new MarcRecord(strMARC);
+
+            // 观察 210$a$c 子字段是否已经存在。如果已经存在，则放弃处理
+            var s_210a = record.select("field[@name='210']/subfield[@name='a']").FirstContent?.Trim();
+            var s_210c = record.select("field[@name='210']/subfield[@name='c']").FirstContent?.Trim();
+            if (string.IsNullOrEmpty(s_210a) == false
+                || string.IsNullOrEmpty(s_210c) == false)
+            {
+                // 210$a$c 子字段至少存在一个
+                strError = "记录中已经存在 210$a$c 子字段(至少一个), 因此放弃添加 210$a$c 子字段";
+                return 0;
+            }
+
             var isbn = record.select("field[@name='010']/subfield[@name='a']").FirstContent?.Trim();
             if (string.IsNullOrEmpty(isbn))
             {
@@ -788,7 +897,10 @@ MessageBoxDefaultButton.Button1);
                     "出版地:出版社名",
                     Program.MainForm.DefaultFont);
                 if (strValue == null)
+                {
+                    strError = "用户放弃处理";
                     return 0; // 放弃操作
+                }
 
                 nRet = this.SetPublisherInfo(strPublisherNumber,
                     strValue,
@@ -822,6 +934,247 @@ MessageBoxDefaultButton.Button1);
                 strMARC = record.Text;
                 return 1;
             }
+
+            strError = "没有发生修改";
+            return 0;
+        }
+
+        public int AddPinyin(
+            ref string strMARC,
+            string strCfgXml,
+            // bool bUseCache = true,
+            PinyinStyle style,
+            string strPrefix,
+            bool bAutoSel,
+            out string strError)
+        {
+            strError = "";
+            XmlDocument cfg_dom = new XmlDocument();
+            try
+            {
+                cfg_dom.LoadXml(strCfgXml);
+            }
+            catch (Exception ex)
+            {
+                strError = "strCfgXml 装载到 XMLDOM 时出错: " + ex.Message;
+                return -1;
+            }
+
+            string strRuleParam = "";
+            if (string.IsNullOrEmpty(strPrefix) == false)
+            {
+                string strCmd = StringUtil.GetLeadingCommand(strPrefix);
+                if (string.IsNullOrEmpty(strCmd) == false
+&& StringUtil.HasHead(strCmd, "cr:") == true)
+                {
+                    strRuleParam = strCmd.Substring(3);
+                }
+            }
+
+            //Hashtable old_selected = new Hashtable();   // (bUseCache == true) ? this.DetailForm.GetSelectedPinyin() : new Hashtable();
+            //Hashtable new_selected = new Hashtable();
+
+            MarcRecord record = new MarcRecord(strMARC);
+            // PinyinStyle style = PinyinStyle.None;	// 在这里修改拼音大小写风格
+            foreach (MarcField field in record.Fields)
+            // for (int i = 0; i < DetailForm.MarcEditor.Record.Fields.Count; i++)
+            {
+                // Field field = DetailForm.MarcEditor.Record.Fields[i];
+
+                List<PinyinCfgItem> cfg_items = null;
+                int nRet = DetailHost.GetPinyinCfgLine(
+                    cfg_dom,
+                    field.Name,
+                    field.Indicator,
+                    out cfg_items);
+                if (nRet <= 0)
+                    continue;
+
+                string strHanzi = "";
+                // string strNextSubfieldName = "";
+
+                string strField = field.Text;
+
+                string strFieldPrefix = "";
+
+                // 2012/11/5
+                // 观察字段内容前面的 {} 部分
+                {
+                    string strCmd = StringUtil.GetLeadingCommand(field.Content);
+                    if (string.IsNullOrEmpty(strRuleParam) == false
+                        && string.IsNullOrEmpty(strCmd) == false
+                        && StringUtil.HasHead(strCmd, "cr:") == true)
+                    {
+                        string strCurRule = strCmd.Substring(3);
+                        if (strCurRule != strRuleParam)
+                            continue;
+                    }
+                    else if (string.IsNullOrEmpty(strCmd) == false)
+                    {
+                        strFieldPrefix = "{" + strCmd + "}";
+                    }
+                }
+
+                // 2012/11/5
+                // 观察 $* 子字段
+                {
+                    var nodes = field.select("subfield[@name='*']");
+                    MarcSubfield subfield = null;
+                    if (nodes.count > 0)
+                        subfield = nodes[0] as MarcSubfield;
+
+                    /*
+                    //
+                    string strSubfield = "";
+                    string strNextSubfieldName1 = "";
+                    // return:
+                    //		-1	出错
+                    //		0	所指定的子字段没有找到
+                    //		1	找到。找到的子字段返回在strSubfield参数中
+                    nRet = MarcUtil.GetSubfield(strField,
+                        ItemType.Field,
+                        "*",    // "*",
+                        0,
+                        out strSubfield,
+                        out strNextSubfieldName1);
+                    if (nRet == 1)
+                    {
+                        string strCurStyle = strSubfield.Substring(1);
+                        if (string.IsNullOrEmpty(strRuleParam) == false
+                            && strCurStyle != strRuleParam)
+                            continue;
+                        else if (string.IsNullOrEmpty(strCurStyle) == false)
+                        {
+                            strFieldPrefix = "{cr:" + strCurStyle + "}";
+                        }
+                    }
+                    */
+                    if (subfield != null)
+                    {
+                        string strCurStyle = subfield.Content;
+                        if (string.IsNullOrEmpty(strRuleParam) == false
+                            && strCurStyle != strRuleParam)
+                            continue;
+                        else if (string.IsNullOrEmpty(strCurStyle) == false)
+                        {
+                            strFieldPrefix = "{cr:" + strCurStyle + "}";
+                        }
+                    }
+                }
+
+                foreach (PinyinCfgItem item in cfg_items)
+                {
+                    for (int k = 0; k < item.From.Length; k++)
+                    {
+                        if (item.From.Length != item.To.Length)
+                        {
+                            strError = "配置事项 fieldname='" + item.FieldName + "' from='" + item.From + "' to='" + item.To + "' 其中from和to参数值的字符数不等";
+                            return -1;
+                        }
+
+                        string from = new string(item.From[k], 1);
+                        string to = new string(item.To[k], 1);
+                        for (int j = 0; ; j++)
+                        {
+                            // return:
+                            //		-1	error
+                            //		0	not found
+                            //		1	found
+
+                            nRet = MarcUtil.GetSubfield(strField,
+                                ItemType.Field,
+                                from,
+                                j,
+                                out strHanzi,
+                                out string strNextSubfieldName);
+                            if (nRet != 1)
+                                break;
+
+                            if (strHanzi.Length <= 1)
+                                break;
+
+                            strHanzi = strHanzi.Substring(1);
+
+                            // 2013/6/13
+                            if (DetailHost.ContainHanzi(strHanzi) == false)
+                                continue;
+
+                            string strSubfieldPrefix = "";  // 当前子字段内容本来具有的前缀
+
+                            // 检查内容前部可能出现的 {} 符号
+                            string strCmd = StringUtil.GetLeadingCommand(strHanzi);
+                            if (string.IsNullOrEmpty(strRuleParam) == false
+                                && string.IsNullOrEmpty(strCmd) == false
+                                && StringUtil.HasHead(strCmd, "cr:") == true)
+                            {
+                                string strCurRule = strCmd.Substring(3);
+                                if (strCurRule != strRuleParam)
+                                    continue;   // 当前子字段属于和strPrefix表示的不同的编目规则，需要跳过，不给加拼音
+                                strHanzi = strHanzi.Substring(strPrefix.Length); // 去掉 {} 部分
+                            }
+                            else if (string.IsNullOrEmpty(strCmd) == false)
+                            {
+                                strHanzi = strHanzi.Substring(strCmd.Length + 2); // 去掉 {} 部分
+                                strSubfieldPrefix = "{" + strCmd + "}";
+                            }
+
+                            string strPinyin = "";
+
+                            // strPinyin = (string)old_selected[strHanzi];
+                            if (string.IsNullOrEmpty(strPinyin) == true)
+                            {
+                                nRet = Program.MainForm.GetPinyin(
+                                    this,
+                                    strHanzi,
+                                    style,
+                                    bAutoSel,
+                                    out strPinyin,
+                                    out strError);
+                                if (nRet == -1)
+                                {
+                                    //new_selected = null;
+                                    return -1;
+                                }
+                                if (nRet == 0)
+                                {
+                                    //new_selected = null;
+                                    strError = "用户中断。拼音子字段内容可能不完整。";
+                                    return -1;
+                                }
+                            }
+
+                            //if (new_selected != null && nRet != 2)
+                            //    new_selected[strHanzi] = strPinyin;
+
+                            nRet = MarcUtil.DeleteSubfield(
+                                ref strField,
+                                to,
+                                j);
+
+                            string strContent = strPinyin;
+
+                            if (string.IsNullOrEmpty(strPrefix) == false)
+                                strContent = strPrefix + strPinyin;
+                            else if (string.IsNullOrEmpty(strSubfieldPrefix) == false)
+                                strContent = strSubfieldPrefix + strPinyin;
+
+                            nRet = MarcUtil.InsertSubfield(
+                                ref strField,
+                                from,
+                                j,
+                                new string(MarcUtil.SUBFLD, 1) + to + strContent,
+                                1);
+                            field.Text = strField;
+                        }
+                    }
+                }
+            }
+            if (strMARC != record.Text)
+            {
+                strMARC = record.Text;
+                return 1;
+            }
+            strError = "没有发生修改";
             return 0;
         }
 
