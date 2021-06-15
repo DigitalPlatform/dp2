@@ -3730,14 +3730,29 @@ Keys keyData)
         byte[] timestamp,
         ListViewItem item);
 
+        // parameters:
+        //      items   要处理的事项集合。如果为 null，表示要处理当前 ListView 中已选择的行
         int ProcessBiblio(
+            List<ListViewItem> items,
             Delegate_processBiblio func,
             out string strError)
         {
             strError = "";
             int nRet = 0;
 
-            if (this.listView_records.SelectedItems.Count == 0)
+            if (items == null)
+            {
+                items = new List<ListViewItem>();
+                foreach (ListViewItem item in this.listView_records.SelectedItems)
+                {
+                    if (string.IsNullOrEmpty(item.Text) == true)
+                        continue;
+
+                    items.Add(item);
+                }
+            }
+
+            if (items.Count == 0)
             {
                 strError = "尚未选定要进行批处理的事项";
                 return -1;
@@ -3761,8 +3776,7 @@ Keys keyData)
             this.EnableControls(false);
             try
             {
-                stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
-
+                /*
                 List<ListViewItem> items = new List<ListViewItem>();
                 foreach (ListViewItem item in this.listView_records.SelectedItems)
                 {
@@ -3771,6 +3785,10 @@ Keys keyData)
 
                     items.Add(item);
                 }
+                */
+
+                stop.SetProgressRange(0, items.Count);
+
                 ListViewBiblioLoader loader = new ListViewBiblioLoader(channel, // this.Channel,
                     stop,
                     items,
@@ -4388,168 +4406,169 @@ Keys keyData)
                 string strDefaultOrderXml = "";
 
                 nRet = ProcessBiblio(
-                        (strBiblioRecPath, biblio_dom, biblio_timestamp, item) =>
-                        {
-                            this.ShowMessage("正在处理书目记录 " + strBiblioRecPath);
+                    null,
+                    (strBiblioRecPath, biblio_dom, biblio_timestamp, item) =>
+                    {
+                        this.ShowMessage("正在处理书目记录 " + strBiblioRecPath);
 
-                            Order.DistributeExcelFile.WarningRecPath("===", null);
-                            Order.DistributeExcelFile.WarningRecPath("书目记录 " + strBiblioRecPath, null);
+                        Order.DistributeExcelFile.WarningRecPath("===", null);
+                        Order.DistributeExcelFile.WarningRecPath("书目记录 " + strBiblioRecPath, null);
 
-                            nOrderCount += context.OutputDistributeInfos(
-                                // context,
-                                this,
-                                strSellerFilter,
-                                dlg.LibraryCode,
-                                //sheet,
-                                strBiblioRecPath,
-                                ref nLineNumber,
-                                "",
-                                (biblio_recpath, order_recpath) =>
+                        nOrderCount += context.OutputDistributeInfos(
+                            // context,
+                            this,
+                            strSellerFilter,
+                            dlg.LibraryCode,
+                            //sheet,
+                            strBiblioRecPath,
+                            ref nLineNumber,
+                            "",
+                            (biblio_recpath, order_recpath) =>
+                            {
+                            REDO_0:
+                                if (string.IsNullOrEmpty(strDefaultOrderXml))
                                 {
-                                REDO_0:
-                                    if (string.IsNullOrEmpty(strDefaultOrderXml))
+                                REDO:
+                                    // 看看即将插入的位置是图书还是期刊?
+                                    string strPubType = OrderEditForm.GetPublicationType(biblio_recpath);
+
+                                    OrderEditForm edit = new OrderEditForm();
+
+                                    OrderEditForm.SetXml(edit.OrderEditControl,
+                                        SetSeller(Program.MainForm.AppInfo.GetString("BiblioSearchForm", "orderRecord", "<root />"), GetFirstSeller(strSellerFilter)),
+                                        strPubType);
+                                    edit.Text = "新增订购事项";
+                                    edit.DisplayMode = strPubType == "series" ? "simpleseries" : "simplebook";
+
+                                    Program.MainForm.AppInfo.LinkFormState(edit, "BiblioSearchForm_OrderEditForm_state");
+                                    edit.ShowDialog(this);
+
+                                    strDefaultOrderXml = OrderEditForm.GetXml(edit.OrderEditControl);
+                                    // 删除那些空内容的元素
+                                    strDefaultOrderXml = DomUtil.RemoveEmptyElements(strDefaultOrderXml);
+
+                                    Program.MainForm.AppInfo.SetString("BiblioSearchForm", "orderRecord", strDefaultOrderXml);
+
+                                    if (edit.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                                     {
-                                    REDO:
-                                        // 看看即将插入的位置是图书还是期刊?
-                                        string strPubType = OrderEditForm.GetPublicationType(biblio_recpath);
-
-                                        OrderEditForm edit = new OrderEditForm();
-
-                                        OrderEditForm.SetXml(edit.OrderEditControl,
-                                            SetSeller(Program.MainForm.AppInfo.GetString("BiblioSearchForm", "orderRecord", "<root />"), GetFirstSeller(strSellerFilter)),
-                                            strPubType);
-                                        edit.Text = "新增订购事项";
-                                        edit.DisplayMode = strPubType == "series" ? "simpleseries" : "simplebook";
-
-                                        Program.MainForm.AppInfo.LinkFormState(edit, "BiblioSearchForm_OrderEditForm_state");
-                                        edit.ShowDialog(this);
-
-                                        strDefaultOrderXml = OrderEditForm.GetXml(edit.OrderEditControl);
-                                        // 删除那些空内容的元素
-                                        strDefaultOrderXml = DomUtil.RemoveEmptyElements(strDefaultOrderXml);
-
-                                        Program.MainForm.AppInfo.SetString("BiblioSearchForm", "orderRecord", strDefaultOrderXml);
-
-                                        if (edit.DialogResult == System.Windows.Forms.DialogResult.Cancel)
-                                        {
-                                            strDefaultOrderXml = "<root />";
-                                            throw new InterruptException("用户中断");
-                                        }
-
-                                        XmlDocument order_dom = new XmlDocument();
-                                        order_dom.LoadXml(strDefaultOrderXml);
-
-                                        string strDistribute = DomUtil.GetElementInnerText(order_dom.DocumentElement, "distribute");
-
-                                        // 观察一个馆藏分配字符串，看看是否在指定用户权限的管辖范围内
-                                        // return:
-                                        //      -1  出错
-                                        //      0   超过管辖范围。strError中有解释
-                                        //      1   在管辖范围内
-                                        nRet = dp2StringUtil.DistributeInControlled(strDistribute,
-                                            dlg.LibraryCode,
-                                            out bool bAllOutOf,
-                                            out strError);
-                                        if (nRet == -1)
-                                            throw new Exception(strError);
-                                        if (nRet == 0)
-                                        {
-                                            strError = "馆藏去向 '" + strDistribute + "' 越过当前用户的关注范围(馆代码) '" + dlg.LibraryCode + "'。请重新指定馆藏去向";
-                                            MessageBox.Show(this, strError);
-                                            goto REDO;
-                                        }
-
-                                        // TODO: 验证一下书商名称是否在合法值范围内?
-
-
-
+                                        strDefaultOrderXml = "<root />";
+                                        throw new InterruptException("用户中断");
                                     }
 
-                                    // 兑现模板记录中的宏
-                                    string strResultXml = strDefaultOrderXml;
-                                    if (strDefaultOrderXml.IndexOf("@") != -1)
-                                    {
-                                        // 将XML格式转换为MARC格式
-                                        // 自动从数据记录中获得MARC语法
-                                        nRet = MarcUtil.Xml2Marc(biblio_dom.OuterXml,
-                                            true,
-                                            null,
-                                            out string strMarcSyntax,
-                                            out string strMARC,
-                                            out strError);
-                                        if (nRet == -1)
-                                        {
-                                            strError = "XML转换到MARC记录时出错: " + strError;
-                                            throw new Exception(strError);
-                                        }
+                                    XmlDocument order_dom = new XmlDocument();
+                                    order_dom.LoadXml(strDefaultOrderXml);
 
-                                        // 兑现模板 XML 中的宏
-                                        strResultXml = MacroXml(strDefaultOrderXml,
-                strMARC,
-                strMarcSyntax);
-                                        XmlDocument temp_dom = new XmlDocument();
-                                        temp_dom.LoadXml(strResultXml);
-                                        // 验证三个字段之间的关系
-                                        // return:
-                                        //      -2  码洋和订购价货币单位不同，无法进行校验。
-                                        //      -1  校验过程出错
-                                        //      0   校验发现三者关系不正确
-                                        //      1   校验三者关系正确
-                                        nRet = VerifyThreeFields(temp_dom, out strError);
-                                        if (nRet == 0 || nRet == -1)
-                                        {
-                                            strError = "校验三个字段关系时发现问题: " + strError + "\r\n\r\n请重新输入。特别注意关注码洋、折扣和单价之间的计算关系";
-                                            MessageBox.Show(this, strError);
-                                            strDefaultOrderXml = "";
-                                            goto REDO_0;
-                                        }
+                                    string strDistribute = DomUtil.GetElementInnerText(order_dom.DocumentElement, "distribute");
+
+                                    // 观察一个馆藏分配字符串，看看是否在指定用户权限的管辖范围内
+                                    // return:
+                                    //      -1  出错
+                                    //      0   超过管辖范围。strError中有解释
+                                    //      1   在管辖范围内
+                                    nRet = dp2StringUtil.DistributeInControlled(strDistribute,
+                                    dlg.LibraryCode,
+                                    out bool bAllOutOf,
+                                    out strError);
+                                    if (nRet == -1)
+                                        throw new Exception(strError);
+                                    if (nRet == 0)
+                                    {
+                                        strError = "馆藏去向 '" + strDistribute + "' 越过当前用户的关注范围(馆代码) '" + dlg.LibraryCode + "'。请重新指定馆藏去向";
+                                        MessageBox.Show(this, strError);
+                                        goto REDO;
                                     }
 
-                                    EntityInfo order = new EntityInfo
-                                    {
-                                        OldRecord = strResultXml
-                                    };
+                                    // TODO: 验证一下书商名称是否在合法值范围内?
 
-                                    // 实际写入订购记录
-                                    if (dlg.CreateNewOrderRecord)
-                                    {
-                                        LibraryChannel channel = this.GetChannel();
-                                        try
-                                        {
-                                            nRet = MainForm.SaveItemRecord(channel,
-        biblio_recpath,
-        "order",
-        "", // strOrderRecPath,
-        "",
-        order.OldRecord,
-        "",
-        null,   // timestamp,
-        out string strOutputOrderRecPath,
-        out byte[] baNewTimestamp,
-        out strError);
-                                            if (nRet == -1)
-                                                throw new Exception(strError);
-                                            order.OldTimestamp = baNewTimestamp;
-                                            order.OldRecPath = strOutputOrderRecPath;
-                                        }
-                                        finally
-                                        {
-                                            this.ReturnChannel(channel);
-                                        }
-                                        nWriteNewOrderCount++;
-                                    }
 
-                                    Order.DistributeExcelFile.WarningGreen("因书目记录 '" + strBiblioRecPath + "' 没有符合条件的订购记录，所以导出一条新的订购记录，如下：");
-                                    Order.DistributeExcelFile.WarningRecPath(order.OldRecPath, DomUtil.GetIndentXml(DomUtil.RemoveEmptyElements(order.OldRecord)));
 
-                                    nNewOrderCount++;
-                                    return order;
                                 }
-                                );
 
-                            nBiblioCount++;
-                            return true;
-                        },
+                                // 兑现模板记录中的宏
+                                string strResultXml = strDefaultOrderXml;
+                                if (strDefaultOrderXml.IndexOf("@") != -1)
+                                {
+                                    // 将XML格式转换为MARC格式
+                                    // 自动从数据记录中获得MARC语法
+                                    nRet = MarcUtil.Xml2Marc(biblio_dom.OuterXml,
+                                    true,
+                                    null,
+                                    out string strMarcSyntax,
+                                    out string strMARC,
+                                    out strError);
+                                    if (nRet == -1)
+                                    {
+                                        strError = "XML转换到MARC记录时出错: " + strError;
+                                        throw new Exception(strError);
+                                    }
+
+                                    // 兑现模板 XML 中的宏
+                                    strResultXml = MacroXml(strDefaultOrderXml,
+        strMARC,
+        strMarcSyntax);
+                                    XmlDocument temp_dom = new XmlDocument();
+                                    temp_dom.LoadXml(strResultXml);
+                                    // 验证三个字段之间的关系
+                                    // return:
+                                    //      -2  码洋和订购价货币单位不同，无法进行校验。
+                                    //      -1  校验过程出错
+                                    //      0   校验发现三者关系不正确
+                                    //      1   校验三者关系正确
+                                    nRet = VerifyThreeFields(temp_dom, out strError);
+                                    if (nRet == 0 || nRet == -1)
+                                    {
+                                        strError = "校验三个字段关系时发现问题: " + strError + "\r\n\r\n请重新输入。特别注意关注码洋、折扣和单价之间的计算关系";
+                                        MessageBox.Show(this, strError);
+                                        strDefaultOrderXml = "";
+                                        goto REDO_0;
+                                    }
+                                }
+
+                                EntityInfo order = new EntityInfo
+                                {
+                                    OldRecord = strResultXml
+                                };
+
+                                // 实际写入订购记录
+                                if (dlg.CreateNewOrderRecord)
+                                {
+                                    LibraryChannel channel = this.GetChannel();
+                                    try
+                                    {
+                                        nRet = MainForm.SaveItemRecord(channel,
+    biblio_recpath,
+    "order",
+    "", // strOrderRecPath,
+    "",
+    order.OldRecord,
+    "",
+    null,   // timestamp,
+    out string strOutputOrderRecPath,
+    out byte[] baNewTimestamp,
+    out strError);
+                                        if (nRet == -1)
+                                            throw new Exception(strError);
+                                        order.OldTimestamp = baNewTimestamp;
+                                        order.OldRecPath = strOutputOrderRecPath;
+                                    }
+                                    finally
+                                    {
+                                        this.ReturnChannel(channel);
+                                    }
+                                    nWriteNewOrderCount++;
+                                }
+
+                                Order.DistributeExcelFile.WarningGreen("因书目记录 '" + strBiblioRecPath + "' 没有符合条件的订购记录，所以导出一条新的订购记录，如下：");
+                                Order.DistributeExcelFile.WarningRecPath(order.OldRecPath, DomUtil.GetIndentXml(DomUtil.RemoveEmptyElements(order.OldRecord)));
+
+                                nNewOrderCount++;
+                                return order;
+                            }
+                            );
+
+                        nBiblioCount++;
+                        return true;
+                    },
                 out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -4661,19 +4680,20 @@ Keys keyData)
             try
             {
                 int nRet = ProcessBiblio(
-                        (strRecPath, dom, timestamp, item) =>
-                        {
-                            this.ShowMessage("正在处理书目记录 " + strRecPath);
+                    null,
+                    (strRecPath, dom, timestamp, item) =>
+                    {
+                        this.ShowMessage("正在处理书目记录 " + strRecPath);
 
-                            OutputBiblioInfo(sheet,
-                                dom,
-                                strRecPath,
-                                nBiblioIndex++,
-                                "",
-                                ref nRowIndex);
-                            nRowIndex++;    // 空行
-                            return true;
-                        },
+                        OutputBiblioInfo(sheet,
+                            dom,
+                            strRecPath,
+                            nBiblioIndex++,
+                            "",
+                            ref nRowIndex);
+                        nRowIndex++;    // 空行
+                        return true;
+                    },
                 out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -12594,7 +12614,7 @@ message,
                 throw new Exception($"不支持参数数量 {parameters.Length}");
         }
 
-        // 智能筛选
+        // 筛选
         private void ToolStripMenuItem_filterRecords_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -12606,34 +12626,53 @@ message,
                 var parameters = query_string.Split(new char[] { ' ' });
                 var xpath = BuildXPath(parameters);
 
-                int nRet = ProcessBiblio((strBiblioRecPath, biblio_dom, biblio_timestamp, item) =>
+                var items = new List<ListViewItem>();
+                foreach (ListViewItem item in this.listView_records.Items)
                 {
-                    this.ShowMessage("正在过滤书目记录 " + strBiblioRecPath);
+                    if (string.IsNullOrEmpty(item.Text) == true)
+                        continue;
 
-                    // 将XML格式转换为MARC格式
-                    // 自动从数据记录中获得MARC语法
-                    nRet = MarcUtil.Xml2Marc(biblio_dom.OuterXml,
-                            true,
-                            null,
-                            out string strMarcSyntax,
-                            out string strMARC,
-                            out string strError1);
-                    if (nRet == -1)
+                    items.Add(item);
+                }
+
+                if (items.Count == 0)
+                {
+                    strError = "没有需要筛选的事项";
+                    goto ERROR1;
+                }
+
+                ListViewUtil.ClearSelection(this.listView_records);
+
+                int nRet = ProcessBiblio(
+                    items,
+                    (strBiblioRecPath, biblio_dom, biblio_timestamp, item) =>
+                    {
+                        this.ShowMessage("正在过滤书目记录 " + strBiblioRecPath);
+
+                        // 将XML格式转换为MARC格式
+                        // 自动从数据记录中获得MARC语法
+                        nRet = MarcUtil.Xml2Marc(biblio_dom.OuterXml,
+                                true,
+                                null,
+                                out string strMarcSyntax,
+                                out string strMARC,
+                                out string strError1);
+                        if (nRet == -1)
+                            return true;
+
+                        MarcRecord record = new MarcRecord(strMARC);
+
+                        // field/subfield[contains(@content, '111')]
+                        // field[@name='200']/subfield[@name='a' and contains(@content, '111')]
+                        MarcNodeList nodes = record.select(xpath);
+                        if (nodes.count > 0)
+                            item.Selected = true;
+                        else
+                            item.Selected = false;
+
+                        nBiblioCount++;
                         return true;
-
-                    MarcRecord record = new MarcRecord(strMARC);
-
-                    // field/subfield[contains(@content, '111')]
-                    // field[@name='200']/subfield[@name='a' and contains(@content, '111')]
-                    MarcNodeList nodes = record.select(xpath);
-                    if (nodes.count > 0)
-                        item.Selected = true;
-                    else
-                        item.Selected = false;
-
-                    nBiblioCount++;
-                    return true;
-                }, out strError);
+                    }, out strError);
 
                 this.ClearMessage();
 

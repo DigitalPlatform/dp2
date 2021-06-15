@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -182,6 +183,8 @@ MessageBoxDefaultButton.Button2);
             foreach (ListViewItem item in this.listView1.SelectedItems)
             {
                 XmlElement server = (XmlElement)item.Tag;
+
+                Debug.Assert(server.ParentNode != null);
 
                 server.ParentNode.RemoveChild(server);
                 this.listView1.Items.Remove(item);
@@ -405,10 +408,11 @@ MessageBoxDefaultButton.Button2);
                     XmlDocument dom = new XmlDocument();
                     dom.Load(dlg.FileName);
 
-                    XmlNodeList servers = dom.DocumentElement.SelectNodes("server");
+                    // XML 文件中任意位置的 server 元素都能被识别
+                    XmlNodeList servers = dom.DocumentElement.SelectNodes("//server");
                     if (servers.Count == 0)
                     {
-                        strError = $"文件 {dlg.FileName} 中不存在 */server 元素";
+                        strError = $"文件 {dlg.FileName} 中不存在 //server 元素";
                         goto ERROR1;
                     }
 
@@ -443,11 +447,20 @@ MessageBoxDefaultButton.Button2);
 
                     XmlElement new_server = _dom.CreateElement("server");
                     _dom.DocumentElement.AppendChild(new_server);
-                    DomUtil.SetElementOuterXml(new_server, server.OuterXml);
+
+                    Debug.Assert(new_server.ParentNode != null);
+
+                    new_server = DomUtil.SetElementOuterXml(new_server, server.OuterXml);
                     item.Tag = new_server;
+
+                    Debug.Assert(new_server.ParentNode != null);
                 }
                 else
+                {
                     item.Tag = server;
+
+                    Debug.Assert(server.ParentNode != null);
+                }
 
                 ListViewUtil.ChangeItemText(item, COLUMN_NAME, name);
                 ListViewUtil.ChangeItemText(item, COLUMN_DATABASE, ZServerUtil.GetDatabaseList(server));

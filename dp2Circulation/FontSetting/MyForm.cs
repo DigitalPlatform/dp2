@@ -1543,6 +1543,244 @@ out string strError)
 
         #endregion
 
+
+        /// <summary>
+        /// 获得102相关信息
+        /// </summary>
+        /// <param name="strPublisherNumber">出版社号码</param>
+        /// <param name="str102">返回 102 字符春</param>
+        /// <param name="strError">返回出错信息</param>
+        /// <returns>-1: 出错; 0: 没有找到; 1: 找到</returns>
+        public int Get102Info(string strPublisherNumber,
+            out string str102,
+            out string strError)
+        {
+            strError = "";
+            str102 = "";
+
+            string strDbName = Program.MainForm.GetUtilDbName("publisher");
+
+            if (String.IsNullOrEmpty(strDbName) == true)
+            {
+                strError = "尚未定义publisher类型的实用库名";
+                return -1;
+            }
+
+            LibraryChannel channel = this.GetChannel();
+
+            Progress.OnStop += new StopEventHandler(this.DoStop);
+            Progress.Initial("正在获得102信息 ...");
+            Progress.BeginLoop();
+
+            try
+            {
+                string strAction = "";
+
+                long lRet = channel.GetUtilInfo(
+                    Progress,
+                    strAction,
+                    strDbName,
+                    "ISBN",
+                    strPublisherNumber,
+                    "v102",
+                    out str102,
+                    out strError);
+                if (lRet == -1)
+                    return -1;
+
+                if (lRet == 0)
+                    return 0;
+
+                return 1;
+            }
+            finally
+            {
+                Progress.EndLoop();
+                Progress.OnStop -= new StopEventHandler(this.DoStop);
+                Progress.Initial("");
+
+                this.ReturnChannel(channel);
+            }
+        }
+
+        // 
+        /// <summary>
+        /// 设置102相关信息
+        /// </summary>
+        /// <param name="strPublisherNumber">出版社号码</param>
+        /// <param name="str102">102 字符串</param>
+        /// <param name="strError">返回出错信息</param>
+        /// <returns>-1: 出错; 1: 成功</returns>
+        public int Set102Info(string strPublisherNumber,
+            string str102,
+            out string strError)
+        {
+            strError = "";
+
+            string strDbName = Program.MainForm.GetUtilDbName("publisher");
+
+            if (String.IsNullOrEmpty(strDbName) == true)
+            {
+                strError = "尚未定义publisher类型的实用库名";
+                return -1;
+            }
+
+            LibraryChannel channel = this.GetChannel();
+
+            Progress.OnStop += new StopEventHandler(this.DoStop);
+            Progress.Initial("正在设置102信息 ...");
+            Progress.BeginLoop();
+
+            try
+            {
+                string strAction = "";
+
+                long lRet = channel.SetUtilInfo(
+                    Progress,
+                    strAction,
+                    strDbName,
+                    "ISBN",
+                    "r",
+                    "i",
+                    "v102",
+                    strPublisherNumber,
+                    str102,
+                    out strError);
+                if (lRet == -1)
+                    return -1;
+
+                return (int)lRet;
+            }
+            finally
+            {
+                Progress.EndLoop();
+                Progress.OnStop -= new StopEventHandler(this.DoStop);
+                Progress.Initial("");
+
+                this.ReturnChannel(channel);
+            }
+        }
+
+        // 
+        /// <summary>
+        /// 获得出版社相关信息
+        /// </summary>
+        /// <param name="strPublisherNumber">出版社号码</param>
+        /// <param name="str210">返回 210 字符串</param>
+        /// <param name="strError">返回出错信息</param>
+        /// <returns>-1: 出错; 0: 没有找到; 1: 找到</returns>
+        public int GetPublisherInfo(string strPublisherNumber,
+            out string str210,
+            out string strError)
+        {
+            strError = "";
+            str210 = "";
+
+            string strDbName = Program.MainForm.GetUtilDbName("publisher");
+
+            if (String.IsNullOrEmpty(strDbName) == true)
+            {
+                strError = "尚未定义publisher类型的实用库名";
+                return -1;
+            }
+
+            LibraryChannel channel = this.GetChannel();
+
+            Progress.OnStop += new StopEventHandler(this.DoStop);
+            Progress.Initial("正在获得出版社信息 ...");
+            Progress.BeginLoop();
+
+            try
+            {
+                string strAction = "";
+
+                long lRet = channel.GetUtilInfo(
+                    Progress,
+                    strAction,
+                    strDbName,
+                    "ISBN",
+                    strPublisherNumber,
+                    "v210",
+                    out str210,
+                    out strError);
+                if (lRet == -1)
+                    return -1;
+
+                if (lRet == 0)
+                    return 0;
+
+                return 1;
+            }
+            finally
+            {
+                Progress.EndLoop();
+                Progress.OnStop -= new StopEventHandler(this.DoStop);
+                Progress.Initial("");
+
+                this.ReturnChannel(channel);
+            }
+        }
+
+        // 
+        /// <summary>
+        /// 设置出版社相关信息
+        /// </summary>
+        /// <param name="strPublisherNumber">出版社号码</param>
+        /// <param name="str210">210 字符串</param>
+        /// <param name="strError">返回出错信息</param>
+        /// <returns>-1: 出错; 1: 成功</returns>
+        public int SetPublisherInfo(string strPublisherNumber,
+            string str210,
+            out string strError)
+        {
+            strError = "";
+
+            string strDbName = Program.MainForm.GetUtilDbName("publisher");
+
+            if (String.IsNullOrEmpty(strDbName) == true)
+            {
+                strError = "尚未定义publisher类型的实用库名";
+                return -1;
+            }
+
+            LibraryChannel channel = this.GetChannel();
+
+            Progress.OnStop += new StopEventHandler(this.DoStop);
+            Progress.Initial("正在设置出版社信息 ...");
+            Progress.BeginLoop();
+
+            try
+            {
+                string strAction = "";
+
+                long lRet = channel.SetUtilInfo(
+                    Progress,
+                    strAction,
+                    strDbName,
+                    "ISBN",
+                    "r",
+                    "i",
+                    "v210",
+                    strPublisherNumber,
+                    str210,
+                    out strError);
+                if (lRet == -1)
+                    return -1;
+
+                return (int)lRet;
+            }
+            finally
+            {
+                Progress.EndLoop();
+                Progress.OnStop -= new StopEventHandler(this.DoStop);
+                Progress.Initial("");
+
+                this.ReturnChannel(channel);
+            }
+
+        }
+
+
         #region 创建书目记录的浏览格式
 
         public int BuildBrowseText(string strXml,

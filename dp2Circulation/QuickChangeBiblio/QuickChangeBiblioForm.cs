@@ -224,7 +224,7 @@ namespace dp2Circulation
             else
             {
                 DialogResult result = MessageBox.Show(this,
-"即将进行下述修改动作：\r\n---"+strInfo+"\r\n\r\n开始处理?",
+"即将进行下述修改动作：\r\n---" + strInfo + "\r\n\r\n开始处理?\r\n[注: 修改会自动兑现保存]",
 "dp2Circulation",
 MessageBoxButtons.OKCancel,
 MessageBoxIcon.Question,
@@ -253,7 +253,7 @@ MessageBoxDefaultButton.Button1);
                 }
 
                 string strLine = this.textBox_paths.Lines[i].Trim();
-                nRet = strLine.IndexOfAny(new char[] {' ','\t'});
+                nRet = strLine.IndexOfAny(new char[] { ' ', '\t' });
                 if (nRet != -1)
                 {
                     strLine = strLine.Substring(0, nRet).Trim();
@@ -372,7 +372,7 @@ MessageBoxDefaultButton.Button1);
                 }
             }
 
-            MessageBox.Show(this, "处理完毕。共处理记录 "+nCount.ToString()+" 条，实际发生修改 "+nChangedCount.ToString()+" 条");
+            MessageBox.Show(this, "处理完毕。共处理记录 " + nCount.ToString() + " 条，实际发生修改 " + nChangedCount.ToString() + " 条");
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -413,7 +413,7 @@ MessageBoxDefaultButton.Button1);
             long lRet = Channel.GetBiblioInfos(
                 stop,
                 strBiblioRecPath,
-                    "",
+                "",
                 formats,
                 out results,
                 out timestamp,
@@ -461,6 +461,7 @@ MessageBoxDefaultButton.Button1);
                 return -1;
             }
 
+            bool changed = false;
             // 修改
             // return:
             //      -1  出错
@@ -471,7 +472,34 @@ MessageBoxDefaultButton.Button1);
                 out strError);
             if (nRet == -1)
                 return -1;
+            if (nRet == 1)
+                changed = true;
+            /*
             if (nRet == 0)
+                return 0;
+            */
+
+            if (ChangeBiblioActionDialog.NeedAdd102)
+            {
+                nRet = Add102(ref strMARC,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+                if (nRet == 1)
+                    changed = true;
+            }
+
+            if (ChangeBiblioActionDialog.NeedAddPublisher)
+            {
+                nRet = AddPublisher(ref strMARC,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+                if (nRet == 1)
+                    changed = true;
+            }
+
+            if (changed == false)
                 return 0;
 
             // 转换回xml格式
@@ -546,7 +574,7 @@ MessageBoxDefaultButton.Button1);
             "");
                     if (String.IsNullOrEmpty(strAdd) == false)
                     {
-                        strResult += "\r\n在状态值(998$s)中添加 '"+strAdd+"'";
+                        strResult += "\r\n在状态值(998$s)中添加 '" + strAdd + "'";
                         nCount++;
                     }
                     if (String.IsNullOrEmpty(strRemove) == false)
@@ -607,7 +635,194 @@ MessageBoxDefaultButton.Button1);
                 nCount++;
             }
 
+            if (ChangeBiblioActionDialog.NeedAdd102)
+            {
+                strResult += "\r\n添加 102 字段";
+                nCount++;
+            }
+
+            if (ChangeBiblioActionDialog.NeedAddPublisher)
+            {
+                strResult += "\r\n添加出版者子字段";
+                nCount++;
+            }
+
             return strResult;
+        }
+
+        int Add102(ref string strMARC,
+            out string strError)
+        {
+            strError = "";
+
+            MarcRecord record = new MarcRecord(strMARC);
+            var isbn = record.select("field[@name='010']/subfield[@name='a']").FirstContent?.Trim();
+            if (string.IsNullOrEmpty(isbn))
+            {
+                // 010$a 不存在
+                strError = "记录中不存在 010$a 子字段,因此无法加 102$a$b";
+                return 0;
+            }
+
+            // 切割出 出版社 代码部分
+            int nRet = Program.MainForm.GetPublisherNumber(isbn,
+                out string strPublisherNumber,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            nRet = this.Get102Info(strPublisherNumber,
+    out string strValue,
+    out strError);
+            if (nRet == -1)
+                return -1;
+
+            bool new_entry = false;
+        REDO_INPUT:
+            if (nRet == 0 || string.IsNullOrEmpty(strValue))
+            {
+                // 创建新条目
+                strValue = InputDlg.GetInput(
+                    this,
+                    null,
+                    "请输入ISBN出版社号码 '" + isbn + "' 对应的UNIMARC 102$a$b参数(格式 国家代码[2位]:城市代码[6位]):",
+                    "国家代码[2位]:城市代码[6位]",
+                    Program.MainForm.DefaultFont);
+                if (strValue == null)
+                    return 0; // 放弃操作
+
+                nRet = this.Set102Info(strPublisherNumber,
+                    strValue,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+
+                new_entry = true;
+            }
+
+            // MessageBox.Show(this.DetailForm, strValue);
+
+            // 把全角冒号替换为半角的形态
+            strValue = strValue.Replace("：", ":");
+
+            string strCountryCode = "";
+            string strCityCode = "";
+            nRet = strValue.IndexOf(":");
+            if (nRet == -1)
+            {
+                strCountryCode = strValue;
+
+                if (strCountryCode.Length != 2)
+                {
+                    strError = "国家代码 '" + strCountryCode + "' 应当为2字符";
+                    if (new_entry)
+                        goto REDO_INPUT;
+                    return -1;
+                }
+            }
+            else
+            {
+                strCountryCode = strValue.Substring(0, nRet);
+                strCityCode = strValue.Substring(nRet + 1);
+                if (strCountryCode.Length != 2)
+                {
+                    strError = "冒号前面的国家代码部分 '" + strCountryCode + "' 应当为2字符";
+                    if (new_entry)
+                        goto REDO_INPUT;
+                    return -1;
+                }
+                if (strCityCode.Length != 6)
+                {
+                    strError = "冒号后面的城市代码部分 '" + strCityCode + "' 应当为6字符";
+                    if (new_entry)
+                        goto REDO_INPUT;
+                    return -1;
+                }
+            }
+
+            record.setFirstSubfield("102", "a", strCountryCode);
+            record.setFirstSubfield("102", "b", strCityCode);
+            if (strMARC != record.Text)
+            {
+                strMARC = record.Text;
+                return 1;
+            }
+            return 0;
+        }
+
+        // 加入出版地、出版者
+        int AddPublisher(ref string strMARC,
+            out string strError)
+        {
+            strError = "";
+
+            MarcRecord record = new MarcRecord(strMARC);
+            var isbn = record.select("field[@name='010']/subfield[@name='a']").FirstContent?.Trim();
+            if (string.IsNullOrEmpty(isbn))
+            {
+                // 010$a 不存在
+                strError = "记录中不存在 010$a 子字段,因此无法加出版社子字段";
+                return 0;
+            }
+
+            // 切割出 出版社 代码部分
+            int nRet = Program.MainForm.GetPublisherNumber(isbn,
+                out string strPublisherNumber,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            nRet = this.GetPublisherInfo(strPublisherNumber,
+                out string strValue,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            if (nRet == 0 || string.IsNullOrEmpty(strValue))
+            {
+                // 创建新条目
+                strValue = InputDlg.GetInput(
+                    this,
+                    null,
+                    "请输入ISBN出版社号 '" + strPublisherNumber + "' 对应的出版社名称(格式 出版地:出版社名):",
+                    "出版地:出版社名",
+                    Program.MainForm.DefaultFont);
+                if (strValue == null)
+                    return 0; // 放弃操作
+
+                nRet = this.SetPublisherInfo(strPublisherNumber,
+                    strValue,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+            }
+
+            // MessageBox.Show(this.DetailForm, strValue);
+
+            // 把全角冒号替换为半角的形态
+            strValue = strValue.Replace("：", ":");
+
+            string strName = "";
+            string strCity = "";
+            nRet = strValue.IndexOf(":");
+            if (nRet == -1)
+            {
+                strName = strValue;
+            }
+            else
+            {
+                strCity = strValue.Substring(0, nRet);
+                strName = strValue.Substring(nRet + 1);
+            }
+
+            record.setFirstSubfield("210", "a", strCity);
+            record.setFirstSubfield("210", "c", strName);
+            if (strMARC != record.Text)
+            {
+                strMARC = record.Text;
+                return 1;
+            }
+            return 0;
         }
 
         // TODO: 预先将AppInfo中值取出，加快速度

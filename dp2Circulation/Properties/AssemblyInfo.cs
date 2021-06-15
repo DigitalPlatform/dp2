@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.19.*")]
-[assembly: AssemblyFileVersion("3.19.0.0")]
+[assembly: AssemblyVersion("3.20.*")]
+[assembly: AssemblyFileVersion("3.20.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -80,3 +80,7 @@ using System.Runtime.InteropServices;
 // 3.17 2021/4/13 摄像头(DigitalPlatform.Drawing)功能从原来的 AForge.NET 改用 Accord.NET 库，支持高分辨率摄像头
 // 3.18 2021/5/28 实体查询窗增加根据当前账户馆代码对册记录进行过滤的功能
 // 3.19 2021/6/6 读者查询窗为导出读者 XML 文件增加同时导出对象的功能。类似导出 .bdf 文件功能
+// 3.20 2021/6/15
+//                  书目查询窗增加“筛选”功能和“在列表中查找”功能
+//                  修正 Z39.50 服务器列表对话框中刚导入一个服务器节点然后马上删除时会出现的 bug。
+//                  导入 .xml 文件中服务器的功能有改进，可以识别任意位置的 server 元素(此前只能识别根元素下的 server 元素)

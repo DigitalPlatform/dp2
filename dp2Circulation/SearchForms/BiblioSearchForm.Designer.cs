@@ -376,7 +376,7 @@
             // 
             this.ToolStripMenuItem_filterRecords.Name = "ToolStripMenuItem_filterRecords";
             this.ToolStripMenuItem_filterRecords.Size = new System.Drawing.Size(327, 40);
-            this.ToolStripMenuItem_filterRecords.Text = "智能筛选 ...";
+            this.ToolStripMenuItem_filterRecords.Text = "筛选 ...";
             this.ToolStripMenuItem_filterRecords.Click += new System.EventHandler(this.ToolStripMenuItem_filterRecords_Click);
             // 
             // toolStripMenuItem_subrecords

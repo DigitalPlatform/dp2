@@ -420,7 +420,7 @@ namespace dp2Circulation
         strQueryString,
         _targetInfo.DefaultQueryTermEncoding,
         _targetInfo.DbNames,
-        _targetInfo.PreferredRecordSyntax,
+        ZServerPropertyForm.GetLeftValue(_targetInfo.PreferredRecordSyntax),
         "default");
                 if (search_result.Value == -1 || search_result.Value == 0)
                 {
@@ -488,7 +488,7 @@ namespace dp2Circulation
                     Math.Min((int)channel._resultCount - channel._fetched, (int)count),
                     10,
                     "F",
-                    channel.TargetInfo.PreferredRecordSyntax).ConfigureAwait(false);
+                    ZServerPropertyForm.GetLeftValue(channel.TargetInfo.PreferredRecordSyntax)).ConfigureAwait(false);
             }
 
             return new PresentResult { Value = -1, ErrorInfo = "已经获取完成" };

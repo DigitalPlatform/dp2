@@ -70,9 +70,41 @@ namespace dp2Circulation
 "batchNo",
 "<不改变>");
 
+            // 2021/6/15
+            this.checkBox_add102.Checked = Program.MainForm.AppInfo.GetBoolean(
+                "change_biblio_param",
+"add102",
+false);
+            this.checkBox_addPublisher.Checked = Program.MainForm.AppInfo.GetBoolean(
+                "change_biblio_param",
+"addPublisher",
+false);
+
             comboBox_state_TextChanged(null, null);
             comboBox_opertime_TextChanged(null, null);
             comboBox_batchNo_TextChanged(null, null);
+        }
+
+        public static bool NeedAdd102
+        {
+            get
+            {
+                return Program.MainForm.AppInfo.GetBoolean(
+                "change_biblio_param",
+"add102",
+false);
+            }
+        }
+
+        public static bool NeedAddPublisher
+        {
+            get
+            {
+                return Program.MainForm.AppInfo.GetBoolean(
+                "change_biblio_param",
+"addPublisher",
+false);
+            }
         }
 
         private void checkedComboBox_stateAdd_DropDown(object sender, EventArgs e)
@@ -132,6 +164,16 @@ this.dateTimePicker1.Text);
     "change_biblio_param",
     "batchNo",
     this.comboBox_batchNo.Text);
+
+            // 2021/6/15
+            Program.MainForm.AppInfo.SetBoolean(
+                "change_biblio_param",
+"add102",
+this.checkBox_add102.Checked);
+            Program.MainForm.AppInfo.SetBoolean(
+                "change_biblio_param",
+"addPublisher",
+this.checkBox_addPublisher.Checked);
 
             this.DialogResult = DialogResult.OK;
             this.Close();
