@@ -93,11 +93,17 @@
     <Reference Include="ExcelNumberFormat, Version=1.0.10.0, Culture=neutral, PublicKeyToken=23c6f5d73be07eca, processorArchitecture=MSIL">
       <HintPath>..\packages\ExcelNumberFormat.1.0.10\lib\net20\ExcelNumberFormat.dll</HintPath>
     </Reference>
-    <Reference Include="FreeSql, Version=2.0.105.0, Culture=neutral, PublicKeyToken=a33928e5d4a4b39c, processorArchitecture=MSIL">
-      <HintPath>..\packages\FreeSql.2.0.105\lib\net45\FreeSql.dll</HintPath>
+    <Reference Include="FreeSql, Version=2.5.200.0, Culture=neutral, PublicKeyToken=a33928e5d4a4b39c, processorArchitecture=MSIL">
+      <HintPath>..\packages\FreeSql.2.5.200\lib\net45\FreeSql.dll</HintPath>
     </Reference>
-    <Reference Include="FreeSql.Provider.Sqlite, Version=2.0.105.0, Culture=neutral, PublicKeyToken=5800863e689c9dd8, processorArchitecture=MSIL">
-      <HintPath>..\packages\FreeSql.Provider.Sqlite.2.0.105\lib\net45\FreeSql.Provider.Sqlite.dll</HintPath>
+    <Reference Include="FreeSql.DbContext, Version=2.5.200.0, Culture=neutral, PublicKeyToken=d6971b25f8f033dc, processorArchitecture=MSIL">
+      <HintPath>..\packages\FreeSql.DbContext.2.5.200\lib\net45\FreeSql.DbContext.dll</HintPath>
+    </Reference>
+    <Reference Include="FreeSql.Provider.Sqlite, Version=2.5.200.0, Culture=neutral, PublicKeyToken=5800863e689c9dd8, processorArchitecture=MSIL">
+      <HintPath>..\packages\FreeSql.Provider.Sqlite.2.5.200\lib\net45\FreeSql.Provider.Sqlite.dll</HintPath>
+    </Reference>
+    <Reference Include="FreeSql.Repository, Version=2.5.200.0, Culture=neutral, PublicKeyToken=e2c05379863de526, processorArchitecture=MSIL">
+      <HintPath>..\packages\FreeSql.Repository.2.5.200\lib\net45\FreeSql.Repository.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
@@ -134,6 +140,7 @@
       <DependentUpon>BeginModifyDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="DataModel.cs" />
+    <Compile Include="EntityStoreage.cs" />
     <Compile Include="FloatingErrorDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -167,7 +174,7 @@
       <DependentUpon>SettingDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="SoundMaker.cs" />
-    <Compile Include="Storeage.cs" />
+    <Compile Include="HistoryStoreage.cs" />
     <EmbeddedResource Include="BeginModifyDialog.resx">
       <DependentUpon>BeginModifyDialog.cs</DependentUpon>
     </EmbeddedResource>
@@ -239,6 +246,10 @@
     <ProjectReference Include="..\DigitalPlatform.Text\DigitalPlatform.Text.csproj">
       <Project>{26f96cc3-a4a9-4bc4-a10a-bc7e25581ff6}</Project>
       <Name>DigitalPlatform.Text</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.Xml\DigitalPlatform.Xml.csproj">
+      <Project>{e6489e89-1349-4ee7-a00b-ac96b9912587}</Project>
+      <Name>DigitalPlatform.Xml</Name>
     </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform\4.0\DigitalPlatform.csproj">
       <Project>{bdd43275-eaa0-4670-8ba3-0db5cd7598dd}</Project>

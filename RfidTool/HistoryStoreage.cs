@@ -12,7 +12,7 @@ using DigitalPlatform.CirculationClient;
 
 namespace RfidTool
 {
-    public static class Storeage
+    public static class HistoryStoreage
     {
         static IFreeSql _fsql = null;
 

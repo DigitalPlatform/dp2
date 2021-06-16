@@ -989,7 +989,7 @@ out string strError)
                     true,	// 本地，快速
                     strHanzi,
                     style,
-                    "auto",
+                    bAutoSel ? "auto,first" : "auto",
                     out strPinyin,
                     out strError);
             }
@@ -1005,7 +1005,7 @@ out string strError)
                     owner,
                     strHanzi,
                     style,
-                    "auto", // bAutoSel,
+                    bAutoSel? "auto,first" : "auto",
                     out strPinyin,
                     out strError);
             }

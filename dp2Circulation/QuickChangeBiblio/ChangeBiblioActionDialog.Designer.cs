@@ -51,8 +51,12 @@ namespace dp2Circulation
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage_normal = new System.Windows.Forms.TabPage();
             this.tabPage_pinyin = new System.Windows.Forms.TabPage();
-            this.label6 = new System.Windows.Forms.Label();
+            this.checkBox_pinyinAutoSel = new System.Windows.Forms.CheckBox();
+            this.comboBox_pinyinStyle = new System.Windows.Forms.ComboBox();
+            this.label7 = new System.Windows.Forms.Label();
             this.textBox_pinyinCfgs = new System.Windows.Forms.TextBox();
+            this.label6 = new System.Windows.Forms.Label();
+            this.button_setDefaultPinyinCfgs = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabPage_normal.SuspendLayout();
             this.tabPage_pinyin.SuspendLayout();
@@ -259,7 +263,7 @@ namespace dp2Circulation
             // checkBox_add102
             // 
             this.checkBox_add102.AutoSize = true;
-            this.checkBox_add102.Location = new System.Drawing.Point(13, 432);
+            this.checkBox_add102.Location = new System.Drawing.Point(15, 406);
             this.checkBox_add102.Name = "checkBox_add102";
             this.checkBox_add102.Size = new System.Drawing.Size(208, 25);
             this.checkBox_add102.TabIndex = 16;
@@ -269,7 +273,7 @@ namespace dp2Circulation
             // checkBox_addPublisher
             // 
             this.checkBox_addPublisher.AutoSize = true;
-            this.checkBox_addPublisher.Location = new System.Drawing.Point(247, 432);
+            this.checkBox_addPublisher.Location = new System.Drawing.Point(249, 406);
             this.checkBox_addPublisher.Name = "checkBox_addPublisher";
             this.checkBox_addPublisher.Size = new System.Drawing.Size(237, 25);
             this.checkBox_addPublisher.TabIndex = 17;
@@ -326,6 +330,10 @@ namespace dp2Circulation
             // tabPage_pinyin
             // 
             this.tabPage_pinyin.AutoScroll = true;
+            this.tabPage_pinyin.Controls.Add(this.button_setDefaultPinyinCfgs);
+            this.tabPage_pinyin.Controls.Add(this.checkBox_pinyinAutoSel);
+            this.tabPage_pinyin.Controls.Add(this.comboBox_pinyinStyle);
+            this.tabPage_pinyin.Controls.Add(this.label7);
             this.tabPage_pinyin.Controls.Add(this.textBox_pinyinCfgs);
             this.tabPage_pinyin.Controls.Add(this.label6);
             this.tabPage_pinyin.Controls.Add(this.checkBox_addPinyin);
@@ -337,14 +345,39 @@ namespace dp2Circulation
             this.tabPage_pinyin.Text = "加拼音";
             this.tabPage_pinyin.UseVisualStyleBackColor = true;
             // 
-            // label6
+            // checkBox_pinyinAutoSel
             // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(3, 95);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(105, 21);
-            this.label6.TabIndex = 19;
-            this.label6.Text = "规则定义:";
+            this.checkBox_pinyinAutoSel.AutoSize = true;
+            this.checkBox_pinyinAutoSel.Location = new System.Drawing.Point(54, 115);
+            this.checkBox_pinyinAutoSel.Name = "checkBox_pinyinAutoSel";
+            this.checkBox_pinyinAutoSel.Size = new System.Drawing.Size(343, 25);
+            this.checkBox_pinyinAutoSel.TabIndex = 23;
+            this.checkBox_pinyinAutoSel.Text = "静默选择多音字[的第一个音](&A)";
+            this.checkBox_pinyinAutoSel.UseVisualStyleBackColor = true;
+            // 
+            // comboBox_pinyinStyle
+            // 
+            this.comboBox_pinyinStyle.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.comboBox_pinyinStyle.FormattingEnabled = true;
+            this.comboBox_pinyinStyle.Items.AddRange(new object[] {
+            "None -- 不做任何改变",
+            "Upper -- 全部大写",
+            "Lower -- 全部小写",
+            "UpperFirst -- 首字母大写，其它小写"});
+            this.comboBox_pinyinStyle.Location = new System.Drawing.Point(172, 80);
+            this.comboBox_pinyinStyle.Name = "comboBox_pinyinStyle";
+            this.comboBox_pinyinStyle.Size = new System.Drawing.Size(497, 29);
+            this.comboBox_pinyinStyle.TabIndex = 22;
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(50, 83);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(96, 21);
+            this.label7.TabIndex = 21;
+            this.label7.Text = "风格(&S):";
             // 
             // textBox_pinyinCfgs
             // 
@@ -353,12 +386,32 @@ namespace dp2Circulation
             this.textBox_pinyinCfgs.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_pinyinCfgs.Location = new System.Drawing.Point(10, 122);
+            this.textBox_pinyinCfgs.Location = new System.Drawing.Point(54, 179);
             this.textBox_pinyinCfgs.Multiline = true;
             this.textBox_pinyinCfgs.Name = "textBox_pinyinCfgs";
             this.textBox_pinyinCfgs.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_pinyinCfgs.Size = new System.Drawing.Size(659, 351);
+            this.textBox_pinyinCfgs.Size = new System.Drawing.Size(615, 318);
             this.textBox_pinyinCfgs.TabIndex = 20;
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(50, 155);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(105, 21);
+            this.label6.TabIndex = 19;
+            this.label6.Text = "规则定义:";
+            // 
+            // button_setDefaultPinyinCfgs
+            // 
+            this.button_setDefaultPinyinCfgs.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_setDefaultPinyinCfgs.Location = new System.Drawing.Point(521, 141);
+            this.button_setDefaultPinyinCfgs.Name = "button_setDefaultPinyinCfgs";
+            this.button_setDefaultPinyinCfgs.Size = new System.Drawing.Size(148, 32);
+            this.button_setDefaultPinyinCfgs.TabIndex = 24;
+            this.button_setDefaultPinyinCfgs.Text = "样例规则(&D)";
+            this.button_setDefaultPinyinCfgs.UseVisualStyleBackColor = true;
+            this.button_setDefaultPinyinCfgs.Click += new System.EventHandler(this.button_setDefaultPinyinCfgs_Click);
             // 
             // ChangeBiblioActionDialog
             // 
@@ -414,5 +467,9 @@ namespace dp2Circulation
         private System.Windows.Forms.TabPage tabPage_pinyin;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.TextBox textBox_pinyinCfgs;
+        private System.Windows.Forms.ComboBox comboBox_pinyinStyle;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.CheckBox checkBox_pinyinAutoSel;
+        private System.Windows.Forms.Button button_setDefaultPinyinCfgs;
     }
 }

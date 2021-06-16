@@ -33,6 +33,8 @@ namespace RfidTool
             this.checkBox_warningWhenUhfFormatMismatch.Checked = DataModel.WarningWhenUhfFormatMismatch;
 
             this.checkBox_writeTag_verifyPii.Checked = DataModel.VerifyPiiWhenWriteTag;
+            this.checkBox_writeTag_useLocalStoreage.Checked = DataModel.UseLocalStoreage;
+
 
             this.checkBox_enableTagCache.Checked = DataModel.EnableTagCache;
 
@@ -151,6 +153,7 @@ namespace RfidTool
             DataModel.WarningWhenUhfFormatMismatch = this.checkBox_warningWhenUhfFormatMismatch.Checked;
 
             DataModel.VerifyPiiWhenWriteTag = this.checkBox_writeTag_verifyPii.Checked;
+            DataModel.UseLocalStoreage = this.checkBox_writeTag_useLocalStoreage.Checked;
 
             DataModel.EnableTagCache = this.checkBox_enableTagCache.Checked;
 

@@ -3006,7 +3006,6 @@ out strError);
                     if (nPathItemCount == 0 || bLooping == true)
                         subMenuItem.Enabled = false;
                     menuItemExport.MenuItems.Add(subMenuItem);
-
                 }
 
                 // ---
@@ -13801,7 +13800,6 @@ out strError);
                 strError = "无法重复进入循环";
                 goto ERROR1;
             }
-
 
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);

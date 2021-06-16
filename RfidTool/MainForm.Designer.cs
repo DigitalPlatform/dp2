@@ -37,6 +37,7 @@ namespace RfidTool
             this.MenuItem_writePatronTags = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_batchModifyTags = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.MenuItem_importOfflineItem = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_saveToExcelFile = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_clearHistory = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_clearHistory_all = new System.Windows.Forms.ToolStripMenuItem();
@@ -71,6 +72,8 @@ namespace RfidTool
             this.columnHeader_eas = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_afi = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_writeTime = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.MenuItem_clearOfflineItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
@@ -99,6 +102,9 @@ namespace RfidTool
             this.MenuItem_writePatronTags,
             this.MenuItem_batchModifyTags,
             this.toolStripSeparator3,
+            this.MenuItem_importOfflineItem,
+            this.MenuItem_clearOfflineItem,
+            this.toolStripSeparator5,
             this.MenuItem_saveToExcelFile,
             this.MenuItem_clearHistory,
             this.toolStripSeparator1,
@@ -143,6 +149,13 @@ namespace RfidTool
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
             this.toolStripSeparator3.Size = new System.Drawing.Size(384, 6);
+            // 
+            // MenuItem_importOfflineItem
+            // 
+            this.MenuItem_importOfflineItem.Name = "MenuItem_importOfflineItem";
+            this.MenuItem_importOfflineItem.Size = new System.Drawing.Size(387, 40);
+            this.MenuItem_importOfflineItem.Text = "导入脱机册信息(&I)...";
+            this.MenuItem_importOfflineItem.Click += new System.EventHandler(this.MenuItem_importOfflineItem_Click);
             // 
             // MenuItem_saveToExcelFile
             // 
@@ -405,6 +418,18 @@ namespace RfidTool
             this.columnHeader_writeTime.Text = "写入时间";
             this.columnHeader_writeTime.Width = 260;
             // 
+            // MenuItem_clearOfflineItem
+            // 
+            this.MenuItem_clearOfflineItem.Name = "MenuItem_clearOfflineItem";
+            this.MenuItem_clearOfflineItem.Size = new System.Drawing.Size(387, 40);
+            this.MenuItem_clearOfflineItem.Text = "清除脱机册信息(&C)";
+            this.MenuItem_clearOfflineItem.Click += new System.EventHandler(this.MenuItem_clearOfflineItem_Click);
+            // 
+            // toolStripSeparator5
+            // 
+            this.toolStripSeparator5.Name = "toolStripSeparator5";
+            this.toolStripSeparator5.Size = new System.Drawing.Size(384, 6);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(13F, 28F);
@@ -477,6 +502,9 @@ namespace RfidTool
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel_lineNo;
         private System.Windows.Forms.ColumnHeader columnHeader_eas;
         private System.Windows.Forms.ColumnHeader columnHeader_afi;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_importOfflineItem;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_clearOfflineItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
     }
 }
 

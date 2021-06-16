@@ -38,6 +38,7 @@ namespace RfidTool
             this.columnHeader_pii = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_tou = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_eas = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_afi = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_oi = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_aoi = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_antenna = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -49,7 +50,7 @@ namespace RfidTool
             this.label_message = new System.Windows.Forms.Label();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.button_test = new System.Windows.Forms.Button();
-            this.columnHeader_afi = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_title = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.SuspendLayout();
             // 
             // label1
@@ -90,6 +91,7 @@ namespace RfidTool
             this.columnHeader_uid,
             this.columnHeader_pii,
             this.columnHeader_tou,
+            this.columnHeader_title,
             this.columnHeader_eas,
             this.columnHeader_afi,
             this.columnHeader_oi,
@@ -134,6 +136,11 @@ namespace RfidTool
             // 
             this.columnHeader_eas.Text = "EAS(防盗标志)";
             this.columnHeader_eas.Width = 159;
+            // 
+            // columnHeader_afi
+            // 
+            this.columnHeader_afi.Text = "AFI";
+            this.columnHeader_afi.Width = 100;
             // 
             // columnHeader_oi
             // 
@@ -221,10 +228,10 @@ namespace RfidTool
             this.button_test.Visible = false;
             this.button_test.Click += new System.EventHandler(this.button_test_Click);
             // 
-            // columnHeader_afi
+            // columnHeader_title
             // 
-            this.columnHeader_afi.Text = "AFI";
-            this.columnHeader_afi.Width = 100;
+            this.columnHeader_title.Text = "Title(书名)";
+            this.columnHeader_title.Width = 137;
             // 
             // ScanDialog
             // 
@@ -275,5 +282,6 @@ namespace RfidTool
         private System.Windows.Forms.ColumnHeader columnHeader_protocol;
         private System.Windows.Forms.Button button_test;
         private System.Windows.Forms.ColumnHeader columnHeader_afi;
+        private System.Windows.Forms.ColumnHeader columnHeader_title;
     }
 }

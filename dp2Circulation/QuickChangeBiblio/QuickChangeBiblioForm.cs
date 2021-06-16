@@ -541,9 +541,9 @@ MessageBoxDefaultButton.Button1);
                 nRet = AddPinyin(
                     ref strMARC,
                     ChangeBiblioActionDialog.PinyinCfgs,
-                    PinyinStyle.Lower,
+                    ChangeBiblioActionDialog.PinyinStyle,
                     "",
-                    false,
+                    ChangeBiblioActionDialog.PinyinAutoSel,
                     out strError);
                 if (nRet == -1)
                 {

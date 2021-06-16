@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-
+using System.Xml;
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.CommonControl;
@@ -18,6 +18,7 @@ using DigitalPlatform.GUI;
 using DigitalPlatform.LibraryServer.Common;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
+using DigitalPlatform.Xml;
 
 namespace RfidTool
 {
@@ -116,6 +117,36 @@ namespace RfidTool
                         return;
                     }
                 }
+
+                // 查询本地存储
+                if (this.UseLocalStoreage())
+                {
+                    var items = EntityStoreage.FindByBarcode(barcode);
+                    string text = "";
+                    if (items == null || items.Count == 0)
+                        text = $"条码号 {barcode} 没有找到册记录";
+                    else if (items.Count > 1)
+                    {
+                        // TODO: 是否允许从多个中选择？
+                        text = $"条码号 {barcode} 找到 {items.Count} 个册记录";
+                    }
+
+                    if (items.Count == 1)
+                        this.ProcessingEntity = items[0];
+                    else
+                        this.ProcessingEntity = null;
+
+                    if (string.IsNullOrEmpty(text) == false)
+                    {
+                        FormClientInfo.Speak(text);
+                        ShowMessageBox("input", text);
+                        this.textBox_barcode.SelectAll();
+                        this.textBox_barcode.Focus();
+                        return;
+                    }
+                }
+                else
+                    this.ProcessingEntity = null;
 
                 ShowMessageBox("input", null);
 
@@ -237,13 +268,14 @@ namespace RfidTool
         const int COLUMN_UID = 0;
         const int COLUMN_PII = 1;
         const int COLUMN_TOU = 2;
-        const int COLUMN_EAS = 3;
-        const int COLUMN_AFI = 4;
-        const int COLUMN_OI = 5;
-        const int COLUMN_AOI = 6;
-        const int COLUMN_ANTENNA = 7;
-        const int COLUMN_READERNAME = 8;
-        const int COLUMN_PROTOCOL = 9;
+        const int COLUMN_TITLE = 3;
+        const int COLUMN_EAS = 4;
+        const int COLUMN_AFI = 5;
+        const int COLUMN_OI = 6;
+        const int COLUMN_AOI = 7;
+        const int COLUMN_ANTENNA = 8;
+        const int COLUMN_READERNAME = 9;
+        const int COLUMN_PROTOCOL = 10;
 
         object _syncRootFill = new object();
 
@@ -326,6 +358,7 @@ namespace RfidTool
             ListViewUtil.ChangeItemText(item, COLUMN_PROTOCOL, tag.OneTag.Protocol);
 
             ListViewUtil.ChangeItemText(item, COLUMN_PII, "(尚未填充)");
+            ListViewUtil.ChangeItemText(item, COLUMN_TITLE, "");
 
             try
             {
@@ -420,6 +453,17 @@ namespace RfidTool
                 else
                     ListViewUtil.ChangeItemText(item, COLUMN_PII, pii);
 
+                // 设置 Title
+                if (this.UseLocalStoreage())
+                {
+                    var uii = BuildUii(pii, oi, aoi);
+                    var entity = EntityStoreage.FindByUII(uii);
+                    if (entity == null)
+                        ListViewUtil.ChangeItemText(item, COLUMN_TITLE, "");
+                    else
+                        ListViewUtil.ChangeItemText(item, COLUMN_TITLE, entity.Title);
+                }
+
                 ListViewUtil.ChangeItemText(item, COLUMN_TOU, tou);
                 ListViewUtil.ChangeItemText(item, COLUMN_EAS, eas);
                 ListViewUtil.ChangeItemText(item, COLUMN_AFI, afi);
@@ -443,6 +487,17 @@ namespace RfidTool
                 ListViewUtil.ChangeItemText(item, COLUMN_PII, "error:" + ex.Message);
                 SetItemColor(item, "error");
             }
+        }
+
+        static string BuildUii(string pii, string oi, string aoi)
+        {
+            if (string.IsNullOrEmpty(oi) && string.IsNullOrEmpty(aoi))
+                return pii;
+            if (string.IsNullOrEmpty(oi) == false)
+                return oi + "." + pii;
+            if (string.IsNullOrEmpty(aoi) == false)
+                return aoi + "." + pii;
+            return pii;
         }
 
         // 获得 oi.pii 的 oi 部分
@@ -481,7 +536,7 @@ namespace RfidTool
         }
 
         // 寻找一个可用于写入的空白标签，或者相同 PII 的标签
-        FindTagResult FindBlankTag(string pii)
+        FindTagResult FindBlankTag(string pii, string oi)
         {
             lock (_syncRootFill)
             {
@@ -506,7 +561,14 @@ namespace RfidTool
                             continue;
 
                         string current_pii = ListViewUtil.GetItemText(item, COLUMN_PII);
-                        if (current_pii == pii)
+                        string current_oi = ListViewUtil.GetItemText(item, COLUMN_OI);
+                        string current_aoi = ListViewUtil.GetItemText(item, COLUMN_AOI);
+
+
+                        if (current_pii == pii
+                        // 2021/6/16
+                        // 判断机构代码是否吻合
+                        && (oi == current_oi || oi == current_aoi))
                         {
                             pii_results.Add(new FindTagResult
                             {
@@ -572,6 +634,8 @@ namespace RfidTool
                 }
 
                 string barcode = "";
+                EntityItem entity = ProcessingEntity;
+
                 this.Invoke((Action)(() =>
                 {
                     barcode = this.ProcessingBarcode;
@@ -588,28 +652,54 @@ namespace RfidTool
                     return;
                 }
 
-                string error = VerifyOiSetting();
-                if (error != null)
-                {
-                    FormClientInfo.Speak("O I (所属机构代码) 和 A O I (非标准所属机构代码) 尚未配置");
-                    MessageBox.Show(this, error);
-                    using (SettingDialog dlg = new SettingDialog())
-                    {
-                        GuiUtil.SetControlFont(dlg, this.Font);
-                        ClientInfo.MemoryState(dlg, "settingDialog", "state");
+                // TODO: 本地存储情况下，直接使用册记录中的 OI
+                // 还可以提供一种强制使用 OiSetting 中的 OI 的方法
 
-                        dlg.ShowDialog(this);
-                        if (dlg.DialogResult == DialogResult.OK)
-                            DataModel.TagList.EnableTagCache = DataModel.EnableTagCache;
+                bool localStore = this.UseLocalStoreage();
+
+                if (localStore == false)
+                {
+                    string error = VerifyOiSetting();
+                    if (error != null)
+                    {
+                        FormClientInfo.Speak("O I (所属机构代码) 和 A O I (非标准所属机构代码) 尚未配置");
+                        MessageBox.Show(this, error);
+                        using (SettingDialog dlg = new SettingDialog())
+                        {
+                            GuiUtil.SetControlFont(dlg, this.Font);
+                            ClientInfo.MemoryState(dlg, "settingDialog", "state");
+
+                            dlg.ShowDialog(this);
+                            if (dlg.DialogResult == DialogResult.OK)
+                                DataModel.TagList.EnableTagCache = DataModel.EnableTagCache;
+                        }
+                        return;
                     }
-                    return;
+                }
+
+                string oi = DataModel.DefaultOiString;
+                string aoi = DataModel.DefaultAoiString;
+
+                if (localStore && entity != null)
+                {
+                    oi = GetOI(entity);
+                    aoi = "";
+                }
+                else
+                {
+                    if (string.IsNullOrEmpty(oi) && string.IsNullOrEmpty(aoi))
+                    {
+                        ShowMessage($"警告: 尚未设置机构代码或非标准机构代码");
+                        // TODO: 弹出对话框警告一次。可以选择不再警告
+                    }
                 }
 
                 OneTag tag = null;
                 ItemInfo iteminfo = null;
                 if (selectedItem == null)
                 {
-                    var find_result = FindBlankTag(barcode);
+                    var find_result = FindBlankTag(barcode,
+                        string.IsNullOrEmpty(oi) == false ? oi : aoi);
                     if (find_result.Value == 0)
                     {
                         FormClientInfo.Speak($"请在读写器上放好空白标签，或双击选择其他可用标签");
@@ -664,14 +754,7 @@ namespace RfidTool
                 Debug.Assert(tag.TagInfo != null);
                 */
 
-                string oi = DataModel.DefaultOiString;
-                string aoi = DataModel.DefaultAoiString;
 
-                if (string.IsNullOrEmpty(oi) && string.IsNullOrEmpty(aoi))
-                {
-                    ShowMessage($"警告: 尚未设置机构代码或非标准机构代码");
-                    // TODO: 弹出对话框警告一次。可以选择不再警告
-                }
 
                 // 判断序列号中的功能类型
                 {
@@ -696,7 +779,7 @@ namespace RfidTool
                     chip.SetElement(ElementOID.AOI, aoi);
 
                 bool eas = false;
-                if (string.IsNullOrEmpty(this.TypeOfUsage) || this.TypeOfUsage == "10")
+                if (this.IsBook())
                     eas = true;
 
                 TagInfo new_tag_info = GetTagInfo(tag.TagInfo, chip, eas);
@@ -728,7 +811,7 @@ namespace RfidTool
 
                 // 写入 UID-->PII 对照关系日志文件
                 if (tou == "10")
-                    DataModel.WriteToUidLogFile(uid, 
+                    DataModel.WriteToUidLogFile(uid,
                         ModifyDialog.MakeOiPii(barcode, oi, aoi));
 
                 // 语音提示写入成功
@@ -749,6 +832,28 @@ namespace RfidTool
             {
                 _inProcessing--;
             }
+        }
+
+        bool IsBook()
+        {
+            if (string.IsNullOrEmpty(this.TypeOfUsage) || this.TypeOfUsage.StartsWith("1"))
+                return true;
+            return false;
+        }
+
+        bool UseLocalStoreage()
+        {
+            if (DataModel.UseLocalStoreage && this.IsBook())
+                return true;
+            return false;
+        }
+
+        static string GetOI(EntityItem entity)
+        {
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml(entity.Xml);
+            string oi = DomUtil.GetElementText(dom.DocumentElement, "oi");
+            return oi;
         }
 
         BarcodeValidator _validator = null;
@@ -823,6 +928,12 @@ namespace RfidTool
             }
         }
 
+        // 正在处理的册对象
+        public EntityItem ProcessingEntity
+        {
+            get;
+            set;
+        }
 
 
         void ClearBarcode()

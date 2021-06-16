@@ -1040,9 +1040,9 @@ namespace RfidTool
                 return null;
 
             // 10 图书; 80 读者证; 30 层架标
-            if (tu == "10")
+            if (tu.StartsWith("1"))
                 return "entity";
-            if (tu == "80")
+            if (tu.StartsWith("8"))
                 return "patron";
             if (tu.StartsWith("3"))
                 return "shelf";

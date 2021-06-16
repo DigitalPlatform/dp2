@@ -359,8 +359,8 @@ TimeSpan.FromMinutes(60),
 _cancel.Token,
 (text, level) =>
 {
-        //      warning_level   警告级别。0 正常文本(白色背景) 1 警告文本(黄色背景) >=2 错误文本(红色背景)
-        ShowStatusText(text);
+    //      warning_level   警告级别。0 正常文本(白色背景) 1 警告文本(黄色背景) >=2 错误文本(红色背景)
+    ShowStatusText(text);
 });
 
             FormClientInfo.SerialNumberMode = "must";
@@ -372,7 +372,8 @@ _cancel.Token,
                 return;
             }
 
-            Storeage.Initialize();
+            HistoryStoreage.Initialize();
+            EntityStoreage.Initialize();
 
             LoadSettings();
 
@@ -428,7 +429,8 @@ _cancel.Token,
 
             if (_historyChanged)
                 SaveHistory();
-            Storeage.Finish();
+            HistoryStoreage.Finish();
+            EntityStoreage.Finish();
         }
 
         void LoadSettings()
@@ -774,7 +776,7 @@ _cancel.Token,
 
         void LoadHistory()
         {
-            var items = Storeage.LoadItems();
+            var items = HistoryStoreage.LoadItems();
             this.Invoke((Action)(() =>
             {
                 foreach (var history in items)
@@ -815,7 +817,7 @@ _cancel.Token,
                 items.Add(history);
             }
 
-            Storeage.SaveItems(items);
+            HistoryStoreage.SaveItems(items);
         }
 
         private void MenuItem_userManual_Click(object sender, EventArgs e)
@@ -939,6 +941,73 @@ MessageBoxDefaultButton.Button2);
                 this.toolStripStatusLabel_lineNo.Text = "行号: " + (this.listView_writeHistory.SelectedIndices[0] + 1).ToString();
             else
                 this.toolStripStatusLabel_lineNo.Text = "选定 " + this.listView_writeHistory.SelectedIndices.Count.ToString() + " 行";
+        }
+
+        private async void MenuItem_importOfflineItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Title = "导入脱机册记录 - 请指定文件名";
+            openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);    // WpfClientInfo.UserDir;
+            openFileDialog.RestoreDirectory = true;
+            openFileDialog.Filter = "脱机册信息文件(*.json)|*.json|所有文件(*.*)|*.*";
+            if (openFileDialog.ShowDialog(this) == DialogResult.Cancel)
+                return;
+
+            var token = new CancellationToken();
+
+            using (var cancel = CancellationTokenSource.CreateLinkedTokenSource(token))
+            {
+                try
+                {
+                    await Task.Run(async () =>
+                    {
+                        var result = await EntityStoreage.ImportOfflineEntityAsync(
+                                openFileDialog.FileName,
+                                (text) =>
+                                {
+                                    ShowStatusText(text);
+                                    /*
+                                    this.Invoke(new Action(() =>
+                                    {
+                                        progress.MessageText = text;
+                                    }));
+                                    */
+                                },
+                                token);
+                        if (result.Value == -1)
+                            MessageBox.Show(this,
+                                $"导入过程出错: {result.ErrorInfo}",
+                                "导入脱机册记录");
+                        else
+                        {
+                            MessageBox.Show(this, 
+                                $"导入完成。\r\n\r\n共处理条目 {result.Value} 个",
+                                "导入脱机册记录");
+                        }
+                    });
+                }
+                catch (Exception ex)
+                {
+                    ClientInfo.WriteErrorLog($"导入脱机册记录过程出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                    MessageBox.Show(this, 
+                        $"导入脱机册记录过程出现异常: {ex.Message}",
+                        "导入脱机册记录");
+                }
+            }
+        }
+
+        private void MenuItem_clearOfflineItem_Click(object sender, EventArgs e)
+        {
+            DialogResult result = MessageBox.Show(this,
+$"确实要清除全部 {EntityStoreage.GetCount()} 个脱机册记录?",
+"RfidTool",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+            if (result != DialogResult.Yes)
+                return;
+
+            EntityStoreage.DeleteAll();
         }
     }
 

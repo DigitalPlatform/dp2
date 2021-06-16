@@ -1409,6 +1409,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6347.382, Culture=neutral, P
 
             string strItemDbName = Global.GetDbName(strItemRecPath);
             int index = GetColumnIndex(strItemDbName, "item_barcode");
+            // TODO: 这里最好直接报错返回
             if (index == -1)
                 index = 0;   // 这个大部分情况能奏效
 

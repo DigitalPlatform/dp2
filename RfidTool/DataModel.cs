@@ -365,7 +365,19 @@ namespace RfidTool
             {
                 ClientInfo.Config.SetBoolean("writeTag", "verifyBarcode", value);
             }
+        }
 
+        // 使用本地存储(写入标签时会查找利用本地存储中的册记录)
+        public static bool UseLocalStoreage
+        {
+            get
+            {
+                return ClientInfo.Config.GetBoolean("writeTag", "useLocalStorage", false);
+            }
+            set
+            {
+                ClientInfo.Config.SetBoolean("writeTag", "useLocalStorage", value);
+            }
         }
 
         // 写入标签

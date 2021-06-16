@@ -9,6 +9,7 @@ using System.Windows.Forms;
 using DigitalPlatform;
 using DigitalPlatform.Text;
 using DigitalPlatform.CommonControl;
+using DigitalPlatform.Script;
 
 namespace dp2Circulation
 {
@@ -85,6 +86,16 @@ false);
 "addPinyin",
 false);
 
+            this.checkBox_pinyinAutoSel.Checked = Program.MainForm.AppInfo.GetBoolean(
+    "change_biblio_param",
+"pinyinAutoSel",
+false);
+
+            this.comboBox_pinyinStyle.Text = Program.MainForm.AppInfo.GetString(
+    "change_biblio_param",
+"pinyinStyle",
+"UpperFirst");
+
             this.textBox_pinyinCfgs.Text = Program.MainForm.AppInfo.GetString(
                 "change_biblio_param",
 "pinyinCfgs",
@@ -136,6 +147,32 @@ false);
                 "change_biblio_param",
 "pinyinCfgs",
 "");
+            }
+        }
+
+        public static bool PinyinAutoSel
+        {
+            get
+            {
+                return Program.MainForm.AppInfo.GetBoolean(
+                "change_biblio_param",
+"pinyinAutoSel",
+false);
+            }
+        }
+
+        public static PinyinStyle PinyinStyle
+        {
+            get
+            {
+                string name = Program.MainForm.AppInfo.GetString(
+    "change_biblio_param",
+"pinyinStyle",
+"UpperFirst");
+                name = StringUtil.GetLeft(name);
+                if (Enum.TryParse<PinyinStyle>(name, out PinyinStyle style) == false)
+                    return PinyinStyle.None;
+                return style;
             }
         }
 
@@ -211,6 +248,16 @@ this.checkBox_addPublisher.Checked);
     "change_biblio_param",
 "addPinyin",
 this.checkBox_addPinyin.Checked);
+
+            Program.MainForm.AppInfo.SetBoolean(
+"change_biblio_param",
+"pinyinAutoSel",
+this.checkBox_pinyinAutoSel.Checked);
+
+            Program.MainForm.AppInfo.SetString(
+"change_biblio_param",
+"pinyinStyle",
+this.comboBox_pinyinStyle.Text);
 
             Program.MainForm.AppInfo.SetString(
     "change_biblio_param",
@@ -354,5 +401,23 @@ this.textBox_pinyinCfgs.Text);
 #endif
         }
 
+        private void button_setDefaultPinyinCfgs_Click(object sender, EventArgs e)
+        {
+            DialogResult result = MessageBox.Show(this,
+    "确实要用样例规则内容来覆盖当前规则定义？",
+    "ChangeBiblioActionDialog",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button2);
+            if (result == DialogResult.No)
+                return;
+            this.textBox_pinyinCfgs.Text = @"<root>
+    <item name='200' from='a' to='9' />
+    <item name='701' indicator='@[^A].' from='a' to='9' />
+    <item name='711' from='a' to='9' />
+    <item name='702' indicator='@[^A].' from='a' to='9' />
+    <item name='712' from='a' to='9' />
+</root>";
+        }
     }
 }
