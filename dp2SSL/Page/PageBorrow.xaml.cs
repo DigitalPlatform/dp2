@@ -1741,7 +1741,7 @@ out string strError);
                         }
                     }
 
-                    CONTINUE:
+                CONTINUE:
                     if (clearError == true)
                         entity.SetError(null);
                     entity.FillFinished = true;
@@ -2305,7 +2305,7 @@ out string strError);
 
                 return; // new NormalResult { Value = success_count };
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 WpfClientInfo.WriteErrorLog($"LoanAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 DisplayError(ref progress, $"LoanAsync() 出现异常: {ex.Message}");
@@ -4141,7 +4141,7 @@ string usage)
                     {
                         App.Invoke(new Action(() =>
                         {
-                            progress.MessageText = "请先拿开读卡器上的主卡，操作才能继续 ...";
+                            progress.MessageText = "请先拿开读卡器上的读者卡(ISO14443A)，操作才能继续 ...";
                         }));
                     }
                     else
@@ -4197,12 +4197,16 @@ string usage)
                     var results = TagList.Patrons.FindAll(o => o.OneTag.Protocol == InventoryInfo.ISO14443A);
                     if (results.Count != 1)
                     {
-                        string text = $"请拿走主卡，并放上要{action_caption}的副卡";  // "读卡器只应放一张副卡。请拿走多余的副卡";
+                        string remove_text = "";
+                        if (results.Count > 1)
+                            remove_text = $"拿走多余的读者卡(ISO14443A)，然后";  // "读卡器只应放一张副卡。请拿走多余的副卡";
+
+                        string text = $"放上要{action_caption}的副卡";
                         if (App.PatronReaderVertical)
-                            text = $"请扫要{action_caption}的副卡";
+                            text = $"扫要{action_caption}的副卡";
                         App.Invoke(new Action(() =>
                         {
-                            progress.MessageText = text;
+                            progress.MessageText = "请" + remove_text + text;
                         }));
                     }
 

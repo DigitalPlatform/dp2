@@ -21,6 +21,7 @@ using log4net;
 
 using Ionic.Zip;
 using AsyncPluggableProtocol;
+using Microsoft.Win32;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
@@ -35,7 +36,6 @@ using DigitalPlatform.Drawing;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Core;
 using DigitalPlatform.RFID;
-using Microsoft.Win32;
 
 namespace dp2Circulation
 {
@@ -2623,6 +2623,17 @@ AppInfo.GetString("config",
                 {
                     try
                     {
+                        // 2021/6/19
+                        // 设置全局加密协议
+                        {
+                            var securityProtocol = this.AppInfo.GetString(
+                                    "global",
+                                    "securityProtocol",
+                                    "SystemDefault");
+                            Enum.TryParse<SecurityProtocolType>(securityProtocol, out SecurityProtocolType protocol);
+                            System.Net.ServicePointManager.SecurityProtocol = protocol;
+                        }
+
                         // 2013/6/18
                         nRet = TouchServer(false);
                         if (nRet == -1)

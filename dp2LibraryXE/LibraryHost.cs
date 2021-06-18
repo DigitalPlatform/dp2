@@ -476,12 +476,12 @@ X509FindType findType, string findValue)
             {
                 X509Certificate2 cert = FindCertificate(
 StoreLocation.LocalMachine,
-StoreName.Root,
+StoreName.My,   // .Root,
 X509FindType.FindBySerialNumber,
 strCertSN);
                 if (cert == null)
                 {
-                    strError = "序列号为 '" + strCertSN + "' 的证书在 StoreLocation.LocalMachine | StoreLocation.CurrentUser / StoreName.Root 中不存在。";
+                    strError = "序列号为 '" + strCertSN + "' 的证书在 StoreLocation.LocalMachine | StoreLocation.CurrentUser / StoreName.My 中不存在。";
                     return null;
                 }
 

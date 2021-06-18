@@ -13801,10 +13801,15 @@ out strError);
                 goto ERROR1;
             }
 
+            int empty_oi_count = 0;
+
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在导出脱机册信息 ...");
             stop.BeginLoop();
+
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
+    + " 开始导出脱机册信息</div>");
 
             LibraryChannel channel = this.GetChannel();
 
@@ -13858,8 +13863,11 @@ out strError);
                         }
                         catch (Exception ex)
                         {
-                            strError = "XML 装入 DOM 失败: " + ex.Message;
-                            goto ERROR1;
+                            strError = "(册记录被跳过)XML 装入 DOM 失败: " + ex.Message;
+                            // goto ERROR1;
+                            Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode($"{info.RecPath} {strError}") + "</div>");
+                            i++;
+                            continue;
                         }
 
                         DomUtil.RemoveEmptyElements(dom.DocumentElement);
@@ -13871,7 +13879,13 @@ out strError);
                         if (string.IsNullOrEmpty(oi) == false)
                             o.UII = oi + "." + pii;
                         else
+                        {
                             o.UII = pii;
+                            empty_oi_count++;
+                            strError = "册记录的 RFID 机构代码为空";
+                            Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode($"{info.RecPath} {strError}") + "</div>");
+                        }
+
                         o.Xml = dom.DocumentElement.OuterXml;
                         o.RecPath = info.RecPath;
                         o.Timestamp = info.Timestamp;
@@ -13886,8 +13900,11 @@ out strError);
     out strError);
                         if (nRet == -1)
                         {
-                            strError = $"获得 {pii} 的书目摘要时出错:" + strError;
-                            goto ERROR1;
+                            strError = $"(册记录被跳过)获得 {pii} 的书目摘要时出错:" + strError;
+                            // goto ERROR1;
+                            Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode($"{info.RecPath} {strError}") + "</div>");
+                            i++;
+                            continue;
                         }
 
                         o.Title = summary;
@@ -13906,6 +13923,13 @@ out strError);
 
                     writer.WriteEndArray();
                 }
+
+                if (empty_oi_count > 0)
+                {
+                    strError = $"处理过程中发现有 {empty_oi_count} 个册记录其 RFID 机构代码为空。请注意检查 library.xml 中的 rfid 元素配置是否正确";
+                    Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode($"{strError}") + "</div>");
+                    goto ERROR1;
+                }
             }
             catch (Exception ex)
             {
@@ -13916,6 +13940,9 @@ out strError);
             {
                 this.EnableControls(true);
                 this.listView_records.Enabled = true;
+
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
++ " 结束导出脱机册信息</div>");
 
                 this.ReturnChannel(channel);
 

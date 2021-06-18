@@ -226,12 +226,21 @@ namespace dp2Circulation
             }
             else
             {
+                bool temp = false;
+                DialogResult result = MessageDlg.Show(this,
+"即将进行下述修改动作：\r\n---" + strInfo + "\r\n\r\n开始处理?\r\n[注: 修改会自动兑现保存]",
+"dp2Circulation",
+MessageBoxButtons.OKCancel,
+MessageBoxDefaultButton.Button1,
+            ref temp);
+                /*
                 DialogResult result = MessageBox.Show(this,
 "即将进行下述修改动作：\r\n---" + strInfo + "\r\n\r\n开始处理?\r\n[注: 修改会自动兑现保存]",
 "dp2Circulation",
 MessageBoxButtons.OKCancel,
 MessageBoxIcon.Question,
 MessageBoxDefaultButton.Button1);
+                */
                 if (result == DialogResult.Cancel)
                     return 0;
             }

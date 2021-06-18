@@ -28,6 +28,7 @@ using DigitalPlatform;
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
+using System.ServiceModel.Security;
 
 namespace dp2Library
 {
@@ -617,6 +618,21 @@ EventLogEntryType.Information);
     url);
                         bHasWsHttp = true;
                     }
+                    else if (uri.Scheme.ToLower() == "https")
+                    {
+                        ServiceEndpoint endpoint = host.AddServiceEndpoint(typeof(ILibraryService),
+    CreateWsHttpBinding10(),
+    url);
+                        // bHasWsHttp = true;
+
+                        // This next line is optional. It specifies that the client's certificate
+                        // does not have to be issued by a trusted authority, but can be issued
+                        // by a peer if it is in the Trusted People store. Do not use this setting
+                        // for production code. The default is PeerTrust, which specifies that
+                        // the certificate must originate from a trusted certificate authority.
+                        host.Credentials.ClientCertificate.Authentication.CertificateValidationMode =
+                        X509CertificateValidationMode.PeerOrChainTrust;
+                    }
                     else if (uri.Scheme.ToLower() == "rest.http")
                     {
                         ServiceEndpoint endpoint = host.AddServiceEndpoint(typeof(ILibraryServiceREST),
@@ -1131,6 +1147,32 @@ EventLogEntryType.Information);
             return binding;
         }
 
+        // 2021/6/18
+        // ws10: anonymouse -- SecurityMode.Transport + MessageCredentialType.None
+        System.ServiceModel.Channels.Binding CreateWsHttpBinding10()
+        {
+            WSHttpBinding binding = new WSHttpBinding();
+            binding.Namespace = "http://dp2003.com/dp2library/";
+            binding.Security.Mode = SecurityMode.TransportWithMessageCredential;
+            binding.Security.Message.ClientCredentialType = MessageCredentialType.Certificate;
+            binding.ReliableSession.Enabled = true;
+
+            binding.MaxReceivedMessageSize = 1024 * 1024;
+            binding.MessageEncoding = WSMessageEncoding.Mtom;
+            XmlDictionaryReaderQuotas quotas = new XmlDictionaryReaderQuotas();
+            quotas.MaxArrayLength = 1024 * 1024;
+            quotas.MaxStringContentLength = 1024 * 1024;
+            binding.ReaderQuotas = quotas;
+            SetTimeout(binding);
+
+            binding.ReliableSession.InactivityTimeout = new TimeSpan(0, 20, 0);
+            // binding.ReliableSession.Enabled = false;
+
+            binding.ReliableSession.InactivityTimeout = new TimeSpan(0, 20, 0);
+            return binding;
+        }
+
+
         System.ServiceModel.Channels.Binding CreateWebHttpBinding1()
         {
             WebHttpBinding binding = new WebHttpBinding();
@@ -1255,12 +1297,13 @@ strCertSN);
 #endif
                 X509Certificate2 cert = FindCertificate(
 StoreLocation.LocalMachine,
-StoreName.Root,
+StoreName.My,   // .Root,
 X509FindType.FindBySerialNumber,
 strCertSN);
                 if (cert == null)
                 {
-                    strError = "序列号为 '" + strCertSN + "' 的证书在 StoreLocation.LocalMachine | StoreLocation.CurrentUser / StoreName.Root 中不存在。";
+                    // strError = "序列号为 '" + strCertSN + "' 的证书在 StoreLocation.LocalMachine | StoreLocation.CurrentUser / StoreName.My 中不存在。";
+                    strError = "序列号为 '" + strCertSN + "' 的证书在 StoreLocation.LocalMachine / StoreName.My 中不存在。";
                     return null;
                 }
 

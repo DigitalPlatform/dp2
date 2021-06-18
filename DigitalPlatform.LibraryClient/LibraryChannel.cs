@@ -25,6 +25,7 @@ using System.Net;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Core;
+using System.Net.Security;
 
 namespace DigitalPlatform.LibraryClient
 {
@@ -402,6 +403,50 @@ namespace DigitalPlatform.LibraryClient
             return new CustomBinding(outputBec);
         }
 
+        // 2021/6/18
+        // ws10:anonymouse
+        System.ServiceModel.Channels.Binding CreateWs10Binding()
+        {
+            WSHttpBinding binding = new WSHttpBinding();
+            binding.Security.Mode = SecurityMode.TransportWithMessageCredential;
+            binding.Security.Message.ClientCredentialType = MessageCredentialType.Certificate;
+            binding.ReliableSession.Enabled = true;
+            // binding.Security.Message.ClientCredentialType = MessageCredentialType.UserName;
+
+            binding.MaxReceivedMessageSize = MaxReceivedMessageSize;
+            binding.MessageEncoding = WSMessageEncoding.Mtom;
+            XmlDictionaryReaderQuotas quotas = new XmlDictionaryReaderQuotas();
+            quotas.MaxArrayLength = 1024 * 1024;
+            quotas.MaxStringContentLength = 1024 * 1024;
+            binding.ReaderQuotas = quotas;
+
+            SetTimeout(binding);
+
+            // binding.ReliableSession.Enabled = true;
+            binding.ReliableSession.InactivityTimeout = this.InactivityTimeout;
+
+            return binding;
+            /*
+            // Get the SecurityBindingElement and cast to a SymmetricSecurityBindingElement to set the IdentityVerifier.
+            BindingElementCollection outputBec = binding.CreateBindingElements();
+            SymmetricSecurityBindingElement ssbe = (SymmetricSecurityBindingElement)outputBec.Find<SecurityBindingElement>();
+
+            //Set the Custom IdentityVerifier.
+            ssbe.LocalClientSettings.IdentityVerifier = new CustomIdentityVerifier();
+
+            //
+            // Get the System.ServiceModel.Security.Tokens.SecureConversationSecurityTokenParameters 
+            SecureConversationSecurityTokenParameters secureTokenParams =
+                (SecureConversationSecurityTokenParameters)ssbe.ProtectionTokenParameters;
+            // From the collection, get the bootstrap element.
+            SecurityBindingElement bootstrap = secureTokenParams.BootstrapSecurityBindingElement;
+            // Set the MaxClockSkew on the bootstrap element.
+            bootstrap.LocalClientSettings.IdentityVerifier = new CustomIdentityVerifier();
+            return new CustomBinding(outputBec);
+            */
+        }
+
+
         // return:
         //      -1  error
         //      0   dp2Library的版本号过低。警告信息在strError中
@@ -653,6 +698,27 @@ out strError);
                         EndpointAddress address = new EndpointAddress(strUrl);
 
                         this.m_ws = new localhost.dp2libraryClient(CreateNt0Binding(), address);
+                    }
+                    else if (uri.Scheme.ToLower() == "https")
+                    {
+                        EndpointAddress address = new EndpointAddress(strUrl);
+
+                        this.m_ws = new localhost.dp2libraryClient(CreateWs10Binding(), address);
+                        //this.m_ws.ClientCredentials.UserName.UserName = "test";
+                        //this.m_ws.ClientCredentials.UserName.Password = "";
+
+                        // The client must specify a certificate trusted by the server.  
+                        this.m_ws.ClientCredentials.ClientCertificate.SetCertificate(
+                            StoreLocation.LocalMachine,  // 这里和服务器端不同
+                            StoreName.My,
+                            X509FindType.FindByThumbprint,  // .FindBySubjectName,
+                            "872801bbd93e75f327b34ae76366fa05b229433b");  // "contoso.com"
+
+                        /*
+                        ServicePointManager.ServerCertificateValidationCallback =
+  (sender, certificate, chain, sslPolicyErrors) => { return true; };
+                        */
+                        // SSLValidator.OverrideValidation();
                     }
                     else
                     {
@@ -10335,6 +10401,13 @@ Stack:
                         LibraryChannelManager.Log?.Debug("ContainsClaim.");
                         return true;
                     }
+                    /*
+                    if (claimset.ContainsClaim(identity.IdentityClaim) == false)
+                    {
+                        LibraryChannelManager.Log?.Debug("ContainsClaim == false");
+                        return false;
+                    }
+                    */
 
                     // string expectedSpn = null;
                     if (ClaimTypes.Dns.Equals(identity.IdentityClaim.ClaimType))
@@ -10352,6 +10425,15 @@ Stack:
                             LibraryChannelManager.Log?.Debug("CheckDnsEquivalence() return not null.");
                             return true;
                         }
+
+                        /*
+                        Claim claim = CheckDnsEquivalence(claimset, strHost);
+                        if (claim == null)
+                        {
+                            LibraryChannelManager.Log?.Debug("CheckDnsEquivalence() return null.");
+                            return false;
+                        }
+                        */
                     }
                 }
 
@@ -10567,5 +10649,21 @@ Stack:
     {
         public string ErrorInfo = "";
         // public bool Canceled = false;
+    }
+
+    // https://stackoverflow.com/questions/18454292/system-net-certificatepolicy-to-servercertificatevalidationcallback-accept-all-c
+    public static class SSLValidator
+    {
+        private static bool OnValidateCertificate(object sender, X509Certificate certificate, X509Chain chain,
+                                                  SslPolicyErrors sslPolicyErrors)
+        {
+            return true;
+        }
+        public static void OverrideValidation()
+        {
+            ServicePointManager.ServerCertificateValidationCallback =
+                OnValidateCertificate;
+            ServicePointManager.Expect100Continue = true;
+        }
     }
 }

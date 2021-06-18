@@ -46,6 +46,13 @@ namespace DigitalPlatform.Install
                         && String.IsNullOrEmpty(this.textBox_httpUrl.Text) == true)
                         this.textBox_httpUrl.Text = strUrl;
                 }
+                // 2021/6/18
+                if (uri.Scheme.ToLower() == "https")
+                {
+                    if (this.checkBox_https.Checked == false
+                        && String.IsNullOrEmpty(this.textBox_httpsUrl.Text) == true)
+                        this.textBox_httpsUrl.Text = strUrl;
+                }
                 if (uri.Scheme.ToLower() == "rest.http")
                 {
                     if (this.checkBox_rest.Checked == false
@@ -112,6 +119,22 @@ namespace DigitalPlatform.Install
                 }
             }
 
+            // 2021/6/18
+            if (this.checkBox_https.Checked == true)
+            {
+                if (String.IsNullOrEmpty(this.textBox_httpsUrl.Text) == true)
+                {
+                    strError = "尚未指定 HTTPS 协议的 URL 地址";
+                    goto ERROR1;
+                }
+                Uri uri = new Uri(this.textBox_httpsUrl.Text);
+                if (uri.Scheme.ToLower() != "https")
+                {
+                    strError = "HTTPS 协议 URL '" + this.textBox_httpsUrl.Text + "' 格式错误: 协议名部分不正确";
+                    goto ERROR1;
+                }
+            }
+
             if (this.checkBox_rest.Checked == true)
             {
                 if (String.IsNullOrEmpty(this.textBox_restUrl.Text) == true)
@@ -146,7 +169,8 @@ namespace DigitalPlatform.Install
                 && this.checkBox_netpipe.Checked == false
                 && this.checkBox_http.Checked == false
                 && this.checkBox_rest.Checked == false
-                && this.checkBox_basic.Checked == false)
+                && this.checkBox_basic.Checked == false
+                && this.checkBox_https.Checked == false)
             {
                 strError = "必须指定启用至少一个协议";
                 goto ERROR1;
@@ -420,6 +444,57 @@ namespace DigitalPlatform.Install
             }
         }
 
+        // *** https
+
+        public bool HttpsSelected
+        {
+            get
+            {
+                return this.checkBox_https.Checked;
+            }
+            set
+            {
+                this.checkBox_https.Checked = value;
+            }
+        }
+
+        public bool HttpsEnabled
+        {
+            get
+            {
+                return this.checkBox_https.Enabled;
+            }
+            set
+            {
+                this.checkBox_https.Enabled = value;
+                this.textBox_httpsComment.Enabled = value;
+            }
+        }
+
+        public string HttpsUrl
+        {
+            get
+            {
+                return this.textBox_httpsUrl.Text;
+            }
+            set
+            {
+                this.textBox_httpsUrl.Text = value;
+            }
+        }
+
+        public string HttpsComment
+        {
+            get
+            {
+                return this.textBox_httpsComment.Text;
+            }
+            set
+            {
+                this.textBox_httpsComment.Text = value;
+            }
+        }
+
 
         public string[] Urls
         {
@@ -452,6 +527,11 @@ namespace DigitalPlatform.Install
                     results.Add(this.textBox_basicUrl.Text);
                 }
 
+                if (this.checkBox_https.Checked == true)
+                {
+                    results.Add(this.textBox_httpsUrl.Text);
+                }
+
                 return StringUtil.FromListString(results);
             }
             set
@@ -461,6 +541,7 @@ namespace DigitalPlatform.Install
                 this.checkBox_http.Checked = false;
                 this.checkBox_rest.Checked = false;
                 this.checkBox_basic.Checked = false;
+                this.checkBox_https.Checked = false;
 
                 for (int i = 0; i < value.Length; i++)
                 {
@@ -493,6 +574,11 @@ namespace DigitalPlatform.Install
                     {
                         this.textBox_basicUrl.Text = strUrl;
                         this.checkBox_basic.Checked = true;
+                    }
+                    if (uri.Scheme.ToLower() == "https")
+                    {
+                        this.textBox_httpsUrl.Text = strUrl;
+                        this.checkBox_https.Checked = true;
                     }
                 }
             }
@@ -528,6 +614,12 @@ namespace DigitalPlatform.Install
         {
             this.textBox_basicUrl.Enabled = this.checkBox_basic.Checked;
             this.textBox_basicComment.Enabled = this.checkBox_basic.Checked;
+        }
+
+        private void checkBox_https_CheckedChanged(object sender, EventArgs e)
+        {
+            this.textBox_httpsUrl.Enabled = this.checkBox_https.Checked;
+            this.textBox_httpsComment.Enabled = this.checkBox_https.Checked;
         }
     }
 }

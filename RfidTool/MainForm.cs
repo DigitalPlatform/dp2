@@ -293,6 +293,8 @@ bool bClickClose = false)
                 ClientInfo.MemoryState(_scanDialog, "scanDialog", "state");
                 _scanDialog.UiState = ClientInfo.Config.Get("scanDialog", "uiState", null);
             }
+
+            _scanDialog.BeginVerifyEnvironment();
         }
 
         private void _scanDialog_WriteComplete(object sender, WriteCompleteventArgs e)
@@ -953,19 +955,33 @@ MessageBoxDefaultButton.Button2);
             if (openFileDialog.ShowDialog(this) == DialogResult.Cancel)
                 return;
 
-            var token = new CancellationToken();
+            var token = _cancel.Token;
 
             using (var cancel = CancellationTokenSource.CreateLinkedTokenSource(token))
+            using (FileDownloadDialog dlg = new FileDownloadDialog())
             {
                 try
                 {
+                    dlg.FormClosed += (s1, e1) =>
+                    {
+                        cancel.Cancel();
+                    };
+                    this.Invoke((Action)(() =>
+                    {
+                        dlg.Text = "导入脱机册信息";
+                        dlg.Show(this);
+                    }));
+
                     await Task.Run(async () =>
                     {
                         var result = await EntityStoreage.ImportOfflineEntityAsync(
                                 openFileDialog.FileName,
                                 (text) =>
                                 {
-                                    ShowStatusText(text);
+                                    dlg.SetProgress(text,
+    -1,
+    -1);
+                                    // ShowStatusText(text);
                                     /*
                                     this.Invoke(new Action(() =>
                                     {
@@ -973,14 +989,28 @@ MessageBoxDefaultButton.Button2);
                                     }));
                                     */
                                 },
-                                token);
+                                cancel.Token);
+
+
+                        this.Invoke((Action)(() =>
+                        {
+                            dlg.Close();
+                        }));
+
                         if (result.Value == -1)
-                            MessageBox.Show(this,
-                                $"导入过程出错: {result.ErrorInfo}",
-                                "导入脱机册记录");
+                        {
+                            if (result.ErrorCode == "canceled")
+                                MessageBox.Show(this,
+    $"{result.ErrorInfo}",
+    "导入脱机册记录");
+                            else
+                                MessageBox.Show(this,
+                                    $"导入过程出错: {result.ErrorInfo}",
+                                    "导入脱机册记录");
+                        }
                         else
                         {
-                            MessageBox.Show(this, 
+                            MessageBox.Show(this,
                                 $"导入完成。\r\n\r\n共处理条目 {result.Value} 个",
                                 "导入脱机册记录");
                         }
@@ -989,7 +1019,7 @@ MessageBoxDefaultButton.Button2);
                 catch (Exception ex)
                 {
                     ClientInfo.WriteErrorLog($"导入脱机册记录过程出现异常: {ExceptionUtil.GetDebugText(ex)}");
-                    MessageBox.Show(this, 
+                    MessageBox.Show(this,
                         $"导入脱机册记录过程出现异常: {ex.Message}",
                         "导入脱机册记录");
                 }

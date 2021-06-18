@@ -61,7 +61,8 @@ namespace RfidTool
         {
             string strError = "";
 
-            // 检查
+            // 检查机构代码
+            if (this.checkBox_writeTag_useLocalStoreage.Checked == false)
             {
                 if (string.IsNullOrEmpty(this.textBox_rfid_oi.Text) == false
                     && string.IsNullOrEmpty(this.textBox_rfid_aoi.Text) == false)
@@ -100,34 +101,6 @@ namespace RfidTool
                     goto ERROR1;
                 }
 
-                if (string.IsNullOrEmpty(this.comboBox_uhfDataFormat.Text))
-                {
-                    strError = "尚未指定 UHF 标签写入格式";
-                    goto ERROR1;
-                }
-
-                string rule = this.textBox_verifyRule.Text;
-                if (string.IsNullOrEmpty(rule) == false)
-                {
-                    try
-                    {
-                        BarcodeValidator validator = new BarcodeValidator(rule);
-                    }
-                    catch(Exception ex)
-                    {
-                        strError = $"条码校验规则不合法: {ex.Message}";
-                        goto ERROR1;
-                    }
-                }
-
-                // 2021/5/12
-                if (this.checkBox_writeTag_verifyPii.Checked
-                    && string.IsNullOrWhiteSpace(rule))
-                {
-                    strError = "您选择了“校验条码号”，但尚未设置条码号校验规则";
-                    goto ERROR1;
-                }
-
                 if (string.IsNullOrEmpty(this.textBox_rfid_aoi.Text) == false)
                 {
                     // TODO: 当 textbox 内容发生过变化才警告
@@ -142,6 +115,36 @@ namespace RfidTool
         MessageBoxDefaultButton.Button2);
                     if (result != DialogResult.Yes)
                         return;
+                }
+            }
+
+            {
+                if (string.IsNullOrEmpty(this.comboBox_uhfDataFormat.Text))
+                {
+                    strError = "尚未指定 UHF 标签写入格式";
+                    goto ERROR1;
+                }
+
+                string rule = this.textBox_verifyRule.Text;
+                if (string.IsNullOrEmpty(rule) == false)
+                {
+                    try
+                    {
+                        BarcodeValidator validator = new BarcodeValidator(rule);
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = $"条码校验规则不合法: {ex.Message}";
+                        goto ERROR1;
+                    }
+                }
+
+                // 2021/5/12
+                if (this.checkBox_writeTag_verifyPii.Checked
+                    && string.IsNullOrWhiteSpace(rule))
+                {
+                    strError = "您选择了“校验条码号”，但尚未设置条码号校验规则";
+                    goto ERROR1;
                 }
             }
 

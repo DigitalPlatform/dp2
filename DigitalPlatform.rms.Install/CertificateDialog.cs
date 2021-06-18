@@ -51,12 +51,12 @@ namespace DigitalPlatform.rms
 #endif
                 X509Certificate2 cert = FindCertificate(
 StoreLocation.LocalMachine,
-StoreName.Root,
+StoreName.My, //.Root,
 X509FindType.FindBySerialNumber,
 this.SN);
                 if (cert == null)
                 {
-                    MessageBox.Show(this, "序列号为 '" + this.SN + "' 的证书在 StoreLocation.LocalMachine / StoreName.Root 中不存在。请重新设置");
+                    MessageBox.Show(this, "序列号为 '" + this.SN + "' 的证书在 StoreLocation.LocalMachine / StoreName.My 中不存在。请重新设置");
                     return;
                 }
                 X509Certificate2UI.DisplayCertificate(cert);

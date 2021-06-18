@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
+
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.CommonControl;
@@ -132,9 +133,15 @@ namespace RfidTool
                     }
 
                     if (items.Count == 1)
+                    {
                         this.ProcessingEntity = items[0];
+                    }
                     else
+                    {
                         this.ProcessingEntity = null;
+                    }
+
+                    ShowBookTitle(this.ProcessingEntity?.Title);
 
                     if (string.IsNullOrEmpty(text) == false)
                     {
@@ -166,12 +173,28 @@ namespace RfidTool
 
             // 首次填充标签
             FillAllTags();
+
+            BeginVerifyEnvironment();
         }
 
         private void ScanDialog_FormClosed(object sender, FormClosedEventArgs e)
         {
             DataModel.TagChanged -= DataModel_TagChanged;
             DataModel.SetError -= DataModel_SetError;
+        }
+
+        public void BeginVerifyEnvironment()
+        {
+            Task.Run(() => {
+                if (EntityStoreage.GetCount() == 0)
+                {
+                    string text = "尚未导入脱机册信息";
+                    ShowMessage(text);
+                    ShowMessageBox("load", text);
+                }
+                else
+                    ShowMessageBox("load", null);
+            });
         }
 
         void SetTitle()
@@ -268,14 +291,16 @@ namespace RfidTool
         const int COLUMN_UID = 0;
         const int COLUMN_PII = 1;
         const int COLUMN_TOU = 2;
-        const int COLUMN_TITLE = 3;
-        const int COLUMN_EAS = 4;
-        const int COLUMN_AFI = 5;
-        const int COLUMN_OI = 6;
-        const int COLUMN_AOI = 7;
-        const int COLUMN_ANTENNA = 8;
-        const int COLUMN_READERNAME = 9;
-        const int COLUMN_PROTOCOL = 10;
+        const int COLUMN_TITLE = 3;     // 册记录中的书名
+        const int COLUMN_ACCESSNO = 4;  // 册记录中的索取号
+        const int COLUMN_EAS = 5;
+        const int COLUMN_AFI = 6;
+        const int COLUMN_OI = 7;
+        const int COLUMN_AOI = 8;
+        const int COLUMN_SHELFLOCATION = 9; // 标签中的 ShelfLocation
+        const int COLUMN_ANTENNA = 10;
+        const int COLUMN_READERNAME = 11;
+        const int COLUMN_PROTOCOL = 12;
 
         object _syncRootFill = new object();
 
@@ -349,6 +374,7 @@ namespace RfidTool
             string afi = "";
             string oi = "";
             string aoi = "";
+            string shelfLocation = "";  // 标签中的 shelfLocation
 
             var iteminfo = item.Tag as ItemInfo;
 
@@ -359,6 +385,8 @@ namespace RfidTool
 
             ListViewUtil.ChangeItemText(item, COLUMN_PII, "(尚未填充)");
             ListViewUtil.ChangeItemText(item, COLUMN_TITLE, "");
+            ListViewUtil.ChangeItemText(item, COLUMN_ACCESSNO, "");
+            ListViewUtil.ChangeItemText(item, COLUMN_SHELFLOCATION, "");
 
             try
             {
@@ -442,6 +470,8 @@ namespace RfidTool
                                 aoi = chip?.FindElement((ElementOID)27)?.Text;
                         }
                     }
+
+                    shelfLocation = chip?.FindElement(ElementOID.ShelfLocation)?.Text;
                 }
 
 
@@ -453,16 +483,27 @@ namespace RfidTool
                 else
                     ListViewUtil.ChangeItemText(item, COLUMN_PII, pii);
 
+                // string accessNo = "";   // 册记录中的索取号
+
                 // 设置 Title
                 if (this.UseLocalStoreage())
                 {
                     var uii = BuildUii(pii, oi, aoi);
                     var entity = EntityStoreage.FindByUII(uii);
                     if (entity == null)
+                    {
                         ListViewUtil.ChangeItemText(item, COLUMN_TITLE, "");
+                        ListViewUtil.ChangeItemText(item, COLUMN_ACCESSNO, "");
+                    }
                     else
+                    {
                         ListViewUtil.ChangeItemText(item, COLUMN_TITLE, entity.Title);
+                        ListViewUtil.ChangeItemText(item, COLUMN_ACCESSNO, GetAccessNo(entity));
+                    }
                 }
+
+                // 方括号中为标签中的索取号
+                ListViewUtil.ChangeItemText(item, COLUMN_SHELFLOCATION, shelfLocation);
 
                 ListViewUtil.ChangeItemText(item, COLUMN_TOU, tou);
                 ListViewUtil.ChangeItemText(item, COLUMN_EAS, eas);
@@ -771,12 +812,16 @@ namespace RfidTool
                 if (string.IsNullOrEmpty(tou))
                     tou = "10"; // 默认图书
 
+                string accessNo = GetAccessNo(entity);
+
                 var chip = new LogicChip();
                 chip.SetElement(ElementOID.PII, barcode);
                 if (string.IsNullOrEmpty(oi) == false)
                     chip.SetElement(ElementOID.OI, oi);
                 if (string.IsNullOrEmpty(aoi) == false)
                     chip.SetElement(ElementOID.AOI, aoi);
+                if (string.IsNullOrEmpty(accessNo) == false)
+                    chip.SetElement(ElementOID.ShelfLocation, accessNo);
 
                 bool eas = false;
                 if (this.IsBook())
@@ -850,10 +895,25 @@ namespace RfidTool
 
         static string GetOI(EntityItem entity)
         {
+            if (entity == null)
+                return "";
+            if (string.IsNullOrEmpty(entity.Xml))
+                return "";
             XmlDocument dom = new XmlDocument();
             dom.LoadXml(entity.Xml);
             string oi = DomUtil.GetElementText(dom.DocumentElement, "oi");
             return oi;
+        }
+
+        static string GetAccessNo(EntityItem entity)
+        {
+            if (entity == null)
+                return "";
+            if (string.IsNullOrEmpty(entity.Xml))
+                return "";
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml(entity.Xml);
+            return DomUtil.GetElementText(dom.DocumentElement, "accessNo");
         }
 
         BarcodeValidator _validator = null;
@@ -925,6 +985,8 @@ namespace RfidTool
             set
             {
                 this.textBox_processingBarcode.Text = value;
+                if (string.IsNullOrEmpty(value))
+                    this.label_title.Text = "";
             }
         }
 
@@ -1411,12 +1473,24 @@ MessageBoxDefaultButton.Button2);
         private void button_clearProcessingBarcode_Click(object sender, EventArgs e)
         {
             this.textBox_processingBarcode.Clear();
+            ShowBookTitle("");
         }
 
         private void textBox_processingBarcode_TextChanged(object sender, EventArgs e)
         {
             this.button_clearProcessingBarcode.Enabled = (this.textBox_processingBarcode.Text.Length > 0);
             SetWriteButtonState();
+        }
+
+        void ShowBookTitle(string text)
+        {
+            if (this.InvokeRequired)
+                this.Invoke((Action)(() =>
+                {
+                    this.label_title.Text = text;
+                }));
+            else
+                this.label_title.Text = text;
         }
 
         void ShowMessage(string text, string color = "")

@@ -83,7 +83,7 @@ CancellationToken token)
                         JsonSerializer serializer = new JsonSerializer();
                         OfflineItem o = serializer.Deserialize<OfflineItem>(reader);
 
-                        func_showProgress?.Invoke($"正在导入 {o.UII} {o.Title} ...");
+                        func_showProgress?.Invoke($"{count} 正在导入 {o.UII} {o.Title} ...");
 
                         EntityItem item = new EntityItem();
                         item.UII = o.UII;
@@ -97,10 +97,36 @@ CancellationToken token)
                     }
                 }
 
+                if (token.IsCancellationRequested)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = "用户中断处理",
+                        ErrorCode = "canceled"
+                    };
+
                 return new NormalResult { Value = count };
+            }
+            catch(TaskCanceledException)
+            {
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = "用户中断处理",
+                    ErrorCode = "canceled"
+                };
             }
             catch (Exception ex)
             {
+                // 判断 InnerException 是否为 TaskCanceledException
+                if (ex.GetOriginalException() is TaskCanceledException)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = "用户中断处理",
+                        ErrorCode = "canceled"
+                    };
+
                 ClientInfo.WriteErrorLog($"ImportOfflineEntityAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 return new NormalResult
                 {
@@ -147,15 +173,26 @@ CancellationToken token)
 
     public class EntityItem
     {
-        [Column(IsIdentity = true, IsPrimary = true)]
-        public int Id { get; set; }
+        // public int Id { get; set; }
 
         // 
+        [Column(IsIdentity = true, IsPrimary = true)]
         public string UII { get; set; }
         public string RecPath { get; set; }
         public string Xml { get; set; }
         public byte[] Timestamp { get; set; }
 
         public string Title { get; set; }
+    }
+
+    // https://stackoverflow.com/questions/1456563/best-way-to-check-for-inner-exception
+    public static class ExceptionExtensions
+    {
+        public static Exception GetOriginalException(this Exception ex)
+        {
+            if (ex.InnerException == null) return ex;
+
+            return ex.InnerException.GetOriginalException();
+        }
     }
 }

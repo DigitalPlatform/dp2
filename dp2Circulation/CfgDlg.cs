@@ -12,6 +12,7 @@ using DigitalPlatform.CommonControl;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Text;
 using DigitalPlatform.Z3950.UI;
+using System.Net;
 
 namespace dp2Circulation
 {
@@ -693,6 +694,12 @@ false);
                 value = value.Replace(",", "\r\n");
             this.textBox_global_additionalLocations.Text = value;
 
+            this.checkedComboBox_global_securityProtocol.Items.AddRange(
+                new string[] { "SystemDefault", "Ssl3", "Tls", "Tls11", "Tls12" });
+            this.checkedComboBox_global_securityProtocol.Text = ap.GetString(
+                    "global",
+                    "securityProtocol",
+                    "SystemDefault");
 
             // *** 标签打印
             // 从何处获取索取号
@@ -1322,6 +1329,13 @@ false);
         "global",
         "upper_input_barcode",
         this.checkBox_global_upperInputBarcode.Checked);
+
+                ap.SetString(
+                    "global",
+                    "securityProtocol",
+                    this.checkedComboBox_global_securityProtocol.Text);
+                Enum.TryParse<SecurityProtocolType>(this.checkedComboBox_global_securityProtocol.Text, out SecurityProtocolType protocol);
+                System.Net.ServicePointManager.SecurityProtocol = protocol;
 
                 // *** 标签打印
                 // 从何处获取索取号
