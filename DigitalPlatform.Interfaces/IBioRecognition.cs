@@ -115,7 +115,19 @@ namespace DigitalPlatform.Interfaces
         public string Version { get; set; }
 
         // [out] 返回读者照片
-        public byte [] ImageData { get; set; }
+        public byte[] ImageData { get; set; }
+    }
+
+    [Serializable()]
+    public class LivenessResult : NormalResult
+    {
+        public int IrLiveness { get; set; }
+        public string IrText { get; set; }
+        public Rectangle IrRect { get; set; }
+
+        public int RgbLiveness { get; set; }
+        public string RgbText { get; set; }
+        public Rectangle RgbRect { get; set; }
     }
 
     [Serializable()]
@@ -130,7 +142,7 @@ namespace DigitalPlatform.Interfaces
 
         public override string ToString()
         {
-            StringBuilder text = new StringBuilder(base.ToString()+"\r\n");
+            StringBuilder text = new StringBuilder(base.ToString() + "\r\n");
             text.Append($"Patron={Patron}\r\n");
             text.Append($"Score={Score}\r\n");
             text.Append($"DebugInfo={DebugInfo}\r\n");

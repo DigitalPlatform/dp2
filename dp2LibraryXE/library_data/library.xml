@@ -319,8 +319,7 @@ public class MyLibraryHost : LibraryHost
 
 			if (strPartName == "price")
 			{
-				strXPath = "//unimarc:record/unimarc:datafield[@tag='010']/unimarc:subfield[@code='d']";
-				// 092?
+				strXPath = "//unimarc:record/unimarc:datafield[@tag='010']/unimarc:subfield[@code='d'] | //unimarc:record/unimarc:datafield[@tag='011']/unimarc:subfield[@code='d']";	// 2021/6/26 增加 011$d
 
 				node = bibliodom.SelectSingleNode(strXPath, mngr);
 				if (node == null)

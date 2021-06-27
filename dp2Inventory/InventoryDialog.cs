@@ -170,6 +170,12 @@ namespace dp2Inventory
                                     progress.SetProgress(text, bytes, total);
                                 },
                                 _cancel.Token);
+                        if (result.Value == -1)
+                        {
+                            strError = $"准备册记录过程出错: {result.ErrorInfo}";
+                            return;
+                        }
+
                         DataModel.SetUidTable(uid_table);
                     }
                     catch (Exception ex)

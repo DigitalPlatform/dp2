@@ -1752,16 +1752,32 @@ bClearList);
 
         public override List<Order.ColumnProperty> GetBiblioColumns()
         {
-            if (_biblioColumns != null)
-                return _biblioColumns;
+            // 2021/6/21
+            // dp2library 3.0 以前不支持获得书目 table 格式。因此只能采用旧的 summary 格式
+            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.0") < 0)
+            {
+                m_nBiblioSummaryColumn = 1;
+                return null;
+            }
 
-            // 准备书目列标题
-            ItemBiblioColumnOption biblio_column_option = new ItemBiblioColumnOption(Program.MainForm.UserDir);
-            biblio_column_option.LoadData(Program.MainForm.AppInfo,
-                GetBiblioColumnPath());
+            if (_biblioColumns == null)
+            {
+                // 准备书目列标题
+                ItemBiblioColumnOption biblio_column_option = new ItemBiblioColumnOption(Program.MainForm.UserDir);
+                biblio_column_option.LoadData(Program.MainForm.AppInfo,
+                    GetBiblioColumnPath());
 
-            _biblioColumns = Order.DistributeExcelFile.BuildList(biblio_column_option);
-            m_nBiblioSummaryColumn = _biblioColumns.Count;
+                _biblioColumns = Order.DistributeExcelFile.BuildList(biblio_column_option);
+                m_nBiblioSummaryColumn = _biblioColumns.Count;
+            }
+
+            if (_biblioColumns.Count == 1 && _biblioColumns[0].Type == "biblio_summary")
+            {
+                // 要求采用旧的 summary 格式
+                m_nBiblioSummaryColumn = 1;
+                return null;
+            }
+
             return _biblioColumns;
         }
 

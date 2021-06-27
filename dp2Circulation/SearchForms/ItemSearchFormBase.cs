@@ -798,6 +798,12 @@ namespace dp2Circulation
                 || this.DbType == "arrive",
                 "");
 
+            var column_def = GetBiblioColumns();
+
+            // testing
+            // column_def = null;
+            // m_nBiblioSummaryColumn = 1;
+
             bool bShowed = false;
 
             List<string> biblio_recpaths = new List<string>();  // 尺寸可能比 items 数组小，没有包含里面不具有 parent id 列的事项
@@ -906,7 +912,6 @@ namespace dp2Circulation
                 }
             }
 
-            var column_def = GetBiblioColumns();
             string format = "summary";
             if (column_def != null)
                 format = "table:slim|" + StringUtil.MakePathList(GetTypeList(column_def), "|");
@@ -975,7 +980,6 @@ namespace dp2Circulation
 
                 BiblioItem biblio = (BiblioItem)enumerator.Current;
                 // Debug.Assert(biblio.RecPath == strRecPath, "m_loader 和 items 的元素之间 记录路径存在严格的锁定对应关系");
-
 
                 if (column_def == null)
                     ListViewUtil.ChangeItemText(item,

@@ -119,18 +119,24 @@ namespace DigitalPlatform.CirculationClient
         {
             get
             {
-                throw new Exception("尚未重载 ItemCount");
+                throw new NotImplementedException("尚未重载 ItemCount");
             }
         }
 
         public virtual NormalResult Init(int dev_index)
         {
-            return new NormalResult { Value = -1, ErrorInfo = "尚未重载 Init() 函数" };
+            return new NormalResult { Value = -1,
+                ErrorInfo = "尚未重载 Init() 函数",
+                ErrorCode = "notSupport",
+            };
         }
 
         public virtual NormalResult Free()
         {
-            return new NormalResult { Value = -1, ErrorInfo = "尚未重载 Free() 函数" };
+            return new NormalResult { Value = -1, 
+                ErrorInfo = "尚未重载 Free() 函数",
+                ErrorCode = "notSupport",
+            };
         }
 
         // GetRegisterString() 过程中所使用的 CancellationTokenSource 对象
@@ -171,7 +177,8 @@ namespace DigitalPlatform.CirculationClient
             return new TextResult
             {
                 Value = -1,
-                ErrorInfo = "尚未重载 GetRegisterString(Image, string) 函数"
+                ErrorInfo = "尚未重载 GetRegisterString(Image, string) 函数",
+                ErrorCode = "notSupport",
             };
         }
 
@@ -184,7 +191,8 @@ namespace DigitalPlatform.CirculationClient
             return new TextResult
             {
                 Value = -1,
-                ErrorInfo = "尚未重载 GetRegisterString(Image, Image, string) 函数"
+                ErrorInfo = "尚未重载 GetRegisterString(Image, Image, string) 函数",
+                ErrorCode = "notSupport",
             };
         }
 
@@ -200,7 +208,22 @@ namespace DigitalPlatform.CirculationClient
             return new RecognitionFaceResult
             {
                 Value = -1,
-                ErrorInfo = "尚未重载 RecongnitionFaceResult() 函数"
+                ErrorInfo = "尚未重载 RecongnitionFace() 函数",
+                ErrorCode = "notSupport",
+            };
+        }
+
+        // 活体检测
+        public virtual LivenessResult Liveness(Image image,
+    Image irImage,
+    string style,
+    CancellationToken token)
+        {
+            return new LivenessResult
+            {
+                Value = -1,
+                ErrorInfo = "尚未重载 Liveness() 函数",
+                ErrorCode = "notSupport",
             };
         }
 
