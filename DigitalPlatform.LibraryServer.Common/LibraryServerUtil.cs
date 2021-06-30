@@ -314,7 +314,7 @@ namespace DigitalPlatform.LibraryServer
         {
             strError = "";
 
-            XmlNodeList users = dom.DocumentElement.SelectNodes("//accounts/account");
+            XmlNodeList users = dom.DocumentElement.SelectNodes("accounts/account");
             foreach (XmlElement user in users)
             {
                 string strExistPassword = user.GetAttribute("password");

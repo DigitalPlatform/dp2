@@ -255,14 +255,14 @@ namespace dp2SSL
                                     // TODO: 判断通讯出错的错误码。如果是通讯出错，则稍后需要重试下载
                                     _replicateEntityError++;
                                     WpfClientInfo.Config.Set("entityReplication", "unprocessed", StringUtil.MakePathList(unprocessed));
-                                    
+
                                     App.CurrentApp.SpeakSequence($"下载全部册记录到本地缓存出错: {repl_result.ErrorInfo}");
                                 }
                                 else
                                 {
                                     WpfClientInfo.Config.SetBoolean("entityReplication", "downloaded", true);
                                     WpfClientInfo.Config.Set("entityReplication", "unprocessed", null);
-                                    
+
                                     App.CurrentApp.SpeakSequence("下载全部册记录到本地缓存完成");
                                 }
                             }
@@ -343,15 +343,36 @@ TaskScheduler.Default).Unwrap();
         }
 
         // 从打开门开始多少时间开始警告关门
-        static TimeSpan _warningDoorLength = TimeSpan.FromSeconds(15);  // 15
-        static DateTime _lastWarningTime;
+        static DateTime _lastWarningTime = DateTime.MinValue;
+
+        // static TimeSpan _warningDoorLength = TimeSpan.FromSeconds(15);  // 15
+        static TimeSpan _warningDoorLength
+        {
+            get
+            {
+                return TimeSpan.FromSeconds(
+        ShelfData.GetWarningCloseDoorLength().Item1
+        );
+            }
+        }
+
+        static TimeSpan _warningDoorRepeatLength
+        {
+            get
+            {
+                return TimeSpan.FromSeconds(
+        ShelfData.GetWarningCloseDoorLength().Item2
+        );
+            }
+        }
 
         static void WarningCloseDoor()
         {
             var now = DateTime.Now;
 
             // 控制进入本函数的频率
-            if (now - _lastWarningTime < TimeSpan.FromSeconds(10))  // 10
+            if (_lastWarningTime > DateTime.MinValue
+                && now - _lastWarningTime < _warningDoorRepeatLength/*TimeSpan.FromSeconds(10)*/)  // 10
                 return;
 
             // 2020/11/20
@@ -373,6 +394,8 @@ TaskScheduler.Default).Unwrap();
 
             if (doors.Count > 0)
                 App.CurrentApp.SpeakSequence($"不要忘记关门 {GetDoorNameSpeakText(doors)}");
+            else
+                _lastWarningTime = DateTime.MinValue;
         }
 
         // 获得一个描述若干门名字的语句

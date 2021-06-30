@@ -9,6 +9,7 @@ using System.Xml;
 using System.Diagnostics;
 using System.Threading;
 using System.IO;
+using System.Web;
 
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
@@ -18,7 +19,6 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.Text;
 
 using DigitalPlatform.LibraryClient.localhost;
-using System.Web;
 using DigitalPlatform.Script;
 using System.Collections;
 
@@ -245,6 +245,9 @@ MessageBoxDefaultButton.Button1);
                     return 0;
             }
 
+            _hideAdd210Dialog = false;
+            _add210_dialog_result = DialogResult.Yes;
+
             int nCount = 0; // 总共处理多少条
             int nChangedCount = 0;  // 发生修改的有多少条
 
@@ -334,6 +337,9 @@ MessageBoxDefaultButton.Button1);
                 if (result == DialogResult.Cancel)
                     return;
             }
+
+            _hideAdd210Dialog = false;
+            _add210_dialog_result = DialogResult.Yes;
 
             int nCount = 0; // 总共处理多少条
             int nChangedCount = 0;  // 发生修改的有多少条
@@ -540,7 +546,7 @@ MessageBoxDefaultButton.Button1);
                     changed = true;
                 else if (string.IsNullOrEmpty(strError) == false)
                 {
-                    Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>&nbsp;" + HttpUtility.HtmlEncode($"{strError}") + "</div>");
+                    Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>&nbsp;" + HttpUtility.HtmlEncode($"{strError}") + "</div>");
                 }
             }
 
@@ -848,6 +854,9 @@ MessageBoxDefaultButton.Button1);
             return 0;
         }
 
+        bool _hideAdd210Dialog = false;
+        DialogResult _add210_dialog_result = DialogResult.Yes;
+
         // 加入出版地、出版者
         int AddPublisher(
             string strMarcSyntax,
@@ -868,10 +877,10 @@ MessageBoxDefaultButton.Button1);
             var s_210a = record.select("field[@name='210']/subfield[@name='a']").FirstContent?.Trim();
             var s_210c = record.select("field[@name='210']/subfield[@name='c']").FirstContent?.Trim();
             if (string.IsNullOrEmpty(s_210a) == false
-                || string.IsNullOrEmpty(s_210c) == false)
+                && string.IsNullOrEmpty(s_210c) == false)
             {
-                // 210$a$c 子字段至少存在一个
-                strError = "记录中已经存在 210$a$c 子字段(至少一个), 因此放弃添加 210$a$c 子字段";
+                // 210$a$c 子字段都存在
+                strError = "记录中已经存在 210$a$c 子字段, 因此放弃添加 210$a$c 子字段";
                 return 0;
             }
 
@@ -883,7 +892,7 @@ MessageBoxDefaultButton.Button1);
                 return 0;
             }
 
-            // 切割出 出版社 代码部分
+            // 从 ISBN 切割出 出版社 代码部分
             int nRet = Program.MainForm.GetPublisherNumber(isbn,
                 out string strPublisherNumber,
                 out strError);
@@ -896,6 +905,10 @@ MessageBoxDefaultButton.Button1);
             if (nRet == -1)
                 return -1;
 
+            string strName = "";
+            string strCity = "";
+
+        REDO_INPUT:
             if (nRet == 0 || string.IsNullOrEmpty(strValue))
             {
                 // 创建新条目
@@ -911,20 +924,44 @@ MessageBoxDefaultButton.Button1);
                     return 0; // 放弃操作
                 }
 
+                // 把全角冒号替换为半角的形态
+                strValue = strValue.Replace("：", ":");
+
+                ParsePublisherText(strValue,
+out strName,
+out strCity);
+                if (strCity == "出版地" || strName == "出版社名")
+                {
+                    MessageBox.Show(this, $"输入的出版地、出版社内容 '{strValue}' 不正确。请重新输入");
+                    nRet = 0;
+                    goto REDO_INPUT;
+                }
+
                 nRet = this.SetPublisherInfo(strPublisherNumber,
                     strValue,
                     out strError);
                 if (nRet == -1)
                     return -1;
             }
+            else
+            {
+                // 把全角冒号替换为半角的形态
+                strValue = strValue.Replace("：", ":");
 
+                ParsePublisherText(strValue,
+out strName,
+out strCity);
+
+                if (strCity == "出版地" || strName == "出版社名")
+                {
+                    MessageBox.Show(this, $"输入的出版地、出版社内容 '{strValue}' 不正确。请重新输入");
+                    nRet = 0;
+                    goto REDO_INPUT;
+                }
+            }
             // MessageBox.Show(this.DetailForm, strValue);
 
-            // 把全角冒号替换为半角的形态
-            strValue = strValue.Replace("：", ":");
-
-            string strName = "";
-            string strCity = "";
+            /*
             nRet = strValue.IndexOf(":");
             if (nRet == -1)
             {
@@ -934,6 +971,72 @@ MessageBoxDefaultButton.Button1);
             {
                 strCity = strValue.Substring(0, nRet);
                 strName = strValue.Substring(nRet + 1);
+            }
+            */
+
+
+            // 2021/6/30
+            if (string.IsNullOrEmpty(s_210a) == false
+                && s_210a != strCity)
+            {
+                if (_hideAdd210Dialog == false)
+                {
+                    _add210_dialog_result = MessageDlg.Show(this,
+            $"记录中已经存在的 210$a 子字段内容 '{s_210a}' 和拟添加的 '{strCity}:{strName}' 不一致。\r\n\r\n是否放弃添加?\r\n\r\n[不添加]放弃添加; [覆盖]用覆盖方式添加; [中断]中断批处理过程",
+            "根据 010$a 自动添加 210$a$c",
+            MessageBoxButtons.YesNoCancel,
+            MessageBoxDefaultButton.Button1,
+            ref _hideAdd210Dialog,
+            new string[] { "不添加", "覆盖", "中断" },
+            "以后不再显示本对话框");
+                }
+
+                if (_add210_dialog_result == DialogResult.Yes)
+                {
+                    strError = $"记录中已经存在的 210$a 子字段内容 '{s_210a}' 和拟添加的 '{strCity}:{strName}' 不一致, 加出版社子字段被放弃。请手动处理添加，或者先删除书目记录中的 210$a 以后再尝试自动添加";
+                    return 0;
+                }
+
+                if (_add210_dialog_result == DialogResult.Cancel)
+                {
+                    strError = "用户中断处理";
+                    return -1;
+                }
+
+                strError = $"记录中已经存在的 210$a 子字段内容 '{s_210a}' 和拟添加的 '{strCity}:{strName}' 不一致，原内容已被强行覆盖";
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode($"警告: {strError}") + "</div>");
+            }
+
+            // 2021/6/30
+            if (string.IsNullOrEmpty(s_210c) == false
+                && s_210c != strName)
+            {
+                if (_hideAdd210Dialog == false)
+                {
+                    _add210_dialog_result = MessageDlg.Show(this,
+            $"记录中已经存在的 210$c 子字段内容 '{s_210c}' 和拟添加的 '{strCity}:{strName}' 不一致。\r\n\r\n是否放弃添加?\r\n\r\n[不添加]放弃添加; [覆盖]用覆盖方式添加; [中断]中断批处理过程",
+            "根据 010$a 自动添加 210$a$c",
+            MessageBoxButtons.YesNoCancel,
+            MessageBoxDefaultButton.Button1,
+            ref _hideAdd210Dialog,
+            new string[] { "不添加", "覆盖", "中断" },
+            "以后不再显示本对话框");
+                }
+
+                if (_add210_dialog_result == DialogResult.Yes)
+                {
+                    strError = $"记录中已经存在的 210$c 子字段内容 '{s_210c}' 和拟添加的 '{strCity}:{strName}' 不一致, 加出版社子字段被放弃。请手动处理添加，或者先删除数据记录中的 210$c 以后再尝试自动添加";
+                    return 0;
+                }
+
+                if (_add210_dialog_result == DialogResult.Cancel)
+                {
+                    strError = "用户中断处理";
+                    return -1;
+                }
+
+                strError = $"记录中已经存在的 210$c 子字段内容 '{s_210c}' 和拟添加的 '{strCity}:{strName}' 不一致，原内容已被强行覆盖";
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode($"警告: {strError}") + "</div>");
             }
 
             record.setFirstSubfield("210", "a", strCity);
@@ -946,6 +1049,24 @@ MessageBoxDefaultButton.Button1);
 
             strError = "没有发生修改";
             return 0;
+        }
+
+        static void ParsePublisherText(string strValue,
+            out string strName,
+            out string strCity)
+        {
+            strName = "";
+            strCity = "";
+            int nRet = strValue.IndexOf(":");
+            if (nRet == -1)
+            {
+                strName = strValue;
+            }
+            else
+            {
+                strCity = strValue.Substring(0, nRet);
+                strName = strValue.Substring(nRet + 1);
+            }
         }
 
         public int AddPinyin(

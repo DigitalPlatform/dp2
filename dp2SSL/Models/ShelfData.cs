@@ -1093,6 +1093,37 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             return count;
         }
 
+        static int _defaultWarningCloseDoorLength = 15;
+        static int _defaultWarningCloseDoorRepeatLength = 10;
+
+        // 语音提醒关门延迟秒数
+        public static Tuple<int,int> GetWarningCloseDoorLength()
+        {
+            if (ShelfCfgDom == null)
+                return new Tuple<int,int>( _defaultWarningCloseDoorLength, _defaultWarningCloseDoorRepeatLength);
+            var value = ShelfCfgDom.DocumentElement.SelectSingleNode("settings/key[@name='语音提醒关门延迟秒数']/@value")?.Value;
+            if (string.IsNullOrEmpty(value))
+                return new Tuple<int, int>(_defaultWarningCloseDoorLength, _defaultWarningCloseDoorRepeatLength);
+
+            var parts = StringUtil.ParseTwoPart(value, ",");
+            string left = parts[0];
+            if (string.IsNullOrEmpty(left))
+                left = _defaultWarningCloseDoorLength.ToString();
+            string right = parts[1];
+            if (string.IsNullOrEmpty(right))
+                right = _defaultWarningCloseDoorRepeatLength.ToString();
+            if (Int32.TryParse(left, out int left_count) == false)
+            {
+                WpfClientInfo.WriteErrorLog($"shelf.xml 中 语音提醒关门延迟秒数 配置参数值 '{value} 格式不正确(逗号左侧数字 '{left}' 格式不正确)。应为一个整数数字，或者逗号间隔的两个整数数字");
+                return new Tuple<int, int>(_defaultWarningCloseDoorLength, _defaultWarningCloseDoorRepeatLength);
+            }
+            if (Int32.TryParse(right, out int right_count) == false)
+            {
+                WpfClientInfo.WriteErrorLog($"shelf.xml 中 语音提醒关门延迟秒数 配置参数值 '{value} 格式不正确(逗号右侧数字 '{right}' 格式不正确)。应为一个整数数字，或者逗号间隔的两个整数数字");
+                return new Tuple<int, int>(_defaultWarningCloseDoorLength, _defaultWarningCloseDoorRepeatLength);
+            }
+            return new Tuple<int, int>(left_count, right_count);
+        }
 
         // 超额时语音播报次数
         public static int GetOverdueSpeakCount()

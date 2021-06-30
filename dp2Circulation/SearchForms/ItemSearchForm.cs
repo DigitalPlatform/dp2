@@ -2757,6 +2757,11 @@ out strError);
             }
 
             menuItem = new MenuItem("设置书目栏目(&B) ...");
+            // dp2library 3.0 以前不支持获得书目 table 格式。因此只能采用旧的 summary 格式
+            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.0") < 0)
+            {
+                menuItem.Enabled = false;
+            }
             menuItem.Click += new System.EventHandler(this.menu_defBiblioColumns_Click);
             contextMenu.MenuItems.Add(menuItem);
 

@@ -30,7 +30,7 @@ using DigitalPlatform.rms.Client.rmsws_localhost;
 using DigitalPlatform.LibraryServer.Common;
 using DigitalPlatform.Core;
 using DigitalPlatform.Marc;
-
+using System.Text.RegularExpressions;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -881,6 +881,24 @@ namespace DigitalPlatform.LibraryServer
                         app.OutofReservationThreshold = 10;
                         app.CanReserveOnshelf = true;
                         app.ArrivedNotifyTypes = "dpmail,email";
+                    }
+
+                    // 2021/6/29
+                    // accounts/@passwordExpireLength 属性
+                    _passwordExpirePeriod = TimeSpan.MaxValue;
+                    node = dom.DocumentElement.SelectSingleNode("accounts") as XmlElement;
+                    if (node != null)
+                    {
+                        string passwordExpireLength = node.GetAttribute("passwordExpireLength");
+                        try
+                        {
+                            if (string.IsNullOrEmpty(passwordExpireLength) == false)
+                                _passwordExpirePeriod = ParseTimeSpan(passwordExpireLength);
+                        }
+                        catch(Exception ex)
+                        {
+                            app.WriteErrorLog($"library.xml 中 accounts/@passwordExpireLength 属性值 '{passwordExpireLength}' 格式不合法: {ex.Message}");
+                        }
                     }
 
                     // 2013/9/24
@@ -2278,6 +2296,44 @@ namespace DigitalPlatform.LibraryServer
                 version = 2.01;
             }
 
+            // 2021/6/29
+            // 从 2.01 版升级
+            if (version < 3.00)
+            {
+                // 将 account 元素中的 password 属性转移到 password 元素(innerText)中
+                XmlNodeList account_nodes = this.LibraryCfgDom.DocumentElement.SelectNodes("accounts/account");
+                foreach (XmlElement account in account_nodes)
+                {
+                    if (account.HasAttribute("password") == false)
+                        continue;
+                    string password_text = account.GetAttribute("password");
+                    XmlElement password_element = account.SelectSingleNode("password") as XmlElement;
+                    if (password_element == null)
+                    {
+                        password_element = this.LibraryCfgDom.CreateElement("password");
+                        password_element = account.AppendChild(password_element) as XmlElement;
+                    }
+                    password_element.InnerText = password_text;
+
+                    /*
+                    // 设置密码失效时刻
+                    if ()
+                    {
+                        string strExpireTime = DateTimeUtil.Rfc1123DateTimeStringEx(DateTime.Now + delta); // 本地时间
+                        password_element.SetAttribute("expire", strExpireTime);
+                    }
+                    */
+
+                    account.RemoveAttribute("password");
+                }
+
+                // 升级完成后，修改版本号
+                nodeVersion.InnerText = "3.00";
+                bChanged = true;
+                WriteErrorLog($"自动升级 library.xml v{version.ToString()}到v3.00");
+                version = 3.00;
+            }
+
             if (bChanged == true)
             {
                 this.Changed = true;
@@ -2286,6 +2342,10 @@ namespace DigitalPlatform.LibraryServer
 
             return 0;
         }
+
+        // 工作人员密码失效时间长度
+        static TimeSpan _passwordExpirePeriod = TimeSpan.MaxValue;  // 默认为不失效
+
 
         // 2008/5/8
         // return:
@@ -3579,7 +3639,7 @@ namespace DigitalPlatform.LibraryServer
                         string[] elements = new string[]{
                             "//rightsTable",       // 0.02以前为rightstable
                             "//locationTypes",  // 0.02以前为locationtypes
-                            "//accounts",
+                            "accounts",
                             "//browseformats",
                             "//foregift",
                             "//virtualDatabases",
@@ -3651,7 +3711,7 @@ namespace DigitalPlatform.LibraryServer
                         }
 
                         // <accounts>
-                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//accounts");
+                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("accounts");
                         if (node != null)
                         {
                             node.WriteTo(writer);
@@ -5430,23 +5490,25 @@ namespace DigitalPlatform.LibraryServer
             account.LoginName = node.GetAttribute("name");
             account.UserID = node.GetAttribute("name");
 
-            string strText = "";
             try
             {
+                /*
+                string strText = "";
                 strText = node.GetAttribute("password");
                 if (String.IsNullOrEmpty(strText) == true)
                     account.Password = "";
                 else
                 {
-#if NO
-                    // 以前的做法，取出密码明文
-                    account.Password = Cryptography.Decrypt(
-                                strText,
-                                EncryptKey);
-#endif
                     // 现在的做法，取出密码的 hashed 字符串
                     account.Password = strText;
                 }
+                */
+                // 2021/6/29
+                string value = GetPasswordValue(node as XmlElement);
+                if (string.IsNullOrEmpty(value))
+                    account.Password = "";
+                else
+                    account.Password = value;
             }
             catch
             {
@@ -5465,7 +5527,7 @@ namespace DigitalPlatform.LibraryServer
 
             try
             {
-                strText = DomUtil.GetAttr(node, "rmsPassword");
+                string strText = DomUtil.GetAttr(node, "rmsPassword");
                 if (String.IsNullOrEmpty(strText) == true)
                     account.RmsPassword = "";
                 else
@@ -15515,6 +15577,60 @@ strLibraryCode);    // 读者所在的馆代码
         {
             return NameValueLine.BuildTableXml(lines, "");
         }
+
+        // https://mattyrowan.com/2008/01/01/parse-timespan-string/
+        public static TimeSpan ParseTimeSpan(string s)
+        {
+            const string Quantity = "quantity";
+            const string Unit = "unit";
+
+            const string Days = @"(d(ays?)?)";
+            const string Hours = @"(h((ours?)|(rs?))?)";
+            const string Minutes = @"(m((inutes?)|(ins?))?)";
+            const string Seconds = @"(s((econds?)|(ecs?))?)";
+
+            Regex timeSpanRegex = new Regex(
+                string.Format(@"\s*(?<{0}>\d+)\s*(?<{1}>({2}|{3}|{4}|{5}|\Z))",
+                              Quantity, Unit, Days, Hours, Minutes, Seconds),
+                              RegexOptions.IgnoreCase);
+            MatchCollection matches = timeSpanRegex.Matches(s);
+
+            TimeSpan ts = new TimeSpan();
+            foreach (Match match in matches)
+            {
+                if (Regex.IsMatch(match.Groups[Unit].Value, @"\A" + Days))
+                {
+                    ts = ts.Add(TimeSpan.FromDays(double.Parse(match.Groups[Quantity].Value)));
+                }
+                else if (Regex.IsMatch(match.Groups[Unit].Value, Hours))
+                {
+                    ts = ts.Add(TimeSpan.FromHours(double.Parse(match.Groups[Quantity].Value)));
+                }
+                else if (Regex.IsMatch(match.Groups[Unit].Value, Minutes))
+                {
+                    ts = ts.Add(TimeSpan.FromMinutes(double.Parse(match.Groups[Quantity].Value)));
+                }
+                else if (Regex.IsMatch(match.Groups[Unit].Value, Seconds))
+                {
+                    ts = ts.Add(TimeSpan.FromSeconds(double.Parse(match.Groups[Quantity].Value)));
+                }
+                else
+                {
+                    // Quantity given but no unit, default to Hours
+                    ts = ts.Add(TimeSpan.FromHours(double.Parse(match.Groups[Quantity].Value)));
+                }
+            }
+            return ts;
+        }
+
+        static TimeSpan ToTimeLength(string name)
+        {
+            if (string.IsNullOrEmpty(name) || name == "无")
+                return TimeSpan.FromMinutes(0);
+
+            return ParseTimeSpan(name);
+        }
+
     }
 
 #if NO

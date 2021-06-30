@@ -200,11 +200,11 @@ namespace DigitalPlatform.LibraryServer
 
                 if (String.IsNullOrEmpty(strUserName) == true)
                 {
-                    strXPath = "//accounts/account";
+                    strXPath = "accounts/account";
                 }
                 else
                 {
-                    strXPath = "//accounts/account[@name='" + strUserName + "']";
+                    strXPath = "accounts/account[@name='" + strUserName + "']";
                 }
 
                 List<UserInfo> userList = new List<UserInfo>();
@@ -383,7 +383,7 @@ namespace DigitalPlatform.LibraryServer
             try
             {
                 // 查重
-                nodeAccount = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//accounts/account[@name='" + strUserName + "']") as XmlElement;
+                nodeAccount = this.LibraryCfgDom.DocumentElement.SelectSingleNode("accounts/account[@name='" + strUserName + "']") as XmlElement;
                 if (nodeAccount != null)
                 {
                     strError = "用户 '" + strUserName + "' 已经存在";
@@ -425,16 +425,11 @@ namespace DigitalPlatform.LibraryServer
                 // 设置密码
                 if (userinfo.SetPassword == true)
                 {
-#if NO
-                    // 以前的做法
-                    string strPassword = Cryptography.Encrypt(userinfo.Password,
-                        EncryptKey);
-                    DomUtil.SetAttr(nodeAccount, "password", strPassword);
-#endif
                     nRet = LibraryServerUtil.SetUserPassword(userinfo.Password, out string strHashed, out strError);
                     if (nRet == -1)
                         return -1;
-                    DomUtil.SetAttr(nodeAccount, "password", strHashed);
+                    // DomUtil.SetAttr(nodeAccount, "password", strHashed);
+                    SetPasswordValue(nodeAccount, strHashed);
                 }
 
                 this.Changed = true;
@@ -519,7 +514,7 @@ namespace DigitalPlatform.LibraryServer
             try
             {
                 // 查重
-                XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//accounts/account[@name='" + strUserName + "']");
+                XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("accounts/account[@name='" + strUserName + "']");
                 if (node != null)
                     return true;
 
@@ -530,6 +525,24 @@ namespace DigitalPlatform.LibraryServer
                 // this.m_lock.ReleaseReaderLock();
                 this.UnlockForRead();
             }
+        }
+
+        // 2021/6/29
+        public static string GetPasswordValue(XmlElement account)
+        {
+            return account.SelectSingleNode("password")?.InnerText;
+        }
+
+        // 2021/6/29
+        public static void SetPasswordValue(XmlElement account, string password_text)
+        {
+            XmlElement password_element = account.SelectSingleNode("password") as XmlElement;
+            if (password_element == null)
+            {
+                password_element = account.OwnerDocument.CreateElement("password");
+                password_element = account.AppendChild(password_element) as XmlElement;
+            }
+            password_element.InnerText = password_text;
         }
 
         // 修改用户密码。这是指用户修改自己帐户的密码，需提供旧密码
@@ -557,7 +570,7 @@ namespace DigitalPlatform.LibraryServer
             try
             {
                 // 查重
-                XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//accounts/account[@name='" + strUserName + "']");
+                XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("accounts/account[@name='" + strUserName + "']");
                 if (node == null)
                 {
                     strError = "用户 '" + strUserName + "' 不存在 (1)";
@@ -602,7 +615,8 @@ namespace DigitalPlatform.LibraryServer
                     return -1;
                 }
 #endif
-                string strExistPassword = DomUtil.GetAttr(node, "password");
+                // string strExistPassword = DomUtil.GetAttr(node, "password");
+                string strExistPassword = GetPasswordValue(node as XmlElement);
                 nRet = LibraryServerUtil.MatchUserPassword(strOldPassword, strExistPassword, out strError);
                 if (nRet == -1)
                     return -1;
@@ -623,7 +637,8 @@ namespace DigitalPlatform.LibraryServer
                 nRet = LibraryServerUtil.SetUserPassword(strNewPassword, out strHashed, out strError);
                 if (nRet == -1)
                     return -1;
-                DomUtil.SetAttr(node, "password", strHashed);
+                // DomUtil.SetAttr(node, "password", strHashed);
+                SetPasswordValue(node as XmlElement, strHashed);
 
                 this.Changed = true;
 
@@ -1040,7 +1055,7 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
-            XmlNode nodeAccount = null;
+            XmlElement nodeAccount = null;
             string strOldOuterXml = "";
 
             // this.m_lock.AcquireWriterLock(m_nLockTimeout);
@@ -1048,7 +1063,7 @@ namespace DigitalPlatform.LibraryServer
             try
             {
                 // 查重
-                nodeAccount = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//accounts/account[@name='" + strUserName + "']");
+                nodeAccount = this.LibraryCfgDom.DocumentElement.SelectSingleNode("accounts/account[@name='" + strUserName + "']") as XmlElement;
                 if (nodeAccount == null)
                 {
                     strError = "用户 '" + strUserName + "' 不存在 (2)";
@@ -1094,17 +1109,12 @@ namespace DigitalPlatform.LibraryServer
                 // 强制修改密码。无需验证旧密码
                 if (userinfo.SetPassword == true)
                 {
-#if NO
-                    // 以前的做法
-                    string strPassword = Cryptography.Encrypt(userinfo.Password,
-                        EncryptKey);
-                    DomUtil.SetAttr(nodeAccount, "password", strPassword);
-#endif
                     string strHashed = "";
                     nRet = LibraryServerUtil.SetUserPassword(userinfo.Password, out strHashed, out strError);
                     if (nRet == -1)
                         return -1;
-                    DomUtil.SetAttr(nodeAccount, "password", strHashed);
+                    // DomUtil.SetAttr(nodeAccount, "password", strHashed);
+                    SetPasswordValue(nodeAccount, strHashed);
                 }
 
                 this.Changed = true;
@@ -1206,7 +1216,7 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
-            XmlNode nodeAccount = null;
+            XmlElement nodeAccount = null;
             string strHashedPassword = "";
 
             // this.m_lock.AcquireWriterLock(m_nLockTimeout);
@@ -1214,7 +1224,7 @@ namespace DigitalPlatform.LibraryServer
             try
             {
                 // 查重
-                nodeAccount = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//accounts/account[@name='" + strUserName + "']");
+                nodeAccount = this.LibraryCfgDom.DocumentElement.SelectSingleNode("accounts/account[@name='" + strUserName + "']") as XmlElement;
                 if (nodeAccount == null)
                 {
                     strError = "用户 '" + strUserName + "' 不存在 (3)";
@@ -1236,17 +1246,11 @@ namespace DigitalPlatform.LibraryServer
                 }
 
                 // 强制修改密码。无需验证旧密码
-#if NO
-                // 以前的做法
-                strHashedPassword = Cryptography.Encrypt(strNewPassword,
-                    EncryptKey);
-                DomUtil.SetAttr(nodeAccount, "password", strHashedPassword);
-#endif
                 nRet = LibraryServerUtil.SetUserPassword(strNewPassword, out strHashedPassword, out strError);
                 if (nRet == -1)
                     return -1;
-                DomUtil.SetAttr(nodeAccount, "password", strHashedPassword);
-
+                // DomUtil.SetAttr(nodeAccount, "password", strHashedPassword);
+                SetPasswordValue(nodeAccount, strHashedPassword);
                 this.Changed = true;
             }
             finally
@@ -1302,7 +1306,7 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
-            XmlNode nodeAccount = null;
+            XmlElement nodeAccount = null;
             string strOldOuterXml = "";
 
             // this.m_lock.AcquireWriterLock(m_nLockTimeout);
@@ -1310,7 +1314,7 @@ namespace DigitalPlatform.LibraryServer
             try
             {
                 // 查重
-                nodeAccount = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//accounts/account[@name='" + strUserName + "']");
+                nodeAccount = this.LibraryCfgDom.DocumentElement.SelectSingleNode("accounts/account[@name='" + strUserName + "']") as XmlElement;
                 if (nodeAccount == null)
                 {
                     strError = "用户 '" + strUserName + "' 不存在 (4)";

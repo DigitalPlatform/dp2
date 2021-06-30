@@ -460,6 +460,6 @@ public class MyLibraryHost : LibraryHost
     </monitors>
     <utilDb>
     </utilDb>
-    <circulation patronAdditionalFroms="证号,姓名" verifyBookType="true" verifyReaderType="true" />
+    <circulation patronAdditionalFroms="证号,姓名,姓名拼音" verifyBookType="true" verifyReaderType="true" />
     <clock>0</clock>
 </root>
