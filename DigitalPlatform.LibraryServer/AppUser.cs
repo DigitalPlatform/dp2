@@ -316,13 +316,13 @@ namespace DigitalPlatform.LibraryServer
 
             if (String.IsNullOrEmpty(strUserName) == true)
             {
-                strError = "strUserName参数值不能为空";
+                strError = "strUserName 参数值不允许为空";
                 return -1;
             }
 
             if (strUserName != userinfo.UserName)
             {
-                strError = "strUserName参数值和userinfo.UserName不一致";
+                strError = "strUserName 参数值和 userinfo.UserName 不一致";
                 return -1;
             }
 
@@ -404,7 +404,7 @@ namespace DigitalPlatform.LibraryServer
                 AutoBindingIP(userinfo, strClientAddress);
 
                 SetUserXml(userinfo, nodeAccount);
-                
+
 #if NO
                 DomUtil.SetAttr(nodeAccount, "name", userinfo.UserName);
 
@@ -430,6 +430,9 @@ namespace DigitalPlatform.LibraryServer
                         return -1;
                     // DomUtil.SetAttr(nodeAccount, "password", strHashed);
                     SetPasswordValue(nodeAccount, strHashed);
+
+                    if (SessionInfo.IsSpecialUserName(userinfo.UserName) == false)
+                        SetPasswordExpire(nodeAccount);
                 }
 
                 this.Changed = true;
@@ -545,6 +548,105 @@ namespace DigitalPlatform.LibraryServer
             password_element.InnerText = password_text;
         }
 
+        // 2021/7/2
+        public void SetPasswordExpire(XmlElement account)
+        {
+            XmlElement password_element = account.SelectSingleNode("password") as XmlElement;
+            if (password_element == null)
+            {
+                password_element = account.OwnerDocument.CreateElement("password");
+                password_element = account.AppendChild(password_element) as XmlElement;
+            }
+            if (_passwordExpirePeriod == TimeSpan.MaxValue)
+                password_element.RemoveAttribute("expire");
+            else
+            {
+                string strExpireTime = DateTimeUtil.Rfc1123DateTimeStringEx(DateTime.Now + _passwordExpirePeriod); // 本地时间
+                password_element.SetAttribute("expire", strExpireTime);
+            }
+        }
+
+        // 2021/7/2
+        public static void ClearPasswordExpire(XmlElement account)
+        {
+            XmlElement password_element = account.SelectSingleNode("password") as XmlElement;
+            if (password_element == null)
+            {
+                password_element = account.OwnerDocument.CreateElement("password");
+                password_element = account.AppendChild(password_element) as XmlElement;
+            }
+            password_element.RemoveAttribute("expire");
+        }
+
+        // 2021/7/2
+        public static DateTime GetPasswordExpire(XmlElement account)
+        {
+            XmlElement password_element = account.SelectSingleNode("password") as XmlElement;
+            if (password_element == null)
+                return DateTime.MaxValue;   // 永不失效
+
+            string strExpireTime = password_element.GetAttribute("expire");
+            if (string.IsNullOrEmpty(strExpireTime) == true)
+                return DateTime.MaxValue;   // 永不失效
+
+            try
+            {
+                return DateTimeUtil.FromRfc1123DateTimeString(strExpireTime).ToLocalTime();
+            }
+            catch
+            {
+                return DateTime.MinValue;   // 立即失效
+            }
+        }
+
+#if NO
+        // 2021/7/2
+        // 观察在 password 元素 expire 属性中的失效期
+        // parameters:
+        //      now 当前时间。本地时间
+        //      expire  失效期末端时间。本地时间
+        // return:
+        //      -1  出错
+        //      0   password 元素没有 expire 属性。也就是说永远不会失效
+        //      1   已经过了失效期
+        //      2   还在失效期以内
+        public static int CheckExpireTime(XmlElement account,
+            DateTime now,
+            out DateTime expire,
+            out string strError)
+        {
+            strError = "";
+            expire = new DateTime(0);
+
+            XmlElement password_element = account.SelectSingleNode("password") as XmlElement;
+            if (password_element == null)
+                return 0;
+
+            string strExpireTime = password_element.GetAttribute("expire");
+            if (string.IsNullOrEmpty(strExpireTime) == true)
+                return 0;
+
+            try
+            {
+                expire = DateTimeUtil.FromRfc1123DateTimeString(strExpireTime).ToLocalTime();
+
+                if (now > expire)
+                {
+                    // 失效期已经过了
+                    return 1;
+                }
+            }
+            catch (Exception)
+            {
+                strError = "密码失效期时间字符串 '" + strExpireTime + "' 格式不正确，应为 RFC1123 格式";
+                return -1;
+            }
+
+            return 2;   // 尚在失效期以内
+        }
+#endif
+
+
         // 修改用户密码。这是指用户修改自己帐户的密码，需提供旧密码
         // return:
         //      -1  error
@@ -617,6 +719,9 @@ namespace DigitalPlatform.LibraryServer
 #endif
                 // string strExistPassword = DomUtil.GetAttr(node, "password");
                 string strExistPassword = GetPasswordValue(node as XmlElement);
+
+                // 注：这里故意不检查密码是否失效。因为即便密码失效，也要允许修改密码
+
                 nRet = LibraryServerUtil.MatchUserPassword(strOldPassword, strExistPassword, out strError);
                 if (nRet == -1)
                     return -1;
@@ -639,9 +744,10 @@ namespace DigitalPlatform.LibraryServer
                     return -1;
                 // DomUtil.SetAttr(node, "password", strHashed);
                 SetPasswordValue(node as XmlElement, strHashed);
+                if (SessionInfo.IsSpecialUserName(strUserName) == false)
+                    SetPasswordExpire(node as XmlElement);
 
                 this.Changed = true;
-
                 return 0;
             }
             finally
@@ -1106,6 +1212,8 @@ namespace DigitalPlatform.LibraryServer
                 DomUtil.SetAttr(nodeAccount, "comment", userinfo.Comment);
                 DomUtil.SetAttr(nodeAccount, "binding", userinfo.Binding);
 
+                bool neverExpire = StringUtil.IsInList("neverExpire", userinfo.Rights);
+
                 // 强制修改密码。无需验证旧密码
                 if (userinfo.SetPassword == true)
                 {
@@ -1115,6 +1223,23 @@ namespace DigitalPlatform.LibraryServer
                         return -1;
                     // DomUtil.SetAttr(nodeAccount, "password", strHashed);
                     SetPasswordValue(nodeAccount, strHashed);
+
+                    if (neverExpire == false
+                        && SessionInfo.IsSpecialUserName(userinfo.UserName) == false)
+                        SetPasswordExpire(nodeAccount);
+                }
+
+                if (neverExpire)
+                    ClearPasswordExpire(nodeAccount);
+                else
+                {
+                    if (SessionInfo.IsSpecialUserName(userinfo.UserName) == false)
+                    {
+                        // 观察以前是否有失效期。如果没有，则主动加上失效期
+                        var old_expire = GetPasswordExpire(nodeAccount);
+                        if (old_expire == DateTime.MaxValue)
+                            SetPasswordExpire(nodeAccount);
+                    }
                 }
 
                 this.Changed = true;
@@ -1251,6 +1376,8 @@ namespace DigitalPlatform.LibraryServer
                     return -1;
                 // DomUtil.SetAttr(nodeAccount, "password", strHashedPassword);
                 SetPasswordValue(nodeAccount, strHashedPassword);
+                if (SessionInfo.IsSpecialUserName(strUserName) == false)
+                    SetPasswordExpire(nodeAccount);
                 this.Changed = true;
             }
             finally

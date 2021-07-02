@@ -350,7 +350,9 @@ namespace dp2SSL
                             continue;
                         }
                         entity.Title = PageBorrow.GetCaption(result.Title);
-                        entity.SetData(result.ItemRecPath, result.ItemXml);
+                        entity.SetData(result.ItemRecPath,
+                            result.ItemXml,
+                            DateTime.Now);
                     }
 
                     entity.SetError(null);

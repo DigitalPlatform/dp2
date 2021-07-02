@@ -42,6 +42,10 @@
                 <MenuItem Header="_工具">
                     <MenuItem x:Name="openTouchKeyboard" Header="打开触摸键盘" HorizontalAlignment="Left" Width="Auto" Click="openTouchKeyboard_Click"/>
                     <MenuItem x:Name="clearCachedEntities" Header="清除本地缓存的全部册记录" HorizontalAlignment="Left" Width="Auto" Click="clearCachedEntities_Click"/>
+
+                    <MenuItem x:Name="pauseShelfSync" Header="* 暂停书柜同步" HorizontalAlignment="Left" Width="Auto" Click="pauseShelfSync_Click"/>
+                    <MenuItem x:Name="clearDontsyncState" Header="* 清除动作记录的 dontsync 状态" HorizontalAlignment="Left" Width="Auto" Click="clearDontsyncState_Click"/>
+
                 </MenuItem>
                 <MenuItem Header="_维护">
                     <MenuItem x:Name="clearTagCache" Header="清除 RFID 标签缓存" HorizontalAlignment="Left" Width="Auto" Click="clearTagCache_Click"/>

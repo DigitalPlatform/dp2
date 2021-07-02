@@ -15,7 +15,7 @@
     <IsWebBootstrapper>true</IsWebBootstrapper>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
-    <PublishUrl>c:\publish\rfidtool\v1_dev\</PublishUrl>
+    <PublishUrl>c:\publish\rfidtool\v1\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Web</InstallFrom>
     <UpdateEnabled>true</UpdateEnabled>
@@ -25,14 +25,14 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <InstallUrl>http://dp2003.com/rfidtool/v1_dev/</InstallUrl>
-    <UpdateUrl>http://dp2003.com/rfidtool/v1_dev/</UpdateUrl>
+    <InstallUrl>http://dp2003.com/rfidtool/v1/</InstallUrl>
+    <UpdateUrl>http://dp2003.com/rfidtool/v1/</UpdateUrl>
     <ProductName>dp2-RFID工具箱</ProductName>
     <PublisherName>DigitalPlatform</PublisherName>
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>50</ApplicationRevision>
+    <ApplicationRevision>51</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>

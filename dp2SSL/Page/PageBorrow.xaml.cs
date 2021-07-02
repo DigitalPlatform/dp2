@@ -1725,7 +1725,9 @@ out string strError);
                             }
 
                             entity.Title = GetCaption(result.Title);
-                            entity.SetData(result.ItemRecPath, result.ItemXml);
+                            entity.SetData(result.ItemRecPath,
+                                result.ItemXml,
+                                DateTime.Now);
 
                             // 2020/7/3
                             // 获得册记录阶段出错，但获得书目摘要成功
@@ -2208,7 +2210,9 @@ out string strError);
                     // 刷新显示
                     {
                         if (item_records?.Length > 0)
-                            entity.SetData(entity.ItemRecPath, item_records[0]);
+                            entity.SetData(entity.ItemRecPath,
+                                item_records[0],
+                                DateTime.Now);
 
                         if (App.Protocol == "sip")
                         {
@@ -2420,7 +2424,9 @@ out string strError);
             }
 
             entity.Title = GetCaption(result.Title);
-            entity.SetData(result.ItemRecPath, result.ItemXml);
+            entity.SetData(result.ItemRecPath, 
+                result.ItemXml,
+                DateTime.Now);
         }
 
         private void Progress_Closed(object sender, EventArgs e)

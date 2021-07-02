@@ -5748,6 +5748,17 @@ out strError);
 
                     if (strPassword != null)
                     {
+                        // 2021/7/3
+                        // 检查密码失效期
+                        if (LibraryApplication._passwordExpirePeriod != TimeSpan.MaxValue)
+                        {
+                            if (DateTime.Now > account.PasswordExpire)
+                            {
+                                strError = "密码已经失效";
+                                return -1;
+                            }
+                        }
+
                         nRet = LibraryServerUtil.MatchUserPassword(strPassword, account.Password, out strError);
                         if (nRet == -1)
                         {

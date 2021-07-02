@@ -54,10 +54,10 @@ namespace dp2SSL
             string style)
         {
             bool network = StringUtil.IsInList("network", style);
-            
+
             // 2021/5/17
             bool offline = StringUtil.IsInList("offline", style);
-            
+
             bool skip_biblio = StringUtil.IsInList("skip_biblio", style);
 
             try
@@ -1027,6 +1027,8 @@ namespace dp2SSL
 
 
         // 把读者记录保存(更新)到本地数据库
+        // parameters:
+        //          lastWriteTime   最后写入时间。采用服务器时间
         // result.Value
         //      -1  出错
         //      0   没有发生修改
@@ -1979,6 +1981,129 @@ out string strError);
                 WpfClientInfo.WriteInfoLog($"结束 DownloadTagsInfo()");
             }
         }
+
+        // 对照服务器时钟和本地时钟
+        // parameters:
+        //      length  时间差异范围。大于这个范围就会返回出错
+        public static NormalResult CheckServerClock(TimeSpan length)
+        {
+            LibraryChannel channel = App.CurrentApp.GetChannel();
+            try
+            {
+                string strTime = "";
+                DateTime start = DateTime.Now;
+                long lRet = channel.GetClock(
+                    null,
+                    out strTime,
+                    out string strError);
+                DateTime end = DateTime.Now;
+                if (lRet == -1)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError,
+                        ErrorCode = channel.ErrorCode.ToString()
+                    };
+
+                DateTime server_time = DateTimeUtil.FromRfc1123DateTimeString(strTime);
+                server_time = server_time.ToLocalTime();
+
+                // API 调用折返中途的前端本地时间
+                DateTime local_time = start + TimeSpan.FromTicks((end - start).Ticks);
+
+                TimeSpan delta = server_time - local_time;
+                if (server_time < local_time)
+                    delta = local_time - server_time;
+
+                if (delta > length)
+                {
+                    strError = $"本地时钟和服务器时钟差异过大(超过 {length.ToString()})，为 "
+                        + delta.ToString()
+                        + "。测试时的服务器时间为: " + server_time.ToString("yyyy-MM-dd HH:mm:ss.ffff") + "  本地时间为: " + local_time.ToString("yyyy-MM-dd HH:mm:ss.ffff");
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError,
+                        ErrorCode = "outOfRange"
+                    };
+                }
+                return new NormalResult
+                {
+                    Value = 0,
+                    ErrorInfo = $"时间正常。测试时的服务器时间为: { server_time.ToString("yyyy-MM-dd HH:mm:ss.ffff")}  本地时间为: { local_time.ToString("yyyy-MM-dd HH:mm:ss.ffff")}"
+                };
+            }
+            catch (Exception ex)
+            {
+                WpfClientInfo.WriteErrorLog($"CheckServerClock() 出现异常：{ExceptionUtil.GetDebugText(ex)}");
+
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"CheckServerClock() 出现异常：{ex.Message}",
+                    ErrorCode = ex.GetType().ToString()
+                };
+            }
+            finally
+            {
+                App.CurrentApp.ReturnChannel(channel);
+            }
+        }
+
+        public class VerifyClockResult : NormalResult
+        {
+            // 前端硬件时钟和服务器时钟的差额 ticks
+            public long DeltaTicks { get; set; }
+        }
+
+        // 依据 dp2library 校验本地时间
+        public static VerifyClockResult VerifyClock()
+        {
+            LibraryChannel channel = App.CurrentApp.GetChannel();
+            try
+            {
+                string strTime = "";
+                DateTime start = DateTime.Now;
+                long lRet = channel.GetClock(
+                    null,
+                    out strTime,
+                    out string strError);
+                DateTime end = DateTime.Now;
+                if (lRet == -1)
+                    return new VerifyClockResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError,
+                        ErrorCode = channel.ErrorCode.ToString()
+                    };
+
+                DateTime server_time = DateTimeUtil.FromRfc1123DateTimeString(strTime);
+                server_time = server_time.ToLocalTime();
+
+                // API 调用折返中途的前端本地时间
+                DateTime local_time = start + TimeSpan.FromTicks((end - start).Ticks);
+
+                TimeSpan delta = server_time - local_time;
+
+                return new VerifyClockResult { DeltaTicks = delta.Ticks };
+            }
+            catch (Exception ex)
+            {
+                WpfClientInfo.WriteErrorLog($"VerifyClock() 出现异常：{ExceptionUtil.GetDebugText(ex)}");
+
+                return new VerifyClockResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"VerifyClock() 出现异常：{ex.Message}",
+                    ErrorCode = ex.GetType().ToString()
+                };
+            }
+            finally
+            {
+                App.CurrentApp.ReturnChannel(channel);
+            }
+        }
+
 
         // 清除前端缓存的所有册记录和书目摘要
         public static void ClearCachedEntities()

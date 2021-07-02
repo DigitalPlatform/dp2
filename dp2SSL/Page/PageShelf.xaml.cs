@@ -1817,7 +1817,9 @@ namespace dp2SSL
                         string old_borrowInfo = entity.BorrowInfo;
                         bool old_overflow = PatronControl.IsState(entity, "overflow");
 
-                        entity.SetData(result.ItemRecPath, result.ItemXml);
+                        entity.SetData(result.ItemRecPath,
+                            result.ItemXml,
+                            ShelfData.Now);
                         if (reserve_state && string.IsNullOrEmpty(old_state) == false)
                         {
                             string state = entity.State;
@@ -2761,7 +2763,7 @@ namespace dp2SSL
                     // *** 联网情况
                     // 构造 inventory 类型的 action 写入本地历史数据库，状态为已经同步
                     /*
-                    DateTime now = DateTime.Now;
+                    DateTime now = ShelfData.Now;   // DateTime.Now;
                     List<ActionInfo> actions = new List<ActionInfo>();
                     foreach (var entity in ShelfData.l_All)
                     {
@@ -3295,7 +3297,7 @@ namespace dp2SSL
             bool force = false)
         {
             List<string> debug_infos = new List<string>();
-            debug_infos.Add($"进入函数时刻: {GetNowString()}");
+            debug_infos.Add($"进入函数时刻(注意这是本地硬件时钟时间): {GetNowString()}");
             _patron.Waiting = true;
             try
             {
@@ -3404,7 +3406,7 @@ namespace dp2SSL
                         // Thread.Sleep(1000 * 20);
                         if (ShelfData.LibraryNetworkCondition == "OK")
                         {
-                            DateTime now = DateTime.Now;
+                            DateTime now = /*DateTime*/ShelfData.Now;
                             var get_result = GetReaderInfo(pii);
                             if (get_result.Value == 1)
                             {
@@ -3413,6 +3415,8 @@ namespace dp2SSL
                                 {
                                     try
                                     {
+                                        // parameters:
+                                        //          lastWriteTime   最后写入时间。采用服务器时间
                                         UpdateLocalPatronRecord(get_result, now);
                                     }
                                     catch (Exception ex)
@@ -4015,7 +4019,7 @@ namespace dp2SSL
             IReadOnlyCollection<Entity> entities,
             out List<ActionInfo> actions)
         {
-            DateTime now = DateTime.Now;
+            DateTime now = ShelfData.Now;   //  DateTime.Now;
 
             actions = new List<ActionInfo>();
             foreach (var entity in entities)
@@ -4553,7 +4557,9 @@ namespace dp2SSL
                 {
                     item.Xml = itemdom.DocumentElement.OuterXml;
                     await AddOrUpdateAsync(context, item);
-                    action.Entity.SetData(item.RecPath, item.Xml);
+                    action.Entity.SetData(item.RecPath,
+                        item.Xml,
+                        ShelfData.Now);
                     return action.Entity;
                 }
 

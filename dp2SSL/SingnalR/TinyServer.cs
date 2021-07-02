@@ -1032,7 +1032,7 @@ cancellation_token);
 
             if (command.StartsWith("hello"))
             {
-                await SendMessageAsync(new string[] { groupName }, "hello!");
+                await SendMessageAsync(new string[] { groupName }, $"hello! 硬件时间:{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.ffff")}");
                 return;
             }
 
@@ -1048,6 +1048,14 @@ cancellation_token);
                 return;
             }
 
+            // 2021/7/1
+            if (command.StartsWith("checktime"))
+            {
+                var result = LibraryChannelUtil.CheckServerClock(TimeSpan.FromSeconds(5));
+                await SendMessageAsync(new string[] { groupName }, $"{result.ErrorInfo}");
+                return;
+            }
+
             if (command.StartsWith("help") || command.StartsWith("?"))
             {
                 await SendMessageAsync(new string[] { groupName },
@@ -1055,6 +1063,7 @@ cancellation_token);
 hello
 version
 error
+checktime
 dialog
 press 按钮文字
 led 命令参数

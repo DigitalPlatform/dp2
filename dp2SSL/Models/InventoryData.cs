@@ -680,7 +680,9 @@ TaskScheduler.Default);
                             {
                                 if (info != null)
                                     info.ItemXml = result.ItemXml;
-                                entity.SetData(result.ItemRecPath, result.ItemXml);
+                                entity.SetData(result.ItemRecPath,
+                                    result.ItemXml,
+                                    DateTime.Now);
                             }
                         }
                     }
@@ -976,7 +978,9 @@ TaskScheduler.Default);
                         {
                             info.ItemXml = request_result.ItemXml;
                             // 2021/1/29
-                            entity.SetData(entity.ItemRecPath, request_result.ItemXml);
+                            entity.SetData(entity.ItemRecPath, 
+                                request_result.ItemXml,
+                                    DateTime.Now);
                         }
 
                         // 标记，即将 VerifyEas
@@ -1141,7 +1145,9 @@ TaskScheduler.Default);
                     else
                     {
                         if (string.IsNullOrEmpty(request_result.ItemXml) == false)
-                            entity.SetData(entity.ItemRecPath, request_result.ItemXml);
+                            entity.SetData(entity.ItemRecPath,
+                                request_result.ItemXml,
+                                DateTime.Now);
 
                         // TODO: info.ItemXml 是否需要被改变?
                         entity.BuildError("setLocation", null, null);
@@ -3181,7 +3187,9 @@ TaskScheduler.Default);
                     {
                         // XML 记录中的 state 元素要转化为界面显示的状态值，然后用于导出 
                         Entity entity = new Entity();
-                        entity.SetData(null, result.ItemXml);
+                        entity.SetData(null,
+                            result.ItemXml,
+                            DateTime.Now);
                         DomUtil.SetElementText(itemdom.DocumentElement, "state", entity.State);
                     }
 

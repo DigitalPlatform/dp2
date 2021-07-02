@@ -80,6 +80,8 @@ namespace dp2SSL
         // 同步重试间隔时间
         static TimeSpan _syncIdleLength = TimeSpan.FromSeconds(10); // 10
 
+        static DateTime _lastVerifyTime = DateTime.MinValue;
+
         // 启动同步任务。此任务长期在后台运行
         public static void StartSyncTask()
         {
@@ -136,6 +138,27 @@ namespace dp2SSL
                         // 2020/6/21
                         if (ShelfData.LibraryNetworkCondition != "OK")
                             continue;
+
+                        // 校准时钟。每个小时一次
+                        if (DateTime.Now - _lastVerifyTime > TimeSpan.FromHours(1))
+                        {
+                            try
+                            {
+                                _lastVerifyTime = DateTime.Now;
+
+                                var result = LibraryChannelUtil.VerifyClock();
+                                if (result.Value == -1)
+                                {
+                                    WpfClientInfo.WriteErrorLog($"校正本地软时钟时出错: {result.ErrorInfo}");
+                                }
+                                else
+                                    ShelfData.SetSoftClock(result.DeltaTicks);
+                            }
+                            catch (Exception ex)
+                            {
+                                WpfClientInfo.WriteErrorLog($"校正本地软时钟时出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                            }
+                        }
 
                         // TODO: 从本地数据库中装载需要同步的那些 Actions
                         List<ActionInfo> actions = await LoadRetryActionsFromDatabaseAsync();
@@ -446,7 +469,7 @@ TaskScheduler.Default);
                 settings.Async = true;
                 settings.Indent = true;
                 using (XmlWriter writer = XmlWriter.Create(strOutputFilename,
-    settings))
+        settings))
                 {
                     //writer.Formatting = System.Xml.Formatting.Indented;
                     //writer.Indentation = 4;
@@ -644,6 +667,32 @@ TaskScheduler.Default);
             }
         }
 
+        // 2021/7/2
+        // 复原被 RemoveRetryActionsFromDatabaseAsync() 标记 dontsync 状态为 null
+        public static async Task<int> FixActionsFromDatabaseAsync()
+        {
+            using (var releaser = await _databaseLimit.EnterAsync())
+            {
+                using (var context = new RequestContext())
+                {
+                    context.Database.EnsureCreated();
+                    {
+                        var items = context.Requests.Where(
+                            o=> o.State == "dontsync" 
+                            && string.IsNullOrEmpty(o.SyncErrorCode)
+                            && string.IsNullOrEmpty(o.SyncErrorInfo)
+                            && o.SyncCount == 0)
+                            .ToList();
+                        items.ForEach(o =>
+                        {
+                            o.State = null;
+                        });
+                        return await context.SaveChangesAsync();
+                    }
+                }
+            }
+        }
+
         // 从操作日志数据库中把一些需要重试的事项移走
         // 原理：当首次初始化以后，已经初始化确认在书架内的图书，已经进行了还书操作，那么此前累积的需要重试借书或者还书的同步请求，都可以不执行了。这样不会造成图书丢失。但可能会丢掉一些中间操作信息
         // 改进：可以不删除，但把这些事项的状态标记为 “放弃重试”
@@ -720,7 +769,7 @@ TaskScheduler.Default);
 
                 // 注: 2020/9/8 把 request.PII 修改为带点的字符串形态
                 request.PII = action.Entity.GetOiPii(true); // action.Entity?.PII;
-                // TODO: 若 PII 为空，写入 UID?
+                                                            // TODO: 若 PII 为空，写入 UID?
                 request.OperatorString = action.Operator == null ? null : JsonConvert.SerializeObject(action.Operator);
                 request.EntityString = JsonConvert.SerializeObject(action.Entity);
                 /*
@@ -737,7 +786,7 @@ TaskScheduler.Default);
                 request.SyncErrorInfo = action.SyncErrorInfo;
                 request.SyncErrorCode = action.SyncErrorCode;
                 if (action.OperTime == DateTime.MinValue)
-                    request.OperTime = DateTime.Now;
+                    request.OperTime = /*DateTime*/ShelfData.Now;
                 else
                     request.OperTime = action.OperTime;
 

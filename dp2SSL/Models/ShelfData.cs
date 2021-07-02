@@ -639,6 +639,27 @@ namespace dp2SSL
                     Value = -1,
                     ErrorInfo = "当前版本暂不支持智能书柜连接 SIP2 服务器"
                 };
+
+            // 初始化软时钟
+            try
+            {
+                ShelfData.LoadSoftClock();
+                if (ShelfData.LibraryNetworkCondition == "OK")
+                {
+                    var result = LibraryChannelUtil.VerifyClock();
+                    if (result.Value == -1)
+                    {
+                        WpfClientInfo.WriteErrorLog($"首次校正本地软时钟时出错: {result.ErrorInfo}");
+                    }
+                    else
+                        ShelfData.SetSoftClock(result.DeltaTicks);
+                }
+            }
+            catch(Exception ex)
+            {
+                WpfClientInfo.WriteErrorLog($"初始化本地软时钟时出现异常: {ExceptionUtil.GetDebugText(ex)}");
+            }
+
             try
             {
                 ShelfData.InitialDoors();
@@ -1097,10 +1118,10 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
         static int _defaultWarningCloseDoorRepeatLength = 10;
 
         // 语音提醒关门延迟秒数
-        public static Tuple<int,int> GetWarningCloseDoorLength()
+        public static Tuple<int, int> GetWarningCloseDoorLength()
         {
             if (ShelfCfgDom == null)
-                return new Tuple<int,int>( _defaultWarningCloseDoorLength, _defaultWarningCloseDoorRepeatLength);
+                return new Tuple<int, int>(_defaultWarningCloseDoorLength, _defaultWarningCloseDoorRepeatLength);
             var value = ShelfCfgDom.DocumentElement.SelectSingleNode("settings/key[@name='语音提醒关门延迟秒数']/@value")?.Value;
             if (string.IsNullOrEmpty(value))
                 return new Tuple<int, int>(_defaultWarningCloseDoorLength, _defaultWarningCloseDoorRepeatLength);
@@ -2188,9 +2209,9 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                     }
 
                     borrow_info.Period = $"{days}{unit}";
-                    DateTime returning = DateTime.Now.AddDays(days);
+                    DateTime returning = /*DateTime*/ShelfData.Now.AddDays(days);
                     if (unit == "hour")
-                        returning = DateTime.Now.AddHours(days);
+                        returning = /*DateTime*/ShelfData.Now.AddHours(days);
                     // 正规化时间
                     returning = LibraryServerUtil.RoundTime(unit, returning);
                     borrow_info.LatestReturnTime = DateTimeUtil.Rfc1123DateTimeStringEx(returning);
@@ -4320,7 +4341,9 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                 {
                     if (entity.UID == uid)
                     {
-                        entity.SetData(entity.ItemRecPath, entity_xml);
+                        entity.SetData(entity.ItemRecPath, 
+                            entity_xml,
+                            ShelfData.Now);
                     }
                 }
                 return changed;
@@ -5486,12 +5509,14 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                         if (string.IsNullOrEmpty(result.Title) == false)
                             entity.Title = PageBorrow.GetCaption(result.Title);
                         if (string.IsNullOrEmpty(result.ItemXml) == false)
-                            entity.SetData(result.ItemRecPath, result.ItemXml);
+                            entity.SetData(result.ItemRecPath,
+                                result.ItemXml,
+                                ShelfData.Now);
                     }
                     else
                     {
                         string uii = entity.GetOiPii(true);
-                        result = await GetEntityDataAsync(uii, 
+                        result = await GetEntityDataAsync(uii,
                             ShelfData.LibraryNetworkCondition == "OK" ? "" : "offline");
                         if (result.Value == -1 || result.Value == 0)
                         {
@@ -5522,7 +5547,9 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                             continue;
                         }
                         entity.Title = PageBorrow.GetCaption(result.Title);
-                        entity.SetData(result.ItemRecPath, result.ItemXml);
+                        entity.SetData(result.ItemRecPath,
+                            result.ItemXml,
+                            ShelfData.Now);
                     }
 
 #if NO
@@ -5702,7 +5729,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                     Entity entity = info.Entity;
 
                     // 2020/4/27
-                    info.SyncOperTime = DateTime.Now;
+                    info.SyncOperTime = /*DateTime*/ShelfData.Now;
 
                     // 2020/4/8
                     // 如果 PII 为空
@@ -5871,8 +5898,8 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                                     strStyle += $",requestPeriod:{value}";
                                 }
                             }
-                            // TODO: 智能书柜要求强制借书。如果册操作前处在被其他读者借阅状态，要自动先还书再进行借书
-
+                            int nRedoBorrowCount = 0;
+                        REDO_BORROW:
                             lRet = channel.Borrow(null,
                                 action == "renew",
                                 info.Operator.PatronBarcode,
@@ -5891,6 +5918,40 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                                 out string output_reader_barcode,
                                 out borrow_info,
                                 out strError);
+                            // 2021/7/1
+                            if (lRet == -1
+                                && (channel.ErrorCode == ErrorCode.AlreadyBorrowed || channel.ErrorCode == ErrorCode.AlreadyBorrowedByOther))
+                            {
+                                // 智能书柜要求强制借书。如果册操作前处在被其他读者借阅状态，要自动先还书再进行借书
+                                long temp = channel.Return(null,
+    "return",
+    "",
+    pii,
+    entity.ItemRecPath,
+    false,
+    strStyle + operTimeStyle,
+    "xml", // item_format_list
+    out item_records,
+    "xml",
+    out reader_records,
+    "summary",
+    out biblio_records,
+    out dup_path,
+    out output_reader_barcode,
+    out return_info,
+    out string return_error);
+                                if (temp == -1)
+                                {
+                                    lRet = -1;
+                                    strError = $"提交借书动作时遇到出错: {strError}，然后补做还书时又遇到出错: {return_error}";
+                                }
+                                else if (nRedoBorrowCount < 10)
+                                {
+                                    WpfClientInfo.WriteInfoLog($"为读者 {info.Operator.PatronBarcode} 同步提交借书 (册 {pii}) 动作时遇到出错: {strError}，然后补做还书成功。后面自动将自动重试提交借书动作");
+                                    nRedoBorrowCount++;
+                                    goto REDO_BORROW;
+                                }
+                            }
                         }
                         else if (action == "return")
                         {
@@ -6268,7 +6329,9 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                         {
                             // TODO: 这里更新 entity 后，那些克隆的 entity 何时更新呢？可否现在存入缓存备用?
                             string entity_xml = item_records[0];
-                            entity.SetData(entity.ItemRecPath, entity_xml);
+                            entity.SetData(entity.ItemRecPath,
+                                entity_xml,
+                                ShelfData.Now);
                             // 2020/4/13
                             l_UpdateEntityXml("all", entity.UID, entity_xml);
 
@@ -6756,6 +6819,64 @@ out string block_map);
             }
         }
 
+        #region 本地软时钟
+
+        static long _deltaTicks = 0;
+
+        public static DateTime Now
+        {
+            get
+            {
+                return DateTime.Now + TimeSpan.FromTicks(_deltaTicks);
+            }
+        }
+
+        // 从文件中装载
+        public static void LoadSoftClock()
+        {
+            try
+            {
+                var fileName = Path.Combine(WpfClientInfo.UserDir, "softclock.bin");
+                if (File.Exists(fileName))
+                {
+                    using (BinaryReader reader = new BinaryReader(File.Open(fileName, FileMode.Open)))
+                    {
+                        _deltaTicks = reader.ReadInt64();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _deltaTicks = 0;
+                WpfClientInfo.WriteErrorLog($"LoadSoftClock() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+            }
+        }
+
+        public static long SetSoftClock(long ticks)
+        {
+            var old_value = _deltaTicks;
+            _deltaTicks = ticks;
+            return old_value;
+        }
+
+        // 保存到文件
+        public static void SaveSoftClock()
+        {
+            try
+            {
+                var fileName = Path.Combine(WpfClientInfo.UserDir, "softclock.bin");
+                using (BinaryWriter writer = new BinaryWriter(File.Open(fileName, FileMode.Create)))
+                {
+                    writer.Write(_deltaTicks);
+                }
+            }
+            catch (Exception ex)
+            {
+                WpfClientInfo.WriteErrorLog($"SaveSoftClock() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+            }
+        }
+
+        #endregion
 
         /*
         static Operator OperatorFromRequest(RequestItem request)

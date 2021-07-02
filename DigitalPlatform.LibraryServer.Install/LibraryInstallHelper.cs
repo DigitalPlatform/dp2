@@ -379,6 +379,8 @@ namespace DigitalPlatform.LibraryServer
             }
             else
             {
+                // 注：这里没有检查密码是否失效
+
                 // 新的做法
                 // return:
                 //      -1  出错
@@ -468,6 +470,8 @@ namespace DigitalPlatform.LibraryServer
             }
             else
             {
+                // 注：这里没有检查密码是否失效
+
                 // 新的做法
                 // return:
                 //      -1  出错

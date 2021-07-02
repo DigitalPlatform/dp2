@@ -648,7 +648,9 @@ Stack:
 
         public bool FillFinished { get; set; }
 
-        public void SetData(string item_recpath, string xml)
+        public void SetData(string item_recpath, 
+            string xml,
+            DateTime now)
         {
             this.ItemRecPath = item_recpath;
 
@@ -707,7 +709,7 @@ Stack:
             if (string.IsNullOrEmpty(returningDate) == false)
             {
                 DateTime time = DateTimeUtil.FromRfc1123DateTimeString(returningDate);
-                TimeSpan delta = DateTime.Now - time.ToLocalTime();
+                TimeSpan delta = /*DateTime.Now*/now - time.ToLocalTime();
                 if (period.IndexOf("hour") != -1)
                 {
                     // TODO: 如果没有册条码号则用 refID 代替

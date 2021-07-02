@@ -714,10 +714,14 @@ out string strError);
                 var patron = LibraryChannelUtil.GetPatronItem(strReaderBarcode);
                 if (patron == null || patron.LastWriteTime < operTime)
                 {
-                    DateTime now = DateTime.Now;
+                    DateTime now = /*DateTime*/ShelfData.Now;
                     var get_result = GetReaderInfo(strReaderBarcode);
                     if (get_result.Value == 1)
+                    {
+                        // parameters:
+                        //          lastWriteTime   最后写入时间。采用服务器时间
                         UpdateLocalPatronRecord(get_result, now);
+                    }
                 }
 
                 // 别处的还书动作兑现到 dp2ssl 本地动作库
@@ -871,6 +875,8 @@ out string strError);
                         */
 
                     // 把读者记录保存(更新)到本地数据库
+                    // parameters:
+                    //          lastWriteTime   最后写入时间。采用服务器时间
                     return LibraryChannelUtil.UpdateLocalPatronRecord(
                         new GetReaderInfoResult
                         {

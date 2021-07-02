@@ -743,9 +743,11 @@ readerType);
             item.SetAttribute("value", value);
         }
 
-        // 读者信息添入的时刻。如果为 DateTime.MinValue 则表示当前没有读者信息(或者被清除)
+        // 读者信息填入的时刻。如果为 DateTime.MinValue 则表示当前没有读者信息(或者被清除)
         DateTime _fillTime = DateTime.MinValue;
 
+        // 读者信息填入的时刻。
+        // 注: 为本地硬件时间
         public DateTime FillTime
         {
             get

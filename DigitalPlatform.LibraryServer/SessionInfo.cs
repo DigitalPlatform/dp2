@@ -331,6 +331,7 @@ namespace DigitalPlatform.LibraryServer
             string strClientIP,
             string strRouterClientIP,   // 2016/10/30
             string strGetToken,
+            out bool passwordExpired,
             out List<string> alter_type_list,
             out string strRights,
             out string strLibraryCode,
@@ -340,6 +341,7 @@ namespace DigitalPlatform.LibraryServer
             strRights = "";
             strLibraryCode = "";
             alter_type_list = new List<string>();
+            passwordExpired = false;
 
             if (this.App == null)
             {
@@ -455,6 +457,14 @@ namespace DigitalPlatform.LibraryServer
 #endif
                 else
                 {
+                    // 2021/7/3
+                    // 检查密码失效期
+                    if (LibraryApplication._passwordExpirePeriod != TimeSpan.MaxValue)
+                    {
+                        if (DateTime.Now > account.PasswordExpire)
+                            passwordExpired = true;
+                    }
+
                     nRet = LibraryServerUtil.MatchUserPassword(strPassword, account.Password, out strError);
                     if (nRet == -1)
                     {
@@ -480,7 +490,8 @@ namespace DigitalPlatform.LibraryServer
 
                 // 2016/6/7 给工作人员账户权限补上 librarian
                 // 2017/1/16 加入 special_usernames 判断
-                if (Array.IndexOf(special_usernames, this.Account.UserID) == -1)
+                // if (Array.IndexOf(special_usernames, this.Account.UserID) == -1)
+                if (IsSpecialUserName(this.Account.UserID) == false)
                 {
                     string strTemp = this.Account.Rights;
                     StringUtil.SetInList(ref strTemp, "librarian", true);
@@ -529,6 +540,11 @@ namespace DigitalPlatform.LibraryServer
         }
 
         static string[] special_usernames = new string[] { "public", "reader", "opac", "图书馆" };
+
+        public static bool IsSpecialUserName(string userName)
+        {
+            return Array.IndexOf(special_usernames, userName) != -1;
+        }
 
         /*
 		// 获得缺省帐户信息

@@ -2300,6 +2300,7 @@ namespace DigitalPlatform.LibraryServer
             // 从 2.01 版升级
             if (version < 3.00)
             {
+                var now = DateTime.Now;
                 // 将 account 元素中的 password 属性转移到 password 元素(innerText)中
                 XmlNodeList account_nodes = this.LibraryCfgDom.DocumentElement.SelectNodes("accounts/account");
                 foreach (XmlElement account in account_nodes)
@@ -2315,14 +2316,18 @@ namespace DigitalPlatform.LibraryServer
                     }
                     password_element.InnerText = password_text;
 
-                    /*
+                    string userName = account.GetAttribute("name");
+                    string rights = account.GetAttribute("rights");
+
                     // 设置密码失效时刻
-                    if ()
+                    // 注意: 特殊代理账户和权限中包含 neverExpire 的用户，其密码永远不失效？
+                    if (SessionInfo.IsSpecialUserName(userName) == false
+                        && StringUtil.IsInList("neverExpire", rights) == false
+                        && _passwordExpirePeriod != TimeSpan.MaxValue)
                     {
-                        string strExpireTime = DateTimeUtil.Rfc1123DateTimeStringEx(DateTime.Now + delta); // 本地时间
+                        string strExpireTime = DateTimeUtil.Rfc1123DateTimeStringEx(now + _passwordExpirePeriod); // 本地时间
                         password_element.SetAttribute("expire", strExpireTime);
                     }
-                    */
 
                     account.RemoveAttribute("password");
                 }
@@ -2344,7 +2349,7 @@ namespace DigitalPlatform.LibraryServer
         }
 
         // 工作人员密码失效时间长度
-        static TimeSpan _passwordExpirePeriod = TimeSpan.MaxValue;  // 默认为不失效
+        internal static TimeSpan _passwordExpirePeriod = TimeSpan.MaxValue;  // 默认为不失效
 
 
         // 2008/5/8
@@ -5515,6 +5520,10 @@ namespace DigitalPlatform.LibraryServer
                 strError = "用户名为 '" + strUserID + "' 的<account> password参数值错误";
                 return -1;
             }
+
+            // 2021/7/3
+            account.PasswordExpire = GetPasswordExpire(node as XmlElement);
+
             account.Type = DomUtil.GetAttr(node, "type");
             account.Rights = DomUtil.GetAttr(node, "rights");
             account.AccountLibraryCode = DomUtil.GetAttr(node, "libraryCode");
@@ -15758,6 +15767,10 @@ strLibraryCode);    // 读者所在的馆代码
 
         private string password = "";
         public string Password { get => password; set => password = value; }
+
+        // 2021/7/3
+        private DateTime passwordExpire = DateTime.MaxValue;
+        public DateTime PasswordExpire { get => passwordExpire; set => passwordExpire = value; }
 
         private string type = "";
         public string Type { get => type; set => type = value; }

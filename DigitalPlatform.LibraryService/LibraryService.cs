@@ -742,6 +742,7 @@ namespace dp2Library
                                  null,
                                  "*",
                                  null,
+                                 out bool passwordExpired1,
                                  out temp_list,
                                  out strRights,
                                  out strTemp,
@@ -757,6 +758,12 @@ namespace dp2Library
                                     if (string.IsNullOrEmpty(strLogText) == false)
                                         app.WriteErrorLog("!!!(simulate 1) " + strLogText);
                                 }
+                                goto ERROR1;
+                            }
+
+                            if (passwordExpired1 == true)
+                            {
+                                strError = "simulate 登录时第一阶段利用管理员帐户 '" + info.ManagerUserName + "' 验证登录失败: 密码已经失效";
                                 goto ERROR1;
                             }
 
@@ -790,6 +797,7 @@ namespace dp2Library
                          sessioninfo.ClientIP,
                          sessioninfo.RouterClientIP,
                          strGetToken,
+                         out bool passwordExpired2,
                          out alter_type_list,
                          out strRights,
                          out strLibraryCode,
@@ -812,6 +820,12 @@ namespace dp2Library
                             string removed = "";
                             sessioninfo.Account.Rights = LibraryApplication.LimitRights(strRights, strLimitRights, out removed);
                         }
+                    }
+
+                    if (nRet == 1 && passwordExpired2 == true)
+                    {
+                        strError = strUserName + "' 登录失败: 密码已经失效";
+                        goto ERROR1;
                     }
                 }
                 else
@@ -865,6 +879,7 @@ namespace dp2Library
                                  null,
                                  "*",
                                  null,
+                                 out bool passwordExpired3,
                                  out temp_list,
                                  out strRights,
                                  out strTemp,
@@ -890,6 +905,12 @@ namespace dp2Library
                                 result.ErrorInfo = "模拟读者登录被拒绝。帐户 '" + info.ManagerUserName + "' 不具备 simulatereader 权限";
                                 result.ErrorCode = ErrorCode.AccessDenied;
                                 return result;
+                            }
+
+                            if (nRet == 1 && passwordExpired3 == true)
+                            {
+                                strError = "simulate 登录时第一阶段利用管理员帐户 '" + info.ManagerUserName + "' 验证登录失败: 密码已经失效";
+                                goto ERROR1;
                             }
                         }
                         finally
@@ -9510,8 +9531,9 @@ Stack:
         // 修改用户
         // parameters:
         //      strAction   new delete change resetpassword
-        //              当action为"change"时，如果要在修改其他信息的同时修改密码，info.SetPassword必须为true；
+        //              当 action 为 "change" 时，如果要在修改其他信息的同时修改密码，info.SetPassword必须为true；
         //              而当action为"resetpassword"时，则info.ResetPassword状态不起作用，无论怎样都要修改密码。resetpassword并不修改其他信息，也就是说info中除了Password/UserName以外其他成员的值无效。
+        //              当 action 为 "changeandclose" 时，效果同 "change"，只是最后还要自动切断此用户的 session
         // return:
         //      result.Value    -1 错误
         public LibraryServerResult SetUser(

@@ -914,6 +914,9 @@ namespace dp2SSL
 
             }
 
+            // 保存软时钟
+            ShelfData.SaveSoftClock();
+
             WaitAllTaskFinish();
             WpfClientInfo.Finish(GrantAccess);
             WpfClientInfo.WriteDebugLog("End WpfClientInfo.Finish()");
@@ -931,7 +934,6 @@ namespace dp2SSL
 
             base.OnSessionEnding(e);
         }
-
 
         // 注：Windows 关机或者重启的时候，会触发 OnSessionEnding 事件，但不会触发 OnExit 事件
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:避免使用 Async Void 方法", Justification = "<挂起>")]
@@ -957,6 +959,9 @@ namespace dp2SSL
             {
                 WpfClientInfo.WriteErrorLog($"PageShelf.SubmitAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
             }
+
+            // 保存软时钟
+            ShelfData.SaveSoftClock();
 
             try
             {

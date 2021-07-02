@@ -1253,5 +1253,21 @@ string color = "red")
                 App.ContinueBarcodeScan();
             }
         }
+
+        // 暂停书柜同步
+        private void pauseShelfSync_Click(object sender, RoutedEventArgs e)
+        {
+            this.pauseShelfSync.IsChecked = !this.pauseShelfSync.IsChecked;
+            ShelfData.PauseSubmit = this.pauseShelfSync.IsChecked;
+        }
+
+        // 清除动作记录的 dontsync 状态
+        private async void clearDontsyncState_Click(object sender, RoutedEventArgs e)
+        {
+            var count = await ShelfData.FixActionsFromDatabaseAsync();
+            App.ErrorBox("清除动作记录的 dontsync 状态", 
+                $"处理完成。修改记录 {count} 条",
+                "green");
+        }
     }
 }
