@@ -646,6 +646,153 @@ namespace DigitalPlatform.LibraryServer
         }
 #endif
 
+        // 验证密码字符串的合法性
+        // parameters:
+        //      style   风格。style-1 为第一种密码风格
+        // return:
+        //      -1  出错
+        //      0   不合法(原因在 strError 中返回)
+        //      1   合法
+        public static int ValidatePassword(
+            XmlElement account,
+            string password,
+            string style,
+            out string strError)
+        {
+            strError = "";
+
+            List<string> errors = new List<string>();
+
+            // 风格 1
+            /*
+1. 8个字符，且不能是顺序、逆序或相同
+2. 数字加字母组合
+3. 密码和用户名不可以一样
+4. 临时密码不可以当做正式密码使用
+5. 新旧密码不能一样
+             * */
+            if (StringUtil.IsInList("style-1", style))
+            {
+                if (string.IsNullOrEmpty(password))
+                {
+                    errors.Add("密码不允许为空");
+                    goto ERROR1;
+                }
+
+                if (string.IsNullOrEmpty(password) == true
+                    || password.Length < 8)
+                    errors.Add("密码字符数不能小于 8");
+
+                if (IsSequence(password))
+                    errors.Add("密码内容不能为顺序字符");
+
+                if (ContainsDigit(password) == false || ContainsLetter(password) == false)
+                    errors.Add("密码内容必须同时包含数字和字母");
+
+                var userName = GetUserNameValue(account);
+
+                if (password == userName)
+                    errors.Add("密码不能和用户名相同");
+
+                // 和当前存在的旧密码比较
+                var old_password_hashed = GetPasswordValue(account);
+                if (string.IsNullOrEmpty(old_password_hashed) == false)
+                {
+                    // 验证密码
+                    // return:
+                    //      -1  出错
+                    //      0   不匹配
+                    //      1   匹配
+                    int nRet = LibraryServerUtil.MatchUserPassword(
+                        password,
+                        old_password_hashed,
+                        out _);
+                    if (nRet == 1)
+                        errors.Add("密码不能和旧密码相同");
+                }
+
+                if (errors.Count > 0)
+                    goto ERROR1;
+            }
+
+            strError = "密码合法";
+            return 1;
+        ERROR1:
+            strError = $"密码不合法: {StringUtil.MakePathList(errors, "; ")}";
+            return 0;
+        }
+
+        public static string GetUserNameValue(XmlElement account)
+        {
+            return account.GetAttribute("name");
+        }
+
+        static bool ContainsDigit(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+                return false;
+            foreach (char ch in text)
+            {
+                if (char.IsDigit(ch))
+                    return true;
+            }
+
+            return false;
+        }
+
+        static bool ContainsLetter(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+                return false;
+            foreach (char ch in text)
+            {
+                if (char.IsLetter(ch))
+                    return true;
+            }
+
+            return false;
+        }
+
+        // 先后三次判断，是否为内码顺序增加，相同，顺序减少的字符串
+        public static bool IsSequence(string text)
+        {
+            if (IsSequence(text, 1))
+                return true;
+            if (IsSequence(text, 0))
+                return true;
+            if (IsSequence(text, -1))
+                return true;
+            return false;
+        }
+
+        // 根据 direction 参数判断，是否为内码顺序增加或相同或顺序减少的字符串
+        // parameters:
+        //      direction   -1 逐步减小; 0 相同; 1 逐步增加
+        public static bool IsSequence(string text, int direction)
+        {
+            if (string.IsNullOrEmpty(text))
+                return false;
+
+            // 只有一个字符的，不用判断
+            if (text.Length == 1)
+                return false;
+
+            // 检查是否逐渐增加
+            char prev_ch = (char)0;
+            int i = 0;
+            foreach (char ch in text)
+            {
+                if (i > 0)
+                {
+                    if (ch != prev_ch + direction)
+                        return false;
+                }
+                prev_ch = ch;
+                i++;
+            }
+
+            return true;
+        }
 
         // 修改用户密码。这是指用户修改自己帐户的密码，需提供旧密码
         // return:
