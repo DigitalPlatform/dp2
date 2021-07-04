@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows.Forms;
 using System.Drawing.Drawing2D;
+using System.Threading.Tasks;
 
 using Newtonsoft.Json;
 
@@ -556,6 +557,25 @@ namespace DigitalPlatform.CirculationClient
                 this.checkBox_isReader.Visible = false;
                 this.toolStrip_server.Visible = false;
                 this.comboBox_serverAddr.Enabled = false;   // readonly
+            }
+
+            // 打开 修改密码 对话框
+            if (this.PasswordExpired)
+            {
+                Task.Run(()=> {
+                    this.Invoke((Action)(() =>
+                    {
+                        ChangePasswordDialog dlg = new ChangePasswordDialog();
+                        dlg.Font = this.Font;
+                        dlg.ServerUrl = this.ServerUrl;
+                        dlg.UserName = this.UserName;
+                        dlg.OldPassword = this.Password;
+                        dlg.StartPosition = FormStartPosition.CenterParent;
+                        dlg.ShowDialog(this);
+                        if (dlg.DialogResult == DialogResult.OK)
+                            this.textBox_password.Text = dlg.NewPassword;
+                    }));
+                });
             }
 
             API.PostMessage(this.Handle, WM_MOVE_FOCUS, 0, 0);
@@ -1127,6 +1147,9 @@ Keys keyData)
                 TempCodeVisible = value;
             }
         }
+
+        // 密码已经失效，需要在对话框打开时先打开 ChangePasswordDialog 以便进行密码修改操作
+        public bool PasswordExpired { get; set; }
 
         // string _tempCode = "";
 

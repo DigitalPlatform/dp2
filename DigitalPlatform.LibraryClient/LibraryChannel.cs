@@ -57,6 +57,8 @@ namespace DigitalPlatform.LibraryClient
         RetryLogin = 5,
 
         TempCodeMismatch = 6,
+
+        PasswordExpired = 7,    // 密码已经失效 2021/7/4
     }
 
     /// <summary>
@@ -2564,6 +2566,8 @@ out strError);
                         ea.LoginFailCondition = LoginFailCondition.NeedSmsLogin;
                     else if (this.ErrorCode == localhost.ErrorCode.TempCodeMismatch)
                         ea.LoginFailCondition = LoginFailCondition.TempCodeMismatch;
+                    else if (this.ErrorCode == ErrorCode.PasswordExpired)
+                        ea.LoginFailCondition = LoginFailCondition.PasswordExpired;
                     else
                         ea.LoginFailCondition = LoginFailCondition.PasswordError;
                     goto REDOLOGIN;

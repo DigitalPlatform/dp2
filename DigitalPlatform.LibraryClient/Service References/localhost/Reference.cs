@@ -497,6 +497,9 @@ namespace DigitalPlatform.LibraryClient.localhost {
         SyncDenied = 40,
         
         [System.Runtime.Serialization.EnumMemberAttribute()]
+        PasswordExpired = 41,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
         AlreadyExist = 100,
         
         [System.Runtime.Serialization.EnumMemberAttribute()]

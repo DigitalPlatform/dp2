@@ -885,7 +885,9 @@ namespace DigitalPlatform.LibraryServer
 
                     // 2021/6/29
                     // accounts/@passwordExpireLength 属性
+                    // accounts/@passwordStyle 属性
                     _passwordExpirePeriod = TimeSpan.MaxValue;
+                    _passwordStyle = "";
                     node = dom.DocumentElement.SelectSingleNode("accounts") as XmlElement;
                     if (node != null)
                     {
@@ -895,11 +897,18 @@ namespace DigitalPlatform.LibraryServer
                             if (string.IsNullOrEmpty(passwordExpireLength) == false)
                                 _passwordExpirePeriod = ParseTimeSpan(passwordExpireLength);
                         }
-                        catch(Exception ex)
+                        catch (Exception ex)
                         {
                             app.WriteErrorLog($"library.xml 中 accounts/@passwordExpireLength 属性值 '{passwordExpireLength}' 格式不合法: {ex.Message}");
                         }
+
+                        _passwordStyle = node.GetAttribute("passwordStyle");
                     }
+
+                    // 2021/7/4
+                    // 根据 account/@passwordExpireLength 参数，重建或者清除 account 密码失效期
+                    if (bReload == false)
+                        CreateOrDeletePasswordExpire();
 
                     // 2013/9/24
                     // 借期提醒通知定义
@@ -2322,7 +2331,7 @@ namespace DigitalPlatform.LibraryServer
                     // 设置密码失效时刻
                     // 注意: 特殊代理账户和权限中包含 neverExpire 的用户，其密码永远不失效？
                     if (SessionInfo.IsSpecialUserName(userName) == false
-                        && StringUtil.IsInList("neverExpire", rights) == false
+                        && StringUtil.IsInList("neverexpire", rights) == false
                         && _passwordExpirePeriod != TimeSpan.MaxValue)
                     {
                         string strExpireTime = DateTimeUtil.Rfc1123DateTimeStringEx(now + _passwordExpirePeriod); // 本地时间
@@ -2348,9 +2357,40 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
-        // 工作人员密码失效时间长度
-        internal static TimeSpan _passwordExpirePeriod = TimeSpan.MaxValue;  // 默认为不失效
+        // 根据 account/@passwordExpireLength 参数，重建或者清除 account 密码失效期
+        // 如果先前有 expire，后来修改了 expire 长度，本函数不负责修改 account 中的 expire 时间。本函数只负责响应创建和清除
+        void CreateOrDeletePasswordExpire()
+        {
+            var create = _passwordExpirePeriod != TimeSpan.MaxValue;
 
+            bool changed = false;
+            var now = DateTime.Now;
+            XmlNodeList account_nodes = this.LibraryCfgDom.DocumentElement.SelectNodes("accounts/account");
+            foreach (XmlElement account in account_nodes)
+            {
+                var userName = account.GetAttribute("name");
+                if (create && SessionInfo.IsSpecialUserName(userName) == false)
+                {
+                    if (SetPasswordExpire(account, now, true) == true)  // 增补。但不修改已有的 exipre 属性值
+                        changed = true;
+                }
+                else
+                {
+                    if (ClearPasswordExpire(account) == true)
+                        changed = true;
+                }
+            }
+
+            if (changed == true)
+            {
+                this.Changed = true;
+            }
+        }
+
+        // 工作人员密码失效时间长度。例如 90days
+        internal static TimeSpan _passwordExpirePeriod = TimeSpan.MaxValue;  // 默认为不失效
+        // 工作人员密码的风格。目前有 style-1 一种
+        internal static string _passwordStyle = "";
 
         // 2008/5/8
         // return:
@@ -15701,6 +15741,7 @@ strLibraryCode);    // 读者所在的馆代码
         AlreadyBorrowed = 38,   // 已经被当前读者借阅 2020/3/26
         AlreadyBorrowedByOther = 39,    // 已经被其他读者借阅 2020/3/26
         SyncDenied = 40,    // 同步操作被拒绝(因为实际操作时间之后又发生过借还操作) 2020/3/27
+        PasswordExpired = 41,   // 密码已经失效 2021/7/4
 
         // 以下为兼容内核错误码而设立的同名错误码
         AlreadyExist = 100, // 兼容

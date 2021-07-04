@@ -425,6 +425,16 @@ namespace DigitalPlatform.LibraryServer
                 // 设置密码
                 if (userinfo.SetPassword == true)
                 {
+                    // return:
+                    //      -1  出错
+                    //      0   不合法(原因在 strError 中返回)
+                    //      1   合法
+                    nRet = ValidatePassword(nodeAccount,
+                        userinfo.Password,
+                        out strError);
+                    if (nRet != 1)
+                        return -1;
+
                     nRet = LibraryServerUtil.SetUserPassword(userinfo.Password, out string strHashed, out strError);
                     if (nRet == -1)
                         return -1;
@@ -432,7 +442,7 @@ namespace DigitalPlatform.LibraryServer
                     SetPasswordValue(nodeAccount, strHashed);
 
                     if (SessionInfo.IsSpecialUserName(userinfo.UserName) == false)
-                        SetPasswordExpire(nodeAccount);
+                        SetPasswordExpire(nodeAccount, DateTime.Now);
                 }
 
                 this.Changed = true;
@@ -549,33 +559,61 @@ namespace DigitalPlatform.LibraryServer
         }
 
         // 2021/7/2
-        public void SetPasswordExpire(XmlElement account)
+        // parameters:
+        //      now     当前时间               
+        //      append  == true: 如果 expire 属性中已经有了值，不会修改
+        public bool SetPasswordExpire(XmlElement account,
+            DateTime now,
+            bool append = false)
         {
+            bool changed = false;
+
+            var rights = account.GetAttribute("rights");
+            bool neverExpire = StringUtil.IsInList("neverexpire", rights);
+
             XmlElement password_element = account.SelectSingleNode("password") as XmlElement;
             if (password_element == null)
             {
                 password_element = account.OwnerDocument.CreateElement("password");
                 password_element = account.AppendChild(password_element) as XmlElement;
+                changed = true;
             }
-            if (_passwordExpirePeriod == TimeSpan.MaxValue)
+            if (_passwordExpirePeriod == TimeSpan.MaxValue
+                || neverExpire == true)
+            {
                 password_element.RemoveAttribute("expire");
+                changed = true;
+            }
             else
             {
-                string strExpireTime = DateTimeUtil.Rfc1123DateTimeStringEx(DateTime.Now + _passwordExpirePeriod); // 本地时间
-                password_element.SetAttribute("expire", strExpireTime);
+                var old_expire_value = password_element.GetAttribute("expire");
+                if (append == true && string.IsNullOrEmpty(old_expire_value) == false)
+                {
+                    // (当 now == DateTime.MinValue 时)如果 expire 属性中已经有了值，不会修改
+                }
+                else
+                {
+                    string strExpireTime = DateTimeUtil.Rfc1123DateTimeStringEx(now + _passwordExpirePeriod); // 本地时间
+                    password_element.SetAttribute("expire", strExpireTime);
+                    changed = true;
+                }
             }
+
+            return changed;
         }
 
         // 2021/7/2
-        public static void ClearPasswordExpire(XmlElement account)
+        public static bool ClearPasswordExpire(XmlElement account)
         {
             XmlElement password_element = account.SelectSingleNode("password") as XmlElement;
             if (password_element == null)
+                return false;
+            if (password_element.HasAttribute("expire"))
             {
-                password_element = account.OwnerDocument.CreateElement("password");
-                password_element = account.AppendChild(password_element) as XmlElement;
+                password_element.RemoveAttribute("expire");
+                return true;
             }
-            password_element.RemoveAttribute("expire");
+            return false;
         }
 
         // 2021/7/2
@@ -645,6 +683,25 @@ namespace DigitalPlatform.LibraryServer
             return 2;   // 尚在失效期以内
         }
 #endif
+
+        // return:
+        //      -1  出错
+        //      0   不合法(原因在 strError 中返回)
+        //      1   合法
+        public static int ValidatePassword(
+    XmlElement account,
+    string password,
+    out string strError)
+        {
+            strError = "";
+            if (string.IsNullOrEmpty(LibraryApplication._passwordStyle))
+                return 1;
+            return ValidatePassword(
+    account,
+    password,
+    LibraryApplication._passwordStyle,
+    out strError);
+        }
 
         // 验证密码字符串的合法性
         // parameters:
@@ -803,6 +860,7 @@ namespace DigitalPlatform.LibraryServer
             string strUserName,
             string strOldPassword,
             string strNewPassword,
+            string strClientIP,
             out string strError)
         {
             strError = "";
@@ -810,7 +868,7 @@ namespace DigitalPlatform.LibraryServer
 
             if (String.IsNullOrEmpty(strUserName) == true)
             {
-                strError = "strUserName参数值不能为空";
+                strError = "strUserName 参数值不能为空";
                 return -1;
             }
 
@@ -819,14 +877,14 @@ namespace DigitalPlatform.LibraryServer
             try
             {
                 // 查重
-                XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("accounts/account[@name='" + strUserName + "']");
-                if (node == null)
+                var nodeAccount = this.LibraryCfgDom.DocumentElement.SelectSingleNode("accounts/account[@name='" + strUserName + "']") as XmlElement;
+                if (nodeAccount == null)
                 {
                     strError = "用户 '" + strUserName + "' 不存在 (1)";
                     return -1;
                 }
 
-                string strExistLibraryCodeList = DomUtil.GetAttr(node, "libraryCode");
+                string strExistLibraryCodeList = nodeAccount.GetAttribute("libraryCode");
 
                 // 2012/9/9
                 // 分馆用户只允许修改馆代码属于管辖分馆的帐户
@@ -864,35 +922,64 @@ namespace DigitalPlatform.LibraryServer
                     return -1;
                 }
 #endif
+
+                nRet = this.UserNameTable.BeforeLogin(strUserName,
+strClientIP,
+out strError);
+                if (nRet == -1)
+                    return -1;
+
                 // string strExistPassword = DomUtil.GetAttr(node, "password");
-                string strExistPassword = GetPasswordValue(node as XmlElement);
+                string strExistPassword = GetPasswordValue(nodeAccount);
 
                 // 注：这里故意不检查密码是否失效。因为即便密码失效，也要允许修改密码
 
+                // return:
+                //      -1  出错
+                //      0   不匹配
+                //      1   匹配
                 nRet = LibraryServerUtil.MatchUserPassword(strOldPassword, strExistPassword, out strError);
                 if (nRet == -1)
                     return -1;
+
+                if (nRet == 0 || nRet == 1)
+                {
+                    // parameters:
+                    //      nLoginResult    1:成功 0:用户名或密码不正确 -1:出错
+                    string strLogText = this.UserNameTable.AfterLogin(strUserName,
+                        strClientIP,
+                        nRet);
+                    if (string.IsNullOrEmpty(strLogText) == false)
+                        this.WriteErrorLog("!!! " + strLogText);
+                }
+
                 if (nRet == 0)
                 {
+                    // TODO: 防范暴力尝试密码
                     strError = "所提供的旧密码经验证不匹配";
                     return -1;
                 }
 
+                // 合法性
+                // return:
+                //      -1  出错
+                //      0   不合法(原因在 strError 中返回)
+                //      1   合法
+                nRet = ValidatePassword(nodeAccount,
+                    strNewPassword,
+                    out strError);
+                if (nRet != 1)
+                    return -1;
+
                 // 设置新密码
-#if NO
-                // 以前的做法
-                strNewPassword = Cryptography.Encrypt(strNewPassword,
-                        EncryptKey);
-                DomUtil.SetAttr(node, "password", strNewPassword);
-#endif
                 string strHashed = "";
                 nRet = LibraryServerUtil.SetUserPassword(strNewPassword, out strHashed, out strError);
                 if (nRet == -1)
                     return -1;
                 // DomUtil.SetAttr(node, "password", strHashed);
-                SetPasswordValue(node as XmlElement, strHashed);
+                SetPasswordValue(nodeAccount, strHashed);
                 if (SessionInfo.IsSpecialUserName(strUserName) == false)
-                    SetPasswordExpire(node as XmlElement);
+                    SetPasswordExpire(nodeAccount, DateTime.Now);
 
                 this.Changed = true;
                 return 0;
@@ -1359,11 +1446,21 @@ namespace DigitalPlatform.LibraryServer
                 DomUtil.SetAttr(nodeAccount, "comment", userinfo.Comment);
                 DomUtil.SetAttr(nodeAccount, "binding", userinfo.Binding);
 
-                bool neverExpire = StringUtil.IsInList("neverExpire", userinfo.Rights);
+                bool neverExpire = StringUtil.IsInList("neverexpire", userinfo.Rights);
 
                 // 强制修改密码。无需验证旧密码
                 if (userinfo.SetPassword == true)
                 {
+                    // return:
+                    //      -1  出错
+                    //      0   不合法(原因在 strError 中返回)
+                    //      1   合法
+                    nRet = ValidatePassword(nodeAccount,
+                        userinfo.Password,
+                        out strError);
+                    if (nRet != 1)
+                        return -1;
+
                     string strHashed = "";
                     nRet = LibraryServerUtil.SetUserPassword(userinfo.Password, out strHashed, out strError);
                     if (nRet == -1)
@@ -1373,7 +1470,7 @@ namespace DigitalPlatform.LibraryServer
 
                     if (neverExpire == false
                         && SessionInfo.IsSpecialUserName(userinfo.UserName) == false)
-                        SetPasswordExpire(nodeAccount);
+                        SetPasswordExpire(nodeAccount, DateTime.Now);
                 }
 
                 if (neverExpire)
@@ -1385,7 +1482,7 @@ namespace DigitalPlatform.LibraryServer
                         // 观察以前是否有失效期。如果没有，则主动加上失效期
                         var old_expire = GetPasswordExpire(nodeAccount);
                         if (old_expire == DateTime.MaxValue)
-                            SetPasswordExpire(nodeAccount);
+                            SetPasswordExpire(nodeAccount, DateTime.Now);
                     }
                 }
 
@@ -1517,6 +1614,16 @@ namespace DigitalPlatform.LibraryServer
                     }
                 }
 
+                // return:
+                //      -1  出错
+                //      0   不合法(原因在 strError 中返回)
+                //      1   合法
+                nRet = ValidatePassword(nodeAccount,
+                    strNewPassword,
+                    out strError);
+                if (nRet != 1)
+                    return -1;
+
                 // 强制修改密码。无需验证旧密码
                 nRet = LibraryServerUtil.SetUserPassword(strNewPassword, out strHashedPassword, out strError);
                 if (nRet == -1)
@@ -1524,7 +1631,7 @@ namespace DigitalPlatform.LibraryServer
                 // DomUtil.SetAttr(nodeAccount, "password", strHashedPassword);
                 SetPasswordValue(nodeAccount, strHashedPassword);
                 if (SessionInfo.IsSpecialUserName(strUserName) == false)
-                    SetPasswordExpire(nodeAccount);
+                    SetPasswordExpire(nodeAccount, DateTime.Now);
                 this.Changed = true;
             }
             finally

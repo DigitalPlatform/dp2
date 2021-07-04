@@ -12,6 +12,7 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Xml;
 
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.Text;
 
 namespace dp2Circulation
 {
@@ -217,26 +218,29 @@ namespace dp2Circulation
                 // 非强制修改密码，即本人修改
                 if (this.checkBox_worker_force.Checked == false)
                 {
-
-                    if (this.textBox_worker_userName.Text != "!changeKernelPassword")
+                    // dp2library 3.54 以前要求先 Login() 成功才能使用 ChangeUserPassword() 修改 dp2library 账户密码
+                    if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.54") < 0)
                     {
-                        // return:
-                        //      -1  error
-                        //      0   登录未成功
-                        //      1   登录成功
-                        lRet = Channel.Login(this.textBox_worker_userName.Text,
-                            this.textBox_worker_oldPassword.Text,
-                            "type=worker,client=dp2circulation|" + Program.ClientVersion,
-                            out strError);
-                        if (lRet == -1)
+                        if (this.textBox_worker_userName.Text != "!changeKernelPassword")
                         {
-                            goto ERROR1;
-                        }
+                            // return:
+                            //      -1  error
+                            //      0   登录未成功
+                            //      1   登录成功
+                            lRet = Channel.Login(this.textBox_worker_userName.Text,
+                                this.textBox_worker_oldPassword.Text,
+                                "type=worker,client=dp2circulation|" + Program.ClientVersion,
+                                out strError);
+                            if (lRet == -1)
+                            {
+                                goto ERROR1;
+                            }
 
-                        if (lRet == 0)
-                        {
-                            strError = "旧密码不正确";
-                            goto ERROR1;
+                            if (lRet == 0)
+                            {
+                                strError = "旧密码不正确";
+                                goto ERROR1;
+                            }
                         }
                     }
 

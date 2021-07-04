@@ -2923,7 +2923,6 @@ false);
                     e.ErrorInfo,
                     e.LoginFailCondition,
                     owner);
-
             }
             ));
             if (dlg == null)
@@ -5374,6 +5373,9 @@ Stack:
             }
             if (fail_contidion == LoginFailCondition.NeedSmsLogin)
                 dlg.ActivatePhoneNumber();
+
+            if (fail_contidion == LoginFailCondition.PasswordExpired)
+                dlg.PasswordExpired = true;
 
             dlg.ShowDialog(owner);
 

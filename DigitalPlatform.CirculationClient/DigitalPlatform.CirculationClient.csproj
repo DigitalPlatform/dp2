@@ -164,6 +164,12 @@
       <DependentUpon>GetDp2ResDlg.cs</DependentUpon>
     </Compile>
     <Compile Include="IUi.cs" />
+    <Compile Include="LoginDialog\ChangePasswordDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="LoginDialog\ChangePasswordDialog.Designer.cs">
+      <DependentUpon>ChangePasswordDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="LoginDialog\CirculationLoginDlg.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -369,6 +375,9 @@
     <EmbeddedResource Include="BinaryResControl.resx">
       <SubType>Designer</SubType>
       <DependentUpon>BinaryResControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="LoginDialog\ChangePasswordDialog.resx">
+      <DependentUpon>ChangePasswordDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="LoginDialog\CirculationLoginDlg.resx">
       <DependentUpon>CirculationLoginDlg.cs</DependentUpon>

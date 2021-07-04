@@ -764,7 +764,11 @@ namespace dp2Library
                             if (passwordExpired1 == true)
                             {
                                 strError = "simulate 登录时第一阶段利用管理员帐户 '" + info.ManagerUserName + "' 验证登录失败: 密码已经失效";
-                                goto ERROR1;
+                                sessioninfo.Account = null;
+                                result.Value = -1;
+                                result.ErrorInfo = strError;
+                                result.ErrorCode = ErrorCode.PasswordExpired;
+                                return result;
                             }
 
                             // 这种情况下使用代理者的权限
@@ -824,8 +828,12 @@ namespace dp2Library
 
                     if (nRet == 1 && passwordExpired2 == true)
                     {
-                        strError = strUserName + "' 登录失败: 密码已经失效";
-                        goto ERROR1;
+                        strError = $"'{strUserName }' 登录失败: 密码已经失效";
+                        sessioninfo.Account = null;
+                        result.Value = -1;
+                        result.ErrorInfo = strError;
+                        result.ErrorCode = ErrorCode.PasswordExpired;
+                        return result;
                     }
                 }
                 else
@@ -910,7 +918,11 @@ namespace dp2Library
                             if (nRet == 1 && passwordExpired3 == true)
                             {
                                 strError = "simulate 登录时第一阶段利用管理员帐户 '" + info.ManagerUserName + "' 验证登录失败: 密码已经失效";
-                                goto ERROR1;
+                                sessioninfo.Account = null;
+                                result.Value = -1;
+                                result.ErrorInfo = strError;
+                                result.ErrorCode = ErrorCode.PasswordExpired;
+                                return result;
                             }
                         }
                         finally
@@ -9804,7 +9816,8 @@ Stack:
         }
 
         // 修改用户自己的密码
-        // 只能用本API修改自己的密码。如果要强制修改别人的密码，请使用SetUser() API
+        // 只能用本 API 修改自己的密码。如果要强制修改别人的密码(意思是修改时并不知道旧密码)，请使用SetUser() API
+        // 注：调用本 API 修改前，无需登录
         // return:
         //      result.Value    -1 错误
         public LibraryServerResult ChangeUserPassword(
@@ -9815,15 +9828,20 @@ Stack:
             string strError = "";
             int nRet = 0;
 
-            LibraryServerResult result = this.PrepareEnvironment("ChangeUserPassword", true, true, true);
-            if (result.Value == -1)
-                return result;
+            LibraryServerResult result = null;
 
             try
             {
                 // 特殊功能：修改 library.xml 中 dp2kernel 用户的密码，并访问 dp2kernel 修改此用户的密码
                 if (strUserName == "!changeKernelPassword")
                 {
+                    result = this.PrepareEnvironment("ChangeUserPassword",
+    true,
+    true,  // 检查是否登录
+    true);
+                    if (result.Value == -1)
+                        return result;
+
                     if (StringUtil.IsInList("supervisor", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
@@ -9850,6 +9868,13 @@ Stack:
                 // 特殊功能：修改 library.xml 中所有的匹配的馆代码
                 if (strUserName == "!changeLibraryCode")
                 {
+                    result = this.PrepareEnvironment("ChangeUserPassword",
+true,
+true,  // 检查是否登录
+true);
+                    if (result.Value == -1)
+                        return result;
+
                     if (StringUtil.IsInList("supervisor", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
@@ -9874,41 +9899,68 @@ Stack:
                     return result;
                 }
 
-                // 权限判断
-
-                // 只能自己修改自己的密码
-                if (sessioninfo.UserID != strUserName)
                 {
-                    result.Value = -1;
-                    result.ErrorInfo = "当前登录用户 " + sessioninfo.UserID + " 只能修改自己的密码，不能修改别人(" + strUserName + ")的密码。";
-                    result.ErrorCode = ErrorCode.AccessDenied;
+                    result = this.PrepareEnvironment("ChangeUserPassword",
+    true,
+    false,  // 不检查是否登录
+    true);
+                    if (result.Value == -1)
+                        return result;
+
+                    // 根据用户名，获得账户权限和图书馆代码
+
+                    // 2021/7/4
+                    // return:
+                    //      -1  出错
+                    //      0   没有找到
+                    //      1   找到
+                    nRet = app.GetUserInfo(strUserName,
+                        out UserInfo userinfo,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    if (nRet == 0)
+                        goto ERROR1;
+
+                    // 权限判断
+
+                    /*
+                    // 只能自己修改自己的密码
+                    if (sessioninfo.UserID != strUserName)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = "当前登录用户 " + sessioninfo.UserID + " 只能修改自己的密码，不能修改别人(" + strUserName + ")的密码。";
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        return result;
+                    }
+                    */
+
+                    if (StringUtil.IsInList("denychangemypassword", userinfo.Rights/*sessioninfo.RightsOrigin*/) == true)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = "当前登录用户 " + userinfo.Rights/*sessioninfo.UserID*/ + " 因被设定了 denychangemypassword 权限，不能修改自己的密码。";
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        return result;
+                    }
+
+                    nRet = app.ChangeUserPassword(
+                        userinfo.LibraryCode,   // sessioninfo.LibraryCodeList,
+                        strUserName,
+                        strOldPassword,
+                        strNewPassword,
+                        sessioninfo.ClientIP,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+
+                    // 2014/12/3
+                    // 促使立即写入 library.xml
+                    if (app.Changed == true)
+                        app.ActivateManagerThread();
+
+                    result.Value = nRet;
                     return result;
                 }
-
-                if (StringUtil.IsInList("denychangemypassword", sessioninfo.RightsOrigin) == true)
-                {
-                    result.Value = -1;
-                    result.ErrorInfo = "当前登录用户 " + sessioninfo.UserID + " 因被设定了 denychangemypassword 权限，不能修改自己的密码。";
-                    result.ErrorCode = ErrorCode.AccessDenied;
-                    return result;
-                }
-
-                nRet = app.ChangeUserPassword(
-                    sessioninfo.LibraryCodeList,
-                    strUserName,
-                    strOldPassword,
-                    strNewPassword,
-                    out strError);
-                if (nRet == -1)
-                    goto ERROR1;
-
-                // 2014/12/3
-                // 促使立即写入 library.xml
-                if (app.Changed == true)
-                    app.ActivateManagerThread();
-
-                result.Value = nRet;
-                return result;
             ERROR1:
                 result.Value = -1;
                 result.ErrorCode = ErrorCode.SystemError;
