@@ -164,7 +164,10 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
 
             if (nRet == 0)
+            {
+                strError = $"用户 '{strUserName}' 没有找到";
                 return 0;   // not found
+            }
 
             if (userinfos == null || userinfos.Length < 1)
             {
@@ -562,7 +565,7 @@ namespace DigitalPlatform.LibraryServer
         // parameters:
         //      now     当前时间               
         //      append  == true: 如果 expire 属性中已经有了值，不会修改
-        public bool SetPasswordExpire(XmlElement account,
+        public static bool SetPasswordExpire(XmlElement account,
             DateTime now,
             bool append = false)
         {

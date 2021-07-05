@@ -570,6 +570,7 @@ namespace DigitalPlatform.CirculationClient
                         dlg.ServerUrl = this.ServerUrl;
                         dlg.UserName = this.UserName;
                         dlg.OldPassword = this.Password;
+                        dlg.IsReader = this.IsReader;
                         dlg.StartPosition = FormStartPosition.CenterParent;
                         dlg.ShowDialog(this);
                         if (dlg.DialogResult == DialogResult.OK)

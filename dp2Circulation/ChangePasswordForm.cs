@@ -91,6 +91,7 @@ namespace dp2Circulation
         private void button_reader_changePassword_Click(object sender, EventArgs e)
         {
             string strError = "";
+            long lRet = 0;
 
             if (this.textBox_reader_barcode.Text == "")
             {
@@ -119,7 +120,7 @@ namespace dp2Circulation
 
             try
             {
-                long lRet = Channel.ChangeReaderPassword(
+                lRet = Channel.ChangeReaderPassword(
                     stop,
                     this.textBox_reader_barcode.Text,
                     bOldPasswordEnabled == false ? null : this.textBox_reader_oldPassword.Text,

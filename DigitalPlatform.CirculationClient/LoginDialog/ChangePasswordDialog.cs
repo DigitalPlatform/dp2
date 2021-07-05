@@ -31,11 +31,27 @@ namespace DigitalPlatform.CirculationClient
                 {
                     channel.Timeout = TimeSpan.FromSeconds(10);
                     channel.Url = ServerUrl;
-                    var ret = channel.ChangeUserPassword(null,
-                        this.textBox_worker_userName.Text,
-                        this.textBox_worker_oldPassword.Text,
-                        this.textBox_worker_newPassword.Text,
-                        out string strError);
+                    bool isReader = this.checkBox_isReader.Checked;
+                    
+                    long ret = 0;
+                    string strError = "";
+
+                    if (isReader)
+                    {
+                        ret = channel.ChangeReaderPassword(null,
+                            this.textBox_worker_userName.Text,
+                            this.textBox_worker_oldPassword.Text,
+                            this.textBox_worker_newPassword.Text,
+                            out strError);
+                    }
+                    else
+                    {
+                        ret = channel.ChangeUserPassword(null,
+                            this.textBox_worker_userName.Text,
+                            this.textBox_worker_oldPassword.Text,
+                            this.textBox_worker_newPassword.Text,
+                            out strError);
+                    }
                     if (ret == -1)
                         MessageBox.Show(this, strError);
                     else
@@ -103,6 +119,30 @@ namespace DigitalPlatform.CirculationClient
             set
             {
                 this.textBox_worker_confirmNewPassword.Text = value;
+            }
+        }
+
+        public bool IsReader
+        {
+            get
+            {
+                return this.checkBox_isReader.Checked;
+            }
+            set
+            {
+                this.checkBox_isReader.Checked = value;
+            }
+        }
+
+        private void checkBox_isReader_CheckedChanged(object sender, EventArgs e)
+        {
+            if (this.checkBox_isReader.Checked == false)
+            {
+                this.label_userName.Text = "用户名(&U):";
+            }
+            else
+            {
+                this.label_userName.Text = "读者证条码号(&B):";
             }
         }
     }

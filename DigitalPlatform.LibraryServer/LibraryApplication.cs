@@ -926,6 +926,12 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     // <login>
+                    // login/@checkClientVersion
+                    // login/@globalAddRights
+                    // login/@patronPasswordExpireLength 属性
+                    // login/@patronPasswordStyle 属性
+                    _patronPasswordExpirePeriod = TimeSpan.MaxValue;
+                    _patronPasswordStyle = "";
                     node = dom.DocumentElement.SelectSingleNode("login") as XmlElement;
                     if (node != null)
                     {
@@ -934,6 +940,20 @@ namespace DigitalPlatform.LibraryServer
                             false);
                         // 2017/10/13
                         this.GlobalAddRights = node.GetAttribute("globalAddRights");
+
+                        // 2021/7/4
+                        string patronPasswordExpireLength = node.GetAttribute("patronPasswordExpireLength");
+                        try
+                        {
+                            if (string.IsNullOrEmpty(patronPasswordExpireLength) == false)
+                                _patronPasswordExpirePeriod = ParseTimeSpan(patronPasswordExpireLength);
+                        }
+                        catch (Exception ex)
+                        {
+                            app.WriteErrorLog($"library.xml 中 login/@patronPasswordExpireLength 属性值 '{patronPasswordExpireLength}' 格式不合法: {ex.Message}");
+                        }
+
+                        _patronPasswordStyle = node.GetAttribute("patronPasswordStyle");
                     }
                     else
                     {
@@ -2391,6 +2411,11 @@ namespace DigitalPlatform.LibraryServer
         internal static TimeSpan _passwordExpirePeriod = TimeSpan.MaxValue;  // 默认为不失效
         // 工作人员密码的风格。目前有 style-1 一种
         internal static string _passwordStyle = "";
+
+        // 读者密码失效时间长度。例如 90days
+        internal static TimeSpan _patronPasswordExpirePeriod = TimeSpan.MaxValue;  // 默认为不失效
+        // 读者密码的风格。目前有 style-1 一种
+        internal static string _patronPasswordStyle = "";
 
         // 2008/5/8
         // return:
@@ -9452,6 +9477,7 @@ out strError);
             int nIndex,
             string strClientIP,
             string strGetToken,
+            out bool passwordExpired,
             out bool bTempPassword,
             out string strXml,
             out string strOutputPath,
@@ -9465,6 +9491,7 @@ out strError);
             output_timestamp = null;
             bTempPassword = false;
             strToken = "";
+            passwordExpired = false;
 
             int nRet = 0;
             LibraryApplication app = this;
@@ -9752,6 +9779,7 @@ out strError);
                             this.Clock.Now,
                             debugInfo,
                             out bTempPassword,
+                            out passwordExpired,
                             out strError);
                         if (nRet == -1)
                             return -1;
@@ -10477,6 +10505,7 @@ out strError);
                 -1,
                 null,
                 null,
+                out bool passwordExpired,
                 out bTempPassword,
                 out strXml,
                 out strOutputPath,
@@ -10488,19 +10517,27 @@ out strError);
                 strError = "以登录名 '" + strLoginName + "' 检索读者记录出错: " + strError;
                 return -1;
             }
-            if (nRet == 0 || nRet == -2)
-            {
-                strError = "帐户 '" + strLoginName + "' 不存在";
-                return 0;
-            }
             if (nRet > 1)
             {
                 strError = "登录名 '" + strLoginName + "' 所匹配的帐户多于一个";
                 return nRet;
             }
 
-            Debug.Assert(nRet == 1);
+            /*
+            if (passwordExpired)
+            {
+                strError = "帐户 '" + strLoginName + "' 密码已经失效";
+                return 0;
+            }
+            */
+            
+            if (nRet == 0 || nRet == -2)
+            {
+                strError = "帐户 '" + strLoginName + "' 不存在";
+                return 0;
+            }
 
+            Debug.Assert(nRet == 1);
             return 1;
         }
 
@@ -10689,6 +10726,7 @@ out strError);
             string strLibraryCodeList,
             int nIndex,
             string strGetToken,
+            out bool passwordExpired,
             out List<string> alter_type_list,
             out string strOutputUserName,
             out string strRights,
@@ -10704,6 +10742,7 @@ out strError);
             strOutputUserName = "";
             strLibraryCode = "";
             alter_type_list = new List<string>();
+            passwordExpired = false;
 
             // 2009/9/22 
             if (String.IsNullOrEmpty(strLoginName) == true)
@@ -10727,11 +10766,24 @@ out strError);
                             if (bIsToken1 == bIsToken2)
                             {
                                 // text-level: 用户提示
-                                strError = this.GetString("帐户不存在或密码不正确") + " app 1";    // "帐户不存在或密码不正确"
+                                strError = this.GetString("帐户不存在或密码不正确") + " .";    // "帐户不存在或密码不正确"
                                 return -1;
                             }
                             else
                                 goto DO_LOGIN;  // 继续作普通登录
+                        }
+                    }
+
+                    // 2021/7/5
+                    // 检查密码失效期
+                    if (LibraryApplication._patronPasswordExpirePeriod != TimeSpan.MaxValue)
+                    {
+                        DateTime expire = temp_account.PasswordExpire;
+                        if (DateTime.Now > expire)
+                        {
+                            //strError = "密码已经失效";
+                            //return -1;
+                            passwordExpired = true;
                         }
                     }
 
@@ -10782,6 +10834,7 @@ out strError);
                 nIndex,
                 sessioninfo.ClientIP,
                 strGetToken,
+                out passwordExpired,
                 out bTempPassword,
                 out strXml,
                 out strOutputPath,
@@ -10802,7 +10855,7 @@ out strError);
             if (nRet == 0)
             {
                 // text-level: 用户提示
-                strError = this.GetString("帐户不存在或密码不正确") + " app 2";    // "帐户不存在或密码不正确"
+                strError = this.GetString("帐户不存在或密码不正确") + " ..";    // "帐户不存在或密码不正确"
                 return 0;   // 2015/12/4 注：这里不应返回 -1。因为返回 -1，会导致调主不去判断探测密码攻击
             }
 
@@ -10925,6 +10978,9 @@ out strError);
                 account.Access = accountref.Access;
             }
 
+            // 2021/7/5
+            account.PasswordExpire = GetPasswordExpire(readerdom.DocumentElement);
+
             // 追加读者记录中定义的权限值
             string strAddRights = DomUtil.GetElementText(readerdom.DocumentElement, "rights");
             if (string.IsNullOrEmpty(strAddRights) == false)
@@ -11026,22 +11082,41 @@ out strError);
             // 把临时密码设置为正式密码
             if (bTempPassword == true)
             {
-                byte[] output_timestamp = null;
-                // 修改读者密码
-                nRet = ChangeReaderPassword(
-                    sessioninfo,
-                    strOutputPath,
-                    ref readerdom,
-                    strPassword,    // TODO: 如果 strPassword == null 会怎么样？
-                    timestamp,
-                    out output_timestamp,
-                    out strError);
-                if (nRet == -1)
-                    return -1;
-                timestamp = output_timestamp;
+                // style-1 不允许把临时密码当作正式密码使用
+                if (StringUtil.IsInList("style-1", _patronPasswordStyle) == false)
+                {
+                    // 2021/7/5
+                    // 验证临时密码是否合法
+                    // return:
+                    //      -1  出错
+                    //      0   不合法(原因在 strError 中返回)
+                    //      1   合法
+                    nRet = ValidatePatronPassword(
+                readerdom.DocumentElement,
+                strPassword,
+                out strError);
+                    if (nRet == 1)
+                    {
+                        // 只有当临时密码验证合法，才会被改为当作正式密码
+                        // 修改读者密码
+                        nRet = ChangeReaderPassword(
+                            sessioninfo,
+                            strOutputPath,
+                            ref readerdom,
+                            strPassword,    // TODO: 如果 strPassword == null 会怎么样？
+                            timestamp,
+                            out byte[] output_timestamp,
+                            out strError);
+                        if (nRet == -1)
+                            return -1;
+                        timestamp = output_timestamp;
 
-                account.PatronDom = readerdom;
-                account.ReaderDomTimestamp = timestamp;
+                        account.PatronDom = readerdom;
+                        account.ReaderDomTimestamp = timestamp;
+                        // 2021/7/5
+                        account.PasswordExpire = GetPasswordExpire(readerdom.DocumentElement);
+                    }
+                }
             }
 
             if (this.LoginCache != null && string.IsNullOrEmpty(account.LoginName) == false
@@ -11649,6 +11724,7 @@ out strError);
             DateTime now,
             StringBuilder debugInfo,
             out bool bTempPassword,
+            out bool passwordExpired,
             out string strError)
         {
             bTempPassword = false;
@@ -11657,6 +11733,7 @@ out strError);
                 readerdom,
                 strPassword,
                 debugInfo,
+                out passwordExpired,
                 out strError);
             if (nRet == -1)
                 return -1;
@@ -11682,6 +11759,7 @@ out strError);
             string strPassword,
             DateTime now,
             StringBuilder debugInfo,
+            out bool passwordExpired,
             out string strError)
         {
             int nRet = VerifyReaderNormalPassword(
@@ -11689,6 +11767,7 @@ out strError);
                 readerdom,
                 strPassword,
                 debugInfo,
+                out passwordExpired,
                 out strError);
             if (nRet == -1)
                 return -1;
@@ -11710,10 +11789,11 @@ out strError);
             XmlDocument readerdom,
             string strPassword,
             StringBuilder debugInfo,
+            out bool passwordExpired,
             out string strError)
         {
             strError = "";
-            // int nRet = 0;
+            passwordExpired = false;
 
             debugInfo?.AppendLine($"enter VerifyReaderNormalPassword() strPassword={strPassword}");
 
@@ -11721,6 +11801,19 @@ out strError);
             {
                 strError = "strPassword 参数值不应为 null";
                 return -1;
+            }
+
+            // 2021/7/5
+            // 检查密码失效期
+            if (LibraryApplication._patronPasswordExpirePeriod != TimeSpan.MaxValue)
+            {
+                DateTime expire = GetPasswordExpire(readerdom.DocumentElement);
+                if (DateTime.Now > expire)
+                {
+                    //strError = "密码已经失效";
+                    //return -1;
+                    passwordExpired = true;
+                }
             }
 
             // 验证密码
@@ -11874,7 +11967,7 @@ out strError);
                 return -1;
             }
 
-            XmlNode node = DomUtil.SetElementText(readerdom.DocumentElement,
+            XmlElement node = DomUtil.SetElementText(readerdom.DocumentElement,
                 "password", strNewPassword);
             // 2013/11/2
             if (node != null)
@@ -11884,6 +11977,13 @@ out strError);
                 // 但失效期不清除
             }
 
+            // 2021/7/4
+            // 设置密码失效期
+            SetPasswordExpire(node,
+                _patronPasswordExpirePeriod,
+                DateTime.Now,
+                out string strExpireTime);
+
             if (domOperLog != null)
             {
                 Debug.Assert(domOperLog.DocumentElement != null, "");
@@ -11892,9 +11992,47 @@ out strError);
                 // 在日志恢复阶段, 把这个密码直接写入读者记录即可, 不需要再加工
                 DomUtil.SetElementText(domOperLog.DocumentElement,
                     "newPassword", strNewPassword);
+
+                // 2021/7/5
+                DomUtil.SetElementText(domOperLog.DocumentElement,
+                    "expire", strExpireTime);
             }
 
             return 0;
+        }
+
+        // 2021/7/5
+        // 设置读者密码的 expire 属性
+        static bool SetPasswordExpire(XmlElement password_element,
+            TimeSpan passwordExpirePeriod,
+            DateTime now,
+            out string strExpireTime,
+            bool append = false)
+        {
+            strExpireTime = "";
+
+            bool changed = false;
+            if (passwordExpirePeriod == TimeSpan.MaxValue)
+            {
+                password_element.RemoveAttribute("expire");
+                changed = true;
+            }
+            else
+            {
+                var old_expire_value = password_element.GetAttribute("expire");
+                if (append == true && string.IsNullOrEmpty(old_expire_value) == false)
+                {
+                    // (当 now == DateTime.MinValue 时)如果 expire 属性中已经有了值，不会修改
+                }
+                else
+                {
+                    strExpireTime = DateTimeUtil.Rfc1123DateTimeStringEx(now + passwordExpirePeriod); // 本地时间
+                    password_element.SetAttribute("expire", strExpireTime);
+                    changed = true;
+                }
+            }
+
+            return changed;
         }
 
         // 修改读者临时密码
@@ -12620,26 +12758,35 @@ out strError);
         {
             LibraryServerResult result = new LibraryServerResult();
 
+            // 是否已经登录？
+            bool loggedIn = false;
+            if (sessioninfo != null && sessioninfo.UserID == "")
+                loggedIn = false;
+            else
+                loggedIn = true;
+
             // 权限判断
-
-            // 权限字符串
-            if (StringUtil.IsInList("changereaderpassword", sessioninfo.RightsOrigin) == false)
+            if (loggedIn)
             {
-                result.Value = -1;
-                result.ErrorInfo = "修改读者密码被拒绝。不具备 changereaderpassword 权限。";
-                result.ErrorCode = ErrorCode.AccessDenied;
-                return result;
-            }
-
-            // 对读者身份的附加判断
-            if (sessioninfo.UserType == "reader")
-            {
-                if (strReaderBarcode != sessioninfo.Account.Barcode)
+                // 权限字符串
+                if (StringUtil.IsInList("changereaderpassword", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "修改读者密码被拒绝。作为读者只能修改自己的密码";
+                    result.ErrorInfo = "修改读者密码被拒绝。不具备 changereaderpassword 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
+                }
+
+                // 对读者身份的附加判断
+                if (sessioninfo.UserType == "reader")
+                {
+                    if (strReaderBarcode != sessioninfo.Account.Barcode)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = "修改读者密码被拒绝。作为读者只能修改自己的密码";
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        return result;
+                    }
                 }
             }
 
@@ -12697,17 +12844,20 @@ out strError);
 
                 string strLibraryCode = "";
 
-                // 看看读者记录所从属的读者库的馆代码，是否被当前用户管辖
-                if (String.IsNullOrEmpty(strOutputPath) == false)
+                if (loggedIn)
                 {
-                    // 检查当前操作者是否管辖这个读者库
-                    // 观察一个读者记录路径，看看是不是在当前用户管辖的读者库范围内?
-                    if (this.IsCurrentChangeableReaderPath(strOutputPath,
-            sessioninfo.LibraryCodeList,
-            out strLibraryCode) == false)
+                    // 看看读者记录所从属的读者库的馆代码，是否被当前用户管辖
+                    if (String.IsNullOrEmpty(strOutputPath) == false)
                     {
-                        strError = "读者记录路径 '" + strOutputPath + "' 从属的读者库不在当前用户管辖范围内";
-                        goto ERROR1;
+                        // 检查当前操作者是否管辖这个读者库
+                        // 观察一个读者记录路径，看看是不是在当前用户管辖的读者库范围内?
+                        if (this.IsCurrentChangeableReaderPath(strOutputPath,
+                sessioninfo.LibraryCodeList,
+                out strLibraryCode) == false)
+                        {
+                            strError = "读者记录路径 '" + strOutputPath + "' 从属的读者库不在当前用户管辖范围内";
+                            goto ERROR1;
+                        }
                     }
                 }
 
@@ -12724,9 +12874,17 @@ out strError);
                 string strExistingBarcode = DomUtil.GetElementText(readerdom.DocumentElement, "barcode");
 
                 // 如果是读者身份, 或者通过参数 strReaderOldPassword (非null)要求，需要验证旧密码
-                if (sessioninfo.UserType == "reader"
+                if ((loggedIn && sessioninfo.UserType == "reader")
+                    || loggedIn == false
                     || strReaderOldPassword != null)
                 {
+                    string strClientIP = sessioninfo.ClientIP;
+                    nRet = this.UserNameTable.BeforeLogin(strExistingBarcode,
+strClientIP,
+out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+
                     // 验证读者密码
                     // return:
                     //      -1  error
@@ -12738,9 +12896,22 @@ out strError);
                         strReaderOldPassword,
                         this.Clock.Now,
                         null,
+                        out bool passwordExpired,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
+
+                    if (nRet == 0 || nRet == 1)
+                    {
+                        // parameters:
+                        //      nLoginResult    1:成功 0:用户名或密码不正确 -1:出错
+                        string strLogText = this.UserNameTable.AfterLogin(strExistingBarcode,
+                            strClientIP,
+                            nRet);
+                        if (string.IsNullOrEmpty(strLogText) == false)
+                            this.WriteErrorLog("!!! " + strLogText);
+                    }
+
 
                     if (nRet == 0)
                     {
@@ -12823,6 +12994,19 @@ out strError);
                 out strLibraryCode,
                 out strError);
             if (nRet == -1)
+                return -1;
+
+            // 2021/7/5
+            // 验证读者密码是否合法
+            // return:
+            //      -1  出错
+            //      0   不合法(原因在 strError 中返回)
+            //      1   合法
+            nRet = ValidatePatronPassword(
+        readerdom.DocumentElement,
+        strReaderNewPassword,
+        out strError);
+            if (nRet != 1)
                 return -1;
 
             // 准备日志DOM
@@ -12952,6 +13136,116 @@ strLibraryCode);    // 读者所在的馆代码
             return 0;
         ERROR1:
             return -1;
+        }
+
+        // 验证读者密码是否合法
+        // return:
+        //      -1  出错
+        //      0   不合法(原因在 strError 中返回)
+        //      1   合法
+        public static int ValidatePatronPassword(
+    XmlElement root,
+    string password,
+    out string strError)
+        {
+            strError = "";
+            if (string.IsNullOrEmpty(LibraryApplication._patronPasswordStyle))
+                return 1;
+            return ValidatePatronPassword(
+    root,
+    password,
+    LibraryApplication._patronPasswordStyle,
+    out strError);
+        }
+
+        // 验证密码字符串的合法性
+        // parameters:
+        //      style   风格。style-1 为第一种密码风格
+        // return:
+        //      -1  出错
+        //      0   不合法(原因在 strError 中返回)
+        //      1   合法
+        public static int ValidatePatronPassword(
+            XmlElement root,
+            string password,
+            string style,
+            out string strError)
+        {
+            strError = "";
+
+            List<string> errors = new List<string>();
+
+            // 风格 1
+            /*
+1. 8个字符，且不能是顺序、逆序或相同
+2. 数字加字母组合
+3. 密码和用户名不可以一样
+4. 临时密码不可以当做正式密码使用
+5. 新旧密码不能一样
+             * */
+            if (StringUtil.IsInList("style-1", style))
+            {
+                if (string.IsNullOrEmpty(password))
+                {
+                    errors.Add("密码不允许为空");
+                    goto ERROR1;
+                }
+
+                if (string.IsNullOrEmpty(password) == true
+                    || password.Length < 8)
+                    errors.Add("密码字符数不能小于 8");
+
+                if (IsSequence(password))
+                    errors.Add("密码内容不能为顺序字符");
+
+                if (ContainsDigit(password) == false || ContainsLetter(password) == false)
+                    errors.Add("密码内容必须同时包含数字和字母");
+
+                var userNameList = GetUserNameValues(root);
+
+                if (userNameList.IndexOf(password) != -1)
+                    errors.Add("密码不能和证条码号、姓名等相同");
+
+                // 和当前存在的旧密码比较
+                var old_password_hashed = GetPasswordValue(root);
+                if (string.IsNullOrEmpty(old_password_hashed) == false)
+                {
+                    // 验证密码
+                    // return:
+                    //      -1  出错
+                    //      0   不匹配
+                    //      1   匹配
+                    int nRet = LibraryServerUtil.MatchUserPassword(
+                        password,
+                        old_password_hashed,
+                        out _);
+                    if (nRet == 1)
+                        errors.Add("密码不能和旧密码相同");
+                }
+
+                if (errors.Count > 0)
+                    goto ERROR1;
+            }
+
+            strError = "密码合法";
+            return 1;
+        ERROR1:
+            strError = $"密码不合法: {StringUtil.MakePathList(errors, "; ")}";
+            return 0;
+        }
+
+        public static List<string> GetUserNameValues(XmlElement root)
+        {
+            List<string> names = new List<string>();
+            string name = root.GetAttribute("name");
+            if (string.IsNullOrEmpty(name) == false)
+                names.Add(name);
+
+            string barcode = root.GetAttribute("barcode");
+            if (string.IsNullOrEmpty(barcode) == false)
+                names.Add(barcode);
+
+            return names;
         }
 
         // 修改读者临时密码

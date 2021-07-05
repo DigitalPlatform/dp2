@@ -958,11 +958,23 @@ namespace dp2Library
                         strLibraryCodeList,
                         nIndex, // -1,
                         strGetToken,
+                        out bool passwordExpired10,
                         out alter_type_list,
                         out strOutputUserName,
                         out strRights,
                         out strLibraryCode,
                         out strError);
+
+                    // 2021/7/5
+                    if (nRet != -1 && passwordExpired10 == true)
+                    {
+                        strError = "密码已经失效";
+                        sessioninfo.Account = null;
+                        result.Value = -1;
+                        result.ErrorInfo = strError;
+                        result.ErrorCode = ErrorCode.PasswordExpired;
+                        return result;
+                    }
                 }
 
                 if (app.LicenseType == "server")
@@ -1673,9 +1685,19 @@ namespace dp2Library
                     strReaderPassword,
                     app.Clock.Now,
                     (StringBuilder)null,
+                    out bool passwordExpired,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
+
+                // 2021/7/5
+                if (passwordExpired)
+                {
+                    result.Value = 0;
+                    result.ErrorCode = ErrorCode.PasswordExpired;
+                    result.ErrorInfo = "密码已经失效";
+                    return result;
+                }
 
                 if (nRet == 0)
                 {
@@ -1709,6 +1731,9 @@ namespace dp2Library
         // 修改读者密码
         //		工作人员或者读者，必须有changereaderpassword权限
         //		如果为读者, 附加限制还只能修改属于自己的密码
+        //      2021/7/5
+        //      工作人员身份调用本 API 修改读者密码，应先用工作人员身份登录。而读者调用本 API 修改自己的密码不需要先登录
+        //      如果调用本 API 前已经用读者身份登录过了，并且打算调用本 API 修改一个不是登录者自己的读者的密码，那需要先 Logout() 再调用本 API 才行
         // parameters:
         //      strReaderOldPassword    旧密码。如果想达到不验证旧密码的效果，可以用 null 调用，但仅限工作人员身份调用的情况。读者身份是必须验证旧密码的
         // Result.Value -1出错 0旧密码不正确 1旧密码正确,已修改为新密码
@@ -1721,7 +1746,10 @@ namespace dp2Library
             string strReaderOldPassword,
             string strReaderNewPassword)
         {
-            LibraryServerResult result = this.PrepareEnvironment("ChangeReaderPassword", true, true, true);
+            LibraryServerResult result = this.PrepareEnvironment("ChangeReaderPassword",
+                true,
+                strReaderOldPassword == null ? true : false,
+                true);
             if (result.Value == -1)
                 return result;
 

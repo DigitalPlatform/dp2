@@ -5902,6 +5902,7 @@ out strError);
                     -1,  // nIndex,
                     sessioninfo.ClientIP,
                     null, // strGetToken,
+                    out bool passwordExpired,
                     out bTempPassword,
                     out strXml,
                     out strOutputPath,
@@ -5914,15 +5915,21 @@ out strError);
                     return -1;
                 }
 
-                if (nRet == 0)
-                {
-                    strError = "帐户 '" + strQueryWord + "' 不存在或密码不正确";
-                    return -1;
-                }
-
                 if (nRet > 1)
                 {
                     strError = "以 '" + strQueryWord + "' 检索读者记录时, 因所匹配的帐户多于一个，无法确认读者记录。可改用证条码号进行绑定操作。";
+                    return -1;
+                }
+
+                if (passwordExpired)
+                {
+                    strError = "帐户 '" + strQueryWord + "' 密码已经失效";
+                    return -1;
+                }
+
+                if (nRet == 0)
+                {
+                    strError = "帐户 '" + strQueryWord + "' 不存在或密码不正确";
                     return -1;
                 }
 
