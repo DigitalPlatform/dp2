@@ -199,6 +199,8 @@
             this.checkBox_operLog_displayItemBorrowHistory = new System.Windows.Forms.CheckBox();
             this.checkBox_operLog_displayReaderBorrowHistory = new System.Windows.Forms.CheckBox();
             this.tabPage_global = new System.Windows.Forms.TabPage();
+            this.checkBox_global_disableSpeak = new System.Windows.Forms.CheckBox();
+            this.checkedComboBox_global_securityProtocol = new DigitalPlatform.CommonControl.CheckedComboBox();
             this.label37 = new System.Windows.Forms.Label();
             this.textBox_global_additionalLocations = new System.Windows.Forms.TextBox();
             this.label35 = new System.Windows.Forms.Label();
@@ -240,7 +242,6 @@
             this.button_z3950_servers = new System.Windows.Forms.Button();
             this.button_OK = new System.Windows.Forms.Button();
             this.button_Cancel = new System.Windows.Forms.Button();
-            this.checkedComboBox_global_securityProtocol = new DigitalPlatform.CommonControl.CheckedComboBox();
             this.tabControl_main.SuspendLayout();
             this.tabPage_server.SuspendLayout();
             this.toolStrip_server.SuspendLayout();
@@ -2360,6 +2361,7 @@
             // tabPage_global
             // 
             this.tabPage_global.AutoScroll = true;
+            this.tabPage_global.Controls.Add(this.checkBox_global_disableSpeak);
             this.tabPage_global.Controls.Add(this.checkedComboBox_global_securityProtocol);
             this.tabPage_global.Controls.Add(this.label37);
             this.tabPage_global.Controls.Add(this.textBox_global_additionalLocations);
@@ -2376,6 +2378,26 @@
             this.tabPage_global.TabIndex = 14;
             this.tabPage_global.Text = "全局";
             this.tabPage_global.UseVisualStyleBackColor = true;
+            // 
+            // checkBox_global_disableSpeak
+            // 
+            this.checkBox_global_disableSpeak.AutoSize = true;
+            this.checkBox_global_disableSpeak.Location = new System.Drawing.Point(7, 431);
+            this.checkBox_global_disableSpeak.Name = "checkBox_global_disableSpeak";
+            this.checkBox_global_disableSpeak.Size = new System.Drawing.Size(153, 25);
+            this.checkBox_global_disableSpeak.TabIndex = 24;
+            this.checkBox_global_disableSpeak.Text = "禁用朗读(&D)";
+            this.checkBox_global_disableSpeak.UseVisualStyleBackColor = true;
+            // 
+            // checkedComboBox_global_securityProtocol
+            // 
+            this.checkedComboBox_global_securityProtocol.BackColor = System.Drawing.SystemColors.Window;
+            this.checkedComboBox_global_securityProtocol.Location = new System.Drawing.Point(153, 390);
+            this.checkedComboBox_global_securityProtocol.Margin = new System.Windows.Forms.Padding(0);
+            this.checkedComboBox_global_securityProtocol.Name = "checkedComboBox_global_securityProtocol";
+            this.checkedComboBox_global_securityProtocol.ReadOnly = false;
+            this.checkedComboBox_global_securityProtocol.Size = new System.Drawing.Size(374, 24);
+            this.checkedComboBox_global_securityProtocol.TabIndex = 23;
             // 
             // label37
             // 
@@ -2487,7 +2509,7 @@
             this.groupBox12.Margin = new System.Windows.Forms.Padding(5);
             this.groupBox12.Name = "groupBox12";
             this.groupBox12.Padding = new System.Windows.Forms.Padding(5);
-            this.groupBox12.Size = new System.Drawing.Size(585, 147);
+            this.groupBox12.Size = new System.Drawing.Size(525, 147);
             this.groupBox12.TabIndex = 4;
             this.groupBox12.TabStop = false;
             this.groupBox12.Text = "掌纹阅读器接口 URL ";
@@ -2495,7 +2517,7 @@
             // button_palmprint_setDefaulValue
             // 
             this.button_palmprint_setDefaulValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_palmprint_setDefaulValue.Location = new System.Drawing.Point(382, 82);
+            this.button_palmprint_setDefaulValue.Location = new System.Drawing.Point(322, 82);
             this.button_palmprint_setDefaulValue.Margin = new System.Windows.Forms.Padding(5);
             this.button_palmprint_setDefaulValue.Name = "button_palmprint_setDefaulValue";
             this.button_palmprint_setDefaulValue.Size = new System.Drawing.Size(193, 40);
@@ -2511,7 +2533,7 @@
             this.textBox_palmprint_readerUrl.Location = new System.Drawing.Point(11, 35);
             this.textBox_palmprint_readerUrl.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_palmprint_readerUrl.Name = "textBox_palmprint_readerUrl";
-            this.textBox_palmprint_readerUrl.Size = new System.Drawing.Size(560, 31);
+            this.textBox_palmprint_readerUrl.Size = new System.Drawing.Size(500, 31);
             this.textBox_palmprint_readerUrl.TabIndex = 0;
             // 
             // groupBox10
@@ -2524,7 +2546,7 @@
             this.groupBox10.Margin = new System.Windows.Forms.Padding(5);
             this.groupBox10.Name = "groupBox10";
             this.groupBox10.Padding = new System.Windows.Forms.Padding(5);
-            this.groupBox10.Size = new System.Drawing.Size(585, 147);
+            this.groupBox10.Size = new System.Drawing.Size(525, 147);
             this.groupBox10.TabIndex = 3;
             this.groupBox10.TabStop = false;
             this.groupBox10.Text = "人脸识别接口 URL ";
@@ -2532,7 +2554,7 @@
             // button_face_setDefaultValue
             // 
             this.button_face_setDefaultValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_face_setDefaultValue.Location = new System.Drawing.Point(382, 82);
+            this.button_face_setDefaultValue.Location = new System.Drawing.Point(322, 82);
             this.button_face_setDefaultValue.Margin = new System.Windows.Forms.Padding(5);
             this.button_face_setDefaultValue.Name = "button_face_setDefaultValue";
             this.button_face_setDefaultValue.Size = new System.Drawing.Size(193, 40);
@@ -2548,7 +2570,7 @@
             this.textBox_face_readerUrl.Location = new System.Drawing.Point(11, 35);
             this.textBox_face_readerUrl.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_face_readerUrl.Name = "textBox_face_readerUrl";
-            this.textBox_face_readerUrl.Size = new System.Drawing.Size(560, 31);
+            this.textBox_face_readerUrl.Size = new System.Drawing.Size(500, 31);
             this.textBox_face_readerUrl.TabIndex = 0;
             // 
             // groupBox9
@@ -2614,7 +2636,7 @@
             this.groupBox7.Margin = new System.Windows.Forms.Padding(5);
             this.groupBox7.Name = "groupBox7";
             this.groupBox7.Padding = new System.Windows.Forms.Padding(5);
-            this.groupBox7.Size = new System.Drawing.Size(585, 147);
+            this.groupBox7.Size = new System.Drawing.Size(525, 147);
             this.groupBox7.TabIndex = 0;
             this.groupBox7.TabStop = false;
             this.groupBox7.Text = " 指纹阅读器接口 URL ";
@@ -2622,7 +2644,7 @@
             // button_fingerprint_setDefaultValue
             // 
             this.button_fingerprint_setDefaultValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_fingerprint_setDefaultValue.Location = new System.Drawing.Point(382, 82);
+            this.button_fingerprint_setDefaultValue.Location = new System.Drawing.Point(322, 82);
             this.button_fingerprint_setDefaultValue.Margin = new System.Windows.Forms.Padding(5);
             this.button_fingerprint_setDefaultValue.Name = "button_fingerprint_setDefaultValue";
             this.button_fingerprint_setDefaultValue.Size = new System.Drawing.Size(193, 40);
@@ -2638,7 +2660,7 @@
             this.textBox_fingerprint_readerUrl.Location = new System.Drawing.Point(11, 35);
             this.textBox_fingerprint_readerUrl.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_fingerprint_readerUrl.Name = "textBox_fingerprint_readerUrl";
-            this.textBox_fingerprint_readerUrl.Size = new System.Drawing.Size(560, 31);
+            this.textBox_fingerprint_readerUrl.Size = new System.Drawing.Size(500, 31);
             this.textBox_fingerprint_readerUrl.TabIndex = 0;
             // 
             // button_fingerprint_clearLocalCacheFiles
@@ -2846,16 +2868,6 @@
             this.button_Cancel.Text = "取消";
             this.button_Cancel.UseVisualStyleBackColor = true;
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
-            // 
-            // checkedComboBox_global_securityProtocol
-            // 
-            this.checkedComboBox_global_securityProtocol.BackColor = System.Drawing.SystemColors.Window;
-            this.checkedComboBox_global_securityProtocol.Location = new System.Drawing.Point(153, 390);
-            this.checkedComboBox_global_securityProtocol.Margin = new System.Windows.Forms.Padding(0);
-            this.checkedComboBox_global_securityProtocol.Name = "checkedComboBox_global_securityProtocol";
-            this.checkedComboBox_global_securityProtocol.ReadOnly = false;
-            this.checkedComboBox_global_securityProtocol.Size = new System.Drawing.Size(374, 24);
-            this.checkedComboBox_global_securityProtocol.TabIndex = 23;
             // 
             // CfgDlg
             // 
@@ -3172,5 +3184,6 @@
         private System.Windows.Forms.CheckBox checkBox_search_itemFilterLibraryCode;
         private System.Windows.Forms.Label label37;
         private DigitalPlatform.CommonControl.CheckedComboBox checkedComboBox_global_securityProtocol;
+        private System.Windows.Forms.CheckBox checkBox_global_disableSpeak;
     }
 }

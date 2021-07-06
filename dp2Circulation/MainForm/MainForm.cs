@@ -7858,6 +7858,10 @@ dp2Circulation 版本: dp2Circulation, Version=2.30.6509.21065, Culture=neutral,
         /// <param name="strText">要朗读的文本</param>
         public void Speak(string strText)
         {
+            // 2021/7/6
+            if (DisableSpeak)
+                return;
+
             try
             {
                 this.m_speech.SpeakAsyncCancelAll();
@@ -7868,6 +7872,17 @@ dp2Circulation 版本: dp2Circulation, Version=2.30.6509.21065, Culture=neutral,
                 // 如何显示出错信息?
             }
             // MessageBox.Show(this, strText);
+        }
+
+        public bool DisableSpeak
+        {
+            get
+            {
+                return this.AppInfo.GetBoolean(
+    "global",
+    "disableSpeak",
+    false);
+            }
         }
 
         private void toolStripMenuItem_fixedPanel_clear_Click(object sender, EventArgs e)

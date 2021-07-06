@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.21.*")]
-[assembly: AssemblyFileVersion("3.21.0.0")]
+[assembly: AssemblyVersion("3.22.*")]
+[assembly: AssemblyFileVersion("3.22.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -85,3 +85,4 @@ using System.Runtime.InteropServices;
 //                  修正 Z39.50 服务器列表对话框中刚导入一个服务器节点然后马上删除时会出现的 bug。
 //                  导入 .xml 文件中服务器的功能有改进，可以识别任意位置的 server 元素(此前只能识别根元素下的 server 元素)
 // 3.21 2021/6/29 实体查询窗的上下文菜单命令“设置书目栏目”在当前连接的 dp2library 是 V3 以前的版本时会处于 disabled 状态。此时只能用书目摘要方式显示书目部分一列。
+// 3.22 2021/7/6 系统参数对话框“全局”属性页增加“禁用朗读”checkbox

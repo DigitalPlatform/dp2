@@ -5298,3 +5298,42 @@ out strError);
             result.ErrorCode = ErrorCode.SystemError;
             return result;
         }
+
+
+        ~~~~~~~~~~~~
+
+                        // style-1 不允许把临时密码当作正式密码使用
+                if (StringUtil.IsInList("style-1", _patronPasswordStyle) == false)
+                {
+                    // 2021/7/5
+                    // 验证临时密码是否合法
+                    // return:
+                    //      -1  出错
+                    //      0   不合法(原因在 strError 中返回)
+                    //      1   合法
+                    nRet = ValidatePatronPassword(
+                readerdom.DocumentElement,
+                strPassword,
+                out strError);
+                    if (nRet == 1)
+                    {
+                        // 只有当临时密码验证合法，才会被改为当作正式密码
+                        // 修改读者密码
+                        nRet = ChangeReaderPassword(
+                            sessioninfo,
+                            strOutputPath,
+                            ref readerdom,
+                            strPassword,    // TODO: 如果 strPassword == null 会怎么样？
+                            timestamp,
+                            out byte[] output_timestamp,
+                            out strError);
+                        if (nRet == -1)
+                            return -1;
+                        timestamp = output_timestamp;
+
+                        account.PatronDom = readerdom;
+                        account.ReaderDomTimestamp = timestamp;
+                        // 2021/7/5
+                        account.PasswordExpire = GetPasswordExpire(readerdom.DocumentElement);
+                    }
+                }

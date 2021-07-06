@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using System.IO;
 using System.Diagnostics;
+using System.Net;
 
 using DigitalPlatform.Xml;
 using DigitalPlatform.Script;
@@ -12,7 +13,6 @@ using DigitalPlatform.CommonControl;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Text;
 using DigitalPlatform.Z3950.UI;
-using System.Net;
 
 namespace dp2Circulation
 {
@@ -701,6 +701,11 @@ false);
                     "securityProtocol",
                     "SystemDefault");
 
+            this.checkBox_global_disableSpeak.Checked = ap.GetBoolean(
+                "global",
+                "disableSpeak",
+                false);
+
             // *** 标签打印
             // 从何处获取索取号
             this.comboBox_labelPrint_accessNoSource.Text = ap.GetString(
@@ -1336,6 +1341,11 @@ false);
                     this.checkedComboBox_global_securityProtocol.Text);
                 Enum.TryParse<SecurityProtocolType>(this.checkedComboBox_global_securityProtocol.Text, out SecurityProtocolType protocol);
                 System.Net.ServicePointManager.SecurityProtocol = protocol;
+
+                ap.SetBoolean(
+    "global",
+    "disableSpeak",
+    this.checkBox_global_disableSpeak.Checked);
 
                 // *** 标签打印
                 // 从何处获取索取号

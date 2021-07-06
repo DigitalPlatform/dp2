@@ -15866,7 +15866,11 @@ start_time_1,
                 bEndInNonWorkingDay = true;
             }
 
-            DateTime now = app.Clock.UtcNow;  //  今天  当下
+            // DateTime now = app.Clock.UtcNow;  //  今天  当下
+            
+            // 2021/7/7
+            // 操作时间
+            DateTime now = DateTimeUtil.FromRfc1123DateTimeString(strOperTime);
 
             // 正规化时间
             DateTime now_rounded = now;

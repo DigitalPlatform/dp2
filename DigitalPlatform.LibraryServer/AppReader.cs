@@ -519,6 +519,7 @@ namespace DigitalPlatform.LibraryServer
             int nRet = ChangeReaderPassword(
                 dom,
                 strNewPassword,
+                _patronPasswordExpirePeriod,
                 ref domOperLog,
                 out strError);
             if (nRet == -1)
@@ -6002,6 +6003,8 @@ out strError);
                         strOutputPath,
                         ref readerdom,
                         strPassword,    // TODO: 如果 strPassword == null 会怎么样？
+                        _patronPasswordExpirePeriod,
+                        false,
                         timestamp,
                         out output_timestamp,
                         out strError);
