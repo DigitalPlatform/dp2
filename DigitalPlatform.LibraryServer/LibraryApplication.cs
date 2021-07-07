@@ -2398,6 +2398,12 @@ namespace DigitalPlatform.LibraryServer
         // 如果先前有 expire，后来修改了 expire 长度，本函数不负责修改 account 中的 expire 时间。本函数只负责响应创建和清除
         void CreateOrDeletePasswordExpire()
         {
+            // 2021/7/7
+            string version = this.LibraryCfgDom.DocumentElement.SelectSingleNode("version/text()").Value;
+            if (string.IsNullOrEmpty(version)
+                || StringUtil.CompareVersion(version, "3.0") < 0)
+                return;
+
             var create = _passwordExpirePeriod != TimeSpan.MaxValue;
 
             bool changed = false;

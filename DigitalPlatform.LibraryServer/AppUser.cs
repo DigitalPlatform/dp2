@@ -445,11 +445,13 @@ namespace DigitalPlatform.LibraryServer
                     // DomUtil.SetAttr(nodeAccount, "password", strHashed);
                     SetPasswordValue(nodeAccount, strHashed);
 
-                    if (SessionInfo.IsSpecialUserName(userinfo.UserName) == false)
-                        SetPasswordExpire(nodeAccount,
-                            _passwordExpirePeriod,
-                            DateTime.Now);
                 }
+
+                // 注: 无论是否明确要求设置密码(也就是说可能会创建空密码)，都要为密码设置失效期
+                if (SessionInfo.IsSpecialUserName(userinfo.UserName) == false)
+                    SetPasswordExpire(nodeAccount,
+                        _passwordExpirePeriod,
+                        DateTime.Now);
 
                 this.Changed = true;
 

@@ -2002,6 +2002,11 @@ out strTargetLibraryCode);
                 foreach (XmlElement account in nodes)
                 {
                     account.RemoveAttribute("password");
+
+                    // 2021/7/7
+                    XmlElement password = account.SelectSingleNode("password") as XmlElement;
+                    if (password != null)
+                        password.ParentNode.RemoveChild(password);
                 }
                 return;
             }

@@ -683,6 +683,11 @@ out string strReaderRefID)
                 {
                     if (node.HasAttribute("password") == true)
                         node.RemoveAttribute("password");
+
+                    // 2021/7/7
+                    XmlElement password = node.SelectSingleNode("password") as XmlElement;
+                    if (password != null)
+                        password.ParentNode.RemoveChild(password);
                 }
             }
 
