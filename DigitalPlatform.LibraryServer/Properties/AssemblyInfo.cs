@@ -238,3 +238,4 @@ ItemCanReturn()
 //		3.53 (2021/6/8) SearchCharging() API actions 参数增加 noResult 表示不返回 results，只返回 result.Value(totalCount)。用于 dp2OPAC 的 BorrowHistoryControl 中单纯获取读者借阅历史的事项数(而不需要返回事项)
 //		3.54 (2021/7/4) ChangeUserPassword() API 在修改密码的时候，不再要求前端先 Login() 成功
 //		3.55 (2021/7/7) Return() API 中，如果 strStyle 参数带有 operTime 子参数，会用这个子参数来计算超期时间。以前的版本这里处理有误，是用 dp2library 服务器当前时钟来计算超期时间了
+//						Login() API 中，以临时密码登录时，临时密码会自动转为正式密码，最新版正式密码的失效期会根据 library.xml 中 login/@tempPasswordExpireLength 属性值来决定。如果此属性缺省，相当于一个小时的长度。找回密码的手机短信的失效期也受这个参数控制(和以前版本的默认值兼容)

@@ -435,7 +435,7 @@ namespace DigitalPlatform.LibraryServer
         //      -1  出错
         //      0   没有实质性修改
         //      1   发生了实质性修改
-        static int BuildNewReaderRecord(XmlDocument domNewRec,
+        int BuildNewReaderRecord(XmlDocument domNewRec,
             out string strXml,
             out string strError)
         {
@@ -5751,7 +5751,7 @@ out strError);
                     {
                         // 2021/7/3
                         // 检查密码失效期
-                        if (LibraryApplication._passwordExpirePeriod != TimeSpan.MaxValue)
+                        if (this._passwordExpirePeriod != TimeSpan.MaxValue)
                         {
                             if (DateTime.Now > account.PasswordExpire)
                             {

@@ -13,6 +13,7 @@ using DigitalPlatform.Xml;
 
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Text;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {
@@ -328,11 +329,141 @@ namespace dp2Circulation
             {
                 this.AcceptButton = this.button_reader_changePassword;
             }
-            else
+            else if (this.tabControl_main.SelectedTab == this.tabPage_worker)
             {
                 Debug.Assert(this.tabControl_main.SelectedTab == this.tabPage_worker, "");
                 this.AcceptButton = this.button_worker_changePassword;
             }
+            else if (this.tabControl_main.SelectedTab == this.tabPage_resetPatronPassword)
+            {
+                this.AcceptButton = this.button_resetPatronPassword;
+            }
+        }
+
+        // 获得临时密码，发送到读者手机
+        private void button_resetPatronPassword_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            if (string.IsNullOrEmpty(this.textBox_resetPatronPassword_name.Text) == true)
+            {
+                strError = "请输入读者姓名";
+                goto ERROR1;
+            }
+
+            if (string.IsNullOrEmpty(this.textBox_resetPatronPassword_barcode.Text) == true)
+            {
+                strError = "请输入读者证条码号";
+                goto ERROR1;
+            }
+
+            if (string.IsNullOrEmpty(this.textBox_resetPatronPassword_phoneNumber.Text) == true)
+            {
+                strError = "请输入读者手机号码";
+                goto ERROR1;
+            }
+
+            if (this.textBox_resetPatronPassword_phoneNumber.Text.Length != 11)
+            {
+                strError = "手机号码格式不正确。应该为 11 位数字";
+                goto ERROR1;
+            }
+
+            string strParameters = "name=" + GetParamValue(this.textBox_resetPatronPassword_name.Text)
+                + ",tel=" + GetParamValue(this.textBox_resetPatronPassword_phoneNumber.Text)
+                + ",barcode=" + GetParamValue(this.textBox_resetPatronPassword_barcode.Text)
+                + ",queryword=" + GetParamValue(this.textBox_resetPatronPassword_barcode.Text);
+
+            LibraryChannel channel = this.Channel;
+            try
+            {
+                long lRet =
+                    channel.ResetPassword(
+                    null,
+                    strParameters,
+                    "",
+                    out string strMessage,
+                    out strError);
+                if (lRet != 1)
+                    goto ERROR1;
+
+                if (string.IsNullOrEmpty(strError) == true)
+                    strError = "临时密码已通过短信方式发送到手机 " + this.textBox_resetPatronPassword_phoneNumber.Text + "。请按照收到的手机短信提示进行后续操作";
+
+                MessageBox.Show(this, strError);
+                return;
+            }
+            finally
+            {
+                // sessioninfo.ReturnChannel(channel);
+            }
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        // 获得临时密码，显示到本界面
+        private void button_resetPatronPassword_displayTempPassword_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            if (string.IsNullOrEmpty(this.textBox_resetPatronPassword_name.Text) == true)
+            {
+                strError = "请输入读者姓名";
+                goto ERROR1;
+            }
+
+            if (string.IsNullOrEmpty(this.textBox_resetPatronPassword_barcode.Text) == true)
+            {
+                strError = "请输入读者证条码号";
+                goto ERROR1;
+            }
+
+            if (string.IsNullOrEmpty(this.textBox_resetPatronPassword_phoneNumber.Text) == true)
+            {
+                strError = "请输入读者手机号码";
+                goto ERROR1;
+            }
+
+            if (this.textBox_resetPatronPassword_phoneNumber.Text.Length != 11)
+            {
+                strError = "手机号码格式不正确。应该为 11 位数字";
+                goto ERROR1;
+            }
+
+            string strParameters = "name=" + GetParamValue(this.textBox_resetPatronPassword_name.Text)
+                + ",tel=" + GetParamValue(this.textBox_resetPatronPassword_phoneNumber.Text)
+                + ",barcode=" + GetParamValue(this.textBox_resetPatronPassword_barcode.Text)
+                + ",queryword=" + GetParamValue(this.textBox_resetPatronPassword_barcode.Text)
+                + ",style=returnMessage";
+
+            LibraryChannel channel = this.Channel;
+            try
+            {
+                long lRet =
+                    channel.ResetPassword(
+                    null,
+                    strParameters,
+                    "",
+                    out string strMessage,
+                    out strError);
+                if (lRet != 1)
+                    goto ERROR1;
+
+                MessageDlg.Show(this, $"{strMessage}\r\n\r\n{strError}", "临时密码");
+                return;
+            }
+            finally
+            {
+                // sessioninfo.ReturnChannel(channel);
+            }
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        // 正规化参数值
+        static string GetParamValue(string strText)
+        {
+            return strText.Replace("=", "").Replace(",", "");
         }
     }
 }

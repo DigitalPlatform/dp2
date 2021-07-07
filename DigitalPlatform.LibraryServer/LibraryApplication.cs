@@ -2408,7 +2408,7 @@ namespace DigitalPlatform.LibraryServer
                 var userName = account.GetAttribute("name");
                 if (create && SessionInfo.IsSpecialUserName(userName) == false)
                 {
-                    if (SetPasswordExpire(account, now, true) == true)  // 增补。但不修改已有的 exipre 属性值
+                    if (SetPasswordExpire(account, _passwordExpirePeriod, now, true) == true)  // 增补。但不修改已有的 exipre 属性值
                         changed = true;
                 }
                 else
@@ -2425,16 +2425,16 @@ namespace DigitalPlatform.LibraryServer
         }
 
         // 工作人员密码失效时间长度。例如 90days
-        internal static TimeSpan _passwordExpirePeriod = TimeSpan.MaxValue;  // 默认为不失效
+        internal TimeSpan _passwordExpirePeriod = TimeSpan.MaxValue;  // 默认为不失效
         // 工作人员密码的风格。目前有 style-1 一种
-        internal static string _passwordStyle = "";
+        internal string _passwordStyle = "";
 
         // 读者密码失效时间长度。例如 90days
-        internal static TimeSpan _patronPasswordExpirePeriod = TimeSpan.MaxValue;  // 默认为不失效
+        internal TimeSpan _patronPasswordExpirePeriod = TimeSpan.MaxValue;  // 默认为不失效
         // 读者密码的风格。目前有 style-1 一种
-        internal static string _patronPasswordStyle = "";
+        internal string _patronPasswordStyle = "";
         // 临时密码(转为正式密码后的)失效时间长度。例如 6mins
-        internal static TimeSpan _tempPasswordExpirePeriod = new TimeSpan(1, 0, 0); // 一小时
+        internal TimeSpan _tempPasswordExpirePeriod = new TimeSpan(1, 0, 0); // 一小时
 
         // 临时密码失效周期
         // static TimeSpan _tempPasswordExpirePeriod = new TimeSpan(1, 0, 0); // 一小时
@@ -10797,7 +10797,7 @@ out strError);
 
                     // 2021/7/5
                     // 检查密码失效期
-                    if (LibraryApplication._patronPasswordExpirePeriod != TimeSpan.MaxValue)
+                    if (this._patronPasswordExpirePeriod != TimeSpan.MaxValue)
                     {
                         DateTime expire = temp_account.PasswordExpire;
                         if (DateTime.Now > expire)
@@ -11723,7 +11723,7 @@ out strError);
         //      -1  error
         //      0   密码不正确
         //      1   密码正确
-        public static int VerifyReaderPassword(
+        public int VerifyReaderPassword(
             string strClientIP,
             XmlDocument readerdom,
             string strPassword,
@@ -11759,7 +11759,7 @@ out strError);
         //      -1  error
         //      0   密码不正确
         //      1   密码正确
-        public static int VerifyReaderPassword(
+        public int VerifyReaderPassword(
             string strClientIP,
             XmlDocument readerdom,
             string strPassword,
@@ -11790,7 +11790,7 @@ out strError);
         //      -1  error
         //      0   密码不正确
         //      1   密码正确
-        public static int VerifyReaderNormalPassword(
+        public int VerifyReaderNormalPassword(
             string strClientIP,
             XmlDocument readerdom,
             string strPassword,
@@ -11811,7 +11811,7 @@ out strError);
 
             // 2021/7/5
             // 检查密码失效期
-            if (LibraryApplication._patronPasswordExpirePeriod != TimeSpan.MaxValue)
+            if (this._patronPasswordExpirePeriod != TimeSpan.MaxValue)
             {
                 DateTime expire = GetPasswordExpire(readerdom.DocumentElement);
                 if (DateTime.Now > expire)
@@ -12046,7 +12046,7 @@ out strError);
         // return:
         //      -1  error
         //      0   成功
-        public static int ChangeReaderTempPassword(
+        public int ChangeReaderTempPassword(
             XmlDocument readerdom,
             string strTempPassword,
             // string strExpireTime,
@@ -12897,7 +12897,7 @@ out strError);
                     //      -1  error
                     //      0   密码不正确
                     //      1   密码正确
-                    nRet = LibraryApplication.VerifyReaderPassword(
+                    nRet = this.VerifyReaderPassword(
                         sessioninfo.ClientIP,
                         readerdom,
                         strReaderOldPassword,
@@ -13018,6 +13018,7 @@ out strError);
                 nRet = ValidatePatronPassword(
             readerdom.DocumentElement,
             strReaderNewPassword,
+            _patronPasswordStyle,
             out strError);
                 if (nRet != 1)
                     return -1;
@@ -13153,6 +13154,7 @@ strLibraryCode);    // 读者所在的馆代码
             return -1;
         }
 
+        /*
         // 验证读者密码是否合法
         // return:
         //      -1  出错
@@ -13164,14 +13166,15 @@ strLibraryCode);    // 读者所在的馆代码
     out string strError)
         {
             strError = "";
-            if (string.IsNullOrEmpty(LibraryApplication._patronPasswordStyle))
+            if (string.IsNullOrEmpty(this._patronPasswordStyle))
                 return 1;
             return ValidatePatronPassword(
     root,
     password,
-    LibraryApplication._patronPasswordStyle,
+    this._patronPasswordStyle,
     out strError);
         }
+        */
 
         // 验证密码字符串的合法性
         // parameters:
@@ -13318,7 +13321,7 @@ strLibraryCode);    // 读者所在的馆代码
             // return:
             //      -1  error
             //      0   成功
-            nRet = LibraryApplication.ChangeReaderTempPassword(
+            nRet = this.ChangeReaderTempPassword(
                 readerdom,
                 strReaderTempPassword,
                 // strExpireTime,

@@ -1679,7 +1679,7 @@ namespace dp2Library
                 //      -1  error
                 //      0   密码不正确
                 //      1   密码正确
-                nRet = LibraryApplication.VerifyReaderPassword(
+                nRet = app.VerifyReaderPassword(
                     sessioninfo.ClientIP,
                     readerdom,
                     strReaderPassword,

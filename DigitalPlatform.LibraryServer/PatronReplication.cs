@@ -1416,7 +1416,7 @@ out kernel_errorcode);
             int nRet = LibraryApplication.ChangeReaderPassword(
                 domNew,
                 Guid.NewGuid().ToString(),
-                LibraryApplication._patronPasswordExpirePeriod,
+                this.App._patronPasswordExpirePeriod,
                 ref domOperLog,
                 out strError);
             if (nRet == -1)

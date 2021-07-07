@@ -55,6 +55,7 @@ namespace DigitalPlatform.CirculationClient
         public TextBox textBox_tempCode;
         private Label label_tempCode; // 是否为 设置缺省帐户 状态？ 第一次进入程序时候是这个状态，其他登录失败后重新输入以便登录的时候不是这个状态
         private ToolStripButton toolStripButton_pasteFromJSONClipboard;
+        private ToolStripButton toolStripButton_changePassword;
         public bool SupervisorMode = false; // 是否为 supervisor 模式。也就是管理员模式。在这个模式下， 无法修改 URL ，无法选择读者类型，不出现 红泥巴数字平台服务器按钮
 
         public CirculationLoginDlg()
@@ -109,12 +110,13 @@ namespace DigitalPlatform.CirculationClient
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButton_server_setHongnibaServer = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_deleteFromList = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButton_pasteFromJSONClipboard = new System.Windows.Forms.ToolStripButton();
             this.comboBox_serverAddr = new System.Windows.Forms.ComboBox();
             this.textBox_phoneNumber = new System.Windows.Forms.TextBox();
             this.label_phoneNumber = new System.Windows.Forms.Label();
             this.textBox_tempCode = new System.Windows.Forms.TextBox();
             this.label_tempCode = new System.Windows.Forms.Label();
-            this.toolStripButton_pasteFromJSONClipboard = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButton_changePassword = new System.Windows.Forms.ToolStripButton();
             this.toolStrip_server.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -307,7 +309,8 @@ namespace DigitalPlatform.CirculationClient
             this.toolStripSeparator1,
             this.toolStripButton_server_setHongnibaServer,
             this.toolStripButton_deleteFromList,
-            this.toolStripButton_pasteFromJSONClipboard});
+            this.toolStripButton_pasteFromJSONClipboard,
+            this.toolStripButton_changePassword});
             this.toolStrip_server.Location = new System.Drawing.Point(22, 248);
             this.toolStrip_server.Name = "toolStrip_server";
             this.toolStrip_server.Padding = new System.Windows.Forms.Padding(0, 0, 4, 0);
@@ -353,6 +356,17 @@ namespace DigitalPlatform.CirculationClient
             this.toolStripButton_deleteFromList.Size = new System.Drawing.Size(40, 38);
             this.toolStripButton_deleteFromList.Text = "从列表中删除此项";
             this.toolStripButton_deleteFromList.Click += new System.EventHandler(this.toolStripButton_deleteFromList_Click);
+            // 
+            // toolStripButton_pasteFromJSONClipboard
+            // 
+            this.toolStripButton_pasteFromJSONClipboard.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_pasteFromJSONClipboard.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_pasteFromJSONClipboard.Image")));
+            this.toolStripButton_pasteFromJSONClipboard.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_pasteFromJSONClipboard.Name = "toolStripButton_pasteFromJSONClipboard";
+            this.toolStripButton_pasteFromJSONClipboard.Size = new System.Drawing.Size(121, 38);
+            this.toolStripButton_pasteFromJSONClipboard.Text = "粘贴服务器";
+            this.toolStripButton_pasteFromJSONClipboard.ToolTipText = "从 Windows 剪贴板中粘贴服务器参数";
+            this.toolStripButton_pasteFromJSONClipboard.Click += new System.EventHandler(this.toolStripButton_pasteFromJSONClipboard_Click);
             // 
             // comboBox_serverAddr
             // 
@@ -425,16 +439,15 @@ namespace DigitalPlatform.CirculationClient
             this.label_tempCode.Text = "验证码(&S):";
             this.label_tempCode.Visible = false;
             // 
-            // toolStripButton_pasteFromJSONClipboard
+            // toolStripButton_changePassword
             // 
-            this.toolStripButton_pasteFromJSONClipboard.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.toolStripButton_pasteFromJSONClipboard.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_pasteFromJSONClipboard.Image")));
-            this.toolStripButton_pasteFromJSONClipboard.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton_pasteFromJSONClipboard.Name = "toolStripButton_pasteFromJSONClipboard";
-            this.toolStripButton_pasteFromJSONClipboard.Size = new System.Drawing.Size(121, 38);
-            this.toolStripButton_pasteFromJSONClipboard.Text = "粘贴服务器";
-            this.toolStripButton_pasteFromJSONClipboard.ToolTipText = "从 Windows 剪贴板中粘贴服务器参数";
-            this.toolStripButton_pasteFromJSONClipboard.Click += new System.EventHandler(this.toolStripButton_pasteFromJSONClipboard_Click);
+            this.toolStripButton_changePassword.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_changePassword.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_changePassword.Image")));
+            this.toolStripButton_changePassword.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_changePassword.Name = "toolStripButton_changePassword";
+            this.toolStripButton_changePassword.Size = new System.Drawing.Size(79, 38);
+            this.toolStripButton_changePassword.Text = "改密码";
+            this.toolStripButton_changePassword.Click += new System.EventHandler(this.toolStripButton_changePassword_Click);
             // 
             // CirculationLoginDlg
             // 
@@ -1273,6 +1286,20 @@ Keys keyData)
             }
         ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+        private void toolStripButton_changePassword_Click(object sender, EventArgs e)
+        {
+            ChangePasswordDialog dlg = new ChangePasswordDialog();
+            dlg.Font = this.Font;
+            dlg.ServerUrl = this.ServerUrl;
+            dlg.UserName = this.UserName;
+            dlg.OldPassword = this.Password;
+            dlg.IsReader = this.IsReader;
+            dlg.StartPosition = FormStartPosition.CenterParent;
+            dlg.ShowDialog(this);
+            if (dlg.DialogResult == DialogResult.OK)
+                this.textBox_password.Text = dlg.NewPassword;
         }
     }
 

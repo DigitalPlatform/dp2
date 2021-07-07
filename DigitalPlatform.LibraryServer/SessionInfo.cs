@@ -459,7 +459,7 @@ namespace DigitalPlatform.LibraryServer
                 {
                     // 2021/7/3
                     // 检查密码失效期
-                    if (LibraryApplication._passwordExpirePeriod != TimeSpan.MaxValue)
+                    if (App._passwordExpirePeriod != TimeSpan.MaxValue)
                     {
                         if (DateTime.Now > account.PasswordExpire)
                             passwordExpired = true;
