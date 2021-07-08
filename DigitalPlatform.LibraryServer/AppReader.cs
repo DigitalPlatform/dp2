@@ -6003,7 +6003,7 @@ out strError);
                         strOutputPath,
                         ref readerdom,
                         strPassword,    // TODO: 如果 strPassword == null 会怎么样？
-                        _patronPasswordExpirePeriod,
+                        _tempPasswordExpirePeriod,
                         false,
                         timestamp,
                         out output_timestamp,
@@ -6093,6 +6093,53 @@ out strError);
                     return 1;
                 return 0;
             }
+        }
+
+        //      expireLength    理想的密码失效前长度。在本函数中还要根据 rights 中的 neverexpire 进行调整
+        // 合成读者记录的最终权限
+        int GetReaderRights(
+            XmlDocument readerdom,
+            out string rights,
+            out string strError)
+        {
+            rights = "";
+            strError = "";
+
+            // 获得一个参考帐户
+            // 从library.xml文件定义 获得一个帐户的信息
+            // return:
+            //      -1  error
+            //      0   not found
+            //      1   found
+            int nRet = GetAccount("reader",
+                out Account accountref,
+                out strError);
+            if (nRet == -1)
+            {
+                // text-level: 用户提示
+                strError = string.Format(this.GetString("获得reader参考帐户时出错s"),    // "获得reader参考帐户时出错: {0}"
+                    strError);
+                // "获得reader参考帐户时出错: " + strError;
+                return -1;
+            }
+
+            // 追加读者记录中定义的权限值
+            string strAddRights = DomUtil.GetElementText(readerdom.DocumentElement, "rights");
+            if (string.IsNullOrEmpty(strAddRights) == false)
+                accountref.Rights += "," + strAddRights;
+
+            /*
+            {
+                // 如果读者记录状态有值，则需要从 account.Rights 中删除 patron 权限值
+                // 反之则增加 patron 值
+                string strState = DomUtil.GetElementText(readerdom.DocumentElement, "state");
+                string strTemp = accountref.Rights;
+                StringUtil.SetInList(ref strTemp, "patron", string.IsNullOrEmpty(strState));
+                accountref.Rights = strTemp;
+            }
+            */
+
+            return 1;
         }
 
         // 加入一个绑定号码

@@ -220,7 +220,7 @@ namespace dp2Circulation
             DispFreeSpace();
             MessageBox.Show(this, strText);
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
 
         }
@@ -247,7 +247,7 @@ namespace dp2Circulation
             DispFreeSpace();
             MessageBox.Show(this, "OK");
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
 
         }
@@ -829,7 +829,7 @@ namespace dp2Circulation
                 EndChannel();
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -982,7 +982,7 @@ namespace dp2Circulation
             this.textBox_cutter_resultString.Text = strText + " " + strNumber;
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -999,7 +999,7 @@ namespace dp2Circulation
 
             MessageBox.Show(this, "OK");
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1016,7 +1016,7 @@ namespace dp2Circulation
 
             MessageBox.Show(this, "OK");
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1481,7 +1481,7 @@ ref bHideMessageBox);
                 if (nRet == -1)
                     goto ERROR1;
                 return;
-                ERROR1:
+            ERROR1:
                 MessageBox.Show(this, strError);
             }
             finally
@@ -1811,7 +1811,7 @@ dlg.UiState);
 #endif
             this.kernelResTree1.Fill();
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1879,7 +1879,7 @@ dlg.UiState);
                 this.textBox_setBiblioInfo_content.Text = Convert.ToBase64String(baRecord);
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1981,5 +1981,38 @@ this,
             notifier.Notify(message);
             MessageBox.Show(this, "发送成功");
         }
+
+        private void button_getFirstItemRecord_Click(object sender, EventArgs e)
+        {
+            var strRecPath = InputDlg.GetInput(this,
+                "书目记录路径",
+                "书目记录路径",
+                "中文图书/1",
+                this.Font);
+            if (strRecPath == null)
+                return;
+
+            LibraryChannel channel = Program.MainForm.GetChannel();
+            try
+            {
+                var ret = Utility.GetSubRecords(
+    channel,
+    null,
+    strRecPath,
+    "firstAccessNo",
+    out string strResult,
+    out string strError);
+                if (ret == -1)
+                    MessageBox.Show(this, strError);
+                else
+                    MessageBox.Show(this, $"accessNo='{strResult}'");
+            }
+            finally
+            {
+                Program.MainForm.ReturnChannel(channel);
+            }
+        }
+
+
     }
 }

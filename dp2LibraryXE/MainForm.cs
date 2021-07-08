@@ -256,14 +256,34 @@ FormWindowState.Normal);
             // 后台自动检查更新
             Task.Run(() =>
             {
+                SetStatusMessage("正在进行后台升级 ...");
+
+                string message = "";
+                // result.Value:
+                //      -1  出错
+                //      0   没有发现更新
+                //      1   已经更新，重启可使用新版本
                 var result = ClientInfo.InstallUpdateSync();
                 if (result.Value == -1)
-                    AppendString($"ClickOnce 后台自动更新出错: {result.ErrorInfo}\r\n");
+                    message = ($"ClickOnce 后台自动更新出错: {result.ErrorInfo}\r\n");
                 else if (result.Value == 1)
-                    AppendString($"ClickOnce 后台自动更新: {result.ErrorInfo}\r\n");
+                    message = ($"ClickOnce 后台自动更新: {result.ErrorInfo}\r\n");
                 else if (string.IsNullOrEmpty(result.ErrorInfo) == false)
-                    AppendString($"ClickOnce 后台自动更新: {result.ErrorInfo}\r\n");
+                    message = ($"ClickOnce 后台自动更新: {result.ErrorInfo}\r\n");
+                else
+                    message = "";
+
+                AppendString(message + "\r\n");
+                SetStatusMessage(message);
             });
+        }
+
+        void SetStatusMessage(string text)
+        {
+            this.Invoke((Action)(() =>
+            {
+                this.toolStripStatusLabel_main.Text = text;
+            }));
         }
 
         // delegate void Delegate_Initialize();
@@ -1103,7 +1123,9 @@ https://github.com/digitalplatform/dp2"
 
             CloseIIsExpress(false);
 
-            this.toolStripStatusLabel_main.Text = "正在退出 dp2Library XE，请稍候 ...";
+            // this.toolStripStatusLabel_main.Text = "正在退出 dp2Library XE，请稍候 ...";
+            SetStatusMessage("正在退出 dp2Library XE，请稍候 ...");
+
             Application.DoEvents();
 
             dp2Library_stop();

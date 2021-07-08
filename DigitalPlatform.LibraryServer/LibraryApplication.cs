@@ -12884,6 +12884,16 @@ out strError);
                     goto ERROR1;
                 }
 
+                // 2021/7/8
+                // 合成读者记录的最终权限
+                nRet = GetReaderRights(
+                    readerdom,
+                    out string rights,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+
                 string strExistingBarcode = DomUtil.GetElementText(readerdom.DocumentElement, "barcode");
 
                 // 如果是读者身份, 或者通过参数 strReaderOldPassword (非null)要求，需要验证旧密码
@@ -12891,6 +12901,8 @@ out strError);
                     || loggedIn == false
                     || strReaderOldPassword != null)
                 {
+
+
                     string strClientIP = sessioninfo.ClientIP;
                     nRet = this.UserNameTable.BeforeLogin(strExistingBarcode,
 strClientIP,
@@ -12936,7 +12948,20 @@ out strError);
                     {
                         result.Value = 1;
                     }
+
+                    // 2021/7/8
+                    if (StringUtil.IsInList("denychangemypassword", rights))
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = "读者 " + strReaderBarcode + " 因被设定了 denychangemypassword 权限，不能修改自己的密码";
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        return result;
+                    }
                 }
+
+                TimeSpan expireLength = _patronPasswordExpirePeriod;
+                if (StringUtil.IsInList("neverexpire", rights))
+                    expireLength = TimeSpan.MaxValue;
 
                 byte[] output_timestamp = null;
                 nRet = ChangeReaderPassword(
@@ -12944,7 +12969,7 @@ out strError);
                     strOutputPath,
                     ref readerdom,
                     strReaderNewPassword,
-                    _patronPasswordExpirePeriod,
+                    expireLength,
                     true,
                     timestamp,
                     out output_timestamp,

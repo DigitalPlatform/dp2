@@ -29,8 +29,8 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <InstallUrl>http://dp2003.com/dp2LibraryXE/v3_dev/</InstallUrl>
-    <UpdateUrl>http://dp2003.com/dp2LibraryXE/v3_dev/</UpdateUrl>
+    <InstallUrl>https://dp2003.com/dp2LibraryXE/v3_dev/</InstallUrl>
+    <UpdateUrl>https://dp2003.com/dp2LibraryXE/v3_dev/</UpdateUrl>
     <TargetCulture>zh-CN</TargetCulture>
     <ProductName>dp2Library XE V3</ProductName>
     <PublisherName>DigitalPlatform</PublisherName>

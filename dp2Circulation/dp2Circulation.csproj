@@ -2996,6 +2996,7 @@
     <Content Include="usmarc_cfgs\dp2circulation_marc_autogen.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Compile Include="Utility.cs" />
     <Compile Include="UtilityForm.cs">
       <SubType>Form</SubType>
     </Compile>

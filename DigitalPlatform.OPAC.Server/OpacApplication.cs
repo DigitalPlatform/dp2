@@ -3669,7 +3669,42 @@ System.Text.Encoding.UTF8))
             }
         }
 
+        // 2021/7/8
+        // 检查上载文件的格式是否为图像文件？
+        // return:
+        //      -1  出错
+        //      0   不是图像文件
+        //      1   是图像文件
+        public static int VerifyImageFileType(HttpPostedFile postedFile,
+    out string strError)
+        {
+            strError = "";
+
+            try
+            {
+                string mime = API.GetMimeTypeFromFile(postedFile.InputStream);
+                if (mime == null
+                    || mime.StartsWith("image/") == false)
+                {
+                    strError = "上载的文件不是图像文件";
+                    return 0;
+                }
+                return 1;
+            }
+            catch(Exception ex)
+            {
+                strError = $"验证上载文件格式时出错: {ex.Message}";
+                return -1;
+            }
+            finally
+            {
+                postedFile.InputStream.Seek(0, SeekOrigin.Begin);
+            }
+        }
+
         // 采用了代理帐户
+        // 保存上载的文件
+        // 注: 本函数会检查上载的文件是否为图像文件，如果不是图像文件会报错
         public int SaveUploadFile(
     System.Web.UI.Page page,
     string strXmlRecPath,
@@ -3682,6 +3717,18 @@ System.Text.Encoding.UTF8))
         {
             strError = "";
 
+            // 检查上载文件的格式是否为图像文件？
+            // return:
+            //      -1  出错
+            //      0   不是图像文件
+            //      1   是图像文件
+            int nRet = VerifyImageFileType(postedFile,
+        out strError);
+            if (nRet != 1)
+            {
+                strError += "。上载失败";
+                return -1;
+            }
 #if NO
             // 临时的SessionInfo对象
             SessionInfo session = new SessionInfo(this);

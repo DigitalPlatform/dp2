@@ -195,6 +195,20 @@ namespace DigitalPlatform
 			}
 		}
 
+		static byte[] ReadFirst256Bytes(Stream fileSource)
+		{
+			byte[] result = new byte[Math.Min(256, fileSource.Length)];
+			fileSource.Read(result, 0, result.Length);
+
+			return result;
+		}
+
+		public static string GetMimeTypeFromFile(Stream fileSource)
+		{
+			return API.MimeTypeFrom(ReadFirst256Bytes(fileSource),
+				"");
+		}
+
 		static string MimeTypeFrom(
 			byte[] dataBytes,
 			string mimeProposed) 

@@ -694,6 +694,14 @@ namespace dp2Library
                 string strLimitRights = ""; // 代理者的权限。用于限定(代理登录方式下)被代理者的危险权限
                 if (bReader == false)
                 {
+                    // 2021/7/8
+                    // 检查特殊账户名
+                    if (strUserName.ToLower() == "reader")
+                    {
+                        strError = "不允许使用名为 reader 的账户直接登录";
+                        goto ERROR1;
+                    }
+
                     if (bSimulateLogin == true)
                     {
 #if NO
@@ -9966,7 +9974,7 @@ true);
                     if (StringUtil.IsInList("denychangemypassword", userinfo.Rights/*sessioninfo.RightsOrigin*/) == true)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "当前登录用户 " + userinfo.Rights/*sessioninfo.UserID*/ + " 因被设定了 denychangemypassword 权限，不能修改自己的密码。";
+                        result.ErrorInfo = "当前登录用户 " + userinfo.Rights/*sessioninfo.UserID*/ + " 因被设定了 denychangemypassword 权限，不能修改自己的密码";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
