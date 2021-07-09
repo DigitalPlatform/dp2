@@ -11992,7 +11992,7 @@ out strError);
 
             // 2021/7/4
             // 设置密码失效期
-            SetPasswordExpire(node,
+            SetPatronPasswordExpire(node,
                 expireLength,   // _patronPasswordExpirePeriod,
                 DateTime.Now,
                 out string strExpireTime);
@@ -12016,7 +12016,14 @@ out strError);
 
         // 2021/7/5
         // 设置读者密码的 expire 属性
-        static bool SetPasswordExpire(XmlElement password_element,
+        // parameters:
+        //      append  是否为追加方式。
+        //              如果 == true，表示只有当 expire 属性不存在的时候才设置它
+        //              如果 == false，表示无论如何都会重设它
+        // return:
+        //      false   没有发生修改
+        //      true    发生了修改
+        public static bool SetPatronPasswordExpire(XmlElement password_element,
             TimeSpan passwordExpirePeriod,
             DateTime now,
             out string strExpireTime,
@@ -12027,8 +12034,11 @@ out strError);
             bool changed = false;
             if (passwordExpirePeriod == TimeSpan.MaxValue)
             {
-                password_element.RemoveAttribute("expire");
-                changed = true;
+                if (password_element.HasAttribute("expire"))
+                {
+                    password_element.RemoveAttribute("expire");
+                    changed = true;
+                }
             }
             else
             {

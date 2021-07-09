@@ -454,7 +454,6 @@ namespace DigitalPlatform.LibraryServer
             if (oldLibraryCode != strLibraryCode)
             {
                 DomUtil.SetElementText(readerdom.DocumentElement, "libraryCode", strLibraryCode);
-                strReaderXml = readerdom.OuterXml;
                 bChanged = true;
             }
 
@@ -486,9 +485,14 @@ namespace DigitalPlatform.LibraryServer
                 // 注: 借书和还书是否需要工作日历参数? 如果也需要，则在相关读者借书或者还书时候就会遇到报错，管理员会及时处理
                 // TODO: 将来在这里增加通知系统管理员的动作
                 strError = "获得读者类型 '" + strReaderType + "' 的相关日历过程失败: " + strError;
-                return -1;
+                this.AppendResultText(strError + "\r\n");
+                // return -1;
+                calendar = null;
+                // 继续往后运行。和 calendar 无关的功能还能起作用
             }
 
+            // testing
+            calendar = null;
 
             // 每种 bodytype 做一次
             for (int i = 0; i < bodytypes.Count; i++)
@@ -551,6 +555,9 @@ namespace DigitalPlatform.LibraryServer
 
                 // 保存调用脚本前的读者记录 
                 string strOldReaderXml = readerdom.DocumentElement.OuterXml;
+
+                if (calendar == null)
+                    continue;
 
                 // 执行脚本函数NotifyReader
                 // parameters:
@@ -807,7 +814,6 @@ namespace DigitalPlatform.LibraryServer
                         bChanged = true;
 #endif
 
-                    strReaderXml = readerdom.OuterXml;
                     bChanged = true;
                 }
             } // end of for
@@ -838,7 +844,6 @@ namespace DigitalPlatform.LibraryServer
 
                 if (nRet == 1)
                 {
-                    strReaderXml = readerdom.OuterXml;
                     bChanged = true;
                 }
             }
@@ -857,7 +862,6 @@ namespace DigitalPlatform.LibraryServer
             }
             if (nRet == 1)
             {
-                strReaderXml = readerdom.OuterXml;
                 bChanged = true;
             }
 
@@ -875,7 +879,6 @@ namespace DigitalPlatform.LibraryServer
             }
             if (nRet == 1)
             {
-                strReaderXml = readerdom.OuterXml;
                 bChanged = true;
             }
 
@@ -893,7 +896,6 @@ namespace DigitalPlatform.LibraryServer
             }
             if (nRet == 1)
             {
-                strReaderXml = readerdom.OuterXml;
                 bChanged = true;
             }
 
@@ -912,9 +914,16 @@ namespace DigitalPlatform.LibraryServer
             }
             if (nRet == 1)
             {
-                strReaderXml = readerdom.OuterXml;
                 bChanged = true;
             }
+
+            // 根据 library.xml 中 login/@patronPasswordExpireLength 和读者记录的 rights 元素，
+            // 添加或者清除读者记录中 password/@expire 属性
+            if (UpdatePasswordExpire(readerdom) == true)
+                bChanged = true;
+
+            if (bChanged)
+                strReaderXml = readerdom.OuterXml;
 
 #if NO
             // 修改读者记录后存回
@@ -1069,6 +1078,23 @@ namespace DigitalPlatform.LibraryServer
                 strError = "发送消息到 MQ 出现异常: " + ExceptionUtil.GetDebugText(ex);
                 return -1;
             }
+        }
+
+        // 根据 library.xml 中 login/@patronPasswordExpireLength 和读者记录的 rights 元素，
+        // 添加或者清除读者记录中 password/@expire 属性
+        bool UpdatePasswordExpire(XmlDocument readerdom)
+        {
+            // 条件化的失效期，考虑了 rights 因素
+            TimeSpan expireLength = this.App.GetConditionalPatronPasswordExpireLength(readerdom);
+
+            XmlElement password_element = readerdom.DocumentElement.SelectSingleNode("password") as XmlElement;
+            
+            // 设置密码失效期
+            return LibraryApplication.SetPatronPasswordExpire(password_element,
+                expireLength,   // _patronPasswordExpirePeriod,
+                DateTime.Now,
+                out string _,
+                true);
         }
 
         // 2016/12/27

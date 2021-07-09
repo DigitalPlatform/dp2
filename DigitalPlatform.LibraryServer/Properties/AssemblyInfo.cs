@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.57.*")]
-[assembly: AssemblyFileVersion("3.57.0.0")]
+[assembly: AssemblyVersion("3.58.*")]
+[assembly: AssemblyFileVersion("3.58.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -242,3 +242,6 @@ ItemCanReturn()
 //		3.56 (2021/7/9) 读者密码被设置的时候，是否有失效期属性，会根据 library.xml 中 login/@patronPasswordExpireLength 参数和读者记录中的 rights 中是否包含 neverexpire 权限综合决定
 //		3.57 (2021/7/9) SetUser() API 创建账户时同时设置密码，如果密码不符合强密码规则，会出现 account 元素创建成功但密码为空的结果。此 bug 已经修正
 //						(发正式版)
+//		3.58 (2021/7/9) ReadersMonitor 中对每一条读者记录的处理中，增加了
+//						根据 library.xml 中 login/@patronPasswordExpireLength 和读者记录的 rights 元素，
+//						添加或者清除读者记录中 password/@expire 属性的步骤。这样当 library.xml 配置发生改变后，后台批处理会自动去修改读者记录
