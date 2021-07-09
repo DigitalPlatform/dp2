@@ -256,7 +256,7 @@ FormWindowState.Normal);
             // 后台自动检查更新
             Task.Run(() =>
             {
-                SetStatusMessage("正在进行后台升级 ...");
+                SetUpdateMessage("正在进行后台升级 ...");
 
                 string message = "";
                 // result.Value:
@@ -274,7 +274,7 @@ FormWindowState.Normal);
                     message = "";
 
                 AppendString(message + "\r\n");
-                SetStatusMessage(message);
+                SetUpdateMessage(message);
             });
         }
 
@@ -283,6 +283,14 @@ FormWindowState.Normal);
             this.Invoke((Action)(() =>
             {
                 this.toolStripStatusLabel_main.Text = text;
+            }));
+        }
+
+        void SetUpdateMessage(string text)
+        {
+            this.Invoke((Action)(() =>
+            {
+                this.toolStripStatusLabel_update.Text = text;
             }));
         }
 

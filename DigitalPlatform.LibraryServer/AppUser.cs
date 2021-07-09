@@ -329,6 +329,15 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
+            // 2021/7/9
+            if (userinfo.SetPassword == false
+                && string.IsNullOrEmpty(userinfo.Password) == false)
+            {
+                strError = "若要在创建账户的同时设置好初始密码，SetPassword 应设置为 true";
+                return -1;
+            }
+
+
             // 2012/9/9
             // 分馆用户只允许创建馆代码属于管辖分馆的帐户
             if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
@@ -424,9 +433,15 @@ namespace DigitalPlatform.LibraryServer
 
                 DomUtil.SetAttr(nodeAccount, "binding", userinfo.Binding);
 #endif
+                // 2021/7/9
+                // 确保当 SetPassword 为 false 是前端不提供密码
+                if (userinfo.SetPassword == false)
+                    userinfo.Password = "";
 
                 // 设置密码
-                if (userinfo.SetPassword == true)
+                if (userinfo.SetPassword == true
+                    || string.IsNullOrEmpty(_passwordStyle) == false    // 如果有强密码要求，则空密码也要参与密码检查
+                    )
                 {
                     // return:
                     //      -1  出错
@@ -437,14 +452,22 @@ namespace DigitalPlatform.LibraryServer
                         _passwordStyle,
                         out strError);
                     if (nRet != 1)
+                    {
+                        // 删除刚创建的 account 元素
+                        nodeAccount.ParentNode?.RemoveChild(nodeAccount);
                         return -1;
+                    }
 
                     nRet = LibraryServerUtil.SetUserPassword(userinfo.Password, out string strHashed, out strError);
                     if (nRet == -1)
+                    {
+                        // 删除刚创建的 account 元素
+                        nodeAccount.ParentNode?.RemoveChild(nodeAccount);
                         return -1;
+                    }
+
                     // DomUtil.SetAttr(nodeAccount, "password", strHashed);
                     SetPasswordValue(nodeAccount, strHashed);
-
                 }
 
                 // 注: 无论是否明确要求设置密码(也就是说可能会创建空密码)，都要为密码设置失效期
@@ -1476,12 +1499,21 @@ out strError);
                         _passwordStyle,
                         out strError);
                     if (nRet != 1)
+                    {
+                        // 撤销全部修改
+                        DomUtil.SetElementOuterXml(nodeAccount, strOldOuterXml);
                         return -1;
+                    }
 
                     string strHashed = "";
                     nRet = LibraryServerUtil.SetUserPassword(userinfo.Password, out strHashed, out strError);
                     if (nRet == -1)
+                    {
+                        // 撤销全部修改
+                        DomUtil.SetElementOuterXml(nodeAccount, strOldOuterXml);
                         return -1;
+                    }
+                    
                     // DomUtil.SetAttr(nodeAccount, "password", strHashed);
                     SetPasswordValue(nodeAccount, strHashed);
 

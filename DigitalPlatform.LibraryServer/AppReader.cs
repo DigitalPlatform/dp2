@@ -511,6 +511,9 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
+            // 条件化的失效期
+            TimeSpan expireLength = GetConditionalPatronPasswordExpireLength(dom);
+
             XmlDocument domOperLog = null;
             // 修改读者密码
             // return:
@@ -519,7 +522,7 @@ namespace DigitalPlatform.LibraryServer
             int nRet = ChangeReaderPassword(
                 dom,
                 strNewPassword,
-                _patronPasswordExpirePeriod,
+                expireLength,   // _patronPasswordExpirePeriod,
                 ref domOperLog,
                 out strError);
             if (nRet == -1)
@@ -542,6 +545,29 @@ namespace DigitalPlatform.LibraryServer
                 return 1;
 
             return 0;
+        }
+
+        // 根据读者记录 XML，获得条件化的读者密码失效前长度
+        public TimeSpan GetConditionalPatronPasswordExpireLength(XmlDocument readerdom)
+        {
+            // 2021/7/8
+            // 合成读者记录的最终权限
+            int nRet = GetReaderRights(
+                readerdom,
+                out string rights,
+                out string strError);
+            if (nRet == -1)
+                throw new Exception($"GetReaderRights() 时出错: {strError}");
+
+            return GetConditionalPatronPasswordExpireLength(rights);
+        }
+
+        TimeSpan GetConditionalPatronPasswordExpireLength(string rights)
+        {
+            TimeSpan expireLength = _patronPasswordExpirePeriod;
+            if (StringUtil.IsInList("neverexpire", rights))
+                expireLength = TimeSpan.MaxValue;
+            return expireLength;
         }
 
         // <DoReaderChange()的下级函数>

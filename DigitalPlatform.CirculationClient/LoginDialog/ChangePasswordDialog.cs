@@ -52,7 +52,7 @@ namespace DigitalPlatform.CirculationClient
                             this.textBox_worker_newPassword.Text,
                             out strError);
                     }
-                    if (ret == -1)
+                    if (ret == -1 || ret == 0)
                         MessageBox.Show(this, strError);
                     else
                     {

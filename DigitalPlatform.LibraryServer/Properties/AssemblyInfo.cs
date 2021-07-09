@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.55.*")]
-[assembly: AssemblyFileVersion("3.55.0.0")]
+[assembly: AssemblyVersion("3.57.*")]
+[assembly: AssemblyFileVersion("3.57.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -239,3 +239,6 @@ ItemCanReturn()
 //		3.54 (2021/7/4) ChangeUserPassword() API 在修改密码的时候，不再要求前端先 Login() 成功
 //		3.55 (2021/7/7) Return() API 中，如果 strStyle 参数带有 operTime 子参数，会用这个子参数来计算超期时间。以前的版本这里处理有误，是用 dp2library 服务器当前时钟来计算超期时间了
 //						Login() API 中，以临时密码登录时，临时密码会自动转为正式密码，最新版正式密码的失效期会根据 library.xml 中 login/@tempPasswordExpireLength 属性值来决定。如果此属性缺省，相当于一个小时的长度。找回密码的手机短信的失效期也受这个参数控制(和以前版本的默认值兼容)
+//		3.56 (2021/7/9) 读者密码被设置的时候，是否有失效期属性，会根据 library.xml 中 login/@patronPasswordExpireLength 参数和读者记录中的 rights 中是否包含 neverexpire 权限综合决定
+//		3.57 (2021/7/9) SetUser() API 创建账户时同时设置密码，如果密码不符合强密码规则，会出现 account 元素创建成功但密码为空的结果。此 bug 已经修正
+//						(发正式版)

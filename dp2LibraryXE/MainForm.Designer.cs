@@ -89,6 +89,7 @@
             this.toolStripStatusLabel_main = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripProgressBar_main = new System.Windows.Forms.ToolStripProgressBar();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
+            this.toolStripStatusLabel_update = new System.Windows.Forms.ToolStripStatusLabel();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.statusStrip_main.SuspendLayout();
@@ -106,7 +107,7 @@
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Padding = new System.Windows.Forms.Padding(11, 3, 0, 3);
-            this.menuStrip1.Size = new System.Drawing.Size(682, 39);
+            this.menuStrip1.Size = new System.Drawing.Size(682, 38);
             this.menuStrip1.TabIndex = 2;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -115,7 +116,7 @@
             this.MenuItem_file.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.MenuItem_exit});
             this.MenuItem_file.Name = "MenuItem_file";
-            this.MenuItem_file.Size = new System.Drawing.Size(97, 33);
+            this.MenuItem_file.Size = new System.Drawing.Size(97, 32);
             this.MenuItem_file.Text = "文件(&F)";
             // 
             // MenuItem_exit
@@ -148,7 +149,7 @@
             this.MenuItem_restartDp2Kernel,
             this.MenuItem_restoreDp2library});
             this.MenuItem_management1.Name = "MenuItem_management1";
-            this.MenuItem_management1.Size = new System.Drawing.Size(107, 33);
+            this.MenuItem_management1.Size = new System.Drawing.Size(107, 32);
             this.MenuItem_management1.Text = "维护(&M)";
             // 
             // MenuItem_installDp2Opac
@@ -290,7 +291,7 @@
             this.MenuItem_registerWebApp,
             this.toolStripSeparator6});
             this.MenuItem_tools.Name = "MenuItem_tools";
-            this.MenuItem_tools.Size = new System.Drawing.Size(98, 33);
+            this.MenuItem_tools.Size = new System.Drawing.Size(98, 32);
             this.MenuItem_tools.Text = "工具(&T)";
             // 
             // MenuItem_enableWindowsMsmq
@@ -374,7 +375,7 @@
             this.toolStripSeparator20,
             this.MenuItem_copyright});
             this.MenuItem_help.Name = "MenuItem_help";
-            this.MenuItem_help.Size = new System.Drawing.Size(102, 33);
+            this.MenuItem_help.Size = new System.Drawing.Size(102, 32);
             this.MenuItem_help.Text = "帮助(&H)";
             // 
             // MenuItem_openUserFolder
@@ -472,7 +473,7 @@
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolButton_stop,
             this.toolStripDropDownButton_stopAll});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 39);
+            this.toolStrip1.Location = new System.Drawing.Point(0, 38);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(682, 34);
             this.toolStrip1.TabIndex = 4;
@@ -512,12 +513,13 @@
             this.statusStrip_main.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.statusStrip_main.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatusLabel_main,
+            this.toolStripStatusLabel_update,
             this.toolStripProgressBar_main});
-            this.statusStrip_main.Location = new System.Drawing.Point(0, 494);
+            this.statusStrip_main.Location = new System.Drawing.Point(0, 490);
             this.statusStrip_main.Name = "statusStrip_main";
             this.statusStrip_main.Padding = new System.Windows.Forms.Padding(2, 0, 26, 0);
             this.statusStrip_main.RenderMode = System.Windows.Forms.ToolStripRenderMode.ManagerRenderMode;
-            this.statusStrip_main.Size = new System.Drawing.Size(682, 33);
+            this.statusStrip_main.Size = new System.Drawing.Size(682, 37);
             this.statusStrip_main.TabIndex = 6;
             this.statusStrip_main.Text = "statusStrip1";
             // 
@@ -525,7 +527,7 @@
             // 
             this.toolStripStatusLabel_main.AutoSize = false;
             this.toolStripStatusLabel_main.Name = "toolStripStatusLabel_main";
-            this.toolStripStatusLabel_main.Size = new System.Drawing.Size(467, 24);
+            this.toolStripStatusLabel_main.Size = new System.Drawing.Size(628, 28);
             this.toolStripStatusLabel_main.Spring = true;
             // 
             // toolStripProgressBar_main
@@ -533,18 +535,24 @@
             this.toolStripProgressBar_main.AutoSize = false;
             this.toolStripProgressBar_main.BackColor = System.Drawing.SystemColors.Control;
             this.toolStripProgressBar_main.Name = "toolStripProgressBar_main";
-            this.toolStripProgressBar_main.Size = new System.Drawing.Size(183, 23);
+            this.toolStripProgressBar_main.Size = new System.Drawing.Size(183, 27);
             this.toolStripProgressBar_main.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
             // 
             // webBrowser1
             // 
             this.webBrowser1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.webBrowser1.Location = new System.Drawing.Point(0, 73);
+            this.webBrowser1.Location = new System.Drawing.Point(0, 72);
             this.webBrowser1.Margin = new System.Windows.Forms.Padding(5);
             this.webBrowser1.MinimumSize = new System.Drawing.Size(37, 35);
             this.webBrowser1.Name = "webBrowser1";
-            this.webBrowser1.Size = new System.Drawing.Size(682, 421);
+            this.webBrowser1.Size = new System.Drawing.Size(682, 418);
             this.webBrowser1.TabIndex = 7;
+            // 
+            // toolStripStatusLabel_update
+            // 
+            this.toolStripStatusLabel_update.Name = "toolStripStatusLabel_update";
+            this.toolStripStatusLabel_update.Size = new System.Drawing.Size(26, 28);
+            this.toolStripStatusLabel_update.Text = "()";
             // 
             // MainForm
             // 
@@ -634,6 +642,7 @@
         private System.Windows.Forms.ToolStripMenuItem MenuItem_viewTodayDp2libraryErrorLogFile;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_viewTodayDp2kernelErrorLogFile;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator11;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel_update;
     }
 }
 

@@ -1406,6 +1406,9 @@ out kernel_errorcode);
 
             strOutputXml = domNew.DocumentElement.OuterXml;
 
+            // 条件化的失效期
+            TimeSpan expireLength = this.App.GetConditionalPatronPasswordExpireLength(domNew);
+
             // 2017/2/21
             // 添加 password 元素
             XmlDocument domOperLog = null;
@@ -1416,7 +1419,7 @@ out kernel_errorcode);
             int nRet = LibraryApplication.ChangeReaderPassword(
                 domNew,
                 Guid.NewGuid().ToString(),
-                this.App._patronPasswordExpirePeriod,
+                expireLength,   // this.App._patronPasswordExpirePeriod,
                 ref domOperLog,
                 out strError);
             if (nRet == -1)
