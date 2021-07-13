@@ -1509,7 +1509,7 @@ namespace DigitalPlatform.LibraryServer
                             item_dom.LoadXml(entity.OldRecord);
                             item.InnerXml = item_dom.DocumentElement.InnerXml;
                         }
-                        catch(Exception ex)
+                        catch (Exception ex)
                         {
                             // itemTotalCount=-1 表示 AccessDenied
                             dom.DocumentElement.SetAttribute(strItemElementName + "TotalCount", "-1");
@@ -2328,9 +2328,8 @@ return result;
                 return -1;
             }
 
-            string strMarcSyntax = "";
             int nRet = DetectMarcSyntax(domNew,
-    out strMarcSyntax,
+    out string strMarcSyntax,
     out strError);
             if (nRet == -1)
                 return -1;
@@ -5102,7 +5101,7 @@ out strError);
 
                     if (strOwner != sessioninfo.UserID)
                     {
-                        strError = "当前用户 '" + sessioninfo.UserID + "' 不是" + strDbTypeCaption + "记录 '" + strBiblioDbName + "' 的创建者(998$z)，因此 setbiblio(authority)info " + strAction + " 操作被拒绝";
+                        strError = $"当前用户 '{ sessioninfo.UserID }' 不是{ strDbTypeCaption }记录 '{ strBiblioRecPath }' 的创建者(998$z) '{strOwner}'，因此 setbiblio(authority)info { strAction } 操作被拒绝";
                         result.Value = -1;
                         result.ErrorInfo = strError;
                         result.ErrorCode = ErrorCode.AccessDenied;

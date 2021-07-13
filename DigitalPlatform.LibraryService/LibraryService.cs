@@ -1744,7 +1744,10 @@ namespace dp2Library
         //      如果调用本 API 前已经用读者身份登录过了，并且打算调用本 API 修改一个不是登录者自己的读者的密码，那需要先 Logout() 再调用本 API 才行
         // parameters:
         //      strReaderOldPassword    旧密码。如果想达到不验证旧密码的效果，可以用 null 调用，但仅限工作人员身份调用的情况。读者身份是必须验证旧密码的
-        // Result.Value -1出错 0旧密码不正确 1旧密码正确,已修改为新密码
+        // Result.Value
+        //      -1  出错
+        //      0   旧密码不正确
+        //      1   旧密码正确,已修改为新密码
         // 权限: 
         //		工作人员或者读者，必须有changereaderpassword权限
         //		如果为读者, 附加限制还只能修改属于自己的密码
@@ -9854,8 +9857,9 @@ Stack:
         // 修改用户自己的密码
         // 只能用本 API 修改自己的密码。如果要强制修改别人的密码(意思是修改时并不知道旧密码)，请使用SetUser() API
         // 注：调用本 API 修改前，无需登录
-        // return:
-        //      result.Value    -1 错误
+        // return.Value:
+        //      -1  出错
+        //      0   成功
         public LibraryServerResult ChangeUserPassword(
             string strUserName,
             string strOldPassword,
@@ -14656,6 +14660,9 @@ out strError);
                             */
 
                             app.StatisLogUidTable.Set(uid);
+
+                            // 2021/7/13
+                            continue;
                         }
 
                         // 异常报告还要写入操作日志
@@ -14687,10 +14694,8 @@ out strError);
                                 strError = "异常报告写入操作日志时出错: " + strError;
                                 goto ERROR1;
                             }
-                        }
 
-                        if (data.strRecipient == "crash")
-                        {
+                            // 发送到 dp2 内置信箱
                             nRet = app.MessageCenter.SendMessage(
                             sessioninfo.Channels,
                             data.strRecipient,
@@ -14702,6 +14707,9 @@ out strError);
                             out strError);
                             if (nRet == -1)
                                 goto ERROR1;
+
+                            // 2021/7/13
+                            continue;
                         }
 
                         // 2020/4/20
@@ -14722,7 +14730,24 @@ out strError);
     out strError);
                             if (nRet == -1)
                                 goto ERROR1;
+
+                            // 2021/7/13
+                            continue;
                         }
+
+                        // 2021/7/13
+                        // 以上之外的 recipient，默认发送到 dp2 内置信箱
+                        nRet = app.MessageCenter.SendMessage(
+                        sessioninfo.Channels,
+                        data.strRecipient,
+                        sessioninfo.UserID,
+                        data.strSubject,
+                        data.strMime,
+                        data.strBody,
+                        true,
+                        out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
                     }
                 }
 

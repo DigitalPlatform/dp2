@@ -3512,6 +3512,24 @@ int nCount)
 
             }
 
+            // 2021/7/13
+            {
+                AccountInfo account = _base.GetAccountInfo(this._biblio.ServerName);
+                if (account == null)
+                {
+                    strError = "服务器名 '" + this._biblio.ServerName + "' 没有配置";
+                    goto ERROR1;
+                }
+                
+                // 补全书目信息
+                nRet = _biblio.AutoCompleteBiblio(
+                    EntityRegisterBase.IsDot(account.UserName) ? Program.MainForm.DefaultUserName : account.UserName,
+                    "",
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+            }
+
             {
                 // 补全册记录信息
                 nRet = _biblio.CompleteEntities(

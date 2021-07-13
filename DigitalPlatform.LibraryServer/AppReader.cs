@@ -500,7 +500,8 @@ namespace DigitalPlatform.LibraryServer
             string strNewPassword = "";
             try
             {
-                if (string.IsNullOrEmpty(strBirthDate) == false)
+                if (string.IsNullOrEmpty(strBirthDate) == false
+                    && StringUtil.IsInList("style-1", _patronPasswordStyle) == false)
                     strNewPassword = DateTimeUtil.DateTimeToString8(DateTimeUtil.FromRfc1123DateTimeString(strBirthDate).ToLocalTime());    // 2015/10/27 修改 bug。原来缺 ToLocalTime()，造成产生的字符串是前一天的日期
                 else
                     strNewPassword = Guid.NewGuid().ToString(); // 2017/10/29 如果前端发来的读者记录中没有 dateOfBirth 元素内容，则自动发生一个随机的字符串作为密码，这样读者就无法登录成功，只能去图书馆柜台重设密码，或者用微信公众号的找回密码功能来得到密码(假如创建读者记录时候提供了手机号码)
@@ -1627,7 +1628,7 @@ strLibraryCode);    // 读者所在的馆代码
             return result;
         }
 
-#region SetReaderInfo() 下级函数
+        #region SetReaderInfo() 下级函数
 
         // 当路径整个为空的时候，自动选用第一个读者库
         // parameters:
@@ -3017,7 +3018,7 @@ root, strLibraryCode);
         }
 
 
-#endregion
+        #endregion
 
 
         // 为读者XML添加附加信息
@@ -6150,9 +6151,11 @@ out strError);
             }
 
             // 追加读者记录中定义的权限值
-            string strAddRights = DomUtil.GetElementText(readerdom.DocumentElement, "rights");
-            if (string.IsNullOrEmpty(strAddRights) == false)
-                accountref.Rights += "," + strAddRights;
+            rights = DomUtil.GetElementText(readerdom.DocumentElement, "rights");
+            if (string.IsNullOrEmpty(rights) == false)
+                rights = accountref.Rights + "," + rights;
+            else
+                rights = accountref.Rights;
 
             /*
             {
@@ -6164,7 +6167,6 @@ out strError);
                 accountref.Rights = strTemp;
             }
             */
-
             return 1;
         }
 
@@ -6284,5 +6286,74 @@ out strError);
             return false;
         }
 
+        // 按照级别对读者记录中的信息字段进行过滤
+        public static void FilterByLevel(XmlDocument readerdom,
+            string level)
+        {
+            /*
+基本字段："borrows","overdues","reservations","outofReservations"
+第一级：证状态，发证日期，失效日期，姓名(除第一字以后都被马赛克)
+第二级：+ 完整姓名，姓名拼音，显示名，性别，民族，证条码号，参考ID，OI，注释
+第三级：+ 单位，职务，地址，读者类型
+第四级：+ 电话，email
+第五级：+ 权限，存取定义，书斋名称，好友
+第六级：+ 身份证号，出生日期
+第七级：+ 借阅历史，个性化参数等字段
+第八级：+ 租金押金字段 
+第九级：+ 指纹，掌纹，人脸特征
+             * */
+
+        }
+
+        static List<string> GetNames(string level)
+        {
+            List<string> names = new List<string>();
+
+            // 基本字段。借阅的册，违约金, 预约未取参数
+            names.AddRange(new string[] {
+                "borrows",
+                "overdues",
+                "reservations",
+                "outofReservations" });
+
+
+            // 第一级：证状态，发证日期，失效日期，姓名(除第一字以后都被马赛克)
+            names.AddRange(new string[] { "state", "createDate", "expireDate", "name" });
+            if (level == "1")
+                return names;
+            // 第二级：+ 完整姓名，姓名拼音，显示名，性别，民族，证条码号，参考ID，OI，注释
+            names.AddRange(new string[] { "namePinyin", "displayName", "gender", "nation", "barcode", "refID", "oi", "comment" });
+            if (level == "2")
+                return names;
+            // 第三级：+ 单位，职务，地址，读者类型
+            names.AddRange(new string[] { "department", "post", "address", "readerType" });
+            if (level == "3")
+                return names;
+            // 第四级：+ 电话，email
+            names.AddRange(new string[] { "tel", "email" });
+            if (level == "4")
+                return names;
+            // 第五级：+ 权限，存取定义，书斋名称，好友
+            names.AddRange(new string[] { "rights", "access", "personalLibrary", "friends" });
+            if (level == "5")
+                return names;
+            // 第六级：+ 身份证号，出生日期
+            names.AddRange(new string[] { "idCardNumber", "birthDate" });
+            if (level == "6")
+                return names;
+            // 第七级：+ 借阅历史，个性化参数等字段
+            names.AddRange(new string[] { "borrowHistory", "preference" });
+            if (level == "7")
+                return names;
+            // 第八级：+ 租金押金字段 
+            names.AddRange(new string[] { "hire", "foregift" });
+            if (level == "8")
+                return names;
+            // 第九级：+ 指纹，掌纹，人脸特征
+            names.AddRange(new string[] { "fingerprint", "palmprint", "face" });
+            if (level == "9")
+                return names;
+            return names;
+        }
     }
 }

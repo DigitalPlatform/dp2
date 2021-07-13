@@ -121,6 +121,10 @@ namespace dp2Circulation
 
             try
             {
+                // Result.Value
+                //      -1  出错
+                //      0   旧密码不正确
+                //      1   旧密码正确,已修改为新密码
                 lRet = Channel.ChangeReaderPassword(
                     stop,
                     this.textBox_reader_barcode.Text,
@@ -249,6 +253,9 @@ namespace dp2Circulation
                     try
                     {
 
+                        // return.Value:
+                        //      -1  出错
+                        //      0   成功
                         lRet = Channel.ChangeUserPassword(
                             stop,
                             this.textBox_worker_userName.Text,

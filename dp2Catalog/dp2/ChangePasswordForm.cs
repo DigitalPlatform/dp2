@@ -335,6 +335,9 @@ namespace dp2Catalog
                     try
                     {
 
+                        // return.Value:
+                        //      -1  出错
+                        //      0   成功
                         lRet = Channel.ChangeUserPassword(
                             stop,
                             this.textBox_dp2library_userName.Text,

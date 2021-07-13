@@ -95,6 +95,10 @@ ref sessioninfo) == false)
         try
         {
             string strError = "";
+            // Result.Value
+            //      -1  出错
+            //      0   旧密码不正确
+            //      1   旧密码正确,已修改为新密码
             long lRet = // sessioninfo.Channel.
                 channel.ChangeReaderPassword(
                 null,

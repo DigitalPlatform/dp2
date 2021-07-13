@@ -5231,6 +5231,9 @@ MessageBoxDefaultButton.Button2);
                 }
 
                 // 修改为新密码
+                // return.Value:
+                //      -1  出错
+                //      0   成功
                 lRet = channel.ChangeUserPassword(
         null,
         userName,

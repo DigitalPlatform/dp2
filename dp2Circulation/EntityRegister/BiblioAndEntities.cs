@@ -21,6 +21,7 @@ using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Core;
+using DigitalPlatform.IO;
 
 namespace dp2Circulation
 {
@@ -1641,6 +1642,81 @@ MessageBoxDefaultButton.Button2);
             return 0;
         }
 
+        // 2021/7/13
+        // 保存前，自动补全书目记录内容
+        public int AutoCompleteBiblio(
+            string currentUserName,
+            string style,
+            out string strError)
+        {
+            strError = "";
+
+            bool bChanged = false;
+            MarcRecord record = new MarcRecord(this.GetMarc());
+
+            if (this.MarcSyntax == "unimarc")
+            {
+
+            }
+            else if (this.MarcSyntax == "usmarc")
+            {
+
+            }
+            else
+            {
+                // 暂时无法处理其他 MARC 格式
+            }
+
+            // 编目批次号
+            string strBatchNo = record.select("field[@name='998']/subfield[@name='a']").FirstContent;
+            if (string.IsNullOrEmpty(strBatchNo) == true)
+            {
+                // 检查本地 %catalog_batchno% 宏是否存在
+                // 从marceditor_macrotable.xml文件中解析宏
+                // return:
+                //      -1  error
+                //      0   not found
+                //      1   found
+                int nRet = MacroUtil.GetFromLocalMacroTable(
+                    // PathUtil.MergePath(Program.MainForm.DataDir, "marceditor_macrotable.xml"),
+                    PathUtil.MergePath(Program.MainForm.UserDir, "marceditor_macrotable.xml"),
+        "catalog_batchno",
+        false,
+        out string strValue,
+        out strError);
+                if (nRet == -1)
+                    return -1;
+                if (nRet == 1 && string.IsNullOrEmpty(strValue) == false)
+                {
+                    record.setFirstSubfield("998", "a", strValue);
+                    bChanged = true;
+                }
+            }
+
+            // 记录创建时间
+            string strCreateTime = record.select("field[@name='998']/subfield[@name='u']").FirstContent;
+            if (string.IsNullOrEmpty(strCreateTime) == true)
+            {
+                DateTime now = DateTime.Now;
+                strCreateTime = now.ToString("u");
+                record.setFirstSubfield("998", "u", strCreateTime);
+                bChanged = true;
+            }
+
+            // 记录创建者
+            string strCreator = record.select("field[@name='998']/subfield[@name='z']").FirstContent;
+            if (string.IsNullOrEmpty(strCreator) == true)
+            {
+                record.setFirstSubfield("998", "z", currentUserName);
+                bChanged = true;
+            }
+
+            if (bChanged)
+                this.SetMarc(record.Text);
+
+            return 0;
+        }
+
         // 补全册记录字段
         public int CompleteEntities(out string strError)
         {
@@ -1822,7 +1898,7 @@ MessageBoxDefaultButton.Button2);
                         location = Global.GetLibraryCode(StringUtil.GetPureLocation(edit.LocationString));
                     else
                         location = StringUtil.GetPureLocation(edit.LocationString); // 2019/7/12
-                    
+
                     // 检查册价格字符串格式是否正确
                     // 形式校验条码号
                     // return:

@@ -10307,6 +10307,10 @@ out strError);
                                     "重设密码通知",
                                     "SMS message 重设密码通知人数",
                                     1);
+
+                                // 2021/7/13
+                                // 成功的情况也记入错误日志，便于分析
+                                this.WriteErrorLog($"向 MSMQ 队列 '{this.OutgoingQueue}' 发送重设密码消息成功，strTelParam='{strTelParam}'");
                             }
                         }
                         else
@@ -10435,9 +10439,9 @@ out strError);
 
             try
             {
-                retry_start = DateTimeUtil.FromRfc1123DateTimeString(strCreateTime).ToLocalTime();
+                retry_start = DateTimeUtil.FromRfc1123DateTimeString(strCreateTime).ToLocalTime() + _tempPasswordRetryPeriod;   // 2021/7/13 增加 + ...
 
-                if (now > retry_start + _tempPasswordRetryPeriod)
+                if (now > retry_start)
                 {
                     // 禁止期已经过了
                     return 0;
@@ -13300,11 +13304,11 @@ strLibraryCode);    // 读者所在的馆代码
         public static List<string> GetUserNameValues(XmlElement root)
         {
             List<string> names = new List<string>();
-            string name = root.GetAttribute("name");
+            string name = DomUtil.GetElementText(root, "name");
             if (string.IsNullOrEmpty(name) == false)
                 names.Add(name);
 
-            string barcode = root.GetAttribute("barcode");
+            string barcode = DomUtil.GetElementText(root, "barcode");
             if (string.IsNullOrEmpty(barcode) == false)
                 names.Add(barcode);
 

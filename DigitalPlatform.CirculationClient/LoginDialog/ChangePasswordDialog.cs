@@ -27,6 +27,12 @@ namespace DigitalPlatform.CirculationClient
             this.button_worker_changePassword.Enabled = false;
             try
             {
+                if (this.textBox_worker_newPassword.Text != this.textBox_worker_confirmNewPassword.Text)
+                {
+                    MessageBox.Show(this, "新密码和确认新密码不一致。请重新输入");
+                    return;
+                }
+
                 using (LibraryChannel channel = new LibraryChannel())
                 {
                     channel.Timeout = TimeSpan.FromSeconds(10);
@@ -38,27 +44,42 @@ namespace DigitalPlatform.CirculationClient
 
                     if (isReader)
                     {
+                        // Result.Value
+                        //      -1  出错
+                        //      0   旧密码不正确
+                        //      1   旧密码正确,已修改为新密码
                         ret = channel.ChangeReaderPassword(null,
                             this.textBox_worker_userName.Text,
                             this.textBox_worker_oldPassword.Text,
                             this.textBox_worker_newPassword.Text,
                             out strError);
+                        if (ret == -1 || ret == 0)
+                            MessageBox.Show(this, strError);
+                        else
+                        {
+                            MessageBox.Show(this, "密码修改成功");
+                            succeed = true;
+                        }
                     }
                     else
                     {
+                        // return.Value:
+                        //      -1  出错
+                        //      0   成功
                         ret = channel.ChangeUserPassword(null,
                             this.textBox_worker_userName.Text,
                             this.textBox_worker_oldPassword.Text,
                             this.textBox_worker_newPassword.Text,
                             out strError);
+                        if (ret == -1)
+                            MessageBox.Show(this, strError);
+                        else
+                        {
+                            MessageBox.Show(this, "密码修改成功");
+                            succeed = true;
+                        }
                     }
-                    if (ret == -1 || ret == 0)
-                        MessageBox.Show(this, strError);
-                    else
-                    {
-                        MessageBox.Show(this, "密码修改成功");
-                        succeed = true;
-                    }
+
                     channel.Close();
                 }
             }

@@ -1460,6 +1460,10 @@ namespace dp2SIPServer
             if (String.IsNullOrEmpty(strPassword) == false
                 && strAction == "new")
             {
+                // Result.Value
+                //      -1  出错
+                //      0   旧密码不正确
+                //      1   旧密码正确,已修改为新密码
                 lRet = channel.ChangeReaderPassword(null,
                     strReaderBarcode,
                     "", // strOldReaderPassword
@@ -1739,6 +1743,10 @@ namespace dp2SIPServer
 
             LibraryChannel channel = this.GetChannel();
             string strMsg = "";
+            // Result.Value
+            //      -1  出错
+            //      0   旧密码不正确
+            //      1   旧密码正确,已修改为新密码
             long lRet = channel.ChangeReaderPassword(null,
                 strBarcode,
                 strOldPassword,
