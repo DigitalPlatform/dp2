@@ -3974,7 +3974,8 @@ out strError);
             // 权限判断
 
             // 权限字符串
-            if (StringUtil.IsInList("getreaderinfo", sessioninfo.RightsOrigin) == false)
+            // if (StringUtil.IsInList("getreaderinfo", sessioninfo.RightsOrigin) == false)
+            if (GetReaderInfoLevel(sessioninfo.RightsOrigin) == null)
             {
                 result.Value = -1;
                 result.ErrorInfo = "读取读者信息被拒绝。不具备 getreaderinfo 权限。";
@@ -4490,8 +4491,22 @@ out strError);
             }
 
             XmlDocument readerdom = null;
+
+            // 2021/7/13
+            // 无论怎样都要装入 readerdom
+            nRet = LibraryApplication.LoadToDom(strXml,
+                out readerdom,
+                out strError);
+            if (nRet == -1)
+            {
+                strError = "装载读者记录进入 XML DOM 时发生错误: " + strError;
+                goto ERROR1;
+            }
+
             if (sessioninfo.UserType == "reader")
             {
+                /*
+                // TODO: 无论怎样都要装入 readerdom
                 nRet = LibraryApplication.LoadToDom(strXml,
                     out readerdom,
                     out strError);
@@ -4500,6 +4515,7 @@ out strError);
                     strError = "装载读者记录进入 XML DOM 时发生错误: " + strError;
                     goto ERROR1;
                 }
+                */
 
                 // 对读者身份的附加判断
                 if (sessioninfo.UserType == "reader"
@@ -4567,7 +4583,11 @@ out strError);
                     DomUtil.SetElementText(readerdom.DocumentElement, "libraryCode", strLibraryCode);
                     // 2020/9/8
                     AddPatronOI(readerdom, strLibraryCode);
+
+                    strXml = null;  // 从此以后不用 strXml，而用 readerdom
                 }
+
+                /*
                 if (string.IsNullOrEmpty(strXml) == false)
                 {
                     XmlDocument temp = new XmlDocument();
@@ -4587,12 +4607,14 @@ out strError);
                     AddPatronOI(temp, strLibraryCode);
                     strXml = temp.DocumentElement.OuterXml;
                 }
+                */
             }
 
             nRet = BuildReaderResults(
                 sessioninfo,
                 readerdom,
-                strXml,
+                null,   // strXml,
+                GetReaderInfoLevel(sessioninfo.Rights),
                 strResultTypeList,
                 strLibraryCode,
                 recpaths,
@@ -4812,12 +4834,13 @@ out strError);
         // 创建读者记录返回格式
         // 注：出于安全需要，readerdom 和 strXml 在调用前就应该把里面的 barcode 元素删除
         // parameters:
-        //      readerdom   读者 XMLDocument 对象。如果为空，则 strXml 参数中应该有读者记录
+        //      readerdom   读者 XmlDocument 对象。如果为空，则 strXml 参数中应该有读者记录
         //      strXml      读者 XML 记录。如果 readerdom 为空，可以用这里的值
         int BuildReaderResults(
             SessionInfo sessioninfo,
             XmlDocument readerdom,
             string strXml,
+            string level,
             string strResultTypeList,
             string strLibraryCode,  // calendar/advancexml/html 时需要
             List<string> recpaths,    // recpaths 时需要
@@ -4838,6 +4861,32 @@ out strError);
                 return 0;
             }
 
+            // 2021/7/13
+            if (readerdom == null && string.IsNullOrEmpty(strXml))
+            {
+                strError = "readerdom 和 strXml 不应同时为空";
+                return -1;
+            }
+
+            if (readerdom == null)
+            {
+                nRet = LibraryApplication.LoadToDom(strXml,
+                    out readerdom,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = "装载读者记录进入XML DOM时发生错误: " + strError;
+                    goto ERROR1;
+                }
+            }
+
+            XmlDocument filtered_readerdom = new XmlDocument();
+            if (readerdom != null)
+                filtered_readerdom.LoadXml(readerdom.OuterXml);
+            else
+                filtered_readerdom.LoadXml(strXml);
+            FilterByLevel(filtered_readerdom, level);
+
             string[] result_types = strResultTypeList.Split(new char[] { ',' });
             //results = new string[result_types.Length];
             List<string> results_list = new List<string>();
@@ -4851,6 +4900,7 @@ out strError);
                 // if (String.Compare(strResultType, "calendar", true) == 0)
                 if (IsResultType(strResultType, "calendar") == true)
                 {
+                    /*
                     if (readerdom == null)
                     {
                         nRet = LibraryApplication.LoadToDom(strXml,
@@ -4862,6 +4912,7 @@ out strError);
                             goto ERROR1;
                         }
                     }
+                    */
 
                     string strReaderType = DomUtil.GetElementText(readerdom, "readerType");
 
@@ -4893,7 +4944,7 @@ out strError);
                     || IsResultType(strResultType, "json") == true)
                 {
                     string strResultXml = "";
-                    nRet = GetPatronXml(strXml,
+                    nRet = GetPatronXml(filtered_readerdom.OuterXml, // strXml,
         strResultType,
         strLibraryCode,
         out strResultXml,
@@ -4964,6 +5015,7 @@ out strError);
                         continue;
                     }
 #endif
+                    /*
                     if (readerdom == null)
                     {
                         nRet = LibraryApplication.LoadToDom(strXml,
@@ -4977,7 +5029,9 @@ out strError);
                             goto CONTINUE;
                         }
                     }
-                    strSummary = DomUtil.GetElementText(readerdom.DocumentElement, "name");
+                    */
+
+                    strSummary = DomUtil.GetElementText(filtered_readerdom.DocumentElement, "name");
                     // results[i] = strSummary;
                     SetResult(results_list, i, strSummary);
                 }
@@ -4991,7 +5045,7 @@ out strError);
                         sessioninfo,
                         strResultTypeList,  // strResultType, BUG!!! 2012/4/8
                         strLibraryCode,
-                        strXml,
+                        filtered_readerdom.OuterXml, // strXml,
                         out strOutputXml,
                         out strError);
                     if (nRet == -1)
@@ -5019,7 +5073,7 @@ out strError);
                         Path.Combine(this.CfgDir, "readerxml2html.cs"),
                         Path.Combine(this.CfgDir, "readerxml2html.cs.ref"),
                         strLibraryCode,
-                        strXml,
+                        filtered_readerdom.OuterXml, // strXml,
                         strOutputPath,  // 2009/10/18 
                         operType,   // OperType.None,
                         saBorrowedItemBarcode,  // null,
@@ -5046,7 +5100,7 @@ out strError);
                         this.CfgDir + "\\readerxml2text.cs",
                         this.CfgDir + "\\readerxml2text.cs.ref",
                         strLibraryCode,
-                        strXml,
+                        filtered_readerdom.OuterXml, // strXml,
                         strOutputPath,  // 2009/10/18 
                         OperType.None,
                         null,
@@ -6103,6 +6157,7 @@ out strError);
         sessioninfo,
         readerdom,
         readerdom.OuterXml,
+        GetReaderInfoLevel(sessioninfo.Rights),
         strResultTypeList,
         "", // strLibraryCode,
         recpaths,
@@ -6287,9 +6342,13 @@ out strError);
         }
 
         // 按照级别对读者记录中的信息字段进行过滤
-        public static void FilterByLevel(XmlDocument readerdom,
+        public static bool FilterByLevel(XmlDocument readerdom,
             string level)
         {
+            if (string.IsNullOrEmpty(level))
+                return false;
+
+            bool changed = true;
             /*
 基本字段："borrows","overdues","reservations","outofReservations"
 第一级：证状态，发证日期，失效日期，姓名(除第一字以后都被马赛克)
@@ -6302,15 +6361,43 @@ out strError);
 第八级：+ 租金押金字段 
 第九级：+ 指纹，掌纹，人脸特征
              * */
+            var names = GetNames(level);
+            XmlNodeList nodes = readerdom.DocumentElement.SelectNodes("*");
+            foreach (XmlElement element in nodes)
+            {
+                // 马赛克
+                if (names.IndexOf("?" + element.Name) != -1)
+                {
+                    element.InnerText = Mask(element.InnerText);
+                    changed = true;
+                    continue;
+                }
 
+                if (names.IndexOf(element.Name) == -1)
+                {
+                    element.ParentNode.RemoveChild(element);
+                    changed = true;
+                    continue;
+                }
+            }
+
+            return changed;
+
+            string Mask(string text)
+            {
+                if (text == null || text.Length < 2)
+                    return text;
+                return new string(text[0], 1) + new string('*', text.Length - 1);
+            }
         }
 
         static List<string> GetNames(string level)
         {
             List<string> names = new List<string>();
 
-            // 基本字段。借阅的册，违约金, 预约未取参数
+            // 基本字段。高级信息，借阅的册，违约金, 预约未取参数
             names.AddRange(new string[] {
+                "info",
                 "borrows",
                 "overdues",
                 "reservations",
@@ -6318,11 +6405,14 @@ out strError);
 
 
             // 第一级：证状态，发证日期，失效日期，姓名(除第一字以后都被马赛克)
-            names.AddRange(new string[] { "state", "createDate", "expireDate", "name" });
+            names.AddRange(new string[] { "state", "createDate", "expireDate" });
             if (level == "1")
+            {
+                names.Add("?name");
                 return names;
+            }
             // 第二级：+ 完整姓名，姓名拼音，显示名，性别，民族，证条码号，参考ID，OI，注释
-            names.AddRange(new string[] { "namePinyin", "displayName", "gender", "nation", "barcode", "refID", "oi", "comment" });
+            names.AddRange(new string[] { "name", "namePinyin", "displayName", "gender", "nation", "barcode", "refID", "oi", "comment" });
             if (level == "2")
                 return names;
             // 第三级：+ 单位，职务，地址，读者类型
@@ -6354,6 +6444,22 @@ out strError);
             if (level == "9")
                 return names;
             return names;
+        }
+
+        // 从 rights 字符串中得到 getreaderinfo 权限的 level 字符串
+        // 原理：权限字符串中通常会这样定义 getreaderinfo:1，其中 1 表示 level "1"
+        // return:
+        //      null    没有找到 getreaderinfo 前缀
+        //      ""      找到了前缀，并且 level 部分为空
+        //      其他     返回 level 部分
+        public static string GetReaderInfoLevel(string rights)
+        {
+            // return:
+            //      null    没有找到前缀
+            //      ""      找到了前缀，并且值部分为空
+            //      其他     返回值部分
+            var level = StringUtil.GetParameterByPrefix(rights, "getreaderinfo");
+            return level;
         }
     }
 }

@@ -1985,6 +1985,7 @@ namespace DigitalPlatform.LibraryServer
             sessioninfo,
             null,
             strOutputReaderXml,
+            GetReaderInfoLevel(sessioninfo.Rights),
             strReaderFormatList,
             strLibraryCode,  // calendar/advancexml/html 时需要
             null,    // recpaths 时需要
@@ -7995,6 +7996,7 @@ start_time_1,
     sessioninfo,
     null,
     strOutputReaderXml,
+            GetReaderInfoLevel(sessioninfo.Rights),
     strReaderFormatList,
     strLibraryCode,  // calendar/advancexml/html 时需要
     null,    // recpaths 时需要
