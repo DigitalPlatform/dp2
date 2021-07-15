@@ -2102,11 +2102,15 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                         if (ret == false)
                             App.Current.Shutdown();
                         StartNetworkMode = dlg.Mode;
+                        _startNetworkModeComment = $"{DateTime.Now.ToString()} 断网模式对话框弹出，人工选择了模式 '{dlg.Mode}'";
                     }
                     ));
                 }
             }
         }
+
+        // 关于 dp2ssl 启动阶段断网模式对话框曾经出现过，如何选择的，注释
+        internal static string _startNetworkModeComment = "";
 
         // 命令行参数里面是否包含了静默初始化？
         public static bool IsSilently()

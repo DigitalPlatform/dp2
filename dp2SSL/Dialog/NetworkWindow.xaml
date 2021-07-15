@@ -37,13 +37,13 @@
 
                 <Button Name="localMode" 
                     Style="{DynamicResource RoundedButtonStyle}" 
-                    Width="320" Height="60" 
+                    Width="420" Height="60" 
                     FontSize="30" FontWeight="ExtraBold" 
                     Foreground="White" 
                     Click="localMode_Click">按断网模式继续启动</Button>
                 <Button Name="networkMode" 
                     Style="{DynamicResource RoundedButtonStyle}" 
-                    Width="320" Height="60" 
+                    Width="420" Height="60" 
                     FontSize="30" FontWeight="ExtraBold" 
                     Foreground="White" 
                     Click="networkMode_Click">按联网模式继续启动</Button>

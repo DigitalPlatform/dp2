@@ -693,7 +693,6 @@ namespace DigitalPlatform.LibraryServer
                 "name",
                 this.textBox_manageUserName.Text);
 
-
             // 密码
             DomUtil.SetElementText(UserRecDom.DocumentElement,
                "password",

@@ -13,6 +13,9 @@ using DigitalPlatform.Text;
 
 namespace DigitalPlatform.LibraryServer
 {
+    /// <summary>
+    /// 服务器同步参数对话框
+    /// </summary>
     public partial class LibraryXmlDialog : Form
     {
         bool _changed = false;

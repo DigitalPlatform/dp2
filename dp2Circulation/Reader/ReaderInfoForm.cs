@@ -2109,16 +2109,17 @@ strSavedXml);
                     // 装载记录到HTML
                     {
 
-                        string strBarcode = this.readerEditControl1.Barcode;
+                        // string strBarcode = this.readerEditControl1.Barcode;
 
-                        stop.SetMessage("正在装入读者记录 " + strBarcode + " ...");
+                        stop.SetMessage($"正在装入读者记录 {strSavedPath} 的 HTML ...");
 
                         int nRedoCount = 0;
                     REDO_LOAD_HTML:
                         string[] results = null;
                         lRet = Channel.GetReaderInfo(
                             stop,
-                            strBarcode,
+                            // strBarcode,
+                            "@path:" + strSavedPath,
                             "html",
                             out results,
                             out string strOutputRecPath,
@@ -2149,7 +2150,8 @@ strSavedXml);
 
                         if (lRet > 1)
                         {
-                            strError = "条码 " + strBarcode + " 命中记录 " + lRet.ToString() + " 条，注意这是一个严重错误，请系统管理员尽快排除。";
+                            // strError = "条码 " + strBarcode + " 命中记录 " + lRet.ToString() + " 条，注意这是一个严重错误，请系统管理员尽快排除。";
+                            strError = $"路径 '{strSavedPath}' 命中记录 { lRet.ToString() } 条，注意这是一个严重错误，请系统管理员尽快排除。";
                             strError = "保存记录已经成功，但在刷新HTML显示的时候发生错误: " + strError;
                             // Global.SetHtmlString(this.webBrowser_readerInfo, strError);
                             this.m_webExternalHost.SetTextString(strError);

@@ -5172,13 +5172,14 @@ out strError);
                     }
 
                     // 合并新旧记录
-                    string strNewXml = "";
+                    // string strNewXml = "";
                     nRet = MergeTwoReaderXml(
                         element_names,
                         "change",
                         domExist,
                         domNew,
-                        out strNewXml,
+                        // out strNewXml,
+                        out XmlDocument domMerged,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
@@ -5186,7 +5187,7 @@ out strError);
                     // 保存新记录
                     byte[] output_timestamp = null;
                     lRet = channel.DoSaveTextRes(strRecPath,
-                        strNewXml,
+                        domMerged.OuterXml, // strNewXml,
                         false,   // include preamble?
                         "content,ignorechecktimestamp",
                         exist_timestamp,

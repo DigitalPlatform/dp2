@@ -524,7 +524,7 @@ namespace dp2Circulation
                         null,   // strResultSetName
                         lStart,
                         lCount,
-                        "id,cols",
+                        "id,cols", // "id,cols,xml",
                         this.Lang,
                         out searchresults,
                         out strError);
@@ -545,16 +545,19 @@ namespace dp2Circulation
 
                     // 处理浏览结果
                     this.listView_records.BeginUpdate();
-                    for (int i = 0; i < searchresults.Length; i++)
+                    // for (int i = 0; i < searchresults.Length; i++)
+                    foreach(var record in searchresults)
                     {
+                        // string xml = record.RecordBody.Xml;
+
                         if (bPushFillingBrowse == true)
                             Global.InsertNewLine(this.listView_records,
-                                searchresults[i].Path,
-                                searchresults[i].Cols);
+                                record.Path,
+                                record.Cols);
                         else
                             Global.AppendNewLine(this.listView_records,
-                                searchresults[i].Path,
-                                searchresults[i].Cols);
+                                record.Path,
+                                record.Cols);
                     }
                     this.listView_records.EndUpdate();
 
@@ -585,7 +588,6 @@ namespace dp2Circulation
         ERROR1:
             MessageBox.Show(this, strError);
         }
-
 
         /// <summary>
         /// 当前窗口查询的数据库类型，用于显示的名称形态
@@ -747,7 +749,8 @@ out strError);
                 strBarcodeOrRecPath = ListViewUtil.GetItemText(this.listView_records.SelectedItems[0], 1);  // this.listView_records.SelectedItems[0].SubItems[1].Text;
 
                 // 如果条码号为空
-                if (String.IsNullOrEmpty(strBarcodeOrRecPath) == true)
+                if (String.IsNullOrEmpty(strBarcodeOrRecPath) == true
+                    || strBarcodeOrRecPath == "[滤除]")
                 {
                     strBarcodeOrRecPath = this.listView_records.SelectedItems[0].SubItems[0].Text;
                     strIdType = "recpath";

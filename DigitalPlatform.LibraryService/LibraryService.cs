@@ -3106,6 +3106,41 @@ namespace dp2Library
                     return result;
                 }
 
+                // 2021/7/15
+                // 过滤结果
+                // 对 XML 记录进行过滤或者修改
+                if (searchresults != null)
+                {
+                    // 2012/9/15
+                    Hashtable table = new Hashtable();  // 加快运算速度
+
+                    // return:
+                    //      null    没有找到 getreaderinfo 前缀
+                    //      ""      找到了前缀，并且 level 部分为空
+                    //      其他     返回 level 部分
+                    string read_level = LibraryApplication.GetReaderInfoLevel("getreaderinfo", sessioninfo.RightsOrigin);
+                    bool bHasGetReaderInfoRight = read_level != null;
+                    // bool bHasGetReaderInfoRight = StringUtil.IsInList("getreaderinfo", sessioninfo.RightsOrigin);
+
+                    foreach (Record record in searchresults)
+                    {
+                        string strDbName = ResPath.GetDbName(record.Path);
+
+                        bool bIsReader = sessioninfo.UserType == "reader";
+
+                        if (app.IsReaderDbName(strDbName))
+                        {
+                            // 如果 level 不是空，则 mask 全部浏览列内容
+                            if (read_level != "")
+                                ClearCols(record, "[滤除]");
+
+                            // 过滤
+                            FilterPatronRecord(record, read_level);
+                        }
+                    }
+                }
+
+
                 result.Value = lRet;
                 result.ErrorInfo = strError;
                 return result;
@@ -3120,6 +3155,49 @@ namespace dp2Library
                 result.ErrorInfo = strErrorText;
                 return result;
             }
+        }
+
+        // 过滤读者记录 XML
+        // parameters:
+        //      read_level
+        //                  null    没有找到 getreaderinfo 前缀
+        //                  ""      找到了前缀，并且 level 部分为空
+        //                  其他     返回 level 部分
+        static void FilterPatronRecord(Record record, string read_level)
+        {
+            if (read_level == "")
+                return; // 保持 XML 不变
+            if (record.RecordBody == null)
+                return;
+
+            if (read_level == null)
+            {
+                if (string.IsNullOrEmpty(record.RecordBody.Xml) == false)
+                    record.RecordBody.Xml = "";
+                return;
+            }
+
+            string xml = "";
+            try
+            {
+                xml = record.RecordBody.Xml;
+            }
+            catch
+            {
+                record.RecordBody.Xml = "<root error='xml parse error'>";
+                return;
+            }
+            if (string.IsNullOrEmpty(xml))
+                return;
+
+            XmlDocument domNewRec = new XmlDocument();
+            domNewRec.LoadXml(xml);
+
+            // string path = record.Path;
+            // AddPatronOI(domNewRec, strLibraryCode);
+
+            LibraryApplication.FilterByLevel(domNewRec, read_level);
+            record.RecordBody.Xml = domNewRec.DocumentElement == null ? domNewRec.OuterXml : domNewRec.DocumentElement.OuterXml;
         }
 
         // 获得数据库记录
@@ -3390,6 +3468,18 @@ namespace dp2Library
                     // 2012/9/15
                     Hashtable table = new Hashtable();  // 加快运算速度
 
+                    // 如果当前身份是读者，或者没有getreaderinfo权限，则要过滤掉属于读者库的记录
+                    // TODO: 今后对书目库、各种功能库的访问也要加以限制
+                    bool bIsReader = sessioninfo.UserType == "reader";
+                    // bool bHasGetReaderInfoRight = StringUtil.IsInList("getreaderinfo", sessioninfo.RightsOrigin);
+
+                    // return:
+                    //      null    没有找到 getreaderinfo 前缀
+                    //      ""      找到了前缀，并且 level 部分为空
+                    //      其他     返回 level 部分
+                    string read_level = LibraryApplication.GetReaderInfoLevel("getreaderinfo", sessioninfo.RightsOrigin);
+                    bool bHasGetReaderInfoRight = read_level != null;
+
                     foreach (Record record in searchresults)
                     {
                         string strDbName = ResPath.GetDbName(record.Path);
@@ -3400,10 +3490,18 @@ namespace dp2Library
                             AddItemOI(app, record);
                         }
 
-                        // 如果当前身份是读者，或者没有getreaderinfo权限，则要过滤掉属于读者库的记录
-                        // TODO: 今后对书目库、各种功能库的访问也要加以限制
-                        bool bIsReader = sessioninfo.UserType == "reader";
-                        bool bHasGetReaderInfoRight = StringUtil.IsInList("getreaderinfo", sessioninfo.RightsOrigin);
+
+
+                        if (app.IsReaderDbName(strDbName))
+                        {
+                            // 如果 level 不是空，则 mask 全部浏览列内容
+                            if (read_level != "")
+                                ClearCols(record, "[滤除]");
+
+                            // 过滤
+                            FilterPatronRecord(record, read_level);
+                        }
+
                         if (bIsReader == true || bHasGetReaderInfoRight == false)
                         {
                             bool bIsReaderRecord = app.IsReaderDbName(strDbName);
@@ -3471,6 +3569,21 @@ namespace dp2Library
                 result.ErrorCode = ErrorCode.SystemError;
                 result.ErrorInfo = strErrorText;
                 return result;
+            }
+        }
+
+        // 2021/7/15
+        // 清除全部 Cols 列内容
+        static void ClearCols(Record record, string mask_string = "")
+        {
+            if (record == null || record.Cols == null || record.Cols.Length == 0)
+                return;
+            for (int i = 0; i < record.Cols.Length; i++)
+            {
+                if (i == 0)
+                    record.Cols[i] = mask_string;
+                else
+                    record.Cols[i] = "";
             }
         }
 

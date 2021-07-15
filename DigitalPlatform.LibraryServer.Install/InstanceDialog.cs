@@ -2832,7 +2832,7 @@ MessageBoxDefaultButton.Button2);
                         Cryptography.Encrypt(this.SupervisorPassword, "dp2circulationpassword")
                         );
                 }
-                else
+                else if (version < 3.0)
                 {
                     // 新的密码存储策略
                     nRet = LibraryServerUtil.SetUserPassword(this.SupervisorPassword, out string strHashed, out strError);
@@ -2842,6 +2842,18 @@ MessageBoxDefaultButton.Button2);
                         return -1;
                     }
                     nodeSupervisor.SetAttribute("password", strHashed);
+                }
+                else
+                {
+                    // 2021/7/14
+                    // >= 3.0
+                    nRet = LibraryServerUtil.SetUserPassword(this.SupervisorPassword, out string strHashed, out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "SetUserPassword() error: " + strError;
+                        return -1;
+                    }
+                    LibraryServerUtil.SetPasswordValue(nodeSupervisor, strHashed);
                 }
             }
             if (this.SupervisorRights != null)

@@ -339,11 +339,25 @@ namespace DigitalPlatform.LibraryServer
                         strError = "SetUserPassword() error: " + strError;
                         return -1;
                     }
-                    user.SetAttribute("password", strHashed);
+                    // user.SetAttribute("password", strHashed);
+                    // 2021/7/14
+                    SetPasswordValue(user, strHashed);
                 }
             }
 
             return 0;
+        }
+
+        // 2021/6/29
+        public static void SetPasswordValue(XmlElement account, string password_text)
+        {
+            XmlElement password_element = account.SelectSingleNode("password") as XmlElement;
+            if (password_element == null)
+            {
+                password_element = account.OwnerDocument.CreateElement("password");
+                password_element = account.AppendChild(password_element) as XmlElement;
+            }
+            password_element.InnerText = password_text;
         }
 
         // 2015/5/20 新的密码存储策略

@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.59.*")]
-[assembly: AssemblyFileVersion("3.59.0.0")]
+[assembly: AssemblyVersion("3.61.*")]
+[assembly: AssemblyFileVersion("3.61.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -247,3 +247,5 @@ ItemCanReturn()
 //						添加或者清除读者记录中 password/@expire 属性的步骤。这样当 library.xml 配置发生改变后，后台批处理会自动去修改读者记录
 //		3.59 (2021/7/9) 此前版本 SetMessage() API 中发送 dp2 内置邮件给一般收件者，不会发送成功。此 bug 在最新版中已经修正。
 //						此前版本 ChangeReaderPassword() API 修改读者密码时，(强密码状态下)检查新密码时不允许和证条码号、读者姓名相同，这项检查没有兑现。此 bug 在最新版中已经修正
+//		3.60 (2021/7/15) GetReaderInfo() SetReaderInfo() 初步实现了账户 getreaderinfo:n setreaderinfo:n 分级权限控制
+//		3.61 (2021/7/15) GetReaderInfo() API 的返回数据类型增加 structure 类型，用于返回记录结构定义

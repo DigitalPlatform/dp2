@@ -2153,6 +2153,12 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
+        // 特殊权限列表。这些权限，都是“反向”权限，即加了这些权限反而限制了权限。也就是说增加了这些权限不会让账户有权利增强的效果
+        static string[] special_rights = new string[] { 
+            "denychangemypassword",
+            "neverexpire",
+        };
+
         // strLeft 包含的权限是否小于等于 strRight
         static bool IsLessOrEqualThan(string strLeft,
             string strRight,
@@ -2175,8 +2181,14 @@ namespace DigitalPlatform.LibraryServer
 
             foreach (string s in left)
             {
+                // _ 开头的权限跳过
                 if (string.IsNullOrEmpty(s) == false
                     && s[0] == '_')
+                    continue;
+
+                // 2021/7/14
+                // 对于不会增强权利的权限值，跳过检查
+                if (Array.IndexOf<string>(special_rights, s) != -1)
                     continue;
 
                 if (Array.IndexOf<string>(right, s) == -1)

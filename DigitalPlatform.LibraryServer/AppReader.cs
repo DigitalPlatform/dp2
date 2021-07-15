@@ -24,6 +24,7 @@ using DigitalPlatform.Message;
 using DigitalPlatform.rms.Client.rmsws_localhost;
 using DigitalPlatform.Core;
 using Newtonsoft.Json;
+using System.Linq;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -32,7 +33,7 @@ namespace DigitalPlatform.LibraryServer
     /// </summary>
     public partial class LibraryApplication
     {
-        // 读者记录中 要害元素名列表
+        // 读者记录中 要害元素名列表。注意没有包含 borrows 等流通信息元素
         static string[] _reader_element_names = new string[] {
                 "barcode",
                 "state",
@@ -246,13 +247,20 @@ namespace DigitalPlatform.LibraryServer
         static int MergeTwoReaderXml(
             string[] element_names,
             string strAction,
-            XmlDocument domExist,
+            XmlDocument domExistParam,
             XmlDocument domNew,
-            out string strMergedXml,
+            // out string strMergedXml,
+            out XmlDocument domMerged,
             out string strError)
         {
-            strMergedXml = "";
+            domMerged = null;
+            // strMergedXml = "";
             strError = "";
+
+            // 2021/7/14
+            // 确保 domExistParam 参数不会在本函数内被修改，只修改 domExist
+            var domExist = new XmlDocument();
+            domExist.LoadXml(domExistParam.OuterXml);
 
             if (strAction == "change"
                 || strAction == "changereaderbarcode")
@@ -425,7 +433,8 @@ namespace DigitalPlatform.LibraryServer
             // 删除以前误为根元素添加的 expireDate 属性
             domExist.DocumentElement.RemoveAttribute("expireDate");
 
-            strMergedXml = domExist.OuterXml;
+            // strMergedXml = domExist.OuterXml;
+            domMerged = domExist;
             return 0;
         }
 
@@ -436,6 +445,7 @@ namespace DigitalPlatform.LibraryServer
         //      0   没有实质性修改
         //      1   发生了实质性修改
         int BuildNewReaderRecord(XmlDocument domNewRec,
+            string rights,
             out string strXml,
             out string strError)
         {
@@ -462,6 +472,17 @@ namespace DigitalPlatform.LibraryServer
             RenameBirthday(dom);
 
             bool bChanged = false;
+
+            // *** 滤掉 setreaderinfo:n 权限不包含的那些字段
+            // 2021/7/15
+            // return:
+            //      null    没有找到 getreaderinfo 前缀
+            //      ""      找到了前缀，并且 level 部分为空
+            //      其他     返回 level 部分
+            string write_level = GetReaderInfoLevel("setreaderinfo", rights);
+            if (FilterByLevel(dom, write_level) == true)
+                bChanged = true;
+
             for (int i = 0; i < element_names.Length; i++)
             {
                 List<XmlNode> deleted_nodes = DomUtil.DeleteElements(dom.DocumentElement,
@@ -678,7 +699,8 @@ namespace DigitalPlatform.LibraryServer
                 if (strAction == "changestate")
                 {
                     // 有setreaderinfo和changereaderstate之一均可
-                    if (StringUtil.IsInList("setreaderinfo", sessioninfo.RightsOrigin) == false)
+                    // if (StringUtil.IsInList("setreaderinfo", sessioninfo.RightsOrigin) == false)
+                    if (GetReaderInfoLevel("setreaderinfo", sessioninfo.RightsOrigin) == null)
                     {
                         if (StringUtil.IsInList("changereaderstate", sessioninfo.RightsOrigin) == false)
                         {
@@ -712,7 +734,8 @@ namespace DigitalPlatform.LibraryServer
                 }
                 else
                 {
-                    if (StringUtil.IsInList("setreaderinfo", sessioninfo.RightsOrigin) == false)
+                    // if (StringUtil.IsInList("setreaderinfo", sessioninfo.RightsOrigin) == false)
+                    if (GetReaderInfoLevel("setreaderinfo", sessioninfo.RightsOrigin) == null)
                     {
                         result.Value = -1;
                         result.ErrorInfo = "修改读者信息被拒绝。不具备 setreaderinfo 权限。";
@@ -1357,6 +1380,7 @@ namespace DigitalPlatform.LibraryServer
                     {
                         // 主要是为了把待加工的记录中，可能出现的属于“流通信息”的字段去除，避免出现安全性问题
                         nRet = BuildNewReaderRecord(domNewRec,
+                            sessioninfo.RightsOrigin,
                             out strSavedXml,
                             out strError);
                         if (nRet == -1)
@@ -1486,6 +1510,27 @@ strLibraryCode);    // 读者所在的馆代码
                     || strAction == "changeforegift"
                     || strAction == "changereaderbarcode")
                 {
+                    // 限定 element_names 集合，根据当前账户权限中 getreaderinfo:n 和 setreaderinfo:n 中的级别 n
+
+                    // 2021/7/15
+                    // return:
+                    //      null    没有找到 getreaderinfo 前缀
+                    //      ""      找到了前缀，并且 level 部分为空
+                    //      其他     返回 level 部分
+                    string read_level = GetReaderInfoLevel("getreaderinfo", sessioninfo.RightsOrigin);
+                    if (string.IsNullOrEmpty(read_level) == false)
+                    {
+                        var names = GetElementNames(read_level);
+                        element_names = element_names.Intersect(names).ToArray();
+                    }
+
+                    string write_level = GetReaderInfoLevel("setreaderinfo", sessioninfo.RightsOrigin);
+                    if (string.IsNullOrEmpty(write_level) == false)
+                    {
+                        var names = GetElementNames(write_level);
+                        element_names = element_names.Intersect(names).ToArray();
+                    }
+
                     // DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue errorcode;
                     // 执行"change"操作
                     // 1) 操作成功后, NewRecord中有实际保存的新记录，NewTimeStamp为新的时间戳
@@ -1499,6 +1544,7 @@ strLibraryCode);    // 读者所在的馆代码
                         strAction,
                         bForce,
                         channel,
+                        sessioninfo.RightsOrigin,
                         strRecPath,
                         domNewRec,
                         domOldRec,
@@ -1528,6 +1574,26 @@ strLibraryCode);    // 读者所在的馆代码
                 }
                 else if (strAction == "delete")
                 {
+                    // 限定 element_names 集合，根据当前账户权限中 getreaderinfo:n 和 setreaderinfo:n 中的级别 n
+
+                    // 2021/7/15
+                    // return:
+                    //      null    没有找到 getreaderinfo 前缀
+                    //      ""      找到了前缀，并且 level 部分为空
+                    //      其他     返回 level 部分
+                    string read_level = GetReaderInfoLevel("getreaderinfo", sessioninfo.RightsOrigin);
+                    if (string.IsNullOrEmpty(read_level) == false)
+                    {
+                        var names = GetElementNames(read_level);
+                        element_names = element_names.Intersect(names).ToArray();
+                    }
+
+                    string write_level = GetReaderInfoLevel("setreaderinfo", sessioninfo.RightsOrigin);
+                    if (string.IsNullOrEmpty(write_level) == false)
+                    {
+                        var names = GetElementNames(write_level);
+                        element_names = element_names.Intersect(names).ToArray();
+                    }
 
                     // return:
                     //      -2  记录中有流通信息，不能删除
@@ -1536,21 +1602,21 @@ strLibraryCode);    // 读者所在的馆代码
                     //      1   记录成功删除
                     nRet = DoReaderOperDelete(
                         sessioninfo.LibraryCodeList,
-                       element_names,
-                       sessioninfo,
-                       bForce,
-                       channel,
-                       strRecPath,
-                       strOldXml,
-                       baOldTimestamp,
-                       strOldBarcode,
-                       // strNewBarcode,
-                       domOldRec,
-                       ref strExistingXml,
-                       ref baNewTimestamp,
-                       ref domOperLog,
-                       ref kernel_errorcode,
-                       out strError);
+                        element_names,
+                        sessioninfo,
+                        bForce,
+                        channel,
+                        strRecPath,
+                        strOldXml,
+                        baOldTimestamp,
+                        strOldBarcode,
+                        // strNewBarcode,
+                        domOldRec,
+                        ref strExistingXml,
+                        ref baNewTimestamp,
+                        ref domOperLog,
+                        ref kernel_errorcode,
+                        out strError);
                     if (nRet == -1)
                         goto ERROR1;
                     if (nRet == -2)
@@ -2243,6 +2309,7 @@ root, strLibraryCode);
             string strAction,
             bool bForce,
             RmsChannel channel,
+            string rights,
             string strRecPath,
             XmlDocument domNewRec,
             XmlDocument domOldRec,
@@ -2472,11 +2539,13 @@ root, strLibraryCode);
                     strAction,
                     domExist,
                     domNewRec,
-                    out string strNewXml,
+                    // out string strNewXml,
+                    out XmlDocument domMerged,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
 
+                /*
                 domNewRec = new XmlDocument();
                 try
                 {
@@ -2487,6 +2556,8 @@ root, strLibraryCode);
                     strError = "(1)读者记录装入 XMLDOM 时出错: " + ex.Message;
                     return -1;
                 }
+                */
+                domNewRec = domMerged;
             }
 
             // 观察一个读者记录路径，看看是不是在当前用户管辖的读者库范围内?
@@ -2552,6 +2623,33 @@ root, strLibraryCode);
                 DomUtil.SetElementText(domNewRec.DocumentElement, "comment", strExistComment);
             }
 
+            // 检查 password/@expire 属性
+            {
+                // return:
+                //      -1  出错
+                //      0   相等
+                //      1   不相等
+                nRet = CompareTwoField(
+                    "rights",
+                    domExist,
+                    domNewRec,
+                    out string strOldText,
+                    out string strNewText,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+                if (nRet == 1)
+                {
+                    // 进行检查
+                    // 根据 library.xml 中 login/@patronPasswordExpireLength 和读者记录的 rights 元素，
+                    // 添加或者清除读者记录中 password/@expire 属性
+                    if (ReadersMonitor.UpdatePasswordExpire(this, domNewRec) == true)
+                    {
+                        // 对 domNewRec 有改动
+                    }
+                }
+            }
+
         REDO_SAVE:
             // 保存新记录
             byte[] output_timestamp = null;
@@ -2605,7 +2703,22 @@ root, strLibraryCode);
 
                 // 保存成功，需要返回信息元素。因为需要返回新的时间戳
                 baNewTimestamp = output_timestamp;
-                strNewRecord = domNewRec.OuterXml;  // strNewXml;
+
+                // 2021/7/15
+                // 按照 getreaderinfo:n 中的 level 来过滤记录，避免包含不该让这个用户看到的元素内容
+                {
+                    AddPatronOI(domNewRec, strLibraryCode);
+
+                    // 2021/7/15
+                    // return:
+                    //      null    没有找到 getreaderinfo 前缀
+                    //      ""      找到了前缀，并且 level 部分为空
+                    //      其他     返回 level 部分
+                    string read_level = GetReaderInfoLevel("getreaderinfo", rights);
+                    FilterByLevel(domNewRec, read_level);
+
+                    strNewRecord = domNewRec.OuterXml;
+                }
 
                 strError = "保存操作成功。NewTimeStamp中返回了新的时间戳，NewRecord中返回了实际保存的新记录(可能和提交的新记录稍有差异)。";
                 errorcode = DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue.NoError;
@@ -3975,7 +4088,7 @@ out strError);
 
             // 权限字符串
             // if (StringUtil.IsInList("getreaderinfo", sessioninfo.RightsOrigin) == false)
-            if (GetReaderInfoLevel(sessioninfo.RightsOrigin) == null)
+            if (GetReaderInfoLevel("getreaderinfo", sessioninfo.RightsOrigin) == null)
             {
                 result.Value = -1;
                 result.ErrorInfo = "读取读者信息被拒绝。不具备 getreaderinfo 权限。";
@@ -4614,7 +4727,7 @@ out strError);
                 sessioninfo,
                 readerdom,
                 null,   // strXml,
-                GetReaderInfoLevel(sessioninfo.Rights),
+                GetReaderInfoLevel("getreaderinfo", sessioninfo.Rights),
                 strResultTypeList,
                 strLibraryCode,
                 recpaths,
@@ -5115,6 +5228,47 @@ out strError);
                     }
                     // results[i] = strReaderRecord;
                     SetResult(results_list, i, strReaderRecord);
+                }
+                else if (IsResultType(strResultType, "structure") == true)
+                {
+                    // 2021/7/15
+                    // structure 是数据结构定义
+                    /*
+                     * <structure 
+                     * visibleFields="name,namePinyin,state,?comment"
+                     * writeableFields="name,namePinyin" />
+                     * 
+                     * */
+                    XmlDocument struct_dom = new XmlDocument();
+                    struct_dom.LoadXml("<structure />");
+                    // 2021/7/15
+                    // return:
+                    //      null    没有找到 getreaderinfo 前缀
+                    //      ""      找到了前缀，并且 level 部分为空
+                    //      其他     返回 level 部分
+                    string read_level = GetReaderInfoLevel("getreaderinfo", sessioninfo.RightsOrigin);
+                    if (read_level == null)
+                        struct_dom.DocumentElement.SetAttribute("visibleFields", "[none]");
+                    else if (string.IsNullOrEmpty(read_level) == false)
+                    {
+                        var names = GetElementNames(read_level);
+                        struct_dom.DocumentElement.SetAttribute("visibleFields", StringUtil.MakePathList(names));
+                    }
+                    else
+                        struct_dom.DocumentElement.SetAttribute("visibleFields", "[all]");
+
+                    string write_level = GetReaderInfoLevel("setreaderinfo", sessioninfo.RightsOrigin);
+                    if (read_level == null)
+                        struct_dom.DocumentElement.SetAttribute("writeableFields", "[none]");
+                    else if (string.IsNullOrEmpty(write_level) == false)
+                    {
+                        var names = GetElementNames(write_level);
+                        struct_dom.DocumentElement.SetAttribute("writeableFields", StringUtil.MakePathList(names));
+                    }
+                    else
+                        struct_dom.DocumentElement.SetAttribute("writeableFields", "[all]");
+                    
+                    SetResult(results_list, i, struct_dom.DocumentElement.OuterXml);
                 }
                 else
                 {
@@ -6157,7 +6311,7 @@ out strError);
         sessioninfo,
         readerdom,
         readerdom.OuterXml,
-        GetReaderInfoLevel(sessioninfo.Rights),
+        GetReaderInfoLevel("getreaderinfo", sessioninfo.Rights),
         strResultTypeList,
         "", // strLibraryCode,
         recpaths,
@@ -6361,7 +6515,7 @@ out strError);
 第八级：+ 租金押金字段 
 第九级：+ 指纹，掌纹，人脸特征
              * */
-            var names = GetNames(level);
+            var names = GetElementNames(level);
             XmlNodeList nodes = readerdom.DocumentElement.SelectNodes("*");
             foreach (XmlElement element in nodes)
             {
@@ -6391,7 +6545,9 @@ out strError);
             }
         }
 
-        static List<string> GetNames(string level)
+        // 获得一个 level 可以传输的读者 XML 元素名字列表
+        // 注: 名字前面有个问号的，表示元素正文在传输中要被马赛克遮盖部分字符
+        static List<string> GetElementNames(string level)
         {
             List<string> names = new List<string>();
 
@@ -6402,7 +6558,6 @@ out strError);
                 "overdues",
                 "reservations",
                 "outofReservations" });
-
 
             // 第一级：证状态，发证日期，失效日期，姓名(除第一字以后都被马赛克)
             names.AddRange(new string[] { "state", "createDate", "expireDate" });
@@ -6452,13 +6607,13 @@ out strError);
         //      null    没有找到 getreaderinfo 前缀
         //      ""      找到了前缀，并且 level 部分为空
         //      其他     返回 level 部分
-        public static string GetReaderInfoLevel(string rights)
+        public static string GetReaderInfoLevel(string prefix, string rights)
         {
             // return:
             //      null    没有找到前缀
             //      ""      找到了前缀，并且值部分为空
             //      其他     返回值部分
-            var level = StringUtil.GetParameterByPrefix(rights, "getreaderinfo");
+            var level = StringUtil.GetParameterByPrefix(rights, prefix);
             return level;
         }
     }

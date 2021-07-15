@@ -919,7 +919,7 @@ namespace DigitalPlatform.LibraryServer
 
             // 根据 library.xml 中 login/@patronPasswordExpireLength 和读者记录的 rights 元素，
             // 添加或者清除读者记录中 password/@expire 属性
-            if (UpdatePasswordExpire(readerdom) == true)
+            if (UpdatePasswordExpire(this.App, readerdom) == true)
                 bChanged = true;
 
             if (bChanged)
@@ -1082,10 +1082,12 @@ namespace DigitalPlatform.LibraryServer
 
         // 根据 library.xml 中 login/@patronPasswordExpireLength 和读者记录的 rights 元素，
         // 添加或者清除读者记录中 password/@expire 属性
-        bool UpdatePasswordExpire(XmlDocument readerdom)
+        public static bool UpdatePasswordExpire(
+            LibraryApplication app,
+            XmlDocument readerdom)
         {
             // 条件化的失效期，考虑了 rights 因素
-            TimeSpan expireLength = this.App.GetConditionalPatronPasswordExpireLength(readerdom);
+            TimeSpan expireLength = app.GetConditionalPatronPasswordExpireLength(readerdom);
 
             XmlElement password_element = readerdom.DocumentElement.SelectSingleNode("password") as XmlElement;
             

@@ -1985,7 +1985,7 @@ namespace DigitalPlatform.LibraryServer
             sessioninfo,
             null,
             strOutputReaderXml,
-            GetReaderInfoLevel(sessioninfo.Rights),
+            GetReaderInfoLevel("getreaderinfo", sessioninfo.Rights),
             strReaderFormatList,
             strLibraryCode,  // calendar/advancexml/html 时需要
             null,    // recpaths 时需要
@@ -4226,6 +4226,7 @@ start_time_1,
                 return 0;
             }
 
+            // ??
             // 去掉 <borrowHistory> 的下级元素
             XmlNodeList nodes = dom.DocumentElement.SelectNodes("borrowHistory/*");
             foreach (XmlNode node in nodes)
@@ -7996,7 +7997,7 @@ start_time_1,
     sessioninfo,
     null,
     strOutputReaderXml,
-            GetReaderInfoLevel(sessioninfo.Rights),
+            GetReaderInfoLevel("getreaderinfo", sessioninfo.Rights),
     strReaderFormatList,
     strLibraryCode,  // calendar/advancexml/html 时需要
     null,    // recpaths 时需要

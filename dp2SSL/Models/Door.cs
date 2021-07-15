@@ -543,6 +543,8 @@ namespace dp2SSL
                     // TODO: 采用特定类型的 Exception 重载类
                     // throw new Exception(getlocation_result.ErrorInfo);
                     errors.Add(getlocation_result.ErrorInfo);
+                    if (string.IsNullOrEmpty(App._startNetworkModeComment) == false)
+                        errors.Add($"(注: {App._startNetworkModeComment})");
                 }
             }
 
