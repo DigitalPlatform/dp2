@@ -3953,7 +3953,7 @@ MessageBoxDefaultButton.Button2);
             List<Image> images = ImageUtil.GetImagesFromClipboard(out strError);
             if (images == null)
             {
-                strError = "。无法创建证件照片";
+                strError += "。无法创建证件照片";
                 goto ERROR1;
             }
             Image image = images[0];

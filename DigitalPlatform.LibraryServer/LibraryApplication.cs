@@ -2367,7 +2367,7 @@ namespace DigitalPlatform.LibraryServer
 
                     // 设置密码失效时刻
                     // 注意: 特殊代理账户和权限中包含 neverExpire 的用户，其密码永远不失效？
-                    if (SessionInfo.IsSpecialUserName(userName) == false
+                    if (LibraryServerUtil.IsSpecialUserName(userName) == false
                         && StringUtil.IsInList("neverexpire", rights) == false
                         && _passwordExpirePeriod != TimeSpan.MaxValue)
                     {
@@ -2412,7 +2412,7 @@ namespace DigitalPlatform.LibraryServer
             foreach (XmlElement account in account_nodes)
             {
                 var userName = account.GetAttribute("name");
-                if (create && SessionInfo.IsSpecialUserName(userName) == false)
+                if (create && LibraryServerUtil.IsSpecialUserName(userName) == false)
                 {
                     if (SetPasswordExpire(account, _passwordExpirePeriod, now, true) == true)  // 增补。但不修改已有的 exipre 属性值
                         changed = true;
@@ -9820,6 +9820,31 @@ out strError);
                         }
 
                         // 原来在这里
+
+                        // 2021/7/16
+                        // *** 检查密码强度
+                        if (StringUtil.IsInList("login", this._patronPasswordStyle) == true)
+                        {
+                            // return:
+                            //      -1  出错
+                            //      0   不合法(原因在 strError 中返回)
+                            //      1   合法
+                            nRet = LibraryApplication.ValidatePatronPassword(
+                                readerdom.DocumentElement,
+                                strPassword,
+                                this._patronPasswordStyle,
+                                false,
+                                out strError);
+                            if (nRet == -1)
+                                return -1;
+                            if (nRet == 0)
+                            {
+                                // passwordExpired = true;
+                                strError = $"现有密码强度不够，请修改密码后重新登录: {strError}";
+                                return -1;
+                            }
+                        }
+
                     }
                 }
 
@@ -13068,6 +13093,7 @@ out strError);
             readerdom.DocumentElement,
             strReaderNewPassword,
             _patronPasswordStyle,
+            true,
             out strError);
                 if (nRet != 1)
                     return -1;
@@ -13225,7 +13251,7 @@ strLibraryCode);    // 读者所在的馆代码
         }
         */
 
-        // 验证密码字符串的合法性
+        // 验证读者密码字符串的合法性
         // parameters:
         //      style   风格。style-1 为第一种密码风格
         // return:
@@ -13236,6 +13262,7 @@ strLibraryCode);    // 读者所在的馆代码
             XmlElement root,
             string password,
             string style,
+            bool check_old_password,
             out string strError)
         {
             strError = "";
@@ -13273,21 +13300,24 @@ strLibraryCode);    // 读者所在的馆代码
                 if (userNameList.IndexOf(password) != -1)
                     errors.Add("密码不能和证条码号、姓名等相同");
 
-                // 和当前存在的旧密码比较
-                var old_password_hashed = GetPasswordValue(root);
-                if (string.IsNullOrEmpty(old_password_hashed) == false)
+                if (check_old_password)
                 {
-                    // 验证密码
-                    // return:
-                    //      -1  出错
-                    //      0   不匹配
-                    //      1   匹配
-                    int nRet = LibraryServerUtil.MatchUserPassword(
-                        password,
-                        old_password_hashed,
-                        out _);
-                    if (nRet == 1)
-                        errors.Add("密码不能和旧密码相同");
+                    // 和当前存在的旧密码比较
+                    var old_password_hashed = GetPasswordValue(root);
+                    if (string.IsNullOrEmpty(old_password_hashed) == false)
+                    {
+                        // 验证密码
+                        // return:
+                        //      -1  出错
+                        //      0   不匹配
+                        //      1   匹配
+                        int nRet = LibraryServerUtil.MatchUserPassword(
+                            password,
+                            old_password_hashed,
+                            out _);
+                        if (nRet == 1)
+                            errors.Add("密码不能和旧密码相同");
+                    }
                 }
 
                 if (errors.Count > 0)

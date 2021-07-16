@@ -39,9 +39,12 @@ namespace DigitalPlatform.LibraryServer
                 goto ERROR1;
             }
 
+            /*
             if (this.textBox_supervisorUserName.Text.ToLower() == "public"
                 || this.textBox_supervisorUserName.Text.ToLower() == "reader"   //?
                 || this.textBox_supervisorUserName.Text == "图书馆")
+            */
+            if (LibraryServerUtil.IsSpecialUserName(this.textBox_supervisorUserName.Text))
             {
                 strError = "在这里您不能把用户名取为 '" + this.textBox_supervisorUserName.Text + "'，因为它是被保留的特殊用户名";
                 goto ERROR1;
@@ -74,9 +77,8 @@ namespace DigitalPlatform.LibraryServer
             this.DialogResult = DialogResult.OK;
             this.Close();
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
-
         }
 
         private void button_cancel_Click(object sender, EventArgs e)

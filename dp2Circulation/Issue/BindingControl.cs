@@ -9387,7 +9387,7 @@ MessageBoxDefaultButton.Button2);
             List<Image> images = ImageUtil.GetImagesFromClipboard(out strError);
             if (images == null)
             {
-                strError = "。无法创建封面图像";
+                strError += "。无法创建封面图像";
                 goto ERROR1;
             }
 
@@ -9535,7 +9535,7 @@ MessageBoxDefaultButton.Button2);
                     List<Image> images = ImageUtil.GetImagesFromClipboard(out strError);
                     if (images == null)
                     {
-                        strError = "。无法创建封面图像";
+                        strError += "。无法创建封面图像";
                         goto ERROR1;
                     }
                     if (images.Count > 0)

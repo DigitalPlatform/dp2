@@ -447,9 +447,10 @@ namespace DigitalPlatform.LibraryServer
                     //      -1  出错
                     //      0   不合法(原因在 strError 中返回)
                     //      1   合法
-                    nRet = ValidatePassword(nodeAccount,
+                    nRet = ValidateUserPassword(nodeAccount,
                         userinfo.Password,
                         _passwordStyle,
+                        true,
                         out strError);
                     if (nRet != 1)
                     {
@@ -471,7 +472,7 @@ namespace DigitalPlatform.LibraryServer
                 }
 
                 // 注: 无论是否明确要求设置密码(也就是说可能会创建空密码)，都要为密码设置失效期
-                if (SessionInfo.IsSpecialUserName(userinfo.UserName) == false)
+                if (LibraryServerUtil.IsSpecialUserName(userinfo.UserName) == false)
                     SetPasswordExpire(nodeAccount,
                         _passwordExpirePeriod,
                         DateTime.Now);
@@ -738,17 +739,18 @@ namespace DigitalPlatform.LibraryServer
         }
         */
 
-        // 验证密码字符串的合法性
+        // 验证工作人员密码字符串的合法性
         // parameters:
         //      style   风格。style-1 为第一种密码风格
         // return:
         //      -1  出错
         //      0   不合法(原因在 strError 中返回)
         //      1   合法
-        public static int ValidatePassword(
+        public static int ValidateUserPassword(
             XmlElement account,
             string password,
             string style,
+            bool check_old_password,
             out string strError)
         {
             strError = "";
@@ -789,21 +791,24 @@ namespace DigitalPlatform.LibraryServer
                 if (password == userName)
                     errors.Add("密码不能和用户名相同");
 
-                // 和当前存在的旧密码比较
-                var old_password_hashed = GetPasswordValue(account);
-                if (string.IsNullOrEmpty(old_password_hashed) == false)
+                if (check_old_password)
                 {
-                    // 验证密码
-                    // return:
-                    //      -1  出错
-                    //      0   不匹配
-                    //      1   匹配
-                    int nRet = LibraryServerUtil.MatchUserPassword(
-                        password,
-                        old_password_hashed,
-                        out _);
-                    if (nRet == 1)
-                        errors.Add("密码不能和旧密码相同");
+                    // 和当前存在的旧密码比较
+                    var old_password_hashed = GetPasswordValue(account);
+                    if (string.IsNullOrEmpty(old_password_hashed) == false)
+                    {
+                        // 验证密码
+                        // return:
+                        //      -1  出错
+                        //      0   不匹配
+                        //      1   匹配
+                        int nRet = LibraryServerUtil.MatchUserPassword(
+                            password,
+                            old_password_hashed,
+                            out _);
+                        if (nRet == 1)
+                            errors.Add("密码不能和旧密码相同");
+                    }
                 }
 
                 if (errors.Count > 0)
@@ -887,6 +892,20 @@ namespace DigitalPlatform.LibraryServer
             }
 
             return true;
+        }
+
+        // 2021/7/16
+        public XmlElement FindUserAccount(string strUserName,
+            out string strError)
+        {
+            strError = "";
+            var nodeAccount = this.LibraryCfgDom.DocumentElement.SelectSingleNode("accounts/account[@name='" + strUserName + "']") as XmlElement;
+            if (nodeAccount == null)
+            {
+                strError = "用户 '" + strUserName + "' 不存在";
+                return null;
+            }
+            return nodeAccount;
         }
 
         // 修改用户密码。这是指用户修改自己帐户的密码，需提供旧密码
@@ -1003,9 +1022,10 @@ out strError);
                 //      -1  出错
                 //      0   不合法(原因在 strError 中返回)
                 //      1   合法
-                nRet = ValidatePassword(nodeAccount,
+                nRet = ValidateUserPassword(nodeAccount,
                     strNewPassword,
                     _passwordStyle,
+                    true,
                     out strError);
                 if (nRet != 1)
                     return -1;
@@ -1017,7 +1037,7 @@ out strError);
                     return -1;
                 // DomUtil.SetAttr(node, "password", strHashed);
                 SetPasswordValue(nodeAccount, strHashed);
-                if (SessionInfo.IsSpecialUserName(strUserName) == false)
+                if (LibraryServerUtil.IsSpecialUserName(strUserName) == false)
                     SetPasswordExpire(nodeAccount, _passwordExpirePeriod, DateTime.Now);
 
                 this.Changed = true;
@@ -1494,9 +1514,10 @@ out strError);
                     //      -1  出错
                     //      0   不合法(原因在 strError 中返回)
                     //      1   合法
-                    nRet = ValidatePassword(nodeAccount,
+                    nRet = ValidateUserPassword(nodeAccount,
                         userinfo.Password,
                         _passwordStyle,
+                        true,
                         out strError);
                     if (nRet != 1)
                     {
@@ -1518,7 +1539,7 @@ out strError);
                     SetPasswordValue(nodeAccount, strHashed);
 
                     if (neverExpire == false
-                        && SessionInfo.IsSpecialUserName(userinfo.UserName) == false)
+                        && LibraryServerUtil.IsSpecialUserName(userinfo.UserName) == false)
                         SetPasswordExpire(nodeAccount, _passwordExpirePeriod, DateTime.Now);
                 }
 
@@ -1526,7 +1547,7 @@ out strError);
                     ClearPasswordExpire(nodeAccount);
                 else
                 {
-                    if (SessionInfo.IsSpecialUserName(userinfo.UserName) == false)
+                    if (LibraryServerUtil.IsSpecialUserName(userinfo.UserName) == false)
                     {
                         // 观察以前是否有失效期。如果没有，则主动加上失效期
                         var old_expire = GetPasswordExpire(nodeAccount);
@@ -1667,9 +1688,10 @@ out strError);
                 //      -1  出错
                 //      0   不合法(原因在 strError 中返回)
                 //      1   合法
-                nRet = ValidatePassword(nodeAccount,
+                nRet = ValidateUserPassword(nodeAccount,
                     strNewPassword,
                     _passwordStyle,
+                    true,
                     out strError);
                 if (nRet != 1)
                     return -1;
@@ -1680,7 +1702,7 @@ out strError);
                     return -1;
                 // DomUtil.SetAttr(nodeAccount, "password", strHashedPassword);
                 SetPasswordValue(nodeAccount, strHashedPassword);
-                if (SessionInfo.IsSpecialUserName(strUserName) == false)
+                if (LibraryServerUtil.IsSpecialUserName(strUserName) == false)
                     SetPasswordExpire(nodeAccount, _passwordExpirePeriod, DateTime.Now);
                 this.Changed = true;
             }

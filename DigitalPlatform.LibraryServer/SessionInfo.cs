@@ -479,6 +479,35 @@ namespace DigitalPlatform.LibraryServer
                             strError = this.App.GetString("密码不正确");
                         return 0;
                     }
+
+                    // 2021/7/16
+                    // *** 检查密码强度
+                    if (StringUtil.IsInList("login", this.App._passwordStyle) == true
+                        && StringUtil.IsInList(strUserID, "reader,public,opac", false) == false)
+                    {
+                        var account_element = this.App.FindUserAccount(strUserID,
+    out strError);
+                        if (account_element == null)
+                            return -1;
+                        // return:
+                        //      -1  出错
+                        //      0   不合法(原因在 strError 中返回)
+                        //      1   合法
+                        nRet = LibraryApplication.ValidateUserPassword(
+                            account_element,
+                            strPassword,
+                            this.App._passwordStyle,
+                            false,
+                            out strError);
+                        if (nRet == -1)
+                            return -1;
+                        if (nRet == 0)
+                        {
+                            // passwordExpired = true;
+                            strError = $"账户现有密码强度不够，请修改密码后重新登录: {strError}";
+                            return -1;
+                        }
+                    }
                 }
             }
 
@@ -491,7 +520,7 @@ namespace DigitalPlatform.LibraryServer
                 // 2016/6/7 给工作人员账户权限补上 librarian
                 // 2017/1/16 加入 special_usernames 判断
                 // if (Array.IndexOf(special_usernames, this.Account.UserID) == -1)
-                if (IsSpecialUserName(this.Account.UserID) == false)
+                if (LibraryServerUtil.IsSpecialUserName(this.Account.UserID) == false)
                 {
                     string strTemp = this.Account.Rights;
                     StringUtil.SetInList(ref strTemp, "librarian", true);
@@ -537,13 +566,6 @@ namespace DigitalPlatform.LibraryServer
             if (string.IsNullOrEmpty(this.App.GlobalAddRights) == false)
                 strRights += "," + this.App.GlobalAddRights;
             return 1;
-        }
-
-        static string[] special_usernames = new string[] { "public", "reader", "opac", "图书馆" };
-
-        public static bool IsSpecialUserName(string userName)
-        {
-            return Array.IndexOf(special_usernames, userName) != -1;
         }
 
         /*

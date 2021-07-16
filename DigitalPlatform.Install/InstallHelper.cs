@@ -1095,18 +1095,14 @@ MessageBoxDefaultButton.Button1);
         {
             for (int i = 0; ; i++)
             {
-                string strInstanceName = "";
-                string strDataDir = "";
-                string strCertificatSN = "";
-                string[] existing_urls = null;
-                string strSerialNumber = "";
                 bool bRet = InstallHelper.GetInstanceInfo(strProductName,
                     i,
-                    out strInstanceName,
-                    out strDataDir,
-                    out existing_urls,
-                    out strCertificatSN,
-                    out strSerialNumber);
+                    out string strInstanceName,
+                    out string strDataDir,
+                    out string [] existing_urls,
+                    out string strCertificatSN,
+                    out string strSerialNumber,
+                    out string style);
                 if (bRet == false)
                     break;
 
@@ -1172,6 +1168,7 @@ MessageBoxDefaultButton.Button1);
                 strDataDir,
                 urls,
                 strCertificateSN,
+                null,
                 null);
         }
 
@@ -1183,7 +1180,8 @@ MessageBoxDefaultButton.Button1);
             string strDataDir,
             string[] urls,
             string strCertificateSN,
-            string strSerialNumber)
+            string strSerialNumber,
+            string style)
         {
             using (RegistryKey digitalplatform = Registry.LocalMachine.CreateSubKey("SOFTWARE\\DigitalPlatform"))
             {
@@ -1214,6 +1212,14 @@ MessageBoxDefaultButton.Button1);
                             if (instance.GetValue("sn") != null)
                                 instance.DeleteValue("sn");
                         }
+
+                        if (string.IsNullOrEmpty(style) == false)
+                            instance.SetValue("style", style);
+                        else
+                        {
+                            if (instance.GetValue("style") != null)
+                                instance.DeleteValue("style");
+                        }
                     }
                 }
             }
@@ -1227,14 +1233,14 @@ MessageBoxDefaultButton.Button1);
     out string[] urls,
     out string strCertificateSN)
         {
-            string strSN = "";
             return GetInstanceInfo(strProductName,
                 nIndex,
                 out strInstanceName,
                 out strDataDir,
                 out urls,
                 out strCertificateSN,
-                out strSN);
+                out string strSN,
+                out string style);
         }
 
         // 获得instance信息
@@ -1249,13 +1255,15 @@ MessageBoxDefaultButton.Button1);
             out string strDataDir,
             out string[] urls,
             out string strCertificateSN,
-            out string strSerialNumber)
+            out string strSerialNumber,
+            out string style)
         {
             strInstanceName = "";
             strDataDir = "";
             urls = null;
             strCertificateSN = "";
             strSerialNumber = "";
+            style = "";
 
             using (RegistryKey digitalplatform = Registry.LocalMachine.CreateSubKey("SOFTWARE\\DigitalPlatform"))
             {
@@ -1279,6 +1287,7 @@ MessageBoxDefaultButton.Button1);
 
                         strSerialNumber = (string)instance.GetValue("sn");
 
+                        style = (string)instance.GetValue("style");
                         return true;    // found
                     }
                 }

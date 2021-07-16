@@ -21,6 +21,7 @@ using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting;
 using System.Runtime.Serialization.Formatters;
 using System.Threading.Tasks;
+using System.ServiceModel.Security;
 
 using Microsoft.Win32;
 
@@ -28,7 +29,6 @@ using DigitalPlatform;
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
-using System.ServiceModel.Security;
 
 namespace dp2Library
 {
@@ -160,13 +160,15 @@ namespace dp2Library
             out string strDataDir,
             out string[] urls,
             out string strCertificateSN,
-            out string strSerialNumber)
+            out string strSerialNumber,
+            out string style)
         {
             strInstanceName = "";
             strDataDir = "";
             urls = null;
             strCertificateSN = "";
             strSerialNumber = "";
+            style = "";
 
             string strLocation = "SOFTWARE\\DigitalPlatform";
 
@@ -196,6 +198,9 @@ namespace dp2Library
                             urls = new string[0];
 
                         strSerialNumber = (string)instance.GetValue("sn");
+
+                        // 2021/7/16
+                        style = (string)instance.GetValue("style");
                         return true;    // found
                     }
                 }
@@ -510,9 +515,11 @@ EventLogEntryType.Information);
                     out strDataDir,
                     out existing_urls,
                     out strCertSN,
-                    out strSerialNumber);
+                    out strSerialNumber,
+                    out string style);
                 if (bRet == false)
                     break;
+
 
                 if (instance_names != null && instance_names.IndexOf(strInstanceName) == -1)
                     continue;
@@ -521,6 +528,13 @@ EventLogEntryType.Information);
                 if (FindHost(strInstanceName) != null)
                 {
                     errors.Add("实例 '" + strInstanceName + "' 调用前已经是启动状态，不能重复启动");
+                    continue;
+                }
+
+                // 2021/7/16
+                if (StringUtil.IsInList("stop", style))
+                {
+                    errors.Add("实例 '" + strInstanceName + "' 已被管理员停用");
                     continue;
                 }
 

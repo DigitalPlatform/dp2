@@ -187,10 +187,11 @@ namespace TestDp2Library
             //      -1  出错
             //      0   不合法(原因在 strError 中返回)
             //      1   合法
-            var ret = LibraryApplication.ValidatePassword(
+            var ret = LibraryApplication.ValidateUserPassword(
                 dom.DocumentElement,
                 password,
                 "style-1",
+                true,
                 out string strError);
             Assert.AreEqual(0, ret);
             Debug.WriteLine($"密码 '{password}' 验证结果: {strError}");
@@ -214,10 +215,11 @@ namespace TestDp2Library
             //      -1  出错
             //      0   不合法(原因在 strError 中返回)
             //      1   合法
-            var ret = LibraryApplication.ValidatePassword(
+            var ret = LibraryApplication.ValidateUserPassword(
                 dom.DocumentElement,
                 password,
                 "style-1",
+                true,
                 out string strError);
             Assert.AreEqual(0, ret);
             Debug.WriteLine($"密码 '{password}' 验证结果: {strError}");
@@ -242,10 +244,11 @@ namespace TestDp2Library
             //      -1  出错
             //      0   不合法(原因在 strError 中返回)
             //      1   合法
-            var ret = LibraryApplication.ValidatePassword(
+            var ret = LibraryApplication.ValidateUserPassword(
                 dom.DocumentElement,
                 password,
                 "style-1",
+                true,
                 out string strError);
             Assert.AreEqual(0, ret);
             Debug.WriteLine($"密码 '{password}' 验证结果: {strError}");
@@ -270,10 +273,11 @@ namespace TestDp2Library
             //      -1  出错
             //      0   不合法(原因在 strError 中返回)
             //      1   合法
-            var ret = LibraryApplication.ValidatePassword(
+            var ret = LibraryApplication.ValidateUserPassword(
                 dom.DocumentElement,
                 password,
                 "style-1",
+                true,
                 out string strError);
             Assert.AreEqual(1, ret);
             Debug.WriteLine($"密码 '{password}' 验证结果: {strError}");
@@ -298,10 +302,11 @@ namespace TestDp2Library
             //      -1  出错
             //      0   不合法(原因在 strError 中返回)
             //      1   合法
-            var ret = LibraryApplication.ValidatePassword(
+            var ret = LibraryApplication.ValidateUserPassword(
                 dom.DocumentElement,
                 password,
                 "style-1",
+                true,
                 out string strError);
             Assert.AreEqual(0, ret);
             Debug.WriteLine($"密码 '{password}' 验证结果: {strError}");
@@ -325,10 +330,11 @@ namespace TestDp2Library
             //      -1  出错
             //      0   不合法(原因在 strError 中返回)
             //      1   合法
-            var ret = LibraryApplication.ValidatePassword(
+            var ret = LibraryApplication.ValidateUserPassword(
                 dom.DocumentElement,
                 password,
                 "style-1",
+                true,
                 out string strError);
             Assert.AreEqual(0, ret);
             Debug.WriteLine($"密码 '{password}' 验证结果: {strError}");

@@ -32,8 +32,8 @@ using System.Runtime.InteropServices;
 // 可以指定所有这些值，也可以使用“内部版本号”和“修订号”的默认值，
 // 方法是按如下所示使用“*”:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("3.3.1")]
-[assembly: AssemblyFileVersion("3.3.0.0")]
+[assembly: AssemblyVersion("3.4.0")]
+[assembly: AssemblyFileVersion("3.4.0.0")]
 
 // 1.1
 // 1.2 (2016/11/2) 增加安装 Z39.50 服务器功能
@@ -43,3 +43,4 @@ using System.Runtime.InteropServices;
 // 3.2 (2019/4/28) 改为用 .NET Framework 4.7.2 编译的版本
 // 3.3 (2021/1/5) 增加 PalmCenter 安装维护功能
 //      3.3.1 (2021/1/5)
+// 3.4 (2021/7/16) dp2installer 的 dp2library 实例对话框中增加了 checkbox “停用本实例”

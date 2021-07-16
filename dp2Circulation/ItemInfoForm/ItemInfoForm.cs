@@ -2309,7 +2309,7 @@ out strError);
             List<Image> images = ImageUtil.GetImagesFromClipboard(out strError);
             if (images == null)
             {
-                strError = "。无法创建封面图像";
+                strError += "。无法创建封面图像";
                 goto ERROR1;
             }
             Image image = images[0];

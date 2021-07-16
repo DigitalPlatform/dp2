@@ -820,7 +820,8 @@ namespace DigitalPlatform.LibraryServer
                     out strDataDir,
                     out existing_urls,
                     out strCertificatSN,
-                    out strSerialNumber);
+                    out strSerialNumber,
+                    out string style);
                 if (bRet == false)
                     break;
 
@@ -834,6 +835,7 @@ namespace DigitalPlatform.LibraryServer
 
                 info.CertificateSN = strCertificatSN;
                 info.SerialNumber = strSerialNumber;
+                info.Style = style;
 
                 // return:
                 //      -1  error
@@ -1322,7 +1324,8 @@ namespace DigitalPlatform.LibraryServer
                     strDataDir,
                     strBindings.Split(new char[] { ';' }),
                     info.CertificateSN,
-                    info.SerialNumber);
+                    info.SerialNumber,
+                    info.Style);
             }
 
             // 删除注册表中多余的instance信息
@@ -2594,6 +2597,9 @@ MessageBoxDefaultButton.Button2);
         public string CertificateSN = "";
 
         public string SerialNumber = "";
+
+        // 2021/7/16
+        public string Style { get; set; }
 
         // *** dp2Kernel服务器信息
         // dp2Kernel URL

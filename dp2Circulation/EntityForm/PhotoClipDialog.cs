@@ -459,7 +459,7 @@ namespace dp2Circulation
             List<Image> images = ImageUtil.GetImagesFromClipboard(out strError);
             if (images == null)
             {
-                strError = "。无法进行粘贴";
+                strError += "。无法进行粘贴";
                 goto ERROR1;
             }
             Image image = images[0];

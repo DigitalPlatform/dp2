@@ -9,6 +9,7 @@ using DigitalPlatform.Install;
 using DigitalPlatform.GUI;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
+using System.Drawing;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -45,6 +46,7 @@ namespace DigitalPlatform.LibraryServer
             Refreshdp2KernelDef();
             RefreshSupervisorUserInfo();
             RefreshLibraryName();
+            RefreshStopInstance();
             RefreshUpdateCfgsDir();
 
             if (IsNew == true && String.IsNullOrEmpty(this.textBox_dataDir.Text) == true)
@@ -142,6 +144,17 @@ namespace DigitalPlatform.LibraryServer
             }
             if (this.LineInfo == null)
                 this.LineInfo = new DigitalPlatform.LibraryServer.LineInfo();
+
+            // 2021/7/16
+            {
+                bool stopInstance = this.checkBox_stopInstance.Checked;
+                string style = this.LineInfo.Style;
+                if (style == null)
+                    style = "";
+                StringUtil.SetInList(ref style, "stop", stopInstance);
+                this.LineInfo.Style = style;
+            }
+            
             this.LineInfo.LibraryName = this.textBox_libraryName.Text;
 
             this.LineInfo.UpdateCfgsDir = this.checkBox_updateCfgsDir.Checked;
@@ -371,6 +384,14 @@ namespace DigitalPlatform.LibraryServer
                 this.textBox_libraryName.Text = this.LineInfo.LibraryName;
             else
                 this.textBox_libraryName.Text = "";
+        }
+
+        void RefreshStopInstance()
+        {
+            if (this.LineInfo != null)
+                this.checkBox_stopInstance.Checked = StringUtil.IsInList("stop", this.LineInfo.Style);
+            else
+                this.checkBox_stopInstance.Checked = false;
         }
 
         void RefreshUpdateCfgsDir()
@@ -730,6 +751,7 @@ MessageBoxDefaultButton.Button1);
                         Refreshdp2KernelDef();
                         RefreshSupervisorUserInfo();
                         RefreshLibraryName();
+                        RefreshStopInstance();
                         RefreshUpdateCfgsDir();
                         this.LoadedDataDir = this.textBox_dataDir.Text; // 防止重复装载
                         this.m_bDataDirExist = true;    // 防止OK时不合适的检查警告
@@ -788,6 +810,7 @@ MessageBoxDefaultButton.Button1);
                         Refreshdp2KernelDef();
                         RefreshSupervisorUserInfo();
                         RefreshLibraryName();
+                        RefreshStopInstance();
                         RefreshUpdateCfgsDir();
                         this.LoadedDataDir = this.textBox_dataDir.Text; // 防止重复装载
                         this.m_bDataDirExist = true;    // 防止OK时不合适的检查警告
@@ -1266,6 +1289,20 @@ MessageBoxDefaultButton.Button1);
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+        private void checkBox_stopInstance_CheckedChanged(object sender, EventArgs e)
+        {
+            if (this.checkBox_stopInstance.Checked)
+            {
+                this.BackColor = Color.Yellow;
+                this.ForeColor = Color.Black;
+            }
+            else
+            {
+                this.BackColor = SystemColors.Control;
+                this.ForeColor = SystemColors.ControlText;
+            }
         }
     }
 }

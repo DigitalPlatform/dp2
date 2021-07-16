@@ -362,6 +362,8 @@ namespace DigitalPlatform.LibraryServer
 
         // 2015/5/20 新的密码存储策略
         // 验证密码
+        // parameters:
+        //      strPasswordStyle    强密码规则。如果不打算进行密码强度检查，可使用 null 调用本函数
         // return:
         //      -1  出错
         //      0   不匹配
@@ -369,6 +371,7 @@ namespace DigitalPlatform.LibraryServer
         public static int MatchUserPassword(
             string strPassword,
             string strHashed,
+            // string strPasswordStyle,
             out string strError)
         {
             strError = "";
@@ -1347,5 +1350,11 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             + "$";
         }
 
+        static string[] special_usernames = new string[] { "public", "reader", "opac", "图书馆" };
+
+        public static bool IsSpecialUserName(string userName)
+        {
+            return Array.IndexOf(special_usernames, userName) != -1;
+        }
     }
 }

@@ -13924,7 +13924,7 @@ out strError);
             List<Image> images = ImageUtil.GetImagesFromClipboard(out strError);
             if (images == null)
             {
-                strError = "。无法创建封面图像";
+                strError += "。无法创建封面图像\r\n\r\n(请先复制图形对象或者文件到 Windows 剪贴板，再使用本功能)";
                 goto ERROR1;
             }
             Image image = images[0];

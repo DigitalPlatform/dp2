@@ -1410,7 +1410,8 @@ MessageBoxDefaultButton.Button2);
                     out strDataDir,
                     out existing_urls,
                     out strCertificateSN,
-                    out strSerialCode);
+                    out strSerialCode,
+                    out string style);
                 if (bRet == false)
                     break;
 
@@ -1461,7 +1462,8 @@ MessageBoxDefaultButton.Button2);
                             strDataDir,
                             existing_urls,
                             strCertificateSN,
-                            strSerialCode);
+                            strSerialCode,
+                            style);
                         AppendString("实例 '" + strInstanceName + "' 的序列号被重新设定为 " + strSerialCode + " \r\n");
                         nCount++;
                     }
@@ -2896,7 +2898,8 @@ MessageBoxDefaultButton.Button1);
                         out strDataDir,
                         out existing_urls,
                         out strCertificatSN,
-                        out strSerialCode);
+                        out strSerialCode,
+                        out string style);
                     if (bRet == false)
                         break;
 
@@ -2906,7 +2909,7 @@ MessageBoxDefaultButton.Button1);
                     text.Append("协议绑定:\t" + StringUtil.MakePathList(existing_urls) + "\r\n");
                     text.Append("数字签名SN:\t" + strCertificatSN + "\r\n");
                     text.Append("序列号:\t" + strSerialCode + "\r\n");
-
+                    text.Append("风格:\t" + style + "\r\n");
                 }
             }
 
@@ -2933,7 +2936,8 @@ MessageBoxDefaultButton.Button1);
                         out strDataDir,
                         out existing_urls,
                         out strCertificatSN,
-                        out strSerialCode);
+                        out strSerialCode,
+                        out string style);
                     if (bRet == false)
                         break;
 
@@ -2943,7 +2947,7 @@ MessageBoxDefaultButton.Button1);
                     text.Append("协议绑定:\t" + StringUtil.MakePathList(existing_urls) + "\r\n");
                     text.Append("数字签名SN:\t" + strCertificatSN + "\r\n");
                     text.Append("序列号:\t" + strSerialCode + "\r\n");
-
+                    text.Append("风格:\t" + style + "\r\n");
                 }
             }
 
