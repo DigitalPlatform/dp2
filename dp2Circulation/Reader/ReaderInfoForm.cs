@@ -131,6 +131,10 @@ namespace dp2Circulation
 
             this.readerEditControl1.SetReadOnly("librarian");
 
+            // testing
+            this.readerEditControl1.SetEditable("name", "name");
+
+
             this.readerEditControl1.GetValueTable += new GetValueTableEventHandler(readerEditControl1_GetValueTable);
 
             this.readerEditControl1.Initializing = false;   // 如果没有此句，一开始在空模板上修改就不会变色

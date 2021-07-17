@@ -6098,6 +6098,7 @@ out strError);
                         sessioninfo.UserID,
                         userinfo,
                         sessioninfo.ClientAddress,
+                        out ErrorCode _,
                         out strError);
                     if (nRet == -1)
                         return -1;

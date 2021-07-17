@@ -3556,6 +3556,7 @@ namespace dp2Library
                     }
                 }
 
+                // 注: 0 并不表示没有命中。命中数要看 searchresults.Length
                 result.Value = lRet;
                 result.ErrorInfo = strError;
                 return result;
@@ -9801,6 +9802,7 @@ Stack:
                     sessioninfo.UserID,
                     info,
                     sessioninfo.ClientAddress,
+                    out ErrorCode error_code,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -9817,7 +9819,10 @@ Stack:
                 return result;
             ERROR1:
                 result.Value = -1;
-                result.ErrorCode = ErrorCode.SystemError;
+                if (error_code != ErrorCode.NoError)    // 2021/7/17
+                    result.ErrorCode = error_code;
+                else
+                    result.ErrorCode = ErrorCode.SystemError;
                 result.ErrorInfo = strError;
                 return result;
             }

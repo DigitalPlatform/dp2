@@ -313,19 +313,23 @@ namespace DigitalPlatform.LibraryServer
             string strOperator,
             UserInfo userinfo,
             string strClientAddress,
+            out ErrorCode error_code,
             out string strError)
         {
             strError = "";
+            error_code = ErrorCode.NoError;
 
             if (String.IsNullOrEmpty(strUserName) == true)
             {
                 strError = "strUserName 参数值不允许为空";
+                // error_code = ErrorCode.ArgumentError;
                 return -1;
             }
 
             if (strUserName != userinfo.UserName)
             {
                 strError = "strUserName 参数值和 userinfo.UserName 不一致";
+                // error_code = ErrorCode.ArgumentError;
                 return -1;
             }
 
@@ -334,6 +338,7 @@ namespace DigitalPlatform.LibraryServer
                 && string.IsNullOrEmpty(userinfo.Password) == false)
             {
                 strError = "若要在创建账户的同时设置好初始密码，SetPassword 应设置为 true";
+                // error_code = ErrorCode.ArgumentError;
                 return -1;
             }
 
@@ -346,6 +351,7 @@ namespace DigitalPlatform.LibraryServer
                     || IsListInList(userinfo.LibraryCode, strLibraryCodeList) == false)
                 {
                     strError = "当前用户只能创建图书馆代码完全属于 '" + strLibraryCodeList + "' 范围的新用户";
+                    error_code = ErrorCode.AccessDenied;
                     return -1;
                 }
             }
@@ -399,6 +405,7 @@ namespace DigitalPlatform.LibraryServer
                 if (nodeAccount != null)
                 {
                     strError = "用户 '" + strUserName + "' 已经存在";
+                    error_code = ErrorCode.AlreadyExist;
                     return -1;
                 }
 
@@ -456,6 +463,7 @@ namespace DigitalPlatform.LibraryServer
                     {
                         // 删除刚创建的 account 元素
                         nodeAccount.ParentNode?.RemoveChild(nodeAccount);
+                        // error_code = ErrorCode.WeakPassword;
                         return -1;
                     }
 
@@ -1437,9 +1445,11 @@ out strError);
             string strOperator,
             UserInfo userinfo,
             string strClientAddress,
+            out ErrorCode error_code,
             out string strError)
         {
             strError = "";
+            error_code = ErrorCode.NoError;
             int nRet = 0;
 
             if (String.IsNullOrEmpty(strUserName) == true)
@@ -1466,6 +1476,7 @@ out strError);
                 if (nodeAccount == null)
                 {
                     strError = "用户 '" + strUserName + "' 不存在 (2)";
+                    error_code = ErrorCode.NotFound;
                     return -1;
                 }
 
@@ -1481,6 +1492,7 @@ out strError);
                         || IsListInList(strExistLibraryCodeList, strLibraryCodeList) == false)
                     {
                         strError = "当前用户只能修改图书馆代码完全属于 '" + strLibraryCodeList + "' 范围的用户信息";
+                        error_code = ErrorCode.AccessDenied;
                         return -1;
                     }
                 }
@@ -1493,6 +1505,7 @@ out strError);
                         || IsListInList(userinfo.LibraryCode, strLibraryCodeList) == false)
                     {
                         strError = "当前用户只能将用户信息的馆代码修改到完全属于 '" + strLibraryCodeList + "' 范围内的值";
+                        error_code = ErrorCode.AccessDenied;
                         return -1;
                     }
                 }
@@ -1644,9 +1657,11 @@ out strError);
             string strOperator,
             string strNewPassword,
             string strClientAddress,
+            out ErrorCode error_code,
             out string strError)
         {
             strError = "";
+            error_code = ErrorCode.NoError;
             int nRet = 0;
 
             if (String.IsNullOrEmpty(strUserName) == true)
@@ -1667,6 +1682,7 @@ out strError);
                 if (nodeAccount == null)
                 {
                     strError = "用户 '" + strUserName + "' 不存在 (3)";
+                    error_code = ErrorCode.NotFound;
                     return -1;
                 }
 
@@ -1680,6 +1696,7 @@ out strError);
                         || IsListInList(strExistLibraryCodeList, strLibraryCodeList) == false)
                     {
                         strError = "当前用户只能重设 图书馆代码完全属于 '" + strLibraryCodeList + "' 范围的用户的密码";
+                        error_code = ErrorCode.AccessDenied;
                         return -1;
                     }
                 }
@@ -1749,9 +1766,11 @@ out strError);
             string strUserName,
             string strOperator,
             string strClientAddress,
+            out ErrorCode error_code,
             out string strError)
         {
             strError = "";
+            error_code = ErrorCode.NoError;
 
             if (String.IsNullOrEmpty(strUserName) == true)
             {
@@ -1771,6 +1790,7 @@ out strError);
                 if (nodeAccount == null)
                 {
                     strError = "用户 '" + strUserName + "' 不存在 (4)";
+                    error_code = ErrorCode.NotFound;
                     return -1;
                 }
                 strOldOuterXml = nodeAccount.OuterXml;
@@ -1785,6 +1805,7 @@ out strError);
                         || IsListInList(strExistLibraryCodeList, strLibraryCodeList) == false)
                     {
                         strError = "当前用户只能删除 图书馆代码完全属于 '" + strLibraryCodeList + "' 范围的用户";
+                        error_code = ErrorCode.AccessDenied;
                         return -1;
                     }
                 }
@@ -1823,6 +1844,7 @@ out strError);
                 if (nRet == -1)
                 {
                     strError = "SetUser() API 写入日志时发生错误: " + strError;
+                    error_code = ErrorCode.SystemError; // TODO: 建议增加一个日志写入错误的错误码
                     return -1;
                 }
             }
@@ -1837,8 +1859,10 @@ out strError);
             string strOperator,
             UserInfo info,
             string strClientAddress,
+            out ErrorCode error_code,
             out string strError)
         {
+            error_code = ErrorCode.NoError;
             if (strAction == "new")
             {
                 return this.CreateUser(strLibraryCodeList,
@@ -1846,6 +1870,7 @@ out strError);
                     strOperator,
                     info,
                     strClientAddress,
+                    out error_code,
                     out strError);
             }
 
@@ -1856,6 +1881,7 @@ out strError);
                     strOperator,
                     info,
                     strClientAddress,
+                    out error_code,
                     out strError);
             }
 
@@ -1866,6 +1892,7 @@ out strError);
                     strOperator,
                     info.Password,
                     strClientAddress,
+                    out error_code,
                     out strError);
             }
 
@@ -1875,6 +1902,7 @@ out strError);
                     info.UserName,
                     strOperator,
                     strClientAddress,
+                    out error_code,
                     out strError);
             }
 

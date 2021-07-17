@@ -7,6 +7,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Xml;
 using System.Diagnostics;
+using System.Linq;
 
 using DigitalPlatform;
 using DigitalPlatform.Xml;
@@ -131,7 +132,7 @@ namespace dp2Circulation
                 }
                 return DomUtil.GetElementText(this._dataDom.DocumentElement, "fingerprint");
             }
-            set 
+            set
             {
                 if (this._dataDom == null)
                 {
@@ -722,6 +723,9 @@ namespace dp2Circulation
             Debug.Assert(false, "");
             this.dateTimePicker_birthday.Value = DateTimePicker.MinimumDateTime;    // new DateTime(0);
              * */
+
+            // 2021/7/17
+            InitialTags();
         }
 
         private void ReaderEditControl_SizeChanged(object sender, EventArgs e)
@@ -900,7 +904,7 @@ namespace dp2Circulation
             this.PersonalLibrary = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "personalLibrary");
             this.Access = DomUtil.GetElementText(this._dataDom.DocumentElement,
-                "access"); 
+                "access");
             this.Friends = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "friends");
             this.RefID = DomUtil.GetElementText(this._dataDom.DocumentElement,
@@ -1200,10 +1204,29 @@ namespace dp2Circulation
         /// "all" 表示全部为只读；
         /// "librarian" 表示只有记录路径、失效时间为只读，其余为可改写;
         /// "reader" 表示只有姓名等几项为可改写，其余为只读;
-        /// "clear" 表示清除全部只读状态，业即全部都是可改写状态
+        /// "clear" 表示清除全部只读状态，也即全部都是可改写状态
         /// </param>
         public override void SetReadOnly(string strStyle)
         {
+            if (strStyle.StartsWith("editable:"))
+            {
+                string list = strStyle.Substring("editable:".Length);
+                var names = StringUtil.SplitList(list);
+
+                foreach (Control child in this.tableLayoutPanel_main.Controls)
+                {
+                    var name = child.Tag as string;
+                    if (name == null)
+                        continue;
+                    if (names.IndexOf(name) == -1)
+                        SetReadOnly(child, true);
+                    else
+                        SetReadOnly(child, false);
+                }
+
+                return;
+            }
+
             if (strStyle == "all")
             {
                 this.textBox_barcode.ReadOnly = true;
@@ -1316,6 +1339,67 @@ namespace dp2Circulation
             {
                 // 前面已经清除
             }
+
+            void SetReadOnly(Control child, bool value)
+            {
+                if (child is TextBox)
+                {
+                    ((TextBox)child).ReadOnly = value;
+                }
+                else
+                    child.Enabled = !value;
+
+                // TODO: 右侧按钮也要禁用
+
+                // 改变 Label 颜色
+                var label = GetLabel(child);
+                if (label != null)
+                    label.ForeColor = value ? SystemColors.GrayText : SystemColors.ControlText;
+            }
+
+            // 根据编辑 Control 找到它左侧的 Label
+            Label GetLabel(Control edit)
+            {
+                var row = this.tableLayoutPanel_main.GetRow(edit);
+                if (row == -1)
+                    return null;
+                return this.tableLayoutPanel_main.GetControlFromPosition(0, row) as Label;
+            }
+        }
+
+        // 为每个编辑域设置 Tag
+        void InitialTags()
+        {
+            this.textBox_barcode.Tag = "barcode";
+            this.textBox_cardNumber.Tag = "cardNumber";
+            this.comboBox_readerType.Tag = "readerType";
+            this.comboBox_state.Tag = "state";
+            this.textBox_comment.Tag = "comment";
+            this.dateControl_createDate.Tag = "createDate";
+            this.dateControl_expireDate.Tag = "expireDate";
+
+            this.dateControl_hireExpireDate.Tag = "hire,expireDate";
+            this.comboBox_hirePeriod.Tag = "hire,period";
+
+            this.textBox_foregift.Tag = "foregift";
+
+            this.dateControl_dateOfBirth.Tag = "dateOfBirth";
+            this.textBox_name.Tag = "name";
+            this.textBox_namePinyin.Tag = "namePinyin";
+            this.comboBox_gender.Tag = "gender";
+            this.textBox_idCardNumber.Tag = "idCardNumber";
+            this.textBox_department.Tag = "department";
+            this.textBox_post.Tag = "post";
+            this.textBox_address.Tag = "address";
+            this.textBox_tel.Tag = "tel";
+            this.textBox_email.Tag = "email";
+            this.textBox_rights.Tag = "rights";
+            this.textBox_personalLibrary.Tag = "personalLibrary";
+            this.textBox_access.Tag = "access";
+            this.textBox_friends.Tag = "friends";
+
+            this.textBox_recPath.Tag = "recPath";
+            this.textBox_refID.Tag = "refID";
         }
 
         // 比较自己和refControl的数据差异，用特殊颜色显示差异字段
@@ -1850,8 +1934,19 @@ namespace dp2Circulation
                 this.EditRights(this, new EventArgs());
             }
         }
+
+        public void SetEditable(string visibleFields, string writeableFields)
+        {
+            var visible_names = StringUtil.SplitList(visibleFields);
+            var writeable_names = StringUtil.SplitList(writeableFields);
+
+            var names = visible_names.Intersect(writeable_names);
+
+            SetReadOnly("editable:" + StringUtil.MakePathList(new List<string>(names)));
+        }
+
     }
-// 
+    // 
     /// <summary>
     /// 获得图书馆代码事件
     /// </summary>

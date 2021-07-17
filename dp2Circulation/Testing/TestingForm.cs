@@ -61,11 +61,11 @@ namespace dp2Circulation
         // 测试创建索取号
         private void ToolStripMenuItem_createAccessNo_Click(object sender, EventArgs e)
         {
-            Task.Factory.StartNew(() =>
-            {
-                TestCreateAccessNo("seed");
-                TestCreateAccessNo("");
-            });
+            _ = Task.Factory.StartNew(() =>
+              {
+                  TestCreateAccessNo("seed");
+                  TestCreateAccessNo("");
+              });
         }
 
         // parameters:
