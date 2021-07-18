@@ -8,21 +8,23 @@ using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.Marc;
+using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 
-// TODO: 创建一个具有 Access 存取定义的账户，限定读者库访问的那种，然后进行检索验证
 namespace dp2LibraryApiTester
 {
-    // 测试 SearchReader() API 安全性
-    // 测试 Search() API 针对读者库的安全性
-    public static class TestSearchReaderSafety
+    // 测试 SearchBiblio() API 安全性
+    // 测试 Search() API 针对书目库的安全性
+    public static class TestSearchBiblioSafety
     {
-        static string _strReaderDbName = "_测试用读者";
+        static string _strBiblioDbName = "_测试用书目";
 
         public static NormalResult PrepareEnvironment()
         {
             string strError = "";
 
+            // 创建一个读者库
             LibraryChannel channel = DataModel.GetChannel();
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = TimeSpan.FromMinutes(10);
@@ -31,14 +33,13 @@ namespace dp2LibraryApiTester
             {
                 // 创建测试所需的书目库
 
-
-                // 如果测试用的读者库以前就存在，要先删除。
-                DataModel.SetMessage("正在删除测试用读者库 ...");
+                // 如果测试用的书目库以前就存在，要先删除。
+                DataModel.SetMessage("正在删除测试用书目库 ...");
                 string strOutputInfo = "";
                 long lRet = channel.ManageDatabase(
     null,
     "delete",
-    _strReaderDbName,    // strDatabaseNames,
+    _strBiblioDbName,    // strDatabaseNames,
     "",
     "",
     out strOutputInfo,
@@ -49,55 +50,58 @@ namespace dp2LibraryApiTester
                         goto ERROR1;
                 }
 
-                DataModel.SetMessage("正在创建测试用读者库 ...");
+                DataModel.SetMessage("正在创建测试用书目库 ...");
                 // 创建一个书目库
                 // parameters:
                 // return:
                 //      -1  出错
                 //      0   没有必要创建，或者操作者放弃创建。原因在 strError 中
                 //      1   成功创建
-                int nRet = ManageHelper.CreateReaderDatabase(
+                int nRet = ManageHelper.CreateBiblioDatabase(
                     channel,
                     null,
-                    _strReaderDbName,
-                    "", // libraryCode
-                    true,
+                    _strBiblioDbName,
+                    "book",
+                    "unimarc",
+                    "*",
                     "",
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
 
-                // *** 创建读者记录
-                string path = _strReaderDbName + "/?";
-                string xml = @"<root>
-<barcode>R9999998</barcode>
-<name>张三</name>
-<readerType>本科生</readerType>
-<department>数学系</department>
-</root>";
+                // *** 创建书目记录
+                string path = _strBiblioDbName + "/?";
+                var record = BuildBiblioRecord("测试题名", "");
 
-                DataModel.SetMessage("正在创建读者记录");
-                lRet = channel.SetReaderInfo(null,
+                string strXml = "";
+                nRet = MarcUtil.Marc2XmlEx(
+    record.Text,
+    "unimarc",
+    ref strXml,
+    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+                DataModel.SetMessage("正在创建书目记录");
+                lRet = channel.SetBiblioInfo(null,
                     "new",
                     path,
-                    xml,
+                    "xml", // strBiblioType
+                    strXml,
                     null,
                     null,
-                    out string existing_xml,
-                    out string saved_xml,
-                    out string saved_recpath,
+                    "", // style
+                    out string output_biblio_recpath,
                     out byte[] new_timestamp,
-                    out ErrorCodeValue kernel_errorcode,
                     out strError);
                 if (lRet == -1)
                     goto ERROR1;
 
-                DataModel.SetMessage("正在删除用户 test_level1 ...");
+                DataModel.SetMessage("正在删除用户 test_rights ...");
                 lRet = channel.SetUser(null,
                     "delete",
                     new UserInfo
                     {
-                        UserName = "test_level1",
+                        UserName = "test_rights",
                     },
                     out strError);
                 if (lRet == -1 && channel.ErrorCode != ErrorCode.NotFound)
@@ -114,17 +118,59 @@ namespace dp2LibraryApiTester
                 if (lRet == -1 && channel.ErrorCode != ErrorCode.NotFound)
                     goto ERROR1;
 
-                // 创建几个测试用工作人员账户
-                DataModel.SetMessage("正在创建用户 test_level1 ...");
+                DataModel.SetMessage("正在删除用户 test_access2 ...");
+                lRet = channel.SetUser(null,
+                    "delete",
+                    new UserInfo
+                    {
+                        UserName = "test_access2",
+                    },
+                    out strError);
+                if (lRet == -1 && channel.ErrorCode != ErrorCode.NotFound)
+                    goto ERROR1;
+
+                // 通过 rights 定义，能正常访问书目记录
+                DataModel.SetMessage("正在创建用户 test_rights ...");
                 lRet = channel.SetUser(null,
                     "new",
-                    new UserInfo {
-                    UserName = "test_level1",
-                    Rights = "searchreader,search,getreaderinfo:1",
+                    new UserInfo
+                    {
+                        UserName = "test_rights",
+                        Rights = "searchbiblio,search,getbiblioinfo",
                     },
                     out strError);
                 if (lRet == -1)
                     goto ERROR1;
+
+                // 通过存取代码，造成无法访问书目记录的效果
+                DataModel.SetMessage("正在创建用户 test_access1 ...");
+                lRet = channel.SetUser(null,
+                    "new",
+                    new UserInfo
+                    {
+                        UserName = "test_access1",
+                        Rights = "searchbiblio,search,getbiblioinfo",
+                        Access = "中文图书:getbiblioinfo=*;",
+                    },
+                    out strError);
+                if (lRet == -1)
+                    goto ERROR1;
+
+                // 通过存取代码，定义只能获得 200 字段
+                DataModel.SetMessage("正在创建用户 test_access2 ...");
+                lRet = channel.SetUser(null,
+                    "new",
+                    new UserInfo
+                    {
+                        UserName = "test_access2",
+                        Rights = "searchbiblio,search,getbiblioinfo",
+                        Access = $"{_strBiblioDbName}:getbiblioinfo=*(200);",
+                    },
+                    out strError);
+                if (lRet == -1)
+                    goto ERROR1;
+
+                // 中文图书:getbiblioinfo=*;中文期刊:getbiblioinfo=*|setbiblioinfo=new,change;西文采访:getbiblioinfo=*|setbiblioinfo=*;
 
                 return new NormalResult();
             }
@@ -138,9 +184,6 @@ namespace dp2LibraryApiTester
                 channel.Timeout = old_timeout;
                 DataModel.ReturnChannel(channel);
             }
-
-
-
         ERROR1:
             DataModel.SetMessage($"PrepareEnvironment() error: {strError}");
             return new NormalResult
@@ -150,36 +193,41 @@ namespace dp2LibraryApiTester
             };
         }
 
-        // 用 SearchReader() + GetSearchResult() API
-        public static NormalResult TestSearchReader(string search_api_name)
+        // 用 SearchBiblio() + GetSearchResult() API
+        public static NormalResult TestSearchBiblio(
+            string search_api_name,
+            string userName)
         {
             string strError = "";
 
-            LibraryChannel channel = DataModel.NewChannel("test_level1", "");
+            LibraryChannel channel = DataModel.NewChannel(userName, "");
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = TimeSpan.FromMinutes(10);
 
             try
             {
-                DataModel.SetMessage($"正在检索 {search_api_name} ...");
+                DataModel.SetMessage($"正在以用户 {userName} 检索 {search_api_name} ...");
                 long lRet = 0;
-                if (search_api_name == "SearchReader")
-                    lRet = channel.SearchReader(
+                if (search_api_name == "SearchBiblio")
+                    lRet = channel.SearchBiblio(
         null,
-        _strReaderDbName,    // strDatabaseNames,
+        _strBiblioDbName,    // strDatabaseNames,
         "",
-        -1,
-        "__id",
+        1000,
+        "recid", // "__id",
         "left",
         "zh",
         "default",
-        "",
+        "", // search_style
+        "", // output_style
+        "", // location_filter
+        out string query_xml,
         out strError);
                 else
                 {
-                    string query_xml = "<target list='" + _strReaderDbName + ":" + "__id'><item><word>"
+                    string query_xml = "<target list='" + _strBiblioDbName + ":" + "__id'><item><word>"
         + "</word><match>left</match><maxCount>"
-        + "-1"
+        + "1000"
         + "</maxCount></item><lang>zh</lang></target>";
 
                     lRet = channel.Search(null,
@@ -196,7 +244,7 @@ namespace dp2LibraryApiTester
 
                 if (lRet == 0)
                 {
-                    strError = "检索没有命中任何读者记录";
+                    strError = "检索没有命中任何书目记录";
                     goto ERROR1;
                 }
 
@@ -205,19 +253,64 @@ null,
 "default",
 $"id,cols,xml",
 "zh");
-
+                List<string> errors = new List<string>();
                 foreach (Record record in loader)
                 {
                     var xml = DomUtil.GetIndentXml(record.RecordBody.Xml);
+                    var cols = string.Join(",", record.Cols);
                     DataModel.SetMessage($"path={record.Path}");
+                    DataModel.SetMessage($"cols={cols}");
                     DataModel.SetMessage($"xml=\r\n{xml}");
+
+                    if (userName == "test_access2")
+                    {
+                        // MARC 中只有 200 字段
+                        int nRet = MarcUtil.Xml2Marc(xml,
+                            false,
+                            "unimarc",
+                            out string _,
+                            out string marc,
+                            out string error);
+                        MarcRecord marc_record = new MarcRecord(marc);
+                        if (marc_record.select("field[@name='690']").count > 0)
+                            errors.Add("xml 中不应该存在 690 字段");
+                        if (marc_record.select("field[@name='701']").count > 0)
+                            errors.Add("xml 中不应该存在 701 字段");
+                    }
+
+                    // access 代码为无法访问的效果
+                    if (userName == "test_access1")
+                    {
+                        // Cols 被滤除
+                        if (record.Cols[0] != "[滤除]")
+                        {
+                            string error = $"用户 {userName} 通过 GetSearchResult() API 获得了浏览列内容 '{string.Join(",", record.Cols)}'，违反安全性原则";
+                            errors.Add(error);
+                        }
+
+                        // 用户 "test_access1" 应无法看到 XML 才对
+                        if (string.IsNullOrEmpty(xml) == false)
+                        {
+                            string error = $"用户 {userName} 通过 GetSearchResult() API 获得了书目记录 XML，违反安全性原则";
+                            errors.Add(error);
+                        }
+                    }
                 }
 
+                if (errors.Count > 0)
+                {
+                    DisplayErrors(errors);
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = StringUtil.MakePathList(errors, "; ")
+                    };
+                }
                 return new NormalResult();
             }
             catch (Exception ex)
             {
-                strError = "TestSearchReader() Exception: " + ExceptionUtil.GetExceptionText(ex);
+                strError = "TestSearchBiblio() Exception: " + ExceptionUtil.GetExceptionText(ex);
                 goto ERROR1;
             }
             finally
@@ -227,7 +320,7 @@ $"id,cols,xml",
             }
 
         ERROR1:
-            DataModel.SetMessage($"TestSearchReader() error: {strError}");
+            DataModel.SetMessage($"TestSearchBiblio() error: {strError}");
             return new NormalResult
             {
                 Value = -1,
@@ -235,26 +328,36 @@ $"id,cols,xml",
             };
         }
 
+        static void DisplayErrors(List<string> errors)
+        {
+            DataModel.SetMessage("**********************************");
+            foreach (string error in errors)
+            {
+                DataModel.SetMessage($"!!! {error} !!!");
+            }
+            DataModel.SetMessage("**********************************");
+        }
+
         // 用 GetBrowseRecords() API
         public static NormalResult TestGetBrowseRecords()
         {
             string strError = "";
 
-            LibraryChannel channel = DataModel.NewChannel("test_level1", "");
+            LibraryChannel channel = DataModel.NewChannel("test_rights", "");
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = TimeSpan.FromMinutes(10);
 
             try
             {
                 List<string> path_list = new List<string>();
-                path_list.Add(_strReaderDbName + "/1");
+                path_list.Add(_strBiblioDbName + "/1");
 
                 DataModel.SetMessage("正在用路径检索 ...");
                 long lRet = channel.GetBrowseRecords(
     null,
     path_list.ToArray(),
     "id,cols,xml",
-    out Record [] results,
+    out Record[] results,
     out strError);
                 if (lRet == -1)
                 {
@@ -263,7 +366,7 @@ $"id,cols,xml",
 
                 if (results.Length == 0)
                 {
-                    strError = "路径检索没有命中任何读者记录";
+                    strError = "路径检索没有命中任何书目记录";
                     goto ERROR1;
                 }
 
@@ -306,12 +409,12 @@ $"id,cols,xml",
 
             try
             {
-                DataModel.SetMessage("正在删除测试用读者库 ...");
+                DataModel.SetMessage("正在删除测试用书目库 ...");
                 string strOutputInfo = "";
                 long lRet = channel.ManageDatabase(
     null,
     "delete",
-    _strReaderDbName,    // strDatabaseNames,
+    _strBiblioDbName,    // strDatabaseNames,
     "",
     "",
     out strOutputInfo,
@@ -322,12 +425,12 @@ $"id,cols,xml",
                         goto ERROR1;
                 }
 
-                DataModel.SetMessage("正在删除用户 test_level1 ...");
+                DataModel.SetMessage("正在删除用户 test_rights ...");
                 lRet = channel.SetUser(null,
                     "delete",
                     new UserInfo
                     {
-                        UserName = "test_level1",
+                        UserName = "test_rights",
                     },
                     out strError);
                 if (lRet == -1 && channel.ErrorCode != ErrorCode.NotFound)
@@ -339,6 +442,17 @@ $"id,cols,xml",
                     new UserInfo
                     {
                         UserName = "test_access1",
+                    },
+                    out strError);
+                if (lRet == -1 && channel.ErrorCode != ErrorCode.NotFound)
+                    goto ERROR1;
+
+                DataModel.SetMessage("正在删除用户 test_access2 ...");
+                lRet = channel.SetUser(null,
+                    "delete",
+                    new UserInfo
+                    {
+                        UserName = "test_access2",
                     },
                     out strError);
                 if (lRet == -1 && channel.ErrorCode != ErrorCode.NotFound)
@@ -366,5 +480,19 @@ $"id,cols,xml",
                 ErrorInfo = strError
             };
         }
+
+        // parameters:
+        //      strStyle    create_objects  表示要创建对象文件
+        static MarcRecord BuildBiblioRecord(
+            string strTitle,
+            string strStyle)
+        {
+            MarcRecord record = new MarcRecord();
+            record.add(new MarcField('$', "200  $a" + strTitle));
+            record.add(new MarcField('$', "690  $aI247.5"));
+            record.add(new MarcField('$', "701  $a测试著者"));
+            return record;
+        }
+
     }
 }

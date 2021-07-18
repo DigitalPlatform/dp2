@@ -62,6 +62,7 @@
     <Compile Include="SettingDialog.Designer.cs">
       <DependentUpon>SettingDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="TestCase\TestSearchBiblioSafety.cs" />
     <Compile Include="TestCase\TestSearchReaderSafety.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
@@ -104,6 +105,10 @@
       <Project>{3541EC0B-82F5-4829-AFC3-5EF48254175D}</Project>
       <Name>DigitalPlatform.LibraryClient</Name>
     </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.MarcKernel\DigitalPlatform.MarcKernel.csproj">
+      <Project>{74242530-ef96-457e-852d-5c21a3ea8449}</Project>
+      <Name>DigitalPlatform.MarcKernel</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.Text\DigitalPlatform.Text.csproj">
       <Project>{26F96CC3-A4A9-4BC4-A10A-BC7E25581FF6}</Project>
       <Name>DigitalPlatform.Text</Name>
@@ -119,6 +124,10 @@
     <ProjectReference Include="..\dp-library\DigitalPlatform.Core\DigitalPlatform.Core.csproj">
       <Project>{C5B517C1-7344-45A5-89DC-06A9B130AE36}</Project>
       <Name>DigitalPlatform.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\dp-library\DigitalPlatform.MarcQuery\DigitalPlatform.MarcQuery.csproj">
+      <Project>{623EA980-BE0A-46BB-9E3E-DD8D0FE54F6F}</Project>
+      <Name>DigitalPlatform.MarcQuery</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

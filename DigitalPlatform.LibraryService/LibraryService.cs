@@ -3122,6 +3122,8 @@ namespace dp2Library
                     bool bHasGetReaderInfoRight = read_level != null;
                     // bool bHasGetReaderInfoRight = StringUtil.IsInList("getreaderinfo", sessioninfo.RightsOrigin);
 
+                    bool bHasGetBiblioInfoRight = StringUtil.IsInList("getbiblioinfo", sessioninfo.RightsOrigin);
+
                     foreach (Record record in searchresults)
                     {
                         string strDbName = ResPath.GetDbName(record.Path);
@@ -3132,10 +3134,24 @@ namespace dp2Library
                         {
                             // 如果 level 不是空，则 mask 全部浏览列内容
                             if (read_level != "")
-                                ClearCols(record, "[滤除]");
+                                ClearCols(record, LibraryApplication.FILTERED);
 
                             // 过滤
                             FilterPatronRecord(record, read_level);
+                        }
+                        else if (app.IsBiblioDbName(strDbName))
+                        {
+                            /*
+                            if (bHasGetBiblioInfoRight == false)
+                            {
+                                ClearCols(record, "[滤除]");
+                            }
+                            */
+                            FilterBiblioRecord(record,
+                                strDbName,
+                                bHasGetBiblioInfoRight,
+                                sessioninfo.Access,
+                                strBrowseInfoStyle);
                         }
                     }
                 }
@@ -3154,6 +3170,162 @@ namespace dp2Library
                 result.ErrorCode = ErrorCode.SystemError;
                 result.ErrorInfo = strErrorText;
                 return result;
+            }
+        }
+
+        /*
+         * record.Cols 和 record.RecordBody.Xml 需要进行过滤处理
+         * 1) (style 中包含 xml)如果 .Xml 被 access 处理(减少字段或者禁止)
+         *  1.1 如果 style 中有 cols，则重新创建 cols
+         *  1.2 如果 style 中没有 cols，则设置 cols 为 null
+         * 2) 如果 style 中没有 xml，也就是说 .Xml == null，
+         * 并且发现 XML 需要按照 access 处理(减少字段或者禁止)，那么 Cols 设置 [被滤除]
+         * */
+        void FilterBiblioRecord(Record record,
+            string strBiblioDbName,
+            bool has_getbiblioinfo_right,
+            string access,
+            string strBrowseInfoStyle)
+        {
+            bool bHasCols = StringUtil.IsInList("cols", strBrowseInfoStyle);
+            bool bHasXml = StringUtil.IsInList("xml", strBrowseInfoStyle);
+
+            string origin_xml = record.RecordBody?.Xml;
+
+            /*
+            if (has_getbiblioinfo_right == false)
+            {
+                if (string.IsNullOrEmpty(record.RecordBody.Xml) == false)
+                {
+                    record.RecordBody.Xml = "";
+                }
+            }
+            */
+
+            if (string.IsNullOrEmpty(access))
+                return; // 保持 XML 和 Cols 不变
+
+            /*
+            if (record.RecordBody == null
+                || string.IsNullOrEmpty(record.RecordBody.Xml))
+                return;
+            */
+
+            if (string.IsNullOrEmpty(origin_xml))
+                return;
+
+            bool bHasRight = true;
+            string strAccessParameters = "";
+
+            string strAction = "*";
+
+            // 按照 Access 定义来过滤 XML 记录
+            // return:
+            //      null    指定的操作类型的权限没有定义
+            //      ""      定义了指定类型的操作权限，但是否定的定义
+            //      其它      权限列表。* 表示通配的权限列表
+            string strActionList = LibraryApplication.GetDbOperRights(access,
+                strBiblioDbName,
+                "getbiblioinfo");
+            if (strActionList == null)
+            {
+                if (LibraryApplication.GetDbOperRights(access,
+                    "",
+                    "getbiblioinfo") != null)
+                {
+                    bHasRight = false;
+                }
+                else
+                {
+                    // 没有定义任何 getbiblioinfo 的存取定义(虽然定义了其他操作的存取定义)
+                    // 这时应该转过去看普通的权限
+                    // TODO: 这种算法，速度较慢
+                    if (has_getbiblioinfo_right == false)
+                    {
+                        bHasRight = false;
+                    }
+                }
+            }
+            else if (strActionList == "*")
+            {
+                // 通配
+            }
+            else
+            {
+                if (LibraryApplication.IsInAccessList(strAction, strActionList, out strAccessParameters) == false)
+                {
+                    bHasRight = false;
+                }
+            }
+
+            if (bHasRight == false)
+            {
+                if (record.RecordBody != null)
+                    record.RecordBody.Xml = "";
+                if (record.Cols != null && record.Cols.Length > 0)
+                    ClearCols(record, LibraryApplication.FILTERED);
+                return;
+            }
+
+            if (record.RecordBody == null
+    || string.IsNullOrEmpty(record.RecordBody.Xml))
+                return;
+
+            // 过滤书目记录的字段
+            if (string.IsNullOrEmpty(origin_xml) == false
+                && string.IsNullOrEmpty(strAccessParameters) == false)
+            {
+                string xml = origin_xml;
+                // 根据字段权限定义过滤出允许的内容
+                // parameters:
+                //      strUserRights   用户权限。如果为 null，表示不启用过滤 856 字段功能
+                // return:
+                //      -1  出错
+                //      0   成功
+                //      1   有部分字段被修改或滤除
+                int nRet = LibraryApplication.FilterBiblioByFieldNameList(
+                    StringUtil.IsInList("objectRights", app.Function) == true ? sessioninfo.Rights : null,
+                    strAccessParameters,
+                    ref xml,
+                    out string strError);
+                if (nRet == -1)
+                {
+                    XmlDocument dom = new XmlDocument();
+                    dom.LoadXml("<root />");
+                    dom.DocumentElement.SetAttribute("error", strError);
+                    record.RecordBody.Xml = dom.DocumentElement.OuterXml;
+                    // TODO: 此时 Cols 需要清除么?
+                }
+                else
+                    record.RecordBody.Xml = xml;
+
+                if (nRet == 1)  // XML 记录发生过改变，也要重新创建 Cols
+                {
+                    if (bHasCols)
+                    {
+                        // 有可能返回 null
+                        string strFormat = StringUtil.GetStyleParam(strBrowseInfoStyle, "format");
+
+                        RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);
+                        // return:
+                        //      // cols中包含的字符总数
+                        //      -1  出错
+                        //      0   记录没有找到
+                        //      其他  cols 中包含的字符总数。最少为 1，不会为 0
+                        nRet = app.GetCols(
+                            channel,
+                            strFormat,
+                            strBiblioDbName,
+                            xml,
+                            0,  // nStartCol,
+                            out string[] cols,
+                            out strError);
+                        // TODO: 检查 nRet == -1 时候 cols 是否为报错信息
+                        record.Cols = cols;
+                    }
+                    else
+                        record.Cols = null;
+                }
             }
         }
 
@@ -3496,7 +3668,7 @@ namespace dp2Library
                         {
                             // 如果 level 不是空，则 mask 全部浏览列内容
                             if (read_level != "")
-                                ClearCols(record, "[滤除]");
+                                ClearCols(record, LibraryApplication.FILTERED);
 
                             // 过滤
                             FilterPatronRecord(record, read_level);

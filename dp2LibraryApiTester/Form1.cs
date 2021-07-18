@@ -253,6 +253,18 @@ string style = "")
             ScrollToEnd();
         }
 
+        // 线程安全
+        public void AppendHtml(string strText)
+        {
+            if (this.webBrowser1.InvokeRequired)
+            {
+                this.webBrowser1.Invoke(new Action<string>(AppendHtml), strText);
+                return;
+            }
+            this.WriteToConsole(strText);
+            ScrollToEnd();
+        }
+
         void ScrollToEnd()
         {
             this.webBrowser1.ScrollToEnd();
@@ -261,5 +273,41 @@ string style = "")
 
         #endregion
 
+        private void MenuItem_test_searchBiblioSafety_Click(object sender, EventArgs e)
+        {
+            Task.Run(() => {
+                try
+                {
+                    NormalResult result = TestSearchBiblioSafety.PrepareEnvironment();
+                    if (result.Value == -1) return;
+
+                    result = TestSearchBiblioSafety.TestSearchBiblio("SearchBiblio", "test_access2");
+                    if (result.Value == -1) return;
+
+                    result = TestSearchBiblioSafety.TestSearchBiblio("SearchBiblio", "test_access1");
+                    if (result.Value == -1) return;
+
+                    result = TestSearchBiblioSafety.TestSearchBiblio("SearchBiblio", "test_rights");
+                    if (result.Value == -1) return;
+
+                    result = TestSearchBiblioSafety.TestSearchBiblio("Search", "test_access2");
+                    if (result.Value == -1) return;
+
+                    result = TestSearchBiblioSafety.TestSearchBiblio("Search", "test_access1");
+                    if (result.Value == -1) return;
+                    result = TestSearchBiblioSafety.TestSearchBiblio("Search", "test_rights");
+                    if (result.Value == -1) return;
+
+                    result = TestSearchBiblioSafety.TestGetBrowseRecords();
+                    if (result.Value == -1) return;
+
+                    TestSearchBiblioSafety.Finish();
+                }
+                catch (Exception ex)
+                {
+                    AppendString($"exception: {ex.Message}");
+                }
+            });
+        }
     }
 }

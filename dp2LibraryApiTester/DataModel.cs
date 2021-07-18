@@ -26,6 +26,11 @@ namespace dp2LibraryApiTester
             MainForm.AppendString(text + "\r\n");
         }
 
+        public static void SetHtml(string text)
+        {
+            MainForm.AppendHtml(text);
+        }
+
         static string EncryptKey = "dp2libraryapitester_key";
 
         internal static string DecryptPasssword(string strEncryptedText)

@@ -2763,7 +2763,7 @@ out strError);
         //      -1  出错
         //      0   成功
         //      1   有部分字段被修改或滤除
-        static int FilterBiblioByFieldNameList(
+        public static int FilterBiblioByFieldNameList(
             string strUserRights,
             string strFieldNameList,
             ref string strBiblioXml,

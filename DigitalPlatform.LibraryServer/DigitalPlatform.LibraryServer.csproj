@@ -162,6 +162,7 @@
     <Compile Include="AppAuthorNumber.cs" />
     <Compile Include="AppBatchTask.cs" />
     <Compile Include="AppBiblio.cs" />
+    <Compile Include="AppBrowseColumn.cs" />
     <Compile Include="AppCallNumber.cs" />
     <Compile Include="AppCenter.cs" />
     <Compile Include="AppChannel.cs" />
