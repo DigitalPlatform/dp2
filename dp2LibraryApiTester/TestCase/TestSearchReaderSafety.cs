@@ -3,14 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 
 // TODO: 创建一个具有 Access 存取定义的账户，限定读者库访问的那种，然后进行检索验证
+// TODO: 为读者库准备好机构代码参数，然后测试验证返回的读者 XML 记录中是否有 oi 元素
 namespace dp2LibraryApiTester
 {
     // 测试 SearchReader() API 安全性
@@ -92,35 +95,47 @@ namespace dp2LibraryApiTester
                 if (lRet == -1)
                     goto ERROR1;
 
-                DataModel.SetMessage("正在删除用户 test_level1 ...");
-                lRet = channel.SetUser(null,
-                    "delete",
-                    new UserInfo
-                    {
-                        UserName = "test_level1",
-                    },
+                var user_names = new List<string>() { "test_cannot", "test_normal", "test_level1", "test_access1" };
+                DataModel.SetMessage($"正在删除用户 {StringUtil.MakePathList(user_names, ",")} ...");
+                nRet = Utility.DeleteUsers(channel,
+                    user_names,
                     out strError);
-                if (lRet == -1 && channel.ErrorCode != ErrorCode.NotFound)
-                    goto ERROR1;
-
-                DataModel.SetMessage("正在删除用户 test_access1 ...");
-                lRet = channel.SetUser(null,
-                    "delete",
-                    new UserInfo
-                    {
-                        UserName = "test_access1",
-                    },
-                    out strError);
-                if (lRet == -1 && channel.ErrorCode != ErrorCode.NotFound)
+                if (nRet == -1)
                     goto ERROR1;
 
                 // 创建几个测试用工作人员账户
+
+                DataModel.SetMessage("正在创建用户 test_normal ...");
+                lRet = channel.SetUser(null,
+                    "new",
+                    new UserInfo
+                    {
+                        UserName = "test_normal",
+                        Rights = "searchreader,search,getreaderinfo",
+                    },
+                    out strError);
+                if (lRet == -1)
+                    goto ERROR1;
+
+                DataModel.SetMessage("正在创建用户 test_cannot ...");
+                lRet = channel.SetUser(null,
+                    "new",
+                    new UserInfo
+                    {
+                        UserName = "test_cannot",
+                        Rights = "searchreader,search",
+                    },
+                    out strError);
+                if (lRet == -1)
+                    goto ERROR1;
+
                 DataModel.SetMessage("正在创建用户 test_level1 ...");
                 lRet = channel.SetUser(null,
                     "new",
-                    new UserInfo {
-                    UserName = "test_level1",
-                    Rights = "searchreader,search,getreaderinfo:1",
+                    new UserInfo
+                    {
+                        UserName = "test_level1",
+                        Rights = "searchreader,search,getreaderinfo:1",
                     },
                     out strError);
                 if (lRet == -1)
@@ -151,17 +166,19 @@ namespace dp2LibraryApiTester
         }
 
         // 用 SearchReader() + GetSearchResult() API
-        public static NormalResult TestSearchReader(string search_api_name)
+        public static NormalResult TestSearchReader(
+            string search_api_name,
+            string userName)
         {
             string strError = "";
 
-            LibraryChannel channel = DataModel.NewChannel("test_level1", "");
+            LibraryChannel channel = DataModel.NewChannel(userName, "");
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = TimeSpan.FromMinutes(10);
 
             try
             {
-                DataModel.SetMessage($"正在检索 {search_api_name} ...");
+                DataModel.SetMessage($"正在以用户 {userName} 检索 {search_api_name} ...");
                 long lRet = 0;
                 if (search_api_name == "SearchReader")
                     lRet = channel.SearchReader(
@@ -205,14 +222,25 @@ null,
 "default",
 $"id,cols,xml",
 "zh");
+                List<string> errors = new List<string>();
 
                 foreach (Record record in loader)
                 {
-                    var xml = DomUtil.GetIndentXml(record.RecordBody.Xml);
-                    DataModel.SetMessage($"path={record.Path}");
-                    DataModel.SetMessage($"xml=\r\n{xml}");
+                    CheckRecord(
+    userName,
+    record,
+    errors);
                 }
 
+                if (errors.Count > 0)
+                {
+                    Utility.DisplayErrors(errors);
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = StringUtil.MakePathList(errors, "; ")
+                    };
+                }
                 return new NormalResult();
             }
             catch (Exception ex)
@@ -235,12 +263,129 @@ $"id,cols,xml",
             };
         }
 
+        static void CheckRecord(
+            string userName,
+            Record record,
+            List<string> errors)
+        {
+            var xml = DomUtil.GetIndentXml(record.RecordBody.Xml);
+            string cols = "(null)";
+            if (record.Cols != null)
+                cols = string.Join(",", record.Cols);
+            DataModel.SetMessage($"path={record.Path}");
+            DataModel.SetMessage($"cols={cols}");
+            DataModel.SetMessage($"xml=\r\n{xml}");
+
+            // 没有 getreaderinfo 权限
+            if (userName == "test_cannot")
+            {
+                // Cols 被滤除
+                if (record.Cols != null)
+                {
+                    if (Array.IndexOf(record.Cols, "本科生") != -1
+                        || Array.IndexOf(record.Cols, "数学系") != -1
+                        || Array.IndexOf(record.Cols, "张三") != -1)
+                    {
+                        string error = $"用户 {userName} 通过 GetSearchResult() API 获得了没有过滤的原始浏览列内容 '{string.Join(",", record.Cols)}'，违反安全性原则";
+                        errors.Add(error);
+                    }
+                }
+
+                // 用户 "test_level1" 应无法看到 XML 中的 barcode readerType department 元素才对
+                // name 元素能看到，但应该是被 mask 形态
+                if (string.IsNullOrEmpty(xml) == false)
+                {
+                    errors.Add($"用户 {userName} 通过 GetSearchResult() API 获得了读者记录 XML");
+                }
+            }
+
+            // getreaderinfo 普通权限
+            if (userName == "test_normal")
+            {
+                // Cols 被滤除
+                if (Array.IndexOf(record.Cols, "本科生") == -1
+                    || Array.IndexOf(record.Cols, "数学系") == -1
+                    || Array.IndexOf(record.Cols, "张三") == -1)
+                {
+                    string error = $"用户 {userName} 通过 GetSearchResult() API 获得了不正确的浏览列内容 '{string.Join(",", record.Cols)}'，违反安全性原则";
+                    errors.Add(error);
+                }
+
+                // 用户 "test_normal" 应看到 XML 中的 name barcode readerType department 元素才对
+                if (string.IsNullOrEmpty(xml) == false)
+                {
+                    XmlDocument dom = new XmlDocument();
+                    dom.LoadXml(xml);
+
+                    XmlElement password = dom.DocumentElement.SelectSingleNode("password") as XmlElement;
+                    if (password != null)
+                        errors.Add($"用户 {userName} 通过 GetSearchResult() API 居然获得了读者记录 XML 元素 password。严重问题");
+
+                    var barcode = DomUtil.GetElementText(dom.DocumentElement, "barcode");
+                    var name = DomUtil.GetElementText(dom.DocumentElement, "name");
+                    var readerType = DomUtil.GetElementText(dom.DocumentElement, "readerType");
+                    var department = DomUtil.GetElementText(dom.DocumentElement, "department");
+
+                    if (barcode != "R9999998")
+                        errors.Add($"用户 {userName} 通过 GetSearchResult() API 无法获得读者记录 XML 元素 barcode");
+
+                    if (readerType != "本科生")
+                        errors.Add($"用户 {userName} 通过 GetSearchResult() API 无法获得读者记录 XML 元素 readerType");
+                    if (department != "数学系")
+                        errors.Add($"用户 {userName} 通过 GetSearchResult() API 无法获得读者记录 XML 元素 department");
+
+                    if (name != "张三")
+                        errors.Add($"用户 {userName} 通过 GetSearchResult() API 无法获得读者记录 XML 元素 name");
+
+                }
+            }
+
+
+            // getreaderinfo:1
+            if (userName == "test_level1")
+            {
+                // Cols 被滤除
+                if (Array.IndexOf(record.Cols, "本科生") != -1
+                    || Array.IndexOf(record.Cols, "数学系") != -1
+                    || Array.IndexOf(record.Cols, "张三") != -1)
+                {
+                    string error = $"用户 {userName} 通过 GetSearchResult() API 获得了没有过滤的原始浏览列内容 '{string.Join(",", record.Cols)}'，违反安全性原则";
+                    errors.Add(error);
+                }
+
+                // 用户 "test_level1" 应无法看到 XML 中的 barcode readerType department 元素才对
+                // name 元素能看到，但应该是被 mask 形态
+                if (string.IsNullOrEmpty(xml) == false)
+                {
+                    XmlDocument dom = new XmlDocument();
+                    dom.LoadXml(xml);
+                    var barcode = DomUtil.GetElementText(dom.DocumentElement, "barcode");
+                    var name = DomUtil.GetElementText(dom.DocumentElement, "name");
+                    var readerType = DomUtil.GetElementText(dom.DocumentElement, "readerType");
+                    var department = DomUtil.GetElementText(dom.DocumentElement, "department");
+
+                    if (string.IsNullOrEmpty(barcode) == false)
+                        errors.Add($"用户 {userName} 通过 GetSearchResult() API 获得了读者记录 XML 元素 barcode");
+
+                    if (string.IsNullOrEmpty(readerType) == false)
+                        errors.Add($"用户 {userName} 通过 GetSearchResult() API 获得了读者记录 XML 元素 readerType");
+                    if (string.IsNullOrEmpty(department) == false)
+                        errors.Add($"用户 {userName} 通过 GetSearchResult() API 获得了读者记录 XML 元素 department");
+
+                    if (name == "张三")
+                        errors.Add($"用户 {userName} 通过 GetSearchResult() API 获得了读者记录 XML 元素 name (没有过滤)");
+
+                }
+            }
+
+        }
+
         // 用 GetBrowseRecords() API
-        public static NormalResult TestGetBrowseRecords()
+        public static NormalResult TestGetBrowseRecords(string userName)
         {
             string strError = "";
 
-            LibraryChannel channel = DataModel.NewChannel("test_level1", "");
+            LibraryChannel channel = DataModel.NewChannel(userName, "");
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = TimeSpan.FromMinutes(10);
 
@@ -254,7 +399,7 @@ $"id,cols,xml",
     null,
     path_list.ToArray(),
     "id,cols,xml",
-    out Record [] results,
+    out Record[] results,
     out strError);
                 if (lRet == -1)
                 {
@@ -267,13 +412,25 @@ $"id,cols,xml",
                     goto ERROR1;
                 }
 
+                List<string> errors = new List<string>();
                 foreach (Record record in results)
                 {
-                    var xml = DomUtil.GetIndentXml(record.RecordBody.Xml);
-                    DataModel.SetMessage($"path={record.Path}");
-                    DataModel.SetMessage($"xml=\r\n{xml}");
+                    CheckRecord(
+    userName,
+    record,
+    errors);
                 }
 
+
+                if (errors.Count > 0)
+                {
+                    Utility.DisplayErrors(errors);
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = StringUtil.MakePathList(errors, "; ")
+                    };
+                }
                 return new NormalResult();
             }
             catch (Exception ex)
@@ -322,26 +479,12 @@ $"id,cols,xml",
                         goto ERROR1;
                 }
 
-                DataModel.SetMessage("正在删除用户 test_level1 ...");
-                lRet = channel.SetUser(null,
-                    "delete",
-                    new UserInfo
-                    {
-                        UserName = "test_level1",
-                    },
+                var user_names = new List<string>() { "test_cannot", "test_normal", "test_level1", "test_access1" };
+                DataModel.SetMessage($"正在删除用户 {StringUtil.MakePathList(user_names, ",")} ...");
+                int nRet = Utility.DeleteUsers(channel,
+                    user_names,
                     out strError);
-                if (lRet == -1 && channel.ErrorCode != ErrorCode.NotFound)
-                    goto ERROR1;
-
-                DataModel.SetMessage("正在删除用户 test_access1 ...");
-                lRet = channel.SetUser(null,
-                    "delete",
-                    new UserInfo
-                    {
-                        UserName = "test_access1",
-                    },
-                    out strError);
-                if (lRet == -1 && channel.ErrorCode != ErrorCode.NotFound)
+                if (nRet == -1)
                     goto ERROR1;
 
                 DataModel.SetMessage("结束");

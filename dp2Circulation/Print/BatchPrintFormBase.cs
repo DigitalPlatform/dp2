@@ -507,7 +507,6 @@ namespace dp2Circulation
                         string strLine = "";
                         strLine = sr.ReadLine();
 
-
                         if (strLine == null)
                             break;
 

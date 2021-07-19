@@ -132,8 +132,7 @@ namespace dp2Circulation
             this.readerEditControl1.SetReadOnly("librarian");
 
             // testing
-            this.readerEditControl1.SetEditable("name", "name");
-
+            // this.readerEditControl1.SetEditable("name", "name");
 
             this.readerEditControl1.GetValueTable += new GetValueTableEventHandler(readerEditControl1_GetValueTable);
 

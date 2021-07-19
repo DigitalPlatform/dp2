@@ -3112,6 +3112,7 @@ namespace dp2Library
                 if (searchresults != null)
                 {
                     // 2012/9/15
+                    // 当前用户是否能管辖一个读者库。key 为数据库名，value 为 true 或 false
                     Hashtable table = new Hashtable();  // 加快运算速度
 
                     // return:
@@ -3132,12 +3133,55 @@ namespace dp2Library
 
                         if (app.IsReaderDbName(strDbName))
                         {
-                            // 如果 level 不是空，则 mask 全部浏览列内容
-                            if (read_level != "")
-                                ClearCols(record, LibraryApplication.FILTERED);
+                            // 2021/7/20
+                            // 先检测当前用户是否能管辖读者库 strDbName
+                            bool bChangeable = true;
 
-                            // 过滤
-                            FilterPatronRecord(record, read_level);
+                            if (bIsReader)
+                            {
+                                // 不是读者自己的读者记录或者下级记录(比如对象记录)
+                                if (sessioninfo.Account == null
+                                    || StringUtil.IsEqualOrSubPath(sessioninfo.Account.ReaderDomPath, record.Path) == false)
+                                    bChangeable = false;
+                            }
+                            else
+                            {
+                                object o = table[strDbName];
+                                if (o == null)
+                                {
+                                    if (app.IsReaderDbName(strDbName,
+                                        out bool bReaderDbInCirculation,
+                                        out string strLibraryCode) == true)
+                                    {
+                                        // 检查当前操作者是否管辖这个读者库
+                                        // 观察一个读者记录路径，看看是不是在当前用户管辖的读者库范围内?
+                                        bChangeable = app.IsCurrentChangeableReaderPath(strDbName + "/?",
+                                sessioninfo.LibraryCodeList);
+                                    }
+                                    table[strDbName] = bChangeable; // 记忆
+                                }
+                                else
+                                    bChangeable = (bool)o;
+                            }
+
+                            if (bChangeable == false)
+                            {
+                                // 当前用户不管辖此读者库
+                                ClearRecord(record, $"当前用户不管辖读者库 '{strDbName}'");
+                                record.Path = "";
+                                /*
+                                record.Cols = null;
+                                record.RecordBody = null;
+                                */
+                            }
+                            else
+                            {
+                                // 过滤
+                                FilterPatronRecord(record,
+        strDbName,
+        read_level,
+        strBrowseInfoStyle);
+                            }
                         }
                         else if (app.IsBiblioDbName(strDbName))
                         {
@@ -3153,9 +3197,114 @@ namespace dp2Library
                                 sessioninfo.Access,
                                 strBrowseInfoStyle);
                         }
+                        else if (app.IsItemDbName(strDbName))
+                        {
+                            if (StringUtil.IsInList("getiteminfo,getentities,order", sessioninfo.RightsOrigin) == false)
+                            {
+                                ClearXml(record);
+                                ClearCols(record, LibraryApplication.FILTERED);
+                            }
+                            else
+                                AddItemOI(app, record);
+                        }
+                        else if (app.IsIssueDbName(strDbName))
+                        {
+                            if (StringUtil.IsInList("getissues,getissueinfo,order", sessioninfo.RightsOrigin) == false)
+                            {
+                                ClearXml(record);
+                                ClearCols(record, LibraryApplication.FILTERED);
+                            }
+                        }
+                        else if (app.IsOrderDbName(strDbName))
+                        {
+                            if (StringUtil.IsInList("getorders,getorderinfo,order", sessioninfo.RightsOrigin) == false)
+                            {
+                                ClearXml(record);
+                                ClearCols(record, LibraryApplication.FILTERED);
+                            }
+                        }
+                        else if (app.IsCommentDbName(strDbName))
+                        {
+                            if (StringUtil.IsInList("getcommentinfo,order", sessioninfo.RightsOrigin) == false)
+                            {
+                                ClearXml(record);
+                                ClearCols(record, LibraryApplication.FILTERED);
+                            }
+                        }
+                        else if (app.ArrivedDbName == strDbName)
+                        {
+                            if (StringUtil.IsInList("borrow,return", sessioninfo.RightsOrigin) == true
+                                || read_level == "")
+                            {
+
+                            }
+                            else
+                            {
+                                ClearXml(record);
+                                ClearCols(record, LibraryApplication.FILTERED);
+                            }
+                        }
+                        else if (app.AmerceDbName == strDbName)
+                        {
+                            if (StringUtil.IsInList("getrecord", sessioninfo.RightsOrigin) == false
+                                || sessioninfo.UserType == "reader")
+                            {
+                                ClearXml(record);
+                                ClearCols(record, LibraryApplication.FILTERED);
+                            }
+                            else
+                                FilterAmerceRecord(record);
+                            // 注: GetRecord() API 可以获取违约金记录
+                            // settlement undosettlement deletesettlement
+                        }
+                        else if (app.MessageDbName == strDbName)
+                        {
+                            if (StringUtil.IsInList("managedatabase", sessioninfo.RightsOrigin) == false)
+                            {
+                                ClearXml(record);
+                                ClearCols(record, LibraryApplication.FILTERED);
+                            }
+                        }
+                        else if (app.PinyinDbName == strDbName
+                            || app.GcatDbName == strDbName
+                            || app.WordDbName == strDbName)
+                        {
+                            if (StringUtil.IsInList("managedatabase", sessioninfo.RightsOrigin) == false)
+                            {
+                                ClearXml(record);
+                                ClearCols(record, LibraryApplication.FILTERED);
+                            }
+                        }
+                        else
+                        {
+                            // 实用库包括 publisher / zhongcihao / dictionary / inventory 类型
+                            string util_type = ServerDatabaseUtility.GetUtilDbType(app.LibraryCfgDom,
+    strDbName);
+                            if (util_type != null)
+                            {
+                                if (util_type == "inventory")
+                                {
+                                    // TODO: 盘点操作的用户具有什么权限?
+                                    if (StringUtil.IsInList("inventory", sessioninfo.RightsOrigin) == false)
+                                    {
+                                        ClearXml(record);
+                                        ClearCols(record, LibraryApplication.FILTERED);
+                                    }
+                                }
+                                else if (util_type == "publisher")
+                                {
+                                    // 公开
+                                }
+                            }
+                            else
+                            {
+                                // TODO: 根据具体情况再扩展 if
+                                ClearXml(record);
+                                ClearCols(record, LibraryApplication.FILTERED);
+                            }
+                        }
                     }
                 }
-
 
                 result.Value = lRet;
                 result.ErrorInfo = strError;
@@ -3179,7 +3328,7 @@ namespace dp2Library
          *  1.1 如果 style 中有 cols，则重新创建 cols
          *  1.2 如果 style 中没有 cols，则设置 cols 为 null
          * 2) 如果 style 中没有 xml，也就是说 .Xml == null，
-         * 并且发现 XML 需要按照 access 处理(减少字段或者禁止)，那么 Cols 设置 [被滤除]
+         * 并且发现 XML 需要按照 access 处理(减少字段或者禁止)，那么 Cols 设置 [滤除]
          * */
         void FilterBiblioRecord(Record record,
             string strBiblioDbName,
@@ -3260,8 +3409,7 @@ namespace dp2Library
 
             if (bHasRight == false)
             {
-                if (record.RecordBody != null)
-                    record.RecordBody.Xml = "";
+                ClearXml(record);
                 if (record.Cols != null && record.Cols.Length > 0)
                     ClearCols(record, LibraryApplication.FILTERED);
                 return;
@@ -3297,7 +3445,7 @@ namespace dp2Library
                     // TODO: 此时 Cols 需要清除么?
                 }
                 else
-                    record.RecordBody.Xml = xml;
+                    ClearXml(record);
 
                 if (nRet == 1)  // XML 记录发生过改变，也要重新创建 Cols
                 {
@@ -3329,47 +3477,181 @@ namespace dp2Library
             }
         }
 
+        /*
+         * record.Cols 和 record.RecordBody.Xml 需要进行过滤处理
+         * 1) (style 中包含 xml)如果 .Xml 被 :level 处理(减少字段或者禁止)
+         *  1.1 如果 style 中有 cols，则重新创建 cols
+         *  1.2 如果 style 中没有 cols，则设置 cols 为 null
+         * 2) 如果 style 中没有 xml，也就是说 .Xml == null，
+         * 并且发现 XML 需要按照 :level 处理(减少字段或者禁止)，那么 Cols 设置 [滤除]
+         * */
         // 过滤读者记录 XML
         // parameters:
         //      read_level
         //                  null    没有找到 getreaderinfo 前缀
         //                  ""      找到了前缀，并且 level 部分为空
         //                  其他     返回 level 部分
-        static void FilterPatronRecord(Record record, string read_level)
+        void FilterPatronRecord(Record record,
+            string strPatronDbName,
+            string read_level,
+            string strBrowseInfoStyle)
         {
-            if (read_level == "")
-                return; // 保持 XML 不变
-            if (record.RecordBody == null)
-                return;
+            bool bHasCols = StringUtil.IsInList("cols", strBrowseInfoStyle);
+            bool bHasXml = StringUtil.IsInList("xml", strBrowseInfoStyle);
 
-            if (read_level == null)
+            // style 中包含 'xml'
+            if (bHasXml == true)
             {
-                if (string.IsNullOrEmpty(record.RecordBody.Xml) == false)
-                    record.RecordBody.Xml = "";
-                return;
+                // *** 没有 getreaderinfo 权限
+                if (read_level == null)
+                {
+                    ClearXml(record);
+                    ClearCols(record, LibraryApplication.FILTERED);
+                    return;
+                }
+
+                // *** 完整的 getreaderinfo 权限
+                if (read_level == "")
+                {
+                    RemovePassword(record);
+                    return; // 保持 XML 和 Cols 不变
+                }
+
+                // *** 不完整的 getreaderinfo 权限
+
+                string origin_xml = record.RecordBody?.Xml;
+                if (string.IsNullOrEmpty(origin_xml))
+                {
+                    // 没有传递 XML，那么只能把 Cols 滤除
+                    ClearCols(record, LibraryApplication.FILTERED);
+                    return;
+                }
+
+                // 下面是有 XML 的情况，把 XML 过滤，然后重新生成 Cols
+                XmlDocument domNewRec = new XmlDocument();
+                domNewRec.LoadXml(origin_xml);
+
+                // 给读者记录加上 oi 元素
+                {
+                    if (app.IsReaderDbName(strPatronDbName,
+                        out bool _,
+                        out string library_code) == false)
+                    {
+                    }
+                    else
+                    {
+                        app.AddPatronOI(domNewRec, library_code);
+                    }
+                }
+
+                var changed = LibraryApplication.FilterByLevel(domNewRec, read_level);
+                record.RecordBody.Xml = domNewRec.DocumentElement == null ? domNewRec.OuterXml : domNewRec.DocumentElement.OuterXml;
+
+                if (changed)
+                {
+                    if (bHasCols)
+                    {
+                        // 有可能返回 null
+                        string strFormat = StringUtil.GetStyleParam(strBrowseInfoStyle, "format");
+
+                        RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);
+                        // return:
+                        //      // cols中包含的字符总数
+                        //      -1  出错
+                        //      0   记录没有找到
+                        //      其他  cols 中包含的字符总数。最少为 1，不会为 0
+                        int nRet = app.GetCols(
+                            channel,
+                            strFormat,
+                            strPatronDbName,
+                            record.RecordBody.Xml,
+                            0,  // nStartCol,
+                            out string[] cols,
+                            out string strError);
+                        // TODO: 检查 nRet == -1 时候 cols 是否为报错信息
+                        record.Cols = cols;
+                    }
+                    else
+                        record.Cols = null;
+                }
+            }
+            else
+            {
+                // bHashXml == false
+
+                // *** 没有 getreaderinfo 权限
+                if (read_level == null)
+                {
+                    ClearXml(record);
+                    ClearCols(record, LibraryApplication.FILTERED);
+                    return;
+                }
+
+                // *** 完整的 getreaderinfo 权限
+                if (read_level == "")
+                {
+                    RemovePassword(record);
+                    return; // 保持 XML 和 Cols 不变
+                }
+
+                // *** 不完整的 getreaderinfo 权限
+                ClearXml(record);
+                ClearCols(record, LibraryApplication.FILTERED);
             }
 
-            string xml = "";
+            // 去除 password 元素
+            void RemovePassword(Record r)
+            {
+                if (r.RecordBody == null || string.IsNullOrEmpty(r.RecordBody.Xml))
+                    return;
+                XmlDocument dom = new XmlDocument();
+                try
+                {
+                    dom.LoadXml(r.RecordBody.Xml);
+                }
+                catch
+                {
+                    dom.LoadXml("<root />");
+                    dom.DocumentElement.SetAttribute("error", "xml parse error");
+                    record.RecordBody.Xml = dom.DocumentElement.OuterXml;
+                    return;
+                }
+
+                DomUtil.DeleteElement(dom.DocumentElement, "password");
+                r.RecordBody.Xml = dom.DocumentElement == null ? dom.OuterXml : dom.DocumentElement.OuterXml;
+            }
+        }
+
+        void FilterAmerceRecord(Record record)
+        {
+            var origin_xml = record.RecordBody?.Xml;
+            if (string.IsNullOrEmpty(origin_xml))
+                return;
+
+            // 当前用户只能获取和管辖的馆代码关联的违约金记录
+            XmlDocument dom = new XmlDocument();
             try
             {
-                xml = record.RecordBody.Xml;
+                dom.LoadXml(origin_xml);
             }
-            catch
+            catch (Exception ex)
             {
-                record.RecordBody.Xml = "<root error='xml parse error'>";
+                // strError = "违约金记录 '" + strPath + "' 装入XMLDOM时出错: " + ex.Message;
+                ClearXml(record);
                 return;
             }
-            if (string.IsNullOrEmpty(xml))
-                return;
-
-            XmlDocument domNewRec = new XmlDocument();
-            domNewRec.LoadXml(xml);
-
-            // string path = record.Path;
-            // AddPatronOI(domNewRec, strLibraryCode);
-
-            LibraryApplication.FilterByLevel(domNewRec, read_level);
-            record.RecordBody.Xml = domNewRec.DocumentElement == null ? domNewRec.OuterXml : domNewRec.DocumentElement.OuterXml;
+            string strLibraryCode = DomUtil.GetElementText(dom.DocumentElement, "libraryCode");
+            if (StringUtil.IsInList(strLibraryCode, sessioninfo.LibraryCodeList) == false)
+            {
+                /*
+                result.Value = -1;
+                result.ErrorInfo = "违约金记录 '" + strPath + "' 超出当前用户管辖范围，无法获取";
+                result.ErrorCode = ErrorCode.AccessDenied;
+                return result;
+                */
+                ClearXml(record);
+                ClearCols(record, LibraryApplication.FILTERED);
+            }
         }
 
         // 获得数据库记录
@@ -3638,6 +3920,7 @@ namespace dp2Library
                 if (searchresults != null)
                 {
                     // 2012/9/15
+                    // 当前用户是否能管辖一个读者库。key 为数据库名，value 为 true 或 false
                     Hashtable table = new Hashtable();  // 加快运算速度
 
                     // 如果当前身份是读者，或者没有getreaderinfo权限，则要过滤掉属于读者库的记录
@@ -3652,34 +3935,89 @@ namespace dp2Library
                     string read_level = LibraryApplication.GetReaderInfoLevel("getreaderinfo", sessioninfo.RightsOrigin);
                     bool bHasGetReaderInfoRight = read_level != null;
 
+                    bool bHasGetBiblioInfoRight = StringUtil.IsInList("getbiblioinfo", sessioninfo.RightsOrigin);
+
                     foreach (Record record in searchresults)
                     {
                         string strDbName = ResPath.GetDbName(record.Path);
 
-                        // 2021/5/10
                         if (app.IsItemDbName(strDbName))
                         {
-                            AddItemOI(app, record);
+                            if (StringUtil.IsInList("getiteminfo,getentities,order", sessioninfo.RightsOrigin) == false)
+                            {
+                                ClearXml(record);
+                                ClearCols(record, LibraryApplication.FILTERED);
+                            }
+                            else
+                                AddItemOI(app, record);
                         }
-
-
-
-                        if (app.IsReaderDbName(strDbName))
+                        else if (app.IsReaderDbName(strDbName))
                         {
+                            /*
                             // 如果 level 不是空，则 mask 全部浏览列内容
                             if (read_level != "")
                                 ClearCols(record, LibraryApplication.FILTERED);
+                            */
 
                             // 过滤
-                            FilterPatronRecord(record, read_level);
+                            FilterPatronRecord(record,
+    strDbName,
+    read_level,
+    strBrowseInfoStyle);
+                        }
+                        else if (app.IsBiblioDbName(strDbName))
+                        {
+                            /*
+                            if (bHasGetBiblioInfoRight == false)
+                            {
+                                ClearCols(record, "[滤除]");
+                            }
+                            */
+                            FilterBiblioRecord(record,
+                                strDbName,
+                                bHasGetBiblioInfoRight,
+                                sessioninfo.Access,
+                                strBrowseInfoStyle);
+                        }
+                        else if (app.IsIssueDbName(strDbName))
+                        {
+                            if (StringUtil.IsInList("getissues,getissueinfo,order", sessioninfo.RightsOrigin) == false)
+                            {
+                                ClearXml(record);
+                                ClearCols(record, LibraryApplication.FILTERED);
+                            }
+                        }
+                        else if (app.IsOrderDbName(strDbName))
+                        {
+                            if (StringUtil.IsInList("getorders,getorderinfo,order", sessioninfo.RightsOrigin) == false)
+                            {
+                                ClearXml(record);
+                                ClearCols(record, LibraryApplication.FILTERED);
+                            }
+                        }
+                        else if (app.IsCommentDbName(strDbName))
+                        {
+                            if (StringUtil.IsInList("getcommentinfo,order", sessioninfo.RightsOrigin) == false)
+                            {
+                                ClearXml(record);
+                                ClearCols(record, LibraryApplication.FILTERED);
+                            }
+                        }
+                        else
+                        {
+                            // TODO: 根据实际需要增补 else if
+                            ClearXml(record);
+                            ClearCols(record, LibraryApplication.FILTERED);
                         }
 
+                        // 读者身份，没有 getreaderinfo 权限。针对读者记录
                         if (bIsReader == true || bHasGetReaderInfoRight == false)
                         {
                             bool bIsReaderRecord = app.IsReaderDbName(strDbName);
                             if ((bIsReader == true || bHasGetReaderInfoRight == false)
                                 && bIsReaderRecord == true)
                             {
+                                // 不是读者自己的读者记录或者下级记录(比如对象记录)
                                 if (sessioninfo.Account == null
                                     || StringUtil.IsEqualOrSubPath(sessioninfo.Account.ReaderDomPath, record.Path) == false)
                                 {
@@ -3694,6 +4032,8 @@ namespace dp2Library
                         }
                         else if (sessioninfo.GlobalUser == false && bIsReader == false)
                         {
+                            // 不是全局用户，不是读者。即不是全局用户的工作人员账户
+
                             bool bChangeable = true;
 
                             object o = table[strDbName];
@@ -3717,6 +4057,7 @@ namespace dp2Library
 
                             if (bChangeable == false)
                             {
+                                // 当前用户不管辖此读者库
                                 ClearRecord(record, "不具备 getreaderinfo 权限");
                                 /*
                                 record.Path = "";
@@ -3743,6 +4084,13 @@ namespace dp2Library
                 result.ErrorInfo = strErrorText;
                 return result;
             }
+        }
+
+        static void ClearXml(Record record)
+        {
+            if (record == null || record.RecordBody == null)
+                return;
+            record.RecordBody.Xml = null;
         }
 
         // 2021/7/15

@@ -299,7 +299,7 @@ $"id,cols,xml",
 
                 if (errors.Count > 0)
                 {
-                    DisplayErrors(errors);
+                    Utility.DisplayErrors(errors);
                     return new NormalResult
                     {
                         Value = -1,
@@ -326,16 +326,6 @@ $"id,cols,xml",
                 Value = -1,
                 ErrorInfo = strError
             };
-        }
-
-        static void DisplayErrors(List<string> errors)
-        {
-            DataModel.SetMessage("**********************************");
-            foreach (string error in errors)
-            {
-                DataModel.SetMessage($"!!! {error} !!!");
-            }
-            DataModel.SetMessage("**********************************");
         }
 
         // 用 GetBrowseRecords() API

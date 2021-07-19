@@ -64,6 +64,7 @@
     </Compile>
     <Compile Include="TestCase\TestSearchBiblioSafety.cs" />
     <Compile Include="TestCase\TestSearchReaderSafety.cs" />
+    <Compile Include="TestCase\Utility.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>

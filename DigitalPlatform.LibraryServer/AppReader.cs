@@ -68,6 +68,7 @@ namespace DigitalPlatform.LibraryServer
                 "access",   // 2014/9/10
                 "refID", // 2015/9/12
                 "face", // 2018/12/16
+                "http://dp2003.com/dprms:file", // 2021/7/19
             };
 
         // 读者记录中 读者自己能修改的元素名列表
@@ -257,6 +258,15 @@ namespace DigitalPlatform.LibraryServer
             // strMergedXml = "";
             strError = "";
 
+            // 2021/7/19
+            bool has_file_element = Array.IndexOf(element_names, "http://dp2003.com/dprms:file") != -1;
+            if (has_file_element)
+            {
+                List<string> temp = new List<string>(element_names);
+                temp.Remove("http://dp2003.com/dprms:file");
+                element_names = temp.ToArray();
+            }
+
             // 2021/7/14
             // 确保 domExistParam 参数不会在本函数内被修改，只修改 domExist
             var domExist = new XmlDocument();
@@ -376,9 +386,12 @@ namespace DigitalPlatform.LibraryServer
                         strTextNew);
                 }
 
-                // 删除target中的全部<dprms:file>元素，然后将source记录中的全部<dprms:file>元素插入到target记录中
-                MergeDprmsFile(ref domExist,
-                    domNew);
+                if (has_file_element)
+                {
+                    // 删除target中的全部<dprms:file>元素，然后将source记录中的全部<dprms:file>元素插入到target记录中
+                    MergeDprmsFile(ref domExist,
+                        domNew);
+                }
             }
             else if (strAction == "changestate")
             {
@@ -6549,11 +6562,17 @@ out strError);
         }
 
         // 按照级别对读者记录中的信息字段进行过滤
+        // 注: 无论如何都要删除读者记录中的 password 元素
         public static bool FilterByLevel(XmlDocument readerdom,
             string level)
         {
             if (string.IsNullOrEmpty(level))
+            {
+                var node = DomUtil.DeleteElement(readerdom.DocumentElement, "password");
+                if (node != null)
+                    return true;
                 return false;
+            }
 
             bool changed = true;
             /*
@@ -6572,20 +6591,28 @@ out strError);
             XmlNodeList nodes = readerdom.DocumentElement.SelectNodes("*");
             foreach (XmlElement element in nodes)
             {
+                var myname = GetMyName(element);
+
                 // 马赛克
-                if (names.IndexOf("?" + element.Name) != -1)
+                if (names.IndexOf("?" + myname) != -1)
                 {
                     element.InnerText = Mask(element.InnerText);
                     changed = true;
                     continue;
                 }
 
-                if (names.IndexOf(element.Name) == -1)
+                if (names.IndexOf(myname) == -1)
                 {
                     element.ParentNode.RemoveChild(element);
                     changed = true;
                     continue;
                 }
+            }
+
+            {
+                var node = DomUtil.DeleteElement(readerdom.DocumentElement, "password");
+                if (node != null)
+                    changed = true;
             }
 
             return changed;
@@ -6596,6 +6623,13 @@ out strError);
                     return text;
                 return new string(text[0], 1) + new string('*', text.Length - 1);
             }
+        }
+
+        static string GetMyName(XmlElement element)
+        {
+            if (string.IsNullOrEmpty(element.NamespaceURI))
+                return element.LocalName;
+            return element.NamespaceURI + ":" + element.LocalName;
         }
 
         // 获得一个 level 可以传输的读者 XML 元素名字列表
@@ -6647,10 +6681,11 @@ out strError);
             names.AddRange(new string[] { "hire", "foregift" });
             if (level == "8")
                 return names;
-            // 第九级：+ 指纹，掌纹，人脸特征
-            names.AddRange(new string[] { "fingerprint", "palmprint", "face" });
+            // 第九级：+ 指纹，掌纹，人脸特征，对象
+            names.AddRange(new string[] { "fingerprint", "palmprint", "face", "http://dp2003.com/dprms:file" });
             if (level == "9")
                 return names;
+
             return names;
         }
 

@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.62.*")]
-[assembly: AssemblyFileVersion("3.62.0.0")]
+[assembly: AssemblyVersion("3.63.*")]
+[assembly: AssemblyFileVersion("3.63.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -251,3 +251,4 @@ ItemCanReturn()
 //		3.61 (2021/7/15) GetReaderInfo() API 的返回数据类型增加 structure 类型，用于返回记录结构定义
 //		3.62 (2021/7/16) library.xml 中 login/@patronPasswordStyle 属性，和 accounts/passwordStlye 属性，可以用 "style-1,login" 这样的属性值，其中 login 表示工作人员或者读者身份登录的时候 dp2library 会自动检查密码强度，如果密码强度不够，登录会失败，报错信息提示密码强度不够，需要修改密码后重新登录 
 //						dp2installer 的 dp2library 实例对话框中增加了 checkbox “停用本实例”
+//		3.63 (2021/7/19) GetSearchResult() 和 GetBrowseRecord() API 对书目和读者 XML 记录和 Cols 巩固了按照当前权限进行过滤

@@ -22219,7 +22219,7 @@ start_time_1,
             }
             else
             {
-                strError = "无法识别的strAction参数值 '" + strAction + "'";
+                strError = "无法识别的 strAction 参数值 '" + strAction + "'";
                 goto ERROR1;
             }
 
@@ -22353,7 +22353,6 @@ start_time_1,
             result.ErrorCode = ErrorCode.SystemError;
             result.ErrorInfo = strError;
             return result;
-
         }
 
         // 结算一个交费记录

@@ -5,6 +5,7 @@ using System.Windows.Forms;
 using System.Xml;
 using System.Diagnostics;
 using System.Threading;
+using System.Collections;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
@@ -15,7 +16,6 @@ using DigitalPlatform.CommonControl;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Core;
-using System.Collections;
 
 namespace dp2Circulation
 {

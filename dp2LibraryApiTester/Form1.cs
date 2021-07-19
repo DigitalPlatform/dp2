@@ -137,9 +137,20 @@ string style = "")
                 try
                 {
                     TestSearchReaderSafety.PrepareEnvironment();
-                    TestSearchReaderSafety.TestSearchReader("SearchReader");
-                    TestSearchReaderSafety.TestSearchReader("Search");
-                    TestSearchReaderSafety.TestGetBrowseRecords();
+
+                    TestSearchReaderSafety.TestSearchReader("SearchReader", "test_cannot");
+                    TestSearchReaderSafety.TestSearchReader("Search", "test_cannot");
+
+                    TestSearchReaderSafety.TestSearchReader("SearchReader", "test_normal");
+                    TestSearchReaderSafety.TestSearchReader("Search", "test_normal");
+
+                    TestSearchReaderSafety.TestSearchReader("SearchReader", "test_level1");
+                    TestSearchReaderSafety.TestSearchReader("Search", "test_level1");
+
+                    TestSearchReaderSafety.TestGetBrowseRecords("test_cannot");
+                    TestSearchReaderSafety.TestGetBrowseRecords("test_normal");
+                    TestSearchReaderSafety.TestGetBrowseRecords("test_level1");
+
                     TestSearchReaderSafety.Finish();
                 }
                 catch(Exception ex)
