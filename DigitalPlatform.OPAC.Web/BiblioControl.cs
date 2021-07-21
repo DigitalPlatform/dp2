@@ -641,6 +641,10 @@ namespace DigitalPlatform.OPAC.Web
             base.OnPreRender(e);
 
             string strError = "";
+            // return:
+            //      -2  AccessDenied。虽然书目记录访问受限，但有可能下级记录可以访问呢？
+            //      -1  出错
+            //      0   成功
             int nRet = PrepareBiblioRecord(out strError);
             if (nRet == -1)
             {
@@ -654,6 +658,10 @@ namespace DigitalPlatform.OPAC.Web
         string m_strMARC = "";
         string m_strOpacBiblio = "";
 
+        // return:
+        //      -2  AccessDenied。虽然书目记录访问受限，但有可能下级记录可以访问呢？
+        //      -1  出错
+        //      0   成功
         int PrepareBiblioRecord(
             out string strError)
         {
@@ -691,6 +699,16 @@ namespace DigitalPlatform.OPAC.Web
                 if (lRet == -1)
                 {
                     strError = "获得书目记录 '" + this.RecPath + "' 时出错: " + strError;
+                    // 2021/7/21
+                    if (channel.ErrorCode == LibraryClient.localhost.ErrorCode.AccessDenied)
+                    {
+                        this.m_strXml = "";
+                        this.Timestamp = null;
+                        this.BiblioRecPath = this.RecPath;
+                        this.m_strMARC = "";
+                        this.m_strOpacBiblio = "";
+                        return -2;
+                    }
                     goto ERROR1;
                 }
                 if (lRet == 0)
@@ -979,12 +997,19 @@ namespace DigitalPlatform.OPAC.Web
                 }
             }
 
+            string strAccessDeniedComment = ""; // 2021/7/21
             string strMarc = "";
             if (string.IsNullOrEmpty(this.m_strMARC) == true)
             {
+                // return:
+                //      -2  AccessDenied。虽然书目记录访问受限，但有可能下级记录可以访问呢？
+                //      -1  出错
+                //      0   成功
                 nRet = PrepareBiblioRecord(out strError);
                 if (nRet == -1)
                     goto ERROR1;
+                if (nRet == -2)
+                    strAccessDeniedComment = strError;
                 strMarc = this.m_strMARC;
             }
 
@@ -1020,11 +1045,17 @@ namespace DigitalPlatform.OPAC.Web
             {
                 if (bAjax == true)
                 {
-                    strBiblio = "<div class='pending'>biblio_html:" + HttpUtility.HtmlEncode(this.RecPath) + "</div>";
+                    if (string.IsNullOrEmpty(strAccessDeniedComment) == false)
+                        strBiblio = $"<div>{HttpUtility.HtmlEncode(this.RecPath)} {strAccessDeniedComment}</div>";
+                    else
+                        strBiblio = "<div class='pending'>biblio_html:" + HttpUtility.HtmlEncode(this.RecPath) + "</div>";
                 }
                 else
                 {
-                    strBiblio = this.m_strOpacBiblio;
+                    if (string.IsNullOrEmpty(strAccessDeniedComment) == false)
+                        strBiblio = $"<div>{HttpUtility.HtmlEncode(this.RecPath)} {strAccessDeniedComment}</div>";
+                    else
+                        strBiblio = this.m_strOpacBiblio;
 #if NO
                     string strBiblioDbName = ResPath.GetDbName(this.RecPath);
 
