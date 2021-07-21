@@ -565,16 +565,18 @@ MessageBoxDefaultButton.Button2);
                 REDO:
                     stop.SetMessage("正在装入读者记录 " + strBarcode + " ...");
 
-                    string formats = "xml,html";
+                    List<string> formats = new List<string>() { "xml", "html" };
                     if (Control.ModifierKeys == Keys.Control)
-                        formats = "xml";
+                        formats = new List<string>() { "xml" };
+                    // 2021/7/21
+                    if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.61") >= 0)
+                        formats.Add("structure");
 
-                    string[] results = null;
                     long lRet = Channel.GetReaderInfo(
                         stop,
                         strBarcode,
-                        formats,
-                        out results,
+                        StringUtil.MakePathList(formats),
+                        out string [] results,
                         out strOutputRecPath,
                         out baTimestamp,
                         out strError);
@@ -586,18 +588,6 @@ MessageBoxDefaultButton.Button2);
 
                     if (lRet > 1)
                     {
-#if NO
-                        if (bForceLoad == true)
-                        {
-                            strError = "条码 " + strBarcode + " 命中记录 " + lRet.ToString() + " 条，但仍装入其中第一条读者记录。\r\n\r\n这是一个严重错误，请系统管理员尽快排除。";
-                            MessageBox.Show(this, strError);    // 警告后继续装入第一条 
-                        }
-                        else
-                        {
-                            strError = "条码 " + strBarcode + " 命中记录 " + lRet.ToString() + " 条，放弃装入读者记录。\r\n\r\n注意这是一个严重错误，请系统管理员尽快排除。";
-                            goto ERROR1;    // 当出错处理
-                        }
-#endif
                         // 如果重试后依然发生重复
                         if (nRedoCount > 0)
                         {
@@ -651,15 +641,20 @@ MessageBoxDefaultButton.Button2);
                     // if (results == null || results.Length < 2)
                     if (results == null || results.Length < 1)
                     {
-                        strError = "返回的results不正常。";
+                        strError = "返回的 results 不正常。";
                         goto ERROR1;
                     }
 
                     string strXml = "";
                     string strHtml = "";
+                    /*
                     strXml = results[0];
                     if (results.Length >= 2)
                         strHtml = results[1];
+                    */
+                    strXml = GetValue(formats, results, "xml");
+                    strHtml = GetValue(formats, results, "html");
+                    string strStructure = GetValue(formats, results, "structure");
 
                     nRet = this.readerEditControl1.SetData(
                         strXml,
@@ -668,6 +663,15 @@ MessageBoxDefaultButton.Button2);
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
+
+                    if (string.IsNullOrEmpty(strStructure) == false)
+                    {
+                        ParseStructure(strStructure,
+        out string visibleFields,
+        out string writeableFields);
+
+                        this.readerEditControl1.SetEditable(visibleFields, writeableFields);
+                    }
 
                     // 接着装入对象资源
                     {
@@ -751,6 +755,42 @@ MessageBoxDefaultButton.Button2);
         ERROR1:
             MessageBox.Show(this, strError);
             return -1;
+        }
+
+        // 根据格式名字找到值
+        static string GetValue(List<string> formats,
+            string [] results, 
+            string format)
+        {
+            if (results == null || results.Length == 0)
+                return null;
+            int index = formats.IndexOf(format);
+            if (index == -1)
+                return null;    // not found
+            Debug.Assert(index >= 0);
+            if (index >= results.Length)
+                return null;
+            return results[index];
+        }
+
+        void ParseStructure(string xml, 
+            out string visibleFields,
+            out string writeableFields)
+        {
+            visibleFields = "";
+            writeableFields = "";
+            if (string.IsNullOrEmpty(xml))
+                return;
+            /*
+ * <structure 
+ * visibleFields="name,namePinyin,state,?comment"
+ * writeableFields="name,namePinyin" />
+ * 
+ * */
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml(xml);
+            visibleFields = dom.DocumentElement?.GetAttribute("visibleFields");
+            writeableFields = dom.DocumentElement?.GetAttribute("writeableFields");
         }
 
         void ClearReaderHtmlPage()
@@ -861,17 +901,20 @@ MessageBoxDefaultButton.Button2);
                 try
                 {
                     byte[] baTimestamp = null;
-                    string strOutputRecPath = "";
 
                     stop.SetMessage("正在装入读者记录 " + strRecPath + " ...");
 
-                    string[] results = null;
+                    List<string> formats = new List<string>() { "xml", "html" };
+                    // 2021/7/21
+                    if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.61") >= 0)
+                        formats.Add("structure");
+                    // string[] results = null;
                     long lRet = Channel.GetReaderInfo(
                         stop,
                         "@path:" + strRecPath,
-                        "xml,html",
-                        out results,
-                        out strOutputRecPath,
+                        StringUtil.MakePathList(formats),   // "xml,html",
+                        out string [] results,
+                        out string strOutputRecPath,
                         out baTimestamp,
                         out strError);
                     if (lRet == -1)
@@ -907,9 +950,14 @@ MessageBoxDefaultButton.Button2);
 
                     string strXml = "";
                     string strHtml = "";
+                    /*
                     strXml = results[0];
                     if (results.Length >= 2)
                         strHtml = results[1];
+                    */
+                    strXml = GetValue(formats, results, "xml");
+                    strHtml = GetValue(formats, results, "html");
+                    string strStructure = GetValue(formats, results, "structure");
 
                     int nRet = this.readerEditControl1.SetData(
                         strXml,
@@ -918,6 +966,15 @@ MessageBoxDefaultButton.Button2);
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
+
+                    if (string.IsNullOrEmpty(strStructure) == false)
+                    {
+                        ParseStructure(strStructure,
+        out string visibleFields,
+        out string writeableFields);
+
+                        this.readerEditControl1.SetEditable(visibleFields, writeableFields);
+                    }
 
                     // 接着装入对象资源
                     {

@@ -77,9 +77,10 @@ namespace DigitalPlatform.CommonControl
             }
             set
             {
-                this.maskedTextBox_date.Enabled = value;
+                // base.Enabled = Enabled;
+                base.Enabled = value;
 
-                base.Enabled = Enabled;
+                this.maskedTextBox_date.Enabled = value;
 
                 this.Invalidate();
                 this.Update();

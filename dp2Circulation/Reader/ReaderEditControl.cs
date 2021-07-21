@@ -1210,6 +1210,8 @@ namespace dp2Circulation
         {
             if (strStyle.StartsWith("editable:"))
             {
+                // 注: editable:[all] 表示全部都可编辑
+                // editable: 表示全部都不可以编辑
                 string list = strStyle.Substring("editable:".Length);
                 var names = StringUtil.SplitList(list);
 
@@ -1218,7 +1220,29 @@ namespace dp2Circulation
                     var name = child.Tag as string;
                     if (name == null)
                         continue;
-                    if (names.IndexOf(name) == -1)
+
+                    // 任何情形下，refID 要设置为 readonly 状态
+                    if (name == "refID")
+                    {
+                        SetReadOnly(child, true);
+                        continue;
+                    }
+
+                    // [all] 情形下，recPath 和 refID 要设置为 readonly 状态
+                    if (list == "[all]"
+                        && (name == "recPath" || name == "refID")
+                        )
+                    {
+                        SetReadOnly(child, true);
+                        continue;
+                    }
+
+                    // 有可能是 "hire,expireDate" 这样的形态
+                    if (name.Contains(","))
+                        name = name.Substring(0, name.IndexOf(","));
+
+                    if (names.IndexOf(name) == -1
+                        && list != "[all]")
                         SetReadOnly(child, true);
                     else
                         SetReadOnly(child, false);
@@ -1227,7 +1251,7 @@ namespace dp2Circulation
                 return;
             }
 
-            if (strStyle == "all")
+            else if (strStyle == "all")
             {
                 this.textBox_barcode.ReadOnly = true;
                 this.textBox_cardNumber.ReadOnly = true;
@@ -1313,7 +1337,6 @@ namespace dp2Circulation
 
                 // 2007/6/15
                 this.dateControl_hireExpireDate.Enabled = false;
-
             }
             else if (strStyle == "reader")
             {
@@ -1382,10 +1405,12 @@ namespace dp2Circulation
             this.comboBox_hirePeriod.Tag = "hire,period";
 
             this.textBox_foregift.Tag = "foregift";
+            this.button_foregiftSum.Tag = "foregift";
 
             this.dateControl_dateOfBirth.Tag = "dateOfBirth";
             this.textBox_name.Tag = "name";
             this.textBox_namePinyin.Tag = "namePinyin";
+            this.button_createNamePinyin.Tag = "namePinyin";
             this.comboBox_gender.Tag = "gender";
             this.textBox_idCardNumber.Tag = "idCardNumber";
             this.textBox_department.Tag = "department";
@@ -1394,6 +1419,7 @@ namespace dp2Circulation
             this.textBox_tel.Tag = "tel";
             this.textBox_email.Tag = "email";
             this.textBox_rights.Tag = "rights";
+            this.button_editRights.Tag = "rights";
             this.textBox_personalLibrary.Tag = "personalLibrary";
             this.textBox_access.Tag = "access";
             this.textBox_friends.Tag = "friends";
@@ -1940,8 +1966,25 @@ namespace dp2Circulation
             var visible_names = StringUtil.SplitList(visibleFields);
             var writeable_names = StringUtil.SplitList(writeableFields);
 
-            var names = visible_names.Intersect(writeable_names);
+            List<string> names = null;
 
+            if (writeable_names.Count == 1
+                && writeable_names[0] == "[all]")
+                names = visible_names;
+            else
+                names = new List<string>(visible_names.Intersect(writeable_names));
+
+            /*
+            if (names.Count == 1
+    && names[0] == "[all]")
+                names = null;
+
+            if (names == null)
+            {
+                SetReadOnly("editable:[all]");
+                // SetReadOnly("librarian");
+            }
+            else */
             SetReadOnly("editable:" + StringUtil.MakePathList(new List<string>(names)));
         }
 

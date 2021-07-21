@@ -1224,6 +1224,7 @@ namespace dp2Circulation
 
                     TextBox edit = new TextBox();
                     edit.Dock = DockStyle.Fill;
+                    edit.Tag = strElement;  // 2021/7/21
 
                     this._tableLayoutPanel_main.Controls.Add(caption, 0, nRow);
                     this._tableLayoutPanel_main.Controls.Add(color, 1, nRow);
