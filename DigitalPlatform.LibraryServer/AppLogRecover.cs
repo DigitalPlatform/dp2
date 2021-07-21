@@ -5178,6 +5178,7 @@ out strError);
                         "change",
                         domExist,
                         domNew,
+                        null,
                         // out strNewXml,
                         out XmlDocument domMerged,
                         out strError);

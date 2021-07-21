@@ -15,6 +15,7 @@ using DigitalPlatform.Text;
 
 namespace DigitalPlatform.LibraryServer
 {
+    // TODO: 如何清除 _xpath_table 和 _browse_table 缓存? 当检测到 browse 配置文件被修改的时候? 或者休眠一段时间后自动清除?
     /// <summary>
     /// 和创建 GetSearchResult() 浏览列有关的功能
     /// </summary>
@@ -22,7 +23,7 @@ namespace DigitalPlatform.LibraryServer
     {
         public const string FILTERED = "[滤除]";
 
-        Hashtable m_xpath_table = null;
+        Hashtable _xpath_table = new Hashtable();
 
         // 得到一条记录的浏览格式，一个字符串数组
         // parameter:
@@ -140,16 +141,16 @@ namespace DigitalPlatform.LibraryServer
                 // 列定义
 
                 // 预防 Hashtable 变得过大
-                if (m_xpath_table != null && m_xpath_table.Count > 1000)
+                lock (_xpath_table.SyncRoot)
                 {
-                    lock (m_xpath_table)
+                    if (_xpath_table != null && _xpath_table.Count > 1000)
                     {
-                        m_xpath_table.Clear();
+                        _xpath_table.Clear();
                     }
                 }
 
                 nRet = BuildCols(
-                    ref m_xpath_table,
+                    // ref m_xpath_table,
                     strColDef,
                     domData,
                     nStartCol,
@@ -169,7 +170,9 @@ namespace DigitalPlatform.LibraryServer
             return -1;
         }
 
-        Hashtable browse_table = new Hashtable();
+        // browse 配置文件名和 BrowseCfg 对象之间的缓存
+        // key: browseName, value: BrowseCfg
+        Hashtable _browse_table = new Hashtable();
 
         // 得到浏览格式内存对象
         // parameters:
@@ -191,7 +194,10 @@ namespace DigitalPlatform.LibraryServer
 
             strBrowseName = strBrowseName.ToLower();
 
-            browseCfg = (BrowseCfg)this.browse_table[strBrowseName];
+            lock (_browse_table.SyncRoot)
+            {
+                browseCfg = (BrowseCfg)this._browse_table[strBrowseName];
+            }
             if (browseCfg != null)
             {
                 return 1;
@@ -266,7 +272,10 @@ namespace DigitalPlatform.LibraryServer
                     return -1;
                 }
 
-                this.browse_table[strBrowseName] = browseCfg;
+                lock (_browse_table.SyncRoot)
+                {
+                    this._browse_table[strBrowseName] = browseCfg;
+                }
                 return 1;
             }
             finally
@@ -285,8 +294,8 @@ namespace DigitalPlatform.LibraryServer
         // return:
         //		-1	出错
         //		>=0	成功。数字值代表每个列包含的字符数之和
-        static int BuildCols(
-        ref Hashtable xpath_table,
+        int BuildCols(
+        // ref Hashtable xpath_table,
         string strColDef,
         XmlDocument domData,
         int nStartCol,
@@ -298,8 +307,8 @@ namespace DigitalPlatform.LibraryServer
 
             Debug.Assert(domData != null, "BuildCols()调用错误，domData参数不能为null。");
 
-            if (xpath_table == null)
-                xpath_table = new Hashtable();
+            if (_xpath_table == null)
+                _xpath_table = new Hashtable();
 
             int nResultLength = 0;
 
@@ -319,19 +328,26 @@ namespace DigitalPlatform.LibraryServer
                 XmlNamespaceManager nsmgr = null;
                 if (string.IsNullOrEmpty(info.NameList) == false)
                 {
-                    nsmgr = (XmlNamespaceManager)xpath_table[info.NameList];
+                    lock (_xpath_table.SyncRoot)
+                    {
+                        nsmgr = (XmlNamespaceManager)_xpath_table[info.NameList];
+                    }
 
                     if (nsmgr == null)
                     {
                         nsmgr = BuildNamespaceManager(info.NameList, domData);
-                        lock (xpath_table)
+                        lock (_xpath_table.SyncRoot)
                         {
-                            xpath_table[info.NameList] = nsmgr;
+                            _xpath_table[info.NameList] = nsmgr;
                         }
                     }
                 }
 
-                XPathExpression expr = (XPathExpression)xpath_table[info.XPath];
+                XPathExpression expr = null;
+                lock (_xpath_table.SyncRoot)
+                {
+                    expr = (XPathExpression)_xpath_table[info.XPath];
+                }
                 // TODO: nsmgr_table
 
                 if (expr == null)
@@ -343,9 +359,9 @@ namespace DigitalPlatform.LibraryServer
                         if (nsmgr != null)
                             expr.SetContext(nsmgr);
 
-                        lock (xpath_table)
+                        lock (_xpath_table.SyncRoot)
                         {
-                            xpath_table[info.XPath] = expr;
+                            _xpath_table[info.XPath] = expr;
                         }
                     }
                     catch (Exception ex)

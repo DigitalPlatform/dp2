@@ -13580,9 +13580,12 @@ out strError);
 
                         KeyCount keycount = new KeyCount();
                         string strKey = searchresult.Path;
-                        int count = Convert.ToInt32(searchresult.Cols[0]);
 
-                        this.tabComboBox_queryWord.Items.Add(strKey + "\t" + count.ToString() + "笔");
+                        // int count = Convert.ToInt32(searchresult.Cols[0]);
+                        if (Int32.TryParse(searchresult.Cols[0], out int count) == true)
+                            this.tabComboBox_queryWord.Items.Add(strKey + "\t" + count.ToString() + "笔");
+                        else
+                            this.tabComboBox_queryWord.Items.Add($"{strKey}\t{searchresult.Cols[0]}笔");
                     }
 
                 }

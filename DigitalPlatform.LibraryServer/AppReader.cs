@@ -245,11 +245,14 @@ namespace DigitalPlatform.LibraryServer
         // TODO: 需要硬编码禁止覆盖一些流通专用的字段 borrows 等
         // <DoReaderChange()的下级函数>
         // 合并新旧记录
+        // parameters:
+        //      important_fields    重要的字段名列表。要检查这些字段是否没有被采纳，如果没有被采纳要报错
         static int MergeTwoReaderXml(
             string[] element_names,
             string strAction,
             XmlDocument domExistParam,
             XmlDocument domNew,
+            string[] important_fields,
             // out string strMergedXml,
             out XmlDocument domMerged,
             out string strError)
@@ -257,6 +260,23 @@ namespace DigitalPlatform.LibraryServer
             domMerged = null;
             // strMergedXml = "";
             strError = "";
+
+            // 2021/7/21
+            // 判断重要元素是否会被拒绝保存
+            if (important_fields != null && important_fields.Length > 0)
+            {
+                List<string> temp = new List<string>(important_fields);
+                foreach (string s in element_names)
+                {
+                    temp.Remove(s);
+                }
+                StringUtil.RemoveBlank(ref temp);
+                if (temp.Count > 0)
+                {
+                    strError = $"下列元素超过当前用户权限: '{StringUtil.MakePathList(temp)}'";
+                    return -1;
+                }
+            }
 
             // 2021/7/19
             bool has_file_element = Array.IndexOf(element_names, "http://dp2003.com/dprms:file") != -1;
@@ -917,6 +937,10 @@ namespace DigitalPlatform.LibraryServer
                 goto ERROR1;
             }
 
+            // 2021/7/21
+            string important_fields = domNewRec.DocumentElement?.GetAttribute("importantFields");
+            if (domNewRec.DocumentElement != null)
+                domNewRec.DocumentElement.RemoveAttribute("importantFields");
 
             // return:
             //      -1  出错
@@ -1626,6 +1650,7 @@ strLibraryCode);    // 读者所在的馆代码
                     nRet = DoReaderChange(
                         sessioninfo.LibraryCodeList,
                         element_names,
+                        important_fields,
                         strAction,
                         bForce,
                         channel,
@@ -1667,6 +1692,7 @@ strLibraryCode);    // 读者所在的馆代码
                     nRet = DoReaderOperDelete(
                         sessioninfo.LibraryCodeList,
                         element_names,
+                        important_fields,
                         sessioninfo,
                         bForce,
                         channel,
@@ -2043,6 +2069,7 @@ root, strLibraryCode);
         int DoReaderOperDelete(
             string strCurrentLibraryCode,
             string[] element_names,
+            string importantFields,
             SessionInfo sessioninfo,
             bool bForce,
             RmsChannel channel,
@@ -2370,6 +2397,7 @@ root, strLibraryCode);
         int DoReaderChange(
             string strCurrentLibraryCode,
             string[] element_names,
+            string importantFields,
             string strAction,
             bool bForce,
             RmsChannel channel,
@@ -2603,6 +2631,7 @@ root, strLibraryCode);
                     strAction,
                     domExist,
                     domNewRec,
+                    importantFields == null || string.IsNullOrEmpty(importantFields) ? null : importantFields.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries),
                     // out string strNewXml,
                     out XmlDocument domMerged,
                     out strError);
@@ -5331,7 +5360,7 @@ out strError);
                     }
                     else
                         struct_dom.DocumentElement.SetAttribute("writeableFields", "[all]");
-                    
+
                     SetResult(results_list, i, struct_dom.DocumentElement.OuterXml);
                 }
                 else
@@ -5942,8 +5971,8 @@ out strError);
         //          7) 否则用证条码号进行检索
         //      strPassword     读者记录的密码
         //      strBindingID    要绑定的号码。格式如 email:xxxx 或 weixinid:xxxxx
-        //      strStyle    风格。multiple/single。默认 single
-        //                  multiple 表示允许多次绑定同一类型号码；single 表示同一类型号码只能绑定一次，如果多次绑定以前的同类型号码会被清除
+        //      strStyle    风格。multiple/single/singlestrict。默认 single
+        //                  multiple 表示允许多次绑定同一类型号码；single 表示同一类型号码只能绑定一次，如果多次绑定以前的同类型号码会被清除; singlestrict 表示如果以前存在同类型号码，本次绑定会是失败
         //                  如果包含 null_password，表示不用读者密码，strPassword 参数无效。但这个功能只能被工作人员使用
         //      strResultTypeList   结果类型数组 xml/html/text/calendar/advancexml/recpaths/summary
         //              其中calendar表示获得读者所关联的日历名；advancexml表示经过运算了的提供了丰富附加信息的xml，例如具有超期和停借期附加信息
@@ -6076,16 +6105,28 @@ out strError);
 
                 bool bChanged = false;
 
-                bool bMultiple = StringUtil.IsInList("multiple", strStyle); // 若 mutilple 和 single 都包含了，则 multiple 有压倒优势
+                // bool bMultiple = StringUtil.IsInList("multiple", strStyle); // 若 multiple 和 single 都包含了，则 multiple 有压倒优势
 
                 // 修改读者记录的 email 字段
                 string strEmail = userinfo.Binding;
                 string strNewEmail = "";
                 if (strAction == "bind")
                 {
+                    /*
                     strNewEmail = AddBindingString(strEmail,
                         strBindingID,
                         bMultiple);
+                    */
+                    nRet = AddBindingString(strEmail,
+                        strBindingID,
+                        strStyle,
+                        out strNewEmail,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = $"绑定失败: {strError}";
+                        return -1;
+                    }
                 }
                 else if (strAction == "unbind")
                 {
@@ -6258,16 +6299,28 @@ out strError);
 
                 bool bChanged = false;
 
-                bool bMultiple = StringUtil.IsInList("multiple", strStyle); // 若 mutilple 和 single 都包含了，则 multiple 有压倒优势
+                // bool bMultiple = StringUtil.IsInList("multiple", strStyle); // 若 mutilple 和 single 都包含了，则 multiple 有压倒优势
 
                 // 修改读者记录的 email 字段
                 string strEmail = DomUtil.GetElementText(readerdom.DocumentElement, "email");
                 string strNewEmail = "";
                 if (strAction == "bind")
                 {
+                    /*
                     strNewEmail = AddBindingString(strEmail,
                         strBindingID,
                         bMultiple);
+                    */
+                    nRet = AddBindingString(strEmail,
+    strBindingID,
+    strStyle,
+    out strNewEmail,
+    out strError);
+                    if (nRet == -1)
+                    {
+                        strError = $"绑定失败: {strError}";
+                        return -1;
+                    }
                 }
                 else if (strAction == "unbind")
                 {
@@ -6446,7 +6499,82 @@ out strError);
         }
 
         // 加入一个绑定号码
-        static string AddBindingString(string strText,
+        // parameters:
+        //      style   single/multiple/singlestrict
+        public static int AddBindingString(string strText,
+            string strBinding,
+            string style,
+            out string strResult,
+            out string strError)
+        {
+            strError = "";
+            strResult = strBinding;
+
+            if (string.IsNullOrEmpty(strText) == true)
+            {
+                strResult = strBinding;
+                return 1;
+            }
+
+            //                 bool bMultiple = StringUtil.IsInList("multiple", strStyle); // 若 multiple 和 single 都包含了，则 multiple 有压倒优势
+
+            bool single = StringUtil.IsInList("single", style) == true;
+            bool strict = StringUtil.IsInList("singlestrict", style) == true;
+            bool multiple = StringUtil.IsInList("multiple", style) == true;
+
+            if (single == false && strict == false && multiple == false)
+                single = true;    // 缺省时候当作 single 处理
+
+            if (multiple)
+            {
+                // 查重
+                if (FindBindingString(strText, strBinding) != -1)
+                    strResult = strText;
+                else
+                    strResult = strText + "," + strBinding;
+            }
+            else if (single == true || strict == true)
+            {
+                string strName = "";
+                string strValue = "";
+                StringUtil.ParseTwoPart(strBinding, ":", out strName, out strValue);
+
+                List<string> results = new List<string>();
+                string[] parts = strText.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                foreach (string s in parts)
+                {
+                    string strLine = s.Trim();
+                    if (string.IsNullOrEmpty(strLine))
+                        continue;
+                    string strLeft = "";
+                    string strRight = "";
+                    StringUtil.ParseTwoPart(strLine, ":", out strLeft, out strRight);
+                    if (strName == strLeft)
+                    {
+                        if (strict)
+                        {
+                            strError = $"类型 '{strName}' 先前已经被绑定过了";
+                            return -1;
+                        }
+                        continue;   // 忽视所有同类型的号码
+                    }
+                    results.Add(strLine);
+                }
+
+                results.Add(strBinding);
+                strResult = StringUtil.MakePathList(results);
+            }
+            else
+            {
+                strError = $"style 参数值 '{style}' 不合法。不具备 multiple single singlestrict 之一";
+                return -1;
+            }
+
+            return 1;
+        }
+
+        // 加入一个绑定号码
+        public static string AddBindingString(string strText,
             string strBinding,
             bool bMultiple)
         {
@@ -6632,14 +6760,48 @@ out strError);
             return element.NamespaceURI + ":" + element.LocalName;
         }
 
+        public class NameElements
+        {
+            public string Name { get; set; }
+            public string Elements { get; set; }
+        }
+
+        public static List<NameElements> _name_elements = new List<NameElements>() {
+        new NameElements
+        {
+            Name = "shelf",
+            Elements = "info,borrows,overdues,reservations,outofReservations,libraryCode,readerType,"   // libraryCode 和 readerType 是为了显示可借总数和当前可借数的需要
+        },
+        new NameElements
+        {
+            Name = "facerecognition",
+            Elements = "barcode,face",
+        },
+        new NameElements
+        {
+            Name = "faceregister",
+            Elements = "face",
+        },
+        };
+
+        public static string[] ELEMENTS_SHELF = new string[] {
+
+        };
+
         // 获得一个 level 可以传输的读者 XML 元素名字列表
         // 注: 名字前面有个问号的，表示元素正文在传输中要被马赛克遮盖部分字符
         static List<string> GetElementNames(string level)
         {
             List<string> names = new List<string>();
 
-            // 基本字段。高级信息，借阅的册，违约金, 预约未取参数
+            // 基本字段。馆代码，读者类型，证条码号，证号，参考 ID，机构代码(OI)，高级信息，借阅的册，违约金, 预约未取参数
             names.AddRange(new string[] {
+                "libraryCode",
+                "readerType",
+                "barcode",
+                "cardNumber",
+                "refID",
+                "oi",
                 "info",
                 "borrows",
                 "overdues",
@@ -6653,12 +6815,12 @@ out strError);
                 names.Add("?name");
                 return names;
             }
-            // 第二级：+ 完整姓名，姓名拼音，显示名，性别，民族，证条码号，证号, 参考ID，OI，注释
-            names.AddRange(new string[] { "name", "namePinyin", "displayName", "gender", "nation", "barcode", "cardNumber", "refID", "oi", "comment" });
+            // 第二级：+ 完整姓名，姓名拼音，显示名，性别，民族，注释
+            names.AddRange(new string[] { "name", "namePinyin", "displayName", "gender", "nation", "comment" });
             if (level == "2")
                 return names;
-            // 第三级：+ 单位，职务，地址，读者类型
-            names.AddRange(new string[] { "department", "post", "address", "readerType" });
+            // 第三级：+ 单位，职务，地址
+            names.AddRange(new string[] { "department", "post", "address" });
             if (level == "3")
                 return names;
             // 第四级：+ 电话，email
@@ -6681,7 +6843,7 @@ out strError);
             names.AddRange(new string[] { "hire", "foregift" });
             if (level == "8")
                 return names;
-            // 第九级：+ 指纹，掌纹，人脸特征，对象
+            // 第九级：+ 指纹，掌纹，人脸特征，对象(证照片，人脸图片等)
             names.AddRange(new string[] { "fingerprint", "palmprint", "face", "http://dp2003.com/dprms:file" });
             if (level == "9")
                 return names;

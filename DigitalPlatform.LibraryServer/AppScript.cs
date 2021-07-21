@@ -2131,7 +2131,8 @@ namespace DigitalPlatform.LibraryServer
                     if (nRet == -2)
                     {
                         strError = "library.xml 中没有配置条码号验证函数，无法进行条码号验证";
-                        return -1;
+                        // return -1;
+                        return -2;  // 2021/7/20
                     }
                     else if (nRet == -1)
                     {

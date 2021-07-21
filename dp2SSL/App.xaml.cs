@@ -1601,7 +1601,15 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             foreach (var right in base_rights)
             {
                 if (StringUtil.IsInList(right, rights) == false)
+                {
+                    // 2021/7/20
+                    if (right == "getreaderinfo" && StringUtil.GetParameterByPrefix(rights, "getreaderinfo") != null)
+                        continue;
+                    if (right == "setreaderinfo" && StringUtil.GetParameterByPrefix(rights, "setreaderinfo") != null)
+                        continue;
+
                     missing_rights.Add(right);
+                }
             }
 
             if (missing_rights.Count > 0)

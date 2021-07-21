@@ -3109,7 +3109,8 @@ namespace dp2Library
                 // 2021/7/15
                 // 过滤结果
                 // 对 XML 记录进行过滤或者修改
-                if (searchresults != null)
+                if (searchresults != null
+                    && StringUtil.IsInList("keycount", strBrowseInfoStyle) == false)
                 {
                     // 2012/9/15
                     // 当前用户是否能管辖一个读者库。key 为数据库名，value 为 true 或 false
@@ -9218,8 +9219,9 @@ namespace dp2Library
         //          7) 否则用证条码号进行检索
         //      strPassword     读者记录的密码
         //      strBindingID    要绑定的号码。格式如 email:xxxx 或 weixinid:xxxxx
-        //      strStyle    风格。multiple/single。默认 single
-        //                  multiple 表示允许多次绑定同一类型号码；single 表示同一类型号码只能绑定一次，如果多次绑定以前的同类型号码会被清除
+        //      strStyle    风格。multiple/single/singlestrict。默认 single
+        //                  multiple 表示允许多次绑定同一类型号码；single 表示同一类型号码只能绑定一次，如果多次绑定以前的同类型号码会被清除; singlestrict 表示如果以前存在同类型号码，本次绑定会是失败
+        //                  如果包含 null_password，表示不用读者密码，strPassword 参数无效。但这个功能只能被工作人员使用
         //      strResultTypeList   结果类型数组 xml/html/text/calendar/advancexml/recpaths/summary
         //              其中calendar表示获得读者所关联的日历名；advancexml表示经过运算了的提供了丰富附加信息的xml，例如具有超期和停借期附加信息
         //              advancexml_borrow_bibliosummary/advancexml_overdue_bibliosummary/advancexml_history_bibliosummary

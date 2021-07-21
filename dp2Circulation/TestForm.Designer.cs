@@ -1371,7 +1371,7 @@
             this.textBox_gcatClient_url.Name = "textBox_gcatClient_url";
             this.textBox_gcatClient_url.Size = new System.Drawing.Size(484, 31);
             this.textBox_gcatClient_url.TabIndex = 1;
-            this.textBox_gcatClient_url.Text = "http://localhost/gcatserver/";
+            this.textBox_gcatClient_url.Text = "http://dp2003.com/dp2library/";
             // 
             // button_gcatClient_getNumber
             // 

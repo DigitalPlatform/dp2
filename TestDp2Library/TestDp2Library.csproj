@@ -71,6 +71,7 @@
     <Compile Include="TestGetOwnerInstitution.cs" />
     <Compile Include="TestMergeCurrentLocation.cs" />
     <Compile Include="TestPassword.cs" />
+    <Compile Include="TestPatronBinding.cs" />
     <Compile Include="TestRfid.cs" />
     <Compile Include="TestString.cs" />
   </ItemGroup>
