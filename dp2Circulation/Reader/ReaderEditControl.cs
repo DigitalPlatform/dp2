@@ -1961,6 +1961,7 @@ namespace dp2Circulation
             }
         }
 
+
         public void SetEditable(string visibleFields, string writeableFields)
         {
             var visible_names = StringUtil.SplitList(visibleFields);
@@ -1968,11 +1969,15 @@ namespace dp2Circulation
 
             List<string> names = null;
 
-            if (writeable_names.Count == 1
-                && writeable_names[0] == "[all]")
+            if (IsAll(writeable_names))
                 names = visible_names;
             else
-                names = new List<string>(visible_names.Intersect(writeable_names));
+            {
+                if (IsAll(visible_names))
+                    names = writeable_names;
+                else
+                    names = new List<string>(visible_names.Intersect(writeable_names));
+            }
 
             /*
             if (names.Count == 1
@@ -1988,6 +1993,13 @@ namespace dp2Circulation
             SetReadOnly("editable:" + StringUtil.MakePathList(new List<string>(names)));
         }
 
+        static bool IsAll(List<string> names)
+        {
+            if (names == null)
+                return false;
+            return (names.Count == 1
+    && names[0] == "[all]");
+        }
     }
     // 
     /// <summary>

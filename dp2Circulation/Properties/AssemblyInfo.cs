@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.23.*")]
-[assembly: AssemblyFileVersion("3.23.0.0")]
+[assembly: AssemblyVersion("3.24.*")]
+[assembly: AssemblyFileVersion("3.24.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -88,3 +88,4 @@ using System.Runtime.InteropServices;
 // 3.22 2021/7/6 系统参数对话框“全局”属性页增加“禁用朗读”checkbox
 //      2021/7/7 登录对话框工具条增加“改密码”按钮。可以修改工作人员或读者的密码
 // 3.23 2021/7/22 读者窗内的编辑控件实现了根据从 GetReaderInfo() 获得格式为 "structure" 的字段列表，显示“禁止/可编辑”字段外观
+// 3.24 2021/7/22 读者窗登记人脸、指纹、掌纹，或者删除的时候，SetReaderInfo() 请求里 XML 记录的根元素包含了 importantFields 属性，这样当用户(读者记录字段)权限不够的时候，保存记录会明确报错

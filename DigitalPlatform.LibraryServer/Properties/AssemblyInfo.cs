@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.66.*")]
-[assembly: AssemblyFileVersion("3.66.0.0")]
+[assembly: AssemblyVersion("3.67.*")]
+[assembly: AssemblyFileVersion("3.67.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -255,3 +255,6 @@ ItemCanReturn()
 //		3.64 (2021/7/20) 继续完善 GetSearchResult() 和 GetBrowseRecord() API 的存取控制
 //		3.65 (2021/7/20) SetReaderInfo() API 中(strAction 为 'change' 时) strNewXml 内容的 XML 根元素可以带一个 importantFields 属性，表明保存时候关注的重要字段，如果这些字段被拒绝保存，请求就会整个失败(确保不会发生仅有部分字段被修改的情况)
 //		3.66 (2021/7/20) BindPatron() API 的 strStyle 参数增加了一种值 singlestrict 表示如果以前存在同类型号码，本次绑定会失败
+//		3.67 (2021/7/22) 账户权限中 getreaderinfo:m 和 setreaderinfo:n 中，m 和 n 代表字段定义。字段定义用法如下:
+//						数字|g_xxx|元素名
+//						其中，“数字”是先前版本中的 1-9 的数字；“g_xxx” 是组名；“元素名”即读者 XML 记录中的 XML 元素名，例如 face readerType 这样的

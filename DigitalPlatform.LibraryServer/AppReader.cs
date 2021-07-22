@@ -5334,32 +5334,36 @@ out strError);
                      * */
                     XmlDocument struct_dom = new XmlDocument();
                     struct_dom.LoadXml("<structure />");
-                    // 2021/7/15
-                    // return:
-                    //      null    没有找到 getreaderinfo 前缀
-                    //      ""      找到了前缀，并且 level 部分为空
-                    //      其他     返回 level 部分
-                    string read_level = GetReaderInfoLevel("getreaderinfo", sessioninfo.RightsOrigin);
-                    if (read_level == null)
-                        struct_dom.DocumentElement.SetAttribute("visibleFields", "[none]");
-                    else if (string.IsNullOrEmpty(read_level) == false)
                     {
-                        var names = GetElementNames(read_level);
-                        struct_dom.DocumentElement.SetAttribute("visibleFields", StringUtil.MakePathList(names));
+                        // 2021/7/15
+                        // return:
+                        //      null    没有找到 getreaderinfo 前缀
+                        //      ""      找到了前缀，并且 level 部分为空
+                        //      其他     返回 level 部分
+                        string read_level = GetReaderInfoLevel("getreaderinfo", sessioninfo.RightsOrigin);
+                        if (read_level == null)
+                            struct_dom.DocumentElement.SetAttribute("visibleFields", "[none]");
+                        else if (string.IsNullOrEmpty(read_level) == false)
+                        {
+                            var names = GetElementNames(read_level);
+                            struct_dom.DocumentElement.SetAttribute("visibleFields", StringUtil.MakePathList(names));
+                        }
+                        else
+                            struct_dom.DocumentElement.SetAttribute("visibleFields", "[all]");
                     }
-                    else
-                        struct_dom.DocumentElement.SetAttribute("visibleFields", "[all]");
 
-                    string write_level = GetReaderInfoLevel("setreaderinfo", sessioninfo.RightsOrigin);
-                    if (read_level == null)
-                        struct_dom.DocumentElement.SetAttribute("writeableFields", "[none]");
-                    else if (string.IsNullOrEmpty(write_level) == false)
                     {
-                        var names = GetElementNames(write_level);
-                        struct_dom.DocumentElement.SetAttribute("writeableFields", StringUtil.MakePathList(names));
+                        string write_level = GetReaderInfoLevel("setreaderinfo", sessioninfo.RightsOrigin);
+                        if (write_level == null)
+                            struct_dom.DocumentElement.SetAttribute("writeableFields", "[none]");
+                        else if (string.IsNullOrEmpty(write_level) == false)
+                        {
+                            var names = GetElementNames(write_level);
+                            struct_dom.DocumentElement.SetAttribute("writeableFields", StringUtil.MakePathList(names));
+                        }
+                        else
+                            struct_dom.DocumentElement.SetAttribute("writeableFields", "[all]");
                     }
-                    else
-                        struct_dom.DocumentElement.SetAttribute("writeableFields", "[all]");
 
                     SetResult(results_list, i, struct_dom.DocumentElement.OuterXml);
                 }
@@ -6769,28 +6773,66 @@ out strError);
         public static List<NameElements> _name_elements = new List<NameElements>() {
         new NameElements
         {
-            Name = "shelf",
+            Name = "g_shelf",
             Elements = "info,borrows,overdues,reservations,outofReservations,libraryCode,readerType,"   // libraryCode 和 readerType 是为了显示可借总数和当前可借数的需要
         },
         new NameElements
         {
-            Name = "facerecognition",
+            Name = "g_facerecognition",
             Elements = "barcode,face",
         },
         new NameElements
         {
-            Name = "faceregister",
+            Name = "g_faceregister",
             Elements = "face",
         },
         };
 
-        public static string[] ELEMENTS_SHELF = new string[] {
+        static List<string> GetGroupElementNames(string name)
+        {
+            var item = _name_elements.Find(o => o.Name == name);
+            if (item == null)
+                return null;
+            return StringUtil.SplitList(item.Elements);
+        }
 
-        };
+        // 获得元素名列表
+        // parameters:
+        //      name    元素集合的名称或者定义。
+        //              形态: n|元素名|组名
+        //              (n代表数字)
+        static List<string> GetElementNames(string name)
+        {
+            List<string> results = new List<string>();
+            var parts = StringUtil.SplitList(name, '|');
+            foreach (string part in parts)
+            {
+                if (StringUtil.IsNumber(part))
+                {
+                    results.AddRange(GetNumberElementNames(part));
+                }
+                else if (part.StartsWith("g_"))
+                {
+                    var result = GetGroupElementNames(part);
+                    if (result == null)
+                        throw new Exception($"不存在名为 '{part}' 的元素组");
+                    results.AddRange(results);
+                }
+                else
+                {
+                    results.Add(part);
+                }
+            }
+
+            // 去掉重复元素
+            StringUtil.RemoveDupNoSort(ref results);
+
+            return results;
+        }
 
         // 获得一个 level 可以传输的读者 XML 元素名字列表
         // 注: 名字前面有个问号的，表示元素正文在传输中要被马赛克遮盖部分字符
-        static List<string> GetElementNames(string level)
+        static List<string> GetNumberElementNames(string level)
         {
             List<string> names = new List<string>();
 

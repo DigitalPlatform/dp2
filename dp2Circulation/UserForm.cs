@@ -9,6 +9,7 @@ using DigitalPlatform;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {
@@ -43,9 +44,9 @@ namespace dp2Circulation
                 this.m_bEditChanged = value;
 
                 if (this.m_bEditChanged == true)
-                    this.button_save.Enabled = true;
+                    this.toolStripButton_save.Enabled = true;
                 else
-                    this.button_save.Enabled = false;
+                    this.toolStripButton_save.Enabled = false;
             }
         }
 
@@ -67,6 +68,27 @@ namespace dp2Circulation
 
             EnableControls(false);
             API.PostMessage(this.Handle, WM_PREPARE, 0, 0);
+
+            this.PrivateUserName = Program.MainForm.AppInfo.GetString(
+                "userForm",
+                "privateUserName",
+                "");
+
+            this._savePassword = Program.MainForm.AppInfo.GetBoolean(
+                "userForm",
+                "privateSavePassword",
+                false);
+
+            if (this._savePassword)
+            {
+                string password = Program.MainForm.AppInfo.GetString(
+        "userForm",
+        "privatePassword",
+        "");
+                this._password = Program.MainForm.DecryptPasssword(password);
+            }
+            else
+                this._password = "";
         }
 
         private void UserForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -93,6 +115,26 @@ namespace dp2Circulation
         private void UserForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             SaveSize();
+
+            Program.MainForm.AppInfo.SetString(
+    "userForm",
+    "privateUserName",
+    this.PrivateUserName);
+
+            Program.MainForm.AppInfo.SetBoolean(
+    "userForm",
+    "privateSavePassword",
+    this._savePassword);
+
+            string password = "";
+            if (_savePassword)
+                password = Program.MainForm.EncryptPassword(this._password);
+            Program.MainForm.AppInfo.SetString(
+"userForm",
+"privatePassword",
+password);
+
+            FinishPrivateChannel();
         }
 
         void SaveSize()
@@ -195,8 +237,8 @@ namespace dp2Circulation
             this.textBox_comment.Enabled = bEnable;
             this.listView_users.Enabled = bEnable;
 
-            this.button_listAllUsers.Enabled = bEnable;
-            this.button_create.Enabled = bEnable;
+            this.toolStripButton_listAllUsers.Enabled = bEnable;
+            this.toolStripButton_create.Enabled = bEnable;
             this.button_editUserRights.Enabled = bEnable;
 
             this.checkBox_changePassword.Enabled = bEnable;
@@ -204,19 +246,19 @@ namespace dp2Circulation
             if (bEnable == true)
             {
                 if (this.m_bEditChanged == true)
-                    this.button_save.Enabled = true;
+                    this.toolStripButton_save.Enabled = true;
                 else
-                    this.button_save.Enabled = false;
+                    this.toolStripButton_save.Enabled = false;
             }
             else
             {
-                this.button_save.Enabled = false;
+                this.toolStripButton_save.Enabled = false;
             }
 
             if (this.textBox_userName.Text == "")
-                this.button_delete.Enabled = false;
+                this.toolStripButton_delete.Enabled = false;
             else
-                this.button_delete.Enabled = bEnable;
+                this.toolStripButton_delete.Enabled = bEnable;
 
             if (this.checkBox_changePassword.Checked == true)
             {
@@ -244,6 +286,98 @@ namespace dp2Circulation
             this.textBox_comment.Text = "";
         }
 
+        // 私有 channel
+        LibraryChannel _channel = null;
+        // string _userName = "";
+        string _password = "";
+        bool _savePassword = false;
+
+        // 开始使用私有 Channel
+        void UsePrivateChannel(string userName)
+        {
+            if (_channel == null)
+            {
+                _channel = new LibraryChannel();
+                _channel.Url = Program.MainForm.LibraryServerUrl;
+                _channel.UserName = userName;
+                _channel.BeforeLogin += (s, e) =>
+                {
+                    if (e.FirstTry == true)
+                    {
+                        e.UserName = _channel.UserName;
+                        e.Password = _password;
+
+                        e.Parameters += ",mac=" + StringUtil.MakePathList(SerialCodeForm.GetMacAddress(), "|");
+                        e.Parameters += ",client=dp2circulation|" + Program.ClientVersion;
+
+                        if (String.IsNullOrEmpty(e.UserName) == false)
+                            return; // 立即返回, 以便作第一次 不出现 对话框的自动登录
+                    }
+
+                    LoginDlg login_dlg = new LoginDlg();
+                    GuiUtil.SetControlFont(login_dlg, this.Font);
+
+                    login_dlg.Comment = e.ErrorInfo;
+                    login_dlg.UserName = e.UserName;
+                    login_dlg.Password = e.Password;
+                    login_dlg.SavePassword = _savePassword;
+                    login_dlg.ServerUrl = e.LibraryServerUrl;
+                    login_dlg.StartPosition = FormStartPosition.CenterScreen;
+                    login_dlg.ShowDialog(this);
+
+                    if (login_dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                    {
+                        e.Cancel = true;
+                        return;
+                    }
+
+                    e.UserName = login_dlg.UserName;
+                    e.Password = login_dlg.Password;
+                    _password = e.Password;
+                    e.LibraryServerUrl = login_dlg.ServerUrl;
+                    _savePassword = login_dlg.SavePassword;
+
+                    e.Parameters += ",mac=" + StringUtil.MakePathList(SerialCodeForm.GetMacAddress(), "|");
+                    e.Parameters += ",client=dp2circulation|" + Program.ClientVersion;
+                };
+            }
+            else
+                _channel.UserName = userName;
+
+            this.Text = $"用户窗 - {userName}";
+        }
+
+        void FinishPrivateChannel()
+        {
+            _channel?.Dispose();
+            _channel = null;
+
+            _password = "";
+
+            try
+            {
+                this.Text = $"用户窗";
+            }
+            catch
+            {
+
+            }
+        }
+
+        LibraryChannel GetChannel()
+        {
+            if (_channel == null)
+                return base.GetChannel();
+
+            return _channel;
+        }
+
+        new void ReturnChannel(LibraryChannel channel)
+        {
+            if (_channel == null)
+                base.ReturnChannel(channel);
+        }
+
         // 列出所有用户
         // return:
         //      -1  出错
@@ -259,6 +393,8 @@ namespace dp2Circulation
 
             EnableControls(false);
 
+            LibraryChannel channel = this.GetChannel();
+
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在获得全部用户信息 ...");
             stop.BeginLoop();
@@ -272,7 +408,7 @@ namespace dp2Circulation
                 for (; ; )
                 {
                     UserInfo[] users = null;
-                    long lRet = Channel.GetUser(
+                    long lRet = channel.GetUser(
                         stop,
                         "list",
                         "",
@@ -324,11 +460,13 @@ namespace dp2Circulation
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
 
+                this.ReturnChannel(channel);
+
                 EnableControls(true);
             }
 
             return 1;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -379,33 +517,6 @@ namespace dp2Circulation
 
         private void button_listAllUsers_Click(object sender, EventArgs e)
         {
-            string strError = "";
-            int nRet = 0;
-
-            int nChangedCount = GetChangedCount();
-
-            if (nChangedCount > 0)
-            {
-                // 警告尚未保存
-                DialogResult result = MessageBox.Show(this,
-    "当前有 " + nChangedCount.ToString() + " 个用户信息修改后尚未保存。若此时重新列全部用信息，现有未保存信息将丢失。\r\n\r\n确实要重新列全部用户信息? ",
-    "UserForm",
-    MessageBoxButtons.YesNo,
-    MessageBoxIcon.Question,
-    MessageBoxDefaultButton.Button2);
-                if (result != DialogResult.Yes)
-                {
-                    return;
-                }
-            }
-
-            nRet = ListAllUsers(out strError);
-            if (nRet == -1)
-                goto ERROR1;
-
-            return;
-            ERROR1:
-            MessageBox.Show(this, strError);
         }
 
         // 把edit中的内容恢复到listviewitem中
@@ -463,9 +574,9 @@ namespace dp2Circulation
             this.m_nCurrentItemIndex = index;
 
             if (this.textBox_userName.Text == "")
-                this.button_delete.Enabled = false;
+                this.toolStripButton_delete.Enabled = false;
             else
-                this.button_delete.Enabled = true;
+                this.toolStripButton_delete.Enabled = true;
 
             // 每次都要人为On这个checkbox，才能修改密码
             this.checkBox_changePassword.Checked = false;
@@ -535,7 +646,7 @@ namespace dp2Circulation
 
             MessageBox.Show(this, "密码重设完成");
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -548,6 +659,8 @@ namespace dp2Circulation
             strError = "";
 
             EnableControls(false);
+
+            LibraryChannel channel = this.GetChannel();
 
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在重设用户密码 ...");
@@ -564,7 +677,7 @@ namespace dp2Circulation
                 info.Password = strNewPassword;
                 info.SetPassword = true;    // 没有必要
 
-                long lRet = Channel.SetUser(
+                long lRet = channel.SetUser(
                     stop,
                     "resetpassword",
                     info,
@@ -578,11 +691,13 @@ namespace dp2Circulation
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
 
+                this.ReturnChannel(channel);
+
                 EnableControls(true);
             }
 
             return 1;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -596,6 +711,8 @@ namespace dp2Circulation
 
             EnableControls(false);
 
+            LibraryChannel channel = this.GetChannel();
+
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在保存用户信息 ...");
             stop.BeginLoop();
@@ -605,7 +722,7 @@ namespace dp2Circulation
 
             try
             {
-                long lRet = Channel.SetUser(
+                long lRet = channel.SetUser(
                     stop,
                     strAction,  // "change",
                     info,
@@ -619,11 +736,13 @@ namespace dp2Circulation
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
 
+                this.ReturnChannel(channel);
+
                 EnableControls(true);
             }
 
             return 1;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -636,6 +755,8 @@ namespace dp2Circulation
 
             EnableControls(false);
 
+            LibraryChannel channel = this.GetChannel();
+
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在创建用户信息 ...");
             stop.BeginLoop();
@@ -645,7 +766,7 @@ namespace dp2Circulation
 
             try
             {
-                long lRet = Channel.SetUser(
+                long lRet = channel.SetUser(
                     stop,
                     "new",
                     info,
@@ -659,11 +780,13 @@ namespace dp2Circulation
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
 
+                this.ReturnChannel(channel);
+
                 EnableControls(true);
             }
 
             return 1;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -675,6 +798,8 @@ namespace dp2Circulation
             strError = "";
 
             EnableControls(false);
+
+            LibraryChannel channel = this.GetChannel();
 
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在删除用户信息 ...");
@@ -688,7 +813,7 @@ namespace dp2Circulation
                 UserInfo info = new UserInfo();
                 info.UserName = strUserName;
 
-                long lRet = Channel.SetUser(
+                long lRet = channel.SetUser(
                     stop,
                     "delete",
                     info,
@@ -702,11 +827,13 @@ namespace dp2Circulation
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
 
+                this.ReturnChannel(channel);
+
                 EnableControls(true);
             }
 
             return 1;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -739,73 +866,6 @@ namespace dp2Circulation
         // 保存用户信息
         private void button_save_Click(object sender, EventArgs e)
         {
-            string strError = "";
-            int nRet = 0;
-
-            if (this.textBox_userName.Text == "")
-            {
-                strError = "用户名不能为空";
-                goto ERROR1;
-            }
-
-            UserInfo info = new UserInfo();
-
-            info.UserName = this.textBox_userName.Text;
-            info.Type = this.textBox_userType.Text;
-            info.Rights = this.textBox_userRights.Text;
-            info.LibraryCode = this.checkedComboBox_libraryCode.Text;   //  this.textBox_libraryCode.Text;
-            info.Access = this.textBox_access.Text;
-            info.Binding = this.textBox_binding.Text;
-            info.Comment = this.textBox_comment.Text;
-
-            if (this.checkBox_changePassword.Checked == true)
-            {
-                if (this.textBox_confirmPassword.Text != this.textBox_password.Text)
-                {
-                    strError = "密码 和 再次输入密码 不一致。";
-                    goto ERROR1;
-                }
-                info.SetPassword = true;
-                info.Password = this.textBox_password.Text;
-            }
-            else
-                info.SetPassword = false;
-
-            // 保存用户信息
-            nRet = SaveUserInfo(
-                info,
-                "change",
-                out strError);
-            if (nRet == -1)
-                goto ERROR1;
-
-            this.EditChanged = false;
-            MessageBox.Show(this, "用户信息保存成功");
-
-
-            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.116") >= 0
-                && info.UserName == Program.MainForm._currentUserName)
-            {
-                DialogResult result = MessageBox.Show(this,
-    "您刚修改和保存了当前正在使用的账户 " + info.UserName + "，请问是否需要关闭此账户的所有活跃通道，以迫使刚才修改的账户权限尽快兑现?\r\n\r\n(警告：关闭通道会中断正在使用该通道的长操作)",
-    "UserForm",
-    MessageBoxButtons.YesNo,
-    MessageBoxIcon.Question,
-    MessageBoxDefaultButton.Button2);
-                if (result == System.Windows.Forms.DialogResult.Yes)
-                {
-                    nRet = SaveUserInfo(
-    info,
-    "closechannel",
-    out strError);
-                    if (nRet == -1)
-                        goto ERROR1;
-                    // TODO: 如何迫使重新登录，避免下一次操作时出现通道被关闭过的报错?
-                }
-            }
-            return;
-            ERROR1:
-            MessageBox.Show(this, strError);
         }
 
         internal class ItemInfo
@@ -867,44 +927,6 @@ namespace dp2Circulation
 
         private void button_delete_Click(object sender, EventArgs e)
         {
-            string strError = "";
-            int nRet = 0;
-
-            if (this.textBox_userName.Text == "")
-            {
-                strError = "用户名不能为空";
-                goto ERROR1;
-            }
-
-            // 警告
-            DialogResult result = MessageBox.Show(this,
-                "确实要删除用户 " + this.textBox_userName.Text,
-                "UserForm",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question,
-                MessageBoxDefaultButton.Button2);
-            if (result == DialogResult.No)
-                return;
-
-            // 删除用户信息
-            nRet = DeleteUserInfo(
-                this.textBox_userName.Text,
-                out strError);
-            if (nRet == -1)
-                goto ERROR1;
-
-            MessageBox.Show(this, "用户信息删除成功");
-
-            // 从listview中删除
-            if (this.listView_users.SelectedItems.Count > 0
-                && ListViewUtil.GetItemText(this.listView_users.SelectedItems[0], COLUMN_USERNAME) == this.textBox_userName.Text)
-            {
-                this.listView_users.Items.Remove(this.listView_users.SelectedItems[0]);
-            }
-
-            return;
-            ERROR1:
-            MessageBox.Show(this, strError);
         }
 
         private void checkBox_changePassword_CheckedChanged(object sender, EventArgs e)
@@ -926,74 +948,6 @@ namespace dp2Circulation
         // 创建新用户
         private void button_create_Click(object sender, EventArgs e)
         {
-            string strError = "";
-            int nRet = 0;
-
-            // 刷新模板，准备输入信息
-            if (Control.ModifierKeys == Keys.Control)
-            {
-                for (int i = 0; i < this.listView_users.Items.Count; i++)
-                {
-                    this.listView_users.Items[i].Selected = false;
-                }
-                return;
-            }
-
-            if (this.textBox_userName.Text == "")
-            {
-                strError = "用户名不能为空";
-                goto ERROR1;
-            }
-
-            UserInfo info = new UserInfo();
-
-            info.UserName = this.textBox_userName.Text;
-            info.Type = this.textBox_userType.Text;
-            info.Rights = this.textBox_userRights.Text;
-            info.LibraryCode = this.checkedComboBox_libraryCode.Text;   //  this.textBox_libraryCode.Text;
-            info.Access = this.textBox_access.Text;
-            info.Binding = this.textBox_binding.Text;
-            info.Comment = this.textBox_comment.Text;
-
-            if (this.checkBox_changePassword.Checked == true)
-            {
-                if (this.textBox_confirmPassword.Text != this.textBox_password.Text)
-                {
-                    strError = "密码 和 再次输入密码 不一致。";
-                    goto ERROR1;
-                }
-                info.SetPassword = true;
-                info.Password = this.textBox_password.Text;
-            }
-            else
-                info.SetPassword = false;
-
-            // 保存用户信息
-            nRet = CreateUserInfo(
-                info,
-                out strError);
-            if (nRet == -1)
-                goto ERROR1;
-
-            this.EditChanged = false;
-
-            // 加入listview
-            ListViewItem item = new ListViewItem();
-            ItemInfo item_info = new ItemInfo();
-            info.SetPassword = false;
-            item_info.UserInfo = info;
-
-            item.Tag = item_info;
-
-            SetListViewItemValue(item_info,
-                item);
-
-            this.listView_users.Items.Add(item);
-
-            MessageBox.Show(this, "用户 '" + info.UserName + "' 创建成功");
-            return;
-            ERROR1:
-            MessageBox.Show(this, strError);
         }
 
         private void UserForm_Activated(object sender, EventArgs e)
@@ -1064,6 +1018,8 @@ namespace dp2Circulation
 
             EnableControls(false);
 
+            LibraryChannel channel = this.GetChannel();
+
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在获得全部馆代码 ...");
             stop.BeginLoop();
@@ -1071,7 +1027,7 @@ namespace dp2Circulation
             try
             {
                 string strValue = "";
-                long lRet = Channel.GetSystemParameter(stop,
+                long lRet = channel.GetSystemParameter(stop,
                     "system",
                     "libraryCodes",
                     out strValue,
@@ -1089,6 +1045,8 @@ namespace dp2Circulation
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
+
+                this.ReturnChannel(channel);
 
                 EnableControls(true);
             }
@@ -1108,6 +1066,286 @@ namespace dp2Circulation
         private void textBox_binding_TextChanged(object sender, EventArgs e)
         {
             this.EditChanged = true;
+        }
+
+        private void toolStripButton_listAllUsers_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            int nChangedCount = GetChangedCount();
+
+            if (nChangedCount > 0)
+            {
+                // 警告尚未保存
+                DialogResult result = MessageBox.Show(this,
+    "当前有 " + nChangedCount.ToString() + " 个用户信息修改后尚未保存。若此时重新列全部用信息，现有未保存信息将丢失。\r\n\r\n确实要重新列全部用户信息? ",
+    "UserForm",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button2);
+                if (result != DialogResult.Yes)
+                {
+                    return;
+                }
+            }
+
+            nRet = ListAllUsers(out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+
+        }
+
+        private void toolStripButton_delete_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            if (this.textBox_userName.Text == "")
+            {
+                strError = "用户名不能为空";
+                goto ERROR1;
+            }
+
+            // 警告
+            DialogResult result = MessageBox.Show(this,
+                "确实要删除用户 " + this.textBox_userName.Text,
+                "UserForm",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question,
+                MessageBoxDefaultButton.Button2);
+            if (result == DialogResult.No)
+                return;
+
+            // 删除用户信息
+            nRet = DeleteUserInfo(
+                this.textBox_userName.Text,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            MessageBox.Show(this, "用户信息删除成功");
+
+            // 从listview中删除
+            if (this.listView_users.SelectedItems.Count > 0
+                && ListViewUtil.GetItemText(this.listView_users.SelectedItems[0], COLUMN_USERNAME) == this.textBox_userName.Text)
+            {
+                this.listView_users.Items.Remove(this.listView_users.SelectedItems[0]);
+            }
+
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        // 创建新用户
+        private void toolStripButton_create_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            // 刷新模板，准备输入信息
+            if (Control.ModifierKeys == Keys.Control)
+            {
+                for (int i = 0; i < this.listView_users.Items.Count; i++)
+                {
+                    this.listView_users.Items[i].Selected = false;
+                }
+                return;
+            }
+
+            if (this.textBox_userName.Text == "")
+            {
+                strError = "用户名不能为空";
+                goto ERROR1;
+            }
+
+            UserInfo info = new UserInfo();
+
+            info.UserName = this.textBox_userName.Text;
+            info.Type = this.textBox_userType.Text;
+            info.Rights = this.textBox_userRights.Text;
+            info.LibraryCode = this.checkedComboBox_libraryCode.Text;   //  this.textBox_libraryCode.Text;
+            info.Access = this.textBox_access.Text;
+            info.Binding = this.textBox_binding.Text;
+            info.Comment = this.textBox_comment.Text;
+
+            if (this.checkBox_changePassword.Checked == true)
+            {
+                if (this.textBox_confirmPassword.Text != this.textBox_password.Text)
+                {
+                    strError = "密码 和 再次输入密码 不一致。";
+                    goto ERROR1;
+                }
+                info.SetPassword = true;
+                info.Password = this.textBox_password.Text;
+            }
+            else
+                info.SetPassword = false;
+
+            // 保存用户信息
+            nRet = CreateUserInfo(
+                info,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            this.EditChanged = false;
+
+            // 加入listview
+            ListViewItem item = new ListViewItem();
+            ItemInfo item_info = new ItemInfo();
+            info.SetPassword = false;
+            item_info.UserInfo = info;
+
+            item.Tag = item_info;
+
+            SetListViewItemValue(item_info,
+                item);
+
+            this.listView_users.Items.Add(item);
+
+            MessageBox.Show(this, "用户 '" + info.UserName + "' 创建成功");
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        // 保存用户信息
+        private void toolStripButton_save_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            if (this.textBox_userName.Text == "")
+            {
+                strError = "用户名不能为空";
+                goto ERROR1;
+            }
+
+            UserInfo info = new UserInfo();
+
+            info.UserName = this.textBox_userName.Text;
+            info.Type = this.textBox_userType.Text;
+            info.Rights = this.textBox_userRights.Text;
+            info.LibraryCode = this.checkedComboBox_libraryCode.Text;   //  this.textBox_libraryCode.Text;
+            info.Access = this.textBox_access.Text;
+            info.Binding = this.textBox_binding.Text;
+            info.Comment = this.textBox_comment.Text;
+
+            if (this.checkBox_changePassword.Checked == true)
+            {
+                if (this.textBox_confirmPassword.Text != this.textBox_password.Text)
+                {
+                    strError = "密码 和 再次输入密码 不一致。";
+                    goto ERROR1;
+                }
+                info.SetPassword = true;
+                info.Password = this.textBox_password.Text;
+            }
+            else
+                info.SetPassword = false;
+
+            // 保存用户信息
+            nRet = SaveUserInfo(
+                info,
+                "change",
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            this.EditChanged = false;
+            MessageBox.Show(this, "用户信息保存成功");
+
+
+            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.116") >= 0
+                && info.UserName == Program.MainForm._currentUserName)
+            {
+                DialogResult result = MessageBox.Show(this,
+    "您刚修改和保存了当前正在使用的账户 " + info.UserName + "，请问是否需要关闭此账户的所有活跃通道，以迫使刚才修改的账户权限尽快兑现?\r\n\r\n(警告：关闭通道会中断正在使用该通道的长操作)",
+    "UserForm",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button2);
+                if (result == System.Windows.Forms.DialogResult.Yes)
+                {
+                    nRet = SaveUserInfo(
+    info,
+    "closechannel",
+    out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    // TODO: 如何迫使重新登录，避免下一次操作时出现通道被关闭过的报错?
+                }
+            }
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        private void toolStripButton_setPivateUserName_Click(object sender, EventArgs e)
+        {
+            LoginDlg login_dlg = new LoginDlg();
+            GuiUtil.SetControlFont(login_dlg, this.Font);
+
+            // Url 不允许改变
+            login_dlg.ServerAddrEnabled = false;
+            login_dlg.Comment = "指定登录账号";
+            login_dlg.UserName = _channel?.UserName;
+            if (string.IsNullOrEmpty(login_dlg.UserName))
+                login_dlg.Password = "";
+            else
+                login_dlg.Password = _password;
+            login_dlg.SavePassword = _savePassword;
+            login_dlg.ServerUrl = Program.MainForm.LibraryServerUrl;
+            login_dlg.StartPosition = FormStartPosition.CenterScreen;
+            login_dlg.ShowDialog(this);
+
+            if (login_dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+            {
+                return;
+            }
+
+            _savePassword = login_dlg.SavePassword;
+            UsePrivateChannel(login_dlg.UserName);
+            _password = login_dlg.Password;
+        }
+
+        private void toolStripButton_clearPrivateUserName_Click(object sender, EventArgs e)
+        {
+            FinishPrivateChannel();
+        }
+
+        public string PrivateUserName
+        {
+            get
+            {
+                if (_channel == null)
+                    return "";
+                return _channel.UserName;
+            }
+            set
+            {
+                if (string.IsNullOrEmpty(value))
+                {
+                    FinishPrivateChannel();
+                }
+                else
+                {
+                    UsePrivateChannel(value);
+                }
+            }
+        }
+
+        private void toolStripButton_freeAllChannels_Click(object sender, EventArgs e)
+        {
+            // TODO: 警告
+            Program.MainForm._channelPool.Clear();
+            Program.MainForm._channelPoolExt.Clear();
         }
 
 #if NO

@@ -311,7 +311,11 @@ namespace dp2Circulation
             set
             {
                 if (this.readerEditControl1 != null)
+                {
                     this.readerEditControl1.Changed = value;
+                    if (value == false)
+                        ClearImportantFields();
+                }
             }
         }
 
@@ -576,7 +580,7 @@ MessageBoxDefaultButton.Button2);
                         stop,
                         strBarcode,
                         StringUtil.MakePathList(formats),
-                        out string [] results,
+                        out string[] results,
                         out strOutputRecPath,
                         out baTimestamp,
                         out strError);
@@ -759,7 +763,7 @@ MessageBoxDefaultButton.Button2);
 
         // 根据格式名字找到值
         static string GetValue(List<string> formats,
-            string [] results, 
+            string[] results,
             string format)
         {
             if (results == null || results.Length == 0)
@@ -773,7 +777,7 @@ MessageBoxDefaultButton.Button2);
             return results[index];
         }
 
-        void ParseStructure(string xml, 
+        void ParseStructure(string xml,
             out string visibleFields,
             out string writeableFields)
         {
@@ -913,7 +917,7 @@ MessageBoxDefaultButton.Button2);
                         stop,
                         "@path:" + strRecPath,
                         StringUtil.MakePathList(formats),   // "xml,html",
-                        out string [] results,
+                        out string[] results,
                         out string strOutputRecPath,
                         out baTimestamp,
                         out strError);
@@ -1534,6 +1538,7 @@ MessageBoxDefaultButton.Button2);
                     goto ERROR1;
 
                 this.readerEditControl1.Changed = false;
+                ClearImportantFields();
 
                 string strSelectedDbName = Program.MainForm.AppInfo.GetString(
                     "readerinfo_form",
@@ -1576,6 +1581,7 @@ MessageBoxDefaultButton.Button2);
 
                 this.readerEditControl1.RecPath = dbname_dlg.DbName + "/?";	// 为了追加保存
                 this.readerEditControl1.Changed = false;
+                ClearImportantFields();
 
                 // 下载配置文件
                 string strContent = "";
@@ -1709,6 +1715,7 @@ select_temp_dlg.SelectedRecordXml);
                 ClearReaderHtmlPage();
 
                 this.readerEditControl1.Changed = false;
+                ClearImportantFields();
                 return 1;
             ERROR1:
                 MessageBox.Show(this, strError);
@@ -1787,6 +1794,7 @@ strNewDefault);
                 // this.m_strLoadSource = "local";
 
                 this.readerEditControl1.Changed = false; // 2013/10/17
+                ClearImportantFields();
                 this.ObjectChanged = false; // 2013/10/17
                 return 1;
             }
@@ -2364,6 +2372,11 @@ strSavedXml);
             if (string.IsNullOrEmpty(strRefID) == true)
                 DomUtil.SetElementText(dom.DocumentElement, "refID", Guid.NewGuid().ToString());
 
+            // 2021/7/22
+            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.65") >= 0
+                && _importantFields.Count > 0)
+                dom.DocumentElement.SetAttribute("importantFields", StringUtil.MakePathList(_importantFields));
+
             strXml = dom.OuterXml;
             return 0;
         }
@@ -2881,6 +2894,7 @@ strSavedXml);
                 }
 
                 this.readerEditControl1.Changed = false;
+                ClearImportantFields();
 
                 // 更新指纹高速缓存
                 if (string.IsNullOrEmpty(Program.MainForm.FingerprintReaderUrl) == false
@@ -5651,6 +5665,7 @@ MessageBoxDefaultButton.Button1);
                     this.readerEditControl1.FingerprintFeature = result.Fingerprint;   // strFingerprint;
                     this.readerEditControl1.FingerprintFeatureVersion = result.Version;    // strVersion;
                     this.readerEditControl1.Changed = true;
+                    AddImportantField("fingerprint");
                 }
             }
             finally
@@ -5672,6 +5687,7 @@ MessageBoxDefaultButton.Button1);
             this.readerEditControl1.FingerprintFeatureVersion = "";
             this.readerEditControl1.FingerprintFeature = "";
             this.readerEditControl1.Changed = true;
+            AddImportantField("fingerprint");
         }
 
         // 导出在借册条码号到文本文件
@@ -6688,6 +6704,18 @@ MessageBoxDefaultButton.Button1);
             MessageBox.Show(this, strError);
         }
 
+        List<string> _importantFields = new List<string>();
+        void AddImportantField(string name)
+        {
+            if (_importantFields.IndexOf(name) == -1)
+                _importantFields.Add(name);
+        }
+
+        void ClearImportantFields()
+        {
+            _importantFields.Clear();
+        }
+
         // 登记人脸。用于人脸识别
         private async void toolStripSplitButton_registerFace_ButtonClick(object sender, EventArgs e)
         {
@@ -6726,6 +6754,10 @@ MessageBoxDefaultButton.Button1);
                 this.readerEditControl1.FaceFeature = result.FeatureString;
                 this.readerEditControl1.FaceFeatureVersion = result.Version;
                 this.readerEditControl1.Changed = true;
+                AddImportantField("face");
+
+                // 2021/7/22
+                AddImportantField("face");
 
                 // TODO: 如果尺寸符合要求，则直接用返回的 jpeg 上载
                 // 设置人脸照片对象
@@ -6850,6 +6882,7 @@ MessageBoxDefaultButton.Button1);
             this.readerEditControl1.FaceFeatureVersion = "";
             this.readerEditControl1.FaceFeature = "";
             this.readerEditControl1.Changed = true;
+            AddImportantField("face");
 
             // 标记删除 usage 为 "face" 的对象
             List<ListViewItem> items = this.binaryResControl1.FindItemByUsage("face");
@@ -6966,6 +6999,7 @@ MessageBoxDefaultButton.Button1);
                     this.readerEditControl1.FingerprintFeature = result.Fingerprint;   // strFingerprint;
                     this.readerEditControl1.FingerprintFeatureVersion = result.Version;    // strVersion;
                     this.readerEditControl1.Changed = true;
+                    AddImportantField("fingerprint");
                 }
             }
             finally
@@ -7082,6 +7116,7 @@ MessageBoxDefaultButton.Button1);
                     this.readerEditControl1.PalmprintFeature = result.Fingerprint;   // strFingerprint;
                     this.readerEditControl1.PalmprintFeatureVersion = result.Version;    // strVersion;
                     this.readerEditControl1.Changed = true;
+                    AddImportantField("palmprint");
                 }
 
                 this.Invoke((Action)(() =>
@@ -7136,6 +7171,7 @@ MessageBoxDefaultButton.Button1);
             this.readerEditControl1.PalmprintFeatureVersion = "";
             this.readerEditControl1.PalmprintFeature = "";
             this.readerEditControl1.Changed = true;
+            AddImportantField("palmprint");
         }
 
     }

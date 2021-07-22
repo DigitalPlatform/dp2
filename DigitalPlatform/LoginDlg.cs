@@ -295,6 +295,19 @@ else
             }
         }
 
+        // 2021/7/22
+        public bool ServerAddrEnabled
+        {
+            get
+            {
+                return this.textBox_serverAddr.Enabled;
+            }
+            set
+            {
+                this.textBox_serverAddr.Enabled = value;
+            }
+        }
+
         public bool SavePassword
         {
             get
