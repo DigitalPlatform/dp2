@@ -77,20 +77,30 @@ namespace DigitalPlatform.LibraryServer
                 "preference",   // 个性化参数
             };
 
-        // 删除target中的全部<dprms:file>元素，然后将source记录中的全部<dprms:file>元素插入到target记录中
-        public static void MergeDprmsFile(ref XmlDocument domTarget,
+        // 更换 domTarget 中所有 dprms:file 元素
+        // 算法是：删除target中的全部<dprms:file>元素，然后将source记录中的全部<dprms:file>元素插入到target记录中
+        // return:
+        //      false   没有发生实质性改变
+        //      true    发生了实质性改变
+        public static bool MergeDprmsFile(ref XmlDocument domTarget,
             XmlDocument domSource)
         {
             XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
             nsmgr.AddNamespace("dprms", DpNs.dprms);
 
-            // 删除target中的全部<dprms:file>元素
+            List<string> oldOuterXmls = new List<string>();
+            List<string> newOuterXmls = new List<string>();
+
+            // 删除 target 中的全部 <dprms:file> 元素
             XmlNodeList nodes = domTarget.DocumentElement.SelectNodes("//dprms:file", nsmgr);
             for (int i = 0; i < nodes.Count; i++)
             {
                 XmlNode node = nodes[i];
                 if (node.ParentNode != null)
+                {
+                    oldOuterXmls.Add(node.OuterXml);
                     node.ParentNode.RemoveChild(node);
+                }
             }
 
             // 然后将source记录中的全部<dprms:file>元素插入到target记录中
@@ -99,11 +109,16 @@ namespace DigitalPlatform.LibraryServer
             {
                 XmlNode node = nodes[i];
 
+                newOuterXmls.Add(node.OuterXml);
+
                 XmlDocumentFragment fragment = domTarget.CreateDocumentFragment();
                 fragment.InnerXml = node.OuterXml;
 
                 domTarget.DocumentElement.AppendChild(fragment);
             }
+
+            // 比较 oldOuterXmls 和 newOuterXmls 之间是否有差异
+            return oldOuterXmls.SequenceEqual(newOuterXmls);
         }
 
 #if NO
@@ -247,7 +262,7 @@ namespace DigitalPlatform.LibraryServer
         // 合并新旧记录
         // parameters:
         //      important_fields    重要的字段名列表。要检查这些字段是否没有被采纳，如果没有被采纳要报错
-        static int MergeTwoReaderXml(
+        public static int MergeTwoReaderXml(
             string[] element_names,
             string strAction,
             XmlDocument domExistParam,
@@ -261,22 +276,64 @@ namespace DigitalPlatform.LibraryServer
             // strMergedXml = "";
             strError = "";
 
+            if (strAction == "changestate")
+            {
+                element_names = new string[] {
+                    "state",
+                    "comment",
+                    };
+            }
+            else if (strAction == "changeforegift")
+            {
+                // 2008/11/11 
+                element_names = new string[] {
+                    "foregift",
+                    "comment",
+                    };
+            }
+
             // 2021/7/21
-            // 判断重要元素是否会被拒绝保存
+            // 超出 element_names 的部分元素名
+            List<string> outof_names = new List<string>();
             if (important_fields != null && important_fields.Length > 0)
             {
-                List<string> temp = new List<string>(important_fields);
+                outof_names = new List<string>(important_fields);
                 foreach (string s in element_names)
                 {
-                    temp.Remove(s);
+                    outof_names.Remove(s);
                 }
-                StringUtil.RemoveBlank(ref temp);
-                if (temp.Count > 0)
+                StringUtil.RemoveBlank(ref outof_names);
+                /*
+                if (outof_names.Count > 0)
                 {
-                    strError = $"下列元素超过当前用户权限: '{StringUtil.MakePathList(temp)}'";
-                    return -1;
+                    strImportantError = $"下列元素超过当前用户权限: '{StringUtil.MakePathList(temp)}'";
                 }
+                */
             }
+
+            // 检查超出部分元素的内容是否即将发生变化
+            // 实际发生了内容修改的、超出权限的元素名集合
+            List<string> error_names = new List<string>();
+            foreach (var strElementName in outof_names)
+            {
+                string old_outerXml = GetOuterXml(domExistParam, strElementName);
+
+                string new_outerXml = GetOuterXml(domNew, strElementName);
+
+                if (old_outerXml != new_outerXml)
+                    error_names.Add(strElementName);
+            }
+
+            if (error_names.Count > 0)
+            {
+                strError = $"下列元素超过当前用户权限: '{StringUtil.MakePathList(error_names)}'";
+                return -1;
+            }
+
+            // 2021/7/14
+            // 确保 domExistParam 参数不会在本函数内被修改，只修改 domExist
+            var domExist = new XmlDocument();
+            domExist.LoadXml(domExistParam.OuterXml);
 
             // 2021/7/19
             bool has_file_element = Array.IndexOf(element_names, "http://dp2003.com/dprms:file") != -1;
@@ -286,11 +343,6 @@ namespace DigitalPlatform.LibraryServer
                 temp.Remove("http://dp2003.com/dprms:file");
                 element_names = temp.ToArray();
             }
-
-            // 2021/7/14
-            // 确保 domExistParam 参数不会在本函数内被修改，只修改 domExist
-            var domExist = new XmlDocument();
-            domExist.LoadXml(domExistParam.OuterXml);
 
             if (strAction == "change"
                 || strAction == "changereaderbarcode")
@@ -331,6 +383,9 @@ namespace DigitalPlatform.LibraryServer
                     if (strElementName == "foregift")
                         continue;
 
+                    // 2021/7/23
+                    // string old_outerXml = domExist.DocumentElement.SelectSingleNode(strElementName)?.OuterXml;
+
                     // 2006/11/29 changed
                     string strTextNew = DomUtil.GetElementOuterXml(domNew.DocumentElement,
                         strElementName);
@@ -364,12 +419,10 @@ namespace DigitalPlatform.LibraryServer
                                     DomUtil.SetAttr(node, "timestamp", DateTime.Now.ToString("u"));
                             }
                         }
-                        continue;
                     }
-
                     // 2013/6/19 <hire>元素单独处理
                     // 保护 expireDate 属性不被修改
-                    if (strElementName == "hire")
+                    else if (strElementName == "hire")
                     {
                         XmlNode nodeExist = domExist.DocumentElement.SelectSingleNode("hire");
                         // XmlNode nodeNew = domNew.DocumentElement.SelectSingleNode("hire");
@@ -397,13 +450,25 @@ namespace DigitalPlatform.LibraryServer
                                 "");
                             DomUtil.SetAttr(node, "expireDate", strExistExpireDate);
                         }
-
-                        continue;
+                    }
+                    else
+                    {
+                        // 一般处理
+                        DomUtil.SetElementOuterXml(domExist.DocumentElement,
+                            strElementName,
+                            strTextNew);
                     }
 
-                    DomUtil.SetElementOuterXml(domExist.DocumentElement,
-                        strElementName,
-                        strTextNew);
+                    /*
+                    // 2021/7/23
+                    // 判断是否发生了变化
+                    string changed_outerXml = domExist.DocumentElement.SelectSingleNode(strElementName)?.OuterXml;
+                    if (old_outerXml != changed_outerXml
+&& outof_names.IndexOf(strElementName) != -1)
+                    {
+                        error_names.Add(strElementName);
+                    }
+                    */
                 }
 
                 if (has_file_element)
@@ -415,10 +480,13 @@ namespace DigitalPlatform.LibraryServer
             }
             else if (strAction == "changestate")
             {
+                /*
                 string[] element_names_onlystate = new string[] {
                     "state",
                     "comment",
                     };
+                */
+                var element_names_onlystate = element_names;
                 for (int i = 0; i < element_names_onlystate.Length; i++)
                 {
                     string strTextNew = DomUtil.GetElementOuterXml(domNew.DocumentElement,
@@ -433,11 +501,14 @@ namespace DigitalPlatform.LibraryServer
             }
             else if (strAction == "changeforegift")
             {
+                /*
                 // 2008/11/11 
                 string[] element_names_onlyforegift = new string[] {
                     "foregift",
                     "comment",
                     };
+                */
+                var element_names_onlyforegift = element_names;
                 for (int i = 0; i < element_names_onlyforegift.Length; i++)
                 {
                     string strTextNew = DomUtil.GetElementOuterXml(domNew.DocumentElement,
@@ -452,7 +523,7 @@ namespace DigitalPlatform.LibraryServer
             }
             else
             {
-                strError = "strAction值必须为change、changestate、changeforegift 和 changereaderbarcode 之一。";
+                strError = "strAction 值必须为 change、changestate、changeforegift 和 changereaderbarcode 之一。";
                 return -1;
             }
 
@@ -469,6 +540,38 @@ namespace DigitalPlatform.LibraryServer
             // strMergedXml = domExist.OuterXml;
             domMerged = domExist;
             return 0;
+        }
+
+        static string GetOuterXml(XmlDocument domTarget,
+            string element_name)
+        {
+            XmlNodeList nodes = null;
+            if (element_name.Contains(":"))
+            {
+                XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
+                nsmgr.AddNamespace("dprms", DpNs.dprms);
+                element_name = element_name.Replace(DpNs.dprms, "dprms");
+                nodes = domTarget.DocumentElement.SelectNodes("//" + element_name, nsmgr);   // "//dprms:file"
+            }
+            else
+                nodes = domTarget.DocumentElement.SelectNodes(element_name);
+
+            if (nodes.Count == 0)
+                return null;
+
+            List<string> oldOuterXmls = new List<string>();
+            foreach (XmlElement element in nodes)
+            {
+                oldOuterXmls.Add(element.OuterXml);
+            }
+
+            /*
+            // TODO: 是否要排序?
+            if (oldOuterXmls.Count > 0)
+                oldOuterXmls.Sort();
+            */
+
+            return StringUtil.MakePathList(oldOuterXmls, "\r\n");
         }
 
         // 构造出适合保存的新读者记录
@@ -6801,6 +6904,7 @@ out strError);
         //      name    元素集合的名称或者定义。
         //              形态: n|元素名|组名
         //              (n代表数字)
+        //              注: 这里使用 dprms.file 元素名，实际上表达的是 "http://dp2003.com/dprms:file"，因为 setreaderinfo:xxx 这里 xxx 之内不允许里面再出现冒号，逗号，竖线
         static List<string> GetElementNames(string name)
         {
             List<string> results = new List<string>();
@@ -6820,7 +6924,11 @@ out strError);
                 }
                 else
                 {
-                    results.Add(part);
+                    // 2021/7/23
+                    if (part == "dprms.file")
+                        results.Add("http://dp2003.com/dprms:file");
+                    else
+                        results.Add(part);
                 }
             }
 

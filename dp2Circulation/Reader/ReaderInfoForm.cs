@@ -2354,6 +2354,7 @@ strSavedXml);
                 {
                     node.ParentNode.RemoveChild(node);
                 }
+                AddImportantField("http://dp2003.com/dprms:file");
             }
 
             // 合成<dprms:file>元素
@@ -2365,6 +2366,7 @@ strSavedXml);
             out strError);
                 if (nRet == -1)
                     return -1;
+                AddImportantField("http://dp2003.com/dprms:file");
             }
 
             // 如果没有 refID 元素，需要给添加一个
