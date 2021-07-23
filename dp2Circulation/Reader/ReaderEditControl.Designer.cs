@@ -31,32 +31,32 @@ namespace dp2Circulation
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ReaderEditControl));
             this.tableLayoutPanel_main = new System.Windows.Forms.TableLayoutPanel();
             this.textBox_barcode = new System.Windows.Forms.TextBox();
-            this.label2 = new System.Windows.Forms.Label();
+            this.label_readerType = new System.Windows.Forms.Label();
             this.comboBox_readerType = new System.Windows.Forms.ComboBox();
-            this.label3 = new System.Windows.Forms.Label();
-            this.label4 = new System.Windows.Forms.Label();
-            this.label5 = new System.Windows.Forms.Label();
+            this.label_createDate = new System.Windows.Forms.Label();
+            this.label_expireDate = new System.Windows.Forms.Label();
+            this.label_name = new System.Windows.Forms.Label();
             this.textBox_name = new System.Windows.Forms.TextBox();
-            this.label6 = new System.Windows.Forms.Label();
+            this.label_gender = new System.Windows.Forms.Label();
             this.comboBox_gender = new System.Windows.Forms.ComboBox();
-            this.label7 = new System.Windows.Forms.Label();
-            this.label8 = new System.Windows.Forms.Label();
+            this.label_dateOfBirth = new System.Windows.Forms.Label();
+            this.label_idCardNumber = new System.Windows.Forms.Label();
             this.textBox_idCardNumber = new System.Windows.Forms.TextBox();
-            this.label9 = new System.Windows.Forms.Label();
+            this.label_department = new System.Windows.Forms.Label();
             this.textBox_department = new System.Windows.Forms.TextBox();
-            this.label10 = new System.Windows.Forms.Label();
+            this.label_address = new System.Windows.Forms.Label();
             this.textBox_address = new System.Windows.Forms.TextBox();
-            this.label11 = new System.Windows.Forms.Label();
+            this.label_tel = new System.Windows.Forms.Label();
             this.textBox_tel = new System.Windows.Forms.TextBox();
-            this.label12 = new System.Windows.Forms.Label();
+            this.label_email = new System.Windows.Forms.Label();
             this.textBox_email = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
+            this.label_barcode = new System.Windows.Forms.Label();
             this.flowLayoutPanel_barcodeAction = new System.Windows.Forms.FlowLayoutPanel();
             this.button_verifyBarcode = new System.Windows.Forms.Button();
             this.button_reload = new System.Windows.Forms.Button();
-            this.label13 = new System.Windows.Forms.Label();
+            this.label_recPath = new System.Windows.Forms.Label();
             this.textBox_recPath = new System.Windows.Forms.TextBox();
-            this.label14 = new System.Windows.Forms.Label();
+            this.label_state = new System.Windows.Forms.Label();
             this.comboBox_state = new System.Windows.Forms.ComboBox();
             this.label_barcode_color = new System.Windows.Forms.Label();
             this.label_readerType_color = new System.Windows.Forms.Label();
@@ -74,16 +74,16 @@ namespace dp2Circulation
             this.label_recPath_color = new System.Windows.Forms.Label();
             this.dateControl_dateOfBirth = new DigitalPlatform.CommonControl.DateControl();
             this.dateControl_expireDate = new DigitalPlatform.CommonControl.DateControl();
-            this.label15 = new System.Windows.Forms.Label();
+            this.label_comment = new System.Windows.Forms.Label();
             this.textBox_comment = new DigitalPlatform.CommonControl.AutoHeightTextBox();
             this.label_comment_color = new System.Windows.Forms.Label();
-            this.label16 = new System.Windows.Forms.Label();
-            this.label17 = new System.Windows.Forms.Label();
+            this.label_hirePeriod = new System.Windows.Forms.Label();
+            this.label_hireExpireDate = new System.Windows.Forms.Label();
             this.comboBox_hirePeriod = new System.Windows.Forms.ComboBox();
             this.label_hirePeriod_color = new System.Windows.Forms.Label();
             this.label_hireExpireDate_color = new System.Windows.Forms.Label();
             this.dateControl_hireExpireDate = new DigitalPlatform.CommonControl.DateControl();
-            this.label18 = new System.Windows.Forms.Label();
+            this.label_cardNumber = new System.Windows.Forms.Label();
             this.label_cardNumber_color = new System.Windows.Forms.Label();
             this.textBox_cardNumber = new System.Windows.Forms.TextBox();
             this.textBox_foregift = new System.Windows.Forms.TextBox();
@@ -92,14 +92,14 @@ namespace dp2Circulation
             this.button_foregiftSum = new System.Windows.Forms.Button();
             this.textBox_post = new System.Windows.Forms.TextBox();
             this.label_post_color = new System.Windows.Forms.Label();
-            this.label20 = new System.Windows.Forms.Label();
+            this.label_post = new System.Windows.Forms.Label();
             this.dateControl_createDate = new DigitalPlatform.CommonControl.DateControl();
-            this.label21 = new System.Windows.Forms.Label();
+            this.label_namePinyin = new System.Windows.Forms.Label();
             this.label_namePinyin_color = new System.Windows.Forms.Label();
             this.textBox_namePinyin = new System.Windows.Forms.TextBox();
             this.button_createNamePinyin = new System.Windows.Forms.Button();
-            this.label22 = new System.Windows.Forms.Label();
-            this.label23 = new System.Windows.Forms.Label();
+            this.label_personalLibrary = new System.Windows.Forms.Label();
+            this.label_rights = new System.Windows.Forms.Label();
             this.label_rights_color = new System.Windows.Forms.Label();
             this.label_personalLibrary_color = new System.Windows.Forms.Label();
             this.textBox_rights = new DigitalPlatform.CommonControl.AutoHeightTextBox();
@@ -107,11 +107,11 @@ namespace dp2Circulation
             this.button_editRights = new System.Windows.Forms.Button();
             this.textBox_friends = new DigitalPlatform.CommonControl.AutoHeightTextBox();
             this.label_friends_color = new System.Windows.Forms.Label();
-            this.label24 = new System.Windows.Forms.Label();
+            this.label_friends = new System.Windows.Forms.Label();
             this.textBox_access = new DigitalPlatform.CommonControl.AutoHeightTextBox();
             this.label_access_color = new System.Windows.Forms.Label();
-            this.label25 = new System.Windows.Forms.Label();
-            this.label26 = new System.Windows.Forms.Label();
+            this.label_access = new System.Windows.Forms.Label();
+            this.label_refID = new System.Windows.Forms.Label();
             this.label_refID_color = new System.Windows.Forms.Label();
             this.textBox_refID = new System.Windows.Forms.TextBox();
             this.tableLayoutPanel_main.SuspendLayout();
@@ -128,30 +128,30 @@ namespace dp2Circulation
             this.tableLayoutPanel_main.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel_main.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel_main.Controls.Add(this.textBox_barcode, 2, 0);
-            this.tableLayoutPanel_main.Controls.Add(this.label2, 0, 2);
+            this.tableLayoutPanel_main.Controls.Add(this.label_readerType, 0, 2);
             this.tableLayoutPanel_main.Controls.Add(this.comboBox_readerType, 2, 2);
-            this.tableLayoutPanel_main.Controls.Add(this.label3, 0, 3);
-            this.tableLayoutPanel_main.Controls.Add(this.label4, 0, 4);
-            this.tableLayoutPanel_main.Controls.Add(this.label5, 0, 11);
+            this.tableLayoutPanel_main.Controls.Add(this.label_createDate, 0, 3);
+            this.tableLayoutPanel_main.Controls.Add(this.label_expireDate, 0, 4);
+            this.tableLayoutPanel_main.Controls.Add(this.label_name, 0, 11);
             this.tableLayoutPanel_main.Controls.Add(this.textBox_name, 2, 11);
-            this.tableLayoutPanel_main.Controls.Add(this.label6, 0, 13);
+            this.tableLayoutPanel_main.Controls.Add(this.label_gender, 0, 13);
             this.tableLayoutPanel_main.Controls.Add(this.comboBox_gender, 2, 13);
-            this.tableLayoutPanel_main.Controls.Add(this.label7, 0, 14);
-            this.tableLayoutPanel_main.Controls.Add(this.label8, 0, 15);
+            this.tableLayoutPanel_main.Controls.Add(this.label_dateOfBirth, 0, 14);
+            this.tableLayoutPanel_main.Controls.Add(this.label_idCardNumber, 0, 15);
             this.tableLayoutPanel_main.Controls.Add(this.textBox_idCardNumber, 2, 15);
-            this.tableLayoutPanel_main.Controls.Add(this.label9, 0, 16);
+            this.tableLayoutPanel_main.Controls.Add(this.label_department, 0, 16);
             this.tableLayoutPanel_main.Controls.Add(this.textBox_department, 2, 16);
-            this.tableLayoutPanel_main.Controls.Add(this.label10, 0, 18);
+            this.tableLayoutPanel_main.Controls.Add(this.label_address, 0, 18);
             this.tableLayoutPanel_main.Controls.Add(this.textBox_address, 2, 18);
-            this.tableLayoutPanel_main.Controls.Add(this.label11, 0, 19);
+            this.tableLayoutPanel_main.Controls.Add(this.label_tel, 0, 19);
             this.tableLayoutPanel_main.Controls.Add(this.textBox_tel, 2, 19);
-            this.tableLayoutPanel_main.Controls.Add(this.label12, 0, 20);
+            this.tableLayoutPanel_main.Controls.Add(this.label_email, 0, 20);
             this.tableLayoutPanel_main.Controls.Add(this.textBox_email, 2, 20);
-            this.tableLayoutPanel_main.Controls.Add(this.label1, 0, 0);
+            this.tableLayoutPanel_main.Controls.Add(this.label_barcode, 0, 0);
             this.tableLayoutPanel_main.Controls.Add(this.flowLayoutPanel_barcodeAction, 3, 0);
-            this.tableLayoutPanel_main.Controls.Add(this.label13, 0, 29);
+            this.tableLayoutPanel_main.Controls.Add(this.label_recPath, 0, 29);
             this.tableLayoutPanel_main.Controls.Add(this.textBox_recPath, 2, 29);
-            this.tableLayoutPanel_main.Controls.Add(this.label14, 0, 5);
+            this.tableLayoutPanel_main.Controls.Add(this.label_state, 0, 5);
             this.tableLayoutPanel_main.Controls.Add(this.comboBox_state, 2, 5);
             this.tableLayoutPanel_main.Controls.Add(this.label_barcode_color, 1, 0);
             this.tableLayoutPanel_main.Controls.Add(this.label_readerType_color, 1, 2);
@@ -169,16 +169,16 @@ namespace dp2Circulation
             this.tableLayoutPanel_main.Controls.Add(this.label_recPath_color, 1, 29);
             this.tableLayoutPanel_main.Controls.Add(this.dateControl_dateOfBirth, 2, 14);
             this.tableLayoutPanel_main.Controls.Add(this.dateControl_expireDate, 2, 4);
-            this.tableLayoutPanel_main.Controls.Add(this.label15, 0, 6);
+            this.tableLayoutPanel_main.Controls.Add(this.label_comment, 0, 6);
             this.tableLayoutPanel_main.Controls.Add(this.textBox_comment, 2, 6);
             this.tableLayoutPanel_main.Controls.Add(this.label_comment_color, 1, 6);
-            this.tableLayoutPanel_main.Controls.Add(this.label16, 0, 7);
-            this.tableLayoutPanel_main.Controls.Add(this.label17, 0, 8);
+            this.tableLayoutPanel_main.Controls.Add(this.label_hirePeriod, 0, 7);
+            this.tableLayoutPanel_main.Controls.Add(this.label_hireExpireDate, 0, 8);
             this.tableLayoutPanel_main.Controls.Add(this.comboBox_hirePeriod, 2, 7);
             this.tableLayoutPanel_main.Controls.Add(this.label_hirePeriod_color, 1, 7);
             this.tableLayoutPanel_main.Controls.Add(this.label_hireExpireDate_color, 1, 8);
             this.tableLayoutPanel_main.Controls.Add(this.dateControl_hireExpireDate, 2, 8);
-            this.tableLayoutPanel_main.Controls.Add(this.label18, 0, 1);
+            this.tableLayoutPanel_main.Controls.Add(this.label_cardNumber, 0, 1);
             this.tableLayoutPanel_main.Controls.Add(this.label_cardNumber_color, 1, 1);
             this.tableLayoutPanel_main.Controls.Add(this.textBox_cardNumber, 2, 1);
             this.tableLayoutPanel_main.Controls.Add(this.textBox_foregift, 2, 9);
@@ -187,14 +187,14 @@ namespace dp2Circulation
             this.tableLayoutPanel_main.Controls.Add(this.button_foregiftSum, 3, 9);
             this.tableLayoutPanel_main.Controls.Add(this.textBox_post, 2, 17);
             this.tableLayoutPanel_main.Controls.Add(this.label_post_color, 1, 17);
-            this.tableLayoutPanel_main.Controls.Add(this.label20, 0, 17);
+            this.tableLayoutPanel_main.Controls.Add(this.label_post, 0, 17);
             this.tableLayoutPanel_main.Controls.Add(this.dateControl_createDate, 2, 3);
-            this.tableLayoutPanel_main.Controls.Add(this.label21, 0, 12);
+            this.tableLayoutPanel_main.Controls.Add(this.label_namePinyin, 0, 12);
             this.tableLayoutPanel_main.Controls.Add(this.label_namePinyin_color, 1, 12);
             this.tableLayoutPanel_main.Controls.Add(this.textBox_namePinyin, 2, 12);
             this.tableLayoutPanel_main.Controls.Add(this.button_createNamePinyin, 3, 12);
-            this.tableLayoutPanel_main.Controls.Add(this.label22, 0, 27);
-            this.tableLayoutPanel_main.Controls.Add(this.label23, 0, 25);
+            this.tableLayoutPanel_main.Controls.Add(this.label_personalLibrary, 0, 27);
+            this.tableLayoutPanel_main.Controls.Add(this.label_rights, 0, 25);
             this.tableLayoutPanel_main.Controls.Add(this.label_rights_color, 1, 25);
             this.tableLayoutPanel_main.Controls.Add(this.label_personalLibrary_color, 1, 27);
             this.tableLayoutPanel_main.Controls.Add(this.textBox_rights, 2, 25);
@@ -202,11 +202,11 @@ namespace dp2Circulation
             this.tableLayoutPanel_main.Controls.Add(this.button_editRights, 3, 25);
             this.tableLayoutPanel_main.Controls.Add(this.textBox_friends, 2, 28);
             this.tableLayoutPanel_main.Controls.Add(this.label_friends_color, 1, 28);
-            this.tableLayoutPanel_main.Controls.Add(this.label24, 0, 28);
+            this.tableLayoutPanel_main.Controls.Add(this.label_friends, 0, 28);
             this.tableLayoutPanel_main.Controls.Add(this.textBox_access, 2, 26);
             this.tableLayoutPanel_main.Controls.Add(this.label_access_color, 1, 26);
-            this.tableLayoutPanel_main.Controls.Add(this.label25, 0, 26);
-            this.tableLayoutPanel_main.Controls.Add(this.label26, 0, 30);
+            this.tableLayoutPanel_main.Controls.Add(this.label_access, 0, 26);
+            this.tableLayoutPanel_main.Controls.Add(this.label_refID, 0, 30);
             this.tableLayoutPanel_main.Controls.Add(this.label_refID_color, 1, 30);
             this.tableLayoutPanel_main.Controls.Add(this.textBox_refID, 2, 30);
             this.tableLayoutPanel_main.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -264,17 +264,17 @@ namespace dp2Circulation
             this.textBox_barcode.Size = new System.Drawing.Size(269, 32);
             this.textBox_barcode.TabIndex = 2;
             // 
-            // label2
+            // label_readerType
             // 
-            this.label2.AutoSize = true;
-            this.label2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label2.Location = new System.Drawing.Point(13, 151);
-            this.label2.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(159, 39);
-            this.label2.TabIndex = 6;
-            this.label2.Text = "读者类别(&T):";
-            this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.label_readerType.AutoSize = true;
+            this.label_readerType.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label_readerType.Location = new System.Drawing.Point(13, 151);
+            this.label_readerType.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.label_readerType.Name = "label_readerType";
+            this.label_readerType.Size = new System.Drawing.Size(159, 39);
+            this.label_readerType.TabIndex = 6;
+            this.label_readerType.Text = "读者类别(&T):";
+            this.label_readerType.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // comboBox_readerType
             // 
@@ -290,41 +290,42 @@ namespace dp2Circulation
             this.comboBox_readerType.DropDown += new System.EventHandler(this.comboBox_readerType_DropDown);
             this.comboBox_readerType.SelectedIndexChanged += new System.EventHandler(this.comboBox_readerType_SelectedIndexChanged);
             // 
-            // label3
+            // label_createDate
             // 
-            this.label3.AutoSize = true;
-            this.label3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label3.Location = new System.Drawing.Point(13, 190);
-            this.label3.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(159, 36);
-            this.label3.TabIndex = 9;
-            this.label3.Text = "发证日期(&C):";
-            this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.label_createDate.AutoSize = true;
+            this.label_createDate.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label_createDate.Location = new System.Drawing.Point(13, 190);
+            this.label_createDate.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.label_createDate.Name = "label_createDate";
+            this.label_createDate.Size = new System.Drawing.Size(159, 36);
+            this.label_createDate.TabIndex = 9;
+            this.label_createDate.Text = "发证日期(&C):";
+            this.label_createDate.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
-            // label4
+            // label_expireDate
             // 
-            this.label4.AutoSize = true;
-            this.label4.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label4.Location = new System.Drawing.Point(13, 226);
-            this.label4.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(159, 36);
-            this.label4.TabIndex = 12;
-            this.label4.Text = "失效日期(&E):";
-            this.label4.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.label_expireDate.AutoSize = true;
+            this.label_expireDate.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label_expireDate.Location = new System.Drawing.Point(13, 226);
+            this.label_expireDate.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.label_expireDate.Name = "label_expireDate";
+            this.label_expireDate.Size = new System.Drawing.Size(159, 36);
+            this.label_expireDate.TabIndex = 12;
+            this.label_expireDate.Text = "失效日期(&E):";
+            this.label_expireDate.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
-            // label5
+            // label_name
             // 
-            this.label5.AutoSize = true;
-            this.label5.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label5.Location = new System.Drawing.Point(13, 491);
-            this.label5.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(159, 42);
-            this.label5.TabIndex = 31;
-            this.label5.Text = "姓名(&N):";
-            this.label5.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.label_name.AutoSize = true;
+            this.label_name.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label_name.Font = new System.Drawing.Font("宋体", 12F);
+            this.label_name.Location = new System.Drawing.Point(13, 491);
+            this.label_name.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.label_name.Name = "label_name";
+            this.label_name.Size = new System.Drawing.Size(159, 42);
+            this.label_name.TabIndex = 31;
+            this.label_name.Text = "姓名(&N):";
+            this.label_name.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // textBox_name
             // 
@@ -334,20 +335,20 @@ namespace dp2Circulation
             this.textBox_name.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.textBox_name.MinimumSize = new System.Drawing.Size(183, 0);
             this.textBox_name.Name = "textBox_name";
-            this.textBox_name.Size = new System.Drawing.Size(183, 32);
+            this.textBox_name.Size = new System.Drawing.Size(269, 32);
             this.textBox_name.TabIndex = 33;
             // 
-            // label6
+            // label_gender
             // 
-            this.label6.AutoSize = true;
-            this.label6.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label6.Location = new System.Drawing.Point(13, 575);
-            this.label6.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(159, 39);
-            this.label6.TabIndex = 34;
-            this.label6.Text = "性别(&G):";
-            this.label6.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.label_gender.AutoSize = true;
+            this.label_gender.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label_gender.Location = new System.Drawing.Point(13, 575);
+            this.label_gender.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.label_gender.Name = "label_gender";
+            this.label_gender.Size = new System.Drawing.Size(159, 39);
+            this.label_gender.TabIndex = 34;
+            this.label_gender.Text = "性别(&G):";
+            this.label_gender.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // comboBox_gender
             // 
@@ -363,29 +364,29 @@ namespace dp2Circulation
             this.comboBox_gender.Size = new System.Drawing.Size(180, 29);
             this.comboBox_gender.TabIndex = 36;
             // 
-            // label7
+            // label_dateOfBirth
             // 
-            this.label7.AutoSize = true;
-            this.label7.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label7.Location = new System.Drawing.Point(13, 614);
-            this.label7.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(159, 36);
-            this.label7.TabIndex = 37;
-            this.label7.Text = "出生日期(&B):";
-            this.label7.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.label_dateOfBirth.AutoSize = true;
+            this.label_dateOfBirth.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label_dateOfBirth.Location = new System.Drawing.Point(13, 614);
+            this.label_dateOfBirth.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.label_dateOfBirth.Name = "label_dateOfBirth";
+            this.label_dateOfBirth.Size = new System.Drawing.Size(159, 36);
+            this.label_dateOfBirth.TabIndex = 37;
+            this.label_dateOfBirth.Text = "出生日期(&B):";
+            this.label_dateOfBirth.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
-            // label8
+            // label_idCardNumber
             // 
-            this.label8.AutoSize = true;
-            this.label8.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label8.Location = new System.Drawing.Point(13, 650);
-            this.label8.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(159, 34);
-            this.label8.TabIndex = 40;
-            this.label8.Text = "身份证号(&I):";
-            this.label8.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.label_idCardNumber.AutoSize = true;
+            this.label_idCardNumber.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label_idCardNumber.Location = new System.Drawing.Point(13, 650);
+            this.label_idCardNumber.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.label_idCardNumber.Name = "label_idCardNumber";
+            this.label_idCardNumber.Size = new System.Drawing.Size(159, 34);
+            this.label_idCardNumber.TabIndex = 40;
+            this.label_idCardNumber.Text = "身份证号(&I):";
+            this.label_idCardNumber.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // textBox_idCardNumber
             // 
@@ -399,17 +400,17 @@ namespace dp2Circulation
             this.textBox_idCardNumber.Size = new System.Drawing.Size(269, 24);
             this.textBox_idCardNumber.TabIndex = 42;
             // 
-            // label9
+            // label_department
             // 
-            this.label9.AutoSize = true;
-            this.label9.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label9.Location = new System.Drawing.Point(13, 684);
-            this.label9.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
-            this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(159, 34);
-            this.label9.TabIndex = 43;
-            this.label9.Text = "单位(&D):";
-            this.label9.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.label_department.AutoSize = true;
+            this.label_department.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label_department.Location = new System.Drawing.Point(13, 684);
+            this.label_department.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.label_department.Name = "label_department";
+            this.label_department.Size = new System.Drawing.Size(159, 34);
+            this.label_department.TabIndex = 43;
+            this.label_department.Text = "单位(&D):";
+            this.label_department.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // textBox_department
             // 
@@ -423,17 +424,17 @@ namespace dp2Circulation
             this.textBox_department.Size = new System.Drawing.Size(269, 24);
             this.textBox_department.TabIndex = 45;
             // 
-            // label10
+            // label_address
             // 
-            this.label10.AutoSize = true;
-            this.label10.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label10.Location = new System.Drawing.Point(13, 752);
-            this.label10.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(159, 34);
-            this.label10.TabIndex = 46;
-            this.label10.Text = "地址(&A):";
-            this.label10.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.label_address.AutoSize = true;
+            this.label_address.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label_address.Location = new System.Drawing.Point(13, 752);
+            this.label_address.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.label_address.Name = "label_address";
+            this.label_address.Size = new System.Drawing.Size(159, 34);
+            this.label_address.TabIndex = 46;
+            this.label_address.Text = "地址(&A):";
+            this.label_address.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // textBox_address
             // 
@@ -447,17 +448,17 @@ namespace dp2Circulation
             this.textBox_address.Size = new System.Drawing.Size(269, 24);
             this.textBox_address.TabIndex = 48;
             // 
-            // label11
+            // label_tel
             // 
-            this.label11.AutoSize = true;
-            this.label11.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label11.Location = new System.Drawing.Point(13, 786);
-            this.label11.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
-            this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(159, 34);
-            this.label11.TabIndex = 49;
-            this.label11.Text = "电话(&T):";
-            this.label11.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.label_tel.AutoSize = true;
+            this.label_tel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label_tel.Location = new System.Drawing.Point(13, 786);
+            this.label_tel.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.label_tel.Name = "label_tel";
+            this.label_tel.Size = new System.Drawing.Size(159, 34);
+            this.label_tel.TabIndex = 49;
+            this.label_tel.Text = "电话(&T):";
+            this.label_tel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // textBox_tel
             // 
@@ -470,17 +471,17 @@ namespace dp2Circulation
             this.textBox_tel.Size = new System.Drawing.Size(269, 24);
             this.textBox_tel.TabIndex = 52;
             // 
-            // label12
+            // label_email
             // 
-            this.label12.AutoSize = true;
-            this.label12.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label12.Location = new System.Drawing.Point(13, 820);
-            this.label12.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
-            this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(159, 34);
-            this.label12.TabIndex = 53;
-            this.label12.Text = "Email地址(&E):";
-            this.label12.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.label_email.AutoSize = true;
+            this.label_email.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label_email.Location = new System.Drawing.Point(13, 820);
+            this.label_email.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.label_email.Name = "label_email";
+            this.label_email.Size = new System.Drawing.Size(159, 34);
+            this.label_email.TabIndex = 53;
+            this.label_email.Text = "Email地址(&E):";
+            this.label_email.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // textBox_email
             // 
@@ -494,17 +495,17 @@ namespace dp2Circulation
             this.textBox_email.Size = new System.Drawing.Size(269, 24);
             this.textBox_email.TabIndex = 55;
             // 
-            // label1
+            // label_barcode
             // 
-            this.label1.AutoSize = true;
-            this.label1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label1.Location = new System.Drawing.Point(13, 7);
-            this.label1.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(159, 110);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "证条码号(&B):";
-            this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.label_barcode.AutoSize = true;
+            this.label_barcode.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label_barcode.Location = new System.Drawing.Point(13, 7);
+            this.label_barcode.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.label_barcode.Name = "label_barcode";
+            this.label_barcode.Size = new System.Drawing.Size(159, 110);
+            this.label_barcode.TabIndex = 0;
+            this.label_barcode.Text = "证条码号(&B):";
+            this.label_barcode.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // flowLayoutPanel_barcodeAction
             // 
@@ -543,17 +544,17 @@ namespace dp2Circulation
             this.button_reload.Text = "重新装载(&R)";
             this.button_reload.UseVisualStyleBackColor = false;
             // 
-            // label13
+            // label_recPath
             // 
-            this.label13.AutoSize = true;
-            this.label13.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label13.Location = new System.Drawing.Point(13, 1018);
-            this.label13.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
-            this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(159, 34);
-            this.label13.TabIndex = 56;
-            this.label13.Text = "记录路径(&P):";
-            this.label13.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.label_recPath.AutoSize = true;
+            this.label_recPath.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label_recPath.Location = new System.Drawing.Point(13, 1018);
+            this.label_recPath.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.label_recPath.Name = "label_recPath";
+            this.label_recPath.Size = new System.Drawing.Size(159, 34);
+            this.label_recPath.TabIndex = 56;
+            this.label_recPath.Text = "记录路径(&P):";
+            this.label_recPath.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // textBox_recPath
             // 
@@ -567,17 +568,17 @@ namespace dp2Circulation
             this.textBox_recPath.TabIndex = 58;
             this.textBox_recPath.TextChanged += new System.EventHandler(this.textBox_recPath_TextChanged);
             // 
-            // label14
+            // label_state
             // 
-            this.label14.AutoSize = true;
-            this.label14.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label14.Location = new System.Drawing.Point(13, 262);
-            this.label14.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
-            this.label14.Name = "label14";
-            this.label14.Size = new System.Drawing.Size(159, 37);
-            this.label14.TabIndex = 15;
-            this.label14.Text = "证状态(&S):";
-            this.label14.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.label_state.AutoSize = true;
+            this.label_state.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label_state.Location = new System.Drawing.Point(13, 262);
+            this.label_state.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.label_state.Name = "label_state";
+            this.label_state.Size = new System.Drawing.Size(159, 37);
+            this.label_state.TabIndex = 15;
+            this.label_state.Text = "证状态(&S):";
+            this.label_state.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // comboBox_state
             // 
@@ -761,17 +762,17 @@ namespace dp2Circulation
             this.dateControl_expireDate.TabIndex = 14;
             this.dateControl_expireDate.Value = new System.DateTime(((long)(0)));
             // 
-            // label15
+            // label_comment
             // 
-            this.label15.AutoSize = true;
-            this.label15.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label15.Location = new System.Drawing.Point(11, 299);
-            this.label15.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label15.Name = "label15";
-            this.label15.Size = new System.Drawing.Size(163, 38);
-            this.label15.TabIndex = 18;
-            this.label15.Text = "注释(&C):";
-            this.label15.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.label_comment.AutoSize = true;
+            this.label_comment.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label_comment.Location = new System.Drawing.Point(11, 299);
+            this.label_comment.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label_comment.Name = "label_comment";
+            this.label_comment.Size = new System.Drawing.Size(163, 38);
+            this.label_comment.TabIndex = 18;
+            this.label_comment.Text = "注释(&C):";
+            this.label_comment.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // textBox_comment
             // 
@@ -796,29 +797,29 @@ namespace dp2Circulation
             this.label_comment_color.Size = new System.Drawing.Size(7, 38);
             this.label_comment_color.TabIndex = 19;
             // 
-            // label16
+            // label_hirePeriod
             // 
-            this.label16.AutoSize = true;
-            this.label16.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label16.Location = new System.Drawing.Point(13, 337);
-            this.label16.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
-            this.label16.Name = "label16";
-            this.label16.Size = new System.Drawing.Size(159, 37);
-            this.label16.TabIndex = 21;
-            this.label16.Text = "租金周期(&P):";
-            this.label16.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.label_hirePeriod.AutoSize = true;
+            this.label_hirePeriod.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label_hirePeriod.Location = new System.Drawing.Point(13, 337);
+            this.label_hirePeriod.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.label_hirePeriod.Name = "label_hirePeriod";
+            this.label_hirePeriod.Size = new System.Drawing.Size(159, 37);
+            this.label_hirePeriod.TabIndex = 21;
+            this.label_hirePeriod.Text = "租金周期(&P):";
+            this.label_hirePeriod.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
-            // label17
+            // label_hireExpireDate
             // 
-            this.label17.AutoSize = true;
-            this.label17.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label17.Location = new System.Drawing.Point(13, 374);
-            this.label17.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
-            this.label17.Name = "label17";
-            this.label17.Size = new System.Drawing.Size(159, 36);
-            this.label17.TabIndex = 24;
-            this.label17.Text = "租金失效期(&E):";
-            this.label17.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.label_hireExpireDate.AutoSize = true;
+            this.label_hireExpireDate.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label_hireExpireDate.Location = new System.Drawing.Point(13, 374);
+            this.label_hireExpireDate.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.label_hireExpireDate.Name = "label_hireExpireDate";
+            this.label_hireExpireDate.Size = new System.Drawing.Size(159, 36);
+            this.label_hireExpireDate.TabIndex = 24;
+            this.label_hireExpireDate.Text = "租金失效期(&E):";
+            this.label_hireExpireDate.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // comboBox_hirePeriod
             // 
@@ -867,17 +868,17 @@ namespace dp2Circulation
             this.dateControl_hireExpireDate.TabIndex = 26;
             this.dateControl_hireExpireDate.Value = new System.DateTime(((long)(0)));
             // 
-            // label18
+            // label_cardNumber
             // 
-            this.label18.AutoSize = true;
-            this.label18.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label18.Location = new System.Drawing.Point(13, 117);
-            this.label18.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
-            this.label18.Name = "label18";
-            this.label18.Size = new System.Drawing.Size(159, 34);
-            this.label18.TabIndex = 3;
-            this.label18.Text = "证号(&N):";
-            this.label18.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.label_cardNumber.AutoSize = true;
+            this.label_cardNumber.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label_cardNumber.Location = new System.Drawing.Point(13, 117);
+            this.label_cardNumber.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.label_cardNumber.Name = "label_cardNumber";
+            this.label_cardNumber.Size = new System.Drawing.Size(159, 34);
+            this.label_cardNumber.TabIndex = 3;
+            this.label_cardNumber.Text = "证号(&N):";
+            this.label_cardNumber.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // label_cardNumber_color
             // 
@@ -968,17 +969,17 @@ namespace dp2Circulation
             this.label_post_color.Size = new System.Drawing.Size(7, 34);
             this.label_post_color.TabIndex = 60;
             // 
-            // label20
+            // label_post
             // 
-            this.label20.AutoSize = true;
-            this.label20.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label20.Location = new System.Drawing.Point(13, 718);
-            this.label20.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
-            this.label20.Name = "label20";
-            this.label20.Size = new System.Drawing.Size(159, 34);
-            this.label20.TabIndex = 61;
-            this.label20.Text = "职务(&P):";
-            this.label20.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.label_post.AutoSize = true;
+            this.label_post.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label_post.Location = new System.Drawing.Point(13, 718);
+            this.label_post.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.label_post.Name = "label_post";
+            this.label_post.Size = new System.Drawing.Size(159, 34);
+            this.label_post.TabIndex = 61;
+            this.label_post.Text = "职务(&P):";
+            this.label_post.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // dateControl_createDate
             // 
@@ -994,17 +995,18 @@ namespace dp2Circulation
             this.dateControl_createDate.TabIndex = 62;
             this.dateControl_createDate.Value = new System.DateTime(((long)(0)));
             // 
-            // label21
+            // label_namePinyin
             // 
-            this.label21.AutoSize = true;
-            this.label21.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label21.Location = new System.Drawing.Point(13, 533);
-            this.label21.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
-            this.label21.Name = "label21";
-            this.label21.Size = new System.Drawing.Size(159, 42);
-            this.label21.TabIndex = 63;
-            this.label21.Text = "姓名拼音(&P):";
-            this.label21.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.label_namePinyin.AutoSize = true;
+            this.label_namePinyin.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label_namePinyin.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label_namePinyin.Location = new System.Drawing.Point(13, 533);
+            this.label_namePinyin.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.label_namePinyin.Name = "label_namePinyin";
+            this.label_namePinyin.Size = new System.Drawing.Size(159, 42);
+            this.label_namePinyin.TabIndex = 63;
+            this.label_namePinyin.Text = "姓名拼音(&P):";
+            this.label_namePinyin.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // label_namePinyin_color
             // 
@@ -1024,7 +1026,7 @@ namespace dp2Circulation
             this.textBox_namePinyin.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.textBox_namePinyin.MinimumSize = new System.Drawing.Size(183, 0);
             this.textBox_namePinyin.Name = "textBox_namePinyin";
-            this.textBox_namePinyin.Size = new System.Drawing.Size(183, 32);
+            this.textBox_namePinyin.Size = new System.Drawing.Size(269, 32);
             this.textBox_namePinyin.TabIndex = 65;
             // 
             // button_createNamePinyin
@@ -1041,29 +1043,29 @@ namespace dp2Circulation
             this.button_createNamePinyin.UseVisualStyleBackColor = false;
             this.button_createNamePinyin.Click += new System.EventHandler(this.button_createNamePinyin_Click);
             // 
-            // label22
+            // label_personalLibrary
             // 
-            this.label22.AutoSize = true;
-            this.label22.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label22.Location = new System.Drawing.Point(13, 946);
-            this.label22.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
-            this.label22.Name = "label22";
-            this.label22.Size = new System.Drawing.Size(159, 34);
-            this.label22.TabIndex = 67;
-            this.label22.Text = "书斋名称(&P):";
-            this.label22.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.label_personalLibrary.AutoSize = true;
+            this.label_personalLibrary.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label_personalLibrary.Location = new System.Drawing.Point(13, 946);
+            this.label_personalLibrary.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.label_personalLibrary.Name = "label_personalLibrary";
+            this.label_personalLibrary.Size = new System.Drawing.Size(159, 34);
+            this.label_personalLibrary.TabIndex = 67;
+            this.label_personalLibrary.Text = "书斋名称(&P):";
+            this.label_personalLibrary.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
-            // label23
+            // label_rights
             // 
-            this.label23.AutoSize = true;
-            this.label23.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label23.Location = new System.Drawing.Point(13, 854);
-            this.label23.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
-            this.label23.Name = "label23";
-            this.label23.Size = new System.Drawing.Size(159, 54);
-            this.label23.TabIndex = 68;
-            this.label23.Text = "权限(&R):";
-            this.label23.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.label_rights.AutoSize = true;
+            this.label_rights.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label_rights.Location = new System.Drawing.Point(13, 854);
+            this.label_rights.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.label_rights.Name = "label_rights";
+            this.label_rights.Size = new System.Drawing.Size(159, 54);
+            this.label_rights.TabIndex = 68;
+            this.label_rights.Text = "权限(&R):";
+            this.label_rights.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // label_rights_color
             // 
@@ -1151,17 +1153,17 @@ namespace dp2Circulation
             this.label_friends_color.Size = new System.Drawing.Size(7, 38);
             this.label_friends_color.TabIndex = 75;
             // 
-            // label24
+            // label_friends
             // 
-            this.label24.AutoSize = true;
-            this.label24.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label24.Location = new System.Drawing.Point(13, 980);
-            this.label24.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
-            this.label24.Name = "label24";
-            this.label24.Size = new System.Drawing.Size(159, 38);
-            this.label24.TabIndex = 76;
-            this.label24.Text = "好友(&F):";
-            this.label24.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.label_friends.AutoSize = true;
+            this.label_friends.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label_friends.Location = new System.Drawing.Point(13, 980);
+            this.label_friends.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.label_friends.Name = "label_friends";
+            this.label_friends.Size = new System.Drawing.Size(159, 38);
+            this.label_friends.TabIndex = 76;
+            this.label_friends.Text = "好友(&F):";
+            this.label_friends.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // textBox_access
             // 
@@ -1188,29 +1190,29 @@ namespace dp2Circulation
             this.label_access_color.Size = new System.Drawing.Size(7, 38);
             this.label_access_color.TabIndex = 78;
             // 
-            // label25
+            // label_access
             // 
-            this.label25.AutoSize = true;
-            this.label25.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label25.Location = new System.Drawing.Point(13, 908);
-            this.label25.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
-            this.label25.Name = "label25";
-            this.label25.Size = new System.Drawing.Size(159, 38);
-            this.label25.TabIndex = 79;
-            this.label25.Text = "存取定义(&A):";
-            this.label25.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.label_access.AutoSize = true;
+            this.label_access.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label_access.Location = new System.Drawing.Point(13, 908);
+            this.label_access.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.label_access.Name = "label_access";
+            this.label_access.Size = new System.Drawing.Size(159, 38);
+            this.label_access.TabIndex = 79;
+            this.label_access.Text = "存取定义(&A):";
+            this.label_access.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
-            // label26
+            // label_refID
             // 
-            this.label26.AutoSize = true;
-            this.label26.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label26.Location = new System.Drawing.Point(13, 1052);
-            this.label26.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
-            this.label26.Name = "label26";
-            this.label26.Size = new System.Drawing.Size(159, 35);
-            this.label26.TabIndex = 81;
-            this.label26.Text = "参考ID(&R):";
-            this.label26.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.label_refID.AutoSize = true;
+            this.label_refID.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label_refID.Location = new System.Drawing.Point(13, 1052);
+            this.label_refID.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.label_refID.Name = "label_refID";
+            this.label_refID.Size = new System.Drawing.Size(159, 35);
+            this.label_refID.TabIndex = 81;
+            this.label_refID.Text = "参考ID(&R):";
+            this.label_refID.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // label_refID_color
             // 
@@ -1255,32 +1257,32 @@ namespace dp2Circulation
 
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel_main;
         private System.Windows.Forms.TextBox textBox_barcode;
-        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label label_readerType;
         private System.Windows.Forms.ComboBox comboBox_readerType;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Label label_createDate;
+        private System.Windows.Forms.Label label_expireDate;
+        private System.Windows.Forms.Label label_name;
         private System.Windows.Forms.TextBox textBox_name;
-        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Label label_gender;
         private System.Windows.Forms.ComboBox comboBox_gender;
-        private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.Label label_dateOfBirth;
+        private System.Windows.Forms.Label label_idCardNumber;
         private System.Windows.Forms.TextBox textBox_idCardNumber;
-        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.Label label_department;
         private System.Windows.Forms.TextBox textBox_department;
-        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.Label label_address;
         private System.Windows.Forms.TextBox textBox_address;
-        private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.Label label_tel;
         private System.Windows.Forms.TextBox textBox_tel;
-        private System.Windows.Forms.Label label12;
+        private System.Windows.Forms.Label label_email;
         private System.Windows.Forms.TextBox textBox_email;
-        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label label_barcode;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel_barcodeAction;
         private System.Windows.Forms.Button button_verifyBarcode;
         private System.Windows.Forms.Button button_reload;
-        private System.Windows.Forms.Label label13;
+        private System.Windows.Forms.Label label_recPath;
         private System.Windows.Forms.TextBox textBox_recPath;
-        private System.Windows.Forms.Label label14;
+        private System.Windows.Forms.Label label_state;
         private System.Windows.Forms.ComboBox comboBox_state;
         private System.Windows.Forms.Label label_barcode_color;
         private System.Windows.Forms.Label label_readerType_color;
@@ -1298,16 +1300,16 @@ namespace dp2Circulation
         private System.Windows.Forms.Label label_recPath_color;
         private DigitalPlatform.CommonControl.DateControl dateControl_dateOfBirth;
         private DigitalPlatform.CommonControl.DateControl dateControl_expireDate;
-        private System.Windows.Forms.Label label15;
+        private System.Windows.Forms.Label label_comment;
         private System.Windows.Forms.Label label_comment_color;
-        private System.Windows.Forms.Label label16;
-        private System.Windows.Forms.Label label17;
+        private System.Windows.Forms.Label label_hirePeriod;
+        private System.Windows.Forms.Label label_hireExpireDate;
         private DigitalPlatform.CommonControl.DateControl dateControl_hireExpireDate;
         private System.Windows.Forms.ComboBox comboBox_hirePeriod;
         private System.Windows.Forms.Label label_hirePeriod_color;
         private System.Windows.Forms.Label label_hireExpireDate_color;
         private System.Windows.Forms.Label label_cardNumber_color;
-        private System.Windows.Forms.Label label18;
+        private System.Windows.Forms.Label label_cardNumber;
         private System.Windows.Forms.TextBox textBox_cardNumber;
         private System.Windows.Forms.Label label19;
         private System.Windows.Forms.TextBox textBox_foregift;
@@ -1315,28 +1317,28 @@ namespace dp2Circulation
         private System.Windows.Forms.Button button_foregiftSum;
         private System.Windows.Forms.TextBox textBox_post;
         private System.Windows.Forms.Label label_post_color;
-        private System.Windows.Forms.Label label20;
+        private System.Windows.Forms.Label label_post;
         private DigitalPlatform.CommonControl.DateControl dateControl_createDate;
-        private System.Windows.Forms.Label label21;
+        private System.Windows.Forms.Label label_namePinyin;
         private System.Windows.Forms.Label label_namePinyin_color;
         private System.Windows.Forms.TextBox textBox_namePinyin;
         private System.Windows.Forms.Button button_createNamePinyin;
-        private System.Windows.Forms.Label label22;
-        private System.Windows.Forms.Label label23;
+        private System.Windows.Forms.Label label_personalLibrary;
+        private System.Windows.Forms.Label label_rights;
         private System.Windows.Forms.Label label_rights_color;
         private System.Windows.Forms.Label label_personalLibrary_color;
         private System.Windows.Forms.TextBox textBox_personalLibrary;
         private System.Windows.Forms.Button button_editRights;
         private System.Windows.Forms.Label label_friends_color;
-        private System.Windows.Forms.Label label24;
+        private System.Windows.Forms.Label label_friends;
         private System.Windows.Forms.Label label_access_color;
-        private System.Windows.Forms.Label label25;
+        private System.Windows.Forms.Label label_access;
         private DigitalPlatform.CommonControl.AutoHeightTextBox textBox_comment;
         private DigitalPlatform.CommonControl.AutoHeightTextBox textBox_rights;
         private DigitalPlatform.CommonControl.AutoHeightTextBox textBox_friends;
         private DigitalPlatform.CommonControl.AutoHeightTextBox textBox_access;
         private System.Windows.Forms.TextBox textBox_refID;
-        private System.Windows.Forms.Label label26;
+        private System.Windows.Forms.Label label_refID;
         private System.Windows.Forms.Label label_refID_color;
     }
 }

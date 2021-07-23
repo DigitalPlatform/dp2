@@ -589,7 +589,7 @@ namespace DigitalPlatform.LibraryServer
             strXml = "";
 
             // 流通元素名列表
-            string[] element_names = new string[] {
+            string[] remove_element_names = new string[] {
                 "borrows",
                 "overdues",
                 "reservations",
@@ -616,13 +616,14 @@ namespace DigitalPlatform.LibraryServer
             //      ""      找到了前缀，并且 level 部分为空
             //      其他     返回 level 部分
             string write_level = GetReaderInfoLevel("setreaderinfo", rights);
-            if (FilterByLevel(dom, write_level) == true)
+            if (FilterByLevel(dom, write_level, "write") == true)
                 bChanged = true;
 
-            for (int i = 0; i < element_names.Length; i++)
+            // 删除一些敏感元素
+            for (int i = 0; i < remove_element_names.Length; i++)
             {
                 List<XmlNode> deleted_nodes = DomUtil.DeleteElements(dom.DocumentElement,
-                    element_names[i]);
+                    remove_element_names[i]);
                 if (deleted_nodes != null
                     && deleted_nodes.Count > 0)
                     bChanged = true;
@@ -6799,7 +6800,8 @@ out strError);
         // 按照级别对读者记录中的信息字段进行过滤
         // 注: 无论如何都要删除读者记录中的 password 元素
         public static bool FilterByLevel(XmlDocument readerdom,
-            string level)
+            string level,
+            string style = "read")
         {
             if (string.IsNullOrEmpty(level))
             {
@@ -6808,6 +6810,12 @@ out strError);
                     return true;
                 return false;
             }
+
+            bool read = StringUtil.IsInList("read", style);
+            bool write = StringUtil.IsInList("write", style);
+            // 如果两个都缺乏，默认为读
+            if (read == false && write == false)
+                read = true;
 
             bool changed = true;
             /*
@@ -6831,9 +6839,18 @@ out strError);
                 // 马赛克
                 if (names.IndexOf("?" + myname) != -1)
                 {
-                    element.InnerText = Mask(element.InnerText);
-                    changed = true;
-                    continue;
+                    if (read)
+                    {
+                        element.InnerText = Mask(element.InnerText);
+                        changed = true;
+                        continue;
+                    }
+                    else if (write)
+                    {
+                        element.ParentNode.RemoveChild(element);
+                        changed = true;
+                        continue;
+                    }
                 }
 
                 if (names.IndexOf(myname) == -1)
@@ -6860,6 +6877,7 @@ out strError);
             }
         }
 
+        // 获得专用的元素名，形态为 uri:localName
         static string GetMyName(XmlElement element)
         {
             if (string.IsNullOrEmpty(element.NamespaceURI))

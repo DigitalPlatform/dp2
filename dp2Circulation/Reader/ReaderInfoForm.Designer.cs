@@ -105,6 +105,7 @@
             this.toolStripTextBox_barcode = new System.Windows.Forms.ToolStripTextBox();
             this.toolStripButton_load = new System.Windows.Forms.ToolStripButton();
             this.tableLayoutPanel_main = new System.Windows.Forms.TableLayoutPanel();
+            this.toolStripMenuItem_loadBlankRecord = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_normal)).BeginInit();
             this.splitContainer_normal.Panel1.SuspendLayout();
             this.splitContainer_normal.Panel2.SuspendLayout();
@@ -503,7 +504,7 @@
             // toolStripMenuItem_clearPalmprint1
             // 
             this.toolStripMenuItem_clearPalmprint1.Name = "toolStripMenuItem_clearPalmprint1";
-            this.toolStripMenuItem_clearPalmprint1.Size = new System.Drawing.Size(315, 40);
+            this.toolStripMenuItem_clearPalmprint1.Size = new System.Drawing.Size(255, 40);
             this.toolStripMenuItem_clearPalmprint1.Text = "清除掌纹特征";
             this.toolStripMenuItem_clearPalmprint1.Click += new System.EventHandler(this.toolStripMenuItem_clearPalmprint_Click);
             // 
@@ -674,6 +675,7 @@
             this.toolStripDropDownButton_otherFunc.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.toolStripDropDownButton_otherFunc.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButton_saveTemplate,
+            this.toolStripMenuItem_loadBlankRecord,
             this.toolStripSeparator8,
             this.toolStripMenuItem_createRfidCard,
             this.toolStripMenuItem_bindCardNumber,
@@ -797,7 +799,7 @@
             this.toolStripButton_option.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_option.Image")));
             this.toolStripButton_option.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_option.Name = "toolStripButton_option";
-            this.toolStripButton_option.Size = new System.Drawing.Size(86, 32);
+            this.toolStripButton_option.Size = new System.Drawing.Size(82, 32);
             this.toolStripButton_option.Text = "选项";
             this.toolStripButton_option.Click += new System.EventHandler(this.toolStripButton_option_Click);
             // 
@@ -864,6 +866,13 @@
             this.tableLayoutPanel_main.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_main.Size = new System.Drawing.Size(1118, 500);
             this.tableLayoutPanel_main.TabIndex = 6;
+            // 
+            // toolStripMenuItem_loadBlankRecord
+            // 
+            this.toolStripMenuItem_loadBlankRecord.Name = "toolStripMenuItem_loadBlankRecord";
+            this.toolStripMenuItem_loadBlankRecord.Size = new System.Drawing.Size(443, 40);
+            this.toolStripMenuItem_loadBlankRecord.Text = "装载空白记录";
+            this.toolStripMenuItem_loadBlankRecord.Visible = false;
             // 
             // ReaderInfoForm
             // 
@@ -980,5 +989,6 @@
         private System.Windows.Forms.ToolStripSplitButton toolStripSplitButton_registerPalmprint;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_clearPalmprint;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_clearPalmprint1;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_loadBlankRecord;
     }
 }

@@ -4,9 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.Xml;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace TestDp2Library
 {
@@ -261,6 +263,203 @@ namespace TestDp2Library
     out string strError);
             Assert.AreEqual(0, ret);
             AreEqual(domNew, domMerged);
+        }
+
+        // dprms:file 元素没有变化
+        // 因为没有变化，所以即便 dprms:file 被列入了重要元素，也没有发生报错
+        [TestMethod]
+        public void Test_MergeTwoReaderXml_07()
+        {
+            string[] element_names = new string[] {
+            "name",
+            // "http://dp2003.com/dprms:file"
+            };
+            string[] important_fields = new string[] {
+            "http://dp2003.com/dprms:file"
+            };
+
+            string old_xml = @"<root>
+<name>姓名</name>
+<dprms:file id='0' usage='face' xmlns:dprms='http://dp2003.com/dprms' />
+</root>";
+            string new_xml = @"<root>
+<name>新姓名</name>
+<dprms:file id='0' usage='face' xmlns:dprms='http://dp2003.com/dprms' />
+</root>";
+
+            XmlDocument domExist = new XmlDocument();
+            domExist.LoadXml(old_xml);
+            XmlDocument domNew = new XmlDocument();
+            domNew.LoadXml(new_xml);
+
+            var ret = LibraryApplication.MergeTwoReaderXml(
+    element_names,
+    "change",
+    domExist,
+    domNew,
+    important_fields,
+    out XmlDocument domMerged,
+    out string strError);
+            Assert.AreEqual(0, ret);
+            AreEqual(domNew, domMerged);
+        }
+
+        // dprms:file 元素请求希望发生了变化，但权限不允许变化
+        // 因 dprms:file 被列入了重要元素，所以会报错
+        [TestMethod]
+        public void Test_MergeTwoReaderXml_08()
+        {
+            string[] element_names = new string[] {
+            "name",
+            };
+            string[] important_fields = new string[] {
+            "http://dp2003.com/dprms:file"
+            };
+
+            string old_xml = @"<root>
+<name>姓名</name>
+<dprms:file id='0' usage='face' xmlns:dprms='http://dp2003.com/dprms' />
+</root>";
+            string new_xml = @"<root>
+<name>新姓名</name>
+<dprms:file id='1' usage='face' xmlns:dprms='http://dp2003.com/dprms' />
+</root>";
+
+            XmlDocument domExist = new XmlDocument();
+            domExist.LoadXml(old_xml);
+            XmlDocument domNew = new XmlDocument();
+            domNew.LoadXml(new_xml);
+
+            var ret = LibraryApplication.MergeTwoReaderXml(
+    element_names,
+    "change",
+    domExist,
+    domNew,
+    important_fields,
+    out XmlDocument domMerged,
+    out string strError);
+            Assert.AreEqual(-1, ret);
+            Assert.AreEqual(true, strError.StartsWith("下列"));
+        }
+
+        // 删除一个元素
+        [TestMethod]
+        public void Test_MergeTwoReaderXml_09()
+        {
+            string[] element_names = new string[] {
+            "name",
+            "department",
+            };
+            string[] important_fields = new string[] {
+            "name"
+            };
+
+            string old_xml = @"<root>
+<name>姓名</name>
+<department>单位</department>
+</root>";
+            string new_xml = @"<root>
+<name>新姓名</name>
+</root>";
+
+            XmlDocument domExist = new XmlDocument();
+            domExist.LoadXml(old_xml);
+            XmlDocument domNew = new XmlDocument();
+            domNew.LoadXml(new_xml);
+
+            var ret = LibraryApplication.MergeTwoReaderXml(
+    element_names,
+    "change",
+    domExist,
+    domNew,
+    important_fields,
+    out XmlDocument domMerged,
+    out string strError);
+            Assert.AreEqual(0, ret);
+            AreEqual(domNew, domMerged);
+        }
+
+        // 删除一个元素
+        // 因为 department 元素不在许可修改的范围，所以删除没有兑现。但没有报错
+        [TestMethod]
+        public void Test_MergeTwoReaderXml_10()
+        {
+            string[] element_names = new string[] {
+            "name",
+            // "department",
+            };
+            string[] important_fields = new string[] {
+            "name"
+            };
+
+            string old_xml = @"<root>
+<name>姓名</name>
+<department>单位</department>
+</root>";
+            string new_xml = @"<root>
+<name>新姓名</name>
+</root>";
+
+            string result_xml = @"<root>
+<name>新姓名</name>
+<department>单位</department>
+</root>";
+
+            XmlDocument domExist = new XmlDocument();
+            domExist.LoadXml(old_xml);
+            XmlDocument domNew = new XmlDocument();
+            domNew.LoadXml(new_xml);
+
+            var ret = LibraryApplication.MergeTwoReaderXml(
+    element_names,
+    "change",
+    domExist,
+    domNew,
+    important_fields,
+    out XmlDocument domMerged,
+    out string strError);
+            Assert.AreEqual(0, ret);
+            Assert.AreEqual(Convert(result_xml), GetOuterXml(domMerged));
+        }
+
+        // 删除一个元素
+        // 因为 department 元素不在许可修改的范围，所以删除没有兑现。
+        // 因为 department 元素属于重要元素，所以最后报错了
+        [TestMethod]
+        public void Test_MergeTwoReaderXml_11()
+        {
+            string[] element_names = new string[] {
+            "name",
+            };
+            string[] important_fields = new string[] {
+            "name",
+            "department",
+            };
+
+            string old_xml = @"<root>
+<name>姓名</name>
+<department>单位</department>
+</root>";
+            string new_xml = @"<root>
+<name>新姓名</name>
+</root>";
+
+            XmlDocument domExist = new XmlDocument();
+            domExist.LoadXml(old_xml);
+            XmlDocument domNew = new XmlDocument();
+            domNew.LoadXml(new_xml);
+
+            var ret = LibraryApplication.MergeTwoReaderXml(
+    element_names,
+    "change",
+    domExist,
+    domNew,
+    important_fields,
+    out XmlDocument domMerged,
+    out string strError);
+            Assert.AreEqual(-1, ret);
+            Assert.AreEqual(true, strError.StartsWith("下列"));
+
         }
 
 

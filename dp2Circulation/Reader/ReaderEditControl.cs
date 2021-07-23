@@ -726,6 +726,7 @@ namespace dp2Circulation
 
             // 2021/7/17
             InitialTags();
+            HighlightKeyLines();
         }
 
         private void ReaderEditControl_SizeChanged(object sender, EventArgs e)
@@ -1426,6 +1427,31 @@ namespace dp2Circulation
 
             this.textBox_recPath.Tag = "recPath";
             this.textBox_refID.Tag = "refID";
+        }
+
+        void HighlightKeyLines()
+        {
+            Font font = new Font(this.Font, FontStyle.Bold);
+
+            this.label_barcode.Font = font;
+            this.textBox_barcode.Font = font;
+
+            this.label_readerType.Font = font;
+            this.comboBox_readerType.Font = font;
+
+            /*
+            this.label_name_color.Font = font;
+            this.textBox_name.Font = font;
+            */
+
+            this.label_department.Font = font;
+            this.textBox_department.Font = font;
+
+            this.label_address.Font = font;
+            this.textBox_address.Font = font;
+
+            this.label_tel.Font = font;
+            this.textBox_tel.Font = font;
         }
 
         // 比较自己和refControl的数据差异，用特殊颜色显示差异字段

@@ -1193,6 +1193,7 @@ MessageBoxDefaultButton.Button2);
             if (this.toolStripTextBox_barcode.Text == "")
             {
                 MessageBox.Show(this, "尚未指定读者证条码号");
+                this.toolStripTextBox_barcode.Focus();
                 return;
             }
 
@@ -1507,7 +1508,6 @@ MessageBoxDefaultButton.Button2);
 
             try
             {
-
                 int nRet = 0;
                 string strError = "";
 
@@ -1605,10 +1605,19 @@ MessageBoxDefaultButton.Button2);
     "readerinfoform_optiondlg",
     "newreader_default",
     "<root />");
+                    /*
                     nRet = this.readerEditControl1.SetData(strNewDefault,
                          "",
                          null,
                          out strError);
+                    if (nRet == -1)
+                        MessageBox.Show(this, strError);
+                    */
+                    // 2021/7/23
+                    nRet = LoadStructure(
+                        strNewDefault,
+                        "",
+                        out strError);
                     if (nRet == -1)
                         MessageBox.Show(this, strError);
 
@@ -1687,7 +1696,7 @@ MessageBoxDefaultButton.Button2);
 
                 // this.BiblioOriginPath = ""; // 保存从数据库中来的原始path
 
-
+                /*
                 nRet = this.readerEditControl1.SetData(
         select_temp_dlg.SelectedRecordXml,
         dbname_dlg.DbName + "/?",
@@ -1695,18 +1704,22 @@ MessageBoxDefaultButton.Button2);
         out strError);
                 if (nRet == -1)
                     goto ERROR1;
+                */
+                // 2021/7/23
+                nRet = LoadStructure(
+                    select_temp_dlg.SelectedRecordXml,
+                    dbname_dlg.DbName + "/?",
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
 
-                /*
-                this.SetXmlToWebbrowser(this.webBrowser_xml,
-                    select_temp_dlg.SelectedRecordXml);
-                 * */
+
                 Global.SetXmlToWebbrowser(this.webBrowser_xml,
 Program.MainForm.DataDir,
 "xml",
 select_temp_dlg.SelectedRecordXml);
 
                 this.m_strSetAction = "new";
-                // this.m_strLoadSource = "server";
 
 #if NO
                 Global.ClearHtmlPage(this.webBrowser_readerInfo,
@@ -1725,6 +1738,65 @@ select_temp_dlg.SelectedRecordXml);
             {
                 this.EnableControls(true);
             }
+        }
+
+        // 2021/7/23
+        int LoadStructure(string strDefaultXml,
+            string strRecPath,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            // 旧版本
+            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.61") < 0)
+            {
+                nRet = this.readerEditControl1.SetData(strDefaultXml,
+     strRecPath,
+     null,
+     out strError);
+                if (nRet == -1)
+                    return -1;
+                return 0;
+            }
+
+            List<string> formats = new List<string>() { "xml" };
+            // if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.61") >= 0)
+            formats.Add("structure");
+
+            long lRet = Channel.GetReaderInfo(
+                stop,
+                string.IsNullOrEmpty(strDefaultXml) ? "<root />" : strDefaultXml,
+                StringUtil.MakePathList(formats),
+                out string[] results,
+                out string _,
+                out byte[] _,
+                out strError);
+            if (lRet == -1)
+                return -1;
+
+            string strXml = "";
+            strXml = GetValue(formats, results, "xml");
+            string strStructure = GetValue(formats, results, "structure");
+
+            nRet = this.readerEditControl1.SetData(
+                strXml,
+                strRecPath,
+                null,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            if (string.IsNullOrEmpty(strStructure) == false)
+            {
+                ParseStructure(strStructure,
+out string visibleFields,
+out string writeableFields);
+
+                this.readerEditControl1.SetEditable(visibleFields, writeableFields);
+            }
+
+            return 0;
         }
 
         // 装载一条空白记录[从本地]
@@ -1762,10 +1834,22 @@ select_temp_dlg.SelectedRecordXml);
         "readerinfoform_optiondlg",
         "newreader_default",
         "<root />");
+                /*
                 int nRet = this.readerEditControl1.SetData(strNewDefault,
                      "",
                      null,
                      out strError);
+                if (nRet == -1)
+                {
+                    MessageBox.Show(this, strError);
+                    return -1;
+                }
+                */
+                // 2021/7/23
+                int nRet = LoadStructure(
+                    strNewDefault,
+                    "",
+                    out strError);
                 if (nRet == -1)
                 {
                     MessageBox.Show(this, strError);
