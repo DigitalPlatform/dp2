@@ -3351,6 +3351,7 @@ out strError);
                                     goto ERROR1;
                                 if (nRet == 1)
                                 {
+                                    // 注 ErrorInfos 里面已经添加好了错误信息
                                     continue;
                                 }
                             }

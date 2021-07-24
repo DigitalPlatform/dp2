@@ -3560,183 +3560,187 @@ namespace DigitalPlatform.LibraryServer
                     this.WriteErrorLog("开始 从内存写入 " + strFileName);
                 }
 
-                using (XmlTextWriter writer = new XmlTextWriter(strFileName,
-                    Encoding.UTF8))
+                // 写入 XML 文件中途不允许使用和修改 XmlDocument
+                _lockLibraryCfgDom.EnterWriteLock();
+                try
                 {
-                    // 缩进
-                    writer.Formatting = Formatting.Indented;
-                    writer.Indentation = 4;
-
-                    writer.WriteStartDocument();
-
-                    writer.WriteStartElement("root");
-                    if (this.DebugMode == true)
-                        writer.WriteAttributeString("debugMode", "true");
-
-                    if (string.IsNullOrEmpty(this.UID) == false)
-                        writer.WriteAttributeString("uid", this.UID);
-
-                    // 2008/6/6 nwe add
-                    // <version>
+                    using (XmlTextWriter writer = new XmlTextWriter(strFileName,
+                        Encoding.UTF8))
                     {
-                        XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("version");
+                        // 缩进
+                        writer.Formatting = Formatting.Indented;
+                        writer.Indentation = 4;
+
+                        writer.WriteStartDocument();
+
+                        writer.WriteStartElement("root");
+                        if (this.DebugMode == true)
+                            writer.WriteAttributeString("debugMode", "true");
+
+                        if (string.IsNullOrEmpty(this.UID) == false)
+                            writer.WriteAttributeString("uid", this.UID);
+
+                        // 2008/6/6 nwe add
+                        // <version>
+                        {
+                            XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("version");
+                            if (node != null)
+                            {
+                                node.WriteTo(writer);
+                            }
+                        }
+
+                        // 内核参数
+                        // 元素<rmsserver>
+                        // 属性url/username/password
+                        writer.WriteStartElement("rmsserver");
+                        writer.WriteAttributeString("url", this.WsUrl);
+                        writer.WriteAttributeString("username", this.ManagerUserName);
+                        writer.WriteAttributeString("password",
+                            Cryptography.Encrypt(this.ManagerPassword, EncryptKey)
+                            );
+                        writer.WriteEndElement();
+
+                        //2015/10/2
+                        // <mongoDB>
+                        {
+                            XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("mongoDB");
+                            if (node != null)
+                            {
+                                node.WriteTo(writer);
+                            }
+                        }
+
+                        //2013/11/18
+                        // <center>
+                        {
+                            XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("center");
+                            if (node != null)
+                            {
+                                node.WriteTo(writer);
+                            }
+                        }
+
+                        // 预约到书
+                        // 元素<arrived>
+                        // 属性dbname/reserveTimeSpan/outofReservationThreshold/canReserveOnshelf
+                        writer.WriteStartElement("arrived");
+                        writer.WriteAttributeString("dbname", this.ArrivedDbName);
+                        writer.WriteAttributeString("reserveTimeSpan", this.ArrivedReserveTimeSpan);
+
+                        // 2007/11/5 
+                        writer.WriteAttributeString("outofReservationThreshold", this.OutofReservationThreshold.ToString());
+                        writer.WriteAttributeString("canReserveOnshelf", this.CanReserveOnshelf == true ? "true" : "false");
+                        writer.WriteAttributeString("notifyTypes", this.ArrivedNotifyTypes);
+
+                        writer.WriteEndElement();
+
+                        /*
+                        // <arrived>
+                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//arrived");
                         if (node != null)
                         {
+                            //writer.WriteRaw(node.OuterXml);
                             node.WriteTo(writer);
-                        }
-                    }
+                        }*/
 
-                    // 内核参数
-                    // 元素<rmsserver>
-                    // 属性url/username/password
-                    writer.WriteStartElement("rmsserver");
-                    writer.WriteAttributeString("url", this.WsUrl);
-                    writer.WriteAttributeString("username", this.ManagerUserName);
-                    writer.WriteAttributeString("password",
-                        Cryptography.Encrypt(this.ManagerPassword, EncryptKey)
-                        );
-                    writer.WriteEndElement();
+                        // -----------
+                        // 2007/11/5 
+                        // 入馆登记
+                        // 元素<passgate>
+                        // 属性writeOperLog
+                        writer.WriteStartElement("passgate");
+                        writer.WriteAttributeString("writeOperLog", this.PassgateWriteToOperLog == true ? "true" : "false");
+                        writer.WriteEndElement();
 
-                    //2015/10/2
-                    // <mongoDB>
-                    {
-                        XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("mongoDB");
-                        if (node != null)
+                        // -----------
+                        // 2015/7/14
+                        // 对象管理
+                        // 元素<object>
+                        // 属性 writeOperLog
+                        writer.WriteStartElement("object");
+                        writer.WriteAttributeString("writeGetResOperLog", this.GetObjectWriteToOperLog == true ? "true" : "false");
+                        writer.WriteEndElement();
+
+                        // -----------
+                        // 2015/11/26
+                        // 日志
+                        // 元素<log>
+                        writer.WriteStartElement("log");
+                        writer.WriteAttributeString("accessLogMaxCountPerDay", this.AccessLogMaxCountPerDay.ToString());
+                        writer.WriteEndElement();
+
+                        // 消息
+                        // 元素<message>
+                        // 属性dbname/reserveTimeSpan
+                        writer.WriteStartElement("message");
+                        writer.WriteAttributeString("dbname", this.MessageDbName);
+                        writer.WriteAttributeString("reserveTimeSpan", this.MessageReserveTimeSpan);    // 2007/11/5 
+                        if (string.IsNullOrEmpty(this.OutgoingQueue) == false)
+                            writer.WriteAttributeString("defaultQueue", this.OutgoingQueue);
+                        writer.WriteEndElement();
+
+                        // 拼音
+                        // 元素<pinyin>
+                        // 属性dbname
+                        writer.WriteStartElement("pinyin");
+                        writer.WriteAttributeString("dbname", this.PinyinDbName);
+                        writer.WriteEndElement();
+
+                        // GCAT
+                        // 元素<gcat>
+                        // 属性dbname
+                        writer.WriteStartElement("gcat");
+                        writer.WriteAttributeString("dbname", this.GcatDbName);
+                        writer.WriteEndElement();
+
+                        // 词
+                        // 元素<word>
+                        // 属性dbname
+                        writer.WriteStartElement("word");
+                        writer.WriteAttributeString("dbname", this.WordDbName);
+                        writer.WriteEndElement();
+
+                        /*
+                        // 图书馆业务服务器
+                        // 元素<libraryserver>
+                        // 属性url
+                        writer.WriteStartElement("libraryserver");
+                        writer.WriteAttributeString("url", this.LibraryServerUrl);
+                        writer.WriteEndElement();
+                         * */
+
+                        // OPAC服务器
+                        // 元素<opacServer>
+                        // 属性url
+                        writer.WriteStartElement("opacServer");
+                        writer.WriteAttributeString("url", this.OpacServerUrl);
+                        writer.WriteEndElement();
+
+                        // 违约金
+                        // 元素<amerce>
+                        // 属性dbname/overdueStyle
+                        writer.WriteStartElement("amerce");
+                        writer.WriteAttributeString("dbname", this.AmerceDbName);
+                        writer.WriteAttributeString("overdueStyle", this.OverdueStyle); // 2007/11/5 
+                        writer.WriteEndElement();
+
+                        // 发票
+                        // 元素<invoice>
+                        // 属性dbname
+                        writer.WriteStartElement("invoice");
+                        writer.WriteAttributeString("dbname", this.InvoiceDbName);
+                        writer.WriteEndElement();
+
+                        WriteReaderDbGroupParam(writer);
+
+                        WriteItemDbGroupParam(writer);
+
+                        // TODO: 把这些语句都写入一个函数
+                        // 没有进入内存属性的其他XML片断
+                        if (this.LibraryCfgDom != null)
                         {
-                            node.WriteTo(writer);
-                        }
-                    }
-
-                    //2013/11/18
-                    // <center>
-                    {
-                        XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("center");
-                        if (node != null)
-                        {
-                            node.WriteTo(writer);
-                        }
-                    }
-
-                    // 预约到书
-                    // 元素<arrived>
-                    // 属性dbname/reserveTimeSpan/outofReservationThreshold/canReserveOnshelf
-                    writer.WriteStartElement("arrived");
-                    writer.WriteAttributeString("dbname", this.ArrivedDbName);
-                    writer.WriteAttributeString("reserveTimeSpan", this.ArrivedReserveTimeSpan);
-
-                    // 2007/11/5 
-                    writer.WriteAttributeString("outofReservationThreshold", this.OutofReservationThreshold.ToString());
-                    writer.WriteAttributeString("canReserveOnshelf", this.CanReserveOnshelf == true ? "true" : "false");
-                    writer.WriteAttributeString("notifyTypes", this.ArrivedNotifyTypes);
-
-                    writer.WriteEndElement();
-
-                    /*
-                    // <arrived>
-                    node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//arrived");
-                    if (node != null)
-                    {
-                        //writer.WriteRaw(node.OuterXml);
-                        node.WriteTo(writer);
-                    }*/
-
-                    // -----------
-                    // 2007/11/5 
-                    // 入馆登记
-                    // 元素<passgate>
-                    // 属性writeOperLog
-                    writer.WriteStartElement("passgate");
-                    writer.WriteAttributeString("writeOperLog", this.PassgateWriteToOperLog == true ? "true" : "false");
-                    writer.WriteEndElement();
-
-                    // -----------
-                    // 2015/7/14
-                    // 对象管理
-                    // 元素<object>
-                    // 属性 writeOperLog
-                    writer.WriteStartElement("object");
-                    writer.WriteAttributeString("writeGetResOperLog", this.GetObjectWriteToOperLog == true ? "true" : "false");
-                    writer.WriteEndElement();
-
-                    // -----------
-                    // 2015/11/26
-                    // 日志
-                    // 元素<log>
-                    writer.WriteStartElement("log");
-                    writer.WriteAttributeString("accessLogMaxCountPerDay", this.AccessLogMaxCountPerDay.ToString());
-                    writer.WriteEndElement();
-
-                    // 消息
-                    // 元素<message>
-                    // 属性dbname/reserveTimeSpan
-                    writer.WriteStartElement("message");
-                    writer.WriteAttributeString("dbname", this.MessageDbName);
-                    writer.WriteAttributeString("reserveTimeSpan", this.MessageReserveTimeSpan);    // 2007/11/5 
-                    if (string.IsNullOrEmpty(this.OutgoingQueue) == false)
-                        writer.WriteAttributeString("defaultQueue", this.OutgoingQueue);
-                    writer.WriteEndElement();
-
-                    // 拼音
-                    // 元素<pinyin>
-                    // 属性dbname
-                    writer.WriteStartElement("pinyin");
-                    writer.WriteAttributeString("dbname", this.PinyinDbName);
-                    writer.WriteEndElement();
-
-                    // GCAT
-                    // 元素<gcat>
-                    // 属性dbname
-                    writer.WriteStartElement("gcat");
-                    writer.WriteAttributeString("dbname", this.GcatDbName);
-                    writer.WriteEndElement();
-
-                    // 词
-                    // 元素<word>
-                    // 属性dbname
-                    writer.WriteStartElement("word");
-                    writer.WriteAttributeString("dbname", this.WordDbName);
-                    writer.WriteEndElement();
-
-                    /*
-                    // 图书馆业务服务器
-                    // 元素<libraryserver>
-                    // 属性url
-                    writer.WriteStartElement("libraryserver");
-                    writer.WriteAttributeString("url", this.LibraryServerUrl);
-                    writer.WriteEndElement();
-                     * */
-
-                    // OPAC服务器
-                    // 元素<opacServer>
-                    // 属性url
-                    writer.WriteStartElement("opacServer");
-                    writer.WriteAttributeString("url", this.OpacServerUrl);
-                    writer.WriteEndElement();
-
-                    // 违约金
-                    // 元素<amerce>
-                    // 属性dbname/overdueStyle
-                    writer.WriteStartElement("amerce");
-                    writer.WriteAttributeString("dbname", this.AmerceDbName);
-                    writer.WriteAttributeString("overdueStyle", this.OverdueStyle); // 2007/11/5 
-                    writer.WriteEndElement();
-
-                    // 发票
-                    // 元素<invoice>
-                    // 属性dbname
-                    writer.WriteStartElement("invoice");
-                    writer.WriteAttributeString("dbname", this.InvoiceDbName);
-                    writer.WriteEndElement();
-
-                    WriteReaderDbGroupParam(writer);
-
-                    WriteItemDbGroupParam(writer);
-
-                    // TODO: 把这些语句都写入一个函数
-                    // 没有进入内存属性的其他XML片断
-                    if (this.LibraryCfgDom != null)
-                    {
-                        string[] elements = new string[]{
+                            string[] elements = new string[]{
                             "//rightsTable",       // 0.02以前为rightstable
                             "//locationTypes",  // 0.02以前为locationtypes
                             "accounts",
@@ -3774,7 +3778,7 @@ namespace DigitalPlatform.LibraryServer
                             "barcodeValidation", // 2019/5/31
                         };
 
-                        RestoreElements(writer, elements);
+                            RestoreElements(writer, elements);
 
 #if NO
                         // <rightsTable>
@@ -4025,27 +4029,42 @@ namespace DigitalPlatform.LibraryServer
                             node.WriteTo(writer);
                         }
 #endif
+                        }
+
+                        // 时钟
+                        writer.WriteElementString("clock", Convert.ToString(this.Clock.Delta));
+
+                        writer.WriteEndElement();
+
+                        writer.WriteEndDocument();
                     }
+                    // writer.Close();
 
-                    // 时钟
-                    writer.WriteElementString("clock", Convert.ToString(this.Clock.Delta));
+                    if (bFlush == false)
+                        this.WriteErrorLog("完成 从内存写入 " + strFileName);
 
-                    writer.WriteEndElement();
+                    this.m_bChanged = false;
 
-                    writer.WriteEndDocument();
+                    /*
+                    // 2017/11/25
+                    {
+                        if (this.LibraryCfgDom == null)
+                            this.LibraryCfgDom = new XmlDocument();
+                        this.LibraryCfgDom.Load(strFileName);
+                    }
+                    */
+
+                    // 2021/7/24
+                    {
+                        XmlDocument dom = new XmlDocument();
+                        dom.Load(strFileName);
+
+                        this._libraryCfgDom = dom;
+                    }
                 }
-                // writer.Close();
-
-                if (bFlush == false)
-                    this.WriteErrorLog("完成 从内存写入 " + strFileName);
-
-                this.m_bChanged = false;
-
-                // 2017/11/25
+                finally
                 {
-                    if (this.LibraryCfgDom == null)
-                        this.LibraryCfgDom = new XmlDocument();
-                    this.LibraryCfgDom.Load(strFileName);
+                    _lockLibraryCfgDom.ExitWriteLock();
                 }
 
                 if (this.watcher != null)

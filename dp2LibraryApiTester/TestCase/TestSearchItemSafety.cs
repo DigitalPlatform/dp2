@@ -14,11 +14,30 @@ using DigitalPlatform.Xml;
 
 namespace dp2LibraryApiTester
 {
-    // 测试 SearchBiblio() API 安全性
-    // 测试 Search() API 针对书目库的安全性
-    public static class TestSearchBiblioSafety
+    // 测试 SearchItem() API 安全性
+    // 测试 Search() API 针对实体库的安全性
+    public static class TestSearchItemSafety
     {
+        public static NormalResult TestAll()
+        {
+            NormalResult result = null;
+
+            result = PrepareEnvironment();
+            if (result.Value == -1) return result;
+
+            result = TestSearchItem("SearchItem", "test_rights");
+            if (result.Value == -1) return result;
+
+            result = Finish();
+            if (result.Value == -1) return result;
+
+            return new NormalResult();
+        }
+
+
         static string _strBiblioDbName = "_测试用书目";
+        // static string _strItemDbName = "_测试用实体";
+        static string _itemRecordPath = "";
 
         public static NormalResult PrepareEnvironment()
         {
@@ -95,6 +114,20 @@ namespace dp2LibraryApiTester
                 if (lRet == -1)
                     goto ERROR1;
 
+                // 创建册记录
+                DataModel.SetMessage("正在创建册记录");
+                lRet = channel.SetEntities(null,
+                    output_biblio_recpath,
+                    BuildEntityRecords(),
+                    out EntityInfo[] errorinfos,
+                    out strError);
+                if (lRet == -1)
+                    goto ERROR1;
+                strError = GetError(errorinfos);
+                if (string.IsNullOrEmpty(strError) == false)
+                    goto ERROR1;
+                _itemRecordPath = errorinfos[0].NewRecPath;
+
                 DataModel.SetMessage("正在删除用户 test_rights ...");
                 lRet = channel.SetUser(null,
                     "delete",
@@ -128,14 +161,14 @@ namespace dp2LibraryApiTester
                 if (lRet == -1 && channel.ErrorCode != ErrorCode.NotFound)
                     goto ERROR1;
 
-                // 通过 rights 定义，能正常访问书目记录
+                // 通过 rights 定义，能正常访问实体记录
                 DataModel.SetMessage("正在创建用户 test_rights ...");
                 lRet = channel.SetUser(null,
                     "new",
                     new UserInfo
                     {
                         UserName = "test_rights",
-                        Rights = "searchbiblio,search,getbiblioinfo",
+                        Rights = "searchitem,search,getiteminfo",
                     },
                     out strError);
                 if (lRet == -1)
@@ -192,8 +225,8 @@ namespace dp2LibraryApiTester
             };
         }
 
-        // 用 SearchBiblio() + GetSearchResult() API
-        public static NormalResult TestSearchBiblio(
+        // 用 SearchItem() + GetSearchResult() API
+        public static NormalResult TestSearchItem(
             string search_api_name,
             string userName)
         {
@@ -205,22 +238,22 @@ namespace dp2LibraryApiTester
 
             try
             {
+                string strItemDbName = StringUtil.GetDbName(_itemRecordPath);
+
                 DataModel.SetMessage($"正在以用户 {userName} 检索 {search_api_name} ...");
                 long lRet = 0;
-                if (search_api_name == "SearchBiblio")
-                    lRet = channel.SearchBiblio(
+                if (search_api_name == "SearchItem")
+                    lRet = channel.SearchItem(
         null,
-        _strBiblioDbName,    // strDatabaseNames,
+        strItemDbName,    // strDatabaseNames,
         "",
         1000,
-        "recid", // "__id",
+        "__id",
         "left",
         "zh",
         "default",
         "", // search_style
         "", // output_style
-        "", // location_filter
-        out string query_xml,
         out strError);
                 else
                 {
@@ -243,7 +276,7 @@ namespace dp2LibraryApiTester
 
                 if (lRet == 0)
                 {
-                    strError = "检索没有命中任何书目记录";
+                    strError = "检索没有命中任何实体记录";
                     goto ERROR1;
                 }
 
@@ -483,5 +516,40 @@ $"id,cols,xml",
             return record;
         }
 
+        static EntityInfo[] BuildEntityRecords()
+        {
+            List<EntityInfo> results = new List<EntityInfo>();
+            EntityInfo entity = new EntityInfo { 
+                Action = "new",
+                NewRecord = @"<root>
+<barcode>X0000001</barcode>
+<location>阅览室</location>
+<bookType>普通</bookType>
+<price>CNY12.00</price>
+</root>",
+            };
+            results.Add(entity);
+            return results.ToArray();
+        }
+
+        static string GetError(EntityInfo[] errorinfos)
+        {
+            if (errorinfos != null)
+            {
+                List<string> errors = new List<string>();
+                foreach (var error in errorinfos)
+                {
+                    if (error.ErrorCode != ErrorCodeValue.NoError)
+                    {
+                        errors.Add(error.ErrorInfo);
+                    }
+                }
+
+                if (errors.Count > 0)
+                    return StringUtil.MakePathList(errors, "; ");
+            }
+
+            return null;
+        }
     }
 }

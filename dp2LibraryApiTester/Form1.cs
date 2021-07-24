@@ -137,8 +137,11 @@ string style = "")
                 try
                 {
                     TestSearchReaderSafety.TestCross();
+
+                    TestSearchReaderSafety.TestAll();
+
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     AppendString($"exception: {ex.Message}");
                 }
@@ -304,6 +307,21 @@ string style = "")
                     AppendString($"exception: {ex.Message}");
                 }
             });
+        }
+
+        private void MenuItem_test_searchItemSafety_Click(object sender, EventArgs e)
+        {
+            Task.Run(() => {
+                try
+                {
+                    TestSearchItemSafety.TestAll();
+                }
+                catch (Exception ex)
+                {
+                    AppendString($"exception: {ex.Message}");
+                }
+            });
+
         }
     }
 }

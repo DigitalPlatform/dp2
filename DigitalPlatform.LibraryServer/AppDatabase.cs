@@ -1779,7 +1779,7 @@ namespace DigitalPlatform.LibraryServer
                 strError = "数据库名 '" + strName + "' 不属于 dp2library (library.xml)目前管辖的范围...";
                 return 0;
 
-                CONTINUE:
+            CONTINUE:
                 // 及时保存library.xml的变化
                 if (this.Changed == true)
                     this.Flush();
@@ -1849,7 +1849,7 @@ out strError);
             }
 
             return 1;
-            ERROR1:
+        ERROR1:
             // 2015/1/29
             if (this.Changed == true)
                 this.ActivateManagerThread();
@@ -3118,7 +3118,11 @@ out strError);
                         strError = "数据库 '" + strName + "' 不存在";
                     else
                         strError = "数据库 '" + strName + "' 属于 mongodb 类型的特殊数据库，不允许直接删除";
-                    return 0;
+                    // 2021/7/24
+                    if (names.Length == 1)
+                        return 0;
+                    else
+                        continue;
                 }
 
                 #region biblio
@@ -3143,101 +3147,11 @@ out strError);
                     if (nRet == -1)
                         return -1;
                     if (nRet == 0)
-                        return 0;
-#if NO
-                    // 获得相关配置小节
-                    XmlNode nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("itemdbgroup/database[@biblioDbName='" + strName + "']");
-                    if (nodeDatabase == null)
                     {
-                        strError = "配置 DOM 中名字为 '" + strName + "' 的书目库(biblioDbName属性)相关<database>元素没有找到";
-                        return 0;
+                        //2021/7/24
+                        continue;
+                        // return 0;
                     }
-
-                    if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
-                    {
-                        strError = "当前用户不是全局用户，不允许删除书目库";
-                        return -1;
-                    }
-
-                    // 删除书目库
-                    nRet = DeleteDatabase(channel, strName, strLogFileName,
-out strError);
-                    if (nRet == -1)
-                    {
-                        strError = "删除书目库 '" + strName + "' 时发生错误: " + strError;
-                        return -1;
-                    }
-
-                    bDbNameChanged = true;
-
-                    // 删除实体库
-                    string strEntityDbName = DomUtil.GetAttr(nodeDatabase, "name");
-                    if (String.IsNullOrEmpty(strEntityDbName) == false)
-                    {
-                        nRet = DeleteDatabase(channel,
-                            strEntityDbName,
-                            strLogFileName,
-                            out strError);
-                        if (nRet == -1)
-                        {
-                            strError = "删除书目库 '" + strName + "' 所从属的实体库 '" + strEntityDbName + "' 时发生错误: " + strError;
-                            return -1;
-                        }
-                    }
-
-                    // 删除订购库
-                    string strOrderDbName = DomUtil.GetAttr(nodeDatabase, "orderDbName");
-                    if (String.IsNullOrEmpty(strOrderDbName) == false)
-                    {
-                        nRet = DeleteDatabase(channel, strOrderDbName, strLogFileName,
-out strError);
-                        if (nRet == -1)
-                        {
-                            strError = "删除书目库 '" + strName + "' 所从属的订购库 '" + strOrderDbName + "' 时发生错误: " + strError;
-                            return -1;
-                        }
-                    }
-
-                    // 删除期库
-                    string strIssueDbName = DomUtil.GetAttr(nodeDatabase, "issueDbName");
-                    if (String.IsNullOrEmpty(strIssueDbName) == false)
-                    {
-                        nRet = DeleteDatabase(channel, strIssueDbName, strLogFileName,
-out strError);
-                        if (nRet == -1)
-                        {
-                            strError = "删除书目库 '" + strName + "' 所从属的期库 '" + strIssueDbName + "' 时发生错误: " + strError;
-                            return -1;
-                        }
-                    }
-
-                    // 删除评注库
-                    string strCommentDbName = DomUtil.GetAttr(nodeDatabase, "commentDbName");
-                    if (String.IsNullOrEmpty(strCommentDbName) == false)
-                    {
-                        nRet = DeleteDatabase(channel, strCommentDbName, strLogFileName,
-out strError);
-                        if (nRet == -1)
-                        {
-                            strError = "删除书目库 '" + strName + "' 所从属的评注库 '" + strCommentDbName + "' 时发生错误: " + strError;
-                            return -1;
-                        }
-                    }
-
-                    nodeDatabase.ParentNode.RemoveChild(nodeDatabase);
-
-                    // <itemdbgroup>内容更新，刷新配套的内存结构
-                    nRet = this.LoadItemDbGroupParam(this.LibraryCfgDom,
-                        out strError);
-                    if (nRet == -1)
-                    {
-                        this.WriteErrorLog(strError);
-                        return -1;
-                    }
-
-                    this.Changed = true;
-                    // this.ActivateManagerThread();
-#endif
 
                     goto CONTINUE;
                 }
@@ -3253,6 +3167,10 @@ out strError);
                     || this.IsCommentDbName(strName) == true*/
                     ServerDatabaseUtility.IsBiblioSubType(strDbType))
                 {
+                    // return:
+                    //      -1  出错
+                    //      0   指定的数据库不存在
+                    //      1   成功删除
                     nRet = DeleteBiblioChildDatabase(channel,
                         strLibraryCodeList,
                         strName,
@@ -3262,197 +3180,21 @@ out strError);
                     if (nRet == -1)
                         return -1;
                     if (nRet == 0)
-                        return 0;
-
-#if NO
-                    // 获得相关配置小节
-                    XmlNode nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("itemdbgroup/database[@name='" + strName + "']");
-                    if (nodeDatabase == null)
                     {
-                        strError = "配置 DOM 中名字为 '" + strName + "' 的实体库(name属性)相关<database>元素没有找到";
-                        return 0;
+                        //2021/7/24
+                        continue;
+                        // return 0;
                     }
-
-                    if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
-                    {
-                        strError = "当前用户不是全局用户，不允许删除实体库";
-                        return -1;
-                    }
-
-                    // 删除实体库
-                    nRet = DeleteDatabase(channel, strName, strLogFileName,
-out strError);
-                    if (nRet == -1)
-                    {
-                        strError = "删除实体库 '" + strName + "' 时发生错误: " + strError;
-                        return -1;
-                    }
-
-                    bDbNameChanged = true;
-
-                    DomUtil.SetAttr(nodeDatabase, "name", null);
-
-                    // <itemdbgroup>内容更新，刷新配套的内存结构
-                    nRet = this.LoadItemDbGroupParam(this.LibraryCfgDom,
-                        out strError);
-                    if (nRet == -1)
-                    {
-                        this.WriteErrorLog(strError);
-                        return -1;
-                    }
-
-                    this.Changed = true;
-                    // this.ActivateManagerThread();
-#endif
 
                     goto CONTINUE;
                 }
                 #endregion
 
-#if NO
-                #region order
-                // 单独删除订购库
-                if (this.IsOrderDbName(strName) == true)
-                {
-                    // 获得相关配置小节
-                    XmlNode nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("itemdbgroup/database[@orderDbName='" + strName + "']");
-                    if (nodeDatabase == null)
-                    {
-                        strError = "配置DOM中名字为 '" + strName + "' 的订购库(orderDbName属性)相关<database>元素没有找到";
-                        return 0;
-                    }
-
-                    if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
-                    {
-                        strError = "当前用户不是全局用户，不允许删除订购库";
-                        return -1;
-                    }
-
-                    // 删除订购库
-                    nRet = DeleteDatabase(channel, strName, strLogFileName,
-out strError);
-                    if (nRet == -1)
-                    {
-                        strError = "删除订购库 '" + strName + "' 时发生错误: " + strError;
-                        return -1;
-                    }
-
-                    bDbNameChanged = true;
-
-                    DomUtil.SetAttr(nodeDatabase, "orderDbName", null);
-
-                    // <itemdbgroup>内容更新，刷新配套的内存结构
-                    nRet = this.LoadItemDbGroupParam(this.LibraryCfgDom,
-                        out strError);
-                    if (nRet == -1)
-                    {
-                        this.WriteErrorLog(strError);
-                        return -1;
-                    }
-
-                    this.Changed = true;
-                    // this.ActivateManagerThread();
-                    continue;
-                }
-                #endregion
-
-                #region issue
-                // 单独删除期库
-                if (this.IsIssueDbName(strName) == true)
-                {
-                    // 获得相关配置小节
-                    XmlNode nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("itemdbgroup/database[@issueDbName='" + strName + "']");
-                    if (nodeDatabase == null)
-                    {
-                        strError = "配置 DOM 中名字为 '" + strName + "' 的期库(issueDbName属性)相关<database>元素没有找到";
-                        return 0;
-                    }
-
-                    if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
-                    {
-                        strError = "当前用户不是全局用户，不允许删除期库";
-                        return -1;
-                    }
-
-                    // 删除期库
-                    nRet = DeleteDatabase(channel, strName, strLogFileName,
-out strError);
-                    if (nRet == -1)
-                    {
-                        strError = "删除期库 '" + strName + "' 时发生错误: " + strError;
-                        return -1;
-                    }
-
-                    bDbNameChanged = true;
-
-                    DomUtil.SetAttr(nodeDatabase, "issueDbName", null);
-
-                    // <itemdbgroup>内容更新，刷新配套的内存结构
-                    nRet = this.LoadItemDbGroupParam(this.LibraryCfgDom,
-                        out strError);
-                    if (nRet == -1)
-                    {
-                        this.WriteErrorLog(strError);
-                        return -1;
-                    }
-
-                    this.Changed = true;
-                    // this.ActivateManagerThread();
-                    continue;
-                }
-                #endregion
-
-                #region comment
-                // 单独删除评注库
-                if (this.IsCommentDbName(strName) == true)
-                {
-                    // 获得相关配置小节
-                    XmlNode nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("itemdbgroup/database[@commentDbName='" + strName + "']");
-                    if (nodeDatabase == null)
-                    {
-                        strError = "配置DOM中名字为 '" + strName + "' 的评注库(commentDbName属性)相关<database>元素没有找到";
-                        return 0;
-                    }
-
-                    if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
-                    {
-                        strError = "当前用户不是全局用户，不允许删除评注库";
-                        return 0;
-                    }
-
-                    nRet = DeleteDatabase(channel, strName, strLogFileName,
-out strError);
-                    if (nRet == -1)
-                    {
-                        strError = "删除评注库 '" + strName + "' 时发生错误: " + strError;
-                        return -1;
-                    }
-
-                    bDbNameChanged = true;
-
-                    DomUtil.SetAttr(nodeDatabase, "commentDbName", null);
-
-                    // <itemdbgroup>内容更新，刷新配套的内存结构
-                    nRet = this.LoadItemDbGroupParam(this.LibraryCfgDom,
-                        out strError);
-                    if (nRet == -1)
-                    {
-                        this.WriteErrorLog(strError);
-                        return -1;
-                    }
-
-                    this.Changed = true;
-                    // this.ActivateManagerThread();
-                    continue;
-                }
-                #endregion
-#endif
 
                 #region reader
                 // 删除读者库
                 if (this.IsReaderDbName(strName) == true)
                 {
-
                     // 删除读者库。
                     // 也会自动修改 library.xml 的 readerdbgroup 中相关元素
                     // parameters:
@@ -3470,50 +3212,12 @@ out strError);
                     if (nRet == -1)
                         return -1;
                     if (nRet == 0)
-                        return 0;
-
-#if NO
-                    // 获得相关配置小节
-                    XmlNode nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("readerdbgroup/database[@name='" + strName + "']");
-                    if (nodeDatabase == null)
                     {
-                        strError = "配置 DOM 中名字为 '" + strName + "' 的读者库(name属性)相关<database>元素没有找到";
-                        return 0;
+                        // 2021/7/24
+                        continue;
+                        // return 0;
                     }
 
-                    // 2012/9/9
-                    // 分馆用户只允许删除属于管辖分馆的读者库
-                    if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
-                    {
-                        string strExistLibraryCode = DomUtil.GetAttr(nodeDatabase, "libraryCode");
-
-                        if (string.IsNullOrEmpty(strExistLibraryCode) == true
-                            || StringUtil.IsInList(strExistLibraryCode, strLibraryCodeList) == false)
-                        {
-                            strError = "删除读者库 '" + strName + "' 被拒绝。当前用户只能删除图书馆代码完全完全属于 '" + strLibraryCodeList + "' 范围的读者库";
-                            return -1;
-                        }
-                    }
-
-                    // 删除读者库
-                    nRet = DeleteDatabase(channel, strName, strLogFileName,
-out strError);
-                    if (nRet == -1)
-                    {
-                        strError = "删除读者库 '" + strName + "' 时发生错误: " + strError;
-                        return -1;
-                    }
-
-                    bDbNameChanged = true;
-
-                    nodeDatabase.ParentNode.RemoveChild(nodeDatabase);
-
-                    // <readerdbgroup>内容更新，刷新配套的内存结构
-                    this.LoadReaderDbGroupParam(this.LibraryCfgDom);
-
-                    this.Changed = true;
-                    // this.ActivateManagerThread();
-#endif
                     goto CONTINUE;
                 }
                 #endregion
@@ -3540,7 +3244,11 @@ out strError);
                     if (nRet == -1)
                         return -1;
                     if (nRet == 0)
-                        return 0;
+                    {
+                        //2021/7/24
+                        continue;
+                        // return 0;
+                    }
                     goto CONTINUE;
                 }
                 #endregion
@@ -3576,183 +3284,15 @@ out strError);
                     if (nRet == -1)
                         return -1;
                     if (nRet == 0)
-                        return 0;
-#if NO
-                    if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     {
-                        strError = "当前用户不是全局用户，不允许删除预约到书库";
-                        return -1;
+                        //2021/7/24
+                        continue;
+                        // return 0;
                     }
-
-                    // 删除预约到书库
-                    nRet = DeleteDatabase(channel, strName, strLogFileName,
-out strError);
-                    if (nRet == -1)
-                    {
-                        strError = "删除预约到书库 '" + strName + "' 时发生错误: " + strError;
-                        return -1;
-                    }
-
-                    this.ArrivedDbName = "";
-
-                    this.Changed = true;
-                    // this.ActivateManagerThread();
-#endif
                     // TODO: 要把 this.ArrivedDbName 的值兑现到 LibraryCfgDom，便于 Verify 模块正常运作
                     goto CONTINUE;
                 }
                 #endregion
-
-#if NO
-                // 删除违约金库
-                if (this.AmerceDbName == strName)
-                {
-                    if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
-                    {
-                        strError = "当前用户不是全局用户，不允许删除违约金库";
-                        return -1;
-                    }
-
-                    // 删除违约金库
-                    nRet = DeleteDatabase(channel, strName, strLogFileName,
-out strError);
-                    if (nRet == -1)
-                    {
-                        strError = "删除违约金库 '" + strName + "' 时发生错误: " + strError;
-                        return -1;
-                    }
-
-                    this.AmerceDbName = "";
-
-                    this.Changed = true;
-                    // this.ActivateManagerThread();
-                    continue;
-                }
-
-                // 删除发票库
-                if (this.InvoiceDbName == strName)
-                {
-                    if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
-                    {
-                        strError = "当前用户不是全局用户，不允许删除发票库";
-                        return -1;
-                    }
-
-                    nRet = DeleteDatabase(channel, strName, strLogFileName,
-out strError);
-                    if (nRet == -1)
-                    {
-                        strError = "删除发票库 '" + strName + "' 时发生错误: " + strError;
-                        return -1;
-                    }
-
-                    this.InvoiceDbName = "";
-
-                    this.Changed = true;
-                    // this.ActivateManagerThread();
-                    continue;
-                }
-
-                if (this.PinyinDbName == strName)
-                {
-                    string strTypeCaption = "";
-                    string strDbName = "";
-
-                    strTypeCaption = "拼音";
-                    strDbName = this.PinyinDbName;
-
-                    nRet = DeleteDatabase(
-                        channel,
-                        strTypeCaption,
-                        strName,
-                        strLibraryCodeList,
-                        strLogFileName,
-                        ref strDbName,
-                        out strError);
-                    this.PinyinDbName = strDbName;
-                    if (nRet == -1)
-                        return -1;
-
-                    this.Changed = true;
-                    // this.ActivateManagerThread();
-                    continue;
-                }
-
-                if (this.GcatDbName == strName)
-                {
-                    string strTypeCaption = "";
-                    string strDbName = "";
-
-                    strTypeCaption = "著者号码";
-                    strDbName = this.GcatDbName;
-
-                    nRet = DeleteDatabase(
-                        channel,
-                        strTypeCaption,
-                        strName,
-                        strLibraryCodeList,
-                        strLogFileName,
-                        ref strDbName,
-                        out strError);
-                    this.GcatDbName = strDbName;
-                    if (nRet == -1)
-                        return -1;
-
-                    this.Changed = true;
-                    // this.ActivateManagerThread();
-                    continue;
-                }
-
-                if (this.WordDbName == strName)
-                {
-                    string strTypeCaption = "";
-                    string strDbName = "";
-
-                    strTypeCaption = "词";
-                    strDbName = this.WordDbName;
-
-                    nRet = DeleteDatabase(
-                        channel,
-                        strTypeCaption,
-                        strName,
-                        strLibraryCodeList,
-                        strLogFileName,
-                        ref strDbName,
-                        out strError);
-                    this.WordDbName = strDbName;
-                    if (nRet == -1)
-                        return -1;
-
-                    this.Changed = true;
-                    // this.ActivateManagerThread();
-                    continue;
-                }
-
-                // 删除消息库
-                if (this.MessageDbName == strName)
-                {
-                    if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
-                    {
-                        strError = "当前用户不是全局用户，不允许删除消息库";
-                        return -1;
-                    }
-
-                    // 删除消息库
-                    nRet = DeleteDatabase(channel, strName, strLogFileName,
-out strError);
-                    if (nRet == -1)
-                    {
-                        strError = "删除消息库 '" + strName + "' 时发生错误: " + strError;
-                        return -1;
-                    }
-
-                    this.MessageDbName = "";
-
-                    this.Changed = true;
-                    // this.ActivateManagerThread();
-                    continue;
-                }
-#endif
 
                 #region 实用库
 
@@ -3777,35 +3317,11 @@ out strError);
                     if (nRet == -1)
                         return -1;
                     if (nRet == 0)
-                        return 0;
-#if NO
-                    XmlNode nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("utilDb/database[@name='" + strName + "']");
-                    if (nodeDatabase == null)
                     {
-                        strError = "不存在name属性值为 '" + strName + "' 的<utilDb/database>的元素";
-                        return 0;
+                        //2021/7/24
+                        continue;
+                        // return 0;
                     }
-
-                    if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
-                    {
-                        strError = "当前用户不是全局用户，不允许删除实用库";
-                        return -1;
-                    }
-
-                    // 删除实用库
-                    nRet = DeleteDatabase(channel, strName, strLogFileName,
-out strError);
-                    if (nRet == -1)
-                    {
-                        strError = "删除实用库 '" + strName + "' 时发生错误: " + strError;
-                        return -1;
-                    }
-
-                    nodeDatabase.ParentNode.RemoveChild(nodeDatabase);
-
-                    this.Changed = true;
-                    // this.ActivateManagerThread();
-#endif
                     goto CONTINUE;
                 }
                 #endregion
@@ -3813,7 +3329,7 @@ out strError);
                 strError = "数据库名 '" + strName + "' 不属于 dp2library 目前管辖的范围...";
                 return 0;
 
-                CONTINUE:
+            CONTINUE:
                 // 及时保存library.xml的变化
                 if (this.Changed == true)
                     this.Flush();
@@ -4834,7 +4350,7 @@ out strError);
             }
 
             return 1;
-            ERROR1:
+        ERROR1:
             if (keyschanged_dbnames.Count > 0)
             {
                 // 增加WebServiceUrl部分
@@ -8137,7 +7653,7 @@ out strError);
             }
 
             return 1;
-            ERROR1:
+        ERROR1:
             List<string> error_deleting_dbnames = new List<string>();
             // 将本次已经创建的数据库在返回前删除掉
             for (int i = 0; i < created_dbnames.Count; i++)
@@ -8584,7 +8100,7 @@ out strError);
             strDbName = strName;
             this.Changed = true;
             return 1;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -8777,7 +8293,7 @@ out strError);
                         continue;
 #endif
 
-                    DO_CREATE:
+                DO_CREATE:
                     using (Stream new_stream = new FileStream(strFullPath, FileMode.Open))
                     {
                         new_stream.Seek(0, SeekOrigin.Begin);
@@ -9711,7 +9227,7 @@ out strError);
 
                 strError = "不存在数据库名 '" + strName + "'";
                 return 0;
-                CONTINUE:
+            CONTINUE:
                 int kkk = 0;
                 kkk++;
             }

@@ -63,6 +63,7 @@
       <DependentUpon>SettingDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="TestCase\TestSearchBiblioSafety.cs" />
+    <Compile Include="TestCase\TestSearchItemSafety.cs" />
     <Compile Include="TestCase\TestSearchReaderSafety.cs" />
     <Compile Include="TestCase\Utility.cs" />
     <EmbeddedResource Include="Form1.resx">
