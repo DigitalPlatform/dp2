@@ -726,7 +726,7 @@ $"id,cols,xml",
                 path_list.Add(_haidianPatronDbName + "/1");
                 path_list.Add(_xichengPatronDbName + "/1");
 
-                DataModel.SetMessage("正在用路径检索 ...");
+                DataModel.SetMessage($"正在用路径检索 ({userName}) ...");
                 long lRet = channel.GetBrowseRecords(
     null,
     path_list.ToArray(),

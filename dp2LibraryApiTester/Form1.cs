@@ -314,7 +314,10 @@ string style = "")
             Task.Run(() => {
                 try
                 {
-                    TestSearchItemSafety.TestAll();
+                    TestSearchItemSafety.TestAll("item");
+                    TestSearchItemSafety.TestAll("issue");
+                    TestSearchItemSafety.TestAll("order");
+                    TestSearchItemSafety.TestAll("comment");
                 }
                 catch (Exception ex)
                 {

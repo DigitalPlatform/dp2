@@ -651,25 +651,7 @@ namespace DigitalPlatform.LibraryServer
 
                     if (bReload == false)
                     {
-#if NO
-                    try
-                    {
-                        string strTempFileName = Path.GetTempFileName();
-                        File.Delete(strTempFileName);
-                        string strTempDir1 = Path.GetDirectoryName(strTempFileName);
-                        long count = 0;
-                        long size = PathUtil.GetAllFileSize(strTempDir1, ref count);
-                        app.WriteErrorLog("系统临时文件目录 " + Path.GetTempPath() + " 内的全部临时文件尺寸为 " + size.ToString() + "， 文件个数为 " + count.ToString());
-                    }
-                    catch
-                    {
-                    }
-#endif
 
-#if NO
-                    if (PathUtil.TryClearDir(app.TempDir) == false)
-                        app.WriteErrorLog("清除临时文件目录 " + app.TempDir + " 时出错");
-#endif
 #if LOG_INFO
                         app.WriteErrorLog($"INFO: 清除临时文件目录 {app.TempDir}");
 #endif
@@ -700,22 +682,6 @@ namespace DigitalPlatform.LibraryServer
                         app.WriteErrorLog("library (" + FullVersion + ") application 开始重新装载 " + this.m_strFileName);
                     else
                         app.WriteErrorLog("library (" + FullVersion + ") application 开始初始化。");
-
-                    //
-#if NO
-            if (bReload == false)
-            {
-                app.m_strWebuiFileName = PathUtil.MergePath(strDataDir, "webui.xml");
-                // string strWebUiFileName = PathUtil.MergePath(strDataDir, "webui.xml");
-                nRet = LoadWebuiCfgDom(out strError);
-                if (nRet == -1)
-                {
-                    // strError = "装载配置文件-- '" + strWebUiFileName + "'时发生错误，原因：" + ex.Message;
-                    app.WriteErrorLog(strError);
-                    goto ERROR1;
-                }
-            }
-#endif
 
 #if LOG_INFO
                     app.WriteErrorLog("INFO: 开始装载 " + strFileName + " 到 XMLDOM");
@@ -753,7 +719,7 @@ namespace DigitalPlatform.LibraryServer
 
                     // 2011/1/7
                     bool bValue = false;
-                    DomUtil.GetBooleanParam(app.LibraryCfgDom.DocumentElement,
+                    DomUtil.GetBooleanParam(dom.DocumentElement,
                         "debugMode",
                         false,
                         out bValue,
@@ -763,7 +729,7 @@ namespace DigitalPlatform.LibraryServer
 
                     // 2013/4/10 
                     // uid
-                    this.UID = app.LibraryCfgDom.DocumentElement.GetAttribute("uid");
+                    this.UID = dom.DocumentElement.GetAttribute("uid");
                     if (string.IsNullOrEmpty(this.UID) == true)
                     {
                         this.UID = Guid.NewGuid().ToString();
@@ -908,7 +874,7 @@ namespace DigitalPlatform.LibraryServer
                     // 2021/7/4
                     // 根据 account/@passwordExpireLength 参数，重建或者清除 account 密码失效期
                     if (bReload == false)
-                        CreateOrDeletePasswordExpire();
+                        CreateOrDeletePasswordExpire(dom);
 
                     // 2013/9/24
                     // 借期提醒通知定义
@@ -2396,10 +2362,10 @@ namespace DigitalPlatform.LibraryServer
 
         // 根据 account/@passwordExpireLength 参数，重建或者清除 account 密码失效期
         // 如果先前有 expire，后来修改了 expire 长度，本函数不负责修改 account 中的 expire 时间。本函数只负责响应创建和清除
-        void CreateOrDeletePasswordExpire()
+        void CreateOrDeletePasswordExpire(XmlDocument cfg_dom)
         {
             // 2021/7/7
-            string version = this.LibraryCfgDom.DocumentElement.SelectSingleNode("version/text()").Value;
+            string version = cfg_dom.DocumentElement.SelectSingleNode("version/text()")?.Value;
             if (string.IsNullOrEmpty(version)
                 || StringUtil.CompareVersion(version, "3.0") < 0)
                 return;
@@ -2408,7 +2374,7 @@ namespace DigitalPlatform.LibraryServer
 
             bool changed = false;
             var now = DateTime.Now;
-            XmlNodeList account_nodes = this.LibraryCfgDom.DocumentElement.SelectNodes("accounts/account");
+            XmlNodeList account_nodes = cfg_dom.DocumentElement.SelectNodes("accounts/account");
             foreach (XmlElement account in account_nodes)
             {
                 var userName = account.GetAttribute("name");
@@ -3560,6 +3526,8 @@ namespace DigitalPlatform.LibraryServer
                     this.WriteErrorLog("开始 从内存写入 " + strFileName);
                 }
 
+                XmlDocument cfg_dom = this.LibraryCfgDom;
+
                 // 写入 XML 文件中途不允许使用和修改 XmlDocument
                 _lockLibraryCfgDom.EnterWriteLock();
                 try
@@ -3583,7 +3551,7 @@ namespace DigitalPlatform.LibraryServer
                         // 2008/6/6 nwe add
                         // <version>
                         {
-                            XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("version");
+                            XmlNode node = cfg_dom.DocumentElement.SelectSingleNode("version");
                             if (node != null)
                             {
                                 node.WriteTo(writer);
@@ -3604,7 +3572,7 @@ namespace DigitalPlatform.LibraryServer
                         //2015/10/2
                         // <mongoDB>
                         {
-                            XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("mongoDB");
+                            XmlNode node = cfg_dom.DocumentElement.SelectSingleNode("mongoDB");
                             if (node != null)
                             {
                                 node.WriteTo(writer);
@@ -3614,7 +3582,7 @@ namespace DigitalPlatform.LibraryServer
                         //2013/11/18
                         // <center>
                         {
-                            XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("center");
+                            XmlNode node = cfg_dom.DocumentElement.SelectSingleNode("center");
                             if (node != null)
                             {
                                 node.WriteTo(writer);
@@ -3738,7 +3706,7 @@ namespace DigitalPlatform.LibraryServer
 
                         // TODO: 把这些语句都写入一个函数
                         // 没有进入内存属性的其他XML片断
-                        if (this.LibraryCfgDom != null)
+                        if (cfg_dom != null)
                         {
                             string[] elements = new string[]{
                             "//rightsTable",       // 0.02以前为rightstable
@@ -3778,257 +3746,7 @@ namespace DigitalPlatform.LibraryServer
                             "barcodeValidation", // 2019/5/31
                         };
 
-                            RestoreElements(writer, elements);
-
-#if NO
-                        // <rightsTable>
-                        XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//rightsTable");    // 0.02以前为rightstable
-                        if (node != null)
-                        {
-                            // writer.WriteRaw(node.OuterXml);
-                            node.WriteTo(writer);
-                        }
-
-                        /*
-                        // <readertypes>
-                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//readertypes");    // 0.02以前为readertypes
-                        if (node != null)
-                        {
-                            //writer.WriteRaw(node.OuterXml);
-                            node.WriteTo(writer);
-                        }
-
-                        // <booktypes>
-                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//booktypes");    // 0.02以前为booktypes
-                        if (node != null)
-                        {
-                            // writer.WriteRaw(node.OuterXml);
-                            node.WriteTo(writer);
-                        }
-                         * */
-
-                        // <locationTypes>
-                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//locationTypes");    // 0.02以前为locationtypes
-                        if (node != null)
-                        {
-                            node.WriteTo(writer);
-                        }
-
-                        // <accounts>
-                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("accounts");
-                        if (node != null)
-                        {
-                            node.WriteTo(writer);
-                        }
-
-                        // <browseformats>
-                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//browseformats");
-                        if (node != null)
-                        {
-                            node.WriteTo(writer);
-                        }
-
-                        // <foregift>
-                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//foregift");
-                        if (node != null)
-                        {
-                            node.WriteTo(writer);
-                        }
-
-                        // <virtualDatabases>
-                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//virtualDatabases");
-                        if (node != null)
-                        {
-                            node.WriteTo(writer);
-                        }
-
-                        // <valueTables>
-                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//valueTables");
-                        if (node != null)
-                        {
-                            node.WriteTo(writer);
-                        }
-
-                        // <calendars>
-                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//calendars");
-                        if (node != null)
-                        {
-                            node.WriteTo(writer);
-                        }
-
-                        // <traceDTLP>
-                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//traceDTLP");
-                        if (node != null)
-                        {
-                            node.WriteTo(writer);
-                        }
-
-                        // <zhengyuan>
-                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//zhengyuan");
-                        if (node != null)
-                        {
-                            node.WriteTo(writer);
-                        }
-
-                        // <dkyw>
-                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//dkyw");
-                        if (node != null)
-                        {
-                            node.WriteTo(writer);
-                        }
-
-                        // <patronReplication>
-                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//patronReplication");
-                        if (node != null)
-                        {
-                            node.WriteTo(writer);
-                        }
-
-                        // 2009/7/20 
-                        // <clientFineInterface>
-                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//clientFineInterface");
-                        if (node != null)
-                        {
-                            node.WriteTo(writer);
-                        }
-
-                        // 2009/9/23 
-                        // <yczb>
-                        /*
-        <yczb>
-            <sso appID='CBPM_Library' validateWsUrl='http://.../AuthCenter/services/validate' />
-        </yczb>
-                         * */
-                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//yczb");
-                        if (node != null)
-                        {
-                            node.WriteTo(writer);
-                        }
-
-                        // <script>
-                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("script");
-                        if (node != null)
-                        {
-                            node.WriteTo(writer);
-                        }
-
-                        // <mailTemplates>
-                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("mailTemplates");
-                        if (node != null)
-                        {
-                            node.WriteTo(writer);
-                        }
-
-                        // <smtpServer>
-                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("smtpServer");
-                        if (node != null)
-                        {
-                            node.WriteTo(writer);
-                        }
-
-                        // <externalMessageInterface>
-                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("externalMessageInterface");
-                        if (node != null)
-                        {
-                            node.WriteTo(writer);
-                        }
-
-                        /* 前面已经有了
-                        // <passgate>
-                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("passgate");
-                        if (node != null)
-                        {
-                            node.WriteTo(writer);
-                        }
-                         * */
-
-                        // <zhongcihao>
-                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("zhongcihao");
-                        if (node != null)
-                        {
-                            node.WriteTo(writer);
-                        }
-
-                        // <callNumber>
-                        // 2009/2/18 
-                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("callNumber");
-                        if (node != null)
-                        {
-                            node.WriteTo(writer);
-                        }
-
-                        // <monitors>
-                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("monitors");
-                        if (node != null)
-                        {
-                            node.WriteTo(writer);
-                        }
-
-                        // <dup>
-                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("dup");
-                        if (node != null)
-                        {
-                            node.WriteTo(writer);
-                        }
-
-                        // 2016/12/14
-                        // <unique>
-                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("unique");
-                        if (node != null)
-                        {
-                            node.WriteTo(writer);
-                        }
-
-                        // <utilDb>
-                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("utilDb");
-                        if (node != null)
-                        {
-                            node.WriteTo(writer);
-                        }
-
-                        // <libraryInfo>
-                        // 注: <libraryName>元素在此里面
-                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("libraryInfo");
-                        if (node != null)
-                        {
-                            node.WriteTo(writer);
-                        }
-
-                        // <login>
-                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("login");
-                        if (node != null)
-                        {
-                            node.WriteTo(writer);
-                        }
-
-                        // <circulation>
-                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("circulation");
-                        if (node != null)
-                        {
-                            node.WriteTo(writer);
-                        }
-
-                        // <channel>
-                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("channel");
-                        if (node != null)
-                        {
-                            node.WriteTo(writer);
-                        }
-
-                        // <cataloging>
-                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("cataloging");
-                        if (node != null)
-                        {
-                            node.WriteTo(writer);
-                        }
-
-                        // <serverReplication>
-                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("serverReplication");
-                        if (node != null)
-                        {
-                            node.WriteTo(writer);
-                        }
-#endif
+                            RestoreElements(cfg_dom, writer, elements);
                         }
 
                         // 时钟
@@ -4080,11 +3798,14 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
-        void RestoreElements(XmlTextWriter writer, string[] elements)
+        static void RestoreElements(
+            XmlDocument cfg_dom,
+            XmlTextWriter writer, 
+            string[] elements)
         {
             foreach (string element in elements)
             {
-                XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode(element);
+                XmlNode node = cfg_dom.DocumentElement.SelectSingleNode(element);
                 if (node != null)
                     node.WriteTo(writer);
             }

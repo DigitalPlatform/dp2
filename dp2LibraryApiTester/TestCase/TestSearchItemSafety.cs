@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
@@ -18,14 +19,38 @@ namespace dp2LibraryApiTester
     // 测试 Search() API 针对实体库的安全性
     public static class TestSearchItemSafety
     {
-        public static NormalResult TestAll()
+        static string _dbType = "item"; // order/issue/comment
+
+        public static NormalResult TestAll(string dbType)
         {
+            _dbType = dbType;
+
             NormalResult result = null;
 
             result = PrepareEnvironment();
             if (result.Value == -1) return result;
 
-            result = TestSearchItem("SearchItem", "test_rights");
+            string api_name = "";
+            if (_dbType == "item")
+                api_name = "SearchItem";
+            else if (_dbType == "order")
+                api_name = "SearchOrder";
+            else if (_dbType == "issue")
+                api_name = "SearchIssue";
+            else if (_dbType == "comment")
+                api_name = "SearchComment";
+            else
+                throw new ArgumentException("_dbType error");
+
+            result = TestSearchItem(api_name, "test_rights");
+            if (result.Value == -1) return result;
+
+            result = TestSearchItem(api_name, "test_cannot");
+            if (result.Value == -1) return result;
+
+            result = TestGetBrowseRecords("test_rights");
+            if (result.Value == -1) return result;
+            result = TestGetBrowseRecords("test_cannot");
             if (result.Value == -1) return result;
 
             result = Finish();
@@ -79,7 +104,7 @@ namespace dp2LibraryApiTester
                     channel,
                     null,
                     _strBiblioDbName,
-                    "book",
+                    _dbType == "issue" ? "series" : "book",
                     "unimarc",
                     "*",
                     "",
@@ -116,11 +141,34 @@ namespace dp2LibraryApiTester
 
                 // 创建册记录
                 DataModel.SetMessage("正在创建册记录");
-                lRet = channel.SetEntities(null,
-                    output_biblio_recpath,
-                    BuildEntityRecords(),
-                    out EntityInfo[] errorinfos,
-                    out strError);
+                EntityInfo[] errorinfos = null;
+                var entities = BuildEntityRecords();
+                if (_dbType == "item")
+                    lRet = channel.SetEntities(null,
+                        output_biblio_recpath,
+                        entities,
+                        out errorinfos,
+                        out strError);
+                else if (_dbType == "order")
+                    lRet = channel.SetOrders(null,
+    output_biblio_recpath,
+    entities,
+    out errorinfos,
+    out strError);
+                else if (_dbType == "issue")
+                    lRet = channel.SetIssues(null,
+    output_biblio_recpath,
+    entities,
+    out errorinfos,
+    out strError);
+                else if (_dbType == "comment")
+                    lRet = channel.SetComments(null,
+    output_biblio_recpath,
+    entities,
+    out errorinfos,
+    out strError);
+                else
+                    throw new ArgumentException("_dbType error");
                 if (lRet == -1)
                     goto ERROR1;
                 strError = GetError(errorinfos);
@@ -128,81 +176,66 @@ namespace dp2LibraryApiTester
                     goto ERROR1;
                 _itemRecordPath = errorinfos[0].NewRecPath;
 
-                DataModel.SetMessage("正在删除用户 test_rights ...");
-                lRet = channel.SetUser(null,
-                    "delete",
-                    new UserInfo
-                    {
-                        UserName = "test_rights",
-                    },
+                var user_names = new List<string>() { "test_rights", "test_cannot" };
+                DataModel.SetMessage($"正在删除用户 {StringUtil.MakePathList(user_names, ",")} ...");
+                nRet = Utility.DeleteUsers(channel,
+                    user_names,
                     out strError);
-                if (lRet == -1 && channel.ErrorCode != ErrorCode.NotFound)
+                if (nRet == -1)
                     goto ERROR1;
 
-                DataModel.SetMessage("正在删除用户 test_access1 ...");
-                lRet = channel.SetUser(null,
-                    "delete",
-                    new UserInfo
-                    {
-                        UserName = "test_access1",
-                    },
-                    out strError);
-                if (lRet == -1 && channel.ErrorCode != ErrorCode.NotFound)
-                    goto ERROR1;
-
-                DataModel.SetMessage("正在删除用户 test_access2 ...");
-                lRet = channel.SetUser(null,
-                    "delete",
-                    new UserInfo
-                    {
-                        UserName = "test_access2",
-                    },
-                    out strError);
-                if (lRet == -1 && channel.ErrorCode != ErrorCode.NotFound)
-                    goto ERROR1;
+                // 创建
 
                 // 通过 rights 定义，能正常访问实体记录
                 DataModel.SetMessage("正在创建用户 test_rights ...");
+                string rights = "";
+                if (_dbType == "item")
+                    rights = "searchitem,search,getiteminfo";
+                else if (_dbType == "order")
+                    rights = "searchorder,search,getorderinfo";
+                else if (_dbType == "issue")
+                    rights = "searchissue,search,getissueinfo";
+                else if (_dbType == "comment")
+                    rights = "searchcomment,search,getcommentinfo";
+                else
+                    throw new ArgumentException("_dbType error");
+
                 lRet = channel.SetUser(null,
                     "new",
                     new UserInfo
                     {
                         UserName = "test_rights",
-                        Rights = "searchitem,search,getiteminfo",
+                        Rights = rights,
                     },
                     out strError);
                 if (lRet == -1)
                     goto ERROR1;
 
-                // 通过存取代码，造成无法访问书目记录的效果
-                DataModel.SetMessage("正在创建用户 test_access1 ...");
+                // 不具备 getiteminfo，造成无法访问实体记录的效果
+                DataModel.SetMessage("正在创建用户 test_cannot ...");
+                rights = "";
+                if (_dbType == "item")
+                    rights = "searchitem,search";
+                else if (_dbType == "order")
+                    rights = "searchorder,search";
+                else if (_dbType == "issue")
+                    rights = "searchissue,search";
+                else if (_dbType == "comment")
+                    rights = "searchcomment,search";
+                else
+                    throw new ArgumentException("_dbType error");
+
                 lRet = channel.SetUser(null,
                     "new",
                     new UserInfo
                     {
-                        UserName = "test_access1",
-                        Rights = "searchbiblio,search,getbiblioinfo",
-                        Access = "中文图书:getbiblioinfo=*;",
+                        UserName = "test_cannot",
+                        Rights = rights,
+                        Access = "",
                     },
                     out strError);
                 if (lRet == -1)
                     goto ERROR1;
-
-                // 通过存取代码，定义只能获得 200 字段
-                DataModel.SetMessage("正在创建用户 test_access2 ...");
-                lRet = channel.SetUser(null,
-                    "new",
-                    new UserInfo
-                    {
-                        UserName = "test_access2",
-                        Rights = "searchbiblio,search,getbiblioinfo",
-                        Access = $"{_strBiblioDbName}:getbiblioinfo=*(200);",
-                    },
-                    out strError);
-                if (lRet == -1)
-                    goto ERROR1;
-
-                // 中文图书:getbiblioinfo=*;中文期刊:getbiblioinfo=*|setbiblioinfo=new,change;西文采访:getbiblioinfo=*|setbiblioinfo=*;
 
                 return new NormalResult();
             }
@@ -255,9 +288,48 @@ namespace dp2LibraryApiTester
         "", // search_style
         "", // output_style
         out strError);
+                else if (search_api_name == "SearchOrder")
+                    lRet = channel.SearchOrder(
+null,
+strItemDbName,
+"",
+1000,
+"__id",
+"left",
+"zh",
+"default",
+"", // search_style
+"", // output_style
+out strError);
+                else if (search_api_name == "SearchIssue")
+                    lRet = channel.SearchIssue(
+null,
+strItemDbName,
+"",
+1000,
+"__id",
+"left",
+"zh",
+"default",
+"", // search_style
+"", // output_style
+out strError);
+                else if (search_api_name == "SearchComment")
+                    lRet = channel.SearchComment(
+null,
+strItemDbName,
+"",
+1000,
+"__id",
+"left",
+"zh",
+"default",
+"", // search_style
+"", // output_style
+out strError);
                 else
                 {
-                    string query_xml = "<target list='" + _strBiblioDbName + ":" + "__id'><item><word>"
+                    string query_xml = "<target list='" + strItemDbName + ":" + "__id'><item><word>"
         + "</word><match>left</match><maxCount>"
         + "1000"
         + "</maxCount></item><lang>zh</lang></target>";
@@ -276,7 +348,7 @@ namespace dp2LibraryApiTester
 
                 if (lRet == 0)
                 {
-                    strError = "检索没有命中任何实体记录";
+                    strError = $"检索没有命中任何{_dbType}记录";
                     goto ERROR1;
                 }
 
@@ -294,39 +366,9 @@ $"id,cols,xml",
                     DataModel.SetMessage($"cols={cols}");
                     DataModel.SetMessage($"xml=\r\n{xml}");
 
-                    if (userName == "test_access2")
-                    {
-                        // MARC 中只有 200 字段
-                        int nRet = MarcUtil.Xml2Marc(xml,
-                            false,
-                            "unimarc",
-                            out string _,
-                            out string marc,
-                            out string error);
-                        MarcRecord marc_record = new MarcRecord(marc);
-                        if (marc_record.select("field[@name='690']").count > 0)
-                            errors.Add("xml 中不应该存在 690 字段");
-                        if (marc_record.select("field[@name='701']").count > 0)
-                            errors.Add("xml 中不应该存在 701 字段");
-                    }
-
-                    // access 代码为无法访问的效果
-                    if (userName == "test_access1")
-                    {
-                        // Cols 被滤除
-                        if (record.Cols[0] != "[滤除]")
-                        {
-                            string error = $"用户 {userName} 通过 GetSearchResult() API 获得了浏览列内容 '{string.Join(",", record.Cols)}'，违反安全性原则";
-                            errors.Add(error);
-                        }
-
-                        // 用户 "test_access1" 应无法看到 XML 才对
-                        if (string.IsNullOrEmpty(xml) == false)
-                        {
-                            string error = $"用户 {userName} 通过 GetSearchResult() API 获得了书目记录 XML，违反安全性原则";
-                            errors.Add(error);
-                        }
-                    }
+                    CheckRecord(userName,
+                        record,
+                        errors);
                 }
 
                 if (errors.Count > 0)
@@ -342,7 +384,7 @@ $"id,cols,xml",
             }
             catch (Exception ex)
             {
-                strError = "TestSearchBiblio() Exception: " + ExceptionUtil.GetExceptionText(ex);
+                strError = "TestSearchItem() Exception: " + ExceptionUtil.GetExceptionText(ex);
                 goto ERROR1;
             }
             finally
@@ -352,7 +394,7 @@ $"id,cols,xml",
             }
 
         ERROR1:
-            DataModel.SetMessage($"TestSearchBiblio() error: {strError}");
+            DataModel.SetMessage($"TestSearchItem() error: {strError}");
             return new NormalResult
             {
                 Value = -1,
@@ -360,21 +402,54 @@ $"id,cols,xml",
             };
         }
 
+        static void CheckRecord(
+    string userName,
+    Record record,
+    List<string> errors)
+        {
+            var xml = DomUtil.GetIndentXml(record.RecordBody.Xml);
+
+            if (userName == "test_rights")
+            {
+                errors.AddRange(VerifyCols(record.Cols));
+
+                errors.AddRange(VerifyItemRecord(record.RecordBody.Xml));
+            }
+
+            // 权限无法访问的效果
+            if (userName == "test_cannot")
+            {
+                // Cols 被滤除
+                if (record.Cols[0] != "[滤除]")
+                {
+                    string error = $"用户 {userName} 通过 GetSearchResult() API 获得了浏览列内容 '{string.Join(",", record.Cols)}'，违反安全性原则";
+                    errors.Add(error);
+                }
+
+                // 用户 "test_cannot" 应无法看到 XML 才对
+                if (string.IsNullOrEmpty(xml) == false)
+                {
+                    string error = $"用户 {userName} 通过 GetSearchResult() API 获得了册记录 XML，违反安全性原则";
+                    errors.Add(error);
+                }
+            }
+        }
+
         // 用 GetBrowseRecords() API
-        public static NormalResult TestGetBrowseRecords()
+        public static NormalResult TestGetBrowseRecords(string userName)
         {
             string strError = "";
 
-            LibraryChannel channel = DataModel.NewChannel("test_rights", "");
+            LibraryChannel channel = DataModel.NewChannel(userName, "");
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = TimeSpan.FromMinutes(10);
 
             try
             {
                 List<string> path_list = new List<string>();
-                path_list.Add(_strBiblioDbName + "/1");
+                path_list.Add(_itemRecordPath);
 
-                DataModel.SetMessage("正在用路径检索 ...");
+                DataModel.SetMessage($"正在用路径 {StringUtil.MakePathList(path_list, ",")} 检索 ({userName})...");
                 long lRet = channel.GetBrowseRecords(
     null,
     path_list.ToArray(),
@@ -388,17 +463,33 @@ $"id,cols,xml",
 
                 if (results.Length == 0)
                 {
-                    strError = "路径检索没有命中任何书目记录";
+                    strError = "路径检索没有命中任何实体记录";
                     goto ERROR1;
                 }
 
+                List<string> errors = new List<string>();
                 foreach (Record record in results)
                 {
                     var xml = DomUtil.GetIndentXml(record.RecordBody.Xml);
+                    var cols = string.Join(",", record.Cols);
                     DataModel.SetMessage($"path={record.Path}");
+                    DataModel.SetMessage($"cols={cols}");
                     DataModel.SetMessage($"xml=\r\n{xml}");
+
+                    CheckRecord(userName,
+                        record,
+                        errors);
                 }
 
+                if (errors.Count > 0)
+                {
+                    Utility.DisplayErrors(errors);
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = StringUtil.MakePathList(errors, "; ")
+                    };
+                }
                 return new NormalResult();
             }
             catch (Exception ex)
@@ -447,37 +538,12 @@ $"id,cols,xml",
                         goto ERROR1;
                 }
 
-                DataModel.SetMessage("正在删除用户 test_rights ...");
-                lRet = channel.SetUser(null,
-                    "delete",
-                    new UserInfo
-                    {
-                        UserName = "test_rights",
-                    },
+                var user_names = new List<string>() { "test_rights", "test_cannot" };
+                DataModel.SetMessage($"正在删除用户 {StringUtil.MakePathList(user_names, ",")} ...");
+                int nRet = Utility.DeleteUsers(channel,
+                    user_names,
                     out strError);
-                if (lRet == -1 && channel.ErrorCode != ErrorCode.NotFound)
-                    goto ERROR1;
-
-                DataModel.SetMessage("正在删除用户 test_access1 ...");
-                lRet = channel.SetUser(null,
-                    "delete",
-                    new UserInfo
-                    {
-                        UserName = "test_access1",
-                    },
-                    out strError);
-                if (lRet == -1 && channel.ErrorCode != ErrorCode.NotFound)
-                    goto ERROR1;
-
-                DataModel.SetMessage("正在删除用户 test_access2 ...");
-                lRet = channel.SetUser(null,
-                    "delete",
-                    new UserInfo
-                    {
-                        UserName = "test_access2",
-                    },
-                    out strError);
-                if (lRet == -1 && channel.ErrorCode != ErrorCode.NotFound)
+                if (nRet == -1)
                     goto ERROR1;
 
                 DataModel.SetMessage("结束");
@@ -516,17 +582,183 @@ $"id,cols,xml",
             return record;
         }
 
-        static EntityInfo[] BuildEntityRecords()
-        {
-            List<EntityInfo> results = new List<EntityInfo>();
-            EntityInfo entity = new EntityInfo { 
-                Action = "new",
-                NewRecord = @"<root>
+        static string _itemXml = @"<root>
 <barcode>X0000001</barcode>
 <location>阅览室</location>
 <bookType>普通</bookType>
 <price>CNY12.00</price>
-</root>",
+</root>";
+
+        static string _issueXml = @"<root>
+<publishTime>20150101</publishTime>
+<issue>1</issue>
+<zong>1</zong>
+<volume>1</volume>
+</root>";
+
+        static string _orderXml = @"<root>
+<seller>qudao</seller>
+<source>laiyuan</source>
+<copy>1</copy>
+<orderTime>Sun, 09 Apr 2017 00:00:00 +0800</orderTime>
+<price>CNY12.00</price>
+</root>";
+
+        static string _commentXml = @"<root>
+<type>书评</type>
+<title>title</title>
+<creator>R0000001</creator>
+<content>comment</content>
+<parent>612</parent>
+</root>";
+
+        // 验证 Cols 是否正确
+        static List<string> VerifyCols(string[] cols)
+        {
+            List<string> errors = new List<string>();
+            XmlDocument dom = new XmlDocument();
+
+            if (_dbType == "item")
+            {
+                dom.LoadXml(_itemXml);
+
+                string barcode = DomUtil.GetElementText(dom.DocumentElement, "barcode");
+                if (Array.IndexOf(cols, barcode) == -1)
+                    errors.Add($"浏览列中未包含册条码号 '{barcode}'");
+
+                string location = DomUtil.GetElementText(dom.DocumentElement, "location");
+                if (Array.IndexOf(cols, location) == -1)
+                    errors.Add($"浏览列中未包含馆藏地 '{location}'");
+
+                string bookType = DomUtil.GetElementText(dom.DocumentElement, "bookType");
+                if (Array.IndexOf(cols, bookType) == -1)
+                    errors.Add($"浏览列中未包含册条码号 '{bookType}'");
+
+                string price = DomUtil.GetElementText(dom.DocumentElement, "price");
+                if (Array.IndexOf(cols, price) == -1)
+                    errors.Add($"浏览列中未包含册条码号 '{price}'");
+            }
+            else if (_dbType == "order")
+            {
+                dom.LoadXml(_orderXml);
+
+                errors.AddRange(VerifyCols(dom, cols, "seller,source,copy,price"));
+            }
+            else if (_dbType == "issue")
+            {
+                dom.LoadXml(_issueXml);
+
+                errors.AddRange(VerifyCols(dom, cols, "publishTime,issue,zong,volume"));
+            }
+            else if (_dbType == "comment")
+            {
+                dom.LoadXml(_commentXml);
+
+                errors.AddRange(VerifyCols(dom, cols, "type,title,creator,content"));
+            }
+            else 
+                throw new ArgumentException("_dbType error");
+
+            return errors;
+        }
+
+        static List<string> VerifyCols(XmlDocument dom,
+            string [] cols,
+            string name_list)
+        {
+            var names = StringUtil.SplitList(name_list);
+            List<string> errors = new List<string>();
+            foreach (var name in names)
+            {
+                string value = DomUtil.GetElementText(dom.DocumentElement, name);
+                if (Array.IndexOf(cols, value) == -1)
+                    errors.Add($"浏览列中未包含{name}元素值 '{value}'");
+            }
+
+            return errors;
+        }
+
+        // 验证册记录是否正确
+        static List<string> VerifyItemRecord(string xml)
+        {
+            string list = "";
+            if (_dbType == "item")
+                list = "barcode,location,bookType,price";
+            else if (_dbType == "issue")
+                list = "publishTime,issue,zong,volume";
+            else if (_dbType == "order")
+                list = "seller,source,copy,orderTime,price";
+            else if (_dbType == "comment")
+                list = "type,title,creator,content";
+            else
+                throw new ArgumentException("_dbType error");
+
+            return VerifyItemRecord(xml, list);
+        }
+
+        static List<string> VerifyItemRecord(string xml,
+            string name_list)
+        {
+            List<string> errors = new List<string>();
+
+            string origin_xml = "";
+            if (_dbType == "item")
+                origin_xml = _itemXml;
+            else if (_dbType == "order")
+                origin_xml = _orderXml;
+            else if (_dbType == "issue")
+                origin_xml = _issueXml;
+            else if (_dbType == "comment")
+                origin_xml = _commentXml;
+            else
+                throw new ArgumentException("_dbType error");
+
+            XmlDocument origin_dom = new XmlDocument();
+            origin_dom.LoadXml(origin_xml);
+
+            XmlDocument new_dom = new XmlDocument();
+            new_dom.LoadXml(xml);
+
+            var names = StringUtil.SplitList(name_list);
+            foreach (var name in names)
+            {
+                string error = VerifyElement(name);
+                if (error != null)
+                    errors.Add(error);
+            }
+
+            return errors;
+
+            string VerifyElement(string element_name)
+            {
+                string origin_value = DomUtil.GetElementText(origin_dom.DocumentElement, element_name);
+                string new_value = DomUtil.GetElementText(new_dom.DocumentElement, element_name);
+                if (origin_value != new_value)
+                    return $"{element_name} 元素值 '{new_value}' 和参考值 '{origin_value}' 不符";
+                return null;
+            }
+        }
+
+
+        static EntityInfo[] BuildEntityRecords()
+        {
+            string xml = "";
+            if (_dbType == "item")
+                xml = _itemXml;
+            else if (_dbType == "issue")
+                xml = _issueXml;
+            else if (_dbType == "order")
+                xml = _orderXml;
+            else if (_dbType == "comment")
+                xml = _commentXml;
+            else
+                throw new ArgumentException("_dbType 不合法");
+
+            List<EntityInfo> results = new List<EntityInfo>();
+            EntityInfo entity = new EntityInfo
+            {
+                Action = "new",
+                NewRecord = xml,
             };
             results.Add(entity);
             return results.ToArray();

@@ -2391,6 +2391,39 @@ strSavedXml);
             this.commander.AddMessage(WM_SAVETO);
         }
 
+        static string GetOuterXml(XmlDocument domTarget,
+    string element_name)
+        {
+            XmlNodeList nodes = null;
+            if (element_name.Contains(":"))
+            {
+                XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
+                nsmgr.AddNamespace("dprms", DpNs.dprms);
+                element_name = element_name.Replace(DpNs.dprms, "dprms");
+                nodes = domTarget.DocumentElement.SelectNodes("//" + element_name, nsmgr);   // "//dprms:file"
+            }
+            else
+                nodes = domTarget.DocumentElement.SelectNodes(element_name);
+
+            if (nodes.Count == 0)
+                return null;
+
+            List<string> oldOuterXmls = new List<string>();
+            foreach (XmlElement element in nodes)
+            {
+                oldOuterXmls.Add(element.OuterXml);
+            }
+
+            /*
+            // TODO: 是否要排序?
+            if (oldOuterXmls.Count > 0)
+                oldOuterXmls.Sort();
+            */
+
+            return StringUtil.MakePathList(oldOuterXmls, "\r\n");
+        }
+
+
         // 获得读者记录的XML格式
         // parameters:
         //      bIncludeFileID  是否要根据当前rescontrol内容合成<dprms:file>元素?
@@ -2422,6 +2455,10 @@ strSavedXml);
                 return -1;
             }
 
+            // 2021/7/26
+            // 保留此时的 dprms:file 元素值，这是上次 SetData() 时候的值，代表从服务器获取过来时候的值
+            string old_files = GetOuterXml(dom, "http://dp2003.com/dprms:file");
+
             Debug.Assert(dom != null, "");
 
             XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
@@ -2438,7 +2475,6 @@ strSavedXml);
                 {
                     node.ParentNode.RemoveChild(node);
                 }
-                AddImportantField("http://dp2003.com/dprms:file");
             }
 
             // 合成<dprms:file>元素
@@ -2450,8 +2486,12 @@ strSavedXml);
             out strError);
                 if (nRet == -1)
                     return -1;
-                AddImportantField("http://dp2003.com/dprms:file");
             }
+
+            // 如果 dprms:file 元素相比从服务器获取来的原始记录发生了变化，则需要在后继提交的读者 XML 记录根元素 importantFields 属性中标注它为重要元素
+            string new_files = GetOuterXml(dom, "http://dp2003.com/dprms:file");
+            if (old_files != new_files)
+                AddImportantField("http://dp2003.com/dprms:file");
 
             // 如果没有 refID 元素，需要给添加一个
             string strRefID = DomUtil.GetElementText(dom.DocumentElement, "refID");
